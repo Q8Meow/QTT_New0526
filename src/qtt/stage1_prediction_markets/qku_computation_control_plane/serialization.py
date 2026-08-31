@@ -92,7 +92,7 @@ def _is_windows_reserved_segment(segment: str) -> bool:
 
 
 def validate_relative_path(path: str) -> str:
-    if not isinstance(path, str) or not path:
+    if type(path) is not str or not path:
         raise SerializationSafetyError(
             ReasonCode.PATH_UNSAFE, "path must be a nonempty text value"
         )
@@ -117,7 +117,17 @@ def _check_key(key: str) -> None:
     SECRET_KEY_POLICY.reject(key)
 
 
-def _check_path_value(key: str, value: Any) -> None:
+def _check_path_value(
+    key: str,
+    value: Any,
+    *,
+    location: tuple[str | int, ...] = (),
+) -> None:
+    if type(key) is not str:
+        raise SerializationSafetyError(
+            ReasonCode.SERIALIZATION_UNSAFE,
+            "JSON keys must be exact strings",
+        )
     lowered = key.casefold()
     if not (
         lowered == "path"
@@ -125,10 +135,51 @@ def _check_path_value(key: str, value: Any) -> None:
         or lowered.endswith("_paths")
     ):
         return
+
+    if (
+        key == "no_llm_hot_path"
+        and len(location) >= 2
+        and location[-2] == "authority_envelope"
+    ):
+        if type(value) is not bool:
+            raise SerializationSafetyError(
+                ReasonCode.PATH_UNSAFE,
+                f"path-bearing authority flag must be an exact boolean: {key}",
+            )
+        return
+
+    is_entry_owner_path = (
+        key in {"existing_owner_paths", "future_owner_paths"}
+        and len(location) >= 4
+        and location[-4] == "manifest"
+        and location[-3] == "entries"
+        and type(location[-2]) is int
+        and location[-1] == key
+    )
+    if is_entry_owner_path:
+        if type(value) not in {list, tuple} or any(
+            type(item) is not str for item in value
+        ):
+            raise SerializationSafetyError(
+                ReasonCode.PATH_UNSAFE,
+                f"entry owner paths must be an exact text sequence: {key}",
+            )
+        for candidate in value:
+            validate_relative_path(candidate)
+        return
+
     if value is None:
         return
-    candidates = value if isinstance(value, tuple | list) else (value,)
-    if not candidates or any(not isinstance(item, str) for item in candidates):
+    if type(value) is str:
+        candidates = (value,)
+    elif type(value) in {tuple, list}:
+        candidates = value
+    else:
+        raise SerializationSafetyError(
+            ReasonCode.PATH_UNSAFE,
+            f"path-bearing field must contain relative text paths: {key}",
+        )
+    if not candidates or any(type(item) is not str for item in candidates):
         raise SerializationSafetyError(
             ReasonCode.PATH_UNSAFE,
             f"path-bearing field must contain relative text paths: {key}",
@@ -137,7 +188,11 @@ def _check_path_value(key: str, value: Any) -> None:
         validate_relative_path(candidate)
 
 
-def _json_value(value: Any) -> Any:
+def _json_value(
+    value: Any,
+    *,
+    location: tuple[str | int, ...] = (),
+) -> Any:
     if value is None or isinstance(value, (bool, int, str)):
         return value
     if isinstance(value, float):
@@ -162,26 +217,31 @@ def _json_value(value: Any) -> Any:
     if isinstance(value, timedelta):
         return value.total_seconds()
     if isinstance(value, Enum):
-        return value.value
+        return _json_value(value.value, location=location)
     if is_dataclass(value) and not isinstance(value, type):
         return _json_value(
             {
                 field.name: getattr(value, field.name)
                 for field in fields(value)
-            }
+            },
+            location=location,
         )
     if isinstance(value, tuple | list):
-        return [_json_value(item) for item in value]
+        return [
+            _json_value(item, location=(*location, index))
+            for index, item in enumerate(value)
+        ]
     if isinstance(value, Mapping):
         converted: dict[str, Any] = {}
         for key, item in value.items():
-            if not isinstance(key, str):
+            if type(key) is not str:
                 raise SerializationSafetyError(
                     ReasonCode.SERIALIZATION_UNSAFE, "JSON object keys must be strings"
                 )
             _check_key(key)
-            _check_path_value(key, item)
-            converted[key] = _json_value(item)
+            child_location = (*location, key)
+            _check_path_value(key, item, location=child_location)
+            converted[key] = _json_value(item, location=child_location)
         return converted
     raise SerializationSafetyError(
         ReasonCode.SERIALIZATION_UNSAFE,

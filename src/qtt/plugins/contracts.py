@@ -2,11 +2,11 @@
 
 from __future__ import annotations
 
-from collections.abc import Mapping as ABCMapping
-from dataclasses import asdict, dataclass, fields, is_dataclass
+from dataclasses import asdict, dataclass, fields
 from enum import Enum, StrEnum
 import json
 import re
+from types import MappingProxyType
 from typing import Any, Mapping, Sequence
 
 
@@ -167,6 +167,20 @@ class PluginAuthorityEnvelope:
     no_llm_result_rewrite: bool = True
     no_qtt_sha_freeze_checksum_global_digest_authority: bool = True
     no_atomicrows_bundle_sha_hash_checksum_authority: bool = True
+
+    def __post_init__(self) -> None:
+        _require_canonical_text(
+            self.authority_envelope_id,
+            "authority_envelope_id",
+        )
+        for field_definition in fields(self):
+            if field_definition.name == "authority_envelope_id":
+                continue
+            if type(getattr(self, field_definition.name)) is not bool:
+                raise _package_contract_error(
+                    PluginPackageReasonCodeV1.RUNTIME_EFFECT_FORBIDDEN,
+                    f"{field_definition.name} must be an exact boolean",
+                )
 
     def to_row(self) -> dict[str, Any]:
         return asdict(self)
@@ -649,7 +663,13 @@ class PackageVersionV1:
                 PluginPackageReasonCodeV1.VERSION_INVALID,
                 "version must be canonical final X.Y.Z text",
             )
-        major, minor, patch = (int(part) for part in text.split("."))
+        try:
+            major, minor, patch = (int(part) for part in text.split("."))
+        except ValueError as exc:
+            raise _package_contract_error(
+                PluginPackageReasonCodeV1.VERSION_INVALID,
+                "version segments must fit the local integer runtime",
+            ) from exc
         return cls(major=major, minor=minor, patch=patch)
 
     @property
@@ -1142,34 +1162,82 @@ class PackageReproducibilityReceiptV1:
             )
 
 
+_PACKAGE_SERIALIZATION_RECORD_TYPES: tuple[type, ...] = (
+    PluginAuthorityEnvelope,
+    PackageOperationEligibilityV1,
+    SelectedComponentPackageEntryV1,
+    SelectedComponentPackageManifestV1,
+    CompatibilityAndDependencyReceiptV1,
+    RollbackAndSupersessionReceiptV1,
+    PackageReproducibilityReceiptV1,
+)
+
+
 def _normalize_package_serialization_value(value: object) -> object:
-    if value is None or type(value) in {bool, int}:
-        return value
-    if type(value) is str:
-        return _require_canonical_text(value, "serialized text")
-    if type(value) is PackageVersionV1:
-        return value.canonical
-    if isinstance(value, Enum):
-        return value.value
-    if is_dataclass(value) and not isinstance(value, type):
-        return {
-            field_definition.name: _normalize_package_serialization_value(
-                getattr(value, field_definition.name)
+    def normalize(item: object, ancestors: set[int]) -> object:
+        if item is None or type(item) in {bool, int}:
+            return item
+        if type(item) is str:
+            return _require_canonical_text(item, "serialized text")
+        if type(item) is PackageVersionV1:
+            return item.canonical
+
+        item_id = id(item)
+        if item_id in ancestors:
+            raise _package_contract_error(
+                PluginPackageReasonCodeV1.CANONICAL_INPUT_INVALID,
+                "canonical serialization values must be acyclic",
             )
-            for field_definition in fields(value)
-        }
-    if type(value) is tuple:
-        return [_normalize_package_serialization_value(item) for item in value]
-    if isinstance(value, ABCMapping):
-        normalized: dict[str, object] = {}
-        for key, item in value.items():
-            canonical_key = _require_canonical_text(key, "mapping key")
-            normalized[canonical_key] = _normalize_package_serialization_value(item)
-        return normalized
-    raise _package_contract_error(
-        PluginPackageReasonCodeV1.CANONICAL_INPUT_INVALID,
-        f"unsupported canonical serialization type: {type(value).__name__}",
-    )
+
+        if isinstance(item, Enum):
+            if type(item.value) in {list, dict, MappingProxyType}:
+                raise _package_contract_error(
+                    PluginPackageReasonCodeV1.CANONICAL_INPUT_INVALID,
+                    "Enum payloads must remain in the immutable scalar domain",
+                )
+            ancestors.add(item_id)
+            try:
+                return normalize(item.value, ancestors)
+            finally:
+                ancestors.remove(item_id)
+
+        if type(item) in _PACKAGE_SERIALIZATION_RECORD_TYPES:
+            ancestors.add(item_id)
+            try:
+                return {
+                    field_definition.name: normalize(
+                        getattr(item, field_definition.name),
+                        ancestors,
+                    )
+                    for field_definition in fields(item)
+                }
+            finally:
+                ancestors.remove(item_id)
+
+        if type(item) is tuple:
+            ancestors.add(item_id)
+            try:
+                return [normalize(member, ancestors) for member in item]
+            finally:
+                ancestors.remove(item_id)
+
+        if type(item) in {dict, MappingProxyType}:
+            ancestors.add(item_id)
+            try:
+                normalized: dict[str, object] = {}
+                for key, member in item.items():
+                    canonical_key = _require_canonical_text(key, "mapping key")
+                    normalized[canonical_key] = normalize(member, ancestors)
+                return normalized
+            finally:
+                ancestors.remove(item_id)
+
+        raise _package_contract_error(
+            PluginPackageReasonCodeV1.CANONICAL_INPUT_INVALID,
+            f"unsupported canonical serialization type: {type(item).__name__}",
+        )
+
+    return normalize(value, set())
 
 
 def _canonical_package_json(value: object) -> str:

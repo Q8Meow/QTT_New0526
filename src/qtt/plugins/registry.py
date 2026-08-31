@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from collections import Counter
 from collections.abc import Mapping
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, fields
 import json
 from types import MappingProxyType
 
@@ -53,296 +53,12 @@ _EXCLUDED_PROFILE_IDS = (
     "FORECASTEX_IBKR",
     "FORECASTEX_DIRECT_MEMBER",
 )
-_ROLE_IDS = tuple(f"ROLE-{value:02d}" for value in range(1, 29))
-_COMPONENT_IDS = tuple(f"S1PKG::{role_id}" for role_id in _ROLE_IDS)
-_BINDING_ONLY_ROLE_IDS = (
-    "ROLE-01",
-    "ROLE-03",
-    "ROLE-05",
-    "ROLE-06",
-    "ROLE-10",
-    "ROLE-15",
-    "ROLE-18",
-    "ROLE-19",
-    "ROLE-24",
-    "ROLE-26",
-    "ROLE-28",
-)
-_EVIDENCE_ONLY_ROLE_IDS = (
-    "ROLE-07",
-    "ROLE-11",
-    "ROLE-13",
-    "ROLE-23",
-    "ROLE-27",
-)
-_TRUE_MISSING_ROLE_IDS = (
-    "ROLE-02",
-    "ROLE-04",
-    "ROLE-08",
-    "ROLE-09",
-    "ROLE-12",
-    "ROLE-14",
-    "ROLE-16",
-    "ROLE-17",
-    "ROLE-20",
-    "ROLE-21",
-    "ROLE-22",
-    "ROLE-25",
-)
-_DIRECT_PREREQUISITE_ROLE_IDS = (
-    (),
-    ("ROLE-01",),
-    ("ROLE-01", "ROLE-02"),
-    ("ROLE-01", "ROLE-02", "ROLE-03"),
-    ("ROLE-03", "ROLE-04"),
-    ("ROLE-04",),
-    ("ROLE-03", "ROLE-05", "ROLE-06"),
-    ("ROLE-03", "ROLE-07"),
-    ("ROLE-01", "ROLE-02", "ROLE-03"),
-    ("ROLE-04", "ROLE-09"),
-    ("ROLE-04", "ROLE-05", "ROLE-10", "ROLE-12"),
-    ("ROLE-04", "ROLE-05"),
-    ("ROLE-05", "ROLE-11"),
-    ("ROLE-03", "ROLE-04", "ROLE-05"),
-    (
-        "ROLE-06",
-        "ROLE-07",
-        "ROLE-08",
-        "ROLE-09",
-        "ROLE-10",
-        "ROLE-11",
-        "ROLE-13",
-        "ROLE-14",
-    ),
-    ("ROLE-08", "ROLE-15"),
-    ("ROLE-01", "ROLE-03"),
-    ("ROLE-01", "ROLE-03", "ROLE-17"),
-    ("ROLE-16", "ROLE-17", "ROLE-18"),
-    ("ROLE-16", "ROLE-17", "ROLE-18", "ROLE-19"),
-    (
-        "ROLE-14",
-        "ROLE-16",
-        "ROLE-17",
-        "ROLE-18",
-        "ROLE-19",
-        "ROLE-20",
-        "ROLE-26",
-        "ROLE-28",
-    ),
-    ("ROLE-14", "ROLE-15", "ROLE-17", "ROLE-18", "ROLE-26"),
-    (
-        "ROLE-03",
-        "ROLE-09",
-        "ROLE-10",
-        "ROLE-11",
-        "ROLE-13",
-        "ROLE-14",
-        "ROLE-17",
-        "ROLE-21",
-        "ROLE-22",
-    ),
-    (
-        "ROLE-03",
-        "ROLE-08",
-        "ROLE-16",
-        "ROLE-17",
-        "ROLE-18",
-        "ROLE-21",
-        "ROLE-22",
-        "ROLE-23",
-        "ROLE-26",
-        "ROLE-28",
-    ),
-    (
-        "ROLE-01",
-        "ROLE-03",
-        "ROLE-14",
-        "ROLE-17",
-        "ROLE-18",
-        "ROLE-21",
-        "ROLE-22",
-        "ROLE-24",
-        "ROLE-26",
-        "ROLE-28",
-    ),
-    ("ROLE-01", "ROLE-03"),
-    ("ROLE-16", "ROLE-20", "ROLE-26"),
-    ("ROLE-01", "ROLE-03", "ROLE-26"),
-)
-_EXPECTED_DEPENDENCY_EDGES = tuple(
-    sorted(
-        (_component_id, f"S1PKG::{role_id}")
-        for role_id, prerequisites in zip(
-            _ROLE_IDS,
-            _DIRECT_PREREQUISITE_ROLE_IDS,
-            strict=True,
-        )
-        for _component_id in (
-            f"S1PKG::{prerequisite}" for prerequisite in prerequisites
-        )
-    )
-)
-_EXPECTED_TOPOLOGICAL_ORDER = tuple(
-    f"S1PKG::{role_id}"
-    for role_id in (
-        "ROLE-01",
-        "ROLE-02",
-        "ROLE-03",
-        "ROLE-04",
-        "ROLE-05",
-        "ROLE-06",
-        "ROLE-07",
-        "ROLE-08",
-        "ROLE-09",
-        "ROLE-10",
-        "ROLE-12",
-        "ROLE-11",
-        "ROLE-13",
-        "ROLE-14",
-        "ROLE-15",
-        "ROLE-16",
-        "ROLE-17",
-        "ROLE-18",
-        "ROLE-19",
-        "ROLE-20",
-        "ROLE-26",
-        "ROLE-22",
-        "ROLE-27",
-        "ROLE-28",
-        "ROLE-21",
-        "ROLE-23",
-        "ROLE-24",
-        "ROLE-25",
-    )
-)
 _OPERATION_CLASSES = (
     "NEW_OR_INCREASED_EXPOSURE",
     "CANCEL_QUERY_RECONCILE",
     "RISK_REDUCING_POSITION_ACTION",
     "REPLAY_PAPER_EVIDENCE",
     "QUANTUM_CHALLENGER_RESEARCH",
-)
-_OPERATION_REQUIRED_ROLE_IDS = (
-    tuple(role_id for role_id in _ROLE_IDS if role_id != "ROLE-27"),
-    ("ROLE-01", "ROLE-17", "ROLE-24", "ROLE-25", "ROLE-28"),
-    (
-        "ROLE-01",
-        "ROLE-02",
-        "ROLE-03",
-        "ROLE-04",
-        "ROLE-09",
-        "ROLE-10",
-        "ROLE-14",
-        "ROLE-15",
-        "ROLE-17",
-        "ROLE-18",
-        "ROLE-22",
-        "ROLE-24",
-        "ROLE-25",
-        "ROLE-26",
-        "ROLE-28",
-    ),
-    (
-        "ROLE-01",
-        "ROLE-02",
-        "ROLE-03",
-        "ROLE-04",
-        "ROLE-05",
-        "ROLE-06",
-        "ROLE-07",
-        "ROLE-08",
-        "ROLE-09",
-        "ROLE-10",
-        "ROLE-11",
-        "ROLE-12",
-        "ROLE-13",
-        "ROLE-14",
-        "ROLE-15",
-        "ROLE-16",
-        "ROLE-17",
-        "ROLE-18",
-        "ROLE-23",
-        "ROLE-26",
-        "ROLE-28",
-    ),
-    (
-        "ROLE-01",
-        "ROLE-03",
-        "ROLE-08",
-        "ROLE-15",
-        "ROLE-16",
-        "ROLE-17",
-        "ROLE-18",
-        "ROLE-19",
-        "ROLE-20",
-        "ROLE-26",
-        "ROLE-27",
-    ),
-)
-_OPERATION_REQUIRED_COUNTS = tuple(
-    len(role_ids) for role_ids in _OPERATION_REQUIRED_ROLE_IDS
-)
-_OPERATION_OPTIONAL_ROLE_IDS = (
-    ("ROLE-27",),
-    (),
-    (),
-    ("ROLE-27",),
-    (),
-)
-_OPERATION_TERMINAL_ROUTES = (
-    "NO_TRADE_AND_SUBMIT_DISABLED",
-    "QUERY_RECONCILE_REQUIRED_OR_SAFE_HOLD",
-    "SAFE_HOLD",
-    "EVIDENCE_INSUFFICIENT_FAIL_CLOSED",
-    "CLASSICAL_ONLY",
-)
-_EXPECTED_OPERATION_BLOCKERS = tuple(
-    tuple(f"S1PKG::{role_id}" for role_id in roles)
-    for roles in (
-        (
-            "ROLE-02",
-            "ROLE-04",
-            "ROLE-07",
-            "ROLE-08",
-            "ROLE-09",
-            "ROLE-11",
-            "ROLE-12",
-            "ROLE-13",
-            "ROLE-14",
-            "ROLE-16",
-            "ROLE-17",
-            "ROLE-20",
-            "ROLE-21",
-            "ROLE-22",
-            "ROLE-23",
-            "ROLE-25",
-        ),
-        ("ROLE-17", "ROLE-25"),
-        (
-            "ROLE-02",
-            "ROLE-04",
-            "ROLE-09",
-            "ROLE-14",
-            "ROLE-17",
-            "ROLE-22",
-            "ROLE-25",
-        ),
-        (
-            "ROLE-02",
-            "ROLE-04",
-            "ROLE-07",
-            "ROLE-08",
-            "ROLE-09",
-            "ROLE-11",
-            "ROLE-12",
-            "ROLE-13",
-            "ROLE-14",
-            "ROLE-16",
-            "ROLE-17",
-            "ROLE-23",
-        ),
-        ("ROLE-08", "ROLE-16", "ROLE-17", "ROLE-20", "ROLE-27"),
-    )
 )
 _NO_EFFECT_KEYS = frozenset(
     {
@@ -488,11 +204,73 @@ def _raise(reason_code: PluginPackageReasonCodeV1, message: str) -> None:
     raise PluginPackageContractError(reason_code, message)
 
 
-def _mapping(value: object, name: str) -> Mapping[str, object]:
-    if not isinstance(value, Mapping):
+def _copy_canonical_json_v1(value: object) -> object:
+    """Copy the exact closed JSON domain without retaining caller containers."""
+
+    def copy_value(item: object, ancestors: set[int]) -> object:
+        if item is None or type(item) in {bool, int, str}:
+            return item
+        item_id = id(item)
+        if item_id in ancestors:
+            _raise(
+                PluginPackageReasonCodeV1.CANONICAL_INPUT_INVALID,
+                "canonical launch projection must be acyclic",
+            )
+        if type(item) is list:
+            ancestors.add(item_id)
+            try:
+                return [copy_value(member, ancestors) for member in item]
+            finally:
+                ancestors.remove(item_id)
+        if type(item) in {dict, MappingProxyType}:
+            ancestors.add(item_id)
+            try:
+                copied: dict[str, object] = {}
+                for key, member in item.items():
+                    if type(key) is not str:
+                        _raise(
+                            PluginPackageReasonCodeV1.CANONICAL_INPUT_INVALID,
+                            "canonical launch projection keys must be exact strings",
+                        )
+                    copied[key] = copy_value(member, ancestors)
+                return copied
+            finally:
+                ancestors.remove(item_id)
         _raise(
             PluginPackageReasonCodeV1.CANONICAL_INPUT_INVALID,
-            f"{name} must be a mapping",
+            f"unsupported canonical launch value: {type(item).__name__}",
+        )
+
+    return copy_value(value, set())
+
+
+def _same_canonical_json_v1(left: object, right: object) -> bool:
+    """Compare copied JSON values with exact primitive/container types."""
+
+    if type(left) is not type(right):
+        return False
+    if left is None or type(left) in {bool, int, str}:
+        return left == right
+    if type(left) is list:
+        return len(left) == len(right) and all(
+            _same_canonical_json_v1(left_item, right_item)
+            for left_item, right_item in zip(left, right, strict=True)
+        )
+    if type(left) is dict:
+        return left.keys() == right.keys() and all(
+            _same_canonical_json_v1(left[key], right[key]) for key in left
+        )
+    _raise(
+        PluginPackageReasonCodeV1.CANONICAL_INPUT_INVALID,
+        "canonical JSON comparison received an unsupported value",
+    )
+
+
+def _mapping(value: object, name: str) -> Mapping[str, object]:
+    if type(value) is not dict:
+        _raise(
+            PluginPackageReasonCodeV1.CANONICAL_INPUT_INVALID,
+            f"{name} must be an exact JSON object",
         )
     return value
 
@@ -528,6 +306,24 @@ def _list(value: object, name: str) -> list[object]:
         _raise(
             PluginPackageReasonCodeV1.CANONICAL_INPUT_INVALID,
             f"{name} must be an exact JSON list",
+        )
+    return value
+
+
+def _exact_int(value: object, name: str) -> int:
+    if type(value) is not int or value < 0:
+        _raise(
+            PluginPackageReasonCodeV1.CANONICAL_INPUT_INVALID,
+            f"{name} must be an exact nonnegative integer",
+        )
+    return value
+
+
+def _exact_bool(value: object, name: str) -> bool:
+    if type(value) is not bool:
+        _raise(
+            PluginPackageReasonCodeV1.CANONICAL_INPUT_INVALID,
+            f"{name} must be an exact boolean",
         )
     return value
 
@@ -583,7 +379,7 @@ def _validate_launch_projection(
 ]:
     projection = _mapping(launch_graph_projection, "launch_graph_projection")
     _exact_keys(projection, _TOP_LEVEL_KEYS, "launch_graph_projection")
-    if projection["package_ref"] != _LAUNCH_GRAPH_PACKAGE_REF:
+    if _text(projection["package_ref"], "package_ref") != _LAUNCH_GRAPH_PACKAGE_REF:
         _raise(
             PluginPackageReasonCodeV1.IDENTITY_INVALID,
             "launch graph package reference differs",
@@ -592,11 +388,15 @@ def _validate_launch_projection(
     graph = _mapping(projection["graph"], "graph")
     _exact_keys(graph, _GRAPH_KEYS, "graph")
     if (
-        graph["schema_version"] != _LAUNCH_GRAPH_SCHEMA_VERSION
-        or graph["graph_semantics"] != _LAUNCH_GRAPH_SEMANTICS
-        or graph["future_sole_write_role_id"] != "ROLE-25"
-        or graph["terminal_state"] != "VALIDATED_NO_EFFECT"
-        or graph["reason_codes"] != []
+        _text(graph["schema_version"], "graph.schema_version")
+        != _LAUNCH_GRAPH_SCHEMA_VERSION
+        or _text(graph["graph_semantics"], "graph.graph_semantics")
+        != _LAUNCH_GRAPH_SEMANTICS
+        or _text(graph["future_sole_write_role_id"], "future_sole_write_role_id")
+        != "ROLE-25"
+        or _text(graph["terminal_state"], "graph.terminal_state")
+        != "VALIDATED_NO_EFFECT"
+        or _list(graph["reason_codes"], "graph.reason_codes")
     ):
         _raise(
             PluginPackageReasonCodeV1.CANONICAL_INPUT_INVALID,
@@ -606,15 +406,26 @@ def _validate_launch_projection(
 
     scope = _mapping(graph["scope"], "graph.scope")
     _exact_keys(scope, _SCOPE_KEYS, "graph.scope")
+    selected_profile_ids = _text_list(
+        scope["selected_profile_ids"],
+        "scope.selected_profile_ids",
+    )
+    excluded_profile_ids = _text_list(
+        scope["excluded_profile_ids"],
+        "scope.excluded_profile_ids",
+    )
+    serialization = _text_list(scope["serialization"], "scope.serialization")
+    active_live_profile_ids = _text_list(
+        scope["active_live_profile_ids"],
+        "scope.active_live_profile_ids",
+    )
     if (
-        scope["schema_version"] != _SELECTED_SCOPE_SCHEMA_VERSION
-        or tuple(_text_list(scope["selected_profile_ids"], "selected_profile_ids"))
-        != _SELECTED_PROFILE_IDS
-        or tuple(_text_list(scope["excluded_profile_ids"], "excluded_profile_ids"))
-        != _EXCLUDED_PROFILE_IDS
-        or tuple(_text_list(scope["serialization"], "scope.serialization"))
-        != _SELECTED_PROFILE_IDS
-        or scope["active_live_profile_ids"] != []
+        _text(scope["schema_version"], "scope.schema_version")
+        != _SELECTED_SCOPE_SCHEMA_VERSION
+        or selected_profile_ids != _SELECTED_PROFILE_IDS
+        or excluded_profile_ids != _EXCLUDED_PROFILE_IDS
+        or serialization != _SELECTED_PROFILE_IDS
+        or active_live_profile_ids
     ):
         _raise(
             PluginPackageReasonCodeV1.PROFILE_SCOPE_INVALID,
@@ -623,54 +434,61 @@ def _validate_launch_projection(
     _text(scope["authority_class"], "scope.authority_class")
     _text(scope["source_decision_ref"], "scope.source_decision_ref")
     _exact_no_effects(scope["no_effects"], "scope.no_effects")
+
     profile_rows = _list(scope["profiles"], "scope.profiles")
-    if len(profile_rows) != 5:
+    expected_profile_ids = (*_SELECTED_PROFILE_IDS, *_EXCLUDED_PROFILE_IDS)
+    if len(profile_rows) != len(expected_profile_ids):
         _raise(
             PluginPackageReasonCodeV1.PROFILE_SCOPE_INVALID,
             "Stage-1 profile row count must be five",
         )
-    expected_profile_ids = (*_SELECTED_PROFILE_IDS, *_EXCLUDED_PROFILE_IDS)
     for index, raw_profile in enumerate(profile_rows):
         profile = _mapping(raw_profile, "profile row")
         _exact_keys(profile, _PROFILE_KEYS, "profile row")
+        for name in _PROFILE_KEYS - {"serialization_ordinal_or_none"}:
+            _text(profile[name], f"profile.{name}")
         if profile["profile_id"] != expected_profile_ids[index]:
             _raise(
                 PluginPackageReasonCodeV1.PROFILE_SCOPE_INVALID,
                 "profile row identity or order differs",
             )
-        for name in _PROFILE_KEYS - {"serialization_ordinal_or_none"}:
-            _text(profile[name], f"profile.{name}")
-        if index < 3:
+        ordinal = profile["serialization_ordinal_or_none"]
+        if index < len(_SELECTED_PROFILE_IDS):
             if (
                 profile["scope_state"] != "SELECTED_CORE"
-                or profile["serialization_ordinal_or_none"] != index + 1
+                or type(ordinal) is not int
+                or ordinal != index + 1
             ):
                 _raise(
                     PluginPackageReasonCodeV1.PROFILE_SCOPE_INVALID,
                     "selected profile serialization differs",
                 )
         elif (
-            profile["scope_state"]
-            != "OWNER_EXCLUDED_STAGE1_NO_IMPLEMENTATION"
-            or profile["serialization_ordinal_or_none"] is not None
+            profile["scope_state"] != "OWNER_EXCLUDED_STAGE1_NO_IMPLEMENTATION"
+            or ordinal is not None
         ):
             _raise(
                 PluginPackageReasonCodeV1.PROFILE_SCOPE_INVALID,
                 "ForecastEx exclusion differs",
             )
 
+    family_rows = _selected_family_rows()
+    expected_role_ids = tuple(row["role_id"] for row in family_rows)
     raw_roles = _list(graph["roles"], "graph.roles")
-    if len(raw_roles) != 28:
+    if len(raw_roles) != len(expected_role_ids) or len(raw_roles) != 28:
         _raise(
             PluginPackageReasonCodeV1.IDENTITY_INVALID,
-            "launch graph must contain 28 roles",
+            "launch graph must contain the 28 canonical roles",
         )
     roles: list[Mapping[str, object]] = []
     derived_edges: list[tuple[str, str]] = []
     role_paths: list[str] = []
+    path_dispositions: Counter[str] = Counter()
     dispositions: list[str] = []
-    for role_index, (expected_role_id, raw_role) in enumerate(
-        zip(_ROLE_IDS, raw_roles, strict=True)
+    for expected_role_id, raw_role in zip(
+        expected_role_ids,
+        raw_roles,
+        strict=True,
     ):
         role = _mapping(raw_role, "role row")
         _exact_keys(role, _ROLE_KEYS, "role row")
@@ -702,12 +520,12 @@ def _validate_launch_projection(
             _text(role[name], f"role.{name}")
         prerequisites = _text_list(
             role["direct_prerequisite_role_ids"],
-            "direct_prerequisite_role_ids",
+            "role.direct_prerequisite_role_ids",
         )
-        if prerequisites != _DIRECT_PREREQUISITE_ROLE_IDS[role_index]:
+        if role_id in prerequisites:
             _raise(
-                PluginPackageReasonCodeV1.EDGE_UNKNOWN_NODE,
-                "direct prerequisites differ from the frozen role graph",
+                PluginPackageReasonCodeV1.SELF_EDGE,
+                "launch role cannot depend on itself",
             )
         derived_edges.extend((producer, role_id) for producer in prerequisites)
         path_rows = _list(role["path_refs"], "role.path_refs")
@@ -716,13 +534,18 @@ def _validate_launch_projection(
                 PluginPackageReasonCodeV1.CANONICAL_INPUT_INVALID,
                 "each role requires at least one owner path",
             )
+        per_role_paths: list[tuple[str, str]] = []
         for raw_path in path_rows:
             path_row = _mapping(raw_path, "path row")
             _exact_keys(path_row, _PATH_KEYS, "path row")
             path = _safe_relative_path(path_row["path"])
+            path_disposition = _text(
+                path_row["disposition"],
+                "path.disposition",
+            )
             if (
                 path_row["semantic_owner"] != semantic_owner
-                or path_row["disposition"]
+                or path_disposition
                 not in {
                     "EXISTING_CANONICAL_OWNER",
                     "FUTURE_AUTHORIZED_OWNER_NOT_YET_IMPLEMENTED",
@@ -733,53 +556,69 @@ def _validate_launch_projection(
                     "owner path lineage differs",
                 )
             _text(path_row["reason"], "path.reason")
+            per_role_paths.append((path, path_disposition))
             role_paths.append(path)
+            path_dispositions[path_disposition] += 1
+        if len(per_role_paths) != len(set(per_role_paths)):
+            _raise(
+                PluginPackageReasonCodeV1.IDENTITY_INVALID,
+                "role owner-path rows must be duplicate-free",
+            )
         roles.append(role)
-    if Counter(dispositions) != Counter(
-        {
-            "BINDING_ONLY_GAP": 11,
-            "EVIDENCE_ONLY_GAP": 5,
-            "TRUE_MISSING_DEPENDENCY": 12,
-        }
-    ) or len(set(role_paths)) != 34:
+
+    role_id_set = set(expected_role_ids)
+    if any(
+        producer not in role_id_set or consumer not in role_id_set
+        for producer, consumer in derived_edges
+    ):
+        _raise(
+            PluginPackageReasonCodeV1.EDGE_UNKNOWN_NODE,
+            "launch prerequisites contain an unknown role",
+        )
+    if (
+        Counter(dispositions)
+        != Counter(
+            {
+                "BINDING_ONLY_GAP": 11,
+                "EVIDENCE_ONLY_GAP": 5,
+                "TRUE_MISSING_DEPENDENCY": 12,
+            }
+        )
+        or len(role_paths) != 68
+        or path_dispositions
+        != Counter(
+            {
+                "EXISTING_CANONICAL_OWNER": 57,
+                "FUTURE_AUTHORIZED_OWNER_NOT_YET_IMPLEMENTED": 11,
+            }
+        )
+        or len(set(role_paths)) != 34
+    ):
         _raise(
             PluginPackageReasonCodeV1.ADMISSION_INVALID,
-            "launch role disposition or owner-path denominators differ",
+            "launch disposition or owner-path denominators differ",
         )
-    binding_role_ids = _text_list(
-        graph["binding_only_role_ids"],
-        "graph.binding_only_role_ids",
-    )
-    evidence_role_ids = _text_list(
-        graph["evidence_only_role_ids"],
-        "graph.evidence_only_role_ids",
-    )
-    missing_role_ids = _text_list(
-        graph["true_missing_role_ids"],
-        "graph.true_missing_role_ids",
-    )
-    if (
-        binding_role_ids != _BINDING_ONLY_ROLE_IDS
-        or evidence_role_ids != _EVIDENCE_ONLY_ROLE_IDS
-        or missing_role_ids != _TRUE_MISSING_ROLE_IDS
-        or binding_role_ids
-        != tuple(
+
+    disposition_partitions = {
+        "binding_only_role_ids": tuple(
             role["role_id"]
             for role in roles
             if role["disposition"] == "BINDING_ONLY_GAP"
-        )
-        or evidence_role_ids
-        != tuple(
+        ),
+        "evidence_only_role_ids": tuple(
             role["role_id"]
             for role in roles
             if role["disposition"] == "EVIDENCE_ONLY_GAP"
-        )
-        or missing_role_ids
-        != tuple(
+        ),
+        "true_missing_role_ids": tuple(
             role["role_id"]
             for role in roles
             if role["disposition"] == "TRUE_MISSING_DEPENDENCY"
-        )
+        ),
+    }
+    if any(
+        _text_list(graph[key], f"graph.{key}") != expected
+        for key, expected in disposition_partitions.items()
     ):
         _raise(
             PluginPackageReasonCodeV1.ADMISSION_INVALID,
@@ -787,28 +626,29 @@ def _validate_launch_projection(
         )
 
     raw_edges = _list(graph["dependency_edges"], "graph.dependency_edges")
-    if len(raw_edges) != 102:
+    if len(raw_edges) != 102 or len(derived_edges) != 102:
         _raise(
             PluginPackageReasonCodeV1.EDGE_UNKNOWN_NODE,
             "launch graph must contain 102 dependency edges",
         )
     observed_edges: list[tuple[str, str]] = []
+    failure_route_by_role = {
+        role["role_id"]: role["default_failure_route"] for role in roles
+    }
     for expected_edge, raw_edge in zip(derived_edges, raw_edges, strict=True):
         edge = _mapping(raw_edge, "dependency edge")
         _exact_keys(edge, _EDGE_KEYS, "dependency edge")
         producer = _text(edge["producer_role_id"], "edge.producer_role_id")
         consumer = _text(edge["consumer_role_id"], "edge.consumer_role_id")
         pair = (producer, consumer)
+        required = _exact_bool(edge["required"], "edge.required")
         if (
             pair != expected_edge
-            or edge["edge_id"] != f"S1-EDGE::{producer}->{consumer}"
-            or edge["required"] is not True
-            or edge["failure_route"]
-            != next(
-                role["default_failure_route"]
-                for role in roles
-                if role["role_id"] == consumer
-            )
+            or _text(edge["edge_id"], "edge.edge_id")
+            != f"S1-EDGE::{producer}->{consumer}"
+            or not required
+            or _text(edge["failure_route"], "edge.failure_route")
+            != failure_route_by_role[consumer]
         ):
             _raise(
                 PluginPackageReasonCodeV1.CANONICAL_INPUT_INVALID,
@@ -820,23 +660,22 @@ def _validate_launch_projection(
             PluginPackageReasonCodeV1.EDGE_DUPLICATE,
             "launch graph contains duplicate dependency edges",
         )
+    component_ids = tuple(_component_id(role_id) for role_id in expected_role_ids)
     component_edges = tuple(
         (_component_id(producer), _component_id(consumer))
         for producer, consumer in observed_edges
     )
-    if tuple(sorted(component_edges)) != _EXPECTED_DEPENDENCY_EDGES:
-        _raise(
-            PluginPackageReasonCodeV1.EDGE_UNKNOWN_NODE,
-            "launch dependency edge set differs from the frozen package graph",
-        )
     compiled_order = compile_selected_package_dependency_order_v1(
-        _COMPONENT_IDS,
+        component_ids,
         component_edges,
     )
+    declared_role_order = _text_list(
+        graph["topological_order"],
+        "graph.topological_order",
+    )
     if (
-        tuple(_component_id(role_id) for role_id in graph["topological_order"])
+        tuple(_component_id(role_id) for role_id in declared_role_order)
         != compiled_order
-        or compiled_order != _EXPECTED_TOPOLOGICAL_ORDER
         or ("S1PKG::ROLE-12", "S1PKG::ROLE-11") not in component_edges
     ):
         _raise(
@@ -851,7 +690,16 @@ def _validate_launch_projection(
             "launch graph must contain five operation profiles",
         )
     operations: list[Mapping[str, object]] = []
-    for index, raw_operation in enumerate(raw_operations):
+    operation_classes: list[str] = []
+    blocker_counts: list[int] = []
+    required_counts: list[int] = []
+    optional_counts: list[int] = []
+    held_role_ids = {
+        role["role_id"]
+        for role in roles
+        if role["disposition"] != "BINDING_ONLY_GAP"
+    }
+    for raw_operation in raw_operations:
         operation = _mapping(raw_operation, "operation profile")
         _exact_keys(operation, _OPERATION_KEYS, "operation profile")
         operation_class = _text(
@@ -867,39 +715,85 @@ def _validate_launch_projection(
             "operation.optional_role_ids",
         )
         if (
-            operation_class != _OPERATION_CLASSES[index]
-            or required != _OPERATION_REQUIRED_ROLE_IDS[index]
-            or optional != _OPERATION_OPTIONAL_ROLE_IDS[index]
-            or operation["terminal_failure_route"]
-            != _OPERATION_TERMINAL_ROUTES[index]
-            or set(required).intersection(optional)
-            or not set((*required, *optional)).issubset(_ROLE_IDS)
+            set(required).intersection(optional)
+            or not set((*required, *optional)).issubset(role_id_set)
         ):
             _raise(
                 PluginPackageReasonCodeV1.OPERATION_PROFILE_INVALID,
                 "operation dependency profile differs",
             )
-        for name in ("purpose", "consumption_law", "research_state"):
+        for name in (
+            "purpose",
+            "consumption_law",
+            "research_state",
+            "terminal_failure_route",
+        ):
             _text(operation[name], f"operation.{name}")
         _exact_no_effects(operation["no_effects"], "operation.no_effects")
+        operation_classes.append(operation_class)
+        required_counts.append(len(required))
+        optional_counts.append(len(optional))
+        blocker_counts.append(sum(role_id in held_role_ids for role_id in required))
         operations.append(operation)
+    if (
+        tuple(operation_classes) != _OPERATION_CLASSES
+        or tuple(required_counts) != (27, 5, 15, 21, 11)
+        or tuple(optional_counts) != (1, 0, 0, 1, 0)
+        or tuple(blocker_counts) != (16, 2, 7, 12, 5)
+        or operations[0]["optional_role_ids"] != ["ROLE-27"]
+        or operations[3]["optional_role_ids"] != ["ROLE-27"]
+    ):
+        _raise(
+            PluginPackageReasonCodeV1.OPERATION_PROFILE_INVALID,
+            "operation identities or aggregate closures differ",
+        )
 
     validation = _mapping(projection["validation"], "validation")
     _exact_keys(validation, _VALIDATION_KEYS, "validation")
-    if validation != {
+    expected_counts = {
         "checked_edge_count": 102,
         "checked_operation_profile_count": 5,
         "checked_path_count": 34,
         "checked_profile_count": 5,
         "checked_role_count": 28,
-        "reason_codes": [],
-        "terminal_state": "VALIDATED_NO_EFFECT",
-    }:
+    }
+    if (
+        any(
+            _exact_int(validation[key], f"validation.{key}") != expected
+            for key, expected in expected_counts.items()
+        )
+        or _list(validation["reason_codes"], "validation.reason_codes")
+        or _text(validation["terminal_state"], "validation.terminal_state")
+        != "VALIDATED_NO_EFFECT"
+    ):
         _raise(
             PluginPackageReasonCodeV1.CANONICAL_INPUT_INVALID,
             "launch graph validation receipt differs",
         )
     return graph, tuple(roles), tuple(operations)
+
+
+def _capture_launch_projection_pair(
+    launch_graph_projection: Mapping[str, object],
+    canonical_launch_graph_projection: Mapping[str, object],
+) -> tuple[
+    Mapping[str, object],
+    tuple[Mapping[str, object], ...],
+    tuple[Mapping[str, object], ...],
+    Mapping[str, object],
+    Mapping[str, object],
+]:
+    reference_snapshot = _copy_canonical_json_v1(
+        canonical_launch_graph_projection
+    )
+    candidate_snapshot = _copy_canonical_json_v1(launch_graph_projection)
+    graph, roles, operations = _validate_launch_projection(reference_snapshot)
+    if not _same_canonical_json_v1(candidate_snapshot, reference_snapshot):
+        _raise(
+            PluginPackageReasonCodeV1.CANONICAL_INPUT_INVALID,
+            "launch graph candidate differs from the canonical reference",
+        )
+    return graph, roles, operations, candidate_snapshot, reference_snapshot
 
 
 def _selected_family_rows() -> tuple[Mapping[str, object], ...]:
@@ -918,7 +812,8 @@ def _selected_family_rows() -> tuple[Mapping[str, object], ...]:
     rows: list[Mapping[str, object]] = []
     family_refs: list[str] = []
     no_family_count = 0
-    for expected_role_id, raw_row in zip(_ROLE_IDS, raw, strict=True):
+    expected_role_ids = tuple(f"ROLE-{index:02d}" for index in range(1, 29))
+    for expected_role_id, raw_row in zip(expected_role_ids, raw, strict=True):
         row = _mapping(raw_row, "selected role-family row")
         if tuple(row) != _FAMILY_ROW_KEYS or row["role_id"] != expected_role_id:
             _raise(
@@ -952,7 +847,9 @@ def _selected_family_rows() -> tuple[Mapping[str, object], ...]:
         if fallback is not None:
             fallback = _text(fallback, "fallback_role_id_or_none")
         if (expected_role_id, fallback) not in {
-            (role_id, None) for role_id in _ROLE_IDS if role_id != "ROLE-27"
+            (role_id, None)
+            for role_id in expected_role_ids
+            if role_id != "ROLE-27"
         } | {("ROLE-27", "ROLE-26")}:
             _raise(
                 PluginPackageReasonCodeV1.ROLLBACK_INVALID,
@@ -1043,8 +940,19 @@ def _operation_rows_from_launch(
 
 def build_selected_component_package_manifest_v1(
     launch_graph_projection: Mapping[str, object],
+    *,
+    canonical_launch_graph_projection: Mapping[str, object],
 ) -> SelectedComponentPackageManifestV1:
-    graph, roles, operations = _validate_launch_projection(launch_graph_projection)
+    (
+        graph,
+        roles,
+        operations,
+        _candidate_snapshot,
+        reference_snapshot,
+    ) = _capture_launch_projection_pair(
+        launch_graph_projection,
+        canonical_launch_graph_projection,
+    )
     family_rows = _selected_family_rows()
     entries: list[SelectedComponentPackageEntryV1] = []
     for role, family_row in zip(roles, family_rows, strict=True):
@@ -1152,7 +1060,10 @@ def build_selected_component_package_manifest_v1(
         authority_envelope=DEFAULT_AUTHORITY_ENVELOPE,
         active_live_profile_ids=(),
     )
-    receipt = validate_selected_component_package_v1(manifest)
+    receipt = validate_selected_component_package_v1(
+        manifest,
+        canonical_launch_graph_projection=reference_snapshot,
+    )
     if receipt.terminal_state is PackageValidationTerminalStateV1.REJECTED_INVALID:
         reason = receipt.reason_codes[0]
         raise PluginPackageContractError(
@@ -1168,19 +1079,29 @@ def _sorted_reasons(
     return tuple(sorted(reasons, key=lambda reason: reason.value))
 
 
-def _expected_disposition(role_id: str) -> str:
-    if role_id in _BINDING_ONLY_ROLE_IDS:
-        return "BINDING_ONLY_GAP"
-    if role_id in _EVIDENCE_ONLY_ROLE_IDS:
-        return "EVIDENCE_ONLY_GAP"
-    return "TRUE_MISSING_DEPENDENCY"
+def _authority_matches_default(value: object) -> bool:
+    if type(value) is not type(DEFAULT_AUTHORITY_ENVELOPE):
+        return False
+    return all(
+        type(getattr(value, field_definition.name))
+        is type(getattr(DEFAULT_AUTHORITY_ENVELOPE, field_definition.name))
+        and getattr(value, field_definition.name)
+        == getattr(DEFAULT_AUTHORITY_ENVELOPE, field_definition.name)
+        for field_definition in fields(DEFAULT_AUTHORITY_ENVELOPE)
+    )
 
 
 def validate_selected_component_package_v1(
     manifest: SelectedComponentPackageManifestV1,
+    *,
+    canonical_launch_graph_projection: Mapping[str, object],
 ) -> CompatibilityAndDependencyReceiptV1:
     """Validate one exact typed selected-component package manifest."""
 
+    reference_snapshot = _copy_canonical_json_v1(
+        canonical_launch_graph_projection
+    )
+    graph, roles, operations = _validate_launch_projection(reference_snapshot)
     if type(manifest) is not SelectedComponentPackageManifestV1:
         _raise(
             PluginPackageReasonCodeV1.CANONICAL_INPUT_INVALID,
@@ -1210,41 +1131,50 @@ def validate_selected_component_package_v1(
         != _CANONICAL_SERIALIZATION_POLICY
     ):
         reasons.add(PluginPackageReasonCodeV1.REPRODUCIBILITY_FAILED)
-    if manifest.authority_envelope != DEFAULT_AUTHORITY_ENVELOPE:
+    if not _authority_matches_default(manifest.authority_envelope):
         reasons.add(PluginPackageReasonCodeV1.RUNTIME_EFFECT_FORBIDDEN)
 
     entries = manifest.entries
     family_rows = _selected_family_rows()
-    if len(entries) != 28:
+    if len(entries) != len(roles) or len(entries) != 28:
         reasons.add(PluginPackageReasonCodeV1.IDENTITY_INVALID)
     for index, entry in enumerate(entries):
-        if index >= len(_ROLE_IDS):
+        if index >= len(roles) or index >= len(family_rows):
             reasons.add(PluginPackageReasonCodeV1.IDENTITY_INVALID)
             continue
-        role_id = _ROLE_IDS[index]
-        component_id = _COMPONENT_IDS[index]
+        role = roles[index]
         family_row = family_rows[index]
-        disposition = _expected_disposition(role_id)
+        role_id = role["role_id"]
+        component_id = _component_id(role_id)
+        disposition = role["disposition"]
         admission, compatibility, compatibility_reasons = _admission_contract(
             disposition
         )
         expected_required_operations = tuple(
-            operation_class
-            for operation_class, required_role_ids in zip(
-                _OPERATION_CLASSES,
-                _OPERATION_REQUIRED_ROLE_IDS,
-                strict=True,
-            )
-            if role_id in required_role_ids
+            operation["operation_class"]
+            for operation in operations
+            if role_id in operation["required_role_ids"]
         )
         expected_optional_operations = tuple(
-            operation_class
-            for operation_class, optional_role_ids in zip(
-                _OPERATION_CLASSES,
-                _OPERATION_OPTIONAL_ROLE_IDS,
-                strict=True,
-            )
-            if role_id in optional_role_ids
+            operation["operation_class"]
+            for operation in operations
+            if role_id in operation["optional_role_ids"]
+        )
+        expected_existing_paths = tuple(
+            path_row["path"]
+            for path_row in role["path_refs"]
+            if path_row["disposition"] == "EXISTING_CANONICAL_OWNER"
+        )
+        expected_future_paths = tuple(
+            path_row["path"]
+            for path_row in role["path_refs"]
+            if path_row["disposition"]
+            == "FUTURE_AUTHORIZED_OWNER_NOT_YET_IMPLEMENTED"
+        )
+        expected_fallback = (
+            _component_id(family_row["fallback_role_id_or_none"])
+            if family_row["fallback_role_id_or_none"] is not None
+            else None
         )
         if (
             entry.package_component_id != component_id
@@ -1275,31 +1205,29 @@ def validate_selected_component_package_v1(
         ):
             reasons.add(PluginPackageReasonCodeV1.FAMILY_UNKNOWN)
         if (
+            entry.existing_owner_paths != expected_existing_paths
+            or entry.future_owner_paths != expected_future_paths
+            or entry.canonical_output_contract != role["frozen_output"]
+            or entry.default_failure_route != role["default_failure_route"]
+            or entry.latency_class != role["latency_class"]
+        ):
+            reasons.add(PluginPackageReasonCodeV1.CANONICAL_INPUT_INVALID)
+        if (
             entry.rollback_target_kind.value != family_row["rollback_target_kind"]
-            or entry.fallback_component_id_or_none
-            != (
-                _component_id(family_row["fallback_role_id_or_none"])
-                if family_row["fallback_role_id_or_none"] is not None
-                else None
-            )
+            or entry.fallback_component_id_or_none != expected_fallback
         ):
             reasons.add(PluginPackageReasonCodeV1.ROLLBACK_INVALID)
         if entry.direct_dependency_component_ids != tuple(
-            _component_id(prerequisite)
-            for prerequisite in _DIRECT_PREREQUISITE_ROLE_IDS[index]
+            sorted(
+                _component_id(prerequisite)
+                for prerequisite in role["direct_prerequisite_role_ids"]
+            )
         ):
             reasons.add(PluginPackageReasonCodeV1.EDGE_UNKNOWN_NODE)
         if entry.authority_envelope_id != (
             DEFAULT_AUTHORITY_ENVELOPE.authority_envelope_id
         ):
             reasons.add(PluginPackageReasonCodeV1.RUNTIME_EFFECT_FORBIDDEN)
-        if not (*entry.existing_owner_paths, *entry.future_owner_paths):
-            reasons.add(PluginPackageReasonCodeV1.CANONICAL_INPUT_INVALID)
-        for path in (*entry.existing_owner_paths, *entry.future_owner_paths):
-            try:
-                _safe_relative_path(path)
-            except PluginPackageContractError as exc:
-                reasons.add(exc.reason_code)
 
     if len(
         {
@@ -1342,9 +1270,27 @@ def validate_selected_component_package_v1(
     ):
         reasons.add(PluginPackageReasonCodeV1.FAMILY_UNKNOWN)
 
-    if len(manifest.dependency_edges) != 102:
-        reasons.add(PluginPackageReasonCodeV1.EDGE_UNKNOWN_NODE)
-    if manifest.dependency_edges != _EXPECTED_DEPENDENCY_EDGES:
+    expected_dependency_edges = tuple(
+        sorted(
+            (
+                _component_id(prerequisite),
+                _component_id(role["role_id"]),
+            )
+            for role in roles
+            for prerequisite in role["direct_prerequisite_role_ids"]
+        )
+    )
+    expected_component_ids = tuple(
+        _component_id(role["role_id"]) for role in roles
+    )
+    expected_topological_order = compile_selected_package_dependency_order_v1(
+        expected_component_ids,
+        expected_dependency_edges,
+    )
+    if (
+        len(manifest.dependency_edges) != 102
+        or manifest.dependency_edges != expected_dependency_edges
+    ):
         reasons.add(PluginPackageReasonCodeV1.EDGE_UNKNOWN_NODE)
     try:
         compiled_order = compile_selected_package_dependency_order_v1(
@@ -1355,36 +1301,46 @@ def validate_selected_component_package_v1(
         reasons.add(exc.reason_code)
         compiled_order = ()
     if (
-        compiled_order != _EXPECTED_TOPOLOGICAL_ORDER
-        or manifest.topological_order != _EXPECTED_TOPOLOGICAL_ORDER
+        compiled_order != expected_topological_order
+        or manifest.topological_order != expected_topological_order
         or ("S1PKG::ROLE-12", "S1PKG::ROLE-11")
         not in manifest.dependency_edges
     ):
         reasons.add(PluginPackageReasonCodeV1.DEPENDENCY_CYCLE)
 
     operation_rows = manifest.operation_eligibility_rows
-    if len(operation_rows) != 5:
+    if len(operation_rows) != len(operations) or len(operation_rows) != 5:
         reasons.add(PluginPackageReasonCodeV1.OPERATION_PROFILE_INVALID)
     for index, row in enumerate(operation_rows):
-        if index >= len(_OPERATION_CLASSES):
+        if index >= len(operations):
             reasons.add(PluginPackageReasonCodeV1.OPERATION_PROFILE_INVALID)
             continue
+        operation = operations[index]
+        required_component_ids = tuple(
+            _component_id(role_id)
+            for role_id in operation["required_role_ids"]
+        )
+        optional_component_ids = tuple(
+            _component_id(role_id)
+            for role_id in operation["optional_role_ids"]
+        )
+        disposition_by_role = {
+            role["role_id"]: role["disposition"] for role in roles
+        }
+        blocking_component_ids = tuple(
+            _component_id(role_id)
+            for role_id in operation["required_role_ids"]
+            if _admission_contract(disposition_by_role[role_id])[0]
+            is not PackageAdmissionStateV1.ADMITTED_CONTRACT_ONLY_NO_EFFECT
+        )
         if (
-            row.operation_class != _OPERATION_CLASSES[index]
-            or row.required_component_ids
-            != tuple(
-                _component_id(role_id)
-                for role_id in _OPERATION_REQUIRED_ROLE_IDS[index]
-            )
-            or row.optional_component_ids
-            != tuple(
-                _component_id(role_id)
-                for role_id in _OPERATION_OPTIONAL_ROLE_IDS[index]
-            )
-            or row.blocking_component_ids != _EXPECTED_OPERATION_BLOCKERS[index]
+            row.operation_class != operation["operation_class"]
+            or row.required_component_ids != required_component_ids
+            or row.optional_component_ids != optional_component_ids
+            or row.blocking_component_ids != blocking_component_ids
             or row.state
             is not PackageOperationEligibilityStateV1.BLOCKED_CURRENT_PACKAGE_NO_EFFECT
-            or row.terminal_failure_route != _OPERATION_TERMINAL_ROUTES[index]
+            or row.terminal_failure_route != operation["terminal_failure_route"]
         ):
             reasons.add(PluginPackageReasonCodeV1.OPERATION_PROFILE_INVALID)
 
@@ -1419,8 +1375,13 @@ def validate_selected_component_package_v1(
 
 def _require_valid_manifest(
     manifest: SelectedComponentPackageManifestV1,
+    *,
+    canonical_launch_graph_projection: Mapping[str, object],
 ) -> CompatibilityAndDependencyReceiptV1:
-    receipt = validate_selected_component_package_v1(manifest)
+    receipt = validate_selected_component_package_v1(
+        manifest,
+        canonical_launch_graph_projection=canonical_launch_graph_projection,
+    )
     if receipt.terminal_state is PackageValidationTerminalStateV1.REJECTED_INVALID:
         _raise(
             receipt.reason_codes[0],
@@ -1462,12 +1423,20 @@ def _disabled_operation_rows(
 def derive_rollback_and_supersession_receipt_v1(
     manifest: SelectedComponentPackageManifestV1,
     *,
+    canonical_launch_graph_projection: Mapping[str, object],
     predecessor_manifest: SelectedComponentPackageManifestV1 | None = None,
     disabled_component_ids: tuple[str, ...] = (),
 ) -> RollbackAndSupersessionReceiptV1:
     """Derive immutable no-effect disable, rollback, and retention state."""
 
-    manifest_receipt = _require_valid_manifest(manifest)
+    reference_snapshot = _copy_canonical_json_v1(
+        canonical_launch_graph_projection
+    )
+    _validate_launch_projection(reference_snapshot)
+    manifest_receipt = _require_valid_manifest(
+        manifest,
+        canonical_launch_graph_projection=reference_snapshot,
+    )
     if type(disabled_component_ids) is not tuple or any(
         type(component_id) is not str
         or not component_id
@@ -1506,7 +1475,8 @@ def derive_rollback_and_supersession_receipt_v1(
                 "predecessor_manifest must be an exact typed manifest or None",
             )
         predecessor_receipt = validate_selected_component_package_v1(
-            predecessor_manifest
+            predecessor_manifest,
+            canonical_launch_graph_projection=reference_snapshot,
         )
         predecessor_version = predecessor_manifest.package_version
         predecessor_is_valid = (
@@ -1557,9 +1527,15 @@ def derive_rollback_and_supersession_receipt_v1(
 def validate_package_supersession_v1(
     previous: SelectedComponentPackageManifestV1,
     candidate: SelectedComponentPackageManifestV1,
+    *,
+    canonical_launch_graph_projection: Mapping[str, object],
 ) -> RollbackAndSupersessionReceiptV1:
     """Validate strictly increasing append-only selected-package mechanics."""
 
+    reference_snapshot = _copy_canonical_json_v1(
+        canonical_launch_graph_projection
+    )
+    _validate_launch_projection(reference_snapshot)
     if (
         type(previous) is not SelectedComponentPackageManifestV1
         or type(candidate) is not SelectedComponentPackageManifestV1
@@ -1568,8 +1544,14 @@ def validate_package_supersession_v1(
             PluginPackageReasonCodeV1.CANONICAL_INPUT_INVALID,
             "previous and candidate must be exact typed manifests",
         )
-    previous_receipt = validate_selected_component_package_v1(previous)
-    candidate_receipt = validate_selected_component_package_v1(candidate)
+    previous_receipt = validate_selected_component_package_v1(
+        previous,
+        canonical_launch_graph_projection=reference_snapshot,
+    )
+    candidate_receipt = validate_selected_component_package_v1(
+        candidate,
+        canonical_launch_graph_projection=reference_snapshot,
+    )
     valid = (
         previous_receipt.terminal_state
         is not PackageValidationTerminalStateV1.REJECTED_INVALID
@@ -1621,12 +1603,21 @@ def validate_package_supersession_v1(
 
 def _build_selected_component_package_core_v1(
     launch_graph_projection: Mapping[str, object],
+    *,
+    canonical_launch_graph_projection: Mapping[str, object],
 ) -> Mapping[str, object]:
     manifest = build_selected_component_package_manifest_v1(
-        launch_graph_projection
+        launch_graph_projection,
+        canonical_launch_graph_projection=canonical_launch_graph_projection,
     )
-    compatibility = _require_valid_manifest(manifest)
-    rollback = derive_rollback_and_supersession_receipt_v1(manifest)
+    compatibility = _require_valid_manifest(
+        manifest,
+        canonical_launch_graph_projection=canonical_launch_graph_projection,
+    )
+    rollback = derive_rollback_and_supersession_receipt_v1(
+        manifest,
+        canonical_launch_graph_projection=canonical_launch_graph_projection,
+    )
     if rollback.terminal_state is PackageValidationTerminalStateV1.REJECTED_INVALID:
         _raise(
             rollback.reason_codes[0],
@@ -1643,14 +1634,28 @@ def _build_selected_component_package_core_v1(
 
 def rebuild_selected_component_package_v1(
     launch_graph_projection: Mapping[str, object],
+    *,
+    canonical_launch_graph_projection: Mapping[str, object],
 ) -> PackageReproducibilityReceiptV1:
     """Perform two independent pure builds and compare canonical core bytes."""
 
+    (
+        _graph,
+        _roles,
+        _operations,
+        candidate_snapshot,
+        reference_snapshot,
+    ) = _capture_launch_projection_pair(
+        launch_graph_projection,
+        canonical_launch_graph_projection,
+    )
     first_core = _build_selected_component_package_core_v1(
-        launch_graph_projection
+        candidate_snapshot,
+        canonical_launch_graph_projection=reference_snapshot,
     )
     second_core = _build_selected_component_package_core_v1(
-        launch_graph_projection
+        candidate_snapshot,
+        canonical_launch_graph_projection=reference_snapshot,
     )
     first_json = _canonical_package_json(first_core)
     second_json = _canonical_package_json(second_core)
@@ -1693,12 +1698,28 @@ def rebuild_selected_component_package_v1(
 
 def selected_component_package_projection_v1(
     launch_graph_projection: Mapping[str, object],
+    *,
+    canonical_launch_graph_projection: Mapping[str, object],
 ) -> Mapping[str, object]:
     """Return the immutable four-key selected-component package projection."""
 
-    core = _build_selected_component_package_core_v1(launch_graph_projection)
+    (
+        _graph,
+        _roles,
+        _operations,
+        candidate_snapshot,
+        reference_snapshot,
+    ) = _capture_launch_projection_pair(
+        launch_graph_projection,
+        canonical_launch_graph_projection,
+    )
+    core = _build_selected_component_package_core_v1(
+        candidate_snapshot,
+        canonical_launch_graph_projection=reference_snapshot,
+    )
     reproducibility = rebuild_selected_component_package_v1(
-        launch_graph_projection
+        candidate_snapshot,
+        canonical_launch_graph_projection=reference_snapshot,
     )
     if (
         reproducibility.terminal_state

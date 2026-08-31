@@ -782,6 +782,8 @@ S1_PLUGIN_PACKAGE_CURRENTIZATION_ALLOWED_EXACT_PATHS = frozenset(
         "src/qtt/plugins/registry.py",
         "src/qtt/plugins/__init__.py",
         "src/qtt/stage1_prediction_markets/qku_computation_control_plane/plugin_adapter.py",
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/serialization.py",
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/agent_policy.py",
         "src/qtt/stage1_prediction_markets/qku_computation_control_plane/__init__.py",
         "tools/build_qku_computation_control_plane.py",
         "tools/independent_validate_qku_computation_control_plane_architecture.py",
@@ -796,6 +798,7 @@ S1_PLUGIN_PACKAGE_CURRENTIZATION_ALLOWED_EXACT_PATHS = frozenset(
         "tests/tools/test_validation_scope_registry.py",
         "tests/tools/test_validation_inventory.py",
         "tests/tools/test_changed_area_validation_router.py",
+        "docs/master_plan/generated/qku_control_plane/agent_capability/manifest.json",
         "docs/master_plan/generated/PR152_GrandGlobalDebugLogicalConsistencyAuditEntireQTTRepo.report.json",
     }
 )

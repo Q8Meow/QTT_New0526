@@ -34,6 +34,7 @@ from src.qtt.stage1_prediction_markets.qku_computation_control_plane import (  #
     SOURCE_CURRENTIZATION_OVERLAYS,
     build_tranche_a_coverage_manifest,
     deterministic_json,
+    safe_json_loads,
     validate_relative_path,
     ST12GAgentEvidenceHandoffV2,
     ST12GOwnerDashboardEvidenceViewV2,
@@ -2629,7 +2630,9 @@ def main() -> int:
             payload["selected_component_package_v1"]
         )
     )
-    text = deterministic_json(serializable_payload) + "\n"
+    encoded_payload = deterministic_json(serializable_payload)
+    safe_json_loads(encoded_payload)
+    text = encoded_payload + "\n"
     if args.output:
         try:
             output = resolve_output_path(args.output)

@@ -22,8 +22,10 @@ def test_dependency_dag_is_acyclic_and_ordered():
     assert orders == sorted(orders)
     assert all(row["cycle_detection_status"] == "NO_CYCLE" for row in rows)
 
+    launch_projection = stage1_launch_graph_projection_v2()
     manifest = build_selected_component_package_manifest_v1(
-        stage1_launch_graph_projection_v2()
+        launch_projection,
+        canonical_launch_graph_projection=stage1_launch_graph_projection_v2(),
     )
     node_ids = tuple(entry.package_component_id for entry in manifest.entries)
     edges = manifest.dependency_edges

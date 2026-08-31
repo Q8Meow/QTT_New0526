@@ -3,8 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Mapping
-from dataclasses import dataclass, fields, is_dataclass
-from enum import Enum
+from dataclasses import dataclass
 import json
 from pathlib import Path
 
@@ -12,13 +11,15 @@ from src.qtt.plugins.contracts import (
     CompatibilityAndDependencyReceiptV1,
     PackageAdmissionStateV1,
     PackageValidationTerminalStateV1,
+    PluginPackageContractError,
     SelectedComponentPackageManifestV1,
+    _normalize_package_serialization_value,
 )
 from src.qtt.plugins.registry import selected_component_package_projection_v1
 
 from .errors import OwnerAdapterError, ReasonCode
 from .models import NO_EFFECTS_V1, NoEffectFlagsV1
-from .serialization import deterministic_json
+from .serialization import deterministic_json, safe_json_loads
 
 
 PLUGIN_REPORT_PATH = Path(
@@ -56,65 +57,8 @@ def _view_text_tuple(value: object, field_name: str) -> tuple[str, ...]:
     return value
 
 
-class _DeterministicEmptyPathTuple(tuple[()]):
-    """Preserve an empty path tuple through the existing QKU path guard."""
-
-    def __new__(cls) -> _DeterministicEmptyPathTuple:
-        return super().__new__(cls)
-
-    def __bool__(self) -> bool:
-        return True
-
-
-class _DeterministicNonPathKey(str):
-    """Keep an exact JSON key while disambiguating a non-path field."""
-
-    def casefold(self) -> str:
-        return f"{super().casefold()}_field"
-
-
-def _qku_projection_serialization_key(key: str, value: object) -> str:
-    lowered = key.casefold()
-    if lowered.endswith(("_path", "_paths")) and not (
-        value is None or isinstance(value, (str, tuple, list))
-    ):
-        return _DeterministicNonPathKey(key)
-    return key
-
-
-def _qku_projection_serialization_value(
-    value: object,
-    *,
-    field_name: str = "",
-) -> object:
-    if isinstance(value, Enum):
-        return value
-    if is_dataclass(value) and not isinstance(value, type):
-        return {
-            _qku_projection_serialization_key(
-                field_definition.name,
-                getattr(value, field_definition.name),
-            ): _qku_projection_serialization_value(
-                getattr(value, field_definition.name),
-                field_name=field_definition.name,
-            )
-            for field_definition in fields(value)
-        }
-    if isinstance(value, Mapping):
-        return {
-            _qku_projection_serialization_key(
-                key,
-                item,
-            ): _qku_projection_serialization_value(item, field_name=key)
-            for key, item in value.items()
-        }
-    if type(value) is tuple:
-        if not value and field_name.casefold().endswith("_paths"):
-            return _DeterministicEmptyPathTuple()
-        return tuple(
-            _qku_projection_serialization_value(item) for item in value
-        )
-    return value
+def _qku_projection_serialization_value(value: object) -> object:
+    return _normalize_package_serialization_value(value)
 
 
 @dataclass(frozen=True, slots=True)
@@ -285,9 +229,26 @@ class SelectedComponentPackageAdapterV1:
     def build_projection(
         launch_graph_projection: Mapping[str, object],
     ) -> Mapping[str, object]:
-        return selected_component_package_projection_v1(
-            launch_graph_projection
-        )
+        from .stage1_launch_graph import stage1_launch_graph_projection_v2
+
+        canonical_launch_graph_projection = stage1_launch_graph_projection_v2()
+        try:
+            return selected_component_package_projection_v1(
+                launch_graph_projection,
+                canonical_launch_graph_projection=(
+                    canonical_launch_graph_projection
+                ),
+            )
+        except PluginPackageContractError as exc:
+            reason_code = (
+                ReasonCode.OWNER_DATA_CONTRADICTORY
+                if "differs from the canonical reference" in exc.message
+                else ReasonCode.OWNER_DATA_MALFORMED
+            )
+            raise OwnerAdapterError(
+                reason_code,
+                "generic selected package projection was rejected",
+            ) from exc
 
     @staticmethod
     def build_view(
@@ -345,6 +306,10 @@ class SelectedComponentPackageAdapterV1:
             )
             for row in manifest.operation_eligibility_rows
         )
+        canonical_projection_json = deterministic_json(
+            _qku_projection_serialization_value(projection)
+        )
+        safe_json_loads(canonical_projection_json)
         return SelectedComponentPackageViewV1(
             package_id=manifest.package_id,
             package_version=manifest.package_version.canonical,
@@ -373,9 +338,7 @@ class SelectedComponentPackageAdapterV1:
             operations=operations,
             source_owner="src/qtt/plugins/registry.py",
             source_package_ref=manifest.launch_graph_package_ref,
-            canonical_projection_json=deterministic_json(
-                _qku_projection_serialization_value(projection)
-            ),
+            canonical_projection_json=canonical_projection_json,
             no_effects=NO_EFFECTS_V1,
         )
 

@@ -2586,6 +2586,8 @@ def test_s1_launch_graph_scope_is_exactly_owned_and_fail_closed() -> None:
             "src/qtt/plugins/registry.py",
             "src/qtt/plugins/__init__.py",
             "src/qtt/stage1_prediction_markets/qku_computation_control_plane/plugin_adapter.py",
+            "src/qtt/stage1_prediction_markets/qku_computation_control_plane/serialization.py",
+            "src/qtt/stage1_prediction_markets/qku_computation_control_plane/agent_policy.py",
             "src/qtt/stage1_prediction_markets/qku_computation_control_plane/__init__.py",
             "tools/build_qku_computation_control_plane.py",
             "tools/independent_validate_qku_computation_control_plane_architecture.py",
@@ -2600,12 +2602,13 @@ def test_s1_launch_graph_scope_is_exactly_owned_and_fail_closed() -> None:
             "tests/tools/test_validation_scope_registry.py",
             "tests/tools/test_validation_inventory.py",
             "tests/tools/test_changed_area_validation_router.py",
+            "docs/master_plan/generated/qku_control_plane/agent_capability/manifest.json",
         }
     )
     package_paths = package_normal_paths | {conditional}
-    assert len(package_normal_paths) == 20
+    assert len(package_normal_paths) == 23
     assert package_paths - package_normal_paths == {conditional}
-    assert len(package_paths) == 21
+    assert len(package_paths) == 24
     assert (
         registry.S1_PLUGIN_PACKAGE_CURRENTIZATION_ALLOWED_EXACT_PATHS
         == package_paths

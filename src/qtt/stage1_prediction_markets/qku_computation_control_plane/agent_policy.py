@@ -1998,10 +1998,19 @@ class AgentCapabilityPolicyStoreV1:
             or manifest.get("llm_inference_allowed") is not False
             or manifest.get("quantum_mapping_or_execution_allowed") is not False
             or manifest.get("raw_jsonl_request_time_scan_allowed") is not False
-            or tuple(manifest.get("implemented_operation_ids") or ())
-            != _PRE_ST12F_IMPLEMENTED_OPERATION_IDS
-            or tuple(manifest.get("held_operation_ids") or ())
-            != _PRE_ST12F_HELD_OPERATION_IDS
+            or type(manifest.get("implemented_operation_ids")) is not list
+            or any(
+                type(operation_id) is not str
+                for operation_id in manifest["implemented_operation_ids"]
+            )
+            or tuple(manifest["implemented_operation_ids"])
+            != IMPLEMENTED_OPERATION_IDS
+            or type(manifest.get("held_operation_ids")) is not list
+            or any(
+                type(operation_id) is not str
+                for operation_id in manifest["held_operation_ids"]
+            )
+            or tuple(manifest["held_operation_ids"]) != HELD_OPERATION_IDS
         ):
             raise AuthorityDeniedError(
                 ReasonCode.TASK_ENVELOPE_STALE,

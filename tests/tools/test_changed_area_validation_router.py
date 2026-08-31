@@ -272,7 +272,7 @@ def test_qku_shared_integration_paths_use_the_exact_allowlists() -> None:
         inventory.S1_PLUGIN_PACKAGE_CURRENTIZATION_ALLOWED_EXACT_PATHS
         - {conditional_package_path}
     )
-    assert len(package_normal_paths) == 20
+    assert len(package_normal_paths) == 23
     assert (
         router.S1_PLUGIN_PACKAGE_CURRENTIZATION_ALLOWED_EXACT_PATHS
         == inventory.S1_PLUGIN_PACKAGE_CURRENTIZATION_ALLOWED_EXACT_PATHS
