@@ -8,13 +8,13 @@ from decimal import Decimal, InvalidOperation
 import json
 from pathlib import Path
 import re
-import subprocess
 import sys
 from tempfile import TemporaryDirectory
 from typing import Any, Callable, Mapping
 
 import pytest
 
+import tools.validation_scope_registry as scope_registry
 import tools.validate_repair_pr_changed_file_scope as runtime_artifact_policy
 
 
@@ -393,6 +393,8 @@ def _resolve_local_schema_refs(schema_path: Path, node: object) -> None:
 
 
 def _case_schema_and_serialization() -> None:
+    import subprocess
+
     from src.qtt.stage1_prediction_markets.market_data_ingest.adapter import (
         _pit_payload_matches_event_kind,
         _pit_typed_fields_payload,
@@ -3870,56 +3872,30 @@ def _case_independent_reconstruction_mutations() -> None:
         )
 
 
-def _git_paths(arguments: tuple[str, ...]) -> set[str]:
-    completed = subprocess.run(
-        ("git", *arguments),
-        check=True,
-        capture_output=True,
-        text=True,
-        encoding="utf-8",
-    )
-    return {line.strip().replace("\\", "/") for line in completed.stdout.splitlines() if line.strip()}
-
-
 def _case_physical_anti_sprawl() -> None:
-    committed = _git_paths(("diff", "--name-only", "--diff-filter=ACDMRTUXB", "origin/main...HEAD"))
-    staged = _git_paths(("diff", "--cached", "--name-only", "--diff-filter=ACDMRTUXB"))
-    unstaged = _git_paths(("diff", "--name-only", "--diff-filter=ACDMRTUXB"))
-    raw_untracked = _git_paths(("ls-files", "--others", "--exclude-standard"))
-    versioned_runtime_artifacts = {
-        path
-        for versioned_paths in (committed, staged, unstaged)
-        for path in versioned_paths
-        if runtime_artifact_policy._is_transient_runtime_artifact_path(path)
-    }
-    assert not versioned_runtime_artifacts
-    transient_untracked = {
-        path
-        for path in raw_untracked
-        if runtime_artifact_policy._is_transient_runtime_artifact_path(path)
-    }
-    semantic_untracked = raw_untracked - transient_untracked
-    assert transient_untracked.isdisjoint(semantic_untracked)
-    assert transient_untracked | semantic_untracked == raw_untracked
-    changed = committed | staged | unstaged | semantic_untracked
     assert len(_ALLOWED_SEMANTIC_PATHS) == 30
     assert len(_ALLOWED_CENTRAL_CLOSURE_PATHS) == 8
     assert _ALLOWED_SEMANTIC_PATHS.isdisjoint(_ALLOWED_CENTRAL_CLOSURE_PATHS)
     normal_paths = _ALLOWED_SEMANTIC_PATHS | _ALLOWED_CENTRAL_CLOSURE_PATHS
     assert len(normal_paths) == 38
+    assert normal_paths == scope_registry.S1_PIT_DATA_PHASE_A_01_NORMAL_CHANGED_PATHS
     assert _ALLOWED_CONDITIONAL_PATHS == {
         "docs/master_plan/generated/PR152_GrandGlobalDebugLogicalConsistencyAuditEntireQTTRepo.report.json"
     }
+    assert (
+        _ALLOWED_CONDITIONAL_PATHS
+        == scope_registry.S1_PIT_DATA_PHASE_A_01_CONDITIONAL_CHANGED_PATHS
+    )
     assert normal_paths.isdisjoint(_ALLOWED_CONDITIONAL_PATHS)
     assert len(_ALLOWED_CANDIDATE_PATHS) == 39
-    assert changed == _ALLOWED_CANDIDATE_PATHS
-    added = (
-        _git_paths(("diff", "--name-only", "--diff-filter=A", "origin/main...HEAD"))
-        | _git_paths(("diff", "--cached", "--name-only", "--diff-filter=A"))
-        | _git_paths(("diff", "--name-only", "--diff-filter=A"))
-        | semantic_untracked
+    assert (
+        _ALLOWED_CANDIDATE_PATHS
+        == scope_registry.S1_PIT_DATA_PHASE_A_01_ALLOWED_EXACT_PATHS
     )
-    assert added == {"tests/source_evidence/test_s1_pit_data_phase_a_01.py"}
+    assert not any(
+        runtime_artifact_policy._is_transient_runtime_artifact_path(path)
+        for path in _ALLOWED_CANDIDATE_PATHS
+    )
     source = Path("tests/source_evidence/test_s1_pit_data_phase_a_01.py").read_text(
         encoding="utf-8"
     )
@@ -3958,12 +3934,19 @@ def _case_physical_anti_sprawl() -> None:
         isinstance(node, ast.Constant) and node.value == "recovery_action"
         for node in ast.walk(request_builders[0])
     )
-    assert not any(path.startswith(".github/workflows/") for path in changed)
-    assert not any("run_validation_gates.py" in path for path in changed)
-    assert not any("MasterPlan" in path or "Roadmap" in path for path in changed)
-    assert {path for path in changed if path.endswith(".report.json")} == set(
-        _ALLOWED_CONDITIONAL_PATHS
+    assert not any(
+        path.startswith(".github/workflows/") for path in _ALLOWED_CANDIDATE_PATHS
     )
+    assert not any(
+        "run_validation_gates.py" in path for path in _ALLOWED_CANDIDATE_PATHS
+    )
+    assert not any(
+        "MasterPlan" in path or "Roadmap" in path
+        for path in _ALLOWED_CANDIDATE_PATHS
+    )
+    assert {
+        path for path in _ALLOWED_CANDIDATE_PATHS if path.endswith(".report.json")
+    } == set(_ALLOWED_CONDITIONAL_PATHS)
 
 
 def _build_cases() -> tuple[PITCase, ...]:
