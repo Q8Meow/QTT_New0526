@@ -4404,6 +4404,31 @@ def test_pull_request_detached_head_simulation_prefers_head_ref(monkeypatch):
     assert package_branch_context.branch == package_branch
     assert package_branch_context.source == "GITHUB_HEAD_REF"
 
+    pit_branch = context.S1_PIT_DATA_PHASE_A_01_IMPLEMENTATION_BRANCH
+    assert pit_branch == "s1-pit-data-phase-a-01"
+    assert pit_branch in context.OWNER_AUTHORIZED_VALIDATION_BRANCHES
+    assert context.is_owner_authorized_validation_branch(pit_branch)
+    assert not context.is_repair_branch(pit_branch)
+    assert not context.is_main_cumulative_branch(pit_branch)
+    assert context.roadmap_pr_number(pit_branch) is None
+    for near_name in (
+        pit_branch.upper(),
+        f"{pit_branch}-copy",
+        f"{pit_branch}/",
+        pit_branch.replace("phase-a-01", "phase-*-01"),
+        pit_branch.removesuffix("-01"),
+    ):
+        assert near_name not in context.OWNER_AUTHORIZED_VALIDATION_BRANCHES
+        assert not context.is_owner_authorized_validation_branch(near_name)
+
+    monkeypatch.setenv("GITHUB_HEAD_REF", pit_branch)
+    pit_branch_context = context.current_branch_context(
+        REPO_ROOT,
+        git_stdout=fake_git_stdout,
+    )
+    assert pit_branch_context.branch == pit_branch
+    assert pit_branch_context.source == "GITHUB_HEAD_REF"
+
 
 def test_pr152_helper_cli_repair_branch_allows_validation_execution_gates_only():
     branch = context.PR152_HELPER_CLI_TEMP_REPO_GIT_STATUS_REPAIR_BRANCH

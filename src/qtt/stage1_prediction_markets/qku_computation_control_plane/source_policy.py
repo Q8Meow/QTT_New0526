@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import ast
 from dataclasses import dataclass
-from datetime import UTC, date, datetime
+from datetime import UTC, date, datetime, timedelta
 from enum import StrEnum
 import json
 from pathlib import Path
@@ -12,6 +12,12 @@ from types import MappingProxyType
 from typing import Mapping
 
 from .errors import ReasonCode, SourcePolicyError
+from .models import NO_EFFECTS_V1, NoEffectFlagsV1
+from .point_in_time import (
+    PITDataContractErrorV1,
+    PITReasonCodeV1,
+)
+from .stage1_launch_graph import Stage1VenueProfileIdV1
 
 
 class AtomicFactTerminalStateV1(StrEnum):
@@ -4861,4 +4867,329 @@ if (
     raise SourcePolicyError(
         ReasonCode.SOURCE_CONFLICT,
         "ST12-H source closure must remain exact and ordered",
+    )
+
+
+def _pit_source_text(value: object, name: str) -> str:
+    if (
+        type(value) is not str
+        or not value
+        or value != value.strip()
+        or any(ord(character) < 0x20 for character in value)
+    ):
+        raise PITDataContractErrorV1(
+            PITReasonCodeV1.PIT_SCHEMA_OR_WIRE_DIALECT_INVALID,
+            f"{name} must be canonical nonempty text",
+        )
+    return value
+
+
+def _pit_source_utc(value: object, name: str) -> datetime:
+    if (
+        type(value) is not datetime
+        or value.tzinfo is None
+        or value.utcoffset() is None
+        or value.utcoffset().total_seconds() != 0
+    ):
+        raise PITDataContractErrorV1(
+            PITReasonCodeV1.PIT_SOURCE_CURRENTIZATION_STALE,
+            f"{name} must be an aware UTC datetime",
+        )
+    return value.astimezone(UTC)
+
+
+def _pit_source_text_tuple(value: object, name: str) -> tuple[str, ...]:
+    if type(value) is not tuple or any(type(item) is not str for item in value):
+        raise PITDataContractErrorV1(
+            PITReasonCodeV1.PIT_SCHEMA_OR_WIRE_DIALECT_INVALID,
+            f"{name} must be an exact text tuple",
+        )
+    result = tuple(_pit_source_text(item, name) for item in value)
+    if len(result) != len(set(result)):
+        raise PITDataContractErrorV1(
+            PITReasonCodeV1.PIT_SCHEMA_OR_WIRE_DIALECT_INVALID,
+            f"{name} must contain unique values",
+        )
+    return result
+
+
+@dataclass(frozen=True, slots=True)
+class PITSourceCurrentizationReceiptV1:
+    receipt_id: str
+    profile_id: Stage1VenueProfileIdV1
+    source_id: str
+    source_contract_version: str
+    checked_at_utc: datetime
+    effective_at_utc: datetime
+    expires_at_utc: datetime
+    currentization_owner_id: str
+    recheck_triggers: tuple[str, ...]
+    invalidating_change_detected: bool
+    admitted_current: bool
+    no_effects: NoEffectFlagsV1 = NO_EFFECTS_V1
+
+    def __post_init__(self) -> None:
+        for name in (
+            "receipt_id",
+            "source_id",
+            "source_contract_version",
+            "currentization_owner_id",
+        ):
+            _pit_source_text(getattr(self, name), name)
+        if type(self.profile_id) is not Stage1VenueProfileIdV1:
+            raise PITDataContractErrorV1(
+                PITReasonCodeV1.PIT_SCOPE_NOT_SELECTED,
+                "profile_id must be an exact Stage1VenueProfileIdV1",
+            )
+        for name in ("checked_at_utc", "effective_at_utc", "expires_at_utc"):
+            object.__setattr__(self, name, _pit_source_utc(getattr(self, name), name))
+        if not _pit_source_text_tuple(self.recheck_triggers, "recheck_triggers"):
+            raise PITDataContractErrorV1(
+                PITReasonCodeV1.PIT_SOURCE_CURRENTIZATION_STALE,
+                "source currentization requires at least one recheck trigger",
+            )
+        if (
+            type(self.invalidating_change_detected) is not bool
+            or type(self.admitted_current) is not bool
+        ):
+            raise PITDataContractErrorV1(
+                PITReasonCodeV1.PIT_SOURCE_CURRENTIZATION_STALE,
+                "currentization states must be exact booleans",
+            )
+        if self.effective_at_utc > self.checked_at_utc:
+            raise PITDataContractErrorV1(
+                PITReasonCodeV1.PIT_SOURCE_CURRENTIZATION_STALE,
+                "source receipt cannot be checked before it is effective",
+            )
+        if self.expires_at_utc <= self.checked_at_utc:
+            raise PITDataContractErrorV1(
+                PITReasonCodeV1.PIT_SOURCE_CURRENTIZATION_STALE,
+                "source receipt must be unexpired when checked",
+            )
+        if self.invalidating_change_detected or not self.admitted_current:
+            raise PITDataContractErrorV1(
+                PITReasonCodeV1.PIT_SOURCE_CURRENTIZATION_STALE,
+                "source receipt is stale or invalidated",
+            )
+        if type(self.no_effects) is not NoEffectFlagsV1 or self.no_effects != NO_EFFECTS_V1:
+            raise PITDataContractErrorV1(
+                PITReasonCodeV1.PIT_EFFECT_AUTHORITY_FORBIDDEN,
+                "source currentization must have exactly zero effects",
+            )
+
+
+@dataclass(frozen=True, slots=True)
+class PITRightsAdmissionReceiptV1:
+    receipt_id: str
+    profile_id: Stage1VenueProfileIdV1
+    account_scope: str
+    source_id: str
+    agreement_id: str
+    agreement_version: str
+    internal_use_class: str
+    owner_decision: str
+    checked_at_utc: datetime
+    expires_at_utc: datetime
+    recheck_triggers: tuple[str, ...]
+    revoked: bool
+    permitted_retention_class: str
+    prohibited_redistribution_class: str
+    no_effects: NoEffectFlagsV1 = NO_EFFECTS_V1
+
+    def __post_init__(self) -> None:
+        if type(self.profile_id) is not Stage1VenueProfileIdV1:
+            raise PITDataContractErrorV1(
+                PITReasonCodeV1.PIT_SCOPE_NOT_SELECTED,
+                "profile_id must be an exact Stage1VenueProfileIdV1",
+            )
+        for name in (
+            "receipt_id",
+            "account_scope",
+            "source_id",
+            "agreement_id",
+            "agreement_version",
+            "internal_use_class",
+            "owner_decision",
+            "permitted_retention_class",
+            "prohibited_redistribution_class",
+        ):
+            _pit_source_text(getattr(self, name), name)
+        object.__setattr__(
+            self, "checked_at_utc", _pit_source_utc(self.checked_at_utc, "checked_at_utc")
+        )
+        object.__setattr__(
+            self, "expires_at_utc", _pit_source_utc(self.expires_at_utc, "expires_at_utc")
+        )
+        if not _pit_source_text_tuple(self.recheck_triggers, "recheck_triggers"):
+            raise PITDataContractErrorV1(
+                PITReasonCodeV1.PIT_RIGHTS_NOT_ADMITTED,
+                "rights admission requires at least one recheck trigger",
+            )
+        if type(self.revoked) is not bool:
+            raise PITDataContractErrorV1(
+                PITReasonCodeV1.PIT_RIGHTS_NOT_ADMITTED,
+                "revoked must be an exact boolean",
+            )
+        if (
+            self.owner_decision != "ADMITTED_INTERNAL_USE"
+            or self.revoked
+            or self.expires_at_utc <= self.checked_at_utc
+        ):
+            raise PITDataContractErrorV1(
+                PITReasonCodeV1.PIT_RIGHTS_NOT_ADMITTED,
+                "rights receipt is not an active owner admission",
+            )
+        if type(self.no_effects) is not NoEffectFlagsV1 or self.no_effects != NO_EFFECTS_V1:
+            raise PITDataContractErrorV1(
+                PITReasonCodeV1.PIT_EFFECT_AUTHORITY_FORBIDDEN,
+                "rights admission must have exactly zero effects",
+            )
+
+
+@dataclass(frozen=True, slots=True)
+class PITSourceRightsAdmissionV1:
+    admission_id: str
+    profile_id: Stage1VenueProfileIdV1
+    source_receipt_ref: str
+    rights_receipt_ref: str
+    source_contract_version: str
+    agreement_version: str
+    account_scope: str
+    internal_use_class: str
+    permitted_retention_class: str
+    admitted_at_utc: datetime
+    valid_until_utc: datetime
+    admitted: bool
+    no_effects: NoEffectFlagsV1 = NO_EFFECTS_V1
+
+    def __post_init__(self) -> None:
+        if type(self.profile_id) is not Stage1VenueProfileIdV1:
+            raise PITDataContractErrorV1(
+                PITReasonCodeV1.PIT_SCOPE_NOT_SELECTED,
+                "profile_id must be an exact Stage1VenueProfileIdV1",
+            )
+        for name in (
+            "admission_id",
+            "source_receipt_ref",
+            "rights_receipt_ref",
+            "source_contract_version",
+            "agreement_version",
+            "account_scope",
+            "internal_use_class",
+            "permitted_retention_class",
+        ):
+            _pit_source_text(getattr(self, name), name)
+        object.__setattr__(
+            self, "admitted_at_utc", _pit_source_utc(self.admitted_at_utc, "admitted_at_utc")
+        )
+        object.__setattr__(
+            self, "valid_until_utc", _pit_source_utc(self.valid_until_utc, "valid_until_utc")
+        )
+        if type(self.admitted) is not bool or not self.admitted:
+            raise PITDataContractErrorV1(
+                PITReasonCodeV1.PIT_RIGHTS_NOT_ADMITTED,
+                "source/rights admission must be admitted",
+            )
+        if self.valid_until_utc < self.admitted_at_utc:
+            raise PITDataContractErrorV1(
+                PITReasonCodeV1.PIT_RIGHTS_NOT_ADMITTED,
+                "source/rights admission validity interval is reversed",
+            )
+        if type(self.no_effects) is not NoEffectFlagsV1 or self.no_effects != NO_EFFECTS_V1:
+            raise PITDataContractErrorV1(
+                PITReasonCodeV1.PIT_EFFECT_AUTHORITY_FORBIDDEN,
+                "source/rights admission must have exactly zero effects",
+            )
+
+
+def validate_pit_source_rights_admission_v1(
+    source_receipt: PITSourceCurrentizationReceiptV1,
+    rights_receipt: PITRightsAdmissionReceiptV1,
+    *,
+    admission_id: str,
+    profile_id: Stage1VenueProfileIdV1,
+    account_scope: str,
+    internal_use_class: str,
+    permitted_retention_class: str,
+    evaluated_at_utc: datetime,
+) -> PITSourceRightsAdmissionV1:
+    """Bind exact current source and rights receipts without runtime inference."""
+
+    if type(source_receipt) is not PITSourceCurrentizationReceiptV1:
+        raise PITDataContractErrorV1(
+            PITReasonCodeV1.PIT_SOURCE_CURRENTIZATION_STALE,
+            "source_receipt must be exact PITSourceCurrentizationReceiptV1",
+        )
+    if type(rights_receipt) is not PITRightsAdmissionReceiptV1:
+        raise PITDataContractErrorV1(
+            PITReasonCodeV1.PIT_RIGHTS_NOT_ADMITTED,
+            "rights_receipt must be exact PITRightsAdmissionReceiptV1",
+        )
+    evaluated = _pit_source_utc(evaluated_at_utc, "evaluated_at_utc")
+    if (
+        type(profile_id) is not Stage1VenueProfileIdV1
+        or source_receipt.profile_id is not profile_id
+        or rights_receipt.profile_id is not profile_id
+    ):
+        raise PITDataContractErrorV1(
+            PITReasonCodeV1.PIT_SCOPE_NOT_SELECTED,
+            "source, rights, and requested profile must match exactly",
+        )
+    if source_receipt.source_id != rights_receipt.source_id:
+        raise PITDataContractErrorV1(
+            PITReasonCodeV1.PIT_RIGHTS_NOT_ADMITTED,
+            "rights receipt does not bind the current source",
+        )
+    for requested, observed, name in (
+        (account_scope, rights_receipt.account_scope, "account_scope"),
+        (internal_use_class, rights_receipt.internal_use_class, "internal_use_class"),
+        (
+            permitted_retention_class,
+            rights_receipt.permitted_retention_class,
+            "permitted_retention_class",
+        ),
+    ):
+        _pit_source_text(requested, name)
+        if requested != observed:
+            raise PITDataContractErrorV1(
+                PITReasonCodeV1.PIT_RIGHTS_NOT_ADMITTED,
+                f"{name} does not equal the owner rights receipt",
+            )
+    if (
+        evaluated < source_receipt.effective_at_utc
+        or evaluated < source_receipt.checked_at_utc
+        or evaluated - source_receipt.checked_at_utc > timedelta(hours=24)
+        or evaluated >= source_receipt.expires_at_utc
+    ):
+        raise PITDataContractErrorV1(
+            PITReasonCodeV1.PIT_SOURCE_CURRENTIZATION_STALE,
+            "source currentization is not valid at the evaluation time",
+        )
+    if (
+        evaluated < rights_receipt.checked_at_utc
+        or evaluated >= rights_receipt.expires_at_utc
+        or rights_receipt.revoked
+    ):
+        raise PITDataContractErrorV1(
+            PITReasonCodeV1.PIT_RIGHTS_NOT_ADMITTED,
+            "rights admission is not valid at the evaluation time",
+        )
+    valid_until = min(
+        source_receipt.expires_at_utc,
+        source_receipt.checked_at_utc + timedelta(hours=24),
+        rights_receipt.expires_at_utc,
+    )
+    return PITSourceRightsAdmissionV1(
+        admission_id=admission_id,
+        profile_id=profile_id,
+        source_receipt_ref=source_receipt.receipt_id,
+        rights_receipt_ref=rights_receipt.receipt_id,
+        source_contract_version=source_receipt.source_contract_version,
+        agreement_version=rights_receipt.agreement_version,
+        account_scope=account_scope,
+        internal_use_class=internal_use_class,
+        permitted_retention_class=permitted_retention_class,
+        admitted_at_utc=evaluated,
+        valid_until_utc=valid_until,
+        admitted=True,
     )

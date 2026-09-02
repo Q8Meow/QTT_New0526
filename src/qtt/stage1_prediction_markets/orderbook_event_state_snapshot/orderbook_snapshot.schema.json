@@ -1,5 +1,166 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$defs": {
+    "noEffectFlagsV1": {
+      "additionalProperties": false,
+      "properties": {
+        "provider_connection_allowed": {"const": false},
+        "private_state_read_allowed": {"const": false},
+        "replay_or_paper_execution_allowed": {"const": false},
+        "llm_inference_allowed": {"const": false},
+        "qpu_execution_allowed": {"const": false},
+        "mode_or_allow_activation_allowed": {"const": false},
+        "order_release_allowed": {"const": false},
+        "capital_mutation_allowed": {"const": false}
+      },
+      "required": ["provider_connection_allowed", "private_state_read_allowed", "replay_or_paper_execution_allowed", "llm_inference_allowed", "qpu_execution_allowed", "mode_or_allow_activation_allowed", "order_release_allowed", "capital_mutation_allowed"],
+      "type": "object"
+    },
+    "stateVectorV1": {
+      "additionalProperties": false,
+      "properties": {
+        "transport_state": {"enum": ["DISCONNECTED", "CONNECTING", "CONNECTED_HEALTHY", "HEARTBEAT_OVERDUE", "SOURCE_MAINTENANCE", "SOURCE_UNAVAILABLE"]},
+        "anchor_state": {"enum": ["ANCHOR_REQUIRED", "ANCHOR_ACCEPTED", "REANCHOR_REQUIRED"]},
+        "continuity_state": {"enum": ["NOT_APPLICABLE_CURRENT_STATE_FRAME", "SEQUENCE_UNAVAILABLE", "CONTIGUOUS", "GAP_DETECTED", "RECOVERY_IN_PROGRESS"]},
+        "integrity_state": {"enum": ["UNVALIDATED", "VALID", "CORRUPT", "CURRENT_STATE_PARITY_FAILED"]},
+        "availability_state": {"enum": ["UNAVAILABLE", "AVAILABLE_CURRENT_STATE", "AVAILABLE_CHANGE_LEVEL", "STALE", "RIGHTS_BLOCKED", "LIFECYCLE_BLOCKED", "CLOCK_BLOCKED"]},
+        "event_disposition": {"enum": ["COMMITTED", "DUPLICATE_IGNORED", "REJECTED", "QUARANTINED"]},
+        "depth_class": {"enum": ["COMPLETE_PROVIDER_SNAPSHOT", "INCREMENTAL_FROM_COMPLETE_ANCHOR", "PROVIDER_PUBLISHED_TOP_LEVELS_CURRENT_STATE_FRAME", "BBO_ONLY"]},
+        "lifecycle_state": {"type": "string", "minLength": 1}
+      },
+      "required": ["transport_state", "anchor_state", "continuity_state", "integrity_state", "availability_state", "event_disposition", "depth_class", "lifecycle_state"],
+      "type": "object"
+    },
+    "bookStateLevelV2": {
+      "additionalProperties": false,
+      "properties": {
+        "source_side": {"type": "string", "minLength": 1},
+        "canonical_side": {"type": "string", "minLength": 1},
+        "price_text": {"type": "string", "pattern": "^-?(0|[1-9][0-9]*)(\\.[0-9]+)?$"},
+        "price": {"type": "string", "pattern": "^-?(0|[1-9][0-9]*)(\\.[0-9]+)?$"},
+        "quantity_text": {"type": "string", "pattern": "^(0|[1-9][0-9]*)(\\.[0-9]+)?$"},
+        "quantity": {"type": "string", "pattern": "^(0|[1-9][0-9]*)(\\.[0-9]+)?$"},
+        "price_scale": {"type": "integer", "minimum": 0},
+        "quantity_scale": {"type": "integer", "minimum": 0},
+        "price_increment": {"type": "string", "pattern": "^(0|[1-9][0-9]*)(\\.[0-9]+)?$"},
+        "price_origin": {"type": "string", "pattern": "^-?(0|[1-9][0-9]*)(\\.[0-9]+)?$"},
+        "quantity_increment": {
+          "type": ["string", "null"],
+          "pattern": "^(0|[1-9][0-9]*)(\\.[0-9]+)?$"
+        }
+      },
+      "required": ["source_side", "canonical_side", "price_text", "price", "quantity_text", "quantity", "price_scale", "quantity_scale", "price_increment", "price_origin", "quantity_increment"],
+      "type": "object"
+    },
+    "orderBookStateV2": {
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {"const": "PIT_ORDERBOOK_SNAPSHOT_V2"},
+        "record_type": {"const": "PIT_ORDERBOOK_STATE"},
+        "created_by": {"type": "string", "minLength": 1},
+        "authority_class": {"type": "string", "minLength": 1},
+        "state_id": {"type": "string", "minLength": 1},
+        "profile_id": {"enum": ["GEMINI_TITAN_DIRECT", "POLYMARKET_US_RETAIL_DIRECT", "KALSHI_US_DCM_DIRECT"]},
+        "market_id": {"type": "string", "minLength": 1},
+        "instrument_id": {"type": "string", "minLength": 1},
+        "capture_session_id": {"type": "string", "minLength": 1},
+        "connection_epoch": {"type": "string", "minLength": 1},
+        "wire_dialect": {"type": "string", "minLength": 1},
+        "levels": {"type": "array", "items": {"$ref": "#/$defs/bookStateLevelV2"}},
+        "last_provider_sequence_start_or_none": {"type": ["integer", "null"], "minimum": 0},
+        "last_provider_sequence_end_or_none": {"type": ["integer", "null"], "minimum": 0},
+        "provider_subscription_id_or_none": {"type": ["string", "null"]},
+        "retained_provider_event_content": {"type": "array", "items": {"type": "array", "prefixItems": [{"type": "string", "minLength": 1}, {"type": "string", "minLength": 1}], "items": false, "minItems": 2, "maxItems": 2}},
+        "last_completed_event_ordinal": {"type": "integer", "minimum": 0},
+        "state_vector": {"$ref": "#/$defs/stateVectorV1"},
+        "source_receipt_ref": {"type": "string", "minLength": 1},
+        "rights_receipt_ref": {"type": "string", "minLength": 1},
+        "no_effect_flags": {"$ref": "#/$defs/noEffectFlagsV1"}
+      },
+      "allOf": [
+        {
+          "oneOf": [
+            {
+              "properties": {
+                "last_provider_sequence_start_or_none": {"type": "null"},
+                "last_provider_sequence_end_or_none": {"type": "null"}
+              }
+            },
+            {
+              "properties": {
+                "last_provider_sequence_start_or_none": {"type": "integer"},
+                "last_provider_sequence_end_or_none": {"type": "integer"}
+              }
+            }
+          ]
+        },
+        {
+          "if": {"properties": {"profile_id": {"const": "GEMINI_TITAN_DIRECT"}}, "required": ["profile_id"]},
+          "then": {
+            "properties": {
+              "wire_dialect": {"const": "GEMINI_TITAN_DIFFERENTIAL_DEPTH_V1"},
+              "provider_subscription_id_or_none": {"type": "null"},
+              "levels": {
+                "items": {
+                  "properties": {
+                    "source_side": {"enum": ["BID", "OFFER"]},
+                    "canonical_side": {"enum": ["BID", "ASK"]}
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {"properties": {"profile_id": {"const": "POLYMARKET_US_RETAIL_DIRECT"}}, "required": ["profile_id"]},
+          "then": {
+            "properties": {
+              "wire_dialect": {"enum": ["POLYMARKET_RETAIL_CAMEL_STRING_V1", "POLYMARKET_RETAIL_SNAKE_NUMERIC_V1"]},
+              "last_provider_sequence_start_or_none": {"type": "null"},
+              "last_provider_sequence_end_or_none": {"type": "null"},
+              "provider_subscription_id_or_none": {"type": "null"},
+              "levels": {
+                "items": {
+                  "properties": {
+                    "source_side": {"enum": ["BID", "OFFER"]},
+                    "canonical_side": {"enum": ["BID", "ASK"]}
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {"properties": {"profile_id": {"const": "KALSHI_US_DCM_DIRECT"}}, "required": ["profile_id"]},
+          "then": {
+            "properties": {
+              "wire_dialect": {"const": "KALSHI_TRADE_API_WS_V2_FIXED_POINT"},
+              "levels": {
+                "items": {
+                  "properties": {
+                    "source_side": {"enum": ["YES", "NO"]},
+                    "canonical_side": {"enum": ["YES_BID", "NO_BID"]}
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "profile_id": {"const": "KALSHI_US_DCM_DIRECT"},
+              "last_provider_sequence_start_or_none": {"type": "integer"}
+            },
+            "required": ["profile_id", "last_provider_sequence_start_or_none"]
+          },
+          "then": {"properties": {"provider_subscription_id_or_none": {"type": "string", "minLength": 1}}}
+        }
+      ],
+      "required": ["state_id", "profile_id", "market_id", "instrument_id", "capture_session_id", "connection_epoch", "wire_dialect", "levels", "last_provider_sequence_start_or_none", "last_provider_sequence_end_or_none", "provider_subscription_id_or_none", "retained_provider_event_content", "last_completed_event_ordinal", "state_vector", "source_receipt_ref", "rights_receipt_ref", "no_effect_flags"],
+      "type": "object"
+    }
+  },
   "additionalProperties": false,
   "properties": {
     "accepted_source_dependency_refs": {
@@ -702,7 +863,7 @@
       "const": false
     },
     "record_type": {
-      "const": "ORDERBOOK_SNAPSHOT_RECORD"
+      "enum": ["ORDERBOOK_SNAPSHOT_RECORD", "PIT_ORDERBOOK_STATE"]
     },
     "rejected_action_or_payload_class": {
       "type": "string"
@@ -770,7 +931,7 @@
       "const": false
     },
     "schema_version": {
-      "const": "PR133_ORDERBOOK_EVENT_STATE_SNAPSHOT_SCHEMA_V1"
+      "enum": ["PR133_ORDERBOOK_EVENT_STATE_SNAPSHOT_SCHEMA_V1", "PIT_ORDERBOOK_SNAPSHOT_V2"]
     },
     "scope_id": {
       "enum": [
@@ -917,9 +1078,33 @@
     },
     "websocket_client_created": {
       "const": false
-    }
+    },
+    "state_id": {},
+    "profile_id": {},
+    "market_id": {},
+    "instrument_id": {},
+    "capture_session_id": {},
+    "connection_epoch": {},
+    "wire_dialect": {},
+    "levels": {},
+    "last_provider_sequence_start_or_none": {},
+    "last_provider_sequence_end_or_none": {},
+    "provider_subscription_id_or_none": {},
+    "retained_provider_event_content": {},
+    "last_completed_event_ordinal": {},
+    "state_vector": {},
+    "source_receipt_ref": {},
+    "rights_receipt_ref": {},
+    "no_effect_flags": {}
   },
-  "required": [
+  "required": ["schema_version", "record_type", "created_by", "authority_class"],
+  "oneOf": [
+    {
+      "properties": {
+        "schema_version": {"const": "PR133_ORDERBOOK_EVENT_STATE_SNAPSHOT_SCHEMA_V1"},
+        "record_type": {"const": "ORDERBOOK_SNAPSHOT_RECORD"}
+      },
+      "required": [
     "schema_version",
     "record_type",
     "created_by",
@@ -1017,6 +1202,16 @@
     "no_order_authority",
     "no_profit_evidence",
     "no_quantum_execution"
+      ]
+    },
+    {
+      "$ref": "#/$defs/orderBookStateV2",
+      "properties": {
+        "schema_version": {"const": "PIT_ORDERBOOK_SNAPSHOT_V2"},
+        "record_type": {"const": "PIT_ORDERBOOK_STATE"}
+      },
+      "required": ["schema_version", "record_type", "created_by", "authority_class"]
+    }
   ],
   "title": "PR133 Orderbook Snapshot",
   "type": "object"

@@ -249,6 +249,7 @@ def test_qku_shared_integration_paths_use_the_exact_allowlists() -> None:
                 *inventory.ST12G_ALLOWED_EXACT_PATHS,
                 *inventory.ST12H_ALLOWED_EXACT_PATHS,
                 *inventory.S1_LAUNCH_GRAPH_ALLOWED_EXACT_PATHS,
+                *inventory.S1_PIT_DATA_PHASE_A_01_ALLOWED_EXACT_PATHS,
                 *inventory.S1_PLUGIN_PACKAGE_CURRENTIZATION_ALLOWED_EXACT_PATHS,
             )
         )
@@ -282,6 +283,63 @@ def test_qku_shared_integration_paths_use_the_exact_allowlists() -> None:
         router.QKU_VALIDATOR_IDS <= set(result.classified_files[path])
         for path in package_normal_paths
     )
+    assert (
+        router.S1_PIT_DATA_PHASE_A_01_ALLOWED_EXACT_PATHS
+        == inventory.S1_PIT_DATA_PHASE_A_01_ALLOWED_EXACT_PATHS
+    )
+    pit_result = build_router_result(
+        RouterInput(
+            repo_root=REPO_ROOT,
+            changed_files=tuple(
+                sorted(inventory.S1_PIT_DATA_PHASE_A_01_ALLOWED_EXACT_PATHS)
+            ),
+            workflow_event_name="pull_request",
+            is_pull_request=True,
+            current_branch="s1-pit-data-phase-a-01",
+        )
+    )
+    assert all(
+        path in pit_result.classified_files
+        for path in inventory.S1_PIT_DATA_PHASE_A_01_ALLOWED_EXACT_PATHS
+    )
+    assert set(pit_result.classified_files) == set(
+        inventory.S1_PIT_DATA_PHASE_A_01_ALLOWED_EXACT_PATHS
+    )
+    assert len(pit_result.classified_files) == 39
+    pr132_target_path = (
+        "tests/source_evidence/"
+        "test_pr132_schema_enums_and_quantum_fields_match_policy_constants.py"
+    )
+    pr132_sibling_path = (
+        "tests/source_evidence/test_pr132_market_data_ingest_schema.py"
+    )
+    sibling_result = build_router_result(
+        RouterInput(
+            repo_root=REPO_ROOT,
+            changed_files=(pr132_sibling_path,),
+            workflow_event_name="pull_request",
+            is_pull_request=True,
+            current_branch="s1-pit-data-phase-a-01",
+        )
+    )
+    pit_wide_validator_ids = {
+        entry.validator_id
+        for entry in inventory.validation_inventory()
+        if inventory.S1_PIT_DATA_PHASE_A_01_ALLOWED_EXACT_PATHS
+        <= set(entry.required_when_files_match)
+    }
+    assert set(pit_result.classified_files[pr132_target_path]) - (
+        pit_wide_validator_ids
+    ) == set(sibling_result.classified_files[pr132_sibling_path])
+    assert set(pit_result.classified_files[pr132_target_path]) == (
+        set(sibling_result.classified_files[pr132_sibling_path])
+        | pit_wide_validator_ids
+    )
+    assert router.QKU_VALIDATOR_IDS <= set(pit_result.required_validators)
+    assert pit_result.full_validation_required is True
+    assert pit_result.unknown_files == ()
+    assert pit_result.fail_closed_reasons == ()
+    assert pit_result.skipped_validators == ()
     assert result.full_validation_required is True
     assert result.unknown_files == ()
     assert result.fail_closed_reasons == ()

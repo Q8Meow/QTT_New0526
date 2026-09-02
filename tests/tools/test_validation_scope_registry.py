@@ -2668,3 +2668,105 @@ def test_s1_launch_graph_scope_is_exactly_owned_and_fail_closed() -> None:
             package_branch,
             denied_path,
         )
+
+    pit_branch = registry.S1_PIT_DATA_PHASE_A_01_IMPLEMENTATION_BRANCH
+    pit_normal_paths = frozenset(
+        {
+            "src/qtt/stage1_prediction_markets/qku_computation_control_plane/point_in_time.py",
+            "src/qtt/stage1_prediction_markets/qku_computation_control_plane/freshness.py",
+            "src/qtt/stage1_prediction_markets/qku_computation_control_plane/input_resolver.py",
+            "src/qtt/stage1_prediction_markets/qku_computation_control_plane/receipts.py",
+            "src/qtt/stage1_prediction_markets/qku_computation_control_plane/source_policy.py",
+            "src/qtt/stage1_prediction_markets/qku_computation_control_plane/__init__.py",
+            "src/qtt/stage1_prediction_markets/market_data_ingest/policy.py",
+            "src/qtt/stage1_prediction_markets/market_data_ingest/adapter.py",
+            "src/qtt/stage1_prediction_markets/market_data_ingest/binding.py",
+            "src/qtt/stage1_prediction_markets/market_data_ingest/source_dependency.py",
+            "src/qtt/stage1_prediction_markets/market_data_ingest/validator.py",
+            "src/qtt/stage1_prediction_markets/market_data_ingest/canonical_market_data_ingest_event.schema.json",
+            "src/qtt/stage1_prediction_markets/market_data_ingest/market_data_source_dependency.schema.json",
+            "src/qtt/stage1_prediction_markets/market_data_ingest/market_data_no_live_network_attestation.schema.json",
+            "src/qtt/stage1_prediction_markets/market_data_ingest/handoff.py",
+            "src/qtt/stage1_prediction_markets/market_data_ingest/market_data_ingest_downstream_handoff.schema.json",
+            "src/qtt/stage1_prediction_markets/market_data_ingest/__init__.py",
+            "src/qtt/stage1_prediction_markets/orderbook_event_state_snapshot/policy.py",
+            "src/qtt/stage1_prediction_markets/orderbook_event_state_snapshot/builder.py",
+            "src/qtt/stage1_prediction_markets/orderbook_event_state_snapshot/integrity.py",
+            "src/qtt/stage1_prediction_markets/orderbook_event_state_snapshot/input_lock.py",
+            "src/qtt/stage1_prediction_markets/orderbook_event_state_snapshot/validator.py",
+            "src/qtt/stage1_prediction_markets/orderbook_event_state_snapshot/event_state_snapshot.schema.json",
+            "src/qtt/stage1_prediction_markets/orderbook_event_state_snapshot/orderbook_snapshot.schema.json",
+            "src/qtt/stage1_prediction_markets/orderbook_event_state_snapshot/snapshot_builder_binding.schema.json",
+            "src/qtt/stage1_prediction_markets/orderbook_event_state_snapshot/handoff.py",
+            "src/qtt/stage1_prediction_markets/orderbook_event_state_snapshot/snapshot_downstream_handoff.schema.json",
+            "src/qtt/stage1_prediction_markets/orderbook_event_state_snapshot/__init__.py",
+            "tests/source_evidence/test_pr132_schema_enums_and_quantum_fields_match_policy_constants.py",
+            "tests/source_evidence/test_s1_pit_data_phase_a_01.py",
+            "tools/ci_branch_context.py",
+            "tools/validation_scope_registry.py",
+            "tools/validation_inventory.py",
+            "tools/changed_area_validation_router.py",
+            "tests/tools/test_ci_branch_context.py",
+            "tests/tools/test_validation_scope_registry.py",
+            "tests/tools/test_validation_inventory.py",
+            "tests/tools/test_changed_area_validation_router.py",
+        }
+    )
+    pit_conditional_paths = frozenset({conditional})
+    pit_allowed_paths = pit_normal_paths | pit_conditional_paths
+    assert pit_branch == "s1-pit-data-phase-a-01"
+    assert len(pit_normal_paths) == 38
+    assert pit_conditional_paths == frozenset({conditional})
+    assert pit_normal_paths.isdisjoint(pit_conditional_paths)
+    assert len(pit_allowed_paths) == 39
+    assert registry.S1_PIT_DATA_PHASE_A_01_NORMAL_CHANGED_PATHS == pit_normal_paths
+    assert (
+        registry.S1_PIT_DATA_PHASE_A_01_CONDITIONAL_CHANGED_PATHS
+        == pit_conditional_paths
+    )
+    assert registry.S1_PIT_DATA_PHASE_A_01_ALLOWED_EXACT_PATHS == pit_allowed_paths
+    for path in pit_allowed_paths:
+        assert registry.explain_pr_scope_decision(pit_branch, path) == {
+            "allowed": True,
+            "branch": pit_branch,
+            "normalized_path": path,
+            "pr_id": "S1-PIT-DATA-PHASE-A-01",
+            "matched_rule": f"exact:{path}",
+            "reason": "registered_exact_path",
+        }
+        validation_decision = registry.explain_pr_scope_decision(
+            FIXTURE_BRANCH,
+            path,
+        )
+        assert validation_decision["allowed"] is True
+        assert validation_decision["branch"] == FIXTURE_BRANCH
+        assert validation_decision["normalized_path"] == path
+        assert validation_decision["reason"].startswith(
+            "registered_validation_context_"
+        )
+    pit_unique_path = "tests/source_evidence/test_s1_pit_data_phase_a_01.py"
+    assert registry.explain_pr_scope_decision(FIXTURE_BRANCH, pit_unique_path) == {
+        "allowed": True,
+        "branch": FIXTURE_BRANCH,
+        "normalized_path": pit_unique_path,
+        "pr_id": "S1-PIT-DATA-PHASE-A-01",
+        "matched_rule": f"validation_context_exact:{pit_unique_path}",
+        "reason": "registered_validation_context_exact_path",
+    }
+    for denied_path in (
+        "tests/source_evidence/test_s1_pit_data_phase_a_01.py.copy",
+        "src/qtt/stage1_prediction_markets/unrelated.py",
+    ):
+        decision = registry.explain_pr_scope_decision(pit_branch, denied_path)
+        assert decision["allowed"] is False
+        assert decision["pr_id"] == "S1-PIT-DATA-PHASE-A-01"
+        assert decision["reason"] == "path_not_registered_for_pr_scope"
+    for near_branch in (
+        pit_branch.upper(),
+        f"{pit_branch}-copy",
+        pit_branch.removesuffix("-01"),
+    ):
+        assert not registry.is_pr_scoped_changed_path_allowed(
+            near_branch,
+            "tests/source_evidence/test_s1_pit_data_phase_a_01.py",
+        )

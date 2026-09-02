@@ -180,6 +180,7 @@ def test_inventory_has_centralized_qku_validation_entries():
             *inventory.ST12G_ALLOWED_EXACT_PATHS,
             *inventory.ST12H_ALLOWED_EXACT_PATHS,
             *inventory.S1_LAUNCH_GRAPH_ALLOWED_EXACT_PATHS,
+            *inventory.S1_PIT_DATA_PHASE_A_01_ALLOWED_EXACT_PATHS,
             *inventory.S1_PLUGIN_PACKAGE_CURRENTIZATION_ALLOWED_EXACT_PATHS,
         )
     )
@@ -226,6 +227,41 @@ def test_inventory_has_centralized_qku_validation_entries():
     assert (
         inventory.S1_PLUGIN_PACKAGE_CURRENTIZATION_ALLOWED_EXACT_PATHS
         == scope_registry.S1_PLUGIN_PACKAGE_CURRENTIZATION_ALLOWED_EXACT_PATHS
+    )
+    assert (
+        inventory.S1_PIT_DATA_PHASE_A_01_ALLOWED_EXACT_PATHS
+        == scope_registry.S1_PIT_DATA_PHASE_A_01_ALLOWED_EXACT_PATHS
+    )
+    assert len(inventory.S1_PIT_DATA_PHASE_A_01_ALLOWED_EXACT_PATHS) == 39
+    assert all(
+        inventory.entries_matching_path(path)
+        for path in inventory.S1_PIT_DATA_PHASE_A_01_ALLOWED_EXACT_PATHS
+    )
+    pr132_target_entries = inventory.entries_matching_path(
+        "tests/source_evidence/"
+        "test_pr132_schema_enums_and_quantum_fields_match_policy_constants.py"
+    )
+    pr132_sibling_entries = inventory.entries_matching_path(
+        "tests/source_evidence/test_pr132_market_data_ingest_schema.py"
+    )
+    pr132_target_classification = {
+        (entry.validator_id, entry.phase) for entry in pr132_target_entries
+    }
+    pr132_sibling_classification = {
+        (entry.validator_id, entry.phase) for entry in pr132_sibling_entries
+    }
+    pit_wide_classification = {
+        (entry.validator_id, entry.phase)
+        for entry in inventory.validation_inventory()
+        if inventory.S1_PIT_DATA_PHASE_A_01_ALLOWED_EXACT_PATHS
+        <= set(entry.required_when_files_match)
+    }
+    assert (
+        pr132_target_classification - pit_wide_classification
+        == pr132_sibling_classification
+    )
+    assert pr132_target_classification == (
+        pr132_sibling_classification | pit_wide_classification
     )
     package_owner_ids = {
         "validate_qku_computation_control_plane_architecture",

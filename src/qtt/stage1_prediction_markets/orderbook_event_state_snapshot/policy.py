@@ -1,10 +1,31 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from types import MappingProxyType
 from typing import Any
 
+from src.qtt.stage1_prediction_markets.qku_computation_control_plane.models import (
+    NO_EFFECTS_V1,
+    NoEffectFlagsV1,
+)
+from src.qtt.stage1_prediction_markets.qku_computation_control_plane.point_in_time import (
+    PITAnchorStateV1,
+    PITAvailabilityStateV2,
+    PITContinuityStateV3,
+    PITDataContractErrorV1,
+    PITDepthClassV2,
+    PITEventDispositionV1,
+    PITIntegrityStateV1,
+    PITReasonCodeV1,
+    PITTransportStateV1,
+)
+from src.qtt.stage1_prediction_markets.qku_computation_control_plane.stage1_launch_graph import (
+    Stage1VenueProfileIdV1,
+)
 
-STAGE1_VENUE_IDS = ("KALSHI", "POLYMARKET", "FORECASTEX_IBKR")
+
+LEGACY_V1_FIXTURE_VENUE_IDS = ("KALSHI", "POLYMARKET", "FORECASTEX_IBKR")
+STAGE1_VENUE_IDS = LEGACY_V1_FIXTURE_VENUE_IDS
 SHARED_SCOPE_IDS = ("PREDICTION_MARKETS_GENERAL",)
 
 PRODUCER_REPO_PR = "PR133"
@@ -361,6 +382,390 @@ ZERO_COUNT_INVARIANTS = (
     "neural_training_inference_count",
 )
 
+SCHEMA_COMMON_REQUIRED_FIELDS = frozenset(
+    {
+        "schema_version",
+        "record_type",
+        "created_by",
+        "authority_class",
+    }
+)
+
+LEGACY_PR133_V1_SHARED_REQUIRED_FIELDS = frozenset(
+    {
+        *SCHEMA_COMMON_REQUIRED_FIELDS,
+        "venue_id",
+        "scope_id",
+        *AUTHORITY_ZERO_FLAGS,
+        *QUANTUM_FORWARD_SNAPSHOT_METADATA_FIELDS,
+        *ATOMICROWS_PRE_BRIDGE_METADATA_FIELDS,
+    }
+)
+
+LEGACY_PR133_V1_REQUIRED_FIELDS_BY_RECORD_TYPE = MappingProxyType(
+    {
+        "ORDERBOOK_EVENT_STATE_SNAPSHOT_INPUT_LOCK": frozenset(
+            {
+                *LEGACY_PR133_V1_SHARED_REQUIRED_FIELDS,
+                "input_lock_id",
+                "market_data_ingest_handoff_ref",
+                "canonical_market_data_ingest_event_refs",
+                "accepted_source_dependency_refs",
+                "connector_semantic_dependency_refs",
+                "credential_readiness_dependency_ref",
+                "source_dependency_state",
+                "snapshot_input_class",
+                "input_payload_is_synthetic",
+                "input_contains_live_market_data",
+                "input_contains_official_venue_semantic_values",
+                "deterministic_sequence_id",
+                "snapshot_build_allowed",
+                "live_snapshot_build_allowed",
+                "runtime_resolver_snapshot_allowed",
+                "historical_dataset_digest_allowed",
+                "input_lock_required_for_each_snapshot",
+            }
+        ),
+        "ORDERBOOK_SNAPSHOT_RECORD": frozenset(
+            {
+                *LEGACY_PR133_V1_SHARED_REQUIRED_FIELDS,
+                "snapshot_id",
+                "snapshot_input_lock_ref",
+                "snapshot_class",
+                "deterministic_sequence_id",
+                "synthetic_depth_level_refs",
+                "synthetic_depth_level_id",
+                "depth_levels",
+                "canonical_depth_side",
+                "canonical_price_rank",
+                "canonical_quantity_rank",
+                "canonical_sort_key",
+                "qtt_internal_orderbook_side_class",
+                "qtt_internal_price_level_class",
+                "qtt_internal_quantity_level_class",
+                "official_venue_field_value_source_state",
+                "fixture_orderbook_snapshot_created",
+                "crossed_book_valid_trading_evidence_created",
+                "orderbook_snapshot_is_trading_signal",
+                "orderbook_snapshot_is_feature_vector",
+                "orderbook_snapshot_is_quantum_feature_vector",
+                "orderbook_snapshot_is_atomicrows_row",
+                "orderbook_snapshot_is_order_authority",
+                "orderbook_snapshot_is_runtime_resolver_snapshot",
+                "no_live_fetch",
+                "no_network_io",
+                "no_order_authority",
+                "no_profit_evidence",
+                "no_quantum_execution",
+            }
+        ),
+        "EVENT_STATE_SNAPSHOT_RECORD": frozenset(
+            {
+                *LEGACY_PR133_V1_SHARED_REQUIRED_FIELDS,
+                "snapshot_id",
+                "snapshot_input_lock_ref",
+                "snapshot_class",
+                "deterministic_sequence_id",
+                "synthetic_event_state_refs",
+                "synthetic_event_state_id",
+                "event_states",
+                "canonical_event_state_rank",
+                "canonical_sort_key",
+                "qtt_internal_event_status_class",
+                "qtt_internal_lifecycle_state_class",
+                "qtt_internal_settlement_state_class",
+                "official_venue_field_value_source_state",
+                "fixture_event_state_snapshot_created",
+                "event_state_snapshot_is_trading_signal",
+                "event_state_snapshot_is_feature_vector",
+                "event_state_snapshot_is_quantum_feature_vector",
+                "event_state_snapshot_is_atomicrows_row",
+                "event_state_snapshot_is_order_authority",
+                "event_state_snapshot_is_runtime_resolver_snapshot",
+                "no_live_fetch",
+                "no_network_io",
+                "no_order_authority",
+                "no_profit_evidence",
+                "no_quantum_execution",
+            }
+        ),
+        "ORDERBOOK_EVENT_STATE_SNAPSHOT_BUILDER_BINDING": frozenset(
+            {
+                *LEGACY_PR133_V1_SHARED_REQUIRED_FIELDS,
+                "binding_id",
+                "builder_name",
+                "builder_version",
+                "builder_scope",
+                "input_lock_refs",
+                "orderbook_snapshot_refs",
+                "event_state_snapshot_refs",
+                "market_data_ingest_handoff_ref",
+                "credential_readiness_handoff_ref",
+                "source_dependency_refs",
+                "connector_semantic_dependency_refs",
+                "orderbook_canonical_sort_rules_ref",
+                "event_state_canonical_sort_rules_ref",
+                "allowed_use",
+                "disallowed_use",
+                "future_live_use_requires_owner_approval",
+                "future_live_use_requires_accepted_source_packet",
+                "future_live_use_requires_fresh_revalidation_state",
+                "future_live_use_requires_connector_semantic_binding",
+                "future_live_use_requires_credential_provider_receipt_if_credentials_needed",
+                "future_runtime_resolver_use_requires_pr134_authorization",
+                "future_historical_dataset_use_requires_pr135_authorization",
+                "future_atomicrows_bridge_requires_post_pr135_owner_authorization",
+                "future_atomicrows_bundle_sha_requires_explicit_owner_authorization",
+                "future_quantum_use_requires_pr116_pr117_data_chain",
+                "future_quantum_use_requires_replay_paper_validation",
+                "future_quantum_use_requires_owner_approval",
+            }
+        ),
+        "ORDERBOOK_EVENT_STATE_SNAPSHOT_INTEGRITY_RECEIPT": frozenset(
+            {
+                *LEGACY_PR133_V1_SHARED_REQUIRED_FIELDS,
+                "integrity_receipt_id",
+                "snapshot_builder_binding_ref",
+                "orderbook_snapshot_refs",
+                "event_state_snapshot_refs",
+                "deterministic_sorting_verified",
+                "canonical_sequence_verified",
+                "bid_side_sorting_verified",
+                "ask_side_sorting_verified",
+                "event_state_sorting_verified",
+                "duplicate_synthetic_depth_level_id_count",
+                "duplicate_synthetic_event_state_id_count",
+                "duplicate_orderbook_snapshot_id_count",
+                "duplicate_event_state_snapshot_id_count",
+                "duplicate_canonical_sort_key_count",
+                "invalid_orderbook_side_count",
+                "invalid_event_lifecycle_state_count",
+                "missing_snapshot_input_lock_count",
+                "crossed_book_trading_evidence_created_count",
+                "cross_venue_scope_mismatch_count",
+                "live_market_payload_count",
+                "official_semantics_fabricated_count",
+                "runtime_resolver_snapshot_created_count",
+                "historical_dataset_digest_created_count",
+                "feature_vector_created_count",
+                "trading_signal_created_count",
+                "quantum_snapshot_feature_computation_created_count",
+                "quantum_optimizer_input_created_count",
+                "quantum_trading_signal_created_count",
+                "atomicrows_bundle_created_count",
+                "atomicrows_sha_created_count",
+                "atomicrows_4183_completion_claim_created_count",
+                "order_authority_count",
+                "order_execution_count",
+            }
+        ),
+        "ORDERBOOK_EVENT_STATE_SNAPSHOT_REJECTION": frozenset(
+            {
+                *LEGACY_PR133_V1_SHARED_REQUIRED_FIELDS,
+                "rejection_id",
+                "rejected_action_or_payload_class",
+                "rejected_reason_code",
+                "rejected_artifact_ref",
+                "raw_live_payload_stored",
+                "live_fetch_performed",
+                "source_fact_accepted",
+                "connector_semantic_binding_created",
+                "official_semantics_fabricated",
+                "feature_vector_created",
+                "crossed_book_trading_evidence_created",
+                "duplicate_depth_level_allowed",
+                "duplicate_snapshot_id_allowed",
+                "invalid_event_lifecycle_state_allowed",
+                "missing_snapshot_input_lock_allowed",
+                "validator_fail_closed",
+            }
+        ),
+        "ORDERBOOK_EVENT_STATE_SNAPSHOT_DOWNSTREAM_HANDOFF": frozenset(
+            {
+                *LEGACY_PR133_V1_SHARED_REQUIRED_FIELDS,
+                "handoff_id",
+                "producer_pr",
+                "producer_roadmap_pr",
+                "upstream_prs",
+                "downstream_prs",
+                "venue_specific_scope",
+                "shared_scope",
+                "contains_fixture_orderbook_snapshot",
+                "contains_fixture_event_state_snapshot",
+                "contains_live_orderbook_snapshot",
+                "contains_live_event_state_snapshot",
+                "contains_live_market_data",
+                "contains_live_credentials",
+                "contains_private_state_payload",
+                "contains_runtime_resolver_snapshot",
+                "contains_historical_dataset_digest",
+                "contains_feature_vector",
+                "contains_trading_signal",
+                "contains_quantum_feature_vector",
+                "contains_quantum_optimizer_input",
+                "contains_quantum_trading_signal",
+                "contains_order_authority",
+                "contains_profit_evidence",
+                "contains_quantum_execution",
+                "contains_atomicrows_materialized_rows",
+                "contains_atomicrows_bundle",
+                "contains_atomicrows_sha",
+                "orderbook_canonicalization_verified",
+                "event_state_canonicalization_verified",
+                "downstream_pr116_contract_prepared",
+                "downstream_pr116_execution_authorized",
+                "downstream_pr117_contract_prepared",
+                "downstream_pr117_execution_authorized",
+                "downstream_quantum_feature_computation_authorized",
+                "downstream_quantum_optimizer_input_creation_authorized",
+                "downstream_quantum_trading_signal_creation_authorized",
+                "downstream_atomicrows_bridge_authorized_now",
+                "downstream_atomicrows_bridge_recommended_after_pr135",
+                "downstream_atomicrows_bundle_sha_authorized_now",
+            }
+        ),
+        "ATOMICROWS_PRE_BRIDGE_COMPATIBILITY_RECORD": frozenset(
+            {
+                *LEGACY_PR133_V1_SHARED_REQUIRED_FIELDS,
+                "compatibility_id",
+                "producer_pr",
+                "producer_roadmap_pr",
+                "snapshot_builder_binding_ref",
+                "orderbook_snapshot_refs",
+                "event_state_snapshot_refs",
+                "compatibility_class",
+                "bridge_may_consume_after_pr135",
+                "bridge_materialization_authorized_now",
+                "bundle_materialization_authorized_now",
+                "sha_freeze_authorized_now",
+            }
+        ),
+    }
+)
+
+PIT_V2_REQUIRED_FIELDS_BY_RECORD_TYPE = MappingProxyType(
+    {
+        "PIT_ORDERBOOK_STATE": frozenset(
+            {
+                *SCHEMA_COMMON_REQUIRED_FIELDS,
+                "state_id",
+                "profile_id",
+                "market_id",
+                "instrument_id",
+                "capture_session_id",
+                "connection_epoch",
+                "wire_dialect",
+                "levels",
+                "last_provider_sequence_start_or_none",
+                "last_provider_sequence_end_or_none",
+                "provider_subscription_id_or_none",
+                "retained_provider_event_content",
+                "last_completed_event_ordinal",
+                "state_vector",
+                "source_receipt_ref",
+                "rights_receipt_ref",
+                "no_effect_flags",
+            }
+        ),
+        "PIT_EVENT_STATE_SNAPSHOT": frozenset(
+            {
+                *SCHEMA_COMMON_REQUIRED_FIELDS,
+                "state_id",
+                "profile_id",
+                "market_id",
+                "instrument_id",
+                "capture_session_id",
+                "connection_epoch",
+                "wire_dialect",
+                "last_completed_event_ordinal",
+                "state_vector",
+                "source_receipt_ref",
+                "rights_receipt_ref",
+                "no_effect_flags",
+            }
+        ),
+        "PIT_RECONSTRUCTION_INPUT_LOCK": frozenset(
+            {
+                *SCHEMA_COMMON_REQUIRED_FIELDS,
+                "lock_id",
+                "profile_id",
+                "market_id",
+                "instrument_id",
+                "capture_session_id",
+                "connection_epoch",
+                "wire_dialect",
+                "first_completed_event_ordinal",
+                "last_completed_event_ordinal",
+                "provider_sequence_start_or_none",
+                "provider_sequence_end_or_none",
+                "process_epoch_id",
+                "monotonic_clock_id",
+                "source_receipt_ref",
+                "rights_receipt_ref",
+                "commit_completion_refs",
+                "state_ref",
+                "state_vector",
+                "reconstruction_receipt_ref",
+                "capability_context_id",
+                "serializer_version",
+                "no_effect_flags",
+            }
+        ),
+        "PIT_SNAPSHOT_DOWNSTREAM_HANDOFF": frozenset(
+            {
+                *SCHEMA_COMMON_REQUIRED_FIELDS,
+                "handoff_id",
+                "profile_id",
+                "state_ref",
+                "state",
+                "reconstruction_receipt",
+                "reconstruction_input_lock",
+                "availability_receipt",
+                "canonical_event_ref",
+                "capture_and_gap_receipt_ref",
+                "commit_completion_ref",
+                "provider_sequence_available",
+                "provider_publication_time_available",
+                "change_level_history_available",
+                "full_depth_available",
+                "durable_strategy_admission_available",
+                "no_network_effect",
+                "no_outbox_or_order_effect",
+                "no_capital_or_private_state_effect",
+                "no_llm_or_quantum_effect",
+                "no_effect_flags",
+            }
+        ),
+    }
+)
+
+PIT_V2_DISCRIMINATOR_BY_LEGACY_V1_RECORD_TYPE = MappingProxyType(
+    {
+        "ORDERBOOK_SNAPSHOT_RECORD": (
+            "PIT_ORDERBOOK_SNAPSHOT_V2",
+            "PIT_ORDERBOOK_STATE",
+        ),
+        "EVENT_STATE_SNAPSHOT_RECORD": (
+            "PIT_EVENT_STATE_SNAPSHOT_V2",
+            "PIT_EVENT_STATE_SNAPSHOT",
+        ),
+        "ORDERBOOK_EVENT_STATE_SNAPSHOT_BUILDER_BINDING": (
+            "PIT_RECONSTRUCTION_INPUT_LOCK_V2",
+            "PIT_RECONSTRUCTION_INPUT_LOCK",
+        ),
+        "ORDERBOOK_EVENT_STATE_SNAPSHOT_DOWNSTREAM_HANDOFF": (
+            "PIT_SNAPSHOT_DOWNSTREAM_HANDOFF_V2",
+            "PIT_SNAPSHOT_DOWNSTREAM_HANDOFF",
+        ),
+    }
+)
+
+PIT_V2_SELECTED_PROFILE_IDS = (
+    Stage1VenueProfileIdV1.GEMINI_TITAN_DIRECT.value,
+    Stage1VenueProfileIdV1.POLYMARKET_US_RETAIL_DIRECT.value,
+    Stage1VenueProfileIdV1.KALSHI_US_DCM_DIRECT.value,
+)
+
 BANNED_IMPORT_MODULES = (
     "requests",
     "httpx",
@@ -514,3 +919,195 @@ def common_record_fields(record_type: str, scope_value: str) -> dict[str, object
 
 def scope_field(scope_ref: ScopeRef) -> dict[str, str]:
     return {scope_ref.field_name: scope_ref.value}
+
+
+def _pit_state_text(value: object, name: str) -> str:
+    if type(value) is not str or not value or value != value.strip():
+        raise PITDataContractErrorV1(
+            PITReasonCodeV1.PIT_SCHEMA_OR_WIRE_DIALECT_INVALID,
+            f"{name} must be canonical nonempty text",
+        )
+    return value
+
+
+def _derive_pit_availability_v2(
+    *,
+    transport_state: PITTransportStateV1,
+    anchor_state: PITAnchorStateV1,
+    continuity_state: PITContinuityStateV3,
+    integrity_state: PITIntegrityStateV1,
+    depth_class: PITDepthClassV2,
+    lifecycle_state: str,
+) -> PITAvailabilityStateV2:
+    _pit_state_text(lifecycle_state, "lifecycle_state")
+    if lifecycle_state != "ADMISSIBLE":
+        return PITAvailabilityStateV2.LIFECYCLE_BLOCKED
+    if transport_state is PITTransportStateV1.HEARTBEAT_OVERDUE:
+        return PITAvailabilityStateV2.STALE
+    if transport_state is not PITTransportStateV1.CONNECTED_HEALTHY:
+        return PITAvailabilityStateV2.UNAVAILABLE
+    if anchor_state is not PITAnchorStateV1.ANCHOR_ACCEPTED:
+        return PITAvailabilityStateV2.UNAVAILABLE
+    if integrity_state is not PITIntegrityStateV1.VALID:
+        return PITAvailabilityStateV2.UNAVAILABLE
+    if continuity_state is PITContinuityStateV3.CONTIGUOUS:
+        if depth_class is PITDepthClassV2.INCREMENTAL_FROM_COMPLETE_ANCHOR:
+            return PITAvailabilityStateV2.AVAILABLE_CHANGE_LEVEL
+        return PITAvailabilityStateV2.AVAILABLE_CURRENT_STATE
+    if continuity_state in {
+        PITContinuityStateV3.NOT_APPLICABLE_CURRENT_STATE_FRAME,
+        PITContinuityStateV3.SEQUENCE_UNAVAILABLE,
+    }:
+        return PITAvailabilityStateV2.AVAILABLE_CURRENT_STATE
+    return PITAvailabilityStateV2.UNAVAILABLE
+
+
+@dataclass(frozen=True, slots=True)
+class PITStateVectorV1:
+    transport_state: PITTransportStateV1
+    anchor_state: PITAnchorStateV1
+    continuity_state: PITContinuityStateV3
+    integrity_state: PITIntegrityStateV1
+    availability_state: PITAvailabilityStateV2
+    event_disposition: PITEventDispositionV1
+    depth_class: PITDepthClassV2
+    lifecycle_state: str
+
+    def __post_init__(self) -> None:
+        for name, enum_type in (
+            ("transport_state", PITTransportStateV1),
+            ("anchor_state", PITAnchorStateV1),
+            ("continuity_state", PITContinuityStateV3),
+            ("integrity_state", PITIntegrityStateV1),
+            ("availability_state", PITAvailabilityStateV2),
+            ("event_disposition", PITEventDispositionV1),
+            ("depth_class", PITDepthClassV2),
+        ):
+            if type(getattr(self, name)) is not enum_type:
+                raise PITDataContractErrorV1(
+                    PITReasonCodeV1.PIT_SCHEMA_OR_WIRE_DIALECT_INVALID,
+                    f"{name} has the wrong exact enum type",
+                )
+        _pit_state_text(self.lifecycle_state, "lifecycle_state")
+        expected = _derive_pit_availability_v2(
+            transport_state=self.transport_state,
+            anchor_state=self.anchor_state,
+            continuity_state=self.continuity_state,
+            integrity_state=self.integrity_state,
+            depth_class=self.depth_class,
+            lifecycle_state=self.lifecycle_state,
+        )
+        if self.availability_state is not expected:
+            raise PITDataContractErrorV1(
+                PITReasonCodeV1.PIT_CAPABILITY_UNAVAILABLE,
+                "availability must equal the one canonical state reducer",
+            )
+
+
+@dataclass(frozen=True, slots=True)
+class PITBookTransitionPolicyV2:
+    policy_id: str
+    profile_id: Stage1VenueProfileIdV1
+    provider_sequence_required: bool
+    current_state_without_sequence_allowed: bool
+    absolute_update_semantics: bool
+    signed_delta_semantics: bool
+    locked_book_allowed: bool
+    crossed_book_allowed: bool
+    duplicate_requires_canonical_equality: bool
+    forward_gap_requires_reanchor: bool
+    no_effect_flags: NoEffectFlagsV1 = NO_EFFECTS_V1
+
+    def __post_init__(self) -> None:
+        _pit_state_text(self.policy_id, "policy_id")
+        if type(self.profile_id) is not Stage1VenueProfileIdV1:
+            raise PITDataContractErrorV1(
+                PITReasonCodeV1.PIT_SCOPE_NOT_SELECTED,
+                "transition policy profile has the wrong exact type",
+            )
+        for name in (
+            "provider_sequence_required",
+            "current_state_without_sequence_allowed",
+            "absolute_update_semantics",
+            "signed_delta_semantics",
+            "locked_book_allowed",
+            "crossed_book_allowed",
+            "duplicate_requires_canonical_equality",
+            "forward_gap_requires_reanchor",
+        ):
+            if type(getattr(self, name)) is not bool:
+                raise PITDataContractErrorV1(
+                    PITReasonCodeV1.PIT_SCHEMA_OR_WIRE_DIALECT_INVALID,
+                    f"{name} must be an exact boolean",
+                )
+        if self.crossed_book_allowed or not self.locked_book_allowed:
+            raise PITDataContractErrorV1(
+                PITReasonCodeV1.PIT_BOOK_CROSSED_INVALID,
+                "transition policy must accept locked and reject crossed books",
+            )
+        if (
+            self.provider_sequence_required
+            == self.current_state_without_sequence_allowed
+        ):
+            raise PITDataContractErrorV1(
+                PITReasonCodeV1.PIT_PROVIDER_SEQUENCE_UNAVAILABLE,
+                "sequence-required and sequence-unavailable modes must be exclusive",
+            )
+        if self.absolute_update_semantics and self.signed_delta_semantics:
+            raise PITDataContractErrorV1(
+                PITReasonCodeV1.PIT_SCHEMA_OR_WIRE_DIALECT_INVALID,
+                "one profile cannot reinterpret absolute updates as signed deltas",
+            )
+        if (
+            not self.duplicate_requires_canonical_equality
+            or not self.forward_gap_requires_reanchor
+        ):
+            raise PITDataContractErrorV1(
+                PITReasonCodeV1.PIT_SEQUENCE_GAP,
+                "duplicate equality and gap reanchor controls are mandatory",
+            )
+        if type(self.no_effect_flags) is not NoEffectFlagsV1 or self.no_effect_flags != NO_EFFECTS_V1:
+            raise PITDataContractErrorV1(
+                PITReasonCodeV1.PIT_EFFECT_AUTHORITY_FORBIDDEN,
+                "transition policy must carry exact NO_EFFECTS_V1",
+            )
+
+
+PIT_BOOK_TRANSITION_POLICIES_V2 = MappingProxyType({
+    Stage1VenueProfileIdV1.GEMINI_TITAN_DIRECT: PITBookTransitionPolicyV2(
+        policy_id="S1-PIT-BOOK-POLICY::GEMINI-TITAN::V2",
+        profile_id=Stage1VenueProfileIdV1.GEMINI_TITAN_DIRECT,
+        provider_sequence_required=True,
+        current_state_without_sequence_allowed=False,
+        absolute_update_semantics=True,
+        signed_delta_semantics=False,
+        locked_book_allowed=True,
+        crossed_book_allowed=False,
+        duplicate_requires_canonical_equality=True,
+        forward_gap_requires_reanchor=True,
+    ),
+    Stage1VenueProfileIdV1.POLYMARKET_US_RETAIL_DIRECT: PITBookTransitionPolicyV2(
+        policy_id="S1-PIT-BOOK-POLICY::POLYMARKET-US-RETAIL::V2",
+        profile_id=Stage1VenueProfileIdV1.POLYMARKET_US_RETAIL_DIRECT,
+        provider_sequence_required=False,
+        current_state_without_sequence_allowed=True,
+        absolute_update_semantics=False,
+        signed_delta_semantics=False,
+        locked_book_allowed=True,
+        crossed_book_allowed=False,
+        duplicate_requires_canonical_equality=True,
+        forward_gap_requires_reanchor=True,
+    ),
+    Stage1VenueProfileIdV1.KALSHI_US_DCM_DIRECT: PITBookTransitionPolicyV2(
+        policy_id="S1-PIT-BOOK-POLICY::KALSHI-US-DCM::V2",
+        profile_id=Stage1VenueProfileIdV1.KALSHI_US_DCM_DIRECT,
+        provider_sequence_required=True,
+        current_state_without_sequence_allowed=False,
+        absolute_update_semantics=False,
+        signed_delta_semantics=True,
+        locked_book_allowed=True,
+        crossed_book_allowed=False,
+        duplicate_requires_canonical_equality=True,
+        forward_gap_requires_reanchor=True,
+    ),
+})

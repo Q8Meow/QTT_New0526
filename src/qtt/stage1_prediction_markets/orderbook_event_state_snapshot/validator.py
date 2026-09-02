@@ -67,6 +67,10 @@ SCHEMA_FILES = (
     "atomicrows_pre_bridge_compatibility.schema.json",
 )
 
+LEGACY_PR133_V1_ONLY = "LEGACY_PR133_V1_ONLY"
+BACKWARD_COMPATIBLE_V1_V2_UNION = "BACKWARD_COMPATIBLE_V1_V2_UNION"
+INVALID_OR_AMBIGUOUS_SCHEMA_SHAPE = "INVALID_OR_AMBIGUOUS_SCHEMA_SHAPE"
+
 FIXTURE_FILES = (
     "market_data_ingest_downstream_handoff.v1.fixture.json",
     "snapshot_input_locks.v1.fixture.json",
@@ -758,6 +762,432 @@ def _main_report(artifacts: Mapping[str, Any]) -> dict[str, object]:
     }
 
 
+def _schema_ref_target(
+    schema: Mapping[str, Any],
+    reference: object,
+) -> Mapping[str, Any] | None:
+    if not isinstance(reference, str) or not reference.startswith("#/"):
+        return None
+    target: object = schema
+    for raw_token in reference[2:].split("/"):
+        token = raw_token.replace("~1", "/").replace("~0", "~")
+        if not isinstance(target, Mapping) or token not in target:
+            return None
+        target = target[token]
+    return target if isinstance(target, Mapping) else None
+
+
+def _schema_fragment_contract(
+    schema: Mapping[str, Any],
+    fragment: object,
+    *,
+    context: str,
+    seen_refs: tuple[str, ...] = (),
+) -> dict[str, object]:
+    required: set[str] = set()
+    properties: dict[str, Mapping[str, Any]] = {}
+    failures: list[str] = []
+    if not isinstance(fragment, Mapping):
+        return {
+            "required": frozenset(),
+            "properties": properties,
+            "failures": (f"{context} must be an object schema",),
+        }
+
+    reference = fragment.get("$ref")
+    if reference is not None:
+        if not isinstance(reference, str) or reference in seen_refs:
+            failures.append(f"{context} has an invalid or cyclic local schema reference")
+        else:
+            target = _schema_ref_target(schema, reference)
+            if target is None:
+                failures.append(f"{context} has an unresolved or non-local schema reference")
+            else:
+                resolved = _schema_fragment_contract(
+                    schema,
+                    target,
+                    context=f"{context} {reference}",
+                    seen_refs=(*seen_refs, reference),
+                )
+                required.update(resolved["required"])
+                properties.update(resolved["properties"])
+                failures.extend(resolved["failures"])
+
+    all_of = fragment.get("allOf", [])
+    if not isinstance(all_of, list):
+        failures.append(f"{context} allOf must be a list")
+    else:
+        for index, child in enumerate(all_of):
+            resolved = _schema_fragment_contract(
+                schema,
+                child,
+                context=f"{context} allOf[{index}]",
+                seen_refs=seen_refs,
+            )
+            required.update(resolved["required"])
+            properties.update(resolved["properties"])
+            failures.extend(resolved["failures"])
+
+    raw_required = fragment.get("required", [])
+    if not isinstance(raw_required, list) or any(
+        not isinstance(field, str) or not field for field in raw_required
+    ):
+        failures.append(f"{context} required must be a list of nonempty field names")
+    else:
+        if len(raw_required) != len(set(raw_required)):
+            failures.append(f"{context} required field names must be unique")
+        required.update(raw_required)
+
+    raw_properties = fragment.get("properties", {})
+    if not isinstance(raw_properties, Mapping):
+        failures.append(f"{context} properties must be an object")
+    else:
+        for field, field_schema in raw_properties.items():
+            if not isinstance(field, str) or not isinstance(field_schema, Mapping):
+                failures.append(f"{context} property definitions must be object schemas")
+                continue
+            properties[field] = field_schema
+
+    return {
+        "required": frozenset(required),
+        "properties": properties,
+        "failures": tuple(failures),
+    }
+
+
+def _schema_discriminator(
+    properties: Mapping[str, Mapping[str, Any]],
+) -> tuple[str, str] | None:
+    schema_version = properties.get("schema_version", {}).get("const")
+    record_type = properties.get("record_type", {}).get("const")
+    if not isinstance(schema_version, str) or not isinstance(record_type, str):
+        return None
+    return schema_version, record_type
+
+
+def _classify_schema_contract(schema: Mapping[str, Any]) -> dict[str, object]:
+    root = _schema_fragment_contract(schema, schema, context="schema root")
+    structural_failures = list(root["failures"])
+    if schema.get("type") != "object":
+        structural_failures.append("schema root type must be object")
+
+    branches_value = schema.get("oneOf")
+    if branches_value is None:
+        discriminator = _schema_discriminator(root["properties"])
+        if (
+            not structural_failures
+            and discriminator is not None
+            and discriminator[0] == policy.SCHEMA_VERSION
+            and discriminator[1]
+            in policy.LEGACY_PR133_V1_REQUIRED_FIELDS_BY_RECORD_TYPE
+        ):
+            return {
+                "shape": LEGACY_PR133_V1_ONLY,
+                "root": root,
+                "legacy_record_type": discriminator[1],
+                "structural_failures": (),
+            }
+        structural_failures.append(
+            "V1-only schema must have the exact PR133 schema and record discriminators"
+        )
+        return {
+            "shape": INVALID_OR_AMBIGUOUS_SCHEMA_SHAPE,
+            "root": root,
+            "structural_failures": tuple(structural_failures),
+        }
+
+    if not isinstance(branches_value, list) or len(branches_value) != 2:
+        structural_failures.append("union schema must contain exactly two oneOf branches")
+        return {
+            "shape": INVALID_OR_AMBIGUOUS_SCHEMA_SHAPE,
+            "root": root,
+            "structural_failures": tuple(structural_failures),
+        }
+
+    branches: list[dict[str, object]] = []
+    for index, branch_value in enumerate(branches_value):
+        branch = _schema_fragment_contract(
+            schema,
+            branch_value,
+            context=f"schema branch[{index}]",
+        )
+        structural_failures.extend(branch["failures"])
+        effective_properties = dict(root["properties"])
+        effective_properties.update(branch["properties"])
+        branches.append(
+            {
+                "required": frozenset(
+                    set(root["required"]) | set(branch["required"])
+                ),
+                "local_required": frozenset(
+                    set(branch["required"]) - set(root["required"])
+                ),
+                "properties": effective_properties,
+                "discriminator": _schema_discriminator(effective_properties),
+            }
+        )
+
+    v1_branches = [
+        branch
+        for branch in branches
+        if branch["discriminator"] is not None
+        and branch["discriminator"][0] == policy.SCHEMA_VERSION
+        and branch["discriminator"][1]
+        in policy.LEGACY_PR133_V1_REQUIRED_FIELDS_BY_RECORD_TYPE
+    ]
+    if len(v1_branches) != 1:
+        structural_failures.append(
+            "union schema must contain exactly one exact PR133 V1 discriminator"
+        )
+    else:
+        legacy_record_type = v1_branches[0]["discriminator"][1]
+        expected_v2 = policy.PIT_V2_DISCRIMINATOR_BY_LEGACY_V1_RECORD_TYPE.get(
+            legacy_record_type
+        )
+        discriminators = [branch["discriminator"] for branch in branches]
+        if (
+            expected_v2 is None
+            or any(value is None for value in discriminators)
+            or len(set(discriminators)) != 2
+            or set(discriminators)
+            != {(policy.SCHEMA_VERSION, legacy_record_type), expected_v2}
+        ):
+            structural_failures.append(
+                "union schema must contain one exact matched V1/V2 discriminator pair"
+            )
+
+    if structural_failures:
+        return {
+            "shape": INVALID_OR_AMBIGUOUS_SCHEMA_SHAPE,
+            "root": root,
+            "branches": tuple(branches),
+            "structural_failures": tuple(structural_failures),
+        }
+
+    legacy_record_type = v1_branches[0]["discriminator"][1]
+    expected_v2 = policy.PIT_V2_DISCRIMINATOR_BY_LEGACY_V1_RECORD_TYPE[
+        legacy_record_type
+    ]
+    return {
+        "shape": BACKWARD_COMPATIBLE_V1_V2_UNION,
+        "root": root,
+        "legacy_record_type": legacy_record_type,
+        "v1": next(
+            branch
+            for branch in branches
+            if branch["discriminator"]
+            == (policy.SCHEMA_VERSION, legacy_record_type)
+        ),
+        "v2": next(
+            branch for branch in branches if branch["discriminator"] == expected_v2
+        ),
+        "v2_discriminator": expected_v2,
+        "structural_failures": (),
+    }
+
+
+def _required_set_failures(
+    label: str,
+    actual: frozenset[str],
+    expected: frozenset[str],
+) -> list[str]:
+    failures: list[str] = []
+    missing = sorted(expected - actual)
+    unexpected = sorted(actual - expected)
+    if missing:
+        failures.append(f"{label} is missing required fields: {', '.join(missing)}")
+    if unexpected:
+        failures.append(
+            f"{label} has unexpected required fields: {', '.join(unexpected)}"
+        )
+    return failures
+
+
+def _required_property_failures(
+    label: str,
+    required: frozenset[str],
+    properties: Mapping[str, Mapping[str, Any]],
+) -> list[str]:
+    missing = sorted(required - set(properties))
+    return (
+        [f"{label} required fields lack property definitions: {', '.join(missing)}"]
+        if missing
+        else []
+    )
+
+
+def _legacy_schema_contract_failures(
+    label: str,
+    required: frozenset[str],
+    properties: Mapping[str, Mapping[str, Any]],
+) -> list[str]:
+    failures: list[str] = []
+    for field in policy.QUANTUM_FORWARD_SNAPSHOT_METADATA_FIELDS:
+        if field not in required or field not in properties:
+            failures.append(f"{label} must include quantum metadata field {field}")
+    for field in policy.QUANTUM_ZERO_AUTHORITY_FLAGS:
+        if field not in required or field not in properties:
+            failures.append(f"{label} must include quantum zero flag {field}")
+    for field in policy.ATOMICROWS_PRE_BRIDGE_METADATA_FIELDS:
+        if field not in required or field not in properties:
+            failures.append(f"{label} must include AtomicRows metadata field {field}")
+    for field in policy.ATOMICROWS_ZERO_AUTHORITY_FLAGS:
+        if field not in required or field not in properties:
+            failures.append(f"{label} must include AtomicRows zero flag {field}")
+    if "venue_id" in properties and tuple(
+        properties["venue_id"].get("enum", [])
+    ) != policy.LEGACY_V1_FIXTURE_VENUE_IDS:
+        failures.append(f"{label} venue_id enum must match legacy V1 fixture policy")
+    if "scope_id" in properties and tuple(
+        properties["scope_id"].get("enum", [])
+    ) != policy.SHARED_SCOPE_IDS:
+        failures.append(f"{label} scope_id enum must match policy")
+    enum_checks = {
+        "canonical_depth_side": policy.ALLOWED_CANONICAL_DEPTH_SIDES,
+        "qtt_internal_lifecycle_state_class": (
+            policy.ALLOWED_EVENT_LIFECYCLE_STATUS_CLASSES
+        ),
+        "source_dependency_state": policy.ALLOWED_SOURCE_DEPENDENCY_STATES,
+        "snapshot_input_class": policy.ALLOWED_SNAPSHOT_INPUT_CLASSES,
+        "snapshot_class": policy.ALLOWED_ORDERBOOK_SNAPSHOT_CLASSES
+        + policy.ALLOWED_EVENT_STATE_SNAPSHOT_CLASSES,
+        "rejected_reason_code": policy.REJECTION_REASON_CODES,
+    }
+    for field, expected in enum_checks.items():
+        if field in properties and tuple(properties[field].get("enum", [])) != tuple(
+            expected
+        ):
+            failures.append(f"{label} {field} enum must match policy")
+    return failures
+
+
+def _validate_schema_document(
+    schema: Mapping[str, Any],
+    label: str,
+) -> list[str]:
+    failures: list[str] = []
+    classification = _classify_schema_contract(schema)
+    shape = classification["shape"]
+    if shape == INVALID_OR_AMBIGUOUS_SCHEMA_SHAPE:
+        failures.append(f"{label} has {INVALID_OR_AMBIGUOUS_SCHEMA_SHAPE}")
+        failures.extend(
+            f"{label} {failure}"
+            for failure in classification.get("structural_failures", ())
+        )
+        return failures
+
+    root = classification["root"]
+    root_required = root["required"]
+    root_properties = root["properties"]
+    if schema.get("additionalProperties") is not False:
+        failures.append(f"{label} must reject additional properties")
+    for field, expected in (
+        ("created_by", policy.CREATED_BY),
+        ("authority_class", policy.PACKAGE_AUTHORITY_CLASS),
+    ):
+        if root_properties.get(field, {}).get("const") != expected:
+            failures.append(f"{label} {field} const must match policy")
+
+    legacy_record_type = classification["legacy_record_type"]
+    expected_v1 = policy.LEGACY_PR133_V1_REQUIRED_FIELDS_BY_RECORD_TYPE[
+        legacy_record_type
+    ]
+    if shape == LEGACY_PR133_V1_ONLY:
+        failures.extend(
+            _required_set_failures(f"{label} V1 root", root_required, expected_v1)
+        )
+        failures.extend(
+            _legacy_schema_contract_failures(
+                f"{label} V1 root", root_required, root_properties
+            )
+        )
+        return failures
+
+    v1 = classification["v1"]
+    v2 = classification["v2"]
+    v2_schema_version, v2_record_type = classification["v2_discriminator"]
+    expected_v2 = policy.PIT_V2_REQUIRED_FIELDS_BY_RECORD_TYPE[v2_record_type]
+    common_required = expected_v1 & expected_v2
+    expected_v1_local = expected_v1 - common_required
+    expected_v2_local = expected_v2 - common_required
+
+    if not policy.SCHEMA_COMMON_REQUIRED_FIELDS.issubset(common_required):
+        failures.append(f"{label} common contract omits immutable identity fields")
+
+    failures.extend(
+        _required_set_failures(
+            f"{label} common root",
+            root_required,
+            common_required,
+        )
+    )
+    failures.extend(
+        _required_set_failures(f"{label} V1 effective branch", v1["required"], expected_v1)
+    )
+    failures.extend(
+        _required_set_failures(f"{label} V2 effective branch", v2["required"], expected_v2)
+    )
+    failures.extend(
+        _required_set_failures(
+            f"{label} V1 branch-local",
+            v1["required"] - common_required,
+            expected_v1_local,
+        )
+    )
+    failures.extend(
+        _required_set_failures(
+            f"{label} V2 branch-local",
+            v2["required"] - common_required,
+            expected_v2_local,
+        )
+    )
+    failures.extend(
+        _required_property_failures(
+            f"{label} V1 effective branch", v1["required"], v1["properties"]
+        )
+    )
+    failures.extend(
+        _required_property_failures(
+            f"{label} V2 effective branch", v2["required"], v2["properties"]
+        )
+    )
+    failures.extend(
+        _legacy_schema_contract_failures(
+            f"{label} V1 effective branch", v1["required"], v1["properties"]
+        )
+    )
+
+    expected_root_schema_versions = (policy.SCHEMA_VERSION, v2_schema_version)
+    expected_root_record_types = (legacy_record_type, v2_record_type)
+    if tuple(root_properties.get("schema_version", {}).get("enum", [])) != (
+        expected_root_schema_versions
+    ):
+        failures.append(f"{label} root schema_version enum must match both branches")
+    if tuple(root_properties.get("record_type", {}).get("enum", [])) != (
+        expected_root_record_types
+    ):
+        failures.append(f"{label} root record_type enum must match both branches")
+
+    profile_schema = v2["properties"].get("profile_id", {})
+    if tuple(profile_schema.get("enum", [])) != policy.PIT_V2_SELECTED_PROFILE_IDS:
+        failures.append(f"{label} V2 profile_id enum must match selected PIT profiles")
+    legacy_placeholder_fields = frozenset(
+        {
+            *policy.QUANTUM_FORWARD_SNAPSHOT_METADATA_FIELDS,
+            *policy.QUANTUM_ZERO_AUTHORITY_FLAGS,
+            *policy.ATOMICROWS_PRE_BRIDGE_METADATA_FIELDS,
+            *policy.ATOMICROWS_ZERO_AUTHORITY_FLAGS,
+        }
+    )
+    forbidden_v2_required = sorted(v2["required"] & legacy_placeholder_fields)
+    if forbidden_v2_required:
+        failures.append(
+            f"{label} V2 branch requires legacy placeholder fields: "
+            + ", ".join(forbidden_v2_required)
+        )
+    return failures
+
+
 def _schema_validation(repo_root: Path) -> list[str]:
     failures: list[str] = []
     for filename in SCHEMA_FILES:
@@ -765,42 +1195,12 @@ def _schema_validation(repo_root: Path) -> list[str]:
         if not path.exists():
             failures.append(f"missing PR133 schema: {filename}")
             continue
-        schema = _load_json(path)
-        if schema.get("additionalProperties") is not False:
-            failures.append(f"{filename} must reject additional properties")
-        required = set(schema.get("required", []))
-        properties = schema.get("properties", {})
-        for field in ("schema_version", "record_type", "created_by", "authority_class"):
-            if field not in required:
-                failures.append(f"{filename} must require {field}")
-        for field in policy.QUANTUM_FORWARD_SNAPSHOT_METADATA_FIELDS:
-            if field not in required or field not in properties:
-                failures.append(f"{filename} must include quantum metadata field {field}")
-        for field in policy.QUANTUM_ZERO_AUTHORITY_FLAGS:
-            if field not in required or field not in properties:
-                failures.append(f"{filename} must include quantum zero flag {field}")
-        for field in policy.ATOMICROWS_PRE_BRIDGE_METADATA_FIELDS:
-            if field not in required or field not in properties:
-                failures.append(f"{filename} must include AtomicRows metadata field {field}")
-        for field in policy.ATOMICROWS_ZERO_AUTHORITY_FLAGS:
-            if field not in required or field not in properties:
-                failures.append(f"{filename} must include AtomicRows zero flag {field}")
-        if "venue_id" in properties and tuple(properties["venue_id"].get("enum", [])) != policy.STAGE1_VENUE_IDS:
-            failures.append(f"{filename} venue_id enum must match policy")
-        if "scope_id" in properties and tuple(properties["scope_id"].get("enum", [])) != policy.SHARED_SCOPE_IDS:
-            failures.append(f"{filename} scope_id enum must match policy")
-        enum_checks = {
-            "canonical_depth_side": policy.ALLOWED_CANONICAL_DEPTH_SIDES,
-            "qtt_internal_lifecycle_state_class": policy.ALLOWED_EVENT_LIFECYCLE_STATUS_CLASSES,
-            "source_dependency_state": policy.ALLOWED_SOURCE_DEPENDENCY_STATES,
-            "snapshot_input_class": policy.ALLOWED_SNAPSHOT_INPUT_CLASSES,
-            "snapshot_class": policy.ALLOWED_ORDERBOOK_SNAPSHOT_CLASSES
-            + policy.ALLOWED_EVENT_STATE_SNAPSHOT_CLASSES,
-            "rejected_reason_code": policy.REJECTION_REASON_CODES,
-        }
-        for field, expected in enum_checks.items():
-            if field in properties and tuple(properties[field].get("enum", [])) != tuple(expected):
-                failures.append(f"{filename} {field} enum must match policy")
+        try:
+            schema = _load_json(path)
+        except (OSError, UnicodeError, json.JSONDecodeError) as exc:
+            failures.append(f"invalid PR133 schema {filename}: {exc}")
+            continue
+        failures.extend(_validate_schema_document(schema, filename))
     return failures
 
 

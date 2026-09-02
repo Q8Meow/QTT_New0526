@@ -7,6 +7,7 @@ from fnmatch import fnmatchcase
 
 from tools.ci_branch_context import (
     S1_LAUNCH_GRAPH_IMPLEMENTATION_BRANCH,
+    S1_PIT_DATA_PHASE_A_01_IMPLEMENTATION_BRANCH,
     S1_PLUGIN_PACKAGE_CURRENTIZATION_BRANCH,
 )
 
@@ -773,6 +774,76 @@ S1_LAUNCH_GRAPH_ALLOWED_EXACT_PATHS = frozenset(
         "docs/master_plan/generated/PR152_GrandGlobalDebugLogicalConsistencyAuditEntireQTTRepo.report.json",
     }
 )
+
+S1_PIT_DATA_PHASE_A_01_NORMAL_CHANGED_PATHS = frozenset(
+    {
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/point_in_time.py",
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/freshness.py",
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/input_resolver.py",
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/receipts.py",
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/source_policy.py",
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/__init__.py",
+        "src/qtt/stage1_prediction_markets/market_data_ingest/policy.py",
+        "src/qtt/stage1_prediction_markets/market_data_ingest/adapter.py",
+        "src/qtt/stage1_prediction_markets/market_data_ingest/binding.py",
+        "src/qtt/stage1_prediction_markets/market_data_ingest/source_dependency.py",
+        "src/qtt/stage1_prediction_markets/market_data_ingest/validator.py",
+        "src/qtt/stage1_prediction_markets/market_data_ingest/canonical_market_data_ingest_event.schema.json",
+        "src/qtt/stage1_prediction_markets/market_data_ingest/market_data_source_dependency.schema.json",
+        "src/qtt/stage1_prediction_markets/market_data_ingest/market_data_no_live_network_attestation.schema.json",
+        "src/qtt/stage1_prediction_markets/market_data_ingest/handoff.py",
+        "src/qtt/stage1_prediction_markets/market_data_ingest/market_data_ingest_downstream_handoff.schema.json",
+        "src/qtt/stage1_prediction_markets/market_data_ingest/__init__.py",
+        "src/qtt/stage1_prediction_markets/orderbook_event_state_snapshot/policy.py",
+        "src/qtt/stage1_prediction_markets/orderbook_event_state_snapshot/builder.py",
+        "src/qtt/stage1_prediction_markets/orderbook_event_state_snapshot/integrity.py",
+        "src/qtt/stage1_prediction_markets/orderbook_event_state_snapshot/input_lock.py",
+        "src/qtt/stage1_prediction_markets/orderbook_event_state_snapshot/validator.py",
+        "src/qtt/stage1_prediction_markets/orderbook_event_state_snapshot/event_state_snapshot.schema.json",
+        "src/qtt/stage1_prediction_markets/orderbook_event_state_snapshot/orderbook_snapshot.schema.json",
+        "src/qtt/stage1_prediction_markets/orderbook_event_state_snapshot/snapshot_builder_binding.schema.json",
+        "src/qtt/stage1_prediction_markets/orderbook_event_state_snapshot/handoff.py",
+        "src/qtt/stage1_prediction_markets/orderbook_event_state_snapshot/snapshot_downstream_handoff.schema.json",
+        "src/qtt/stage1_prediction_markets/orderbook_event_state_snapshot/__init__.py",
+        "tests/source_evidence/test_pr132_schema_enums_and_quantum_fields_match_policy_constants.py",
+        "tests/source_evidence/test_s1_pit_data_phase_a_01.py",
+        "tools/ci_branch_context.py",
+        "tools/validation_scope_registry.py",
+        "tools/validation_inventory.py",
+        "tools/changed_area_validation_router.py",
+        "tests/tools/test_ci_branch_context.py",
+        "tests/tools/test_validation_scope_registry.py",
+        "tests/tools/test_validation_inventory.py",
+        "tests/tools/test_changed_area_validation_router.py",
+    }
+)
+S1_PIT_DATA_PHASE_A_01_CONDITIONAL_CHANGED_PATHS = frozenset(
+    {
+        "docs/master_plan/generated/"
+        "PR152_GrandGlobalDebugLogicalConsistencyAuditEntireQTTRepo.report.json",
+    }
+)
+S1_PIT_DATA_PHASE_A_01_ALLOWED_EXACT_PATHS = frozenset(
+    (
+        *S1_PIT_DATA_PHASE_A_01_NORMAL_CHANGED_PATHS,
+        *S1_PIT_DATA_PHASE_A_01_CONDITIONAL_CHANGED_PATHS,
+    )
+)
+if (
+    len(S1_PIT_DATA_PHASE_A_01_NORMAL_CHANGED_PATHS) != 38
+    or len(S1_PIT_DATA_PHASE_A_01_CONDITIONAL_CHANGED_PATHS) != 1
+    or S1_PIT_DATA_PHASE_A_01_NORMAL_CHANGED_PATHS.intersection(
+        S1_PIT_DATA_PHASE_A_01_CONDITIONAL_CHANGED_PATHS
+    )
+    or len(S1_PIT_DATA_PHASE_A_01_ALLOWED_EXACT_PATHS) != 39
+    or not S1_PIT_DATA_PHASE_A_01_NORMAL_CHANGED_PATHS.issubset(
+        S1_PIT_DATA_PHASE_A_01_ALLOWED_EXACT_PATHS
+    )
+    or not S1_PIT_DATA_PHASE_A_01_CONDITIONAL_CHANGED_PATHS.issubset(
+        S1_PIT_DATA_PHASE_A_01_ALLOWED_EXACT_PATHS
+    )
+):
+    raise RuntimeError("S1 PIT Phase A-01 exact path closure must remain exact")
 
 S1_PLUGIN_PACKAGE_CURRENTIZATION_ALLOWED_EXACT_PATHS = frozenset(
     {
@@ -2477,6 +2548,18 @@ def explain_pr_scope_decision(branch: str, path: str) -> dict[str, object]:
 
     normalized = normalize_changed_path(path)
     branch_name = str(branch).strip()
+    if (
+        branch_name == S1_PIT_DATA_PHASE_A_01_IMPLEMENTATION_BRANCH
+        and normalized in S1_PIT_DATA_PHASE_A_01_ALLOWED_EXACT_PATHS
+    ):
+        return {
+            "allowed": True,
+            "branch": branch_name,
+            "normalized_path": normalized,
+            "pr_id": "S1-PIT-DATA-PHASE-A-01",
+            "matched_rule": f"exact:{normalized}",
+            "reason": "registered_exact_path",
+        }
     if branch_name == S1_PLUGIN_PACKAGE_CURRENTIZATION_BRANCH:
         allowed = (
             normalized
@@ -2752,6 +2835,18 @@ def explain_pr_scope_decision(branch: str, path: str) -> dict[str, object]:
         }
     if (
         is_validation_context_branch(branch_name)
+        and normalized in S1_PIT_DATA_PHASE_A_01_ALLOWED_EXACT_PATHS
+    ):
+        return {
+            "allowed": True,
+            "branch": branch_name,
+            "normalized_path": normalized,
+            "pr_id": "S1-PIT-DATA-PHASE-A-01",
+            "matched_rule": f"validation_context_exact:{normalized}",
+            "reason": "registered_validation_context_exact_path",
+        }
+    if (
+        is_validation_context_branch(branch_name)
         and normalized in S1_LAUNCH_GRAPH_ALLOWED_EXACT_PATHS
     ):
         return {
@@ -2779,6 +2874,15 @@ def explain_pr_scope_decision(branch: str, path: str) -> dict[str, object]:
             "normalized_path": normalized,
             "pr_id": "S1-LAUNCH-GRAPH-MATERIALIZATION-01",
             "matched_rule": "no_s1_launch_graph_exact_scope_rule",
+            "reason": "path_not_registered_for_pr_scope",
+        }
+    if branch_name == S1_PIT_DATA_PHASE_A_01_IMPLEMENTATION_BRANCH:
+        return {
+            "allowed": False,
+            "branch": branch_name,
+            "normalized_path": normalized,
+            "pr_id": "S1-PIT-DATA-PHASE-A-01",
+            "matched_rule": "no_s1_pit_data_phase_a_01_exact_scope_rule",
             "reason": "path_not_registered_for_pr_scope",
         }
     if branch_name == ST12A_BRANCH:

@@ -2,25 +2,57 @@ from __future__ import annotations
 
 import ast
 from copy import deepcopy
+from datetime import datetime
+from decimal import Decimal
 import json
 from pathlib import Path
 from typing import Any, Mapping
 
 from src.qtt.stage1_prediction_markets.market_data_ingest import policy
 from src.qtt.stage1_prediction_markets.market_data_ingest.adapter import (
+    PITCanonicalEventCandidateV2,
+    PITCanonicalEventV2,
+    PITRawFrameV1,
+    PITReadRequestV1,
+    _PITBookAbsoluteUpdatePayloadV2,
+    _PITBookDeltaPayloadV2,
+    _PITBookReplacementPayloadV2,
+    _PITBookSnapshotPayloadV2,
+    _decode_pit_frame_v2,
+    _pit_frame_tree,
     build_adapter_inputs,
     build_canonical_events,
 )
 from src.qtt.stage1_prediction_markets.market_data_ingest.binding import (
+    SelectedPITPublicDataContractV2,
     build_adapter_bindings,
 )
 from src.qtt.stage1_prediction_markets.market_data_ingest.handoff import (
     build_downstream_handoff,
 )
 from src.qtt.stage1_prediction_markets.market_data_ingest.source_dependency import (
+    PIT_SOURCE_DEPENDENCIES_V2,
+    PITSourceDependencyV2,
+    _resolve_pit_source_dependency_v2,
     build_no_live_network_attestations,
     build_rejection_receipts,
     build_source_dependencies,
+)
+from src.qtt.stage1_prediction_markets.qku_computation_control_plane.input_resolver import (
+    PITInputCapabilityV2,
+)
+from src.qtt.stage1_prediction_markets.qku_computation_control_plane.point_in_time import (
+    PITDataContractErrorV1,
+    PITDepthClassV2,
+    PITEventKindV2,
+    PITReasonCodeV1,
+    validate_pit_clock_set_v3,
+)
+from src.qtt.stage1_prediction_markets.qku_computation_control_plane.receipts import (
+    CaptureAndGapReceiptV2,
+)
+from src.qtt.stage1_prediction_markets.qku_computation_control_plane.stage1_launch_graph import (
+    Stage1VenueProfileIdV1,
 )
 
 
@@ -418,6 +450,11 @@ def _schema_validation(repo_root: Path) -> list[str]:
         if schema.get("additionalProperties") is not False:
             failures.append(f"{filename} must reject additional properties")
         required = set(schema.get("required", []))
+        for branch in schema.get("oneOf", ()):
+            if isinstance(branch, Mapping):
+                branch_required = branch.get("required", ())
+                if isinstance(branch_required, list):
+                    required.update(branch_required)
         for field in ("schema_version", "record_type", "created_by", "authority_class"):
             if field not in required:
                 failures.append(f"{filename} must require {field}")
@@ -1233,3 +1270,703 @@ def write_fixture_files(repo_root: Path, out_root: Path | None = None) -> dict[s
             newline="\n",
         )
     return artifacts
+
+
+def _pit_validator_contract_map(
+    contracts: tuple[SelectedPITPublicDataContractV2, ...],
+) -> dict[Stage1VenueProfileIdV1, SelectedPITPublicDataContractV2]:
+    if type(contracts) is not tuple or any(
+        type(value) is not SelectedPITPublicDataContractV2 for value in contracts
+    ):
+        raise PITDataContractErrorV1(
+            PITReasonCodeV1.PIT_SCHEMA_OR_WIRE_DIALECT_INVALID,
+            "dispatcher contracts must be exact selected contract values",
+        )
+    by_profile = {value.profile_id: value for value in contracts}
+    expected = set(policy.PIT_SELECTED_SCOPE_V2.serialization)
+    if len(by_profile) != len(contracts) or set(by_profile) != expected:
+        raise PITDataContractErrorV1(
+            PITReasonCodeV1.PIT_SCOPE_NOT_SELECTED,
+            "dispatcher contract profile set must equal selected scope",
+        )
+    return by_profile
+
+
+class PITMarketDataIngestDispatcherV2:
+    """Exact selected-profile decoder dispatcher with Retail dialect custody."""
+
+    __slots__ = (
+        "_contracts",
+        "_polymarket_dialect_by_epoch",
+        "_polymarket_data_seen_by_capture",
+        "_polymarket_fallback_used_by_capture",
+    )
+
+    def __init__(
+        self,
+        contracts: tuple[SelectedPITPublicDataContractV2, ...],
+    ) -> None:
+        self._contracts = _pit_validator_contract_map(contracts)
+        self._polymarket_dialect_by_epoch: dict[tuple[str, str], str] = {}
+        self._polymarket_data_seen_by_capture: dict[str, bool] = {}
+        self._polymarket_fallback_used_by_capture: dict[str, bool] = {}
+
+    @property
+    def contracts(self) -> tuple[SelectedPITPublicDataContractV2, ...]:
+        return tuple(
+            self._contracts[profile_id]
+            for profile_id in policy.PIT_SELECTED_SCOPE_V2.serialization
+        )
+
+    def ingest(
+        self,
+        frame: PITRawFrameV1,
+        *,
+        event_kind: PITEventKindV2,
+        parse_completed_at_utc: datetime,
+        parse_completed_monotonic_ns: int,
+        price_increment_text: str,
+        price_origin_text: str,
+        quantity_increment_text_or_none: str | None,
+        explicit_pre_data_subscription_error: bool = False,
+    ) -> PITCanonicalEventCandidateV2:
+        return ingest_pit_frame_v2(
+            self,
+            frame,
+            event_kind=event_kind,
+            parse_completed_at_utc=parse_completed_at_utc,
+            parse_completed_monotonic_ns=parse_completed_monotonic_ns,
+            price_increment_text=price_increment_text,
+            price_origin_text=price_origin_text,
+            quantity_increment_text_or_none=quantity_increment_text_or_none,
+            explicit_pre_data_subscription_error=(
+                explicit_pre_data_subscription_error
+            ),
+        )
+
+
+def _pit_validate_polymarket_dialect_transition(
+    dispatcher: PITMarketDataIngestDispatcherV2,
+    frame: PITRawFrameV1,
+    *,
+    explicit_pre_data_subscription_error: bool,
+) -> None:
+    if type(explicit_pre_data_subscription_error) is not bool:
+        raise PITDataContractErrorV1(
+            PITReasonCodeV1.PIT_SCHEMA_OR_WIRE_DIALECT_INVALID,
+            "explicit subscription-error state must be exact Boolean",
+        )
+    primary = "POLYMARKET_RETAIL_CAMEL_STRING_V1"
+    fallback = "POLYMARKET_RETAIL_SNAKE_NUMERIC_V1"
+    epoch_key = (frame.capture_session_id, frame.connection_epoch)
+    locked = dispatcher._polymarket_dialect_by_epoch.get(epoch_key)
+    if locked is not None and locked != frame.wire_dialect:
+        raise PITDataContractErrorV1(
+            PITReasonCodeV1.PIT_SCHEMA_OR_WIRE_DIALECT_INVALID,
+            "Polymarket Retail dialect changed after epoch lock",
+        )
+    seen_data = dispatcher._polymarket_data_seen_by_capture.get(
+        frame.capture_session_id, False
+    )
+    fallback_used = dispatcher._polymarket_fallback_used_by_capture.get(
+        frame.capture_session_id, False
+    )
+    if frame.wire_dialect == fallback:
+        if not explicit_pre_data_subscription_error or seen_data or fallback_used:
+            raise PITDataContractErrorV1(
+                PITReasonCodeV1.PIT_SCHEMA_OR_WIRE_DIALECT_INVALID,
+                "Retail fallback requires one explicit pre-data error only",
+            )
+        dispatcher._polymarket_fallback_used_by_capture[frame.capture_session_id] = True
+    elif frame.wire_dialect == primary:
+        if explicit_pre_data_subscription_error or fallback_used:
+            raise PITDataContractErrorV1(
+                PITReasonCodeV1.PIT_SCHEMA_OR_WIRE_DIALECT_INVALID,
+                "primary Retail dialect cannot follow or claim fallback authorization",
+            )
+    else:
+        raise PITDataContractErrorV1(
+            PITReasonCodeV1.PIT_SCHEMA_OR_WIRE_DIALECT_INVALID,
+            "Retail frame dialect is outside the exact two-form policy",
+        )
+    dispatcher._polymarket_dialect_by_epoch[epoch_key] = frame.wire_dialect
+
+
+def _pit_candidate_levels(
+    candidate: PITCanonicalEventCandidateV2,
+) -> tuple[object, ...]:
+    payload = candidate.payload
+    if type(payload) is _PITBookSnapshotPayloadV2:
+        return payload.levels
+    if type(payload) is _PITBookReplacementPayloadV2:
+        return payload.levels
+    if type(payload) is _PITBookAbsoluteUpdatePayloadV2:
+        return payload.updates
+    if type(payload) is _PITBookDeltaPayloadV2:
+        return payload.deltas
+    return ()
+
+
+def _pit_exact_event_surfaces(
+    profile_id: Stage1VenueProfileIdV1,
+    event_kind: PITEventKindV2,
+) -> frozenset[str]:
+    surfaces = {
+        row.path_or_channel
+        for row in PIT_SOURCE_DEPENDENCIES_V2
+        if row.profile_id is profile_id and row.event_kind is event_kind
+    }
+    if (
+        profile_id is Stage1VenueProfileIdV1.POLYMARKET_US_RETAIL_DIRECT
+        and event_kind is PITEventKindV2.BOOK_REPLACEMENT
+    ):
+        surfaces.add("REST_BOOK")
+    return frozenset(surfaces)
+
+
+def _pit_validate_candidate_against_contract(
+    candidate: PITCanonicalEventCandidateV2,
+    contract: SelectedPITPublicDataContractV2,
+) -> None:
+    if candidate.profile_id is not contract.profile_id:
+        raise PITDataContractErrorV1(
+            PITReasonCodeV1.PIT_SCOPE_NOT_SELECTED,
+            "candidate profile does not equal selected contract",
+        )
+    if candidate.event_kind not in contract.admitted_event_kinds:
+        raise PITDataContractErrorV1(
+            PITReasonCodeV1.PIT_SCHEMA_OR_WIRE_DIALECT_INVALID,
+            "candidate event kind is not contract-admitted",
+        )
+    if candidate.channel not in _pit_exact_event_surfaces(
+        candidate.profile_id, candidate.event_kind
+    ):
+        raise PITDataContractErrorV1(
+            PITReasonCodeV1.PIT_ENDPOINT_NOT_ALLOWLISTED,
+            "candidate channel/path is not the exact surface for its event kind",
+        )
+    if candidate.profile_id is Stage1VenueProfileIdV1.POLYMARKET_US_RETAIL_DIRECT:
+        if candidate.wire_dialect not in {
+            "POLYMARKET_RETAIL_CAMEL_STRING_V1",
+            "POLYMARKET_RETAIL_SNAKE_NUMERIC_V1",
+        }:
+            raise PITDataContractErrorV1(
+                PITReasonCodeV1.PIT_SCHEMA_OR_WIRE_DIALECT_INVALID,
+                "Retail candidate does not use one exact locked wire dialect",
+            )
+    elif candidate.wire_dialect != contract.wire_dialect_policy:
+        raise PITDataContractErrorV1(
+            PITReasonCodeV1.PIT_SCHEMA_OR_WIRE_DIALECT_INVALID,
+            "candidate wire dialect differs from its exact selected contract",
+        )
+    if candidate.source_currentization_version != contract.source_contract_version:
+        raise PITDataContractErrorV1(
+            PITReasonCodeV1.PIT_SOURCE_CURRENTIZATION_STALE,
+            "candidate source-currentization version differs from contract",
+        )
+    if (
+        candidate.source_receipt_ref
+        != contract.source_currentization_receipt_ref
+        or candidate.rights_receipt_ref != contract.rights_receipt_ref
+    ):
+        raise PITDataContractErrorV1(
+            PITReasonCodeV1.PIT_RIGHTS_NOT_ADMITTED,
+            "candidate source/rights lineage differs from contract",
+        )
+    if candidate.profile_id is (
+        Stage1VenueProfileIdV1.POLYMARKET_US_RETAIL_DIRECT
+    ):
+        if (
+            candidate.provider_sequence_start_or_none is not None
+            or candidate.provider_sequence_end_or_none is not None
+        ):
+            raise PITDataContractErrorV1(
+                PITReasonCodeV1.PIT_PROVIDER_SEQUENCE_UNAVAILABLE,
+                "Polymarket Retail cannot claim a provider numeric sequence",
+            )
+        if candidate.event_kind is PITEventKindV2.BOOK_REPLACEMENT and (
+            candidate.depth_class
+            not in {
+                PITDepthClassV2.COMPLETE_PROVIDER_SNAPSHOT,
+                PITDepthClassV2.PROVIDER_PUBLISHED_TOP_LEVELS_CURRENT_STATE_FRAME,
+            }
+        ):
+            raise PITDataContractErrorV1(
+                PITReasonCodeV1.PIT_TOP_LEVEL_DEPTH_ONLY,
+                "Retail replacement has an invalid depth claim",
+            )
+        if candidate.provider_subscription_id_or_none is not None:
+            raise PITDataContractErrorV1(
+                PITReasonCodeV1.PIT_PROVIDER_SEQUENCE_UNAVAILABLE,
+                "Retail cannot claim provider subscription sequence identity",
+            )
+    elif candidate.event_kind in {
+        PITEventKindV2.BOOK_SNAPSHOT,
+        PITEventKindV2.BOOK_DELTA,
+    } and (
+        candidate.provider_sequence_start_or_none is None
+        or candidate.provider_sequence_end_or_none is None
+    ):
+        raise PITDataContractErrorV1(
+            PITReasonCodeV1.PIT_PROVIDER_SEQUENCE_UNAVAILABLE,
+            "sequenced provider book event lacks exact sequence identity",
+        )
+    if (
+        (candidate.provider_sequence_start_or_none is None)
+        != (candidate.provider_sequence_end_or_none is None)
+    ):
+        raise PITDataContractErrorV1(
+            PITReasonCodeV1.PIT_PROVIDER_SEQUENCE_UNAVAILABLE,
+            "provider sequence identity must carry both range endpoints or neither",
+        )
+    payload = candidate.payload
+    if candidate.event_kind is PITEventKindV2.BOOK_SNAPSHOT:
+        if (
+            type(payload) is not _PITBookSnapshotPayloadV2
+            or candidate.depth_class is not PITDepthClassV2.COMPLETE_PROVIDER_SNAPSHOT
+            or payload.provider_sequence != candidate.provider_sequence_end_or_none
+        ):
+            raise PITDataContractErrorV1(
+                PITReasonCodeV1.PIT_SCHEMA_OR_WIRE_DIALECT_INVALID,
+                "book snapshot payload, sequence, and complete-depth claim disagree",
+            )
+        if candidate.profile_id is Stage1VenueProfileIdV1.GEMINI_TITAN_DIRECT:
+            if (
+                candidate.provider_subscription_id_or_none is not None
+                or payload.provider_subscription_id_or_none is not None
+            ):
+                raise PITDataContractErrorV1(
+                    PITReasonCodeV1.PIT_SCHEMA_OR_WIRE_DIALECT_INVALID,
+                    "Gemini snapshot cannot claim a provider subscription identity",
+                )
+        elif candidate.profile_id is Stage1VenueProfileIdV1.KALSHI_US_DCM_DIRECT:
+            if (
+                candidate.provider_sequence_start_or_none
+                != candidate.provider_sequence_end_or_none
+                or candidate.provider_subscription_id_or_none is None
+                or payload.provider_subscription_id_or_none
+                != candidate.provider_subscription_id_or_none
+            ):
+                raise PITDataContractErrorV1(
+                    PITReasonCodeV1.PIT_SCHEMA_OR_WIRE_DIALECT_INVALID,
+                    "Kalshi snapshot requires matching sid and exact single seq",
+                )
+    elif candidate.event_kind is PITEventKindV2.BOOK_DELTA:
+        if candidate.depth_class is not PITDepthClassV2.INCREMENTAL_FROM_COMPLETE_ANCHOR:
+            raise PITDataContractErrorV1(
+                PITReasonCodeV1.PIT_TOP_LEVEL_DEPTH_ONLY,
+                "book delta cannot claim a non-incremental depth class",
+            )
+        if candidate.profile_id is Stage1VenueProfileIdV1.GEMINI_TITAN_DIRECT:
+            if (
+                type(payload) is not _PITBookAbsoluteUpdatePayloadV2
+                or payload.first_provider_sequence
+                != candidate.provider_sequence_start_or_none
+                or payload.last_provider_sequence != candidate.provider_sequence_end_or_none
+                or candidate.provider_subscription_id_or_none is not None
+            ):
+                raise PITDataContractErrorV1(
+                    PITReasonCodeV1.PIT_SCHEMA_OR_WIRE_DIALECT_INVALID,
+                    "Gemini delta requires the exact U/u absolute-update payload",
+                )
+        elif candidate.profile_id is Stage1VenueProfileIdV1.KALSHI_US_DCM_DIRECT:
+            if (
+                type(payload) is not _PITBookDeltaPayloadV2
+                or candidate.provider_sequence_start_or_none
+                != candidate.provider_sequence_end_or_none
+                or payload.provider_sequence != candidate.provider_sequence_end_or_none
+                or candidate.provider_subscription_id_or_none is None
+                or payload.provider_subscription_id
+                != candidate.provider_subscription_id_or_none
+            ):
+                raise PITDataContractErrorV1(
+                    PITReasonCodeV1.PIT_SCHEMA_OR_WIRE_DIALECT_INVALID,
+                    "Kalshi delta requires matching sid and exact single seq",
+                )
+    elif candidate.event_kind is not PITEventKindV2.BOOK_REPLACEMENT and (
+        candidate.provider_sequence_start_or_none is not None
+        or candidate.provider_sequence_end_or_none is not None
+    ):
+        raise PITDataContractErrorV1(
+            PITReasonCodeV1.PIT_PROVIDER_SEQUENCE_UNAVAILABLE,
+            "non-book event cannot claim provider book-sequence identity",
+        )
+    if candidate.event_kind is PITEventKindV2.TRADE:
+        if candidate.profile_id in {
+            Stage1VenueProfileIdV1.GEMINI_TITAN_DIRECT,
+            Stage1VenueProfileIdV1.KALSHI_US_DCM_DIRECT,
+        } and candidate.provider_trade_id_or_none is None:
+            raise PITDataContractErrorV1(
+                PITReasonCodeV1.PIT_SCHEMA_OR_WIRE_DIALECT_INVALID,
+                "selected sequenced-provider trade lacks exact provider trade identity",
+            )
+        if (
+            candidate.profile_id
+            is Stage1VenueProfileIdV1.POLYMARKET_US_RETAIL_DIRECT
+            and candidate.provider_trade_id_or_none is not None
+        ):
+            raise PITDataContractErrorV1(
+                PITReasonCodeV1.PIT_CONFLICTING_DUPLICATE,
+                "Retail cannot claim an immutable provider trade identity",
+            )
+    elif candidate.provider_trade_id_or_none is not None:
+        raise PITDataContractErrorV1(
+            PITReasonCodeV1.PIT_CONFLICTING_DUPLICATE,
+            "non-trade event cannot carry provider trade identity",
+        )
+    expected_sides = {
+        Stage1VenueProfileIdV1.GEMINI_TITAN_DIRECT: (
+            frozenset({"BID", "OFFER"}),
+            frozenset({"BID", "ASK"}),
+        ),
+        Stage1VenueProfileIdV1.POLYMARKET_US_RETAIL_DIRECT: (
+            frozenset({"BID", "OFFER"}),
+            frozenset({"BID", "ASK"}),
+        ),
+        Stage1VenueProfileIdV1.KALSHI_US_DCM_DIRECT: (
+            frozenset({"YES", "NO"}),
+            frozenset({"YES_BID", "NO_BID"}),
+        ),
+    }[candidate.profile_id]
+    seen_level_keys: set[tuple[str, object]] = set()
+    for level in _pit_candidate_levels(candidate):
+        if (
+            level.source_side not in expected_sides[0]
+            or level.canonical_side not in expected_sides[1]
+        ):
+            raise PITDataContractErrorV1(
+                PITReasonCodeV1.PIT_SCHEMA_OR_WIRE_DIALECT_INVALID,
+                "candidate source/canonical side is invalid for its selected profile",
+            )
+        if level.price < 0 or level.price > 1:
+            raise PITDataContractErrorV1(
+                PITReasonCodeV1.PIT_TICK_GRID_INVALID,
+                "prediction-market book price is outside the unit payout range",
+            )
+        key = (level.canonical_side, level.price)
+        if key in seen_level_keys:
+            raise PITDataContractErrorV1(
+                PITReasonCodeV1.PIT_CONFLICTING_DUPLICATE,
+                "duplicate price level exists on one canonical side",
+            )
+        seen_level_keys.add(key)
+    if type(payload) in {_PITBookSnapshotPayloadV2, _PITBookReplacementPayloadV2}:
+        bids = [
+            level.price for level in payload.levels if level.canonical_side == "BID"
+        ]
+        asks = [
+            level.price for level in payload.levels if level.canonical_side == "ASK"
+        ]
+        if bids and asks and max(bids) > min(asks):
+            raise PITDataContractErrorV1(
+                PITReasonCodeV1.PIT_BOOK_CROSSED_INVALID,
+                "candidate book is crossed",
+            )
+        yes_bids = [
+            level.price
+            for level in payload.levels
+            if level.canonical_side == "YES_BID"
+        ]
+        no_bids = [
+            level.price
+            for level in payload.levels
+            if level.canonical_side == "NO_BID"
+        ]
+        if yes_bids and no_bids and max(yes_bids) + max(no_bids) > 1:
+            raise PITDataContractErrorV1(
+                PITReasonCodeV1.PIT_BOOK_CROSSED_INVALID,
+                "candidate binary-outcome complement book is crossed",
+            )
+    if type(payload) is _PITBookReplacementPayloadV2:
+        lifecycle_type_valid = (
+            type(payload.source_lifecycle_state) is str
+            if candidate.wire_dialect == "POLYMARKET_RETAIL_CAMEL_STRING_V1"
+            else type(payload.source_lifecycle_state) is int
+            and payload.source_lifecycle_state >= 0
+        )
+        source_tick = Decimal(payload.order_price_min_tick_size_text)
+        if not lifecycle_type_valid:
+            raise PITDataContractErrorV1(
+                PITReasonCodeV1.PIT_SCHEMA_OR_WIRE_DIALECT_INVALID,
+                "Retail lifecycle enum type differs from the locked dialect",
+            )
+        if any(
+            level.price_increment.as_tuple() != source_tick.as_tuple()
+            for level in payload.levels
+        ):
+            raise PITDataContractErrorV1(
+                PITReasonCodeV1.PIT_TICK_GRID_INVALID,
+                "Retail payload levels differ from the retained per-market tick",
+            )
+        is_rest = candidate.channel in {"REST_BOOK", "/v1/markets/{slug}/book"}
+        expected_surface = (
+            "POLYMARKET_RETAIL_REST_COMPLETE_BOOK_CURRENT_STATE"
+            if is_rest
+            else "POLYMARKET_RETAIL_WEBSOCKET_TOP_LEVEL_CURRENT_STATE"
+        )
+        expected_depth = (
+            PITDepthClassV2.COMPLETE_PROVIDER_SNAPSHOT
+            if is_rest
+            else PITDepthClassV2.PROVIDER_PUBLISHED_TOP_LEVELS_CURRENT_STATE_FRAME
+        )
+        if (
+            payload.surface_class != expected_surface
+            or candidate.depth_class is not expected_depth
+        ):
+            raise PITDataContractErrorV1(
+                PITReasonCodeV1.PIT_TOP_LEVEL_DEPTH_ONLY,
+                "Retail surface, payload depth claim, and channel do not agree",
+            )
+
+
+def validate_pit_ingest_record_v2(
+    record: object,
+    *,
+    contract: SelectedPITPublicDataContractV2 | None = None,
+) -> object:
+    """Validate one exact PIT record type and return the unchanged typed record."""
+
+    record_type = type(record)
+    if record_type is SelectedPITPublicDataContractV2:
+        if contract is not None and record is not contract:
+            raise PITDataContractErrorV1(
+                PITReasonCodeV1.PIT_CONFLICTING_DUPLICATE,
+                "contract validation argument differs from record",
+            )
+        return record
+    if record_type is PITSourceDependencyV2:
+        resolved = _resolve_pit_source_dependency_v2(
+            record.profile_id,
+            record.event_kind,
+            record.access_class,
+        )
+        if resolved != record:
+            raise PITDataContractErrorV1(
+                PITReasonCodeV1.PIT_SOURCE_CURRENTIZATION_STALE,
+                "source dependency differs from canonical selected row",
+            )
+        return record
+    if record_type is PITReadRequestV1:
+        if contract is None or type(contract) is not SelectedPITPublicDataContractV2:
+            raise PITDataContractErrorV1(
+                PITReasonCodeV1.PIT_SOURCE_CURRENTIZATION_STALE,
+                "request validation requires exact selected contract",
+            )
+        dependency = next(
+            (
+                row
+                for row in (
+                    _resolve_pit_source_dependency_v2(
+                        record.profile_id,
+                        record.event_kind,
+                        record.access_class,
+                    ),
+                )
+                if row.dependency_id == record.source_dependency_ref
+            ),
+            None,
+        )
+        expected_request_id = (
+            f"S1-PIT-READ::{record.profile_id.value}::"
+            f"{record.event_kind.value}::{record.access_class.value}"
+        )
+        if record.profile_id is not contract.profile_id:
+            raise PITDataContractErrorV1(
+                PITReasonCodeV1.PIT_SCOPE_NOT_SELECTED,
+                "request profile differs from selected contract",
+            )
+        if record.source_contract_version != contract.source_contract_version:
+            raise PITDataContractErrorV1(
+                PITReasonCodeV1.PIT_SOURCE_CURRENTIZATION_STALE,
+                "request source-contract version differs from selected contract",
+            )
+        if (
+            dependency is None
+            or record.request_id != expected_request_id
+            or record.source_dependency_ref != dependency.dependency_id
+            or record.host != dependency.host
+            or record.path_or_channel != dependency.path_or_channel
+            or record.read_action is not dependency.read_action
+            or record.credential_alias_required
+            is not dependency.credential_alias_required
+        ):
+            raise PITDataContractErrorV1(
+                PITReasonCodeV1.PIT_ENDPOINT_NOT_ALLOWLISTED,
+                "request does not equal its canonical source dependency",
+            )
+        return record
+    if record_type is PITRawFrameV1:
+        if contract is None or type(contract) is not SelectedPITPublicDataContractV2:
+            raise PITDataContractErrorV1(
+                PITReasonCodeV1.PIT_SOURCE_CURRENTIZATION_STALE,
+                "raw-frame validation requires exact selected contract",
+            )
+        if (
+            record.profile_id is not contract.profile_id
+            or record.source_contract_refs != (contract.contract_id,)
+        ):
+            raise PITDataContractErrorV1(
+                PITReasonCodeV1.PIT_SOURCE_CURRENTIZATION_STALE,
+                "raw frame does not bind selected contract",
+            )
+        if record.profile_id is Stage1VenueProfileIdV1.POLYMARKET_US_RETAIL_DIRECT:
+            dialect_valid = record.wire_dialect in {
+                "POLYMARKET_RETAIL_CAMEL_STRING_V1",
+                "POLYMARKET_RETAIL_SNAKE_NUMERIC_V1",
+            }
+        else:
+            dialect_valid = record.wire_dialect == contract.wire_dialect_policy
+        allowed_surfaces = set(contract.allowed_channels) | set(contract.allowed_paths)
+        if record.profile_id is Stage1VenueProfileIdV1.POLYMARKET_US_RETAIL_DIRECT:
+            allowed_surfaces.add("REST_BOOK")
+        if not dialect_valid or record.channel not in allowed_surfaces:
+            raise PITDataContractErrorV1(
+                PITReasonCodeV1.PIT_SCHEMA_OR_WIRE_DIALECT_INVALID,
+                "raw-frame wire dialect or surface differs from selected contract",
+            )
+        _pit_frame_tree(record)
+        return record
+    if record_type is PITCanonicalEventCandidateV2:
+        if contract is None or type(contract) is not SelectedPITPublicDataContractV2:
+            raise PITDataContractErrorV1(
+                PITReasonCodeV1.PIT_SOURCE_CURRENTIZATION_STALE,
+                "candidate validation requires exact selected contract",
+            )
+        _pit_validate_candidate_against_contract(record, contract)
+        return record
+    if record_type is PITCanonicalEventV2:
+        if contract is None or type(contract) is not SelectedPITPublicDataContractV2:
+            raise PITDataContractErrorV1(
+                PITReasonCodeV1.PIT_SOURCE_CURRENTIZATION_STALE,
+                "final-event validation requires exact selected contract",
+            )
+        validate_pit_clock_set_v3(
+            record.clocks,
+            receipt_id=f"CLOCK-VALIDATION::{record.event_record_id}",
+            requires_provider_publication_time=False,
+            provider_publication_time_is_source_proven=False,
+        )
+        if record.event_disposition.value != "COMMITTED":
+            raise PITDataContractErrorV1(
+                PITReasonCodeV1.PIT_DURABLE_COMMIT_INCOMPLETE,
+                "only committed final events enter admitted event custody",
+            )
+        _pit_validate_candidate_against_contract(
+            PITCanonicalEventCandidateV2(
+                event_record_id=record.event_record_id,
+                profile_id=record.profile_id,
+                market_id=record.market_id,
+                instrument_id=record.instrument_id,
+                channel=record.channel,
+                connection_epoch=record.connection_epoch,
+                capture_session_id=record.capture_session_id,
+                event_kind=record.event_kind,
+                schema_version=record.schema_version,
+                wire_dialect=record.wire_dialect,
+                source_currentization_version=record.source_currentization_version,
+                provider_sequence_start_or_none=(
+                    record.provider_sequence_start_or_none
+                ),
+                provider_sequence_end_or_none=record.provider_sequence_end_or_none,
+                provider_trade_id_or_none=record.provider_trade_id_or_none,
+                provider_subscription_id_or_none=(
+                    record.provider_subscription_id_or_none
+                ),
+                payload=record.payload,
+                depth_class=record.depth_class,
+                provider_event_time_utc_or_none=(
+                    record.clocks.provider_event_time_utc_or_none
+                ),
+                provider_publication_time_utc_or_none=(
+                    record.clocks.provider_publication_time_utc_or_none
+                ),
+                qtt_received_at_utc=record.clocks.qtt_received_at_utc,
+                qtt_received_monotonic_ns=record.clocks.qtt_received_monotonic_ns,
+                qtt_parse_completed_at_utc=(
+                    record.clocks.qtt_parse_completed_at_utc
+                ),
+                qtt_parse_completed_monotonic_ns=(
+                    record.clocks.qtt_parse_completed_monotonic_ns
+                ),
+                process_epoch_id=record.clocks.process_epoch_id,
+                monotonic_clock_id=record.clocks.monotonic_clock_id,
+                wall_clock_source_id=record.clocks.wall_clock_source_id,
+                clock_quality_receipt_ref=(
+                    record.clocks.clock_quality_receipt_ref
+                ),
+                wall_clock_uncertainty_ns=record.clocks.wall_clock_uncertainty_ns,
+                source_receipt_ref=record.source_receipt_ref,
+                rights_receipt_ref=record.rights_receipt_ref,
+                raw_frame_ref=f"FINAL-EVENT-VALIDATION::{record.event_record_id}",
+                no_private_state_authority=record.no_private_state_authority,
+                no_order_authority=record.no_order_authority,
+                no_profit_claim=record.no_profit_claim,
+                no_qpu_effect=record.no_qpu_effect,
+                no_llm_effect=record.no_llm_effect,
+                no_effect_flags=record.no_effect_flags,
+            ),
+            contract,
+        )
+        return record
+    if record_type in {PITInputCapabilityV2, CaptureAndGapReceiptV2}:
+        return record
+    raise PITDataContractErrorV1(
+        PITReasonCodeV1.PIT_SCHEMA_OR_WIRE_DIALECT_INVALID,
+        f"unsupported exact PIT ingest record type: {record_type.__name__}",
+    )
+
+
+def ingest_pit_frame_v2(
+    dispatcher: PITMarketDataIngestDispatcherV2,
+    frame: PITRawFrameV1,
+    *,
+    event_kind: PITEventKindV2,
+    parse_completed_at_utc: datetime,
+    parse_completed_monotonic_ns: int,
+    price_increment_text: str,
+    price_origin_text: str,
+    quantity_increment_text_or_none: str | None,
+    explicit_pre_data_subscription_error: bool = False,
+) -> PITCanonicalEventCandidateV2:
+    if type(dispatcher) is not PITMarketDataIngestDispatcherV2 or type(
+        frame
+    ) is not PITRawFrameV1:
+        raise PITDataContractErrorV1(
+            PITReasonCodeV1.PIT_SCHEMA_OR_WIRE_DIALECT_INVALID,
+            "ingest requires exact dispatcher and raw frame types",
+        )
+    try:
+        contract = dispatcher._contracts[frame.profile_id]
+    except KeyError as exc:
+        raise PITDataContractErrorV1(
+            PITReasonCodeV1.PIT_SCOPE_NOT_SELECTED,
+            "raw frame profile has no selected dispatcher contract",
+        ) from exc
+    validate_pit_ingest_record_v2(frame, contract=contract)
+    if frame.profile_id is Stage1VenueProfileIdV1.POLYMARKET_US_RETAIL_DIRECT:
+        _pit_validate_polymarket_dialect_transition(
+            dispatcher,
+            frame,
+            explicit_pre_data_subscription_error=(
+                explicit_pre_data_subscription_error
+            ),
+        )
+    elif explicit_pre_data_subscription_error:
+        raise PITDataContractErrorV1(
+            PITReasonCodeV1.PIT_SCHEMA_OR_WIRE_DIALECT_INVALID,
+            "dialect fallback authorization applies only to Retail profile",
+        )
+    candidate = _decode_pit_frame_v2(
+        contract,
+        frame,
+        event_kind=event_kind,
+        parse_completed_at_utc=parse_completed_at_utc,
+        parse_completed_monotonic_ns=parse_completed_monotonic_ns,
+        price_increment_text=price_increment_text,
+        price_origin_text=price_origin_text,
+        quantity_increment_text_or_none=quantity_increment_text_or_none,
+    )
+    validate_pit_ingest_record_v2(candidate, contract=contract)
+    if frame.profile_id is Stage1VenueProfileIdV1.POLYMARKET_US_RETAIL_DIRECT:
+        dispatcher._polymarket_data_seen_by_capture[frame.capture_session_id] = True
+    return candidate
