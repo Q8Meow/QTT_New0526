@@ -1,5 +1,27 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$defs": {
+    "noEffectFlagsV1": {
+      "additionalProperties": false,
+      "properties": {
+        "provider_connection_allowed": {"const": false},
+        "private_state_read_allowed": {"const": false},
+        "replay_or_paper_execution_allowed": {"const": false},
+        "llm_inference_allowed": {"const": false},
+        "qpu_execution_allowed": {"const": false},
+        "mode_or_allow_activation_allowed": {"const": false},
+        "order_release_allowed": {"const": false},
+        "capital_mutation_allowed": {"const": false}
+      },
+      "required": [
+        "provider_connection_allowed", "private_state_read_allowed",
+        "replay_or_paper_execution_allowed", "llm_inference_allowed",
+        "qpu_execution_allowed", "mode_or_allow_activation_allowed",
+        "order_release_allowed", "capital_mutation_allowed"
+      ],
+      "type": "object"
+    }
+  },
   "additionalProperties": false,
   "properties": {
     "accepted_source_packet_ref": {
@@ -177,7 +199,7 @@
       "const": false
     },
     "record_type": {
-      "const": "MARKET_DATA_SOURCE_DEPENDENCY"
+      "enum": ["MARKET_DATA_SOURCE_DEPENDENCY", "PIT_MARKET_DATA_SOURCE_DEPENDENCY"]
     },
     "replay_result_created": {
       "const": false
@@ -195,7 +217,7 @@
       "const": false
     },
     "schema_version": {
-      "const": "PR132_MARKET_DATA_INGEST_SCHEMA_V1"
+      "enum": ["PR132_MARKET_DATA_INGEST_SCHEMA_V1", "PIT_MARKET_DATA_SOURCE_DEPENDENCY_V2"]
     },
     "scope_id": {
       "enum": [
@@ -238,9 +260,32 @@
     },
     "websocket_client_created": {
       "const": false
-    }
+    },
+    "profile_id": {"enum": ["GEMINI_TITAN_DIRECT", "POLYMARKET_US_RETAIL_DIRECT", "KALSHI_US_DCM_DIRECT"]},
+    "event_kind": {"enum": ["CATALOG", "LIFECYCLE", "BOOK_SNAPSHOT", "BOOK_DELTA", "BOOK_REPLACEMENT", "BBO", "TRADE", "SETTLEMENT", "REFERENCE_PRICE", "HEARTBEAT", "SOURCE_STATUS"]},
+    "access_class": {"enum": ["PUBLIC_UNAUTHENTICATED_READ", "AUTHENTICATED_PUBLIC_MARKET_DATA_READ"]},
+    "host": {"type": "string", "minLength": 1},
+    "path_or_channel": {"type": "string", "minLength": 1},
+    "read_action": {"enum": ["GET", "WEBSOCKET_SUBSCRIBE", "WEBSOCKET_UNSUBSCRIBE", "WEBSOCKET_RECOVERY", "WEBSOCKET_PONG"]},
+    "wire_dialect": {"type": "string", "minLength": 1},
+    "depth_class": {"enum": ["COMPLETE_PROVIDER_SNAPSHOT", "INCREMENTAL_FROM_COMPLETE_ANCHOR", "PROVIDER_PUBLISHED_TOP_LEVELS_CURRENT_STATE_FRAME", "BBO_ONLY"]},
+    "sequence_model": {"type": "string", "minLength": 1},
+    "recovery_model": {"type": "string", "minLength": 1},
+    "rights_receipt_required": {"const": true},
+    "source_currentization_receipt_required": {"const": true},
+    "credential_alias_required": {"type": "boolean"},
+    "no_private_state": {"const": true},
+    "no_write": {"const": true},
+    "no_effect_flags": {"$ref": "#/$defs/noEffectFlagsV1"}
   },
-  "required": [
+  "required": ["schema_version", "record_type", "created_by", "authority_class"],
+  "oneOf": [
+    {
+      "properties": {
+        "schema_version": {"const": "PR132_MARKET_DATA_INGEST_SCHEMA_V1"},
+        "record_type": {"const": "MARKET_DATA_SOURCE_DEPENDENCY"}
+      },
+      "required": [
     "schema_version",
     "record_type",
     "created_by",
@@ -299,6 +344,80 @@
     "revalidation_state_ref",
     "live_use_allowed",
     "connector_semantic_binding_created"
+      ]
+    },
+    {
+      "properties": {
+        "schema_version": {"const": "PIT_MARKET_DATA_SOURCE_DEPENDENCY_V2"},
+        "record_type": {"const": "PIT_MARKET_DATA_SOURCE_DEPENDENCY"}
+      },
+      "allOf": [
+        {
+          "if": {"properties": {"access_class": {"const": "AUTHENTICATED_PUBLIC_MARKET_DATA_READ"}}, "required": ["access_class"]},
+          "then": {"properties": {"credential_alias_required": {"const": true}}},
+          "else": {"properties": {"credential_alias_required": {"const": false}}}
+        },
+        {
+          "if": {"properties": {"profile_id": {"const": "GEMINI_TITAN_DIRECT"}}, "required": ["profile_id"]},
+          "then": {
+            "properties": {
+              "access_class": {"const": "PUBLIC_UNAUTHENTICATED_READ"},
+              "event_kind": {"enum": ["CATALOG", "LIFECYCLE", "BOOK_SNAPSHOT", "BOOK_DELTA", "BBO", "TRADE", "SETTLEMENT", "SOURCE_STATUS"]},
+              "host": {"enum": ["https://api.gemini.com", "wss://ws.gemini.com?snapshot=-1"]},
+              "wire_dialect": {"const": "GEMINI_TITAN_DIFFERENTIAL_DEPTH_V1"}
+            }
+          }
+        },
+        {
+          "if": {"properties": {"profile_id": {"const": "POLYMARKET_US_RETAIL_DIRECT"}}, "required": ["profile_id"]},
+          "then": {
+            "properties": {
+              "event_kind": {"enum": ["CATALOG", "LIFECYCLE", "BOOK_REPLACEMENT", "BBO", "TRADE", "SETTLEMENT", "HEARTBEAT", "SOURCE_STATUS"]},
+              "host": {"enum": ["https://gateway.polymarket.us", "wss://api.polymarket.us/v1/ws/markets"]},
+              "wire_dialect": {"const": "CAMEL_CASE_STRING_ENUM_THEN_ONE_EXPLICIT_PRE_DATA_ERROR_FALLBACK_TO_SNAKE_CASE_NUMERIC_ENUM"}
+            }
+          }
+        },
+        {
+          "if": {"properties": {"profile_id": {"const": "KALSHI_US_DCM_DIRECT"}}, "required": ["profile_id"]},
+          "then": {
+            "properties": {
+              "event_kind": {"enum": ["CATALOG", "LIFECYCLE", "BOOK_SNAPSHOT", "BOOK_DELTA", "TRADE", "SETTLEMENT", "HEARTBEAT", "SOURCE_STATUS"]},
+              "host": {"enum": ["https://external-api.kalshi.com/trade-api/v2", "wss://external-api-ws.kalshi.com/trade-api/ws/v2"]},
+              "wire_dialect": {"const": "KALSHI_TRADE_API_WS_V2_FIXED_POINT"}
+            }
+          }
+        },
+        {
+          "if": {"properties": {"event_kind": {"const": "BOOK_SNAPSHOT"}}, "required": ["event_kind"]},
+          "then": {"properties": {"depth_class": {"const": "COMPLETE_PROVIDER_SNAPSHOT"}}}
+        },
+        {
+          "if": {"properties": {"event_kind": {"const": "BOOK_DELTA"}}, "required": ["event_kind"]},
+          "then": {"properties": {"depth_class": {"const": "INCREMENTAL_FROM_COMPLETE_ANCHOR"}}}
+        },
+        {
+          "if": {"properties": {"event_kind": {"const": "BBO"}}, "required": ["event_kind"]},
+          "then": {"properties": {"depth_class": {"const": "BBO_ONLY"}}}
+        },
+        {
+          "if": {"properties": {"event_kind": {"const": "BOOK_REPLACEMENT"}, "read_action": {"const": "GET"}}, "required": ["event_kind", "read_action"]},
+          "then": {"properties": {"depth_class": {"const": "COMPLETE_PROVIDER_SNAPSHOT"}}}
+        },
+        {
+          "if": {"properties": {"event_kind": {"const": "BOOK_REPLACEMENT"}, "read_action": {"const": "WEBSOCKET_SUBSCRIBE"}}, "required": ["event_kind", "read_action"]},
+          "then": {"properties": {"depth_class": {"const": "PROVIDER_PUBLISHED_TOP_LEVELS_CURRENT_STATE_FRAME"}}}
+        }
+      ],
+      "required": [
+        "schema_version", "record_type", "created_by", "authority_class",
+        "dependency_id", "profile_id", "event_kind", "access_class", "host",
+        "path_or_channel", "read_action", "wire_dialect", "depth_class",
+        "sequence_model", "recovery_model", "rights_receipt_required",
+        "source_currentization_receipt_required", "credential_alias_required",
+        "no_private_state", "no_write", "no_effect_flags"
+      ]
+    }
   ],
   "title": "PR132 Market Data Source Dependency",
   "type": "object"

@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, fields as dataclass_fields
-from datetime import datetime
+from datetime import UTC, datetime
 from decimal import Decimal
 from enum import StrEnum
 import json
@@ -11,7 +11,7 @@ from types import MappingProxyType
 from typing import Mapping
 
 from .context import exact_decimal, parse_utc
-from .errors import ContractValidationError, ReasonCode
+from .errors import ContractValidationError, ReasonCode, SerializationSafetyError
 from .models import (
     ComputationExecutionReceiptV1,
     ModeSnapshotCandidateProposalResultV1,
@@ -25,6 +25,19 @@ from .models import (
     TypedValueV1,
 )
 from .serialization import deterministic_json, safe_json_loads
+from .point_in_time import (
+    PITAnchorStateV1,
+    PITAvailabilityStateV2,
+    PITContinuityStateV3,
+    PITDataContractErrorV1,
+    PITDepthClassV2,
+    PITEventDispositionV1,
+    PITEventKindV2,
+    PITIntegrityStateV1,
+    PITReasonCodeV1,
+    PITTransportStateV1,
+)
+from .stage1_launch_graph import Stage1VenueProfileIdV1
 
 
 def _required(value: object, name: str) -> None:
@@ -75,6 +88,12 @@ class EconomicRecordTypeV1(StrEnum):
     EXECUTION_CUSTODY = "EXECUTION_CUSTODY"
     MODE_SNAPSHOT_CONTROL = "MODE_SNAPSHOT_CONTROL"
     ST12F_EVIDENCE_CONTROL = "ST12F_EVIDENCE_CONTROL"
+    PIT_COMMIT_INTENT = "PIT_COMMIT_INTENT"
+    PIT_COMMIT_COMPLETION = "PIT_COMMIT_COMPLETION"
+    PIT_AVAILABILITY = "PIT_AVAILABILITY"
+    PIT_CANONICAL_EVENT = "PIT_CANONICAL_EVENT"
+    PIT_CAPTURE_AND_GAP = "PIT_CAPTURE_AND_GAP"
+    PIT_CHECKPOINT = "PIT_CHECKPOINT"
 
 
 class ModeSnapshotControlClassV1(StrEnum):
@@ -471,6 +490,30 @@ ECONOMIC_RECORD_PAYLOAD_CLASS: Mapping[EconomicRecordTypeV1, tuple[str, str]] = 
         EconomicRecordTypeV1.ST12F_EVIDENCE_CONTROL: (
             "receipts",
             "ST12FEvidenceControlReceiptRecordV1",
+        ),
+        EconomicRecordTypeV1.PIT_COMMIT_INTENT: (
+            "receipts",
+            "PITCommitIntentV1",
+        ),
+        EconomicRecordTypeV1.PIT_COMMIT_COMPLETION: (
+            "receipts",
+            "PITCommitCompletionV1",
+        ),
+        EconomicRecordTypeV1.PIT_AVAILABILITY: (
+            "receipts",
+            "PITAvailabilityReceiptV1",
+        ),
+        EconomicRecordTypeV1.PIT_CANONICAL_EVENT: (
+            "receipts",
+            "PITCanonicalEventReceiptRecordV2",
+        ),
+        EconomicRecordTypeV1.PIT_CAPTURE_AND_GAP: (
+            "receipts",
+            "CaptureAndGapReceiptV2",
+        ),
+        EconomicRecordTypeV1.PIT_CHECKPOINT: (
+            "receipts",
+            "PITCheckpointV1",
         ),
     }
 )
@@ -1889,4 +1932,1234 @@ def serialize_st12h_contract_v1(value: object, *, binding_id: str) -> str:
         allow_nan=False,
         separators=(",", ":"),
         sort_keys=False,
+    )
+
+
+class PITCommitEvidenceClassV1(StrEnum):
+    STORAGE_ASSIGNED_ATOMIC_COMMIT_EVIDENCE = (
+        "STORAGE_ASSIGNED_ATOMIC_COMMIT_EVIDENCE"
+    )
+    COORDINATOR_POST_RETURN_UPPER_BOUND_REFERENCE_ONLY = (
+        "COORDINATOR_POST_RETURN_UPPER_BOUND_REFERENCE_ONLY"
+    )
+
+
+def _pit_receipt_text(value: object, name: str) -> str:
+    if (
+        type(value) is not str
+        or not value
+        or value != value.strip()
+        or any(ord(character) < 0x20 for character in value)
+    ):
+        raise PITDataContractErrorV1(
+            PITReasonCodeV1.PIT_SCHEMA_OR_WIRE_DIALECT_INVALID,
+            f"{name} must be canonical nonempty text",
+        )
+    return value
+
+
+def _pit_receipt_utc(value: object, name: str) -> datetime:
+    if (
+        type(value) is not datetime
+        or value.tzinfo is None
+        or value.utcoffset() is None
+        or value.utcoffset().total_seconds() != 0
+    ):
+        raise PITDataContractErrorV1(
+            PITReasonCodeV1.PIT_CLOCK_DOMAIN_MISMATCH,
+            f"{name} must be an aware UTC datetime",
+        )
+    return value.astimezone(UTC)
+
+
+def _pit_receipt_text_tuple(
+    value: object,
+    name: str,
+    *,
+    allow_empty: bool = True,
+) -> tuple[str, ...]:
+    if type(value) is not tuple or (not allow_empty and not value):
+        raise PITDataContractErrorV1(
+            PITReasonCodeV1.PIT_SCHEMA_OR_WIRE_DIALECT_INVALID,
+            f"{name} must be an exact tuple",
+        )
+    result = tuple(_pit_receipt_text(item, name) for item in value)
+    if len(result) != len(set(result)):
+        raise PITDataContractErrorV1(
+            PITReasonCodeV1.PIT_CONFLICTING_DUPLICATE,
+            f"{name} contains duplicate identities",
+        )
+    return result
+
+
+def _pit_receipt_ordinal(value: object, name: str, *, positive: bool) -> int:
+    if type(value) is not int or value < (1 if positive else 0):
+        raise PITDataContractErrorV1(
+            PITReasonCodeV1.PIT_SCHEMA_OR_WIRE_DIALECT_INVALID,
+            f"{name} must be an exact {'positive' if positive else 'nonnegative'} integer",
+        )
+    return value
+
+
+def _pit_receipt_profile(value: object) -> Stage1VenueProfileIdV1:
+    if type(value) is not Stage1VenueProfileIdV1 or value not in {
+        Stage1VenueProfileIdV1.GEMINI_TITAN_DIRECT,
+        Stage1VenueProfileIdV1.POLYMARKET_US_RETAIL_DIRECT,
+        Stage1VenueProfileIdV1.KALSHI_US_DCM_DIRECT,
+    }:
+        raise PITDataContractErrorV1(
+            PITReasonCodeV1.PIT_SCOPE_NOT_SELECTED,
+            "profile_id must be an exact selected Stage1VenueProfileIdV1",
+        )
+    return value
+
+
+def _pit_receipt_no_effects(value: object) -> None:
+    if type(value) is not NoEffectFlagsV1 or value != NO_EFFECTS_V1:
+        raise PITDataContractErrorV1(
+            PITReasonCodeV1.PIT_EFFECT_AUTHORITY_FORBIDDEN,
+            "PIT receipt must carry the shared exact NO_EFFECTS_V1",
+        )
+
+
+@dataclass(frozen=True, slots=True)
+class PITStorageCommitEvidenceV1:
+    adapter_identity: str
+    transaction_identity: str
+    committed_record_refs: tuple[str, ...]
+    commit_evidence_class: PITCommitEvidenceClassV1
+    storage_commit_time_utc_or_none: datetime | None
+    backend_identity_or_none: str | None
+    backend_sequence_or_revision_or_none: int | str | None
+    coordinator_post_return_observed_at_utc: datetime
+    no_effect_flags: NoEffectFlagsV1 = NO_EFFECTS_V1
+
+    def __post_init__(self) -> None:
+        _pit_receipt_text(self.adapter_identity, "adapter_identity")
+        _pit_receipt_text(self.transaction_identity, "transaction_identity")
+        _pit_receipt_text_tuple(
+            self.committed_record_refs,
+            "committed_record_refs",
+            allow_empty=False,
+        )
+        if type(self.commit_evidence_class) is not PITCommitEvidenceClassV1:
+            raise PITDataContractErrorV1(
+                PITReasonCodeV1.PIT_DURABLE_COMMIT_INCOMPLETE,
+                "commit_evidence_class must be exact PITCommitEvidenceClassV1",
+            )
+        observed = _pit_receipt_utc(
+            self.coordinator_post_return_observed_at_utc,
+            "coordinator_post_return_observed_at_utc",
+        )
+        object.__setattr__(
+            self,
+            "coordinator_post_return_observed_at_utc",
+            observed,
+        )
+        if self.storage_commit_time_utc_or_none is not None:
+            object.__setattr__(
+                self,
+                "storage_commit_time_utc_or_none",
+                _pit_receipt_utc(
+                    self.storage_commit_time_utc_or_none,
+                    "storage_commit_time_utc_or_none",
+                ),
+            )
+        if self.backend_identity_or_none is not None:
+            _pit_receipt_text(self.backend_identity_or_none, "backend_identity_or_none")
+        if isinstance(self.backend_sequence_or_revision_or_none, bool):
+            raise PITDataContractErrorV1(
+                PITReasonCodeV1.PIT_DURABLE_COMMIT_INCOMPLETE,
+                "backend sequence/revision cannot be Boolean",
+            )
+        if self.backend_sequence_or_revision_or_none is not None and type(
+            self.backend_sequence_or_revision_or_none
+        ) not in {int, str}:
+            raise PITDataContractErrorV1(
+                PITReasonCodeV1.PIT_DURABLE_COMMIT_INCOMPLETE,
+                "backend sequence/revision must be exact integer, text, or absent",
+            )
+        if type(self.backend_sequence_or_revision_or_none) is str:
+            _pit_receipt_text(
+                self.backend_sequence_or_revision_or_none,
+                "backend_sequence_or_revision_or_none",
+            )
+        if (
+            type(self.backend_sequence_or_revision_or_none) is int
+            and self.backend_sequence_or_revision_or_none < 0
+        ):
+            raise PITDataContractErrorV1(
+                PITReasonCodeV1.PIT_DURABLE_COMMIT_INCOMPLETE,
+                "backend sequence/revision integer must be nonnegative",
+            )
+        if self.commit_evidence_class is (
+            PITCommitEvidenceClassV1.STORAGE_ASSIGNED_ATOMIC_COMMIT_EVIDENCE
+        ):
+            if (
+                self.storage_commit_time_utc_or_none is None
+                or self.backend_identity_or_none is None
+                or self.backend_sequence_or_revision_or_none is None
+            ):
+                raise PITDataContractErrorV1(
+                    PITReasonCodeV1.PIT_DURABLE_COMMIT_INCOMPLETE,
+                    "storage-assigned evidence requires storage time, backend identity, and backend revision",
+                )
+            if self.storage_commit_time_utc_or_none > observed:
+                raise PITDataContractErrorV1(
+                    PITReasonCodeV1.PIT_CLOCK_DOMAIN_MISMATCH,
+                    "storage commit time cannot follow post-return observation",
+                )
+        elif (
+            self.storage_commit_time_utc_or_none is not None
+            or self.backend_identity_or_none is not None
+            or self.backend_sequence_or_revision_or_none is not None
+        ):
+            raise PITDataContractErrorV1(
+                PITReasonCodeV1.PIT_DURABLE_COMMIT_INCOMPLETE,
+                "coordinator-only evidence cannot claim backend-assigned fields",
+            )
+        _pit_receipt_no_effects(self.no_effect_flags)
+
+
+@dataclass(frozen=True, slots=True)
+class PITCommitIntentV1:
+    intent_id: str
+    profile_id: Stage1VenueProfileIdV1
+    partition_id: str
+    candidate_event_record_id: str
+    capture_session_id: str
+    connection_epoch: str
+    created_at_utc: datetime
+    candidate_ordinal_allocated: bool
+    validation_receipt_ref: str
+    no_effect_flags: NoEffectFlagsV1 = NO_EFFECTS_V1
+
+    def __post_init__(self) -> None:
+        _pit_receipt_profile(self.profile_id)
+        for name in (
+            "intent_id",
+            "partition_id",
+            "candidate_event_record_id",
+            "capture_session_id",
+            "connection_epoch",
+            "validation_receipt_ref",
+        ):
+            _pit_receipt_text(getattr(self, name), name)
+        object.__setattr__(
+            self, "created_at_utc", _pit_receipt_utc(self.created_at_utc, "created_at_utc")
+        )
+        if type(self.candidate_ordinal_allocated) is not bool or self.candidate_ordinal_allocated:
+            raise PITDataContractErrorV1(
+                PITReasonCodeV1.PIT_DURABLE_COMMIT_INCOMPLETE,
+                "a commit intent must not allocate a committed ordinal",
+            )
+        _pit_receipt_no_effects(self.no_effect_flags)
+
+
+@dataclass(frozen=True, slots=True)
+class PITCanonicalEventReceiptRecordV2:
+    record_id: str
+    event_record_id: str
+    schema_version: str
+    profile_id: Stage1VenueProfileIdV1
+    partition_id: str
+    capture_session_id: str
+    connection_epoch: str
+    committed_event_ordinal: int
+    canonical_event_json: str
+    validation_receipt_ref: str
+    prior_event_ref_or_none: str | None
+    checkpoint_ref_or_none: str | None
+    source_receipt_ref: str
+    rights_receipt_ref: str
+    commit_intent_ref: str
+    no_effect_flags: NoEffectFlagsV1 = NO_EFFECTS_V1
+
+    def __post_init__(self) -> None:
+        if self.schema_version != "PIT_CANONICAL_EVENT_RECEIPT_RECORD_V2":
+            raise PITDataContractErrorV1(
+                PITReasonCodeV1.PIT_SCHEMA_OR_WIRE_DIALECT_INVALID,
+                "canonical event receipt schema version is not exact V2",
+            )
+        _pit_receipt_profile(self.profile_id)
+        for name in (
+            "record_id",
+            "event_record_id",
+            "schema_version",
+            "partition_id",
+            "capture_session_id",
+            "connection_epoch",
+            "validation_receipt_ref",
+            "source_receipt_ref",
+            "rights_receipt_ref",
+            "commit_intent_ref",
+        ):
+            _pit_receipt_text(getattr(self, name), name)
+        for name in ("prior_event_ref_or_none", "checkpoint_ref_or_none"):
+            value = getattr(self, name)
+            if value is not None:
+                _pit_receipt_text(value, name)
+        _pit_receipt_ordinal(
+            self.committed_event_ordinal,
+            "committed_event_ordinal",
+            positive=True,
+        )
+        _pit_receipt_text(self.canonical_event_json, "canonical_event_json")
+        try:
+            loaded = safe_json_loads(self.canonical_event_json)
+        except SerializationSafetyError as exc:
+            raise PITDataContractErrorV1(
+                PITReasonCodeV1.PIT_SCHEMA_OR_WIRE_DIALECT_INVALID,
+                "canonical_event_json is not safe canonical JSON",
+            ) from exc
+        if type(loaded) is not dict or deterministic_json(loaded) != self.canonical_event_json:
+            raise PITDataContractErrorV1(
+                PITReasonCodeV1.PIT_SCHEMA_OR_WIRE_DIALECT_INVALID,
+                "canonical_event_json must be exact deterministic object JSON",
+            )
+        expected_event_keys = {
+            "record_type",
+            "schema_version",
+            "event_record_id",
+            "profile_id",
+            "market_id",
+            "instrument_id",
+            "channel",
+            "connection_epoch",
+            "capture_session_id",
+            "raw_frame_ref",
+            "committed_event_ordinal",
+            "event_kind",
+            "wire_dialect",
+            "source_currentization_version",
+            "provider_sequence_start_or_none",
+            "provider_sequence_end_or_none",
+            "provider_trade_id_or_none",
+            "provider_subscription_id_or_none",
+            "payload",
+            "depth_class",
+            "clocks",
+            "pre_state_ref_or_none",
+            "post_state_ref",
+            "event_disposition",
+            "failure_reason_or_none",
+            "rights_receipt_ref",
+            "source_receipt_ref",
+            "commit_completion_ref",
+            "prior_event_ref_or_none",
+            "checkpoint_ref_or_none",
+            "recovery_receipt_ref_or_none",
+            "commit_evidence_class",
+            "strategy_availability",
+            "strategy_unavailability_reason",
+            "no_private_state_authority",
+            "no_order_authority",
+            "no_profit_claim",
+            "no_qpu_effect",
+            "no_llm_effect",
+            "no_effect_flags",
+        }
+        if set(loaded) != expected_event_keys:
+            raise PITDataContractErrorV1(
+                PITReasonCodeV1.PIT_SCHEMA_OR_WIRE_DIALECT_INVALID,
+                "canonical_event_json key set is not exact",
+            )
+        clocks = loaded.get("clocks")
+        expected_clock_keys = {
+            "provider_event_time_utc_or_none",
+            "provider_publication_time_utc_or_none",
+            "qtt_received_at_utc",
+            "qtt_received_monotonic_ns",
+            "qtt_parse_completed_at_utc",
+            "qtt_parse_completed_monotonic_ns",
+            "durable_commit_completed_at_utc",
+            "durable_commit_completed_monotonic_ns",
+            "strategy_available_at_utc",
+            "strategy_available_monotonic_ns",
+            "revision_effective_time_utc_or_none",
+            "settlement_finality_time_utc_or_none",
+            "process_epoch_id",
+            "monotonic_clock_id",
+            "wall_clock_source_id",
+            "clock_quality_receipt_ref",
+            "wall_clock_uncertainty_ns",
+        }
+        if type(clocks) is not dict or set(clocks) != expected_clock_keys:
+            raise PITDataContractErrorV1(
+                PITReasonCodeV1.PIT_SCHEMA_OR_WIRE_DIALECT_INVALID,
+                "canonical_event_json clock key set is not exact",
+            )
+        for name in (
+            "market_id",
+            "instrument_id",
+            "channel",
+            "wire_dialect",
+            "source_currentization_version",
+            "post_state_ref",
+            "commit_completion_ref",
+            "raw_frame_ref",
+        ):
+            _pit_receipt_text(loaded[name], f"canonical_event_json.{name}")
+        for name in (
+            "provider_trade_id_or_none",
+            "provider_subscription_id_or_none",
+            "pre_state_ref_or_none",
+            "prior_event_ref_or_none",
+            "checkpoint_ref_or_none",
+            "recovery_receipt_ref_or_none",
+        ):
+            if loaded[name] is not None:
+                _pit_receipt_text(loaded[name], f"canonical_event_json.{name}")
+        try:
+            PITEventKindV2(loaded["event_kind"])
+            PITDepthClassV2(loaded["depth_class"])
+        except (TypeError, ValueError) as exc:
+            raise PITDataContractErrorV1(
+                PITReasonCodeV1.PIT_SCHEMA_OR_WIRE_DIALECT_INVALID,
+                "canonical_event_json event/depth discriminator is unknown",
+            ) from exc
+        sequence_values = (
+            loaded["provider_sequence_start_or_none"],
+            loaded["provider_sequence_end_or_none"],
+        )
+        if any(
+            value is not None and (type(value) is not int or value < 0)
+            for value in sequence_values
+        ) or ((sequence_values[0] is None) != (sequence_values[1] is None)):
+            raise PITDataContractErrorV1(
+                PITReasonCodeV1.PIT_SCHEMA_OR_WIRE_DIALECT_INVALID,
+                "canonical_event_json provider range has the wrong exact type",
+            )
+        if (
+            sequence_values[0] is not None
+            and sequence_values[0] > sequence_values[1]
+        ):
+            raise PITDataContractErrorV1(
+                PITReasonCodeV1.PIT_SEQUENCE_GAP,
+                "canonical_event_json provider range is reversed",
+            )
+        if type(loaded["payload"]) is not dict:
+            raise PITDataContractErrorV1(
+                PITReasonCodeV1.PIT_SCHEMA_OR_WIRE_DIALECT_INVALID,
+                "canonical_event_json payload must be an exact typed object",
+            )
+        _pit_serialized_optional_utc(
+            clocks["provider_event_time_utc_or_none"],
+            "canonical_event_json.provider_event_time_utc_or_none",
+        )
+        _pit_serialized_optional_utc(
+            clocks["revision_effective_time_utc_or_none"],
+            "canonical_event_json.revision_effective_time_utc_or_none",
+        )
+        _pit_serialized_optional_utc(
+            clocks["settlement_finality_time_utc_or_none"],
+            "canonical_event_json.settlement_finality_time_utc_or_none",
+        )
+        if (
+            clocks["provider_publication_time_utc_or_none"] is not None
+            or clocks["durable_commit_completed_at_utc"] is not None
+            or clocks["durable_commit_completed_monotonic_ns"] is not None
+            or clocks["strategy_available_at_utc"] is not None
+            or clocks["strategy_available_monotonic_ns"] is not None
+        ):
+            raise PITDataContractErrorV1(
+                PITReasonCodeV1.PIT_DURABLE_COMMIT_INCOMPLETE,
+                "reference event cannot claim unavailable commit/publication clocks",
+            )
+        _pit_serialized_utc(
+            clocks["qtt_received_at_utc"],
+            "canonical_event_json.qtt_received_at_utc",
+        )
+        _pit_serialized_utc(
+            clocks["qtt_parse_completed_at_utc"],
+            "canonical_event_json.qtt_parse_completed_at_utc",
+        )
+        for name in (
+            "qtt_received_monotonic_ns",
+            "qtt_parse_completed_monotonic_ns",
+            "wall_clock_uncertainty_ns",
+        ):
+            _pit_receipt_ordinal(
+                clocks[name],
+                f"canonical_event_json.{name}",
+                positive=False,
+            )
+        if (
+            clocks["qtt_parse_completed_monotonic_ns"]
+            < clocks["qtt_received_monotonic_ns"]
+        ):
+            raise PITDataContractErrorV1(
+                PITReasonCodeV1.PIT_CLOCK_DOMAIN_MISMATCH,
+                "canonical_event_json parse clock precedes receive clock",
+            )
+        for name in (
+            "process_epoch_id",
+            "monotonic_clock_id",
+            "wall_clock_source_id",
+            "clock_quality_receipt_ref",
+        ):
+            _pit_receipt_text(clocks[name], f"canonical_event_json.{name}")
+        if (
+            loaded["failure_reason_or_none"] is not None
+            or loaded["commit_evidence_class"]
+            != PITCommitEvidenceClassV1.COORDINATOR_POST_RETURN_UPPER_BOUND_REFERENCE_ONLY.value
+            or loaded["strategy_availability"] != "UNAVAILABLE"
+            or loaded["strategy_unavailability_reason"]
+            != PITReasonCodeV1.PIT_DURABLE_COMMIT_INCOMPLETE.value
+        ):
+            raise PITDataContractErrorV1(
+                PITReasonCodeV1.PIT_DURABLE_COMMIT_INCOMPLETE,
+                "reference event overstates completion or strategy availability",
+            )
+        for name in (
+            "no_private_state_authority",
+            "no_order_authority",
+            "no_profit_claim",
+            "no_qpu_effect",
+            "no_llm_effect",
+        ):
+            if loaded[name] is not True:
+                raise PITDataContractErrorV1(
+                    PITReasonCodeV1.PIT_EFFECT_AUTHORITY_FORBIDDEN,
+                    f"canonical_event_json.{name} must be exact true",
+                )
+        _pit_serialized_no_effects(loaded["no_effect_flags"])
+        if loaded.get("event_record_id") != self.event_record_id:
+            raise PITDataContractErrorV1(
+                PITReasonCodeV1.PIT_CONFLICTING_DUPLICATE,
+                "event JSON identity does not match the receipt identity",
+            )
+        if loaded.get("committed_event_ordinal") != self.committed_event_ordinal:
+            raise PITDataContractErrorV1(
+                PITReasonCodeV1.PIT_CONFLICTING_DUPLICATE,
+                "event JSON ordinal does not match the receipt ordinal",
+            )
+        expected_lineage = {
+            "record_type": "PIT_CANONICAL_EVENT_REFERENCE_COMPLETED_V2",
+            "schema_version": "PIT_CANONICAL_EVENT_V2",
+            "profile_id": self.profile_id.value,
+            "capture_session_id": self.capture_session_id,
+            "connection_epoch": self.connection_epoch,
+            "source_receipt_ref": self.source_receipt_ref,
+            "rights_receipt_ref": self.rights_receipt_ref,
+            "event_disposition": PITEventDispositionV1.COMMITTED.value,
+            "prior_event_ref_or_none": self.prior_event_ref_or_none,
+            "checkpoint_ref_or_none": self.checkpoint_ref_or_none,
+        }
+        if any(loaded.get(key) != value for key, value in expected_lineage.items()):
+            raise PITDataContractErrorV1(
+                PITReasonCodeV1.PIT_CONFLICTING_DUPLICATE,
+                "event JSON identity, version, disposition, or lineage differs from receipt",
+            )
+        _pit_receipt_no_effects(self.no_effect_flags)
+
+
+@dataclass(frozen=True, slots=True)
+class CaptureAndGapReceiptV2:
+    receipt_id: str
+    event_record_id: str
+    profile_id: Stage1VenueProfileIdV1
+    connection_epoch: str
+    provider_identity_or_none: str | None
+    pre_state_ref: str
+    post_state_ref: str
+    event_disposition: PITEventDispositionV1
+    continuity_result: PITContinuityStateV3
+    integrity_result: PITIntegrityStateV1
+    failure_reason_or_none: PITReasonCodeV1 | None
+    recovery_required: bool
+    commit_completion_ref_or_none: str | None
+    no_effect_flags: NoEffectFlagsV1 = NO_EFFECTS_V1
+
+    def __post_init__(self) -> None:
+        _pit_receipt_profile(self.profile_id)
+        for name in (
+            "receipt_id",
+            "event_record_id",
+            "connection_epoch",
+            "pre_state_ref",
+            "post_state_ref",
+        ):
+            _pit_receipt_text(getattr(self, name), name)
+        for name in ("provider_identity_or_none", "commit_completion_ref_or_none"):
+            value = getattr(self, name)
+            if value is not None:
+                _pit_receipt_text(value, name)
+        for name, enum_type in (
+            ("event_disposition", PITEventDispositionV1),
+            ("continuity_result", PITContinuityStateV3),
+            ("integrity_result", PITIntegrityStateV1),
+        ):
+            if type(getattr(self, name)) is not enum_type:
+                raise PITDataContractErrorV1(
+                    PITReasonCodeV1.PIT_SCHEMA_OR_WIRE_DIALECT_INVALID,
+                    f"{name} has the wrong exact enum type",
+                )
+        if self.failure_reason_or_none is not None and type(
+            self.failure_reason_or_none
+        ) is not PITReasonCodeV1:
+            raise PITDataContractErrorV1(
+                PITReasonCodeV1.PIT_SCHEMA_OR_WIRE_DIALECT_INVALID,
+                "failure_reason_or_none has the wrong exact enum type",
+            )
+        if type(self.recovery_required) is not bool:
+            raise PITDataContractErrorV1(
+                PITReasonCodeV1.PIT_SCHEMA_OR_WIRE_DIALECT_INVALID,
+                "recovery_required must be an exact boolean",
+            )
+        if self.event_disposition is PITEventDispositionV1.COMMITTED:
+            if self.failure_reason_or_none is not None or self.recovery_required:
+                raise PITDataContractErrorV1(
+                    PITReasonCodeV1.PIT_CONFLICTING_DUPLICATE,
+                    "a committed event cannot carry failure/recovery state",
+                )
+        elif self.failure_reason_or_none is None:
+            raise PITDataContractErrorV1(
+                PITReasonCodeV1.PIT_CAPABILITY_UNAVAILABLE,
+                "a noncommitted event requires a specific failure reason",
+            )
+        _pit_receipt_no_effects(self.no_effect_flags)
+
+
+@dataclass(frozen=True, slots=True)
+class PITCommitCompletionV1:
+    completion_id: str
+    intent_ref: str
+    profile_id: Stage1VenueProfileIdV1
+    partition_id: str
+    final_event_record_ref: str
+    capture_and_gap_receipt_ref: str
+    committed_event_ordinal: int
+    commit_evidence: PITStorageCommitEvidenceV1
+    completed_at_utc: datetime
+    recovered_after_crash: bool
+    no_effect_flags: NoEffectFlagsV1 = NO_EFFECTS_V1
+
+    def __post_init__(self) -> None:
+        _pit_receipt_profile(self.profile_id)
+        for name in (
+            "completion_id",
+            "intent_ref",
+            "partition_id",
+            "final_event_record_ref",
+            "capture_and_gap_receipt_ref",
+        ):
+            _pit_receipt_text(getattr(self, name), name)
+        _pit_receipt_ordinal(
+            self.committed_event_ordinal,
+            "committed_event_ordinal",
+            positive=True,
+        )
+        if type(self.commit_evidence) is not PITStorageCommitEvidenceV1:
+            raise PITDataContractErrorV1(
+                PITReasonCodeV1.PIT_DURABLE_COMMIT_INCOMPLETE,
+                "commit_evidence must be exact PITStorageCommitEvidenceV1",
+            )
+        required_refs = {
+            self.final_event_record_ref,
+            self.capture_and_gap_receipt_ref,
+        }
+        if (
+            set(self.commit_evidence.committed_record_refs) != required_refs
+            or len(self.commit_evidence.committed_record_refs) != 2
+        ):
+            raise PITDataContractErrorV1(
+                PITReasonCodeV1.PIT_DURABLE_COMMIT_INCOMPLETE,
+                "commit evidence must bind exactly the final event and capture receipt",
+            )
+        object.__setattr__(
+            self,
+            "completed_at_utc",
+            _pit_receipt_utc(self.completed_at_utc, "completed_at_utc"),
+        )
+        expected_completion_time = (
+            self.commit_evidence.storage_commit_time_utc_or_none
+            if self.commit_evidence.commit_evidence_class
+            is PITCommitEvidenceClassV1.STORAGE_ASSIGNED_ATOMIC_COMMIT_EVIDENCE
+            else self.commit_evidence.coordinator_post_return_observed_at_utc
+        )
+        if self.completed_at_utc != expected_completion_time:
+            raise PITDataContractErrorV1(
+                PITReasonCodeV1.PIT_CLOCK_DOMAIN_MISMATCH,
+                "completion time must equal its exact storage or reference evidence time",
+            )
+        if type(self.recovered_after_crash) is not bool:
+            raise PITDataContractErrorV1(
+                PITReasonCodeV1.PIT_SCHEMA_OR_WIRE_DIALECT_INVALID,
+                "recovered_after_crash must be an exact boolean",
+            )
+        _pit_receipt_no_effects(self.no_effect_flags)
+
+
+@dataclass(frozen=True, slots=True)
+class PITAvailabilityReceiptV1:
+    receipt_id: str
+    profile_id: Stage1VenueProfileIdV1
+    partition_id: str
+    snapshot_ref: str
+    commit_completion_ref: str
+    availability: PITAvailabilityStateV2
+    reason_or_none: PITReasonCodeV1 | None
+    strategy_available_at_utc_or_none: datetime | None
+    storage_commit_evidence_ref_or_none: str | None
+    published_pointer: bool
+    no_effect_flags: NoEffectFlagsV1 = NO_EFFECTS_V1
+
+    def __post_init__(self) -> None:
+        _pit_receipt_profile(self.profile_id)
+        for name in (
+            "receipt_id",
+            "partition_id",
+            "snapshot_ref",
+            "commit_completion_ref",
+        ):
+            _pit_receipt_text(getattr(self, name), name)
+        if self.storage_commit_evidence_ref_or_none is not None:
+            _pit_receipt_text(
+                self.storage_commit_evidence_ref_or_none,
+                "storage_commit_evidence_ref_or_none",
+            )
+        if type(self.availability) is not PITAvailabilityStateV2:
+            raise PITDataContractErrorV1(
+                PITReasonCodeV1.PIT_CAPABILITY_UNAVAILABLE,
+                "availability must be exact PITAvailabilityStateV2",
+            )
+        if self.reason_or_none is not None and type(
+            self.reason_or_none
+        ) is not PITReasonCodeV1:
+            raise PITDataContractErrorV1(
+                PITReasonCodeV1.PIT_CAPABILITY_UNAVAILABLE,
+                "reason_or_none has the wrong exact type",
+            )
+        if self.strategy_available_at_utc_or_none is not None:
+            object.__setattr__(
+                self,
+                "strategy_available_at_utc_or_none",
+                _pit_receipt_utc(
+                    self.strategy_available_at_utc_or_none,
+                    "strategy_available_at_utc_or_none",
+                ),
+            )
+        if type(self.published_pointer) is not bool:
+            raise PITDataContractErrorV1(
+                PITReasonCodeV1.PIT_CAPABILITY_UNAVAILABLE,
+                "published_pointer must be an exact boolean",
+            )
+        available_states = {
+            PITAvailabilityStateV2.AVAILABLE_CURRENT_STATE,
+            PITAvailabilityStateV2.AVAILABLE_CHANGE_LEVEL,
+        }
+        if self.availability in available_states:
+            if (
+                self.reason_or_none is not None
+                or self.strategy_available_at_utc_or_none is None
+                or self.storage_commit_evidence_ref_or_none is None
+                or not self.published_pointer
+            ):
+                raise PITDataContractErrorV1(
+                    PITReasonCodeV1.PIT_DURABLE_COMMIT_INCOMPLETE,
+                    "available state requires storage evidence and publication time",
+                )
+        elif (
+            self.reason_or_none is None
+            or self.strategy_available_at_utc_or_none is not None
+            or self.storage_commit_evidence_ref_or_none is not None
+            or self.published_pointer
+        ):
+            raise PITDataContractErrorV1(
+                PITReasonCodeV1.PIT_CAPABILITY_UNAVAILABLE,
+                "unavailable state requires a reason and cannot claim availability evidence",
+            )
+        _pit_receipt_no_effects(self.no_effect_flags)
+
+
+@dataclass(frozen=True, slots=True)
+class PITCheckpointV1:
+    checkpoint_id: str
+    profile_id: Stage1VenueProfileIdV1
+    market_or_instrument_id: str
+    capture_session_id: str
+    connection_epoch: str
+    wire_dialect: str
+    anchor_event_ref: str
+    last_completed_event_ordinal: int
+    last_provider_range_or_sequence_or_none: str | int | None
+    ordered_bid_levels: tuple[tuple[str, str], ...]
+    ordered_offer_levels: tuple[tuple[str, str], ...]
+    depth_class: PITDepthClassV2
+    transport_state: PITTransportStateV1
+    anchor_state: PITAnchorStateV1
+    continuity_state: PITContinuityStateV3
+    integrity_state: PITIntegrityStateV1
+    availability_state: PITAvailabilityStateV2
+    lifecycle_state: str
+    lifecycle_version_ref: str
+    settlement_version_ref_or_none: str | None
+    source_currentization_receipt_ref: str
+    rights_receipt_ref: str
+    previous_checkpoint_ref_or_none: str | None
+    serializer_version: str
+    reconstruction_receipt_ref: str
+    no_effect_flags: NoEffectFlagsV1 = NO_EFFECTS_V1
+
+    def __post_init__(self) -> None:
+        _pit_receipt_profile(self.profile_id)
+        for name in (
+            "checkpoint_id",
+            "market_or_instrument_id",
+            "capture_session_id",
+            "connection_epoch",
+            "wire_dialect",
+            "anchor_event_ref",
+            "lifecycle_state",
+            "lifecycle_version_ref",
+            "source_currentization_receipt_ref",
+            "rights_receipt_ref",
+            "serializer_version",
+            "reconstruction_receipt_ref",
+        ):
+            _pit_receipt_text(getattr(self, name), name)
+        if self.serializer_version != "QKU_DETERMINISTIC_JSON_V1":
+            raise PITDataContractErrorV1(
+                PITReasonCodeV1.PIT_SCHEMA_OR_WIRE_DIALECT_INVALID,
+                "checkpoint serializer version is not exact",
+            )
+        for name in (
+            "settlement_version_ref_or_none",
+            "previous_checkpoint_ref_or_none",
+        ):
+            value = getattr(self, name)
+            if value is not None:
+                _pit_receipt_text(value, name)
+        _pit_receipt_ordinal(
+            self.last_completed_event_ordinal,
+            "last_completed_event_ordinal",
+            positive=True,
+        )
+        if isinstance(self.last_provider_range_or_sequence_or_none, bool) or type(
+            self.last_provider_range_or_sequence_or_none
+        ) not in {str, int, type(None)}:
+            raise PITDataContractErrorV1(
+                PITReasonCodeV1.PIT_SCHEMA_OR_WIRE_DIALECT_INVALID,
+                "provider range/sequence must be exact text, integer, or absent",
+            )
+        if type(self.last_provider_range_or_sequence_or_none) is str:
+            _pit_receipt_text(
+                self.last_provider_range_or_sequence_or_none,
+                "last_provider_range_or_sequence_or_none",
+            )
+        if (
+            type(self.last_provider_range_or_sequence_or_none) is int
+            and self.last_provider_range_or_sequence_or_none < 0
+        ):
+            raise PITDataContractErrorV1(
+                PITReasonCodeV1.PIT_SCHEMA_OR_WIRE_DIALECT_INVALID,
+                "provider range/sequence integer must be nonnegative",
+            )
+        for name in ("ordered_bid_levels", "ordered_offer_levels"):
+            levels = getattr(self, name)
+            if type(levels) is not tuple or any(
+                type(level) is not tuple
+                or len(level) != 2
+                or any(type(value) is not str for value in level)
+                for level in levels
+            ):
+                raise PITDataContractErrorV1(
+                    PITReasonCodeV1.PIT_DECIMAL_OR_SCALE_INVALID,
+                    f"{name} must contain exact (price, quantity) text pairs",
+                )
+            prices = []
+            for price_text, quantity_text in levels:
+                _canonical_decimal_text(price_text, f"{name}.price")
+                _canonical_decimal_text(quantity_text, f"{name}.quantity")
+                price = exact_decimal(price_text, field_name=name)
+                quantity = exact_decimal(quantity_text, field_name=name)
+                prices.append(price)
+                if quantity <= 0:
+                    raise PITDataContractErrorV1(
+                        PITReasonCodeV1.PIT_QUANTITY_GRID_INVALID,
+                        f"{name} must contain positive retained state quantities",
+                    )
+            if len(prices) != len(set(prices)):
+                raise PITDataContractErrorV1(
+                    PITReasonCodeV1.PIT_CONFLICTING_DUPLICATE,
+                    f"{name} contains duplicate price identity",
+                )
+            expected_prices = sorted(
+                prices,
+                reverse=name == "ordered_bid_levels",
+            )
+            if prices != expected_prices:
+                raise PITDataContractErrorV1(
+                    PITReasonCodeV1.PIT_RECONSTRUCTION_DIVERGENCE,
+                    f"{name} is not in exact canonical book order",
+                )
+        if (
+            self.profile_id is not Stage1VenueProfileIdV1.KALSHI_US_DCM_DIRECT
+            and self.ordered_bid_levels
+            and self.ordered_offer_levels
+            and exact_decimal(
+                self.ordered_bid_levels[0][0], field_name="ordered_bid_levels"
+            )
+            > exact_decimal(
+                self.ordered_offer_levels[0][0],
+                field_name="ordered_offer_levels",
+            )
+        ):
+            raise PITDataContractErrorV1(
+                PITReasonCodeV1.PIT_BOOK_CROSSED_INVALID,
+                "checkpoint book is crossed",
+            )
+        for name, enum_type in (
+            ("depth_class", PITDepthClassV2),
+            ("transport_state", PITTransportStateV1),
+            ("anchor_state", PITAnchorStateV1),
+            ("continuity_state", PITContinuityStateV3),
+            ("integrity_state", PITIntegrityStateV1),
+            ("availability_state", PITAvailabilityStateV2),
+        ):
+            if type(getattr(self, name)) is not enum_type:
+                raise PITDataContractErrorV1(
+                    PITReasonCodeV1.PIT_SCHEMA_OR_WIRE_DIALECT_INVALID,
+                    f"{name} has the wrong exact enum type",
+                )
+        _pit_receipt_no_effects(self.no_effect_flags)
+
+
+def _pit_serialized_mapping(
+    value: object,
+    expected_type: type[object],
+) -> dict[str, object]:
+    if type(value) is not dict:
+        raise PITDataContractErrorV1(
+            PITReasonCodeV1.PIT_SCHEMA_OR_WIRE_DIALECT_INVALID,
+            f"serialized {expected_type.__name__} must be an exact object",
+        )
+    expected_fields = tuple(field.name for field in dataclass_fields(expected_type))
+    if len(value) != len(expected_fields) or set(value) != set(expected_fields):
+        raise PITDataContractErrorV1(
+            PITReasonCodeV1.PIT_SCHEMA_OR_WIRE_DIALECT_INVALID,
+            f"serialized {expected_type.__name__} field set is not exact",
+        )
+    return value
+
+
+def _pit_serialized_utc(value: object, name: str) -> datetime:
+    if type(value) is not str:
+        raise PITDataContractErrorV1(
+            PITReasonCodeV1.PIT_CLOCK_DOMAIN_MISMATCH,
+            f"serialized {name} must be canonical UTC text",
+        )
+    try:
+        parsed = datetime.fromisoformat(value)
+    except ValueError as exc:
+        raise PITDataContractErrorV1(
+            PITReasonCodeV1.PIT_CLOCK_DOMAIN_MISMATCH,
+            f"serialized {name} is not canonical UTC text",
+        ) from exc
+    if (
+        parsed.tzinfo is None
+        or parsed.utcoffset() is None
+        or parsed.utcoffset().total_seconds() != 0
+        or parsed.isoformat() != value
+    ):
+        raise PITDataContractErrorV1(
+            PITReasonCodeV1.PIT_CLOCK_DOMAIN_MISMATCH,
+            f"serialized {name} is not exact aware UTC text",
+        )
+    return parsed.astimezone(UTC)
+
+
+def _pit_serialized_optional_utc(value: object, name: str) -> datetime | None:
+    return None if value is None else _pit_serialized_utc(value, name)
+
+
+def _pit_serialized_tuple(value: object, name: str) -> tuple[object, ...]:
+    if type(value) is not list:
+        raise PITDataContractErrorV1(
+            PITReasonCodeV1.PIT_SCHEMA_OR_WIRE_DIALECT_INVALID,
+            f"serialized {name} must be an exact array",
+        )
+    return tuple(value)
+
+
+def _pit_serialized_text_pairs(
+    value: object,
+    name: str,
+) -> tuple[tuple[str, str], ...]:
+    rows = _pit_serialized_tuple(value, name)
+    if any(
+        type(row) is not list
+        or len(row) != 2
+        or any(type(item) is not str for item in row)
+        for row in rows
+    ):
+        raise PITDataContractErrorV1(
+            PITReasonCodeV1.PIT_SCHEMA_OR_WIRE_DIALECT_INVALID,
+            f"serialized {name} must contain exact two-text arrays",
+        )
+    return tuple((row[0], row[1]) for row in rows)
+
+
+def _pit_serialized_no_effects(value: object) -> NoEffectFlagsV1:
+    expected = safe_json_loads(deterministic_json(NO_EFFECTS_V1))
+    if type(value) is not dict or value != expected:
+        raise PITDataContractErrorV1(
+            PITReasonCodeV1.PIT_EFFECT_AUTHORITY_FORBIDDEN,
+            "serialized PIT receipt no-effect flags are not exact",
+        )
+    return NO_EFFECTS_V1
+
+
+def _pit_serialized_profile(value: object) -> Stage1VenueProfileIdV1:
+    if type(value) is not str:
+        raise PITDataContractErrorV1(
+            PITReasonCodeV1.PIT_SCOPE_NOT_SELECTED,
+            "serialized profile identity must be exact text",
+        )
+    try:
+        profile_id = Stage1VenueProfileIdV1(value)
+    except ValueError as exc:
+        raise PITDataContractErrorV1(
+            PITReasonCodeV1.PIT_SCOPE_NOT_SELECTED,
+            "serialized profile identity is unknown",
+        ) from exc
+    return _pit_receipt_profile(profile_id)
+
+
+def _pit_serialized_enum(
+    enum_type: type[StrEnum],
+    value: object,
+    name: str,
+) -> StrEnum:
+    if type(value) is not str:
+        raise PITDataContractErrorV1(
+            PITReasonCodeV1.PIT_SCHEMA_OR_WIRE_DIALECT_INVALID,
+            f"serialized {name} must be exact enum text",
+        )
+    try:
+        return enum_type(value)
+    except ValueError as exc:
+        raise PITDataContractErrorV1(
+            PITReasonCodeV1.PIT_SCHEMA_OR_WIRE_DIALECT_INVALID,
+            f"serialized {name} is not an admitted enum value",
+        ) from exc
+
+
+def _pit_reconstruct_receipt_payload_v1(
+    record_type: EconomicRecordTypeV1,
+    value: object,
+) -> object:
+    """Reconstruct one exact PIT receipt payload from deterministic JSON."""
+
+    if type(record_type) is not EconomicRecordTypeV1:
+        raise PITDataContractErrorV1(
+            PITReasonCodeV1.PIT_SCHEMA_OR_WIRE_DIALECT_INVALID,
+            "receipt reconstruction requires an exact record discriminator",
+        )
+    type_by_record = {
+        EconomicRecordTypeV1.PIT_COMMIT_INTENT: PITCommitIntentV1,
+        EconomicRecordTypeV1.PIT_CANONICAL_EVENT: PITCanonicalEventReceiptRecordV2,
+        EconomicRecordTypeV1.PIT_CAPTURE_AND_GAP: CaptureAndGapReceiptV2,
+        EconomicRecordTypeV1.PIT_COMMIT_COMPLETION: PITCommitCompletionV1,
+        EconomicRecordTypeV1.PIT_AVAILABILITY: PITAvailabilityReceiptV1,
+        EconomicRecordTypeV1.PIT_CHECKPOINT: PITCheckpointV1,
+    }
+    expected_type = type_by_record.get(record_type)
+    if expected_type is None:
+        raise PITDataContractErrorV1(
+            PITReasonCodeV1.PIT_SCHEMA_OR_WIRE_DIALECT_INVALID,
+            "record discriminator is not a PIT receipt payload",
+        )
+    row = _pit_serialized_mapping(value, expected_type)
+    common_no_effects = _pit_serialized_no_effects(row["no_effect_flags"])
+
+    if expected_type is PITCommitIntentV1:
+        return PITCommitIntentV1(
+            intent_id=row["intent_id"],
+            profile_id=_pit_serialized_profile(row["profile_id"]),
+            partition_id=row["partition_id"],
+            candidate_event_record_id=row["candidate_event_record_id"],
+            capture_session_id=row["capture_session_id"],
+            connection_epoch=row["connection_epoch"],
+            created_at_utc=_pit_serialized_utc(row["created_at_utc"], "created_at_utc"),
+            candidate_ordinal_allocated=row["candidate_ordinal_allocated"],
+            validation_receipt_ref=row["validation_receipt_ref"],
+            no_effect_flags=common_no_effects,
+        )
+    if expected_type is PITCanonicalEventReceiptRecordV2:
+        return PITCanonicalEventReceiptRecordV2(
+            record_id=row["record_id"],
+            event_record_id=row["event_record_id"],
+            schema_version=row["schema_version"],
+            profile_id=_pit_serialized_profile(row["profile_id"]),
+            partition_id=row["partition_id"],
+            capture_session_id=row["capture_session_id"],
+            connection_epoch=row["connection_epoch"],
+            committed_event_ordinal=row["committed_event_ordinal"],
+            canonical_event_json=row["canonical_event_json"],
+            validation_receipt_ref=row["validation_receipt_ref"],
+            prior_event_ref_or_none=row["prior_event_ref_or_none"],
+            checkpoint_ref_or_none=row["checkpoint_ref_or_none"],
+            source_receipt_ref=row["source_receipt_ref"],
+            rights_receipt_ref=row["rights_receipt_ref"],
+            commit_intent_ref=row["commit_intent_ref"],
+            no_effect_flags=common_no_effects,
+        )
+    if expected_type is CaptureAndGapReceiptV2:
+        return CaptureAndGapReceiptV2(
+            receipt_id=row["receipt_id"],
+            event_record_id=row["event_record_id"],
+            profile_id=_pit_serialized_profile(row["profile_id"]),
+            connection_epoch=row["connection_epoch"],
+            provider_identity_or_none=row["provider_identity_or_none"],
+            pre_state_ref=row["pre_state_ref"],
+            post_state_ref=row["post_state_ref"],
+            event_disposition=_pit_serialized_enum(
+                PITEventDispositionV1, row["event_disposition"], "event_disposition"
+            ),
+            continuity_result=_pit_serialized_enum(
+                PITContinuityStateV3, row["continuity_result"], "continuity_result"
+            ),
+            integrity_result=_pit_serialized_enum(
+                PITIntegrityStateV1, row["integrity_result"], "integrity_result"
+            ),
+            failure_reason_or_none=(
+                None
+                if row["failure_reason_or_none"] is None
+                else _pit_serialized_enum(
+                    PITReasonCodeV1,
+                    row["failure_reason_or_none"],
+                    "failure_reason_or_none",
+                )
+            ),
+            recovery_required=row["recovery_required"],
+            commit_completion_ref_or_none=row["commit_completion_ref_or_none"],
+            no_effect_flags=common_no_effects,
+        )
+    if expected_type is PITCommitCompletionV1:
+        evidence_row = _pit_serialized_mapping(
+            row["commit_evidence"], PITStorageCommitEvidenceV1
+        )
+        evidence = PITStorageCommitEvidenceV1(
+            adapter_identity=evidence_row["adapter_identity"],
+            transaction_identity=evidence_row["transaction_identity"],
+            committed_record_refs=tuple(
+                _pit_serialized_tuple(
+                    evidence_row["committed_record_refs"], "committed_record_refs"
+                )
+            ),
+            commit_evidence_class=_pit_serialized_enum(
+                PITCommitEvidenceClassV1,
+                evidence_row["commit_evidence_class"],
+                "commit_evidence_class",
+            ),
+            storage_commit_time_utc_or_none=_pit_serialized_optional_utc(
+                evidence_row["storage_commit_time_utc_or_none"],
+                "storage_commit_time_utc_or_none",
+            ),
+            backend_identity_or_none=evidence_row["backend_identity_or_none"],
+            backend_sequence_or_revision_or_none=evidence_row[
+                "backend_sequence_or_revision_or_none"
+            ],
+            coordinator_post_return_observed_at_utc=_pit_serialized_utc(
+                evidence_row["coordinator_post_return_observed_at_utc"],
+                "coordinator_post_return_observed_at_utc",
+            ),
+            no_effect_flags=_pit_serialized_no_effects(
+                evidence_row["no_effect_flags"]
+            ),
+        )
+        return PITCommitCompletionV1(
+            completion_id=row["completion_id"],
+            intent_ref=row["intent_ref"],
+            profile_id=_pit_serialized_profile(row["profile_id"]),
+            partition_id=row["partition_id"],
+            final_event_record_ref=row["final_event_record_ref"],
+            capture_and_gap_receipt_ref=row["capture_and_gap_receipt_ref"],
+            committed_event_ordinal=row["committed_event_ordinal"],
+            commit_evidence=evidence,
+            completed_at_utc=_pit_serialized_utc(
+                row["completed_at_utc"], "completed_at_utc"
+            ),
+            recovered_after_crash=row["recovered_after_crash"],
+            no_effect_flags=common_no_effects,
+        )
+    if expected_type is PITAvailabilityReceiptV1:
+        return PITAvailabilityReceiptV1(
+            receipt_id=row["receipt_id"],
+            profile_id=_pit_serialized_profile(row["profile_id"]),
+            partition_id=row["partition_id"],
+            snapshot_ref=row["snapshot_ref"],
+            commit_completion_ref=row["commit_completion_ref"],
+            availability=_pit_serialized_enum(
+                PITAvailabilityStateV2, row["availability"], "availability"
+            ),
+            reason_or_none=(
+                None
+                if row["reason_or_none"] is None
+                else _pit_serialized_enum(
+                    PITReasonCodeV1, row["reason_or_none"], "reason_or_none"
+                )
+            ),
+            strategy_available_at_utc_or_none=_pit_serialized_optional_utc(
+                row["strategy_available_at_utc_or_none"],
+                "strategy_available_at_utc_or_none",
+            ),
+            storage_commit_evidence_ref_or_none=row[
+                "storage_commit_evidence_ref_or_none"
+            ],
+            published_pointer=row["published_pointer"],
+            no_effect_flags=common_no_effects,
+        )
+
+    return PITCheckpointV1(
+        checkpoint_id=row["checkpoint_id"],
+        profile_id=_pit_serialized_profile(row["profile_id"]),
+        market_or_instrument_id=row["market_or_instrument_id"],
+        capture_session_id=row["capture_session_id"],
+        connection_epoch=row["connection_epoch"],
+        wire_dialect=row["wire_dialect"],
+        anchor_event_ref=row["anchor_event_ref"],
+        last_completed_event_ordinal=row["last_completed_event_ordinal"],
+        last_provider_range_or_sequence_or_none=row[
+            "last_provider_range_or_sequence_or_none"
+        ],
+        ordered_bid_levels=_pit_serialized_text_pairs(
+            row["ordered_bid_levels"], "ordered_bid_levels"
+        ),
+        ordered_offer_levels=_pit_serialized_text_pairs(
+            row["ordered_offer_levels"], "ordered_offer_levels"
+        ),
+        depth_class=_pit_serialized_enum(
+            PITDepthClassV2, row["depth_class"], "depth_class"
+        ),
+        transport_state=_pit_serialized_enum(
+            PITTransportStateV1, row["transport_state"], "transport_state"
+        ),
+        anchor_state=_pit_serialized_enum(
+            PITAnchorStateV1, row["anchor_state"], "anchor_state"
+        ),
+        continuity_state=_pit_serialized_enum(
+            PITContinuityStateV3, row["continuity_state"], "continuity_state"
+        ),
+        integrity_state=_pit_serialized_enum(
+            PITIntegrityStateV1, row["integrity_state"], "integrity_state"
+        ),
+        availability_state=_pit_serialized_enum(
+            PITAvailabilityStateV2,
+            row["availability_state"],
+            "availability_state",
+        ),
+        lifecycle_state=row["lifecycle_state"],
+        lifecycle_version_ref=row["lifecycle_version_ref"],
+        settlement_version_ref_or_none=row["settlement_version_ref_or_none"],
+        source_currentization_receipt_ref=row[
+            "source_currentization_receipt_ref"
+        ],
+        rights_receipt_ref=row["rights_receipt_ref"],
+        previous_checkpoint_ref_or_none=row["previous_checkpoint_ref_or_none"],
+        serializer_version=row["serializer_version"],
+        reconstruction_receipt_ref=row["reconstruction_receipt_ref"],
+        no_effect_flags=common_no_effects,
     )

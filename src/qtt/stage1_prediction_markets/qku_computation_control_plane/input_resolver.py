@@ -35,12 +35,17 @@ from .freshness import (
     FreshnessResolverV1,
 )
 from .point_in_time import (
+    PITDataContractErrorV1,
+    PITDepthClassV2,
+    PITInputAvailabilityV2,
+    PITReasonCodeV1,
     PointInTimeClocksV1,
     PointInTimeFieldClassV1,
     PointInTimePolicyV1,
     PointInTimeReceiptV1,
     classify_point_in_time_semantics,
 )
+from .stage1_launch_graph import Stage1VenueProfileIdV1
 from .models import (
     ComputationExecutionContextV1,
     ComputationScopeV1,
@@ -2083,3 +2088,732 @@ class CurrentModeSnapshotInputResolverV1:
             computation_bundle_closure=bundle,
             owner_action_confirmation=owner_action,
         )
+
+
+PIT_PUBLIC_INPUT_OWNER_IDS_V1 = frozenset(
+    {
+        "SelectedVenuePublicMarketDataOwnerV1",
+        "KalshiAcceptedOrderBookStateOwnerV1",
+        "KalshiMarketMetadataOwnerV1",
+    }
+)
+PIT_PUBLIC_ORIGIN_CLASSES_V1 = frozenset(
+    {
+        "ACCEPTED_POINT_IN_TIME_SNAPSHOT",
+        "ACCEPTED_VERSIONED_MARKET_METADATA",
+    }
+)
+PIT_RAW_INPUT_PACKET_TYPES_V1 = frozenset({"SequencedBookEventsPacketV1"})
+
+
+def _pit_input_text(value: object, name: str) -> str:
+    if type(value) is not str or not value or value != value.strip():
+        raise PITDataContractErrorV1(
+            PITReasonCodeV1.PIT_SCHEMA_OR_WIRE_DIALECT_INVALID,
+            f"{name} must be canonical nonempty text",
+        )
+    return value
+
+
+def _pit_input_text_tuple(
+    value: object,
+    name: str,
+    *,
+    allow_empty: bool,
+) -> tuple[str, ...]:
+    if type(value) is not tuple or (not allow_empty and not value):
+        raise PITDataContractErrorV1(
+            PITReasonCodeV1.PIT_SCHEMA_OR_WIRE_DIALECT_INVALID,
+            f"{name} must be an exact tuple",
+        )
+    result = tuple(_pit_input_text(item, name) for item in value)
+    if len(result) != len(set(result)):
+        raise PITDataContractErrorV1(
+            PITReasonCodeV1.PIT_CONFLICTING_DUPLICATE,
+            f"{name} contains duplicate identities",
+        )
+    return result
+
+
+@dataclass(frozen=True, slots=True)
+class PITFormulaInputAuthorityPartitionV1:
+    all_binding_ids: frozenset[str]
+    pit_applicable_binding_ids: frozenset[str]
+    non_pit_binding_ids: frozenset[str]
+    canonical_binding_order: tuple[str, ...]
+    pit_applicable_binding_order: tuple[str, ...]
+    non_pit_binding_order: tuple[str, ...]
+    all_row_count: int
+    pit_row_count: int
+    non_pit_row_count: int
+    intersection_empty: bool
+    union_complete: bool
+    duplicate_binding_identity_count: int
+    duplicate_object_inclusion_count: int
+    unclassified_row_type_count: int
+
+    def __post_init__(self) -> None:
+        for name in (
+            "all_binding_ids",
+            "pit_applicable_binding_ids",
+            "non_pit_binding_ids",
+        ):
+            value = getattr(self, name)
+            if type(value) is not frozenset or any(
+                type(item) is not str or not item for item in value
+            ):
+                raise PITDataContractErrorV1(
+                    PITReasonCodeV1.PIT_SCHEMA_OR_WIRE_DIALECT_INVALID,
+                    f"{name} must be an exact text frozenset",
+                )
+        for name, expected_set in (
+            ("canonical_binding_order", self.all_binding_ids),
+            ("pit_applicable_binding_order", self.pit_applicable_binding_ids),
+            ("non_pit_binding_order", self.non_pit_binding_ids),
+        ):
+            ordered = _pit_input_text_tuple(
+                getattr(self, name), name, allow_empty=True
+            )
+            if frozenset(ordered) != expected_set:
+                raise PITDataContractErrorV1(
+                    PITReasonCodeV1.PIT_CONFLICTING_DUPLICATE,
+                    f"{name} does not equal its binding-ID set",
+                )
+        for name in (
+            "all_row_count",
+            "pit_row_count",
+            "non_pit_row_count",
+            "duplicate_binding_identity_count",
+            "duplicate_object_inclusion_count",
+            "unclassified_row_type_count",
+        ):
+            value = getattr(self, name)
+            if type(value) is not int or value < 0:
+                raise PITDataContractErrorV1(
+                    PITReasonCodeV1.PIT_SCHEMA_OR_WIRE_DIALECT_INVALID,
+                    f"{name} must be a nonnegative exact integer",
+                )
+        if type(self.intersection_empty) is not bool or type(
+            self.union_complete
+        ) is not bool:
+            raise PITDataContractErrorV1(
+                PITReasonCodeV1.PIT_SCHEMA_OR_WIRE_DIALECT_INVALID,
+                "partition laws must be exact booleans",
+            )
+        if (
+            self.all_row_count != len(self.canonical_binding_order)
+            or self.pit_row_count != len(self.pit_applicable_binding_order)
+            or self.non_pit_row_count != len(self.non_pit_binding_order)
+            or self.pit_row_count + self.non_pit_row_count != self.all_row_count
+            or not self.intersection_empty
+            or not self.union_complete
+            or self.duplicate_binding_identity_count
+            or self.duplicate_object_inclusion_count
+            or self.unclassified_row_type_count
+        ):
+            raise PITDataContractErrorV1(
+                PITReasonCodeV1.PIT_CONFLICTING_DUPLICATE,
+                "formula-input authority partition is not exact and total",
+            )
+
+
+def _pit_formula_rows_once() -> tuple[object, ...]:
+    rows: list[object] = []
+    for math_id, values in CURRENT_FORMULA_INPUT_AUTHORITY_BY_MATH_ID.items():
+        _pit_input_text(math_id, "math_id")
+        if type(values) is not tuple:
+            raise PITDataContractErrorV1(
+                PITReasonCodeV1.PIT_SCHEMA_OR_WIRE_DIALECT_INVALID,
+                "formula-input authority registry values must be exact tuples",
+            )
+        rows.extend(values)
+    return tuple(rows)
+
+
+def _pit_binding_id(row: object) -> str:
+    if type(row) not in {
+        FormulaInputAuthorityBindingV1,
+        ST12DMath39RawInputBindingV1,
+    }:
+        raise PITDataContractErrorV1(
+            PITReasonCodeV1.PIT_SCHEMA_OR_WIRE_DIALECT_INVALID,
+            f"unclassified formula-input authority row type: {type(row).__name__}",
+        )
+    return _pit_input_text(row.binding_id, "binding_id")
+
+
+def _pit_row_is_applicable(row: object) -> bool:
+    if type(row) is FormulaInputAuthorityBindingV1:
+        return (
+            row.accepted_upstream_owner_id in PIT_PUBLIC_INPUT_OWNER_IDS_V1
+            and row.allowed_origin_class in PIT_PUBLIC_ORIGIN_CLASSES_V1
+        )
+    if type(row) is ST12DMath39RawInputBindingV1:
+        return (
+            row.accepted_upstream_owner_id
+            == "SelectedVenuePublicMarketDataOwnerV1"
+            and row.accepted_packet_or_snapshot_type in PIT_RAW_INPUT_PACKET_TYPES_V1
+            and row.binding_id == "FIVAB::sequenced_book_events::MATH-39"
+            and row.input_name == "sequenced_book_events"
+        )
+    _pit_binding_id(row)
+    raise AssertionError("unreachable unclassified formula-input row")
+
+
+def partition_pit_formula_input_authority_v1() -> PITFormulaInputAuthorityPartitionV1:
+    """Partition the current registry once, preserving exact canonical order."""
+
+    rows = _pit_formula_rows_once()
+    all_ids: list[str] = []
+    pit_ids: list[str] = []
+    non_pit_ids: list[str] = []
+    object_ids: list[int] = []
+    unclassified = 0
+    for row in rows:
+        if type(row) not in {
+            FormulaInputAuthorityBindingV1,
+            ST12DMath39RawInputBindingV1,
+        }:
+            unclassified += 1
+            continue
+        binding_id = _pit_binding_id(row)
+        all_ids.append(binding_id)
+        object_ids.append(id(row))
+        (pit_ids if _pit_row_is_applicable(row) else non_pit_ids).append(binding_id)
+    duplicate_binding_count = len(all_ids) - len(set(all_ids))
+    duplicate_object_count = len(object_ids) - len(set(object_ids))
+    all_set = frozenset(all_ids)
+    pit_set = frozenset(pit_ids)
+    non_pit_set = frozenset(non_pit_ids)
+    return PITFormulaInputAuthorityPartitionV1(
+        all_binding_ids=all_set,
+        pit_applicable_binding_ids=pit_set,
+        non_pit_binding_ids=non_pit_set,
+        canonical_binding_order=tuple(all_ids),
+        pit_applicable_binding_order=tuple(pit_ids),
+        non_pit_binding_order=tuple(non_pit_ids),
+        all_row_count=len(rows),
+        pit_row_count=len(pit_ids),
+        non_pit_row_count=len(non_pit_ids),
+        intersection_empty=pit_set.isdisjoint(non_pit_set),
+        union_complete=pit_set | non_pit_set == all_set,
+        duplicate_binding_identity_count=duplicate_binding_count,
+        duplicate_object_inclusion_count=duplicate_object_count,
+        unclassified_row_type_count=unclassified,
+    )
+
+
+@dataclass(frozen=True, slots=True)
+class PITInputCapabilityV2:
+    capability_id: str
+    profile_id: Stage1VenueProfileIdV1
+    binding_id: str
+    math_spec_id: str
+    input_name: str
+    accepted_packet_or_snapshot_type: str
+    source_field_path: str
+    declared_input_type: str
+    declared_shape_or_none: str | None
+    unit_or_basis: str
+    transform: str
+    required_clock_fields: tuple[str, ...]
+    required_depth_class_or_none: PITDepthClassV2 | None
+    provider_sequence_required: bool
+    provider_publication_time_required: bool
+    required_state: str
+    source_contract_ref: str
+    rights_receipt_ref: str
+    availability: PITInputAvailabilityV2
+    unavailable_reason_or_none: PITReasonCodeV1 | None
+    event_or_snapshot_ref_or_none: str | None
+    freshness_receipt_ref_or_none: str | None
+    context_id: str
+    source_epoch_id: str
+    input_version: str
+
+    def __post_init__(self) -> None:
+        if type(self.profile_id) is not Stage1VenueProfileIdV1:
+            raise PITDataContractErrorV1(
+                PITReasonCodeV1.PIT_SCOPE_NOT_SELECTED,
+                "profile_id must be an exact Stage1VenueProfileIdV1",
+            )
+        for name in (
+            "capability_id",
+            "binding_id",
+            "math_spec_id",
+            "input_name",
+            "accepted_packet_or_snapshot_type",
+            "source_field_path",
+            "declared_input_type",
+            "unit_or_basis",
+            "transform",
+            "required_state",
+            "source_contract_ref",
+            "rights_receipt_ref",
+            "context_id",
+            "source_epoch_id",
+            "input_version",
+        ):
+            _pit_input_text(getattr(self, name), name)
+        if self.declared_shape_or_none is not None:
+            _pit_input_text(self.declared_shape_or_none, "declared_shape_or_none")
+        _pit_input_text_tuple(
+            self.required_clock_fields,
+            "required_clock_fields",
+            allow_empty=False,
+        )
+        if self.required_depth_class_or_none is not None and type(
+            self.required_depth_class_or_none
+        ) is not PITDepthClassV2:
+            raise PITDataContractErrorV1(
+                PITReasonCodeV1.PIT_TOP_LEVEL_DEPTH_ONLY,
+                "required depth class has the wrong exact type",
+            )
+        for name in (
+            "provider_sequence_required",
+            "provider_publication_time_required",
+        ):
+            if type(getattr(self, name)) is not bool:
+                raise PITDataContractErrorV1(
+                    PITReasonCodeV1.PIT_SCHEMA_OR_WIRE_DIALECT_INVALID,
+                    f"{name} must be an exact boolean",
+                )
+        if type(self.availability) is not PITInputAvailabilityV2:
+            raise PITDataContractErrorV1(
+                PITReasonCodeV1.PIT_CAPABILITY_UNAVAILABLE,
+                "availability has the wrong exact type",
+            )
+        if self.unavailable_reason_or_none is not None and type(
+            self.unavailable_reason_or_none
+        ) is not PITReasonCodeV1:
+            raise PITDataContractErrorV1(
+                PITReasonCodeV1.PIT_CAPABILITY_UNAVAILABLE,
+                "unavailable reason has the wrong exact type",
+            )
+        for name in (
+            "event_or_snapshot_ref_or_none",
+            "freshness_receipt_ref_or_none",
+        ):
+            value = getattr(self, name)
+            if value is not None:
+                _pit_input_text(value, name)
+        if self.availability is PITInputAvailabilityV2.AVAILABLE:
+            if (
+                self.unavailable_reason_or_none is not None
+                or self.event_or_snapshot_ref_or_none is None
+                or self.freshness_receipt_ref_or_none is None
+            ):
+                raise PITDataContractErrorV1(
+                    PITReasonCodeV1.PIT_CAPABILITY_UNAVAILABLE,
+                    "available capability requires exact event and freshness lineage",
+                )
+        elif (
+            self.unavailable_reason_or_none is None
+            or self.event_or_snapshot_ref_or_none is not None
+            or self.freshness_receipt_ref_or_none is not None
+        ):
+            raise PITDataContractErrorV1(
+                PITReasonCodeV1.PIT_CAPABILITY_UNAVAILABLE,
+                "unavailable capability requires a reason and no admitted lineage",
+            )
+
+    @property
+    def key(self) -> tuple[Stage1VenueProfileIdV1, str]:
+        return (self.profile_id, self.binding_id)
+
+
+@dataclass(frozen=True, slots=True)
+class PITFormulaInputPacketV2:
+    packet_id: str
+    profile_id: Stage1VenueProfileIdV1
+    binding_id: str
+    context_id: str
+    source_epoch_id: str
+    input_version: str
+    declared_input_type: str
+    declared_shape_or_none: str | None
+    unit_or_basis: str
+    source_field_path: str
+    value: object
+    event_or_snapshot_ref: str
+    freshness_receipt_ref: str
+
+    def __post_init__(self) -> None:
+        if type(self.profile_id) is not Stage1VenueProfileIdV1:
+            raise PITDataContractErrorV1(
+                PITReasonCodeV1.PIT_SCOPE_NOT_SELECTED,
+                "packet profile has the wrong exact type",
+            )
+        for name in (
+            "packet_id",
+            "binding_id",
+            "context_id",
+            "source_epoch_id",
+            "input_version",
+            "declared_input_type",
+            "unit_or_basis",
+            "source_field_path",
+            "event_or_snapshot_ref",
+            "freshness_receipt_ref",
+        ):
+            _pit_input_text(getattr(self, name), name)
+        if self.declared_shape_or_none is not None:
+            _pit_input_text(self.declared_shape_or_none, "declared_shape_or_none")
+        object.__setattr__(self, "value", _freeze(self.value))
+
+    @property
+    def key(self) -> tuple[Stage1VenueProfileIdV1, str]:
+        return (self.profile_id, self.binding_id)
+
+
+@dataclass(frozen=True, slots=True)
+class PITResolvedFormulaInputV2:
+    profile_id: Stage1VenueProfileIdV1
+    binding_id: str
+    math_spec_id: str
+    input_name: str
+    value: object
+    declared_input_type: str
+    declared_shape_or_none: str | None
+    unit_or_basis: str
+    source_field_path: str
+    context_id: str
+    source_epoch_id: str
+    input_version: str
+    packet_ref: str
+    event_or_snapshot_ref: str
+    freshness_receipt_ref: str
+
+    def __post_init__(self) -> None:
+        if type(self.profile_id) is not Stage1VenueProfileIdV1:
+            raise PITDataContractErrorV1(
+                PITReasonCodeV1.PIT_SCOPE_NOT_SELECTED,
+                "resolved profile has the wrong exact type",
+            )
+        for name in (
+            "binding_id",
+            "math_spec_id",
+            "input_name",
+            "declared_input_type",
+            "unit_or_basis",
+            "source_field_path",
+            "context_id",
+            "source_epoch_id",
+            "input_version",
+            "packet_ref",
+            "event_or_snapshot_ref",
+            "freshness_receipt_ref",
+        ):
+            _pit_input_text(getattr(self, name), name)
+        if self.declared_shape_or_none is not None:
+            _pit_input_text(self.declared_shape_or_none, "declared_shape_or_none")
+        object.__setattr__(self, "value", _freeze(self.value))
+
+
+@dataclass(frozen=True, slots=True)
+class PITFormulaInputResolutionV2:
+    resolution_id: str
+    context_id: str
+    source_epoch_id: str
+    input_version: str
+    resolved_inputs: tuple[PITResolvedFormulaInputV2, ...]
+    unavailable_capabilities: tuple[PITInputCapabilityV2, ...]
+    required_keys: frozenset[tuple[Stage1VenueProfileIdV1, str]]
+    exact_key_set_equal: bool
+
+    def __post_init__(self) -> None:
+        for name in (
+            "resolution_id",
+            "context_id",
+            "source_epoch_id",
+            "input_version",
+        ):
+            _pit_input_text(getattr(self, name), name)
+        if type(self.resolved_inputs) is not tuple or any(
+            type(value) is not PITResolvedFormulaInputV2
+            for value in self.resolved_inputs
+        ):
+            raise PITDataContractErrorV1(
+                PITReasonCodeV1.PIT_SCHEMA_OR_WIRE_DIALECT_INVALID,
+                "resolved_inputs must be exact PITResolvedFormulaInputV2 values",
+            )
+        if type(self.unavailable_capabilities) is not tuple or any(
+            type(value) is not PITInputCapabilityV2
+            for value in self.unavailable_capabilities
+        ):
+            raise PITDataContractErrorV1(
+                PITReasonCodeV1.PIT_SCHEMA_OR_WIRE_DIALECT_INVALID,
+                "unavailable_capabilities must contain exact capabilities",
+            )
+        if type(self.required_keys) is not frozenset or any(
+            type(key) is not tuple
+            or len(key) != 2
+            or type(key[0]) is not Stage1VenueProfileIdV1
+            or type(key[1]) is not str
+            for key in self.required_keys
+        ):
+            raise PITDataContractErrorV1(
+                PITReasonCodeV1.PIT_SCHEMA_OR_WIRE_DIALECT_INVALID,
+                "required_keys has an invalid exact key",
+            )
+        if type(self.exact_key_set_equal) is not bool or not self.exact_key_set_equal:
+            raise PITDataContractErrorV1(
+                PITReasonCodeV1.PIT_CAPABILITY_UNAVAILABLE,
+                "formula-input resolution key set is not exact",
+            )
+
+
+def _pit_resolution_binding_metadata(binding_id: str) -> dict[str, object]:
+    matches = tuple(
+        row
+        for row in _pit_formula_rows_once()
+        if type(row)
+        in {FormulaInputAuthorityBindingV1, ST12DMath39RawInputBindingV1}
+        and row.binding_id == binding_id
+        and _pit_row_is_applicable(row)
+    )
+    if len(matches) != 1:
+        raise PITDataContractErrorV1(
+            PITReasonCodeV1.PIT_CAPABILITY_UNAVAILABLE,
+            "capability binding identity does not resolve exactly once",
+        )
+    row = matches[0]
+    if type(row) is FormulaInputAuthorityBindingV1:
+        shape_by_exact_type = {
+            "Decimal string": "SCALAR",
+            "boolean": "SCALAR",
+            "enum": "SCALAR",
+            "int": "SCALAR",
+            "list[Decimal string]": "SEQUENCE",
+            "list[record]": "SEQUENCE",
+        }
+        try:
+            shape = shape_by_exact_type[row.input_type]
+        except KeyError as exc:
+            raise PITDataContractErrorV1(
+                PITReasonCodeV1.PIT_SCHEMA_OR_WIRE_DIALECT_INVALID,
+                "formula binding has an unclassified exact input type",
+            ) from exc
+        return {
+            "math_spec_id": row.math_spec_id,
+            "input_name": row.input_name,
+            "packet_type": row.accepted_packet_or_snapshot_type,
+            "source_path": row.exact_field_path,
+            "input_type": row.input_type,
+            "shape": shape,
+            "unit": row.unit_or_basis,
+            "transform": row.canonical_typed_value_extraction,
+            "required_clock_fields": tuple(row.required_clock_fields),
+        }
+    if type(row) is ST12DMath39RawInputBindingV1:
+        return {
+            "math_spec_id": "MATH-39",
+            "input_name": row.input_name,
+            "packet_type": row.accepted_packet_or_snapshot_type,
+            "source_path": row.exact_field_path,
+            "input_type": "SequencedBookEventsPacketV1",
+            "shape": "SEQUENCE",
+            "unit": row.unit_or_basis,
+            "transform": row.point_in_time_rule,
+            "required_clock_fields": (
+                "qtt_received_at_utc",
+                "qtt_parse_completed_at_utc",
+                "durable_commit_completed_at_utc",
+                "strategy_available_at_utc",
+            ),
+        }
+    raise AssertionError("unreachable exact formula binding type")
+
+
+def _pit_validate_resolution_capability_metadata(
+    capability: PITInputCapabilityV2,
+) -> None:
+    expected = _pit_resolution_binding_metadata(capability.binding_id)
+    actual = {
+        "math_spec_id": capability.math_spec_id,
+        "input_name": capability.input_name,
+        "packet_type": capability.accepted_packet_or_snapshot_type,
+        "source_path": capability.source_field_path,
+        "input_type": capability.declared_input_type,
+        "shape": capability.declared_shape_or_none,
+        "unit": capability.unit_or_basis,
+        "transform": capability.transform,
+        "required_clock_fields": capability.required_clock_fields,
+    }
+    if actual != expected:
+        raise PITDataContractErrorV1(
+            PITReasonCodeV1.PIT_CAPABILITY_UNAVAILABLE,
+            "capability metadata differs from the canonical formula-input binding",
+        )
+
+
+def _pit_packet_value_matches_type(value: object, declared_type: str) -> bool:
+    if declared_type == "boolean":
+        return type(value) is bool
+    if declared_type == "int":
+        return type(value) is int
+    if declared_type == "Decimal string":
+        if type(value) is not str:
+            return False
+        try:
+            exact_decimal(value, field_name="PIT formula input")
+        except NumericDomainError:
+            return False
+        return True
+    if declared_type == "list[Decimal string]":
+        if type(value) is not tuple or not value:
+            return False
+        try:
+            for item in value:
+                if type(item) is not str:
+                    return False
+                exact_decimal(item, field_name="PIT formula input list")
+        except NumericDomainError:
+            return False
+        return True
+    if declared_type == "enum":
+        return type(value) is str and bool(value)
+    if declared_type in {"list[record]", "SequencedBookEventsPacketV1"}:
+        return (
+            type(value) is tuple
+            and bool(value)
+            and all(isinstance(item, Mapping) for item in value)
+        )
+    return False
+
+
+def resolve_pit_formula_inputs_v2(
+    capabilities: tuple[PITInputCapabilityV2, ...],
+    packets: tuple[PITFormulaInputPacketV2, ...],
+    *,
+    resolution_id: str,
+    context_id: str,
+    source_epoch_id: str,
+    input_version: str,
+) -> PITFormulaInputResolutionV2:
+    """Resolve available capabilities without synthesizing missing truth."""
+
+    _pit_input_text(resolution_id, "resolution_id")
+    for name, value in (
+        ("context_id", context_id),
+        ("source_epoch_id", source_epoch_id),
+        ("input_version", input_version),
+    ):
+        _pit_input_text(value, name)
+    if type(capabilities) is not tuple or any(
+        type(value) is not PITInputCapabilityV2 for value in capabilities
+    ):
+        raise PITDataContractErrorV1(
+            PITReasonCodeV1.PIT_SCHEMA_OR_WIRE_DIALECT_INVALID,
+            "capabilities must be an exact PITInputCapabilityV2 tuple",
+        )
+    if type(packets) is not tuple or any(
+        type(value) is not PITFormulaInputPacketV2 for value in packets
+    ):
+        raise PITDataContractErrorV1(
+            PITReasonCodeV1.PIT_SCHEMA_OR_WIRE_DIALECT_INVALID,
+            "packets must be an exact PITFormulaInputPacketV2 tuple",
+        )
+    capability_by_key: dict[
+        tuple[Stage1VenueProfileIdV1, str], PITInputCapabilityV2
+    ] = {}
+    for capability in capabilities:
+        _pit_validate_resolution_capability_metadata(capability)
+        if capability.key in capability_by_key:
+            raise PITDataContractErrorV1(
+                PITReasonCodeV1.PIT_CONFLICTING_DUPLICATE,
+                "duplicate PIT capability key",
+            )
+        capability_by_key[capability.key] = capability
+    packet_by_key: dict[
+        tuple[Stage1VenueProfileIdV1, str], PITFormulaInputPacketV2
+    ] = {}
+    for packet in packets:
+        if packet.key in packet_by_key:
+            raise PITDataContractErrorV1(
+                PITReasonCodeV1.PIT_CONFLICTING_DUPLICATE,
+                "duplicate PIT formula-input packet key",
+            )
+        packet_by_key[packet.key] = packet
+    available_keys = {
+        key
+        for key, capability in capability_by_key.items()
+        if capability.availability is PITInputAvailabilityV2.AVAILABLE
+    }
+    if set(packet_by_key) != available_keys:
+        raise PITDataContractErrorV1(
+            PITReasonCodeV1.PIT_CAPABILITY_UNAVAILABLE,
+            "packet keys must equal available capability keys exactly",
+        )
+    resolved: list[PITResolvedFormulaInputV2] = []
+    unavailable: list[PITInputCapabilityV2] = []
+    for capability in capabilities:
+        if (
+            capability.context_id != context_id
+            or capability.source_epoch_id != source_epoch_id
+            or capability.input_version != input_version
+        ):
+            raise PITDataContractErrorV1(
+                PITReasonCodeV1.PIT_CAPABILITY_UNAVAILABLE,
+                "capability context/source epoch/input version mismatch",
+            )
+        if capability.availability is not PITInputAvailabilityV2.AVAILABLE:
+            unavailable.append(capability)
+            continue
+        packet = packet_by_key[capability.key]
+        equality_pairs = (
+            (packet.context_id, capability.context_id),
+            (packet.source_epoch_id, capability.source_epoch_id),
+            (packet.input_version, capability.input_version),
+            (packet.declared_input_type, capability.declared_input_type),
+            (packet.declared_shape_or_none, capability.declared_shape_or_none),
+            (packet.unit_or_basis, capability.unit_or_basis),
+            (packet.source_field_path, capability.source_field_path),
+            (packet.event_or_snapshot_ref, capability.event_or_snapshot_ref_or_none),
+            (packet.freshness_receipt_ref, capability.freshness_receipt_ref_or_none),
+        )
+        if any(left != right for left, right in equality_pairs):
+            raise PITDataContractErrorV1(
+                PITReasonCodeV1.PIT_CAPABILITY_UNAVAILABLE,
+                "packet metadata does not exactly equal the capability binding",
+            )
+        if not _pit_packet_value_matches_type(
+            packet.value, capability.declared_input_type
+        ):
+            raise PITDataContractErrorV1(
+                PITReasonCodeV1.PIT_DECIMAL_OR_SCALE_INVALID,
+                "packet value does not match the exact declared input type",
+            )
+        resolved.append(
+            PITResolvedFormulaInputV2(
+                profile_id=capability.profile_id,
+                binding_id=capability.binding_id,
+                math_spec_id=capability.math_spec_id,
+                input_name=capability.input_name,
+                value=packet.value,
+                declared_input_type=capability.declared_input_type,
+                declared_shape_or_none=capability.declared_shape_or_none,
+                unit_or_basis=capability.unit_or_basis,
+                source_field_path=capability.source_field_path,
+                context_id=context_id,
+                source_epoch_id=source_epoch_id,
+                input_version=input_version,
+                packet_ref=packet.packet_id,
+                event_or_snapshot_ref=packet.event_or_snapshot_ref,
+                freshness_receipt_ref=packet.freshness_receipt_ref,
+            )
+        )
+    required_keys = frozenset(capability_by_key)
+    actual_keys = {
+        (value.profile_id, value.binding_id) for value in resolved
+    } | {value.key for value in unavailable}
+    return PITFormulaInputResolutionV2(
+        resolution_id=resolution_id,
+        context_id=context_id,
+        source_epoch_id=source_epoch_id,
+        input_version=input_version,
+        resolved_inputs=tuple(resolved),
+        unavailable_capabilities=tuple(unavailable),
+        required_keys=required_keys,
+        exact_key_set_equal=actual_keys == set(required_keys),
+    )

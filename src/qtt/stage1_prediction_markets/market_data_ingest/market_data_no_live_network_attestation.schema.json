@@ -1,5 +1,12 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$comment": "Legacy V1 fixture attestation only; PIT V2 transport-neutral contracts are intentionally outside this record type.",
+  "not": {
+    "properties": {
+      "schema_version": {"pattern": "^PIT_.*_V2$"}
+    },
+    "required": ["schema_version"]
+  },
   "additionalProperties": false,
   "properties": {
     "atomicrows_authority_created": {

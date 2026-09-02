@@ -1,5 +1,50 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$defs": {
+    "reconstructionReceiptV2": {
+      "additionalProperties": false,
+      "properties": {
+        "receipt_id": {"type": "string", "minLength": 1},
+        "profile_id": {"enum": ["GEMINI_TITAN_DIRECT", "POLYMARKET_US_RETAIL_DIRECT", "KALSHI_US_DCM_DIRECT"]},
+        "instrument_id": {"type": "string", "minLength": 1},
+        "connection_epoch": {"type": "string", "minLength": 1},
+        "anchor_ref": {"type": "string", "minLength": 1},
+        "first_event_ordinal": {"type": "integer", "minimum": 1},
+        "last_event_ordinal": {"type": "integer", "minimum": 1},
+        "provider_sequence_coverage_or_none": {"type": ["string", "null"]},
+        "expected_state_ref": {"type": "string", "minLength": 1},
+        "reconstructed_state_ref": {"type": "string", "minLength": 1},
+        "expected_levels": {"type": "array", "items": {"$ref": "orderbook_snapshot.schema.json#/$defs/bookStateLevelV2"}},
+        "reconstructed_levels": {"type": "array", "items": {"$ref": "orderbook_snapshot.schema.json#/$defs/bookStateLevelV2"}},
+        "complete_semantic_state_equal": {"const": true},
+        "independent_oracle_class": {"type": "string", "minLength": 1},
+        "unavailable_limits": {"type": "array", "items": {"type": "string", "minLength": 1}, "uniqueItems": true},
+        "completed_event_refs": {"type": "array", "items": {"type": "string", "minLength": 1}, "minItems": 1, "uniqueItems": true},
+        "commit_completion_refs": {"type": "array", "items": {"type": "string", "minLength": 1}, "minItems": 1, "uniqueItems": true},
+        "no_effect_flags": {"$ref": "orderbook_snapshot.schema.json#/$defs/noEffectFlagsV1"}
+      },
+      "required": ["receipt_id", "profile_id", "instrument_id", "connection_epoch", "anchor_ref", "first_event_ordinal", "last_event_ordinal", "provider_sequence_coverage_or_none", "expected_state_ref", "reconstructed_state_ref", "expected_levels", "reconstructed_levels", "complete_semantic_state_equal", "independent_oracle_class", "unavailable_limits", "completed_event_refs", "commit_completion_refs", "no_effect_flags"],
+      "type": "object"
+    },
+    "availabilityReceiptV1": {
+      "additionalProperties": false,
+      "properties": {
+        "receipt_id": {"type": "string", "minLength": 1},
+        "profile_id": {"enum": ["GEMINI_TITAN_DIRECT", "POLYMARKET_US_RETAIL_DIRECT", "KALSHI_US_DCM_DIRECT"]},
+        "partition_id": {"type": "string", "minLength": 1},
+        "snapshot_ref": {"type": "string", "minLength": 1},
+        "commit_completion_ref": {"type": "string", "minLength": 1},
+        "availability": {"enum": ["UNAVAILABLE", "AVAILABLE_CURRENT_STATE", "AVAILABLE_CHANGE_LEVEL", "STALE", "RIGHTS_BLOCKED", "LIFECYCLE_BLOCKED", "CLOCK_BLOCKED"]},
+        "reason_or_none": {"type": ["string", "null"]},
+        "strategy_available_at_utc_or_none": {"type": ["string", "null"], "format": "date-time"},
+        "storage_commit_evidence_ref_or_none": {"type": ["string", "null"]},
+        "published_pointer": {"type": "boolean"},
+        "no_effect_flags": {"$ref": "orderbook_snapshot.schema.json#/$defs/noEffectFlagsV1"}
+      },
+      "required": ["receipt_id", "profile_id", "partition_id", "snapshot_ref", "commit_completion_ref", "availability", "reason_or_none", "strategy_available_at_utc_or_none", "storage_commit_evidence_ref_or_none", "published_pointer", "no_effect_flags"],
+      "type": "object"
+    }
+  },
   "additionalProperties": false,
   "properties": {
     "accepted_source_dependency_refs": {
@@ -702,7 +747,7 @@
       "const": false
     },
     "record_type": {
-      "const": "ORDERBOOK_EVENT_STATE_SNAPSHOT_DOWNSTREAM_HANDOFF"
+      "enum": ["ORDERBOOK_EVENT_STATE_SNAPSHOT_DOWNSTREAM_HANDOFF", "PIT_SNAPSHOT_DOWNSTREAM_HANDOFF"]
     },
     "rejected_action_or_payload_class": {
       "type": "string"
@@ -770,7 +815,7 @@
       "const": false
     },
     "schema_version": {
-      "const": "PR133_ORDERBOOK_EVENT_STATE_SNAPSHOT_SCHEMA_V1"
+      "enum": ["PR133_ORDERBOOK_EVENT_STATE_SNAPSHOT_SCHEMA_V1", "PIT_SNAPSHOT_DOWNSTREAM_HANDOFF_V2"]
     },
     "scope_id": {
       "enum": [
@@ -917,9 +962,35 @@
     },
     "websocket_client_created": {
       "const": false
-    }
+    },
+    "profile_id": {},
+    "state_ref": {},
+    "state": {},
+    "reconstruction_receipt": {},
+    "reconstruction_input_lock": {},
+    "availability_receipt": {},
+    "canonical_event_ref": {},
+    "capture_and_gap_receipt_ref": {},
+    "commit_completion_ref": {},
+    "provider_sequence_available": {},
+    "provider_publication_time_available": {},
+    "change_level_history_available": {},
+    "full_depth_available": {},
+    "durable_strategy_admission_available": {},
+    "no_network_effect": {},
+    "no_outbox_or_order_effect": {},
+    "no_capital_or_private_state_effect": {},
+    "no_llm_or_quantum_effect": {},
+    "no_effect_flags": {}
   },
-  "required": [
+  "required": ["schema_version", "record_type", "created_by", "authority_class", "handoff_id"],
+  "oneOf": [
+    {
+      "properties": {
+        "schema_version": {"const": "PR133_ORDERBOOK_EVENT_STATE_SNAPSHOT_SCHEMA_V1"},
+        "record_type": {"const": "ORDERBOOK_EVENT_STATE_SNAPSHOT_DOWNSTREAM_HANDOFF"}
+      },
+      "required": [
     "schema_version",
     "record_type",
     "created_by",
@@ -1028,6 +1099,34 @@
     "downstream_atomicrows_bridge_authorized_now",
     "downstream_atomicrows_bridge_recommended_after_pr135",
     "downstream_atomicrows_bundle_sha_authorized_now"
+      ]
+    },
+    {
+      "properties": {
+        "schema_version": {"const": "PIT_SNAPSHOT_DOWNSTREAM_HANDOFF_V2"},
+        "record_type": {"const": "PIT_SNAPSHOT_DOWNSTREAM_HANDOFF"},
+        "profile_id": {"enum": ["GEMINI_TITAN_DIRECT", "POLYMARKET_US_RETAIL_DIRECT", "KALSHI_US_DCM_DIRECT"]},
+        "state_ref": {"type": "string", "minLength": 1},
+        "state": {"$ref": "orderbook_snapshot.schema.json#/$defs/orderBookStateV2"},
+        "reconstruction_receipt": {"$ref": "#/$defs/reconstructionReceiptV2"},
+        "reconstruction_input_lock": {"$ref": "snapshot_builder_binding.schema.json#/$defs/reconstructionInputLockV2"},
+        "availability_receipt": {"$ref": "#/$defs/availabilityReceiptV1"},
+        "canonical_event_ref": {"type": "string", "minLength": 1},
+        "capture_and_gap_receipt_ref": {"type": "string", "minLength": 1},
+        "commit_completion_ref": {"type": "string", "minLength": 1},
+        "provider_sequence_available": {"type": "boolean"},
+        "provider_publication_time_available": {"type": "boolean"},
+        "change_level_history_available": {"type": "boolean"},
+        "full_depth_available": {"type": "boolean"},
+        "durable_strategy_admission_available": {"type": "boolean"},
+        "no_network_effect": {"const": true},
+        "no_outbox_or_order_effect": {"const": true},
+        "no_capital_or_private_state_effect": {"const": true},
+        "no_llm_or_quantum_effect": {"const": true},
+        "no_effect_flags": {"$ref": "orderbook_snapshot.schema.json#/$defs/noEffectFlagsV1"}
+      },
+      "required": ["schema_version", "record_type", "created_by", "authority_class", "handoff_id", "profile_id", "state_ref", "state", "reconstruction_receipt", "reconstruction_input_lock", "availability_receipt", "canonical_event_ref", "capture_and_gap_receipt_ref", "commit_completion_ref", "provider_sequence_available", "provider_publication_time_available", "change_level_history_available", "full_depth_available", "durable_strategy_admission_available", "no_network_effect", "no_outbox_or_order_effect", "no_capital_or_private_state_effect", "no_llm_or_quantum_effect", "no_effect_flags"]
+    }
   ],
   "title": "PR133 Snapshot Downstream Handoff",
   "type": "object"

@@ -1,5 +1,277 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$defs": {
+    "clockSetV3": {
+      "additionalProperties": false,
+      "properties": {
+        "provider_event_time_utc_or_none": {"type": ["string", "null"], "format": "date-time"},
+        "provider_publication_time_utc_or_none": {"type": ["string", "null"], "format": "date-time"},
+        "qtt_received_at_utc": {"type": "string", "format": "date-time"},
+        "qtt_received_monotonic_ns": {"type": "integer", "minimum": 0},
+        "qtt_parse_completed_at_utc": {"type": "string", "format": "date-time"},
+        "qtt_parse_completed_monotonic_ns": {"type": "integer", "minimum": 0},
+        "durable_commit_completed_at_utc": {"type": "string", "format": "date-time"},
+        "durable_commit_completed_monotonic_ns": {"type": "integer", "minimum": 0},
+        "strategy_available_at_utc": {"type": "string", "format": "date-time"},
+        "strategy_available_monotonic_ns": {"type": "integer", "minimum": 0},
+        "revision_effective_time_utc_or_none": {"type": ["string", "null"], "format": "date-time"},
+        "settlement_finality_time_utc_or_none": {"type": ["string", "null"], "format": "date-time"},
+        "process_epoch_id": {"type": "string", "minLength": 1},
+        "monotonic_clock_id": {"type": "string", "minLength": 1},
+        "wall_clock_source_id": {"type": "string", "minLength": 1},
+        "clock_quality_receipt_ref": {"type": "string", "minLength": 1},
+        "wall_clock_uncertainty_ns": {"type": "integer", "minimum": 0}
+      },
+      "required": [
+        "provider_event_time_utc_or_none", "provider_publication_time_utc_or_none",
+        "qtt_received_at_utc", "qtt_received_monotonic_ns",
+        "qtt_parse_completed_at_utc", "qtt_parse_completed_monotonic_ns",
+        "durable_commit_completed_at_utc", "durable_commit_completed_monotonic_ns",
+        "strategy_available_at_utc", "strategy_available_monotonic_ns",
+        "revision_effective_time_utc_or_none", "settlement_finality_time_utc_or_none",
+        "process_epoch_id", "monotonic_clock_id", "wall_clock_source_id",
+        "clock_quality_receipt_ref", "wall_clock_uncertainty_ns"
+      ],
+      "type": "object"
+    },
+    "noEffectFlagsV1": {
+      "additionalProperties": false,
+      "properties": {
+        "provider_connection_allowed": {"const": false},
+        "private_state_read_allowed": {"const": false},
+        "replay_or_paper_execution_allowed": {"const": false},
+        "llm_inference_allowed": {"const": false},
+        "qpu_execution_allowed": {"const": false},
+        "mode_or_allow_activation_allowed": {"const": false},
+        "order_release_allowed": {"const": false},
+        "capital_mutation_allowed": {"const": false}
+      },
+      "required": [
+        "provider_connection_allowed", "private_state_read_allowed",
+        "replay_or_paper_execution_allowed", "llm_inference_allowed",
+        "qpu_execution_allowed", "mode_or_allow_activation_allowed",
+        "order_release_allowed", "capital_mutation_allowed"
+      ],
+      "type": "object"
+    },
+    "bookLevelV2": {
+      "additionalProperties": false,
+      "properties": {
+        "source_side": {"type": "string", "minLength": 1},
+        "canonical_side": {"type": "string", "minLength": 1},
+        "price_text": {"type": "string", "pattern": "^-?(0|[1-9][0-9]*)(\\.[0-9]+)?$"},
+        "price": {"type": "string", "pattern": "^-?(0|[1-9][0-9]*)(\\.[0-9]+)?$"},
+        "quantity_text": {"type": "string", "pattern": "^(0|[1-9][0-9]*)(\\.[0-9]+)?$"},
+        "quantity": {"type": "string", "pattern": "^(0|[1-9][0-9]*)(\\.[0-9]+)?$"},
+        "price_scale": {"type": "integer", "minimum": 0},
+        "quantity_scale": {"type": "integer", "minimum": 0},
+        "price_increment": {"type": "string", "pattern": "^(0|[1-9][0-9]*)(\\.[0-9]+)?$"},
+        "price_origin": {"type": "string", "pattern": "^-?(0|[1-9][0-9]*)(\\.[0-9]+)?$"},
+        "quantity_increment_or_none": {
+          "type": ["string", "null"],
+          "pattern": "^(0|[1-9][0-9]*)(\\.[0-9]+)?$"
+        }
+      },
+      "required": [
+        "source_side", "canonical_side", "price_text", "price", "quantity_text",
+        "quantity", "price_scale", "quantity_scale", "price_increment",
+        "price_origin", "quantity_increment_or_none"
+      ],
+      "type": "object"
+    },
+    "absoluteUpdateV2": {
+      "additionalProperties": false,
+      "properties": {
+        "source_side": {"type": "string", "minLength": 1},
+        "canonical_side": {"type": "string", "minLength": 1},
+        "price_text": {"type": "string", "pattern": "^-?(0|[1-9][0-9]*)(\\.[0-9]+)?$"},
+        "price": {"type": "string", "pattern": "^-?(0|[1-9][0-9]*)(\\.[0-9]+)?$"},
+        "absolute_quantity_text": {"type": "string", "pattern": "^(0|[1-9][0-9]*)(\\.[0-9]+)?$"},
+        "absolute_quantity": {"type": "string", "pattern": "^(0|[1-9][0-9]*)(\\.[0-9]+)?$"},
+        "price_scale": {"type": "integer", "minimum": 0},
+        "quantity_scale": {"type": "integer", "minimum": 0},
+        "price_increment": {"type": "string", "pattern": "^(0|[1-9][0-9]*)(\\.[0-9]+)?$"},
+        "price_origin": {"type": "string", "pattern": "^-?(0|[1-9][0-9]*)(\\.[0-9]+)?$"},
+        "quantity_increment_or_none": {
+          "type": ["string", "null"],
+          "pattern": "^(0|[1-9][0-9]*)(\\.[0-9]+)?$"
+        }
+      },
+      "required": [
+        "source_side", "canonical_side", "price_text", "price",
+        "absolute_quantity_text", "absolute_quantity", "price_scale",
+        "quantity_scale", "price_increment", "price_origin",
+        "quantity_increment_or_none"
+      ],
+      "type": "object"
+    },
+    "deltaLevelV2": {
+      "additionalProperties": false,
+      "properties": {
+        "source_side": {"type": "string", "minLength": 1},
+        "canonical_side": {"type": "string", "minLength": 1},
+        "price_text": {"type": "string", "pattern": "^-?(0|[1-9][0-9]*)(\\.[0-9]+)?$"},
+        "price": {"type": "string", "pattern": "^-?(0|[1-9][0-9]*)(\\.[0-9]+)?$"},
+        "quantity_delta_text": {"type": "string", "pattern": "^-?(0|[1-9][0-9]*)(\\.[0-9]+)?$"},
+        "quantity_delta": {"type": "string", "pattern": "^-?(0|[1-9][0-9]*)(\\.[0-9]+)?$"},
+        "price_scale": {"type": "integer", "minimum": 0},
+        "quantity_scale": {"type": "integer", "minimum": 0},
+        "price_increment": {"type": "string", "pattern": "^(0|[1-9][0-9]*)(\\.[0-9]+)?$"},
+        "price_origin": {"type": "string", "pattern": "^-?(0|[1-9][0-9]*)(\\.[0-9]+)?$"},
+        "quantity_increment_or_none": {
+          "type": ["string", "null"],
+          "pattern": "^(0|[1-9][0-9]*)(\\.[0-9]+)?$"
+        }
+      },
+      "required": [
+        "source_side", "canonical_side", "price_text", "price",
+        "quantity_delta_text", "quantity_delta", "price_scale",
+        "quantity_scale", "price_increment", "price_origin",
+        "quantity_increment_or_none"
+      ],
+      "type": "object"
+    },
+    "payloadV2": {
+      "oneOf": [
+        {
+          "additionalProperties": false,
+          "properties": {
+            "levels": {"type": "array", "items": {"$ref": "#/$defs/bookLevelV2"}},
+            "provider_sequence": {"type": "integer", "minimum": 0},
+            "provider_subscription_id_or_none": {"type": ["string", "null"]},
+            "complete_provider_snapshot": {"const": true}
+          },
+          "required": ["levels", "provider_sequence", "provider_subscription_id_or_none", "complete_provider_snapshot"],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "properties": {
+            "updates": {"type": "array", "items": {"$ref": "#/$defs/absoluteUpdateV2"}},
+            "first_provider_sequence": {"type": "integer", "minimum": 0},
+            "last_provider_sequence": {"type": "integer", "minimum": 0}
+          },
+          "required": ["updates", "first_provider_sequence", "last_provider_sequence"],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "properties": {
+            "deltas": {"type": "array", "items": {"$ref": "#/$defs/deltaLevelV2"}},
+            "provider_sequence": {"type": "integer", "minimum": 0},
+            "provider_subscription_id": {"type": "string", "minLength": 1}
+          },
+          "required": ["deltas", "provider_sequence", "provider_subscription_id"],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "properties": {
+            "levels": {"type": "array", "items": {"$ref": "#/$defs/bookLevelV2"}},
+            "surface_class": {"type": "string", "minLength": 1},
+            "provider_sequence_unavailable": {"const": true},
+            "source_lifecycle_state": {
+              "oneOf": [
+                {"type": "string", "minLength": 1},
+                {"type": "integer", "minimum": 0}
+              ]
+            },
+            "market_sides_json": {"type": "string", "minLength": 1},
+            "order_price_min_tick_size_text": {"type": "string", "pattern": "^(0|[1-9][0-9]*)(\\.[0-9]+)?$"}
+          },
+          "required": ["levels", "surface_class", "provider_sequence_unavailable", "source_lifecycle_state", "market_sides_json", "order_price_min_tick_size_text"],
+          "type": "object"
+        },
+        {
+          "oneOf": [
+            {
+              "additionalProperties": false,
+              "properties": {
+                "event_kind": {"const": "CATALOG"},
+                "fields": {"$ref": "#/$defs/typedFieldsV2"}
+              },
+              "required": ["event_kind", "fields"],
+              "type": "object"
+            },
+            {
+              "additionalProperties": false,
+              "properties": {
+                "event_kind": {"const": "LIFECYCLE"},
+                "fields": {"$ref": "#/$defs/typedFieldsV2"}
+              },
+              "required": ["event_kind", "fields"],
+              "type": "object"
+            },
+            {
+              "additionalProperties": false,
+              "properties": {
+                "event_kind": {"const": "BBO"},
+                "fields": {"$ref": "#/$defs/typedFieldsV2"}
+              },
+              "required": ["event_kind", "fields"],
+              "type": "object"
+            },
+            {
+              "additionalProperties": false,
+              "properties": {
+                "event_kind": {"const": "TRADE"},
+                "fields": {"$ref": "#/$defs/typedFieldsV2"}
+              },
+              "required": ["event_kind", "fields"],
+              "type": "object"
+            },
+            {
+              "additionalProperties": false,
+              "properties": {
+                "event_kind": {"const": "SETTLEMENT"},
+                "fields": {"$ref": "#/$defs/typedFieldsV2"}
+              },
+              "required": ["event_kind", "fields"],
+              "type": "object"
+            },
+            {
+              "additionalProperties": false,
+              "properties": {
+                "event_kind": {"const": "REFERENCE_PRICE"},
+                "fields": {"$ref": "#/$defs/typedFieldsV2"}
+              },
+              "required": ["event_kind", "fields"],
+              "type": "object"
+            },
+            {
+              "additionalProperties": false,
+              "properties": {
+                "event_kind": {"const": "HEARTBEAT"},
+                "fields": {"$ref": "#/$defs/typedFieldsV2"}
+              },
+              "required": ["event_kind", "fields"],
+              "type": "object"
+            },
+            {
+              "additionalProperties": false,
+              "properties": {
+                "event_kind": {"const": "SOURCE_STATUS"},
+                "fields": {"$ref": "#/$defs/typedFieldsV2"}
+              },
+              "required": ["event_kind", "fields"],
+              "type": "object"
+            }
+          ]
+        }
+      ]
+    },
+    "typedFieldsV2": {
+      "type": "array",
+      "items": {
+        "type": "array",
+        "prefixItems": [{"type": "string", "minLength": 1}, {}],
+        "items": false,
+        "minItems": 2,
+        "maxItems": 2
+      },
+      "minItems": 1
+    }
+  },
   "additionalProperties": false,
   "properties": {
     "adapter_binding_ref": {
@@ -261,7 +533,7 @@
       "const": false
     },
     "record_type": {
-      "const": "CANONICAL_MARKET_DATA_INGEST_EVENT"
+      "enum": ["CANONICAL_MARKET_DATA_INGEST_EVENT", "PIT_CANONICAL_EVENT"]
     },
     "replay_result_created": {
       "const": false
@@ -276,7 +548,7 @@
       "const": false
     },
     "schema_version": {
-      "const": "PR132_MARKET_DATA_INGEST_SCHEMA_V1"
+      "enum": ["PR132_MARKET_DATA_INGEST_SCHEMA_V1", "PIT_CANONICAL_EVENT_V2"]
     },
     "scope_id": {
       "enum": [
@@ -310,9 +582,68 @@
     },
     "websocket_client_created": {
       "const": false
-    }
+    },
+    "event_record_id": {"type": "string", "minLength": 1},
+    "profile_id": {"enum": ["GEMINI_TITAN_DIRECT", "POLYMARKET_US_RETAIL_DIRECT", "KALSHI_US_DCM_DIRECT"]},
+    "market_id": {"type": "string", "minLength": 1},
+    "instrument_id": {"type": "string", "minLength": 1},
+    "channel": {"type": "string", "minLength": 1},
+    "connection_epoch": {"type": "string", "minLength": 1},
+    "capture_session_id": {"type": "string", "minLength": 1},
+    "committed_event_ordinal": {"type": "integer", "minimum": 1},
+    "event_kind": {"enum": ["CATALOG", "LIFECYCLE", "BOOK_SNAPSHOT", "BOOK_DELTA", "BOOK_REPLACEMENT", "BBO", "TRADE", "SETTLEMENT", "REFERENCE_PRICE", "HEARTBEAT", "SOURCE_STATUS"]},
+    "wire_dialect": {"type": "string", "minLength": 1},
+    "source_currentization_version": {"type": "string", "minLength": 1},
+    "provider_sequence_start_or_none": {"type": ["integer", "null"], "minimum": 0},
+    "provider_sequence_end_or_none": {"type": ["integer", "null"], "minimum": 0},
+    "provider_trade_id_or_none": {"type": ["string", "null"]},
+    "provider_subscription_id_or_none": {"type": ["string", "null"]},
+    "payload": {"$ref": "#/$defs/payloadV2"},
+    "depth_class": {"enum": ["COMPLETE_PROVIDER_SNAPSHOT", "INCREMENTAL_FROM_COMPLETE_ANCHOR", "PROVIDER_PUBLISHED_TOP_LEVELS_CURRENT_STATE_FRAME", "BBO_ONLY"]},
+    "clocks": {"$ref": "#/$defs/clockSetV3"},
+    "pre_state_ref": {"type": "string", "minLength": 1},
+    "post_state_ref": {"type": "string", "minLength": 1},
+    "event_disposition": {"enum": ["COMMITTED", "DUPLICATE_IGNORED", "REJECTED", "QUARANTINED"]},
+    "failure_reason_or_none": {
+      "enum": [
+        null,
+        "PIT_SCOPE_NOT_SELECTED", "PIT_RIGHTS_NOT_ADMITTED",
+        "PIT_SOURCE_CURRENTIZATION_STALE", "PIT_ENDPOINT_NOT_ALLOWLISTED",
+        "PIT_PRIVATE_FIELD_CLASS_REJECTED", "PIT_SCHEMA_OR_WIRE_DIALECT_INVALID",
+        "PIT_DECIMAL_OR_SCALE_INVALID", "PIT_TICK_GRID_INVALID",
+        "PIT_QUANTITY_GRID_INVALID", "PIT_BOOK_CROSSED_INVALID",
+        "PIT_PROVIDER_SEQUENCE_UNAVAILABLE", "PIT_SEQUENCE_GAP",
+        "PIT_CONFLICTING_DUPLICATE", "PIT_ANCHOR_REQUIRED",
+        "PIT_CLOCK_DOMAIN_MISMATCH", "PIT_WALL_CLOCK_UNCERTAIN",
+        "PIT_PROVIDER_PUBLICATION_TIME_UNAVAILABLE", "PIT_TOP_LEVEL_DEPTH_ONLY",
+        "PIT_CURRENT_STATE_PARITY_FAILED", "PIT_SOURCE_MAINTENANCE",
+        "PIT_SOURCE_UNAVAILABLE", "PIT_DURABLE_COMMIT_INCOMPLETE",
+        "PIT_RECONSTRUCTION_DIVERGENCE", "PIT_CAPABILITY_UNAVAILABLE",
+        "PIT_LIFECYCLE_BLOCKED", "PIT_FRESHNESS_EXPIRED",
+        "PIT_EFFECT_AUTHORITY_FORBIDDEN"
+      ]
+    },
+    "rights_receipt_ref": {"type": "string", "minLength": 1},
+    "source_receipt_ref": {"type": "string", "minLength": 1},
+    "commit_completion_ref": {"type": "string", "minLength": 1},
+    "prior_event_ref_or_none": {"type": ["string", "null"]},
+    "checkpoint_ref_or_none": {"type": ["string", "null"]},
+    "recovery_receipt_ref_or_none": {"type": ["string", "null"]},
+    "no_private_state_authority": {"const": true},
+    "no_order_authority": {"const": true},
+    "no_profit_claim": {"const": true},
+    "no_qpu_effect": {"const": true},
+    "no_llm_effect": {"const": true},
+    "no_effect_flags": {"$ref": "#/$defs/noEffectFlagsV1"}
   },
-  "required": [
+  "required": ["schema_version", "record_type", "created_by", "authority_class"],
+  "oneOf": [
+    {
+      "properties": {
+        "schema_version": {"const": "PR132_MARKET_DATA_INGEST_SCHEMA_V1"},
+        "record_type": {"const": "CANONICAL_MARKET_DATA_INGEST_EVENT"}
+      },
+      "required": [
     "schema_version",
     "record_type",
     "created_by",
@@ -392,6 +723,175 @@
     "no_quantum_feature_computation",
     "no_quantum_optimizer_input",
     "no_quantum_trading_signal"
+      ]
+    },
+    {
+      "properties": {
+        "schema_version": {"const": "PIT_CANONICAL_EVENT_V2"},
+        "record_type": {"const": "PIT_CANONICAL_EVENT"}
+      },
+      "allOf": [
+        {
+          "if": {"properties": {"event_kind": {"const": "BOOK_SNAPSHOT"}}, "required": ["event_kind"]},
+          "then": {
+            "properties": {
+              "payload": {"required": ["levels", "provider_sequence", "provider_subscription_id_or_none", "complete_provider_snapshot"]},
+              "depth_class": {"const": "COMPLETE_PROVIDER_SNAPSHOT"}
+            }
+          }
+        },
+        {
+          "if": {"properties": {"event_kind": {"const": "BOOK_DELTA"}}, "required": ["event_kind"]},
+          "then": {
+            "properties": {
+              "payload": {
+                "oneOf": [
+                  {"required": ["updates", "first_provider_sequence", "last_provider_sequence"]},
+                  {"required": ["deltas", "provider_sequence", "provider_subscription_id"]}
+                ]
+              },
+              "depth_class": {"const": "INCREMENTAL_FROM_COMPLETE_ANCHOR"}
+            }
+          }
+        },
+        {
+          "if": {"properties": {"event_kind": {"const": "BOOK_REPLACEMENT"}}, "required": ["event_kind"]},
+          "then": {
+            "properties": {
+              "payload": {"required": ["levels", "surface_class", "provider_sequence_unavailable", "source_lifecycle_state", "market_sides_json", "order_price_min_tick_size_text"]},
+              "depth_class": {"enum": ["COMPLETE_PROVIDER_SNAPSHOT", "PROVIDER_PUBLISHED_TOP_LEVELS_CURRENT_STATE_FRAME"]}
+            }
+          }
+        },
+        {
+          "if": {"properties": {"event_kind": {"const": "CATALOG"}}, "required": ["event_kind"]},
+          "then": {"properties": {"payload": {"properties": {"event_kind": {"const": "CATALOG"}}, "required": ["event_kind", "fields"]}}}
+        },
+        {
+          "if": {"properties": {"event_kind": {"const": "LIFECYCLE"}}, "required": ["event_kind"]},
+          "then": {"properties": {"payload": {"properties": {"event_kind": {"const": "LIFECYCLE"}}, "required": ["event_kind", "fields"]}}}
+        },
+        {
+          "if": {"properties": {"event_kind": {"const": "BBO"}}, "required": ["event_kind"]},
+          "then": {"properties": {"payload": {"properties": {"event_kind": {"const": "BBO"}}, "required": ["event_kind", "fields"]}}}
+        },
+        {
+          "if": {"properties": {"event_kind": {"const": "TRADE"}}, "required": ["event_kind"]},
+          "then": {"properties": {"payload": {"properties": {"event_kind": {"const": "TRADE"}}, "required": ["event_kind", "fields"]}}}
+        },
+        {
+          "if": {"properties": {"event_kind": {"const": "SETTLEMENT"}}, "required": ["event_kind"]},
+          "then": {"properties": {"payload": {"properties": {"event_kind": {"const": "SETTLEMENT"}}, "required": ["event_kind", "fields"]}}}
+        },
+        {
+          "if": {"properties": {"event_kind": {"const": "REFERENCE_PRICE"}}, "required": ["event_kind"]},
+          "then": {"properties": {"payload": {"properties": {"event_kind": {"const": "REFERENCE_PRICE"}}, "required": ["event_kind", "fields"]}}}
+        },
+        {
+          "if": {"properties": {"event_kind": {"const": "HEARTBEAT"}}, "required": ["event_kind"]},
+          "then": {"properties": {"payload": {"properties": {"event_kind": {"const": "HEARTBEAT"}}, "required": ["event_kind", "fields"]}}}
+        },
+        {
+          "if": {"properties": {"event_kind": {"const": "SOURCE_STATUS"}}, "required": ["event_kind"]},
+          "then": {"properties": {"payload": {"properties": {"event_kind": {"const": "SOURCE_STATUS"}}, "required": ["event_kind", "fields"]}}}
+        },
+        {
+          "if": {"properties": {"profile_id": {"const": "GEMINI_TITAN_DIRECT"}}, "required": ["profile_id"]},
+          "then": {
+            "properties": {
+              "event_kind": {"enum": ["CATALOG", "LIFECYCLE", "BOOK_SNAPSHOT", "BOOK_DELTA", "BBO", "TRADE", "SETTLEMENT", "SOURCE_STATUS"]},
+              "wire_dialect": {"const": "GEMINI_TITAN_DIFFERENTIAL_DEPTH_V1"},
+              "provider_subscription_id_or_none": {"type": "null"}
+            }
+          }
+        },
+        {
+          "if": {"properties": {"profile_id": {"const": "POLYMARKET_US_RETAIL_DIRECT"}}, "required": ["profile_id"]},
+          "then": {
+            "properties": {
+              "event_kind": {"enum": ["CATALOG", "LIFECYCLE", "BOOK_REPLACEMENT", "BBO", "TRADE", "SETTLEMENT", "HEARTBEAT", "SOURCE_STATUS"]},
+              "wire_dialect": {"enum": ["POLYMARKET_RETAIL_CAMEL_STRING_V1", "POLYMARKET_RETAIL_SNAKE_NUMERIC_V1"]},
+              "provider_sequence_start_or_none": {"type": "null"},
+              "provider_sequence_end_or_none": {"type": "null"},
+              "provider_subscription_id_or_none": {"type": "null"}
+            }
+          }
+        },
+        {
+          "if": {"properties": {"profile_id": {"const": "KALSHI_US_DCM_DIRECT"}}, "required": ["profile_id"]},
+          "then": {
+            "properties": {
+              "event_kind": {"enum": ["CATALOG", "LIFECYCLE", "BOOK_SNAPSHOT", "BOOK_DELTA", "TRADE", "SETTLEMENT", "HEARTBEAT", "SOURCE_STATUS"]},
+              "wire_dialect": {"const": "KALSHI_TRADE_API_WS_V2_FIXED_POINT"}
+            }
+          }
+        },
+        {
+          "if": {"properties": {"profile_id": {"const": "GEMINI_TITAN_DIRECT"}, "event_kind": {"const": "BOOK_DELTA"}}, "required": ["profile_id", "event_kind"]},
+          "then": {"properties": {"payload": {"required": ["updates", "first_provider_sequence", "last_provider_sequence"]}}}
+        },
+        {
+          "if": {"properties": {"profile_id": {"const": "KALSHI_US_DCM_DIRECT"}, "event_kind": {"const": "BOOK_DELTA"}}, "required": ["profile_id", "event_kind"]},
+          "then": {"properties": {"payload": {"required": ["deltas", "provider_sequence", "provider_subscription_id"]}}}
+        },
+        {
+          "if": {"properties": {"event_kind": {"enum": ["BOOK_SNAPSHOT", "BOOK_DELTA"]}}, "required": ["event_kind"]},
+          "then": {
+            "properties": {
+              "provider_sequence_start_or_none": {"type": "integer"},
+              "provider_sequence_end_or_none": {"type": "integer"}
+            }
+          },
+          "else": {
+            "properties": {
+              "provider_sequence_start_or_none": {"type": "null"},
+              "provider_sequence_end_or_none": {"type": "null"}
+            }
+          }
+        },
+        {
+          "if": {"properties": {"profile_id": {"const": "KALSHI_US_DCM_DIRECT"}, "event_kind": {"enum": ["BOOK_SNAPSHOT", "BOOK_DELTA"]}}, "required": ["profile_id", "event_kind"]},
+          "then": {"properties": {"provider_subscription_id_or_none": {"type": "string", "minLength": 1}}}
+        },
+        {
+          "if": {"properties": {"wire_dialect": {"const": "POLYMARKET_RETAIL_CAMEL_STRING_V1"}, "event_kind": {"const": "BOOK_REPLACEMENT"}}, "required": ["wire_dialect", "event_kind"]},
+          "then": {"properties": {"payload": {"properties": {"source_lifecycle_state": {"type": "string", "minLength": 1}}}}}
+        },
+        {
+          "if": {"properties": {"wire_dialect": {"const": "POLYMARKET_RETAIL_SNAKE_NUMERIC_V1"}, "event_kind": {"const": "BOOK_REPLACEMENT"}}, "required": ["wire_dialect", "event_kind"]},
+          "then": {"properties": {"payload": {"properties": {"source_lifecycle_state": {"type": "integer", "minimum": 0}}}}}
+        },
+        {
+          "if": {"properties": {"event_kind": {"const": "TRADE"}, "profile_id": {"enum": ["GEMINI_TITAN_DIRECT", "KALSHI_US_DCM_DIRECT"]}}, "required": ["event_kind", "profile_id"]},
+          "then": {"properties": {"provider_trade_id_or_none": {"type": "string", "minLength": 1}}},
+          "else": {"properties": {"provider_trade_id_or_none": {"type": "null"}}}
+        },
+        {
+          "properties": {
+            "clocks": {"properties": {"provider_publication_time_utc_or_none": {"type": "null"}}}
+          }
+        },
+        {
+          "if": {"properties": {"event_disposition": {"const": "COMMITTED"}}, "required": ["event_disposition"]},
+          "then": {"properties": {"failure_reason_or_none": {"type": "null"}}},
+          "else": {"properties": {"failure_reason_or_none": {"not": {"type": "null"}}}}
+        }
+      ],
+      "required": [
+        "schema_version", "record_type", "created_by", "authority_class",
+        "event_record_id", "profile_id", "market_id", "instrument_id", "channel",
+        "connection_epoch", "capture_session_id", "committed_event_ordinal",
+        "event_kind", "wire_dialect", "source_currentization_version",
+        "provider_sequence_start_or_none", "provider_sequence_end_or_none",
+        "provider_trade_id_or_none", "provider_subscription_id_or_none", "payload",
+        "depth_class", "clocks", "pre_state_ref", "post_state_ref",
+        "event_disposition", "failure_reason_or_none", "rights_receipt_ref",
+        "source_receipt_ref", "commit_completion_ref", "prior_event_ref_or_none",
+        "checkpoint_ref_or_none", "recovery_receipt_ref_or_none",
+        "no_private_state_authority", "no_order_authority", "no_profit_claim",
+        "no_qpu_effect", "no_llm_effect", "no_effect_flags"
+      ]
+    }
   ],
   "title": "PR132 Canonical Market Data Ingest Event",
   "type": "object"

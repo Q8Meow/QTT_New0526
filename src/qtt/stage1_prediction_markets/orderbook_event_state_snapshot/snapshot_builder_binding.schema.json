@@ -1,5 +1,40 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$defs": {
+    "reconstructionInputLockV2": {
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {"const": "PIT_RECONSTRUCTION_INPUT_LOCK_V2"},
+        "record_type": {"const": "PIT_RECONSTRUCTION_INPUT_LOCK"},
+        "created_by": {"type": "string", "minLength": 1},
+        "authority_class": {"type": "string", "minLength": 1},
+        "lock_id": {"type": "string", "minLength": 1},
+        "profile_id": {"enum": ["GEMINI_TITAN_DIRECT", "POLYMARKET_US_RETAIL_DIRECT", "KALSHI_US_DCM_DIRECT"]},
+        "market_id": {"type": "string", "minLength": 1},
+        "instrument_id": {"type": "string", "minLength": 1},
+        "capture_session_id": {"type": "string", "minLength": 1},
+        "connection_epoch": {"type": "string", "minLength": 1},
+        "wire_dialect": {"type": "string", "minLength": 1},
+        "first_completed_event_ordinal": {"type": "integer", "minimum": 0},
+        "last_completed_event_ordinal": {"type": "integer", "minimum": 0},
+        "provider_sequence_start_or_none": {"type": ["integer", "null"], "minimum": 0},
+        "provider_sequence_end_or_none": {"type": ["integer", "null"], "minimum": 0},
+        "process_epoch_id": {"type": "string", "minLength": 1},
+        "monotonic_clock_id": {"type": "string", "minLength": 1},
+        "source_receipt_ref": {"type": "string", "minLength": 1},
+        "rights_receipt_ref": {"type": "string", "minLength": 1},
+        "commit_completion_refs": {"type": "array", "items": {"type": "string", "minLength": 1}, "minItems": 1, "uniqueItems": true},
+        "state_ref": {"type": "string", "minLength": 1},
+        "state_vector": {"$ref": "orderbook_snapshot.schema.json#/$defs/stateVectorV1"},
+        "reconstruction_receipt_ref": {"type": "string", "minLength": 1},
+        "capability_context_id": {"type": "string", "minLength": 1},
+        "serializer_version": {"const": "QKU_DETERMINISTIC_JSON_V1"},
+        "no_effect_flags": {"$ref": "orderbook_snapshot.schema.json#/$defs/noEffectFlagsV1"}
+      },
+      "required": ["lock_id", "profile_id", "market_id", "instrument_id", "capture_session_id", "connection_epoch", "wire_dialect", "first_completed_event_ordinal", "last_completed_event_ordinal", "provider_sequence_start_or_none", "provider_sequence_end_or_none", "process_epoch_id", "monotonic_clock_id", "source_receipt_ref", "rights_receipt_ref", "commit_completion_refs", "state_ref", "state_vector", "reconstruction_receipt_ref", "capability_context_id", "serializer_version", "no_effect_flags"],
+      "type": "object"
+    }
+  },
   "additionalProperties": false,
   "properties": {
     "accepted_source_dependency_refs": {
@@ -705,7 +740,7 @@
       "const": false
     },
     "record_type": {
-      "const": "ORDERBOOK_EVENT_STATE_SNAPSHOT_BUILDER_BINDING"
+      "enum": ["ORDERBOOK_EVENT_STATE_SNAPSHOT_BUILDER_BINDING", "PIT_RECONSTRUCTION_INPUT_LOCK"]
     },
     "rejected_action_or_payload_class": {
       "type": "string"
@@ -773,7 +808,7 @@
       "const": false
     },
     "schema_version": {
-      "const": "PR133_ORDERBOOK_EVENT_STATE_SNAPSHOT_SCHEMA_V1"
+      "enum": ["PR133_ORDERBOOK_EVENT_STATE_SNAPSHOT_SCHEMA_V1", "PIT_RECONSTRUCTION_INPUT_LOCK_V2"]
     },
     "scope_id": {
       "enum": [
@@ -920,9 +955,38 @@
     },
     "websocket_client_created": {
       "const": false
-    }
+    },
+    "lock_id": {},
+    "profile_id": {},
+    "market_id": {},
+    "instrument_id": {},
+    "capture_session_id": {},
+    "connection_epoch": {},
+    "wire_dialect": {},
+    "first_completed_event_ordinal": {},
+    "last_completed_event_ordinal": {},
+    "provider_sequence_start_or_none": {},
+    "provider_sequence_end_or_none": {},
+    "process_epoch_id": {},
+    "monotonic_clock_id": {},
+    "source_receipt_ref": {},
+    "rights_receipt_ref": {},
+    "commit_completion_refs": {},
+    "state_ref": {},
+    "state_vector": {},
+    "reconstruction_receipt_ref": {},
+    "capability_context_id": {},
+    "serializer_version": {},
+    "no_effect_flags": {}
   },
-  "required": [
+  "required": ["schema_version", "record_type", "created_by", "authority_class"],
+  "oneOf": [
+    {
+      "properties": {
+        "schema_version": {"const": "PR133_ORDERBOOK_EVENT_STATE_SNAPSHOT_SCHEMA_V1"},
+        "record_type": {"const": "ORDERBOOK_EVENT_STATE_SNAPSHOT_BUILDER_BINDING"}
+      },
+      "required": [
     "schema_version",
     "record_type",
     "created_by",
@@ -1019,6 +1083,16 @@
     "future_quantum_use_requires_pr116_pr117_data_chain",
     "future_quantum_use_requires_replay_paper_validation",
     "future_quantum_use_requires_owner_approval"
+      ]
+    },
+    {
+      "$ref": "#/$defs/reconstructionInputLockV2",
+      "properties": {
+        "schema_version": {"const": "PIT_RECONSTRUCTION_INPUT_LOCK_V2"},
+        "record_type": {"const": "PIT_RECONSTRUCTION_INPUT_LOCK"}
+      },
+      "required": ["schema_version", "record_type", "created_by", "authority_class"]
+    }
   ],
   "title": "PR133 Snapshot Builder Binding",
   "type": "object"
