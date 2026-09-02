@@ -15,6 +15,8 @@ from typing import Any, Callable, Mapping
 
 import pytest
 
+import tools.validate_repair_pr_changed_file_scope as runtime_artifact_policy
+
 
 _T0 = datetime(2026, 8, 30, 12, 0, tzinfo=UTC)
 _SELECTED_PROFILE_VALUES = (
@@ -3883,8 +3885,23 @@ def _case_physical_anti_sprawl() -> None:
     committed = _git_paths(("diff", "--name-only", "--diff-filter=ACDMRTUXB", "origin/main...HEAD"))
     staged = _git_paths(("diff", "--cached", "--name-only", "--diff-filter=ACDMRTUXB"))
     unstaged = _git_paths(("diff", "--name-only", "--diff-filter=ACDMRTUXB"))
-    untracked = _git_paths(("ls-files", "--others", "--exclude-standard"))
-    changed = committed | staged | unstaged | untracked
+    raw_untracked = _git_paths(("ls-files", "--others", "--exclude-standard"))
+    versioned_runtime_artifacts = {
+        path
+        for versioned_paths in (committed, staged, unstaged)
+        for path in versioned_paths
+        if runtime_artifact_policy._is_transient_runtime_artifact_path(path)
+    }
+    assert not versioned_runtime_artifacts
+    transient_untracked = {
+        path
+        for path in raw_untracked
+        if runtime_artifact_policy._is_transient_runtime_artifact_path(path)
+    }
+    semantic_untracked = raw_untracked - transient_untracked
+    assert transient_untracked.isdisjoint(semantic_untracked)
+    assert transient_untracked | semantic_untracked == raw_untracked
+    changed = committed | staged | unstaged | semantic_untracked
     assert len(_ALLOWED_SEMANTIC_PATHS) == 30
     assert len(_ALLOWED_CENTRAL_CLOSURE_PATHS) == 8
     assert _ALLOWED_SEMANTIC_PATHS.isdisjoint(_ALLOWED_CENTRAL_CLOSURE_PATHS)
@@ -3900,7 +3917,7 @@ def _case_physical_anti_sprawl() -> None:
         _git_paths(("diff", "--name-only", "--diff-filter=A", "origin/main...HEAD"))
         | _git_paths(("diff", "--cached", "--name-only", "--diff-filter=A"))
         | _git_paths(("diff", "--name-only", "--diff-filter=A"))
-        | untracked
+        | semantic_untracked
     )
     assert added == {"tests/source_evidence/test_s1_pit_data_phase_a_01.py"}
     source = Path("tests/source_evidence/test_s1_pit_data_phase_a_01.py").read_text(
