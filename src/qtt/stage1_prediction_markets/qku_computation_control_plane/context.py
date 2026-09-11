@@ -2,8 +2,9 @@
 
 from __future__ import annotations
 
+import re
 from dataclasses import dataclass
-from datetime import UTC, datetime, timedelta
+from datetime import UTC, datetime, timedelta, timezone
 from decimal import (
     Context,
     Decimal,
@@ -348,3 +349,89 @@ class ComputationContextKeyV1:
                 ReasonCode.STALE_CONTEXT,
                 "context observation exceeds the declared maximum age",
             )
+
+
+# F12 exact-input ports; legacy datetime and numeric behavior stays above.
+def _native_require(value: bool, code: str) -> None:
+    if not value:
+        raise ContractValidationError(ReasonCode.INVALID_CONTRACT, code)
+
+
+def _native_reference_reason(error: ContractValidationError, allowed: frozenset[str]) -> str | None:
+    # Only exact failures produced by this selected reference layer are translated.
+    if type(error) is not ContractValidationError or error.reason_code is not ReasonCode.INVALID_CONTRACT:
+        return None
+    for detail in allowed:
+        if error.args == (f"{ReasonCode.INVALID_CONTRACT}: {detail}",):
+            return detail
+    return None
+
+def _native_text(value: object) -> str:
+    _native_require(type(value) is str and bool(value) and (value == value.strip()), 'TEXT')
+    _native_require(
+        all((ord(c) >= 32 and ord(c) != 127 and (not 55296 <= ord(c) <= 57343) for c in value)),
+        'TEXT'
+    )
+    return value
+
+def _native_ident(x):
+    _native_text(x)
+    _native_require(
+        len(x) <= 256 and (not any((ord(c) < 33 or 127 <= ord(c) < 160 for c in x))),
+        'IDENTITY'
+    )
+    return x
+
+def _native_obj(x, required, optional=()):
+    _native_require(
+        type(x) is dict and set(required) <= set(x) and (set(x) <= set(required) | set(optional)),
+        'NATIVE_FIELDS'
+    )
+    return x
+
+def _native_scalar(value: object, kind: str) -> bool:
+    """F12's selected boolean specialization; no numeric scalar branch is claimed."""
+    _native_require(type(kind) is str and kind == "bool", "UNREGISTERED_SCALAR")
+    _native_require(type(value) is bool, "BOOLEAN")
+    return value
+
+def _native_utc_nanoseconds(value):
+    """RFC3339 instant to exact epoch ns, including numeric offsets.
+
+    No leap-second conversion owner is bound. Unknown -00:00 offset is rejected;
+    normalized UTC must stay within calendar years 1..9999. No float is used.
+    """
+    _native_require(type(value) is str, 'UTC_NANOSECONDS')
+    m = re.fullmatch(
+        '(\\d{4}-\\d\\d-\\d\\dT\\d\\d:\\d\\d:\\d\\d)(?:\\.(\\d{1,9}))?(Z|[+-]\\d\\d:\\d\\d)',
+        value,
+        flags=re.ASCII
+    )
+    _native_require(m is not None and m[3] != '-00:00', 'UTC_NANOSECONDS')
+    # CPython accepts ISO 24:00 midnight; F12's RFC3339 subset does not.
+    _native_require(int(m[1][11:13]) < 24, 'UTC_NANOSECONDS')
+    try:
+        dt = datetime.fromisoformat(m[1] + ('+00:00' if m[3] == 'Z' else m[3])).astimezone(timezone.utc)
+    except (ValueError, OverflowError) as e:
+        raise ContractValidationError(ReasonCode.INVALID_CONTRACT, 'UTC_NANOSECONDS') from e
+    if m[3] != 'Z':
+        _native_require(int(m[3][1:3]) < 24 and int(m[3][4:6]) < 60, 'UTC_NANOSECONDS')
+    delta = dt - datetime(1970, 1, 1, tzinfo=timezone.utc)
+    return (delta.days * 86400 + delta.seconds) * 1000000000 + int((m[2] or '').ljust(9, '0') or '0')
+
+def _native_utc_receipt_pair(value):
+    """One exact UTC conversion owner for V1/V3 compatibility projections."""
+    ns = _native_utc_nanoseconds(value)
+    dt = datetime.fromisoformat(value.replace('Z', '+00:00')).astimezone(timezone.utc)
+    delta = dt - datetime(1970, 1, 1, tzinfo=timezone.utc)
+    floor_us = (delta.days * 86400 + delta.seconds) * 1000000 + delta.microseconds
+    remainder = ns - floor_us * 1000
+    _native_require(0 <= remainder < 1000, 'PIT_TIME_PROJECTION_MISMATCH')
+    stamp = f'{dt.year:04d}-{dt.month:02d}-{dt.day:02d}T{dt.hour:02d}:{dt.minute:02d}:{dt.second:02d}'
+    return {
+        'source_text': value,
+        'utc_ns_text': str(ns),
+        'canonical_utc': stamp + f'.{ns % 1000000000:09d}Z',
+        'receipt_utc_floor': dt.isoformat(timespec='microseconds').replace('+00:00', 'Z'),
+        'nanosecond_remainder': remainder
+    }
