@@ -78,6 +78,16 @@ ST12_BRANCH_CASES = (
             "agent/*st12h-validation-currentization-operations-publication",
         ),
     ),
+    (
+        context.F12_EXACT_TIME_COMPOSITION_BRANCH,
+        (
+            context.F12_EXACT_TIME_COMPOSITION_BRANCH.upper(),
+            "prefix-" + context.F12_EXACT_TIME_COMPOSITION_BRANCH,
+            context.F12_EXACT_TIME_COMPOSITION_BRANCH + "-suffix",
+            context.F12_EXACT_TIME_COMPOSITION_BRANCH + "/",
+            "f12-exact-time-*",
+        ),
+    ),
 )
 
 
@@ -169,7 +179,7 @@ def test_st12_inherited_math_receipt_repair_branch_is_exactly_classified():
 @pytest.mark.parametrize(
     ("branch", "adversarial_branches"),
     ST12_BRANCH_CASES,
-    ids=("st12a", "st12b", "st12c", "st12e", "st12d", "st12f", "st12h"),
+    ids=("st12a", "st12b", "st12c", "st12e", "st12d", "st12f", "st12h", "f12"),
 )
 def test_st12_owner_authorized_branches_are_exactly_validation_only(
     branch: str,
@@ -177,65 +187,130 @@ def test_st12_owner_authorized_branches_are_exactly_validation_only(
 ):
     assert context.is_owner_authorized_validation_branch(branch)
     assert context.roadmap_pr_number(branch) is None
-    assert context.is_branch_allowed_for_upstream_pr_gate(branch, "PR159R")
-    assert context.is_downstream_or_main_validation_branch(
-        branch,
-        after_pr=138,
-        allow_repair=False,
-    )
+    for gate in ("PR159R", "PR160"):
+        assert context.is_branch_allowed_for_upstream_pr_gate(branch, gate)
+    for threshold in (94, 95, 96, 138):
+        assert context.is_downstream_or_main_validation_branch(
+            branch, after_pr=threshold, allow_repair=False,
+        )
     assert not context.is_main_cumulative_branch(branch)
     assert not context.is_repair_branch(branch)
+    assert not context.is_validation_infrastructure_branch(branch)
+    assert not context.is_validation_execution_branch(branch)
+    assert branch not in context.EXPLICIT_DOWNSTREAM_REPAIR_BRANCH_PR_NUMBERS
     assert not context.is_downstream_roadmap_branch(
-        branch,
-        after_pr=1,
-        allow_repair=False,
+        branch, after_pr=1, allow_repair=False,
     )
-    assert context.is_pr_or_later_branch(
-        branch,
-        minimum_pr=1,
-        allow_main=False,
-        allow_repair=False,
-    )
+    for minimum in (1, 99):
+        assert context.is_pr_or_later_branch(
+            branch, minimum_pr=minimum, allow_main=False, allow_repair=False,
+        )
+    for prefix in ("refs/heads/", "refs/remotes/origin/", "origin/"):
+        assert context.normalize_branch_context(prefix + branch) == branch
+        assert context.is_owner_authorized_validation_branch(prefix + branch)
     for adversarial in (*adversarial_branches, "agent/other"):
         assert not context.is_owner_authorized_validation_branch(adversarial)
+        for gate in ("PR159R", "PR160"):
+            assert not context.is_branch_allowed_for_upstream_pr_gate(adversarial, gate)
+        for threshold in (94, 95, 96):
+            assert not context.is_downstream_or_main_validation_branch(
+                adversarial, after_pr=threshold, allow_repair=False,
+            )
+        assert not context.is_pr_or_later_branch(
+            adversarial, minimum_pr=99, allow_main=False, allow_repair=False,
+        )
+
+    if branch == context.F12_EXACT_TIME_COMPOSITION_BRANCH:
+        from tools import run_validation_gates as runner
+
+        builder = "build_pr168_rp5c_immutable_qku_formula_library.py"
+        assert runner.OWNER_VALIDATION_READ_ONLY_UPSTREAM_BUILDER_SCRIPT_NAMES == (
+            frozenset({builder})
+        )
+        commands = [
+            ["python", "tools/validate_pr168_rp5c_immutable_qku_formula_library.py"],
+            ["python", f"tools/{builder}", "--repo-root", "."],
+            ["python", "-B", "-m", "pytest", "tests/pr168_rp5c", "-q"],
+            ["python", "tools/independent_validate_qku_computation_control_plane_d.py"],
+            ["python", "tools/build_other.py", "--output", "synthetic-output"],
+            ["python", "tools/build_pr168_rp5c_immutable_qku_formula_library.py.copy"],
+        ]
+        original = [command.copy() for command in commands]
+        expected = [command.copy() for index, command in enumerate(commands) if index != 1]
+        filtered = runner._filter_foreign_branch_guarded_builders_for_owner_validation(
+            commands, branch=branch,
+        )
+        assert filtered == expected
+        assert commands == original
+        for unknown in ("unregistered-validation-context", *adversarial_branches):
+            retained = runner._filter_foreign_branch_guarded_builders_for_owner_validation(
+                commands, branch=unknown,
+            )
+            assert retained == original
+            assert commands == original
 
 
 def test_st12_pull_request_detached_context_uses_exact_github_head_ref(
     monkeypatch,
 ):
     _clear_github_branch_context_env(monkeypatch)
+    for name in context.BRANCH_CONTEXT_ENV_CANDIDATES:
+        monkeypatch.delenv(name, raising=False)
     monkeypatch.setenv("GITHUB_ACTIONS", "true")
     monkeypatch.setenv("GITHUB_EVENT_NAME", "pull_request")
     monkeypatch.setenv("GITHUB_REF", "refs/pull/276/merge")
     monkeypatch.setenv("GITHUB_REF_NAME", "276/merge")
-    for branch, _adversarial_branches in ST12_BRANCH_CASES:
-        monkeypatch.setenv("GITHUB_HEAD_REF", branch)
-        resolved = context.current_branch_context(
-            REPO_ROOT,
-            git_stdout=lambda *_args: (0, "HEAD", ""),
-        )
-        assert resolved.branch == branch
-        assert resolved.source == "GITHUB_HEAD_REF"
-        assert context.github_actions_pull_request_detached_context_active(
-            branch_returncode=0,
-            branch="HEAD",
-        )
-        assert (
-            context.is_pull_request_detached_head_context_allowed_for_upstream_pr_gate(
-                context.github_actions_head_ref_branch_context(),
-                "PR160",
+    for branch, adversarial_branches in ST12_BRANCH_CASES:
+        for prefix in ("", "refs/heads/", "refs/remotes/origin/", "origin/"):
+            monkeypatch.setenv("GITHUB_HEAD_REF", prefix + branch)
+            resolved = context.current_branch_context(
+                REPO_ROOT,
+                git_stdout=lambda *_args: (0, "HEAD", ""),
             )
-        )
+            assert resolved.branch == branch
+            assert resolved.source == "GITHUB_HEAD_REF"
+            assert context.github_actions_pull_request_detached_context_active(
+                branch_returncode=0, branch="HEAD",
+            )
+            for gate in ("PR159R", "PR160"):
+                assert (
+                    context.is_pull_request_detached_head_context_allowed_for_upstream_pr_gate(
+                        context.github_actions_head_ref_branch_context(), gate,
+                    )
+                )
+        for adversarial in adversarial_branches:
+            monkeypatch.setenv("GITHUB_HEAD_REF", adversarial)
+            resolved = context.current_branch_context(
+                REPO_ROOT, git_stdout=lambda *_args: (0, "HEAD", ""),
+            )
+            assert not context.is_owner_authorized_validation_branch(resolved.branch)
+            for gate in ("PR159R", "PR160"):
+                assert not (
+                    context.is_pull_request_detached_head_context_allowed_for_upstream_pr_gate(
+                        context.github_actions_head_ref_branch_context(), gate,
+                    )
+                )
     monkeypatch.setenv(
         "GITHUB_HEAD_REF",
         "agent/st12c-deterministic-receipts-accounting-v1-suffix",
     )
     assert not (
         context.is_pull_request_detached_head_context_allowed_for_upstream_pr_gate(
-            context.github_actions_head_ref_branch_context(),
-            "PR160",
+            context.github_actions_head_ref_branch_context(), "PR160",
         )
     )
+    monkeypatch.delenv("GITHUB_HEAD_REF")
+    resolved = context.current_branch_context(
+        REPO_ROOT, git_stdout=lambda *_args: (0, "HEAD", ""),
+    )
+    assert resolved.branch == ""
+    assert resolved.source == ""
+    assert context.github_actions_branch_context() == ""
+    assert not context.is_owner_authorized_validation_branch(resolved.branch)
+    for gate in ("PR159R", "PR160"):
+        assert not context.is_pull_request_detached_head_context_allowed_for_upstream_pr_gate(
+            context.github_actions_head_ref_branch_context(), gate,
+        )
 
 
 def test_roadmap_pr_number_parses_pr_branches():

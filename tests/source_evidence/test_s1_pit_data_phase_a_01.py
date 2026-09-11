@@ -957,6 +957,12 @@ def _case_clock_and_leakage() -> None:
         PITReasonCodeV1.PIT_CAPABILITY_UNAVAILABLE,
     )
 
+    _assert_f12_v3_native_relations()
+    _assert_f12_v3_retention()
+    _assert_f12_v3_cutoff_and_shapes()
+    _assert_f12_v3_typed_gate()
+    _assert_f12_error_routing()
+
 
 def _case_decimal_side_tick_and_book() -> None:
     from src.qtt.stage1_prediction_markets.orderbook_event_state_snapshot.builder import (
@@ -3976,3 +3982,279 @@ PIT_CASES = _build_cases()
 @pytest.mark.parametrize("case", PIT_CASES)
 def test_s1_pit_data_phase_a_contract_matrix(case: PITCase) -> None:
     case.run()
+
+
+def _f12_v3_fixture():
+    clocks = {
+        "provider_event_time_utc_or_none": "2026-08-30T12:00:00.000000001Z",
+        "provider_publication_time_utc_or_none": None,
+        "qtt_received_at_utc": "2026-08-30T12:00:01.000000111Z",
+        "qtt_parse_completed_at_utc": "2026-08-30T12:00:02.000000222Z",
+        "durable_commit_completed_at_utc": "2026-08-30T12:00:03.000000333Z",
+        "strategy_available_at_utc": "2026-08-30T12:00:04.000000444Z",
+        "revision_effective_time_utc_or_none": "2026-08-30T12:00:03.000000331Z",
+        "settlement_finality_time_utc_or_none": "2026-08-30T12:00:03.000000332Z",
+        "qtt_received_monotonic_ns": 10, "qtt_parse_completed_monotonic_ns": 20,
+        "durable_commit_completed_monotonic_ns": 30, "strategy_available_monotonic_ns": 40,
+        "process_epoch_id": "PROCESS-EPOCH-1", "monotonic_clock_id": "PERF-COUNTER-NS-1",
+        "wall_clock_source_id": "WALL-CLOCK-1", "clock_quality_receipt_ref": "CLOCK-QUALITY-1",
+        "wall_clock_uncertainty_ns": 1000,
+    }
+    requirements = {
+        "requires_cross_clock_comparison": True,
+        "requires_provider_event_time": True,
+        "requires_provider_publication_time": False,
+        "requires_revision_at_decision": True,
+        "requires_finality_at_decision": True,
+        "provider_publication_time_is_source_proven": False,
+        "maximum_wall_clock_uncertainty_ns_or_none": 2000,
+        "required_process_epoch_id_or_none": "PROCESS-EPOCH-1",
+        "required_monotonic_clock_id_or_none": "PERF-COUNTER-NS-1",
+    }
+    return clocks, requirements, "2026-08-30T12:00:05.000000555Z"
+
+
+def _assert_f12_v3_native_relations() -> None:
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane import point_in_time as pit
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane.errors import ContractValidationError
+
+    clocks, requirements, decision = _f12_v3_fixture()
+    errors = pit.PITReasonCodeV1
+    cases = (
+        ({**clocks, "extra": 1}, requirements, decision, "NATIVE_FIELDS", errors.PIT_SCHEMA_OR_WIRE_DIALECT_INVALID),
+        (clocks, {**requirements, "requires_provider_event_time": 1}, decision, "BOOLEAN", errors.PIT_SCHEMA_OR_WIRE_DIALECT_INVALID),
+        ({**clocks, "process_epoch_id": " bad"}, requirements, decision, "TEXT", errors.PIT_SCHEMA_OR_WIRE_DIALECT_INVALID),
+        ({**clocks, "process_epoch_id": "x" * 257}, requirements, decision, "IDENTITY", errors.PIT_SCHEMA_OR_WIRE_DIALECT_INVALID),
+        ({**clocks, "qtt_received_at_utc": _T0}, requirements, decision, "UTC_NANOSECONDS", errors.PIT_CLOCK_DOMAIN_MISMATCH),
+        ({**clocks, "qtt_received_monotonic_ns": True}, requirements, decision, "PIT_V3_INTEGER", errors.PIT_CLOCK_DOMAIN_MISMATCH),
+        (clocks, {**requirements, "maximum_wall_clock_uncertainty_ns_or_none": True}, decision, "PIT_V3_UNCERTAINTY_CEILING", errors.PIT_WALL_CLOCK_UNCERTAIN),
+        (clocks, requirements, None, "PIT_V3_DECISION_REQUIRED", errors.PIT_CAPABILITY_UNAVAILABLE),
+        ({**clocks, "qtt_parse_completed_monotonic_ns": 9}, requirements, decision, "PIT_V3_MONOTONIC_ORDER", errors.PIT_CLOCK_DOMAIN_MISMATCH),
+        (clocks, {**requirements, "required_process_epoch_id_or_none": "OTHER"}, decision, "PIT_V3_CLOCK_DOMAIN", errors.PIT_CLOCK_DOMAIN_MISMATCH),
+        ({**clocks, "provider_event_time_utc_or_none": None}, requirements, decision, "PIT_V3_EVENT_TIME_UNAVAILABLE", errors.PIT_CAPABILITY_UNAVAILABLE),
+        ({**clocks, "provider_publication_time_utc_or_none": decision}, requirements, decision, "PIT_V3_PUBLICATION_NOT_PROVEN", errors.PIT_PROVIDER_PUBLICATION_TIME_UNAVAILABLE),
+        (clocks, {**requirements, "requires_provider_publication_time": True}, decision, "PIT_V3_PUBLICATION_UNAVAILABLE", errors.PIT_PROVIDER_PUBLICATION_TIME_UNAVAILABLE),
+        (clocks, {**requirements, "maximum_wall_clock_uncertainty_ns_or_none": 999}, decision, "PIT_V3_WALL_CLOCK_UNCERTAIN", errors.PIT_WALL_CLOCK_UNCERTAIN),
+        ({**clocks, "strategy_available_at_utc": "2026-08-30T12:00:05.000000556Z"}, requirements, decision, "PIT_V3_AVAILABLE_AFTER_DECISION", errors.PIT_CAPABILITY_UNAVAILABLE),
+        ({**clocks, "revision_effective_time_utc_or_none": "2026-08-30T12:00:05.000000556Z"}, requirements, decision, "PIT_V3_REVISION_UNAVAILABLE", errors.PIT_CAPABILITY_UNAVAILABLE),
+        ({**clocks, "settlement_finality_time_utc_or_none": "2026-08-30T12:00:05.000000556Z"}, requirements, decision, "PIT_V3_FINALITY_UNAVAILABLE", errors.PIT_LIFECYCLE_BLOCKED),
+    )
+    for values, required, cutoff, detail, reason in cases:
+        with pytest.raises(pit.PITDataContractErrorV1) as caught:
+            pit._native_retail_pit_v3_bridge(values, required, decision_time=cutoff)
+        assert caught.value.pit_reason_code is reason
+        assert str(caught.value).endswith(": " + detail)
+        assert type(caught.value.__cause__) is ContractValidationError
+
+
+def _assert_f12_v3_retention() -> None:
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane import point_in_time as pit
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane.errors import ContractValidationError
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane.serialization import deterministic_json
+
+    clocks, requirements, decision = _f12_v3_fixture()
+    original = deepcopy((clocks, requirements))
+    receipt_id = "F12::V3::" + "r" * 300
+    record = pit.compose_exact_pit_v3(
+        clocks, requirements, decision_time=decision, receipt_id=receipt_id,
+    )
+    assert (clocks, requirements) == original
+    assert record.kind == "V3" and record.context_binding is None
+    assert record.receipt_id == record.typed_check_receipt.receipt_id == receipt_id
+    assert type(record.clock_projection) is pit.PITClockSetV3
+    assert record.typed_check_receipt.admitted is True
+    assert record.typed_check_receipt.cross_clock_comparison_performed is True
+    assert record.typed_check_receipt.decision_time_utc_or_none == _T0 + timedelta(seconds=5)
+    assert len(record.companion["clock_pairs"]) == 8
+    assert record.companion["clock_pairs"]["provider_publication_time_utc_or_none"] is None
+    pair = record.companion["clock_pairs"]["strategy_available_at_utc"]
+    assert pair["source_text"] == clocks["strategy_available_at_utc"]
+    assert pair["nanosecond_remainder"] == 444
+    assert record.companion["datetime_only_is_lossless"] is False
+    assert record.companion["exact_ns_consumer_required"] is True
+    for flag in (
+        "source_accepted", "publication_proof_authenticated", "durable_commit_proven",
+        "strategy_availability_proven", "full_pit_v3_admitted", "receipt_emitted",
+        "posts_cash", "releases_reservation", "runtime_effect_authorized",
+    ):
+        assert record.companion[flag] is False
+    payload = record.to_payload()
+    parsed = json.loads(deterministic_json(payload))
+    restored = pit.restore_exact_pit_composition_v1(parsed)
+    assert restored.to_payload() == payload
+    assert restored.clock_projection == record.clock_projection
+    assert restored.typed_check_receipt == record.typed_check_receipt
+    with pytest.raises(TypeError):
+        record.request["requirements"]["requires_revision_at_decision"] = False
+    with pytest.raises(TypeError):
+        record.companion["clock_pairs"]["strategy_available_at_utc"]["utc_ns_text"] = "0"
+    payload["request"]["clocks"]["strategy_available_at_utc"] = decision
+    assert record.request["clocks"]["strategy_available_at_utc"] == clocks["strategy_available_at_utc"]
+    with pytest.raises(pit.PITDataContractErrorV1):
+        pit.validate_pit_clock_set_v3(record, receipt_id="WRAPPER-NOT-CLOCKS")
+    mutations = (
+        lambda p: p["companion"].pop("decision_pair"),
+        lambda p: p["companion"].update(source_accepted=True),
+        lambda p: p["companion"].update(exact_ns_consumer_required=1),
+        lambda p: p["companion"]["clock_pairs"]["strategy_available_at_utc"].update(nanosecond_remainder=445),
+        lambda p: p["companion"]["requirements"].update(requires_revision_at_decision=False),
+        lambda p: p["request"]["requirements"].update(extra=False),
+        lambda p: p.update(typed_check_receipt={"admitted": True}),
+        lambda p: p.update(context_binding={}),
+    )
+    for index, mutate in enumerate(mutations):
+        damaged = deepcopy(parsed)
+        mutate(damaged)
+        expected = pit.PITDataContractErrorV1 if index == 5 else ContractValidationError
+        with pytest.raises(expected):
+            pit.restore_exact_pit_composition_v1(damaged)
+
+
+def _assert_f12_v3_cutoff_and_shapes() -> None:
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane import point_in_time as pit
+
+    clocks, requirements, decision = _f12_v3_fixture()
+    for flag in ("requires_revision_at_decision", "requires_finality_at_decision"):
+        with pytest.raises(pit.PITDataContractErrorV1) as caught:
+            pit.validate_pit_clock_set_v3(_clock(), receipt_id="REQUIRES-CUTOFF", **{flag: True})
+        assert caught.value.pit_reason_code is pit.PITReasonCodeV1.PIT_CAPABILITY_UNAVAILABLE
+        assert str(caught.value).endswith(": PIT_V3_DECISION_REQUIRED")
+    assert pit.validate_pit_clock_set_v3(_clock(), receipt_id="DEFAULT-INGESTION").admitted is True
+    ingestion = {
+        **requirements, "requires_revision_at_decision": False,
+        "requires_finality_at_decision": False,
+    }
+    record = pit.compose_exact_pit_v3(clocks, ingestion, decision_time=None, receipt_id="INGESTION")
+    assert record.companion["state"] == "INGESTION_CLOCK_SHAPE_CHECKED_NO_DECISION_CUTOFF"
+    assert record.companion["decision_pair"] is None
+    assert record.typed_check_receipt.decision_time_utc_or_none is None
+    assert pit.restore_exact_pit_composition_v1(record.to_payload()).to_payload() == record.to_payload()
+    with pytest.raises(TypeError):
+        pit.compose_exact_pit_v3(clocks, ingestion, receipt_id="OMITTED-CUTOFF")
+
+    # V3 wall time does not inherit V1's observation/availability ordering.
+    reordered = {**clocks, "qtt_received_at_utc": "2026-08-30T12:00:02.000000999Z"}
+    assert pit.compose_exact_pit_v3(
+        reordered, requirements, decision_time=decision, receipt_id="WALL-ORDER",
+    ).typed_check_receipt.admitted is True
+    published = {**clocks, "provider_publication_time_utc_or_none": clocks["provider_event_time_utc_or_none"]}
+    proven = {**requirements, "provider_publication_time_is_source_proven": True,
+              "requires_provider_publication_time": True}
+    assert pit.compose_exact_pit_v3(
+        published, proven, decision_time=decision, receipt_id="SUPPLIED-PROOF-REQUIREMENT",
+    ).companion["publication_proof_authenticated"] is False
+    for key in clocks:
+        incomplete = dict(clocks)
+        incomplete.pop(key)
+        with pytest.raises(pit.PITDataContractErrorV1):
+            pit.compose_exact_pit_v3(incomplete, requirements, decision_time=decision, receipt_id="MISSING")
+    for key in requirements:
+        incomplete = dict(requirements)
+        incomplete.pop(key)
+        with pytest.raises(pit.PITDataContractErrorV1):
+            pit.compose_exact_pit_v3(clocks, incomplete, decision_time=decision, receipt_id="MISSING")
+    for name in (
+        "qtt_received_monotonic_ns", "qtt_parse_completed_monotonic_ns",
+        "durable_commit_completed_monotonic_ns", "strategy_available_monotonic_ns",
+        "wall_clock_uncertainty_ns",
+    ):
+        for value in (True, -1, 1.0):
+            with pytest.raises(pit.PITDataContractErrorV1):
+                pit.compose_exact_pit_v3(
+                    {**clocks, name: value}, requirements, decision_time=decision, receipt_id="INTEGER",
+                )
+
+
+def _assert_f12_v3_typed_gate() -> None:
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane import point_in_time as pit
+
+    clocks, requirements, decision = _f12_v3_fixture()
+    original = pit.validate_pit_clock_set_v3
+    calls = []
+
+    def observe(typed, **kwargs):
+        assert type(typed) is pit.PITClockSetV3
+        for name, raw in clocks.items():
+            if "_utc" in name:
+                value = getattr(typed, name)
+                assert (value is None) == (raw is None)
+                if value is not None:
+                    assert type(value) is datetime and value.utcoffset() == timedelta(0)
+        assert {key: kwargs[key] for key in requirements} == requirements
+        assert set(kwargs) == set(requirements) | {"receipt_id", "decision_time_utc_or_none"}
+        assert kwargs["decision_time_utc_or_none"] == _T0 + timedelta(seconds=5)
+        calls.append(kwargs["receipt_id"])
+        return original(typed, **kwargs)
+
+    with pytest.MonkeyPatch.context() as patch:
+        patch.setattr(pit, "validate_pit_clock_set_v3", observe)
+        pit.compose_exact_pit_v3(clocks, requirements, decision_time=decision, receipt_id="TYPED")
+    assert calls == ["TYPED"]
+    rejection = pit.PITDataContractErrorV1(
+        pit.PITReasonCodeV1.PIT_LIFECYCLE_BLOCKED, "INJECTED_EXISTING_TYPED_GATE",
+    )
+
+    def reject(*args, **kwargs):
+        raise rejection
+
+    with pytest.MonkeyPatch.context() as patch:
+        patch.setattr(pit, "validate_pit_clock_set_v3", reject)
+        with pytest.raises(pit.PITDataContractErrorV1) as caught:
+            pit.compose_exact_pit_v3(clocks, requirements, decision_time=decision, receipt_id="TYPED-STOP")
+        assert caught.value is rejection
+        valid_payload = pit._native_retail_pit_v3_bridge(clocks, requirements, decision_time=decision)
+        assert valid_payload["full_pit_v3_admitted"] is False
+
+    def unexpected_projection(*args, **kwargs):
+        pytest.fail("exact relation failure reached datetime projection or typed validation")
+
+    with pytest.MonkeyPatch.context() as patch:
+        patch.setattr(pit, "_f12_utc_projection", unexpected_projection)
+        patch.setattr(pit, "validate_pit_clock_set_v3", unexpected_projection)
+        with pytest.raises(pit.PITDataContractErrorV1) as caught:
+            pit.compose_exact_pit_v3(
+                {**clocks, "strategy_available_at_utc": "2026-08-30T12:00:05.000000556Z"},
+                requirements, decision_time=decision, receipt_id="ONE-NS-FUTURE",
+            )
+        assert str(caught.value).endswith(": PIT_V3_AVAILABLE_AFTER_DECISION")
+
+
+def _assert_f12_error_routing() -> None:
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane import point_in_time as pit
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane.context import _native_reference_reason
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane.errors import ContractValidationError, ReasonCode
+
+    class DerivedError(ContractValidationError):
+        pass
+
+    known = ContractValidationError(ReasonCode.INVALID_CONTRACT, "UTC_NANOSECONDS")
+    allowed = frozenset({"UTC_NANOSECONDS"})
+    assert _native_reference_reason(known, allowed) == "UTC_NANOSECONDS"
+    exceptions = (
+        ContractValidationError(ReasonCode.INVALID_CONTRACT, "UNKNOWN_REASON"),
+        ContractValidationError(ReasonCode.STALE_CONTEXT, "UTC_NANOSECONDS"),
+        DerivedError(ReasonCode.INVALID_CONTRACT, "UTC_NANOSECONDS"),
+    )
+    clocks, requirements, decision = _f12_v3_fixture()
+    for failure in exceptions:
+        assert _native_reference_reason(failure, allowed) is None
+
+        def fail(*args, **kwargs):
+            raise failure
+
+        with pytest.MonkeyPatch.context() as patch:
+            patch.setattr(pit, "_native_utc_receipt_pair", fail)
+            with pytest.raises(ContractValidationError) as caught:
+                pit._native_retail_pit_v3_bridge(clocks, requirements, decision_time=decision)
+            assert caught.value is failure
+    projection_error = ContractValidationError(ReasonCode.INVALID_CONTRACT, "PIT_TIME_PROJECTION_MISMATCH")
+
+    def mismatch(*args, **kwargs):
+        raise projection_error
+
+    with pytest.MonkeyPatch.context() as patch:
+        patch.setattr(pit, "_native_utc_receipt_pair", mismatch)
+        with pytest.raises(pit.PITDataContractErrorV1) as caught:
+            pit._native_retail_pit_v3_bridge(clocks, requirements, decision_time=decision)
+        assert caught.value.pit_reason_code is pit.PITReasonCodeV1.PIT_CLOCK_DOMAIN_MISMATCH
+        assert caught.value.__cause__ is projection_error
