@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import copy
+import re
 from dataclasses import dataclass, fields as dataclass_fields
 from datetime import UTC, datetime
 from decimal import Decimal
@@ -10,8 +12,14 @@ import json
 from types import MappingProxyType
 from typing import Mapping
 
-from .context import exact_decimal, parse_utc
-from .errors import ContractValidationError, ReasonCode, SerializationSafetyError
+from .context import (
+    _native_ident, _native_obj, _native_reference_reason, _native_require,
+    _native_utc_receipt_pair, exact_decimal, parse_utc,
+)
+from .errors import (
+    ComputationControlPlaneError, ContractValidationError, PersistenceContractError,
+    PointInTimeError, ReasonCode, SerializationSafetyError,
+)
 from .models import (
     ComputationExecutionReceiptV1,
     ModeSnapshotCandidateProposalResultV1,
@@ -24,8 +32,10 @@ from .models import (
     TypedValueRecordV1,
     TypedValueV1,
 )
-from .serialization import deterministic_json, safe_json_loads
+from .serialization import _native_strict_json, deterministic_json, safe_json_loads
+from .source_rights import reject_secret_material
 from .point_in_time import (
+    compose_exact_pit_v3,
     PITAnchorStateV1,
     PITAvailabilityStateV2,
     PITContinuityStateV3,
@@ -94,6 +104,7 @@ class EconomicRecordTypeV1(StrEnum):
     PIT_CANONICAL_EVENT = "PIT_CANONICAL_EVENT"
     PIT_CAPTURE_AND_GAP = "PIT_CAPTURE_AND_GAP"
     PIT_CHECKPOINT = "PIT_CHECKPOINT"
+    PRIVATE_OBSERVATION_CLOCK = "PRIVATE_OBSERVATION_CLOCK"
 
 
 class ModeSnapshotControlClassV1(StrEnum):
@@ -515,6 +526,10 @@ ECONOMIC_RECORD_PAYLOAD_CLASS: Mapping[EconomicRecordTypeV1, tuple[str, str]] = 
             "receipts",
             "PITCheckpointV1",
         ),
+        EconomicRecordTypeV1.PRIVATE_OBSERVATION_CLOCK: (
+            "receipts",
+            "PrivateObservationClockReceiptV1",
+        ),
     }
 )
 
@@ -567,6 +582,9 @@ class EconomicReceiptEventSpineV1:
             raise ContractValidationError(ReasonCode.RUNTIME_EFFECT_FORBIDDEN, "typed no-effect flags are required")
         object.__setattr__(self, "effective_at", _time(self.effective_at, "effective_at"))
         object.__setattr__(self, "recorded_at", _time(self.recorded_at, "recorded_at"))
+
+        if self.record_type is EconomicRecordTypeV1.PRIVATE_OBSERVATION_CLOCK:
+            _private_clock_validate_spine_v1(self)
 
 
 @dataclass(frozen=True, slots=True)
@@ -3163,3 +3181,414 @@ def _pit_reconstruct_receipt_payload_v1(
         reconstruction_receipt_ref=row["reconstruction_receipt_ref"],
         no_effect_flags=common_no_effects,
     )
+
+
+# F13 informational private-clock representation; no source or commit authority.
+_PRIVATE_CLOCK_REFERENCE_REASONS_V1 = frozenset({
+    "CLOCK_COMPANION_CLOCKS", "CLOCK_COMPANION_COMMIT_CLASS",
+    "CLOCK_COMPANION_ENVELOPE_BUDGET", "CLOCK_COMPANION_EVENT_POINTER",
+    "CLOCK_COMPANION_ID_TYPE", "CLOCK_COMPANION_ISSUANCE_ORDER",
+    "CLOCK_COMPANION_PROFILE", "CLOCK_COMPANION_PROOF_PRESENCE",
+    "CLOCK_COMPANION_RAW_BODY", "CLOCK_COMPANION_RAW_BUDGET",
+    "CLOCK_COMPANION_RAW_CLOCK_MISMATCH", "CLOCK_COMPANION_RAW_OBJECT",
+    "CLOCK_COMPANION_REFERENCE_ALIAS", "CLOCK_COMPANION_SERIALIZATION",
+    "CLOCK_COMPANION_VERSION", "CLOCK_REPLAY_DECISION_REQUIRED",
+    "CLOCK_REPLAY_DUPLICATE_KEY", "CLOCK_REPLAY_ENVELOPE",
+    "CLOCK_REPLAY_NONCANONICAL", "CLOCK_REPLAY_NONFINITE",
+    "CLOCK_REPLAY_RAW_BYTES", "CLOCK_REPLAY_RAW_TYPE",
+    "CLOCK_REPLAY_RECORDED_AFTER_CUTOFF", "CLOCK_REPLAY_SCOPE",
+    "DUPLICATE_JSON_KEY", "IDENTITY", "JSON", "JSON_BOUND", "JSON_BUDGET",
+    "JSON_DEPTH", "JSON_NODES", "NATIVE_FIELDS", "NONFINITE", "NUMBER",
+    "NUMBER_BOUND", "PIT_TIME_PROJECTION_MISMATCH", "SURROGATE", "TEXT",
+    "UTC_NANOSECONDS",
+})
+
+
+def _private_clock_raise_mapped_error_v1(
+    error: ContractValidationError, *, stored: bool = False,
+) -> None:
+    reason = _native_reference_reason(error, _PRIVATE_CLOCK_REFERENCE_REASONS_V1)
+    if reason is None:
+        return
+    if stored and reason in {
+        "NATIVE_FIELDS", "CLOCK_COMPANION_VERSION", "CLOCK_COMPANION_ID_TYPE",
+        "CLOCK_COMPANION_CLOCKS", "CLOCK_COMPANION_PROFILE",
+        "CLOCK_COMPANION_REFERENCE_ALIAS",
+    }:
+        raise PersistenceContractError(ReasonCode.SCHEMA_MISMATCH, reason) from error
+    if reason == "CLOCK_REPLAY_RAW_BYTES":
+        raise PersistenceContractError(ReasonCode.PERSISTENCE_CONFLICT, reason) from error
+    if reason in {
+        "CLOCK_COMPANION_ISSUANCE_ORDER", "CLOCK_REPLAY_RECORDED_AFTER_CUTOFF",
+        "CLOCK_REPLAY_DECISION_REQUIRED",
+    }:
+        raise PointInTimeError(ReasonCode.POINT_IN_TIME_VIOLATION, reason) from error
+    if reason.startswith("JSON") or reason in {
+        "DUPLICATE_JSON_KEY", "CLOCK_REPLAY_ENVELOPE", "CLOCK_REPLAY_DUPLICATE_KEY",
+        "CLOCK_REPLAY_NONFINITE", "CLOCK_REPLAY_NONCANONICAL",
+        "CLOCK_COMPANION_SERIALIZATION", "CLOCK_COMPANION_ENVELOPE_BUDGET",
+    }:
+        raise SerializationSafetyError(ReasonCode.SERIALIZATION_UNSAFE, reason) from error
+
+
+def _native_retail_clock_companion(record):
+    """Validate exact informational clocks; authenticate no source or witness."""
+    try:
+        fields = (
+            "schema_version", "record_id", "scope", "raw_record_ref", "raw_body_utf8",
+            "raw_byte_limit", "provider_event_pointer_or_none", "clock_proof_refs",
+            "clocks", "capture_commit_ref", "publication_witness_ref",
+            "commit_evidence_class", "issued_at", "issued_monotonic_ns",
+        )
+        _native_obj(record, fields)
+        _native_require(type(record["schema_version"]) is str and record["schema_version"] == "1",
+                        "CLOCK_COMPANION_VERSION")
+        scope = record["scope"]
+        _native_obj(scope, (
+            "profile", "ledger_account_ref", "source_binding_ref", "source_context_ref",
+            "capture_epoch_ref", "partition_ref",
+        ))
+        for value in scope.values():
+            _native_require(type(value) is str, "CLOCK_COMPANION_ID_TYPE")
+            _native_ident(value)
+        _native_require(scope["profile"] == "POLYMARKET_US_RETAIL_DIRECT", "CLOCK_COMPANION_PROFILE")
+        ids = ("record_id", "raw_record_ref", "capture_commit_ref", "publication_witness_ref")
+        for name in ids:
+            _native_require(type(record[name]) is str, "CLOCK_COMPANION_ID_TYPE")
+            _native_ident(record[name])
+        _native_require(len({record[name] for name in ids}) == len(ids), "CLOCK_COMPANION_REFERENCE_ALIAS")
+        limit = record["raw_byte_limit"]
+        _native_require(type(limit) is int and 0 < limit <= 1048576, "CLOCK_COMPANION_RAW_BUDGET")
+        raw = record["raw_body_utf8"]
+        _native_require(type(raw) is str and 0 < len(raw) <= limit, "CLOCK_COMPANION_RAW_BODY")
+        try:
+            raw_bytes = raw.encode("utf-8")
+        except UnicodeError as exc:
+            raise ContractValidationError(ReasonCode.INVALID_CONTRACT, "CLOCK_COMPANION_RAW_BODY") from exc
+        _native_require(len(raw_bytes) <= limit, "CLOCK_COMPANION_RAW_BUDGET")
+        parsed = _native_strict_json(raw_bytes, limit)
+        _native_require(type(parsed) is dict, "CLOCK_COMPANION_RAW_OBJECT")
+        reject_secret_material("raw_body_utf8", parsed)
+        proof_names = (
+            "provider_publication_time_utc_or_none", "revision_effective_time_utc_or_none",
+            "settlement_finality_time_utc_or_none",
+        )
+        _native_obj(record["clock_proof_refs"], proof_names)
+        _native_require(type(record["clocks"]) is dict, "CLOCK_COMPANION_CLOCKS")
+        clocks = record["clocks"]
+        requirements = {name: False for name in (
+            "requires_cross_clock_comparison", "requires_provider_event_time",
+            "requires_provider_publication_time", "requires_revision_at_decision",
+            "requires_finality_at_decision", "provider_publication_time_is_source_proven",
+        )}
+        requirements.update(
+            maximum_wall_clock_uncertainty_ns_or_none=None,
+            required_process_epoch_id_or_none=None, required_monotonic_clock_id_or_none=None,
+        )
+        requirements["provider_publication_time_is_source_proven"] = (
+            record["clock_proof_refs"][proof_names[0]] is not None
+        )
+        bridge = compose_exact_pit_v3(
+            clocks, requirements, decision_time=None, receipt_id=record["record_id"],
+        ).to_payload()["companion"]
+        for name in proof_names:
+            ref = record["clock_proof_refs"][name]
+            _native_require((ref is None) == (clocks[name] is None), "CLOCK_COMPANION_PROOF_PRESENCE")
+            if ref is not None:
+                _native_require(type(ref) is str, "CLOCK_COMPANION_ID_TYPE")
+                _native_ident(ref)
+                _native_require(ref != record["record_id"], "CLOCK_COMPANION_REFERENCE_ALIAS")
+        pointer = record["provider_event_pointer_or_none"]
+        event = clocks["provider_event_time_utc_or_none"]
+        _native_require((pointer is None) == (event is None), "CLOCK_COMPANION_EVENT_POINTER")
+        if pointer is not None:
+            _native_require(
+                type(pointer) is str and 0 < len(pointer) <= 1024 and pointer.startswith("/"),
+                "CLOCK_COMPANION_EVENT_POINTER",
+            )
+            parts = pointer[1:].split("/")
+            _native_require(len(parts) <= 16, "CLOCK_COMPANION_EVENT_POINTER")
+            value = parsed
+            for part in parts:
+                _native_require(re.search(r"~(?![01])", part) is None, "CLOCK_COMPANION_EVENT_POINTER")
+                token = part.replace("~1", "/").replace("~0", "~")
+                if type(value) is list:
+                    _native_require(
+                        re.fullmatch(r"0|[1-9][0-9]*", token, re.ASCII) is not None and len(token) <= 10,
+                        "CLOCK_COMPANION_EVENT_POINTER",
+                    )
+                    index = int(token)
+                    _native_require(index < len(value), "CLOCK_COMPANION_EVENT_POINTER")
+                    value = value[index]
+                else:
+                    _native_require(type(value) is dict and token in value, "CLOCK_COMPANION_EVENT_POINTER")
+                    value = value[token]
+            _native_require(type(value) is str and value == event, "CLOCK_COMPANION_RAW_CLOCK_MISMATCH")
+        _native_require(
+            type(record["commit_evidence_class"]) is str and record["commit_evidence_class"] in (
+                "COORDINATOR_POST_RETURN_UPPER_BOUND_REFERENCE_ONLY",
+                "STORAGE_ASSIGNED_ATOMIC_COMMIT_EVIDENCE",
+            ), "CLOCK_COMPANION_COMMIT_CLASS",
+        )
+        issued = _native_utc_receipt_pair(record["issued_at"])
+        _native_require(
+            type(record["issued_monotonic_ns"]) is int
+            and record["issued_monotonic_ns"] >= clocks["strategy_available_monotonic_ns"],
+            "CLOCK_COMPANION_ISSUANCE_ORDER",
+        )
+        try:
+            canonical = deterministic_json(record)
+            encoded = canonical.encode("utf-8")
+        except ComputationControlPlaneError:
+            raise
+        except (ValueError, TypeError, OverflowError, UnicodeError) as exc:
+            raise ContractValidationError(ReasonCode.INVALID_CONTRACT, "CLOCK_COMPANION_SERIALIZATION") from exc
+        _native_require(len(encoded) <= 8 * limit + 65536, "CLOCK_COMPANION_ENVELOPE_BUDGET")
+        return {
+            "state": "PRIVATE_CLOCK_PAYLOAD_VALIDATED_NOT_ACCEPTED",
+            "canonical_payload_json": canonical, "record_id": record["record_id"],
+            "issued_pair": issued, "clock_pairs": bridge["clock_pairs"],
+            "raw_byte_count": len(raw_bytes), "source_accepted": False,
+            "durable_commit_proven": False, "strategy_availability_proven": False,
+            "receipt_emitted": False, "posts_cash": False, "releases_reservation": False,
+            "runtime_effect_authorized": False,
+        }
+    except ContractValidationError as exc:
+        _private_clock_raise_mapped_error_v1(exc)
+        raise
+
+
+def _private_clock_body_from_canonical_v1(canonical_payload_json: str) -> dict[str, object]:
+    """Revalidate one complete canonical body without applying raw-number bounds."""
+    try:
+        _native_require(
+            type(canonical_payload_json) is str and 0 < len(canonical_payload_json) <= 8 * 1048576 + 65536,
+            "CLOCK_REPLAY_ENVELOPE",
+        )
+        try:
+            encoded = canonical_payload_json.encode("utf-8")
+        except UnicodeError as exc:
+            raise ContractValidationError(ReasonCode.INVALID_CONTRACT, "CLOCK_REPLAY_ENVELOPE") from exc
+        _native_require(len(encoded) <= 8 * 1048576 + 65536, "CLOCK_REPLAY_ENVELOPE")
+
+        def unique(items):
+            result = {}
+            for key, value in items:
+                _native_require(key not in result, "CLOCK_REPLAY_DUPLICATE_KEY")
+                result[key] = value
+            return result
+
+        def nonfinite(_token):
+            raise ContractValidationError(ReasonCode.INVALID_CONTRACT, "CLOCK_REPLAY_NONFINITE")
+
+        try:
+            record = json.loads(canonical_payload_json, object_pairs_hook=unique, parse_constant=nonfinite)
+        except ComputationControlPlaneError:
+            raise
+        except (ValueError, RecursionError, UnicodeError) as exc:
+            raise ContractValidationError(ReasonCode.INVALID_CONTRACT, "CLOCK_REPLAY_ENVELOPE") from exc
+        restored = _native_retail_clock_companion(record)
+        _native_require(restored["canonical_payload_json"] == canonical_payload_json, "CLOCK_REPLAY_NONCANONICAL")
+        return record
+    except ContractValidationError as exc:
+        _private_clock_raise_mapped_error_v1(exc)
+        raise
+
+
+def _native_retail_clock_replay(
+    canonical_payload_json, *, expected_record_id, expected_scope,
+    original_raw_body, requirements, decision_time, recorded_cutoff,
+):
+    """Check separate exact cutoffs after committed typed reference readback."""
+    try:
+        record = _private_clock_body_from_canonical_v1(canonical_payload_json)
+        _native_require(type(expected_record_id) is str, "CLOCK_REPLAY_SCOPE")
+        _native_ident(expected_record_id)
+        _native_obj(expected_scope, (
+            "profile", "ledger_account_ref", "source_binding_ref", "source_context_ref",
+            "capture_epoch_ref", "partition_ref",
+        ))
+        for value in expected_scope.values():
+            _native_require(type(value) is str, "CLOCK_REPLAY_SCOPE")
+            _native_ident(value)
+        _native_require(
+            record["record_id"] == expected_record_id and record["scope"] == expected_scope,
+            "CLOCK_REPLAY_SCOPE",
+        )
+        _native_require(type(original_raw_body) is bytes, "CLOCK_REPLAY_RAW_TYPE")
+        _native_require(record["raw_body_utf8"].encode("utf-8") == original_raw_body, "CLOCK_REPLAY_RAW_BYTES")
+        issued = _native_utc_receipt_pair(record["issued_at"])
+        cutoff = _native_utc_receipt_pair(recorded_cutoff)
+        _native_require(
+            int(issued["utc_ns_text"]) <= int(cutoff["utc_ns_text"]),
+            "CLOCK_REPLAY_RECORDED_AFTER_CUTOFF",
+        )
+        _native_require(decision_time is not None, "CLOCK_REPLAY_DECISION_REQUIRED")
+        checked = compose_exact_pit_v3(
+            record["clocks"], requirements, decision_time=decision_time, receipt_id=record["record_id"],
+        ).to_payload()["companion"]
+        return {
+            "state": "EXACT_CLOCK_REPLAY_CHECKED_NOT_ADMISSION", "record_id": record["record_id"],
+            "raw_record_ref": record["raw_record_ref"], "scope": copy.deepcopy(record["scope"]),
+            "clock_result": checked, "issued_pair": issued, "recorded_cutoff_pair": cutoff,
+            "commit_evidence_class": record["commit_evidence_class"], "source_accepted": False,
+            "durable_commit_proven": False, "strategy_availability_proven": False,
+            "full_pit_v3_admitted": False, "receipt_emitted": False, "posts_cash": False,
+            "releases_reservation": False, "runtime_effect_authorized": False,
+        }
+    except ContractValidationError as exc:
+        _private_clock_raise_mapped_error_v1(exc)
+        raise
+
+
+@dataclass(frozen=True, slots=True)
+class PrivateObservationClockReceiptV1:
+    record_id: str
+    canonical_payload_json: str
+
+    def __post_init__(self) -> None:
+        _native_require(type(self.record_id) is str, "CLOCK_COMPANION_ID_TYPE")
+        _native_ident(self.record_id)
+        body = _private_clock_body_from_canonical_v1(self.canonical_payload_json)
+        _native_require(self.record_id == body["record_id"], "CLOCK_REPLAY_SCOPE")
+
+
+def _private_clock_schema_require_v1(value: bool, detail: str) -> None:
+    if not value:
+        raise PersistenceContractError(ReasonCode.SCHEMA_MISMATCH, detail)
+
+
+def _private_clock_validate_spine_v1(record: EconomicReceiptEventSpineV1) -> None:
+    """Bind only this discriminator to the exact payload, flags and issuance floor."""
+    _private_clock_schema_require_v1(
+        type(record) is EconomicReceiptEventSpineV1
+        and type(record.record_type) is EconomicRecordTypeV1
+        and record.record_type is EconomicRecordTypeV1.PRIVATE_OBSERVATION_CLOCK
+        and type(record.typed_payload) is PrivateObservationClockReceiptV1
+        and type(record.no_effect_flags) is NoEffectFlagsV1,
+        "F13_SPINE_TYPES_INVALID",
+    )
+    try:
+        _private_clock_schema_require_v1(
+            all(type(getattr(record.no_effect_flags, field.name)) is bool
+                and getattr(record.no_effect_flags, field.name) is False
+                for field in dataclass_fields(NoEffectFlagsV1)),
+            "F13_NO_EFFECT_FLAGS_INVALID",
+        )
+        payload = record.typed_payload
+        _private_clock_schema_require_v1(
+            type(payload.record_id) is str and type(payload.canonical_payload_json) is str,
+            "F13_PAYLOAD_TYPES_INVALID",
+        )
+        body = _private_clock_body_from_canonical_v1(payload.canonical_payload_json)
+        _private_clock_schema_require_v1(
+            type(record.schema_version) is str and record.schema_version == "1"
+            and type(record.record_id) is str and record.record_id == payload.record_id == body["record_id"]
+            and type(record.aggregate_id) is str and record.aggregate_id == body["scope"]["ledger_account_ref"]
+            and type(record.context_ref) is str and record.context_ref == body["scope"]["source_context_ref"],
+            "F13_SPINE_IDENTITY_OR_SCOPE_MISMATCH",
+        )
+        issued_floor = parse_utc(
+            _native_utc_receipt_pair(body["issued_at"])["receipt_utc_floor"], field_name="issued_at",
+        )
+        _private_clock_schema_require_v1(
+            all(type(value) is datetime and value.tzinfo is not None
+                and value.isoformat() == issued_floor.isoformat()
+                for value in (record.effective_at, record.recorded_at)),
+            "F13_SPINE_TIME_METADATA_MISMATCH",
+        )
+    except AttributeError as exc:
+        raise PersistenceContractError(ReasonCode.SCHEMA_MISMATCH, "F13_SPINE_FIELDS_MISSING") from exc
+    except ContractValidationError as exc:
+        _private_clock_raise_mapped_error_v1(exc, stored=True)
+        raise
+
+
+def _private_clock_reconstruct_spine_v1(
+    value: object, *, expected_record_id: str,
+) -> EconomicReceiptEventSpineV1:
+    """Inspect exact stored types before constructing fresh genuine typed records."""
+    outer_fields = {field.name for field in dataclass_fields(EconomicReceiptEventSpineV1)}
+    flag_fields = {field.name for field in dataclass_fields(NoEffectFlagsV1)}
+    payload_fields = {field.name for field in dataclass_fields(PrivateObservationClockReceiptV1)}
+    if type(value) is EconomicReceiptEventSpineV1:
+        try:
+            row = {name: getattr(value, name) for name in outer_fields}
+            _private_clock_schema_require_v1(
+                type(value.record_type) is EconomicRecordTypeV1
+                and value.record_type is EconomicRecordTypeV1.PRIVATE_OBSERVATION_CLOCK
+                and type(value.typed_payload) is PrivateObservationClockReceiptV1
+                and type(value.no_effect_flags) is NoEffectFlagsV1,
+                "F13_STORED_RUNTIME_TYPES_INVALID",
+            )
+            _private_clock_schema_require_v1(
+                all(type(item) is datetime and item.tzinfo is not None
+                    for item in (value.effective_at, value.recorded_at)),
+                "F13_STORED_TIME_TYPES_INVALID",
+            )
+            row["record_type"] = value.record_type.value
+            row["typed_payload"] = {name: getattr(value.typed_payload, name) for name in payload_fields}
+            row["no_effect_flags"] = {name: getattr(value.no_effect_flags, name) for name in flag_fields}
+            row["effective_at"] = value.effective_at.isoformat()
+            row["recorded_at"] = value.recorded_at.isoformat()
+        except AttributeError as exc:
+            raise PersistenceContractError(ReasonCode.SCHEMA_MISMATCH, "F13_SPINE_FIELDS_MISSING") from exc
+    else:
+        _private_clock_schema_require_v1(type(value) is dict, "F13_STORED_ENVELOPE_TYPE_INVALID")
+        row = value
+    _private_clock_schema_require_v1(set(row) == outer_fields, "F13_STORED_ENVELOPE_FIELDS_INVALID")
+    for name in outer_fields - {"sequence", "aggregate_version", "typed_payload", "no_effect_flags"}:
+        _private_clock_schema_require_v1(
+            type(row[name]) is str and bool(row[name].strip()), "F13_STORED_SCALAR_TYPE_INVALID",
+        )
+    for name in ("sequence", "aggregate_version"):
+        _private_clock_schema_require_v1(
+            type(row[name]) is int and row[name] >= 0, "F13_STORED_INTEGER_INVALID",
+        )
+    _private_clock_schema_require_v1(
+        row["record_type"] == "PRIVATE_OBSERVATION_CLOCK" and row["schema_version"] == "1"
+        and type(expected_record_id) is str and row["record_id"] == expected_record_id,
+        "F13_STORED_DISCRIMINATOR_OR_ID_MISMATCH",
+    )
+    inner, flags = row["typed_payload"], row["no_effect_flags"]
+    _private_clock_schema_require_v1(
+        type(inner) is dict and set(inner) == payload_fields
+        and all(type(item) is str for item in inner.values()), "F13_STORED_PAYLOAD_INVALID",
+    )
+    _private_clock_schema_require_v1(
+        type(flags) is dict and set(flags) == flag_fields
+        and all(type(item) is bool and item is False for item in flags.values()),
+        "F13_STORED_NO_EFFECT_FLAGS_INVALID",
+    )
+    _private_clock_schema_require_v1(
+        row["causation_id"] != row["correlation_id"]
+        and row["traceparent"] not in {
+            row["record_id"], row["aggregate_id"], row["causation_id"], row["correlation_id"],
+        }, "F13_STORED_TRACE_IDENTITY_INVALID",
+    )
+    try:
+        body = _private_clock_body_from_canonical_v1(inner["canonical_payload_json"])
+        _private_clock_schema_require_v1(
+            row["record_id"] == inner["record_id"] == body["record_id"]
+            and row["aggregate_id"] == body["scope"]["ledger_account_ref"]
+            and row["context_ref"] == body["scope"]["source_context_ref"],
+            "F13_STORED_PAYLOAD_BINDING_MISMATCH",
+        )
+        issued_floor = parse_utc(
+            _native_utc_receipt_pair(body["issued_at"])["receipt_utc_floor"], field_name="issued_at",
+        )
+        _private_clock_schema_require_v1(
+            row["effective_at"] == row["recorded_at"] == issued_floor.isoformat(),
+            "F13_STORED_TIME_METADATA_MISMATCH",
+        )
+        rebuilt = EconomicReceiptEventSpineV1(**{
+            **row, "record_type": EconomicRecordTypeV1.PRIVATE_OBSERVATION_CLOCK,
+            "typed_payload": PrivateObservationClockReceiptV1(**inner),
+            "no_effect_flags": NoEffectFlagsV1(**flags),
+        })
+    except ContractValidationError as exc:
+        _private_clock_raise_mapped_error_v1(exc, stored=True)
+        raise
+    if deterministic_json(rebuilt) != deterministic_json(row):
+        raise PersistenceContractError(ReasonCode.PERSISTENCE_CONFLICT, "F13_STORED_CANONICAL_MISMATCH")
+    return rebuilt

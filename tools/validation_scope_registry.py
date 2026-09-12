@@ -6,9 +6,30 @@ from __future__ import annotations
 from fnmatch import fnmatchcase
 
 from tools.ci_branch_context import (
+    F13_PRIVATE_CLOCK_STORAGE_REPLAY_BRANCH,
+    normalize_branch_context,
     S1_LAUNCH_GRAPH_IMPLEMENTATION_BRANCH,
     S1_PIT_DATA_PHASE_A_01_IMPLEMENTATION_BRANCH,
     S1_PLUGIN_PACKAGE_CURRENTIZATION_BRANCH,
+)
+
+
+F13_ALLOWED_EXACT_PATHS = frozenset(
+    {
+        'src/qtt/stage1_prediction_markets/qku_computation_control_plane/context.py',
+        'src/qtt/stage1_prediction_markets/qku_computation_control_plane/persistence.py',
+        'src/qtt/stage1_prediction_markets/qku_computation_control_plane/receipts.py',
+        'src/qtt/stage1_prediction_markets/qku_computation_control_plane/serialization.py',
+        'src/qtt/stage1_prediction_markets/qku_computation_control_plane/sqlite_reference.py',
+        'src/qtt/stage1_prediction_markets/qku_computation_control_plane/transaction.py',
+        'tests/source_evidence/test_s1_pit_data_phase_a_01.py',
+        'tests/stage1_prediction_markets/qku_computation_control_plane/accounting/test_contract_matrix.py',
+        'tests/stage1_prediction_markets/qku_computation_control_plane/security/test_deserialization_safety.py',
+        'tests/tools/test_ci_branch_context.py',
+        'tools/ci_branch_context.py',
+        'tools/independent_validate_qku_computation_control_plane_execution.py',
+        'tools/validation_scope_registry.py',
+    }
 )
 
 
@@ -2548,6 +2569,20 @@ def explain_pr_scope_decision(branch: str, path: str) -> dict[str, object]:
 
     normalized = normalize_changed_path(path)
     branch_name = str(branch).strip()
+    if normalize_branch_context(str(branch)) == F13_PRIVATE_CLOCK_STORAGE_REPLAY_BRANCH:
+        allowed = normalized in F13_ALLOWED_EXACT_PATHS
+        return {
+            "allowed": allowed,
+            "branch": F13_PRIVATE_CLOCK_STORAGE_REPLAY_BRANCH,
+            "normalized_path": normalized,
+            "pr_id": "F13",
+            "matched_rule": (
+                f"exact:{normalized}" if allowed else "no_f13_exact_scope_rule"
+            ),
+            "reason": (
+                "registered_exact_path" if allowed else "path_not_registered_for_pr_scope"
+            ),
+        }
     if (
         branch_name == S1_PIT_DATA_PHASE_A_01_IMPLEMENTATION_BRANCH
         and normalized in S1_PIT_DATA_PHASE_A_01_ALLOWED_EXACT_PATHS

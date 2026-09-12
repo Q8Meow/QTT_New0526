@@ -435,3 +435,17 @@ def _native_utc_receipt_pair(value):
         'receipt_utc_floor': dt.isoformat(timespec='microseconds').replace('+00:00', 'Z'),
         'nanosecond_remainder': remainder
     }
+
+
+def _native_bounded_decimal(value: object) -> Decimal:
+    """The selected raw-token domain; independent of ambient Decimal precision."""
+    _native_require(type(value) is Decimal and value.is_finite(), "NUMBER")
+    _native_require(not (value == 0 and value.is_signed()), "NUMBER")
+    digits = value.as_tuple().digits
+    exponent = value.as_tuple().exponent
+    _native_require(
+        len(digits) <= 128 and type(exponent) is int and -128 <= exponent <= 128,
+        "NUMBER_BOUND",
+    )
+    _native_require(value == 0 or -100 <= value.adjusted() <= 100, "NUMBER_BOUND")
+    return value

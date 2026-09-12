@@ -10,7 +10,7 @@ from _thread import RLock
 from typing import Mapping
 
 from .accounting import JournalPostingV1, JournalTransactionV1, ReconciliationBreakReceiptV1
-from .context import parse_utc
+from .context import _native_ident, parse_utc
 from .errors import PersistenceContractError, ReasonCode, TransactionContractError
 from .idempotency import (
     IdempotencyClaimReceiptV1,
@@ -24,7 +24,10 @@ from .receipts import (
     DurableComputationExecutionReceiptRecordV1,
     EconomicEventRecordV1,
     EconomicReceiptEventSpineV1,
+    EconomicRecordTypeV1,
+    PrivateObservationClockReceiptV1,
     ValueLineageEdgeV1,
+    _private_clock_reconstruct_spine_v1,
 )
 from .rollback import (
     JournalReversalBundleV1,
@@ -125,6 +128,11 @@ class PersistenceAdapterV1(ABC):
 
     @abstractmethod
     def get_record(self, record_ref: str) -> object | None: ...
+
+    @abstractmethod
+    def load_committed_private_clock_receipt_v1(
+        self, record_ref: str,
+    ) -> EconomicReceiptEventSpineV1 | None: ...
 
     @abstractmethod
     def get_idempotency_result(self, idempotency_key: str) -> str | None: ...
@@ -228,6 +236,9 @@ class InMemoryPersistenceAdapterV1(PersistenceAdapterV1):
     def insert_receipt_record(self, transaction: PersistenceTransactionV1, record: EconomicReceiptEventSpineV1) -> None:
         tx = self._transaction(transaction)
         payload = record.typed_payload
+        if (record.record_type == EconomicRecordTypeV1.PRIVATE_OBSERVATION_CLOCK
+                or type(payload) is PrivateObservationClockReceiptV1):
+            record = _private_clock_reconstruct_spine_v1(record, expected_record_id=record.record_id)
         if isinstance(payload, DurableComputationExecutionReceiptRecordV1) and any(
             not self._record_exists(tx._working, ref) for ref in payload.dependency_receipt_refs
         ):
@@ -396,6 +407,20 @@ class InMemoryPersistenceAdapterV1(PersistenceAdapterV1):
 
     def insert_reconciliation_break(self, transaction: PersistenceTransactionV1, reconciliation_break: ReconciliationBreakReceiptV1) -> None:
         self._insert(transaction, "reconciliation_breaks", reconciliation_break.break_receipt_id, reconciliation_break)
+
+    def load_committed_private_clock_receipt_v1(
+        self, record_ref: str,
+    ) -> EconomicReceiptEventSpineV1 | None:
+        with self._lock:
+            if self._active_transaction is not None and self._active_transaction.is_active:
+                raise TransactionContractError(
+                    ReasonCode.TRANSACTION_STATE_INVALID, "F13 committed read requires no active transaction",
+                )
+            _native_ident(record_ref)
+            committed = self._tables["receipt_records"]
+            if record_ref not in committed:
+                return None
+            return _private_clock_reconstruct_spine_v1(committed[record_ref], expected_record_id=record_ref)
 
     def get_record(self, record_ref: str) -> object | None:
         with self._lock:

@@ -486,6 +486,585 @@ def test_reference_adapter_atomic_commit_rollback_and_replay(adapter_kind, refer
     if hasattr(rollback_adapter, "close"):
         rollback_adapter.close()
 
+    _assert_f13_reference_storage(adapter_kind, reference_directory)
+    _assert_f13_transaction_truth(adapter_kind, reference_directory)
+
+
+
+def _f13_storage_fixture():
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane import receipts as owner
+    body = {
+        "schema_version": "1", "record_id": "private-clock", "raw_record_ref": "raw-clock",
+        "scope": dict(profile="POLYMARKET_US_RETAIL_DIRECT", ledger_account_ref="aggregate-1",
+                      source_binding_ref="private-binding", source_context_ref="context",
+                      capture_epoch_ref="capture-epoch", partition_ref="partition"),
+        "raw_body_utf8": ' {"event":"2026-01-01T00:00:00.000000001Z","amount":1.20} ',
+        "raw_byte_limit": 4096, "provider_event_pointer_or_none": "/event",
+        "clock_proof_refs": dict(provider_publication_time_utc_or_none=None,
+                                revision_effective_time_utc_or_none=None,
+                                settlement_finality_time_utc_or_none=None),
+        "clocks": {
+            "provider_event_time_utc_or_none": "2026-01-01T00:00:00.000000001Z",
+            "provider_publication_time_utc_or_none": None,
+            "qtt_received_at_utc": "2026-01-01T00:00:00.000000002Z", "qtt_received_monotonic_ns": 1,
+            "qtt_parse_completed_at_utc": "2026-01-01T00:00:00.000000003Z", "qtt_parse_completed_monotonic_ns": 2,
+            "durable_commit_completed_at_utc": "2026-01-01T00:00:00.000000004Z", "durable_commit_completed_monotonic_ns": 3,
+            "strategy_available_at_utc": "2026-01-01T00:00:00.000000005Z", "strategy_available_monotonic_ns": 4,
+            "revision_effective_time_utc_or_none": None, "settlement_finality_time_utc_or_none": None,
+            "process_epoch_id": "process", "monotonic_clock_id": "monotonic",
+            "wall_clock_source_id": "wall", "clock_quality_receipt_ref": "quality",
+            "wall_clock_uncertainty_ns": 0,
+        },
+        "capture_commit_ref": "capture-commit", "publication_witness_ref": "publication",
+        "commit_evidence_class": "COORDINATOR_POST_RETURN_UPPER_BOUND_REFERENCE_ONLY",
+        "issued_at": "2026-01-01T00:00:00.000000009Z", "issued_monotonic_ns": 5,
+    }
+    canonical = owner._native_retail_clock_companion(body)["canonical_payload_json"]
+    private = EconomicReceiptEventSpineV1(
+        "private-clock", EconomicRecordTypeV1.PRIVATE_OBSERVATION_CLOCK, "1",
+        "INFORMATIONAL_FIXTURE", "QKUComputationControlPlaneV1", "context",
+        NOW, NOW, "private-cause", "private-correlation", "private-trace", "trace-state",
+        0, "aggregate-1", 0, "CONTRACT_ONLY",
+        owner.PrivateObservationClockReceiptV1("private-clock", canonical),
+    )
+    return body, private
+
+
+def _f13_rollback_owned_transaction(tx) -> None:
+    if tx.is_active:
+        tx.rollback()
+
+
+def _f13_close_owned_adapter(adapter) -> None:
+    if isinstance(adapter, SQLiteReferenceAdapterV1):
+        active = adapter._active_transaction
+        if active is not None and active.is_active:
+            # A transaction owner already attempted genuine rollback. Close this
+            # test-owned connection without automatically retrying that method.
+            adapter._connection.close()
+        else:
+            adapter.close()
+
+
+def _assert_f13_reference_storage(adapter_kind, directory) -> None:
+    from contextlib import ExitStack
+    from copy import deepcopy
+    from dataclasses import fields
+    import json
+    import sqlite3
+    from threading import Event, Thread
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane import receipts as owner
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane.errors import (
+        ContractValidationError, PersistenceContractError, SerializationSafetyError, TransactionContractError,
+    )
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane.models import NoEffectFlagsV1
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane.persistence import PersistenceAvailabilityV1
+
+    with ExitStack() as adapters:
+        def make(name):
+            adapter = (InMemoryPersistenceAdapterV1() if adapter_kind == "memory" else
+                       SQLiteReferenceAdapterV1(directory / (name + ".db"), busy_timeout_ms=0, max_transaction_attempts=1))
+            adapters.callback(_f13_close_owned_adapter, adapter)
+            return adapter
+
+        body, private = _f13_storage_fixture()
+        adapter = make("private-storage")
+        assert adapter.load_committed_private_clock_receipt_v1("missing") is None
+        for record_ref in (None, 1, "", " bad", "x" * 257):
+            with pytest.raises(ContractValidationError):
+                adapter.load_committed_private_clock_receipt_v1(record_ref)
+        tx = adapter.begin_transaction()
+        try:
+            adapter.insert_receipt_record(tx, private)
+            generic = adapter.get_record(private.record_id)
+            assert (generic is None) if adapter_kind == "memory" else type(generic) is dict
+            with pytest.raises(TransactionContractError) as caught:
+                adapter.load_committed_private_clock_receipt_v1("missing")
+            assert caught.value.reason_code is ReasonCode.TRANSACTION_STATE_INVALID
+        finally:
+            _f13_rollback_owned_transaction(tx)
+        assert adapter.load_committed_private_clock_receipt_v1(private.record_id) is None
+
+        tx = adapter.begin_transaction()
+        try:
+            adapter.insert_receipt_record(tx, private)
+            tx.commit()
+        finally:
+            _f13_rollback_owned_transaction(tx)
+        loaded = adapter.load_committed_private_clock_receipt_v1(private.record_id)
+        assert type(loaded) is EconomicReceiptEventSpineV1 and loaded is not private
+        assert type(loaded.typed_payload) is owner.PrivateObservationClockReceiptV1
+        assert type(loaded.no_effect_flags) is NoEffectFlagsV1
+        assert deterministic_json(loaded) == deterministic_json(private)
+        assert loaded.typed_payload.canonical_payload_json == private.typed_payload.canonical_payload_json
+        assert set(json.loads(loaded.typed_payload.canonical_payload_json)) == set(body)
+        assert tuple(field.name for field in fields(loaded.typed_payload)) == ("record_id", "canonical_payload_json")
+        assert all(type(getattr(loaded.no_effect_flags, field.name)) is bool and
+                   getattr(loaded.no_effect_flags, field.name) is False for field in fields(NoEffectFlagsV1))
+        # Existing generic shape/selection behavior remains compatible.
+        assert type(adapter.get_record(private.record_id)) is (EconomicReceiptEventSpineV1 if adapter_kind == "memory" else dict)
+        assert len(adapter.reconstruct_as_of(effective_cutoff=NOW, recorded_cutoff=NOW, aggregate_scope=("aggregate-1",))) == 1
+        requirements = dict(
+            requires_cross_clock_comparison=False, requires_provider_event_time=True,
+            requires_provider_publication_time=False, requires_revision_at_decision=False,
+            requires_finality_at_decision=False, provider_publication_time_is_source_proven=False,
+            maximum_wall_clock_uncertainty_ns_or_none=None, required_process_epoch_id_or_none=None,
+            required_monotonic_clock_id_or_none=None,
+        )
+        replay = owner._native_retail_clock_replay(
+            loaded.typed_payload.canonical_payload_json, expected_record_id=loaded.record_id,
+            expected_scope=body["scope"], original_raw_body=body["raw_body_utf8"].encode(),
+            requirements=requirements, decision_time=body["clocks"]["strategy_available_at_utc"],
+            recorded_cutoff=body["issued_at"],
+        )
+        assert replay["source_accepted"] is replay["durable_commit_proven"] is replay["runtime_effect_authorized"] is False
+        tx = adapter.begin_transaction()
+        try:
+            adapter.insert_receipt_record(tx, private)
+            with pytest.raises(PersistenceContractError) as caught:
+                adapter.insert_receipt_record(tx, replace(private, sequence=1))
+            assert caught.value.reason_code is ReasonCode.PERSISTENCE_CONFLICT
+        finally:
+            _f13_rollback_owned_transaction(tx)
+        assert deterministic_json(adapter.load_committed_private_clock_receipt_v1(private.record_id)) == deterministic_json(private)
+
+        original_mapping = json.loads(deterministic_json(private))
+        mutations = (
+            lambda row: row.pop("traceparent"),
+            lambda row: row.update(extra=False),
+            lambda row: row.update(record_type="ECONOMIC_EVENT"),
+            lambda row: row.update(schema_version=1),
+            lambda row: row.update(schema_version="2"),
+            lambda row: row.update(record_id="other"),
+            lambda row: row.update(context_ref="other"),
+            lambda row: row.update(aggregate_id="other"),
+            lambda row: row.update(effective_at="2026-01-01T00:00:00.000001+00:00"),
+            lambda row: row.update(recorded_at="2026-01-01T00:00:00Z"),
+            lambda row: row.update(sequence=True),
+            lambda row: row.update(aggregate_version=0.0),
+            lambda row: row.update(causation_id=row["correlation_id"]),
+            lambda row: row.update(traceparent=row["record_id"]),
+            lambda row: row["typed_payload"].update(extra=False),
+            lambda row: row["typed_payload"].update(record_id="other"),
+            lambda row: row["typed_payload"].update(canonical_payload_json=1),
+            lambda row: row["no_effect_flags"].pop("capital_mutation_allowed"),
+            lambda row: row["no_effect_flags"].update(capital_mutation_allowed=0),
+            lambda row: row["no_effect_flags"].update(order_release_allowed=True),
+        )
+        for mutate in mutations:
+            damaged = deepcopy(original_mapping)
+            mutate(damaged)
+            with pytest.raises(PersistenceContractError) as caught:
+                owner._private_clock_reconstruct_spine_v1(damaged, expected_record_id=private.record_id)
+            assert caught.value.reason_code is ReasonCode.SCHEMA_MISMATCH
+        for field, value in (("schema_version", 1), ("record_id", 3), ("clocks", []),
+                             ("profile", "OTHER"), ("raw_record_ref", body["record_id"])):
+            damaged = deepcopy(original_mapping)
+            damaged_body = deepcopy(body)
+            if field == "profile":
+                damaged_body["scope"][field] = value
+            else:
+                damaged_body[field] = value
+            damaged["typed_payload"]["canonical_payload_json"] = json.dumps(damaged_body)
+            with pytest.raises(PersistenceContractError) as caught:
+                owner._private_clock_reconstruct_spine_v1(damaged, expected_record_id=private.record_id)
+            assert caught.value.reason_code is ReasonCode.SCHEMA_MISMATCH
+
+        fake_type = type("PrivateObservationClockReceiptV1", (), {"__module__": owner.__name__})
+        fake = fake_type()
+        fake.record_id, fake.canonical_payload_json = private.record_id, private.typed_payload.canonical_payload_json
+        for field, value in (
+            ("typed_payload", fake), ("record_type", EconomicRecordTypeV1.ECONOMIC_EVENT),
+            ("record_type", "PRIVATE_OBSERVATION_CLOCK"), ("sequence", True),
+            ("effective_at", NOW.isoformat()), ("recorded_at", NOW.replace(tzinfo=None)),
+            ("semantic_owner", 12),
+        ):
+            damaged = deepcopy(private)
+            object.__setattr__(damaged, field, value)
+            tx = adapter.begin_transaction()
+            try:
+                with pytest.raises(PersistenceContractError) as caught:
+                    adapter.insert_receipt_record(tx, damaged)
+                assert caught.value.reason_code is ReasonCode.SCHEMA_MISMATCH
+            finally:
+                _f13_rollback_owned_transaction(tx)
+        damaged_flags = deepcopy(private)
+        object.__setattr__(damaged_flags.no_effect_flags, "capital_mutation_allowed", 0)
+        with pytest.raises(PersistenceContractError):
+            owner._private_clock_reconstruct_spine_v1(damaged_flags, expected_record_id=private.record_id)
+        if adapter_kind == "memory":
+            damaged = deepcopy(private)
+            object.__setattr__(damaged, "sequence", True)
+            try:
+                for corrupt in (damaged, None):
+                    adapter._tables["receipt_records"][private.record_id] = corrupt
+                    with pytest.raises(PersistenceContractError) as caught:
+                        adapter.load_committed_private_clock_receipt_v1(private.record_id)
+                    assert caught.value.reason_code is ReasonCode.SCHEMA_MISMATCH
+            finally:
+                adapter._tables["receipt_records"][private.record_id] = private
+            for failure_point in (None, "readiness", "locked", "worker"):
+                started, finished, observed, errors = Event(), Event(), [], []
+                initiating = (RuntimeError("synthetic worker failure") if failure_point == "worker" else
+                              AssertionError("synthetic owned-lock assertion"))
+                tx = None
+
+                def read_after_lock():
+                    try:
+                        started.set()
+                        observed.append(adapter.load_committed_private_clock_receipt_v1(private.record_id))
+                        if failure_point == "worker":
+                            raise initiating
+                    except BaseException as exc:
+                        errors.append(exc)
+                    finally:
+                        finished.set()
+
+                thread = Thread(target=read_after_lock)
+
+                def read_with_cleanup():
+                    nonlocal tx
+                    worker_started = False
+                    tx = adapter.begin_transaction()
+                    try:
+                        with pytest.MonkeyPatch.context() as patch:
+                            if failure_point == "readiness":
+                                original_wait = started.wait
+
+                                def fail_readiness(timeout):
+                                    assert original_wait(timeout)
+                                    assert tx.is_active and not finished.is_set()
+                                    raise initiating
+
+                                patch.setattr(started, "wait", fail_readiness)
+                            thread.start()
+                            worker_started = True
+                            assert started.wait(2)
+                            assert not finished.wait(0.02)
+                            if failure_point == "locked":
+                                assert tx.is_active
+                                raise initiating
+                    finally:
+                        try:
+                            _f13_rollback_owned_transaction(tx)
+                        finally:
+                            if worker_started:
+                                thread.join(2)
+                                assert not thread.is_alive()
+                                if errors:
+                                    raise errors[0]
+
+                if failure_point is None:
+                    read_with_cleanup()
+                else:
+                    with pytest.raises(type(initiating)) as caught:
+                        read_with_cleanup()
+                    assert caught.value is initiating
+                assert tx is not None and not tx.is_active
+                assert not thread.daemon
+                assert finished.is_set() and not thread.is_alive()
+                assert deterministic_json(observed[0]) == deterministic_json(private)
+                assert errors == ([initiating] if failure_point == "worker" else [])
+        else:
+            # An actual active connection with a cleared wrapper marker is still rejected.
+            adapter._connection.execute("BEGIN IMMEDIATE")
+            try:
+                with pytest.raises(TransactionContractError):
+                    adapter.load_committed_private_clock_receipt_v1(private.record_id)
+                assert adapter._connection.in_transaction is True
+            finally:
+                if adapter._connection.in_transaction:
+                    adapter._connection.execute("ROLLBACK")
+            for availability in (PersistenceAvailabilityV1.UNAVAILABLE, PersistenceAvailabilityV1.INTEGRITY_FAILURE):
+                with pytest.MonkeyPatch.context() as patch:
+                    patch.setattr(adapter, "_availability", availability)
+                    with pytest.raises(PersistenceContractError) as caught:
+                        adapter.load_committed_private_clock_receipt_v1(private.record_id)
+                    assert caught.value.reason_code is ReasonCode.PERSISTENCE_UNAVAILABLE
+            errors = []
+            def wrong_thread():
+                try:
+                    adapter.load_committed_private_clock_receipt_v1(private.record_id)
+                except BaseException as exc:
+                    errors.append(exc)
+            thread = Thread(target=wrong_thread)
+            worker_started = False
+            try:
+                thread.start()
+                worker_started = True
+            finally:
+                if worker_started:
+                    thread.join(2)
+                    assert not thread.is_alive()
+                    if errors and not isinstance(errors[0], PersistenceContractError):
+                        raise errors[0]
+            assert not thread.is_alive() and len(errors) == 1
+            assert type(errors[0]) is PersistenceContractError and isinstance(errors[0].__cause__, sqlite3.Error)
+            adapter.close()
+            with pytest.raises(PersistenceContractError) as caught:
+                adapter.load_committed_private_clock_receipt_v1(private.record_id)
+            assert caught.value.reason_code is ReasonCode.PERSISTENCE_UNAVAILABLE
+            assert isinstance(caught.value.__cause__, sqlite3.Error)
+            adapter = make("private-storage")
+            assert adapter.load_committed_private_clock_receipt_v1(private.record_id).typed_payload.canonical_payload_json == private.typed_payload.canonical_payload_json
+            row = (private.record_id, NOW.isoformat(), NOW.isoformat(), private.aggregate_id, deterministic_json(private))
+            sql_mutations = (
+                (1, "2026-01-01T00:00:01+00:00", ReasonCode.SCHEMA_MISMATCH),
+                (2, "2026-01-01T00:00:00Z", ReasonCode.SCHEMA_MISMATCH),
+                (3, "other", ReasonCode.SCHEMA_MISMATCH),
+                (4, row[4].encode(), ReasonCode.SCHEMA_MISMATCH),
+                (4, " " + row[4], ReasonCode.PERSISTENCE_CONFLICT),
+                (4, '{"record_id":"private-clock","record_id":"private-clock"}', ReasonCode.SERIALIZATION_UNSAFE),
+                (4, '{"api_key":"synthetic-private-marker"}', ReasonCode.SECRET_MATERIAL_REJECTED),
+            )
+            for index, (column, value, reason) in enumerate(sql_mutations):
+                tampered = make("private-tampered-" + str(index))
+                try:
+                    changed = list(row)
+                    changed[column] = value
+                    tampered._connection.execute("INSERT INTO receipt_records VALUES(?,?,?,?,?)", changed)
+                    with pytest.raises((PersistenceContractError, SerializationSafetyError)) as caught:
+                        tampered.load_committed_private_clock_receipt_v1(private.record_id)
+                    assert caught.value.reason_code is reason
+                    assert "synthetic-private-marker" not in str(caught.value)
+                finally:
+                    _f13_close_owned_adapter(tampered)
+            from src.qtt.stage1_prediction_markets.qku_computation_control_plane import sqlite_reference as sqlite_owner
+            for failure in (RecursionError("synthetic recursion"), UnicodeError("synthetic unicode")):
+                def decode_failure(_text):
+                    raise failure
+                with pytest.MonkeyPatch.context() as patch:
+                    patch.setattr(sqlite_owner, "safe_json_loads", decode_failure)
+                    with pytest.raises(SerializationSafetyError, match="F13_STORED_ENVELOPE_INVALID") as caught:
+                        adapter.load_committed_private_clock_receipt_v1(private.record_id)
+                    assert caught.value.__cause__ is failure
+            adapter.close()
+
+            # The assertion leaves both the owned transaction and connection terminal
+            # before TemporaryDirectory attempts to release its SQLite files.
+            initiating = AssertionError("synthetic SQLite fixture assertion")
+            with TemporaryDirectory(prefix="qtt-f13-cleanup-", dir=directory) as release_directory:
+                released_path = Path(release_directory)
+                with pytest.raises(AssertionError) as caught:
+                    with ExitStack() as owned:
+                        failed_adapter = SQLiteReferenceAdapterV1(
+                            released_path / "owned.db", busy_timeout_ms=0, max_transaction_attempts=1,
+                        )
+                        owned.callback(_f13_close_owned_adapter, failed_adapter)
+                        tx = failed_adapter.begin_transaction()
+                        owned.callback(_f13_rollback_owned_transaction, tx)
+                        failed_adapter.insert_receipt_record(tx, private)
+                        raise initiating
+                assert caught.value is initiating
+                assert not tx.is_active and failed_adapter._active_transaction is None
+                with pytest.raises(sqlite3.ProgrammingError):
+                    failed_adapter._connection.execute("SELECT 1")
+            assert not released_path.exists()
+
+
+def _assert_f13_transaction_truth(adapter_kind, directory) -> None:
+    from contextlib import ExitStack
+    from copy import deepcopy
+    from datetime import timedelta
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane.errors import (
+        ContractValidationError, PersistenceContractError, TransactionContractError,
+    )
+
+    def make(name, attempts=1):
+        return (InMemoryPersistenceAdapterV1() if adapter_kind == "memory" else
+                SQLiteReferenceAdapterV1(directory / (name + ".db"), busy_timeout_ms=0, max_transaction_attempts=attempts))
+
+    _body, private = _f13_storage_fixture()
+    base = _atomic_records()
+    event = replace(base.economic_events[0], source_record_refs=(*base.economic_events[0].source_record_refs, private.record_id))
+    records = replace(base, receipt_records=(replace(base.receipt_records[0], typed_payload=event), private),
+                      economic_events=(event,))
+    for index, invalid in enumerate((
+        dict(unit_of_work_id=""), dict(started_at=NOW + timedelta(seconds=1)),
+        dict(started_at=NOW.replace(tzinfo=None)), dict(completed_at="not-a-time"),
+    )):
+        adapter = make("prevalidation-" + str(index))
+        try:
+            unit = TrancheCUnitOfWorkV1(adapter, TransactionRetryPolicyV1(1))
+            calls = []
+            def begin_forbidden():
+                calls.append("begin")
+                raise AssertionError("invalid receipt metadata reached storage")
+            with pytest.MonkeyPatch.context() as patch:
+                patch.setattr(adapter, "begin_transaction", begin_forbidden)
+                with pytest.raises(ContractValidationError):
+                    unit.execute(**{**dict(unit_of_work_id="valid", records=records, accounts=_accounts(),
+                                           started_at=NOW, completed_at=NOW), **invalid})
+            assert calls == [] and adapter.get_record(private.record_id) is None
+        finally:
+            _f13_close_owned_adapter(adapter)
+    for index, corrupt in enumerate(("claim", "references")):
+        adapter = make("prevalidation-identity-" + str(index))
+        try:
+            damaged = deepcopy(records)
+            if corrupt == "claim":
+                object.__setattr__(damaged.idempotency_claim, "claim_id", "")
+            else:
+                object.__setattr__(damaged.receipt_records[0], "record_id", damaged.economic_events[0].economic_event_id)
+            unit = TrancheCUnitOfWorkV1(adapter, TransactionRetryPolicyV1(1))
+            with pytest.MonkeyPatch.context() as patch:
+                patch.setattr(adapter, "begin_transaction", begin_forbidden)
+                with pytest.raises(ContractValidationError):
+                    unit.execute(unit_of_work_id="valid", records=damaged, accounts=_accounts(), started_at=NOW, completed_at=NOW)
+            assert calls == [] and adapter.get_record(private.record_id) is None
+        finally:
+            _f13_close_owned_adapter(adapter)
+
+    def run_case(case, *, assertion_failure=None, observation=None):
+        attempts = 2 if case == "begin-retry-actual-claim" else 1
+        adapter = make("truth-" + case + ("-assertion" if assertion_failure is not None else ""), attempts)
+        try:
+            with ExitStack() as transactions:
+                original_begin = adapter.begin_transaction
+
+                def begin_owned():
+                    tx = original_begin()
+                    transactions.callback(_f13_rollback_owned_transaction, tx)
+                    return tx
+
+                with pytest.MonkeyPatch.context() as patch:
+                    patch.setattr(adapter, "begin_transaction", begin_owned)
+                    unit = TrancheCUnitOfWorkV1(adapter, TransactionRetryPolicyV1(attempts))
+                    historical = case.startswith("historical") or case.startswith("replay") or case.startswith("conflict")
+                    if historical:
+                        assert unit.execute(unit_of_work_id="prior", records=records, accounts=_accounts(),
+                                            started_at=NOW, completed_at=NOW).transaction_state is TransactionTerminalStateV1.COMMITTED
+                    counts = dict(begin=0, commit=0, rollback=0)
+                    initiating = PersistenceContractError(ReasonCode.PERSISTENCE_UNAVAILABLE, "synthetic initiating failure")
+                    cleanup = PersistenceContractError(ReasonCode.PERSISTENCE_UNAVAILABLE, "synthetic cleanup failure")
+                    original_acquire = adapter.acquire_idempotency_claim
+                    original_receipt = unit._receipt
+                    latest = []
+                    def validate_before_commit(**kwargs):
+                        assert counts["commit"] == 0, "receipt construction occurred after commit attempt"
+                        return original_receipt(**kwargs)
+                    patch.setattr(unit, "_receipt", validate_before_commit)
+                    def begin():
+                        counts["begin"] += 1
+                        if case == "begin-retry-actual-claim" and counts["begin"] == 1:
+                            raise PersistenceContractError(ReasonCode.REFERENCE_SQLITE_BUSY_BEFORE_SIDE_EFFECT, "synthetic begin contention")
+                        tx = begin_owned()
+                        latest.append(tx)
+                        original_commit, original_rollback = tx.commit, tx.rollback
+                        if observation is not None:
+                            observation.update(adapter=adapter, tx=tx, begin=original_begin,
+                                               rollback=original_rollback, counts=counts)
+                        def commit():
+                            counts["commit"] += 1
+                            if case in {"active-commit-error", "commit-cleanup-error", "commit-cleanup-stays-active"}:
+                                raise initiating
+                            if case == "inactive-commit-error":
+                                original_rollback()
+                                raise initiating
+                            original_commit()
+                            if case == "after-commit-error":
+                                raise initiating
+                        def rollback():
+                            counts["rollback"] += 1
+                            if case.endswith("rollback-error") or case == "commit-cleanup-error":
+                                raise cleanup
+                            if case.endswith("rollback-stays-active") or case == "commit-cleanup-stays-active":
+                                return
+                            original_rollback()
+                        patch.setattr(tx, "commit", commit)
+                        patch.setattr(tx, "rollback", rollback)
+                        return tx
+                    patch.setattr(adapter, "begin_transaction", begin)
+                    if case in {"precommit-error", "inactive-precommit-error", "rollback-error", "rollback-stays-active"}:
+                        def fail_event(tx, _event):
+                            if case == "inactive-precommit-error":
+                                # Simulate backend-local cleanup without a coordinator rollback witness.
+                                original_type_rollback = type(tx).rollback
+                                original_type_rollback(tx)
+                            raise initiating
+                        patch.setattr(adapter, "insert_economic_event", fail_event)
+                    if case == "begin-retry-actual-claim":
+                        def acquire(tx, claim):
+                            return original_acquire(tx, replace(claim, claim_id="actual-acquired-claim"))
+                        patch.setattr(adapter, "acquire_idempotency_claim", acquire)
+                    actual_records = records
+                    if case.startswith("conflict"):
+                        actual_records = replace(records, idempotency_claim=replace(
+                            records.idempotency_claim, canonical_request_json=canonical_request_json_v1({"command": "other"}),
+                        ))
+                    args = dict(unit_of_work_id="current", records=actual_records, accounts=_accounts(),
+                                started_at=NOW, completed_at=NOW + timedelta(seconds=1))
+                    if case in {"commit-return", "historical-replay", "conflict", "begin-retry-actual-claim", "precommit-error"}:
+                        result = unit.execute(**args)
+                        expected = (TransactionTerminalStateV1.ROLLED_BACK if case == "precommit-error" else
+                                    TransactionTerminalStateV1.CONFLICT if case == "conflict" else TransactionTerminalStateV1.COMMITTED)
+                        assert result.transaction_state is expected
+                        if case == "historical-replay":
+                            assert result.committed_record_refs == (records.result_record_ref,)
+                            assert counts == dict(begin=1, commit=0, rollback=1)
+                        elif case == "begin-retry-actual-claim":
+                            assert result.attempt_count == 2 and result.idempotency_claim_ref == "actual-acquired-claim"
+                            assert counts == dict(begin=2, commit=1, rollback=0)
+                        elif case in {"precommit-error", "conflict"}:
+                            assert counts == dict(begin=1, commit=0, rollback=1)
+                        else:
+                            assert counts == dict(begin=1, commit=1, rollback=0)
+                    else:
+                        with pytest.raises((PersistenceContractError, TransactionContractError)) as caught:
+                            unit.execute(**args)
+                        if "rollback-stays-active" in case or case == "commit-cleanup-stays-active":
+                            assert type(caught.value) is TransactionContractError
+                            assert caught.value.reason_code is ReasonCode.TRANSACTION_STATE_INVALID
+                            if case in {"rollback-stays-active", "commit-cleanup-stays-active"}:
+                                assert caught.value.__cause__ is initiating
+                        elif "rollback-error" in case or case == "commit-cleanup-error":
+                            assert caught.value is cleanup
+                            if case in {"rollback-error", "commit-cleanup-error"}:
+                                assert caught.value.__cause__ is initiating
+                        else:
+                            assert caught.value is initiating
+                        assert counts["begin"] == 1
+                        expected_rollback = 0 if case in {"after-commit-error", "inactive-commit-error", "inactive-precommit-error"} else 1
+                        assert counts["rollback"] == expected_rollback
+                        assert counts["commit"] == (1 if case in {
+                            "after-commit-error", "active-commit-error", "inactive-commit-error",
+                            "commit-cleanup-error", "commit-cleanup-stays-active",
+                        } else 0)
+                    if assertion_failure is not None:
+                        assert latest[-1].is_active
+                        raise assertion_failure
+            should_exist = historical or case in {"commit-return", "after-commit-error", "begin-retry-actual-claim"}
+            assert (adapter.get_record(private.record_id) is not None) is should_exist
+            assert (adapter.get_record(event.economic_event_id) is not None) is should_exist
+            if should_exist:
+                assert adapter.load_committed_private_clock_receipt_v1(private.record_id).typed_payload.canonical_payload_json == private.typed_payload.canonical_payload_json
+        finally:
+            _f13_close_owned_adapter(adapter)
+
+    for case in (
+        "commit-return", "after-commit-error", "active-commit-error", "inactive-commit-error",
+        "precommit-error", "inactive-precommit-error", "rollback-error", "rollback-stays-active",
+        "commit-cleanup-error", "commit-cleanup-stays-active",
+        "historical-replay", "replay-rollback-error", "replay-rollback-stays-active",
+        "conflict", "conflict-rollback-error", "begin-retry-actual-claim",
+    ):
+        run_case(case)
+
+    initiating = AssertionError("synthetic coordinator-scope assertion")
+    observation = {}
+    with pytest.raises(AssertionError) as caught:
+        run_case("rollback-error", assertion_failure=initiating, observation=observation)
+    assert caught.value is initiating
+    assert not observation["tx"].is_active
+    assert observation["adapter"].begin_transaction == observation["begin"]
+    assert observation["tx"].rollback == observation["rollback"]
+    # The test's genuine cleanup is outside the production fault counters.
+    assert observation["counts"] == dict(begin=1, commit=0, rollback=1)
+    if adapter_kind == "sqlite":
+        import sqlite3
+        with pytest.raises(sqlite3.ProgrammingError):
+            observation["adapter"]._connection.execute("SELECT 1")
+
 
 REVERSAL_HISTORY_SCENARIOS = (
     "full-then-full",

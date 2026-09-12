@@ -393,6 +393,7 @@ def _resolve_local_schema_refs(schema_path: Path, node: object) -> None:
 
 
 def _case_schema_and_serialization() -> None:
+    _assert_f13_clock_schema()
     import subprocess
 
     from src.qtt.stage1_prediction_markets.market_data_ingest.adapter import (
@@ -962,6 +963,7 @@ def _case_clock_and_leakage() -> None:
     _assert_f12_v3_cutoff_and_shapes()
     _assert_f12_v3_typed_gate()
     _assert_f12_error_routing()
+    _assert_f13_clock_replay()
 
 
 def _case_decimal_side_tick_and_book() -> None:
@@ -3982,6 +3984,216 @@ PIT_CASES = _build_cases()
 @pytest.mark.parametrize("case", PIT_CASES)
 def test_s1_pit_data_phase_a_contract_matrix(case: PITCase) -> None:
     case.run()
+
+
+
+def _f13_clock_fixture():
+    clocks, requirements, _decision = _f12_v3_fixture()
+    event = clocks["provider_event_time_utc_or_none"]
+    body = {
+        "schema_version": "1", "record_id": "F13::CLOCK", "raw_record_ref": "F13::RAW",
+        "scope": dict(profile="POLYMARKET_US_RETAIL_DIRECT", ledger_account_ref="F13::ACCOUNT",
+                      source_binding_ref="F13::BINDING", source_context_ref="F13::CONTEXT",
+                      capture_epoch_ref="F13::CAPTURE", partition_ref="F13::PARTITION"),
+        "raw_body_utf8": ' { "accepted": "' + event + '", "other": "' + event + '", "amount": 1.20 } ',
+        "raw_byte_limit": 4096, "provider_event_pointer_or_none": "/accepted",
+        "clock_proof_refs": dict(provider_publication_time_utc_or_none=None,
+                                revision_effective_time_utc_or_none="F13::REVISION",
+                                settlement_finality_time_utc_or_none="F13::FINALITY"),
+        "clocks": clocks, "capture_commit_ref": "F13::COMMIT", "publication_witness_ref": "F13::PUBLICATION",
+        "commit_evidence_class": "COORDINATOR_POST_RETURN_UPPER_BOUND_REFERENCE_ONLY",
+        "issued_at": "2026-08-30T12:00:04.000000445Z", "issued_monotonic_ns": 50,
+    }
+    return body, requirements
+
+
+def _assert_f13_clock_schema() -> None:
+    from dataclasses import fields
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane import receipts as owner
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane.errors import (
+        ContractValidationError, PointInTimeError, SerializationSafetyError,
+    )
+    body, requirements = _f13_clock_fixture()
+    original = deepcopy(body)
+    result = owner._native_retail_clock_companion(body)
+    assert body == original and len(body) == 14
+    assert result["canonical_payload_json"] == json.dumps(
+        body, ensure_ascii=False, sort_keys=True, separators=(",", ":"), allow_nan=False,
+    )
+    assert result["raw_byte_count"] == len(body["raw_body_utf8"].encode("utf-8"))
+    assert set(result) == {
+        "state", "canonical_payload_json", "record_id", "issued_pair", "clock_pairs",
+        "raw_byte_count", "source_accepted", "durable_commit_proven", "strategy_availability_proven",
+        "receipt_emitted", "posts_cash", "releases_reservation", "runtime_effect_authorized",
+    }
+    for flag in ("source_accepted", "durable_commit_proven", "strategy_availability_proven",
+                 "receipt_emitted", "posts_cash", "releases_reservation", "runtime_effect_authorized"):
+        assert result[flag] is False
+    payload = owner.PrivateObservationClockReceiptV1(body["record_id"], result["canonical_payload_json"])
+    assert tuple(field.name for field in fields(payload)) == ("record_id", "canonical_payload_json")
+    assert owner._private_clock_body_from_canonical_v1(payload.canonical_payload_json) == body
+    with pytest.raises((AttributeError, TypeError)):
+        payload.canonical_payload_json = "{}"
+    for key in body:
+        damaged = deepcopy(body)
+        damaged.pop(key)
+        with pytest.raises(ContractValidationError, match="NATIVE_FIELDS"):
+            owner._native_retail_clock_companion(damaged)
+    with pytest.raises(ContractValidationError, match="NATIVE_FIELDS"):
+        owner._native_retail_clock_companion({**body, "accepted": False})
+    for field, value, expected, reason in (
+        ("schema_version", 1, ContractValidationError, "CLOCK_COMPANION_VERSION"),
+        ("raw_byte_limit", True, ContractValidationError, "CLOCK_COMPANION_RAW_BUDGET"),
+        ("raw_body_utf8", b"{}", ContractValidationError, "CLOCK_COMPANION_RAW_BODY"),
+        ("raw_body_utf8", "[]", ContractValidationError, "CLOCK_COMPANION_RAW_OBJECT"),
+        ("issued_monotonic_ns", True, PointInTimeError, "CLOCK_COMPANION_ISSUANCE_ORDER"),
+        ("issued_monotonic_ns", 39, PointInTimeError, "CLOCK_COMPANION_ISSUANCE_ORDER"),
+        ("commit_evidence_class", "UNKNOWN", ContractValidationError, "CLOCK_COMPANION_COMMIT_CLASS"),
+        ("issued_at", "2026-08-30T24:00:00Z", ContractValidationError, "UTC_NANOSECONDS"),
+    ):
+        with pytest.raises(expected, match=reason):
+            owner._native_retail_clock_companion({**body, field: value})
+    for name in ("raw_record_ref", "capture_commit_ref", "publication_witness_ref"):
+        with pytest.raises(ContractValidationError, match="CLOCK_COMPANION_REFERENCE_ALIAS"):
+            owner._native_retail_clock_companion({**body, name: body["record_id"]})
+    for damaged in (
+        {**body, "scope": {**body["scope"], "profile": "KALSHI_US_DCM_DIRECT"}},
+        {**body, "scope": {**body["scope"], "ledger_account_ref": " leading"}},
+        {**body, "clock_proof_refs": {**body["clock_proof_refs"], "revision_effective_time_utc_or_none": None}},
+        {**body, "clock_proof_refs": {**body["clock_proof_refs"], "revision_effective_time_utc_or_none": body["record_id"]}},
+    ):
+        with pytest.raises(ContractValidationError):
+            owner._native_retail_clock_companion(damaged)
+    canonical = result["canonical_payload_json"]
+    for damaged, reason in (
+        (" " + canonical, "CLOCK_REPLAY_NONCANONICAL"),
+        (canonical.replace('"schema_version":"1"', '"schema_version":"1","schema_version":"1"'), "CLOCK_REPLAY_DUPLICATE_KEY"),
+        ('{"n":NaN}', "CLOCK_REPLAY_NONFINITE"), ("[", "CLOCK_REPLAY_ENVELOPE"),
+        (" " * (8454144 + 1), "CLOCK_REPLAY_ENVELOPE"),
+        ("é" * (8454144 // 2 + 1), "CLOCK_REPLAY_ENVELOPE"),
+    ):
+        with pytest.raises(SerializationSafetyError, match=reason):
+            owner._private_clock_body_from_canonical_v1(damaged)
+    for pointer in (None, "/", "/missing", "/accepted/~2", "/x" * 17, "/" + "x" * 1024):
+        with pytest.raises(ContractValidationError, match="CLOCK_COMPANION_EVENT_POINTER"):
+            owner._native_retail_clock_companion({**body, "provider_event_pointer_or_none": pointer})
+    event = body["clocks"]["provider_event_time_utc_or_none"]
+    array_body = {**body, "raw_body_utf8": json.dumps({"a/b~c": [event]}),
+                  "provider_event_pointer_or_none": "/a~1b~0c/0"}
+    assert owner._native_retail_clock_companion(array_body)["source_accepted"] is False
+    assert owner._native_retail_clock_companion({
+        **body, "raw_body_utf8": json.dumps({"~1": event}), "provider_event_pointer_or_none": "/~01",
+    })["source_accepted"] is False
+    for index in ("01", "-1", "+0", "1", "99999999999", "٠"):
+        with pytest.raises(ContractValidationError, match="CLOCK_COMPANION_EVENT_POINTER"):
+            owner._native_retail_clock_companion({**array_body, "provider_event_pointer_or_none": "/a~1b~0c/" + index})
+    # The selected codec preserves the pointer; source-field eligibility remains external.
+    assert owner._native_retail_clock_companion({**body, "provider_event_pointer_or_none": "/other"})["source_accepted"] is False
+    with pytest.raises(ContractValidationError, match="CLOCK_COMPANION_RAW_CLOCK_MISMATCH"):
+        owner._native_retail_clock_companion({**body, "raw_body_utf8": body["raw_body_utf8"].replace(event, event.replace("Z", "+00:00"))})
+    huge = 10 ** 180
+    unbounded_clocks = {**body["clocks"], **{
+        name: huge + index for index, name in enumerate((
+            "qtt_received_monotonic_ns", "qtt_parse_completed_monotonic_ns",
+            "durable_commit_completed_monotonic_ns", "strategy_available_monotonic_ns",
+        ))
+    }}
+    large_result = owner._native_retail_clock_companion({**body, "clocks": unbounded_clocks, "issued_monotonic_ns": huge + 4})
+    assert owner._private_clock_body_from_canonical_v1(large_result["canonical_payload_json"])["issued_monotonic_ns"] == huge + 4
+
+
+def _assert_f13_clock_replay() -> None:
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane import receipts as owner
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane import point_in_time as pit
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane.errors import (
+        ContractValidationError, PersistenceContractError, PointInTimeError, ReasonCode,
+    )
+    body, requirements = _f13_clock_fixture()
+    canonical = owner._native_retail_clock_companion(body)["canonical_payload_json"]
+    arguments = dict(
+        expected_record_id=body["record_id"], expected_scope=body["scope"],
+        original_raw_body=body["raw_body_utf8"].encode(), requirements=requirements,
+        decision_time=body["clocks"]["strategy_available_at_utc"], recorded_cutoff=body["issued_at"],
+    )
+    result = owner._native_retail_clock_replay(canonical, **arguments)
+    assert result["state"] == "EXACT_CLOCK_REPLAY_CHECKED_NOT_ADMISSION"
+    assert result["issued_pair"]["nanosecond_remainder"] == 445
+    assert result["clock_result"]["clock_pairs"]["strategy_available_at_utc"]["nanosecond_remainder"] == 444
+    assert int(result["issued_pair"]["utc_ns_text"]) == int(result["recorded_cutoff_pair"]["utc_ns_text"])
+    for flag in ("source_accepted", "durable_commit_proven", "strategy_availability_proven",
+                 "full_pit_v3_admitted", "receipt_emitted", "posts_cash", "releases_reservation",
+                 "runtime_effect_authorized"):
+        assert result[flag] is False
+    for changes, expected, detail in (
+        (dict(recorded_cutoff="2026-08-30T12:00:04.000000444Z"), PointInTimeError, "CLOCK_REPLAY_RECORDED_AFTER_CUTOFF"),
+        (dict(decision_time="2026-08-30T12:00:04.000000443Z"), pit.PITDataContractErrorV1, "PIT_V3_AVAILABLE_AFTER_DECISION"),
+        (dict(decision_time=None), PointInTimeError, "CLOCK_REPLAY_DECISION_REQUIRED"),
+        (dict(recorded_cutoff=None), ContractValidationError, "UTC_NANOSECONDS"),
+        (dict(original_raw_body=arguments["original_raw_body"] + b" "), PersistenceContractError, "CLOCK_REPLAY_RAW_BYTES"),
+        (dict(original_raw_body=bytearray(arguments["original_raw_body"])), ContractValidationError, "CLOCK_REPLAY_RAW_TYPE"),
+        (dict(expected_record_id="another"), ContractValidationError, "CLOCK_REPLAY_SCOPE"),
+        (dict(expected_scope={**body["scope"], "partition_ref": "another"}), ContractValidationError, "CLOCK_REPLAY_SCOPE"),
+    ):
+        with pytest.raises(expected, match=detail) as caught:
+            owner._native_retail_clock_replay(canonical, **{**arguments, **changes})
+        assert type(caught.value) is expected
+        if expected is PersistenceContractError:
+            assert caught.value.reason_code is ReasonCode.PERSISTENCE_CONFLICT
+    for changed_requirements, reason in (
+        (dict(required_process_epoch_id_or_none="other"), pit.PITReasonCodeV1.PIT_CLOCK_DOMAIN_MISMATCH),
+        (dict(required_monotonic_clock_id_or_none="other"), pit.PITReasonCodeV1.PIT_CLOCK_DOMAIN_MISMATCH),
+        (dict(maximum_wall_clock_uncertainty_ns_or_none=999), pit.PITReasonCodeV1.PIT_WALL_CLOCK_UNCERTAIN),
+        (dict(requires_provider_publication_time=True), pit.PITReasonCodeV1.PIT_PROVIDER_PUBLICATION_TIME_UNAVAILABLE),
+    ):
+        with pytest.raises(pit.PITDataContractErrorV1) as caught:
+            owner._native_retail_clock_replay(canonical, **{**arguments, "requirements": {**requirements, **changed_requirements}})
+        assert caught.value.pit_reason_code is reason
+    for name in requirements:
+        incomplete = {key: value for key, value in requirements.items() if key != name}
+        with pytest.raises(pit.PITDataContractErrorV1):
+            owner._native_retail_clock_replay(canonical, **{**arguments, "requirements": incomplete})
+    for name in body["clocks"]:
+        incomplete = deepcopy(body)
+        del incomplete["clocks"][name]
+        with pytest.raises(pit.PITDataContractErrorV1):
+            owner._native_retail_clock_companion(incomplete)
+    for name, reason in (
+        ("provider_event_time_utc_or_none", pit.PITReasonCodeV1.PIT_CAPABILITY_UNAVAILABLE),
+        ("revision_effective_time_utc_or_none", pit.PITReasonCodeV1.PIT_CAPABILITY_UNAVAILABLE),
+        ("settlement_finality_time_utc_or_none", pit.PITReasonCodeV1.PIT_LIFECYCLE_BLOCKED),
+    ):
+        missing = deepcopy(body)
+        missing["clocks"][name] = None
+        if name in missing["clock_proof_refs"]:
+            missing["clock_proof_refs"][name] = None
+        else:
+            missing["provider_event_pointer_or_none"] = None
+        encoded = owner._native_retail_clock_companion(missing)["canonical_payload_json"]
+        with pytest.raises(pit.PITDataContractErrorV1) as caught:
+            owner._native_retail_clock_replay(encoded, **arguments)
+        assert caught.value.pit_reason_code is reason
+    invalid_hour = deepcopy(body)
+    invalid_hour["clocks"]["qtt_received_at_utc"] = "2026-08-30T24:00:00Z"
+    with pytest.raises(pit.PITDataContractErrorV1) as caught:
+        owner._native_retail_clock_companion(invalid_hour)
+    assert caught.value.pit_reason_code is pit.PITReasonCodeV1.PIT_CLOCK_DOMAIN_MISMATCH
+    historic = deepcopy(body)
+    for name, value in historic["clocks"].items():
+        if type(value) is str and ("time_utc" in name or name.endswith("_at_utc")):
+            if value is not None:
+                historic["clocks"][name] = "1969-12-31T23:59:59.999999998Z"
+    historic["issued_at"] = "1969-12-31T23:59:59.999999999Z"
+    historical_canonical = owner._native_retail_clock_companion({
+        **historic, "raw_body_utf8": '{"accepted":"1969-12-31T23:59:59.999999998Z"}',
+    })["canonical_payload_json"]
+    historical = owner._native_retail_clock_replay(
+        historical_canonical, **{**arguments,
+            "original_raw_body": b'{"accepted":"1969-12-31T23:59:59.999999998Z"}',
+            "recorded_cutoff": historic["issued_at"], "decision_time": "1969-12-31T23:59:59.999999998Z"},
+    )
+    assert historical["issued_pair"]["utc_ns_text"] == "-1"
+    assert historical["issued_pair"]["receipt_utc_floor"] == "1969-12-31T23:59:59.999999Z"
+    assert historical["issued_pair"]["nanosecond_remainder"] == 999
 
 
 def _f12_v3_fixture():
