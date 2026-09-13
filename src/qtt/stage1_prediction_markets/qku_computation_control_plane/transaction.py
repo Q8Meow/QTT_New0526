@@ -9,7 +9,7 @@ from typing import Mapping
 
 from .accounting import AccountingAndTCAServiceV1, JournalAccountV1, JournalPostingV1, JournalTransactionV1, ReconciliationBreakReceiptV1
 from .context import parse_utc
-from .errors import ComputationControlPlaneError, ContractValidationError, PersistenceContractError, ReasonCode
+from .errors import ComputationControlPlaneError, ContractValidationError, PersistenceContractError, ReasonCode, TransactionContractError
 from .idempotency import IdempotencyClaimReceiptV1, IdempotencyOutcomeV1
 from .lifecycle import StateTransitionReceiptV1
 from .outbox import OutboxIntentRecordV1
@@ -231,6 +231,24 @@ class TrancheCUnitOfWorkV1:
         started_at: datetime | str,
         completed_at: datetime | str,
     ) -> TransactionCommitReceiptV1:
+        refs = (
+            *(record.record_id for record in records.receipt_records),
+            *(event.economic_event_id for event in records.economic_events),
+            *(edge.lineage_edge_id for edge in records.value_lineage_edges),
+            *((records.journal_transaction.journal_transaction_id,) if records.journal_transaction else ()),
+            *(posting.posting_id for posting in records.journal_postings),
+            records.state_transition.transition_id,
+            *((records.optional_outbox_intent.outbox_intent_id,) if records.optional_outbox_intent else ()),
+            *(row.reversal_receipt_id for row in records.reversal_links),
+            *(row.break_receipt_id for row in records.reconciliation_breaks),
+        )
+        # Local validation only: this prospective object is never emitted as evidence.
+        prospective = self._receipt(
+            unit_of_work_id=unit_of_work_id, state=TransactionTerminalStateV1.COMMITTED,
+            attempt=1, refs=refs, claim_ref=records.idempotency_claim.claim_id,
+            started_at=started_at, completed_at=completed_at, failure_code=None, retryable=False,
+        )
+        started_at, completed_at = prospective.started_at, prospective.completed_at
         for attempt in range(1, self._retry_policy.max_transaction_attempts + 1):
             transaction: PersistenceTransactionV1 | None = None
             try:
@@ -245,23 +263,38 @@ class TrancheCUnitOfWorkV1:
                     started_at=started_at, completed_at=completed_at,
                     failure_code=(ReasonCode.TRANSACTION_RETRY_EXHAUSTED.value if retryable_begin else exc.reason_code.value), retryable=False,
                 )
+            phase = "precommit"
+
+            def rollback_owned() -> None:
+                nonlocal phase
+                phase = "rollback_attempted"
+                transaction.rollback()
+                if transaction.is_active:
+                    raise TransactionContractError(
+                        ReasonCode.TRANSACTION_STATE_INVALID,
+                        "owned rollback returned with an active transaction",
+                    )
+                phase = "rollback_returned"
+
             try:
                 claim = self._adapter.acquire_idempotency_claim(transaction, records.idempotency_claim)
                 if claim.outcome is IdempotencyOutcomeV1.REPLAYED_SAME_PAYLOAD:
-                    transaction.rollback()
-                    return self._receipt(
+                    result = self._receipt(
                         unit_of_work_id=unit_of_work_id, state=TransactionTerminalStateV1.COMMITTED,
                         attempt=attempt, refs=(claim.original_result_ref,), claim_ref=claim.claim_ref,
                         started_at=started_at, completed_at=completed_at, failure_code=None, retryable=False,
                     )
+                    rollback_owned()
+                    return result
                 if claim.outcome in {IdempotencyOutcomeV1.CONFLICT_DIFFERENT_PAYLOAD, IdempotencyOutcomeV1.IN_PROGRESS}:
-                    transaction.rollback()
                     reason = ReasonCode.IDEMPOTENCY_CONFLICT if claim.outcome is IdempotencyOutcomeV1.CONFLICT_DIFFERENT_PAYLOAD else ReasonCode.IDEMPOTENCY_IN_PROGRESS
-                    return self._receipt(
+                    result = self._receipt(
                         unit_of_work_id=unit_of_work_id, state=TransactionTerminalStateV1.CONFLICT,
                         attempt=attempt, refs=(), claim_ref=claim.claim_ref, started_at=started_at,
                         completed_at=completed_at, failure_code=reason.value, retryable=False,
                     )
+                    rollback_owned()
+                    return result
                 original_reversal_ref = (
                     records.journal_transaction.reversal_of_transaction_id
                     if records.journal_transaction is not None
@@ -323,34 +356,31 @@ class TrancheCUnitOfWorkV1:
                 for reconciliation_break in records.reconciliation_breaks:
                     self._adapter.insert_reconciliation_break(transaction, reconciliation_break)
                 self._adapter.bind_idempotency_result(transaction, claim.claim_ref, records.result_record_ref, parse_utc(completed_at, field_name="completed_at"))
-                transaction.commit()
-                refs = (
-                    *(record.record_id for record in records.receipt_records),
-                    *(event.economic_event_id for event in records.economic_events),
-                    *(edge.lineage_edge_id for edge in records.value_lineage_edges),
-                    *((records.journal_transaction.journal_transaction_id,) if records.journal_transaction else ()),
-                    *(posting.posting_id for posting in records.journal_postings),
-                    records.state_transition.transition_id,
-                    *((records.optional_outbox_intent.outbox_intent_id,) if records.optional_outbox_intent else ()),
-                    *(row.reversal_receipt_id for row in records.reversal_links),
-                    *(row.break_receipt_id for row in records.reconciliation_breaks),
-                )
-                return self._receipt(
+                result = self._receipt(
                     unit_of_work_id=unit_of_work_id, state=TransactionTerminalStateV1.COMMITTED,
-                    attempt=attempt, refs=tuple(refs), claim_ref=claim.claim_ref,
+                    attempt=attempt, refs=refs, claim_ref=claim.claim_ref,
                     started_at=started_at, completed_at=completed_at, failure_code=None, retryable=False,
                 )
-            except ComputationControlPlaneError as exc:
-                if transaction.is_active:
-                    transaction.rollback()
+                phase = "commit_attempted"
+                transaction.commit()
+                phase = "commit_returned"
+                return result
+            except Exception as exc:
+                # Inactivity alone says nothing about whether this operation rolled back.
+                # Failed/finished explicit cleanup must never be attempted a second time.
+                if phase in {"rollback_attempted", "rollback_returned"} or not transaction.is_active:
+                    raise
+                commit_attempted = phase in {"commit_attempted", "commit_returned"}
+                try:
+                    rollback_owned()
+                except Exception as cleanup_error:
+                    raise cleanup_error from exc
+                if commit_attempted or not isinstance(exc, ComputationControlPlaneError):
+                    raise
                 return self._receipt(
                     unit_of_work_id=unit_of_work_id, state=TransactionTerminalStateV1.ROLLED_BACK,
                     attempt=attempt, refs=(), claim_ref=records.idempotency_claim.claim_id,
                     started_at=started_at, completed_at=completed_at,
                     failure_code=exc.reason_code.value, retryable=False,
                 )
-            except Exception:
-                if transaction.is_active:
-                    transaction.rollback()
-                raise
         raise AssertionError("bounded retry loop must terminate")

@@ -14,8 +14,8 @@ from .accounting import (
     JournalTransactionV1,
     ReconciliationBreakReceiptV1,
 )
-from .context import parse_utc
-from .errors import PersistenceContractError, ReasonCode, TransactionContractError
+from .context import _native_ident, parse_utc
+from .errors import PersistenceContractError, ReasonCode, SerializationSafetyError, TransactionContractError
 from .idempotency import IdempotencyClaimReceiptV1, IdempotencyClaimStateV1, IdempotencyOutcomeV1
 from .lifecycle import StateTransitionReceiptV1
 from .migrations import (
@@ -33,7 +33,11 @@ from .persistence import (
     PersistenceAvailabilityV1,
     PersistenceTransactionV1,
 )
-from .receipts import DurableComputationExecutionReceiptRecordV1, EconomicEventRecordV1, EconomicReceiptEventSpineV1, ValueLineageEdgeV1
+from .receipts import (
+    DurableComputationExecutionReceiptRecordV1, EconomicEventRecordV1,
+    EconomicReceiptEventSpineV1, EconomicRecordTypeV1, PrivateObservationClockReceiptV1,
+    ValueLineageEdgeV1, _private_clock_reconstruct_spine_v1,
+)
 from .rollback import (
     JournalReversalBundleV1,
     ReversalHistoryViewV1,
@@ -346,6 +350,9 @@ class SQLiteReferenceAdapterV1(PersistenceAdapterV1):
     def insert_receipt_record(self, transaction: PersistenceTransactionV1, record: EconomicReceiptEventSpineV1) -> None:
         self._transaction(transaction)
         payload = record.typed_payload
+        if (record.record_type == EconomicRecordTypeV1.PRIVATE_OBSERVATION_CLOCK
+                or type(payload) is PrivateObservationClockReceiptV1):
+            record = _private_clock_reconstruct_spine_v1(record, expected_record_id=record.record_id)
         if isinstance(payload, DurableComputationExecutionReceiptRecordV1) and any(
             not self._record_exists(ref) for ref in payload.dependency_receipt_refs
         ):
@@ -552,6 +559,53 @@ class SQLiteReferenceAdapterV1(PersistenceAdapterV1):
             return
         self._assert_cross_table_identity_available("reconciliation_breaks", reconciliation_break.break_receipt_id)
         self._insert(transaction, "INSERT INTO reconciliation_breaks VALUES(?,?,?,?,?)", (reconciliation_break.break_receipt_id, reconciliation_break.reconciliation_run_id, _iso(reconciliation_break.effective_at, "effective_at"), _iso(reconciliation_break.recorded_at, "recorded_at"), deterministic_json(reconciliation_break)), "reconciliation break")
+
+    def load_committed_private_clock_receipt_v1(
+        self, record_ref: str,
+    ) -> EconomicReceiptEventSpineV1 | None:
+        if self._active_transaction is not None and self._active_transaction.is_active:
+            raise TransactionContractError(
+                ReasonCode.TRANSACTION_STATE_INVALID, "F13 committed read requires no active transaction",
+            )
+        try:
+            if self._connection.in_transaction:
+                raise TransactionContractError(
+                    ReasonCode.TRANSACTION_STATE_INVALID, "F13 connection transaction remains active",
+                )
+            if self._availability is not PersistenceAvailabilityV1.AVAILABLE_REFERENCE:
+                raise PersistenceContractError(ReasonCode.PERSISTENCE_UNAVAILABLE, "reference persistence is unavailable")
+            _native_ident(record_ref)
+            cursor = self._connection.execute(
+                "SELECT record_id, effective_at, recorded_at, aggregate_id, payload_json "
+                "FROM receipt_records WHERE record_id = ?", (record_ref,),
+            )
+            try:
+                row = cursor.fetchone()
+            finally:
+                cursor.close()
+        except sqlite3.Error as exc:
+            raise PersistenceContractError(
+                ReasonCode.PERSISTENCE_UNAVAILABLE, "SQLite reference private-clock read failed",
+            ) from exc
+        if row is None:
+            return None
+        if any(type(cell) is not str for cell in row):
+            raise PersistenceContractError(ReasonCode.SCHEMA_MISMATCH, "F13_STORED_SQL_CELL_TYPE_INVALID")
+        try:
+            payload = safe_json_loads(row[4])
+        except (RecursionError, UnicodeError) as exc:
+            raise SerializationSafetyError(
+                ReasonCode.SERIALIZATION_UNSAFE, "F13_STORED_ENVELOPE_INVALID",
+            ) from exc
+        record = _private_clock_reconstruct_spine_v1(payload, expected_record_id=record_ref)
+        if row[:4] != (
+            record.record_id, _iso(record.effective_at, "effective_at"),
+            _iso(record.recorded_at, "recorded_at"), record.aggregate_id,
+        ):
+            raise PersistenceContractError(ReasonCode.SCHEMA_MISMATCH, "F13_STORED_SQL_METADATA_MISMATCH")
+        if row[4] != deterministic_json(record):
+            raise PersistenceContractError(ReasonCode.PERSISTENCE_CONFLICT, "F13_STORED_SQL_CANONICAL_MISMATCH")
+        return record
 
     def get_record(self, record_ref: str) -> object | None:
         for table in APPEND_ONLY_TABLES_V1:

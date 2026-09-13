@@ -91,6 +91,18 @@ ST12_BRANCH_CASES = (
 )
 
 
+F13_BRANCH_CASE = (
+    context.F13_PRIVATE_CLOCK_STORAGE_REPLAY_BRANCH,
+    (
+        context.F13_PRIVATE_CLOCK_STORAGE_REPLAY_BRANCH.upper(),
+        "prefix-" + context.F13_PRIVATE_CLOCK_STORAGE_REPLAY_BRANCH,
+        context.F13_PRIVATE_CLOCK_STORAGE_REPLAY_BRANCH + "-suffix",
+        context.F13_PRIVATE_CLOCK_STORAGE_REPLAY_BRANCH + "/",
+        "f13-private-clock-*",
+    ),
+)
+
+
 def _clear_github_branch_context_env(monkeypatch):
     for env_name in GITHUB_BRANCH_CONTEXT_ENV:
         monkeypatch.delenv(env_name, raising=False)
@@ -185,69 +197,247 @@ def test_st12_owner_authorized_branches_are_exactly_validation_only(
     branch: str,
     adversarial_branches: tuple[str, ...],
 ):
-    assert context.is_owner_authorized_validation_branch(branch)
-    assert context.roadmap_pr_number(branch) is None
-    for gate in ("PR159R", "PR160"):
-        assert context.is_branch_allowed_for_upstream_pr_gate(branch, gate)
-    for threshold in (94, 95, 96, 138):
-        assert context.is_downstream_or_main_validation_branch(
-            branch, after_pr=threshold, allow_repair=False,
-        )
-    assert not context.is_main_cumulative_branch(branch)
-    assert not context.is_repair_branch(branch)
-    assert not context.is_validation_infrastructure_branch(branch)
-    assert not context.is_validation_execution_branch(branch)
-    assert branch not in context.EXPLICIT_DOWNSTREAM_REPAIR_BRANCH_PR_NUMBERS
-    assert not context.is_downstream_roadmap_branch(
-        branch, after_pr=1, allow_repair=False,
-    )
-    for minimum in (1, 99):
-        assert context.is_pr_or_later_branch(
-            branch, minimum_pr=minimum, allow_main=False, allow_repair=False,
-        )
-    for prefix in ("refs/heads/", "refs/remotes/origin/", "origin/"):
-        assert context.normalize_branch_context(prefix + branch) == branch
-        assert context.is_owner_authorized_validation_branch(prefix + branch)
-    for adversarial in (*adversarial_branches, "agent/other"):
-        assert not context.is_owner_authorized_validation_branch(adversarial)
+    def assert_selected_branch(branch, adversarial_branches):
+        assert context.is_owner_authorized_validation_branch(branch)
+        assert context.roadmap_pr_number(branch) is None
         for gate in ("PR159R", "PR160"):
-            assert not context.is_branch_allowed_for_upstream_pr_gate(adversarial, gate)
-        for threshold in (94, 95, 96):
-            assert not context.is_downstream_or_main_validation_branch(
-                adversarial, after_pr=threshold, allow_repair=False,
+            assert context.is_branch_allowed_for_upstream_pr_gate(branch, gate)
+        for threshold in (94, 95, 96, 138):
+            assert context.is_downstream_or_main_validation_branch(
+                branch, after_pr=threshold, allow_repair=False,
             )
-        assert not context.is_pr_or_later_branch(
-            adversarial, minimum_pr=99, allow_main=False, allow_repair=False,
+        assert not context.is_main_cumulative_branch(branch)
+        assert not context.is_repair_branch(branch)
+        assert not context.is_validation_infrastructure_branch(branch)
+        assert not context.is_validation_execution_branch(branch)
+        assert branch not in context.EXPLICIT_DOWNSTREAM_REPAIR_BRANCH_PR_NUMBERS
+        assert not context.is_downstream_roadmap_branch(
+            branch, after_pr=1, allow_repair=False,
         )
-
-    if branch == context.F12_EXACT_TIME_COMPOSITION_BRANCH:
-        from tools import run_validation_gates as runner
-
-        builder = "build_pr168_rp5c_immutable_qku_formula_library.py"
-        assert runner.OWNER_VALIDATION_READ_ONLY_UPSTREAM_BUILDER_SCRIPT_NAMES == (
-            frozenset({builder})
-        )
-        commands = [
-            ["python", "tools/validate_pr168_rp5c_immutable_qku_formula_library.py"],
-            ["python", f"tools/{builder}", "--repo-root", "."],
-            ["python", "-B", "-m", "pytest", "tests/pr168_rp5c", "-q"],
-            ["python", "tools/independent_validate_qku_computation_control_plane_d.py"],
-            ["python", "tools/build_other.py", "--output", "synthetic-output"],
-            ["python", "tools/build_pr168_rp5c_immutable_qku_formula_library.py.copy"],
-        ]
-        original = [command.copy() for command in commands]
-        expected = [command.copy() for index, command in enumerate(commands) if index != 1]
-        filtered = runner._filter_foreign_branch_guarded_builders_for_owner_validation(
-            commands, branch=branch,
-        )
-        assert filtered == expected
-        assert commands == original
-        for unknown in ("unregistered-validation-context", *adversarial_branches):
-            retained = runner._filter_foreign_branch_guarded_builders_for_owner_validation(
-                commands, branch=unknown,
+        for minimum in (1, 99):
+            assert context.is_pr_or_later_branch(
+                branch, minimum_pr=minimum, allow_main=False, allow_repair=False,
             )
-            assert retained == original
+        for prefix in ("refs/heads/", "refs/remotes/origin/", "origin/"):
+            assert context.normalize_branch_context(prefix + branch) == branch
+            assert context.is_owner_authorized_validation_branch(prefix + branch)
+        for adversarial in (*adversarial_branches, "agent/other"):
+            assert not context.is_owner_authorized_validation_branch(adversarial)
+            for gate in ("PR159R", "PR160"):
+                assert not context.is_branch_allowed_for_upstream_pr_gate(adversarial, gate)
+            for threshold in (94, 95, 96):
+                assert not context.is_downstream_or_main_validation_branch(
+                    adversarial, after_pr=threshold, allow_repair=False,
+                )
+            assert not context.is_pr_or_later_branch(
+                adversarial, minimum_pr=99, allow_main=False, allow_repair=False,
+            )
+
+        if branch in {context.F12_EXACT_TIME_COMPOSITION_BRANCH, context.F13_PRIVATE_CLOCK_STORAGE_REPLAY_BRANCH}:
+            from tools import run_validation_gates as runner
+
+            builder = "build_pr168_rp5c_immutable_qku_formula_library.py"
+            assert runner.OWNER_VALIDATION_READ_ONLY_UPSTREAM_BUILDER_SCRIPT_NAMES == (
+                frozenset({builder})
+            )
+            commands = [
+                ["python", "tools/validate_pr168_rp5c_immutable_qku_formula_library.py"],
+                ["python", f"tools/{builder}", "--repo-root", "."],
+                ["python", "-B", "-m", "pytest", "tests/pr168_rp5c", "-q"],
+                ["python", "tools/independent_validate_qku_computation_control_plane_d.py"],
+                ["python", "tools/build_other.py", "--output", "synthetic-output"],
+                ["python", "tools/build_pr168_rp5c_immutable_qku_formula_library.py.copy"],
+            ]
+            original = [command.copy() for command in commands]
+            expected = [command.copy() for index, command in enumerate(commands) if index != 1]
+            filtered = runner._filter_foreign_branch_guarded_builders_for_owner_validation(
+                commands, branch=branch,
+            )
+            assert filtered == expected
             assert commands == original
+            for unknown in ("unregistered-validation-context", *adversarial_branches):
+                retained = runner._filter_foreign_branch_guarded_builders_for_owner_validation(
+                    commands, branch=unknown,
+                )
+                assert retained == original
+                assert commands == original
+
+        if branch == context.F13_PRIVATE_CLOCK_STORAGE_REPLAY_BRANCH:
+            from tools import validation_scope_registry as registry
+            from src.qtt.stage1_prediction_markets.grand_global_debug_logical_consistency_audit import report as pr152
+
+            expected_paths = frozenset({
+                'src/qtt/stage1_prediction_markets/qku_computation_control_plane/context.py',
+                'src/qtt/stage1_prediction_markets/qku_computation_control_plane/persistence.py',
+                'src/qtt/stage1_prediction_markets/qku_computation_control_plane/receipts.py',
+                'src/qtt/stage1_prediction_markets/qku_computation_control_plane/serialization.py',
+                'src/qtt/stage1_prediction_markets/qku_computation_control_plane/sqlite_reference.py',
+                'src/qtt/stage1_prediction_markets/qku_computation_control_plane/transaction.py',
+                'tests/source_evidence/test_s1_pit_data_phase_a_01.py',
+                'tests/stage1_prediction_markets/qku_computation_control_plane/accounting/test_contract_matrix.py',
+                'tests/stage1_prediction_markets/qku_computation_control_plane/security/test_deserialization_safety.py',
+                'tests/tools/test_ci_branch_context.py',
+                'tools/ci_branch_context.py',
+                'tools/independent_validate_qku_computation_control_plane_execution.py',
+                'tools/validation_scope_registry.py',
+            })
+            assert type(registry.F13_ALLOWED_EXACT_PATHS) is frozenset
+            assert registry.F13_ALLOWED_EXACT_PATHS == expected_paths
+            assert len(expected_paths) == 13
+            assert context.roadmap_pr_number(branch) is None
+            for prefix in ("", "refs/heads/", "refs/remotes/origin/", "origin/"):
+                supplied_branch = prefix + branch
+                for path in sorted(expected_paths):
+                    for supplied_path in (path, "./" + path, path.replace("/", "\\")):
+                        decision = registry.explain_pr_scope_decision(
+                            supplied_branch, supplied_path,
+                        )
+                        assert decision == {
+                            "allowed": True,
+                            "branch": branch,
+                            "normalized_path": path,
+                            "pr_id": "F13",
+                            "matched_rule": "exact:" + path,
+                            "reason": "registered_exact_path",
+                        }
+                        assert registry.is_pr_scoped_changed_path_allowed(
+                            supplied_branch, supplied_path,
+                        )
+                        assert context.is_explicit_downstream_repair_changed_path(
+                            supplied_branch, supplied_path,
+                        )
+                        assert pr152._is_allowed_pr152_changed_path_for_branch(
+                            supplied_path, supplied_branch,
+                        )
+                for path in expected_paths:
+                    for unapproved_path in (
+                        path + ".near", "prefix/" + path, "../" + path,
+                        "/" + path, "C:/" + path, path.upper(),
+                    ):
+                        assert not registry.is_pr_scoped_changed_path_allowed(
+                            supplied_branch, unapproved_path,
+                        )
+            for adversarial in (*adversarial_branches, "feature/unrelated", "HEAD"):
+                for path in expected_paths:
+                    assert not registry.is_pr_scoped_changed_path_allowed(adversarial, path)
+                    assert not context.is_explicit_downstream_repair_changed_path(adversarial, path)
+                    assert not pr152._is_allowed_pr152_changed_path_for_branch(path, adversarial)
+
+            denied_paths = (
+                "src/qtt/stage1_prediction_markets/qku_computation_control_plane/unapproved.py",
+                "tools/validation_reliability.py",
+                "tools/changed_area_validation_router.py",
+                pr152.c.MASTER_PLAN_PATH.as_posix(),
+                pr152.c.ATOMICROWS_BUNDLE_PATH.as_posix(),
+                pr152._forbidden_bundle_sidecar_path(),
+            )
+            for path in denied_paths:
+                assert not registry.is_pr_scoped_changed_path_allowed(branch, path)
+                assert not pr152._is_allowed_pr152_changed_path_for_branch(path, branch)
+            # Existing legacy shared-path compatibility is not new F13 edit authority.
+            assert not registry.is_pr_scoped_changed_path_allowed(
+                branch, ".github/workflows/qtt_validation.yml",
+            )
+            original_changed_paths = pr152._changed_paths
+            original_branch_context = pr152.current_branch_context
+            with pytest.MonkeyPatch.context() as scope_patch:
+                scope_patch.setattr(
+                    pr152, "current_branch_context",
+                    lambda _root: context.BranchContext(branch=branch, source="synthetic-test"),
+                )
+                scope_patch.setattr(pr152, "_changed_paths", lambda _root: sorted(expected_paths))
+                assert pr152._validate_changed_paths(REPO_ROOT) == []
+                for rejected_path in denied_paths:
+                    scope_patch.setattr(
+                        pr152, "_changed_paths",
+                        lambda _root, rejected_path=rejected_path: sorted(expected_paths | {rejected_path}),
+                    )
+                    failures = pr152._validate_changed_paths(REPO_ROOT)
+                    assert "PR152_CHANGED_PATH_OUT_OF_SCOPE: " + rejected_path in failures
+                scope_patch.setattr(pr152, "_changed_paths", lambda _root: ["<git-status-unavailable>"])
+                assert pr152._validate_changed_paths(REPO_ROOT) == ["PR152_GIT_STATUS_UNAVAILABLE"]
+            assert pr152._changed_paths is original_changed_paths
+            assert pr152.current_branch_context is original_branch_context
+
+            import ast
+            from contextlib import redirect_stderr, redirect_stdout
+            from copy import deepcopy
+            from io import StringIO
+
+            from tools import independent_validate_qku_computation_control_plane_execution as execution_validator
+
+            original_tree_loader = execution_validator._tree
+            persistence_tree = original_tree_loader("persistence.py")
+            original_tree_dump = ast.dump(persistence_tree, include_attributes=True)
+            adapter = next(
+                node for node in persistence_tree.body
+                if isinstance(node, ast.ClassDef) and node.name == "PersistenceAdapterV1"
+            )
+            original_methods = {
+                node.name for node in adapter.body
+                if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef))
+                and not node.name.startswith("_")
+            }
+            get_record_node = next(
+                node for node in adapter.body
+                if isinstance(node, ast.FunctionDef) and node.name == "get_record"
+            )
+            for removed_method, added_method, expected_difference in (
+                ("load_committed_private_clock_receipt_v1", None,
+                 {"load_committed_private_clock_receipt_v1"}),
+                ("get_record", None, {"get_record"}),
+                (None, "unexpected_public_method", {"unexpected_public_method"}),
+                ("get_record", "unexpected_public_method",
+                 {"get_record", "unexpected_public_method"}),
+            ):
+                mutated_tree = deepcopy(persistence_tree)
+                mutated_adapter = next(
+                    node for node in mutated_tree.body
+                    if isinstance(node, ast.ClassDef) and node.name == "PersistenceAdapterV1"
+                )
+                if removed_method is not None:
+                    mutated_adapter.body = [
+                        node for node in mutated_adapter.body
+                        if not (
+                            isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef))
+                            and node.name == removed_method
+                        )
+                    ]
+                if added_method is not None:
+                    unexpected_method = deepcopy(get_record_node)
+                    unexpected_method.name = added_method
+                    mutated_adapter.body.append(unexpected_method)
+                mutated_methods = {
+                    node.name for node in mutated_adapter.body
+                    if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef))
+                    and not node.name.startswith("_")
+                }
+                assert original_methods ^ mutated_methods == expected_difference
+                if removed_method is not None and added_method is not None:
+                    assert len(mutated_methods) == len(original_methods)
+
+                def mutated_tree_loader(name, mutation=mutated_tree):
+                    if name == "persistence.py":
+                        return deepcopy(mutation)
+                    return original_tree_loader(name)
+
+                with StringIO() as stdout, StringIO() as stderr:
+                    with pytest.MonkeyPatch.context() as tree_patch:
+                        tree_patch.setattr(execution_validator, "_tree", mutated_tree_loader)
+                        with redirect_stdout(stdout), redirect_stderr(stderr):
+                            result = execution_validator.main()
+                    assert execution_validator._tree is original_tree_loader
+                    assert result == 1
+                    assert stderr.getvalue() == (
+                        f"typed persistence interface mismatch: {sorted(expected_difference)}\n"
+                    )
+                    assert execution_validator.SUCCESS not in stdout.getvalue()
+                    assert execution_validator.SUCCESS not in stderr.getvalue()
+                assert ast.dump(persistence_tree, include_attributes=True) == original_tree_dump
+
+    assert_selected_branch(branch, adversarial_branches)
+    if branch == context.F12_EXACT_TIME_COMPOSITION_BRANCH:
+        assert_selected_branch(*F13_BRANCH_CASE)
 
 
 def test_st12_pull_request_detached_context_uses_exact_github_head_ref(
@@ -260,7 +450,7 @@ def test_st12_pull_request_detached_context_uses_exact_github_head_ref(
     monkeypatch.setenv("GITHUB_EVENT_NAME", "pull_request")
     monkeypatch.setenv("GITHUB_REF", "refs/pull/276/merge")
     monkeypatch.setenv("GITHUB_REF_NAME", "276/merge")
-    for branch, adversarial_branches in ST12_BRANCH_CASES:
+    for branch, adversarial_branches in (*ST12_BRANCH_CASES, F13_BRANCH_CASE):
         for prefix in ("", "refs/heads/", "refs/remotes/origin/", "origin/"):
             monkeypatch.setenv("GITHUB_HEAD_REF", prefix + branch)
             resolved = context.current_branch_context(
@@ -269,6 +459,17 @@ def test_st12_pull_request_detached_context_uses_exact_github_head_ref(
             )
             assert resolved.branch == branch
             assert resolved.source == "GITHUB_HEAD_REF"
+            if branch == context.F13_PRIVATE_CLOCK_STORAGE_REPLAY_BRANCH:
+                from tools import validation_scope_registry as registry
+                from src.qtt.stage1_prediction_markets.grand_global_debug_logical_consistency_audit import report as pr152
+
+                with monkeypatch.context() as scope_patch:
+                    scope_patch.setattr(pr152, "current_branch_context", lambda _root: resolved)
+                    scope_patch.setattr(
+                        pr152, "_changed_paths",
+                        lambda _root: sorted(registry.F13_ALLOWED_EXACT_PATHS),
+                    )
+                    assert pr152._validate_changed_paths(REPO_ROOT) == []
             assert context.github_actions_pull_request_detached_context_active(
                 branch_returncode=0, branch="HEAD",
             )

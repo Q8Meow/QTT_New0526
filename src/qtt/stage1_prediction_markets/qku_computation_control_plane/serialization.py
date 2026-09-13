@@ -9,11 +9,13 @@ from decimal import Decimal
 from enum import Enum
 import json
 import ntpath
+import re
 from pathlib import PureWindowsPath
 import unicodedata
 from typing import Any
 
-from .errors import ReasonCode, SerializationSafetyError
+from .context import _native_bounded_decimal, _native_require, _native_text
+from .errors import ContractValidationError, ReasonCode, SerializationSafetyError
 
 
 @dataclass(frozen=True, slots=True)
@@ -288,3 +290,82 @@ def safe_json_loads(text: str) -> object:
         ) from exc
     _json_value(value)
     return value
+
+
+def _native_strict_json(raw: bytes, max_bytes: int = 65536) -> Any:
+    """Bounded raw JSON: lexical integers stay int; other numbers use Decimal."""
+    _native_require(type(max_bytes) is int and 0 < max_bytes <= 1048576, "JSON_BUDGET")
+    _native_require(type(raw) is bytes and len(raw) <= max_bytes, "JSON_BOUND")
+    try:
+        decoded = raw.decode("utf-8", errors="strict")
+    except UnicodeError as exc:
+        raise ContractValidationError(ReasonCode.INVALID_CONTRACT, "JSON") from exc
+
+    # Bound nesting before recursive decoding; ignore brackets in quoted text.
+    stack = []
+    quoted = escaped = False
+    for char in decoded:
+        if quoted:
+            if escaped:
+                escaped = False
+            elif char == chr(92):
+                escaped = True
+            elif char == '"':
+                quoted = False
+        elif char == '"':
+            quoted = True
+        elif char in "[{":
+            stack.append(char)
+            _native_require(len(stack) <= 16, "JSON_DEPTH")
+        elif char in "]}":
+            _native_require(bool(stack) and stack.pop() == ("[" if char == "]" else "{"), "JSON")
+    _native_require(not quoted and not stack, "JSON")
+
+    def pairs(items):
+        result = {}
+        for key, value in items:
+            _native_text(key)
+            _native_require(key not in result, "DUPLICATE_JSON_KEY")
+            result[key] = value
+        return result
+
+    def number(token):
+        _native_require(len(token) <= 128, "NUMBER_BOUND")
+        exponent = re.search(r"[eE]([+-]?[0-9]+)$", token)
+        _native_require(exponent is None or abs(int(exponent.group(1))) <= 128, "NUMBER_BOUND")
+        return _native_bounded_decimal(Decimal(token))
+
+    def int_number(token):
+        number(token)
+        return int(token)
+
+    def nonfinite(_token):
+        raise ContractValidationError(ReasonCode.INVALID_CONTRACT, "NONFINITE")
+
+    try:
+        result = json.loads(
+            decoded, object_pairs_hook=pairs, parse_float=number,
+            parse_int=int_number, parse_constant=nonfinite,
+        )
+    except (UnicodeError, json.JSONDecodeError, RecursionError) as exc:
+        raise ContractValidationError(ReasonCode.INVALID_CONTRACT, "JSON") from exc
+
+    nodes = 0
+
+    def visit(value, depth=0):
+        nonlocal nodes
+        nodes += 1
+        _native_require(nodes <= 4096, "JSON_NODES")
+        _native_require(depth <= 16, "JSON_DEPTH")
+        if type(value) is str:
+            _native_require(not any(0xD800 <= ord(char) <= 0xDFFF for char in value), "SURROGATE")
+        elif type(value) is dict:
+            for key, item in value.items():
+                visit(key, depth + 1)
+                visit(item, depth + 1)
+        elif type(value) is list:
+            for item in value:
+                visit(item, depth + 1)
+
+    visit(result)
+    return result

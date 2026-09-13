@@ -1837,6 +1837,7 @@ def main() -> int:
         "insert_state_transition", "acquire_idempotency_claim", "bind_idempotency_result",
         "insert_outbox_intent", "insert_reversal_link", "insert_reconciliation_break",
         "load_committed_reversal_history", "get_record", "get_idempotency_result",
+        "load_committed_private_clock_receipt_v1",
         "reconstruct_as_of",
     }
     if persistence_methods != expected_methods:
