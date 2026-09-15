@@ -524,10 +524,12 @@ class PrivateEvidenceReadRequestV1:
         _f14_validate_v1(_F14_SCOPE, scope)
         _f14_require_v1(scope['profile'] == 'POLYMARKET_US_RETAIL_DIRECT', 'F14_STORAGE_SCOPE')
         refs = dict(self.record_refs)
-        controls = {key: dict(value) for key, value in self.phase_control_refs.items()
-                    if isinstance(value, MappingABC)}
+        supplied_controls = dict(self.phase_control_refs)
         _f14_require_v1(set(refs) == set(_F14_RECORD_ROLES)
-            and set(controls) == {'A', 'B', 'C'}, 'F14_STORAGE_VIEW_REFS')
+            and set(supplied_controls) == {'A', 'B', 'C'}, 'F14_STORAGE_VIEW_REFS')
+        _f14_require_v1(all(isinstance(value, MappingABC) for value in supplied_controls.values()),
+            'F14_STORAGE_VIEW_REFS')
+        controls = {key: dict(value) for key, value in supplied_controls.items()}
         proofs = refs['clock_proofs']
         _f14_require_v1(type(proofs) is tuple and len(proofs) <= 3, 'F14_PHYSICAL_PROOFS')
         identities = [value for key, value in refs.items() if key != 'clock_proofs'] + list(proofs)

@@ -1894,7 +1894,7 @@ def _f14_offline_owners(patch, operation, *, proofs=0):
     return request, ingress, registry, publisher, args[3]['original_raw_body'], expected, ticker
 
 
-def _f14_scripted_transport(patch, request, ingress, raw, *, failure=None):
+def _f14_scripted_transport(patch, request, ingress, raw, *, failure=None, on_native_event=None):
     import base64, json, ssl, types
     calls = []
     def signature(headers, path):
@@ -1919,6 +1919,7 @@ def _f14_scripted_transport(patch, request, ingress, raw, *, failure=None):
         def read(self, amount):
             calls.append('read')
             assert amount == request.maximum_raw_bytes + 1
+            if on_native_event is not None: on_native_event('received')
             if failure == 'revoke': ingress.source_registry.revoke(request.grant.session_binding, 8)
             if failure == 'deadline':
                 patch.setattr(ingress.source_registry._validate_grant_v1.__globals__['time'],
@@ -1929,6 +1930,7 @@ def _f14_scripted_transport(patch, request, ingress, raw, *, failure=None):
         calls.append('construct')
         assert host == 'api.polymarket.us' and port == 443 and 0 < timeout <= 10
         assert context.check_hostname is True and context.verify_mode == ssl.CERT_REQUIRED
+        if on_native_event is not None: on_native_event('constructed')
         return Rest()
     class WS:
         response = types.SimpleNamespace(status_code=101)
@@ -1941,6 +1943,7 @@ def _f14_scripted_transport(patch, request, ingress, raw, *, failure=None):
         def recv(self, *, timeout):
             calls.append('recv')
             assert timeout > 0
+            if on_native_event is not None: on_native_event('received')
             if failure == 'binary': return raw
             if request.operation == 'WS_BALANCE' and calls.count('recv') == 1:
                 return json.dumps(dict(requestId='request', subscriptionType='SUBSCRIPTION_TYPE_ACCOUNT_BALANCE',
@@ -1958,6 +1961,7 @@ def _f14_scripted_transport(patch, request, ingress, raw, *, failure=None):
         assert 0 < kwargs['open_timeout'] <= 10 and kwargs['max_size'] == request.maximum_raw_bytes
         assert kwargs['logger'].disabled and not kwargs['logger'].propagate
         signature(kwargs['additional_headers'], '/v1/ws/private')
+        if on_native_event is not None: on_native_event('constructed')
         return WS()
     modules = {name: types.ModuleType(name) for name in
         ('http', 'http.client', 'websockets', 'websockets.sync', 'websockets.sync.client')}
@@ -1978,11 +1982,265 @@ def _f14_fresh_adapter(kind):
 
 def _assert_f14_native_and_storage(adapter_kind):
     import copy, sys
+    from dataclasses import replace
     from src.qtt.stage1_prediction_markets.private_state_receipts import handoff
     from src.qtt.stage1_prediction_markets.qku_computation_control_plane import serialization as codec
-    from src.qtt.stage1_prediction_markets.qku_computation_control_plane.persistence import _f14_reconstruct_snapshot_v1
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane.persistence import (
+        PrivateEvidenceReadRequestV1, _f14_reconstruct_snapshot_v1)
     from tests.source_evidence.test_s1_pit_data_phase_a_01 import _f14_reference_cases
     absent = object()
+    for operation, boundary in ((operation, boundary) for operation in ('BALANCES', 'WS_POSITION')
+            for boundary in ('reservation', 'constructed', 'received')):
+        for competition in ('distinct_request', 'same_request_other_publisher'):
+            with pytest.MonkeyPatch.context() as patch:
+                request, ingress, registry, publisher, raw, expected, _ = _f14_offline_owners(patch, operation)
+                other_grant = replace(request.grant, grant_id='competing-grant')
+                registry.issue_grant(other_grant)
+                registry.bind_clock_facts(grant_id=other_grant.grant_id,
+                    request_ref=request.consumer['request_ref'], item_key=request.consumer['item_key'],
+                    facts_by_role={})
+                other_request = type(request)(other_grant, operation, handoff._f14_plain_v1(request.consumer),
+                    None, handoff._f14_plain_v1(request.requirements), request.maximum_raw_bytes)
+                other_publisher = type(publisher)(source_registry=registry)
+                adapter = _f14_fresh_adapter(adapter_kind)
+                calls, modules = _f14_scripted_transport(patch, request, ingress, raw,
+                    on_native_event=lambda stage: competing_call() if stage == boundary else None)
+                originals = {name: sys.modules.get(name, absent) for name in modules}
+                reentries = []
+                acquired_tokens, cleanup_calls, commits = [], [], []
+                finish = ingress._finish_attempt_v1
+                execute = handoff.TrancheCUnitOfWorkV1.execute
+                def recorded_finish(token):
+                    cleanup_calls.append(token)
+                    return finish(token)
+                def recorded_commit(unit, **kwargs):
+                    committed = execute(unit, **kwargs)
+                    commits.append((kwargs, committed))
+                    return committed
+                patch.setattr(ingress, '_finish_attempt_v1', recorded_finish)
+                patch.setattr(handoff.TrancheCUnitOfWorkV1, 'execute', recorded_commit)
+                def competing_call():
+                    state = dict(vars(ingress))
+                    token = ingress._coordinator_token
+                    assert token is not None and token is not request
+                    assert ingress._active_request is (None if boundary == 'reservation' else request)
+                    if boundary == 'received' and operation == 'BALANCES':
+                        assert ingress._response_headers is not None and ingress._charged is True
+                    remaining = dict(registry._remaining)
+                    requests = dict(publisher._requests)
+                    before_calls = list(calls)
+                    before_cleanup = list(cleanup_calls)
+                    contender = other_request if competition == 'distinct_request' else request
+                    target = publisher if competition == 'distinct_request' else other_publisher
+                    with pytest.raises(ComputationControlPlaneError, match='F14_INGRESS_ATTEMPT_ACTIVE'):
+                        handoff.run_retail_private_observation_once_v1(contender, ingress=ingress,
+                            source_registry=registry, adapter=adapter, publisher=target)
+                    assert set(vars(ingress)) == set(state)
+                    assert all(getattr(ingress, key) is value for key, value in state.items())
+                    assert registry._remaining == remaining and calls == before_calls
+                    assert publisher._requests == requests and not other_publisher._requests
+                    assert not publisher._slots and not other_publisher._slots
+                    assert cleanup_calls == before_cleanup
+                    for foreign in (None, object(), request, other_request):
+                        ingress._finish_attempt_v1(foreign)
+                        assert all(getattr(ingress, key) is value for key, value in state.items())
+                    acquired_tokens.append(token)
+                    reentries.append(competition)
+                class Reservations(dict):
+                    def __setitem__(self, key, value):
+                        if boundary == 'reservation' and key == id(request) and value[1] is None:
+                            competing_call()
+                        return super().__setitem__(key, value)
+                publisher._requests = Reservations()
+                try:
+                    with pytest.MonkeyPatch.context() as patcher:
+                        for key, value in modules.items():
+                            patcher.setitem(sys.modules, key, value)
+                        result = handoff.run_retail_private_observation_once_v1(request, ingress=ingress,
+                            source_registry=registry, adapter=adapter, publisher=publisher)
+                        assert result['selected_values'] == expected['selected_values']
+                        assert all(value is False for value in result.values() if type(value) is bool)
+                        assert reentries == [competition] and calls[-1] == 'close'
+                        assert registry._remaining == {'grant': 0, 'competing-grant': 1}
+                        assert len(acquired_tokens) == 1 and cleanup_calls[-1] is acquired_tokens[0]
+                        assert ingress._coordinator_token is None and ingress._active_request is None
+                        assert ingress._prepared is None and ingress._attempt_id is None
+                        assert ingress._response_headers is None and ingress._charged is False
+                        cached_calls = []
+                        def cached_during_next():
+                            state = dict(vars(ingress))
+                            token = ingress._coordinator_token
+                            assert token is not None and token is not acquired_tokens[0]
+                            assert ingress._active_request is other_request
+                            remaining = dict(registry._remaining)
+                            before_calls, before_cleanup = list(next_calls), list(cleanup_calls)
+                            requests = dict(publisher._requests)
+                            assert handoff.run_retail_private_observation_once_v1(request, ingress=ingress,
+                                source_registry=registry, adapter=adapter, publisher=publisher) == result
+                            assert cleanup_calls == before_cleanup
+                            for foreign in (acquired_tokens[0], object(), None, other_request):
+                                ingress._finish_attempt_v1(foreign)
+                                assert all(getattr(ingress, key) is value for key, value in state.items())
+                            assert registry._remaining == remaining and next_calls == before_calls
+                            assert publisher._requests == requests
+                            cached_calls.append(token)
+                        next_calls, next_modules = _f14_scripted_transport(patch, other_request, ingress, raw,
+                            on_native_event=lambda stage: cached_during_next() if stage == 'constructed' else None)
+                        with pytest.MonkeyPatch.context() as next_patcher:
+                            for key, value in next_modules.items():
+                                next_patcher.setitem(sys.modules, key, value)
+                            next_result = handoff.run_retail_private_observation_once_v1(other_request, ingress=ingress,
+                                source_registry=registry, adapter=adapter, publisher=publisher)
+                        assert next_result['selected_values'] == expected['selected_values']
+                        assert all(value is False for value in next_result.values() if type(value) is bool)
+                        assert len(cached_calls) == 1 and cleanup_calls[-1] is cached_calls[0]
+                        assert next_calls[-1] == 'close' and registry._remaining == {'grant': 0, 'competing-grant': 0}
+                        assert ingress._coordinator_token is None and ingress._active_request is None
+                        assert ingress._prepared is None and ingress._attempt_id is None
+                        assert ingress._response_headers is None and ingress._charged is False
+                        assert len(commits) == 6
+                        assert all(row[1].transaction_state is TransactionTerminalStateV1.COMMITTED for row in commits)
+                        assert [row[0]['unit_of_work_id'].split(':')[-2] for row in commits] == ['A', 'B', 'C'] * 2
+                        assert len(registry._captures) == 2
+                        for entry in registry._captures.values():
+                            read = handoff._f14_allocation_v1(request.grant.session_binding.scope, entry[4], ())
+                            snapshot = adapter.load_committed_private_evidence_snapshot_v1(read)
+                            immutable_read = PrivateEvidenceReadRequestV1(read.scope, read.record_refs, read.phase_control_refs)
+                            assert adapter.load_committed_private_evidence_snapshot_v1(immutable_read) == snapshot
+                            assert len(snapshot.present_record_refs) == 16
+                            raw_row = adapter.load_committed_private_evidence_witness_v1(read.record_refs['raw'])
+                            assert codec._f14_load_canonical_v1(raw_row.typed_payload.canonical_payload_json,
+                                codec._F14_PHASES['RAW'])['raw_body_utf8'].encode('utf-8') == raw
+                            for extra in (None, False, True, 0, 'extra', [], (), {}):
+                                with pytest.raises(ComputationControlPlaneError):
+                                    adapter.load_committed_private_evidence_snapshot_v1(PrivateEvidenceReadRequestV1(
+                                        read.scope, read.record_refs, {**read.phase_control_refs, 'EXTRA': extra}))
+                            assert adapter.load_committed_private_evidence_snapshot_v1(read) == snapshot
+                finally:
+                    try:
+                        for key, original in originals.items():
+                            if original is absent:
+                                assert key not in sys.modules
+                            else:
+                                assert key in sys.modules and sys.modules[key] is original
+                    finally:
+                        if adapter_kind == 'sqlite': adapter.close()
+    from contextlib import contextmanager
+    from src.qtt.stage1_prediction_markets.private_state_receipts import request as request_owner
+    for boundary in ('fence_exit', 'reserve', 'prepare', 'sign', 'charge', 'receive', 'store', 'publication', 'resolve'):
+        with pytest.MonkeyPatch.context() as patch:
+            request, ingress, registry, publisher, raw, expected, _ = _f14_offline_owners(patch, 'BALANCES')
+            adapter = _f14_fresh_adapter(adapter_kind)
+            calls, modules = _f14_scripted_transport(patch, request, ingress, raw,
+                on_native_event=lambda stage: fail() if boundary == 'receive' and stage == 'received' else None)
+            originals = {name: sys.modules.get(name, absent) for name in modules}
+            cleanups, failures, charges = [], [], []
+            finish, charge, fenced, observe = (ingress._finish_attempt_v1, registry._charge_v1,
+                registry.fenced, registry._observe_v1)
+            def cleanup(token):
+                assert token is ingress._coordinator_token and token is not None
+                cleanups.append((token, registry._remaining[request.grant.grant_id]))
+                return finish(token)
+            def fail(*args, **kwargs):
+                assert ingress._coordinator_token is not None
+                failures.append(boundary)
+                raise RuntimeError('scripted ' + boundary + ' failure')
+            def charged(grant, operation):
+                charge(grant, operation)
+                charges.append(grant.grant_id)
+                if boundary == 'charge': fail()
+            @contextmanager
+            def failing_fence(*args, **kwargs):
+                with fenced(*args, **kwargs) as session:
+                    yield session
+                    if not failures: fail()
+            class FailedReservation(dict):
+                def __setitem__(self, key, value):
+                    super().__setitem__(key, value)
+                    if key == id(request) and value[1] is None: fail()
+            def publication_clock(grant):
+                if publisher._slots and not failures:
+                    assert all(slot['state'] == 'OUTCOME_UNKNOWN' for slot in publisher._slots.values())
+                    fail()
+                return observe(grant)
+            patch.setattr(ingress, '_finish_attempt_v1', cleanup)
+            # A rejected, unissued grant cannot acquire, reserve, charge or release.
+            unissued = replace(request.grant, grant_id='unissued')
+            invalid_request = type(request)(unissued, request.operation, handoff._f14_plain_v1(request.consumer),
+                None, handoff._f14_plain_v1(request.requirements), request.maximum_raw_bytes)
+            with pytest.raises(ComputationControlPlaneError, match='F14_INGRESS_GRANT'):
+                handoff.run_retail_private_observation_once_v1(invalid_request, ingress=ingress,
+                    source_registry=registry, adapter=adapter, publisher=publisher)
+            assert not cleanups and not calls and not publisher._requests and not publisher._slots
+            assert ingress._coordinator_token is None and registry._remaining == {'grant': 1}
+            if boundary == 'reserve': publisher._requests = FailedReservation()
+            try:
+                with pytest.MonkeyPatch.context() as patcher:
+                    for key, value in modules.items():
+                        patcher.setitem(sys.modules, key, value)
+                    with pytest.MonkeyPatch.context() as fault:
+                        fault.setattr(registry, '_charge_v1', charged)
+                        if boundary == 'fence_exit': fault.setattr(registry, 'fenced', failing_fence)
+                        if boundary == 'prepare': fault.setattr(request_owner.ssl, 'create_default_context', fail)
+                        if boundary == 'sign': fault.setattr(request_owner, '_f14_signing_message_v1', fail)
+                        if boundary == 'store': fault.setattr(adapter, 'insert_receipt_record', fail)
+                        if boundary == 'publication': fault.setattr(registry, '_observe_v1', publication_clock)
+                        if boundary == 'resolve': fault.setattr(publisher, 'resolve_committed_private_observation_v1', fail)
+                        with pytest.raises(ComputationControlPlaneError):
+                            handoff.run_retail_private_observation_once_v1(request, ingress=ingress,
+                                source_registry=registry, adapter=adapter, publisher=publisher)
+                    assert failures == [boundary] and len(cleanups) == 1
+                    remaining = 1 if boundary in ('fence_exit', 'reserve', 'prepare', 'sign') else 0
+                    assert registry._remaining == {'grant': remaining}
+                    assert charges == ([] if remaining else ['grant'])
+                    assert cleanups[0][1] == remaining
+                    assert ingress._coordinator_token is None and ingress._active_request is None
+                    assert ingress._prepared is None and ingress._attempt_id is None
+                    assert ingress._response_headers is None and ingress._charged is False
+                    assert publisher._requests[id(request)] == (request, None)
+                    if boundary in ('publication', 'resolve'):
+                        assert len(publisher._slots) == 1
+                        slot = next(iter(publisher._slots.values()))
+                        assert slot['state'] == ('OUTCOME_UNKNOWN' if boundary == 'publication' else 'PENDING')
+                        assert slot['result'] is None
+                    else:
+                        assert not publisher._slots
+                    pending = {key: dict(value) for key, value in publisher._slots.items()}
+                    before_calls = list(calls)
+                    with pytest.raises(ComputationControlPlaneError, match='F14_INGRESS_ATTEMPT_OUTCOME_UNKNOWN'):
+                        handoff.run_retail_private_observation_once_v1(request, ingress=ingress,
+                            source_registry=registry, adapter=adapter, publisher=publisher)
+                    assert calls == before_calls and len(cleanups) == 1
+                    assert publisher._slots == pending and registry._remaining == {'grant': remaining}
+                    # A new grant/request may use the released receiver without replaying the held request.
+                    next_grant = replace(request.grant, grant_id='after-failure')
+                    registry.issue_grant(next_grant)
+                    registry.bind_clock_facts(grant_id=next_grant.grant_id,
+                        request_ref=request.consumer['request_ref'], item_key=request.consumer['item_key'], facts_by_role={})
+                    next_request = type(request)(next_grant, request.operation, handoff._f14_plain_v1(request.consumer),
+                        None, handoff._f14_plain_v1(request.requirements), request.maximum_raw_bytes)
+                    next_calls, next_modules = _f14_scripted_transport(patch, next_request, ingress, raw)
+                    with pytest.MonkeyPatch.context() as next_patcher:
+                        for key, value in next_modules.items(): next_patcher.setitem(sys.modules, key, value)
+                        result = handoff.run_retail_private_observation_once_v1(next_request, ingress=ingress,
+                            source_registry=registry, adapter=adapter, publisher=publisher)
+                    assert result['selected_values'] == expected['selected_values']
+                    assert all(value is False for value in result.values() if type(value) is bool)
+                    assert next_calls[-1] == 'close' and len(cleanups) == 2
+                    assert cleanups[0][0] is not cleanups[1][0]
+                    assert registry._remaining == {'grant': remaining, 'after-failure': 0}
+                    assert publisher._requests[id(request)] == (request, None)
+                    assert all(publisher._slots[key] == value for key, value in pending.items())
+                    assert ingress._coordinator_token is None and ingress._active_request is None
+            finally:
+                try:
+                    for key, original in originals.items():
+                        if original is absent:
+                            assert key not in sys.modules
+                        else:
+                            assert key in sys.modules and sys.modules[key] is original
+                finally:
+                    if adapter_kind == 'sqlite': adapter.close()
     operations = ('ACTIVITY_TRADE','ACTIVITY_RESOLUTION','ACTIVITY_FUNDING','POSITIONS','BALANCES','WS_POSITION','WS_BALANCE')
     for operation in operations:
         for proof_count in range(4):

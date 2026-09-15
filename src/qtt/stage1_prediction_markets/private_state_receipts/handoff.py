@@ -176,28 +176,30 @@ def run_retail_private_observation_once_v1(request: RetailPrivateReadRequestV1, 
         'F14_INGRESS_OWNER_ASSOCIATION')
     _f14_ingress_require_v1(adapter.availability is PersistenceAvailabilityV1.AVAILABLE_REFERENCE,
         'F14_INGRESS_STORAGE_UNAVAILABLE')
-    with source_registry.fenced(request.grant, request.operation):
-        ingress._validate_request_v1(request)
-        with publisher._lock:
-            old = publisher._requests.get(id(request))
-            if old is not None:
-                _f14_ingress_require_v1(old[0] is request and old[1] is not None,
-                    'F14_INGRESS_ATTEMPT_OUTCOME_UNKNOWN')
-                return _f14_freeze_v1(_f14_plain_v1(old[1]))
-            key = (request.grant.grant_id, request.consumer['request_ref'],
-                type(request.consumer['item_key']), request.consumer['item_key'])
-            _f14_ingress_require_v1(key in source_registry._clock_facts, 'F14_INGRESS_CLOCK_FACT')
-            facts = source_registry._clock_facts[key]
-            required = {'publication': request.requirements['requires_provider_publication_time']
-                    or request.requirements['provider_publication_time_is_source_proven'],
-                'revision': request.requirements['requires_revision_at_decision'],
-                'finality': request.requirements['requires_finality_at_decision']}
-            roles = tuple(role for role in _F14_PROOF_ROLES if required[role])
-            _f14_ingress_require_v1(all(role in facts for role in roles), 'F14_INGRESS_CLOCK_FACT')
-            publisher._requests[id(request)] = (request, None)
+    coordinator_token = None
     read_request = intent = observed = None
     observations = dict(capture_commit=None, publication=None, companion_commit=None)
     try:
+        with source_registry.fenced(request.grant, request.operation):
+            ingress._validate_request_v1(request)
+            with publisher._lock:
+                old = publisher._requests.get(id(request))
+                if old is not None:
+                    _f14_ingress_require_v1(old[0] is request and old[1] is not None,
+                        'F14_INGRESS_ATTEMPT_OUTCOME_UNKNOWN')
+                    return _f14_freeze_v1(_f14_plain_v1(old[1]))
+                key = (request.grant.grant_id, request.consumer['request_ref'],
+                    type(request.consumer['item_key']), request.consumer['item_key'])
+                _f14_ingress_require_v1(key in source_registry._clock_facts, 'F14_INGRESS_CLOCK_FACT')
+                facts = source_registry._clock_facts[key]
+                required = {'publication': request.requirements['requires_provider_publication_time']
+                        or request.requirements['provider_publication_time_is_source_proven'],
+                    'revision': request.requirements['requires_revision_at_decision'],
+                    'finality': request.requirements['requires_finality_at_decision']}
+                roles = tuple(role for role in _F14_PROOF_ROLES if required[role])
+                _f14_ingress_require_v1(all(role in facts for role in roles), 'F14_INGRESS_CLOCK_FACT')
+                coordinator_token = ingress._acquire_coordinator_v1(request)
+                publisher._requests[id(request)] = (request, None)
         observed = (ingress.read_private_message_once(request) if request.operation.startswith('WS_')
             else ingress.read_rest_once(request))
         attempt = source_registry._consume_capture_v1(observed, ingress, request)
@@ -348,4 +350,5 @@ def run_retail_private_observation_once_v1(request: RetailPrivateReadRequestV1, 
             raise
         raise ContractValidationError(ReasonCode.INVALID_CONTRACT, 'F14_INGRESS_NATIVE_FAILURE') from exc
     finally:
-        ingress._finish_attempt_v1()
+        if coordinator_token is not None:
+            ingress._finish_attempt_v1(coordinator_token)

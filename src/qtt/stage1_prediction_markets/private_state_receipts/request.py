@@ -406,6 +406,7 @@ class RetailPrivateIngressV1:
             'F14_INGRESS_KEY_BINDING')
         self.source_registry = source_registry
         self.credential_handle = credential_handle
+        self._coordinator_token = None
         self._active_request = None
         self._attempt_id = None
         self._prepared = None
@@ -422,6 +423,15 @@ class RetailPrivateIngressV1:
             and handle.private_key is not None and handle.binding_ref == session.credential_binding_ref
             and handle.session_ref == session.session_ref
             and handle.ledger_account_ref == session.scope['ledger_account_ref'], 'F14_INGRESS_KEY_BINDING')
+
+    def _acquire_coordinator_v1(self, request):
+        with self.source_registry._lock:
+            self._validate_request_v1(request)
+            _f14_ingress_require_v1(self._coordinator_token is None and self._active_request is None,
+                'F14_INGRESS_ATTEMPT_ACTIVE')
+            token = object()
+            self._coordinator_token = token
+            return token
 
     def _prepare_v1(self, request, ws):
         with self.source_registry._lock:
@@ -541,10 +551,12 @@ class RetailPrivateIngressV1:
     def _raise_message_budget_v1(self):
         raise ContractValidationError(ReasonCode.INVALID_CONTRACT, 'F14_INGRESS_MESSAGE_BUDGET')
 
-    def _finish_attempt_v1(self):
+    def _finish_attempt_v1(self, token):
         with self.source_registry._lock:
-            self._active_request = self._attempt_id = self._prepared = self._response_headers = None
-            self._charged = False
+            if token is not None and token is self._coordinator_token:
+                self._active_request = self._attempt_id = self._prepared = self._response_headers = None
+                self._charged = False
+                self._coordinator_token = None
 
     def read_rest_once(self, request):
         prepared = self._prepare_rest_v1(request)

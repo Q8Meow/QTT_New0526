@@ -181,6 +181,38 @@ def _assert_f14_bounded_witness_codec():
     args=_f14_reference_cases()[0][0]
     body,witnesses=args[:2]
     scope=body['scope']
+    from collections import UserDict
+    from src.qtt.stage1_prediction_markets.private_state_receipts.handoff import _f14_allocation_v1
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane.persistence import PrivateEvidenceReadRequestV1
+    read = _f14_allocation_v1(scope, 'closed-phase-roster', ())
+    controls = {key: dict(value) for key, value in read.phase_control_refs.items()}
+    invalid = []
+    for value in (None, False, True, 0, 1, 'extra', [], (), {}, {'claim_ref': 'extra'}):
+        invalid.append({**controls, 'EXTRA': value})
+    for phase in ('A', 'B', 'C'):
+        invalid.append({key: value for key, value in controls.items() if key != phase})
+        invalid.append({('OTHER' if key == phase else key): value for key, value in controls.items()})
+        for value in (None, False, True, 0, 1, 'phase', [], (), {}):
+            invalid.append({**controls, phase: value})
+        for field in controls[phase]:
+            for value in (None, True, 0, '', [], {}):
+                invalid.append({**controls, phase: {**controls[phase], field: value}})
+            invalid.append({**controls, phase: {key: value for key, value in controls[phase].items() if key != field}})
+        invalid.append({**controls, phase: {**controls[phase], 'extra': 'unlisted'}})
+        invalid.append({**controls, phase: {**controls[phase], 'result_binding_ref': 'unbound'}})
+        invalid.append({**controls, phase: {**controls[phase], 'transition_ref': controls[phase]['claim_ref']}})
+    for malformed in invalid:
+        before = copy.deepcopy(malformed)
+        with pytest.raises(ComputationControlPlaneError):
+            PrivateEvidenceReadRequestV1(read.scope, read.record_refs, malformed)
+        assert malformed == before
+    for mapping in (dict, MappingProxyType, UserDict):
+        supplied = {key: mapping(dict(value)) for key, value in controls.items()}
+        restored = PrivateEvidenceReadRequestV1(mapping(dict(read.scope)), mapping(dict(read.record_refs)), mapping(supplied))
+        assert restored == read
+        with pytest.raises(TypeError): restored.phase_control_refs['A']['claim_ref'] = 'changed'
+        supplied['A'] = {'claim_ref': 'detached'}
+        assert restored.phase_control_refs['A'] == controls['A']
     phases={'RAW':('raw',dict(scope=scope,raw_body_utf8=body['raw_body_utf8'])),
         'TRANSPORT':('transport',s._native_retail_transport_storage_projection_v1(witnesses['transport'],expected_binding_ref='authentication')),
         'CAPTURE_COMMIT':('capture-commit',witnesses['capture_commit']),
