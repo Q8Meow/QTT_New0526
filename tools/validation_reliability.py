@@ -46,6 +46,12 @@ PYTEST_TMP_PATH_NAME_LIMIT = 30
 STANDALONE_PYTEST_HELPER_PHASE = "standalone-pytest-helper"
 _RUN_NAME_COUNTER = itertools.count()
 _RUN_NAME_LOCK = threading.Lock()
+# Process-local creation evidence, not a persisted authority marker. Only this
+# allocating process may remove its own repository-local disposable run root.
+_LOCAL_RUN_OWNERS: dict[str, tuple[int, int, int, str]] = {}
+_LOCAL_RUN_NAME = re.compile(r"r\d{12}_\d+_\d+(?:_\d+)?\Z")
+_LOCAL_LAYOUT_DIR = ".qtt"
+
 
 MANAGED_TEXT_SUFFIXES = frozenset(
     {
@@ -187,12 +193,19 @@ class ValidationRunPathsV1:
             "cleanup_target",
         ):
             _require_absolute(getattr(self, field_name), field_name)
-        if not self.process_root_is_external_to_repo:
-            raise ValueError("process_root must be external to the repository")
-        if self.process_root == self.repo_root or _path_is_relative_to(
-            self.process_root, self.repo_root
-        ):
-            raise ValueError("process_root must actually be external to the repository")
+        local = (_lexically_inside_or_equal(self.process_root, self.repo_root)
+                 or _path_is_relative_to(self.process_root.resolve(strict=False),
+                                         self.repo_root.resolve(strict=False)))
+        if type(self.process_root_is_external_to_repo) is not bool:
+            raise ValueError("external-root observation must be an exact boolean")
+        if self.process_root_is_external_to_repo is local:
+            raise ValueError("process_root external observation differs from actual location")
+        if local:
+            _local_run_binding(self.repo_root, self.process_root,
+                               self.evidence_root, self.run_id)
+            if (self.validation_output_root != self.process_root / VALIDATION_OUTPUT_DIR_NAME
+                    or self.pytest_basetemp_root != self.process_root / PYTEST_BASETEMP_DIR_NAME):
+                raise ValueError("local validation/pytest roots must be the exact run slots")
         if self.process_root.name != self.process_child_name:
             raise ValueError("process_root must be the compact unique process child")
         if self.cleanup_target != self.process_root:
@@ -2804,6 +2817,183 @@ def _candidate_parents(
     return tuple(deduped)
 
 
+def _local_layout_git(repo: Path, *args: str) -> bytes:
+    """Read Git custody with no index refresh, replacement objects or lazy fetch."""
+    env = {key: value for key, value in os.environ.items()
+           if not key.upper().startswith("GIT_")}
+    env.update(GIT_OPTIONAL_LOCKS="0", GIT_TERMINAL_PROMPT="0",
+               GIT_NO_REPLACE_OBJECTS="1", GIT_NO_LAZY_FETCH="1",
+               GIT_ALLOW_PROTOCOL="")
+    try:
+        result = subprocess.run(
+            ["git", "--no-optional-locks", "-c", "core.fsmonitor=false",
+             "-c", "protocol.allow=never", "-C", str(repo), *args],
+            stdin=subprocess.DEVNULL, stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE, env=env, check=False, timeout=180,
+        )
+    except (OSError, subprocess.TimeoutExpired) as exc:
+        raise ValidationReliabilityError(
+            "ENGVR_REPOSITORY_LOCAL_LAYOUT_REJECTED",
+            f"read-only layout custody query failed: {type(exc).__name__}",
+        ) from exc
+    if result.returncode != 0:
+        raise ValidationReliabilityError(
+            "ENGVR_REPOSITORY_LOCAL_LAYOUT_REJECTED",
+            "read-only layout custody query returned nonzero",
+        )
+    return result.stdout
+
+
+def _local_unlinked_path(path: Path) -> None:
+    """Check every existing ancestor, retaining lexical paths before resolution."""
+    if not path.is_absolute() or ".." in path.parts:
+        raise ValidationReliabilityError(
+            "ENGVR_REPOSITORY_LOCAL_LAYOUT_REJECTED", "nonexact local path",
+        )
+    for part in (*reversed(path.parents), path):
+        try:
+            value = part.lstat()
+        except FileNotFoundError:
+            continue
+        if (stat.S_ISLNK(value.st_mode) or _stat_is_reparse_point(value)
+                or _path_is_junction(part) or not stat.S_ISDIR(value.st_mode)):
+            raise ValidationReliabilityError(
+                "ENGVR_REPOSITORY_LOCAL_LAYOUT_REJECTED",
+                "local directory chain contains a link, reparse point or non-directory",
+            )
+    if _lexical_path_key(path) != _lexical_path_key(path.resolve(strict=False)):
+        raise ValidationReliabilityError(
+            "ENGVR_REPOSITORY_LOCAL_LAYOUT_REJECTED", "local canonical path differs",
+        )
+
+
+def _require_local_layout(repo_root: Path) -> Path:
+    """Admit only an ignored, untracked .qtt area in this exact Git worktree.
+
+    HEAD and index are checked separately: staging a deletion never makes a
+    previously tracked .qtt file safe for recursive run cleanup.
+    """
+    root = _lexical_absolute_path(repo_root, field_name="local repository root")
+    _local_unlinked_path(root)
+    area = root / _LOCAL_LAYOUT_DIR
+    for path in (area, area / "runs", area / "evidence"):
+        _local_unlinked_path(path)
+    observed = _local_layout_git(root, "rev-parse", "--show-toplevel").strip()
+    if (not observed or _lexical_path_key(Path(os.fsdecode(observed)))
+            != _lexical_path_key(root)):
+        raise ValidationReliabilityError(
+            "ENGVR_REPOSITORY_LOCAL_LAYOUT_REJECTED", "not the exact Git root",
+        )
+    for args in (("ls-files", "--cached", "-z", "--"),
+                 ("ls-tree", "-r", "--name-only", "-z", "HEAD", "--")):
+        names = _local_layout_git(root, *args).split(b"\0")
+        if any(name.lower() == b".qtt" or name.lower().startswith(b".qtt/")
+               for name in names if name):
+            raise ValidationReliabilityError(
+                "ENGVR_REPOSITORY_LOCAL_LAYOUT_REJECTED", "tracked .qtt path present",
+            )
+    # Ask about the area directory itself: excluding a test sentinel alone is
+    # insufficient because it could leave another descendant unignored.
+    ignored = _local_layout_git(root, "check-ignore", "--quiet", "--", ".qtt/")
+    if ignored != b"":
+        raise ValidationReliabilityError(
+            "ENGVR_REPOSITORY_LOCAL_LAYOUT_REJECTED", ".qtt directory is not ignored",
+        )
+    return area
+
+
+def _local_run_binding(repo: Path, process: Path, evidence: Path,
+                       run_id: str | None = None) -> None:
+    area = _require_local_layout(repo)
+    if (_lexical_path_key(process.parent) != _lexical_path_key(area / "runs")
+            or _LOCAL_RUN_NAME.fullmatch(process.name) is None
+            or _lexical_path_key(evidence.parent) != _lexical_path_key(area / "evidence")
+            or not evidence.name.endswith(".evidence")
+            or (run_id is not None and evidence.name != f"{run_id}.evidence")):
+        raise ValidationReliabilityError(
+            "ENGVR_REPOSITORY_LOCAL_LAYOUT_REJECTED", "local run/evidence placement differs",
+        )
+    _local_unlinked_path(process)
+    _local_unlinked_path(evidence)
+
+
+def _local_cleanup_owner(repo: Path, process: Path, evidence: Path | None) -> None:
+    if evidence is None:
+        raise ValidationReliabilityError(
+            "ENGVR_RUN_SCOPED_CLEANUP_FAILED", "local cleanup requires separate evidence root",
+        )
+    _local_run_binding(repo, process, evidence)
+    key = _lexical_path_key(process)
+    with _RUN_NAME_LOCK:
+        owner = _LOCAL_RUN_OWNERS.get(key)
+    if owner is None or owner[0] != os.getpid() or owner[3] != _lexical_path_key(evidence):
+        raise ValidationReliabilityError(
+            "ENGVR_RUN_SCOPED_CLEANUP_FAILED", "local root was not created by this allocator",
+        )
+    if not os.path.lexists(process):
+        return
+    value = process.lstat()
+    if (value.st_dev, value.st_ino) != owner[1:3]:
+        raise ValidationReliabilityError(
+            "ENGVR_RUN_SCOPED_CLEANUP_FAILED", "local root identity changed since allocation",
+        )
+    # Reject preexisting links rather than traverse or chmod them. Concurrent
+    # mutation by another writer is outside the quiescent-run cleanup contract.
+    pending = [process]
+    while pending:
+        directory = pending.pop()
+        with os.scandir(directory) as entries:
+            for entry in entries:
+                # Windows DirEntry.stat leaves device and link counts at zero.
+                # Read full no-follow metadata for the existing custody checks.
+                value = Path(entry.path).lstat()
+                if (stat.S_ISLNK(value.st_mode) or _stat_is_reparse_point(value)
+                        or _path_is_junction(Path(entry.path))
+                        or value.st_dev != owner[1]):
+                    raise ValidationReliabilityError(
+                        "ENGVR_RUN_SCOPED_CLEANUP_FAILED", "linked or foreign-device local descendant",
+                    )
+                if stat.S_ISDIR(value.st_mode):
+                    pending.append(Path(entry.path))
+                elif not stat.S_ISREG(value.st_mode) or value.st_nlink != 1:
+                    raise ValidationReliabilityError(
+                        "ENGVR_RUN_SCOPED_CLEANUP_FAILED", "nonregular or multiply linked local file",
+                    )
+    final = process.lstat()
+    if (final.st_dev, final.st_ino) != owner[1:3]:
+        raise ValidationReliabilityError(
+            "ENGVR_RUN_SCOPED_CLEANUP_FAILED", "local root moved during cleanup validation",
+        )
+
+
+def _require_active_local_run_cache(root: Path, cache_path: Path) -> None:
+    """Accept cache writes only in an allocated run or an attested child run."""
+    process = cache_path.parent.parent
+    _local_unlinked_path(cache_path.parent)
+    if not process.is_dir():
+        raise ValidationReliabilityError(
+            "ENGVR_REPOSITORY_LOCAL_LAYOUT_REJECTED", "local cache run does not exist",
+        )
+    with _RUN_NAME_LOCK:
+        owner = _LOCAL_RUN_OWNERS.get(_lexical_path_key(process))
+    if owner is not None and owner[0] == os.getpid():
+        current = process.lstat()
+        if (current.st_dev, current.st_ino) != owner[1:3]:
+            raise ValidationReliabilityError(
+                "ENGVR_REPOSITORY_LOCAL_LAYOUT_REJECTED", "cache run identity changed",
+            )
+        return
+    inherited = attest_inherited_validation_run(
+        root, inherited_run_id=os.environ.get(RUN_ID_ENV, ""),
+        inherited_evidence_root=Path(os.environ.get(EVIDENCE_ROOT_ENV, "")),
+        explicit_basetemp=process / PYTEST_BASETEMP_DIR_NAME,
+    )
+    if inherited.process_root != process:
+        raise ValidationReliabilityError(
+            "ENGVR_REPOSITORY_LOCAL_LAYOUT_REJECTED", "cache run differs from inherited run",
+        )
+
+
 def _validate_candidate_parent(candidate: Path, repo_root: Path) -> Path:
     if not candidate.is_absolute():
         raise ValidationReliabilityError(
@@ -2817,22 +3007,29 @@ def _validate_candidate_parent(candidate: Path, repo_root: Path) -> Path:
         )
     resolved = candidate.resolve(strict=False)
     root = repo_root.resolve()
-    if resolved == root or _path_is_relative_to(resolved, root):
-        raise ValidationReliabilityError(
-            "ENGVR_SHORT_PROCESS_ROOT_UNAVAILABLE",
-            f"candidate is repository-local: {candidate}",
-        )
+    if (_lexically_inside_or_equal(candidate, root)
+            or resolved == root or _path_is_relative_to(resolved, root)):
+        try:
+            area = _require_local_layout(root)
+            if _lexical_path_key(candidate) != _lexical_path_key(area / "runs"):
+                raise ValueError("only exact .qtt/runs is admissible")
+            _local_unlinked_path(candidate)
+        except (OSError, ValueError, ValidationReliabilityError) as exc:
+            raise ValidationReliabilityError(
+                "ENGVR_SHORT_PROCESS_ROOT_UNAVAILABLE",
+                f"repository-local candidate rejected: {exc}",
+            ) from exc
     return resolved
 
 
 def _safe_relative_projection(value: str) -> Path:
-    normalized = normalize_repo_path(value)
-    parts = [
-        re.sub(r"[^A-Za-z0-9._-]", "_", part) or "_"
-        for part in PurePosixPath(normalized).parts
-        if part not in {"", ".", "..", "/"}
-    ]
-    return Path(*parts) if parts else Path("sentinel.bin")
+    safe = _safe_fixture_path_text(value)
+    if safe is None:
+        raise ValidationReliabilityError(
+            "ENGVR_LONGEST_PATH_PROBE_FAILED",
+            f"unsafe relative projection: {value!r}",
+        )
+    return Path(*safe.split("/"))
 
 
 def _literal_string_values(
@@ -2864,20 +3061,33 @@ def _literal_string_values(
 
 
 def _safe_fixture_path_text(value: str) -> str | None:
+    """Admit conservative literal relative paths without changing their names."""
+    if not isinstance(value, str):
+        return None
     text = value.replace("\\", "/")
-    if (
-        not text
-        or text.startswith(("/", "-"))
-        or ":" in text
-        or any(character.isspace() for character in text)
-    ):
+    if not text or text.startswith(("/", "-")):
         return None
-    path = PurePosixPath(text)
-    if any(part in {"", ".", ".."} for part in path.parts):
-        return None
-    if not all(re.fullmatch(r"[A-Za-z0-9._-]+", part) for part in path.parts):
-        return None
-    return path.as_posix()
+    parts = text.split("/")
+    for part in parts:
+        if (
+            not part
+            or part in {".", ".."}
+            or part.startswith(" ")
+            or part.endswith((" ", "."))
+        ):
+            return None
+        for character in part:
+            if ord(character) < 128:
+                if not (character.isalnum() or character in "._- "):
+                    return None
+            elif not character.isprintable() or character.isspace():
+                return None
+        stem = part.split(".", 1)[0].rstrip(" ").upper()
+        if stem in {"CON", "PRN", "AUX", "NUL"} or re.fullmatch(
+            r"(?:COM|LPT)[1-9\u00b9\u00b2\u00b3]", stem
+        ):
+            return None
+    return text
 
 
 def _path_expression_values(
@@ -3051,11 +3261,14 @@ def _pytest_tmp_path_budget(
 ) -> tuple[str, tuple[str, ...]]:
     test_components: set[str] = set()
     fixture_suffixes: set[str] = set()
+    source_selectors: set[str] = set()
     if repo_root is not None:
+        source_root = repo_root.resolve()
         for source_path in _selected_pytest_source_files(
             repo_root,
             projected_relative_paths,
         ):
+            source_selectors.add(source_path.relative_to(source_root).as_posix())
             try:
                 tree = ast.parse(source_path.read_text(encoding="utf-8"))
             except (OSError, SyntaxError, UnicodeError) as exc:
@@ -3072,14 +3285,14 @@ def _pytest_tmp_path_budget(
 
     for value in projected_relative_paths:
         safe = _safe_fixture_path_text(str(value))
-        if safe is not None and not safe.startswith(
+        if safe is not None and safe not in source_selectors and not safe.startswith(
             ("validation-output/", "pytest-basetemp/", "command-")
         ):
             fixture_suffixes.add(safe)
 
     test_component = max(
         test_components or {"test_validation_path_budget0"},
-        key=lambda item: (len(item), item),
+        key=lambda item: (len(item.encode("utf-16-le")) // 2, len(item), item),
     )
     return test_component, tuple(
         sorted(fixture_suffixes or {"sentinel.bin"})
@@ -3111,9 +3324,23 @@ def _deepest_projection(
         for item in fixture_suffixes
     )
     for value in projected_relative_paths:
-        safe = _safe_fixture_path_text(str(value))
+        raw = str(value).replace("\\", "/")
+        output_namespace = raw in {"validation-output", "pytest-basetemp"} or raw.startswith(
+            ("validation-output/", "pytest-basetemp/")
+        )
+        safe = _safe_fixture_path_text(raw)
         if safe is None:
+            if output_namespace:
+                raise ValidationReliabilityError(
+                    "ENGVR_LONGEST_PATH_PROBE_FAILED",
+                    f"unsafe declared output projection: {value!r}",
+                )
             continue
+        if raw in {"validation-output", "pytest-basetemp"}:
+            raise ValidationReliabilityError(
+                "ENGVR_LONGEST_PATH_PROBE_FAILED",
+                f"declared output has no file destination: {value!r}",
+            )
         if safe.startswith("validation-output/"):
             candidates.append(
                 process_root
@@ -3126,7 +3353,14 @@ def _deepest_projection(
                 / PYTEST_BASETEMP_DIR_NAME
                 / _safe_relative_projection(safe.removeprefix("pytest-basetemp/"))
             )
-    return max(candidates, key=lambda item: (len(str(item)), str(item)))
+    return max(
+        candidates,
+        key=lambda item: (
+            len(str(item).encode("utf-16-le")) // 2,
+            len(str(item)),
+            str(item),
+        ),
+    )
 
 
 def probe_run_filesystem(
@@ -3215,7 +3449,12 @@ def resolve_validation_run_paths(
         process_root_owned = False
         try:
             parent = _validate_candidate_parent(raw_candidate, root)
+            local = _lexically_inside_or_equal(parent, root)
+            evidence_parent = root / ".qtt" / "evidence" if local else parent
             parent.mkdir(parents=True, exist_ok=True)
+            if local:
+                evidence_parent.mkdir(parents=True, exist_ok=True)
+                _require_local_layout(root)
             process_child_name = base_process_child_name
             for collision_counter in range(1000):
                 process_child_name = (
@@ -3229,6 +3468,14 @@ def resolve_validation_run_paths(
                 except FileExistsError:
                     continue
                 process_root_owned = True
+                if local:
+                    _local_unlinked_path(process_root)
+                    value = process_root.lstat()
+                    with _RUN_NAME_LOCK:
+                        _LOCAL_RUN_OWNERS[_lexical_path_key(process_root)] = (
+                            os.getpid(), value.st_dev, value.st_ino,
+                            _lexical_path_key(evidence_parent / f"{selected_run_id}.evidence"),
+                        )
                 break
             else:
                 raise OSError("compact run-child collision budget exhausted")
@@ -3253,7 +3500,7 @@ def resolve_validation_run_paths(
                 )
             validation_root = process_root / VALIDATION_OUTPUT_DIR_NAME
             pytest_root = process_root / PYTEST_BASETEMP_DIR_NAME
-            evidence_root = parent / f"{selected_run_id}.evidence"
+            evidence_root = evidence_parent / f"{selected_run_id}.evidence"
             validation_root.mkdir(parents=True, exist_ok=False)
             pytest_root.mkdir(parents=True, exist_ok=False)
             evidence_root.mkdir(parents=True, exist_ok=False)
@@ -3265,7 +3512,7 @@ def resolve_validation_run_paths(
                 validation_output_root=validation_root,
                 pytest_basetemp_root=pytest_root,
                 evidence_root=evidence_root,
-                process_root_is_external_to_repo=True,
+                process_root_is_external_to_repo=not local,
                 filesystem_probe_state="PASS",
                 deepest_projected_path=deepest,
                 deepest_projected_path_text_length=len(str(deepest)),
@@ -3284,7 +3531,7 @@ def resolve_validation_run_paths(
                 and process_root is not None
                 and process_root.exists()
             ):
-                candidate_evidence_root = parent / f"{selected_run_id}.evidence"
+                candidate_evidence_root = evidence_parent / f"{selected_run_id}.evidence"
                 try:
                     remove_exact_run_owned_process_tree(
                         process_root,
@@ -3300,6 +3547,11 @@ def resolve_validation_run_paths(
                     ) from cleanup_exc
             if explicit_process_root is not None and source == "EXPLICIT":
                 break
+            if source == "ENVIRONMENT" and (
+                _lexically_inside_or_equal(raw_candidate, root)
+                or _path_is_relative_to(raw_candidate.resolve(strict=False), root)
+            ):
+                break  # Never escape a failed explicitly configured local layout.
     if typed_probe_errors:
         raise typed_probe_errors[-1]
     raise ValidationReliabilityError(
@@ -3532,7 +3784,7 @@ def attest_inherited_validation_run(
     inherited_evidence_root: Path,
     explicit_basetemp: Path,
 ) -> InheritedRunAttestation:
-    """Prove inherited helper values name one active external outer run."""
+    """Prove inherited helper values name one active, exactly placed outer run."""
 
     if not isinstance(inherited_run_id, str) or not inherited_run_id.strip():
         raise _evidence_failure("inherited run ID must be nonempty")
@@ -3556,11 +3808,17 @@ def attest_inherited_validation_run(
         raise _evidence_failure(
             "inherited evidence root must be one nonlinked directory"
         )
-    if _lexically_inside_or_equal(evidence, repository) or _path_is_relative_to(
-        evidence.resolve(strict=True),
-        repository.resolve(strict=True),
-    ):
-        raise _evidence_failure("inherited evidence root must be outside the repository")
+    evidence_local = (_lexically_inside_or_equal(evidence, repository)
+                      or _path_is_relative_to(evidence.resolve(strict=True),
+                                              repository.resolve(strict=True)))
+    if evidence_local:
+        try:
+            area = _require_local_layout(repository)
+            _local_unlinked_path(evidence)
+            if _lexical_path_key(evidence.parent) != _lexical_path_key(area / "evidence"):
+                raise ValueError("unexpected local evidence parent")
+        except (ValueError, OSError, ValidationReliabilityError) as exc:
+            raise _evidence_failure(f"inherited local evidence rejected: {exc}") from exc
 
     payload = _read_evidence_json(evidence, "run.json")
     if not isinstance(payload, dict):
@@ -3595,15 +3853,27 @@ def attest_inherited_validation_run(
         raise _evidence_failure("inherited repository root disagrees with run.json")
     if _lexical_path_key(declared_evidence) != _lexical_path_key(evidence):
         raise _evidence_failure("inherited evidence root disagrees with run.json")
-    if _lexically_inside_or_equal(process_root, repository) or _path_is_relative_to(
-        process_root.resolve(strict=False),
-        repository.resolve(strict=True),
-    ):
-        raise _evidence_failure("inherited process root is repository-local")
+    process_local = (_lexically_inside_or_equal(process_root, repository)
+                     or _path_is_relative_to(process_root.resolve(strict=False),
+                                             repository.resolve(strict=True)))
+    if process_local != evidence_local:
+        raise _evidence_failure("inherited local/external path classes disagree")
+    if process_local:
+        try:
+            _local_run_binding(repository, process_root, evidence, inherited_run_id)
+            if not process_root.is_dir():
+                raise ValueError("inherited local process root is absent")
+            if (path_payload.get("process_child_name") != process_root.name
+                    or payload_path("cleanup_target") != process_root
+                    or payload_path("validation_output_root") != process_root / VALIDATION_OUTPUT_DIR_NAME
+                    or pytest_root != process_root / PYTEST_BASETEMP_DIR_NAME):
+                raise ValueError("inherited exact local run fields differ")
+        except (ValueError, OSError, ValidationReliabilityError) as exc:
+            raise _evidence_failure(f"inherited local run rejected: {exc}") from exc
     if not _lexically_inside_or_equal(pytest_root, process_root):
         raise _evidence_failure("inherited pytest basetemp root is not run-scoped")
     if (
-        path_payload.get("process_root_is_external_to_repo") is not True
+        path_payload.get("process_root_is_external_to_repo") is not (not process_local)
         or path_payload.get("filesystem_probe_state") != "PASS"
         or probe_payload.get("failure_operation") is not None
     ):
@@ -4659,14 +4929,13 @@ def remove_exact_run_owned_process_tree(
             "ENGVR_RUN_SCOPED_CLEANUP_FAILED",
             "cleanup target cannot be a symlink or junction",
         )
-    if (
+    local = (
         _lexically_inside_or_equal(cleanup_target, repository)
         or _path_is_relative_to(cleanup_canonical, repository.resolve(strict=False))
-    ):
-        raise ValidationReliabilityError(
-            "ENGVR_RUN_SCOPED_CLEANUP_FAILED",
-            "refusing repository-local cleanup target",
-        )
+    )
+    if local:
+        _local_cleanup_owner(repository, cleanup_target,
+                             None if evidence_root is None else Path(evidence_root))
     if evidence_root is not None:
         evidence = _lexical_absolute_path(
             evidence_root,
@@ -4722,11 +4991,15 @@ def remove_exact_run_owned_process_tree(
         shutil.rmtree(cleanup_target, onexc=recover_windows_read_only)
     if os.path.lexists(cleanup_target):
         raise OSError("run root remains after exact cleanup")
+    if local:
+        with _RUN_NAME_LOCK:
+            _LOCAL_RUN_OWNERS.pop(_lexical_path_key(cleanup_target), None)
     return len(retried_paths)
 
 
 def cleanup_validation_run(paths: ValidationRunPathsV1) -> str:
-    target = paths.cleanup_target.resolve(strict=False)
+    # Preserve lexical identity so an exchanged root link is rejected, not followed.
+    target = _lexical_absolute_path(paths.cleanup_target, field_name="cleanup target")
     state = "PASS_ALREADY_ABSENT"
     read_only_retry_count = 0
     try:

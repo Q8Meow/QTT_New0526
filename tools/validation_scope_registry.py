@@ -7,12 +7,15 @@ from fnmatch import fnmatchcase
 
 from tools.ci_branch_context import (
     F13_PRIVATE_CLOCK_STORAGE_REPLAY_BRANCH,
+    F14_PRIVATE_EVIDENCE_JOIN_BRANCH,
     normalize_branch_context,
     S1_LAUNCH_GRAPH_IMPLEMENTATION_BRANCH,
     S1_PIT_DATA_PHASE_A_01_IMPLEMENTATION_BRANCH,
     S1_PLUGIN_PACKAGE_CURRENTIZATION_BRANCH,
 )
 
+
+F14_ALLOWED_EXACT_PATHS = frozenset(('src/qtt/stage1_prediction_markets/qku_computation_control_plane/context.py', 'src/qtt/stage1_prediction_markets/qku_computation_control_plane/source_policy.py', 'src/qtt/stage1_prediction_markets/qku_computation_control_plane/receipts.py', 'src/qtt/stage1_prediction_markets/qku_computation_control_plane/serialization.py', 'src/qtt/stage1_prediction_markets/qku_computation_control_plane/persistence.py', 'src/qtt/stage1_prediction_markets/qku_computation_control_plane/sqlite_reference.py', 'src/qtt/stage1_prediction_markets/qku_computation_control_plane/transaction.py', 'src/qtt/stage1_prediction_markets/qku_computation_control_plane/input_resolver.py', 'tests/source_evidence/test_s1_pit_data_phase_a_01.py', 'tests/stage1_prediction_markets/qku_computation_control_plane/accounting/test_contract_matrix.py', 'tests/stage1_prediction_markets/qku_computation_control_plane/security/test_deserialization_safety.py', 'tests/stage1_prediction_markets/qku_computation_control_plane/tranche_b/test_resolution_pipeline.py', 'tests/tools/test_ci_branch_context.py', 'tools/ci_branch_context.py', 'tools/validation_scope_registry.py', 'tools/independent_validate_qku_computation_control_plane_execution.py', 'src/qtt/stage1_prediction_markets/private_state_receipts/request.py', 'src/qtt/stage1_prediction_markets/private_state_receipts/receipt.py', 'src/qtt/stage1_prediction_markets/private_state_receipts/handoff.py', 'tools/validate_source_fact_binding_connector_semantic_readiness_static.py', 'tools/validate_no_runtime_artifacts.py', 'tests/source_evidence/test_source_fact_binding_connector_semantic_readiness_static.py', 'tests/fail_closed/test_no_runtime_artifacts_strict.py', '.github/workflows/qtt_validation.yml', '.gitignore', 'tools/validation_reliability.py', 'tools/run_validation_gates.py', 'src/qtt/core/testing/gate_result.py', 'tests/fail_closed/test_run_validation_gates.py', 'tests/fail_closed/test_pytest_fresh_basetemp_helper.py', 'tools/independent_validate_qku_computation_control_plane.py', 'src/qtt/stage1_prediction_markets/qku_computation_control_plane/validation.py', 'tools/currentize_pr152_after_generated_artifacts.py', 'tests/tools/test_currentize_pr152_after_generated_artifacts.py', 'tests/atomicrows/test_atomicrows_semantic_field_coverage_enrichment_plan.py', 'tests/atomicrows/test_atomicrows_semantic_value_materialization_owner_authorization_gate.py', 'tests/atomicrows/test_atomicrows_semantic_value_materialization_authorization_handoff_readiness_gate.py'))
 
 F13_ALLOWED_EXACT_PATHS = frozenset(
     {
@@ -2569,6 +2572,20 @@ def explain_pr_scope_decision(branch: str, path: str) -> dict[str, object]:
 
     normalized = normalize_changed_path(path)
     branch_name = str(branch).strip()
+    if normalize_branch_context(str(branch)) == F14_PRIVATE_EVIDENCE_JOIN_BRANCH:
+        allowed = normalized in F14_ALLOWED_EXACT_PATHS
+        return {
+            "allowed": allowed,
+            "branch": F14_PRIVATE_EVIDENCE_JOIN_BRANCH,
+            "normalized_path": normalized,
+            "pr_id": "F14",
+            "matched_rule": (
+                f"exact:{normalized}" if allowed else "no_f14_exact_scope_rule"
+            ),
+            "reason": (
+                "registered_exact_path" if allowed else "path_not_registered_for_pr_scope"
+            ),
+        }
     if normalize_branch_context(str(branch)) == F13_PRIVATE_CLOCK_STORAGE_REPLAY_BRANCH:
         allowed = normalized in F13_ALLOWED_EXACT_PATHS
         return {

@@ -449,3 +449,116 @@ def _native_bounded_decimal(value: object) -> Decimal:
     )
     _native_require(value == 0 or -100 <= value.adjusted() <= 100, "NUMBER_BOUND")
     return value
+
+
+# F14 selected Retail-US value helpers; the F12 boolean specialization is unchanged.
+from fractions import Fraction
+
+
+def _native_retail_decimal_string_v1(value: object) -> Decimal:
+    _native_require(type(value) is str and re.fullmatch('-?(?:0|[1-9][0-9]*)(?:\\.[0-9]+)?', value) is not None, 'DECIMAL_TEXT')
+    _native_require(len(value) <= 128, 'DECIMAL_BOUND')
+    result = Decimal(value)
+    _native_require(result.is_finite() and (not (result == 0 and result.is_signed())), 'DECIMAL_DOMAIN')
+    return result
+
+
+def _native_retail_finite_decimal_text_v1(value: Fraction) -> str:
+    """Exact finite-decimal rendering from a rational; independent of Decimal context."""
+    f = Fraction(value)
+    n, d = (f.numerator, f.denominator)
+    twos = fives = 0
+    while d % 2 == 0:
+        d //= 2
+        twos += 1
+    while d % 5 == 0:
+        d //= 5
+        fives += 1
+    _native_require(d == 1, 'NONTERMINATING_DECIMAL')
+    scale = max(twos, fives)
+    n *= 2 ** (scale - twos) * 5 ** (scale - fives)
+    digits = str(abs(n)).rjust(scale + 1, '0')
+    if scale:
+        digits = (digits[:-scale] + '.' + digits[-scale:]).rstrip('0').rstrip('.')
+    return ('-' if n < 0 else '') + digits if n else '0'
+
+
+def _native_retail_known_v1(value, required):
+    _native_require(type(value) is dict and set(required) <= set(value), 'REQUIRED_NATIVE_FIELD')
+    return value
+
+
+def _native_retail_rows_v1(value, maximum):
+    _native_require(type(maximum) is int and 0 < maximum <= 10000, 'ROW_BUDGET')
+    _native_require(type(value) is list and len(value) <= maximum, 'ROW_BOUND')
+    return value
+
+
+def _native_retail_scalar_v1(x, kind):
+    if kind == 'id':
+        return _native_ident(x)
+    if kind == 'bool':
+        _native_require(type(x) is bool, 'BOOLEAN')
+        return x
+    if kind == 'decimal':
+        return _native_retail_decimal_string_v1(x)
+    if kind == 'number':
+        _native_require(type(x) in (int, Decimal), 'JSON_NUMBER')
+        return _native_bounded_decimal(Decimal(x))
+    if kind == 'integer':
+        q = _native_retail_scalar_v1(x, 'number')
+        _native_require(q == q.to_integral_value() and 0 <= q <= 2 ** 63 - 1, 'INTEGER')
+        return int(q)
+    if kind == 'seconds_string':
+        _native_require(type(x) is str and re.fullmatch('[1-9][0-9]{0,18}', x) is not None and (int(x) < 2 ** 63), 'SECONDS_STRING')
+        return int(x)
+    if kind == 'utc':
+        _native_require(type(x) is str and re.fullmatch('\\d{4}-\\d\\d-\\d\\dT\\d\\d:\\d\\d:\\d\\d(?:\\.\\d{1,6})?Z', x) is not None, 'UTC')
+        try:
+            return datetime.fromisoformat(x.replace('Z', '+00:00'))
+        except ValueError as e:
+            raise ContractValidationError(ReasonCode.INVALID_CONTRACT, 'UTC') from e
+    if kind.startswith('enum:'):
+        _native_require(type(x) is str and x in kind[5:].split(','), 'ENUM')
+        return x
+    if kind == 'ids':
+        _native_require(type(x) is list and len(x) <= 100, 'LIST_BOUND')
+        vals = [_native_ident(v) for v in x]
+        _native_require(len(set(vals)) == len(vals), 'DUPLICATE_IDENTITY')
+        return vals
+    if kind == 'money':
+        _native_obj(x, ('value', 'currency'))
+        _native_ident(x['currency'])
+        return _native_retail_scalar_v1(x['value'], 'decimal')
+    raise ContractValidationError(ReasonCode.INVALID_CONTRACT, 'UNREGISTERED_SCALAR')
+
+
+def _native_retail_nonnegative_v1(value, kind='decimal'):
+    result = _native_retail_scalar_v1(value, kind)
+    _native_require(result >= 0, 'NONNEGATIVE')
+    return result
+
+
+def _native_retail_exact_text_v1(value):
+    return _native_retail_finite_decimal_text_v1(Fraction(value))
+# F14 uses detached internal mappings; exact dict/list projections are made only
+# at the preserved native and storage predicate boundaries.
+def _f14_freeze_v1(value):
+    from collections.abc import Mapping
+    from types import MappingProxyType
+    if isinstance(value, Mapping):
+        return MappingProxyType({key: _f14_freeze_v1(item) for key, item in value.items()})
+    if type(value) in (list, tuple):
+        return tuple(_f14_freeze_v1(item) for item in value)
+    if type(value) is set:
+        return frozenset(value)
+    return value
+
+
+def _f14_plain_v1(value):
+    from collections.abc import Mapping
+    if isinstance(value, Mapping):
+        return {key: _f14_plain_v1(item) for key, item in value.items()}
+    if type(value) in (tuple, list):
+        return [_f14_plain_v1(item) for item in value]
+    return value

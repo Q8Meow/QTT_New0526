@@ -109,6 +109,7 @@ def _clear_github_branch_context_env(monkeypatch):
 
 
 def test_repair_and_main_cumulative_branch_classification():
+    _assert_f14_exact_scope_and_interfaces()
     repair_branch = context.NO_RUNTIME_CUSTODY_AND_CI_DEPENDENCY_REPAIR_BRANCH
 
     assert context.is_repair_branch("repair/pr138-main-push-ci-context") is True
@@ -4912,3 +4913,95 @@ def test_st12g_owner_authorized_branch_match_is_exact() -> None:
             engvr_branch,
             near_conditional_report,
         )
+
+
+_F14_EXPECTED_PATHS = frozenset(('src/qtt/stage1_prediction_markets/qku_computation_control_plane/context.py', 'src/qtt/stage1_prediction_markets/qku_computation_control_plane/source_policy.py', 'src/qtt/stage1_prediction_markets/qku_computation_control_plane/receipts.py', 'src/qtt/stage1_prediction_markets/qku_computation_control_plane/serialization.py', 'src/qtt/stage1_prediction_markets/qku_computation_control_plane/persistence.py', 'src/qtt/stage1_prediction_markets/qku_computation_control_plane/sqlite_reference.py', 'src/qtt/stage1_prediction_markets/qku_computation_control_plane/transaction.py', 'src/qtt/stage1_prediction_markets/qku_computation_control_plane/input_resolver.py', 'tests/source_evidence/test_s1_pit_data_phase_a_01.py', 'tests/stage1_prediction_markets/qku_computation_control_plane/accounting/test_contract_matrix.py', 'tests/stage1_prediction_markets/qku_computation_control_plane/security/test_deserialization_safety.py', 'tests/stage1_prediction_markets/qku_computation_control_plane/tranche_b/test_resolution_pipeline.py', 'tests/tools/test_ci_branch_context.py', 'tools/ci_branch_context.py', 'tools/validation_scope_registry.py', 'tools/independent_validate_qku_computation_control_plane_execution.py', 'src/qtt/stage1_prediction_markets/private_state_receipts/request.py', 'src/qtt/stage1_prediction_markets/private_state_receipts/receipt.py', 'src/qtt/stage1_prediction_markets/private_state_receipts/handoff.py', 'tools/validate_source_fact_binding_connector_semantic_readiness_static.py', 'tools/validate_no_runtime_artifacts.py', 'tests/source_evidence/test_source_fact_binding_connector_semantic_readiness_static.py', 'tests/fail_closed/test_no_runtime_artifacts_strict.py', '.github/workflows/qtt_validation.yml', '.gitignore', 'tools/validation_reliability.py', 'tools/run_validation_gates.py', 'src/qtt/core/testing/gate_result.py', 'tests/fail_closed/test_run_validation_gates.py', 'tests/fail_closed/test_pytest_fresh_basetemp_helper.py', 'tools/independent_validate_qku_computation_control_plane.py', 'src/qtt/stage1_prediction_markets/qku_computation_control_plane/validation.py', 'tools/currentize_pr152_after_generated_artifacts.py', 'tests/tools/test_currentize_pr152_after_generated_artifacts.py', 'tests/atomicrows/test_atomicrows_semantic_field_coverage_enrichment_plan.py', 'tests/atomicrows/test_atomicrows_semantic_value_materialization_owner_authorization_gate.py', 'tests/atomicrows/test_atomicrows_semantic_value_materialization_authorization_handoff_readiness_gate.py'))
+
+
+def _assert_f14_exact_scope_and_interfaces():
+    from tools.validation_scope_registry import F14_ALLOWED_EXACT_PATHS, explain_pr_scope_decision
+    from tools.independent_validate_qku_computation_control_plane_execution import _f14_execution_contract_failures_v1
+    assert F14_ALLOWED_EXACT_PATHS == _F14_EXPECTED_PATHS and len(_F14_EXPECTED_PATHS) == 37
+    branch = 'f14-private-evidence-join'
+    assert context.F14_PRIVATE_EVIDENCE_JOIN_BRANCH == branch
+    assert context.is_owner_authorized_validation_branch(branch)
+    for bad in (branch.upper(), 'prefix-' + branch, branch + '-suffix', branch + '/', 'f14-private-*'):
+        assert not context.is_owner_authorized_validation_branch(bad)
+    for path in _F14_EXPECTED_PATHS:
+        decision = explain_pr_scope_decision(branch,path)
+        assert decision['allowed'] is True and decision['pr_id'] == 'F14'
+    for path in ('src/qtt/stage1_prediction_markets/credential_readiness/validator.py',
+            'src/qtt/stage1_prediction_markets/qku_computation_control_plane/__init__.py',
+            '.gitattributes', 'tests/new_f14_test.py', 'docs/master_plan/MasterPlan.md'):
+        assert explain_pr_scope_decision(branch,path)['allowed'] is False
+    assert _f14_execution_contract_failures_v1(REPO_ROOT) == []
+    original = Path.read_text
+    for old,new in (('PRIVATE_EVIDENCE_WITNESS = "PRIVATE_EVIDENCE_WITNESS"',
+            'PRIVATE_EVIDENCE_WITNESS = "SAME_COUNT_SUBSTITUTION"'),
+            ('def load_committed_private_evidence_snapshot_v1(', 'def foreign_snapshot_reader(')):
+        def changed(path,*args,**kwargs):
+            text=original(path,*args,**kwargs)
+            if path.name in ('receipts.py','persistence.py'): return text.replace(old,new)
+            return text
+        with pytest.MonkeyPatch.context() as patch:
+            patch.setattr(Path,'read_text',changed)
+            assert _f14_execution_contract_failures_v1(REPO_ROOT)
+
+    from tools import validation_scope_registry as registry
+    from src.qtt.stage1_prediction_markets.atomicrows_semantic_field_coverage_enrichment_plan import report as pr140_report
+    from src.qtt.stage1_prediction_markets.atomicrows_semantic_value_materialization_owner_authorization_gate import report as pr141_report
+    from src.qtt.stage1_prediction_markets.atomicrows_semantic_value_materialization_authorization_handoff_readiness_gate import report as pr142_report
+
+    original_scope = registry.F14_ALLOWED_EXACT_PATHS
+    removed_path = 'tests/atomicrows/test_atomicrows_semantic_field_coverage_enrichment_plan.py'
+    sibling = 'tests/atomicrows/test_atomicrows_semantic_field_coverage_enrichment_plan_extra.py'
+    for changed_scope in (
+        _F14_EXPECTED_PATHS - {removed_path},
+        _F14_EXPECTED_PATHS | {sibling},
+        (_F14_EXPECTED_PATHS - {removed_path}) | {sibling},
+    ):
+        with pytest.MonkeyPatch.context() as patch:
+            patch.setattr(registry, 'F14_ALLOWED_EXACT_PATHS', changed_scope)
+            with pytest.raises(AssertionError):
+                _assert_f14_exact_scope_and_interfaces()
+        assert registry.F14_ALLOWED_EXACT_PATHS is original_scope
+
+    legacy_exclusions = (
+        '.gitignore',
+        'src/qtt/stage1_prediction_markets/private_state_receipts/handoff.py',
+        'src/qtt/stage1_prediction_markets/private_state_receipts/receipt.py',
+        'src/qtt/stage1_prediction_markets/private_state_receipts/request.py',
+        'tests/tools/test_currentize_pr152_after_generated_artifacts.py',
+    )
+    protected_paths = (
+        ('docs/master_plan/QTT_MasterPlan_Current.md', 'MASTER_PLAN_MUTATION_DETECTED'),
+        ('docs/master_plan/atomic_rows/AtomicRows.bundle.jsonl', 'ATOMICROWS_BUNDLE_MUTATION_DETECTED'),
+        ('docs/master_plan/atomic_rows/pr98_row_family_sources/source_rows.jsonl', 'ROW_FAMILY_SOURCE_MUTATION_DETECTED'),
+    )
+    for label, report in (('PR140', pr140_report), ('PR141', pr141_report), ('PR142', pr142_report)):
+        original_context = report.current_branch_context
+        original_changed_paths = report._changed_paths
+        with pytest.MonkeyPatch.context() as patch:
+            f14_context = context.BranchContext(branch=branch, source='unit-test')
+            patch.setattr(report, 'current_branch_context', lambda root: f14_context)
+            patch.setattr(report, '_changed_paths', lambda root: sorted(_F14_EXPECTED_PATHS))
+            assert report._validate_changed_paths(REPO_ROOT) == []
+            for path, reason in protected_paths:
+                patch.setattr(report, '_changed_paths', lambda root, path=path: [path])
+                assert f'{label}_{reason}' in report._validate_changed_paths(REPO_ROOT)
+            patch.setattr(report, '_changed_paths', lambda root: [sibling])
+            assert report._validate_changed_paths(REPO_ROOT) == [f'{label}_CHANGED_PATH_OUT_OF_SCOPE: {sibling}']
+            legacy_context = context.BranchContext(
+                branch='pr-ci-fastfail-validation-context-preflight', source='unit-test'
+            )
+            patch.setattr(report, 'current_branch_context', lambda root: legacy_context)
+            patch.setattr(report, '_changed_paths', lambda root: list(legacy_exclusions))
+            assert report._validate_changed_paths(REPO_ROOT) == sorted(
+                f'{label}_CHANGED_PATH_OUT_OF_SCOPE: {path}' for path in legacy_exclusions
+            )
+            lookalike_context = context.BranchContext(branch=branch + '-unregistered', source='unit-test')
+            patch.setattr(report, 'current_branch_context', lambda root: lookalike_context)
+            patch.setattr(report, '_changed_paths', lambda root: ['.gitignore'])
+            assert report._validate_changed_paths(REPO_ROOT) == [f'{label}_CHANGED_PATH_OUT_OF_SCOPE: .gitignore']
+        assert report.current_branch_context is original_context
+        assert report._changed_paths is original_changed_paths

@@ -85,6 +85,7 @@ def test_scanner_rejects_flagged_runtime_paths_and_install_scripts(tmp_path):
 def test_scanner_allows_exact_ci_test_dependency_pytest_install(
     tmp_path, install_command
 ):
+    _assert_f14_dual_install_slots(tmp_path)
     _write_ci_validation_workflow(tmp_path, [install_command])
 
     violations = scan_repository(tmp_path, _strict_options())
@@ -1123,3 +1124,25 @@ def test_scanner_progress_receipts_are_available_for_long_running_gate(tmp_path)
     assert any(receipt.startswith("NO_RUNTIME_ARTIFACT_SCAN_SCOPE") for receipt in receipts)
     assert any(receipt.startswith("NO_RUNTIME_ARTIFACT_SCAN_PROGRESS") for receipt in receipts)
     assert any(receipt.startswith("NO_RUNTIME_ARTIFACT_SCAN_DONE") for receipt in receipts)
+
+
+_F14_TEST_NATIVE_INSTALL = 'python -m pip install --only-binary=:all: --no-deps --index-url https://pypi.org/simple websockets==17.0.1 cryptography==50.0.1 cffi==2.1.1 pycparser==3.0'
+
+
+def _assert_f14_dual_install_slots(tmp_path):
+    from pathlib import PurePosixPath
+    path=PurePosixPath('.github/workflows/qtt_validation.yml')
+    for pytest_line in ('python -m pip install pytest', 'python -m pip install pytest==9.1.1'):
+        text=pytest_line+'\n'+_F14_TEST_NATIVE_INSTALL+'\n'
+        file=tmp_path/'dual-install.txt';file.write_text(text,encoding='utf-8')
+        assert scanner._scan_text_content(path,text,['forbid_package_install_scripts']) == []
+        assert scanner._scan_package_install_text_file(path,file) == []
+        for extra in (pytest_line,_F14_TEST_NATIVE_INSTALL,_F14_TEST_NATIVE_INSTALL.replace('17.0.1','17.0.2'),
+                _F14_TEST_NATIVE_INSTALL+' extra==1',_F14_TEST_NATIVE_INSTALL+'; echo unsafe',
+                _F14_TEST_NATIVE_INSTALL.replace('--only-binary=:all: ','')):
+            bad=text+extra+'\n';file.write_text(bad,encoding='utf-8')
+            assert scanner._scan_text_content(path,bad,['forbid_package_install_scripts'])
+            assert scanner._scan_package_install_text_file(path,file)
+        file.write_text(text,encoding='utf-8')
+        assert scanner._scan_text_content(PurePosixPath('.github/workflows/other.yml'),text,
+            ['forbid_package_install_scripts'])

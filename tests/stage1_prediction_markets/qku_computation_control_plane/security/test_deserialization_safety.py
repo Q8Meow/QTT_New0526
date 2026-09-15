@@ -13,6 +13,7 @@ from src.qtt.stage1_prediction_markets.qku_computation_control_plane.serializati
 
 
 def test_json_is_deterministic_and_unsafe_values_fail_closed() -> None:
+    _assert_f14_bounded_witness_codec()
     assert deterministic_json({"b": 2, "a": 1}) == '{"a":1,"b":2}'
     assert safe_json_loads('{"a":[1,true,null]}') == {
         "a": [1, True, None]
@@ -169,3 +170,82 @@ def test_json_is_deterministic_and_unsafe_values_fail_closed() -> None:
             with pytest.raises(type(error)) as caught:
                 receipt_owner._native_retail_clock_companion(body)
             assert caught.value is error
+
+
+def _assert_f14_bounded_witness_codec():
+    import copy
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane import receipts as r, serialization as s
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane.errors import ComputationControlPlaneError
+    from src.qtt.stage1_prediction_markets.private_state_receipts.handoff import _f14_spine_v1
+    from tests.source_evidence.test_s1_pit_data_phase_a_01 import _f14_reference_cases
+    args=_f14_reference_cases()[0][0]
+    body,witnesses=args[:2]
+    scope=body['scope']
+    from collections import UserDict
+    from src.qtt.stage1_prediction_markets.private_state_receipts.handoff import _f14_allocation_v1
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane.persistence import PrivateEvidenceReadRequestV1
+    read = _f14_allocation_v1(scope, 'closed-phase-roster', ())
+    controls = {key: dict(value) for key, value in read.phase_control_refs.items()}
+    invalid = []
+    for value in (None, False, True, 0, 1, 'extra', [], (), {}, {'claim_ref': 'extra'}):
+        invalid.append({**controls, 'EXTRA': value})
+    for phase in ('A', 'B', 'C'):
+        invalid.append({key: value for key, value in controls.items() if key != phase})
+        invalid.append({('OTHER' if key == phase else key): value for key, value in controls.items()})
+        for value in (None, False, True, 0, 1, 'phase', [], (), {}):
+            invalid.append({**controls, phase: value})
+        for field in controls[phase]:
+            for value in (None, True, 0, '', [], {}):
+                invalid.append({**controls, phase: {**controls[phase], field: value}})
+            invalid.append({**controls, phase: {key: value for key, value in controls[phase].items() if key != field}})
+        invalid.append({**controls, phase: {**controls[phase], 'extra': 'unlisted'}})
+        invalid.append({**controls, phase: {**controls[phase], 'result_binding_ref': 'unbound'}})
+        invalid.append({**controls, phase: {**controls[phase], 'transition_ref': controls[phase]['claim_ref']}})
+    for malformed in invalid:
+        before = copy.deepcopy(malformed)
+        with pytest.raises(ComputationControlPlaneError):
+            PrivateEvidenceReadRequestV1(read.scope, read.record_refs, malformed)
+        assert malformed == before
+    for mapping in (dict, MappingProxyType, UserDict):
+        supplied = {key: mapping(dict(value)) for key, value in controls.items()}
+        restored = PrivateEvidenceReadRequestV1(mapping(dict(read.scope)), mapping(dict(read.record_refs)), mapping(supplied))
+        assert restored == read
+        with pytest.raises(TypeError): restored.phase_control_refs['A']['claim_ref'] = 'changed'
+        supplied['A'] = {'claim_ref': 'detached'}
+        assert restored.phase_control_refs['A'] == controls['A']
+    phases={'RAW':('raw',dict(scope=scope,raw_body_utf8=body['raw_body_utf8'])),
+        'TRANSPORT':('transport',s._native_retail_transport_storage_projection_v1(witnesses['transport'],expected_binding_ref='authentication')),
+        'CAPTURE_COMMIT':('capture-commit',witnesses['capture_commit']),
+        'PUBLICATION':('publication',witnesses['publication']),
+        'COMPANION_COMMIT':('seal',witnesses['companion_commit']),
+        'CLOCK_PROOF':('proof',dict(record_id='proof',scope=scope,subject_raw_record_ref='raw',
+            source_binding_ref='source',value='2026-09-13T00:00:00.000000000Z'))}
+    times={'TRANSPORT':'parse_completed_at','CAPTURE_COMMIT':'completed_at','PUBLICATION':'published_at','COMPANION_COMMIT':'completed_at'}
+    for phase,(rid,payload) in phases.items():
+        before=copy.deepcopy(payload)
+        w=r._f14_witness_v1(rid,phase,payload)
+        stamp=payload[times[phase]] if phase in times else '2026-09-13T00:00:00.000000002Z'
+        row=_f14_spine_v1(rid,w,scope,stamp,'codec-attempt')
+        text=s.deterministic_json(row)
+        restored,decoded=s._f14_hydrate_v1(text,rid,phase,scope)
+        assert restored == w and decoded == before and payload == before
+        decoded['scope']['ledger_account_ref']='detached'
+        assert payload == before
+        for prefix in (' ','\n'):
+            with pytest.raises(SerializationSafetyError,match='F14_STORAGE_NONCANONICAL'):
+                s._f14_hydrate_v1(prefix+text,rid,phase,scope)
+        for field,value in (('sequence',True),('sequence',2**63),('record_id','foreign'),
+                ('aggregate_id','foreign'),('semantic_owner','x'*257),('authority_class','LIVE')):
+            data=s.safe_json_loads(text);data[field]=value
+            with pytest.raises(ComputationControlPlaneError):
+                s._f14_hydrate_v1(s._f14_dumps_v1(data),rid,phase,scope)
+    for raw in ('{"authorization":"synthetic"}','{"nested":{"sessionToken":"synthetic"}}',
+            '{"password":"synthetic"}','{"x":1,"x":2}','{"x":NaN}'):
+        with pytest.raises(ComputationControlPlaneError):
+            r._f14_witness_v1('raw','RAW',dict(scope=scope,raw_body_utf8=raw))
+    maximum='{}'+'\n'*(1048576-2)
+    assert r._f14_witness_v1('raw','RAW',dict(scope=scope,raw_body_utf8=maximum)).record_id == 'raw'
+    with pytest.raises(ComputationControlPlaneError):
+        r._f14_witness_v1('raw','RAW',dict(scope=scope,raw_body_utf8=maximum+' '))
+    with pytest.raises(ComputationControlPlaneError):
+        r._f14_witness_v1('transport','TRANSPORT',{**phases['TRANSPORT'][1],'credential_binding_ref':'authentication'})

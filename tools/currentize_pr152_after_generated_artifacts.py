@@ -6,6 +6,7 @@ from __future__ import annotations
 import argparse
 from dataclasses import dataclass
 from fnmatch import fnmatchcase
+import os
 from pathlib import Path
 import subprocess
 import sys
@@ -77,13 +78,58 @@ def _stable_paths(values: Sequence[str | Path]) -> list[str]:
     )
 
 
+def _run_repository_git(
+    repo_root: Path, arguments: Sequence[str]
+) -> subprocess.CompletedProcess[str]:
+    try:
+        root_text = str(repo_root)
+        if any(character in root_text for character in ("\r", "\n", "\0")):
+            raise ValueError("invalid repository root text")
+        root = Path(repo_root).resolve(strict=True)
+        if not root.is_dir():
+            raise NotADirectoryError(str(root))
+        environment = {
+            key: value for key, value in os.environ.items()
+            if not key.upper().startswith("GIT_")
+        }
+        environment.update({
+            "GIT_CEILING_DIRECTORIES": str(root.parent),
+            "GIT_OPTIONAL_LOCKS": "0",
+            "GIT_TERMINAL_PROMPT": "0",
+            "GIT_NO_REPLACE_OBJECTS": "1",
+            "GIT_NO_LAZY_FETCH": "1",
+            "GIT_ALLOW_PROTOCOL": "",
+        })
+        prefix = ["git", "-c", "core.fsmonitor=false", "-c", "protocol.allow=never"]
+        options = dict(
+            cwd=root, env=environment, stdin=subprocess.DEVNULL,
+            check=False, capture_output=True, text=True, encoding="utf-8",
+        )
+        discovery = subprocess.run([*prefix, "rev-parse", "--show-toplevel"], **options)
+        if discovery.returncode != 0:
+            detail = discovery.stderr.strip() or discovery.stdout.strip()
+            raise CurrentizationError(
+                [f"PR152_CURRENTIZATION_GIT_STATUS_UNAVAILABLE: {detail}"]
+            )
+        discovered_text = discovery.stdout.removesuffix("\n").removesuffix("\r")
+        if not discovered_text or any(
+            character in discovered_text for character in ("\r", "\n", "\0")
+        ):
+            raise ValueError("invalid Git repository root text")
+        if Path(discovered_text).resolve(strict=True) != root:
+            raise CurrentizationError(
+                ["PR152_CURRENTIZATION_GIT_STATUS_UNAVAILABLE: REPOSITORY_ROOT_MISMATCH"]
+            )
+        return subprocess.run([*prefix, *arguments], **options)
+    except (OSError, ValueError) as exc:
+        raise CurrentizationError(
+            [f"PR152_CURRENTIZATION_GIT_STATUS_UNAVAILABLE: {type(exc).__name__}: {exc}"]
+        ) from exc
+
+
 def _git_status_changed_paths(repo_root: Path) -> list[str]:
-    completed = subprocess.run(
-        ["git", "status", "--porcelain=v1", "-z", "--untracked-files=all"],
-        cwd=repo_root,
-        check=False,
-        capture_output=True,
-        text=True,
+    completed = _run_repository_git(
+        repo_root, ["status", "--porcelain=v1", "-z", "--untracked-files=all"]
     )
     if completed.returncode != 0:
         detail = completed.stderr.strip() or completed.stdout.strip()
@@ -110,12 +156,8 @@ _DEFAULT_GIT_STATUS_CHANGED_PATHS = _git_status_changed_paths
 
 
 def _git_untracked_paths(repo_root: Path) -> list[str]:
-    completed = subprocess.run(
-        ["git", "ls-files", "--others", "--exclude-standard", "-z"],
-        cwd=repo_root,
-        check=False,
-        capture_output=True,
-        text=True,
+    completed = _run_repository_git(
+        repo_root, ["ls-files", "--others", "--exclude-standard", "-z"]
     )
     if completed.returncode != 0:
         detail = completed.stderr.strip() or completed.stdout.strip()
@@ -263,13 +305,12 @@ def _text_file_contains_forbidden_qtt_authority(path: Path) -> bool:
 
 
 def _added_diff_text_for_path(repo_root: Path, rel_path: str) -> str | None:
-    completed = subprocess.run(
-        ["git", "diff", "--unified=0", "--", rel_path],
-        cwd=repo_root,
-        check=False,
-        capture_output=True,
-        text=True,
-    )
+    try:
+        completed = _run_repository_git(
+            repo_root, ["diff", "--no-ext-diff", "--no-textconv", "--unified=0", "--", rel_path]
+        )
+    except CurrentizationError:
+        return None
     if completed.returncode != 0 or not completed.stdout:
         return None
     added_lines = [

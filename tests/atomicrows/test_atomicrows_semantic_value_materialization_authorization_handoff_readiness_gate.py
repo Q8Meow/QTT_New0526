@@ -421,14 +421,15 @@ def test_changed_path_guard_rejects_protected_atomicrows_paths() -> None:
 
 
 def test_repository_artifacts_validate_with_monkeypatched_branch_context(monkeypatch) -> None:
+    observed_context = pr142_report.current_branch_context(REPO_ROOT)
+    assert observed_context.branch, (
+        observed_context.git_error or "Repository branch context is unavailable"
+    )
     monkeypatch.setattr(
-            pr142_report,
-            "current_branch_context",
-            lambda repo_root: BranchContext(
-                branch="pr-ci-fastfail-validation-context-preflight",
-                source="unit-test",
-            ),
-        )
+        pr142_report,
+        "current_branch_context",
+        lambda repo_root: observed_context,
+    )
     assert validate_repository_artifacts(REPO_ROOT) == []
     assert build_report(REPO_ROOT) == build_report(REPO_ROOT)
 

@@ -384,3 +384,208 @@ class TrancheCUnitOfWorkV1:
                     failure_code=exc.reason_code.value, retryable=False,
                 )
         raise AssertionError("bounded retry loop must terminate")
+
+
+# F14 pure recovery/composition law; no independent transaction implementation.
+import copy
+from .context import _native_require, _native_obj, _native_ident, _native_utc_nanoseconds
+from .serialization import _native_retail_strict_equal_v1, _f14_require_v1
+
+
+def _native_retail_private_recovery_plan_v1(scope, record_refs, snapshot, *, expected_scope, current_source_snapshot_ref, current_revocation_epoch, process_epoch_id, monotonic_clock_id, recorded_cutoff):
+    """Derive the next bounded issuance step from an owner-supplied read snapshot.
+
+    This pure reference neither reads storage nor authenticates its input. The
+    existing storage/source/connector owners must construct the snapshot after
+    trusted readback. Returned actions are plans, never capabilities or effects.
+    """
+    scope_fields = ('profile', 'ledger_account_ref', 'source_binding_ref', 'source_context_ref', 'capture_epoch_ref', 'partition_ref')
+    _native_obj(scope, scope_fields)
+    _native_obj(expected_scope, scope_fields)
+
+    def text(value):
+        _native_require(type(value) is str, 'PRIVATE_ISSUANCE_TEXT')
+        return _native_ident(value)
+
+    def integer(value):
+        _native_require(type(value) is int and 0 <= value <= 2 ** 63 - 1, 'PRIVATE_ISSUANCE_INTEGER')
+        return value
+    for item in (scope, expected_scope):
+        for value in item.values():
+            text(value)
+    _native_require(_native_retail_strict_equal_v1(scope, expected_scope) and scope['profile'] == 'POLYMARKET_US_RETAIL_DIRECT', 'PRIVATE_ISSUANCE_SCOPE')
+    phases = ('raw', 'transport', 'capture_commit', 'publication', 'companion', 'companion_commit')
+    _native_obj(record_refs, phases + ('clock_proofs',))
+    for phase in phases:
+        text(record_refs[phase])
+    proofs = record_refs['clock_proofs']
+    _native_require(type(proofs) is list and len(proofs) <= 3, 'PRIVATE_ISSUANCE_PROOFS')
+    for value in proofs:
+        text(value)
+    ids = [record_refs[k] for k in phases] + proofs
+    _native_require(len(ids) == len(set(ids)), 'PRIVATE_ISSUANCE_REFERENCE_ALIAS')
+    _native_obj(snapshot, ('source_snapshot_ref', 'revocation_epoch', 'process_epoch_id', 'monotonic_clock_id', 'storage_state', 'committed_record_refs', 'observations', 'snapshot_observed_at', 'snapshot_monotonic_ns', 'publication_state'))
+    for key in ('source_snapshot_ref', 'process_epoch_id', 'monotonic_clock_id'):
+        text(snapshot[key])
+    text(current_source_snapshot_ref)
+    text(process_epoch_id)
+    text(monotonic_clock_id)
+    integer(current_revocation_epoch)
+    integer(snapshot['revocation_epoch'])
+    now = integer(snapshot['snapshot_monotonic_ns'])
+    visible_at = _native_utc_nanoseconds(snapshot['snapshot_observed_at'])
+    cutoff = _native_utc_nanoseconds(recorded_cutoff)
+    state = snapshot['storage_state']
+    _native_require(type(state) is str and state in ('ACTIVE_TRANSACTION', 'OUTCOME_UNKNOWN', 'READBACK_UNAVAILABLE', 'READBACK_CONFLICT', 'COMMITTED_SNAPSHOT'), 'PRIVATE_ISSUANCE_STORAGE_STATE')
+    refs = snapshot['committed_record_refs']
+    _native_require(type(refs) is list and len(refs) <= 9, 'PRIVATE_ISSUANCE_RECORD_SET')
+    for value in refs:
+        text(value)
+    _native_require(len(refs) == len(set(refs)) and set(refs) <= set(ids), 'PRIVATE_ISSUANCE_RECORD_SET')
+    publication_state = snapshot['publication_state']
+    _native_require(type(publication_state) is str and publication_state in ('NOT_ATTEMPTED', 'OUTCOME_UNKNOWN', 'OBSERVED'), 'PRIVATE_ISSUANCE_PUBLICATION_STATE')
+    obs = snapshot['observations']
+    _native_obj(obs, ('capture_commit', 'publication', 'companion_commit'))
+    times = []
+    for phase in ('capture_commit', 'publication', 'companion_commit'):
+        value = obs[phase]
+        if value is None:
+            continue
+        _native_obj(value, ('observed_at', 'monotonic_ns'))
+        _native_utc_nanoseconds(value['observed_at'])
+        n = integer(value['monotonic_ns'])
+        _native_require(n <= now, 'PRIVATE_ISSUANCE_OBSERVATION_AFTER_SNAPSHOT')
+        times.append(n)
+    _native_require(times == sorted(times), 'PRIVATE_ISSUANCE_OBSERVATION_ORDER')
+    _native_require(obs['publication'] is None or obs['capture_commit'] is not None, 'PRIVATE_ISSUANCE_OBSERVATION_ORDER')
+    _native_require(obs['companion_commit'] is None or obs['publication'] is not None, 'PRIVATE_ISSUANCE_OBSERVATION_ORDER')
+
+    def result(action, stage, planned=()):
+        return {'state': 'PRIVATE_ISSUANCE_PLAN_ONLY', 'action': action, 'committed_stage': stage, 'planned_record_refs': list(planned), 'snapshot_bound_ns_text': str(visible_at), 'source_accepted': False, 'witnesses_authenticated': False, 'storage_qualified': False, 'record_written': False, 'publication_performed': False, 'replay_admitted': False, 'posts_cash': False, 'releases_reservation': False, 'runtime_effect_authorized': False}
+    blocked = {'ACTIVE_TRANSACTION': 'WAIT_FOR_OWNED_TRANSACTION', 'OUTCOME_UNKNOWN': 'RESOLVE_COMMIT_OUTCOME_NO_RESUBMISSION', 'READBACK_UNAVAILABLE': 'HOLD_STORAGE_UNAVAILABLE', 'READBACK_CONFLICT': 'QUARANTINE_READBACK_CONFLICT'}
+    if state in blocked:
+        return result(blocked[state], 'UNKNOWN')
+    a = {record_refs['raw'], record_refs['transport']}
+    b = {record_refs['capture_commit'], record_refs['publication'], record_refs['companion'], *proofs}
+    c = {record_refs['companion_commit']}
+    observed = set(refs)
+    sets = (set(), a, a | b, a | b | c)
+    _native_require(observed in sets, 'PRIVATE_ISSUANCE_ATOMIC_PREFIX')
+    stage = sets.index(observed)
+    _native_require(not (stage == 0 and publication_state != 'NOT_ATTEMPTED') and (not (stage >= 2 and publication_state == 'NOT_ATTEMPTED')), 'PRIVATE_ISSUANCE_PUBLICATION_STATE')
+    _native_require(obs['publication'] is None or publication_state == 'OBSERVED', 'PRIVATE_ISSUANCE_PUBLICATION_STATE')
+    if visible_at > cutoff:
+        return result('HOLD_SNAPSHOT_AFTER_RECORDED_CUTOFF', stage)
+    if snapshot['source_snapshot_ref'] != current_source_snapshot_ref or snapshot['revocation_epoch'] != current_revocation_epoch:
+        return result('REQUALIFY_SOURCE_NO_PUBLICATION', stage)
+    same_domain = snapshot['process_epoch_id'] == process_epoch_id and snapshot['monotonic_clock_id'] == monotonic_clock_id
+    if not same_domain:
+        return result('HISTORICAL_CHAIN_VALIDATION_ONLY' if stage == 3 else 'RECAPTURE_NEW_EPOCH_NO_BACKDATE', stage)
+    if publication_state == 'OUTCOME_UNKNOWN':
+        return result('RESOLVE_PUBLICATION_OUTCOME_NO_REPUBLISH', stage)
+    if stage == 1 and publication_state == 'OBSERVED':
+        _native_require(obs['publication'] is not None, 'PRIVATE_ISSUANCE_PUBLICATION_STATE')
+    if stage == 0:
+        _native_require(all((value is None for value in obs.values())), 'PRIVATE_ISSUANCE_ORPHAN_OBSERVATION')
+        return result('CAPTURE_AUTHORIZED_READ_ONLY_RESPONSE', stage, sorted(a))
+    if stage == 1:
+        _native_require(obs['companion_commit'] is None, 'PRIVATE_ISSUANCE_ORPHAN_OBSERVATION')
+        if obs['capture_commit'] is None:
+            return result('OBSERVE_CAPTURE_COMMIT_UPPER_BOUND', stage)
+        if obs['publication'] is None:
+            return result('PUBLISH_THROUGH_EXISTING_OWNER', stage)
+        return result('COMMIT_COMPANION_GROUP', stage, sorted(b))
+    if stage == 2:
+        if obs['companion_commit'] is None:
+            return result('OBSERVE_COMPANION_COMMIT_UPPER_BOUND', stage)
+        return result('COMMIT_COMPLETION_WITNESS', stage, sorted(c))
+    return result('VALIDATE_EXISTING_EVIDENCE_JOIN_AND_REPLAY', stage)
+
+
+def _native_retail_private_composition_plan_v1(scope, record_refs, snapshot, publication_intent, *, expected_scope, current_source_snapshot_ref, current_revocation_epoch, process_epoch_id, monotonic_clock_id, recorded_cutoff, source_snapshot_after_ref, revocation_epoch_after):
+    """Intent-aware F14-F17 planning; no IO, authenticated inputs or authority.
+
+    Validate the expanded atomic sets BEFORE projecting to the preserved F16
+    planner. The additional intent is an existing non-dispatchable outbox row,
+    not a seventh private-evidence witness phase. After-read source validation
+    is defense in depth; the real implementation must ALSO hold the source
+    fence across grouped committed read and reference-slot exposure.
+    """
+    scope_fields = ('profile', 'ledger_account_ref', 'source_binding_ref', 'source_context_ref', 'capture_epoch_ref', 'partition_ref')
+    _native_obj(scope, scope_fields)
+    _native_obj(expected_scope, scope_fields)
+    _native_obj(record_refs, ('raw', 'transport', 'capture_commit', 'publication', 'companion', 'companion_commit', 'clock_proofs', 'publication_intent'))
+    _native_obj(publication_intent, ('outbox_intent_id', 'topic_class', 'aggregate_id', 'payload_record_ref', 'created_at', 'dispatch_state', 'dispatch_attempt_count', 'next_eligible_at', 'authority_class'))
+
+    def exact_id(value):
+        _native_require(type(value) is str, 'PRIVATE_COMPOSITION_ID')
+        return _native_ident(value)
+
+    def exact_counter(value):
+        _native_require(type(value) is int and 0 <= value <= 2 ** 63 - 1, 'PRIVATE_COMPOSITION_COUNTER')
+        return value
+    intent_ref = exact_id(record_refs['publication_intent'])
+    _native_require(exact_id(publication_intent['outbox_intent_id']) == intent_ref, 'PRIVATE_COMPOSITION_INTENT_BINDING')
+    _native_require(type(publication_intent['topic_class']) is str and publication_intent['topic_class'] == 'PRIVATE_OBSERVATION_REFERENCE_PUBLICATION', 'PRIVATE_COMPOSITION_INTENT_KIND')
+    _native_require(exact_id(publication_intent['payload_record_ref']) == record_refs['raw'] and exact_id(publication_intent['aggregate_id']) == expected_scope.get('ledger_account_ref'), 'PRIVATE_COMPOSITION_INTENT_BINDING')
+    _native_utc_nanoseconds(publication_intent['created_at'])
+    _native_require(type(publication_intent['dispatch_state']) is str and publication_intent['dispatch_state'] == 'RECORDED_NOT_DISPATCHABLE' and (type(publication_intent['authority_class']) is str) and (publication_intent['authority_class'] == 'NO_WRITE_CONTRACT_ONLY') and (type(publication_intent['dispatch_attempt_count']) is int) and (publication_intent['dispatch_attempt_count'] == 0) and (publication_intent['next_eligible_at'] is None), 'PRIVATE_COMPOSITION_OUTBOX_EFFECT_FORBIDDEN')
+    base_refs = copy.deepcopy(record_refs)
+    del base_refs['publication_intent']
+    _native_require(type(base_refs['clock_proofs']) is list and len(base_refs['clock_proofs']) <= 3, 'PRIVATE_COMPOSITION_PROOFS')
+    names = ('raw', 'transport', 'capture_commit', 'publication', 'companion', 'companion_commit')
+    identities = [exact_id(base_refs[name]) for name in names]
+    identities.extend((exact_id(value) for value in base_refs['clock_proofs']))
+    identities.append(intent_ref)
+    _native_require(len(identities) == len(set(identities)), 'PRIVATE_COMPOSITION_REFERENCE_ALIAS')
+    _native_obj(snapshot, ('source_snapshot_ref', 'revocation_epoch', 'process_epoch_id', 'monotonic_clock_id', 'storage_state', 'committed_record_refs', 'observations', 'snapshot_observed_at', 'snapshot_monotonic_ns', 'publication_state'))
+    committed = snapshot['committed_record_refs']
+    _native_require(type(committed) is list and len(committed) <= 10, 'PRIVATE_COMPOSITION_RECORD_SET')
+    for value in committed:
+        exact_id(value)
+    _native_require(len(committed) == len(set(committed)) and set(committed) <= set(identities), 'PRIVATE_COMPOSITION_RECORD_SET')
+    after_ref = exact_id(source_snapshot_after_ref)
+    after_generation = exact_counter(revocation_epoch_after)
+    exact_id(current_source_snapshot_ref)
+    exact_counter(current_revocation_epoch)
+    a = {record_refs['raw'], record_refs['transport'], intent_ref}
+    b = {record_refs['capture_commit'], record_refs['publication'], record_refs['companion'], *record_refs['clock_proofs']}
+    c = {record_refs['companion_commit']}
+    if snapshot['storage_state'] == 'COMMITTED_SNAPSHOT':
+        _native_require(set(committed) in (set(), a, a | b, a | b | c), 'PRIVATE_COMPOSITION_ATOMIC_PREFIX')
+    projected = copy.deepcopy(snapshot)
+    projected['committed_record_refs'] = [value for value in committed if value != intent_ref]
+    planned = _native_retail_private_recovery_plan_v1(scope, base_refs, projected, expected_scope=expected_scope, current_source_snapshot_ref=current_source_snapshot_ref, current_revocation_epoch=current_revocation_epoch, process_epoch_id=process_epoch_id, monotonic_clock_id=monotonic_clock_id, recorded_cutoff=recorded_cutoff)
+    if snapshot['storage_state'] == 'COMMITTED_SNAPSHOT' and snapshot['publication_state'] == 'OBSERVED':
+        present = set(committed)
+        if a | b <= present:
+            _native_require(snapshot['observations']['capture_commit'] is not None and snapshot['observations']['publication'] is not None, 'PRIVATE_COMPOSITION_OBSERVATION_MEMBERSHIP')
+        if a | b | c <= present:
+            _native_require(snapshot['observations']['companion_commit'] is not None, 'PRIVATE_COMPOSITION_OBSERVATION_MEMBERSHIP')
+    prior_blocks = {'WAIT_FOR_OWNED_TRANSACTION', 'RESOLVE_COMMIT_OUTCOME_NO_RESUBMISSION', 'HOLD_STORAGE_UNAVAILABLE', 'QUARANTINE_READBACK_CONFLICT', 'HOLD_SNAPSHOT_AFTER_RECORDED_CUTOFF'}
+    if planned['action'] not in prior_blocks and snapshot['storage_state'] == 'COMMITTED_SNAPSHOT' and (intent_ref in committed):
+        created = _native_utc_nanoseconds(publication_intent['created_at'])
+        _native_require(created <= _native_utc_nanoseconds(snapshot['snapshot_observed_at']), 'PRIVATE_COMPOSITION_INTENT_TIME')
+        capture_observation = snapshot['observations']['capture_commit']
+        if capture_observation is not None:
+            _native_require(created <= _native_utc_nanoseconds(capture_observation['observed_at']), 'PRIVATE_COMPOSITION_INTENT_TIME')
+    if planned['action'] not in prior_blocks and (after_ref != current_source_snapshot_ref or after_generation != current_revocation_epoch):
+        planned['action'] = 'REQUALIFY_SOURCE_NO_PUBLICATION'
+        planned['planned_record_refs'] = []
+    if planned['action'] == 'CAPTURE_AUTHORIZED_READ_ONLY_RESPONSE':
+        planned['planned_record_refs'] = sorted(a)
+    planned['state'] = 'PRIVATE_COMPOSITION_PLAN_ONLY'
+    planned['publication_intent_ref'] = intent_ref
+    return planned
+
+
+def _f14_physical_prefix_v1(proof_count: int, present: frozenset[str]) -> int:
+    """Exact semantic AND control membership; never an authentication gate."""
+    _f14_require_v1(type(proof_count) is int and 0 <= proof_count <= 3, 'F14_PHYSICAL_PROOFS')
+    _f14_require_v1(type(present) is frozenset and all((type(x) is str for x in present)), 'F14_PHYSICAL_SET')
+    a = frozenset(('raw', 'transport', 'intent', 'A.claim', 'A.result', 'A.transition'))
+    b = frozenset(('capture', 'publication', 'companion', 'B.claim', 'B.result', 'B.transition', *(f'proof{i}' for i in range(proof_count))))
+    c = frozenset(('completion', 'C.claim', 'C.result', 'C.transition'))
+    stages = (frozenset(), a, a | b, a | b | c)
+    _f14_require_v1(present in stages, 'F14_PHYSICAL_PARTIAL_BATCH')
+    return stages.index(present)

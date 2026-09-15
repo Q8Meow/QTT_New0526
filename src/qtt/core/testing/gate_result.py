@@ -200,6 +200,11 @@ def hidden_zip_paths(repo_root: pathlib.Path) -> list[pathlib.PurePosixPath]:
     paths: list[pathlib.PurePosixPath] = []
     if not resolved_repo_root.exists():
         return paths
+    local_control_dirs = _ROOT_LOCAL_CONTROL_INPUT_DIR_NAMES
+    if os.path.lexists(resolved_repo_root / ".qtt"):
+        from tools.validation_reliability import _require_local_layout
+        _require_local_layout(resolved_repo_root)
+        local_control_dirs = local_control_dirs | frozenset({".qtt"})
     for dirpath, dirnames, filenames in os.walk(resolved_repo_root):
         current_dir = pathlib.Path(dirpath)
         dirnames[:] = [name for name in dirnames if name not in SKIP_DIR_PARTS]
@@ -207,7 +212,7 @@ def hidden_zip_paths(repo_root: pathlib.Path) -> list[pathlib.PurePosixPath]:
             dirnames[:] = [
                 name
                 for name in dirnames
-                if name not in _ROOT_LOCAL_CONTROL_INPUT_DIR_NAMES
+                if name not in local_control_dirs
             ]
         for filename in filenames:
             path = current_dir / filename

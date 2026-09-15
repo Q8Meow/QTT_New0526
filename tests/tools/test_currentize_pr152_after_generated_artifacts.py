@@ -1,6 +1,8 @@
 from __future__ import annotations
 
+import os
 from pathlib import Path
+import subprocess
 
 import pytest
 
@@ -337,8 +339,49 @@ def test_helper_cli_fails_closed_without_git_status(
     monkeypatch: pytest.MonkeyPatch,
     capsys: pytest.CaptureFixture[str],
 ) -> None:
-    root = _prepared_repo(tmp_path)
-    monkeypatch.setattr(helper, "write_report_file", lambda _root: _report())
+    parent = (tmp_path / "p").resolve()
+    root = _prepared_repo(parent)
+    hooks = tmp_path / "h"
+    hooks.mkdir()
+    fixture_environment = {
+        key: value for key, value in os.environ.items()
+        if not key.upper().startswith("GIT_")
+    }
+    fixture_environment.update({
+        "GIT_CONFIG_NOSYSTEM": "1", "GIT_CONFIG_GLOBAL": os.devnull,
+        "GIT_TERMINAL_PROMPT": "0", "GIT_NO_REPLACE_OBJECTS": "1",
+        "GIT_NO_LAZY_FETCH": "1", "GIT_ALLOW_PROTOCOL": "",
+        "GIT_OPTIONAL_LOCKS": "0",
+    })
+
+    def git(directory: Path, *arguments: str) -> bytes:
+        completed = subprocess.run(
+            ["git", "-c", "user.name=QTT test fixture",
+             "-c", "user.email=qtt-fixture@example.invalid",
+             "-c", "commit.gpgsign=false", "-c", "core.autocrlf=false",
+             "-c", "core.hooksPath=" + str(hooks),
+             "-c", "core.fsmonitor=false", "-c", "protocol.allow=never",
+             *arguments],
+            cwd=directory, env=fixture_environment, stdin=subprocess.DEVNULL,
+            capture_output=True, timeout=60,
+        )
+        assert completed.returncode == 0, completed.stderr.decode("utf-8")
+        return completed.stdout
+
+    (parent / ".gitignore").write_bytes(b"/repo/\n/n/\n/b/\n/w/\n")
+    (parent / "parent.txt").write_bytes(b"parent baseline\n")
+    git(parent, "init", "--initial-branch=main")
+    git(parent, "add", "--", ".gitignore", "parent.txt")
+    git(parent, "commit", "-m", "PR152 parent fixture")
+    parent_head = git(parent, "rev-parse", "HEAD")
+    parent_index = git(parent, "ls-files", "--stage", "-z")
+    assert git(parent, "status", "--porcelain=v1", "-z") == b""
+    protected = {path: path.read_bytes() for path in (
+        root / "docs/master_plan/QTT_MasterPlan_Current.md",
+        root / "docs/master_plan/atomic_rows/AtomicRows.bundle.jsonl",
+    )}
+    writes: list[Path] = []
+    monkeypatch.setattr(helper, "write_report_file", lambda path: writes.append(path) or _report())
     monkeypatch.setattr(helper, "validate_repository_artifacts", lambda _root, **_kwargs: [])
 
     assert helper.main(["--repo-root", str(root)]) == 1
@@ -346,6 +389,81 @@ def test_helper_cli_fails_closed_without_git_status(
     output = capsys.readouterr().out
     assert helper.FAILURE_MARKER in output
     assert "PR152_CURRENTIZATION_GIT_STATUS_UNAVAILABLE" in output
+    assert writes == []
+
+    nested = _prepared_repo(parent / "n")
+    (nested / "tracked.txt").write_bytes(b"before\n")
+    git(nested, "init", "--initial-branch=main")
+    git(nested, "add", "--", "tracked.txt",
+        "docs/master_plan/QTT_MasterPlan_Current.md",
+        "docs/master_plan/atomic_rows/AtomicRows.bundle.jsonl")
+    git(nested, "commit", "-m", "PR152 nested fixture")
+    nested_protected = {path: path.read_bytes() for path in (
+        nested / "docs/master_plan/QTT_MasterPlan_Current.md",
+        nested / "docs/master_plan/atomic_rows/AtomicRows.bundle.jsonl",
+    )}
+    nested_head = git(nested, "rev-parse", "HEAD")
+    assert helper._git_status_changed_paths(nested) == []
+    assert helper._git_untracked_paths(nested) == []
+    assert helper._added_diff_text_for_path(nested, "tracked.txt") is None
+    (nested / "tracked.txt").write_bytes(b"after\n")
+    (nested / "new.txt").write_bytes(b"untracked\n")
+    (nested / "staged.txt").write_bytes(b"staged\n")
+    git(nested, "add", "--", "staged.txt")
+    nested_index = git(nested, "ls-files", "--stage", "-z")
+    ordinary_child = nested / "child"
+    ordinary_child.mkdir()
+    bare = parent / "b"
+    bare.mkdir()
+    git(bare, "init", "--bare", "--initial-branch=main")
+    linked = parent / "w"
+    git(nested, "worktree", "add", "--detach", str(linked), "HEAD")
+    assert (linked / ".git").is_file()
+
+    redirects = {
+        "GIT_DIR": str(parent / ".git"), "GIT_WORK_TREE": str(parent),
+        "GIT_INDEX_FILE": str(parent / ".git/index"),
+        "GIT_CONFIG_COUNT": "2", "GIT_CONFIG_KEY_0": "core.worktree",
+        "GIT_CONFIG_VALUE_0": str(parent), "GIT_CONFIG_KEY_1": "core.bare",
+        "GIT_CONFIG_VALUE_1": "true", "GIT_CONFIG_PARAMETERS": "'core.bare=true'",
+    }
+    original_environment = dict(os.environ)
+    for inherited in ({}, redirects):
+        with pytest.MonkeyPatch.context() as patch:
+            for key, value in inherited.items():
+                patch.setenv(key, value)
+            before_reads = dict(os.environ)
+            for rejected in (root, ordinary_child, bare):
+                for reader in (helper._git_status_changed_paths, helper._git_untracked_paths):
+                    with pytest.raises(
+                        helper.CurrentizationError,
+                        match="PR152_CURRENTIZATION_GIT_STATUS_UNAVAILABLE",
+                    ):
+                        reader(rejected)
+            assert helper.main(["--repo-root", str(root)]) == 1
+            assert writes == []
+            assert helper._git_status_changed_paths(nested) == ["new.txt", "staged.txt", "tracked.txt"]
+            assert helper._git_untracked_paths(nested) == ["new.txt"]
+            assert helper._added_diff_text_for_path(nested, "tracked.txt") == "after"
+            assert helper._git_status_changed_paths(linked) == []
+            assert helper._git_untracked_paths(linked) == []
+            assert helper._added_diff_text_for_path(linked, "tracked.txt") is None
+            assert dict(os.environ) == before_reads
+        assert dict(os.environ) == original_environment
+    for invalid in (
+        parent / "missing", nested / "tracked.txt",
+        *(Path(str(root) + character) for character in ("\r", "\n", "\0")),
+    ):
+        with pytest.raises(helper.CurrentizationError, match="PR152_CURRENTIZATION_GIT_STATUS_UNAVAILABLE"):
+            helper._run_repository_git(invalid, ["status", "--porcelain=v1"])
+    assert git(parent, "rev-parse", "HEAD") == parent_head
+    assert git(parent, "ls-files", "--stage", "-z") == parent_index
+    assert git(parent, "status", "--porcelain=v1", "-z") == b""
+    assert git(nested, "rev-parse", "HEAD") == nested_head
+    assert git(nested, "ls-files", "--stage", "-z") == nested_index
+    assert all(path.read_bytes() == expected for path, expected in protected.items())
+    assert (parent / "parent.txt").read_bytes() == b"parent baseline\n"
+    assert all(path.read_bytes() == expected for path, expected in nested_protected.items())
 
 
 def test_helper_cli_can_be_called_by_future_pr_finalization(

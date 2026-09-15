@@ -10,6 +10,7 @@ from copy import deepcopy
 from dataclasses import dataclass, replace
 from datetime import UTC, datetime, timedelta
 from decimal import Decimal
+import io
 import json
 import math
 import os
@@ -18,7 +19,6 @@ import shutil
 import stat
 import subprocess
 import sys
-import tempfile
 from types import MappingProxyType
 from typing import Callable, Sequence
 import unicodedata
@@ -31,6 +31,11 @@ if str(REPO_ROOT) not in sys.path:
 
 from tools.validation_scope_registry import (  # noqa: E402
     build_st12g_architecture_validation_command,
+)
+from tools.validation_reliability import (  # noqa: E402
+    cleanup_validation_run,
+    resolve_validation_run_paths,
+    write_run_provenance,
 )
 from tools.qku_independent_math_row_receipt import (  # noqa: E402
     EVIDENCE_PREFIX as INHERITED_RECEIPT_PREFIX,
@@ -2048,7 +2053,7 @@ _ST12H_BACKUP_REQUIRED_STAGE_EVIDENCE = {
         "TRACKED_PROJECTION_VALIDATOR=PASS",
         "SERIALIZED_CONTRACT_VALIDATOR=PASS",
     ),
-    "RESTORE_DECLARED_ARTIFACTS": ("REPOSITORY_WRITE_COUNT=0",),
+    "RESTORE_DECLARED_ARTIFACTS": ("RESTORE_WRITES_CONFINED_TO_SCRATCH=true",),
     "COMPARE_RESTORED_BYTES": ("RESTORED_BYTE_PARITY_COUNT=2",),
     "EXECUTE_RESTORE_VALIDATION": (
         "DECLARED_RESTORE_COMMAND_COUNT=1",
@@ -2179,8 +2184,7 @@ def validate_st12h_portable_directory_v1(root: Path | str) -> tuple[str, ...]:
 
 
 def _archive_mutation_rejected(entries: Sequence[tuple[zipfile.ZipInfo, bytes]]) -> bool:
-    with tempfile.TemporaryDirectory(prefix="qtt st12h archive mutation ") as directory:
-        archive = Path(directory) / "mutation.zip"
+    with io.BytesIO() as archive:
         with warnings.catch_warnings():
             warnings.filterwarnings("ignore", message="Duplicate name:.*")
             with zipfile.ZipFile(
@@ -2190,8 +2194,10 @@ def _archive_mutation_rejected(entries: Sequence[tuple[zipfile.ZipInfo, bytes]])
             ) as handle:
                 for info, content in entries:
                     handle.writestr(info, content)
+        archive.seek(0)
         try:
-            validate_st12h_archive_members_v1(archive)
+            with zipfile.ZipFile(archive, "r") as handle:
+                validate_st12h_archive_members_v1(handle)
         except ValueError:
             return True
     return False
@@ -2288,16 +2294,29 @@ def execute_st12h_backup_restore_portability_v1(
         "EXACT_PUBLICATION_ROSTER=true",
     )
 
-    scratch_parent = Path(tempfile.mkdtemp(prefix="QTT ST12H portable ü "))
-    workspace = scratch_parent / "transactional workspace é with spaces"
-    workspace.mkdir()
+    projected_paths = tuple(
+        f"validation-output/w ü/{directory}/{member}"
+        for directory in ("x é", "r é", "c é")
+        for member in _ST12H_PUBLICATION_MEMBERS
+    ) + (
+        "validation-output/w ü/publication archive.zip",
+        "validation-output/w ü/stage journal.partial",
+        "validation-output/w ü/stage journal.json",
+    )
+    scratch_paths, scratch_probe = resolve_validation_run_paths(
+        root, projected_relative_paths=projected_paths,
+    )
+    cleanup_attempted = False
+    workspace = scratch_paths.validation_output_root / "w ü"
     try:
-        try:
-            scratch_parent.resolve().relative_to(root)
-        except ValueError:
-            pass
-        else:
-            raise ValueError("ST12H_SCRATCH_MUST_BE_OUTSIDE_REPOSITORY")
+        write_run_provenance(
+            scratch_paths,
+            scratch_probe,
+            phase="st12h-backup-restore-scratch",
+            command_count=0,
+            text_integrity_preflight_state="NOT_APPLICABLE",
+        )
+        workspace.mkdir()
 
         archive = workspace / "publication archive.zip"
         with zipfile.ZipFile(
@@ -2330,7 +2349,7 @@ def execute_st12h_backup_restore_portability_v1(
                 "READBACK_AND_COMPARE_SOURCE_BYTES",
                 f"DIRECT_BYTE_PARITY_COUNT={len(archived_bytes)}",
             )
-            extracted = workspace / "portable package é directory"
+            extracted = workspace / "x é"
             extracted.mkdir()
             for info in handle.infolist():
                 target = (extracted / info.filename).resolve()
@@ -2353,7 +2372,7 @@ def execute_st12h_backup_restore_portability_v1(
             "SERIALIZED_CONTRACT_VALIDATOR=PASS",
         )
 
-        restored = workspace / "restored ordinary directory ü"
+        restored = workspace / "r é"
         for member in members:
             target = restored / member
             target.parent.mkdir(parents=True, exist_ok=True)
@@ -2361,7 +2380,7 @@ def execute_st12h_backup_restore_portability_v1(
         record(
             "RESTORE_DECLARED_ARTIFACTS",
             f"RESTORED_MEMBER_COUNT={len(members)}",
-            "REPOSITORY_WRITE_COUNT=0",
+            "RESTORE_WRITES_CONFINED_TO_SCRATCH=true",
         )
 
         restored_bytes = {
@@ -2440,7 +2459,7 @@ def execute_st12h_backup_restore_portability_v1(
         )
 
         active_pointer_before = "NO_RUNTIME_POINTER"
-        crash_partial = workspace / "crash rollback.partial"
+        crash_partial = workspace / "c é"
         crash_partial.mkdir()
         first_member = members[0]
         partial_target = crash_partial / first_member
@@ -2465,8 +2484,9 @@ def execute_st12h_backup_restore_portability_v1(
             path.stat().st_size for path in workspace.rglob("*") if path.is_file()
         )
         file_count = sum(path.is_file() for path in workspace.rglob("*"))
-        shutil.rmtree(workspace)
-        if workspace.exists():
+        cleanup_attempted = True
+        cleanup_validation_run(scratch_paths)
+        if workspace.exists() or scratch_paths.process_root.exists():
             raise ValueError("ST12H_SCRATCH_CLEANUP_FAILED")
         record(
             "CLEAN_SCRATCH_AND_FINALIZE",
@@ -2519,8 +2539,9 @@ def execute_st12h_backup_restore_portability_v1(
         _validate_st12h_backup_execution_receipts_v1(receipts)
         return receipts
     finally:
-        if scratch_parent.exists():
-            shutil.rmtree(scratch_parent, ignore_errors=False)
+        if not cleanup_attempted:
+            cleanup_attempted = True
+            cleanup_validation_run(scratch_paths)
 
 
 def _validate_st12h_backup_execution_receipts_v1(

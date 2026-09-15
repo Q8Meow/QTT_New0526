@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from contextlib import contextmanager
 from datetime import datetime
 from pathlib import Path
 import sqlite3
@@ -29,6 +30,8 @@ from .migrations import (
 from .outbox import OutboxIntentRecordV1
 from .persistence import (
     IdempotencyAcquireResultV1,
+    PrivateEvidenceReadRequestV1, PrivateEvidenceReadSnapshotV1,
+    _f14_requested_identities_v1, _f14_reconstruct_snapshot_v1,
     PersistenceAdapterV1,
     PersistenceAvailabilityV1,
     PersistenceTransactionV1,
@@ -37,13 +40,15 @@ from .receipts import (
     DurableComputationExecutionReceiptRecordV1, EconomicEventRecordV1,
     EconomicReceiptEventSpineV1, EconomicRecordTypeV1, PrivateObservationClockReceiptV1,
     ValueLineageEdgeV1, _private_clock_reconstruct_spine_v1,
+    PrivateEvidenceWitnessV1, _f14_singleton_witness_v1,
 )
 from .rollback import (
     JournalReversalBundleV1,
     ReversalHistoryViewV1,
     ReversalReceiptV1,
 )
-from .serialization import deterministic_json, safe_json_loads
+from .serialization import (deterministic_json, safe_json_loads,
+    _f14_require_v1, _f14_validate_v1, _F14_ID)
 
 
 def _iso(value: datetime | str, name: str) -> str:
@@ -353,6 +358,9 @@ class SQLiteReferenceAdapterV1(PersistenceAdapterV1):
         if (record.record_type == EconomicRecordTypeV1.PRIVATE_OBSERVATION_CLOCK
                 or type(payload) is PrivateObservationClockReceiptV1):
             record = _private_clock_reconstruct_spine_v1(record, expected_record_id=record.record_id)
+        if (record.record_type is EconomicRecordTypeV1.PRIVATE_EVIDENCE_WITNESS
+                or type(payload) is PrivateEvidenceWitnessV1):
+            record = _f14_singleton_witness_v1(record, record.record_id)
         if isinstance(payload, DurableComputationExecutionReceiptRecordV1) and any(
             not self._record_exists(ref) for ref in payload.dependency_receipt_refs
         ):
@@ -607,6 +615,80 @@ class SQLiteReferenceAdapterV1(PersistenceAdapterV1):
             raise PersistenceContractError(ReasonCode.PERSISTENCE_CONFLICT, "F13_STORED_SQL_CANONICAL_MISMATCH")
         return record
 
+    @contextmanager
+    def _f14_read_rows_v1(self, identities):
+        """One read transaction, owned here; never end a caller's transaction."""
+        if self._active_transaction is not None and self._active_transaction.is_active:
+            raise TransactionContractError(ReasonCode.TRANSACTION_STATE_INVALID,
+                'F14 committed read requires no active transaction')
+        if self._availability is not PersistenceAvailabilityV1.AVAILABLE_REFERENCE:
+            raise PersistenceContractError(ReasonCode.PERSISTENCE_UNAVAILABLE,
+                'F14 reference persistence is unavailable')
+        owned = False
+        cursor = None
+        try:
+            if self._connection.in_transaction:
+                raise TransactionContractError(ReasonCode.TRANSACTION_STATE_INVALID,
+                    'F14 connection transaction remains active')
+            cursor = self._connection.cursor()
+            cursor.execute('BEGIN')
+            owned = True
+            rows = {table: {} for table in APPEND_ONLY_TABLES_V1}
+            mirrors = {}
+            parameters = tuple(sorted(identities))
+            placeholders = ','.join('?' for _ in parameters)
+            for table in APPEND_ONLY_TABLES_V1:
+                identity = REFERENCE_IDENTITY_COLUMN_BY_TABLE_V1[table]
+                columns = REFERENCE_SCHEMA_COLUMNS_V1[table]
+                cursor.execute(f"SELECT {','.join(columns)} FROM {table} "
+                    f"WHERE {identity} IN ({placeholders})", parameters)
+                for values in cursor.fetchall():
+                    _f14_require_v1(type(values[0]) is str and type(values[-1]) is str,
+                        'F14_STORAGE_TEXT')
+                    _f14_require_v1(values[0] not in rows[table], 'F14_STORAGE_VIEW_MEMBERSHIP')
+                    rows[table][values[0]] = values[-1]
+                    mirrors[(table, values[0])] = tuple(values)
+            yield rows, mirrors
+        except sqlite3.Error as exc:
+            raise PersistenceContractError(ReasonCode.PERSISTENCE_UNAVAILABLE,
+                'SQLite reference private-evidence read failed') from exc
+        finally:
+            if cursor is not None:
+                try:
+                    if owned:
+                        cursor.execute('ROLLBACK')
+                finally:
+                    cursor.close()
+
+    def load_committed_private_evidence_witness_v1(
+        self, record_ref: str,
+    ) -> EconomicReceiptEventSpineV1 | None:
+        _f14_validate_v1(_F14_ID, record_ref)
+        with self._f14_read_rows_v1(frozenset((record_ref,))) as (rows, mirrors):
+            found = [(table, text) for table, values in rows.items() for text in values.values()]
+            if not found:
+                return None
+            _f14_require_v1(len(found) == 1 and found[0][0] == 'receipt_records',
+                'F14_STORAGE_VIEW_MEMBERSHIP')
+            record = _f14_singleton_witness_v1(found[0][1], record_ref)
+            _f14_verify_sql_mirror_v1('receipt_records', mirrors[('receipt_records', record_ref)], record)
+            return record
+
+    def load_committed_private_evidence_snapshot_v1(
+        self, request: PrivateEvidenceReadRequestV1,
+    ) -> PrivateEvidenceReadSnapshotV1:
+        identities = _f14_requested_identities_v1(request)
+        with self._f14_read_rows_v1(identities) as (rows, mirrors):
+            snapshot = _f14_reconstruct_snapshot_v1(request, rows)
+            values = dict(snapshot.records_by_ref)
+            values.update(snapshot.control_records_by_ref)
+            if snapshot.publication_intent_or_none is not None:
+                intent = snapshot.publication_intent_or_none
+                values[intent.outbox_intent_id] = intent
+            for (table, rid), columns in mirrors.items():
+                _f14_verify_sql_mirror_v1(table, columns, values[rid])
+            return snapshot
+
     def get_record(self, record_ref: str) -> object | None:
         for table in APPEND_ONLY_TABLES_V1:
             identity = REFERENCE_IDENTITY_COLUMN_BY_TABLE_V1[table]
@@ -648,3 +730,28 @@ class SQLiteReferenceAdapterV1(PersistenceAdapterV1):
                 sequence = int(payload.get("sequence", payload.get("event_sequence", payload.get("aggregate_version_after", 0)))) if isinstance(payload, dict) else 0
                 results.append((aggregate, sequence, recorded, identity_value, payload))
         return tuple(payload for *_, payload in sorted(results, key=lambda row: row[:4]))
+
+
+def _f14_verify_sql_mirror_v1(table, values, record):
+    """Payloads have already passed bounded hydration before mirror comparison."""
+    payload = deterministic_json(record)
+    row = safe_json_loads(payload)
+    if table == 'receipt_records':
+        expected = (row['record_id'], row['effective_at'], row['recorded_at'], row['aggregate_id'], payload)
+    elif table == 'state_transitions':
+        expected = (row['transition_id'], row['aggregate_id'], row['aggregate_version_after'],
+            row['effective_at'], row['recorded_at'], payload)
+    elif table == 'idempotency_claims':
+        if 'claim_id' in row:
+            expected = (row['claim_id'], None, row['idempotency_key'], row['canonical_request_json'],
+                None, row['created_at'], payload)
+        else:
+            expected = (row['binding_id'], row['claim_ref'], None, None, row['result_record_ref'],
+                row['created_at'], payload)
+    elif table == 'outbox_intents':
+        expected = (row['outbox_intent_id'], row['aggregate_id'], row['payload_record_ref'], row['created_at'], payload)
+    else:
+        raise PersistenceContractError(ReasonCode.SCHEMA_MISMATCH, 'F14_STORAGE_VIEW_MEMBERSHIP')
+    _f14_require_v1(len(values) == len(expected)
+        and all(type(a) is type(b) and a == b for a, b in zip(values, expected, strict=True)),
+        'F14_STORAGE_PLAN_ACTUAL_MISMATCH')

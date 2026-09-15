@@ -77,6 +77,7 @@ jobs:
       - name: Install test dependency
         run: &install_pytest |
           python -m pip install pytest==9.1.1
+          python -m pip install --only-binary=:all: --no-deps --index-url https://pypi.org/simple websockets==17.0.1 cryptography==50.0.1 cffi==2.1.1 pycparser==3.0
 
       - name: Run validation shard
         run: >

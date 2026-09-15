@@ -711,15 +711,17 @@ def test_selected_fresh_basetemp_is_under_system_temp():
     assert basetemp.name == "pytest_20260508_123456_123456_4321"
 
     with tempfile.TemporaryDirectory(prefix="qtt-helper-root-") as temp_root:
+        fixture_repo = Path(temp_root) / "fixture-repo"
+        fixture_repo.mkdir()
         external_parent = Path(temp_root) / "external-process-root"
         first, first_probe = reliability.resolve_validation_run_paths(
-            helper.REPO_ROOT,
+            fixture_repo,
             explicit_process_root=external_parent.resolve(),
             run_id="run_helper_first",
             projected_relative_paths=("tests/fail_closed/deep/example/test_case.py",),
         )
         second, second_probe = reliability.resolve_validation_run_paths(
-            helper.REPO_ROOT,
+            fixture_repo,
             explicit_process_root=external_parent.resolve(),
             run_id="run_helper_second",
         )
@@ -775,6 +777,8 @@ def test_selected_fresh_basetemp_is_short_and_windows_safe(monkeypatch):
 
     with tempfile.TemporaryDirectory(prefix="qtt-path-matrix-") as temp_root:
         root = Path(temp_root)
+        fixture_repo = root / "fixture-repo"
+        fixture_repo.mkdir()
         explicit = (root / "explicit").resolve()
         environment_root = (root / "environment").resolve()
         candidates = reliability._candidate_parents(
@@ -794,7 +798,7 @@ def test_selected_fresh_basetemp_is_short_and_windows_safe(monkeypatch):
         assert str(candidates[2][1]).replace("/", "\\") == "Z:\\qttv"
 
         environment_paths, _probe = reliability.resolve_validation_run_paths(
-            helper.REPO_ROOT,
+            fixture_repo,
             environment={reliability.PROCESS_ROOT_ENV: str(environment_root)},
             platform_name="posix",
             run_id="run_environment_precedence",
@@ -813,7 +817,7 @@ def test_selected_fresh_basetemp_is_short_and_windows_safe(monkeypatch):
                 lambda: str(fallback_parent),
             )
             fallback_paths, _probe = reliability.resolve_validation_run_paths(
-                helper.REPO_ROOT,
+                fixture_repo,
                 environment={},
                 platform_name="posix",
                 run_id="run_system_temp_fallback",
@@ -855,7 +859,7 @@ def test_selected_fresh_basetemp_is_short_and_windows_safe(monkeypatch):
                 )
                 with pytest.raises(reliability.ValidationReliabilityError) as raised:
                     reliability.resolve_validation_run_paths(
-                        helper.REPO_ROOT,
+                        fixture_repo,
                         explicit_process_root=(root / operation).resolve(),
                         run_id=f"run_{operation}",
                     )

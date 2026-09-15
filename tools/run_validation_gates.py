@@ -31,6 +31,10 @@ from tools.validation_scope_registry import (  # noqa: E402
 )
 from tools.validation_reliability import (  # noqa: E402
     EVIDENCE_ROOT_ENV,
+    _require_local_layout,
+    _require_active_local_run_cache,
+    _local_unlinked_path,
+    _LOCAL_RUN_NAME,
     PYTEST_BASETEMP_DIR_NAME,
     RUN_ID_ENV,
     VALIDATION_OUTPUT_DIR_NAME,
@@ -2482,6 +2486,9 @@ def _validate_no_runtime_scan_cache_path(
         return
     scanner = _no_runtime_scanner_module()
     rel = cache_path.relative_to(root)
+    if rel.parts and rel.parts[0] == ".qtt":
+        _validate_run_local_cache_path(root, cache_path, NO_RUNTIME_ARTIFACT_SCAN_CACHE_ENV)
+        return
     if rel.parts and rel.parts[0] in scanner.SKIP_DIR_PARTS:
         return
     raise RuntimeError(
@@ -2695,6 +2702,24 @@ def _validate_run_local_cache_path(
     if not _path_is_relative_to(cache_path, root):
         return
     rel = cache_path.relative_to(root)
+    if rel.parts and rel.parts[0] == ".qtt":
+        _require_local_layout(root)
+        expected_names = {
+            NO_RUNTIME_ARTIFACT_SCAN_CACHE_ENV: "NoRuntimeArtifactScanCache.json",
+            PR152_BUILD_REPORT_CACHE_ENV: "PR152BuildReportCache.json",
+        }
+        if (len(rel.parts) != 5 or rel.parts[1] != "runs"
+                or _LOCAL_RUN_NAME.fullmatch(rel.parts[2]) is None
+                or rel.parts[3] != VALIDATION_OUTPUT_DIR_NAME
+                or rel.parts[4] != expected_names.get(env_name)):
+            raise RuntimeError("repository-local cache must be the exact run-owned cache slot")
+        _local_unlinked_path(cache_path.parent)
+        _require_active_local_run_cache(root, cache_path)
+        if os.path.lexists(cache_path) and (cache_path.is_symlink()
+                or cache_path.is_junction() or not cache_path.is_file()
+                or cache_path.stat().st_nlink != 1):
+            raise RuntimeError("repository-local cache cannot be linked or nonregular")
+        return
     if rel.parts and rel.parts[0] == ".tmp":
         return
     raise RuntimeError(
@@ -7494,7 +7519,7 @@ def _main_impl(argv: Sequence[str] | None = None) -> int:
     parser.add_argument(
         "--process-root",
         type=pathlib.Path,
-        help="Optional absolute external parent for the unique validation run root.",
+        help="Absolute external parent, or exact ignored repository .qtt/runs, for the unique validation run root.",
     )
     parser.add_argument(
         "--router-report",
