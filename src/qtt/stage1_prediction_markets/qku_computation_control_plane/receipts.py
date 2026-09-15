@@ -105,6 +105,7 @@ class EconomicRecordTypeV1(StrEnum):
     PIT_CAPTURE_AND_GAP = "PIT_CAPTURE_AND_GAP"
     PIT_CHECKPOINT = "PIT_CHECKPOINT"
     PRIVATE_OBSERVATION_CLOCK = "PRIVATE_OBSERVATION_CLOCK"
+    PRIVATE_EVIDENCE_WITNESS = "PRIVATE_EVIDENCE_WITNESS"
 
 
 class ModeSnapshotControlClassV1(StrEnum):
@@ -526,6 +527,7 @@ ECONOMIC_RECORD_PAYLOAD_CLASS: Mapping[EconomicRecordTypeV1, tuple[str, str]] = 
             "receipts",
             "PITCheckpointV1",
         ),
+        EconomicRecordTypeV1.PRIVATE_EVIDENCE_WITNESS: ("receipts", "PrivateEvidenceWitnessV1"),
         EconomicRecordTypeV1.PRIVATE_OBSERVATION_CLOCK: (
             "receipts",
             "PrivateObservationClockReceiptV1",
@@ -580,6 +582,8 @@ class EconomicReceiptEventSpineV1:
             raise ContractValidationError(ReasonCode.INVALID_CONTRACT, "record discriminator/payload type mismatch")
         if not isinstance(self.no_effect_flags, NoEffectFlagsV1):
             raise ContractValidationError(ReasonCode.RUNTIME_EFFECT_FORBIDDEN, "typed no-effect flags are required")
+        if self.record_type is EconomicRecordTypeV1.PRIVATE_EVIDENCE_WITNESS:
+            _f14_validate_witness_spine_v1(self)
         object.__setattr__(self, "effective_at", _time(self.effective_at, "effective_at"))
         object.__setattr__(self, "recorded_at", _time(self.recorded_at, "recorded_at"))
 
@@ -3592,3 +3596,584 @@ def _private_clock_reconstruct_spine_v1(
     if deterministic_json(rebuilt) != deterministic_json(row):
         raise PersistenceContractError(ReasonCode.PERSISTENCE_CONFLICT, "F13_STORED_CANONICAL_MISMATCH")
     return rebuilt
+
+
+# F14 seven-route value/evidence conformance; no source or runtime authority.
+from fractions import Fraction
+from .context import (
+    _native_text, _native_utc_nanoseconds, _native_retail_known_v1,
+    _native_retail_rows_v1, _native_retail_scalar_v1, _native_retail_nonnegative_v1,
+    _native_retail_exact_text_v1,
+)
+from .serialization import _native_retail_wire_encode_v1, _native_retail_strict_equal_v1
+
+
+def _native_retail_cursor_step_v1(page, request_cursor, seen_cursors, remaining_requests):
+    """Retail activities known-field projection; EOF is traversal only, not cash finality."""
+    _native_obj(page, ('activities', 'eof'), ('nextCursor',))
+    _native_require(type(page['activities']) is list and type(page['eof']) is bool, 'PAGE')
+    _native_require(type(remaining_requests) is int and remaining_requests >= 0, 'BUDGET')
+    seen = _native_retail_scalar_v1(seen_cursors, 'ids')
+    if request_cursor is not None:
+        _native_ident(request_cursor)
+        _native_require(request_cursor not in seen, 'CURSOR_REUSE')
+    if page['eof']:
+        return {'state': 'TRAVERSAL_END_NOT_COVERAGE', 'next': None, 'cash_finality': False}
+    nxt = page.get('nextCursor')
+    _native_ident(nxt)
+    _native_require(nxt != request_cursor and nxt not in seen, 'CURSOR_CYCLE')
+    return {'state': 'NEXT_PAGE' if remaining_requests else 'INCOMPLETE_REQUEST_BUDGET', 'next': nxt if remaining_requests else None, 'cash_finality': False}
+
+
+def _native_retail_position_projection_v1(profile, payload, *, max_rows=10000):
+    """Presence-sensitive projection only; no position ledger mutation."""
+    if profile == 'POLYMARKET_US_RETAIL_DIRECT':
+        _native_require(type(payload) is dict, 'POSITION')
+        out = {}
+        for f in ('netPosition', 'qtyBought', 'qtySold', 'bodPosition', 'qtyAvailable'):
+            precise = f + 'Decimal'
+            if precise in payload:
+                value = _native_retail_scalar_v1(payload[precise], 'decimal')
+                if f in ('qtyBought', 'qtySold'):
+                    _native_require(value >= 0, 'NONNEGATIVE')
+                out[f] = str(value)
+        _native_require('netPosition' in out, 'PRECISE_POSITION_REQUIRED')
+        reported = {}
+        for f in ('cost', 'realized', 'cashValue'):
+            if f in payload:
+                reported[f] = {'value': str(_native_retail_money_value_v1(payload[f], 'USD')), 'currency': 'USD'}
+        if 'expired' in payload:
+            reported['expired'] = _native_retail_scalar_v1(payload['expired'], 'bool')
+        if 'updateTime' in payload:
+            _native_utc_nanoseconds(payload['updateTime'])
+            reported['updateTime'] = payload['updateTime']
+        if 'marketMetadata' in payload:
+            _native_retail_known_v1(payload['marketMetadata'], ())
+            metadata = {}
+            for f in ('slug', 'icon', 'title', 'outcome', 'eventSlug'):
+                if f not in payload['marketMetadata']:
+                    continue
+                value = payload['marketMetadata'][f]
+                if f in ('slug', 'eventSlug'):
+                    _native_ident(value)
+                else:
+                    _native_require(type(value) is str, 'RETAIL_DIAGNOSTIC_TEXT')
+                    _native_retail_wire_encode_v1(value)
+                metadata[f] = value
+            reported['marketMetadata'] = metadata
+        return {'position': out, 'reported_fields': reported, 'rounded_legacy_compared_for_equality': False, 'settlement_final': False, 'runtime_effect_authorized': False, 'cash_posting_proven': False, 'releases_reservation': False}
+    raise ContractValidationError(ReasonCode.INVALID_CONTRACT, 'POSITION_PROFILE')
+
+
+def _native_retail_money_value_v1(value, currency):
+    _native_retail_known_v1(value, ('value', 'currency'))
+    _native_require(value['currency'] == currency, 'CURRENCY')
+    return _native_retail_scalar_v1(value['value'], 'decimal')
+
+
+def _native_retail_private_v1(kind, payload, request_id, markets, max_rows):
+    _native_require(type(kind) is str and kind in ('POSITION', 'BALANCE_SNAPSHOT', 'BALANCE_UPDATE'), 'PRIVATE_VARIANT')
+    _native_ident(request_id)
+    allowed = set(_native_retail_scalar_v1(markets, 'ids'))
+    if kind not in ('BALANCE_SNAPSHOT', 'BALANCE_UPDATE'):
+        _native_require(bool(allowed), 'MARKET_SCOPE')
+    variants = {'ORDER_SNAPSHOT': ('SUBSCRIPTION_TYPE_ORDER', 'orderSubscriptionSnapshot'), 'ORDER_UPDATE': ('SUBSCRIPTION_TYPE_ORDER', 'orderSubscriptionUpdate'), 'POSITION': ('SUBSCRIPTION_TYPE_POSITION', 'positionSubscription'), 'BALANCE_SNAPSHOT': ('SUBSCRIPTION_TYPE_ACCOUNT_BALANCE', 'accountBalancesSnapshot'), 'BALANCE_UPDATE': ('SUBSCRIPTION_TYPE_ACCOUNT_BALANCE', 'accountBalancesUpdate')}
+    _native_require(kind in variants, 'PRIVATE_VARIANT')
+    tag, key = variants[kind]
+    _native_retail_known_v1(payload, ('requestId', 'subscriptionType', key))
+    _native_require(payload['requestId'] == request_id, 'SUBSCRIPTION_SCOPE')
+    _native_require(payload['subscriptionType'] == tag or (kind == 'ORDER_SNAPSHOT' and payload['subscriptionType'] == 'SUBSCRIPTION_TYPE_ORDER_SNAPSHOT'), 'SUBSCRIPTION_TYPE')
+    _native_require(sum((k in payload for _, k in variants.values())) == 1, 'AMBIGUOUS_PRIVATE_VARIANT')
+    v = payload[key]
+    _native_require(type(v) is dict, 'PRIVATE_BODY')
+    result = {'kind': kind, 'cash_posting_proven': False, 'sequence_proven': False, 'releases_reservation': False}
+    if kind == 'POSITION':
+        _native_retail_known_v1(v, ('beforePosition', 'afterPosition', 'updateTime', 'entryType'))
+        _native_utc_nanoseconds(v['updateTime'])
+        _native_ident(v['entryType'])
+        before_projection = _native_retail_position_projection_v1('POLYMARKET_US_RETAIL_DIRECT', v['beforePosition'], max_rows=max_rows)
+        after_projection = _native_retail_position_projection_v1('POLYMARKET_US_RETAIL_DIRECT', v['afterPosition'], max_rows=max_rows)
+        b = before_projection['position']
+        a = after_projection['position']
+        slugs = []
+        for state in (v['beforePosition'], v['afterPosition']):
+            metadata = state.get('marketMetadata', {})
+            if type(metadata) is dict and 'slug' in metadata:
+                slugs.append(_native_ident(metadata['slug']))
+        if slugs:
+            _native_require((len(allowed) == 1 or len(slugs) == 2) and len(set(slugs)) == 1 and (slugs[0] in allowed), 'MARKET_SCOPE')
+            slug = slugs[0]
+        else:
+            _native_require(len(allowed) == 1, 'MARKET_IDENTITY_UNRESOLVED')
+            slug = next(iter(allowed))
+        reported = {'entryType': v['entryType'], 'updateTime': v['updateTime']}
+        if 'tradeId' in v:
+            reported['tradeId'] = _native_ident(v['tradeId'])
+        result.update(market=slug, before=b, after=a, before_reported_fields=before_projection['reported_fields'], after_reported_fields=after_projection['reported_fields'], reported_fields=reported, position_delta=_native_retail_exact_text_v1(Fraction(Decimal(a['netPosition'])) - Fraction(Decimal(b['netPosition']))))
+    else:
+
+        def balance(b):
+            return _native_retail_portfolio_v1('BALANCES', {'balances': [b]}, [], max_rows)['rows'][0]
+        if kind == 'BALANCE_SNAPSHOT':
+            projected = _native_retail_portfolio_v1('BALANCES', v, [], max_rows)
+            result.update(rows=projected['rows'], buying_power_diagnostics=projected['buying_power_diagnostics'])
+        else:
+            b = _native_retail_known_v1(v.get('balanceChange'), ('beforeBalance', 'afterBalance', 'updateTime', 'entryType'))
+            _native_utc_nanoseconds(b['updateTime'])
+            _native_ident(b['entryType'])
+            before = balance(b['beforeBalance'])
+            after = balance(b['afterBalance'])
+            _native_require(before['currency'] == after['currency'], 'CURRENCY')
+            reported = {'entryType': b['entryType'], 'updateTime': b['updateTime']}
+            if 'description' in b:
+                _native_require(type(b['description']) is str, 'RETAIL_DIAGNOSTIC_TEXT')
+                _native_retail_wire_encode_v1(b['description'])
+                reported['description'] = b['description']
+            result.update(before=before, after=after, reported_fields=reported, balance_delta=_native_retail_exact_text_v1(Fraction(Decimal(after['currentBalance'])) - Fraction(Decimal(before['currentBalance']))))
+    return result
+
+
+def _native_retail_portfolio_v1(kind, payload, markets, max_rows, *, http_status=None, response_received=True, expected_market=None, request_cursor=None, seen_cursors=(), remaining_requests=0):
+    """Retail read projections inside the existing native owner, never ledger writes.
+
+    Shape-only calls omit http_status. Native field absence is not zero; native
+    transport, private source acceptance and account identity are separate gates.
+    """
+    _native_require(type(kind) is str and kind in ('POSITIONS', 'ACTIVITIES', 'BALANCES'), 'RETAIL_READ_KIND')
+    _native_retail_rows_v1([], max_rows)
+    allowed = set(_native_retail_scalar_v1(markets, 'ids'))
+    if expected_market is not None:
+        _native_ident(expected_market)
+        _native_require(expected_market in allowed, 'MARKET_SCOPE')
+    if kind == 'BALANCES':
+        _native_require(expected_market is None, 'UNUSED_MARKET_CONTEXT')
+    if kind == 'POSITIONS':
+        _native_require(bool(allowed), 'MARKET_SCOPE')
+    _native_require(type(response_received) is bool, 'BOOLEAN')
+    _native_require(type(seen_cursors) in (tuple, list), 'CURSOR_HISTORY')
+    _native_require(type(remaining_requests) is int and remaining_requests >= 0, 'BUDGET')
+    if kind not in ('POSITIONS', 'ACTIVITIES'):
+        _native_require(request_cursor is None and (not seen_cursors) and (remaining_requests == 0), 'UNUSED_PAGE_CONTEXT')
+    result = {'kind': kind, 'runtime_effect_authorized': False, 'cash_posting_proven': False, 'releases_reservation': False, 'settlement_final': False, 'coverage_proven': False, 'cash_only_spendable_proven': False, 'automatic_mutation_retry_allowed': False}
+    _native_require(response_received is True, 'BOOLEAN')
+    if http_status is not None:
+        _native_require(type(http_status) is int and http_status == 200, 'UNDOCUMENTED_RETAIL_SUCCESS_STATUS')
+        result['http_status'] = http_status
+    _native_retail_known_v1(payload, ())
+    if kind == 'BALANCES':
+        _native_retail_known_v1(payload, ('balances',))
+        rows = []
+        seen = set()
+        withdrawal_count = 0
+        for raw in _native_retail_rows_v1(payload['balances'], max_rows):
+            _native_retail_known_v1(raw, ('currency', 'currentBalance', 'buyingPower'))
+            currency = _native_ident(raw['currency'])
+            _native_require(currency not in seen, 'DUPLICATE_ASSET')
+            seen.add(currency)
+            row = {'currency': currency}
+            for field in ('currentBalance', 'buyingPower', 'assetNotional', 'assetAvailable', 'pendingCredit', 'openOrders', 'unsettledFunds', 'marginRequirement', 'balanceReservation'):
+                if field in raw:
+                    row[field] = str(_native_retail_scalar_v1(raw[field], 'number'))
+            if 'lastUpdated' in raw:
+                _native_utc_nanoseconds(raw['lastUpdated'])
+                row['lastUpdated'] = raw['lastUpdated']
+            if 'pendingWithdrawals' in raw:
+                withdrawals = []
+                ids = set()
+                for item in _native_retail_rows_v1(raw['pendingWithdrawals'], max_rows):
+                    withdrawal_count += 1
+                    _native_require(withdrawal_count <= max_rows, 'TOTAL_WITHDRAWAL_BOUND')
+                    _native_retail_known_v1(item, ('id', 'balance'))
+                    identity = _native_ident(item['id'])
+                    _native_require(identity not in ids, 'DUPLICATE_WITHDRAWAL')
+                    ids.add(identity)
+                    w = {'id': identity, 'balance': str(_native_retail_scalar_v1(item['balance'], 'number'))}
+                    for field in ('name', 'description', 'bankId', 'destinationAccountName'):
+                        if field in item:
+                            _native_require(type(item[field]) is str, 'RETAIL_DIAGNOSTIC_TEXT')
+                            _native_retail_wire_encode_v1(item[field])
+                            w[field] = item[field]
+                    if 'acknowledged' in item:
+                        w['acknowledged'] = _native_retail_scalar_v1(item['acknowledged'], 'bool')
+                    if 'creationTime' in item:
+                        _native_utc_nanoseconds(item['creationTime'])
+                        w['creationTime'] = item['creationTime']
+                    withdrawals.append(w)
+                row['pendingWithdrawals'] = withdrawals
+            rows.append(row)
+        diagnostics = []
+        for row in rows:
+            complete = all((f in row for f in ('assetAvailable', 'openOrders', 'marginRequirement')))
+            residual = None
+            if complete:
+                residual = _native_retail_exact_text_v1(Fraction(Decimal(row['buyingPower'])) - Fraction(Decimal(row['currentBalance'])) - Fraction(Decimal(row['assetAvailable'])) + Fraction(Decimal(row['openOrders'])) + Fraction(Decimal(row['marginRequirement'])))
+            diagnostics.append({'currency': row['currency'], 'published_identity_components_complete': complete, 'published_identity_residual': residual, 'is_cash_only_spendable_limit': False})
+        result.update(rows=rows, buying_power_diagnostics=diagnostics)
+        return result
+    field = 'positions' if kind == 'POSITIONS' else 'activities'
+    _native_retail_known_v1(payload, (field, 'eof'))
+    _native_retail_scalar_v1(payload['eof'], 'bool')
+    if 'nextCursor' in payload:
+        _native_require(type(payload['nextCursor']) is str, 'CURSOR_TYPE')
+        if payload['nextCursor']:
+            _native_ident(payload['nextCursor'])
+    page = {'activities': [], 'eof': payload['eof']}
+    if 'nextCursor' in payload:
+        page['nextCursor'] = payload['nextCursor']
+    pagination = _native_retail_cursor_step_v1(page, request_cursor, list(seen_cursors), remaining_requests)
+    result['pagination'] = pagination
+    if 'nextCursor' in payload:
+        result['reported_next_cursor'] = payload['nextCursor']
+    result['eof'] = payload['eof']
+    if kind == 'POSITIONS':
+        raw = payload['positions']
+        _native_require(type(raw) is dict and len(raw) <= max_rows, 'POSITION_MAP')
+        rows = {}
+        for slug, value in raw.items():
+            _native_ident(slug)
+            _native_require(slug in allowed and (expected_market is None or slug == expected_market), 'MARKET_SCOPE')
+            projected = _native_retail_position_projection_v1('POLYMARKET_US_RETAIL_DIRECT', value, max_rows=max_rows)
+            metadata = projected.get('reported_fields', {}).get('marketMetadata', {})
+            if 'slug' in metadata:
+                _native_require(metadata['slug'] == slug, 'MARKET_SCOPE')
+            rows[slug] = projected
+        result['positions'] = rows
+        if 'availablePositions' in payload:
+            legacy = _native_retail_rows_v1(payload['availablePositions'], max_rows)
+            for value in legacy:
+                _native_require(type(value) is str and re.fullmatch('-?(?:0|[1-9][0-9]{0,18})', value) is not None, 'LEGACY_INT64')
+                _native_require(-2 ** 63 <= int(value) < 2 ** 63, 'LEGACY_INT64')
+            result['reported_legacy_available_positions'] = list(legacy)
+        result['missing_market_means_zero'] = False
+        return result
+    rows = []
+    seen = set()
+    repeated = False
+    account_types = ('ACTIVITY_TYPE_ACCOUNT_DEPOSIT', 'ACTIVITY_TYPE_ACCOUNT_ADVANCED_DEPOSIT', 'ACTIVITY_TYPE_ACCOUNT_WITHDRAWAL', 'ACTIVITY_TYPE_TRANSFER', 'ACTIVITY_TYPE_REFERRAL_BONUS', 'ACTIVITY_TYPE_TAKER_FEE_REBATE', 'ACTIVITY_TYPE_LIQUIDITY_PROGRAM')
+    trade_states = ('TRADE_STATE_NEW', 'TRADE_STATE_CLEARED', 'TRADE_STATE_BUSTED', 'TRADE_STATE_INFLIGHT', 'TRADE_STATE_PENDING_RISK', 'TRADE_STATE_PENDING_CLEARED', 'TRADE_STATE_REJECTED', 'TRADE_STATE_CLEARING_ACKNOWLEDGED', 'TRADE_STATE_RETRY_REQUEST')
+    for raw in _native_retail_rows_v1(payload['activities'], max_rows):
+        _native_retail_known_v1(raw, ('type',))
+        activity_type = _native_ident(raw['type'])
+        _native_require(activity_type in ('ACTIVITY_TYPE_TRADE', 'ACTIVITY_TYPE_POSITION_RESOLUTION', *account_types), 'ACTIVITY_TYPE')
+        nested = 'trade' if activity_type == 'ACTIVITY_TYPE_TRADE' else 'positionResolution' if activity_type == 'ACTIVITY_TYPE_POSITION_RESOLUTION' else 'accountBalanceChange'
+        _native_require({k for k in ('trade', 'positionResolution', 'accountBalanceChange') if k in raw} == {nested}, 'ACTIVITY_VARIANT')
+        item = _native_retail_known_v1(raw[nested], ())
+        out = {}
+        row = {'type': activity_type}
+        if nested == 'trade':
+            _native_retail_known_v1(item, ('id', 'marketSlug'))
+            out['id'] = _native_ident(item['id'])
+            out['marketSlug'] = _native_ident(item['marketSlug'])
+            _native_require(out['marketSlug'] in allowed and (expected_market is None or out['marketSlug'] == expected_market), 'MARKET_SCOPE')
+            if 'state' in item:
+                out['state'] = _native_ident(item['state'])
+            if 'qtyDecimal' in item:
+                out['qtyDecimal'] = str(_native_retail_nonnegative_v1(item['qtyDecimal']))
+            if 'qty' in item:
+                _native_require(type(item['qty']) is str, 'LEGACY_QUANTITY_TYPE')
+                _native_retail_wire_encode_v1(item['qty'])
+                out['qty'] = item['qty']
+            if 'isAggressor' in item:
+                out['isAggressor'] = _native_retail_scalar_v1(item['isAggressor'], 'bool')
+            for f in ('price', 'costBasis', 'realizedPnl'):
+                if f in item:
+                    value = _native_retail_money_value_v1(item[f], 'USD')
+                    if f == 'price':
+                        _native_require(0 <= value <= 1, 'UNIT_PAYOUT_TRADE_PRICE_DOMAIN')
+                    out[f] = {'value': str(value), 'currency': 'USD'}
+            state = out.get('state')
+            classification = 'REVERSED_TRADE_RECONCILIATION_REQUIRED' if state == 'TRADE_STATE_BUSTED' else 'CLEARED_TRADE_OBSERVATION_NOT_CASH' if state == 'TRADE_STATE_CLEARED' else 'REJECTED_TRADE_RECONCILIATION_REQUIRED' if state == 'TRADE_STATE_REJECTED' else 'NONFINAL_TRADE_OBSERVATION' if state in trade_states else 'UNKNOWN_TRADE_STATE'
+            row.update(trade_state_class=classification, precise_quantity_available='qtyDecimal' in out, requires_prior_trade_reconciliation=state == 'TRADE_STATE_BUSTED', automatically_reverses_ledger=False, creates_additional_fill=False)
+            identity = (nested, out['id'])
+        elif nested == 'positionResolution':
+            _native_retail_known_v1(item, ('marketSlug', 'beforePosition', 'afterPosition', 'updateTime'))
+            out['marketSlug'] = _native_ident(item['marketSlug'])
+            _native_require(out['marketSlug'] in allowed and (expected_market is None or out['marketSlug'] == expected_market), 'MARKET_SCOPE')
+            for f in ('beforePosition', 'afterPosition'):
+                out[f] = _native_retail_position_projection_v1('POLYMARKET_US_RETAIL_DIRECT', item[f], max_rows=max_rows)
+                meta = out[f].get('reported_fields', {}).get('marketMetadata', {})
+                if 'slug' in meta:
+                    _native_require(meta['slug'] == out['marketSlug'], 'MARKET_SCOPE')
+            if 'tradeId' in item:
+                out['tradeId'] = _native_ident(item['tradeId'])
+            if 'side' in item:
+                out['side'] = _native_ident(item['side'])
+            row['position_delta'] = _native_retail_exact_text_v1(Fraction(Decimal(out['afterPosition']['position']['netPosition'])) - Fraction(Decimal(out['beforePosition']['position']['netPosition'])))
+            row['account_payout_computed'] = False
+            identity = (nested, out['marketSlug'], out.get('tradeId'), item['updateTime'])
+        else:
+            _native_retail_known_v1(item, ('transactionId',))
+            out['transactionId'] = _native_ident(item['transactionId'])
+            _native_require('transactions' not in item, 'RETAIL_ACCOUNT_CHANGE_SCHEMA_CONFLICT')
+            if 'status' in item:
+                out['status'] = _native_ident(item['status'])
+            if 'amount' in item:
+                value = _native_retail_money_value_v1(item['amount'], 'USD')
+                out['amount'] = {'value': str(value), 'currency': 'USD'}
+            _native_require(expected_market is None, 'MARKET_FILTER_ACCOUNT_ACTIVITY_CONFLICT')
+            row.update(native_status_is_posting_proof=False, amount_sign_reinterpreted=False, is_advanced_deposit=activity_type == 'ACTIVITY_TYPE_ACCOUNT_ADVANCED_DEPOSIT', trading_profit_computed=False)
+            identity = (nested, out['transactionId'])
+        for f in ('createTime', 'updateTime'):
+            if f in item:
+                _native_utc_nanoseconds(item[f])
+                out[f] = item[f]
+        if 'createTime' in out and 'updateTime' in out:
+            _native_require(_native_utc_nanoseconds(out['createTime']) <= _native_utc_nanoseconds(out['updateTime']), 'ACTIVITY_TIME_ORDER')
+        if identity in seen:
+            repeated = True
+        seen.add(identity)
+        row[nested] = out
+        rows.append(row)
+    result.update(rows=rows, identity_repetition_observed=repeated, updates_deduplicated=False, raw_trade_and_execution_addition_forbidden=True)
+    return result
+
+
+def _native_retail_private_evidence_join_v1(record, witnesses, consumer, *, expected_record_id, expected_scope, expected_source_snapshot_ref, expected_credential_binding_ref, expected_session_ref, expected_revocation_epoch, requirements, decision_time, recorded_cutoff, original_raw_body):
+    """Check a selected private proof chain and derive values; grant no authority.
+
+    Production resolves every witness from its existing owner under one pinned
+    read snapshot. A caller-created dictionary, even a passing one, is not an
+    authenticated source, a commit observation, or a capability admission.
+    """
+    checked = _native_retail_clock_companion(record)
+    scope = record['scope']
+    clocks = record['clocks']
+    _native_obj(witnesses, ('source', 'transport', 'capture_commit', 'publication', 'companion_commit', 'clock_proofs'))
+    _native_obj(consumer, ('operation', 'item_key', 'request_ref', 'markets', 'max_rows', 'request_cursor', 'seen_cursors', 'remaining_requests'))
+
+    def text(value):
+        _native_require(type(value) is str, 'PRIVATE_JOIN_TEXT')
+        return _native_ident(value)
+
+    def integer(value):
+        _native_require(type(value) is int and 0 <= value <= 2 ** 63 - 1, 'PRIVATE_JOIN_INTEGER')
+        return value
+
+    def scoped(value, fields):
+        _native_obj(value, ('record_id', 'scope') + fields)
+        text(value['record_id'])
+        _native_require(type(value['scope']) is dict and _native_retail_strict_equal_v1(value['scope'], scope), 'PRIVATE_JOIN_SCOPE')
+        return value
+
+    def domain(value):
+        for name in ('process_epoch_id', 'monotonic_clock_id'):
+            _native_require(text(value[name]) == clocks[name], 'PRIVATE_JOIN_CLOCK_DOMAIN')
+
+    def same_time(actual, expected):
+        _native_require(_native_utc_nanoseconds(actual) == _native_utc_nanoseconds(expected), 'PRIVATE_JOIN_CLOCK_VALUE')
+    source = scoped(witnesses['source'], ('source_snapshot_ref', 'revocation_epoch', 'valid_from', 'valid_until', 'rights_receipt_ref', 'currentization_receipt_ref'))
+    transport = scoped(witnesses['transport'], ('raw_record_ref', 'source_binding_ref', 'source_snapshot_ref', 'revocation_epoch', 'operation', 'request_ref', 'credential_binding_ref', 'endpoint', 'method', 'response_status', 'tls_peer_verified', 'request_authentication_verified', 'session_ref', 'response_received', 'received_at', 'received_monotonic_ns', 'parse_completed_at', 'parse_completed_monotonic_ns', 'process_epoch_id', 'monotonic_clock_id'))
+    commit_fields = ('committed_record_refs', 'evidence_class', 'completed_at', 'completed_monotonic_ns', 'process_epoch_id', 'monotonic_clock_id')
+    commit = scoped(witnesses['capture_commit'], commit_fields)
+    seal = scoped(witnesses['companion_commit'], commit_fields)
+    publication = scoped(witnesses['publication'], ('raw_record_ref', 'capture_commit_ref', 'source_snapshot_ref', 'revocation_epoch', 'published_at', 'published_monotonic_ns', 'process_epoch_id', 'monotonic_clock_id'))
+    ids = [record['record_id'], record['raw_record_ref'], source['record_id'], transport['record_id'], commit['record_id'], publication['record_id'], seal['record_id']]
+    _native_require(len(ids) == len(set(ids)), 'PRIVATE_JOIN_REFERENCE_ALIAS')
+    _native_require(source['record_id'] == scope['source_binding_ref'] and text(transport['source_binding_ref']) == source['record_id'], 'PRIVATE_JOIN_BINDING')
+    _native_require(text(transport['raw_record_ref']) == record['raw_record_ref'], 'PRIVATE_JOIN_RAW_BINDING')
+    text(source['rights_receipt_ref'])
+    text(source['currentization_receipt_ref'])
+    snapshot = text(expected_source_snapshot_ref)
+    epoch = integer(expected_revocation_epoch)
+    for value in (source, transport, publication):
+        _native_require(text(value['source_snapshot_ref']) == snapshot and integer(value['revocation_epoch']) == epoch, 'PRIVATE_JOIN_REVOKED_OR_CHANGED')
+    start = _native_utc_nanoseconds(source['valid_from'])
+    end = _native_utc_nanoseconds(source['valid_until'])
+    _native_require(start < end and start <= _native_utc_nanoseconds(transport['received_at']) < end and (start <= _native_utc_nanoseconds(publication['published_at']) < end), 'PRIVATE_JOIN_SOURCE_VALIDITY')
+    for name in ('tls_peer_verified', 'request_authentication_verified', 'response_received'):
+        _native_require(type(transport[name]) is bool and transport[name] is True, 'PRIVATE_JOIN_TRANSPORT')
+    for name in ('credential_binding_ref', 'session_ref', 'request_ref'):
+        text(transport[name])
+    _native_require(transport['credential_binding_ref'] == text(expected_credential_binding_ref) and transport['session_ref'] == text(expected_session_ref), 'PRIVATE_JOIN_AUTHENTICATION_BINDING')
+    domain(transport)
+    domain(commit)
+    domain(publication)
+    domain(seal)
+    for t, c in (('received_at', 'qtt_received_at_utc'), ('parse_completed_at', 'qtt_parse_completed_at_utc')):
+        same_time(transport[t], clocks[c])
+    for t, c in (('received_monotonic_ns', 'qtt_received_monotonic_ns'), ('parse_completed_monotonic_ns', 'qtt_parse_completed_monotonic_ns')):
+        _native_require(integer(transport[t]) == clocks[c], 'PRIVATE_JOIN_CLOCK_VALUE')
+    for row, required in ((commit, {record['raw_record_ref'], transport['record_id']}), (seal, {record['record_id']})):
+        refs = row['committed_record_refs']
+        _native_require(type(refs) is list and 1 <= len(refs) <= 100, 'PRIVATE_JOIN_COMMIT_REFS')
+        for ref in refs:
+            text(ref)
+        _native_require(len(refs) == len(set(refs)) and required <= set(refs) and (row['record_id'] not in refs), 'PRIVATE_JOIN_COMMIT_REFS')
+        _native_require(type(row['evidence_class']) is str and row['evidence_class'] in ('COORDINATOR_POST_RETURN_UPPER_BOUND_REFERENCE_ONLY', 'STORAGE_ASSIGNED_ATOMIC_COMMIT_EVIDENCE'), 'PRIVATE_JOIN_COMMIT_CLASS')
+        _native_utc_nanoseconds(row['completed_at'])
+        integer(row['completed_monotonic_ns'])
+    _native_require(commit['record_id'] == record['capture_commit_ref'] and commit['evidence_class'] == record['commit_evidence_class'], 'PRIVATE_JOIN_CAPTURE_COMMIT')
+    same_time(commit['completed_at'], clocks['durable_commit_completed_at_utc'])
+    _native_require(commit['completed_monotonic_ns'] == clocks['durable_commit_completed_monotonic_ns'], 'PRIVATE_JOIN_CLOCK_VALUE')
+    _native_require(publication['record_id'] == record['publication_witness_ref'] and text(publication['capture_commit_ref']) == commit['record_id'] and (text(publication['raw_record_ref']) == record['raw_record_ref']), 'PRIVATE_JOIN_PUBLICATION')
+    same_time(publication['published_at'], clocks['strategy_available_at_utc'])
+    _native_require(integer(publication['published_monotonic_ns']) == clocks['strategy_available_monotonic_ns'] and integer(record['issued_monotonic_ns']) <= seal['completed_monotonic_ns'], 'PRIVATE_JOIN_COMMIT_ORDER')
+    _native_require(_native_utc_nanoseconds(seal['completed_at']) <= _native_utc_nanoseconds(recorded_cutoff), 'PRIVATE_JOIN_COMPANION_COMMITTED_AFTER_CUTOFF')
+    proofs = witnesses['clock_proofs']
+    _native_require(type(proofs) is dict, 'PRIVATE_JOIN_PROOFS')
+    needed = {k for k, v in record['clock_proof_refs'].items() if v is not None}
+    _native_require(set(proofs) == needed, 'PRIVATE_JOIN_PROOFS')
+    for name in sorted(needed):
+        proof = scoped(proofs[name], ('subject_raw_record_ref', 'source_binding_ref', 'value'))
+        _native_require(proof['record_id'] == record['clock_proof_refs'][name] and text(proof['subject_raw_record_ref']) == record['raw_record_ref'] and (text(proof['source_binding_ref']) == source['record_id']), 'PRIVATE_JOIN_PROOF_BINDING')
+        _native_require(proof['record_id'] not in ids, 'PRIVATE_JOIN_REFERENCE_ALIAS')
+        ids.append(proof['record_id'])
+        _native_require(type(proof['value']) is str and proof['value'] == clocks[name], 'PRIVATE_JOIN_PROOF_VALUE')
+    replay = _native_retail_clock_replay(checked['canonical_payload_json'], expected_record_id=expected_record_id, expected_scope=expected_scope, original_raw_body=original_raw_body, requirements=requirements, decision_time=decision_time, recorded_cutoff=recorded_cutoff)
+    op = text(consumer['operation'])
+    _native_require(text(transport['operation']) == op, 'PRIVATE_JOIN_OPERATION')
+    routes = {'ACTIVITY_TRADE': ('/v1/portfolio/activities', 'trade'), 'ACTIVITY_RESOLUTION': ('/v1/portfolio/activities', 'positionResolution'), 'ACTIVITY_FUNDING': ('/v1/portfolio/activities', 'accountBalanceChange'), 'POSITIONS': ('/v1/portfolio/positions', 'positions'), 'BALANCES': ('/v1/account/balances', 'balances'), 'WS_POSITION': ('/v1/ws/private', 'positionSubscription'), 'WS_BALANCE': ('/v1/ws/private', 'accountBalancesUpdate')}
+    _native_require(op in routes, 'PRIVATE_JOIN_OPERATION')
+    path, nested = routes[op]
+    ws = op.startswith('WS_')
+    _native_require(type(transport['endpoint']) is str and transport['endpoint'] == ('wss' if ws else 'https') + '://api.polymarket.us' + path and (type(transport['method']) is str) and (transport['method'] == 'GET') and (type(transport['response_status']) is int) and (transport['response_status'] == (101 if ws else 200)), 'PRIVATE_JOIN_ENDPOINT_OR_STATUS')
+    _native_require(text(consumer['request_ref']) == transport['request_ref'], 'PRIVATE_JOIN_REQUEST')
+    _native_retail_rows_v1([], consumer['max_rows'])
+    _native_retail_scalar_v1(consumer['markets'], 'ids')
+    if not ws:
+        integer(consumer['remaining_requests'])
+        _native_require(type(consumer['seen_cursors']) is list, 'PRIVATE_JOIN_CURSOR_HISTORY')
+        _native_retail_scalar_v1(consumer['seen_cursors'], 'ids')
+    key = consumer['item_key']
+    raw = _native_strict_json(original_raw_body, record['raw_byte_limit'])
+    if op.startswith('ACTIVITY_') or op == 'BALANCES':
+        _native_require(type(key) is int and 0 <= key < consumer['max_rows'], 'PRIVATE_JOIN_ITEM')
+        field = 'activities' if op.startswith('ACTIVITY_') else 'balances'
+        _native_require(type(raw.get(field)) is list and key < len(raw[field]), 'PRIVATE_JOIN_ITEM')
+        tokens = [field, str(key)] + ([nested, 'updateTime'] if field == 'activities' else ['lastUpdated'])
+        if field == 'activities':
+            _native_require(nested in raw[field][key], 'PRIVATE_JOIN_VARIANT')
+    elif op == 'POSITIONS':
+        text(key)
+        _native_require(type(raw.get('positions')) is dict and key in raw['positions'], 'PRIVATE_JOIN_ITEM')
+        tokens = ['positions', key, 'updateTime']
+    else:
+        _native_require(key is None, 'PRIVATE_JOIN_ITEM')
+        tokens = ['positionSubscription', 'updateTime'] if op == 'WS_POSITION' else ['accountBalancesUpdate', 'balanceChange', 'updateTime']
+    pointer = '/' + '/'.join((t.replace('~', '~0').replace('/', '~1') for t in tokens))
+    selected = raw
+    for token in tokens:
+        if type(selected) is list:
+            selected = selected[int(token)]
+        elif type(selected) is dict and token in selected:
+            selected = selected[token]
+        else:
+            selected = None
+            break
+    if selected is None:
+        _native_require(record['provider_event_pointer_or_none'] is None and clocks['provider_event_time_utc_or_none'] is None, 'PRIVATE_JOIN_SELECTOR')
+    else:
+        _native_require(type(selected) is str and record['provider_event_pointer_or_none'] == pointer and (clocks['provider_event_time_utc_or_none'] == selected), 'PRIVATE_JOIN_SELECTOR')
+    if ws:
+        _native_require(consumer['request_cursor'] is None and type(consumer['seen_cursors']) is list and (consumer['seen_cursors'] == []) and (type(consumer['remaining_requests']) is int) and (consumer['remaining_requests'] == 0), 'PRIVATE_JOIN_UNUSED_PAGE_CONTEXT')
+        decoded = _native_retail_private_v1('POSITION' if op == 'WS_POSITION' else 'BALANCE_UPDATE', raw, consumer['request_ref'], consumer['markets'], consumer['max_rows'])
+    else:
+        kind = 'ACTIVITIES' if op.startswith('ACTIVITY_') else op
+        decoded = _native_retail_portfolio_v1(kind, raw, consumer['markets'], consumer['max_rows'], http_status=200, request_cursor=consumer['request_cursor'], seen_cursors=consumer['seen_cursors'], remaining_requests=consumer['remaining_requests'])
+        decoded = decoded['positions'][key] if op == 'POSITIONS' else decoded['rows'][key]
+    return {'state': 'PRIVATE_EVIDENCE_CHAIN_CONFORMANCE_ONLY', 'operation': op, 'record_id': record['record_id'], 'raw_record_ref': record['raw_record_ref'], 'source_snapshot_ref': snapshot, 'revocation_epoch': epoch, 'selected_values': copy.deepcopy(decoded), 'exact_clock_result': replay, 'companion_commit_ref': seal['record_id'], 'source_accepted': False, 'witnesses_authenticated': False, 'durability_qualified': False, 'complete_account_state': False, 'receipt_emitted': False, 'posts_cash': False, 'releases_reservation': False, 'runtime_effect_authorized': False}
+
+
+
+@dataclass(frozen=True, slots=True)
+class PrivateEvidenceWitnessV1:
+    record_id: str
+    phase: str
+    canonical_payload_json: str
+
+    def __post_init__(self) -> None:
+        from .serialization import _F14_ID, _F14_PHASES, _f14_validate_v1, _f14_require_v1, _f14_load_canonical_v1
+        _f14_validate_v1(_F14_ID, self.record_id)
+        _f14_require_v1(type(self.phase) is str and self.phase in _F14_PHASES, "F14_STORAGE_PHASE")
+        _f14_load_canonical_v1(self.canonical_payload_json, _F14_PHASES[self.phase])
+
+
+def _f14_witness_v1(record_id: str, phase: str, body: dict[str, object]) -> PrivateEvidenceWitnessV1:
+    from .serialization import _F14_ID, _F14_PHASES, _F14_ROUTES, _f14_validate_v1, _f14_require_v1, _f14_secret_keys_v1, _f14_dumps_v1
+    _f14_validate_v1(_F14_ID, record_id)
+    _f14_require_v1(type(phase) is str and phase in _F14_PHASES, 'F14_STORAGE_PHASE')
+    _f14_validate_v1(_F14_PHASES[phase], body)
+    _f14_secret_keys_v1(body)
+    _f14_require_v1(body['scope']['profile'] == 'POLYMARKET_US_RETAIL_DIRECT', 'F14_STORAGE_SCOPE')
+    if 'record_id' in body:
+        _f14_require_v1(body['record_id'] == record_id, 'F14_STORAGE_ID_BINDING')
+    if phase in ('CAPTURE_COMMIT', 'COMPANION_COMMIT'):
+        _f14_require_v1(record_id not in body['committed_record_refs'], 'F14_STORAGE_SELF_COMMIT')
+    if phase == 'TRANSPORT':
+        op = body['operation']
+        ws = op.startswith('WS_')
+        _f14_require_v1(body['endpoint'] == ('wss' if ws else 'https') + '://api.polymarket.us' + _F14_ROUTES[op] and body['response_status'] == (101 if ws else 200), 'F14_STORAGE_ROUTE')
+        _f14_require_v1(body['received_monotonic_ns'] <= body['parse_completed_monotonic_ns'], 'F14_STORAGE_CLOCK_ORDER')
+    return PrivateEvidenceWitnessV1(record_id, phase, _f14_dumps_v1(copy.deepcopy(body)))
+
+
+
+def _f14_validate_witness_spine_v1(record: EconomicReceiptEventSpineV1) -> None:
+    from .serialization import _f14_require_v1, _f14_reconstruct_v1, _f14_load_canonical_v1, _F14_PHASES
+    _f14_require_v1(type(record) is EconomicReceiptEventSpineV1
+        and type(record.record_type) is EconomicRecordTypeV1
+        and record.record_type is EconomicRecordTypeV1.PRIVATE_EVIDENCE_WITNESS
+        and type(record.typed_payload) is PrivateEvidenceWitnessV1
+        and type(record.no_effect_flags) is NoEffectFlagsV1, "F14_STORAGE_FIELDS")
+    row = {field.name: getattr(record, field.name) for field in dataclass_fields(record)}
+    for name in ("effective_at", "recorded_at"):
+        value = row[name]
+        _f14_require_v1(type(value) in (str, datetime), "F14_STORAGE_TIME")
+        if type(value) is datetime:
+            row[name] = value.isoformat()
+    row["record_type"] = record.record_type.value
+    row["typed_payload"] = {field.name: getattr(record.typed_payload, field.name)
+        for field in dataclass_fields(PrivateEvidenceWitnessV1)}
+    row["no_effect_flags"] = {field.name: getattr(record.no_effect_flags, field.name)
+        for field in dataclass_fields(NoEffectFlagsV1)}
+    body = _f14_load_canonical_v1(record.typed_payload.canonical_payload_json,
+        _F14_PHASES[record.typed_payload.phase])
+    _f14_reconstruct_v1(row, record.record_id, record.typed_payload.phase, body["scope"])
+
+
+def _f14_typed_spine_v1(text, expected_id, phase, expected_scope):
+    """Reconstruct a new-profile spine using the same closed storage predicates."""
+    from .serialization import (_f14_hydrate_v1, _f14_hydrate_clock_v1,
+        _f14_load_canonical_v1, _f14_spine_shape_v1, _F14_CLOCK_SPINE,
+        _f14_dumps_v1, _f14_require_v1)
+    if phase is None:
+        _f14_hydrate_clock_v1(text, expected_id, expected_scope)
+        row = _f14_load_canonical_v1(text, _F14_CLOCK_SPINE)
+        payload = PrivateObservationClockReceiptV1(**row['typed_payload'])
+        kind = EconomicRecordTypeV1.PRIVATE_OBSERVATION_CLOCK
+    else:
+        payload, body = _f14_hydrate_v1(text, expected_id, phase, expected_scope)
+        row = _f14_load_canonical_v1(text, _f14_spine_shape_v1(phase))
+        kind = EconomicRecordTypeV1.PRIVATE_EVIDENCE_WITNESS
+    fields = dict(row)
+    fields['typed_payload'] = payload
+    fields['record_type'] = kind
+    fields['no_effect_flags'] = NoEffectFlagsV1(**row['no_effect_flags'])
+    record = EconomicReceiptEventSpineV1(**fields)
+    _f14_require_v1(deterministic_json(record) == text, 'F14_STORAGE_NONCANONICAL')
+    return record
+
+
+def _f14_singleton_witness_v1(value, expected_id):
+    """Bound the closed witness union before allocation; reject non-witnesses."""
+    from .serialization import (_F14_PHASES, _F14_SHAPE_LIMITS,
+        _f14_spine_shape_v1, _f14_shape_scan_v1, _f14_require_v1,
+        _f14_load_canonical_v1)
+    if type(value) is EconomicReceiptEventSpineV1:
+        _f14_validate_witness_spine_v1(value)
+        text = deterministic_json(value)
+        phase = value.typed_payload.phase
+    else:
+        _f14_require_v1(type(value) is str, 'F14_STORAGE_TEXT')
+        text = value
+        limits = tuple(_F14_SHAPE_LIMITS[_f14_spine_shape_v1(p)] for p in _F14_PHASES)
+        _f14_require_v1(len(text.encode('utf-8')) <= max(x[0] for x in limits), 'F14_STORAGE_ENVELOPE_BOUND')
+        _f14_shape_scan_v1(text, max(x[2] for x in limits), max(x[1] for x in limits))
+        row = safe_json_loads(text)
+        _f14_require_v1(type(row) is dict and type(row.get('typed_payload')) is dict,
+            'F14_STORAGE_FIELDS')
+        phase = row['typed_payload'].get('phase')
+        _f14_require_v1(type(phase) is str and phase in _F14_PHASES, 'F14_STORAGE_PHASE')
+    row = _f14_load_canonical_v1(text, _f14_spine_shape_v1(phase))
+    body = _f14_load_canonical_v1(row['typed_payload']['canonical_payload_json'], _F14_PHASES[phase])
+    return _f14_typed_spine_v1(text, expected_id, phase, body['scope'])

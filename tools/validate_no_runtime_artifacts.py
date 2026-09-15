@@ -340,7 +340,7 @@ SKIP_DIR_PARTS = {
     "node_modules",
     "venv",
 }
-TOP_LEVEL_LOCAL_CUSTODY_DIR_NAMES = frozenset({".codex_inputs"})
+TOP_LEVEL_LOCAL_CUSTODY_DIR_NAMES = frozenset({".codex_inputs", ".qtt"})
 SKIP_FILE_NAMES = {
     ".coverage",
     "coverage.xml",
@@ -568,7 +568,7 @@ def _is_allowed_always_forbidden_path(
     return False
 
 
-def _validate_top_level_local_custody_boundary(
+def _validate_top_level_codex_custody_boundary(
     root: pathlib.Path,
 ) -> tuple[list[str], frozenset[str]]:
     root = root.resolve()
@@ -650,6 +650,21 @@ def _validate_top_level_local_custody_boundary(
     if ignored.returncode == 1:
         return [f"TOP_LEVEL_LOCAL_CUSTODY_NOT_IGNORED: {custody_name}"], frozenset()
     return ["LOCAL_CUSTODY_GIT_STATUS_UNAVAILABLE: ignore-check"], frozenset()
+
+
+def _validate_top_level_local_custody_boundary(
+    root: pathlib.Path,
+) -> tuple[list[str], frozenset[str]]:
+    failures, admitted = _validate_top_level_codex_custody_boundary(root)
+    local = root / ".qtt"
+    if os.path.lexists(local):
+        from tools.validation_reliability import _require_local_layout
+        try:
+            _require_local_layout(root.resolve())
+        except (OSError, ValueError, RuntimeError) as exc:
+            return [*failures, f"REPOSITORY_LOCAL_LAYOUT_REJECTED: {exc}"], admitted
+        admitted = admitted | frozenset({".qtt"})
+    return failures, admitted
 
 
 def _should_exclude_directory_from_scan(
@@ -806,6 +821,8 @@ def _call_labels(node: ast.Call) -> list[str]:
         labels.append("urllib retrieval client")
     if name == "http.client.HTTPConnection" or name == "http.client.HTTPSConnection":
         labels.append("http.client import/use")
+    if name == "websockets.sync.client.connect":
+        labels.append("websocket client")
     if name == "socket.socket":
         labels.append("socket client")
     if name == "aiohttp.ClientSession":
@@ -888,15 +905,49 @@ def _assignment_labels(node: ast.Assign | ast.AnnAssign) -> list[str]:
     return labels
 
 
+_F14_NATIVE_OWNER = 'src/qtt/stage1_prediction_markets/private_state_receipts/request.py'
+_F14_NATIVE_TRANSPORT_TEMPLATE = 'class RetailPrivateIngressV1:\n    def read_rest_once(self, request):\n        prepared = self._prepare_rest_v1(request)\n        import http.client\n        connection = http.client.HTTPSConnection("api.polymarket.us", 443, timeout=prepared.timeout_seconds, context=prepared.tls_context)\n        try:\n            self._recheck_and_charge_v1(prepared)\n            connection.request("GET", prepared.target, body=None, headers=prepared.headers)\n            response = connection.getresponse()\n            self._validate_response_headers_v1(prepared, response)\n            raw = response.read(prepared.maximum_raw_bytes + 1)\n            received = self._observe_clock_v1()\n            self._validate_response_body_v1(prepared, response, raw)\n            return self._retain_received_v1(prepared, raw, received, 200)\n        finally:\n            connection.close()\n\n    def read_private_message_once(self, request):\n        prepared = self._prepare_ws_v1(request)\n        import websockets.sync.client\n        with websockets.sync.client.connect("wss://api.polymarket.us/v1/ws/private", ssl=prepared.tls_context, additional_headers=prepared.headers, proxy=None, compression=None, open_timeout=prepared.timeout_seconds, ping_interval=20, ping_timeout=20, close_timeout=10, max_size=prepared.maximum_raw_bytes, max_queue=16, logger=prepared.quiet_logger) as connection:\n            self._verify_handshake_v1(prepared, connection.response)\n            self._recheck_subscription_v1(prepared)\n            connection.send(prepared.subscription_json)\n            state = self._initial_ws_state_v1()\n            for unused in range(prepared.maximum_application_messages):\n                message = connection.recv(timeout=self._remaining_seconds_v1(prepared))\n                received = self._observe_clock_v1()\n                state, disposition, raw = self._classify_ws_message_v1(prepared, state, message)\n                if disposition == "SELECTED_UPDATE":\n                    return self._retain_received_v1(prepared, raw, received, 101)\n            self._raise_message_budget_v1()\n'
+
+def f14_native_admission_v1(relpath: str, tree: ast.Module) -> tuple[frozenset[tuple], tuple[str, ...]]:
+    """One exact AST template, not a file/module-wide network exemption.
+
+    Return positions of just the two admitted imports and two construction calls.
+    The callers must still scan every other node for all original restrictions.
+    """
+    if relpath != _F14_NATIVE_OWNER:
+        return (frozenset(), ())
+    classes = [n for n in tree.body if isinstance(n, ast.ClassDef) and n.name == 'RetailPrivateIngressV1']
+    if len(classes) != 1:
+        return (frozenset(), ('F14_NATIVE_OWNER_CLASS_ROSTER',))
+    template = ast.parse(_F14_NATIVE_TRANSPORT_TEMPLATE).body[0]
+    allowed = set()
+    errors = []
+    for method in template.body:
+        found = [n for n in classes[0].body if isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef)) and n.name == method.name]
+        if len(found) != 1 or ast.dump(found[0], include_attributes=False) != ast.dump(method, include_attributes=False):
+            errors.append('F14_NATIVE_METHOD_TEMPLATE:' + method.name)
+            continue
+        for node in ast.walk(found[0]):
+            match = isinstance(node, ast.Import) and len(node.names) == 1 and (node.names[0].name in {'http.client', 'websockets.sync.client'})
+            if isinstance(node, ast.Call):
+                match = ast.unparse(node.func) in {'http.client.HTTPSConnection', 'websockets.sync.client.connect'}
+            if match:
+                allowed.add((type(node).__name__, node.lineno, node.col_offset, node.end_lineno, node.end_col_offset))
+    if errors:
+        return (frozenset(), tuple(errors))
+    return (frozenset(allowed), ())
+
 def _scan_python_content(path: pathlib.Path, text: str, enabled_flags: list[str]) -> list[str]:
     try:
         tree = ast.parse(text, filename=str(path))
     except SyntaxError:
         return _scan_text_content(path, text, enabled_flags)
 
+    admitted, admission_failures = f14_native_admission_v1(path.as_posix(), tree)
     found_by_flag = {flag: set[str]() for flag in enabled_flags}
     source_retrieval_imports = {
         "http.client": "http.client import/use",
+        "websockets": "websocket client",
         "urllib3": "urllib3 client",
         "playwright": "browser retrieval automation",
         "selenium": "browser retrieval automation",
@@ -910,9 +961,12 @@ def _scan_python_content(path: pathlib.Path, text: str, enabled_flags: list[str]
     }
 
     for node in ast.walk(tree):
+        admitted_network_position = (type(node).__name__, getattr(node, 'lineno', None),
+            getattr(node, 'col_offset', None), getattr(node, 'end_lineno', None),
+            getattr(node, 'end_col_offset', None)) in admitted
         for module_name in _imported_module_names(node):
             root_name = module_name.split(".", 1)[0]
-            if "forbid_source_retrieval" in found_by_flag:
+            if "forbid_source_retrieval" in found_by_flag and not admitted_network_position:
                 if module_name in source_retrieval_imports:
                     found_by_flag["forbid_source_retrieval"].add(source_retrieval_imports[module_name])
                 if root_name in source_retrieval_imports:
@@ -926,6 +980,7 @@ def _scan_python_content(path: pathlib.Path, text: str, enabled_flags: list[str]
             labels = set(_call_labels(node))
             flag_to_labels = {
                 "forbid_source_retrieval": {
+                    "websocket client",
                     "HTTP retrieval client",
                     "HTTP retrieval session client",
                     "urllib retrieval client",
@@ -967,7 +1022,7 @@ def _scan_python_content(path: pathlib.Path, text: str, enabled_flags: list[str]
                 },
             }
             for flag, flag_labels in flag_to_labels.items():
-                if flag in found_by_flag:
+                if flag in found_by_flag and not (flag == "forbid_source_retrieval" and admitted_network_position):
                     found_by_flag[flag].update(labels & flag_labels)
 
         if isinstance(node, (ast.Assign, ast.AnnAssign)):
@@ -998,7 +1053,7 @@ def _scan_python_content(path: pathlib.Path, text: str, enabled_flags: list[str]
             if "forbid_connector_binding" in found_by_flag and node.id == "CONNECTOR_SEMANTIC_BOUND":
                 found_by_flag["forbid_connector_binding"].add("connector bound state")
 
-    return [
+    return list(admission_failures) + [
         f"forbidden {label} in {path}"
         for flag in enabled_flags
         for label in sorted(found_by_flag.get(flag, set()))
@@ -1014,27 +1069,32 @@ def _matched_line(text: str, match: re.Match[str]) -> str:
     return text[line_start:line_end].strip()
 
 
+_F14_NATIVE_INSTALL = 'python -m pip install --only-binary=:all: --no-deps --index-url https://pypi.org/simple websockets==17.0.1 cryptography==50.0.1 cffi==2.1.1 pycparser==3.0'
+
+
 def _is_ci_test_dependency_allowlisted_pip_install(
     path: pathlib.PurePosixPath,
     text: str,
     match: re.Match[str],
-    allowlist_hits: dict[pathlib.PurePosixPath, int],
+    allowlist_hits: dict[tuple[pathlib.PurePosixPath, str], int],
 ) -> bool:
     allowed_commands = CI_TEST_DEPENDENCY_ALLOWLIST.get(path)
     if allowed_commands is None:
         return False
-    if _matched_line(text, match) not in allowed_commands:
+    line = _matched_line(text, match)
+    slot = "pytest" if line in allowed_commands else "native" if line == _F14_NATIVE_INSTALL else None
+    if slot is None:
         return False
-
-    allowlist_hits[path] = allowlist_hits.get(path, 0) + 1
-    return allowlist_hits[path] == 1
+    key = (path, slot)
+    allowlist_hits[key] = allowlist_hits.get(key, 0) + 1
+    return allowlist_hits[key] == 1
 
 
 def _scan_text_content(
     path: pathlib.PurePosixPath, text: str, enabled_flags: list[str]
 ) -> list[str]:
     violations: list[str] = []
-    ci_test_dependency_allowlist_hits: dict[pathlib.PurePosixPath, int] = {}
+    ci_test_dependency_allowlist_hits: dict[tuple[pathlib.PurePosixPath, str], int] = {}
     for flag in enabled_flags:
         for label, pattern in CONTENT_PATTERNS.get(flag, []):
             matches = list(re.finditer(pattern, text, flags=re.IGNORECASE | re.MULTILINE))
@@ -1070,7 +1130,7 @@ def _scan_package_install_text_file(
     source_path: pathlib.Path,
 ) -> list[str]:
     violations: list[str] = []
-    ci_test_dependency_allowlist_hits: dict[pathlib.PurePosixPath, int] = {}
+    ci_test_dependency_allowlist_hits: dict[tuple[pathlib.PurePosixPath, str], int] = {}
     try:
         lines = source_path.open(encoding="utf-8", errors="ignore")
     except OSError as exc:

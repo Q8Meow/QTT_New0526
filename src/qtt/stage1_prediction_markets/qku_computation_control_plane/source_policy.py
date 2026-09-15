@@ -5193,3 +5193,308 @@ def validate_pit_source_rights_admission_v1(
         valid_until_utc=valid_until,
         admitted=True,
     )
+
+
+# Internal F14 source capabilities. Bootstrap supplies accepted operational
+# inputs; these types do not measure clock quality or authorize a real account.
+from contextlib import contextmanager
+from _thread import RLock
+import time
+from .context import _f14_freeze_v1, _f14_plain_v1, _native_utc_nanoseconds
+from .errors import ContractValidationError, PointInTimeError
+from .serialization import (_F14_SCOPE, _F14_SCOPE_FIELDS, _F14_ID, _F14_OPERATIONS, _F14_MAX_INT,
+    _f14_validate_v1, _f14_native_time_v1)
+
+
+def _f14_ingress_require_v1(ok, token):
+    if not ok:
+        if any(word in token for word in ('CLOCK', 'DEADLINE', 'TIME_ORDER')):
+            raise PointInTimeError(ReasonCode.POINT_IN_TIME_VIOLATION, token)
+        raise ContractValidationError(ReasonCode.INVALID_CONTRACT, token)
+
+
+def _f14_counter_v1(value, minimum=0, maximum=_F14_MAX_INT):
+    _f14_ingress_require_v1(type(value) is int and minimum <= value <= maximum,
+        'F14_INGRESS_COUNTER')
+    return value
+
+
+def _f14_wall_text_v1(nanoseconds):
+    _f14_ingress_require_v1(type(nanoseconds) is int, 'F14_INGRESS_CLOCK')
+    seconds, fraction = divmod(nanoseconds, 1_000_000_000)
+    stamp = datetime(1970, 1, 1, tzinfo=UTC) + timedelta(seconds=seconds)
+    return (f'{stamp.year:04d}-{stamp.month:02d}-{stamp.day:02d}T'
+        f'{stamp.hour:02d}:{stamp.minute:02d}:{stamp.second:02d}.{fraction:09d}Z')
+
+
+@dataclass(frozen=True, slots=True)
+class RetailPrivateSessionBindingV1:
+    scope: Mapping[str, str]
+    source_snapshot_ref: str
+    credential_binding_ref: str
+    session_ref: str
+    revocation_epoch: int
+    source_receipt: PITSourceCurrentizationReceiptV1
+    rights_receipt: PITRightsAdmissionReceiptV1
+    valid_from_utc: datetime
+    valid_until_utc: datetime
+    permitted_route_ops: tuple[str, ...]
+
+    def __post_init__(self):
+        _f14_ingress_require_v1(isinstance(self.scope, Mapping), 'F14_INGRESS_SCOPE')
+        scope = dict(self.scope)
+        _f14_validate_v1(_F14_SCOPE, scope)
+        _f14_ingress_require_v1(scope['profile'] == 'POLYMARKET_US_RETAIL_DIRECT', 'F14_INGRESS_SCOPE')
+        for value in (self.source_snapshot_ref, self.credential_binding_ref, self.session_ref):
+            _f14_validate_v1(_F14_ID, value)
+        _f14_counter_v1(self.revocation_epoch)
+        _f14_ingress_require_v1(type(self.source_receipt) is PITSourceCurrentizationReceiptV1
+            and type(self.rights_receipt) is PITRightsAdmissionReceiptV1, 'F14_INGRESS_SOURCE')
+        for name in ('valid_from_utc', 'valid_until_utc'):
+            _f14_ingress_require_v1(type(getattr(self, name)) is datetime, 'F14_INGRESS_CLOCK')
+            object.__setattr__(self, name, _pit_source_utc(getattr(self, name), name))
+        start = max(self.source_receipt.effective_at_utc, self.source_receipt.checked_at_utc,
+            self.rights_receipt.checked_at_utc)
+        end = min(self.source_receipt.expires_at_utc, self.rights_receipt.expires_at_utc,
+            self.source_receipt.checked_at_utc + timedelta(hours=24))
+        _f14_ingress_require_v1(start == self.valid_from_utc < self.valid_until_utc == end,
+            'F14_INGRESS_SOURCE_INTERVAL')
+        _f14_ingress_require_v1(self.source_receipt.source_id == self.rights_receipt.source_id
+            == scope['source_binding_ref'], 'F14_INGRESS_SOURCE')
+        ops = self.permitted_route_ops
+        _f14_ingress_require_v1(type(ops) is tuple and bool(ops)
+            and all(type(op) is str and op in _F14_OPERATIONS for op in ops)
+            and len(ops) == len(set(ops)), 'F14_INGRESS_ROUTE')
+        object.__setattr__(self, 'scope', _f14_freeze_v1(scope))
+
+
+@dataclass(frozen=True, slots=True)
+class RetailPrivateRuntimeGrantV1:
+    grant_id: str
+    session_binding: RetailPrivateSessionBindingV1
+    issued_at_utc: datetime
+    expires_at_utc: datetime
+    process_epoch_id: str
+    monotonic_clock_id: str
+    wall_clock_source_id: str
+    clock_quality_receipt_ref: str
+    wall_clock_uncertainty_ns: int
+    transport_attempts_remaining: int
+    deadline_monotonic_ns: int
+    maximum_application_messages: int
+
+    def __post_init__(self):
+        _f14_ingress_require_v1(type(self.session_binding) is RetailPrivateSessionBindingV1,
+            'F14_INGRESS_SESSION')
+        for value in (self.grant_id, self.process_epoch_id, self.monotonic_clock_id,
+                self.wall_clock_source_id, self.clock_quality_receipt_ref):
+            _f14_validate_v1(_F14_ID, value)
+        _f14_counter_v1(self.wall_clock_uncertainty_ns)
+        for value in (self.transport_attempts_remaining, self.deadline_monotonic_ns,
+                self.maximum_application_messages):
+            _f14_counter_v1(value, 1)
+        for name in ('issued_at_utc', 'expires_at_utc'):
+            _f14_ingress_require_v1(type(getattr(self, name)) is datetime, 'F14_INGRESS_CLOCK')
+            object.__setattr__(self, name, _pit_source_utc(getattr(self, name), name))
+        _f14_ingress_require_v1(self.session_binding.valid_from_utc <= self.issued_at_utc
+            < self.expires_at_utc <= self.session_binding.valid_until_utc, 'F14_INGRESS_SOURCE_INTERVAL')
+
+
+class RetailPrivateSourceRegistryV1:
+    """Empty, process-local projection over independently admitted source inputs."""
+
+    def __init__(self, *, process_epoch_id: str, monotonic_clock_id: str):
+        for value in (process_epoch_id, monotonic_clock_id):
+            _f14_validate_v1(_F14_ID, value)
+        self.process_epoch_id = process_epoch_id
+        self.monotonic_clock_id = monotonic_clock_id
+        self._lock = RLock()
+        self._sessions = {}
+        self._generations = {}
+        self._grants = {}
+        self._remaining = {}
+        self._credentials = {}
+        self._receivers = {}
+        self._captures = {}
+        self._clock_facts = {}
+        self._last_clock = None
+
+    def _validate_session_v1(self, session, wall_ns):
+        _f14_ingress_require_v1(type(session) is RetailPrivateSessionBindingV1
+            and self._sessions.get(session.source_snapshot_ref) is session,
+            'F14_INGRESS_SESSION')
+        key = tuple(session.scope[name] for name in _F14_SCOPE_FIELDS)
+        _f14_ingress_require_v1(self._generations.get(key) == session.revocation_epoch,
+            'F14_INGRESS_REVOKED')
+        instant = _f14_wall_text_v1(wall_ns)
+        _f14_ingress_require_v1(_native_utc_nanoseconds(session.valid_from_utc.isoformat())
+            <= wall_ns < _native_utc_nanoseconds(session.valid_until_utc.isoformat()),
+            'F14_INGRESS_SOURCE_EXPIRED')
+        validate_pit_source_rights_admission_v1(session.source_receipt, session.rights_receipt,
+            admission_id=session.source_snapshot_ref,
+            profile_id=Stage1VenueProfileIdV1.POLYMARKET_US_RETAIL_DIRECT,
+            account_scope=session.scope['ledger_account_ref'],
+            internal_use_class=session.rights_receipt.internal_use_class,
+            permitted_retention_class=session.rights_receipt.permitted_retention_class,
+            evaluated_at_utc=datetime.fromisoformat(_f14_native_time_v1(instant)[1]))
+
+    def bind_session(self, session):
+        _f14_ingress_require_v1(type(session) is RetailPrivateSessionBindingV1, 'F14_INGRESS_SESSION')
+        with self._lock:
+            prior = self._sessions.get(session.source_snapshot_ref)
+            if prior is not None:
+                _f14_ingress_require_v1(prior is session, 'F14_INGRESS_SESSION_CONFLICT')
+                self._validate_session_v1(session, time.time_ns())
+                return
+            key = tuple(session.scope[name] for name in _F14_SCOPE_FIELDS)
+            previous = self._generations.get(key)
+            _f14_ingress_require_v1(previous is None or session.revocation_epoch > previous,
+                'F14_INGRESS_REVOKED')
+            # Validate first; publish the new projection only after all predicates.
+            now = time.time_ns()
+            _f14_ingress_require_v1(_native_utc_nanoseconds(session.valid_from_utc.isoformat()) <= now
+                < _native_utc_nanoseconds(session.valid_until_utc.isoformat()), 'F14_INGRESS_SOURCE_EXPIRED')
+            validate_pit_source_rights_admission_v1(session.source_receipt, session.rights_receipt,
+                admission_id=session.source_snapshot_ref,
+                profile_id=Stage1VenueProfileIdV1.POLYMARKET_US_RETAIL_DIRECT,
+                account_scope=session.scope['ledger_account_ref'],
+                internal_use_class=session.rights_receipt.internal_use_class,
+                permitted_retention_class=session.rights_receipt.permitted_retention_class,
+                evaluated_at_utc=datetime.fromisoformat(_f14_native_time_v1(_f14_wall_text_v1(now))[1]))
+            self._sessions[session.source_snapshot_ref] = session
+            self._generations[key] = session.revocation_epoch
+
+    def issue_grant(self, grant):
+        _f14_ingress_require_v1(type(grant) is RetailPrivateRuntimeGrantV1, 'F14_INGRESS_GRANT')
+        with self._lock:
+            now = time.time_ns()
+            self._validate_session_v1(grant.session_binding, now)
+            _f14_ingress_require_v1(grant.process_epoch_id == self.process_epoch_id
+                and grant.monotonic_clock_id == self.monotonic_clock_id, 'F14_INGRESS_CLOCK_DOMAIN')
+            _f14_ingress_require_v1(_native_utc_nanoseconds(grant.issued_at_utc.isoformat()) <= now
+                < _native_utc_nanoseconds(grant.expires_at_utc.isoformat()), 'F14_INGRESS_GRANT_EXPIRED')
+            _f14_ingress_require_v1(time.monotonic_ns() < grant.deadline_monotonic_ns,
+                'F14_INGRESS_DEADLINE')
+            old = self._grants.get(grant.grant_id)
+            _f14_ingress_require_v1(old is None or old is grant, 'F14_INGRESS_GRANT_CONFLICT')
+            if old is None:
+                self._grants[grant.grant_id] = grant
+                self._remaining[grant.grant_id] = grant.transport_attempts_remaining
+
+    def _validate_grant_v1(self, grant, operation=None):
+        _f14_ingress_require_v1(type(grant) is RetailPrivateRuntimeGrantV1
+            and self._grants.get(grant.grant_id) is grant, 'F14_INGRESS_GRANT')
+        now = time.time_ns()
+        self._validate_session_v1(grant.session_binding, now)
+        _f14_ingress_require_v1(_native_utc_nanoseconds(grant.issued_at_utc.isoformat()) <= now
+            < _native_utc_nanoseconds(grant.expires_at_utc.isoformat()), 'F14_INGRESS_GRANT_EXPIRED')
+        _f14_ingress_require_v1(grant.process_epoch_id == self.process_epoch_id
+            and grant.monotonic_clock_id == self.monotonic_clock_id, 'F14_INGRESS_CLOCK_DOMAIN')
+        _f14_ingress_require_v1(time.monotonic_ns() < grant.deadline_monotonic_ns, 'F14_INGRESS_DEADLINE')
+        if operation is not None:
+            _f14_ingress_require_v1(type(operation) is str
+                and operation in grant.session_binding.permitted_route_ops, 'F14_INGRESS_ROUTE')
+
+    @contextmanager
+    def fenced(self, grant, operation=None):
+        with self._lock:
+            self._validate_grant_v1(grant, operation)
+            try:
+                yield grant.session_binding
+            finally:
+                self._validate_grant_v1(grant, operation)
+
+    def revoke(self, session_binding, revocation_epoch):
+        _f14_counter_v1(revocation_epoch)
+        with self._lock:
+            _f14_ingress_require_v1(type(session_binding) is RetailPrivateSessionBindingV1
+                and self._sessions.get(session_binding.source_snapshot_ref) is session_binding,
+                'F14_INGRESS_SESSION')
+            key = tuple(session_binding.scope[name] for name in _F14_SCOPE_FIELDS)
+            _f14_ingress_require_v1(revocation_epoch > self._generations[key], 'F14_INGRESS_REVOKED')
+            self._generations[key] = revocation_epoch
+
+    def _charge_v1(self, grant, operation):
+        with self.fenced(grant, operation):
+            count = self._remaining[grant.grant_id]
+            _f14_ingress_require_v1(count > 0, 'F14_INGRESS_ATTEMPT_BUDGET')
+            self._remaining[grant.grant_id] = count - 1
+
+    def _observe_v1(self, grant):
+        with self._lock:
+            before = time.monotonic_ns()
+            wall = time.time_ns()
+            after = time.monotonic_ns()
+            _f14_counter_v1(before)
+            _f14_counter_v1(after)
+            _f14_ingress_require_v1(before <= after and (self._last_clock is None
+                or self._last_clock <= before), 'F14_INGRESS_TIME_ORDER')
+            self._last_clock = after
+            self._validate_grant_v1(grant)
+            return _f14_freeze_v1(dict(observed_at=_f14_wall_text_v1(wall), monotonic_ns=after,
+                process_epoch_id=grant.process_epoch_id, monotonic_clock_id=grant.monotonic_clock_id,
+                wall_clock_source_id=grant.wall_clock_source_id,
+                clock_quality_receipt_ref=grant.clock_quality_receipt_ref,
+                wall_clock_uncertainty_ns=grant.wall_clock_uncertainty_ns))
+
+    def bind_clock_facts(self, *, grant_id, request_ref, item_key, facts_by_role):
+        with self._lock:
+            grant = self._grants.get(grant_id)
+            self._validate_grant_v1(grant)
+            _f14_validate_v1(_F14_ID, request_ref)
+            _f14_ingress_require_v1(item_key is None or type(item_key) in (str, int), 'F14_INGRESS_ITEM')
+            if type(item_key) is int:
+                _f14_counter_v1(item_key)
+            elif type(item_key) is str:
+                _f14_validate_v1(_F14_ID, item_key)
+            _f14_ingress_require_v1(type(facts_by_role) is dict
+                and set(facts_by_role) <= {'publication', 'revision', 'finality'}, 'F14_INGRESS_CLOCK_FACT')
+            facts = {}
+            for role, fact in facts_by_role.items():
+                _f14_ingress_require_v1(type(fact) is dict
+                    and set(fact) == {'timestamp', 'source_record_ref', 'source_binding_ref'},
+                    'F14_INGRESS_CLOCK_FACT')
+                _native_utc_nanoseconds(fact['timestamp'])
+                session = grant.session_binding
+                _f14_ingress_require_v1(fact['source_record_ref'] == session.source_receipt.receipt_id
+                    and fact['source_binding_ref'] == session.scope['source_binding_ref'],
+                    'F14_INGRESS_CLOCK_FACT_SOURCE')
+                facts[role] = dict(fact)
+            key = (grant_id, request_ref, type(item_key), item_key)
+            frozen = _f14_freeze_v1(facts)
+            _f14_ingress_require_v1(key not in self._clock_facts or self._clock_facts[key] == frozen,
+                'F14_INGRESS_CLOCK_FACT_CONFLICT')
+            self._clock_facts[key] = frozen
+
+    def register_observed_capture(self, observed, *, receiver, request, attempt_id):
+        from ..private_state_receipts.receipt import ObservedPrivateCaptureV1
+        with self.fenced(request.grant, request.operation):
+            _f14_ingress_require_v1(type(observed) is ObservedPrivateCaptureV1
+                and self._receivers.get(id(receiver)) is receiver
+                and receiver.source_registry is self and receiver._active_request is request
+                and receiver._attempt_id == attempt_id
+                and observed.session_binding is request.grant.session_binding
+                and observed.operation == request.operation and observed.consumer == request.consumer
+                and observed.requirements == request.requirements,
+                'F14_INGRESS_CAPTURE_ASSOCIATION')
+            _f14_ingress_require_v1(id(observed) not in self._captures
+                and all(value[4] != attempt_id for value in self._captures.values()),
+                'F14_INGRESS_CAPTURE_DUPLICATE')
+            self._captures[id(observed)] = (observed, receiver, request, False, attempt_id)
+
+    def _consume_capture_v1(self, observed, receiver, request):
+        with self.fenced(request.grant, request.operation):
+            entry = self._captures.get(id(observed))
+            _f14_ingress_require_v1(entry is not None and entry[0] is observed and entry[1] is receiver
+                and entry[2] is request and entry[3] is False, 'F14_INGRESS_CAPTURE_ASSOCIATION')
+            self._captures[id(observed)] = (*entry[:3], True, entry[4])
+            return entry[4]
+
+    def _source_witness_v1(self, grant):
+        self._validate_grant_v1(grant)
+        session = grant.session_binding
+        return dict(record_id=session.scope['source_binding_ref'], scope=dict(session.scope),
+            source_snapshot_ref=session.source_snapshot_ref, revocation_epoch=session.revocation_epoch,
+            valid_from=session.valid_from_utc.isoformat(), valid_until=session.valid_until_utc.isoformat(),
+            rights_receipt_ref=session.rights_receipt.receipt_id,
+            currentization_receipt_ref=session.source_receipt.receipt_id)

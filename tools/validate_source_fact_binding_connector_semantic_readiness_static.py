@@ -13,6 +13,8 @@ _REPO_ROOT = pathlib.Path(__file__).resolve().parents[1]
 if str(_REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(_REPO_ROOT))
 
+from tools.validate_no_runtime_artifacts import f14_native_admission_v1
+
 from src.qtt.core.testing.atomicrows_bundle_state import (  # noqa: E402
     validate_current_atomicrows_bundle_state,
 )
@@ -571,13 +573,18 @@ def _scan_forbidden_python_usage(repo_root: pathlib.Path) -> list[str]:
         except SyntaxError as exc:
             failures.append(f"{rel} must parse for readiness usage scan: {exc}")
             continue
+        admitted, admission_failures = f14_native_admission_v1(rel.as_posix(), tree)
+        failures.extend(admission_failures)
         for node in ast.walk(tree):
+            admitted_network_position = (type(node).__name__, getattr(node, 'lineno', None),
+                getattr(node, 'col_offset', None), getattr(node, 'end_lineno', None),
+                getattr(node, 'end_col_offset', None)) in admitted
             for module in _imported_modules(node):
                 root_name = module.split(".", 1)[0]
-                if (
+                if not admitted_network_position and ((
                     module in FORBIDDEN_PYTHON_MODULES
                     and not _is_allowed_local_visual_qa_browser_module(rel, module)
-                ) or root_name in FORBIDDEN_PYTHON_MODULE_ROOTS:
+                ) or root_name in FORBIDDEN_PYTHON_MODULE_ROOTS):
                     failures.append(f"{rel} imports forbidden network/client module {module}")
             if isinstance(node, ast.Call):
                 name = _dotted_name(node.func)
@@ -598,7 +605,10 @@ def _scan_forbidden_python_usage(repo_root: pathlib.Path) -> list[str]:
                     "close_order",
                 }:
                     failures.append(f"{rel} calls forbidden authority function {name}")
-                if name in {
+                if not admitted_network_position and name in {
+                    "http.client.HTTPSConnection",
+                    "http.client.HTTPConnection",
+                    "websockets.sync.client.connect",
                     "requests.get",
                     "requests.post",
                     "requests.request",

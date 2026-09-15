@@ -406,6 +406,7 @@ def test_five_point_in_time_classes_have_one_central_policy() -> None:
     )
 
     _assert_f12_exact_utc()
+    _assert_f14_storage_time_domain()
     _assert_f12_v1_predicates()
     _assert_f12_v1_retention()
     _assert_f12_v1_context_and_gate()
@@ -1041,3 +1042,40 @@ def _assert_f12_v1_typed_gate() -> None:
         with pytest.raises(PointInTimeError) as caught:
             pit.compose_exact_pit_v1(**arguments)
         assert caught.value is sentinel
+
+
+def _assert_f14_storage_time_domain():
+    from datetime import UTC, datetime, timedelta
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane.serialization import _f14_native_time_v1
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane.errors import PointInTimeError
+    origin = datetime(1970, 1, 1, tzinfo=UTC)
+    base = datetime(2026, 9, 13, 12, 34, 56, tzinfo=UTC)
+    count = 0
+    for minutes in range(-1439, 1440):
+        hour, minute = divmod(abs(minutes), 60)
+        zone = f"{'+' if minutes >= 0 else '-'}{hour:02d}:{minute:02d}"
+        delta = base - timedelta(minutes=minutes) - origin
+        seconds = delta.days * 86400 + delta.seconds
+        for width in range(10):
+            digits = '123456789'[:width]
+            stamp = '2026-09-13T12:34:56' + ('.' + digits if width else '') + zone
+            expected = seconds * 1_000_000_000 + int(digits.ljust(9, '0'))
+            ns, floor = _f14_native_time_v1(stamp)
+            assert ns == expected
+            floor_delta = datetime.fromisoformat(floor) - origin
+            assert ((floor_delta.days * 86400 + floor_delta.seconds) * 1_000_000
+                + floor_delta.microseconds) == ns // 1000
+            count += 1
+    for stamp, expected in (('0001-01-01T00:00:00Z', -62135596800000000000),
+            ('9999-12-31T23:59:59.999999999+00:00', 253402300799999999999),
+            ('1969-12-31T23:59:59.999999999Z', -1)):
+        assert _f14_native_time_v1(stamp)[0] == expected
+    assert count == 28790
+    for stamp in (None, True, 1, '', '2026-09-13T00:00:00-00:00', '2026-09-13T00:00:00+24:00',
+            '2026-09-13T00:00:00+00:60', '2026-09-13T00:00:60Z', '2026-09-13T24:00:00Z',
+            '2026-02-29T00:00:00Z', '2026-09-13T00:00:00.1234567890Z',
+            '2026-09-13T00:00:00+00:00:00', '0001-01-01T00:00:00+00:01',
+            '9999-12-31T23:59:59-00:01', '2026-09-13t00:00:00z', '2026-09-13T00:00:00Z ',
+            '２０２６-09-13T00:00:00Z', '2026-09-13T00:00:00.Z', '2026-09-13T00:00:00', '0000-01-01T00:00:00Z'):
+        with pytest.raises(PointInTimeError, match='F14_STORAGE_TIME'):
+            _f14_native_time_v1(stamp)

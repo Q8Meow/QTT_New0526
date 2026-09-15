@@ -558,6 +558,15 @@ def _validate_execution_math_owner_ast(
     context_tree: ast.Module,
     independent_tree: ast.Module,
 ) -> None:
+    for node in ast.walk(independent_tree):
+        modules = (
+            [alias.name for alias in node.names]
+            if isinstance(node, ast.Import)
+            else [node.module or ""] if isinstance(node, ast.ImportFrom) else []
+        )
+        if any(module.split(".", 1)[0] in {"src", "qtt"} for module in modules):
+            raise ValueError("independent execution validator imports production source")
+
     def function(tree: ast.Module, name: str) -> ast.FunctionDef:
         return next(
             node
@@ -1750,6 +1759,48 @@ def _call_order(tree: ast.Module) -> tuple[str, ...]:
     raise ValueError("unit-of-work execute method missing")
 
 
+
+def _f14_execution_contract_failures_v1(repo_root):
+    from tools.validate_no_runtime_artifacts import f14_native_admission_v1
+    failures = []
+    native_path = 'src/qtt/stage1_prediction_markets/private_state_receipts/request.py'
+    native_tree = ast.parse((repo_root / native_path).read_text(encoding='utf-8'))
+    positions, errors = f14_native_admission_v1(native_path, native_tree)
+    failures.extend(errors)
+    if len(positions) != 4:
+        failures.append('F14 native import/construction roster is not exactly four positions')
+    owner = repo_root / 'src/qtt/stage1_prediction_markets/qku_computation_control_plane'
+    tree = ast.parse((owner / 'receipts.py').read_text(encoding='utf-8'))
+    discriminator = next(n for n in tree.body if isinstance(n, ast.ClassDef) and n.name == 'EconomicRecordTypeV1')
+    values = {ast.literal_eval(n.value) for n in discriminator.body if isinstance(n, ast.Assign)}
+    if values != _F14_EXPECTED_DISCRIMINATORS:
+        failures.append('F14 exact 21-discriminator roster changed')
+    for name, cls in (('persistence.py', 'PersistenceAdapterV1'), ('persistence.py', 'InMemoryPersistenceAdapterV1'),
+            ('sqlite_reference.py', 'SQLiteReferenceAdapterV1')):
+        tree = ast.parse((owner / name).read_text(encoding='utf-8'))
+        methods = set(_class_methods(tree, cls))
+        if (cls == 'PersistenceAdapterV1' and methods != _F14_EXPECTED_METHODS) or not _F14_EXPECTED_METHODS <= methods:
+            failures.append('F14 committed reader/interface roster changed: ' + cls)
+    handoff = ast.parse((repo_root / 'src/qtt/stage1_prediction_markets/private_state_receipts/handoff.py').read_text(encoding='utf-8'))
+    function = next(n for n in handoff.body if isinstance(n, ast.FunctionDef) and n.name == 'run_retail_private_observation_once_v1')
+    calls = {ast.unparse(n.func) for n in ast.walk(function) if isinstance(n, ast.Call)}
+    required = {'ingress.read_rest_once', 'ingress.read_private_message_once',
+        'adapter.load_committed_private_evidence_snapshot_v1', '_f14_execute_phase_v1',
+        '_native_retail_private_evidence_join_v1', 'publisher.publish_private_reference_v1',
+        'publisher.resolve_committed_private_observation_v1', 'source_registry.fenced'}
+    if not required <= calls:
+        failures.append('F14 native/grouped consumer composition is incomplete')
+    text = (repo_root / '.github/workflows/qtt_validation.yml').read_text(encoding='utf-8')
+    line = '          ' + _F14_EXPECTED_NATIVE_INSTALL + '\n'
+    if text.count(line) != 1 or 'run: &install_pytest |\n          python -m pip install pytest==9.1.1\n' + line not in text:
+        failures.append('F14 native install is not the single exact line under the inherited anchor')
+    return failures
+
+_F14_EXPECTED_DISCRIMINATORS = frozenset(('DURABLE_COMPUTATION_RECEIPT', 'ECONOMIC_EVENT', 'JOURNAL_TRANSACTION', 'JOURNAL_POSTING', 'STATE_TRANSITION', 'IDEMPOTENCY_CLAIM', 'OUTBOX_INTENT', 'REVERSAL', 'RECONCILIATION_BREAK', 'ORDER_INTENT', 'EXECUTION_CUSTODY', 'MODE_SNAPSHOT_CONTROL', 'ST12F_EVIDENCE_CONTROL', 'PIT_COMMIT_INTENT', 'PIT_COMMIT_COMPLETION', 'PIT_AVAILABILITY', 'PIT_CANONICAL_EVENT', 'PIT_CAPTURE_AND_GAP', 'PIT_CHECKPOINT', 'PRIVATE_OBSERVATION_CLOCK', 'PRIVATE_EVIDENCE_WITNESS'))
+_F14_EXPECTED_METHODS = frozenset(('availability', 'begin_transaction', 'insert_receipt_record', 'insert_value_lineage_edge', 'insert_economic_event', 'insert_journal_transaction', 'insert_journal_posting', 'insert_state_transition', 'acquire_idempotency_claim', 'bind_idempotency_result', 'insert_outbox_intent', 'insert_reversal_link', 'load_committed_reversal_history', 'insert_reconciliation_break', 'get_record', 'load_committed_private_clock_receipt_v1', 'get_idempotency_result', 'reconstruct_as_of', 'load_committed_private_evidence_witness_v1', 'load_committed_private_evidence_snapshot_v1'))
+_F14_EXPECTED_NATIVE_INSTALL = 'python -m pip install --only-binary=:all: --no-deps --index-url https://pypi.org/simple websockets==17.0.1 cryptography==50.0.1 cffi==2.1.1 pycparser==3.0'
+
+
 def main() -> int:
     failures: list[str] = []
     receipt_rows: tuple[IndependentMathRowEvidenceV1, ...] = ()
@@ -1838,6 +1889,8 @@ def main() -> int:
         "insert_outbox_intent", "insert_reversal_link", "insert_reconciliation_break",
         "load_committed_reversal_history", "get_record", "get_idempotency_result",
         "load_committed_private_clock_receipt_v1",
+        "load_committed_private_evidence_witness_v1",
+        "load_committed_private_evidence_snapshot_v1",
         "reconstruct_as_of",
     }
     if persistence_methods != expected_methods:
@@ -1988,6 +2041,7 @@ def main() -> int:
     matrix_root = REPO_ROOT / "tests" / "stage1_prediction_markets" / "qku_computation_control_plane"
     if not (matrix_root / "accounting" / "test_contract_matrix.py").is_file() or not (matrix_root / "execution" / "test_contract_matrix.py").is_file():
         failures.append("centralized contract matrices are missing")
+    failures.extend(_f14_execution_contract_failures_v1(REPO_ROOT))
     if failures:
         print("\n".join(failures), file=sys.stderr)
         return 1

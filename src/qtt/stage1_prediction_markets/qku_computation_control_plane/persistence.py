@@ -10,7 +10,7 @@ from _thread import RLock
 from typing import Mapping
 
 from .accounting import JournalPostingV1, JournalTransactionV1, ReconciliationBreakReceiptV1
-from .context import _native_ident, parse_utc
+from .context import _native_ident, parse_utc, _f14_freeze_v1, _f14_plain_v1
 from .errors import PersistenceContractError, ReasonCode, TransactionContractError
 from .idempotency import (
     IdempotencyClaimReceiptV1,
@@ -25,7 +25,8 @@ from .receipts import (
     EconomicEventRecordV1,
     EconomicReceiptEventSpineV1,
     EconomicRecordTypeV1,
-    PrivateObservationClockReceiptV1,
+    PrivateObservationClockReceiptV1, PrivateEvidenceWitnessV1,
+    _f14_singleton_witness_v1, _f14_typed_spine_v1,
     ValueLineageEdgeV1,
     _private_clock_reconstruct_spine_v1,
 )
@@ -34,7 +35,10 @@ from .rollback import (
     ReversalHistoryViewV1,
     ReversalReceiptV1,
 )
-from .serialization import deterministic_json
+from .serialization import (deterministic_json, _f14_require_v1,
+    _f14_validate_v1, _F14_ID, _F14_SCOPE, _F14_PHASES,
+    _f14_load_canonical_v1, _f14_dumps_v1, _f14_phase_shapes_v1,
+    _f14_hydrate_phase_storage_view_v1)
 
 
 class PersistenceAvailabilityV1(StrEnum):
@@ -141,6 +145,17 @@ class PersistenceAdapterV1(ABC):
     def reconstruct_as_of(self, *, effective_cutoff: datetime, recorded_cutoff: datetime, aggregate_scope: tuple[str, ...]) -> tuple[object, ...]: ...
 
 
+    @abstractmethod
+    def load_committed_private_evidence_witness_v1(
+        self, record_ref: str,
+    ) -> EconomicReceiptEventSpineV1 | None: ...
+
+    @abstractmethod
+    def load_committed_private_evidence_snapshot_v1(
+        self, request: PrivateEvidenceReadRequestV1,
+    ) -> PrivateEvidenceReadSnapshotV1: ...
+
+
 class _InMemoryTransactionV1(PersistenceTransactionV1):
     def __init__(
         self,
@@ -239,6 +254,9 @@ class InMemoryPersistenceAdapterV1(PersistenceAdapterV1):
         if (record.record_type == EconomicRecordTypeV1.PRIVATE_OBSERVATION_CLOCK
                 or type(payload) is PrivateObservationClockReceiptV1):
             record = _private_clock_reconstruct_spine_v1(record, expected_record_id=record.record_id)
+        if (record.record_type is EconomicRecordTypeV1.PRIVATE_EVIDENCE_WITNESS
+                or type(payload) is PrivateEvidenceWitnessV1):
+            record = _f14_singleton_witness_v1(record, record.record_id)
         if isinstance(payload, DurableComputationExecutionReceiptRecordV1) and any(
             not self._record_exists(tx._working, ref) for ref in payload.dependency_receipt_refs
         ):
@@ -422,6 +440,38 @@ class InMemoryPersistenceAdapterV1(PersistenceAdapterV1):
                 return None
             return _private_clock_reconstruct_spine_v1(committed[record_ref], expected_record_id=record_ref)
 
+    def load_committed_private_evidence_witness_v1(
+        self, record_ref: str,
+    ) -> EconomicReceiptEventSpineV1 | None:
+        with self._lock:
+            self._f14_require_committed_v1()
+            _f14_validate_v1(_F14_ID, record_ref)
+            found = [(table, rows[record_ref]) for table, rows in self._tables.items()
+                     if record_ref in rows]
+            if not found:
+                return None
+            _f14_require_v1(len(found) == 1 and found[0][0] == 'receipt_records',
+                'F14_STORAGE_VIEW_MEMBERSHIP')
+            return _f14_singleton_witness_v1(found[0][1], record_ref)
+
+    def _f14_require_committed_v1(self) -> None:
+        if self._active_transaction is not None and self._active_transaction.is_active:
+            raise TransactionContractError(ReasonCode.TRANSACTION_STATE_INVALID,
+                'F14 committed read requires no active transaction')
+        if self.availability is not PersistenceAvailabilityV1.AVAILABLE_REFERENCE:
+            raise PersistenceContractError(ReasonCode.PERSISTENCE_UNAVAILABLE,
+                'F14 reference persistence is unavailable')
+
+    def load_committed_private_evidence_snapshot_v1(
+        self, request: PrivateEvidenceReadRequestV1,
+    ) -> PrivateEvidenceReadSnapshotV1:
+        with self._lock:
+            self._f14_require_committed_v1()
+            identities = _f14_requested_identities_v1(request)
+            rows = {table: {rid: _f14_memory_payload_v1(request, rid, value) for rid, value in values.items()
+                           if rid in identities} for table, values in self._tables.items()}
+            return _f14_reconstruct_snapshot_v1(request, rows)
+
     def get_record(self, record_ref: str) -> object | None:
         with self._lock:
             for rows in self._tables.values():
@@ -453,3 +503,160 @@ class InMemoryPersistenceAdapterV1(PersistenceAdapterV1):
                         records.append(record)
         minimum = datetime.min.replace(tzinfo=UTC)
         return tuple(sorted(records, key=lambda row: (getattr(row, "aggregate_id", ""), getattr(row, "sequence", getattr(row, "event_sequence", 0)), getattr(row, "recorded_at", getattr(row, "created_at", minimum)), getattr(row, "record_id", getattr(row, "economic_event_id", getattr(row, "journal_transaction_id", getattr(row, "transition_id", "")))))))
+
+
+_F14_RECORD_ROLES = ('raw', 'transport', 'capture_commit', 'publication',
+    'companion', 'companion_commit', 'clock_proofs', 'publication_intent')
+_F14_CONTROL_ROLES = ('unit_of_work_id', 'claim_ref', 'result_binding_ref', 'transition_ref')
+
+
+@dataclass(frozen=True, slots=True)
+class PrivateEvidenceReadRequestV1:
+    scope: Mapping[str, str]
+    record_refs: Mapping[str, object]
+    phase_control_refs: Mapping[str, Mapping[str, str]]
+
+    def __post_init__(self) -> None:
+        from collections.abc import Mapping as MappingABC
+        _f14_require_v1(all(isinstance(x, MappingABC) for x in
+            (self.scope, self.record_refs, self.phase_control_refs)), 'F14_STORAGE_FIELDS')
+        scope = dict(self.scope)
+        _f14_validate_v1(_F14_SCOPE, scope)
+        _f14_require_v1(scope['profile'] == 'POLYMARKET_US_RETAIL_DIRECT', 'F14_STORAGE_SCOPE')
+        refs = dict(self.record_refs)
+        controls = {key: dict(value) for key, value in self.phase_control_refs.items()
+                    if isinstance(value, MappingABC)}
+        _f14_require_v1(set(refs) == set(_F14_RECORD_ROLES)
+            and set(controls) == {'A', 'B', 'C'}, 'F14_STORAGE_VIEW_REFS')
+        proofs = refs['clock_proofs']
+        _f14_require_v1(type(proofs) is tuple and len(proofs) <= 3, 'F14_PHYSICAL_PROOFS')
+        identities = [value for key, value in refs.items() if key != 'clock_proofs'] + list(proofs)
+        for values in controls.values():
+            _f14_require_v1(set(values) == set(_F14_CONTROL_ROLES), 'F14_STORAGE_VIEW_REFS')
+            for value in values.values():
+                _f14_validate_v1(_F14_ID, value)
+            _f14_require_v1(len(values['claim_ref']) <= 248
+                and values['result_binding_ref'] == values['claim_ref'] + '::RESULT',
+                'F14_CONTROL_RESULT_BINDING')
+            identities.extend(values.values())
+        for value in identities:
+            _f14_validate_v1(_F14_ID, value)
+        _f14_require_v1(len(identities) == len(set(identities)), 'F14_CONTROL_ID_ALIAS')
+        object.__setattr__(self, 'scope', _f14_freeze_v1(scope))
+        object.__setattr__(self, 'record_refs', _f14_freeze_v1(refs))
+        object.__setattr__(self, 'phase_control_refs', _f14_freeze_v1(controls))
+
+
+@dataclass(frozen=True, slots=True)
+class PrivateEvidenceReadSnapshotV1:
+    scope: Mapping[str, str]
+    records_by_ref: Mapping[str, EconomicReceiptEventSpineV1]
+    control_records_by_ref: Mapping[str, object]
+    present_record_refs: frozenset[str]
+    publication_intent_or_none: OutboxIntentRecordV1 | None
+
+    def __post_init__(self) -> None:
+        for name in ('scope', 'records_by_ref', 'control_records_by_ref'):
+            object.__setattr__(self, name, _f14_freeze_v1(getattr(self, name)))
+        _f14_require_v1(type(self.present_record_refs) is frozenset, 'F14_PHYSICAL_SET')
+
+
+def _f14_requested_identities_v1(request):
+    _f14_require_v1(type(request) is PrivateEvidenceReadRequestV1, 'F14_STORAGE_FIELDS')
+    refs = request.record_refs
+    identities = {value for key, value in refs.items() if key != 'clock_proofs'}
+    identities.update(refs['clock_proofs'])
+    for values in request.phase_control_refs.values():
+        identities.update(values.values())
+    return frozenset(identities)
+
+
+def _f14_memory_payload_v1(request, rid, value):
+    from .lifecycle import TransitionDispositionV1
+    from .outbox import OutboxDispatchStateV1
+    refs, controls = request.record_refs, request.phase_control_refs
+    if rid == refs['publication_intent']:
+        expected = OutboxIntentRecordV1
+        _f14_require_v1(type(value) is expected and type(value.dispatch_state) is OutboxDispatchStateV1,
+            'F14_STORAGE_FIELDS')
+    elif any(rid == control['claim_ref'] for control in controls.values()):
+        expected = IdempotencyClaimReceiptV1
+        _f14_require_v1(type(value) is expected and type(value.claim_state) is IdempotencyClaimStateV1,
+            'F14_STORAGE_FIELDS')
+    elif any(rid == control['result_binding_ref'] for control in controls.values()):
+        expected = _IdempotencyResultBindingV1
+    elif any(rid == control['transition_ref'] for control in controls.values()):
+        expected = StateTransitionReceiptV1
+        _f14_require_v1(type(value) is expected and type(value.disposition) is TransitionDispositionV1,
+            'F14_STORAGE_FIELDS')
+    else:
+        expected = EconomicReceiptEventSpineV1
+        _f14_require_v1(type(value) is expected, 'F14_STORAGE_FIELDS')
+        if rid == refs['companion']:
+            _private_clock_reconstruct_spine_v1(value, expected_record_id=rid)
+        else:
+            _f14_singleton_witness_v1(value, rid)
+    _f14_require_v1(type(value) is expected, 'F14_STORAGE_FIELDS')
+    return deterministic_json(value)
+
+
+def _f14_reconstruct_snapshot_v1(request, rows):
+    """Validate all physical membership before hydrating actual committed rows."""
+    from .transaction import _f14_physical_prefix_v1
+    from .lifecycle import TransitionDispositionV1
+    _f14_requested_identities_v1(request)
+    _f14_require_v1(type(rows) is dict and set(rows) == set(APPEND_ONLY_TABLES_V1),
+        'F14_STORAGE_VIEW_TABLES')
+    refs, controls = request.record_refs, request.phase_control_refs
+    phases = {'A': (refs['raw'], refs['transport']),
+        'B': (refs['capture_commit'], refs['publication'], refs['companion'], *refs['clock_proofs']),
+        'C': (refs['companion_commit'],)}
+    roles = {refs['raw']: 'raw', refs['transport']: 'transport',
+        refs['capture_commit']: 'capture', refs['publication']: 'publication',
+        refs['companion']: 'companion', refs['companion_commit']: 'completion',
+        refs['publication_intent']: 'intent'}
+    roles.update({rid: f'proof{i}' for i, rid in enumerate(refs['clock_proofs'])})
+    for phase, control in controls.items():
+        roles.update({control['claim_ref']: phase + '.claim',
+            control['result_binding_ref']: phase + '.result',
+            control['transition_ref']: phase + '.transition'})
+    present = [rid for values in rows.values() for rid in values]
+    _f14_require_v1(len(present) == len(set(present)) and set(present) <= set(roles),
+        'F14_STORAGE_VIEW_MEMBERSHIP')
+    stage = _f14_physical_prefix_v1(len(refs['clock_proofs']), frozenset(roles[rid] for rid in present))
+    records, technical = {}, {}
+    intent = None
+    kinds = {'A': ('RAW', 'TRANSPORT'),
+        'B': ('CAPTURE_COMMIT', 'PUBLICATION', None, *('CLOCK_PROOF' for _ in refs['clock_proofs'])),
+        'C': ('COMPANION_COMMIT',)}
+    for phase in ('A', 'B', 'C')[:stage]:
+        control = dict(controls[phase])
+        phase_ids = set(phases[phase]) | set(control.values())
+        if phase == 'A':
+            phase_ids.add(refs['publication_intent'])
+        selected = {table: {rid: text for rid, text in values.items() if rid in phase_ids}
+                    for table, values in rows.items()}
+        restored = _f14_hydrate_phase_storage_view_v1(selected, phase=phase,
+            proof_count=len(refs['clock_proofs']), expected_scope=dict(request.scope),
+            receipt_refs=phases[phase], **control,
+            publication_intent_ref=refs['publication_intent'] if phase == 'A' else None)
+        for rid, kind in zip(phases[phase], kinds[phase], strict=True):
+            records[rid] = _f14_typed_spine_v1(selected['receipt_records'][rid], rid, kind, dict(request.scope))
+        claim = dict(restored['claim'])
+        claim['claim_state'] = IdempotencyClaimStateV1(claim['claim_state'])
+        technical[control['claim_ref']] = IdempotencyClaimReceiptV1(**claim)
+        binding = dict(restored['binding'])
+        binding['created_at'] = parse_utc(binding['created_at'], field_name='created_at')
+        technical[control['result_binding_ref']] = _IdempotencyResultBindingV1(**binding)
+        transition = dict(restored['request']['state_transition'])
+        transition['disposition'] = TransitionDispositionV1(transition['disposition'])
+        technical[control['transition_ref']] = StateTransitionReceiptV1(**transition)
+        if phase == 'A':
+            from .outbox import OutboxDispatchStateV1
+            data = dict(restored['request']['publication_intent_or_none'])
+            data['dispatch_state'] = OutboxDispatchStateV1(data['dispatch_state'])
+            intent = OutboxIntentRecordV1(**data)
+        for rid in (control['claim_ref'], control['result_binding_ref'], control['transition_ref']):
+            text = next(values[rid] for values in selected.values() if rid in values)
+            _f14_require_v1(deterministic_json(technical[rid]) == text, 'F14_STORAGE_NONCANONICAL')
+    return PrivateEvidenceReadSnapshotV1(dict(request.scope), records, technical, frozenset(present), intent)

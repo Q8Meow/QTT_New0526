@@ -439,6 +439,8 @@ def _assert_actual_runner_receipt_integration(
     external_parent: Path,
     monkeypatch,
 ) -> None:
+    REPO_ROOT = (external_parent.parent / "receipt-fixture-repo").resolve()
+    REPO_ROOT.mkdir(parents=True, exist_ok=False)
     marker = "ENGVR_ACTUAL_RECEIPT_INTEGRATION_OK"
     command = (sys.executable, "-c", f'print("{marker}")')
     before_evidence = set(external_parent.glob("*.evidence"))
@@ -927,13 +929,91 @@ def test_run_validation_gates_direct_script_imports_router_without_pythonpath(
     monkeypatch,
     tmp_path,
 ):
-    external_parent = (tmp_path / "actual-runner-process-parent").resolve()
+    fixture_repo = (tmp_path / "r").resolve()
+    fixture_hooks = (tmp_path / "h").resolve()
+    external_parent = (tmp_path / "p").resolve()
+    for directory in (fixture_repo, fixture_hooks, external_parent):
+        directory.mkdir()
+        assert directory.is_dir() and not directory.is_symlink()
+        assert not getattr(directory.lstat(), "st_file_attributes", 0) & 0x400
+    assert not tuple(fixture_hooks.iterdir())
+
+    source_paths = (
+        "tools/run_validation_gates.py",
+        "tools/validation_reliability.py",
+        "tools/validation_scope_registry.py",
+        "tools/ci_branch_context.py",
+        "tools/changed_area_validation_router.py",
+        "tools/validation_inventory.py",
+        "tools/repo_path_refs.py",
+    )
+    copied_sources = {}
+    for relative_path in source_paths:
+        content = (REPO_ROOT / relative_path).read_bytes()
+        destination = fixture_repo / relative_path
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        destination.write_bytes(content)
+        assert destination.read_bytes() == content
+        copied_sources[relative_path] = content
+    (fixture_repo / ".gitattributes").write_bytes(b"*.py text eol=lf\n")
+    (fixture_repo / ".gitignore").write_bytes(b"__pycache__/\n")
+
     environment = _env_without_pythonpath()
+    for env_name in tuple(environment):
+        if env_name.upper().startswith("GIT_"):
+            environment.pop(env_name)
+    environment.update(
+        GIT_CONFIG_NOSYSTEM="1",
+        GIT_CONFIG_GLOBAL=os.devnull,
+        GIT_TERMINAL_PROMPT="0",
+        GIT_NO_REPLACE_OBJECTS="1",
+        GIT_NO_LAZY_FETCH="1",
+        GIT_ALLOW_PROTOCOL="",
+        PYTHONDONTWRITEBYTECODE="1",
+    )
     environment[reliability.PROCESS_ROOT_ENV] = str(external_parent)
-    environment.pop(reliability.RUN_ID_ENV, None)
-    environment.pop(reliability.EVIDENCE_ROOT_ENV, None)
-    for env_name in BRANCH_CONTEXT_ENV:
+    for env_name in (
+        reliability.RUN_ID_ENV,
+        reliability.EVIDENCE_ROOT_ENV,
+        runner.NO_RUNTIME_ARTIFACT_SCAN_CACHE_ENV,
+        runner.PR152_BUILD_REPORT_CACHE_ENV,
+        "QTT_FORCE_FULL_VALIDATION",
+        *BRANCH_CONTEXT_ENV,
+    ):
         environment.pop(env_name, None)
+
+    def fixture_git(*arguments):
+        result = subprocess.run(
+            [
+                "git",
+                "-c", "user.name=QTT test fixture",
+                "-c", "user.email=qtt-fixture@example.invalid",
+                "-c", "commit.gpgsign=false",
+                "-c", "core.autocrlf=false",
+                "-c", f"core.hooksPath={fixture_hooks}",
+                *arguments,
+            ],
+            cwd=fixture_repo,
+            env=environment,
+            stdin=subprocess.DEVNULL,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            timeout=60,
+        )
+        assert result.returncode == 0, result.stderr.decode("utf-8")
+        return result.stdout
+
+    fixture_git("init", "--initial-branch=main")
+    fixture_git("add", "--", ".gitattributes", ".gitignore", *source_paths)
+    fixture_git("commit", "-m", "Direct runner test fixture")
+    fixture_git("update-ref", "refs/remotes/origin/main", "HEAD")
+    assert fixture_git("status", "--porcelain=v1", "-z", "--untracked-files=all") == b""
+    fixture_head = fixture_git("rev-parse", "HEAD")
+    fixture_index = fixture_git("ls-files", "--stage", "-z")
+    fixture_entries = [entry for entry in fixture_index.split(b"\0") if entry]
+    assert len(fixture_entries) == len(source_paths) + 2
+    assert all(entry.split(b"\t", 1)[0].split()[2] == b"0" for entry in fixture_entries)
+
     completed = subprocess.run(
         [
             sys.executable,
@@ -946,10 +1026,11 @@ def test_run_validation_gates_direct_script_imports_router_without_pythonpath(
             "--changed-file",
             "docs/master_plan/generated/UnownedGeneratedReport.report.json",
         ],
-        cwd=REPO_ROOT,
+        cwd=fixture_repo,
         env=environment,
         capture_output=True,
         text=True,
+        encoding="utf-8",
         timeout=60,
     )
 
@@ -958,6 +1039,64 @@ def test_run_validation_gates_direct_script_imports_router_without_pythonpath(
     assert "GENERATED_REPORT_OWNER_MISSING" in combined_output
     assert "ModuleNotFoundError" not in combined_output
     assert "No module named 'tools'" not in combined_output
+    assert "QTT_VALIDATION_TEXT_INTEGRITY_PREFLIGHT_OK" in combined_output
+    assert runner.SUCCESS_MARKER not in combined_output
+    assert fixture_git("status", "--porcelain=v1", "-z", "--untracked-files=all") == b""
+    fixture_head_unchanged = fixture_git("rev-parse", "HEAD") == fixture_head
+    fixture_index_unchanged = fixture_git("ls-files", "--stage", "-z") == fixture_index
+    assert fixture_head_unchanged
+    assert fixture_index_unchanged
+    for relative_path, content in copied_sources.items():
+        assert (fixture_repo / relative_path).read_bytes() == content
+    assert not (fixture_repo / "docs").exists()
+    assert not tuple(fixture_hooks.iterdir())
+
+    evidence_roots = tuple(external_parent.glob("*.evidence"))
+    assert len(evidence_roots) == 1
+    evidence_root = evidence_roots[0]
+    assert evidence_root.is_dir()
+    run_payload = json.loads((evidence_root / "run.json").read_bytes().decode("utf-8"))
+    completion_payload = json.loads(
+        (evidence_root / "completion.json").read_bytes().decode("utf-8")
+    )
+    cleanup_payload = json.loads(
+        (evidence_root / "cleanup.json").read_bytes().decode("utf-8")
+    )
+    assert Path(run_payload["paths"]["repo_root"]).resolve() == fixture_repo
+    assert run_payload["phase"] == runner.FAST_PREFLIGHT_PHASE
+    assert run_payload["command_count"] == 0
+    assert run_payload["text_integrity_preflight_state"] == "PASS"
+    assert run_payload["paths"]["filesystem_probe_state"] == "PASS"
+    probe = run_payload["filesystem_probe"]
+    assert probe["created_directory"] is True
+    assert probe["written_bytes"] > 0
+    assert probe["readback_equal"] is True
+    assert probe["rename_equal"] is True
+    assert probe["unlink_success"] is True
+    assert probe["directory_cleanup_success"] is True
+    assert probe["failure_operation"] is None
+    assert probe["native_error_class"] is None
+    assert completion_payload["final_state"] == "FAIL"
+    assert completion_payload["text_integrity_preflight_state"] == "PASS"
+    assert completion_payload["command_count_planned"] == 0
+    assert completion_payload["command_count_started"] == 0
+    assert completion_payload["command_count_completed"] == 0
+    assert completion_payload["required_marker_state"] == "NOT_RUN"
+    assert completion_payload["evidence_root_state"] == "PRESENT"
+    assert completion_payload["run_id"] == run_payload["run_id"]
+    assert cleanup_payload["run_id"] == run_payload["run_id"]
+    assert cleanup_payload["cleanup_state"].startswith("PASS")
+    assert completion_payload["process_root_cleanup_state"] == cleanup_payload["cleanup_state"]
+    assert cleanup_payload["parent_preserved"] is True
+    cleanup_target = Path(cleanup_payload["cleanup_target"])
+    assert cleanup_target == Path(run_payload["paths"]["cleanup_target"])
+    assert cleanup_target.parent == external_parent
+    assert not cleanup_target.exists()
+    assert evidence_root.is_dir()
+    assert reliability.command_receipt_file_indexes(evidence_root) == ()
+    assert not tuple(evidence_root.glob("command-*.json"))
+    assert not tuple(evidence_root.glob("command-*.stdout.bin"))
+    assert not tuple(evidence_root.glob("command-*.stderr.bin"))
     _assert_generic_text_preflight_and_scope_matrix(monkeypatch)
     _assert_actual_runner_receipt_integration(external_parent, monkeypatch)
 
@@ -12155,8 +12294,11 @@ def test_runner_rejects_tracked_generated_timing_report_path(monkeypatch):
     assert exit_code == 2
 
 
-def test_runner_returns_zero_when_all_mocked_commands_pass(monkeypatch, capsys):
+def test_runner_returns_zero_when_all_mocked_commands_pass(monkeypatch, capsys, tmp_path):
     _clear_branch_context_env(monkeypatch)
+    fixture_repo = tmp_path / "mocked-runner-repo"
+    fixture_repo.mkdir()
+    monkeypatch.setattr(runner, "_repo_root", lambda: fixture_repo)
 
     class Completed:
         def __init__(self, stdout: str = "", stderr: str = "") -> None:
@@ -12609,6 +12751,7 @@ def test_runner_pr152_build_report_cache_rejects_repo_root_path(
 
 
 def test_runner_keeps_process_roots_external_to_repo(monkeypatch, capsys):
+    _assert_repository_local_layout_contract()
     _clear_branch_context_env(monkeypatch)
 
     class Completed:
@@ -13031,6 +13174,202 @@ def _assert_path_projection_contract(monkeypatch, tmp_path: Path) -> None:
     assert class_probe.native_error_class is None
     assert not any(class_process_root.iterdir())
     class_process_root.rmdir()
+
+    selector_repo = tmp_path / "selector-repo"
+    selector = "tests/test_selected_source_" + "x" * 60 + ".py"
+    selected_source = selector_repo / selector
+    selected_source.parent.mkdir(parents=True)
+    source_text = (
+        "def test_selected_source(tmp_path):\n"
+        "    actual = tmp_path / 'actual-output.json'\n"
+        "    fixture = tmp_path / 'tests' / 'fixtures' / 'retained.json'\n"
+    )
+    selected_source.write_text(source_text, encoding="utf-8")
+    _, selected_suffixes = reliability._pytest_tmp_path_budget(
+        selector_repo, (selector,)
+    )
+    assert selector not in selected_suffixes
+    assert "actual-output.json" in selected_suffixes
+    assert "tests/fixtures/retained.json" in selected_suffixes
+
+    # A selected source may also be a real AST-derived temporary destination.
+    selected_source.write_text(
+        source_text + f"    same_spelling = tmp_path / {selector!r}\n",
+        encoding="utf-8",
+    )
+    _, identical_suffixes = reliability._pytest_tmp_path_budget(
+        selector_repo, (selector,)
+    )
+    assert set(selected_suffixes) <= set(identical_suffixes)
+    assert selector in identical_suffixes
+
+    fixture_input = "tests/fixtures/source_selector_metadata.json"
+    fixture_file = selector_repo / fixture_input
+    fixture_file.parent.mkdir(parents=True)
+    fixture_file.write_text("{}\n", encoding="utf-8")
+    unknown_paths = ("tests/test_unknown_destination.py", "unknown/retained.json")
+    conservative_inputs = (selector, fixture_input, *unknown_paths)
+    _, conservative_suffixes = reliability._pytest_tmp_path_budget(
+        selector_repo, conservative_inputs
+    )
+    assert fixture_input in conservative_suffixes
+    assert set(unknown_paths) <= set(conservative_suffixes)
+    _, no_repository_suffixes = reliability._pytest_tmp_path_budget(
+        None, conservative_inputs
+    )
+    assert set(conservative_inputs) <= set(no_repository_suffixes)
+
+    # These are projection-only paths; their complete spelling must survive.
+    long_output = "/".join(["explicit-output-component"] * 20) + "/retained.json"
+    projection_root = Path("projection-only-root")
+    for prefix, directory in (
+        ("validation-output/", reliability.VALIDATION_OUTPUT_DIR_NAME),
+        ("pytest-basetemp/", reliability.PYTEST_BASETEMP_DIR_NAME),
+    ):
+        explicit_output = prefix + long_output
+        explicit_deepest = reliability._deepest_projection(
+            projection_root, (selector, explicit_output), repo_root=selector_repo
+        )
+        assert explicit_deepest == projection_root / directory / long_output
+        assert len(str(explicit_deepest)) == len(
+            str(projection_root / directory / long_output)
+        )
+
+    malformed_selector = "tests/test_malformed_selected.py"
+    (selector_repo / malformed_selector).write_text(
+        "def test_malformed(\n", encoding="utf-8"
+    )
+    with pytest.raises(
+        reliability.ValidationReliabilityError,
+        match="ENGVR_LONGEST_PATH_PROBE_FAILED",
+    ):
+        reliability._pytest_tmp_path_budget(selector_repo, (malformed_selector,))
+
+    from tools import independent_validate_qku_computation_control_plane as st12h
+
+    declarations = tuple(
+        f"validation-output/w \u00fc/{directory}/{member}"
+        for directory in ("x \u00e9", "r \u00e9", "c \u00e9")
+        for member in st12h._ST12H_PUBLICATION_MEMBERS
+    ) + (
+        "validation-output/w \u00fc/publication archive.zip",
+        "validation-output/w \u00fc/stage journal.partial",
+        "validation-output/w \u00fc/stage journal.json",
+    )
+    expected_destinations = tuple(
+        projection_root / reliability.VALIDATION_OUTPUT_DIR_NAME / Path(*value.split("/")[1:])
+        for value in declarations
+    )
+    assert len(declarations) == 9
+    for declaration, expected_path in zip(declarations, expected_destinations, strict=True):
+        assert reliability._safe_fixture_path_text(declaration) == declaration
+        assert reliability._safe_fixture_path_text(declaration.replace("/", "\\")) == declaration
+        materialized = reliability._safe_relative_projection(declaration.removeprefix("validation-output/"))
+        assert materialized.parts == tuple(declaration.split("/")[1:])
+        assert (projection_root / reliability.VALIDATION_OUTPUT_DIR_NAME / materialized).parts == expected_path.parts
+    expected_deepest = max(
+        expected_destinations,
+        key=lambda path: (len(str(path).encode("utf-16-le")) // 2, len(str(path)), str(path)),
+    )
+    assert reliability._deepest_projection(projection_root, declarations).parts == expected_deepest.parts
+
+    literal_paths = (
+        "reports/two  internal spaces.txt", "reports/caf\u00e9.txt",
+        "reports/cafe\u0301.txt", "\u6f22\u5b57/\u0434\u0430\u043d\u043d\u044b\u0435.json",
+        "reports/\U0001f9ea \U00010400.json", ".hidden/MixedCase_.txt",
+        "names/COM0.txt", "names/COM10.txt", "names/LPT0.txt",
+    )
+    materialized_spellings = []
+    for value in literal_paths:
+        assert reliability._safe_fixture_path_text(value) == value
+        path = reliability._safe_relative_projection(value)
+        assert path.parts == tuple(value.split("/"))
+        assert path.as_posix() == value
+        materialized_spellings.append(path.as_posix())
+    assert len(set(materialized_spellings)) == len(literal_paths)
+    assert materialized_spellings[1] != materialized_spellings[2]
+
+    invalid_paths = (
+        "", ".", "..", "../escape", "a/../escape", "/absolute", "C:/drive",
+        "C:relative", "\\\\server\\share", "a//b", "a/./b", "a/", "-option",
+        " leading/file", "a/ leading", "trailing /file", "a/trailing ",
+        "trailing./file", "a/trailing.", "a:stream", "a/b:stream",
+        "bad[0].json", "bad@name", "bad*name", "bad?name", "bad|name",
+        'bad"name', "bad<name", "bad>name", "a/\x00file", "a/\x1ffile",
+        "a/\x7ffile", "a/\tfile", "a/line\nfeed", "a/\u00a0file",
+        "a/\u2003file", "a/\u200dfile", "a/\ud800file", "a/\udffffile",
+    ) + tuple(
+        f"directory/{name}{suffix}"
+        for name in ("CON", "con", "PRN", "AUX", "NUL", "nul ", "COM1", "COM9", "LPT1", "LPT9", "COM\u00b9", "COM\u00b2", "LPT\u00b3")
+        for suffix in ("", ".json")
+    )
+    for value in (*invalid_paths, None, 1, b"literal"):
+        assert reliability._safe_fixture_path_text(value) is None
+        with pytest.raises(reliability.ValidationReliabilityError, match="ENGVR_LONGEST_PATH_PROBE_FAILED"):
+            reliability._safe_relative_projection(value)
+    for namespace in ("validation-output", "pytest-basetemp"):
+        bad_outputs = (namespace, namespace + "/") + tuple(
+            namespace + "/" + value
+            for value in ("../escape", "a/./b", "a//b", "/absolute", "C:/drive", "a:stream", "CON.json", "trailing.", " leading", "a/\ud800file", "a/\tfile")
+        )
+        for value in bad_outputs:
+            for spelling in (value, value.replace("/", "\\")):
+                with pytest.raises(reliability.ValidationReliabilityError, match="ENGVR_LONGEST_PATH_PROBE_FAILED") as rejected:
+                    reliability._deepest_projection(projection_root, (spelling,))
+                assert repr(spelling) in str(rejected.value)
+    assert reliability._pytest_tmp_path_budget(None, ()) == ("test_validation_path_budget0", ("sentinel.bin",))
+    assert reliability._deepest_projection(projection_root, ("unknown:heuristic",)) == reliability._deepest_projection(projection_root, ())
+
+    ascii_leaf = "a" * 80 + ".bin"
+    supplementary_leaf = "\U0001f9ea" * 50 + ".bin"
+    for namespace, directory in (("validation-output", reliability.VALIDATION_OUTPUT_DIR_NAME), ("pytest-basetemp", reliability.PYTEST_BASETEMP_DIR_NAME)):
+        inputs = (f"{namespace}/utf16/{ascii_leaf}", f"{namespace}/utf16/{supplementary_leaf}")
+        ascii_path = projection_root / directory / "utf16" / ascii_leaf
+        supplementary_path = projection_root / directory / "utf16" / supplementary_leaf
+        assert len(str(supplementary_path)) < len(str(ascii_path))
+        assert len(str(supplementary_path).encode("utf-16-le")) > len(str(ascii_path).encode("utf-16-le"))
+        assert reliability._deepest_projection(projection_root, inputs).parts == supplementary_path.parts
+
+    unicode_selector = "tests/test_\u00e9_\u6f22.py"
+    unicode_source = selector_repo / unicode_selector
+    ascii_test_name = "test_" + "a" * 24
+    unicode_test_name = "test_" + "\U00010400" * 16
+    unicode_source_text = (
+        f"def {ascii_test_name}(tmp_path):\n"
+        "    actual = tmp_path / 'actual caf\\u00e9.json'\n"
+        f"def {unicode_test_name}(tmp_path):\n"
+        "    fixture = tmp_path / 'tests/fixtures/\\u65e5\\u672c.json'\n"
+    )
+    unicode_source.write_text(unicode_source_text, encoding="utf-8")
+    unicode_component, unicode_suffixes = reliability._pytest_tmp_path_budget(selector_repo, (unicode_selector,))
+    assert len(unicode_test_name + "0") < len(ascii_test_name + "0")
+    assert len((unicode_test_name + "0").encode("utf-16-le")) > len((ascii_test_name + "0").encode("utf-16-le"))
+    assert unicode_component == unicode_test_name + "0"
+    assert unicode_selector not in unicode_suffixes
+    assert {"actual caf\u00e9.json", "tests/fixtures/\u65e5\u672c.json"} <= set(unicode_suffixes)
+    unicode_source.write_text(unicode_source_text + f"    same_spelling = tmp_path / {unicode_selector!r}\n", encoding="utf-8")
+    _, same_spelling_suffixes = reliability._pytest_tmp_path_budget(selector_repo, (unicode_selector,))
+    assert set(unicode_suffixes) <= set(same_spelling_suffixes)
+    assert unicode_selector in same_spelling_suffixes
+
+    real_admission = reliability._safe_fixture_path_text
+    real_materialization = reliability._safe_relative_projection
+    def old_ascii_admission(value):
+        if any(character.isspace() or ord(character) >= 128 for character in value):
+            return None
+        return real_admission(value)
+    def old_underscore_materialization(value):
+        return Path(*(re.sub(r"[^A-Za-z0-9._-]", "_", part) for part in value.split("/")))
+    with monkeypatch.context() as half_fix:
+        half_fix.setattr(reliability, "_safe_fixture_path_text", old_ascii_admission)
+        with pytest.raises(reliability.ValidationReliabilityError, match="ENGVR_LONGEST_PATH_PROBE_FAILED"):
+            reliability._deepest_projection(projection_root, declarations)
+    with monkeypatch.context() as half_fix:
+        half_fix.setattr(reliability, "_safe_relative_projection", old_underscore_materialization)
+        with pytest.raises(AssertionError):
+            assert reliability._deepest_projection(projection_root, declarations).parts == expected_deepest.parts
+    assert reliability._safe_fixture_path_text is real_admission
+    assert reliability._safe_relative_projection is real_materialization
 
 
 def _assert_process_supervision_contract(monkeypatch, tmp_path: Path) -> None:
@@ -13645,6 +13984,8 @@ def _assert_prestart_failure_custody_contract(
     monkeypatch,
     tmp_path: Path,
 ) -> None:
+    REPO_ROOT = (tmp_path / "prestart-fixture-repo").resolve()
+    REPO_ROOT.mkdir(parents=True, exist_ok=False)
     evidence_root = tmp_path / "prestart-failure-evidence"
     missing_cwd = (tmp_path / "missing-cwd").resolve()
     missing_executable = str((tmp_path / "missing-executable.exe").resolve())
@@ -13880,6 +14221,8 @@ def _assert_receipt_accounting_contract(tmp_path: Path) -> None:
     assert not list(count_evidence.glob(".completion.json.*.tmp"))
 
 def _assert_complete_terminal_evidence_contract(monkeypatch, tmp_path: Path) -> None:
+    REPO_ROOT = (tmp_path / "terminal-fixture-repo").resolve()
+    REPO_ROOT.mkdir(parents=True, exist_ok=False)
     phase = runner.FAST_PREFLIGHT_PHASE
     marker = "COMPLETE_EVIDENCE_OK"
     external_parent = (tmp_path / "complete-evidence-parent").resolve()
@@ -14095,6 +14438,14 @@ def _assert_complete_terminal_evidence_contract(monkeypatch, tmp_path: Path) -> 
             assert failed_result != 0
             assert failed_cleanup.startswith("PASS")
             assert failed_completion.final_state == "FAIL"
+            if tamper == "linked-stdout":
+                # The negative assertion above observes the real hard link.
+                # Release only the extra link created by this synthetic case.
+                linked_source = _failed_paths.evidence_root / "linked-stdout-source.bin"
+                assert os.path.samefile(
+                    linked_source, _failed_paths.evidence_root / "command-1.stdout.bin"
+                )
+                linked_source.unlink()
 
         reordered_paths, reordered_probe = reliability.resolve_validation_run_paths(
             REPO_ROOT,
@@ -14153,6 +14504,8 @@ def _assert_receipt_publication_failure_accounting(
     tmp_path: Path,
     capsys,
 ) -> None:
+    REPO_ROOT = (tmp_path / "publication-fixture-repo").resolve()
+    REPO_ROOT.mkdir(parents=True, exist_ok=False)
     capsys.readouterr()
     external_parent = (tmp_path / "publication-failure-parent").resolve()
     run_paths, probe = reliability.resolve_validation_run_paths(
@@ -14267,6 +14620,8 @@ def _assert_receipt_publication_failure_accounting(
 
 def _assert_exact_cleanup_contract(monkeypatch) -> None:
     with tempfile.TemporaryDirectory(prefix="qtt-supervision-cleanup-") as temp_root:
+        REPO_ROOT = (Path(temp_root) / "cleanup-fixture-repo").resolve()
+        REPO_ROOT.mkdir()
         external_parent = Path(temp_root) / "qttv"
         historical = external_parent / "historical-unrelated"
         historical.mkdir(parents=True)
@@ -14687,3 +15042,196 @@ def test_st12h_runner_fails_closed_for_budget_overrun_and_second_campaign(
     )
     assert runner.run_commands([[sys.executable, "noop.py"]]) == 1
     assert "ST12H_SCRATCH_LOGICAL_BYTE_BUDGET_EXCEEDED" in capsys.readouterr().err
+
+
+def _assert_repository_local_layout_contract() -> int:
+    import dataclasses
+    r = reliability
+    checks=[]
+    def check(name,condition):
+     if not condition: raise AssertionError(name)
+     checks.append(name)
+    def rejects(name,fn):
+     try: fn()
+     except (r.ValidationReliabilityError,ValueError,OSError,RuntimeError): checks.append(name)
+     else: raise AssertionError('accepted:'+name)
+    def git(p,*a):
+     clean_env={key:value for key,value in os.environ.items() if not key.upper().startswith('GIT_')}
+     clean_env.update(GIT_CONFIG_NOSYSTEM='1',GIT_CONFIG_GLOBAL=os.devnull,GIT_TERMINAL_PROMPT='0')
+     c=subprocess.run(['git','-c','init.templateDir=','-c','commit.gpgSign=false','-C',str(p),*a],env=clean_env,stdout=subprocess.PIPE,stderr=subprocess.PIPE,check=True);return c.stdout
+    with tempfile.TemporaryDirectory(prefix='qtt-local-layout-contract-') as t:
+     root=Path(t)/'repo';root.mkdir()
+     git(root,'init','-q');git(root,'config','user.name','Synthetic');git(root,'config','user.email','local@example.invalid')
+     (root/'.gitignore').write_text('/.qtt/\n',encoding='utf-8');(root/'protected.txt').write_bytes(b'preserve')
+     git(root,'add','.');git(root,'commit','-qm','synthetic')
+     before=git(root,'status','--porcelain=v1');
+     paths,probe=r.resolve_validation_run_paths(root,explicit_process_root=root/'.qtt/runs',run_id='run_local')
+     check('local_flag_false',paths.process_root_is_external_to_repo is False)
+     check('separate_evidence',paths.evidence_root.parent==root/'.qtt/evidence')
+     check('probe_pass',probe.failure_operation is None)
+     check('git_ignored',git(root,'status','--porcelain=v1')==before)
+     r.write_run_provenance(paths,probe,phase='test',command_count=1,text_integrity_preflight_state='PASS')
+     a=r.attest_inherited_validation_run(root,inherited_run_id=paths.run_id,inherited_evidence_root=paths.evidence_root,explicit_basetemp=paths.pytest_basetemp_root/'child')
+     check('inherited_works',a.process_root==paths.process_root)
+     from tools import run_validation_gates as runner_module
+     from tools import validate_no_runtime_artifacts as scanner_module
+     from src.qtt.core.testing.gate_result import hidden_zip_paths
+     violations,skipped=scanner_module._validate_top_level_local_custody_boundary(root)
+     check('scanner_guard_admission',not violations and '.qtt' in skipped)
+     (root/'.qtt/local.zip').write_bytes(b'not a real archive; discovery test only')
+     check('hidden_zip_local_exclusion',hidden_zip_paths(root)==[])
+     outside=root/'visible.zip';outside.write_bytes(b'visible')
+     check('ordinary_zip_still_visible',[str(x) for x in hidden_zip_paths(root)]==['visible.zip'])
+     outside.unlink()
+     cache=paths.validation_output_root/'NoRuntimeArtifactScanCache.json'
+     runner_module._validate_no_runtime_scan_cache_path(root,cache)
+     runner_module._validate_run_local_cache_path(root,paths.validation_output_root/'PR152BuildReportCache.json',runner_module.PR152_BUILD_REPORT_CACHE_ENV)
+     check('both_actual_cache_owners_admit',True)
+     rejects('wrong_local_cache_slot',lambda:runner_module._validate_no_runtime_scan_cache_path(root,root/'.qtt/cache/NoRuntimeArtifactScanCache.json'))
+     runfile=paths.evidence_root/'run.json';original=runfile.read_bytes();payload=json.loads(original)
+     payload['paths']['process_root_is_external_to_repo']=True
+     runfile.write_text(json.dumps(payload),encoding='utf8')
+     rejects('forged_inherited_external_flag',lambda:r.attest_inherited_validation_run(root,inherited_run_id=paths.run_id,inherited_evidence_root=paths.evidence_root,explicit_basetemp=paths.pytest_basetemp_root))
+     runfile.write_bytes(original)
+     rejects('false_external_flag',lambda:dataclasses.replace(paths,process_root_is_external_to_repo=True))
+     rejects('wrong_cleanup_identity',lambda:r.remove_exact_run_owned_process_tree(paths.process_root,expected_run_root=paths.process_root/'child',repo_root=root,evidence_root=paths.evidence_root))
+     for relative in ('.tmp','.qtt','.qtt/envs','.qtt/cache','.qtt/evidence','.qtt/runs/child'):
+      rejects('bad_candidate_'+relative,lambda rel=relative:r.resolve_validation_run_paths(root,explicit_process_root=root/rel))
+     for relative in ('.qtt','.qtt/runs','.qtt/evidence','protected.txt'):
+      target=root/relative
+      rejects('bad_cleanup_'+relative,lambda target=target:r.remove_exact_run_owned_process_tree(target,expected_run_root=target,repo_root=root,evidence_root=paths.evidence_root))
+     rogue=root/'.qtt/runs/r260913000000_1_1';rogue.mkdir();(rogue/'preserve').write_bytes(b'keep')
+     rejects('unowned_root',lambda:r.remove_exact_run_owned_process_tree(rogue,expected_run_root=rogue,repo_root=root,evidence_root=paths.evidence_root))
+     link=paths.process_root/'escape'
+     try:
+         link.symlink_to(root,target_is_directory=True)
+     except OSError as exc:
+         if os.name != 'nt' or getattr(exc, 'winerror', None) != 1314:
+             raise
+         # A standard Windows account may lack symlink-creation privilege.
+         # Do not alter privileges or mark native symlink execution as passed.
+         # Exercise the same no-traversal boundary through a simulated junction.
+         import warnings
+         from unittest.mock import patch
+         link.mkdir()
+         original_junction = r._path_is_junction
+         with patch.object(r, '_path_is_junction', lambda value: Path(value) == link or original_junction(value)):
+             rejects('descendant_reparse_simulated_no_native_privilege',lambda:r.remove_exact_run_owned_process_tree(paths.process_root, expected_run_root=paths.process_root, repo_root=root, evidence_root=paths.evidence_root))
+         link.rmdir()
+         warnings.warn('Native Windows symlink creation unavailable (1314); junction rejection was simulated, not native-qualified.', RuntimeWarning)
+     else:
+         rejects('descendant_symlink',lambda:r.remove_exact_run_owned_process_tree(paths.process_root, expected_run_root=paths.process_root, repo_root=root, evidence_root=paths.evidence_root))
+         link.unlink()
+     check('source_preserved', (root/'protected.txt').read_bytes()==b'preserve')
+     # Existing immutable failure cleanup receipt cannot be overwritten. Check direct
+     # cleanup to demonstrate that correcting test-only link permits exact removal.
+     hard=paths.process_root/'hard';os.link(root/'protected.txt',hard)
+     rejects('descendant_hardlink',lambda:r.remove_exact_run_owned_process_tree(paths.process_root,expected_run_root=paths.process_root,repo_root=root,evidence_root=paths.evidence_root))
+     hard.unlink()
+     tracked=root/'.qtt/forced';tracked.write_bytes(b'keep');git(root,'add','-f','.qtt/forced')
+     rejects('index_tracked_area',lambda:r.remove_exact_run_owned_process_tree(paths.process_root,expected_run_root=paths.process_root,repo_root=root,evidence_root=paths.evidence_root))
+     git(root,'reset','-q','HEAD','--','.qtt/forced')
+     check('direct_cleanup_succeeds',r.remove_exact_run_owned_process_tree(paths.process_root,expected_run_root=paths.process_root,repo_root=root,evidence_root=paths.evidence_root)==0)
+     check('evidence_preserved',paths.evidence_root.exists())
+     check('unowned_preserved',(rogue/'preserve').read_bytes()==b'keep')
+     second,probe=r.resolve_validation_run_paths(root,explicit_process_root=root/'.qtt/runs',run_id='run_second')
+     r.write_run_provenance(second,probe,phase='test',command_count=0)
+     check('cleanup_success',r.cleanup_validation_run(second).startswith('PASS'))
+     check('cleanup_receipt',json.loads((second.evidence_root/'cleanup.json').read_text(encoding='utf-8'))['parent_preserved'])
+     from tools import independent_validate_qku_computation_control_plane as st12h
+     tracked_paths = git(root, 'ls-files', '-z').decode('utf-8').rstrip('\0').split('\0')
+     tracked_bytes = {name: (root / name).read_bytes() for name in tracked_paths}
+     tracked_entries = git(root, 'ls-files', '--stage', '-z')
+     fixture_head = git(root, 'rev-parse', 'HEAD')
+     evidence_parent = root / '.qtt/evidence'
+     evidence_before = set(evidence_parent.iterdir())
+     st12h_probe_calls = []
+     real_st12h_probe = r.probe_run_filesystem
+     def observe_st12h_probe(process_root, *, deepest_projected_path):
+         receipt = real_st12h_probe(process_root, deepest_projected_path=deepest_projected_path)
+         st12h_probe_calls.append((process_root, deepest_projected_path, receipt))
+         return receipt
+     with pytest.MonkeyPatch.context() as patch:
+         patch.setenv(r.PROCESS_ROOT_ENV, str(root / '.qtt/runs'))
+         patch.delenv(r.RUN_ID_ENV, raising=False)
+         patch.delenv(r.EVIDENCE_ROOT_ENV, raising=False)
+         patch.setattr(r, 'probe_run_filesystem', observe_st12h_probe)
+         stages = st12h.execute_st12h_backup_restore_portability_v1(root)
+     check('st12h_twelve_executed_stages', len(stages) == 12 and tuple(stage.stage_id for stage in stages) == tuple(plan.plan_id for plan in st12h.ST12H_BACKUP_RESTORE_PLANS))
+     check('st12h_real_restore_parity', all(stage.terminal_state == 'PASS_EXECUTED_STAGE' and stage.artifact_refs == st12h._ST12H_PUBLICATION_MEMBERS and stage.artifact_member_count == stage.restored_member_count == stage.byte_parity_count == 2 for stage in stages))
+     check('st12h_no_effects_or_repository_copies', all(stage.no_effect_flags == st12h.NO_EFFECTS_V1 and stage.repository_copy_count == stage.copied_git_index_count == 0 for stage in stages))
+     markers = {marker for stage in stages for marker in stage.validation_markers}
+     check('st12h_scratch_confinement_marker', 'RESTORE_WRITES_CONFINED_TO_SCRATCH=true' in markers and 'REPOSITORY_WRITE_COUNT=0' not in markers)
+     check('st12h_real_subprocess_and_unicode_paths', {'PATH_HAS_SPACES=true', 'PATH_HAS_NON_ASCII=true', 'DECLARED_RESTORE_COMMAND_COUNT=1', 'RESTORED_REPORT_VALIDATION=PASS'} <= markers)
+     scratch_evidence = set(evidence_parent.iterdir()) - evidence_before
+     check('st12h_one_retained_evidence_pair', len(scratch_evidence) == 1)
+     scratch_evidence_root = scratch_evidence.pop()
+     check('st12h_no_fabricated_campaign_acceptance', {path.name for path in scratch_evidence_root.iterdir()} == {'run.json', 'cleanup.json'})
+     provenance = json.loads((scratch_evidence_root / 'run.json').read_bytes().decode('utf-8'))
+     cleanup = json.loads((scratch_evidence_root / 'cleanup.json').read_bytes().decode('utf-8'))
+     scratch = provenance['paths']
+     check('st12h_scratch_provenance', provenance['phase'] == 'st12h-backup-restore-scratch' and provenance['command_count'] == 0 and provenance['text_integrity_preflight_state'] == 'NOT_APPLICABLE')
+     check('st12h_truthful_local_placement', Path(scratch['repo_root']) == root.resolve() and scratch['process_root_is_external_to_repo'] is False and Path(scratch['process_root']).parent == root / '.qtt/runs' and Path(scratch['evidence_root']) == scratch_evidence_root)
+     actual_probe = provenance['filesystem_probe']
+     check('st12h_actual_filesystem_probe', scratch['filesystem_probe_state'] == 'PASS' and actual_probe['failure_operation'] is None and actual_probe['native_error_class'] is None and actual_probe['written_bytes'] > 0 and all(actual_probe[name] is True for name in ('created_directory', 'readback_equal', 'rename_equal', 'unlink_success', 'directory_cleanup_success')))
+     check('st12h_exact_root_removed_evidence_preserved', cleanup['cleanup_state'] == 'PASS_REMOVED_EXACT_RUN_ROOT' and Path(cleanup['cleanup_target']) == Path(scratch['process_root']) and not Path(scratch['process_root']).exists() and not (Path(scratch['validation_output_root']) / 'w ü').exists() and scratch_evidence_root.is_dir())
+     attacks = st12h.exercise_st12h_archive_safety_mutations_v1()
+     check('st12h_all_archive_attacks_rejected', len(attacks) == 13 and all(value is True for value in attacks.values()))
+     check('st12h_valid_archive_is_not_attack', st12h._archive_mutation_rejected(tuple((st12h.zipfile.ZipInfo(member), b'{}\n') for member in st12h._ST12H_PUBLICATION_MEMBERS)) is False)
+     for relative in ('.tmp', '.qtt', '.qtt/envs', '.qtt/cache', '.qtt/evidence', '.qtt/runs/child'):
+         evidence_before = set(evidence_parent.iterdir())
+         with pytest.MonkeyPatch.context() as patch:
+             patch.setenv(r.PROCESS_ROOT_ENV, str(root / relative))
+             with pytest.raises(r.ValidationReliabilityError, match='ENGVR_SHORT_PROCESS_ROOT_UNAVAILABLE'):
+                 st12h.execute_st12h_backup_restore_portability_v1(root)
+         check('st12h_invalid_local_root_no_fallback_' + relative, set(evidence_parent.iterdir()) == evidence_before)
+     real_cleanup = st12h.cleanup_validation_run
+     for failure in ('stage', 'cleanup'):
+         cleanup_calls = []
+         def observed_cleanup(allocated):
+             cleanup_calls.append(allocated)
+             result = real_cleanup(allocated)
+             if failure == 'cleanup':
+                 # Raise after real exact-root removal so the injected exception
+                 # tests propagation and no retry without leaving a test artifact.
+                 raise RuntimeError('ST12H_TEST_CLEANUP_FAILURE')
+             return result
+         def fail_stage(extracted):
+             assert extracted.is_relative_to(root / '.qtt/runs')
+             assert all((extracted / member).is_file() for member in st12h._ST12H_PUBLICATION_MEMBERS)
+             raise RuntimeError('ST12H_TEST_STAGE_FAILURE')
+         with pytest.MonkeyPatch.context() as patch:
+             patch.setenv(r.PROCESS_ROOT_ENV, str(root / '.qtt/runs'))
+             patch.setattr(st12h, 'cleanup_validation_run', observed_cleanup)
+             if failure == 'stage':
+                 patch.setattr(st12h, 'validate_st12h_portable_directory_v1', fail_stage)
+             with pytest.raises(RuntimeError, match='ST12H_TEST_' + failure.upper() + '_FAILURE'):
+                 st12h.execute_st12h_backup_restore_portability_v1(root)
+         check('st12h_' + failure + '_failure_cleanup_once', len(cleanup_calls) == 1)
+         failed_paths = cleanup_calls[0]
+         check('st12h_' + failure + '_failure_keeps_evidence', not failed_paths.process_root.exists() and (failed_paths.evidence_root / 'run.json').is_file() and (failed_paths.evidence_root / 'cleanup.json').is_file() and not (failed_paths.evidence_root / 'completion.json').exists())
+     check('st12h_fixture_source_and_stage_entries_unchanged', {name: (root / name).read_bytes() for name in tracked_paths} == tracked_bytes and git(root, 'ls-files', '--stage', '-z') == tracked_entries and git(root, 'rev-parse', 'HEAD') == fixture_head and git(root, 'status', '--porcelain=v1') == before)
+     check('st12h_no_canonical_generated_artifacts', not (root / 'docs').exists())
+     # HEAD protection remains after staging deletion.
+     git(root,'add','-f','.qtt/forced');git(root,'commit','-qm','synthetic tracked');git(root,'rm','--cached','-q','.qtt/forced')
+     rejects('head_still_tracked',lambda:r.resolve_validation_run_paths(root,explicit_process_root=root/'.qtt/runs'))
+
+     actual_destinations = tuple(
+         Path(scratch['validation_output_root']) / 'w \u00fc' / directory / member
+         for directory in ('x \u00e9', 'r \u00e9', 'c \u00e9')
+         for member in st12h._ST12H_PUBLICATION_MEMBERS
+     ) + tuple(
+         Path(scratch['validation_output_root']) / 'w \u00fc' / name
+         for name in ('publication archive.zip', 'stage journal.partial', 'stage journal.json')
+     )
+     # A passing fallback sentinel cannot qualify an omitted scratch destination.
+     check('st12h_longest_actual_destination_probed', Path(actual_probe['write_path']) == max(actual_destinations, key=lambda path: (len(str(path)), str(path))))
+     expected_target = max(actual_destinations, key=lambda path: (len(str(path).encode('utf-16-le')) // 2, len(str(path)), str(path)))
+     check('st12h_one_real_probe_call', len(st12h_probe_calls) == 1)
+     called_root, called_target, returned_probe = st12h_probe_calls[0]
+     check('st12h_exact_argument_return_and_provenance', called_root == Path(scratch['process_root']) and str(called_target) == str(returned_probe.write_path) == actual_probe['write_path'] == scratch['deepest_projected_path'] == str(expected_target))
+     check('st12h_probe_receipt_matches_provenance', all((str(value) if isinstance(value, Path) else value) == actual_probe[name] for name, value in dataclasses.asdict(returned_probe).items()))
+     check('st12h_character_count_units_preserved', scratch['deepest_projected_path_text_length'] == len(str(expected_target)))
+     check('st12h_real_probe_restored_after_observation', r.probe_run_filesystem is real_st12h_probe)
+
+    return len(checks)

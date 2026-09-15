@@ -2817,3 +2817,89 @@ def resolve_pit_formula_inputs_v2(
         required_keys=required_keys,
         exact_key_set_equal=actual_keys == set(required_keys),
     )
+
+
+# F14 pending references are separate from the closed formula input registry.
+from _thread import RLock
+from .context import _f14_freeze_v1, _f14_plain_v1
+from .source_policy import RetailPrivateSourceRegistryV1, _f14_ingress_require_v1
+
+
+class PrivateObservationPublisherV1:
+    def __init__(self, *, source_registry):
+        _f14_ingress_require_v1(type(source_registry) is RetailPrivateSourceRegistryV1,
+            'F14_INGRESS_SOURCE')
+        self.source_registry = source_registry
+        self._lock = RLock()
+        self._slots = {}
+        self._requests = {}
+
+    def _capture_v1(self, observed):
+        entry = self.source_registry._captures.get(id(observed))
+        _f14_ingress_require_v1(entry is not None and entry[0] is observed and entry[3] is True,
+            'F14_INGRESS_CAPTURE_ASSOCIATION')
+        return entry
+
+    def publish_private_reference_v1(self, observed, raw_record_ref, capture_commit_ref):
+        with self.source_registry._lock:
+            entry = self._capture_v1(observed)
+            request, attempt = entry[2], entry[4]
+            with self.source_registry.fenced(request.grant, request.operation):
+                _f14_ingress_require_v1(raw_record_ref == attempt + ':raw'
+                    and capture_commit_ref == attempt + ':capture', 'F14_INGRESS_PUBLICATION_BINDING')
+                key = (observed.session_binding.source_snapshot_ref, attempt)
+                with self._lock:
+                    existing = self._slots.get(key)
+                    if existing is not None:
+                        _f14_ingress_require_v1(existing['observed'] is observed
+                            and existing['raw_record_ref'] == raw_record_ref
+                            and existing['capture_commit_ref'] == capture_commit_ref
+                            and existing['state'] in ('PENDING', 'RESOLVED')
+                            and existing['published_clock'] is not None,
+                            'F14_INGRESS_PUBLICATION_OUTCOME_UNKNOWN')
+                        return existing['published_clock']
+                    slot = dict(observed=observed, raw_record_ref=raw_record_ref,
+                        capture_commit_ref=capture_commit_ref, state='OUTCOME_UNKNOWN',
+                        published_clock=None, resolution=None, result=None)
+                    self._slots[key] = slot
+                    slot['state'] = 'PENDING'
+                    try:
+                        published = self.source_registry._observe_v1(request.grant)
+                    except Exception:
+                        slot['state'] = 'OUTCOME_UNKNOWN'
+                        raise
+                    slot['published_clock'] = published
+                    return published
+
+    def _bind_resolution_v1(self, observed, snapshot, observation, decision_time, recorded_cutoff):
+        entry = self._capture_v1(observed)
+        key = (observed.session_binding.source_snapshot_ref, entry[4])
+        with self._lock:
+            slot = self._slots.get(key)
+            _f14_ingress_require_v1(slot is not None and slot['state'] == 'PENDING',
+                'F14_INGRESS_PUBLICATION_OUTCOME_UNKNOWN')
+            slot['resolution'] = (snapshot, observation, observed.session_binding, decision_time, recorded_cutoff)
+
+    def resolve_committed_private_observation_v1(self, snapshot, observation, source_binding,
+            decision_time, recorded_cutoff):
+        from .persistence import PrivateEvidenceReadSnapshotV1
+        _f14_ingress_require_v1(type(snapshot) is PrivateEvidenceReadSnapshotV1,
+            'F14_INGRESS_COMMITTED_SNAPSHOT')
+        with self.source_registry._lock:
+            with self._lock:
+                matches = [slot for slot in self._slots.values() if slot['resolution'] is not None
+                    and slot['resolution'][0] is snapshot and slot['resolution'][1] is observation
+                    and slot['resolution'][2] is source_binding
+                    and slot['resolution'][3:] == (decision_time, recorded_cutoff)]
+                _f14_ingress_require_v1(len(matches) == 1, 'F14_INGRESS_COMMITTED_SNAPSHOT')
+                slot = matches[0]
+                entry = self._capture_v1(slot['observed'])
+                self.source_registry._validate_grant_v1(entry[2].grant, entry[2].operation)
+                _f14_ingress_require_v1(slot['state'] in ('PENDING', 'RESOLVED')
+                    and observation.get('state') == 'PRIVATE_EVIDENCE_CHAIN_CONFORMANCE_ONLY'
+                    and all(value is False for value in observation.values() if type(value) is bool),
+                    'F14_INGRESS_PUBLICATION_OUTCOME_UNKNOWN')
+                if slot['state'] == 'PENDING':
+                    slot['result'] = _f14_freeze_v1(_f14_plain_v1(observation))
+                    slot['state'] = 'RESOLVED'
+                return _f14_freeze_v1(_f14_plain_v1(slot['result']))

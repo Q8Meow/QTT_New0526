@@ -573,14 +573,15 @@ def test_pr140_guard_repair_allowance_is_integration_support_not_materialization
 
 
 def test_repository_artifacts_validate_and_report_is_deterministic(monkeypatch) -> None:
+    observed_context = pr141_report.current_branch_context(REPO_ROOT)
+    assert observed_context.branch, (
+        observed_context.git_error or "Repository branch context is unavailable"
+    )
     monkeypatch.setattr(
-            pr141_report,
-            "current_branch_context",
-            lambda repo_root: BranchContext(
-                branch="pr-ci-fastfail-validation-context-preflight",
-                source="unit-test",
-            ),
-        )
+        pr141_report,
+        "current_branch_context",
+        lambda repo_root: observed_context,
+    )
     assert validate_repository_artifacts(REPO_ROOT) == []
     assert build_report(REPO_ROOT) == build_report(REPO_ROOT)
 

@@ -488,6 +488,7 @@ def test_reference_adapter_atomic_commit_rollback_and_replay(adapter_kind, refer
 
     _assert_f13_reference_storage(adapter_kind, reference_directory)
     _assert_f13_transaction_truth(adapter_kind, reference_directory)
+    _assert_f14_native_and_storage(adapter_kind)
 
 
 
@@ -1831,3 +1832,431 @@ def test_control_coverage_meta_matrix() -> None:
     )
     with pytest.raises(ComputationControlPlaneError):
         resolve_tranche_c_parameter_v1(dormant)
+
+
+def _f14_offline_owners(patch, operation, *, proofs=0):
+    from datetime import UTC, datetime, timedelta
+    from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane import source_policy as source
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane.input_resolver import PrivateObservationPublisherV1
+    from src.qtt.stage1_prediction_markets.private_state_receipts.request import (
+        bind_private_runtime_credential_v1, RetailPrivateIngressV1, RetailPrivateReadRequestV1)
+    from tests.source_evidence.test_s1_pit_data_phase_a_01 import _f14_reference_cases
+    args, expected = next((args, expected) for args, expected in _f14_reference_cases()
+        if args[2]['operation'] == operation)
+    now = datetime(2026, 9, 13, 0, 0, 1, tzinfo=UTC)
+    delta = now - datetime(1970, 1, 1, tzinfo=UTC)
+    wall = (delta.days * 86400 + delta.seconds) * 1_000_000_000
+    ticker = [1000, wall]
+    def mono():
+        ticker[0] += 1000
+        return ticker[0]
+    def wall_clock():
+        ticker[1] += 1000
+        return ticker[1]
+    patch.setattr(source.time, 'monotonic_ns', mono)
+    patch.setattr(source.time, 'time_ns', wall_clock)
+    start, end = now - timedelta(minutes=1), now + timedelta(hours=1)
+    profile = source.Stage1VenueProfileIdV1.POLYMARKET_US_RETAIL_DIRECT
+    current = source.PITSourceCurrentizationReceiptV1('current', profile, 'source', '1', start, start,
+        end, 'synthetic-currentization', ('SOURCE_CHANGE',), False, True)
+    rights = source.PITRightsAdmissionReceiptV1('rights', profile, 'account', 'source', 'agreement', '1',
+        'SYNTHETIC_INTERNAL_USE', 'ADMITTED_INTERNAL_USE', start, end, ('RIGHTS_CHANGE',), False,
+        'SYNTHETIC_RETAIN', 'NO_REDISTRIBUTION')
+    session = source.RetailPrivateSessionBindingV1(dict(args[0]['scope']), 'snapshot', 'authentication',
+        'session', 7, current, rights, start, end, (operation,))
+    registry = source.RetailPrivateSourceRegistryV1(process_epoch_id='process', monotonic_clock_id='monotonic')
+    registry.bind_session(session)
+    grant = source.RetailPrivateRuntimeGrantV1('grant', session, start, end, 'process', 'monotonic',
+        'synthetic-wall', 'synthetic-clock-quality', 1, 1, 10**12, 3)
+    registry.issue_grant(grant)
+    # Public RFC8032 empty-message known-answer vector, never operational credentials.
+    key = Ed25519PrivateKey.from_private_bytes(bytes.fromhex(
+        '9d61b19deffd5a60ba844af492ec2cc44449c5697b326919703bac031cae7f60'))
+    assert key.sign(b'').hex() == ('e5564300c360ac729086e2cc806e828a84877f1eb8e5d974d873e065224901555f'
+        'b8821590a33bacc61e39701cf9b46bd25bf5f0595bbe24655141438e7a100b')
+    handle = bind_private_runtime_credential_v1(session_binding=session,
+        api_key_id='00000000-0000-4000-8000-000000000014', private_key=key, source_registry=registry)
+    assert '9d61' not in repr(handle) and '00000000' not in repr(handle)
+    requirement = dict(args[3]['requirements'])
+    facts = {}
+    for role, flag in tuple(zip(('publication','revision','finality'),
+            ('requires_provider_publication_time','requires_revision_at_decision','requires_finality_at_decision')))[:proofs]:
+        requirement[flag] = True
+        if role == 'publication': requirement['provider_publication_time_is_source_proven'] = True
+        facts[role] = dict(timestamp='2026-09-13T00:00:00.000000000Z',
+            source_record_ref='current', source_binding_ref='source')
+    registry.bind_clock_facts(grant_id=grant.grant_id, request_ref=args[2]['request_ref'],
+        item_key=args[2]['item_key'], facts_by_role=facts)
+    request = RetailPrivateReadRequestV1(grant, operation, dict(args[2]), None, requirement, 65536)
+    ingress = RetailPrivateIngressV1(source_registry=registry, credential_handle=handle)
+    publisher = PrivateObservationPublisherV1(source_registry=registry)
+    return request, ingress, registry, publisher, args[3]['original_raw_body'], expected, ticker
+
+
+def _f14_scripted_transport(patch, request, ingress, raw, *, failure=None):
+    import base64, json, ssl, types
+    calls = []
+    def signature(headers, path):
+        assert set(headers) == ({'X-PM-Access-Key', 'X-PM-Timestamp', 'X-PM-Signature'}
+            | ({'Accept', 'Accept-Encoding'} if not request.operation.startswith('WS_') else set()))
+        if not request.operation.startswith('WS_'):
+            assert headers['Accept-Encoding'] == 'identity' and headers['Accept'] == 'application/json'
+        message = (headers['X-PM-Timestamp'] + 'GET' + path).encode('ascii')
+        ingress.credential_handle.private_key.public_key().verify(base64.b64decode(headers['X-PM-Signature']), message)
+    class Rest:
+        status = 200
+        def request(self, method, target, body, headers):
+            calls.append('request')
+            assert ingress.source_registry._remaining[request.grant.grant_id] == 0
+            assert method == 'GET' and body is None and target.startswith('/v1/')
+            signature(headers, target.split('?')[0])
+            if failure == 'request': raise TimeoutError('synthetic transport timeout')
+        def getresponse(self): return self
+        def getheaders(self):
+            return [('Content-Type','application/json; charset=utf-8'), ('Content-Length',str(len(raw)))] + (
+                [('Content-Length',str(len(raw)))] if failure == 'duplicate_length' else [])
+        def read(self, amount):
+            calls.append('read')
+            assert amount == request.maximum_raw_bytes + 1
+            if failure == 'revoke': ingress.source_registry.revoke(request.grant.session_binding, 8)
+            if failure == 'deadline':
+                patch.setattr(ingress.source_registry._validate_grant_v1.__globals__['time'],
+                    'monotonic_ns', lambda: request.grant.deadline_monotonic_ns)
+            return raw
+        def close(self): calls.append('close')
+    def rest(host, port, *, timeout, context):
+        calls.append('construct')
+        assert host == 'api.polymarket.us' and port == 443 and 0 < timeout <= 10
+        assert context.check_hostname is True and context.verify_mode == ssl.CERT_REQUIRED
+        return Rest()
+    class WS:
+        response = types.SimpleNamespace(status_code=101)
+        def __enter__(self): return self
+        def __exit__(self, *unused): calls.append('close')
+        def send(self, subscription):
+            calls.append('subscribe')
+            body = json.loads(subscription)['subscribe']
+            assert body['requestId'] == request.consumer['request_ref']
+        def recv(self, *, timeout):
+            calls.append('recv')
+            assert timeout > 0
+            if failure == 'binary': return raw
+            if request.operation == 'WS_BALANCE' and calls.count('recv') == 1:
+                return json.dumps(dict(requestId='request', subscriptionType='SUBSCRIPTION_TYPE_ACCOUNT_BALANCE',
+                    accountBalancesSnapshot={'balances':[{'currency':'USD','currentBalance':100,'buyingPower':100}]}))
+            return raw.decode('utf-8')
+    def ws(uri, **kwargs):
+        calls.append('connect')
+        assert set(kwargs) == {'ssl', 'additional_headers', 'proxy', 'compression',
+            'open_timeout', 'ping_interval', 'ping_timeout', 'close_timeout',
+            'max_size', 'max_queue', 'logger'}
+        assert ingress.source_registry._remaining[request.grant.grant_id] == 0
+        assert uri == 'wss://api.polymarket.us/v1/ws/private'
+        assert kwargs['proxy'] is None and kwargs['compression'] is None
+        assert (kwargs['ping_interval'], kwargs['ping_timeout'], kwargs['close_timeout'], kwargs['max_queue']) == (20,20,10,16)
+        assert 0 < kwargs['open_timeout'] <= 10 and kwargs['max_size'] == request.maximum_raw_bytes
+        assert kwargs['logger'].disabled and not kwargs['logger'].propagate
+        signature(kwargs['additional_headers'], '/v1/ws/private')
+        return WS()
+    modules = {name: types.ModuleType(name) for name in
+        ('http', 'http.client', 'websockets', 'websockets.sync', 'websockets.sync.client')}
+    for name in ('http', 'websockets', 'websockets.sync'):
+        modules[name].__path__ = []
+    modules['http'].client = modules['http.client']
+    modules['http.client'].HTTPSConnection = rest
+    modules['websockets'].sync = modules['websockets.sync']
+    modules['websockets.sync'].client = modules['websockets.sync.client']
+    modules['websockets.sync.client'].connect = ws
+    return calls, modules
+
+
+def _f14_fresh_adapter(kind):
+    return (InMemoryPersistenceAdapterV1() if kind == 'memory' else
+        SQLiteReferenceAdapterV1(':memory:', busy_timeout_ms=0, max_transaction_attempts=1))
+
+
+def _assert_f14_native_and_storage(adapter_kind):
+    import copy, sys
+    from src.qtt.stage1_prediction_markets.private_state_receipts import handoff
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane import serialization as codec
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane.persistence import _f14_reconstruct_snapshot_v1
+    from tests.source_evidence.test_s1_pit_data_phase_a_01 import _f14_reference_cases
+    absent = object()
+    operations = ('ACTIVITY_TRADE','ACTIVITY_RESOLUTION','ACTIVITY_FUNDING','POSITIONS','BALANCES','WS_POSITION','WS_BALANCE')
+    for operation in operations:
+        for proof_count in range(4):
+            with pytest.MonkeyPatch.context() as patch:
+                request, ingress, registry, publisher, raw, expected, ticker = _f14_offline_owners(patch, operation, proofs=proof_count)
+                adapter = _f14_fresh_adapter(adapter_kind)
+                calls, modules = _f14_scripted_transport(patch, request, ingress, raw)
+                originals = {name: sys.modules.get(name, absent) for name in modules}
+                commits = []
+                execute = handoff.TrancheCUnitOfWorkV1.execute
+                def recorded_execute(unit, **kwargs):
+                    result = execute(unit, **kwargs)
+                    commits.append((kwargs, result))
+                    return result
+                patch.setattr(handoff.TrancheCUnitOfWorkV1, 'execute', recorded_execute)
+                try:
+                    with pytest.MonkeyPatch.context() as patcher:
+                        for name, module in modules.items():
+                            patcher.setitem(sys.modules, name, module)
+                        result = handoff.run_retail_private_observation_once_v1(request, ingress=ingress,
+                            source_registry=registry, adapter=adapter, publisher=publisher)
+                        assert result['selected_values'] == expected['selected_values']
+                        assert all(value is False for value in result.values() if type(value) is bool)
+                        assert len(commits) == 3 and all(row[1].transaction_state is TransactionTerminalStateV1.COMMITTED for row in commits)
+                        assert calls[-1] == 'close' and registry._remaining['grant'] == 0
+                        count = len(calls)
+                        assert handoff.run_retail_private_observation_once_v1(request, ingress=ingress,
+                            source_registry=registry, adapter=adapter, publisher=publisher) == result
+                        assert len(calls) == count
+                        entry = next(iter(registry._captures.values()))
+                        attempt = entry[4]
+                        read = handoff._f14_allocation_v1(request.grant.session_binding.scope, attempt,
+                            tuple(('publication','revision','finality')[:proof_count]))
+                        snapshot = adapter.load_committed_private_evidence_snapshot_v1(read)
+                        assert len(snapshot.present_record_refs) == 16 + proof_count
+                        raw_row = adapter.load_committed_private_evidence_witness_v1(read.record_refs['raw'])
+                        assert codec._f14_load_canonical_v1(raw_row.typed_payload.canonical_payload_json,
+                            codec._F14_PHASES['RAW'])['raw_body_utf8'].encode('utf-8') == raw
+                        assert adapter.load_committed_private_evidence_witness_v1('missing') is None
+                        with pytest.raises(ComputationControlPlaneError):
+                            adapter.load_committed_private_evidence_witness_v1(read.record_refs['companion'])
+                        with pytest.raises(TypeError): snapshot.records_by_ref['forged'] = raw_row
+                        tx = adapter.begin_transaction()
+                        try:
+                            with pytest.raises(ComputationControlPlaneError): adapter.load_committed_private_evidence_snapshot_v1(read)
+                        finally: tx.rollback()
+                        # Exact old claim replay does not manufacture a second batch or timestamp.
+                        old_kwargs = commits[0][0]
+                        replay = execute(handoff.TrancheCUnitOfWorkV1(adapter, TransactionRetryPolicyV1(1, frozenset())), **old_kwargs)
+                        assert replay.committed_record_refs == (read.record_refs['raw'],)
+                        assert adapter.load_committed_private_evidence_snapshot_v1(read).present_record_refs == snapshot.present_record_refs
+                        if operation == 'ACTIVITY_TRADE':
+                            _assert_f14_corrupt_committed_views(adapter_kind, adapter, read)
+                        registry.revoke(request.grant.session_binding, 8)
+                        with pytest.raises(ComputationControlPlaneError):
+                            handoff.run_retail_private_observation_once_v1(request, ingress=ingress,
+                                source_registry=registry, adapter=adapter, publisher=publisher)
+                        assert adapter.load_committed_private_evidence_snapshot_v1(read).present_record_refs == snapshot.present_record_refs
+                finally:
+                    try:
+                        for name, original in originals.items():
+                            if original is absent:
+                                assert name not in sys.modules
+                            else:
+                                assert name in sys.modules
+                                assert sys.modules[name] is original
+                    finally:
+                        if adapter_kind == 'sqlite': adapter.close()
+    for failure, operation in (('request','BALANCES'),('duplicate_length','BALANCES'),
+            ('revoke','BALANCES'),('deadline','BALANCES'),('binary','WS_POSITION')):
+        with pytest.MonkeyPatch.context() as patch:
+            request, ingress, registry, publisher, raw, _, _ = _f14_offline_owners(patch, operation)
+            adapter = _f14_fresh_adapter(adapter_kind)
+            calls, modules = _f14_scripted_transport(patch, request, ingress, raw, failure=failure)
+            originals = {name: sys.modules.get(name, absent) for name in modules}
+            try:
+                with pytest.MonkeyPatch.context() as patcher:
+                    for name, module in modules.items():
+                        patcher.setitem(sys.modules, name, module)
+                    with pytest.raises(ComputationControlPlaneError):
+                        handoff.run_retail_private_observation_once_v1(request, ingress=ingress,
+                            source_registry=registry, adapter=adapter, publisher=publisher)
+                    assert calls[-1] == 'close' and registry._remaining['grant'] == 0
+                    assert not publisher._slots
+                    if failure == 'duplicate_length': assert 'read' not in calls
+            finally:
+                try:
+                    for name, original in originals.items():
+                        if original is absent:
+                            assert name not in sys.modules
+                        else:
+                            assert name in sys.modules
+                            assert sys.modules[name] is original
+                finally:
+                    if adapter_kind == 'sqlite': adapter.close()
+    if adapter_kind == 'memory':
+        _assert_f14_composition_prefixes()
+        import ast
+        import os
+        import subprocess
+        from tools import independent_validate_qku_computation_control_plane_execution as independent
+        from src.qtt.stage1_prediction_markets.qku_computation_control_plane import source_policy
+
+        repo_root = Path(__file__).resolve().parents[4]
+        workflow_name = '.github/workflows/qtt_validation.yml'
+        workflow_bytes = (repo_root / workflow_name).read_bytes()
+        assert source_policy._st12h_validate_workflow_contract(repo_root) == (workflow_name,)
+        with TemporaryDirectory() as temporary:
+            fixture_root = Path(temporary)
+            workflow = fixture_root / workflow_name
+            workflow.parent.mkdir(parents=True)
+            workflow.write_bytes(workflow_bytes)
+            assert source_policy._st12h_validate_workflow_contract(fixture_root) == (workflow_name,)
+            for old, new in (
+                (b'uses: actions/setup-python@v5', b'uses: actions/setup-python@v4'),
+                (b"python-version: '3.14.6'", b"python-version: '3.14.5'"),
+                (b'python -m pip install pytest==9.1.1', b'python -m pip install pytest==9.1.0'),
+                (b'          - phase: post-validation\n', b''),
+                (b'      - validation_shards\n', b'      - unexpected_dependency\n'),
+            ):
+                assert old in workflow_bytes
+                workflow.write_bytes(workflow_bytes.replace(old, new, 1))
+                with pytest.raises(source_policy.SourcePolicyError) as failure:
+                    source_policy._st12h_validate_workflow_contract(fixture_root)
+                assert failure.value.reason_code.value == 'ST12A_SOURCE_EPOCH_STALE'
+            workflow.write_bytes(workflow_bytes + b'          - phase: post-validation\n')
+            with pytest.raises(source_policy.SourcePolicyError) as failure:
+                source_policy._st12h_validate_workflow_contract(fixture_root)
+            assert failure.value.reason_code.value == 'ST12A_SOURCE_EPOCH_STALE'
+            parser_limit = 256 * 1024
+            at_limit = workflow_bytes + b'#' + b'x' * (parser_limit - len(workflow_bytes) - 2) + b'\n'
+            assert len(at_limit) == parser_limit
+            workflow.write_bytes(at_limit)
+            assert source_policy._st12h_validate_workflow_contract(fixture_root) == (workflow_name,)
+            workflow.write_bytes(at_limit + b'x')
+            with pytest.raises(source_policy.SourcePolicyError) as failure:
+                source_policy._st12h_validate_workflow_contract(fixture_root)
+            assert failure.value.reason_code.value == 'ST12A_SOURCE_EPOCH_STALE'
+            workflow.unlink()
+            with pytest.raises(source_policy.SourcePolicyError) as failure:
+                source_policy._st12h_validate_workflow_contract(fixture_root)
+            assert failure.value.reason_code.value == 'ST12A_SOURCE_EPOCH_MISSING'
+        assert (repo_root / workflow_name).read_bytes() == workflow_bytes
+
+        independent_source = Path(independent.__file__).read_bytes().decode('utf-8')
+        economic_tree = independent._tree('economic_math.py')
+        context_tree = independent._tree('context.py')
+        independent._validate_execution_math_owner_ast(
+            economic_tree, context_tree, ast.parse(independent_source),
+        )
+        for mutation in (
+            'import src', 'import qtt', 'import src.qtt as aliased',
+            'from src import qtt', 'from qtt.domain import value',
+            'def _unused():\n    import qtt.domain',
+            'if False:\n    from src.qtt import value',
+        ):
+            with pytest.raises(ValueError, match='independent execution validator imports production source'):
+                independent._validate_execution_math_owner_ast(
+                    economic_tree, context_tree,
+                    ast.parse(independent_source + '\n' + mutation + '\n'),
+                )
+        for unrelated in ('import src_peer', 'from qtt_peer import value'):
+            independent._validate_execution_math_owner_ast(
+                economic_tree, context_tree,
+                ast.parse(independent_source + '\n' + unrelated + '\n'),
+            )
+
+        code = '\n'.join((
+            'import importlib.abc, sys',
+            "assert not any(name.split('.', 1)[0] in {'src', 'qtt'} for name in sys.modules)",
+            'class ProductionImportBoundary(importlib.abc.MetaPathFinder):',
+            '    def find_spec(self, fullname, path=None, target=None):',
+            "        if fullname.split('.', 1)[0] in {'src', 'qtt'}:",
+            "            raise ImportError('production import rejected: ' + fullname)",
+            '        return None',
+            'sys.meta_path.insert(0, ProductionImportBoundary())',
+            'from tools import independent_validate_qku_computation_control_plane_execution as independent',
+            'result = independent.main()',
+            'assert result == 0',
+            "assert not any(name.split('.', 1)[0] in {'src', 'qtt'} for name in sys.modules)",
+            'raise SystemExit(result)',
+        ))
+        environment = dict(os.environ, PYTHONDONTWRITEBYTECODE='1')
+        completed = subprocess.run(
+            [sys.executable, '-B', '-c', code], cwd=repo_root, env=environment,
+            stdin=subprocess.DEVNULL, capture_output=True, text=True,
+            encoding='utf-8', timeout=120,
+        )
+        assert completed.returncode == 0, completed.stderr
+        assert independent.SUCCESS + ' controls=9 identities=8 gates=13 lifecycle=NO_WRITE effects=0 blockers=9' in completed.stdout.splitlines()
+        assert completed.stderr == ''
+
+
+def _assert_f14_corrupt_committed_views(kind, adapter, request):
+    import copy, json
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane.persistence import _f14_reconstruct_snapshot_v1
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane.migrations import APPEND_ONLY_TABLES_V1
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane.serialization import deterministic_json
+    if kind == 'memory':
+        rows = {table: {rid: deterministic_json(value) for rid,value in items.items()} for table,items in adapter._tables.items()}
+    else:
+        with adapter._f14_read_rows_v1(frozenset(value for values in request.phase_control_refs.values()
+                for value in values.values()) | frozenset(adapter.load_committed_private_evidence_snapshot_v1(request).present_record_refs)) as (rows, mirrors):
+            rows = copy.deepcopy(rows)
+    names = list(adapter.load_committed_private_evidence_snapshot_v1(request).present_record_refs)
+    assert not any(rows[table] for table in ('economic_events','journal_transactions','journal_postings','value_lineage_edges','reversal_links','reconciliation_breaks'))
+    for table, values in rows.items():
+        for rid in values:
+            for mutation in ('missing','alias','other_table'):
+                bad = copy.deepcopy(rows)
+                if mutation == 'missing': del bad[table][rid]
+                elif mutation == 'alias': bad[table]['same-count-alias'] = bad[table].pop(rid)
+                else: bad['journal_transactions'][rid] = '{}'
+                with pytest.raises(ComputationControlPlaneError): _f14_reconstruct_snapshot_v1(request, bad)
+    # Plant a valid-looking altered payload in actual committed storage in a fresh adapter.
+    changed = request.record_refs['raw']
+    clone = _f14_fresh_adapter(kind)
+    try:
+        if kind == 'memory':
+            clone._tables = {table: dict(values) for table,values in adapter._tables.items()}
+            clone._tables['receipt_records'][changed] = replace(adapter._tables['receipt_records'][changed], sequence=1)
+        else:
+            for table in APPEND_ONLY_TABLES_V1:
+                cursor = adapter._connection.execute(f'SELECT * FROM {table}')
+                try: records = cursor.fetchall()
+                finally: cursor.close()
+                for values in records:
+                    values = list(values)
+                    if table == 'receipt_records' and values[0] == changed:
+                        payload = json.loads(values[-1]); payload['sequence'] = 1
+                        values[-1] = deterministic_json(payload)
+                    cursor = clone._connection.execute(f"INSERT INTO {table} VALUES({','.join('?' for _ in values)})", tuple(values))
+                    cursor.close()
+        with pytest.raises(ComputationControlPlaneError, match='F14_STORAGE_PLAN_ACTUAL_MISMATCH'):
+            clone.load_committed_private_evidence_snapshot_v1(request)
+    finally:
+        if kind == 'sqlite': clone.close()
+
+
+def _assert_f14_composition_prefixes():
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane.transaction import _native_retail_private_composition_plan_v1
+    from tests.source_evidence.test_s1_pit_data_phase_a_01 import _f14_reference_cases
+    scope = _f14_reference_cases()[0][0][0]['scope']
+    checked = accepted = 0
+    for proofs in range(4):
+        names = ['raw','transport','intent','capture','published','companion',*[f'proof-{i}' for i in range(proofs)],'seal']
+        valid = [[], names[:3], names[:-1], names]
+        refs = dict(raw='raw',transport='transport',publication_intent='intent',capture_commit='capture',
+            publication='published',companion='companion',companion_commit='seal',clock_proofs=[f'proof-{i}' for i in range(proofs)])
+        intent = dict(outbox_intent_id='intent',topic_class='PRIVATE_OBSERVATION_REFERENCE_PUBLICATION',
+            aggregate_id='account',payload_record_ref='raw',created_at='2026-09-13T00:00:00.000000002Z',
+            dispatch_state='RECORDED_NOT_DISPATCHABLE',dispatch_attempt_count=0,next_eligible_at=None,
+            authority_class='NO_WRITE_CONTRACT_ONLY')
+        kw = dict(expected_scope=dict(scope),current_source_snapshot_ref='snapshot',current_revocation_epoch=7,
+            process_epoch_id='process',monotonic_clock_id='monotonic',recorded_cutoff='2026-09-13T00:00:00.000000008Z',
+            source_snapshot_after_ref='snapshot',revocation_epoch_after=7)
+        for mask in range(1 << len(names)):
+            selected = [value for i,value in enumerate(names) if mask & (1 << i)]
+            stage = valid.index(selected) if selected in valid else None
+            observations = dict(capture_commit=None,publication=None,companion_commit=None)
+            if stage is not None and stage >= 2:
+                observations['capture_commit'] = dict(observed_at='2026-09-13T00:00:00.000000003Z',monotonic_ns=3)
+                observations['publication'] = dict(observed_at='2026-09-13T00:00:00.000000004Z',monotonic_ns=4)
+            if stage == 3: observations['companion_commit'] = dict(observed_at='2026-09-13T00:00:00.000000006Z',monotonic_ns=6)
+            snapshot = dict(source_snapshot_ref='snapshot',revocation_epoch=7,process_epoch_id='process',
+                monotonic_clock_id='monotonic',storage_state='COMMITTED_SNAPSHOT',committed_record_refs=selected,
+                observations=observations,snapshot_observed_at='2026-09-13T00:00:00.000000008Z',snapshot_monotonic_ns=8,
+                publication_state='OBSERVED' if stage is not None and stage >= 2 else 'NOT_ATTEMPTED')
+            checked += 1
+            if stage is None:
+                with pytest.raises(ComputationControlPlaneError, match='PRIVATE_COMPOSITION_ATOMIC_PREFIX'):
+                    _native_retail_private_composition_plan_v1(dict(scope),refs,snapshot,intent,**kw)
+            else:
+                out = _native_retail_private_composition_plan_v1(dict(scope),refs,snapshot,intent,**kw)
+                assert out['committed_stage'] == stage and out['runtime_effect_authorized'] is False
+                accepted += 1
+    assert (checked,accepted) == (1920,16)

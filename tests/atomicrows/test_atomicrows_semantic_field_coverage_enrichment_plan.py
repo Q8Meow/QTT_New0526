@@ -590,16 +590,17 @@ def test_quantum_forward_metadata_plan_has_references_without_execution_or_advan
 
 
 def test_repository_artifacts_validate_and_report_is_deterministic(monkeypatch) -> None:
+    observed_context = pr140_report.current_branch_context(REPO_ROOT)
+    assert observed_context.branch, (
+        observed_context.git_error or "Repository branch context is unavailable"
+    )
     _outputs()
     _restore_tracked_generated_side_effects()
     monkeypatch.setattr(
-            pr140_report,
-            "current_branch_context",
-            lambda repo_root: BranchContext(
-                branch="pr-ci-fastfail-validation-context-preflight",
-                source="unit-test",
-            ),
-        )
+        pr140_report,
+        "current_branch_context",
+        lambda repo_root: observed_context,
+    )
     assert validate_repository_artifacts(REPO_ROOT) == []
     assert build_report(REPO_ROOT) == build_report(REPO_ROOT)
     assert validate_report_payload(_report(), build_report(REPO_ROOT)) == []

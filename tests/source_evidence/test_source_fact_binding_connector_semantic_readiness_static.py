@@ -236,6 +236,7 @@ def test_python_usage_scan_allows_exact_local_visual_qa_playwright_path(tmp_path
 
 
 def test_python_usage_scan_rejects_unregistered_playwright_path(tmp_path):
+    _assert_f14_shared_native_admission(tmp_path / "f14")
     script = tmp_path / "tools" / "bad_browser_fetch.py"
     script.parent.mkdir(parents=True)
     script.write_text(
@@ -302,3 +303,29 @@ def test_master_plan_remains_unchanged():
 
     assert completed.returncode == 0
     assert completed.stdout == ""
+
+
+_F14_INDEPENDENT_NATIVE_TEMPLATE = 'class RetailPrivateIngressV1:\n    def read_rest_once(self, request):\n        prepared = self._prepare_rest_v1(request)\n        import http.client\n        connection = http.client.HTTPSConnection("api.polymarket.us", 443, timeout=prepared.timeout_seconds, context=prepared.tls_context)\n        try:\n            self._recheck_and_charge_v1(prepared)\n            connection.request("GET", prepared.target, body=None, headers=prepared.headers)\n            response = connection.getresponse()\n            self._validate_response_headers_v1(prepared, response)\n            raw = response.read(prepared.maximum_raw_bytes + 1)\n            received = self._observe_clock_v1()\n            self._validate_response_body_v1(prepared, response, raw)\n            return self._retain_received_v1(prepared, raw, received, 200)\n        finally:\n            connection.close()\n\n    def read_private_message_once(self, request):\n        prepared = self._prepare_ws_v1(request)\n        import websockets.sync.client\n        with websockets.sync.client.connect("wss://api.polymarket.us/v1/ws/private", ssl=prepared.tls_context, additional_headers=prepared.headers, proxy=None, compression=None, open_timeout=prepared.timeout_seconds, ping_interval=20, ping_timeout=20, close_timeout=10, max_size=prepared.maximum_raw_bytes, max_queue=16, logger=prepared.quiet_logger) as connection:\n            self._verify_handshake_v1(prepared, connection.response)\n            self._recheck_subscription_v1(prepared)\n            connection.send(prepared.subscription_json)\n            state = self._initial_ws_state_v1()\n            for unused in range(prepared.maximum_application_messages):\n                message = connection.recv(timeout=self._remaining_seconds_v1(prepared))\n                received = self._observe_clock_v1()\n                state, disposition, raw = self._classify_ws_message_v1(prepared, state, message)\n                if disposition == "SELECTED_UPDATE":\n                    return self._retain_received_v1(prepared, raw, received, 101)\n            self._raise_message_budget_v1()\n'
+
+
+def _assert_f14_shared_native_admission(root):
+    import ast
+    from pathlib import Path, PurePosixPath
+    from tools import validate_no_runtime_artifacts as runtime
+    from tools import validate_source_fact_binding_connector_semantic_readiness_static as readiness
+    relative='src/qtt/stage1_prediction_markets/private_state_receipts/request.py'
+    target=root/relative;target.parent.mkdir(parents=True)
+    source=_F14_INDEPENDENT_NATIVE_TEMPLATE
+    target.write_text(source,encoding='utf-8')
+    positions,failures=runtime.f14_native_admission_v1(relative,ast.parse(source))
+    assert len(positions) == 4 and failures == ()
+    assert runtime._scan_python_content(PurePosixPath(relative),source,['forbid_source_retrieval']) == []
+    assert readiness._scan_forbidden_python_usage(root) == []
+    for bad in (source.replace('proxy=None','proxy=True'),source.replace('max_queue=16','max_queue=None'),
+            source.replace('"GET", prepared.target','"POST", prepared.target'),
+            source.replace('self._recheck_and_charge_v1(prepared)','self._recheck_subscription_v1(prepared)'),
+            source+source,source+'\nimport socket\nsocket.socket()\n',
+            source+'\nimport websockets.sync.client\nwebsockets.sync.client.connect("wss://other.example")\n'):
+        target.write_text(bad,encoding='utf-8')
+        assert runtime._scan_python_content(PurePosixPath(relative),bad,['forbid_source_retrieval'])
+        assert readiness._scan_forbidden_python_usage(root)
