@@ -17,6 +17,7 @@ from tools.ci_branch_context import (
     is_pr_or_later_branch,
     is_validation_infrastructure_changed_path,
 )
+from tools.validation_reliability import parse_git_status_porcelain_v1_z
 from tools.validation_scope_registry import is_pr_scoped_changed_path_allowed
 
 from . import constants as c
@@ -665,13 +666,9 @@ def _path_records(paths: Sequence[Path | str], present: set[str], required: bool
 
 
 def _git_stdout(repo_root: Path, args: Sequence[str]) -> tuple[int, str, str]:
-    completed = subprocess.run(
-        ["git", *args],
-        cwd=repo_root,
-        check=False,
-        capture_output=True,
-        text=True,
-    )
+    from tools.ci_branch_context import _run_pr152_repository_read
+
+    completed = _run_pr152_repository_read(repo_root, args)
     return completed.returncode, completed.stdout, completed.stderr
 
 
@@ -1301,6 +1298,19 @@ def _build_payload(evidence: Mapping[str, Any]) -> dict[str, Any]:
     root = Path(evidence["repo_root"])
     payloads = _mapping(evidence.get("json_payloads"))
     present = set(str(path) for path in evidence.get("present_paths", set()))
+    # The already-selected PR136 alias satisfies this one required input role.
+    # Report actual consumed paths; do not mark an unread canonical file consumed.
+    required_paths = tuple(
+        c.PR136_SECTION_CROSSWALK_ALIAS_PATH
+        if (
+            path == c.PR136_SECTION_CROSSWALK_CANONICAL_PATH
+            and evidence["alias_resolution"].get("alias_used") is True
+            and evidence["alias_resolution"].get("selected_path")
+            == c.PR136_SECTION_CROSSWALK_ALIAS_PATH.as_posix()
+        )
+        else path
+        for path in c.REQUIRED_UPSTREAM_ARTIFACTS
+    )
     inventory_record = _mapping(evidence.get("inventory"))
     tracked = [str(path) for path in inventory_record.get("tracked_files", [])]
     inventory = _mapping(inventory_record.get("audit"))
@@ -1325,11 +1335,11 @@ def _build_payload(evidence: Mapping[str, Any]) -> dict[str, Any]:
             "random_ids_allowed": False,
             "tracked_timestamp_policy": c.STATIC_TIME,
         },
-        "upstream_artifact_inputs": _path_records(c.REQUIRED_UPSTREAM_ARTIFACTS, present, True),
+        "upstream_artifact_inputs": _path_records(required_paths, present, True),
         "optional_context_inputs": _path_records(c.OPTIONAL_CONTEXT_ARTIFACTS, present, False),
         "orchestration_preflight_receipt": {
             "alias_resolution": evidence["alias_resolution"],
-            "all_required_inputs_consumed": all(path.as_posix() in present for path in c.REQUIRED_UPSTREAM_ARTIFACTS),
+            "all_required_inputs_consumed": all(path.as_posix() in present for path in required_paths),
             "owner_source_packet_consumed": c.SOURCE_EVIDENCE_PACKET_PATH.as_posix() in present,
             "pr149_report_consumed": c.PR149_REPORT_PATH.as_posix() in present,
             "pr150_report_consumed": c.PR150_REPORT_PATH.as_posix() in present,
@@ -1679,18 +1689,15 @@ def _changed_paths(repo_root: Path) -> list[str]:
     )
     if status_rc != 0:
         return ["<git-status-unavailable>"]
+    try:
+        records = parse_git_status_porcelain_v1_z(status_out)
+    except ValueError:
+        return ["<git-status-unavailable>"]
     paths: list[str] = []
-    records = [record for record in status_out.split("\0") if record]
-    index = 0
-    while index < len(records):
-        line = records[index]
-        if not line.strip():
-            index += 1
-            continue
-        code = line[:2]
-        path = line[3:] if len(line) > 3 and line[2] == " " else line[2:].strip()
-        paths.append(_normalize_repo_relative_path(path))
-        index += 2 if code[:1] in {"R", "C"} or code[1:] in {"R", "C"} else 1
+    for _code, destination, original in records:
+        paths.append(destination)
+        if original is not None:
+            paths.append(original)
     return _stable_sorted_repo_paths(paths)
 
 
@@ -1743,7 +1750,7 @@ def _validate_changed_paths(
     *,
     tracked_report_write_allowed: bool = False,
 ) -> list[str]:
-    branch = current_branch_context(repo_root).branch
+    branch = current_branch_context(repo_root, git_stdout=_git_stdout).branch
     failures: list[str] = []
     sidecar = _forbidden_bundle_sidecar_path()
     for path in _changed_paths(repo_root):
@@ -1789,9 +1796,9 @@ def validate_repository_artifacts(
     try:
         actual_report = _read_json(root / c.REPORT_PATH)
     except (OSError, ValueError, json.JSONDecodeError) as exc:
-        actual_report = {}
+        actual_report = None
         failures.append(f"PR152_REPORT_INVALID: {c.REPORT_PATH.as_posix()}: {exc}")
-    if actual_report and actual_report != expected_report:
+    if actual_report is not None and actual_report != expected_report:
         diagnostics = report_payload_mismatch_diagnostics(
             actual_report,
             expected_report,
@@ -1806,14 +1813,14 @@ def validate_repository_artifacts(
                     diagnostics,
                 )
             )
-    if actual_report and actual_report != expected_report and diagnostics:
+    if actual_report is not None and actual_report != expected_report and diagnostics:
         failures.append("PR152_REPORT_STALE_OR_NONDETERMINISTIC")
         for diagnostic in diagnostics:
             failures.append(
                 "PR152_REPORT_STALE_OR_NONDETERMINISTIC_DETAIL: "
                 f"{_format_report_mismatch_diagnostic(diagnostic)}"
             )
-    if actual_report:
+    if actual_report is not None:
         failures.extend(validate_report_payload(actual_report))
 
     failures.extend(

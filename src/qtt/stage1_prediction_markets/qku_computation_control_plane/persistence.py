@@ -3,11 +3,15 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
+from contextlib import contextmanager
 from dataclasses import dataclass
 from datetime import UTC, datetime
 from enum import StrEnum
+import time
+import threading
 from _thread import RLock
-from typing import Mapping
+from typing import Mapping, ContextManager
+from types import MappingProxyType
 
 from .accounting import JournalPostingV1, JournalTransactionV1, ReconciliationBreakReceiptV1
 from .context import _native_ident, parse_utc, _f14_freeze_v1, _f14_plain_v1
@@ -29,6 +33,9 @@ from .receipts import (
     _f14_singleton_witness_v1, _f14_typed_spine_v1,
     ValueLineageEdgeV1,
     _private_clock_reconstruct_spine_v1,
+    ProbabilityProducerControlReceiptV1, _validate_probability_control_spine_v1,
+    _probability_control_spine_from_cells_v1, _probability_control_projection_v1,
+    _probability_scope_mapping_v1,
 )
 from .rollback import (
     JournalReversalBundleV1,
@@ -39,6 +46,430 @@ from .serialization import (deterministic_json, _f14_require_v1,
     _f14_validate_v1, _F14_ID, _F14_SCOPE, _F14_PHASES,
     _f14_load_canonical_v1, _f14_dumps_v1, _f14_phase_shapes_v1,
     _f14_hydrate_phase_storage_view_v1)
+from .models import (
+    ProbabilityPredictionArtifactWriteRequestV1,
+    ProbabilityPredictionArtifactSealV1,
+    ProbabilityProducerScopeV1, ProbabilityPredictionReadRequestV1,
+    ProbabilityPredictionReviewBasisReadRequestV1,
+    _probability_require_v1, _probability_text_v1, _probability_ns_v1, _probability_int_v1,
+)
+from .serialization import _iter_prediction_artifact_frames_v1, _bounded_probability_json_v1
+
+
+@dataclass(frozen=True, slots=True)
+class ProbabilityProducerReadLimitsV1:
+    max_records: int
+    max_total_bytes: int
+    max_frame_bytes: int
+    max_sql_steps: int
+    deadline_monotonic_ns: int
+
+    def __post_init__(self) -> None:
+        for value in (self.max_records, self.max_total_bytes, self.max_frame_bytes,
+                      self.max_sql_steps, self.deadline_monotonic_ns):
+            _probability_int_v1(value, 1)
+        _probability_require_v1(self.max_records <= 2**63 - 2 and self.max_frame_bytes <= 1048576,
+                                "PROBABILITY_READ_LIMIT")
+
+
+@dataclass(frozen=True, slots=True)
+class ProbabilityProducerReadRequestV1:
+    scope: ProbabilityProducerScopeV1
+    purpose: str
+    binding_ref: str | None
+    request_id: str | None
+    receipt_id: str | None
+    effective_cutoff_ns: int
+    recorded_cutoff_ns: int
+    limits: ProbabilityProducerReadLimitsV1
+
+    def __post_init__(self) -> None:
+        _probability_require_v1(type(self.scope) is ProbabilityProducerScopeV1 and
+                                type(self.limits) is ProbabilityProducerReadLimitsV1, "PROBABILITY_READ_TYPES")
+        _probability_ns_v1(self.effective_cutoff_ns); _probability_ns_v1(self.recorded_cutoff_ns)
+        _probability_require_v1(type(self.purpose) is str and self.purpose in
+                                ("MATERIALIZE_CURRENT", "CONSTRUCT_CANDIDATE", "READ_CURRENT_STATE", "EXACT_REPEAT"),
+                                "PROBABILITY_READ_PURPOSE")
+        if self.purpose in ("MATERIALIZE_CURRENT", "CONSTRUCT_CANDIDATE"):
+            _probability_text_v1(self.binding_ref)
+            _probability_require_v1(self.request_id is None and self.receipt_id is None, "PROBABILITY_READ_IDENTITY")
+        elif self.purpose == "READ_CURRENT_STATE":
+            _probability_require_v1(self.binding_ref is self.request_id is self.receipt_id is None, "PROBABILITY_READ_IDENTITY")
+        else:
+            _probability_text_v1(self.request_id); _probability_text_v1(self.receipt_id)
+            _probability_require_v1(self.binding_ref is None and self.request_id != self.receipt_id, "PROBABILITY_READ_IDENTITY")
+
+
+@dataclass(frozen=True, slots=True)
+class ProbabilityProducerReadSnapshotV1:
+    scope: ProbabilityProducerScopeV1
+    records_by_ref: Mapping[str, EconomicReceiptEventSpineV1]
+    publication_records: tuple[EconomicReceiptEventSpineV1, ...]
+    revocation_records: tuple[EconomicReceiptEventSpineV1, ...]
+    read_completed_ns: int
+
+    def __post_init__(self) -> None:
+        _probability_require_v1(type(self.scope) is ProbabilityProducerScopeV1 and
+                                type(self.records_by_ref) in (dict, MappingProxyType), "PROBABILITY_SNAPSHOT")
+        _probability_ns_v1(self.read_completed_ns)
+        for key, record in self.records_by_ref.items():
+            _validate_probability_control_spine_v1(record)
+            _probability_require_v1(key == record.record_id and record.typed_payload.scope == self.scope,
+                                    "PROBABILITY_SNAPSHOT_IDENTITY")
+        for records, kind in ((self.publication_records, "PUBLICATION"), (self.revocation_records, "REVOCATION_APPLICATION")):
+            _probability_require_v1(type(records) is tuple, "PROBABILITY_SNAPSHOT_ROWS")
+            for record in records:
+                _probability_require_v1(self.records_by_ref.get(record.record_id) is record and
+                                        record.typed_payload.control_kind == kind, "PROBABILITY_SNAPSHOT_OBJECT")
+        object.__setattr__(self, "records_by_ref", MappingProxyType(dict(self.records_by_ref)))
+
+
+def _probability_read_check_v1(request) -> int:
+    if type(request) not in (ProbabilityProducerReadRequestV1, ProbabilityPredictionReadRequestV1,
+                             ProbabilityPredictionReviewBasisReadRequestV1):
+        raise PersistenceContractError(ReasonCode.SCHEMA_MISMATCH, "PROBABILITY_READ_REQUEST")
+    request.__post_init__()
+    request.limits.__post_init__()
+    now, mono = time.time_ns(), time.monotonic_ns()
+    _probability_ns_v1(now)
+    if type(mono) is not int or mono >= request.limits.deadline_monotonic_ns:
+        raise PersistenceContractError(ReasonCode.PERSISTENCE_UNAVAILABLE, "PROBABILITY_READ_DEADLINE")
+    if request.effective_cutoff_ns > now or request.recorded_cutoff_ns > now:
+        raise PersistenceContractError(ReasonCode.INVALID_CONTRACT, "PROBABILITY_READ_FUTURE_CUTOFF")
+    return now
+
+
+def _probability_read_roots_v1(request) -> tuple[str, ...]:
+    if type(request) is ProbabilityProducerReadRequestV1:
+        return (request.receipt_id,) if request.purpose == "EXACT_REPEAT" else (request.binding_ref,) if request.binding_ref is not None else ()
+    if type(request) is ProbabilityPredictionReviewBasisReadRequestV1:
+        return (request.result_ref, *request.validation_receipt_refs, request.use_limit_ref,
+                request.model_risk_receipt_ref, request.binding_ref)
+    return (request.result_ref,) if request.review_ref is None else (request.result_ref, request.review_ref)
+
+
+def _probability_read_aggregates_v1(scope) -> tuple[str, ...]:
+    return tuple(deterministic_json(("V35", kind, _probability_scope_mapping_v1(scope))) for kind in
+                 ("PUBLICATION", "INPUT_BINDING", "ACCEPTANCE_MANIFEST", "ACCEPTANCE_RECEIPT", "REVOCATION_APPLICATION"))
+
+
+def _probability_cell_sizes_v1(cells, *, max_frame_bytes: int) -> tuple[int, ...]:
+    if type(cells) is not tuple or len(cells) != 5 or any(type(cell) is not str for cell in cells):
+        raise PersistenceContractError(ReasonCode.SCHEMA_MISMATCH, "PROBABILITY_STORAGE_CELLS")
+    lengths = []
+    for cell in cells:
+        length = 0
+        for char in cell:
+            point = ord(char)
+            if 0xD800 <= point <= 0xDFFF:
+                raise PersistenceContractError(ReasonCode.SCHEMA_MISMATCH, "PROBABILITY_STORAGE_SURROGATE")
+            length += 1 if point < 128 else 2 if point < 2048 else 3 if point < 65536 else 4
+            if length > max_frame_bytes:
+                raise PersistenceContractError(ReasonCode.PERSISTENCE_UNAVAILABLE, "PROBABILITY_READ_FRAME_BUDGET")
+        lengths.append(length)
+    return tuple(lengths)
+
+
+def _probability_require_append_context_v1(adapter, transaction, record) -> None:
+    # Only the original private owner binds this guard. Historical hydration and
+    # a matching record ID cannot create an active issued append context.
+    guard = getattr(adapter, "_probability_preappend_guard_v1", None)
+    if guard is None:
+        raise PersistenceContractError(ReasonCode.OWNER_DATA_MISSING, "probability append context is absent")
+    guard(transaction, record)
+
+
+def _probability_select_committed_cells_v1(request, exact, aggregate):
+    """One closed selection program shared by the two storage owners."""
+    cells_by_ref, decoded = {}, {}
+
+    def retain(cells):
+        if cells is None:
+            return None
+        key = cells[0]
+        if key in cells_by_ref:
+            if cells_by_ref[key] != cells:
+                raise PersistenceContractError(ReasonCode.PERSISTENCE_CONFLICT, "PROBABILITY_RECORD_CHANGED")
+            return decoded[key]
+        record = _probability_control_spine_from_cells_v1(cells, expected_record_id=key,
+                    expected_scope=request.scope, max_frame_bytes=request.limits.max_frame_bytes)
+        cells_by_ref[key], decoded[key] = cells, record
+        return record
+
+    def get(ref, kind=None, *, required=True):
+        record = retain(exact(ref, required))
+        if record is not None and kind is not None and record.typed_payload.control_kind != kind:
+            raise PersistenceContractError(ReasonCode.INPUT_OWNER_MISMATCH, "PROBABILITY_SELECTED_KIND")
+        return record
+
+    def ancestry(binding_ref):
+        binding = get(binding_ref, "INPUT_BINDING")
+        manifest = get(binding.typed_payload.body["acceptance_manifest_ref"], "ACCEPTANCE_MANIFEST")
+        if manifest.typed_payload.body["binding_ref"] != binding_ref:
+            raise PersistenceContractError(ReasonCode.INPUT_OWNER_MISMATCH, "PROBABILITY_MANIFEST_BINDING")
+        roles = tuple(get(ref, "ACCEPTANCE_RECEIPT") for ref in manifest.typed_payload.body["receipt_refs"])
+        origins = {row.typed_payload.body["binding_ref"] for row in roles[:6]}
+        if len(origins) != 1:
+            raise PersistenceContractError(ReasonCode.INPUT_OWNER_MISMATCH, "PROBABILITY_MIXED_ORIGIN")
+        origin_ref = next(iter(origins))
+        if origin_ref != binding_ref:
+            if len(roles) != 7 or roles[-1].typed_payload.body["binding_ref"] != binding_ref:
+                raise PersistenceContractError(ReasonCode.INPUT_OWNER_MISMATCH, "PROBABILITY_SUCCESSOR_LAYOUT")
+            origin = get(origin_ref, "INPUT_BINDING")
+            original_manifest = get(origin.typed_payload.body["acceptance_manifest_ref"], "ACCEPTANCE_MANIFEST")
+            if (original_manifest.typed_payload.body["binding_ref"] != origin_ref or
+                    original_manifest.typed_payload.body["receipt_refs"] != manifest.typed_payload.body["receipt_refs"][:6]):
+                raise PersistenceContractError(ReasonCode.INPUT_OWNER_MISMATCH, "PROBABILITY_RECURSIVE_OR_CHANGED_ORIGIN")
+        return binding
+
+    if request.purpose == "EXACT_REPEAT":
+        root = get(request.receipt_id, "PUBLICATION", required=False)
+        if root is None:
+            return cells_by_ref, decoded
+        if root.typed_payload.body["request_id"] != request.request_id:
+            raise PersistenceContractError(ReasonCode.INPUT_OWNER_MISMATCH, "PROBABILITY_EXACT_REPEAT_IDENTITY")
+    elif request.purpose in ("CONSTRUCT_CANDIDATE", "MATERIALIZE_CURRENT"):
+        ancestry(request.binding_ref)
+    elif type(request) in (ProbabilityPredictionReadRequestV1, ProbabilityPredictionReviewBasisReadRequestV1):
+        result = get(request.result_ref, "PREDICTION_RESULT")
+        # Only direct native dependencies are inspected; arbitrary ancestors are
+        # never recursively chased. External references still need issuer proof.
+        bindings = []
+        for ref in result.typed_payload.dependency_refs:
+            dependency = get(ref, required=False)
+            if dependency is not None and dependency.typed_payload.control_kind == "INPUT_BINDING":
+                bindings.append(dependency)
+        if len(bindings) != 1:
+            raise PersistenceContractError(ReasonCode.INPUT_OWNER_MISMATCH, "PROBABILITY_RESULT_ORIGINAL_BINDING")
+        binding = ancestry(bindings[0].record_id)
+        if tuple(row["role"] for row in binding.typed_payload.body["objects"]) != ("MODEL", "CATALOG", "POLICY"):
+            raise PersistenceContractError(ReasonCode.INPUT_OWNER_MISMATCH, "PROBABILITY_RESULT_PRE_RESULT_BINDING")
+        if type(request) is ProbabilityPredictionReviewBasisReadRequestV1:
+            if request.binding_ref != binding.record_id:
+                raise PersistenceContractError(ReasonCode.INPUT_OWNER_MISMATCH, "PROBABILITY_BASIS_BINDING")
+            basis = (*request.validation_receipt_refs, request.use_limit_ref, request.model_risk_receipt_ref)
+        elif request.review_ref is not None:
+            review = get(request.review_ref, "PREDICTION_REVIEW")
+            body = review.typed_payload.body
+            if body["result_ref"] != result.record_id:
+                raise PersistenceContractError(ReasonCode.INPUT_OWNER_MISMATCH, "PROBABILITY_REVIEW_RESULT_JOIN")
+            basis = (*body["validation_receipt_refs"], body["use_limit_ref"], body["model_risk_receipt_ref"])
+        else:
+            basis = ()
+        for ref in basis:
+            get(ref, "ACCEPTANCE_RECEIPT")
+    kinds = ("PUBLICATION", "INPUT_BINDING", "ACCEPTANCE_MANIFEST", "ACCEPTANCE_RECEIPT", "REVOCATION_APPLICATION") if request.purpose == "READ_CURRENT_STATE" else (
+        ("PUBLICATION", "REVOCATION_APPLICATION") if type(request) is ProbabilityProducerReadRequestV1 else ("REVOCATION_APPLICATION",))
+    for kind in kinds:
+        key = deterministic_json(("V35", kind, _probability_scope_mapping_v1(request.scope)))
+        for cells in aggregate(key):
+            retain(cells)
+    return cells_by_ref, decoded
+
+
+def _probability_snapshot_from_cells_v1(request, cells_by_ref, observed_ns, *, decoded_records=None):
+    records = {}
+    for key, cells in cells_by_ref.items():
+        _probability_read_check_v1(request)
+        record = (decoded_records[key] if decoded_records is not None else
+                  _probability_control_spine_from_cells_v1(cells, expected_record_id=key,
+                    expected_scope=request.scope, max_frame_bytes=request.limits.max_frame_bytes))
+        payload = record.typed_payload
+        if (payload.effective_ns <= request.effective_cutoff_ns and payload.recorded_ns <= request.recorded_cutoff_ns
+                and payload.available_ns <= observed_ns):
+            records[key] = record
+        elif request.purpose not in ("READ_CURRENT_STATE", "EXACT_REPEAT") and payload.control_kind not in ("PUBLICATION", "REVOCATION_APPLICATION"):
+            raise PersistenceContractError(ReasonCode.OWNER_DATA_MISSING, "PROBABILITY_REQUIRED_RECORD_AFTER_CUTOFF")
+    for ref in _probability_read_roots_v1(request):
+        if ref not in records:
+            if request.purpose == "EXACT_REPEAT" and ref not in cells_by_ref:
+                return ProbabilityProducerReadSnapshotV1(request.scope, {}, (), (), observed_ns)
+            raise PersistenceContractError(ReasonCode.OWNER_DATA_MISSING, "PROBABILITY_REQUIRED_COMMITTED_RECORD")
+    if request.purpose == "EXACT_REPEAT":
+        payload = records[request.receipt_id].typed_payload
+        if payload.control_kind != "PUBLICATION" or payload.body["request_id"] != request.request_id:
+            raise PersistenceContractError(ReasonCode.INPUT_OWNER_MISMATCH, "PROBABILITY_EXACT_REPEAT_IDENTITY")
+    publications = tuple(sorted((row for row in records.values() if row.typed_payload.control_kind == "PUBLICATION"), key=lambda row: row.sequence))
+    previous = None
+    for index, record in enumerate(publications, 1):
+        if record.sequence != index or record.typed_payload.body["expected_head_ref"] != previous:
+            raise PersistenceContractError(ReasonCode.PERSISTENCE_CONFLICT, "PROBABILITY_PUBLICATION_HISTORY")
+        previous = record.record_id
+    revocations = tuple(sorted((row for row in records.values() if row.typed_payload.control_kind == "REVOCATION_APPLICATION"), key=lambda row: row.sequence))
+    if revocations:
+        identity = tuple(revocations[0].typed_payload.body[key] for key in ("issuer_ref", "stream_ref", "baseline_ref"))
+        for index, record in enumerate(revocations):
+            body = record.typed_payload.body
+            if (tuple(body[key] for key in ("issuer_ref", "stream_ref", "baseline_ref")) != identity or
+                    record.sequence != revocations[0].sequence + index):
+                raise PersistenceContractError(ReasonCode.PERSISTENCE_CONFLICT, "PROBABILITY_REVOCATION_HISTORY")
+    if request.purpose in ("MATERIALIZE_CURRENT", "CONSTRUCT_CANDIDATE"):
+        binding = records[request.binding_ref]
+        if binding.typed_payload.control_kind != "INPUT_BINDING":
+            raise PersistenceContractError(ReasonCode.INPUT_OWNER_MISMATCH, "PROBABILITY_BINDING_KIND")
+        manifest = records.get(binding.typed_payload.body["acceptance_manifest_ref"])
+        if (manifest is None or manifest.typed_payload.control_kind != "ACCEPTANCE_MANIFEST" or
+                manifest.typed_payload.body["binding_ref"] != binding.record_id):
+            raise PersistenceContractError(ReasonCode.OWNER_DATA_MISSING, "PROBABILITY_MANIFEST_JOIN")
+        expected = ("SOURCE_RIGHTS", "ENVIRONMENT", "MODEL_BUILD", "MODEL_REVIEW", "USE_POLICY", "CATALOG")
+        if len(binding.typed_payload.body["objects"]) == 4:
+            expected += ("COMPUTATION",)
+        if request.purpose == "CONSTRUCT_CANDIDATE" and len(expected) != 6:
+            raise PersistenceContractError(ReasonCode.INPUT_OWNER_MISMATCH, "PROBABILITY_CONSTRUCTION_HAS_RESULT")
+        role_refs = manifest.typed_payload.body["receipt_refs"]
+        if len(role_refs) != len(expected):
+            raise PersistenceContractError(ReasonCode.INPUT_OWNER_MISMATCH, "PROBABILITY_MANIFEST_ROLES")
+        for ref, role in zip(role_refs, expected, strict=True):
+            receipt = records.get(ref)
+            if (receipt is None or receipt.typed_payload.control_kind != "ACCEPTANCE_RECEIPT" or
+                    receipt.typed_payload.body["role"] != role):
+                raise PersistenceContractError(ReasonCode.INPUT_OWNER_MISMATCH, "PROBABILITY_ROLE_JOIN")
+    if type(request) in (ProbabilityPredictionReadRequestV1, ProbabilityPredictionReviewBasisReadRequestV1):
+        if records[request.result_ref].typed_payload.control_kind != "PREDICTION_RESULT":
+            raise PersistenceContractError(ReasonCode.INPUT_OWNER_MISMATCH, "PROBABILITY_RESULT_KIND")
+        if type(request) is ProbabilityPredictionReadRequestV1 and request.review_ref is not None:
+            review = records[request.review_ref].typed_payload
+            if review.control_kind != "PREDICTION_REVIEW" or review.body["result_ref"] != request.result_ref:
+                raise PersistenceContractError(ReasonCode.INPUT_OWNER_MISMATCH, "PROBABILITY_REVIEW_RESULT_JOIN")
+    return ProbabilityProducerReadSnapshotV1(request.scope, records, publications, revocations, observed_ns)
+
+
+def _finalize_prediction_artifact_v1(*, bank, request, artifact_writer, check_current=None) -> ProbabilityPredictionArtifactSealV1:
+    """Finalize one bounded artifact; receipt publication remains a separate step.
+
+    The caller retains the original admitted bank/request/writer and dependency
+    fence. A returned seal does not admit a source, a model, or a receipt append.
+    """
+    def require(ok: bool, message: str) -> None:
+        if not ok:
+            raise PersistenceContractError(ReasonCode.INVALID_CONTRACT, message)
+
+    require(type(request) is ProbabilityPredictionArtifactWriteRequestV1,
+            "PROBABILITY_ARTIFACT_REQUEST")
+    if artifact_writer is None or not callable(getattr(artifact_writer, "begin_prediction_artifact_v1", None)):
+        raise PersistenceContractError(ReasonCode.OWNER_DATA_MISSING, "prediction artifact writer is absent")
+    effective_valid_until_ns = request.valid_until_ns
+    previous_utc = previous_monotonic = None
+
+    def current() -> int:
+        nonlocal previous_utc, previous_monotonic
+        now = time.time_ns()
+        mono = time.monotonic_ns()
+        require(type(now) is int and type(mono) is int, "PROBABILITY_ARTIFACT_CLOCK")
+        require((previous_utc is None or now >= previous_utc) and
+                (previous_monotonic is None or mono >= previous_monotonic), "PROBABILITY_ARTIFACT_CLOCK_REGRESSED")
+        require(now < effective_valid_until_ns, "PROBABILITY_ARTIFACT_EXPIRED")
+        require(mono < request.deadline_monotonic_ns, "PROBABILITY_ARTIFACT_DEADLINE")
+        if check_current is not None:
+            require(check_current() is None, "PROBABILITY_ARTIFACT_SOURCE_CHECK_RESULT")
+        previous_utc, previous_monotonic = now, mono
+        return now
+
+    def frames():
+        return _iter_prediction_artifact_frames_v1(
+            bank, max_bytes=request.max_artifact_bytes, max_frames=request.max_frames)
+
+    current()
+    body_ok = seal_attempted = False
+    seal = None
+    body_error = abort_error = exit_error = None
+    try:
+        with artifact_writer.begin_prediction_artifact_v1(request) as session:
+            try:
+                total = count = 0
+                for frame in frames():
+                    current()
+                    require(type(frame) is bytes and 0 < len(frame) <= 65537 and frame.endswith(b"\n"),
+                            "PROBABILITY_ARTIFACT_FRAME")
+                    require(total + len(frame) <= request.max_artifact_bytes and count < request.max_frames,
+                            "PROBABILITY_ARTIFACT_BUDGET")
+                    session.append_prediction_frame_v1(frame)
+                    total += len(frame)
+                    count += 1
+                    current()
+                require(count > 0 and total > 0, "PROBABILITY_ARTIFACT_EMPTY")
+                current()
+                written = iter(session.iter_written_prediction_frames_v1())
+                expected = iter(frames())
+                expected_end, actual_end = object(), object()
+                verified_count = verified_bytes = 0
+                while True:
+                    current()
+                    wanted = next(expected, expected_end)
+                    current()
+                    actual = next(written, actual_end)
+                    current()
+                    if wanted is expected_end and actual is actual_end:
+                        break
+                    require(wanted is not expected_end and actual is not actual_end and
+                            type(actual) is bytes and actual == wanted, "PROBABILITY_ARTIFACT_READBACK")
+                    verified_count += 1
+                    verified_bytes += len(actual)
+                require((verified_count, verified_bytes) == (count, total), "PROBABILITY_ARTIFACT_READBACK_COUNT")
+                current()
+                # Even a raising or malformed seal can have published the artifact.
+                seal_attempted = True
+                seal = session.seal_prediction_artifact_v1()
+                require(type(seal) is ProbabilityPredictionArtifactSealV1, "PROBABILITY_ARTIFACT_SEAL")
+                require((seal.artifact_ref, seal.scope, seal.result_ref, seal.dependency_refs) ==
+                        (request.artifact_ref, request.scope, request.result_ref, request.dependency_refs),
+                        "PROBABILITY_ARTIFACT_SEAL_IDENTITY")
+                require(type(seal.byte_count) is int and type(seal.frame_count) is int and
+                        (seal.byte_count, seal.frame_count) == (total, count), "PROBABILITY_ARTIFACT_SEAL_COUNT")
+                require(seal.observed_ns <= current() < seal.valid_until_ns <= request.valid_until_ns,
+                        "PROBABILITY_ARTIFACT_SEAL_LIFETIME")
+                effective_valid_until_ns = min(effective_valid_until_ns, seal.valid_until_ns)
+                current()
+                body_ok = True
+            except BaseException as error:
+                body_error = error
+                if not seal_attempted:
+                    try:
+                        session.abort_unpublished_prediction_stage_v1()
+                    except BaseException as cleanup_error:
+                        abort_error = cleanup_error
+                raise
+    except BaseException as error:
+        exit_error = error
+    failures = []
+    for error in (body_error, abort_error, exit_error):
+        if error is not None and not any(error is saved for saved in failures):
+            failures.append(error)
+    if len(failures) == 1:
+        raise failures[0]
+    if failures:
+        raise BaseExceptionGroup("prediction artifact body, abort and exit failures", failures)
+    require(body_ok and seal is not None, "PROBABILITY_ARTIFACT_BODY_NOT_COMPLETED")
+    current()
+    return seal
+
+
+@contextmanager
+def _probability_combined_read_budget_v1(adapter, *, scope, max_total_bytes):
+    """One owned byte allowance spanning both metadata reads and the artifact."""
+    _probability_int_v1(max_total_bytes, 1)
+    _probability_require_v1(type(scope) is ProbabilityProducerScopeV1, "PROBABILITY_SCOPE")
+    if getattr(adapter, "_probability_read_accounting_v1", None) is not None:
+        raise PersistenceContractError(ReasonCode.TRANSACTION_STATE_INVALID, "probability combined read is already owned")
+    ledger = {"scope": scope, "maximum": max_total_bytes, "used": 0,
+              "thread": threading.get_ident()}
+    adapter._probability_read_accounting_v1 = ledger
+    try:
+        yield ledger
+    finally:
+        if getattr(adapter, "_probability_read_accounting_v1", None) is not ledger:
+            raise PersistenceContractError(ReasonCode.PERSISTENCE_UNAVAILABLE, "probability byte owner changed")
+        adapter._probability_read_accounting_v1 = None
+
+
+def _probability_charge_read_v1(adapter, scope, size):
+    ledger = getattr(adapter, "_probability_read_accounting_v1", None)
+    if ledger is None:
+        return
+    if (ledger["scope"] != scope or ledger["thread"] != threading.get_ident() or
+            type(size) is not int or size < 0 or ledger["used"] + size > ledger["maximum"]):
+        raise PersistenceContractError(ReasonCode.PERSISTENCE_UNAVAILABLE, "PROBABILITY_COMBINED_READ_BYTE_BUDGET")
+    ledger["used"] += size
 
 
 class PersistenceAvailabilityV1(StrEnum):
@@ -82,6 +513,11 @@ class PersistenceAdapterV1(ABC):
     """Typed append-only storage boundary; production technology remains unselected."""
 
     production_selection_state = PRODUCTION_PERSISTENCE_SELECTION_STATE_V1
+
+    def load_committed_probability_producer_state_v1(
+        self, request: ProbabilityProducerReadRequestV1 | ProbabilityPredictionReadRequestV1 | ProbabilityPredictionReviewBasisReadRequestV1,
+    ) -> ContextManager[ProbabilityProducerReadSnapshotV1]:
+        raise PersistenceContractError(ReasonCode.OWNER_DATA_MISSING, "committed probability reader is absent")
 
     @property
     @abstractmethod
@@ -196,6 +632,7 @@ class InMemoryPersistenceAdapterV1(PersistenceAdapterV1):
         self._tables: dict[str, dict[str, object]] = {table: {} for table in APPEND_ONLY_TABLES_V1}
         self._lock = RLock()
         self._active_transaction: _InMemoryTransactionV1 | None = None
+        self._probability_read_active_v1 = False
 
     @property
     def availability(self) -> PersistenceAvailabilityV1:
@@ -204,6 +641,8 @@ class InMemoryPersistenceAdapterV1(PersistenceAdapterV1):
     def begin_transaction(self) -> PersistenceTransactionV1:
         self._lock.acquire()
         try:
+            if self._probability_read_active_v1:
+                raise TransactionContractError(ReasonCode.TRANSACTION_STATE_INVALID, "probability read owns this adapter")
             if self._active_transaction is not None and self._active_transaction.is_active:
                 raise TransactionContractError(ReasonCode.TRANSACTION_STATE_INVALID, "nested transactions are forbidden")
             committed_snapshot = {
@@ -248,9 +687,23 @@ class InMemoryPersistenceAdapterV1(PersistenceAdapterV1):
     def _record_exists(tables: Mapping[str, Mapping[str, object]], record_ref: str) -> bool:
         return any(record_ref in rows for table, rows in tables.items() if table != "idempotency_claims")
 
+    def _probability_append_snapshot_v1(self, transaction, request):
+        from dataclasses import replace
+        tx = self._transaction(transaction)
+        # The writer's committed cut is fresh. The preparation cut cannot hide
+        # a later competing publication or applied revocation from the CAS.
+        now = _probability_read_check_v1(request)
+        request = replace(request, effective_cutoff_ns=now, recorded_cutoff_ns=now)
+        cells, decoded = _probability_memory_cells_v1(self, request, tx._committed_snapshot)
+        return _probability_snapshot_from_cells_v1(request, cells, _probability_read_check_v1(request), decoded_records=decoded)
+
     def insert_receipt_record(self, transaction: PersistenceTransactionV1, record: EconomicReceiptEventSpineV1) -> None:
         tx = self._transaction(transaction)
         payload = record.typed_payload
+        if (record.record_type is EconomicRecordTypeV1.PROBABILITY_PRODUCER_CONTROL
+                or type(payload) is ProbabilityProducerControlReceiptV1):
+            _validate_probability_control_spine_v1(record)
+            _probability_require_append_context_v1(self, tx, record)
         if (record.record_type == EconomicRecordTypeV1.PRIVATE_OBSERVATION_CLOCK
                 or type(payload) is PrivateObservationClockReceiptV1):
             record = _private_clock_reconstruct_spine_v1(record, expected_record_id=record.record_id)
@@ -262,6 +715,45 @@ class InMemoryPersistenceAdapterV1(PersistenceAdapterV1):
         ):
             raise PersistenceContractError(ReasonCode.PERSISTENCE_CONFLICT, "durable receipt dependency is absent")
         self._insert(transaction, "receipt_records", record.record_id, record)
+
+    @contextmanager
+    def load_committed_probability_producer_state_v1(self, request):
+        started = _probability_read_check_v1(request)
+        self._lock.acquire()
+        claimed = False
+        body_error = cleanup_error = None
+        body_ok = False
+        try:
+            if self._probability_read_active_v1 or (self._active_transaction is not None and self._active_transaction.is_active):
+                raise PersistenceContractError(ReasonCode.TRANSACTION_STATE_INVALID, "probability read conflicts with adapter ownership")
+            self._probability_read_active_v1 = True
+            claimed = True
+            selected_cells, decoded = _probability_memory_cells_v1(self, request, self._tables)
+            observed = _probability_read_check_v1(request)
+            if observed < started:
+                raise PersistenceContractError(ReasonCode.INVALID_CONTRACT, "PROBABILITY_READ_CLOCK_REGRESSED")
+            snapshot = _probability_snapshot_from_cells_v1(request, selected_cells, observed, decoded_records=decoded)
+            yield snapshot
+            body_ok = True
+        except BaseException as error:
+            body_error = error
+        finally:
+            try:
+                self._lock.release()
+            except BaseException as error:
+                cleanup_error = error
+            else:
+                if claimed:
+                    self._probability_read_active_v1 = False
+        failures = [error for error in (body_error, cleanup_error) if error is not None]
+        if len(failures) == 1:
+            raise failures[0]
+        if failures:
+            raise BaseExceptionGroup("probability memory read and cleanup failures", failures)
+        if not body_ok:
+            raise PersistenceContractError(ReasonCode.PERSISTENCE_UNAVAILABLE, "PROBABILITY_READ_BODY_NOT_COMPLETED")
+        if _probability_read_check_v1(request) < observed:
+            raise PersistenceContractError(ReasonCode.INVALID_CONTRACT, "PROBABILITY_READ_CLOCK_REGRESSED")
 
     def insert_value_lineage_edge(self, transaction: PersistenceTransactionV1, edge: ValueLineageEdgeV1) -> None:
         tx = self._transaction(transaction)
@@ -662,3 +1154,50 @@ def _f14_reconstruct_snapshot_v1(request, rows):
             text = next(values[rid] for values in selected.values() if rid in values)
             _f14_require_v1(deterministic_json(technical[rid]) == text, 'F14_STORAGE_NONCANONICAL')
     return PrivateEvidenceReadSnapshotV1(dict(request.scope), records, technical, frozenset(present), intent)
+
+
+def _probability_memory_cells_v1(self, request, tables):
+    cells_by_ref = {}
+    total = 0
+
+    def acquire(record):
+        nonlocal total
+        _probability_read_check_v1(request)
+        if type(record) is not EconomicReceiptEventSpineV1:
+            raise PersistenceContractError(ReasonCode.SCHEMA_MISMATCH, "PROBABILITY_RECORD_TYPE")
+        if record.record_id in cells_by_ref:
+            return cells_by_ref[record.record_id]
+        if type(record.typed_payload) is not ProbabilityProducerControlReceiptV1:
+            raise PersistenceContractError(ReasonCode.SCHEMA_MISMATCH, "PROBABILITY_PAYLOAD_TYPE")
+        if len(cells_by_ref) >= request.limits.max_records:
+            raise PersistenceContractError(ReasonCode.PERSISTENCE_UNAVAILABLE, "PROBABILITY_READ_RECORD_BUDGET")
+        canonical = _bounded_probability_json_v1(_probability_control_projection_v1(record), max_bytes=request.limits.max_frame_bytes)
+        _validate_probability_control_spine_v1(record)
+        cells = (record.record_id, record.effective_at.isoformat(), record.recorded_at.isoformat(), record.aggregate_id, canonical)
+        size = sum(_probability_cell_sizes_v1(cells, max_frame_bytes=request.limits.max_frame_bytes))
+        if total + size > request.limits.max_total_bytes:
+            raise PersistenceContractError(ReasonCode.PERSISTENCE_UNAVAILABLE, "PROBABILITY_READ_BYTE_BUDGET")
+        _probability_charge_read_v1(self, request.scope, size)
+        cells_by_ref[record.record_id] = cells
+        total += size
+        return cells
+
+    def exact(ref, required):
+        _probability_read_check_v1(request)
+        record = tables["receipt_records"].get(ref)
+        if record is None:
+            if (required or request.purpose == "EXACT_REPEAT") and any(ref in rows for name, rows in tables.items() if name != "receipt_records"):
+                raise PersistenceContractError(ReasonCode.INPUT_OWNER_MISMATCH, "PROBABILITY_REFERENCE_TABLE")
+            if required:
+                raise PersistenceContractError(ReasonCode.OWNER_DATA_MISSING, "PROBABILITY_REQUIRED_COMMITTED_RECORD")
+            return None
+        return acquire(record)
+
+    def aggregate(key):
+        for record in tables["receipt_records"].values():
+            _probability_read_check_v1(request)
+            if type(record) is EconomicReceiptEventSpineV1 and record.aggregate_id == key:
+                yield acquire(record)
+
+    selected_cells, decoded = _probability_select_committed_cells_v1(request, exact, aggregate)
+    return selected_cells, decoded

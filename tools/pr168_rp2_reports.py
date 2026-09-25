@@ -52,7 +52,7 @@ def write_jsonl(path: Path, rows: Iterable[Mapping[str, Any]]) -> list[dict[str,
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("w", encoding="utf-8", newline="\n") as handle:
         for row in materialized:
-            handle.write(json.dumps(row, sort_keys=True, ensure_ascii=True, separators=(",", ":")) + "\n")
+            handle.write(json.dumps(row, sort_keys=True, ensure_ascii=True, separators=(",", ":"), allow_nan=False) + "\n")
     return materialized
 
 

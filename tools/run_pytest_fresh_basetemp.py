@@ -15,6 +15,7 @@ if str(REPO_ROOT) not in sys.path:
 
 from tools.validation_reliability import (  # noqa: E402
     EVIDENCE_ROOT_ENV,
+    PROCESS_ROOT_ENV,
     RUN_ID_ENV,
     STANDALONE_PYTEST_HELPER_PHASE,
     CommandExecutionReceiptV1,
@@ -27,6 +28,10 @@ from tools.validation_reliability import (  # noqa: E402
     command_attempt_accounting,
     resolve_validation_run_paths,
     supervise_command,
+    _command_requires_process_retention_v1,
+    _command_projection_v1,
+    _local_unlinked_path,
+    _scan_raise_errors,
     validate_complete_run_evidence,
     validate_published_completion_receipt,
     write_run_provenance,
@@ -34,6 +39,7 @@ from tools.validation_reliability import (  # noqa: E402
 
 MAX_BASETEMP_TEXT_LENGTH = 160
 MAX_NESTED_EVIDENCE_COLLISIONS = 10_000
+_STANDALONE_SUPERVISION = None
 
 
 @dataclass(frozen=True)
@@ -60,15 +66,90 @@ def make_fresh_basetemp(
     )
 
 
+def _split_pytest_options_v1(pytest_args: Sequence[str]):
+    if isinstance(pytest_args, (str, bytes)) or any(type(arg) is not str for arg in pytest_args):
+        raise ValueError("pytest arguments must be exact strings")
+    args = list(pytest_args)
+    marker = args.index("--") if "--" in args else len(args)
+    prefix, literals = args[:marker], args[marker:]
+    retained = []
+    selected = None
+    index = 0
+    while index < len(prefix):
+        arg = prefix[index]
+        if arg == "--basetemp" or arg.startswith("--basetemp="):
+            if selected is not None:
+                raise ValueError("duplicate pytest basetemp")
+            if arg == "--basetemp":
+                index += 1
+                if index == len(prefix):
+                    raise ValueError("missing pytest basetemp value")
+                selected = prefix[index]
+            else:
+                selected = arg.split("=", 1)[1]
+            if not selected or selected.startswith("-"):
+                raise ValueError("invalid pytest basetemp value")
+        else:
+            retained.append(arg)
+        index += 1
+    return retained, literals, selected
+
+
 def find_explicit_basetemp(pytest_args: Sequence[str]) -> str | None:
-    for index, arg in enumerate(pytest_args):
-        if arg == "--basetemp":
-            if index + 1 < len(pytest_args):
-                return pytest_args[index + 1]
-            return "<missing --basetemp value>"
-        if arg.startswith("--basetemp="):
-            return arg.split("=", 1)[1]
-    return None
+    return _split_pytest_options_v1(pytest_args)[2]
+
+
+def _bind_canonical_pytest_invocation_v1(
+    pytest_args: Sequence[str], *, repository_root: pathlib.Path,
+    python_executable: str, run_root: pathlib.Path, environment,
+):
+    """Project an already admitted run; this creates no execution authority."""
+    from tools.validation_reliability import _local_unlinked_path
+
+    prefix, literals, explicit = _split_pytest_options_v1(pytest_args)
+    for arg in prefix:
+        if (arg.startswith("@") or arg in {"--noconftest", "--debug"}
+                or any(arg == control or arg.startswith(control + "=") for control in (
+                    "--rootdir", "--confcutdir", "--override-ini", "--inifile",
+                    "--junitxml", "--junit-xml", "--log-file", "--debug"))
+                or any(arg.startswith(control) for control in ("-c", "-o", "-p"))):
+            raise ValueError("competing canonical pytest control")
+    root = repository_root.resolve(strict=True)
+    process_root = run_root.resolve(strict=True)
+    basetemp = process_root / "p"
+    cache = process_root / "pytest-cache"
+    if (not root.is_dir() or not process_root.is_dir()
+            or any(root == path or root.is_relative_to(path) for path in (basetemp, cache))):
+        raise ValueError("pytest owned paths conflict with the repository")
+    for path in (repository_root, run_root, basetemp, cache):
+        _local_unlinked_path(path)
+        if path.exists() and not path.is_dir():
+            raise ValueError("pytest owned directory changed kind")
+    if explicit is not None and explicit != str(basetemp):
+        raise ValueError("pytest basetemp differs from exact admitted root")
+    if type(python_executable) is not str or not python_executable:
+        raise ValueError("missing admitted Python executable")
+    child = {}
+    removed = []
+    seen = set()
+    for key, value in environment.items():
+        if (type(key) is not str or type(value) is not str or not key
+                or "=" in key or "\0" in key or "\0" in value or key.upper() in seen):
+            raise ValueError("invalid or case-colliding pytest environment")
+        seen.add(key.upper())
+        if key.upper().startswith("PYTEST_"):
+            removed.append(key)
+        elif key.upper() != "PYTHONDONTWRITEBYTECODE":
+            child[key] = value
+    controls = (("PYTEST_DISABLE_PLUGIN_AUTOLOAD", "1"), ("PYTHONDONTWRITEBYTECODE", "1"))
+    child.update(controls)
+    command = [python_executable, "-B", "-m", "pytest", "-c", str(root / "pytest.ini"),
+               "-o", "addopts=", "-o", "cache_dir=" + str(cache),
+               "--rootdir=" + str(root), "--confcutdir=" + str(root),
+               *prefix, "--basetemp", str(basetemp), *literals]
+    metadata = {"registered_argv": (python_executable, "-m", "pytest", *pytest_args),
+                "removed_environment_keys": tuple(removed), "fixed_environment_controls": controls}
+    return PytestInvocation(command, str(basetemp), explicit is None), child, metadata
 
 
 def _allocate_nested_evidence_root(
@@ -105,7 +186,8 @@ def build_pytest_invocation(
     explicit_basetemp = find_explicit_basetemp(forwarded_args)
     if explicit_basetemp is None:
         selected_basetemp = fresh_basetemp or make_fresh_basetemp()
-        forwarded_args.extend(["--basetemp", str(selected_basetemp)])
+        marker = forwarded_args.index("--") if "--" in forwarded_args else len(forwarded_args)
+        forwarded_args[marker:marker] = ["--basetemp", str(selected_basetemp)]
         return PytestInvocation(
             command=[sys.executable, "-m", "pytest", *forwarded_args],
             basetemp=str(selected_basetemp),
@@ -189,19 +271,24 @@ def _run_inherited_nested(
             inherited_evidence_root=pathlib.Path(inherited_evidence),
             explicit_basetemp=pathlib.Path(invocation.basetemp),
         )
+        invocation, child_environment, projection = _bind_canonical_pytest_invocation_v1(
+            forwarded, repository_root=REPO_ROOT, python_executable=sys.executable,
+            run_root=attestation.process_root, environment=os.environ,
+        )
         nested_evidence = _allocate_nested_evidence_root(
             attestation.evidence_root
         )
         print(f"pytest basetemp: {invocation.basetemp}", flush=True)
-        receipt = supervise_command(
-            invocation.command,
-            cwd=REPO_ROOT,
-            run_id=attestation.run_id,
-            phase="nested-pytest",
-            command_index=1,
-            evidence_root=nested_evidence,
-            environment=os.environ,
-        )
+        with _command_projection_v1(projection):
+            receipt = supervise_command(
+                invocation.command,
+                cwd=REPO_ROOT,
+                run_id=attestation.run_id,
+                phase="nested-pytest",
+                command_index=1,
+                evidence_root=nested_evidence,
+                environment=child_environment,
+            )
     except Exception as exc:
         _print_typed_error_once(
             _as_typed_error(
@@ -227,14 +314,30 @@ def _run_inherited_nested(
 
 
 def _run_standalone_owned(forwarded: Sequence[str]) -> int:
+    global _STANDALONE_SUPERVISION
+    if _STANDALONE_SUPERVISION is not None and _STANDALONE_SUPERVISION["pending"]:
+        _print_typed_error_once(ValidationReliabilityError(
+            "ENGVR_PROCESS_TERMINATION_FAILED",
+            "an earlier standalone command still has unresolved process custody",
+        ))
+        return 1
     owned_paths = None
     probe = None
     receipt = None
     cleanup_state = "NOT_RUN"
     first_error: ValidationReliabilityError | None = None
     try:
+        configured_parent = os.environ.get(PROCESS_ROOT_ENV)
+        if configured_parent is not None:
+            if not configured_parent or configured_parent != configured_parent.strip():
+                raise ValidationReliabilityError(
+                    "ENGVR_SHORT_PROCESS_ROOT_UNAVAILABLE",
+                    "configured process parent must be nonempty exact text",
+                )
+            _local_unlinked_path(pathlib.Path(configured_parent))
         owned_paths, probe = resolve_validation_run_paths(
             REPO_ROOT,
+            explicit_process_root=configured_parent,
             projected_relative_paths=tuple(forwarded),
         )
     except Exception as exc:
@@ -246,6 +349,8 @@ def _run_standalone_owned(forwarded: Sequence[str]) -> int:
         _print_typed_error_once(first_error)
         return 1
 
+    supervision = {"paths": owned_paths, "phase": STANDALONE_PYTEST_HELPER_PHASE,
+                   "pending": False, "receipt": None, "errors": []}
     explicit_basetemp = find_explicit_basetemp(forwarded)
     invocation = build_pytest_invocation(
         forwarded,
@@ -256,6 +361,10 @@ def _run_standalone_owned(forwarded: Sequence[str]) -> int:
         ),
     )
     try:
+        invocation, child_environment, projection = _bind_canonical_pytest_invocation_v1(
+            forwarded, repository_root=REPO_ROOT, python_executable=sys.executable,
+            run_root=owned_paths.process_root, environment=os.environ,
+        )
         write_run_provenance(
             owned_paths,
             probe,
@@ -264,29 +373,58 @@ def _run_standalone_owned(forwarded: Sequence[str]) -> int:
             text_integrity_preflight_state="NOT_APPLICABLE",
         )
         print(f"pytest basetemp: {invocation.basetemp}", flush=True)
-        receipt = supervise_command(
-            invocation.command,
-            cwd=REPO_ROOT,
-            run_id=owned_paths.run_id,
-            phase=STANDALONE_PYTEST_HELPER_PHASE,
-            command_index=1,
-            evidence_root=owned_paths.evidence_root,
-            environment=os.environ,
-        )
+        with _command_projection_v1(projection):
+            supervision["pending"] = True
+            _STANDALONE_SUPERVISION = supervision
+            receipt = supervise_command(
+                invocation.command,
+                cwd=REPO_ROOT,
+                run_id=owned_paths.run_id,
+                phase=STANDALONE_PYTEST_HELPER_PHASE,
+                command_index=1,
+                evidence_root=owned_paths.evidence_root,
+                environment=child_environment,
+            )
+            supervision["receipt"] = receipt
+        if _command_requires_process_retention_v1(receipt):
+            raise ValidationReliabilityError(
+                "ENGVR_PROCESS_TERMINATION_FAILED",
+                "standalone command retains unresolved process custody",
+            )
+        if (type(receipt) is not CommandExecutionReceiptV1
+                or receipt.run_id != owned_paths.run_id
+                or receipt.phase != STANDALONE_PYTEST_HELPER_PHASE
+                or type(receipt.command_index) is not int or receipt.command_index != 1
+                or receipt.argv != tuple(invocation.command) or receipt.cwd != str(REPO_ROOT)):
+            raise ValidationReliabilityError(
+                "ENGVR_PROCESS_TERMINATION_FAILED",
+                "standalone command receipt differs from the attempted invocation",
+            )
+        supervision["pending"] = False
         receipt_error = _receipt_infrastructure_error(receipt)
-        if receipt_error is not None:
+        if receipt_error is not None and first_error is None:
             first_error = receipt_error
-    except Exception as exc:
+    except BaseException as exc:
+        supervision["errors"].append(exc)
+        if receipt is not None:
+            supervision["receipt"] = receipt
+        errors_to_inspect = [exc]
+        while errors_to_inspect:
+            error = errors_to_inspect.pop()
+            if isinstance(error, BaseExceptionGroup):
+                errors_to_inspect.extend(reversed(error.exceptions))
+            attached = getattr(error, "command_receipt", None)
+            if receipt is None and type(attached) is CommandExecutionReceiptV1:
+                receipt = attached
+                supervision["receipt"] = attached
         first_error = _as_typed_error(
             exc,
             default_code="ENGVR_ATOMIC_RECEIPT_WRITE_FAILED",
             operation="standalone pytest supervision failed",
         )
     finally:
-        if (
-            receipt is not None
-            and receipt.failure_class == "ENGVR_PROCESS_TERMINATION_FAILED"
-        ):
+        if (supervision["pending"] or (receipt is not None
+                and _command_requires_process_retention_v1(receipt))):
             cleanup_state = "SKIPPED_PROCESS_TERMINATION_UNPROVEN"
             try:
                 atomic_write_json(
@@ -299,7 +437,8 @@ def _run_standalone_owned(forwarded: Sequence[str]) -> int:
                         "parent_preserved": True,
                     },
                 )
-            except Exception as exc:
+            except BaseException as exc:
+                supervision["errors"].append(exc)
                 if first_error is None:
                     first_error = _as_typed_error(
                         exc,
@@ -309,7 +448,8 @@ def _run_standalone_owned(forwarded: Sequence[str]) -> int:
         else:
             try:
                 cleanup_state = cleanup_validation_run(owned_paths)
-            except Exception as exc:
+            except BaseException as exc:
+                supervision["errors"].append(exc)
                 cleanup_state = "FAIL"
                 if first_error is None:
                     first_error = _as_typed_error(
@@ -355,6 +495,7 @@ def _run_standalone_owned(forwarded: Sequence[str]) -> int:
                 text_integrity_preflight_state="NOT_APPLICABLE",
             )
         except ValidationReliabilityError as exc:
+            supervision["errors"].append(exc)
             custody_error = exc
             if first_error is None:
                 first_error = exc
@@ -391,7 +532,8 @@ def _run_standalone_owned(forwarded: Sequence[str]) -> int:
             owned_paths.evidence_root,
             completion,
         )
-    except Exception as exc:
+    except BaseException as exc:
+        supervision["errors"].append(exc)
         if first_error is None:
             first_error = _as_typed_error(
                 exc,
@@ -399,6 +541,8 @@ def _run_standalone_owned(forwarded: Sequence[str]) -> int:
                 operation="standalone pytest completion write failed",
             )
 
+    if any(not isinstance(error, Exception) for error in supervision["errors"]):
+        _scan_raise_errors(supervision["errors"])
     if first_error is not None:
         _print_typed_error_once(first_error)
         return 1
@@ -414,7 +558,21 @@ def _run_standalone_owned(forwarded: Sequence[str]) -> int:
 
 
 def main(argv: Sequence[str] | None = None) -> int:
+    if _STANDALONE_SUPERVISION is not None and _STANDALONE_SUPERVISION["pending"]:
+        _print_typed_error_once(ValidationReliabilityError(
+            "ENGVR_PROCESS_TERMINATION_FAILED",
+            "an earlier standalone command still has unresolved process custody",
+        ))
+        return 1
     forwarded = list(sys.argv[1:] if argv is None else argv)
+    try:
+        _split_pytest_options_v1(forwarded)
+    except (ValueError, TypeError) as exc:
+        _print_typed_error_once(_as_typed_error(
+            exc, default_code="ENGVR_SHORT_PROCESS_ROOT_UNAVAILABLE",
+            operation="pytest option admission failed",
+        ))
+        return 1
     inherited_evidence = os.environ.get(EVIDENCE_ROOT_ENV, "").strip()
     inherited_run_id = os.environ.get(RUN_ID_ENV, "").strip()
     if bool(inherited_evidence) != bool(inherited_run_id):

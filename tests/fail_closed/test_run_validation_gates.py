@@ -195,6 +195,116 @@ def _clear_branch_context_env(monkeypatch):
         monkeypatch.delenv(env_name, raising=False)
 
 
+def _synthetic_candidate_custody_v1(root, plan, *, observed_paths, effects, index_path=None):
+    """Finite pytest-owned surfaces; not real campaign acceptance."""
+    return runner._ValidationCandidateCustodyV1(repo_root=root, plan=plan,
+        observe_paths=observed_paths, check_exclusive=lambda: None, index_path=index_path,
+        effects_by_occurrence={index: tuple(effects) for index in range(1, len(plan) + 1)}, ignored_paths=(),
+        entry_limit=100, snapshot_byte_limit=1_000_000, read_byte_limit=100_000_000,
+        deadline_ns=runner.time.monotonic_ns() + 60_000_000_000,
+        operation_checks={index: (lambda **kwargs: None) for index in range(1, len(plan) + 1)})
+
+
+def _exercise_candidate_custody_failures_v1(tmp_path, monkeypatch):
+    """Synthetic finite custody faults, with independently retained byte answers."""
+    plan = runner._prepare_execution_plan([["python", "tools/example_gate.py"]])
+    def case(name):
+        root = tmp_path / name
+        root.mkdir()
+        (root / "source.py").write_bytes(b"owner source\n")
+        (root / "output.json").write_bytes(b"candidate report\n")
+        index = root / "synthetic-index"
+        index.write_bytes(b"staged state\n")
+        candidate = _synthetic_candidate_custody_v1(root, plan,
+            observed_paths=lambda: ("source.py", "output.json"),
+            effects=("output.json",), index_path=index)
+        return root, index, candidate
+    def begin(candidate):
+        candidate.begin_occurrence(1, plan[0], environment={}, timeout_seconds=1,
+                                   scratch_roots=())
+
+    root, index, candidate = case("raw-index-change")
+    begin(candidate)
+    index.write_bytes(b"unexpected staged change\n")
+    with pytest.raises(RuntimeError, match="INDEX_CHANGED"):
+        candidate.end_occurrence(1, plan[0])
+    assert candidate.state == "CLEANUP_REJECTED"
+    assert index.read_bytes() == b"unexpected staged change\n"
+    assert (root / "source.py").read_bytes() == b"owner source\n"
+
+    root, index, candidate = case("mixed-permitted-and-owner-change")
+    begin(candidate)
+    (root / "output.json").write_bytes(b"permitted output\n")
+    (root / "source.py").write_bytes(b"unexplained owner change\n")
+    with pytest.raises(RuntimeError, match="UNADMITTED_EFFECT"):
+        candidate.end_occurrence(1, plan[0])
+    with pytest.raises(RuntimeError, match="not retried"):
+        candidate.restore()
+    assert (root / "source.py").read_bytes() == b"unexplained owner change\n"
+    assert (root / "output.json").read_bytes() == b"permitted output\n"
+    assert candidate.completed_actions == []
+    assert index.read_bytes() == b"staged state\n"
+
+    root, index, candidate = case("change-before-child")
+    (root / "output.json").write_bytes(b"later owner report\n")
+    with pytest.raises(RuntimeError, match="BETWEEN_OCCURRENCES"):
+        begin(candidate)
+    assert candidate.active_occurrence is None
+    assert (root / "output.json").read_bytes() == b"later owner report\n"
+
+    root, index, candidate = case("change-after-child")
+    begin(candidate)
+    (root / "output.json").write_bytes(b"permitted output\n")
+    candidate.end_occurrence(1, plan[0])
+    (root / "output.json").write_bytes(b"later owner report\n")
+    with pytest.raises(RuntimeError, match="BEFORE_RESTORATION"):
+        candidate.restore()
+    assert candidate.completed_actions == []
+    assert (root / "output.json").read_bytes() == b"later owner report\n"
+
+    root, index, candidate = case("partial-restore-write")
+    begin(candidate)
+    (root / "output.json").write_bytes(b"permitted output\n")
+    candidate.end_occurrence(1, plan[0])
+    original_write = runner.os.write
+    calls = []
+    failure = OSError("synthetic second write failure")
+    def short_then_fail(descriptor, value):
+        calls.append(len(value))
+        if len(calls) == 1:
+            return original_write(descriptor, value[:1])
+        raise failure
+    with monkeypatch.context() as scoped:
+        scoped.setattr(runner.os, "write", short_then_fail)
+        with pytest.raises(OSError) as caught:
+            candidate.restore()
+    assert caught.value is failure
+    assert candidate.state == "CLEANUP_INCOMPLETE"
+    assert (root / "output.json").read_bytes() == b"c"
+    assert len(calls) == 2
+    with pytest.raises(RuntimeError, match="not retried"):
+        candidate.restore()
+    assert index.read_bytes() == b"staged state\n"
+
+    root, index, candidate = case("readback-fault")
+    begin(candidate)
+    (root / "output.json").write_bytes(b"permitted output\n")
+    candidate.end_occurrence(1, plan[0])
+    original_snapshot = candidate._snapshot
+    def corrupted_readback(paths, **kwargs):
+        if candidate.state == "APPLYING" and candidate.completed_actions:
+            (root / "output.json").write_bytes(b"readback corruption\n")
+        return original_snapshot(paths, **kwargs)
+    candidate._snapshot = corrupted_readback
+    with pytest.raises(RuntimeError, match="RESTORATION_READBACK"):
+        candidate.restore()
+    assert candidate.state == "CLEANUP_INCOMPLETE"
+    assert len(candidate.completed_actions) == 1
+    assert (root / "output.json").read_bytes() == b"readback corruption\n"
+    assert (root / "source.py").read_bytes() == b"owner source\n"
+    assert index.read_bytes() == b"staged state\n"
+
+
 @pytest.fixture(autouse=True)
 def _central_supervision_test_adapter(monkeypatch, tmp_path):
     def make_paths(label: str):
@@ -281,6 +391,33 @@ def _central_supervision_test_adapter(monkeypatch, tmp_path):
             pid=4321,
         )
 
+    def typed_fake_supervise(command, **kwargs):
+        # Preserve the existing substituted child outcomes, with complete receipt
+        # identity. A namespace is deliberately no longer a terminal receipt.
+        observed = fake_supervise(command, **kwargs)
+        timed_out = observed.failure_class == "ENGVR_PROCESS_TIMEOUT"
+        timeout = kwargs.get("timeout_seconds")
+        evidence = Path(kwargs["evidence_root"])
+        return reliability.CommandExecutionReceiptV1(
+            schema_version=1, run_id=kwargs["run_id"], phase=kwargs["phase"],
+            command_index=kwargs["command_index"], argv=tuple(command),
+            cwd=str(Path(kwargs["cwd"]).resolve()), pid=observed.pid, platform=os.name,
+            start_time_utc="2026-08-24T00:00:00Z", end_time_utc="2026-08-24T00:00:01Z",
+            elapsed_monotonic_seconds=observed.elapsed_monotonic_seconds,
+            native_exit_code=observed.native_exit_code, start_failure_class=None,
+            timeout_seconds_or_null=timeout,
+            timeout_state="TRIGGERED" if timed_out else "NOT_CONFIGURED" if timeout is None else "NOT_TRIGGERED",
+            termination_state=("TASKKILL_T:0;TERMINAL:PROVEN" if os.name == "nt"
+                               else "SIGTERM:0;TERMINAL:PROVEN") if timed_out else "NOT_REQUIRED",
+            stdout_path=str(evidence / f"command-{kwargs['command_index']}.stdout.bin"),
+            stderr_path=str(evidence / f"command-{kwargs['command_index']}.stderr.bin"),
+            stdout_byte_count=0, stderr_byte_count=0,
+            stdout_required_markers=tuple(kwargs.get("required_markers", ())),
+            stdout_marker_state=observed.stdout_marker_state, stderr_was_nonempty=False,
+            failure_class=observed.failure_class,
+        )
+
+    monkeypatch.setattr(runner, "_RUN_COMMANDS_SUPERVISION", None)
     monkeypatch.setattr(runner, "resolve_validation_run_paths", fake_resolve)
     monkeypatch.setattr(runner, "_RUN_COMMANDS_ACTIVE_PATHS", paths)
     monkeypatch.setattr(runner, "_ACTIVE_SEMANTIC_CHANGED_PATHS", None)
@@ -307,7 +444,124 @@ def _central_supervision_test_adapter(monkeypatch, tmp_path):
         "validate_published_completion_receipt",
         lambda *args, **kwargs: None,
     )
-    monkeypatch.setattr(runner, "_execute_supervised_command", fake_supervise)
+    monkeypatch.setattr(runner, "_execute_supervised_command", typed_fake_supervise)
+
+    # The existing orchestration probes already replace the process owner.
+    # Their no-effect stub is never used by the explicit candidate-custody cases.
+    original_prepare = runner._prepare_validation_candidate_v1
+    original_restore = runner._restore_tracked_gate_side_effects
+    class SyntheticNoEffectCustody:
+        def begin_occurrence(self, *args, **kwargs):
+            pass
+        def end_occurrence(self, *args, **kwargs):
+            pass
+        def restore(self):
+            return ()
+    def prepare_fixture(root, plan, original):
+        if original is not None:
+            return original_prepare(root, plan, original)
+        return None if root is None else SyntheticNoEffectCustody()
+    def restore_fixture(root, original):
+        if type(original) is SyntheticNoEffectCustody:
+            return original.restore()
+        return original_restore(root, original)
+    monkeypatch.setattr(runner, "_prepare_validation_candidate_v1", prepare_fixture)
+    monkeypatch.setattr(runner, "_restore_tracked_gate_side_effects", restore_fixture)
+
+    def activate_synthetic_scan():
+        # Opt-in support for the existing mocked full-plan tests only. The real
+        # capacity guard and native frame owner stay in the exercised call chain.
+        # This grants no real RP5A scan, source acceptance or campaign capacity.
+        from tools import pr168_rp5a_git_grep_scanner as scan_owner
+
+        issued_inputs = []
+
+        def resolve_scan_fixture(repo_root, **_kwargs):
+            return reliability.resolve_validation_run_paths(
+                Path(repo_root), explicit_process_root=tmp_path / "s",
+                projected_relative_paths=("command-1.json",),
+            )
+
+        def synthetic_capacity(original_paths, phase, expected_plan):
+            root = original_paths.repo_root
+            assert root.is_relative_to(tmp_path) and root != REPO_ROOT
+            selected = tuple(row for row in expected_plan
+                             if runner._scan_full_builder_argv(row.argv))
+            assert len(selected) == 1
+            entry = selected[0]
+            assert entry.cwd == str(root) and entry.run_id == original_paths.run_id
+            source = root / "scan-fixture.py"
+            source_bytes = b"# deterministic fixture-owned scan input\n"
+            if source.exists():
+                assert source.read_bytes() == source_bytes
+            else:
+                source.write_bytes(source_bytes)
+            surface = reliability._ScanCandidateSurface(
+                source.name, "FILE", source.stat().st_mode & 0o7777, source_bytes, (),
+            )
+            limits = reliability._ScanRunReadLimits(100_000, 1_000, 16, 1)
+            deadline = runner.time.monotonic_ns() + 60_000_000_000
+            scratch = original_paths.process_root / "i"
+            scratch.mkdir()
+            fence = reliability._ScanCandidateFence(
+                root, (surface,), limits=limits, candidate_read_bytes=100_000,
+                deadline_ns=deadline,
+            )
+            executable = shutil.which("git")
+            assert executable is not None
+            executable = str(Path(executable).resolve())
+            profile = reliability._Rp5aScanProfile(
+                original_paths.run_id, entry.command_index, str(root), str(scratch),
+                (source.name,), 1, len(source.name.encode("utf-8")) + 1,
+                ((source.name, len(source_bytes)),), executable, executable, "git",
+                tuple(scan_owner._scan_child_environment(os.environ).items()),
+                100_000, 100_000, 4096, 100_000, deadline, 3,
+            )
+            identity = reliability._ScanLaunchIdentity(
+                original_paths.run_id, phase, entry.command_index,
+                len(expected_plan), entry.argv, str(root),
+            )
+            original_input = reliability._ScanLaunchInput(
+                identity, (surface,), limits=limits, candidate_read_bytes=100_000,
+                deadline_ns=deadline, scratch_root=scratch, scratch_bytes=100_000,
+                parent_frame_reread_bytes=100_000, check_candidate=fence,
+            )
+            issued_inputs.append(original_input)
+            return reliability._prepare_scan_launch(
+                original_paths, phase=phase, plan=expected_plan,
+                profiles={entry.command_index: profile}, read_limits=limits,
+                deadline_ns=deadline,
+                launch_inputs={entry.command_index: original_input},
+            )
+
+        def supervise_scan_fixture(command, **kwargs):
+            original_input = kwargs.get("launch_input")
+            if original_input is None:
+                return typed_fake_supervise(command, **kwargs)
+            assert any(original_input is value for value in issued_inputs)
+            stream = original_input._claim(
+                run_id=kwargs["run_id"], phase=kwargs["phase"],
+                command_index=kwargs["command_index"], argv=tuple(command),
+                cwd=kwargs["cwd"],
+            )
+            # The existing subprocess port is mocked. Only its labeled lifecycle
+            # is simulated; the original frame I/O and context cleanup are real.
+            process = SimpleNamespace(pid=4321, returncode=None)
+            process.poll = lambda: process.returncode
+            original_input._attached(process)
+            frame = stream.read(original_input.extent + 1)
+            assert len(frame) == original_input.extent
+            receipt = typed_fake_supervise(command, **kwargs)
+            process.returncode = receipt.native_exit_code
+            original_input._finished(process, receipt.native_exit_code)
+            assert original_input.state == "CONSUMED"
+            return receipt
+
+        monkeypatch.setattr(runner, "resolve_validation_run_paths", resolve_scan_fixture)
+        monkeypatch.setattr(runner, "_execute_supervised_command", supervise_scan_fixture)
+        return synthetic_capacity
+
+    return activate_synthetic_scan
 
 
 def _st12h_mock_terminal_output(command: list[str]) -> str:
@@ -321,7 +575,17 @@ def _st12h_mock_terminal_output(command: list[str]) -> str:
 def _record_fake_aggregate_success_receipts(commands) -> None:
     runner._LAST_PLANNED_COMMAND_COUNT = len(commands)
     runner._LAST_COMMAND_RECEIPTS = tuple(
-        SimpleNamespace(
+        reliability.CommandExecutionReceiptV1(
+            schema_version=1, run_id=runner._RUN_COMMANDS_ACTIVE_PATHS.run_id,
+            phase=runner.ALL_PHASE, argv=tuple(_command), cwd=str(REPO_ROOT),
+            platform=os.name, start_time_utc="2026-08-24T00:00:00Z",
+            end_time_utc="2026-08-24T00:00:01Z", elapsed_monotonic_seconds=1.0,
+            start_failure_class=None, timeout_seconds_or_null=None,
+            timeout_state="NOT_CONFIGURED", termination_state="NOT_REQUIRED",
+            stdout_path=str(runner._RUN_COMMANDS_ACTIVE_PATHS.evidence_root / f"command-{index}.stdout.bin"),
+            stderr_path=str(runner._RUN_COMMANDS_ACTIVE_PATHS.evidence_root / f"command-{index}.stderr.bin"),
+            stdout_byte_count=0, stderr_byte_count=0, stdout_required_markers=(),
+            stderr_was_nonempty=False,
             command_index=index,
             pid=4321,
             native_exit_code=0,
@@ -3900,6 +4164,538 @@ def test_runner_phase_manifest_covers_full_validation_plan(monkeypatch):
     )
 
 
+    # Independent registered-vector evidence transcribed from unchanged R5
+    # reference/ORDERED_COMMAND_PLAN_SOURCE.json, never from projector output.
+    # REVIEW_PYTHON and /owned are synthetic operands, not execution grants.
+    import ast
+    from pathlib import PurePosixPath
+    from types import SimpleNamespace
+    expected_ordered = (
+        ('fast-preflight', ('REVIEW_PYTHON', 'tools/validate_grand_global_debug_logical_consistency_audit.py', '--repo-root', '.')),
+        ('fast-preflight', ('REVIEW_PYTHON', 'tools/validate_ci_branch_context_matrix.py', '--repo-root', '.')),
+        ('fast-preflight', ('REVIEW_PYTHON', 'tools/validate_repair_pr_changed_file_scope.py', '--repo-root', '.')),
+        ('fast-preflight', ('REVIEW_PYTHON', 'tools/validate_nested_validator_contracts.py', '--repo-root', '.')),
+        ('fast-preflight', ('REVIEW_PYTHON', 'tools/validate_validation_inventory.py', '--repo-root', '.')),
+        ('fast-preflight', ('REVIEW_PYTHON', 'tools/validate_validation_scope_registry.py')),
+        ('fast-preflight', ('REVIEW_PYTHON', 'tools/changed_area_validation_router.py', '--repo-root', '.')),
+        ('fast-preflight', ('REVIEW_PYTHON', 'tools/cross_platform_path_invariant.py', '--repo-root', '.')),
+        ('deterministic-validators-a', ('REVIEW_PYTHON', 'tools/master_plan_ingest.py', '--input', 'docs/master_plan/QTT_MasterPlan_Current.md', '--section-manifest-out', '/owned/v/SectionManifest.json', '--traceability-out', '/owned/v/TraceabilityReport.json', '--scope-report-out', '/owned/v/FirstPrScopeReport.json')),
+        ('deterministic-validators-a', ('REVIEW_PYTHON', 'tools/master_plan_traceability_check.py', '--master-plan', 'docs/master_plan/QTT_MasterPlan_Current.md', '--section-manifest', '/owned/v/SectionManifest.json', '--traceability-report', '/owned/v/TraceabilityReport.json')),
+        ('deterministic-validators-a', ('REVIEW_PYTHON', 'tools/validate_first_pr_scope.py', '--repo-root', '.', '--scope-report', '/owned/v/FirstPrScopeReport.json', '--block-runtime', '--block-live', '--block-sha', '--block-companion-package', '--block-profit-claims', '--block-source-retrieval', '--block-source-acceptance', '--block-connector-binding', '--block-private-state-fetch', '--block-order-execution', '--block-neural-training', '--block-neural-inference', '--block-external-repo-clone', '--block-package-install-scripts')),
+        ('deterministic-validators-a', ('REVIEW_PYTHON', '-c', "from pathlib import Path\nfrom src.qtt.stage1_prediction_markets.atomicrows_semantic_contract.report import build_report\nfrom src.qtt.stage1_prediction_markets.atomicrows_semantic_contract.validator import validate_report_payload, validate_repository_artifacts\nroot = Path('.').resolve()\nreport = build_report(root)\nfailures = list(validate_repository_artifacts(root))\noutcome = validate_report_payload(\n    report,\n    repo_root=root,\n    enforce_environment=True,\n    enforce_protected_diff=True,\n)\nfailures.extend(outcome.failures)\nunique_failures = tuple(sorted(set(failures)))\nif unique_failures:\n    print('\\n'.join(unique_failures))\n    raise SystemExit(1)\nfor receipt in outcome.receipts:\n    print(receipt)\n")),
+        ('deterministic-validators-a', ('REVIEW_PYTHON', 'tools/validate_atomicrows_row_family_source_manifest_currentization.py', '--repo-root', '.', '--out', '/owned/v/AtomicRowsRowFamilySourceManifestCurrentization.report.json')),
+        ('deterministic-validators-a', ('REVIEW_PYTHON', 'tools/validate_atomicrows_semantic_field_coverage_enrichment_plan.py', '--repo-root', '.')),
+        ('deterministic-validators-a', ('REVIEW_PYTHON', 'tools/validate_idempotence_runtime_containment.py', '--repo-root', '.')),
+        ('deterministic-validators-a', ('REVIEW_PYTHON', 'tools/validate_atomicrows_semantic_value_materialization_owner_authorization_gate.py', '--repo-root', '.')),
+        ('deterministic-validators-a', ('REVIEW_PYTHON', 'tools/validate_atomicrows_semantic_value_materialization_authorization_handoff_readiness_gate.py', '--repo-root', '.')),
+        ('deterministic-validators-a', ('REVIEW_PYTHON', 'tools/validate_qtt_owner_global_override_authority.py', '--mode', 'dev', '--repo-root', '.', '--out', '/owned/v/master_plan_generated/QTTOwnerGlobalOverrideAuthority.report.json')),
+        ('deterministic-validators-a', ('REVIEW_PYTHON', 'tools/validate_qtt_owner_global_override_directive_currentization_and_internal_gate_release.py', '--repo-root', '.')),
+        ('deterministic-validators-a', ('REVIEW_PYTHON', 'tools/validate_atomicrows_semantic_value_materialization_implementation_bridge.py', '--repo-root', '.')),
+        ('deterministic-validators-a', ('REVIEW_PYTHON', 'tools/validate_source_backed_classical_quantum_parameter_default_target_matrix.py', '--repo-root', '.')),
+        ('deterministic-validators-a', ('REVIEW_PYTHON', 'tools/validate_official_source_retrieval_target_pack_parameter_defaults.py', '--repo-root', '.')),
+        ('deterministic-validators-a', ('REVIEW_PYTHON', 'tools/validate_controlled_official_source_capture_candidate_packets.py', '--repo-root', '.')),
+        ('deterministic-validators-a', ('REVIEW_PYTHON', 'tools/validate_pr153r_redo_external_source_value_capture_targets.py', '--repo-root', '.')),
+        ('deterministic-validators-a', ('REVIEW_PYTHON', 'tools/validate_pr153s_source_value_capture_closure_classifier.py', '--repo-root', '.')),
+        ('deterministic-validators-a', ('REVIEW_PYTHON', 'tools/validate_atomicrows_parameter_default_value_materialization_gate.py', '--repo-root', '.')),
+        ('deterministic-validators-a', ('REVIEW_PYTHON', 'tools/validate_agent_consumable_parameter_default_registry.py', '--repo-root', '.')),
+        ('deterministic-validators-a', ('REVIEW_PYTHON', 'tools/validate_agent_default_binding_universal_intake_gate.py', '--repo-root', '.')),
+        ('deterministic-validators-a', ('REVIEW_PYTHON', 'tools/validate_pr157_pr154_atomicrows_completion_materialization_bridge.py', '--repo-root', '.')),
+        ('deterministic-validators-a', ('REVIEW_PYTHON', 'tools/validate_pr158_owner_response_selection_readiness_bridge.py', '--repo-root', '.')),
+        ('deterministic-validators-a', ('REVIEW_PYTHON', 'tools/validate_pr159_official_source_completion_bridge.py', '--repo-root', '.')),
+        ('deterministic-validators-a', ('REVIEW_PYTHON', 'tools/validate_pr160_split_reclassification_route_closure.py', '--repo-root', '.')),
+        ('deterministic-validators-a', ('REVIEW_PYTHON', 'tools/validate_pr159r_source_locator_value_capture.py', '--repo-root', '.')),
+        ('deterministic-validators-a', ('REVIEW_PYTHON', 'tools/validate_pr159s_open_intake_completion.py', '--repo-root', '.')),
+        ('deterministic-validators-a', ('REVIEW_PYTHON', 'tools/validate_pr161a_atomicrows_pr154_value_state_materialization.py', '--repo-root', '.')),
+        ('deterministic-validators-a', ('REVIEW_PYTHON', 'tools/validate_pr161b_master_plan_residual_candidate_coverage.py', '--repo-root', '.')),
+        ('deterministic-validators-a', ('REVIEW_PYTHON', 'tools/validate_pr161c_qku_residual_candidate_assimilation.py', '--repo-root', '.')),
+        ('deterministic-validators-a', ('REVIEW_PYTHON', 'tools/validate_pr161d_qku_candidate_quality_replay_paper_prioritization.py', '--repo-root', '.')),
+        ('deterministic-validators-a', ('REVIEW_PYTHON', 'tools/validate_pr161e_replay_paper_outcome_capture_scenario_learning.py', '--repo-root', '.')),
+        ('deterministic-validators-a', ('REVIEW_PYTHON', 'tools/validate_pr161f_replay_paper_executor_input_run_artifact_generation.py', '--repo-root', '.')),
+        ('deterministic-validators-a', ('REVIEW_PYTHON', 'tools/validate_pr162_safe_nonlive_replay_paper_data_adapter_quantum_forward_bridge.py', '--repo-root', '.')),
+        ('deterministic-validators-a', ('REVIEW_PYTHON', 'tools/validate_pr162a_safe_repo_local_nonlive_dataset_materialization_authority_gate.py', '--repo-root', '.')),
+        ('deterministic-validators-a', ('REVIEW_PYTHON', 'tools/validate_pr162b_qku_formula_algorithm_solver_market_scope_materialization.py', '--repo-root', '.')),
+        ('deterministic-validators-a', ('REVIEW_PYTHON', 'tools/validate_pr162c_multisource_safe_nonlive_dataset_expansion_strict_qku_coverage.py', '--repo-root', '.')),
+        ('deterministic-validators-a', ('REVIEW_PYTHON', 'tools/validate_pr162d_aggressive_qku_candidate_materialization_agent_routing.py', '--repo-root', '.')),
+        ('deterministic-validators-a', ('REVIEW_PYTHON', 'tools/validate_pr162r_a_replay_paper_executability_classification_audit.py', '--repo-root', '.')),
+        ('deterministic-validators-a', ('REVIEW_PYTHON', 'tools/validate_pr162d_r2a_real_formulations.py', '--repo-root', '.')),
+        ('deterministic-validators-a', ('REVIEW_PYTHON', 'tools/validate_pr162r_generic_replay_paper_adapter_rerun.py', '--repo-root', '.')),
+        ('deterministic-validators-a', ('REVIEW_PYTHON', 'tools/validate_pr162r_b_replay_paper_data_binding_completion.py', '--repo-root', '.')),
+        ('deterministic-validators-a', ('REVIEW_PYTHON', 'tools/validate_pr163_generic_paper_adapter_capture_framework.py', '--repo-root', '.')),
+        ('deterministic-validators-a', ('REVIEW_PYTHON', 'tools/validate_pr163_b_paired_replay_paper_concurrent_executor.py', '--repo-root', '.')),
+        ('deterministic-validators-a', ('REVIEW_PYTHON', 'tools/validate_pr164_review_provenance_qku_canonical_coverage_audit.py', '--repo-root', '.')),
+        ('deterministic-validators-a', ('REVIEW_PYTHON', 'tools/validate_pr163_c_pretrade_infrastructure_rejection_remediation.py', '--repo-root', '.')),
+        ('deterministic-validators-a', ('REVIEW_PYTHON', 'tools/validate_pr165_evidence_backed_scoring_ranking.py', '--repo-root', '.')),
+        ('deterministic-validators-a', ('REVIEW_PYTHON', 'tools/validate_pr165_b_condition_scoped_negative_memory.py', '--repo-root', '.')),
+        ('deterministic-validators-a', ('REVIEW_PYTHON', 'tools/validate_pr165_c_replay_paper_memory_consumer_integration.py', '--repo-root', '.')),
+        ('deterministic-validators-a', ('REVIEW_PYTHON', 'tools/validate_pr165_d_scenario_qku_combination_selection.py', '--repo-root', '.')),
+        ('deterministic-validators-a', ('REVIEW_PYTHON', 'tools/validate_pr166_s_replay_paper_scenario_retest_execution.py', '--repo-root', '.')),
+        ('deterministic-validators-a', ('REVIEW_PYTHON', 'tools/validate_pr166_sm_score_memory_refresh_from_pr166_s_results.py', '--repo-root', '.')),
+        ('deterministic-validators-a', ('REVIEW_PYTHON', 'tools/validate_pr166_sf_repair_materialization_before_retest.py', '--repo-root', '.')),
+        ('deterministic-validators-a', ('REVIEW_PYTHON', 'tools/validate_pr166_s2_replay_paper_retest_loop_v2.py', '--repo-root', '.')),
+        ('deterministic-validators-a', ('REVIEW_PYTHON', 'tools/validate_pr166_sm2_score_memory_refresh_v2.py', '--repo-root', '.')),
+        ('deterministic-validators-a', ('REVIEW_PYTHON', 'tools/validate_pr166_sf_r2_targeted_conversion_repair_retest.py', '--repo-root', '.')),
+        ('deterministic-validators-a', ('REVIEW_PYTHON', 'tools/validate_pr166_sm3_score_memory_refresh_v3.py', '--repo-root', '.')),
+        ('deterministic-validators-a', ('REVIEW_PYTHON', 'tools/validate_pr166_q_quantum_classical_hybrid_comparator.py', '--repo-root', '.')),
+        ('deterministic-validators-a', ('REVIEW_PYTHON', 'tools/validate_pr166_qb_bounded_quantum_benchmark.py', '--repo-root', '.')),
+        ('deterministic-validators-a', ('REVIEW_PYTHON', 'tools/validate_pr166_qc_quantum_selected_replay_paper_retest.py', '--repo-root', '.')),
+        ('deterministic-validators-a', ('REVIEW_PYTHON', 'tools/validate_pr162e_q_quantum_automapper.py', '--repo-root', '.')),
+        ('deterministic-validators-a', ('REVIEW_PYTHON', 'tools/validate_pr167_open_trade_simulator_integration.py', '--repo-root', '.')),
+        ('deterministic-validators-a', ('REVIEW_PYTHON', 'tools/validate_pr162e_plugin_framework.py', '--repo-root', '.')),
+        ('deterministic-validators-a', ('REVIEW_PYTHON', 'tools/validate_pr162e_negative_repair_factory.py', '--repo-root', '.')),
+        ('deterministic-validators-a', ('REVIEW_PYTHON', 'tools/validate_pr162e_no_orphan_lineage.py', '--repo-root', '.')),
+        ('deterministic-validators-b', ('REVIEW_PYTHON', 'tools/build_pr168_gfp_global_formula_discovery_real_computation.py')),
+        ('deterministic-validators-b', ('REVIEW_PYTHON', 'tools/validate_pr168_gfp_baseline_count_reconcile.py')),
+        ('deterministic-validators-b', ('REVIEW_PYTHON', 'tools/validate_pr168_gfp_no_fake_positive_negative_labels.py')),
+        ('deterministic-validators-b', ('REVIEW_PYTHON', 'tools/validate_pr168_gfp_formula_assignment_coverage.py')),
+        ('deterministic-validators-b', ('REVIEW_PYTHON', 'tools/validate_pr168_gfp_real_formula_computation.py')),
+        ('deterministic-validators-b', ('REVIEW_PYTHON', 'tools/validate_pr168_gfp_formula_registry_integrity.py')),
+        ('deterministic-validators-b', ('REVIEW_PYTHON', 'tools/validate_pr168_gfp_atomicrows_computation_coverage.py')),
+        ('deterministic-validators-b', ('REVIEW_PYTHON', 'tools/validate_pr168_gfp_qku_computation_coverage.py')),
+        ('deterministic-validators-b', ('REVIEW_PYTHON', 'tools/validate_pr168_gfp_candidate_packet_v1_coverage.py')),
+        ('deterministic-validators-b', ('REVIEW_PYTHON', 'tools/validate_pr168_gfp_quantum_objective_coefficients.py')),
+        ('deterministic-validators-b', ('REVIEW_PYTHON', 'tools/validate_pr168_gfp_metadata_placeholder_demotions.py')),
+        ('deterministic-validators-b', ('REVIEW_PYTHON', 'tools/validate_pr168_gfp_truth_overlay_required.py')),
+        ('deterministic-validators-b', ('REVIEW_PYTHON', 'tools/validate_pr168_gfp_report_compactness.py')),
+        ('deterministic-validators-b', ('REVIEW_PYTHON', 'tools/validate_pr168_gfp_formula_source_arbitration.py')),
+        ('deterministic-validators-b', ('REVIEW_PYTHON', 'tools/validate_pr168_gfp_master_plan_formula_catalog_diff.py')),
+        ('deterministic-validators-b', ('REVIEW_PYTHON', 'tools/validate_pr168_gfp_minimum_tradability_formula_set.py')),
+        ('deterministic-validators-b', ('REVIEW_PYTHON', 'tools/validate_pr168_gfp_forbidden_bundle_terminology.py')),
+        ('deterministic-validators-b', ('REVIEW_PYTHON', 'tools/validate_pr168_gfp_no_orphan_lineage.py')),
+        ('deterministic-validators-b', ('REVIEW_PYTHON', 'tools/validate_pr168_gfp_authority_boundaries.py')),
+        ('deterministic-validators-b', ('REVIEW_PYTHON', 'tools/build_pr168_rp_formula_based_replay_paper_recompute.py')),
+        ('deterministic-validators-b', ('REVIEW_PYTHON', 'tools/validate_qtt_authority_reason_code_registry.py')),
+        ('deterministic-validators-b', ('REVIEW_PYTHON', 'tools/validate_pr168_rp_formula_execution.py')),
+        ('deterministic-validators-b', ('REVIEW_PYTHON', 'tools/validate_pr168_rp_replay_paper_results.py')),
+        ('deterministic-validators-b', ('REVIEW_PYTHON', 'tools/validate_pr168_rp_no_fake_computed_labels.py')),
+        ('deterministic-validators-b', ('REVIEW_PYTHON', 'tools/validate_pr168_rp_tca_pnl_math.py')),
+        ('deterministic-validators-b', ('REVIEW_PYTHON', 'tools/validate_pr168_rp_microstructure_fill_model.py')),
+        ('deterministic-validators-b', ('REVIEW_PYTHON', 'tools/validate_pr168_rp_pretrade_simulation_kernel.py')),
+        ('deterministic-validators-b', ('REVIEW_PYTHON', 'tools/validate_pr168_rp_order_policy_candidate_ranking.py')),
+        ('deterministic-validators-b', ('REVIEW_PYTHON', 'tools/validate_pr168_rp_no_trade_candidate.py')),
+        ('deterministic-validators-b', ('REVIEW_PYTHON', 'tools/validate_pr168_rp_scenario_ladder.py')),
+        ('deterministic-validators-b', ('REVIEW_PYTHON', 'tools/validate_pr168_rp_latency_budget.py')),
+        ('deterministic-validators-b', ('REVIEW_PYTHON', 'tools/validate_pr168_rp_live_candidate_handoff_no_order_authority.py')),
+        ('deterministic-validators-b', ('REVIEW_PYTHON', 'tools/validate_pr168_rp_probability_calibration.py')),
+        ('deterministic-validators-b', ('REVIEW_PYTHON', 'tools/validate_pr168_rp_overfit_fdr.py')),
+        ('deterministic-validators-b', ('REVIEW_PYTHON', 'tools/validate_pr168_rp_quantum_objective_recompute.py')),
+        ('deterministic-validators-b', ('REVIEW_PYTHON', 'tools/validate_pr168_rp_quantum_structural_readiness.py')),
+        ('deterministic-validators-b', ('REVIEW_PYTHON', 'tools/validate_pr168_rp_portfolio_marginal_utility.py')),
+        ('deterministic-validators-b', ('REVIEW_PYTHON', 'tools/validate_pr168_rp_capacity_crowding.py')),
+        ('deterministic-validators-b', ('REVIEW_PYTHON', 'tools/validate_pr168_rp_regime_memory.py')),
+        ('deterministic-validators-b', ('REVIEW_PYTHON', 'tools/validate_pr168_rp_champion_challenger.py')),
+        ('deterministic-validators-b', ('REVIEW_PYTHON', 'tools/validate_pr168_rp_combination_selection.py')),
+        ('deterministic-validators-b', ('REVIEW_PYTHON', 'tools/validate_pr168_rp_negative_recovery.py')),
+        ('deterministic-validators-b', ('REVIEW_PYTHON', 'tools/validate_pr168_rp_edge_attribution.py')),
+        ('deterministic-validators-b', ('REVIEW_PYTHON', 'tools/validate_pr168_rp_agent_duty_orchestration.py')),
+        ('deterministic-validators-b', ('REVIEW_PYTHON', 'tools/validate_pr168_rp_connector_candidate_routing.py')),
+        ('deterministic-validators-b', ('REVIEW_PYTHON', 'tools/validate_pr168_rp_strict_input_consumption.py')),
+        ('deterministic-validators-b', ('REVIEW_PYTHON', 'tools/validate_pr168_rp_no_orphan_lineage.py')),
+        ('deterministic-validators-b', ('REVIEW_PYTHON', 'tools/validate_pr168_rp_artifact_information_value_dag.py')),
+        ('deterministic-validators-b', ('REVIEW_PYTHON', 'tools/validate_pr168_rp_authority_boundaries.py')),
+        ('deterministic-validators-b', ('REVIEW_PYTHON', 'tools/validate_pr168_rp_report_compactness.py')),
+        ('deterministic-validators-b', ('REVIEW_PYTHON', 'tools/validate_pr168_rp_validation_scope_registry_integration.py')),
+        ('deterministic-validators-b', ('REVIEW_PYTHON', 'tools/validate_pr168_rp_windows_linux_compatibility.py')),
+        ('deterministic-validators-b', ('REVIEW_PYTHON', 'tools/validate_pr168_rp_no_metadata_only_pass.py')),
+        ('deterministic-validators-b', ('REVIEW_PYTHON', 'tools/validate_pr168_rp_no_forced_negative_to_positive.py')),
+        ('deterministic-validators-b', ('REVIEW_PYTHON', 'tools/validate_pr168_rp_no_scattered_authority_wording.py')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/build_pr168_rank_evidence_backed_ranking.py')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/validate_pr168_data1_public_market_data_snapshots.py')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/validate_pr168_data1a_focused_audit.py')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/validate_pr168_gfp2r_data1a_gated_candidate_recompute.py')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/build_pr168_rp2_map2.py', '--offline')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/validate_pr168_rp2_map2.py')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/build_pr168_map3.py', '--offline')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/validate_pr168_map3.py')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/build_pr168_rp3.py', '--offline')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/validate_pr168_rp3.py')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/build_pr168_rank3.py', '--offline')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/validate_pr168_rank3.py')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/build_pr168_rp5a_legacy_semantic_audit.py', '--offline')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/validate_pr168_rp5a_legacy_semantic_audit.py')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/build_pr168_rp5b_active_registry_safe_cleanup.py', '--dry-run', '--offline')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/validate_pr168_rp5b_active_registry_safe_cleanup.py')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/build_pr168_rp5c_immutable_qku_formula_library.py', '--offline')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/validate_pr168_rp5c_immutable_qku_formula_library.py')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/run_pr168_vs1_trading_intelligence_slice.py', '--fixture', 'all', '--top-k', '10', '--max-identities', '50', '--max-stacks-per-fixture', '20', '--dump-temp')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/validate_pr168_vs1_trading_intelligence_slice.py')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/build_pr168_rp5d_replay_paper_executability_tiers.py', '--offline')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/validate_pr168_rp5d_replay_paper_executability_tiers.py')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/build_pr168_rp5e_stack_gen.py', '--offline', '--fixture', 'sample', '--max-stacks', '1000', '--dump-temp')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/validate_pr168_rp5e_stack_gen.py')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/build_pr168_rp5d_r1_exec_now_unlock.py', '--offline', '--fixture', 'sample', '--target-min', '5', '--target-max', '15')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/validate_pr168_rp5d_r1_exec_now_unlock.py')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/build_pr168_rp5f_dynamic_targets.py', '--offline', '--fixture', 'sample', '--max-targets', '25', '--max-seeds', '500', '--dump-temp')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/validate_pr168_rp5f_dynamic_targets.py')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/build_pr168_rp5g_trade_plan_sim.py', '--offline', '--fixture', 'sample', '--max-candidates', '10', '--out', '/owned/v/master_plan_generated/pr168_rp5g', '--timeout-ms', '3600000')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/validate_pr168_rp5g_trade_plan_sim.py', '--generated', '/owned/v/master_plan_generated/pr168_rp5g', '--timeout-ms', '3600000')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/build_pr168_rank4_advisory_ranking.py', '--repo-root', '.', '--out-dir', '/owned/v/master_plan_generated/pr168_rank4', '--timeout-ms', '3600000')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/validate_pr168_rank4_advisory_ranking.py', '--repo-root', '.', '--artifact-dir', '/owned/v/master_plan_generated/pr168_rank4', '--timeout-ms', '3600000')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/build_pr168_qopt1_batch_optimization.py', '--repo-root', '.', '--out-dir', '/owned/v/master_plan_generated/pr168_qopt1', '--timeout-ms', '3600000')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/validate_pr168_qopt1_batch_optimization.py', '--repo-root', '.', '--artifact-dir', '/owned/v/master_plan_generated/pr168_qopt1', '--timeout-ms', '3600000')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/build_pr168_vs2_paper_intent_candidates.py', '--repo-root', '.', '--out-dir', '/owned/v/master_plan_generated/pr168_vs2', '--timeout-ms', '3600000')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/validate_pr168_vs2_paper_intent_candidates.py', '--repo-root', '.', '--artifact-dir', '/owned/v/master_plan_generated/pr168_vs2', '--timeout-ms', '3600000')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/build_pr168_mem1_condition_scoped_memory.py', '--repo-root', '.', '--out-dir', '/owned/v/master_plan_generated/pr168_mem1', '--timeout-ms', '3600000')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/validate_pr168_mem1_condition_scoped_memory.py', '--repo-root', '.', '--artifact-dir', '/owned/v/master_plan_generated/pr168_mem1', '--timeout-ms', '3600000')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/build_pr169_readiness1.py', '--repo-root', '.', '--out-dir', '/owned/v/master_plan_generated/pr169_readiness1', '--timeout-ms', '3600000')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/validate_pr169_readiness1.py', '--repo-root', '.', '--artifact-dir', '/owned/v/master_plan_generated/pr169_readiness1', '--timeout-ms', '3600000')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/build_pr169_pretrade1.py', '--repo-root', '.', '--out-dir', '/owned/v/master_plan_generated/pr169_pretrade1', '--timeout-ms', '3600000')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/validate_pr169_pretrade1.py', '--repo-root', '.', '--artifact-dir', '/owned/v/master_plan_generated/pr169_pretrade1', '--timeout-ms', '3600000')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/build_pr169_agent_orch1.py', '--repo-root', '.', '--out-dir', '/owned/v/master_plan_generated/pr169_agent_orch1', '--timeout-ms', '3600000')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/validate_pr169_agent_orch1.py', '--repo-root', '.', '--artifact-dir', '/owned/v/master_plan_generated/pr169_agent_orch1', '--timeout-ms', '3600000')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/build_pr169_svc1.py', '--repo-root', '.', '--out-dir', '/owned/v/master_plan_generated/pr169_svc1', '--timeout-ms', '3600000')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/validate_pr169_svc1.py', '--repo-root', '.', '--artifact-dir', '/owned/v/master_plan_generated/pr169_svc1', '--timeout-ms', '3600000')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/build_pr169_dash1_owner_dashboard.py', '--repo-root', '.', '--out', '/owned/v/master_plan_generated/pr169_dash1', '--timeout-ms', '3600000')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/build_pr169_dash1_owner_dashboard_ui.py', '--repo-root', '.', '--base', '/owned/v/master_plan_generated/pr169_dash1', '--timeout-ms', '3600000')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/validate_pr169_dash1_owner_dashboard.py', '--repo-root', '.', '--base', '/owned/v/master_plan_generated/pr169_dash1', '--timeout-ms', '3600000')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/validate_pr169_dash1_owner_dashboard_ui.py', '--repo-root', '.', '--base', '/owned/v/master_plan_generated/pr169_dash1', '--timeout-ms', '3600000')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/validate_pr168_rank_input_consumption.py')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/validate_pr168_rank_no_fake_ranking.py')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/validate_pr168_rank_score_math.py')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/validate_pr168_rank_binary_prediction_market_pnl.py')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/validate_pr168_rank_candidate_stack_generation.py')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/validate_pr168_rank_mode_policy_matrix.py')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/validate_pr168_rank_pretrade_order_simulation.py')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/validate_pr168_rank_order_decision_tournament.py')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/validate_pr168_rank_tca_decomposition.py')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/validate_pr168_rank_champion_challenger.py')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/validate_pr168_rank_no_trade_dominance.py')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/validate_pr168_rank_overfit_fdr.py')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/validate_pr168_rank_regime_ranking.py')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/validate_pr168_rank_portfolio_ranking.py')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/validate_pr168_rank_capacity_crowding.py')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/validate_pr168_rank_quantum_structural_ranking.py')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/validate_pr168_rank_quantum_combinatorial_selection.py')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/validate_pr168_rank_latency_hot_path_seed.py')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/validate_pr168_rank_agent_work_orders.py')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/validate_pr168_rank_downstream_orchestration.py')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/validate_pr168_rank_dag_orchestration.py')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/validate_pr168_rank_no_orphan.py')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/validate_pr168_rank_authority_boundaries.py')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/validate_pr168_rank_validation_scope_registry_integration.py')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/validate_pr168_rank_centralized_systems_coverage.py')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/validate_pr168_rank_edge_capture_attribution.py')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/validate_pr168_rank_negative_recovery_tournament.py')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/validate_pr168_rank_threshold_surfaces.py')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/validate_pr168_rank_maker_taker_tradeoff.py')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/validate_pr168_rank_size_price_time_sensitivity.py')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/validate_pr168_rank_scenario_stress_surface.py')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/validate_pr168_rank_materialized_artifacts_not_blueprints.py')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/validate_pr168_rank_scalar_value_no_orphan.py')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/validate_pr168_rank_terminal_artifact_lifecycle.py')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/validate_pr168_rank_connector_candidate_routing.py')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/validate_pr168_rank_two_speed_decision_surface.py')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/validate_pr168_rank_future_expansion_registries.py')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/validate_pr168_rank_market_adapter_registry_seed.py')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/validate_pr168_rank_venue_cost_model_registry_seed.py')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/validate_pr168_rank_contract_payoff_model_registry_seed.py')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/validate_pr168_rank_formula_algorithm_plugin_registry_seed.py')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/validate_pr168_rank_quantum_objective_registry_seed.py')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/validate_pr168_rank_order_policy_registry_seed.py')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/validate_pr168_rank_agent_capability_registry_seed.py')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/validate_pr168_rank_connector_readiness_registry_seed.py')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/validate_pr168_rank_runtime_allowlist_seed_registry.py')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/validate_pr168_rank_hot_path_decision_surface_registry.py')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/validate_pr168_rank_registry_seed_no_orphan.py')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/validate_pr168_rank_registry_anti_scatter.py')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/validate_pr165_d2_score_refreshed_scenario_selection_v2.py', '--repo-root', '.')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/validate_pr165_d3_quantum_aware_scenario_selection_v3.py', '--repo-root', '.')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/validate_qtt_agent_role_operating_charter_registry.py', '--mode', 'dev', '--repo-root', '.', '--out', '/owned/v/master_plan_generated/QTTAgentRoleOperatingCharterReport.json')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/validate_qtt_algorithm_formula_family_registry.py', '--mode', 'dev', '--repo-root', '.', '--out', '/owned/v/master_plan_generated/QTTAlgorithmFormulaFamilyReport.json')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/validate_qtt_agent_algorithm_binding_registry.py', '--mode', 'dev', '--repo-root', '.', '--out', '/owned/v/master_plan_generated/QTTAgentAlgorithmBindingReport.json')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/validate_qtt_agent_algorithm_consumer_gate.py', '--mode', 'dev', '--repo-root', '.', '--out', '/owned/v/master_plan_generated/QTTAgentAlgorithmConsumerGate.report.json')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/validate_qtt_agent_algorithm_cumulative_readiness_gate.py', '--mode', 'dev', '--repo-root', '.', '--out', '/owned/v/master_plan_generated/QTTAgentAlgorithmCumulativeReadinessGate.report.json')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/validate_qtt_agent_algorithm_command_matrix.py', '--out', '/owned/v/master_plan_generated/QTTAgentAlgorithmCommandMatrix.json')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/validate_source_evidence_static.py', '--schema', 'schemas/source_evidence/source_evidence.schema.json', '--owner-packet', 'docs/master_plan/source_evidence/QTT_OWNER_SOURCE_EVIDENCE_DEFINITIONS_PACKET.md', '--registry-fixture', 'tests/fixtures/source_evidence/synthetic_acceptance_registry.v1.fixture.json')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/validate_source_evidence_gate_confirmation_static.py', '--repo-root', '.', '--schema', 'schemas/source_evidence/source_evidence_gate_confirmation.schema.json', '--fixture', 'tests/fixtures/source_evidence/synthetic_source_evidence_gate_confirmation_blocked.v1.fixture.json')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/validate_source_evidence_retrieval_executor.py', '--repo-root', '.', '--check-only')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/validate_source_evidence_acceptance.py', '--repo-root', '.', '--check-only')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/validate_accepted_source_to_connector_semantic_binding.py', '--repo-root', '.', '--out', '/owned/v/master_plan_generated/CODEX_PR124_ACCEPTED_SOURCE_TO_CONNECTOR_SEMANTIC_BINDING_CONSUMER_GATE_REPORT.json')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/validate_source_revalidation_scheduler.py', '--repo-root', '.', '--check-only', '--out', '/owned/v/master_plan_generated/CODEX_PR125_SOURCE_REVALIDATION_SUPERSESSION_MATERIALITY_SCHEDULER_REPORT.json')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/validate_connector_semantic_binding_implementation_gate.py', '--repo-root', '.', '--check-only')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/validate_per_venue_execution_lifecycle_model.py', '--repo-root', '.', '--check-only')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/validate_cross_venue_execution_normalization_binding.py', '--repo-root', '.', '--check-only')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/runtime_cash_component_field_map_validate.py', '--repo-root', '.', '--check-only')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/private_state_read_receipt_gate_validate.py', '--repo-root', '.', '--check-only')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/credential_alias_secret_no_capture_readiness_validate.py', '--repo-root', '.', '--check-only')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/venue_market_data_ingest_adapters_validate.py', '--repo-root', '.', '--check-only')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/orderbook_event_state_snapshot_builder_validate.py', '--repo-root', '.', '--check-only')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/runtime_resolver_snapshot_executor_validate.py', '--repo-root', '.', '--check-only')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/validate_historical_dataset_policy_literal_drift.py', '--repo-root', '.')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/validate_historical_dataset_digest_and_loader.py', '--repo-root', '.')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/validate_pr136_roadmap_policy_literal_drift.py', '--repo-root', '.')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/validate_pr136_day1_launch_readiness_roadmap.py', '--repo-root', '.')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/validate_pr137_generated_integrity_authority_boundary.py', '--repo-root', '.')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/validate_pr137_launch_readiness_dependency_controller.py', '--repo-root', '.')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/validate_connector_capability_static.py', '--schema', 'schemas/connectors/connector_capability_registry.schema.json', '--fixture', 'tests/fixtures/connectors/synthetic_connector_capability_registry.v1.fixture.json')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/validate_runtime_orchestration_static.py', '--schema', 'schemas/runtime_orchestration/runtime_orchestration_skeleton.schema.json', '--fixture', 'tests/fixtures/runtime_orchestration/synthetic_runtime_orchestration_skeleton.v1.fixture.json')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/validate_replay_paper_execution_graph_static.py', '--schema', 'schemas/replay_paper_review/replay_paper_execution_graph.schema.json', '--fixture', 'tests/fixtures/replay_paper_review/synthetic_replay_paper_execution_graph.v1.fixture.json')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/validate_venue_abstraction_layer_static.py', '--schema', 'schemas/connectors/venue_abstraction_layer.schema.json', '--fixture', 'tests/fixtures/connectors/synthetic_venue_abstraction_layer.v1.fixture.json')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/validate_order_intent_execution_router_static.py', '--schema', 'schemas/connectors/order_intent_execution_router_scaffolding.schema.json', '--fixture', 'tests/fixtures/connectors/synthetic_order_intent_execution_router_scaffolding.v1.fixture.json')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/validate_atomicrows_readiness_static.py', '--repo-root', '.', '--schema', 'schemas/atomicrows/atomicrows_readiness_audit.schema.json', '--fixture', 'tests/fixtures/atomicrows/synthetic_atomicrows_readiness_blocked.v1.fixture.json')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/validate_atomicrows_unblocking_requirements_static.py', '--repo-root', '.', '--schema', 'schemas/atomicrows/atomicrows_unblocking_requirements_audit.schema.json', '--fixture', 'tests/fixtures/atomicrows/synthetic_atomicrows_unblocking_requirements_required.v1.fixture.json')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/validate_atomicrows_canonical_row_specification_static.py', '--repo-root', '.', '--schema', 'schemas/atomicrows/atomicrows_canonical_row_specification_audit.schema.json', '--fixture', 'tests/fixtures/atomicrows/synthetic_atomicrows_canonical_row_specification_required.v1.fixture.json')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/validate_atomicrows_bundle_schema_checker_static.py', '--repo-root', '.', '--row-schema', 'schemas/atomicrows/atomic_parameter_row.schema.json', '--bundle-schema', 'schemas/atomicrows/atomic_row_bundle.schema.json', '--fixture', 'tests/fixtures/atomicrows/synthetic_atomicrows_bundle_bootstrap_absent.v1.fixture.json')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/build_atomicrows_parameter_lifecycle_report.py', '--out', '/owned/v/master_plan_generated/AtomicRowsParameterLifecycleReport.json')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/validate_atomicrows_parameter_lifecycle.py', '--mode', 'dev')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/validate_atomicrows_lifecycle_consumer_gate.py', '--mode', 'dev', '--out', '/owned/v/master_plan_generated/AtomicRowsLifecycleConsumerGate.report.json')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/validate_atomicrows_lifecycle_promotion_receipt_gate.py', '--mode', 'dev', '--out', '/owned/v/master_plan_generated/AtomicRowsLifecyclePromotionReceiptGate.report.json')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/validate_atomicrows_lifecycle_registry_mutation_guard.py', '--mode', 'dev', '--out', '/owned/v/master_plan_generated/AtomicRowsLifecycleRegistryMutationGuard.report.json')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/validate_atomicrows_lifecycle_cumulative_readiness_gate.py', '--mode', 'dev', '--out', '/owned/v/master_plan_generated/AtomicRowsLifecycleCumulativeReadinessGate.report.json')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/validate_atomicrows_lifecycle_gate_command_matrix.py', '--mode', 'dev', '--out', '/owned/v/master_plan_generated/AtomicRowsLifecycleGateCommandMatrix.json')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/validate_atomicrows_parameter_agent_binding_registry.py', '--mode', 'dev', '--out', '/owned/v/master_plan_generated/AtomicRowsParameterAgentBindingReport.json')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/validate_atomicrows_parameter_agent_binding_consumer_gate.py', '--mode', 'dev', '--out', '/owned/v/master_plan_generated/AtomicRowsParameterAgentBindingConsumerGate.report.json')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/validate_atomicrows_parameter_agent_binding_cumulative_readiness_gate.py', '--mode', 'dev', '--out', '/owned/v/master_plan_generated/AtomicRowsParameterAgentBindingCumulativeReadinessGate.report.json')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/validate_atomicrows_parameter_agent_binding_command_matrix.py', '--mode', 'dev', '--out', '/owned/v/master_plan_generated/AtomicRowsParameterAgentBindingCommandMatrix.json')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/validate_atomicrows_research_provenance_evidence_tier_classification.py', '--out', '/owned/v/master_plan_generated/AtomicRowsResearchProvenanceEvidenceTierClassification.report.json')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/validate_atomicrows_owner_submitted_research_source_intake_registry.py', '--out', '/owned/v/master_plan_generated/AtomicRowsOwnerSubmittedResearchSourceIntakeRegistry.report.json')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/validate_atomicrows_research_source_to_candidate_family_gate.py', '--out', '/owned/v/master_plan_generated/AtomicRowsResearchSourceToCandidateFamilyGate.report.json')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/validate_atomicrows_parameter_stack_role_taxonomy.py', '--out', '/owned/v/master_plan_generated/AtomicRowsParameterStackRoleTaxonomy.report.json')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/validate_atomicrows_parameter_stack_completeness_gate.py', '--out', '/owned/v/master_plan_generated/AtomicRowsParameterStackCompletenessGate.report.json')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/validate_atomicrows_parameter_stack_compatibility_gate.py', '--out', '/owned/v/master_plan_generated/AtomicRowsParameterStackCompatibilityGate.report.json')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/validate_edge_parameter_stack_selection_packet.py', '--out', '/owned/v/master_plan_generated/EDGEParameterStackSelectionPacket.report.json')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/validate_qtt_trade_context_packet.py', '--out', '/owned/v/master_plan_generated/QTTTradeContextPacket.report.json')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/validate_atomicrows_parameter_selection_universe_registry.py', '--out', '/owned/v/master_plan_generated/AtomicRowsParameterSelectionUniverseRegistry.report.json')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/validate_atomicrows_parameter_selection_universe_consumer_gate.py', '--out', '/owned/v/master_plan_generated/AtomicRowsParameterSelectionUniverseConsumerGate.report.json')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/validate_trade_context_selection_universe_routing_gate.py', '--out', '/owned/v/master_plan_generated/AtomicRowsTradeContextSelectionUniverseRoutingGate.report.json')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/validate_quantum_applicability_classification_registry.py', '--out', '/owned/v/master_plan_generated/QuantumApplicabilityClassificationRegistry.report.json')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/validate_owner_quantum_priority_policy_registry.py', '--out', '/owned/v/master_plan_generated/OwnerQuantumPriorityPolicyRegistry.report.json')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/validate_parameter_algorithm_scoring_policy_registry.py', '--out', '/owned/v/master_plan_generated/ParameterAlgorithmScoringPolicyRegistry.report.json')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/validate_parameter_stack_scoring_and_ranking_gate.py', '--out', '/owned/v/master_plan_generated/ParameterStackScoringAndRankingGate.report.json')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/validate_quantum_classical_optimizer_arbitration_gate.py', '--out', '/owned/v/master_plan_generated/QuantumClassicalOptimizerArbitrationGate.report.json')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/validate_candidate_parameter_stack_generation_gate.py', '--out', '/owned/v/master_plan_generated/CandidateParameterStackGenerationGate.report.json')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/validate_trade_context_parameter_stack_selection_gate.py', '--out', '/owned/v/master_plan_generated/TradeContextParameterStackSelectionGate.report.json')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/validate_selected_parameter_stack_handoff_packet.py', '--out', '/owned/v/master_plan_generated/SelectedParameterStackHandoffPacket.report.json')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/validate_replay_paper_candidate_stack_competition_gate.py', '--out', '/owned/v/master_plan_generated/ReplayPaperCandidateStackCompetitionGate.report.json')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/validate_dual_result_review_for_parameter_stacks.py', '--out', '/owned/v/master_plan_generated/DualResultReviewForParameterStacks.report.json')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/validate_owner_live_promotion_review_for_parameter_stacks.py', '--out', '/owned/v/master_plan_generated/OwnerLivePromotionReviewForParameterStacks.report.json')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/validate_owner_approval_request_queue_registry.py', '--out', '/owned/v/master_plan_generated/OwnerApprovalRequestQueueRegistry.report.json')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/validate_owner_override_receipt_authoring_gate.py', '--out', '/owned/v/master_plan_generated/OwnerOverrideReceiptAuthoringGate.report.json')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/validate_owner_dashboard_approval_menu_schema.py', '--out', '/owned/v/master_plan_generated/OwnerDashboardApprovalMenuSchema.report.json')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/validate_owner_dashboard_approval_static_screen_contract.py', '--out', '/owned/v/master_plan_generated/OwnerDashboardApprovalStaticScreenContract.report.json')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/validate_atomicrows_full_bundle_row_expansion_plan.py', '--out', '/owned/v/master_plan_generated/AtomicRowsFullBundleRowExpansionPlan.report.json')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/validate_atomicrows_bundle_row_family_source_files.py', '--out', '/owned/v/master_plan_generated/AtomicRowsBundleRowFamilySourceFiles.report.json')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/validate_atomicrows_bundle_builder_deterministic_assembly_gate.py', '--out', '/owned/v/master_plan_generated/AtomicRowsBundleBuilderDeterministicAssemblyGate.report.json')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/validate_atomicrows_sha_system_dormancy_state_contract.py', '--report-out', '/owned/v/master_plan_generated/AtomicRowsShaSystemDormancyStateContract.report.json')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/validate_qtt_final_readiness_dependency_policy_contract.py', '--report-out', '/owned/v/master_plan_generated/QttFinalReadinessDependencyPolicy.report.json')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/validate_qtt_active_non_sha_day1_gate_state_registry_contract.py', '--report-out', '/owned/v/master_plan_generated/QttActiveNonShaDay1GateStateRegistry.report.json')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/validate_qtt_pr_identity_roster.py', '--report-out', '/owned/v/master_plan_generated/QttPrIdentityRoster.report.json')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/validate_qtt_roadmap_execution_state_controller.py', '--report-out', '/owned/v/master_plan_generated/QttRoadmapExecutionStateController.report.json')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/validate_atomicrows_bundle_sha_freeze_authority_gate.py', '--report-out', '/owned/v/master_plan_generated/AtomicRowsBundleShaFreezeAuthorityGate.report.json')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/validate_atomicrows_exact_row_authority_classifier_bridge.py', '--report-out', '/owned/v/master_plan_generated/AtomicRowsExactRowAuthorityClassifierBridge.report.json')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/validate_atomicrows_exact_row_expansion_manifest.py', '--report-out', '/owned/v/master_plan_generated/AtomicRowsExactRowExpansionManifest.report.json')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/validate_atomicrows_owner_approved_exact_15_family_count_distribution.py', '--report-out', '/owned/v/master_plan_generated/AtomicRowsOwnerApprovedExact15FamilyCountDistribution.report.json')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/validate_atomicrows_exact_row_generator_dry_run_manifest.py', '--report-out', '/owned/v/master_plan_generated/AtomicRowsExactRowGeneratorDryRun.report.json')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/validate_atomicrows_repair_chain_grand_debug_logic_audit_manifest.py', '--report-out', '/owned/v/master_plan_generated/AtomicRowsRepairChainGrandDebugLogicAudit.report.json')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/validate_atomicrows_exact_row_source_materialization_manifest.py', '--report-out', '/owned/v/master_plan_generated/AtomicRowsExactRowSourceMaterialization.report.json')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/validate_atomicrows_exact_row_agent_family_eligibility_matrix.py', '--report-out', '/owned/v/master_plan_generated/AtomicRowsExactRowAgentFamilyEligibilityMatrix.report.json')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/validate_atomicrows_bundle_materialization_manifest.py', '--report-out', '/owned/v/master_plan_generated/AtomicRowsBundleMaterialization.report.json')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/validate_atomicrows_bundle_boundary_state_contract.py', '--report-out', '/owned/v/master_plan_generated/AtomicRowsBundleBoundaryStateContract.report.json')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/validate_atomicrows_sha_freeze_final_readiness_state_contract.py', '--report-out', '/owned/v/master_plan_generated/AtomicRowsShaFreezeFinalReadinessStateContract.report.json')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/validate_generated_derivative_bootstrap_gate_static.py', '--repo-root', '.', '--schema', 'schemas/master_plan/generated_derivative_bootstrap_gate.schema.json', '--fixture', 'tests/fixtures/master_plan/synthetic_generated_derivative_bootstrap_gate.v1.fixture.json')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/validate_stage1_packet_schema_gate_static.py', '--repo-root', '.', '--schema-dir', 'schemas/stage1_prediction_markets', '--fixture', 'tests/fixtures/stage1_prediction_markets/synthetic_stage1_packet_schema_gate_blocked.v1.fixture.json')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/validate_venue_neutral_prediction_adapter_gate_static.py', '--repo-root', '.', '--schema-dir', 'schemas/venue_neutral_prediction_adapter', '--fixture', 'tests/fixtures/venue_neutral_prediction_adapter/synthetic_venue_neutral_prediction_adapter_gate_blocked.v1.fixture.json')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/validate_connector_scaffold_source_required_gate_static.py', '--repo-root', '.', '--schema', 'schemas/connectors/connector_scaffold_source_required_gate.schema.json', '--fixture', 'tests/fixtures/connectors/synthetic_connector_scaffold_source_required_blocked.v1.fixture.json')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/validate_stage1_runtime_scaffold_gate_static.py', '--repo-root', '.', '--schema', 'schemas/runtime_orchestration/stage1_runtime_scaffold_gate.schema.json', '--fixture', 'tests/fixtures/runtime_orchestration/synthetic_stage1_runtime_scaffold_gate_blocked.v1.fixture.json')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/validate_source_fact_binding_connector_semantic_readiness_static.py', '--repo-root', '.', '--source-to-connector-schema', 'schemas/source_fact_binding_readiness/stage1_source_to_connector_field_binding_matrix.schema.json', '--source-to-connector-fixture', 'tests/fixtures/source_fact_binding_readiness/synthetic_stage1_source_to_connector_field_binding_matrix.v1.fixture.json', '--connector-target-schema', 'schemas/source_fact_binding_readiness/stage1_connector_semantic_target_field_matrix.schema.json', '--connector-target-fixture', 'tests/fixtures/source_fact_binding_readiness/synthetic_stage1_connector_semantic_target_field_matrix.v1.fixture.json', '--gate-report-schema', 'schemas/source_fact_binding_readiness/stage1_connector_semantic_readiness_gate_report.schema.json', '--gate-report-fixture', 'tests/fixtures/source_fact_binding_readiness/synthetic_stage1_connector_semantic_readiness_gate_report.v1.fixture.json')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/source_evidence_acceptance_consumer_contract_check.py', '--repo-root', '.', '--consumer-contract-schema', 'src/qtt/source_evidence/acceptance/accepted_source_evidence_consumer_contract.schema.json', '--target-field-ledger-schema', 'src/qtt/source_evidence/acceptance/stage1_target_field_acceptance_ledger_record.schema.json', '--export-record-schema', 'src/qtt/source_evidence/acceptance/stage1_accepted_source_evidence_export_record.schema.json', '--fixture', 'tests/fixtures/source_evidence/acceptance_consumer_contract/synthetic_accepted_source_evidence_consumer_contract_records.v1.fixture.json')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/stage1_connector_semantic_binding_ledger_check.py', '--repo-root', '.', '--ledger-schema', 'src/qtt/stage1_prediction_markets/connector_semantic_binding/stage1_connector_semantic_binding_ledger_record.schema.json', '--canonicalization-schema', 'src/qtt/stage1_prediction_markets/connector_semantic_binding/stage1_connector_semantic_value_canonicalization.schema.json', '--consumer-contract-schema', 'src/qtt/stage1_prediction_markets/connector_semantic_binding/stage1_connector_semantic_binding_consumer_contract.schema.json', '--fixture', 'tests/fixtures/source_evidence/connector_semantic_binding/synthetic_stage1_connector_semantic_binding_contracts.v1.fixture.json', '--out', '/owned/v/master_plan_generated/Stage1ConnectorSemanticBindingLedgerCheck.report.json')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/stage1_runtime_resolver_snapshot_contract_check.py', '--repo-root', '.', '--input-lock-schema', 'src/qtt/stage1_prediction_markets/runtime_resolver/stage1_runtime_resolver_snapshot_input_lock.schema.json', '--manifest-schema', 'src/qtt/stage1_prediction_markets/runtime_resolver/stage1_runtime_resolver_snapshot_manifest.schema.json', '--consumer-contract-schema', 'src/qtt/stage1_prediction_markets/runtime_resolver/stage1_runtime_resolver_consumer_contract.schema.json', '--gate-report-schema', 'src/qtt/stage1_prediction_markets/runtime_resolver/stage1_runtime_resolver_snapshot_gate_report.schema.json', '--fixture', 'tests/fixtures/source_evidence/runtime_resolver/synthetic_stage1_runtime_resolver_snapshot_contracts.v1.fixture.json', '--out', '/owned/v/master_plan_generated/Stage1RuntimeResolverSnapshotContractCheck.report.json')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/stage1_runtime_resolver_to_replay_paper_handoff_check.py', '--repo-root', '.', '--consumer-allowlist-schema', 'src/qtt/stage1_prediction_markets/runtime_resolver_snapshot/stage1_runtime_resolver_snapshot_consumer_allowlist.schema.json', '--handoff-contract-schema', 'src/qtt/stage1_prediction_markets/runtime_resolver_snapshot/stage1_runtime_resolver_to_replay_paper_handoff_contract.schema.json', '--handoff-report-schema', 'src/qtt/stage1_prediction_markets/runtime_resolver_snapshot/stage1_runtime_resolver_to_replay_paper_handoff_report.schema.json', '--fixture', 'tests/fixtures/source_evidence/runtime_resolver_snapshot/synthetic_stage1_runtime_resolver_to_replay_paper_handoff.v1.fixture.json', '--out', '/owned/v/master_plan_generated/Stage1RuntimeResolverToReplayPaperHandoff.report.json')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/stage1_concurrent_replay_paper_contract_check.py', '--repo-root', '.', '--input-identity-schema', 'src/qtt/stage1_prediction_markets/replay_paper/concurrent_replay_paper_input_identity.schema.json', '--replay-lane-schema', 'src/qtt/stage1_prediction_markets/replay_paper/concurrent_replay_lane_contract.schema.json', '--paper-lane-schema', 'src/qtt/stage1_prediction_markets/replay_paper/concurrent_paper_lane_contract.schema.json', '--replay-result-boundary-schema', 'src/qtt/stage1_prediction_markets/replay_paper/replay_result_packet_boundary.schema.json', '--paper-result-boundary-schema', 'src/qtt/stage1_prediction_markets/replay_paper/paper_result_packet_boundary.schema.json', '--gate-report-schema', 'src/qtt/stage1_prediction_markets/replay_paper/concurrent_replay_paper_execution_gate_report.schema.json', '--fixture', 'tests/fixtures/source_evidence/replay_paper/synthetic_concurrent_replay_paper_contracts.v1.fixture.json', '--out', '/owned/v/master_plan_generated/Stage1ConcurrentReplayPaperContractCheck.report.json')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/stage1_dual_result_review_contract_check.py', '--repo-root', '.', '--input-contract-schema', 'src/qtt/stage1_prediction_markets/dual_result_review/stage1_dual_result_review_input_contract.schema.json', '--comparison-matrix-schema', 'src/qtt/stage1_prediction_markets/dual_result_review/stage1_replay_paper_comparison_matrix.schema.json', '--gate-report-schema', 'src/qtt/stage1_prediction_markets/dual_result_review/stage1_dual_result_review_gate_report.schema.json', '--owner-handoff-block-schema', 'src/qtt/stage1_prediction_markets/dual_result_review/stage1_owner_live_promotion_handoff_block.schema.json', '--fixture', 'tests/fixtures/source_evidence/dual_result_review/synthetic_stage1_dual_result_review_contracts.v1.fixture.json', '--out', '/owned/v/master_plan_generated/Stage1DualResultReviewContractCheck.report.json')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/stage1_owner_live_promotion_review_contract_check.py', '--repo-root', '.', '--input-contract-schema', 'src/qtt/stage1_prediction_markets/owner_live_promotion_review/stage1_owner_live_promotion_review_input_contract.schema.json', '--owner-approval-receipt-boundary-schema', 'src/qtt/stage1_prediction_markets/owner_live_promotion_review/stage1_owner_approval_receipt_boundary.schema.json', '--gate-report-schema', 'src/qtt/stage1_prediction_markets/owner_live_promotion_review/stage1_owner_live_promotion_review_gate_report.schema.json', '--handoff-block-schema', 'src/qtt/stage1_prediction_markets/owner_live_promotion_review/stage1_three_venue_canary_eligibility_handoff_block.schema.json', '--fixture', 'tests/fixtures/source_evidence/owner_live_promotion_review/synthetic_stage1_owner_live_promotion_review_contracts.v1.fixture.json', '--out', '/owned/v/master_plan_generated/Stage1OwnerLivePromotionReviewContractCheck.report.json')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/stage1_three_venue_canary_eligibility_contract_check.py', '--repo-root', '.', '--input-contract-schema', 'src/qtt/stage1_prediction_markets/three_venue_canary_eligibility/stage1_three_venue_canary_eligibility_input_contract.schema.json', '--readiness-matrix-schema', 'src/qtt/stage1_prediction_markets/three_venue_canary_eligibility/stage1_three_venue_platform_readiness_matrix.schema.json', '--handoff-schema', 'src/qtt/stage1_prediction_markets/three_venue_canary_eligibility/stage1_owner_review_to_canary_eligibility_handoff.schema.json', '--gate-report-schema', 'src/qtt/stage1_prediction_markets/three_venue_canary_eligibility/stage1_three_venue_canary_eligibility_gate_report.schema.json', '--execution-block-schema', 'src/qtt/stage1_prediction_markets/three_venue_canary_eligibility/stage1_limited_live_canary_execution_block.schema.json', '--fixture', 'tests/fixtures/source_evidence/three_venue_canary_eligibility/synthetic_stage1_three_venue_canary_eligibility_contracts.v1.fixture.json', '--out', '/owned/v/master_plan_generated/Stage1ThreeVenueCanaryEligibilityContractCheck.report.json')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/build_master_plan_section_coverage_report.py', '--out', '/owned/v/master_plan_generated/MasterPlanSectionCoverageReport.json')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/validate_master_plan_section_coverage.py', '--mode', 'dev')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/validate_qtt_master_plan_section_coverage_triage_routes.py')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/validate_qtt_master_plan_section_roadmap_crosswalk.py')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/validate_qtt_master_plan_section_coverage_command_matrix.py')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/qtt_test_gate.py', '--phase', 'first-coding-runbook', '--repo-root', '.', '--strict-no-claim', '--out', '/owned/v/master_plan_generated/QTTTestGate.report.json')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/local_gate_command_matrix.py', '--repo-root', '.', '--out', '/owned/v/master_plan_generated/LocalGateCommandMatrix.json')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/pr_handoff_check.py', '--repo-root', '.', '--out', '/owned/v/master_plan_generated/FirstCodingPRHandoff.packet.json')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/validate_qku_computation_control_plane.py', '--domain', 'architecture')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/validate_qku_computation_control_plane.py', '--domain', 'quantum')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/validate_qku_computation_control_plane.py', '--domain', 'latency')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/validate_qku_computation_control_plane.py', '--domain', 'd')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/validate_qku_computation_control_plane.py', '--domain', 'agent')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/validate_qku_computation_control_plane.py', '--domain', 'model_risk')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/validate_qku_computation_control_plane.py', '--domain', 'g')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/validate_qku_computation_control_plane.py', '--domain', 'h')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/independent_validate_qku_computation_control_plane.py')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/independent_validate_qku_computation_control_plane_latency.py')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/independent_validate_qku_computation_control_plane_model_risk.py')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/independent_validate_qku_computation_control_plane_g.py')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/independent_validate_qku_computation_control_plane_agent.py')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/independent_validate_qku_computation_control_plane_d.py')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/independent_validate_qku_computation_control_plane_quantum.py')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/independent_validate_qku_computation_control_plane_architecture.py')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/independent_validate_qku_computation_control_plane_accounting.py')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/independent_validate_qku_computation_control_plane_execution.py')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/independent_validate_qku_computation_control_plane_llm.py')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/independent_validate_qku_computation_control_plane_operations.py')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/independent_validate_qku_computation_control_plane_security.py')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/independent_validate_qku_computation_control_plane_source.py')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/validate_qku_computation_control_plane.py', '--domain', 'accounting')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/validate_qku_computation_control_plane.py', '--domain', 'execution')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/validate_qku_computation_control_plane.py', '--domain', 'llm')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/validate_qku_computation_control_plane.py', '--domain', 'operations')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/validate_qku_computation_control_plane.py', '--domain', 'security')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/validate_qku_computation_control_plane.py', '--domain', 'source')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/validate_pr169_val1.py', '--repo-root', '.')),
+        ('deterministic-validators-c', ('REVIEW_PYTHON', 'tools/validate_no_runtime_artifacts.py', '--repo-root', '.', '--forbid-source-retrieval', '--forbid-source-acceptance', '--forbid-connector-binding', '--forbid-private-state-fetch', '--forbid-order-execution', '--forbid-neural-training', '--forbid-neural-inference', '--forbid-external-repo-clone', '--forbid-package-install-scripts')),
+        ('pytest-shard-1', ('REVIEW_PYTHON', 'tools/run_pytest_fresh_basetemp.py', 'tests/tools', 'tests/fail_closed', '-q', '--durations=50', '--basetemp', '/owned/p')),
+        ('pytest-shard-2', ('REVIEW_PYTHON', 'tools/run_pytest_fresh_basetemp.py', 'tests/stage1_prediction_markets/agent_consumable_parameter_default_registry', 'tests/stage1_prediction_markets/agent_default_binding_universal_intake_gate', 'tests/stage1_prediction_markets/aggressive_qku_candidate_materialization_agent_routing', 'tests/stage1_prediction_markets/atomicrows_bundle_reconciliation', 'tests/stage1_prediction_markets/atomicrows_pr154_value_state', 'tests/stage1_prediction_markets/latency_hot_path_snapshot_boundary', '-q', '--durations=50', '--basetemp', '/owned/p')),
+        ('pytest-shard-2', ('REVIEW_PYTHON', 'tools/run_pytest_fresh_basetemp.py', 'tests/stage1_prediction_markets/pr160_split_reclassification_route_closure', 'tests/stage1_prediction_markets/pr162d_r1_external_formula_data_quantum_acquisition_expansion', 'tests/stage1_prediction_markets/pr162d_r2a_real_formulations', 'tests/stage1_prediction_markets/pr162r_a_replay_paper_executability_classification_audit', 'tests/stage1_prediction_markets/pr162r_b_replay_paper_data_binding_completion', 'tests/stage1_prediction_markets/pr162r_generic_replay_paper_adapter_rerun', 'tests/stage1_prediction_markets/pr163_b_paired_replay_paper_concurrent_executor', 'tests/stage1_prediction_markets/pr163_c_pretrade_infrastructure_rejection_remediation', '-q', '--durations=50', '--basetemp', '/owned/p')),
+        ('pytest-shard-2', ('REVIEW_PYTHON', 'tools/run_pytest_fresh_basetemp.py', 'tests/atomicrows', '-q', '--durations=50', '--basetemp', '/owned/p')),
+        ('pytest-shard-2', ('REVIEW_PYTHON', 'tools/run_pytest_fresh_basetemp.py', 'tests/pr168_gfp', '-q', '--durations=50', '--basetemp', '/owned/p')),
+        ('pytest-shard-2', ('REVIEW_PYTHON', 'tools/run_pytest_fresh_basetemp.py', 'tests/pr168_rp', '-q', '--durations=50', '--basetemp', '/owned/p')),
+        ('pytest-shard-2', ('REVIEW_PYTHON', 'tools/run_pytest_fresh_basetemp.py', 'tests/pr168_rank', '-q', '--durations=50', '--basetemp', '/owned/p')),
+        ('pytest-shard-2', ('REVIEW_PYTHON', 'tools/run_pytest_fresh_basetemp.py', 'tests/pr168_data1', '-q', '--durations=50', '--basetemp', '/owned/p')),
+        ('pytest-shard-2', ('REVIEW_PYTHON', 'tools/run_pytest_fresh_basetemp.py', 'tests/pr168_data1a', '-q', '--durations=50', '--basetemp', '/owned/p')),
+        ('pytest-shard-2', ('REVIEW_PYTHON', 'tools/run_pytest_fresh_basetemp.py', 'tests/pr168_gfp2r', '-q', '--durations=50', '--basetemp', '/owned/p')),
+        ('pytest-shard-2', ('REVIEW_PYTHON', 'tools/run_pytest_fresh_basetemp.py', 'tests/pr168_rp2', '-q', '--durations=50', '--basetemp', '/owned/p')),
+        ('pytest-shard-2', ('REVIEW_PYTHON', 'tools/run_pytest_fresh_basetemp.py', 'tests/pr168_map3', '-q', '--durations=50', '--basetemp', '/owned/p')),
+        ('pytest-shard-2', ('REVIEW_PYTHON', 'tools/run_pytest_fresh_basetemp.py', 'tests/pr168_rp3', '-q', '--durations=50', '--basetemp', '/owned/p')),
+        ('pytest-shard-2', ('REVIEW_PYTHON', 'tools/run_pytest_fresh_basetemp.py', 'tests/pr168_rank3', '-q', '--durations=50', '--basetemp', '/owned/p')),
+        ('pytest-shard-2', ('REVIEW_PYTHON', 'tools/run_pytest_fresh_basetemp.py', 'tests/pr168_rp5a', '-q', '--durations=50', '--basetemp', '/owned/p')),
+        ('pytest-shard-2', ('REVIEW_PYTHON', 'tools/run_pytest_fresh_basetemp.py', 'tests/pr168_rp5b', '-q', '--durations=50', '--basetemp', '/owned/p')),
+        ('pytest-shard-2', ('REVIEW_PYTHON', 'tools/run_pytest_fresh_basetemp.py', 'tests/pr168_rp5c', '-q', '--durations=50', '--basetemp', '/owned/p')),
+        ('pytest-shard-2', ('REVIEW_PYTHON', 'tools/run_pytest_fresh_basetemp.py', 'tests/pr168_vs1', '-q', '--durations=50', '--basetemp', '/owned/p')),
+        ('pytest-shard-2', ('REVIEW_PYTHON', 'tools/run_pytest_fresh_basetemp.py', 'tests/pr168_rp5d', '-q', '--durations=50', '--basetemp', '/owned/p')),
+        ('pytest-shard-2', ('REVIEW_PYTHON', 'tools/run_pytest_fresh_basetemp.py', 'tests/pr168_rp5e', '-q', '--durations=50', '--basetemp', '/owned/p')),
+        ('pytest-shard-2', ('REVIEW_PYTHON', 'tools/run_pytest_fresh_basetemp.py', 'tests/pr168_rp5d_r1', '-q', '--durations=50', '--basetemp', '/owned/p')),
+        ('pytest-shard-2', ('REVIEW_PYTHON', 'tools/run_pytest_fresh_basetemp.py', 'tests/pr168_rp5f', '-q', '--durations=50', '--basetemp', '/owned/p')),
+        ('pytest-shard-2', ('REVIEW_PYTHON', 'tools/run_pytest_fresh_basetemp.py', 'tests/pr168_rp5g', '-q', '--durations=50', '--basetemp', '/owned/p')),
+        ('pytest-shard-2', ('REVIEW_PYTHON', 'tools/run_pytest_fresh_basetemp.py', 'tests/pr168_rank4', '-q', '--durations=50', '--basetemp', '/owned/p')),
+        ('pytest-shard-2', ('REVIEW_PYTHON', 'tools/run_pytest_fresh_basetemp.py', 'tests/pr168_qopt1', '-q', '--durations=50', '--basetemp', '/owned/p')),
+        ('pytest-shard-2', ('REVIEW_PYTHON', 'tools/run_pytest_fresh_basetemp.py', 'tests/pr168_vs2', '-q', '--durations=50', '--basetemp', '/owned/p')),
+        ('pytest-shard-2', ('REVIEW_PYTHON', 'tools/run_pytest_fresh_basetemp.py', 'tests/pr168_mem1', '-q', '--durations=50', '--basetemp', '/owned/p')),
+        ('pytest-shard-2', ('REVIEW_PYTHON', 'tools/run_pytest_fresh_basetemp.py', 'tests/pr169_dash1', '-q', '--durations=50', '--basetemp', '/owned/p')),
+        ('pytest-shard-2', ('REVIEW_PYTHON', 'tools/run_pytest_fresh_basetemp.py', 'tests/pr169_readiness1', '-q', '--durations=50', '--basetemp', '/owned/p')),
+        ('pytest-shard-2', ('REVIEW_PYTHON', 'tools/run_pytest_fresh_basetemp.py', 'tests/pr169_pretrade1', '-q', '--durations=50', '--basetemp', '/owned/p')),
+        ('pytest-shard-2', ('REVIEW_PYTHON', 'tools/run_pytest_fresh_basetemp.py', 'tests/pr169_svc1', '-q', '--durations=50', '--basetemp', '/owned/p')),
+        ('pytest-shard-2', ('REVIEW_PYTHON', 'tools/run_pytest_fresh_basetemp.py', 'tests/pr169_agent_orch1', '-q', '--durations=50', '--basetemp', '/owned/p')),
+        ('pytest-shard-2', ('REVIEW_PYTHON', 'tools/run_pytest_fresh_basetemp.py', 'tests/pr169_dash1_ui1', '-q', '--durations=50', '--basetemp', '/owned/p')),
+        ('pytest-shard-3', ('REVIEW_PYTHON', 'tools/run_pytest_fresh_basetemp.py', 'tests/stage1_prediction_markets/master_plan_residual_candidate_coverage', 'tests/stage1_prediction_markets/multisource_safe_nonlive_dataset_expansion_strict_qku_coverage', 'tests/stage1_prediction_markets/nonlive_replay_paper_data_adapter_quantum_forward_bridge', 'tests/stage1_prediction_markets/pr157_completion_materialization_bridge', 'tests/stage1_prediction_markets/pr158_owner_response_selection_readiness_bridge', 'tests/stage1_prediction_markets/pr159_official_source_completion_bridge', 'tests/stage1_prediction_markets/pr159r_source_locator_value_capture', '-q', '--durations=50', '--basetemp', '/owned/p')),
+        ('pytest-shard-3', ('REVIEW_PYTHON', 'tools/run_pytest_fresh_basetemp.py', 'tests/stage1_prediction_markets/pr163_generic_paper_adapter_capture_framework', 'tests/stage1_prediction_markets/pr164_review_provenance_qku_canonical_coverage_audit', 'tests/stage1_prediction_markets/pr165_b_condition_scoped_negative_memory', 'tests/stage1_prediction_markets/pr165_c_replay_paper_memory_consumer_integration', 'tests/stage1_prediction_markets/pr165_d_scenario_qku_combination_selection', 'tests/stage1_prediction_markets/pr165_d2_score_refreshed_scenario_selection_v2', 'tests/stage1_prediction_markets/pr165_evidence_backed_scoring_ranking', 'tests/stage1_prediction_markets/pr166_s_replay_paper_scenario_retest_execution', 'tests/stage1_prediction_markets/pr166_s2_replay_paper_retest_loop_v2', '-q', '--durations=50', '--basetemp', '/owned/p')),
+        ('pytest-shard-3', ('REVIEW_PYTHON', 'tools/run_pytest_fresh_basetemp.py', 'tests/stage1_prediction_markets/qku_candidate_quality_replay_paper_prioritization', 'tests/stage1_prediction_markets/qku_formula_algorithm_solver_market_scope_materialization', 'tests/stage1_prediction_markets/qku_residual_candidate_assimilation', 'tests/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation', 'tests/stage1_prediction_markets/replay_paper_outcome_capture_scenario_learning', 'tests/stage1_prediction_markets/safe_repo_local_nonlive_dataset_materialization_authority_gate', 'tests/stage1_prediction_markets/source_intelligence', 'tests/stage1_prediction_markets/test_validate_stage1_packet_schema_gate_static.py', '-q', '--durations=50', '--basetemp', '/owned/p')),
+        ('pytest-shard-4', ('REVIEW_PYTHON', 'tools/run_pytest_fresh_basetemp.py', 'tests/stage1_prediction_markets/pr166_sf_repair_materialization_before_retest', 'tests/stage1_prediction_markets/pr166_sm_score_memory_refresh_from_pr166_s_results', '-q', '--durations=50', '--basetemp', '/owned/p')),
+        ('pytest-shard-4', ('REVIEW_PYTHON', 'tools/run_pytest_fresh_basetemp.py', 'tests/stage1_prediction_markets/pr166_sf_r2_targeted_conversion_repair_retest/test_pr166_sf_r2_idempotence.py', '-q', '--durations=50', '--basetemp', '/owned/p')),
+        ('pytest-shard-5', ('REVIEW_PYTHON', 'tools/run_pytest_fresh_basetemp.py', 'tests/stage1_prediction_markets/pr166_sm2_score_memory_refresh_v2/test_pr166_sm2_ablation.py', 'tests/stage1_prediction_markets/pr166_sm2_score_memory_refresh_v2/test_pr166_sm2_agent_duty.py', 'tests/stage1_prediction_markets/pr166_sm2_score_memory_refresh_v2/test_pr166_sm2_agent_kpi.py', 'tests/stage1_prediction_markets/pr166_sm2_score_memory_refresh_v2/test_pr166_sm2_agent_task_queue.py', 'tests/stage1_prediction_markets/pr166_sm2_score_memory_refresh_v2/test_pr166_sm2_all_neg_conversion.py', 'tests/stage1_prediction_markets/pr166_sm2_score_memory_refresh_v2/test_pr166_sm2_alt_exec_memory.py', 'tests/stage1_prediction_markets/pr166_sm2_score_memory_refresh_v2/test_pr166_sm2_authority_boundaries.py', 'tests/stage1_prediction_markets/pr166_sm2_score_memory_refresh_v2/test_pr166_sm2_break_even_gap.py', 'tests/stage1_prediction_markets/pr166_sm2_score_memory_refresh_v2/test_pr166_sm2_build_outputs.py', 'tests/stage1_prediction_markets/pr166_sm2_score_memory_refresh_v2/test_pr166_sm2_calib_boost.py', 'tests/stage1_prediction_markets/pr166_sm2_score_memory_refresh_v2/test_pr166_sm2_calibration.py', 'tests/stage1_prediction_markets/pr166_sm2_score_memory_refresh_v2/test_pr166_sm2_candidate_family.py', 'tests/stage1_prediction_markets/pr166_sm2_score_memory_refresh_v2/test_pr166_sm2_capacity_crowding.py', '-q', '--durations=50', '--basetemp', '/owned/p')),
+        ('pytest-shard-5', ('REVIEW_PYTHON', 'tools/run_pytest_fresh_basetemp.py', 'tests/stage1_prediction_markets/pr166_sm2_score_memory_refresh_v2/test_pr166_sm2_champion_challenger.py', 'tests/stage1_prediction_markets/pr166_sm2_score_memory_refresh_v2/test_pr166_sm2_compact_names.py', 'tests/stage1_prediction_markets/pr166_sm2_score_memory_refresh_v2/test_pr166_sm2_condition_winners_losers.py', 'tests/stage1_prediction_markets/pr166_sm2_score_memory_refresh_v2/test_pr166_sm2_connector_ref_routing.py', 'tests/stage1_prediction_markets/pr166_sm2_score_memory_refresh_v2/test_pr166_sm2_conversion_agent_queue.py', 'tests/stage1_prediction_markets/pr166_sm2_score_memory_refresh_v2/test_pr166_sm2_conversion_math.py', 'tests/stage1_prediction_markets/pr166_sm2_score_memory_refresh_v2/test_pr166_sm2_convertible_queue.py', 'tests/stage1_prediction_markets/pr166_sm2_score_memory_refresh_v2/test_pr166_sm2_cost_cut.py', 'tests/stage1_prediction_markets/pr166_sm2_score_memory_refresh_v2/test_pr166_sm2_counterfactual.py', 'tests/stage1_prediction_markets/pr166_sm2_score_memory_refresh_v2/test_pr166_sm2_diversity.py', 'tests/stage1_prediction_markets/pr166_sm2_score_memory_refresh_v2/test_pr166_sm2_edge_decay.py', 'tests/stage1_prediction_markets/pr166_sm2_score_memory_refresh_v2/test_pr166_sm2_edge_uplift.py', '-q', '--durations=50', '--basetemp', '/owned/p')),
+        ('pytest-shard-5', ('REVIEW_PYTHON', 'tools/run_pytest_fresh_basetemp.py', 'tests/stage1_prediction_markets/pr166_sm2_score_memory_refresh_v2/test_pr166_sm2_evidence_depth.py', 'tests/stage1_prediction_markets/pr166_sm2_score_memory_refresh_v2/test_pr166_sm2_expansion_policy.py', 'tests/stage1_prediction_markets/pr166_sm2_score_memory_refresh_v2/test_pr166_sm2_external_dedupe.py', 'tests/stage1_prediction_markets/pr166_sm2_score_memory_refresh_v2/test_pr166_sm2_external_signal_registry.py', 'tests/stage1_prediction_markets/pr166_sm2_score_memory_refresh_v2/test_pr166_sm2_fill_boost.py', 'tests/stage1_prediction_markets/pr166_sm2_score_memory_refresh_v2/test_pr166_sm2_fragile_watchlist.py', 'tests/stage1_prediction_markets/pr166_sm2_score_memory_refresh_v2/test_pr166_sm2_handoff_intake.py', 'tests/stage1_prediction_markets/pr166_sm2_score_memory_refresh_v2/test_pr166_sm2_idempotence.py', 'tests/stage1_prediction_markets/pr166_sm2_score_memory_refresh_v2/test_pr166_sm2_input_consumption.py', 'tests/stage1_prediction_markets/pr166_sm2_score_memory_refresh_v2/test_pr166_sm2_lat_liq_impact.py', 'tests/stage1_prediction_markets/pr166_sm2_score_memory_refresh_v2/test_pr166_sm2_latent_edge.py', 'tests/stage1_prediction_markets/pr166_sm2_score_memory_refresh_v2/test_pr166_sm2_lcb_confidence.py', '-q', '--durations=50', '--basetemp', '/owned/p')),
+        ('pytest-shard-5', ('REVIEW_PYTHON', 'tools/run_pytest_fresh_basetemp.py', 'tests/stage1_prediction_markets/pr166_sm2_score_memory_refresh_v2/test_pr166_sm2_marginal_utility.py', 'tests/stage1_prediction_markets/pr166_sm2_score_memory_refresh_v2/test_pr166_sm2_memory_dag.py', 'tests/stage1_prediction_markets/pr166_sm2_score_memory_refresh_v2/test_pr166_sm2_memory_ledger.py', 'tests/stage1_prediction_markets/pr166_sm2_score_memory_refresh_v2/test_pr166_sm2_microstructure.py', 'tests/stage1_prediction_markets/pr166_sm2_score_memory_refresh_v2/test_pr166_sm2_no_bad_status_tokens.py', 'tests/stage1_prediction_markets/pr166_sm2_score_memory_refresh_v2/test_pr166_sm2_no_fill_memory.py', 'tests/stage1_prediction_markets/pr166_sm2_score_memory_refresh_v2/test_pr166_sm2_no_orphans.py', 'tests/stage1_prediction_markets/pr166_sm2_score_memory_refresh_v2/test_pr166_sm2_no_profit_evidence.py', 'tests/stage1_prediction_markets/pr166_sm2_score_memory_refresh_v2/test_pr166_sm2_orthogonal_edge.py', 'tests/stage1_prediction_markets/pr166_sm2_score_memory_refresh_v2/test_pr166_sm2_overfit_fdr.py', 'tests/stage1_prediction_markets/pr166_sm2_score_memory_refresh_v2/test_pr166_sm2_param_uplift.py', 'tests/stage1_prediction_markets/pr166_sm2_score_memory_refresh_v2/test_pr166_sm2_pos_seed_driver.py', '-q', '--durations=50', '--basetemp', '/owned/p')),
+        ('pytest-shard-5', ('REVIEW_PYTHON', 'tools/run_pytest_fresh_basetemp.py', 'tests/stage1_prediction_markets/pr166_sm2_score_memory_refresh_v2/test_pr166_sm2_positive_expansion.py', 'tests/stage1_prediction_markets/pr166_sm2_score_memory_refresh_v2/test_pr166_sm2_positive_negative_edge.py', 'tests/stage1_prediction_markets/pr166_sm2_score_memory_refresh_v2/test_pr166_sm2_pr152_pr208_routing_contract.py', 'tests/stage1_prediction_markets/pr166_sm2_score_memory_refresh_v2/test_pr166_sm2_pref_avoid_memory.py', 'tests/stage1_prediction_markets/pr166_sm2_score_memory_refresh_v2/test_pr166_sm2_provenance_supersession_drift.py', 'tests/stage1_prediction_markets/pr166_sm2_score_memory_refresh_v2/test_pr166_sm2_quantum_priority.py', 'tests/stage1_prediction_markets/pr166_sm2_score_memory_refresh_v2/test_pr166_sm2_rank_aggregation.py', 'tests/stage1_prediction_markets/pr166_sm2_score_memory_refresh_v2/test_pr166_sm2_rank_delta.py', 'tests/stage1_prediction_markets/pr166_sm2_score_memory_refresh_v2/test_pr166_sm2_rank_stability.py', 'tests/stage1_prediction_markets/pr166_sm2_score_memory_refresh_v2/test_pr166_sm2_regime_memory.py', 'tests/stage1_prediction_markets/pr166_sm2_score_memory_refresh_v2/test_pr166_sm2_repair_priority.py', 'tests/stage1_prediction_markets/pr166_sm2_score_memory_refresh_v2/test_pr166_sm2_result_intake.py', '-q', '--durations=50', '--basetemp', '/owned/p')),
+        ('pytest-shard-5', ('REVIEW_PYTHON', 'tools/run_pytest_fresh_basetemp.py', 'tests/stage1_prediction_markets/pr166_sm2_score_memory_refresh_v2/test_pr166_sm2_retest_boost_queue.py', 'tests/stage1_prediction_markets/pr166_sm2_score_memory_refresh_v2/test_pr166_sm2_route_crosswalk_cmd.py', 'tests/stage1_prediction_markets/pr166_sm2_score_memory_refresh_v2/test_pr166_sm2_row_count_reconciliation.py', 'tests/stage1_prediction_markets/pr166_sm2_score_memory_refresh_v2/test_pr166_sm2_score_explain.py', 'tests/stage1_prediction_markets/pr166_sm2_score_memory_refresh_v2/test_pr166_sm2_score_registry.py', 'tests/stage1_prediction_markets/pr166_sm2_score_memory_refresh_v2/test_pr166_sm2_selection_pressure.py', 'tests/stage1_prediction_markets/pr166_sm2_score_memory_refresh_v2/test_pr166_sm2_selection_ready_queue.py', 'tests/stage1_prediction_markets/pr166_sm2_score_memory_refresh_v2/test_pr166_sm2_settlement_adverse.py', 'tests/stage1_prediction_markets/pr166_sm2_score_memory_refresh_v2/test_pr166_sm2_shard_input_audit.py', 'tests/stage1_prediction_markets/pr166_sm2_score_memory_refresh_v2/test_pr166_sm2_shrinkage.py', 'tests/stage1_prediction_markets/pr166_sm2_score_memory_refresh_v2/test_pr166_sm2_status_enum_drift.py', 'tests/stage1_prediction_markets/pr166_sm2_score_memory_refresh_v2/test_pr166_sm2_tca_cost_roots.py', 'tests/stage1_prediction_markets/pr166_sm2_score_memory_refresh_v2/test_pr166_sm2_tt_risk.py', 'tests/stage1_prediction_markets/pr166_sm2_score_memory_refresh_v2/test_pr166_sm2_validator.py', '-q', '--durations=50', '--basetemp', '/owned/p')),
+        ('pytest-shard-6', ('REVIEW_PYTHON', 'tools/run_pytest_fresh_basetemp.py', 'tests/stage1_prediction_markets/pr166_sf_r2_targeted_conversion_repair_retest/test_pr166_sf_r2_agent_duty.py', 'tests/stage1_prediction_markets/pr166_sf_r2_targeted_conversion_repair_retest/test_pr166_sf_r2_agent_kpi.py', 'tests/stage1_prediction_markets/pr166_sf_r2_targeted_conversion_repair_retest/test_pr166_sf_r2_agent_task_queue.py', 'tests/stage1_prediction_markets/pr166_sf_r2_targeted_conversion_repair_retest/test_pr166_sf_r2_all_negative_intake.py', 'tests/stage1_prediction_markets/pr166_sf_r2_targeted_conversion_repair_retest/test_pr166_sf_r2_alt_exec_repair.py', 'tests/stage1_prediction_markets/pr166_sf_r2_targeted_conversion_repair_retest/test_pr166_sf_r2_authority_boundaries.py', 'tests/stage1_prediction_markets/pr166_sf_r2_targeted_conversion_repair_retest/test_pr166_sf_r2_before_after.py', 'tests/stage1_prediction_markets/pr166_sf_r2_targeted_conversion_repair_retest/test_pr166_sf_r2_break_even_gap.py', 'tests/stage1_prediction_markets/pr166_sf_r2_targeted_conversion_repair_retest/test_pr166_sf_r2_build_outputs.py', 'tests/stage1_prediction_markets/pr166_sf_r2_targeted_conversion_repair_retest/test_pr166_sf_r2_calib_uplift_proof.py', 'tests/stage1_prediction_markets/pr166_sf_r2_targeted_conversion_repair_retest/test_pr166_sf_r2_calibration.py', 'tests/stage1_prediction_markets/pr166_sf_r2_targeted_conversion_repair_retest/test_pr166_sf_r2_calibration_repair.py', 'tests/stage1_prediction_markets/pr166_sf_r2_targeted_conversion_repair_retest/test_pr166_sf_r2_capacity_crowding.py', '-q', '--durations=50', '--basetemp', '/owned/p')),
+        ('pytest-shard-6', ('REVIEW_PYTHON', 'tools/run_pytest_fresh_basetemp.py', 'tests/stage1_prediction_markets/pr166_sf_r2_targeted_conversion_repair_retest/test_pr166_sf_r2_champion_challenger.py', 'tests/stage1_prediction_markets/pr166_sf_r2_targeted_conversion_repair_retest/test_pr166_sf_r2_compact_names.py', 'tests/stage1_prediction_markets/pr166_sf_r2_targeted_conversion_repair_retest/test_pr166_sf_r2_computable_payload.py', 'tests/stage1_prediction_markets/pr166_sf_r2_targeted_conversion_repair_retest/test_pr166_sf_r2_connectivity.py', 'tests/stage1_prediction_markets/pr166_sf_r2_targeted_conversion_repair_retest/test_pr166_sf_r2_connector_routing.py', 'tests/stage1_prediction_markets/pr166_sf_r2_targeted_conversion_repair_retest/test_pr166_sf_r2_conversion_attribution.py', 'tests/stage1_prediction_markets/pr166_sf_r2_targeted_conversion_repair_retest/test_pr166_sf_r2_conversion_frontier.py', 'tests/stage1_prediction_markets/pr166_sf_r2_targeted_conversion_repair_retest/test_pr166_sf_r2_conversion_proof.py', 'tests/stage1_prediction_markets/pr166_sf_r2_targeted_conversion_repair_retest/test_pr166_sf_r2_cost_floor.py', 'tests/stage1_prediction_markets/pr166_sf_r2_targeted_conversion_repair_retest/test_pr166_sf_r2_cost_repair.py', 'tests/stage1_prediction_markets/pr166_sf_r2_targeted_conversion_repair_retest/test_pr166_sf_r2_downstream_handoffs.py', 'tests/stage1_prediction_markets/pr166_sf_r2_targeted_conversion_repair_retest/test_pr166_sf_r2_episode_plan.py', '-q', '--durations=50', '--basetemp', '/owned/p')),
+        ('pytest-shard-6', ('REVIEW_PYTHON', 'tools/run_pytest_fresh_basetemp.py', 'tests/stage1_prediction_markets/pr166_sf_r2_targeted_conversion_repair_retest/test_pr166_sf_r2_external_signals.py', 'tests/stage1_prediction_markets/pr166_sf_r2_targeted_conversion_repair_retest/test_pr166_sf_r2_fill_probability_model.py', 'tests/stage1_prediction_markets/pr166_sf_r2_targeted_conversion_repair_retest/test_pr166_sf_r2_fill_repair.py', 'tests/stage1_prediction_markets/pr166_sf_r2_targeted_conversion_repair_retest/test_pr166_sf_r2_fills_no_fills.py', 'tests/stage1_prediction_markets/pr166_sf_r2_targeted_conversion_repair_retest/test_pr166_sf_r2_formula_qku_repair.py', 'tests/stage1_prediction_markets/pr166_sf_r2_targeted_conversion_repair_retest/test_pr166_sf_r2_handoff_intake.py', 'tests/stage1_prediction_markets/pr166_sf_r2_targeted_conversion_repair_retest/test_pr166_sf_r2_holdout_replay.py', '-q', '--durations=50', '--basetemp', '/owned/p')),
+        ('pytest-shard-6', ('REVIEW_PYTHON', 'tools/run_pytest_fresh_basetemp.py', 'tests/stage1_prediction_markets/pr166_sf_r2_targeted_conversion_repair_retest/test_pr166_sf_r2_impl_shortfall.py', 'tests/stage1_prediction_markets/pr166_sf_r2_targeted_conversion_repair_retest/test_pr166_sf_r2_input_consumption.py', 'tests/stage1_prediction_markets/pr166_sf_r2_targeted_conversion_repair_retest/test_pr166_sf_r2_launch_candidate_filter.py', 'tests/stage1_prediction_markets/pr166_sf_r2_targeted_conversion_repair_retest/test_pr166_sf_r2_lcb_confidence.py', '-q', '--durations=50', '--basetemp', '/owned/p')),
+        ('pytest-shard-6', ('REVIEW_PYTHON', 'tools/run_pytest_fresh_basetemp.py', 'tests/stage1_prediction_markets/pr166_sf_r2_targeted_conversion_repair_retest/test_pr166_sf_r2_marginal_utility.py', 'tests/stage1_prediction_markets/pr166_sf_r2_targeted_conversion_repair_retest/test_pr166_sf_r2_microstructure.py', 'tests/stage1_prediction_markets/pr166_sf_r2_targeted_conversion_repair_retest/test_pr166_sf_r2_net_edge.py', 'tests/stage1_prediction_markets/pr166_sf_r2_targeted_conversion_repair_retest/test_pr166_sf_r2_no_bad_status_tokens.py', 'tests/stage1_prediction_markets/pr166_sf_r2_targeted_conversion_repair_retest/test_pr166_sf_r2_no_orphans.py', 'tests/stage1_prediction_markets/pr166_sf_r2_targeted_conversion_repair_retest/test_pr166_sf_r2_no_profit_evidence.py', 'tests/stage1_prediction_markets/pr166_sf_r2_targeted_conversion_repair_retest/test_pr166_sf_r2_order_intents.py', 'tests/stage1_prediction_markets/pr166_sf_r2_targeted_conversion_repair_retest/test_pr166_sf_r2_overfit_fdr.py', 'tests/stage1_prediction_markets/pr166_sf_r2_targeted_conversion_repair_retest/test_pr166_sf_r2_parameter_bound_audit.py', 'tests/stage1_prediction_markets/pr166_sf_r2_targeted_conversion_repair_retest/test_pr166_sf_r2_parameter_repair.py', 'tests/stage1_prediction_markets/pr166_sf_r2_targeted_conversion_repair_retest/test_pr166_sf_r2_positive_capacity.py', 'tests/stage1_prediction_markets/pr166_sf_r2_targeted_conversion_repair_retest/test_pr166_sf_r2_positive_conversion.py', '-q', '--durations=50', '--basetemp', '/owned/p')),
+        ('pytest-shard-6', ('REVIEW_PYTHON', 'tools/run_pytest_fresh_basetemp.py', 'tests/stage1_prediction_markets/pr166_sf_r2_targeted_conversion_repair_retest/test_pr166_sf_r2_pr152_pr208_routing_contract.py', 'tests/stage1_prediction_markets/pr166_sf_r2_targeted_conversion_repair_retest/test_pr166_sf_r2_quantum_handoff.py', 'tests/stage1_prediction_markets/pr166_sf_r2_targeted_conversion_repair_retest/test_pr166_sf_r2_quantum_objective_map.py', 'tests/stage1_prediction_markets/pr166_sf_r2_targeted_conversion_repair_retest/test_pr166_sf_r2_quantum_repair.py', 'tests/stage1_prediction_markets/pr166_sf_r2_targeted_conversion_repair_retest/test_pr166_sf_r2_rank_stability.py', 'tests/stage1_prediction_markets/pr166_sf_r2_targeted_conversion_repair_retest/test_pr166_sf_r2_regime_memory.py', 'tests/stage1_prediction_markets/pr166_sf_r2_targeted_conversion_repair_retest/test_pr166_sf_r2_repair_ablation.py', 'tests/stage1_prediction_markets/pr166_sf_r2_targeted_conversion_repair_retest/test_pr166_sf_r2_repair_failure.py', 'tests/stage1_prediction_markets/pr166_sf_r2_targeted_conversion_repair_retest/test_pr166_sf_r2_repair_feasibility.py', 'tests/stage1_prediction_markets/pr166_sf_r2_targeted_conversion_repair_retest/test_pr166_sf_r2_repair_frontier.py', 'tests/stage1_prediction_markets/pr166_sf_r2_targeted_conversion_repair_retest/test_pr166_sf_r2_repair_portfolio.py', 'tests/stage1_prediction_markets/pr166_sf_r2_targeted_conversion_repair_retest/test_pr166_sf_r2_repair_priority.py', '-q', '--durations=50', '--basetemp', '/owned/p')),
+        ('pytest-shard-6', ('REVIEW_PYTHON', 'tools/run_pytest_fresh_basetemp.py', 'tests/stage1_prediction_markets/pr166_sf_r2_targeted_conversion_repair_retest/test_pr166_sf_r2_repair_sensitivity.py', 'tests/stage1_prediction_markets/pr166_sf_r2_targeted_conversion_repair_retest/test_pr166_sf_r2_repair_universe.py', 'tests/stage1_prediction_markets/pr166_sf_r2_targeted_conversion_repair_retest/test_pr166_sf_r2_repaired_packet_registry.py', 'tests/stage1_prediction_markets/pr166_sf_r2_targeted_conversion_repair_retest/test_pr166_sf_r2_retest_policy.py', 'tests/stage1_prediction_markets/pr166_sf_r2_targeted_conversion_repair_retest/test_pr166_sf_r2_retest_universe.py', 'tests/stage1_prediction_markets/pr166_sf_r2_targeted_conversion_repair_retest/test_pr166_sf_r2_route_crosswalk_cmd.py', 'tests/stage1_prediction_markets/pr166_sf_r2_targeted_conversion_repair_retest/test_pr166_sf_r2_row_count_reconciliation.py', 'tests/stage1_prediction_markets/pr166_sf_r2_targeted_conversion_repair_retest/test_pr166_sf_r2_runtime_safety_handoff.py', 'tests/stage1_prediction_markets/pr166_sf_r2_targeted_conversion_repair_retest/test_pr166_sf_r2_shard_input_audit.py', 'tests/stage1_prediction_markets/pr166_sf_r2_targeted_conversion_repair_retest/test_pr166_sf_r2_status_enum_drift.py', 'tests/stage1_prediction_markets/pr166_sf_r2_targeted_conversion_repair_retest/test_pr166_sf_r2_still_negative.py', 'tests/stage1_prediction_markets/pr166_sf_r2_targeted_conversion_repair_retest/test_pr166_sf_r2_tca_cost_roots.py', 'tests/stage1_prediction_markets/pr166_sf_r2_targeted_conversion_repair_retest/test_pr166_sf_r2_terminal_rows.py', 'tests/stage1_prediction_markets/pr166_sf_r2_targeted_conversion_repair_retest/test_pr166_sf_r2_validator.py', '-q', '--durations=50', '--basetemp', '/owned/p')),
+        ('pytest-shard-7', ('REVIEW_PYTHON', 'tools/run_pytest_fresh_basetemp.py', 'tests/stage1_prediction_markets/pr165_d3_quantum_aware_scenario_selection_v3', '-q', '--durations=50', '--basetemp', '/owned/p')),
+        ('pytest-shard-7', ('REVIEW_PYTHON', 'tools/run_pytest_fresh_basetemp.py', 'tests/stage1_prediction_markets/pr166_sm3_score_memory_refresh_v3/test_pr166_sm3_idempotence.py', '-q', '--durations=50', '--basetemp', '/owned/p')),
+        ('pytest-shard-7', ('REVIEW_PYTHON', 'tools/run_pytest_fresh_basetemp.py', 'tests/stage1_prediction_markets/pr166_sm3_score_memory_refresh_v3', '-q', '--ignore', 'tests/stage1_prediction_markets/pr166_sm3_score_memory_refresh_v3/test_pr166_sm3_idempotence.py', '--durations=50', '--basetemp', '/owned/p')),
+        ('pytest-shard-8', ('REVIEW_PYTHON', 'tools/run_pytest_fresh_basetemp.py', 'tests/stage1_prediction_markets/pr166_q_quantum_classical_hybrid_comparator/test_pr166_q_idempotence.py', '-q', '--durations=50', '--basetemp', '/owned/p')),
+        ('pytest-shard-8', ('REVIEW_PYTHON', 'tools/run_pytest_fresh_basetemp.py', 'tests/stage1_prediction_markets/pr166_q_quantum_classical_hybrid_comparator', '-q', '--ignore', 'tests/stage1_prediction_markets/pr166_q_quantum_classical_hybrid_comparator/test_pr166_q_idempotence.py', '--durations=50', '--basetemp', '/owned/p')),
+        ('pytest-shard-8', ('REVIEW_PYTHON', 'tools/run_pytest_fresh_basetemp.py', 'tests/stage1_prediction_markets/pr166_qb_bounded_quantum_benchmark/test_pr166_qb_idempotence.py', '-q', '--durations=50', '--basetemp', '/owned/p')),
+        ('pytest-shard-8', ('REVIEW_PYTHON', 'tools/run_pytest_fresh_basetemp.py', 'tests/stage1_prediction_markets/pr166_qb_bounded_quantum_benchmark', '-q', '--ignore', 'tests/stage1_prediction_markets/pr166_qb_bounded_quantum_benchmark/test_pr166_qb_idempotence.py', '--durations=50', '--basetemp', '/owned/p')),
+        ('pytest-shard-8', ('REVIEW_PYTHON', 'tools/run_pytest_fresh_basetemp.py', 'tests/stage1_prediction_markets/pr166_qc_quantum_selected_replay_paper_retest/test_pr166_qc_idempotence.py', '-q', '--durations=50', '--basetemp', '/owned/p')),
+        ('pytest-shard-8', ('REVIEW_PYTHON', 'tools/run_pytest_fresh_basetemp.py', 'tests/stage1_prediction_markets/pr166_qc_quantum_selected_replay_paper_retest', '-q', '--ignore', 'tests/stage1_prediction_markets/pr166_qc_quantum_selected_replay_paper_retest/test_pr166_qc_idempotence.py', '--durations=50', '--basetemp', '/owned/p')),
+        ('pytest-shard-8', ('REVIEW_PYTHON', 'tools/run_pytest_fresh_basetemp.py', 'tests/stage1_prediction_markets/pr162e_q_quantum_automapper/test_pr162e_q_idempotence.py', '-q', '--durations=50', '--basetemp', '/owned/p')),
+        ('pytest-shard-8', ('REVIEW_PYTHON', 'tools/run_pytest_fresh_basetemp.py', 'tests/stage1_prediction_markets/pr162e_q_quantum_automapper', '-q', '--ignore', 'tests/stage1_prediction_markets/pr162e_q_quantum_automapper/test_pr162e_q_idempotence.py', '--durations=50', '--basetemp', '/owned/p')),
+        ('pytest-shard-8', ('REVIEW_PYTHON', 'tools/run_pytest_fresh_basetemp.py', 'tests/stage1_prediction_markets/pr167_open_trade_simulator_integration/test_pr167_idempotence.py', '-q', '--durations=50', '--basetemp', '/owned/p')),
+        ('pytest-shard-8', ('REVIEW_PYTHON', 'tools/run_pytest_fresh_basetemp.py', 'tests/stage1_prediction_markets/pr167_open_trade_simulator_integration', '-q', '--ignore', 'tests/stage1_prediction_markets/pr167_open_trade_simulator_integration/test_pr167_idempotence.py', '--durations=50', '--basetemp', '/owned/p')),
+        ('pytest-shard-8', ('REVIEW_PYTHON', 'tools/run_pytest_fresh_basetemp.py', 'tests/pr162e/test_pr162e_idempotence_bounded.py', '-q', '--durations=50', '--basetemp', '/owned/p')),
+        ('pytest-shard-8', ('REVIEW_PYTHON', 'tools/run_pytest_fresh_basetemp.py', 'tests/pr162e', '-q', '--ignore', 'tests/pr162e/test_pr162e_idempotence_bounded.py', '--durations=50', '--basetemp', '/owned/p')),
+        ('pytest-shard-8', ('REVIEW_PYTHON', 'tools/run_pytest_fresh_basetemp.py', 'tests/source_evidence/test_controlled_official_source_capture_candidate_packets.py', '-q', '--durations=50', '--basetemp', '/owned/p')),
+        ('pytest-shard-8', ('REVIEW_PYTHON', 'tools/run_pytest_fresh_basetemp.py', 'tests/agent_algorithm', 'tests/agents', 'tests/algorithms', 'tests/connectors', '-q', '--durations=50', '--basetemp', '/owned/p')),
+        ('pytest-shard-8', ('REVIEW_PYTHON', 'tools/run_pytest_fresh_basetemp.py', 'tests/core', 'tests/dashboard', 'tests/edge', 'tests/external_repo', 'tests/governance', 'tests/launch', 'tests/master_plan', '-q', '--durations=50', '--basetemp', '/owned/p')),
+        ('pytest-shard-8', ('REVIEW_PYTHON', 'tools/run_pytest_fresh_basetemp.py', 'tests/global_debug', '-q', '--durations=50', '--basetemp', '/owned/p')),
+        ('pytest-shard-8', ('REVIEW_PYTHON', 'tools/run_pytest_fresh_basetemp.py', 'tests/neural_signal', 'tests/quantum', 'tests/replay_paper', 'tests/replay_paper_review', 'tests/research', 'tests/roadmap', '-q', '--durations=50', '--basetemp', '/owned/p')),
+        ('pytest-shard-8', ('REVIEW_PYTHON', 'tools/run_pytest_fresh_basetemp.py', 'tests/runtime_cash', 'tests/runtime_orchestration', 'tests/runtime_resolver', 'tests/scoring', 'tests/selection', 'tests/venue_neutral_prediction_adapter', '-q', '--durations=50', '--basetemp', '/owned/p')),
+        ('pytest-shard-8', ('REVIEW_PYTHON', 'tools/run_pytest_fresh_basetemp.py', 'tests/source_evidence', '-q', '--ignore', 'tests/source_evidence/test_controlled_official_source_capture_candidate_packets.py', '--durations=50', '--basetemp', '/owned/p')),
+        ('pytest-shard-8', ('REVIEW_PYTHON', 'tools/run_pytest_fresh_basetemp.py', 'tests/stage1_prediction_markets/qku_computation_control_plane', '-q', '--durations=50', '--basetemp', '/owned/p')),
+        ('post-validation', ('REVIEW_PYTHON', '-m', 'compileall', '-q', 'tools', 'tests', 'src')),
+        ('post-validation', ('git', 'diff', '--check')),
+        ('post-validation', ('git', 'diff', '--exit-code', '--', 'docs/master_plan/QTT_MasterPlan_Current.md')),
+        ('post-validation', ('REVIEW_PYTHON', '-c', "import json\nfrom pathlib import Path\n\nbundle = Path('docs/master_plan/atomic_rows/AtomicRows.bundle.jsonl')\nsidecar = Path('docs/master_plan/atomic_rows') / ('AtomicRows' + '.bundle' + '.' + 'sha256')\nif not bundle.is_file():\n    raise SystemExit('AtomicRows bundle is missing')\nif sidecar.exists():\n    raise SystemExit('AtomicRows bundle SHA sidecar must be absent')\ndata = bundle.read_bytes()\nassert data, 'AtomicRows bundle is empty'\nassert not data.startswith(b'\\xef\\xbb\\xbf'), 'AtomicRows bundle has a UTF-8 BOM'\nassert b'\\r' not in data, 'AtomicRows bundle contains CR or CRLF line endings'\nassert data.endswith(b'\\n'), 'AtomicRows bundle must end with LF'\nlines = data.decode('utf-8').splitlines()\nassert len(lines) == 4183, f'expected 4183 AtomicRows rows, found {len(lines)}'\nassert all(line.strip() for line in lines), 'AtomicRows bundle contains blank rows'\nfor line_number, line in enumerate(lines, start=1):\n    json.loads(line)\n")),
+    )
+    runner_source = Path(runner.__file__).read_bytes()
+    scope_source = (Path(runner.__file__).parent / "validation_scope_registry.py").read_bytes()
+    # The retained diagnostic has POSIX path spelling. Keep that inspected
+    # formatting profile explicit even when this group runs on admitted Windows;
+    # this pure path facade neither performs I/O nor qualifies native execution.
+    monkeypatch.setattr(runner, "pathlib", SimpleNamespace(
+        Path=PurePosixPath, PurePath=PurePosixPath, PurePosixPath=PurePosixPath))
+    node_count = sum(sum(1 for _ in ast.walk(ast.parse(source))) for source in (runner_source, scope_source))
+    checks = []
+    finite_before = {name for name in sys.modules if name.startswith("_qtt_v35_finite_manifest_")}
+    options = dict(expected_runner_source=runner_source, expected_scope_source=scope_source,
+        python_executable="REVIEW_PYTHON", validation_dir=PurePosixPath("/owned/v"), pytest_basetemp=PurePosixPath("/owned/p"),
+        byte_limit=len(runner_source) + len(scope_source), node_limit=node_count,
+        command_limit=450, argument_limit=2323, check_candidate=lambda: checks.append("original-candidate"))
+    projected = runner._project_probability_validation_manifest_v1(runner_source, scope_source, **options)
+    assert checks == ["original-candidate", "original-candidate"]
+    assert len(projected) == 13
+    assert tuple((phase["phase"], tuple(command)) for phase in projected for command in phase["commands"]) == expected_ordered
+    assert [phase["command_count"] for phase in projected] == [8, 64, 55, 245, 1, 32, 3, 2, 6, 7, 3, 20, 4]
+    assert sum(len(command) for phase in projected for command in phase["commands"]) == 2323
+    assert {name for name in sys.modules if name.startswith("_qtt_v35_finite_manifest_")} == finite_before
+
+    def replaced_declaration(source, name, replacement):
+        decoded = source.decode("utf-8")
+        nodes = [node for node in ast.parse(decoded).body if
+                 (isinstance(node, (ast.FunctionDef, ast.ClassDef)) and node.name == name) or
+                 (isinstance(node, ast.Assign) and any(isinstance(target, ast.Name) and target.id == name for target in node.targets))]
+        assert len(nodes) == 1
+        lines = decoded.splitlines(keepends=True)
+        node = nodes[0]
+        return ("".join(lines[:node.lineno - 1]) + replacement + "\n" + "".join(lines[node.end_lineno:])).encode("utf-8")
+
+    for bad_runner, bad_helper in ((runner_source + b"\n", scope_source), (runner_source, scope_source + b"\n")):
+        with pytest.raises(ValueError, match="independent original byte basis"):
+            runner._project_probability_validation_manifest_v1(bad_runner, bad_helper, **options)
+    # Both bad bytes are independently supplied to reach the structural/effect
+    # checks: source equality alone must not bless arbitrary selected declarations.
+    phase_nodes = [node for node in ast.parse(runner_source).body if isinstance(node, ast.Assign) and
+                   any(isinstance(target, ast.Name) and target.id == "ORDERED_PHASES" for target in node.targets)]
+    assert len(phase_nodes) == 2
+    phase_lines = runner_source.decode("utf-8").splitlines(keepends=True)
+    first, second = phase_nodes
+    altered_pair = ("".join(phase_lines[:first.lineno - 1]) + "ORDERED_PHASES = ()\n" +
+                    "".join(phase_lines[first.end_lineno:])).encode("utf-8")
+    reversed_pair = ("".join(phase_lines[:first.lineno - 1]) +
+                     "".join(phase_lines[second.lineno - 1:second.end_lineno]) +
+                     "".join(phase_lines[first.end_lineno:second.lineno - 1]) +
+                     "".join(phase_lines[first.lineno - 1:first.end_lineno]) +
+                     "".join(phase_lines[second.end_lineno:])).encode("utf-8")
+    negative_sources = (
+        (runner_source + b"\nORDERED_PHASES = ()\n", "ordered phase expansion profile"),
+        (altered_pair, "ordered phase expansion profile"),
+        (reversed_pair, "ordered phase expansion profile"),
+        (runner_source + b"\nFAST_PREFLIGHT_PHASE = 'duplicate'\n", "duplicate manifest declaration"),
+        (replaced_declaration(runner_source, "PYTEST_DURATIONS_ARG", "PYTEST_DURATIONS_ARG = _path('x')"), "unselected manifest initializer"),
+        (replaced_declaration(runner_source, "PYTEST_DURATIONS_ARG", "PYTEST_DURATIONS_ARG = _pr166_sm2_pytest_paths(())"), "unselected manifest initializer"),
+        (replaced_declaration(runner_source, "_pr166_sm2_pytest_paths", "def _pr166_sm2_pytest_paths(file_names: Sequence[str]) -> tuple[str, ...]:\n    return ()"), "path constructor profile"),
+        (replaced_declaration(runner_source, "_pr166_sf_r2_pytest_paths", "def _pr166_sf_r2_pytest_paths(file_names: Sequence[str]) -> tuple[str, ...]:\n    return ()"), "path constructor profile"),
+        (replaced_declaration(runner_source, "build_phase_manifest", "def build_phase_manifest(validation_dir=None, pytest_basetemp=None):\n    import os\n    return []"), "effectful declaration"),
+        (replaced_declaration(runner_source, "build_phase_manifest", "def build_phase_manifest(validation_dir=None, pytest_basetemp=None):\n    return getattr(pathlib, 'Path')('.')"), "unselected manifest call"),
+    )
+    for bad, reason in negative_sources:
+        with pytest.raises(ValueError, match=reason):
+            runner._project_probability_validation_manifest_v1(bad, scope_source, **{**options,
+                "expected_runner_source": bad, "byte_limit": len(bad) + len(scope_source),
+                "node_limit": node_count + 1000})
+        assert {name for name in sys.modules if name.startswith("_qtt_v35_finite_manifest_")} == finite_before
+    for key, value in (("byte_limit", len(runner_source) + len(scope_source) - 1),
+                       ("node_limit", node_count - 1), ("command_limit", 449), ("argument_limit", 2322)):
+        with pytest.raises(ValueError):
+            runner._project_probability_validation_manifest_v1(runner_source, scope_source, **{**options, key: value})
+        assert {name for name in sys.modules if name.startswith("_qtt_v35_finite_manifest_")} == finite_before
+
+
 def test_runner_assigns_canonical_non_pytest_commands_to_one_phase(monkeypatch):
     python_executable = r"C:\repo\.venv\Scripts\python.exe"
     monkeypatch.setattr(runner.sys, "executable", python_executable)
@@ -6081,10 +6877,12 @@ def test_runner_restores_new_generated_untracked_outputs_at_terminal_boundaries(
         monkeypatch.setattr(runner, "_untracked_paths", current_untracked)
         monkeypatch.setattr(runner.subprocess, "run", fake_run)
 
-        exit_code = runner.run_commands(
-            [["python", "tools/example_gate.py"]],
-            repo_root=repo_root,
-        )
+        commands = [["python", "tools/example_gate.py"]]
+        plan = runner._prepare_execution_plan(commands)
+        paths[new_generated_rel].parent.mkdir(parents=True, exist_ok=True)
+        observe = lambda: tuple(sorted(current_untracked(repo_root) - {new_workspace_output_rel}))
+        candidate = _synthetic_candidate_custody_v1(repo_root, plan, observed_paths=observe, effects=(new_generated_rel,))
+        exit_code = runner.run_commands(commands, repo_root=repo_root, execution_plan=plan, candidate_custody=candidate)
 
         assert exit_code == expected_returncode
         assert paths[preexisting_generated_rel].read_text(encoding="utf-8") == (
@@ -6131,18 +6929,78 @@ def test_runner_fails_closed_without_removing_new_untracked_output_outside_prefi
         monkeypatch.setattr(runner, "_untracked_paths", current_untracked)
         monkeypatch.setattr(runner.subprocess, "run", fake_run)
 
-        exit_code = runner.run_commands(
-            [["python", "tools/example_gate.py"]],
-            repo_root=repo_root,
-        )
+        commands = [["python", "tools/example_gate.py"]]
+        plan = runner._prepare_execution_plan(commands)
+        observe = lambda: tuple(sorted(current_untracked(repo_root)))
+        candidate = _synthetic_candidate_custody_v1(repo_root, plan, observed_paths=observe, effects=())
+        exit_code = runner.run_commands(commands, repo_root=repo_root, execution_plan=plan, candidate_custody=candidate)
 
         assert exit_code == 1
         assert paths[preexisting_rel].read_text(encoding="utf-8") == "preserve\n"
         assert paths[unexpected_rel].read_text(encoding="utf-8") == "diagnostic\n"
         assert (
-            "VALIDATION_GATE_UNTRACKED_OUTPUT_OUTSIDE_GENERATED_PREFIX: "
+            "VALIDATION_CANDIDATE_UNADMITTED_EFFECT: "
             "unexpected.txt"
         ) in capsys.readouterr().err
+
+    # A mixed invalid batch must preserve even the generated diagnostic prefix.
+    with tempfile.TemporaryDirectory(prefix="qtt_gate_batch_") as temp_dir:
+        root = Path(temp_dir)
+        generated = root / "docs/master_plan/generated/first.json"
+        generated.parent.mkdir(parents=True)
+        generated.write_bytes(b"retained diagnostic")
+        other = root / "outside.txt"
+        other.write_bytes(b"outside diagnostic")
+        with monkeypatch.context() as scoped:
+            scoped.setattr(runner, "_untracked_paths", lambda _: {
+                "docs/master_plan/generated/first.json", "outside.txt"
+            })
+            with pytest.raises(RuntimeError, match="OUTSIDE_GENERATED_PREFIX"):
+                runner._restore_untracked_gate_side_effects(root, set())
+        assert generated.read_bytes() == b"retained diagnostic"
+        assert other.read_bytes() == b"outside diagnostic"
+
+    # All candidate leaf types are checked before any unlink in the batch.
+    with tempfile.TemporaryDirectory(prefix="qtt_gate_kinds_") as temp_dir:
+        root = Path(temp_dir)
+        generated = root / "docs/master_plan/generated/first.json"
+        generated.parent.mkdir(parents=True)
+        generated.write_bytes(b"retained diagnostic")
+        directory = generated.parent / "last.json"
+        directory.mkdir()
+        with monkeypatch.context() as scoped:
+            scoped.setattr(runner, "_untracked_paths", lambda _: {
+                "docs/master_plan/generated/first.json",
+                "docs/master_plan/generated/last.json"
+            })
+            with pytest.raises(RuntimeError, match="GENERATED_OUTPUT_NOT_FILE"):
+                runner._restore_untracked_gate_side_effects(root, set())
+        assert generated.read_bytes() == b"retained diagnostic"
+        assert directory.is_dir()
+
+    # Reparse admission is tested without requiring Windows symlink privilege.
+    import stat as file_stat
+    with tempfile.TemporaryDirectory(prefix="qtt_gate_reparse_") as temp_dir:
+        root = Path(temp_dir)
+        generated = root / "docs/master_plan/generated/alias.json"
+        generated.parent.mkdir(parents=True)
+        generated.write_bytes(b"retained diagnostic")
+        original_lstat = Path.lstat
+        for selected in (generated, generated.parent):
+            def observed(path, *args, **kwargs):
+                value = original_lstat(path, *args, **kwargs)
+                if path == selected:
+                    return SimpleNamespace(
+                        st_mode=value.st_mode,
+                        st_file_attributes=getattr(file_stat, "FILE_ATTRIBUTE_REPARSE_POINT", 0x400),
+                    )
+                return value
+            with monkeypatch.context() as scoped:
+                scoped.setattr(Path, "lstat", observed)
+                with pytest.raises(RuntimeError, match="UNSAFE_GENERATED_OUTPUT_PATH"):
+                    runner._generated_gate_output_path(root, "docs/master_plan/generated/alias.json")
+        assert generated.read_bytes() == b"retained diagnostic"
+
 
 
 def test_generated_gate_output_path_rejects_nonportable_or_escaping_paths(
@@ -6229,123 +7087,580 @@ def test_validation_workspace_output_path_uses_exact_cross_platform_boundary():
 
 
 def test_runner_restores_only_runtime_side_effects_before_pr142_pr143_and_final_pytest(
-    monkeypatch,
-    capsys,
-    tmp_path,
+    monkeypatch, capsys, tmp_path,
 ):
+    import stat
     class Completed:
-        def __init__(
-            self,
-            returncode: int = 0,
-            stdout: str = "",
-            stderr: str = "",
-        ) -> None:
-            self.returncode = returncode
+        returncode = 0
+        stderr = ""
+        def __init__(self, stdout=""):
             self.stdout = stdout
-            self.stderr = stderr
-
-    intended_repair_paths = [
-        "tools/run_validation_gates.py",
-        "tests/fail_closed/test_run_validation_gates.py",
-    ]
-    generated_side_effect_paths = [
-        "docs/master_plan/generated/GateSideEffect.report.json",
-        "tests/fixtures/atomicrows/synthetic_gate_side_effect.v1.fixture.json",
-    ]
-    modified_outputs = iter(
-        [
-            "\n".join(intended_repair_paths) + "\n",
-            "\n".join([*intended_repair_paths, *generated_side_effect_paths]) + "\n",
-            "\n".join([*intended_repair_paths, *generated_side_effect_paths]) + "\n",
-            "\n".join(intended_repair_paths) + "\n",
-            "\n".join([*intended_repair_paths, *generated_side_effect_paths]) + "\n",
-            "\n".join(intended_repair_paths) + "\n",
-            "\n".join([*intended_repair_paths, *generated_side_effect_paths]) + "\n",
-            "\n".join(intended_repair_paths) + "\n",
-        ]
-    )
-    events: list[tuple[str, list[str]]] = []
-    commands = runner.build_validation_commands(
-        Path("validation-dir"),
-        Path("pytest-basetemp"),
-    )
-
-    def fake_run(command: list[str], **kwargs) -> Completed:
-        if command[0] == "git":
-            git_args = command[1:]
-            events.append(("git", git_args))
-            if git_args == ["ls-files", "-m"]:
-                return Completed(stdout=next(modified_outputs))
-            if git_args == [
-                "restore",
-                "--source=HEAD",
-                "--worktree",
-                "--",
-                *generated_side_effect_paths,
-            ]:
-                return Completed()
-            raise AssertionError(f"unexpected git command: {git_args}")
-
-        events.append(("gate", command))
-        return Completed(stdout=_st12h_mock_terminal_output(command))
-
-    monkeypatch.setattr(runner.subprocess, "run", fake_run)
-    monkeypatch.setattr(runner, "_untracked_paths", lambda repo_root: set())
-    monkeypatch.setattr(
-        runner,
-        "_routed_generated_output_currentness_failures",
-        lambda command, repo_root: [],
-    )
-
-    repo_root = tmp_path / "repo-root"
-    repo_root.mkdir()
+    intended_repair_paths = ("tools/run_validation_gates.py", "tests/fail_closed/test_run_validation_gates.py")
+    generated_side_effect_paths = ("docs/master_plan/generated/GateSideEffect.report.json",
+                                  "tests/fixtures/atomicrows/synthetic_gate_side_effect.v1.fixture.json")
+    root = tmp_path / "candidate-repo"
+    root.mkdir()
+    repo_root = root
     assert repo_root.is_absolute()
     assert repo_root.is_dir()
     assert not (repo_root / ".git").exists()
-    exit_code = runner.run_commands(commands, repo_root=repo_root)
+    paths = (*intended_repair_paths, *generated_side_effect_paths, "unowned/keep.txt")
+    candidate_bytes = {path: ("working-candidate:" + path).encode() for path in paths}
+    for path, data in candidate_bytes.items():
+        target = root / path
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_bytes(data)
+    index = root / "synthetic-index"
+    index.write_bytes(b"synthetic staged state differs from working bytes")
+    commands = runner.build_validation_commands(Path("validation-dir"), Path("pytest-basetemp"))
+    original_vectors = tuple(tuple(command) for command in commands)
+    plan = runner._prepare_execution_plan(commands)
+    events = []
+    observations = []
+    timeline = []
+    activity = ["acquisition"]
 
-    ls_files_event = ("git", ["ls-files", "-m"])
-    restore_event = (
-        "git",
-        [
-            "restore",
-            "--source=HEAD",
-            "--worktree",
-            "--",
-            *generated_side_effect_paths,
-        ],
+    def observed_paths():
+        return tuple(sorted(path.relative_to(root).as_posix() for path in root.rglob("*")
+                            if path.is_file() and path != index))
+
+    def independent_surface():
+        # Read the actual fixture surface independently of the candidate's map.
+        assert set(observed_paths()) == set(paths)
+        rows = []
+        for relative in sorted(paths):
+            path = root / relative
+            info = path.lstat()
+            assert stat.S_ISREG(info.st_mode) and info.st_nlink == 1
+            assert not (getattr(info, "st_file_attributes", 0) & 0x400)
+            rows.append((relative, "FILE", stat.S_IMODE(info.st_mode), path.read_bytes()))
+        assert index.read_bytes() == b"synthetic staged state differs from working bytes"
+        return tuple(rows)
+
+    original_surface = independent_surface()
+    original_snapshot = runner._ValidationCandidateCustodyV1._snapshot
+
+    def observed_snapshot(owner, selected_paths, *, baseline=False):
+        if owner.root != root:
+            return original_snapshot(owner, selected_paths, baseline=baseline)
+        before = independent_surface()
+        actual = original_snapshot(owner, selected_paths, baseline=baseline)
+        after = independent_surface()
+        assert before == after
+        assert actual == {path: (mode, data) for path, kind, mode, data in after}
+        observation = (activity[0], baseline, after)
+        observations.append(observation)
+        timeline.append(("observation", observation))
+        return actual
+
+    monkeypatch.setattr(runner._ValidationCandidateCustodyV1, "_snapshot", observed_snapshot)
+    candidate = _synthetic_candidate_custody_v1(root, plan, observed_paths=observed_paths,
+        effects=generated_side_effect_paths, index_path=index)
+    assert observations == [("acquisition", True, original_surface)]
+    activity[0] = "occurrence"
+    original_restore = candidate.restore
+    restoration_observations = []
+
+    def observed_restore():
+        activity[0] = ("restoration", len(restoration_observations))
+        start = len(observations)
+        before = independent_surface()
+        try:
+            restored = original_restore()
+            after = independent_surface()
+        finally:
+            activity[0] = "occurrence"
+        selected = observations[start:]
+        # Both original owner observations must occur, even for an empty plan.
+        assert len(selected) == 2 and all(row[1] is False for row in selected)
+        assert selected[0][2] == before and selected[1][2] == after == original_surface
+        assert {path for path, _, mode, data in before
+                if (mode, data) != candidate.baseline[path]} == set(restored)
+        assert set(restored) <= set(generated_side_effect_paths)
+        restoration_observations.append((before, after, tuple(restored)))
+        timeline.append(("restoration_complete", tuple(restored)))
+        if restored:
+            events.append(("restore", restored))
+        return restored
+    candidate.restore = observed_restore
+    def fake_run(command, **kwargs):
+        assert command[0] != "git", "HEAD/index restoration is forbidden"
+        assert timeline[0] == ("observation", ("acquisition", True, original_surface))
+        timeline.append(("child", tuple(command)))
+        events.append(("gate", command))
+        for path in generated_side_effect_paths:
+            (root / path).write_bytes(b"synthetic permitted validation output")
+        return Completed(_st12h_mock_terminal_output(command))
+    monkeypatch.setattr(runner.subprocess, "run", fake_run)
+    monkeypatch.setattr(runner, "_routed_generated_output_currentness_failures", lambda command, repo_root: [])
+    # This complete synthetic launch belongs only to the existing simulated
+    # orchestration case. It supplies no capacity or builder-read authority to
+    # an authentic campaign, and every original command vector is retained.
+    from tools import pr168_rp5a_git_grep_scanner as scan_owner
+
+    run_paths, probe = reliability.resolve_validation_run_paths(
+        root, explicit_process_root=tmp_path / "synthetic-launch-parent",
+        run_id="run_test_supervision_active",
+        projected_relative_paths=("command-1.json",),
     )
+    scratch = run_paths.process_root / "scan-input"
+    scratch.mkdir()
+    limits = reliability._ScanRunReadLimits(100_000, 1_000, 16, 1)
+    immutable_names = (*intended_repair_paths, "unowned/keep.txt")
+    surfaces = tuple(reliability._ScanCandidateSurface(
+        name, "FILE", candidate.baseline[name][0], candidate_bytes[name], (),
+    ) for name in immutable_names)
+    fence = reliability._ScanCandidateFence(
+        root, surfaces, limits=limits, candidate_read_bytes=100_000,
+        deadline_ns=candidate.deadline_ns,
+    )
+    capacity_calls = []
+    issued_inputs = []
+
+    def synthetic_capacity(original_paths, phase, expected_plan):
+        assert original_paths is run_paths and phase == runner.ALL_PHASE
+        capacity_calls.append(expected_plan)
+        selected = tuple(row for row in expected_plan
+                         if runner._scan_full_builder_argv(row.argv))
+        assert len(selected) == 1
+        selected_entry = selected[0]
+        git_executable = str(Path(shutil.which("git")).resolve())
+        profile = reliability._Rp5aScanProfile(
+            run_paths.run_id, selected_entry.command_index, str(root), str(scratch),
+            immutable_names, len(immutable_names),
+            sum(len(name.encode("utf-8")) + 1 for name in immutable_names),
+            tuple((name, len(candidate_bytes[name])) for name in immutable_names),
+            git_executable, git_executable, "git",
+            tuple(scan_owner._scan_child_environment(os.environ).items()),
+            100_000, 100_000, 4096, 100_000, candidate.deadline_ns, 3,
+        )
+        identity = reliability._ScanLaunchIdentity(
+            run_paths.run_id, phase, selected_entry.command_index,
+            len(expected_plan), selected_entry.argv, str(root),
+        )
+        original_input = reliability._ScanLaunchInput(
+            identity, surfaces, limits=limits, candidate_read_bytes=100_000,
+            deadline_ns=candidate.deadline_ns, scratch_root=scratch,
+            scratch_bytes=100_000, parent_frame_reread_bytes=100_000,
+            check_candidate=fence,
+        )
+        issued_inputs.append(original_input)
+        return reliability._prepare_scan_launch(
+            run_paths, phase=phase, plan=expected_plan,
+            profiles={selected_entry.command_index: profile},
+            read_limits=limits, deadline_ns=candidate.deadline_ns,
+            launch_inputs={selected_entry.command_index: original_input},
+        )
+
+    original_supervise_fixture = runner._execute_supervised_command
+    consumed_inputs = []
+
+    def supervise_fixture(command, **kwargs):
+        original_input = kwargs.get("launch_input")
+        if original_input is None:
+            return original_supervise_fixture(command, **kwargs)
+        assert original_input is issued_inputs[0]
+        stream = original_input._claim(
+            run_id=kwargs["run_id"], phase=kwargs["phase"],
+            command_index=kwargs["command_index"], argv=tuple(command),
+            cwd=kwargs["cwd"],
+        )
+        # The existing process adapter is synthetic; label its lifecycle too.
+        process = SimpleNamespace(pid=4321, returncode=None)
+        process.poll = lambda: process.returncode
+        original_input._attached(process)
+        captured_frame = stream.read(original_input.extent + 1)
+        assert len(captured_frame) == original_input.extent
+        receipt = original_supervise_fixture(command, **kwargs)
+        process.returncode = receipt.native_exit_code
+        original_input._finished(process, receipt.native_exit_code)
+        consumed_inputs.append(original_input)
+        return receipt
+
+    with monkeypatch.context() as publication:
+        for name, value in (
+            ("_RUN_COMMANDS_ACTIVE_PATHS", run_paths),
+            ("_ACTIVE_FILESYSTEM_PROBE", probe),
+            ("_RUN_PROVENANCE_ATTEMPTED", False),
+            ("_RUN_PROVENANCE_WRITTEN", False),
+            ("_SCAN_CAPACITY_ATTEMPTED", False),
+            ("_ACTIVE_SCAN_LAUNCH", None),
+            ("_ACTIVE_SCAN_CAPACITY_SOURCE", synthetic_capacity),
+            ("_LAST_EXPECTED_COMMAND_PLAN", ()),
+            ("write_run_provenance", reliability.write_run_provenance),
+            ("_execute_supervised_command", supervise_fixture),
+        ):
+            publication.setattr(runner, name, value)
+        runner._publish_active_plan_provenance(runner.ALL_PHASE, plan)
+        assert len(capacity_calls) == 1
+        assert capacity_calls[0] is runner._LAST_EXPECTED_COMMAND_PLAN
+        exit_code = runner.run_commands(commands, repo_root=root, execution_plan=plan, candidate_custody=candidate)
+        assert consumed_inputs == issued_inputs and len(consumed_inputs) == 1
+        assert consumed_inputs[0].state == "CLOSED"
+        assert list(scratch.iterdir()) == []
     assert exit_code == 0
-    assert events[0] == ls_files_event
-    assert events.count(ls_files_event) == 8
-    assert restore_event in events
-    assert events.count(restore_event) == 4
-    assert "tools/run_validation_gates.py" not in restore_event[1]
-    assert "tests/fail_closed/test_run_validation_gates.py" not in restore_event[1]
-    pr142_command = next(
-        command
-        for command in commands
-        if Path(command[1]).name == runner.PR142_HANDOFF_READINESS_VALIDATOR_SCRIPT
-    )
-    pr143_command = next(
-        command
-        for command in commands
-        if Path(command[1]).name
-        == runner.PR143_OWNER_OVERRIDE_CURRENTIZATION_VALIDATOR_SCRIPT
-    )
-    restore_indices = [
-        index for index, event in enumerate(events) if event == restore_event
+    assert all((root / path).read_bytes() == data for path, data in candidate_bytes.items())
+    assert index.read_bytes() == b"synthetic staged state differs from working bytes"
+    assert all(path not in restored for kind, restored in events if kind == "restore" for path in intended_repair_paths)
+    selected_scripts = {runner.PR142_HANDOFF_READINESS_VALIDATOR_SCRIPT,
+                        runner.PR143_OWNER_OVERRIDE_CURRENTIZATION_VALIDATOR_SCRIPT}
+    expected_occurrences = tuple((index, vector) for index, vector in enumerate(original_vectors)
+                                 if Path(vector[1]).name in selected_scripts)
+    assert len(expected_occurrences) == 2
+    pr142_command = next(command for command in commands
+                        if Path(command[1]).name == runner.PR142_HANDOFF_READINESS_VALIDATOR_SCRIPT)
+    pr143_command = next(command for command in commands
+                        if Path(command[1]).name == runner.PR143_OWNER_OVERRIDE_CURRENTIZATION_VALIDATOR_SCRIPT)
+
+    def assert_original_command_occurrences(recorded):
+        gates = [(position, tuple(vector)) for position, (kind, vector) in enumerate(recorded) if kind == "gate"]
+        assert len(gates) == len(original_vectors)
+        for ordinal, expected in expected_occurrences:
+            position, vector = gates[ordinal]
+            assert vector == expected
+            assert recorded[position - 1][0] == "restore"
+        assert [vector for _, vector in gates if Path(vector[1]).name in selected_scripts] == [
+            vector for _, vector in expected_occurrences]
+
+    assert_original_command_occurrences(events)
+    # The script name alone cannot conceal a changed operand or missing occurrence.
+    for ordinal, expected in expected_occurrences:
+        changed = list(events)
+        position = [i for i, event in enumerate(changed) if event[0] == "gate"][ordinal]
+        changed[position] = ("gate", [*expected, "--unapproved-argument"])
+        with pytest.raises(AssertionError):
+            assert_original_command_occurrences(changed)
+        with pytest.raises(AssertionError):
+            assert_original_command_occurrences(events[:position] + events[position + 1:])
+    # The registered plan is distinct from the dispatched execution projection.
+    # This finite fixture is the retained 367-occurrence unsplit plan, not the
+    # real 450/449 campaign. The fake child changes both admitted files each time.
+    assert len(original_vectors) == len(plan) == 367
+    assert tuple(entry.registered_argv for entry in plan) == original_vectors
+    expected_script_positions = {
+        "validate_atomicrows_semantic_value_materialization_authorization_handoff_readiness_gate.py": (9,),
+        "validate_qtt_owner_global_override_directive_currentization_and_internal_gate_release.py": (11,),
+        "run_pytest_fresh_basetemp.py": (366, 367),
+    }
+    for script, expected_positions in expected_script_positions.items():
+        assert tuple(i for i, vector in enumerate(original_vectors, 1)
+                     if len(vector) > 1 and Path(vector[1]).name == script) == expected_positions
+
+    effect_names = tuple(sorted(generated_side_effect_paths, key=lambda p: (p.casefold(), p)))
+    dirty_surface = tuple((path, kind, mode,
+                           b"synthetic permitted validation output" if path in effect_names else data)
+                          for path, kind, mode, data in original_surface)
+    expected_events = []
+    expected_observations = [("acquisition", True, original_surface)]
+    expected_timeline = [("observation", expected_observations[0])]
+    expected_restorations = []
+    expected_checkpoints = []
+    dirty = False
+
+    def expect_restoration(checkpoint):
+        nonlocal dirty
+        before = dirty_surface if dirty else original_surface
+        restored = effect_names if dirty else ()
+        tag = ("restoration", len(expected_restorations))
+        for surface in (before, original_surface):
+            observation = (tag, False, surface)
+            expected_observations.append(observation)
+            expected_timeline.append(("observation", observation))
+        expected_timeline.append(("restoration_complete", restored))
+        expected_restorations.append((before, original_surface, restored))
+        expected_checkpoints.append(checkpoint)
+        if restored:
+            expected_events.append(("restore", restored))
+        dirty = False
+
+    # Normative barrier selection is independent of the implementation predicate.
+    for ordinal, entry in enumerate(plan, 1):
+        if ordinal in (9, 11, 366, 367):
+            expect_restoration(("before", ordinal))
+        before = dirty_surface if dirty else original_surface
+        observed_before = ("occurrence", False, before)
+        expected_observations.append(observed_before)
+        expected_timeline.append(("observation", observed_before))
+        expected_timeline.append(("child", tuple(entry.execution_argv)))
+        expected_events.append(("gate", list(entry.execution_argv)))
+        dirty = True
+        observed_after = ("occurrence", False, dirty_surface)
+        expected_observations.append(observed_after)
+        expected_timeline.append(("observation", observed_after))
+        if ordinal in (366, 367):
+            expect_restoration(("after", ordinal))
+    expect_restoration(("final", None))
+
+    assert expected_checkpoints == [
+        ("before", 9), ("before", 11), ("before", 366),
+        ("after", 366), ("before", 367), ("after", 367), ("final", None),
     ]
+    assert events == expected_events
+    assert observations == expected_observations
+    assert restoration_observations == expected_restorations
+    assert timeline == expected_timeline
+    restore_positions = [i for i, event in enumerate(events) if event[0] == "restore"]
+    assert restore_positions == [8, 11, 367, 369, 371]
+    assert len(restore_positions) == 5
+    restore_indices = restore_positions
     assert events[restore_indices[0] + 1] == ("gate", pr142_command)
     assert events[restore_indices[1] + 1] == ("gate", pr143_command)
-    assert events[restore_indices[2] - 2] == ("gate", commands[-2])
-    assert events[-4:] == [
-        ("gate", commands[-1]),
-        ls_files_event,
-        restore_event,
-        ls_files_event,
+    for restore_position, (_, expected) in zip(restore_positions[:2], expected_occurrences, strict=True):
+        assert events[restore_position + 1] == ("gate", list(expected))
+    assert events[restore_positions[2] + 1] == ("gate", commands[-2])
+    assert events[restore_positions[3] - 1] == ("gate", commands[-2])
+    assert events[restore_positions[3] + 1] == ("gate", commands[-1])
+    assert events[-2] == ("gate", commands[-1])
+    assert all(set(events[i][1]) == set(generated_side_effect_paths) for i in restore_positions)
+    assert events[-1][0] == "restore" and candidate.state == "RESTORED_VERIFIED"
+    assert len(restoration_observations) == 7
+    assert [bool(restored) for _, _, restored in restoration_observations] == [
+        True, True, True, True, False, True, False,
     ]
+    assert all(after == original_surface for _, after, _ in restoration_observations)
+    assert len([row for row in observations if isinstance(row[0], tuple)]) == 14
+    assert timeline[-1] == ("restoration_complete", ())
+
+    # Finite copied observations only: no additional child, restore, or campaign.
+    from copy import deepcopy
+    expected_trace = (expected_events, expected_observations,
+                      expected_restorations, expected_timeline)
+    assert (events, observations, restoration_observations, timeline) == expected_trace
+    invalid_traces = []
+    for checkpoint_index in (2, 4, 6):
+        altered = deepcopy(expected_trace)
+        tag = ("restoration", checkpoint_index)
+        altered[1][:] = [row for row in altered[1] if row[0] != tag]
+        start = next(i for i, row in enumerate(altered[3])
+                     if row[0] == "observation" and row[1][0] == tag)
+        del altered[3][start:start + 3]
+        del altered[2][checkpoint_index]
+        if checkpoint_index == 2:
+            del altered[0][367]  # Lose the nonempty pre366 barrier too.
+        invalid_traces.append(altered)
+    # Merge adjacent post366/pre367 into one pair, with subsequent tags renumbered.
+    merged = deepcopy(expected_trace)
+    merge_tag = ("restoration", 4)
+    merged[1][:] = [row for row in merged[1] if row[0] != merge_tag]
+    start = next(i for i, row in enumerate(merged[3])
+                 if row[0] == "observation" and row[1][0] == merge_tag)
+    del merged[3][start:start + 3]
+    del merged[2][4]
+    for i, row in enumerate(merged[1]):
+        if isinstance(row[0], tuple) and row[0][1] > 4:
+            merged[1][i] = (("restoration", row[0][1] - 1), row[1], row[2])
+    for i, row in enumerate(merged[3]):
+        if row[0] == "observation" and isinstance(row[1][0], tuple) and row[1][0][1] > 4:
+            observed = row[1]
+            merged[3][i] = ("observation", (("restoration", observed[0][1] - 1), observed[1], observed[2]))
+    invalid_traces.append(merged)
+    reordered = deepcopy(expected_trace)
+    reordered[1][1], reordered[1][2] = reordered[1][2], reordered[1][1]
+    invalid_traces.append(reordered)
+    unowned = deepcopy(expected_trace)
+    unowned[0][8] = ("restore", (*effect_names, "unowned/keep.txt"))
+    unowned[2][0] = (dirty_surface, original_surface, (*effect_names, "unowned/keep.txt"))
+    invalid_traces.append(unowned)
+    changed_vector = deepcopy(expected_trace)
+    gate_position = next(i for i, row in enumerate(changed_vector[0]) if row[0] == "gate")
+    changed_vector[0][gate_position][1].append("--unapproved-argument")
+    invalid_traces.append(changed_vector)
+    missing_occurrence = deepcopy(expected_trace)
+    del missing_occurrence[0][gate_position]
+    invalid_traces.append(missing_occurrence)
+    for altered in invalid_traces:
+        with pytest.raises(AssertionError):
+            assert altered == expected_trace
+
+    assert independent_surface() == original_surface
     assert capsys.readouterr().out.splitlines()[-1] == runner.SUCCESS_MARKER
+    repo_root = root
+
+    # A pre-command restoration failure must not be retried by finish().
+    with monkeypatch.context() as scoped:
+        attempted = []
+        spawned = []
+        def failed_restore(*args):
+            attempted.append("tracked")
+            raise RuntimeError("synthetic restoration failure")
+        scoped.setattr(runner, "_tracked_modified_paths", lambda _: set())
+        scoped.setattr(runner, "_untracked_paths", lambda _: set())
+        scoped.setattr(runner, "_restore_tracked_gate_side_effects", failed_restore)
+        scoped.setattr(runner, "_execute_supervised_command", lambda *a, **k: spawned.append(a))
+        scoped.setattr(runner, "_st12h_scratch_budget_failures", lambda _: [])
+        result = runner.run_commands(
+            [["python", "tools/run_pytest_fresh_basetemp.py", "tests/example.py"]],
+            repo_root=tmp_path,
+        )
+        assert result == 1
+        assert attempted == ["tracked"]
+        assert spawned == []
+        assert "prior restoration failure; not retried" in capsys.readouterr().err
+    _exercise_candidate_custody_failures_v1(tmp_path, monkeypatch)
+
+    # Append separate finite caller faults; the complete 367-occurrence trace
+    # above is unchanged. No native child or extra campaign is used here.
+    for fault in ("unproven", "exception", "group", "cancel", "system-exit", "base-group",
+                  "context-exit", "missing", "shape", "bool-pid", "bool-exit", "unknown",
+                  "conflicting-proof", "run", "phase", "index", "argv", "cwd", "proven-timeout"):
+        fault_root = tmp_path / ("retention-" + fault)
+        fault_root.mkdir()
+        (fault_root / "source.py").write_bytes(b"original source\n")
+        (fault_root / "output.json").write_bytes(b"original output\n")
+        fault_index = fault_root / "index"
+        fault_index.write_bytes(b"original index\n")
+        fault_commands = ((sys.executable, "tools/first_gate.py"),
+                          (sys.executable, "tools/next_gate.py"))
+        fault_plan = runner._prepare_execution_plan(fault_commands)
+        fault_candidate = _synthetic_candidate_custody_v1(
+            fault_root, fault_plan, observed_paths=lambda: ("source.py", "output.json"),
+            effects=("output.json",), index_path=fault_index,
+        )
+        fault_paths, fault_probe = reliability.resolve_validation_run_paths(
+            fault_root, explicit_process_root=tmp_path / ("retention-parent-" + fault),
+            run_id="run_retention_" + fault,
+        )
+        caller_events, emitted, deletions, returned = [], [], [], []
+        original_begin = fault_candidate.begin_occurrence
+        original_end = fault_candidate.end_occurrence
+        original_restore = fault_candidate.restore
+
+        def begin_fault(index, entry, **kwargs):
+            caller_events.append(("begin", index))
+            return original_begin(index, entry, **kwargs)
+
+        def end_fault(index, entry):
+            caller_events.append(("end", index))
+            return original_end(index, entry)
+
+        def restore_fault():
+            caller_events.append(("restore", None))
+            return original_restore()
+
+        fault_candidate.begin_occurrence = begin_fault
+        fault_candidate.end_occurrence = end_fault
+        fault_candidate.restore = restore_fault
+        original_error = reliability.ValidationReliabilityError(
+            "ENGVR_PROCESS_TERMINATION_FAILED", "synthetic original unresolved child",
+        )
+        original_error.owned_process = SimpleNamespace(pid=7822)
+        raised = {
+            "exception": original_error,
+            "group": ExceptionGroup("outer", [ExceptionGroup("inner", [original_error])]),
+            "cancel": KeyboardInterrupt("original interruption"),
+            "system-exit": SystemExit(23),
+            "base-group": BaseExceptionGroup("cancel and child", [KeyboardInterrupt(), original_error]),
+            "context-exit": RuntimeError("original context exit failed"),
+        }.get(fault)
+
+        class ExitFailure:
+            def __enter__(self):
+                return None
+
+            def __exit__(self, *args):
+                caller_events.append(("context-exit", 1))
+                raise raised
+
+        def supervise_fault(command, **kwargs):
+            caller_events.append(("supervise", kwargs["command_index"]))
+            assert fault_candidate.active_occurrence == 1
+            (fault_root / "output.json").write_bytes(b"child effect\n")
+            if raised is not None and fault != "context-exit":
+                raise raised
+            receipt = reliability.CommandExecutionReceiptV1(
+                schema_version=1, run_id=kwargs["run_id"], phase=kwargs["phase"],
+                command_index=kwargs["command_index"], argv=tuple(command), cwd=str(kwargs["cwd"]),
+                pid=7822, platform="nt", start_time_utc="2026-08-24T00:00:00Z",
+                end_time_utc="2026-08-24T00:00:01Z", elapsed_monotonic_seconds=1.0,
+                native_exit_code=0, start_failure_class=None, timeout_seconds_or_null=None,
+                timeout_state="NOT_CONFIGURED", termination_state="NOT_REQUIRED",
+                stdout_path=str(fault_paths.evidence_root / "command-1.stdout.bin"),
+                stderr_path=str(fault_paths.evidence_root / "command-1.stderr.bin"),
+                stdout_byte_count=0, stderr_byte_count=0, stdout_required_markers=(),
+                stdout_marker_state="NOT_REQUIRED", stderr_was_nonempty=False, failure_class=None,
+            )
+            changes = {
+                "unproven": {"termination_state": "TASKKILL_T:128;TERMINAL:UNPROVEN",
+                             "failure_class": "ENGVR_ATOMIC_RECEIPT_WRITE_FAILED"},
+                "bool-pid": {"pid": True}, "bool-exit": {"native_exit_code": False},
+                "unknown": {"termination_state": "UNKNOWN"},
+                "conflicting-proof": {"termination_state": "TERMINAL:UNPROVEN;TERMINAL:PROVEN"},
+                "run": {"run_id": "different_run"}, "phase": {"phase": "different-phase"},
+                "index": {"command_index": 2}, "argv": {"argv": (*tuple(command), "--different")},
+                "cwd": {"cwd": str(tmp_path)},
+                "proven-timeout": {"native_exit_code": 1, "failure_class": "ENGVR_PROCESS_TIMEOUT",
+                    "timeout_seconds_or_null": 1.0, "timeout_state": "TRIGGERED",
+                    "termination_state": "TASKKILL_T:0;TERMINAL:PROVEN"},
+            }.get(fault, {})
+            receipt = replace(receipt, **changes)
+            if fault == "missing":
+                receipt = None
+            elif fault == "shape":
+                receipt = SimpleNamespace(pid=7822, native_exit_code=0)
+            returned.append(receipt)
+            return receipt
+
+        with monkeypatch.context() as fault_patch:
+            fault_patch.setattr(runner, "_RUN_COMMANDS_SUPERVISION", None)
+            fault_patch.setattr(runner, "_RUN_PROVENANCE_WRITTEN", False)
+            fault_patch.setattr(runner, "_ACTIVE_SCAN_LAUNCH", None)
+            fault_patch.setattr(runner, "_execute_supervised_command", supervise_fault)
+            fault_patch.setattr(runner, "atomic_write_json", lambda path, value: emitted.append((path.name, value)))
+            fault_patch.setattr(runner, "cleanup_validation_run",
+                                lambda paths: deletions.append(paths) or "PASS_REMOVED_EXACT_RUN_ROOT")
+            if fault == "context-exit":
+                fault_patch.setattr(runner, "nullcontext", ExitFailure)
+            if fault == "proven-timeout":
+                fault_patch.setattr(runner, "_st12h_command_contract", lambda argv: (1.0, ()))
+            call = lambda: runner.run_commands(
+                fault_commands, repo_root=fault_root, phase=runner.FAST_PREFLIGHT_PHASE,
+                run_paths=fault_paths, execution_plan=fault_plan, candidate_custody=fault_candidate,
+            )
+            if fault in {"group", "cancel", "system-exit", "base-group"}:
+                with pytest.raises(type(raised)) as caught:
+                    call()
+                assert caught.value is raised
+            else:
+                assert call() == 1
+            pending = runner._RUN_COMMANDS_SUPERVISION
+            if raised is not None:
+                assert pending["errors"][0] is raised
+            retained = runner._LAST_COMMAND_RECEIPTS
+            assert len(retained) == (1 if returned and type(returned[0]) is reliability.CommandExecutionReceiptV1 else 0)
+            if retained:
+                assert retained[0] is returned[0]
+            if fault == "proven-timeout":
+                assert pending["pending"] is False
+                assert caller_events == [("begin", 1), ("supervise", 1), ("end", 1), ("restore", None)]
+                assert fault_candidate.active_occurrence is None
+                assert (fault_root / "output.json").read_bytes() == b"original output\n"
+            else:
+                assert pending["pending"] is True
+                assert caller_events == [("begin", 1), ("supervise", 1)] + (
+                    [("context-exit", 1)] if fault == "context-exit" else [])
+                assert fault_candidate.active_occurrence == 1
+                assert (fault_root / "output.json").read_bytes() == b"child effect\n"
+                with pytest.raises(RuntimeError, match="VALIDATION_CANDIDATE_CHILD_STILL_OWNED"):
+                    original_restore()
+                assert runner.run_commands(fault_commands, run_paths=fault_paths) == 1
+                assert runner._RUN_COMMANDS_SUPERVISION is pending
+            final_result, cleanup, completion = runner._finalize_validation_run(
+                run_paths=fault_paths, probe=fault_probe, phase=runner.FAST_PREFLIGHT_PHASE,
+                planned_count=2, expected_plan=runner._LAST_EXPECTED_COMMAND_PLAN,
+                receipts=retained, result=1, text_state="PASS",
+            )
+            assert final_result == 1 and completion.final_state == "FAIL"
+            if fault == "proven-timeout":
+                assert deletions == [fault_paths] and cleanup == "PASS_REMOVED_EXACT_RUN_ROOT"
+            else:
+                assert deletions == [] and cleanup == "SKIPPED_PROCESS_TERMINATION_UNPROVEN"
+                assert fault_paths.process_root.is_dir()
+                assert emitted[0][1]["cleanup_state"] == "SKIPPED_PROCESS_TERMINATION_UNPROVEN"
+                assert runner._RUN_COMMANDS_SUPERVISION is pending and pending["pending"] is True
+            assert (fault_root / "source.py").read_bytes() == b"original source\n"
+            assert fault_index.read_bytes() == b"original index\n"
+        capsys.readouterr()
+
 
 
 def test_runner_preserves_initially_modified_files_after_final_pytest(
@@ -6386,7 +7701,12 @@ def test_runner_preserves_initially_modified_files_after_final_pytest(
             runner.sys.executable,
             str(Path("tools") / runner.PYTEST_FRESH_BASETEMP_SCRIPT),
         ]
-        assert runner.run_commands([command], repo_root=repo_root) == 0
+        commands = [command]
+        plan = runner._prepare_execution_plan(commands)
+        candidate = _synthetic_candidate_custody_v1(repo_root, plan,
+            observed_paths=lambda: (report_rel,), effects=(report_rel,))
+        assert runner.run_commands(commands, repo_root=repo_root,
+            execution_plan=plan, candidate_custody=candidate) == 0
         assert report_path.read_text(encoding="utf-8") == "updated\n"
 
 
@@ -10359,7 +11679,13 @@ def test_pr82_static_contract_preserves_metadata_only_boundaries():
     assert not (Path(".") / quantum_applicability_gate.PR76_OLD_LONG_TEST).exists()
 
 
-def test_pr83_static_contract_preserves_owner_quantum_priority_boundaries():
+def test_pr83_static_contract_preserves_owner_quantum_priority_boundaries(monkeypatch, tmp_path):
+    # Redirect only the CLI's output default; execute the real validator and writer.
+    original_report = owner_quantum_priority_gate.DEFAULT_REPORT
+    assert original_report.as_posix() == "docs/master_plan/generated/OwnerQuantumPriorityPolicyRegistry.report.json"
+    before = (original_report.read_bytes(), original_report.stat().st_mode,
+              original_report.stat().st_mtime_ns)
+    monkeypatch.setattr(owner_quantum_priority_gate, "DEFAULT_REPORT", tmp_path / original_report.name)
     assert owner_quantum_priority_gate.main([]) == 0
     production = owner_quantum_priority_gate.load_yaml(
         owner_quantum_priority_gate.DEFAULT_PRODUCTION_REGISTRY
@@ -10394,9 +11720,17 @@ def test_pr83_static_contract_preserves_owner_quantum_priority_boundaries():
     assert not (Path(".") / owner_quantum_priority_gate.CANONICAL_BUNDLE_SHA256).exists()
     assert (Path(".") / owner_quantum_priority_gate.PR76_SHORT_TEST).exists()
     assert not (Path(".") / owner_quantum_priority_gate.PR76_OLD_LONG_TEST).exists()
+    assert (original_report.read_bytes(), original_report.stat().st_mode,
+            original_report.stat().st_mtime_ns) == before
 
 
-def test_pr84_static_contract_preserves_formula_registry_only_boundaries():
+def test_pr84_static_contract_preserves_formula_registry_only_boundaries(monkeypatch, tmp_path):
+    # Redirect only the CLI's output default; execute the real validator and writer.
+    original_report = scoring_policy_gate.DEFAULT_REPORT
+    assert original_report.as_posix() == "docs/master_plan/generated/ParameterAlgorithmScoringPolicyRegistry.report.json"
+    before = (original_report.read_bytes(), original_report.stat().st_mode,
+              original_report.stat().st_mtime_ns)
+    monkeypatch.setattr(scoring_policy_gate, "DEFAULT_REPORT", tmp_path / original_report.name)
     assert scoring_policy_gate.main([]) == 0
     production = scoring_policy_gate.load_yaml(
         scoring_policy_gate.DEFAULT_PRODUCTION_REGISTRY
@@ -10440,9 +11774,17 @@ def test_pr84_static_contract_preserves_formula_registry_only_boundaries():
     assert not (Path(".") / scoring_policy_gate.CANONICAL_BUNDLE_SHA256).exists()
     assert (Path(".") / scoring_policy_gate.PR76_SHORT_TEST).exists()
     assert not (Path(".") / scoring_policy_gate.PR76_OLD_LONG_TEST).exists()
+    assert (original_report.read_bytes(), original_report.stat().st_mode,
+            original_report.stat().st_mtime_ns) == before
 
 
-def test_pr85_static_contract_preserves_parameter_stack_ranking_boundaries():
+def test_pr85_static_contract_preserves_parameter_stack_ranking_boundaries(monkeypatch, tmp_path):
+    # Redirect only the CLI's output default; execute the real validator and writer.
+    original_report = stack_scoring_gate.DEFAULT_REPORT
+    assert original_report.as_posix() == "docs/master_plan/generated/ParameterStackScoringAndRankingGate.report.json"
+    before = (original_report.read_bytes(), original_report.stat().st_mode,
+              original_report.stat().st_mtime_ns)
+    monkeypatch.setattr(stack_scoring_gate, "DEFAULT_REPORT", tmp_path / original_report.name)
     assert stack_scoring_gate.main([]) == 0
     production = stack_scoring_gate.load_yaml(
         stack_scoring_gate.DEFAULT_PRODUCTION_REGISTRY
@@ -10489,9 +11831,17 @@ def test_pr85_static_contract_preserves_parameter_stack_ranking_boundaries():
     assert not (Path(".") / stack_scoring_gate.CANONICAL_BUNDLE_SHA256).exists()
     assert (Path(".") / stack_scoring_gate.PR76_SHORT_TEST).exists()
     assert not (Path(".") / stack_scoring_gate.PR76_OLD_LONG_TEST).exists()
+    assert (original_report.read_bytes(), original_report.stat().st_mode,
+            original_report.stat().st_mtime_ns) == before
 
 
-def test_pr86_static_contract_preserves_optimizer_arbitration_boundaries():
+def test_pr86_static_contract_preserves_optimizer_arbitration_boundaries(monkeypatch, tmp_path):
+    # Redirect only the CLI's output default; execute the real validator and writer.
+    original_report = optimizer_arbitration_gate.DEFAULT_REPORT
+    assert original_report.as_posix() == "docs/master_plan/generated/QuantumClassicalOptimizerArbitrationGate.report.json"
+    before = (original_report.read_bytes(), original_report.stat().st_mode,
+              original_report.stat().st_mtime_ns)
+    monkeypatch.setattr(optimizer_arbitration_gate, "DEFAULT_REPORT", tmp_path / original_report.name)
     assert optimizer_arbitration_gate.main([]) == 0
     production = optimizer_arbitration_gate.load_yaml(
         optimizer_arbitration_gate.DEFAULT_PRODUCTION_REGISTRY
@@ -10545,6 +11895,8 @@ def test_pr86_static_contract_preserves_optimizer_arbitration_boundaries():
     assert not (Path(".") / optimizer_arbitration_gate.CANONICAL_BUNDLE_SHA256).exists()
     assert (Path(".") / optimizer_arbitration_gate.PR76_SHORT_TEST).exists()
     assert not (Path(".") / optimizer_arbitration_gate.PR76_OLD_LONG_TEST).exists()
+    assert (original_report.read_bytes(), original_report.stat().st_mode,
+            original_report.stat().st_mtime_ns) == before
 
 
 def test_pr87_static_contract_preserves_candidate_generation_boundaries(monkeypatch):
@@ -12294,7 +13646,7 @@ def test_runner_rejects_tracked_generated_timing_report_path(monkeypatch):
     assert exit_code == 2
 
 
-def test_runner_returns_zero_when_all_mocked_commands_pass(monkeypatch, capsys, tmp_path):
+def test_runner_returns_zero_when_all_mocked_commands_pass(monkeypatch, capsys, tmp_path, _central_supervision_test_adapter):
     _clear_branch_context_env(monkeypatch)
     fixture_repo = tmp_path / "mocked-runner-repo"
     fixture_repo.mkdir()
@@ -12337,7 +13689,24 @@ def test_runner_returns_zero_when_all_mocked_commands_pass(monkeypatch, capsys, 
         lambda command, repo_root: [],
     )
 
-    exit_code = runner.main([])
+    # A synthetic success dependency must remain explicit, never a default.
+    scan_vector = (sys.executable, "tools/build_pr168_rp5a_legacy_semantic_audit.py")
+    negative_plan = reliability.build_command_evidence_plan(
+        run_id="run_test_supervision_active", phase=runner.ALL_PHASE,
+        commands=(scan_vector,), cwd=fixture_repo,
+    )
+    with monkeypatch.context() as absent_capacity:
+        absent_capacity.setattr(runner, "_ACTIVE_SCAN_CAPACITY_SOURCE", None)
+        absent_capacity.setattr(runner, "_ACTIVE_SCAN_LAUNCH", None)
+        absent_capacity.setattr(runner, "_SCAN_CAPACITY_ATTEMPTED", False)
+        with pytest.raises(ValueError, match="independently admitted scan capacity source"):
+            runner._scan_resolve_parent_capacity(
+                runner._RUN_COMMANDS_ACTIVE_PATHS, runner.ALL_PHASE, negative_plan,
+            )
+        assert runner._ACTIVE_SCAN_LAUNCH is None
+        assert seen == [] and provenance_counts == []
+
+    exit_code = runner.main([], scan_capacity_source=_central_supervision_test_adapter())
 
     assert exit_code == 0
     validation_dir = _validation_dir_from_commands(seen)
@@ -12372,12 +13741,12 @@ def test_runner_returns_zero_when_all_mocked_commands_pass(monkeypatch, capsys, 
     assert completion_receipts[-1].command_count_completed == provenance_counts[0]
 
 
-def test_runner_sets_run_local_no_runtime_scan_cache_env(monkeypatch):
+def test_runner_sets_run_local_no_runtime_scan_cache_env(monkeypatch, tmp_path):
     _clear_branch_context_env(monkeypatch)
     monkeypatch.delenv(runner.NO_RUNTIME_ARTIFACT_SCAN_CACHE_ENV, raising=False)
     monkeypatch.delenv(runner.PR152_BUILD_REPORT_CACHE_ENV, raising=False)
 
-    repo_root = (Path(".tmp") / "test_run_validation_gates_scan_cache").resolve()
+    repo_root = (tmp_path / "test_run_validation_gates_scan_cache").resolve()
     shutil.rmtree(repo_root, ignore_errors=True)
     repo_root.mkdir(parents=True)
     cache_paths: list[Path] = []
@@ -12417,10 +13786,10 @@ def test_runner_sets_run_local_no_runtime_scan_cache_env(monkeypatch):
     assert pr152_cache_paths
 
 
-def test_runner_preserves_explicit_no_runtime_scan_cache_env(monkeypatch):
+def test_runner_preserves_explicit_no_runtime_scan_cache_env(monkeypatch, tmp_path):
     _clear_branch_context_env(monkeypatch)
 
-    repo_root = (Path(".tmp") / "test_run_validation_gates_explicit_scan_cache").resolve()
+    repo_root = (tmp_path / "test_run_validation_gates_explicit_scan_cache").resolve()
     shutil.rmtree(repo_root, ignore_errors=True)
     repo_root.mkdir(parents=True)
     explicit_cache = repo_root / ".tmp" / "explicit_scan_cache.json"
@@ -12449,10 +13818,10 @@ def test_runner_preserves_explicit_no_runtime_scan_cache_env(monkeypatch):
         shutil.rmtree(repo_root, ignore_errors=True)
 
 
-def test_runner_preserves_explicit_pr152_build_report_cache_env(monkeypatch):
+def test_runner_preserves_explicit_pr152_build_report_cache_env(monkeypatch, tmp_path):
     _clear_branch_context_env(monkeypatch)
 
-    repo_root = (Path(".tmp") / "test_run_validation_gates_explicit_pr152_cache").resolve()
+    repo_root = (tmp_path / "test_run_validation_gates_explicit_pr152_cache").resolve()
     shutil.rmtree(repo_root, ignore_errors=True)
     repo_root.mkdir(parents=True)
     explicit_cache = repo_root / ".tmp" / "explicit_pr152_build_cache.json"
@@ -12750,7 +14119,7 @@ def test_runner_pr152_build_report_cache_rejects_repo_root_path(
         runner.build_pr152_report_with_run_cache(repo_root, lambda root: {})
 
 
-def test_runner_keeps_process_roots_external_to_repo(monkeypatch, capsys):
+def test_runner_keeps_process_roots_external_to_repo(monkeypatch, capsys, tmp_path, _central_supervision_test_adapter):
     _assert_repository_local_layout_contract()
     _clear_branch_context_env(monkeypatch)
 
@@ -12760,7 +14129,7 @@ def test_runner_keeps_process_roots_external_to_repo(monkeypatch, capsys):
             self.stdout = stdout
             self.stderr = stderr
 
-    repo_root = (Path(".tmp") / "test_run_validation_gates_repo_root").resolve()
+    repo_root = (tmp_path / "test_run_validation_gates_repo_root").resolve()
     shutil.rmtree(repo_root, ignore_errors=True)
     repo_root.mkdir(parents=True)
     tmp_parent = repo_root / ".tmp"
@@ -12785,7 +14154,7 @@ def test_runner_keeps_process_roots_external_to_repo(monkeypatch, capsys):
     assert not tmp_parent.exists()
 
     try:
-        exit_code = runner.main([])
+        exit_code = runner.main([], scan_capacity_source=_central_supervision_test_adapter())
 
         assert exit_code == 0
         assert seen
@@ -12798,10 +14167,10 @@ def test_runner_keeps_process_roots_external_to_repo(monkeypatch, capsys):
         shutil.rmtree(repo_root, ignore_errors=True)
 
 
-def test_runner_uses_unique_pytest_basetemp_for_each_main_run(monkeypatch):
+def test_runner_uses_unique_pytest_basetemp_for_each_main_run(monkeypatch, tmp_path, _central_supervision_test_adapter):
     _clear_branch_context_env(monkeypatch)
 
-    repo_root = (Path(".tmp") / "test_run_validation_gates_unique_repo_root").resolve()
+    repo_root = (tmp_path / "test_run_validation_gates_unique_repo_root").resolve()
     shutil.rmtree(repo_root, ignore_errors=True)
     repo_root.mkdir(parents=True)
     pytest_basetemps: list[Path] = []
@@ -12823,8 +14192,8 @@ def test_runner_uses_unique_pytest_basetemp_for_each_main_run(monkeypatch):
     monkeypatch.setattr(runner, "run_commands", fake_run_commands)
 
     try:
-        assert runner.main([]) == 0
-        assert runner.main([]) == 0
+        assert runner.main([], scan_capacity_source=_central_supervision_test_adapter()) == 0
+        assert runner.main([], scan_capacity_source=_central_supervision_test_adapter()) == 0
 
         assert len(pytest_basetemps) == 2
         assert pytest_basetemps[0] != pytest_basetemps[1]
@@ -12832,10 +14201,10 @@ def test_runner_uses_unique_pytest_basetemp_for_each_main_run(monkeypatch):
         shutil.rmtree(repo_root, ignore_errors=True)
 
 
-def test_runner_does_not_touch_stale_fixed_pytest_basetemp(monkeypatch):
+def test_runner_does_not_touch_stale_fixed_pytest_basetemp(monkeypatch, tmp_path, _central_supervision_test_adapter):
     _clear_branch_context_env(monkeypatch)
 
-    repo_root = (Path(".tmp") / "test_run_validation_gates_stale_repo_root").resolve()
+    repo_root = (tmp_path / "test_run_validation_gates_stale_repo_root").resolve()
     shutil.rmtree(repo_root, ignore_errors=True)
     tmp_parent = repo_root / ".tmp"
     stale_basetemp = tmp_parent / "run_validation_gates_pytest"
@@ -12864,7 +14233,7 @@ def test_runner_does_not_touch_stale_fixed_pytest_basetemp(monkeypatch):
     monkeypatch.setattr(runner, "run_commands", fake_run_commands)
 
     try:
-        assert runner.main([]) == 0
+        assert runner.main([], scan_capacity_source=_central_supervision_test_adapter()) == 0
 
         assert pytest_basetemps
         assert stale_basetemp.is_dir()
@@ -13580,6 +14949,49 @@ def _assert_process_supervision_contract(monkeypatch, tmp_path: Path) -> None:
             sibling.terminate()
         sibling.wait(timeout=10)
 
+    # The receipt veto adds no process discovery. These are finite data copies;
+    # the original actual-child cases above and their assertions remain intact.
+    from copy import copy
+    for terminal_receipt in (pass_receipt, nonzero_receipt, marker_receipt,
+                             start_receipt, timeout_receipt):
+        assert reliability._command_requires_process_retention_v1(terminal_receipt) is False
+    for malformed in (None, {}, SimpleNamespace(pid=123, native_exit_code=0),
+                      object.__new__(reliability.CommandExecutionReceiptV1)):
+        assert reliability._command_requires_process_retention_v1(malformed) is True
+    for field, value in (
+        ("pid", True), ("pid", 0), ("pid", "123"), ("native_exit_code", False),
+        ("native_exit_code", None), ("native_exit_code", "0"),
+        ("failure_class", "ENGVR_PROCESS_TERMINATION_FAILED"),
+        ("start_failure_class", "OSError"), ("failure_class", "ENGVR_PROCESS_START_FAILED"),
+        ("failure_class", False), ("timeout_state", None), ("timeout_state", "UNKNOWN"),
+        ("timeout_seconds_or_null", True), ("termination_state", None),
+        ("termination_state", "TERMINAL:PROVEN"), ("termination_state", "UNKNOWN:0;TERMINAL:PROVEN"),
+        ("termination_state", "TASKKILL_T:0;TERMINAL:UNPROVEN;TERMINAL:PROVEN"),
+        ("termination_state", "TASKKILL_T:0;TERMINAL:PROVEN;NATIVE_TREE_UNPROVEN_OUTPUT_PIPE_OPEN"),
+        ("stdout_byte_count", True), ("command_index", True), ("schema_version", True),
+        ("argv", list(pass_receipt.argv)), ("elapsed_monotonic_seconds", float("nan")),
+    ):
+        malformed = copy(pass_receipt)
+        object.__setattr__(malformed, field, value)
+        assert reliability._command_requires_process_retention_v1(malformed) is True
+    for state in ("TASKKILL_T:0;TERMINAL:PROVEN",
+                  "TASKKILL_T:128;TASKKILL_T_F:0;TERMINAL:PROVEN"):
+        proven = replace(pass_receipt, platform="nt", native_exit_code=1,
+                         timeout_state="TRIGGERED", failure_class="ENGVR_PROCESS_TIMEOUT",
+                         termination_state=state)
+        assert reliability._command_requires_process_retention_v1(proven) is False
+        for invalid_state in ("NOT_REQUIRED", "TASKKILL_T:128;TERMINAL:PROVEN",
+                              state + ";", "TASKKILL_T_F:0;TERMINAL:PROVEN",
+                              "TASKKILL_T:00;TERMINAL:PROVEN"):
+            assert reliability._command_requires_process_retention_v1(
+                replace(proven, termination_state=invalid_state)) is True
+    for field, value in (("start_failure_class", None), ("start_failure_class", ""),
+                         ("native_exit_code", 0), ("timeout_state", "TRIGGERED"),
+                         ("failure_class", "ENGVR_ATOMIC_RECEIPT_WRITE_FAILED")):
+        malformed = copy(start_receipt)
+        object.__setattr__(malformed, field, value)
+        assert reliability._command_requires_process_retention_v1(malformed) is True
+
 def _assert_mirror_isolation_contract(monkeypatch, tmp_path: Path) -> None:
     marker = "MIRROR_OK"
     intended_bytes = 300_000 + 1 + len(marker.encode("utf-8")) + 1
@@ -13793,7 +15205,36 @@ def _assert_output_drain_terminality_contract(monkeypatch, tmp_path: Path) -> No
             raise OSError("synthetic raw evidence write failure")
         return real_write_chunk(stream, data)
 
+    original_terminate = reliability._terminate_owned_process_tree
+    termination_observations = []
+
+    def observe_original_termination(original_process, *, platform_name, grace_seconds):
+        observed = {
+            "process": original_process,
+            "pid": original_process.pid,
+            "platform_name": platform_name,
+            "grace_seconds": grace_seconds,
+        }
+        termination_observations.append(observed)
+        try:
+            returned = original_terminate(
+                original_process, platform_name=platform_name,
+                grace_seconds=grace_seconds,
+            )
+            observed["returned"] = returned
+            observed["post_poll"] = original_process.poll()
+            observed["post_returncode"] = original_process.returncode
+        except BaseException as exc:
+            observed["exception"] = exc
+            raise
+        return returned
+
     with monkeypatch.context() as evidence_patch:
+        evidence_patch.setattr(
+            reliability,
+            "_terminate_owned_process_tree",
+            observe_original_termination,
+        )
         evidence_patch.setattr(
             reliability,
             "_write_evidence_chunk",
@@ -13820,7 +15261,29 @@ def _assert_output_drain_terminality_contract(monkeypatch, tmp_path: Path) -> No
     assert failed_writes
     assert raw_intended_bytes > 64 * 1024
     assert raw_failure_receipt.pid is not None
-    assert raw_failure_receipt.native_exit_code == 0
+    assert len(termination_observations) == 1
+    observed_termination = termination_observations[0]
+    assert "exception" not in observed_termination
+    original_process = observed_termination["process"]
+    assert observed_termination["pid"] == original_process.pid == raw_failure_receipt.pid
+    assert observed_termination["platform_name"] == os.name
+    assert observed_termination["grace_seconds"] == reliability.TERMINATION_GRACE_SECONDS
+    termination_result = observed_termination["returned"]
+    assert type(termination_result) is tuple and len(termination_result) == 2
+    termination_state, proven = termination_result
+    assert type(proven) is bool and proven is True
+    assert type(termination_state) is str and termination_state.endswith(";TERMINAL:PROVEN")
+    assert "UNPROVEN" not in termination_state
+    assert raw_failure_receipt.termination_state == termination_state
+    terminal_exit = original_process.returncode
+    assert type(terminal_exit) is int
+    assert type(observed_termination["post_poll"]) is int
+    assert type(observed_termination["post_returncode"]) is int
+    assert type(raw_failure_receipt.native_exit_code) is int
+    assert raw_failure_receipt.native_exit_code == observed_termination["post_poll"] == (
+        observed_termination["post_returncode"]
+    ) == terminal_exit
+    assert raw_failure_receipt.timeout_state == "NOT_TRIGGERED"
     raw_stdout_path = Path(raw_failure_receipt.stdout_path)
     raw_stderr_path = Path(raw_failure_receipt.stderr_path)
     raw_command_path = raw_failure_evidence / "command-1.json"
@@ -13834,6 +15297,96 @@ def _assert_output_drain_terminality_contract(monkeypatch, tmp_path: Path) -> No
         path: path.read_bytes()
         for path in (raw_stdout_path, raw_stderr_path, raw_command_path)
     }
+    assert raw_failure_receipt.stderr_byte_count == raw_stderr_path.stat().st_size
+    assert {path.name for path in raw_failure_evidence.glob("command-*.json")} == {"command-1.json"}
+    raw_command_record = json.loads(raw_stable_bytes[raw_command_path])
+    observed_metadata = {key: observed_termination[key] for key in (
+        "pid", "returned", "post_poll", "post_returncode",
+    )}
+    retained_lengths = (len(raw_stable_bytes[raw_stdout_path]), len(raw_stable_bytes[raw_stderr_path]))
+
+    def assert_failed_retention_record(record, observed, *, expected_pid, expected_exit):
+        assert type(expected_pid) is int and expected_pid > 0
+        assert type(expected_exit) is int
+        assert type(observed["pid"]) is int and observed["pid"] == expected_pid
+        assert type(record["pid"]) is int and record["pid"] == expected_pid
+        result = observed["returned"]
+        assert type(result) is tuple and len(result) == 2
+        state, terminal_proven = result
+        assert type(state) is str and state.endswith(";TERMINAL:PROVEN")
+        assert "UNPROVEN" not in state
+        assert type(terminal_proven) is bool and terminal_proven is True
+        assert record["termination_state"] == state == termination_state
+        for value in (observed["post_poll"], observed["post_returncode"], record["native_exit_code"]):
+            assert type(value) is int and value == expected_exit
+        assert record["timeout_state"] == "NOT_TRIGGERED"
+        assert record["failure_class"] == "ENGVR_ATOMIC_RECEIPT_WRITE_FAILED"
+        assert record["failure_class"] != "ENGVR_PROCESS_TERMINATION_FAILED"
+        assert record["stdout_marker_state"] == "EVIDENCE_UNAVAILABLE"
+        assert record["stdout_marker_state"] != "PASS"
+        for key, length in zip(("stdout_byte_count", "stderr_byte_count"), retained_lengths, strict=True):
+            assert type(record[key]) is int and record[key] == length
+
+    assert_failed_retention_record(
+        raw_command_record, observed_metadata,
+        expected_pid=original_process.pid, expected_exit=terminal_exit,
+    )
+    for key in ("pid", "native_exit_code", "termination_state", "timeout_state",
+                "failure_class", "stdout_marker_state", "stdout_byte_count", "stderr_byte_count"):
+        assert type(raw_command_record[key]) is type(getattr(raw_failure_receipt, key))
+        assert raw_command_record[key] == getattr(raw_failure_receipt, key)
+    assert raw_command_record["run_id"] == "run_raw_evidence_failure"
+    assert raw_command_record["command_index"] == 1
+    # FD-level ordinary stdout survives the later helper's capsys.readouterr().
+    # This is the existing actual receipt, not a new receipt or inferred exit.
+    print("Actual raw-evidence-failure command-1.json:", file=sys.__stdout__, flush=True)
+    print(json.dumps(raw_command_record, sort_keys=True), file=sys.__stdout__, flush=True)
+    print("Original child terminal observation:",
+          json.dumps(observed_metadata, sort_keys=True), file=sys.__stdout__, flush=True)
+
+    from copy import deepcopy
+    invalid_metadata = []
+    for key, value in (
+        ("pid", original_process.pid + 1),
+        ("native_exit_code", True), ("native_exit_code", None), ("native_exit_code", str(terminal_exit)),
+        ("timeout_state", "TRIGGERED"), ("termination_state", "NONE"),
+        ("stdout_marker_state", "PASS"), ("failure_class", None),
+        ("failure_class", "ENGVR_PROCESS_TERMINATION_FAILED"),
+        ("stdout_byte_count", retained_lengths[0] + 1),
+    ):
+        altered_record = deepcopy(raw_command_record)
+        altered_record[key] = value
+        invalid_metadata.append((altered_record, deepcopy(observed_metadata)))
+    for key, value in (
+        ("pid", original_process.pid + 1),
+        ("returned", (termination_state, False)),
+        ("returned", (termination_state, 1)),
+        ("returned", ("TERMINAL:UNPROVEN;TERMINAL:PROVEN", True)),
+        ("returned", ("NONE", True)),
+        ("post_poll", True), ("post_poll", None), ("post_poll", str(terminal_exit)),
+        ("post_returncode", None),
+    ):
+        altered_observed = deepcopy(observed_metadata)
+        altered_observed[key] = value
+        invalid_metadata.append((deepcopy(raw_command_record), altered_observed))
+    for altered_record, altered_observed in invalid_metadata:
+        with pytest.raises(AssertionError):
+            assert_failed_retention_record(
+                altered_record, altered_observed,
+                expected_pid=original_process.pid, expected_exit=terminal_exit,
+            )
+    # Explicit copied-metadata counterexample only: no child or receipt is changed.
+    # A real observed zero remains valid; taskkill's zero cannot replace a nonzero child.
+    nonzero_witness = terminal_exit if terminal_exit != 0 else 7
+    copied_observed = deepcopy(observed_metadata)
+    copied_observed["post_poll"] = copied_observed["post_returncode"] = nonzero_witness
+    fabricated_zero = deepcopy(raw_command_record)
+    fabricated_zero["native_exit_code"] = 0
+    with pytest.raises(AssertionError):
+        assert_failed_retention_record(
+            fabricated_zero, copied_observed,
+            expected_pid=original_process.pid, expected_exit=nonzero_witness,
+        )
     time.sleep(0.2)
     assert {
         path: path.read_bytes()
@@ -14617,6 +16170,131 @@ def _assert_receipt_publication_failure_accounting(
     assert output.out.count(runner.SUCCESS_MARKER) == 0
     assert output.out.count(runner.PHASE_SUCCESS_MARKER_PREFIX) == 0
 
+    # Unlike the terminal publication failure above, this deterministic port
+    # returns an integer leader exit while the original tree remains UNPROVEN.
+    uncertain_paths, uncertain_probe = reliability.resolve_validation_run_paths(
+        REPO_ROOT, explicit_process_root=tmp_path / "uncertain-publication-parent",
+        run_id="run_uncertain_publication", projected_relative_paths=("command-1.json",),
+    )
+    command_process = SimpleNamespace(pid=7811, returncode=7)
+    publication_error = OSError("synthetic secondary publication failure")
+    publications, acquisitions, reports, cleanups = [], [], [], []
+
+    def acquire_one(*args, **kwargs):
+        acquisitions.append((args, kwargs))
+        return command_process
+
+    def uncertain_output(process, **kwargs):
+        assert process is command_process
+        for name, payload in (("stdout", b"OUT"), ("stderr", b"ERR")):
+            stream = kwargs[name + "_stream"]
+            stream.write(payload)
+            stream.close()
+            kwargs[name + "_outcome"]["evidence_complete"] = True
+        return (7, "NOT_CONFIGURED", "TASKKILL_T:128;TERMINAL:UNPROVEN",
+                "ENGVR_PROCESS_TERMINATION_FAILED")
+
+    def reject_publication(path, payload):
+        publications.append((path, payload))
+        raise publication_error
+
+    with monkeypatch.context() as uncertainty:
+        uncertainty.setattr(runner, "_RUN_COMMANDS_SUPERVISION", None)
+        uncertainty.setattr(runner, "_RUN_COMMANDS_CLEANUP_REPO_ROOT", None)
+        uncertainty.setattr(runner, "_RUN_PROVENANCE_WRITTEN", False)
+        uncertainty.setattr(runner, "_ACTIVE_SCAN_LAUNCH", None)
+        uncertainty.setattr(runner, "_execute_supervised_command", reliability.supervise_command)
+        uncertainty.setattr(reliability.subprocess, "Popen", acquire_one)
+        uncertainty.setattr(reliability, "_supervise_native_output", uncertain_output)
+        uncertainty.setattr(reliability, "atomic_write_json", reject_publication)
+        uncertainty.setattr(runner, "cleanup_validation_run", lambda paths: cleanups.append(paths))
+        uncertainty.setattr(runner, "atomic_write_json", lambda path, value: reports.append((path.name, value)))
+        uncertain_result = runner.run_commands(
+            commands, phase=runner.FAST_PREFLIGHT_PHASE, run_paths=uncertain_paths,
+            defer_success_markers=True, execution_plan=runner._prepare_execution_plan(commands),
+        )
+        pending = runner._RUN_COMMANDS_SUPERVISION
+        assert uncertain_result == 1 and pending["pending"] is True
+        assert len(acquisitions) == len(publications) == 1
+        original_receipt = publications[0][1]
+        original_error = pending["errors"][0]
+        assert type(original_error) is reliability.ValidationReliabilityError
+        assert original_error.code == "ENGVR_PROCESS_TERMINATION_FAILED"
+        assert original_error.__cause__ is publication_error
+        assert original_error.owned_process is command_process
+        assert original_error.command_receipt is original_receipt
+        assert pending["receipt"] is original_receipt
+        assert runner._LAST_COMMAND_RECEIPTS == (original_receipt,)
+        assert runner._LAST_COMMAND_RECEIPTS[0] is original_receipt
+        assert original_receipt.native_exit_code == 7
+        assert original_receipt.failure_class == "ENGVR_PROCESS_TERMINATION_FAILED"
+        assert original_receipt.termination_state == "TASKKILL_T:128;TERMINAL:UNPROVEN"
+        assert original_receipt.stdout_byte_count == original_receipt.stderr_byte_count == 3
+        assert not (uncertain_paths.evidence_root / "command-1.json").exists()
+        result, state, completion = runner._finalize_validation_run(
+            run_paths=uncertain_paths, probe=uncertain_probe, phase=runner.FAST_PREFLIGHT_PHASE,
+            planned_count=2, expected_plan=runner._LAST_EXPECTED_COMMAND_PLAN,
+            receipts=runner._LAST_COMMAND_RECEIPTS, result=uncertain_result, text_state="PASS",
+        )
+        assert result == 1 and state == "SKIPPED_PROCESS_TERMINATION_UNPROVEN"
+        assert completion.final_state == "FAIL"
+        assert completion.command_count_started == completion.command_count_completed == 1
+        assert completion.terminal_native_exit_code == 7
+        assert cleanups == [] and uncertain_paths.process_root.is_dir()
+        assert [name for name, _ in reports] == ["cleanup.json", "completion.json"]
+        assert reports[0][1]["cleanup_state"] == "SKIPPED_PROCESS_TERMINATION_UNPROVEN"
+        assert original_error in pending["errors"]
+    assert Path(original_receipt.stdout_path).read_bytes() == b"OUT"
+    assert Path(original_receipt.stderr_path).read_bytes() == b"ERR"
+
+    # Exceptions retain a taskkill helper's different ownership and the original
+    # group/cancellation object; no substitute process is actually launched.
+    for ordinal, kind in enumerate(("direct", "group", "cancel"), 1):
+        helper_process = SimpleNamespace(pid=8822)
+        original = reliability.ValidationReliabilityError(
+            "ENGVR_PROCESS_TERMINATION_FAILED", "synthetic taskkill unresolved",
+        )
+        original.owned_process = helper_process
+        original.stdout_prefix, original.stderr_prefix = b"partial out", b"partial err"
+        escaped = (original if kind == "direct" else
+                   ExceptionGroup("nested", [ExceptionGroup("inner", [original])])
+                   if kind == "group" else KeyboardInterrupt("synthetic cancellation"))
+        starts, writes = [], []
+
+        def acquire_error_case(*args, **kwargs):
+            starts.append(command_process)
+            return command_process
+
+        def raise_after_acquisition(process, **kwargs):
+            assert process is command_process
+            kwargs["stdout_stream"].close()
+            kwargs["stderr_stream"].close()
+            raise escaped
+
+        with monkeypatch.context() as exception_patch:
+            exception_patch.setattr(reliability.subprocess, "Popen", acquire_error_case)
+            exception_patch.setattr(reliability, "_supervise_native_output", raise_after_acquisition)
+            exception_patch.setattr(reliability, "atomic_write_json", lambda *args: writes.append(args))
+            with pytest.raises(type(escaped)) as caught:
+                reliability.supervise_command(
+                    commands[0], cwd=REPO_ROOT, run_id="run_escaped_supervision",
+                    phase=runner.FAST_PREFLIGHT_PHASE, command_index=ordinal,
+                    evidence_root=tmp_path / f"escaped-supervision-{ordinal}",
+                    mirror_stdout=False, mirror_stderr=False,
+                )
+        assert caught.value is escaped
+        assert starts == [command_process] and writes == []
+        assert not hasattr(escaped, "command_receipt")
+        if kind == "direct":
+            assert escaped.owned_process is helper_process
+            assert escaped.command_process is command_process
+            assert escaped.stdout_prefix == b"partial out" and escaped.stderr_prefix == b"partial err"
+        else:
+            assert escaped.owned_process is command_process
+            if kind == "group":
+                assert escaped.exceptions[0].exceptions[0] is original
+                assert original.owned_process is helper_process
+
 
 def _assert_exact_cleanup_contract(monkeypatch) -> None:
     with tempfile.TemporaryDirectory(prefix="qtt-supervision-cleanup-") as temp_root:
@@ -14885,6 +16563,212 @@ def _assert_exact_cleanup_contract(monkeypatch) -> None:
                 reliability.cleanup_validation_run(failed_paths)
         real_rmtree(failed_paths.process_root)
         assert historical.is_dir()
+
+        # Exercise the original main/finalizer unwind with no returned receipt.
+        # The process port raises; no native process is created by these cases.
+        for fault in ("direct", "group", "cancel", "report-failure", "preflight"):
+            held_paths, held_probe = reliability.resolve_validation_run_paths(
+                REPO_ROOT, explicit_process_root=external_parent.resolve(),
+                run_id="run_pending_finalization_" + fault,
+            )
+            primary = reliability.ValidationReliabilityError(
+                "ENGVR_PROCESS_TERMINATION_FAILED", "synthetic unresolved original process",
+            )
+            primary.owned_process = SimpleNamespace(pid=9012)
+            raised = (ExceptionGroup("outer", [ExceptionGroup("inner", [primary])])
+                      if fault == "group" else KeyboardInterrupt("original cancellation")
+                      if fault == "cancel" else primary)
+            publication_error = OSError("synthetic cleanup evidence unavailable")
+            commands = ((sys.executable, "-c", "raise AssertionError('must not execute')"),)
+            calls, cleanup_calls, published, allocations = [], [], [], []
+
+            def resolve_held(*args, **kwargs):
+                allocations.append((args, kwargs))
+                return held_paths, held_probe
+
+            def unresolved_call(*args, **kwargs):
+                calls.append((args, kwargs))
+                raise raised
+
+            def dispatch_held(_argv):
+                return runner.run_commands(commands, phase=runner.FAST_PREFLIGHT_PHASE)
+
+            def record_finalization(path, payload):
+                published.append((path.name, payload))
+                if fault == "report-failure" and path.name == "cleanup.json":
+                    raise publication_error
+
+            def fail_preflight(_root):
+                raise ValueError("definite failure before supervision")
+
+            with monkeypatch.context() as pending_patch:
+                pending_patch.setattr(runner, "_RUN_COMMANDS_SUPERVISION", None)
+                pending_patch.setattr(runner, "_RUN_COMMANDS_CLEANUP_REPO_ROOT", None)
+                pending_patch.setattr(runner, "_ACTIVE_SCAN_LAUNCH", None)
+                pending_patch.setattr(runner, "_repo_root", lambda: REPO_ROOT)
+                pending_patch.setattr(runner, "resolve_validation_run_paths", resolve_held)
+                pending_patch.setattr(runner, "_projected_validation_relative_paths", lambda _phase: ())
+                pending_patch.setattr(runner, "_main_impl", dispatch_held)
+                pending_patch.setattr(runner, "_execute_supervised_command", unresolved_call)
+                pending_patch.setattr(runner, "atomic_write_json", record_finalization)
+                pending_patch.setattr(runner, "cleanup_validation_run",
+                                      lambda paths: cleanup_calls.append(paths) or "PASS_REMOVED_EXACT_RUN_ROOT")
+                if fault == "preflight":
+                    pending_patch.setattr(runner, "_validation_text_integrity_preflight", fail_preflight)
+                if fault in {"group", "cancel"}:
+                    with pytest.raises(type(raised)) as caught:
+                        runner._main_owned(["--phase", runner.FAST_PREFLIGHT_PHASE])
+                    assert caught.value is raised
+                elif fault == "report-failure":
+                    with pytest.raises(BaseExceptionGroup) as caught:
+                        runner._main_owned(["--phase", runner.FAST_PREFLIGHT_PHASE])
+                    pending_errors = [caught.value]
+                    leaves = []
+                    while pending_errors:
+                        error = pending_errors.pop()
+                        if isinstance(error, BaseExceptionGroup):
+                            pending_errors.extend(error.exceptions)
+                        else:
+                            leaves.append(error)
+                    assert any(error is primary for error in leaves)
+                    assert any(error is publication_error for error in leaves)
+                else:
+                    assert runner._main_owned(["--phase", runner.FAST_PREFLIGHT_PHASE]) == 1
+                assert len(allocations) == 1
+                if fault == "preflight":
+                    assert calls == [] and cleanup_calls == [held_paths]
+                    assert runner._RUN_COMMANDS_SUPERVISION is None
+                else:
+                    retained_state = runner._RUN_COMMANDS_SUPERVISION
+                    assert retained_state["pending"] is True
+                    assert retained_state["paths"] is held_paths
+                    assert retained_state["receipt"] is None
+                    assert retained_state["errors"][0] is raised
+                    assert len(calls) == 1 and cleanup_calls == []
+                    assert runner._LAST_COMMAND_RECEIPTS == ()
+                    assert held_paths.process_root.is_dir()
+                    assert published[0][0] == "cleanup.json"
+                    assert published[0][1]["cleanup_state"] == "SKIPPED_PROCESS_TERMINATION_UNPROVEN"
+                    assert runner._main_owned(["--phase", runner.ALL_PHASE]) == 1
+                    assert len(allocations) == len(calls) == 1
+                    assert runner._RUN_COMMANDS_SUPERVISION is retained_state
+                    if fault == "direct":
+                        other_paths, other_probe = reliability.resolve_validation_run_paths(
+                            REPO_ROOT, explicit_process_root=external_parent.resolve(),
+                            run_id="run_different_cannot_clear_pending",
+                        )
+                        final_result, cleanup, completion = runner._finalize_validation_run(
+                            run_paths=other_paths, probe=other_probe, phase=runner.ALL_PHASE,
+                            planned_count=0, expected_plan=(), receipts=(), result=0, text_state="PASS",
+                            _supervision_state={"paths": other_paths, "phase": runner.ALL_PHASE,
+                                                "pending": False, "receipt": None, "errors": []},
+                        )
+                        assert final_result == 1 and completion.final_state == "FAIL"
+                        assert cleanup == "SKIPPED_PROCESS_TERMINATION_UNPROVEN"
+                        assert cleanup_calls == [] and other_paths.process_root.is_dir()
+                        assert runner._RUN_COMMANDS_SUPERVISION is retained_state
+                        assert retained_state["pending"] is True
+                        assert retained_state["errors"][0] is primary
+
+        overwritten = reliability.CommandExecutionReceiptV1(
+            schema_version=1, run_id=held_paths.run_id, phase=runner.FAST_PREFLIGHT_PHASE,
+            command_index=1, argv=(sys.executable, "tools/original.py"), cwd=str(REPO_ROOT),
+            pid=9023, platform="nt", start_time_utc="2026-08-24T00:00:00Z",
+            end_time_utc="2026-08-24T00:00:01Z", elapsed_monotonic_seconds=1.0,
+            native_exit_code=0, start_failure_class=None, timeout_seconds_or_null=None,
+            timeout_state="NOT_CONFIGURED", termination_state="TASKKILL_T:128;TERMINAL:UNPROVEN",
+            stdout_path=str(held_paths.evidence_root / "command-1.stdout.bin"),
+            stderr_path=str(held_paths.evidence_root / "command-1.stderr.bin"),
+            stdout_byte_count=0, stderr_byte_count=0, stdout_required_markers=(),
+            stdout_marker_state="NOT_REQUIRED", stderr_was_nonempty=False,
+            failure_class="ENGVR_ATOMIC_RECEIPT_WRITE_FAILED",
+        )
+        no_deletions, final_reports = [], []
+        with monkeypatch.context() as overwritten_patch:
+            overwritten_patch.setattr(runner, "_RUN_COMMANDS_SUPERVISION", None)
+            overwritten_patch.setattr(runner, "cleanup_validation_run", lambda paths: no_deletions.append(paths))
+            overwritten_patch.setattr(runner, "atomic_write_json", lambda path, value: final_reports.append((path.name, value)))
+            result, cleanup, completion = runner._finalize_validation_run(
+                run_paths=held_paths, probe=held_probe, phase=runner.FAST_PREFLIGHT_PHASE,
+                planned_count=1, expected_plan=(), receipts=(overwritten,), result=0, text_state="PASS",
+            )
+            assert result == 1 and completion.final_state == "FAIL"
+            assert cleanup == "SKIPPED_PROCESS_TERMINATION_UNPROVEN" and no_deletions == []
+            assert final_reports[0][1]["cleanup_state"] == "SKIPPED_PROCESS_TERMINATION_UNPROVEN"
+            retained_state = runner._RUN_COMMANDS_SUPERVISION
+            assert retained_state["pending"] is True and retained_state["receipt"] is overwritten
+            assert runner.run_commands(((sys.executable, "tools/never.py"),), run_paths=held_paths) == 1
+            assert runner._RUN_COMMANDS_SUPERVISION is retained_state
+            assert held_paths.process_root.is_dir() and no_deletions == []
+
+        # Known process uncertainty must be retained before unrelated scan-plan
+        # identity validation can raise. No native process or scan is started.
+        identity_plan = reliability.build_command_evidence_plan(
+            run_id=held_paths.run_id, phase=runner.FAST_PREFLIGHT_PHASE,
+            commands=(overwritten.argv,), cwd=REPO_ROOT,
+        )
+        for supplied_state in (False, True):
+            for mismatch in ("paths", "plan", "phase", "count"):
+                scan = SimpleNamespace(
+                    paths=held_paths, plan=identity_plan,
+                    phase=runner.FAST_PREFLIGHT_PHASE, profiles=(),
+                )
+                if mismatch == "paths":
+                    scan.paths = object()
+                elif mismatch == "plan":
+                    scan.plan = tuple(list(identity_plan))
+                elif mismatch == "phase":
+                    scan.phase = runner.ALL_PHASE
+                count = 2 if mismatch == "count" else 1
+                state = ({"paths": held_paths, "phase": runner.FAST_PREFLIGHT_PHASE,
+                          "pending": False, "receipt": None, "errors": []}
+                         if supplied_state else None)
+                calls = []
+                with monkeypatch.context() as early_failure_patch:
+                    early_failure_patch.setattr(runner, "_RUN_COMMANDS_SUPERVISION", None)
+                    early_failure_patch.setattr(runner, "cleanup_validation_run",
+                                                lambda *a, **k: calls.append("cleanup"))
+                    early_failure_patch.setattr(runner, "atomic_write_json",
+                                                lambda *a, **k: calls.append("publication"))
+                    early_failure_patch.setattr(runner, "_execute_supervised_command",
+                                                lambda *a, **k: calls.append("dispatch"))
+                    with pytest.raises(ValueError, match="finalizer lost original scan launch identity") as caught:
+                        runner._finalize_validation_run(
+                            run_paths=held_paths, probe=held_probe,
+                            phase=runner.FAST_PREFLIGHT_PHASE, planned_count=count,
+                            expected_plan=identity_plan, receipts=(overwritten,),
+                            result=1, text_state="PASS", scan_launch=scan,
+                            _supervision_state=state,
+                        )
+                    retained = runner._RUN_COMMANDS_SUPERVISION
+                    assert retained is not None and retained["pending"] is True
+                    assert state is None or retained is state
+                    assert retained["paths"] is held_paths
+                    assert retained["receipt"] is overwritten
+                    assert retained["errors"] == [caught.value]
+                    assert calls == []
+                    assert runner.run_commands((overwritten.argv,), run_paths=held_paths) == 1
+                    assert runner._RUN_COMMANDS_SUPERVISION is retained
+                    assert calls == [] and held_paths.process_root.is_dir()
+
+        # The same identity failure without process uncertainty does not invent
+        # an unresolved child or bypass the original scan identity check.
+        terminal = replace(overwritten, termination_state="NOT_REQUIRED", failure_class=None)
+        calls = []
+        with monkeypatch.context() as terminal_identity_patch:
+            terminal_identity_patch.setattr(runner, "_RUN_COMMANDS_SUPERVISION", None)
+            terminal_identity_patch.setattr(runner, "cleanup_validation_run",
+                                            lambda *a, **k: calls.append("cleanup"))
+            terminal_identity_patch.setattr(runner, "atomic_write_json",
+                                            lambda *a, **k: calls.append("publication"))
+            with pytest.raises(ValueError, match="finalizer lost original scan launch identity"):
+                runner._finalize_validation_run(
+                    run_paths=held_paths, probe=held_probe,
+                    phase=runner.FAST_PREFLIGHT_PHASE, planned_count=1,
+                    expected_plan=identity_plan, receipts=(terminal,), result=1,
+                    text_state="PASS", scan_launch=SimpleNamespace(paths=object()),
+                )
+            assert runner._RUN_COMMANDS_SUPERVISION is None and calls == []
 
 
 def test_st12h_runner_enforces_exact_timeouts_one_process_and_zero_retry(

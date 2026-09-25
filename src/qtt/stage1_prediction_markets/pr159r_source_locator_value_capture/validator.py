@@ -486,11 +486,11 @@ def _validate_currentness(root: Path, failures: list[str]) -> None:
     expected = build_artifacts(root)
     for rel_path, payload in expected.payloads.items():
         full_path = root / rel_path
-        if full_path.exists() and full_path.read_text(encoding="utf-8") != json_dump(payload):
+        if full_path.exists() and full_path.read_bytes().decode("utf-8") != json_dump(payload):
             failures.append(f"PR159R_GENERATED_ARTIFACT_NOT_DETERMINISTIC_CURRENT:{rel_path}")
     for rel_path, payload in expected.markdown_payloads.items():
         full_path = root / rel_path
-        if full_path.exists() and full_path.read_text(encoding="utf-8") != payload:
+        if full_path.exists() and full_path.read_bytes().decode("utf-8") != payload:
             failures.append(f"PR159R_MARKDOWN_ARTIFACT_NOT_DETERMINISTIC_CURRENT:{rel_path}")
 
 

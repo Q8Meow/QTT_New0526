@@ -3,7 +3,6 @@ from __future__ import annotations
 from copy import deepcopy
 import json
 from pathlib import Path
-import subprocess
 
 from tools.build_master_plan_section_coverage_report import load_yaml_subset
 from tools.ci_branch_context import BranchContext
@@ -33,54 +32,7 @@ from tools import run_validation_gates as runner
 
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-_TRACKED_GENERATED_SIDE_EFFECT_ROOTS = (
-    "docs/master_plan/generated/",
-    "docs/master_plan/source_evidence/generated/",
-    "docs/roadmap/generated/",
-)
 _CACHE: dict[str, dict] | None = None
-
-
-def _tracked_modified_generated_side_effect_paths() -> list[str]:
-    completed = subprocess.run(
-        ["git", "ls-files", "-m"],
-        cwd=REPO_ROOT,
-        check=False,
-        capture_output=True,
-        text=True,
-    )
-    assert completed.returncode == 0, (completed.stderr or completed.stdout).strip()
-    paths: list[str] = []
-    for line in completed.stdout.splitlines():
-        normalized = line.strip().replace("\\", "/")
-        if normalized.startswith(_TRACKED_GENERATED_SIDE_EFFECT_ROOTS):
-            paths.append(normalized)
-    return paths
-
-
-_INITIAL_MODIFIED_GENERATED_SIDE_EFFECT_PATHS = frozenset(
-    _tracked_modified_generated_side_effect_paths()
-)
-
-
-def _restore_tracked_generated_side_effects_from_head() -> list[str]:
-    paths = [
-        path
-        for path in _tracked_modified_generated_side_effect_paths()
-        if path not in _INITIAL_MODIFIED_GENERATED_SIDE_EFFECT_PATHS
-    ]
-    if not paths:
-        return []
-
-    completed = subprocess.run(
-        ["git", "restore", "--source=HEAD", "--worktree", "--", *paths],
-        cwd=REPO_ROOT,
-        check=False,
-        capture_output=True,
-        text=True,
-    )
-    assert completed.returncode == 0, (completed.stderr or completed.stdout).strip()
-    return paths
 
 
 def _outputs() -> dict[str, dict]:
@@ -118,17 +70,186 @@ def _payload_failures(mutator) -> set[str]:
 
 
 def test_cli_default_validation_does_not_rewrite_tracked_report(capsys) -> None:
+    # The central runner, not this test, owns the working-candidate boundary.
     report_path = REPO_ROOT / c.REPORT_PATH
-    _restore_tracked_generated_side_effects_from_head()
     before = report_path.read_bytes()
+    assert pr143_cli.main(["--repo-root", str(REPO_ROOT)]) == 0
+    assert report_path.read_bytes() == before
+    assert c.SUCCESS_MARKER in capsys.readouterr().out
 
-    try:
-        assert pr143_cli.main(["--repo-root", str(REPO_ROOT)]) == 0
+    # Synthetic control-flow regression only; the real CLI segment above is unpatched.
+    from unittest.mock import patch
+    import pytest
 
-        assert report_path.read_bytes() == before
-        assert c.SUCCESS_MARKER in capsys.readouterr().out
-    finally:
-        _restore_tracked_generated_side_effects_from_head()
+    expected = {
+        "schema": {"expected": "schema"}, "gate": {"expected": "gate"},
+        "report": {"expected": "report"}, "fixture": {"expected": "fixture"},
+    }
+    paths = {
+        "schema": c.SCHEMA_PATH, "gate": c.YAML_PATH,
+        "report": c.REPORT_PATH, "fixture": c.FIXTURE_PATH,
+    }
+    complete_calls = (
+        "build_schema", "build_gate", "build_report", "build_fixture", "build_report",
+        "read_schema", "align_schema", "read_gate", "read_report", "read_fixture",
+        "validate_gate", "validate_report", "validate_fixture", "changed_paths",
+    )
+    original_validator = pr143_report.validate_repository_artifacts
+    port_names = (
+        "build_json_schema", "build_gate", "build_report", "build_fixture",
+        "_read_json", "_read_yaml", "validate_constants_schema_alignment",
+        "validate_payload", "_validate_changed_paths",
+    )
+    original_ports = {name: getattr(pr143_report, name) for name in port_names}
+
+    def check_case(actual, expected_failures, expected_calls=complete_calls, *,
+                   read_errors=None, second_report=None, changed_failures=(),
+                   raise_at=None, propagated=None):
+        calls = []
+        read_errors = {} if read_errors is None else read_errors
+        report_values = iter((expected["report"],
+                              expected["report"] if second_report is None else second_report))
+
+        def record(name):
+            calls.append(name)
+            if raise_at is not None and name == raise_at[0]:
+                raise raise_at[1]
+
+        def build(name, root):
+            assert root == REPO_ROOT.resolve()
+            record("build_" + name)
+            return next(report_values) if name == "report" else expected[name]
+
+        def read(path, *, yaml):
+            labels = ("gate",) if yaml else ("schema", "report", "fixture")
+            name = next(label for label in labels if path == REPO_ROOT / paths[label])
+            record("read_" + name)
+            if name in read_errors:
+                raise read_errors[name]
+            return actual[name]
+
+        def align(schema):
+            assert schema is actual["schema"]
+            record("align_schema")
+            return ([] if schema else [
+                "PR143_SCHEMA_AUTHORITY_CLASS_ENUM_MISMATCH",
+                "PR143_SCHEMA_AUTHORITY_CLASS_ENUM_MISMATCH",
+            ])
+
+        def validate(payload, schema):
+            assert schema is expected["schema"]  # Generated expected schema, not the read schema.
+            name = next(label for label in ("gate", "report", "fixture")
+                        if payload is actual[label])
+            record("validate_" + name)
+            return ([] if payload else [
+                "PR143_AUTHORITY_CLASS_MISMATCH", "PR143_AUTHORITY_CLASS_MISMATCH",
+            ])
+
+        def changed(root):
+            assert root == REPO_ROOT.resolve()
+            record("changed_paths")
+            return list(changed_failures)
+
+        ports = {
+            "build_json_schema": lambda root: build("schema", root),
+            "build_gate": lambda root: build("gate", root),
+            "build_report": lambda root: build("report", root),
+            "build_fixture": lambda root: build("fixture", root),
+            "_read_json": lambda path: read(path, yaml=False),
+            "_read_yaml": lambda path: read(path, yaml=True),
+            "validate_constants_schema_alignment": align,
+            "validate_payload": validate,
+            "_validate_changed_paths": changed,
+        }
+        with patch.multiple(pr143_report, **ports):
+            assert pr143_report.validate_repository_artifacts is original_validator
+            if propagated is None:
+                failures = pr143_report.validate_repository_artifacts(REPO_ROOT)
+                assert failures == list(expected_failures)
+                assert failures == sorted(set(failures))
+                assert calls.count("build_report") == 2
+            else:
+                with pytest.raises(type(propagated)) as raised:
+                    pr143_report.validate_repository_artifacts(REPO_ROOT)
+                assert raised.value is propagated
+            assert calls == list(expected_calls)
+        assert all(getattr(pr143_report, name) is original for name, original in original_ports.items())
+        assert pr143_report.validate_repository_artifacts is original_validator
+
+    empty_failures = {
+        "schema": ("PR143_SCHEMA_AUTHORITY_CLASS_ENUM_MISMATCH",
+                   "PR143_SCHEMA_STALE_OR_NONDETERMINISTIC"),
+        "gate": ("PR143_YAML_PR143_AUTHORITY_CLASS_MISMATCH",
+                 "PR143_YAML_STALE_OR_NONDETERMINISTIC"),
+        "report": ("PR143_REPORT_PR143_AUTHORITY_CLASS_MISMATCH",
+                   "PR143_REPORT_STALE_OR_NONDETERMINISTIC"),
+        "fixture": ("PR143_FIXTURE_PR143_AUTHORITY_CLASS_MISMATCH",
+                    "PR143_FIXTURE_STALE_OR_NONDETERMINISTIC"),
+    }
+    for name, failures in empty_failures.items():
+        actual = deepcopy(expected)
+        actual[name] = {}
+        check_case(actual, failures)
+    check_case({name: {} for name in paths}, (
+        "PR143_FIXTURE_PR143_AUTHORITY_CLASS_MISMATCH",
+        "PR143_FIXTURE_STALE_OR_NONDETERMINISTIC",
+        "PR143_REPORT_PR143_AUTHORITY_CLASS_MISMATCH",
+        "PR143_REPORT_STALE_OR_NONDETERMINISTIC",
+        "PR143_SCHEMA_AUTHORITY_CLASS_ENUM_MISMATCH",
+        "PR143_SCHEMA_STALE_OR_NONDETERMINISTIC",
+        "PR143_YAML_PR143_AUTHORITY_CLASS_MISMATCH",
+        "PR143_YAML_STALE_OR_NONDETERMINISTIC",
+    ))
+
+    reader_contracts = (
+        ("schema", "PR143_SCHEMA_INVALID", "align_schema",
+         (OSError("synthetic read failure"),
+          json.JSONDecodeError("synthetic JSON failure", "!", 0),
+          ValueError("synthetic mapping failure"))),
+        ("gate", "PR143_YAML_INVALID", "validate_gate",
+         (OSError("synthetic read failure"), ValueError("synthetic YAML failure"))),
+        ("report", "PR143_REPORT_INVALID", "validate_report",
+         (OSError("synthetic read failure"),
+          json.JSONDecodeError("synthetic JSON failure", "!", 0),
+          ValueError("synthetic mapping failure"))),
+        ("fixture", "PR143_FIXTURE_INVALID", "validate_fixture",
+         (OSError("synthetic read failure"),
+          json.JSONDecodeError("synthetic JSON failure", "!", 0),
+          ValueError("synthetic mapping failure"))),
+    )
+    for name, prefix, skipped_semantic, errors in reader_contracts:
+        for error in errors:
+            check_case(
+                deepcopy(expected), (f"{prefix}: {paths[name].as_posix()}: {error}",),
+                tuple(call for call in complete_calls if call != skipped_semantic),
+                read_errors={name: error},
+            )
+
+    check_case(deepcopy(expected), ())
+    check_case({name: {"stale": name} for name in paths}, (
+        "PR143_FIXTURE_STALE_OR_NONDETERMINISTIC",
+        "PR143_REPORT_STALE_OR_NONDETERMINISTIC",
+        "PR143_SCHEMA_STALE_OR_NONDETERMINISTIC",
+        "PR143_YAML_STALE_OR_NONDETERMINISTIC",
+    ))
+    check_case(deepcopy(expected), ("PR143_OUTPUT_NOT_DETERMINISTIC",),
+               complete_calls[:5], second_report={"expected": "different report"})
+    check_case(deepcopy(expected), (
+        "PR143_GIT_STATUS_UNAVAILABLE", "PR143_MASTER_PLAN_MUTATION_DETECTED",
+    ), changed_failures=(
+        "PR143_MASTER_PLAN_MUTATION_DETECTED", "PR143_GIT_STATUS_UNAVAILABLE",
+        "PR143_MASTER_PLAN_MUTATION_DETECTED",
+    ))
+    # Uncaught reader and non-reader exceptions retain identity and stop at that port.
+    for name in paths:
+        error = RuntimeError("synthetic unrelated reader failure")
+        last_call = "read_" + name
+        check_case(deepcopy(expected), (), complete_calls[:complete_calls.index(last_call) + 1],
+                   read_errors={name: error}, propagated=error)
+    for last_call in ("build_schema", "align_schema", "validate_gate", "changed_paths"):
+        error = ValueError("synthetic non-reader failure")
+        check_case(deepcopy(expected), (), complete_calls[:complete_calls.index(last_call) + 1],
+                   raise_at=(last_call, error), propagated=error)
 
 
 def test_cli_write_artifacts_mode_is_explicit_opt_in(monkeypatch, capsys) -> None:

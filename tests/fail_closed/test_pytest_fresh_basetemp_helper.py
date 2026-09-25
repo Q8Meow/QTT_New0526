@@ -631,6 +631,160 @@ def _assert_standalone_helper_receipt_matrix(
             final_state="PASS",
         )
 
+    # Append isolated caller faults after the existing actual-child matrix.
+    # These receipt/evidence ports are fixtures, not saved native command proof.
+    from contextlib import contextmanager
+    from dataclasses import replace
+    for fault in ("success", "nonzero", "marker", "prestart", "terminal-publication",
+                  "unproven", "exception", "group", "cancel", "system-exit", "base-group",
+                  "context-exit", "publication-error", "group-publication", "report-error", "missing", "shape",
+                  "bool-pid", "bool-exit", "unknown", "conflicting-proof",
+                  "run", "phase", "index", "argv", "cwd"):
+        parent = matrix_root / ("pending-" + fault)
+        primary = reliability.ValidationReliabilityError(
+            "ENGVR_PROCESS_TERMINATION_FAILED", "original unresolved supervision",
+        )
+        primary.owned_process = object()
+        publication = OSError("original receipt publication failed")
+        reporting = OSError("cleanup/completion reporting unavailable")
+        raised = (ExceptionGroup("outer", [ExceptionGroup("inner", [primary])])
+                  if fault in {"group", "group-publication"} else KeyboardInterrupt("original interruption")
+                  if fault == "cancel" else SystemExit(17) if fault == "system-exit"
+                  else BaseExceptionGroup("mixed", [KeyboardInterrupt(), primary])
+                  if fault == "base-group" else primary)
+        context_error = RuntimeError("original projection exit failed")
+        starts, actual_receipts, deleted, writes, validations = [], [], [], [], []
+        real_cleanup = helper.cleanup_validation_run
+        real_write = helper.atomic_write_json
+
+        @contextmanager
+        def fail_projection_exit(_projection):
+            yield
+            raise context_error
+
+        def fixture_supervise(command, **kwargs):
+            starts.append((tuple(command), kwargs))
+            if fault in {"exception", "group", "cancel", "system-exit", "base-group", "report-error"}:
+                raise raised
+            parameters = {"native_exit_code": 0, "failure_class": None}
+            if fault == "nonzero":
+                parameters.update(native_exit_code=7, failure_class="ENGVR_NATIVE_EXIT_NONZERO")
+            elif fault == "marker":
+                parameters.update(failure_class="ENGVR_REQUIRED_MARKER_MISSING",
+                                  required_markers=("EXPECTED",), marker_state="MISSING:EXPECTED")
+            elif fault == "prestart":
+                parameters.update(native_exit_code=None, failure_class="ENGVR_PROCESS_START_FAILED",
+                                  start_failure_class="FileNotFoundError")
+            elif fault in {"unproven", "terminal-publication"}:
+                parameters.update(failure_class="ENGVR_ATOMIC_RECEIPT_WRITE_FAILED")
+                if fault == "unproven":
+                    parameters.update(termination_state="TASKKILL_T:128;TERMINAL:UNPROVEN")
+            elif fault in {"publication-error", "group-publication"}:
+                parameters.update(failure_class="ENGVR_PROCESS_TERMINATION_FAILED",
+                                  termination_state="TASKKILL_T:128;TERMINAL:UNPROVEN")
+            receipt = _command_receipt(command, kwargs, tmp_path, **parameters)
+            changes = {
+                "bool-pid": {"pid": True}, "bool-exit": {"native_exit_code": False},
+                "unknown": {"termination_state": "UNKNOWN"},
+                "conflicting-proof": {"termination_state": "TASKKILL_T:0;TERMINAL:PROVEN;UNPROVEN"},
+                "run": {"run_id": "different_run"}, "phase": {"phase": "different-phase"},
+                "index": {"command_index": 2}, "argv": {"argv": (*tuple(command), "--different")},
+                "cwd": {"cwd": str(tmp_path)},
+            }.get(fault, {})
+            receipt = replace(receipt, **changes)
+            if fault == "missing":
+                receipt = None
+            elif fault == "shape":
+                receipt = {"pid": 4242, "native_exit_code": 0}
+            actual_receipts.append(receipt)
+            if fault in {"publication-error", "group-publication"}:
+                primary.command_receipt = receipt
+                if fault == "group-publication":
+                    primary.__cause__ = publication
+                    raise raised
+                raise primary from publication
+            return receipt
+
+        def observe_cleanup(paths):
+            deleted.append(paths)
+            return real_cleanup(paths)
+
+        def observe_write(path, payload):
+            writes.append((path.name, payload))
+            if fault == "report-error":
+                raise reporting
+            return real_write(path, payload)
+
+        def observe_validation(*args, **kwargs):
+            validations.append(kwargs)
+
+        with monkeypatch.context() as fault_patch:
+            fault_patch.setattr(helper, "_STANDALONE_SUPERVISION", None)
+            fault_patch.setattr(helper, "REPO_ROOT", repo_root)
+            fault_patch.setenv(reliability.PROCESS_ROOT_ENV, str(parent))
+            fault_patch.delenv(reliability.RUN_ID_ENV, raising=False)
+            fault_patch.delenv(reliability.EVIDENCE_ROOT_ENV, raising=False)
+            fault_patch.setattr(helper, "supervise_command", fixture_supervise)
+            fault_patch.setattr(helper, "cleanup_validation_run", observe_cleanup)
+            fault_patch.setattr(helper, "atomic_write_json", observe_write)
+            fault_patch.setattr(helper, "validate_complete_run_evidence", observe_validation)
+            fault_patch.setattr(helper, "validate_published_completion_receipt", lambda *args: None)
+            if fault == "context-exit":
+                fault_patch.setattr(helper, "_command_projection_v1", fail_projection_exit)
+            if fault in {"cancel", "system-exit", "base-group"}:
+                with pytest.raises(type(raised)) as caught:
+                    helper.main(["--version"])
+                assert caught.value is raised
+            else:
+                result = helper.main(["--version"])
+                assert result == (0 if fault == "success" else 7 if fault == "nonzero" else 1)
+            pending = helper._STANDALONE_SUPERVISION
+            assert len(starts) == 1
+            terminal = fault in {"success", "nonzero", "marker", "prestart", "terminal-publication"}
+            if terminal:
+                assert pending["pending"] is False
+                assert deleted == [pending["paths"]]
+                assert not pending["paths"].process_root.exists()
+                assert writes[-1][1].final_state == ("PASS" if fault == "success" else "FAIL")
+            else:
+                assert pending["pending"] is True
+                assert deleted == [] and pending["paths"].process_root.is_dir()
+                assert writes[0][0] == "cleanup.json"
+                assert writes[0][1]["cleanup_state"] == "SKIPPED_PROCESS_TERMINATION_UNPROVEN"
+                before_retry = set(parent.iterdir())
+                assert helper.main(["--version"]) == 1
+                assert helper._STANDALONE_SUPERVISION is pending
+                assert set(parent.iterdir()) == before_retry and len(starts) == 1
+                if fault == "unproven":
+                    inherited_calls = []
+                    fault_patch.setenv(reliability.RUN_ID_ENV, "different_inherited_run")
+                    fault_patch.setenv(reliability.EVIDENCE_ROOT_ENV, str(parent))
+                    fault_patch.setattr(helper, "_run_inherited_nested",
+                                        lambda *args, **kwargs: inherited_calls.append((args, kwargs)))
+                    assert helper.main(["--version"]) == 1
+                    assert inherited_calls == []
+                    assert helper._STANDALONE_SUPERVISION is pending
+            if fault in {"exception", "group", "cancel", "system-exit", "base-group", "report-error", "publication-error", "group-publication"}:
+                assert pending["errors"][0] is raised
+            if fault == "context-exit":
+                assert pending["errors"][0] is context_error
+            if fault == "report-error":
+                assert any(error is reporting for error in pending["errors"])
+                assert [name for name, _ in writes] == ["cleanup.json", "completion.json"]
+            if actual_receipts and type(actual_receipts[0]) is reliability.CommandExecutionReceiptV1:
+                assert pending["receipt"] is actual_receipts[0]
+                assert len(validations) == 1
+                assert len(validations[0]["receipts"]) == 1
+                assert validations[0]["receipts"][0] is actual_receipts[0]
+            elif fault not in {"shape", "missing"}:
+                assert pending["receipt"] is None
+                assert validations[0]["receipts"] == ()
+            if fault in {"publication-error", "group-publication"}:
+                assert primary.__cause__ is publication
+                assert primary.command_receipt is actual_receipts[0]
+                assert not (pending["paths"].evidence_root / "command-1.json").exists()
+        capsys.readouterr()
+
 
 def test_helper_builds_pytest_command_using_sys_executable(monkeypatch):
     python_executable = r"C:\repo\.venv\Scripts\python.exe"
@@ -656,10 +810,11 @@ def test_helper_adds_basetemp_when_absent():
     assert invocation.added_basetemp is True
     assert invocation.basetemp == str(basetemp)
     assert invocation.command[3:-2] == pytest_args
+
     assert invocation.command[-2:] == ["--basetemp", str(basetemp)]
 
 
-def test_helper_preserves_user_pytest_args():
+def test_helper_preserves_user_pytest_args(tmp_path):
     pytest_args = ["tests/fail_closed", "-q", "-k", "scanner"]
 
     invocation = helper.build_pytest_invocation(
@@ -668,6 +823,39 @@ def test_helper_preserves_user_pytest_args():
     )
 
     assert invocation.command[3:-2] == pytest_args
+
+    # These synthetic owned paths exercise textual projection, not host qualification.
+    repository = tmp_path / "canonical-repository"
+    run_root = tmp_path / "canonical-run"
+    repository.mkdir()
+    run_root.mkdir()
+    original = ["tests/fail_closed", "-q", "--", "--basetemp=literal-test-name"]
+    environment = {"Path": "admitted-fixture-path", "PYTEST_ADDOPTS": "--basetemp=outside",
+                   "pytest_plugins": "unadmitted_plugin", "PYTEST_DEBUG": "1", "PYTEST_CURRENT_TEST": "fixture"}
+    parent = dict(environment)
+    bound, child, projection = helper._bind_canonical_pytest_invocation_v1(
+        original, repository_root=repository, python_executable=helper.sys.executable,
+        run_root=run_root, environment=environment)
+    assert bound.command == [helper.sys.executable, "-B", "-m", "pytest", "-c", str(repository / "pytest.ini"),
+                             "-o", "addopts=", "-o", "cache_dir=" + str(run_root / "pytest-cache"),
+                             "--rootdir=" + str(repository), "--confcutdir=" + str(repository),
+                             "tests/fail_closed", "-q", "--basetemp", str(run_root / "p"),
+                             "--", "--basetemp=literal-test-name"]
+    assert child == {"Path": "admitted-fixture-path", "PYTEST_DISABLE_PLUGIN_AUTOLOAD": "1", "PYTHONDONTWRITEBYTECODE": "1"}
+    assert environment == parent
+    assert set(projection["removed_environment_keys"]) == set(parent) - {"Path"}
+    assert projection["registered_argv"] == (helper.sys.executable, "-m", "pytest", *original)
+    assert helper.find_explicit_basetemp(original) is None
+    for rejected in (["--basetemp"], ["--basetemp="], ["--basetemp", "-q"],
+                     ["--basetemp=x", "--basetemp=x"], ["--basetemp", "x", "--basetemp=y"]):
+        with pytest.raises(ValueError):
+            helper.build_pytest_invocation(rejected, fresh_basetemp=run_root / "p")
+    for rejected in (["-o", "addopts=--basetemp=x"], ["--rootdir=x"], ["-p", "plugin"],
+                     ["--noconftest"], ["@arguments"], ["--basetemp", str(tmp_path / "other")]):
+        with pytest.raises(ValueError):
+            helper._bind_canonical_pytest_invocation_v1(
+                rejected, repository_root=repository, python_executable=helper.sys.executable,
+                run_root=run_root, environment={})
 
 
 def test_helper_does_not_duplicate_basetemp_when_separate_arg_supplied():
@@ -871,10 +1059,311 @@ def test_main_prints_basetemp_and_returns_pytest_exit_code(
     capsys,
     tmp_path,
 ):
+    # Synthetic substitutions below isolate the admitted allocation and taskkill
+    # boundaries. They do not attest a real child or native tree termination.
+    boundary_root = tmp_path / "focused-launch-boundaries"
+    boundary_root.mkdir()
+    fixture_repo = boundary_root / "repo"
+    fixture_repo.mkdir()
+    selected_parent = boundary_root / "selected"
+    selected_parent.mkdir()
+
+    def no_child(*args, **kwargs):
+        pytest.fail("rejected allocation must not start a supervisor")
+
+    for selected in (str(selected_parent), None):
+        allocations = []
+
+        def stop_at_allocation(repo, **kwargs):
+            allocations.append((repo, kwargs))
+            raise reliability.ValidationReliabilityError(
+                "ENGVR_SHORT_PROCESS_ROOT_UNAVAILABLE",
+                "synthetic allocation-boundary stop",
+            )
+
+        with monkeypatch.context() as patch:
+            patch.setattr(helper, "REPO_ROOT", fixture_repo)
+            patch.delenv(reliability.RUN_ID_ENV, raising=False)
+            patch.delenv(reliability.EVIDENCE_ROOT_ENV, raising=False)
+            if selected is None:
+                patch.delenv(reliability.PROCESS_ROOT_ENV, raising=False)
+            else:
+                patch.setenv(reliability.PROCESS_ROOT_ENV, selected)
+            patch.setattr(helper, "resolve_validation_run_paths", stop_at_allocation)
+            patch.setattr(helper, "supervise_command", no_child)
+            assert helper.main(["-q"]) == 1
+        assert allocations == [
+            (fixture_repo, {
+                "explicit_process_root": selected,
+                "projected_relative_paths": ("-q",),
+            })
+        ]
+        output = capsys.readouterr()
+        assert output.out == ""
+        assert output.err.count("ENGVR_SHORT_PROCESS_ROOT_UNAVAILABLE") == 1
+
+    linked_parent = boundary_root / "synthetic-junction"
+    linked_parent.mkdir()
+    ordinary_file = boundary_root / "ordinary-file"
+    ordinary_file.write_bytes(b"fixture")
+    for selected, code in (
+        ("", "ENGVR_SHORT_PROCESS_ROOT_UNAVAILABLE"),
+        (" " + str(selected_parent), "ENGVR_SHORT_PROCESS_ROOT_UNAVAILABLE"),
+        (str(selected_parent) + " ", "ENGVR_SHORT_PROCESS_ROOT_UNAVAILABLE"),
+        ("relative-parent", "ENGVR_REPOSITORY_LOCAL_LAYOUT_REJECTED"),
+        (str(selected_parent / ".." / "other"), "ENGVR_REPOSITORY_LOCAL_LAYOUT_REJECTED"),
+        (str(linked_parent), "ENGVR_REPOSITORY_LOCAL_LAYOUT_REJECTED"),
+        (str(ordinary_file), "ENGVR_REPOSITORY_LOCAL_LAYOUT_REJECTED"),
+    ):
+        allocations = []
+
+        def unexpected_allocation(*args, **kwargs):
+            allocations.append((args, kwargs))
+            pytest.fail("invalid configured parent reached allocation")
+
+        with monkeypatch.context() as patch:
+            patch.setattr(helper, "REPO_ROOT", fixture_repo)
+            patch.delenv(reliability.RUN_ID_ENV, raising=False)
+            patch.delenv(reliability.EVIDENCE_ROOT_ENV, raising=False)
+            patch.setenv(reliability.PROCESS_ROOT_ENV, selected)
+            patch.setattr(helper, "resolve_validation_run_paths", unexpected_allocation)
+            patch.setattr(helper, "supervise_command", no_child)
+            if selected == str(linked_parent):
+                # This one path has a simulated junction observation; the real
+                # path-chain validator still makes the rejection.
+                real_is_junction = reliability._path_is_junction
+                patch.setattr(
+                    reliability, "_path_is_junction",
+                    lambda path: path == linked_parent or real_is_junction(path),
+                )
+            assert helper.main(["-q"]) == 1
+        assert allocations == []
+        output = capsys.readouterr()
+        assert output.out == ""
+        assert output.err.count(code) == 1
+
+    def no_default_enumeration(*args, **kwargs):
+        pytest.fail("explicit parent enumerated a default candidate")
+
+    with monkeypatch.context() as patch:
+        patch.setattr(reliability, "_candidate_parents", no_default_enumeration)
+        patch.setattr(reliability.tempfile, "gettempdir", no_default_enumeration)
+        paths, probe = reliability.resolve_validation_run_paths(
+            fixture_repo, explicit_process_root=str(selected_parent),
+        )
+        assert paths.process_root.parent == selected_parent
+        assert paths.evidence_root.parent == selected_parent
+        assert paths.pytest_basetemp_root.parent == paths.process_root
+        assert paths.validation_output_root.parent == paths.process_root
+        assert paths.process_root_is_external_to_repo is True
+        assert probe.failure_operation is None
+        assert reliability.cleanup_validation_run(paths).startswith("PASS")
+        assert not paths.process_root.exists()
+        assert paths.evidence_root.is_dir()
+
+    admission_parent = boundary_root / "admission-denied"
+    admission_parent.mkdir()
+    admissions = []
+    denied = reliability.ValidationReliabilityError(
+        "ENGVR_SHORT_PROCESS_ROOT_UNAVAILABLE", "synthetic explicit admission denial",
+    )
+
+    def deny_admission(candidate, repo):
+        admissions.append((candidate, repo))
+        raise denied
+
+    with monkeypatch.context() as patch:
+        patch.setattr(helper, "REPO_ROOT", fixture_repo)
+        patch.delenv(reliability.RUN_ID_ENV, raising=False)
+        patch.delenv(reliability.EVIDENCE_ROOT_ENV, raising=False)
+        patch.setenv(reliability.PROCESS_ROOT_ENV, str(admission_parent))
+        patch.setattr(reliability, "_candidate_parents", no_default_enumeration)
+        patch.setattr(reliability.tempfile, "gettempdir", no_default_enumeration)
+        patch.setattr(reliability, "_validate_candidate_parent", deny_admission)
+        patch.setattr(helper, "supervise_command", no_child)
+        assert helper.main(["-q"]) == 1
+    assert admissions == [(admission_parent, fixture_repo.resolve())]
+    assert list(admission_parent.iterdir()) == []
+    output = capsys.readouterr()
+    assert output.out == ""
+    assert "synthetic explicit admission denial" in output.err
+
+    probe_parent = boundary_root / "probe-denied"
+    probe_parent.mkdir()
+    operations = []
+    real_probe = reliability.probe_run_filesystem
+    real_remove = reliability.remove_exact_run_owned_process_tree
+
+    def failed_probe(process_root, **kwargs):
+        operations.append(("probe", process_root))
+        receipt = real_probe(process_root, **kwargs)
+        assert receipt.failure_operation is None
+        return reliability.replace(
+            receipt, failure_operation="deepest_open",
+            native_error_class="OSError",
+        )
+
+    def owned_remove(process_root, **kwargs):
+        operations.append(("cleanup", process_root))
+        assert kwargs["expected_run_root"] == process_root
+        assert process_root.parent == probe_parent
+        assert kwargs["repo_root"] == fixture_repo.resolve()
+        assert kwargs["evidence_root"].parent == probe_parent
+        return real_remove(process_root, **kwargs)
+
+    with monkeypatch.context() as patch:
+        patch.setattr(helper, "REPO_ROOT", fixture_repo)
+        patch.delenv(reliability.RUN_ID_ENV, raising=False)
+        patch.delenv(reliability.EVIDENCE_ROOT_ENV, raising=False)
+        patch.setenv(reliability.PROCESS_ROOT_ENV, str(probe_parent))
+        patch.setattr(reliability, "_candidate_parents", no_default_enumeration)
+        patch.setattr(reliability.tempfile, "gettempdir", no_default_enumeration)
+        patch.setattr(reliability, "probe_run_filesystem", failed_probe)
+        patch.setattr(reliability, "remove_exact_run_owned_process_tree", owned_remove)
+        patch.setattr(helper, "supervise_command", no_child)
+        assert helper.main(["-q"]) == 1
+    assert len(operations) == 2
+    assert operations[0][0] == "probe"
+    assert operations[1] == ("cleanup", operations[0][1])
+    assert list(probe_parent.iterdir()) == []
+    output = capsys.readouterr()
+    assert output.out == ""
+    assert output.err.count("ENGVR_LONGEST_PATH_PROBE_FAILED") == 1
+
+    generic_temp = boundary_root / "legacy-temp"
+    generic_env = boundary_root / "legacy-environment"
+    with monkeypatch.context() as patch:
+        patch.setattr(reliability.tempfile, "gettempdir", lambda: str(generic_temp))
+        assert reliability._candidate_parents(
+            None,
+            environment={reliability.PROCESS_ROOT_ENV: " " + str(generic_env) + " ",
+                         "SystemDrive": "Z:"},
+            platform_name="nt",
+        ) == (
+            ("ENVIRONMENT", generic_env),
+            ("WINDOWS_SHORT_ROOT", Path("Z:/qttv")),
+            ("SYSTEM_TEMP", generic_temp / "qttv"),
+        )
+        assert reliability._candidate_parents(
+            selected_parent,
+            environment={reliability.PROCESS_ROOT_ENV: str(generic_env),
+                         "SystemDrive": "Z:"},
+            platform_name="nt",
+        ) == (
+            ("EXPLICIT", selected_parent),
+            ("ENVIRONMENT", generic_env),
+            ("WINDOWS_SHORT_ROOT", Path("Z:/qttv")),
+            ("SYSTEM_TEMP", generic_temp / "qttv"),
+        )
+        assert reliability._candidate_parents(
+            None, environment={}, platform_name="posix",
+        ) == (("SYSTEM_TEMP", generic_temp / "qttv"),)
+
+    # Exercise the real termination-helper body with a simulated Popen child.
+    # No Windows taskkill or operating-system process is started by these cases.
+    taskkill_argv = ["taskkill", "/PID", "12345", "/T"]
+    for case in ("zero", "nonzero", "timeout-terminal", "timeout-unknown", "kill-error"):
+        calls = []
+        timeout_first = reliability.subprocess.TimeoutExpired(
+            taskkill_argv, reliability.TERMINATION_GRACE_SECONDS,
+            output=b"first stdout", stderr=b"first stderr",
+        )
+        timeout_second = reliability.subprocess.TimeoutExpired(
+            taskkill_argv, reliability.TERMINATION_GRACE_SECONDS,
+            output=b"second stdout", stderr=b"second stderr",
+        )
+        kill_error = OSError("synthetic kill failure")
+
+        class SimulatedTaskkill:
+            pid = 12345
+            returncode = None
+
+            def communicate(self, *, timeout):
+                calls.append(("communicate", timeout))
+                count = sum(kind == "communicate" for kind, _ in calls)
+                if case.startswith("timeout") or case == "kill-error":
+                    if count == 1:
+                        raise timeout_first
+                    if case == "timeout-unknown":
+                        raise timeout_second
+                self.returncode = 19 if case == "nonzero" else 0
+                return b"simulated stdout", b"simulated stderr"
+
+            def kill(self):
+                calls.append(("kill", None))
+                if case == "kill-error":
+                    raise kill_error
+
+        child = SimulatedTaskkill()
+        starts = []
+
+        def simulated_popen(argv, **kwargs):
+            starts.append((argv, kwargs))
+            return child
+
+        with monkeypatch.context() as patch:
+            patch.setattr(reliability.subprocess, "Popen", simulated_popen)
+            if case in {"timeout-unknown", "kill-error"}:
+                with pytest.raises(reliability.ValidationReliabilityError) as raised:
+                    reliability._hidden_taskkill(taskkill_argv)
+                error = raised.value
+                cause = timeout_second if case == "timeout-unknown" else kill_error
+                assert error.code == "ENGVR_PROCESS_TERMINATION_FAILED"
+                assert error.owned_process is child
+                assert error.__cause__ is cause
+                assert error.stdout_prefix == getattr(cause, "output", None)
+                assert error.stderr_prefix == getattr(cause, "stderr", None)
+                assert "PID=12345" in error.detail
+                assert child.returncode is None
+            else:
+                expected = {"zero": 0, "nonzero": 19, "timeout-terminal": 124}[case]
+                assert reliability._hidden_taskkill(taskkill_argv) == expected
+                assert child.returncode == (19 if case == "nonzero" else 0)
+        assert len(starts) == 1
+        assert starts[0][0] == taskkill_argv
+        actual_kwargs = dict(starts[0][1])
+        expected_kwargs = {
+            "shell": False,
+            "stdin": reliability.subprocess.DEVNULL,
+            "stdout": reliability.subprocess.PIPE,
+            "stderr": reliability.subprocess.PIPE,
+            "creationflags": int(getattr(reliability.subprocess, "CREATE_NO_WINDOW", 0)),
+        }
+        startup_class = getattr(reliability.subprocess, "STARTUPINFO", None)
+        if startup_class is not None:
+            assert set(actual_kwargs) == set(expected_kwargs) | {"startupinfo"}
+            startup = actual_kwargs.pop("startupinfo")
+            assert type(startup) is startup_class
+            assert {
+                "dwFlags": startup.dwFlags,
+                "wShowWindow": startup.wShowWindow,
+                "hStdInput": startup.hStdInput,
+                "hStdOutput": startup.hStdOutput,
+                "hStdError": startup.hStdError,
+                "lpAttributeList": startup.lpAttributeList,
+            } == {
+                "dwFlags": int(getattr(reliability.subprocess, "STARTF_USESHOWWINDOW", 0)),
+                "wShowWindow": int(getattr(reliability.subprocess, "SW_HIDE", 0)),
+                "hStdInput": None,
+                "hStdOutput": None,
+                "hStdError": None,
+                "lpAttributeList": {"handle_list": []},
+            }
+        assert actual_kwargs == expected_kwargs
+        expected_calls = [("communicate", reliability.TERMINATION_GRACE_SECONDS)]
+        if case.startswith("timeout") or case == "kill-error":
+            expected_calls.append(("kill", None))
+            if case != "kill-error":
+                expected_calls.append(("communicate", reliability.TERMINATION_GRACE_SECONDS))
+        assert calls == expected_calls
+
     seen: dict[str, object] = {}
 
     def fake_supervise(command, **kwargs):
-        seen["command"] = list(command)
+        projection = reliability._COMMAND_PROJECTION_V1.get()
+        seen["command"] = list(projection["registered_argv"])
+        seen["effective_command"] = list(command)
+        seen["projection"] = projection
         seen["kwargs"] = kwargs
         receipt = _command_receipt(
             command,
@@ -933,6 +1422,10 @@ def test_main_prints_basetemp_and_returns_pytest_exit_code(
 
         assert exit_code == 7
         assert seen["command"][1:3] == ["-m", "pytest"]
+        assert seen["effective_command"][1:4] == ["-B", "-m", "pytest"]
+        assert seen["effective_command"].count("--basetemp") == 1
+        assert seen["kwargs"]["environment"]["PYTEST_DISABLE_PLUGIN_AUTOLOAD"] == "1"
+        assert seen["kwargs"]["environment"]["PYTHONDONTWRITEBYTECODE"] == "1"
         assert seen["kwargs"]["cwd"] == inherited_repo
         assert seen["kwargs"]["run_id"] == "run_inherited"
         assert seen["kwargs"]["phase"] == "nested-pytest"

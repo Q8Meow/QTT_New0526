@@ -8,7 +8,10 @@ from __future__ import annotations
 
 import ast
 from contextlib import ExitStack, contextmanager
-from dataclasses import asdict, dataclass, is_dataclass, replace
+from dataclasses import asdict, dataclass, field, is_dataclass, replace
+from contextvars import ContextVar
+from types import MappingProxyType
+import math
 from datetime import UTC, datetime
 import codecs
 import errno
@@ -28,6 +31,18 @@ import tempfile
 import threading
 import time
 from typing import BinaryIO, Callable, ContextManager, Iterable, Iterator, Mapping, Sequence
+
+
+_COMMAND_PROJECTION_V1 = ContextVar("_COMMAND_PROJECTION_V1", default=None)
+
+
+@contextmanager
+def _command_projection_v1(projection):
+    token = _COMMAND_PROJECTION_V1.set(projection)
+    try:
+        yield
+    finally:
+        _COMMAND_PROJECTION_V1.reset(token)
 
 
 SCHEMA_VERSION = 1
@@ -253,6 +268,10 @@ class CommandExecutionReceiptV1:
     stderr_was_nonempty: bool
     failure_class: str | None
 
+    registered_argv: tuple[str, ...] = field(default=(), kw_only=True)
+    removed_environment_keys: tuple[str, ...] = field(default=(), kw_only=True)
+    fixed_environment_controls: tuple[tuple[str, str], ...] = field(default=(), kw_only=True)
+
     def __post_init__(self) -> None:
         if self.schema_version != SCHEMA_VERSION:
             raise ValueError("unsupported command receipt schema_version")
@@ -294,6 +313,93 @@ class CommandExecutionReceiptV1:
             raise ValueError("a passing receipt requires native exit code zero")
         if self.failure_class is None and self.stdout_marker_state.startswith("MISSING:"):
             raise ValueError("a passing receipt cannot have missing required markers")
+
+
+def _command_requires_process_retention_v1(receipt: object) -> bool:
+    """Return an unresolved-process veto, never independent tree certification."""
+    if type(receipt) is not CommandExecutionReceiptV1:
+        return True
+    if any(not hasattr(receipt, name) for name in CommandExecutionReceiptV1.__dataclass_fields__):
+        return True
+    for name in ("run_id", "phase", "cwd", "platform", "start_time_utc",
+                 "end_time_utc", "stdout_path", "stderr_path", "stdout_marker_state",
+                 "timeout_state", "termination_state"):
+        value = getattr(receipt, name)
+        if type(value) is not str or not value:
+            return True
+    if (type(receipt.schema_version) is not int or receipt.schema_version != SCHEMA_VERSION
+            or type(receipt.command_index) is not int or receipt.command_index < 1):
+        return True
+    for name in ("argv", "registered_argv", "stdout_required_markers", "removed_environment_keys"):
+        value = getattr(receipt, name)
+        if type(value) is not tuple or any(type(part) is not str for part in value):
+            return True
+    if not receipt.argv or any(not part for part in receipt.argv):
+        return True
+    controls = receipt.fixed_environment_controls
+    if (type(controls) is not tuple or any(type(pair) is not tuple or len(pair) != 2
+            or any(type(part) is not str for part in pair) for pair in controls)):
+        return True
+    if (any(type(value) is not int or value < 0 for value in
+            (receipt.stdout_byte_count, receipt.stderr_byte_count))
+            or type(receipt.stderr_was_nonempty) is not bool
+            or receipt.stderr_was_nonempty != (receipt.stderr_byte_count > 0)):
+        return True
+    elapsed = receipt.elapsed_monotonic_seconds
+    timeout = receipt.timeout_seconds_or_null
+    if (type(elapsed) not in (int, float)
+            or (type(elapsed) is float and not math.isfinite(elapsed)) or elapsed < 0
+            or (timeout is not None and (type(timeout) not in (int, float)
+                or (type(timeout) is float and not math.isfinite(timeout)) or timeout <= 0))):
+        return True
+    if receipt.timeout_state not in (
+            {"NOT_CONFIGURED"} if timeout is None else {"NOT_TRIGGERED", "TRIGGERED"}):
+        return True
+    for value in (receipt.start_failure_class, receipt.failure_class):
+        if value is not None and (type(value) is not str or not value):
+            return True
+    state = receipt.termination_state
+    if (receipt.failure_class == "ENGVR_PROCESS_TERMINATION_FAILED"
+            or "UNPROVEN" in state):
+        return True
+    if receipt.pid is None:
+        return not (
+            receipt.native_exit_code is None and receipt.start_failure_class is not None
+            and receipt.failure_class == "ENGVR_PROCESS_START_FAILED"
+            and state == "NOT_REQUIRED" and receipt.timeout_state != "TRIGGERED"
+        )
+    if (type(receipt.pid) is not int or receipt.pid <= 0
+            or type(receipt.native_exit_code) is not int
+            or receipt.start_failure_class is not None
+            or receipt.failure_class == "ENGVR_PROCESS_START_FAILED"):
+        return True
+    if receipt.failure_class is None and receipt.native_exit_code != 0:
+        return True
+    if (receipt.failure_class == "ENGVR_PROCESS_TIMEOUT"
+            and receipt.timeout_state != "TRIGGERED"):
+        return True
+    if state == "NOT_REQUIRED":
+        return receipt.timeout_state == "TRIGGERED"
+    # Only the original termination owner's ordered action grammar is terminal.
+    # The final token is exact: PROVEN is also a substring of UNPROVEN.
+    tokens = state.split(";")
+    if tokens[-1] != "TERMINAL:PROVEN" or receipt.failure_class is None:
+        return True
+    actions = tokens[:-1]
+    if receipt.platform == "nt":
+        if len(actions) not in (1, 2):
+            return True
+        names = ("TASKKILL_T", "TASKKILL_T_F")
+        if any(re.fullmatch(name + r":(?:0|-?[1-9][0-9]*)", action) is None
+               for name, action in zip(names, actions)):
+            return True
+        return actions[-1].split(":", 1)[1] != "0"
+    if receipt.platform == "posix":
+        if len(actions) not in (1, 2):
+            return True
+        return any(re.fullmatch(name + r":(?:0|[A-Za-z_][A-Za-z0-9_]*)", action) is None
+                   for name, action in zip(("SIGTERM", "SIGKILL"), actions))
+    return True
 
 
 @dataclass(frozen=True, slots=True)
@@ -579,10 +685,12 @@ def _same_observed_file(
     )
 
 
-def _open_regular_worktree_descriptor(path: Path) -> int:
+def _open_regular_worktree_descriptor(path: Path, *, nonblocking: bool = False) -> int:
     flags = os.O_RDONLY | int(getattr(os, "O_BINARY", 0))
     if os.name != "nt":
         flags |= int(getattr(os, "O_NOFOLLOW", 0))
+        if nonblocking:
+            flags |= int(getattr(os, "O_NONBLOCK", 0))
         return os.open(path, flags)
 
     # The Windows CRT has no O_NOFOLLOW.  Open the reparse point itself so a
@@ -2041,6 +2149,49 @@ def _worktree_index_stat_paths(repo_root: Path) -> tuple[str, ...]:
     )
 
 
+def parse_git_status_porcelain_v1_z(
+    raw: bytes | str,
+) -> tuple[tuple[str, str, str | None], ...]:
+    """Decode complete porcelain-v1 -z records, preserving both rename paths.
+
+    Records are (XY, destination, original_or_none), in stream order. No path
+    normalization, unquoting, scope admission, or file operation is performed.
+    An empty complete stream is clean; malformed/truncated streams raise.
+    The caller must separately prove successful terminal capture/currentness.
+    """
+    if type(raw) is bytes:
+        text = raw.decode("utf-8", "surrogateescape")
+    elif type(raw) is str:
+        text = raw
+    else:
+        raise ValueError("porcelain-v1 -z input must be bytes or str")
+    if not text:
+        return ()
+    if not text.endswith("\0"):
+        raise ValueError("porcelain-v1 -z stream is not NUL-terminated")
+    fields = text[:-1].split("\0")
+    records: list[tuple[str, str, str | None]] = []
+    index = 0
+    while index < len(fields):
+        field = fields[index]
+        if len(field) < 4 or field[2] != " ":
+            raise ValueError("malformed porcelain-v1 status record")
+        code, destination = field[:2], field[3:]
+        if code not in {"??", "!!"} and (
+            code == "  " or any(value not in " MTADRCU" for value in code)
+        ):
+            raise ValueError("unsupported porcelain-v1 status code")
+        index += 1
+        original: str | None = None
+        if "R" in code or "C" in code:
+            if index >= len(fields) or not fields[index]:
+                raise ValueError("rename/copy original pathname is missing")
+            original = fields[index]
+            index += 1
+        records.append((code, destination, original))
+    return tuple(records)
+
+
 def _status_paths(repo_root: Path) -> tuple[str, ...]:
     environment = os.environ.copy()
     environment["GIT_OPTIONAL_LOCKS"] = "0"
@@ -2049,19 +2200,18 @@ def _status_paths(repo_root: Path) -> tuple[str, ...]:
         ("status", "--porcelain=v1", "-z", "--untracked-files=all"),
         environment=environment,
     )
-    records = [record for record in raw.split(b"\0") if record]
+    try:
+        records = parse_git_status_porcelain_v1_z(raw)
+    except ValueError as exc:
+        raise ValidationReliabilityError(
+            "ENGVR_PREPUBLICATION_CUSTODY_FAILED",
+            f"invalid complete Git status stream: {exc}",
+        ) from exc
     paths: list[str] = []
-    skip_source = False
-    for record in records:
-        if skip_source:
-            paths.append(normalize_repo_path(record.decode("utf-8", "surrogateescape")))
-            skip_source = False
-            continue
-        if len(record) < 4:
-            continue
-        code = record[:2]
-        paths.append(normalize_repo_path(record[3:].decode("utf-8", "surrogateescape")))
-        skip_source = b"R" in code or b"C" in code
+    for _code, destination, original in records:
+        paths.append(normalize_repo_path(destination))
+        if original is not None:
+            paths.append(normalize_repo_path(original))
     return tuple(dict.fromkeys(paths))
 
 
@@ -2360,23 +2510,18 @@ def _status_record_map(repo_root: Path) -> dict[str, str]:
         ("status", "--porcelain=v1", "-z", "--untracked-files=all"),
         environment=environment,
     )
-    records = [record for record in raw.split(b"\0") if record]
+    try:
+        records = parse_git_status_porcelain_v1_z(raw)
+    except ValueError as exc:
+        raise ValidationReliabilityError(
+            "ENGVR_PREPUBLICATION_CUSTODY_FAILED",
+            f"invalid complete Git status stream: {exc}",
+        ) from exc
     result: dict[str, str] = {}
-    skip_source = False
-    previous_code = ""
-    for record in records:
-        if skip_source:
-            path = normalize_repo_path(record.decode("utf-8", "surrogateescape"))
-            result[path] = previous_code + ":SOURCE"
-            skip_source = False
-            continue
-        if len(record) < 4:
-            continue
-        code = record[:2].decode("ascii", "replace")
-        path = normalize_repo_path(record[3:].decode("utf-8", "surrogateescape"))
-        result[path] = code
-        previous_code = code
-        skip_source = "R" in code or "C" in code
+    for code, destination, original in records:
+        result[normalize_repo_path(destination)] = code
+        if original is not None:
+            result[normalize_repo_path(original)] = code + ":SOURCE"
     return result
 
 
@@ -3440,11 +3585,14 @@ def resolve_validation_run_paths(
     selected_run_id, base_process_child_name = _new_run_names(run_id)
     errors: list[str] = []
     typed_probe_errors: list[ValidationReliabilityError] = []
-    for source, raw_candidate in _candidate_parents(
-        explicit_process_root,
-        environment=env,
-        platform_name=selected_platform,
-    ):
+    candidates = (
+        (("EXPLICIT", Path(explicit_process_root)),)
+        if explicit_process_root is not None
+        else _candidate_parents(
+            None, environment=env, platform_name=selected_platform,
+        )
+    )
+    for source, raw_candidate in candidates:
         process_root: Path | None = None
         process_root_owned = False
         try:
@@ -3632,8 +3780,11 @@ def _run_provenance_payload(
     phase: str,
     command_count: int,
     text_integrity_preflight_state: str,
+    rp5a_scan_profiles=None,
+    scan_read_limits=None,
+    scan_deadline_ns=None,
 ) -> dict[str, object]:
-    return {
+    payload = {
         "schema_version": SCHEMA_VERSION,
         "run_id": paths.run_id,
         "phase": phase,
@@ -3642,6 +3793,9 @@ def _run_provenance_payload(
         "paths": paths,
         "filesystem_probe": probe,
     }
+    if rp5a_scan_profiles is not None:
+        payload["rp5a_scan_profiles"] = _scan_profile_projection(rp5a_scan_profiles)
+    return payload
 
 
 def write_run_provenance(
@@ -3651,6 +3805,9 @@ def write_run_provenance(
     phase: str,
     command_count: int,
     text_integrity_preflight_state: str = "NOT_RUN",
+    rp5a_scan_profiles=None,
+    scan_read_limits=None,
+    scan_deadline_ns=None,
 ) -> None:
     if text_integrity_preflight_state not in {
         "PASS",
@@ -3667,6 +3824,7 @@ def write_run_provenance(
             phase=phase,
             command_count=command_count,
             text_integrity_preflight_state=text_integrity_preflight_state,
+            rp5a_scan_profiles=rp5a_scan_profiles,
         ),
     )
 
@@ -3775,6 +3933,7 @@ class InheritedRunAttestation:
     evidence_root: Path
     process_root: Path
     pytest_basetemp_root: Path
+    _scan_snapshot: object = field(default=None, kw_only=True, repr=False, compare=False)
 
 
 def attest_inherited_validation_run(
@@ -3783,6 +3942,8 @@ def attest_inherited_validation_run(
     inherited_run_id: str,
     inherited_evidence_root: Path,
     explicit_basetemp: Path,
+    scan_read_limits=None,
+    scan_deadline_ns=None,
 ) -> InheritedRunAttestation:
     """Prove inherited helper values name one active, exactly placed outer run."""
 
@@ -3820,12 +3981,16 @@ def attest_inherited_validation_run(
         except (ValueError, OSError, ValidationReliabilityError) as exc:
             raise _evidence_failure(f"inherited local evidence rejected: {exc}") from exc
 
-    payload = _read_evidence_json(evidence, "run.json")
-    if not isinstance(payload, dict):
+    if (scan_read_limits is None) != (scan_deadline_ns is None):
+        raise ValueError("scan limits and deadline must be supplied together")
+    snapshot = None if scan_read_limits is None else _read_scan_run_snapshot(
+        evidence, limits=scan_read_limits, deadline_ns=scan_deadline_ns)
+    payload = _read_evidence_json(evidence, "run.json") if snapshot is None else snapshot.value
+    if not isinstance(payload, Mapping):
         raise _evidence_failure("inherited run.json must contain an object")
     path_payload = payload.get("paths")
     probe_payload = payload.get("filesystem_probe")
-    if not isinstance(path_payload, dict) or not isinstance(probe_payload, dict):
+    if not isinstance(path_payload, Mapping) or not isinstance(probe_payload, Mapping):
         raise _evidence_failure("inherited run.json lacks path or probe custody")
     if payload.get("run_id") != inherited_run_id or path_payload.get(
         "run_id"
@@ -3901,6 +4066,7 @@ def attest_inherited_validation_run(
         evidence_root=evidence,
         process_root=process_root,
         pytest_basetemp_root=pytest_root,
+        _scan_snapshot=snapshot,
     )
 
 
@@ -3914,6 +4080,9 @@ def validate_complete_run_evidence(
     receipts: Sequence[CommandExecutionReceiptV1],
     cleanup_state: str,
     text_integrity_preflight_state: str,
+    rp5a_scan_profiles=None,
+    scan_read_limits=None,
+    scan_deadline_ns=None,
 ) -> None:
     """Reconcile retained run, command, stream, and cleanup evidence before PASS."""
 
@@ -3927,6 +4096,7 @@ def validate_complete_run_evidence(
             phase=phase,
             command_count=command_count_planned,
             text_integrity_preflight_state=text_integrity_preflight_state,
+            rp5a_scan_profiles=rp5a_scan_profiles,
         )
     )
     if _read_evidence_json(evidence_root, "run.json") != expected_run:
@@ -4206,42 +4376,46 @@ def _reserve_command_evidence_files(
 
 
 def _consume_available_pipe(
-    pipe: BinaryIO,
-    destination: BinaryIO,
-    *,
-    outcome: dict[str, object],
+    pipe: BinaryIO, destination: BinaryIO, *, outcome: dict[str, object],
     native_terminal: bool,
 ) -> tuple[bool, bool]:
-    """Consume at most one bounded chunk; return (progress, end_of_stream)."""
-
+    """One bounded drain; selected limits apply before retained writes."""
+    limit = outcome.get("retention_limit")
+    retained = int(outcome.get("retained_byte_count", 0))
+    remaining = None if limit is None else max(0, limit - retained)
+    quantum = 64 * 1024
+    if remaining is not None and outcome.get("evidence_write_enabled", True):
+        quantum = min(quantum, remaining + 1)
     try:
-        chunk = os.read(pipe.fileno(), 64 * 1024)
+        chunk = os.read(pipe.fileno(), quantum)
     except BlockingIOError:
         return False, False
     except OSError as exc:
         if exc.errno in {errno.EAGAIN, errno.EWOULDBLOCK}:
             return False, False
-        if native_terminal and (
-            exc.errno == errno.EPIPE or getattr(exc, "winerror", None) in {109, 232}
-        ):
+        if native_terminal and (exc.errno == errno.EPIPE or getattr(exc, "winerror", None) in {109, 232}):
             return False, True
-        outcome.setdefault("evidence_error", exc)
+        _scan_output_failure(outcome, exc)
         return False, True
     if not chunk:
         return False, True
-    outcome["drained_byte_count"] = int(
-        outcome.get("drained_byte_count", 0)
-    ) + len(chunk)
-    if bool(outcome.get("evidence_write_enabled", True)):
+    outcome["drained_byte_count"] = int(outcome.get("drained_byte_count", 0)) + len(chunk)
+    overflow = remaining is not None and len(chunk) > remaining
+    admitted = chunk if remaining is None else chunk[:remaining]
+    if outcome.get("evidence_write_enabled", True) and admitted:
         try:
-            _write_evidence_chunk(destination, chunk)
+            _write_evidence_chunk(destination, admitted)
         except BaseException as exc:
-            outcome.setdefault("evidence_error", exc)
-            outcome["evidence_write_enabled"] = False
+            _scan_output_failure(outcome, exc)
+        else:
+            outcome["retained_byte_count"] = retained + len(admitted)
+    if overflow and outcome.get("evidence_write_enabled", True):
+        outcome["overflow"] = True
+        _scan_output_failure(outcome, ValueError("native scan retained-output overflow"))
     active_mirror = outcome.get("mirror")
-    if active_mirror is not None:
+    if active_mirror is not None and "evidence_error" not in outcome:
         try:
-            _mirror_bytes(chunk, active_mirror)
+            _mirror_bytes(admitted, active_mirror)
         except BaseException as exc:
             outcome.setdefault("mirror_error", type(exc).__name__)
             outcome["mirror"] = None
@@ -4249,148 +4423,117 @@ def _consume_available_pipe(
 
 
 def _finalize_owned_output_resources(
-    pipe: BinaryIO,
-    destination: BinaryIO,
-    *,
-    outcome: dict[str, object],
+    pipe: BinaryIO, destination: BinaryIO, *, outcome: dict[str, object],
 ) -> None:
-    """Flush and close raw resources from their sole supervisor owner."""
-
+    """Each original close is attempted once, with every failure retained."""
     try:
         destination.flush()
         os.fsync(destination.fileno())
     except BaseException as exc:
-        outcome.setdefault("evidence_error", exc)
+        _scan_output_failure(outcome, exc)
+    outcome["close_attempted"] = True
     try:
         destination.close()
     except BaseException as exc:
-        outcome.setdefault("evidence_error", exc)
+        _scan_output_failure(outcome, exc)
+    else:
+        outcome["writer_closed"] = True
     try:
         pipe.close()
-    except (OSError, ValueError):
-        pass
+    except BaseException as exc:
+        _scan_output_failure(outcome, exc)
     outcome["evidence_complete"] = "evidence_error" not in outcome
 
 
 def _supervise_native_output(
-    process: subprocess.Popen[bytes],
-    *,
-    stdout_stream: BinaryIO,
-    stderr_stream: BinaryIO,
-    stdout_outcome: dict[str, object],
-    stderr_outcome: dict[str, object],
-    started_monotonic: float,
-    timeout_seconds: float | None,
-    termination_grace_seconds: float,
-    platform_name: str,
+    process: subprocess.Popen[bytes], *, stdout_stream: BinaryIO, stderr_stream: BinaryIO,
+    stdout_outcome: dict[str, object], stderr_outcome: dict[str, object],
+    started_monotonic: float, timeout_seconds: float | None,
+    termination_grace_seconds: float, platform_name: str,
 ) -> tuple[int | None, str, str, str | None]:
-    """Multiplex both child pipes without cross-thread descriptor ownership."""
-
-    assert process.stdout is not None
-    assert process.stderr is not None
+    """Multiplex the original two pipes, retaining failure before terminal success."""
+    assert process.stdout is not None and process.stderr is not None
     pipes = (process.stdout, process.stderr)
-    destinations = (stdout_stream, stderr_stream)
+    streams = (stdout_stream, stderr_stream)
     outcomes = (stdout_outcome, stderr_outcome)
-    receipt_timeout_seconds = (
-        float(timeout_seconds)
-        if isinstance(timeout_seconds, (int, float)) and timeout_seconds > 0
-        else None
-    )
-    timeout_state = (
-        "NOT_CONFIGURED" if receipt_timeout_seconds is None else "NOT_TRIGGERED"
-    )
+    timeout_state = "NOT_CONFIGURED" if timeout_seconds is None else "NOT_TRIGGERED"
     termination_state = "NOT_REQUIRED"
-    failure_class: str | None = None
-    native_exit: int | None = None
+    failure_class = None
+    native_exit = None
+    terminal_at = None
     pipe_terminal = [False, False]
-    native_terminal_observed_at: float | None = None
-    try:
-        try:
-            for pipe in pipes:
-                os.set_blocking(pipe.fileno(), False)
-        except (OSError, ValueError) as exc:
-            for outcome in outcomes:
-                outcome.setdefault("evidence_error", exc)
-            termination_state, tree_terminal = _terminate_owned_process_tree(
-                process,
-                platform_name=platform_name,
-                grace_seconds=termination_grace_seconds,
-            )
-            native_exit = process.poll()
-            failure_class = (
-                "ENGVR_ATOMIC_RECEIPT_WRITE_FAILED"
-                if tree_terminal
-                else "ENGVR_PROCESS_TERMINATION_FAILED"
-            )
-            return native_exit, timeout_state, termination_state, failure_class
+    termination_attempted = False
+    errors = []
 
+    def terminate_once():
+        nonlocal termination_attempted, termination_state, failure_class, native_exit, terminal_at
+        if termination_attempted:
+            return
+        termination_attempted = True
+        termination_state, proven = _terminate_owned_process_tree(
+            process, platform_name=platform_name, grace_seconds=termination_grace_seconds)
+        native_exit = process.poll()
+        terminal_at = time.monotonic()
+        if not proven:
+            failure_class = "ENGVR_PROCESS_TERMINATION_FAILED"
+
+    try:
+        for pipe in pipes:
+            os.set_blocking(pipe.fileno(), False)
         while True:
             polled = process.poll()
             if polled is not None and native_exit is None:
-                native_exit = int(polled)
-                native_terminal_observed_at = time.monotonic()
-
+                if type(polled) is not int:
+                    raise ValueError("noninteger native exit")
+                native_exit = polled
+                terminal_at = time.monotonic()
             progress = False
-            for index, (pipe, destination, outcome) in enumerate(
-                zip(pipes, destinations, outcomes, strict=True)
-            ):
-                if pipe_terminal[index]:
-                    continue
-                consumed, reached_eof = _consume_available_pipe(
-                    pipe,
-                    destination,
-                    outcome=outcome,
-                    native_terminal=native_exit is not None,
-                )
-                progress = progress or consumed
-                pipe_terminal[index] = reached_eof
-
+            for index, (pipe, stream, outcome) in enumerate(zip(pipes, streams, outcomes, strict=True)):
+                if not pipe_terminal[index]:
+                    consumed, eof = _consume_available_pipe(
+                        pipe, stream, outcome=outcome, native_terminal=native_exit is not None)
+                    progress = progress or consumed
+                    pipe_terminal[index] = eof
+                if any("evidence_error" in value for value in outcomes):
+                    for value in outcomes:
+                        value["evidence_write_enabled"] = False
+                        value["mirror"] = None
+                    failure_class = failure_class or "ENGVR_ATOMIC_RECEIPT_WRITE_FAILED"
+                    terminate_once()
+            # Errors above precede the simultaneous exit/EOF success observation.
             if native_exit is not None and all(pipe_terminal):
                 break
-
             now = time.monotonic()
-            if (
-                native_exit is None
-                and timeout_seconds is not None
-                and now - started_monotonic >= timeout_seconds
-            ):
+            if (not termination_attempted and timeout_seconds is not None
+                    and now - started_monotonic >= timeout_seconds):
                 timeout_state = "TRIGGERED"
-                termination_state, tree_terminal = _terminate_owned_process_tree(
-                    process,
-                    platform_name=platform_name,
-                    grace_seconds=termination_grace_seconds,
-                )
-                native_exit = process.poll()
-                if not tree_terminal:
-                    failure_class = "ENGVR_PROCESS_TERMINATION_FAILED"
-                    break
                 failure_class = "ENGVR_PROCESS_TIMEOUT"
-                native_terminal_observed_at = time.monotonic()
-                continue
-
-            if (
-                native_exit is not None
-                and native_terminal_observed_at is not None
-                and now - native_terminal_observed_at
-                >= OUTPUT_DRAIN_COMPLETION_WAIT_SECONDS
-            ):
+                for value in outcomes:
+                    value["evidence_write_enabled"] = False
+                    value["mirror"] = None
+                terminate_once()
+            if terminal_at is not None and now - terminal_at >= OUTPUT_DRAIN_COMPLETION_WAIT_SECONDS:
                 failure_class = "ENGVR_PROCESS_TERMINATION_FAILED"
                 termination_state += ";NATIVE_TREE_UNPROVEN_OUTPUT_PIPE_OPEN"
                 break
             if not progress:
                 time.sleep(OUTPUT_POLL_INTERVAL_SECONDS)
+    except BaseException as exc:
+        errors.append(exc)
+        for value in outcomes:
+            value["evidence_write_enabled"] = False
+            value["mirror"] = None
+        try:
+            terminate_once()
+        except BaseException as termination_error:
+            errors.append(termination_error)
     finally:
-        for pipe, destination, outcome in zip(
-            pipes,
-            destinations,
-            outcomes,
-            strict=True,
-        ):
-            _finalize_owned_output_resources(
-                pipe,
-                destination,
-                outcome=outcome,
-            )
+        for pipe, stream, outcome in zip(pipes, streams, outcomes, strict=True):
+            _finalize_owned_output_resources(pipe, stream, outcome=outcome)
+    if errors:
+        for outcome in outcomes:
+            errors.extend(outcome.get("errors", ()))
+        _scan_raise_errors(errors)
     return native_exit, timeout_state, termination_state, failure_class
 
 
@@ -4472,8 +4615,20 @@ def _hidden_taskkill(argv: Sequence[str]) -> int:
     try:
         process.communicate(timeout=TERMINATION_GRACE_SECONDS)
     except subprocess.TimeoutExpired:
-        process.kill()
-        process.communicate()
+        try:
+            process.kill()
+            process.communicate(timeout=TERMINATION_GRACE_SECONDS)
+        except (OSError, subprocess.TimeoutExpired) as exc:
+            error = ValidationReliabilityError(
+                "ENGVR_PROCESS_TERMINATION_FAILED",
+                "termination helper did not reach a confirmed terminal state; "
+                f"PID={process.pid}; bounded post-kill wait failed",
+            )
+            # Retain unresolved ownership and the original partial output, if supplied.
+            error.owned_process = process
+            error.stdout_prefix = getattr(exc, "output", None)
+            error.stderr_prefix = getattr(exc, "stderr", None)
+            raise error from exc
         return 124
     return int(process.returncode)
 
@@ -4624,6 +4779,7 @@ def supervise_command(
     mirror_stdout: bool = True,
     mirror_stderr: bool = True,
     platform_name: str | None = None,
+    launch_input: _ScanLaunchInput | None = None,
 ) -> CommandExecutionReceiptV1:
     """Launch one shell-free child and retain PID, output, and native exit custody."""
 
@@ -4700,158 +4856,210 @@ def supervise_command(
     selected_argv: tuple[str, ...] | None = None
     selected_markers: tuple[str, ...] | None = None
     selected_environment: dict[str, str] | None = None
+    receipt = None
     try:
-        if tuple_error is not None:
-            raise tuple_error
-        if marker_tuple_error is not None:
-            raise marker_tuple_error
-        if cwd_error is not None:
-            raise cwd_error
-        selected_argv, selected_markers, selected_environment = (
-            _validate_process_invocation(
-                raw_argv,
+        try:
+            if tuple_error is not None:
+                raise tuple_error
+            if marker_tuple_error is not None:
+                raise marker_tuple_error
+            if cwd_error is not None:
+                raise cwd_error
+            selected_argv, selected_markers, selected_environment = (
+                _validate_process_invocation(
+                    raw_argv,
+                    cwd=receipt_cwd,
+                    required_markers=raw_markers,
+                    timeout_seconds=timeout_seconds,
+                    termination_grace_seconds=termination_grace_seconds,
+                    environment=environment,
+                )
+            )
+            original_stdin = subprocess.DEVNULL
+            if launch_input is not None:
+                if type(launch_input) is not _ScanLaunchInput:
+                    raise TypeError("original scan launch input required")
+                original_stdin = launch_input._claim(
+                    run_id=run_id, phase=phase, command_index=command_index,
+                    argv=selected_argv, cwd=receipt_cwd)
+            process = subprocess.Popen(
+                list(selected_argv),
                 cwd=receipt_cwd,
-                required_markers=raw_markers,
-                timeout_seconds=timeout_seconds,
-                termination_grace_seconds=termination_grace_seconds,
-                environment=environment,
+                env=selected_environment,
+                shell=False,
+                stdin=original_stdin,
+                close_fds=True,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                **hidden_subprocess_kwargs(
+                    platform_name=selected_platform,
+                    new_process_group=True,
+                ),
             )
-        )
-        process = subprocess.Popen(
-            list(selected_argv),
-            cwd=receipt_cwd,
-            env=selected_environment,
-            shell=False,
-            stdin=subprocess.DEVNULL,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            **hidden_subprocess_kwargs(
-                platform_name=selected_platform,
-                new_process_group=True,
-            ),
-        )
-        pid = process.pid
-    except Exception as exc:
-        start_failure = type(exc).__name__
-        failure_class = "ENGVR_PROCESS_START_FAILED"
-        _close_prestart_evidence_stream(stdout_stream, stdout_outcome)
-        _close_prestart_evidence_stream(stderr_stream, stderr_outcome)
+            pid = process.pid
+        except Exception as exc:
+            if process is not None:
+                raise
+            start_failure = type(exc).__name__
+            failure_class = "ENGVR_PROCESS_START_FAILED"
+            _close_prestart_evidence_stream(stdout_stream, stdout_outcome)
+            _close_prestart_evidence_stream(stderr_stream, stderr_outcome)
+        except BaseException as body:
+            if process is not None:
+                raise
+            failures = [body]
+            for stream, outcome in ((stdout_stream, stdout_outcome), (stderr_stream, stderr_outcome)):
+                _close_prestart_evidence_stream(stream, outcome)
+                if "evidence_error" in outcome:
+                    failures.append(outcome["evidence_error"])
+            _scan_raise_errors(failures)
 
-    if process is not None:
-        native_exit, timeout_state, termination_state, failure_class = (
-            _supervise_native_output(
-                process,
-                stdout_stream=stdout_stream,
-                stderr_stream=stderr_stream,
-                stdout_outcome=stdout_outcome,
-                stderr_outcome=stderr_outcome,
-                started_monotonic=started_monotonic,
-                timeout_seconds=timeout_seconds,
-                termination_grace_seconds=termination_grace_seconds,
-                platform_name=selected_platform,
+        if process is not None:
+            if launch_input is not None:
+                try:
+                    launch_input._attached(process)
+                except Exception as exc:
+                    _scan_output_failure(stdout_outcome, exc)
+            native_exit, timeout_state, termination_state, failure_class = (
+                _supervise_native_output(
+                    process,
+                    stdout_stream=stdout_stream,
+                    stderr_stream=stderr_stream,
+                    stdout_outcome=stdout_outcome,
+                    stderr_outcome=stderr_outcome,
+                    started_monotonic=started_monotonic,
+                    timeout_seconds=timeout_seconds,
+                    termination_grace_seconds=termination_grace_seconds,
+                    platform_name=selected_platform,
+                )
             )
-        )
-        if failure_class != "ENGVR_PROCESS_TERMINATION_FAILED" and any(
-            "evidence_error" in outcome
-            for outcome in (stdout_outcome, stderr_outcome)
+            if failure_class != "ENGVR_PROCESS_TERMINATION_FAILED" and any(
+                "evidence_error" in outcome
+                for outcome in (stdout_outcome, stderr_outcome)
+            ):
+                failure_class = "ENGVR_ATOMIC_RECEIPT_WRITE_FAILED"
+            if failure_class is None and native_exit != 0:
+                failure_class = "ENGVR_NATIVE_EXIT_NONZERO"
+            if launch_input is not None:
+                try:
+                    launch_input._finished(process, native_exit)
+                except Exception as exc:
+                    _scan_output_failure(stdout_outcome, exc)
+                    if failure_class != "ENGVR_PROCESS_TERMINATION_FAILED":
+                        failure_class = "ENGVR_ATOMIC_RECEIPT_WRITE_FAILED"
+
+        try:
+            reservation_path.unlink()
+        except OSError as exc:
+            if process is not None and failure_class != "ENGVR_PROCESS_TERMINATION_FAILED":
+                failure_class = "ENGVR_ATOMIC_RECEIPT_WRITE_FAILED"
+            stdout_outcome.setdefault("evidence_error", exc)
+
+        try:
+            stdout_count = stdout_path.stat().st_size
+        except OSError as exc:
+            stdout_outcome.setdefault("evidence_error", exc)
+            stdout_count = 0
+        try:
+            stderr_count = stderr_path.stat().st_size
+        except OSError as exc:
+            stderr_outcome.setdefault("evidence_error", exc)
+            stderr_count = 0
+        if process is not None and failure_class != "ENGVR_PROCESS_TERMINATION_FAILED" and any(
+            "evidence_error" in outcome for outcome in (stdout_outcome, stderr_outcome)
         ):
             failure_class = "ENGVR_ATOMIC_RECEIPT_WRITE_FAILED"
-        if failure_class is None and native_exit != 0:
-            failure_class = "ENGVR_NATIVE_EXIT_NONZERO"
 
-    try:
-        reservation_path.unlink()
-    except OSError as exc:
-        if process is not None and failure_class != "ENGVR_PROCESS_TERMINATION_FAILED":
-            failure_class = "ENGVR_ATOMIC_RECEIPT_WRITE_FAILED"
-        stdout_outcome.setdefault("evidence_error", exc)
-
-    try:
-        stdout_count = stdout_path.stat().st_size
-    except OSError as exc:
-        stdout_outcome.setdefault("evidence_error", exc)
-        stdout_count = 0
-    try:
-        stderr_count = stderr_path.stat().st_size
-    except OSError as exc:
-        stderr_outcome.setdefault("evidence_error", exc)
-        stderr_count = 0
-    if process is not None and failure_class != "ENGVR_PROCESS_TERMINATION_FAILED" and any(
-        "evidence_error" in outcome for outcome in (stdout_outcome, stderr_outcome)
-    ):
-        failure_class = "ENGVR_ATOMIC_RECEIPT_WRITE_FAILED"
-
-    raw_evidence_complete = all(
-        bool(outcome.get("evidence_complete", False))
-        and "evidence_error" not in outcome
-        for outcome in (stdout_outcome, stderr_outcome)
-    )
-    missing_markers: tuple[str, ...] = ()
-    active_markers = (
-        selected_markers if selected_markers is not None else receipt_markers
-    )
-    if not active_markers:
-        marker_state = "NOT_REQUIRED"
-    elif not raw_evidence_complete:
-        marker_state = "EVIDENCE_UNAVAILABLE"
-        if process is not None and failure_class != "ENGVR_PROCESS_TERMINATION_FAILED":
-            failure_class = "ENGVR_ATOMIC_RECEIPT_WRITE_FAILED"
-    else:
-        try:
-            missing_markers = _file_marker_states(
-                (stdout_path,),
-                active_markers,
-            )
-        except OSError:
+        raw_evidence_complete = all(
+            bool(outcome.get("evidence_complete", False))
+            and "evidence_error" not in outcome
+            for outcome in (stdout_outcome, stderr_outcome)
+        )
+        missing_markers: tuple[str, ...] = ()
+        active_markers = (
+            selected_markers if selected_markers is not None else receipt_markers
+        )
+        if not active_markers:
+            marker_state = "NOT_REQUIRED"
+        elif not raw_evidence_complete:
             marker_state = "EVIDENCE_UNAVAILABLE"
             if process is not None and failure_class != "ENGVR_PROCESS_TERMINATION_FAILED":
                 failure_class = "ENGVR_ATOMIC_RECEIPT_WRITE_FAILED"
         else:
-            marker_state = (
-                "PASS"
-                if not missing_markers
-                else "MISSING:" + ",".join(missing_markers)
-            )
-            if failure_class is None and missing_markers:
-                failure_class = "ENGVR_REQUIRED_MARKER_MISSING"
-    elapsed = time.monotonic() - started_monotonic
-    receipt = CommandExecutionReceiptV1(
-        schema_version=SCHEMA_VERSION,
-        run_id=run_id,
-        phase=phase,
-        command_index=command_index,
-        argv=receipt_argv if selected_argv is None else selected_argv,
-        cwd=str(receipt_cwd),
-        pid=pid,
-        platform=selected_platform,
-        start_time_utc=started_utc,
-        end_time_utc=_utc_now_text(),
-        elapsed_monotonic_seconds=elapsed,
-        native_exit_code=native_exit,
-        start_failure_class=start_failure,
-        timeout_seconds_or_null=receipt_timeout_seconds,
-        timeout_state=timeout_state,
-        termination_state=termination_state,
-        stdout_path=str(stdout_path),
-        stderr_path=str(stderr_path),
-        stdout_byte_count=stdout_count,
-        stderr_byte_count=stderr_count,
-        stdout_required_markers=active_markers,
-        stdout_marker_state=marker_state,
-        stderr_was_nonempty=stderr_count > 0,
-        failure_class=failure_class,
-    )
-    try:
-        atomic_write_json(receipt_path, receipt)
-    except Exception:
-        if receipt.pid is not None:
-            receipt = replace(
-                receipt,
-                failure_class="ENGVR_ATOMIC_RECEIPT_WRITE_FAILED",
-            )
-        else:
-            raise
-    return receipt
+            try:
+                missing_markers = _file_marker_states(
+                    (stdout_path,),
+                    active_markers,
+                )
+            except OSError:
+                marker_state = "EVIDENCE_UNAVAILABLE"
+                if process is not None and failure_class != "ENGVR_PROCESS_TERMINATION_FAILED":
+                    failure_class = "ENGVR_ATOMIC_RECEIPT_WRITE_FAILED"
+            else:
+                marker_state = (
+                    "PASS"
+                    if not missing_markers
+                    else "MISSING:" + ",".join(missing_markers)
+                )
+                if failure_class is None and missing_markers:
+                    failure_class = "ENGVR_REQUIRED_MARKER_MISSING"
+        elapsed = time.monotonic() - started_monotonic
+        receipt = CommandExecutionReceiptV1(
+            schema_version=SCHEMA_VERSION,
+            run_id=run_id,
+            phase=phase,
+            command_index=command_index,
+            argv=receipt_argv if selected_argv is None else selected_argv,
+            cwd=str(receipt_cwd),
+            pid=pid,
+            platform=selected_platform,
+            start_time_utc=started_utc,
+            end_time_utc=_utc_now_text(),
+            elapsed_monotonic_seconds=elapsed,
+            native_exit_code=native_exit,
+            start_failure_class=start_failure,
+            timeout_seconds_or_null=receipt_timeout_seconds,
+            timeout_state=timeout_state,
+            termination_state=termination_state,
+            stdout_path=str(stdout_path),
+            stderr_path=str(stderr_path),
+            stdout_byte_count=stdout_count,
+            stderr_byte_count=stderr_count,
+            stdout_required_markers=active_markers,
+            stdout_marker_state=marker_state,
+            stderr_was_nonempty=stderr_count > 0,
+            failure_class=failure_class,
+            **(_COMMAND_PROJECTION_V1.get() or {}),
+        )
+        try:
+            atomic_write_json(receipt_path, receipt)
+        except Exception as publication_error:
+            if _command_requires_process_retention_v1(receipt):
+                error = ValidationReliabilityError(
+                    "ENGVR_PROCESS_TERMINATION_FAILED",
+                    "command receipt publication failed with unresolved process custody",
+                )
+                error.command_receipt = receipt
+                error.owned_process = process
+                raise error from publication_error
+            if receipt.pid is not None:
+                receipt = replace(
+                    receipt,
+                    failure_class="ENGVR_ATOMIC_RECEIPT_WRITE_FAILED",
+                )
+            else:
+                raise
+        return receipt
+    except BaseException as exc:
+        if process is not None:
+            # A taskkill error may already own a different, unresolved process.
+            if getattr(exc, "owned_process", process) is not process:
+                exc.command_process = process
+            else:
+                exc.owned_process = process
+        if receipt is not None and not hasattr(exc, "command_receipt"):
+            exc.command_receipt = receipt
+        raise
 
 
 def _lexical_absolute_path(path: Path | str, *, field_name: str) -> Path:
@@ -5035,3 +5243,1614 @@ def cleanup_validation_run(paths: ValidationRunPathsV1) -> str:
     if state.startswith("FAIL"):
         raise ValidationReliabilityError("ENGVR_RUN_SCOPED_CLEANUP_FAILED", state)
     return state
+
+
+# Selected RP5A native capture shares the ordinary supervisor's process owner.
+def _scan_raise_errors(errors):
+    unique = []
+    for error in errors:
+        if not any(error is earlier for earlier in unique):
+            unique.append(error)
+    if len(unique) == 1:
+        raise unique[0]
+    if unique:
+        raise BaseExceptionGroup("native scan body and cleanup failures", unique)
+
+
+def _scan_output_failure(outcome, error):
+    outcome.setdefault("errors", []).append(error)
+    outcome.setdefault("evidence_error", error)
+    outcome["evidence_write_enabled"] = False
+    outcome["mirror"] = None
+
+
+def _capture_scan_output(
+    argv, *, cwd, environment, stdout_stream, stderr_stream,
+    stdout_limit, stderr_limit, deadline_ns, allow_no_match,
+):
+    """Own both original writers from entry; return only complete native evidence."""
+    outcomes = tuple({"drained_byte_count": 0, "retained_byte_count": 0,
+                      "retention_limit": limit, "evidence_write_enabled": True, "mirror": None}
+                     for limit in (stdout_limit, stderr_limit))
+    errors = []
+    process = None
+    native_exit = None
+    try:
+        for limit in (stdout_limit, stderr_limit):
+            if type(limit) is not int or limit < 0:
+                raise ValueError("scan channel limit must be a nonnegative integer")
+        if type(allow_no_match) is not bool:
+            raise ValueError("scan no-match policy must be an exact Boolean")
+        now = _scan_deadline(deadline_ns)
+        if stdout_stream is stderr_stream:
+            raise ValueError("scan output writers alias")
+        left, right = (os.fstat(stream.fileno()) for stream in (stdout_stream, stderr_stream))
+        if (left.st_dev, left.st_ino) == (right.st_dev, right.st_ino):
+            raise ValueError("scan output files alias")
+        for value in (left, right):
+            if not stat.S_ISREG(value.st_mode) or value.st_nlink != 1 or value.st_size != 0:
+                raise ValueError("scan output must be an original empty regular file")
+        timeout = (deadline_ns - now) / 1_000_000_000
+        selected, _, child = _validate_process_invocation(
+            tuple(argv), cwd=Path(cwd), required_markers=(), timeout_seconds=timeout,
+            termination_grace_seconds=TERMINATION_GRACE_SECONDS, environment=environment)
+        _scan_deadline(deadline_ns)
+        process = subprocess.Popen(
+            list(selected), cwd=cwd, env=child, shell=False, stdin=subprocess.DEVNULL,
+            stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+            **hidden_subprocess_kwargs(platform_name=os.name, new_process_group=True))
+        native_exit, timeout_state, termination_state, failure = _supervise_native_output(
+            process, stdout_stream=stdout_stream, stderr_stream=stderr_stream,
+            stdout_outcome=outcomes[0], stderr_outcome=outcomes[1],
+            started_monotonic=now / 1_000_000_000, timeout_seconds=timeout,
+            termination_grace_seconds=TERMINATION_GRACE_SECONDS, platform_name=os.name)
+        for outcome in outcomes:
+            errors.extend(outcome.get("errors", ()))
+        if errors:
+            _scan_raise_errors(errors)
+        if (failure is not None or type(native_exit) is not int
+                or native_exit not in ({0, 1} if allow_no_match else {0})
+                or not all(value.get("evidence_complete") is True
+                           and value.get("writer_closed") is True for value in outcomes)):
+            raise RuntimeError(f"native scan incomplete: exit={native_exit!r}; {failure}; {timeout_state}; {termination_state}")
+        completed = subprocess.CompletedProcess(list(selected), native_exit)
+        _scan_deadline(deadline_ns)
+        return completed, outcomes[0], outcomes[1]
+    except BaseException as exc:
+        # Preserve the actual terminal observation and original channel counters.
+        # None means no confirmed native exit, never an invented zero or one.
+        exc.scan_native_exit_code = native_exit
+        exc.scan_output_outcomes = outcomes
+        errors = [exc]
+        # After transfer, supervision owns close even if its result is a failure.
+        if process is None:
+            for stream, outcome in zip((stdout_stream, stderr_stream), outcomes, strict=True):
+                if outcome.get("close_attempted"):
+                    continue
+                outcome["close_attempted"] = True
+                try:
+                    stream.close()
+                except BaseException as close_error:
+                    errors.append(close_error)
+        _scan_raise_errors(errors)
+
+
+def _scan_deadline(deadline_ns):
+    if type(deadline_ns) is not int or deadline_ns <= 0:
+        raise ValueError("scan deadline must be an original positive integer")
+    now = time.monotonic_ns()
+    if type(now) is not int or now >= deadline_ns:
+        raise TimeoutError("original scan deadline expired")
+    return now
+
+
+@dataclass(frozen=True)
+class _ScanRunReadLimits:
+    byte_limit: int
+    node_limit: int
+    depth_limit: int
+    profile_limit: int
+
+    def __post_init__(self):
+        for value in (self.byte_limit, self.node_limit, self.depth_limit, self.profile_limit):
+            if type(value) is not int or value <= 0:
+                raise ValueError("scan record limits must be exact positive integers")
+
+
+@dataclass(frozen=True)
+class _Rp5aScanProfile:
+    run_id: str
+    command_index: int
+    repo_root: str
+    scratch_root: str
+    expected_inventory: tuple[str, ...]
+    inventory_path_limit: int
+    inventory_utf8_limit: int
+    file_sizes: tuple[tuple[str, int], ...]
+    git_executable: str
+    search_executable: str
+    search_engine: str
+    child_environment: tuple[tuple[str, str], ...]
+    output_bytes: int
+    scratch_bytes: int
+    stderr_bytes_per_call: int
+    readback_bytes: int
+    deadline_ns: int
+    max_invocations: int
+
+    def __post_init__(self):
+        if type(self.run_id) is not str or not self.run_id:
+            raise ValueError("scan profile run identity missing")
+        for name in ("command_index", "deadline_ns", "max_invocations"):
+            if type(getattr(self, name)) is not int or getattr(self, name) <= 0:
+                raise ValueError("scan profile positive integer required: " + name)
+        for name in ("inventory_path_limit", "inventory_utf8_limit", "output_bytes", "scratch_bytes",
+                     "stderr_bytes_per_call", "readback_bytes"):
+            if type(getattr(self, name)) is not int or getattr(self, name) < 0:
+                raise ValueError("scan profile nonnegative integer required: " + name)
+        for name in ("repo_root", "scratch_root", "git_executable", "search_executable"):
+            value = getattr(self, name)
+            if type(value) is not str or not Path(value).is_absolute() or "\0" in value or ".." in Path(value).parts:
+                raise ValueError("scan profile absolute original path required: " + name)
+        if self.search_engine not in {"git", "rg"} or (self.search_engine == "git" and self.search_executable != self.git_executable):
+            raise ValueError("scan profile engine/executable mismatch")
+        if type(self.expected_inventory) is not tuple or len(self.expected_inventory) > self.inventory_path_limit:
+            raise ValueError("scan inventory exceeds original cardinality")
+        from tools.pr168_rp5a_git_grep_scanner import _scan_admitted_paths
+        _scan_admitted_paths(self.expected_inventory, path_limit=self.inventory_path_limit,
+                             byte_limit=self.inventory_utf8_limit)
+        if type(self.file_sizes) is not tuple or len(self.file_sizes) > len(self.expected_inventory):
+            raise ValueError("scan size observations exceed inventory")
+        seen = set()
+        inventory = set(self.expected_inventory)
+        for pair in self.file_sizes:
+            if (type(pair) is not tuple or len(pair) != 2 or type(pair[0]) is not str
+                    or pair[0] not in inventory or pair[0] in seen
+                    or type(pair[1]) is not int or pair[1] < 0):
+                raise ValueError("invalid original scan size observation")
+            seen.add(pair[0])
+        if type(self.child_environment) is not tuple:
+            raise ValueError("scan environment must be owned immutable pairs")
+        keys = set()
+        for pair in self.child_environment:
+            if (type(pair) is not tuple or len(pair) != 2 or any(type(v) is not str for v in pair)
+                    or not pair[0] or "=" in pair[0] or "\0" in pair[0] or "\0" in pair[1]
+                    or pair[0].upper() in keys):
+                raise ValueError("invalid scan child environment")
+            keys.add(pair[0].upper())
+
+
+@dataclass(frozen=True)
+class _ScanRunSnapshot:
+    raw: bytes
+    value: Mapping[str, object]
+
+
+def _scan_lexical_json_limits(raw, limits):
+    # Count containers, keys, strings and primitive tokens before constructing JSON.
+    nodes = depth = 0
+    string = escaped = token = False
+    for byte in raw:
+        if string:
+            if escaped:
+                escaped = False
+            elif byte == 92:
+                escaped = True
+            elif byte == 34:
+                string = False
+            continue
+        if byte in b" \t\r\n,:{}[]\"":
+            token = False
+        if byte == 34:
+            nodes += 1
+            string = True
+        elif byte in (123, 91):
+            nodes += 1
+            depth += 1
+            if depth > limits.depth_limit:
+                raise ValueError("scan run JSON depth overflow")
+        elif byte in (125, 93):
+            depth -= 1
+            if depth < 0:
+                raise ValueError("scan run JSON malformed nesting")
+        elif byte not in b" \t\r\n,:" and not token:
+            nodes += 1
+            token = True
+        if nodes > limits.node_limit:
+            raise ValueError("scan run JSON node overflow")
+    if string or depth:
+        raise ValueError("scan run JSON truncated")
+
+
+def _scan_owned_json(raw, limits):
+    _scan_lexical_json_limits(raw, limits)
+
+    def pairs(items):
+        result = {}
+        for key, value in items:
+            if key in result:
+                raise ValueError("duplicate scan JSON key")
+            result[key] = value
+        return result
+
+    def constant(value):
+        raise ValueError("nonfinite scan JSON token: " + value)
+
+    def real(value):
+        result = float(value)
+        if not math.isfinite(result):
+            raise ValueError("nonfinite scan JSON real")
+        return result
+
+    value = json.loads(raw.decode("utf-8", errors="strict"), object_pairs_hook=pairs,
+                       parse_constant=constant, parse_float=real)
+
+    def freeze(value):
+        if type(value) is dict:
+            return MappingProxyType({key: freeze(item) for key, item in value.items()})
+        if type(value) is list:
+            return tuple(freeze(item) for item in value)
+        return value
+
+    return freeze(value)
+
+
+def _scan_file_identity(value):
+    if (not stat.S_ISREG(value.st_mode) or value.st_nlink != 1
+            or _stat_is_reparse_point(value)):
+        raise ValueError("scan file is not an original single-link regular file")
+    return value.st_dev, value.st_ino, value.st_size, value.st_mtime_ns
+
+
+def _scan_same_api_version(value):
+    return (*_scan_file_identity(value), value.st_ctime_ns, value.st_mode)
+
+
+def _read_scan_run_snapshot(evidence_root: Path, *, limits: _ScanRunReadLimits, deadline_ns: int):
+    if type(limits) is not _ScanRunReadLimits:
+        raise TypeError("original scan run limits required")
+    _scan_deadline(deadline_ns)
+    _local_unlinked_path(evidence_root)
+    directory = evidence_root.lstat()
+    path, before = _require_direct_regular_evidence_file(evidence_root, "run.json")
+    identity = _scan_file_identity(before)
+    if before.st_size > limits.byte_limit:
+        raise ValueError("scan run record exceeds pre-read byte allowance")
+    fd = None
+    errors = []
+    try:
+        fd = _open_regular_worktree_descriptor(path, nonblocking=True)
+        opened = os.fstat(fd)
+        if _scan_file_identity(opened) != identity:
+            raise ValueError("scan run descriptor differs from selected path")
+        raw = bytearray()
+        while True:
+            _scan_deadline(deadline_ns)
+            count = min(DEFAULT_SCAN_CHUNK_BYTES, limits.byte_limit - len(raw) + 1)
+            chunk = os.read(fd, count)
+            if type(chunk) is not bytes or len(chunk) > count:
+                raise ValueError("invalid scan run descriptor read")
+            if not chunk:
+                break
+            if len(raw) + len(chunk) > limits.byte_limit:
+                raise ValueError("scan run record overflow")
+            raw.extend(chunk)
+        if len(raw) != before.st_size or _scan_same_api_version(os.fstat(fd)) != _scan_same_api_version(opened):
+            raise ValueError("scan run record changed or truncated")
+        if _scan_same_api_version(path.lstat()) != _scan_same_api_version(before):
+            raise ValueError("scan run path changed")
+        owned = bytes(raw)
+        result = _ScanRunSnapshot(owned, _scan_owned_json(owned, limits))
+    except BaseException as exc:
+        errors.append(exc)
+    finally:
+        if fd is not None:
+            try:
+                os.close(fd)
+            except BaseException as exc:
+                errors.append(exc)
+    _scan_raise_errors(errors)
+    _local_unlinked_path(evidence_root)
+    after_directory = evidence_root.lstat()
+    if (directory.st_dev, directory.st_ino, directory.st_mode) != (
+            after_directory.st_dev, after_directory.st_ino, after_directory.st_mode):
+        raise ValueError("scan evidence directory changed")
+    if _scan_same_api_version(path.lstat()) != _scan_same_api_version(before):
+        raise ValueError("scan run path changed after close")
+    _scan_deadline(deadline_ns)
+    return result
+
+
+def _scan_profile_projection(profiles):
+    if not isinstance(profiles, Mapping):
+        raise TypeError("scan profiles must be an original mapping")
+    result = {}
+    for index, profile in profiles.items():
+        if type(index) is not int or index <= 0 or type(profile) is not _Rp5aScanProfile or profile.command_index != index:
+            raise ValueError("scan profile index mismatch")
+        result[str(index)] = asdict(profile)
+    return result
+
+
+def _read_scan_profile_for_run(
+    repo_root: Path, *, command_index: int, inherited_run_id: str,
+    inherited_evidence_root: Path, explicit_basetemp: Path,
+    read_limits: _ScanRunReadLimits, deadline_ns: int,
+    expected_phase=None, expected_command_count=None,
+):
+    attestation = attest_inherited_validation_run(
+        repo_root, inherited_run_id=inherited_run_id,
+        inherited_evidence_root=inherited_evidence_root, explicit_basetemp=explicit_basetemp,
+        scan_read_limits=read_limits, scan_deadline_ns=deadline_ns)
+    snapshot = attestation._scan_snapshot
+    if type(snapshot) is not _ScanRunSnapshot:
+        raise ValueError("scan attestation lacks original bounded snapshot")
+    value = snapshot.value
+    if (type(value.get("schema_version")) is not int or value["schema_version"] != SCHEMA_VERSION
+            or type(value.get("phase")) is not str or not value["phase"]
+            or type(value.get("command_count")) is not int or value["command_count"] <= 0
+            or type(command_index) is not int or not 1 <= command_index <= value["command_count"]):
+        raise ValueError("invalid scan run header")
+    if expected_phase is not None and value["phase"] != expected_phase:
+        raise ValueError("scan phase differs from original launch")
+    if expected_command_count is not None and value["command_count"] != expected_command_count:
+        raise ValueError("scan count differs from original launch")
+    table = value.get("rp5a_scan_profiles")
+    if not isinstance(table, Mapping) or not 0 < len(table) <= read_limits.profile_limit:
+        raise ValueError("invalid bounded scan profile table")
+    fields = tuple(_Rp5aScanProfile.__dataclass_fields__)
+    for key, member in table.items():
+        if (type(key) is not str or re.fullmatch(r"[1-9][0-9]*", key) is None
+                or not isinstance(member, Mapping) or set(member) != set(fields)
+                or type(member["command_index"]) is not int or str(member["command_index"]) != key):
+            raise ValueError("noncanonical scan profile member")
+    selected = table.get(str(command_index))
+    if selected is None:
+        raise ValueError("selected scan occurrence has no original profile")
+    profile = _Rp5aScanProfile(**dict(selected))
+    scratch = Path(profile.scratch_root)
+    if (profile.run_id != inherited_run_id or Path(profile.repo_root) != repo_root
+            or profile.deadline_ns > deadline_ns or scratch == attestation.process_root
+            or not scratch.is_relative_to(attestation.process_root)
+            or scratch == attestation.evidence_root or scratch.is_relative_to(attestation.evidence_root)
+            or attestation.evidence_root.is_relative_to(scratch)):
+        raise ValueError("scan profile differs from original run paths/deadline")
+    _local_unlinked_path(scratch)
+    if not scratch.is_dir():
+        raise ValueError("original scan scratch does not exist")
+    result = (attestation, profile)
+    _scan_deadline(min(deadline_ns, profile.deadline_ns))
+    return result
+
+
+@dataclass(frozen=True)
+class _ScanLaunch:
+    paths: ValidationRunPathsV1
+    phase: str
+    plan: tuple
+    profiles: Mapping[int, _Rp5aScanProfile]
+    read_limits: _ScanRunReadLimits
+    deadline_ns: int
+    process_id: int
+    thread_id: int
+
+    launch_inputs: Mapping = field(default_factory=lambda: MappingProxyType({}), kw_only=True)
+
+
+def _prepare_scan_launch(paths, *, phase, plan, profiles, read_limits, deadline_ns, launch_inputs=None):
+    if type(paths) is not ValidationRunPathsV1 or type(plan) is not tuple or type(read_limits) is not _ScanRunReadLimits:
+        raise TypeError("original scan launch operands required")
+    _scan_deadline(deadline_ns)
+    _scan_profile_projection(profiles)
+    if len(profiles) > read_limits.profile_limit:
+        raise ValueError("scan launch profile count exceeds read allowance")
+    for index, planned in enumerate(plan, 1):
+        if (planned.command_index != index or planned.run_id != paths.run_id
+                or planned.phase != phase or planned.cwd != str(paths.repo_root)):
+            raise ValueError("scan launch original plan differs")
+    roots = []
+    for index, profile in profiles.items():
+        if index > len(plan) or profile.run_id != paths.run_id or profile.repo_root != str(paths.repo_root) or profile.deadline_ns > deadline_ns:
+            raise ValueError("scan profile does not belong to original launch")
+        scratch = Path(profile.scratch_root)
+        if (scratch == paths.process_root or not scratch.is_relative_to(paths.process_root)
+                or scratch.is_relative_to(paths.evidence_root) or paths.evidence_root.is_relative_to(scratch)
+                or any(scratch.is_relative_to(root) or root.is_relative_to(scratch) for root in roots)):
+            raise ValueError("scan scratch roots overlap or escape original process root")
+        _local_unlinked_path(scratch)
+        if not scratch.is_dir():
+            raise ValueError("scan source did not admit an existing scratch directory")
+        roots.append(scratch)
+    inputs = {} if launch_inputs is None else dict(launch_inputs)
+    if set(inputs) - set(profiles):
+        raise ValueError("launch input belongs to an unselected occurrence")
+    for index, original_input in inputs.items():
+        expected = _ScanLaunchIdentity(paths.run_id, phase, index, len(plan), plan[index - 1].argv, str(paths.repo_root))
+        if type(original_input) is not _ScanLaunchInput or original_input.identity != expected:
+            raise ValueError("original scan input differs from selected plan")
+    return _ScanLaunch(paths, phase, plan, MappingProxyType(dict(profiles)), read_limits,
+                       deadline_ns, os.getpid(), threading.get_ident(),
+                       launch_inputs=MappingProxyType(inputs))
+
+
+_SCAN_TRANSPORT_KEYS = (
+    "QTT_SCAN_COMMAND_INDEX", "QTT_SCAN_PHASE", "QTT_SCAN_COMMAND_COUNT", "QTT_SCAN_DEADLINE_NS",
+    "QTT_SCAN_BYTE_LIMIT", "QTT_SCAN_NODE_LIMIT", "QTT_SCAN_DEPTH_LIMIT", "QTT_SCAN_PROFILE_LIMIT",
+)
+
+
+def _scan_child_launch_environment(parent, *, launch, planned):
+    if (type(launch) is not _ScanLaunch or launch.process_id != os.getpid()
+            or launch.thread_id != threading.get_ident() or not any(planned is row for row in launch.plan)):
+        raise ValueError("scan launch original owner/occurrence required")
+    profile = launch.profiles.get(planned.command_index)
+    if profile is None:
+        raise ValueError("unselected scan occurrence")
+    deadline = min(launch.deadline_ns, profile.deadline_ns)
+    _scan_deadline(deadline)
+    child = {}
+    seen = set()
+    controlled = set(_SCAN_TRANSPORT_KEYS) | {RUN_ID_ENV, EVIDENCE_ROOT_ENV, PROCESS_ROOT_ENV}
+    for key, value in parent.items():
+        if (type(key) is not str or type(value) is not str or not key or "=" in key
+                or "\0" in key or "\0" in value or key.upper() in seen):
+            raise ValueError("invalid scan launch environment")
+        seen.add(key.upper())
+        if key.upper() not in controlled:
+            child[key] = value
+    child.update({RUN_ID_ENV: launch.paths.run_id, EVIDENCE_ROOT_ENV: str(launch.paths.evidence_root),
+                  PROCESS_ROOT_ENV: str(launch.paths.process_root)})
+    values = (planned.command_index, launch.phase, len(launch.plan), deadline,
+              launch.read_limits.byte_limit, launch.read_limits.node_limit,
+              launch.read_limits.depth_limit, launch.read_limits.profile_limit)
+    child.update({key: str(value) for key, value in zip(_SCAN_TRANSPORT_KEYS, values, strict=True)})
+    return child
+
+
+def _scan_read_forwarded_profile(repo_root, *, environment, explicit_basetemp):
+    original = {}
+    for key, value in environment.items():
+        if type(key) is not str or key.upper() in original or type(value) is not str:
+            raise ValueError("invalid forwarded scan environment")
+        original[key.upper()] = value
+    values = []
+    for key in _SCAN_TRANSPORT_KEYS:
+        value = original.get(key)
+        if type(value) is not str or not value:
+            raise ValueError("missing forwarded scan operand: " + key)
+        if key != "QTT_SCAN_PHASE":
+            if re.fullmatch(r"[1-9][0-9]*", value) is None:
+                raise ValueError("noncanonical forwarded scan integer")
+            value = int(value)
+        values.append(value)
+    index, phase, count, deadline, byte_limit, nodes, depth, profile_limit = values
+    result = _read_scan_profile_for_run(
+        repo_root, command_index=index, inherited_run_id=original.get(RUN_ID_ENV),
+        inherited_evidence_root=Path(original[EVIDENCE_ROOT_ENV]), explicit_basetemp=explicit_basetemp,
+        read_limits=_ScanRunReadLimits(byte_limit, nodes, depth, profile_limit), deadline_ns=deadline,
+        expected_phase=phase, expected_command_count=count)
+    if str(result[0].process_root) != original.get(PROCESS_ROOT_ENV):
+        raise ValueError("forwarded scan process root differs")
+    _scan_deadline(min(deadline, result[1].deadline_ns))
+    return result
+
+
+class _ScanReservationLedger:
+    def __init__(self, profile):
+        if type(profile) is not _Rp5aScanProfile:
+            raise TypeError("original scan profile required")
+        self.profile = profile
+        self.process_id = os.getpid()
+        self.thread_id = threading.get_ident()
+        self.state = "READY"
+        self.spent_output = 0
+        self.spent_readback = 0
+        self.invocations = 0
+        self.active = None
+        self.last_ns = _scan_deadline(profile.deadline_ns)
+
+    def check(self):
+        if (os.getpid(), threading.get_ident()) != (self.process_id, self.thread_id):
+            raise ValueError("foreign scan ledger owner")
+        now = _scan_deadline(self.profile.deadline_ns)
+        if now < self.last_ns:
+            raise ValueError("scan monotonic clock regressed")
+        self.last_ns = now
+        if self.state in {"HELD", "CLOSED"}:
+            raise ValueError("scan ledger is not reusable")
+        return now
+
+    def hold(self):
+        if (os.getpid(), threading.get_ident()) != (self.process_id, self.thread_id):
+            raise ValueError("foreign owner cannot change scan ledger")
+        self.state = "HELD"
+
+    def reserve(self, stdout_bound, pattern_bytes):
+        self.check()
+        if (self.state != "READY" or self.active is not None
+                or self.invocations >= self.profile.max_invocations):
+            raise ValueError("scan reservation unavailable")
+        if any(type(value) is not int or value < 0 for value in (stdout_bound, pattern_bytes)):
+            raise ValueError("invalid scan reservation operands")
+        diagnostic = self.profile.stderr_bytes_per_call
+        allowance = min(self.profile.output_bytes - self.spent_output - diagnostic,
+                        self.profile.scratch_bytes - pattern_bytes - diagnostic,
+                        self.profile.readback_bytes - self.spent_readback)
+        if allowance < 0 or (stdout_bound > 0 and allowance == 0):
+            raise ValueError("original cumulative scan allowance exhausted")
+        reservation = (min(stdout_bound, allowance), diagnostic, pattern_bytes)
+        self.active = reservation
+        self.state = "INFLIGHT"
+        self.invocations += 1
+        return reservation
+
+    def settle(self, reservation, *, stdout_bytes, stderr_bytes, readback_bytes):
+        self.check()
+        if self.state != "INFLIGHT" or self.active is not reservation:
+            raise ValueError("original scan reservation required")
+        if (any(type(v) is not int or v < 0 for v in (stdout_bytes, stderr_bytes, readback_bytes))
+                or stdout_bytes > reservation[0] or stderr_bytes > reservation[1]
+                or readback_bytes != stdout_bytes):
+            raise ValueError("scan actual byte charges differ")
+        self.spent_output += stdout_bytes + stderr_bytes
+        self.spent_readback += readback_bytes
+        self.active = None
+        self.state = "READY"
+
+
+def _scan_candidate_fence(check_candidate):
+    if not callable(check_candidate) or check_candidate() is not None:
+        raise ValueError("original scan candidate fence must return None or raise")
+
+
+class _ScanScratch:
+    """One exact disposable directory, original writers and retained duplicates."""
+    def __init__(self, root, *, pattern, stdout_limit, stderr_limit, deadline_ns):
+        self.root = Path(root)
+        self.pattern = pattern
+        self.stdout_limit = stdout_limit
+        self.stderr_limit = stderr_limit
+        self.deadline_ns = deadline_ns
+        self.files = {}
+        self.transferred = False
+        self.capture_complete = False
+        self.read_started = False
+        self.read_complete = False
+        self.readback_bytes = 0
+        self.pattern_path = None
+        self.directory_identity = None
+
+    def check(self):
+        _scan_deadline(self.deadline_ns)
+        _local_unlinked_path(self.root)
+        value = self.root.lstat()
+        identity = (value.st_dev, value.st_ino, value.st_mode)
+        if self.directory_identity is not None and identity != self.directory_identity:
+            raise ValueError("original scan scratch directory changed")
+        return identity
+
+    def _allocate(self, role):
+        self.check()
+        fd, raw_path = tempfile.mkstemp(prefix="scan-" + role + "-", dir=self.root)
+        path = Path(raw_path)
+        entry = {"path": path, "writer": None, "reader": None,
+                 "writer_close_attempted": False, "reader_close_attempted": False}
+        self.files[role] = entry
+        duplicate = None
+        try:
+            os.set_inheritable(fd, False)
+            duplicate = os.dup(fd)
+            os.set_inheritable(duplicate, False)
+            value = os.fstat(fd)
+            if _scan_file_identity(value) != _scan_file_identity(path.lstat()):
+                raise ValueError("allocated scan path differs from descriptor")
+            entry["identity"] = value.st_dev, value.st_ino
+            entry["writer"] = os.fdopen(fd, "wb", buffering=0)
+            fd = None
+            entry["reader"] = os.fdopen(duplicate, "rb", buffering=0)
+            duplicate = None
+        except BaseException as body:
+            errors = [body]
+            for remaining in (fd, duplicate):
+                if remaining is not None:
+                    try:
+                        os.close(remaining)
+                    except BaseException as cleanup:
+                        errors.append(cleanup)
+            _scan_raise_errors(errors)
+        return entry
+
+    def __enter__(self):
+        try:
+            self.directory_identity = self.check()
+            if any(self.root.iterdir()):
+                raise ValueError("scan scratch directory must initially be empty")
+            if self.pattern is not None:
+                if type(self.pattern) is not bytes:
+                    raise TypeError("scan pattern must be original bytes")
+                entry = self._allocate("pattern")
+                writer = entry["writer"]
+                offset = 0
+                while offset < len(self.pattern):
+                    self.check()
+                    count = writer.write(memoryview(self.pattern)[offset:])
+                    if type(count) is not int or not 0 < count <= len(self.pattern) - offset:
+                        raise OSError("invalid pattern write progress")
+                    offset += count
+                writer.flush()
+                os.fsync(writer.fileno())
+                entry["writer_close_attempted"] = True
+                writer.close()
+                reader = entry["reader"]
+                reader.seek(0)
+                readback = bytearray()
+                while True:
+                    chunk = reader.read(min(DEFAULT_SCAN_CHUNK_BYTES, len(self.pattern) - len(readback) + 1))
+                    if type(chunk) is not bytes:
+                        raise ValueError("invalid pattern readback")
+                    if not chunk:
+                        break
+                    if len(readback) + len(chunk) > len(self.pattern):
+                        raise ValueError("pattern readback overflow")
+                    readback.extend(chunk)
+                    self.check()
+                if readback != self.pattern:
+                    raise ValueError("pattern exact readback mismatch")
+                self._retain_version(entry)
+                self.pattern_path = entry["path"]
+            self._allocate("stdout")
+            self._allocate("stderr")
+            self.check()
+            return self
+        except BaseException as body:
+            self._cleanup(body)
+
+    def _retain_version(self, entry):
+        descriptor = os.fstat(entry["reader"].fileno())
+        path_stat = entry["path"].lstat()
+        if (_scan_file_identity(descriptor) != _scan_file_identity(path_stat)
+                or (descriptor.st_dev, descriptor.st_ino) != entry["identity"]):
+            raise ValueError("scan original descriptor/path identity changed")
+        entry["descriptor_version"] = _scan_same_api_version(descriptor)
+        entry["path_version"] = _scan_same_api_version(path_stat)
+
+    def _verify_version(self, entry):
+        if (_scan_same_api_version(os.fstat(entry["reader"].fileno())) != entry["descriptor_version"]
+                or _scan_same_api_version(entry["path"].lstat()) != entry["path_version"]):
+            raise ValueError("scan file version changed")
+
+    def take_writers(self):
+        self.check()
+        if self.transferred:
+            raise ValueError("scan writers already transferred")
+        if "pattern" in self.files:
+            self._verify_version(self.files["pattern"])
+        self.transferred = True
+        # From this point the shared capture owns every close, even on denial.
+        for role in ("stdout", "stderr"):
+            self.files[role]["writer_close_attempted"] = True
+        return self.files["stdout"]["writer"], self.files["stderr"]["writer"]
+
+    def captured(self, result):
+        self.check()
+        if not self.transferred or self.capture_complete or type(result) is not tuple or len(result) != 3:
+            raise ValueError("invalid scan capture handoff")
+        completed, stdout, stderr = result
+        if type(completed) is not subprocess.CompletedProcess or type(completed.returncode) is not int:
+            raise ValueError("actual completed native scan required")
+        for role, outcome, limit in (("stdout", stdout, self.stdout_limit), ("stderr", stderr, self.stderr_limit)):
+            entry = self.files[role]
+            if (outcome.get("evidence_complete") is not True or outcome.get("writer_closed") is not True
+                    or not entry["writer"].closed):
+                raise ValueError("scan writer closure unproven")
+            count = outcome.get("retained_byte_count")
+            if type(count) is not int or not 0 <= count <= limit:
+                raise ValueError("invalid retained scan count")
+            self._retain_version(entry)
+            if os.fstat(entry["reader"].fileno()).st_size != count:
+                raise ValueError("scan retained count differs from descriptor size")
+            entry["count"] = count
+        if "pattern" in self.files:
+            self._verify_version(self.files["pattern"])
+        self.capture_complete = True
+
+    def stdout_chunks(self, *, readback_limit):
+        if not self.capture_complete or self.read_started or type(readback_limit) is not int or readback_limit < 0:
+            raise ValueError("scan readback is unavailable")
+        self.read_started = True
+        entry = self.files["stdout"]
+        expected = entry["count"]
+        if expected > readback_limit:
+            raise ValueError("scan stdout readback allowance exceeded")
+        self._verify_version(entry)
+        reader = entry["reader"]
+        reader.seek(0)
+        while True:
+            self.check()
+            remaining = expected - self.readback_bytes
+            count = min(DEFAULT_SCAN_CHUNK_BYTES, remaining + 1)
+            chunk = reader.read(count)
+            if type(chunk) is not bytes or len(chunk) > count:
+                raise ValueError("invalid scan stdout read progress")
+            if not chunk:
+                break
+            if len(chunk) > remaining:
+                raise ValueError("scan stdout grew during readback")
+            self.readback_bytes += len(chunk)
+            yield chunk
+        if self.readback_bytes != expected:
+            raise ValueError("scan stdout truncated during readback")
+        self._verify_version(entry)
+        self.check()
+        self.read_complete = True
+
+    def _cleanup(self, body=None):
+        errors = [] if body is None else [body]
+        safe = False
+        try:
+            self.check()
+            if set(self.root.iterdir()) != {entry["path"] for entry in self.files.values()}:
+                raise ValueError("scan scratch complete entry set changed")
+            # Uncertain capture/partial allocation is held; no guessed cleanup.
+            if self.capture_complete:
+                for entry in self.files.values():
+                    self._verify_version(entry)
+                safe = True
+            elif body is None:
+                raise ValueError("scan incomplete capture retains scratch evidence")
+        except BaseException as exc:
+            errors.append(exc)
+        for entry in self.files.values():
+            for role in ("writer", "reader"):
+                stream = entry[role]
+                attempted = role + "_close_attempted"
+                if stream is not None and not entry[attempted]:
+                    entry[attempted] = True
+                    try:
+                        stream.close()
+                    except BaseException as exc:
+                        errors.append(exc)
+                        safe = False
+        if safe:
+            try:
+                for entry in self.files.values():
+                    if _scan_same_api_version(entry["path"].lstat()) != entry["path_version"]:
+                        raise ValueError("scan path changed before exact unlink")
+                    entry["path"].unlink()
+                self.check()
+                if any(self.root.iterdir()):
+                    raise ValueError("scan scratch not empty after exact cleanup")
+            except BaseException as exc:
+                errors.append(exc)
+        _scan_raise_errors(errors)
+
+    def __exit__(self, exc_type, exc, traceback):
+        self._cleanup(exc)
+        return False
+
+
+def _execute_scan_with_scratch(
+    ledger, *, stdout_bound, pattern, command, parser, check_candidate,
+    deadline_ns, allow_no_match,
+):
+    if type(ledger) is not _ScanReservationLedger:
+        raise TypeError("original scan ledger required")
+    ledger.check()
+    deadline = min(deadline_ns, ledger.profile.deadline_ns)
+    _scan_candidate_fence(check_candidate)
+    reservation = ledger.reserve(stdout_bound, 0 if pattern is None else len(pattern))
+    try:
+        scratch = _ScanScratch(ledger.profile.scratch_root, pattern=pattern,
+                               stdout_limit=reservation[0], stderr_limit=reservation[1], deadline_ns=deadline)
+        with scratch:
+            argv = command(scratch.pattern_path)
+            _scan_candidate_fence(check_candidate)
+            ledger.check()
+            _scan_deadline(deadline)
+            stdout, stderr = scratch.take_writers()
+            captured = _capture_scan_output(
+                argv, cwd=Path(ledger.profile.repo_root), environment=dict(ledger.profile.child_environment),
+                stdout_stream=stdout, stderr_stream=stderr, stdout_limit=reservation[0],
+                stderr_limit=reservation[1], deadline_ns=deadline, allow_no_match=allow_no_match)
+            scratch.captured(captured)
+            value = parser(scratch.stdout_chunks(readback_limit=reservation[0]), captured[0].returncode)
+            if not scratch.read_complete:
+                raise ValueError("scan parser did not consume complete original stdout")
+            _scan_candidate_fence(check_candidate)
+            ledger.check()
+            _scan_deadline(deadline)
+        _scan_candidate_fence(check_candidate)
+        ledger.check()
+        _scan_deadline(deadline)
+        ledger.settle(reservation, stdout_bytes=captured[1]["retained_byte_count"],
+                      stderr_bytes=captured[2]["retained_byte_count"], readback_bytes=scratch.readback_bytes)
+        return value
+    except BaseException:
+        ledger.hold()
+        raise
+
+
+class _ScanPhaseController:
+    def __init__(self, profile, ledger, *, check_candidate, max_matched_files, structured_byte_limit):
+        if (type(profile) is not _Rp5aScanProfile or type(ledger) is not _ScanReservationLedger
+                or ledger.profile is not profile or ledger.invocations != 0 or ledger.state != "READY"):
+            raise ValueError("scan controller requires original unused profile/ledger")
+        if any(type(value) is not int or value <= 0 for value in (max_matched_files, structured_byte_limit)):
+            raise ValueError("invalid existing scan limits")
+        self.profile = profile
+        self.ledger = ledger
+        self.check_candidate = check_candidate
+        self.max_matched_files = max_matched_files
+        self.structured_byte_limit = structured_byte_limit
+        self.state = "INVENTORY"
+        self.selected = ()
+        self.positive_names = []
+        self.line_files = ()
+        self.skipped_large = ()
+        self.names_offset = self.lines_offset = 0
+        self.reasons = []
+
+    def check(self):
+        self.ledger.check()
+        if self.state in {"HELD", "INFLIGHT", "DONE"}:
+            raise ValueError("scan phase cannot admit work")
+        _scan_candidate_fence(self.check_candidate)
+
+    def hold(self):
+        self.ledger.hold()
+        self.state = "HELD"
+
+    def reason(self, reason):
+        if reason not in self.reasons:
+            self.reasons.append(reason)
+
+    def _acquire(self, stage, batch, callback):
+        self.check()
+        if self.state != stage:
+            raise ValueError("scan phase mismatch")
+        previous = self.ledger.invocations
+        self.state = "INFLIGHT"
+        try:
+            value = callback(batch)
+            if self.ledger.state != "READY" or self.ledger.invocations != previous + 1:
+                raise ValueError("scan acquisition did not settle its original reservation")
+            self.ledger.check()
+            _scan_candidate_fence(self.check_candidate)
+            self.state = stage
+            return value
+        except BaseException:
+            self.hold()
+            raise
+
+    def inventory(self, callback):
+        value = self._acquire("INVENTORY", self.profile.expected_inventory, callback)
+        try:
+            if type(value) is not tuple or value != self.profile.expected_inventory:
+                raise ValueError("scan inventory differs from independent original inventory")
+            self.state = "SELECT"
+            self.check()
+            return value
+        except BaseException:
+            self.hold()
+            raise
+
+    def select(self, all_scannable, selected):
+        self.check()
+        if self.state != "SELECT" or type(all_scannable) is not tuple or type(selected) is not tuple:
+            raise ValueError("original scan selection required")
+        try:
+            if (len(all_scannable) > len(self.profile.expected_inventory) or len(selected) > len(all_scannable)
+                    or len(set(all_scannable)) != len(all_scannable) or len(set(selected)) != len(selected)
+                    or not set(all_scannable) <= set(self.profile.expected_inventory) or not set(selected) <= set(all_scannable)):
+                raise ValueError("invalid original scan selection")
+            self.selected = selected
+            if selected != all_scannable:
+                self.reason("MAX_FILES_SCANNED")
+            self.state = "NAMES" if selected else "NAMES_COMPLETE"
+        except BaseException:
+            self.hold()
+            raise
+
+    def names(self, callback):
+        batch = self.selected[self.names_offset:self.names_offset + 50]
+        if not batch:
+            raise ValueError("empty or repeated scan names acquisition")
+        value = self._acquire("NAMES", batch, callback)
+        try:
+            if (type(value) is not tuple or len(value) > len(batch)
+                    or len(set(value)) != len(value) or not set(value) <= set(batch)):
+                raise ValueError("scan names do not belong to original batch")
+            remaining = self.max_matched_files - len(self.positive_names)
+            self.positive_names.extend(value[:remaining])
+            self.names_offset += len(batch)
+            if len(self.positive_names) >= self.max_matched_files:
+                self.reason("MAX_MATCHED_FILES")
+                self.state = "NAMES_COMPLETE"
+            elif self.names_offset == len(self.selected):
+                self.state = "NAMES_COMPLETE"
+            return value
+        except BaseException:
+            self.hold()
+            raise
+
+    def seal_names(self):
+        self.check()
+        if self.state != "NAMES_COMPLETE":
+            raise ValueError("scan names phase is unfinished")
+        try:
+            sizes = dict(self.profile.file_sizes)
+            names = tuple(sorted(self.positive_names, key=lambda path: (path.casefold(), path)))
+            if any(path not in sizes for path in names):
+                raise ValueError("missing original scan size observation")
+            self.skipped_large = tuple(path for path in names if sizes[path] > self.structured_byte_limit)
+            self.line_files = tuple(path for path in names if sizes[path] <= self.structured_byte_limit)
+            if self.skipped_large:
+                self.reason("PASS_B_LARGE_FILE_LINE_SCAN_SKIPPED")
+            self.state = "LINES" if self.line_files else "COMPLETE"
+            return self.line_files
+        except BaseException:
+            self.hold()
+            raise
+
+    def lines(self, callback):
+        batch = self.line_files[self.lines_offset:self.lines_offset + 50]
+        if not batch:
+            raise ValueError("empty or repeated scan line acquisition")
+        value = self._acquire("LINES", batch, callback)
+        try:
+            if type(value) is not tuple:
+                raise ValueError("owned scan line tuple required")
+            last = {}
+            counts = {}
+            sizes = dict(self.profile.file_sizes)
+            for row in value:
+                if (type(row) is not tuple or len(row) != 3 or row[0] not in batch
+                        or type(row[1]) is not int or not 0 < row[1] <= sizes[row[0]] + 1
+                        or row[1] <= last.get(row[0], 0) or type(row[2]) is not bytes):
+                    raise ValueError("invalid original scan line record")
+                path = row[0]
+                last[path] = row[1]
+                counts[path] = counts.get(path, 0) + 1
+                if counts[path] > 51:
+                    raise ValueError("native scan line overflow exceeds sentinel")
+                if counts[path] == 51:
+                    self.reason("MAX_LINE_HITS_PER_FILE")
+            self.lines_offset += len(batch)
+            if self.lines_offset == len(self.line_files):
+                self.state = "COMPLETE"
+            return value
+        except BaseException:
+            self.hold()
+            raise
+
+    def stop(self, reason):
+        self.check()
+        if self.state not in {"NAMES", "NAMES_COMPLETE", "LINES", "COMPLETE"} or self.ledger.state != "READY":
+            raise ValueError("scan cannot stop an unsettled acquisition")
+        self.reason(reason)
+        self.state = "COMPLETE"
+
+    def finish(self):
+        self.check()
+        if self.state != "COMPLETE" or self.ledger.state != "READY":
+            raise ValueError("scan did not complete its selected phase")
+        result = ("SCAN_BUDGET_EXHAUSTED" if self.reasons else "SCAN_BUDGET_OK", tuple(self.reasons))
+        self.check()
+        self.state = "DONE"
+        self.ledger.state = "CLOSED"
+        return result
+
+
+@dataclass(frozen=True)
+class _ScanCandidateSurface:
+    path: str
+    kind: str
+    mode: int
+    content: bytes
+    children: tuple[str, ...]
+
+
+@dataclass(frozen=True)
+class _ScanLaunchIdentity:
+    run_id: str
+    phase: str
+    command_index: int
+    command_count: int
+    argv: tuple[str, ...]
+    repo_root: str
+
+
+def _scan_candidate_path(path, *, root_allowed=False):
+    if root_allowed and path == ".":
+        return path
+    if (type(path) is not str or not path or path.startswith("/") or "\0" in path
+            or any(part in {"", ".", ".."} for part in path.split("/"))
+            or any(0xD800 <= ord(character) <= 0xDFFF for character in path)):
+        raise ValueError("invalid original candidate path")
+    if os.name == "nt":
+        for part in path.split("/"):
+            stem = part.split(".")[0].upper()
+            if (any(character in '<>:"\\|?*' or ord(character) < 32 for character in part)
+                    or part.endswith((" ", ".")) or stem in {"CON", "PRN", "AUX", "NUL"}
+                    or re.fullmatch(r"(?:COM|LPT)[1-9\u00b9\u00b2\u00b3]", stem)):
+                raise ValueError("unsupported original Windows candidate path")
+    return path
+
+
+def _scan_utf8_charge(text, remaining):
+    if type(text) is not str:
+        raise ValueError("original candidate text required")
+    for character in text:
+        code = ord(character)
+        if 0xD800 <= code <= 0xDFFF:
+            raise ValueError("candidate text is not strict UTF-8")
+        remaining -= 1 if code < 128 else 2 if code < 2048 else 3 if code < 65536 else 4
+        if remaining < 0:
+            raise ValueError("original candidate byte allowance exceeded")
+    return remaining
+
+
+def _scan_candidate_rows(rows, *, limits, candidate_read_bytes):
+    if (type(limits) is not _ScanRunReadLimits or type(rows) is not tuple
+            or type(candidate_read_bytes) is not int or candidate_read_bytes < 0
+            or len(rows) > limits.node_limit):
+        raise ValueError("invalid original candidate row envelope")
+    seen = {}
+    aliases = set()
+    nodes = 1
+    remaining = candidate_read_bytes
+    for row in rows:
+        if type(row) is not _ScanCandidateSurface:
+            raise TypeError("original native candidate surface required")
+        nodes += 7 + len(row.children) if type(row.children) is tuple else limits.node_limit + 1
+        if nodes > limits.node_limit:
+            raise ValueError("candidate member node allowance exceeded")
+        _scan_candidate_path(row.path, root_allowed=row.kind == "DIRECTORY")
+        if row.path in seen or (os.name == "nt" and row.path.casefold() in aliases):
+            raise ValueError("duplicate candidate surface")
+        if (row.kind not in {"FILE", "DIRECTORY", "ABSENT"} or type(row.mode) is not int
+                or not 0 <= row.mode <= 0o7777 or type(row.content) is not bytes or type(row.children) is not tuple):
+            raise ValueError("unsupported candidate kind/mode/content")
+        if row.kind == "FILE":
+            if row.children:
+                raise ValueError("file candidate cannot contain directory members")
+            remaining -= len(row.content)
+        elif row.kind == "ABSENT":
+            if row.mode or row.content or row.children:
+                raise ValueError("absence candidate must have empty structural fields")
+        else:
+            if row.content or row.children != tuple(sorted(row.children)) or len(set(row.children)) != len(row.children):
+                raise ValueError("directory candidate requires complete sorted unique membership")
+            child_aliases = set()
+            for name in row.children:
+                _scan_candidate_path(name)
+                if "/" in name or (os.name == "nt" and name.casefold() in child_aliases):
+                    raise ValueError("invalid candidate immediate member")
+                remaining = _scan_utf8_charge(name, remaining)
+                child_aliases.add(name.casefold())
+        if remaining < 0:
+            raise ValueError("candidate byte allowance exceeded")
+        seen[row.path] = row
+        aliases.add(row.path.casefold())
+    for path in seen:
+        pieces = path.split("/")
+        for index in range(1, len(pieces)):
+            parent = seen.get("/".join(pieces[:index]))
+            if parent is not None and parent.kind != "DIRECTORY":
+                raise ValueError("declared candidate file/absence has descendants")
+    return rows
+
+
+class _ScanCandidateFence:
+    def __init__(self, repo_root, rows, *, limits, candidate_read_bytes, deadline_ns):
+        self.root = Path(repo_root)
+        if not self.root.is_absolute() or ".." in self.root.parts:
+            raise ValueError("original absolute candidate root required")
+        self.rows = _scan_candidate_rows(rows, limits=limits, candidate_read_bytes=candidate_read_bytes)
+        self.remaining = candidate_read_bytes
+        self.deadline_ns = deadline_ns
+        self.process_id = os.getpid()
+        self.thread_id = threading.get_ident()
+        self.held = False
+        self.last_ns = _scan_deadline(deadline_ns)
+        self.identities = {}
+        _local_unlinked_path(self.root)
+
+    def _clock(self):
+        now = _scan_deadline(self.deadline_ns)
+        if now < self.last_ns:
+            raise ValueError("candidate monotonic clock regressed")
+        self.last_ns = now
+
+    def __call__(self):
+        if (os.getpid(), threading.get_ident()) != (self.process_id, self.thread_id):
+            raise ValueError("foreign candidate fence owner")
+        if self.held:
+            raise ValueError("candidate fence is held")
+        try:
+            self._clock()
+            _local_unlinked_path(self.root)
+            for row in self.rows:
+                path = self.root if row.path == "." else self.root.joinpath(*row.path.split("/"))
+                _local_unlinked_path(path.parent)
+                if not path.parent.is_dir():
+                    raise ValueError("candidate ordinary parent is missing")
+                try:
+                    before = path.lstat()
+                except FileNotFoundError:
+                    if row.kind != "ABSENT":
+                        raise
+                    continue
+                if row.kind == "ABSENT":
+                    raise ValueError("original absent candidate now exists")
+                if stat.S_ISLNK(before.st_mode) or _stat_is_reparse_point(before):
+                    raise ValueError("candidate link/reparse substitution")
+                identity = before.st_dev, before.st_ino, before.st_mode
+                if stat.S_IMODE(before.st_mode) != row.mode:
+                    raise ValueError("candidate mode changed")
+                if row.path in self.identities and self.identities[row.path] != identity:
+                    raise ValueError("candidate identity changed")
+                self.identities.setdefault(row.path, identity)
+                if row.kind == "DIRECTORY":
+                    if not stat.S_ISDIR(before.st_mode):
+                        raise ValueError("candidate directory changed kind")
+                    names = []
+                    with os.scandir(path) as entries:
+                        for entry in entries:
+                            if len(names) >= len(row.children):
+                                raise ValueError("candidate directory gained a member")
+                            self.remaining = _scan_utf8_charge(entry.name, self.remaining)
+                            names.append(entry.name)
+                    after = path.lstat()
+                    if (tuple(sorted(names)) != row.children
+                            or (before.st_dev, before.st_ino, before.st_mode, before.st_mtime_ns, before.st_ctime_ns)
+                            != (after.st_dev, after.st_ino, after.st_mode, after.st_mtime_ns, after.st_ctime_ns)):
+                        raise ValueError("candidate directory membership changed")
+                else:
+                    _scan_file_identity(before)
+                    if before.st_size != len(row.content) or before.st_size > self.remaining:
+                        raise ValueError("candidate file size or read allowance differs")
+                    descriptor = None
+                    errors = []
+                    try:
+                        descriptor = _open_regular_worktree_descriptor(path, nonblocking=True)
+                        opened = os.fstat(descriptor)
+                        if _scan_file_identity(opened) != _scan_file_identity(before):
+                            raise ValueError("candidate selected descriptor differs")
+                        offset = 0
+                        while True:
+                            self._clock()
+                            request = min(64 * 1024, len(row.content) - offset + 1)
+                            chunk = os.read(descriptor, request)
+                            if type(chunk) is not bytes or len(chunk) > request:
+                                raise ValueError("invalid candidate native read")
+                            if not chunk:
+                                break
+                            self.remaining -= len(chunk)
+                            if self.remaining < 0 or chunk != row.content[offset:offset + len(chunk)]:
+                                raise ValueError("candidate bytes/read allowance changed")
+                            offset += len(chunk)
+                        if (offset != len(row.content) or _scan_same_api_version(os.fstat(descriptor)) != _scan_same_api_version(opened)
+                                or _scan_same_api_version(path.lstat()) != _scan_same_api_version(before)):
+                            raise ValueError("candidate file changed while observed")
+                    except BaseException as exc:
+                        errors.append(exc)
+                    finally:
+                        if descriptor is not None:
+                            try:
+                                os.close(descriptor)
+                            except BaseException as exc:
+                                errors.append(exc)
+                    _scan_raise_errors(errors)
+                    if _scan_same_api_version(path.lstat()) != _scan_same_api_version(before):
+                        raise ValueError("candidate file changed after close")
+                self._clock()
+            self._clock()
+        except BaseException:
+            self.held = True
+            raise
+        return None
+
+
+@dataclass(frozen=True)
+class _ScanHex:
+    value: bytes
+
+
+def _scan_launch_payload(identity, rows, *, limits, candidate_read_bytes):
+    if (type(identity) is not _ScanLaunchIdentity or type(identity.run_id) is not str or not identity.run_id
+            or type(identity.phase) is not str or not identity.phase
+            or type(identity.command_index) is not int or type(identity.command_count) is not int
+            or not 1 <= identity.command_index <= identity.command_count
+            or type(identity.argv) is not tuple or not identity.argv
+            or any(type(arg) is not str or not arg or "\0" in arg for arg in identity.argv)
+            or type(identity.repo_root) is not str or not Path(identity.repo_root).is_absolute()):
+        raise ValueError("invalid original scan launch identity")
+    _scan_candidate_rows(rows, limits=limits, candidate_read_bytes=candidate_read_bytes)
+    return MappingProxyType({
+        "run_id": identity.run_id, "phase": identity.phase, "command_index": identity.command_index,
+        "command_count": identity.command_count, "argv": identity.argv, "repo_root": identity.repo_root,
+        "candidate_files": tuple((row.path, row.kind, row.mode, _ScanHex(row.content), row.children) for row in rows),
+        "candidate_read_bytes": candidate_read_bytes,
+    })
+
+
+def _scan_launch_measure(payload, *, limits):
+    size = nodes = 0
+
+    def text_size(value):
+        count = 2
+        for char in value:
+            code = ord(char)
+            if 0xD800 <= code <= 0xDFFF:
+                raise ValueError("launch text is not valid Unicode")
+            count += 2 if code in {8, 9, 10, 12, 13, 34, 92} else 6 if code < 32 or 127 <= code <= 65535 else 12 if code > 65535 else 1
+            if count > limits.byte_limit:
+                raise ValueError("launch scalar exceeds byte allowance")
+        return count
+
+    def walk(value, depth):
+        nonlocal size, nodes
+        nodes += 1
+        if nodes > limits.node_limit:
+            raise ValueError("launch node allowance exceeded")
+        if type(value) is str:
+            size += text_size(value)
+        elif type(value) is int:
+            if value.bit_length() > limits.byte_limit * 4:
+                raise ValueError("launch integer exceeds byte allowance")
+            size += len(str(value))
+        elif type(value) is _ScanHex:
+            size += 2 + 2 * len(value.value)
+        elif type(value) in {tuple, MappingProxyType}:
+            if depth > limits.depth_limit:
+                raise ValueError("launch container depth exceeded")
+            size += 2 + max(0, len(value) - 1)
+            if type(value) is tuple:
+                for item in value:
+                    walk(item, depth + 1)
+            else:
+                size += len(value)
+                for key, item in value.items():
+                    if type(key) is not str:
+                        raise ValueError("launch key must be exact text")
+                    walk(key, depth + 1)
+                    walk(item, depth + 1)
+        else:
+            raise TypeError("unsupported launch representation")
+        if size > limits.byte_limit or size > 0xFFFFFFFF:
+            raise ValueError("launch byte allowance exceeded")
+
+    walk(payload, 1)
+    if size <= 0:
+        raise ValueError("empty launch payload")
+    return size
+
+
+
+def _scan_launch_parts(payload):
+    def text(value):
+        encoded = json.encoder.encode_basestring_ascii(value).encode("ascii")
+        for offset in range(0, len(encoded), 64 * 1024):
+            yield encoded[offset:offset + 64 * 1024]
+
+    if type(payload) is str:
+        yield from text(payload)
+    elif type(payload) is int:
+        yield str(payload).encode("ascii")
+    elif type(payload) is _ScanHex:
+        yield b'"'
+        for offset in range(0, len(payload.value), 32 * 1024):
+            yield payload.value[offset:offset + 32 * 1024].hex().encode("ascii")
+        yield b'"'
+    elif type(payload) is tuple:
+        yield b"["
+        for index, item in enumerate(payload):
+            if index:
+                yield b","
+            yield from _scan_launch_parts(item)
+        yield b"]"
+    elif type(payload) is MappingProxyType:
+        yield b"{"
+        for index, (key, item) in enumerate(payload.items()):
+            if index:
+                yield b","
+            yield from text(key)
+            yield b":"
+            yield from _scan_launch_parts(item)
+        yield b"}"
+    else:
+        raise TypeError("unsupported measured launch value")
+
+
+def _read_scan_launch_fd(fd, *, limits, deadline_ns, expected_identity):
+    if type(fd) is not int or type(limits) is not _ScanRunReadLimits:
+        raise TypeError("original launch descriptor and limits required")
+    before = os.fstat(fd)
+    _scan_file_identity(before)
+    if os.lseek(fd, 0, os.SEEK_CUR) != 0 or not 4 < before.st_size <= limits.byte_limit + 4:
+        raise ValueError("invalid launch input position/extent")
+    owned = os.dup(fd)
+    errors = []
+    raw = bytearray()
+    try:
+        os.set_inheritable(owned, False)
+        while True:
+            _scan_deadline(deadline_ns)
+            count = min(64 * 1024, before.st_size - len(raw) + 1)
+            chunk = os.read(owned, count)
+            if type(chunk) is not bytes or len(chunk) > count:
+                raise ValueError("invalid launch input progress")
+            if not chunk:
+                break
+            if len(raw) + len(chunk) > before.st_size:
+                raise ValueError("launch input suffix or growth")
+            raw.extend(chunk)
+        if len(raw) != before.st_size or _scan_same_api_version(os.fstat(owned)) != _scan_same_api_version(before):
+            raise ValueError("launch input truncated or changed")
+        length = int.from_bytes(raw[:4], "big")
+        if length <= 0 or length > limits.byte_limit or length != len(raw) - 4:
+            raise ValueError("launch frame length differs")
+        value = _scan_owned_json(bytes(raw[4:]), limits)
+    except BaseException as exc:
+        errors.append(exc)
+    finally:
+        try:
+            os.close(owned)
+        except BaseException as exc:
+            errors.append(exc)
+    _scan_raise_errors(errors)
+    fields = {"run_id", "phase", "command_index", "command_count", "argv", "repo_root", "candidate_files", "candidate_read_bytes"}
+    if type(value) is not MappingProxyType or set(value) != fields:
+        raise ValueError("invalid closed launch fields")
+    identity = _ScanLaunchIdentity(*(value[key] for key in ("run_id", "phase", "command_index", "command_count", "argv", "repo_root")))
+    if type(expected_identity) is not _ScanLaunchIdentity or identity != expected_identity:
+        raise ValueError("launch differs from independent original expectation")
+    raw_rows = value["candidate_files"]
+    if type(raw_rows) is not tuple or len(raw_rows) > limits.node_limit:
+        raise ValueError("invalid bounded candidate transport")
+    rows = []
+    for row in raw_rows:
+        if (type(row) is not tuple or len(row) != 5 or type(row[3]) is not str
+                or len(row[3]) % 2 or re.fullmatch(r"[0-9a-f]*", row[3]) is None):
+            raise ValueError("invalid restricted candidate byte representation")
+        if len(row[3]) // 2 > value["candidate_read_bytes"]:
+            raise ValueError("candidate byte operand exceeds original allowance")
+        rows.append(_ScanCandidateSurface(row[0], row[1], row[2], bytes.fromhex(row[3]), row[4]))
+    result = tuple(rows)
+    _scan_launch_payload(identity, result, limits=limits, candidate_read_bytes=value["candidate_read_bytes"])
+    _scan_deadline(deadline_ns)
+    return identity, result, value["candidate_read_bytes"]
+
+
+class _ScanLaunchInput:
+    def __init__(self, identity, candidate_files, *, limits, candidate_read_bytes,
+                 deadline_ns, scratch_root, scratch_bytes, parent_frame_reread_bytes, check_candidate):
+        self.identity = identity
+        self.candidate_files = candidate_files
+        self.limits = limits
+        self.candidate_read_bytes = candidate_read_bytes
+        self.deadline_ns = deadline_ns
+        self.scratch_root = Path(scratch_root)
+        self.scratch_bytes = scratch_bytes
+        self.remaining_reread = parent_frame_reread_bytes
+        self.check_candidate = check_candidate
+        self.process_id = os.getpid()
+        self.thread_id = threading.get_ident()
+        self.state = "PREPARING"
+        self.path = None
+        self.reader = None
+        self.writer = None
+        self.writer_close_attempted = False
+        self.reader_close_attempted = False
+        self.process = None
+        self.last_ns = _scan_deadline(deadline_ns)
+        self.payload = _scan_launch_payload(identity, candidate_files, limits=limits,
+                                           candidate_read_bytes=candidate_read_bytes)
+        self.length = _scan_launch_measure(self.payload, limits=limits)
+        self.extent = self.length + 4
+        if (type(scratch_bytes) is not int or type(parent_frame_reread_bytes) is not int
+                or scratch_bytes < self.extent or parent_frame_reread_bytes < 3 * self.extent):
+            raise ValueError("original launch input allocation cannot cover its measured lifetime")
+
+    def _check(self):
+        if (os.getpid(), threading.get_ident()) != (self.process_id, self.thread_id):
+            raise ValueError("foreign launch input owner")
+        now = _scan_deadline(self.deadline_ns)
+        if now < self.last_ns:
+            raise ValueError("launch input clock regressed")
+        self.last_ns = now
+        _scan_candidate_fence(self.check_candidate)
+        _local_unlinked_path(self.scratch_root)
+        if not self.scratch_root.is_dir():
+            raise ValueError("original input scratch directory unavailable")
+
+    def _parts(self):
+        yield self.length.to_bytes(4, "big")
+        yield from _scan_launch_parts(self.payload)
+
+    def _compare(self):
+        self._check()
+        if self.process is not None and self.process.poll() is None:
+            raise ValueError("cannot reread launch input while child is live")
+        if self.remaining_reread < self.extent:
+            raise ValueError("cumulative parent frame reread allowance exhausted")
+        if (_scan_same_api_version(os.fstat(self.reader.fileno())) != self.descriptor_version
+                or _scan_same_api_version(self.path.lstat()) != self.path_version):
+            raise ValueError("original launch frame changed")
+        self.reader.seek(0)
+        count = 0
+        for expected in self._parts():
+            offset = 0
+            while offset < len(expected):
+                self._check()
+                chunk = self.reader.read(len(expected) - offset)
+                if type(chunk) is not bytes or not chunk or len(chunk) > len(expected) - offset:
+                    raise ValueError("invalid parent frame read progress")
+                self.remaining_reread -= len(chunk)
+                if chunk != expected[offset:offset + len(chunk)]:
+                    raise ValueError("parent launch frame byte mismatch")
+                offset += len(chunk)
+                count += len(chunk)
+        suffix = self.reader.read(1)
+        if type(suffix) is not bytes or suffix or count != self.extent:
+            if type(suffix) is bytes:
+                self.remaining_reread -= len(suffix)
+            raise ValueError("parent launch frame suffix/extent mismatch")
+        if (_scan_same_api_version(os.fstat(self.reader.fileno())) != self.descriptor_version
+                or _scan_same_api_version(self.path.lstat()) != self.path_version):
+            raise ValueError("launch frame changed during parent comparison")
+        self._check()
+
+    def __enter__(self):
+        try:
+            self._check()
+            directory = self.scratch_root.lstat()
+            self.directory_identity = directory.st_dev, directory.st_ino, directory.st_mode
+            descriptor, raw_path = tempfile.mkstemp(prefix="scan-launch-", dir=self.scratch_root)
+            self.path = Path(raw_path)
+            try:
+                os.set_inheritable(descriptor, False)
+                self.writer = os.fdopen(descriptor, "wb", buffering=0)
+            except BaseException as allocation_error:
+                errors = [allocation_error]
+                try:
+                    os.close(descriptor)
+                except BaseException as close_error:
+                    errors.append(close_error)
+                _scan_raise_errors(errors)
+            written = 0
+            for chunk in self._parts():
+                offset = 0
+                while offset < len(chunk):
+                    self._check()
+                    count = self.writer.write(memoryview(chunk)[offset:])
+                    if type(count) is not int or not 0 < count <= len(chunk) - offset:
+                        raise OSError("invalid launch frame write progress")
+                    offset += count
+                    written += count
+            if written != self.extent:
+                raise ValueError("launch frame measurement differs from emission")
+            self.writer.flush()
+            os.fsync(self.writer.fileno())
+            original = os.fstat(self.writer.fileno())
+            reader_fd = _open_regular_worktree_descriptor(self.path, nonblocking=True)
+            try:
+                os.set_inheritable(reader_fd, False)
+                read_stat = os.fstat(reader_fd)
+                if _scan_file_identity(read_stat) != _scan_file_identity(original):
+                    raise ValueError("launch readonly descriptor differs from original writer")
+                self.reader = os.fdopen(reader_fd, "rb", buffering=0)
+            except BaseException as body:
+                errors = [body]
+                try:
+                    os.close(reader_fd)
+                except BaseException as close_error:
+                    errors.append(close_error)
+                _scan_raise_errors(errors)
+            self.writer_close_attempted = True
+            self.writer.close()
+            self.descriptor_version = _scan_same_api_version(os.fstat(self.reader.fileno()))
+            self.path_version = _scan_same_api_version(self.path.lstat())
+            if _scan_file_identity(os.fstat(self.reader.fileno())) != _scan_file_identity(self.path.lstat()):
+                raise ValueError("launch frame original path changed")
+            self._compare()
+            self.reader.seek(0)
+            self.state = "READY"
+            return self
+        except BaseException as body:
+            self.state = "HELD"
+            self._close(body)
+
+    def _claim(self, *, run_id, phase, command_index, argv, cwd):
+        self._check()
+        if (self.state != "READY" or (run_id, phase, command_index, tuple(argv), str(cwd))
+                != (self.identity.run_id, self.identity.phase, self.identity.command_index,
+                    self.identity.argv, self.identity.repo_root)):
+            raise ValueError("launch input does not belong to this original occurrence")
+        self._compare()
+        self.reader.seek(0)
+        self.state = "ISSUED"
+        return self.reader
+
+    def _attached(self, process):
+        if self.state != "ISSUED" or type(process.pid) is not int or process.pid <= 0:
+            self.state = "HELD"
+            raise ValueError("launch input lacks actual process association")
+        self.process = process
+        self.state = "ATTACHED"
+
+    def _finished(self, process, native_exit):
+        try:
+            if (self.state != "ATTACHED" or self.process is not process or type(native_exit) is not int
+                    or process.poll() is None or process.returncode != native_exit):
+                raise ValueError("launch input original child terminal state unproven")
+            if self.reader.tell() != self.extent:
+                raise ValueError("child did not consume exact original input extent")
+            self._compare()
+            self.state = "CONSUMED"
+        except BaseException:
+            self.state = "HELD"
+            raise
+
+    def _close(self, body=None):
+        errors = [] if body is None else [body]
+        if self.process is not None and self.process.poll() is None:
+            self.state = "HELD"
+            errors.append(RuntimeError("live child retains original launch input custody"))
+            _scan_raise_errors(errors)
+        safe = self.path is not None and hasattr(self, "path_version")
+        if safe:
+            try:
+                _local_unlinked_path(self.scratch_root)
+                current = self.scratch_root.lstat()
+                if (current.st_dev, current.st_ino, current.st_mode) != self.directory_identity:
+                    raise ValueError("launch scratch identity changed")
+                if _scan_same_api_version(self.path.lstat()) != self.path_version:
+                    raise ValueError("launch input path changed before cleanup")
+            except BaseException as exc:
+                errors.append(exc)
+                safe = False
+        for role in ("writer", "reader"):
+            stream = getattr(self, role)
+            attempted = role + "_close_attempted"
+            if stream is not None and not getattr(self, attempted):
+                setattr(self, attempted, True)
+                try:
+                    stream.close()
+                except BaseException as exc:
+                    errors.append(exc)
+                    safe = False
+        if safe:
+            try:
+                if _scan_same_api_version(self.path.lstat()) != self.path_version:
+                    raise ValueError("launch input path changed at unlink")
+                self.path.unlink()
+                self.state = "CLOSED"
+            except BaseException as exc:
+                errors.append(exc)
+        _scan_raise_errors(errors)
+
+    def __exit__(self, exc_type, exc, traceback):
+        self._close(exc)
+        return False
+
+
+def _read_scan_bound_launch_fd(fd, *, repo_root, environment, explicit_basetemp, original_argv):
+    attestation, profile = _scan_read_forwarded_profile(
+        repo_root, environment=environment, explicit_basetemp=explicit_basetemp)
+    # Numeric spelling has already been checked by the one forwarded-profile read.
+    lowered = {key.upper(): value for key, value in environment.items()}
+    limits = _ScanRunReadLimits(*(int(lowered[key]) for key in (
+        "QTT_SCAN_BYTE_LIMIT", "QTT_SCAN_NODE_LIMIT", "QTT_SCAN_DEPTH_LIMIT", "QTT_SCAN_PROFILE_LIMIT")))
+    identity = _ScanLaunchIdentity(attestation.run_id, lowered["QTT_SCAN_PHASE"], profile.command_index,
+                                  int(lowered["QTT_SCAN_COMMAND_COUNT"]), tuple(original_argv), str(repo_root))
+    deadline = min(int(lowered["QTT_SCAN_DEADLINE_NS"]), profile.deadline_ns)
+    _, rows, candidate_read_bytes = _read_scan_launch_fd(
+        fd, limits=limits, deadline_ns=deadline, expected_identity=identity)
+    fence = _ScanCandidateFence(repo_root, rows, limits=limits,
+                                candidate_read_bytes=candidate_read_bytes, deadline_ns=deadline)
+    _scan_candidate_fence(fence)
+    result = (attestation, profile, fence)
+    _scan_deadline(deadline)
+    return result

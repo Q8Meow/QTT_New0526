@@ -4,12 +4,17 @@ from __future__ import annotations
 
 from dataclasses import dataclass, fields
 from datetime import datetime
-from decimal import Decimal
+from decimal import Decimal, DecimalException, Inexact, localcontext
 from enum import StrEnum
-from typing import Mapping
+from typing import Mapping, TYPE_CHECKING
 
-from .context import exact_decimal, parse_utc
-from .errors import ContractValidationError, ReasonCode
+if TYPE_CHECKING:
+    from .models import ProbabilityProducerScopeV1, PreparedProbabilityPredictionV1, ComputationExecutionContextV1
+    from .input_resolver import ProbabilityOutcomeJoinV1
+    from .persistence import ProbabilityProducerReadSnapshotV1
+
+from .context import decimal_context_v1, exact_decimal, parse_utc
+from .errors import ContractValidationError, NumericDomainError, ReasonCode
 from .serialization import deterministic_json
 
 
@@ -26,6 +31,86 @@ NO_TRADE_CONDITION_IDS_V1 = (
     "STRONGEST_CLASSICAL_OR_NO_TRADE_DOMINATES",
     "INDEPENDENT_REVIEW_NOT_CLOSED",
 )
+
+
+_PROBABILITY_NATIVE_BINDING_GROUPS_V1 = (
+    ("FIVAB::MATH-02::calibrated_model_probability", "FIVAB::MATH-02::calibration_state"),
+    ("FIVAB::MATH-02::calibrated_model_probability", "FIVAB::MATH-02::calibration_state",
+     "FIVAB::MATH-06::p_win", "FIVAB::MATH-06::p_void"),
+)
+
+
+@dataclass(frozen=True, slots=True)
+class ProbabilityNativeUseRequestV1:
+    producer_scope: ProbabilityProducerScopeV1
+    prepared_prediction: PreparedProbabilityPredictionV1
+    execution_context: ComputationExecutionContextV1
+    query_key: tuple[str, tuple[str, ...]]
+    binding_ids: tuple[str, ...]
+    outcome_join: ProbabilityOutcomeJoinV1 | None
+    selected_use_decision_ref: str
+    effective_cutoff_ns: int
+    recorded_cutoff_ns: int
+
+    def __post_init__(self) -> None:
+        from .models import (ProbabilityProducerScopeV1, PreparedProbabilityPredictionV1, ComputationExecutionContextV1,
+                             _probability_require_v1, _probability_text_v1, _probability_ns_v1)
+        need = _probability_require_v1
+        need(type(self.producer_scope) is ProbabilityProducerScopeV1 and
+             type(self.prepared_prediction) is PreparedProbabilityPredictionV1 and
+             type(self.execution_context) is ComputationExecutionContextV1, "PROBABILITY_NATIVE_USE_TYPES")
+        need(type(self.query_key) is tuple and self.query_key in self.prepared_prediction.request_keys,
+             "PROBABILITY_NATIVE_QUERY")
+        need(type(self.binding_ids) is tuple and self.binding_ids in _PROBABILITY_NATIVE_BINDING_GROUPS_V1,
+             "PROBABILITY_NATIVE_BINDINGS")
+        if self.binding_ids == _PROBABILITY_NATIVE_BINDING_GROUPS_V1[0]:
+            need(self.outcome_join is None, "PROBABILITY_OUTCOME_NOT_SELECTED")
+        else:
+            from .input_resolver import ProbabilityOutcomeJoinV1
+            need(type(self.outcome_join) is ProbabilityOutcomeJoinV1 and self.outcome_join.query_key == self.query_key and
+                 self.outcome_join.context_identity == self.execution_context.execution_identity_tuple, "PROBABILITY_OUTCOME_JOIN")
+        _probability_text_v1(self.selected_use_decision_ref)
+        _probability_ns_v1(self.effective_cutoff_ns); _probability_ns_v1(self.recorded_cutoff_ns)
+        need(self.prepared_prediction.generation == self.producer_scope.generation and
+             self.prepared_prediction.input_lock_ref == self.producer_scope.input_lock_ref, "PROBABILITY_NATIVE_SCOPE")
+
+
+@dataclass(frozen=True, slots=True)
+class ProbabilityNativeUseAdmissionV1:
+    request: ProbabilityNativeUseRequestV1
+    accepted_use_decision_ref: str
+    accepted_use_policy_ref: str
+    accepted_transition_ref: str
+    available_ns: int
+    valid_until_ns: int
+    dependency_refs: tuple[str, ...]
+    policy_ref: str
+    policy_epoch: int
+    registry_version: str
+    process_ref: str
+    source_generation: int
+    invalidation_cut_ref: str
+
+    def __post_init__(self) -> None:
+        from .models import (_probability_require_v1, _probability_text_v1, _probability_int_v1,
+                             _probability_ns_v1, _probability_refs_v1)
+        need = _probability_require_v1
+        need(type(self.request) is ProbabilityNativeUseRequestV1, "PROBABILITY_NATIVE_USE_REQUEST")
+        for name in ("accepted_use_decision_ref", "accepted_use_policy_ref", "accepted_transition_ref", "policy_ref",
+                     "registry_version", "process_ref", "invalidation_cut_ref"):
+            _probability_text_v1(getattr(self, name))
+        _probability_ns_v1(self.available_ns); _probability_ns_v1(self.valid_until_ns)
+        _probability_int_v1(self.policy_epoch); _probability_int_v1(self.source_generation)
+        _probability_refs_v1(self.dependency_refs, nonempty=True)
+        need(self.accepted_use_decision_ref == self.request.selected_use_decision_ref and
+             self.accepted_use_policy_ref != self.request.producer_scope.policy_ref and
+             self.source_generation == self.request.prepared_prediction.generation,
+             "PROBABILITY_NATIVE_USE_BINDING")
+        need(self.available_ns < self.valid_until_ns <= self.request.prepared_prediction.valid_until_ns,
+             "PROBABILITY_NATIVE_USE_LIFETIME")
+        need({self.accepted_use_decision_ref, self.accepted_use_policy_ref, self.accepted_transition_ref,
+              self.request.producer_scope.policy_ref, *self.request.prepared_prediction.dependency_refs}.issubset(self.dependency_refs),
+             "PROBABILITY_NATIVE_USE_DEPENDENCIES")
 
 
 def _refs(value: object, name: str, *, required: bool = False) -> tuple[str, ...]:
@@ -184,7 +269,7 @@ class PermanentNoTradeEvidenceComparisonV1:
         }
         expected = sorted(
             utilities,
-            key=lambda key: (-utilities[key], conservative_priority[key]),
+            key=lambda key: (utilities[key].copy_negate(), conservative_priority[key]),
         )[0]
         if self.strongest_comparator != expected:
             raise ContractValidationError(
@@ -597,11 +682,19 @@ class ModelRiskEvidenceAdjudicatorV1:
             != adjudication_basis.expected_component_or_template_ref
             for row in lane_rows
         )
-        reserve_dominates = (
-            adjudication_basis.uncertainty_reserve
-            + adjudication_basis.model_risk_reserve
-            >= comparison.candidate_utility
-        )
+        try:
+            with localcontext(decimal_context_v1()) as context:
+                context.traps[Inexact] = True
+                combined_reserve = (
+                    adjudication_basis.uncertainty_reserve
+                    + adjudication_basis.model_risk_reserve
+                )
+        except DecimalException as exc:
+            raise NumericDomainError(
+                ReasonCode.INVALID_NUMERIC_INPUT,
+                "model-risk reserve sum must be exactly representable in the canonical Decimal context",
+            ) from exc
+        reserve_dominates = combined_reserve >= comparison.candidate_utility
         capacity_or_liquidity_veto = (
             adjudication_basis.capacity_hard_veto
             or adjudication_basis.liquidity_hard_veto
@@ -681,7 +774,7 @@ class ModelRiskEvidenceAdjudicatorV1:
             "NO_TRADE"
             if non_review_veto
             else "READY_FOR_INDEPENDENT_REVIEW"
-            if review_not_closed
+            if mutable["INDEPENDENT_REVIEW_NOT_CLOSED"].active
             else "CLOSED_INDEPENDENTLY_VALIDATED"
         )
         return ModelRiskEvidenceAssessmentV1(
@@ -708,3 +801,157 @@ if len(MODEL_RISK_CONTROL_IDS_V1) != 12 or len(NO_TRADE_CONDITION_IDS_V1) != 8:
         ReasonCode.SCHEMA_MISMATCH,
         "model-risk and permanent NO_TRADE denominators differ",
     )
+
+
+def _bind_probability_condition_evidence_v1(
+    *, scope: ProbabilityProducerScopeV1, read_snapshot: ProbabilityProducerReadSnapshotV1,
+    evaluated_ns: int, model_available_ns: int, model_valid_until_ns: int,
+    receipt_dependency_refs: tuple[str, ...], receipt_valid_until_ns: int,
+    conditions: tuple[NoTradeConditionOutcomeV1, ...],
+) -> tuple[NoTradeConditionOutcomeV1, ...]:
+    """Add one conservative probability-evidence floor to the original eight rows."""
+    from .models import ProbabilityProducerScopeV1, _probability_ns_v1, _probability_refs_v1
+    from .persistence import ProbabilityProducerReadSnapshotV1
+    from .receipts import _validate_probability_control_spine_v1
+
+    def need(ok, detail):
+        if not ok:
+            raise ContractValidationError(ReasonCode.INVALID_CONTRACT, detail)
+
+    need(type(scope) is ProbabilityProducerScopeV1 and type(read_snapshot) is ProbabilityProducerReadSnapshotV1
+         and read_snapshot.scope == scope, "PROBABILITY_RISK_SCOPE")
+    for instant in (evaluated_ns, model_available_ns, model_valid_until_ns, receipt_valid_until_ns):
+        _probability_ns_v1(instant)
+    _probability_refs_v1(receipt_dependency_refs, nonempty=True)
+    need(type(conditions) is tuple and len(conditions) == 8 and
+         all(type(row) is NoTradeConditionOutcomeV1 for row in conditions) and
+         tuple(row.condition_id for row in conditions) == NO_TRADE_CONDITION_IDS_V1,
+         "PROBABILITY_CONDITION_ROSTER")
+    need(read_snapshot.read_completed_ns <= evaluated_ns, "PROBABILITY_RISK_FUTURE_READ")
+    blocker = not (model_available_ns <= read_snapshot.read_completed_ns <= evaluated_ns < model_valid_until_ns
+                   and evaluated_ns < receipt_valid_until_ns)
+    retained = list(receipt_dependency_refs)
+    invalidated = set()
+    for record in read_snapshot.revocation_records:
+        _validate_probability_control_spine_v1(record)
+        payload = record.typed_payload
+        need(payload.scope == scope and payload.available_ns <= read_snapshot.read_completed_ns and
+             payload.effective_ns <= evaluated_ns, "PROBABILITY_RISK_REVOCATION_CUT")
+        invalidated.update(payload.body["invalidated_dependency_refs"])
+        retained.extend((record.record_id, *payload.dependency_refs))
+    blocker = blocker or bool(invalidated.intersection(receipt_dependency_refs))
+    prior = None
+    bad = green = 0
+    # A retained initial latch is conservative evidence; accepted genesis is
+    # reconstructed by the materializer. This consumer must never clear it.
+    latched = bool(read_snapshot.publication_records and
+                   read_snapshot.publication_records[0].typed_payload.body["after"]["latched"])
+    seen_rows, seen_clusters = set(), set()
+    for sequence, record in enumerate(read_snapshot.publication_records, 1):
+        _validate_probability_control_spine_v1(record)
+        payload, body = record.typed_payload, record.typed_payload.body
+        need(payload.scope == scope and payload.available_ns <= read_snapshot.read_completed_ns and
+             payload.effective_ns <= evaluated_ns and record.sequence == sequence, "PROBABILITY_RISK_PUBLICATION_CUT")
+        need(body["expected_head_ref"] == (None if prior is None else prior.record_id), "PROBABILITY_RISK_PUBLICATION_PARENT")
+        if prior is not None:
+            previous = prior.typed_payload.body["after"]
+            need(body["expected_high_watermark"] == previous["high_watermark"] and
+                 body["cutoff_ns"] >= previous["last_cutoff_ns"], "PROBABILITY_RISK_PUBLICATION_CURSOR")
+        if body["kind"] == "WINDOW":
+            for row in body["selected_rows"]:
+                need(row["cluster_id"] not in seen_clusters and not seen_rows.intersection(row["row_ids"]),
+                     "PROBABILITY_WINDOW_REUSE")
+                seen_clusters.add(row["cluster_id"]); seen_rows.update(row["row_ids"])
+            if body["family_result"] == "MATERIAL_BREACH":
+                bad, green = min(2, bad + 1), 0
+                latched = latched or bad == 2
+            elif body["family_result"] == "FAMILY_NONREJECTION":
+                bad, green = 0, min(2, green + 1)
+            else:
+                bad = green = 0
+        else:
+            bad = green = 0
+            latched = latched or body["kind"] == "HARD_FAILURE"
+            if prior is not None:
+                need(body["after"]["last_maturity_ns"] == prior.typed_payload.body["after"]["last_maturity_ns"],
+                     "PROBABILITY_NONWINDOW_MATURITY")
+        need((body["after"]["bad_streak"], body["after"]["green_streak"], body["after"]["latched"]) ==
+             (bad, green, latched), "PROBABILITY_RISK_STATE_TRANSITION")
+        retained.extend((record.record_id, *payload.dependency_refs))
+        prior = record
+    if prior is not None:
+        last = prior.typed_payload.body
+        blocker = (blocker or latched or last["kind"] == "EVIDENCE_UNAVAILABLE" or
+                   (last["kind"] == "WINDOW" and last["family_result"] == "UNAVAILABLE"))
+    for reference in receipt_dependency_refs:
+        record = read_snapshot.records_by_ref.get(reference)
+        if record is not None:
+            payload = record.typed_payload
+            need(payload.available_ns <= read_snapshot.read_completed_ns, "PROBABILITY_RISK_FUTURE_DEPENDENCY")
+            blocker = blocker or (payload.valid_until_ns is not None and evaluated_ns >= payload.valid_until_ns)
+    retained_refs = tuple(dict.fromkeys(retained))
+    before = conditions[1]
+    after = NoTradeConditionOutcomeV1(before.condition_id, before.active or blocker,
+        tuple(dict.fromkeys((*before.evidence_receipt_refs, *retained_refs))),
+        tuple(dict.fromkeys((*before.reason_codes, *((ReasonCode.ST12F_MODEL_RISK_VETO,) if blocker else ())))))
+    return (conditions[0], after, *conditions[2:])
+
+
+from .models import (
+    ProbabilityProducerScopeV1, _ProbabilityWindowRequestV1, _probability_require_v1,
+    _probability_projection_integer_v1, _probability_projection_names_v1,
+)
+import copy as _probability_copy_v1
+
+
+def _probability_genesis_v1(scope: ProbabilityProducerScopeV1, *, reference_clusters: tuple[str, ...], reference_rows: tuple[str, ...], reference_cutoff_ns: int, initial_latch: bool) -> dict:
+    _probability_require_v1(type(scope) is ProbabilityProducerScopeV1 and type(initial_latch) is bool, 'GENESIS_TYPE')
+    _probability_projection_names_v1(reference_clusters, 'REFERENCE_CLUSTERS', empty=True)
+    _probability_projection_names_v1(reference_rows, 'REFERENCE_ROWS', empty=True)
+    _probability_projection_integer_v1(reference_cutoff_ns, 'REFERENCE_CUTOFF_NS', None)
+    return {'scope': scope.as_dict(), 'head_ref': None, 'sequence': 0, 'high_watermark': 0, 'last_maturity_ns': reference_cutoff_ns, 'last_cutoff_ns': reference_cutoff_ns, 'bad_streak': 0, 'green_streak': 0, 'latched': initial_latch, 'used_clusters': list(reference_clusters), 'used_rows': list(reference_rows)}
+
+def _derive_probability_window_v1(state: dict, request: _ProbabilityWindowRequestV1, *, window_size: int, max_catalog_rows: int) -> dict:
+    """Pure window transition over detached accepted-owner projections."""
+    _probability_require_v1(type(window_size) is int and window_size == 200, 'WINDOW_SIZE')
+    _probability_projection_integer_v1(max_catalog_rows, 'CATALOG_BUDGET', 1)
+    _probability_require_v1(type(request) is _ProbabilityWindowRequestV1, 'REQUEST_TYPE')
+    _probability_require_v1(state['scope'] == request.scope.as_dict(), 'SCOPE_MISMATCH')
+    _probability_require_v1((state['head_ref'], state['sequence'], state['high_watermark']) == (request.expected_head_ref, request.expected_sequence, request.expected_high_watermark), 'STALE_PARENT')
+    _probability_require_v1(request.cutoff_ns >= state['last_cutoff_ns'], 'CUTOFF_REGRESSION')
+    selected = ()
+    if request.kind == 'WINDOW':
+        _probability_require_v1(sum((len(r.row_ids) for r in request.catalog)) <= max_catalog_rows, 'CATALOG_RESOURCE_LIMIT')
+        cids, rids = ([], [])
+        maturity = state['last_maturity_ns']
+        for offset, row in enumerate(request.catalog, 1):
+            _probability_require_v1(row.ordinal == state['high_watermark'] + offset, 'ORDINAL_GAP')
+            _probability_require_v1(row.maturity_ns >= maturity, 'MATURITY_ORDER')
+            maturity = row.maturity_ns
+            cids.append(row.cluster_id)
+            rids.extend(row.row_ids)
+        _probability_require_v1(len(cids) == len(set(cids)) and len(rids) == len(set(rids)), 'CATALOG_DUPLICATE')
+        _probability_require_v1(not set(cids).intersection(state['used_clusters']), 'CLUSTER_REUSE')
+        _probability_require_v1(not set(rids).intersection(state['used_rows']), 'SOURCE_ROW_REUSE')
+        mature = tuple((r for r in request.catalog if r.maturity_ns <= request.cutoff_ns))
+        if len(mature) < window_size:
+            return {'disposition': 'NOT_READY_NO_TRANSITION', 'state': _probability_copy_v1.deepcopy(state), 'record': None, 'model_use_authorized': False}
+        selected = mature[:window_size]
+    after = _probability_copy_v1.deepcopy(state)
+    after.update(head_ref=request.receipt_id, sequence=state['sequence'] + 1, last_cutoff_ns=request.cutoff_ns)
+    if selected:
+        after['high_watermark'] = selected[-1].ordinal
+        after['last_maturity_ns'] = selected[-1].maturity_ns
+        after['used_clusters'].extend((r.cluster_id for r in selected))
+        after['used_rows'].extend((x for r in selected for x in r.row_ids))
+    if request.kind == 'HARD_FAILURE':
+        after.update(latched=True, bad_streak=0, green_streak=0)
+    elif request.kind == 'EVIDENCE_UNAVAILABLE' or request.family_result == 'UNAVAILABLE':
+        after.update(bad_streak=0, green_streak=0)
+    elif request.family_result == 'MATERIAL_BREACH':
+        after.update(bad_streak=min(2, state['bad_streak'] + 1), green_streak=0)
+        after['latched'] = state['latched'] or after['bad_streak'] == 2
+    else:
+        after.update(bad_streak=0, green_streak=min(2, state['green_streak'] + 1))
+    record = {'schema_version': 'PROBABILITY_WINDOW_DERIVATION_V1', 'request': request.as_dict(), 'sequence': after['sequence'], 'parent_ref': state['head_ref'], 'selected_rows': [r.as_dict() for r in selected], 'after': {k: v for k, v in after.items() if k not in ('used_rows', 'used_clusters')}, 'authority_class': 'NO_EFFECT_MODEL_REVIEW_EVIDENCE'}
+    return {'disposition': 'APPEND_CANDIDATE', 'state': after, 'record': record, 'model_use_authorized': False}

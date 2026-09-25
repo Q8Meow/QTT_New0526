@@ -120,18 +120,50 @@ def expand_payload_records(
     payload: dict[str, Any],
     shared_dictionary: dict[str, Any] | None = None,
 ) -> list[dict[str, Any]]:
-    shared_dictionary = shared_dictionary or {}
-    defaults = dict(payload.get("compact_record_defaults") or {})
-    field_by_alias = dict(shared_dictionary.get("compact_field_by_alias") or {})
-    strings = list(shared_dictionary.get("compact_string_values") or [])
-    return [
-        {
-            **_decode_compact_value(defaults, field_by_alias, strings),
-            **_decode_compact_value(record, field_by_alias, strings),
-        }
-        for record in payload.get("records") or []
-        if isinstance(record, dict)
-    ]
+    """Expand JSON-native compact records without coercion or silent row loss.
+
+    Absent/null optional containers retain their empty-container behavior.
+    A record overrides a default field; two keys in the same object must not
+    decode to the same field. Mutable defaults are decoded afresh per record.
+    This codec does not admit a source generation or authorize its use.
+    """
+    if type(payload) is not dict:
+        raise TypeError("compact payload must be a JSON object")
+    if shared_dictionary is None:
+        shared_dictionary = {}
+    if type(shared_dictionary) is not dict:
+        raise TypeError("shared dictionary must be a JSON object or None")
+    defaults = payload.get("compact_record_defaults")
+    defaults = {} if defaults is None else defaults
+    aliases = shared_dictionary.get("compact_field_by_alias")
+    aliases = {} if aliases is None else aliases
+    strings = shared_dictionary.get("compact_string_values")
+    strings = [] if strings is None else strings
+    records = payload.get("records")
+    records = [] if records is None else records
+    if type(defaults) is not dict or type(aliases) is not dict:
+        raise TypeError("compact defaults and field aliases must be JSON objects")
+    if type(strings) is not list or any(type(item) is not str for item in strings):
+        raise TypeError("compact string values must be a JSON array of strings")
+    if type(records) is not list:
+        raise TypeError("compact records must be a JSON array")
+    if any(type(alias) is not str or type(field) is not str
+           for alias, field in aliases.items()):
+        raise TypeError("compact field aliases must map strings to strings")
+    if len(set(aliases.values())) != len(aliases):
+        raise ValueError("compact field aliases must be one-to-one")
+    field_by_alias = dict(aliases)
+    strings = list(strings)
+    expanded: list[dict[str, Any]] = []
+    for record in records:
+        if type(record) is not dict:
+            raise TypeError("every compact record must be a JSON object")
+        decoded_defaults = _decode_compact_value(defaults, field_by_alias, strings)
+        decoded_record = _decode_compact_value(record, field_by_alias, strings)
+        if type(decoded_defaults) is not dict or type(decoded_record) is not dict:
+            raise TypeError("compact defaults and records must decode to JSON objects")
+        expanded.append({**decoded_defaults, **decoded_record})
+    return expanded
 
 
 def _field_alias(index: int) -> str:
@@ -189,6 +221,18 @@ def _encode_compact_value(
     return value
 
 
+def _compact_string_at(index: Any, strings: list[Any]) -> str:
+    """Read only a producer-domain string-table index; never coerce it."""
+    if type(index) is not int:
+        raise TypeError("compact string index must be a JSON integer, not a boolean")
+    if index < 0 or index >= len(strings):
+        raise IndexError("compact string index is outside the string table")
+    value = strings[index]
+    if type(value) is not str:
+        raise TypeError("compact string-table entry must be a string")
+    return value
+
+
 def _decode_compact_value(
     value: Any,
     field_by_alias: dict[str, str],
@@ -196,13 +240,23 @@ def _decode_compact_value(
 ) -> Any:
     if isinstance(value, dict):
         if set(value) == {"$s"}:
-            return strings[int(value["$s"])]
+            return _compact_string_at(value["$s"], strings)
         if set(value) == {"$l"}:
-            return [strings[int(index)] for index in value["$l"]]
-        return {
-            field_by_alias.get(key, key): _decode_compact_value(item, field_by_alias, strings)
-            for key, item in value.items()
-        }
+            indexes = value["$l"]
+            if type(indexes) is not list:
+                raise TypeError("compact string-list indices must be a JSON array")
+            return [_compact_string_at(index, strings) for index in indexes]
+        decoded: dict[str, Any] = {}
+        for key, item in value.items():
+            if type(key) is not str:
+                raise TypeError("compact object keys must be strings")
+            field = field_by_alias.get(key, key)
+            if type(field) is not str:
+                raise TypeError("decoded compact field must be a string")
+            if field in decoded:
+                raise ValueError("compact object keys decode to the same field")
+            decoded[field] = _decode_compact_value(item, field_by_alias, strings)
+        return decoded
     if isinstance(value, list):
         return [_decode_compact_value(item, field_by_alias, strings) for item in value]
     return value

@@ -416,7 +416,7 @@ def _final_summary_count_failures(
     return failures
 
 
-def _failures() -> list[str]:
+def _failures_owned_v1() -> list[str]:
     failures: list[str] = []
     for name in REPORT_NAMES:
         if not report_path(name).is_file():
@@ -486,7 +486,7 @@ def _failures() -> list[str]:
             no_delete,
             final_summary,
             live_validation_scope,
-            current_branch_context(Path(__file__).resolve().parents[1]).branch,
+            _builder_branch_context_v1(Path(__file__).resolve().parents[1]).branch,
         )
     )
     path_audit = read_json(report_path("PR168_RP5A_PathAudit.report.json"))
@@ -769,8 +769,26 @@ def _failures() -> list[str]:
     return failures
 
 
-def run_validation() -> dict[str, Any]:
-    failures = _failures()
+def _builder_branch_context_v1(repo_root):
+    from tools.build_pr168_rp5a_legacy_semantic_audit import _require_builder_reads_v1
+
+    owner = _require_builder_reads_v1()
+    def reader(root, arguments):
+        if root != repo_root:
+            raise ValueError("validator branch root differs from original binding")
+        return 0, owner.text(arguments, empty=tuple(arguments) == ("branch", "--show-current")), None
+    return current_branch_context(repo_root, git_stdout=reader)
+
+
+def _failures(*, builder_read_context=None) -> list[str]:
+    from tools.build_pr168_rp5a_legacy_semantic_audit import _builder_reads_or_current_v1
+
+    with _builder_reads_or_current_v1(builder_read_context):
+        return _failures_owned_v1()
+
+
+def run_validation(*, builder_read_context=None) -> dict[str, Any]:
+    failures = _failures(builder_read_context=builder_read_context)
     if failures:
         raise AssertionError("\n".join(failures))
     return {

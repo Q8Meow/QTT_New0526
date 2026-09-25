@@ -8,6 +8,79 @@ import re
 import subprocess
 from typing import Callable, Sequence
 
+
+def _run_pr152_repository_read(
+    repo_root: pathlib.Path, arguments: Sequence[str]
+) -> subprocess.CompletedProcess[str]:
+    """The closed PR152 read profile; discovery failure is not a child result."""
+    if isinstance(arguments, (str, bytes)) or not isinstance(arguments, Sequence):
+        raise ValueError("PR152 read arguments must be a string sequence")
+    if not all(type(value) is str for value in arguments):
+        raise ValueError("PR152 read arguments must be exact strings")
+    selected = tuple(arguments)
+    fixed = {
+        ("ls-files", "-z"),
+        ("ls-files", "--others", "--exclude-standard", "-z"),
+        ("status", "--porcelain=v1", "-z", "--untracked-files=all"),
+        ("branch", "--show-current"),
+        ("rev-parse", "--abbrev-ref", "HEAD"),
+    }
+    if selected not in fixed:
+        if (len(selected) != 6 or selected[:5] != (
+            "diff", "--no-ext-diff", "--no-textconv", "--unified=0", "--"
+        )):
+            raise ValueError("unadmitted PR152 Git read vector")
+        path = selected[5]
+        if (not path or any(character in path for character in "\\\x00\r\n:")
+                or path.startswith("/")
+                or any(part in {"", ".", ".."} for part in path.split("/"))):
+            raise ValueError("invalid literal PR152 diff path")
+    root_text = str(repo_root)
+    if any(ord(character) < 32 or ord(character) == 127 for character in root_text):
+        raise ValueError("invalid repository root text")
+    root = pathlib.Path(repo_root).resolve(strict=True)
+    if not root.is_dir():
+        raise NotADirectoryError(str(root))
+    environment: dict[str, str] = {}
+    seen: set[str] = set()
+    for key, value in os.environ.items():
+        if (type(key) is not str or type(value) is not str or not key
+                or "=" in key or "\x00" in key or "\x00" in value
+                or key.upper() in seen):
+            raise ValueError("invalid or case-colliding child environment")
+        seen.add(key.upper())
+        if not key.upper().startswith("GIT_"):
+            environment[key] = value
+    environment.update({
+        "GIT_CEILING_DIRECTORIES": str(root.parent),
+        "GIT_OPTIONAL_LOCKS": "0", "GIT_TERMINAL_PROMPT": "0",
+        "GIT_NO_REPLACE_OBJECTS": "1", "GIT_NO_LAZY_FETCH": "1",
+        "GIT_ALLOW_PROTOCOL": "", "GIT_CONFIG_NOSYSTEM": "1",
+        "GIT_CONFIG_SYSTEM": os.devnull, "GIT_CONFIG_GLOBAL": os.devnull,
+        "GIT_TRACE2": "0", "GIT_TRACE2_PERF": "0", "GIT_TRACE2_EVENT": "0",
+        "GIT_CONFIG_COUNT": "2", "GIT_CONFIG_KEY_0": "core.fsmonitor",
+        "GIT_CONFIG_VALUE_0": "false", "GIT_CONFIG_KEY_1": "protocol.allow",
+        "GIT_CONFIG_VALUE_1": "never",
+    })
+    prefix = ["git", "--no-pager", "--literal-pathspecs", "-c",
+              "core.fsmonitor=false", "-c", "protocol.allow=never"]
+    options = dict(cwd=root, env=environment, stdin=subprocess.DEVNULL,
+                   shell=False, check=False, capture_output=True,
+                   text=True, encoding="utf-8", errors="strict")
+    discovery = subprocess.run([*prefix, "rev-parse", "--show-toplevel"], **options)
+    if type(discovery.returncode) is not int or discovery.returncode != 0:
+        raise ValueError(f"PR152 repository discovery failed: {discovery!r}")
+    discovered = discovery.stdout.removesuffix("\n").removesuffix("\r")
+    if (not discovered or any(ord(character) < 32 or ord(character) == 127
+                               for character in discovered)):
+        raise ValueError("invalid Git repository root text")
+    if pathlib.Path(discovered).resolve(strict=True) != root:
+        raise ValueError("REPOSITORY_ROOT_MISMATCH")
+    completed = subprocess.run([*prefix, *selected], **options)
+    if type(completed.returncode) is not int:
+        raise ValueError("Git read did not retain an integer native exit")
+    return completed
+
 BRANCH_CONTEXT_ENV_CANDIDATES = (
     "GITHUB_HEAD_REF",
     "GITHUB_REF_NAME",

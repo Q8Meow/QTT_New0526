@@ -15,7 +15,10 @@ import inspect
 import json
 import ntpath
 import os
+import stat
 import time
+import threading
+from contextlib import nullcontext
 from typing import Sequence
 
 REPO_ROOT = pathlib.Path(__file__).resolve().parents[1]
@@ -34,6 +37,8 @@ from tools.validation_reliability import (  # noqa: E402
     _require_local_layout,
     _require_active_local_run_cache,
     _local_unlinked_path,
+    _stat_is_reparse_point,
+    _same_observed_file,
     _LOCAL_RUN_NAME,
     PYTEST_BASETEMP_DIR_NAME,
     RUN_ID_ENV,
@@ -53,6 +58,8 @@ from tools.validation_reliability import (  # noqa: E402
     resolve_validation_run_paths,
     semantic_candidate_paths,
     supervise_command,
+    _command_requires_process_retention_v1,
+    _scan_raise_errors,
     text_integrity_failure_codes,
     validate_complete_run_evidence,
     validate_published_completion_receipt,
@@ -85,6 +92,7 @@ PR152_BUILD_REPORT_CACHE_KIND = "qtt_pr152_build_report"
 PR152_BUILD_REPORT_CACHE_SCHEMA_VERSION = 1
 _RUN_COMMANDS_ACTIVE_PATHS: ValidationRunPathsV1 | None = None
 _LAST_COMMAND_RECEIPTS: tuple[CommandExecutionReceiptV1, ...] = ()
+_RUN_COMMANDS_SUPERVISION = None
 _LAST_PLANNED_COMMAND_COUNT: int | None = None
 _LAST_EXPECTED_COMMAND_PLAN: tuple[CommandEvidencePlanEntry, ...] = ()
 _ACTIVE_SEMANTIC_CHANGED_PATHS: tuple[str, ...] | None = None
@@ -94,6 +102,13 @@ _ACTIVE_TEXT_INTEGRITY_STATE = "NOT_RUN"
 _ACTIVE_FILESYSTEM_PROBE: FilesystemProbeReceiptV1 | None = None
 _RUN_PROVENANCE_WRITTEN = False
 _RUN_PROVENANCE_ATTEMPTED = False
+_ACTIVE_CANDIDATE_SOURCE = None
+_SCAN_MAIN_LOCK = threading.Lock()
+_ACTIVE_SCAN_CAPACITY_SOURCE = None
+_ACTIVE_SCAN_LAUNCH = None
+_SCAN_CAPACITY_ATTEMPTED = False
+
+
 _execute_supervised_command = supervise_command
 FAST_PREFLIGHT_PHASE = "fast-preflight"
 DETERMINISTIC_VALIDATORS_PHASE = "deterministic-validators"
@@ -2992,14 +3007,34 @@ def _generated_gate_output_path(
             f"{normalized or '<empty>'}"
         )
 
-    resolved_root = repo_root.resolve()
-    resolved_path = resolved_root.joinpath(*segments).resolve()
-    if not _path_is_relative_to(resolved_path, resolved_root):
+    # Keep the lexical leaf: resolving it before unlink could select a different
+    # file. The existing central reparse predicate is also used on Windows.
+    absolute_root = repo_root.absolute()
+    if ".." in absolute_root.parts:
         raise RuntimeError(
-            "VALIDATION_GATE_UNSAFE_GENERATED_OUTPUT_PATH: "
-            f"{normalized}"
+            "VALIDATION_GATE_UNSAFE_GENERATED_OUTPUT_PATH: " + normalized
         )
-    return resolved_path
+    candidate = absolute_root.joinpath(*segments)
+    chain = [*reversed(absolute_root.parents), absolute_root]
+    current = absolute_root
+    for segment in segments:
+        current = current / segment
+        chain.append(current)
+    for component in chain:
+        try:
+            observed = component.lstat()
+        except FileNotFoundError:
+            # The lexical validation API also supports not-yet-created leaves.
+            break
+        if stat.S_ISLNK(observed.st_mode) or _stat_is_reparse_point(observed):
+            raise RuntimeError(
+                "VALIDATION_GATE_UNSAFE_GENERATED_OUTPUT_PATH: " + normalized
+            )
+        if component != candidate and not stat.S_ISDIR(observed.st_mode):
+            raise RuntimeError(
+                "VALIDATION_GATE_UNSAFE_GENERATED_OUTPUT_PATH: " + normalized
+            )
+    return candidate
 
 
 def _restore_untracked_gate_side_effects(
@@ -3016,101 +3051,315 @@ def _restore_untracked_gate_side_effects(
     unexpected_paths = [
         path for path in new_paths if not _is_tracked_generated_output_path(path)
     ]
-    generated_paths = [
-        path for path in new_paths if _is_tracked_generated_output_path(path)
-    ]
-    resolved_generated_paths = [
-        (path, _generated_gate_output_path(repo_root, path))
-        for path in generated_paths
-    ]
-
-    restored: list[str] = []
-    for path_text, path in resolved_generated_paths:
-        if path.is_symlink() or path.is_file():
-            path.unlink()
-            restored.append(path_text)
-        elif path.exists():
-            raise RuntimeError(
-                "VALIDATION_GATE_GENERATED_OUTPUT_NOT_FILE: "
-                f"{path_text}"
-            )
-
     if unexpected_paths:
         raise RuntimeError(
             "VALIDATION_GATE_UNTRACKED_OUTPUT_OUTSIDE_GENERATED_PREFIX: "
             + ",".join(unexpected_paths)
         )
-    return tuple(restored)
-
-
-def _modified_file_snapshots(
-    repo_root: pathlib.Path,
-    paths: set[str],
-) -> dict[str, bytes | None]:
-    snapshots: dict[str, bytes | None] = {}
-    for path_text in sorted(paths):
-        path = repo_root / path_text
-        snapshots[path_text] = path.read_bytes() if path.exists() else None
-    return snapshots
-
-
-def _restore_modified_file_snapshots(
-    repo_root: pathlib.Path,
-    snapshots: dict[str, bytes | None],
-) -> tuple[str, ...]:
-    restored: list[str] = []
-    for path_text, content in sorted(snapshots.items()):
-        path = repo_root / path_text
-        if content is None:
-            if path.exists() and path.is_file():
-                path.unlink()
-                restored.append(path_text)
+    # Validate the complete selected batch before its first deletion. This is
+    # not an atomic filesystem transaction or an occurrence-authorization grant.
+    prepared: list[tuple[str, pathlib.Path, os.stat_result]] = []
+    for path_text in new_paths:
+        path = _generated_gate_output_path(repo_root, path_text)
+        try:
+            observed = path.lstat()
+        except FileNotFoundError:
             continue
-        if path.exists() and path.read_bytes() == content:
-            continue
-        path.parent.mkdir(parents=True, exist_ok=True)
-        path.write_bytes(content)
-        restored.append(path_text)
-    return tuple(restored)
+        if not stat.S_ISREG(observed.st_mode) or _stat_is_reparse_point(observed):
+            raise RuntimeError(
+                "VALIDATION_GATE_GENERATED_OUTPUT_NOT_FILE: " + path_text
+            )
+        prepared.append((path_text, path, observed))
+    if prepared:
+        raise RuntimeError("VALIDATION_CANDIDATE_BASELINE_REQUIRED")
+    return ()
 
 
-def _restore_tracked_gate_side_effects(
-    repo_root: pathlib.Path,
-    initially_modified_paths: set[str],
-) -> tuple[str, ...]:
-    restore_paths = sorted(_tracked_modified_paths(repo_root) - initially_modified_paths)
-    if not restore_paths:
-        return ()
+class _ValidationCandidateCustodyV1:
+    """One explicitly admitted working candidate and occurrence-specific effects.
 
-    path_batches: list[list[str]] = []
-    current_batch: list[str] = []
-    current_length = 0
-    for path in restore_paths:
-        quoted_length = len(subprocess.list2cmdline([path])) + 1
-        if current_batch and current_length + quoted_length > 12_000:
-            path_batches.append(current_batch)
-            current_batch = []
-            current_length = 0
-        current_batch.append(path)
-        current_length += quoted_length
-    if current_batch:
-        path_batches.append(current_batch)
+    The supplied enumeration and exclusive-custody check are the original run
+    owner's inputs. Neither a generated prefix nor this class grants effects.
+    """
+    def __init__(self, *, repo_root, plan, observe_paths, check_exclusive, index_path,
+                 effects_by_occurrence, ignored_paths, entry_limit, snapshot_byte_limit,
+                 read_byte_limit, deadline_ns, operation_checks):
+        from types import MappingProxyType
+        if (type(plan) is not tuple or not plan or not callable(observe_paths)
+                or not callable(check_exclusive) or type(effects_by_occurrence) is not dict
+                or type(ignored_paths) is not tuple):
+            raise ValueError("original candidate and effect inputs required")
+        for bound in (entry_limit, snapshot_byte_limit, read_byte_limit, deadline_ns):
+            if type(bound) is not int or bound <= 0:
+                raise ValueError("explicit candidate resource limits required")
+        if set(effects_by_occurrence) != set(range(1, len(plan) + 1)):
+            raise ValueError("candidate effects do not cover original occurrences")
+        if (type(operation_checks) is not dict or set(operation_checks) != set(effects_by_occurrence)
+                or any(not callable(check) for check in operation_checks.values())):
+            raise ValueError("original per-occurrence source/input/environment/resource checks required")
+        self.operation_checks = MappingProxyType(dict(operation_checks))
+        self.root = pathlib.Path(repo_root).absolute()
+        self.plan, self.observe_paths, self.check_exclusive = plan, observe_paths, check_exclusive
+        self.effects = MappingProxyType({i: frozenset(self._paths(value, entry_limit))
+            for i, value in effects_by_occurrence.items()})
+        self.ignored = self._paths(ignored_paths, entry_limit)
+        self.all_effects = frozenset(path for value in self.effects.values() for path in value)
+        self.entry_limit, self.snapshot_byte_limit = entry_limit, snapshot_byte_limit
+        self.remaining_read_bytes, self.deadline_ns = read_byte_limit, deadline_ns
+        self.index_path = None if index_path is None else pathlib.Path(index_path).absolute()
+        if self.index_path is None and (self.root / ".git").exists():
+            raise ValueError("actual active index custody is required")
+        self.process_id, self.thread_id = os.getpid(), threading.get_ident()
+        self.state, self.failure, self.completed_actions = "CAPTURING", None, []
+        self.active_occurrence, self.permitted_since_barrier = None, set()
+        self.completed_occurrences = set()
+        self._check()
+        paths = self._universe()
+        if self.index_path is not None:
+            index_info = self.index_path.lstat()
+            if index_info.st_size > self.snapshot_byte_limit:
+                raise RuntimeError("VALIDATION_CANDIDATE_SNAPSHOT_BUDGET")
+        self.index_baseline = self._read(self.index_path) if self.index_path is not None else None
+        self.index_snapshot_bytes = 0 if self.index_baseline is None else len(self.index_baseline[1])
+        self.baseline = MappingProxyType(self._snapshot(paths, baseline=True))
+        self._settled_snapshot = self.baseline
+        self.state = "BASELINE_READY"
 
-    for path_batch in path_batches:
-        returncode, stdout, stderr = _git_stdout(
-            repo_root,
-            [
-                "restore",
-                "--source=HEAD",
-                "--worktree",
-                "--",
-                *path_batch,
-            ],
-        )
-        if returncode != 0:
-            detail = stderr.strip() or stdout.strip() or "git restore failed"
-            raise RuntimeError(detail)
-    return tuple(restore_paths)
+    @staticmethod
+    def _paths(paths, limit):
+        if type(paths) is not tuple or len(paths) > limit:
+            raise ValueError("complete bounded candidate path tuple required")
+        if (len(set(paths)) != len(paths) or any(type(p) is not str or
+                not _is_portable_relative_repo_path(p) for p in paths)):
+            raise ValueError("invalid or duplicate candidate path")
+        if len({p.casefold() for p in paths}) != len(paths):
+            raise ValueError("candidate path alias")
+        return paths
+
+    def _check(self):
+        if self.failure is not None:
+            raise RuntimeError("ENGVR_PREPUBLICATION_CUSTODY_FAILED: prior restoration failure; not retried") from self.failure
+        if (os.getpid() != self.process_id or threading.get_ident() != self.thread_id
+                or time.monotonic_ns() >= self.deadline_ns or self.check_exclusive() is not None):
+            raise RuntimeError("VALIDATION_CANDIDATE_CUSTODY_UNAVAILABLE")
+
+    def _universe(self):
+        self._check()
+        observed = self._paths(self.observe_paths(), self.entry_limit)
+        result = tuple(sorted(set(observed) | set(self.ignored) | self.all_effects,
+                              key=lambda path: (path.casefold(), path)))
+        self._paths(result, self.entry_limit)
+        return result
+
+    def _read(self, path):
+        from tools.validation_reliability import (_open_regular_worktree_descriptor,
+                                                  _local_unlinked_path, _scan_same_api_version)
+        self._check()
+        _local_unlinked_path(path.parent)
+        try:
+            before = path.lstat()
+        except FileNotFoundError:
+            return None
+        if (not stat.S_ISREG(before.st_mode) or _stat_is_reparse_point(before)
+                or before.st_nlink != 1 or before.st_size > self.remaining_read_bytes):
+            raise RuntimeError("VALIDATION_CANDIDATE_UNSUPPORTED_OR_UNBOUNDED_FILE: " + str(path))
+        descriptor = _open_regular_worktree_descriptor(path, nonblocking=True)
+        errors = []
+        result = None
+        try:
+            opened = os.fstat(descriptor)
+            if not _same_observed_file(before, opened) or opened.st_nlink != 1:
+                raise RuntimeError("VALIDATION_CANDIDATE_FILE_SUBSTITUTION")
+            data = bytearray()
+            while True:
+                self._check()
+                # Charge every acquired byte, including a changed-size sentinel.
+                chunk = os.read(descriptor, min(65536, before.st_size - len(data) + 1))
+                if len(chunk) > self.remaining_read_bytes:
+                    raise RuntimeError("VALIDATION_CANDIDATE_READ_BUDGET")
+                self.remaining_read_bytes -= len(chunk)
+                if not chunk:
+                    break
+                data.extend(chunk)
+                if len(data) > before.st_size:
+                    raise RuntimeError("VALIDATION_CANDIDATE_FILE_GREW")
+            after = path.lstat()
+            if (len(data) != before.st_size or _scan_same_api_version(opened) !=
+                    _scan_same_api_version(os.fstat(descriptor)) or
+                    _scan_same_api_version(before) != _scan_same_api_version(after)):
+                raise RuntimeError("VALIDATION_CANDIDATE_UNSTABLE_FILE")
+            result = (stat.S_IMODE(before.st_mode), bytes(data))
+        except BaseException as exc:
+            errors.append(exc)
+        try:
+            os.close(descriptor)
+        except BaseException as exc:
+            errors.append(exc)
+        if len(errors) == 1:
+            raise errors[0]
+        if errors:
+            raise BaseExceptionGroup("candidate read and close failures", errors)
+        self._check()
+        return result
+
+    def _snapshot(self, paths, *, baseline=False):
+        # Complete size preflight before retaining any candidate contents.
+        total = self.index_snapshot_bytes
+        for relative in paths:
+            path = self.root / relative
+            try:
+                info = path.lstat()
+            except FileNotFoundError:
+                continue
+            if not stat.S_ISREG(info.st_mode) or _stat_is_reparse_point(info) or info.st_nlink != 1:
+                raise RuntimeError("VALIDATION_CANDIDATE_UNSUPPORTED_FILE: " + relative)
+            total += info.st_size
+            if total > self.snapshot_byte_limit:
+                raise RuntimeError("VALIDATION_CANDIDATE_SNAPSHOT_BUDGET")
+        if total - self.index_snapshot_bytes > self.remaining_read_bytes:
+            raise RuntimeError("VALIDATION_CANDIDATE_READ_BUDGET")
+        return {relative: self._read(self.root / relative) for relative in paths}
+
+    def begin_occurrence(self, index, entry, *, environment, timeout_seconds, scratch_roots):
+        self._check()
+        if (type(index) is not int or not 1 <= index <= len(self.plan)
+                or entry is not self.plan[index - 1] or self.active_occurrence is not None
+                or index in self.completed_occurrences):
+            raise RuntimeError("VALIDATION_CANDIDATE_ORIGINAL_OCCURRENCE_REQUIRED")
+        # These are the original operation-specific accepted inputs and resource
+        # controls, not the union of other commands' permissions.
+        if self.operation_checks[index](entry=entry, environment=environment,
+                timeout_seconds=timeout_seconds, scratch_roots=scratch_roots) is not None:
+            raise RuntimeError("VALIDATION_OPERATION_INPUT_RESOURCE_BINDING_FAILED")
+        try:
+            self._occurrence_before = self._snapshot(self._universe())
+            prior = self._settled_snapshot
+            if any(prior.get(p) != self._occurrence_before.get(p)
+                   for p in set(prior) | set(self._occurrence_before)):
+                raise RuntimeError("VALIDATION_CANDIDATE_CHANGED_BETWEEN_OCCURRENCES")
+            if self.index_path is not None and self._read(self.index_path) != self.index_baseline:
+                raise RuntimeError("VALIDATION_CANDIDATE_INDEX_CHANGED")
+        except BaseException as exc:
+            self.failure, self.state = exc, "CLEANUP_REJECTED"
+            raise
+        self.active_occurrence = index
+        self.permitted_since_barrier.update(self.effects[index])
+
+    def end_occurrence(self, index, entry):
+        self._check()
+        if self.active_occurrence != index or entry is not self.plan[index - 1]:
+            raise RuntimeError("VALIDATION_CANDIDATE_PROCESS_ASSOCIATION")
+        try:
+            after = self._snapshot(self._universe())
+            before = self._occurrence_before
+            delta = {p for p in set(before) | set(after) if before.get(p) != after.get(p)}
+            forbidden = delta - self.effects[index]
+            if forbidden:
+                raise RuntimeError("VALIDATION_CANDIDATE_UNADMITTED_EFFECT: " + ",".join(sorted(forbidden)))
+            if self.index_path is not None and self._read(self.index_path) != self.index_baseline:
+                raise RuntimeError("VALIDATION_CANDIDATE_INDEX_CHANGED")
+        except BaseException as exc:
+            self.failure, self.state = exc, "CLEANUP_REJECTED"
+            raise
+        self.completed_occurrences.add(index)
+        self.active_occurrence = None
+        self._settled_snapshot = after
+
+    def restore(self):
+        self._check()
+        if self.active_occurrence is not None:
+            raise RuntimeError("VALIDATION_CANDIDATE_CHILD_STILL_OWNED")
+        applying = False
+        try:
+            self.state = "OBSERVED"
+            paths = self._universe()
+            current = self._snapshot(paths)
+            if any(current.get(p) != self._settled_snapshot.get(p)
+                   for p in set(current) | set(self._settled_snapshot)):
+                raise RuntimeError("VALIDATION_CANDIDATE_CHANGED_BEFORE_RESTORATION")
+            if self.index_path is not None and self._read(self.index_path) != self.index_baseline:
+                raise RuntimeError("VALIDATION_CANDIDATE_INDEX_CHANGED")
+            changed = sorted((p for p in set(current) | set(self.baseline)
+                if current.get(p) != self.baseline.get(p)), key=lambda path: (path.casefold(), path))
+            forbidden = set(changed) - self.permitted_since_barrier
+            if forbidden:
+                raise RuntimeError("VALIDATION_CANDIDATE_UNADMITTED_EFFECT: " + ",".join(sorted(forbidden)))
+            plan = tuple((p, current.get(p), self.baseline.get(p)) for p in changed)
+            self.state = "PLAN_VALIDATED"
+            for relative, before, after in plan:
+                self._check()
+                path = self.root / relative
+                if self._read(path) != before:
+                    raise RuntimeError("VALIDATION_CANDIDATE_CONCURRENT_BEFORE_STATE: " + relative)
+                before_identity = None if before is None else path.lstat()
+                applying = True
+                self.state = "APPLYING"
+                if after is None:
+                    path.unlink()
+                else:
+                    mode, content = after
+                    # No parent creation and no truncation until the original
+                    # observed file handle is checked under exclusive custody.
+                    flags = os.O_WRONLY | int(getattr(os, "O_BINARY", 0))
+                    if before is None:
+                        flags |= os.O_CREAT | os.O_EXCL
+                    else:
+                        flags |= int(getattr(os, "O_NOFOLLOW", 0))
+                    descriptor = os.open(path, flags, mode)
+                    errors = []
+                    try:
+                        info = os.fstat(descriptor)
+                        if not stat.S_ISREG(info.st_mode) or info.st_nlink != 1 or not _same_observed_file(info, path.lstat()):
+                            raise RuntimeError("VALIDATION_CANDIDATE_WRITE_IDENTITY")
+                        if before_identity is not None and not _same_observed_file(before_identity, info):
+                            raise RuntimeError("VALIDATION_CANDIDATE_WRITE_SUBSTITUTION")
+                        os.ftruncate(descriptor, 0)
+                        view = memoryview(content)
+                        while view:
+                            self._check()
+                            count = os.write(descriptor, view)
+                            if type(count) is not int or count <= 0 or count > len(view):
+                                raise OSError("candidate restoration made invalid write progress")
+                            view = view[count:]
+                        os.fsync(descriptor)
+                    except BaseException as exc:
+                        errors.append(exc)
+                    try:
+                        os.close(descriptor)
+                    except BaseException as exc:
+                        errors.append(exc)
+                    if len(errors) == 1:
+                        raise errors[0]
+                    if errors:
+                        raise BaseExceptionGroup("candidate restore and close failures", errors)
+                    os.chmod(path, mode)
+                self.completed_actions.append((relative, before, after))
+            observed = self._snapshot(self._universe())
+            if (any(observed.get(p) != self.baseline.get(p) for p in set(observed) | set(self.baseline)) or
+                    self.index_path is not None and self._read(self.index_path) != self.index_baseline):
+                raise RuntimeError("VALIDATION_CANDIDATE_RESTORATION_READBACK")
+            self.state = "RESTORED_VERIFIED"
+            self.permitted_since_barrier.clear()
+            self._settled_snapshot = self.baseline
+        except BaseException as exc:
+            self.failure = exc
+            self.state = "CLEANUP_INCOMPLETE" if applying else "CLEANUP_REJECTED"
+            raise
+        return tuple(path for path, _, _ in plan)
+
+
+def _restore_tracked_gate_side_effects(repo_root, candidate):
+    if type(candidate) is not _ValidationCandidateCustodyV1 or candidate.root != pathlib.Path(repo_root).absolute():
+        raise RuntimeError("VALIDATION_CANDIDATE_BASELINE_REQUIRED")
+    return candidate.restore()
+
+
+def _restore_modified_file_snapshots(repo_root, candidate):
+    return _restore_tracked_gate_side_effects(repo_root, candidate)
+
+
+def _modified_file_snapshots(repo_root, paths):
+    raise RuntimeError("VALIDATION_CANDIDATE_COMPLETE_BASELINE_REQUIRED")
 
 
 def build_validation_commands(
@@ -6459,16 +6708,34 @@ def _prepare_execution_plan(
         execution = tuple(
             _execution_command_with_qku_root_importlib(list(st12g_adapted))
         )
+        qku_adapted = execution
+        if (len(execution) >= 2
+                and execution[1].replace("\\", "/") == "tools/currentize_pr152_after_generated_artifacts.py"):
+            execution = (execution[0], "-I", "-S", "-B", *execution[1:])
         plan.append(
             ExecutionPlanEntry(
                 registered_argv=registered,
                 timing_identity_argv=st12g_adapted,
                 execution_argv=execution,
                 st12g_adapter_applied=st12g_adapted != registered,
-                qku_root_import_adapter_applied=execution != st12g_adapted,
+                qku_root_import_adapter_applied=qku_adapted != st12g_adapted,
             )
         )
     return tuple(plan)
+
+
+def _prepare_validation_candidate_v1(root, plan, candidate):
+    if root is None:
+        if candidate is not None:
+            raise ValueError("candidate custody has no original repository root")
+        return None
+    if candidate is None and callable(_ACTIVE_CANDIDATE_SOURCE):
+        candidate = _ACTIVE_CANDIDATE_SOURCE(root, plan)
+    if (type(candidate) is not _ValidationCandidateCustodyV1 or candidate.plan is not plan
+            or candidate.root != pathlib.Path(root).absolute() or candidate.state != "BASELINE_READY"):
+        raise RuntimeError("VALIDATION_CANDIDATE_COMPLETE_SOURCE_EFFECT_RESOURCE_BINDING_REQUIRED")
+    candidate._check()
+    return candidate
 
 
 def run_commands(
@@ -6481,7 +6748,14 @@ def run_commands(
     defer_success_markers: bool = False,
     scratch_roots: Sequence[pathlib.Path] = (),
     execution_plan: Sequence[ExecutionPlanEntry] | None = None,
+    candidate_custody=None,
 ) -> int:
+    global _RUN_COMMANDS_SUPERVISION
+    global _LAST_COMMAND_RECEIPTS
+    if _RUN_COMMANDS_SUPERVISION is not None and _RUN_COMMANDS_SUPERVISION["pending"]:
+        print("ENGVR_PROCESS_TERMINATION_FAILED: prior command custody is unresolved",
+              file=sys.stderr, flush=True)
+        return 1
     prepared_plan = (
         _prepare_execution_plan(commands)
         if execution_plan is None
@@ -6503,18 +6777,34 @@ def run_commands(
             flush=True,
         )
         return 2
+    if (_RUN_COMMANDS_SUPERVISION is None
+            or _RUN_COMMANDS_SUPERVISION["paths"] is not active_run_paths
+            or _RUN_COMMANDS_SUPERVISION["phase"] != phase):
+        _RUN_COMMANDS_SUPERVISION = {
+            "paths": active_run_paths, "phase": phase, "pending": False,
+            "receipt": None, "errors": [],
+        }
+    supervision = _RUN_COMMANDS_SUPERVISION
     cleanup_repo_root = (
         _RUN_COMMANDS_CLEANUP_REPO_ROOT if repo_root is None else repo_root
     )
     execution_cwd = (cleanup_repo_root or _repo_root()).resolve()
-    _LAST_EXPECTED_COMMAND_PLAN = build_command_evidence_plan(
-        run_id=active_run_paths.run_id,
-        phase=phase,
-        commands=tuple(entry.execution_argv for entry in prepared_plan),
-        cwd=execution_cwd,
-    )
+    expected_vectors = tuple(entry.execution_argv for entry in prepared_plan)
+    if _RUN_PROVENANCE_WRITTEN:
+        if (tuple(row.argv for row in _LAST_EXPECTED_COMMAND_PLAN) != expected_vectors
+                or any(row.run_id != active_run_paths.run_id or row.phase != phase
+                       or row.cwd != str(execution_cwd) for row in _LAST_EXPECTED_COMMAND_PLAN)):
+            raise ValueError("dispatch differs from the original published evidence plan")
+        if _ACTIVE_SCAN_LAUNCH is not None and _ACTIVE_SCAN_LAUNCH.plan is not _LAST_EXPECTED_COMMAND_PLAN:
+            raise ValueError("dispatch lost original scan plan identity")
+    else:
+        if any(_scan_full_builder_argv(row) for row in expected_vectors):
+            raise ValueError("direct full scanner dispatch lacks original capacity publication")
+        _LAST_EXPECTED_COMMAND_PLAN = build_command_evidence_plan(
+            run_id=active_run_paths.run_id, phase=phase, commands=expected_vectors, cwd=execution_cwd)
     timing_entries: list[TimingEntry] = []
     command_receipts: list[CommandExecutionReceiptV1] = []
+    _LAST_COMMAND_RECEIPTS = ()
     total_started = time.perf_counter()
 
     def finish(returncode: int) -> int:
@@ -6553,35 +6843,34 @@ def run_commands(
             print(SUCCESS_MARKER, flush=True)
         return returncode
 
-    initially_modified_paths: set[str] = set()
-    initially_modified_snapshots: dict[str, bytes | None] = {}
-    initially_untracked_paths: set[str] = set()
-    if cleanup_repo_root is not None:
-        initially_modified_paths = _tracked_modified_paths(cleanup_repo_root)
-        initially_modified_snapshots = _modified_file_snapshots(
-            cleanup_repo_root,
-            initially_modified_paths,
-        )
-        initially_untracked_paths = _untracked_paths(cleanup_repo_root)
+    candidate_custody = _prepare_validation_candidate_v1(
+        cleanup_repo_root, prepared_plan, candidate_custody)
+
+    restoration_failure: BaseException | None = None
 
     def restore_gate_side_effects() -> None:
+        nonlocal restoration_failure
+        if supervision["pending"]:
+            raise ValidationReliabilityError(
+                "ENGVR_PROCESS_TERMINATION_FAILED",
+                "restoration skipped while command process custody is unresolved",
+            ) from (supervision["errors"][0] if supervision["errors"] else None)
         if cleanup_repo_root is None:
             return
-        _restore_tracked_gate_side_effects(
-            cleanup_repo_root,
-            initially_modified_paths,
-        )
-        _restore_modified_file_snapshots(
-            cleanup_repo_root,
-            initially_modified_snapshots,
-        )
-        _restore_untracked_gate_side_effects(
-            cleanup_repo_root,
-            initially_untracked_paths,
-        )
+        if restoration_failure is not None:
+            raise RuntimeError(
+                "ENGVR_PREPUBLICATION_CUSTODY_FAILED: "
+                "prior restoration failure; not retried"
+            ) from restoration_failure
+        try:
+            _restore_tracked_gate_side_effects(cleanup_repo_root, candidate_custody)
+        except BaseException as exc:
+            restoration_failure = exc
+            raise
 
     active_validation_processes = 0
     for command_index, plan_entry in enumerate(prepared_plan, start=1):
+        receipt = None
         command_list = list(plan_entry.registered_argv)
         if cleanup_repo_root is not None and (
             _is_pr142_handoff_readiness_validator_command(command_list)
@@ -6626,34 +6915,79 @@ def run_commands(
             command_environment = os.environ.copy()
             command_environment[RUN_ID_ENV] = active_run_paths.run_id
             command_environment[EVIDENCE_ROOT_ENV] = str(active_run_paths.evidence_root)
-            receipt = _execute_supervised_command(
-                execution_command,
-                cwd=execution_cwd,
-                run_id=active_run_paths.run_id,
-                phase=phase,
-                command_index=command_index,
-                evidence_root=active_run_paths.evidence_root,
-                required_markers=expected_markers,
-                timeout_seconds=timeout_seconds,
-                environment=command_environment,
-            )
-            command_receipts.append(receipt)
-        except ValidationReliabilityError as exc:
-            print(str(exc), file=sys.stderr, flush=True)
-            return finish(1)
-        except OSError as exc:
-            print(
-                f"ENGVR_ATOMIC_RECEIPT_WRITE_FAILED: {type(exc).__name__}: {exc}",
-                file=sys.stderr,
-                flush=True,
-            )
-            return finish(1)
-        except (RuntimeError, ValueError) as exc:
-            print(
-                f"ENGVR_PROCESS_START_FAILED: {type(exc).__name__}: {exc}",
-                file=sys.stderr,
-                flush=True,
-            )
+            planned = _LAST_EXPECTED_COMMAND_PLAN[command_index - 1]
+            command_environment = _scan_dispatch_environment(command_environment, planned)
+            original_input = None if _ACTIVE_SCAN_LAUNCH is None else _ACTIVE_SCAN_LAUNCH.launch_inputs.get(command_index)
+            if candidate_custody is not None:
+                candidate_custody.begin_occurrence(command_index, plan_entry,
+                    environment=command_environment, timeout_seconds=timeout_seconds, scratch_roots=tuple(scratch_roots))
+            with (nullcontext() if original_input is None else original_input):
+                supervision["pending"] = True
+                supervision["receipt"] = None
+                receipt = _execute_supervised_command(
+                    execution_command,
+                    cwd=execution_cwd,
+                    run_id=active_run_paths.run_id,
+                    phase=phase,
+                    command_index=command_index,
+                    evidence_root=active_run_paths.evidence_root,
+                    required_markers=expected_markers,
+                    timeout_seconds=timeout_seconds,
+                    environment=command_environment,
+                    **({"launch_input": original_input} if original_input is not None else {}),
+                )
+                supervision["receipt"] = receipt
+                if type(receipt) is CommandExecutionReceiptV1:
+                    if all(receipt is not earlier for earlier in command_receipts):
+                        command_receipts.append(receipt)
+                    _LAST_COMMAND_RECEIPTS = tuple(command_receipts)
+            if _command_requires_process_retention_v1(receipt):
+                raise ValidationReliabilityError(
+                    "ENGVR_PROCESS_TERMINATION_FAILED",
+                    "command process custody remains unresolved",
+                )
+            if (type(receipt) is not CommandExecutionReceiptV1
+                    or receipt.run_id != active_run_paths.run_id or receipt.phase != phase
+                    or type(receipt.command_index) is not int or receipt.command_index != command_index
+                    or receipt.argv != tuple(execution_command) or receipt.cwd != str(execution_cwd)):
+                raise ValidationReliabilityError(
+                    "ENGVR_PROCESS_TERMINATION_FAILED",
+                    "command receipt differs from the original attempted execution",
+                )
+            supervision["pending"] = False
+            if candidate_custody is not None:
+                if type(receipt.native_exit_code) is not int:
+                    raise RuntimeError("VALIDATION_CANDIDATE_CHILD_TERMINAL_UNKNOWN")
+                candidate_custody.end_occurrence(command_index, plan_entry)
+        except BaseException as exc:
+            supervision["errors"].append(exc)
+            if receipt is not None:
+                supervision["receipt"] = receipt
+            if type(receipt) is CommandExecutionReceiptV1:
+                if all(receipt is not earlier for earlier in command_receipts):
+                    command_receipts.append(receipt)
+                _LAST_COMMAND_RECEIPTS = tuple(command_receipts)
+            errors_to_inspect = [exc]
+            while errors_to_inspect:
+                error = errors_to_inspect.pop()
+                if isinstance(error, BaseExceptionGroup):
+                    errors_to_inspect.extend(reversed(error.exceptions))
+                attached = getattr(error, "command_receipt", None)
+                if supervision["receipt"] is None and type(attached) is CommandExecutionReceiptV1:
+                    supervision["receipt"] = attached
+                    if all(attached is not earlier for earlier in command_receipts):
+                        command_receipts.append(attached)
+                    _LAST_COMMAND_RECEIPTS = tuple(command_receipts)
+            if isinstance(exc, ValidationReliabilityError):
+                print(str(exc), file=sys.stderr, flush=True)
+            elif isinstance(exc, OSError):
+                print(f"ENGVR_ATOMIC_RECEIPT_WRITE_FAILED: {type(exc).__name__}: {exc}",
+                      file=sys.stderr, flush=True)
+            elif isinstance(exc, (RuntimeError, ValueError)):
+                print(f"ENGVR_PROCESS_START_FAILED: {type(exc).__name__}: {exc}",
+                      file=sys.stderr, flush=True)
+            else:
+                raise
             return finish(1)
         finally:
             active_validation_processes -= 1
@@ -7471,6 +7805,8 @@ def _publish_active_plan_provenance(
     global _LAST_EXPECTED_COMMAND_PLAN
     global _RUN_PROVENANCE_WRITTEN
     global _RUN_PROVENANCE_ATTEMPTED
+    if _RUN_PROVENANCE_ATTEMPTED or _SCAN_CAPACITY_ATTEMPTED:
+        raise ValueError("original plan publication/capacity acquisition cannot be retried")
     _LAST_PLANNED_COMMAND_COUNT = len(execution_plan)
     _LAST_EXPECTED_COMMAND_PLAN = build_command_evidence_plan(
         run_id=active_run_paths.run_id,
@@ -7478,6 +7814,7 @@ def _publish_active_plan_provenance(
         commands=tuple(entry.execution_argv for entry in execution_plan),
         cwd=active_run_paths.repo_root,
     )
+    launch = _scan_resolve_parent_capacity(active_run_paths, phase, _LAST_EXPECTED_COMMAND_PLAN)
     _RUN_PROVENANCE_ATTEMPTED = True
     write_run_provenance(
         active_run_paths,
@@ -7485,6 +7822,9 @@ def _publish_active_plan_provenance(
         phase=phase,
         command_count=len(execution_plan),
         text_integrity_preflight_state=_ACTIVE_TEXT_INTEGRITY_STATE,
+        rp5a_scan_profiles=None if launch is None else launch.profiles,
+        scan_read_limits=None if launch is None else launch.read_limits,
+        scan_deadline_ns=None if launch is None else launch.deadline_ns,
     )
     _RUN_PROVENANCE_WRITTEN = True
 
@@ -7878,120 +8218,165 @@ def _finalize_validation_run(
     receipts: Sequence[CommandExecutionReceiptV1],
     result: int,
     text_state: str,
+    scan_launch=None,
+    _supervision_state=None,
 ) -> tuple[int, str, ValidationCompletionReceiptV1]:
     """Publish cleanup and terminal custody for one already-planned run."""
 
-    cleanup_state = "NOT_RUN"
-    termination_unproven = any(
-        receipt.failure_class == "ENGVR_PROCESS_TERMINATION_FAILED"
-        for receipt in receipts
-    )
-    if termination_unproven:
-        cleanup_state = "SKIPPED_PROCESS_TERMINATION_UNPROVEN"
-        try:
-            atomic_write_json(
-                run_paths.evidence_root / "cleanup.json",
-                {
-                    "schema_version": 1,
-                    "run_id": run_paths.run_id,
-                    "cleanup_target": str(run_paths.cleanup_target),
-                    "cleanup_state": cleanup_state,
-                    "parent_preserved": True,
-                },
+    global _RUN_COMMANDS_SUPERVISION
+    supervision = _supervision_state
+    if (supervision is None and _RUN_COMMANDS_SUPERVISION is not None
+            and (_RUN_COMMANDS_SUPERVISION["paths"] is run_paths
+                 or _RUN_COMMANDS_SUPERVISION["pending"])):
+        supervision = _RUN_COMMANDS_SUPERVISION
+    try:
+        termination_unproven = (
+            (_RUN_COMMANDS_SUPERVISION is not None and _RUN_COMMANDS_SUPERVISION["pending"])
+            or (supervision is not None and (supervision["pending"]
+                or supervision["paths"] is not run_paths or supervision["phase"] != phase))
+            or any(_command_requires_process_retention_v1(receipt) for receipt in receipts)
+        )
+        if termination_unproven:
+            if supervision is None:
+                supervision = {"paths": run_paths, "phase": phase, "pending": True,
+                               "receipt": next((receipt for receipt in receipts
+                                   if _command_requires_process_retention_v1(receipt)), None),
+                               "errors": []}
+            supervision["pending"] = True
+            if supervision["receipt"] is None:
+                supervision["receipt"] = next((receipt for receipt in receipts
+                    if _command_requires_process_retention_v1(receipt)), None)
+            if _RUN_COMMANDS_SUPERVISION is None or not _RUN_COMMANDS_SUPERVISION["pending"]:
+                _RUN_COMMANDS_SUPERVISION = supervision
+        # Retain known uncertainty even if independent finalizer identity checks fail.
+        if scan_launch is not None:
+            if (scan_launch.paths is not run_paths or scan_launch.plan is not expected_plan
+                    or scan_launch.phase != phase or len(scan_launch.plan) != planned_count):
+                raise ValueError("finalizer lost original scan launch identity")
+        cleanup_state = "NOT_RUN"
+        if termination_unproven:
+            cleanup_state = "SKIPPED_PROCESS_TERMINATION_UNPROVEN"
+            try:
+                atomic_write_json(
+                    run_paths.evidence_root / "cleanup.json",
+                    {
+                        "schema_version": 1,
+                        "run_id": run_paths.run_id,
+                        "cleanup_target": str(run_paths.cleanup_target),
+                        "cleanup_state": cleanup_state,
+                        "parent_preserved": True,
+                    },
+                )
+            except RuntimeError as exc:
+                if supervision is not None:
+                    supervision["errors"].append(exc)
+                print(str(exc), file=sys.stderr, flush=True)
+            result = 1
+        else:
+            try:
+                cleanup_state = cleanup_validation_run(run_paths)
+            except RuntimeError as exc:
+                cleanup_state = "FAIL"
+                print(str(exc), file=sys.stderr, flush=True)
+                result = 1
+
+        started_count, completed_count, first_failed, terminal_native_exit = (
+            command_attempt_accounting(receipts)
+        )
+        if result == 0 and not (
+            planned_count > 0
+            and len(receipts) == planned_count
+            and started_count == planned_count
+            and completed_count == planned_count
+            and all(receipt.native_exit_code == 0 for receipt in receipts)
+            and all(receipt.failure_class is None for receipt in receipts)
+        ):
+            print(
+                "ENGVR_ATOMIC_RECEIPT_WRITE_FAILED: "
+                "passing command result lacks complete native receipt custody",
+                file=sys.stderr,
+                flush=True,
             )
-        except RuntimeError as exc:
-            print(str(exc), file=sys.stderr, flush=True)
-        result = 1
-    else:
+            result = 1
+        marker_state = (
+            "NOT_RUN"
+            if not receipts
+            else "FAIL"
+            if any(
+                receipt.stdout_marker_state not in {"PASS", "NOT_REQUIRED"}
+                for receipt in receipts
+            )
+            else "PASS"
+        )
+        custody_error: ValidationReliabilityError | None = None
         try:
-            cleanup_state = cleanup_validation_run(run_paths)
-        except RuntimeError as exc:
-            cleanup_state = "FAIL"
+            validate_complete_run_evidence(
+                run_paths,
+                probe,
+                phase=phase,
+                command_count_planned=planned_count,
+                expected_plan=expected_plan,
+                receipts=receipts,
+                cleanup_state=cleanup_state,
+                text_integrity_preflight_state=text_state,
+                rp5a_scan_profiles=None if scan_launch is None else scan_launch.profiles,
+            )
+        except ValidationReliabilityError as exc:
+            if supervision is not None:
+                supervision["errors"].append(exc)
+            custody_error = exc
             print(str(exc), file=sys.stderr, flush=True)
             result = 1
-
-    started_count, completed_count, first_failed, terminal_native_exit = (
-        command_attempt_accounting(receipts)
-    )
-    if result == 0 and not (
-        planned_count > 0
-        and len(receipts) == planned_count
-        and started_count == planned_count
-        and completed_count == planned_count
-        and all(receipt.native_exit_code == 0 for receipt in receipts)
-        and all(receipt.failure_class is None for receipt in receipts)
-    ):
-        print(
-            "ENGVR_ATOMIC_RECEIPT_WRITE_FAILED: "
-            "passing command result lacks complete native receipt custody",
-            file=sys.stderr,
-            flush=True,
-        )
-        result = 1
-    marker_state = (
-        "NOT_RUN"
-        if not receipts
-        else "FAIL"
-        if any(
-            receipt.stdout_marker_state not in {"PASS", "NOT_REQUIRED"}
-            for receipt in receipts
-        )
-        else "PASS"
-    )
-    custody_error: ValidationReliabilityError | None = None
-    try:
-        validate_complete_run_evidence(
-            run_paths,
-            probe,
+        completion = ValidationCompletionReceiptV1(
+            run_id=run_paths.run_id,
             phase=phase,
             command_count_planned=planned_count,
-            expected_plan=expected_plan,
-            receipts=receipts,
-            cleanup_state=cleanup_state,
+            command_count_started=started_count,
+            command_count_completed=completed_count,
+            first_failed_command_index_or_null=first_failed,
+            terminal_native_exit_code=(
+                terminal_native_exit
+            ),
+            required_marker_state=marker_state,
+            process_root_cleanup_state=cleanup_state,
+            evidence_root_state=(
+                "PRESENT" if run_paths.evidence_root.is_dir() else "MISSING"
+            ),
             text_integrity_preflight_state=text_state,
+            final_state=(
+                "PASS"
+                if result == 0
+                and cleanup_state.startswith("PASS")
+                and text_state == "PASS"
+                and custody_error is None
+                else "FAIL"
+            ),
         )
-    except ValidationReliabilityError as exc:
-        custody_error = exc
-        print(str(exc), file=sys.stderr, flush=True)
-        result = 1
-    completion = ValidationCompletionReceiptV1(
-        run_id=run_paths.run_id,
-        phase=phase,
-        command_count_planned=planned_count,
-        command_count_started=started_count,
-        command_count_completed=completed_count,
-        first_failed_command_index_or_null=first_failed,
-        terminal_native_exit_code=(
-            terminal_native_exit
-        ),
-        required_marker_state=marker_state,
-        process_root_cleanup_state=cleanup_state,
-        evidence_root_state=(
-            "PRESENT" if run_paths.evidence_root.is_dir() else "MISSING"
-        ),
-        text_integrity_preflight_state=text_state,
-        final_state=(
-            "PASS"
-            if result == 0
-            and cleanup_state.startswith("PASS")
-            and text_state == "PASS"
-            and custody_error is None
-            else "FAIL"
-        ),
-    )
-    try:
-        atomic_write_json(run_paths.evidence_root / "completion.json", completion)
-        validate_published_completion_receipt(
-            run_paths.evidence_root,
-            completion,
-        )
-    except RuntimeError as exc:
-        print(str(exc), file=sys.stderr, flush=True)
-        result = 1
-    return result, cleanup_state, completion
+        try:
+            atomic_write_json(run_paths.evidence_root / "completion.json", completion)
+            validate_published_completion_receipt(
+                run_paths.evidence_root,
+                completion,
+            )
+        except RuntimeError as exc:
+            if supervision is not None:
+                supervision["errors"].append(exc)
+            print(str(exc), file=sys.stderr, flush=True)
+            result = 1
+        return result, cleanup_state, completion
+    except BaseException as exc:
+        if supervision is not None:
+            supervision["errors"].append(exc)
+            _scan_raise_errors(supervision["errors"])
+        raise
 
 
-def main(argv: Sequence[str] | None = None) -> int:
+def _main_owned(argv: Sequence[str] | None = None) -> int:
+    global _RUN_COMMANDS_SUPERVISION
+    if _RUN_COMMANDS_SUPERVISION is not None and _RUN_COMMANDS_SUPERVISION["pending"]:
+        print("ENGVR_PROCESS_TERMINATION_FAILED: prior command custody is unresolved",
+              file=sys.stderr, flush=True)
+        return 1
     raw_argv = list(sys.argv[1:] if argv is None else argv)
     if any(argument in {"-h", "--help"} for argument in raw_argv):
         return _main_impl(raw_argv)
@@ -8043,6 +8428,12 @@ def main(argv: Sequence[str] | None = None) -> int:
     previous_provenance_state = _RUN_PROVENANCE_WRITTEN
     previous_provenance_attempted = _RUN_PROVENANCE_ATTEMPTED
     previous_expected_plan = _LAST_EXPECTED_COMMAND_PLAN
+    previous_supervision = _RUN_COMMANDS_SUPERVISION
+    _RUN_COMMANDS_SUPERVISION = {
+        "paths": run_paths, "phase": pre_args.phase, "pending": False,
+        "receipt": None, "errors": [],
+    }
+    supervision = _RUN_COMMANDS_SUPERVISION
     _RUN_COMMANDS_ACTIVE_PATHS = run_paths
     _ACTIVE_SEMANTIC_CHANGED_PATHS = None
     _ACTIVE_CLASSIFIED_CHANGED_PATHS = None
@@ -8080,51 +8471,268 @@ def main(argv: Sequence[str] | None = None) -> int:
                     flush=True,
                 )
             result = _main_impl(raw_argv)
-    except (OSError, RuntimeError, ValueError) as exc:
+    except BaseException as exc:
+        if all(exc is not earlier for earlier in supervision["errors"]):
+            supervision["errors"].append(exc)
+        if not isinstance(exc, (OSError, RuntimeError, ValueError)):
+            raise
         print(str(exc), file=sys.stderr, flush=True)
         result = 1
     finally:
-        if not _RUN_PROVENANCE_ATTEMPTED:
-            try:
-                _RUN_PROVENANCE_ATTEMPTED = True
-                write_run_provenance(
-                    run_paths,
-                    probe,
-                    phase=pre_args.phase,
-                    command_count=0,
-                    text_integrity_preflight_state=text_state,
-                )
-                _RUN_PROVENANCE_WRITTEN = True
-                _LAST_PLANNED_COMMAND_COUNT = 0
-                _LAST_EXPECTED_COMMAND_PLAN = ()
-            except (RuntimeError, ValueError) as exc:
-                print(str(exc), file=sys.stderr, flush=True)
-                result = 1
-        receipts = _LAST_COMMAND_RECEIPTS
-        planned_count = 0 if _LAST_PLANNED_COMMAND_COUNT is None else _LAST_PLANNED_COMMAND_COUNT
-        result, cleanup_state, _completion = _finalize_validation_run(
-            run_paths=run_paths,
-            probe=probe,
-            phase=pre_args.phase,
-            planned_count=planned_count,
-            expected_plan=_LAST_EXPECTED_COMMAND_PLAN,
-            receipts=receipts,
-            result=result,
-            text_state=text_state,
-        )
-        _RUN_COMMANDS_ACTIVE_PATHS = previous_paths
-        _ACTIVE_SEMANTIC_CHANGED_PATHS = previous_semantic_paths
-        _ACTIVE_CLASSIFIED_CHANGED_PATHS = previous_classified_paths
-        _ACTIVE_TEXT_INTEGRITY_FAILURES = previous_text_failures
-        _ACTIVE_TEXT_INTEGRITY_STATE = previous_text_state
-        _ACTIVE_FILESYSTEM_PROBE = previous_probe
-        _RUN_PROVENANCE_WRITTEN = previous_provenance_state
-        _RUN_PROVENANCE_ATTEMPTED = previous_provenance_attempted
-        _LAST_EXPECTED_COMMAND_PLAN = previous_expected_plan
+        try:
+            if (not _RUN_PROVENANCE_ATTEMPTED and not supervision["pending"]
+                    and supervision["receipt"] is None):
+                try:
+                    _RUN_PROVENANCE_ATTEMPTED = True
+                    write_run_provenance(
+                        run_paths,
+                        probe,
+                        phase=pre_args.phase,
+                        command_count=0,
+                        text_integrity_preflight_state=text_state,
+                    )
+                    _RUN_PROVENANCE_WRITTEN = True
+                    _LAST_PLANNED_COMMAND_COUNT = 0
+                    _LAST_EXPECTED_COMMAND_PLAN = ()
+                except (RuntimeError, ValueError) as exc:
+                    print(str(exc), file=sys.stderr, flush=True)
+                    result = 1
+            receipts = _LAST_COMMAND_RECEIPTS
+            planned_count = 0 if _LAST_PLANNED_COMMAND_COUNT is None else _LAST_PLANNED_COMMAND_COUNT
+            result, cleanup_state, _completion = _finalize_validation_run(
+                run_paths=run_paths,
+                probe=probe,
+                phase=pre_args.phase,
+                planned_count=planned_count,
+                expected_plan=_LAST_EXPECTED_COMMAND_PLAN,
+                receipts=receipts,
+                result=result,
+                text_state=text_state,
+                scan_launch=_ACTIVE_SCAN_LAUNCH,
+                _supervision_state=supervision,
+            )
+        except BaseException as exc:
+            supervision["errors"].append(exc)
+            _scan_raise_errors(supervision["errors"])
+        finally:
+            _RUN_COMMANDS_ACTIVE_PATHS = previous_paths
+            _ACTIVE_SEMANTIC_CHANGED_PATHS = previous_semantic_paths
+            _ACTIVE_CLASSIFIED_CHANGED_PATHS = previous_classified_paths
+            _ACTIVE_TEXT_INTEGRITY_FAILURES = previous_text_failures
+            _ACTIVE_TEXT_INTEGRITY_STATE = previous_text_state
+            _ACTIVE_FILESYSTEM_PROBE = previous_probe
+            _RUN_PROVENANCE_WRITTEN = previous_provenance_state
+            _RUN_PROVENANCE_ATTEMPTED = previous_provenance_attempted
+            _LAST_EXPECTED_COMMAND_PLAN = previous_expected_plan
+            if not supervision["pending"]:
+                _RUN_COMMANDS_SUPERVISION = previous_supervision
     if result == 0:
         print(f"{PHASE_SUCCESS_MARKER_PREFIX} phase={pre_args.phase}", flush=True)
         print(SUCCESS_MARKER, flush=True)
     return result
+
+
+_V35_MANIFEST_SOURCE_NAMES = {'tools/run_validation_gates.py': ('ALL_PHASE', 'ATOMICROWS_BUNDLE_CHECK_SCRIPT', 'CHECK_ONLY_VALIDATOR_SCRIPTS', 'DEFAULT_GENERATED_OUTPUT_ARGS', 'DETERMINISTIC_VALIDATORS_PHASE', 'DETERMINISTIC_VALIDATOR_SHARD_COMMAND_RANGES', 'DETERMINISTIC_VALIDATOR_SHARD_PHASES', 'FAST_PREFLIGHT_PHASE', 'FAST_PREFLIGHT_SCRIPT_NAMES', 'ISOLATED_SOURCE_EVIDENCE_PYTEST', 'ORDERED_PHASES', 'POST_VALIDATION_PHASE', 'PR138_NON_MUTATING_VALIDATION_SCRIPT', 'PR162E_IDEMPOTENCE_TEST_FILE', 'PR162E_Q_IDEMPOTENCE_TEST_FILE', 'PR162E_Q_TEST_ROOT', 'PR162E_TEST_ROOT', 'PR166_QB_IDEMPOTENCE_TEST_FILE', 'PR166_QB_TEST_ROOT', 'PR166_QC_IDEMPOTENCE_TEST_FILE', 'PR166_QC_TEST_ROOT', 'PR166_Q_IDEMPOTENCE_TEST_FILE', 'PR166_Q_TEST_ROOT', 'PR166_SF_R2_IDEMPOTENCE_TEST_FILE', 'PR166_SF_R2_PYTEST_FILE_GROUPS', 'PR166_SF_R2_TEST_ROOT', 'PR166_SM2_PYTEST_FILE_GROUPS', 'PR166_SM2_TEST_ROOT', 'PR166_SM3_IDEMPOTENCE_TEST_FILE', 'PR166_SM3_TEST_ROOT', 'PR167_IDEMPOTENCE_TEST_FILE', 'PR167_TEST_ROOT', 'PYTEST_BASETEMP_LEGACY_FIXED_DIR_NAME', 'PYTEST_BASETEMP_PARENT', 'PYTEST_DURATIONS_ARG', 'PYTEST_FRESH_BASETEMP_SCRIPT', 'PYTEST_IDEMPOTENCE_HARD_REVIEW_SECONDS', 'PYTEST_SHARD_COMMANDS', 'PYTEST_SHARD_PHASES', 'PYTEST_SUBPROCESS_GROUP_TARGET_SECONDS', 'PytestShardCommand', 'ST12A_TEST_ROOT', 'TRACKED_GENERATED_PATH_PREFIXES', 'TimingEntry', '_build_pytest_command', '_command_script_name', '_command_uses_pytest_helper', '_is_tracked_generated_output_path', '_normal_path_text', '_path', '_pr166_sf_r2_pytest_paths', '_pr166_sm2_pytest_paths', '_route_command_generated_outputs_to_temp', '_validation_generated_output', 'build_deterministic_validator_commands', 'build_deterministic_validator_shard_commands', 'build_fast_preflight_commands', 'build_phase_commands', 'build_phase_manifest', 'build_post_validation_commands', 'build_pytest_shard_commands', 'build_validation_commands'), 'tools/validation_scope_registry.py': ('ST12H_EXACT_VALIDATION_COMMANDS', 'build_st12h_validation_commands')}
+
+
+def _project_probability_validation_manifest_v1(
+    runner_source, scope_source, *, expected_runner_source, expected_scope_source,
+    python_executable, validation_dir, pytest_basetemp, byte_limit, node_limit,
+    command_limit, argument_limit, check_candidate,
+):
+    """Project admitted command declarations; never execute a historical module."""
+    import ast
+    import __future__
+    import types
+    from dataclasses import dataclass
+    from tools.validation_reliability import _scan_candidate_fence
+
+    _scan_candidate_fence(check_candidate)
+    for value in (byte_limit, node_limit, command_limit, argument_limit):
+        if type(value) is not int or value <= 0:
+            raise ValueError("original manifest projection limits required")
+    if (any(type(value) is not bytes for value in (runner_source, scope_source, expected_runner_source, expected_scope_source))
+            or len(runner_source) + len(scope_source) > byte_limit
+            or runner_source != expected_runner_source or scope_source != expected_scope_source):
+        raise ValueError("manifest source differs from independent original byte basis")
+    if (type(python_executable) is not str or not python_executable or validation_dir is None or pytest_basetemp is None):
+        raise ValueError("manifest projection requires explicit execution/path operands")
+    sources = {"tools/run_validation_gates.py": runner_source, "tools/validation_scope_registry.py": scope_source}
+    # These are the two ordered statements in the inspected runner, not a
+    # last-definition-wins exception. Compare structure without source locations.
+    phase_profile = ast.parse("""ORDERED_PHASES = (
+    FAST_PREFLIGHT_PHASE, DETERMINISTIC_VALIDATORS_PHASE,
+    *PYTEST_SHARD_PHASES, POST_VALIDATION_PHASE,
+)
+ORDERED_PHASES = tuple(
+    shard_phase
+    for phase in ORDERED_PHASES
+    for shard_phase in (
+        DETERMINISTIC_VALIDATOR_SHARD_PHASES
+        if phase == DETERMINISTIC_VALIDATORS_PHASE else (phase,)
+    )
+)
+""").body
+    path_constructor_profiles = {
+        name: ast.parse(
+            f'def {name}(file_names: Sequence[str]) -> tuple[str, ...]:\n'
+            f'    return tuple(f"{{{root}}}/{{file_name}}" for file_name in file_names)\n'
+        ).body[0]
+        for name, root in (
+            ("_pr166_sf_r2_pytest_paths", "PR166_SF_R2_TEST_ROOT"),
+            ("_pr166_sm2_pytest_paths", "PR166_SM2_TEST_ROOT"),
+        )
+    }
+    selected = {}
+    total_nodes = 0
+    for owner, raw in sources.items():
+        tree = ast.parse(raw.decode("utf-8", errors="strict"), filename=owner)
+        total_nodes += sum(1 for _ in ast.walk(tree))
+        if total_nodes > node_limit:
+            raise ValueError("manifest AST exceeds original node allowance")
+        roster = _V35_MANIFEST_SOURCE_NAMES[owner]
+        definitions = {}
+        for node in tree.body:
+            names = (node.name,) if isinstance(node, (ast.FunctionDef, ast.ClassDef)) else tuple(
+                target.id for target in (node.targets if isinstance(node, ast.Assign) else (node.target,))
+                if isinstance(target, ast.Name)) if isinstance(node, (ast.Assign, ast.AnnAssign)) else ()
+            for name in names:
+                if name in roster:
+                    if name in definitions and not (
+                            owner == "tools/run_validation_gates.py" and name == "ORDERED_PHASES"):
+                        raise ValueError("duplicate manifest declaration")
+                    definitions.setdefault(name, []).append(node)
+        if set(definitions) != set(roster):
+            raise ValueError("unsupported manifest source declaration profile")
+        if owner == "tools/run_validation_gates.py":
+            if ([ast.dump(node) for node in definitions["ORDERED_PHASES"]]
+                    != [ast.dump(node) for node in phase_profile]):
+                raise ValueError("unsupported ordered phase expansion profile")
+            for name, expected in path_constructor_profiles.items():
+                if [ast.dump(node) for node in definitions[name]] != [ast.dump(expected)]:
+                    raise ValueError("unsupported manifest path constructor profile: " + name)
+        ids = {id(node) for nodes in definitions.values() for node in nodes}
+        selected[owner] = [node for node in tree.body if id(node) in ids]
+    declarations = selected["tools/validation_scope_registry.py"] + selected["tools/run_validation_gates.py"]
+    function_names = {node.name for node in declarations if isinstance(node, ast.FunctionDef)}
+    bare_calls = function_names | {"PytestShardCommand", "TimingEntry", "dataclass", "ValueError",
+                                 "any", "enumerate", "frozenset", "len", "list", "str", "tuple", "type",
+                                 "_default_validation_dir", "_default_pytest_basetemp"}
+    dotted_calls = {"pathlib.Path", "pathlib.PurePath", "pathlib.PurePosixPath", "built.extend", "commands.extend",
+                    "manifest.append", "normalized.startswith", "python_executable.strip", "routed.append",
+                    "routed.extend", "str(value).replace", "token.endswith"}
+    initializer_calls = {"PytestShardCommand", "dataclass", "frozenset", "tuple", "str", "pathlib.Path", "pathlib.PurePath", "pathlib.PurePosixPath"}
+    for declaration in declarations:
+        for node in ast.walk(declaration):
+            if isinstance(node, (ast.Import, ast.ImportFrom, ast.Global, ast.Nonlocal, ast.AsyncFunctionDef,
+                                 ast.Await, ast.Yield, ast.YieldFrom, ast.With, ast.AsyncWith)):
+                raise ValueError("effectful declaration is outside the finite manifest profile")
+            if isinstance(node, ast.Attribute) and node.attr.startswith("__"):
+                raise ValueError("magic lookup is outside the manifest profile")
+            if isinstance(node, ast.Call):
+                name = ast.unparse(node.func)
+                if name not in bare_calls and name not in dotted_calls:
+                    raise ValueError("unselected manifest call: " + name)
+                if isinstance(declaration, (ast.Assign, ast.AnnAssign)) and name not in initializer_calls:
+                    if not (name in path_constructor_profiles and
+                            isinstance(declaration, ast.AnnAssign) and
+                            isinstance(declaration.target, ast.Name) and
+                            declaration.target.id == "PYTEST_SHARD_COMMANDS"):
+                        raise ValueError("unselected manifest initializer: " + name)
+    module_name = "_qtt_v35_finite_manifest_" + str(id(declarations))
+    module = types.ModuleType(module_name)
+
+    def acquisition_default_denied():
+        raise ValueError("manifest acquisition defaults are forbidden")
+
+    namespace = module.__dict__
+    namespace.update({"__builtins__": {"__build_class__": __build_class__, "ValueError": ValueError,
+        "any": any, "enumerate": enumerate, "frozenset": frozenset, "len": len, "list": list,
+        "str": str, "tuple": tuple, "type": type, "bool": bool, "int": int, "float": float, "dict": dict},
+        "pathlib": pathlib, "sys": types.SimpleNamespace(executable=python_executable), "dataclass": dataclass,
+        "_default_validation_dir": acquisition_default_denied, "_default_pytest_basetemp": acquisition_default_denied})
+    # Only inspected declarations enter the temporary module. The future directive
+    # is supplied here, never taken from a historical module's imports.
+    tree = ast.Module(body=declarations, type_ignores=[])
+    tree = ast.fix_missing_locations(tree)
+    if module_name in sys.modules:
+        raise ValueError("finite manifest module identity collision")
+    sys.modules[module_name] = module
+    try:
+        exec(compile(tree, "<admitted-finite-manifest>", "exec", flags=__future__.annotations.compiler_flag, dont_inherit=True), namespace)
+        manifest = namespace["build_phase_manifest"](validation_dir, pytest_basetemp)
+    finally:
+        if sys.modules.get(module_name) is module:
+            del sys.modules[module_name]
+    if type(manifest) is not list:
+        raise ValueError("manifest is not the original list projection")
+    count = arguments = 0
+    for phase in manifest:
+        if (type(phase) is not dict or set(phase) != {"phase", "command_count", "commands"}
+                or type(phase["phase"]) is not str or not phase["phase"]
+                or type(phase["command_count"]) is not int or type(phase["commands"]) is not list
+                or phase["command_count"] != len(phase["commands"])):
+            raise ValueError("invalid original manifest phase projection")
+        for command in phase["commands"]:
+            if type(command) is not list or not command or any(type(part) is not str or not part for part in command):
+                raise ValueError("invalid original manifest command vector")
+            count += 1
+            arguments += len(command)
+            if count > command_limit or arguments > argument_limit:
+                raise ValueError("manifest output allowance exceeded")
+    _scan_candidate_fence(check_candidate)
+    return manifest
+
+
+def _scan_full_builder_argv(argv):
+    return any(type(part) is str and part.replace("\\", "/") == "tools/build_pr168_rp5a_legacy_semantic_audit.py"
+               for part in argv) and "--validation-scope-evidence-only" not in argv
+
+
+def _scan_resolve_parent_capacity(paths, phase, plan):
+    from tools.validation_reliability import _ScanLaunch
+
+    global _SCAN_CAPACITY_ATTEMPTED, _ACTIVE_SCAN_LAUNCH
+    selected = {row.command_index for row in plan if _scan_full_builder_argv(row.argv)}
+    if not selected:
+        return None
+    if _SCAN_CAPACITY_ATTEMPTED:
+        raise ValueError("original scan capacity acquisition cannot be retried")
+    _SCAN_CAPACITY_ATTEMPTED = True
+    if not callable(_ACTIVE_SCAN_CAPACITY_SOURCE):
+        raise ValueError("full RP5A plan requires an independently admitted scan capacity source")
+    launch = _ACTIVE_SCAN_CAPACITY_SOURCE(paths, phase, plan)
+    if (type(launch) is not _ScanLaunch or launch.paths is not paths or launch.plan is not plan
+            or launch.phase != phase or launch.process_id != os.getpid()
+            or launch.thread_id != threading.get_ident() or set(launch.profiles) != selected
+            or set(launch.launch_inputs) != selected):
+        raise ValueError("capacity source did not retain exact original run/plan/input coverage")
+    _ACTIVE_SCAN_LAUNCH = launch
+    return launch
+
+
+def _scan_dispatch_environment(parent, planned):
+    from tools.validation_reliability import _SCAN_TRANSPORT_KEYS, _scan_child_launch_environment
+
+    if _ACTIVE_SCAN_LAUNCH is not None and planned.command_index in _ACTIVE_SCAN_LAUNCH.profiles:
+        return _scan_child_launch_environment(parent, launch=_ACTIVE_SCAN_LAUNCH, planned=planned)
+    return {key: value for key, value in parent.items() if key.upper() not in _SCAN_TRANSPORT_KEYS}
+
+
+def main(argv: Sequence[str] | None = None, *, scan_capacity_source=None, candidate_source=None) -> int:
+    global _ACTIVE_SCAN_CAPACITY_SOURCE, _ACTIVE_SCAN_LAUNCH, _SCAN_CAPACITY_ATTEMPTED, _ACTIVE_CANDIDATE_SOURCE
+    if not _SCAN_MAIN_LOCK.acquire(blocking=False):
+        raise ValueError("central validation invocation already active")
+    previous = (_ACTIVE_SCAN_CAPACITY_SOURCE, _ACTIVE_SCAN_LAUNCH, _SCAN_CAPACITY_ATTEMPTED, _ACTIVE_CANDIDATE_SOURCE)
+    try:
+        _ACTIVE_SCAN_CAPACITY_SOURCE = scan_capacity_source
+        _ACTIVE_CANDIDATE_SOURCE = candidate_source
+        _ACTIVE_SCAN_LAUNCH = None
+        _SCAN_CAPACITY_ATTEMPTED = False
+        return _main_owned(argv)
+    finally:
+        _ACTIVE_SCAN_CAPACITY_SOURCE, _ACTIVE_SCAN_LAUNCH, _SCAN_CAPACITY_ATTEMPTED, _ACTIVE_CANDIDATE_SOURCE = previous
+        _SCAN_MAIN_LOCK.release()
 
 
 if __name__ == "__main__":

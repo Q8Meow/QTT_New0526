@@ -5912,3 +5912,1728 @@ if (
         ReasonCode.INVALID_CONTRACT,
         "ST12-F evidence registry must reuse 39 and add exactly nine callables",
     )
+
+
+# V35 private scientific producer. Existing public MATH identities stay unchanged.
+from fractions import Fraction as _ProbabilityFractionV1
+import re
+import sys
+import warnings
+
+from .models import CompiledProbabilityPredictionV1, _probability_text_v1
+from .serialization import _probability_binary64_v1
+
+
+class _ProbabilityNumericalFailureV1(NumericDomainError):
+    def __init__(self, detail: str) -> None:
+        self.detail = detail
+        super().__init__(ReasonCode.OUT_OF_DOMAIN, detail)
+
+
+def _probability_require_synchronous_worker_v1() -> None:
+    """Reject observable overlap before touching warning filters.
+
+    This local guard supplements the original job's admitted worker custody;
+    it neither creates a worker nor qualifies its environment. Selected calls
+    are synchronous and never dispatch Python tasks or threads. On builds with
+    process-wide warning filters even an idle second Python thread denies work.
+    """
+    import asyncio
+    import threading
+    try:
+        asyncio.get_running_loop()
+    except RuntimeError:
+        pass
+    else:
+        raise ContractValidationError(ReasonCode.OWNER_DATA_MISSING, "synchronous numerical worker is required")
+    if not getattr(sys.flags, "context_aware_warnings", False):
+        active = threading.enumerate()
+        if len(active) != 1 or active[0] is not threading.current_thread():
+            raise ContractValidationError(ReasonCode.OWNER_DATA_MISSING, "exclusive Python warning context is unavailable")
+
+
+def _probability_numeric_require_v1(value: bool, detail: str) -> None:
+    if not value:
+        raise _ProbabilityNumericalFailureV1(detail)
+
+
+def _probability_numeric_text_v1(value: object) -> str:
+    _probability_text_v1(value)
+    return value
+
+
+def _probability_decimal34_prediction_v1(value: _ProbabilityFractionV1, rounding: str) -> Decimal:
+    _probability_numeric_require_v1(type(value) is _ProbabilityFractionV1 and rounding in
+        ('ROUND_HALF_EVEN', 'ROUND_FLOOR', 'ROUND_CEILING'), 'PAYOUT_ROUNDING')
+    context = decimal_context_v1()
+    context.rounding = rounding
+    with localcontext(context):
+        return Decimal(value.numerator) / Decimal(value.denominator)
+
+
+def _probability_integer_v1(value: object, minimum: int = 0) -> int:
+    _probability_numeric_require_v1(type(value) is int and minimum <= value and value.bit_length() <= 512, 'INTEGER')
+    return value
+
+
+
+def _probability_dec_v1(value: object) -> Decimal:
+    _probability_numeric_require_v1(type(value) is str and re.fullmatch(r'-?(?:0|[1-9][0-9]*)(?:\.[0-9]+)?', value) is not None, 'DECIMAL_TEXT')
+    _probability_numeric_require_v1(len(value) <= 128, 'DECIMAL_BOUND')
+    result = Decimal(value)
+    _probability_numeric_require_v1(result.is_finite() and not (result == 0 and result.is_signed()), 'DECIMAL_DOMAIN')
+    return result
+
+
+
+def _probability_rational_v1(value: object, nonnegative: bool = False) -> _ProbabilityFractionV1:
+    result = _ProbabilityFractionV1(_probability_dec_v1(value))
+    _probability_numeric_require_v1(not nonnegative or result >= 0, 'NEGATIVE')
+    return result
+
+
+
+def _probability_closed_v1(value: object, keys: set[str]) -> dict:
+    _probability_numeric_require_v1(type(value) is dict and set(value) == keys, 'FIELD_SET')
+    return value
+
+
+
+def _probability_unique_names_v1(value: object) -> list[str]:
+    _probability_numeric_require_v1(type(value) is list and bool(value), 'IDENTITIES')
+    names = [_probability_numeric_text_v1(v) for v in value]
+    _probability_numeric_require_v1(len(set(names)) == len(names), 'DUPLICATE_IDENTITY')
+    return names
+
+
+
+def _probability_finite_decimal_text_v1(value: _ProbabilityFractionV1) -> str:
+    """Exact finite-decimal rendering from a rational; independent of Decimal context."""
+    f=_ProbabilityFractionV1(value); n,d=f.numerator,f.denominator; twos=fives=0
+    while d % 2 == 0: d//=2; twos+=1
+    while d % 5 == 0: d//=5; fives+=1
+    _probability_numeric_require_v1(d == 1, 'NONTERMINATING_DECIMAL')
+    scale=max(twos,fives); n*=2**(scale-twos)*5**(scale-fives)
+    digits=str(abs(n)).rjust(scale+1,'0')
+    if scale: digits=(digits[:-scale]+'.'+digits[-scale:]).rstrip('0').rstrip('.')
+    return ('-' if n<0 else '')+digits if n else '0'
+
+
+
+def _probability_selected_scaler_v1(means: tuple, variances: tuple, scales: tuple,
+                               n_samples: int) -> None:
+    """Validate the selected no-fallback StandardScaler state without NumPy I/O.
+
+    Reproduce the pinned dense-binary64 constant-feature test in its stated
+    operation order. QTT keeps its stronger exclusion of scale-one fallback;
+    neither positive near-constant variance nor forged sqrt(var) admits it.
+    This is preparation-time numerical validation, not source authentication.
+    """
+    _probability_integer_v1(n_samples, 1)
+    _probability_numeric_require_v1(type(means) is tuple and type(variances) is tuple and type(scales) is tuple
+            and 0 < len(means) == len(variances) == len(scales), 'SCALER_DIMENSION')
+    _probability_numeric_require_v1(all(type(x) is float and math.isfinite(x)
+                for values in (means, variances, scales) for x in values), 'SCALER_VARIANCE')
+    _probability_numeric_require_v1(all(x > 0 for x in (*variances, *scales)), 'ZERO_VARIANCE')
+    eps = 2.0 ** -52  # binary64 machine epsilon, not a selected financial threshold.
+    n = float(n_samples)
+    for mean, variance, scale in zip(means, variances, scales, strict=True):
+        mean_error = (n * mean) * eps
+        upper_bound = (n * eps) * variance + mean_error * mean_error
+        _probability_numeric_require_v1(math.isfinite(upper_bound) and variance > upper_bound, 'SCALER_VARIANCE')
+        # Retain the original nonconstant variance/scale consistency tolerance.
+        _probability_numeric_require_v1(math.isclose(scale * scale, variance, rel_tol=1e-12, abs_tol=0.0),
+                'SCALER_VARIANCE')
+
+
+
+def _probability_prediction_feature_cells_v1(fit_rows: int, calibration_rows: int,
+                                        query_rows: int, feature_count: int) -> int:
+    """Live Xf + Xc + Xp element count; not total RSS or allocator memory.
+
+    Xp contains every calibration row again, plus queries, zero/basis/extreme
+    probes. Label vectors, transformed copies, solver workspace, model snapshots,
+    Python containers and returned predictions remain separately budgeted.
+    """
+    for count in (fit_rows, calibration_rows, query_rows): _probability_integer_v1(count, 0)
+    _probability_integer_v1(feature_count, 1)
+    return feature_count * (fit_rows + 2 * calibration_rows + query_rows
+                            + 2 * feature_count + 3)
+
+
+
+def _probability_validate_model_v1(a: dict):
+    _probability_numeric_require_v1(type(a) is dict,'MODEL_FIELD_SET')
+    keys={'schema','kind','feature_names','environment','scaler','coefficients','intercept','classes','calibration','fit_ids','calibration_ids','final_ids'}
+    if a.get('kind')=='HUBER':keys.add('scale')
+    _probability_closed_v1(a,keys);_probability_numeric_require_v1(a['schema']=='QTT_MODEL_DATA_ONLY_V35','MODEL_SCHEMA');_probability_numeric_require_v1(a['kind'] in ('CALIBRATED_LOGISTIC','HUBER'),'MODEL_KIND')
+    names=_probability_unique_names_v1(a['feature_names']);n=len(names)
+    _probability_closed_v1(a['environment'],{'python','numpy','scipy','scikit-learn'})
+    for value in a['environment'].values():_probability_numeric_text_v1(value)
+    s=_probability_closed_v1(a['scaler'],{'mean','var','scale','n_samples_seen'})
+    for k in ['mean','var','scale']:_probability_numeric_require_v1(type(s[k]) is list and len(s[k])==n,'SCALER_DIMENSION')
+    means=list(map(_probability_binary64_v1,s['mean']));variances=list(map(_probability_binary64_v1,s['var']));scales=list(map(_probability_binary64_v1,s['scale']))
+    _probability_numeric_require_v1(all(v>0 for v in variances) and all(v>0 for v in scales),'ZERO_VARIANCE')
+    _probability_selected_scaler_v1(tuple(means), tuple(variances), tuple(scales),
+                               _probability_integer_v1(s['n_samples_seen'], 1))
+    ids=[_probability_unique_names_v1(a[k]) for k in ['fit_ids','calibration_ids','final_ids']]
+    _probability_numeric_require_v1(not(set(ids[0])&set(ids[1]) or set(ids[0])&set(ids[2]) or set(ids[1])&set(ids[2])),'SPLIT_LEAKAGE')
+    _probability_numeric_require_v1(_probability_integer_v1(s['n_samples_seen'],1)==len(ids[0]),'SCALER_FIT_COUNT')
+    _probability_numeric_require_v1(type(a['coefficients']) is list and len(a['coefficients'])==n,'COEFFICIENT_DIMENSION')
+    beta=list(map(_probability_binary64_v1,a['coefficients']));intercept=_probability_binary64_v1(a['intercept'])
+    if a['kind']=='CALIBRATED_LOGISTIC':
+        _probability_numeric_require_v1(a['classes']==[0,1] and all(type(x) is int for x in a['classes']),'CLASSES')
+        cal=_probability_closed_v1(a['calibration'],{'method','response','a','b'});_probability_numeric_require_v1(cal['method']=='sigmoid' and cal['response']=='decision_function','CALIBRATION_METHOD');_probability_binary64_v1(cal['a']);_probability_binary64_v1(cal['b'])
+    else:
+        _probability_numeric_require_v1(a['classes']==[] and a['calibration'] is None,'HUBER_SCHEMA');_probability_numeric_require_v1(_probability_binary64_v1(a['scale'])>0,'HUBER_SCALE')
+    return means,scales,beta,intercept
+
+
+
+def _probability_prediction_parity_v1(kind: str, reference: float, candidate: float) -> bool:
+    """PM2-035/036: exact comparison of finite binary64 model outputs.
+
+    abs(candidate-reference) <= atol + rtol*abs(reference), with no monetary tolerance.
+    Existing stronger probability/regression policies control the synthetic adapter.
+    """
+    _probability_numeric_require_v1(kind in ('CALIBRATED_LOGISTIC','HUBER'),'MODEL_KIND')
+    _probability_numeric_require_v1(type(reference) is float and type(candidate) is float and
+            math.isfinite(reference) and math.isfinite(candidate),'PARITY_FINITE_BINARY64')
+    absolute=_ProbabilityFractionV1(1,10**15) if kind=='CALIBRATED_LOGISTIC' else _ProbabilityFractionV1(1,10**12)
+    relative=_ProbabilityFractionV1(1,10**12)
+    return abs(_ProbabilityFractionV1(candidate)-_ProbabilityFractionV1(reference)) <= absolute+relative*abs(_ProbabilityFractionV1(reference))
+
+
+
+def _probability_scalar_logit_identifiability_v1(logits: tuple[_ProbabilityFractionV1,...], labels: tuple[int,...]) -> str:
+    """Exact 1-D unpenalized logistic geometry, not a fitted model or a tolerance."""
+    _probability_numeric_require_v1(type(logits) is tuple and type(labels) is tuple and 2<=len(logits)<=10000 and len(logits)==len(labels),'DIAGNOSTIC_SHAPE')
+    _probability_numeric_require_v1(all(type(x) is _ProbabilityFractionV1 and x.numerator.bit_length()<=4096 and x.denominator.bit_length()<=4096 for x in logits),'DIAGNOSTIC_VALUE')
+    _probability_numeric_require_v1(all(type(y) is int and y in (0,1) for y in labels),'DIAGNOSTIC_LABEL')
+    if len(set(labels))!=2:return 'CLASS_ABSENT'
+    if len(set(logits))<2:return 'RANK_DEFICIENT'
+    zero=[x for x,y in zip(logits,labels,strict=True) if y==0]
+    one=[x for x,y in zip(logits,labels,strict=True) if y==1]
+    if max(zero)<min(one) or max(one)<min(zero):return 'COMPLETE_SEPARATION'
+    if max(zero)==min(one) or max(one)==min(zero):return 'QUASI_SEPARATION'
+    return 'FINITE_MLE_GEOMETRY'
+
+
+
+_PROBABILITY_DIAGNOSTIC_FAILURES_V1 = frozenset((
+    'CLASS_ABSENT', 'RANK_DEFICIENT', 'COMPLETE_SEPARATION', 'QUASI_SEPARATION',
+    'FIT_NUMERIC_FAILURE', 'FIT_NOT_CONVERGED', 'FIT_OUTPUT_INVALID',
+    'FIT_EXPORT_PARITY',
+))
+
+
+
+def _fit_probability_calibration_diagnostic_v1(probabilities: tuple[float, ...],
+                                         labels: tuple[int, ...], *,
+                                         max_rows: int) -> dict:
+    """Fresh unpenalized intercept/slope diagnostic; installed-library evidence.
+
+    Inputs are occurrence-expanded rows, not cluster averages. No sample weights,
+    tuning, cached estimator, callback, or target-environment claim is accepted.
+    """
+    _probability_work_observation_v1()
+    _probability_integer_v1(max_rows, 2)
+    _probability_numeric_require_v1(type(probabilities) is tuple and type(labels) is tuple and
+            2 <= len(probabilities) == len(labels) <= min(max_rows, 10000),
+            'DIAGNOSTIC_SHAPE')
+    _probability_numeric_require_v1(all(type(q) is float and math.isfinite(q) and 0 <= q <= 1
+                for q in probabilities), 'DIAGNOSTIC_PROBABILITY')
+    _probability_numeric_require_v1(all(type(y) is int and y in (0, 1) for y in labels), 'DIAGNOSTIC_LABEL')
+    low, high = math.nextafter(0., 1.), math.nextafter(1., 0.)
+    logits = tuple(math.log(min(high, max(low, q))) -
+                   math.log1p(-min(high, max(low, q))) for q in probabilities)
+    geometry = _probability_scalar_logit_identifiability_v1(tuple(_ProbabilityFractionV1.from_float(x) for x in logits), labels)
+    if geometry != 'FINITE_MLE_GEOMETRY':
+        return {'status': 'INVALID', 'values': None, 'reason': geometry,
+                'fit_calls': 0, 'occurrence_rows': len(labels)}
+    # An unavailable dependency is an environment failure, not a numerical
+    # observation or an excuse to publish a successfully evaluated window.
+    import warnings
+    import numpy as np
+    from sklearn.exceptions import ConvergenceWarning
+    from sklearn.linear_model import LogisticRegression
+    X = np.ascontiguousarray(np.asarray(logits, dtype=np.float64).reshape(-1, 1))
+    y = np.asarray(labels, dtype=np.int64)
+    estimator = LogisticRegression(C=float('inf'), l1_ratio=0., solver='lbfgs',
+        tol=1e-4, max_iter=100, fit_intercept=True, dual=False,
+        intercept_scaling=1., class_weight=None, random_state=None,
+        verbose=0, warm_start=False, n_jobs=1)
+    def invalid(reason):
+        return {'status': 'INVALID', 'values': None, 'reason': reason,
+                'fit_calls': 1, 'occurrence_rows': len(labels)}
+    _probability_require_synchronous_worker_v1()
+    with warnings.catch_warnings(record=True) as caught:
+        warnings.simplefilter('always')
+        try:
+            estimator.fit(X, y)
+        except (ValueError, FloatingPointError, OverflowError):
+            return invalid('FIT_NUMERIC_FAILURE')
+    if any(issubclass(w.category, (ConvergenceWarning, RuntimeWarning)) for w in caught):
+        return invalid('FIT_NOT_CONVERGED')
+    # The same binary-classifier counter contract applies to the unpenalized
+    # drift diagnostic. A malformed native interface is not a numerical INVALID
+    # observation and must escape the bank's numerical-failure classification.
+    iterations = _probability_prediction_iterations_v1('CALIBRATED_LOGISTIC', estimator.n_iter_)
+    if (estimator.classes_.tolist() != [0, 1] or estimator.coef_.shape != (1, 1)
+            or estimator.intercept_.shape != (1,)):
+        return invalid('FIT_OUTPUT_INVALID')
+    intercept, slope = float(estimator.intercept_[0]), float(estimator.coef_[0, 0])
+    if not all(math.isfinite(v) for v in (intercept, slope)):
+        return invalid('FIT_OUTPUT_INVALID')
+    try:
+        native = estimator.predict_proba(X)[:, 1]
+        verified_pairs = set()
+        for x, q in zip(logits, native, strict=True):
+            # Repeating an identical deterministic input/output pair does not
+            # need another exact-ratio parity calculation. Fit rows themselves
+            # remain fully occurrence-expanded and unit weighted.
+            pair = (x, float(q))
+            if pair in verified_pairs:
+                continue
+            margin = math.fsum((intercept, slope * x))
+            if not math.isfinite(margin):
+                return invalid('FIT_EXPORT_PARITY')
+            e = math.exp(-abs(margin))
+            exported = 1. / (1. + e) if margin >= 0 else e / (1. + e)
+            if not _probability_prediction_parity_v1('CALIBRATED_LOGISTIC', float(q), exported):
+                return invalid('FIT_EXPORT_PARITY')
+            verified_pairs.add(pair)
+    except (ValueError, OverflowError, FloatingPointError, _ProbabilityNumericalFailureV1):
+        return invalid('FIT_EXPORT_PARITY')
+    return {'status': 'VALID', 'values': (
+                (0. if intercept == 0 else intercept).hex(),
+                (0. if slope == 0 else slope).hex()),
+            'reason': None, 'fit_calls': 1, 'occurrence_rows': len(labels),
+            'n_iter': iterations,
+            'warning_classes': sorted({w.category.__name__ for w in caught})}
+
+
+
+def _probability_inverse_ecdf_v1(values: tuple[_ProbabilityFractionV1,...], p: _ProbabilityFractionV1) -> _ProbabilityFractionV1:
+    _probability_numeric_require_v1(type(values) is tuple and 1<=len(values)<=10000 and all(type(x) is _ProbabilityFractionV1 for x in values),'QUANTILE_VALUES')
+    _probability_numeric_require_v1(type(p) is _ProbabilityFractionV1 and 0<p<=1,'QUANTILE_PROBABILITY')
+    rank=(len(values)*p.numerator+p.denominator-1)//p.denominator
+    return sorted(values)[rank-1]
+
+
+
+def _probability_cluster_occurrence_lineage_v1(clusters: tuple[tuple[str,...],...], indices: tuple[int,...],
+                               *, partition: str, replicate: int, max_rows: int) -> tuple:
+    """Data-only accepted-input projection; no source-admission authority."""
+    _probability_numeric_require_v1(partition in ('FIT','CALIBRATION','METRIC_REFERENCE','METRIC_CURRENT','JOINT_ACTIONS'),'PARTITION')
+    _probability_integer_v1(replicate);_probability_integer_v1(max_rows,1)
+    _probability_numeric_require_v1(type(clusters) is tuple and 1<=len(clusters)<=10000,'CLUSTER_SHAPE')
+    _probability_numeric_require_v1(all(type(c) is tuple and c for c in clusters),'CLUSTER_ROWS')
+    flat=[_probability_numeric_text_v1(r) for c in clusters for r in c]
+    _probability_numeric_require_v1(len(flat)==len(set(flat)),'ORIGINAL_ROW_DUPLICATE')
+    _probability_numeric_require_v1(type(indices) is tuple and len(indices)==len(clusters),'DRAW_COUNT')
+    _probability_numeric_require_v1(all(type(i) is int and 0<=i<len(clusters) for i in indices),'DRAW_INDEX')
+    required_rows=sum(len(clusters[i]) for i in indices)
+    _probability_numeric_require_v1(required_rows<=max_rows,'RESOURCE_ROW_BUDGET')
+    return tuple(((partition,replicate,d,j),i,r) for d,i in enumerate(indices) for j,r in enumerate(clusters[i]))
+
+
+
+def _probability_conformal_cluster_maxima_v1(scores_by_cluster: tuple[tuple[_ProbabilityFractionV1,...],...]) -> tuple[_ProbabilityFractionV1,...]:
+    """Selected cluster-envelope score, not a per-row exchangeability claim."""
+    _probability_numeric_require_v1(type(scores_by_cluster) is tuple and scores_by_cluster,'SCORE_CLUSTER_SHAPE')
+    _probability_numeric_require_v1(all(type(c) is tuple and c and all(type(x) is _ProbabilityFractionV1 and x>=0 for x in c) for c in scores_by_cluster),'SCORE_DOMAIN')
+    return tuple(max(c) for c in scores_by_cluster)
+
+
+
+_PROBABILITY_REPLICATE_FAILURES_V1 = frozenset({
+    'PREDICTION_SINGLE_CLASS', 'ZERO_VARIANCE', 'PREDICTION_FIT_FAILURE',
+    'CALIBRATION_FIT_FAILURE', 'PREDICTION_CONVERGENCE', 'PREDICTION_ITERATIONS',
+    'PREDICTION_PARITY', 'CANONICAL_FLOAT_HEX', 'SCALER_VARIANCE',
+    'HUBER_SCALE', 'TRANSFORM_NONFINITE', 'MARGIN_NONFINITE', 'CALIBRATION_NONFINITE',
+    'CALIBRATION_VERIFICATION',
+})
+
+
+
+def _probability_compile_prediction_v1(artifact: dict) -> CompiledProbabilityPredictionV1:
+    """Validate full data-only custody once; copy immutable bounded inference state."""
+    means, scales, beta, intercept = _probability_validate_model_v1(artifact)
+    calibration = (None if artifact['kind'] == 'HUBER' else
+                   (_probability_binary64_v1(artifact['calibration']['a']), _probability_binary64_v1(artifact['calibration']['b'])))
+    return CompiledProbabilityPredictionV1(artifact['kind'], tuple(artifact['feature_names']),
+                                       tuple(means), tuple(scales), tuple(beta), intercept, calibration)
+
+
+
+def _probability_predict_compiled_v1(state: CompiledProbabilityPredictionV1, values: tuple[float, ...],
+                               feature_names: tuple[str, ...]) -> tuple[float, float]:
+    """No library import, model fit, ID-history scan, or artifact decode in this function."""
+    _probability_numeric_require_v1(type(state) is CompiledProbabilityPredictionV1 and
+            type(feature_names) is tuple and feature_names == state.feature_names,
+            'FEATURE_ORDER_BINDING')
+    _probability_numeric_require_v1(type(values) is tuple and len(values) == len(state.coefficients) and
+            all(type(x) is float and math.isfinite(x) for x in values), 'FEATURE_VALUE')
+    z = tuple((x - m) / s for x, m, s in zip(values, state.means, state.scales, strict=True))
+    _probability_numeric_require_v1(all(math.isfinite(x) for x in z), 'TRANSFORM_NONFINITE')
+    terms = (state.intercept, *(b * x for b, x in zip(state.coefficients, z, strict=True)))
+    _probability_numeric_require_v1(all(math.isfinite(x) for x in terms), 'MARGIN_NONFINITE')
+    try:
+        margin = math.fsum(terms)
+    except (ValueError, OverflowError) as exc:
+        raise _ProbabilityNumericalFailureV1('MARGIN_NONFINITE') from exc
+    _probability_numeric_require_v1(math.isfinite(margin), 'MARGIN_NONFINITE')
+    if state.kind == 'HUBER':
+        return margin, margin
+    a, b = state.calibration
+    u = -(a * margin + b)
+    _probability_numeric_require_v1(math.isfinite(u), 'CALIBRATION_NONFINITE')
+    if u >= 0:
+        probability = 1.0 / (1.0 + math.exp(-u))
+    else:
+        e = math.exp(u)
+        probability = e / (1.0 + e)
+    return margin, probability
+
+
+
+def _probability_prediction_iterations_v1(kind: str, raw: object) -> int:
+    """Validate the selected native iteration representation without coercion.
+
+    A solver may converge at its initialized point. Type/shape/bound errors are
+    interface failures (not Rejected numerical slots), so a bank must stop.
+    The caller separately enforces convergence warnings, geometry and parity.
+    """
+    import numpy as np
+    if kind == 'CALIBRATED_LOGISTIC':
+        if (type(raw) is not np.ndarray or raw.shape != (1,)
+                or raw.dtype.kind not in 'iu'):
+            raise ContractValidationError(ReasonCode.SCHEMA_MISMATCH, 'PREDICTION_ITERATIONS: classifier requires one native integer array cell')
+        count = raw[0].item()
+    elif kind == 'HUBER':
+        if type(raw) is int:
+            count = raw
+        elif isinstance(raw, np.integer) and not isinstance(raw, np.bool_):
+            count = raw.item()
+        else:
+            raise ContractValidationError(ReasonCode.SCHEMA_MISMATCH, 'PREDICTION_ITERATIONS: Huber requires a native integer scalar')
+    else:
+        raise ContractValidationError(ReasonCode.SCHEMA_MISMATCH, 'PREDICTION_ITERATIONS: unselected model kind')
+    if type(count) is not int or not 0 <= count <= 100:
+        raise ContractValidationError(ReasonCode.SCHEMA_MISMATCH, 'PREDICTION_ITERATIONS: count outside the fixed zero-to-max_iter domain')
+    return count
+
+
+
+def _probability_fit_prediction_v1(fit_rows: tuple, cal_rows: tuple, final_ids: tuple[str, ...],
+                              features: tuple[str, ...], request_values: tuple, kind: str, work: dict) -> dict:
+    """One original or one bootstrap fit, using only frozen constructors and source rows.
+
+    A row is (unique original-or-occurrence ID, finite feature tuple, exact label).
+    Bootstrap IDs identify occurrences; the caller retains the original index plan.
+    No final feature or target is accepted by this private numerical function.
+    """
+    _probability_work_observation_v1()
+    _probability_numeric_require_v1(kind in ('CALIBRATED_LOGISTIC', 'HUBER'), 'MODEL_KIND')
+    _probability_closed_v1(work, {'base_fit_calls', 'calibration_fit_calls', 'calibration_verification_calls'})
+    for v in work.values(): _probability_integer_v1(v, 0)
+    for rows in (fit_rows, cal_rows):
+        _probability_numeric_require_v1(type(rows) is tuple and bool(rows), 'PREDICTION_ROWS')
+        _probability_unique_names_v1([r[0] for r in rows])
+        for row in rows:
+            _probability_numeric_require_v1(type(row) is tuple and len(row) == 3 and type(row[1]) is tuple
+                    and len(row[1]) == len(features) and
+                    all(type(x) is float and math.isfinite(x) for x in row[1]), 'PREDICTION_ROW')
+            _probability_numeric_require_v1((kind == 'CALIBRATED_LOGISTIC' and type(row[2]) is int and row[2] in (0, 1)) or
+                    (kind == 'HUBER' and type(row[2]) is Decimal and row[2].is_finite()), 'PREDICTION_LABEL')
+    if kind == 'CALIBRATED_LOGISTIC':
+        _probability_numeric_require_v1({r[2] for r in fit_rows} == {0, 1} and {r[2] for r in cal_rows} == {0, 1},
+                'PREDICTION_SINGLE_CLASS')
+    import numpy as np
+    import scipy
+    import sklearn
+    from sklearn.preprocessing import StandardScaler
+    from sklearn.linear_model import LogisticRegression, HuberRegressor
+    from sklearn.pipeline import Pipeline
+    from sklearn.calibration import CalibratedClassifierCV
+    from sklearn.frozen import FrozenEstimator
+    from sklearn.exceptions import ConvergenceWarning
+    from threadpoolctl import threadpool_limits
+    Xf = np.ascontiguousarray([r[1] for r in fit_rows], dtype=np.float64)
+    Xc = np.ascontiguousarray([r[1] for r in cal_rows], dtype=np.float64)
+    yf = np.asarray([r[2] for r in fit_rows], dtype=np.int64 if kind == 'CALIBRATED_LOGISTIC' else np.float64)
+    yc = np.asarray([r[2] for r in cal_rows], dtype=np.int64 if kind == 'CALIBRATED_LOGISTIC' else np.float64)
+    base = (LogisticRegression(C=1.0, l1_ratio=0.0, dual=False, tol=0.0001,
+                fit_intercept=True, intercept_scaling=1, class_weight=None, random_state=None,
+                solver='lbfgs', max_iter=100, verbose=0, warm_start=False, n_jobs=None)
+            if kind == 'CALIBRATED_LOGISTIC' else
+            HuberRegressor(epsilon=1.35, max_iter=100, alpha=0.0001,
+                           warm_start=False, fit_intercept=True, tol=0.00001))
+    pipe = Pipeline([('scaler', StandardScaler(copy=True, with_mean=True, with_std=True)), ('base', base)])
+    _probability_require_synchronous_worker_v1()
+    verification = None
+    with threadpool_limits(limits=1), warnings.catch_warnings(record=True) as captured:
+        warnings.simplefilter('always')
+        _probability_numeric_require_v1(np.all(np.isfinite(yf)) and np.all(np.isfinite(yc)), 'PREDICTION_TARGET_CONVERSION')
+        if kind == 'HUBER':
+            _probability_numeric_require_v1(all(v != 0 or row[2] == 0 for rows, vals in ((fit_rows, yf), (cal_rows, yc))
+                        for row, v in zip(rows, vals, strict=True)), 'PREDICTION_TARGET_UNDERFLOW')
+        work['base_fit_calls'] += 1
+        try:
+            pipe.fit(Xf, yf)
+        except (ValueError, FloatingPointError, OverflowError) as exc:
+            raise _ProbabilityNumericalFailureV1('PREDICTION_FIT_FAILURE') from exc
+        # Validate before calibration; do not spend another fit on invalid metadata.
+        iterations = _probability_prediction_iterations_v1(kind, base.n_iter_)
+        scaler = pipe.named_steps['scaler']
+        _probability_numeric_require_v1(np.all(np.isfinite(scaler.var_)) and np.all(scaler.var_ > 0), 'ZERO_VARIANCE')
+        _probability_selected_scaler_v1(tuple(float(x) for x in scaler.mean_),
+                                   tuple(float(x) for x in scaler.var_),
+                                   tuple(float(x) for x in scaler.scale_), len(fit_rows))
+        before = tuple(np.array(v, copy=True) for v in
+                       (base.coef_, base.intercept_, scaler.mean_, scaler.var_, scaler.scale_, scaler.n_samples_seen_))
+        if kind == 'CALIBRATED_LOGISTIC':
+            _probability_numeric_require_v1(base.classes_.tolist() == [0, 1], 'CLASSES')
+            work['calibration_fit_calls'] += 1
+            try:
+                predicted = CalibratedClassifierCV(FrozenEstimator(pipe), method='sigmoid', cv=None,
+                                                   n_jobs=1, ensemble=False).fit(Xc, yc)
+            except (ValueError, FloatingPointError, OverflowError) as exc:
+                raise _ProbabilityNumericalFailureV1('CALIBRATION_FIT_FAILURE') from exc
+            _probability_numeric_require_v1(len(predicted.calibrated_classifiers_) == 1 and
+                    len(predicted.calibrated_classifiers_[0].calibrators) == 1, 'CALIBRATOR_COUNT')
+            sigmoid = predicted.calibrated_classifiers_[0].calibrators[0]
+            calibration = {'method': 'sigmoid', 'response': 'decision_function',
+                           'a': float(sigmoid.a_).hex(), 'b': float(sigmoid.b_).hex()}
+            work['calibration_verification_calls'] += 1
+            verified_a, verified_b, _ = _probability_checked_sigmoid_v1(pipe.decision_function(Xc), yc)
+            verification = (verified_a, verified_b)
+        else:
+            predicted = pipe
+            calibration = None
+        after = (base.coef_, base.intercept_, scaler.mean_, scaler.var_, scaler.scale_, scaler.n_samples_seen_)
+        _probability_numeric_require_v1(all(np.array_equal(a, b) for a, b in zip(before, after, strict=True)), 'FROZEN_BASE_MUTATION')
+    _probability_numeric_require_v1(not any(issubclass(w.category, ConvergenceWarning) for w in captured), 'PREDICTION_CONVERGENCE')
+    if _probability_prediction_iterations_v1(kind, base.n_iter_) != iterations:
+        raise ContractValidationError(ReasonCode.SCHEMA_MISMATCH, 'PREDICTION_ITERATIONS: calibration changed the original counter')
+    state = {'schema': 'QTT_MODEL_DATA_ONLY_V35', 'kind': kind, 'feature_names': list(features),
+             'environment': {'python': sys.version.split()[0], 'numpy': np.__version__,
+                             'scipy': scipy.__version__, 'scikit-learn': sklearn.__version__},
+             'scaler': {k: [float(x).hex() for x in getattr(scaler, k + '_')]
+                        for k in ('mean', 'var', 'scale')},
+             'coefficients': [float(x).hex() for x in base.coef_.ravel()],
+             'intercept': float(np.asarray(base.intercept_).ravel()[0]).hex(),
+             'classes': [0, 1] if kind == 'CALIBRATED_LOGISTIC' else [],
+             'calibration': calibration, 'fit_ids': [r[0] for r in fit_rows],
+             'calibration_ids': [r[0] for r in cal_rows], 'final_ids': list(final_ids)}
+    state['scaler']['n_samples_seen'] = int(scaler.n_samples_seen_)
+    if kind == 'HUBER':
+        state['scale'] = float(base.scale_).hex()
+    compiled = _probability_compile_prediction_v1(state)
+    # Exact frozen request roster plus deterministic zero/basis/extreme probes.
+    d = len(features)
+    probes = (*request_values, *((r[1]) for r in cal_rows),
+              tuple(0.0 for _ in features),
+              *(tuple(1.0 if i == j else 0.0 for j in range(d)) for i in range(d)),
+              *(tuple(-1.0 if i == j else 0.0 for j in range(d)) for i in range(d)),
+              tuple(30.0 for _ in features), tuple(-30.0 for _ in features))
+    Xp = np.ascontiguousarray(probes, dtype=np.float64)
+    native = predicted.predict_proba(Xp)[:, 1] if kind == 'CALIBRATED_LOGISTIC' else predicted.predict(Xp)
+    outputs = tuple(_probability_predict_compiled_v1(compiled, tuple(row), features) for row in probes)
+    _probability_numeric_require_v1(all(_probability_prediction_parity_v1(kind, float(a), b[1]) for a, b in zip(native, outputs, strict=True)),
+            'PREDICTION_PARITY')
+    if verification is not None:
+        for native_probability, (margin, _) in zip(native, outputs, strict=True):
+            u = -(verification[0] * margin + verification[1])
+            _probability_numeric_require_v1(math.isfinite(u), 'CALIBRATION_VERIFICATION')
+            e = math.exp(-abs(u))
+            checked_probability = 1.0 / (1.0 + e) if u >= 0 else e / (1.0 + e)
+            _probability_numeric_require_v1(
+                _probability_prediction_parity_v1(kind, float(native_probability), checked_probability),
+                'CALIBRATION_VERIFICATION')
+    return {'model': state, 'requests': outputs[:len(request_values)],
+            'calibration_predictions': tuple(v[1] for v in outputs[len(request_values):len(request_values) + len(cal_rows)]),
+            'convergence_warnings': 0, 'iterations': iterations,
+            'iteration_limit_diagnostic': iterations == 100,
+            'fit_calls': 2 if kind == 'CALIBRATED_LOGISTIC' else 1,
+            'max_absolute_parity_error': max(abs(float(a) - b[1]) for a, b in zip(native, outputs, strict=True))}
+
+
+
+def _probability_prediction_partition_v1(clusters: tuple, features: tuple[str, ...], *,
+                                     minimum: int, cutoff_ns: int, kind: str) -> tuple:
+    """Validate numerical projection shape, not accepted-source authority.
+
+    Cluster tuple: (cluster_id, available_ns, matured_ns, info_start_ns,
+                    info_end_ns, ((row_id, feature_tuple, target), ...)).
+    All summaries must be derived from the separately validated original rows.
+    """
+    _probability_numeric_require_v1(type(clusters) is tuple and len(clusters) >= minimum, 'PREDICTION_CLUSTER_SUPPORT')
+    _probability_integer_v1(cutoff_ns, 0)
+    _probability_numeric_require_v1(all(type(c) is tuple and len(c) == 6 for c in clusters), 'PREDICTION_CLUSTER_SHAPE')
+    _probability_unique_names_v1([c[0] for c in clusters])
+    rows = []
+    previous = None
+    for cluster in clusters:
+        _probability_numeric_require_v1(type(cluster) is tuple and len(cluster) == 6, 'PREDICTION_CLUSTER_SHAPE')
+        cid, available, matured, start, end, cr = cluster
+        for v in (available, matured, start, end): _probability_integer_v1(v, 0)
+        _probability_numeric_require_v1(available <= cutoff_ns and matured <= cutoff_ns and start <= end <= matured,
+                'PREDICTION_POINT_IN_TIME')
+        order = (matured, cid)
+        _probability_numeric_require_v1(previous is None or order > previous, 'PREDICTION_CLUSTER_ORDER')
+        previous = order
+        _probability_numeric_require_v1(type(cr) is tuple and cr, 'PREDICTION_CLUSTER_ROWS')
+        for r in cr:
+            _probability_numeric_require_v1(type(r) is tuple and len(r) == 3, 'PREDICTION_ROW')
+            _probability_numeric_text_v1(r[0]); _probability_numeric_require_v1(type(r[1]) is tuple and len(r[1]) == len(features) and
+                all(type(x) is float and math.isfinite(x) for x in r[1]), 'PREDICTION_FEATURES')
+            _probability_numeric_require_v1((kind == 'CALIBRATED_LOGISTIC' and type(r[2]) is int and r[2] in (0, 1)) or
+                    (kind == 'HUBER' and type(r[2]) is Decimal and r[2].is_finite()), 'PREDICTION_LABEL')
+            rows.append(r)
+    _probability_unique_names_v1([r[0] for r in rows])
+    return tuple(rows)
+
+
+
+def _probability_prediction_occurrence_prefix_v1(original_row_ids: tuple[str, ...]) -> str:
+    """Temporary numerical occurrence labels occupy a disjoint namespace.
+
+    Original FIT/CALIBRATION/FINAL IDs remain opaque and unchanged. Select the
+    smallest unused decimal namespace component, without parsing arbitrary
+    original components as integers. This helper supplies neither identity
+    authority nor an alternative source roster. Its derived set is charged to
+    the already admitted original-row metadata budget.
+    """
+    _probability_numeric_require_v1(type(original_row_ids) is tuple and bool(original_row_ids), 'PREDICTION_ORIGINAL_ROW_ROSTER')
+    stem = 'V35_OCCURRENCE:'
+    occupied = set()
+    for row_id in original_row_ids:
+        _probability_numeric_text_v1(row_id)
+        if row_id.startswith(stem):
+            tail = row_id[len(stem):]
+            component, separator, _ = tail.partition(':')
+            if separator:
+                occupied.add(component)
+    candidate = 0
+    while str(candidate) in occupied:
+        candidate += 1
+    # At most one occupied component per original ID; termination is bounded.
+    return f'{stem}{candidate}:'
+
+
+
+def _probability_construct_prediction_bank_v1(*, fit_clusters: tuple, calibration_clusters: tuple,
+        final_cluster_ids: tuple[str, ...], final_row_ids: tuple[str, ...], final_start_ns: int,
+        feature_names: tuple[str, ...], requests: tuple, input_lock_id: str,
+        prediction_input_lock_id: str, plan_id: str, master_seed: int, replicate_count: int,
+        method: str, block_length: int | None, fit_cutoff_ns: int,
+        calibration_cutoff_ns: int, embargo_ns: int, max_plan_cells: int,
+        max_expanded_rows: int, max_prediction_cells: int, max_feature_cells: int,
+        max_fit_calls: int, work: dict) -> dict:
+    """Complete request-locked B-refit probability bank, not a model-use authorization.
+
+    No defaults select budgets, seeds, data, method, or block length. The native
+    owner must admit source/dependence/resource policies and the full environment
+    before invoking this numerical boundary. Calling this numerical helper does not qualify an environment or authenticate its inputs.
+    """
+    for x in (input_lock_id, prediction_input_lock_id, plan_id): _probability_numeric_text_v1(x)
+    _probability_numeric_require_v1(type(feature_names) is tuple, 'FEATURE_NAMES'); _probability_unique_names_v1(list(feature_names))
+    for x in (master_seed, embargo_ns, final_start_ns): _probability_integer_v1(x, 0)
+    _probability_numeric_require_v1(type(replicate_count) is int and replicate_count in (1000, 5000), 'PREDICTION_REPLICATE_POLICY')
+    for x in (max_plan_cells, max_expanded_rows, max_prediction_cells, max_feature_cells, max_fit_calls): _probability_integer_v1(x, 1)
+    _probability_numeric_require_v1(3 * (replicate_count + 1) <= max_fit_calls, 'PREDICTION_FIT_WORK_BUDGET')
+    _probability_closed_v1(work, {'base_fit_calls', 'calibration_fit_calls', 'calibration_verification_calls'})
+    _probability_numeric_require_v1(all(type(value) is int and value == 0 for value in work.values()), 'PREDICTION_WORK_ORIGIN')
+    _probability_numeric_require_v1(type(requests) is tuple and bool(requests), 'PREDICTION_REQUESTS')
+    for r in requests:
+        _probability_numeric_require_v1(type(r) is tuple and len(r) == 2 and type(r[1]) is tuple and
+                len(r[1]) == len(feature_names) and
+                all(type(x) is float and math.isfinite(x) for x in r[1]), 'PREDICTION_REQUESTS')
+    _probability_unique_names_v1([r[0] for r in requests])
+    fr = _probability_prediction_partition_v1(fit_clusters, feature_names, minimum=97,
+                    cutoff_ns=fit_cutoff_ns, kind='CALIBRATED_LOGISTIC')
+    cr = _probability_prediction_partition_v1(calibration_clusters, feature_names, minimum=100,
+                    cutoff_ns=calibration_cutoff_ns, kind='CALIBRATED_LOGISTIC')
+    _probability_numeric_require_v1(type(final_cluster_ids) is tuple and len(final_cluster_ids) >= 30 and
+            type(final_row_ids) is tuple and len(final_row_ids) >= len(final_cluster_ids), 'FINAL_CUSTODY')
+    _probability_unique_names_v1(list(final_cluster_ids)); _probability_unique_names_v1(list(final_row_ids))
+    csets = [set(c[0] for c in fit_clusters), set(c[0] for c in calibration_clusters), set(final_cluster_ids)]
+    rsets = [set(r[0] for r in fr), set(r[0] for r in cr), set(final_row_ids)]
+    _probability_numeric_require_v1(all(not (sets[a] & sets[b]) for sets in (csets, rsets) for a, b in ((0, 1), (0, 2), (1, 2))), 'SPLIT_LEAKAGE')
+    _probability_numeric_require_v1(max(c[4] for c in fit_clusters) + embargo_ns < min(c[3] for c in calibration_clusters)
+            and max(c[4] for c in calibration_clusters) + embargo_ns < final_start_ns,
+            'PURGE_EMBARGO_OVERLAP')
+    _probability_numeric_require_v1(fit_cutoff_ns < min(c[3] for c in calibration_clusters) and
+            calibration_cutoff_ns < final_start_ns, 'FIT_CALIBRATION_FINAL_CUTOFF')
+    sizes = (len(fit_clusters), len(calibration_clusters))
+    _probability_numeric_require_v1(replicate_count * sum(sizes) <= max_plan_cells, 'PREDICTION_PLAN_BUDGET')
+    _probability_numeric_require_v1((replicate_count + 1) * len(requests) <= max_prediction_cells, 'PREDICTION_OUTPUT_BUDGET')
+    _probability_numeric_require_v1(all(len(cs) * max(len(c[5]) for c in cs) <= max_expanded_rows
+                for cs in (fit_clusters, calibration_clusters)), 'PREDICTION_EXPANSION_BUDGET')
+    _probability_numeric_require_v1(_probability_prediction_feature_cells_v1(max_expanded_rows, max_expanded_rows,
+                    len(requests), len(feature_names)) <= max_feature_cells, 'PREDICTION_FEATURE_BUDGET')
+    _probability_numeric_require_v1(method in ('PAIRED_IID_CLUSTERS', 'PAIRED_STATIONARY_CLUSTERS'), 'DEPENDENCE_METHOD_UNAVAILABLE')
+    if method == 'PAIRED_IID_CLUSTERS': _probability_numeric_require_v1(block_length is None, 'IID_BLOCK_LENGTH')
+    else: _probability_numeric_require_v1(type(block_length) is int and 1 <= block_length <= min(sizes), 'BLOCK_BOUND')
+    # Row labels are temporary coordinates, not original source identities.
+    # Reserve one namespace against all three original rosters before any fit.
+    occurrence_prefix = _probability_prediction_occurrence_prefix_v1(
+        tuple(r[0] for r in fr) + tuple(r[0] for r in cr) + final_row_ids)
+    # Streams and call order are exactly the retained PCG64 plan; no resampling service.
+    import numpy as np
+    plans = []
+    for r in range(replicate_count):
+        _probability_work_observation_v1()
+        pair = []
+        for code, n in enumerate(sizes, 1):
+            rng = np.random.Generator(np.random.PCG64(np.random.SeedSequence([master_seed, code, r])))
+            starts = [int(x) for x in rng.integers(0, n, size=n, dtype=np.int64, endpoint=False)]
+            uniforms = ([] if block_length is None else
+                        [_ProbabilityFractionV1.from_float(float(x)) for x in rng.random(size=n, dtype=np.float64)])
+            pair.append(_probability_resampling_indices_v1(starts, uniforms, n, block_length))
+        plans.append(tuple(pair))
+    request_values = tuple(r[1] for r in requests)
+    original = _probability_fit_prediction_v1(fr, cr, final_row_ids, feature_names, request_values, 'CALIBRATED_LOGISTIC', work)
+    records = []; counts = []; max_error = original['max_absolute_parity_error']
+    fit_calls = original['fit_calls']
+    for r, pair in enumerate(plans):
+        _probability_work_observation_v1()
+        draws = []
+        for code, cs, indices in zip((1, 2), (fit_clusters, calibration_clusters), pair, strict=True):
+            row_ids = [list(x[0] for x in c[5]) for c in cs]
+            lineage = _probability_expand_cluster_draw_v1(row_ids, indices)
+            lookup = {row[0]: row for c in cs for row in c[5]}
+            draw = tuple((f'{occurrence_prefix}{code}:{r}:{occurrence}', lookup[source][1], lookup[source][2])
+                         for occurrence, source in lineage)
+            _probability_numeric_require_v1(len(draw) == sum(len(cs[i][5]) for i in indices), 'PREDICTION_OCCURRENCE_LINEAGE')
+            draws.append(draw)
+        counts.append(tuple(map(len, draws)))
+        try:
+            result = _probability_fit_prediction_v1(draws[0], draws[1], final_row_ids,
+                                               feature_names, request_values, 'CALIBRATED_LOGISTIC', work)
+        except _ProbabilityNumericalFailureV1 as exc:
+            _probability_numeric_require_v1(exc.detail in _PROBABILITY_REPLICATE_FAILURES_V1, 'UNCLASSIFIED_PREDICTION_FAILURE')
+            # Rejected rows stay in the fixed ordinal bank. No redraw or retry.
+            records.append({'replicate': r, 'status': 'INVALID', 'values': None, 'reason': exc.detail})
+            continue
+        fit_calls += result['fit_calls']
+        max_error = max(max_error, result['max_absolute_parity_error'])
+        records.append({'replicate': r, 'status': 'VALID', 'values':
+                       {q[0]: float(out[1]).hex() for q, out in zip(requests, result['requests'], strict=True)},
+                        'reason': None})
+    reduced = _probability_bootstrap_bank_v1(records, replicate_count, [r[0] for r in requests])
+    intervals = None
+    if reduced['state'] == 'COMPLETE':
+        intervals = {request[0]: (float(_probability_inverse_ecdf_v1(tuple(row[j] for row in reduced['values']), _ProbabilityFractionV1(1, 40))),
+                                  float(_probability_inverse_ecdf_v1(tuple(row[j] for row in reduced['values']), _ProbabilityFractionV1(39, 40))))
+                     for j, request in enumerate(requests)}
+    return {'schema': 'QTT_REQUEST_LOCKED_PREDICTION_BANK_V36', 'plan_id': plan_id,
+            'input_lock_id': input_lock_id, 'prediction_input_lock_id': prediction_input_lock_id,
+            'feature_names': feature_names, 'requests': requests, 'replicate_count': replicate_count,
+            'method': method, 'block_length': block_length, 'master_seed': master_seed,
+            'numpy_version': np.__version__, 'partition_codes': (1, 2), 'plans': tuple(plans),
+            'ordered_cluster_ids': tuple(tuple(c[0] for c in cs) for cs in (fit_clusters, calibration_clusters)),
+            'ordered_row_ids_by_cluster': tuple(tuple(tuple(row[0] for row in c[5]) for c in cs)
+                                               for cs in (fit_clusters, calibration_clusters)),
+            'expanded_row_counts': tuple(counts), 'original_model': original['model'],
+            'original_predictions': {q[0]: out for q, out in zip(requests, original['requests'], strict=True)},
+            'records': records, 'state': reduced['state'], 'intervals': intervals,
+            'actual_fit_calls': {key: work[key] for key in ('base_fit_calls', 'calibration_fit_calls')},
+            'successful_fit_calls': fit_calls, 'max_absolute_parity_error': max_error,
+            'inference_scope': 'EXACT_LOCKED_REQUESTS_ONLY', 'model_use_authorized': False,
+            'source_authentication': False, 'target_environment_qualified': False}
+
+
+
+def _probability_prediction_interval_v1(records: list[dict], replicate_count: int,
+                                  request_ids: tuple[str, ...]) -> dict:
+    """Bank admission always checks every original ordinal, target and value first."""
+    _probability_numeric_require_v1(type(request_ids) is tuple, 'PREDICTION_TARGETS')
+    _probability_numeric_require_v1(type(replicate_count) is int and replicate_count in (1000, 5000), 'PREDICTION_REPLICATE_POLICY')
+    # Validate every declared VALID row even when another slot is INVALID.
+    _probability_numeric_require_v1(type(records) is list, 'REPLICATE_COUNT')
+    for row in records:
+        _probability_numeric_require_v1(type(row) is dict, 'REPLICATE_STATUS')
+        if row.get('status') == 'VALID':
+            _probability_closed_v1(row.get('values'), set(request_ids))
+            # This is the selected operational-format prediction bank, not the
+            # dual-domain standalone arithmetic oracle. A decimal value cannot
+            # select a legacy operational migration or be rounded into validity.
+            for value in row['values'].values():
+                try:
+                    _probability_binary64_v1(value, probability=True)
+                except ContractValidationError as error:
+                    raise ContractValidationError(ReasonCode.SCHEMA_MISMATCH, 'PREDICTION_SCIENTIFIC_ENCODING') from error
+        elif row.get('status') == 'INVALID':
+            _probability_numeric_require_v1(row.get('reason') in _PROBABILITY_REPLICATE_FAILURES_V1, 'PREDICTION_FAILURE_REASON')
+    result = _probability_bootstrap_bank_v1(records, replicate_count, list(request_ids))
+    if result['state'] != 'COMPLETE':
+        return {'state': 'ABSTAIN', 'reason': result['state'], 'intervals': None,
+                'failed_replicates': result['failed_replicates'], 'model_use_authorized': False}
+    _probability_numeric_require_v1(all(0 <= x <= 1 for row in result['values'] for x in row), 'PREDICTION_RANGE')
+    return {'state': 'SCORE_RESEARCH_ONLY', 'reason': None,
+            'intervals': tuple((q, float(_probability_inverse_ecdf_v1(tuple(r[j] for r in result['values']), _ProbabilityFractionV1(1, 40))),
+                               float(_probability_inverse_ecdf_v1(tuple(r[j] for r in result['values']), _ProbabilityFractionV1(39, 40))))
+                               for j, q in enumerate(request_ids)),
+            'failed_replicates': (), 'model_use_authorized': False}
+
+
+
+def _probability_validate_prediction_lineage_v1(bank: dict) -> None:
+    """Offline structural/stream replay, never proof of source or fit authenticity.
+
+    Called at preparation admission, not inside compiled per-order inference.
+    Source-owner locks still prove the original features, labels and environment.
+    """
+    _probability_numeric_text_v1(bank['plan_id'])
+    _probability_numeric_require_v1(type(bank['feature_names']) is tuple, 'PREDICTION_FEATURE_ORDER')
+    _probability_unique_names_v1(list(bank['feature_names']))
+    _probability_numeric_require_v1(list(bank['feature_names']) == bank['original_model']['feature_names'],
+            'PREDICTION_FEATURE_ORDER')
+    B = bank['replicate_count']
+    _probability_numeric_require_v1(type(B) is int and B in (1000, 5000), 'PREDICTION_REPLICATE_POLICY')
+    _probability_integer_v1(bank['master_seed'], 0)
+    _probability_numeric_require_v1(type(bank['partition_codes']) is tuple and
+            all(type(x) is int for x in bank['partition_codes']) and
+            bank['partition_codes'] == (1, 2), 'PREDICTION_PARTITION_CODES')
+    method = bank['method']; block = bank['block_length']
+    _probability_numeric_require_v1(type(method) is str and method in ('PAIRED_IID_CLUSTERS', 'PAIRED_STATIONARY_CLUSTERS'),
+            'DEPENDENCE_METHOD_UNAVAILABLE')
+    ids = bank['ordered_cluster_ids']; rows = bank['ordered_row_ids_by_cluster']
+    _probability_numeric_require_v1(type(ids) is tuple and len(ids) == 2 and type(rows) is tuple and len(rows) == 2,
+            'PREDICTION_LINEAGE_SHAPE')
+    flat = []
+    for part, minimum in enumerate((97, 100)):
+        _probability_numeric_require_v1(type(ids[part]) is tuple and len(ids[part]) >= minimum,
+                'PREDICTION_CLUSTER_SUPPORT')
+        _probability_unique_names_v1(list(ids[part]))
+        _probability_numeric_require_v1(type(rows[part]) is tuple and len(rows[part]) == len(ids[part]),
+                'PREDICTION_LINEAGE_SHAPE')
+        rr = []
+        for group in rows[part]:
+            _probability_numeric_require_v1(type(group) is tuple and bool(group), 'PREDICTION_CLUSTER_ROWS')
+            _probability_unique_names_v1(list(group)); rr.extend(group)
+        _probability_unique_names_v1(rr); flat.append(rr)
+    _probability_numeric_require_v1(not set(ids[0]).intersection(ids[1]), 'PREDICTION_CLUSTER_LEAKAGE')
+    model = bank['original_model']
+    _probability_numeric_require_v1(flat[0] == model['fit_ids'] and flat[1] == model['calibration_ids'],
+            'PREDICTION_ORIGINAL_ROW_ROSTER')
+    _probability_numeric_require_v1(not set(flat[0]).intersection(flat[1]) and
+            not set(model['final_ids']).intersection((*flat[0], *flat[1])), 'SPLIT_LEAKAGE')
+    sizes = tuple(map(len, ids))
+    if method == 'PAIRED_IID_CLUSTERS':
+        _probability_numeric_require_v1(block is None, 'IID_BLOCK_LENGTH')
+    else:
+        _probability_numeric_require_v1(type(block) is int and 1 <= block <= min(sizes), 'BLOCK_BOUND')
+    plans = bank['plans']; counts = bank['expanded_row_counts']
+    _probability_numeric_require_v1(type(plans) is tuple and len(plans) == B and
+            type(counts) is tuple and len(counts) == B, 'PREDICTION_PLAN_FRAMING')
+    # Check all shapes and original-row expansion before invoking any generator.
+    for pair, count in zip(plans, counts, strict=True):
+        _probability_numeric_require_v1(type(pair) is tuple and len(pair) == 2 and
+                type(count) is tuple and len(count) == 2, 'PREDICTION_PLAN_FRAMING')
+        for part, n in enumerate(sizes):
+            _probability_numeric_require_v1(type(pair[part]) is tuple and len(pair[part]) == n and
+                    all(type(i) is int and 0 <= i < n for i in pair[part]),
+                    'PREDICTION_PLAN_INDEX')
+            _probability_numeric_require_v1(type(count[part]) is int and count[part] ==
+                    sum(len(rows[part][i]) for i in pair[part]), 'PREDICTION_EXPANSION_LINEAGE')
+    import numpy as np
+    _probability_numeric_require_v1(type(bank['numpy_version']) is str and
+            bank['numpy_version'] == model['environment']['numpy'] == np.__version__,
+            'PREDICTION_PLAN_ENVIRONMENT')
+    for r, pair in enumerate(plans):
+        for code, n in enumerate(sizes, 1):
+            gen = np.random.Generator(np.random.PCG64(np.random.SeedSequence([bank['master_seed'], code, r])))
+            starts = [int(x) for x in gen.integers(0, n, size=n, dtype=np.int64, endpoint=False)]
+            uniforms = ([] if block is None else
+                        [_ProbabilityFractionV1.from_float(float(x)) for x in gen.random(size=n, dtype=np.float64)])
+            _probability_numeric_require_v1(pair[code-1] == _probability_resampling_indices_v1(starts, uniforms, n, block),
+                    'PREDICTION_PLAN_REPLAY')
+    calls = _probability_closed_v1(bank['actual_fit_calls'], {'base_fit_calls', 'calibration_fit_calls'})
+    for v in calls.values(): _probability_integer_v1(v, 1)
+    _probability_numeric_require_v1(calls['calibration_fit_calls'] <= calls['base_fit_calls'] <= B+1,
+            'PREDICTION_FIT_ACCOUNTING')
+    successful = bank['successful_fit_calls']; _probability_integer_v1(successful, 2)
+    valid = sum(row.get('status') == 'VALID' for row in bank['records'])
+    _probability_numeric_require_v1(successful == 2*(1+valid) and calls['calibration_fit_calls'] >= 1+valid,
+            'PREDICTION_FIT_ACCOUNTING')
+    error = bank['max_absolute_parity_error']
+    _probability_numeric_require_v1(type(error) is float and math.isfinite(error) and error >= 0.0,
+            'PREDICTION_PARITY_ACCOUNTING')
+
+
+
+def _probability_read_locked_prediction_bank_v1(bank: dict, *, input_lock_id: str,
+        prediction_input_lock_id: str, feature_names: tuple[str, ...], requests: tuple) -> dict:
+    """Pure numerical consumer. Exact value binding is necessary, not source acceptance."""
+    _probability_closed_v1(bank, {'schema','plan_id','input_lock_id','prediction_input_lock_id','feature_names',
+        'requests','replicate_count','method','block_length','master_seed','numpy_version',
+        'partition_codes','plans','ordered_cluster_ids','ordered_row_ids_by_cluster','expanded_row_counts',
+        'original_model','original_predictions','records','state','intervals','actual_fit_calls',
+        'successful_fit_calls','max_absolute_parity_error','inference_scope','model_use_authorized',
+        'source_authentication','target_environment_qualified'})
+    for x in (input_lock_id, prediction_input_lock_id): _probability_numeric_text_v1(x)
+    _probability_numeric_require_v1(bank['schema']=='QTT_REQUEST_LOCKED_PREDICTION_BANK_V36' and
+            bank['input_lock_id']==input_lock_id and bank['prediction_input_lock_id']==prediction_input_lock_id,
+            'PREDICTION_LOCK_MISMATCH')
+    _probability_numeric_require_v1(type(feature_names) is tuple and feature_names==bank['feature_names'] and
+            type(requests) is tuple and requests and type(bank['requests']) is tuple,
+            'PREDICTION_REQUEST_MISMATCH')
+    def values_key(rows):
+        result=[]
+        for r in rows:
+            _probability_numeric_require_v1(type(r) is tuple and len(r)==2 and type(r[1]) is tuple and
+                    len(r[1])==len(feature_names) and all(type(x) is float and math.isfinite(x) for x in r[1]),
+                    'PREDICTION_REQUEST_MISMATCH')
+            _probability_numeric_text_v1(r[0]);result.append((r[0],tuple(x.hex() for x in r[1])))
+        _probability_unique_names_v1([r[0] for r in rows]);return tuple(result)
+    _probability_numeric_require_v1(values_key(requests)==values_key(bank['requests']), 'PREDICTION_REQUEST_MISMATCH')
+    _probability_numeric_require_v1(bank['inference_scope']=='EXACT_LOCKED_REQUESTS_ONLY' and
+            all(bank[k] is False for k in ('model_use_authorized','source_authentication','target_environment_qualified')),
+            'PREDICTION_AUTHORITY')
+    model=bank['original_model'];compiled=_probability_compile_prediction_v1(model)
+    _probability_numeric_require_v1(compiled.kind=='CALIBRATED_LOGISTIC', 'MODEL_KIND')
+    _probability_closed_v1(bank['original_predictions'],set(r[0] for r in requests))
+    for rid, vector in requests:
+        expected=_probability_predict_compiled_v1(compiled,vector,feature_names)
+        actual=bank['original_predictions'][rid]
+        _probability_numeric_require_v1(type(actual) is tuple and len(actual)==2 and
+                all(type(x) is float and math.isfinite(x) for x in actual) and actual==expected,
+                'PREDICTION_ORIGINAL_MISMATCH')
+    out=_probability_prediction_interval_v1(bank['records'],bank['replicate_count'],tuple(r[0] for r in requests))
+    _probability_validate_prediction_lineage_v1(bank)
+    expected_intervals=(None if out['intervals'] is None else {r[0]:(r[1],r[2]) for r in out['intervals']})
+    _probability_numeric_require_v1(bank['intervals']==expected_intervals and bank['state']==('COMPLETE' if expected_intervals is not None else 'UNAVAILABLE_INVALID_REPLICATE'),
+            'PREDICTION_SUMMARY_MISMATCH')
+    return {'state':out['state'],'values':None if expected_intervals is None else
+            tuple((r[0],bank['original_predictions'][r[0]][1],*expected_intervals[r[0]]) for r in requests),
+            'reason':out['reason'],'model_use_authorized':False,'source_authentication':False,
+            'record_authenticity_proven':False}
+
+
+
+def _probability_fair_value_v1(*, probability: float, epistemic_bounds: tuple[float, float],
+                         payoff_yes: str, payoff_no: str, estimand: str,
+                         validity_probability: float | None, expected_void_payout: str | None) -> dict:
+    """Source-admitted fixed-input payout transform, never executable net cash or an LCB."""
+    _probability_numeric_require_v1(type(probability) is float and math.isfinite(probability) and 0 <= probability <= 1,
+            'FAIR_VALUE_PROBABILITY')
+    _probability_numeric_require_v1(type(epistemic_bounds) is tuple and len(epistemic_bounds) == 2 and
+            all(type(x) is float and math.isfinite(x) and 0 <= x <= 1 for x in epistemic_bounds)
+            and epistemic_bounds[0] <= epistemic_bounds[1], 'FAIR_VALUE_INTERVAL')
+    _probability_numeric_require_v1(estimand in ('CONDITIONAL_ON_VALID', 'UNCONDITIONAL_EXPECTED_PAYOUT'), 'FAIR_VALUE_ESTIMAND')
+    yes = _probability_dec_v1(payoff_yes); no = _probability_dec_v1(payoff_no)
+    _probability_numeric_require_v1(yes >= 0 and no >= 0, 'FAIR_VALUE_PAYOUT_DOMAIN')
+    if estimand == 'UNCONDITIONAL_EXPECTED_PAYOUT' and (validity_probability is None or expected_void_payout is None):
+        return {'state': 'ABSTAIN', 'reason': 'VALIDITY_OR_VOID_EVIDENCE_MISSING',
+                'estimand': estimand, 'expected_payout': None, 'q_only_bounds': None,
+                'net_cash_lcb': None, 'model_use_authorized': False}
+    if validity_probability is not None:
+        _probability_numeric_require_v1(type(validity_probability) is float and math.isfinite(validity_probability)
+                and 0 <= validity_probability <= 1, 'VALIDITY_PROBABILITY')
+    void = None if expected_void_payout is None else _probability_dec_v1(expected_void_payout)
+    if void is not None: _probability_numeric_require_v1(void >= 0, 'VOID_PAYOUT_DOMAIN')
+    def value(q):
+        qd=_ProbabilityFractionV1(Decimal(repr(q)))
+        conditional=qd*_ProbabilityFractionV1(yes)+(1-qd)*_ProbabilityFractionV1(no)
+        if estimand=='CONDITIONAL_ON_VALID':return conditional
+        pv=_ProbabilityFractionV1(Decimal(repr(validity_probability)))
+        return pv*conditional+(1-pv)*_ProbabilityFractionV1(void)
+    point=_probability_decimal34_prediction_v1(value(probability),'ROUND_HALF_EVEN')
+    exact_bounds=tuple(sorted(value(x) for x in epistemic_bounds))
+    endpoints=(_probability_decimal34_prediction_v1(exact_bounds[0],'ROUND_FLOOR'),
+               _probability_decimal34_prediction_v1(exact_bounds[1],'ROUND_CEILING'))
+    return {'state': 'SCORE_RESEARCH_ONLY', 'reason': None, 'estimand': estimand,
+            'expected_payout': str(point), 'q_only_bounds': tuple(map(str, endpoints)),
+            'uncertainty_scope': 'POINTWISE_Q_ONLY_GIVEN_FIXED_PAYOUT_AND_VALIDITY_INPUTS',
+            'net_cash_lcb': None, 'model_use_authorized': False}
+
+
+
+def _probability_continuous_prediction_v1(*, fit_clusters: tuple, calibration_clusters: tuple,
+        final_row_ids: tuple[str, ...], final_cluster_ids: tuple[str, ...], final_start_ns: int,
+        feature_names: tuple[str, ...], requests: tuple, fit_cutoff_ns: int,
+        calibration_cutoff_ns: int, embargo_ns: int, max_rows: int, max_feature_cells: int,
+        work: dict | None = None) -> dict:
+    """Selected Huber fit and cluster-max split-conformal numerical projection."""
+    _probability_numeric_require_v1(type(feature_names) is tuple, 'FEATURE_NAMES'); _probability_unique_names_v1(list(feature_names))
+    _probability_integer_v1(embargo_ns, 0)
+    fr = _probability_prediction_partition_v1(fit_clusters, feature_names, minimum=97,
+                                        cutoff_ns=fit_cutoff_ns, kind='HUBER')
+    cr = _probability_prediction_partition_v1(calibration_clusters, feature_names, minimum=100,
+                                        cutoff_ns=calibration_cutoff_ns, kind='HUBER')
+    _probability_numeric_require_v1(not ({c[0] for c in fit_clusters} & {c[0] for c in calibration_clusters}) and
+            not ({r[0] for r in fr} & {r[0] for r in cr}) and
+            not (set(final_row_ids) & {r[0] for r in (*fr, *cr)}), 'SPLIT_LEAKAGE')
+    _probability_numeric_require_v1(max(c[4] for c in fit_clusters) + embargo_ns < min(c[3] for c in calibration_clusters),
+            'PURGE_EMBARGO_OVERLAP')
+    _probability_numeric_require_v1(type(requests) is tuple and bool(requests), 'PREDICTION_REQUESTS')
+    _probability_numeric_require_v1(type(final_cluster_ids) is tuple and len(final_cluster_ids) >= 30 and
+            type(final_row_ids) is tuple and len(final_row_ids) >= len(final_cluster_ids), 'FINAL_CUSTODY')
+    _probability_unique_names_v1(list(final_cluster_ids)); _probability_unique_names_v1(list(final_row_ids)); _probability_integer_v1(final_start_ns, 0)
+    _probability_numeric_require_v1(not(set(final_cluster_ids) & {c[0] for c in (*fit_clusters, *calibration_clusters)}), 'SPLIT_LEAKAGE')
+    _probability_numeric_require_v1(max(c[4] for c in calibration_clusters) + embargo_ns < final_start_ns and
+            fit_cutoff_ns < min(c[3] for c in calibration_clusters) and calibration_cutoff_ns < final_start_ns,
+            'FIT_CALIBRATION_FINAL_CUTOFF')
+    for r in requests:
+        _probability_numeric_require_v1(type(r) is tuple and len(r) == 2 and type(r[1]) is tuple and len(r[1]) == len(feature_names)
+                and all(type(x) is float and math.isfinite(x) for x in r[1]), 'PREDICTION_REQUESTS')
+    _probability_unique_names_v1([r[0] for r in requests])
+    _probability_integer_v1(max_rows, 1); _probability_integer_v1(max_feature_cells, 1)
+    _probability_numeric_require_v1(len(fr) + len(cr) <= max_rows, 'PREDICTION_ROW_BUDGET')
+    _probability_numeric_require_v1(_probability_prediction_feature_cells_v1(len(fr), len(cr), len(requests),
+                    len(feature_names)) <= max_feature_cells, 'PREDICTION_FEATURE_BUDGET')
+    if work is None:
+        work = {'base_fit_calls': 0, 'calibration_fit_calls': 0, 'calibration_verification_calls': 0}
+    _probability_closed_v1(work, {'base_fit_calls', 'calibration_fit_calls', 'calibration_verification_calls'})
+    _probability_numeric_require_v1(all(type(value) is int and value == 0 for value in work.values()),
+                                    'PREDICTION_WORK_ORIGIN')
+    out = _probability_fit_prediction_v1(fr, cr, final_row_ids, feature_names,
+                                    tuple(r[1] for r in requests), 'HUBER', work)
+    residuals = []; offset = 0
+    for cluster in calibration_clusters:
+        rows = cluster[5]; predictions = out['calibration_predictions'][offset:offset + len(rows)]
+        residuals.append(max(abs(_ProbabilityFractionV1(r[2]) - _ProbabilityFractionV1(Decimal(repr(p))))
+                             for r, p in zip(rows, predictions, strict=True)))
+        offset += len(rows)
+    n = len(residuals); rank = (19 * (n + 1) + 19) // 20
+    _probability_numeric_require_v1(rank <= n, 'CONFORMAL_RANK_UNAVAILABLE')
+    q = sorted(residuals)[rank - 1]
+    # Do not round a scientific interval inward; exact rational endpoints retained.
+    values = tuple((r[0], _ProbabilityFractionV1(Decimal(repr(p[1]))), _ProbabilityFractionV1(Decimal(repr(p[1]))) - q,
+                    _ProbabilityFractionV1(Decimal(repr(p[1]))) + q) for r, p in zip(requests, out['requests'], strict=True))
+    return {'state': 'SCORE_RESEARCH_ONLY', 'model': out['model'], 'values': values,
+            'decimal34_values': tuple((r[0],str(_probability_decimal34_prediction_v1(r[1],'ROUND_HALF_EVEN')),
+                str(_probability_decimal34_prediction_v1(r[2],'ROUND_FLOOR')),str(_probability_decimal34_prediction_v1(r[3],'ROUND_CEILING')))
+                for r in values),
+            'cluster_residuals': tuple(residuals), 'rank': rank, 'q': q,
+            'original_predictions': tuple((r[0], float(p[1]).hex()) for r, p in zip(requests, out['requests'], strict=True)),
+            'actual_fit_calls': dict(work), 'fit_calls': work['base_fit_calls'],
+            'calibrator_fit_calls': work['calibration_fit_calls'],
+            'coverage_scope': 'ONE_FUTURE_CLUSTER_FIXED_SCHEDULE_UNDER_EXCHANGEABLE_ENVELOPES',
+            'model_use_authorized': False, 'empirical_coverage_proven': False,
+            'max_absolute_parity_error': out['max_absolute_parity_error']}
+
+
+
+def _probability_construct_continuous_bank_v1(*, fit_clusters, calibration_clusters,
+        final_row_ids, final_cluster_ids, final_start_ns, feature_names, requests,
+        fit_cutoff_ns, calibration_cutoff_ns, embargo_ns, max_rows, max_feature_cells,
+        unit, input_lock_id, prediction_input_lock_id, plan_id, master_seed, replicate_count,
+        method, block_length, max_plan_cells, max_expanded_rows, max_prediction_cells,
+        max_fit_calls, max_model_bytes, max_record_bytes, max_total_bank_bytes,
+        resource_envelope, allocation_calculation, work_roster, deadline_ns, work, attempt):
+    """One original conformal fit plus B independent full scaler/Huber refits.
+
+    This private working bank retains signed values in the parent's units. Its
+    descriptive bootstrap quantiles do not replace the original cluster-envelope
+    conformal interval, financial acceptance, or subsequent independent review.
+    All resource values come from the original accepted source; none is a grant
+    inferred from this function, successful outputs, or the current host.
+    """
+    import time
+    from types import MappingProxyType
+    from .models import _ContinuousRefitBankV1
+    from .serialization import _bounded_probability_json_v1
+
+    need = _probability_numeric_require_v1
+    for value in (unit, input_lock_id, prediction_input_lock_id, plan_id):
+        _probability_numeric_text_v1(value)
+    _probability_integer_v1(master_seed, 0)
+    need(type(replicate_count) is int and replicate_count in (1000, 5000), 'PREDICTION_REPLICATE_POLICY')
+    for value in (max_rows, max_feature_cells, max_plan_cells, max_expanded_rows,
+                  max_prediction_cells, max_fit_calls, max_model_bytes, max_record_bytes,
+                  max_total_bank_bytes, deadline_ns):
+        _probability_integer_v1(value, 1)
+    _probability_closed_v1(work, {'base_fit_calls', 'calibration_fit_calls', 'calibration_verification_calls'})
+    need(all(type(value) is int and value == 0 for value in work.values()), 'PREDICTION_WORK_ORIGIN')
+    need(type(attempt) is dict and not attempt, 'CONTINUOUS_ORIGINAL_ATTEMPT_REQUIRED')
+    envelope_fields = {'max_source_clusters', 'max_expanded_rows_per_replicate',
+                       'max_prediction_targets', 'max_memory_bytes', 'max_duration_ns'}
+    allocation_fields = {'index_bytes', 'prediction_bytes', 'lineage_bytes', 'fitted_state_bytes',
+                         'numerical_scratch_bytes', 'python_object_bytes', 'artifact_bytes', 'storage_bytes'}
+    need(type(resource_envelope) is MappingProxyType and set(resource_envelope) == envelope_fields and
+         type(allocation_calculation) is MappingProxyType and set(allocation_calculation) == allocation_fields and
+         type(work_roster) is MappingProxyType and set(work_roster) == set(work), 'CONTINUOUS_ACCEPTED_WORKLOAD')
+    for value in (*resource_envelope.values(), *allocation_calculation.values()):
+        _probability_integer_v1(value, 1)
+    expected_work = {'base_fit_calls': replicate_count + 1,
+                     'calibration_fit_calls': 0, 'calibration_verification_calls': 0}
+    need(all(type(value) is int for value in work_roster.values()) and dict(work_roster) == expected_work and
+         replicate_count + 1 <= max_fit_calls, 'PREDICTION_FIT_WORK_BUDGET')
+    started = time.monotonic_ns()
+    need(started < deadline_ns, 'CONTINUOUS_WORK_DEADLINE')
+    deadline = min(deadline_ns, started + resource_envelope['max_duration_ns'])
+
+    def observe():
+        _probability_work_observation_v1()
+        if time.monotonic_ns() >= deadline:
+            raise ContractValidationError(ReasonCode.RESOURCE_BOUND_EXCEEDED, 'CONTINUOUS_WORK_DEADLINE')
+
+    observe()
+    need(type(feature_names) is tuple, 'FEATURE_NAMES')
+    _probability_unique_names_v1(list(feature_names))
+    need(type(fit_clusters) is tuple and type(calibration_clusters) is tuple and
+         len(fit_clusters) + len(calibration_clusters) <= resource_envelope['max_source_clusters'],
+         'CONTINUOUS_SOURCE_CLUSTER_BUDGET')
+    need(type(requests) is tuple and bool(requests) and len(requests) <= resource_envelope['max_prediction_targets'],
+         'PREDICTION_REQUESTS')
+    for request in requests:
+        need(type(request) is tuple and len(request) == 2 and type(request[1]) is tuple and
+             len(request[1]) == len(feature_names) and
+             all(type(x) is float and math.isfinite(x) for x in request[1]), 'PREDICTION_REQUESTS')
+    names = _probability_unique_names_v1([request[0] for request in requests])
+    for clusters in (fit_clusters, calibration_clusters):
+        need(all(type(cluster) is tuple and len(cluster) == 6 and type(cluster[5]) is tuple
+                 for cluster in clusters), 'PREDICTION_CLUSTER_SHAPE')
+    need(sum(len(cluster[5]) for clusters in (fit_clusters, calibration_clusters) for cluster in clusters)
+         <= max_rows, 'PREDICTION_ROW_BUDGET')
+    fr = _probability_prediction_partition_v1(fit_clusters, feature_names, minimum=97,
+                                             cutoff_ns=fit_cutoff_ns, kind='HUBER')
+    cr = _probability_prediction_partition_v1(calibration_clusters, feature_names, minimum=100,
+                                             cutoff_ns=calibration_cutoff_ns, kind='HUBER')
+    sizes = (len(fit_clusters), len(calibration_clusters))
+    expanded = tuple(len(clusters) * max(len(cluster[5]) for cluster in clusters)
+                     for clusters in (fit_clusters, calibration_clusters))
+    need(all(count <= max_expanded_rows and count <= resource_envelope['max_expanded_rows_per_replicate']
+             for count in expanded), 'PREDICTION_EXPANSION_BUDGET')
+    feature_cells = _probability_prediction_feature_cells_v1(*expanded, len(requests), len(feature_names))
+    need(feature_cells <= max_feature_cells, 'PREDICTION_FEATURE_BUDGET')
+    plan_cells = replicate_count * sum(sizes)
+    prediction_cells = (replicate_count + 1) * len(requests)
+    need(plan_cells <= max_plan_cells, 'PREDICTION_PLAN_BUDGET')
+    need(prediction_cells <= max_prediction_cells, 'PREDICTION_OUTPUT_BUDGET')
+    need(method in ('PAIRED_IID_CLUSTERS', 'PAIRED_STATIONARY_CLUSTERS'), 'DEPENDENCE_METHOD_UNAVAILABLE')
+    if method == 'PAIRED_IID_CLUSTERS':
+        need(block_length is None, 'IID_BLOCK_LENGTH')
+    else:
+        need(type(block_length) is int and 1 <= block_length <= min(sizes), 'BLOCK_BOUND')
+    # Admit the complete original split before constructing either tape. FINAL
+    # has identities only; no FINAL feature/target argument can reach the fitter.
+    need(type(final_row_ids) is tuple and type(final_cluster_ids) is tuple and
+         len(final_cluster_ids) >= 30 and len(final_row_ids) >= len(final_cluster_ids), 'FINAL_CUSTODY')
+    need(sum(sizes) + len(final_cluster_ids) <= resource_envelope['max_source_clusters'],
+         'CONTINUOUS_SOURCE_CLUSTER_BUDGET')
+    _probability_unique_names_v1(list(final_row_ids)); _probability_unique_names_v1(list(final_cluster_ids))
+    _probability_integer_v1(embargo_ns, 0); _probability_integer_v1(final_start_ns, 0)
+    for groups in (({row[0] for row in fr}, {row[0] for row in cr}, set(final_row_ids)),
+                   ({c[0] for c in fit_clusters}, {c[0] for c in calibration_clusters}, set(final_cluster_ids))):
+        need(all(not groups[a] & groups[b] for a, b in ((0, 1), (0, 2), (1, 2))), 'SPLIT_LEAKAGE')
+    need(max(c[4] for c in fit_clusters) + embargo_ns < min(c[3] for c in calibration_clusters) and
+         max(c[4] for c in calibration_clusters) + embargo_ns < final_start_ns and
+         fit_cutoff_ns < min(c[3] for c in calibration_clusters) and calibration_cutoff_ns < final_start_ns,
+         'FIT_CALIBRATION_FINAL_CUTOFF')
+    prefix = _probability_prediction_occurrence_prefix_v1(tuple(row[0] for row in (*fr, *cr)) + final_row_ids)
+    rosters = tuple(tuple(tuple(row[0] for row in cluster[5]) for cluster in clusters)
+                    for clusters in (fit_clusters, calibration_clusters))
+    cluster_ids = tuple(tuple(cluster[0] for cluster in clusters) for clusters in (fit_clusters, calibration_clusters))
+    basis = dict(plan_id=plan_id, input_lock_id=input_lock_id, prediction_input_lock_id=prediction_input_lock_id,
+        unit=unit, feature_names=feature_names, requests=tuple((q, tuple(x.hex() for x in xs)) for q, xs in requests),
+        master_seed=master_seed, replicate_count=replicate_count, method=method, block_length=block_length,
+        ordered_cluster_ids=cluster_ids, ordered_row_ids_by_cluster=rosters, final_row_ids=final_row_ids,
+        occurrence_prefix=prefix)
+    basis_bytes = len(_bounded_probability_json_v1(basis, max_bytes=min(max_model_bytes, max_total_bank_bytes)).encode('utf-8'))
+    # Bound each complete four-field record before drawing/fitting. The longest
+    # finite binary64 spelling is bounded by the negative normal/subnormal ends.
+    widest_hex = max((-float.fromhex('0x1.fffffffffffffp+1023')).hex(),
+                     (-float.fromhex('0x0.0000000000001p-1022')).hex(), key=len)
+    failures = _PROBABILITY_REPLICATE_FAILURES_V1 - {
+        'PREDICTION_SINGLE_CLASS', 'PREDICTION_ITERATIONS', 'CALIBRATION_FIT_FAILURE',
+        'CALIBRATION_NONFINITE', 'CALIBRATION_VERIFICATION'}
+    for record in (dict(replicate=replicate_count - 1, status='VALID', values=dict.fromkeys(names, widest_hex), reason=None),
+                   dict(replicate=replicate_count - 1, status='INVALID', values=None, reason=max(failures, key=len))):
+        _bounded_probability_json_v1(record, max_bytes=max_record_bytes)
+    # JSON index/row-count integer widths are conservatively charged; the fixed
+    # per-record bound also reserves original predictions and summary fields.
+    plan_bytes = replicate_count * sum(2 + count * (len(str(count - 1)) + 1) for count in sizes)
+    count_bytes = replicate_count * (4 + sum(len(str(count)) + 1 for count in expanded))
+    artifact_bound = basis_bytes + plan_bytes + count_bytes + max_model_bytes + (replicate_count + 2) * (max_record_bytes + 1)
+    lineage_bound = basis_bytes + sum(expanded) * (len(prefix.encode('utf-8')) +
+        len(str(replicate_count)) + len(str(max(expanded))) + 32 +
+        max(len(row[0].encode('utf-8')) for row in (*fr, *cr)))
+    need(artifact_bound <= max_total_bank_bytes and allocation_calculation['artifact_bytes'] >= artifact_bound and
+         allocation_calculation['storage_bytes'] >= artifact_bound, 'CONTINUOUS_ARTIFACT_STORAGE_BUDGET')
+    need(allocation_calculation['index_bytes'] >= 8 * plan_cells and
+         allocation_calculation['prediction_bytes'] >= 8 * prediction_cells and
+         allocation_calculation['lineage_bytes'] >= lineage_bound and
+         allocation_calculation['fitted_state_bytes'] >= max_model_bytes,
+         'CONTINUOUS_ALLOCATION_BUDGET')
+    # Scratch and Python-object bounds are separately supplied admitted values,
+    # not inferred from the logical feature-cell calculation or host free RAM.
+    memory_charge = 8 * feature_cells + sum(value for key, value in allocation_calculation.items()
+                                            if key != 'storage_bytes')
+    need(memory_charge <= resource_envelope['max_memory_bytes'], 'CONTINUOUS_MEMORY_BUDGET')
+    observe()
+    attempt.update(state='PLANNED', work=work, records=[], original=None, active_ordinal=None,
+        preflight=dict(fit_calls=replicate_count + 1, plan_cells=plan_cells, expanded_rows=expanded,
+                       prediction_cells=prediction_cells, feature_cells=feature_cells,
+                       artifact_bytes=artifact_bound, memory_bytes=memory_charge, deadline_ns=deadline))
+    try:
+        import numpy as np
+        plans = []
+        attempt['plans'] = plans
+        for replicate in range(replicate_count):
+            observe()
+            pair = []
+            for code, size in enumerate(sizes, 1):
+                rng = np.random.Generator(np.random.PCG64(np.random.SeedSequence([master_seed, code, replicate])))
+                starts = [int(x) for x in rng.integers(0, size, size=size, dtype=np.int64, endpoint=False)]
+                uniforms = ([] if block_length is None else
+                    [_ProbabilityFractionV1.from_float(float(x)) for x in rng.random(size=size, dtype=np.float64)])
+                pair.append(_probability_resampling_indices_v1(starts, uniforms, size, block_length))
+            plans.append(tuple(pair))
+        attempt['state'], attempt['active_ordinal'] = 'FITTING_ORIGINAL', -1
+        observe()
+        original = _probability_continuous_prediction_v1(fit_clusters=fit_clusters,
+            calibration_clusters=calibration_clusters, final_row_ids=final_row_ids,
+            final_cluster_ids=final_cluster_ids, final_start_ns=final_start_ns,
+            feature_names=feature_names, requests=requests, fit_cutoff_ns=fit_cutoff_ns,
+            calibration_cutoff_ns=calibration_cutoff_ns, embargo_ns=embargo_ns,
+            max_rows=max_rows, max_feature_cells=max_feature_cells, work=work)
+        attempt['original'] = original
+        need(work == {'base_fit_calls': 1, 'calibration_fit_calls': 0, 'calibration_verification_calls': 0} and
+             original['fit_calls'] == 1 and original['calibrator_fit_calls'] == 0, 'CONTINUOUS_ORIGINAL_WORK')
+        _bounded_probability_json_v1(original['model'], max_bytes=max_model_bytes)
+        records, row_counts = attempt['records'], []
+        request_values = tuple(request[1] for request in requests)
+        for replicate, pair in enumerate(plans):
+            observe()
+            attempt['state'], attempt['active_ordinal'] = 'FITTING_REPLICATE', replicate
+            draws = []
+            for code, clusters, indices in zip((1, 2), (fit_clusters, calibration_clusters), pair, strict=True):
+                lineage = _probability_expand_cluster_draw_v1([list(row[0] for row in cluster[5]) for cluster in clusters], indices)
+                lookup = {row[0]: row for cluster in clusters for row in cluster[5]}
+                draw = tuple((f'{prefix}{code}:{replicate}:{occurrence}', lookup[source][1], lookup[source][2])
+                             for occurrence, source in lineage)
+                need(len(draw) == sum(len(clusters[index][5]) for index in indices), 'PREDICTION_OCCURRENCE_LINEAGE')
+                draws.append(draw)
+            row_counts.append(tuple(map(len, draws)))
+            before_work = dict(work)
+            try:
+                fitted = _probability_fit_prediction_v1(draws[0], draws[1], final_row_ids,
+                                                       feature_names, request_values, 'HUBER', work)
+            except _ProbabilityNumericalFailureV1 as exc:
+                need(exc.detail in failures, 'UNCLASSIFIED_PREDICTION_FAILURE')
+                record = dict(replicate=replicate, status='INVALID', values=None, reason=exc.detail)
+            else:
+                need(work['base_fit_calls'] == before_work['base_fit_calls'] + 1 and
+                     fitted['fit_calls'] == 1, 'CONTINUOUS_REFIT_WORK')
+                _bounded_probability_json_v1(fitted['model'], max_bytes=max_model_bytes)
+                need(len(fitted['requests']) == len(requests), 'PREDICTION_OUTPUT_SHAPE')
+                need(all(type(output) is tuple and len(output) == 2 and
+                         all(type(value) is float and math.isfinite(value) for value in output) and
+                         output[0].hex() == output[1].hex() for output in fitted['requests']),
+                     'CONTINUOUS_SIGNED_BINARY64_OUTPUT')
+                values = {request[0]: output[1].hex()
+                          for request, output in zip(requests, fitted['requests'], strict=True)}
+                for value in values.values():
+                    _probability_functional_scalar_v1(value)
+                record = dict(replicate=replicate, status='VALID', values=values, reason=None)
+            need(0 <= work['base_fit_calls'] - before_work['base_fit_calls'] <= 1 and
+                 work['calibration_fit_calls'] == work['calibration_verification_calls'] == 0,
+                 'CONTINUOUS_NO_SIGMOID_OR_RESCUE')
+            _bounded_probability_json_v1(record, max_bytes=max_record_bytes)
+            records.append(record)
+            observe()
+        reduced = _probability_bootstrap_bank_v1(records, replicate_count, list(names))
+        bounds = None
+        if reduced['state'] == 'COMPLETE':
+            need(work == expected_work, 'CONTINUOUS_COMPLETE_WORK')
+            bounds = tuple((name,
+                float(_probability_inverse_ecdf_v1(tuple(row[j] for row in reduced['values']), _ProbabilityFractionV1(1, 40))).hex(),
+                float(_probability_inverse_ecdf_v1(tuple(row[j] for row in reduced['values']), _ProbabilityFractionV1(39, 40))).hex())
+                for j, name in enumerate(names))
+        bank = _ContinuousRefitBankV1(plan_id, input_lock_id, prediction_input_lock_id, unit,
+            feature_names, requests, replicate_count, master_seed, method, block_length, np.__version__,
+            cluster_ids, rosters, final_row_ids, (1, 2), tuple(plans), prefix, tuple(row_counts), original['original_predictions'],
+            tuple(_bounded_probability_json_v1(record, max_bytes=max_record_bytes) for record in records),
+            tuple((name, work[name]) for name in expected_work), reduced['state'], bounds)
+        observe()
+        attempt.update(state=bank.state, active_ordinal=None, bank=bank)
+        return bank, original
+    except BaseException as exc:
+        # Keep the exact successful/invalid prefix and work counters. Interface,
+        # deadline and resource exceptions are not recoded as numerical slots.
+        attempt.update(state='INCOMPLETE_UNAVAILABLE', failure=exc)
+        raise
+
+
+def _probability_read_continuous_bank_v1(bank, *, input_lock_id, prediction_input_lock_id,
+        feature_names, requests, unit, max_record_bytes):
+    """Read only the same signed request roster; never grant probability use."""
+    from .models import _ContinuousRefitBankV1
+    from .serialization import _native_strict_json
+    need = _probability_numeric_require_v1
+    need(type(bank) is _ContinuousRefitBankV1, 'CONTINUOUS_REFIT_BANK_TYPE')
+    bank.__post_init__()
+    need((input_lock_id, prediction_input_lock_id, feature_names, unit) ==
+         (bank.input_lock_id, bank.prediction_input_lock_id, bank.feature_names, bank.unit), 'CONTINUOUS_REQUEST_LOCK')
+    need(type(feature_names) is tuple, 'CONTINUOUS_REQUEST_LOCK')
+    _probability_unique_names_v1(list(feature_names))
+    need(type(requests) is tuple and bool(requests) and len(requests) == len(bank.requests), 'CONTINUOUS_REQUEST_LOCK')
+    for actual, expected in zip(requests, bank.requests, strict=True):
+        need(type(expected) is tuple and len(expected) == 2 and type(expected[1]) is tuple and
+             len(expected[1]) == len(feature_names) and
+             all(type(value) is float and math.isfinite(value) for value in expected[1]), 'CONTINUOUS_REQUEST_LOCK')
+        need(type(actual) is tuple and len(actual) == 2 and type(actual[0]) is str and actual[0] == expected[0] and
+             type(actual[1]) is tuple and len(actual[1]) == len(expected[1]) and
+             all(type(a) is float and a.hex() == b.hex() for a, b in zip(actual[1], expected[1], strict=True)),
+             'CONTINUOUS_REQUEST_LOCK')
+    names = list(_probability_unique_names_v1([request[0] for request in requests]))
+    need(len(bank.ordered_cluster_ids) == len(bank.ordered_row_ids_by_cluster) == 2,
+         'CONTINUOUS_PARTITION_ROSTERS')
+    original_ids = []
+    for clusters, rows in zip(bank.ordered_cluster_ids, bank.ordered_row_ids_by_cluster, strict=True):
+        need(type(clusters) is tuple and type(rows) is tuple and len(clusters) == len(rows), 'CONTINUOUS_PARTITION_ROSTERS')
+        _probability_unique_names_v1(list(clusters))
+        for group in rows:
+            need(type(group) is tuple and bool(group), 'CONTINUOUS_ROW_ROSTER')
+            original_ids.extend(group)
+    _probability_unique_names_v1([name for partition in bank.ordered_cluster_ids for name in partition])
+    need(len(bank.ordered_cluster_ids[0]) >= 97 and len(bank.ordered_cluster_ids[1]) >= 100 and
+         len(bank.final_row_ids) >= 30 and
+         (bank.block_length is None or bank.block_length <= min(map(len, bank.ordered_cluster_ids))),
+         'CONTINUOUS_PARTITION_ROSTERS')
+    _probability_unique_names_v1([*original_ids, *bank.final_row_ids])
+    need(bank.occurrence_prefix == _probability_prediction_occurrence_prefix_v1(tuple(original_ids) + bank.final_row_ids),
+         'CONTINUOUS_OCCURRENCE_NAMESPACE')
+    for pair, counts in zip(bank.plans, bank.expanded_row_counts, strict=True):
+        need(type(pair) is tuple and len(pair) == 2 and type(counts) is tuple and len(counts) == 2,
+             'CONTINUOUS_PLAN_SHAPE')
+        for indices, rows, count in zip(pair, bank.ordered_row_ids_by_cluster, counts, strict=True):
+            need(type(indices) is tuple and len(indices) == len(rows) and
+                 all(type(index) is int and 0 <= index < len(rows) for index in indices), 'CONTINUOUS_PLAN_INDEX')
+            need(type(count) is int and count == sum(len(rows[index]) for index in indices), 'CONTINUOUS_EXPANSION_LINEAGE')
+    need(all(type(row) is tuple and len(row) == 2 for row in bank.original_predictions) and
+         tuple(name for name, _ in bank.original_predictions) == tuple(names), 'CONTINUOUS_ORIGINAL_PREDICTION_ROSTER')
+    for _, value in bank.original_predictions:
+        _probability_binary64_v1(value)
+    records = [_native_strict_json(record.encode('utf-8'), max_record_bytes) for record in bank.records]
+    reduced = _probability_bootstrap_bank_v1(records, bank.replicate_count, names)
+    for record in records:
+        if record['status'] == 'VALID':
+            for value in record['values'].values():
+                _probability_binary64_v1(value)
+    need(reduced['state'] == bank.state, 'CONTINUOUS_BANK_STATE')
+    if bank.state != 'COMPLETE':
+        return None
+    expected_bounds = tuple((name,
+        float(_probability_inverse_ecdf_v1(tuple(row[j] for row in reduced['values']), _ProbabilityFractionV1(1, 40))).hex(),
+        float(_probability_inverse_ecdf_v1(tuple(row[j] for row in reduced['values']), _ProbabilityFractionV1(39, 40))).hex())
+        for j, name in enumerate(names))
+    need(bank.descriptive_bounds == expected_bounds and
+         dict(bank.actual_fit_calls) == {'base_fit_calls': bank.replicate_count + 1,
+             'calibration_fit_calls': 0, 'calibration_verification_calls': 0}, 'CONTINUOUS_BANK_BOUNDS_AND_WORK')
+    return expected_bounds
+
+
+def _probability_resampling_indices_v1(starts: list[int], uniforms: list[_ProbabilityFractionV1], n: int, block: int | None) -> tuple[int, ...]:
+    """Paired IID or circular stationary resampling from an explicit random tape."""
+    _probability_integer_v1(n,1);_probability_numeric_require_v1(n<=100000,'RESAMPLE_BOUND')
+    _probability_numeric_require_v1(type(starts) is list and len(starts)==n and all(type(x) is int and 0<=x<n for x in starts),'RESAMPLE_STARTS')
+    if block is None:
+        _probability_numeric_require_v1(uniforms==[],'IID_HAS_NO_CONTINUATION_TAPE');return tuple(starts)
+    _probability_integer_v1(block,1);_probability_numeric_require_v1(block<=n,'BLOCK_BOUND')
+    _probability_numeric_require_v1(type(uniforms) is list and len(uniforms)==n and all(type(u) is _ProbabilityFractionV1 and 0<=u<1 for u in uniforms),'RESAMPLE_UNIFORMS')
+    out=starts.copy();p=_ProbabilityFractionV1(1,block)
+    for i in range(1,n):
+        if uniforms[i]>p:out[i]=(out[i-1]+1)%n
+    return tuple(out)
+
+
+
+def _probability_expand_cluster_draw_v1(cluster_rows: list[list[str]], indices: tuple[int,...]) -> tuple[tuple[str,str],...]:
+    """Occurrence identity and original row lineage are separate; never deduplicate draws."""
+    _probability_numeric_require_v1(type(cluster_rows) is list and bool(cluster_rows),'CLUSTERS')
+    seen=set()
+    for rows in cluster_rows:
+        for row in _probability_unique_names_v1(rows):_probability_numeric_require_v1(row not in seen,'ROW_IN_MULTIPLE_CLUSTERS');seen.add(row)
+    _probability_numeric_require_v1(type(indices) is tuple and len(indices)==len(cluster_rows),'DRAW_DIMENSION')
+    result=[]
+    for draw,index in enumerate(indices):
+        _probability_numeric_require_v1(type(index) is int and 0<=index<len(cluster_rows),'DRAW_INDEX')
+        for offset,row in enumerate(cluster_rows[index]):result.append((f'draw:{draw}:row:{offset}',row))
+    return tuple(result)
+
+
+
+def _probability_functional_scalar_v1(value: object) -> _ProbabilityFractionV1:
+    """Scientific result channel only; retain the decimal-only financial decoder.
+
+    New native producers emit canonical float.hex strings. Bounded decimal strings
+    are retained for the historical standalone arithmetic fixtures, not converted
+    through float. The scientific hexadecimal route preserves the exact supplied
+    binary64 value, including subnormals, without unbounded decimal expansion.
+    """
+    if type(value) is str and value.startswith(('0x', '-0x')):
+        number = _probability_binary64_v1(value)
+        _probability_numeric_require_v1(not (number == 0.0 and math.copysign(1.0, number) < 0.0),
+                'FUNCTIONAL_NEGATIVE_ZERO')
+        return _ProbabilityFractionV1.from_float(number)
+    return _probability_rational_v1(value)
+
+
+
+def _probability_cluster_functional_bank_v1(cluster_values: tuple, targets: tuple[str, ...],
+                            index_plans: tuple, *, max_rows: int,
+                            max_targets: int, max_plan_cells: int) -> dict:
+    """Pure fixed-primitive paired reducer, not model fitting or source acceptance.
+
+    Within-cluster and across-cluster means use exact ratios of already-computed
+    finite binary64 primitives. Round only each final functional to binary64;
+    reject nonzero underflow and overflow. Cache each original cluster summary,
+    then use draw multiplicities; never substitute this for an estimator refit.
+    Limits are explicit fixture/runtime inputs, not selected production defaults.
+    """
+    for limit in (max_rows, max_targets, max_plan_cells): _probability_integer_v1(limit, 1)
+    _probability_numeric_require_v1(type(targets) is tuple and 0 < len(targets) <= max_targets,
+            'FUNCTIONAL_TARGETS')
+    _probability_unique_names_v1(list(targets))
+    _probability_numeric_require_v1(type(cluster_values) is tuple and bool(cluster_values), 'FUNCTIONAL_CLUSTERS')
+    n = len(cluster_values)
+    _probability_numeric_require_v1(type(index_plans) is tuple and bool(index_plans), 'FUNCTIONAL_PLANS')
+    _probability_numeric_require_v1(len(index_plans) <= 10000 and n * len(index_plans) <= max_plan_cells,
+            'FUNCTIONAL_PLAN_BUDGET')
+    _probability_numeric_require_v1(all(type(cluster) is tuple and bool(cluster) for cluster in cluster_values),
+            'FUNCTIONAL_CLUSTER_ROWS')
+    _probability_numeric_require_v1(sum(len(cluster) for cluster in cluster_values) <= max_rows,
+            'FUNCTIONAL_ROW_BUDGET')
+    summaries = []
+    for cluster in cluster_values:
+        _probability_numeric_require_v1(all(type(row) is tuple and len(row) == len(targets) for row in cluster),
+                'FUNCTIONAL_ROW_SHAPE')
+        _probability_numeric_require_v1(all(type(value) is float and math.isfinite(value)
+                    for row in cluster for value in row), 'FUNCTIONAL_FLOAT')
+        summaries.append(tuple(sum((_ProbabilityFractionV1.from_float(row[j]) for row in cluster), _ProbabilityFractionV1(0))
+                               / len(cluster) for j in range(len(targets))))
+    def encoded_means(indices):
+        _probability_numeric_require_v1(type(indices) is tuple and len(indices) == n and
+                all(type(i) is int and 0 <= i < n for i in indices), 'FUNCTIONAL_INDEX')
+        multiplicities = [0] * n
+        for i in indices: multiplicities[i] += 1
+        result = {}
+        for j, target in enumerate(targets):
+            exact = sum((summaries[i][j] * count for i, count in enumerate(multiplicities)
+                         if count), _ProbabilityFractionV1(0)) / n
+            try: number = float(exact)
+            except OverflowError as exc: raise _ProbabilityNumericalFailureV1('FUNCTIONAL_OVERFLOW') from exc
+            _probability_numeric_require_v1(math.isfinite(number), 'FUNCTIONAL_OVERFLOW')
+            _probability_numeric_require_v1(exact == 0 or number != 0.0, 'FUNCTIONAL_UNDERFLOW')
+            result[target] = (0.0 if number == 0.0 else number).hex()
+        return result
+    original = encoded_means(tuple(range(n)))
+    records = []
+    for r, indices in enumerate(index_plans):
+        try:
+            values = encoded_means(indices)
+        except _ProbabilityNumericalFailureV1 as exc:
+            if exc.detail not in ('FUNCTIONAL_UNDERFLOW', 'FUNCTIONAL_OVERFLOW'):
+                raise
+            records.append({'replicate': r, 'status': 'INVALID',
+                            'values': None, 'reason': exc.detail})
+        else:
+            records.append({'replicate': r, 'status': 'VALID',
+                            'values': values, 'reason': None})
+    return {'original': original, 'records': records, 'targets': targets,
+            'independent_cluster_count': n, 'source_row_count': sum(map(len, cluster_values)),
+            'model_fits': 0, 'source_authentication': False}
+
+
+
+def _probability_bootstrap_bank_v1(records: list[dict], expected_replicates: int, targets: list[str]) -> dict:
+    """No failed-replicate deletion, redraw, imputation, or variable denominator."""
+    _probability_integer_v1(expected_replicates,1);_probability_numeric_require_v1(expected_replicates<=10000,'REPLICATE_BOUND');names=_probability_unique_names_v1(targets)
+    _probability_numeric_require_v1(type(records) is list and len(records)==expected_replicates,'REPLICATE_COUNT')
+    invalid=[];values=[]
+    for i,row in enumerate(records):
+        _probability_closed_v1(row,{'replicate','status','values','reason'})
+        _probability_numeric_require_v1(type(row['replicate']) is int and row['replicate']==i,'REPLICATE_SEQUENCE')
+        if row['status']=='INVALID':
+            _probability_numeric_require_v1(row['values'] is None,'INVALID_HAS_NO_VALUES');_probability_numeric_text_v1(row['reason']);invalid.append(i)
+        elif row['status']=='VALID':
+            _probability_numeric_require_v1(row['reason'] is None,'VALID_HAS_NO_FAILURE');_probability_closed_v1(row['values'],set(names))
+            values.append(tuple(_probability_functional_scalar_v1(row['values'][name]) for name in names))
+        else:raise _ProbabilityNumericalFailureV1('REPLICATE_STATUS')
+    if invalid:return {'state':'UNAVAILABLE_INVALID_REPLICATE','failed_replicates':tuple(invalid),'target_names':tuple(names),'values':None}
+    return {'state':'COMPLETE','failed_replicates':(),'target_names':tuple(names),'values':tuple(values)}
+
+
+
+def _probability_checked_sigmoid_v1(margins: object, labels: object):
+    """Return checked same-objective coefficients plus raw termination evidence.
+
+    Call only after the existing owner has validated scope, source, budget,
+    selected environment and CAL lineage. The numerical worker must satisfy the
+    specification's synchronous warning-context exclusivity condition. This local
+    helper is not a process isolation mechanism. No replacement of public coefficients.
+    """
+    import numpy as np
+    from scipy.optimize import minimize
+    from sklearn._loss import HalfBinomialLoss
+    from sklearn.exceptions import ConvergenceWarning
+
+    _probability_require_synchronous_worker_v1()
+    x = np.asarray(margins)
+    y = np.asarray(labels)
+    if (x.dtype != np.dtype('float64') or x.ndim != 1 or y.ndim != 1
+            or x.shape != y.shape or x.size == 0
+            or y.dtype.kind not in 'ifu' or not np.all(np.isfinite(x))
+            or not np.all(np.isfinite(y)) or set(y.tolist()) != {0, 1}):
+        raise _ProbabilityNumericalFailureV1('CALIBRATION_VERIFICATION')
+    # Copies prevent caller mutation by this reference; real custody is upstream.
+    original = x.copy()
+    y = y.copy()
+    maximum = float(np.max(np.abs(original)))
+    divisor = maximum if maximum >= 30.0 else 1.0
+    scaled = original / divisor if maximum >= 30.0 else original
+    negative = float(np.count_nonzero(y <= 0))
+    positive = float(y.size) - negative
+    targets = np.where(y > 0, (positive + 1.0) / (positive + 2.0),
+                       1.0 / (negative + 2.0)).astype(np.float64)
+    loss = HalfBinomialLoss()
+
+    def objective(theta):
+        predictor = -(theta[0] * scaled + theta[1]).astype(np.float64)
+        values, derivative = loss.loss_gradient(
+            y_true=targets, raw_prediction=predictor, sample_weight=None)
+        gradient = np.asarray([-derivative @ scaled, -derivative.sum()], dtype=np.float64)
+        return values.sum(), gradient
+
+    # A success flag cannot erase a convergence warning from this same solve.
+    # Filter restoration assumes the declared exclusive/context-aware worker.
+    # Other warning categories are not silenced.
+    try:
+        with warnings.catch_warnings():
+            warnings.simplefilter('error', ConvergenceWarning)
+            result = minimize(
+                objective, np.asarray([0.0, math.log((negative + 1.0) / (positive + 1.0))]),
+                method='L-BFGS-B', jac=True,
+                options={'gtol': 1e-6, 'ftol': 64 * np.finfo(float).eps})
+    except ConvergenceWarning as exc:
+        raise _ProbabilityNumericalFailureV1('CALIBRATION_VERIFICATION') from exc
+    if (type(result.status) is not int or result.status != 0
+            or type(result.success) is not bool or result.success is not True):
+        raise _ProbabilityNumericalFailureV1('CALIBRATION_VERIFICATION')
+    for name in ('nit', 'nfev', 'njev'):
+        value = getattr(result, name)
+        if type(value) is not int or value < (0 if name == 'nit' else 1):
+            raise _ProbabilityNumericalFailureV1('CALIBRATION_VERIFICATION')
+    theta = np.asarray(result.x)
+    gradient = np.asarray(result.jac)
+    # Do not let Boolean/integer arrays or a one-element array masquerade as
+    # the selected binary64 vector/scalar result. No dtype coercion is performed.
+    if (theta.dtype != np.dtype('float64') or gradient.dtype != np.dtype('float64')
+            or theta.shape != (2,) or gradient.shape != (2,)
+            or type(result.fun) not in (float, np.float64)
+            or not np.all(np.isfinite(theta)) or not np.all(np.isfinite(gradient))
+            or not np.isfinite(result.fun) or result.fun < 0):
+        raise _ProbabilityNumericalFailureV1('CALIBRATION_VERIFICATION')
+    a, b = float(theta[0] / divisor), float(theta[1])
+    if not np.isfinite(a) or not np.isfinite(b):
+        raise _ProbabilityNumericalFailureV1('CALIBRATION_VERIFICATION')
+    return a, b, result
+
+
+def _derive_probability_drift_result_v1(reference: dict, current: dict, reference_bank: dict, current_bank: dict) -> dict:
+    """Consume the original MATH-13 decision after exact centered-tail counting."""
+    need = _probability_numeric_require_v1
+    fraction = _ProbabilityFractionV1
+    need(type(reference) is dict and bool(reference) and type(current) is dict and
+         set(reference) == set(current), 'DRIFT_FAMILY')
+    need(type(reference_bank) is dict and type(reference_bank.get('target_names')) is tuple, 'DRIFT_TARGET_NAMES')
+    names = _probability_unique_names_v1(list(reference_bank['target_names']))
+    need(set(names) == set(reference), 'DRIFT_TARGET_NAMES')
+    originals = tuple(_probability_functional_scalar_v1(reference[name]) for name in names)
+    observed = tuple(_probability_functional_scalar_v1(current[name]) for name in names)
+    for bank in (reference_bank, current_bank):
+        need(type(bank) is dict and bank.get('state') == 'COMPLETE' and bank.get('failed_replicates') == (),
+             'DRIFT_BANK_UNAVAILABLE')
+        need(bank.get('target_names') == tuple(names), 'DRIFT_TARGET_ORDER')
+        need(type(bank.get('values')) is tuple and len(bank['values']) > 0 and
+             all(type(row) is tuple and len(row) == len(names) and all(type(x) is fraction for x in row)
+                 for row in bank['values']), 'DRIFT_BANK_SHAPE')
+    before, after = reference_bank['values'], current_bank['values']
+    need(len(before) == len(after), 'DRIFT_REPLICATE_COUNT')
+    count = len(before)
+    rows, pvalues = [], []
+    for index, name in enumerate(names):
+        delta = observed[index] - originals[index]
+        exceedances = sum(abs(w[index] - r[index] - delta) >= abs(delta) for r, w in zip(before, after, strict=True))
+        pvalue = fraction(exceedances + 1, count + 1)
+        pvalues.append(pvalue)
+        ordered = sorted(row[index] for row in before)
+        low = ordered[math.ceil(fraction(count, 40)) - 1]
+        high = ordered[math.ceil(fraction(39 * count, 40)) - 1]
+        rows.append({'name': name, 'change': delta, 'pvalue': pvalue,
+                     'tail_numerator': exceedances + 1, 'tail_denominator': count + 1,
+                     'outside_reference_band': not low <= observed[index] <= high})
+    native = compute_math_13_benjamini_yekutieli(tuple(float(value) for value in pvalues), q=0.05)
+    # Independent exact step-up reconstruction is only a rejection invariant.
+    # A disagreement makes this family unavailable; it never overrides MATH-13.
+    family_size = len(names)
+    harmonic = sum((fraction(1, index) for index in range(1, family_size + 1)), fraction(0))
+    order = sorted(range(family_size), key=lambda index: (pvalues[index], index))
+    last = 0
+    for rank, index in enumerate(order, 1):
+        if pvalues[index] <= fraction(rank, 20 * family_size) / harmonic:
+            last = rank
+    expected = tuple(sorted(order[:last]))
+    need(native.rejected_original_indices == expected, 'DRIFT_NATIVE_BY_INCONSISTENCY')
+    # Retain exact arithmetic in the diagnostic summary. The accepted native
+    # MATH-13 decision above remains the sole decision consumed by the producer.
+    adjusted = [fraction(1)] * family_size
+    running = fraction(1)
+    for rank in range(family_size, 0, -1):
+        index = order[rank - 1]
+        running = min(running, pvalues[index] * family_size * harmonic / rank)
+        adjusted[index] = running
+    for index, row in enumerate(rows):
+        row['adjusted_pvalue'] = adjusted[index]
+        row['material_breach'] = index in native.rejected_original_indices and row['outside_reference_band']
+    return {'state': 'MATERIAL_BREACH' if any(row['material_breach'] for row in rows) else 'GREEN_STATISTICAL_FAMILY_ONLY',
+            'rows': tuple(rows), 'hard_gate_override_allowed': False}
+
+
+def _probability_metric_plans_v1(*, master_seed: int, replicate_count: int,
+        reference_clusters: int, current_clusters: int, method: str,
+        block_length: int | None, max_plan_cells: int) -> tuple:
+    """Retain both complete PCG64 tapes for fixed-model metric partitions 3/4."""
+    need = _probability_numeric_require_v1
+    for value in (reference_clusters, current_clusters, max_plan_cells):
+        _probability_integer_v1(value, 1)
+    _probability_integer_v1(master_seed, 0)
+    need(type(replicate_count) is int and replicate_count in (1000, 5000), 'REPLICATE_COUNT')
+    need(replicate_count * (reference_clusters + current_clusters) <= max_plan_cells, 'FUNCTIONAL_PLAN_BUDGET')
+    need(method in ('PAIRED_IID_CLUSTERS', 'PAIRED_STATIONARY_CLUSTERS'), 'DEPENDENCE_METHOD_UNAVAILABLE')
+    if method == 'PAIRED_IID_CLUSTERS':
+        need(block_length is None, 'IID_BLOCK_LENGTH')
+    else:
+        need(type(block_length) is int and 1 <= block_length <= min(reference_clusters, current_clusters), 'BLOCK_BOUND')
+    import numpy as np
+    partitions = []
+    for code, clusters in ((3, reference_clusters), (4, current_clusters)):
+        plans = []
+        for replicate in range(replicate_count):
+            _probability_work_observation_v1()
+            generator = np.random.Generator(np.random.PCG64(np.random.SeedSequence([master_seed, code, replicate])))
+            starts = [int(value) for value in generator.integers(0, clusters, size=clusters, dtype=np.int64, endpoint=False)]
+            uniforms = ([] if block_length is None else
+                        [_ProbabilityFractionV1.from_float(float(value)) for value in generator.random(size=clusters, dtype=np.float64)])
+            plans.append(_probability_resampling_indices_v1(starts, uniforms, clusters, block_length))
+        partitions.append(tuple(plans))
+    return tuple(partitions)
+
+
+from .models import (_probability_require_v1, _probability_projection_text_v1, _probability_projection_names_v1)
+
+def _compile_probability_binary_drift_family_v1(family) -> tuple[tuple[str, str], ...]:
+    _probability_projection_text_v1(family.family_ref, 'FULL_FAMILY_REF')
+    _probability_projection_names_v1(family.feature_names, 'FULL_FAMILY_FEATURES')
+    _probability_projection_names_v1(family.missingness_names, 'FULL_FAMILY_MISSINGNESS', empty=True)
+    _probability_projection_names_v1(family.composition_names, 'FULL_FAMILY_COMPOSITION', empty=True)
+    _probability_require_v1(type(family.calibration_material) is bool, 'FULL_FAMILY_MATERIALITY')
+    rows = tuple((item for name in family.feature_names for item in (('feature:' + name + ':mean', 'REAL'), ('feature:' + name + ':second_moment', 'NONNEGATIVE'))))
+    rows += tuple((('missing:' + name, 'UNIT_INTERVAL') for name in family.missingness_names))
+    rows += (('base_rate', 'UNIT_INTERVAL'), ('brier', 'UNIT_INTERVAL'), ('log_loss', 'NONNEGATIVE'), ('ood_rate', 'UNIT_INTERVAL'))
+    rows += tuple((('composition:' + name, 'UNIT_INTERVAL') for name in family.composition_names))
+    if family.calibration_material:
+        rows += (('calibration_intercept', 'REAL'), ('calibration_slope', 'REAL'))
+    _probability_projection_names_v1(tuple((name for name, _ in rows)), 'FULL_FAMILY_TARGET_COLLISION')
+    return rows
+
+def _probability_model_predict_v1(artifact, values, *, feature_names):
+    state = _probability_compile_prediction_v1(artifact)
+    return _probability_predict_compiled_v1(state, tuple(values), feature_names=tuple(feature_names))[1]
+
+
+from contextlib import contextmanager as _probability_contextmanager_v1
+from contextvars import ContextVar as _ProbabilityContextVarV1
+_probability_work_context_v1 = _ProbabilityContextVarV1("probability_work_context", default=None)
+
+
+def _probability_work_observation_v1():
+    import time
+    limits = _probability_work_context_v1.get()
+    if limits is None:
+        return
+    now = time.time_ns()
+    if now < limits[2] or now >= limits[1] or time.monotonic_ns() >= limits[0]:
+        raise ContractValidationError(ReasonCode.RESOURCE_BOUND_EXCEEDED, "PROBABILITY_NUMERICAL_WORK_EXPIRED")
+    limits[2] = now
+
+
+@_probability_contextmanager_v1
+def _probability_numerical_work_v1(*, deadline_ns, valid_until_ns):
+    import time
+    from importlib import metadata
+    from itertools import islice
+    # A runtime join of the frozen four-component model projection, before
+    # fitting. This does not replace the existing full graph, provenance,
+    # ABI/platform or independently accepted model-environment preflight.
+    if (tuple(sys.version_info[:3]) != (3, 14, 7) or sys.version_info.releaselevel != "final"):
+        raise ContractValidationError(ReasonCode.OWNER_DATA_MISSING, "PROBABILITY_MODEL_INTERPRETER_MISMATCH")
+    for name, version in (("numpy", "2.5.2"), ("scipy", "1.18.1"), ("scikit-learn", "1.9.0")):
+        installed = tuple(islice(metadata.distributions(name=name), 2))
+        if len(installed) != 1 or installed[0].version != version:
+            raise ContractValidationError(ReasonCode.OWNER_DATA_MISSING, "PROBABILITY_MODEL_DISTRIBUTION_MISMATCH: " + name)
+    _probability_require_synchronous_worker_v1()
+    if _probability_work_context_v1.get() is not None:
+        raise ContractValidationError(ReasonCode.INVALID_CONTRACT, "PROBABILITY_NUMERICAL_WORK_REENTRANT")
+    token = _probability_work_context_v1.set([deadline_ns, valid_until_ns, time.time_ns()])
+    try:
+        _probability_work_observation_v1()
+        # The accepted numerical profile uses one native numerical thread.
+        from threadpoolctl import threadpool_limits
+        with threadpool_limits(limits=1):
+            yield
+            _probability_work_observation_v1()
+        _probability_work_observation_v1()
+    finally:
+        _probability_work_context_v1.reset(token)
+
+
+def _probability_ood_cluster_envelope_v1(*, artifact, feature_names, calibration_clusters,
+        current_cluster, schedule_ref, calibration_schedule_ref, current_schedule_ref,
+        max_rows, max_feature_cells):
+    """Fixed-scaler cluster-envelope OOD; no exchangeability or source claim."""
+    need = _probability_numeric_require_v1
+    for value in (max_rows, max_feature_cells):
+        _probability_integer_v1(value, 1)
+    for ref in (schedule_ref, calibration_schedule_ref, current_schedule_ref):
+        _probability_numeric_text_v1(ref)
+    need(schedule_ref == calibration_schedule_ref == current_schedule_ref, 'OOD_SCHEDULE_BINDING')
+    need(type(feature_names) is tuple and feature_names and tuple(artifact['feature_names']) == feature_names,
+         'OOD_FEATURE_ORDER')
+    means, scales, _, _ = _probability_validate_model_v1(artifact)
+    need(type(calibration_clusters) is tuple and 100 <= len(calibration_clusters) <= max_rows and
+         type(current_cluster) is tuple and bool(current_cluster), 'OOD_CLUSTER_SUPPORT')
+    rows = len(current_cluster)
+    for cluster in calibration_clusters:
+        need(type(cluster) is tuple and bool(cluster), 'OOD_CLUSTER_SHAPE')
+        rows += len(cluster)
+        need(rows <= max_rows and rows * len(feature_names) <= max_feature_cells, 'OOD_FEATURE_BUDGET')
+    def cluster_maximum(cluster):
+        maximum = 0.0
+        for values in cluster:
+            _probability_work_observation_v1()
+            need(type(values) is tuple and len(values) == len(feature_names) and
+                 all(type(value) is float and math.isfinite(value) for value in values), 'OOD_FEATURE_VALUES')
+            score = 0.0
+            for value, mean, scale in zip(values, means, scales, strict=True):
+                transformed = (value - mean) / scale
+                need(math.isfinite(transformed), 'TRANSFORM_NONFINITE')
+                score = max(score, abs(transformed))
+            maximum = max(maximum, score)
+        return maximum
+    current = cluster_maximum(current_cluster)
+    calibration = tuple(cluster_maximum(cluster) for cluster in calibration_clusters)
+    numerator, denominator = 1 + sum(value >= current for value in calibration), len(calibration) + 1
+    pvalue = _ProbabilityFractionV1(numerator, denominator)
+    return {'state': 'OOD' if pvalue <= _ProbabilityFractionV1(1, 100) else 'IN_SUPPORT',
+            'current_prefix_maximum': current, 'calibration_cluster_maxima': calibration,
+            'tail_numerator': numerator, 'tail_denominator': denominator, 'pvalue': pvalue,
+            'schedule_ref': schedule_ref, 'coverage_scope': 'EXCHANGEABLE_COMPLETE_CLUSTER_ENVELOPES_REQUIRED',
+            'source_authentication': False, 'empirical_coverage_proven': False, 'model_use_authorized': False}

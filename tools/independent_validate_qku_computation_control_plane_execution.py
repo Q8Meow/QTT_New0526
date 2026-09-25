@@ -1773,13 +1773,14 @@ def _f14_execution_contract_failures_v1(repo_root):
     tree = ast.parse((owner / 'receipts.py').read_text(encoding='utf-8'))
     discriminator = next(n for n in tree.body if isinstance(n, ast.ClassDef) and n.name == 'EconomicRecordTypeV1')
     values = {ast.literal_eval(n.value) for n in discriminator.body if isinstance(n, ast.Assign)}
-    if values != _F14_EXPECTED_DISCRIMINATORS:
-        failures.append('F14 exact 21-discriminator roster changed')
+    if len(_F14_EXPECTED_DISCRIMINATORS) != 21 or values != _F14_EXPECTED_DISCRIMINATORS | {"PROBABILITY_PRODUCER_CONTROL"}:
+        failures.append('original F14 21 plus sole V35 discriminator roster changed')
     for name, cls in (('persistence.py', 'PersistenceAdapterV1'), ('persistence.py', 'InMemoryPersistenceAdapterV1'),
             ('sqlite_reference.py', 'SQLiteReferenceAdapterV1')):
         tree = ast.parse((owner / name).read_text(encoding='utf-8'))
         methods = set(_class_methods(tree, cls))
-        if (cls == 'PersistenceAdapterV1' and methods != _F14_EXPECTED_METHODS) or not _F14_EXPECTED_METHODS <= methods:
+        expected_methods = _F14_EXPECTED_METHODS | {"load_committed_probability_producer_state_v1"}
+        if len(_F14_EXPECTED_METHODS) != 20 or (cls == 'PersistenceAdapterV1' and methods != expected_methods) or not expected_methods <= methods:
             failures.append('F14 committed reader/interface roster changed: ' + cls)
     handoff = ast.parse((repo_root / 'src/qtt/stage1_prediction_markets/private_state_receipts/handoff.py').read_text(encoding='utf-8'))
     function = next(n for n in handoff.body if isinstance(n, ast.FunctionDef) and n.name == 'run_retail_private_observation_once_v1')
@@ -1801,8 +1802,48 @@ _F14_EXPECTED_METHODS = frozenset(('availability', 'begin_transaction', 'insert_
 _F14_EXPECTED_NATIVE_INSTALL = 'python -m pip install --only-binary=:all: --no-deps --index-url https://pypi.org/simple websockets==17.0.1 cryptography==50.0.1 cffi==2.1.1 pycparser==3.0'
 
 
+def _v35_execution_surface_failures():
+    failures = []
+    receipt_tree, persistence_tree = _tree("receipts.py"), _tree("persistence.py")
+    def fields(tree, name):
+        cls = next(node for node in tree.body if isinstance(node, ast.ClassDef) and node.name == name)
+        return tuple(node.target.id for node in cls.body if isinstance(node, ast.AnnAssign) and isinstance(node.target, ast.Name))
+    if fields(receipt_tree, "ProbabilityProducerControlReceiptV1") != (
+            "schema_version", "control_kind", "scope", "effective_ns", "recorded_ns", "available_ns",
+            "dependency_refs", "valid_until_ns", "body"):
+        failures.append("V35 nine-field control payload changed")
+    if len(fields(receipt_tree, "EconomicReceiptEventSpineV1")) != 18:
+        failures.append("original 18-field economic spine changed")
+    new_method = _class_method_node(persistence_tree, "PersistenceAdapterV1", "load_committed_probability_producer_state_v1")
+    if any(ast.unparse(item).endswith("abstractmethod") for item in new_method.decorator_list):
+        failures.append("V35 base reader must be concrete default-deny")
+    if not any(isinstance(node, ast.Raise) for node in ast.walk(new_method)):
+        failures.append("V35 base reader default denial missing")
+    producer_tree = _tree("input_resolver.py")
+    producer = next(node for node in producer_tree.body if isinstance(node, ast.FunctionDef)
+                    and node.name == "_construct_probability_prediction_result_v1")
+    calls = [(node.lineno, ast.unparse(node.func)) for node in ast.walk(producer) if isinstance(node, ast.Call)]
+    stages = ("_probability_construct_prediction_bank_v1", "_finalize_prediction_artifact_v1",
+              "_probability_control_record_v1", "_commit_probability_issued_record_v1")
+    positions = [tuple(line for line, name in calls if name == stage) for stage in stages]
+    if any(len(position) != 1 for position in positions) or [p[0] for p in positions] != sorted(p[0] for p in positions):
+        failures.append("V35 one-attempt artifact-before-receipt order changed")
+    for filename, classname in (("persistence.py", "InMemoryPersistenceAdapterV1"), ("sqlite_reference.py", "SQLiteReferenceAdapterV1")):
+        body = _class_method_node(_tree(filename), classname, "load_committed_probability_producer_state_v1")
+        attributes = _attributes(body)
+        if not {"_active_transaction", "_probability_read_active_v1"} <= attributes:
+            failures.append("V35 committed-only read ownership missing: " + classname)
+        if any(isinstance(n, ast.Call) and ast.unparse(n.func).endswith(".fit") for n in ast.walk(body)):
+            failures.append("V35 committed reader contains numerical work")
+    return failures
+
+
 def main() -> int:
     failures: list[str] = []
+    try:
+        failures.extend(_v35_execution_surface_failures())
+    except (OSError, SyntaxError, ValueError, KeyError, TypeError, StopIteration) as exc:
+        failures.append(f"V35 independent execution surface failed: {exc}")
     receipt_rows: tuple[IndependentMathRowEvidenceV1, ...] = ()
     try:
         trees = {name: _tree(name) for name in NEW_MODULES}

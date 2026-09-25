@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from typing import Mapping
 
 from .errors import (
@@ -93,6 +93,20 @@ class ContextualComputabilitySnapshotV1:
                 ReasonCode.INVALID_CONTRACT,
                 "contextual computability snapshot is malformed",
             )
+
+    @property
+    def _context_packet_refs_v1(self) -> tuple[str, ...]:
+        closure = None if self.stack_closure is None else self.stack_closure.component_for(self.math_spec_id)
+        return tuple(dict.fromkeys((*(self.input_resolution.packet_refs if self.input_resolution is not None else ()),
+                                   *(closure.consumed_owner_packet_refs if closure is not None else ()))))
+
+    @property
+    def _stack_packet_refs_v1(self) -> tuple[str, ...]:
+        return () if self.stack_closure is None else self.stack_closure.consumed_owner_packet_refs
+
+    @property
+    def _consumed_packet_refs_v1(self) -> tuple[str, ...]:
+        return tuple(dict.fromkeys((*self._context_packet_refs_v1, *self._stack_packet_refs_v1)))
 
     @property
     def context_id(self) -> str:
@@ -489,7 +503,7 @@ class FrozenContextualComputabilityResolverV1:
                 route=stack_route,
             ),
         )
-        return ContextualComputabilitySnapshotV1(
+        snapshot = ContextualComputabilitySnapshotV1(
             math_spec_id=math_spec_id,
             execution_context=context,
             resolution=resolution,
@@ -497,3 +511,32 @@ class FrozenContextualComputabilityResolverV1:
             registered_stack_id=registered_stack_id,
             stack_closure=stack_closure,
         )
+        try:
+            owner_registry._check_probability_packet_refs_v1(snapshot._consumed_packet_refs_v1, context=context)
+        except (InputAuthorityError, PointInTimeError, FreshnessError) as error:
+            return _probability_block_contextual_snapshot_v1(snapshot, error)
+        return snapshot
+
+
+def _probability_block_contextual_snapshot_v1(snapshot, error):
+    """Retain independent dimensions and original lineage after a failed final guard."""
+    blocker, route = _context_blocker(error)
+    def affected(refs):
+        return any(ref.startswith("V35::") for ref in refs)
+    context_affected = affected(snapshot._context_packet_refs_v1)
+    stack_affected = affected(snapshot._stack_packet_refs_v1)
+    resolution = snapshot.resolution
+    def denied(row):
+        return _state(row.state, tuple(dict.fromkeys((*row.blocker_codes, blocker))),
+                      receipts=row.dependency_receipt_refs, oracle_receipts=row.oracle_receipt_refs, route=route)
+    resolution = replace(resolution,
+        context=denied(resolution.context) if context_affected else resolution.context,
+        stack=denied(resolution.stack) if stack_affected else resolution.stack)
+    closure = snapshot.stack_closure
+    if closure is not None and stack_affected:
+        rows = tuple(replace(row, blocker_reasons=tuple(dict.fromkeys((*row.blocker_reasons, error.reason_code))))
+                     if affected(row.consumed_owner_packet_refs) else row for row in closure.component_closures)
+        closure = replace(closure, component_closures=rows,
+                          full_stack_blocker_reasons=tuple(dict.fromkeys(reason for row in rows for reason in row.blocker_reasons)))
+    return replace(snapshot, resolution=resolution, stack_closure=closure,
+                   registered_stack_id=None if stack_affected else snapshot.registered_stack_id)

@@ -4,15 +4,13 @@
 from __future__ import annotations
 
 from pathlib import Path
+from tools.pr168_rp5a_json_scanner import _read_structured_text
 
 from tools.pr168_rp5a_config import AGENT_TOUCHPOINT_REGEX, REPO_ROOT
 
 
 def _has_agent_touchpoint(file_path: str, repo_root: Path) -> bool:
-    try:
-        text = (repo_root / file_path).read_text(encoding="utf-8", errors="replace")
-    except OSError:
-        return False
+    text = _read_structured_text(repo_root / file_path, errors="replace")
     return bool(AGENT_TOUCHPOINT_REGEX.search(text))
 
 

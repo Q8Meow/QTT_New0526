@@ -442,6 +442,52 @@ def test_stale_report_comparator_keeps_repository_validation_fail_closed(
         "tracked_value=131 rebuilt_value=132"
     ]
 
+    # Preserve the existing selected comparator test; cover the precise alias role
+    # without creating new collected identities or loading repository inputs.
+    canonical = c.PR136_SECTION_CROSSWALK_CANONICAL_PATH.as_posix()
+    alias_path = c.PR136_SECTION_CROSSWALK_ALIAS_PATH.as_posix()
+    all_required = {path.as_posix() for path in c.REQUIRED_UPSTREAM_ARTIFACTS}
+    with monkeypatch.context() as scoped:
+        scoped.setattr(pr152_report, "_generated_report_audit", lambda root, paths: ({}, []))
+        scoped.setattr(pr152_report, "_deep_chain_audit", lambda evidence: ({}, []))
+        scoped.setattr(
+            pr152_report, "_scan_pr152_files",
+            lambda root: {"network_surface_status": "PASS"},
+        )
+        for selected, present, expected in (
+            (canonical, all_required, True),
+            (alias_path, (all_required - {canonical}) | {alias_path}, True),
+            (alias_path, all_required - {canonical}, False),
+            (alias_path, (all_required - {canonical, c.CONTROLLER_PATH.as_posix()}) | {alias_path}, False),
+            ("unregistered_alias.json", (all_required - {canonical}) | {"unregistered_alias.json"}, False),
+        ):
+            evidence = {
+                "repo_root": tmp_path,
+                "json_payloads": {},
+                "present_paths": present,
+                "inventory": {"tracked_files": [], "audit": {}},
+                "alias_resolution": {
+                    "alias_used": selected == alias_path,
+                    "canonical_successor_used": selected == canonical,
+                    "created_missing_alias": False,
+                    "requested_alias": alias_path,
+                    "selected_path": selected,
+                },
+            }
+            payload = pr152_report._build_payload(evidence)
+            assert payload["orchestration_preflight_receipt"]["all_required_inputs_consumed"] is expected
+            selected_rows = {
+                row["artifact_path"]: row["consumed"]
+                for row in payload["upstream_artifact_inputs"]
+            }
+            assert len(selected_rows) == len(c.REQUIRED_UPSTREAM_ARTIFACTS)
+            if selected == alias_path:
+                assert canonical not in selected_rows
+                assert selected_rows[alias_path] is (alias_path in present)
+            else:
+                assert alias_path not in selected_rows
+                assert selected_rows[canonical] is (canonical in present)
+
 
 def test_pr152_validation_infrastructure_exact_fastfail_delta_is_allowed(
     monkeypatch,

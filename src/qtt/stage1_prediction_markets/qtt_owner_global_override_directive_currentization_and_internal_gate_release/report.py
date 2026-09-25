@@ -1019,35 +1019,35 @@ def validate_repository_artifacts(repo_root: Path | str) -> list[str]:
     try:
         actual_schema = _read_json(root / c.SCHEMA_PATH)
     except (OSError, json.JSONDecodeError, ValueError) as exc:
-        actual_schema = {}
+        actual_schema = None
         failures.append(f"PR143_SCHEMA_INVALID: {c.SCHEMA_PATH.as_posix()}: {exc}")
-    if actual_schema and actual_schema != schema:
+    if actual_schema is not None and actual_schema != schema:
         failures.append("PR143_SCHEMA_STALE_OR_NONDETERMINISTIC")
-    if actual_schema:
+    if actual_schema is not None:
         failures.extend(validate_constants_schema_alignment(actual_schema))
 
     try:
         actual_gate = _read_yaml(root / c.YAML_PATH)
     except (OSError, ValueError) as exc:
-        actual_gate = {}
+        actual_gate = None
         failures.append(f"PR143_YAML_INVALID: {c.YAML_PATH.as_posix()}: {exc}")
-    if actual_gate and actual_gate != expected_gate:
+    if actual_gate is not None and actual_gate != expected_gate:
         failures.append("PR143_YAML_STALE_OR_NONDETERMINISTIC")
 
     try:
         actual_report = _read_json(root / c.REPORT_PATH)
     except (OSError, json.JSONDecodeError, ValueError) as exc:
-        actual_report = {}
+        actual_report = None
         failures.append(f"PR143_REPORT_INVALID: {c.REPORT_PATH.as_posix()}: {exc}")
-    if actual_report and actual_report != expected_report:
+    if actual_report is not None and actual_report != expected_report:
         failures.append("PR143_REPORT_STALE_OR_NONDETERMINISTIC")
 
     try:
         actual_fixture = _read_json(root / c.FIXTURE_PATH)
     except (OSError, json.JSONDecodeError, ValueError) as exc:
-        actual_fixture = {}
+        actual_fixture = None
         failures.append(f"PR143_FIXTURE_INVALID: {c.FIXTURE_PATH.as_posix()}: {exc}")
-    if actual_fixture and actual_fixture != expected_fixture:
+    if actual_fixture is not None and actual_fixture != expected_fixture:
         failures.append("PR143_FIXTURE_STALE_OR_NONDETERMINISTIC")
 
     for label, payload in (
@@ -1055,7 +1055,7 @@ def validate_repository_artifacts(repo_root: Path | str) -> list[str]:
         ("REPORT", actual_report),
         ("FIXTURE", actual_fixture),
     ):
-        if payload:
+        if payload is not None:
             failures.extend(
                 f"PR143_{label}_{failure}" for failure in validate_payload(payload, schema)
             )

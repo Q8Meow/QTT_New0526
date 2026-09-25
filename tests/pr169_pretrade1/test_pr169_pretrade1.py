@@ -217,13 +217,33 @@ def test_pr169_pretrade1_source_coverage_external_lanes_calibration_parametrized
     _assert_false_authority(source + external + diff + calibration, "accepted_source_truth_created", "source_truth_created", "paper_execution_created", "replay_execution_created")
 
 
-def test_pr169_pretrade1_currentization_and_validation_workflow():
+def test_pr169_pretrade1_currentization_and_validation_workflow(tmp_path):
     validator.validate(REPO_ROOT, ARTIFACT_DIR)
     matched = validation_inventory.entries_matching_path("docs/master_plan/generated/pr169_pretrade1/pretrade_manifest.json")
     assert matched
     assert any(entry.owner_pr_or_feature == "PR169_PRETRADE1" for entry in matched)
     matched_resolver = validation_inventory.entries_matching_path("src/qtt/pretrade/pr169_pretrade1_resolvers.py")
     assert matched_resolver
+
+
+    # Missing scanner input is not evidence of an empty dependency set.
+    required_source = tmp_path / "required_source.py"
+    with pytest.raises(validator.ValidationError, match="required source module is missing"):
+        validator._source_reads(required_source)
+    required_source.write_text("VALUE = 1\n", encoding="utf-8")
+    assert validator._source_reads(required_source) == set()
+    required_source.write_text("if :\n", encoding="utf-8")
+    with pytest.raises(SyntaxError) as syntax_failure:
+        validator._source_reads(required_source)
+    assert syntax_failure.value.filename == str(required_source)
+    assert syntax_failure.value.text == "if :\n"
+    required_source.write_bytes(b"\xff")
+    with pytest.raises(UnicodeDecodeError):
+        validator._source_reads(required_source)
+    required_source.unlink()
+    required_source.mkdir()
+    with pytest.raises(OSError):
+        validator._source_reads(required_source)
 
 
 def test_pr169_pretrade1_quality_gates_report():

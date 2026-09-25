@@ -401,9 +401,51 @@ def _adjudicate(
     )
 
 
+def _v35_independent_condition_matrix():
+    """Independent Boolean table; production provides only the observed outcome."""
+    from decimal import localcontext, ROUND_DOWN, ROUND_UP
+    names = ("NEGATIVE_OR_ZERO_EXECUTION_ADJUSTED_LCB", "MISSING_OR_STALE_REQUIRED_EVIDENCE",
+             "REPLAY_OR_PAPER_LANE_MISSING", "LOCK_OR_SCOPE_CONFLICT",
+             "UNCERTAINTY_OR_MODEL_RISK_DOMINATES_EDGE", "CAPACITY_OR_LIQUIDITY_HARD_VETO",
+             "STRONGEST_CLASSICAL_OR_NO_TRADE_DOMINATES", "INDEPENDENT_REVIEW_NOT_CLOSED")
+    controls, comparison = _controls(), _comparison()
+    basis = _basis(independent_review_state="CLOSED_INDEPENDENTLY_VALIDATED")
+    for mask in range(256):
+        conditions = tuple(NoTradeConditionOutcomeV1(name, bool(mask & (1 << bit)),
+            (f"SYNTHETIC::INDEPENDENT::{bit}",),
+            (ReasonCode.ST12F_MODEL_RISK_VETO,) if mask & (1 << bit) else ())
+            for bit, name in enumerate(names))
+        result = ModelRiskEvidenceAdjudicatorV1().adjudicate(
+            assessment_id="SYNTHETIC::V35::" + str(mask), input_lock_id="LOCK::1",
+            controls=controls, conditions=conditions, comparison=comparison,
+            adjudication_basis=basis, limitations=("SYNTHETIC_ONLY",), receipt_refs=("R::ASSESSMENT",))
+        expected = ("NO_TRADE" if any(mask & (1 << bit) for bit in range(7)) else
+                    "READY_FOR_INDEPENDENT_REVIEW" if mask & 128 else "CLOSED_INDEPENDENTLY_VALIDATED")
+        if (result.terminal_state != expected or result.control_evidence is not controls
+                or result.permanent_no_trade_comparison is not comparison or result.adjudication_basis is not basis
+                or result.automatic_promotion_allowed is not False):
+            raise ValueError("V35 independent condition decision or original basis mismatch: " + str(mask))
+        for before, after in zip(conditions, result.no_trade_condition_outcomes, strict=True):
+            if (before.condition_id != after.condition_id or before.active is not after.active
+                    or not set(before.reason_codes) <= set(after.reason_codes)
+                    or not set(before.evidence_receipt_refs) <= set(after.evidence_receipt_refs)):
+                raise ValueError("V35 incoming condition evidence was lost")
+    for precision, rounding in ((2, ROUND_DOWN), (9, ROUND_UP), (50, ROUND_DOWN)):
+        with localcontext() as context:
+            context.prec, context.rounding, context.Emin, context.Emax = precision, rounding, -10, 10
+            before = (context.prec, context.rounding, context.Emin, context.Emax,
+                      context.capitals, context.clamp, dict(context.traps), dict(context.flags))
+            result = _adjudicate(controls=controls, comparison=comparison, basis=basis)
+            if result.terminal_state != "CLOSED_INDEPENDENTLY_VALIDATED" or before != (
+                    context.prec, context.rounding, context.Emin, context.Emax,
+                    context.capitals, context.clamp, dict(context.traps), dict(context.flags)):
+                raise ValueError("V35 canonical arithmetic changed the caller's Decimal context")
+
+
 def main() -> int:
     try:
         receipt_row = _build_math45_receipt()
+        _v35_independent_condition_matrix()
     except (OSError, SyntaxError, ValueError, KeyError, TypeError) as exc:
         print(f"QKU_MODEL_RISK_INDEPENDENT_VALIDATION_FAILED::{exc}", file=sys.stderr)
         return 1

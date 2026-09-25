@@ -14,8 +14,11 @@ if str(REPO_ROOT) not in sys.path:
 from tools.pr168_rp5a_validator import run_validation
 
 
-def main() -> int:
-    print(json.dumps(run_validation(), sort_keys=True))
+def main(*, builder_read_context=None) -> int:
+    from tools.build_pr168_rp5a_legacy_semantic_audit import _builder_reads_or_current_v1
+
+    with _builder_reads_or_current_v1(builder_read_context) as original:
+        print(json.dumps(run_validation(builder_read_context=original), sort_keys=True))
     return 0
 
 

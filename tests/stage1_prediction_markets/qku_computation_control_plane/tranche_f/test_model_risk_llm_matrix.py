@@ -2570,6 +2570,42 @@ class TestST12FModelRiskLLMAdditiveMatrix:
         assert len(assessment.control_evidence) == 12
         assert len(assessment.no_trade_condition_outcomes) == 8
         assert assessment.automatic_promotion_allowed is False
+        # Independent literal decision table, all 256 incoming veto masks.
+        # These local contracts are synthetic, with no fitted or market evidence.
+        from decimal import localcontext, ROUND_DOWN, ROUND_UP
+        identities = (
+            "NEGATIVE_OR_ZERO_EXECUTION_ADJUSTED_LCB", "MISSING_OR_STALE_REQUIRED_EVIDENCE",
+            "REPLAY_OR_PAPER_LANE_MISSING", "LOCK_OR_SCOPE_CONFLICT",
+            "UNCERTAINTY_OR_MODEL_RISK_DOMINATES_EDGE", "CAPACITY_OR_LIQUIDITY_HARD_VETO",
+            "STRONGEST_CLASSICAL_OR_NO_TRADE_DOMINATES", "INDEPENDENT_REVIEW_NOT_CLOSED")
+        controls = _st12f_controls()
+        comparison = _st12f_comparison()
+        basis = _st12f_basis(review_state="CLOSED_INDEPENDENTLY_VALIDATED")
+        for mask in range(256):
+            incoming = tuple(_NoTradeConditionOutcomeV1(identity, bool(mask & (1 << index)),
+                (f"SYNTHETIC::MASK::{index}",),
+                (ReasonCode.ST12F_MODEL_RISK_VETO,) if mask & (1 << index) else ())
+                for index, identity in enumerate(identities))
+            result = _st12f_adjudicate(controls, incoming, comparison, basis)
+            expected = "NO_TRADE" if mask & 127 else "READY_FOR_INDEPENDENT_REVIEW" if mask & 128 else "CLOSED_INDEPENDENTLY_VALIDATED"
+            assert result.terminal_state == expected
+            assert result.control_evidence is controls
+            assert result.permanent_no_trade_comparison is comparison
+            assert result.adjudication_basis is basis
+            assert result.automatic_promotion_allowed is False
+            for before, after in zip(incoming, result.no_trade_condition_outcomes, strict=True):
+                assert before.condition_id == after.condition_id and before.active is after.active
+                assert set(before.reason_codes) <= set(after.reason_codes)
+                assert set(before.evidence_receipt_refs) <= set(after.evidence_receipt_refs)
+        for precision, rounding in ((2, ROUND_DOWN), (9, ROUND_UP), (50, ROUND_DOWN)):
+            with localcontext() as ambient:
+                ambient.prec, ambient.rounding, ambient.Emin, ambient.Emax = precision, rounding, -10, 10
+                before = (ambient.prec, ambient.rounding, ambient.Emin, ambient.Emax,
+                          ambient.capitals, ambient.clamp, dict(ambient.traps), dict(ambient.flags))
+                exact = _st12f_adjudicate(controls, _st12f_conditions(), comparison, basis)
+                assert exact.terminal_state == "CLOSED_INDEPENDENTLY_VALIDATED"
+                assert before == (ambient.prec, ambient.rounding, ambient.Emin, ambient.Emax,
+                                  ambient.capitals, ambient.clamp, dict(ambient.traps), dict(ambient.flags))
 
     def test_llm_annotation_advisory_only_semantic_matrix(self) -> None:
         normalized = _GroundedLLMGatewayV1(_ST12FNumericResolver()).validate_and_normalize(

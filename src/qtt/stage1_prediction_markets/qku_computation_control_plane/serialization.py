@@ -8,11 +8,13 @@ from datetime import datetime, timedelta
 from decimal import Decimal
 from enum import Enum
 import json
+import math
 import ntpath
 import re
 from pathlib import PureWindowsPath
 import unicodedata
 from typing import Any
+from types import MappingProxyType
 
 from .context import _native_bounded_decimal, _native_require, _native_text
 from .errors import ContractValidationError, ReasonCode, SerializationSafetyError
@@ -369,6 +371,308 @@ def _native_strict_json(raw: bytes, max_bytes: int = 65536) -> Any:
 
     visit(result)
     return result
+
+
+def _probability_transport_tree_v1(value: object, *, max_bytes: int) -> object:
+    """Admit every occurrence before copying the selected V35 transport tree."""
+    _native_require(type(max_bytes) is int and 0 < max_bytes <= 1048576, "JSON_BUDGET")
+    used = nodes = 0
+    active: set[int] = set()
+
+    def charge(count: int) -> None:
+        nonlocal used
+        _native_require(count <= max_bytes - used, "JSON_BOUND")
+        used += count
+
+    def visit(item: object, depth: int) -> object:
+        nonlocal nodes
+        nodes += 1
+        _native_require(nodes <= 4096, "JSON_NODES")
+        _native_require(depth <= 16, "JSON_DEPTH")
+        if item is None:
+            charge(4)
+            return None
+        if type(item) is bool:
+            charge(4 if item else 5)
+            return item
+        if type(item) is int:
+            _native_require(-10**101 < item < 10**101, "NUMBER_BOUND")
+            charge(len(str(item)))
+            return item
+        if type(item) is datetime:
+            _native_require(item.tzinfo is timezone.utc, "PROBABILITY_UTC")
+            item = item.isoformat()
+        if type(item) is str:
+            _native_require(len(item) + 2 <= max_bytes - used, "JSON_BOUND")
+            charge(2)
+            for character in item:
+                point = ord(character)
+                _native_require(not 0xD800 <= point <= 0xDFFF, "SURROGATE")
+                if character in '"\\\b\f\n\r\t':
+                    charge(2)
+                elif point < 32:
+                    charge(6)
+                else:
+                    charge(1 if point < 128 else 2 if point < 2048 else 3 if point < 65536 else 4)
+            return item
+        _native_require(type(item) in (dict, MappingProxyType, list, tuple), "PROBABILITY_WIRE_TYPE")
+        _native_require(depth < 16, "JSON_DEPTH")
+        _native_require(id(item) not in active, "PROBABILITY_WIRE_CYCLE")
+        mapping = type(item) in (dict, MappingProxyType)
+        _native_require(len(item) * (2 if mapping else 1) <= 4096 - nodes, "JSON_NODES")
+        charge(2 + max(0, len(item) - 1) + (len(item) if mapping else 0))
+        active.add(id(item))
+        try:
+            if mapping:
+                # Check keys before sorting; foreign comparison/formatting is forbidden.
+                _native_require(all(type(key) is str for key in item), "PROBABILITY_WIRE_KEY")
+                return {visit(key, depth + 1): visit(item[key], depth + 1) for key in sorted(item)}
+            return [visit(child, depth + 1) for child in item]
+        finally:
+            active.remove(id(item))
+
+    return visit(value, 0)
+
+
+def _bounded_probability_json_v1(value: object, *, max_bytes: int) -> str:
+    """V35-only bounded transport; retain the existing secret/path/parser policy."""
+    owned = _probability_transport_tree_v1(value, max_bytes=max_bytes)
+    encoded = deterministic_json(owned)
+    raw = encoded.encode("utf-8")
+    _native_strict_json(raw, max_bytes)
+    return encoded
+
+
+def _probability_binary64_v1(value: object, *, probability: bool = False) -> float:
+    """Decode canonical finite binary64 without crossing the Decimal boundary."""
+    _native_require(type(probability) is bool, "PROBABILITY_CODEC_MODE")
+    _native_require(type(value) is str and len(value) <= 80, "BINARY64_TEXT")
+    _native_require(value.startswith(("0x", "-0x")), "BINARY64_TEXT")
+    try:
+        decoded = float.fromhex(value)
+    except (ValueError, OverflowError) as exc:
+        raise ContractValidationError(ReasonCode.SCHEMA_MISMATCH, "BINARY64_TEXT") from exc
+    _native_require(math.isfinite(decoded) and decoded.hex() == value, "BINARY64_CANONICAL")
+    if probability:
+        _native_require(0.0 <= decoded <= 1.0 and value != "-0x0.0p+0", "PREDICTION_SCALAR")
+    return decoded
+
+
+def _probability_frame_bytes_v1(ordinal: int, path: list, tag: str, content: object) -> bytes:
+    """Encode one frame without building an unbounded tagged intermediate tree."""
+    parts: list[str] = []
+    used = nodes = 0
+    active: set[int] = set()
+
+    def emit(token: str) -> None:
+        nonlocal used
+        size = len(token.encode("utf-8"))
+        _native_require(size <= 65536 - used, "JSON_BOUND")
+        used += size
+        parts.append(token)
+
+    def node(depth: int, *, container: bool = False) -> None:
+        nonlocal nodes
+        nodes += 1
+        _native_require(nodes <= 4096, "JSON_NODES")
+        _native_require(depth < 16 if container else depth <= 16, "JSON_DEPTH")
+
+    def scalar(value: object, depth: int) -> None:
+        node(depth)
+        # Admission measures string code points before allocating escaped text.
+        _probability_transport_tree_v1(value, max_bytes=max(1, 65536 - used))
+        emit(json.dumps(value, ensure_ascii=False, allow_nan=False, separators=(",", ":")))
+
+    def array(values: object, depth: int, child) -> None:
+        node(depth, container=True)
+        _native_require(len(values) <= 4096 - nodes, "JSON_NODES")
+        emit("[")
+        for index, value in enumerate(values):
+            if index:
+                emit(",")
+            child(value, depth + 1)
+        emit("]")
+
+    def tagged(name: str, value: object, depth: int, child) -> None:
+        node(depth, container=True)
+        emit("{")
+        scalar(name, depth + 1)
+        emit(":")
+        child(value, depth + 1)
+        emit("}")
+
+    def wire(value: object, depth: int) -> None:
+        if value is None or type(value) in (bool, int, str):
+            scalar(value, depth)
+            return
+        if type(value) is float:
+            _native_require(math.isfinite(value), "PREDICTION_WIRE_NONFINITE")
+            tagged("binary64", value.hex(), depth, scalar)
+            return
+        _native_require(type(value) in (dict, MappingProxyType, tuple, list), "PREDICTION_WIRE_TYPE")
+        _native_require(id(value) not in active, "PREDICTION_WIRE_CYCLE")
+        active.add(id(value))
+        try:
+            if type(value) in (dict, MappingProxyType):
+                # Every mapping pair needs at least a key, value and pair node.
+                _native_require(len(value) * 3 + 3 <= 4096 - nodes, "JSON_NODES")
+                _native_require(all(type(key) is str for key in value), "PREDICTION_WIRE_KEY")
+                keys = sorted(value)
+
+                def pair(key, pair_depth):
+                    node(pair_depth, container=True)
+                    emit("[")
+                    scalar(key, pair_depth + 1)
+                    emit(",")
+                    wire(value[key], pair_depth + 1)
+                    emit("]")
+
+                tagged("mapping", keys, depth, lambda items, d: array(items, d, pair))
+            elif type(value) is tuple:
+                tagged("tuple", value, depth, lambda items, d: array(items, d, wire))
+            else:
+                array(value, depth, wire)
+        finally:
+            active.remove(id(value))
+
+    # Sorted canonical frame keys. Logical paths are not filesystem paths.
+    node(0, container=True)
+    emit("{")
+    scalar("content", 1)
+    emit(":")
+    if tag == "VALUE":
+        wire(content, 1)
+    elif tag == "MAPPING":
+        array(content, 1, scalar)
+    else:
+        scalar(content, 1)
+    for key, value in (("ordinal", ordinal), ("path", path), ("tag", tag)):
+        emit(",")
+        scalar(key, 1)
+        emit(":")
+        if key == "path":
+            array(value, 1, scalar)
+        else:
+            scalar(value, 1)
+    emit("}")
+    raw = "".join(parts).encode("utf-8")
+    _native_strict_json(raw, 65536)
+    return raw + b"\n"
+
+
+def _iter_prediction_artifact_frames_v1(bank: object, *, max_bytes: int, max_frames: int):
+    """Stream the fixed depth-first format; charge each LF before yielding it."""
+    _native_require(type(max_bytes) is int and max_bytes > 0 and
+                    type(max_frames) is int and max_frames > 0, "PREDICTION_ARTIFACT_BUDGET")
+    ordinal = total = 0
+    active: set[int] = set()
+
+    def emit(value: object, path: list):
+        nonlocal ordinal, total
+        _native_require(len(path) <= 16 and ordinal < max_frames, "PREDICTION_FRAME_BUDGET")
+        _native_require(id(value) not in active, "PREDICTION_WIRE_CYCLE")
+        try:
+            frame = _probability_frame_bytes_v1(ordinal, path, "VALUE", value)
+        except ContractValidationError as exc:
+            # Only the inherited representation bounds allow subdivision.
+            if str(exc).split(": ", 1)[-1] not in {"JSON_BOUND", "JSON_NODES", "JSON_DEPTH"}:
+                raise
+            _native_require(type(value) in (dict, MappingProxyType, tuple, list),
+                            "PREDICTION_FRAME_SCALAR_TOO_LARGE")
+            _native_require(len(value) <= max_frames - ordinal - 1, "PREDICTION_FRAME_BUDGET")
+            mapping = type(value) in (dict, MappingProxyType)
+            if mapping:
+                _native_require(all(type(k) is str for k in value), "PREDICTION_WIRE_KEY")
+                # Header itself must fit before retaining its sorted key roster.
+                _native_require(len(value) <= 4096 - 9 - len(path), "JSON_NODES")
+                keys = sorted(value)
+                frame = _probability_frame_bytes_v1(ordinal, path, "MAPPING", keys)
+            else:
+                frame = _probability_frame_bytes_v1(
+                    ordinal, path, "TUPLE" if type(value) is tuple else "LIST", len(value))
+            _native_require(len(frame) <= max_bytes - total, "PREDICTION_ARTIFACT_BUDGET")
+            total += len(frame)
+            ordinal += 1
+            yield frame
+            active.add(id(value))
+            try:
+                for key in keys if mapping else range(len(value)):
+                    yield from emit(value[key], [*path, key])
+            finally:
+                active.remove(id(value))
+        else:
+            _native_require(len(frame) <= max_bytes - total, "PREDICTION_ARTIFACT_BUDGET")
+            total += len(frame)
+            ordinal += 1
+            yield frame
+
+    yield from emit(bank, [])
+
+
+def _decode_prediction_artifact_v1(raw: bytes, *, max_bytes: int, max_frames: int) -> tuple[object, int]:
+    """Decode only the data-only framed grammar; no type-selected construction."""
+    import io
+
+    _native_require(type(raw) is bytes and type(max_bytes) is int and 0 < len(raw) <= max_bytes
+                    and type(max_frames) is int and max_frames > 0, "PREDICTION_ARTIFACT_BUDGET")
+    stream = io.BytesIO(raw)
+    ordinal = 0
+
+    def unwire(value):
+        if value is None or type(value) in (bool, int, str):
+            return value
+        if type(value) is list:
+            return [unwire(v) for v in value]
+        _native_require(type(value) is dict and len(value) == 1, "PREDICTION_WIRE_TAG")
+        if set(value) == {"binary64"}:
+            return _probability_binary64_v1(value["binary64"])
+        if set(value) == {"tuple"}:
+            _native_require(type(value["tuple"]) is list, "PREDICTION_WIRE_TUPLE")
+            return tuple(unwire(v) for v in value["tuple"])
+        _native_require(set(value) == {"mapping"} and type(value["mapping"]) is list,
+                        "PREDICTION_WIRE_TAG")
+        rows = value["mapping"]
+        _native_require(all(type(row) is list and len(row) == 2 and type(row[0]) is str for row in rows),
+                        "PREDICTION_WIRE_MAPPING")
+        keys = [row[0] for row in rows]
+        _native_require(keys == sorted(keys) and len(keys) == len(set(keys)), "PREDICTION_WIRE_MAPPING")
+        return {key: unwire(value) for key, value in rows}
+
+    def read(path: list, depth: int):
+        nonlocal ordinal
+        _native_require(depth <= 16 and ordinal < max_frames, "PREDICTION_FRAME_BUDGET")
+        line = stream.readline(65538)
+        _native_require(line.endswith(b"\n") and len(line) <= 65537, "PREDICTION_FRAME_BYTES")
+        frame = _native_strict_json(line[:-1], 65536)
+        _native_require(type(frame) is dict and set(frame) == {"ordinal", "path", "tag", "content"},
+                        "PREDICTION_FRAME_FIELDS")
+        _native_require(type(frame["ordinal"]) is int and frame["ordinal"] == ordinal and
+                        type(frame["path"]) is list and len(frame["path"]) == len(path) and
+                        all(type(a) is type(b) and a == b for a, b in zip(frame["path"], path)),
+                        "PREDICTION_FRAME_ORDER")
+        _native_require(type(frame["tag"]) is str, "PREDICTION_FRAME_TAG")
+        # Reject Decimal real tokens rather than coercing them during canonicalization.
+        owned = _probability_transport_tree_v1(frame, max_bytes=65536)
+        canonical = json.dumps(owned, sort_keys=True, ensure_ascii=False, allow_nan=False,
+                               separators=(",", ":")).encode("utf-8") + b"\n"
+        _native_require(canonical == line, "PREDICTION_FRAME_CANONICAL")
+        ordinal += 1
+        tag, content = frame["tag"], frame["content"]
+        if tag == "VALUE":
+            return unwire(content)
+        if tag == "MAPPING":
+            _native_require(type(content) is list and all(type(k) is str for k in content) and
+                            content == sorted(content) and len(content) == len(set(content)) and
+                            len(content) <= max_frames - ordinal, "PREDICTION_FRAME_CONTAINER")
+            return {key: read([*path, key], depth + 1) for key in content}
+        _native_require(tag in ("TUPLE", "LIST") and type(content) is int and
+                        0 <= content <= max_frames - ordinal, "PREDICTION_FRAME_CONTAINER")
+        values = [read([*path, i], depth + 1) for i in range(content)]
+        return tuple(values) if tag == "TUPLE" else values
+
+    result = read([], 0)
+    _native_require(stream.read(1) == b"", "PREDICTION_TRAILING_FRAME")
+    return result, ordinal
 
 
 # F14 isolated native/value serialization. Existing global codecs stay unchanged.
@@ -1063,3 +1367,166 @@ _F14_SHAPE_LIMITS = {
 
 
 }
+
+
+# Closed frame codec for the four existing input-artifact roles.
+_PROBABILITY_INPUT_ROLES_V1 = ('MODEL', 'CATALOG', 'RESULT', 'POLICY')
+_PROBABILITY_INPUT_TUPLES_V1 = {
+    'MODEL': frozenset(('feature_names', 'reference_clusters', 'targets', 'target_domains', 'dependency_refs')),
+    'CATALOG': frozenset(('rows', 'dependency_refs')),
+    'RESULT': frozenset(('cluster_ids', 'original_row_ids', 'targets', 'partition_codes',
+                         'reference_values', 'current_values', 'reference_records', 'current_records', 'dependency_refs')),
+    'POLICY': frozenset(('expected_environment',)),
+}
+
+
+def _probability_input_classes_v1():
+    from .models import (_ProbabilityAdmissionModelV1, _ProbabilityAdmissionCatalogV1,
+                         _ProbabilityAdmissionResultV1, _ProbabilityAdmissionLimitsV1)
+    return {'MODEL': _ProbabilityAdmissionModelV1, 'CATALOG': _ProbabilityAdmissionCatalogV1,
+            'RESULT': _ProbabilityAdmissionResultV1, 'POLICY': _ProbabilityAdmissionLimitsV1}
+
+
+def _probability_input_canonical_v1(value):
+    return _bounded_probability_json_v1(value, max_bytes=1048576)
+
+
+def _probability_input_fields_v1(role):
+    from .models import ProbabilityProducerScopeV1, _ProbabilityMaturityClusterV1, _ProbabilityAdmissionLimitsV1, _ProbabilityMaterializationReadBudgetV1, _probability_require_v1, _probability_projection_integer_v1, _probability_projection_text_v1
+    _probability_require_v1(role in _PROBABILITY_INPUT_ROLES_V1, 'MATERIALIZATION_ROLE')
+    fields = tuple(_probability_input_classes_v1()[role].__dataclass_fields__)
+    return fields + (('expected_environment',) if role == 'POLICY' else ())
+
+def _validate_probability_input_fields_v1(role, values):
+    from .models import ProbabilityProducerScopeV1, _ProbabilityMaturityClusterV1, _ProbabilityAdmissionLimitsV1, _ProbabilityMaterializationReadBudgetV1, _probability_require_v1, _probability_projection_integer_v1, _probability_projection_text_v1
+    'Storage shape validation only; numerical admission remains its old owner.'
+    signed = {'MODEL': {'reference_cutoff_ns', 'available_ns', 'valid_until_ns'}, 'CATALOG': {'complete_through_ns'}, 'RESULT': {'selection_cutoff_ns', 'available_ns'}, 'POLICY': set()}
+    integers = {'MODEL': {'replicate_count'}, 'CATALOG': {'owner_epoch', 'after_ordinal'}, 'RESULT': {'owner_epoch', 'replicate_count'}, 'POLICY': set(_ProbabilityAdmissionLimitsV1.__dataclass_fields__)}
+    pairs = {'target_domains', 'reference_values', 'current_values', 'expected_environment'}
+    for name, value in values.items():
+        if name == 'scope':
+            _probability_require_v1(type(value) is ProbabilityProducerScopeV1, 'MATERIALIZATION_SCOPE')
+        elif name in ('reference_clusters', 'rows'):
+            _probability_require_v1(type(value) is tuple and all((type(x) is _ProbabilityMaturityClusterV1 for x in value)), 'MATERIALIZATION_CATALOG_ROW')
+        elif name in signed[role]:
+            _probability_projection_integer_v1(value, 'MATERIALIZATION_FIELD_TYPE', None)
+        elif name in integers[role]:
+            minimum = 1 if role == 'POLICY' or name == 'replicate_count' else 0
+            _probability_projection_integer_v1(value, 'MATERIALIZATION_FIELD_TYPE', minimum)
+        elif name in pairs:
+            _probability_require_v1(type(value) is tuple and all((type(row) is tuple and len(row) == 2 and all((type(x) is str for x in row)) for row in value)), 'MATERIALIZATION_PAIRS')
+        elif name == 'partition_codes':
+            _probability_require_v1(type(value) is tuple and len(value) == 2 and all((type(x) is int for x in value)) and (value == (3, 4)), 'MATERIALIZATION_PARTITION')
+        elif name in _PROBABILITY_INPUT_TUPLES_V1[role]:
+            _probability_require_v1(type(value) is tuple and all((type(x) is str for x in value)), 'MATERIALIZATION_FIELD_TYPE')
+        elif name == 'precision_protocol_ref' and value is None:
+            pass
+        else:
+            _probability_require_v1(type(value) is str, 'MATERIALIZATION_FIELD_TYPE')
+            if name != 'export_text':
+                _probability_projection_text_v1(value, 'MATERIALIZATION_FIELD_TYPE')
+
+def _iter_probability_input_object_frames_v1(role, obj, *, budget, expected_environment=None):
+    """Emit only the four fixed data-only schemas, charging before each yield."""
+    from .models import (ProbabilityProducerScopeV1, _ProbabilityMaturityClusterV1,
+                         _ProbabilityMaterializationReadBudgetV1, _probability_require_v1)
+    need = _probability_require_v1
+    need(type(role) is str and role in _PROBABILITY_INPUT_ROLES_V1, "MATERIALIZATION_ROLE")
+    need(type(budget) is _ProbabilityMaterializationReadBudgetV1 and
+         type(obj) is _probability_input_classes_v1()[role], "MATERIALIZATION_OBJECT_TYPE")
+    budget.__post_init__()
+    values = {name: getattr(obj, name) for name in obj.__dataclass_fields__}
+    if role == "POLICY":
+        values["expected_environment"] = expected_environment
+    else:
+        need(expected_environment is None, "MATERIALIZATION_UNEXPECTED_ENVIRONMENT")
+    _validate_probability_input_fields_v1(role, values)
+    count = 1 + len(values)
+    for name in _PROBABILITY_INPUT_TUPLES_V1[role]:
+        need(len(values[name]) <= budget.max_frames - count, "MATERIALIZATION_ARTIFACT_BUDGET")
+        count += len(values[name])
+    need(count <= budget.max_frames, "MATERIALIZATION_ARTIFACT_BUDGET")
+    total = 0
+
+    def project(value):
+        if type(value) in (ProbabilityProducerScopeV1, _ProbabilityMaturityClusterV1):
+            value.__post_init__()
+            return {name: getattr(value, name) for name in value.__dataclass_fields__}
+        return value
+
+    def frame(value):
+        nonlocal total
+        text = _bounded_probability_json_v1(value, max_bytes=min(budget.max_frame_bytes,
+                                                                budget.max_total_bytes - total))
+        raw = text.encode("utf-8", "strict")
+        need(total + len(raw) <= budget.max_total_bytes, "MATERIALIZATION_ARTIFACT_BUDGET")
+        total += len(raw)
+        return raw
+
+    yield frame({"schema_version": "V35_INPUT_OBJECT_REFERENCE_V1", "role": role})
+    for name in _probability_input_fields_v1(role):
+        value = values[name]
+        if name in _PROBABILITY_INPUT_TUPLES_V1[role]:
+            yield frame({"field": name, "count": len(value)})
+            for item in value:
+                yield frame({"item": project(item)})
+        else:
+            yield frame({"field": name, "value": project(value)})
+
+
+def _decode_probability_input_object_v1(role, frames, budget):
+    from .models import ProbabilityProducerScopeV1, _ProbabilityMaturityClusterV1, _ProbabilityAdmissionLimitsV1, _ProbabilityMaterializationReadBudgetV1, _probability_require_v1, _probability_projection_integer_v1, _probability_projection_text_v1
+    'Closed, ordered, frame-bounded parser; never imports a payload class name.'
+    _probability_require_v1(type(budget) is _ProbabilityMaterializationReadBudgetV1, 'MATERIALIZATION_READ_BUDGET')
+    _probability_require_v1(type(frames) is tuple and all((type(frame) is bytes for frame in frames)), 'MATERIALIZATION_ARTIFACT_TYPE')
+    _probability_require_v1(len(frames) <= budget.max_frames and sum(map(len, frames)) <= budget.max_total_bytes, 'MATERIALIZATION_ARTIFACT_BUDGET')
+    position = 0
+
+    def take():
+        nonlocal position
+        _probability_require_v1(position < len(frames), 'MATERIALIZATION_FRAME_MISSING')
+        raw = frames[position]
+        position += 1
+        value = _native_strict_json(raw, budget.max_frame_bytes)
+        _probability_require_v1(type(value) is dict, 'MATERIALIZATION_FRAME_SHAPE')
+        _probability_require_v1(_probability_input_canonical_v1(value).encode('utf-8') == raw, 'MATERIALIZATION_NONCANONICAL')
+        return value
+    _probability_require_v1(take() == {'schema_version': 'V35_INPUT_OBJECT_REFERENCE_V1', 'role': role}, 'MATERIALIZATION_OBJECT_HEADER')
+    values = {}
+    for name in _probability_input_fields_v1(role):
+        row = take()
+        if name in _PROBABILITY_INPUT_TUPLES_V1[role]:
+            _probability_require_v1(set(row) == {'field', 'count'} and row['field'] == name, 'MATERIALIZATION_FIELD_ORDER')
+            count = _probability_projection_integer_v1(row['count'], 'MATERIALIZATION_COUNT')
+            _probability_require_v1(count <= budget.max_frames and count <= len(frames) - position, 'MATERIALIZATION_COUNT')
+            items = []
+            for _ in range(count):
+                item = take()
+                _probability_require_v1(set(item) == {'item'}, 'MATERIALIZATION_ITEM_SHAPE')
+                items.append(item['item'])
+            values[name] = tuple(items)
+        else:
+            _probability_require_v1(set(row) == {'field', 'value'} and row['field'] == name, 'MATERIALIZATION_FIELD_ORDER')
+            values[name] = row['value']
+    _probability_require_v1(position == len(frames), 'MATERIALIZATION_TRAILING_FRAMES')
+    if 'scope' in values:
+        _probability_require_v1(type(values['scope']) is dict and set(values['scope']) == set(ProbabilityProducerScopeV1.__dataclass_fields__), 'MATERIALIZATION_SCOPE')
+        values['scope'] = ProbabilityProducerScopeV1(**values['scope'])
+    for name in ('reference_clusters', 'rows'):
+        if name in values:
+            restored = []
+            for row in values[name]:
+                _probability_require_v1(type(row) is dict and set(row) == set(_ProbabilityMaturityClusterV1.__dataclass_fields__), 'MATERIALIZATION_CATALOG_ROW')
+                row = dict(row)
+                _probability_require_v1(type(row['row_ids']) is list, 'MATERIALIZATION_ROW_IDS')
+                row['row_ids'] = tuple(row['row_ids'])
+                restored.append(_ProbabilityMaturityClusterV1(**row))
+            values[name] = tuple(restored)
+    for name in ('target_domains', 'reference_values', 'current_values', 'expected_environment'):
+        if name in values:
+            _probability_require_v1(all((type(row) is list and len(row) == 2 for row in values[name])), 'MATERIALIZATION_PAIRS')
+            values[name] = tuple((tuple(row) for row in values[name]))
+    _validate_probability_input_fields_v1(role, values)
+    environment = values.pop('expected_environment', None)
+    obj = _probability_input_classes_v1()[role](**values)
+    return (obj, environment)

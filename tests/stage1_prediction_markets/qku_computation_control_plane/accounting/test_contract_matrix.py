@@ -127,9 +127,11 @@ ACCOUNTING_CASES = tuple(row for row in ST12C_CONTROL_COVERAGE_MATRIX if row.dom
 
 
 @pytest.fixture
-def reference_directory():
-    with TemporaryDirectory(prefix="qtt-st12c-") as directory:
-        yield Path(directory)
+def reference_directory(tmp_path):
+    # Keep accounting files in the original pytest basetemp and retain failure evidence.
+    directory = tmp_path / "reference"
+    directory.mkdir()
+    yield directory
 
 
 def _amount(value: str, *, basis: str = "SETTLED") -> AccountingAmountV1:
@@ -488,7 +490,357 @@ def test_reference_adapter_atomic_commit_rollback_and_replay(adapter_kind, refer
 
     _assert_f13_reference_storage(adapter_kind, reference_directory)
     _assert_f13_transaction_truth(adapter_kind, reference_directory)
-    _assert_f14_native_and_storage(adapter_kind)
+    _assert_f14_native_and_storage(adapter_kind, reference_directory)
+    _assert_v35_artifact_finalization()
+    _assert_v35_control_storage(adapter_kind, reference_directory)
+
+
+def _assert_v35_control_storage(adapter_kind, directory):
+    """Synthetic historical cells only; fixtures do not issue append authority."""
+    import json
+    import sqlite3
+    import time
+    from types import MappingProxyType
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane.models import ProbabilityProducerScopeV1
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane.receipts import (
+        ProbabilityProducerControlReceiptV1, _probability_control_spine_from_cells_v1,
+    )
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane.persistence import (
+        ProbabilityProducerReadLimitsV1, ProbabilityProducerReadRequestV1,
+    )
+
+    scope = ProbabilityProducerScopeV1("KALSHI_US_DCM_DIRECT", "synthetic-model", "synthetic-cell", "synthetic-lock",
+                                        "synthetic-reference", "synthetic-family", "synthetic-policy", "synthetic-environment", 0)
+    scope_row = {name: getattr(scope, name) for name in scope.__dataclass_fields__}
+    body = {"owner_epoch": 0, "objects": tuple({"role": role, "object_ref": ref, "frame_count": 1, "byte_count": 1}
+            for role, ref in (("MODEL", scope.model_artifact_ref), ("CATALOG", "synthetic-catalog"), ("POLICY", scope.policy_ref))),
+            "acceptance_manifest_ref": "synthetic-manifest"}
+    payload = ProbabilityProducerControlReceiptV1("PROBABILITY_PRODUCER_CONTROL_V1", "INPUT_BINDING", scope,
+                                                 -1, -1, 0, (), None, body)
+    body["objects"][0]["byte_count"] = 999
+    assert payload.body["objects"][0]["byte_count"] == 1
+    assert type(payload.body) is MappingProxyType
+    # This literal floor is independent of the production nanosecond helper.
+    floor = datetime(1969, 12, 31, 23, 59, 59, 999999, tzinfo=UTC)
+    record = EconomicReceiptEventSpineV1("synthetic-binding", EconomicRecordTypeV1.PROBABILITY_PRODUCER_CONTROL,
+        "QTT_PROBABILITY_PRODUCER_CONTROL_SPINE_V1", "input_resolver", "input_resolver", "synthetic-context",
+        floor, floor, "synthetic-cause", "synthetic-correlation", "synthetic-trace", "synthetic-trace-state", 0,
+        deterministic_json(("V35", "INPUT_BINDING", scope_row)), 1, "NO_EFFECT_MODEL_REVIEW_EVIDENCE", payload)
+    cells = (record.record_id, floor.isoformat(), floor.isoformat(), record.aggregate_id, deterministic_json(record))
+    frame_bytes = max(len(cell.encode("utf-8")) for cell in cells)
+    total_bytes = sum(len(cell.encode("utf-8")) for cell in cells)
+
+    def decode(values):
+        return _probability_control_spine_from_cells_v1(values, expected_record_id=record.record_id,
+                                                       expected_scope=scope, max_frame_bytes=1048576)
+
+    hydrated = decode(cells)
+    assert hydrated == record and hydrated is not record
+    assert hydrated.typed_payload.effective_ns == -1
+    assert hydrated.effective_at == floor
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane.persistence import ProbabilityProducerReadSnapshotV1
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane.model_risk import (
+        NoTradeConditionOutcomeV1, NO_TRADE_CONDITION_IDS_V1, _bind_probability_condition_evidence_v1,
+    )
+    synthetic_snapshot = ProbabilityProducerReadSnapshotV1(scope, {record.record_id: hydrated}, (), (), 100)
+    conditions = tuple(NoTradeConditionOutcomeV1(name, False, (), ()) for name in NO_TRADE_CONDITION_IDS_V1)
+    for evaluated, blocked in ((199, False), (200, True), (201, True)):
+        projected = _bind_probability_condition_evidence_v1(scope=scope, read_snapshot=synthetic_snapshot,
+            evaluated_ns=evaluated, model_available_ns=0, model_valid_until_ns=200,
+            receipt_dependency_refs=(record.record_id,), receipt_valid_until_ns=300, conditions=conditions)
+        assert projected[1].active is blocked
+        assert projected[1].evidence_receipt_refs == (record.record_id,)
+        assert all(projected[index] is conditions[index] for index in (0, 2, 3, 4, 5, 6, 7))
+    already_blocked = (conditions[0], NoTradeConditionOutcomeV1(conditions[1].condition_id, True,
+                        ("synthetic-earlier-veto",), (ReasonCode.ST12F_MODEL_RISK_VETO,)), *conditions[2:])
+    projected = _bind_probability_condition_evidence_v1(scope=scope, read_snapshot=synthetic_snapshot,
+        evaluated_ns=199, model_available_ns=0, model_valid_until_ns=200,
+        receipt_dependency_refs=(record.record_id,), receipt_valid_until_ns=300, conditions=already_blocked)
+    assert projected[1].active is True
+    assert projected[1].evidence_receipt_refs == ("synthetic-earlier-veto", record.record_id)
+    assert projected[1].reason_codes == already_blocked[1].reason_codes
+    original = json.loads(cells[4])
+    for name in original:
+        changed = dict(original)
+        del changed[name]
+        with pytest.raises(ComputationControlPlaneError):
+            decode((*cells[:4], deterministic_json(changed)))
+    for name in original["typed_payload"]["body"]:
+        changed = json.loads(cells[4])
+        del changed["typed_payload"]["body"][name]
+        with pytest.raises(ComputationControlPlaneError):
+            decode((*cells[:4], deterministic_json(changed)))
+    for name in original["no_effect_flags"]:
+        changed = json.loads(cells[4])
+        changed["no_effect_flags"][name] = 0
+        with pytest.raises(ComputationControlPlaneError):
+            decode((*cells[:4], deterministic_json(changed)))
+    for index in range(4):
+        changed = list(cells)
+        changed[index] += "x"
+        with pytest.raises(ComputationControlPlaneError):
+            decode(tuple(changed))
+
+    adapter = (InMemoryPersistenceAdapterV1() if adapter_kind == "memory" else
+               SQLiteReferenceAdapterV1(directory / "v35-historical.db", busy_timeout_ms=0, max_transaction_attempts=1))
+    transaction = adapter.begin_transaction()
+    try:
+        with pytest.raises(ComputationControlPlaneError):
+            adapter.insert_receipt_record(transaction, record)
+    finally:
+        transaction.rollback()
+    # Test-owned raw seeding exercises historical reconstruction, not issuance.
+    if adapter_kind == "memory":
+        adapter._tables["receipt_records"][record.record_id] = record
+    else:
+        adapter._connection.execute("INSERT INTO receipt_records VALUES(?,?,?,?,?)", cells)
+    limits = ProbabilityProducerReadLimitsV1(1, total_bytes, frame_bytes, 100000, time.monotonic_ns() + 60_000_000_000)
+    request = ProbabilityProducerReadRequestV1(scope, "READ_CURRENT_STATE", None, None, None, 10, 10, limits)
+    with adapter.load_committed_probability_producer_state_v1(request) as snapshot:
+        assert tuple(snapshot.records_by_ref) == (record.record_id,)
+        assert snapshot.records_by_ref[record.record_id] == record
+        assert snapshot.publication_records == snapshot.revocation_records == ()
+        with pytest.raises(TypeError):
+            snapshot.records_by_ref["invented"] = record
+        with pytest.raises(ComputationControlPlaneError):
+            adapter.begin_transaction()
+        with pytest.raises(ComputationControlPlaneError):
+            with adapter.load_committed_probability_producer_state_v1(request):
+                pass
+        if adapter_kind == "sqlite":
+            with pytest.raises(ComputationControlPlaneError):
+                adapter.close()
+    assert adapter._probability_read_active_v1 is False
+    for narrower in (replace(limits, max_total_bytes=total_bytes - 1), replace(limits, max_frame_bytes=frame_bytes - 1)):
+        with pytest.raises(ComputationControlPlaneError):
+            with adapter.load_committed_probability_producer_state_v1(replace(request, limits=narrower)):
+                pass
+        assert adapter._probability_read_active_v1 is False
+    transaction = adapter.begin_transaction()
+    try:
+        with pytest.raises(ComputationControlPlaneError):
+            with adapter.load_committed_probability_producer_state_v1(request):
+                pass
+        assert transaction.is_active
+    finally:
+        transaction.rollback()
+    repeat = ProbabilityProducerReadRequestV1(scope, "EXACT_REPEAT", None, "synthetic-request", "synthetic-absent", 10, 10, limits)
+    with adapter.load_committed_probability_producer_state_v1(repeat) as snapshot:
+        assert not snapshot.records_by_ref
+    with pytest.raises(ComputationControlPlaneError):
+        with adapter.load_committed_probability_producer_state_v1(replace(repeat, receipt_id=record.record_id)):
+            pass
+    sentinel = RuntimeError("synthetic body failure")
+    with pytest.raises(RuntimeError) as failed:
+        with adapter.load_committed_probability_producer_state_v1(request):
+            raise sentinel
+    assert failed.value is sentinel
+    assert adapter._probability_read_active_v1 is False
+    # The ordinary as-of read excludes this later record. The transaction's
+    # fresh committed observation must include it before making a CAS decision.
+    epoch = datetime(1970, 1, 1, tzinfo=UTC)
+    late = replace(record, record_id="synthetic-later-binding", effective_at=epoch, recorded_at=epoch,
+                   typed_payload=replace(payload, effective_ns=11, recorded_ns=11, available_ns=11))
+    late_cells = (late.record_id, epoch.isoformat(), epoch.isoformat(), late.aggregate_id, deterministic_json(late))
+    if adapter_kind == "memory":
+        adapter._tables["receipt_records"][late.record_id] = late
+    else:
+        adapter._connection.execute("INSERT INTO receipt_records VALUES(?,?,?,?,?)", late_cells)
+    both_limits = replace(limits, max_records=2,
+        max_total_bytes=total_bytes + sum(len(cell.encode("utf-8")) for cell in late_cells),
+        max_frame_bytes=max(frame_bytes, *(len(cell.encode("utf-8")) for cell in late_cells)))
+    both_request = replace(request, limits=both_limits)
+    with adapter.load_committed_probability_producer_state_v1(both_request) as old_cut:
+        assert tuple(old_cut.records_by_ref) == (record.record_id,)
+    transaction = adapter.begin_transaction()
+    try:
+        fresh = adapter._probability_append_snapshot_v1(transaction, both_request)
+        assert set(fresh.records_by_ref) == {record.record_id, late.record_id}
+        assert fresh.records_by_ref[late.record_id] == late
+        assert both_request.effective_cutoff_ns == both_request.recorded_cutoff_ns == 10
+    finally:
+        transaction.rollback()
+    if adapter_kind == "sqlite":
+        assert adapter._connection.in_transaction is False
+        assert adapter._probability_progress_owned_v1 is False
+        for native_encoding in ("UTF-16le", "UTF-16be"):
+            database = directory / ("v35-" + native_encoding + ".db")
+            connection = sqlite3.connect(database)
+            try:
+                connection.execute("PRAGMA encoding='" + native_encoding + "'")
+                connection.execute("CREATE TABLE synthetic_encoding_anchor(value TEXT)")
+                connection.commit()
+            finally:
+                connection.close()
+            other = SQLiteReferenceAdapterV1(database, busy_timeout_ms=0, max_transaction_attempts=1)
+            try:
+                with pytest.raises(ComputationControlPlaneError):
+                    with other.load_committed_probability_producer_state_v1(request):
+                        pass
+                assert other._connection.in_transaction is False
+            finally:
+                other.close()
+        adapter.close()
+
+    _assert_v35_prediction_history(adapter_kind, directory)
+
+
+def _assert_v35_prediction_history(adapter_kind, directory):
+    """All seven closed wire kinds through test-owned historical storage."""
+    import json
+    import time
+    from tests.stage1_prediction_markets.qku_computation_control_plane.tranche_e import _synthetic_prediction_receipt_graph
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane.models import ProbabilityPredictionReadRequestV1
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane.persistence import (
+        ProbabilityProducerReadLimitsV1, ProbabilityProducerReadRequestV1)
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane.receipts import _probability_control_spine_from_cells_v1
+    scope, records, ids, _, _, _, cutoff = _synthetic_prediction_receipt_graph()
+    adapter = (InMemoryPersistenceAdapterV1() if adapter_kind == "memory" else
+               SQLiteReferenceAdapterV1(directory / "v35-prediction-history.db", busy_timeout_ms=0, max_transaction_attempts=1))
+    try:
+        kinds = set()
+        for ref, record in records.items():
+            cells = (ref, record.effective_at.isoformat(), record.recorded_at.isoformat(), record.aggregate_id,
+                     deterministic_json(record))
+            restored = _probability_control_spine_from_cells_v1(cells, expected_record_id=ref,
+                expected_scope=scope, max_frame_bytes=65536)
+            assert restored == record and restored is not record
+            kinds.add(restored.typed_payload.control_kind)
+            original = json.loads(cells[-1])
+            for field in (*original["typed_payload"]["body"], "unexpected"):
+                damaged = json.loads(cells[-1])
+                if field == "unexpected":
+                    damaged["typed_payload"]["body"][field] = False
+                else:
+                    del damaged["typed_payload"]["body"][field]
+                with pytest.raises(ComputationControlPlaneError):
+                    _probability_control_spine_from_cells_v1((*cells[:4], deterministic_json(damaged)),
+                        expected_record_id=ref, expected_scope=scope, max_frame_bytes=65536)
+            # This is raw test-owned historical setup, with no issued append guard.
+            if adapter_kind == "memory":
+                adapter._tables["receipt_records"][ref] = record
+            else:
+                adapter._connection.execute("INSERT INTO receipt_records VALUES(?,?,?,?,?)", cells)
+        assert kinds == {"INPUT_BINDING", "ACCEPTANCE_MANIFEST", "ACCEPTANCE_RECEIPT", "PUBLICATION",
+                         "REVOCATION_APPLICATION", "PREDICTION_RESULT", "PREDICTION_REVIEW"}
+        limits = ProbabilityProducerReadLimitsV1(64, 2_000_000, 65536, 100000, time.monotonic_ns() + 60_000_000_000)
+        current = ProbabilityProducerReadRequestV1(scope, "READ_CURRENT_STATE", None, None, None, cutoff, cutoff, limits)
+        with adapter.load_committed_probability_producer_state_v1(current) as snapshot:
+            assert tuple(row.record_id for row in snapshot.publication_records) == (ids["PUBLICATION"],)
+            assert tuple(row.record_id for row in snapshot.revocation_records) == (ids["REVOCATION"],)
+            assert ids["RESULT"] not in snapshot.records_by_ref and ids["REVIEW"] not in snapshot.records_by_ref
+        request = ProbabilityPredictionReadRequestV1(scope, "ADMIT_COMMITTED_PREDICTION", ids["RESULT"],
+                                                     ids["REVIEW"], cutoff, cutoff, limits)
+        with adapter.load_committed_probability_producer_state_v1(request) as snapshot:
+            assert snapshot.records_by_ref[ids["RESULT"]] == records[ids["RESULT"]]
+            assert snapshot.records_by_ref[ids["REVIEW"]] == records[ids["REVIEW"]]
+            assert {ids[key] for key in ("BINDING", "MANIFEST", "VALIDATION", "USE-LIMIT", "RISK", "REVOCATION")} <= set(snapshot.records_by_ref)
+            assert snapshot.records_by_ref[ids["RISK"]].typed_payload.body["claims"]["qualification_scope"] == "SYNTHETIC_REFERENCE"
+        result_ns = records[ids["RESULT"]].typed_payload.effective_ns
+        for earlier in (replace(request, effective_cutoff_ns=result_ns - 1),
+                        replace(request, recorded_cutoff_ns=result_ns - 1)):
+            with pytest.raises(ComputationControlPlaneError):
+                with adapter.load_committed_probability_producer_state_v1(earlier):
+                    raise AssertionError("required result after the original cutoff was exposed")
+        assert adapter._probability_read_active_v1 is False
+    finally:
+        if adapter_kind == "sqlite":
+            adapter.close()
+
+
+def _assert_v35_artifact_finalization():
+    """Synthetic artifact ownership only; no source or model-use acceptance."""
+    from types import SimpleNamespace
+    from unittest.mock import patch
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane import persistence
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane.models import (
+        ProbabilityProducerScopeV1, ProbabilityPredictionArtifactWriteRequestV1,
+        ProbabilityPredictionArtifactSealV1,
+    )
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane.serialization import _decode_prediction_artifact_v1
+
+    scope = ProbabilityProducerScopeV1(
+        "KALSHI_US_DCM_DIRECT", "model", "cell", "input", "reference", "family", "policy", "environment", 0)
+    request = ProbabilityPredictionArtifactWriteRequestV1("artifact", scope, "result", ("model", "input"),
+                                                         1000, 10000, 20, 1000)
+    bank = (-0.0, [True, 3])
+    literal = b'{"content":{"tuple":[{"binary64":"-0x0.0p+0"},[true,3]]},"ordinal":0,"path":[],"tag":"VALUE"}\n'
+
+    class SyntheticWriter:
+        def __init__(self, mode):
+            self.mode = mode
+            self.frames = []
+            self.seals = self.aborts = 0
+            self.utc, self.mono = 100, 100
+            self.body_error = RuntimeError("synthetic body failure")
+            self.abort_error = RuntimeError("synthetic abort failure")
+            self.exit_error = RuntimeError("synthetic exit failure")
+
+        def begin_prediction_artifact_v1(self, received):
+            assert received is request
+            return self
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, exc_type, exc, traceback):
+            if self.mode in ("exit", "combined"):
+                raise self.exit_error
+            if self.mode == "post_exit_expiry":
+                self.utc = 250
+            return self.mode == "suppressed"
+
+        def append_prediction_frame_v1(self, frame):
+            if self.mode in ("body", "suppressed", "combined"):
+                raise self.body_error
+            self.frames.append(frame)
+
+        def iter_written_prediction_frames_v1(self):
+            if self.mode == "truncated":
+                return iter(())
+            if self.mode == "extra":
+                return iter((*self.frames, literal))
+            if self.mode == "changed":
+                return iter((literal.replace(b"true", b"null"),))
+            return iter(self.frames)
+
+        def seal_prediction_artifact_v1(self):
+            self.seals += 1
+            if self.mode == "uncertain":
+                raise self.body_error
+            return ProbabilityPredictionArtifactSealV1(
+                "artifact", scope, "other-result" if self.mode == "identity" else "result",
+                sum(map(len, self.frames)), len(self.frames), 100,
+                250 if self.mode == "post_exit_expiry" else 900, ("model", "input"))
+
+        def abort_unpublished_prediction_stage_v1(self):
+            self.aborts += 1
+            if self.mode == "combined":
+                raise self.abort_error
+
+    for mode in ("valid", "body", "suppressed", "combined", "truncated", "extra", "changed",
+                 "uncertain", "identity", "exit", "post_exit_expiry"):
+        writer = SyntheticWriter(mode)
+        clocks = SimpleNamespace(time_ns=lambda: writer.utc, monotonic_ns=lambda: writer.mono)
+        with patch.object(persistence, "time", clocks):
+            if mode == "valid":
+                seal = persistence._finalize_prediction_artifact_v1(bank=bank, request=request, artifact_writer=writer)
+                assert seal.result_ref == "result" and seal.valid_until_ns == 900
+                assert writer.frames == [literal] and writer.seals == 1 and writer.aborts == 0
+                decoded, count = _decode_prediction_artifact_v1(b"".join(writer.frames), max_bytes=10000, max_frames=20)
+                assert decoded == bank and count == 1
+            else:
+                with pytest.raises(BaseException) as failed:
+                    persistence._finalize_prediction_artifact_v1(bank=bank, request=request, artifact_writer=writer)
+                if mode in ("body", "suppressed", "uncertain"):
+                    assert failed.value is writer.body_error
+                if mode == "combined":
+                    assert type(failed.value) is ExceptionGroup
+                    assert failed.value.exceptions == (writer.body_error, writer.abort_error, writer.exit_error)
+                if mode in ("uncertain", "identity", "exit", "post_exit_expiry"):
+                    assert writer.seals == 1 and writer.aborts == 0
+                else:
+                    assert writer.seals == 0 and writer.aborts == 1
 
 
 
@@ -1980,7 +2332,7 @@ def _f14_fresh_adapter(kind):
         SQLiteReferenceAdapterV1(':memory:', busy_timeout_ms=0, max_transaction_attempts=1))
 
 
-def _assert_f14_native_and_storage(adapter_kind):
+def _assert_f14_native_and_storage(adapter_kind, directory):
     import copy, sys
     from dataclasses import replace
     from src.qtt.stage1_prediction_markets.private_state_receipts import handoff
@@ -2348,7 +2700,7 @@ def _assert_f14_native_and_storage(adapter_kind):
         workflow_name = '.github/workflows/qtt_validation.yml'
         workflow_bytes = (repo_root / workflow_name).read_bytes()
         assert source_policy._st12h_validate_workflow_contract(repo_root) == (workflow_name,)
-        with TemporaryDirectory() as temporary:
+        with TemporaryDirectory(dir=directory) as temporary:
             fixture_root = Path(temporary)
             workflow = fixture_root / workflow_name
             workflow.parent.mkdir(parents=True)
