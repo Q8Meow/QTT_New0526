@@ -56,3 +56,60 @@ def test_pr159r_generated_artifacts_are_deterministic(pr159r_validation_result, 
     assert all(options.get("newline") == "\n" for options in write_options)
     assert (tmp_path / "writer.json").read_bytes() == native_io.json_dump({"probe": 1}).encode("utf-8")
     assert (tmp_path / "writer.txt").read_bytes() == b"first\nsecond\n"
+
+    # The existing central branch owner, not a test-only validator bypass,
+    # admits local cumulative PR159R validation only with original ancestry.
+    branch_owner = native.ci_branch_context
+    cumulative = "repair/main-cumulative-v35-final-r5-local-20260922"
+    for branch_name in (cumulative, "repair/main-cumulative-contract-test"):
+        assert branch_owner.is_branch_allowed_for_upstream_pr_gate(
+            branch_name, "PR159R", ancestry_present=True, include_main=True) is True
+        for ancestry, include in ((False, True), (True, False), (1, True),
+                                  (True, 1), (None, True), (True, None)):
+            assert branch_owner.is_branch_allowed_for_upstream_pr_gate(
+                branch_name, "PR159R", ancestry_present=ancestry,
+                include_main=include) is False
+        assert branch_owner.is_branch_allowed_for_upstream_pr_gate(
+            branch_name, "PR159R", ancestry_present=True) is False
+        assert branch_owner.is_pull_request_detached_head_context_allowed_for_upstream_pr_gate(
+            branch_name, "PR159R") is False
+        for gate_id in branch_owner.BRANCH_CONTEXT_GATE_POLICIES:
+            if gate_id != "PR159R":
+                assert branch_owner.is_branch_allowed_for_upstream_pr_gate(
+                    branch_name, gate_id, ancestry_present=True,
+                    include_main=True) is False
+    for branch_name in ("", "HEAD", "repair/unrelated", "repair/main-cumulative-"):
+        assert branch_owner.is_branch_allowed_for_upstream_pr_gate(
+            branch_name, "PR159R", ancestry_present=True, include_main=True) is False
+    assert branch_owner.is_branch_allowed_for_upstream_pr_gate(
+        "main", "PR159R", ancestry_present=True, include_main=True) is True
+    assert branch_owner.is_branch_allowed_for_upstream_pr_gate(
+        "main", "PR159R", ancestry_present=False, include_main=True) is False
+    assert branch_owner.is_branch_allowed_for_upstream_pr_gate(
+        native.c.EXPECTED_BRANCH, "PR159R") is True
+
+    # Original caller with explicitly synthetic Git and ancestry ports.
+    # No native repository ancestry or CI permission is manufactured here.
+    for ancestry_result in (False, True):
+        git_calls = []
+        ancestry_calls = []
+        def recorded_git(root, arguments):
+            git_calls.append(tuple(arguments))
+            assert tuple(arguments) == ("branch", "--show-current")
+            return (0, cumulative, "")
+        def recorded_ancestry(root, branch_context="", *, refresh_shallow=False):
+            ancestry_calls.append((root, branch_context, refresh_shallow))
+            return ancestry_result
+        with monkeypatch.context() as patch:
+            for environment_key in (*branch_owner.BRANCH_CONTEXT_ENV_CANDIDATES,
+                                    "GITHUB_ACTIONS", "GITHUB_EVENT_NAME", "GITHUB_HEAD_REF",
+                                    "GITHUB_REF_NAME", "GITHUB_REF", "QTT_BRANCH_CONTEXT"):
+                patch.delenv(environment_key, raising=False)
+            patch.setattr(native, "_git_stdout", recorded_git)
+            patch.setattr(native, "_pr159r_or_repair_ancestry_present", recorded_ancestry)
+            failures, receipts = [], []
+            native._validate_branch(tmp_path, failures, receipts)
+        assert failures == ([] if ancestry_result else ["PR159R_BLOCKED_WRONG_BRANCH:" + cumulative])
+        assert receipts == []
+        assert git_calls == [("branch", "--show-current"), ("branch", "--show-current")]
+        assert ancestry_calls == [(tmp_path, "", False)]

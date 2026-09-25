@@ -2861,6 +2861,16 @@ def is_branch_allowed_for_upstream_pr_gate(
         return True
     if normalized == "main":
         return include_main and ancestry_present
+    # Local cumulative PR159R validation retains the original ancestry requirement.
+    # This does not admit a detached CI context or any other upstream gate.
+    if (
+        policy.gate_id == "PR159R"
+        and include_main is True
+        and ancestry_present is True
+        and is_main_cumulative_branch(normalized)
+        and len(normalized) > len(MAIN_CUMULATIVE_BRANCH_PREFIX)
+    ):
+        return True
     if normalized in policy.allowed_branches:
         return True
     gate_pr_number = upstream_branch_gate_pr_number(upstream_gate)
