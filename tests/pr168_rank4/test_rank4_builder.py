@@ -2,9 +2,28 @@ from ._helpers import ensure_built, report
 
 
 def test_rank4_builder_and_validator_pass(tmp_path, monkeypatch) -> None:
-    out_dir = ensure_built()
-    assert (out_dir / "art_reg.json").is_file()
-    assert report("run_receipt.report.json")["RP5G_outputs_consumed"] is True
+    # Bind this test's real builder/validator helper to its pytest-owned output.
+    # Keep any pre-existing helper cache intact; use the same original helper body.
+    from functools import lru_cache
+    from . import _helpers as artifact_helpers
+
+    original_output_dir = artifact_helpers.GENERATED_DIR
+    original_ensure_built = artifact_helpers.ensure_built
+    original_cache_info = original_ensure_built.cache_info()
+    generated_dir = tmp_path / "native-artifacts"
+    assert generated_dir != original_output_dir
+    isolated_ensure_built = lru_cache(maxsize=1)(original_ensure_built.__wrapped__)
+    with monkeypatch.context() as output_patch:
+        output_patch.setattr(artifact_helpers, "GENERATED_DIR", generated_dir)
+        output_patch.setattr(artifact_helpers, "ensure_built", isolated_ensure_built)
+        ensure_built = isolated_ensure_built
+        out_dir = ensure_built()
+        assert (out_dir / "art_reg.json").is_file()
+        assert report("run_receipt.report.json")["RP5G_outputs_consumed"] is True
+        assert isolated_ensure_built() == generated_dir
+    assert artifact_helpers.GENERATED_DIR == original_output_dir
+    assert artifact_helpers.ensure_built is original_ensure_built
+    assert original_ensure_built.cache_info() == original_cache_info
 
     # Keep the native two-build comparison byte-exact and preserve failure prefixes.
     from src.qtt.ranking.pr168_rank4 import builder, validator

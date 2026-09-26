@@ -2,12 +2,30 @@ from ._helpers import report, rows
 
 
 def test_builder_creates_primary_artifacts(tmp_path, monkeypatch) -> None:
-    run_report = report("run_receipt.report.json")
-    assert run_report["branch_created_by_codex"] is True
-    assert run_report["RANK4_outputs_consumed"] is True
-    assert run_report["RP5G_refs_preserved"] is True
-    assert run_report["candidate_count"] >= 1
-    assert rows("batch_select.jsonl")
+    # Bind this test's real builder/validator helper to its pytest-owned output.
+    # Keep any pre-existing helper cache intact; use the same original helper body.
+    from functools import lru_cache
+    from . import _helpers as artifact_helpers
+
+    original_output_dir = artifact_helpers.GENERATED_DIR
+    original_ensure_built = artifact_helpers.ensure_built
+    original_cache_info = original_ensure_built.cache_info()
+    generated_dir = tmp_path / "native-artifacts"
+    assert generated_dir != original_output_dir
+    isolated_ensure_built = lru_cache(maxsize=1)(original_ensure_built.__wrapped__)
+    with monkeypatch.context() as output_patch:
+        output_patch.setattr(artifact_helpers, "GENERATED_DIR", generated_dir)
+        output_patch.setattr(artifact_helpers, "ensure_built", isolated_ensure_built)
+        run_report = report("run_receipt.report.json")
+        assert run_report["branch_created_by_codex"] is True
+        assert run_report["RANK4_outputs_consumed"] is True
+        assert run_report["RP5G_refs_preserved"] is True
+        assert run_report["candidate_count"] >= 1
+        assert rows("batch_select.jsonl")
+        assert isolated_ensure_built() == generated_dir
+    assert artifact_helpers.GENERATED_DIR == original_output_dir
+    assert artifact_helpers.ensure_built is original_ensure_built
+    assert original_ensure_built.cache_info() == original_cache_info
 
     # Keep the native two-build comparison byte-exact and preserve failure prefixes.
     from src.qtt.optimization.pr168_qopt1 import builder, validator
