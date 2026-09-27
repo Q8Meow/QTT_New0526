@@ -3781,6 +3781,8 @@ def _run_provenance_payload(
     command_count: int,
     text_integrity_preflight_state: str,
     rp5a_scan_profiles=None,
+    rp5a_reader_profiles=None,
+    rp5a_reader_bases=None,
     scan_read_limits=None,
     scan_deadline_ns=None,
 ) -> dict[str, object]:
@@ -3795,6 +3797,14 @@ def _run_provenance_payload(
     }
     if rp5a_scan_profiles is not None:
         payload["rp5a_scan_profiles"] = _scan_profile_projection(rp5a_scan_profiles)
+    if (rp5a_reader_profiles is None) != (rp5a_reader_bases is None):
+        raise ValueError("reader provenance fields must appear together")
+    if rp5a_reader_profiles is not None:
+        readers = _scan_profile_projection(rp5a_reader_profiles)
+        bases = _rp5a_basis_map_projection_v1(rp5a_reader_bases)
+        if not readers or set(readers) != set(bases):
+            raise ValueError("reader provenance coverage differs")
+        payload.update(rp5a_reader_profiles=readers, rp5a_reader_bases=bases, rp5a_launch_wire_version=2)
     return payload
 
 
@@ -3806,6 +3816,8 @@ def write_run_provenance(
     command_count: int,
     text_integrity_preflight_state: str = "NOT_RUN",
     rp5a_scan_profiles=None,
+    rp5a_reader_profiles=None,
+    rp5a_reader_bases=None,
     scan_read_limits=None,
     scan_deadline_ns=None,
 ) -> None:
@@ -3825,6 +3837,8 @@ def write_run_provenance(
             command_count=command_count,
             text_integrity_preflight_state=text_integrity_preflight_state,
             rp5a_scan_profiles=rp5a_scan_profiles,
+            rp5a_reader_profiles=rp5a_reader_profiles,
+            rp5a_reader_bases=rp5a_reader_bases,
         ),
     )
 
@@ -4081,6 +4095,8 @@ def validate_complete_run_evidence(
     cleanup_state: str,
     text_integrity_preflight_state: str,
     rp5a_scan_profiles=None,
+    rp5a_reader_profiles=None,
+    rp5a_reader_bases=None,
     scan_read_limits=None,
     scan_deadline_ns=None,
 ) -> None:
@@ -4097,6 +4113,8 @@ def validate_complete_run_evidence(
             command_count=command_count_planned,
             text_integrity_preflight_state=text_integrity_preflight_state,
             rp5a_scan_profiles=rp5a_scan_profiles,
+            rp5a_reader_profiles=rp5a_reader_profiles,
+            rp5a_reader_bases=rp5a_reader_bases,
         )
     )
     if _read_evidence_json(evidence_root, "run.json") != expected_run:
@@ -5420,6 +5438,64 @@ class _Rp5aScanProfile:
             keys.add(pair[0].upper())
 
 
+
+@dataclass(frozen=True)
+class _Rp5aReadBasisV1:
+    baseline_ref: str
+    historical_runner_bytes: bytes
+    stdout_bytes_per_call: int
+    status_record_limit: int
+    path_byte_limit: int
+    source_byte_limit: int
+    manifest_node_limit: int
+    manifest_command_limit: int
+    manifest_argument_limit: int
+
+    def __post_init__(self):
+        if (type(self.baseline_ref) is not str
+                or re.fullmatch(r"(?:[0-9a-f]{40}|[0-9a-f]{64})", self.baseline_ref) is None):
+            raise ValueError("original unique historical Git reference required")
+        for name in tuple(self.__dataclass_fields__)[2:]:
+            value = getattr(self, name)
+            if type(value) is not int or value <= 0:
+                raise ValueError("original positive reader basis counter required: " + name)
+        if (type(self.historical_runner_bytes) is not bytes or not self.historical_runner_bytes
+                or len(self.historical_runner_bytes) > self.source_byte_limit):
+            raise ValueError("bounded immutable complete historical runner required")
+
+
+def _rp5a_basis_projection_v1(basis, *, wire=False):
+    if type(basis) is not _Rp5aReadBasisV1:
+        raise TypeError("original typed RP5A reader basis required")
+    values = {name: getattr(basis, name) for name in basis.__dataclass_fields__}
+    values["historical_runner_bytes"] = (_ScanHex(basis.historical_runner_bytes) if wire
+                                          else basis.historical_runner_bytes.hex())
+    return MappingProxyType(values) if wire else values
+
+
+def _rp5a_basis_from_projection_v1(value):
+    if not isinstance(value, Mapping) or set(value) != set(_Rp5aReadBasisV1.__dataclass_fields__):
+        raise ValueError("invalid closed RP5A reader basis")
+    original = value["historical_runner_bytes"]
+    if (type(original) is not str or len(original) % 2
+            or re.fullmatch(r"[0-9a-f]+", original) is None
+            or type(value["source_byte_limit"]) is not int
+            or len(original) // 2 > value["source_byte_limit"]):
+        raise ValueError("invalid original historical byte representation")
+    return _Rp5aReadBasisV1(**{**dict(value), "historical_runner_bytes": bytes.fromhex(original)})
+
+
+def _rp5a_basis_map_projection_v1(bases):
+    if not isinstance(bases, Mapping):
+        raise TypeError("original reader basis mapping required")
+    result = {}
+    for index, basis in bases.items():
+        if type(index) is not int or index <= 0:
+            raise ValueError("invalid reader basis occurrence")
+        result[str(index)] = _rp5a_basis_projection_v1(basis)
+    return result
+
+
 @dataclass(frozen=True)
 class _ScanRunSnapshot:
     raw: bytes
@@ -5572,11 +5648,57 @@ def _scan_profile_projection(profiles):
     return result
 
 
+
+def _rp5a_reader_profiles_from_run_v1(attestation, value, *, command_index, repo_root,
+                                    inherited_run_id, read_limits, deadline_ns):
+    fields_run = {"schema_version", "run_id", "phase", "command_count", "text_integrity_preflight_state",
+                  "paths", "filesystem_probe", "rp5a_scan_profiles", "rp5a_reader_profiles",
+                  "rp5a_reader_bases", "rp5a_launch_wire_version"}
+    if (set(value) != fields_run or type(value["rp5a_launch_wire_version"]) is not int
+            or value["rp5a_launch_wire_version"] != 2):
+        raise ValueError("missing or invalid original reader-bearing run provenance")
+    tables = (value["rp5a_scan_profiles"], value["rp5a_reader_profiles"])
+    bases = value["rp5a_reader_bases"]
+    if any(type(table) is not MappingProxyType for table in (*tables, bases)):
+        raise ValueError("original immutable reader profile tables required")
+    if (not tables[1] or set(tables[1]) != set(bases) or not set(tables[0]) <= set(tables[1])
+            or sum(len(table) for table in tables) > read_limits.profile_limit):
+        raise ValueError("invalid original reader/scanner profile coverage or count")
+    parsed = []
+    roots = []
+    for table in tables:
+        selected = {}
+        for key, member in table.items():
+            if (type(key) is not str or re.fullmatch(r"[1-9][0-9]*", key) is None
+                    or int(key) > value["command_count"] or type(member) is not MappingProxyType
+                    or set(member) != set(_Rp5aScanProfile.__dataclass_fields__)):
+                raise ValueError("noncanonical original reader/scanner profile")
+            profile = _Rp5aScanProfile(**dict(member))
+            scratch = Path(profile.scratch_root)
+            if (str(profile.command_index) != key or profile.run_id != inherited_run_id
+                    or Path(profile.repo_root) != repo_root or profile.deadline_ns > deadline_ns
+                    or scratch == attestation.process_root or not scratch.is_relative_to(attestation.process_root)
+                    or scratch.is_relative_to(attestation.evidence_root) or attestation.evidence_root.is_relative_to(scratch)
+                    or any(scratch.is_relative_to(root) or root.is_relative_to(scratch) for root in roots)):
+                raise ValueError("original role allocation identity/deadline/overlap mismatch")
+            _local_unlinked_path(scratch)
+            if not scratch.is_dir():
+                raise ValueError("original role scratch is unavailable")
+            roots.append(scratch)
+            selected[key] = profile
+        parsed.append(selected)
+    parsed_bases = {key: _rp5a_basis_from_projection_v1(member) for key, member in bases.items()}
+    index = str(command_index)
+    if index not in parsed[1]:
+        raise ValueError("selected reader occurrence is absent")
+    return attestation, parsed[0].get(index), parsed[1][index], parsed_bases[index]
+
+
 def _read_scan_profile_for_run(
     repo_root: Path, *, command_index: int, inherited_run_id: str,
     inherited_evidence_root: Path, explicit_basetemp: Path,
     read_limits: _ScanRunReadLimits, deadline_ns: int,
-    expected_phase=None, expected_command_count=None,
+    expected_phase=None, expected_command_count=None, reader_required=False,
 ):
     attestation = attest_inherited_validation_run(
         repo_root, inherited_run_id=inherited_run_id,
@@ -5595,6 +5717,12 @@ def _read_scan_profile_for_run(
         raise ValueError("scan phase differs from original launch")
     if expected_command_count is not None and value["command_count"] != expected_command_count:
         raise ValueError("scan count differs from original launch")
+    if reader_required:
+        return _rp5a_reader_profiles_from_run_v1(
+            attestation, value, command_index=command_index, repo_root=repo_root,
+            inherited_run_id=inherited_run_id, read_limits=read_limits, deadline_ns=deadline_ns)
+    if any(key in value for key in ("rp5a_reader_profiles", "rp5a_reader_bases", "rp5a_launch_wire_version")):
+        raise ValueError("reader-bearing provenance requires its original reader consumer")
     table = value.get("rp5a_scan_profiles")
     if not isinstance(table, Mapping) or not 0 < len(table) <= read_limits.profile_limit:
         raise ValueError("invalid bounded scan profile table")
@@ -5623,6 +5751,60 @@ def _read_scan_profile_for_run(
     return result
 
 
+
+def _rp5a_consumer_role_v1(argv, repo_root):
+    """Classify actual Python entry/selected pytest paths, never payload prose."""
+    if type(argv) is not tuple or not argv or any(type(v) is not str for v in argv):
+        raise TypeError("original command vector required")
+    offset = 1
+    while offset < len(argv) and argv[offset] in ("-B", "-I", "-u"):
+        offset += 1
+    if offset >= len(argv):
+        return None
+    root = Path(repo_root)
+    entry = argv[offset].replace("\\", "/")
+    if Path(entry).is_absolute():
+        try:
+            entry = Path(entry).relative_to(root).as_posix()
+        except ValueError:
+            return None
+    if entry == "tools/build_pr168_rp5a_legacy_semantic_audit.py":
+        return "EVIDENCE" if "--validation-scope-evidence-only" in argv[offset + 1:] else "SCANNER"
+    if entry == "tools/validate_pr168_rp5a_legacy_semantic_audit.py":
+        return "VALIDATE"
+    if entry == "tools/run_pytest_fresh_basetemp.py":
+        arguments = argv[offset + 1:]
+    elif argv[offset:offset + 2] == ("-m", "pytest"):
+        arguments = argv[offset + 2:]
+    else:
+        return None
+    value_options = {"-k", "-m", "-c", "-o", "-p", "--basetemp", "--rootdir", "--confcutdir",
+                     "--ignore", "--ignore-glob", "--deselect", "--maxfail", "--tb", "--color",
+                     "--import-mode", "--override-ini", "--inifile", "--durations"}
+    skip = False
+    literals = False
+    for value in arguments:
+        if skip:
+            skip = False
+            continue
+        if not literals and value == "--":
+            literals = True
+            continue
+        if not literals and value.startswith("-"):
+            skip = value in value_options
+            continue
+        selected = value.split("::", 1)[0].replace("\\", "/").rstrip("/")
+        if Path(selected).is_absolute():
+            try:
+                selected = Path(selected).relative_to(root).as_posix()
+            except ValueError:
+                continue
+        parts = selected.split("/")
+        if parts[:2] == ["tests", "pr168_rp5a"] and all(p not in ("", ".", "..") for p in parts):
+            return "PYTEST"
+    return None
+
+
 @dataclass(frozen=True)
 class _ScanLaunch:
     paths: ValidationRunPathsV1
@@ -5635,21 +5817,48 @@ class _ScanLaunch:
     thread_id: int
 
     launch_inputs: Mapping = field(default_factory=lambda: MappingProxyType({}), kw_only=True)
+    reader_profiles: Mapping = field(default_factory=lambda: MappingProxyType({}), kw_only=True)
+    reader_bases: Mapping = field(default_factory=lambda: MappingProxyType({}), kw_only=True)
+
+    def __post_init__(self):
+        # Own the new mappings even when the caller retained a mappingproxy's
+        # backing dictionary. Preserve every original profile/basis object.
+        if (type(self.reader_profiles) is not MappingProxyType
+                or type(self.reader_bases) is not MappingProxyType):
+            raise TypeError("reader launch mappings must be immutable")
+        _scan_profile_projection(self.reader_profiles)
+        _rp5a_basis_map_projection_v1(self.reader_bases)
+        if set(self.reader_profiles) != set(self.reader_bases):
+            raise ValueError("reader launch mappings require exact coverage")
+        object.__setattr__(self, "reader_profiles", MappingProxyType(dict(self.reader_profiles)))
+        object.__setattr__(self, "reader_bases", MappingProxyType(dict(self.reader_bases)))
 
 
-def _prepare_scan_launch(paths, *, phase, plan, profiles, read_limits, deadline_ns, launch_inputs=None):
+def _prepare_scan_launch(paths, *, phase, plan, profiles, read_limits, deadline_ns, launch_inputs=None,
+                         reader_profiles=None, reader_bases=None):
     if type(paths) is not ValidationRunPathsV1 or type(plan) is not tuple or type(read_limits) is not _ScanRunReadLimits:
         raise TypeError("original scan launch operands required")
     _scan_deadline(deadline_ns)
+    readers = {} if reader_profiles is None else dict(reader_profiles)
+    bases = {} if reader_bases is None else dict(reader_bases)
+    _scan_profile_projection(readers)
+    _rp5a_basis_map_projection_v1(bases)
+    if set(readers) != set(bases):
+        raise ValueError("reader profiles and bases require exact coverage")
+    if readers:
+        roles = {row.command_index: _rp5a_consumer_role_v1(row.argv, paths.repo_root) for row in plan}
+        if (set(readers) != {i for i, role in roles.items() if role is not None}
+                or set(profiles) != {i for i, role in roles.items() if role == "SCANNER"}):
+            raise ValueError("reader/scanner profiles differ from original role-derived coverage")
     _scan_profile_projection(profiles)
-    if len(profiles) > read_limits.profile_limit:
+    if len(profiles) + len(readers) > read_limits.profile_limit:
         raise ValueError("scan launch profile count exceeds read allowance")
     for index, planned in enumerate(plan, 1):
         if (planned.command_index != index or planned.run_id != paths.run_id
                 or planned.phase != phase or planned.cwd != str(paths.repo_root)):
             raise ValueError("scan launch original plan differs")
     roots = []
-    for index, profile in profiles.items():
+    for index, profile in (*profiles.items(), *readers.items()):
         if index > len(plan) or profile.run_id != paths.run_id or profile.repo_root != str(paths.repo_root) or profile.deadline_ns > deadline_ns:
             raise ValueError("scan profile does not belong to original launch")
         scratch = Path(profile.scratch_root)
@@ -5662,15 +5871,28 @@ def _prepare_scan_launch(paths, *, phase, plan, profiles, read_limits, deadline_
             raise ValueError("scan source did not admit an existing scratch directory")
         roots.append(scratch)
     inputs = {} if launch_inputs is None else dict(launch_inputs)
-    if set(inputs) - set(profiles):
+    if (set(inputs) != set(readers)) if readers else bool(set(inputs) - set(profiles)):
         raise ValueError("launch input belongs to an unselected occurrence")
     for index, original_input in inputs.items():
         expected = _ScanLaunchIdentity(paths.run_id, phase, index, len(plan), plan[index - 1].argv, str(paths.repo_root))
         if type(original_input) is not _ScanLaunchInput or original_input.identity != expected:
             raise ValueError("original scan input differs from selected plan")
+        if readers:
+            if original_input.rp5a_read_basis is not bases[index] or original_input.parent_identity is not None:
+                raise ValueError("direct parent input lost original reader basis identity")
+            scratch = original_input.scratch_root
+            if (scratch == paths.process_root or not scratch.is_relative_to(paths.process_root)
+                    or scratch.is_relative_to(paths.evidence_root) or paths.evidence_root.is_relative_to(scratch)
+                    or any(scratch.is_relative_to(root) or root.is_relative_to(scratch) for root in roots)):
+                raise ValueError("input scratch overlaps the original scanner/reader allocation")
+            _local_unlinked_path(scratch)
+            if not scratch.is_dir():
+                raise ValueError("input scratch was not admitted")
+            roots.append(scratch)
     return _ScanLaunch(paths, phase, plan, MappingProxyType(dict(profiles)), read_limits,
                        deadline_ns, os.getpid(), threading.get_ident(),
-                       launch_inputs=MappingProxyType(inputs))
+                       launch_inputs=MappingProxyType(inputs), reader_profiles=MappingProxyType(readers),
+                       reader_bases=MappingProxyType(bases))
 
 
 _SCAN_TRANSPORT_KEYS = (
@@ -5683,7 +5905,7 @@ def _scan_child_launch_environment(parent, *, launch, planned):
     if (type(launch) is not _ScanLaunch or launch.process_id != os.getpid()
             or launch.thread_id != threading.get_ident() or not any(planned is row for row in launch.plan)):
         raise ValueError("scan launch original owner/occurrence required")
-    profile = launch.profiles.get(planned.command_index)
+    profile = launch.reader_profiles.get(planned.command_index) or launch.profiles.get(planned.command_index)
     if profile is None:
         raise ValueError("unselected scan occurrence")
     deadline = min(launch.deadline_ns, profile.deadline_ns)
@@ -5707,7 +5929,7 @@ def _scan_child_launch_environment(parent, *, launch, planned):
     return child
 
 
-def _scan_read_forwarded_profile(repo_root, *, environment, explicit_basetemp):
+def _scan_read_forwarded_profile(repo_root, *, environment, explicit_basetemp, reader_required=False):
     original = {}
     for key, value in environment.items():
         if type(key) is not str or key.upper() in original or type(value) is not str:
@@ -5728,17 +5950,20 @@ def _scan_read_forwarded_profile(repo_root, *, environment, explicit_basetemp):
         repo_root, command_index=index, inherited_run_id=original.get(RUN_ID_ENV),
         inherited_evidence_root=Path(original[EVIDENCE_ROOT_ENV]), explicit_basetemp=explicit_basetemp,
         read_limits=_ScanRunReadLimits(byte_limit, nodes, depth, profile_limit), deadline_ns=deadline,
-        expected_phase=phase, expected_command_count=count)
+        expected_phase=phase, expected_command_count=count, reader_required=reader_required)
     if str(result[0].process_root) != original.get(PROCESS_ROOT_ENV):
         raise ValueError("forwarded scan process root differs")
-    _scan_deadline(min(deadline, result[1].deadline_ns))
+    _scan_deadline(min(deadline, (result[2] if reader_required else result[1]).deadline_ns))
     return result
 
 
 class _ScanReservationLedger:
-    def __init__(self, profile):
+    def __init__(self, profile, *, reader_only=False):
         if type(profile) is not _Rp5aScanProfile:
             raise TypeError("original scan profile required")
+        if type(reader_only) is not bool:
+            raise TypeError("reader ledger role must be an exact Boolean")
+        self._reader_only = reader_only
         self.profile = profile
         self.process_id = os.getpid()
         self.thread_id = threading.get_ident()
@@ -6073,7 +6298,8 @@ def _execute_scan_with_scratch(
 class _ScanPhaseController:
     def __init__(self, profile, ledger, *, check_candidate, max_matched_files, structured_byte_limit):
         if (type(profile) is not _Rp5aScanProfile or type(ledger) is not _ScanReservationLedger
-                or ledger.profile is not profile or ledger.invocations != 0 or ledger.state != "READY"):
+                or ledger.profile is not profile or ledger._reader_only is not False
+                or ledger.invocations != 0 or ledger.state != "READY"):
             raise ValueError("scan controller requires original unused profile/ledger")
         if any(type(value) is not int or value <= 0 for value in (max_matched_files, structured_byte_limit)):
             raise ValueError("invalid existing scan limits")
@@ -6346,6 +6572,7 @@ class _ScanCandidateFence:
         self.root = Path(repo_root)
         if not self.root.is_absolute() or ".." in self.root.parts:
             raise ValueError("original absolute candidate root required")
+        self.limits = limits
         self.rows = _scan_candidate_rows(rows, limits=limits, candidate_read_bytes=candidate_read_bytes)
         self.remaining = candidate_read_bytes
         self.deadline_ns = deadline_ns
@@ -6451,13 +6678,51 @@ class _ScanCandidateFence:
             raise
         return None
 
+    def observe_surfaces(self, paths):
+        if type(paths) is not tuple or len(paths) != len(set(paths)):
+            raise ValueError("original finite surface selection required")
+        originals = {row.path: row for row in self.rows}
+        if not set(paths) <= set(originals):
+            raise ValueError("surface selection escaped original candidate")
+        all_rows = self.rows
+        try:
+            self.rows = tuple(originals[path] for path in paths)
+            self()
+        finally:
+            self.rows = all_rows
+        return MappingProxyType({path: originals[path] for path in paths})
+
+    def read_original_source(self, relative, limit):
+        if relative not in ("tools/run_validation_gates.py", "tools/validation_scope_registry.py"):
+            raise ValueError("reader source path is fixed by the original owner")
+        row = self.observe_surfaces((relative,))[relative]
+        if row.kind != "FILE" or len(row.content) > limit:
+            raise ValueError("original complete source unavailable or oversized")
+        path = self.root / relative
+        observed = path.lstat()
+        data = bytearray()
+        try:
+            with _regular_worktree_source(path, observed).open() as stream:
+                while block := stream.read(min(65536, limit - len(data) + 1)):
+                    self._clock()
+                    self.remaining -= len(block)
+                    if self.remaining < 0 or len(data) + len(block) > limit:
+                        raise ValueError("source acquisition allowance exhausted")
+                    data.extend(block)
+            if bytes(data) != row.content:
+                raise ValueError("current source differs from original candidate frame")
+        except BaseException:
+            self.held = True
+            raise
+        return bytes(data), row.content
+
 
 @dataclass(frozen=True)
 class _ScanHex:
     value: bytes
 
 
-def _scan_launch_payload(identity, rows, *, limits, candidate_read_bytes):
+def _scan_launch_payload(identity, rows, *, limits, candidate_read_bytes, rp5a_read_basis=None, parent_identity=None):
     if (type(identity) is not _ScanLaunchIdentity or type(identity.run_id) is not str or not identity.run_id
             or type(identity.phase) is not str or not identity.phase
             or type(identity.command_index) is not int or type(identity.command_count) is not int
@@ -6467,16 +6732,48 @@ def _scan_launch_payload(identity, rows, *, limits, candidate_read_bytes):
             or type(identity.repo_root) is not str or not Path(identity.repo_root).is_absolute()):
         raise ValueError("invalid original scan launch identity")
     _scan_candidate_rows(rows, limits=limits, candidate_read_bytes=candidate_read_bytes)
-    return MappingProxyType({
+    result = {
         "run_id": identity.run_id, "phase": identity.phase, "command_index": identity.command_index,
         "command_count": identity.command_count, "argv": identity.argv, "repo_root": identity.repo_root,
         "candidate_files": tuple((row.path, row.kind, row.mode, _ScanHex(row.content), row.children) for row in rows),
         "candidate_read_bytes": candidate_read_bytes,
-    })
+    }
+    if rp5a_read_basis is None:
+        if parent_identity is not None:
+            raise ValueError("parent identity requires the complete reader extension")
+    else:
+        basis = _rp5a_basis_projection_v1(rp5a_read_basis, wire=True)
+        parent = None
+        if parent_identity is not None:
+            # Reuse the original identity domain without introducing a second
+            # permissive identity codec or a payload-selected delegation chain.
+            _scan_launch_payload(parent_identity, (), limits=limits, candidate_read_bytes=1)
+            if (identity.run_id != parent_identity.run_id or identity.repo_root != parent_identity.repo_root
+                    or identity.phase != "nested-pytest" or identity.command_index != 1 or identity.command_count != 1):
+                raise ValueError("RP5A delegation must be the original single pytest hop")
+            parent = MappingProxyType({name: getattr(parent_identity, name)
+                                       for name in _ScanLaunchIdentity.__dataclass_fields__})
+        result.update(wire_version=2, rp5a_read_basis=basis, parent_identity=parent)
+    return MappingProxyType(result)
+
+
+def _scan_v2_direct_null_v1(payload):
+    if (type(payload) is not MappingProxyType or type(payload.get("wire_version")) is not int
+            or payload.get("wire_version") != 2 or payload.get("parent_identity", False) is not None):
+        return False
+    if set(payload) != {"run_id", "phase", "command_index", "command_count", "argv", "repo_root",
+                        "candidate_files", "candidate_read_bytes", "wire_version", "rp5a_read_basis", "parent_identity"}:
+        raise ValueError("null requires the closed direct reader-bearing frame")
+    basis = payload["rp5a_read_basis"]
+    if type(basis) is not MappingProxyType or type(basis.get("historical_runner_bytes")) is not _ScanHex:
+        raise ValueError("null requires complete typed reader basis")
+    _Rp5aReadBasisV1(**{**dict(basis), "historical_runner_bytes": basis["historical_runner_bytes"].value})
+    return True
 
 
 def _scan_launch_measure(payload, *, limits):
     size = nodes = 0
+    direct_null = _scan_v2_direct_null_v1(payload)
 
     def text_size(value):
         count = 2
@@ -6489,12 +6786,14 @@ def _scan_launch_measure(payload, *, limits):
                 raise ValueError("launch scalar exceeds byte allowance")
         return count
 
-    def walk(value, depth):
+    def walk(value, depth, *, direct_parent=False):
         nonlocal size, nodes
         nodes += 1
         if nodes > limits.node_limit:
             raise ValueError("launch node allowance exceeded")
-        if type(value) is str:
+        if value is None and direct_null and direct_parent:
+            size += 4
+        elif type(value) is str:
             size += text_size(value)
         elif type(value) is int:
             if value.bit_length() > limits.byte_limit * 4:
@@ -6515,7 +6814,7 @@ def _scan_launch_measure(payload, *, limits):
                     if type(key) is not str:
                         raise ValueError("launch key must be exact text")
                     walk(key, depth + 1)
-                    walk(item, depth + 1)
+                    walk(item, depth + 1, direct_parent=value is payload and key == "parent_identity")
         else:
             raise TypeError("unsupported launch representation")
         if size > limits.byte_limit or size > 0xFFFFFFFF:
@@ -6528,12 +6827,13 @@ def _scan_launch_measure(payload, *, limits):
 
 
 
-def _scan_launch_parts(payload):
+def _scan_launch_parts(payload, *, _root=True):
     def text(value):
         encoded = json.encoder.encode_basestring_ascii(value).encode("ascii")
         for offset in range(0, len(encoded), 64 * 1024):
             yield encoded[offset:offset + 64 * 1024]
 
+    direct_null = _root and _scan_v2_direct_null_v1(payload)
     if type(payload) is str:
         yield from text(payload)
     elif type(payload) is int:
@@ -6548,7 +6848,7 @@ def _scan_launch_parts(payload):
         for index, item in enumerate(payload):
             if index:
                 yield b","
-            yield from _scan_launch_parts(item)
+            yield from _scan_launch_parts(item, _root=False)
         yield b"]"
     elif type(payload) is MappingProxyType:
         yield b"{"
@@ -6557,15 +6857,26 @@ def _scan_launch_parts(payload):
                 yield b","
             yield from text(key)
             yield b":"
-            yield from _scan_launch_parts(item)
+            if direct_null and key == "parent_identity":
+                yield b"null"
+            else:
+                yield from _scan_launch_parts(item, _root=False)
         yield b"}"
     else:
         raise TypeError("unsupported measured launch value")
 
 
-def _read_scan_launch_fd(fd, *, limits, deadline_ns, expected_identity):
+def _read_scan_launch_fd(fd, *, limits, deadline_ns, expected_identity, expected_wire_version=1,
+                         expected_parent_identity=None, expected_rp5a_read_basis=None):
     if type(fd) is not int or type(limits) is not _ScanRunReadLimits:
         raise TypeError("original launch descriptor and limits required")
+    if type(expected_wire_version) is not int or expected_wire_version not in (1, 2):
+        raise ValueError("unsupported independently selected launch wire version")
+    if expected_wire_version == 1:
+        if expected_parent_identity is not None or expected_rp5a_read_basis is not None:
+            raise ValueError("legacy launch cannot admit reader/delegation expectations")
+    elif type(expected_rp5a_read_basis) is not _Rp5aReadBasisV1:
+        raise ValueError("v2 requires independently bound original reader basis")
     before = os.fstat(fd)
     _scan_file_identity(before)
     if os.lseek(fd, 0, os.SEEK_CUR) != 0 or not 4 < before.st_size <= limits.byte_limit + 4:
@@ -6601,11 +6912,33 @@ def _read_scan_launch_fd(fd, *, limits, deadline_ns, expected_identity):
             errors.append(exc)
     _scan_raise_errors(errors)
     fields = {"run_id", "phase", "command_index", "command_count", "argv", "repo_root", "candidate_files", "candidate_read_bytes"}
+    if expected_wire_version == 2:
+        fields |= {"wire_version", "rp5a_read_basis", "parent_identity"}
     if type(value) is not MappingProxyType or set(value) != fields:
         raise ValueError("invalid closed launch fields")
+    basis = parent = None
+    if expected_wire_version == 2:
+        if type(value["wire_version"]) is not int or value["wire_version"] != 2:
+            raise ValueError("reader launch wire version mismatch")
+        basis = _rp5a_basis_from_projection_v1(value["rp5a_read_basis"])
+        if basis != expected_rp5a_read_basis:
+            raise ValueError("reader basis differs from original parent profile")
+        parent_value = value["parent_identity"]
+        if expected_parent_identity is None:
+            if parent_value is not None:
+                raise ValueError("direct reader launch cannot delegate")
+        else:
+            fields_parent = tuple(_ScanLaunchIdentity.__dataclass_fields__)
+            if type(parent_value) is not MappingProxyType or set(parent_value) != set(fields_parent):
+                raise ValueError("invalid closed parent identity")
+            parent = _ScanLaunchIdentity(*(parent_value[key] for key in fields_parent))
+            if type(expected_parent_identity) is not _ScanLaunchIdentity or parent != expected_parent_identity:
+                raise ValueError("reader parent differs from independently selected original")
     identity = _ScanLaunchIdentity(*(value[key] for key in ("run_id", "phase", "command_index", "command_count", "argv", "repo_root")))
     if type(expected_identity) is not _ScanLaunchIdentity or identity != expected_identity:
         raise ValueError("launch differs from independent original expectation")
+    if type(value["candidate_read_bytes"]) is not int or value["candidate_read_bytes"] <= 0:
+        raise ValueError("original positive candidate allowance required")
     raw_rows = value["candidate_files"]
     if type(raw_rows) is not tuple or len(raw_rows) > limits.node_limit:
         raise ValueError("invalid bounded candidate transport")
@@ -6618,14 +6951,20 @@ def _read_scan_launch_fd(fd, *, limits, deadline_ns, expected_identity):
             raise ValueError("candidate byte operand exceeds original allowance")
         rows.append(_ScanCandidateSurface(row[0], row[1], row[2], bytes.fromhex(row[3]), row[4]))
     result = tuple(rows)
-    _scan_launch_payload(identity, result, limits=limits, candidate_read_bytes=value["candidate_read_bytes"])
+    _scan_launch_payload(identity, result, limits=limits, candidate_read_bytes=value["candidate_read_bytes"],
+                         rp5a_read_basis=basis, parent_identity=parent)
     _scan_deadline(deadline_ns)
+    if expected_wire_version == 2:
+        return identity, result, value["candidate_read_bytes"], basis, parent
     return identity, result, value["candidate_read_bytes"]
 
 
 class _ScanLaunchInput:
     def __init__(self, identity, candidate_files, *, limits, candidate_read_bytes,
-                 deadline_ns, scratch_root, scratch_bytes, parent_frame_reread_bytes, check_candidate):
+                 deadline_ns, scratch_root, scratch_bytes, parent_frame_reread_bytes, check_candidate,
+                 rp5a_read_basis=None, parent_identity=None):
+        self.rp5a_read_basis = rp5a_read_basis
+        self.parent_identity = parent_identity
         self.identity = identity
         self.candidate_files = candidate_files
         self.limits = limits
@@ -6646,7 +6985,8 @@ class _ScanLaunchInput:
         self.process = None
         self.last_ns = _scan_deadline(deadline_ns)
         self.payload = _scan_launch_payload(identity, candidate_files, limits=limits,
-                                           candidate_read_bytes=candidate_read_bytes)
+                                           candidate_read_bytes=candidate_read_bytes,
+                                           rp5a_read_basis=rp5a_read_basis, parent_identity=parent_identity)
         self.length = _scan_launch_measure(self.payload, limits=limits)
         self.extent = self.length + 4
         if (type(scratch_bytes) is not int or type(parent_frame_reread_bytes) is not int
@@ -6854,3 +7194,44 @@ def _read_scan_bound_launch_fd(fd, *, repo_root, environment, explicit_basetemp,
     result = (attestation, profile, fence)
     _scan_deadline(deadline)
     return result
+
+def _read_rp5a_bound_launch_fd_v1(fd, *, repo_root, environment, explicit_basetemp, original_argv,
+                                  expected_role, expected_parent_identity=None):
+    if expected_role not in {"SCANNER", "VALIDATE", "PYTEST", "EVIDENCE"}:
+        raise ValueError("unknown independently selected RP5A consumer role")
+    lowered = {key.upper(): value for key, value in environment.items()}
+    # Direct script callers do not have a pytest basetemp argument. Its fixed
+    # original child p root is independently selected from the inherited owner.
+    if explicit_basetemp is None:
+        explicit_basetemp = Path(lowered[PROCESS_ROOT_ENV]) / PYTEST_BASETEMP_DIR_NAME
+    attestation, scanner, reader, basis = _scan_read_forwarded_profile(
+        repo_root, environment=environment, explicit_basetemp=explicit_basetemp, reader_required=True)
+    limits = _ScanRunReadLimits(*(int(lowered[key]) for key in (
+        "QTT_SCAN_BYTE_LIMIT", "QTT_SCAN_NODE_LIMIT", "QTT_SCAN_DEPTH_LIMIT", "QTT_SCAN_PROFILE_LIMIT")))
+    outer_identity = _ScanLaunchIdentity(attestation.run_id, lowered["QTT_SCAN_PHASE"],
+        reader.command_index, int(lowered["QTT_SCAN_COMMAND_COUNT"]), tuple(original_argv), str(repo_root))
+    if expected_parent_identity is None:
+        if _rp5a_consumer_role_v1(tuple(original_argv), repo_root) != expected_role:
+            raise ValueError("RP5A role differs from actual original entry")
+        identity = outer_identity
+    else:
+        parent = expected_parent_identity
+        if (type(parent) is not _ScanLaunchIdentity or expected_role != "PYTEST"
+                or (parent.run_id, parent.phase, parent.command_index, parent.command_count, parent.repo_root)
+                != (outer_identity.run_id, outer_identity.phase, outer_identity.command_index,
+                    outer_identity.command_count, outer_identity.repo_root)
+                or _rp5a_consumer_role_v1(parent.argv, repo_root) != "PYTEST"):
+            raise ValueError("invalid independently bound original pytest parent")
+        identity = _ScanLaunchIdentity(attestation.run_id, "nested-pytest", 1, 1, tuple(original_argv), str(repo_root))
+    if (scanner is not None) != (expected_role == "SCANNER"):
+        raise ValueError("scanner allocation does not match reader consumer role")
+    deadline = min(int(lowered["QTT_SCAN_DEADLINE_NS"]), reader.deadline_ns)
+    _, rows, allowance, original_basis, parent = _read_scan_launch_fd(
+        fd, limits=limits, deadline_ns=deadline, expected_identity=identity,
+        expected_wire_version=2, expected_parent_identity=expected_parent_identity,
+        expected_rp5a_read_basis=basis)
+    fence = _ScanCandidateFence(repo_root, rows, limits=limits,
+                                candidate_read_bytes=allowance, deadline_ns=deadline)
+    fence()
+    fence.transport_extent = os.fstat(fd).st_size
+    return attestation, scanner, reader, original_basis, fence, parent

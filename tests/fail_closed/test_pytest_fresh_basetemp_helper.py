@@ -1061,6 +1061,69 @@ def test_main_prints_basetemp_and_returns_pytest_exit_code(
 ):
     # Synthetic substitutions below isolate the admitted allocation and taskkill
     # boundaries. They do not attest a real child or native tree termination.
+    _exercise_rp5a_reader_hop_v1(monkeypatch, tmp_path)
+    # The new real-child helper obeys the existing retention policy as well.
+    # Only the supervisor is substituted below: it never starts a native child.
+    # Existing path allocation/input checks and cleanup remain real.
+    original_resolve = reliability.resolve_validation_run_paths
+    original_cleanup = reliability.cleanup_validation_run
+    for case, expected_cleanup in (("exception", False), ("unproven", False),
+                                   ("terminal-failure", True), ("before-dispatch", True)):
+        case_root = tmp_path / ("reader-retention-" + case)
+        case_root.mkdir()
+        allocated = []
+        cleanup_calls = []
+        dispatch_calls = []
+        original_error = RuntimeError("synthetic reader-hop boundary failure")
+
+        def recording_resolve(*args, **kwargs):
+            result = original_resolve(*args, **kwargs)
+            allocated.append(result[0])
+            return result
+
+        def recording_cleanup(paths):
+            cleanup_calls.append(paths)
+            return original_cleanup(paths)
+
+        def no_child_supervisor(command, **kwargs):
+            dispatch_calls.append(tuple(command))
+            if case == "exception":
+                raise original_error
+            receipt = _command_receipt(
+                command, kwargs, case_root,
+                native_exit_code=0 if case == "unproven" else 1,
+                failure_class=("ENGVR_PROCESS_TERMINATION_FAILED" if case == "unproven"
+                               else "ENGVR_NATIVE_NONZERO_EXIT"),
+                termination_state="TERMINAL:UNPROVEN" if case == "unproven" else "NOT_REQUIRED",
+            )
+            destination = Path(receipt.stderr_path)
+            destination.parent.mkdir()
+            destination.write_bytes(b"")
+            return receipt
+
+        def stop_before_dispatch(*args, **kwargs):
+            raise original_error
+
+        with monkeypatch.context() as fault:
+            fault.setattr(reliability, "resolve_validation_run_paths", recording_resolve)
+            fault.setattr(reliability, "cleanup_validation_run", recording_cleanup)
+            fault.setattr(reliability, "supervise_command", no_child_supervisor)
+            if case == "before-dispatch":
+                fault.setattr(reliability, "write_run_provenance", stop_before_dispatch)
+            expected_type = RuntimeError if case in {"exception", "before-dispatch"} else AssertionError
+            with pytest.raises(expected_type) as observed:
+                _exercise_rp5a_reader_hop_v1(fault, case_root)
+        assert len(allocated) == 1
+        assert len(dispatch_calls) == (0 if case == "before-dispatch" else 1)
+        assert cleanup_calls == (allocated if expected_cleanup else [])
+        assert allocated[0].process_root.exists() is not expected_cleanup
+        if case in {"exception", "before-dispatch"}:
+            assert observed.value is original_error
+        if not expected_cleanup:
+            # The explicit no-child substitution, not a production receipt,
+            # proves this fault-injection fixture has no process to preserve.
+            assert original_cleanup(allocated[0]) == "PASS_REMOVED_EXACT_RUN_ROOT"
+
     boundary_root = tmp_path / "focused-launch-boundaries"
     boundary_root.mkdir()
     fixture_repo = boundary_root / "repo"
@@ -1406,6 +1469,10 @@ def test_main_prints_basetemp_and_returns_pytest_exit_code(
     original_evidence_root = os.environ.get(reliability.EVIDENCE_ROOT_ENV)
     with monkeypatch.context() as inherited_patch:
         inherited_patch.setattr(helper, "REPO_ROOT", inherited_repo)
+        # The surrounding pytest selection is not this in-process invocation.
+        # Its unrelated arguments must not cause any descriptor acquisition.
+        inherited_patch.setattr(helper.sys, "orig_argv", [helper.sys.executable, "-B", "-m",
+            "pytest", "tests/pr168_rp5a/test_scan_is_bounded.py"])
         inherited_patch.setenv(reliability.RUN_ID_ENV, inherited_paths.run_id)
         inherited_patch.setenv(
             reliability.EVIDENCE_ROOT_ENV,
@@ -1465,3 +1532,152 @@ def test_helper_introduces_no_blocked_behavior_terms():
     assert ' / ".tmp"' not in helper_text
     assert "subprocess.run" not in helper_text
     assert "supervise_command" in helper_text
+
+def _exercise_rp5a_reader_hop_v1(monkeypatch, tmp_path):
+    import dataclasses
+    import shutil
+    import stat
+    import sys
+    import time
+    from tools import pr168_rp5a_git_grep_scanner as scan_owner
+    # Copy only this literal reached module closure into a finite toy repository.
+    # The child fixture proves transport/context ownership, not RP5A data truth.
+    closure = (
+        "build_pr168_rp5a_legacy_semantic_audit.py", "ci_branch_context.py",
+        "pr168_rp5a_agent_touchpoints.py", "pr168_rp5a_blast_radius.py",
+        "pr168_rp5a_config.py", "pr168_rp5a_consumer_graph.py",
+        "pr168_rp5a_cross_graph_consistency.py", "pr168_rp5a_delete_eligibility.py",
+        "pr168_rp5a_git_grep_scanner.py", "pr168_rp5a_identity_custody.py",
+        "pr168_rp5a_identity_dependency.py", "pr168_rp5a_json_scanner.py",
+        "pr168_rp5a_pr_metadata_scanner.py", "pr168_rp5a_report_writer.py",
+        "pr168_rp5a_row_field_hit_index.py", "pr168_rp5a_term_taxonomy.py",
+        "pr168_rp5a_validation_dependency_graph.py", "repo_path_refs.py",
+        "run_pytest_fresh_basetemp.py", "run_validation_gates.py", "validation_inventory.py",
+        "validation_reliability.py", "validation_scope_registry.py",
+    )
+    root = tmp_path / "reader-hop-repo"
+    (root / "tools").mkdir(parents=True)
+    original_root = Path(helper.__file__).resolve().parents[1]
+    for filename in closure:
+        source = original_root / "tools" / filename
+        assert source.is_file() and source.stat().st_nlink == 1
+        (root / "tools" / filename).write_bytes(source.read_bytes())
+    (root / "pytest.ini").write_bytes(b"[pytest]\n")
+    import subprocess
+    git_program = shutil.which("git")
+    assert git_program is not None
+    initialized = subprocess.run([git_program, "--no-optional-locks", "init", "-b", "main"],
+        cwd=root, env=scan_owner._scan_child_environment(os.environ),
+        stdin=subprocess.DEVNULL, stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=False)
+    assert initialized.returncode == 0, initialized.stderr
+
+    selected = root / "tests/pr168_rp5a/test_reader_fixture.py"
+    selected.parent.mkdir(parents=True)
+    selected.write_text(
+        "from tools.build_pr168_rp5a_legacy_semantic_audit import _require_builder_reads_v1\n"
+        "def test_original_bound_reader():\n"
+        "    context = _require_builder_reads_v1()\n"
+        "    assert context.expected_baseline_ref == '1' * 40\n"
+        "    assert context.ledger.invocations == 0\n"
+        "    assert context.text(('branch', '--show-current')) == 'main'\n"
+        "    assert context.ledger.invocations == 1\n"
+        "    assert context.current_runner_source == context.expected_current_runner_source\n"
+        "    assert context.scope_source == context.expected_scope_source\n",
+        encoding="utf-8", newline="\n")
+    paths, probe = reliability.resolve_validation_run_paths(
+        root, explicit_process_root=(tmp_path / "reader-hop-parent").resolve(),
+        run_id="run_synthetic_reader_hop", projected_relative_paths=(selected.relative_to(root).as_posix(),))
+    receipt = None
+    supervision_pending = False
+    retained_errors = []
+    try:
+        for relative in ("reader", "input"):
+            (paths.process_root / relative).mkdir()
+        names = ("tools/run_validation_gates.py", "tools/validation_scope_registry.py")
+        rows = tuple(reliability._ScanCandidateSurface(relative, "FILE",
+            stat.S_IMODE((root / relative).stat().st_mode), (root / relative).read_bytes(), ()) for relative in names)
+        limits = reliability._ScanRunReadLimits(4_000_000, 20000, 64, 1)
+        deadline = time.monotonic_ns() + 180_000_000_000
+        basis = reliability._Rp5aReadBasisV1("1" * 40, b"# synthetic historical data\n",
+            1_048_576, 2, 256, 1_048_576, 10000, 100, 1000)
+        argv = (sys.executable, "-B", str(root / "tools/run_pytest_fresh_basetemp.py"),
+                "-q", selected.relative_to(root).as_posix(), "--basetemp", str(paths.pytest_basetemp_root))
+        plan = reliability.build_command_evidence_plan(run_id=paths.run_id, phase="synthetic-reader-hop",
+            commands=(argv,), cwd=root)
+        executable = shutil.which("git")
+        assert executable is not None
+        executable = str(Path(executable).resolve())
+        profile = reliability._Rp5aScanProfile(paths.run_id, 1, str(root), str(paths.process_root / "reader"),
+            names, 2, sum(len(n.encode()) + 1 for n in names),
+            tuple((row.path, len(row.content)) for row in rows), executable, executable, "git",
+            tuple(scan_owner._scan_child_environment(os.environ).items()),
+            8_388_608, limits.byte_limit + basis.stdout_bytes_per_call + 4096,
+            4096, 16_777_216, deadline, 4)
+        # Account worst-case one-byte frame progress and all three comparisons
+        # for both original frames, plus original context/source/final checks.
+        candidate_bytes = sum(len(row.content) for row in rows)
+        allowance = candidate_bytes * (8 * (limits.byte_limit + 4) + 100)
+        fence = reliability._ScanCandidateFence(root, rows, limits=limits,
+            candidate_read_bytes=allowance, deadline_ns=deadline)
+        identity = reliability._ScanLaunchIdentity(paths.run_id, "synthetic-reader-hop", 1, 1, argv, str(root))
+        original_input = reliability._ScanLaunchInput(identity, rows, limits=limits,
+            candidate_read_bytes=allowance, deadline_ns=deadline,
+            scratch_root=paths.process_root / "input", scratch_bytes=limits.byte_limit + 4,
+            parent_frame_reread_bytes=3 * (limits.byte_limit + 4), check_candidate=fence, rp5a_read_basis=basis)
+        launch = reliability._prepare_scan_launch(paths, phase="synthetic-reader-hop", plan=plan,
+            profiles={}, reader_profiles={1: profile}, reader_bases={1: basis}, launch_inputs={1: original_input},
+            read_limits=limits, deadline_ns=deadline)
+        assert launch.plan is plan and launch.reader_bases[1] is basis
+        for kwargs in (
+            {"reader_profiles": {}, "reader_bases": {1: basis}},
+            {"reader_profiles": {1: profile}, "reader_bases": {}},
+            {"reader_profiles": {1: profile, 2: dataclasses.replace(profile, command_index=2)},
+             "reader_bases": {1: basis, 2: basis}},
+        ):
+            with pytest.raises(ValueError):
+                reliability._prepare_scan_launch(paths, phase="synthetic-reader-hop", plan=plan,
+                    profiles={}, launch_inputs={1: original_input}, read_limits=limits,
+                    deadline_ns=deadline, **kwargs)
+        reliability.write_run_provenance(paths, probe, phase="synthetic-reader-hop", command_count=1,
+            text_integrity_preflight_state="NOT_APPLICABLE", rp5a_scan_profiles={},
+            rp5a_reader_profiles=launch.reader_profiles, rp5a_reader_bases=launch.reader_bases)
+        environment = reliability._scan_child_launch_environment(os.environ, launch=launch, planned=plan[0])
+        environment.update({"PYTEST_DISABLE_PLUGIN_AUTOLOAD": "1", "PYTHONDONTWRITEBYTECODE": "1"})
+        with original_input:
+            supervision_pending = True
+            receipt = reliability.supervise_command(argv, cwd=root, run_id=paths.run_id,
+                phase="synthetic-reader-hop", command_index=1, evidence_root=paths.evidence_root,
+                environment=environment, launch_input=original_input, timeout_seconds=180,
+                mirror_stdout=False, mirror_stderr=False)
+            supervision_pending = reliability._command_requires_process_retention_v1(receipt)
+        assert receipt.native_exit_code == 0 and receipt.failure_class is None, Path(receipt.stderr_path).read_bytes()
+        assert original_input.state == "CLOSED"
+        assert b"1 passed" in Path(receipt.stdout_path).read_bytes()
+        nested_roots = tuple(paths.evidence_root.glob("nested-pytest-*"))
+        assert len(nested_roots) == 1
+        nested = json.loads((nested_roots[0] / "command-1.json").read_text())
+        assert nested["run_id"] == paths.run_id and nested["phase"] == "nested-pytest" and nested["command_index"] == 1
+        assert nested["native_exit_code"] == 0 and nested["failure_class"] is None
+        assert nested["argv"][2:4] == ["-c", helper._RP5A_PYTEST_BOOTSTRAP_V1]
+        assert sorted(p.name for p in (paths.process_root / "reader").iterdir()) == ["pytest-input", "pytest-reads"]
+        assert all(not list(p.iterdir()) for p in (paths.process_root / "reader").iterdir())
+        assert not list((paths.process_root / "input").iterdir())
+    except BaseException as error:
+        retained_errors.append(error)
+    finally:
+        retain = supervision_pending or (
+            receipt is not None and reliability._command_requires_process_retention_v1(receipt)
+        )
+        if retain:
+            if not retained_errors:
+                retained_errors.append(reliability.ValidationReliabilityError(
+                    "ENGVR_PROCESS_TERMINATION_FAILED",
+                    "RP5A reader-hop fixture retains its run after unresolved supervision",
+                ))
+        else:
+            try:
+                assert reliability.cleanup_validation_run(paths) == "PASS_REMOVED_EXACT_RUN_ROOT"
+            except BaseException as error:
+                retained_errors.append(error)
+    reliability._scan_raise_errors(retained_errors)
+    assert not paths.process_root.exists()

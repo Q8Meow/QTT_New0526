@@ -774,6 +774,10 @@ def test_no_validation_scope_removal(monkeypatch) -> None:
         # synthetic native-reader token must now satisfy R5's Git wire grammar;
         # no spelling of an object id supplies source authority.
         native_token = "a" * 40 if context_branch == "main" else "b" * 64
+        # This suffix replaces the native read with its independent literal
+        # oracle. Bind the corresponding expected identity only in that same
+        # synthetic branch case; the real prefix retains its admitted basis.
+        monkeypatch.setattr(original_context, "expected_baseline_ref", native_token)
         monkeypatch.setattr(
             builder,
             "current_branch_context",

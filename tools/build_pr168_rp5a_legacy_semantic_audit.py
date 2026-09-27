@@ -188,7 +188,7 @@ class _Rp5aBuilderReadContext:
                  source_byte_limit, manifest_node_limit, manifest_command_limit, manifest_argument_limit,
                  expected_historical_source, current_runner_source, expected_current_runner_source,
                  scope_source, expected_scope_source, python_executable,
-                 check_candidate, before_surfaces, observe_surfaces):
+                 check_candidate, before_surfaces, observe_surfaces, expected_baseline_ref=None):
         from tools.validation_reliability import _ScanReservationLedger
         if type(ledger) is not _ScanReservationLedger or ledger.invocations or ledger.state != "READY":
             raise ValueError("builder reads require an original unused separate suballocation")
@@ -218,6 +218,11 @@ class _Rp5aBuilderReadContext:
         self.check_candidate = check_candidate
         self.before_surfaces = before_surfaces
         self.observe_surfaces = observe_surfaces
+        if expected_baseline_ref is not None and (
+                type(expected_baseline_ref) is not str or len(expected_baseline_ref) not in (40, 64)
+                or any(c not in "0123456789abcdef" for c in expected_baseline_ref)):
+            raise ValueError("original expected baseline reference is invalid")
+        self.expected_baseline_ref = expected_baseline_ref
         self.resolved_ref = None
 
     def acquire(self, arguments, parser):
@@ -754,6 +759,9 @@ def _validation_scope_baseline() -> tuple[str, str, str]:
         internal_ref = owner.text(arguments)
         if len(internal_ref) not in (40, 64) or any(character not in "0123456789abcdef" for character in internal_ref):
             raise ValueError("baseline object is not one original Git object token")
+        if owner.expected_baseline_ref is not None and internal_ref != owner.expected_baseline_ref:
+            owner.ledger.hold()
+            raise ValueError("native baseline differs from independently admitted reference")
         owner.resolved_ref = internal_ref
     except Exception as exc:
         raise RuntimeError("RP5A_VALIDATION_SCOPE_BASELINE_RESOLVE_FAILED:" + semantic_label) from exc
@@ -1776,25 +1784,84 @@ def main(argv: Sequence[str] | None = None, *, scan_context=None) -> int:
     return 0
 
 
+
+def _rp5a_reconstruct_reader_v1(reader, basis, fence):
+    from types import MappingProxyType
+    from tools.validation_reliability import _Rp5aReadBasisV1, _ScanCandidateFence, _ScanReservationLedger
+    if (type(basis) is not _Rp5aReadBasisV1 or type(fence) is not _ScanCandidateFence
+            or fence.root != REPO_ROOT or Path(reader.repo_root) != REPO_ROOT):
+        raise ValueError("original fixed RP5A reader reconstruction operands required")
+    ledger = _ScanReservationLedger(reader, reader_only=True)
+    try:
+        current, expected_current = fence.read_original_source("tools/run_validation_gates.py", basis.source_byte_limit)
+        scope, expected_scope = fence.read_original_source("tools/validation_scope_registry.py", basis.source_byte_limit)
+        before = MappingProxyType({row.path: row for row in fence.rows if _is_legacy_generated_artifact_path(row.path)})
+        original = _Rp5aBuilderReadContext(
+            ledger=ledger, **{name: getattr(basis, name) for name in tuple(basis.__dataclass_fields__)[2:]},
+            expected_historical_source=basis.historical_runner_bytes,
+            current_runner_source=current, expected_current_runner_source=expected_current,
+            scope_source=scope, expected_scope_source=expected_scope, python_executable=sys.executable,
+            check_candidate=fence, before_surfaces=before, observe_surfaces=fence.observe_surfaces,
+            expected_baseline_ref=basis.baseline_ref)
+        fence()
+        return original
+    except BaseException:
+        ledger.hold()
+        raise
+
+
+@contextmanager
+def _rp5a_bound_reader_v1(original):
+    errors = []
+    try:
+        with _bind_builder_reads_v1(original):
+            yield original
+    except BaseException as error:
+        errors.append(error)
+    try:
+        original.check_candidate()
+        original.ledger.check()
+        if original.ledger.active is not None:
+            raise ValueError("RP5A reader exited with an unresolved original reservation")
+    except BaseException as error:
+        errors.append(error)
+    if errors:
+        original.ledger.hold()
+        if len(errors) == 1:
+            raise errors[0]
+        raise BaseExceptionGroup("RP5A consumer and original reader exit failed", errors)
+
+
 def _standalone_main_v1(argv=None, *, builder_read_context=None):
-    """Fixed child bootstrap; payload data never selects a callable or quota."""
+    """Consume the admitted descriptor before the otherwise missing context."""
     arguments = tuple(sys.argv[1:] if argv is None else argv)
     args = parse_args(arguments)
-    with _builder_reads_or_current_v1(builder_read_context):
-        if args.validation_scope_evidence_only:
-            return main(arguments)
-        from tools.validation_reliability import _read_scan_bound_launch_fd
-        from tools.pr168_rp5a_git_grep_scanner import _ScanInvocation
-        # Python's original process argv retains interpreter options and script.
-        # Registered/effective adaptation is the parent supervisor's obligation.
-        original = tuple(sys.orig_argv)
-        attestation, profile, fence = _read_scan_bound_launch_fd(
-            sys.stdin.fileno(), repo_root=REPO_ROOT, environment=os.environ.copy(),
-            explicit_basetemp=None, original_argv=original)
-        invocation = _ScanInvocation(profile, check_candidate=fence)
+    from tools.pr168_rp5a_git_grep_scanner import _ScanInvocation
+    if builder_read_context is not None:
+        # Retain the original explicitly supplied in-process compatibility route.
+        with _builder_reads_or_current_v1(builder_read_context):
+            if args.validation_scope_evidence_only:
+                return main(arguments)
+            from tools.validation_reliability import _read_scan_bound_launch_fd
+            _, profile, fence = _read_scan_bound_launch_fd(
+                sys.stdin.fileno(), repo_root=REPO_ROOT, environment=os.environ.copy(),
+                explicit_basetemp=None, original_argv=tuple(sys.orig_argv))
+            result = main(arguments, scan_context=_ScanInvocation(profile, check_candidate=fence))
+            fence()
+            return result
+    from tools.validation_reliability import _read_rp5a_bound_launch_fd_v1
+    role = "EVIDENCE" if args.validation_scope_evidence_only else "SCANNER"
+    _, scanner, reader, basis, fence, parent = _read_rp5a_bound_launch_fd_v1(
+        sys.stdin.fileno(), repo_root=REPO_ROOT, environment=os.environ.copy(),
+        explicit_basetemp=None, original_argv=tuple(sys.orig_argv), expected_role=role)
+    if parent is not None:
+        raise ValueError("standalone RP5A builder cannot inherit pytest delegation")
+    original = _rp5a_reconstruct_reader_v1(reader, basis, fence)
+    invocation = None if scanner is None else _ScanInvocation(scanner, check_candidate=fence)
+    with _rp5a_bound_reader_v1(original):
         result = main(arguments, scan_context=invocation)
         fence()
-        return result
+    return result
 
 
 if __name__ == "__main__":

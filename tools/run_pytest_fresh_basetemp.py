@@ -249,6 +249,121 @@ def _receipt_infrastructure_error(
     )
 
 
+
+_RP5A_PYTEST_BOOTSTRAP_V1 = (
+    "from tools.run_pytest_fresh_basetemp import _rp5a_pytest_main_v1; "
+    "raise SystemExit(_rp5a_pytest_main_v1())"
+)
+
+
+def _rp5a_forward_pytest_input_v1(bound, invocation, original_argv, environment):
+    import time
+    from tools.validation_reliability import (
+        _ScanLaunchIdentity, _ScanLaunchInput, _scan_launch_payload, _scan_launch_measure,
+    )
+    attestation, scanner, reader, basis, fence, inherited = bound
+    if scanner is not None or inherited is not None:
+        raise ValueError("the fixed pytest wrapper requires direct reader-only custody")
+    lowered = {key.upper(): value for key, value in environment.items()}
+    parent = _ScanLaunchIdentity(attestation.run_id, lowered["QTT_SCAN_PHASE"], reader.command_index,
+        int(lowered["QTT_SCAN_COMMAND_COUNT"]), tuple(original_argv), str(REPO_ROOT))
+    command = (sys.executable, "-B", "-c", _RP5A_PYTEST_BOOTSTRAP_V1,
+               str(len(parent.argv)), *parent.argv, *invocation.command[4:])
+    identity = _ScanLaunchIdentity(attestation.run_id, "nested-pytest", 1, 1, command, str(REPO_ROOT))
+    payload = _scan_launch_payload(identity, fence.rows, limits=fence.limits,
+        candidate_read_bytes=fence.remaining, rp5a_read_basis=basis, parent_identity=parent)
+    extent_bound = _scan_launch_measure(payload, limits=fence.limits) + 4
+    one_check = sum(len(row.content) + sum(len(name.encode("utf-8")) for name in row.children)
+                    for row in fence.rows)
+    # Each native write/read can make one-byte progress: one write plus three
+    # complete comparisons, each at most extent_bound iterations. The three
+    # comparisons each have two endpoint checks; enter/claim/final add three.
+    forwarding_reads = (4 * extent_bound + 9) * one_check
+    child_reads = fence.remaining - forwarding_reads
+    if child_reads <= 0 or reader.scratch_bytes < extent_bound + basis.stdout_bytes_per_call + reader.stderr_bytes_per_call:
+        raise ValueError("original reader allocation cannot cover simultaneous narrowed forwarding")
+    reader_root = pathlib.Path(reader.scratch_root)
+    _local_unlinked_path(reader_root)
+    if not reader_root.is_dir() or any(reader_root.iterdir()):
+        raise ValueError("original reader allocation is not empty")
+    # Two fixed child directories remain under the original run cleanup owner.
+    # The input descriptor and bounded native capture must never occupy one root.
+    input_root = reader_root / "pytest-input"
+    capture_root = reader_root / "pytest-reads"
+    input_root.mkdir()
+    capture_root.mkdir()
+    narrowed = _ScanLaunchInput(identity, fence.rows, limits=fence.limits,
+        candidate_read_bytes=child_reads, deadline_ns=fence.deadline_ns,
+        scratch_root=input_root, scratch_bytes=extent_bound,
+        parent_frame_reread_bytes=3 * extent_bound, check_candidate=fence,
+        rp5a_read_basis=basis, parent_identity=parent)
+    if narrowed.extent > extent_bound:
+        raise ValueError("narrowed frame increased its measured allocation")
+    # Reserve the whole child allocation once; failed work is not refunded.
+    fence.remaining = forwarding_reads
+    timeout = (fence.deadline_ns - time.monotonic_ns()) / 1_000_000_000
+    if timeout <= 0:
+        raise TimeoutError("original RP5A reader parent deadline expired")
+    return command, narrowed, timeout
+
+
+def _rp5a_pytest_main_v1():
+    """One literal bootstrap. Data cannot choose a module, callable or plugin."""
+    from dataclasses import replace
+    from tools.validation_reliability import (
+        _ScanLaunchIdentity, _read_rp5a_bound_launch_fd_v1, _rp5a_consumer_role_v1,
+    )
+    from tools.build_pr168_rp5a_legacy_semantic_audit import (
+        _rp5a_reconstruct_reader_v1, _rp5a_bound_reader_v1,
+    )
+    import pytest
+    if tuple(sys.orig_argv[:4]) != (sys.executable, "-B", "-c", _RP5A_PYTEST_BOOTSTRAP_V1):
+        raise ValueError("RP5A pytest bootstrap must be the original literal child invocation")
+    if len(sys.argv) < 2 or not sys.argv[1].isascii() or not sys.argv[1].isdigit() or sys.argv[1].startswith("0"):
+        raise ValueError("invalid original wrapper argv extent")
+    count = int(sys.argv[1])
+    if count <= 0 or count > len(sys.argv) - 2:
+        raise ValueError("truncated original wrapper argv")
+    parent_argv = tuple(sys.argv[2:2 + count])
+    if _rp5a_consumer_role_v1(parent_argv, REPO_ROOT) != "PYTEST":
+        raise ValueError("nested RP5A reader is not an original selected pytest occurrence")
+    offset = 1
+    while offset < len(parent_argv) and parent_argv[offset] in ("-B", "-I", "-u"):
+        offset += 1
+    script = pathlib.Path(parent_argv[offset])
+    if script != pathlib.Path("tools/run_pytest_fresh_basetemp.py") and script != REPO_ROOT / "tools/run_pytest_fresh_basetemp.py":
+        raise ValueError("only the canonical wrapper may delegate to pytest")
+    invocation, _, _ = _bind_canonical_pytest_invocation_v1(
+        parent_argv[offset + 1:], repository_root=REPO_ROOT, python_executable=sys.executable,
+        run_root=pathlib.Path(os.environ[PROCESS_ROOT_ENV]), environment=os.environ)
+    pytest_arguments = tuple(sys.argv[2 + count:])
+    if pytest_arguments != tuple(invocation.command[4:]):
+        raise ValueError("nested pytest argv differs from the exact canonical parent transformation")
+    parent = _ScanLaunchIdentity(os.environ[RUN_ID_ENV], os.environ["QTT_SCAN_PHASE"],
+        int(os.environ["QTT_SCAN_COMMAND_INDEX"]), int(os.environ["QTT_SCAN_COMMAND_COUNT"]),
+        parent_argv, str(REPO_ROOT))
+    _, scanner, reader, basis, fence, bound_parent = _read_rp5a_bound_launch_fd_v1(
+        sys.stdin.fileno(), repo_root=REPO_ROOT, environment=os.environ.copy(),
+        explicit_basetemp=pathlib.Path(invocation.basetemp), original_argv=tuple(sys.orig_argv),
+        expected_role="PYTEST", expected_parent_identity=parent)
+    if scanner is not None or bound_parent != parent:
+        raise ValueError("nested reader lost its original one-hop parent")
+    # The still-open child input occupies this originally reserved portion of
+    # reader scratch. Native reads receive only the remaining simultaneous allocation.
+    capture_root = pathlib.Path(reader.scratch_root) / "pytest-reads"
+    _local_unlinked_path(capture_root)
+    if not capture_root.is_dir() or any(capture_root.iterdir()):
+        raise ValueError("original nested reader capture allocation differs")
+    narrowed_reader = replace(reader, scratch_root=str(capture_root),
+                              scratch_bytes=reader.scratch_bytes - fence.transport_extent)
+    original = _rp5a_reconstruct_reader_v1(narrowed_reader, basis, fence)
+    with _rp5a_bound_reader_v1(original):
+        result = pytest.main(list(pytest_arguments))
+    if result != 0:
+        original.ledger.hold()
+    return int(result)
+
+
 def _run_inherited_nested(
     forwarded: Sequence[str],
     *,
@@ -263,14 +378,25 @@ def _run_inherited_nested(
         )
         _print_typed_error_once(error)
         return 1
+    from contextlib import nullcontext
+    from tools.validation_reliability import _rp5a_consumer_role_v1, _read_rp5a_bound_launch_fd_v1
+    bound = None
     invocation = build_pytest_invocation(forwarded)
     try:
-        attestation = attest_inherited_validation_run(
-            REPO_ROOT,
-            inherited_run_id=inherited_run_id,
-            inherited_evidence_root=pathlib.Path(inherited_evidence),
-            explicit_basetemp=pathlib.Path(invocation.basetemp),
-        )
+        selected_call = (sys.executable, str(REPO_ROOT / "tools/run_pytest_fresh_basetemp.py"), *forwarded)
+        if _rp5a_consumer_role_v1(selected_call, REPO_ROOT) == "PYTEST":
+            bound = _read_rp5a_bound_launch_fd_v1(
+                sys.stdin.fileno(), repo_root=REPO_ROOT, environment=os.environ.copy(),
+                explicit_basetemp=pathlib.Path(invocation.basetemp), original_argv=tuple(sys.orig_argv),
+                expected_role="PYTEST")
+            attestation = bound[0]
+        else:
+            attestation = attest_inherited_validation_run(
+                REPO_ROOT,
+                inherited_run_id=inherited_run_id,
+                inherited_evidence_root=pathlib.Path(inherited_evidence),
+                explicit_basetemp=pathlib.Path(invocation.basetemp),
+            )
         invocation, child_environment, projection = _bind_canonical_pytest_invocation_v1(
             forwarded, repository_root=REPO_ROOT, python_executable=sys.executable,
             run_root=attestation.process_root, environment=os.environ,
@@ -279,16 +405,23 @@ def _run_inherited_nested(
             attestation.evidence_root
         )
         print(f"pytest basetemp: {invocation.basetemp}", flush=True)
-        with _command_projection_v1(projection):
+        command, original_input, timeout = invocation.command, None, None
+        if bound is not None:
+            command, original_input, timeout = _rp5a_forward_pytest_input_v1(
+                bound, invocation, tuple(sys.orig_argv), child_environment)
+        with (nullcontext() if original_input is None else original_input), _command_projection_v1(projection):
             receipt = supervise_command(
-                invocation.command,
+                command,
                 cwd=REPO_ROOT,
                 run_id=attestation.run_id,
                 phase="nested-pytest",
                 command_index=1,
                 evidence_root=nested_evidence,
                 environment=child_environment,
+                **({"launch_input": original_input, "timeout_seconds": timeout} if original_input is not None else {}),
             )
+        if bound is not None:
+            bound[4]()
     except Exception as exc:
         _print_typed_error_once(
             _as_typed_error(

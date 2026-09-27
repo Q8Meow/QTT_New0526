@@ -6844,7 +6844,7 @@ def run_commands(
         return returncode
 
     candidate_custody = _prepare_validation_candidate_v1(
-        cleanup_repo_root, prepared_plan, candidate_custody)
+        cleanup_repo_root, _LAST_EXPECTED_COMMAND_PLAN if _RUN_PROVENANCE_WRITTEN and candidate_custody is None else prepared_plan, candidate_custody)
 
     restoration_failure: BaseException | None = None
 
@@ -6919,7 +6919,7 @@ def run_commands(
             command_environment = _scan_dispatch_environment(command_environment, planned)
             original_input = None if _ACTIVE_SCAN_LAUNCH is None else _ACTIVE_SCAN_LAUNCH.launch_inputs.get(command_index)
             if candidate_custody is not None:
-                candidate_custody.begin_occurrence(command_index, plan_entry,
+                candidate_custody.begin_occurrence(command_index, planned if getattr(candidate_custody, "plan", None) is _LAST_EXPECTED_COMMAND_PLAN else plan_entry,
                     environment=command_environment, timeout_seconds=timeout_seconds, scratch_roots=tuple(scratch_roots))
             with (nullcontext() if original_input is None else original_input):
                 supervision["pending"] = True
@@ -6958,7 +6958,7 @@ def run_commands(
             if candidate_custody is not None:
                 if type(receipt.native_exit_code) is not int:
                     raise RuntimeError("VALIDATION_CANDIDATE_CHILD_TERMINAL_UNKNOWN")
-                candidate_custody.end_occurrence(command_index, plan_entry)
+                candidate_custody.end_occurrence(command_index, planned if getattr(candidate_custody, "plan", None) is _LAST_EXPECTED_COMMAND_PLAN else plan_entry)
         except BaseException as exc:
             supervision["errors"].append(exc)
             if receipt is not None:
@@ -7823,6 +7823,8 @@ def _publish_active_plan_provenance(
         command_count=len(execution_plan),
         text_integrity_preflight_state=_ACTIVE_TEXT_INTEGRITY_STATE,
         rp5a_scan_profiles=None if launch is None else launch.profiles,
+        rp5a_reader_profiles=None if launch is None or not launch.reader_profiles else launch.reader_profiles,
+        rp5a_reader_bases=None if launch is None or not launch.reader_bases else launch.reader_bases,
         scan_read_limits=None if launch is None else launch.read_limits,
         scan_deadline_ns=None if launch is None else launch.deadline_ns,
     )
@@ -8320,6 +8322,8 @@ def _finalize_validation_run(
                 cleanup_state=cleanup_state,
                 text_integrity_preflight_state=text_state,
                 rp5a_scan_profiles=None if scan_launch is None else scan_launch.profiles,
+        rp5a_reader_profiles=None if scan_launch is None or not scan_launch.reader_profiles else scan_launch.reader_profiles,
+        rp5a_reader_bases=None if scan_launch is None or not scan_launch.reader_bases else scan_launch.reader_bases,
             )
         except ValidationReliabilityError as exc:
             if supervision is not None:
@@ -8685,15 +8689,18 @@ ORDERED_PHASES = tuple(
 
 
 def _scan_full_builder_argv(argv):
-    return any(type(part) is str and part.replace("\\", "/") == "tools/build_pr168_rp5a_legacy_semantic_audit.py"
-               for part in argv) and "--validation-scope-evidence-only" not in argv
+    from tools.validation_reliability import _rp5a_consumer_role_v1
+    return _rp5a_consumer_role_v1(tuple(argv), _repo_root()) == "SCANNER"
 
 
 def _scan_resolve_parent_capacity(paths, phase, plan):
     from tools.validation_reliability import _ScanLaunch
 
     global _SCAN_CAPACITY_ATTEMPTED, _ACTIVE_SCAN_LAUNCH
-    selected = {row.command_index for row in plan if _scan_full_builder_argv(row.argv)}
+    from tools.validation_reliability import _rp5a_consumer_role_v1
+    roles = {row.command_index: _rp5a_consumer_role_v1(row.argv, paths.repo_root) for row in plan}
+    selected = {index for index, role in roles.items() if role is not None}
+    scanners = {index for index, role in roles.items() if role == "SCANNER"}
     if not selected:
         return None
     if _SCAN_CAPACITY_ATTEMPTED:
@@ -8704,8 +8711,9 @@ def _scan_resolve_parent_capacity(paths, phase, plan):
     launch = _ACTIVE_SCAN_CAPACITY_SOURCE(paths, phase, plan)
     if (type(launch) is not _ScanLaunch or launch.paths is not paths or launch.plan is not plan
             or launch.phase != phase or launch.process_id != os.getpid()
-            or launch.thread_id != threading.get_ident() or set(launch.profiles) != selected
-            or set(launch.launch_inputs) != selected):
+            or launch.thread_id != threading.get_ident() or set(launch.profiles) != scanners
+            or set(launch.launch_inputs) != selected
+            or set(launch.reader_profiles) != selected or set(launch.reader_bases) != selected):
         raise ValueError("capacity source did not retain exact original run/plan/input coverage")
     _ACTIVE_SCAN_LAUNCH = launch
     return launch
@@ -8714,7 +8722,7 @@ def _scan_resolve_parent_capacity(paths, phase, plan):
 def _scan_dispatch_environment(parent, planned):
     from tools.validation_reliability import _SCAN_TRANSPORT_KEYS, _scan_child_launch_environment
 
-    if _ACTIVE_SCAN_LAUNCH is not None and planned.command_index in _ACTIVE_SCAN_LAUNCH.profiles:
+    if _ACTIVE_SCAN_LAUNCH is not None and planned.command_index in _ACTIVE_SCAN_LAUNCH.launch_inputs:
         return _scan_child_launch_environment(parent, launch=_ACTIVE_SCAN_LAUNCH, planned=planned)
     return {key: value for key, value in parent.items() if key.upper() not in _SCAN_TRANSPORT_KEYS}
 

@@ -475,6 +475,7 @@ def _central_supervision_test_adapter(monkeypatch, tmp_path):
         from tools import pr168_rp5a_git_grep_scanner as scan_owner
 
         issued_inputs = []
+        reader_inputs = []
 
         def resolve_scan_fixture(repo_root, **_kwargs):
             return reliability.resolve_validation_run_paths(
@@ -527,18 +528,20 @@ def _central_supervision_test_adapter(monkeypatch, tmp_path):
                 parent_frame_reread_bytes=100_000, check_candidate=fence,
             )
             issued_inputs.append(original_input)
-            return reliability._prepare_scan_launch(
+            return _extend_synthetic_reader_launch_v1(
+                reliability._prepare_scan_launch(
                 original_paths, phase=phase, plan=expected_plan,
                 profiles={entry.command_index: profile}, read_limits=limits,
                 deadline_ns=deadline,
                 launch_inputs={entry.command_index: original_input},
-            )
+            ), issued_inputs, reader_inputs)
 
         def supervise_scan_fixture(command, **kwargs):
             original_input = kwargs.get("launch_input")
             if original_input is None:
                 return typed_fake_supervise(command, **kwargs)
-            assert any(original_input is value for value in issued_inputs)
+            if original_input not in reader_inputs:
+                assert any(original_input is value for value in issued_inputs)
             stream = original_input._claim(
                 run_id=kwargs["run_id"], phase=kwargs["phase"],
                 command_index=kwargs["command_index"], argv=tuple(command),
@@ -562,6 +565,56 @@ def _central_supervision_test_adapter(monkeypatch, tmp_path):
         return synthetic_capacity
 
     return activate_synthetic_scan
+
+
+
+def _extend_synthetic_reader_launch_v1(legacy, issued_inputs, reader_inputs):
+    """Extend only the existing finite mocked orchestration fixture."""
+    from dataclasses import replace
+    root = legacy.paths.repo_root
+    assert root != REPO_ROOT
+    roles = {entry.command_index: reliability._rp5a_consumer_role_v1(entry.argv, root)
+             for entry in legacy.plan}
+    selected = {index for index, role in roles.items() if role is not None}
+    limits = replace(legacy.read_limits, profile_limit=len(legacy.profiles) + len(selected))
+    scanners, readers, bases, inputs = {}, {}, {}, {}
+    original_profile = next(iter(legacy.profiles.values()))
+    original_input = next(iter(legacy.launch_inputs.values()))
+    read_allowance = (4 * (limits.byte_limit + 4) + 9) * sum(
+        len(row.content) + sum(len(name.encode("utf-8")) for name in row.children)
+        for row in original_input.candidate_files) * len(selected)
+    reader_fence = reliability._ScanCandidateFence(root, original_input.candidate_files,
+        limits=limits, candidate_read_bytes=read_allowance, deadline_ns=legacy.deadline_ns)
+    basis = reliability._Rp5aReadBasisV1("1" * 40, b"# synthetic historical data\n",
+        4096, 10, 256, 4096, 1000, 100, 1000)
+    for index in sorted(selected):
+        reader_root = legacy.paths.process_root / ("reader-" + str(index))
+        reader_root.mkdir()
+        readers[index] = replace(original_profile, command_index=index, scratch_root=str(reader_root))
+        bases[index] = basis
+        if index in legacy.profiles:
+            scanner_root = legacy.paths.process_root / ("scanner-" + str(index))
+            scanner_root.mkdir()
+            scanners[index] = replace(legacy.profiles[index], scratch_root=str(scanner_root))
+            frame_root = original_input.scratch_root
+        else:
+            frame_root = legacy.paths.process_root / ("input-" + str(index))
+            frame_root.mkdir()
+        identity = reliability._ScanLaunchIdentity(legacy.paths.run_id, legacy.phase,
+            index, len(legacy.plan), legacy.plan[index - 1].argv, str(root))
+        input_owner = reliability._ScanLaunchInput(identity, original_input.candidate_files,
+            limits=limits, candidate_read_bytes=read_allowance,
+            deadline_ns=legacy.deadline_ns, scratch_root=frame_root,
+            scratch_bytes=original_input.scratch_bytes, parent_frame_reread_bytes=original_input.remaining_reread,
+            check_candidate=reader_fence, rp5a_read_basis=basis)
+        inputs[index] = input_owner
+        if index in legacy.profiles:
+            issued_inputs[issued_inputs.index(original_input)] = input_owner
+        else:
+            reader_inputs.append(input_owner)
+    return reliability._prepare_scan_launch(legacy.paths, phase=legacy.phase, plan=legacy.plan,
+        profiles=scanners, reader_profiles=readers, reader_bases=bases, launch_inputs=inputs,
+        read_limits=limits, deadline_ns=legacy.deadline_ns)
 
 
 def _st12h_mock_terminal_output(command: list[str]) -> str:
@@ -7216,6 +7269,7 @@ def test_runner_restores_only_runtime_side_effects_before_pr142_pr143_and_final_
     )
     capacity_calls = []
     issued_inputs = []
+    reader_inputs = []
 
     def synthetic_capacity(original_paths, phase, expected_plan):
         assert original_paths is run_paths and phase == runner.ALL_PHASE
@@ -7245,12 +7299,13 @@ def test_runner_restores_only_runtime_side_effects_before_pr142_pr143_and_final_
             check_candidate=fence,
         )
         issued_inputs.append(original_input)
-        return reliability._prepare_scan_launch(
+        return _extend_synthetic_reader_launch_v1(
+            reliability._prepare_scan_launch(
             run_paths, phase=phase, plan=expected_plan,
             profiles={selected_entry.command_index: profile},
             read_limits=limits, deadline_ns=candidate.deadline_ns,
             launch_inputs={selected_entry.command_index: original_input},
-        )
+        ), issued_inputs, reader_inputs)
 
     original_supervise_fixture = runner._execute_supervised_command
     consumed_inputs = []
@@ -7259,7 +7314,8 @@ def test_runner_restores_only_runtime_side_effects_before_pr142_pr143_and_final_
         original_input = kwargs.get("launch_input")
         if original_input is None:
             return original_supervise_fixture(command, **kwargs)
-        assert original_input is issued_inputs[0]
+        if original_input not in reader_inputs:
+            assert original_input is issued_inputs[0]
         stream = original_input._claim(
             run_id=kwargs["run_id"], phase=kwargs["phase"],
             command_index=kwargs["command_index"], argv=tuple(command),
@@ -7274,7 +7330,8 @@ def test_runner_restores_only_runtime_side_effects_before_pr142_pr143_and_final_
         receipt = original_supervise_fixture(command, **kwargs)
         process.returncode = receipt.native_exit_code
         original_input._finished(process, receipt.native_exit_code)
-        consumed_inputs.append(original_input)
+        if original_input not in reader_inputs:
+            consumed_inputs.append(original_input)
         return receipt
 
     with monkeypatch.context() as publication:
@@ -7297,6 +7354,7 @@ def test_runner_restores_only_runtime_side_effects_before_pr142_pr143_and_final_
         exit_code = runner.run_commands(commands, repo_root=root, execution_plan=plan, candidate_custody=candidate)
         assert consumed_inputs == issued_inputs and len(consumed_inputs) == 1
         assert consumed_inputs[0].state == "CLOSED"
+        assert reader_inputs and all(value.state == "CLOSED" for value in reader_inputs)
         assert list(scratch.iterdir()) == []
     assert exit_code == 0
     assert all((root / path).read_bytes() == data for path, data in candidate_bytes.items())

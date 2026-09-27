@@ -1933,6 +1933,7 @@ def main() -> int:
         "load_committed_private_evidence_witness_v1",
         "load_committed_private_evidence_snapshot_v1",
         "reconstruct_as_of",
+        "load_committed_probability_producer_state_v1",
     }
     if persistence_methods != expected_methods:
         failures.append(f"typed persistence interface mismatch: {sorted(persistence_methods ^ expected_methods)}")
