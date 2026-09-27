@@ -1812,6 +1812,10 @@ def _rp5a_reconstruct_reader_v1(reader, basis, fence):
 
 @contextmanager
 def _rp5a_bound_reader_v1(original):
+    from tools.validation_reliability import _ScanCandidateFence
+    lease_fence = original.check_candidate
+    if type(lease_fence) is not _ScanCandidateFence or lease_fence.wire_version != 3:
+        lease_fence = None
     errors = []
     try:
         with _bind_builder_reads_v1(original):
@@ -1825,6 +1829,11 @@ def _rp5a_bound_reader_v1(original):
             raise ValueError("RP5A reader exited with an unresolved original reservation")
     except BaseException as error:
         errors.append(error)
+    if lease_fence is not None:
+        try:
+            lease_fence.close_payload_lease()
+        except BaseException as error:
+            errors.append(error)
     if errors:
         original.ledger.hold()
         if len(errors) == 1:
@@ -1854,13 +1863,26 @@ def _standalone_main_v1(argv=None, *, builder_read_context=None):
     _, scanner, reader, basis, fence, parent = _read_rp5a_bound_launch_fd_v1(
         sys.stdin.fileno(), repo_root=REPO_ROOT, environment=os.environ.copy(),
         explicit_basetemp=None, original_argv=tuple(sys.orig_argv), expected_role=role)
-    if parent is not None:
-        raise ValueError("standalone RP5A builder cannot inherit pytest delegation")
-    original = _rp5a_reconstruct_reader_v1(reader, basis, fence)
-    invocation = None if scanner is None else _ScanInvocation(scanner, check_candidate=fence)
-    with _rp5a_bound_reader_v1(original):
-        result = main(arguments, scan_context=invocation)
-        fence()
+    scope_owns_lease = False
+    errors = []
+    try:
+        if parent is not None:
+            raise ValueError("standalone RP5A builder cannot inherit pytest delegation")
+        original = _rp5a_reconstruct_reader_v1(reader, basis, fence)
+        invocation = None if scanner is None else _ScanInvocation(scanner, check_candidate=fence)
+        scope_owns_lease = True
+        with _rp5a_bound_reader_v1(original):
+            result = main(arguments, scan_context=invocation)
+            fence()
+    except BaseException as body:
+        errors.append(body)
+    if not scope_owns_lease and fence.wire_version == 3:
+        try:
+            fence.close_payload_lease()
+        except BaseException as error:
+            errors.append(error)
+    from tools.validation_reliability import _scan_raise_errors
+    _scan_raise_errors(errors)
     return result
 
 

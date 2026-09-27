@@ -13798,6 +13798,260 @@ def test_runner_returns_zero_when_all_mocked_commands_pass(monkeypatch, capsys, 
     assert completion_receipts[-1].command_count_started == provenance_counts[0]
     assert completion_receipts[-1].command_count_completed == provenance_counts[0]
 
+    # Mixed v2/v3 provenance uses real typed inputs and ordinary local paths.
+    # No command below invokes a scanner/domain body or grants a real campaign.
+    import dataclasses
+    import stat
+    import time
+    from types import MappingProxyType
+    from tools import pr168_rp5a_git_grep_scanner as scan_owner
+    mixed_root = tmp_path / "mixed-wire-repository"
+    mixed_root.mkdir()
+    live = mixed_root / "data.bin"
+    live.write_bytes(b"\x00\xffAB")
+    snapshot_root = tmp_path / "mixed-wire-snapshots"
+    snapshot_root.mkdir()
+    saved = snapshot_root / "data.bin"
+    saved.write_bytes(b"\x00\xffAB")
+    descriptor = reliability._open_regular_worktree_descriptor(saved)
+    try:
+        snapshot_version = reliability._scan_same_api_version(os.fstat(descriptor))
+    finally:
+        os.close(descriptor)
+    carrier = reliability._ScanDiskSnapshotV3("data.bin", saved, snapshot_version,
+        reliability._scan_file_identity(live.lstat()), stat.S_IMODE(live.stat().st_mode), 4)
+    disk_rows = (reliability._ScanCandidateSurface("data.bin", "FILE", carrier.mode, carrier, ()),)
+    byte_rows = (reliability._ScanCandidateSurface("data.bin", "FILE", carrier.mode, b"\x00\xffAB", ()),)
+    mixed_paths, mixed_probe = reliability.resolve_validation_run_paths(
+        mixed_root, explicit_process_root=tmp_path / "mixed-wire-process",
+        run_id="run_mixed_v3_provenance", projected_relative_paths=("command-2.json",))
+    phase = "mixed-wire-fixture"
+    command_vectors = (
+        (sys.executable, "-B", "tools/build_pr168_rp5a_legacy_semantic_audit.py", "--offline"),
+        (sys.executable, "-B", "tools/run_pytest_fresh_basetemp.py", "tests/pr168_rp5a"))
+    mixed_plan = reliability.build_command_evidence_plan(run_id=mixed_paths.run_id, phase=phase,
+        commands=command_vectors, cwd=mixed_root)
+    limits = reliability._ScanRunReadLimits(2_000_000, 50_000, 64, 3)
+    deadline = time.monotonic_ns() + 120_000_000_000
+    basis = reliability._Rp5aReadBasisV1("1" * 40, b"# synthetic historical source\n",
+        100000, 10, 512, 100000, 10000, 100, 1000)
+    executable = str(Path(shutil.which("git")).resolve())
+    profiles = []
+    for name, index in (("scan", 1), ("reader1", 1), ("reader2", 2)):
+        directory = mixed_paths.process_root / name
+        directory.mkdir()
+        profiles.append(reliability._Rp5aScanProfile(mixed_paths.run_id, index, str(mixed_root), str(directory),
+            ("data.bin",), 1, 9, (("data.bin", 4),), executable, executable, "git",
+            tuple(scan_owner._scan_child_environment(os.environ).items()),
+            1000000, 1000000, 4096, 2000000, deadline, 10))
+    inputs = {}
+    for index in (1, 2):
+        directory = mixed_paths.process_root / ("input" + str(index))
+        directory.mkdir()
+        is_v3 = index == 1
+        fence = reliability._ScanCandidateFence(mixed_root, disk_rows if is_v3 else byte_rows,
+            limits=limits, candidate_read_bytes=1000000, deadline_ns=deadline,
+            **({"wire_version":3, "surface_role":"sender", "snapshot_root":snapshot_root} if is_v3 else {}))
+        identity = reliability._ScanLaunchIdentity(mixed_paths.run_id, phase, index, 2,
+            command_vectors[index - 1], str(mixed_root))
+        inputs[index] = reliability._ScanLaunchInput(identity, disk_rows if is_v3 else byte_rows,
+            limits=limits, candidate_read_bytes=1000000, deadline_ns=deadline, scratch_root=directory,
+            scratch_bytes=2000000, parent_frame_reread_bytes=10000000, check_candidate=fence,
+            rp5a_read_basis=basis, **({"wire_version":3, "snapshot_root":snapshot_root} if is_v3 else {}))
+    readers = {1:profiles[1], 2:profiles[2]}
+    bases = {1:basis, 2:basis}
+    def prepare(plan=mixed_plan, **changes):
+        operands = {"phase":phase, "plan":plan, "profiles":{1:profiles[0]}, "reader_profiles":readers,
+            "reader_bases":bases, "launch_inputs":inputs, "read_limits":limits, "deadline_ns":deadline}
+        operands.update(changes)
+        return reliability._prepare_scan_launch(mixed_paths, **operands)
+    launch = prepare()
+    assert launch.plan is mixed_plan and launch.reader_profiles[1] is profiles[1] and launch.reader_bases[1] is basis
+    assert dict(launch.rp5a_launch_wire_versions) == {1:3, 2:2}
+    assert dict(launch.rp5a_payload_byte_limits) == {1:4, 2:0}
+    with pytest.raises(TypeError):
+        launch.rp5a_payload_byte_limits[1] = 5
+    for changes in (
+        {"reader_profiles": {1:profiles[1]}}, {"reader_bases": {2:basis}},
+        {"reader_profiles": {**readers,3:dataclasses.replace(profiles[2],command_index=3)}},
+        {"profiles": {}}, {"launch_inputs": {1:inputs[1]}},
+    ):
+        with pytest.raises((ValueError,TypeError)):
+            prepare(**changes)
+    for versions, counts in (({1:3,2:3},{1:4,2:0}), ({1:3},{1:4}), ({1:3,2:2},{1:5,2:0}),
+                             ({1:True,2:2},{1:4,2:0}), ({1:3,2:2},{1:4,2:True})):
+        with pytest.raises((ValueError,TypeError)):
+            dataclasses.replace(launch, rp5a_launch_wire_versions=MappingProxyType(versions),
+                                rp5a_payload_byte_limits=MappingProxyType(counts))
+    publication = {"phase":phase, "command_count":2, "text_integrity_preflight_state":"PASS",
+        "rp5a_scan_profiles":launch.profiles, "rp5a_reader_profiles":launch.reader_profiles,
+        "rp5a_reader_bases":launch.reader_bases, "rp5a_launch_wire_versions":launch.rp5a_launch_wire_versions,
+        "rp5a_payload_byte_limits":launch.rp5a_payload_byte_limits}
+    expected_keys = {"schema_version","run_id","phase","command_count","text_integrity_preflight_state",
+        "paths","filesystem_probe","rp5a_scan_profiles","rp5a_reader_profiles","rp5a_reader_bases",
+        "rp5a_launch_wire_version","rp5a_launch_wire_versions","rp5a_payload_byte_limits"}
+    run_payload = reliability._run_provenance_payload(mixed_paths,mixed_probe,**publication)
+    assert set(run_payload) == expected_keys and run_payload["rp5a_launch_wire_version"] == 3
+    assert run_payload["rp5a_launch_wire_versions"] == {"1":3,"2":2}
+    assert run_payload["rp5a_payload_byte_limits"] == {"1":4,"2":0}
+    legacy_publication = {key:value for key,value in publication.items()
+                          if key not in {"rp5a_launch_wire_versions","rp5a_payload_byte_limits"}}
+    legacy_payload = reliability._run_provenance_payload(mixed_paths,mixed_probe,**legacy_publication)
+    assert set(legacy_payload) == expected_keys - {"rp5a_launch_wire_versions","rp5a_payload_byte_limits"}
+    assert legacy_payload["rp5a_launch_wire_version"] == 2
+    reliability.write_run_provenance(mixed_paths,mixed_probe,**publication)
+    # Real finite operational decode and lease scopes, with explicit no-child
+    # body/close faults. Neither a scanner body nor a builder output runs.
+    from tools import build_pr168_rp5a_legacy_semantic_audit as builder
+    for scope_case in ("success", "body", "body-and-close", "construction"):
+        original = inputs[1]
+        scope_input = reliability._ScanLaunchInput(original.identity, original.candidate_files,
+            limits=limits, candidate_read_bytes=1000000, deadline_ns=deadline,
+            scratch_root=original.scratch_root, scratch_bytes=2000000, parent_frame_reread_bytes=10000000,
+            check_candidate=original.check_candidate, rp5a_read_basis=basis,
+            wire_version=3, snapshot_root=snapshot_root)
+        with scope_input:
+            decoded = reliability._read_rp5a_bound_launch_fd_v1(scope_input.reader.fileno(),
+                repo_root=mixed_root, environment=reliability._scan_child_launch_environment(
+                    {},launch=launch,planned=mixed_plan[0]),
+                explicit_basetemp=mixed_paths.pytest_basetemp_root,
+                original_argv=command_vectors[0],expected_role="SCANNER")
+            assert len(decoded) == 6 and decoded[5] is None
+            fence = decoded[4]
+            lease = fence.payload_lease
+            assert lease.initial_consumption_complete and fence.wire_version == 3
+            ledger = reliability._ScanReservationLedger(profiles[1],reader_only=True)
+            context = builder._Rp5aBuilderReadContext(ledger=ledger,
+                **{name:getattr(basis,name) for name in tuple(basis.__dataclass_fields__)[2:]},
+                expected_historical_source=basis.historical_runner_bytes,
+                current_runner_source=b"# current\n",expected_current_runner_source=b"# current\n",
+                scope_source=b"# scope\n",expected_scope_source=b"# scope\n",
+                python_executable=sys.executable,check_candidate=fence,before_surfaces=MappingProxyType({}),
+                observe_surfaces=fence.observe_surfaces,expected_baseline_ref=basis.baseline_ref)
+            body_error = RuntimeError("original scoped body failure")
+            close_error = OSError("original scoped lease close failure")
+            original_close = reliability.os.close
+            with monkeypatch.context() as scope_fault:
+                if scope_case == "body-and-close":
+                    def failing_close(fd):
+                        original_close(fd)
+                        if fd == lease._fd:
+                            raise close_error
+                    scope_fault.setattr(reliability.os,"close",failing_close)
+                if scope_case == "construction":
+                    scope_fault.setattr(builder.sys,"stdin",scope_input.reader)
+                    scope_fault.setattr(reliability,"_read_rp5a_bound_launch_fd_v1",lambda *args,**kwargs:decoded)
+                    def failed_reconstruction(*args,**kwargs):
+                        raise body_error
+                    scope_fault.setattr(builder,"_rp5a_reconstruct_reader_v1",failed_reconstruction)
+                    with pytest.raises(RuntimeError) as caught:
+                        builder._standalone_main_v1(["--offline"])
+                    assert caught.value is body_error
+                elif scope_case == "success":
+                    with builder._rp5a_bound_reader_v1(context):
+                        assert builder._require_builder_reads_v1() is context
+                else:
+                    with pytest.raises(RuntimeError if scope_case == "body" else BaseExceptionGroup) as caught:
+                        with builder._rp5a_bound_reader_v1(context):
+                            raise body_error
+                    assert (caught.value is body_error if scope_case == "body"
+                            else caught.value.exceptions == (body_error,close_error))
+            assert lease._close_attempted
+            assert lease.closed if scope_case != "body-and-close" else lease.held
+            assert builder._BUILDER_READ_SCOPE_V1.get() is None
+        assert not scope_input.path.exists()
+    for index in (1,2):
+        forwarded = reliability._scan_child_launch_environment({},launch=launch,planned=mixed_plan[index - 1])
+        default = reliability._scan_read_forwarded_profile(mixed_root,environment=forwarded,
+            explicit_basetemp=mixed_paths.pytest_basetemp_root,reader_required=True)
+        selected = reliability._scan_read_forwarded_profile(mixed_root,environment=forwarded,
+            explicit_basetemp=mixed_paths.pytest_basetemp_root,reader_required=True,include_wire_binding=True)
+        assert len(default) == 4 and len(selected) == 6
+        assert selected[1:] == (*default[1:],3 if index==1 else 2,4 if index==1 else 0)
+        assert default[3] == basis
+        value = selected[0]._scan_snapshot.value
+        for wire_changes in (
+            {"rp5a_launch_wire_versions":MappingProxyType({"1":3})},
+            {"rp5a_payload_byte_limits":MappingProxyType({"1":4,"2":1})},
+            {"rp5a_launch_wire_versions":MappingProxyType({"1":3,"2":3})},
+            {"rp5a_payload_byte_limits":MappingProxyType({"1":True,"2":0})},
+            {"rp5a_launch_wire_version":2},
+        ):
+            with pytest.raises((ValueError,TypeError)):
+                reliability._rp5a_reader_profiles_from_run_v1(selected[0],MappingProxyType({**value,**wire_changes}),
+                    command_index=index,repo_root=mixed_root,inherited_run_id=mixed_paths.run_id,
+                    read_limits=limits,deadline_ns=deadline,include_wire_binding=True)
+    # Wrong operational argv is rejected before a decoder/descriptor acquisition.
+    for argv,role in (((sys.executable,"transport_diagnostic.py"),"SCANNER"),
+                      ((sys.executable,"tools/validate_pr168_rp5a_legacy_semantic_audit.py"),"VALIDATE"),
+                      ((sys.executable,"tools/run_pytest_fresh_basetemp.py","tests/pr168_rp5a"),"PYTEST"),
+                      ((sys.executable,"tools/build_pr168_rp5a_legacy_semantic_audit.py","--validation-scope-evidence-only"),"EVIDENCE")):
+        calls = []
+        with monkeypatch.context() as denied:
+            denied.setattr(reliability,"_read_scan_launch_fd",lambda *args,**kwargs:calls.append((args,kwargs)))
+            with pytest.raises(ValueError):
+                reliability._read_rp5a_bound_launch_fd_v1(99999,repo_root=mixed_root,
+                    environment=reliability._scan_child_launch_environment({},launch=launch,planned=mixed_plan[0]),
+                    explicit_basetemp=mixed_paths.pytest_basetemp_root,original_argv=argv,expected_role=role)
+        assert calls == []
+    # Original runner publishes exactly one plan and forwards both new tables.
+    published = []
+    capacity_calls = []
+    selected_launches = []
+    def capacity(paths, selected_phase, plan):
+        assert paths is mixed_paths and selected_phase == phase
+        capacity_calls.append(plan)
+        value = prepare(plan)
+        selected_launches.append(value)
+        return value
+    publication_state = {name: getattr(runner, name) for name in (
+        "_LAST_PLANNED_COMMAND_COUNT", "_LAST_EXPECTED_COMMAND_PLAN", "_RUN_PROVENANCE_WRITTEN")}
+    with monkeypatch.context() as forwarding:
+        # Register the publisher's direct assignments for exact scoped teardown,
+        # including when an assertion or the publisher itself raises.
+        for name, value in publication_state.items():
+            forwarding.setattr(runner, name, value)
+        forwarding.setattr(runner,"_RUN_COMMANDS_ACTIVE_PATHS",mixed_paths)
+        forwarding.setattr(runner,"_ACTIVE_FILESYSTEM_PROBE",mixed_probe)
+        forwarding.setattr(runner,"_ACTIVE_TEXT_INTEGRITY_STATE","PASS")
+        forwarding.setattr(runner,"_RUN_PROVENANCE_ATTEMPTED",False)
+        forwarding.setattr(runner,"_SCAN_CAPACITY_ATTEMPTED",False)
+        forwarding.setattr(runner,"_ACTIVE_SCAN_CAPACITY_SOURCE",capacity)
+        forwarding.setattr(runner,"_ACTIVE_SCAN_LAUNCH",None)
+        forwarding.setattr(runner,"write_run_provenance",lambda paths,probe,**kwargs:published.append((paths,probe,kwargs)))
+        runner._publish_active_plan_provenance(phase,runner._prepare_execution_plan(command_vectors))
+        assert len(capacity_calls) == len(published) == len(selected_launches) == 1
+        selected_launch = selected_launches[0]
+        assert capacity_calls[0] is runner._LAST_EXPECTED_COMMAND_PLAN is selected_launch.plan
+        assert published[0][2]["rp5a_launch_wire_versions"] is selected_launch.rp5a_launch_wire_versions
+        assert published[0][2]["rp5a_payload_byte_limits"] is selected_launch.rp5a_payload_byte_limits
+        with pytest.raises(ValueError):
+            runner._publish_active_plan_provenance(phase,runner._prepare_execution_plan(command_vectors))
+        assert len(capacity_calls) == 1
+    assert all(getattr(runner, name) is value for name, value in publication_state.items())
+    # Completion uses the real original evidence validator; no child was
+    # dispatched, so this synthetic terminal record is explicitly FAIL.
+    completed_bindings = []
+    original_validator = reliability.validate_complete_run_evidence
+    def observed_validation(*args,**kwargs):
+        completed_bindings.append(kwargs)
+        return original_validator(*args,**kwargs)
+    with monkeypatch.context() as completion:
+        completion.setattr(runner,"_RUN_COMMANDS_SUPERVISION",None)
+        completion.setattr(runner,"cleanup_validation_run",reliability.cleanup_validation_run)
+        completion.setattr(runner,"atomic_write_json",reliability.atomic_write_json)
+        completion.setattr(runner,"validate_complete_run_evidence",observed_validation)
+        completion.setattr(runner,"validate_published_completion_receipt",reliability.validate_published_completion_receipt)
+        result,cleanup,receipt = runner._finalize_validation_run(run_paths=mixed_paths,probe=mixed_probe,
+            phase=phase,planned_count=2,expected_plan=mixed_plan,receipts=(),result=1,text_state="PASS",scan_launch=launch)
+    assert result == 1 and receipt.final_state == "FAIL"
+    assert cleanup == "PASS_REMOVED_EXACT_RUN_ROOT"
+    assert len(completed_bindings) == 1
+    assert completed_bindings[0]["rp5a_launch_wire_versions"] is launch.rp5a_launch_wire_versions
+    assert completed_bindings[0]["rp5a_payload_byte_limits"] is launch.rp5a_payload_byte_limits
+    assert not mixed_paths.process_root.exists()
+    capsys.readouterr()
+
 
 def test_runner_sets_run_local_no_runtime_scan_cache_env(monkeypatch, tmp_path):
     _clear_branch_context_env(monkeypatch)

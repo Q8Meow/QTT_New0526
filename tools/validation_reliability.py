@@ -3783,6 +3783,8 @@ def _run_provenance_payload(
     rp5a_scan_profiles=None,
     rp5a_reader_profiles=None,
     rp5a_reader_bases=None,
+    rp5a_launch_wire_versions=None,
+    rp5a_payload_byte_limits=None,
     scan_read_limits=None,
     scan_deadline_ns=None,
 ) -> dict[str, object]:
@@ -3805,6 +3807,16 @@ def _run_provenance_payload(
         if not readers or set(readers) != set(bases):
             raise ValueError("reader provenance coverage differs")
         payload.update(rp5a_reader_profiles=readers, rp5a_reader_bases=bases, rp5a_launch_wire_version=2)
+    if (rp5a_launch_wire_versions is None) != (rp5a_payload_byte_limits is None):
+        raise ValueError("streamed provenance tables must appear together")
+    if rp5a_launch_wire_versions is not None:
+        if rp5a_reader_profiles is None or rp5a_scan_profiles is None:
+            raise ValueError("streamed provenance requires original reader and scanner profiles")
+        versions, counts = _rp5a_wire_projection_v3(
+            rp5a_launch_wire_versions, rp5a_payload_byte_limits,
+            readers=readers, scanners=payload["rp5a_scan_profiles"], command_count=command_count)
+        payload.update(rp5a_launch_wire_version=3, rp5a_launch_wire_versions=versions,
+                       rp5a_payload_byte_limits=counts)
     return payload
 
 
@@ -3818,6 +3830,8 @@ def write_run_provenance(
     rp5a_scan_profiles=None,
     rp5a_reader_profiles=None,
     rp5a_reader_bases=None,
+    rp5a_launch_wire_versions=None,
+    rp5a_payload_byte_limits=None,
     scan_read_limits=None,
     scan_deadline_ns=None,
 ) -> None:
@@ -3839,6 +3853,8 @@ def write_run_provenance(
             rp5a_scan_profiles=rp5a_scan_profiles,
             rp5a_reader_profiles=rp5a_reader_profiles,
             rp5a_reader_bases=rp5a_reader_bases,
+            rp5a_launch_wire_versions=rp5a_launch_wire_versions,
+            rp5a_payload_byte_limits=rp5a_payload_byte_limits,
         ),
     )
 
@@ -4097,6 +4113,8 @@ def validate_complete_run_evidence(
     rp5a_scan_profiles=None,
     rp5a_reader_profiles=None,
     rp5a_reader_bases=None,
+    rp5a_launch_wire_versions=None,
+    rp5a_payload_byte_limits=None,
     scan_read_limits=None,
     scan_deadline_ns=None,
 ) -> None:
@@ -4115,6 +4133,8 @@ def validate_complete_run_evidence(
             rp5a_scan_profiles=rp5a_scan_profiles,
             rp5a_reader_profiles=rp5a_reader_profiles,
             rp5a_reader_bases=rp5a_reader_bases,
+            rp5a_launch_wire_versions=rp5a_launch_wire_versions,
+            rp5a_payload_byte_limits=rp5a_payload_byte_limits,
         )
     )
     if _read_evidence_json(evidence_root, "run.json") != expected_run:
@@ -5650,12 +5670,17 @@ def _scan_profile_projection(profiles):
 
 
 def _rp5a_reader_profiles_from_run_v1(attestation, value, *, command_index, repo_root,
-                                    inherited_run_id, read_limits, deadline_ns):
+                                    inherited_run_id, read_limits, deadline_ns, include_wire_binding=False):
     fields_run = {"schema_version", "run_id", "phase", "command_count", "text_integrity_preflight_state",
                   "paths", "filesystem_probe", "rp5a_scan_profiles", "rp5a_reader_profiles",
                   "rp5a_reader_bases", "rp5a_launch_wire_version"}
-    if (set(value) != fields_run or type(value["rp5a_launch_wire_version"]) is not int
-            or value["rp5a_launch_wire_version"] != 2):
+    if type(include_wire_binding) is not bool:
+        raise TypeError("wire binding selection must be an exact Boolean")
+    declared_version = value.get("rp5a_launch_wire_version")
+    if type(declared_version) is int and declared_version == 3:
+        fields_run |= {"rp5a_launch_wire_versions", "rp5a_payload_byte_limits"}
+    if (set(value) != fields_run or type(declared_version) is not int
+            or declared_version not in (2, 3)):
         raise ValueError("missing or invalid original reader-bearing run provenance")
     tables = (value["rp5a_scan_profiles"], value["rp5a_reader_profiles"])
     bases = value["rp5a_reader_bases"]
@@ -5687,18 +5712,33 @@ def _rp5a_reader_profiles_from_run_v1(attestation, value, *, command_index, repo
             roots.append(scratch)
             selected[key] = profile
         parsed.append(selected)
+    selected_version = 2
+    selected_payload = 0
+    if declared_version == 3:
+        wire_map = value["rp5a_launch_wire_versions"]
+        payload_map = value["rp5a_payload_byte_limits"]
+        if (type(wire_map) is not MappingProxyType or type(payload_map) is not MappingProxyType
+                or set(wire_map) != set(bases) or set(payload_map) != set(bases)):
+            raise ValueError("streamed provenance tables require exact original reader coverage")
+        versions, counts = _rp5a_wire_projection_v3(
+            {int(key): member for key, member in wire_map.items()},
+            {int(key): member for key, member in payload_map.items()},
+            readers=parsed[1], scanners=parsed[0], command_count=value["command_count"])
+        selected_version = versions[str(command_index)]
+        selected_payload = counts[str(command_index)]
     parsed_bases = {key: _rp5a_basis_from_projection_v1(member) for key, member in bases.items()}
     index = str(command_index)
     if index not in parsed[1]:
         raise ValueError("selected reader occurrence is absent")
-    return attestation, parsed[0].get(index), parsed[1][index], parsed_bases[index]
+    result = attestation, parsed[0].get(index), parsed[1][index], parsed_bases[index]
+    return (*result, selected_version, selected_payload) if include_wire_binding else result
 
 
 def _read_scan_profile_for_run(
     repo_root: Path, *, command_index: int, inherited_run_id: str,
     inherited_evidence_root: Path, explicit_basetemp: Path,
     read_limits: _ScanRunReadLimits, deadline_ns: int,
-    expected_phase=None, expected_command_count=None, reader_required=False,
+    expected_phase=None, expected_command_count=None, reader_required=False, include_wire_binding=False,
 ):
     attestation = attest_inherited_validation_run(
         repo_root, inherited_run_id=inherited_run_id,
@@ -5720,7 +5760,8 @@ def _read_scan_profile_for_run(
     if reader_required:
         return _rp5a_reader_profiles_from_run_v1(
             attestation, value, command_index=command_index, repo_root=repo_root,
-            inherited_run_id=inherited_run_id, read_limits=read_limits, deadline_ns=deadline_ns)
+            inherited_run_id=inherited_run_id, read_limits=read_limits, deadline_ns=deadline_ns,
+            include_wire_binding=include_wire_binding)
     if any(key in value for key in ("rp5a_reader_profiles", "rp5a_reader_bases", "rp5a_launch_wire_version")):
         raise ValueError("reader-bearing provenance requires its original reader consumer")
     table = value.get("rp5a_scan_profiles")
@@ -5805,6 +5846,47 @@ def _rp5a_consumer_role_v1(argv, repo_root):
     return None
 
 
+def _rp5a_wire_projection_v3(versions, payload_limits, *, readers, scanners, command_count):
+    if not isinstance(versions, Mapping) or not isinstance(payload_limits, Mapping):
+        raise TypeError("original immutable launch wire maps required")
+    if set(versions) != set(payload_limits):
+        raise ValueError("wire/payload maps require exact coverage")
+    projected_versions = {}
+    projected_limits = {}
+    for index, version in versions.items():
+        if type(index) is not int or not 1 <= index <= command_count or type(version) is not int or version not in (2, 3):
+            raise ValueError("invalid original per-occurrence wire binding")
+        count = _scan_v3_integer(payload_limits[index], "per-occurrence payload limit")
+        if (version == 2 and count != 0) or (version == 3 and str(index) not in scanners):
+            raise ValueError("streamed payload requires an original scanner occurrence")
+        projected_versions[str(index)] = version
+        projected_limits[str(index)] = count
+    if set(projected_versions) != set(readers) or 3 not in projected_versions.values():
+        raise ValueError("streamed tables require all reader occurrences and an actual v3 member")
+    return projected_versions, projected_limits
+
+
+def _scan_launch_wire_tables_v3(plan, inputs, readers, scanner_keys, repo_root):
+    if not any(item.wire_version == 3 for item in inputs.values()):
+        return None, None
+    if set(inputs) != set(readers):
+        raise ValueError("streamed plan requires exact reader input coverage")
+    versions = {}
+    payloads = {}
+    for index, original in inputs.items():
+        if (type(index) is not int or not 1 <= index <= len(plan) or type(original) is not _ScanLaunchInput
+                or original.wire_version not in (2, 3)):
+            raise ValueError("invalid original streamed launch occurrence")
+        if original.wire_version == 3 and (
+                index not in scanner_keys or _rp5a_consumer_role_v1(plan[index - 1].argv, repo_root) != "SCANNER"):
+            raise ValueError("streamed launch is restricted to the original full scanner role")
+        versions[index] = original.wire_version
+        payloads[index] = original.payload_bytes
+    _rp5a_wire_projection_v3(versions, payloads, readers={str(i) for i in readers},
+                             scanners={str(i) for i in scanner_keys}, command_count=len(plan))
+    return MappingProxyType(versions), MappingProxyType(payloads)
+
+
 @dataclass(frozen=True)
 class _ScanLaunch:
     paths: ValidationRunPathsV1
@@ -5819,6 +5901,8 @@ class _ScanLaunch:
     launch_inputs: Mapping = field(default_factory=lambda: MappingProxyType({}), kw_only=True)
     reader_profiles: Mapping = field(default_factory=lambda: MappingProxyType({}), kw_only=True)
     reader_bases: Mapping = field(default_factory=lambda: MappingProxyType({}), kw_only=True)
+    rp5a_launch_wire_versions: Mapping | None = field(default=None, kw_only=True)
+    rp5a_payload_byte_limits: Mapping | None = field(default=None, kw_only=True)
 
     def __post_init__(self):
         # Own the new mappings even when the caller retained a mappingproxy's
@@ -5832,6 +5916,20 @@ class _ScanLaunch:
             raise ValueError("reader launch mappings require exact coverage")
         object.__setattr__(self, "reader_profiles", MappingProxyType(dict(self.reader_profiles)))
         object.__setattr__(self, "reader_bases", MappingProxyType(dict(self.reader_bases)))
+        if (self.rp5a_launch_wire_versions is None) != (self.rp5a_payload_byte_limits is None):
+            raise ValueError("streamed launch tables must appear together")
+        if self.rp5a_launch_wire_versions is not None:
+            if (type(self.rp5a_launch_wire_versions) is not MappingProxyType
+                    or type(self.rp5a_payload_byte_limits) is not MappingProxyType):
+                raise TypeError("streamed launch tables must be immutable")
+            expected = _scan_launch_wire_tables_v3(self.plan, self.launch_inputs, self.reader_profiles,
+                                                   set(self.profiles), self.paths.repo_root)
+            if expected != (self.rp5a_launch_wire_versions, self.rp5a_payload_byte_limits):
+                raise ValueError("streamed launch tables differ from actual original inputs")
+            object.__setattr__(self, "rp5a_launch_wire_versions", MappingProxyType(dict(expected[0])))
+            object.__setattr__(self, "rp5a_payload_byte_limits", MappingProxyType(dict(expected[1])))
+        elif any(item.wire_version == 3 for item in self.launch_inputs.values()):
+            raise ValueError("streamed input requires its exact original launch tables")
 
 
 def _prepare_scan_launch(paths, *, phase, plan, profiles, read_limits, deadline_ns, launch_inputs=None,
@@ -5889,10 +5987,12 @@ def _prepare_scan_launch(paths, *, phase, plan, profiles, read_limits, deadline_
             if not scratch.is_dir():
                 raise ValueError("input scratch was not admitted")
             roots.append(scratch)
+    versions, payload_limits = _scan_launch_wire_tables_v3(plan, inputs, readers, set(profiles), paths.repo_root)
     return _ScanLaunch(paths, phase, plan, MappingProxyType(dict(profiles)), read_limits,
                        deadline_ns, os.getpid(), threading.get_ident(),
                        launch_inputs=MappingProxyType(inputs), reader_profiles=MappingProxyType(readers),
-                       reader_bases=MappingProxyType(bases))
+                       reader_bases=MappingProxyType(bases), rp5a_launch_wire_versions=versions,
+                       rp5a_payload_byte_limits=payload_limits)
 
 
 _SCAN_TRANSPORT_KEYS = (
@@ -5929,7 +6029,8 @@ def _scan_child_launch_environment(parent, *, launch, planned):
     return child
 
 
-def _scan_read_forwarded_profile(repo_root, *, environment, explicit_basetemp, reader_required=False):
+def _scan_read_forwarded_profile(repo_root, *, environment, explicit_basetemp, reader_required=False,
+                                 include_wire_binding=False):
     original = {}
     for key, value in environment.items():
         if type(key) is not str or key.upper() in original or type(value) is not str:
@@ -5950,7 +6051,8 @@ def _scan_read_forwarded_profile(repo_root, *, environment, explicit_basetemp, r
         repo_root, command_index=index, inherited_run_id=original.get(RUN_ID_ENV),
         inherited_evidence_root=Path(original[EVIDENCE_ROOT_ENV]), explicit_basetemp=explicit_basetemp,
         read_limits=_ScanRunReadLimits(byte_limit, nodes, depth, profile_limit), deadline_ns=deadline,
-        expected_phase=phase, expected_command_count=count, reader_required=reader_required)
+        expected_phase=phase, expected_command_count=count, reader_required=reader_required,
+        include_wire_binding=include_wire_binding)
     if str(result[0].process_root) != original.get(PROCESS_ROOT_ENV):
         raise ValueError("forwarded scan process root differs")
     _scan_deadline(min(deadline, (result[2] if reader_required else result[1]).deadline_ns))
@@ -6472,7 +6574,7 @@ class _ScanCandidateSurface:
     path: str
     kind: str
     mode: int
-    content: bytes
+    content: bytes | _ScanDiskSnapshotV3 | _ScanPayloadSpanV3
     children: tuple[str, ...]
 
 
@@ -6516,7 +6618,305 @@ def _scan_utf8_charge(text, remaining):
     return remaining
 
 
-def _scan_candidate_rows(rows, *, limits, candidate_read_bytes):
+_SCAN_V3_CHUNK = 65_536
+_SCAN_V3_MAX = (1 << 63) - 1
+
+
+def _scan_v3_integer(value, name):
+    if type(value) is not int or not 0 <= value <= _SCAN_V3_MAX:
+        raise ValueError("invalid streamed candidate integer: " + name)
+    return value
+
+
+@dataclass(frozen=True)
+class _ScanDiskSnapshotV3:
+    path: str
+    snapshot_path: Path
+    snapshot_version: tuple
+    source_identity: tuple
+    mode: int
+    length: int
+
+    def __post_init__(self):
+        _scan_candidate_path(self.path)
+        if (type(self.snapshot_path) is not type(Path()) or not self.snapshot_path.is_absolute()
+                or ".." in self.snapshot_path.parts):
+            raise ValueError("original absolute disk snapshot path required")
+        if type(self.mode) is not int or not 0 <= self.mode <= 0o7777:
+            raise ValueError("original disk snapshot mode required")
+        _scan_v3_integer(self.length, "snapshot length")
+        for value, length in ((self.snapshot_version, 6), (self.source_identity, 4)):
+            if type(value) is not tuple or len(value) != length or any(type(v) is not int or v < 0 for v in value):
+                raise ValueError("original same-API snapshot/source observation required")
+        if (self.snapshot_version[2] != self.length or self.source_identity[2] != self.length
+                or self.snapshot_version[:2] == self.source_identity[:2]):
+            raise ValueError("snapshot extent or independent physical identity differs")
+
+
+def _scan_snapshot_root_v3(root):
+    if type(root) is not type(Path()) or not root.is_absolute() or ".." in root.parts:
+        raise ValueError("original absolute snapshot root required")
+    _local_unlinked_path(root)
+    if not root.is_dir():
+        raise ValueError("original snapshot directory unavailable")
+    return root
+
+
+def _scan_snapshot_path_v3(carrier, root):
+    if type(carrier) is not _ScanDiskSnapshotV3:
+        raise TypeError("original disk snapshot carrier required")
+    _scan_snapshot_root_v3(root)
+    path = carrier.snapshot_path
+    if path == root or not path.is_relative_to(root):
+        raise ValueError("snapshot escaped its original external area")
+    _local_unlinked_path(path.parent)
+    before = path.lstat()
+    if (_scan_file_identity(before) != carrier.snapshot_version[:4]
+            or (before.st_dev, before.st_ino) == carrier.source_identity[:2]):
+        raise ValueError("snapshot path identity/extent changed or aliases source")
+    return before
+
+
+@contextmanager
+def _scan_snapshot_descriptor_v3(carrier, root, check):
+    before = _scan_snapshot_path_v3(carrier, root)
+    descriptor = None
+    errors = []
+    try:
+        check()
+        descriptor = _open_regular_worktree_descriptor(carrier.snapshot_path, nonblocking=True)
+        os.set_inheritable(descriptor, False)
+        if _scan_same_api_version(os.fstat(descriptor)) != carrier.snapshot_version:
+            raise ValueError("snapshot descriptor differs from original retained version")
+        yield descriptor
+        if _scan_same_api_version(os.fstat(descriptor)) != carrier.snapshot_version:
+            raise ValueError("snapshot changed during bounded acquisition")
+    except BaseException as error:
+        errors.append(error)
+    finally:
+        if descriptor is not None:
+            try:
+                os.close(descriptor)
+            except BaseException as error:
+                errors.append(error)
+        try:
+            after = _scan_snapshot_path_v3(carrier, root)
+            if _scan_same_api_version(after) != _scan_same_api_version(before):
+                raise ValueError("snapshot pathname changed during/after close")
+            check()
+        except BaseException as error:
+            errors.append(error)
+    _scan_raise_errors(errors)
+
+
+def _scan_readonly_duplicate_v3(descriptor):
+    if os.name != "nt":
+        import fcntl
+        if fcntl.fcntl(descriptor, fcntl.F_GETFL) & os.O_ACCMODE != os.O_RDONLY:
+            raise ValueError("streamed launch descriptor must be read-only")
+        return os.dup(descriptor)
+    # Duplicate the same file object/cursor with read rights only; neither
+    # close the borrowed handle nor reopen a payload-selected pathname.
+    import _winapi
+    import msvcrt
+    process = _winapi.GetCurrentProcess()
+    handle = _winapi.DuplicateHandle(process, msvcrt.get_osfhandle(descriptor),
+                                    process, 0x120089, False, 0)
+    try:
+        return msvcrt.open_osfhandle(handle, os.O_RDONLY | os.O_BINARY)
+    except BaseException as body:
+        errors = [body]
+        try:
+            _winapi.CloseHandle(handle)
+        except BaseException as error:
+            errors.append(error)
+        _scan_raise_errors(errors)
+
+
+class _ScanPayloadLeaseV3:
+    __slots__ = ("_fd", "_raw_data_start", "_payload_bytes", "_extent", "_version",
+                 "_process_id", "_thread_id", "_deadline_ns", "_last_ns", "_remaining",
+                 "_initial_consumption_complete", "_closed", "_held", "_close_attempted")
+
+    def __init__(self, descriptor, *, raw_data_start, payload_bytes, extent,
+                 descriptor_version, deadline_ns, read_allowance):
+        for value, name in ((raw_data_start, "raw start"), (payload_bytes, "payload"),
+                            (extent, "extent")):
+            _scan_v3_integer(value, name)
+        if (type(descriptor) is not int or descriptor < 0 or raw_data_start + payload_bytes != extent
+                or type(read_allowance) is not int or read_allowance <= 0):
+            raise ValueError("invalid original payload lease")
+        self._fd = descriptor
+        self._raw_data_start = raw_data_start
+        self._payload_bytes = payload_bytes
+        self._extent = extent
+        self._version = descriptor_version
+        self._process_id = os.getpid()
+        self._thread_id = threading.get_ident()
+        self._deadline_ns = deadline_ns
+        self._last_ns = _scan_deadline(deadline_ns)
+        self._remaining = read_allowance
+        self._initial_consumption_complete = self._closed = self._held = self._close_attempted = False
+        self._check()
+
+    @property
+    def raw_data_start(self):
+        return self._raw_data_start
+
+    @property
+    def payload_bytes(self):
+        return self._payload_bytes
+
+    @property
+    def extent(self):
+        return self._extent
+
+    @property
+    def descriptor_version(self):
+        return self._version
+
+    @property
+    def initial_consumption_complete(self):
+        return self._initial_consumption_complete
+
+    @property
+    def closed(self):
+        return self._closed
+
+    @property
+    def held(self):
+        return self._held
+
+    @property
+    def remaining(self):
+        return self._remaining
+
+    def _check(self, *, releasing=False):
+        if (os.getpid(), threading.get_ident()) != (self._process_id, self._thread_id):
+            raise ValueError("foreign payload lease owner")
+        if self._closed or (self._held and not releasing):
+            raise ValueError("payload lease is closed or held")
+        now = _scan_deadline(self._deadline_ns)
+        if now < self._last_ns:
+            raise ValueError("payload lease clock regressed")
+        self._last_ns = now
+        if (_scan_same_api_version(os.fstat(self._fd)) != self._version
+                or os.fstat(self._fd).st_size != self._extent or os.get_inheritable(self._fd)):
+            raise ValueError("original payload descriptor changed")
+
+    def _hold(self):
+        self._held = True
+
+    def _read(self, span, position, request, *, charge=None):
+        try:
+            self._check()
+            if type(span) is not _ScanPayloadSpanV3 or span.lease is not self:
+                raise ValueError("foreign original payload span")
+            _scan_v3_integer(position, "span position")
+            if (position > span.length or type(request) is not int
+                    or not 0 < request <= _SCAN_V3_CHUNK):
+                raise ValueError("invalid bounded span request")
+            count = min(request, span.length - position)
+            if not count:
+                return b""
+            if count > self._remaining:
+                raise ValueError("payload lease cumulative read allowance exhausted")
+            os.lseek(self._fd, self._raw_data_start + span.offset + position, os.SEEK_SET)
+            chunk = os.read(self._fd, count)
+            if type(chunk) is bytes:
+                self._remaining -= len(chunk)
+                if charge is not None:
+                    charge(len(chunk))
+            if type(chunk) is not bytes or not chunk or len(chunk) > count or self._remaining < 0:
+                raise ValueError("invalid payload span read progress")
+            self._check()
+            return chunk
+        except BaseException:
+            self._hold()
+            raise
+
+    def _comparison_complete(self, *, full_initial=False):
+        self._check()
+        if full_initial or self._initial_consumption_complete:
+            os.lseek(self._fd, self._extent, os.SEEK_SET)
+            suffix = os.read(self._fd, 1)
+            if type(suffix) is bytes:
+                self._remaining -= len(suffix)
+            if type(suffix) is not bytes or suffix or self._remaining < 0:
+                self._hold()
+                raise ValueError("payload physical suffix or allowance mismatch")
+            self._check()
+            if full_initial:
+                # Only the original fence grants this after every admitted row,
+                # physical EOF and descriptor-version check has succeeded.
+                self._initial_consumption_complete = True
+
+    def close(self):
+        if self._close_attempted:
+            raise ValueError("payload lease close already attempted")
+        if (os.getpid(), threading.get_ident()) != (self._process_id, self._thread_id):
+            raise ValueError("foreign payload lease release")
+        errors = []
+        try:
+            self._check(releasing=True)
+        except BaseException as error:
+            errors.append(error)
+        self._close_attempted = True
+        try:
+            os.close(self._fd)
+            self._closed = True
+        except BaseException as error:
+            errors.append(error)
+        if errors or not self._initial_consumption_complete:
+            self._hold()
+        _scan_raise_errors(errors)
+
+
+@dataclass(frozen=True)
+class _ScanPayloadSpanV3:
+    lease: _ScanPayloadLeaseV3
+    offset: int
+    length: int
+
+    def __post_init__(self):
+        if type(self.lease) is not _ScanPayloadLeaseV3:
+            raise TypeError("original process-local payload lease required")
+        _scan_v3_integer(self.offset, "span offset")
+        _scan_v3_integer(self.length, "span length")
+        if self.length > _SCAN_V3_MAX - self.offset or self.offset + self.length > self.lease.payload_bytes:
+            raise ValueError("payload span exceeds original extent")
+
+
+def _scan_v3_native_read(descriptor, request, charge, check):
+    if type(request) is not int or not 0 < request <= _SCAN_V3_CHUNK:
+        raise ValueError("invalid streamed binary request")
+    check()
+    chunk = os.read(descriptor, request)
+    if type(chunk) is bytes:
+        charge(len(chunk))
+    if type(chunk) is not bytes or len(chunk) > request:
+        raise ValueError("invalid streamed binary progress")
+    check()
+    return chunk
+
+def _scan_candidate_rows(rows, *, limits, candidate_read_bytes, wire_version=1,
+                         surface_role="legacy", snapshot_root=None, payload_lease=None):
+    if type(wire_version) is not int or wire_version not in (1, 2, 3):
+        raise ValueError("unsupported original candidate row version")
+    if wire_version != 3:
+        if surface_role != "legacy" or snapshot_root is not None or payload_lease is not None:
+            raise ValueError("legacy rows cannot bind disk snapshots or payload leases")
+    elif surface_role == "sender":
+        if payload_lease is not None:
+            raise ValueError("sender rows cannot acquire a child lease")
+        _scan_snapshot_root_v3(snapshot_root)
+    elif surface_role == "receiver":
+        if snapshot_root is not None or type(payload_lease) is not _ScanPayloadLeaseV3:
+            raise ValueError("receiver rows require their one original lease")
+    else:
+        raise ValueError("streamed rows require an explicit sender or receiver role")
+    snapshot_identities = set()
+    cursor = 0
     if (type(limits) is not _ScanRunReadLimits or type(rows) is not tuple
             or type(candidate_read_bytes) is not int or candidate_read_bytes < 0
             or len(rows) > limits.node_limit):
@@ -6528,19 +6928,40 @@ def _scan_candidate_rows(rows, *, limits, candidate_read_bytes):
     for row in rows:
         if type(row) is not _ScanCandidateSurface:
             raise TypeError("original native candidate surface required")
-        nodes += 7 + len(row.children) if type(row.children) is tuple else limits.node_limit + 1
+        width = (8 if row.kind == "FILE" else 6) if wire_version == 3 else 7
+        nodes += width + len(row.children) if type(row.children) is tuple else limits.node_limit + 1
         if nodes > limits.node_limit:
             raise ValueError("candidate member node allowance exceeded")
         _scan_candidate_path(row.path, root_allowed=row.kind == "DIRECTORY")
         if row.path in seen or (os.name == "nt" and row.path.casefold() in aliases):
             raise ValueError("duplicate candidate surface")
         if (row.kind not in {"FILE", "DIRECTORY", "ABSENT"} or type(row.mode) is not int
-                or not 0 <= row.mode <= 0o7777 or type(row.content) is not bytes or type(row.children) is not tuple):
+                or not 0 <= row.mode <= 0o7777 or type(row.children) is not tuple
+                or ((wire_version != 3 or row.kind != "FILE") and type(row.content) is not bytes)):
             raise ValueError("unsupported candidate kind/mode/content")
         if row.kind == "FILE":
             if row.children:
                 raise ValueError("file candidate cannot contain directory members")
-            remaining -= len(row.content)
+            if wire_version == 3:
+                if surface_role == "sender":
+                    if (type(row.content) is not _ScanDiskSnapshotV3 or row.content.path != row.path
+                            or row.content.mode != row.mode):
+                        raise ValueError("sender requires the exact original disk carrier")
+                    _scan_snapshot_path_v3(row.content, snapshot_root)
+                    physical = row.content.snapshot_version[:2]
+                    if physical in snapshot_identities:
+                        raise ValueError("distinct sender rows alias one snapshot file")
+                    snapshot_identities.add(physical)
+                elif (type(row.content) is not _ScanPayloadSpanV3 or row.content.lease is not payload_lease
+                        or row.content.offset != cursor):
+                    raise ValueError("receiver requires contiguous spans from its exact lease")
+                length = row.content.length
+                if length > _SCAN_V3_MAX - cursor:
+                    raise ValueError("streamed candidate extent overflow")
+                cursor += length
+                remaining -= length
+            else:
+                remaining -= len(row.content)
         elif row.kind == "ABSENT":
             if row.mode or row.content or row.children:
                 raise ValueError("absence candidate must have empty structural fields")
@@ -6564,16 +6985,29 @@ def _scan_candidate_rows(rows, *, limits, candidate_read_bytes):
             parent = seen.get("/".join(pieces[:index]))
             if parent is not None and parent.kind != "DIRECTORY":
                 raise ValueError("declared candidate file/absence has descendants")
+    if wire_version == 3 and surface_role == "receiver" and cursor != payload_lease.payload_bytes:
+        raise ValueError("receiver rows do not cover their exact original payload")
     return rows
 
 
 class _ScanCandidateFence:
-    def __init__(self, repo_root, rows, *, limits, candidate_read_bytes, deadline_ns):
+    def __init__(self, repo_root, rows, *, limits, candidate_read_bytes, deadline_ns,
+                 wire_version=1, surface_role="legacy", snapshot_root=None, payload_lease=None):
         self.root = Path(repo_root)
         if not self.root.is_absolute() or ".." in self.root.parts:
             raise ValueError("original absolute candidate root required")
         self.limits = limits
-        self.rows = _scan_candidate_rows(rows, limits=limits, candidate_read_bytes=candidate_read_bytes)
+        self.wire_version = wire_version
+        self.surface_role = surface_role
+        self.snapshot_root = snapshot_root
+        self.payload_lease = payload_lease
+        if wire_version == 3 and surface_role == "sender":
+            _scan_snapshot_root_v3(snapshot_root)
+            if snapshot_root.is_relative_to(self.root) or self.root.is_relative_to(snapshot_root):
+                raise ValueError("snapshot area must be independent and external to the repository")
+        self.rows = _scan_candidate_rows(rows, limits=limits, candidate_read_bytes=candidate_read_bytes,
+            wire_version=wire_version, surface_role=surface_role, snapshot_root=snapshot_root,
+            payload_lease=payload_lease)
         self.remaining = candidate_read_bytes
         self.deadline_ns = deadline_ns
         self.process_id = os.getpid()
@@ -6582,14 +7016,24 @@ class _ScanCandidateFence:
         self.last_ns = _scan_deadline(deadline_ns)
         self.identities = {}
         _local_unlinked_path(self.root)
+        if wire_version == 3:
+            observed = self.root.lstat()
+            self._root_identity_v3 = observed.st_dev, observed.st_ino, observed.st_mode
+            self._parent_identities_v3 = {}
+            self._all_rows_v3 = self.rows
 
     def _clock(self):
+        if self.wire_version == 3 and (os.getpid(), threading.get_ident()) != (self.process_id, self.thread_id):
+            raise ValueError("foreign streamed candidate owner")
         now = _scan_deadline(self.deadline_ns)
         if now < self.last_ns:
             raise ValueError("candidate monotonic clock regressed")
         self.last_ns = now
 
     def __call__(self):
+        if self.wire_version == 3:
+            self._check_v3()
+            return None
         if (os.getpid(), threading.get_ident()) != (self.process_id, self.thread_id):
             raise ValueError("foreign candidate fence owner")
         if self.held:
@@ -6678,6 +7122,161 @@ class _ScanCandidateFence:
             raise
         return None
 
+    def _charge_v3(self, count):
+        self.remaining -= count
+        if self.remaining < 0:
+            raise ValueError("streamed candidate cumulative read allowance exhausted")
+
+    def _file_v3(self, row, path, before, *, source_limit=None):
+        expected_length = row.content.length
+        if before.st_size != expected_length or 2 * expected_length > self.remaining:
+            raise ValueError("streamed candidate size/read allowance differs")
+        if self.surface_role == "sender" and _scan_file_identity(before) != row.content.source_identity:
+            raise ValueError("current candidate differs from independently captured source identity")
+        current = None
+        errors = []
+        actual_data = bytearray() if source_limit is not None else None
+        expected_data = bytearray() if source_limit is not None else None
+        try:
+            current = _open_regular_worktree_descriptor(path, nonblocking=True)
+            opened = os.fstat(current)
+            if _scan_file_identity(opened) != _scan_file_identity(before):
+                raise ValueError("streamed candidate selected descriptor differs")
+            with ExitStack() as stack:
+                expected = (stack.enter_context(_scan_snapshot_descriptor_v3(
+                    row.content, self.snapshot_root, self._clock)) if self.surface_role == "sender" else None)
+                offset = 0
+                while offset < expected_length:
+                    chunk = _scan_v3_native_read(current, min(_SCAN_V3_CHUNK, expected_length - offset),
+                                                 self._charge_v3, self._clock)
+                    if not chunk:
+                        raise ValueError("current candidate ended before its original extent")
+                    if actual_data is not None:
+                        if len(actual_data) + len(chunk) > source_limit:
+                            raise ValueError("original finite source exceeds selected limit")
+                        actual_data.extend(chunk)
+                    compared = 0
+                    while compared < len(chunk):
+                        if expected is None:
+                            part = self.payload_lease._read(row.content, offset + compared, len(chunk) - compared,
+                                                            charge=self._charge_v3)
+                        else:
+                            part = _scan_v3_native_read(expected, len(chunk) - compared,
+                                                       self._charge_v3, self._clock)
+                        if not part or part != chunk[compared:compared + len(part)]:
+                            raise ValueError("streamed candidate bytes differ from original baseline")
+                        if expected_data is not None:
+                            expected_data.extend(part)
+                        compared += len(part)
+                    offset += len(chunk)
+                suffix = _scan_v3_native_read(current, 1, self._charge_v3, self._clock)
+                if suffix:
+                    raise ValueError("current candidate has an unexpected physical suffix")
+                if expected is not None:
+                    if _scan_v3_native_read(expected, 1, self._charge_v3, self._clock):
+                        raise ValueError("snapshot has an unexpected physical suffix")
+                elif self.payload_lease._read(row.content, expected_length, 1) != b"":
+                    raise ValueError("payload span logical EOF differs")
+                if (_scan_same_api_version(os.fstat(current)) != _scan_same_api_version(opened)
+                        or _scan_same_api_version(path.lstat()) != _scan_same_api_version(before)):
+                    raise ValueError("streamed current source changed during comparison")
+        except BaseException as error:
+            errors.append(error)
+        finally:
+            if current is not None:
+                try:
+                    os.close(current)
+                except BaseException as error:
+                    errors.append(error)
+            try:
+                if _scan_same_api_version(path.lstat()) != _scan_same_api_version(before):
+                    raise ValueError("streamed current source changed after close")
+            except BaseException as error:
+                errors.append(error)
+        _scan_raise_errors(errors)
+        if actual_data is not None:
+            return bytes(actual_data), bytes(expected_data)
+        return None
+
+    def _check_v3(self, *, source_relative=None, source_limit=None):
+        if (os.getpid(), threading.get_ident()) != (self.process_id, self.thread_id) or self.held:
+            raise ValueError("foreign or held streamed candidate fence")
+        acquired_source = None
+        try:
+            self._clock()
+            _local_unlinked_path(self.root)
+            root_stat = self.root.lstat()
+            if (root_stat.st_dev, root_stat.st_ino, root_stat.st_mode) != self._root_identity_v3:
+                raise ValueError("streamed candidate root identity changed")
+            for row in self.rows:
+                self._clock()
+                path = self.root if row.path == "." else self.root.joinpath(*row.path.split("/"))
+                _local_unlinked_path(path.parent)
+                parent = path.parent.lstat()
+                if not stat.S_ISDIR(parent.st_mode):
+                    raise ValueError("candidate ordinary parent is missing")
+                parent_key = str(path.parent)
+                parent_identity = parent.st_dev, parent.st_ino, parent.st_mode
+                if self._parent_identities_v3.setdefault(parent_key, parent_identity) != parent_identity:
+                    raise ValueError("candidate ordinary parent identity changed")
+                try:
+                    before = path.lstat()
+                except FileNotFoundError:
+                    if row.kind != "ABSENT":
+                        raise
+                    continue
+                if row.kind == "ABSENT":
+                    raise ValueError("original absent candidate now exists")
+                if stat.S_ISLNK(before.st_mode) or _stat_is_reparse_point(before):
+                    raise ValueError("candidate link/reparse substitution")
+                identity = before.st_dev, before.st_ino, before.st_mode
+                if stat.S_IMODE(before.st_mode) != row.mode:
+                    raise ValueError("candidate mode changed")
+                if self.identities.setdefault(row.path, identity) != identity:
+                    raise ValueError("candidate identity changed")
+                if row.kind == "DIRECTORY":
+                    if not stat.S_ISDIR(before.st_mode):
+                        raise ValueError("candidate directory changed kind")
+                    names = []
+                    with os.scandir(path) as entries:
+                        for entry in entries:
+                            self._clock()
+                            if len(names) >= len(row.children):
+                                raise ValueError("candidate directory gained a member")
+                            self.remaining = _scan_utf8_charge(entry.name, self.remaining)
+                            names.append(entry.name)
+                    after = path.lstat()
+                    if (tuple(sorted(names)) != row.children
+                            or (before.st_dev, before.st_ino, before.st_mode, before.st_mtime_ns, before.st_ctime_ns)
+                            != (after.st_dev, after.st_ino, after.st_mode, after.st_mtime_ns, after.st_ctime_ns)):
+                        raise ValueError("candidate directory membership changed")
+                else:
+                    _scan_file_identity(before)
+                    value = self._file_v3(row, path, before,
+                                          source_limit=source_limit if row.path == source_relative else None)
+                    if row.path == source_relative:
+                        acquired_source = value
+                self._clock()
+            if self.payload_lease is not None:
+                self.payload_lease._comparison_complete(full_initial=self.rows is self._all_rows_v3)
+            self._clock()
+        except BaseException:
+            self.held = True
+            if self.payload_lease is not None:
+                self.payload_lease._hold()
+            raise
+        return acquired_source
+
+    def close_payload_lease(self):
+        if self.wire_version != 3 or self.payload_lease is None:
+            return None
+        try:
+            self.payload_lease.close()
+        except BaseException:
+            self.held = True
+            raise
+        return None
+
     def observe_surfaces(self, paths):
         if type(paths) is not tuple or len(paths) != len(set(paths)):
             raise ValueError("original finite surface selection required")
@@ -6695,6 +7294,18 @@ class _ScanCandidateFence:
     def read_original_source(self, relative, limit):
         if relative not in ("tools/run_validation_gates.py", "tools/validation_scope_registry.py"):
             raise ValueError("reader source path is fixed by the original owner")
+        if self.wire_version == 3:
+            if type(limit) is not int or limit <= 0:
+                raise ValueError("original positive source byte limit required")
+            original_rows = self.rows
+            selected = tuple(row for row in original_rows if row.path == relative)
+            if len(selected) != 1 or selected[0].kind != "FILE" or selected[0].content.length > limit:
+                raise ValueError("original complete source unavailable or oversized")
+            try:
+                self.rows = selected
+                return self._check_v3(source_relative=relative, source_limit=limit)
+            finally:
+                self.rows = original_rows
         row = self.observe_surfaces((relative,))[relative]
         if row.kind != "FILE" or len(row.content) > limit:
             raise ValueError("original complete source unavailable or oversized")
@@ -6722,7 +7333,22 @@ class _ScanHex:
     value: bytes
 
 
-def _scan_launch_payload(identity, rows, *, limits, candidate_read_bytes, rp5a_read_basis=None, parent_identity=None):
+def _scan_launch_payload(identity, rows, *, limits, candidate_read_bytes, rp5a_read_basis=None, parent_identity=None,
+                         wire_version=None, snapshot_root=None, surface_role=None, payload_lease=None):
+    selected_version = (1 if rp5a_read_basis is None else 2) if wire_version is None else wire_version
+    if type(selected_version) is not int or selected_version not in (1, 2, 3):
+        raise ValueError("unsupported explicitly selected launch version")
+    if (selected_version == 1) != (rp5a_read_basis is None):
+        raise ValueError("launch version requires its original reader basis")
+    if selected_version != 3:
+        if snapshot_root is not None or payload_lease is not None or surface_role not in (None, "legacy"):
+            raise ValueError("legacy launch cannot use streamed operands")
+        selected_role = "legacy"
+    else:
+        if parent_identity is not None:
+            raise ValueError("streamed launch cannot delegate")
+        selected_role = "sender" if surface_role is None else surface_role
+        _scan_v3_integer(candidate_read_bytes, "candidate allowance")
     if (type(identity) is not _ScanLaunchIdentity or type(identity.run_id) is not str or not identity.run_id
             or type(identity.phase) is not str or not identity.phase
             or type(identity.command_index) is not int or type(identity.command_count) is not int
@@ -6731,11 +7357,29 @@ def _scan_launch_payload(identity, rows, *, limits, candidate_read_bytes, rp5a_r
             or any(type(arg) is not str or not arg or "\0" in arg for arg in identity.argv)
             or type(identity.repo_root) is not str or not Path(identity.repo_root).is_absolute()):
         raise ValueError("invalid original scan launch identity")
-    _scan_candidate_rows(rows, limits=limits, candidate_read_bytes=candidate_read_bytes)
+    _scan_candidate_rows(rows, limits=limits, candidate_read_bytes=candidate_read_bytes,
+                         wire_version=selected_version, surface_role=selected_role,
+                         snapshot_root=snapshot_root, payload_lease=payload_lease)
+    if selected_version == 3:
+        _scan_v3_integer(identity.command_index, "command index")
+        _scan_v3_integer(identity.command_count, "command count")
+        cursor = 0
+        projected = []
+        for row in rows:
+            extent = ()
+            if row.kind == "FILE":
+                extent = (cursor, row.content.length)
+                if row.content.length > _SCAN_V3_MAX - cursor:
+                    raise ValueError("streamed payload extent overflow")
+                cursor += row.content.length
+            projected.append((row.path, row.kind, row.mode, extent, row.children))
+        candidate_projection = tuple(projected)
+    else:
+        candidate_projection = tuple((row.path, row.kind, row.mode, _ScanHex(row.content), row.children) for row in rows)
     result = {
         "run_id": identity.run_id, "phase": identity.phase, "command_index": identity.command_index,
         "command_count": identity.command_count, "argv": identity.argv, "repo_root": identity.repo_root,
-        "candidate_files": tuple((row.path, row.kind, row.mode, _ScanHex(row.content), row.children) for row in rows),
+        "candidate_files": candidate_projection,
         "candidate_read_bytes": candidate_read_bytes,
     }
     if rp5a_read_basis is None:
@@ -6753,8 +7397,137 @@ def _scan_launch_payload(identity, rows, *, limits, candidate_read_bytes, rp5a_r
                 raise ValueError("RP5A delegation must be the original single pytest hop")
             parent = MappingProxyType({name: getattr(parent_identity, name)
                                        for name in _ScanLaunchIdentity.__dataclass_fields__})
-        result.update(wire_version=2, rp5a_read_basis=basis, parent_identity=parent)
+        result.update(wire_version=selected_version, rp5a_read_basis=basis, parent_identity=parent)
+        if selected_version == 3:
+            result["payload_byte_count"] = cursor
     return MappingProxyType(result)
+
+
+_SCAN_V3_FIELDS = (
+    "run_id", "phase", "command_index", "command_count", "argv", "repo_root",
+    "candidate_files", "candidate_read_bytes", "wire_version", "rp5a_read_basis",
+    "parent_identity", "payload_byte_count",
+)
+
+
+def _scan_v3_direct_null(payload):
+    if (type(payload) is not MappingProxyType or type(payload.get("wire_version")) is not int
+            or payload.get("wire_version") != 3 or payload.get("parent_identity", False) is not None):
+        return False
+    if set(payload) != set(_SCAN_V3_FIELDS):
+        raise ValueError("v3 null requires the exact direct streamed control fields")
+    basis = payload["rp5a_read_basis"]
+    if type(basis) is not MappingProxyType or type(basis.get("historical_runner_bytes")) is not _ScanHex:
+        raise ValueError("v3 null requires a complete original reader basis")
+    _Rp5aReadBasisV1(**{**dict(basis), "historical_runner_bytes": basis["historical_runner_bytes"].value})
+    _scan_v3_integer(payload["payload_byte_count"], "payload bytes")
+    return True
+
+
+def _read_scan_launch_v3(fd, *, limits, deadline_ns, expected_identity,
+                         expected_rp5a_read_basis, expected_payload_bytes):
+    _scan_v3_integer(expected_payload_bytes, "independent payload bytes")
+    before = os.fstat(fd)
+    version = _scan_same_api_version(before)
+    if os.lseek(fd, 0, os.SEEK_CUR) != 0 or not 4 < before.st_size <= _SCAN_V3_MAX:
+        raise ValueError("invalid streamed launch position/extent")
+    owned = _scan_readonly_duplicate_v3(fd)
+    lease = None
+    errors = []
+    result = None
+    try:
+        os.set_inheritable(owned, False)
+
+        def acquire(size):
+            raw = bytearray()
+            while len(raw) < size:
+                _scan_deadline(deadline_ns)
+                if _scan_same_api_version(os.fstat(owned)) != version:
+                    raise ValueError("streamed launch changed while reading control")
+                request = min(_SCAN_V3_CHUNK, size - len(raw))
+                part = os.read(owned, request)
+                if type(part) is not bytes or not part or len(part) > request:
+                    raise ValueError("streamed control ended or made invalid progress")
+                raw.extend(part)
+            return bytes(raw)
+
+        length = int.from_bytes(acquire(4), "big")
+        if (not 0 < length <= min(limits.byte_limit, 0xFFFFFFFF)
+                or expected_payload_bytes > _SCAN_V3_MAX - 4 - length
+                or before.st_size != 4 + length + expected_payload_bytes):
+            raise ValueError("streamed control/payload extent differs from independent allocation")
+        raw = acquire(length)
+        if any(byte > 127 for byte in raw):
+            raise ValueError("streamed control must be canonical ASCII")
+        value = _scan_owned_json(raw, limits)
+        if type(value) is not MappingProxyType or set(value) != set(_SCAN_V3_FIELDS):
+            raise ValueError("invalid closed streamed control fields")
+        if (type(value["wire_version"]) is not int or value["wire_version"] != 3
+                or value["parent_identity"] is not None):
+            raise ValueError("streamed launch cannot change version or delegate")
+        if _scan_v3_integer(value["payload_byte_count"], "payload count") != expected_payload_bytes:
+            raise ValueError("payload count differs from independent allowance")
+        allowance = _scan_v3_integer(value["candidate_read_bytes"], "candidate allowance")
+        if allowance <= 0:
+            raise ValueError("positive original candidate allowance required")
+        basis = _rp5a_basis_from_projection_v1(value["rp5a_read_basis"])
+        if basis != expected_rp5a_read_basis:
+            raise ValueError("streamed reader basis differs from original parent")
+        identity = _ScanLaunchIdentity(*(value[key] for key in _ScanLaunchIdentity.__dataclass_fields__))
+        if type(expected_identity) is not _ScanLaunchIdentity or identity != expected_identity:
+            raise ValueError("streamed identity differs from original expectation")
+        for number in (identity.command_index, identity.command_count):
+            _scan_v3_integer(number, "command identity")
+        raw_rows = value["candidate_files"]
+        if type(raw_rows) is not tuple or len(raw_rows) > limits.node_limit:
+            raise ValueError("invalid bounded streamed rows")
+        cursor = 0
+        for row in raw_rows:
+            if type(row) is not tuple or len(row) != 5 or type(row[3]) is not tuple:
+                raise ValueError("invalid streamed candidate row shape")
+            extent = row[3]
+            if row[1] == "FILE":
+                if len(extent) != 2:
+                    raise ValueError("streamed file requires one exact extent")
+                offset = _scan_v3_integer(extent[0], "file offset")
+                count = _scan_v3_integer(extent[1], "file length")
+                if offset != cursor or count > _SCAN_V3_MAX - cursor:
+                    raise ValueError("streamed extents have gaps, overlaps or overflow")
+                cursor += count
+            elif extent:
+                raise ValueError("non-file candidate cannot carry a payload extent")
+        if cursor != expected_payload_bytes:
+            raise ValueError("streamed rows do not cover exactly the admitted payload")
+        lease = _ScanPayloadLeaseV3(owned, raw_data_start=4 + length, payload_bytes=cursor,
+            extent=before.st_size, descriptor_version=version, deadline_ns=deadline_ns, read_allowance=allowance)
+        rows = tuple(_ScanCandidateSurface(row[0], row[1], row[2],
+            _ScanPayloadSpanV3(lease, *row[3]) if row[1] == "FILE" else b"", row[4]) for row in raw_rows)
+        canonical = _scan_launch_payload(identity, rows, limits=limits, candidate_read_bytes=allowance,
+            rp5a_read_basis=expected_rp5a_read_basis, wire_version=3, surface_role="receiver", payload_lease=lease)
+        if _scan_launch_measure(canonical, limits=limits) != length:
+            raise ValueError("streamed control measurement differs")
+        position = 0
+        for part in _scan_launch_parts(canonical):
+            if raw[position:position + len(part)] != part:
+                raise ValueError("noncanonical streamed control bytes")
+            position += len(part)
+        if position != length:
+            raise ValueError("streamed control coverage differs")
+        lease._check()
+        result = (identity, rows, allowance, expected_rp5a_read_basis, None, lease)
+    except BaseException as error:
+        errors.append(error)
+    if errors:
+        try:
+            if lease is not None:
+                lease._hold()
+                lease.close()
+            else:
+                os.close(owned)
+        except BaseException as error:
+            errors.append(error)
+        _scan_raise_errors(errors)
+    return result
 
 
 def _scan_v2_direct_null_v1(payload):
@@ -6773,7 +7546,7 @@ def _scan_v2_direct_null_v1(payload):
 
 def _scan_launch_measure(payload, *, limits):
     size = nodes = 0
-    direct_null = _scan_v2_direct_null_v1(payload)
+    direct_null = _scan_v2_direct_null_v1(payload) or _scan_v3_direct_null(payload)
 
     def text_size(value):
         count = 2
@@ -6833,7 +7606,7 @@ def _scan_launch_parts(payload, *, _root=True):
         for offset in range(0, len(encoded), 64 * 1024):
             yield encoded[offset:offset + 64 * 1024]
 
-    direct_null = _root and _scan_v2_direct_null_v1(payload)
+    direct_null = _root and (_scan_v2_direct_null_v1(payload) or _scan_v3_direct_null(payload))
     if type(payload) is str:
         yield from text(payload)
     elif type(payload) is int:
@@ -6867,16 +7640,23 @@ def _scan_launch_parts(payload, *, _root=True):
 
 
 def _read_scan_launch_fd(fd, *, limits, deadline_ns, expected_identity, expected_wire_version=1,
-                         expected_parent_identity=None, expected_rp5a_read_basis=None):
+                         expected_parent_identity=None, expected_rp5a_read_basis=None, expected_payload_bytes=None):
     if type(fd) is not int or type(limits) is not _ScanRunReadLimits:
         raise TypeError("original launch descriptor and limits required")
-    if type(expected_wire_version) is not int or expected_wire_version not in (1, 2):
+    if type(expected_wire_version) is not int or expected_wire_version not in (1, 2, 3):
         raise ValueError("unsupported independently selected launch wire version")
     if expected_wire_version == 1:
         if expected_parent_identity is not None or expected_rp5a_read_basis is not None:
             raise ValueError("legacy launch cannot admit reader/delegation expectations")
     elif type(expected_rp5a_read_basis) is not _Rp5aReadBasisV1:
         raise ValueError("v2 requires independently bound original reader basis")
+    if expected_wire_version == 3:
+        if expected_parent_identity is not None:
+            raise ValueError("streamed launch cannot admit parent delegation")
+        return _read_scan_launch_v3(fd, limits=limits, deadline_ns=deadline_ns, expected_identity=expected_identity,
+            expected_rp5a_read_basis=expected_rp5a_read_basis, expected_payload_bytes=expected_payload_bytes)
+    if expected_payload_bytes is not None:
+        raise ValueError("legacy launch cannot admit a streamed payload allowance")
     before = os.fstat(fd)
     _scan_file_identity(before)
     if os.lseek(fd, 0, os.SEEK_CUR) != 0 or not 4 < before.st_size <= limits.byte_limit + 4:
@@ -6962,7 +7742,9 @@ def _read_scan_launch_fd(fd, *, limits, deadline_ns, expected_identity, expected
 class _ScanLaunchInput:
     def __init__(self, identity, candidate_files, *, limits, candidate_read_bytes,
                  deadline_ns, scratch_root, scratch_bytes, parent_frame_reread_bytes, check_candidate,
-                 rp5a_read_basis=None, parent_identity=None):
+                 rp5a_read_basis=None, parent_identity=None, wire_version=None, snapshot_root=None):
+        self.wire_version = (1 if rp5a_read_basis is None else 2) if wire_version is None else wire_version
+        self.snapshot_root = snapshot_root
         self.rp5a_read_basis = rp5a_read_basis
         self.parent_identity = parent_identity
         self.identity = identity
@@ -6977,6 +7759,7 @@ class _ScanLaunchInput:
         self.process_id = os.getpid()
         self.thread_id = threading.get_ident()
         self.state = "PREPARING"
+        self.entry_attempted = False
         self.path = None
         self.reader = None
         self.writer = None
@@ -6986,11 +7769,21 @@ class _ScanLaunchInput:
         self.last_ns = _scan_deadline(deadline_ns)
         self.payload = _scan_launch_payload(identity, candidate_files, limits=limits,
                                            candidate_read_bytes=candidate_read_bytes,
-                                           rp5a_read_basis=rp5a_read_basis, parent_identity=parent_identity)
+                                           rp5a_read_basis=rp5a_read_basis, parent_identity=parent_identity,
+                                           wire_version=wire_version, snapshot_root=snapshot_root)
         self.length = _scan_launch_measure(self.payload, limits=limits)
-        self.extent = self.length + 4
+        self.payload_bytes = self.payload["payload_byte_count"] if self.wire_version == 3 else 0
+        self.extent = self.length + 4 + self.payload_bytes
+        if self.wire_version == 3:
+            _scan_v3_integer(self.extent, "complete frame extent")
+            root = Path(identity.repo_root)
+            if (snapshot_root.is_relative_to(root) or root.is_relative_to(snapshot_root)
+                    or snapshot_root.is_relative_to(self.scratch_root) or self.scratch_root.is_relative_to(snapshot_root)):
+                raise ValueError("snapshot area aliases repository or launch cleanup allocation")
+        required_reads = (self.payload_bytes + 3 * (self.extent + self.payload_bytes)
+                          if self.wire_version == 3 else 3 * self.extent)
         if (type(scratch_bytes) is not int or type(parent_frame_reread_bytes) is not int
-                or scratch_bytes < self.extent or parent_frame_reread_bytes < 3 * self.extent):
+                or scratch_bytes < self.extent or parent_frame_reread_bytes < required_reads):
             raise ValueError("original launch input allocation cannot cover its measured lifetime")
 
     def _check(self):
@@ -7000,16 +7793,28 @@ class _ScanLaunchInput:
         if now < self.last_ns:
             raise ValueError("launch input clock regressed")
         self.last_ns = now
-        _scan_candidate_fence(self.check_candidate)
-        _local_unlinked_path(self.scratch_root)
-        if not self.scratch_root.is_dir():
-            raise ValueError("original input scratch directory unavailable")
+        if self.wire_version != 3:
+            _scan_candidate_fence(self.check_candidate)
+        if self.wire_version == 3 and hasattr(self, "directory_identity"):
+            current = self.scratch_root.lstat()
+            if (_stat_is_reparse_point(current) or not stat.S_ISDIR(current.st_mode)
+                    or (current.st_dev, current.st_ino, current.st_mode) != self.directory_identity):
+                raise ValueError("streamed input scratch identity changed")
+        else:
+            _local_unlinked_path(self.scratch_root)
+            if not self.scratch_root.is_dir():
+                raise ValueError("original input scratch directory unavailable")
 
     def _parts(self):
+        if self.wire_version == 3:
+            yield from self._parts_v3()
+            return
         yield self.length.to_bytes(4, "big")
         yield from _scan_launch_parts(self.payload)
 
     def _compare(self):
+        if self.wire_version == 3:
+            return self._compare_v3()
         self._check()
         if self.process is not None and self.process.poll() is None:
             raise ValueError("cannot reread launch input while child is live")
@@ -7042,7 +7847,126 @@ class _ScanLaunchInput:
             raise ValueError("launch frame changed during parent comparison")
         self._check()
 
+    def _charge_v3(self, count):
+        self.remaining_reread -= count
+        if self.remaining_reread < 0:
+            raise ValueError("streamed input cumulative acquisition allowance exhausted")
+
+    def _parts_v3(self):
+        yield self.length.to_bytes(4, "big")
+        buffer = bytearray()
+        for part in _scan_launch_parts(self.payload):
+            offset = 0
+            while offset < len(part):
+                take = min(_SCAN_V3_CHUNK - len(buffer), len(part) - offset)
+                buffer.extend(part[offset:offset + take])
+                offset += take
+                if len(buffer) == _SCAN_V3_CHUNK:
+                    yield bytes(buffer)
+                    buffer.clear()
+        if buffer:
+            yield bytes(buffer)
+        for row in self.candidate_files:
+            if row.kind != "FILE":
+                continue
+            with _scan_snapshot_descriptor_v3(row.content, self.snapshot_root, self._check) as descriptor:
+                remaining = row.content.length
+                while remaining:
+                    request = min(_SCAN_V3_CHUNK, remaining)
+                    if request > self.remaining_reread:
+                        raise ValueError("streamed snapshot acquisition allowance exhausted")
+                    chunk = _scan_v3_native_read(descriptor, request, self._charge_v3, self._check)
+                    if not chunk:
+                        raise ValueError("original snapshot ended before its admitted extent")
+                    remaining -= len(chunk)
+                    yield chunk
+                if _scan_v3_native_read(descriptor, 1, self._charge_v3, self._check):
+                    raise ValueError("original snapshot grew beyond its admitted extent")
+
+    def _write_v3(self):
+        parts = self._parts_v3()
+        errors = []
+        written = 0
+        try:
+            for chunk in parts:
+                offset = 0
+                while offset < len(chunk):
+                    self._check()
+                    count = self.writer.write(memoryview(chunk)[offset:])
+                    if type(count) is not int or not 0 < count <= len(chunk) - offset:
+                        raise OSError("invalid streamed launch write progress")
+                    offset += count
+                    written += count
+        except BaseException as error:
+            errors.append(error)
+        finally:
+            try:
+                parts.close()
+            except BaseException as error:
+                errors.append(error)
+        _scan_raise_errors(errors)
+        return written
+
+    def _compare_v3(self):
+        self._check()
+        _local_unlinked_path(self.scratch_root)
+        if self.process is not None and self.process.poll() is None:
+            raise ValueError("cannot reread streamed launch input while child is live")
+        needed = self.extent + self.payload_bytes
+        if self.remaining_reread < needed:
+            raise ValueError("cumulative streamed readback allowance exhausted")
+        self._check_frame_v3()
+        _scan_candidate_fence(self.check_candidate)
+        self.reader.seek(0)
+        count = 0
+        parts = self._parts_v3()
+        errors = []
+        try:
+            for expected in parts:
+                offset = 0
+                while offset < len(expected):
+                    self._check()
+                    self._check_frame_v3()
+                    request = min(_SCAN_V3_CHUNK, len(expected) - offset)
+                    chunk = self.reader.read(request)
+                    if type(chunk) is bytes:
+                        self._charge_v3(len(chunk))
+                    if type(chunk) is not bytes or not chunk or len(chunk) > request:
+                        raise ValueError("invalid streamed parent frame read progress")
+                    if chunk != expected[offset:offset + len(chunk)]:
+                        raise ValueError("streamed parent frame byte mismatch")
+                    count += len(chunk)
+                    offset += len(chunk)
+        except BaseException as error:
+            errors.append(error)
+        finally:
+            try:
+                parts.close()
+            except BaseException as error:
+                errors.append(error)
+        _scan_raise_errors(errors)
+        suffix = self.reader.read(1)
+        if type(suffix) is bytes:
+            self._charge_v3(len(suffix))
+        if type(suffix) is not bytes or suffix or count != self.extent:
+            raise ValueError("streamed parent frame suffix/extent mismatch")
+        self._check_frame_v3()
+        self._check()
+
+    def _check_frame_v3(self):
+        if (_scan_same_api_version(os.fstat(self.reader.fileno())) != self.descriptor_version
+                or _scan_same_api_version(self.path.lstat()) != self.path_version
+                or os.fstat(self.reader.fileno()).st_size != self.extent):
+            raise ValueError("original streamed launch frame changed")
+
     def __enter__(self):
+        # Refuse duplicate entry before callbacks, allocation or cleanup. A
+        # rejected nested entry must not close the original live owner's frame.
+        if (os.getpid(), threading.get_ident()) != (self.process_id, self.thread_id):
+            raise ValueError("foreign launch input owner")
+        if self.state != "PREPARING" or self.entry_attempted:
+            raise ValueError("launch input entry is single use")
+        self.entry_attempted = True
         try:
             self._check()
             directory = self.scratch_root.lstat()
@@ -7060,15 +7984,18 @@ class _ScanLaunchInput:
                     errors.append(close_error)
                 _scan_raise_errors(errors)
             written = 0
-            for chunk in self._parts():
-                offset = 0
-                while offset < len(chunk):
-                    self._check()
-                    count = self.writer.write(memoryview(chunk)[offset:])
-                    if type(count) is not int or not 0 < count <= len(chunk) - offset:
-                        raise OSError("invalid launch frame write progress")
-                    offset += count
-                    written += count
+            if self.wire_version == 3:
+                written = self._write_v3()
+            else:
+                for chunk in self._parts():
+                    offset = 0
+                    while offset < len(chunk):
+                        self._check()
+                        count = self.writer.write(memoryview(chunk)[offset:])
+                        if type(count) is not int or not 0 < count <= len(chunk) - offset:
+                            raise OSError("invalid launch frame write progress")
+                        offset += count
+                        written += count
             if written != self.extent:
                 raise ValueError("launch frame measurement differs from emission")
             self.writer.flush()
@@ -7140,6 +8067,10 @@ class _ScanLaunchInput:
             errors.append(RuntimeError("live child retains original launch input custody"))
             _scan_raise_errors(errors)
         safe = self.path is not None and hasattr(self, "path_version")
+        if self.wire_version == 3 and self.state == "HELD":
+            safe = False
+            if body is None:
+                errors.append(ValueError("held streamed launch retains its original frame evidence"))
         if safe:
             try:
                 _local_unlinked_path(self.scratch_root)
@@ -7204,8 +8135,8 @@ def _read_rp5a_bound_launch_fd_v1(fd, *, repo_root, environment, explicit_basete
     # original child p root is independently selected from the inherited owner.
     if explicit_basetemp is None:
         explicit_basetemp = Path(lowered[PROCESS_ROOT_ENV]) / PYTEST_BASETEMP_DIR_NAME
-    attestation, scanner, reader, basis = _scan_read_forwarded_profile(
-        repo_root, environment=environment, explicit_basetemp=explicit_basetemp, reader_required=True)
+    attestation, scanner, reader, basis, selected_version, selected_payload = _scan_read_forwarded_profile(
+        repo_root, environment=environment, explicit_basetemp=explicit_basetemp, reader_required=True, include_wire_binding=True)
     limits = _ScanRunReadLimits(*(int(lowered[key]) for key in (
         "QTT_SCAN_BYTE_LIMIT", "QTT_SCAN_NODE_LIMIT", "QTT_SCAN_DEPTH_LIMIT", "QTT_SCAN_PROFILE_LIMIT")))
     outer_identity = _ScanLaunchIdentity(attestation.run_id, lowered["QTT_SCAN_PHASE"],
@@ -7226,12 +8157,28 @@ def _read_rp5a_bound_launch_fd_v1(fd, *, repo_root, environment, explicit_basete
     if (scanner is not None) != (expected_role == "SCANNER"):
         raise ValueError("scanner allocation does not match reader consumer role")
     deadline = min(int(lowered["QTT_SCAN_DEADLINE_NS"]), reader.deadline_ns)
-    _, rows, allowance, original_basis, parent = _read_scan_launch_fd(
+    if selected_version == 3 and (expected_role != "SCANNER" or scanner is None or expected_parent_identity is not None):
+        raise ValueError("streamed transport requires the direct original scanner entry")
+    decoded = _read_scan_launch_fd(
         fd, limits=limits, deadline_ns=deadline, expected_identity=identity,
-        expected_wire_version=2, expected_parent_identity=expected_parent_identity,
-        expected_rp5a_read_basis=basis)
-    fence = _ScanCandidateFence(repo_root, rows, limits=limits,
-                                candidate_read_bytes=allowance, deadline_ns=deadline)
-    fence()
-    fence.transport_extent = os.fstat(fd).st_size
-    return attestation, scanner, reader, original_basis, fence, parent
+        expected_wire_version=selected_version, expected_parent_identity=expected_parent_identity,
+        expected_rp5a_read_basis=basis, expected_payload_bytes=selected_payload if selected_version == 3 else None)
+    _, rows, allowance, original_basis, parent = decoded[:5]
+    lease = decoded[5] if selected_version == 3 else None
+    try:
+        bindings = ({"wire_version": 3, "surface_role": "receiver", "payload_lease": lease}
+                    if selected_version == 3 else {})
+        fence = _ScanCandidateFence(repo_root, rows, limits=limits,
+                                    candidate_read_bytes=allowance, deadline_ns=deadline, **bindings)
+        fence()
+        fence.transport_extent = os.fstat(fd).st_size
+        return attestation, scanner, reader, original_basis, fence, parent
+    except BaseException as body:
+        errors = [body]
+        if lease is not None:
+            try:
+                lease._hold()
+                lease.close()
+            except BaseException as error:
+                errors.append(error)
+        _scan_raise_errors(errors)

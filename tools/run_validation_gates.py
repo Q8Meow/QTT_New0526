@@ -7825,6 +7825,8 @@ def _publish_active_plan_provenance(
         rp5a_scan_profiles=None if launch is None else launch.profiles,
         rp5a_reader_profiles=None if launch is None or not launch.reader_profiles else launch.reader_profiles,
         rp5a_reader_bases=None if launch is None or not launch.reader_bases else launch.reader_bases,
+        rp5a_launch_wire_versions=None if launch is None else launch.rp5a_launch_wire_versions,
+        rp5a_payload_byte_limits=None if launch is None else launch.rp5a_payload_byte_limits,
         scan_read_limits=None if launch is None else launch.read_limits,
         scan_deadline_ns=None if launch is None else launch.deadline_ns,
     )
@@ -8324,6 +8326,8 @@ def _finalize_validation_run(
                 rp5a_scan_profiles=None if scan_launch is None else scan_launch.profiles,
         rp5a_reader_profiles=None if scan_launch is None or not scan_launch.reader_profiles else scan_launch.reader_profiles,
         rp5a_reader_bases=None if scan_launch is None or not scan_launch.reader_bases else scan_launch.reader_bases,
+        rp5a_launch_wire_versions=None if scan_launch is None else scan_launch.rp5a_launch_wire_versions,
+        rp5a_payload_byte_limits=None if scan_launch is None else scan_launch.rp5a_payload_byte_limits,
             )
         except ValidationReliabilityError as exc:
             if supervision is not None:
@@ -8715,6 +8719,11 @@ def _scan_resolve_parent_capacity(paths, phase, plan):
             or set(launch.launch_inputs) != selected
             or set(launch.reader_profiles) != selected or set(launch.reader_bases) != selected):
         raise ValueError("capacity source did not retain exact original run/plan/input coverage")
+    from tools.validation_reliability import _scan_launch_wire_tables_v3
+    wire_binding = _scan_launch_wire_tables_v3(plan, launch.launch_inputs, launch.reader_profiles,
+                                               scanners, paths.repo_root)
+    if wire_binding != (launch.rp5a_launch_wire_versions, launch.rp5a_payload_byte_limits):
+        raise ValueError("capacity source changed the exact original wire/payload binding")
     _ACTIVE_SCAN_LAUNCH = launch
     return launch
 
