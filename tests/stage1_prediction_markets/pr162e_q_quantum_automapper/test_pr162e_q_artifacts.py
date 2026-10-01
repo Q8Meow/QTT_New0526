@@ -109,6 +109,58 @@ def test_pr162e_q_unit_objective_variable_interpret_and_proof_contracts():
     assert all(abs(row["objective_delta"]) <= 1e-9 for row in proof_rows)
     assert all(row["interpret_back_match_flag"] is True for row in proof_rows)
 
+    # A complete synthetic model supplies the predicate fixture. Retained
+    # reports above are tested as stored; this fixture neither currentizes them
+    # nor treats a generated witness as independently accepted evidence.
+    from copy import deepcopy
+    import json
+    from src.qtt.stage1_prediction_markets.pr162e_q_quantum_automapper.report_writer import (
+        _constraints, _decision_variables, _variable_domains, _qubo_matrix,
+        _ising_from_qubo, _recipe_payload, _proof_fields,
+    )
+    fixture_linear = dict.fromkeys(("x_select", "x_precompute", "x_retest", "x_owner_review"), 0.0)
+    fixture_constraints = [
+        {"name": "select_requires_one_route", "linear": {"x_select": 1, "x_precompute": -1}, "sense": "GE", "rhs": 0},
+        {"name": "owner_review_for_negative_or_repair", "linear": {"x_owner_review": 1, "x_retest": 1}, "sense": "GE", "rhs": 0},
+        {"name": "bounded_candidate_size", "linear": {"x_size_0": 1, "x_size_1": 2, "x_size_2": 4}, "sense": "LE", "rhs": 7},
+    ]
+    assert _constraints(1, "QUBO", False, False) == fixture_constraints
+    fixture_q = _qubo_matrix(fixture_linear, {}, 0.0)
+    fixture_recipe = _recipe_payload(
+        "QUBO", fixture_linear, {}, fixture_q, _ising_from_qubo(fixture_q, 0.0),
+        fixture_constraints, 1.0, {"hybrid": "fixture-hybrid", "to_pr166_qc": "fixture-retest"}, False,
+    )
+    # Independently known loss for this zero-utility fixture is precompute*(1-select).
+    assert {key: value for key, value in fixture_recipe["qubo"]["Q"].items() if value} == {
+        "x_precompute,x_precompute": 1.0, "x_precompute,x_select": -1.0,
+    }
+    assert fixture_recipe["qubo"]["offset"] == 0.0
+    model_fixture = deepcopy(proof_rows[0])
+    model_fixture.update(
+        candidate_packet_id="fixture-packet-A",
+        model_family_selected="QUBO", still_negative_after_costs_flag=False,
+        paper_retest_flag=False, owner_dashboard_review_flag=False,
+        objective_linear_terms=fixture_linear, objective_quadratic_terms={},
+        objective_terms={"linear": fixture_linear, "quadratic": {}, "offset": 0.0},
+        constraints=fixture_constraints, recipe_payload=fixture_recipe,
+        decision_variables=_decision_variables(1), variable_domains=_variable_domains("QUBO"),
+        canonical_variable_signature=",".join(item["name"] for item in _decision_variables(1)),
+        canonical_constraint_signature=json.dumps(fixture_constraints, sort_keys=True, separators=(",", ":")),
+        constraint_native_flag=False,
+        slack_variable_plan="NO_ADDITIONAL_SLACK_FOR_SELECTED_SOURCE_BOUND_BINARY_CONSTRAINTS",
+        coefficient_scaling_status="UNSCALED_MODEL_COEFFICIENTS_WITH_SOURCE_MAXIMUM_MAGNITUDE_PROXY",
+        discrete_case_handling="TWO_CASE_PER_ORIGINAL_BINARY_VARIABLE;ONE_HOT_ONLY_WHEN_ORIGINAL_CONSTRAINT_REQUIRES",
+    )
+    model_fixture.update(_proof_fields(model_fixture, 1, fixture_linear, {}, fixture_constraints, 1.0))
+    assert model_fixture["encoded_variable_assignment"] == {
+        "x_select": 1, "x_precompute": 1, "x_retest": 0, "x_owner_review": 0,
+        "x_size_0": 0, "x_size_1": 0, "x_size_2": 0,
+        "case_skip": 0, "case_precompute": 0, "case_retest": 1, "case_owner_review": 0,
+    }
+    for field in ("original_objective_value", "encoded_objective_value", "objective_delta",
+                  "encoded_energy_value", "bqm_energy_value", "ising_energy_value", "penalty_value"):
+        assert model_fixture[field] == 0.0
+
     # Exercise finite objective proof values without claiming a solver run.
     from copy import deepcopy
     import math
@@ -117,7 +169,7 @@ def test_pr162e_q_unit_objective_variable_interpret_and_proof_contracts():
     key = "PR162E_Q_MapProof.report.json"
     baseline = {
         "PR162E_Q_SolutionInterpretBack.report.json": [],
-        key: [deepcopy(proof_rows[0])],
+        key: [deepcopy(model_fixture)],
         "PR162E_Q_TestVectors.report.json": [],
     }
     for value in (0, 0.0, -0.0, 1e-9, -1e-9, "0", "0.000000001", "-0.000000001"):
@@ -328,9 +380,8 @@ def test_pr162e_q_unit_objective_variable_interpret_and_proof_contracts():
         _constraints_satisfied({"x": 1}, [constraint, {**constraint, "name": "bad", "sense": "UNKNOWN"}])
     assert _constraints_satisfied({"x": 1, "y": 1}, [{"name": "cancellation", "linear": {"x": 2**53+1, "y": -(2**53)}, "sense": "EQ", "rhs": 0}]) is False
 
-    # Reuse an actual report's complete model as test data. This does not make
-    # the report authentic; its source/generation admission remains separate.
-    witness = deepcopy(proof_rows[0])
+    # Reuse the complete synthetic model; report admission remains separate.
+    witness = deepcopy(model_fixture)
     failures = []
     _validate_interpret_back_and_proofs({"PR162E_Q_SolutionInterpretBack.report.json": [], "PR162E_Q_MapProof.report.json": [witness], "PR162E_Q_TestVectors.report.json": []}, failures)
     assert failures == []
@@ -376,7 +427,7 @@ def test_pr162e_q_unit_objective_variable_interpret_and_proof_contracts():
             encoded_loss = penalty_constant + sum(value*assignment[pair.split(",")[0]]*assignment[pair.split(",")[1]] for pair, value in penalty_terms.items())
             assert encoded_loss == loss
     # Decode preserves the original domain and never invents missing size bits.
-    witness = deepcopy(proof_rows[0])
+    witness = deepcopy(model_fixture)
     bits = witness["encoded_variable_assignment"]
     decoded = _mapping_solution_v1(witness, bits)
     assert decoded["original_variable_assignment"] == witness["original_variable_assignment"]
@@ -467,7 +518,7 @@ def test_pr162e_q_unit_objective_variable_interpret_and_proof_contracts():
     from src.qtt.stage1_prediction_markets.pr162e_q_quantum_automapper.validator import _validate_mapping_projection_consistency_v1
     projection_names = ("PR162E_Q_MapProof.report.json", "PR162E_Q_SolutionInterpretBack.report.json", "PR162E_Q_TestVectors.report.json")
     projection_report_names = tuple(c.ROW_REPORTS)
-    projection_seed = deepcopy(proof_rows[0])
+    projection_seed = deepcopy(model_fixture)
     projection_seed_before = deepcopy(projection_seed)
     projections = {name: [row_for_report(name, projection_seed, 1)] for name in projection_report_names}
     projection_failures = []
@@ -497,7 +548,7 @@ def test_pr162e_q_unit_objective_variable_interpret_and_proof_contracts():
     # A valid current inverse may retain several case bits without one-hot.
     # Its serialized interpretation must not invent a unique route.
     projection_report_names = tuple(c.ROW_REPORTS)
-    projection_seed = deepcopy(proof_rows[0])
+    projection_seed = deepcopy(model_fixture)
     if projection_seed["model_family_selected"] != "DQM":
         sample = dict(projection_seed["encoded_variable_assignment"])
         sample.update(case_skip=1, case_precompute=0, case_retest=1, case_owner_review=0)
@@ -591,7 +642,7 @@ def test_pr162e_q_unit_objective_variable_interpret_and_proof_contracts():
 
     # Independent decoded files do not share nested object aliases. A changed
     # recipe on any row report must not hide behind an unchanged proof copy.
-    all_projections = {name: [row_for_report(name, deepcopy(proof_rows[0]), 1)] for name in c.ROW_REPORTS}
+    all_projections = {name: [row_for_report(name, deepcopy(model_fixture), 1)] for name in c.ROW_REPORTS}
     projection_failures = []
     _validate_mapping_projection_consistency_v1(all_projections, projection_failures)
     assert projection_failures == []
@@ -604,7 +655,7 @@ def test_pr162e_q_unit_objective_variable_interpret_and_proof_contracts():
         _validate_mapping_projection_consistency_v1(changed, projection_failures)
         assert projection_failures == ["MAPPING_PROJECTION_MISMATCH"]
     for field, wrong in (
-        ("constraint_native_flag", not proof_rows[0]["constraint_native_flag"]),
+        ("constraint_native_flag", not model_fixture["constraint_native_flag"]),
         ("coefficient_scaling_status", "SCALED_TO_UNIT_INTERVAL_WITH_DYNAMIC_RANGE_RECORDED"),
         ("canonical_variable_signature", "x_select,x_size_bits,x_side_case"),
         ("canonical_constraint_signature", "budget<=1"),

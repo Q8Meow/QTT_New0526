@@ -44,7 +44,16 @@ def test_pr166_qb_budget_subset_is_capped_and_deterministic():
     )
     budget_key = "PR166_QB_BudgetPolicy.report.json"
     rows_key = "PR166_QB_SubsetSelection.report.json"
-    baseline = {budget_key: [{"actual_benchmark_subset_size": len(subset)}], rows_key: deepcopy(subset)}
+    # Explicit zero-count synthetic rows exercise the predicate independently
+    # of retained generated reports that do not carry current variable counts.
+    # Preserve all 64 row identities/families and the original report checks.
+    fixture_subset = [
+        {"row_id": row["row_id"], "model_family": row["model_family"],
+         "benchmark_subset_flag": True, "iterations_used": 0,
+         "samples_or_reads_used": 0, "seed_count": 0, "problem_variable_count": 0}
+        for row in subset
+    ]
+    baseline = {budget_key: [{"actual_benchmark_subset_size": len(fixture_subset)}], rows_key: fixture_subset}
     failures = []
     _validate_budget(baseline, failures)
     assert failures == []
