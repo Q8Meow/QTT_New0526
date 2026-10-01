@@ -857,6 +857,36 @@ def test_helper_preserves_user_pytest_args(tmp_path):
                 rejected, repository_root=repository, python_executable=helper.sys.executable,
                 run_root=run_root, environment={})
 
+    # Source-fixed report routes share one family table; no caller-selected scope.
+    frozen_scopes = (
+        (429, "QB", "pr166_qb_bounded_quantum_benchmark", "pr166_qb"),
+        (431, "QC", "pr166_qc_quantum_selected_replay_paper_retest", "pr166_qc"),
+        (433, "MAPPER", "pr162e_q_quantum_automapper", "pr162e_q"),
+    )
+    for first, family, domain, stem in frozen_scopes:
+        prefix = "tests/stage1_prediction_markets/" + domain
+        idem = prefix + "/test_" + stem + "_idempotence.py"
+        for position, scope in ((first, (idem, "-q", "--durations=50")),
+                (first + 1, (prefix, "-q", "--ignore", idem, "--durations=50"))):
+            for temp_args in (("--basetemp", str(run_root / "p")),
+                              ("--basetemp=" + str(run_root / "p"),)):
+                command = (helper.sys.executable, "-B", "tools/run_pytest_fresh_basetemp.py", *scope, *temp_args)
+                assert reliability._mapper_original_position_v1(command, repository) == position
+                assert next(row[1] for row in reliability._REPORT_READ_ROUTES_V1 if row[0] == position) == family
+                child = reliability._mapper_child_command_v1(command, repository, run_root)
+                assert child[:3] == (helper.sys.executable, "-B", "-c")
+                assert child[3] == reliability._MAPPER_PYTEST_BOOTSTRAP_V1
+                assert child[-len(scope)-2:] == (*scope, "--basetemp", str(run_root / "p"))
+            command = (helper.sys.executable, "tools/run_pytest_fresh_basetemp.py", *scope, "--basetemp", str(run_root / "p"))
+            for bad in (command + ("-x",), command + ("-k", "one"),
+                        command + ("--noconftest",), command + ("-p", "plugin"),
+                        command + ("--", "extra"), command + ("--basetemp=x",),
+                        command[:-2], command + ("--collect-only",)):
+                with pytest.raises(ValueError):
+                    reliability._mapper_original_position_v1(bad, repository)
+    unrelated = (helper.sys.executable, "tools/run_pytest_fresh_basetemp.py", "tests/fail_closed", "-q", "--basetemp", str(run_root / "p"))
+    assert reliability._mapper_original_position_v1(unrelated, repository) is None
+
 
 def test_helper_does_not_duplicate_basetemp_when_separate_arg_supplied():
     custom_basetemp = str(_custom_basetemp())

@@ -364,6 +364,19 @@ def _rp5a_pytest_main_v1():
     return int(result)
 
 
+def _mapper_pytest_main_v1():
+    """Fixed one-hop mapper bootstrap; the data cannot select executable code."""
+    from tools.validation_reliability import (
+        _mapper_read_profile_for_process_v1, _mapper_bound_reads_v1,
+    )
+    _, binding = _mapper_read_profile_for_process_v1(REPO_ROOT,
+        environment=os.environ, actual_argv=tuple(sys.orig_argv), role="CHILD")
+    # Bind before pytest import/collection. Every alias calls the same io owner.
+    with _mapper_bound_reads_v1(binding):
+        import pytest
+        return int(pytest.main(list(sys.argv[1:])))
+
+
 def _run_inherited_nested(
     forwarded: Sequence[str],
     *,
@@ -379,8 +392,13 @@ def _run_inherited_nested(
         _print_typed_error_once(error)
         return 1
     from contextlib import nullcontext
-    from tools.validation_reliability import _rp5a_consumer_role_v1, _read_rp5a_bound_launch_fd_v1
+    from tools.validation_reliability import (
+        _rp5a_consumer_role_v1, _read_rp5a_bound_launch_fd_v1,
+        _mapper_nested_pytest_args_v1, _mapper_child_deadline_v1,
+        _MAPPER_DEADLINE_ENV_KEYS,
+    )
     bound = None
+    mapper_binding = None
     invocation = build_pytest_invocation(forwarded)
     try:
         selected_call = (sys.executable, str(REPO_ROOT / "tools/run_pytest_fresh_basetemp.py"), *forwarded)
@@ -390,6 +408,10 @@ def _run_inherited_nested(
                 explicit_basetemp=pathlib.Path(invocation.basetemp), original_argv=tuple(sys.orig_argv),
                 expected_role="PYTEST")
             attestation = bound[0]
+        elif _mapper_nested_pytest_args_v1(selected_call, REPO_ROOT) is not None:
+            from tools.validation_reliability import _mapper_read_profile_for_process_v1
+            attestation, mapper_binding = _mapper_read_profile_for_process_v1(
+                REPO_ROOT, environment=os.environ, actual_argv=tuple(sys.orig_argv), role="PARENT")
         else:
             attestation = attest_inherited_validation_run(
                 REPO_ROOT,
@@ -401,11 +423,30 @@ def _run_inherited_nested(
             forwarded, repository_root=REPO_ROOT, python_executable=sys.executable,
             run_root=attestation.process_root, environment=os.environ,
         )
+        execution_deadline_ns = None
+        mapper_arguments = _mapper_nested_pytest_args_v1(selected_call, REPO_ROOT)
+        if mapper_arguments is not None:
+            if bound is not None or _mapper_nested_pytest_args_v1(tuple(sys.orig_argv), REPO_ROOT) != mapper_arguments:
+                raise ValueError("mapper deadline lost its original ordinary invocation")
+            execution_deadline_ns = _mapper_child_deadline_v1(child_environment)
+            for key in _MAPPER_DEADLINE_ENV_KEYS:
+                del child_environment[key]
+            projection["removed_environment_keys"] += _MAPPER_DEADLINE_ENV_KEYS
+        elif any(key.upper() in _MAPPER_DEADLINE_ENV_KEYS for key in child_environment):
+            raise ValueError("mapper deadline controls cannot select another child")
         nested_evidence = _allocate_nested_evidence_root(
             attestation.evidence_root
         )
         print(f"pytest basetemp: {invocation.basetemp}", flush=True)
         command, original_input, timeout = invocation.command, None, None
+        if mapper_binding is not None:
+            if mapper_binding["basis"]["deadline_ns"] != execution_deadline_ns:
+                raise ValueError("mapper read and child execution deadlines differ")
+            command = list(mapper_binding["child_argv"])
+            if mapper_binding['kind'] == 'MAPPER_NATIVE_READ_BINDING_V2':
+                from tools.validation_reliability import _MAPPER_ACTIVATION_ENV_V1
+                projection['fixed_environment_controls'] += ((_MAPPER_ACTIVATION_ENV_V1,
+                    child_environment[_MAPPER_ACTIVATION_ENV_V1]),)
         if bound is not None:
             command, original_input, timeout = _rp5a_forward_pytest_input_v1(
                 bound, invocation, tuple(sys.orig_argv), child_environment)
@@ -419,6 +460,8 @@ def _run_inherited_nested(
                 evidence_root=nested_evidence,
                 environment=child_environment,
                 **({"launch_input": original_input, "timeout_seconds": timeout} if original_input is not None else {}),
+                **({"execution_deadline_ns": execution_deadline_ns}
+                   if execution_deadline_ns is not None else {}),
             )
         if bound is not None:
             bound[4]()

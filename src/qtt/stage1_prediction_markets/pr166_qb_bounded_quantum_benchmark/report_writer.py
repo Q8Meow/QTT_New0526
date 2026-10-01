@@ -25,6 +25,8 @@ from .io import (
     resolve_repo_relative,
     write_json,
 )
+from src.qtt.stage1_prediction_markets.qku_computation_control_plane.serialization import _report_carry_candidate_lineage_v1
+from src.qtt.stage1_prediction_markets.qku_computation_control_plane.serialization import _report_companion_alignment_v1
 
 
 @dataclass(frozen=True)
@@ -124,11 +126,19 @@ def build_candidate_contexts(source: SourceData) -> list[dict[str, Any]]:
         source.records["PR166_Q_PR166_QB_BoundedNonLiveQuantumBenchmarkHandoff.report.json"],
         key=lambda item: str(item.get("deterministic_sort_key") or item.get("candidate_packet_id") or item.get("row_id")),
     )
+    aligned = _report_companion_alignment_v1(
+        handoffs,
+        {
+            name: source.records[name]
+            for name in c.EXPECTED_559_INPUTS
+            if name != "PR166_Q_PR166_QB_BoundedNonLiveQuantumBenchmarkHandoff.report.json"
+        },
+    )
     companions = {
-        name: _by_candidate(source.records[name])
-        for name in c.EXPECTED_559_INPUTS
-        if name != "PR166_Q_PR166_QB_BoundedNonLiveQuantumBenchmarkHandoff.report.json"
+        name: {row["candidate_packet_id"]: row for row in rows}
+        for name, rows in aligned.items()
     }
+    del aligned
     contexts: list[dict[str, Any]] = []
     for index, row in enumerate(handoffs, start=1):
         candidate = str(row["candidate_packet_id"])
@@ -300,7 +310,10 @@ def build_row_payloads(
     rows["PR166_QB_CloudSwitchReady.report.json"] = build_cloud_switch_rows()
     rows["PR166_QB_OwnerQuantumControlReady.report.json"] = build_owner_control_rows()
     for report_name in c.BENCHMARK_ROW_REPORTS:
-        rows[report_name] = [row_for_report(report_name, bench) for bench in benchmarks]
+        rows[report_name] = [
+            _report_carry_candidate_lineage_v1(bench["handoff"], row_for_report(report_name, bench))
+            for bench in benchmarks
+        ]
     rows["PR166_QB_FinalSummary.report.json"] = [build_final_summary(source, benchmarks, dependency_rows)]
     return rows
 
@@ -1055,6 +1068,7 @@ def _benchmark_common_row(report_name: str, index: int, bench: dict[str, Any]) -
         "iterations_used": bench["iterations_used"],
         "samples_or_reads_used": bench["samples_or_reads_used"],
         "seed_count": bench["seed_count"],
+        "problem_variable_count": bench["problem_variable_count"],
         "stability_score": bench["stability_score"],
         "coefficient_scaling_status": "NORMALIZED_WITH_UNIT_INTERVAL_PROXY",
         "constraint_violation_count": bench["constraint_violation_count"],

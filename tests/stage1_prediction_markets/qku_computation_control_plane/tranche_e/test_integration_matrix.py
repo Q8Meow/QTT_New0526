@@ -162,9 +162,11 @@ def _exercise_synthetic_probability_packet_factory(monkeypatch):
 
     The fixture does not stand in for fitted-model, source, or review acceptance.
     Its boundary starts at the original registered prepared object; the existing
-    numerical/artifact and committed-reader groups exercise the preceding ports.
+    numerical/artifact and committed-reader groups exercise separate preceding
+    ports. This helper does not prove the full producer-to-committed-reader chain.
     """
     from contextlib import contextmanager
+    from dataclasses import FrozenInstanceError
     from datetime import datetime, timedelta, timezone
     from decimal import Decimal
     import builtins
@@ -175,12 +177,15 @@ def _exercise_synthetic_probability_packet_factory(monkeypatch):
     import time
     from . import _synthetic_registered_prediction
     from src.qtt.stage1_prediction_markets.qku_computation_control_plane import implementation_registry as numerical
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane import input_resolver as inputs
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane import model_risk as risk
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane import service as composition
     from src.qtt.stage1_prediction_markets.qku_computation_control_plane.input_resolver import (
         ProbabilityOutcomeJoinV1, _build_probability_owner_registry_v1,
         _resolve_formula_input_binding, FORMULA_INPUT_AUTHORITY_BY_MATH_ID)
     from src.qtt.stage1_prediction_markets.qku_computation_control_plane.models import (
         ComputationExecutionContextV1, ComputationScopeV1, ImplementationVersionPinV1,
-        ProbabilityPredictionReadLimitsV1)
+        ProbabilityPredictionReadLimitsV1, ResourceBoundsProfileV1)
     from src.qtt.stage1_prediction_markets.qku_computation_control_plane.model_risk import (
         ProbabilityNativeUseRequestV1, ProbabilityNativeUseAdmissionV1,
         NoTradeConditionOutcomeV1, NO_TRADE_CONDITION_IDS_V1)
@@ -199,7 +204,8 @@ def _exercise_synthetic_probability_packet_factory(monkeypatch):
 
     with monkeypatch.context() as clock_patch:
         clock_patch.setattr(time, "time_ns", advancing_utc)
-        for mode in ("two", "four", "request_copy", "exit_revoked", "checker_value", "checker_revoked"):
+        for mode in ("two", "four", "request_copy", "exit_revoked", "checker_value", "checker_revoked",
+                     "service", "service_revoked"):
             resolver, reader, fence, prepared, entry = _synthetic_registered_prediction()
             initial_issuer_reads = reader.read_calls
             at = prepared.observed_ns
@@ -290,12 +296,93 @@ def _exercise_synthetic_probability_packet_factory(monkeypatch):
                 call = dict(base_registry=CanonicalOwnerPacketRegistryV1(), request=request,
                     capability_resolver=resolver, clock_facts=(cutoffs,) * 5, existing_conditions=conditions,
                     limits=limits, deadline_ns=deadline)
-                if mode not in ("two", "four"):
+                if mode in ("service", "service_revoked"):
+                    controls = tuple(risk.ModelRiskControlEvidenceV1(identity,
+                        risk.ModelRiskControlStateV1.BLOCKED_WITH_TYPED_REASON, (),
+                        (ReasonCode.ST12F_EVIDENCE_INCOMPLETE,), ("SYNTHETIC::UNQUALIFIED",), False)
+                        for identity in risk.MODEL_RISK_CONTROL_IDS_V1)
+                    comparison = risk.PermanentNoTradeEvidenceComparisonV1("SYNTHETIC::COMPARISON",
+                        scope.input_lock_ref, Decimal("0.1"), Decimal("1"), Decimal("0.8"), Decimal("0"), "CANDIDATE")
+                    # Missing lane/control evidence remains unavailable; composing
+                    # this candidate cannot invent a passing review or permission.
+                    basis = risk.ModelRiskAdjudicationBasisV1("MATH-02", observed,
+                        observed + timedelta(seconds=30), ("SYNTHETIC::REQUIRED",), None, None,
+                        Decimal("0.05"), Decimal("0.05"), False, False, ("SYNTHETIC::CAPACITY",),
+                        "READY_FOR_INDEPENDENT_REVIEW", "SYNTHETIC::PENDING-REVIEW")
+                    resource = ResourceBoundsProfileV1("SYNTHETIC::SERVICE",
+                        limits.metadata_limits.max_records, limits.metadata_limits.max_total_bytes, 1, 1, 1)
+                    factory_results, assessments, constructed = [], [], []
+                    actual_factory = inputs._build_probability_owner_registry_v1
+                    actual_adjudicate = risk.ModelRiskEvidenceAdjudicatorV1.adjudicate
+                    actual_service = composition.QKUComputationControlPlaneV1
+
+                    def build_once(**kwargs):
+                        result = actual_factory(**kwargs)
+                        factory_results.append(result)
+                        return result
+
+                    def adjudicate_once(self, **kwargs):
+                        result = actual_adjudicate(self, **kwargs)
+                        assessments.append(result)
+                        return result
+
+                    def construct_once(**kwargs):
+                        result = actual_service(**kwargs)
+                        constructed.append(result)
+                        if mode == "service_revoked":
+                            fence._source_synchronized_v1 = False
+                        return result
+
+                    compose_call = dict(owner_registry=call["base_registry"],
+                        agent_capability_resolver=resolver, native_use_request=request,
+                        clock_facts=call["clock_facts"], prediction_read_limits=limits,
+                        existing_conditions=conditions, assessment_id="SYNTHETIC::RISK",
+                        input_lock_id=scope.input_lock_ref, controls=controls, comparison=comparison,
+                        adjudication_basis=basis, limitations=("SYNTHETIC::PREPARED-BOUNDARY-ONLY",),
+                        receipt_refs=("SYNTHETIC::ASSESSMENT",), evaluated_ns=time.time_ns(),
+                        deadline_ns=deadline, resource_bounds_profile=resource)
+                    with monkeypatch.context() as joined:
+                        joined.setattr(inputs, "_build_probability_owner_registry_v1", build_once)
+                        joined.setattr(risk.ModelRiskEvidenceAdjudicatorV1, "adjudicate", adjudicate_once)
+                        joined.setattr(composition, "QKUComputationControlPlaneV1", construct_once)
+                        if mode == "service_revoked":
+                            with pytest.raises(InputAuthorityError) as rejected:
+                                composition._compose_probability_native_service_v1(**compose_call)
+                            assert rejected.value.reason_code is ReasonCode.INPUT_PACKET_MISMATCH
+                        else:
+                            service, assessment = composition._compose_probability_native_service_v1(**compose_call)
+                    assert len(factory_results) == len(assessments) == len(constructed) == 1
+                    assert counts["read"] == counts["exit"] == 1 and counts["check"] > 0
+                    assert reader.read_calls == initial_issuer_reads
+                    if mode == "service_revoked":
+                        continue
+                    registry, retained = factory_results[0]
+                    assert service is constructed[0] and type(service) is actual_service
+                    assert assessment is assessments[0] and service.owner_registry is registry
+                    assert service.agent_capability_resolver is resolver and service.resource_bounds_profile is resource
+                    assert service.mode_snapshot_input_resolver is None
+                    assert service.mode_snapshot_owner_projection_adapter is service.mode_snapshot_projection_bundle is None
+                    assert service.computation_evidence_service is None
+                    assert assessment.control_evidence is controls
+                    assert assessment.permanent_no_trade_comparison is comparison
+                    assert assessment.adjudication_basis is basis
+                    assert assessment.terminal_state == "NO_TRADE" and assessment.permanent_no_trade_wins is True
+                    assert assessment.automatic_promotion_allowed is False
+                    assert assessment.champion_challenger_evidence_only is True
+                    assert tuple(row.active for row in assessment.no_trade_condition_outcomes) == (
+                        True, True, True, False, False, False, False, True)
+                    assert set(conditions[0].evidence_receipt_refs) <= set(
+                        assessment.no_trade_condition_outcomes[0].evidence_receipt_refs)
+                    assert set(conditions[0].reason_codes) <= set(assessment.no_trade_condition_outcomes[0].reason_codes)
+                    with pytest.raises(FrozenInstanceError):
+                        service.owner_registry = call["base_registry"]
+                if mode not in ("two", "four", "service"):
                     with pytest.raises(ContractValidationError):
                         _build_probability_owner_registry_v1(**call, evaluated_ns=time.time_ns())
                     assert all(item["kind"] != "NATIVE_USE" for item in fence._registrations.values())
                 else:
-                    registry, retained = _build_probability_owner_registry_v1(**call, evaluated_ns=time.time_ns())
+                    if mode != "service":
+                        registry, retained = _build_probability_owner_registry_v1(**call, evaluated_ns=time.time_ns())
                     assert counts["read"] == counts["exit"] == 1 and counts["check"] > 0
                     assert len(registry.packets) == len(binding_ids) and len({packet.packet_id for packet in registry.packets}) == len(binding_ids)
                     assert retained[0] == conditions[0] and retained[0].active

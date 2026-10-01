@@ -10,6 +10,18 @@ from typing import Any
 from . import constants as c
 from .authority import FORBIDDEN_AUTHORITY_FLAGS, ZERO_AUTHORITY_KEYS
 from .io import read_json, records_from_report_payload
+from src.qtt.stage1_prediction_markets.qku_computation_control_plane.errors import ContractValidationError
+from src.qtt.stage1_prediction_markets.qku_computation_control_plane.errors import NumericDomainError
+from src.qtt.stage1_prediction_markets.qku_computation_control_plane.errors import ReasonCode
+from src.qtt.stage1_prediction_markets.qku_computation_control_plane.errors import SerializationSafetyError
+from src.qtt.stage1_prediction_markets.qku_computation_control_plane.serialization import _report_companion_alignment_v1
+from src.qtt.stage1_prediction_markets.qku_computation_control_plane.serialization import _report_manifest_consistency_v1
+from src.qtt.stage1_prediction_markets.qku_computation_control_plane.serialization import _report_directory_entries_v1
+from src.qtt.stage1_prediction_markets.qku_computation_control_plane.serialization import _report_schema_records_v1
+from src.qtt.stage1_prediction_markets.qku_computation_control_plane.serialization import _report_schema_session_v1
+from src.qtt.stage1_prediction_markets.qku_computation_control_plane.context import is_finite_json_number_v1
+from src.qtt.stage1_prediction_markets.qku_computation_control_plane.context import is_nonnegative_json_integer_v1
+from .report_writer import schema_filename
 
 
 @dataclass(frozen=True)
@@ -22,6 +34,7 @@ def validate_artifacts(repo_root: Path) -> ValidationResult:
     failures: list[str] = []
     payloads: dict[str, dict[str, Any]] = {}
     records: dict[str, list[dict[str, Any]]] = {}
+    schema_check = _report_schema_session_v1(repo_root, c, read_json, profile="QB", schema_name=schema_filename)
     for filename in c.REPORT_FILENAMES:
         path = repo_root / c.GENERATED_DIR / filename
         if not path.exists():
@@ -29,11 +42,19 @@ def validate_artifacts(repo_root: Path) -> ValidationResult:
             continue
         payload = read_json(path)
         payloads[filename] = payload
-        records[filename] = records_from_report_payload(repo_root, payload)
+        records[filename] = _report_schema_records_v1(repo_root, payload, read_json, schema_check, filename)
     if failures:
         return ValidationResult(ok=False, failures=tuple(failures))
     _validate_schemas(repo_root, payloads, failures)
     _validate_payload_contracts(payloads, records, failures)
+    try:
+        _report_manifest_consistency_v1(
+            payloads, records, c.REPORT_FILENAMES,
+            "PR166_QB_ReportManifest.report.json", c.GENERATED_DIR, c.SCHEMA_DIR,
+            style="ROOT_REFERENCE", schema_refs=None,
+        )
+    except SerializationSafetyError as exc:
+        failures.append(str(exc))
     _validate_inputs(repo_root, records, failures)
     _validate_benchmark_rows(records, failures)
     _validate_budget(records, failures)
@@ -74,10 +95,10 @@ def _validate_payload_contracts(
             failures.append(f"BAD_ROADMAP_PR::{filename}")
         if payload.get("created_by_pr") != c.PR_ID:
             failures.append(f"BAD_CREATED_BY_PR::{filename}")
-        if payload.get("record_count") != len(records[filename]):
+        if not is_nonnegative_json_integer_v1(payload.get("record_count")) or payload.get("record_count") != len(records[filename]):
             failures.append(f"BAD_RECORD_COUNT::{filename}")
         for key in ZERO_AUTHORITY_KEYS:
-            if payload.get(key, 0) != 0:
+            if (not is_nonnegative_json_integer_v1(payload.get(key, 0)) or payload.get(key, 0) != 0):
                 failures.append(f"PAYLOAD_FORBIDDEN_AUTHORITY_COUNT::{filename}::{key}")
         if filename in c.BENCHMARK_ROW_REPORTS and not payload.get("sharded_flag"):
             failures.append(f"ROW_REPORT_NOT_SHARDED::{filename}")
@@ -88,6 +109,7 @@ def _validate_inputs(
     records: dict[str, list[dict[str, Any]]],
     failures: list[str],
 ) -> None:
+    lineage_primary = None
     for filename in c.STRICT_INPUT_REPORTS:
         path = repo_root / c.GENERATED_DIR / filename
         if not path.exists():
@@ -95,6 +117,8 @@ def _validate_inputs(
             continue
         payload = read_json(path)
         expanded = records_from_report_payload(repo_root, payload)
+        if filename == 'PR166_Q_PR166_QB_BoundedNonLiveQuantumBenchmarkHandoff.report.json':
+            lineage_primary = expanded
         if filename in c.EXPECTED_559_INPUTS and len(expanded) != 559:
             failures.append(f"INPUT_COUNT_DRIFT::{filename}::{len(expanded)}")
     input_rows = records["PR166_QB_InputConsumption.report.json"]
@@ -103,6 +127,13 @@ def _validate_inputs(
     for row in input_rows:
         if not row.get("record_count_matches_expected_flag"):
             failures.append(f"INPUT_EXPECTED_COUNT_FAIL::{row.get('source_report_ref')}")
+
+    try:
+        _report_companion_alignment_v1(
+            lineage_primary, {name: records[name] for name in c.BENCHMARK_ROW_REPORTS}
+        )
+    except SerializationSafetyError:
+        failures.append("INPUT_CANDIDATE_LINEAGE_MISMATCH")
 
 
 def _validate_benchmark_rows(
@@ -131,7 +162,7 @@ def _validate_benchmark_rows(
             if mode in c.FORBIDDEN_EXECUTION_MODES:
                 failures.append(f"FORBIDDEN_EXECUTION_MODE::{filename}::{row_id}::{mode}")
             for key in ZERO_AUTHORITY_KEYS:
-                if row.get(key, 0) != 0:
+                if (not is_nonnegative_json_integer_v1(row.get(key, 0)) or row.get(key, 0) != 0):
                     failures.append(f"ROW_FORBIDDEN_AUTHORITY_COUNT::{filename}::{row_id}::{key}")
             for flag in FORBIDDEN_AUTHORITY_FLAGS:
                 if row.get(flag) is not False:
@@ -144,12 +175,26 @@ def _validate_benchmark_rows(
 
 def _validate_budget(records: dict[str, list[dict[str, Any]]], failures: list[str]) -> None:
     budget = records["PR166_QB_BudgetPolicy.report.json"][0]
-    subset_rows = [
-        row
-        for row in records["PR166_QB_SubsetSelection.report.json"]
-        if row.get("benchmark_subset_flag")
-    ]
-    if len(subset_rows) != budget.get("actual_benchmark_subset_size"):
+    actual_size = budget.get("actual_benchmark_subset_size")
+    if type(actual_size) is not int:
+        raise NumericDomainError(
+            ReasonCode.INVALID_NUMERIC_INPUT,
+            "actual_benchmark_subset_size must be an integer, not a Boolean or coerced value",
+        )
+    if actual_size < 0:
+        raise NumericDomainError(
+            ReasonCode.OUT_OF_DOMAIN,
+            "actual_benchmark_subset_size must be nonnegative",
+        )
+    selection_rows = records["PR166_QB_SubsetSelection.report.json"]
+    for row in selection_rows:
+        if type(row.get("benchmark_subset_flag")) is not bool:
+            raise ContractValidationError(
+                ReasonCode.INVALID_CONTRACT,
+                f"benchmark_subset_flag must be a Boolean: {row.get('row_id')}",
+            )
+    subset_rows = [row for row in selection_rows if row["benchmark_subset_flag"]]
+    if len(subset_rows) != actual_size:
         failures.append("SUBSET_SIZE_MISMATCH")
     if len(subset_rows) > c.BENCHMARK_CAPS["max_actual_benchmark_rows_default_ci"]:
         failures.append("SUBSET_CAP_EXCEEDED")
@@ -158,14 +203,25 @@ def _validate_budget(records: dict[str, list[dict[str, Any]]], failures: list[st
         if count > c.BENCHMARK_CAPS["max_rows_per_family_default_ci"]:
             failures.append(f"FAMILY_CAP_EXCEEDED::{family}::{count}")
     for row in subset_rows:
-        if row.get("iterations_used", 0) > c.BENCHMARK_CAPS["max_optimizer_iterations_default_ci"]:
-            failures.append(f"ITERATION_CAP_EXCEEDED::{row.get('row_id')}")
-        if row.get("samples_or_reads_used", 0) > c.BENCHMARK_CAPS["max_samples_or_reads_default_ci"]:
-            failures.append(f"SAMPLE_CAP_EXCEEDED::{row.get('row_id')}")
-        if row.get("seed_count", 0) > c.BENCHMARK_CAPS["max_random_seeds_default_ci"]:
-            failures.append(f"SEED_CAP_EXCEEDED::{row.get('row_id')}")
-        if row.get("problem_variable_count", 0) > c.BENCHMARK_CAPS["max_problem_variables_default_ci"]:
-            failures.append(f"VARIABLE_CAP_EXCEEDED::{row.get('row_id')}")
+        for field, cap_field, failure_prefix in (
+            ("iterations_used", "max_optimizer_iterations_default_ci", "ITERATION_CAP_EXCEEDED"),
+            ("samples_or_reads_used", "max_samples_or_reads_default_ci", "SAMPLE_CAP_EXCEEDED"),
+            ("seed_count", "max_random_seeds_default_ci", "SEED_CAP_EXCEEDED"),
+            ("problem_variable_count", "max_problem_variables_default_ci", "VARIABLE_CAP_EXCEEDED"),
+        ):
+            value = row.get(field)
+            if type(value) is not int:
+                raise NumericDomainError(
+                    ReasonCode.INVALID_NUMERIC_INPUT,
+                    f"{field} must be an observed integer: {row.get('row_id')}",
+                )
+            if value < 0:
+                raise NumericDomainError(
+                    ReasonCode.OUT_OF_DOMAIN,
+                    f"{field} must be nonnegative: {row.get('row_id')}",
+                )
+            if value > c.BENCHMARK_CAPS[cap_field]:
+                failures.append(f"{failure_prefix}::{row.get('row_id')}")
 
 
 def _validate_fairness(records: dict[str, list[dict[str, Any]]], failures: list[str]) -> None:
@@ -191,7 +247,7 @@ def _validate_race(records: dict[str, list[dict[str, Any]]], failures: list[str]
             "hybrid_route_score",
             "final_arbitration_score",
         ):
-            if not isinstance(row.get(key), (int, float)):
+            if not is_finite_json_number_v1(row.get(key)):
                 failures.append(f"RACE_SCORE_MISSING::{row.get('row_id')}::{key}")
         if row.get("classical_fallback_required_flag") is not True:
             failures.append(f"RACE_CLASSICAL_FALLBACK_MISSING::{row.get('row_id')}")
@@ -326,9 +382,12 @@ def _validate_artifact_map(records: dict[str, list[dict[str, Any]]], failures: l
 
 def _validate_summary(records: dict[str, list[dict[str, Any]]], failures: list[str]) -> None:
     summary = records["PR166_QB_FinalSummary.report.json"][0]
-    if summary.get("consumed_pr166_qb_handoff_rows") != 559:
+    if (not is_nonnegative_json_integer_v1(summary.get("consumed_pr166_qb_handoff_rows"))
+            or summary.get("consumed_pr166_qb_handoff_rows") != 559):
         failures.append("SUMMARY_HANDOFF_COUNT_NOT_559")
-    if summary.get("benchmark_subset_count", 0) > c.BENCHMARK_CAPS["max_actual_benchmark_rows_default_ci"]:
+    if not is_nonnegative_json_integer_v1(summary.get("benchmark_subset_count", 0)):
+        failures.append("SUMMARY_SUBSET_COUNT_INVALID")
+    elif summary.get("benchmark_subset_count", 0) > c.BENCHMARK_CAPS["max_actual_benchmark_rows_default_ci"]:
         failures.append("SUMMARY_SUBSET_CAP_EXCEEDED")
     if summary.get("forbidden_authority_counts_all_zero_flag") is not True:
         failures.append("SUMMARY_AUTHORITY_NOT_ZERO")
@@ -339,7 +398,10 @@ def _validate_summary(records: dict[str, list[dict[str, Any]]], failures: list[s
 
 
 def _validate_no_forbidden_sidecars(repo_root: Path, failures: list[str]) -> None:
-    for path in (repo_root / c.GENERATED_DIR).glob("PR166_QB_*"):
+    from fnmatch import fnmatch
+    for path in _report_directory_entries_v1(repo_root / c.GENERATED_DIR):
+        if not fnmatch(path.name, "PR166_QB_*"):
+            continue
         name = path.name.lower()
         if any(token in name for token in ("sha256", "checksum", "freeze", "global_digest")):
             failures.append(f"FORBIDDEN_DIGEST_ARTIFACT::{path.name}")

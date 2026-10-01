@@ -2572,7 +2572,8 @@ class TestST12FModelRiskLLMAdditiveMatrix:
         assert assessment.automatic_promotion_allowed is False
         # Independent literal decision table, all 256 incoming veto masks.
         # These local contracts are synthetic, with no fitted or market evidence.
-        from decimal import localcontext, ROUND_DOWN, ROUND_UP
+        from decimal import localcontext, ROUND_DOWN, ROUND_UP, Inexact, Overflow
+        from src.qtt.stage1_prediction_markets.qku_computation_control_plane.context import decimal_context_v1
         identities = (
             "NEGATIVE_OR_ZERO_EXECUTION_ADJUSTED_LCB", "MISSING_OR_STALE_REQUIRED_EVIDENCE",
             "REPLAY_OR_PAPER_LANE_MISSING", "LOCK_OR_SCOPE_CONFLICT",
@@ -2604,6 +2605,42 @@ class TestST12FModelRiskLLMAdditiveMatrix:
                           ambient.capitals, ambient.clamp, dict(ambient.traps), dict(ambient.flags))
                 exact = _st12f_adjudicate(controls, _st12f_conditions(), comparison, basis)
                 assert exact.terminal_state == "CLOSED_INDEPENDENTLY_VALIDATED"
+                D = _ST12FDecimal
+                reserves = replace(basis,
+                    uncertainty_reserve=D("0.50000000000000000000000000004"),
+                    model_risk_reserve=D("0.50000000000000000000000000004"))
+                edge = replace(comparison, candidate_utility=D("1.00000000000000000000000000007"))
+                exact = _st12f_adjudicate(controls, _st12f_conditions(), edge, reserves)
+                assert exact.terminal_state == "NO_TRADE"
+                assert exact.no_trade_condition_outcomes[4].active is True
+                assert exact.permanent_no_trade_comparison is edge and exact.adjudication_basis is reserves
+                # Literal winners distinguish ambient-rounded false ties from
+                # genuine conservative ties, without a production-derived oracle.
+                for candidate, classical, no_trade, winner in (
+                        ("1.004", "1.003", "1.002", "CANDIDATE"),
+                        ("1", "1", "1", "NO_TRADE"),
+                        ("1", "1", "0.9", "STRONGEST_CLASSICAL")):
+                    ordered = replace(comparison, candidate_utility=D(candidate),
+                        strongest_classical_utility=D(classical), no_trade_utility=D(no_trade),
+                        strongest_comparator=winner)
+                    assert ordered.strongest_comparator == winner
+                    assert (ordered.candidate_utility, ordered.strongest_classical_utility,
+                            ordered.no_trade_utility) == (D(candidate), D(classical), D(no_trade))
+                overflow_operand = D((0, (9,), decimal_context_v1().Emax))
+                for uncertainty, model_risk, cause in (
+                        (D("1"), D("1E-34"), Inexact),
+                        (overflow_operand, overflow_operand, Overflow)):
+                    unrepresentable = replace(basis, uncertainty_reserve=uncertainty,
+                                              model_risk_reserve=model_risk)
+                    with pytest.raises(NumericDomainError) as rejected:
+                        _st12f_adjudicate(controls, _st12f_conditions(), comparison, unrepresentable)
+                    assert rejected.value.reason_code is ReasonCode.INVALID_NUMERIC_INPUT
+                    assert type(rejected.value.__cause__) is cause
+                trailing_zero = replace(basis,
+                    uncertainty_reserve=D("1.0000000000000000000000000000000000"), model_risk_reserve=D("0"))
+                exact = _st12f_adjudicate(controls, _st12f_conditions(), comparison, trailing_zero)
+                assert exact.terminal_state == "NO_TRADE"
+                assert exact.no_trade_condition_outcomes[4].active is True
                 assert before == (ambient.prec, ambient.rounding, ambient.Emin, ambient.Emax,
                                   ambient.capitals, ambient.clamp, dict(ambient.traps), dict(ambient.flags))
 

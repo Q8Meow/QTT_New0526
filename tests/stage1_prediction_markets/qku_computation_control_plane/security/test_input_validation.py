@@ -454,6 +454,97 @@ def _exercise_v35_synthetic_fit_interfaces():
         calls = []
         interface_failure = ContractValidationError(ReasonCode.SCHEMA_MISMATCH, "synthetic malformed native iteration counter")
         mode = "interface"
+        actual_fit = subject._probability_fit_prediction_v1
+        native_fault_entries, verification_entries = [], []
+
+        def fit_with_nonfinite_output(fault, fit_rows, cal_rows, final_ids,
+                                      feature_names, request_values, kind, work):
+            # These library ports expose declared fitted-output faults to the
+            # real fit owner. They do not fit or qualify numerical libraries.
+            from contextlib import nullcontext
+            import math
+
+            class Vector(tuple):
+                def __gt__(self, other):
+                    return tuple(value > other for value in self)
+                def tolist(self):
+                    return list(self)
+                def ravel(self):
+                    def flatten(value):
+                        if isinstance(value, (tuple, list)):
+                            for child in value:
+                                yield from flatten(child)
+                        else:
+                            yield value
+                    return Vector(flatten(self))
+
+            def array(value, **kwargs):
+                if isinstance(value, (tuple, list)):
+                    return Vector(array(child) if isinstance(child, (tuple, list)) else child
+                                  for child in value)
+                return value
+
+            def finite(value):
+                if isinstance(value, (tuple, list)):
+                    return tuple(flag for child in value for flag in finite(child))
+                return (math.isfinite(value),)
+
+            class SyntheticConvergenceWarning(UserWarning):
+                pass
+
+            class FittedClassifier:
+                def __init__(self, **kwargs):
+                    self.n_iter_ = Array(0) if kind == "CALIBRATED_LOGISTIC" else 0
+                    self.scale_ = float("inf") if fault == "huber_scale" else 1.0
+                    self.coef_ = Vector((Vector((float("inf") if fault == "coefficient" else 0.0,)),))
+                    self.intercept_ = Vector((float("nan") if fault == "intercept" else 0.0,))
+                    self.classes_ = Vector((0, 1))
+
+            class Scaler:
+                def __init__(self, **kwargs):
+                    self.mean_, self.var_, self.scale_ = Vector((0.0,)), Vector((1.0,)), Vector((1.0,))
+                    self.n_samples_seen_ = len(fit_rows)
+
+            class Pipeline:
+                def __init__(self, steps):
+                    self.named_steps = dict(steps)
+                def fit(self, values, labels):
+                    native_fault_entries.append(fault)
+                    return self
+                def decision_function(self, values):
+                    return Vector(0.0 for _ in values)
+
+            class Calibrator:
+                def __init__(self, estimator, **kwargs):
+                    self.calibrated_classifiers_ = [SimpleNamespace(calibrators=[SimpleNamespace(
+                        a_=float("inf") if fault == "sigmoid_a" else 0.0,
+                        b_=float("nan") if fault == "sigmoid_b" else 0.0)])]
+                def fit(self, values, labels):
+                    return self
+
+            def verification_port(*args):
+                verification_entries.append(fault)
+                return 0.0, 0.0, None
+
+            fit_numpy = SimpleNamespace(**vars(synthetic_numpy), float64=float,
+                asarray=array, ascontiguousarray=array, array=array, all=all,
+                isfinite=finite, array_equal=lambda left, right: left == right)
+            modules = {
+                "numpy": fit_numpy,
+                "scipy": SimpleNamespace(__version__="SYNTHETIC_INTERFACE_ONLY"),
+                "sklearn": SimpleNamespace(__version__="SYNTHETIC_INTERFACE_ONLY"),
+                "sklearn.preprocessing": SimpleNamespace(StandardScaler=Scaler),
+                "sklearn.linear_model": SimpleNamespace(LogisticRegression=FittedClassifier, HuberRegressor=FittedClassifier),
+                "sklearn.pipeline": SimpleNamespace(Pipeline=Pipeline),
+                "sklearn.calibration": SimpleNamespace(CalibratedClassifierCV=Calibrator),
+                "sklearn.frozen": SimpleNamespace(FrozenEstimator=lambda value: value),
+                "sklearn.exceptions": SimpleNamespace(ConvergenceWarning=SyntheticConvergenceWarning),
+                "threadpoolctl": SimpleNamespace(threadpool_limits=lambda **kwargs: nullcontext()),
+            }
+            with patch.dict(sys.modules, modules), patch.object(
+                    subject, "_probability_checked_sigmoid_v1", verification_port):
+                return actual_fit(fit_rows, cal_rows, final_ids, feature_names, request_values, kind, work)
+
         def fitted(fit_rows, cal_rows, final_ids, feature_names, request_values, kind, work):
             calls.append((len(fit_rows), len(cal_rows)))
             assert final_ids is final_rows and kind == "CALIBRATED_LOGISTIC"
@@ -461,6 +552,10 @@ def _exercise_v35_synthetic_fit_interfaces():
                 labels = tuple(row[0] for row in (*fit_rows, *cal_rows))
                 assert all(label.startswith("V35_OCCURRENCE:1:") for label in labels)
                 assert not set(labels).intersection((*original_ids, *final_rows))
+            faults = {2: "coefficient", 3: "intercept", 4: "sigmoid_a", 5: "sigmoid_b"}
+            if mode == "nonfinite_outputs" and len(calls) in faults:
+                return fit_with_nonfinite_output(faults[len(calls)], fit_rows, cal_rows,
+                    final_ids, feature_names, request_values, kind, work)
             work["base_fit_calls"] += 1
             if len(calls) == 2 and mode != "complete":
                 if mode == "interface":
@@ -493,6 +588,36 @@ def _exercise_v35_synthetic_fit_interfaces():
         assert work == {"base_fit_calls": 1001, "calibration_fit_calls": 1000, "calibration_verification_calls": 1000}
         assert tuple(row[0] for cluster in (*fit, *calibration) for row in cluster[5]) == original_ids
         assert bank["model_use_authorized"] is bank["source_authentication"] is bank["target_environment_qualified"] is False
+        calls.clear(); generated.clear(); mode = "nonfinite_outputs"
+        work = work_origin()
+        with patch.object(subject, "_probability_fit_prediction_v1", fitted):
+            failed_bank = subject._probability_construct_prediction_bank_v1(**arguments, work=work)
+        assert native_fault_entries == ["coefficient", "intercept", "sigmoid_a", "sigmoid_b"]
+        assert verification_entries == []
+        assert len(calls) == 1001 and len(generated) == 2000
+        assert tuple(row["replicate"] for row in failed_bank["records"]) == tuple(range(1000))
+        assert failed_bank["records"][:4] == [
+            {"replicate": ordinal, "status": "INVALID", "values": None, "reason": "CANONICAL_FLOAT_HEX"}
+            for ordinal in range(4)]
+        assert all(row["status"] == "VALID" for row in failed_bank["records"][4:])
+        assert failed_bank["state"] == "UNAVAILABLE_INVALID_REPLICATE" and failed_bank["intervals"] is None
+        # Two faults precede calibration, two precede verification. The 997
+        # successful fits include the original and retain the full denominator.
+        assert failed_bank["successful_fit_calls"] == 1994
+        assert work == {"base_fit_calls": 1001, "calibration_fit_calls": 999, "calibration_verification_calls": 997}
+        assert failed_bank["model_use_authorized"] is failed_bank["source_authentication"] is False
+        # The continuous scale has the same finite-export boundary, with no
+        # calibration work. This is one synthetic fitted-output interface call.
+        from decimal import Decimal
+        huber_rows = tuple((row[0], row[1], Decimal(row[2])) for cluster in fit for row in cluster[5])
+        huber_calibration = tuple((row[0], row[1], Decimal(row[2])) for cluster in calibration for row in cluster[5])
+        huber_work = work_origin()
+        with pytest.raises(subject._ProbabilityNumericalFailureV1) as scale_failure:
+            fit_with_nonfinite_output("huber_scale", huber_rows, huber_calibration,
+                final_rows, ("f",), ((0.0,),), "HUBER", huber_work)
+        assert scale_failure.value.detail == "CANONICAL_FLOAT_HEX"
+        assert huber_work == {"base_fit_calls": 1, "calibration_fit_calls": 0, "calibration_verification_calls": 0}
+        assert native_fault_entries[-1] == "huber_scale" and verification_entries == []
         # Native bank construction, complete framing, decoding and locked-value
         # admission are exercised together. Only the explicitly synthetic
         # generator/fitter ports above are substituted; this is no model fit.

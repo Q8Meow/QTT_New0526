@@ -611,6 +611,74 @@ def _assert_v35_control_storage(adapter_kind, directory):
             with pytest.raises(ComputationControlPlaneError):
                 adapter.close()
     assert adapter._probability_read_active_v1 is False
+    if adapter_kind == "memory":
+        from unittest.mock import patch
+        from src.qtt.stage1_prediction_markets.qku_computation_control_plane import persistence as storage
+        from src.qtt.stage1_prediction_markets.qku_computation_control_plane import serialization as wire
+        mirror_bytes = sum(len(cell.encode("utf-8")) for cell in cells[:4])
+        payload_bytes = len(cells[4].encode("utf-8"))
+        # Real reader/codec calls: the remaining total must constrain the
+        # serializer before it can allocate the canonical payload.
+        with patch.object(storage, "_bounded_probability_json_v1",
+                          wraps=storage._bounded_probability_json_v1) as bounded:
+            with adapter.load_committed_probability_producer_state_v1(request) as reread:
+                assert reread.records_by_ref[record.record_id] == record
+            assert bounded.call_count == 1
+            assert bounded.call_args.kwargs["max_bytes"] == min(frame_bytes, payload_bytes)
+        mirror_only = replace(request, limits=replace(limits, max_total_bytes=mirror_bytes))
+        for local_request, combined_remaining in ((mirror_only, total_bytes), (request, mirror_bytes)):
+            with storage._probability_combined_read_budget_v1(
+                    adapter, scope=scope, max_total_bytes=combined_remaining) as ledger:
+                with patch.object(storage, "_bounded_probability_json_v1") as bounded:
+                    with pytest.raises(ComputationControlPlaneError, match="PROBABILITY_READ_BYTE_BUDGET"):
+                        with adapter.load_committed_probability_producer_state_v1(local_request):
+                            pass
+                    bounded.assert_not_called()
+                assert ledger["used"] == 0
+            assert adapter._probability_read_active_v1 is False
+        for remaining in (total_bytes, total_bytes - 1):
+            with storage._probability_combined_read_budget_v1(
+                    adapter, scope=scope, max_total_bytes=total_bytes + remaining) as ledger:
+                storage._probability_charge_read_v1(adapter, scope, total_bytes)
+                with patch.object(storage, "_bounded_probability_json_v1",
+                                  wraps=storage._bounded_probability_json_v1) as bounded:
+                    if remaining == total_bytes:
+                        with adapter.load_committed_probability_producer_state_v1(request) as reread:
+                            assert reread.records_by_ref[record.record_id] == record
+                        assert ledger["used"] == 2 * total_bytes
+                    else:
+                        with patch.object(wire, "deterministic_json", wraps=wire.deterministic_json) as serializer:
+                            with pytest.raises(ComputationControlPlaneError, match="JSON_BOUND"):
+                                with adapter.load_committed_probability_producer_state_v1(request):
+                                    pass
+                            serializer.assert_not_called()
+                        assert ledger["used"] == total_bytes
+                    assert bounded.call_count == 1
+                    assert bounded.call_args.kwargs["max_bytes"] == min(frame_bytes, remaining - mirror_bytes)
+            assert adapter._probability_read_active_v1 is False
+        # Equal bytes or even the same original object cannot collapse two
+        # physical destinations into one apparent committed record.
+        for alias_record in (record, replace(record)):
+            adapter._tables["receipt_records"]["synthetic-alias"] = alias_record
+            try:
+                with pytest.raises(ComputationControlPlaneError, match="PROBABILITY_MEMORY_LOCATOR_IDENTITY"):
+                    with adapter.load_committed_probability_producer_state_v1(request):
+                        pass
+            finally:
+                del adapter._tables["receipt_records"]["synthetic-alias"]
+            assert adapter._probability_read_active_v1 is False
+        repeated = [1]
+        for value, expected in (
+                (None, "null"), (False, "false"), ((1, -2), "[1,-2]"),
+                ({"x": "\u00e9\n"}, '{"x":"\u00e9\\n"}'),
+                ({"x": "\u0001"}, '{"x":"\\u0001"}'),
+                ((repeated, repeated), "[[1],[1]]")):
+            assert wire._bounded_probability_json_v1(value, max_bytes=len(expected.encode("utf-8"))) == expected
+        # A serializer returning a different-length valid JSON value must not
+        # discard the independently admitted byte count.
+        with patch.object(wire, "deterministic_json", return_value="null"):
+            with pytest.raises(ComputationControlPlaneError, match="PROBABILITY_WIRE_BYTE_COUNT"):
+                wire._bounded_probability_json_v1({}, max_bytes=32)
     for narrower in (replace(limits, max_total_bytes=total_bytes - 1), replace(limits, max_frame_bytes=frame_bytes - 1)):
         with pytest.raises(ComputationControlPlaneError):
             with adapter.load_committed_probability_producer_state_v1(replace(request, limits=narrower)):

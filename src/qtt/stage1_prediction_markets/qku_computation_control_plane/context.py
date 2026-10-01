@@ -562,3 +562,27 @@ def _f14_plain_v1(value):
     if type(value) in (tuple, list):
         return [_f14_plain_v1(item) for item in value]
     return value
+
+def is_finite_json_number_v1(value: object) -> bool:
+    """Validate a decoded JSON number without coercion or a new numeric policy.
+
+    Exact Python integers are finite without conversion to binary float. This
+    avoids losing precision or rejecting an integer solely for exceeding float
+    range. Floating scalars reuse the existing finite-float owner. Booleans,
+    subclasses, strings, Decimal objects, and containers are not decoded JSON
+    numeric scalars at this boundary. This predicate does not validate units,
+    provenance, economic sign, probability bounds, or model eligibility.
+    """
+    if type(value) is int:
+        return True
+    if type(value) is not float:
+        return False
+    try:
+        finite_float(value)
+    except NumericDomainError:
+        return False
+    return True
+
+def is_nonnegative_json_integer_v1(value: object) -> bool:
+    """Validate an observed count; never infer a missing value or coerce it."""
+    return type(value) is int and value >= 0

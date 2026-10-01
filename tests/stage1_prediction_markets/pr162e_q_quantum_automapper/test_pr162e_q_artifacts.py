@@ -109,6 +109,515 @@ def test_pr162e_q_unit_objective_variable_interpret_and_proof_contracts():
     assert all(abs(row["objective_delta"]) <= 1e-9 for row in proof_rows)
     assert all(row["interpret_back_match_flag"] is True for row in proof_rows)
 
+    # Exercise finite objective proof values without claiming a solver run.
+    from copy import deepcopy
+    import math
+    from src.qtt.stage1_prediction_markets.pr162e_q_quantum_automapper.validator import _validate_interpret_back_and_proofs
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane.errors import NumericDomainError, ReasonCode
+    key = "PR162E_Q_MapProof.report.json"
+    baseline = {
+        "PR162E_Q_SolutionInterpretBack.report.json": [],
+        key: [deepcopy(proof_rows[0])],
+        "PR162E_Q_TestVectors.report.json": [],
+    }
+    for value in (0, 0.0, -0.0, 1e-9, -1e-9, "0", "0.000000001", "-0.000000001"):
+        case = deepcopy(baseline)
+        case[key][0]["objective_delta"] = value
+        failures = []
+        _validate_interpret_back_and_proofs(case, failures)
+        assert failures == []
+    for value in (math.nextafter(1e-9, math.inf), math.nextafter(-1e-9, -math.inf), 1.0, -1.0):
+        case = deepcopy(baseline)
+        case[key][0]["objective_delta"] = value
+        failures = []
+        _validate_interpret_back_and_proofs(case, failures)
+        assert failures == [f"PROOF_OBJECTIVE_DELTA_NONZERO::{case[key][0].get('row_id')}"]
+    for value in (float("nan"), float("inf"), float("-inf"), "NaN", "Infinity", "1e999", True, False, None, [], {}):
+        case = deepcopy(baseline)
+        case[key][0]["objective_delta"] = value
+        try:
+            _validate_interpret_back_and_proofs(case, [])
+        except NumericDomainError as exc:
+            assert exc.reason_code in {ReasonCode.INVALID_NUMERIC_INPUT, ReasonCode.NONFINITE_NUMERIC_INPUT}
+        else:
+            raise AssertionError("invalid mapping objective proof accepted")
+    case = deepcopy(baseline)
+    del case[key][0]["objective_delta"]
+    try:
+        _validate_interpret_back_and_proofs(case, [])
+    except NumericDomainError as exc:
+        assert exc.reason_code == ReasonCode.INVALID_NUMERIC_INPUT
+    else:
+        raise AssertionError("missing mapping objective proof accepted")
+    for field, value, prefix in (
+        ("proof_status", "UNPROVEN", "PROOF_STATUS_BAD"),
+        ("interpret_back_match_flag", False, "PROOF_INTERPRET_BACK_FAIL"),
+    ):
+        case = deepcopy(baseline)
+        case[key][0]["objective_delta"] = 0.0
+        case[key][0][field] = value
+        failures = []
+        _validate_interpret_back_and_proofs(case, failures)
+        expected = f"{prefix}::{case[key][0].get('row_id')}"
+        if field == "proof_status":
+            expected += "::UNPROVEN"
+        assert failures == [expected]
+
+    from src.qtt.stage1_prediction_markets.pr162e_q_quantum_automapper.validator import _validate_payload_contracts
+    count_name = "PR162E_Q_InputConsumption.report.json"
+    count_payload = {count_name: {"roadmap_pr_id": c.PR_ID, "created_by_pr": c.PR_ID, "record_count": 1}}
+    count_rows = {count_name: [{}]}
+    failures = []
+    _validate_payload_contracts(count_payload, count_rows, failures)
+    assert failures == []
+    for value in (True, False, 1.0, 1.9, "1", None, -1, float("nan"), float("inf")):
+        candidate_count = dict(count_payload[count_name])
+        candidate_count["record_count"] = value
+        failures = []
+        _validate_payload_contracts({count_name: candidate_count}, count_rows, failures)
+        assert failures == [f"BAD_RECORD_COUNT::{count_name}"]
+
+    from src.qtt.stage1_prediction_markets.pr162e_q_quantum_automapper.validator import _validate_risk_execution_and_units
+    map_reports = ('PR162E_Q_UnitNorm.report.json', 'PR162E_Q_TCAMapImpact.report.json', 'PR162E_Q_OverfitFDRMapRisk.report.json', 'PR162E_Q_MapSensitivityStress.report.json', 'PR162E_Q_EdgeAttribution.report.json')
+    cost_fields = ('explicit_fee_component', 'bid_ask_spread_component', 'slippage_component', 'impact_component', 'latency_component', 'no_fill_opportunity_cost_component', 'settlement_finality_component', 'market_state_mismatch_component', 'model_vs_execution_gap_component', 'mapping_to_replay_translation_penalty', 'mapping_to_paper_translation_penalty', 'mapping_to_simulator_translation_penalty', 'total_tca_estimate')
+    delta_fields = ('baseline_expected_net_profit_per_order_candidate', 'mapped_expected_net_profit_per_order_candidate', 'expected_value_delta_candidate', 'TCA_delta_candidate', 'latency_delta_candidate', 'fill_probability_delta_candidate', 'queue_risk_delta_candidate', 'capacity_delta_candidate', 'crowding_delta_candidate', 'overfit_delta_candidate', 'marginal_utility_delta_candidate', 'quantum_precompute_delta_candidate', 'classical_fallback_delta_candidate')
+    tca_name = "PR162E_Q_TCAMapImpact.report.json"
+    edge_name = "PR162E_Q_EdgeAttribution.report.json"
+    packets = {name: [] for name in map_reports}
+    packets[tca_name] = [{"row_id": "synthetic", "tca_reason_codes": ["SYNTHETIC"], **dict.fromkeys(cost_fields, 0.5)}]
+    packets[edge_name] = [{"row_id": "synthetic", "not_profit_evidence_flag": True, **dict.fromkeys(delta_fields, 0.5)}]
+    for name, fields, prefix in ((tca_name, cost_fields, "TCA_FIELD_MISSING"), (edge_name, delta_fields, "EDGE_FIELD_MISSING")):
+        for field in fields:
+            for value in (True, False, float("nan"), float("inf"), float("-inf"), "0.5", None):
+                case = deepcopy(packets)
+                case[name][0][field] = value
+                failures = []
+                _validate_risk_execution_and_units(case, failures)
+                assert failures == [f"{prefix}::synthetic::{field}"]
+            case = deepcopy(packets)
+            case[name][0][field] = -1.0
+            failures = []
+            _validate_risk_execution_and_units(case, failures)
+            assert failures == []
+
+    # Companion association is checked on existing semantic fields, not row order.
+    from copy import deepcopy
+    from types import SimpleNamespace
+    import pytest
+    from src.qtt.stage1_prediction_markets.pr162e_q_quantum_automapper.report_writer import build_candidate_contexts
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane.errors import SerializationSafetyError
+
+    companion_names = (
+        'PR166_QC_AutomapperNeeds.report.json',
+        'PR166_QC_ReplayPaperRepairLab.report.json',
+        'PR166_QC_StillNegativeAfterCosts.report.json',
+        'PR166_QC_PaperPromotionCandidate.report.json',
+        'PR166_QC_ChampChallengerPaper.report.json',
+        'PR166_QC_OpenTradeSimHandoff.report.json',
+        'PR166_QC_BenchmarkOnlyResidual.report.json',
+        'PR166_QC_OwnerDashboardReview.report.json',
+        'PR166_QC_ConnectorRouteReadiness.report.json',
+        'PR166_QC_OverfitFDRRetest.report.json',
+        'PR166_QC_PortfolioUtility.report.json',
+        'PR166_QC_RegimeEvidence.report.json',
+        'PR166_QB_QUBOReceipt.report.json',
+        'PR166_QB_BQMReceipt.report.json',
+        'PR166_QB_IsingReceipt.report.json',
+        'PR166_QB_CQMReceipt.report.json',
+        'PR166_QB_DQMReceipt.report.json',
+        'PR166_QB_QuadProgramReceipt.report.json',
+        'PR166_QB_ClassicalReceipt.report.json',
+        'PR166_QB_RaceArb.report.json',
+        'PR166_Q_QuantumStructuralReadiness.report.json',
+        'PR166_Q_ObjectiveVariableConstraintPenaltyMap.report.json',
+        'PR166_Q_QuantumClassicalHybridRaceLedger.report.json',
+    )
+    primary_name = 'PR166_QC_To_PR162E_Q.report.json'
+    base = {"row_id": "fixture-A", "qku_id": "fixture-QKU", "formula_id": "fixture-formula",
+            "algorithm_id": "fixture-algorithm", "parameter_stack_id": "fixture-parameters-A",
+            "execution_route_id": "fixture-route", "market_scope": "fixture-market",
+            "qku_family": "fixture-family", "model_family": "QUBO", "deterministic_sort_key": "A"}
+    other = {**base, "row_id": "fixture-B", "parameter_stack_id": "fixture-parameters-B", "deterministic_sort_key": "B"}
+    base["candidate_packet_id"] = "fixture-packet-A"
+    other["candidate_packet_id"] = "fixture-packet-B"
+    source_rows = {primary_name: [base, other]}
+    for name in companion_names:
+        source_rows[name] = [{**base, "row_id": name + "::A", "association_value": -7},
+                             {**other, "row_id": name + "::B", "association_value": 11}]
+    source = SimpleNamespace(records=source_rows)
+    clean = build_candidate_contexts(source)
+    assert len(clean) == 2
+    expected = [-7, 11]
+    for name in companion_names:
+        assert [item["companions"][name]["association_value"] for item in clean] == expected
+    name = companion_names[0]
+    source_rows[name][0]["deterministic_sort_key"] = "Z"
+    source_rows[name][1]["deterministic_sort_key"] = "0"
+    source_rows[name].reverse()
+    snapshot = deepcopy(source_rows)
+    aligned = build_candidate_contexts(source)
+    assert [item["companions"][name]["association_value"] for item in aligned] == expected
+    assert source_rows == snapshot
+    for mutation in ("missing", "extra", "duplicate-key", "wrong-key", "duplicate-row-id", "null-key"):
+        changed = deepcopy(source_rows)
+        if mutation == "missing":
+            changed[name].pop()
+        elif mutation == "extra":
+            changed[name].append({**changed[name][0], "row_id": "fixture-extra", "parameter_stack_id": "fixture-extra"})
+        elif mutation == "duplicate-key":
+            changed[name].append({**changed[name][0], "row_id": "fixture-duplicate"})
+        elif mutation == "wrong-key":
+            changed[name][0]["execution_route_id"] = "fixture-unmatched-route"
+        elif mutation == "duplicate-row-id":
+            changed[name][1]["row_id"] = changed[name][0]["row_id"]
+        else:
+            changed[name][0]["qku_id"] = None
+        with pytest.raises(SerializationSafetyError):
+            build_candidate_contexts(SimpleNamespace(records=changed))
+
+    # Existing packet identity must agree even when all context fields agree.
+    for invalid_packet in (None, True, 0, 1.0, "", " ", "foreign-packet"):
+        changed = deepcopy(source_rows)
+        changed[name][0]["candidate_packet_id"] = invalid_packet
+        with pytest.raises(SerializationSafetyError):
+            build_candidate_contexts(SimpleNamespace(records=changed))
+    changed = deepcopy(source_rows)
+    del changed[name][0]["candidate_packet_id"]
+    with pytest.raises(SerializationSafetyError):
+        build_candidate_contexts(SimpleNamespace(records=changed))
+    # Distinct packet identities resolve a legitimately shared six-field context.
+    changed = deepcopy(source_rows)
+    for values in changed.values():
+        for value in values:
+            value["parameter_stack_id"] = "shared-fixture-parameters"
+    aligned = build_candidate_contexts(SimpleNamespace(records=changed))
+    assert [item["companions"][name]["candidate_packet_id"] for item in aligned] == ["fixture-packet-A", "fixture-packet-B"]
+
+    # Independent bounded energy oracle and original-constraint witness checks.
+    from fractions import Fraction
+    from itertools import product
+    from src.qtt.stage1_prediction_markets.pr162e_q_quantum_automapper.report_writer import (
+        _qubo_matrix, _ising_from_qubo, _constraints_satisfied,
+        _proof_fields, _recipe_payload,
+    )
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane.errors import ContractValidationError
+    linear = {"x_1": 22, "x_2": 6, "x_3": 14}
+    quadratic = {"x_1*x_2": -20, "x_1*x_3": -28}
+    q = _qubo_matrix(linear, quadratic, 9)
+    ising = _ising_from_qubo(q, 9)
+    assert q == {"x_1,x_1": -22, "x_2,x_2": -6, "x_3,x_3": -14, "x_1,x_2": 20, "x_1,x_3": 28}
+    assert ising["h"] == {"s_1": 1, "s_2": 2, "s_3": 0} and ising["J"] == {"s_1,s_2": 5, "s_1,s_3": 7} and ising["offset"] == 0
+    for x1, x2, x3 in product((0, 1), repeat=3):
+        expected = -22*x1 - 6*x2 - 14*x3 + 20*x1*x2 + 28*x1*x3 + 9
+        s1, s2, s3 = 2*x1-1, 2*x2-1, 2*x3-1
+        observed = ising["h"]["s_1"]*s1 + ising["h"]["s_2"]*s2 + ising["h"]["s_3"]*s3 + ising["J"]["s_1,s_2"]*s1*s2 + ising["J"]["s_1,s_3"]*s1*s3 + ising["offset"]
+        assert observed == expected
+    tiny = _ising_from_qubo({"x_1,x_1": 0.000001}, 0)
+    assert abs(tiny["h"]["s_1"] + tiny["offset"] - 0.000001) <= 1e-9
+    assert _qubo_matrix({"x_select": 0.005}, {}, 1) == _qubo_matrix({"x_select": 0.005}, {}, 0)
+    constraint = {"name": "bound", "linear": {"x": 1}, "sense": "LE", "rhs": 0}
+    assert _constraints_satisfied({"x": 0}, [constraint]) is True
+    assert _constraints_satisfied({"x": 1}, [constraint]) is False
+    for bad in ({**constraint, "sense": "UNKNOWN"}, {**constraint, "rhs": float("nan")}, {**constraint, "linear": {"missing": 1}}, {**constraint, "quadratic": {"x*x": 1}}):
+        with pytest.raises((ContractValidationError, NumericDomainError)):
+            _constraints_satisfied({"x": 0}, [bad])
+    for value in (True, False, 0.0, "0", None, -1, 2):
+        with pytest.raises(ContractValidationError):
+            _constraints_satisfied({"x": value}, [constraint])
+    with pytest.raises(ContractValidationError):
+        _constraints_satisfied({"x": 1}, [constraint, {**constraint, "name": "bad", "sense": "UNKNOWN"}])
+    assert _constraints_satisfied({"x": 1, "y": 1}, [{"name": "cancellation", "linear": {"x": 2**53+1, "y": -(2**53)}, "sense": "EQ", "rhs": 0}]) is False
+
+    # Reuse an actual report's complete model as test data. This does not make
+    # the report authentic; its source/generation admission remains separate.
+    witness = deepcopy(proof_rows[0])
+    failures = []
+    _validate_interpret_back_and_proofs({"PR162E_Q_SolutionInterpretBack.report.json": [], "PR162E_Q_MapProof.report.json": [witness], "PR162E_Q_TestVectors.report.json": []}, failures)
+    assert failures == []
+    for path, bad_value in (
+        (("encoded_variable_assignment", "x_size_0"), None),
+        (("constraints", 0, "sense"), "UNKNOWN"),
+        (("recipe_payload", "bqm", "offset"), 42),
+        (("recipe_payload", "ising", "offset"), 42),
+        (("recipe_payload", "qubo", "Q", "x_retest,x_retest"), 42),
+        (("original_variable_assignment", "candidate_size"), 7),
+        (("feasibility_match_flag",), False),
+        (("encoded_energy_value",), 42),
+    ):
+        changed = deepcopy(witness)
+        cursor = changed
+        for part in path[:-1]:
+            cursor = cursor[part]
+        cursor[path[-1]] = bad_value
+        failures = []
+        _validate_interpret_back_and_proofs({"PR162E_Q_SolutionInterpretBack.report.json": [], "PR162E_Q_MapProof.report.json": [changed], "PR162E_Q_TestVectors.report.json": []}, failures)
+        assert failures == [f"PROOF_MODEL_WITNESS_INVALID::{changed.get('row_id')}"]
+    changed = deepcopy(witness)
+    changed["recipe_payload"]["qubo"]["Q"]["x_select,x_select"] += 1
+    with pytest.raises(ContractValidationError):
+        _proof_fields(changed, 1, changed["objective_linear_terms"], changed["objective_quadratic_terms"], changed["constraints"], 3.0)
+
+    # Original-model constraint compilation; no slack variables or guessed penalty.
+    from src.qtt.stage1_prediction_markets.pr162e_q_quantum_automapper.report_writer import (
+        _constraints, _decision_variables, _mapping_penalty_polynomial_v1, _mapping_solution_v1,
+    )
+    names = [item["name"] for item in _decision_variables(1)]
+    assert len(names) == len(set(names)) == 11
+    for family in ("QUBO", "BQM", "Ising", "CQM", "DQM", "QuadraticProgram"):
+        constraint_rows = _constraints(13, family, True, True)
+        penalty_terms, penalty_constant = _mapping_penalty_polynomial_v1(constraint_rows)
+        for values in product((0, 1), repeat=len(names)):
+            assignment = dict(zip(names, values))
+            loss = 0
+            for item in constraint_rows:
+                residual = sum(value*assignment[name] for name, value in item["linear"].items()) - item["rhs"]
+                violation = max(0, -residual) if item["sense"] == "GE" else max(0, residual) if item["sense"] == "LE" else abs(residual)
+                loss += violation*violation
+            encoded_loss = penalty_constant + sum(value*assignment[pair.split(",")[0]]*assignment[pair.split(",")[1]] for pair, value in penalty_terms.items())
+            assert encoded_loss == loss
+    # Decode preserves the original domain and never invents missing size bits.
+    witness = deepcopy(proof_rows[0])
+    bits = witness["encoded_variable_assignment"]
+    decoded = _mapping_solution_v1(witness, bits)
+    assert decoded["original_variable_assignment"] == witness["original_variable_assignment"]
+    spin = {name.replace("x_", "s_"): 2*value-1 for name, value in bits.items()}
+    assert _mapping_solution_v1(witness, spin, sample_kind="SPIN") == decoded
+    assert _mapping_solution_v1(witness, bits, sample_kind="DQM") == decoded
+    for invalid in (None, True, 0.0, "0", -1, 2):
+        changed = dict(bits, x_size_0=invalid)
+        with pytest.raises(ContractValidationError):
+            _mapping_solution_v1(witness, changed)
+    changed = dict(bits)
+    del changed["case_skip"]
+    with pytest.raises(ContractValidationError):
+        _mapping_solution_v1(witness, changed)
+    with pytest.raises(ContractValidationError):
+        _mapping_solution_v1(witness, dict(bits, x_select=0, x_precompute=1))
+    # A penalty below the original utility variation cannot certify feasibility.
+    lin, quad = witness["objective_linear_terms"], witness["objective_quadratic_terms"]
+    offset = witness["objective_terms"]["offset"]
+    q = _qubo_matrix(lin, quad, offset)
+    s = _ising_from_qubo(q, offset)
+    with pytest.raises(NumericDomainError):
+        _recipe_payload(witness["recipe_payload"]["selected_family"], lin, quad, q, s, witness["constraints"], 0, {"hybrid":"fixture-hybrid", "to_pr166_qc":"fixture-retest"}, witness["recipe_payload"]["hybrid"]["structural_only_flag"])
+    for path, invalid in (
+        (("recipe_payload", "cqm", "objective", "sense"), "maximize"),
+        (("recipe_payload", "quadratic_program", "objective", "sense"), "minimize"),
+        (("recipe_payload", "dqm", "offset"), 42),
+        (("recipe_payload", "dqm", "linear_biases", "x_retest"), [1, 0]),
+        (("recipe_payload", "constraint_encoding", "additional_binary_variables"), True),
+        (("recipe_payload", "constraint_encoding", "uniform_export_error_bound"), -1),
+    ):
+        changed = deepcopy(witness)
+        cursor = changed
+        for key in path[:-1]: cursor = cursor[key]
+        cursor[path[-1]] = invalid
+        failures = []
+        _validate_interpret_back_and_proofs({"PR162E_Q_SolutionInterpretBack.report.json": [], "PR162E_Q_MapProof.report.json": [changed], "PR162E_Q_TestVectors.report.json": []}, failures)
+        assert failures == [f"PROOF_MODEL_WITNESS_INVALID::{changed.get('row_id')}"]
+
+    # The selected compiler never accepts a missing native constraint roster.
+    for family in ("QUBO", "BQM", "Ising", "CQM", "DQM", "QuadraticProgram"):
+        with pytest.raises(ContractValidationError):
+            _recipe_payload(family, lin, quad, q, s, [], 3.0, {"hybrid":"fixture-hybrid", "to_pr166_qc":"fixture-retest"}, False)
+
+    # A model's native case constraint, not the chosen sample container, governs
+    # one-hot feasibility. Non-DQM branches preserve zero/multiple case bits.
+    from src.qtt.stage1_prediction_markets.pr162e_q_quantum_automapper.report_writer import _variable_domains
+    for family in ("QUBO", "BQM", "Ising", "CQM", "DQM", "QuadraticProgram"):
+        lin = {name: 0.0 for name in ("x_select", "x_precompute", "x_retest", "x_owner_review")}
+        quad = {}
+        q = _qubo_matrix(lin, quad, 0.0)
+        s = _ising_from_qubo(q, 0.0)
+        constraint_rows = _constraints(1, family, False, False)
+        recipe = _recipe_payload(family, lin, quad, q, s, constraint_rows, 1.0, {"hybrid":"fixture-hybrid", "to_pr166_qc":"fixture-retest"}, False)
+        seed = {"row_id":"domain-fixture", "proof_status":"PROOF_VECTOR_COMPUTED_DETERMINISTIC_NO_SOLVER",
+                "still_negative_after_costs_flag":False, "paper_retest_flag":False, "owner_dashboard_review_flag":False,
+                "objective_linear_terms":lin, "objective_quadratic_terms":quad,
+                "objective_terms":{"linear":lin,"quadratic":quad,"offset":0.0},
+                "constraints":constraint_rows, "recipe_payload":recipe, "model_family_selected":family,
+                "decision_variables":_decision_variables(1), "variable_domains":_variable_domains(family)}
+        seed.update(_proof_fields(seed, 1, lin, quad, constraint_rows, 1.0))
+        for cases in product((0, 1), repeat=4):
+            sample = dict(seed["encoded_variable_assignment"])
+            sample.update(dict(zip(("case_skip", "case_precompute", "case_retest", "case_owner_review"), cases)))
+            if family == "DQM" and sum(cases) != 1:
+                with pytest.raises(ContractValidationError):
+                    _mapping_solution_v1(seed, sample)
+                continue
+            for sample_kind in ("BINARY", "SPIN", "DQM"):
+                native_sample = {name.replace("x_", "s_"):2*value-1 for name,value in sample.items()} if sample_kind=="SPIN" else sample
+                updated = deepcopy(seed)
+                updated.update(_mapping_solution_v1(seed, native_sample, sample_kind=sample_kind))
+                failures = []
+                _validate_interpret_back_and_proofs({"PR162E_Q_SolutionInterpretBack.report.json":[], "PR162E_Q_MapProof.report.json":[updated], "PR162E_Q_TestVectors.report.json":[]}, failures)
+                assert failures == []
+                if sum(cases) != 1:
+                    assert updated["original_variable_assignment"]["route_case"] is None
+            for field in ("model_family_selected", "decision_variables", "variable_domains"):
+                changed = deepcopy(updated)
+                del changed[field]
+                failures = []
+                _validate_interpret_back_and_proofs({"PR162E_Q_SolutionInterpretBack.report.json":[], "PR162E_Q_MapProof.report.json":[changed], "PR162E_Q_TestVectors.report.json":[]}, failures)
+                assert failures == ["PROOF_MODEL_WITNESS_INVALID::domain-fixture"]
+
+    # Bind all current row-report projections to the independently checked proof.
+    # Original report/schema/current-generation admission remains independent.
+    from src.qtt.stage1_prediction_markets.pr162e_q_quantum_automapper.report_writer import row_for_report
+    from src.qtt.stage1_prediction_markets.pr162e_q_quantum_automapper.validator import _validate_mapping_projection_consistency_v1
+    projection_names = ("PR162E_Q_MapProof.report.json", "PR162E_Q_SolutionInterpretBack.report.json", "PR162E_Q_TestVectors.report.json")
+    projection_report_names = tuple(c.ROW_REPORTS)
+    projection_seed = deepcopy(proof_rows[0])
+    projection_seed_before = deepcopy(projection_seed)
+    projections = {name: [row_for_report(name, projection_seed, 1)] for name in projection_report_names}
+    projection_failures = []
+    _validate_interpret_back_and_proofs(projections, projection_failures)
+    _validate_mapping_projection_consistency_v1(projections, projection_failures)
+    assert projection_failures == []
+    assert projection_seed == projection_seed_before
+    for name, field, value in (
+        (projection_names[2], "expected_original_objective_value", None),
+        (projection_names[2], "expected_encoded_objective_value", 123.0),
+        (projection_names[1], "original_variable_assignment", {}),
+        (projection_names[1], "proof_vector_ref", "foreign-proof"),
+        (projection_names[2], "candidate_packet_id", "foreign-packet"),
+        (projection_names[1], "reverse_transform_rule", "choose argmax and overwrite execution_route_id"),
+    ):
+        changed = deepcopy(projections)
+        changed[name][0][field] = value
+        projection_failures = []
+        _validate_mapping_projection_consistency_v1(changed, projection_failures)
+        assert projection_failures == ["MAPPING_PROJECTION_MISMATCH"]
+    for name in projection_report_names:
+        changed = deepcopy(projections)
+        changed[name] = []
+        projection_failures = []
+        _validate_mapping_projection_consistency_v1(changed, projection_failures)
+        assert projection_failures == ["MAPPING_PROJECTION_MISMATCH"]
+    # A valid current inverse may retain several case bits without one-hot.
+    # Its serialized interpretation must not invent a unique route.
+    projection_report_names = tuple(c.ROW_REPORTS)
+    projection_seed = deepcopy(proof_rows[0])
+    if projection_seed["model_family_selected"] != "DQM":
+        sample = dict(projection_seed["encoded_variable_assignment"])
+        sample.update(case_skip=1, case_precompute=0, case_retest=1, case_owner_review=0)
+        projection_seed.update(_mapping_solution_v1(projection_seed, sample))
+        projections = {name: [row_for_report(name, projection_seed, 1)] for name in projection_report_names}
+        projection_failures = []
+        _validate_interpret_back_and_proofs(projections, projection_failures)
+        _validate_mapping_projection_consistency_v1(projections, projection_failures)
+        assert projection_failures == []
+        assert projections[projection_names[1]][0]["original_variable_assignment"]["route_case"] is None
+
+    # Distinct packets must not share a business-reference identity.
+    for key, related in (("proof_vector_id", "proof_vector_ref"), ("mapping_row_ref", "source_mapping_row_ref"), ("test_vector_ref", "test_vector_id")):
+        changed = deepcopy(projections)
+        for name in projection_report_names:
+            other = deepcopy(changed[name][0])
+            other["candidate_packet_id"] += "-distinct-packet"
+            other["row_id"] += "-distinct-row"
+            for distinct_key, distinct_ref in (("proof_vector_id", "proof_vector_ref"), ("mapping_row_ref", "source_mapping_row_ref"), ("test_vector_ref", "test_vector_id")):
+                other[distinct_key] += "-distinct-reference"
+                if distinct_ref in other:
+                    other[distinct_ref] = other[distinct_key]
+            other[key] = changed[name][0][key]
+            if related in other:
+                other[related] = other[key]
+            changed[name].append(other)
+        projection_failures = []
+        _validate_mapping_projection_consistency_v1(changed, projection_failures)
+        assert projection_failures == ["MAPPING_PROJECTION_MISMATCH"]
+
+    # Crosswalk projection counts must reflect the final inline reports and
+    # actual acquisition-ledger counts, never the pre-convergence empty state.
+    from copy import deepcopy as publication_copy
+    from types import SimpleNamespace as PublicationSource
+    from unittest.mock import patch as publication_patch
+    from pathlib import Path as PublicationPath
+    from src.qtt.stage1_prediction_markets.pr162e_q_quantum_automapper import report_writer as publication_writer
+    from src.qtt.stage1_prediction_markets.pr162e_q_quantum_automapper.validator import _validate_crosswalk_and_artifacts as publication_validate
+
+    publication_rows = {name: [] for name in publication_writer.c.REPORT_FILENAMES}
+    for name in publication_writer.c.ROW_REPORTS:
+        publication_rows[name] = [{
+            "row_id": name + "::fixture", "no_orphan_status": "NO_ORPHAN",
+            "artifact_refs_checked": ["synthetic-count-test"],
+        }]
+    publication_rows["PR162E_Q_InputConsumption.report.json"] = [
+        {"source_report_ref": name, "expanded_record_count": 3}
+        for name in publication_writer.c.STRICT_INPUT_REPORTS
+    ]
+    publication_rows["PR162E_Q_FinalSummary.report.json"] = [{"synthetic": True}]
+    with publication_patch.object(publication_writer, "load_sources", return_value=PublicationSource()), \
+         publication_patch.object(publication_writer, "build_candidate_contexts", return_value=[]), \
+         publication_patch.object(publication_writer, "select_deep_mapping_subset", return_value=set()), \
+         publication_patch.object(publication_writer, "build_row_payloads", side_effect=lambda *_: publication_copy(publication_rows)):
+        publication_payloads, publication_shards = publication_writer.build_payloads_with_shards(PublicationPath("."))
+    publication_records = {
+        name: (
+            [row for path in payload.get("shard_files", []) for row in publication_shards[path]["records"]]
+            if payload.get("sharded_flag") else payload["records"]
+        ) for name, payload in publication_payloads.items()
+    }
+    publication_crosswalk = publication_records["PR162E_Q_ReportConsumerCrosswalk.report.json"]
+    assert all(
+        row["record_count"] == (
+            publication_payloads[row["report_path"].rsplit("/", 1)[-1]]["record_count"]
+            if row["report_path"].rsplit("/", 1)[-1] in publication_payloads else 3
+        ) for row in publication_crosswalk
+    )
+    publication_failures = []
+    publication_validate(publication_records, publication_failures)
+    assert publication_failures == []
+    for invalid in (0, True, 3.0, "3", None):
+        publication_bad = publication_copy(publication_records)
+        publication_bad["PR162E_Q_ReportConsumerCrosswalk.report.json"][0]["record_count"] = invalid
+        publication_failures = []
+        publication_validate(publication_bad, publication_failures)
+        assert "CROSSWALK_COUNT_OR_COVERAGE_MISMATCH" in publication_failures
+
+    # A second fill pass must charge only newly selected references. The eight
+    # champion rows consume eight slots, not sixteen, under the original cap.
+    from src.qtt.stage1_prediction_markets.pr162e_q_quantum_automapper.report_writer import select_deep_mapping_subset
+    family_cap = c.MAP_CAPS["max_rows_per_model_family_default_ci"]
+    selector_rows = [
+        {"upstream_pr166_qc_row_ref": f"selection::{i:05d}", "model_family": "QUBO",
+         "handoff": {"paper_champion_flag": i < family_cap // 2}}
+        for i in range(family_cap + 4)
+    ]
+    selected_refs = select_deep_mapping_subset(selector_rows)
+    assert len(selected_refs) == family_cap
+    assert selected_refs == {row["upstream_pr166_qc_row_ref"] for row in selector_rows[:family_cap]}
+
+    # Independent decoded files do not share nested object aliases. A changed
+    # recipe on any row report must not hide behind an unchanged proof copy.
+    all_projections = {name: [row_for_report(name, deepcopy(proof_rows[0]), 1)] for name in c.ROW_REPORTS}
+    projection_failures = []
+    _validate_mapping_projection_consistency_v1(all_projections, projection_failures)
+    assert projection_failures == []
+    for name in c.ROW_REPORTS:
+        if name == "PR162E_Q_MapProof.report.json":
+            continue
+        changed = deepcopy(all_projections)
+        changed[name][0]["recipe_payload"]["qubo"]["Q"]["x_select,x_select"] += 0.5
+        projection_failures = []
+        _validate_mapping_projection_consistency_v1(changed, projection_failures)
+        assert projection_failures == ["MAPPING_PROJECTION_MISMATCH"]
+    for field, wrong in (
+        ("constraint_native_flag", not proof_rows[0]["constraint_native_flag"]),
+        ("coefficient_scaling_status", "SCALED_TO_UNIT_INTERVAL_WITH_DYNAMIC_RANGE_RECORDED"),
+        ("canonical_variable_signature", "x_select,x_size_bits,x_side_case"),
+        ("canonical_constraint_signature", "budget<=1"),
+        ("slack_variable_plan", "BINARY_SLACK_INSERTED"),
+        ("discrete_case_handling", "ONE_FOUR_CASE_VARIABLE"),
+    ):
+        changed = deepcopy(all_projections)
+        for rows in changed.values():
+            rows[0][field] = wrong
+        projection_failures = []
+        _validate_mapping_projection_consistency_v1(changed, projection_failures)
+        assert projection_failures == ["MAPPING_PROJECTION_MISMATCH"]
+
 
 def test_pr162e_q_recipe_reports_are_computable_not_label_only():
     for filename in (

@@ -6386,6 +6386,11 @@ def _probability_fit_prediction_v1(fit_rows: tuple, cal_rows: tuple, final_ids: 
             raise _ProbabilityNumericalFailureV1('PREDICTION_FIT_FAILURE') from exc
         # Validate before calibration; do not spend another fit on invalid metadata.
         iterations = _probability_prediction_iterations_v1(kind, base.n_iter_)
+        _probability_numeric_require_v1(
+            np.all(np.isfinite(base.coef_)) and np.all(np.isfinite(base.intercept_)),
+            'CANONICAL_FLOAT_HEX')
+        if kind == 'HUBER':
+            _probability_numeric_require_v1(math.isfinite(float(base.scale_)), 'CANONICAL_FLOAT_HEX')
         scaler = pipe.named_steps['scaler']
         _probability_numeric_require_v1(np.all(np.isfinite(scaler.var_)) and np.all(scaler.var_ > 0), 'ZERO_VARIANCE')
         _probability_selected_scaler_v1(tuple(float(x) for x in scaler.mean_),
@@ -6404,6 +6409,9 @@ def _probability_fit_prediction_v1(fit_rows: tuple, cal_rows: tuple, final_ids: 
             _probability_numeric_require_v1(len(predicted.calibrated_classifiers_) == 1 and
                     len(predicted.calibrated_classifiers_[0].calibrators) == 1, 'CALIBRATOR_COUNT')
             sigmoid = predicted.calibrated_classifiers_[0].calibrators[0]
+            _probability_numeric_require_v1(
+                math.isfinite(float(sigmoid.a_)) and math.isfinite(float(sigmoid.b_)),
+                'CANONICAL_FLOAT_HEX')
             calibration = {'method': 'sigmoid', 'response': 'decision_function',
                            'a': float(sigmoid.a_).hex(), 'b': float(sigmoid.b_).hex()}
             work['calibration_verification_calls'] += 1

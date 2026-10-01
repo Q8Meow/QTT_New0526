@@ -109,6 +109,12 @@ _ACTIVE_SCAN_LAUNCH = None
 _SCAN_CAPACITY_ATTEMPTED = False
 
 
+from tools.validation_reliability import (
+    _NestedPytestEvidenceV1, _mapper_nested_pytest_args_v1,
+    _recheck_nested_pytest_custody_v1, _mapper_deadline_controls_v1,
+    _MAPPER_DEADLINE_ENV_KEYS, _execution_remaining_seconds_v1, _command_projection_v1,
+)
+
 _execute_supervised_command = supervise_command
 FAST_PREFLIGHT_PHASE = "fast-preflight"
 DETERMINISTIC_VALIDATORS_PHASE = "deterministic-validators"
@@ -3083,7 +3089,7 @@ class _ValidationCandidateCustodyV1:
     """
     def __init__(self, *, repo_root, plan, observe_paths, check_exclusive, index_path,
                  effects_by_occurrence, ignored_paths, entry_limit, snapshot_byte_limit,
-                 read_byte_limit, deadline_ns, operation_checks):
+                 read_byte_limit, deadline_ns, operation_checks, nested_evidence_limits=None):
         from types import MappingProxyType
         if (type(plan) is not tuple or not plan or not callable(observe_paths)
                 or not callable(check_exclusive) or type(effects_by_occurrence) is not dict
@@ -3097,6 +3103,35 @@ class _ValidationCandidateCustodyV1:
         if (type(operation_checks) is not dict or set(operation_checks) != set(effects_by_occurrence)
                 or any(not callable(check) for check in operation_checks.values())):
             raise ValueError("original per-occurrence source/input/environment/resource checks required")
+        required_nested = set()
+        for index, entry in enumerate(plan, start=1):
+            vector = entry.argv if type(entry) is CommandEvidencePlanEntry else entry.execution_argv
+            if _mapper_nested_pytest_args_v1(tuple(vector), pathlib.Path(repo_root)) is not None:
+                required_nested.add(index)
+        if nested_evidence_limits is None:
+            nested_evidence_limits = {}
+        if (type(nested_evidence_limits) is not dict
+                or set(nested_evidence_limits) != required_nested):
+            raise ValueError("exact mapper nested-evidence resource bindings required")
+        for index, limits in nested_evidence_limits.items():
+            if (type(index) is not int or type(limits) is not dict
+                    or set(limits) != _NestedPytestEvidenceV1._LIMITS
+                    or any(type(v) is not int or v <= 0 for v in limits.values())
+                    or limits["deadline_ns"] > deadline_ns):
+                raise ValueError("nested evidence limits must fit the original ancestor")
+            _mapper_deadline_controls_v1(limits)
+        nested_reads = sum(v["read_byte_limit"] for v in nested_evidence_limits.values())
+        nested_retained = sum(v["retained_byte_limit"] for v in nested_evidence_limits.values())
+        nested_entries = sum(v["entry_limit"] for v in nested_evidence_limits.values())
+        if (nested_reads >= read_byte_limit or nested_retained >= snapshot_byte_limit
+                or nested_entries >= entry_limit):
+            raise ValueError("nested evidence allocations exceed original candidate allowance")
+        # Reserve once from original totals. Failed or unused work is not refunded.
+        read_byte_limit -= nested_reads
+        snapshot_byte_limit -= nested_retained
+        entry_limit -= nested_entries
+        self.nested_evidence_limits = MappingProxyType({index: MappingProxyType(dict(limits))
+            for index, limits in nested_evidence_limits.items()})
         self.operation_checks = MappingProxyType(dict(operation_checks))
         self.root = pathlib.Path(repo_root).absolute()
         self.plan, self.observe_paths, self.check_exclusive = plan, observe_paths, check_exclusive
@@ -6844,12 +6879,13 @@ def run_commands(
         return returncode
 
     candidate_custody = _prepare_validation_candidate_v1(
-        cleanup_repo_root, _LAST_EXPECTED_COMMAND_PLAN if _RUN_PROVENANCE_WRITTEN and candidate_custody is None else prepared_plan, candidate_custody)
+        cleanup_repo_root, _LAST_EXPECTED_COMMAND_PLAN if _RUN_PROVENANCE_WRITTEN else prepared_plan, candidate_custody)
 
     restoration_failure: BaseException | None = None
 
     def restore_gate_side_effects() -> None:
         nonlocal restoration_failure
+        _recheck_nested_pytest_custody_v1(supervision)
         if supervision["pending"]:
             raise ValidationReliabilityError(
                 "ENGVR_PROCESS_TERMINATION_FAILED",
@@ -6918,10 +6954,66 @@ def run_commands(
             planned = _LAST_EXPECTED_COMMAND_PLAN[command_index - 1]
             command_environment = _scan_dispatch_environment(command_environment, planned)
             original_input = None if _ACTIVE_SCAN_LAUNCH is None else _ACTIVE_SCAN_LAUNCH.launch_inputs.get(command_index)
+            from tools.validation_reliability import _mapper_binding_v1, _mapper_read_controls_v1, _MAPPER_READ_ENV_KEYS_V1
+            mapper_read_binding = None if _ACTIVE_MAPPER_READ_PROFILES_V1 is None else _ACTIVE_MAPPER_READ_PROFILES_V1.get(str(command_index))
+            if any(k.upper() in (*_MAPPER_READ_ENV_KEYS_V1, 'QTT_MAPPER_ACTIVATION_IDENTITY') for k in command_environment):
+                raise ValueError("competing mapper read environment")
+            if mapper_read_binding is not None:
+                mapper_read_binding = _mapper_binding_v1(mapper_read_binding)
+                if tuple(mapper_read_binding["parent_argv"]) != tuple(execution_command):
+                    raise ValueError("mapper read binding lost original command")
+                command_environment.update(_mapper_read_controls_v1(mapper_read_binding))
+            execution_deadline_ns = None
+            deadline_projection = None
+            mapper_arguments = _mapper_nested_pytest_args_v1(tuple(execution_command), execution_cwd)
+            if mapper_arguments is not None:
+                if (original_input is not None or candidate_custody is None
+                        or command_index not in candidate_custody.nested_evidence_limits):
+                    raise ValueError("mapper deadline requires its original ordinary candidate owner")
+                limits = candidate_custody.nested_evidence_limits[command_index]
+                controls = _mapper_deadline_controls_v1(limits)
+                if any(key.upper() in _MAPPER_DEADLINE_ENV_KEYS for key in command_environment):
+                    raise ValueError("competing inherited mapper deadline controls")
+                command_environment.update(controls)
+                execution_deadline_ns = limits["execution_deadline_ns"]
+                remaining = _execution_remaining_seconds_v1(execution_deadline_ns)
+                timeout_seconds = remaining if timeout_seconds is None else min(timeout_seconds, remaining)
+                if mapper_read_binding is not None:
+                    if mapper_read_binding["basis"]["deadline_ns"] != limits["child_execution_deadline_ns"]:
+                        raise ValueError("mapper read allocation exceeds exact child schedule")
+                    controls += _mapper_read_controls_v1(mapper_read_binding)
+                deadline_projection = {"fixed_environment_controls": controls}
+            elif mapper_read_binding is not None:
+                execution_deadline_ns = mapper_read_binding["basis"]["deadline_ns"]
+                remaining = _execution_remaining_seconds_v1(execution_deadline_ns)
+                timeout_seconds = remaining if timeout_seconds is None else min(timeout_seconds,remaining)
+                deadline_projection = {"fixed_environment_controls": _mapper_read_controls_v1(mapper_read_binding)}
             if candidate_custody is not None:
                 candidate_custody.begin_occurrence(command_index, planned if getattr(candidate_custody, "plan", None) is _LAST_EXPECTED_COMMAND_PLAN else plan_entry,
                     environment=command_environment, timeout_seconds=timeout_seconds, scratch_roots=tuple(scratch_roots))
-            with (nullcontext() if original_input is None else original_input):
+            if mapper_read_binding is not None and mapper_read_binding['kind'] == 'MAPPER_NATIVE_READ_BINDING_V2':
+                from tools.validation_reliability import _mapper_publish_occurrence_v1, _MAPPER_ACTIVATION_ENV_V1
+                key = str(command_index)
+                if key in _ACTIVE_MAPPER_OCCURRENCES_V1:
+                    raise ValueError("mapper activation already published")
+                activation = _mapper_publish_occurrence_v1(mapper_read_binding, candidate=candidate_custody, entry=planned)
+                _ACTIVE_MAPPER_OCCURRENCES_V1[key] = activation
+                command_environment[_MAPPER_ACTIVATION_ENV_V1] = activation.identity
+                deadline_projection['fixed_environment_controls'] += ((_MAPPER_ACTIVATION_ENV_V1, activation.identity),)
+            nested_gate = None
+            if _mapper_nested_pytest_args_v1(tuple(execution_command), execution_cwd) is not None:
+                if candidate_custody is None or command_index not in candidate_custody.nested_evidence_limits:
+                    raise ValueError("mapper dispatch lacks original nested-evidence limits")
+                nested_gate = _NestedPytestEvidenceV1(
+                    planned=planned, run_paths=active_run_paths, environment=command_environment,
+                    limits=dict(candidate_custody.nested_evidence_limits[command_index]),
+                    check_exclusive=candidate_custody.check_exclusive, mapper_read_binding=mapper_read_binding)
+                gates = supervision.setdefault("nested_evidence", {})
+                if command_index in gates:
+                    raise ValueError("nested custody cannot be dispatched twice")
+                gates[command_index] = nested_gate
+            with (nullcontext() if original_input is None else original_input), (
+                    nullcontext() if deadline_projection is None else _command_projection_v1(deadline_projection)):
                 supervision["pending"] = True
                 supervision["receipt"] = None
                 receipt = _execute_supervised_command(
@@ -6935,6 +7027,8 @@ def run_commands(
                     timeout_seconds=timeout_seconds,
                     environment=command_environment,
                     **({"launch_input": original_input} if original_input is not None else {}),
+                    **({"execution_deadline_ns": execution_deadline_ns}
+                       if execution_deadline_ns is not None else {}),
                 )
                 supervision["receipt"] = receipt
                 if type(receipt) is CommandExecutionReceiptV1:
@@ -6954,7 +7048,12 @@ def run_commands(
                     "ENGVR_PROCESS_TERMINATION_FAILED",
                     "command receipt differs from the original attempted execution",
                 )
+            if nested_gate is not None:
+                nested_gate.observe(receipt)
             supervision["pending"] = False
+            if nested_gate is not None and nested_gate.inconsistent:
+                raise ValidationReliabilityError("ENGVR_ATOMIC_RECEIPT_WRITE_FAILED",
+                    "parent success contradicts terminal nested child failure")
             if candidate_custody is not None:
                 if type(receipt.native_exit_code) is not int:
                     raise RuntimeError("VALIDATION_CANDIDATE_CHILD_TERMINAL_UNKNOWN")
@@ -7815,6 +7914,7 @@ def _publish_active_plan_provenance(
         cwd=active_run_paths.repo_root,
     )
     launch = _scan_resolve_parent_capacity(active_run_paths, phase, _LAST_EXPECTED_COMMAND_PLAN)
+    _mapper_resolve_parent_profiles_v1(active_run_paths, phase, _LAST_EXPECTED_COMMAND_PLAN)
     _RUN_PROVENANCE_ATTEMPTED = True
     write_run_provenance(
         active_run_paths,
@@ -7829,6 +7929,7 @@ def _publish_active_plan_provenance(
         rp5a_payload_byte_limits=None if launch is None else launch.rp5a_payload_byte_limits,
         scan_read_limits=None if launch is None else launch.read_limits,
         scan_deadline_ns=None if launch is None else launch.deadline_ns,
+        mapper_read_profiles=_ACTIVE_MAPPER_READ_PROFILES_V1,
     )
     _RUN_PROVENANCE_WRITTEN = True
 
@@ -8234,6 +8335,30 @@ def _finalize_validation_run(
                  or _RUN_COMMANDS_SUPERVISION["pending"])):
         supervision = _RUN_COMMANDS_SUPERVISION
     try:
+        # Revalidate before cleanup, not merely in the post-cleanup report.
+        if supervision is not None:
+            try:
+                _recheck_nested_pytest_custody_v1(supervision)
+                if any(gate.inconsistent for gate in supervision.get("nested_evidence", {}).values()):
+                    result = 1
+            except (ValidationReliabilityError, OSError, ValueError):
+                result = 1  # The helper has latched pending and retained the error.
+        # A mapper receipt cannot pass a direct finalizer call without its live
+        # pre-dispatch gate. Missing state is not an empty-descendant proof.
+        mapper_receipts = [receipt for receipt in receipts
+            if type(receipt) is CommandExecutionReceiptV1 and
+            _mapper_nested_pytest_args_v1(receipt.argv, pathlib.Path(receipt.cwd)) is not None]
+        if mapper_receipts and (supervision is None or any(
+                receipt.command_index not in supervision.get("nested_evidence", {})
+                or supervision["nested_evidence"][receipt.command_index].receipt != receipt
+                or receipt.command_index > len(expected_plan)
+                or supervision["nested_evidence"][receipt.command_index].planned is not expected_plan[receipt.command_index - 1]
+                for receipt in mapper_receipts)):
+            if supervision is None:
+                supervision = {"paths": run_paths, "phase": phase, "pending": True,
+                               "receipt": mapper_receipts[-1], "errors": []}
+            supervision["pending"] = True
+            result = 1
         termination_unproven = (
             (_RUN_COMMANDS_SUPERVISION is not None and _RUN_COMMANDS_SUPERVISION["pending"])
             or (supervision is not None and (supervision["pending"]
@@ -8328,6 +8453,8 @@ def _finalize_validation_run(
         rp5a_reader_bases=None if scan_launch is None or not scan_launch.reader_bases else scan_launch.reader_bases,
         rp5a_launch_wire_versions=None if scan_launch is None else scan_launch.rp5a_launch_wire_versions,
         rp5a_payload_byte_limits=None if scan_launch is None else scan_launch.rp5a_payload_byte_limits,
+                mapper_read_profiles=_ACTIVE_MAPPER_READ_PROFILES_V1 if planned_count else None,
+                mapper_occurrence_records=_ACTIVE_MAPPER_OCCURRENCES_V1,
             )
         except ValidationReliabilityError as exc:
             if supervision is not None:
@@ -8736,12 +8863,51 @@ def _scan_dispatch_environment(parent, planned):
     return {key: value for key, value in parent.items() if key.upper() not in _SCAN_TRANSPORT_KEYS}
 
 
-def main(argv: Sequence[str] | None = None, *, scan_capacity_source=None, candidate_source=None) -> int:
+_ACTIVE_MAPPER_OCCURRENCES_V1 = {}
+_ACTIVE_MAPPER_READ_PROFILES_V1 = None
+_ACTIVE_MAPPER_READ_SOURCE_V1 = None
+_MAPPER_READ_SOURCE_ATTEMPTED = False
+
+
+def _mapper_resolve_parent_profiles_v1(paths, phase, plan):
+    from tools.validation_reliability import _mapper_original_position_v1, _mapper_profiles_projection_v1
+    global _MAPPER_READ_SOURCE_ATTEMPTED, _ACTIVE_MAPPER_READ_PROFILES_V1
+    selected = {str(row.command_index): row for row in plan
+                if _mapper_original_position_v1(row.argv, paths.repo_root) is not None}
+    if not selected:
+        if _ACTIVE_MAPPER_READ_SOURCE_V1 is not None:
+            raise ValueError("mapper source cannot attach to an unselected plan")
+        return None
+    if _MAPPER_READ_SOURCE_ATTEMPTED:
+        raise ValueError("mapper input source cannot be reacquired within a run")
+    _MAPPER_READ_SOURCE_ATTEMPTED = True
+    if not callable(_ACTIVE_MAPPER_READ_SOURCE_V1):
+        raise ValueError("mapper source/input/resource binding is required")
+    supplied = _ACTIVE_MAPPER_READ_SOURCE_V1(paths, phase, plan)
+    bindings = _mapper_profiles_projection_v1(supplied, run_id=paths.run_id,
+        phase=phase, command_count=len(plan), paths=paths)
+    if set(bindings) != set(selected) or any(tuple(bindings[key]["parent_argv"]) != row.argv for key,row in selected.items()):
+        raise ValueError("mapper profiles do not cover the exact original plan")
+    if len(plan) > 1 and any(b['kind'] != 'MAPPER_NATIVE_READ_BINDING_V2' for b in bindings.values()):
+        raise ValueError("multi-command mapper plan requires occurrence-time activation")
+    _ACTIVE_MAPPER_READ_PROFILES_V1 = bindings
+    return bindings
+
+
+def main(argv: Sequence[str] | None = None, *, scan_capacity_source=None, candidate_source=None, mapper_read_source=None) -> int:
+    global _ACTIVE_MAPPER_OCCURRENCES_V1
+    global _ACTIVE_MAPPER_READ_PROFILES_V1, _ACTIVE_MAPPER_READ_SOURCE_V1, _MAPPER_READ_SOURCE_ATTEMPTED
     global _ACTIVE_SCAN_CAPACITY_SOURCE, _ACTIVE_SCAN_LAUNCH, _SCAN_CAPACITY_ATTEMPTED, _ACTIVE_CANDIDATE_SOURCE
     if not _SCAN_MAIN_LOCK.acquire(blocking=False):
         raise ValueError("central validation invocation already active")
+    previous_occurrences = _ACTIVE_MAPPER_OCCURRENCES_V1
+    previous_mapper = (_ACTIVE_MAPPER_READ_PROFILES_V1, _ACTIVE_MAPPER_READ_SOURCE_V1, _MAPPER_READ_SOURCE_ATTEMPTED)
     previous = (_ACTIVE_SCAN_CAPACITY_SOURCE, _ACTIVE_SCAN_LAUNCH, _SCAN_CAPACITY_ATTEMPTED, _ACTIVE_CANDIDATE_SOURCE)
     try:
+        _ACTIVE_MAPPER_OCCURRENCES_V1 = {}
+        _ACTIVE_MAPPER_READ_PROFILES_V1 = None
+        _ACTIVE_MAPPER_READ_SOURCE_V1 = mapper_read_source
+        _MAPPER_READ_SOURCE_ATTEMPTED = False
         _ACTIVE_SCAN_CAPACITY_SOURCE = scan_capacity_source
         _ACTIVE_CANDIDATE_SOURCE = candidate_source
         _ACTIVE_SCAN_LAUNCH = None
@@ -8749,6 +8915,8 @@ def main(argv: Sequence[str] | None = None, *, scan_capacity_source=None, candid
         return _main_owned(argv)
     finally:
         _ACTIVE_SCAN_CAPACITY_SOURCE, _ACTIVE_SCAN_LAUNCH, _SCAN_CAPACITY_ATTEMPTED, _ACTIVE_CANDIDATE_SOURCE = previous
+        _ACTIVE_MAPPER_READ_PROFILES_V1, _ACTIVE_MAPPER_READ_SOURCE_V1, _MAPPER_READ_SOURCE_ATTEMPTED = previous_mapper
+        _ACTIVE_MAPPER_OCCURRENCES_V1 = previous_occurrences
         _SCAN_MAIN_LOCK.release()
 
 

@@ -3787,6 +3787,7 @@ def _run_provenance_payload(
     rp5a_payload_byte_limits=None,
     scan_read_limits=None,
     scan_deadline_ns=None,
+    mapper_read_profiles=None,
 ) -> dict[str, object]:
     payload = {
         "schema_version": SCHEMA_VERSION,
@@ -3817,6 +3818,10 @@ def _run_provenance_payload(
             readers=readers, scanners=payload["rp5a_scan_profiles"], command_count=command_count)
         payload.update(rp5a_launch_wire_version=3, rp5a_launch_wire_versions=versions,
                        rp5a_payload_byte_limits=counts)
+    if mapper_read_profiles is not None:
+        payload["mapper_read_profiles"] = _mapper_profiles_projection_v1(
+            mapper_read_profiles, run_id=paths.run_id, phase=phase,
+            command_count=command_count, paths=paths)
     return payload
 
 
@@ -3834,6 +3839,7 @@ def write_run_provenance(
     rp5a_payload_byte_limits=None,
     scan_read_limits=None,
     scan_deadline_ns=None,
+    mapper_read_profiles=None,
 ) -> None:
     if text_integrity_preflight_state not in {
         "PASS",
@@ -3855,6 +3861,7 @@ def write_run_provenance(
             rp5a_reader_bases=rp5a_reader_bases,
             rp5a_launch_wire_versions=rp5a_launch_wire_versions,
             rp5a_payload_byte_limits=rp5a_payload_byte_limits,
+            mapper_read_profiles=mapper_read_profiles,
         ),
     )
 
@@ -4100,6 +4107,445 @@ def attest_inherited_validation_run(
     )
 
 
+# Nested evidence is observed through the existing reliability owner. It is
+# not OS-level process containment, and it creates no resource or run authority.
+def _mapper_nested_pytest_args_v1(argv, repo_root):
+    """Recognize only the six source-fixed report-wrapper scopes."""
+    if type(argv) is not tuple or not argv or any(type(x) is not str for x in argv):
+        raise ValueError("exact command tuple required")
+    offset = 1
+    while offset < len(argv) and argv[offset] in ("-B", "-I", "-u"):
+        offset += 1
+    if offset >= len(argv):
+        return None
+    script = Path(argv[offset])
+    if script not in (Path("tools/run_pytest_fresh_basetemp.py"),
+                      Path(repo_root) / "tools/run_pytest_fresh_basetemp.py"):
+        return None
+    arguments = argv[offset + 1:]
+    scopes = tuple(row[3] for row in _REPORT_READ_ROUTES_V1 if row[3] is not None)
+    targets = {scope[0] for scope in scopes}
+    selected = any(x.split("::", 1)[0].replace("\\", "/").rstrip("/") in targets
+                   for x in arguments if not x.startswith("-"))
+    if not selected:
+        return None
+    from tools.run_pytest_fresh_basetemp import _split_pytest_options_v1
+    retained, literals, basetemp = _split_pytest_options_v1(arguments)
+    if literals or tuple(retained) not in scopes or basetemp is None:
+        raise ValueError("report wrapper differs from its exact admitted test scope")
+    return arguments
+
+
+# Same-host monotonic cutoffs only. These controls restrict execution; they do
+# not grant source, process, resource, or trading authority.
+_MAPPER_PARENT_DEADLINE_ENV = "QTT_VALIDATION_MAPPER_PARENT_DEADLINE_NS"
+_MAPPER_CHILD_DEADLINE_ENV = "QTT_VALIDATION_MAPPER_CHILD_DEADLINE_NS"
+_MAPPER_DEADLINE_ENV_KEYS = (_MAPPER_PARENT_DEADLINE_ENV, _MAPPER_CHILD_DEADLINE_ENV)
+
+
+def _execution_remaining_seconds_v1(deadline_ns):
+    """A relative observation of one immutable signed-64-bit monotonic cutoff."""
+    if type(deadline_ns) is not int or not 0 < deadline_ns < 2 ** 63:
+        raise ValueError("execution deadline must be an exact positive int64 nanosecond value")
+    remaining = deadline_ns - time.monotonic_ns()
+    if remaining <= 0:
+        raise TimeoutError("original execution deadline expired; no budget reset")
+    # This float is a compatibility receipt/wait projection, not the authoritative
+    # cutoff. The native loop independently compares integer monotonic ns.
+    return remaining / 1_000_000_000
+
+
+def _mapper_deadline_controls_v1(limits):
+    child = limits["child_execution_deadline_ns"]
+    parent = limits["execution_deadline_ns"]
+    custody = limits["deadline_ns"]
+    if (any(type(value) is not int or not 0 < value < 2 ** 63
+            for value in (child, parent, custody)) or not child < parent < custody):
+        raise ValueError("child, parent and custody cutoffs must be strictly nested")
+    _execution_remaining_seconds_v1(child)
+    return ((_MAPPER_PARENT_DEADLINE_ENV, str(parent)),
+            (_MAPPER_CHILD_DEADLINE_ENV, str(child)))
+
+
+def _mapper_child_deadline_v1(environment):
+    """Consume, never regenerate, the attested ordinary parent's one-hop controls."""
+    values = {}
+    for key, value in environment.items():
+        if type(key) is not str:
+            raise ValueError("deadline environment key is not text")
+        canonical = key.upper()
+        if canonical not in _MAPPER_DEADLINE_ENV_KEYS:
+            continue
+        if canonical in values or key != canonical:
+            raise ValueError("duplicate or noncanonical mapper deadline control")
+        if (type(value) is not str or not 1 <= len(value) <= 19
+                or re.fullmatch(r"[1-9][0-9]*", value, flags=re.ASCII) is None):
+            raise ValueError("noncanonical mapper deadline value")
+        values[canonical] = int(value)
+    if set(values) != set(_MAPPER_DEADLINE_ENV_KEYS):
+        raise ValueError("both original mapper deadline controls are required")
+    parent, child = (values[name] for name in _MAPPER_DEADLINE_ENV_KEYS)
+    if not 0 < child < parent < 2 ** 63:
+        raise ValueError("child deadline widens or loses the original parent")
+    _execution_remaining_seconds_v1(child)
+    return child
+
+
+class _NestedPytestEvidenceV1:
+    """Bounded one-hop evidence collection for source-fixed report-wrapper calls.
+
+    The original candidate owner supplies exclusive custody and finite limits.
+    Existing parent/child receipts are never rewritten. A failed observation is
+    sticky: failure evidence cannot be repaired into success within this object.
+    """
+    _LIMITS = frozenset(("entry_limit", "file_byte_limit", "read_byte_limit",
+                        "retained_byte_limit", "deadline_ns",
+                        "execution_deadline_ns", "child_execution_deadline_ns"))
+
+    def __init__(self, *, planned, run_paths, environment, limits, check_exclusive, mapper_read_binding=None):
+        if (type(planned) is not CommandEvidencePlanEntry or type(limits) is not dict
+                or set(limits) != self._LIMITS or not callable(check_exclusive)
+                or any(type(v) is not int or v <= 0 for v in limits.values())):
+            raise ValueError("original nested evidence plan and finite limits required")
+        if planned.run_id != run_paths.run_id:
+            raise ValueError("nested evidence lost the original run")
+        self.planned, self.paths = planned, run_paths
+        self.root = Path(run_paths.evidence_root)
+        self.owner_pid, self.owner_thread = os.getpid(), threading.get_ident()
+        self.limits = MappingProxyType(dict(limits))
+        self.remaining = limits["read_byte_limit"]
+        self.retained = 0
+        self.check_exclusive = check_exclusive
+        self.armed_ns = time.monotonic_ns()
+        self.state, self.failure, self.receipt = "PREPARING", None, None
+        self.inconsistent = False
+        self.saved = {}
+        self.child_directory = None
+        self._check()
+        _local_unlinked_path(self.root)
+        if not self.root.is_dir():
+            raise ValueError("original evidence root is unavailable")
+        self.root_identity = self._directory_identity(self.root.lstat())
+        args = _mapper_nested_pytest_args_v1(planned.argv, Path(planned.cwd))
+        if args is None or not Path(planned.argv[0]).is_absolute():
+            raise ValueError("exact mapper wrapper and interpreter required")
+        if (type(environment) is not dict or environment.get(RUN_ID_ENV) != planned.run_id
+                or environment.get(EVIDENCE_ROOT_ENV) != str(self.root)):
+            raise ValueError("nested parent environment differs from its original run")
+        from tools.run_pytest_fresh_basetemp import _bind_canonical_pytest_invocation_v1
+        # Windows os.environ uppercases names; iteration order is not a semantic
+        # environment guarantee. Preserve recorded order, compare removal as a set.
+        child_input = ({k.upper(): v for k, v in environment.items()}
+                       if os.name == "nt" else dict(environment))
+        if len(child_input) != len(environment):
+            raise ValueError("case-colliding environment")
+        invocation, _, projection = _bind_canonical_pytest_invocation_v1(
+            args, repository_root=Path(planned.cwd), python_executable=planned.argv[0],
+            run_root=run_paths.process_root, environment=child_input)
+        self.parent_controls = _mapper_deadline_controls_v1(limits)
+        if mapper_read_binding is not None:
+            binding = _mapper_binding_v1(mapper_read_binding)
+            if (tuple(binding["parent_argv"]) != planned.argv
+                    or binding["command_index"] != planned.command_index
+                    or binding["basis"]["deadline_ns"] != limits["child_execution_deadline_ns"]):
+                raise ValueError("mapper read binding differs from nested deadline/parent")
+            self.parent_controls += _mapper_read_controls_v1(binding)
+            if binding['kind'] == 'MAPPER_NATIVE_READ_BINDING_V2':
+                identity = environment.get(_MAPPER_ACTIVATION_ENV_V1)
+                _mapper_activation_identity_v1(identity)
+                self.parent_controls += ((_MAPPER_ACTIVATION_ENV_V1, identity),)
+                projection['fixed_environment_controls'] += ((_MAPPER_ACTIVATION_ENV_V1, identity),)
+        if any(environment.get(key) != value for key, value in self.parent_controls):
+            raise ValueError("mapper environment is not its original deadline binding")
+        if _mapper_child_deadline_v1(environment) != limits["child_execution_deadline_ns"]:
+            raise ValueError("mapper child deadline differs")
+        projection["removed_environment_keys"] += _MAPPER_DEADLINE_ENV_KEYS
+        self.child_argv = tuple(invocation.command) if mapper_read_binding is None else tuple(binding["child_argv"])
+        self.child_projection = projection
+        self.baseline = self._inventory(self.root)
+        self.parent_names = tuple(f"command-{planned.command_index}{suffix}" for suffix in
+                                  (".json", ".stdout.bin", ".stderr.bin"))
+        if any(name in self.baseline for name in self.parent_names):
+            raise ValueError("parent evidence slots already exist")
+        self.state = "ARMED"
+
+    @staticmethod
+    def _directory_identity(info):
+        return (info.st_dev, info.st_ino, info.st_mode,
+                getattr(info, "st_file_attributes", 0), getattr(info, "st_reparse_tag", 0))
+
+    @classmethod
+    def _entry_version(cls, info):
+        if stat.S_ISREG(info.st_mode):
+            return _scan_same_api_version(info)
+        return (*cls._directory_identity(info), info.st_nlink, info.st_size,
+                info.st_mtime_ns, info.st_ctime_ns)
+
+    def _fail(self, message):
+        raise ValidationReliabilityError("ENGVR_PROCESS_TERMINATION_FAILED", message)
+
+    def _check(self):
+        if self.failure is not None:
+            self._fail("nested evidence has a previous unresolved observation")
+        if (os.getpid() != self.owner_pid or threading.get_ident() != self.owner_thread
+                or time.monotonic_ns() >= self.limits["deadline_ns"]
+                or self.check_exclusive() is not None):
+            self._fail("nested evidence custody, thread, or deadline unavailable")
+
+    def _inventory(self, directory):
+        self._check()
+        _local_unlinked_path(directory)
+        before = directory.lstat()
+        names, folded_names = {}, set()
+        # Bounded enumeration: never materialize an unbounded directory iterator.
+        with os.scandir(directory) as entries:
+            for item in entries:
+                self._check()
+                if len(names) >= self.limits["entry_limit"]:
+                    self._fail("nested evidence directory entry allowance exhausted")
+                name = item.name
+                if name.casefold() in folded_names:
+                    self._fail("nested evidence names have a case collision")
+                info = item.stat(follow_symlinks=False)
+                if (_stat_is_reparse_point(info) or stat.S_ISLNK(info.st_mode)
+                        or not (stat.S_ISREG(info.st_mode) or stat.S_ISDIR(info.st_mode))
+                        or (stat.S_ISREG(info.st_mode) and info.st_nlink != 1)):
+                    self._fail("unsupported nested evidence entry: " + name)
+                folded_names.add(name.casefold())
+                names[name] = self._entry_version(info)
+        after = directory.lstat()
+        if self._entry_version(before) != self._entry_version(after):
+            self._fail("nested evidence directory changed during enumeration")
+        return names
+
+    def _read(self, path):
+        self._check()
+        _local_unlinked_path(path.parent)
+        before = path.lstat()
+        if (not stat.S_ISREG(before.st_mode) or _stat_is_reparse_point(before)
+                or before.st_nlink != 1 or before.st_size > self.limits["file_byte_limit"]):
+            self._fail("unbounded or unsupported evidence file: " + str(path))
+        # Limit simultaneous saved and current buffers, as well as acquired bytes.
+        if (before.st_size > self.remaining
+                or self.retained + 2 * before.st_size > self.limits["retained_byte_limit"]):
+            self._fail("nested evidence byte allowance exhausted: " + str(path))
+        fd = _open_regular_worktree_descriptor(path, nonblocking=True)
+        errors, result = [], None
+        try:
+            opened = os.fstat(fd)
+            if not _same_observed_file(before, opened) or opened.st_nlink != 1:
+                self._fail("nested evidence open identity mismatch: " + str(path))
+            data = bytearray()
+            while True:
+                self._check()
+                remaining_size = before.st_size - len(data)
+                piece = os.read(fd, min(65536, remaining_size + 1))
+                # A changed-size sentinel is charged too. No failed-work refund.
+                self.remaining -= len(piece)
+                if self.remaining < 0 or len(piece) > remaining_size:
+                    self._fail("nested evidence changed size or exceeded read allowance")
+                if not piece:
+                    break
+                data.extend(piece)
+            after = path.lstat()
+            final_fd = os.fstat(fd)
+            if (len(data) != before.st_size
+                    or _scan_same_api_version(before) != _scan_same_api_version(after)
+                    or _scan_same_api_version(opened) != _scan_same_api_version(final_fd)):
+                self._fail("nested evidence changed while reading: " + str(path))
+            result = (bytes(data), _scan_same_api_version(before), _scan_same_api_version(opened))
+        except BaseException as exc:
+            errors.append(exc)
+        try:
+            os.close(fd)
+        except BaseException as exc:
+            errors.append(exc)
+        if errors:
+            _scan_raise_errors(errors)
+        self._check()
+        return result
+
+    def _json(self, raw):
+        def pairs(items):
+            result = {}
+            for key, value in items:
+                if key in result:
+                    self._fail("duplicate nested receipt field: " + key)
+                result[key] = value
+            return result
+        def constant(value):
+            self._fail("nonfinite nested receipt value: " + value)
+        return json.loads(raw.decode("utf-8"), object_pairs_hook=pairs, parse_constant=constant)
+
+    def _read_receipt(self, directory, index, expected, parent=None):
+        paths = tuple(directory / f"command-{index}{suffix}" for suffix in
+                      (".json", ".stdout.bin", ".stderr.bin"))
+        observed = {}
+        for path in paths:
+            observed[path] = self._read(path)
+            self.retained += len(observed[path][0])
+        payload = self._json(observed[paths[0]][0])
+        fields = set(CommandExecutionReceiptV1.__dataclass_fields__)
+        if type(payload) is not dict or set(payload) != fields:
+            self._fail("nested receipt field set differs")
+        converted = dict(payload)
+        for name in ("argv", "stdout_required_markers", "registered_argv", "removed_environment_keys"):
+            if type(converted[name]) is not list or any(type(x) is not str for x in converted[name]):
+                self._fail("nested receipt sequence differs: " + name)
+            converted[name] = tuple(converted[name])
+        controls = converted["fixed_environment_controls"]
+        if (type(controls) is not list or any(type(x) is not list or len(x) != 2
+                or any(type(y) is not str for y in x) for x in controls)):
+            self._fail("nested receipt environment controls differ")
+        converted["fixed_environment_controls"] = tuple(tuple(x) for x in controls)
+        if converted["failure_class"] not in {
+                None, "ENGVR_PROCESS_START_FAILED", "ENGVR_PROCESS_TIMEOUT",
+                "ENGVR_PROCESS_TERMINATION_FAILED", "ENGVR_ATOMIC_RECEIPT_WRITE_FAILED",
+                "ENGVR_NATIVE_EXIT_NONZERO", "ENGVR_REQUIRED_MARKER_MISSING"}:
+            self._fail("unrecognized nested receipt failure class")
+        child = CommandExecutionReceiptV1(**converted)
+        if _command_requires_process_retention_v1(child):
+            self._fail("nested receipt retains unresolved process custody")
+        for key, value in expected.items():
+            actual = getattr(child, key)
+            if key == "removed_environment_keys":
+                equal = len(actual) == len(set(actual)) and set(actual) == set(value)
+            else:
+                equal = type(actual) is type(value) and actual == value
+            if not equal:
+                self._fail("nested receipt original association differs: " + key)
+        timeout = child.timeout_seconds_or_null
+        cutoff = self.limits["execution_deadline_ns" if parent is not None
+                             else "child_execution_deadline_ns"]
+        maximum = (cutoff - self.armed_ns) / 1_000_000_000
+        if (child.pid is not None and timeout is None) or (timeout is not None and timeout > maximum):
+            self._fail("receipt timeout is missing or exceeds the original pre-dispatch remainder")
+        stdout, stderr = observed[paths[1]][0], observed[paths[2]][0]
+        if (child.stdout_byte_count != len(stdout) or child.stderr_byte_count != len(stderr)
+                or child.stderr_was_nonempty != bool(stderr)):
+            self._fail("nested receipt and observed stream sizes differ")
+        missing = [m for m in child.stdout_required_markers if m.encode("utf-8") not in stdout]
+        state = "NOT_REQUIRED" if not child.stdout_required_markers else (
+            "MISSING:" + ",".join(missing) if missing else "PASS")
+        if child.stdout_marker_state != state or (missing and child.failure_class is None):
+            self._fail("nested receipt and observed marker state differ")
+        if parent is not None and child != parent:
+            self._fail("retained parent and native parent receipt differ")
+        return child, observed
+
+    def observe(self, receipt):
+        try:
+            self._check()
+            if self.state != "ARMED" or type(receipt) is not CommandExecutionReceiptV1:
+                self._fail("nested evidence observation lacks its armed parent")
+            if _command_requires_process_retention_v1(receipt):
+                self._fail("parent retains unresolved process custody")
+            self.receipt = receipt
+            root_now = self._inventory(self.root)
+            if self._directory_identity(self.root.lstat()) != self.root_identity:
+                self._fail("nested evidence root identity changed")
+            for name, version in self.baseline.items():
+                if root_now.get(name) != version:
+                    self._fail("earlier evidence changed during this occurrence: " + name)
+            child_name = None
+            if receipt.pid is not None:
+                from tools.run_pytest_fresh_basetemp import MAX_NESTED_EVIDENCE_COLLISIONS
+                # Exact source-defined allocation, bound to this observed parent PID.
+                for counter in range(MAX_NESTED_EVIDENCE_COLLISIONS):
+                    candidate = f"nested-pytest-{receipt.pid}-{counter}"
+                    if candidate not in self.baseline:
+                        child_name = candidate
+                        break
+                if child_name is None:
+                    self._fail("nested evidence collision allowance exhausted")
+            additions = set(self.parent_names) | ({child_name} if child_name else set())
+            if set(root_now) != set(self.baseline) | additions:
+                self._fail("nested evidence membership is missing, extra, or unbound")
+            p = self.planned
+            expected = dict(schema_version=SCHEMA_VERSION, run_id=p.run_id, phase=p.phase,
+                command_index=p.command_index, argv=p.argv, cwd=p.cwd,
+                platform=os.name, stdout_required_markers=(), registered_argv=(),
+                removed_environment_keys=(), fixed_environment_controls=self.parent_controls,
+                stdout_path=str(self.root / self.parent_names[1]),
+                stderr_path=str(self.root / self.parent_names[2]))
+            parent, saved = self._read_receipt(self.root, p.command_index, expected, parent=receipt)
+            if parent.pid is not None and parent.timeout_seconds_or_null is None:
+                self._fail("started mapper parent has no bounded execution receipt")
+            child = None
+            if child_name is not None:
+                directory = self.root / child_name
+                children = self._inventory(directory)
+                if set(children) != {"command-1.json", "command-1.stdout.bin", "command-1.stderr.bin"}:
+                    self._fail("nested child evidence is not the exact three-file set")
+                expected = dict(schema_version=SCHEMA_VERSION, run_id=p.run_id, phase="nested-pytest",
+                    command_index=1, argv=self.child_argv, cwd=p.cwd, platform=os.name,
+                    stdout_path=str(directory / "command-1.stdout.bin"),
+                    stderr_path=str(directory / "command-1.stderr.bin"), stdout_required_markers=(),
+                    **self.child_projection)
+                child, seen = self._read_receipt(directory, 1, expected)
+                if child.pid is not None and child.timeout_seconds_or_null is None:
+                    self._fail("started mapper child has no bounded execution receipt")
+                if child.pid == parent.pid:
+                    self._fail("parent and child PID are identical")
+                saved.update(seen)
+                self.child_directory = (directory, self._directory_identity(directory.lstat()))
+            # Direct byte rechecks with raw same-API metadata before marking settled.
+            if self._inventory(self.root) != root_now:
+                self._fail("evidence membership or versions changed during collection")
+            self.saved = saved
+            self.retained = sum(len(value[0]) for value in saved.values())
+            if self.retained > self.limits["retained_byte_limit"]:
+                self._fail("retained nested evidence exceeds its allowance")
+            self.inconsistent = (parent.failure_class is None and child is not None
+                                 and child.failure_class is not None)
+            self.state = "SETTLED"
+            self.revalidate()
+            return self.inconsistent
+        except BaseException as exc:
+            self.failure, self.state = exc, "HELD"
+            raise
+
+    def revalidate(self):
+        try:
+            self._check()
+            if self.state != "SETTLED":
+                self._fail("nested evidence is not settled")
+            _local_unlinked_path(self.root)
+            if self._directory_identity(self.root.lstat()) != self.root_identity:
+                self._fail("nested evidence root was substituted")
+            if self.child_directory is not None:
+                directory, version = self.child_directory
+                if (set(self._inventory(directory)) !=
+                        {"command-1.json", "command-1.stdout.bin", "command-1.stderr.bin"}
+                        or self._directory_identity(directory.lstat()) != version):
+                    self._fail("nested evidence child directory changed")
+            for path, original in self.saved.items():
+                if self._read(path) != original:
+                    self._fail("settled nested evidence changed: " + str(path))
+        except BaseException as exc:
+            self.failure, self.state = exc, "HELD"
+            raise
+
+
+def _recheck_nested_pytest_custody_v1(supervision):
+    """No restoration/cleanup may pass an armed, absent, failed, or stale gate."""
+    gates = supervision.get("nested_evidence", {})
+    if type(gates) is not dict:
+        supervision["pending"] = True
+        raise ValidationReliabilityError("ENGVR_PROCESS_TERMINATION_FAILED", "invalid nested custody state")
+    try:
+        for index, gate in gates.items():
+            if (type(index) is not int or type(gate) is not _NestedPytestEvidenceV1
+                    or gate.planned.command_index != index or gate.paths is not supervision["paths"]
+                    or gate.planned.phase != supervision["phase"]):
+                raise ValidationReliabilityError("ENGVR_PROCESS_TERMINATION_FAILED", "nested custody association lost")
+            gate.revalidate()
+    except BaseException as exc:
+        supervision["pending"] = True
+        supervision["errors"].append(exc)
+        raise
+
+
 def validate_complete_run_evidence(
     paths: ValidationRunPathsV1,
     probe: FilesystemProbeReceiptV1,
@@ -4117,8 +4563,12 @@ def validate_complete_run_evidence(
     rp5a_payload_byte_limits=None,
     scan_read_limits=None,
     scan_deadline_ns=None,
+    mapper_read_profiles=None,
+    mapper_occurrence_records=None,
 ) -> None:
     """Reconcile retained run, command, stream, and cleanup evidence before PASS."""
+
+    _mapper_occurrence_evidence_v1(paths, mapper_read_profiles, mapper_occurrence_records, receipts)
 
     evidence_root = Path(os.path.abspath(os.path.normpath(str(paths.evidence_root))))
     if os.path.lexists(evidence_root / "completion.json"):
@@ -4135,6 +4585,7 @@ def validate_complete_run_evidence(
             rp5a_reader_bases=rp5a_reader_bases,
             rp5a_launch_wire_versions=rp5a_launch_wire_versions,
             rp5a_payload_byte_limits=rp5a_payload_byte_limits,
+            mapper_read_profiles=mapper_read_profiles,
         )
     )
     if _read_evidence_json(evidence_root, "run.json") != expected_run:
@@ -4488,6 +4939,7 @@ def _supervise_native_output(
     stdout_outcome: dict[str, object], stderr_outcome: dict[str, object],
     started_monotonic: float, timeout_seconds: float | None,
     termination_grace_seconds: float, platform_name: str,
+    execution_deadline_ns: int | None = None,
 ) -> tuple[int | None, str, str, str | None]:
     """Multiplex the original two pipes, retaining failure before terminal success."""
     assert process.stdout is not None and process.stderr is not None
@@ -4538,6 +4990,19 @@ def _supervise_native_output(
                         value["mirror"] = None
                     failure_class = failure_class or "ENGVR_ATOMIC_RECEIPT_WRITE_FAILED"
                     terminate_once()
+            # A late exit/EOF observation must not outrank the original cutoff.
+            # No hard wall-clock claim: scheduling, process creation and native I/O
+            # are not preempted by this cooperative observation.
+            if (not termination_attempted and execution_deadline_ns is not None
+                    and (time.monotonic_ns() >= execution_deadline_ns
+                         or (timeout_seconds is not None
+                             and time.monotonic() - started_monotonic >= timeout_seconds))):
+                timeout_state = "TRIGGERED"
+                failure_class = failure_class or "ENGVR_PROCESS_TIMEOUT"
+                for value in outcomes:
+                    value["evidence_write_enabled"] = False
+                    value["mirror"] = None
+                terminate_once()
             # Errors above precede the simultaneous exit/EOF success observation.
             if native_exit is not None and all(pipe_terminal):
                 break
@@ -4818,9 +5283,17 @@ def supervise_command(
     mirror_stderr: bool = True,
     platform_name: str | None = None,
     launch_input: _ScanLaunchInput | None = None,
+    execution_deadline_ns: int | None = None,
 ) -> CommandExecutionReceiptV1:
     """Launch one shell-free child and retain PID, output, and native exit custody."""
 
+    if execution_deadline_ns is not None:
+        remaining_seconds = _execution_remaining_seconds_v1(execution_deadline_ns)
+        if timeout_seconds is not None and (type(timeout_seconds) not in (int, float)
+                or not math.isfinite(timeout_seconds) or timeout_seconds <= 0):
+            raise ValueError("relative execution cap must be finite and positive")
+        timeout_seconds = (remaining_seconds if timeout_seconds is None
+                           else min(timeout_seconds, remaining_seconds))
     selected_platform = os.name if platform_name is None else platform_name
     evidence_root = Path(evidence_root).resolve(strict=False)
     (
@@ -4920,6 +5393,10 @@ def supervise_command(
                 original_stdin = launch_input._claim(
                     run_id=run_id, phase=phase, command_index=command_index,
                     argv=selected_argv, cwd=receipt_cwd)
+            if execution_deadline_ns is not None:
+                # Reservation, input validation and startup preparations consume
+                # the original allowance, rather than moving its deadline.
+                _execution_remaining_seconds_v1(execution_deadline_ns)
             process = subprocess.Popen(
                 list(selected_argv),
                 cwd=receipt_cwd,
@@ -4969,6 +5446,8 @@ def supervise_command(
                     timeout_seconds=timeout_seconds,
                     termination_grace_seconds=termination_grace_seconds,
                     platform_name=selected_platform,
+                    **({"execution_deadline_ns": execution_deadline_ns}
+                       if execution_deadline_ns is not None else {}),
                 )
             )
             if failure_class != "ENGVR_PROCESS_TERMINATION_FAILED" and any(
@@ -5671,6 +6150,7 @@ def _scan_profile_projection(profiles):
 
 def _rp5a_reader_profiles_from_run_v1(attestation, value, *, command_index, repo_root,
                                     inherited_run_id, read_limits, deadline_ns, include_wire_binding=False):
+    value = _mapper_strip_run_extension_v1(value)
     fields_run = {"schema_version", "run_id", "phase", "command_count", "text_integrity_preflight_state",
                   "paths", "filesystem_probe", "rp5a_scan_profiles", "rp5a_reader_profiles",
                   "rp5a_reader_bases", "rp5a_launch_wire_version"}
@@ -8182,3 +8662,869 @@ def _read_rp5a_bound_launch_fd_v1(fd, *, repo_root, environment, explicit_basete
             except BaseException as error:
                 errors.append(error)
         _scan_raise_errors(errors)
+
+
+# Original mapper acquisition: one shared native binding, no scanner role expansion.
+import copy
+# Original occurrence -> family -> direct CLI, or None for the two retained
+# mapper pytest wrappers. No data payload can add routes or executable text.
+_REPORT_READ_ROUTES_V1 = (
+    (66, 'QB', 'tools/validate_pr166_qb_bounded_quantum_benchmark.py', None),
+    (67, 'QC', 'tools/validate_pr166_qc_quantum_selected_replay_paper_retest.py', None),
+    (68, 'MAPPER', 'tools/validate_pr162e_q_quantum_automapper.py', None),
+    (429, 'QB', None, ('tests/stage1_prediction_markets/pr166_qb_bounded_quantum_benchmark/test_pr166_qb_idempotence.py', '-q', '--durations=50')),
+    (430, 'QB', None, ('tests/stage1_prediction_markets/pr166_qb_bounded_quantum_benchmark', '-q', '--ignore', 'tests/stage1_prediction_markets/pr166_qb_bounded_quantum_benchmark/test_pr166_qb_idempotence.py', '--durations=50')),
+    (431, 'QC', None, ('tests/stage1_prediction_markets/pr166_qc_quantum_selected_replay_paper_retest/test_pr166_qc_idempotence.py', '-q', '--durations=50')),
+    (432, 'QC', None, ('tests/stage1_prediction_markets/pr166_qc_quantum_selected_replay_paper_retest', '-q', '--ignore', 'tests/stage1_prediction_markets/pr166_qc_quantum_selected_replay_paper_retest/test_pr166_qc_idempotence.py', '--durations=50')),
+    (433, 'MAPPER', None, ('tests/stage1_prediction_markets/pr162e_q_quantum_automapper/test_pr162e_q_idempotence.py', '-q', '--durations=50')),
+    (434, 'MAPPER', None, ('tests/stage1_prediction_markets/pr162e_q_quantum_automapper', '-q', '--ignore', 'tests/stage1_prediction_markets/pr162e_q_quantum_automapper/test_pr162e_q_idempotence.py', '--durations=50')),
+)
+
+
+_MAPPER_INTEGER_MAX_V1 = (1 << 63) - 1
+def _mapper_need_v1(condition, message):
+    if not condition:
+        raise ValueError(message)
+
+def _mapper_relative_v1(name):
+    _mapper_need_v1(type(name) is str and name and '\\' not in name and ':' not in name, 'UNSAFE_MEMBER')
+    parts = name.split('/')
+    p = PurePosixPath(name)
+    _mapper_need_v1(not p.is_absolute() and all(x not in ('', '.', '..') for x in parts), 'UNSAFE_MEMBER')
+    return p
+
+def _mapper_int_v1(value, name, *, positive=False):
+    if type(value) is not int or not int(positive) <= value <= _MAPPER_INTEGER_MAX_V1:
+        raise ValueError('RUNTIME_INTEGER:' + name)
+    return value
+
+def _mapper_add_v1(a, b):
+    _mapper_int_v1(a, 'sum_left'); _mapper_int_v1(b, 'sum_right')
+    if b > _MAPPER_INTEGER_MAX_V1 - a:
+        raise ValueError('RUNTIME_INTEGER_OVERFLOW')
+    return a + b
+
+def _mapper_portable_relative_v1(name):
+    """Portable, nonaliasing relative spelling; physical identity is also checked."""
+    p = _mapper_relative_v1(name)
+    reserved = {'CON', 'PRN', 'AUX', 'NUL', 'CONIN$', 'CONOUT$'}
+    reserved |= {prefix + digit for prefix in ('COM', 'LPT') for digit in '123456789¹²³'}
+    for part in p.parts:
+        if (any(ord(c) < 32 or c in '<>:"|?*' for c in part)
+                or part.endswith((' ', '.')) or part.split('.')[0].upper() in reserved):
+            raise ValueError('BASIS_NONPORTABLE_PATH')
+    return p
+
+def _mapper_absolute_v1(value):
+    if type(value) is not str or not value or '\0' in value:
+        raise ValueError('BASIS_ABSOLUTE_PATH')
+    p = Path(value)
+    if not p.is_absolute() or str(p) != os.path.normpath(value) or '..' in p.parts:
+        raise ValueError('BASIS_ABSOLUTE_PATH')
+    return p
+
+def _mapper_stamp_v1(info, *, directory=False):
+    if (getattr(info, 'st_file_attributes', 0) & 0x400 or
+            not (stat.S_ISDIR(info.st_mode) if directory else stat.S_ISREG(info.st_mode))):
+        raise ValueError('BASIS_UNSUPPORTED_FILE_KIND')
+    if not directory and info.st_nlink != 1:
+        raise ValueError('BASIS_MULTIPLE_LINKS')
+    common = [info.st_dev, info.st_ino, info.st_mode]
+    if not directory:
+        common += [info.st_size, info.st_mtime_ns, info.st_nlink, info.st_ctime_ns]
+    return common
+
+def _mapper_chain_v1(path, observe=os.lstat):
+    return [[str(p), _mapper_stamp_v1(observe(p), directory=True)]
+            for p in (*reversed(path.parents), path)]
+
+def _mapper_profile_v1(profile):
+    """Validate representation, not acceptance. Every resource operand is explicit."""
+    fields = {'kind', 'position', 'generation', 'root', 'root_chain', 'basis',
+              'basis_chain', 'basis_lstat', 'basis_fstat', 'entries', 'limits',
+              'chunk_bytes', 'deadline_ns'}
+    _mapper_need_v1(type(profile) is dict and set(profile) == fields, 'BASIS_PROFILE_FIELDS')
+    _mapper_need_v1(profile['kind'] == 'MAPPER_DISK_BASIS_V1', 'BASIS_PROFILE_KIND')
+    _mapper_need_v1(type(profile['position']) is int and profile['position'] in tuple(row[0] for row in _REPORT_READ_ROUTES_V1), 'BASIS_POSITION')
+    _mapper_need_v1(type(profile['generation']) is str and bool(profile['generation']), 'BASIS_GENERATION')
+    root = _mapper_absolute_v1(profile['root']); basis = _mapper_absolute_v1(profile['basis'])
+    _mapper_need_v1(not basis.is_relative_to(root) and not root.is_relative_to(basis.parent), 'BASIS_ROOT_OVERLAP')
+    _mapper_int_v1(profile['chunk_bytes'], 'chunk', positive=True)
+    _mapper_int_v1(profile['deadline_ns'], 'deadline', positive=True)
+    limits = profile['limits']
+    _mapper_need_v1(type(limits) is dict and set(limits) == {'attempts', 'target_bytes', 'basis_bytes', 'metadata_calls', 'single_target_buffer'}, 'BASIS_LIMIT_FIELDS')
+    for name, value in limits.items(): _mapper_int_v1(value, name)
+    def stamp(value, n):
+        _mapper_need_v1(type(value) is list and len(value) == n and all(type(x) is int for x in value), 'BASIS_STAMP_FIELDS')
+        _mapper_need_v1(value[0] >= 0 and value[1] > 0 and value[2] >= 0, 'BASIS_STAMP_IDENTITY')
+        if n == 7:
+            _mapper_need_v1(value[3] >= 0 and value[5] == 1 and stat.S_ISREG(value[2]), 'BASIS_STAMP_FILE')
+        else: _mapper_need_v1(stat.S_ISDIR(value[2]), 'BASIS_STAMP_DIRECTORY')
+    for name, path in (('root_chain', root), ('basis_chain', basis.parent)):
+        expected = [str(p) for p in (*reversed(path.parents), path)]
+        chain = profile[name]
+        _mapper_need_v1(type(chain) is list and len(chain) == len(expected), 'BASIS_CHAIN_FIELDS')
+        for row, wanted in zip(chain, expected):
+            _mapper_need_v1(type(row) is list and len(row) == 2 and row[0] == wanted, 'BASIS_CHAIN_PATH')
+            stamp(row[1], 3)
+    stamp(profile['basis_lstat'], 7); stamp(profile['basis_fstat'], 7)
+    _mapper_need_v1(profile['basis_lstat'][:6] == profile['basis_fstat'][:6], 'BASIS_CROSS_API_IDENTITY')
+    entries = profile['entries']; _mapper_need_v1(type(entries) is list and bool(entries), 'BASIS_ENTRIES')
+    names = set(); identities = set(); end = attempts = target = reference = 0
+    for row in entries:
+        _mapper_need_v1(type(row) is dict and set(row) == {'path', 'offset', 'length', 'attempt_limit', 'lstat', 'fstat', 'parent_chain'}, 'BASIS_ENTRY_FIELDS')
+        name = row['path']; _mapper_portable_relative_v1(name)
+        _mapper_need_v1(name.casefold() not in names, 'BASIS_ALIAS_SPELLING'); names.add(name.casefold())
+        for field in ('offset', 'length', 'attempt_limit'):
+            _mapper_int_v1(row[field], field, positive=field == 'attempt_limit')
+        _mapper_need_v1(row['offset'] == end, 'BASIS_NONCONTIGUOUS_SEGMENT')
+        end = _mapper_add_v1(end, row['length'])
+        stamp(row['lstat'], 7); stamp(row['fstat'], 7)
+        _mapper_need_v1(row['lstat'][:6] == row['fstat'][:6] and row['lstat'][3] == row['length'], 'BASIS_ENTRY_IDENTITY')
+        identity = tuple(row['lstat'][:2]); _mapper_need_v1(identity not in identities, 'BASIS_PHYSICAL_ALIAS'); identities.add(identity)
+        parent = root.joinpath(*name.split('/')).parent
+        expected_chain = [str(p) for p in (*reversed(parent.parents), parent)]
+        chain = row['parent_chain']; _mapper_need_v1(type(chain) is list and len(chain) == len(expected_chain), 'BASIS_ENTRY_PARENT_CHAIN')
+        for pair, wanted in zip(chain, expected_chain):
+            _mapper_need_v1(type(pair) is list and len(pair) == 2 and pair[0] == wanted, 'BASIS_ENTRY_PARENT_PATH')
+            stamp(pair[1], 3)
+        _mapper_need_v1(chain[:len(profile['root_chain'])] == profile['root_chain'], 'BASIS_ENTRY_ROOT_DRIFT')
+        attempts = _mapper_add_v1(attempts, row['attempt_limit'])
+        # Overflow is checked before addition even though Python integers grow.
+        t = row['attempt_limit'] * _mapper_add_v1(row['length'], 1)
+        b = row['attempt_limit'] * row['length']
+        target = _mapper_add_v1(target, t); reference = _mapper_add_v1(reference, b)
+    _mapper_need_v1(end == profile['basis_lstat'][3], 'BASIS_FINAL_EXTENT')
+    _mapper_need_v1(tuple(profile['basis_lstat'][:2]) not in identities, 'BASIS_ALIASES_INPUT')
+    _mapper_need_v1(limits['attempts'] <= attempts and limits['target_bytes'] <= target and limits['basis_bytes'] <= reference, 'BASIS_EXCESS_UNUSED_ALLOCATION')
+    return {'unique_files': len(entries), 'basis_extent': end, 'attempt_envelope': attempts,
+            'target_byte_reservation_envelope': target, 'basis_byte_reservation_envelope': reference,
+            'is_authentic_resource_grant': False}
+
+class _MapperDiskBasisV1:
+    """Pinned original-generation, disk-backed comparator for one process/thread.
+
+    Does not sandbox Python or preempt blocking OS calls. The original parent
+    must supervise termination and retain input/evidence custody. The caller
+    supplies an independently bound identity; the profile cannot approve itself.
+    """
+    def __init__(self, profile, *, expected_position, expected_generation, clock):
+        import threading
+        self.profile = copy.deepcopy(profile)
+        self.shape = _mapper_profile_v1(self.profile)
+        _mapper_need_v1(type(expected_position) is int and expected_position == profile['position']
+             and type(expected_generation) is str and expected_generation == profile['generation'], 'BASIS_WRONG_OCCURRENCE_OR_GENERATION')
+        _mapper_need_v1(callable(clock), 'BASIS_CLOCK_REQUIRED')
+        self.clock = clock; self.last_clock = None; self.owner = (os.getpid(), threading.get_ident())
+        self.busy = False; self.poisoned = False; self.closed = False
+        self.counters = {k: 0 for k in ('attempts', 'target_bytes', 'basis_bytes', 'metadata_calls', 'target_read_calls', 'basis_read_calls')}
+        self.reserved = {'target_bytes': 0, 'basis_bytes': 0}; self.by_path = {}; self.events = []
+        self.root = Path(profile['root']); self.basis = Path(profile['basis'])
+        self.entries = {row['path']: row for row in self.profile['entries']}
+        self.fd = None
+        self._check()
+        try:
+            self._chains()
+            _mapper_need_v1(self._stamp(self.basis) == profile['basis_lstat'], 'BASIS_INITIAL_PATH_CHANGED')
+            self.fd = os.open(self.basis, os.O_RDONLY | getattr(os, 'O_BINARY', 0) | getattr(os, 'O_NOFOLLOW', 0))
+            os.set_inheritable(self.fd, False)
+            _mapper_need_v1(self._stamp(fd=self.fd) == profile['basis_fstat'], 'BASIS_INITIAL_HANDLE_CHANGED')
+            self._basis_current()
+        except BaseException as primary:
+            self.poisoned = True
+            if self.fd is not None:
+                fd,self.fd = self.fd,None
+                try: os.close(fd)
+                except BaseException as secondary:
+                    raise BaseExceptionGroup('basis initialization and close failed', [primary, secondary])
+            raise
+
+    def _check(self):
+        import threading
+        _mapper_need_v1((os.getpid(), threading.get_ident()) == self.owner, 'BASIS_FOREIGN_OWNER')
+        _mapper_need_v1(not self.closed and not self.poisoned, 'BASIS_SESSION_UNUSABLE')
+        try:
+            now = self.clock(); _mapper_int_v1(now, 'clock')
+            _mapper_need_v1(self.last_clock is None or now >= self.last_clock, 'BASIS_CLOCK_REGRESSION')
+            self.last_clock = now
+            if now >= self.profile['deadline_ns']: raise TimeoutError('BASIS_DEADLINE')
+        except BaseException:
+            self.poisoned = True
+            raise
+
+    def _stat(self, path=None, fd=None):
+        self._check()
+        _mapper_need_v1(self.counters['metadata_calls'] < self.profile['limits']['metadata_calls'], 'BASIS_METADATA_EXHAUSTED')
+        self.counters['metadata_calls'] += 1
+        result = os.fstat(fd) if fd is not None else os.lstat(path)
+        self._check()
+        return result
+
+    def _stamp(self, path=None, fd=None):
+        return _mapper_stamp_v1(self._stat(path, fd))
+
+    def _chains(self, entry=None):
+        for key, path in (('root_chain', self.root), ('basis_chain', self.basis.parent)):
+            _mapper_need_v1(_mapper_chain_v1(path, self._stat) == self.profile[key], 'BASIS_PINNED_DIRECTORY_CHANGED')
+        if entry is not None:
+            parent = self.root.joinpath(*entry['path'].split('/')).parent
+            _mapper_need_v1(_mapper_chain_v1(parent, self._stat) == entry['parent_chain'], 'BASIS_PINNED_PARENT_CHANGED')
+
+    def _basis_current(self):
+        self._chains()
+        _mapper_need_v1(self._stamp(self.basis) == self.profile['basis_lstat'] and self._stamp(fd=self.fd) == self.profile['basis_fstat'], 'BASIS_CHANGED')
+
+    def _read(self, fd, request, lane):
+        self._check()
+        _mapper_need_v1(type(request) is int and request > 0, 'BASIS_POSITIVE_READ_REQUIRED')
+        self.counters[lane + '_read_calls'] += 1
+        data = os.read(fd, request)
+        if type(data) is not bytes:
+            self.poisoned = True; raise ValueError('BASIS_UNKNOWN_DELIVERED_BYTES')
+        self.counters[lane + '_bytes'] = _mapper_add_v1(self.counters[lane + '_bytes'], len(data))
+        if len(data) > request:
+            self.poisoned = True; raise ValueError('BASIS_OVERSIZED_READ')
+        self._check(); return data
+
+    def read_json(self, name, parser):
+        return self._acquire(name, parser, decode_text=True)
+
+    def compare_bytes(self, name):
+        return self._acquire(name, lambda value: None, decode_text=False)
+
+    def _acquire(self, name, parser, *, decode_text):
+        _mapper_portable_relative_v1(name); self._check()
+        _mapper_need_v1(not self.busy and name in self.entries and callable(parser), 'BASIS_REENTRANT_OR_UNBOUND_READ')
+        row = self.entries[name]; limits = self.profile['limits']; n = row['length']
+        _mapper_need_v1(self.counters['attempts'] < limits['attempts'] and self.by_path.get(name, 0) < row['attempt_limit'], 'BASIS_ATTEMPTS_EXHAUSTED')
+        self.counters['attempts'] += 1; self.by_path[name] = self.by_path.get(name, 0) + 1
+        event = {'path':name,'ordinal':self.counters['attempts'],'outcome':'BEFORE_OPEN', 'target_bytes':0,'basis_bytes':0,'descriptor_closed':False}
+        self.events.append(event); before = dict(self.counters)
+        self.busy = True; target_fd = None; primary = None
+        try:
+            _mapper_need_v1(n + 1 <= limits['single_target_buffer'], 'BASIS_SINGLE_BUFFER_EXHAUSTED')
+            for lane, amount in (('target_bytes', n + 1), ('basis_bytes', n)):
+                _mapper_need_v1(amount <= limits[lane] - self.reserved[lane], 'BASIS_RESERVATION_EXHAUSTED')
+            self.reserved['target_bytes'] += n + 1; self.reserved['basis_bytes'] += n
+            self._basis_current(); self._chains(row)
+            path = self.root.joinpath(*name.split('/'))
+            _mapper_need_v1(self._stamp(path) == row['lstat'], 'BASIS_TARGET_GENERATION_CHANGED')
+            target_fd = os.open(path, os.O_RDONLY | getattr(os,'O_BINARY',0) | getattr(os,'O_NOFOLLOW',0))
+            os.set_inheritable(target_fd,False)
+            _mapper_need_v1(self._stamp(fd=target_fd) == row['fstat'], 'BASIS_TARGET_HANDLE_CHANGED')
+            os.lseek(self.fd, row['offset'], os.SEEK_SET)
+            data = bytearray(); remaining = n
+            event['outcome'] = 'READING'
+            while remaining:
+                chunk = self._read(target_fd, min(self.profile['chunk_bytes'], remaining), 'target')
+                _mapper_need_v1(bool(chunk), 'BASIS_TARGET_TRUNCATED')
+                compared = 0
+                while compared < len(chunk):
+                    expected = self._read(self.fd, len(chunk) - compared, 'basis')
+                    _mapper_need_v1(bool(expected), 'BASIS_REFERENCE_TRUNCATED')
+                    _mapper_need_v1(expected == chunk[compared:compared+len(expected)], 'BASIS_BYTES_DIFFER')
+                    compared += len(expected)
+                data.extend(chunk); remaining -= len(chunk)
+            _mapper_need_v1(self._read(target_fd, 1, 'target') == b'', 'BASIS_TARGET_GREW')
+            _mapper_need_v1(self._stamp(fd=target_fd) == row['fstat'] and self._stamp(path) == row['lstat'], 'BASIS_POSTREAD_TARGET_CHANGED')
+            self._basis_current(); self._chains(row)
+            event['outcome']='DECODE'
+            text = (data.decode('utf-8', errors='strict').replace('\r\n','\n').replace('\r','\n')
+                    if decode_text else None)
+            self._check(); event['outcome']='PARSE'; result=parser(text); self._check()
+            # Parser is synchronous. It may not hand out a lazy dependency on fd.
+            self._basis_current(); self._chains(row)
+            _mapper_need_v1(self._stamp(path) == row['lstat'], 'BASIS_TARGET_CHANGED_DURING_PARSE')
+            event['outcome']='RETURNED'; return result
+        except BaseException as exc:
+            primary=exc
+            if isinstance(exc,TimeoutError) or isinstance(exc,ValueError) and str(exc).startswith('BASIS_'):
+                self.poisoned=True
+            event['exception_type']=type(exc).__name__
+            event['reason']=str(exc) if str(exc).startswith('BASIS_') else 'ORIGINAL_DECODER_OR_PARSER_EXCEPTION'
+            raise
+        finally:
+            event['target_bytes']=self.counters['target_bytes']-before['target_bytes']
+            event['basis_bytes']=self.counters['basis_bytes']-before['basis_bytes']
+            self.busy=False
+            if target_fd is not None:
+                try:
+                    os.close(target_fd); event['descriptor_closed']=True
+                except BaseException as close_error:
+                    self.poisoned=True
+                    if primary is not None: raise BaseExceptionGroup('read and target close failed',[primary,close_error])
+                    raise
+            if primary is None:
+                try: self._check()
+                except BaseException:
+                    self.poisoned=True; event['outcome']='FINAL_CHECK_FAILED'; raise
+
+    def close(self):
+        import threading
+        _mapper_need_v1((os.getpid(),threading.get_ident())==self.owner and not self.busy, 'BASIS_CLOSE_WITHOUT_OWNERSHIP')
+        if self.closed: return
+        self.closed=True
+        if self.fd is not None:
+            fd,self.fd=self.fd,None
+            os.close(fd)
+
+# Runtime records live under the existing validation evidence owner, never Git.
+_MAPPER_ACTIVATION_ENV_V1 = 'QTT_MAPPER_ACTIVATION_IDENTITY'
+
+
+def _mapper_activation_limits_v1(binding):
+    limits = binding['activation_limits']
+    fields = {'target_bytes', 'basis_bytes', 'metadata_calls', 'record_bytes', 'evidence_deadline_ns'}
+    if type(limits) is not dict or set(limits) != fields:
+        raise ValueError('MAPPER_ACTIVATION_LIMIT_FIELDS')
+    for name, value in limits.items():
+        _mapper_int_v1(value, name, positive=name in ('metadata_calls', 'record_bytes', 'evidence_deadline_ns'))
+    if limits['evidence_deadline_ns'] < binding['basis']['deadline_ns']:
+        raise ValueError('MAPPER_ACTIVATION_EVIDENCE_BEFORE_EXECUTION_DEADLINE')
+    entries = binding['basis']['entries']
+    if (limits['target_bytes'] < sum(row['length'] + 1 for row in entries)
+            or limits['basis_bytes'] < sum(row['length'] for row in entries)):
+        raise ValueError('MAPPER_ACTIVATION_INSUFFICIENT_BYTE_ALLOWANCE')
+    if limits['record_bytes'] > binding['run_read_limits']['byte_limit']:
+        raise ValueError('MAPPER_ACTIVATION_RECORD_READ_CEILING')
+    return limits
+
+
+def _mapper_activation_path_v1(binding):
+    return Path(binding['evidence_root']) / ('mapper-read-' + str(binding['command_index']) + '.json')
+
+
+def _mapper_occurrence_generation_v1(binding):
+    return json.dumps([binding['basis']['generation'], binding['run_id'], binding['phase'],
+                       binding['command_index'], binding['original_position']],
+                      ensure_ascii=True, separators=(',', ':'))
+
+
+def _mapper_activation_record_v1(template, record):
+    """The observed profile cannot replace expected bytes, roots or allowances."""
+    template = _mapper_binding_v1(template)
+    if template['kind'] != 'MAPPER_NATIVE_READ_BINDING_V2':
+        raise ValueError('MAPPER_ACTIVATION_REQUIRES_V2')
+    record = _mapper_plain_v1(record)
+    if (type(record) is not dict or set(record) != {'kind', 'binding', 'observed'}
+            or record['kind'] != 'MAPPER_OCCURRENCE_ACTIVATION_V1'):
+        raise ValueError('MAPPER_ACTIVATION_RECORD_FIELDS')
+    live = _mapper_binding_v1(record['binding'])
+    reverse = copy.deepcopy(live)
+    if live['basis']['generation'] != _mapper_occurrence_generation_v1(template):
+        raise ValueError('MAPPER_ACTIVATION_GENERATION')
+    reverse['basis']['generation'] = template['basis']['generation']
+    if len(live['basis']['entries']) != len(template['basis']['entries']):
+        raise ValueError('MAPPER_ACTIVATION_ENTRY_ROSTER')
+    for old, current, restored in zip(template['basis']['entries'], live['basis']['entries'],
+                                       reverse['basis']['entries'], strict=True):
+        if current['lstat'][2:4] != old['lstat'][2:4] or current['fstat'][2:4] != old['fstat'][2:4]:
+            raise ValueError('MAPPER_ACTIVATION_MODE_OR_LENGTH')
+        restored['lstat'], restored['fstat'] = old['lstat'], old['fstat']
+    if reverse != template:
+        raise ValueError('MAPPER_ACTIVATION_TEMPLATE_DRIFT')
+    observed = record['observed']; limits = template['activation_limits']
+    if type(observed) is not dict or set(observed) != {'files', 'target_bytes', 'basis_bytes', 'metadata_calls'}:
+        raise ValueError('MAPPER_ACTIVATION_OBSERVATION_FIELDS')
+    for key, value in observed.items(): _mapper_int_v1(value, key)
+    expected_bytes = sum(row['length'] for row in template['basis']['entries'])
+    if (observed['files'] != len(template['basis']['entries'])
+            or observed['target_bytes'] != expected_bytes or observed['basis_bytes'] != expected_bytes
+            or not 0 < observed['metadata_calls'] <= limits['metadata_calls']):
+        raise ValueError('MAPPER_ACTIVATION_OBSERVATION_CONFLICT')
+    return live
+
+
+def _mapper_activation_identity_v1(text):
+    if type(text) is not str or len(text) > 200:
+        raise ValueError('MAPPER_ACTIVATION_IDENTITY_EXTENT')
+    try: value = json.loads(text)
+    except (ValueError, TypeError) as exc: raise ValueError('MAPPER_ACTIVATION_IDENTITY') from exc
+    if (type(value) is not list or len(value) != 7
+            or any(type(v) is not int or abs(v) > 2**63 - 1 for v in value)
+            or value[0] < 0 or value[1] <= 0 or not stat.S_ISREG(value[2])
+            or value[3] < 0 or value[5] != 1
+            or json.dumps(value, separators=(',', ':')) != text):
+        raise ValueError('MAPPER_ACTIVATION_IDENTITY')
+    return value
+
+
+def _mapper_read_activation_v1(template, identity, *, expected_raw=None, evidence_review=False):
+    """Bounded data read pinned by the original parent's launch environment."""
+    template = _mapper_binding_v1(template)
+    identity = _mapper_activation_identity_v1(identity)
+    limits = _mapper_activation_limits_v1(template)
+    if identity[3] > limits['record_bytes']:
+        raise ValueError('MAPPER_ACTIVATION_RECORD_TOO_LARGE')
+    path = _mapper_activation_path_v1(template)
+    deadline = (limits['evidence_deadline_ns'] if evidence_review else template['basis']['deadline_ns'])
+    _scan_deadline(deadline); _local_unlinked_path(path.parent)
+    parents = _mapper_chain_v1(path.parent)
+    if _mapper_stamp_v1(path.lstat()) != identity:
+        raise ValueError('MAPPER_ACTIVATION_PATH_CHANGED')
+    fd = _open_regular_worktree_descriptor(path, nonblocking=True)
+    errors = []; raw = bytearray()
+    try:
+        opened = _mapper_stamp_v1(os.fstat(fd))
+        if opened[:6] != identity[:6]: raise ValueError('MAPPER_ACTIVATION_HANDLE_CHANGED')
+        while True:
+            _scan_deadline(deadline)
+            amount = min(template['basis']['chunk_bytes'], identity[3] - len(raw) + 1)
+            data = os.read(fd, amount)
+            if type(data) is not bytes or len(data) > amount:
+                raise ValueError('MAPPER_ACTIVATION_READ_RESULT')
+            raw.extend(data)
+            if len(raw) > identity[3]: raise ValueError('MAPPER_ACTIVATION_GREW')
+            if not data: break
+        if (len(raw) != identity[3] or _mapper_stamp_v1(os.fstat(fd)) != opened
+                or _mapper_stamp_v1(path.lstat()) != identity):
+            raise ValueError('MAPPER_ACTIVATION_READ_DRIFT')
+    except BaseException as exc: errors.append(exc)
+    try: os.close(fd)
+    except BaseException as exc: errors.append(exc)
+    _scan_raise_errors(errors)
+    if _mapper_chain_v1(path.parent) != parents or _mapper_stamp_v1(path.lstat()) != identity:
+        raise ValueError('MAPPER_ACTIVATION_AFTER_CLOSE_DRIFT')
+    _scan_deadline(deadline)
+    raw = bytes(raw)
+    if expected_raw is not None and raw != expected_raw:
+        raise ValueError('MAPPER_ACTIVATION_RETAINED_BYTES_DRIFT')
+    read_limits = _ScanRunReadLimits(**template['run_read_limits'])
+    record = _scan_owned_json(raw, read_limits)
+    live = _mapper_activation_record_v1(template, record)
+    return live, raw
+
+
+@dataclass(frozen=True, slots=True)
+class _MapperOccurrenceRecordV1:
+    template_json: bytes
+    record_json: bytes
+    identity: str
+    process_id: int
+    thread_id: int
+
+    def template(self):
+        return _mapper_binding_v1(json.loads(self.template_json))
+
+    def binding(self):
+        return _mapper_activation_record_v1(self.template(), json.loads(self.record_json))
+
+    def verify(self):
+        import threading
+        if (os.getpid(), threading.get_ident()) != (self.process_id, self.thread_id):
+            raise ValueError('MAPPER_ACTIVATION_FOREIGN_OWNER')
+        return _mapper_read_activation_v1(self.template(), self.identity, expected_raw=self.record_json, evidence_review=True)[0]
+
+
+def _mapper_publish_occurrence_v1(template, *, candidate, entry):
+    """Rebind physical versions once, after the original custody admission.
+
+    Expected binary segments never change. This is not source acceptance and
+    cannot admit a different result produced by an earlier command.
+    """
+    import threading
+    from tools.run_validation_gates import _ValidationCandidateCustodyV1
+    template = _mapper_binding_v1(template)
+    if template['kind'] != 'MAPPER_NATIVE_READ_BINDING_V2':
+        raise ValueError('MAPPER_ACTIVATION_REQUIRES_V2')
+    if (type(candidate) is not _ValidationCandidateCustodyV1
+            or candidate.active_occurrence != template['command_index']
+            or entry is not candidate.plan[template['command_index'] - 1]
+            or tuple(entry.argv) != tuple(template['parent_argv'])
+            or str(candidate.root) != template['repo_root']
+            or entry.run_id != template['run_id'] or entry.phase != template['phase']
+            or len(candidate.plan) != template['command_count']):
+        raise ValueError('MAPPER_ACTIVATION_ORIGINAL_CUSTODY_REQUIRED')
+    candidate._check()
+    attempted = getattr(candidate, '_mapper_activation_attempts_v1', None)
+    if attempted is None:
+        attempted = set(); candidate._mapper_activation_attempts_v1 = attempted
+    index = template['command_index']
+    if index in attempted: raise ValueError('MAPPER_ACTIVATION_NOT_RETRIED')
+    attempted.add(index)
+    limits = _mapper_activation_limits_v1(template)
+    if limits['evidence_deadline_ns'] > candidate.deadline_ns:
+        raise ValueError('MAPPER_ACTIVATION_EVIDENCE_EXCEEDS_ANCESTOR')
+    # Readback + CLI/parent + optional child + finalizer; reserve even on failure.
+    record_reads = 3 if template['child_argv'] is None else 4
+    total_reads = _mapper_add_v1(_mapper_add_v1(limits['target_bytes'], limits['basis_bytes']),
+                                record_reads * (limits['record_bytes'] + 1))
+    if total_reads > candidate.remaining_read_bytes:
+        raise ValueError('MAPPER_ACTIVATION_ANCESTOR_READ_ALLOWANCE')
+    if limits['record_bytes'] >= candidate.snapshot_byte_limit:
+        raise ValueError('MAPPER_ACTIVATION_ANCESTOR_RETAINED_ALLOWANCE')
+    candidate.remaining_read_bytes -= total_reads
+    candidate.snapshot_byte_limit -= limits['record_bytes']
+    usage = {'files': 0, 'target_bytes': 0, 'basis_bytes': 0, 'metadata_calls': 0}
+    # Failure usage remains on the existing candidate; failed work is not lost.
+    ledger = getattr(candidate, '_mapper_activation_usage_v1', None)
+    if ledger is None:
+        ledger = {}; candidate._mapper_activation_usage_v1 = ledger
+    ledger[index] = usage
+    live = copy.deepcopy(template)
+    live['basis']['generation'] = _mapper_occurrence_generation_v1(template)
+    profile = live['basis']; root = Path(profile['root'])
+    def observe(path=None, fd=None):
+        candidate._check(); _scan_deadline(profile['deadline_ns'])
+        if usage['metadata_calls'] >= limits['metadata_calls']:
+            raise ValueError('MAPPER_ACTIVATION_METADATA_ALLOWANCE')
+        usage['metadata_calls'] += 1
+        result = os.fstat(fd) if fd is not None else os.lstat(path)
+        _scan_deadline(profile['deadline_ns']); return result
+    if _mapper_chain_v1(root, observe) != profile['root_chain']:
+        raise ValueError('MAPPER_ACTIVATION_ROOT_REPLACED')
+    for row in profile['entries']:
+        original = candidate._occurrence_before.get(row['path'])
+        if original is None or len(original[1]) != row['length']:
+            raise ValueError('MAPPER_ACTIVATION_INPUT_OUTSIDE_CANDIDATE')
+        path = root.joinpath(*row['path'].split('/'))
+        if _mapper_chain_v1(path.parent, observe) != row['parent_chain']:
+            raise ValueError('MAPPER_ACTIVATION_PARENT_REPLACED')
+        before = _mapper_stamp_v1(observe(path))
+        if before[2:4] != row['lstat'][2:4] or stat.S_IMODE(before[2]) != original[0]:
+            raise ValueError('MAPPER_ACTIVATION_MODE_OR_LENGTH')
+        fd = _open_regular_worktree_descriptor(path, nonblocking=True)
+        errors = []
+        try:
+            opened = _mapper_stamp_v1(observe(fd=fd))
+            if opened[:6] != before[:6]: raise ValueError('MAPPER_ACTIVATION_TARGET_SUBSTITUTED')
+        except BaseException as exc: errors.append(exc)
+        try: os.close(fd)
+        except BaseException as exc: errors.append(exc)
+        _scan_raise_errors(errors)
+        if _mapper_stamp_v1(observe(path)) != before:
+            raise ValueError('MAPPER_ACTIVATION_TARGET_CHANGED')
+        row['lstat'], row['fstat'] = before, opened
+    preflight = copy.deepcopy(profile)
+    preflight['limits'] = {
+        'attempts':len(profile['entries']), 'target_bytes':sum(x['length']+1 for x in profile['entries']),
+        'basis_bytes':sum(x['length'] for x in profile['entries']),
+        'metadata_calls':limits['metadata_calls'] - usage['metadata_calls'],
+        'single_target_buffer':profile['limits']['single_target_buffer']}
+    for row in preflight['entries']: row['attempt_limit'] = 1
+    reader = None; errors = []
+    try:
+        reader = _MapperDiskBasisV1(preflight, expected_position=template['original_position'],
+                                   expected_generation=profile['generation'], clock=time.monotonic_ns)
+        for row in profile['entries']:
+            candidate._check()
+            reader.compare_bytes(row['path'])
+            usage['files'] += 1
+        # An early input may not change while later inputs are being compared.
+        for row in profile['entries']:
+            reader._chains(row)
+            if reader._stamp(root.joinpath(*row['path'].split('/'))) != row['lstat']:
+                raise ValueError('MAPPER_ACTIVATION_INPUT_CHANGED_AFTER_COMPARISON')
+        reader._basis_current()
+    except BaseException as exc:
+        errors.append(exc)
+        if reader is None:
+            # Initializer metadata attempts are not externally observable here.
+            # Never report the known prefix as an exact total after that failure.
+            usage['metadata_calls'] = None
+    if reader is not None:
+        usage['target_bytes'] = reader.counters['target_bytes']
+        usage['basis_bytes'] = reader.counters['basis_bytes']
+        usage['metadata_calls'] += reader.counters['metadata_calls']
+        try: reader.close()
+        except BaseException as exc: errors.append(exc)
+    _scan_raise_errors(errors)
+    candidate._check(); _scan_deadline(profile['deadline_ns'])
+    record = {'kind':'MAPPER_OCCURRENCE_ACTIVATION_V1','binding':live,'observed':dict(usage)}
+    _mapper_activation_record_v1(template, record)
+    raw = json.dumps(record, ensure_ascii=True, separators=(',', ':'), allow_nan=False).encode('utf-8')
+    if len(raw) > limits['record_bytes']: raise ValueError('MAPPER_ACTIVATION_RECORD_TOO_LARGE')
+    path = _mapper_activation_path_v1(template)
+    _local_unlinked_path(path.parent); parents = _mapper_chain_v1(path.parent)
+    fd = os.open(path, os.O_WRONLY | os.O_CREAT | os.O_EXCL | getattr(os,'O_BINARY',0), 0o600)
+    errors = []
+    try:
+        view = memoryview(raw)
+        while view:
+            candidate._check(); _scan_deadline(profile['deadline_ns'])
+            n = os.write(fd, view)
+            if type(n) is not int or not 0 < n <= len(view): raise OSError('invalid activation write progress')
+            view = view[n:]
+        os.fsync(fd)
+        final = _mapper_stamp_v1(os.fstat(fd))
+        if final[:6] != _mapper_stamp_v1(path.lstat())[:6]:
+            raise ValueError('MAPPER_ACTIVATION_PUBLICATION_SUBSTITUTED')
+    except BaseException as exc: errors.append(exc)
+    try: os.close(fd)
+    except BaseException as exc: errors.append(exc)
+    _scan_raise_errors(errors)
+    if _mapper_chain_v1(path.parent) != parents:
+        raise ValueError('MAPPER_ACTIVATION_PUBLICATION_PARENT_CHANGED')
+    identity = json.dumps(_mapper_stamp_v1(path.lstat()), separators=(',', ':'))
+    result = _MapperOccurrenceRecordV1(
+        json.dumps(template, ensure_ascii=True, separators=(',', ':'), allow_nan=False).encode('utf-8'),
+        raw, identity, os.getpid(), threading.get_ident())
+    result.verify()
+    candidate._check(); _scan_deadline(profile['deadline_ns'])
+    return result
+
+
+def _mapper_occurrence_evidence_v1(paths, templates, records, receipts):
+    """Check the exact activation prefix before final success, without rebinding."""
+    if records is None: records = {}
+    if type(records) is not dict:
+        raise _evidence_failure('invalid mapper activation custody')
+    templates = {} if templates is None else _mapper_plain_v1(templates)
+    expected = {str(receipt.command_index) for receipt in receipts
+                if str(receipt.command_index) in templates
+                and templates[str(receipt.command_index)]['kind'] == 'MAPPER_NATIVE_READ_BINDING_V2'}
+    if set(records) != expected:
+        raise _evidence_failure('mapper activation records differ from executed prefix')
+    actual = {p.name for p in paths.evidence_root.iterdir() if p.name.startswith('mapper-read-')}
+    wanted = {'mapper-read-' + k + '.json' for k in expected}
+    if actual != wanted:
+        raise _evidence_failure('mapper activation file roster differs')
+    for key, record in records.items():
+        if type(record) is not _MapperOccurrenceRecordV1 or record.template() != templates[key]:
+            raise _evidence_failure('mapper activation lost its original template')
+        try: record.verify()
+        except (ValueError, OSError, RuntimeError) as exc:
+            raise _evidence_failure('mapper activation evidence changed: ' + str(exc)) from exc
+        receipt = next(x for x in receipts if str(x.command_index) == key)
+        if (_MAPPER_ACTIVATION_ENV_V1, record.identity) not in receipt.fixed_environment_controls:
+            raise _evidence_failure('mapper activation missing from original process receipt')
+
+
+# The following definitions are integrated into tools/validation_reliability.py.
+_MAPPER_READ_ENV_KEYS_V1 = (
+    'QTT_MAPPER_READ_INDEX', 'QTT_MAPPER_READ_PHASE', 'QTT_MAPPER_READ_COUNT',
+    'QTT_MAPPER_RUN_BYTES', 'QTT_MAPPER_RUN_NODES', 'QTT_MAPPER_RUN_DEPTH',
+    'QTT_MAPPER_RUN_PROFILES', 'QTT_MAPPER_READ_DEADLINE',
+)
+_MAPPER_PYTEST_BOOTSTRAP_V1 = (
+    'from tools.run_pytest_fresh_basetemp import _mapper_pytest_main_v1; '
+    'raise SystemExit(_mapper_pytest_main_v1())'
+)
+
+
+def _mapper_plain_v1(value):
+    if isinstance(value, Mapping):
+        return {key: _mapper_plain_v1(item) for key, item in value.items()}
+    if type(value) in (list, tuple):
+        return [_mapper_plain_v1(item) for item in value]
+    if type(value) in (str, int, bool, float, type(None)):
+        return value
+    raise ValueError('MAPPER_NON_DATA_PROFILE')
+
+
+def _mapper_original_position_v1(argv, repo_root):
+    if type(argv) is not tuple or not argv or any(type(v) is not str for v in argv):
+        raise ValueError('MAPPER_ORIGINAL_ARGV')
+    offset = 1
+    while offset < len(argv) and argv[offset] in ('-B', '-I', '-u'):
+        offset += 1
+    if offset >= len(argv):
+        return None
+    for position, family, script, pytest_scope in _REPORT_READ_ROUTES_V1:
+        if script is None:
+            continue
+        cli = Path(script)
+        if Path(argv[offset]) in (cli, Path(repo_root)/cli):
+            if argv[offset+1:] not in ((), ('--repo-root', str(repo_root)), ('--repo-root', '.')):
+                raise ValueError('MAPPER_CLI_SCOPE')
+            return position
+    args = _mapper_nested_pytest_args_v1(argv, Path(repo_root))
+    if args is None:
+        return None
+    from tools.run_pytest_fresh_basetemp import _split_pytest_options_v1
+    retained, _, _ = _split_pytest_options_v1(args)
+    return next(row[0] for row in _REPORT_READ_ROUTES_V1 if row[3] == tuple(retained))
+
+
+def _mapper_child_command_v1(parent, repo_root, process_root):
+    args = _mapper_nested_pytest_args_v1(tuple(parent), Path(repo_root))
+    if args is None:
+        raise ValueError('MAPPER_PYTEST_PARENT_REQUIRED')
+    from tools.run_pytest_fresh_basetemp import _split_pytest_options_v1
+    prefix, literals, explicit = _split_pytest_options_v1(args)
+    if literals or explicit != str(Path(process_root)/'p'):
+        raise ValueError('MAPPER_CHILD_BASETEMP')
+    # Pure projection: final provenance comparison can occur after owned process
+    # directories have been cleaned. Live path admission stays at dispatch.
+    arguments = ('-c', str(Path(repo_root)/'pytest.ini'), '-o', 'addopts=',
+        '-o', 'cache_dir=' + str(Path(process_root)/'pytest-cache'),
+        '--rootdir=' + str(repo_root), '--confcutdir=' + str(repo_root),
+        *prefix, '--basetemp', str(Path(process_root)/'p'))
+    return (parent[0], '-B', '-c', _MAPPER_PYTEST_BOOTSTRAP_V1, *arguments)
+
+
+def _mapper_binding_v1(value):
+    value = _mapper_plain_v1(value)
+    fields = {'kind', 'run_id', 'phase', 'command_index', 'command_count',
+              'original_position', 'repo_root', 'process_root', 'evidence_root',
+              'parent_argv', 'child_argv', 'run_read_limits', 'basis'}
+    if type(value) is dict and value.get('kind') == 'MAPPER_NATIVE_READ_BINDING_V2':
+        fields.add('activation_limits')
+    if (type(value) is not dict or set(value) != fields
+            or value['kind'] not in ('MAPPER_NATIVE_READ_BINDING_V1', 'MAPPER_NATIVE_READ_BINDING_V2')):
+        raise ValueError('MAPPER_BINDING_FIELDS')
+    for key in ('run_id', 'phase'):
+        if type(value[key]) is not str or not value[key] or '\0' in value[key]:
+            raise ValueError('MAPPER_BINDING_TEXT')
+    for key in ('command_index', 'command_count', 'original_position'):
+        _mapper_int_v1(value[key], key, positive=True)
+    if value['command_index'] > value['command_count']:
+        raise ValueError('MAPPER_BINDING_INDEX')
+    for key in ('repo_root', 'process_root', 'evidence_root'):
+        _mapper_absolute_v1(value[key])
+    parent = value['parent_argv']
+    if type(parent) is not list or not parent or any(type(x) is not str for x in parent) or not Path(parent[0]).is_absolute():
+        raise ValueError('MAPPER_BINDING_PARENT')
+    position = _mapper_original_position_v1(tuple(parent), Path(value['repo_root']))
+    if position is None or position != value['original_position']:
+        raise ValueError('MAPPER_BINDING_POSITION')
+    child = value['child_argv']
+    if position in tuple(row[0] for row in _REPORT_READ_ROUTES_V1 if row[2] is not None):
+        if child is not None:
+            raise ValueError('MAPPER_CLI_CANNOT_DELEGATE')
+    elif type(child) is not list or tuple(child) != _mapper_child_command_v1(parent, value['repo_root'], value['process_root']):
+        raise ValueError('MAPPER_BINDING_CHILD')
+    limits = value['run_read_limits']
+    if type(limits) is not dict or set(limits) != set(_ScanRunReadLimits.__dataclass_fields__):
+        raise ValueError('MAPPER_RUN_LIMIT_FIELDS')
+    for key, item in limits.items():
+        _mapper_int_v1(item, key, positive=True)
+    _mapper_profile_v1(value['basis'])
+    if value['basis']['position'] != position or value['basis']['root'] != value['repo_root']:
+        raise ValueError('MAPPER_BINDING_BASIS_IDENTITY')
+    if value['kind'] == 'MAPPER_NATIVE_READ_BINDING_V2':
+        _mapper_activation_limits_v1(value)
+    # A mapper profile never changes the scanner wire version or scanner role.
+    return value
+
+
+def _mapper_profiles_projection_v1(profiles, *, run_id, phase, command_count, paths):
+    if not isinstance(profiles, Mapping) or not profiles or len(profiles) > len(_REPORT_READ_ROUTES_V1):
+        raise ValueError('MAPPER_PROFILE_TABLE')
+    result = {}
+    for key, item in profiles.items():
+        if type(key) is not str or re.fullmatch(r'[1-9][0-9]*', key) is None:
+            raise ValueError('MAPPER_PROFILE_KEY')
+        binding = _mapper_binding_v1(item)
+        if (str(binding['command_index']) != key or binding['run_id'] != run_id
+                or binding['phase'] != phase or binding['command_count'] != command_count):
+            raise ValueError('MAPPER_PROFILE_RUN_IDENTITY')
+        for name in ('repo_root', 'process_root', 'evidence_root'):
+            expected = paths[name] if isinstance(paths, Mapping) else getattr(paths, name)
+            if binding[name] != str(expected):
+                raise ValueError('MAPPER_PROFILE_PATH_IDENTITY')
+        result[key] = binding
+    if len({b['original_position'] for b in result.values()}) != len(result):
+        raise ValueError('MAPPER_DUPLICATE_ORIGINAL_POSITION')
+    return result
+
+
+def _mapper_strip_run_extension_v1(value):
+    if 'mapper_read_profiles' not in value:
+        return value
+    _mapper_profiles_projection_v1(value['mapper_read_profiles'], run_id=value.get('run_id'),
+        phase=value.get('phase'), command_count=value.get('command_count'), paths=value.get('paths'))
+    # Only this validated, named optional extension is stripped. Unknown keys
+    # remain for the existing exact-field reader to reject.
+    return MappingProxyType({k:v for k,v in value.items() if k != 'mapper_read_profiles'})
+
+
+def _mapper_read_controls_v1(binding):
+    b = _mapper_binding_v1(binding)
+    limits = b['run_read_limits']
+    values = (b['command_index'], b['phase'], b['command_count'], limits['byte_limit'],
+              limits['node_limit'], limits['depth_limit'], limits['profile_limit'], b['basis']['deadline_ns'])
+    return (*zip(_MAPPER_READ_ENV_KEYS_V1, map(str, values)), (PROCESS_ROOT_ENV, b['process_root']))
+
+
+def _mapper_read_profile_for_process_v1(repo_root, *, environment, actual_argv, role):
+    if role not in ('PARENT', 'CHILD'):
+        raise ValueError('MAPPER_PROCESS_ROLE')
+    env = {}
+    for key, value in environment.items():
+        if type(key) is not str or type(value) is not str or key.upper() in env:
+            raise ValueError('MAPPER_ENVIRONMENT_ALIAS')
+        env[key.upper()] = value
+    unknown = ({key for key in env if key.startswith('QTT_MAPPER_')} - set(_MAPPER_READ_ENV_KEYS_V1)
+               - set(_MAPPER_DEADLINE_ENV_KEYS) - {_MAPPER_ACTIVATION_ENV_V1})
+    if unknown:
+        raise ValueError('MAPPER_UNKNOWN_CONTROL')
+    values = []
+    for key in _MAPPER_READ_ENV_KEYS_V1:
+        item = env.get(key)
+        if type(item) is not str or not item or (key != 'QTT_MAPPER_READ_PHASE' and re.fullmatch(r'[1-9][0-9]*', item) is None):
+            raise ValueError('MAPPER_MISSING_OR_INVALID_CONTROL:' + key)
+        if key != 'QTT_MAPPER_READ_PHASE' and len(item) > 19:
+            raise ValueError('MAPPER_CONTROL_INTEGER_EXTENT')
+        values.append(item if key == 'QTT_MAPPER_READ_PHASE' else _mapper_int_v1(int(item), key, positive=True))
+    index, phase, count, size, nodes, depth, profiles, deadline = values
+    for key in (RUN_ID_ENV, PROCESS_ROOT_ENV, EVIDENCE_ROOT_ENV):
+        if not env.get(key):
+            raise ValueError('MAPPER_MISSING_RUN_CONTEXT:' + key)
+    attestation = attest_inherited_validation_run(Path(repo_root), inherited_run_id=env[RUN_ID_ENV],
+        inherited_evidence_root=Path(env[EVIDENCE_ROOT_ENV]), explicit_basetemp=Path(env[PROCESS_ROOT_ENV])/'p',
+        scan_read_limits=_ScanRunReadLimits(size,nodes,depth,profiles), scan_deadline_ns=deadline)
+    value = attestation._scan_snapshot.value
+    base_fields = {'schema_version','run_id','phase','command_count','text_integrity_preflight_state','paths','filesystem_probe'}
+    optional = {'rp5a_scan_profiles','rp5a_reader_profiles','rp5a_reader_bases','rp5a_launch_wire_version',
+                'rp5a_launch_wire_versions','rp5a_payload_byte_limits'}
+    if not base_fields <= set(value) or set(value)-base_fields-optional != {'mapper_read_profiles'}:
+        raise ValueError('MAPPER_RUN_FIELDS')
+    if type(value.get('schema_version')) is not int or value['schema_version'] != SCHEMA_VERSION:
+        raise ValueError('MAPPER_RUN_VERSION')
+    if value['phase'] != phase or type(value['command_count']) is not int or value['command_count'] != count:
+        raise ValueError('MAPPER_RUN_ASSOCIATION')
+    table = _mapper_profiles_projection_v1(value['mapper_read_profiles'],run_id=env[RUN_ID_ENV],phase=phase,command_count=count,paths=value['paths'])
+    if len(table) > profiles or str(index) not in table:
+        raise ValueError('MAPPER_SELECTED_PROFILE_MISSING')
+    binding = table[str(index)]
+    expected_controls = dict(_mapper_read_controls_v1(binding))
+    if expected_controls != {k:env.get(k) for k in expected_controls}:
+        raise ValueError('MAPPER_CONTROL_PROFILE_DRIFT')
+    if str(attestation.process_root) != env[PROCESS_ROOT_ENV] or binding['repo_root'] != str(repo_root):
+        raise ValueError('MAPPER_PROCESS_ROOT_DRIFT')
+    expected = binding['parent_argv'] if role == 'PARENT' else binding['child_argv']
+    if expected is None or type(actual_argv) is not tuple or actual_argv != tuple(expected):
+        raise ValueError('MAPPER_ACTUAL_ARGV_DRIFT')
+    if binding['kind'] == 'MAPPER_NATIVE_READ_BINDING_V2':
+        binding, _ = _mapper_read_activation_v1(binding, env.get(_MAPPER_ACTIVATION_ENV_V1))
+    elif _MAPPER_ACTIVATION_ENV_V1 in env:
+        raise ValueError('MAPPER_LEGACY_BINDING_CANNOT_USE_ACTIVATION')
+    return attestation, binding
+
+
+@contextmanager
+def _mapper_bound_reads_v1(binding):
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane import serialization
+    b = _mapper_binding_v1(binding)
+    family = next(row[1] for row in _REPORT_READ_ROUTES_V1 if row[0] == b['original_position'])
+    reader = _MapperDiskBasisV1(b['basis'], expected_position=b['original_position'],
+        expected_generation=b['basis']['generation'], clock=time.monotonic_ns)
+    if not _MAPPER_READ_LOCK_V1.acquire(blocking=False):
+        reader.close()
+        raise ValueError('MAPPER_CONCURRENT_BINDING')
+    primary = None
+    installed = False
+    try:
+        if serialization._REPORT_READ_BINDING_V1 is not None:
+            raise ValueError('MAPPER_REENTRANT_BINDING')
+        serialization._REPORT_READ_BINDING_V1 = (family, reader)
+        installed = True
+        yield reader
+    except BaseException as exc:
+        primary = exc
+        raise
+    finally:
+        if installed:
+            serialization._REPORT_READ_BINDING_V1 = None
+        try:
+            reader.close()
+        except BaseException as close_error:
+            if primary is not None:
+                raise BaseExceptionGroup('mapper use and close failed', [primary, close_error])
+            raise
+        finally:
+            _MAPPER_READ_LOCK_V1.release()
+
+
+_MAPPER_READ_LOCK_V1 = threading.Lock()

@@ -1158,27 +1158,45 @@ def _f14_reconstruct_snapshot_v1(request, rows):
 
 def _probability_memory_cells_v1(self, request, tables):
     cells_by_ref = {}
+    original_records = {}
     total = 0
 
-    def acquire(record):
+    def acquire(locator, record):
         nonlocal total
         _probability_read_check_v1(request)
         if type(record) is not EconomicReceiptEventSpineV1:
             raise PersistenceContractError(ReasonCode.SCHEMA_MISMATCH, "PROBABILITY_RECORD_TYPE")
-        if record.record_id in cells_by_ref:
-            return cells_by_ref[record.record_id]
+        if type(locator) is not str or type(record.record_id) is not str or locator != record.record_id:
+            raise PersistenceContractError(ReasonCode.PERSISTENCE_CONFLICT, "PROBABILITY_MEMORY_LOCATOR_IDENTITY")
+        if locator in cells_by_ref:
+            if original_records[locator] is not record:
+                raise PersistenceContractError(ReasonCode.PERSISTENCE_CONFLICT, "PROBABILITY_MEMORY_RECORD_CHANGED")
+            return cells_by_ref[locator]
         if type(record.typed_payload) is not ProbabilityProducerControlReceiptV1:
             raise PersistenceContractError(ReasonCode.SCHEMA_MISMATCH, "PROBABILITY_PAYLOAD_TYPE")
         if len(cells_by_ref) >= request.limits.max_records:
             raise PersistenceContractError(ReasonCode.PERSISTENCE_UNAVAILABLE, "PROBABILITY_READ_RECORD_BUDGET")
-        canonical = _bounded_probability_json_v1(_probability_control_projection_v1(record), max_bytes=request.limits.max_frame_bytes)
+        mirrors = (record.record_id, record.effective_at.isoformat(), record.recorded_at.isoformat(), record.aggregate_id)
+        mirror_bytes = sum(_probability_cell_sizes_v1((*mirrors, ""), max_frame_bytes=request.limits.max_frame_bytes))
+        remaining = request.limits.max_total_bytes - total
+        ledger = getattr(self, "_probability_read_accounting_v1", None)
+        if ledger is not None:
+            _probability_charge_read_v1(self, request.scope, 0)
+            remaining = min(remaining, ledger["maximum"] - ledger["used"])
+        if mirror_bytes >= remaining:
+            raise PersistenceContractError(ReasonCode.PERSISTENCE_UNAVAILABLE, "PROBABILITY_READ_BYTE_BUDGET")
+        canonical = _bounded_probability_json_v1(
+            _probability_control_projection_v1(record),
+            max_bytes=min(request.limits.max_frame_bytes, remaining - mirror_bytes),
+        )
         _validate_probability_control_spine_v1(record)
-        cells = (record.record_id, record.effective_at.isoformat(), record.recorded_at.isoformat(), record.aggregate_id, canonical)
+        cells = (*mirrors, canonical)
         size = sum(_probability_cell_sizes_v1(cells, max_frame_bytes=request.limits.max_frame_bytes))
         if total + size > request.limits.max_total_bytes:
             raise PersistenceContractError(ReasonCode.PERSISTENCE_UNAVAILABLE, "PROBABILITY_READ_BYTE_BUDGET")
         _probability_charge_read_v1(self, request.scope, size)
-        cells_by_ref[record.record_id] = cells
+        cells_by_ref[locator] = cells
+        original_records[locator] = record
         total += size
         return cells
 
@@ -1191,13 +1209,13 @@ def _probability_memory_cells_v1(self, request, tables):
             if required:
                 raise PersistenceContractError(ReasonCode.OWNER_DATA_MISSING, "PROBABILITY_REQUIRED_COMMITTED_RECORD")
             return None
-        return acquire(record)
+        return acquire(ref, record)
 
     def aggregate(key):
-        for record in tables["receipt_records"].values():
+        for locator, record in tables["receipt_records"].items():
             _probability_read_check_v1(request)
             if type(record) is EconomicReceiptEventSpineV1 and record.aggregate_id == key:
-                yield acquire(record)
+                yield acquire(locator, record)
 
     selected_cells, decoded = _probability_select_committed_cells_v1(request, exact, aggregate)
     return selected_cells, decoded
