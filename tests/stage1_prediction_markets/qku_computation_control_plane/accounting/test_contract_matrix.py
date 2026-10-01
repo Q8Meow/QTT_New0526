@@ -2777,12 +2777,17 @@ def _assert_f14_native_and_storage(adapter_kind, directory):
             for old, new in (
                 (b'uses: actions/setup-python@v5', b'uses: actions/setup-python@v4'),
                 (b"python-version: '3.14.6'", b"python-version: '3.14.5'"),
-                (b'python -m pip install pytest==9.1.1', b'python -m pip install pytest==9.1.0'),
+                (b'            pytest==9.1.1 \\\n', b'            pytest==9.1.0 \\\n'),
                 (b'          - phase: post-validation\n', b''),
                 (b'      - validation_shards\n', b'      - unexpected_dependency\n'),
             ):
-                assert old in workflow_bytes
-                workflow.write_bytes(workflow_bytes.replace(old, new, 1))
+                expected_count = 2 if old.startswith((b'uses:', b'python-version:')) else 1
+                assert workflow_bytes.count(old) == expected_count
+                mutated = workflow_bytes.replace(old, new, 1)
+                assert mutated != workflow_bytes
+                assert mutated.count(old) == expected_count - 1
+                assert mutated.count(new) == workflow_bytes.count(new) + 1 if new else old not in mutated
+                workflow.write_bytes(mutated)
                 with pytest.raises(source_policy.SourcePolicyError) as failure:
                     source_policy._st12h_validate_workflow_contract(fixture_root)
                 assert failure.value.reason_code.value == 'ST12A_SOURCE_EPOCH_STALE'

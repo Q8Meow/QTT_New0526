@@ -1791,15 +1791,144 @@ def _f14_execution_contract_failures_v1(repo_root):
         'publisher.resolve_committed_private_observation_v1', 'source_registry.fenced'}
     if not required <= calls:
         failures.append('F14 native/grouped consumer composition is incomplete')
-    text = (repo_root / '.github/workflows/qtt_validation.yml').read_text(encoding='utf-8')
-    line = '          ' + _F14_EXPECTED_NATIVE_INSTALL + '\n'
-    if text.count(line) != 1 or 'run: &install_pytest |\n          python -m pip install pytest==9.1.1\n' + line not in text:
-        failures.append('F14 native install is not the single exact line under the inherited anchor')
+    text = (repo_root / '.github/workflows/qtt_validation.yml').read_bytes().decode('utf-8')
+    if not _f14_ci_dependency_contract_v1(text):
+        failures.append('F14 CI dependencies are not the single complete selected stanza')
     return failures
 
 _F14_EXPECTED_DISCRIMINATORS = frozenset(('DURABLE_COMPUTATION_RECEIPT', 'ECONOMIC_EVENT', 'JOURNAL_TRANSACTION', 'JOURNAL_POSTING', 'STATE_TRANSITION', 'IDEMPOTENCY_CLAIM', 'OUTBOX_INTENT', 'REVERSAL', 'RECONCILIATION_BREAK', 'ORDER_INTENT', 'EXECUTION_CUSTODY', 'MODE_SNAPSHOT_CONTROL', 'ST12F_EVIDENCE_CONTROL', 'PIT_COMMIT_INTENT', 'PIT_COMMIT_COMPLETION', 'PIT_AVAILABILITY', 'PIT_CANONICAL_EVENT', 'PIT_CAPTURE_AND_GAP', 'PIT_CHECKPOINT', 'PRIVATE_OBSERVATION_CLOCK', 'PRIVATE_EVIDENCE_WITNESS'))
 _F14_EXPECTED_METHODS = frozenset(('availability', 'begin_transaction', 'insert_receipt_record', 'insert_value_lineage_edge', 'insert_economic_event', 'insert_journal_transaction', 'insert_journal_posting', 'insert_state_transition', 'acquire_idempotency_claim', 'bind_idempotency_result', 'insert_outbox_intent', 'insert_reversal_link', 'load_committed_reversal_history', 'insert_reconciliation_break', 'get_record', 'load_committed_private_clock_receipt_v1', 'get_idempotency_result', 'reconstruct_as_of', 'load_committed_private_evidence_witness_v1', 'load_committed_private_evidence_snapshot_v1'))
-_F14_EXPECTED_NATIVE_INSTALL = 'python -m pip install --only-binary=:all: --no-deps --index-url https://pypi.org/simple websockets==17.0.1 cryptography==50.0.1 cffi==2.1.1 pycparser==3.0'
+_F14_EXPECTED_CI_SCRIPT = r"""python -m pip install --only-binary=:all: --no-deps --index-url https://pypi.org/simple \
+  pytest==9.1.1 \
+  iniconfig==2.3.0 \
+  packaging==26.0 \
+  pluggy==1.6.0 \
+  pygments==2.21.0 \
+  websockets==17.0.1 \
+  cryptography==50.0.1 \
+  cffi==2.1.1 \
+  pycparser==3.0 \
+  jsonschema==4.26.0 \
+  jsonschema-specifications==2025.9.1 \
+  referencing==0.37.0 \
+  rpds-py==2026.5.1 \
+  attrs==26.1.0
+python -m pip check
+python - <<'PY'
+from importlib.metadata import PackageNotFoundError, version
+
+expected = (
+    ('pytest', '9.1.1'),
+    ('iniconfig', '2.3.0'),
+    ('packaging', '26.0'),
+    ('pluggy', '1.6.0'),
+    ('pygments', '2.21.0'),
+    ('websockets', '17.0.1'),
+    ('cryptography', '50.0.1'),
+    ('cffi', '2.1.1'),
+    ('pycparser', '3.0'),
+    ('jsonschema', '4.26.0'),
+    ('jsonschema-specifications', '2025.9.1'),
+    ('referencing', '0.37.0'),
+    ('rpds-py', '2026.5.1'),
+    ('attrs', '26.1.0'),
+)
+failures = []
+for name, wanted in expected:
+    try:
+        actual = version(name)
+    except PackageNotFoundError:
+        failures.append(f"{name}: missing; required {wanted}")
+    else:
+        if actual != wanted:
+            failures.append(f"{name}: {actual}; required {wanted}")
+if failures:
+    raise SystemExit("CI dependency profile mismatch: " + "; ".join(failures))
+print("Selected CI dependency versions verified.")
+PY"""
+
+
+def _f14_ci_dependency_contract_v1(text):
+    """Independent literal/placement comparison; no production contract verdict."""
+    import re
+
+    if len(text.encode('utf-8')) > 256 * 1024:
+        return False
+    text = text.replace('\r\n', '\n')
+    if '\r' in text or re.search(r'^[ \t]*\t', text, re.MULTILINE):
+        return False
+    expected_step = ('      - name: Install test dependency\n'
+                     '        run: &install_pytest |\n' + '\n'.join(
+                         '          ' + line if line else ''
+                         for line in _F14_EXPECTED_CI_SCRIPT.split('\n')))
+    if (text.count(expected_step + '\n') != 1
+            or len(re.findall(r'&install_pytest\b', text)) != 1
+            or re.search(r'\*install_pytest\b', text)
+            or len(re.findall(r'\bpip3?\s+install\b', text, re.IGNORECASE)) != 1):
+        return False
+    # Build an outline without interpreting any scalar content as a mapping.
+    outline = []
+    scalar_depth = -1
+    for index, raw in enumerate(text.split('\n')):
+        value = raw.lstrip(' ')
+        if not value or value.startswith('#'):
+            continue
+        depth = len(raw) - len(value)
+        if scalar_depth >= 0 and depth > scalar_depth:
+            continue
+        scalar_depth = -1
+        field = re.fullmatch(r'(?:- )?([A-Za-z_][\w-]*):(?: +(.*))?', value)
+        if not field:
+            if re.fullmatch(r'- [A-Za-z_][\w-]*', value):
+                outline.append((index, depth, value))
+                continue
+            return False
+        operand = field.group(2) or ''
+        if operand.startswith(("'", '"')) and not (
+                re.fullmatch(r"'(?:[^']|'')*'", operand)
+                or re.fullmatch(r'"(?:[^"\\]|\\.)*"', operand)):
+            return False
+        if re.fullmatch(r'(?:&[A-Za-z_][\w-]* )?[|>]', operand):
+            scalar_depth = depth
+        elif operand.startswith(('|', '>')):
+            return False
+        outline.append((index, depth, value))
+    # Four actual ancestor declarations, with unique direct controlling keys.
+    lower, upper = -1, len(text.split('\n'))
+    step_outline = ()
+    for depth, declaration, key in (
+            (0, 'jobs:', 'jobs:'), (2, 'validation_shards:', 'validation_shards:'),
+            (4, 'steps:', 'steps:'),
+            (6, '- name: Install test dependency', '- name: Install test dependency')):
+        candidates = [row for row in outline if lower < row[0] < upper
+                      and row[1] == depth and row[2].startswith(key)]
+        if len(candidates) != 1 or candidates[0][2] != declaration:
+            return False
+        lower = candidates[0][0]
+        upper = next((row[0] for row in outline if row[0] > lower and row[1] <= depth), upper)
+        direct = [row[2] for row in outline if lower < row[0] < upper and row[1] == depth + 2]
+        if depth == 0 and any(not re.fullmatch(r'[A-Za-z_][\w-]*:', item) for item in direct):
+            return False
+        if depth == 2 and any(item.startswith(('if:', 'continue-on-error:', 'uses:')) for item in direct):
+            return False
+        if depth == 4 and any(not item.startswith('- name: ') for item in direct):
+            return False
+        if depth == 4:
+            step_outline = tuple(row for row in outline if lower < row[0] < upper)
+        if depth == 6 and direct != ['run: &install_pytest |']:
+            return False
+    if sum(row[2] == '- name: Install test dependency' for row in outline) != 1:
+        return False
+    preceding = [row for row in step_outline if row[0] < lower]
+    if (sum(row[1:] == (6, '- name: Set up Python') for row in preceding) != 1
+            or any(row[1] == 8 and row[2].startswith('run:') for row in preceding)):
+        return False
+    # The entire selected step, including the scalar terminator, is exact.
+    actual_lines = text.split('\n')[lower:upper]
+    while actual_lines and not actual_lines[-1].strip():
+        actual_lines.pop()
+    actual = '\n'.join(actual_lines)
+    return actual == expected_step
 
 
 def _v35_execution_surface_failures():
