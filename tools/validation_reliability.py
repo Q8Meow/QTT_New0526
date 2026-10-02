@@ -5581,7 +5581,12 @@ def supervise_command(
                     "errors": [str(error) for error in outcome.get("errors", (outcome["evidence_error"],) if "evidence_error" in outcome else ())],
                 }
             if type(launch_input) is _PreflightLaunchInputV1:
+                # Failed prefixes retain their original unqualified result.
+                # A complete proof must still match the parent-emitted frame.
+                basis_counts = (dict(launch_input.basis_counts) if launch_input.result is None
+                    else launch_input._proof_basis_counts())
                 bounded_observation["preflight"] = {"identity": launch_input.identity,
+                    "basis_counts": basis_counts,
                     "initial_limits": launch_input.delegated, "input_bytes": launch_input.extent,
                     "row_total": launch_input.row_total, "parent_spend": launch_input.parent_spend,
                     "parent_tail": launch_input.tail, "receiver": launch_input.result}
@@ -11071,7 +11076,8 @@ class _PreflightLaunchInputV1:
         self.header = dict(identity=identity,allowance=self.delegated,deadline_ns=self.deadline_ns,git=git,files=files,
             directories=[[p,[list(v) for v in observation.directories[p]]] for p in
                 sorted(observation.directories,key=lambda s:s.encode('utf-8'))])
-        _preflight_header_v1(self.header,offset,identity)
+        _, basis_entries = _preflight_header_v1(self.header,offset,identity)
+        self.basis_counts = MappingProxyType(dict(entries=basis_entries,bytes=offset))
         self.result_bound = _preflight_result_bound_v1(identity)
         self.raw_header = _preflight_encode_header_v1(self.header,self.limits,self._check,
             lambda size:self.parent_meter.buffers(size+2*self.result_bound+self.limits['chunk_bytes']))
@@ -11079,6 +11085,9 @@ class _PreflightLaunchInputV1:
         import struct
         self.prefix = struct.pack('>8sQQ',b'QTTPF01\n',len(self.raw_header),offset)
         self.extent = 24+len(self.raw_header)+offset
+        # These immutable operands bind counts to the validated emitted frame,
+        # independently of every child-reported ledger. No body copy is made.
+        self._basis_frame = (basis_entries,offset,self.prefix,self.raw_header,self.segments)
         _preflight_require_v1(self.extent <= self.limits['frame_byte_limit']
             and self.result_bound <= self.limits['receiver_byte_limit']
             and 3*self.extent+2*self.result_bound <= self.limits['retained_buffer_bytes'], 'preflight measured transport demand')
@@ -11093,6 +11102,17 @@ class _PreflightLaunchInputV1:
             and self.process.poll() is not None else self.deadline_ns), 'preflight input deadline')
     def _parts(self):
         yield self.prefix; yield self.raw_header; yield from self.segments
+    def _proof_basis_counts(self):
+        self._check()
+        entries, body_bytes, prefix, header, segments = self._basis_frame
+        counts = dict(self.basis_counts)
+        _preflight_keys_v1(counts,('entries','bytes'))
+        for value in counts.values(): _preflight_integer_v1(value)
+        _preflight_require_v1(counts == dict(entries=entries,bytes=body_bytes)
+            and (self.prefix,self.raw_header,self.segments) == (prefix,header,segments)
+            and sum(len(part) for part in self.segments) == body_bytes
+            and self.extent == 24+len(header)+body_bytes, 'preflight emitted basis binding differs')
+        return counts
     def _stable(self):
         self._check()
         _preflight_require_v1(_scan_same_api_version(self.path.lstat()) == self.path_version
@@ -11207,12 +11227,12 @@ def _preflight_read_result_v1(launch,pid,native_exit):
         os.close(fd)
     result = launch.parent_meter.parse(raw,canonical_encoding=False)
     _preflight_verify_result_v1(result,identity=launch.identity,initial=launch.delegated,
-        extent=launch.extent,pid=pid,native_exit=native_exit)
+        extent=launch.extent,pid=pid,native_exit=native_exit,basis_counts=launch._proof_basis_counts())
     launch._check()
     return result
 
 
-def _preflight_verify_result_v1(result, *, identity, initial, extent, pid, native_exit):
+def _preflight_verify_result_v1(result, *, identity, initial, extent, pid, native_exit, basis_counts):
     shape = _preflight_result_v1(identity,None,None,None,False,False,None,False,None)
     _preflight_keys_v1(result,shape)
     for key in ('run_id','phase','command_index','original_position','argv'):
@@ -11237,6 +11257,27 @@ def _preflight_verify_result_v1(result, *, identity, initial, extent, pid, nativ
         'preflight receiver retained entry relation')
     _preflight_require_v1(result['failure_class'] == (None if native_exit == 0 else 'PREFLIGHT_APPLICATION_DENIED'),
         'preflight receiver failure/exit disagreement')
+    # Only the fully decoded, normally returned and completely observed child
+    # above has this lifecycle. Failed prefixes keep their unknown work intact.
+    _preflight_keys_v1(basis_counts,('entries','bytes'))
+    for value in basis_counts.values(): _preflight_integer_v1(value)
+    observed, reserved = result['observed'], result['reserved']
+    debits = {key:initial[key]-result['remaining_limits'][key] for key in initial}
+    for key in ('attempts','git_attempts'):
+        _preflight_require_v1(debits[key] == observed[key] == reserved[key],
+            'preflight receiver exact accounting: '+key)
+    for key in ('bytes','stdout_bytes','stderr_bytes','combined_output_bytes'):
+        _preflight_require_v1(debits[key] == observed[key] and reserved[key] == 0,
+            'preflight receiver exact accounting: '+key)
+    _preflight_require_v1(observed['combined_output_bytes'] == observed['stdout_bytes']+observed['stderr_bytes'],
+        'preflight receiver exact Git stream sum')
+    _preflight_require_v1(reserved['entries'] == basis_counts['entries']
+        and debits['entries'] == basis_counts['entries']+observed['entries']
+        and result['retained_entries'] == debits['entries'], 'preflight receiver exact entry accounting')
+    _preflight_require_v1(debits['retained_bytes'] == reserved['retained_bytes']
+        == basis_counts['bytes']+observed['retained_bytes'], 'preflight receiver exact retained-byte accounting')
+    _preflight_require_v1(observed['bytes'] == observed['retained_bytes'],
+        'preflight receiver complete acquisition byte accounting')
 
 
 def _preflight_command_evidence_v1(receipt, paths, parent_meter):
@@ -11247,7 +11288,7 @@ def _preflight_command_evidence_v1(receipt, paths, parent_meter):
         and type(receipt.output_observation) is dict and type(parent_meter) is _PreflightTransportV1,
         'preflight command evidence projection or terminal grant missing')
     proof = receipt.output_observation.get('preflight')
-    _preflight_keys_v1(proof,('identity','initial_limits','input_bytes','receiver','row_total','parent_spend','parent_tail'))
+    _preflight_keys_v1(proof,('identity','initial_limits','input_bytes','receiver','row_total','parent_spend','parent_tail','basis_counts'))
     for name in ('row_total','parent_spend','parent_tail'):
         _preflight_keys_v1(proof[name],_PREFLIGHT_DIMENSIONS_V1)
         for value in proof[name].values(): _preflight_integer_v1(value)
@@ -11264,7 +11305,7 @@ def _preflight_command_evidence_v1(receipt, paths, parent_meter):
         and _preflight_decimal_v1(controls['QTT_PREFLIGHT_INPUT_BYTES']) == proof['input_bytes'],
         'preflight command proof differs from actual plan/run')
     _preflight_verify_result_v1(proof['receiver'],identity=identity,initial=proof['initial_limits'],
-        extent=proof['input_bytes'],pid=receipt.pid,native_exit=receipt.native_exit_code)
+        extent=proof['input_bytes'],pid=receipt.pid,native_exit=receipt.native_exit_code,basis_counts=proof['basis_counts'])
     directory = paths.evidence_root/('preflight-'+str(receipt.command_index))
     _preflight_transport_chain_v1(directory)
     path,info = _require_direct_regular_evidence_file(directory,'receiver.json')

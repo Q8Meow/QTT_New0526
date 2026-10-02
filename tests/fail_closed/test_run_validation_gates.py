@@ -18468,6 +18468,14 @@ def _exercise_preflight_transport_v1(tmp_path, monkeypatch, capsys):
     run_id = 'synthetic-preflight-transport'
     deadline = time.monotonic_ns()+120_000_000_000
     settlement = deadline+30_000_000_000
+    # Optional engineering caps only shorten this helper's existing window;
+    # they never supply a native lease or enter the five transport controls.
+    caps = tuple(os.environ.get(key) for key in ('QTT_TEST_EXECUTION_CUTOFF_NS','QTT_TEST_SETTLEMENT_CUTOFF_NS'))
+    if any(value is not None for value in caps):
+        assert all(type(value) is str and value.isascii() and value.isdecimal() for value in caps)
+        deadline = min(deadline,int(caps[0]))
+        settlement = min(deadline+30_000_000_000,int(caps[1]))
+        assert time.monotonic_ns() < deadline < settlement
     transport = dict(frame_byte_limit=2_000_000,header_byte_limit=100_000,lexical_units=100_000,
         depth=32,quoted_bytes=100_000,read_calls=10000,write_calls=10000,chunk_bytes=97,
         retained_buffer_bytes=8_000_000,receiver_byte_limit=20000)
@@ -18475,15 +18483,18 @@ def _exercise_preflight_transport_v1(tmp_path, monkeypatch, capsys):
     limits = dict(zero,attempts=20,bytes=40,entries=30,retained_bytes=50)
     tail = dict(zero,attempts=2,bytes=3,entries=4,retained_bytes=5)
     class SyntheticLease(owner._PreflightHostLeaseV1):
-        def __init__(self): self.calls=[]
+        def __init__(self, *, fixture_root=root, fixture_process_root=process_root, fixture_run_id=run_id):
+            self.calls=[]
+            self.root, self.process_root, self.run_id = fixture_root, fixture_process_root, fixture_run_id
         def check_parent(self, root, index_path):
-            assert root == Path(owner.__file__).resolve().parents[1]
+            assert root == self.root
             assert index_path is None
             self.calls.append('parent')
         def check_launch(self, entry, argv, environment, scratch_roots, deadline_ns):
             assert tuple(argv) == entry.argv and owner._preflight_vector_v1(tuple(argv))
-            assert deadline_ns == deadline and scratch_roots == (process_root,)
-            assert environment[owner.RUN_ID_ENV] == run_id
+            assert deadline_ns == deadline and scratch_roots == (self.process_root,)
+            assert entry.cwd == str(self.root)
+            assert environment[owner.RUN_ID_ENV] == self.run_id
             self.calls.append('launch')
         def check_child(self, process):
             assert type(process.pid) is int and process.pid != os.getpid()
@@ -18590,6 +18601,119 @@ def _exercise_preflight_transport_v1(tmp_path, monkeypatch, capsys):
             runner.main([*args,'--preflight-input',str(area/'declaration.bin')])
     with pytest.raises(ValueError,match='competing suppliers'):
         runner.main(['--phase','fast-preflight','--preflight-input',str(area/'declaration.bin')],candidate_source=lambda *a:None)
+    # Independent complete-ledger references are pure verification cases, not
+    # native executions or grants. Real byte-consuming CLI cases follow below.
+    from types import SimpleNamespace
+    accounting_area=area/'accounting'; accounting_area.mkdir()
+    accounting_process=accounting_area/'process'; accounting_process.mkdir()
+    accounting_meter=owner._PreflightTransportV1(transport,settlement)
+    reference_initial=dict.fromkeys(zero,100)
+    reference_initial['combined_output_bytes']=200  # Separate streams have a valid combined cap.
+    reference_count=mutation_count=0
+    def reference_result(basis, observed, exit_code):
+        reserved=dict(zero,attempts=observed['attempts'],git_attempts=observed['git_attempts'],
+            entries=basis['entries'],retained_bytes=basis['bytes']+observed['retained_bytes'])
+        debit=dict(observed)
+        debit['entries']+=basis['entries']; debit['retained_bytes']+=basis['bytes']
+        return dict(run_id=run_id,phase='fast-preflight',command_index=2,original_position=2,
+            argv=accounting_identity['argv'],cwd=str(root),pid=12345,parent_pid=os.getpid(),
+            input_bytes_consumed=999,decode_complete=True,application_entered=True,application_exit=exit_code,
+            observation_complete=True,failure_class=None if exit_code==0 else 'PREFLIGHT_APPLICATION_DENIED',
+            initial_limits=dict(reference_initial),remaining_limits={k:reference_initial[k]-debit[k] for k in zero},
+            observed=dict(observed),reserved=reserved,retained_entries=debit['entries'])
+    def reference_receipt(value,basis):
+        return SimpleNamespace(fixed_environment_controls=tuple(zip(owner._PREFLIGHT_INPUT_KEYS_V1,
+            ('999','900','10000,32,10000,10000,97','2',str(deadline)))),
+            output_observation=dict(preflight=dict(identity=accounting_identity,initial_limits=reference_initial,
+                input_bytes=999,receiver=value,row_total=reference_initial,parent_spend=dict(zero),
+                parent_tail=dict(zero),basis_counts=basis)),phase='fast-preflight',command_index=2,
+            argv=tuple(accounting_identity['argv']),cwd=str(root),pid=12345,native_exit_code=value['application_exit'])
+    def verify_reference(value,basis):
+        owner._preflight_verify_result_v1(value,identity=accounting_identity,initial=reference_initial,
+            extent=999,pid=12345,native_exit=value['application_exit'],basis_counts=basis)
+    def reject_reference(value,basis,original,original_basis,match='preflight receiver|preflight exact integer|preflight exact object|preflight copied/changed initial allowance'):
+        nonlocal mutation_count
+        # JSON distinguishes Boolean/float substitutions even where Python == does not.
+        assert json.dumps([value,basis],sort_keys=True) != json.dumps([original,original_basis],sort_keys=True)
+        with pytest.raises(RuntimeError,match=match): verify_reference(value,basis)
+        with pytest.raises(RuntimeError,match=match):
+            owner._preflight_command_evidence_v1(reference_receipt(value,basis),accounting_paths,accounting_meter)
+        mutation_count+=1
+    scenarios=(
+        ('zero-work',dict(entries=0,bytes=0),dict(zero)),
+        ('nonempty-basis',dict(entries=5,bytes=3),dict(zero)),
+        ('zero-length-file',dict(entries=1,bytes=0),dict(zero,attempts=1)),
+        ('repeated-file-acquisition',dict(entries=5,bytes=3),dict(zero,attempts=2,bytes=6,retained_bytes=6)),
+        ('directory-delivery',dict(entries=4,bytes=0),dict(zero,attempts=1,entries=3)),
+        ('Git-stream-evidence-readback',dict(entries=0,bytes=0),
+            dict(zero,attempts=2,git_attempts=1,bytes=7,retained_bytes=7,
+                stdout_bytes=4,stderr_bytes=3,combined_output_bytes=7)),
+    )
+    for case,basis,observed in scenarios:
+        for exit_code in (0,1,2):
+            accounting_evidence=accounting_area/(case+'-'+str(exit_code)); accounting_evidence.mkdir()
+            accounting_result=accounting_evidence/'preflight-2'; accounting_result.mkdir()
+            accounting_identity=dict(identity(2),process_root=str(accounting_process),evidence_root=str(accounting_evidence))
+            accounting_paths=SimpleNamespace(run_id=run_id,repo_root=root,process_root=accounting_process,
+                evidence_root=accounting_evidence)
+            original=reference_result(basis,observed,exit_code)
+            verify_reference(original,basis)
+            owner.atomic_write_json(accounting_result/'receiver.json',original)
+            owner._preflight_command_evidence_v1(reference_receipt(original,basis),accounting_paths,accounting_meter)
+            reference_count+=1
+            # All eight independently changed remaining dimensions must reject,
+            # including shared attempt views which must not be added together.
+            for key in zero:
+                bad=copy.deepcopy(original); bad['remaining_limits'][key]-=1
+                reject_reference(bad,basis,original,basis,match='preflight receiver exact')
+            for ledger in ('observed','reserved'):
+                for key in zero:
+                    bad=copy.deepcopy(original)
+                    bad[ledger][key]+=(-1 if bad[ledger][key] else 1)
+                    reject_reference(bad,basis,original,basis)
+            bad=copy.deepcopy(original)
+            bad['retained_entries']+=(-1 if bad['retained_entries'] else 1)
+            reject_reference(bad,basis,original,basis)
+            for key in ('entries','bytes'):
+                wrong=dict(basis); wrong[key]+=1
+                reject_reference(original,wrong,original,basis)
+            for ledger in ('initial_limits','remaining_limits','observed','reserved'):
+                for key in zero:
+                    for scalar in (False,float(original[ledger][key]),-1,1<<63):
+                        bad=copy.deepcopy(original); bad[ledger][key]=scalar
+                        reject_reference(bad,basis,original,basis)
+                for extra in (False,True):
+                    bad=copy.deepcopy(original)
+                    if extra: bad[ledger]['extra']=0
+                    else: del bad[ledger]['attempts']
+                    reject_reference(bad,basis,original,basis)
+            for key in ('entries','bytes'):
+                for scalar in (False,float(basis[key]),-1,1<<63):
+                    wrong=dict(basis); wrong[key]=scalar
+                    reject_reference(original,wrong,original,basis)
+            for wrong in ({},dict(basis,extra=0),{'entries':basis['entries']},None):
+                reject_reference(original,wrong,original,basis)
+            for scalar in (False,float(original['retained_entries']),-1,1<<63):
+                bad=copy.deepcopy(original); bad['retained_entries']=scalar
+                reject_reference(bad,basis,original,basis)
+            missing=reference_receipt(original,basis)
+            del missing.output_observation['preflight']['basis_counts']
+            with pytest.raises(RuntimeError,match='exact object fields'):
+                owner._preflight_command_evidence_v1(missing,accounting_paths,accounting_meter)
+            if case=='Git-stream-evidence-readback':
+                bad=copy.deepcopy(original)
+                bad['remaining_limits']['combined_output_bytes']+=1
+                bad['observed']['combined_output_bytes']-=1
+                reject_reference(bad,basis,original,basis,match='exact Git stream sum')
+                bad=copy.deepcopy(original)
+                bad['remaining_limits']['retained_bytes']+=1
+                bad['observed']['retained_bytes']-=1
+                bad['reserved']['retained_bytes']-=1
+                reject_reference(bad,basis,original,basis,match='complete acquisition byte accounting')
+    with capsys.disabled():
+        print('PREFLIGHT_ACCOUNTING_REFERENCE '+json.dumps(dict(valid_complete_references=reference_count,
+            rejected_mutations_each_through_direct_and_final_verifier=mutation_count,
+            application_exits=[0,1,2],cases=[case for case,_,_ in scenarios],native_execution=False)),flush=True)
     # A real child receives its own PID/thread and executes each original pure CLI.
     # These two synthetic selections are not an admitted canonical eight-command run.
     for n in (2,6):
@@ -18656,11 +18780,11 @@ def _exercise_preflight_transport_v1(tmp_path, monkeypatch, capsys):
             bad=copy.deepcopy(original); bad[field]=value; assert bad != original
             with pytest.raises(RuntimeError):
                 owner._preflight_verify_result_v1(bad,identity=ident,initial=launch.delegated,
-                    extent=launch.extent,pid=receipt.pid,native_exit=0)
+                    extent=launch.extent,pid=receipt.pid,native_exit=0,basis_counts=dict(launch.basis_counts))
         bad=copy.deepcopy(original); bad['remaining_limits']['attempts'] += 100
         with pytest.raises(RuntimeError,match='debit'):
             owner._preflight_verify_result_v1(bad,identity=ident,initial=launch.delegated,
-                extent=launch.extent,pid=receipt.pid,native_exit=0)
+                extent=launch.extent,pid=receipt.pid,native_exit=0,basis_counts=dict(launch.basis_counts))
     assert parent_meter.received > 0 and parent_meter.emitted > 0 and parent_meter.readback_bytes > 0
     assert parent_meter.read_calls > 0 and parent_meter.write_calls > 0
     # The same production receiver rejects a corrupt identity in a real child.
@@ -18706,6 +18830,198 @@ def _exercise_preflight_transport_v1(tmp_path, monkeypatch, capsys):
                 native_exit=receipt.native_exit_code,failure_class=receipt.failure_class,
                 termination_state=receipt.termination_state,complete_stdout=Path(receipt.stdout_path).read_bytes().decode('utf-8'),
                 complete_stderr=raw_error,receiver=failed,closed_reader=True,failed_input_retained=launch.path.exists())),flush=True)
+    # Real position-4 applications read complete current copied source. The
+    # copied tree is disposable test support, not an accepted QTT checkout.
+    import stat
+    from tools import validate_nested_validator_contracts as nested
+    source_paths=['tools/validation_reliability.py','tools/validate_nested_validator_contracts.py']
+    if (root/'tools/__init__.py').exists(): source_paths.append('tools/__init__.py')
+    source_bytes={}
+    for name in source_paths:
+        info=(root/name).lstat()
+        assert stat.S_ISREG(info.st_mode) and info.st_nlink==1 and not owner._stat_is_reparse_point(info)
+        source_bytes[name]=(root/name).read_bytes()
+    for case,payload,expected_exit in (
+            ('positive',b'VALUE = 7\n',0),
+            ('semantic-rejection',b'import subprocess\nsubprocess.run(["pytest"])\n',1)):
+        case_root=area/('position-4-'+case); case_root.mkdir()
+        copied_root=case_root/'repo'; copied_root.mkdir()
+        for name,raw in source_bytes.items():
+            target=copied_root/name; target.parent.mkdir(parents=True,exist_ok=True)
+            target.write_bytes(raw); assert target.read_bytes()==raw
+        data_path=copied_root/'src/qtt/stage1_prediction_markets/transport_fixture.py'
+        data_path.parent.mkdir(parents=True); data_path.write_bytes(payload)
+        fixture_paths,fixture_probe=owner.resolve_validation_run_paths(copied_root,
+            explicit_process_root=case_root,projected_relative_paths=('preflight-input-4.bin',))
+        assert fixture_paths.repo_root==copied_root
+        assert fixture_paths.process_root.parent==fixture_paths.evidence_root.parent==copied_root.parent
+        assert fixture_probe.failure_operation is None and fixture_paths.filesystem_probe_state=='PASS'
+        fixture_run=fixture_paths.run_id
+        fixture_process,fixture_evidence=fixture_paths.process_root,fixture_paths.evidence_root
+        fixture_lease=SyntheticLease(fixture_root=copied_root,fixture_process_root=fixture_process,fixture_run_id=fixture_run)
+        fixture_environment={k:v for k,v in os.environ.items() if not k.upper().startswith(('QTT_','PYTHON'))}
+        fixture_environment.update(PYTHONDONTWRITEBYTECODE='1',PYTHONNOUSERSITE='1')
+        # This additional bounded bootstrap probe imports complete copied modules
+        # and records actual origins. It does not call/extract their functions or
+        # claim that bootstrap reads are application observations.
+        import_code=('import json,os,sys; sys.path.insert(0,os.getcwd()); '
+            'import tools.validation_reliability as r; import tools.validate_nested_validator_contracts as v; '
+            'print(json.dumps({"reliability":r.__file__,"validator":v.__file__}))')
+        import_evidence=fixture_evidence/'imports'; import_evidence.mkdir()
+        import_output={}
+        import_receipt=owner.supervise_command((sys.executable,'-I','-B','-c',import_code),cwd=copied_root,
+            run_id=fixture_run,phase='standalone-pytest-helper',command_index=1,evidence_root=import_evidence,
+            environment=fixture_environment,execution_deadline_ns=deadline,
+            output_limits=dict(stdout_bytes=16384,stderr_bytes=16384,combined_output_bytes=32768),
+            output_observation=import_output,mirror_stdout=False,mirror_stderr=False)
+        assert import_receipt.native_exit_code==0 and import_receipt.failure_class is None,Path(import_receipt.stderr_path).read_bytes()
+        assert not owner._command_requires_process_retention_v1(import_receipt)
+        import_stdout=Path(import_receipt.stdout_path).read_bytes().decode('utf-8')
+        import_stderr=Path(import_receipt.stderr_path).read_bytes().decode('utf-8')
+        assert import_stderr=='' and all(import_output[s]['complete'] for s in ('stdout','stderr'))
+        origins=json.loads(import_stdout)
+        assert origins==dict(reliability=str(copied_root/'tools/validation_reliability.py'),
+            validator=str(copied_root/'tools/validate_nested_validator_contracts.py'))
+        files,rosters={},{}
+        scanned=[]
+        def inventory(directory):
+            info=directory.lstat()
+            assert stat.S_ISDIR(info.st_mode) and not owner._stat_is_reparse_point(info)
+            entries=[]; descendants=[]
+            with os.scandir(directory) as iterator:
+                for entry in iterator:
+                    path=Path(entry.path); info=path.lstat()
+                    assert not stat.S_ISLNK(info.st_mode) and not owner._stat_is_reparse_point(info)
+                    if stat.S_ISDIR(info.st_mode):
+                        kind='directory'; descendants.append(path)
+                    else:
+                        assert stat.S_ISREG(info.st_mode) and info.st_nlink==1
+                        kind='file'
+                        name=path.relative_to(copied_root).as_posix()
+                        if path.name.endswith('.py'):
+                            scanned.append(name)
+                            if name not in nested.ORCHESTRATOR_ALLOWLIST: files[name]=path.read_bytes()
+                    entries.append((entry.name,kind))
+            rosters[directory.relative_to(copied_root).as_posix()]=tuple(sorted(entries,key=lambda row:row[0].encode('utf-8')))
+            for child in descendants: inventory(child)
+        for subtree in (copied_root/'tools',copied_root/'src/qtt/stage1_prediction_markets'): inventory(subtree)
+        assert 'tools/validate_nested_validator_contracts.py' in scanned
+        assert 'tools/validate_nested_validator_contracts.py' not in files
+        assert set(files)==set(source_paths)-{'tools/validate_nested_validator_contracts.py'}|{'src/qtt/stage1_prediction_markets/transport_fixture.py'}
+        P=sum(len(raw) for raw in files.values()); N=len(files); L=len(rosters); E=sum(map(len,rosters.values())); C=N+L+E
+        assert P>0 and N>0 and L>0 and E>0
+        fixture_limits=dict(zero,attempts=L+N,bytes=P+N,entries=C+E,retained_bytes=2*P)
+        expected_observed=dict(zero,attempts=L+N,bytes=P,entries=E,retained_bytes=P)
+        expected_reserved=dict(zero,attempts=L+N,entries=C,retained_bytes=2*P)
+        expected_remaining=dict(zero,bytes=N)
+        fixture_argv=(sys.executable,str(Path('tools/validate_nested_validator_contracts.py')),'--repo-root','.')
+        fixture_identity=dict(run_id=fixture_run,phase='fast-preflight',command_index=4,original_position=4,
+            command_count=8,argv=list(fixture_argv),repo_root=str(copied_root),process_root=str(fixture_process),
+            evidence_root=str(fixture_evidence),parent_pid=os.getpid())
+        offset=0; file_rows=[]
+        for name in sorted(files,key=lambda name:name.encode('utf-8')):
+            file_rows.append([name,offset,len(files[name])]); offset+=len(files[name])
+        fixture_header=dict(identity=fixture_identity,allowance=fixture_limits,deadline_ns=deadline,
+            git=dict(executable=None,evidence_root=None),files=file_rows,
+            directories=[[name,[list(item) for item in rosters[name]]] for name in sorted(rosters,key=lambda name:name.encode('utf-8'))])
+        assert owner._preflight_header_v1(fixture_header,P,fixture_identity)==(rosters,C)
+        emitted=owner._preflight_encode_header_v1(fixture_header,transport,parent_meter.check,parent_meter.buffers)
+        H=len(emitted); B=owner._preflight_result_bound_v1(fixture_identity); F=24+H+P; chunk=min(65536,F)
+        fixture_transport=dict(frame_byte_limit=3*F+2*B,header_byte_limit=H,lexical_units=H+B,depth=32,
+            quoted_bytes=H+B,read_calls=3*F+2*B+5,write_calls=F,chunk_bytes=chunk,
+            retained_buffer_bytes=max(3*F+2*B,3*H+2*B+chunk),receiver_byte_limit=B)
+        fixture_meter=owner._PreflightTransportV1(fixture_transport,settlement)
+        fixture_observation=owner._PreflightObservationV1(root=copied_root,run_id=fixture_run,occurrence=4,
+            argv=fixture_argv,files=files,directories=rosters,limits=fixture_limits,deadline_ns=deadline)
+        fixture_entry=owner.build_command_evidence_plan(run_id=fixture_run,phase='fast-preflight',commands=[fixture_argv],cwd=copied_root)[0]
+        fixture_entry=replace(fixture_entry,command_index=4)
+        fixture_environment.update({owner.RUN_ID_ENV:fixture_run,owner.PROCESS_ROOT_ENV:str(fixture_process),
+            owner.EVIDENCE_ROOT_ENV:str(fixture_evidence)})
+        fixture_launch=owner._PreflightLaunchInputV1(identity=fixture_identity,observation=fixture_observation,
+            row_total=fixture_limits,parent_tail_reserve=zero,limits=fixture_transport,parent_meter=fixture_meter,
+            settlement_deadline_ns=settlement,host_lease=fixture_lease,plan_entry=fixture_entry,
+            environment=fixture_environment,scratch_roots=(fixture_process,),
+            output_limits=dict(stdout_bytes=16384,stderr_bytes=16384,combined_output_bytes=32768))
+        assert fixture_launch.raw_header==emitted and fixture_launch.extent==F
+        assert dict(fixture_launch.basis_counts)==dict(entries=C,bytes=P)
+        with pytest.raises(TypeError): fixture_launch.basis_counts['bytes']=0
+        original_counts=fixture_launch.basis_counts
+        fixture_launch.basis_counts=dict(entries=C,bytes=P-1)
+        with pytest.raises(RuntimeError,match='emitted basis binding'): fixture_launch._proof_basis_counts()
+        fixture_launch.basis_counts=original_counts
+        original_frame=fixture_launch.raw_header
+        fixture_launch.raw_header=original_frame+b' '
+        with pytest.raises(RuntimeError,match='emitted basis binding'): fixture_launch._proof_basis_counts()
+        fixture_launch.raw_header=original_frame
+        assert fixture_launch._proof_basis_counts()==dict(entries=C,bytes=P)
+        fixture_environment.update(fixture_launch.controls); fixture_launch.environment=fixture_environment
+        fixture_projection=dict(registered_argv=fixture_argv,removed_environment_keys=(),
+            fixed_environment_controls=tuple((key,fixture_environment[key]) for key in (*owner._PREFLIGHT_INPUT_KEYS_V1,
+                owner.RUN_ID_ENV,owner.PROCESS_ROOT_ENV,owner.EVIDENCE_ROOT_ENV)))
+        fixture_output={}
+        with fixture_launch,owner._command_projection_v1(fixture_projection):
+            fixture_receipt=owner.supervise_command(fixture_argv,cwd=copied_root,run_id=fixture_run,
+                phase='fast-preflight',command_index=4,evidence_root=fixture_evidence,environment=fixture_environment,
+                execution_deadline_ns=deadline,output_limits=fixture_launch.output_limits,output_observation=fixture_output,
+                launch_input=fixture_launch,preflight_launch=(fixture_argv,dict(fixture_environment)),
+                mirror_stdout=False,mirror_stderr=False)
+            fixture_stdout=Path(fixture_receipt.stdout_path).read_bytes().decode('utf-8')
+            fixture_stderr=Path(fixture_receipt.stderr_path).read_bytes().decode('utf-8')
+            assert fixture_receipt.native_exit_code==expected_exit,fixture_stderr
+            assert fixture_receipt.failure_class==(None if expected_exit==0 else 'ENGVR_NATIVE_EXIT_NONZERO'),fixture_stderr
+            assert fixture_launch.state=='CONSUMED' and fixture_launch.result is not None
+            measured=fixture_launch.result
+            assert measured['pid']==fixture_receipt.pid!=os.getpid() and measured['parent_pid']==os.getpid()
+            assert measured['cwd']==str(copied_root) and measured['argv']==list(fixture_argv)
+            assert measured['run_id']==fixture_run and measured['original_position']==measured['command_index']==4
+            assert measured['decode_complete'] is measured['application_entered'] is measured['observation_complete'] is True
+            assert measured['application_exit']==expected_exit
+            assert measured['failure_class']==(None if expected_exit==0 else 'PREFLIGHT_APPLICATION_DENIED')
+            assert measured['initial_limits']==fixture_limits and measured['remaining_limits']==expected_remaining
+            assert measured['observed']==expected_observed and measured['reserved']==expected_reserved
+            assert measured['retained_entries']==C+E and measured['input_bytes_consumed']==F
+            assert fixture_observation.observed==zero and fixture_observation.remaining==zero
+            assert all(fixture_output[stream]['complete'] for stream in ('stdout','stderr'))
+            if expected_exit==0:
+                assert fixture_stdout=='NESTED_VALIDATOR_CONTRACTS_OK'+os.linesep and fixture_stderr==''
+            else:
+                assert fixture_stdout==''
+                assert fixture_stderr==('src/qtt/stage1_prediction_markets/transport_fixture.py:2: nested full validator rerun '
+                    'forbidden: pytest; validate recorded receipts/contracts or add NESTED_VALIDATOR_RERUN_ALLOWED_SAFE_FAST_INTENTIONAL'+os.linesep)
+        assert fixture_launch.state=='CLOSED' and fixture_launch.reader.closed
+        assert owner._PREFLIGHT_OBSERVATION_V1.get() is None
+        assert not owner._command_requires_process_retention_v1(fixture_receipt)
+        assert ('child',fixture_receipt.pid) in fixture_lease.calls and ('settled',fixture_receipt.pid) in fixture_lease.calls
+        owner._preflight_command_evidence_v1(fixture_receipt,fixture_paths,fixture_meter)
+        assert fixture_receipt.output_observation['preflight']['basis_counts']==dict(entries=C,bytes=P)
+        result_bytes=(fixture_launch.evidence/'receiver.json').stat().st_size
+        assert fixture_meter.emitted==F and fixture_meter.readback_bytes==3*F
+        assert fixture_meter.received==3*F+2*result_bytes<=3*F+2*B
+        assert fixture_meter.read_calls<=3*F+2*B+5 and fixture_meter.write_calls<=F
+        assert fixture_meter.lexical_units<=H+B and fixture_meter.quoted_bytes<=H+B
+        assert fixture_meter.peak_buffers<=fixture_transport['retained_buffer_bytes']
+        cleanup=owner.cleanup_validation_run(fixture_paths)
+        assert cleanup=='PASS_REMOVED_EXACT_RUN_ROOT' and not fixture_process.exists()
+        assert copied_root.is_dir() and fixture_evidence.is_dir() and data_path.read_bytes()==payload
+        cleanup_record=json.loads((fixture_evidence/'cleanup.json').read_text())
+        with capsys.disabled():
+            print('PREFLIGHT_SYNTHETIC_BYTE_CONSUMING_CHILD '+json.dumps(dict(case=case,original_position=4,
+                argv=fixture_argv,cwd=str(copied_root),pid=fixture_receipt.pid,parent_pid=os.getpid(),
+                native_exit=fixture_receipt.native_exit_code,failure_class=fixture_receipt.failure_class,
+                complete_stdout=fixture_stdout,complete_stderr=fixture_stderr,receiver=measured,
+                copied_source_paths=source_paths,source_lengths={name:len(raw) for name,raw in source_bytes.items()},
+                import_probe=dict(argv=import_receipt.argv,native_exit=import_receipt.native_exit_code,
+                    complete_stdout=import_stdout,complete_stderr=import_stderr,origins=origins),
+                independent_counts=dict(P=P,N=N,L=L,E=E,C=C,H=H,B=B,F=F),
+                basis_counts=dict(fixture_launch.basis_counts),expected_observed=expected_observed,
+                expected_reserved=expected_reserved,expected_remaining=expected_remaining,
+                parent_transport=dict(emitted=fixture_meter.emitted,received=fixture_meter.received,
+                    readback_bytes=fixture_meter.readback_bytes,read_calls=fixture_meter.read_calls,
+                    write_calls=fixture_meter.write_calls,lexical_units=fixture_meter.lexical_units,
+                    quoted_bytes=fixture_meter.quoted_bytes,peak_buffers=fixture_meter.peak_buffers),
+                transport_limits=fixture_transport,execution_deadline_ns=deadline,settlement_deadline_ns=settlement,
+                native_host_qualified=False,canonical_run=False,closed_reader=fixture_launch.reader.closed,
+                actual_cleanup=cleanup_record)),flush=True)
     # One-shot parent declaration and candidate assembly over a tiny literal
     # no-Git repository. Startup is intentionally not qualified or executed.
     fixture_root=area/'candidate'; fixture_root.mkdir(); (fixture_root/'a.bin').write_bytes(b'abc')
