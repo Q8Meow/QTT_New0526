@@ -240,4 +240,5 @@ def main() -> int:
 
 
 if __name__ == "__main__":
-    raise SystemExit(main())
+    from tools.validation_reliability import _preflight_cli_v1
+    raise SystemExit(_preflight_cli_v1(main, __file__))

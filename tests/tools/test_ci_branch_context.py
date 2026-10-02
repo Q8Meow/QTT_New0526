@@ -5222,9 +5222,13 @@ def _assert_v35_exact_repair_scope():
         'tests/tools/test_validation_inventory.py',
         'src/qtt/stage1_prediction_markets/qtt_owner_global_override_directive_currentization_and_internal_gate_release/report.py',
         'tools/validation_scope_registry.py',
-    })
+            'tools/validate_grand_global_debug_logical_consistency_audit.py',
+        'tools/validate_ci_branch_context_matrix.py',
+        'tools/validate_validation_inventory.py',
+        'tools/validate_validation_scope_registry.py',
+})
     actual = context.EXPLICIT_DOWNSTREAM_REPAIR_BRANCH_CHANGED_PATHS[branch]
-    assert type(actual) is frozenset and len(actual) == 135 and actual == expected
+    assert type(actual) is frozenset and len(actual) == 139 and actual == expected
     for path in expected:
         assert context.changed_path_allowed_for_explicit_repair_branch(branch, path)
         assert context.is_explicit_downstream_repair_changed_path(branch, path)

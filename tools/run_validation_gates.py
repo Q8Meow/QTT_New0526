@@ -103,6 +103,9 @@ _ACTIVE_FILESYSTEM_PROBE: FilesystemProbeReceiptV1 | None = None
 _RUN_PROVENANCE_WRITTEN = False
 _RUN_PROVENANCE_ATTEMPTED = False
 _ACTIVE_CANDIDATE_SOURCE = None
+_ACTIVE_PREFLIGHT_PATH_V1 = None
+_ACTIVE_PREFLIGHT_NATIVE_V1 = None
+_ACTIVE_PREFLIGHT_ASSEMBLY_V1 = None
 _SCAN_MAIN_LOCK = threading.Lock()
 _ACTIVE_SCAN_CAPACITY_SOURCE = None
 _ACTIVE_SCAN_LAUNCH = None
@@ -3079,6 +3082,273 @@ def _restore_untracked_gate_side_effects(
     if prepared:
         raise RuntimeError("VALIDATION_CANDIDATE_BASELINE_REQUIRED")
     return ()
+
+
+
+
+class _PreflightAssemblyV1:
+    """One actual plan and candidate, with no declaration-created authority."""
+    def __init__(self, native, paths, plan):
+        from tools import validation_reliability as owner
+        self.owner, self.native, self.paths, self.plan = owner, native, paths, plan
+        self.state, self.candidate = 'SELECTED', None
+        self.launches = {}
+        self.failure = None
+        owner._preflight_require_v1(type(plan) is tuple and len(plan) == 8
+            and all(type(e) is CommandEvidencePlanEntry and e.command_index == n
+                and e.run_id == paths.run_id and e.phase == FAST_PREFLIGHT_PHASE and e.cwd == str(paths.repo_root)
+                and owner._preflight_vector_v1(e.argv) and e.argv[1].replace('\\','/') == owner._PREFLIGHT_SCRIPTS_V1[n-1]
+                and e.argv[0] == sys.executable for n,e in enumerate(plan,1)), 'preflight exact full original plan required')
+        try:
+            header, blobs, _ = native.consume(self._validate_declaration)
+            self.header = header
+            self.repository = header['repository']
+            self.files = {p:blobs[i] for p,i in self.repository['files']}
+            self.directories = owner._preflight_rosters_v1(self.repository['directories'])
+            self.installation = dict(header['installation'])
+            basis = self.installation['startup_basis']
+            self.installation['startup_basis'] = dict(files={p:blobs[i] for p,i in basis['files']},
+                directories=owner._preflight_rosters_v1(basis['directories'],absolute=True),absent=tuple(basis['absent']))
+            for key in ('version','abi','stdlib_roots','site_roots','config_paths','customizer_paths'):
+                self.installation[key] = tuple(self.installation[key])
+            self.state = 'INPUTS_VALIDATED'
+            self.native.check()
+            self.capture = owner._PreflightObservationV1(root=paths.repo_root,run_id=paths.run_id,occurrence=1,
+                argv=plan[0].argv,files=self.files,directories=self.directories,
+                limits=header['parent_limits']['capture'],deadline_ns=header['parent_limits']['deadline_ns'])
+            self.terminal = owner._PreflightObservationV1(root=paths.repo_root,run_id=paths.run_id,occurrence=1,
+                argv=plan[0].argv,files=self.files,directories=self.directories,
+                limits=header['parent_limits']['terminal'],deadline_ns=header['parent_limits']['deadline_ns'])
+            self.parent_meter = owner._PreflightTransportV1(header['parent_limits']['transport'],
+                header['parent_limits']['deadline_ns'],native.check)
+            bindings = {}
+            self.rows = header['rows']
+            for row, entry in zip(self.rows,plan,strict=True):
+                owner._preflight_require_v1(all(self.files[p] == blobs[i] for p,i in row['files']),
+                    'preflight row byte generation differs')
+                observation = owner._PreflightObservationV1(root=paths.repo_root,run_id=paths.run_id,
+                    occurrence=entry.command_index,argv=entry.argv,files={p:blobs[i] for p,i in row['files']},
+                    directories=owner._preflight_rosters_v1(row['directories']),limits=row['limits'],
+                    deadline_ns=row['deadline_ns'],git_executable=row['git_executable'],
+                    evidence_root=paths.evidence_root/('preflight-'+str(entry.command_index))/'git')
+                binding = {k:v for k,v in self.installation.items() if k != 'executable'}
+                binding['observation'] = observation
+                bindings[entry.command_index] = binding
+            index = self.repository['index']
+            self.candidate = _ValidationCandidateCustodyV1(repo_root=paths.repo_root,plan=plan,
+                observe_paths=self._observe_paths,check_exclusive=native.check,
+                index_path=None if index is None else pathlib.Path(index[0]),
+                effects_by_occurrence={n:() for n in range(1,9)},ignored_paths=tuple(self.repository['protected_paths']),
+                operation_checks={n:self._check_operation for n in range(1,9)},nested_evidence_limits={},
+                preflight_bindings=bindings,**header['candidate_limits'])
+            for name, raw in self.files.items():
+                actual = self.candidate.baseline.get(name)
+                owner._preflight_require_v1(actual is not None and actual[1] == raw,
+                    'preflight candidate basis differs: '+name)
+            if index is not None:
+                owner._preflight_require_v1(self.candidate.index_baseline is not None
+                    and self.candidate.index_baseline[1] == blobs[index[1]],'preflight active index basis differs')
+            self.candidate._preflight_assembly = self
+            self.state = 'CUSTODY_READY'
+        except BaseException as exc:
+            self.failure = exc
+            raise
+
+    def _validate_declaration(self,h,payload):
+        o = self.owner
+        o._preflight_keys_v1(h,('phase','repository','installation','rows','candidate_limits','parent_limits','blobs'))
+        o._preflight_require_v1(h['phase'] == FAST_PREFLIGHT_PHASE, 'preflight declaration phase')
+        o._preflight_require_v1(type(h['blobs']) is list,'preflight blob array')
+        offset, sizes = 0, []
+        for pair in h['blobs']:
+            o._preflight_require_v1(type(pair) is list and len(pair) == 2,'preflight blob range')
+            start,length = (o._preflight_integer_v1(v) for v in pair)
+            o._preflight_require_v1(start == offset and length <= payload-offset,'preflight contiguous declaration body')
+            sizes.append(length); offset += length
+        o._preflight_require_v1(offset == payload,'preflight complete declaration body')
+        used = set()
+        def ref(index):
+            o._preflight_integer_v1(index)
+            o._preflight_require_v1(index < len(sizes),'preflight blob reference')
+            used.add(index)
+        def files(rows,absolute=False):
+            o._preflight_require_v1(type(rows) is list,'preflight declaration file array')
+            names, ordered = {}, []
+            for row in rows:
+                o._preflight_require_v1(type(row) is list and len(row) == 2,'preflight declaration file row')
+                (o._preflight_startup_path_v1 if absolute else o._preflight_relative_v1)(row[0])
+                o._preflight_require_v1(row[0].casefold() not in names,'preflight declaration file alias')
+                names[row[0].casefold()] = row[1]; ordered.append(row[0].encode('utf-8')); ref(row[1])
+            o._preflight_require_v1(ordered == sorted(ordered),'preflight declaration file order')
+        r = h['repository']
+        o._preflight_keys_v1(r,('root','files','directories','index','protected_paths'))
+        o._preflight_startup_path_v1(r['root'])
+        o._preflight_require_v1(r['root'] == str(self.paths.repo_root) == str(self.native.root), 'preflight declaration actual repository')
+        files(r['files']); repository_files = dict(r['files'])
+        directories = o._preflight_rosters_v1(r['directories'])
+        o._preflight_catalog_consistency_v1(repository_files,directories)
+        o._preflight_require_v1(type(r['protected_paths']) is list,'preflight protected path array')
+        protected = [o._preflight_relative_v1(p) for p in r['protected_paths']]
+        o._preflight_require_v1(len({p.casefold() for p in protected}) == len(protected), 'preflight protected path alias')
+        index = r['index']
+        if index is None:
+            o._preflight_require_v1(self.native.index_path is None and not (self.paths.repo_root/'.git').exists(),
+                'preflight actual active index required')
+        else:
+            o._preflight_require_v1(type(index) is list and len(index) == 2,'preflight active index pair')
+            o._preflight_startup_path_v1(index[0]); ref(index[1])
+            o._preflight_require_v1(index[0] == str(self.native.index_path),'preflight native active index identity')
+        install = h['installation']
+        o._preflight_keys_v1(install,('executable','version','abi','stdlib_roots','site_roots','loader_environment',
+            'config_paths','customizer_paths','startup_basis'))
+        o._preflight_require_v1(install['executable'] == sys.executable,'preflight admitted executable identity')
+        o._preflight_require_v1(type(install['version']) is list and len(install['version']) == 3
+            and all(type(v) is int for v in install['version']) and tuple(install['version']) == tuple(sys.version_info[:3]),
+            'preflight installation version')
+        o._preflight_require_v1(type(install['abi']) is list and len(install['abi']) == 5
+            and all(type(install['abi'][i]) is int for i in (2,3)), 'preflight installation ABI scalars')
+        for key in ('stdlib_roots','site_roots','config_paths','customizer_paths'):
+            o._preflight_require_v1(type(install[key]) is list,'preflight installation path array')
+            for path in install[key]: o._preflight_startup_path_v1(path)
+            o._preflight_require_v1(len(set(install[key])) == len(install[key]), 'preflight duplicate installation path')
+        loaders = install['loader_environment']
+        o._preflight_require_v1(type(loaders) is dict and all(type(k) is str and type(v) is str
+            and k and '=' not in k and '\0' not in k+v for k,v in loaders.items())
+            and len({k.upper() for k in loaders}) == len(loaders),'preflight loader environment')
+        basis = install['startup_basis']
+        o._preflight_keys_v1(basis,('files','directories','absent'))
+        files(basis['files'],absolute=True)
+        o._preflight_rosters_v1(basis['directories'],absolute=True)
+        o._preflight_require_v1(type(basis['absent']) is list,'preflight startup absence array')
+        for path in basis['absent']: o._preflight_startup_path_v1(path)
+        all_startup = [row[0] for row in basis['files']]+[row[0] for row in basis['directories']]+basis['absent']
+        o._preflight_require_v1(len({p.casefold() for p in all_startup}) == len(all_startup),'preflight startup status alias')
+        o._preflight_require_v1(install['executable'] in dict(basis['files']),'preflight executable byte basis unavailable')
+        o._preflight_keys_v1(h['candidate_limits'],('entry_limit','snapshot_byte_limit','read_byte_limit','deadline_ns'))
+        for v in h['candidate_limits'].values(): o._preflight_integer_v1(v,positive=True)
+        parent = h['parent_limits']
+        o._preflight_keys_v1(parent,('capture','transport','terminal','deadline_ns'))
+        o._preflight_limits_v1(parent['capture']); o._preflight_limits_v1(parent['terminal'])
+        o._preflight_limits_v1(parent['transport'],transport=True)
+        o._preflight_integer_v1(parent['deadline_ns'],positive=True)
+        o._preflight_require_v1(parent['capture'] == self.native.capture_limits
+            and parent['terminal'] == self.native.terminal_limits,'preflight independently reserved parent tranches differ')
+        o._preflight_require_v1(time.monotonic_ns() < parent['deadline_ns'] <= h['candidate_limits']['deadline_ns']
+            <= self.native.deadline_ns,'preflight parent ancestor deadline')
+        o._preflight_require_v1(type(h['rows']) is list and len(h['rows']) == 8,'preflight all eight rows required')
+        for n,(row,entry) in enumerate(zip(h['rows'],self.plan,strict=True),1):
+            o._preflight_keys_v1(row,('original_position','argv','files','directories','limits','parent_tail_reserve',
+                'deadline_ns','settlement_deadline_ns','transport','application_output_limits','git_executable'))
+            o._preflight_require_v1(type(row['original_position']) is int and row['original_position'] == n
+                and type(row['argv']) is list and tuple(row['argv']) == entry.argv,'preflight original row identity')
+            files(row['files']); row_files = dict(row['files'])
+            row_dirs = o._preflight_rosters_v1(row['directories'])
+            o._preflight_catalog_consistency_v1(row_files,row_dirs)
+            o._preflight_require_v1(all(p in repository_files for p in row_files)
+                and all(directories.get(p) == v for p,v in row_dirs.items()), 'preflight row disagrees with repository facts')
+            limits = o._preflight_limits_v1(row['limits']); tail = o._preflight_limits_v1(row['parent_tail_reserve'])
+            o._preflight_require_v1(all(tail[k] <= limits[k] for k in limits),'preflight parent tail allocation')
+            o._preflight_limits_v1(row['transport'],transport=True)
+            output = row['application_output_limits']
+            o._preflight_keys_v1(output,('stdout_bytes','stderr_bytes','combined_output_bytes'))
+            for v in output.values(): o._preflight_integer_v1(v)
+            o._preflight_require_v1(output['stdout_bytes']+output['stderr_bytes'] <= output['combined_output_bytes'],
+                'preflight application stream relation')
+            for key in ('deadline_ns','settlement_deadline_ns'): o._preflight_integer_v1(row[key],positive=True)
+            o._preflight_require_v1(time.monotonic_ns() < row['deadline_ns'] < row['settlement_deadline_ns']
+                <= parent['deadline_ns'],'preflight row ancestor deadline')
+            git = row['git_executable']
+            if limits['git_attempts'] == 0:
+                o._preflight_require_v1(git is None,'preflight unselected Git executable')
+            else:
+                o._preflight_startup_path_v1(git)
+                o._preflight_require_v1(git == self.native.git_executable and git in dict(basis['files']),
+                    'preflight independently admitted Git byte basis unavailable')
+        o._preflight_require_v1(used == set(range(len(sizes))),'preflight unreferenced declaration blob')
+        return sizes,None
+
+    def _observe_paths(self):
+        o = self.owner
+        budget = self.terminal if self.state == 'SETTLING' else self.capture
+        def walk(root):
+            result = []
+            for path,kind in o._preflight_directory_v1(root):
+                if path == self.paths.repo_root/'.git':
+                    continue  # Active index is independently protected by its original owner.
+                if kind == 'directory': result.extend(walk(path))
+                else: result.append(path.relative_to(self.paths.repo_root).as_posix())
+            return result
+        with o._preflight_observation_v1(budget,run_id=budget.run_id,occurrence=1,
+                argv=budget.argv,root=budget.root):
+            result = tuple(walk(self.paths.repo_root))
+            o._preflight_require_v1(set(result) == set(self.files), 'preflight complete candidate file roster differs')
+        return result
+
+    def candidate_source(self,root,plan):
+        self.owner._preflight_require_v1(root == self.paths.repo_root and plan is self.plan
+            and self.state in ('CUSTODY_READY','PUBLISHED'),'preflight single candidate/plan association')
+        self.native.check()
+        return self.candidate
+
+    def _check_operation(self, *, entry, environment, timeout_seconds, scratch_roots):
+        self.native.check()
+        self.owner._preflight_require_v1(entry is self.plan[entry.command_index-1], 'preflight operation plan identity')
+        result = self.native.host_lease.check_launch(entry,entry.argv,environment,scratch_roots,
+            self.rows[entry.command_index-1]['deadline_ns'])
+        self.owner._preflight_require_v1(result is None,'preflight native operation denied')
+
+    def launch(self,index,environment,projection,scratch_roots):
+        o = self.owner
+        o._preflight_require_v1(self.state in ('PUBLISHED','DISPATCHING') and index not in self.launches,
+            'preflight one-shot dispatch state')
+        self.native.check()
+        row,entry = self.rows[index-1],self.plan[index-1]
+        observation = self.candidate.preflight_bindings[index]['observation']
+        if row['git_executable'] is not None:
+            with o._preflight_observation_v1(observation,run_id=observation.run_id,occurrence=index,
+                    argv=entry.argv,root=self.paths.repo_root), o._preflight_startup_access_v1(observation,self.installation['startup_basis']):
+                o._preflight_read_bytes_v1(pathlib.Path(row['git_executable']))
+        lowered = {k.upper() for k in environment}
+        o._preflight_require_v1(len(lowered) == len(environment) and not any(k in lowered for k in o._PREFLIGHT_INPUT_KEYS_V1)
+            and not any(k.startswith(('QTT_SCAN_','QTT_MAPPER_')) for k in lowered),'preflight competing inherited controls')
+        identity = dict(run_id=self.paths.run_id,phase=FAST_PREFLIGHT_PHASE,command_index=index,original_position=index,
+            command_count=8,argv=list(entry.argv),repo_root=str(self.paths.repo_root),process_root=str(self.paths.process_root),
+            evidence_root=str(self.paths.evidence_root),parent_pid=os.getpid())
+        environment = dict(environment)
+        for key,value in ((o.RUN_ID_ENV,self.paths.run_id),(o.PROCESS_ROOT_ENV,str(self.paths.process_root)),
+                (o.EVIDENCE_ROOT_ENV,str(self.paths.evidence_root))):
+            for old in tuple(environment):
+                if old.upper() == key: del environment[old]
+            environment[key] = value
+        launch = o._PreflightLaunchInputV1(identity=identity,observation=observation,row_total=row['limits'],parent_tail_reserve=row['parent_tail_reserve'],
+            limits=row['transport'],parent_meter=self.parent_meter,settlement_deadline_ns=row['settlement_deadline_ns'],
+            host_lease=self.native.host_lease,plan_entry=entry,environment=environment,scratch_roots=tuple(scratch_roots),
+            output_limits=row['application_output_limits'])
+        environment.update(launch.controls)
+        launch.environment = environment
+        projection = dict(projection)
+        projection['fixed_environment_controls'] += tuple((k,environment[k]) for k in
+            (*o._PREFLIGHT_INPUT_KEYS_V1,o.RUN_ID_ENV,o.PROCESS_ROOT_ENV,o.EVIDENCE_ROOT_ENV))
+        self.candidate._preflight_launch = (entry.argv,dict(environment))
+        self.launches[index] = launch
+        self.state = 'DISPATCHING'
+        return launch,environment,projection
+
+    def reconcile(self,index,receipt):
+        launch = self.launches[index]
+        self.owner._preflight_require_v1(launch.state == 'CLOSED' and launch.result is not None
+            and receipt.pid == launch.process.pid and receipt.native_exit_code == launch.result['application_exit'],
+            'preflight receiver/native terminal reconciliation')
+        self.native.check()
+
+    def settling(self):
+        self.native.check()
+        for launch in self.launches.values():
+            if launch.process is not None:
+                self.owner._preflight_require_v1(launch.process.poll() is not None,'preflight final process settlement unproven')
+                self.owner._preflight_require_v1(self.native.host_lease.check_settled(launch.process) is None,
+                    'preflight final host settlement denied')
+        self.state = 'SETTLING'
 
 
 class _ValidationCandidateCustodyV1:
@@ -7059,6 +7329,12 @@ def run_commands(
                     if deadline_projection is not None:
                         raise ValueError("competing command environment projections")
                     deadline_projection = preflight_projection
+                if _ACTIVE_PREFLIGHT_ASSEMBLY_V1 is not None:
+                    if original_input is not None or mapper_read_binding is not None:
+                        raise ValueError("competing preflight dispatch transport")
+                    original_input, command_environment, deadline_projection = _ACTIVE_PREFLIGHT_ASSEMBLY_V1.launch(
+                        command_index, command_environment, deadline_projection, scratch_roots)
+                    execution_deadline_ns = original_input.deadline_ns
                 candidate_custody.begin_occurrence(command_index, planned if getattr(candidate_custody, "plan", None) is _LAST_EXPECTED_COMMAND_PLAN else plan_entry,
                     environment=command_environment, timeout_seconds=timeout_seconds, scratch_roots=tuple(scratch_roots))
             if mapper_read_binding is not None and mapper_read_binding['kind'] == 'MAPPER_NATIVE_READ_BINDING_V2':
@@ -7103,6 +7379,8 @@ def run_commands(
                     **({"launch_input": original_input} if original_input is not None else {}),
                     **({"execution_deadline_ns": execution_deadline_ns}
                        if execution_deadline_ns is not None else {}),
+                    **({"output_limits": original_input.output_limits, "output_observation": {}}
+                       if _ACTIVE_PREFLIGHT_ASSEMBLY_V1 is not None else {}),
                 )
                 supervision["receipt"] = receipt
                 if type(receipt) is CommandExecutionReceiptV1:
@@ -7124,6 +7402,8 @@ def run_commands(
                 )
             if nested_gate is not None:
                 nested_gate.observe(receipt)
+            if _ACTIVE_PREFLIGHT_ASSEMBLY_V1 is not None:
+                _ACTIVE_PREFLIGHT_ASSEMBLY_V1.reconcile(command_index, receipt)
             supervision["pending"] = False
             if nested_gate is not None and nested_gate.inconsistent:
                 raise ValidationReliabilityError("ENGVR_ATOMIC_RECEIPT_WRITE_FAILED",
@@ -7992,6 +8272,10 @@ def _publish_active_plan_provenance(
     # provenance publication. Zero executions cannot erase this plan.
     _LAST_EXPECTED_COMMAND_PLAN = selected_plan
     _LAST_PLANNED_COMMAND_COUNT = len(selected_plan)
+    global _ACTIVE_PREFLIGHT_ASSEMBLY_V1, _ACTIVE_CANDIDATE_SOURCE
+    if _ACTIVE_PREFLIGHT_PATH_V1 is not None:
+        _ACTIVE_PREFLIGHT_ASSEMBLY_V1 = _PreflightAssemblyV1(_ACTIVE_PREFLIGHT_NATIVE_V1, active_run_paths, selected_plan)
+        _ACTIVE_CANDIDATE_SOURCE = _ACTIVE_PREFLIGHT_ASSEMBLY_V1.candidate_source
     launch = _scan_resolve_parent_capacity(active_run_paths, phase, selected_plan)
     _mapper_resolve_parent_profiles_v1(active_run_paths, phase, _LAST_EXPECTED_COMMAND_PLAN)
     _RUN_PROVENANCE_ATTEMPTED = True
@@ -8011,10 +8295,13 @@ def _publish_active_plan_provenance(
         mapper_read_profiles=_ACTIVE_MAPPER_READ_PROFILES_V1,
     )
     _RUN_PROVENANCE_WRITTEN = True
+    if _ACTIVE_PREFLIGHT_ASSEMBLY_V1 is not None:
+        _ACTIVE_PREFLIGHT_ASSEMBLY_V1.state = "PUBLISHED"
 
 
 def _main_impl(argv: Sequence[str] | None = None) -> int:
     parser = argparse.ArgumentParser()
+    parser.add_argument("--preflight-input", type=pathlib.Path, help="Bounded first-phase declaration; requires a live native input lease.")
     parser.add_argument(
         "--phase",
         choices=VALIDATION_PHASES,
@@ -8461,6 +8748,11 @@ def _finalize_validation_run(
             if (scan_launch.paths is not run_paths or scan_launch.plan is not expected_plan
                     or scan_launch.phase != phase or len(scan_launch.plan) != planned_count):
                 raise ValueError("finalizer lost original scan launch identity")
+        if _ACTIVE_PREFLIGHT_ASSEMBLY_V1 is not None:
+            if (_ACTIVE_PREFLIGHT_ASSEMBLY_V1.paths is not run_paths
+                    or _ACTIVE_PREFLIGHT_ASSEMBLY_V1.plan is not expected_plan):
+                raise ValueError("finalizer lost original preflight assembly identity")
+            _ACTIVE_PREFLIGHT_ASSEMBLY_V1.settling()
         cleanup_state = "NOT_RUN"
         if termination_unproven:
             cleanup_state = "SKIPPED_PROCESS_TERMINATION_UNPROVEN"
@@ -8483,6 +8775,9 @@ def _finalize_validation_run(
         else:
             try:
                 cleanup_state = cleanup_validation_run(run_paths)
+                if _ACTIVE_PREFLIGHT_ASSEMBLY_V1 is not None:
+                    _ACTIVE_PREFLIGHT_ASSEMBLY_V1.native.check()
+                    _ACTIVE_PREFLIGHT_ASSEMBLY_V1.state = "SETTLED"
             except RuntimeError as exc:
                 cleanup_state = "FAIL"
                 print(str(exc), file=sys.stderr, flush=True)
@@ -8534,6 +8829,8 @@ def _finalize_validation_run(
         rp5a_payload_byte_limits=None if scan_launch is None else scan_launch.rp5a_payload_byte_limits,
                 mapper_read_profiles=_ACTIVE_MAPPER_READ_PROFILES_V1 if planned_count else None,
                 mapper_occurrence_records=_ACTIVE_MAPPER_OCCURRENCES_V1,
+                **({"preflight_meter": _ACTIVE_PREFLIGHT_ASSEMBLY_V1.parent_meter}
+                   if _ACTIVE_PREFLIGHT_ASSEMBLY_V1 is not None else {}),
             )
         except ValidationReliabilityError as exc:
             if supervision is not None:
@@ -8599,6 +8896,7 @@ def _main_owned(argv: Sequence[str] | None = None) -> int:
     pre_parser = argparse.ArgumentParser(add_help=False)
     pre_parser.add_argument("--phase", choices=VALIDATION_PHASES, default=ALL_PHASE)
     pre_parser.add_argument("--process-root", type=pathlib.Path)
+    pre_parser.add_argument("--preflight-input", type=pathlib.Path)
     pre_parser.add_argument(
         "--validation-mode",
         choices=("auto", "full", "reduced"),
@@ -8607,6 +8905,10 @@ def _main_owned(argv: Sequence[str] | None = None) -> int:
     pre_parser.add_argument("--changed-file", action="append", default=[])
     pre_args, _unknown = pre_parser.parse_known_args(raw_argv)
     repo_root = _repo_root()
+    global _ACTIVE_PREFLIGHT_NATIVE_V1
+    if pre_args.preflight_input is not None:
+        from tools.validation_reliability import _preflight_acquire_native_input_v1
+        _ACTIVE_PREFLIGHT_NATIVE_V1 = _preflight_acquire_native_input_v1(pre_args.preflight_input.absolute(), repo_root)
     try:
         run_paths, probe = resolve_validation_run_paths(
             repo_root,
@@ -9052,15 +9354,28 @@ def _mapper_resolve_parent_profiles_v1(paths, phase, plan):
 
 
 def main(argv: Sequence[str] | None = None, *, scan_capacity_source=None, candidate_source=None, mapper_read_source=None) -> int:
+    global _ACTIVE_PREFLIGHT_PATH_V1, _ACTIVE_PREFLIGHT_NATIVE_V1, _ACTIVE_PREFLIGHT_ASSEMBLY_V1
     global _ACTIVE_MAPPER_OCCURRENCES_V1
     global _ACTIVE_MAPPER_READ_PROFILES_V1, _ACTIVE_MAPPER_READ_SOURCE_V1, _MAPPER_READ_SOURCE_ATTEMPTED
     global _ACTIVE_SCAN_CAPACITY_SOURCE, _ACTIVE_SCAN_LAUNCH, _SCAN_CAPACITY_ATTEMPTED, _ACTIVE_CANDIDATE_SOURCE
     if not _SCAN_MAIN_LOCK.acquire(blocking=False):
         raise ValueError("central validation invocation already active")
+    previous_preflight = (_ACTIVE_PREFLIGHT_PATH_V1, _ACTIVE_PREFLIGHT_NATIVE_V1, _ACTIVE_PREFLIGHT_ASSEMBLY_V1)
     previous_occurrences = _ACTIVE_MAPPER_OCCURRENCES_V1
     previous_mapper = (_ACTIVE_MAPPER_READ_PROFILES_V1, _ACTIVE_MAPPER_READ_SOURCE_V1, _MAPPER_READ_SOURCE_ATTEMPTED)
     previous = (_ACTIVE_SCAN_CAPACITY_SOURCE, _ACTIVE_SCAN_LAUNCH, _SCAN_CAPACITY_ATTEMPTED, _ACTIVE_CANDIDATE_SOURCE)
     try:
+        request = argparse.ArgumentParser(add_help=False)
+        request.add_argument("--preflight-input", type=pathlib.Path)
+        request.add_argument("--phase", default=ALL_PHASE)
+        request.add_argument("--validation-mode", default="auto")
+        selected, _ = request.parse_known_args(sys.argv[1:] if argv is None else list(argv))
+        if selected.preflight_input is not None and (selected.phase != FAST_PREFLIGHT_PHASE
+                or selected.validation_mode == "reduced"
+                or any(v is not None for v in (candidate_source, mapper_read_source, scan_capacity_source))):
+            raise ValueError("preflight input requires the full first phase without competing suppliers")
+        _ACTIVE_PREFLIGHT_PATH_V1 = selected.preflight_input
+        _ACTIVE_PREFLIGHT_NATIVE_V1 = _ACTIVE_PREFLIGHT_ASSEMBLY_V1 = None
         _ACTIVE_MAPPER_OCCURRENCES_V1 = {}
         _ACTIVE_MAPPER_READ_PROFILES_V1 = None
         _ACTIVE_MAPPER_READ_SOURCE_V1 = mapper_read_source
@@ -9071,6 +9386,7 @@ def main(argv: Sequence[str] | None = None, *, scan_capacity_source=None, candid
         _SCAN_CAPACITY_ATTEMPTED = False
         return _main_owned(argv)
     finally:
+        _ACTIVE_PREFLIGHT_PATH_V1, _ACTIVE_PREFLIGHT_NATIVE_V1, _ACTIVE_PREFLIGHT_ASSEMBLY_V1 = previous_preflight
         _ACTIVE_SCAN_CAPACITY_SOURCE, _ACTIVE_SCAN_LAUNCH, _SCAN_CAPACITY_ATTEMPTED, _ACTIVE_CANDIDATE_SOURCE = previous
         _ACTIVE_MAPPER_READ_PROFILES_V1, _ACTIVE_MAPPER_READ_SOURCE_V1, _MAPPER_READ_SOURCE_ATTEMPTED = previous_mapper
         _ACTIVE_MAPPER_OCCURRENCES_V1 = previous_occurrences

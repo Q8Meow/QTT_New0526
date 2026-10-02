@@ -4575,10 +4575,13 @@ def validate_complete_run_evidence(
     scan_deadline_ns=None,
     mapper_read_profiles=None,
     mapper_occurrence_records=None,
+    preflight_meter=None,
 ) -> None:
     """Reconcile retained run, command, stream, and cleanup evidence before PASS."""
 
     _mapper_occurrence_evidence_v1(paths, mapper_read_profiles, mapper_occurrence_records, receipts)
+    for receipt in receipts:
+        _preflight_command_evidence_v1(receipt, paths, preflight_meter)
 
     evidence_root = Path(os.path.abspath(os.path.normpath(str(paths.evidence_root))))
     if os.path.lexists(evidence_root / "completion.json"):
@@ -5423,8 +5426,14 @@ def supervise_command(
                 raise ValueError("selected canonical preflight has no parent startup projection")
             original_stdin = subprocess.DEVNULL
             if launch_input is not None:
-                if type(launch_input) is not _ScanLaunchInput:
-                    raise TypeError("original scan launch input required")
+                if type(launch_input) not in (_ScanLaunchInput, _PreflightLaunchInputV1):
+                    raise TypeError("original source-known launch input required")
+                if type(launch_input) is _PreflightLaunchInputV1:
+                    if (preflight_launch is None or phase != "fast-preflight"
+                            or output_limits != launch_input.output_limits
+                            or execution_deadline_ns != launch_input.deadline_ns
+                            or selected_environment != launch_input.environment):
+                        raise ValueError("preflight launch lacks its original bounded projection")
                 original_stdin = launch_input._claim(
                     run_id=run_id, phase=phase, command_index=command_index,
                     argv=selected_argv, cwd=receipt_cwd)
@@ -5571,6 +5580,11 @@ def supervise_command(
                         and (stdout_count if stream == "stdout" else stderr_count) == outcome["drained_byte_count"] and process is not None),
                     "errors": [str(error) for error in outcome.get("errors", (outcome["evidence_error"],) if "evidence_error" in outcome else ())],
                 }
+            if type(launch_input) is _PreflightLaunchInputV1:
+                bounded_observation["preflight"] = {"identity": launch_input.identity,
+                    "initial_limits": launch_input.delegated, "input_bytes": launch_input.extent,
+                    "row_total": launch_input.row_total, "parent_spend": launch_input.parent_spend,
+                    "parent_tail": launch_input.tail, "receiver": launch_input.result}
             output_observation.update(bounded_observation)
         receipt = CommandExecutionReceiptV1(
             schema_version=SCHEMA_VERSION,
@@ -10276,6 +10290,7 @@ def _preflight_launch_guard_v1(argv, environment, *, expected_argv, expected_env
 def _preflight_git_process_v1(value, argv, *, root, environment):
     """Finite Git observations use the existing native supervisor and receipts."""
     value.check()
+    environment = {k: v for k, v in environment.items() if k.upper() not in _PREFLIGHT_INPUT_KEYS_V1}
     if (type(value.git_executable) is not str or not Path(value.git_executable).is_absolute()
             or value.evidence_root is None or not Path(value.evidence_root).is_absolute()):
         value.fail("missing admitted absolute Git/evidence operands")
@@ -10406,3 +10421,868 @@ def _preflight_startup_v1(argv, environment, *, binding, cache_root):
                     if any(str(p) not in search_roots for p in additions):
                         raise ValueError("startup .pth adds an unbound customizer search root")
     return _preflight_environment_v1(argv, environment, cache_root=cache_root)
+
+
+# First-phase transport is data, never a source of host or semantic authority.
+_PREFLIGHT_MAX_V1 = (1 << 63) - 1
+_PREFLIGHT_DIMENSIONS_V1 = ('attempts', 'bytes', 'entries', 'retained_bytes',
+    'git_attempts', 'stdout_bytes', 'stderr_bytes', 'combined_output_bytes')
+_PREFLIGHT_TRANSPORT_FIELDS_V1 = ('frame_byte_limit', 'header_byte_limit', 'lexical_units',
+    'depth', 'quoted_bytes', 'read_calls', 'write_calls', 'chunk_bytes',
+    'retained_buffer_bytes', 'receiver_byte_limit')
+_PREFLIGHT_INPUT_KEYS_V1 = ('QTT_PREFLIGHT_INPUT_BYTES', 'QTT_PREFLIGHT_HEADER_LIMIT',
+    'QTT_PREFLIGHT_PARSE_LIMITS', 'QTT_PREFLIGHT_ORIGINAL_POSITION', 'QTT_PREFLIGHT_DEADLINE_NS')
+_PREFLIGHT_NATIVE_INPUT_V1 = ContextVar('_PREFLIGHT_NATIVE_INPUT_V1', default=None)
+
+
+def _preflight_require_v1(condition, detail):
+    if not condition:
+        raise ValidationReliabilityError('ENGVR_PREPUBLICATION_CUSTODY_FAILED', detail)
+
+
+def _preflight_integer_v1(value, *, positive=False):
+    _preflight_require_v1(type(value) is int and int(positive) <= value <= _PREFLIGHT_MAX_V1,
+        'preflight exact integer range')
+    return value
+
+
+def _preflight_keys_v1(value, keys):
+    _preflight_require_v1(type(value) is dict and set(value) == set(keys)
+        and all(type(k) is str for k in value), 'preflight exact object fields: ' + ','.join(keys))
+
+
+def _preflight_text_v1(value):
+    _preflight_require_v1(type(value) is str and bool(value) and all(ord(c) >= 32
+        and not 127 <= ord(c) <= 159 and not 0xD800 <= ord(c) <= 0xDFFF for c in value),
+        'preflight exact nonempty text')
+    return value
+
+
+def _preflight_relative_v1(value, *, directory=False):
+    _preflight_text_v1(value)
+    if directory and value == '.':
+        return value
+    _preflight_require_v1('\\' not in value and ':' not in value and not value.startswith('/')
+        and all(p not in ('', '.', '..') for p in value.split('/')), 'preflight portable relative path')
+    _scope_git_path(value)
+    return value
+
+
+def _preflight_transport_chain_v1(path):
+    # Directory membership changes from our own evidence writes are expected;
+    # physical ancestor identity, type and reparse rejection are not relaxed.
+    _local_unlinked_path(path)
+    result = []
+    for parent in (*reversed(path.parents),path):
+        info = parent.lstat()
+        _preflight_require_v1(stat.S_ISDIR(info.st_mode) and not _stat_is_reparse_point(info),
+            'preflight unsupported transport ancestor')
+        result.append((str(parent),_NestedPytestEvidenceV1._directory_identity(info)))
+    return tuple(result)
+
+
+def _preflight_limits_v1(value, *, transport=False):
+    _preflight_keys_v1(value, _PREFLIGHT_TRANSPORT_FIELDS_V1 if transport else _PREFLIGHT_DIMENSIONS_V1)
+    for v in value.values():
+        _preflight_integer_v1(v, positive=transport)
+    if transport:
+        _preflight_require_v1(value['header_byte_limit'] <= value['frame_byte_limit']
+            and value['chunk_bytes'] <= 65536, 'preflight transport capacity relation')
+    else:
+        _preflight_require_v1(value['stdout_bytes'] + value['stderr_bytes'] <= value['combined_output_bytes'],
+            'preflight separate streams exceed combined allowance')
+    return dict(value)
+
+
+def _preflight_canonical_v1(value):
+    return json.dumps(value, ensure_ascii=True, sort_keys=True, separators=(',', ':'),
+        allow_nan=False).encode('ascii')
+
+
+def _preflight_json_v1(raw, limits, check, *, canonical_encoding=True):
+    # Bound recursive decoding before json.loads allocates the object graph.
+    depth = units = quoted = 0
+    string = escape = False
+    for offset, b in enumerate(raw):
+        if offset % 4096 == 0:
+            check()
+        if string:
+            quoted += 1
+            if escape:
+                escape = False
+            elif b == 92:
+                escape = True
+            elif b == 34:
+                string = False
+        elif b == 34:
+            string = True
+            units += 1
+        elif b in (123, 91):
+            depth += 1
+            units += 1
+        elif b in (125, 93):
+            depth -= 1
+        elif b not in (32, 9, 10, 13, 58, 44):
+            units += 1
+        _preflight_require_v1(0 <= depth <= limits['depth'] and units <= limits['lexical_units']
+            and quoted <= limits['quoted_bytes'], 'preflight lexical/depth/quoted capacity')
+    _preflight_require_v1(not string and not escape and depth == 0, 'preflight incomplete JSON')
+    def pairs(rows):
+        result = {}
+        for k, v in rows:
+            _preflight_require_v1(k not in result, 'preflight duplicate JSON key: ' + k)
+            _preflight_require_v1(not any(0xD800 <= ord(c) <= 0xDFFF for c in k), 'preflight surrogate key')
+            result[k] = v
+        return result
+    def integer(token):
+        _preflight_require_v1(len(token) <= 19 and token.isascii() and token.isdecimal(), 'preflight integer token')
+        return _preflight_integer_v1(int(token))
+    def reject(token):
+        raise ValueError('preflight noninteger JSON number: ' + token)
+    result = json.loads(raw.decode('utf-8', errors='strict'), object_pairs_hook=pairs,
+        parse_int=integer, parse_float=reject, parse_constant=reject)
+    def scalars(value):
+        if type(value) is str:
+            _preflight_require_v1(not any(0xD800 <= ord(c) <= 0xDFFF for c in value), 'preflight surrogate text')
+        elif type(value) is dict:
+            for v in value.values(): scalars(v)
+        elif type(value) is list:
+            for v in value: scalars(v)
+    scalars(result)
+    if canonical_encoding:
+        _preflight_require_v1(_preflight_canonical_v1(result) == raw, 'preflight noncanonical JSON')
+    check()
+    return result, dict(lexical_units=units, quoted_bytes=quoted)
+
+
+class _PreflightTransportV1:
+    """One already reserved transport tranche; consumption never refunds it."""
+    def __init__(self, limits, deadline_ns, check=None):
+        self.limits = _preflight_limits_v1(limits, transport=True)
+        self.deadline_ns = _preflight_integer_v1(deadline_ns, positive=True)
+        self.external_check = check
+        self.read_calls = self.write_calls = self.received = self.emitted = 0
+        self.readback_bytes = self.lexical_units = self.quoted_bytes = self.peak_buffers = 0
+        self.last_ns = -1
+        self.failure = None
+    def check(self):
+        if self.failure is not None:
+            raise self.failure
+        now = time.monotonic_ns()
+        _preflight_require_v1(self.last_ns <= now < self.deadline_ns, 'preflight transport deadline/clock')
+        self.last_ns = now
+        if self.external_check is not None:
+            _preflight_require_v1(self.external_check() is None, 'preflight transport custody check')
+    def buffers(self, count):
+        self.peak_buffers = max(self.peak_buffers, count)
+        _preflight_require_v1(count <= self.limits['retained_buffer_bytes'], 'preflight transport buffer capacity')
+        self.check()
+    def parse(self,raw,*,canonical_encoding=True):
+        limits = dict(self.limits)
+        limits['lexical_units'] -= self.lexical_units
+        limits['quoted_bytes'] -= self.quoted_bytes
+        try:
+            result,work = _preflight_json_v1(raw,limits,self.check,canonical_encoding=canonical_encoding)
+        except BaseException as exc:
+            self.failure = exc
+            raise
+        self.lexical_units += work['lexical_units']; self.quoted_bytes += work['quoted_bytes']
+        return result
+    def read(self, fd, size, *, eof=False):
+        _preflight_require_v1(0 < size <= self.limits['chunk_bytes'], 'preflight transport read size')
+        self.check()
+        _preflight_require_v1(self.read_calls < self.limits['read_calls'], 'preflight transport read calls')
+        self.read_calls += 1
+        def charge(count):
+            self.received += count
+            _preflight_require_v1(self.received <= self.limits['frame_byte_limit'], 'preflight cumulative transport read capacity')
+        block = _scan_v3_native_read(fd, size, charge, self.check)
+        if eof:
+            _preflight_require_v1(not block, 'preflight trailing bytes')
+        return block
+    def exact(self, fd, size, *, retained=0):
+        _preflight_integer_v1(size)
+        self.buffers(retained + 2 * size + min(size, self.limits['chunk_bytes']))
+        result = bytearray()
+        while len(result) < size:
+            block = self.read(fd, min(self.limits['chunk_bytes'], size-len(result)))
+            _preflight_require_v1(bool(block), 'preflight truncated frame')
+            result.extend(block)
+        self.check()
+        return bytes(result)
+    def write(self, fd, data):
+        offset = 0
+        while offset < len(data):
+            self.check()
+            _preflight_require_v1(self.write_calls < self.limits['write_calls'], 'preflight transport write calls')
+            self.write_calls += 1
+            size = min(self.limits['chunk_bytes'], len(data)-offset)
+            n = os.write(fd, memoryview(data)[offset:offset+size])
+            _preflight_require_v1(type(n) is int and 0 < n <= size, 'preflight invalid write progress')
+            self.emitted += n
+            _preflight_require_v1(self.emitted <= self.limits['frame_byte_limit'], 'preflight cumulative transport write capacity')
+            offset += n
+            self.check()
+
+
+def _preflight_rosters_v1(rows, *, absolute=False):
+    _preflight_require_v1(type(rows) is list, 'preflight directory array')
+    result, folded, order = {}, set(), []
+    for row in rows:
+        _preflight_require_v1(type(row) is list and len(row) == 2 and type(row[1]) is list, 'preflight directory row')
+        name = row[0]
+        if absolute:
+            _preflight_startup_path_v1(name)
+        else:
+            _preflight_relative_v1(name, directory=True)
+        _preflight_require_v1(name.casefold() not in folded, 'preflight directory alias')
+        folded.add(name.casefold()); order.append(name.encode('utf-8'))
+        children, seen = [], set()
+        for item in row[1]:
+            _preflight_require_v1(type(item) is list and len(item) == 2 and type(item[1]) is str
+                and item[1] in ('file', 'directory'), 'preflight directory entry')
+            leaf = _preflight_relative_v1(item[0])
+            _preflight_require_v1('/' not in leaf and leaf.casefold() not in seen, 'preflight immediate alias')
+            seen.add(leaf.casefold()); children.append((leaf,item[1]))
+        _preflight_require_v1([p[0].encode('utf-8') for p in children] == sorted(p[0].encode('utf-8') for p in children),
+            'preflight directory child order')
+        result[name] = tuple(children)
+    _preflight_require_v1(order == sorted(order), 'preflight directory order')
+    return result
+
+
+def _preflight_catalog_consistency_v1(files, directories):
+    names = list(files) + list(directories)
+    _preflight_require_v1(len({p.casefold() for p in names}) == len(names), 'preflight catalog alias')
+    for name, kind in [(p,'file') for p in files] + [(p,'directory') for p in directories if p != '.']:
+        parent, _, leaf = name.rpartition('/')
+        if (parent or '.') in directories:
+            _preflight_require_v1(dict(directories[parent or '.']).get(leaf) == kind, 'preflight parent roster contradiction')
+        for ancestor in Path(name).parents:
+            _preflight_require_v1(ancestor.as_posix() not in files, 'preflight file ancestor contradiction')
+
+
+def _preflight_identity_v1(identity):
+    _preflight_keys_v1(identity, ('run_id','phase','command_index','original_position','command_count',
+        'argv','repo_root','process_root','evidence_root','parent_pid'))
+    _preflight_text_v1(identity['run_id'])
+    n = _preflight_integer_v1(identity['original_position'], positive=True)
+    _preflight_require_v1(n <= 8 and type(identity['command_index']) is int and identity['command_index'] == n
+        and type(identity['command_count']) is int and identity['command_count'] == 8
+        and identity['phase'] == 'fast-preflight', 'preflight original position/phase')
+    argv = identity['argv']
+    _preflight_require_v1(type(argv) is list and _preflight_vector_v1(tuple(argv))
+        and argv[1].replace('\\','/') == _PREFLIGHT_SCRIPTS_V1[n-1], 'preflight fixed route')
+    _preflight_startup_path_v1(argv[0])
+    roots = [Path(_preflight_startup_path_v1(identity[k])) for k in ('repo_root','process_root','evidence_root')]
+    for i, root in enumerate(roots):
+        for other in roots[i+1:]:
+            _preflight_require_v1(not root.is_relative_to(other) and not other.is_relative_to(root), 'preflight root separation')
+    _preflight_integer_v1(identity['parent_pid'], positive=True)
+
+
+def _preflight_header_v1(header, payload_size, expected):
+    _preflight_keys_v1(header, ('identity','allowance','deadline_ns','git','files','directories'))
+    _preflight_identity_v1(header['identity']); _preflight_identity_v1(expected)
+    _preflight_require_v1(header['identity'] == expected, 'preflight invocation identity mismatch')
+    allowance = _preflight_limits_v1(header['allowance'])
+    _preflight_require_v1(type(header['files']) is list and type(header['directories']) is list,
+        'preflight catalog arrays')
+    count = len(header['files'])+len(header['directories'])
+    for row in header['directories']:
+        _preflight_require_v1(type(row) is list and len(row) == 2 and type(row[1]) is list,
+            'preflight directory row')
+        count += len(row[1])
+    # Admit indexing/retention before constructing the corresponding maps.
+    _preflight_require_v1(payload_size <= allowance['retained_bytes'] and count <= allowance['entries'],
+        'preflight decoded basis allowance')
+    _preflight_integer_v1(header['deadline_ns'], positive=True)
+    _preflight_keys_v1(header['git'], ('executable','evidence_root'))
+    git = header['git']
+    if allowance['git_attempts'] == 0:
+        _preflight_require_v1(git == dict(executable=None,evidence_root=None), 'preflight unselected Git')
+    else:
+        _preflight_startup_path_v1(git['executable']); _preflight_startup_path_v1(git['evidence_root'])
+        _preflight_require_v1(git['evidence_root'] == str(Path(expected['evidence_root']) /
+            ('preflight-'+str(expected['command_index'])) / 'git'), 'preflight Git evidence namespace')
+    _preflight_require_v1(type(header['files']) is list, 'preflight file array')
+    names, offset, order = {}, 0, []
+    for row in header['files']:
+        _preflight_require_v1(type(row) is list and len(row) == 3, 'preflight file row')
+        name = _preflight_relative_v1(row[0])
+        start, length = (_preflight_integer_v1(v) for v in row[1:])
+        _preflight_require_v1(start == offset and length <= payload_size-offset, 'preflight contiguous payload')
+        _preflight_require_v1(name not in names, 'preflight duplicate file')
+        names[name] = length; offset += length; order.append(name.encode('utf-8'))
+    _preflight_require_v1(offset == payload_size and order == sorted(order), 'preflight complete ordered payload')
+    directories = _preflight_rosters_v1(header['directories'])
+    _preflight_catalog_consistency_v1(names, directories)
+    return directories, count
+
+
+def _preflight_encode_header_v1(header, limits, check, buffer_check):
+    # Bound emission before joining header chunks. No joined archive body.
+    measured = 0
+    def add(n):
+        nonlocal measured
+        measured += n
+        _preflight_require_v1(measured <= limits['header_byte_limit'],'preflight header emission capacity')
+        if measured % 4096 < 12: check()
+    def measure(value,depth=0):
+        check()
+        _preflight_require_v1(depth <= limits['depth'],'preflight header encoding depth')
+        if type(value) is str:
+            add(2)
+            for c in value:
+                code=ord(c)
+                _preflight_require_v1(not 0xD800 <= code <= 0xDFFF,'preflight surrogate text')
+                add(2 if c in '\"\\\b\f\n\r\t' else 6 if code < 32 or 127 <= code <= 65535 else 12 if code > 65535 else 1)
+        elif value is None: add(4)
+        elif type(value) is bool: add(4 if value else 5)
+        elif type(value) is int:
+            _preflight_integer_v1(value); add(len(str(value)))
+        elif type(value) is list:
+            add(2+max(0,len(value)-1))
+            for v in value: measure(v,depth+1)
+        elif type(value) is dict:
+            add(2+max(0,len(value)-1)+len(value))
+            for k,v in value.items(): measure(k,depth+1); measure(v,depth+1)
+        else: raise ValueError('preflight header is data only')
+    measure(header)
+    _preflight_require_v1(3*measured <= limits['retained_buffer_bytes'],'preflight header buffer capacity')
+    buffer_check(3*measured)
+    encoder = json.JSONEncoder(ensure_ascii=True, sort_keys=True, separators=(',', ':'), allow_nan=False)
+    parts, count = [], 0
+    for part in encoder.iterencode(header):
+        check()
+        raw = part.encode('ascii'); count += len(raw)
+        _preflight_require_v1(count <= limits['header_byte_limit'], 'preflight header emission capacity')
+        parts.append(raw)
+    raw = b''.join(parts)
+    _preflight_require_v1(len(raw) == measured,'preflight header encoding measurement differs')
+    return raw
+
+
+def _preflight_frame_read_v1(fd, *, magic, extent, meter, validate):
+    import struct
+    _preflight_integer_v1(extent, positive=True)
+    _preflight_require_v1(extent <= meter.limits['frame_byte_limit'], 'preflight frame limit')
+    prefix = meter.exact(fd, 24)
+    actual_magic, h, p = struct.unpack('>8sQQ', prefix)
+    _preflight_integer_v1(h, positive=True); _preflight_integer_v1(p)
+    _preflight_require_v1(actual_magic == magic and h <= meter.limits['header_byte_limit']
+        and 24+h+p == extent, 'preflight prefix/extent')
+    raw = meter.exact(fd, h)
+    header = meter.parse(raw)
+    segments, result = validate(header, p)
+    # All ranges, shape and association are checked before retaining any body.
+    values = []
+    retained = h
+    for length in segments:
+        values.append(meter.exact(fd, length, retained=retained))
+        retained += length
+    meter.read(fd, 1, eof=True)
+    _preflight_require_v1(meter.received == extent, 'preflight exact consumed frame')
+    meter.check()
+    return header, values, result
+
+
+def _preflight_regular_v1(info):
+    _preflight_require_v1(stat.S_ISREG(info.st_mode) and info.st_nlink == 1
+        and not _stat_is_reparse_point(info), 'preflight regular single-link input required')
+
+
+def _preflight_decimal_v1(text):
+    _preflight_require_v1(type(text) is str and 1 <= len(text) <= 19 and text.isascii()
+        and text.isdecimal() and (text == '0' or not text.startswith('0')), 'preflight canonical decimal control')
+    return _preflight_integer_v1(int(text), positive=True)
+
+
+def _preflight_result_bound_v1(identity):
+    # Finite worst-case numeric width, fixed failure classes, no exception text.
+    result = _preflight_result_v1(identity, None, None, _PREFLIGHT_MAX_V1, False, False, None, False,
+        'PREFLIGHT_APPLICATION_EXCEPTION')
+    result['pid'] = _PREFLIGHT_MAX_V1
+    for key in ('initial_limits','remaining_limits','observed','reserved'):
+        result[key] = dict.fromkeys(_PREFLIGHT_DIMENSIONS_V1, _PREFLIGHT_MAX_V1)
+    result['retained_entries'] = _PREFLIGHT_MAX_V1
+    return len((json.dumps(result, indent=2, sort_keys=True)+'\n').encode('utf-8')) + 128
+
+
+def _preflight_result_v1(identity, observation, initial, consumed, decoded, entered, exit_code, complete, failure):
+    return dict(run_id=identity['run_id'], phase=identity['phase'], command_index=identity['command_index'],
+        original_position=identity['original_position'], argv=identity['argv'], cwd=identity['repo_root'],
+        pid=os.getpid(), parent_pid=os.getppid(), input_bytes_consumed=consumed,
+        decode_complete=decoded, application_entered=entered, application_exit=exit_code,
+        observation_complete=complete, initial_limits=initial,
+        remaining_limits=None if observation is None else dict(observation.remaining),
+        observed=None if observation is None else dict(observation.observed),
+        reserved=None if observation is None else dict(observation.reserved),
+        retained_entries=None if observation is None else observation.retained_entries, failure_class=failure)
+
+
+def _preflight_cli_v1(main, script_file):
+    """Explicit CLI boundary. Imports are trusted bootstrap, not metered reads."""
+    environment, seen = {}, set()
+    for key, value in os.environ.items():
+        _preflight_require_v1(key.upper() not in seen, 'preflight case-colliding environment')
+        seen.add(key.upper()); environment[key.upper()] = value
+    controls = set(_PREFLIGHT_INPUT_KEYS_V1)
+    selected = bool(controls & seen) or bool(environment.get(RUN_ID_ENV))
+    if not selected:
+        return main()
+    _preflight_require_v1(controls <= seen and all(environment.get(k) for k in
+        (RUN_ID_ENV, PROCESS_ROOT_ENV, EVIDENCE_ROOT_ENV)), 'preflight missing/partial input controls')
+    _preflight_require_v1(not any(k.startswith(('QTT_SCAN_', 'QTT_MAPPER_')) for k in seen), 'preflight competing transport')
+    extent = _preflight_decimal_v1(environment[_PREFLIGHT_INPUT_KEYS_V1[0]])
+    hlimit = _preflight_decimal_v1(environment[_PREFLIGHT_INPUT_KEYS_V1[1]])
+    parsers = environment[_PREFLIGHT_INPUT_KEYS_V1[2]].split(',')
+    _preflight_require_v1(len(parsers) == 5, 'preflight parser controls arity')
+    lexical, depth, quoted, calls, chunk = map(_preflight_decimal_v1, parsers)
+    n = _preflight_decimal_v1(environment[_PREFLIGHT_INPUT_KEYS_V1[3]])
+    deadline = _preflight_decimal_v1(environment[_PREFLIGHT_INPUT_KEYS_V1[4]])
+    identity = dict(run_id=environment[RUN_ID_ENV],phase='fast-preflight',command_index=n,
+        original_position=n,command_count=8,argv=[sys.executable,*sys.argv],repo_root=str(Path.cwd()),
+        process_root=environment[PROCESS_ROOT_ENV],evidence_root=environment[EVIDENCE_ROOT_ENV],parent_pid=os.getppid())
+    _preflight_identity_v1(identity)
+    _preflight_require_v1(Path(script_file).resolve() == Path.cwd()/_PREFLIGHT_SCRIPTS_V1[n-1]
+        and Path(__file__).resolve().parents[1] == Path.cwd(), 'preflight actual module/root mismatch')
+    # These ceilings are consequences of the admitted frame extent/algorithm,
+    # not new grants. The sender must cover the same demand in its reserved tranche.
+    bound = _preflight_result_bound_v1(identity)
+    limits = dict(frame_byte_limit=extent,header_byte_limit=min(hlimit,extent),lexical_units=lexical,depth=depth,
+        quoted_bytes=quoted,read_calls=calls,write_calls=1,chunk_bytes=chunk,
+        retained_buffer_bytes=3*extent+2*bound,receiver_byte_limit=bound)
+    meter = _PreflightTransportV1(limits, deadline)
+    path = Path(identity['process_root'])/('preflight-input-'+str(n)+'.bin')
+    evidence = Path(identity['evidence_root'])/('preflight-'+str(n))
+    chain = _preflight_transport_chain_v1(path.parent)
+    evidence_chain = _preflight_transport_chain_v1(evidence)
+    before = path.lstat(); opened = os.fstat(0)
+    _preflight_regular_v1(before); _preflight_regular_v1(opened)
+    _preflight_require_v1(_same_observed_file(before, opened) and before.st_size == extent
+        and opened.st_size == extent and os.lseek(0, 0, os.SEEK_CUR) == 0, 'preflight original stdin identity/extent/cursor')
+    def stable():
+        meter.check()
+        _preflight_require_v1(_scan_same_api_version(path.lstat()) == _scan_same_api_version(before)
+            and _scan_same_api_version(os.fstat(0)) == _scan_same_api_version(opened)
+            and chain == _preflight_transport_chain_v1(path.parent)
+            and evidence_chain == _preflight_transport_chain_v1(evidence), 'preflight frame or evidence identity changed')
+    def validate(header, payload):
+        dirs, count = _preflight_header_v1(header, payload, identity)
+        _preflight_require_v1(header['deadline_ns'] == deadline, 'preflight child deadline binding')
+        return [row[2] for row in header['files']], (dirs,count,payload)
+    observation = initial = None
+    decoded = entered = complete = False
+    exit_code = None
+    failure = 'PREFLIGHT_DECODE_FAILED'
+    errors = []
+    try:
+        header, values, (directories,count,payload) = _preflight_frame_read_v1(0,
+            magic=b'QTTPF01\n',extent=extent,meter=meter,validate=validate)
+        stable(); decoded = True
+        initial = dict(header['allowance'])
+        residual = dict(initial)
+        residual['entries'] -= count; residual['retained_bytes'] -= payload
+        # Reserve before constructing these corresponding indexes.
+        files = {row[0]: raw for row,raw in zip(header['files'],values,strict=True)}
+        observation = _PreflightObservationV1(root=Path.cwd(),run_id=identity['run_id'],occurrence=n,
+            argv=tuple(identity['argv']),files=files,directories=directories,limits=residual,deadline_ns=deadline,
+            git_executable=header['git']['executable'],evidence_root=header['git']['evidence_root'])
+        observation.reserved['entries'] = count; observation.reserved['retained_bytes'] = payload
+        observation.retained_entries = count
+        failure = 'PREFLIGHT_APPLICATION_EXCEPTION'
+        with _preflight_observation_v1(observation,run_id=identity['run_id'],occurrence=n,
+                argv=tuple(identity['argv']),root=Path.cwd()):
+            entered = True
+            exit_code = main()
+            _preflight_require_v1(type(exit_code) is int, 'preflight application exact native return required')
+            observation.check(); stable()
+            complete = True
+            failure = None if exit_code == 0 else 'PREFLIGHT_APPLICATION_DENIED'
+            result = _preflight_result_v1(identity,observation,initial,meter.received,decoded,entered,exit_code,complete,failure)
+            _preflight_write_result_v1(evidence,result,bound,meter.check)
+        stable()
+        return exit_code
+    except BaseException as exc:
+        errors.append(exc)
+        if observation is not None and observation.failure is not None:
+            failure = 'PREFLIGHT_OBSERVATION_FAILED'
+        if not (evidence/'receiver.json').exists():
+            try:
+                stable()
+                result = _preflight_result_v1(identity,observation,initial,meter.received,decoded,entered,
+                    exit_code,False,failure)
+                _preflight_write_result_v1(evidence,result,bound,meter.check)
+            except BaseException as write_error:
+                errors.append(write_error)
+        _scan_raise_errors(errors)
+
+
+def _preflight_write_result_v1(evidence, result, bound, check):
+    check()
+    _preflight_chain_v1(evidence)
+    raw = (json.dumps(result,indent=2,sort_keys=True)+'\n').encode('utf-8')
+    _preflight_require_v1(len(raw) <= bound, 'preflight receiver emission capacity')
+    atomic_write_json(evidence/'receiver.json',result)
+    check()
+
+
+class _PreflightHostLeaseV1:
+    """Native owner interface; the default supplies no host authority.
+
+    A provisioned native owner must override every check using its actual job or
+    cgroup, ancestor restrictions, bootstrap and exclusive custody. Declaration
+    bytes cannot construct this live object or select an implementation.
+    """
+    def check_parent(self, root, index_path):
+        raise RuntimeError('PREFLIGHT_NATIVE_HOST_PROVIDER_UNAVAILABLE')
+    def check_launch(self, plan_entry, argv, environment, scratch_roots, deadline_ns):
+        raise RuntimeError('PREFLIGHT_NATIVE_HOST_PROVIDER_UNAVAILABLE')
+    def check_child(self, actual_process):
+        raise RuntimeError('PREFLIGHT_NATIVE_HOST_PROVIDER_UNAVAILABLE')
+    def check_settled(self, actual_process):
+        raise RuntimeError('PREFLIGHT_NATIVE_HOST_PROVIDER_UNAVAILABLE')
+
+
+class _PreflightNativeInputV1:
+    """Live, source-owned input lease; never reconstructed from declaration JSON."""
+    def __init__(self, *, path, root, index_path, expected_path_version, expected_chain,
+            limits, deadline_ns, host_lease, capture_limits, terminal_limits, git_executable=None):
+        _preflight_require_v1(isinstance(host_lease,_PreflightHostLeaseV1), 'PREFLIGHT_NATIVE_HOST_PROVIDER_UNAVAILABLE')
+        self.path = Path(_preflight_startup_path_v1(str(path)))
+        self.root = Path(_preflight_startup_path_v1(str(root)))
+        self.index_path = index_path
+        self.expected_path_version, self.expected_chain = expected_path_version, expected_chain
+        self.limits = _preflight_limits_v1(limits,transport=True)
+        self.deadline_ns = _preflight_integer_v1(deadline_ns,positive=True)
+        self.host_lease = host_lease
+        self.git_executable = git_executable
+        self.capture_limits = _preflight_limits_v1(capture_limits)
+        self.terminal_limits = _preflight_limits_v1(terminal_limits)
+        self.pid, self.thread = os.getpid(), threading.get_ident()
+        self.state = 'AVAILABLE'
+        self.meter = _PreflightTransportV1(self.limits,self.deadline_ns,self.check)
+    def check(self):
+        _preflight_require_v1((os.getpid(),threading.get_ident()) == (self.pid,self.thread)
+            and time.monotonic_ns() < self.deadline_ns, 'preflight native input host/deadline association')
+        _preflight_require_v1(self.host_lease.check_parent(self.root,self.index_path) is None,
+            'preflight native parent custody rejected')
+    def consume(self, validate):
+        self.check()
+        _preflight_require_v1(self.state == 'AVAILABLE','preflight declaration is single use')
+        self.state = 'CONSUMING'
+        fd = None
+        errors = []
+        result = None
+        try:
+            _preflight_require_v1(_preflight_chain_v1(self.path.parent) == self.expected_chain,
+                'preflight declaration ancestor identity')
+            before = self.path.lstat(); _preflight_regular_v1(before)
+            _preflight_require_v1(_scan_same_api_version(before) == self.expected_path_version,
+                'preflight declaration physical identity')
+            fd = _open_regular_worktree_descriptor(self.path,nonblocking=True)
+            opened = os.fstat(fd); _preflight_regular_v1(opened)
+            _preflight_require_v1(_same_observed_file(before,opened),'preflight declaration descriptor identity')
+            result = _preflight_frame_read_v1(fd,magic=b'QTTPA01\n',extent=before.st_size,
+                meter=self.meter,validate=validate)
+            _preflight_require_v1(_scan_same_api_version(self.path.lstat()) == self.expected_path_version
+                and _scan_same_api_version(os.fstat(fd)) == _scan_same_api_version(opened)
+                and _preflight_chain_v1(self.path.parent) == self.expected_chain,'preflight declaration drift')
+        except BaseException as exc:
+            errors.append(exc)
+        if fd is not None:
+            try: os.close(fd)
+            except BaseException as exc: errors.append(exc)
+        try: self.check()
+        except BaseException as exc: errors.append(exc)
+        self.state = 'FAILED' if errors else 'CONSUMED'
+        _scan_raise_errors(errors)
+        return result
+
+
+@contextmanager
+def _preflight_native_input_v1(value):
+    _preflight_require_v1(type(value) is _PreflightNativeInputV1 and _PREFLIGHT_NATIVE_INPUT_V1.get() is None,
+        'preflight original native input owner required')
+    value.check()
+    token = _PREFLIGHT_NATIVE_INPUT_V1.set(value)
+    try:
+        yield value
+    finally:
+        _PREFLIGHT_NATIVE_INPUT_V1.reset(token)
+
+
+def _preflight_acquire_native_input_v1(path, root):
+    value = _PREFLIGHT_NATIVE_INPUT_V1.get()
+    if type(value) is not _PreflightNativeInputV1:
+        raise RuntimeError('PREFLIGHT_NATIVE_HOST_PROVIDER_UNAVAILABLE: --preflight-input needs live input custody, identity and native grants')
+    _preflight_require_v1(value.path == Path(path) and value.root == Path(root) and value.state == 'AVAILABLE',
+        'preflight native input location/root/generation mismatch')
+    value.check()
+    return value
+
+
+class _PreflightLaunchInputV1:
+    """Private alternative in the existing supervisor's stdin lifecycle."""
+    def __init__(self, *, identity, observation, row_total, parent_tail_reserve, limits, parent_meter,
+            settlement_deadline_ns, host_lease, plan_entry, environment, scratch_roots, output_limits):
+        _preflight_identity_v1(identity)
+        _preflight_require_v1(isinstance(host_lease,_PreflightHostLeaseV1), 'PREFLIGHT_NATIVE_HOST_PROVIDER_UNAVAILABLE')
+        _preflight_require_v1(type(observation) is _PreflightObservationV1 and observation.argv == tuple(identity['argv'])
+            and observation.root == Path(identity['repo_root']) and observation.run_id == identity['run_id']
+            and observation.occurrence == identity['command_index'], 'preflight transfer observation identity')
+        observation.check()
+        self.identity, self.observation = dict(identity), observation
+        self.tail = _preflight_limits_v1(parent_tail_reserve)
+        self.row_total = _preflight_limits_v1(row_total)
+        self.limits = _preflight_limits_v1(limits,transport=True)
+        self.output_limits = dict(output_limits)
+        _preflight_keys_v1(self.output_limits,('stdout_bytes','stderr_bytes','combined_output_bytes'))
+        for v in self.output_limits.values(): _preflight_integer_v1(v)
+        _preflight_require_v1(self.output_limits['stdout_bytes']+self.output_limits['stderr_bytes'] <= self.output_limits['combined_output_bytes'],
+            'preflight application stream capacity')
+        self.deadline_ns = observation.deadline_ns
+        self.settlement_deadline_ns = _preflight_integer_v1(settlement_deadline_ns,positive=True)
+        _preflight_require_v1(time.monotonic_ns() < self.deadline_ns < self.settlement_deadline_ns <= parent_meter.deadline_ns,
+            'preflight execution/settlement ancestor deadlines')
+        self.parent_meter, self.host_lease = parent_meter, host_lease
+        self.plan_entry, self.environment, self.scratch_roots = plan_entry, environment, scratch_roots
+        self.pid, self.thread = os.getpid(), threading.get_ident()
+        self.reader = self.process = self.result = None
+        self.state = 'PREPARING'
+        self.path = Path(identity['process_root'])/('preflight-input-'+str(identity['command_index'])+'.bin')
+        self.evidence = Path(identity['evidence_root'])/('preflight-'+str(identity['command_index']))
+        self.initial_parent = dict(observation.remaining)
+        self.parent_spend = {k:self.row_total[k]-self.initial_parent[k] for k in self.row_total}
+        for debit in self.parent_spend.values(): _preflight_integer_v1(debit)
+        self.delegated = {k: observation.remaining[k]-self.tail[k] for k in _PREFLIGHT_DIMENSIONS_V1}
+        _preflight_limits_v1(self.delegated)
+        # Remove delegated credit once, before any allocation/failed issue.
+        self.transfer_debit = dict(self.delegated)
+        for key, amount in self.delegated.items():
+            observation.remaining[key] -= amount
+        self.segments = tuple(observation.files[p] for p in sorted(observation.files,key=lambda s:s.encode('utf-8')))
+        offset, files = 0, []
+        for name, raw in zip(sorted(observation.files,key=lambda s:s.encode('utf-8')),self.segments,strict=True):
+            files.append([name,offset,len(raw)]); offset += len(raw)
+        git = dict(executable=None,evidence_root=None) if not self.delegated['git_attempts'] else dict(
+            executable=observation.git_executable,evidence_root=str(self.evidence/'git'))
+        self.header = dict(identity=identity,allowance=self.delegated,deadline_ns=self.deadline_ns,git=git,files=files,
+            directories=[[p,[list(v) for v in observation.directories[p]]] for p in
+                sorted(observation.directories,key=lambda s:s.encode('utf-8'))])
+        _preflight_header_v1(self.header,offset,identity)
+        self.result_bound = _preflight_result_bound_v1(identity)
+        self.raw_header = _preflight_encode_header_v1(self.header,self.limits,self._check,
+            lambda size:self.parent_meter.buffers(size+2*self.result_bound+self.limits['chunk_bytes']))
+        self.parent_meter.parse(self.raw_header)
+        import struct
+        self.prefix = struct.pack('>8sQQ',b'QTTPF01\n',len(self.raw_header),offset)
+        self.extent = 24+len(self.raw_header)+offset
+        _preflight_require_v1(self.extent <= self.limits['frame_byte_limit']
+            and self.result_bound <= self.limits['receiver_byte_limit']
+            and 3*self.extent+2*self.result_bound <= self.limits['retained_buffer_bytes'], 'preflight measured transport demand')
+        self.parent_meter.buffers(3*len(self.raw_header)+2*self.result_bound+self.limits['chunk_bytes'])
+        self.controls = dict(zip(_PREFLIGHT_INPUT_KEYS_V1,(str(self.extent),str(self.limits['header_byte_limit']),
+            ','.join(str(self.limits[k]) for k in ('lexical_units','depth','quoted_bytes','read_calls','chunk_bytes')),
+            str(identity['original_position']),str(self.deadline_ns))))
+    def _check(self):
+        _preflight_require_v1((self.pid,self.thread) == (os.getpid(),threading.get_ident()), 'preflight foreign input owner')
+        self.parent_meter.check()
+        _preflight_require_v1(time.monotonic_ns() < (self.settlement_deadline_ns if self.process is not None
+            and self.process.poll() is not None else self.deadline_ns), 'preflight input deadline')
+    def _parts(self):
+        yield self.prefix; yield self.raw_header; yield from self.segments
+    def _stable(self):
+        self._check()
+        _preflight_require_v1(_scan_same_api_version(self.path.lstat()) == self.path_version
+            and _scan_same_api_version(os.fstat(self.reader.fileno())) == self.descriptor_version
+            and _preflight_transport_chain_v1(self.path.parent) == self.chain, 'preflight input identity drift')
+    def _compare(self):
+        self._stable()
+        _preflight_require_v1(self.process is None or self.process.poll() is not None, 'preflight live input readback denied')
+        self.reader.seek(0)
+        for part in self._parts():
+            offset = 0
+            while offset < len(part):
+                block = self.parent_meter.read(self.reader.fileno(), min(self.parent_meter.limits['chunk_bytes'],len(part)-offset))
+                self.parent_meter.readback_bytes += len(block)
+                _preflight_require_v1(block and block == part[offset:offset+len(block)], 'preflight input byte readback differs')
+                offset += len(block)
+        self.parent_meter.read(self.reader.fileno(),1,eof=True)
+        self._stable()
+    def __enter__(self):
+        _preflight_require_v1(self.state == 'PREPARING','preflight input entry is single use')
+        self.state = 'CREATING'
+        try:
+            return self._create()
+        except BaseException as exc:
+            self.state = 'HELD'
+            errors = [exc]
+            if self.reader is not None:
+                try: self.reader.close()
+                except BaseException as error: errors.append(error)
+            _scan_raise_errors(errors)
+    def _create(self):
+        self._check()
+        _preflight_chain_v1(self.path.parent); _preflight_chain_v1(self.evidence.parent)
+        self.evidence.mkdir(exist_ok=False)
+        if self.delegated['git_attempts']: (self.evidence/'git').mkdir(exist_ok=False)
+        fd = None
+        try:
+            fd = os.open(self.path,os.O_WRONLY|os.O_CREAT|os.O_EXCL|int(getattr(os,'O_BINARY',0)),0o600)
+            for part in self._parts(): self.parent_meter.write(fd,part)
+            os.fsync(fd)
+            created = os.fstat(fd); _preflight_regular_v1(created)
+            reader_fd = _open_regular_worktree_descriptor(self.path,nonblocking=True)
+            try:
+                _preflight_require_v1(_same_observed_file(created,os.fstat(reader_fd)), 'preflight writer/reader identity')
+                self.reader = os.fdopen(reader_fd,'rb',buffering=0)
+            except BaseException:
+                os.close(reader_fd); raise
+        finally:
+            if fd is not None: os.close(fd)
+        self.path_version = _scan_same_api_version(self.path.lstat())
+        self.descriptor_version = _scan_same_api_version(os.fstat(self.reader.fileno()))
+        self.chain = _preflight_transport_chain_v1(self.path.parent)
+        self.evidence_chain = _preflight_transport_chain_v1(self.evidence)
+        self._compare(); self.reader.seek(0)
+        self.state = 'READY'
+        return self
+    def _claim(self, *, run_id,phase,command_index,argv,cwd):
+        _preflight_require_v1(self.state == 'READY' and (run_id,phase,command_index,tuple(argv),str(cwd)) ==
+            (self.identity['run_id'],'fast-preflight',self.identity['command_index'],tuple(self.identity['argv']),self.identity['repo_root']),
+            'preflight launch association or replay')
+        self._compare(); self.reader.seek(0)
+        _preflight_require_v1(self.host_lease.check_launch(self.plan_entry,tuple(argv),self.environment,
+            self.scratch_roots,self.deadline_ns) is None,'preflight native launch rejected')
+        self.state = 'ISSUED'
+        return self.reader
+    def _attached(self,process):
+        _preflight_require_v1(self.state == 'ISSUED' and type(process.pid) is int, 'preflight child association')
+        self.process = process; self.state = 'ATTACHED'
+        _preflight_require_v1(self.host_lease.check_child(process) is None,'preflight native child membership rejected')
+    def _finished(self,process,native_exit):
+        try:
+            _preflight_require_v1(self.state == 'ATTACHED' and process is self.process and type(native_exit) is int
+                and process.poll() is not None and process.returncode == native_exit,'preflight process termination unproven')
+            _preflight_require_v1(self.host_lease.check_settled(process) is None,'preflight native settlement rejected')
+            _preflight_require_v1(self.reader.tell() == self.extent,'preflight input cursor consumption')
+            self._compare()
+            self.result = _preflight_read_result_v1(self,process.pid,native_exit)
+            self.state = 'CONSUMED'
+        except BaseException:
+            self.state = 'HELD'; raise
+    def __exit__(self,exc_type,exc,tb):
+        if self.process is not None and self.process.poll() is None:
+            self.state = 'HELD'
+            raise RuntimeError('preflight live process retains input custody') from exc
+        errors = [] if exc is None else [exc]
+        try: self._stable()
+        except BaseException as error: errors.append(error)
+        if self.reader is not None:
+            try: self.reader.close()
+            except BaseException as error: errors.append(error)
+        # Keep failed input evidence; normal run cleanup owns successful deletion.
+        if not errors and self.state == 'CONSUMED': self.state = 'CLOSED'
+        _scan_raise_errors(errors)
+        return False
+
+
+def _preflight_read_result_v1(launch,pid,native_exit):
+    launch._check()
+    _preflight_require_v1(launch.evidence_chain == _preflight_transport_chain_v1(launch.evidence), 'preflight receiver ancestor identity')
+    path = launch.evidence/'receiver.json'
+    before = path.lstat(); _preflight_regular_v1(before)
+    _preflight_require_v1(before.st_size <= launch.limits['receiver_byte_limit'], 'preflight receiver size')
+    fd = _open_regular_worktree_descriptor(path,nonblocking=True)
+    try:
+        opened = os.fstat(fd); _preflight_regular_v1(opened)
+        _preflight_require_v1(_same_observed_file(before,opened), 'preflight receiver descriptor identity')
+        raw = launch.parent_meter.exact(fd,before.st_size)
+        launch.parent_meter.read(fd,1,eof=True)
+        _preflight_require_v1(_scan_same_api_version(path.lstat()) == _scan_same_api_version(before)
+            and _scan_same_api_version(os.fstat(fd)) == _scan_same_api_version(opened), 'preflight receiver generation drift')
+    finally:
+        os.close(fd)
+    result = launch.parent_meter.parse(raw,canonical_encoding=False)
+    _preflight_verify_result_v1(result,identity=launch.identity,initial=launch.delegated,
+        extent=launch.extent,pid=pid,native_exit=native_exit)
+    launch._check()
+    return result
+
+
+def _preflight_verify_result_v1(result, *, identity, initial, extent, pid, native_exit):
+    shape = _preflight_result_v1(identity,None,None,None,False,False,None,False,None)
+    _preflight_keys_v1(result,shape)
+    for key in ('run_id','phase','command_index','original_position','argv'):
+        _preflight_require_v1(type(result[key]) is type(identity[key]) and result[key] == identity[key], 'preflight receiver identity: '+key)
+    _preflight_require_v1(result['cwd'] == identity['repo_root'] and type(result['pid']) is int and result['pid'] == pid
+        and type(result['parent_pid']) is int and result['parent_pid'] == identity['parent_pid'], 'preflight receiver process/root')
+    _preflight_require_v1(type(result['input_bytes_consumed']) is int and result['input_bytes_consumed'] == extent
+        and result['decode_complete'] is True and result['application_entered'] is True
+        and result['observation_complete'] is True and type(result['application_exit']) is int
+        and result['application_exit'] == native_exit, 'preflight receiver incomplete application/transport')
+    _preflight_require_v1(result['initial_limits'] == initial,'preflight copied/changed initial allowance')
+    for k in ('initial_limits','remaining_limits','observed','reserved'):
+        _preflight_keys_v1(result[k],_PREFLIGHT_DIMENSIONS_V1)
+        for v in result[k].values(): _preflight_integer_v1(v)
+    for k in initial:
+        remaining,observed,reserved = (result[name][k] for name in ('remaining_limits','observed','reserved'))
+        debit = initial[k]-remaining
+        _preflight_require_v1(0 <= debit <= initial[k] and observed <= debit and reserved <= debit,
+            'preflight receiver debit relation: '+k)
+    _preflight_integer_v1(result['retained_entries'])
+    _preflight_require_v1(result['retained_entries'] <= initial['entries']-result['remaining_limits']['entries'],
+        'preflight receiver retained entry relation')
+    _preflight_require_v1(result['failure_class'] == (None if native_exit == 0 else 'PREFLIGHT_APPLICATION_DENIED'),
+        'preflight receiver failure/exit disagreement')
+
+
+def _preflight_command_evidence_v1(receipt, paths, parent_meter):
+    controls = dict(receipt.fixed_environment_controls)
+    if not any(k in controls for k in _PREFLIGHT_INPUT_KEYS_V1):
+        return
+    _preflight_require_v1(all(k in controls for k in _PREFLIGHT_INPUT_KEYS_V1)
+        and type(receipt.output_observation) is dict and type(parent_meter) is _PreflightTransportV1,
+        'preflight command evidence projection or terminal grant missing')
+    proof = receipt.output_observation.get('preflight')
+    _preflight_keys_v1(proof,('identity','initial_limits','input_bytes','receiver','row_total','parent_spend','parent_tail'))
+    for name in ('row_total','parent_spend','parent_tail'):
+        _preflight_keys_v1(proof[name],_PREFLIGHT_DIMENSIONS_V1)
+        for value in proof[name].values(): _preflight_integer_v1(value)
+    _preflight_limits_v1(proof['initial_limits'])
+    _preflight_require_v1(all(proof['row_total'][k] == proof['parent_spend'][k]
+        + proof['initial_limits'][k] + proof['parent_tail'][k] for k in _PREFLIGHT_DIMENSIONS_V1),
+        'preflight parent/child allowance conservation')
+    identity = proof['identity']
+    _preflight_identity_v1(identity)
+    _preflight_require_v1(identity['run_id'] == paths.run_id and identity['phase'] == receipt.phase
+        and identity['command_index'] == receipt.command_index and tuple(identity['argv']) == receipt.argv
+        and identity['repo_root'] == receipt.cwd == str(paths.repo_root)
+        and identity['process_root'] == str(paths.process_root) and identity['evidence_root'] == str(paths.evidence_root)
+        and _preflight_decimal_v1(controls['QTT_PREFLIGHT_INPUT_BYTES']) == proof['input_bytes'],
+        'preflight command proof differs from actual plan/run')
+    _preflight_verify_result_v1(proof['receiver'],identity=identity,initial=proof['initial_limits'],
+        extent=proof['input_bytes'],pid=receipt.pid,native_exit=receipt.native_exit_code)
+    directory = paths.evidence_root/('preflight-'+str(receipt.command_index))
+    _preflight_transport_chain_v1(directory)
+    path,info = _require_direct_regular_evidence_file(directory,'receiver.json')
+    _preflight_require_v1(info.st_size <= _preflight_result_bound_v1(identity),'preflight final receiver bound')
+    expected = (json.dumps(proof['receiver'],indent=2,sort_keys=True)+'\n').encode('utf-8')
+    fd = _open_regular_worktree_descriptor(path,nonblocking=True)
+    errors = []
+    try:
+        opened = os.fstat(fd); _preflight_regular_v1(opened)
+        _preflight_require_v1(_same_observed_file(info,opened),'preflight final receiver descriptor')
+        raw = parent_meter.exact(fd,info.st_size)
+        parent_meter.read(fd,1,eof=True)
+        _preflight_require_v1(raw == expected and _scan_same_api_version(path.lstat()) == _scan_same_api_version(info)
+            and _scan_same_api_version(os.fstat(fd)) == _scan_same_api_version(opened),
+            'preflight final receiver differs from measured parent result')
+    except BaseException as exc: errors.append(exc)
+    try: os.close(fd)
+    except BaseException as exc: errors.append(exc)
+    try: parent_meter.check()
+    except BaseException as exc: errors.append(exc)
+    _scan_raise_errors(errors)

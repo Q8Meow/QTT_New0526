@@ -7332,6 +7332,7 @@ def test_runner_restores_only_runtime_side_effects_before_pr142_pr143_and_final_
     import stat
     _exercise_preflight_observation_v1(tmp_path, monkeypatch)
     _exercise_preflight_candidate_debits_v1(tmp_path, monkeypatch)
+    _exercise_preflight_transport_v1(tmp_path, monkeypatch, capsys)
     class Completed:
         returncode = 0
         stderr = ""
@@ -18446,3 +18447,366 @@ def _exercise_failed_admission_plan_v1(tmp_path, monkeypatch, fixture_factory):
             if "launch" in selected:
                 assert all(value.process is None and value.reader is None and value.writer is None
                            for value in selected["launch"].launch_inputs.values())
+
+
+def _exercise_preflight_transport_v1(tmp_path, monkeypatch, capsys):
+    """Synthetic engineering: real original CLI children, no canonical host grant."""
+    import copy
+    import json
+    import os
+    import struct
+    import sys
+    import time
+    import pytest
+    from tools import validation_reliability as owner
+    from tools import run_validation_gates as runner
+    root = Path(owner.__file__).resolve().parents[1]
+    area = tmp_path/'preflight-transport'
+    area.mkdir()
+    process_root, evidence_root = area/'process',area/'evidence'
+    process_root.mkdir(); evidence_root.mkdir()
+    run_id = 'synthetic-preflight-transport'
+    deadline = time.monotonic_ns()+120_000_000_000
+    settlement = deadline+30_000_000_000
+    transport = dict(frame_byte_limit=2_000_000,header_byte_limit=100_000,lexical_units=100_000,
+        depth=32,quoted_bytes=100_000,read_calls=10000,write_calls=10000,chunk_bytes=97,
+        retained_buffer_bytes=8_000_000,receiver_byte_limit=20000)
+    zero = dict.fromkeys(owner._PREFLIGHT_DIMENSIONS_V1,0)
+    limits = dict(zero,attempts=20,bytes=40,entries=30,retained_bytes=50)
+    tail = dict(zero,attempts=2,bytes=3,entries=4,retained_bytes=5)
+    class SyntheticLease(owner._PreflightHostLeaseV1):
+        def __init__(self): self.calls=[]
+        def check_parent(self, root, index_path):
+            assert root == Path(owner.__file__).resolve().parents[1]
+            assert index_path is None
+            self.calls.append('parent')
+        def check_launch(self, entry, argv, environment, scratch_roots, deadline_ns):
+            assert tuple(argv) == entry.argv and owner._preflight_vector_v1(tuple(argv))
+            assert deadline_ns == deadline and scratch_roots == (process_root,)
+            assert environment[owner.RUN_ID_ENV] == run_id
+            self.calls.append('launch')
+        def check_child(self, process):
+            assert type(process.pid) is int and process.pid != os.getpid()
+            self.calls.append(('child',process.pid))
+        def check_settled(self, process):
+            assert process.poll() is not None
+            self.calls.append(('settled',process.pid))
+    lease = SyntheticLease()
+    parent_meter = owner._PreflightTransportV1(transport,settlement)
+    def identity(n):
+        argv = (sys.executable,str(Path(owner._PREFLIGHT_SCRIPTS_V1[n-1])),*(('--repo-root','.') if n != 6 else ()))
+        return dict(run_id=run_id,phase='fast-preflight',command_index=n,original_position=n,command_count=8,
+            argv=list(argv),repo_root=str(root),process_root=str(process_root),evidence_root=str(evidence_root),parent_pid=os.getpid())
+    def header(n):
+        return dict(identity=identity(n),allowance=dict(limits),deadline_ns=deadline,
+            git=dict(executable=None,evidence_root=None),files=[['a.bin',0,3],['z.bin',3,0]],
+            directories=[['.',[['a.bin','file'],['z.bin','file']]]])
+    # Every original vector is projected and decoded without editing its argv.
+    for n in range(1,9):
+        h = header(n)
+        owner._preflight_header_v1(h,3,identity(n))
+        raw = owner._preflight_canonical_v1(h)
+        decoded,_ = owner._preflight_json_v1(raw,transport,parent_meter.check)
+        assert decoded == h
+    valid = header(2)
+    bad_headers = []
+    for field,value in (('run_id','wrong'),('phase','later'),('command_index',True),('parent_pid',0),
+            ('repo_root',str(process_root)),('argv',[sys.executable,'tools/other.py'])):
+        bad=copy.deepcopy(valid); bad['identity'][field]=value; bad_headers.append(bad)
+    for key,value in (('deadline_ns',True),('extra',1)):
+        bad=copy.deepcopy(valid); bad[key]=value; bad_headers.append(bad)
+    for mutate in (
+        lambda h:h['files'][1].__setitem__(1,2),
+        lambda h:h['files'][0].__setitem__(0,'../a.bin'),
+        lambda h:h['files'][1].__setitem__(0,'A.BIN'),
+        lambda h:h['directories'][0][1][0].__setitem__(1,'directory'),
+        lambda h:h['allowance'].__setitem__('entries',0),
+        lambda h:h['allowance'].__setitem__('retained_bytes',2),
+        lambda h:h['git'].__setitem__('executable',sys.executable)):
+        bad=copy.deepcopy(valid); mutate(bad); assert bad != valid; bad_headers.append(bad)
+    for bad in bad_headers:
+        with pytest.raises((ValueError,RuntimeError)):
+            owner._preflight_header_v1(bad,3,identity(2))
+    no_entries=copy.deepcopy(valid); no_entries['allowance']['entries']=0
+    with monkeypatch.context() as scoped:
+        scoped.setattr(owner,'_preflight_rosters_v1',lambda *a,**k:pytest.fail('index constructed before admission'))
+        with pytest.raises(RuntimeError,match='decoded basis allowance'):
+            owner._preflight_header_v1(no_entries,3,identity(2))
+    oversized=copy.deepcopy(valid); oversized['identity']['run_id']='x'*1025
+    with monkeypatch.context() as scoped:
+        scoped.setattr(owner.json.JSONEncoder,'iterencode',lambda *a,**k:pytest.fail('header allocated before bound'))
+        with pytest.raises(RuntimeError,match='header emission capacity'):
+            owner._preflight_encode_header_v1(oversized,dict(transport,header_byte_limit=1024),
+                parent_meter.check,parent_meter.buffers)
+    raw = owner._preflight_canonical_v1(valid)
+    duplicate = b'{"deadline_ns":1,'+raw[1:]
+    for raw_bad,match in ((duplicate,'duplicate'),(raw+b'\n','noncanonical'),
+            (b'{"x":1e2}','noninteger'),(b'{"x":-1}','integer token'),
+            (b'{"x":NaN}','noninteger'),(b'{"x":"\\ud800"}','surrogate')):
+        with pytest.raises((ValueError,RuntimeError),match=match):
+            owner._preflight_json_v1(raw_bad,transport,parent_meter.check)
+    for key,bound in (('depth',1),('lexical_units',1),('quoted_bytes',1)):
+        with pytest.raises(RuntimeError,match='capacity'):
+            owner._preflight_json_v1(raw,dict(transport,**{key:bound}),parent_meter.check)
+    frame = struct.pack('>8sQQ',b'QTTPF01\n',len(raw),3)+raw+b'abc'
+    def decode(data, *, shape=None, patch=None):
+        path=area/('wire-'+str(len(list(area.glob('wire-*'))))+'.bin')
+        path.write_bytes(data)
+        fd=os.open(path,os.O_RDONLY|int(getattr(os,'O_BINARY',0)))
+        meter=owner._PreflightTransportV1(transport,deadline)
+        def validate(h,p):
+            d,c=owner._preflight_header_v1(h,p,identity(2))
+            return [row[2] for row in h['files']],(d,c)
+        try:
+            with monkeypatch.context() as scoped:
+                if patch:
+                    real=owner.os.read
+                    scoped.setattr(owner.os,'read',lambda handle,size: real(handle,min(size,patch)))
+                return owner._preflight_frame_read_v1(fd,magic=b'QTTPF01\n',extent=len(data) if shape is None else shape,
+                    meter=meter,validate=validate)
+        finally: os.close(fd)
+    for fragment in (1,2,7,31):
+        decoded,body,(_dirs,count)=decode(frame,patch=fragment)
+        assert body == [b'abc',b''] and decoded == valid and count == 5
+    for bad in (frame[:-1],frame+b'x',b'QTTPA01\n'+frame[8:],frame+frame):
+        with pytest.raises((ValueError,RuntimeError)):
+            decode(bad)
+    # The shared adapter preserves unselected main semantics and rejects partial controls before stdin.
+    with monkeypatch.context() as scoped:
+        for key in tuple(os.environ):
+            if key.upper().startswith('QTT_'): scoped.delenv(key,raising=False)
+        calls=[]
+        assert owner._preflight_cli_v1(lambda:(calls.append(1) or 7),__file__) == 7 and calls == [1]
+        scoped.setenv('QTT_PREFLIGHT_INPUT_BYTES','10')
+        with pytest.raises(RuntimeError,match='partial'):
+            owner._preflight_cli_v1(lambda:pytest.fail('entered without input'),__file__)
+    # No JSON Boolean or pathname can supply the absent native host owner.
+    with pytest.raises(RuntimeError,match='NATIVE_HOST_PROVIDER_UNAVAILABLE'):
+        owner._preflight_acquire_native_input_v1(area/'declaration.bin',root)
+    with pytest.raises(RuntimeError,match='NATIVE_HOST_PROVIDER_UNAVAILABLE'):
+        owner._PreflightHostLeaseV1().check_parent(root,None)
+    for args in (['--phase','all'],['--phase','fast-preflight','--validation-mode','reduced']):
+        with pytest.raises(ValueError,match='full first phase'):
+            runner.main([*args,'--preflight-input',str(area/'declaration.bin')])
+    with pytest.raises(ValueError,match='competing suppliers'):
+        runner.main(['--phase','fast-preflight','--preflight-input',str(area/'declaration.bin')],candidate_source=lambda *a:None)
+    # A real child receives its own PID/thread and executes each original pure CLI.
+    # These two synthetic selections are not an admitted canonical eight-command run.
+    for n in (2,6):
+        ident=identity(n); argv=tuple(ident['argv'])
+        observation=owner._PreflightObservationV1(root=root,run_id=run_id,occurrence=n,argv=argv,
+            files={},directories={},limits=dict(limits),deadline_ns=deadline)
+        observation.reserve('attempts',1)
+        observation.received('bytes',2)
+        before=dict(observation.remaining)
+        entry=owner.build_command_evidence_plan(run_id=run_id,phase='fast-preflight',commands=[argv],cwd=root)[0]
+        from dataclasses import replace
+        entry=replace(entry,command_index=n)
+        environment={k:v for k,v in os.environ.items() if not k.upper().startswith(('QTT_','PYTHON'))}
+        environment.update({owner.RUN_ID_ENV:run_id,owner.PROCESS_ROOT_ENV:str(process_root),
+            owner.EVIDENCE_ROOT_ENV:str(evidence_root),'PYTHONDONTWRITEBYTECODE':'1','PYTHONNOUSERSITE':'1'})
+        launch=owner._PreflightLaunchInputV1(identity=ident,observation=observation,row_total=limits,parent_tail_reserve=tail,
+            limits=transport,parent_meter=parent_meter,settlement_deadline_ns=settlement,host_lease=lease,
+            plan_entry=entry,environment=environment,scratch_roots=(process_root,),
+            output_limits=dict(stdout_bytes=16384,stderr_bytes=16384,combined_output_bytes=32768))
+        assert observation.remaining == tail
+        assert observation.observed['attempts'] == 1 and observation.observed['bytes'] == 2
+        assert all(before[k] == tail[k]+launch.delegated[k] for k in before)
+        assert launch.delegated != limits and launch.delegated['attempts'] == 17
+        environment.update(launch.controls); launch.environment=environment
+        projection=dict(registered_argv=argv,removed_environment_keys=(),
+            fixed_environment_controls=tuple((k,environment[k]) for k in (*owner._PREFLIGHT_INPUT_KEYS_V1,
+                owner.RUN_ID_ENV,owner.PROCESS_ROOT_ENV,owner.EVIDENCE_ROOT_ENV)))
+        actual={}
+        with launch, owner._command_projection_v1(projection):
+            receipt=owner.supervise_command(argv,cwd=root,run_id=run_id,phase='fast-preflight',command_index=n,
+                evidence_root=evidence_root,environment=environment,execution_deadline_ns=deadline,
+                output_limits=launch.output_limits,output_observation=actual,launch_input=launch,
+                preflight_launch=(argv,dict(environment)),mirror_stdout=False,mirror_stderr=False)
+            assert receipt.native_exit_code == 0, Path(receipt.stderr_path).read_bytes().decode('utf-8')
+            assert receipt.failure_class is None,actual
+            assert launch.state == 'CONSUMED' and launch.result['pid'] == receipt.pid != os.getpid()
+            assert launch.result['initial_limits'] == launch.delegated and launch.result['observation_complete']
+            assert launch.result['remaining_limits'] == launch.delegated
+            assert launch.result['observed'] == zero and launch.result['reserved'] == zero
+            assert all(actual[s]['complete'] for s in ('stdout','stderr'))
+            assert Path(receipt.stderr_path).read_bytes() == b''
+            with pytest.raises(RuntimeError,match='replay'):
+                launch._claim(run_id=run_id,phase='fast-preflight',command_index=n,argv=argv,cwd=root)
+        assert launch.reader.closed and launch.state == 'CLOSED' and owner._PREFLIGHT_OBSERVATION_V1.get() is None
+        assert ('child',receipt.pid) in lease.calls and ('settled',receipt.pid) in lease.calls
+        from types import SimpleNamespace
+        actual_paths=SimpleNamespace(run_id=run_id,repo_root=root,process_root=process_root,evidence_root=evidence_root)
+        owner._preflight_command_evidence_v1(receipt,actual_paths,parent_meter)
+        changed_proof=copy.deepcopy(receipt.output_observation)
+        changed_proof['preflight']['row_total']['attempts'] += 1
+        assert changed_proof != receipt.output_observation
+        with pytest.raises(RuntimeError,match='conservation'):
+            owner._preflight_command_evidence_v1(replace(receipt,output_observation=changed_proof),actual_paths,parent_meter)
+        with capsys.disabled():
+            print('PREFLIGHT_SYNTHETIC_NATIVE_CHILD '+json.dumps(dict(original_position=n,
+                argv=argv,pid=receipt.pid,parent_pid=os.getpid(),native_exit=receipt.native_exit_code,
+                failure_class=receipt.failure_class,termination_state=receipt.termination_state,
+                complete_stdout=Path(receipt.stdout_path).read_bytes().decode('utf-8'),
+                complete_stderr=Path(receipt.stderr_path).read_bytes().decode('utf-8'),
+                receiver=launch.result,parent_after_transfer=observation.remaining,
+                parent_actual_observed=observation.observed,closed_reader=launch.reader.closed)),flush=True)
+        original=copy.deepcopy(launch.result)
+        for field,value in (('pid',os.getpid()),('decode_complete',False),('application_exit',1),('input_bytes_consumed',1)):
+            bad=copy.deepcopy(original); bad[field]=value; assert bad != original
+            with pytest.raises(RuntimeError):
+                owner._preflight_verify_result_v1(bad,identity=ident,initial=launch.delegated,
+                    extent=launch.extent,pid=receipt.pid,native_exit=0)
+        bad=copy.deepcopy(original); bad['remaining_limits']['attempts'] += 100
+        with pytest.raises(RuntimeError,match='debit'):
+            owner._preflight_verify_result_v1(bad,identity=ident,initial=launch.delegated,
+                extent=launch.extent,pid=receipt.pid,native_exit=0)
+    assert parent_meter.received > 0 and parent_meter.emitted > 0 and parent_meter.readback_bytes > 0
+    assert parent_meter.read_calls > 0 and parent_meter.write_calls > 0
+    # The same production receiver rejects a corrupt identity in a real child.
+    # Corrupt the wire deliberately after the sender's normal validation, prove
+    # the operand changed, and retain the real traceback/native terminal result.
+    for n in (1,3):
+        ident=identity(n); argv=tuple(ident['argv'])
+        observation=owner._PreflightObservationV1(root=root,run_id=run_id,occurrence=n,argv=argv,
+            files={},directories={},limits=dict(limits),deadline_ns=deadline)
+        entry=owner.build_command_evidence_plan(run_id=run_id,phase='fast-preflight',commands=[argv],cwd=root)[0]
+        environment={k:v for k,v in os.environ.items() if not k.upper().startswith(('QTT_','PYTHON'))}
+        environment.update({owner.RUN_ID_ENV:run_id,owner.PROCESS_ROOT_ENV:str(process_root),
+            owner.EVIDENCE_ROOT_ENV:str(evidence_root),'PYTHONDONTWRITEBYTECODE':'1','PYTHONNOUSERSITE':'1'})
+        launch=owner._PreflightLaunchInputV1(identity=ident,observation=observation,row_total=limits,parent_tail_reserve=tail,
+            limits=transport,parent_meter=parent_meter,settlement_deadline_ns=settlement,host_lease=lease,
+            plan_entry=entry,environment=environment,scratch_roots=(process_root,),
+            output_limits=dict(stdout_bytes=32768,stderr_bytes=32768,combined_output_bytes=65536))
+        bad=copy.deepcopy(launch.header)
+        if n==1: bad['identity']['run_id']='synthetic-preflight-corrupted'
+        corrupted=owner._preflight_canonical_v1(bad)
+        assert (corrupted != launch.raw_header) is (n==1)
+        launch.raw_header=corrupted; launch.prefix=struct.pack('>8sQQ',b'QTTPF01\n',len(corrupted),0)
+        launch.extent=24+len(corrupted); launch.controls['QTT_PREFLIGHT_INPUT_BYTES']=str(launch.extent)
+        environment.update(launch.controls); launch.environment=environment
+        projection=dict(registered_argv=argv,removed_environment_keys=(),fixed_environment_controls=tuple(launch.controls.items()))
+        actual={}
+        with launch,owner._command_projection_v1(projection):
+            receipt=owner.supervise_command(argv,cwd=root,run_id=run_id,phase='fast-preflight',command_index=n,
+                evidence_root=evidence_root,environment=environment,execution_deadline_ns=deadline,
+                output_limits=launch.output_limits,output_observation=actual,launch_input=launch,
+                preflight_launch=(argv,dict(environment)),mirror_stdout=False,mirror_stderr=False)
+            assert receipt.native_exit_code != 0 and receipt.failure_class is not None
+            assert launch.state == 'HELD' and launch.process.poll() is not None
+        raw_error=Path(receipt.stderr_path).read_bytes().decode('utf-8')
+        assert ('invocation identity mismatch' if n==1 else 'missing admitted absolute Git/evidence operands') in raw_error
+        failed=json.loads((launch.evidence/'receiver.json').read_text())
+        assert failed['decode_complete'] is (n==3) and failed['application_entered'] is (n==3)
+        assert failed['application_exit'] is None
+        assert (failed['initial_limits'] is None) is (n==1)
+        assert launch.reader.closed and launch.path.exists()
+        with capsys.disabled():
+            print('PREFLIGHT_SYNTHETIC_NATIVE_NEGATIVE '+json.dumps(dict(argv=argv,pid=receipt.pid,
+                native_exit=receipt.native_exit_code,failure_class=receipt.failure_class,
+                termination_state=receipt.termination_state,complete_stdout=Path(receipt.stdout_path).read_bytes().decode('utf-8'),
+                complete_stderr=raw_error,receiver=failed,closed_reader=True,failed_input_retained=launch.path.exists())),flush=True)
+    # One-shot parent declaration and candidate assembly over a tiny literal
+    # no-Git repository. Startup is intentionally not qualified or executed.
+    fixture_root=area/'candidate'; fixture_root.mkdir(); (fixture_root/'a.bin').write_bytes(b'abc')
+    allocation=area/'assembly-runs'; allocation.mkdir()
+    paths,probe=owner.resolve_validation_run_paths(fixture_root,explicit_process_root=allocation,
+        projected_relative_paths=('a.bin',))
+    vectors=tuple(tuple(identity(i)['argv']) for i in range(1,9))
+    plan=owner.build_command_evidence_plan(run_id=paths.run_id,phase='fast-preflight',commands=vectors,cwd=fixture_root)
+    capture=dict(zero,attempts=1000,bytes=100000,entries=1000,retained_bytes=100000)
+    declaration=dict(phase='fast-preflight',repository=dict(root=str(fixture_root),files=[['a.bin',0]],
+        directories=[['.',[['a.bin','file']]]],index=None,protected_paths=['a.bin']),
+        installation=dict(executable=sys.executable,version=list(sys.version_info[:3]),
+            abi=[sys.implementation.cache_tag,None,64,0,''],stdlib_roots=[],site_roots=[],loader_environment={},
+            config_paths=[],customizer_paths=[],startup_basis=dict(files=[[sys.executable,1]],directories=[],absent=[])),
+        candidate_limits=dict(entry_limit=1000,snapshot_byte_limit=100000,read_byte_limit=100000,deadline_ns=settlement),
+        parent_limits=dict(capture=capture,terminal=capture,transport=transport,deadline_ns=settlement),
+        rows=[dict(original_position=i,argv=list(vectors[i-1]),files=[['a.bin',0]],directories=[['.',[['a.bin','file']]]],
+            limits=limits,parent_tail_reserve=zero,deadline_ns=deadline,settlement_deadline_ns=settlement,
+            transport=transport,application_output_limits=dict(stdout_bytes=1000,stderr_bytes=1000,combined_output_bytes=2000),
+            git_executable=None) for i in range(1,9)],blobs=[[0,3],[3,4]])
+    class AssemblyLease(owner._PreflightHostLeaseV1):
+        def check_parent(self,checked_root,index_path):
+            assert checked_root == fixture_root and index_path is None
+            assert (fixture_root/'a.bin').read_bytes() == b'abc'
+    sequence=0
+    def source(h):
+        nonlocal sequence
+        sequence+=1
+        declaration_path=area/('declaration-'+str(sequence)+'.bin')
+        raw=owner._preflight_canonical_v1(h)
+        declaration_path.write_bytes(struct.pack('>8sQQ',b'QTTPA01\n',len(raw),7)+raw+b'abcboot')
+        return owner._PreflightNativeInputV1(path=declaration_path,root=fixture_root,index_path=None,
+            expected_path_version=owner._scan_same_api_version(declaration_path.lstat()),
+            expected_chain=owner._preflight_chain_v1(declaration_path.parent),limits=transport,deadline_ns=settlement,
+            host_lease=AssemblyLease(),capture_limits=capture,terminal_limits=capture)
+    native=source(declaration)
+    with owner._preflight_native_input_v1(native):
+        assert owner._preflight_acquire_native_input_v1(native.path,fixture_root) is native
+        assembly=runner._PreflightAssemblyV1(native,paths,plan)
+        assert assembly.state == 'CUSTODY_READY' and native.state == 'CONSUMED'
+        assert assembly.plan is plan and assembly.candidate.plan is plan
+        assert assembly.candidate_source(fixture_root,plan) is assembly.candidate
+        assert assembly.candidate.baseline['a.bin'][1] == b'abc'
+        assert set(assembly.candidate.effects) == set(range(1,9)) and not any(assembly.candidate.effects.values())
+        assert assembly.candidate.nested_evidence_limits == {} and assembly.launches == {}
+        with pytest.raises(RuntimeError,match='single use'):
+            native.consume(assembly._validate_declaration)
+    assert owner._PREFLIGHT_NATIVE_INPUT_V1.get() is None
+    for mutate in (lambda h:h.__setitem__('host_lease',True),
+            lambda h:h['rows'].pop(),lambda h:h['rows'][7].__setitem__('original_position',1),
+            lambda h:h['rows'][2].__setitem__('git_executable',sys.executable),
+            lambda h:h['repository']['files'][0].__setitem__(1,True),
+            lambda h:h['rows'][0]['parent_tail_reserve'].__setitem__('bytes',9999)):
+        bad=copy.deepcopy(declaration); mutate(bad); assert bad != declaration
+        denied=source(bad)
+        with pytest.raises((ValueError,RuntimeError)):
+            runner._PreflightAssemblyV1(denied,paths,plan)
+        assert denied.state == 'FAILED'
+    assert not (paths.evidence_root/'run.json').exists()
+    cleanup=owner.cleanup_validation_run(paths)
+    assert cleanup == 'PASS_REMOVED_EXACT_RUN_ROOT'
+    with capsys.disabled():
+        print('PREFLIGHT_SYNTHETIC_PARENT_ASSEMBLY '+json.dumps(dict(original_positions=8,one_plan_identity=True,
+            candidate_bytes_compared=3,application_children_started=0,startup_qualified=False,canonical_host_qualified=False,
+            run_header_published=False,actual_cleanup=cleanup)),flush=True)
+    # Deadline and exhausted transport negatives operate on the real reader.
+    expired=owner._PreflightTransportV1(transport,time.monotonic_ns()-1)
+    with pytest.raises(RuntimeError,match='deadline'):
+        expired.check()
+    tiny=owner._PreflightTransportV1(dict(transport,read_calls=1),deadline)
+    path=area/'short-read-budget.bin'; path.write_bytes(b'ab')
+    fd=os.open(path,os.O_RDONLY|int(getattr(os,'O_BINARY',0)))
+    try:
+        assert tiny.read(fd,1) == b'a'
+        with pytest.raises(RuntimeError,match='read calls'):
+            tiny.read(fd,1)
+        assert tiny.received == 1 and tiny.read_calls == 1
+    finally: os.close(fd)
+    # Actual normal parent CLI, with no configured native provider, denies
+    # before path/probe allocation. This extra engineering probe is not a ninth
+    # selected command or a canonical run.
+    parent_argv=(sys.executable,'tools/run_validation_gates.py','--phase','fast-preflight',
+        '--preflight-input',str(area/'unavailable-parent-input.bin'))
+    parent_env={k:v for k,v in os.environ.items() if not k.upper().startswith(('QTT_','PYTHON'))}
+    parent_env.update(PYTHONDONTWRITEBYTECODE='1',PYTHONNOUSERSITE='1')
+    parent_output={}
+    parent_receipt=owner.supervise_command(parent_argv,cwd=root,run_id='synthetic-parent-port',
+        phase='standalone-pytest-helper',command_index=9,evidence_root=evidence_root,environment=parent_env,
+        execution_deadline_ns=deadline,output_limits=dict(stdout_bytes=32768,stderr_bytes=32768,combined_output_bytes=65536),
+        output_observation=parent_output,mirror_stdout=False,mirror_stderr=False)
+    assert parent_receipt.native_exit_code==1 and parent_receipt.failure_class=='ENGVR_NATIVE_EXIT_NONZERO'
+    parent_error=Path(parent_receipt.stderr_path).read_bytes().decode('utf-8')
+    assert 'PREFLIGHT_NATIVE_HOST_PROVIDER_UNAVAILABLE' in parent_error
+    assert not owner._command_requires_process_retention_v1(parent_receipt)
+    with capsys.disabled():
+        print('PREFLIGHT_SYNTHETIC_PARENT_CLI_DENIAL '+json.dumps(dict(argv=parent_argv,pid=parent_receipt.pid,
+            native_exit=parent_receipt.native_exit_code,failure_class=parent_receipt.failure_class,
+            termination_state=parent_receipt.termination_state,
+            complete_stdout=Path(parent_receipt.stdout_path).read_bytes().decode('utf-8'),complete_stderr=parent_error)),flush=True)
+    # Exact selected CLI reaches the missing-provider denial without opening a declaration or dispatching.
+    with monkeypatch.context() as scoped:
+        scoped.setattr(runner,'_legacy_run_commands_test_adapter_active',lambda:False)
+        with pytest.raises(RuntimeError,match='NATIVE_HOST_PROVIDER_UNAVAILABLE'):
+            runner.main(['--phase','fast-preflight','--preflight-input',str(area/'missing.bin')])

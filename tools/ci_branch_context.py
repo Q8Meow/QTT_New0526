@@ -2165,6 +2165,10 @@ QTT_V35_PREFLIGHT_REPAIR_CHANGED_PATHS = frozenset({
     'tests/tools/test_validation_inventory.py',
     'src/qtt/stage1_prediction_markets/qtt_owner_global_override_directive_currentization_and_internal_gate_release/report.py',
     'tools/validation_scope_registry.py',
+    'tools/validate_grand_global_debug_logical_consistency_audit.py',
+    'tools/validate_ci_branch_context_matrix.py',
+    'tools/validate_validation_inventory.py',
+    'tools/validate_validation_scope_registry.py',
 })
 
 EXPLICIT_DOWNSTREAM_REPAIR_BRANCH_CHANGED_PATHS = {
