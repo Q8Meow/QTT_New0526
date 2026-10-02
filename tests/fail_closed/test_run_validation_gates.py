@@ -185,6 +185,7 @@ BRANCH_CONTEXT_ENV = (
     "GITHUB_REF_NAME",
     "GITHUB_HEAD_REF",
 )
+_PRODUCTION_RUN_COMMANDS = runner.run_commands
 _PRODUCTION_TEXT_INTEGRITY_PREFLIGHT = (
     runner._validation_text_integrity_preflight
 )
@@ -195,14 +196,26 @@ def _clear_branch_context_env(monkeypatch):
         monkeypatch.delenv(env_name, raising=False)
 
 
-def _synthetic_candidate_custody_v1(root, plan, *, observed_paths, effects, index_path=None):
+def _synthetic_candidate_custody_v1(root, plan, *, observed_paths, effects, index_path=None,
+                                    deadline_ns=None, nested_evidence_limits=None):
     """Finite pytest-owned surfaces; not real campaign acceptance."""
-    return runner._ValidationCandidateCustodyV1(repo_root=root, plan=plan,
+    nested_evidence_limits = {} if nested_evidence_limits is None else nested_evidence_limits
+    custody = runner._ValidationCandidateCustodyV1(repo_root=root, plan=plan,
         observe_paths=observed_paths, check_exclusive=lambda: None, index_path=index_path,
         effects_by_occurrence={index: tuple(effects) for index in range(1, len(plan) + 1)}, ignored_paths=(),
-        entry_limit=100, snapshot_byte_limit=1_000_000, read_byte_limit=100_000_000,
-        deadline_ns=runner.time.monotonic_ns() + 60_000_000_000,
+        entry_limit=100 + sum(v["entry_limit"] for v in nested_evidence_limits.values()),
+        snapshot_byte_limit=1_000_000 + sum(v["retained_byte_limit"] for v in nested_evidence_limits.values()),
+        read_byte_limit=100_000_000 + sum(v["read_byte_limit"] for v in nested_evidence_limits.values()),
+        deadline_ns=deadline_ns or runner.time.monotonic_ns() + 60_000_000_000,
+        nested_evidence_limits=nested_evidence_limits,
         operation_checks={index: (lambda **kwargs: None) for index in range(1, len(plan) + 1)})
+
+    def simulated_startup(index, entry, *, environment, run_paths):
+        argv = tuple(entry.argv if type(entry) is reliability.CommandEvidencePlanEntry else entry.execution_argv)
+        custody._preflight_launch = (argv, dict(environment))
+        return environment, None
+    custody.prepare_preflight = simulated_startup
+    return custody
 
 
 def _exercise_candidate_custody_failures_v1(tmp_path, monkeypatch):
@@ -238,8 +251,11 @@ def _exercise_candidate_custody_failures_v1(tmp_path, monkeypatch):
     (root / "source.py").write_bytes(b"unexplained owner change\n")
     with pytest.raises(RuntimeError, match="UNADMITTED_EFFECT"):
         candidate.end_occurrence(1, plan[0])
-    with pytest.raises(RuntimeError, match="not retried"):
+    latched = candidate.failure
+    with pytest.raises(RuntimeError, match="terminal candidate failure") as denied:
         candidate.restore()
+    assert latched is not None and denied.value.__cause__ is latched
+    assert candidate.failure is latched
     assert (root / "source.py").read_bytes() == b"unexplained owner change\n"
     assert (root / "output.json").read_bytes() == b"permitted output\n"
     assert candidate.completed_actions == []
@@ -282,8 +298,11 @@ def _exercise_candidate_custody_failures_v1(tmp_path, monkeypatch):
     assert candidate.state == "CLEANUP_INCOMPLETE"
     assert (root / "output.json").read_bytes() == b"c"
     assert len(calls) == 2
-    with pytest.raises(RuntimeError, match="not retried"):
+    latched = candidate.failure
+    with pytest.raises(RuntimeError, match="terminal candidate failure") as denied:
         candidate.restore()
+    assert latched is not None and denied.value.__cause__ is latched
+    assert candidate.failure is latched
     assert index.read_bytes() == b"staged state\n"
 
     root, index, candidate = case("readback-fault")
@@ -451,6 +470,8 @@ def _central_supervision_test_adapter(monkeypatch, tmp_path):
     original_prepare = runner._prepare_validation_candidate_v1
     original_restore = runner._restore_tracked_gate_side_effects
     class SyntheticNoEffectCustody:
+        def prepare_preflight(self, *args, environment, **kwargs):
+            return environment, None
         def begin_occurrence(self, *args, **kwargs):
             pass
         def end_occurrence(self, *args, **kwargs):
@@ -468,7 +489,8 @@ def _central_supervision_test_adapter(monkeypatch, tmp_path):
     monkeypatch.setattr(runner, "_prepare_validation_candidate_v1", prepare_fixture)
     monkeypatch.setattr(runner, "_restore_tracked_gate_side_effects", restore_fixture)
 
-    def activate_synthetic_scan():
+    def activate_synthetic_scan(*, scan_source=None, resolve_paths=True, mock_commands=False, deadline_ns=None, patcher=None):
+        patcher = monkeypatch if patcher is None else patcher
         # Opt-in support for the existing mocked full-plan tests only. The real
         # capacity guard and native frame owner stay in the exercised call chain.
         # This grants no real RP5A scan, source acceptance or campaign capacity.
@@ -560,9 +582,174 @@ def _central_supervision_test_adapter(monkeypatch, tmp_path):
             assert original_input.state == "CONSUMED"
             return receipt
 
-        monkeypatch.setattr(runner, "resolve_validation_run_paths", resolve_scan_fixture)
-        monkeypatch.setattr(runner, "_execute_supervised_command", supervise_scan_fixture)
-        return synthetic_capacity
+        state = {}
+        supplied_scan = synthetic_capacity if scan_source is None else scan_source
+        def bind_run(paths, phase, plan):
+            if state:
+                assert state["paths"] is paths and state["plan"] is plan
+                assert state["phase"] == phase
+                return
+            assert paths.repo_root.is_relative_to(tmp_path) and paths.repo_root != REPO_ROOT
+            custody_deadline = deadline_ns or runner.time.monotonic_ns() + 60_000_000_000
+            state.update(paths=paths, phase=phase, plan=plan, deadline=custody_deadline,
+                         child=custody_deadline - 15_000_000_000,
+                         parent=custody_deadline - 10_000_000_000, calls=[], nested={})
+
+        def scan_supplier(paths, phase, plan):
+            bind_run(paths, phase, plan)
+            assert "scan" not in state["calls"]
+            state["calls"].append("scan")
+            launch = supplied_scan(paths, phase, plan)
+            assert launch.paths is paths and launch.plan is plan and launch.phase == phase
+            return launch
+
+        def mapper_supplier(paths, phase, plan):
+            bind_run(paths, phase, plan)
+            assert "mapper" not in state["calls"]
+            state["calls"].append("mapper")
+            root = paths.repo_root
+            selected = [(row, reliability._mapper_original_position_v1(row.argv, root)) for row in plan]
+            selected = [(row, position) for row, position in selected if position is not None]
+            assert selected, "do not attach this supplier to an unselected plan"
+            assert {position for row, position in selected} in ({66, 67, 68}, {66, 67, 68, 429, 430, 431, 432, 433, 434})
+            target = root / "mapper-fixture.json"
+            raw = b"{}\n"  # Independent transport bytes, never authentic application acceptance.
+            if target.exists():
+                assert target.read_bytes() == raw
+            else:
+                target.write_bytes(raw)
+            reference = paths.process_root / "mapper-basis.bin"
+            with reference.open("xb") as stream:
+                stream.write(raw)
+            with target.open("rb") as stream:
+                target_fd = reliability._mapper_stamp_v1(os.fstat(stream.fileno()))
+            with reference.open("rb") as stream:
+                reference_fd = reliability._mapper_stamp_v1(os.fstat(stream.fileno()))
+            root_chain = reliability._mapper_chain_v1(root)
+            basis_chain = reliability._mapper_chain_v1(reference.parent)
+            r, b, p = len(root_chain), len(basis_chain), len(root_chain)
+            metadata = 2*(r+b)+4 + 6*(r+b)+3*p+11
+            # Existing finite sibling reader/header limits, with exact byte and
+            # metadata demand for this one three-byte acquisition per route.
+            read_limits = dict(byte_limit=1_048_576, node_limit=10_000, depth_limit=32,
+                               profile_limit=len(selected) + 4)
+            bindings = {}
+            for row, position in selected:
+                assert row is plan[row.command_index - 1]
+                assert row.run_id == paths.run_id and row.phase == phase and row.cwd == str(root)
+                child = (None if position in (66, 67, 68) else list(
+                    reliability._mapper_child_command_v1(row.argv, root, paths.process_root)))
+                basis = dict(kind="MAPPER_DISK_BASIS_V1", position=position,
+                    generation="synthetic-three-byte-transport", root=str(root), root_chain=root_chain,
+                    basis=str(reference), basis_chain=basis_chain,
+                    basis_lstat=reliability._mapper_stamp_v1(reference.lstat()), basis_fstat=reference_fd,
+                    entries=[dict(path=target.name, offset=0, length=3, attempt_limit=1,
+                        lstat=reliability._mapper_stamp_v1(target.lstat()), fstat=target_fd,
+                        parent_chain=root_chain)], limits=dict(attempts=1, target_bytes=4, basis_bytes=3,
+                        metadata_calls=metadata, single_target_buffer=4), chunk_bytes=3,
+                    deadline_ns=state["child"])
+                binding = dict(kind="MAPPER_NATIVE_READ_BINDING_V2", run_id=paths.run_id,
+                    phase=phase, command_index=row.command_index, command_count=len(plan),
+                    original_position=position, repo_root=str(root), process_root=str(paths.process_root),
+                    evidence_root=str(paths.evidence_root), parent_argv=list(row.argv), child_argv=child,
+                    run_read_limits=read_limits, basis=basis,
+                    activation_limits=dict(target_bytes=4, basis_bytes=3,
+                        metadata_calls=metadata + 3*r + 2*b + 3*p + 6,
+                        record_bytes=100_000, evidence_deadline_ns=state["deadline"]))
+                bindings[str(row.command_index)] = reliability._mapper_binding_v1(binding)
+                if child is not None:
+                    # Finite evidence roster and six retained files per nested
+                    # route. Every possible original barrier/final recheck is
+                    # reserved before dispatch, not enlarged after a failure.
+                    state["nested"][row.command_index] = dict(
+                        entry_limit=3*len(plan)+2*len(selected)+4,
+                        file_byte_limit=100_000, retained_byte_limit=1_000_000,
+                        read_byte_limit=(2*len(plan)+16)*6*100_000,
+                        child_execution_deadline_ns=state["child"],
+                        execution_deadline_ns=state["parent"], deadline_ns=state["deadline"])
+            state["bindings"] = bindings
+            return bindings
+
+        def candidate_supplier(root, plan):
+            assert state["paths"].repo_root == root and state["plan"] is plan
+            names = tuple(sorted(path.relative_to(root).as_posix() for path in root.rglob("*") if path.is_file()))
+            return _synthetic_candidate_custody_v1(root, plan, observed_paths=lambda: names,
+                effects=(), deadline_ns=state["deadline"], nested_evidence_limits=state["nested"])
+
+        previous_provenance = getattr(runner.write_run_provenance, "_fixture_original", runner.write_run_provenance)
+        previous_atomic = getattr(runner.atomic_write_json, "_fixture_original", runner.atomic_write_json)
+        def write_fixture_provenance(*args, **kwargs):
+            previous_provenance(*args, **kwargs)
+            if previous_provenance is not reliability.write_run_provenance:
+                reliability.write_run_provenance(*args, **kwargs)
+        def write_fixture_atomic(path, payload):
+            previous_atomic(path, payload)
+            if previous_atomic is not reliability.atomic_write_json:
+                reliability.atomic_write_json(path, payload)
+        write_fixture_provenance._fixture_original = previous_provenance
+        write_fixture_atomic._fixture_original = previous_atomic
+        patcher.setattr(runner, "write_run_provenance", write_fixture_provenance)
+        patcher.setattr(runner, "atomic_write_json", write_fixture_atomic)
+        patcher.setattr(runner, "_prepare_validation_candidate_v1", original_prepare)
+        if mock_commands:
+            # These root/uniqueness tests previously substituted the whole
+            # run_commands port. Only their synthetic process outcomes move
+            # through the real admission/finalizer path; no application runs.
+            patcher.setattr(runner.subprocess, "run", lambda command, **kwargs:
+                SimpleNamespace(returncode=0, stdout=_st12h_mock_terminal_output(command), stderr=""))
+        original_port = runner._execute_supervised_command
+        if resolve_paths:
+            patcher.setattr(runner, "resolve_validation_run_paths", resolve_scan_fixture)
+            original_port = supervise_scan_fixture
+
+        def supervise_bound_fixture(command, **kwargs):
+            if "execution_deadline_ns" in kwargs:
+                # Match the existing native supervisor's launch-time clamp.
+                # The earlier planner timeout cannot widen the armed gate.
+                remaining = (kwargs["execution_deadline_ns"] - runner.time.monotonic_ns()) / 1e9
+                assert remaining > 0
+                prior = kwargs.get("timeout_seconds")
+                kwargs["timeout_seconds"] = remaining if prior is None else min(prior, remaining)
+            receipt = original_port(command, **kwargs)
+            position = reliability._mapper_original_position_v1(tuple(command), Path(kwargs["cwd"]))
+            if position is None:
+                return receipt
+            paths = state["paths"]
+            assert kwargs["run_id"] == paths.run_id and kwargs["phase"] == state["phase"]
+            row = state["plan"][kwargs["command_index"] - 1]
+            assert row.argv == tuple(command)
+            _, live = reliability._mapper_read_profile_for_process_v1(paths.repo_root,
+                environment=kwargs["environment"], actual_argv=tuple(command), role="PARENT")
+            assert live["original_position"] == position
+            with reliability._mapper_bound_reads_v1(live) as reader:
+                assert reader.read_json("mapper-fixture.json", json.loads) == {}
+                assert reader.counters["attempts"] == 1
+            controls = reliability._mapper_read_controls_v1(state["bindings"][str(row.command_index)])
+            controls += ((reliability._MAPPER_ACTIVATION_ENV_V1,
+                          kwargs["environment"][reliability._MAPPER_ACTIVATION_ENV_V1]),)
+            if live["child_argv"] is not None:
+                gate = runner._RUN_COMMANDS_SUPERVISION["nested_evidence"][row.command_index]
+                assert gate.planned is row and gate.paths is paths
+                controls = gate.parent_controls
+                from tools.run_pytest_fresh_basetemp import _allocate_nested_evidence_root
+                child_root = _allocate_nested_evidence_root(paths.evidence_root, pid=receipt.pid)
+                child = replace(receipt, phase="nested-pytest", command_index=1,
+                    argv=gate.child_argv, pid=receipt.pid+1,
+                    timeout_seconds_or_null=(state["child"]-runner.time.monotonic_ns())/1e9,
+                    timeout_state="NOT_TRIGGERED", stdout_required_markers=(),
+                    stdout_marker_state="NOT_REQUIRED", stdout_path=str(child_root/"command-1.stdout.bin"),
+                    stderr_path=str(child_root/"command-1.stderr.bin"), **gate.child_projection)
+                Path(child.stdout_path).write_bytes(b"")
+                Path(child.stderr_path).write_bytes(b"")
+                reliability.atomic_write_json(child_root/"command-1.json", child)
+            receipt = replace(receipt, fixed_environment_controls=controls)
+            Path(receipt.stdout_path).write_bytes(b"")
+            Path(receipt.stderr_path).write_bytes(b"")
+            reliability.atomic_write_json(paths.evidence_root/f"command-{row.command_index}.json", receipt)
+            return receipt
+        patcher.setattr(runner, "_execute_supervised_command", supervise_bound_fixture)
+        return dict(scan_capacity_source=scan_supplier, mapper_read_source=mapper_supplier,
+                    candidate_source=candidate_supplier)
 
     return activate_synthetic_scan
 
@@ -7140,9 +7327,11 @@ def test_validation_workspace_output_path_uses_exact_cross_platform_boundary():
 
 
 def test_runner_restores_only_runtime_side_effects_before_pr142_pr143_and_final_pytest(
-    monkeypatch, capsys, tmp_path,
+    monkeypatch, capsys, tmp_path, _central_supervision_test_adapter,
 ):
     import stat
+    _exercise_preflight_observation_v1(tmp_path, monkeypatch)
+    _exercise_preflight_candidate_debits_v1(tmp_path, monkeypatch)
     class Completed:
         returncode = 0
         stderr = ""
@@ -7157,8 +7346,9 @@ def test_runner_restores_only_runtime_side_effects_before_pr142_pr143_and_final_
     assert repo_root.is_absolute()
     assert repo_root.is_dir()
     assert not (repo_root / ".git").exists()
-    paths = (*intended_repair_paths, *generated_side_effect_paths, "unowned/keep.txt")
+    paths = (*intended_repair_paths, *generated_side_effect_paths, "unowned/keep.txt", "mapper-fixture.json")
     candidate_bytes = {path: ("working-candidate:" + path).encode() for path in paths}
+    candidate_bytes["mapper-fixture.json"] = b"{}\n"
     for path, data in candidate_bytes.items():
         target = root / path
         target.parent.mkdir(parents=True, exist_ok=True)
@@ -7207,11 +7397,7 @@ def test_runner_restores_only_runtime_side_effects_before_pr142_pr143_and_final_
         return actual
 
     monkeypatch.setattr(runner._ValidationCandidateCustodyV1, "_snapshot", observed_snapshot)
-    candidate = _synthetic_candidate_custody_v1(root, plan, observed_paths=observed_paths,
-        effects=generated_side_effect_paths, index_path=index)
-    assert observations == [("acquisition", True, original_surface)]
-    activity[0] = "occurrence"
-    original_restore = candidate.restore
+    fixture_deadline = runner.time.monotonic_ns() + 60_000_000_000
     restoration_observations = []
 
     def observed_restore():
@@ -7235,7 +7421,6 @@ def test_runner_restores_only_runtime_side_effects_before_pr142_pr143_and_final_
         if restored:
             events.append(("restore", restored))
         return restored
-    candidate.restore = observed_restore
     def fake_run(command, **kwargs):
         assert command[0] != "git", "HEAD/index restoration is forbidden"
         assert timeline[0] == ("observation", ("acquisition", True, original_surface))
@@ -7261,11 +7446,11 @@ def test_runner_restores_only_runtime_side_effects_before_pr142_pr143_and_final_
     limits = reliability._ScanRunReadLimits(100_000, 1_000, 16, 1)
     immutable_names = (*intended_repair_paths, "unowned/keep.txt")
     surfaces = tuple(reliability._ScanCandidateSurface(
-        name, "FILE", candidate.baseline[name][0], candidate_bytes[name], (),
+        name, "FILE", next(mode for path, kind, mode, raw in original_surface if path == name), candidate_bytes[name], (),
     ) for name in immutable_names)
     fence = reliability._ScanCandidateFence(
         root, surfaces, limits=limits, candidate_read_bytes=100_000,
-        deadline_ns=candidate.deadline_ns,
+        deadline_ns=fixture_deadline,
     )
     capacity_calls = []
     issued_inputs = []
@@ -7286,7 +7471,7 @@ def test_runner_restores_only_runtime_side_effects_before_pr142_pr143_and_final_
             tuple((name, len(candidate_bytes[name])) for name in immutable_names),
             git_executable, git_executable, "git",
             tuple(scan_owner._scan_child_environment(os.environ).items()),
-            100_000, 100_000, 4096, 100_000, candidate.deadline_ns, 3,
+            100_000, 100_000, 4096, 100_000, fixture_deadline, 3,
         )
         identity = reliability._ScanLaunchIdentity(
             run_paths.run_id, phase, selected_entry.command_index,
@@ -7294,7 +7479,7 @@ def test_runner_restores_only_runtime_side_effects_before_pr142_pr143_and_final_
         )
         original_input = reliability._ScanLaunchInput(
             identity, surfaces, limits=limits, candidate_read_bytes=100_000,
-            deadline_ns=candidate.deadline_ns, scratch_root=scratch,
+            deadline_ns=fixture_deadline, scratch_root=scratch,
             scratch_bytes=100_000, parent_frame_reread_bytes=100_000,
             check_candidate=fence,
         )
@@ -7303,7 +7488,7 @@ def test_runner_restores_only_runtime_side_effects_before_pr142_pr143_and_final_
             reliability._prepare_scan_launch(
             run_paths, phase=phase, plan=expected_plan,
             profiles={selected_entry.command_index: profile},
-            read_limits=limits, deadline_ns=candidate.deadline_ns,
+            read_limits=limits, deadline_ns=fixture_deadline,
             launch_inputs={selected_entry.command_index: original_input},
         ), issued_inputs, reader_inputs)
 
@@ -7344,11 +7529,26 @@ def test_runner_restores_only_runtime_side_effects_before_pr142_pr143_and_final_
             ("_ACTIVE_SCAN_LAUNCH", None),
             ("_ACTIVE_SCAN_CAPACITY_SOURCE", synthetic_capacity),
             ("_LAST_EXPECTED_COMMAND_PLAN", ()),
+            ("_LAST_PLANNED_COMMAND_COUNT", None),
+            ("_MAPPER_READ_SOURCE_ATTEMPTED", False),
+            ("_ACTIVE_MAPPER_READ_PROFILES_V1", None),
+            ("_ACTIVE_MAPPER_OCCURRENCES_V1", {}),
             ("write_run_provenance", reliability.write_run_provenance),
             ("_execute_supervised_command", supervise_fixture),
         ):
             publication.setattr(runner, name, value)
+        suppliers = _central_supervision_test_adapter(scan_source=synthetic_capacity,
+            resolve_paths=False, deadline_ns=fixture_deadline, patcher=publication)
+        publication.setattr(runner, "_ACTIVE_SCAN_CAPACITY_SOURCE", suppliers["scan_capacity_source"])
+        publication.setattr(runner, "_ACTIVE_MAPPER_READ_SOURCE_V1", suppliers["mapper_read_source"])
         runner._publish_active_plan_provenance(runner.ALL_PHASE, plan)
+        candidate = _synthetic_candidate_custody_v1(root, runner._LAST_EXPECTED_COMMAND_PLAN,
+            observed_paths=observed_paths, effects=generated_side_effect_paths, index_path=index,
+            deadline_ns=fixture_deadline)
+        assert observations == [("acquisition", True, original_surface)]
+        activity[0] = "occurrence"
+        original_restore = candidate.restore
+        candidate.restore = observed_restore
         assert len(capacity_calls) == 1
         assert capacity_calls[0] is runner._LAST_EXPECTED_COMMAND_PLAN
         exit_code = runner.run_commands(commands, repo_root=root, execution_plan=plan, candidate_custody=candidate)
@@ -7667,7 +7867,12 @@ def test_runner_restores_only_runtime_side_effects_before_pr142_pr143_and_final_
             fault_patch.setattr(runner, "cleanup_validation_run",
                                 lambda paths: deletions.append(paths) or "PASS_REMOVED_EXACT_RUN_ROOT")
             if fault == "context-exit":
-                fault_patch.setattr(runner, "nullcontext", ExitFailure)
+                original_nullcontext = runner.nullcontext
+                context_calls = []
+                def fail_original_launch_context(*args, **kwargs):
+                    context_calls.append((args, kwargs))
+                    return ExitFailure() if len(context_calls) == 1 else original_nullcontext(*args, **kwargs)
+                fault_patch.setattr(runner, "nullcontext", fail_original_launch_context)
             if fault == "proven-timeout":
                 fault_patch.setattr(runner, "_st12h_command_contract", lambda argv: (1.0, ()))
             call = lambda: runner.run_commands(
@@ -7696,6 +7901,8 @@ def test_runner_restores_only_runtime_side_effects_before_pr142_pr143_and_final_
                 assert pending["pending"] is True
                 assert caller_events == [("begin", 1), ("supervise", 1)] + (
                     [("context-exit", 1)] if fault == "context-exit" else [])
+                if fault == "context-exit":
+                    assert context_calls == [((), {}), ((), {})]
                 assert fault_candidate.active_occurrence == 1
                 assert (fault_root / "output.json").read_bytes() == b"child effect\n"
                 with pytest.raises(RuntimeError, match="VALIDATION_CANDIDATE_CHILD_STILL_OWNED"):
@@ -13764,7 +13971,7 @@ def test_runner_returns_zero_when_all_mocked_commands_pass(monkeypatch, capsys, 
         assert runner._ACTIVE_SCAN_LAUNCH is None
         assert seen == [] and provenance_counts == []
 
-    exit_code = runner.main([], scan_capacity_source=_central_supervision_test_adapter())
+    exit_code = runner.main([], **_central_supervision_test_adapter())
 
     assert exit_code == 0
     validation_dir = _validation_dir_from_commands(seen)
@@ -14014,6 +14221,11 @@ def test_runner_returns_zero_when_all_mocked_commands_pass(monkeypatch, capsys, 
         forwarding.setattr(runner,"_RUN_COMMANDS_ACTIVE_PATHS",mixed_paths)
         forwarding.setattr(runner,"_ACTIVE_FILESYSTEM_PROBE",mixed_probe)
         forwarding.setattr(runner,"_ACTIVE_TEXT_INTEGRITY_STATE","PASS")
+        forwarding.setattr(runner,"_LAST_PLANNED_COMMAND_COUNT",None)
+        forwarding.setattr(runner,"_LAST_EXPECTED_COMMAND_PLAN",())
+        forwarding.setattr(runner,"_MAPPER_READ_SOURCE_ATTEMPTED",False)
+        forwarding.setattr(runner,"_ACTIVE_MAPPER_READ_SOURCE_V1",None)
+        forwarding.setattr(runner,"_ACTIVE_MAPPER_READ_PROFILES_V1",None)
         forwarding.setattr(runner,"_RUN_PROVENANCE_ATTEMPTED",False)
         forwarding.setattr(runner,"_SCAN_CAPACITY_ATTEMPTED",False)
         forwarding.setattr(runner,"_ACTIVE_SCAN_CAPACITY_SOURCE",capacity)
@@ -14466,7 +14678,7 @@ def test_runner_keeps_process_roots_external_to_repo(monkeypatch, capsys, tmp_pa
     assert not tmp_parent.exists()
 
     try:
-        exit_code = runner.main([], scan_capacity_source=_central_supervision_test_adapter())
+        exit_code = runner.main([], **_central_supervision_test_adapter())
 
         assert exit_code == 0
         assert seen
@@ -14497,15 +14709,14 @@ def test_runner_uses_unique_pytest_basetemp_for_each_main_run(monkeypatch, tmp_p
         assert pytest_basetemp.name == reliability.PYTEST_BASETEMP_DIR_NAME
         assert pytest_basetemp.is_dir()
         pytest_basetemps.append(pytest_basetemp)
-        _record_fake_aggregate_success_receipts(commands)
-        return 0
+        return _PRODUCTION_RUN_COMMANDS(commands, repo_root=repo_root, **kwargs)
 
     monkeypatch.setattr(runner, "_repo_root", lambda: repo_root)
     monkeypatch.setattr(runner, "run_commands", fake_run_commands)
 
     try:
-        assert runner.main([], scan_capacity_source=_central_supervision_test_adapter()) == 0
-        assert runner.main([], scan_capacity_source=_central_supervision_test_adapter()) == 0
+        assert runner.main([], **_central_supervision_test_adapter(mock_commands=True)) == 0
+        assert runner.main([], **_central_supervision_test_adapter(mock_commands=True)) == 0
 
         assert len(pytest_basetemps) == 2
         assert pytest_basetemps[0] != pytest_basetemps[1]
@@ -14536,8 +14747,7 @@ def test_runner_does_not_touch_stale_fixed_pytest_basetemp(monkeypatch, tmp_path
         assert stale_basetemp.is_dir()
         assert sentinel.read_text(encoding="utf-8") == "do-not-touch"
         pytest_basetemps.append(pytest_basetemp)
-        _record_fake_aggregate_success_receipts(commands)
-        return 0
+        return _PRODUCTION_RUN_COMMANDS(commands, repo_root=repo_root, **kwargs)
 
     original_cwd = Path.cwd()
     monkeypatch.chdir(repo_root)
@@ -14545,7 +14755,7 @@ def test_runner_does_not_touch_stale_fixed_pytest_basetemp(monkeypatch, tmp_path
     monkeypatch.setattr(runner, "run_commands", fake_run_commands)
 
     try:
-        assert runner.main([], scan_capacity_source=_central_supervision_test_adapter()) == 0
+        assert runner.main([], **_central_supervision_test_adapter(mock_commands=True)) == 0
 
         assert pytest_basetemps
         assert stale_basetemp.is_dir()
@@ -14605,7 +14815,15 @@ def test_github_workflow_splits_validation_into_parallel_phase_jobs():
         in shard_block
     )
     assert "        run: &install_pytest |\n" in shard_block
-    assert "          python -m pip install pytest==9.1.1\n" in shard_block
+    expected_pins = ("pytest==9.1.1", "iniconfig==2.3.0", "packaging==26.0", "pluggy==1.6.0",
+        "pygments==2.21.0", "websockets==17.0.1", "cryptography==50.0.1", "cffi==2.1.1", "pycparser==3.0",
+        "jsonschema==4.26.0", "jsonschema-specifications==2025.9.1", "referencing==0.37.0", "rpds-py==2026.5.1", "attrs==26.1.0")
+    install = shard_block.split("        run: &install_pytest |\n", 1)[1].split("          python -m pip check\n", 1)[0]
+    import shlex
+    assert tuple(shlex.split(install.replace("\\\n", " "))) == (
+        "python", "-m", "pip", "install", "--only-binary=:all:", "--no-deps", "--index-url",
+        "https://pypi.org/simple", *expected_pins)
+    assert "          python -m pip check\n" in shard_block
     for phase in runner.ORDERED_PHASES:
         assert f"          - phase: {phase}\n" in shard_block
     assert "          - phase: deterministic-validators\n" not in shard_block
@@ -14662,6 +14880,13 @@ def test_nested_validator_contract_scan_blocks_hidden_full_rerun():
     assert len(failures) == 1
     assert "nested full validator rerun forbidden" in failures[0]
     assert "validate_pr159r_source_locator_value_capture.py" in failures[0]
+
+    import pytest
+    from tools.validation_reliability import ValidationReliabilityError
+    with tempfile.TemporaryDirectory(prefix="qtt_nested_required_") as temp_dir:
+        with pytest.raises(ValidationReliabilityError):
+            nested_contracts._candidate_files(Path(temp_dir))
+
 
 
 def test_nested_validator_contract_scan_allows_recorded_receipt_contract_text():
@@ -17087,7 +17312,9 @@ def test_st12h_runner_enforces_exact_timeouts_one_process_and_zero_retry(
     monkeypatch,
     tmp_path,
     capsys,
+    _central_supervision_test_adapter,
 ) -> None:
+    _exercise_failed_admission_plan_v1(tmp_path, monkeypatch, _central_supervision_test_adapter)
     _assert_path_projection_contract(monkeypatch, tmp_path)
     _assert_process_supervision_contract(monkeypatch, tmp_path)
     _assert_mirror_isolation_contract(monkeypatch, tmp_path)
@@ -17431,3 +17658,404 @@ def _assert_repository_local_layout_contract() -> int:
      check('st12h_real_probe_restored_after_observation', r.probe_run_filesystem is real_st12h_probe)
 
     return len(checks)
+
+
+def _exercise_preflight_observation_v1(tmp_path, monkeypatch):
+    """Finite synthetic acquisitions; independent expected bytes, never acceptance."""
+    from tools import validation_reliability as owner
+    from contextlib import contextmanager
+    original_vectors = tuple(tuple(row) for row in runner.build_phase_commands(
+        runner.FAST_PREFLIGHT_PHASE, tmp_path / "validation", tmp_path / "pytest"))
+    assert len(original_vectors) == 8
+    assert all(owner._preflight_vector_v1(row) for row in original_vectors)
+    assert not any(owner._preflight_vector_v1((*row, "--extra")) for row in original_vectors)
+    _exercise_preflight_startup_v1(tmp_path, monkeypatch)
+    root = tmp_path / "preflight-observations"
+    root.mkdir()
+    path = root / "source.txt"
+    expected = b"a\r\nb\rc\n"
+    path.write_bytes(expected)
+    argv = (sys.executable, "tools/validate_repair_pr_changed_file_scope.py", "--repo-root", ".")
+
+    def session(**updates):
+        limits = dict(attempts=20, bytes=200, entries=20, retained_bytes=200,
+                      git_attempts=4, stdout_bytes=4096, stderr_bytes=4096, combined_output_bytes=8192)
+        limits.update(updates)
+        return owner._PreflightObservationV1(root=root, run_id="synthetic-preflight", occurrence=3,
+            argv=argv, files={"source.txt": expected}, directories={".": (("source.txt", "file"),)},
+            limits=limits, deadline_ns=owner.time.monotonic_ns() + 60_000_000_000)
+
+    @contextmanager
+    def activate(value):
+        with owner._preflight_observation_v1(value, run_id=value.run_id,
+                occurrence=3, argv=argv, root=root):
+            yield
+
+    native_read = owner.os.read
+    value = session()
+    with monkeypatch.context() as scoped, activate(value):
+        scoped.setattr(owner.os, "read", lambda fd, n: native_read(fd, min(n, 2)))
+        assert owner._preflight_read_text_v1(path) == "a\nb\nc\n"
+        assert value.observed["bytes"] == len(expected)
+        assert value.reserved["attempts"] == 1
+        assert value.reserved["retained_bytes"] == value.observed["retained_bytes"] == len(expected)
+        assert owner._preflight_directory_v1(root) == ((path, "file"),)
+        assert value.observed["entries"] == 1
+    for fault in ("early-eof", "overdelivery", "late-deadline", "growth", "close"):
+        value = session(bytes=len(expected) + 1)
+        seen = []
+        original_close = owner.os.close
+        with monkeypatch.context() as scoped:
+            def deliver(fd, n):
+                seen.append(n)
+                if fault == "early-eof":
+                    return b""
+                if fault == "overdelivery":
+                    return b"x" * (len(expected) + 5)
+                block = native_read(fd, n)
+                if fault == "late-deadline":
+                    value.deadline_ns = owner.time.monotonic_ns()
+                if fault == "growth" and len(seen) == 1:
+                    return expected + b"!"
+                return block
+            scoped.setattr(owner.os, "read", deliver)
+            if fault == "close":
+                def failed_close(fd):
+                    original_close(fd)
+                    raise OSError("synthetic descriptor close failure")
+                scoped.setattr(owner.os, "close", failed_close)
+            with pytest.raises(owner.ValidationReliabilityError):
+                with activate(value):
+                    owner._preflight_read_bytes_v1(path)
+            failure = value.failure
+            assert failure is not None and seen
+            assert value.observed["bytes"] == (0 if fault == "early-eof" else len(expected) + 5 if fault == "overdelivery" else len(expected) + 1 if fault == "growth" else len(expected))
+            assert value.remaining["bytes"] == max(0, len(expected) + 1 - value.observed["bytes"])
+            with pytest.raises(owner.ValidationReliabilityError) as again:
+                value.check()
+            assert again.value is failure
+    # Capacity is reserved before any native read, but an attempt is still spent.
+    value = session(bytes=len(expected))
+    with monkeypatch.context() as scoped:
+        scoped.setattr(owner.os, "read", lambda *a: pytest.fail("pre-effect denial performed a read"))
+        with pytest.raises(owner.ValidationReliabilityError), activate(value):
+            owner._preflight_read_bytes_v1(path)
+    assert value.reserved["attempts"] == 1 and value.observed["bytes"] == 0
+    # Every directory entry is charged, including an unmatched over-limit entry.
+    value = session(entries=0)
+    with pytest.raises(owner.ValidationReliabilityError), activate(value):
+        owner._preflight_files_v1(root, "*.py")
+    assert value.observed["entries"] == 1 and value.remaining["entries"] == 0
+    for fault in ("denied", "iteration", "close", "duplicate"):
+        value = session()
+        real_scandir = owner.os.scandir
+        class BrokenDirectory:
+            def __init__(self):
+                self.original = real_scandir(root)
+            def __iter__(self):
+                entry = next(self.original)
+                yield entry
+                if fault == "duplicate":
+                    yield entry
+                if fault == "iteration":
+                    raise PermissionError("synthetic enumeration failure")
+            def close(self):
+                self.original.close()
+                if fault == "close":
+                    raise OSError("synthetic iterator close failure")
+        with monkeypatch.context() as scoped:
+            def broken_scan(_path):
+                if fault == "denied":
+                    raise PermissionError("synthetic directory denial")
+                return BrokenDirectory()
+            scoped.setattr(owner.os, "scandir", broken_scan)
+            with pytest.raises(owner.ValidationReliabilityError), activate(value):
+                owner._preflight_directory_v1(root)
+        assert value.observed["entries"] == (0 if fault == "denied" else 2 if fault == "duplicate" else 1)
+        assert value.failure is not None
+    with pytest.raises(owner.ValidationReliabilityError):
+        owner._preflight_directory_v1(root / "missing")
+    assert owner._preflight_kind_v1(root / "missing", optional=True) is None
+    # Parsing follows complete acquisition and keeps its independent semantics.
+    value = session()
+    with activate(value):
+        with pytest.raises(json.JSONDecodeError):
+            json.loads(owner._preflight_read_text_v1(path))
+        assert value.failure is None and value.observed["bytes"] == len(expected)
+    parent = {"PythonPath": "untrusted", "PYTHONHOME": "untrusted", "SystemRoot": "C:\\Windows", "OMP_NUM_THREADS": "1"}
+    original = dict(parent)
+    projected, projection = owner._preflight_environment_v1(argv, parent, cache_root=root / "cache")
+    assert parent == original and projected == {"SystemRoot": "C:\\Windows", "OMP_NUM_THREADS": "1",
+        "PYTHONDONTWRITEBYTECODE": "1", "PYTHONNOUSERSITE": "1", "PYTHONPYCACHEPREFIX": str(root / "cache")}
+    assert projection["registered_argv"] == argv
+    for mutation in ({**projected, "EXTRA": "1"}, {**projected, "PYTHONNOUSERSITE": "0"}):
+        assert mutation != projected
+        with pytest.raises(owner.ValidationReliabilityError):
+            owner._preflight_launch_guard_v1(argv, mutation, expected_argv=argv, expected_environment=projected)
+    with pytest.raises(ValueError):
+        owner._preflight_environment_v1(argv, {"PATH": "a", "Path": "b"}, cache_root=root / "not-created")
+    assert not (root / "not-created").exists()
+    assert owner._preflight_pth_v1(b"\xef\xbb\xbf# comment\n\n.  \n", site_root=root, bound_roots=(root,)) == (root,)
+    for raw in (b"import os\n", b"import\tos\n", b"../outside\n", b"\xff\n", b"path\0\n"):
+        with pytest.raises((ValueError, UnicodeError)):
+            owner._preflight_pth_v1(raw, site_root=root, bound_roots=(root,))
+    with pytest.raises(ValueError, match="binding unavailable"):
+        owner._preflight_startup_v1(argv, parent, binding=None, cache_root=root / "no-start")
+    with monkeypatch.context() as scoped:
+        scoped.setenv(owner.RUN_ID_ENV, "selected-without-binding")
+        scoped.setattr(owner.sys, "argv", [argv[1], *argv[2:]])
+        with pytest.raises(owner.ValidationReliabilityError, match="no original observation binding"):
+            owner._preflight_read_bytes_v1(path)
+    # Two tiny real native children exercise the existing finite pipe owner.
+    for index, limit in enumerate((32, 4), 1):
+        observation = {}
+        program = "import os; os.write(1,b'abcdefgh'); os.write(2,b'err')"
+        if limit == 4:
+            # Keep the offending child alive for the original tree owner to
+            # prove termination; a raced dead PID is deliberately not proof.
+            program += "; import time; time.sleep(30)"
+        receipt = owner.supervise_command(
+            (sys.executable, "-I", "-B", "-c", program),
+            cwd=root, run_id="synthetic-preflight-stream", phase="engineering",
+            command_index=index, evidence_root=root / "streams", environment=dict(os.environ),
+            timeout_seconds=30, mirror_stdout=False, mirror_stderr=False,
+            output_limits={"stdout_bytes": limit, "stderr_bytes": 8, "combined_output_bytes": limit + 8},
+            output_observation=observation)
+        assert not owner._command_requires_process_retention_v1(receipt)
+        assert receipt.output_observation == observation
+        assert Path(receipt.stdout_path).read_bytes() == (b"abcdefgh" if limit == 32 else b"abcd")
+        assert observation["stdout"]["retained_byte_count"] == min(limit, 8)
+        if limit == 32:
+            assert receipt.native_exit_code == 0 and receipt.failure_class is None
+            assert observation["stdout"]["complete"] and observation["stderr"]["complete"]
+        else:
+            assert receipt.failure_class is not None and observation["stdout"]["overflow"]
+            assert not observation["stdout"]["complete"]
+            assert observation["stdout"]["drained_byte_count"] >= 5
+    with monkeypatch.context() as scoped:
+        scoped.setattr(owner.subprocess, "Popen", lambda *a, **k: pytest.fail("mismatched startup launched a child"))
+        altered = {**projected, "PYTHONPATH": "injected"}
+        assert altered != projected
+        receipt = owner.supervise_command(argv, cwd=root, run_id="synthetic-launch-guard",
+            phase="engineering", command_index=3, evidence_root=root / "streams",
+            environment=altered, preflight_launch=(argv, projected), mirror_stdout=False, mirror_stderr=False)
+        assert receipt.pid is None and receipt.native_exit_code is None
+        assert receipt.failure_class == "ENGVR_PROCESS_START_FAILED"
+    with monkeypatch.context() as scoped:
+        def partial_write(stream, block):
+            stream.write(block[:1])
+            raise OSError("synthetic partial evidence write")
+        scoped.setattr(owner, "_write_evidence_chunk", partial_write)
+        observation = {}
+        receipt = owner.supervise_command(
+            (sys.executable, "-I", "-B", "-c", "import os,time; os.write(1,b'abcdefgh'); os.write(2,b'err'); time.sleep(30)"),
+            cwd=root, run_id="synthetic-partial-evidence", phase="engineering", command_index=4,
+            evidence_root=root / "streams", environment=dict(os.environ), timeout_seconds=30,
+            output_limits={"stdout_bytes": 32, "stderr_bytes": 8, "combined_output_bytes": 40},
+            output_observation=observation, mirror_stdout=False, mirror_stderr=False)
+        assert not owner._command_requires_process_retention_v1(receipt)
+        assert receipt.failure_class is not None
+        assert sum(observation[s]["retained_byte_count"] for s in ("stdout", "stderr")) == 1
+        assert not any(observation[s]["complete"] for s in ("stdout", "stderr"))
+        assert any("synthetic partial evidence write" in e for s in ("stdout", "stderr") for e in observation[s]["errors"])
+
+
+def _exercise_preflight_startup_v1(tmp_path, monkeypatch):
+    """Data-only synthetic installation. No synthetic executable is launched."""
+    import site
+    import sysconfig
+    import struct
+    from tools import validation_reliability as owner
+    for fault in (None, "hook", "config", "customizer", "loader", "version", "abi"):
+        root = tmp_path / ("startup-" + str(fault))
+        for name in ("bin", "tools", "Lib/site-packages"):
+            (root / name).mkdir(parents=True, exist_ok=True)
+        executable = root / "bin/python.exe"
+        executable.write_bytes(b"synthetic executable input; never run")
+        pth = root / "Lib/site-packages/safe.pth"
+        pth_raw = b"import os\n" if fault == "hook" else b".\n"
+        pth.write_bytes(pth_raw)
+        config = root / "bin/python._pth"
+        customizer = root / "Lib/sitecustomize.py"
+        files = {"bin/python.exe": b"synthetic executable input; never run", "Lib/site-packages/safe.pth": pth_raw}
+        if fault == "config":
+            config.write_bytes(b"import site\n")
+            files["bin/python._pth"] = b"import site\n"
+        if fault == "customizer":
+            customizer.write_bytes(b"raise RuntimeError('must not execute')\n")
+            files["Lib/sitecustomize.py"] = b"raise RuntimeError('must not execute')\n"
+        argv = (str(executable), "tools/validate_repair_pr_changed_file_scope.py", "--repo-root", ".")
+        roots = tuple(str(root / name) for name in ("", "tools", "bin", "Lib", "Lib/site-packages"))
+        env = {"SystemRoot": "C:\\Windows"}
+        if fault == "loader":
+            env["LD_PRELOAD"] = "synthetic injection"
+        observation = owner._PreflightObservationV1(root=root, run_id="synthetic-startup", occurrence=3,
+            argv=argv, files=files, directories={"Lib": (("site-packages", "directory"),),
+                "Lib/site-packages": (("safe.pth", "file"),)},
+            limits=dict(attempts=200, bytes=4096, entries=20, retained_bytes=4096,
+                git_attempts=0, stdout_bytes=0, stderr_bytes=0, combined_output_bytes=0),
+            deadline_ns=owner.time.monotonic_ns() + 60_000_000_000)
+        binding = dict(observation=observation, version=(0, 0, 0) if fault == "version" else tuple(sys.version_info[:3]),
+            abi=(sys.implementation.cache_tag, "wrong-abi" if fault == "abi" else sysconfig.get_config_var("SOABI"),
+                 struct.calcsize("P") * 8, sysconfig.get_config_var("Py_GIL_DISABLED"), getattr(sys, "abiflags", "")),
+            stdlib_roots=(str(root / "Lib"),),
+            site_roots=(str(root / "Lib/site-packages"),), loader_environment=dict(env),
+            config_paths=(str(root / "bin/pyvenv.cfg"), str(root / "pyvenv.cfg"), str(config),
+                          str(root / f"bin/python{sys.version_info.major}{sys.version_info.minor}._pth")),
+            customizer_paths=tuple(str(Path(parent) / (name + suffix)) for parent in roots
+                for name in ("sitecustomize", "usercustomize") for suffix in (".py", ".pyc", ".pyd", ".so", "")))
+        with monkeypatch.context() as scoped:
+            scoped.chdir(root)
+            scoped.setattr(owner.sys, "executable", str(executable))
+            scoped.setattr(sysconfig, "get_path", lambda key: str(root / "Lib"))
+            scoped.setattr(site, "getsitepackages", lambda: [str(root / "Lib/site-packages")])
+            if fault is None:
+                projected, receipt = owner._preflight_startup_v1(argv, env, binding=binding, cache_root=root / "cache")
+                assert projected["PYTHONNOUSERSITE"] == "1" and receipt["registered_argv"] == argv
+                assert observation.observed["bytes"] == len(files["bin/python.exe"]) + 2 * len(pth_raw)
+            else:
+                with pytest.raises(ValueError, match={"hook": "executable startup", "config": "._pth",
+                        "customizer": "customizer", "loader": "loader injection", "version": "version/ABI", "abi": "version/ABI"}[fault]):
+                    owner._preflight_startup_v1(argv, env, binding=binding, cache_root=root / "cache")
+                assert not (root / "cache").exists()
+
+
+def _exercise_preflight_candidate_debits_v1(tmp_path, monkeypatch):
+    plan = runner._prepare_execution_plan([["python", "tools/example_gate.py"]])
+    root = tmp_path / "candidate-debits"
+    root.mkdir()
+    source = root / "source.py"
+    source.write_bytes(b"source\n")
+    for bad in (True, 1.0, type("IntegerAlias", (int,), {})(1)):
+        for field in ("effects_by_occurrence", "operation_checks"):
+            kwargs = dict(repo_root=root, plan=plan, observe_paths=lambda: pytest.fail("aliased input performed I/O"),
+                check_exclusive=lambda: None, index_path=None, effects_by_occurrence={1: ()}, ignored_paths=(),
+                entry_limit=10, snapshot_byte_limit=100, read_byte_limit=100, deadline_ns=runner.time.monotonic_ns() + 60_000_000_000,
+                operation_checks={1: lambda **kw: None})
+            kwargs[field] = {bad: () if field == "effects_by_occurrence" else lambda **kw: None}
+            assert type(next(iter(kwargs[field]))) is not int
+            with pytest.raises(ValueError):
+                runner._ValidationCandidateCustodyV1(**kwargs)
+    custody = _synthetic_candidate_custody_v1(root, plan, observed_paths=lambda: ("source.py",), effects=())
+    baseline = custody.observed_read_bytes
+    custody.remaining_read_bytes = 8
+    with monkeypatch.context() as scoped:
+        scoped.setattr(runner.os, "read", lambda fd, n: b"x" * 13)
+        with pytest.raises(RuntimeError, match="READ_BUDGET"):
+            custody._read(source)
+    assert custody.observed_read_bytes == baseline + 13 and custody.remaining_read_bytes == 0
+    failure = custody.failure
+    assert custody.state == "CLEANUP_REJECTED"
+    with pytest.raises(RuntimeError, match="READ_BUDGET"):
+        custody.restore()
+    assert custody.failure is failure
+
+
+def _exercise_failed_admission_plan_v1(tmp_path, monkeypatch, fixture_factory):
+    """Real selection/acquisition/finalizer negatives, with no command dispatch."""
+    for fault in ("before-selection", "scan", "mapper", "publication"):
+        root = tmp_path / ("admission-" + fault)
+        root.mkdir()
+        primary = ValueError("synthetic admission failure: " + fault)
+        calls, writes, final = [], [], []
+        selected = {}
+        with monkeypatch.context() as scoped:
+            scoped.setattr(runner, "_repo_root", lambda: root)
+            suppliers = fixture_factory(patcher=scoped)
+            original_scan, original_mapper = suppliers["scan_capacity_source"], suppliers["mapper_read_source"]
+            def scan(paths, phase, plan):
+                calls.append("scan")
+                selected.update(paths=paths, phase=phase, plan=plan)
+                assert runner._RUN_PROVENANCE_ATTEMPTED is False
+                if fault == "scan":
+                    raise primary
+                launch = original_scan(paths, phase, plan)
+                selected["launch"] = launch
+                return launch
+            def mapper(paths, phase, plan):
+                calls.append("mapper")
+                assert paths is selected["paths"] and plan is selected["plan"]
+                assert phase == selected["phase"] and runner._RUN_PROVENANCE_ATTEMPTED is False
+                if fault == "mapper":
+                    raise primary
+                return original_mapper(paths, phase, plan)
+            def publish(*args, **kwargs):
+                writes.append(kwargs["command_count"])
+                assert runner._RUN_PROVENANCE_ATTEMPTED is True
+                if fault == "publication":
+                    raise primary
+                reliability.write_run_provenance(*args, **kwargs)
+            def implementation(_argv):
+                paths = runner._RUN_COMMANDS_ACTIVE_PATHS
+                commands = runner.build_phase_commands(runner.ALL_PHASE,
+                    paths.validation_output_root, paths.pytest_basetemp_root)
+                selected["execution"] = runner._prepare_execution_plan(commands)
+                runner._publish_active_plan_provenance(runner.ALL_PHASE, selected["execution"])
+                raise AssertionError("failed admission must never reach dispatch")
+            original_finalize = runner._finalize_validation_run
+            def finalize(**kwargs):
+                final.append(kwargs)
+                assert kwargs["receipts"] == () and kwargs["result"] != 0
+                if fault == "before-selection":
+                    assert kwargs["expected_plan"] == () and kwargs["planned_count"] == 0
+                    assert kwargs["scan_launch"] is None
+                    assert not runner._SCAN_CAPACITY_ATTEMPTED and not runner._MAPPER_READ_SOURCE_ATTEMPTED
+                else:
+                    assert kwargs["expected_plan"] is selected["plan"]
+                    assert kwargs["run_paths"] is selected["paths"] and kwargs["phase"] == selected["phase"]
+                    assert kwargs["planned_count"] == len(selected["plan"]) > 0
+                    assert kwargs["scan_launch"] is selected.get("launch")
+                    assert runner._RUN_PROVENANCE_ATTEMPTED is (fault == "publication")
+                    assert not runner._RUN_PROVENANCE_WRITTEN
+                    assert not (kwargs["run_paths"].evidence_root / "run.json").exists()
+                    counts = tuple(calls)
+                    with pytest.raises(ValueError, match="cannot be retried"):
+                        runner._publish_active_plan_provenance(runner.ALL_PHASE, selected["execution"])
+                    assert tuple(calls) == counts
+                    if fault == "publication":
+                        for field in ("expected_plan", "run_paths", "phase"):
+                            changed = dict(kwargs)
+                            changed["_supervision_state"] = dict(paths=kwargs["run_paths"],
+                                phase=kwargs["phase"], pending=False, receipt=None, errors=[])
+                            changed[field] = (tuple(list(kwargs[field])) if field == "expected_plan"
+                                else replace(kwargs[field]) if field == "run_paths" else "different-phase")
+                            assert changed[field] is not kwargs[field]
+                            # Each deliberately corrupt identity owns separate
+                            # synthetic custody. Its retained pending state must
+                            # not contaminate the real failed-publication case.
+                            original_supervision = runner._RUN_COMMANDS_SUPERVISION
+                            with monkeypatch.context() as identity_case:
+                                identity_case.setattr(runner, "_RUN_COMMANDS_SUPERVISION",
+                                    changed["_supervision_state"])
+                                with pytest.raises(ValueError, match="finalizer lost original scan launch identity"):
+                                    original_finalize(**changed)
+                                assert changed["_supervision_state"]["pending"] is (field != "expected_plan")
+                            assert runner._RUN_COMMANDS_SUPERVISION is original_supervision
+                            assert not original_supervision["pending"]
+                assert any(error is primary for error in kwargs["_supervision_state"]["errors"])
+                outcome = original_finalize(**kwargs)
+                result, cleanup, completion = outcome
+                assert result == 1 and completion.final_state == "FAIL"
+                assert completion.command_count_started == completion.command_count_completed == 0
+                assert completion.command_count_planned == kwargs["planned_count"]
+                assert cleanup == "PASS_REMOVED_EXACT_RUN_ROOT"
+                return outcome
+            scoped.setattr(runner, "_main_impl", implementation)
+            scoped.setattr(runner, "write_run_provenance", publish)
+            scoped.setattr(runner, "_finalize_validation_run", finalize)
+            scoped.setattr(runner, "cleanup_validation_run", reliability.cleanup_validation_run)
+            scoped.setattr(runner, "validate_complete_run_evidence", reliability.validate_complete_run_evidence)
+            scoped.setattr(runner, "validate_published_completion_receipt", reliability.validate_published_completion_receipt)
+            scoped.setattr(runner, "_execute_supervised_command", lambda *a, **k:
+                (_ for _ in ()).throw(AssertionError("unexpected native dispatch")))
+            if fault == "before-selection":
+                scoped.setattr(runner, "_validation_text_integrity_preflight", lambda root:
+                    (_ for _ in ()).throw(primary))
+            assert runner.main([], scan_capacity_source=scan, mapper_read_source=mapper) == 1
+            assert len(final) == 1
+            assert calls == ([] if fault == "before-selection" else ["scan"] if fault == "scan" else ["scan", "mapper"])
+            assert writes == ([0] if fault == "before-selection" else [len(selected["plan"])] if fault == "publication" else [])
+            assert not final[0]["run_paths"].process_root.exists()
+            if "launch" in selected:
+                assert all(value.process is None and value.reader is None and value.writer is None
+                           for value in selected["launch"].launch_inputs.values())

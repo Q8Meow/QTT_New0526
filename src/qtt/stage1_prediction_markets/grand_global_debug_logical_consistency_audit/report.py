@@ -10,6 +10,11 @@ import re
 import subprocess
 from typing import Any, Mapping, Sequence
 
+from tools.validation_reliability import (
+    _preflight_active_v1, _preflight_kind_v1, _preflight_read_bytes_v1,
+    _preflight_read_text_v1, _preflight_directory_v1, _preflight_files_v1,
+)
+
 from tools.ci_branch_context import (
     VALIDATION_INFRASTRUCTURE_CHANGED_PATHS,
     current_branch_context,
@@ -31,7 +36,7 @@ def json_dump(value: Any) -> str:
 
 
 def _read_text(path: Path) -> str:
-    return path.read_text(encoding="utf-8")
+    return _preflight_read_text_v1(path)
 
 
 def _read_json(path: Path) -> dict[str, Any]:
@@ -391,7 +396,7 @@ def _validation_infrastructure_delta_policy_failures(repo_root: Path) -> list[st
         key=_stable_path_key,
     ):
         path = repo_root / rel_path
-        if not path.is_file():
+        if not (_preflight_kind_v1(path, optional=True) == "file"):
             failures.append(
                 "PR152_VALIDATION_INFRASTRUCTURE_DELTA_POLICY_MISSING_TOOL: "
                 f"{rel_path}"
@@ -529,8 +534,11 @@ def _project_validation_infrastructure_report_counts(
     repo_root: Path,
     report: dict[str, Any],
 ) -> dict[str, Any]:
+    tracked_path = repo_root / c.REPORT_PATH
+    if _preflight_kind_v1(tracked_path, optional=True) is None:
+        return report
     try:
-        tracked_report = _read_json(repo_root / c.REPORT_PATH)
+        tracked_report = _read_json(tracked_path)
     except (OSError, ValueError, json.JSONDecodeError):
         return report
     diagnostics = report_payload_mismatch_diagnostics(
@@ -560,7 +568,7 @@ def _read_required_text(
     failures: list[str],
 ) -> str:
     path = root / rel_path
-    if not path.exists():
+    if not (_preflight_kind_v1(path, optional=True) is not None):
         failures.append(f"PR152_UPSTREAM_REPORT_MISSING: {key}: {rel_path.as_posix()}")
         return ""
     try:
@@ -579,7 +587,7 @@ def _read_required_json(
     failures: list[str],
 ) -> dict[str, Any]:
     path = root / rel_path
-    if not path.exists():
+    if not (_preflight_kind_v1(path, optional=True) is not None):
         failures.append(f"PR152_UPSTREAM_REPORT_MISSING: {key}: {rel_path.as_posix()}")
         return {}
     try:
@@ -593,12 +601,12 @@ def _read_required_json(
 
 def _optional_payload(root: Path, rel_path: Path, failures: list[str]) -> Any:
     path = root / rel_path
-    if not path.exists():
+    if not (_preflight_kind_v1(path, optional=True) is not None):
         return None
-    if path.is_dir():
+    if (_preflight_kind_v1(path) == "directory"):
         return {
-            "directory_entry_count": len(list(path.iterdir())),
-            "directory_file_names": sorted(child.name for child in path.iterdir()),
+            "directory_entry_count": len(list((child for child, _kind in _preflight_directory_v1(path)))),
+            "directory_file_names": sorted(child.name for child in (child for child, _kind in _preflight_directory_v1(path))),
             "present": True,
         }
     if path.suffix == ".json":
@@ -622,8 +630,8 @@ def _optional_payload(root: Path, rel_path: Path, failures: list[str]) -> Any:
 def _crosswalk_payload(root: Path, failures: list[str]) -> tuple[dict[str, Any], dict[str, Any]]:
     alias_path = root / c.PR136_SECTION_CROSSWALK_ALIAS_PATH
     canonical_path = root / c.PR136_SECTION_CROSSWALK_CANONICAL_PATH
-    alias_exists = alias_path.exists()
-    canonical_exists = canonical_path.exists()
+    alias_exists = (_preflight_kind_v1(alias_path, optional=True) is not None)
+    canonical_exists = (_preflight_kind_v1(canonical_path, optional=True) is not None)
     selected = (
         c.PR136_SECTION_CROSSWALK_ALIAS_PATH
         if alias_exists
@@ -673,16 +681,22 @@ def _git_stdout(repo_root: Path, args: Sequence[str]) -> tuple[int, str, str]:
 
 
 def _tracked_files(repo_root: Path) -> tuple[list[str], str, int]:
-    if not repo_root.exists():
+    observation = _preflight_active_v1(repo_root)
+    if _preflight_kind_v1(repo_root, optional=True) is None:
         return [], "deterministic path traversal", 0
     rc, stdout, _stderr = _git_stdout(repo_root, ["ls-files", "-z"])
+    if observation is not None:
+        from tools.validation_reliability import _scope_nul_paths
+        if type(rc) is not int or rc != 0 or type(stdout) is not str or type(_stderr) is not str:
+            observation.fail(f"tracked inventory Git failed: exit={rc}; stderr={_stderr!r}")
+        return _stable_sorted_repo_paths(_scope_nul_paths(stdout)), "git ls-files -z", 0
     if rc == 0 and stdout:
         return _stable_sorted_repo_paths(stdout.split("\0")), "git ls-files -z", 0
 
     excluded_count = 0
     paths: list[str] = []
     for path in sorted(
-        repo_root.rglob("*"),
+        _preflight_files_v1(repo_root, recursive=True, include_directories=True),
         key=lambda item: _stable_path_key(item.relative_to(repo_root)),
     ):
         rel = path.relative_to(repo_root).as_posix()
@@ -690,14 +704,14 @@ def _tracked_files(repo_root: Path) -> tuple[list[str], str, int]:
         if parts.intersection(c.INVENTORY_EXCLUDED_LOCAL_RUNTIME_PATTERNS):
             excluded_count += 1
             continue
-        if path.is_file():
+        if (_preflight_kind_v1(path, optional=True) == "file"):
             paths.append(rel)
     return _stable_sorted_repo_paths(paths), "deterministic path traversal", excluded_count
 
 
 def _is_text_file(path: Path) -> bool:
     try:
-        data = path.read_bytes()
+        data = _preflight_read_bytes_v1(path)
     except OSError:
         return False
     if b"\x00" in data:
@@ -885,7 +899,7 @@ def load_static_evidence(repo_root: Path | str) -> tuple[dict[str, Any], list[st
     for rel_path in c.OPTIONAL_CONTEXT_ARTIFACTS:
         payload = _optional_payload(root, rel_path, failures)
         optional_payloads[rel_path.as_posix()] = payload
-        if (root / rel_path).exists():
+        if (_preflight_kind_v1(root / rel_path, optional=True) is not None):
             present.add(rel_path.as_posix())
 
     inventory = _repo_inventory(root)
@@ -1219,10 +1233,10 @@ def _scan_pr152_files(root: Path) -> dict[str, Any]:
         ):
             continue
         path = root / rel_path
-        if not path.exists() or path.suffix != ".py":
+        if not (_preflight_kind_v1(path, optional=True) is not None) or path.suffix != ".py":
             continue
         inspected.append(rel_path)
-        text = path.read_text(encoding="utf-8")
+        text = _preflight_read_text_v1(path)
         try:
             tree = ast.parse(text)
         except SyntaxError:
@@ -1487,6 +1501,7 @@ def _build_payload(evidence: Mapping[str, Any]) -> dict[str, Any]:
 
 
 def build_report(repo_root: Path | str) -> dict[str, Any]:
+    _preflight_active_v1(repo_root)
     root = Path(repo_root).resolve()
     evidence, failures = load_static_evidence(root)
     if failures:

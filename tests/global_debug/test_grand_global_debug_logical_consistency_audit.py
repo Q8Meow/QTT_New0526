@@ -58,6 +58,20 @@ def _copy_inputs(tmp_path: Path) -> Path:
         target = tmp_path / rel_path
         target.parent.mkdir(parents=True, exist_ok=True)
         target.write_bytes(source.read_bytes())
+    # The current read owner requires genuine repository discovery. These
+    # disposable copied fixtures are synthetic, never accepted source inputs.
+    import os
+    import shutil
+    executable = shutil.which("git")
+    assert executable is not None
+    environment = {k: v for k, v in os.environ.items() if not k.upper().startswith("GIT_")}
+    environment.update(GIT_CONFIG_NOSYSTEM="1", GIT_CONFIG_GLOBAL=os.devnull,
+        GIT_TERMINAL_PROMPT="0", GIT_ALLOW_PROTOCOL="")
+    for arguments in (("-c", "init.templateDir=", "init", "-q"), ("add", "--", ".")):
+        completed = subprocess.run([executable, *arguments], cwd=tmp_path,
+            env=environment, stdin=subprocess.DEVNULL, shell=False, capture_output=True,
+            timeout=30, check=False)
+        assert completed.returncode == 0, completed.stderr
     return tmp_path
 
 
@@ -584,7 +598,7 @@ def test_pr152_validation_infrastructure_delta_is_policy_based_not_branch_based(
     monkeypatch.setattr(
         pr152_report,
         "current_branch_context",
-        lambda repo_root: BranchContext(branch="unrelated-branch", source="unit-test"),
+        lambda repo_root, **_kwargs: BranchContext(branch="unrelated-branch", source="unit-test"),
     )
     tracked, rebuilt = _pr152_validation_infrastructure_count_payloads()
     assert (
@@ -764,7 +778,7 @@ def test_explicit_tracked_write_guard_allows_only_pr152_report_on_main(monkeypat
     monkeypatch.setattr(
         pr152_report,
         "current_branch_context",
-        lambda repo_root: BranchContext(branch="main", source="unit-test"),
+        lambda repo_root, **_kwargs: BranchContext(branch="main", source="unit-test"),
     )
     monkeypatch.setattr(pr152_report, "_changed_paths", lambda repo_root: [report_path])
     assert pr152_report.validate_repository_artifacts(REPO_ROOT) == [
@@ -795,7 +809,7 @@ def test_pr152_fast_preflight_workflow_path_is_exactly_scoped(monkeypatch) -> No
     monkeypatch.setattr(
         pr152_report,
         "current_branch_context",
-        lambda repo_root: BranchContext(
+        lambda repo_root, **_kwargs: BranchContext(
             branch="pr201-pr152-currentization-after-merge",
             source="unit-test",
         ),
@@ -817,11 +831,37 @@ def test_missing_and_malformed_upstream_fail_closed(tmp_path) -> None:
     _evidence, missing = pr152_report.load_static_evidence(tmp_path / "empty")
     assert any(failure.startswith("PR152_UPSTREAM_REPORT_MISSING") for failure in missing)
 
+    # Optional comparison absence retains the original builder result;
+    # inaccessible or disappearing observed input stays infrastructure failure.
+    import pytest
+    from tools import validation_reliability as owner
+    from unittest.mock import patch
+    optional_root = tmp_path / "optional-comparison"
+    optional_root.mkdir()
+    untouched = {"independent_fixture": True}
+    assert pr152_report._project_validation_infrastructure_report_counts(optional_root, untouched) is untouched
+    with patch.object(pr152_report, "_preflight_kind_v1", side_effect=owner.ValidationReliabilityError(
+            "ENGVR_PREPUBLICATION_CUSTODY_FAILED", "synthetic optional status denied")):
+        with pytest.raises(owner.ValidationReliabilityError, match="optional status denied"):
+            pr152_report._project_validation_infrastructure_report_counts(optional_root, untouched)
+    with patch.object(pr152_report, "_preflight_kind_v1", return_value="file"), patch.object(
+            pr152_report, "_read_json", side_effect=owner.ValidationReliabilityError(
+                "ENGVR_PREPUBLICATION_CUSTODY_FAILED", "synthetic observed input lost")):
+        with pytest.raises(owner.ValidationReliabilityError, match="observed input lost"):
+            pr152_report._project_validation_infrastructure_report_counts(optional_root, untouched)
     copied = _copy_inputs(tmp_path / "malformed")
     bad_path = copied / c.PR150_REPORT_PATH
     bad_path.write_text("{", encoding="utf-8")
     _evidence, malformed = pr152_report.load_static_evidence(copied)
     assert any(failure.startswith("PR152_UPSTREAM_REPORT_PARSE_ERROR") for failure in malformed)
+
+    import pytest
+    from tools import validation_reliability as owner
+    from unittest.mock import patch
+    with patch.object(owner.Path, "open", side_effect=PermissionError("synthetic upstream read denied")):
+        with pytest.raises(owner.ValidationReliabilityError, match="upstream read denied"):
+            pr152_report._read_json(REPO_ROOT / c.PR151_REPORT_PATH)
+
 
 
 def test_synthetic_chain_mismatch_and_orphan_fail_closed(tmp_path) -> None:

@@ -35,51 +35,7 @@ def _run_pr152_repository_read(
                 or path.startswith("/")
                 or any(part in {"", ".", ".."} for part in path.split("/"))):
             raise ValueError("invalid literal PR152 diff path")
-    root_text = str(repo_root)
-    if any(ord(character) < 32 or ord(character) == 127 for character in root_text):
-        raise ValueError("invalid repository root text")
-    root = pathlib.Path(repo_root).resolve(strict=True)
-    if not root.is_dir():
-        raise NotADirectoryError(str(root))
-    environment: dict[str, str] = {}
-    seen: set[str] = set()
-    for key, value in os.environ.items():
-        if (type(key) is not str or type(value) is not str or not key
-                or "=" in key or "\x00" in key or "\x00" in value
-                or key.upper() in seen):
-            raise ValueError("invalid or case-colliding child environment")
-        seen.add(key.upper())
-        if not key.upper().startswith("GIT_"):
-            environment[key] = value
-    environment.update({
-        "GIT_CEILING_DIRECTORIES": str(root.parent),
-        "GIT_OPTIONAL_LOCKS": "0", "GIT_TERMINAL_PROMPT": "0",
-        "GIT_NO_REPLACE_OBJECTS": "1", "GIT_NO_LAZY_FETCH": "1",
-        "GIT_ALLOW_PROTOCOL": "", "GIT_CONFIG_NOSYSTEM": "1",
-        "GIT_CONFIG_SYSTEM": os.devnull, "GIT_CONFIG_GLOBAL": os.devnull,
-        "GIT_TRACE2": "0", "GIT_TRACE2_PERF": "0", "GIT_TRACE2_EVENT": "0",
-        "GIT_CONFIG_COUNT": "2", "GIT_CONFIG_KEY_0": "core.fsmonitor",
-        "GIT_CONFIG_VALUE_0": "false", "GIT_CONFIG_KEY_1": "protocol.allow",
-        "GIT_CONFIG_VALUE_1": "never",
-    })
-    prefix = ["git", "--no-pager", "--literal-pathspecs", "-c",
-              "core.fsmonitor=false", "-c", "protocol.allow=never"]
-    options = dict(cwd=root, env=environment, stdin=subprocess.DEVNULL,
-                   shell=False, check=False, capture_output=True,
-                   text=True, encoding="utf-8", errors="strict")
-    discovery = subprocess.run([*prefix, "rev-parse", "--show-toplevel"], **options)
-    if type(discovery.returncode) is not int or discovery.returncode != 0:
-        raise ValueError(f"PR152 repository discovery failed: {discovery!r}")
-    discovered = discovery.stdout.removesuffix("\n").removesuffix("\r")
-    if (not discovered or any(ord(character) < 32 or ord(character) == 127
-                               for character in discovered)):
-        raise ValueError("invalid Git repository root text")
-    if pathlib.Path(discovered).resolve(strict=True) != root:
-        raise ValueError("REPOSITORY_ROOT_MISMATCH")
-    completed = subprocess.run([*prefix, *selected], **options)
-    if type(completed.returncode) is not int:
-        raise ValueError("Git read did not retain an integer native exit")
-    return completed
+    return _run_repository_read_process(repo_root, selected)
 
 BRANCH_CONTEXT_ENV_CANDIDATES = (
     "GITHUB_HEAD_REF",
@@ -2071,7 +2027,148 @@ PR159S_ALLOWED_CHANGED_PATHS = frozenset(
         "src/qtt/stage1_prediction_markets/pr160_split_reclassification_route_closure/validator.py",
     }
 )
+# Exact engineering classification only. The inherited owner report remains
+# read-only; this predicate does not establish byte custody or acceptance.
+QTT_V35_PREFLIGHT_REPAIR_CHANGED_PATHS = frozenset({
+    'src/qtt/agents/pr169_agent_orch1_resolvers.py',
+    'src/qtt/optimization/pr168_qopt1/validator.py',
+    'src/qtt/ranking/pr168_rank4/validator.py',
+    'src/qtt/stage1_prediction_markets/grand_global_debug_logical_consistency_audit/report.py',
+    'src/qtt/stage1_prediction_markets/multisource_safe_nonlive_dataset_expansion_strict_qku_coverage/formula_test_vectors.py',
+    'src/qtt/stage1_prediction_markets/pr157_completion_materialization_bridge/validator.py',
+    'src/qtt/stage1_prediction_markets/pr158_owner_response_selection_readiness_bridge/io.py',
+    'src/qtt/stage1_prediction_markets/pr158_owner_response_selection_readiness_bridge/validator.py',
+    'src/qtt/stage1_prediction_markets/pr159_official_source_completion_bridge/validator.py',
+    'src/qtt/stage1_prediction_markets/pr159r_source_locator_value_capture/io.py',
+    'src/qtt/stage1_prediction_markets/pr159r_source_locator_value_capture/validator.py',
+    'src/qtt/stage1_prediction_markets/pr162e_q_quantum_automapper/io.py',
+    'src/qtt/stage1_prediction_markets/pr162e_q_quantum_automapper/report_writer.py',
+    'src/qtt/stage1_prediction_markets/pr162e_q_quantum_automapper/validator.py',
+    'src/qtt/stage1_prediction_markets/pr165_d3_quantum_aware_scenario_selection_v3/io.py',
+    'src/qtt/stage1_prediction_markets/pr165_d3_quantum_aware_scenario_selection_v3/validator.py',
+    'src/qtt/stage1_prediction_markets/pr166_q_quantum_classical_hybrid_comparator/io.py',
+    'src/qtt/stage1_prediction_markets/pr166_q_quantum_classical_hybrid_comparator/validator.py',
+    'src/qtt/stage1_prediction_markets/pr166_qb_bounded_quantum_benchmark/io.py',
+    'src/qtt/stage1_prediction_markets/pr166_qb_bounded_quantum_benchmark/report_writer.py',
+    'src/qtt/stage1_prediction_markets/pr166_qb_bounded_quantum_benchmark/validator.py',
+    'src/qtt/stage1_prediction_markets/pr166_qc_quantum_selected_replay_paper_retest/io.py',
+    'src/qtt/stage1_prediction_markets/pr166_qc_quantum_selected_replay_paper_retest/report_writer.py',
+    'src/qtt/stage1_prediction_markets/pr166_qc_quantum_selected_replay_paper_retest/validator.py',
+    'src/qtt/stage1_prediction_markets/pr167_open_trade_simulator_integration/io.py',
+    'src/qtt/stage1_prediction_markets/pr167_open_trade_simulator_integration/report_writer.py',
+    'src/qtt/stage1_prediction_markets/pr167_open_trade_simulator_integration/validator.py',
+    'src/qtt/stage1_prediction_markets/pr168_rp5d_executability/validator.py',
+    'src/qtt/stage1_prediction_markets/qku_computation_control_plane/agent_policy.py',
+    'src/qtt/stage1_prediction_markets/qku_computation_control_plane/context.py',
+    'src/qtt/stage1_prediction_markets/qku_computation_control_plane/contextual_computability.py',
+    'src/qtt/stage1_prediction_markets/qku_computation_control_plane/evidence.py',
+    'src/qtt/stage1_prediction_markets/qku_computation_control_plane/implementation_registry.py',
+    'src/qtt/stage1_prediction_markets/qku_computation_control_plane/input_resolver.py',
+    'src/qtt/stage1_prediction_markets/qku_computation_control_plane/latency_policy.py',
+    'src/qtt/stage1_prediction_markets/qku_computation_control_plane/model_risk.py',
+    'src/qtt/stage1_prediction_markets/qku_computation_control_plane/models.py',
+    'src/qtt/stage1_prediction_markets/qku_computation_control_plane/oracle_contracts.py',
+    'src/qtt/stage1_prediction_markets/qku_computation_control_plane/persistence.py',
+    'src/qtt/stage1_prediction_markets/qku_computation_control_plane/protocols.py',
+    'src/qtt/stage1_prediction_markets/qku_computation_control_plane/receipts.py',
+    'src/qtt/stage1_prediction_markets/qku_computation_control_plane/serialization.py',
+    'src/qtt/stage1_prediction_markets/qku_computation_control_plane/service.py',
+    'src/qtt/stage1_prediction_markets/qku_computation_control_plane/sqlite_reference.py',
+    'src/qtt/stage1_prediction_markets/qku_computation_control_plane/stack_resolver.py',
+    'src/qtt/stage1_prediction_markets/qku_computation_control_plane/validation.py',
+    'src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/compact_records.py',
+    'tests/fail_closed/test_pytest_fresh_basetemp_helper.py',
+    'tests/fail_closed/test_run_validation_gates.py',
+    'tests/global_debug/test_grand_global_debug_logical_consistency_audit.py',
+    'tests/governance/test_qtt_owner_global_override_directive_currentization_and_internal_gate_release.py',
+    'tests/pr168_qopt1/test_qopt1_builder.py',
+    'tests/pr168_rank4/test_rank4_builder.py',
+    'tests/pr168_rp2/test_file_aliases.py',
+    'tests/pr168_rp5a/_helpers.py',
+    'tests/pr168_rp5a/test_cross_graph_consistency.py',
+    'tests/pr168_rp5a/test_no_validation_scope_removal.py',
+    'tests/pr168_rp5a/test_scan_is_bounded.py',
+    'tests/pr168_rp5b/test_rp5a_inputs_exist.py',
+    'tests/pr168_rp5d/test_rp5d_validation.py',
+    'tests/pr169_agent_orch1/test_resolvers.py',
+    'tests/pr169_dash1_ui1/test_ui1_generated_projections_not_manual_truth.py',
+    'tests/pr169_pretrade1/test_pr169_pretrade1.py',
+    'tests/pr169_readiness1/test_pr169_readiness1.py',
+    'tests/stage1_prediction_markets/multisource_safe_nonlive_dataset_expansion_strict_qku_coverage/test_pr162c_formula_implementations_have_test_vectors.py',
+    'tests/stage1_prediction_markets/nonlive_replay_paper_data_adapter_quantum_forward_bridge/test_pr162_safe_nonlive_replay_paper_data_adapter_quantum_forward_bridge.py',
+    'tests/stage1_prediction_markets/pr157_completion_materialization_bridge/test_pr157_generated_artifacts_are_deterministic.py',
+    'tests/stage1_prediction_markets/pr158_owner_response_selection_readiness_bridge/test_pr158_generated_artifacts_are_deterministic.py',
+    'tests/stage1_prediction_markets/pr159_official_source_completion_bridge/test_pr159_generated_artifacts_are_deterministic.py',
+    'tests/stage1_prediction_markets/pr159r_source_locator_value_capture/helpers.py',
+    'tests/stage1_prediction_markets/pr159r_source_locator_value_capture/test_pr159r_generated_artifacts_are_deterministic.py',
+    'tests/stage1_prediction_markets/pr159r_source_locator_value_capture/test_pr159r_selection_readiness_update_metadata_only.py',
+    'tests/stage1_prediction_markets/pr162e_q_quantum_automapper/test_pr162e_q_artifacts.py',
+    'tests/stage1_prediction_markets/pr165_d3_quantum_aware_scenario_selection_v3/test_pr165_d3_build_outputs.py',
+    'tests/stage1_prediction_markets/pr166_q_quantum_classical_hybrid_comparator/test_pr166_q_build_outputs.py',
+    'tests/stage1_prediction_markets/pr166_qb_bounded_quantum_benchmark/test_pr166_qb_artifacts.py',
+    'tests/stage1_prediction_markets/pr166_qc_quantum_selected_replay_paper_retest/test_pr166_qc_artifacts.py',
+    'tests/stage1_prediction_markets/pr167_open_trade_simulator_integration/test_pr167_artifacts.py',
+    'tests/stage1_prediction_markets/qku_computation_control_plane/accounting/test_contract_matrix.py',
+    'tests/stage1_prediction_markets/qku_computation_control_plane/security/test_input_validation.py',
+    'tests/stage1_prediction_markets/qku_computation_control_plane/tranche_b/test_resolution_pipeline.py',
+    'tests/stage1_prediction_markets/qku_computation_control_plane/tranche_b/test_service_operations.py',
+    'tests/stage1_prediction_markets/qku_computation_control_plane/tranche_e/__init__.py',
+    'tests/stage1_prediction_markets/qku_computation_control_plane/tranche_e/test_adversarial_matrix.py',
+    'tests/stage1_prediction_markets/qku_computation_control_plane/tranche_e/test_integration_matrix.py',
+    'tests/stage1_prediction_markets/qku_computation_control_plane/tranche_f/test_model_risk_llm_matrix.py',
+    'tests/tools/test_currentize_pr152_after_generated_artifacts.py',
+    'tests/tools/test_validate_repair_pr_changed_file_scope.py',
+    'tools/build_pr168_rp5a_legacy_semantic_audit.py',
+    'tools/build_pr169_dash1_owner_dashboard_ui.py',
+    'tools/changed_area_validation_router.py',
+    'tools/ci_branch_context.py',
+    'tools/currentize_pr152_after_generated_artifacts.py',
+    'tools/independent_validate_qku_computation_control_plane.py',
+    'tools/independent_validate_qku_computation_control_plane_accounting.py',
+    'tools/independent_validate_qku_computation_control_plane_architecture.py',
+    'tools/independent_validate_qku_computation_control_plane_e.py',
+    'tools/independent_validate_qku_computation_control_plane_execution.py',
+    'tools/independent_validate_qku_computation_control_plane_model_risk.py',
+    'tools/independent_validate_qku_computation_control_plane_quantum.py',
+    'tools/pr168_rp2_reports.py',
+    'tools/pr168_rp5a_agent_touchpoints.py',
+    'tools/pr168_rp5a_git_grep_scanner.py',
+    'tools/pr168_rp5a_identity_dependency.py',
+    'tools/pr168_rp5a_json_scanner.py',
+    'tools/pr168_rp5a_row_field_hit_index.py',
+    'tools/pr168_rp5a_term_taxonomy.py',
+    'tools/pr168_rp5a_validation_dependency_graph.py',
+    'tools/pr168_rp5a_validator.py',
+    'tools/pr168_rp5b_rp5a_loader.py',
+    'tools/pr168_rp5b_validator.py',
+    'tools/run_pytest_fresh_basetemp.py',
+    'tools/run_validation_gates.py',
+    'tools/validate_pr162e_q_quantum_automapper.py',
+    'tools/validate_pr166_qb_bounded_quantum_benchmark.py',
+    'tools/validate_pr166_qc_quantum_selected_replay_paper_retest.py',
+    'tools/validate_pr168_rp5a_legacy_semantic_audit.py',
+    'tools/validate_pr169_pretrade1.py',
+    'tools/validate_pr169_readiness1.py',
+    'tools/validate_repair_pr_changed_file_scope.py',
+    'tools/validation_reliability.py',
+    '.github/workflows/qtt_validation.yml',
+    'src/qtt/stage1_prediction_markets/qku_computation_control_plane/source_policy.py',
+    'tools/validate_no_runtime_artifacts.py',
+    'tests/fail_closed/test_no_runtime_artifacts_strict.py',
+    'tests/stage1_prediction_markets/qku_computation_control_plane/tranche_h/test_contract_matrix.py',
+    'tools/validate_nested_validator_contracts.py',
+    'tools/validation_inventory.py',
+    'tools/cross_platform_path_invariant.py',
+    'tests/tools/test_ci_branch_context.py',
+    'tests/tools/test_changed_area_validation_router.py',
+    'tests/tools/test_cross_platform_path_invariant.py',
+    'tests/tools/test_validation_inventory.py',
+    'src/qtt/stage1_prediction_markets/qtt_owner_global_override_directive_currentization_and_internal_gate_release/report.py',
+    'tools/validation_scope_registry.py',
+})
+
 EXPLICIT_DOWNSTREAM_REPAIR_BRANCH_CHANGED_PATHS = {
+    'repair/main-cumulative-v35-final-r5-local-20260922': QTT_V35_PREFLIGHT_REPAIR_CHANGED_PATHS,
     ENGVR_IMPLEMENTATION_BRANCH: ENGVR_CHANGED_PATHS,
     ST12_ARCHITECTURE_ORACLE_PREREQUISITE_REPAIR_BRANCH: (
         ST12_ARCHITECTURE_ORACLE_PREREQUISITE_REPAIR_CHANGED_PATHS
@@ -2698,6 +2795,10 @@ BRANCH_CONTEXT_GATE_POLICIES = {
 
 
 def _git_stdout(repo_root: pathlib.Path, args: Sequence[str]) -> tuple[int, str, str]:
+    from tools.validation_reliability import _preflight_active_v1
+    if _preflight_active_v1(repo_root) is not None:
+        completed = _run_validation_scope_read(repo_root, args)
+        return completed.returncode, completed.stdout, completed.stderr
     completed = subprocess.run(
         ["git", *args],
         cwd=repo_root,
@@ -3596,3 +3697,93 @@ def is_pr_or_later_branch(
         return True
     pr_number = roadmap_pr_number(branch)
     return pr_number is not None and pr_number >= minimum_pr
+
+
+def _run_repository_read_process(repo_root: pathlib.Path, selected: Sequence[str]) -> subprocess.CompletedProcess[str]:
+    from tools.validation_reliability import _preflight_active_v1, _preflight_git_process_v1, _preflight_chain_v1
+    observation = _preflight_active_v1(repo_root)
+    if observation is not None:
+        observation.reserve("attempts")
+        try:
+            _preflight_chain_v1(pathlib.Path(repo_root).absolute())
+        except BaseException as exc:
+            observation.fail(exc)
+    root_text = str(repo_root)
+    if any(ord(character) < 32 or ord(character) == 127 for character in root_text):
+        raise ValueError("invalid repository root text")
+    root = pathlib.Path(repo_root).resolve(strict=True)
+    if not root.is_dir():
+        raise NotADirectoryError(str(root))
+    environment: dict[str, str] = {}
+    seen: set[str] = set()
+    for key, value in os.environ.items():
+        if (type(key) is not str or type(value) is not str or not key
+                or "=" in key or "\x00" in key or "\x00" in value
+                or key.upper() in seen):
+            raise ValueError("invalid or case-colliding child environment")
+        seen.add(key.upper())
+        if not key.upper().startswith("GIT_"):
+            environment[key] = value
+    environment.update({
+        "GIT_CEILING_DIRECTORIES": str(root.parent),
+        "GIT_OPTIONAL_LOCKS": "0", "GIT_TERMINAL_PROMPT": "0",
+        "GIT_NO_REPLACE_OBJECTS": "1", "GIT_NO_LAZY_FETCH": "1",
+        "GIT_ALLOW_PROTOCOL": "", "GIT_CONFIG_NOSYSTEM": "1",
+        "GIT_CONFIG_SYSTEM": os.devnull, "GIT_CONFIG_GLOBAL": os.devnull,
+        "GIT_TRACE2": "0", "GIT_TRACE2_PERF": "0", "GIT_TRACE2_EVENT": "0",
+        "GIT_CONFIG_COUNT": "2", "GIT_CONFIG_KEY_0": "core.fsmonitor",
+        "GIT_CONFIG_VALUE_0": "false", "GIT_CONFIG_KEY_1": "protocol.allow",
+        "GIT_CONFIG_VALUE_1": "never",
+    })
+    prefix = ["git", "--no-pager", "--literal-pathspecs", "-c",
+              "core.fsmonitor=false", "-c", "protocol.allow=never"]
+    options = dict(cwd=root, env=environment, stdin=subprocess.DEVNULL,
+                   shell=False, check=False, capture_output=True,
+                   text=True, encoding="utf-8", errors="strict")
+    def acquire(arguments):
+        if observation is not None:
+            return _preflight_git_process_v1(observation, tuple([*prefix, *arguments]), root=root, environment=environment)
+        return subprocess.run([*prefix, *arguments], **options)
+    discovery = acquire(("rev-parse", "--show-toplevel"))
+    if type(discovery.returncode) is not int or discovery.returncode != 0:
+        raise ValueError(f"PR152 repository discovery failed: {discovery!r}")
+    discovered = discovery.stdout.removesuffix("\n").removesuffix("\r")
+    if (not discovered or any(ord(character) < 32 or ord(character) == 127
+                               for character in discovered)):
+        raise ValueError("invalid Git repository root text")
+    if pathlib.Path(discovered).resolve(strict=True) != root:
+        raise ValueError("REPOSITORY_ROOT_MISMATCH")
+    completed = acquire(selected)
+    if type(completed.returncode) is not int:
+        raise ValueError("Git read did not retain an integer native exit")
+    return completed
+
+
+def _run_validation_scope_read(
+    repo_root: pathlib.Path, arguments: Sequence[str],
+) -> subprocess.CompletedProcess[str]:
+    """Separate closed scope profile; the original PR152 profile stays closed."""
+    if isinstance(arguments, (str, bytes)) or not isinstance(arguments, Sequence):
+        raise ValueError("scope read arguments must be a string sequence")
+    if not all(type(value) is str for value in arguments):
+        raise ValueError("scope read arguments must be exact strings")
+    selected = tuple(arguments)
+    fixed = {
+        ("status", "--porcelain=v1", "-z", "--untracked-files=all", "--ignore-submodules=none"),
+        ("branch", "--show-current"),
+        ("rev-parse", "--abbrev-ref", "HEAD"),
+    }
+    refs = ()
+    if selected in fixed:
+        pass
+    elif len(selected) == 4 and selected[:2] == ("merge-base", "--all"):
+        refs = selected[2:]
+    elif len(selected) == 10 and selected[:7] == (
+        "diff", "--name-only", "-z", "--no-renames", "--no-ext-diff", "--no-textconv", "--ignore-submodules=none",
+    ) and selected[-1] == "--":
+        refs = selected[7:9]
+    else:
+        raise ValueError("unadmitted scope Git read vector")
+    if any(not ref or ref.startswith("-") or any(c in ref for c in "\0\r\n") for ref in refs):
+        raise ValueError("invalid exact scope comparison reference")
+    return _run_repository_read_process(repo_root, selected)

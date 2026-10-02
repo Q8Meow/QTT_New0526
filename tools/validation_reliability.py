@@ -261,16 +261,17 @@ class CommandExecutionReceiptV1:
     termination_state: str
     stdout_path: str
     stderr_path: str
-    stdout_byte_count: int
-    stderr_byte_count: int
+    stdout_byte_count: int | None
+    stderr_byte_count: int | None
     stdout_required_markers: tuple[str, ...]
     stdout_marker_state: str
-    stderr_was_nonempty: bool
+    stderr_was_nonempty: bool | None
     failure_class: str | None
 
     registered_argv: tuple[str, ...] = field(default=(), kw_only=True)
     removed_environment_keys: tuple[str, ...] = field(default=(), kw_only=True)
     fixed_environment_controls: tuple[tuple[str, str], ...] = field(default=(), kw_only=True)
+    output_observation: dict | None = field(default=None, kw_only=True)
 
     def __post_init__(self) -> None:
         if self.schema_version != SCHEMA_VERSION:
@@ -283,9 +284,16 @@ class CommandExecutionReceiptV1:
             raise ValueError("argv must be a nonempty tuple of strings")
         if self.elapsed_monotonic_seconds < 0:
             raise ValueError("elapsed_monotonic_seconds cannot be negative")
-        if self.stdout_byte_count < 0 or self.stderr_byte_count < 0:
-            raise ValueError("output byte counts cannot be negative")
-        if self.stderr_was_nonempty != (self.stderr_byte_count > 0):
+        for stream in ("stdout", "stderr"):
+            count = getattr(self, stream + "_byte_count")
+            if count is None:
+                if (self.failure_class is None or self.output_observation is None
+                        or self.output_observation[stream]["retained_byte_count"] is not None
+                        or self.output_observation[stream]["complete"]):
+                    raise ValueError("unmeasured output requires failed incomplete bounded evidence")
+            elif count < 0:
+                raise ValueError("output byte counts cannot be negative")
+        if self.stderr_was_nonempty != (None if self.stderr_byte_count is None else self.stderr_byte_count > 0):
             raise ValueError("stderr_was_nonempty is inconsistent")
         if self.start_failure_class is not None and self.pid is not None:
             raise ValueError("a start failure cannot claim a child PID")
@@ -4306,7 +4314,9 @@ class _NestedPytestEvidenceV1:
                 name = item.name
                 if name.casefold() in folded_names:
                     self._fail("nested evidence names have a case collision")
-                info = item.stat(follow_symlinks=False)
+                # Use the same pathname API as subsequent custody reads.
+                # Windows DirEntry.stat omits device/inode/link information.
+                info = (directory / name).lstat()
                 if (_stat_is_reparse_point(info) or stat.S_ISLNK(info.st_mode)
                         or not (stat.S_ISREG(info.st_mode) or stat.S_ISDIR(info.st_mode))
                         or (stat.S_ISREG(info.st_mode) and info.st_nlink != 1)):
@@ -4888,6 +4898,8 @@ def _consume_available_pipe(
         return False, True
     if not chunk:
         return False, True
+    if "cleanup_drained_byte_count" in outcome and not outcome.get("evidence_write_enabled", True):
+        outcome["cleanup_drained_byte_count"] += len(chunk)
     outcome["drained_byte_count"] = int(outcome.get("drained_byte_count", 0)) + len(chunk)
     overflow = remaining is not None and len(chunk) > remaining
     admitted = chunk if remaining is None else chunk[:remaining]
@@ -4984,6 +4996,7 @@ def _supervise_native_output(
                         pipe, stream, outcome=outcome, native_terminal=native_exit is not None)
                     progress = progress or consumed
                     pipe_terminal[index] = eof
+                    outcome["eof_observed"] = eof
                 if any("evidence_error" in value for value in outcomes):
                     for value in outcomes:
                         value["evidence_write_enabled"] = False
@@ -5284,9 +5297,21 @@ def supervise_command(
     platform_name: str | None = None,
     launch_input: _ScanLaunchInput | None = None,
     execution_deadline_ns: int | None = None,
+    output_limits: dict | None = None,
+    output_observation: dict | None = None,
+    preflight_launch: tuple | None = None,
 ) -> CommandExecutionReceiptV1:
     """Launch one shell-free child and retain PID, output, and native exit custody."""
 
+    if output_limits is not None:
+        if (type(output_limits) is not dict
+                or set(output_limits) != {"stdout_bytes", "stderr_bytes", "combined_output_bytes"}
+                or any(type(v) is not int or v < 0 for v in output_limits.values())
+                or output_limits["stdout_bytes"] + output_limits["stderr_bytes"] > output_limits["combined_output_bytes"]
+                or type(output_observation) is not dict or output_observation):
+            raise ValueError("exact finite separate and combined native output operands required")
+    elif output_observation is not None:
+        raise ValueError("native output observation requires finite limits")
     if execution_deadline_ns is not None:
         remaining_seconds = _execution_remaining_seconds_v1(execution_deadline_ns)
         if timeout_seconds is not None and (type(timeout_seconds) not in (int, float)
@@ -5363,6 +5388,9 @@ def supervise_command(
         "evidence_write_enabled": True,
         "mirror": sys.stderr if mirror_stderr else None,
     }
+    if output_limits is not None:
+        for stream, outcome in (("stdout", stdout_outcome), ("stderr", stderr_outcome)):
+            outcome.update(retention_limit=output_limits[stream + "_bytes"], cleanup_drained_byte_count=0)
     process: subprocess.Popen[bytes] | None = None
     selected_argv: tuple[str, ...] | None = None
     selected_markers: tuple[str, ...] | None = None
@@ -5386,6 +5414,13 @@ def supervise_command(
                     environment=environment,
                 )
             )
+            if preflight_launch is not None:
+                if type(preflight_launch) is not tuple or len(preflight_launch) != 2:
+                    raise ValueError("original preflight launch projection required")
+                _preflight_launch_guard_v1(selected_argv, selected_environment,
+                    expected_argv=preflight_launch[0], expected_environment=preflight_launch[1])
+            elif _preflight_vector_v1(selected_argv) and (os.environ if selected_environment is None else selected_environment).get(RUN_ID_ENV):
+                raise ValueError("selected canonical preflight has no parent startup projection")
             original_stdin = subprocess.DEVNULL
             if launch_input is not None:
                 if type(launch_input) is not _ScanLaunchInput:
@@ -5476,12 +5511,12 @@ def supervise_command(
             stdout_count = stdout_path.stat().st_size
         except OSError as exc:
             stdout_outcome.setdefault("evidence_error", exc)
-            stdout_count = 0
+            stdout_count = None if output_limits is not None else 0
         try:
             stderr_count = stderr_path.stat().st_size
         except OSError as exc:
             stderr_outcome.setdefault("evidence_error", exc)
-            stderr_count = 0
+            stderr_count = None if output_limits is not None else 0
         if process is not None and failure_class != "ENGVR_PROCESS_TERMINATION_FAILED" and any(
             "evidence_error" in outcome for outcome in (stdout_outcome, stderr_outcome)
         ):
@@ -5521,6 +5556,22 @@ def supervise_command(
                 if failure_class is None and missing_markers:
                     failure_class = "ENGVR_REQUIRED_MARKER_MISSING"
         elapsed = time.monotonic() - started_monotonic
+        bounded_observation = None
+        if output_limits is not None:
+            bounded_observation = {"combined_output_grant": output_limits["combined_output_bytes"]}
+            for stream, outcome in (("stdout", stdout_outcome), ("stderr", stderr_outcome)):
+                bounded_observation[stream] = {
+                    "retention_limit": outcome["retention_limit"],
+                    "drained_byte_count": outcome["drained_byte_count"] if process is not None else None,
+                    "cleanup_drained_byte_count": outcome["cleanup_drained_byte_count"] if process is not None else None,
+                    "retained_byte_count": (stdout_count if stream == "stdout" else stderr_count) if process is not None else None,
+                    "overflow": bool(outcome.get("overflow", False)),
+                    "complete": (bool(outcome.get("evidence_complete", False)) and "evidence_error" not in outcome
+                        and bool(outcome.get("eof_observed", False)) and bool(outcome.get("evidence_write_enabled", True))
+                        and (stdout_count if stream == "stdout" else stderr_count) == outcome["drained_byte_count"] and process is not None),
+                    "errors": [str(error) for error in outcome.get("errors", (outcome["evidence_error"],) if "evidence_error" in outcome else ())],
+                }
+            output_observation.update(bounded_observation)
         receipt = CommandExecutionReceiptV1(
             schema_version=SCHEMA_VERSION,
             run_id=run_id,
@@ -5544,8 +5595,9 @@ def supervise_command(
             stderr_byte_count=stderr_count,
             stdout_required_markers=active_markers,
             stdout_marker_state=marker_state,
-            stderr_was_nonempty=stderr_count > 0,
+            stderr_was_nonempty=None if stderr_count is None else stderr_count > 0,
             failure_class=failure_class,
+            output_observation=bounded_observation,
             **(_COMMAND_PROJECTION_V1.get() or {}),
         )
         try:
@@ -9528,3 +9580,692 @@ def _mapper_bound_reads_v1(binding):
 
 
 _MAPPER_READ_LOCK_V1 = threading.Lock()
+
+
+# Complete definitions proposed for tools/validation_reliability.py. Existing
+# error, native opener and porcelain parser owners are reused, not replaced.
+
+def _scope_git_text(repo_root: Path, args: Sequence[str]) -> tuple[int, str, str]:
+    """Reuse the existing root-discovered, no-fetch/no-hook Git process owner."""
+    from tools.ci_branch_context import _run_validation_scope_read
+    completed = _run_validation_scope_read(repo_root, args)
+    return completed.returncode, completed.stdout, completed.stderr
+
+
+def _scope_git_path(path: str) -> str:
+    """Reject unrepresentable identities; never trim/unquote a native pathname."""
+    if type(path) is not str or not path or path != path.strip():
+        raise ValueError("invalid or whitespace-aliased Git path")
+    if "\\" in path or ":" in path or any(ord(c) < 32 or 0xD800 <= ord(c) <= 0xDFFF for c in path):
+        raise ValueError("Git path is not a portable exact repository identity")
+    parts = path.split("/")
+    if any(part in {"", ".", ".."} for part in parts):
+        raise ValueError("Git path is not an exact relative repository identity")
+    return path
+
+
+def _scope_nul_paths(raw: str) -> tuple[str, ...]:
+    if type(raw) is not str:
+        raise ValueError("scope pathname stream must be decoded text")
+    if not raw:
+        return ()
+    if not raw.endswith("\0"):
+        raise ValueError("scope pathname stream is not NUL-terminated")
+    paths = tuple(_scope_git_path(p) for p in raw[:-1].split("\0"))
+    if len(paths) != len(set(paths)) or len({p.casefold() for p in paths}) != len(paths):
+        raise ValueError("duplicate path in a single complete Git diff stream")
+    return paths
+
+
+def _scope_required_query(repo_root: Path, args: Sequence[str], git_stdout) -> str:
+    result = git_stdout(repo_root, args)
+    if type(result) is not tuple or len(result) != 3:
+        raise ValidationReliabilityError("ENGVR_PREPUBLICATION_CUSTODY_FAILED", "invalid Git query result shape")
+    code, stdout, stderr = result
+    if type(code) is not int or type(stdout) is not str or type(stderr) is not str:
+        raise ValidationReliabilityError("ENGVR_PREPUBLICATION_CUSTODY_FAILED", "invalid native Git exit/stream types")
+    if code != 0:
+        raise ValidationReliabilityError(
+            "ENGVR_PREPUBLICATION_CUSTODY_FAILED",
+            f"required Git scope query failed: {tuple(args)!r}; exit={code}; stderr={stderr!r}",
+        )
+    return stdout
+
+
+def _scope_git_committed_paths(
+    repo_root: Path, *, base_ref: str | None = None,
+    head_ref: str | None = None, git_stdout=None,
+) -> tuple[str, ...]:
+    query = _scope_git_text if git_stdout is None else git_stdout
+    base = "refs/remotes/origin/main" if base_ref is None else base_ref
+    head = "HEAD" if head_ref is None else head_ref
+    for ref in (base, head):
+        if type(ref) is not str or not ref or ref.startswith("-") or any(c in ref for c in "\0\r\n"):
+            raise ValidationReliabilityError("ENGVR_REMOTE_STATE_DRIFT", "invalid exact comparison reference")
+    merge_raw = _scope_required_query(repo_root, ("merge-base", "--all", base, head), query)
+    merge_base = merge_raw.rstrip("\r\n")
+    if not re.fullmatch(r"[0-9a-f]{40}|[0-9a-f]{64}", merge_base):
+        raise ValidationReliabilityError("ENGVR_REMOTE_STATE_DRIFT", "missing or ambiguous native merge-base identity")
+    raw_diff = _scope_required_query(
+        repo_root,
+        ("diff", "--name-only", "-z", "--no-renames", "--no-ext-diff", "--no-textconv", "--ignore-submodules=none", merge_base, head, "--"),
+        query,
+    )
+    try:
+        return _scope_nul_paths(raw_diff)
+    except ValueError as exc:
+        raise ValidationReliabilityError("ENGVR_PREPUBLICATION_CUSTODY_FAILED", str(exc)) from exc
+
+
+def _scope_git_change_snapshot(
+    repo_root: Path, *, base_ref: str | None = None,
+    head_ref: str | None = None, git_stdout=None,
+) -> tuple[tuple[str, ...], tuple[tuple[str, str, str | None], ...]]:
+    """Complete branch delta plus worktree/index/untracked identities, never a grant.
+
+    Caller binds accepted source/root/reference generations and custody.
+    Required-query failure never falls back to another comparison.
+    """
+    query = _scope_git_text if git_stdout is None else git_stdout
+    committed = _scope_git_committed_paths(
+        repo_root, base_ref=base_ref, head_ref=head_ref, git_stdout=query)
+    raw_status = _scope_required_query(
+        repo_root,
+        ("status", "--porcelain=v1", "-z", "--untracked-files=all", "--ignore-submodules=none"),
+        query,
+    )
+    try:
+        records = parse_git_status_porcelain_v1_z(raw_status)
+        destinations = set()
+        for code, destination, original in records:
+            _scope_git_path(destination)
+            if destination in destinations or code == "!!":
+                raise ValueError("duplicate or unrequested ignored status entry")
+            destinations.add(destination)
+            if original is not None:
+                _scope_git_path(original)
+    except ValueError as exc:
+        raise ValidationReliabilityError("ENGVR_PREPUBLICATION_CUSTODY_FAILED", str(exc)) from exc
+    all_paths = set(committed)
+    for _code, destination, original in records:
+        all_paths.add(destination)
+        if original is not None:
+            all_paths.add(original)
+    if len({p.casefold() for p in all_paths}) != len(all_paths):
+        raise ValidationReliabilityError("ENGVR_PREPUBLICATION_CUSTODY_FAILED", "case-colliding Git identities")
+    return committed, records
+
+
+
+# First-phase observations share the existing custody and native process owner.
+# None of these logical counters establishes a native host resource grant.
+_PREFLIGHT_OBSERVATION_V1 = ContextVar("_PREFLIGHT_OBSERVATION_V1", default=None)
+_PREFLIGHT_SCRIPTS_V1 = (
+    "tools/validate_grand_global_debug_logical_consistency_audit.py",
+    "tools/validate_ci_branch_context_matrix.py",
+    "tools/validate_repair_pr_changed_file_scope.py",
+    "tools/validate_nested_validator_contracts.py",
+    "tools/validate_validation_inventory.py",
+    "tools/validate_validation_scope_registry.py",
+    "tools/changed_area_validation_router.py",
+    "tools/cross_platform_path_invariant.py",
+)
+
+
+def _preflight_vector_v1(argv):
+    if type(argv) is not tuple or len(argv) < 2 or any(type(value) is not str for value in argv):
+        return False
+    script = argv[1].replace("\\", "/")
+    if script not in _PREFLIGHT_SCRIPTS_V1:
+        return False
+    tail = () if script == _PREFLIGHT_SCRIPTS_V1[5] else ("--repo-root", ".")
+    return argv[2:] == tail
+
+
+def _preflight_stamp_v1(info):
+    directory = stat.S_ISDIR(info.st_mode)
+    identity = tuple(_mapper_stamp_v1(info, directory=directory))
+    return identity + ((info.st_size, info.st_mtime_ns, info.st_ctime_ns, info.st_nlink) if directory else ())
+
+
+def _preflight_chain_v1(path, *, optional=False):
+    result = []
+    for parent in (*reversed(path.parents), path):
+        try:
+            info = parent.lstat()
+        except FileNotFoundError:
+            if not optional:
+                raise
+            result.append((str(parent), None))
+            break
+        if not stat.S_ISDIR(info.st_mode) or _stat_is_reparse_point(info):
+            raise ValidationReliabilityError("ENGVR_PREPUBLICATION_CUSTODY_FAILED", f"unsupported ancestor: {parent}")
+        result.append((str(parent), _preflight_stamp_v1(info)))
+    return tuple(result)
+
+
+class _PreflightObservationV1:
+    """One original occurrence's supplied immutable basis and logical allowance.
+
+    The environment/custody owner supplies these inputs. Construction is neither
+    semantic acceptance nor proof of exclusivity, bootstrap trust or containment.
+    """
+    def __init__(self, *, root, run_id, occurrence, argv, files, directories,
+                 limits, deadline_ns, git_executable=None, evidence_root=None):
+        keys = {"attempts", "bytes", "entries", "retained_bytes", "git_attempts",
+                "stdout_bytes", "stderr_bytes", "combined_output_bytes"}
+        if (type(limits) is not dict or set(limits) != keys
+                or any(type(k) is not str for k in limits)
+                or any(type(v) is not int or v < 0 for v in limits.values())
+                or type(deadline_ns) is not int or deadline_ns <= 0
+                or type(run_id) is not str or not run_id
+                or type(occurrence) is not int or not 1 <= occurrence <= 8
+                or not _preflight_vector_v1(argv) or argv[1].replace("\\", "/") != _PREFLIGHT_SCRIPTS_V1[occurrence - 1]
+                or type(files) is not dict or type(directories) is not dict):
+            raise ValueError("exact original preflight association and finite inputs required")
+        if any(type(k) is not str or type(v) is not bytes for k, v in files.items()):
+            raise ValueError("immutable expected file bytes required")
+        if any(type(k) is not str or type(v) is not tuple
+               or any(type(item) is not tuple or len(item) != 2
+                      or type(item[0]) is not str or item[1] not in ("file", "directory") for item in v)
+               for k, v in directories.items()):
+            raise ValueError("complete directory name/type observations required")
+        for roster in directories.values():
+            names = [item[0] for item in roster]
+            if (len(names) != len(set(names)) or any(not name or Path(name).name != name
+                    or name in (".", "..") or "\\" in name or "/" in name or "\0" in name for name in names)):
+                raise ValueError("distinct immediate directory names required")
+        self.root = Path(root).absolute()
+        self.run_id, self.occurrence, self.argv = run_id, occurrence, argv
+        self.files = MappingProxyType(dict(files))
+        self.directories = MappingProxyType(dict(directories))
+        for name in (*files, *directories):
+            if name != ".":
+                _scope_git_path(name)
+        self.remaining = dict(limits)
+        self.observed = dict.fromkeys(limits, 0)
+        self.reserved = dict.fromkeys(limits, 0)
+        self.retained_entries = 0
+        self.failure, self.measurement_complete = None, True
+        self.deadline_ns, self.last_clock = deadline_ns, -1
+        self.pid, self.thread = os.getpid(), threading.get_ident()
+        self.git_executable, self.evidence_root = git_executable, evidence_root
+        self.git_receipts = []
+
+    def fail(self, detail):
+        if self.failure is None:
+            self.failure = ValidationReliabilityError("ENGVR_PREPUBLICATION_CUSTODY_FAILED", str(detail))
+            if isinstance(detail, BaseException):
+                self.failure.__cause__ = detail
+                for name in ("owned_process", "command_process", "command_receipt"):
+                    if hasattr(detail, name):
+                        setattr(self.failure, name, getattr(detail, name))
+        raise self.failure
+
+    def check(self):
+        if self.failure is not None:
+            raise self.failure
+        now = time.monotonic_ns()
+        if (type(now) is not int or now < self.last_clock or now >= self.deadline_ns
+                or self.pid != os.getpid() or self.thread != threading.get_ident()):
+            self.fail("preflight deadline/clock/process association failed")
+        self.last_clock = now
+
+    def reserve(self, key, amount=1):
+        self.check()
+        if type(amount) is not int or amount < 0 or amount > self.remaining[key]:
+            self.fail("preflight reservation exhausted: " + key)
+        self.remaining[key] -= amount
+        self.reserved[key] += amount
+        if key in ("attempts", "git_attempts"):
+            self.observed[key] += amount
+
+    def received(self, key, amount):
+        if type(amount) is not int or amount < 0:
+            self.measurement_complete = False
+            self.fail("unmeasured preflight delivery: " + key)
+        previous = self.remaining[key]
+        self.observed[key] += amount
+        self.remaining[key] = max(0, previous - amount)
+        if amount > previous:
+            self.fail("preflight delivery exceeded: " + key)
+        self.check()
+
+    def relative(self, path):
+        self.check()
+        path = Path(path).absolute()
+        if ".." in path.parts or not path.is_relative_to(self.root):
+            self.fail("preflight path/root mismatch: " + str(path))
+        return path.relative_to(self.root).as_posix()
+
+
+@contextmanager
+def _preflight_observation_v1(value, *, run_id, occurrence, argv, root):
+    if (type(value) is not _PreflightObservationV1 or value.run_id != run_id
+            or type(occurrence) is not int or value.occurrence != occurrence
+            or value.argv != argv or value.root != Path(root).absolute()
+            or _PREFLIGHT_OBSERVATION_V1.get() is not None):
+        raise ValueError("preflight context lost original run/occurrence/root")
+    value.check()
+    token = _PREFLIGHT_OBSERVATION_V1.set(value)
+    try:
+        yield value
+        value.check()
+    finally:
+        _PREFLIGHT_OBSERVATION_V1.reset(token)
+
+
+def _preflight_active_v1(root=None):
+    value = _PREFLIGHT_OBSERVATION_V1.get()
+    selected = os.environ.get(RUN_ID_ENV) and any(
+        str(sys.argv[0]).replace("\\", "/").endswith(script) for script in _PREFLIGHT_SCRIPTS_V1)
+    if value is not None:
+        value.check()
+        if selected and (value.run_id != os.environ[RUN_ID_ENV]
+                         or value.argv != (sys.executable, *sys.argv)
+                         or value.root != Path.cwd()
+                         or value.root != Path(__file__).resolve().parents[1]):
+            value.fail("active canonical preflight lost actual run/vector/module/cwd association")
+        if root is not None and Path(root).absolute() != value.root:
+            value.fail("preflight module/argument root mismatch")
+    elif selected:
+        raise ValidationReliabilityError("ENGVR_PREPUBLICATION_CUSTODY_FAILED",
+                                        "selected preflight has no original observation binding")
+    return value
+
+
+def _preflight_failure_v1(value, exc):
+    if value is not None:
+        value.fail(exc)
+    if isinstance(exc, ValidationReliabilityError):
+        raise exc
+    raise ValidationReliabilityError("ENGVR_PREPUBLICATION_CUSTODY_FAILED", f"{type(exc).__name__}: {exc}") from exc
+
+
+def _preflight_kind_v1(path, *, optional=False):
+    value = _preflight_active_v1()
+    path = Path(path).absolute()
+    try:
+        if value is None:
+            # Preserve unselected legacy diagnostics without promoting them to
+            # original-run custody. Unlike exists/is_file, errors are not absence.
+            try:
+                info = path.lstat()
+            except FileNotFoundError:
+                if optional:
+                    return None
+                raise
+            if _stat_is_reparse_point(info) or stat.S_ISLNK(info.st_mode):
+                raise ValueError("linked diagnostic path: " + str(path))
+            if stat.S_ISREG(info.st_mode) and info.st_nlink == 1:
+                return "file"
+            if stat.S_ISDIR(info.st_mode):
+                return "directory"
+            raise ValueError("unsupported diagnostic path: " + str(path))
+        if value is not None:
+            value.relative(path)
+            value.reserve("attempts")
+        chain = _preflight_chain_v1(path.parent, optional=optional)
+        if chain[-1][1] is None:
+            if chain != _preflight_chain_v1(path.parent, optional=True):
+                raise ValueError("optional preflight ancestor changed")
+            return None
+        try:
+            info = path.lstat()
+        except FileNotFoundError:
+            if not optional or chain != _preflight_chain_v1(path.parent):
+                raise
+            return None
+        if _stat_is_reparse_point(info) or stat.S_ISLNK(info.st_mode):
+            raise ValueError("linked preflight path: " + str(path))
+        if stat.S_ISREG(info.st_mode) and info.st_nlink == 1:
+            kind = "file"
+        elif stat.S_ISDIR(info.st_mode):
+            kind = "directory"
+        else:
+            raise ValueError("unsupported preflight path: " + str(path))
+        if chain != _preflight_chain_v1(path.parent) or _preflight_stamp_v1(info) != _preflight_stamp_v1(path.lstat()):
+            raise ValueError("preflight path generation changed: " + str(path))
+        if value is not None:
+            value.check()
+        return kind
+    except BaseException as exc:
+        _preflight_failure_v1(value, exc)
+
+
+def _preflight_read_bytes_v1(path, *, evidence=False):
+    value = _preflight_active_v1()
+    path = Path(path).absolute()
+    if value is None:
+        # This is the original unselected read interface, not canonical custody.
+        # _preflight_active_v1 has already rejected missing selected bindings.
+        try:
+            return path.read_bytes()
+        except OSError as exc:
+            _preflight_failure_v1(None, exc)
+    descriptor, errors, result = None, [], None
+    try:
+        expected = None
+        if value is not None:
+            if evidence:
+                allowed = {Path(p).absolute() for receipt in value.git_receipts
+                           for p in (receipt.stdout_path, receipt.stderr_path)}
+                if path not in allowed:
+                    value.fail("unowned Git evidence readback")
+                name = None
+            else:
+                name = value.relative(path)
+            value.reserve("attempts")
+            if not evidence and name not in value.files:
+                value.fail("missing preflight file basis: " + name)
+            expected = None if evidence else value.files[name]
+        chain = _preflight_chain_v1(path.parent)
+        before = path.lstat()
+        if (not stat.S_ISREG(before.st_mode) or before.st_nlink != 1 or _stat_is_reparse_point(before)):
+            raise ValueError("unsupported preflight file: " + str(path))
+        if value is not None:
+            if ((expected is not None and len(expected) != before.st_size)
+                    or before.st_size + 1 > value.remaining["bytes"]):
+                value.fail("insufficient full preflight acquisition capacity: " + str(path))
+            value.reserve("retained_bytes", before.st_size)
+        descriptor = _open_regular_worktree_descriptor(path, nonblocking=True)
+        opened = os.fstat(descriptor)
+        if not _same_observed_file(before, opened) or opened.st_nlink != 1:
+            raise ValueError("preflight descriptor substitution: " + str(path))
+        data = bytearray()
+        while True:
+            if value is not None:
+                value.check()
+            requested = min(65536, before.st_size - len(data) + 1)
+            block = os.read(descriptor, requested)
+            if type(block) is not bytes:
+                if value is not None:
+                    value.measurement_complete = False
+                raise ValueError("unmeasured preflight file delivery")
+            if value is not None:
+                value.received("bytes", len(block))
+            if len(block) > requested or len(data) + len(block) > before.st_size:
+                raise ValueError("preflight file grew or reader overdelivered: " + str(path))
+            if not block:
+                break
+            if expected is not None and block != expected[len(data):len(data) + len(block)]:
+                raise ValueError("preflight expected bytes differ: " + str(path))
+            data.extend(block)
+            if value is not None:
+                value.observed["retained_bytes"] += len(block)
+        if (len(data) != before.st_size
+                or _scan_same_api_version(opened) != _scan_same_api_version(os.fstat(descriptor))
+                or _scan_same_api_version(before) != _scan_same_api_version(path.lstat())
+                or chain != _preflight_chain_v1(path.parent)):
+            raise ValueError("incomplete or changed preflight file: " + str(path))
+        result = bytes(data)
+    except BaseException as exc:
+        errors.append(exc)
+    if descriptor is not None:
+        try:
+            os.close(descriptor)
+        except BaseException as exc:
+            errors.append(exc)
+    if errors:
+        _preflight_failure_v1(value, errors[0] if len(errors) == 1 else BaseExceptionGroup("preflight read/close", errors))
+    if value is not None:
+        value.check()
+    return result
+
+
+def _preflight_read_text_v1(path):
+    # Decode outside acquisition: a payload error does not falsify complete I/O.
+    return _preflight_read_bytes_v1(path).decode("utf-8", errors="strict").replace("\r\n", "\n").replace("\r", "\n")
+
+
+def _preflight_directory_v1(path):
+    value = _preflight_active_v1()
+    path = Path(path).absolute()
+    iterator, errors, result = None, [], []
+    try:
+        expected = None
+        if value is not None:
+            name = value.relative(path)
+            value.reserve("attempts")
+            if name not in value.directories:
+                value.fail("missing complete preflight directory basis: " + name)
+            expected = value.directories[name]
+        chain = _preflight_chain_v1(path)
+        iterator = os.scandir(path)
+        names = set()
+        for entry in iterator:
+            if value is not None:
+                value.received("entries", 1)
+            if entry.name in names:
+                raise ValueError("duplicate preflight directory entry: " + entry.name)
+            names.add(entry.name)
+            # Windows DirEntry.stat caches zero inode/device/link counts. Use
+            # the same no-follow pathname API for both generation observations.
+            info = Path(entry.path).lstat()
+            if _stat_is_reparse_point(info) or stat.S_ISLNK(info.st_mode):
+                raise ValueError("linked preflight directory entry: " + entry.path)
+            if stat.S_ISREG(info.st_mode) and info.st_nlink == 1:
+                kind = "file"
+            elif stat.S_ISDIR(info.st_mode):
+                kind = "directory"
+            else:
+                raise ValueError("unsupported preflight directory entry: " + entry.path)
+            if _preflight_stamp_v1(info) != _preflight_stamp_v1(Path(entry.path).lstat()):
+                raise ValueError("changed preflight directory entry: " + entry.path)
+            result.append((Path(entry.path), kind))
+            if value is not None:
+                value.retained_entries += 1
+        if chain != _preflight_chain_v1(path):
+            raise ValueError("changed preflight directory generation: " + str(path))
+        if expected is not None and sorted((p.name, k) for p, k in result) != sorted(expected):
+            raise ValueError("preflight directory basis differs: " + str(path))
+    except BaseException as exc:
+        errors.append(exc)
+    if iterator is not None:
+        try:
+            iterator.close()
+        except BaseException as exc:
+            errors.append(exc)
+    if errors:
+        _preflight_failure_v1(value, errors[0] if len(errors) == 1 else BaseExceptionGroup("preflight directory/close", errors))
+    try:
+        if chain != _preflight_chain_v1(path):
+            raise ValueError("directory generation changed during close: " + str(path))
+    except BaseException as exc:
+        _preflight_failure_v1(value, exc)
+    if value is not None:
+        value.check()
+    return tuple(result)
+
+
+def _preflight_files_v1(root, pattern="*", *, recursive=False, include_directories=False):
+    from fnmatch import fnmatch
+    # Observe the complete directory before filtering, preserve iterator order.
+    result = []
+    for path, kind in _preflight_directory_v1(root):
+        if (kind == "file" or include_directories) and fnmatch(path.name, pattern):
+            result.append(path)
+        if kind == "directory" and recursive:
+            result.extend(_preflight_files_v1(path, pattern, recursive=True, include_directories=include_directories))
+    return tuple(result)
+
+
+def _preflight_pth_v1(raw, *, site_root, bound_roots):
+    if type(raw) is not bytes or b"\0" in raw:
+        raise ValueError("complete startup bytes required")
+    selected = []
+    for line in raw.decode("utf-8-sig", errors="strict").splitlines():
+        if line.startswith("#") or not line.strip():
+            continue
+        if line.startswith(("import ", "import\t")):
+            raise ValueError("unsupported executable startup .pth line")
+        path = (Path(site_root) / line.rstrip()).absolute()
+        if ".." in path.parts or not any(path.is_relative_to(Path(root).absolute()) for root in bound_roots):
+            raise ValueError("startup .pth path leaves bound roots")
+        selected.append(path)
+    return tuple(selected)
+
+
+def _preflight_environment_v1(argv, environment, *, cache_root):
+    if not _preflight_vector_v1(argv) or type(environment) is not dict:
+        raise ValueError("original first-eight vector/environment required")
+    projected, removed, seen = {}, [], set()
+    for key, value in environment.items():
+        if (type(key) is not str or type(value) is not str or not key or "=" in key
+                or "\0" in key or "\0" in value or key.upper() in seen):
+            raise ValueError("invalid or case-colliding startup environment")
+        seen.add(key.upper())
+        if key.upper().startswith("PYTHON"):
+            removed.append(key)
+        else:
+            projected[key] = value
+    cache = Path(cache_root).absolute()
+    _preflight_chain_v1(cache.parent)
+    cache.mkdir(exist_ok=False)
+    if _preflight_directory_v1(cache):
+        raise ValueError("startup cache is not empty")
+    fixed = {"PYTHONDONTWRITEBYTECODE": "1", "PYTHONNOUSERSITE": "1", "PYTHONPYCACHEPREFIX": str(cache)}
+    projected.update(fixed)
+    return projected, {"registered_argv": argv, "removed_environment_keys": tuple(removed),
+                       "fixed_environment_controls": tuple(fixed.items())}
+
+
+def _preflight_launch_guard_v1(argv, environment, *, expected_argv, expected_environment):
+    if (type(argv) is not tuple or not _preflight_vector_v1(argv) or argv != expected_argv
+            or type(environment) is not dict or environment != expected_environment):
+        raise ValidationReliabilityError("ENGVR_PREPUBLICATION_CUSTODY_FAILED", "actual startup vector/environment differs")
+
+
+def _preflight_git_process_v1(value, argv, *, root, environment):
+    """Finite Git observations use the existing native supervisor and receipts."""
+    value.check()
+    if (type(value.git_executable) is not str or not Path(value.git_executable).is_absolute()
+            or value.evidence_root is None or not Path(value.evidence_root).is_absolute()):
+        value.fail("missing admitted absolute Git/evidence operands")
+    executable = Path(value.git_executable)
+    _local_unlinked_path(executable.parent)
+    info = executable.lstat()
+    if not stat.S_ISREG(info.st_mode) or info.st_nlink != 1 or _stat_is_reparse_point(info):
+        value.fail("unsupported admitted Git executable")
+    value.reserve("git_attempts")
+    limits = {name: value.remaining[name] for name in ("stdout_bytes", "stderr_bytes", "combined_output_bytes")}
+    if limits["stdout_bytes"] + limits["stderr_bytes"] > limits["combined_output_bytes"]:
+        value.fail("separate Git streams exceed combined allowance")
+    observation = {}
+    try:
+        receipt = supervise_command((value.git_executable, *argv[1:]), cwd=root,
+            run_id=value.run_id, phase="preflight-git", command_index=len(value.git_receipts) + 1,
+            evidence_root=Path(value.evidence_root), environment=environment,
+            execution_deadline_ns=value.deadline_ns, mirror_stdout=False, mirror_stderr=False,
+            output_limits=limits, output_observation=observation)
+    except BaseException as exc:
+        value.measurement_complete = False
+        _preflight_failure_v1(value, exc)
+    value.git_receipts.append(receipt)
+    # Record both streams even if one exhausts the ancestor allowance.
+    failures = []
+    for key, stream in (("stdout_bytes", "stdout"), ("stderr_bytes", "stderr")):
+        try:
+            value.received(key, observation[stream]["drained_byte_count"])
+        except BaseException as exc:
+            failures.append(exc)
+    try:
+        value.received("combined_output_bytes", sum(observation[s]["drained_byte_count"] for s in ("stdout", "stderr")))
+    except BaseException as exc:
+        failures.append(exc)
+    if failures or receipt.failure_class not in (None, "ENGVR_NATIVE_EXIT_NONZERO") or type(receipt.native_exit_code) is not int:
+        exc = ValidationReliabilityError(receipt.failure_class or "ENGVR_PREPUBLICATION_CUSTODY_FAILED",
+            f"Git observation failed; native_exit={receipt.native_exit_code}; evidence={receipt.stderr_path}")
+        exc.command_receipt = receipt
+        value.fail(exc)
+    try:
+        payloads = []
+        for stream, path in (("stdout", receipt.stdout_path), ("stderr", receipt.stderr_path)):
+            item = observation[stream]
+            if not item["complete"] or item["overflow"]:
+                value.fail("incomplete Git stream: " + stream)
+            payloads.append(_preflight_read_bytes_v1(Path(path), evidence=True).decode("utf-8", errors="strict"))
+        if receipt.native_exit_code != 0:
+            exc = ValidationReliabilityError("ENGVR_PREPUBLICATION_CUSTODY_FAILED",
+                f"required Git query failed: exit={receipt.native_exit_code}; stderr={payloads[1]!r}")
+            exc.command_receipt = receipt
+            value.fail(exc)
+        return subprocess.CompletedProcess(tuple(argv), receipt.native_exit_code, *payloads)
+    except BaseException as exc:
+        _preflight_failure_v1(value, exc)
+
+
+def _preflight_startup_v1(argv, environment, *, binding, cache_root):
+    """Inspect supplied startup bytes from the already trusted same interpreter.
+
+    This supported subset does not certify its parent's bootstrap or native host
+    containment. No child probe, executable hook, or approval callback is used.
+    An absent independently supplied startup closure remains unavailable.
+    """
+    import sysconfig
+    import site
+    import struct
+    keys = {"observation", "version", "abi", "stdlib_roots", "site_roots",
+            "loader_environment", "config_paths", "customizer_paths"}
+    if (type(binding) is not dict or set(binding) != keys
+            or type(binding["observation"]) is not _PreflightObservationV1):
+        raise ValueError("original host startup byte/identity binding unavailable")
+    observation = binding["observation"]
+    actual_abi = (sys.implementation.cache_tag, sysconfig.get_config_var("SOABI"),
+                  struct.calcsize("P") * 8, sysconfig.get_config_var("Py_GIL_DISABLED"),
+                  getattr(sys, "abiflags", ""))
+    if (not _preflight_vector_v1(argv) or argv != observation.argv
+            or Path(argv[0]).absolute() != Path(sys.executable).absolute()
+            or type(binding["version"]) is not tuple or len(binding["version"]) != 3
+            or any(type(v) is not int for v in binding["version"])
+            or tuple(sys.version_info[:3]) != (3, 14, 6)
+            or binding["version"] != tuple(sys.version_info[:3])
+            or type(binding["abi"]) is not tuple or len(binding["abi"]) != 5
+            or any(type(binding["abi"][i]) is not int for i in (2, 3))
+            or binding["abi"] != actual_abi):
+        raise ValueError("startup executable/version/ABI association unavailable")
+    stdlib = tuple(dict.fromkeys(str(Path(sysconfig.get_path(k)).absolute()) for k in ("stdlib", "platstdlib")))
+    sites = tuple(str(Path(p).absolute()) for p in site.getsitepackages())
+    if binding["stdlib_roots"] != stdlib or binding["site_roots"] != sites:
+        raise ValueError("startup standard-library/site roots differ")
+    loaders = {k: v for k, v in environment.items() if k.upper() in {
+        "PATH", "SYSTEMROOT", "WINDIR", "LD_LIBRARY_PATH", "LD_PRELOAD", "DYLD_LIBRARY_PATH",
+        "DYLD_INSERT_LIBRARIES", "__PYVENV_LAUNCHER__"}}
+    if type(binding["loader_environment"]) is not dict or loaders != binding["loader_environment"]:
+        raise ValueError("startup loader environment differs")
+    if any(k.upper() in {"LD_PRELOAD", "DYLD_INSERT_LIBRARIES", "__PYVENV_LAUNCHER__"} for k in loaders):
+        raise ValueError("unsupported startup loader injection")
+    executable = Path(argv[0]).absolute()
+    config_paths = tuple(dict.fromkeys((
+        str(executable.parent / "pyvenv.cfg"), str(executable.parent.parent / "pyvenv.cfg"),
+        str(executable.with_suffix("._pth")),
+        str(executable.parent / f"python{sys.version_info.major}{sys.version_info.minor}._pth"))))
+    if binding["config_paths"] != config_paths:
+        raise ValueError("incomplete applicable startup configuration candidates")
+    search_roots = tuple(dict.fromkeys((str(Path.cwd()), str(Path(argv[1]).absolute().parent), str(executable.parent), *stdlib, *sites)))
+    customizers = tuple(str(Path(root) / (name + suffix)) for root in search_roots
+                        for name in ("sitecustomize", "usercustomize")
+                        for suffix in (".py", ".pyc", ".pyd", ".so", ""))
+    if binding["customizer_paths"] != customizers:
+        raise ValueError("incomplete startup customizer candidate set")
+    with _preflight_observation_v1(observation, run_id=observation.run_id,
+            occurrence=observation.occurrence, argv=argv, root=observation.root):
+        _preflight_read_bytes_v1(executable)
+        for path in config_paths:
+            if _preflight_kind_v1(Path(path), optional=True) is not None:
+                raw = _preflight_read_bytes_v1(Path(path))
+                if path.endswith("._pth"):
+                    # ._pth alters the complete resolver; unsupported by this subset.
+                    raise ValueError("unsupported executable ._pth configuration: " + path)
+                raw.decode("utf-8", errors="strict")
+        for path in customizers:
+            if _preflight_kind_v1(Path(path), optional=True) is not None:
+                raise ValueError("unadmitted startup customizer: " + path)
+        for root in dict.fromkeys((*stdlib, *sites)):
+            for path in _preflight_files_v1(Path(root), recursive=True):
+                raw = _preflight_read_bytes_v1(path)
+                if str(path.parent) in sites and path.suffix == ".pth":
+                    additions = _preflight_pth_v1(raw, site_root=path.parent, bound_roots=search_roots)
+                    if any(str(p) not in search_roots for p in additions):
+                        raise ValueError("startup .pth adds an unbound customizer search root")
+    return _preflight_environment_v1(argv, environment, cache_root=cache_root)

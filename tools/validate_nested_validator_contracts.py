@@ -9,6 +9,15 @@ import sys
 from typing import Iterable, Sequence
 
 
+REPO_ROOT = Path(__file__).resolve().parents[1]
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+
+from tools.validation_reliability import (
+    _preflight_active_v1, _preflight_kind_v1, _preflight_read_bytes_v1,
+    _preflight_read_text_v1, _preflight_directory_v1, _preflight_files_v1,
+)
+
 SUCCESS_MARKER = "NESTED_VALIDATOR_CONTRACTS_OK"
 SAFE_NESTED_VALIDATOR_RERUN_MARKER = (
     "NESTED_VALIDATOR_RERUN_ALLOWED_SAFE_FAST_INTENTIONAL"
@@ -31,12 +40,9 @@ def _repo_relative(path: Path, repo_root: Path) -> str:
 
 
 def _candidate_files(repo_root: Path) -> tuple[Path, ...]:
+    _preflight_active_v1(repo_root)
     roots = (repo_root / "tools", repo_root / "src" / "qtt" / "stage1_prediction_markets")
-    files: list[Path] = []
-    for root in roots:
-        if root.exists():
-            files.extend(path for path in root.rglob("*.py") if path.is_file())
-    return tuple(sorted(files))
+    return tuple(sorted(path for root in roots for path in _preflight_files_v1(root, "*.py", recursive=True)))
 
 
 def _is_subprocess_run(node: ast.Call) -> bool:
@@ -81,7 +87,7 @@ def nested_validator_contract_failures_for_paths(
         relative = _repo_relative(path, repo_root)
         if relative in ORCHESTRATOR_ALLOWLIST:
             continue
-        source = path.read_text(encoding="utf-8")
+        source = _preflight_read_text_v1(path)
         if SAFE_NESTED_VALIDATOR_RERUN_MARKER in source:
             continue
         try:

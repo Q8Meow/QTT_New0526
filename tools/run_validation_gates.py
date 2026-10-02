@@ -3089,8 +3089,14 @@ class _ValidationCandidateCustodyV1:
     """
     def __init__(self, *, repo_root, plan, observe_paths, check_exclusive, index_path,
                  effects_by_occurrence, ignored_paths, entry_limit, snapshot_byte_limit,
-                 read_byte_limit, deadline_ns, operation_checks, nested_evidence_limits=None):
+                 read_byte_limit, deadline_ns, operation_checks, nested_evidence_limits=None, preflight_bindings=None):
         from types import MappingProxyType
+        if preflight_bindings is None:
+            preflight_bindings = {}
+        if (type(preflight_bindings) is not dict
+                or any(type(key) is not int or not 1 <= key <= len(plan) for key in preflight_bindings)):
+            raise ValueError("exact original preflight startup bindings required")
+        self.preflight_bindings = MappingProxyType(dict(preflight_bindings))
         if (type(plan) is not tuple or not plan or not callable(observe_paths)
                 or not callable(check_exclusive) or type(effects_by_occurrence) is not dict
                 or type(ignored_paths) is not tuple):
@@ -3098,9 +3104,9 @@ class _ValidationCandidateCustodyV1:
         for bound in (entry_limit, snapshot_byte_limit, read_byte_limit, deadline_ns):
             if type(bound) is not int or bound <= 0:
                 raise ValueError("explicit candidate resource limits required")
-        if set(effects_by_occurrence) != set(range(1, len(plan) + 1)):
+        if any(type(key) is not int for key in effects_by_occurrence) or set(effects_by_occurrence) != set(range(1, len(plan) + 1)):
             raise ValueError("candidate effects do not cover original occurrences")
-        if (type(operation_checks) is not dict or set(operation_checks) != set(effects_by_occurrence)
+        if (type(operation_checks) is not dict or any(type(key) is not int for key in operation_checks) or set(operation_checks) != set(effects_by_occurrence)
                 or any(not callable(check) for check in operation_checks.values())):
             raise ValueError("original per-occurrence source/input/environment/resource checks required")
         required_nested = set()
@@ -3141,6 +3147,8 @@ class _ValidationCandidateCustodyV1:
         self.all_effects = frozenset(path for value in self.effects.values() for path in value)
         self.entry_limit, self.snapshot_byte_limit = entry_limit, snapshot_byte_limit
         self.remaining_read_bytes, self.deadline_ns = read_byte_limit, deadline_ns
+        self.observed_read_bytes, self.read_attempts = 0, 0
+        self.read_measurement_complete = True
         self.index_path = None if index_path is None else pathlib.Path(index_path).absolute()
         if self.index_path is None and (self.root / ".git").exists():
             raise ValueError("actual active index custody is required")
@@ -3160,6 +3168,28 @@ class _ValidationCandidateCustodyV1:
         self._settled_snapshot = self.baseline
         self.state = "BASELINE_READY"
 
+    def prepare_preflight(self, index, entry, *, environment, run_paths):
+        from tools.validation_reliability import (_preflight_vector_v1, _preflight_startup_v1,
+                                                  _preflight_launch_guard_v1)
+        argv = tuple(entry.argv if type(entry) is CommandEvidencePlanEntry else entry.execution_argv)
+        if not _preflight_vector_v1(argv):
+            return environment, None
+        self._check()
+        if (type(index) is not int or not 1 <= index <= len(self.plan)
+                or entry is not self.plan[index - 1] or index not in self.preflight_bindings):
+            raise RuntimeError("VALIDATION_PREFLIGHT_STARTUP_BINDING_UNAVAILABLE")
+        binding = self.preflight_bindings[index]
+        if (type(run_paths) is not ValidationRunPathsV1 or run_paths.repo_root != self.root
+                or type(binding) is not dict or binding.get("observation") is None
+                or binding["observation"].run_id != run_paths.run_id
+                or binding["observation"].occurrence != index):
+            raise RuntimeError("VALIDATION_PREFLIGHT_STARTUP_ASSOCIATION")
+        projected, receipt = _preflight_startup_v1(argv, environment, binding=binding,
+            cache_root=run_paths.process_root / ("preflight-cache-" + str(index)))
+        self._preflight_launch = (argv, dict(projected))
+        _preflight_launch_guard_v1(argv, projected, expected_argv=argv, expected_environment=projected)
+        return projected, receipt
+
     @staticmethod
     def _paths(paths, limit):
         if type(paths) is not tuple or len(paths) > limit:
@@ -3173,7 +3203,7 @@ class _ValidationCandidateCustodyV1:
 
     def _check(self):
         if self.failure is not None:
-            raise RuntimeError("ENGVR_PREPUBLICATION_CUSTODY_FAILED: prior restoration failure; not retried") from self.failure
+            raise RuntimeError(f"ENGVR_PREPUBLICATION_CUSTODY_FAILED: terminal candidate failure: {self.failure}") from self.failure
         if (os.getpid() != self.process_id or threading.get_ident() != self.thread_id
                 or time.monotonic_ns() >= self.deadline_ns or self.check_exclusive() is not None):
             raise RuntimeError("VALIDATION_CANDIDATE_CUSTODY_UNAVAILABLE")
@@ -3187,16 +3217,28 @@ class _ValidationCandidateCustodyV1:
         return result
 
     def _read(self, path):
+        try:
+            self._check()
+            self.read_attempts += 1
+            return self._read_acquisition(path)
+        except BaseException as exc:
+            if self.failure is None:
+                self.failure = exc
+                self.state = "CLEANUP_REJECTED"
+            raise
+
+    def _read_acquisition(self, path):
         from tools.validation_reliability import (_open_regular_worktree_descriptor,
-                                                  _local_unlinked_path, _scan_same_api_version)
+                                                  _local_unlinked_path, _scan_same_api_version, _preflight_chain_v1)
         self._check()
         _local_unlinked_path(path.parent)
+        ancestor_generation = _preflight_chain_v1(path.parent)
         try:
             before = path.lstat()
         except FileNotFoundError:
             return None
         if (not stat.S_ISREG(before.st_mode) or _stat_is_reparse_point(before)
-                or before.st_nlink != 1 or before.st_size > self.remaining_read_bytes):
+                or before.st_nlink != 1 or before.st_size + 1 > self.remaining_read_bytes):
             raise RuntimeError("VALIDATION_CANDIDATE_UNSUPPORTED_OR_UNBOUNDED_FILE: " + str(path))
         descriptor = _open_regular_worktree_descriptor(path, nonblocking=True)
         errors = []
@@ -3209,10 +3251,19 @@ class _ValidationCandidateCustodyV1:
             while True:
                 self._check()
                 # Charge every acquired byte, including a changed-size sentinel.
-                chunk = os.read(descriptor, min(65536, before.st_size - len(data) + 1))
-                if len(chunk) > self.remaining_read_bytes:
+                requested = min(65536, before.st_size - len(data) + 1)
+                chunk = os.read(descriptor, requested)
+                if type(chunk) is not bytes:
+                    self.read_measurement_complete = False
+                    raise RuntimeError("VALIDATION_CANDIDATE_UNMEASURED_READ")
+                previous = self.remaining_read_bytes
+                self.observed_read_bytes += len(chunk)
+                self.remaining_read_bytes = max(0, previous - len(chunk))
+                if len(chunk) > previous:
                     raise RuntimeError("VALIDATION_CANDIDATE_READ_BUDGET")
-                self.remaining_read_bytes -= len(chunk)
+                self._check()
+                if len(chunk) > requested:
+                    raise RuntimeError("VALIDATION_CANDIDATE_READ_OVERDELIVERY")
                 if not chunk:
                     break
                 data.extend(chunk)
@@ -3221,7 +3272,8 @@ class _ValidationCandidateCustodyV1:
             after = path.lstat()
             if (len(data) != before.st_size or _scan_same_api_version(opened) !=
                     _scan_same_api_version(os.fstat(descriptor)) or
-                    _scan_same_api_version(before) != _scan_same_api_version(after)):
+                    _scan_same_api_version(before) != _scan_same_api_version(after) or
+                    ancestor_generation != _preflight_chain_v1(path.parent)):
                 raise RuntimeError("VALIDATION_CANDIDATE_UNSTABLE_FILE")
             result = (stat.S_IMODE(before.st_mode), bytes(data))
         except BaseException as exc:
@@ -3261,6 +3313,14 @@ class _ValidationCandidateCustodyV1:
                 or entry is not self.plan[index - 1] or self.active_occurrence is not None
                 or index in self.completed_occurrences):
             raise RuntimeError("VALIDATION_CANDIDATE_ORIGINAL_OCCURRENCE_REQUIRED")
+        from tools.validation_reliability import _preflight_vector_v1, _preflight_launch_guard_v1
+        argv = tuple(entry.argv if type(entry) is CommandEvidencePlanEntry else entry.execution_argv)
+        if _preflight_vector_v1(argv):
+            if not hasattr(self, "_preflight_launch"):
+                raise RuntimeError("VALIDATION_PREFLIGHT_STARTUP_BINDING_UNAVAILABLE")
+            expected_argv, expected_environment = self._preflight_launch
+            _preflight_launch_guard_v1(argv, environment, expected_argv=expected_argv,
+                                      expected_environment=expected_environment)
         # These are the original operation-specific accepted inputs and resource
         # controls, not the union of other commands' permissions.
         if self.operation_checks[index](entry=entry, environment=environment,
@@ -6989,6 +7049,13 @@ def run_commands(
                 timeout_seconds = remaining if timeout_seconds is None else min(timeout_seconds,remaining)
                 deadline_projection = {"fixed_environment_controls": _mapper_read_controls_v1(mapper_read_binding)}
             if candidate_custody is not None:
+                candidate_entry = planned if getattr(candidate_custody, "plan", None) is _LAST_EXPECTED_COMMAND_PLAN else plan_entry
+                command_environment, preflight_projection = candidate_custody.prepare_preflight(
+                    command_index, candidate_entry, environment=command_environment, run_paths=active_run_paths)
+                if preflight_projection is not None:
+                    if deadline_projection is not None:
+                        raise ValueError("competing command environment projections")
+                    deadline_projection = preflight_projection
                 candidate_custody.begin_occurrence(command_index, planned if getattr(candidate_custody, "plan", None) is _LAST_EXPECTED_COMMAND_PLAN else plan_entry,
                     environment=command_environment, timeout_seconds=timeout_seconds, scratch_roots=tuple(scratch_roots))
             if mapper_read_binding is not None and mapper_read_binding['kind'] == 'MAPPER_NATIVE_READ_BINDING_V2':
@@ -7012,6 +7079,9 @@ def run_commands(
                 if command_index in gates:
                     raise ValueError("nested custody cannot be dispatched twice")
                 gates[command_index] = nested_gate
+            from tools.validation_reliability import _preflight_vector_v1
+            preflight_launch = (getattr(candidate_custody, "_preflight_launch", None)
+                if _preflight_vector_v1(tuple(execution_command)) else None)
             with (nullcontext() if original_input is None else original_input), (
                     nullcontext() if deadline_projection is None else _command_projection_v1(deadline_projection)):
                 supervision["pending"] = True
@@ -7026,6 +7096,7 @@ def run_commands(
                     required_markers=expected_markers,
                     timeout_seconds=timeout_seconds,
                     environment=command_environment,
+                    **({"preflight_launch": preflight_launch} if preflight_launch is not None else {}),
                     **({"launch_input": original_input} if original_input is not None else {}),
                     **({"execution_deadline_ns": execution_deadline_ns}
                        if execution_deadline_ns is not None else {}),
@@ -7904,16 +7975,21 @@ def _publish_active_plan_provenance(
     global _LAST_EXPECTED_COMMAND_PLAN
     global _RUN_PROVENANCE_WRITTEN
     global _RUN_PROVENANCE_ATTEMPTED
-    if _RUN_PROVENANCE_ATTEMPTED or _SCAN_CAPACITY_ATTEMPTED:
+    if (_RUN_PROVENANCE_ATTEMPTED or _SCAN_CAPACITY_ATTEMPTED
+            or _MAPPER_READ_SOURCE_ATTEMPTED or _ACTIVE_SCAN_LAUNCH is not None
+            or _LAST_PLANNED_COMMAND_COUNT is not None or _LAST_EXPECTED_COMMAND_PLAN):
         raise ValueError("original plan publication/capacity acquisition cannot be retried")
-    _LAST_PLANNED_COMMAND_COUNT = len(execution_plan)
-    _LAST_EXPECTED_COMMAND_PLAN = build_command_evidence_plan(
+    selected_plan = build_command_evidence_plan(
         run_id=active_run_paths.run_id,
         phase=phase,
         commands=tuple(entry.execution_argv for entry in execution_plan),
         cwd=active_run_paths.repo_root,
     )
-    launch = _scan_resolve_parent_capacity(active_run_paths, phase, _LAST_EXPECTED_COMMAND_PLAN)
+    # Selection is retained even if either one-shot acquisition fails before
+    # provenance publication. Zero executions cannot erase this plan.
+    _LAST_EXPECTED_COMMAND_PLAN = selected_plan
+    _LAST_PLANNED_COMMAND_COUNT = len(selected_plan)
+    launch = _scan_resolve_parent_capacity(active_run_paths, phase, selected_plan)
     _mapper_resolve_parent_profiles_v1(active_run_paths, phase, _LAST_EXPECTED_COMMAND_PLAN)
     _RUN_PROVENANCE_ATTEMPTED = True
     write_run_provenance(
@@ -8615,8 +8691,17 @@ def _main_owned(argv: Sequence[str] | None = None) -> int:
         result = 1
     finally:
         try:
-            if (not _RUN_PROVENANCE_ATTEMPTED and not supervision["pending"]
-                    and supervision["receipt"] is None):
+            if (not _RUN_PROVENANCE_ATTEMPTED and not _RUN_PROVENANCE_WRITTEN
+                    and _LAST_PLANNED_COMMAND_COUNT is None
+                    and not _LAST_EXPECTED_COMMAND_PLAN and not _LAST_COMMAND_RECEIPTS
+                    and _ACTIVE_SCAN_LAUNCH is None and not _SCAN_CAPACITY_ATTEMPTED
+                    and not _MAPPER_READ_SOURCE_ATTEMPTED
+                    and _ACTIVE_MAPPER_READ_PROFILES_V1 is None
+                    and not _ACTIVE_MAPPER_OCCURRENCES_V1
+                    and not supervision["pending"] and supervision["receipt"] is None
+                    and not supervision.get("nested_evidence")):
+                # Only a genuine pre-selection failure may publish zero-plan
+                # provenance. Acquisition and publication are distinct facts.
                 try:
                     _RUN_PROVENANCE_ATTEMPTED = True
                     write_run_provenance(

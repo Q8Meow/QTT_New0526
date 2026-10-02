@@ -108,7 +108,8 @@ def _clear_github_branch_context_env(monkeypatch):
         monkeypatch.delenv(env_name, raising=False)
 
 
-def test_repair_and_main_cumulative_branch_classification():
+def test_repair_and_main_cumulative_branch_classification(tmp_path, monkeypatch):
+    _assert_v35_exact_repair_scope()
     _assert_f14_exact_scope_and_interfaces()
     repair_branch = context.NO_RUNTIME_CUSTODY_AND_CI_DEPENDENCY_REPAIR_BRANCH
 
@@ -143,6 +144,9 @@ def test_repair_and_main_cumulative_branch_classification():
         after_pr=97,
     ) is False
     assert context.is_repair_branch("feature/non-downstream-validation") is False
+
+    _exercise_preflight_git_observation_v1(tmp_path, monkeypatch)
+
 
 
 def test_st12_architecture_oracle_prerequisite_repair_branch_is_exactly_classified():
@@ -344,7 +348,7 @@ def test_st12_owner_authorized_branches_are_exactly_validation_only(
             with pytest.MonkeyPatch.context() as scope_patch:
                 scope_patch.setattr(
                     pr152, "current_branch_context",
-                    lambda _root: context.BranchContext(branch=branch, source="synthetic-test"),
+                    lambda _root, **_kwargs: context.BranchContext(branch=branch, source="synthetic-test"),
                 )
                 scope_patch.setattr(pr152, "_changed_paths", lambda _root: sorted(expected_paths))
                 assert pr152._validate_changed_paths(REPO_ROOT) == []
@@ -465,7 +469,7 @@ def test_st12_pull_request_detached_context_uses_exact_github_head_ref(
                 from src.qtt.stage1_prediction_markets.grand_global_debug_logical_consistency_audit import report as pr152
 
                 with monkeypatch.context() as scope_patch:
-                    scope_patch.setattr(pr152, "current_branch_context", lambda _root: resolved)
+                    scope_patch.setattr(pr152, "current_branch_context", lambda _root, **_kwargs: resolved)
                     scope_patch.setattr(
                         pr152, "_changed_paths",
                         lambda _root: sorted(registry.F13_ALLOWED_EXACT_PATHS),
@@ -5005,3 +5009,340 @@ def _assert_f14_exact_scope_and_interfaces():
             assert report._validate_changed_paths(REPO_ROOT) == [f'{label}_CHANGED_PATH_OUT_OF_SCOPE: .gitignore']
         assert report.current_branch_context is original_context
         assert report._changed_paths is original_changed_paths
+
+
+def _exercise_preflight_git_observation_v1(tmp_path, monkeypatch):
+    import os
+    from pathlib import Path
+    import shutil
+    import subprocess
+    import sys
+    from tools import validation_reliability as owner
+    from tools import ci_branch_context as context
+    root = tmp_path / "preflight-git-fixture"
+    root.mkdir()
+    git = shutil.which("git")
+    assert git is not None and Path(git).is_absolute()
+    if os.name == "nt":
+        # Git for Windows' cmd shim is a hard-link alias on this host. Select
+        # its already-installed single-link bin shim before constructing inputs.
+        git = str(Path(git).parent.parent / "bin" / "git.exe")
+        assert Path(git).lstat().st_nlink == 1
+    env = {k: v for k, v in os.environ.items() if not k.upper().startswith("GIT_")}
+    env.update(GIT_CONFIG_NOSYSTEM="1", GIT_CONFIG_GLOBAL=os.devnull,
+               GIT_CONFIG_SYSTEM=os.devnull, GIT_TERMINAL_PROMPT="0", GIT_ALLOW_PROTOCOL="")
+    def setup(*args):
+        completed = subprocess.run([git, "-c", "user.name=Synthetic Engineering", "-c",
+            "user.email=synthetic@example.invalid", "-c", "core.hooksPath=" + str(root / "absent-hooks"),
+            "-c", "commit.gpgsign=false", *args], cwd=root, env=env, shell=False,
+            stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL, stderr=subprocess.PIPE, timeout=30)
+        assert completed.returncode == 0, completed.stderr.decode("utf-8")
+    setup("init", "-b", "main")
+    (root / "deleted.py").write_text("base\n")
+    (root / "renamed.py").write_text("rename\n")
+    setup("add", "--", "deleted.py", "renamed.py")
+    setup("commit", "-m", "synthetic base")
+    setup("branch", "base")
+    (root / "earlier.py").write_text("earlier\n")
+    setup("add", "--", "earlier.py")
+    setup("commit", "-m", "synthetic earlier change")
+    (root / "deleted.py").unlink()
+    setup("add", "-u")
+    setup("commit", "-m", "synthetic deletion")
+    setup("mv", "renamed.py", "new.py")
+    (root / "earlier.py").write_text("dirty\n")
+    (root / "untracked.py").write_text("untracked\n")
+    index_path = root / ".git/index"
+    original_index = index_path.read_bytes()
+    argv = (sys.executable, "tools/validate_repair_pr_changed_file_scope.py", "--repo-root", ".")
+    value = owner._PreflightObservationV1(root=root, run_id="synthetic-git", occurrence=3,
+        argv=argv, files={}, directories={}, limits=dict(attempts=30, bytes=100_000,
+        entries=10, retained_bytes=100_000, git_attempts=8, stdout_bytes=8192,
+        stderr_bytes=8192, combined_output_bytes=16384),
+        deadline_ns=owner.time.monotonic_ns() + 60_000_000_000,
+        git_executable=git, evidence_root=tmp_path / "git-evidence")
+    with owner._preflight_observation_v1(value, run_id=value.run_id, occurrence=3, argv=argv, root=root):
+        committed, dirty = owner._scope_git_change_snapshot(root, base_ref="base")
+    assert set(committed) == {"earlier.py", "deleted.py"}
+    assert ("R ", "new.py", "renamed.py") in dirty
+    assert (" M", "earlier.py", None) in dirty and ("??", "untracked.py", None) in dirty
+    assert index_path.read_bytes() == original_index
+    assert len(value.git_receipts) == 6 and all(r.native_exit_code == 0 for r in value.git_receipts)
+    assert all(r.output_observation[stream]["complete"] for r in value.git_receipts for stream in ("stdout", "stderr"))
+    assert value.reserved["git_attempts"] == 6 and value.observed["stdout_bytes"] > 0
+    # A failed discovery cannot be converted to an empty query or start the query.
+    calls = []
+    with monkeypatch.context() as scoped:
+        def failed(argv, **kwargs):
+            calls.append(tuple(argv))
+            return subprocess.CompletedProcess(argv, 7, "", "synthetic discovery denied")
+        scoped.setattr(context.subprocess, "run", failed)
+        import pytest
+        with pytest.raises(ValueError, match="discovery failed"):
+            context._run_pr152_repository_read(root, ("ls-files", "-z"))
+    assert len(calls) == 1 and calls[0][-2:] == ("rev-parse", "--show-toplevel")
+
+
+def _assert_v35_exact_repair_scope():
+    # Independent adopted literals; never derived from the policy's answer.
+    branch = 'repair/main-cumulative-v35-final-r5-local-20260922'
+    expected = frozenset({
+        'src/qtt/agents/pr169_agent_orch1_resolvers.py',
+        'src/qtt/optimization/pr168_qopt1/validator.py',
+        'src/qtt/ranking/pr168_rank4/validator.py',
+        'src/qtt/stage1_prediction_markets/grand_global_debug_logical_consistency_audit/report.py',
+        'src/qtt/stage1_prediction_markets/multisource_safe_nonlive_dataset_expansion_strict_qku_coverage/formula_test_vectors.py',
+        'src/qtt/stage1_prediction_markets/pr157_completion_materialization_bridge/validator.py',
+        'src/qtt/stage1_prediction_markets/pr158_owner_response_selection_readiness_bridge/io.py',
+        'src/qtt/stage1_prediction_markets/pr158_owner_response_selection_readiness_bridge/validator.py',
+        'src/qtt/stage1_prediction_markets/pr159_official_source_completion_bridge/validator.py',
+        'src/qtt/stage1_prediction_markets/pr159r_source_locator_value_capture/io.py',
+        'src/qtt/stage1_prediction_markets/pr159r_source_locator_value_capture/validator.py',
+        'src/qtt/stage1_prediction_markets/pr162e_q_quantum_automapper/io.py',
+        'src/qtt/stage1_prediction_markets/pr162e_q_quantum_automapper/report_writer.py',
+        'src/qtt/stage1_prediction_markets/pr162e_q_quantum_automapper/validator.py',
+        'src/qtt/stage1_prediction_markets/pr165_d3_quantum_aware_scenario_selection_v3/io.py',
+        'src/qtt/stage1_prediction_markets/pr165_d3_quantum_aware_scenario_selection_v3/validator.py',
+        'src/qtt/stage1_prediction_markets/pr166_q_quantum_classical_hybrid_comparator/io.py',
+        'src/qtt/stage1_prediction_markets/pr166_q_quantum_classical_hybrid_comparator/validator.py',
+        'src/qtt/stage1_prediction_markets/pr166_qb_bounded_quantum_benchmark/io.py',
+        'src/qtt/stage1_prediction_markets/pr166_qb_bounded_quantum_benchmark/report_writer.py',
+        'src/qtt/stage1_prediction_markets/pr166_qb_bounded_quantum_benchmark/validator.py',
+        'src/qtt/stage1_prediction_markets/pr166_qc_quantum_selected_replay_paper_retest/io.py',
+        'src/qtt/stage1_prediction_markets/pr166_qc_quantum_selected_replay_paper_retest/report_writer.py',
+        'src/qtt/stage1_prediction_markets/pr166_qc_quantum_selected_replay_paper_retest/validator.py',
+        'src/qtt/stage1_prediction_markets/pr167_open_trade_simulator_integration/io.py',
+        'src/qtt/stage1_prediction_markets/pr167_open_trade_simulator_integration/report_writer.py',
+        'src/qtt/stage1_prediction_markets/pr167_open_trade_simulator_integration/validator.py',
+        'src/qtt/stage1_prediction_markets/pr168_rp5d_executability/validator.py',
+        'src/qtt/stage1_prediction_markets/qku_computation_control_plane/agent_policy.py',
+        'src/qtt/stage1_prediction_markets/qku_computation_control_plane/context.py',
+        'src/qtt/stage1_prediction_markets/qku_computation_control_plane/contextual_computability.py',
+        'src/qtt/stage1_prediction_markets/qku_computation_control_plane/evidence.py',
+        'src/qtt/stage1_prediction_markets/qku_computation_control_plane/implementation_registry.py',
+        'src/qtt/stage1_prediction_markets/qku_computation_control_plane/input_resolver.py',
+        'src/qtt/stage1_prediction_markets/qku_computation_control_plane/latency_policy.py',
+        'src/qtt/stage1_prediction_markets/qku_computation_control_plane/model_risk.py',
+        'src/qtt/stage1_prediction_markets/qku_computation_control_plane/models.py',
+        'src/qtt/stage1_prediction_markets/qku_computation_control_plane/oracle_contracts.py',
+        'src/qtt/stage1_prediction_markets/qku_computation_control_plane/persistence.py',
+        'src/qtt/stage1_prediction_markets/qku_computation_control_plane/protocols.py',
+        'src/qtt/stage1_prediction_markets/qku_computation_control_plane/receipts.py',
+        'src/qtt/stage1_prediction_markets/qku_computation_control_plane/serialization.py',
+        'src/qtt/stage1_prediction_markets/qku_computation_control_plane/service.py',
+        'src/qtt/stage1_prediction_markets/qku_computation_control_plane/sqlite_reference.py',
+        'src/qtt/stage1_prediction_markets/qku_computation_control_plane/stack_resolver.py',
+        'src/qtt/stage1_prediction_markets/qku_computation_control_plane/validation.py',
+        'src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/compact_records.py',
+        'tests/fail_closed/test_pytest_fresh_basetemp_helper.py',
+        'tests/fail_closed/test_run_validation_gates.py',
+        'tests/global_debug/test_grand_global_debug_logical_consistency_audit.py',
+        'tests/governance/test_qtt_owner_global_override_directive_currentization_and_internal_gate_release.py',
+        'tests/pr168_qopt1/test_qopt1_builder.py',
+        'tests/pr168_rank4/test_rank4_builder.py',
+        'tests/pr168_rp2/test_file_aliases.py',
+        'tests/pr168_rp5a/_helpers.py',
+        'tests/pr168_rp5a/test_cross_graph_consistency.py',
+        'tests/pr168_rp5a/test_no_validation_scope_removal.py',
+        'tests/pr168_rp5a/test_scan_is_bounded.py',
+        'tests/pr168_rp5b/test_rp5a_inputs_exist.py',
+        'tests/pr168_rp5d/test_rp5d_validation.py',
+        'tests/pr169_agent_orch1/test_resolvers.py',
+        'tests/pr169_dash1_ui1/test_ui1_generated_projections_not_manual_truth.py',
+        'tests/pr169_pretrade1/test_pr169_pretrade1.py',
+        'tests/pr169_readiness1/test_pr169_readiness1.py',
+        'tests/stage1_prediction_markets/multisource_safe_nonlive_dataset_expansion_strict_qku_coverage/test_pr162c_formula_implementations_have_test_vectors.py',
+        'tests/stage1_prediction_markets/nonlive_replay_paper_data_adapter_quantum_forward_bridge/test_pr162_safe_nonlive_replay_paper_data_adapter_quantum_forward_bridge.py',
+        'tests/stage1_prediction_markets/pr157_completion_materialization_bridge/test_pr157_generated_artifacts_are_deterministic.py',
+        'tests/stage1_prediction_markets/pr158_owner_response_selection_readiness_bridge/test_pr158_generated_artifacts_are_deterministic.py',
+        'tests/stage1_prediction_markets/pr159_official_source_completion_bridge/test_pr159_generated_artifacts_are_deterministic.py',
+        'tests/stage1_prediction_markets/pr159r_source_locator_value_capture/helpers.py',
+        'tests/stage1_prediction_markets/pr159r_source_locator_value_capture/test_pr159r_generated_artifacts_are_deterministic.py',
+        'tests/stage1_prediction_markets/pr159r_source_locator_value_capture/test_pr159r_selection_readiness_update_metadata_only.py',
+        'tests/stage1_prediction_markets/pr162e_q_quantum_automapper/test_pr162e_q_artifacts.py',
+        'tests/stage1_prediction_markets/pr165_d3_quantum_aware_scenario_selection_v3/test_pr165_d3_build_outputs.py',
+        'tests/stage1_prediction_markets/pr166_q_quantum_classical_hybrid_comparator/test_pr166_q_build_outputs.py',
+        'tests/stage1_prediction_markets/pr166_qb_bounded_quantum_benchmark/test_pr166_qb_artifacts.py',
+        'tests/stage1_prediction_markets/pr166_qc_quantum_selected_replay_paper_retest/test_pr166_qc_artifacts.py',
+        'tests/stage1_prediction_markets/pr167_open_trade_simulator_integration/test_pr167_artifacts.py',
+        'tests/stage1_prediction_markets/qku_computation_control_plane/accounting/test_contract_matrix.py',
+        'tests/stage1_prediction_markets/qku_computation_control_plane/security/test_input_validation.py',
+        'tests/stage1_prediction_markets/qku_computation_control_plane/tranche_b/test_resolution_pipeline.py',
+        'tests/stage1_prediction_markets/qku_computation_control_plane/tranche_b/test_service_operations.py',
+        'tests/stage1_prediction_markets/qku_computation_control_plane/tranche_e/__init__.py',
+        'tests/stage1_prediction_markets/qku_computation_control_plane/tranche_e/test_adversarial_matrix.py',
+        'tests/stage1_prediction_markets/qku_computation_control_plane/tranche_e/test_integration_matrix.py',
+        'tests/stage1_prediction_markets/qku_computation_control_plane/tranche_f/test_model_risk_llm_matrix.py',
+        'tests/tools/test_currentize_pr152_after_generated_artifacts.py',
+        'tests/tools/test_validate_repair_pr_changed_file_scope.py',
+        'tools/build_pr168_rp5a_legacy_semantic_audit.py',
+        'tools/build_pr169_dash1_owner_dashboard_ui.py',
+        'tools/changed_area_validation_router.py',
+        'tools/ci_branch_context.py',
+        'tools/currentize_pr152_after_generated_artifacts.py',
+        'tools/independent_validate_qku_computation_control_plane.py',
+        'tools/independent_validate_qku_computation_control_plane_accounting.py',
+        'tools/independent_validate_qku_computation_control_plane_architecture.py',
+        'tools/independent_validate_qku_computation_control_plane_e.py',
+        'tools/independent_validate_qku_computation_control_plane_execution.py',
+        'tools/independent_validate_qku_computation_control_plane_model_risk.py',
+        'tools/independent_validate_qku_computation_control_plane_quantum.py',
+        'tools/pr168_rp2_reports.py',
+        'tools/pr168_rp5a_agent_touchpoints.py',
+        'tools/pr168_rp5a_git_grep_scanner.py',
+        'tools/pr168_rp5a_identity_dependency.py',
+        'tools/pr168_rp5a_json_scanner.py',
+        'tools/pr168_rp5a_row_field_hit_index.py',
+        'tools/pr168_rp5a_term_taxonomy.py',
+        'tools/pr168_rp5a_validation_dependency_graph.py',
+        'tools/pr168_rp5a_validator.py',
+        'tools/pr168_rp5b_rp5a_loader.py',
+        'tools/pr168_rp5b_validator.py',
+        'tools/run_pytest_fresh_basetemp.py',
+        'tools/run_validation_gates.py',
+        'tools/validate_pr162e_q_quantum_automapper.py',
+        'tools/validate_pr166_qb_bounded_quantum_benchmark.py',
+        'tools/validate_pr166_qc_quantum_selected_replay_paper_retest.py',
+        'tools/validate_pr168_rp5a_legacy_semantic_audit.py',
+        'tools/validate_pr169_pretrade1.py',
+        'tools/validate_pr169_readiness1.py',
+        'tools/validate_repair_pr_changed_file_scope.py',
+        'tools/validation_reliability.py',
+        '.github/workflows/qtt_validation.yml',
+        'src/qtt/stage1_prediction_markets/qku_computation_control_plane/source_policy.py',
+        'tools/validate_no_runtime_artifacts.py',
+        'tests/fail_closed/test_no_runtime_artifacts_strict.py',
+        'tests/stage1_prediction_markets/qku_computation_control_plane/tranche_h/test_contract_matrix.py',
+        'tools/validate_nested_validator_contracts.py',
+        'tools/validation_inventory.py',
+        'tools/cross_platform_path_invariant.py',
+        'tests/tools/test_ci_branch_context.py',
+        'tests/tools/test_changed_area_validation_router.py',
+        'tests/tools/test_cross_platform_path_invariant.py',
+        'tests/tools/test_validation_inventory.py',
+        'src/qtt/stage1_prediction_markets/qtt_owner_global_override_directive_currentization_and_internal_gate_release/report.py',
+        'tools/validation_scope_registry.py',
+    })
+    actual = context.EXPLICIT_DOWNSTREAM_REPAIR_BRANCH_CHANGED_PATHS[branch]
+    assert type(actual) is frozenset and len(actual) == 135 and actual == expected
+    for path in expected:
+        assert context.changed_path_allowed_for_explicit_repair_branch(branch, path)
+        assert context.is_explicit_downstream_repair_changed_path(branch, path)
+    denied = ('tools/unlisted.py', 'src/qtt/unlisted.py',
+        'docs/master_plan/QTT_MasterPlan_Current.md',
+        'docs/roadmap/QTT_PostPR135_Day1_Launch_Readiness_Roadmap_v1_0.md',
+        'docs/master_plan/generated/PR152_GrandGlobalDebugLogicalConsistencyAuditEntireQTTRepo.report.json',
+        '.env', 'credentials.json')
+    for path in denied:
+        assert not context.changed_path_allowed_for_explicit_repair_branch(branch, path)
+    for other in (branch.upper(), branch + '-copy', 'prefix-' + branch, branch + '/'):
+        assert other not in context.EXPLICIT_DOWNSTREAM_REPAIR_BRANCH_CHANGED_PATHS
+        for path in expected:
+            assert not context.changed_path_allowed_for_explicit_repair_branch(other, path)
+
+
+    # This is an independent delegation oracle, not a copy of the mapping keys.
+    import importlib
+    import sys
+    import tools
+    from tools import validation_scope_registry as registry
+
+    delegated = (
+        'repair/main-pr166-sm2-bounded-idempotence-ci',
+        'repair/no-runtime-custody-and-ci-dependency-boundary',
+        'repair/pr153s-source-value-capture-closure-classifier',
+        'repair/pr154-post-merge-pytest-context-hygiene',
+        'repair/pr163-c-main-branch-context-after-merge',
+        'repair/st12-architecture-independent-oracle-closure',
+        'repair/st12-inherited-math-row-receipt-closure',
+    )
+    legacy = 'pr-ci-fastfail-validation-context-preflight'
+    currentizer = 'tests/tools/test_currentize_pr152_after_generated_artifacts.py'
+    future = 'repair/future-independent-test-only'
+    future_path = 'tests/tools/synthetic_future_independent_scope_only.py'
+    shared_path = 'tools/ci_branch_context.py'
+    delegated_examples = (
+        ('repair/main-pr166-sm2-bounded-idempotence-ci',
+         'src/qtt/stage1_prediction_markets/bounded_idempotence.py'),
+        ('repair/no-runtime-custody-and-ci-dependency-boundary',
+         'tools/validate_no_runtime_artifacts.py'),
+        ('repair/pr153s-source-value-capture-closure-classifier',
+         'src/qtt/stage1_prediction_markets/pr153s_source_value_capture_closure_classifier/classifier.py'),
+        ('repair/pr154-post-merge-pytest-context-hygiene',
+         'tests/atomicrows/test_atomicrows_parameter_default_value_materialization_gate.py'),
+        ('repair/pr163-c-main-branch-context-after-merge',
+         'src/qtt/stage1_prediction_markets/pr163_c_pretrade_infrastructure_rejection_remediation/paths.py'),
+        ('repair/st12-architecture-independent-oracle-closure',
+         'tools/independent_validate_qku_computation_control_plane_architecture.py'),
+        ('repair/st12-inherited-math-row-receipt-closure',
+         'tools/qku_independent_math_row_receipt.py'),
+    )
+
+    def exact_decision(selected_branch, path):
+        return dict(allowed=True, branch=selected_branch, normalized_path=path,
+            pr_id='REGISTERED-EXACT-REPAIR', matched_rule='exact:' + path,
+            reason='registered_exact_path')
+
+    def assert_isolated(selected_registry):
+        assert type(selected_registry._VALIDATION_FIXTURE_REGISTERED_REPAIR_BRANCHES) is tuple
+        assert selected_registry._VALIDATION_FIXTURE_REGISTERED_REPAIR_BRANCHES == delegated
+        for path in expected:
+            assert selected_registry.explain_pr_scope_decision(branch, path) == exact_decision(branch, path)
+        assert selected_registry.explain_pr_scope_decision(legacy, currentizer) == dict(
+            allowed=False, branch=legacy, normalized_path=currentizer, pr_id='PR168-GFP',
+            matched_rule='no_pr168_scope_rule', reason='path_not_registered_for_pr_scope')
+        for path in (currentizer, future_path):
+            assert selected_registry.explain_pr_scope_decision(legacy, path)['allowed'] is False
+        for delegated_branch, path in delegated_examples + ((delegated[0], shared_path),):
+            assert selected_registry.explain_pr_scope_decision(delegated_branch, path) == exact_decision(delegated_branch, path)
+            if path in ('tools/independent_validate_qku_computation_control_plane_architecture.py',
+                        'tools/ci_branch_context.py'):
+                # The original earlier ST12 rule retains precedence and all
+                # diagnostic fields, even for these delegated/V35 overlaps.
+                assert selected_registry.explain_pr_scope_decision(legacy, path) == dict(
+                    allowed=True, branch=legacy, normalized_path=path,
+                    pr_id='ST12-TRANCHE-A', matched_rule='validation_context_exact:' + path,
+                    reason='registered_validation_context_exact_path')
+            else:
+                assert selected_registry.explain_pr_scope_decision(legacy, path) == dict(
+                    allowed=True, branch=legacy, normalized_path=path,
+                    pr_id='REGISTERED-EXACT-REPAIR',
+                    matched_rule='validation_context_registered_exact_repair:' + delegated_branch + ':' + path,
+                    reason='registered_validation_context_exact_repair_path')
+        for path in denied:
+            assert selected_registry.explain_pr_scope_decision(branch, path)['allowed'] is False
+        for other in (branch.upper(), branch + '-copy', 'prefix-' + branch, branch + '/'):
+            assert selected_registry._registered_exact_repair_scope_decision(other, currentizer) is None
+            assert selected_registry.explain_pr_scope_decision(other, currentizer)['allowed'] is False
+
+    original_mapping = context.EXPLICIT_DOWNSTREAM_REPAIR_BRANCH_CHANGED_PATHS
+    original_items = tuple(original_mapping.items())
+    assert future not in original_mapping and context.is_repair_branch(future)
+    assert registry.explain_pr_scope_decision(future, future_path)['allowed'] is False
+    assert shared_path in expected
+    assert_isolated(registry)
+    for entries in (original_items + ((future, frozenset({future_path})),),
+                    ((future, frozenset({future_path})),) + tuple(reversed(original_items))):
+        with pytest.MonkeyPatch.context() as patch:
+            changed_mapping = dict(entries)
+            patch.setattr(context, 'EXPLICIT_DOWNSTREAM_REPAIR_BRANCH_CHANGED_PATHS', changed_mapping)
+            assert context.EXPLICIT_DOWNSTREAM_REPAIR_BRANCH_CHANGED_PATHS is changed_mapping
+            assert tuple(changed_mapping.items()) == entries and future in changed_mapping
+            assert registry.explain_pr_scope_decision(future, future_path) == exact_decision(future, future_path)
+            assert_isolated(registry)
+            # Import the complete module after registration without replacing or
+            # reloading the module objects held by existing consumer imports.
+            with pytest.MonkeyPatch.context() as import_patch:
+                import_patch.delitem(sys.modules, 'tools.validation_scope_registry')
+                import_patch.delattr(tools, 'validation_scope_registry')
+                fresh = importlib.import_module('tools.validation_scope_registry')
+                assert fresh is not registry and tools.validation_scope_registry is fresh
+                assert sys.modules['tools.validation_scope_registry'] is fresh
+                assert fresh.explain_pr_scope_decision(future, future_path) == exact_decision(future, future_path)
+                assert_isolated(fresh)
+            assert tools.validation_scope_registry is registry
+            assert sys.modules['tools.validation_scope_registry'] is registry
+        assert context.EXPLICIT_DOWNSTREAM_REPAIR_BRANCH_CHANGED_PATHS is original_mapping
+        assert tuple(original_mapping.items()) == original_items
+        assert registry.explain_pr_scope_decision(future, future_path)['allowed'] is False
+        assert_isolated(registry)

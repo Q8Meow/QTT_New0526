@@ -104,6 +104,14 @@ def test_inventory_represents_every_run_validation_gate_command():
     assert ids == expected_ids
     assert inventory.validate_inventory(rows) == ()
 
+    from tools import validation_reliability as owner
+    from unittest.mock import patch
+    import pytest
+    with patch.object(owner.Path, "lstat", side_effect=PermissionError("synthetic inventory observation denied")):
+        with pytest.raises(owner.ValidationReliabilityError, match="inventory observation denied"):
+            inventory.validate_inventory()
+
+
 
 def test_inventory_classifies_reduced_pr_and_full_validation_behavior():
     rows = inventory.validation_inventory()

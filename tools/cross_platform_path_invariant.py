@@ -12,6 +12,11 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
+from tools.validation_reliability import (
+    _preflight_active_v1, _preflight_kind_v1, _preflight_read_bytes_v1,
+    _preflight_read_text_v1, _preflight_directory_v1, _preflight_files_v1,
+)
+
 from tools.changed_area_validation_router import (
     build_router_result,
     router_input_from_environment,
@@ -118,8 +123,10 @@ def _path_ref_failures_in_value(
 def path_ref_failures_for_json_file(repo_root: str | Path, rel_path: str | Path) -> tuple[PathInvariantFailure, ...]:
     root = Path(repo_root)
     normalized = normalize_repo_ref(rel_path)
-    path = resolve_repo_ref(root, normalized)
-    if not path.exists():
+    observation = _preflight_active_v1(root)
+    path = (root.joinpath(*normalized.split("/")) if observation is not None
+            else resolve_repo_ref(root, normalized))
+    if not (_preflight_kind_v1(path, optional=True) is not None):
         return (
             PathInvariantFailure(
                 normalized,
@@ -130,7 +137,7 @@ def path_ref_failures_for_json_file(repo_root: str | Path, rel_path: str | Path)
         )
     if path.suffix == ".jsonl":
         failures: list[PathInvariantFailure] = []
-        for line_number, line in enumerate(path.read_text(encoding="utf-8").splitlines(), start=1):
+        for line_number, line in enumerate(_preflight_read_text_v1(path).splitlines(), start=1):
             if not line.strip():
                 continue
             failures.extend(
@@ -141,22 +148,17 @@ def path_ref_failures_for_json_file(repo_root: str | Path, rel_path: str | Path)
                 )
             )
         return tuple(failures)
-    payload = json.loads(path.read_text(encoding="utf-8"))
+    payload = json.loads(_preflight_read_text_v1(path))
     return _path_ref_failures_in_value(payload, source_path=normalized)
 
 
 def pr208_generated_reports(repo_root: str | Path) -> tuple[str, ...]:
     root = Path(repo_root)
+    _preflight_active_v1(root)
     generated = root / "docs" / "master_plan" / "generated"
-    if not generated.is_dir():
+    if _preflight_kind_v1(generated, optional=True) is None:
         return ()
-    return tuple(
-        sorted(
-            to_repo_posix(path, root)
-            for path in generated.glob("PR208_*.report.json")
-            if path.is_file()
-        )
-    )
+    return tuple(sorted(to_repo_posix(path, root) for path in _preflight_files_v1(generated, "PR208_*.report.json")))
 
 
 def changed_generated_reports_to_scan(
