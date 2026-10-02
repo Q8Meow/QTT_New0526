@@ -17776,6 +17776,54 @@ def _exercise_preflight_observation_v1(tmp_path, monkeypatch):
     with pytest.raises(owner.ValidationReliabilityError):
         owner._preflight_directory_v1(root / "missing")
     assert owner._preflight_kind_v1(root / "missing", optional=True) is None
+    # Successful status settlement follows the last real ancestor/stat call.
+    for kind in ("absent-leaf", "absent-parent", "file", "directory"):
+        for late in (False, True):
+            value, clock, calls = session(), [100], []
+            value.deadline_ns = 1000
+            target = {"absent-leaf": root / "missing", "absent-parent": root / "missing-parent/leaf",
+                      "file": path, "directory": root}[kind]
+            native_chain, native_lstat = owner._preflight_chain_v1, Path.lstat
+            with monkeypatch.context() as scoped:
+                scoped.setattr(owner.time, "monotonic_ns", lambda: clock[0])
+                def final_chain(*args, **kwargs):
+                    result = native_chain(*args, **kwargs)
+                    calls.append(result)
+                    if late and len(calls) == 2:
+                        clock[0] = 1000
+                    return result
+                def final_stat(p, *args, **kwargs):
+                    result = native_lstat(p, *args, **kwargs)
+                    if p == target:
+                        calls.append(result)
+                        if late and len(calls) == 2:
+                            clock[0] = 1000
+                    return result
+                if kind.startswith("absent"):
+                    scoped.setattr(owner, "_preflight_chain_v1", final_chain)
+                else:
+                    scoped.setattr(Path, "lstat", final_stat)
+                if late:
+                    with pytest.raises(owner.ValidationReliabilityError, match="deadline"), activate(value):
+                        owner._preflight_kind_v1(target, optional=True)
+                else:
+                    with activate(value):
+                        assert owner._preflight_kind_v1(target, optional=True) == (
+                            None if kind.startswith("absent") else kind)
+            assert len(calls) == 2 and value.observed["attempts"] == 1
+            assert (value.failure is not None) is late
+    value = session()
+    with monkeypatch.context() as scoped:
+        native_lstat = Path.lstat
+        denied_path = root / "unreadable-optional"
+        def denied_stat(p, *args, **kwargs):
+            if p == denied_path:
+                raise PermissionError("optional status is unreadable")
+            return native_lstat(p, *args, **kwargs)
+        scoped.setattr(Path, "lstat", denied_stat)
+        with pytest.raises(owner.ValidationReliabilityError, match="optional status is unreadable"), activate(value):
+            owner._preflight_kind_v1(denied_path, optional=True)
+    assert value.observed["attempts"] == 1 and value.failure is not None
     # Parsing follows complete acquisition and keeps its independent semantics.
     value = session()
     with activate(value):
@@ -17861,65 +17909,372 @@ def _exercise_preflight_observation_v1(tmp_path, monkeypatch):
 
 
 def _exercise_preflight_startup_v1(tmp_path, monkeypatch):
-    """Data-only synthetic installation. No synthetic executable is launched."""
+    """Known literal startup data, separated namespaces, and the actual readers."""
     import site
     import sysconfig
     import struct
+    from contextlib import contextmanager
+    from pathlib import PurePosixPath, PureWindowsPath
+    from types import SimpleNamespace
     from tools import validation_reliability as owner
-    for fault in (None, "hook", "config", "customizer", "loader", "version", "abi"):
-        root = tmp_path / ("startup-" + str(fault))
-        for name in ("bin", "tools", "Lib/site-packages"):
-            (root / name).mkdir(parents=True, exist_ok=True)
-        executable = root / "bin/python.exe"
-        executable.write_bytes(b"synthetic executable input; never run")
-        pth = root / "Lib/site-packages/safe.pth"
-        pth_raw = b"import os\n" if fault == "hook" else b".\n"
-        pth.write_bytes(pth_raw)
-        config = root / "bin/python._pth"
-        customizer = root / "Lib/sitecustomize.py"
-        files = {"bin/python.exe": b"synthetic executable input; never run", "Lib/site-packages/safe.pth": pth_raw}
-        if fault == "config":
-            config.write_bytes(b"import site\n")
-            files["bin/python._pth"] = b"import site\n"
-        if fault == "customizer":
-            customizer.write_bytes(b"raise RuntimeError('must not execute')\n")
-            files["Lib/sitecustomize.py"] = b"raise RuntimeError('must not execute')\n"
-        argv = (str(executable), "tools/validate_repair_pr_changed_file_scope.py", "--repo-root", ".")
-        roots = tuple(str(root / name) for name in ("", "tools", "bin", "Lib", "Lib/site-packages"))
+
+    original_vectors = tuple(tuple(row) for row in runner.build_phase_commands(
+        runner.FAST_PREFLIGHT_PHASE, tmp_path / "validation", tmp_path / "pytest"))
+    assert len(original_vectors) == 8
+    executable_raw = b"synthetic executable\n"
+    module_raw = b"# stdlib fixture\n"
+    pth_raw = b"# no executable path code\n"
+    script_raw = b"# synthetic source location; never executed\n"
+
+    def fixture(name, occurrence=3, *, colocated=False, owned=False):
+        parent = tmp_path / ("startup-" + name)
+        repo, run = parent / "repo", parent / "run"
+        runtime = repo if colocated else parent / "runtime"
+        lib, site_root = runtime / "Lib", runtime / "Lib/site-packages"
+        for directory in (repo / "tools", runtime / "bin", site_root, run):
+            directory.mkdir(parents=True, exist_ok=True)
+        executable, module, pth = runtime / "bin/python.exe", lib / "module.py", site_root / "no_import.pth"
+        for path, raw in ((executable, executable_raw), (module, module_raw), (pth, pth_raw)):
+            path.write_bytes(raw)
+        vectors = tuple((str(executable), *row[1:]) for row in original_vectors)
+        argv = vectors[occurrence - 1]
+        script_relative = Path(argv[1]).as_posix()
+        (repo / script_relative).write_bytes(script_raw)
+        assert script_relative.startswith("tools/") and owner._preflight_vector_v1(argv)
+        if not colocated:
+            assert not executable.is_relative_to(repo)
+        assert not run.is_relative_to(repo) and not run.is_relative_to(runtime)
+        roots = tuple(str(p) for p in (repo, repo / "tools", executable.parent, lib, site_root))
+        config = (str(executable.parent / "pyvenv.cfg"), str(runtime / "pyvenv.cfg"),
+                  str(executable.with_suffix("._pth")),
+                  str(executable.parent / f"python{sys.version_info.major}{sys.version_info.minor}._pth"))
+        customizers = tuple(str(Path(root) / (stem + suffix)) for root in roots
+            for stem in ("sitecustomize", "usercustomize") for suffix in (".py", ".pyc", ".pyd", ".so", ""))
+        basis = dict(files={str(executable): executable_raw, str(module): module_raw, str(pth): pth_raw},
+            directories={str(lib): (("module.py", "file"), ("site-packages", "directory")),
+                         str(site_root): (("no_import.pth", "file"),)}, absent=config + customizers)
+        catalog_entries = 3 + 2 + len(config) + len(customizers) + 3
+        # The existing finite acquisition allowance plus the known literal
+        # catalog index demand. Raw lengths are not a native memory grant.
+        limits = dict(attempts=200, bytes=4096, entries=catalog_entries + 20, retained_bytes=4096,
+            git_attempts=0, stdout_bytes=0, stderr_bytes=0, combined_output_bytes=0)
+        paths = None
+        if owned:
+            paths, probe = owner.resolve_validation_run_paths(repo, explicit_process_root=run)
+            assert probe.failure_operation is None and probe.readback_equal and probe.directory_cleanup_success
+            assert paths.repo_root == repo and paths.process_root.parent == run
+        observation = owner._PreflightObservationV1(root=repo,
+            run_id=paths.run_id if paths else "synthetic-startup", occurrence=occurrence,
+            argv=argv, files={script_relative: script_raw}, directories={"tools": ((Path(argv[1]).name, "file"),)},
+            limits=limits, deadline_ns=owner.time.monotonic_ns() + 60_000_000_000)
         env = {"SystemRoot": "C:\\Windows"}
-        if fault == "loader":
-            env["LD_PRELOAD"] = "synthetic injection"
-        observation = owner._PreflightObservationV1(root=root, run_id="synthetic-startup", occurrence=3,
-            argv=argv, files=files, directories={"Lib": (("site-packages", "directory"),),
-                "Lib/site-packages": (("safe.pth", "file"),)},
-            limits=dict(attempts=200, bytes=4096, entries=20, retained_bytes=4096,
-                git_attempts=0, stdout_bytes=0, stderr_bytes=0, combined_output_bytes=0),
-            deadline_ns=owner.time.monotonic_ns() + 60_000_000_000)
-        binding = dict(observation=observation, version=(0, 0, 0) if fault == "version" else tuple(sys.version_info[:3]),
-            abi=(sys.implementation.cache_tag, "wrong-abi" if fault == "abi" else sysconfig.get_config_var("SOABI"),
-                 struct.calcsize("P") * 8, sysconfig.get_config_var("Py_GIL_DISABLED"), getattr(sys, "abiflags", "")),
-            stdlib_roots=(str(root / "Lib"),),
-            site_roots=(str(root / "Lib/site-packages"),), loader_environment=dict(env),
-            config_paths=(str(root / "bin/pyvenv.cfg"), str(root / "pyvenv.cfg"), str(config),
-                          str(root / f"bin/python{sys.version_info.major}{sys.version_info.minor}._pth")),
-            customizer_paths=tuple(str(Path(parent) / (name + suffix)) for parent in roots
-                for name in ("sitecustomize", "usercustomize") for suffix in (".py", ".pyc", ".pyd", ".so", "")))
+        binding = dict(observation=observation, version=tuple(sys.version_info[:3]),
+            abi=(sys.implementation.cache_tag, sysconfig.get_config_var("SOABI"), struct.calcsize("P") * 8,
+                 sysconfig.get_config_var("Py_GIL_DISABLED"), getattr(sys, "abiflags", "")),
+            stdlib_roots=(str(lib),), site_roots=(str(site_root),), loader_environment=dict(env),
+            config_paths=config, customizer_paths=customizers, startup_basis=basis)
+        return SimpleNamespace(repo=repo, run=run, runtime=runtime, executable=executable,
+            module=module, pth=pth, lib=lib, site_root=site_root, vectors=vectors, argv=argv, script_relative=script_relative,
+            basis=basis, binding=binding, observation=observation, env=env, paths=paths,
+            catalog_entries=catalog_entries, limits=limits, cache=run / "cache")
+
+    @contextmanager
+    def installation(case):
         with monkeypatch.context() as scoped:
-            scoped.chdir(root)
-            scoped.setattr(owner.sys, "executable", str(executable))
-            scoped.setattr(sysconfig, "get_path", lambda key: str(root / "Lib"))
-            scoped.setattr(site, "getsitepackages", lambda: [str(root / "Lib/site-packages")])
-            if fault is None:
-                projected, receipt = owner._preflight_startup_v1(argv, env, binding=binding, cache_root=root / "cache")
-                assert projected["PYTHONNOUSERSITE"] == "1" and receipt["registered_argv"] == argv
-                assert observation.observed["bytes"] == len(files["bin/python.exe"]) + 2 * len(pth_raw)
+            scoped.chdir(case.repo)
+            scoped.setattr(owner.sys, "executable", str(case.executable))
+            scoped.setattr(sysconfig, "get_path", lambda key: str(case.lib))
+            scoped.setattr(site, "getsitepackages", lambda: [str(case.site_root)])
+            # No startup check may execute the literal data file (or a probe).
+            scoped.setattr(owner.subprocess, "Popen", lambda *a, **k: pytest.fail("startup launched a process"))
+            yield scoped
+
+    @contextmanager
+    def active(case):
+        value = case.observation
+        with owner._preflight_observation_v1(value, run_id=value.run_id,
+                occurrence=value.occurrence, argv=value.argv, root=case.repo):
+            yield value
+
+    def settled(case):
+        assert case.observation._startup_catalog is None
+        assert owner._PREFLIGHT_OBSERVATION_V1.get() is None
+        assert case.observation.root == case.repo
+
+    def candidate(case):
+        plan = runner._prepare_execution_plan(case.vectors)
+        custody = runner._ValidationCandidateCustodyV1(repo_root=case.repo, plan=plan,
+            observe_paths=lambda: (case.script_relative,), check_exclusive=lambda: None,
+            index_path=None, effects_by_occurrence={i: () for i in range(1, 9)}, ignored_paths=(),
+            entry_limit=100, snapshot_byte_limit=1_000_000, read_byte_limit=100_000_000,
+            deadline_ns=runner.time.monotonic_ns() + 60_000_000_000,
+            operation_checks={i: (lambda **kw: None) for i in range(1, 9)},
+            preflight_bindings={case.observation.occurrence: case.binding})
+        return custody, plan
+
+    # Every original vector gets a fresh observation and actual run-owned cache.
+    # Keep the older colocated positive as additional, separately scoped coverage.
+    for occurrence, colocated in (*((i, False) for i in range(1, 9)), (3, True)):
+        case = fixture(f"positive-{occurrence}-{colocated}", occurrence, colocated=colocated, owned=True)
+        with installation(case) as scoped:
+            custody, plan = candidate(case)
+            original_environment = owner._preflight_environment_v1
+            def project(*args, **kwargs):
+                assert case.observation._startup_catalog is None
+                assert owner._PREFLIGHT_OBSERVATION_V1.get() is None
+                assert kwargs["cache_root"] == case.paths.process_root / f"preflight-cache-{occurrence}"
+                return original_environment(*args, **kwargs)
+            scoped.setattr(owner, "_preflight_environment_v1", project)
+            projected, receipt = custody.prepare_preflight(occurrence, plan[occurrence - 1],
+                environment=case.env, run_paths=case.paths)
+            assert projected["PYTHONNOUSERSITE"] == "1" and receipt["registered_argv"] == case.argv
+            assert Path(projected["PYTHONPYCACHEPREFIX"]).is_dir()
+            assert not Path(projected["PYTHONPYCACHEPREFIX"]).is_relative_to(case.repo)
+            expected_read = len(executable_raw) + len(module_raw) + 2 * len(pth_raw)
+            retained_basis = len(executable_raw) + len(module_raw) + len(pth_raw)
+            assert expected_read > 0 and case.observation.observed["bytes"] == expected_read
+            assert case.observation.observed["entries"] == 4  # nested site visits remain separate
+            assert case.observation.reserved["entries"] == case.catalog_entries
+            assert case.observation.retained_entries == case.catalog_entries + 4
+            assert case.observation.observed["retained_bytes"] == retained_basis + expected_read
+            assert case.observation.reserved["retained_bytes"] == retained_basis + expected_read
+            assert case.observation.observed["attempts"] == 1 + 4 + 3 + len(case.basis["absent"])
+            assert case.observation.remaining["bytes"] == 4096 - expected_read
+        settled(case)
+
+    # Preserve the original trust denials and add actual separated-location faults.
+    failures = {
+        "hook": "executable startup", "config": "._pth", "customizer": "customizer",
+        "loader": "loader injection", "version": "version/ABI", "abi": "version/ABI",
+        "missing-executable": r"python\.exe", "changed-executable": "expected bytes differ",
+        "missing-directory": "undeclared startup directory", "missing-file": "undeclared startup file",
+        "declared-present-missing": "startup status differs", "declared-absent-present": "startup status differs",
+        "roster": "directory basis differs", "close": "startup close failure",
+    }
+    for fault, message in failures.items():
+        case = fixture(fault)
+        basis = case.basis
+        if fault == "hook":
+            case.pth.write_bytes(b"import os\n")
+            basis["files"][str(case.pth)] = b"import os\n"
+        elif fault in ("config", "customizer"):
+            path = case.executable.with_suffix("._pth") if fault == "config" else case.lib / "sitecustomize.py"
+            raw = b"import site\n" if fault == "config" else b"raise RuntimeError('must not execute')\n"
+            path.write_bytes(raw)
+            basis["files"][str(path)] = raw
+            basis["absent"] = tuple(p for p in basis["absent"] if p != str(path))
+            if fault == "customizer":
+                basis["directories"][str(case.lib)] += ((path.name, "file"),)
+        elif fault == "loader":
+            case.env["LD_PRELOAD"] = "synthetic injection"
+            case.binding["loader_environment"] = dict(case.env)
+        elif fault == "version":
+            case.binding["version"] = (0, 0, 0)
+        elif fault == "abi":
+            abi = case.binding["abi"]
+            case.binding["abi"] = (abi[0], "wrong-abi", *abi[2:])
+        elif fault == "missing-executable":
+            case.executable.unlink()
+        elif fault == "changed-executable":
+            case.executable.write_bytes(b"Synthetic executable\n")
+            assert case.executable.read_bytes() != executable_raw
+        elif fault == "missing-directory":
+            del basis["directories"][str(case.site_root)]
+        elif fault == "missing-file":
+            del basis["files"][str(case.pth)]
+        elif fault == "declared-present-missing":
+            path = basis["absent"][0]
+            basis["absent"] = basis["absent"][1:]
+            basis["files"][path] = b"missing but declared present\n"
+        elif fault == "declared-absent-present":
+            Path(basis["absent"][0]).write_bytes(b"unexpected\n")
+        elif fault == "roster":
+            (case.site_root / "undeclared.py").write_bytes(b"# not in the roster\n")
+        with installation(case) as scoped:
+            if fault == "close":
+                native_close = owner.os.close
+                def close(fd):
+                    native_close(fd)
+                    raise OSError("startup close failure")
+                scoped.setattr(owner.os, "close", close)
+            expected_error = ValueError if fault in ("loader", "version", "abi") else owner.ValidationReliabilityError
+            with pytest.raises(expected_error, match=message) as failure:
+                owner._preflight_startup_v1(case.argv, case.env, binding=case.binding, cache_root=case.cache)
+            if fault == "missing-executable":
+                assert isinstance(failure.value.__cause__, FileNotFoundError)
+        settled(case)
+        assert not case.cache.exists()
+        if fault not in ("loader", "version", "abi"):
+            assert case.observation.failure is not None
+            assert case.observation.reserved["entries"] > 0
+            assert case.observation.remaining["bytes"] == 4096 - case.observation.observed["bytes"]
+
+    # Real declared file/directory/absence statuses and unchanged byte content.
+    case = fixture("exact-status")
+    with active(case), owner._preflight_startup_access_v1(case.observation, case.basis):
+        assert owner._preflight_kind_v1(case.executable, optional=True) == "file"
+        assert owner._preflight_kind_v1(case.lib, optional=True) == "directory"
+        assert owner._preflight_kind_v1(Path(case.basis["absent"][0]), optional=True) is None
+        assert owner._preflight_read_bytes_v1(case.executable) == executable_raw
+    settled(case)
+    assert case.observation.observed["attempts"] == 5
+    assert case.observation.observed["bytes"] == len(executable_raw)
+
+    # Exact role membership, no evidence exception, no reentry, immutable basis.
+    for fault in ("sibling", "repository-role", "repository-only", "evidence", "reentry", "catalog-mutation", "wrong-observation"):
+        case = fixture("role-" + fault)
+        value = case.observation
+        with pytest.raises(owner.ValidationReliabilityError), active(case):
+            if fault == "repository-role":
+                owner._preflight_read_bytes_v1(case.executable)
             else:
-                with pytest.raises(ValueError, match={"hook": "executable startup", "config": "._pth",
-                        "customizer": "customizer", "loader": "loader injection", "version": "version/ABI", "abi": "version/ABI"}[fault]):
-                    owner._preflight_startup_v1(argv, env, binding=binding, cache_root=root / "cache")
-                assert not (root / "cache").exists()
+                with owner._preflight_startup_access_v1(value, case.basis):
+                    if fault == "sibling":
+                        owner._preflight_kind_v1(case.executable.parent / "unlisted.py", optional=True)
+                    elif fault == "repository-only":
+                        owner._preflight_read_bytes_v1(case.repo / case.argv[1])
+                    elif fault == "evidence":
+                        value.git_receipts.append(SimpleNamespace(stdout_path=str(case.executable), stderr_path=str(case.module)))
+                        owner._preflight_read_bytes_v1(case.executable, evidence=True)
+                    elif fault == "reentry":
+                        with owner._preflight_startup_access_v1(value, case.basis):
+                            pytest.fail("reentered startup role")
+                    elif fault == "wrong-observation":
+                        other = fixture("other-observation").observation
+                        with owner._preflight_startup_access_v1(other, case.basis):
+                            pytest.fail("wrong observation entered")
+                    else:
+                        immutable = value._startup_catalog
+                        assert immutable[0][str(case.executable)] is executable_raw
+                        with pytest.raises(TypeError):
+                            immutable[0][str(case.executable)] = b"changed"
+                        case.basis["files"][str(case.executable)] = b"wrong"
+                        assert owner._preflight_read_bytes_v1(case.executable) == executable_raw
+                        case.basis["files"][str(case.executable.parent / "later.py")] = b"new"
+                        owner._preflight_read_bytes_v1(case.executable.parent / "later.py")
+        settled(case)
+        assert value.failure is not None
+        assert value.remaining["bytes"] == 4096 - value.observed["bytes"]
+        assert value.observed["bytes"] == (len(executable_raw) if fault == "catalog-mutation" else 0)
 
+    # Exact types/shape, aliases, cross-kind contradictions and finite indexing.
+    mutations = (
+        lambda b, c: b.update(absent=list(b["absent"])),
+        lambda b, c: b["files"].update({str(c.executable): bytearray(executable_raw)}),
+        lambda b, c: b["files"].update({str(c.executable).swapcase(): executable_raw}),
+        lambda b, c: b.update(absent=b["absent"] + (b["absent"][0],)),
+        lambda b, c: b.update(absent=b["absent"] + (str(c.executable),)),
+        lambda b, c: b["files"].update({str(c.runtime) + "/../runtime/alias": b""}),
+        lambda b, c: b["files"].update({"relative/path": b""}),
+        lambda b, c: b["files"].update({str(c.executable) + "\0": b""}),
+        lambda b, c: b["files"].update({c.executable: b""}),
+        lambda b, c: b["directories"].update({str(c.lib): (("MODULE.py", "file"), ("module.py", "file"))}),
+        lambda b, c: b["directories"].update({str(c.lib): (("../escape", "file"),)}),
+        lambda b, c: b["directories"].update({str(c.lib): (("module.py", True),)}),
+        lambda b, c: b["directories"].update({str(c.lib): (("module.py", "directory"),)}),
+        lambda b, c: b["directories"].update({str(c.lib): ()}),
+        lambda b, c: b["files"].update({str(c.repo / c.script_relative): b"contradicts repository bytes"}),
+        lambda b, c: b["directories"].update({str(c.lib): (("oversized", "file"),) * (c.limits["entries"] + 1)}),
+    )
+    for index, mutate in enumerate(mutations):
+        case = fixture(f"catalog-{index}")
+        mutate(case.basis, case)
+        with pytest.raises(owner.ValidationReliabilityError), active(case):
+            with owner._preflight_startup_access_v1(case.observation, case.basis):
+                pytest.fail("invalid catalog was installed")
+        settled(case)
+        assert case.observation.observed["bytes"] == 0 and case.observation.failure is not None
 
+    # Pure lexical checks cover both layouts; only the actual platform fixture
+    # above establishes physical I/O observations.
+    for path_type, good, bad in (
+        (PurePosixPath, "/runtime/bin/python", ("relative", "/runtime/../python", "/runtime/./python", "/runtime//python", "/runtime/python\x7f")),
+        (PureWindowsPath, r"C:\runtime\bin\python.exe", (r"C:python.exe", r"\runtime\python.exe", r"C:\runtime\..\python.exe", "C:/runtime/python.exe", r"C:\runtime\python.exe.", r"C:\runtime\NUL")),
+    ):
+        assert owner._preflight_startup_path_v1(good, path_type) == good
+        for operand in bad:
+            with pytest.raises(ValueError):
+                owner._preflight_startup_path_v1(operand, path_type)
+
+    # Candidate association is checked before the startup owner can acquire I/O.
+    for field in ("root", "run_id", "occurrence"):
+        case = fixture("candidate-" + field, owned=True)
+        with installation(case):
+            custody, plan = candidate(case)
+            before = getattr(case.observation, field)
+            changed = case.runtime if field == "root" else "different-run" if field == "run_id" else 4
+            assert changed != before
+            setattr(case.observation, field, changed)
+            try:
+                with pytest.raises(RuntimeError, match="STARTUP_ASSOCIATION"):
+                    custody.prepare_preflight(3, plan[2], environment=case.env, run_paths=case.paths)
+            finally:
+                setattr(case.observation, field, before)
+        settled(case)
+        assert case.observation.observed["attempts"] == 0
+        assert not (case.paths.process_root / "preflight-cache-3").exists()
+
+    # Both absence paths retain real no-follow observations. The final native
+    # ancestor check advances a deterministic clock only in the negative case.
+    for parent_missing in (False, True):
+        for late in (False, True):
+            case = fixture(f"absence-{parent_missing}-{late}")
+            path = case.runtime / ("missing-parent/optional.py" if parent_missing else "optional.py")
+            case.basis["absent"] += (str(path),)
+            value, clock, calls = case.observation, [100], []
+            value.deadline_ns = 1000
+            native_chain = owner._preflight_chain_v1
+            with monkeypatch.context() as scoped:
+                scoped.setattr(owner.time, "monotonic_ns", lambda: clock[0])
+                def chain(*args, **kwargs):
+                    result = native_chain(*args, **kwargs)
+                    calls.append(result)
+                    if late and len(calls) == 2:
+                        clock[0] = 1000
+                    return result
+                scoped.setattr(owner, "_preflight_chain_v1", chain)
+                if late:
+                    with pytest.raises(owner.ValidationReliabilityError, match="deadline"), active(case):
+                        with owner._preflight_startup_access_v1(value, case.basis):
+                            owner._preflight_kind_v1(path, optional=True)
+                else:
+                    with active(case), owner._preflight_startup_access_v1(value, case.basis):
+                        assert owner._preflight_kind_v1(path, optional=True) is None
+            settled(case)
+            assert len(calls) == 2 and value.observed["attempts"] == 2
+            assert value.reserved["entries"] == case.catalog_entries + 1
+            assert (value.failure is not None) is late
+
+    for fault in ("permission", "already-failed", "expired", "process", "thread"):
+        case = fixture("entry-" + fault)
+        value = case.observation
+        with monkeypatch.context() as scoped:
+            if fault == "permission":
+                native_lstat = Path.lstat
+                target = Path(case.basis["absent"][0])
+                def lstat(path, *args, **kwargs):
+                    if path == target:
+                        raise PermissionError("startup status denied")
+                    return native_lstat(path, *args, **kwargs)
+                scoped.setattr(Path, "lstat", lstat)
+                with pytest.raises(owner.ValidationReliabilityError, match="startup status denied"), active(case):
+                    with owner._preflight_startup_access_v1(value, case.basis):
+                        owner._preflight_kind_v1(target, optional=True)
+            else:
+                with pytest.raises(owner.ValidationReliabilityError), active(case):
+                    if fault == "already-failed":
+                        with pytest.raises(owner.ValidationReliabilityError):
+                            value.fail("original startup failure")
+                    elif fault == "expired":
+                        value.deadline_ns = owner.time.monotonic_ns()
+                    elif fault == "process":
+                        value.pid = -1
+                    else:
+                        value.thread = -1
+                    with owner._preflight_startup_access_v1(value, case.basis):
+                        pytest.fail("invalid observation entered startup access")
+        settled(case)
+        assert value.failure is not None and value.observed["bytes"] == 0
 def _exercise_preflight_candidate_debits_v1(tmp_path, monkeypatch):
     plan = runner._prepare_execution_plan([["python", "tools/example_gate.py"]])
     root = tmp_path / "candidate-debits"
@@ -17949,6 +18304,38 @@ def _exercise_preflight_candidate_debits_v1(tmp_path, monkeypatch):
     with pytest.raises(RuntimeError, match="READ_BUDGET"):
         custody.restore()
     assert custody.failure is failure
+
+    # The real absent acquisition settles through _read's common final check.
+    # A delayed FileNotFoundError cannot escape as a timely successful None.
+    for fault in ("timely", "late", "permission"):
+        custody = _synthetic_candidate_custody_v1(root, plan, observed_paths=lambda: ("source.py",), effects=())
+        custody.deadline_ns = 1000
+        missing, clock = root / ("absent-" + fault), [100]
+        native_lstat = Path.lstat
+        before_attempts, before_bytes = custody.read_attempts, custody.observed_read_bytes
+        remaining = custody.remaining_read_bytes
+        with monkeypatch.context() as scoped:
+            scoped.setattr(runner.time, "monotonic_ns", lambda: clock[0])
+            def final_absence(p, *args, **kwargs):
+                if p == missing:
+                    if fault == "permission":
+                        raise PermissionError("candidate optional status denied")
+                    try:
+                        return native_lstat(p, *args, **kwargs)
+                    finally:
+                        if fault == "late":
+                            clock[0] = 1000
+                return native_lstat(p, *args, **kwargs)
+            scoped.setattr(Path, "lstat", final_absence)
+            if fault == "timely":
+                assert custody._read(missing) is None and custody.failure is None
+            else:
+                expected = RuntimeError if fault == "late" else PermissionError
+                with pytest.raises(expected, match="CUSTODY_UNAVAILABLE" if fault == "late" else "status denied") as failure:
+                    custody._read(missing)
+                assert custody.failure is failure.value and custody.state == "CLEANUP_REJECTED"
+        assert custody.read_attempts == before_attempts + 1
+        assert custody.observed_read_bytes == before_bytes and custody.remaining_read_bytes == remaining
 
 
 def _exercise_failed_admission_plan_v1(tmp_path, monkeypatch, fixture_factory):

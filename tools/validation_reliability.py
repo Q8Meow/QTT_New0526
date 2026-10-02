@@ -9791,6 +9791,7 @@ class _PreflightObservationV1:
         self.pid, self.thread = os.getpid(), threading.get_ident()
         self.git_executable, self.evidence_root = git_executable, evidence_root
         self.git_receipts = []
+        self._startup_catalog = None
 
     def fail(self, detail):
         if self.failure is None:
@@ -9882,6 +9883,153 @@ def _preflight_failure_v1(value, exc):
     raise ValidationReliabilityError("ENGVR_PREPUBLICATION_CUSTODY_FAILED", f"{type(exc).__name__}: {exc}") from exc
 
 
+def _preflight_startup_path_v1(name, path_type=Path):
+    """Pure spelling check; physical custody still belongs to each acquisition."""
+    from pathlib import PureWindowsPath
+    import ntpath
+    if (type(name) is not str or not name
+            or any(ord(c) < 32 or 127 <= ord(c) <= 159 for c in name)):
+        raise ValueError("exact startup pathname string required")
+    path = path_type(name)
+    if (not path.is_absolute() or str(path) != name
+            or any(part in (".", "..") for part in name.replace("\\", "/").split("/"))):
+        raise ValueError("noncanonical startup pathname: " + name)
+    if isinstance(path, PureWindowsPath):
+        if ntpath.isreserved(name) or name.startswith(("\\\\?\\", "\\\\.\\")):
+            raise ValueError("aliased startup pathname: " + name)
+    elif "\\" in name:
+        raise ValueError("nonportable startup pathname: " + name)
+    return name
+
+
+@contextmanager
+def _preflight_startup_access_v1(observation, startup_basis):
+    """Install an exact data catalog on the existing, active I/O owner only."""
+    if type(observation) is not _PreflightObservationV1:
+        raise ValueError("original startup observation required")
+    previous = observation._startup_catalog
+    installed = False
+    try:
+        if _preflight_active_v1() is not observation or previous is not None:
+            raise ValueError("startup access requires the exact active observation without reentry")
+        observation.check()
+        observation.reserve("attempts")
+        if (type(startup_basis) is not dict or len(startup_basis) != 3
+                or any(type(k) is not str for k in startup_basis)
+                or set(startup_basis) != {"files", "directories", "absent"}):
+            raise ValueError("exact startup catalog fields required")
+        files, directories, absent = (startup_basis[k] for k in ("files", "directories", "absent"))
+        if type(files) is not dict or type(directories) is not dict or type(absent) is not tuple:
+            raise ValueError("exact startup catalog containers required")
+        # Bound declared cardinality before copying mappings or constructing
+        # indexes. These are logical entries/content retention, not heap/RAM.
+        entries = len(files) + len(directories) + len(absent)
+        for roster in directories.values():
+            if type(roster) is not tuple:
+                raise ValueError("immutable startup directory roster required")
+            entries += len(roster)
+        if entries > observation.remaining["entries"]:
+            raise ValueError("startup catalog entry capacity unavailable")
+        retained = 0
+        for raw in files.values():
+            if type(raw) is not bytes:
+                raise ValueError("exact startup expected bytes required")
+            retained += len(raw)
+        observation.reserve("entries", entries)
+        observation.reserve("retained_bytes", retained)
+        frozen_files, frozen_directories, frozen_absent = dict(files), dict(directories), tuple(absent)
+        observation.retained_entries += entries
+        observation.observed["retained_bytes"] += retained
+        identities = set()
+        for collection in (frozen_files, frozen_directories, frozen_absent):
+            for name in collection:
+                _preflight_startup_path_v1(name)
+                key = name.casefold()
+                if key in identities:
+                    raise ValueError("duplicate, case-aliased or contradictory startup status: " + name)
+                identities.add(key)
+        for parent, roster in frozen_directories.items():
+            names = set()
+            for item in roster:
+                if (type(item) is not tuple or len(item) != 2 or type(item[0]) is not str
+                        or type(item[1]) is not str or item[1] not in ("file", "directory")):
+                    raise ValueError("exact startup directory name/kind pair required")
+                name, kind = item
+                if (not name or name in (".", "..") or "/" in name or "\\" in name
+                        or name.casefold() in names):
+                    raise ValueError("distinct immediate startup directory names required")
+                child = _preflight_startup_path_v1(str(Path(parent) / name))
+                names.add(name.casefold())
+                if (child in frozen_absent or child in frozen_files and kind != "file"
+                        or child in frozen_directories and kind != "directory"):
+                    raise ValueError("startup roster contradicts declared status")
+                # Reject cross-catalog case aliases even when a directory alone
+                # could have named the same physical child on this platform.
+                if child.casefold() in identities and not any(child in c for c in
+                        (frozen_files, frozen_directories, frozen_absent)):
+                    raise ValueError("startup roster aliases a catalog pathname")
+        for collection, kind in ((frozen_files, "file"), (frozen_directories, "directory"), (frozen_absent, None)):
+            for name in collection:
+                path = Path(name)
+                parent = str(path.parent)
+                if parent in frozen_directories:
+                    observed_kind = next((k for n, k in frozen_directories[parent] if n == path.name), None)
+                    if observed_kind != kind:
+                        raise ValueError("startup declaration contradicts its complete parent roster")
+                if path.is_relative_to(observation.root):
+                    relative = path.relative_to(observation.root).as_posix()
+                    if relative in observation.files and (kind != "file" or frozen_files[name] != observation.files[relative]):
+                        raise ValueError("startup declaration contradicts repository file facts")
+                    if relative in observation.directories and (kind != "directory" or frozen_directories[name] != observation.directories[relative]):
+                        raise ValueError("startup declaration contradicts repository directory facts")
+        if (len(identities) + sum(map(len, frozen_directories.values())) != entries
+                or sum(map(len, frozen_files.values())) != retained):
+            raise ValueError("startup catalog changed during acquisition")
+        observation._startup_catalog = (MappingProxyType(frozen_files), MappingProxyType(frozen_directories), frozen_absent)
+        installed = True
+        observation.check()
+        yield
+        observation.check()
+    except BaseException as exc:
+        _preflight_failure_v1(observation, exc)
+    finally:
+        if installed:
+            observation._startup_catalog = previous
+
+
+def _preflight_operand_v1(value, path, operation, *, evidence=False):
+    """Select a basis before the shared reader/status/enumerator performs I/O."""
+    if value._startup_catalog is not None:
+        if evidence:
+            value.fail("startup access cannot read native Git evidence")
+        name = _preflight_startup_path_v1(str(path))
+        files, directories, absent = value._startup_catalog
+        if operation == "file" and name in files:
+            return files[name]
+        if operation == "directory" and name in directories:
+            return directories[name]
+        if operation == "kind":
+            if name in files:
+                return "file"
+            if name in directories:
+                return "directory"
+            if name in absent:
+                return None
+        value.fail("undeclared startup " + operation + " operand: " + name)
+    if evidence:
+        allowed = {Path(p).absolute() for receipt in value.git_receipts
+                   for p in (receipt.stdout_path, receipt.stderr_path)}
+        if path not in allowed:
+            value.fail("unowned Git evidence readback")
+        return None
+    name = value.relative(path)
+    if operation == "kind":
+        return None
+    basis = value.files if operation == "file" else value.directories
+    if name not in basis:
+        value.fail("missing preflight " + operation + " basis: " + name)
+    return basis[name]
+
 def _preflight_kind_v1(path, *, optional=False):
     value = _preflight_active_v1()
     path = Path(path).absolute()
@@ -9902,32 +10050,36 @@ def _preflight_kind_v1(path, *, optional=False):
             if stat.S_ISDIR(info.st_mode):
                 return "directory"
             raise ValueError("unsupported diagnostic path: " + str(path))
-        if value is not None:
-            value.relative(path)
-            value.reserve("attempts")
+        value.reserve("attempts")
+        declared = _preflight_operand_v1(value, path, "kind")
         chain = _preflight_chain_v1(path.parent, optional=optional)
+        kind = None
         if chain[-1][1] is None:
             if chain != _preflight_chain_v1(path.parent, optional=True):
                 raise ValueError("optional preflight ancestor changed")
-            return None
-        try:
-            info = path.lstat()
-        except FileNotFoundError:
-            if not optional or chain != _preflight_chain_v1(path.parent):
-                raise
-            return None
-        if _stat_is_reparse_point(info) or stat.S_ISLNK(info.st_mode):
-            raise ValueError("linked preflight path: " + str(path))
-        if stat.S_ISREG(info.st_mode) and info.st_nlink == 1:
-            kind = "file"
-        elif stat.S_ISDIR(info.st_mode):
-            kind = "directory"
         else:
-            raise ValueError("unsupported preflight path: " + str(path))
-        if chain != _preflight_chain_v1(path.parent) or _preflight_stamp_v1(info) != _preflight_stamp_v1(path.lstat()):
-            raise ValueError("preflight path generation changed: " + str(path))
-        if value is not None:
-            value.check()
+            try:
+                info = path.lstat()
+            except FileNotFoundError:
+                if not optional or chain != _preflight_chain_v1(path.parent):
+                    raise
+            else:
+                if _stat_is_reparse_point(info) or stat.S_ISLNK(info.st_mode):
+                    raise ValueError("linked preflight path: " + str(path))
+                if stat.S_ISREG(info.st_mode) and info.st_nlink == 1:
+                    kind = "file"
+                elif stat.S_ISDIR(info.st_mode):
+                    kind = "directory"
+                else:
+                    raise ValueError("unsupported preflight path: " + str(path))
+                if (chain != _preflight_chain_v1(path.parent)
+                        or _preflight_stamp_v1(info) != _preflight_stamp_v1(path.lstat())):
+                    raise ValueError("preflight path generation changed: " + str(path))
+        if value._startup_catalog is not None and kind != declared:
+            raise ValueError("startup status differs from declaration: " + str(path))
+        # All successful statuses, including both kinds of absence, settle
+        # after their last observation. Consumed work is never refunded.
+        value.check()
         return kind
     except BaseException as exc:
         _preflight_failure_v1(value, exc)
@@ -9945,20 +10097,8 @@ def _preflight_read_bytes_v1(path, *, evidence=False):
             _preflight_failure_v1(None, exc)
     descriptor, errors, result = None, [], None
     try:
-        expected = None
-        if value is not None:
-            if evidence:
-                allowed = {Path(p).absolute() for receipt in value.git_receipts
-                           for p in (receipt.stdout_path, receipt.stderr_path)}
-                if path not in allowed:
-                    value.fail("unowned Git evidence readback")
-                name = None
-            else:
-                name = value.relative(path)
-            value.reserve("attempts")
-            if not evidence and name not in value.files:
-                value.fail("missing preflight file basis: " + name)
-            expected = None if evidence else value.files[name]
+        value.reserve("attempts")
+        expected = _preflight_operand_v1(value, path, "file", evidence=evidence)
         chain = _preflight_chain_v1(path.parent)
         before = path.lstat()
         if (not stat.S_ISREG(before.st_mode) or before.st_nlink != 1 or _stat_is_reparse_point(before)):
@@ -10025,11 +10165,8 @@ def _preflight_directory_v1(path):
     try:
         expected = None
         if value is not None:
-            name = value.relative(path)
             value.reserve("attempts")
-            if name not in value.directories:
-                value.fail("missing complete preflight directory basis: " + name)
-            expected = value.directories[name]
+            expected = _preflight_operand_v1(value, path, "directory")
         chain = _preflight_chain_v1(path)
         iterator = os.scandir(path)
         names = set()
@@ -10206,7 +10343,7 @@ def _preflight_startup_v1(argv, environment, *, binding, cache_root):
     import site
     import struct
     keys = {"observation", "version", "abi", "stdlib_roots", "site_roots",
-            "loader_environment", "config_paths", "customizer_paths"}
+            "loader_environment", "config_paths", "customizer_paths", "startup_basis"}
     if (type(binding) is not dict or set(binding) != keys
             or type(binding["observation"]) is not _PreflightObservationV1):
         raise ValueError("original host startup byte/identity binding unavailable")
@@ -10249,7 +10386,7 @@ def _preflight_startup_v1(argv, environment, *, binding, cache_root):
     if binding["customizer_paths"] != customizers:
         raise ValueError("incomplete startup customizer candidate set")
     with _preflight_observation_v1(observation, run_id=observation.run_id,
-            occurrence=observation.occurrence, argv=argv, root=observation.root):
+            occurrence=observation.occurrence, argv=argv, root=observation.root), _preflight_startup_access_v1(observation, binding["startup_basis"]):
         _preflight_read_bytes_v1(executable)
         for path in config_paths:
             if _preflight_kind_v1(Path(path), optional=True) is not None:

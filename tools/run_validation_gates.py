@@ -3170,7 +3170,7 @@ class _ValidationCandidateCustodyV1:
 
     def prepare_preflight(self, index, entry, *, environment, run_paths):
         from tools.validation_reliability import (_preflight_vector_v1, _preflight_startup_v1,
-                                                  _preflight_launch_guard_v1)
+                                                  _preflight_launch_guard_v1, _PreflightObservationV1)
         argv = tuple(entry.argv if type(entry) is CommandEvidencePlanEntry else entry.execution_argv)
         if not _preflight_vector_v1(argv):
             return environment, None
@@ -3180,7 +3180,8 @@ class _ValidationCandidateCustodyV1:
             raise RuntimeError("VALIDATION_PREFLIGHT_STARTUP_BINDING_UNAVAILABLE")
         binding = self.preflight_bindings[index]
         if (type(run_paths) is not ValidationRunPathsV1 or run_paths.repo_root != self.root
-                or type(binding) is not dict or binding.get("observation") is None
+                or type(binding) is not dict or type(binding.get("observation")) is not _PreflightObservationV1
+                or binding["observation"].root != self.root
                 or binding["observation"].run_id != run_paths.run_id
                 or binding["observation"].occurrence != index):
             raise RuntimeError("VALIDATION_PREFLIGHT_STARTUP_ASSOCIATION")
@@ -3220,7 +3221,9 @@ class _ValidationCandidateCustodyV1:
         try:
             self._check()
             self.read_attempts += 1
-            return self._read_acquisition(path)
+            result = self._read_acquisition(path)
+            self._check()
+            return result
         except BaseException as exc:
             if self.failure is None:
                 self.failure = exc
