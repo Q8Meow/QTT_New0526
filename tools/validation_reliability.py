@@ -370,6 +370,9 @@ def _command_requires_process_retention_v1(receipt: object) -> bool:
     if (receipt.failure_class == "ENGVR_PROCESS_TERMINATION_FAILED"
             or "UNPROVEN" in state):
         return True
+    observation = receipt.output_observation
+    if type(observation) is dict and 'windows_job' in observation:
+        return _windows_job_projection_retains_v1(receipt, observation['windows_job'])
     if receipt.pid is None:
         return not (
             receipt.native_exit_code is None and receipt.start_failure_class is not None
@@ -4770,6 +4773,634 @@ def validate_published_completion_receipt(
         )
 
 
+# Opt-in resource custody, deliberately separate from the full host lease.
+_WINDOWS_JOB_SCOPE_V1 = ContextVar('_WINDOWS_JOB_SCOPE_V1', default=None)
+_WINDOWS_JOB_LIVE_LOCK_V1 = threading.Lock()
+
+
+def _windows_job_error_v1(operation, code):
+    error = OSError(code, f'{operation}: Win32 error {code}')
+    error.winerror = code
+    error.operation = operation
+    return error
+
+
+def _windows_job_api_v1():
+    """Lazy, fixed Win64 declarations; no native mutation during construction."""
+    if sys.platform != 'win32':
+        raise RuntimeError('Windows job resource backend is unsupported on this platform')
+    import ctypes as C
+    from types import SimpleNamespace
+    D, B, H, S, W = C.c_uint32, C.c_int32, C.c_void_p, C.c_size_t, C.c_uint16
+    class Basic(C.Structure):
+        _fields_ = [('process_time',C.c_int64),('job_time',C.c_int64),('flags',D),
+            ('minimum_ws',S),('maximum_ws',S),('active',D),('affinity',S),('priority',D),('scheduling',D)]
+    class Io(C.Structure):
+        _fields_ = [(name,C.c_uint64) for name in ('reads','writes','other','read_bytes','write_bytes','other_bytes')]
+    class Extended(C.Structure):
+        _fields_ = [('basic',Basic),('io',Io),('process_memory',S),('job_memory',S),('peak_process',S),('peak_job',S)]
+    class Accounting(C.Structure):
+        _fields_ = [(name,C.c_int64) for name in ('user','kernel','period_user','period_kernel')]
+        _fields_ += [(name,D) for name in ('faults','total','active','terminated')]
+    class Cpu(C.Structure):
+        _fields_ = [('flags',D),('rate',D)]
+    class Startup(C.Structure):
+        _fields_ = [('cb',D),('reserved',H),('desktop',H),('title',H),('x',D),('y',D),
+            ('xsize',D),('ysize',D),('xchars',D),('ychars',D),('fill',D),('flags',D),
+            ('show',W),('reserved_size',W),('reserved_bytes',H),('stdin',H),('stdout',H),('stderr',H)]
+    class StartupEx(C.Structure):
+        _fields_ = [('startup',Startup),('attributes',H)]
+    class ProcessInfo(C.Structure):
+        _fields_ = [('process',H),('thread',H),('pid',D),('tid',D)]
+    class FileTime(C.Structure):
+        _fields_ = [('low',D),('high',D)]
+    sizes = {name:C.sizeof(cls) for name,cls in dict(BASIC_LIMIT=Basic,IO_COUNTERS=Io,
+        EXTENDED_LIMIT=Extended,BASIC_ACCOUNTING=Accounting,CPU_RATE=Cpu,
+        STARTUPINFOW=Startup,STARTUPINFOEXW=StartupEx,PROCESS_INFORMATION=ProcessInfo).items()}
+    if (C.sizeof(H) != 8 or C.sizeof(D) != 4 or C.sizeof(C.c_wchar) != 2
+            or sizes != dict(BASIC_LIMIT=64,IO_COUNTERS=48,EXTENDED_LIMIT=144,
+                BASIC_ACCOUNTING=48,CPU_RATE=8,STARTUPINFOW=104,STARTUPINFOEXW=112,PROCESS_INFORMATION=24)
+            or (Basic.flags.offset,Basic.active.offset,Extended.process_memory.offset,Extended.job_memory.offset,
+                Startup.stdin.offset,Startup.stdout.offset,Startup.stderr.offset,StartupEx.attributes.offset,
+                ProcessInfo.pid.offset,ProcessInfo.tid.offset,Accounting.total.offset,Accounting.active.offset,
+                Accounting.terminated.offset) != (16,40,112,120,80,88,96,104,16,20,36,40,44)):
+        raise RuntimeError('unsupported Windows job ABI')
+    dll = C.WinDLL('kernel32.dll',use_last_error=True,winmode=0x800)
+    api = SimpleNamespace(C=C,D=D,B=B,H=H,S=S,Basic=Basic,Extended=Extended,Accounting=Accounting,
+        Cpu=Cpu,StartupEx=StartupEx,ProcessInfo=ProcessInfo,FileTime=FileTime,sizes=sizes)
+    definitions = {
+        'GetCurrentProcess':([],H), 'CreateJobObjectW':([H,C.c_wchar_p],H),
+        'SetInformationJobObject':([H,C.c_int32,H,D],B),
+        'QueryInformationJobObject':([H,C.c_int32,H,D,C.POINTER(D)],B),
+        'GetHandleInformation':([H,C.POINTER(D)],B),
+        'DuplicateHandle':([H,H,H,C.POINTER(H),D,B,D],B),
+        'InitializeProcThreadAttributeList':([H,D,D,C.POINTER(S)],B),
+        'UpdateProcThreadAttribute':([H,D,S,H,S,H,H],B),
+        'DeleteProcThreadAttributeList':([H],None),
+        'CreateProcessW':([C.c_wchar_p,H,H,H,B,D,H,C.c_wchar_p,C.POINTER(StartupEx),C.POINTER(ProcessInfo)],B),
+        'IsProcessInJob':([H,H,C.POINTER(B)],B),
+        'OpenProcess':([D,B,D],H), 'GetProcessId':([H],D),
+        'QueryFullProcessImageNameW':([H,D,H,C.POINTER(D)],B),
+        'GetProcessTimes':([H,C.POINTER(FileTime),C.POINTER(FileTime),C.POINTER(FileTime),C.POINTER(FileTime)],B),
+        'ResumeThread':([H],D), 'WaitForSingleObject':([H,D],D),
+        'GetExitCodeProcess':([H,C.POINTER(D)],B), 'TerminateJobObject':([H,D],B),
+        'CloseHandle':([H],B),
+    }
+    for name,(arguments,result) in definitions.items():
+        function = getattr(dll,name); function.argtypes=arguments; function.restype=result
+        setattr(api,name,function)
+    return api
+
+
+class _WindowsJobScopeV1:
+    """One source-owned, single-use resource scope; never a complete host grant."""
+    def __init__(self, *, run_id, phase, command_index, argv, cwd, evidence_root, environment,
+                 active_process_limit, process_commit_bytes, job_commit_bytes, cpu_rate_10000,
+                 execution_deadline_ns, settlement_deadline_ns):
+        now=time.monotonic_ns()
+        if (type(run_id) is not str or not run_id or type(phase) is not str or not phase
+                or type(command_index) is not int or command_index < 1
+                or type(argv) is not tuple or not argv or any(type(s) is not str or not s or '\0' in s for s in argv)
+                or type(environment) is not dict or any(type(k) is not str or not k or '=' in k or '\0' in k
+                    or type(v) is not str or '\0' in v for k,v in environment.items())):
+            raise TypeError('exact Windows job invocation operands required')
+        integers=(active_process_limit,process_commit_bytes,job_commit_bytes,cpu_rate_10000,
+                  execution_deadline_ns,settlement_deadline_ns)
+        if (any(type(v) is not int for v in integers) or not 1 <= active_process_limit <= 2
+                or not 0 < process_commit_bytes <= job_commit_bytes <= 536870912
+                or not 1 <= cpu_rate_10000 <= 2000
+                or not now < execution_deadline_ns < settlement_deadline_ns
+                or execution_deadline_ns-now > 60_000_000_000
+                or settlement_deadline_ns-execution_deadline_ns > 10_000_000_000):
+            raise ValueError('Windows job engineering caps/deadlines are outside the explicit profile')
+        if (not Path(argv[0]).is_absolute() or not Path(cwd).is_absolute() or not Path(evidence_root).is_absolute()
+                or any('..' in Path(value).parts for value in (argv[0],cwd,evidence_root))):
+            raise ValueError('exact absolute Windows job paths required')
+        selected,_,env=_validate_process_invocation(argv,cwd=Path(cwd),required_markers=(),
+            timeout_seconds=(execution_deadline_ns-now)/1e9,termination_grace_seconds=1,environment=environment)
+        if len({key.upper() for key in env}) != len(env):
+            raise ValueError('case-colliding Windows environment keys')
+        command=subprocess.list2cmdline(selected)
+        env_parts=[key+'='+env[key] for key in sorted(env,key=str.upper)]
+        environment_units=1+sum(len(part.encode('utf-16-le'))//2+1 for part in env_parts)
+        if len(command.encode('utf-16-le'))//2+1 > 32767 or environment_units > 32767:
+            raise ValueError('Windows command/environment UTF-16 bound exceeded')
+        self.identity=(run_id,phase,command_index,selected,str(Path(cwd)),str(Path(evidence_root)))
+        self.environment=MappingProxyType(dict(env))
+        self.command_line=command
+        self.environment_text='\0'.join(env_parts)+'\0\0'
+        if not env_parts: self.environment_text='\0\0'
+        self.configured=MappingProxyType(dict(limit_flags=0x2308,active_process_limit=active_process_limit,
+            process_commit_bytes=process_commit_bytes,job_commit_bytes=job_commit_bytes,
+            cpu_flags=5,cpu_rate_10000=cpu_rate_10000))
+        self.execution_deadline_ns=execution_deadline_ns; self.settlement_deadline_ns=settlement_deadline_ns
+        self.owner=(os.getpid(),threading.get_ident())
+        self.state='NEW'; self.history=['NEW']; self.claimed=False; self.entered=False; self.api=None
+        self.original_deadlines=(execution_deadline_ns,settlement_deadline_ns)
+        self.original_invocation=(self.identity,tuple(self.environment.items()),self.command_line,self.environment_text)
+        self.original_profile=tuple(self.configured.items())
+        self.handles=dict.fromkeys(('job','process','thread','stdio-0','stdio-1','stdio-2'))
+        self.close_attempts=set(); self.handle_close_errors=[]; self.native_errors=[]
+        self.queried=None; self.process=None; self.termination_attempted=False
+        self.creation=dict(pid=None,creation_filetime_100ns=None,membership_verified_before_resume=False,resume_previous_count=None,
+            creation_flags=None)
+        self.terminal=dict(root_exit=None,active_processes=None,process_ids=None,termination_attempted=False,
+            empty_verified=False,job_handle_closed=False,process_handle_closed=False,primary_thread_handle_closed=False)
+        self.accounting=None; self.final_close_test=False
+        self.membership_observation=None; self.configured_membership=None; self.creation_membership=None
+        self.creation_identity=None
+
+    def check(self, *, settling=False):
+        if self.owner != (os.getpid(),threading.get_ident()):
+            raise RuntimeError('foreign Windows job scope owner')
+        if (self.execution_deadline_ns,self.settlement_deadline_ns) != self.original_deadlines:
+            raise RuntimeError('Windows job original deadlines changed')
+        if ((self.identity,tuple(self.environment.items()),self.command_line,self.environment_text) != self.original_invocation
+                or tuple(self.configured.items()) != self.original_profile):
+            raise RuntimeError('Windows job original invocation/profile changed')
+        deadline=self.settlement_deadline_ns if settling else self.execution_deadline_ns
+        if time.monotonic_ns() >= deadline:
+            raise TimeoutError('Windows job settlement deadline' if settling else 'Windows job execution deadline')
+
+    def transition(self,state):
+        self.state=state; self.history.append(state)
+
+    def call(self,name,*arguments,settling=False):
+        self.check(settling=settling)
+        self.api.C.set_last_error(0)
+        ok=getattr(self.api,name)(*arguments)
+        code=self.api.C.get_last_error() if not ok else 0
+        if not ok:
+            self.native_errors.append(dict(operation=name,error=int(code)))
+            raise _windows_job_error_v1(name,int(code))
+        self.check(settling=settling)
+        return ok
+
+    def close_handle(self,name):
+        value=self.handles.get(name)
+        if not value: return True
+        if name in self.close_attempts: return False
+        self.close_attempts.add(name)
+        self.api.C.set_last_error(0)
+        try:
+            success=bool(self.api.CloseHandle(value))
+            code=int(self.api.C.get_last_error()) if not success else None
+        except BaseException as exc:
+            success=False; code=getattr(exc,'winerror',None)
+        if success:
+            self.handles[name]=None
+            return True
+        self.handle_close_errors.append(dict(operation='CloseHandle:'+name,error=code))
+        return False
+
+    def query(self,kind,cls, *, settling=False,handle=None):
+        value=cls(); length=self.api.D()
+        self.call('QueryInformationJobObject',self.handles['job'] if handle is None else handle,kind,
+            self.api.C.byref(value),self.api.C.sizeof(value),self.api.C.byref(length),settling=settling)
+        if length.value != self.api.C.sizeof(value):
+            raise ValueError('incomplete Windows job information structure')
+        return value
+
+    def limits(self, *, settling=False):
+        ext=self.query(9,self.api.Extended,settling=settling)
+        cpu=self.query(15,self.api.Cpu,settling=settling)
+        actual=dict(limit_flags=int(ext.basic.flags),active_process_limit=int(ext.basic.active),
+            process_commit_bytes=int(ext.process_memory),job_commit_bytes=int(ext.job_memory),
+            cpu_flags=int(cpu.flags),cpu_rate_10000=int(cpu.rate))
+        if actual != self.configured: raise ValueError('Windows job configured/readback mismatch')
+        self.queried=actual
+        return dict(actual)
+
+    def membership(self, *, settling=False, bracket=False):
+        api=self.api; C=api.C
+        self.membership_observation=dict(total=None,active=None,terminated_by_limit=None,
+            assigned=None,listed=None,pids=None,returned_bytes=None,accounting_before=None,
+            query=None,accounting_after=None,errors=[])
+        observation=self.membership_observation
+        def sample():
+            started=time.monotonic_ns()
+            value=self.query(1,api.Accounting,settling=settling)
+            return value,dict(total=int(value.total),active=int(value.active),
+                terminated_by_limit=int(value.terminated),raw_hex=bytes(value).hex(),
+                before_ns=started,after_ns=time.monotonic_ns())
+        accounting,before=sample(); observation['accounting_before']=before
+        observation.update(total=before['total'],active=before['active'],terminated_by_limit=before['terminated_by_limit'])
+        # Observation storage is finite and independent of the unchanged job cap.
+        capacity=8
+        class Pids(C.Structure):
+            _fields_=[('assigned',api.D),('listed',api.D),('ids',api.S*capacity)]
+        if (C.sizeof(api.D),C.sizeof(api.S),C.sizeof(Pids),Pids.assigned.offset,
+                Pids.listed.offset,Pids.ids.offset)!=(4,8,72,0,4,8):
+            raise RuntimeError('unsupported Windows job process-list ABI')
+        value=Pids(); length=api.D(0xffffffff)
+        query=dict(information_class=3,job_handle=int(self.handles['job']),capacity=capacity,
+            supplied_bytes=72,attempted=False,api_return=None,last_error_raw=None,
+            raw_hex=bytes(value).hex(),returned_bytes_raw=int(length.value),
+            before_ns=None,after_ns=None,status='unavailable',complete=False)
+        observation['query']=query
+        failures=[]
+        try:
+            self.check(settling=settling)
+            query['before_ns']=time.monotonic_ns(); query['attempted']=True
+            C.set_last_error(0)
+            returned=api.QueryInformationJobObject(self.handles['job'],3,C.byref(value),72,C.byref(length))
+            error=int(C.get_last_error())  # Capture before any further native call.
+            raw=bytes(value); returned_length=int(length.value)
+            query.update(api_return=int(returned),last_error_raw=error,raw_hex=raw.hex(),
+                returned_bytes_raw=returned_length,after_ns=time.monotonic_ns(),
+                assigned_raw=int(value.assigned),listed_raw=int(value.listed),
+                pid_buffer_raw=tuple(int(pid) for pid in value.ids))
+            if not returned:
+                query['status']='incomplete' if error==234 else 'api_error'
+                self.native_errors.append(dict(operation='QueryInformationJobObject:process-list',error=error))
+                raise _windows_job_error_v1('QueryInformationJobObject:process-list',error)
+            query['status']='malformed'
+            if (not 8<=returned_length<=72 or value.listed>capacity or value.assigned<value.listed
+                    or returned_length<8+8*value.listed):
+                raise ValueError('invalid Windows job process-list length/count')
+            if value.assigned!=value.listed:
+                query['status']='incomplete'
+                raise ValueError('incomplete Windows job process list')
+            ids=tuple(int(value.ids[i]) for i in range(value.listed))
+            if any(not 0<pid<=0xffffffff for pid in ids) or len(set(ids))!=len(ids):
+                raise ValueError('invalid Windows job process identities')
+            query.update(status='complete',complete=True)
+            observation.update(assigned=int(value.assigned),listed=int(value.listed),pids=ids,
+                returned_bytes=returned_length)
+            self.check(settling=settling)
+        except BaseException as exc:
+            failures.append(exc)
+            observation['errors'].append(dict(error_class=type(exc).__name__,message=str(exc),winerror=getattr(exc,'winerror',None)))
+        finally:
+            # A failed/incomplete list never supplies PIDs. Its surrounding raw
+            # accounting is still retained once while ownership/deadlines permit.
+            if bracket:
+                try:
+                    _,observation['accounting_after']=sample()
+                except BaseException as exc:
+                    failures.append(exc)
+                    observation['errors'].append(dict(error_class=type(exc).__name__,message=str(exc),winerror=getattr(exc,'winerror',None)))
+        if failures: _scan_raise_errors(failures)
+        self.accounting=dict(total_processes=int(accounting.total),active_processes=int(accounting.active),
+            terminated_processes=int(accounting.terminated),user_time_100ns=int(accounting.user),kernel_time_100ns=int(accounting.kernel))
+        self.terminal.update(active_processes=int(accounting.active),process_ids=list(ids),
+            empty_verified=(accounting.active==0 and ids==()))
+        return self.terminal['empty_verified']
+
+
+    def configure(self):
+        self.check()
+        if self.state != 'NEW': raise RuntimeError('reused Windows job scope')
+        self.api=_windows_job_api_v1(); api=self.api; C=api.C
+        self.check(); C.set_last_error(0)
+        self.handles['job']=api.CreateJobObjectW(None,None)
+        if not self.handles['job']:
+            code=int(C.get_last_error()); self.native_errors.append(dict(operation='CreateJobObjectW',error=code))
+            raise _windows_job_error_v1('CreateJobObjectW',code)
+        self.check()
+        flags=api.D(); self.call('GetHandleInformation',self.handles['job'],C.byref(flags))
+        if flags.value & 1: raise ValueError('owned job handle must not be inheritable')
+        ext=api.Extended(); ext.basic.flags=0x2308; ext.basic.active=self.configured['active_process_limit']
+        ext.process_memory=self.configured['process_commit_bytes']; ext.job_memory=self.configured['job_commit_bytes']
+        self.call('SetInformationJobObject',self.handles['job'],9,C.byref(ext),C.sizeof(ext))
+        cpu=api.Cpu(); cpu.flags=5; cpu.rate=self.configured['cpu_rate_10000']
+        self.call('SetInformationJobObject',self.handles['job'],15,C.byref(cpu),C.sizeof(cpu))
+        self.limits()
+        member=api.B()
+        self.call('IsProcessInJob',api.GetCurrentProcess(),self.handles['job'],C.byref(member))
+        if member.value: raise RuntimeError('controller cannot be in its owned job')
+        if not self.membership(): raise RuntimeError('new owned job is not empty')
+        self.configured_membership=dict(self.membership_observation)
+        self.transition('CONFIGURED_EMPTY')
+
+    def match(self, *, run_id,phase,command_index,argv,cwd,evidence_root,environment,execution_deadline_ns):
+        self.check()
+        if (_WINDOWS_JOB_SCOPE_V1.get() is not self or self.claimed or self.state != 'CONFIGURED_EMPTY'
+                or (run_id,phase,command_index,argv,str(cwd),str(evidence_root)) != self.identity
+                or environment != dict(self.environment) or execution_deadline_ns != self.execution_deadline_ns):
+            raise ValueError('Windows job exact invocation/custody mismatch')
+        self.claimed=True
+
+    @staticmethod
+    def _checked_root_creation_flags(flags):
+        # Closed source policy for this opt-in backend; never a runtime selector.
+        if type(flags) is not int or not 0<=flags<=0xffffffff or flags!=0x0008060C:
+            raise ValueError('exact console-detached native root flags required')
+        return flags
+
+    def create_suspended(self,original_stdin):
+        self.check()
+        if not self.claimed or self.state != 'CONFIGURED_EMPTY': raise RuntimeError('unclaimed Windows job creation')
+        creation_flags=self._checked_root_creation_flags(0x4|0x8|0x200|0x400|0x80000)
+        import msvcrt
+        api=self.api; C=api.C
+        process=_WindowsJobProcessV1(self); self.process=process
+        pairs=[]; nul=None; attrs=None; initialized=False; failures=[]
+        try:
+            for name in ('stdout','stderr'):
+                pair=os.pipe(); pairs.append(pair)
+                if any(os.get_inheritable(fd) for fd in pair): raise ValueError('parent pipe descriptors must not be inherited')
+                stream=os.fdopen(pair[0],'rb',buffering=0)
+                setattr(process,name,stream)
+            input_fd=None
+            if original_stdin == subprocess.DEVNULL:
+                nul=os.open(os.devnull,os.O_RDONLY|os.O_BINARY); input_fd=nul
+            else:
+                input_fd=original_stdin if type(original_stdin) is int else original_stdin.fileno()
+            duplicates=[]
+            for index,fd in enumerate((input_fd,pairs[0][1],pairs[1][1])):
+                duplicate=api.H(); label='stdio-'+str(index)
+                self.check(); C.set_last_error(0)
+                ok=api.DuplicateHandle(api.GetCurrentProcess(),msvcrt.get_osfhandle(fd),api.GetCurrentProcess(),
+                    C.byref(duplicate),0,True,2)
+                self.handles[label]=duplicate.value
+                if not ok: raise _windows_job_error_v1('DuplicateHandle',int(C.get_last_error()))
+                self.check(); flags=api.D()
+                self.call('GetHandleInformation',duplicate,C.byref(flags))
+                if not flags.value & 1: raise ValueError('child stdio duplicate is not inheritable')
+                duplicates.append(duplicate.value)
+            size=api.S(); self.check(); C.set_last_error(0)
+            sizing=api.InitializeProcThreadAttributeList(None,2,0,C.byref(size)); error=int(C.get_last_error())
+            if sizing or error != 122 or not 0 < size.value <= 65536:
+                raise _windows_job_error_v1('InitializeProcThreadAttributeList:size',error)
+            self.check(); attrs=C.create_string_buffer(size.value)
+            C.set_last_error(0)
+            initialized=bool(api.InitializeProcThreadAttributeList(attrs,2,0,C.byref(size)))
+            if not initialized:
+                raise _windows_job_error_v1('InitializeProcThreadAttributeList',int(C.get_last_error()))
+            self.check()
+            stdio=(api.H*3)(*duplicates); jobs=(api.H*1)(self.handles['job'])
+            self.call('UpdateProcThreadAttribute',attrs,0,0x20002,stdio,C.sizeof(stdio),None,None)
+            self.call('UpdateProcThreadAttribute',attrs,0,0x2000D,jobs,C.sizeof(jobs),None,None)
+            startup=api.StartupEx(); startup.startup.cb=C.sizeof(startup)
+            startup.startup.flags=0x101; startup.startup.show=0
+            startup.startup.stdin,startup.startup.stdout,startup.startup.stderr=duplicates
+            startup.attributes=C.cast(attrs,api.H).value
+            command=C.create_unicode_buffer(self.command_line)
+            environment=C.create_unicode_buffer(self.environment_text,len(self.environment_text))
+            argv=self.identity[3]; cwd=self.identity[4]; env=dict(self.environment)
+            self.check()
+            sys.audit('subprocess.Popen',argv[0],list(argv),cwd,env)
+            sys.audit('_winapi.CreateProcess',argv[0],self.command_line,cwd)
+            self.check(); C.set_last_error(0)
+            self.creation['creation_flags']=creation_flags
+            ok=api.CreateProcessW(argv[0],command,None,None,True,creation_flags,
+                environment,cwd,C.byref(startup),C.byref(process._info))
+            # The adapter and PROCESS_INFORMATION already exist before the call.
+            self.handles['process']=process._info.process; self.handles['thread']=process._info.thread
+            if not ok: raise _windows_job_error_v1('CreateProcessW',int(C.get_last_error()))
+            self.creation['pid']=process.pid
+            self.transition('CREATED_SUSPENDED')
+            self.check()
+        except BaseException as exc:
+            failures.append(exc)
+        finally:
+            if initialized:
+                try: api.DeleteProcThreadAttributeList(attrs)
+                except BaseException as exc: failures.append(exc)
+            for index in range(3):
+                if not self.close_handle('stdio-'+str(index)):
+                    failures.append(RuntimeError('Windows child stdio handle close failed'))
+            for index,pair in enumerate(pairs):
+                for pos,fd in enumerate(pair):
+                    # A successfully wrapped read descriptor belongs to its stream.
+                    if pos==0 and getattr(process,('stdout','stderr')[index]) is not None: continue
+                    try: os.close(fd)
+                    except BaseException as exc: failures.append(exc)
+            if nul is not None:
+                try: os.close(nul)
+                except BaseException as exc: failures.append(exc)
+        if failures:
+            error=failures[0] if len(failures)==1 else BaseExceptionGroup('Windows job creation and temporary cleanup',failures)
+            if process._info.process:
+                self.handles['process']=process._info.process; self.handles['thread']=process._info.thread
+                self.creation['pid']=process.pid
+                error.owned_process=process
+            else:
+                for stream in (process.stdout,process.stderr):
+                    if stream is not None: stream.close()
+            raise error
+        return process
+
+    def verify_created(self):
+        self.check()
+        if self.state != 'CREATED_SUSPENDED' or self.process is None: raise RuntimeError('original suspended process required')
+        api=self.api; C=api.C
+        self.limits()
+        member=api.B()
+        self.call('IsProcessInJob',self.handles['process'],self.handles['job'],C.byref(member))
+        if member.value != 1: raise RuntimeError('created process missing exact owned job membership')
+        times=[api.FileTime() for _ in range(4)]
+        self.call('GetProcessTimes',self.handles['process'],*(C.byref(value) for value in times))
+        stamp=(int(times[0].high)<<32)|int(times[0].low)
+        if self.process.pid <= 0 or stamp <= 0: raise RuntimeError('invalid returned native process identity')
+        self.creation.update(pid=self.process.pid,creation_filetime_100ns=stamp)
+        actual_pid=int(self.call('GetProcessId',self.handles['process']))
+        image=C.create_unicode_buffer(32768); capacity=api.D(32768)
+        self.call('QueryFullProcessImageNameW',self.handles['process'],0,image,C.byref(capacity))
+        if not 0 < capacity.value < 32768: raise ValueError('invalid bounded native process image')
+        self.check(); C.set_last_error(0)
+        wait=int(api.WaitForSingleObject(self.handles['process'],0))
+        if wait==0xffffffff: raise _windows_job_error_v1('WaitForSingleObject:before-resume',int(C.get_last_error()))
+        self.creation_identity=dict(pid=actual_pid,creation_filetime_100ns=stamp,
+            image=image[:capacity.value],wait_result=wait)
+        if (actual_pid != self.process.pid or wait != 258
+                or _lexical_path_key(Path(self.creation_identity['image'])) != _lexical_path_key(Path(self.identity[3][0]))):
+            raise RuntimeError('suspended process identity/image/wait mismatch')
+        self.check()
+        self.membership()
+        if self.terminal['active_processes'] != 1 or self.terminal['process_ids'] != [self.process.pid]:
+            raise RuntimeError('unexpected owned membership before primary-thread resume')
+        self.creation_accounting=dict(self.accounting)
+        self.creation_membership=dict(self.membership_observation)
+        self.creation['membership_verified_before_resume']=True
+        self.transition('MEMBERSHIP_VERIFIED')
+
+    def resume(self):
+        self.check()
+        if self.state != 'MEMBERSHIP_VERIFIED': raise RuntimeError('verified suspended membership required before resume')
+        self.api.C.set_last_error(0)
+        count=int(self.api.ResumeThread(self.handles['thread']))
+        self.creation['resume_previous_count']=count
+        if count==0xffffffff: raise _windows_job_error_v1('ResumeThread',int(self.api.C.get_last_error()))
+        if count != 1: raise RuntimeError('unexpected primary thread suspend count')
+        self.transition('RUNNING')
+        if not self.close_handle('thread'): raise RuntimeError('primary thread handle close failed')
+        self.check()
+
+    def terminate(self,grace_seconds):
+        self.check(settling=True)
+        end=min(self.settlement_deadline_ns,time.monotonic_ns()+int(grace_seconds*1e9))
+        if not self.termination_attempted:
+            self.termination_attempted=True; self.terminal['termination_attempted']=True
+            try: self.call('TerminateJobObject',self.handles['job'],1,settling=True)
+            except BaseException as exc:
+                self.native_errors.append(dict(operation='TerminateJobObject:settlement',error=getattr(exc,'winerror',None)))
+                return 'WINDOWS_JOB_TERMINATE:FAILED;TERMINAL:UNPROVEN',False
+        while time.monotonic_ns()<end:
+            self.check(settling=True)
+            root=self.process.poll() if self.process is not None else None
+            empty=self.membership(settling=True)
+            if root is not None and empty:
+                self.terminal['root_exit']=root
+                self.transition('EMPTY')
+                return 'WINDOWS_JOB_TERMINATE:1;TERMINAL:PROVEN',True
+            time.sleep(min(0.01,max(0,(end-time.monotonic_ns())/1e9)))
+        return 'WINDOWS_JOB_TERMINATE:1;TERMINAL:UNPROVEN',False
+
+    def finish(self):
+        """Close only after observed held-root termination and explicit job emptiness."""
+        self.check(settling=True)
+        if self.state=='CLOSED': return not self.handle_close_errors
+        if self.process is not None and self.process._info.process:
+            root=self.process.poll()
+            self.terminal['root_exit']=root
+            if root is None or not self.membership(settling=True): return False
+            self.transition('ROOT_TERMINAL')
+        elif self.handles.get('job') and not self.membership(settling=True): return False
+        self.transition('EMPTY')
+        for name in ('thread','process','job'): self.close_handle(name)
+        self.terminal.update(job_handle_closed=not bool(self.handles.get('job')),
+            process_handle_closed=not bool(self.handles.get('process')),
+            primary_thread_handle_closed=not bool(self.handles.get('thread')))
+        if any(self.handles.values()) or self.handle_close_errors: return False
+        self.transition('CLOSED')
+        return True
+
+    def projection(self):
+        return dict(kind='WINDOWS_JOB_RESOURCE_ONLY_V1',configured=dict(self.configured),
+            queried=None if self.queried is None else dict(self.queried),creation=dict(self.creation),
+            terminal=dict(self.terminal),handle_close_errors=[dict(item) for item in self.handle_close_errors])
+
+    def close_suspended_backstop(self):
+        """Explicit cap-one fixture: final handle close, never ordinary success."""
+        self.check()
+        if (self.state != 'MEMBERSHIP_VERIFIED' or self.configured['active_process_limit'] != 1
+                or self.creation['resume_previous_count'] is not None or self.termination_attempted):
+            raise RuntimeError('final-close fixture requires one verified unresumed worker')
+        self.final_close_test=True
+        if not self.close_handle('job'): raise RuntimeError('final owned job handle close failed')
+        self.terminal['job_handle_closed']=True
+        self.terminal.update(active_processes=None,process_ids=None,empty_verified=False)
+        self.terminal['root_exit']=self.process.wait(min(10,max(0,(self.settlement_deadline_ns-time.monotonic_ns())/1e9)))
+        for name in ('thread','process'): self.close_handle(name)
+        self.terminal.update(process_handle_closed=not bool(self.handles.get('process')),
+            primary_thread_handle_closed=not bool(self.handles.get('thread')))
+        if any(self.handles.values()) or self.handle_close_errors: raise RuntimeError('final-close fixture handle custody unresolved')
+        self.transition('CLOSED')
+        return self.projection()
+
+
+class _WindowsJobProcessV1:
+    """Held-handle protocol adapter for the existing supervisor and pipe drains."""
+    def __init__(self,scope):
+        self.scope=scope; self.args=scope.identity[3]; self.returncode=None
+        self.stdout=None; self.stderr=None; self._info=scope.api.ProcessInfo()
+        self.last_wait_result=None
+
+    @property
+    def pid(self): return int(self._info.pid)
+
+    def poll(self):
+        if self.returncode is not None: return self.returncode
+        self.scope.check(settling=True)
+        if not self.scope.handles.get('process'): raise RuntimeError('original process handle unavailable')
+        api=self.scope.api
+        result=int(api.WaitForSingleObject(self.scope.handles['process'],0))
+        self.last_wait_result=result
+        self.scope.check(settling=True)
+        if result==258: return None
+        if result==0xffffffff: raise _windows_job_error_v1('WaitForSingleObject',int(api.C.get_last_error()))
+        if result != 0: raise RuntimeError(f'unexpected process wait result {result}')
+        value=api.D()
+        self.scope.call('GetExitCodeProcess',self.scope.handles['process'],api.C.byref(value),settling=True)
+        self.returncode=int(value.value)  # 259 is a valid exit once the held handle is signaled.
+        return self.returncode
+
+    def wait(self,timeout):
+        if type(timeout) not in (int,float) or not math.isfinite(timeout) or timeout<0:
+            raise ValueError('finite Windows process wait required')
+        end=min(self.scope.settlement_deadline_ns,time.monotonic_ns()+int(timeout*1e9))
+        while True:
+            result=self.poll()
+            if result is not None: return result
+            left=end-time.monotonic_ns()
+            if left<=0: raise subprocess.TimeoutExpired(self.args,timeout)
+            code=int(self.scope.api.WaitForSingleObject(self.scope.handles['process'],min(50,max(1,left//1_000_000))))
+            self.scope.check(settling=True)
+            if code==0xffffffff: raise _windows_job_error_v1('WaitForSingleObject',int(self.scope.api.C.get_last_error()))
+            if code not in (0,258): raise RuntimeError(f'unexpected process wait result {code}')
+
+
+@contextmanager
+def _windows_job_scope_v1(scope):
+    if type(scope) is not _WindowsJobScopeV1: raise TypeError('exact source-owned Windows job scope required')
+    scope.check()
+    if scope.entered or scope.state != 'NEW' or _WINDOWS_JOB_SCOPE_V1.get() is not None:
+        raise RuntimeError('Windows job scope cannot be reused or reentered')
+    if not _WINDOWS_JOB_LIVE_LOCK_V1.acquire(blocking=False):
+        raise RuntimeError('only one live Windows job scope is permitted')
+    token=_WINDOWS_JOB_SCOPE_V1.set(scope)
+    scope.entered=True
+    body=None
+    try:
+        scope.configure()
+        yield scope
+    except BaseException as exc:
+        body=exc
+        raise
+    finally:
+        errors=[]
+        try:
+            if scope.api is not None and scope.state != 'CLOSED':
+                if scope.process is not None and scope.process._info.process:
+                    if scope.process.poll() is None or (scope.handles.get('job') and not scope.membership(settling=True)):
+                        _,proven=scope.terminate(min(10,max(0,(scope.settlement_deadline_ns-time.monotonic_ns())/1e9)))
+                        if not proven: raise RuntimeError('Windows job context retains unresolved process')
+                if not scope.finish(): raise RuntimeError('Windows job context retains unresolved handles')
+        except BaseException as exc:
+            exc.owned_process=scope.process; exc.windows_job=scope.projection(); errors.append(exc)
+        finally:
+            _WINDOWS_JOB_SCOPE_V1.reset(token)
+            # An unresolved scope keeps the live-slot veto; never start another job.
+            if not any(scope.handles.values()) and not scope.handle_close_errors:
+                _WINDOWS_JOB_LIVE_LOCK_V1.release()
+            if body is not None:
+                body.windows_job=scope.projection()
+        if errors:
+            _scan_raise_errors(([body] if body is not None else [])+errors)
+
+
+def _windows_job_projection_retains_v1(receipt,job):
+    if (type(job) is not dict or set(job)!={'kind','configured','queried','creation','terminal','handle_close_errors'}
+            or job['kind']!='WINDOWS_JOB_RESOURCE_ONLY_V1' or job['handle_close_errors']!=[]): return True
+    terminal=job['terminal']; creation=job['creation']
+    fields={'limit_flags','active_process_limit','process_commit_bytes','job_commit_bytes','cpu_flags','cpu_rate_10000'}
+    for values in (job['configured'],job['queried']):
+        if type(values) is not dict or set(values)!=fields or any(type(v) is not int for v in values.values()): return True
+        if (values['limit_flags']!=0x2308 or values['cpu_flags']!=5 or not 1<=values['active_process_limit']<=2
+                or not 0<values['process_commit_bytes']<=values['job_commit_bytes']<=536870912
+                or not 1<=values['cpu_rate_10000']<=2000): return True
+    if (type(terminal) is not dict or type(creation) is not dict
+            or set(creation)!={'pid','creation_filetime_100ns','membership_verified_before_resume','resume_previous_count','creation_flags'}
+            or set(terminal)!={'root_exit','active_processes','process_ids','termination_attempted','empty_verified',
+                'job_handle_closed','process_handle_closed','primary_thread_handle_closed'}
+            or type(creation['membership_verified_before_resume']) is not bool
+            or type(terminal['termination_attempted']) is not bool): return True
+    if (terminal.get('empty_verified') is not True or terminal.get('active_processes') != 0
+            or type(terminal.get('active_processes')) is not int or terminal.get('process_ids')!=[]
+            or any(terminal.get(name) is not True for name in
+                ('job_handle_closed','process_handle_closed','primary_thread_handle_closed'))): return True
+    if receipt.pid is None: return receipt.start_failure_class is None or receipt.native_exit_code is not None
+    if type(creation['creation_flags']) is not int or creation['creation_flags']!=0x0008060C: return True
+    if type(terminal.get('root_exit')) is not int or terminal['root_exit']!=receipt.native_exit_code: return True
+    if type(creation.get('pid')) is not int or creation['pid']!=receipt.pid: return True
+    if creation['membership_verified_before_resume'] and (type(creation['creation_filetime_100ns']) is not int
+            or creation['creation_filetime_100ns']<=0): return True
+    if receipt.failure_class is None and (job['configured']!=job['queried']
+            or creation.get('membership_verified_before_resume') is not True
+            or type(creation.get('resume_previous_count')) is not int or creation['resume_previous_count']!=1): return True
+    return False
 def hidden_subprocess_kwargs(
     *,
     platform_name: str | None = None,
@@ -4992,6 +5623,14 @@ def _supervise_native_output(
                     raise ValueError("noninteger native exit")
                 native_exit = polled
                 terminal_at = time.monotonic()
+                if (type(process) is _WindowsJobProcessV1 and not process.scope.final_close_test
+                        and not process.scope.membership(settling=True)):
+                    process.scope.history.append(dict(root_terminal_nonempty=dict(
+                        root_exit=polled,accounting=dict(process.scope.accounting),
+                        process_ids=list(process.scope.terminal['process_ids']))))
+                    failure_class = failure_class or ("ENGVR_NATIVE_EXIT_NONZERO" if polled != 0
+                        else "ENGVR_PROCESS_DESCENDANTS_REMAIN")
+                    terminate_once()
             progress = False
             for index, (pipe, stream, outcome) in enumerate(zip(pipes, streams, outcomes, strict=True)):
                 if not pipe_terminal[index]:
@@ -5031,7 +5670,9 @@ def _supervise_native_output(
                     value["evidence_write_enabled"] = False
                     value["mirror"] = None
                 terminate_once()
-            if terminal_at is not None and now - terminal_at >= OUTPUT_DRAIN_COMPLETION_WAIT_SECONDS:
+            if ((terminal_at is not None and now - terminal_at >= OUTPUT_DRAIN_COMPLETION_WAIT_SECONDS)
+                    or (type(process) is _WindowsJobProcessV1
+                        and time.monotonic_ns() >= process.scope.settlement_deadline_ns)):
                 failure_class = "ENGVR_PROCESS_TERMINATION_FAILED"
                 termination_state += ";NATIVE_TREE_UNPROVEN_OUTPUT_PIPE_OPEN"
                 break
@@ -5168,6 +5809,8 @@ def _terminate_owned_process_tree(
     platform_name: str,
     grace_seconds: float,
 ) -> tuple[str, bool]:
+    if type(process) is _WindowsJobProcessV1:
+        return process.scope.terminate(grace_seconds)
     pid = process.pid
     actions: list[str] = []
     if platform_name == "nt":
@@ -5399,6 +6042,7 @@ def supervise_command(
     selected_markers: tuple[str, ...] | None = None
     selected_environment: dict[str, str] | None = None
     receipt = None
+    job_scope = None
     try:
         try:
             if tuple_error is not None:
@@ -5424,6 +6068,13 @@ def supervise_command(
                     expected_argv=preflight_launch[0], expected_environment=preflight_launch[1])
             elif _preflight_vector_v1(selected_argv) and (os.environ if selected_environment is None else selected_environment).get(RUN_ID_ENV):
                 raise ValueError("selected canonical preflight has no parent startup projection")
+            job_scope = _WINDOWS_JOB_SCOPE_V1.get()
+            if job_scope is not None:
+                if type(job_scope) is not _WindowsJobScopeV1 or output_limits is None or selected_platform != 'nt':
+                    raise ValueError("explicit bounded Windows job invocation required")
+                job_scope.match(run_id=run_id,phase=phase,command_index=command_index,argv=selected_argv,
+                    cwd=receipt_cwd,evidence_root=evidence_root,environment=selected_environment,
+                    execution_deadline_ns=execution_deadline_ns)
             original_stdin = subprocess.DEVNULL
             if launch_input is not None:
                 if type(launch_input) not in (_ScanLaunchInput, _PreflightLaunchInputV1):
@@ -5441,30 +6092,55 @@ def supervise_command(
                 # Reservation, input validation and startup preparations consume
                 # the original allowance, rather than moving its deadline.
                 _execution_remaining_seconds_v1(execution_deadline_ns)
-            process = subprocess.Popen(
-                list(selected_argv),
-                cwd=receipt_cwd,
-                env=selected_environment,
-                shell=False,
-                stdin=original_stdin,
-                close_fds=True,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
-                **hidden_subprocess_kwargs(
-                    platform_name=selected_platform,
-                    new_process_group=True,
-                ),
-            )
+            if job_scope is not None:
+                process = job_scope.create_suspended(original_stdin)
+            else:
+                process = subprocess.Popen(
+                    list(selected_argv),
+                    cwd=receipt_cwd,
+                    env=selected_environment,
+                    shell=False,
+                    stdin=original_stdin,
+                    close_fds=True,
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE,
+                    **hidden_subprocess_kwargs(
+                        platform_name=selected_platform,
+                        new_process_group=True,
+                    ),
+                )
             pid = process.pid
         except Exception as exc:
-            if process is not None:
+            owned = getattr(exc, 'owned_process', None)
+            if (job_scope is not None and type(owned) is _WindowsJobProcessV1
+                    and owned is job_scope.process and owned._info.process):
+                process = owned
+                pid = process.pid
+            if process is not None and job_scope is None:
                 raise
-            start_failure = type(exc).__name__
+            start_failure = (str(exc) if job_scope is not None else type(exc).__name__)
             failure_class = "ENGVR_PROCESS_START_FAILED"
-            _close_prestart_evidence_stream(stdout_stream, stdout_outcome)
-            _close_prestart_evidence_stream(stderr_stream, stderr_outcome)
+            if process is None:
+                _close_prestart_evidence_stream(stdout_stream, stdout_outcome)
+                _close_prestart_evidence_stream(stderr_stream, stderr_outcome)
+            else:
+                _scan_output_failure(stdout_outcome, exc)
         except BaseException as body:
+            owned = getattr(body, 'owned_process', None)
+            if (job_scope is not None and type(owned) is _WindowsJobProcessV1
+                    and owned is job_scope.process and owned._info.process):
+                process = owned
+                pid = process.pid
             if process is not None:
+                if job_scope is not None:
+                    failures = [body]
+                    try:
+                        _terminate_owned_process_tree(process,platform_name=selected_platform,
+                            grace_seconds=termination_grace_seconds)
+                        job_scope.finish()
+                    except BaseException as cleanup_error:
+                        failures.append(cleanup_error)
+                    _scan_raise_errors(failures)
                 raise
             failures = [body]
             for stream, outcome in ((stdout_stream, stdout_outcome), (stderr_stream, stderr_outcome)):
@@ -5474,9 +6150,19 @@ def supervise_command(
             _scan_raise_errors(failures)
 
         if process is not None:
+            if job_scope is not None and not any('evidence_error' in value for value in (stdout_outcome,stderr_outcome)):
+                try:
+                    job_scope.verify_created()
+                except Exception as exc:
+                    _scan_output_failure(stdout_outcome, exc)
             if launch_input is not None:
                 try:
                     launch_input._attached(process)
+                except Exception as exc:
+                    _scan_output_failure(stdout_outcome, exc)
+            if job_scope is not None and not any('evidence_error' in value for value in (stdout_outcome,stderr_outcome)):
+                try:
+                    job_scope.resume()
                 except Exception as exc:
                     _scan_output_failure(stdout_outcome, exc)
             native_exit, timeout_state, termination_state, failure_class = (
@@ -5509,6 +6195,13 @@ def supervise_command(
                     if failure_class != "ENGVR_PROCESS_TERMINATION_FAILED":
                         failure_class = "ENGVR_ATOMIC_RECEIPT_WRITE_FAILED"
 
+        if job_scope is not None:
+            try:
+                if not job_scope.finish():
+                    failure_class = "ENGVR_PROCESS_TERMINATION_FAILED"
+            except Exception as exc:
+                _scan_output_failure(stdout_outcome, exc)
+                failure_class = "ENGVR_PROCESS_TERMINATION_FAILED"
         try:
             reservation_path.unlink()
         except OSError as exc:
@@ -5590,6 +6283,8 @@ def supervise_command(
                     "initial_limits": launch_input.delegated, "input_bytes": launch_input.extent,
                     "row_total": launch_input.row_total, "parent_spend": launch_input.parent_spend,
                     "parent_tail": launch_input.tail, "receiver": launch_input.result}
+            if job_scope is not None:
+                bounded_observation['windows_job'] = job_scope.projection()
             output_observation.update(bounded_observation)
         receipt = CommandExecutionReceiptV1(
             schema_version=SCHEMA_VERSION,

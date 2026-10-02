@@ -18449,6 +18449,1087 @@ def _exercise_failed_admission_plan_v1(tmp_path, monkeypatch, fixture_factory):
                            for value in selected["launch"].launch_inputs.values())
 
 
+def _exercise_windows_job_resource_v1(area, monkeypatch, capsys, deadline, settlement):
+    """Grouped resource-only qualification; pure injections never claim native work."""
+    import ctypes as C
+    import json
+    import os
+    import subprocess
+    import sys
+    import threading
+    import time
+    from contextlib import nullcontext,contextmanager
+    from types import SimpleNamespace
+    import pytest
+    from tools import validation_reliability as owner
+    group=area/'windows-job'; group.mkdir()
+    environment={key:value for key,value in os.environ.items() if not key.upper().startswith(('QTT_','PYTHON'))}
+    environment.update(PYTHONDONTWRITEBYTECODE='1',PYTHONNOUSERSITE='1')
+    bounds=dict(stdout_bytes=16384,stderr_bytes=16384,combined_output_bytes=32768)
+    count=0
+    def operands(argv,cwd,evidence,run,index,end,settle,cap=2,env=None,phase='standalone-pytest-helper'):
+        return dict(run_id=run,phase=phase,command_index=index,argv=tuple(argv),cwd=cwd,evidence_root=evidence,
+            environment=dict(environment if env is None else env),active_process_limit=cap,
+            process_commit_bytes=268435456,job_commit_bytes=536870912,cpu_rate_10000=2000,
+            execution_deadline_ns=end,settlement_deadline_ns=settle)
+    def fresh_deadline(seconds=60):
+        end=min(deadline,time.monotonic_ns()+int(seconds*1e9))
+        settle=min(settlement,end+10_000_000_000)
+        assert time.monotonic_ns()<end<settle
+        return end,settle
+    end,settle=fresh_deadline()
+    pure_argv=(sys.executable,'-I','-B','-X','utf8','-c','print("PURE_REFERENCE_ONLY")')
+    good=operands(pure_argv,group,group/'pure','pure-job',1,end,settle)
+    for key in ('command_index','active_process_limit','process_commit_bytes','job_commit_bytes',
+                'cpu_rate_10000','execution_deadline_ns','settlement_deadline_ns'):
+        for value in (True,1.0,'1'):
+            changed=dict(good); changed[key]=value
+            with pytest.raises((TypeError,ValueError)): owner._WindowsJobScopeV1(**changed)
+    for key,value in (('active_process_limit',0),('active_process_limit',3),('process_commit_bytes',0),
+            ('job_commit_bytes',536870913),('cpu_rate_10000',2001),('cpu_rate_10000',0),
+            ('execution_deadline_ns',time.monotonic_ns()-1),('settlement_deadline_ns',end),
+            ('argv',list(pure_argv)),('environment',{'Path':'a','PATH':'b'}),
+            ('environment',{'X':'z'*32768}),('argv',(sys.executable,'z'*32768))):
+        changed=dict(good); changed[key]=value
+        with pytest.raises((TypeError,ValueError)): owner._WindowsJobScopeV1(**changed)
+    scope=owner._WindowsJobScopeV1(**good)
+    original=scope.owner; scope.owner=(original[0],original[1]+1)
+    with pytest.raises(RuntimeError,match='foreign'): scope.check()
+    scope.owner=original
+    with pytest.raises(TypeError):
+        with owner._windows_job_scope_v1(object()): pass
+    # This pure oracle is separate from the native witness produced below.
+    from copy import deepcopy
+    U32=(1<<32)-1
+    def dword(value,positive=False):
+        if type(value) is not int or not int(positive)<=value<=U32:
+            raise ValueError('exact DWORD required')
+        return value
+    def snapshot(value,expected):
+        keys={'total','active','terminated_by_limit','assigned','listed','pids'}
+        if type(value) is not dict or set(value)!=keys:
+            raise ValueError('complete native observation required')
+        if type(expected) is not tuple or len(set(expected))!=len(expected):
+            raise ValueError('distinct expected identities required')
+        for pid in expected: dword(pid,True)
+        for name in keys-{'pids'}: dword(value[name])
+        pids=value['pids']
+        if type(pids) is not tuple: raise ValueError('exact PID sequence required')
+        for pid in pids: dword(pid,True)
+        if len(set(pids))!=len(pids): raise ValueError('duplicate native PID')
+        if value['assigned']!=value['listed'] or value['listed']!=len(pids):
+            raise ValueError('incomplete native member list')
+        if set(pids)!=set(expected) or value['active']!=len(expected):
+            raise ValueError('unexpected current member')
+        if value['total']<len(expected): raise ValueError('impossible lifetime lower bound')
+        return value['total']
+    def pair_reference(record):
+        fields={'root_pid','child_pid','before','held_first','held_last','after',
+            'root_handle_verified','child_handle_verified','root_live_at_barrier','child_live_at_barrier',
+            'creation_identities_match','image_matches','root_signaled','child_signaled',
+            'configured_cap','cap_readback','handle_close_errors'}
+        if type(record) is not dict or set(record)!=fields: raise ValueError('incomplete witness')
+        root,child=record['root_pid'],record['child_pid']; dword(root,True); dword(child,True)
+        if root==child: raise ValueError('root/child alias')
+        for key in ('configured_cap','cap_readback'):
+            if type(record[key]) is not int or record[key]!=2: raise ValueError('changed cap')
+        for key in ('root_handle_verified','child_handle_verified','root_live_at_barrier','child_live_at_barrier',
+                'creation_identities_match','image_matches','root_signaled','child_signaled'):
+            if record[key] is not True: raise ValueError('missing actual witness: '+key)
+        if type(record['handle_close_errors']) is not tuple or record['handle_close_errors']!=():
+            raise ValueError('unresolved handle')
+        totals=[snapshot(record['before'],(root,)),snapshot(record['held_first'],(root,child)),
+            snapshot(record['held_last'],(root,child)),snapshot(record['after'],())]
+        if any(b<a for a,b in zip(totals,totals[1:])): raise ValueError('decreasing lifetime count')
+        return dict(resource_witness='consistent',lifetime_attribution='not_established',
+            raw_totals=tuple(totals),historical_process_trace_complete=False)
+    def reference_row(total,*pids):
+        return dict(total=total,active=len(pids),terminated_by_limit=0,
+            assigned=len(pids),listed=len(pids),pids=tuple(pids))
+    def reference_case(total=4):
+        return dict(root_pid=101,child_pid=202,before=reference_row(1,101),
+            held_first=reference_row(total,101,202),held_last=reference_row(total,202,101),after=reference_row(total),
+            root_handle_verified=True,child_handle_verified=True,root_live_at_barrier=True,child_live_at_barrier=True,
+            creation_identities_match=True,image_matches=True,root_signaled=True,child_signaled=True,
+            configured_cap=2,cap_readback=2,handle_close_errors=())
+    positives=[]
+    for total in (2,3,4,9,U32):
+        for order in ((101,202),(202,101)):
+            value=reference_case(total); value['held_first']['pids']=order
+            positives.append(pair_reference(value))
+    mutations=[]
+    for key in ('root_handle_verified','child_handle_verified','root_live_at_barrier','child_live_at_barrier',
+            'creation_identities_match','image_matches','root_signaled','child_signaled'):
+        for bad in (False,1,None):
+            value=reference_case(); value[key]=bad; mutations.append((key,value))
+    for key in ('configured_cap','cap_readback'):
+        for bad in (1,3,True,2.0):
+            value=reference_case(); value[key]=bad; mutations.append((key,value))
+    for label,keys,bad in (
+        ('unknown_pid',('held_first','pids'),(101,303)),
+        ('extra_current_member',('held_first',),reference_row(4,101,202,303)),
+        ('truncated',('held_first','listed'),1),('duplicate',('held_last','pids'),(101,101)),
+        ('survivor',('after',),reference_row(4,202)),('decrease',('after','total'),3),
+        ('impossible_lower_bound',('held_first','total'),1),('alias',('child_pid',),101),
+        ('close_failure',('handle_close_errors',),('close_error',)),
+        ('missing_first',('held_first',),None),('missing_last',('held_last',),None)):
+        value=reference_case(); target=value
+        for key in keys[:-1]: target=target[key]
+        target[keys[-1]]=bad; mutations.append((label,value))
+    value=reference_case(); del value['held_first']; mutations.append(('absent_barrier',value))
+    for key in ('total','active','terminated_by_limit','assigned','listed'):
+        for bad in (True,1.0,-1,U32+1):
+            value=reference_case(); value['held_first'][key]=bad; mutations.append((key,value))
+    for label,value in mutations:
+        assert repr(value)!=repr(reference_case()),label
+        with pytest.raises(ValueError): pair_reference(value)
+    histories=({'successful_associations':2,'failed_associations':2},
+               {'successful_associations':4,'failed_associations':0})
+    assert all(sum(value.values())==4 for value in histories) and histories[0]!=histories[1]
+    with capsys.disabled():
+        print('WINDOWS_JOB_ACCOUNTING_PURE_REFERENCE '+json.dumps(dict(valid_reference_witnesses=len(positives),
+            invalid_reference_witnesses_rejected=len(mutations),nonidentifiability_examples=2,
+            native_execution=False,historical_report_requalified=False)),flush=True)
+
+    if sys.platform!='win32':
+        with pytest.raises(RuntimeError,match='unsupported'):
+            with owner._windows_job_scope_v1(scope): pass
+        with capsys.disabled(): print('WINDOWS_JOB_UNSUPPORTED_NATIVE_NOT_EXECUTED',flush=True)
+        return (lambda **kw:nullcontext(),lambda *args:None,lambda:None)
+    worker_source="import ctypes as C\nimport json\nimport os\nfrom pathlib import Path\nimport subprocess\nimport sys\nimport time\n\nrepo,area,mode,end,settle,role=sys.argv[1:]\nroot=Path(area); end=int(end); settle=int(settle)\nassert root.is_absolute() and Path(repo).is_absolute() and mode in ('normal','timeout')\nassert os.path.normcase(os.getcwd())==os.path.normcase(str(root))\nsys.path.insert(0,repo)\nfrom tools import validation_reliability as owner\napi=owner._windows_job_api_v1()\nqueries=0\nchecks=0\nreads=set()\ndef call(name,*args):\n    global queries\n    assert time.monotonic_ns()<settle\n    C.set_last_error(0); value=getattr(api,name)(*args)\n    if not value: raise owner._windows_job_error_v1(name,int(C.get_last_error()))\n    queries+=1\n    assert queries<=4\n    return value\ndef creation(handle):\n    values=[api.FileTime() for _ in range(4)]\n    call('GetProcessTimes',handle,*(C.byref(value) for value in values))\n    value=(int(values[0].high)<<32)|int(values[0].low)\n    assert value>0\n    return value\ndef pairs(items):\n    value={}\n    for key,item in items:\n        if key in value: raise ValueError('duplicate synchronization key')\n        value[key]=item\n    return value\ndef read(name,keys=None):\n    global checks\n    assert name in ('child-ready.json','release.bin') and name not in reads\n    assert time.monotonic_ns()<settle\n    checks+=1; assert checks<=3000\n    path=root/name\n    try: before=path.lstat()\n    except FileNotFoundError: return None\n    identity=owner._scan_file_identity(before)\n    assert before.st_size<=4096\n    fd=owner._open_regular_worktree_descriptor(path,nonblocking=True)\n    try:\n        opened=os.fstat(fd)\n        assert owner._scan_file_identity(opened)==identity\n        raw=os.read(fd,4097)\n        assert len(raw)==before.st_size and len(raw)<=4096\n        assert owner._scan_same_api_version(os.fstat(fd))==owner._scan_same_api_version(opened)\n        assert owner._scan_same_api_version(path.lstat())==owner._scan_same_api_version(before)\n    finally: os.close(fd)\n    reads.add(name)\n    if keys is None: return raw\n    value=json.loads(raw.decode('utf-8'),object_pairs_hook=pairs)\n    assert type(value) is dict and set(value)==keys\n    assert all(type(v) is int and 0<v<=(0xffffffffffffffff if 'filetime' in k else 0xffffffff) for k,v in value.items())\n    return value\ndef wait_file(name,keys,deadline):\n    while time.monotonic_ns()<deadline:\n        value=read(name,keys)\n        if value is not None: return value\n        time.sleep(min(0.01,max(0,(deadline-time.monotonic_ns())/1e9)))\n    raise TimeoutError('native fixture readiness cutoff: '+name)\ndef publish(name,value):\n    path=root/name; temporary=root/('.'+name+'.pending')\n    assert name in ('child-ready.json','pair-ready.json')\n    assert not os.path.lexists(path) and not os.path.lexists(temporary)\n    owner.atomic_write_json(temporary,value)\n    # Windows rename refuses an existing destination. Publish only after the\n    # existing atomic owner has removed its temporary hard link.\n    os.rename(temporary,path)\n\nif role=='child':\n    stamp=creation(api.GetCurrentProcess())\n    print('OWNED_DESCENDANT_STARTED' if mode=='normal' else 'OWNED_SLEEPING_DESCENDANT',flush=True)\n    publish('child-ready.json',dict(pid=os.getpid(),parent_pid=os.getppid(),creation_filetime_100ns=stamp))\n    print(json.dumps(dict(child_identity_queries=queries)),flush=True)\n    byte=sys.stdin.buffer.read(1)\n    raise SystemExit(0 if byte==b'R' else 3)\n\nassert role=='root'\nroot_stamp=creation(api.GetCurrentProcess())\nevents={'subprocess.Popen':0,'_winapi.CreateProcess':0}\ndef audit(event,args):\n    if event in events:\n        events[event]+=1\n        if events[event]>1: raise RuntimeError('unexpected repeated worker creation audit')\nsys.addaudithook(audit)\ndescendant_creation_flags = subprocess.DETACHED_PROCESS | subprocess.CREATE_NEW_PROCESS_GROUP\nif type(descendant_creation_flags) is not int or descendant_creation_flags != 0x208:\n    raise ValueError('exact console-detached descendant flags required')\ntry:\n    child=subprocess.Popen([sys.executable,'-I','-B','-X','utf8',__file__,repo,area,mode,str(end),str(settle),'child'],\n        shell=False,close_fds=True,creationflags=descendant_creation_flags,stdin=subprocess.PIPE,stdout=sys.stdout,stderr=sys.stderr)\nexcept OSError as error:\n    print(json.dumps(dict(child_returncode=None,create_error=dict(error_class=type(error).__name__,\n        winerror=error.winerror,errno=error.errno),root_pid=os.getpid(),child_pid=None,\n        creation_audit_counts=events,worker_identity_queries=queries,descendant_creation_flags=descendant_creation_flags)),flush=True)\n    raise SystemExit(2)\nprint('OWNED_PARENT_STARTED' if mode=='normal' else 'OWNED_SLEEPING_PARENT',flush=True)\nready=wait_file('child-ready.json',{'pid','parent_pid','creation_filetime_100ns'},end)\nhandle=int(child._handle)\nactual_pid=int(call('GetProcessId',handle))\nactual_stamp=creation(handle)\nC.set_last_error(0); state=int(api.WaitForSingleObject(handle,0)); queries+=1\nif state==0xffffffff: raise owner._windows_job_error_v1('WaitForSingleObject:child',int(C.get_last_error()))\nassert queries<=4 and state==258\nassert ready==dict(pid=actual_pid,parent_pid=os.getpid(),creation_filetime_100ns=actual_stamp)\nassert actual_pid==child.pid and events=={'subprocess.Popen':1,'_winapi.CreateProcess':1}\npublish('pair-ready.json',dict(root_pid=os.getpid(),root_creation_filetime_100ns=root_stamp,\n    child_pid=actual_pid,child_creation_filetime_100ns=actual_stamp,popen_events=events['subprocess.Popen'],\n    createprocess_events=events['_winapi.CreateProcess']))\nprint(json.dumps(dict(worker_identity_queries=queries,worker_ready_checks=checks,\n    child_ready=ready,child_handle=handle,child_wait=state,descendant_creation_flags=descendant_creation_flags)),flush=True)\nif mode=='timeout':\n    while time.monotonic_ns()<settle:\n        time.sleep(min(0.01,max(0,(settle-time.monotonic_ns())/1e9)))\n    raise TimeoutError('supervisor did not settle held timeout pair')\nrelease=wait_file('release.bin',None,end)\nassert release==b'RELEASE\\n'\nassert child.stdin.write(b'R')==1\nchild.stdin.flush(); child.stdin.close()\nresult=child.wait(timeout=max(0,(end-time.monotonic_ns())/1e9))\nchild._handle.Close()\nprint(json.dumps(dict(child_returncode=result,create_error=None,root_pid=os.getpid(),child_pid=actual_pid,\n    creation_audit_counts=events,worker_identity_queries=queries,descendant_creation_flags=descendant_creation_flags,worker_ready_checks=checks,\n    worker_child_handle_closed=True)),flush=True)\nraise SystemExit(0 if result==0 else 2)\n"
+    real_api=owner._windows_job_api_v1()
+    assert real_api.sizes==dict(BASIC_LIMIT=64,IO_COUNTERS=48,EXTENDED_LIMIT=144,
+        BASIC_ACCOUNTING=48,CPU_RATE=8,STARTUPINFOW=104,STARTUPINFOEXW=112,PROCESS_INFORMATION=24)
+    # Independent launch-input expectations; no new native process or console.
+    import ast
+    import copy
+    root_word=0x0008060C; descendant_word=0x00000208
+    assert owner._WindowsJobScopeV1._checked_root_creation_flags(root_word)==root_word
+    rejected_flags=0
+    invalid_root=[root_word^(1<<bit) for bit in range(32)]
+    invalid_root += [True,False,float(root_word),str(root_word),None,-1,1<<32]
+    for bad in invalid_root:
+        with pytest.raises((TypeError,ValueError)):
+            owner._WindowsJobScopeV1._checked_root_creation_flags(bad)
+        rejected_flags+=1
+    assert root_word&(0x08000000|0x10|0x01000000)==0
+    worker_tree=ast.parse(worker_source)
+    worker_calls=[node for node in ast.walk(worker_tree) if isinstance(node,ast.Call)
+        and isinstance(node.func,ast.Attribute) and node.func.attr=='Popen']
+    assert len(worker_calls)==1  # One shared site implements both normal and timeout modes.
+    keywords={node.arg:node.value for node in worker_calls[0].keywords}
+    assert set(keywords)=={'shell','close_fds','creationflags','stdin','stdout','stderr'}
+    assert ast.literal_eval(keywords['shell']) is False and ast.literal_eval(keywords['close_fds']) is True
+    assert isinstance(keywords['creationflags'],ast.Name) and keywords['creationflags'].id=='descendant_creation_flags'
+    for name,expression in (('stdin','subprocess.PIPE'),('stdout','sys.stdout'),('stderr','sys.stderr')):
+        assert ast.dump(keywords[name])==ast.dump(ast.parse(expression,mode='eval').body)
+    flag_assignments=[node for node in worker_tree.body if isinstance(node,ast.Assign)
+        and any(isinstance(target,ast.Name) and target.id=='descendant_creation_flags' for target in node.targets)]
+    assert len(flag_assignments)==1
+    assert ast.dump(flag_assignments[0].value)==ast.dump(ast.parse(
+        'subprocess.DETACHED_PROCESS | subprocess.CREATE_NEW_PROCESS_GROUP',mode='eval').body)
+    assert (subprocess.DETACHED_PROCESS | subprocess.CREATE_NEW_PROCESS_GROUP)==descendant_word
+    expected_guard=ast.parse("if type(descendant_creation_flags) is not int or descendant_creation_flags != 0x208:\n    raise ValueError('exact console-detached descendant flags required')").body[0]
+    assert any(ast.dump(node)==ast.dump(expected_guard) for node in worker_tree.body)
+    assert any(isinstance(node,ast.Compare) and ast.dump(node)==ast.dump(ast.parse("mode=='timeout'",mode='eval').body)
+        for node in ast.walk(worker_tree))
+    # Existing no-scope supervisor behavior is exercised with a deliberate
+    # injected creation failure; the real Windows helper's operands are retained.
+    assert owner._WINDOWS_JOB_SCOPE_V1.get() is None
+    ordinary=owner.hidden_subprocess_kwargs(platform_name='nt',new_process_group=True)
+    assert ordinary['creationflags']==0x08000200
+    assert ordinary['startupinfo'].dwFlags&subprocess.STARTF_USESHOWWINDOW
+    assert ordinary['startupinfo'].wShowWindow==subprocess.SW_HIDE
+    assert owner.hidden_subprocess_kwargs(platform_name='nt',new_process_group=False)['creationflags']==0x08000000
+    assert owner.hidden_subprocess_kwargs(platform_name='posix',new_process_group=True)=={'start_new_session':True}
+    assert owner.hidden_subprocess_kwargs(platform_name='posix',new_process_group=False)=={}
+    ordinary_calls=[]
+    def denied_ordinary(*args,**kwargs):
+        ordinary_calls.append((args,kwargs))
+        raise OSError('injected ordinary no-scope creation failure')
+    ordinary_evidence=group/'ordinary-noninterference'; ordinary_evidence.mkdir()
+    with monkeypatch.context() as patch:
+        patch.setattr(owner.subprocess,'Popen',denied_ordinary)
+        ordinary_receipt=owner.supervise_command(pure_argv,cwd=group,run_id='pure-no-scope',
+            phase='standalone-pytest-helper',command_index=1,evidence_root=ordinary_evidence,
+            environment=environment,output_limits=bounds,output_observation={},
+            execution_deadline_ns=end,mirror_stdout=False,mirror_stderr=False)
+    assert len(ordinary_calls)==1 and ordinary_receipt.pid is None
+    assert ordinary_receipt.failure_class=='ENGVR_PROCESS_START_FAILED'
+    args,kwargs=ordinary_calls[0]
+    assert args==(list(pure_argv),) and kwargs['creationflags']==0x08000200
+    assert kwargs['shell'] is False and kwargs['close_fds'] is True
+    assert kwargs['stdin']==subprocess.DEVNULL and kwargs['stdout']==kwargs['stderr']==subprocess.PIPE
+    assert kwargs['cwd']==group and kwargs['env']==environment
+    with capsys.disabled():
+        print('WINDOWS_JOB_CONSOLE_PRECHECKS '+json.dumps(dict(root_flags=root_word,
+            descendant_popen_argument=descendant_word,invalid_root_flags_rejected=rejected_flags,
+            shared_descendant_site_modes=['normal','timeout'],explicit_standard_handles=True,
+            ordinary_windows_group_flags=ordinary['creationflags'],ordinary_non_group_flags=0x08000000,
+            posix_unchanged=True,ordinary_creation_failure_injected=True,native_execution=False)),flush=True)
+
+    # An API model exercises the complete backend, not the actual native cases.
+    class ApiModel:
+        def __init__(self,fault):
+            self.api=SimpleNamespace(**vars(real_api)); self.fault=fault; self.triggered=False
+            self.calls={}; self.alive=False; self.created=False; self.resumed=False; self.terminated=False
+            self.handle=100; self.ext=None; self.cpu=None; self.closed=[]
+            self.order=[]; self.attributes={}; self.duplicates=[]; self.creation_inputs=None
+            for name in ('CreateJobObjectW','SetInformationJobObject','QueryInformationJobObject',
+                    'GetHandleInformation','DuplicateHandle','InitializeProcThreadAttributeList',
+                    'UpdateProcThreadAttribute','DeleteProcThreadAttributeList','CreateProcessW',
+                    'IsProcessInJob','GetProcessTimes','GetProcessId','QueryFullProcessImageNameW','ResumeThread','WaitForSingleObject',
+                    'GetExitCodeProcess','TerminateJobObject','CloseHandle'):
+                setattr(self.api,name,self.function(name))
+            self.api.GetCurrentProcess=lambda:-1
+        def function(self,name):
+            def call(*args):
+                n=self.calls.get(name,0)+1; self.calls[name]=n
+                self.order.append(name)
+                if self.fault==(name,n):
+                    self.triggered=True; C.set_last_error(5)
+                    return 0xffffffff if name=='ResumeThread' else 0
+                if name=='CreateJobObjectW': return 99
+                if name=='GetHandleInformation':
+                    C.cast(args[1],C.POINTER(real_api.D))[0]=0 if args[0]==99 else 1
+                elif name=='SetInformationJobObject':
+                    cls=real_api.Extended if args[1]==9 else real_api.Cpu
+                    value=cls.from_buffer_copy(C.string_at(args[2],args[3]))
+                    if args[1]==9: self.ext=value
+                    else: self.cpu=value
+                elif name=='QueryInformationJobObject':
+                    kind=args[1]; length=args[3]
+                    if kind==9:
+                        value=real_api.Extended.from_buffer_copy(bytes(self.ext))
+                        if self.fault=='readback' and self.created:
+                            self.triggered=True; value.process_memory+=1
+                        C.memmove(args[2],C.byref(value),C.sizeof(value))
+                    elif kind==15: C.memmove(args[2],C.byref(self.cpu),C.sizeof(self.cpu))
+                    elif kind==1:
+                        value=real_api.Accounting(); value.total=int(self.created)
+                        value.active=int(self.alive or (self.fault in ('descendant','nonzero-descendant') and self.resumed and not self.terminated))
+                        C.memmove(args[2],C.byref(value),C.sizeof(value))
+                    else:
+                        values=C.cast(args[2],C.POINTER(real_api.D)); active=int(self.alive or (self.fault in ('descendant','nonzero-descendant') and self.resumed and not self.terminated))
+                        values[0]=values[1]=active
+                        if active: C.cast(args[2],C.POINTER(real_api.S))[1]=4322 if self.fault in ('descendant','nonzero-descendant') and self.resumed else 4321
+                        if self.fault=='short-list': self.triggered=True; length=7
+                        if self.fault=='oversized-list': self.triggered=True; values[0]=values[1]=9
+                    C.cast(args[4],C.POINTER(real_api.D))[0]=length
+                elif name=='DuplicateHandle':
+                    self.handle+=1; C.cast(args[3],C.POINTER(real_api.H))[0]=self.handle
+                    assert type(args[1]) is int and args[1]>0 and args[5] is True
+                    self.duplicates.append(dict(source=args[1],duplicate=self.handle))
+                elif name=='InitializeProcThreadAttributeList':
+                    if args[0] is None:
+                        C.cast(args[3],C.POINTER(real_api.S))[0]=65537 if self.fault=='attribute-size' else 128
+                        self.triggered=self.triggered or self.fault=='attribute-size'
+                        C.set_last_error(122); return 0
+                elif name=='UpdateProcThreadAttribute':
+                    assert args[2] in (0x20002,0x2000D) and args[2] not in self.attributes
+                    count=3 if args[2]==0x20002 else 1
+                    assert args[4]==8*count
+                    self.attributes[args[2]]=tuple(int(C.cast(args[3],C.POINTER(real_api.H))[i]) for i in range(count))
+                elif name=='DeleteProcThreadAttributeList': return None
+                elif name=='CreateProcessW':
+                    assert type(args[5]) is int and args[5]==0x0008060C
+                    assert args[2] is args[3] is None and args[4] is True
+                    startup=C.cast(args[8],C.POINTER(real_api.StartupEx)).contents
+                    stdio=(startup.startup.stdin,startup.startup.stdout,startup.startup.stderr)
+                    assert stdio==tuple(row['duplicate'] for row in self.duplicates)==self.attributes[0x20002]
+                    assert all(stdio) and len(set(stdio))==3 and self.attributes[0x2000D]==(99,)
+                    assert startup.startup.cb==112 and startup.startup.flags==0x101 and startup.startup.show==0
+                    first=self.order.index('audit:subprocess.Popen'); second=self.order.index('audit:_winapi.CreateProcess')
+                    assert first<second<self.order.index('CreateProcessW')
+                    self.creation_inputs=dict(creation_flags=args[5],standard_handles=stdio,
+                        job_list=self.attributes[0x2000D],handle_list=self.attributes[0x20002],
+                        startup_flags=startup.startup.flags,show_window=startup.startup.show,audit_before_create=True)
+                    value=C.cast(args[9],C.POINTER(real_api.ProcessInfo)).contents
+                    value.process=501; value.thread=502; value.pid=4321; value.tid=765
+                    self.created=True; self.alive=True
+                elif name=='IsProcessInJob':
+                    member=args[0]!=-1
+                    if self.fault=='membership' and member: self.triggered=True; member=False
+                    C.cast(args[2],C.POINTER(real_api.B))[0]=int(member)
+                elif name=='GetProcessId':
+                    if self.fault=='process-id': self.triggered=True; return 4322
+                    return 4321
+                elif name=='QueryFullProcessImageNameW':
+                    value=pure_argv[0]
+                    if self.fault=='image': self.triggered=True; value=value+'.wrong'
+                    C.memmove(args[2],C.create_unicode_buffer(value),(len(value)+1)*2)
+                    C.cast(args[3],C.POINTER(real_api.D))[0]=len(value)
+                elif name=='GetProcessTimes':
+                    C.cast(args[1],C.POINTER(real_api.FileTime)).contents.low=12345
+                elif name=='ResumeThread':
+                    self.resumed=True; self.alive=False
+                    if self.fault in ('descendant','nonzero-descendant'): self.triggered=True
+                    return 1
+                elif name=='WaitForSingleObject':
+                    if self.fault=='pre-resume-signal' and self.created and not self.resumed:
+                        self.triggered=True; return 0
+                    return 258 if self.alive else 0
+                elif name=='GetExitCodeProcess':
+                    C.cast(args[1],C.POINTER(real_api.D))[0]=259 if self.fault=='exit-259' else 2 if self.fault=='nonzero-descendant' else 1 if self.terminated else 0
+                    if self.fault=='exit-259': self.triggered=True
+                elif name=='TerminateJobObject': self.terminated=True; self.alive=False
+                elif name=='CloseHandle': self.closed.append(args[0])
+                return 1
+            return call
+    fault_cases=[None,('CreateJobObjectW',1),('GetHandleInformation',1),('SetInformationJobObject',1),
+        ('SetInformationJobObject',2),('DuplicateHandle',1),('DuplicateHandle',2),('DuplicateHandle',3),
+        ('GetHandleInformation',2),('GetHandleInformation',3),('GetHandleInformation',4),
+        ('InitializeProcThreadAttributeList',1),('InitializeProcThreadAttributeList',2),
+        ('UpdateProcThreadAttribute',1),('UpdateProcThreadAttribute',2),('CreateProcessW',1),
+        ('GetProcessTimes',1),('ResumeThread',1),('CloseHandle',1),('CloseHandle',2),('CloseHandle',3),
+        ('CloseHandle',4),('CloseHandle',5),('CloseHandle',6),
+        'membership','readback','attribute-size','short-list','oversized-list','descendant','nonzero-descendant','exit-259',
+        'audit-popen','audit-create',('GetProcessId',1),('QueryFullProcessImageNameW',1),
+        'image','process-id','pre-resume-signal','flags-no-window','flags-new-console','flags-breakaway','flags-type']
+    references=[]
+    for index,fault in enumerate(fault_cases):
+        model=ApiModel(fault); end,settle=fresh_deadline()
+        evidence=group/('model-'+str(index)); evidence.mkdir()
+        args=operands(pure_argv,group,evidence,'pure-job-'+str(index),1,end,settle)
+        probe=owner._WindowsJobScopeV1(**args); actual={}; receipt=None; error=None
+        with monkeypatch.context() as patch:
+            patch.setattr(owner,'_windows_job_api_v1',lambda:model.api)
+            patch.setattr(owner,'_WINDOWS_JOB_LIVE_LOCK_V1',threading.Lock())
+            original_audit=sys.audit
+            def audit(name,*values):
+                if name in ('subprocess.Popen','_winapi.CreateProcess'): model.order.append('audit:'+name)
+                event='subprocess.Popen' if fault=='audit-popen' else '_winapi.CreateProcess' if fault=='audit-create' else None
+                if name==event:
+                    model.triggered=True
+                    raise PermissionError('injected creation audit denial')
+                return original_audit(name,*values)
+            patch.setattr(owner.sys,'audit',audit)
+            if fault in ('flags-no-window','flags-new-console','flags-breakaway','flags-type'):
+                original_flags=owner._WindowsJobScopeV1._checked_root_creation_flags
+                def bad_flags(value):
+                    assert value==0x0008060C
+                    model.triggered=True
+                    invalid={'flags-no-window':value|0x08000000,'flags-new-console':value|0x10,
+                        'flags-breakaway':value|0x01000000,'flags-type':float(value)}[fault]
+                    return original_flags(invalid)
+                patch.setattr(owner._WindowsJobScopeV1,'_checked_root_creation_flags',staticmethod(bad_flags))
+            try:
+                with owner._windows_job_scope_v1(probe):
+                    with pytest.raises(RuntimeError,match='reused|reentered'):
+                        with owner._windows_job_scope_v1(probe): pass
+                    receipt=owner.supervise_command(pure_argv,cwd=group,run_id=args['run_id'],phase=args['phase'],
+                        command_index=1,evidence_root=evidence,environment=environment,execution_deadline_ns=end,
+                        output_limits=bounds,output_observation=actual,mirror_stdout=False,mirror_stderr=False)
+            except BaseException as exc: error=exc
+            if fault is None:
+                assert error is None and receipt.failure_class is None
+                assert not owner._command_requires_process_retention_v1(receipt)
+                for invalid in (None,True,float(0x0008060C),0x08080604,0x0008060C|0x10):
+                    bad=copy.deepcopy(actual['windows_job']); bad['creation']['creation_flags']=invalid
+                    assert owner._windows_job_projection_retains_v1(receipt,bad)
+                bad=copy.deepcopy(actual['windows_job']); del bad['creation']['creation_flags']
+                assert owner._windows_job_projection_retains_v1(receipt,bad)
+                with pytest.raises(RuntimeError,match='reused|reentered'):
+                    with owner._windows_job_scope_v1(probe): pass
+            else:
+                assert model.triggered,(fault,model.calls)
+                assert error is not None or receipt.failure_class is not None,fault
+                if fault=='exit-259': assert receipt.native_exit_code==259
+                if fault=='descendant':
+                    assert receipt.failure_class=='ENGVR_PROCESS_DESCENDANTS_REMAIN' and model.calls['TerminateJobObject']==1
+                if fault=='nonzero-descendant':
+                    assert receipt.native_exit_code==2 and receipt.failure_class=='ENGVR_NATIVE_EXIT_NONZERO'
+                    assert model.calls['TerminateJobObject']==1 and any(type(item) is dict and 'root_terminal_nonempty' in item for item in probe.history)
+                if fault in ('audit-popen','audit-create','flags-no-window','flags-new-console','flags-breakaway','flags-type'):
+                    assert model.calls.get('CreateProcessW',0)==0
+                if model.created:
+                    assert probe.creation['pid']==4321
+                    if receipt is not None: assert receipt.pid==4321
+            assert model.calls.get('TerminateJobObject',0)<=1
+            if probe.handle_close_errors: assert error is not None or owner._command_requires_process_retention_v1(receipt)
+            references.append(dict(fault=fault,triggered=model.triggered,native_execution=False,
+                created=model.created,resumed=model.resumed,termination_calls=model.calls.get('TerminateJobObject',0),
+                retained_handle_errors=probe.handle_close_errors,creation_inputs=model.creation_inputs))
+    with capsys.disabled(): print('WINDOWS_JOB_PURE_REFERENCES '+json.dumps(references),flush=True)
+    # Selected engineering evidence is external to the disposable wrapper root.
+    # This test-only location supplies no native grant or production option.
+    retained_text=os.environ.get('QTT_TEST_WINDOWS_JOB_DIAGNOSTIC_EVIDENCE')
+    if not retained_text: raise ValueError('selected native fixture requires its external attempt evidence directory')
+    retained=Path(retained_text)
+    owner._local_unlinked_path(retained)
+    assert retained.is_absolute() and retained.is_dir() and not any(retained.iterdir())
+    assert not retained.is_relative_to(area) and not retained.is_relative_to(REPO_ROOT)
+    diagnostic_used=False
+    last_diagnostic=None
+    def render_error(error):
+        import traceback
+        return ''.join(traceback.format_exception(error))
+    def retain_streams(evidence,receipt,target,errors):
+        streams={}
+        for label in ('stdout','stderr'):
+            path=Path(getattr(receipt,label+'_path')) if receipt is not None else evidence/('command-1.'+label+'.bin')
+            value=dict(source_path=str(path),copy_path=str(target/(label+'.bin')),bytes=None,
+                complete_utf8=None,complete_hex=None,copied=False,error=None)
+            streams[label]=value
+            try:
+                info=path.lstat(); identity=owner._scan_file_identity(info)
+                assert info.st_size<=bounds[label+'_bytes']
+                fd=owner._open_regular_worktree_descriptor(path,nonblocking=True)
+                try:
+                    opened=os.fstat(fd)
+                    assert owner._scan_file_identity(opened)==identity
+                    raw=os.read(fd,bounds[label+'_bytes']+1)
+                    assert len(raw)==info.st_size and len(raw)<=bounds[label+'_bytes']
+                    assert owner._scan_same_api_version(os.fstat(fd))==owner._scan_same_api_version(opened)
+                    assert owner._scan_same_api_version(path.lstat())==owner._scan_same_api_version(info)
+                finally: os.close(fd)
+                destination=target/(label+'.bin')
+                owner._local_unlinked_path(destination.parent)
+                with destination.open('xb') as out:
+                    assert out.write(raw)==len(raw)
+                    out.flush(); os.fsync(out.fileno())
+                copied=destination.lstat(); checked=owner._scan_file_identity(copied)
+                copy_fd=owner._open_regular_worktree_descriptor(destination,nonblocking=True)
+                try:
+                    current=os.fstat(copy_fd)
+                    assert owner._scan_file_identity(current)==checked
+                    assert os.read(copy_fd,bounds[label+'_bytes']+1)==raw
+                    assert owner._scan_same_api_version(os.fstat(copy_fd))==owner._scan_same_api_version(current)
+                    assert owner._scan_same_api_version(destination.lstat())==owner._scan_same_api_version(copied)
+                finally: os.close(copy_fd)
+                value.update(bytes=len(raw),complete_hex=raw.hex(),copied=True)
+                try: value['complete_utf8']=raw.decode('utf-8')
+                except UnicodeDecodeError: pass  # Exact bytes remain available, never a guessed text stream.
+            except BaseException as error:
+                errors.append(error); value['error']=render_error(error)
+        return streams
+    def write_diagnostic(path,value):
+        # Measure incremental UTF-8 output before the bounded aggregate allocation.
+        encoder=json.JSONEncoder(ensure_ascii=True,allow_nan=False,separators=(',',':'))
+        parts=[]; size=0
+        for part in encoder.iterencode(value):
+            size+=len(part)  # ensure_ascii=True: exact UTF-8 byte measurement
+            if size>1_048_576: raise ValueError('membership diagnostic reporting ceiling exceeded')
+            parts.append(part.encode('utf-8'))
+        raw=b''.join(parts)
+        assert len(raw)==size
+        with path.open('xb') as stream:
+            assert stream.write(raw)==size
+            stream.flush(); os.fsync(stream.fileno())
+        return dict(path=str(path),bytes=size,exclusive=True)
+    def diagnostic_members(scope,observation,witness):
+        nonlocal diagnostic_used
+        assert witness['state']=='failed' and not diagnostic_used
+        diagnostic_used=True
+        record=dict(attempts=0,maximum_attempts=96,job_handle=int(scope.handles['job']),
+            observations=[],native_calls=[],errors=[],after_closed_accounting=None,
+            failed_latch_preserved=True,attribution='not_established')
+        witness['diagnostic']=record
+        query=observation.get('query') or {}
+        if query.get('complete') is not True or query.get('status')!='complete':
+            record['not_opened']='membership unavailable or incomplete'
+            return record
+        pids=observation['pids']
+        assert type(pids) is tuple and len(pids)<=8 and len(set(pids))==len(pids)
+        def call(name,*args,close=False):
+            if not close: scope.check()
+            assert record['attempts']<96
+            record['attempts']+=1
+            started=time.monotonic_ns(); C.set_last_error(0)
+            value=getattr(scope.api,name)(*args)
+            error=int(C.get_last_error()); number=int(value or 0)
+            failed=number==0xffffffff if name=='WaitForSingleObject' else not number
+            record['native_calls'].append(dict(operation=name,result=number,last_error_raw=error,
+                before_ns=started,after_ns=time.monotonic_ns()))
+            if failed: raise owner._windows_job_error_v1(name,error)
+            return number
+        for pid in pids:
+            row=dict(listed_pid=pid,handle=None,borrowed=False,closed=None,actual_pid=None,
+                explicit_job_member=None,wait_before=None,wait_after=None,creation_filetime_100ns=None,
+                image=None,image_capacity=4096,native_exit=None,errors=[])
+            record['observations'].append(row)
+            handle=None; borrowed=pid==scope.process.pid
+            try:
+                assert type(pid) is int and 0<pid<=0xffffffff and pid!=os.getpid()
+                if borrowed: handle=scope.handles['process']
+                else: handle=call('OpenProcess',0x00101000,False,pid)
+                row.update(handle=int(handle),borrowed=borrowed)
+                row['actual_pid']=call('GetProcessId',handle)
+                if row['actual_pid']!=pid: raise ValueError('diagnostic handle PID differs from listed PID')
+                member=scope.api.B(); call('IsProcessInJob',handle,scope.handles['job'],C.byref(member))
+                row['explicit_job_member']=int(member.value)
+                if member.value!=1: raise ValueError('diagnostic handle is not verified in the explicit owned job')
+                for operation in ('wait_before','creation','image','wait_after'):
+                    try:
+                        if operation.startswith('wait_'):
+                            state=call('WaitForSingleObject',handle,0)
+                            row[operation]=state
+                            if state not in (0,258): raise ValueError('unexpected diagnostic process wait result')
+                        elif operation=='creation':
+                            values=[scope.api.FileTime() for _ in range(4)]
+                            call('GetProcessTimes',handle,*(C.byref(v) for v in values))
+                            row['creation_filetime_100ns']=(int(values[0].high)<<32)|int(values[0].low)
+                            assert row['creation_filetime_100ns']>0
+                        else:
+                            image=C.create_unicode_buffer(4096); length=scope.api.D(4096)
+                            call('QueryFullProcessImageNameW',handle,0,image,C.byref(length))
+                            row['image_returned_units']=int(length.value)
+                            if not 0<length.value<4096: raise ValueError('diagnostic image exceeds fixed capacity')
+                            row['image']=image[:length.value]
+                    except BaseException as error: row['errors'].append(render_error(error))
+                if row['wait_before']==0 and row['wait_after']==258:
+                    row['errors'].append('signaled-to-nonsignaled handle inconsistency')
+                if 0 in (row['wait_before'],row['wait_after']):
+                    code=scope.api.D(); call('GetExitCodeProcess',handle,C.byref(code))
+                    row['native_exit']=int(code.value)
+            except BaseException as error: row['errors'].append(render_error(error))
+            finally:
+                if handle is not None and not borrowed:
+                    try:
+                        call('CloseHandle',handle,close=True); row['closed']=True
+                    except BaseException as error:
+                        row['closed']=False; row['errors'].append(render_error(error))
+                record['errors'].extend(row['errors'])
+        # This last read cannot clear the latch, and never reissues membership.
+        try:
+            value=scope.api.Accounting(); length=scope.api.D(0xffffffff)
+            call('QueryInformationJobObject',scope.handles['job'],1,C.byref(value),C.sizeof(value),C.byref(length))
+            record['after_closed_accounting']=dict(raw_hex=bytes(value).hex(),returned_bytes_raw=int(length.value),
+                total=int(value.total),active=int(value.active),terminated_by_limit=int(value.terminated))
+            assert length.value==C.sizeof(value)
+        except BaseException as error: record['errors'].append(render_error(error))
+        assert witness['state']=='failed'
+        return record
+
+    # Deterministic fail paths exercise the actual shared query owner before any
+    # new native job is created. These injected answers are never native evidence.
+    import struct
+    class OldIds(C.Structure):
+        _fields_=[('assigned',real_api.D),('listed',real_api.D),('ids',real_api.S*2)]
+    class NewIds(C.Structure):
+        _fields_=[('assigned',real_api.D),('listed',real_api.D),('ids',real_api.S*8)]
+    assert (C.sizeof(real_api.D),C.sizeof(real_api.S),C.sizeof(OldIds),C.sizeof(NewIds),
+        NewIds.assigned.offset,NewIds.listed.offset,NewIds.ids.offset)==(4,8,24,72,0,4,8)
+    def raw_ids(pids,assigned=None,listed=None):
+        value=bytearray(72)
+        struct.pack_into('<II',value,0,len(pids) if assigned is None else assigned,len(pids) if listed is None else listed)
+        for index,pid in enumerate(pids): struct.pack_into('<Q',value,8+8*index,pid)
+        return bytes(value)
+    response_cases=[]
+    for pids in ((),(11,),(11,22),(11,22,33,44),tuple(range(11,19))):
+        response_cases.append((raw_ids(pids),1,234,8+8*len(pids),'complete',pids))
+    for error in (234,5,6,87,0):
+        for length in (None,0,24,72,0xffffffff):
+            response_cases.append((raw_ids((11,22)),0,error,length,'incomplete' if error==234 else 'api_error',None))
+    for raw,length,status in ((raw_ids((11,22)),None,'malformed'),(raw_ids((11,22)),73,'malformed'),
+            (raw_ids((11,22)),23,'malformed'),(raw_ids((11,22)),0,'malformed'),
+            (raw_ids((11,22),4,2),24,'incomplete'),(raw_ids((11,22),1,2),24,'malformed'),
+            (raw_ids((11,11)),24,'malformed'),(raw_ids((0,22)),24,'malformed'),
+            (raw_ids((1<<32,22)),24,'malformed'),(raw_ids(tuple(range(11,19)),9,9),72,'malformed')):
+        response_cases.append((raw,1,0,length,status,None))
+    response_results=[]
+    for raw,ok,error,length,status,pids in response_cases:
+        calls=[]
+        def injected_query(handle,kind,pointer,size,returned):
+            calls.append(kind); assert handle==99
+            if kind==1:
+                value=real_api.Accounting(); value.total=4; value.active=2
+                C.memmove(pointer,C.byref(value),C.sizeof(value))
+                C.cast(returned,C.POINTER(real_api.D))[0]=C.sizeof(value)
+                return 1
+            assert kind==3 and size==72
+            assert C.string_at(pointer,72)==bytes(72)
+            assert C.cast(returned,C.POINTER(real_api.D))[0]==0xffffffff
+            C.memmove(pointer,raw,72)
+            if length is not None: C.cast(returned,C.POINTER(real_api.D))[0]=length
+            C.set_last_error(error)
+            return ok
+        probe=owner._WindowsJobScopeV1(**good)
+        probe.api=SimpleNamespace(**vars(real_api)); probe.api.QueryInformationJobObject=injected_query
+        probe.handles['job']=99
+        if pids is None:
+            with pytest.raises((OSError,ValueError)): probe.membership(bracket=True)
+        else: probe.membership(bracket=True)
+        observed=probe.membership_observation; query=observed['query']
+        assert calls==[1,3,1] and query['status']==status and query['raw_hex']==raw.hex()
+        assert query['api_return']==ok and query['last_error_raw']==error
+        assert query['returned_bytes_raw']==(0xffffffff if length is None else length)
+        assert observed['pids']==pids and query['complete']==(status=='complete')
+        assert observed['accounting_before']['active']==observed['accounting_after']['active']==2
+        assert query['before_ns']<=query['after_ns']<=observed['accounting_after']['before_ns']
+        if pids is None: assert observed['assigned'] is observed['listed'] is observed['returned_bytes'] is None
+        if pids==(11,22): snapshot({k:observed[k] for k in ('total','active','terminated_by_limit','assigned','listed','pids')},pids)
+        elif pids is not None:
+            with pytest.raises(ValueError): snapshot({k:observed[k] for k in ('total','active','terminated_by_limit','assigned','listed','pids')},(11,22))
+        response_results.append(dict(status=status,raw_preserved=True,parsed_pids=pids,native_execution=False))
+    # Receipt-less exceptional streams use the same copier, including byte data
+    # that is not valid UTF-8. A secondary failure never replaces the first one.
+    precheck=group/'evidence-precheck'; precheck.mkdir()
+    source=precheck/'source'; source.mkdir(); target=precheck/'copy'; target.mkdir()
+    payloads={'stdout':b'actual\x00output\xff\r\n','stderr':b'actual error\r\n'}
+    for label,raw in payloads.items(): (source/('command-1.'+label+'.bin')).write_bytes(raw)
+    primary=RuntimeError('injected primary native exception'); errors=[primary]
+    copied=retain_streams(source,None,target,errors)
+    assert errors==[primary] and all(copied[k]['copied'] for k in payloads)
+    for label,raw in payloads.items():
+        assert (target/(label+'.bin')).read_bytes()==raw and copied[label]['bytes']==len(raw)
+    collision_errors=[primary]
+    failed=retain_streams(source,None,target,collision_errors)
+    assert collision_errors[0] is primary and len(collision_errors)==3
+    assert all(not value['copied'] and value['error'] for value in failed.values())
+    assert all((source/('command-1.'+k+'.bin')).read_bytes()==raw for k,raw in payloads.items())
+    with pytest.raises(ValueError,match='reporting ceiling'):
+        write_diagnostic(precheck/'too-large.json',{'data':'x'*1_048_577})
+    assert not (precheck/'too-large.json').exists()
+    write_diagnostic(precheck/'record.json',dict(primary=str(primary),streams=copied))
+    with pytest.raises(FileExistsError): write_diagnostic(precheck/'record.json',{})
+    # Exercise the exact diagnostic helper with injected query-only outcomes;
+    # no process, job membership or termination result is represented as native.
+    diagnostic_results=[]
+    for fault in ('signaled-259','open-denied','pid-mismatch','not-member','image-denied','close-denied','incomplete'):
+        closed=[]; opened=[]; queried=[]
+        fake=SimpleNamespace(**vars(real_api))
+        def fake_open(rights,inherit,pid):
+            assert rights==0x00101000 and inherit is False and pid in (22,33,44)
+            opened.append(pid)
+            if fault=='open-denied' and pid==33: C.set_last_error(5); return 0
+            return 1000+pid
+        def fake_pid(handle):
+            queried.append(('pid',handle))
+            return 99 if fault=='pid-mismatch' and handle==1033 else handle-1000
+        def fake_member(handle,job,pointer):
+            queried.append(('member',handle)); assert job==99
+            C.cast(pointer,C.POINTER(real_api.B))[0]=int(not(fault=='not-member' and handle==1033))
+            return 1
+        def fake_wait(handle,milliseconds):
+            queried.append(('wait',handle)); assert milliseconds==0
+            return 0 if handle==1033 else 258
+        def fake_times(handle,*pointers):
+            queried.append(('times',handle)); C.cast(pointers[0],C.POINTER(real_api.FileTime)).contents.low=123+handle
+            return 1
+        def fake_image(handle,flags,pointer,length):
+            queried.append(('image',handle)); assert C.cast(length,C.POINTER(real_api.D))[0]==4096
+            if fault=='image-denied' and handle==1033: C.set_last_error(122); return 0
+            value='C:\\synthetic-query-only.exe'; C.memmove(pointer,C.create_unicode_buffer(value),(len(value)+1)*2)
+            C.cast(length,C.POINTER(real_api.D))[0]=len(value)
+            return 1
+        def fake_exit(handle,pointer):
+            queried.append(('exit',handle)); assert handle==1033
+            C.cast(pointer,C.POINTER(real_api.D))[0]=259
+            return 1
+        def fake_close(handle):
+            assert handle!=1011; closed.append(handle)
+            if fault=='close-denied' and handle==1033: C.set_last_error(6); return 0
+            return 1
+        def fake_accounting(handle,kind,pointer,size,length):
+            assert handle==99 and kind==1
+            value=real_api.Accounting(); value.total=4; value.active=2
+            C.memmove(pointer,C.byref(value),size); C.cast(length,C.POINTER(real_api.D))[0]=size
+            return 1
+        for name,value in dict(OpenProcess=fake_open,GetProcessId=fake_pid,IsProcessInJob=fake_member,
+                WaitForSingleObject=fake_wait,GetProcessTimes=fake_times,QueryFullProcessImageNameW=fake_image,
+                GetExitCodeProcess=fake_exit,CloseHandle=fake_close,QueryInformationJobObject=fake_accounting).items(): setattr(fake,name,value)
+        scope=SimpleNamespace(api=fake,handles={'job':99,'process':1011},process=SimpleNamespace(pid=11),check=lambda:None)
+        witness={'state':'failed'}
+        observation=dict(query=dict(complete=fault!='incomplete',status='incomplete' if fault=='incomplete' else 'complete'),pids=(11,22,33,44))
+        diagnostic_used=False
+        result=diagnostic_members(scope,observation,witness)
+        assert witness['state']=='failed' and result['attempts']<=96
+        assert closed==[1000+pid for pid in opened if not(fault=='open-denied' and pid==33)]
+        assert 1011 not in closed
+        if fault=='incomplete': assert not opened and result['attempts']==0
+        if fault in ('pid-mismatch','not-member'):
+            assert not any(operation in ('wait','times','image','exit') and handle==1033 for operation,handle in queried)
+        if fault=='signaled-259':
+            assert result['observations'][2]['native_exit']==259 and result['observations'][2]['wait_after']==0
+            assert result['after_closed_accounting']['active']==2 and witness['state']=='failed'
+        if fault=='close-denied': assert result['observations'][2]['closed'] is False and result['errors']
+        diagnostic_results.append(dict(fault=fault,attempts=result['attempts'],closed=closed,failed_latch=True,native_execution=False))
+    diagnostic_used=False
+    with capsys.disabled():
+        print('WINDOWS_JOB_MEMBERSHIP_PRECHECKS '+json.dumps(dict(layouts=[24,72],response_checks=response_results,
+            receiptless_stream_bytes={key:len(value) for key,value in payloads.items()},
+            primary_and_secondary_preserved=True,exclusive_collision_preserved=True,
+            oversized_record_rejected=True,diagnostics=diagnostic_results,native_execution=False)),flush=True)
+
+    # Selected inherited settings only. Live accounting counts are not compared.
+    def inherited_policy():
+        member=real_api.B(); C.set_last_error(0)
+        if not real_api.IsProcessInJob(real_api.GetCurrentProcess(),None,C.byref(member)):
+            raise owner._windows_job_error_v1('IsProcessInJob:controller',int(C.get_last_error()))
+        values={'member':bool(member.value)}
+        if member.value:
+            for name,kind,cls in (('extended',9,real_api.Extended),('cpu',15,real_api.Cpu)):
+                value=cls(); length=real_api.D(); C.set_last_error(0)
+                if not real_api.QueryInformationJobObject(None,kind,C.byref(value),C.sizeof(value),C.byref(length)):
+                    raise owner._windows_job_error_v1('QueryInformationJobObject:inherited-'+name,int(C.get_last_error()))
+                assert length.value==C.sizeof(value)
+                values[name]=(dict(flags=int(value.basic.flags),process_time=int(value.basic.process_time),
+                    job_time=int(value.basic.job_time),active=int(value.basic.active),process_memory=int(value.process_memory),
+                    job_memory=int(value.job_memory)) if kind==9 else dict(flags=int(value.flags),rate=int(value.rate)))
+        return values
+    before=inherited_policy()
+    @contextmanager
+    def make_scope(**kw):
+        nonlocal count
+        count+=1; assert count<=8
+        scope=owner._WindowsJobScopeV1(**kw)
+        try:
+            with owner._windows_job_scope_v1(scope): yield scope
+        except BaseException:
+            with capsys.disabled():
+                print('WINDOWS_JOB_NATIVE_FAILURE '+json.dumps(dict(windows_job=scope.projection(),
+                    native_errors=scope.native_errors,history=scope.history,successful_job_handle_created='job' in scope.close_attempts or bool(scope.handles.get('job')))),flush=True)
+            raise
+    def check_job(receipt,actual):
+        job=actual['windows_job']
+        assert job==receipt.output_observation['windows_job']
+        assert set(job)=={'kind','configured','queried','creation','terminal','handle_close_errors'}
+        assert job['kind']=='WINDOWS_JOB_RESOURCE_ONLY_V1' and job['configured']==job['queried']
+        assert job['configured']==dict(limit_flags=0x2308,active_process_limit=job['configured']['active_process_limit'],
+            process_commit_bytes=268435456,job_commit_bytes=536870912,cpu_flags=5,cpu_rate_10000=2000)
+        assert job['creation']['pid']==receipt.pid and job['creation']['creation_filetime_100ns']>0
+        assert type(job['creation']['creation_flags']) is int and job['creation']['creation_flags']==0x0008060C
+        assert job['creation']['membership_verified_before_resume'] is True and job['creation']['resume_previous_count']==1
+        assert job['terminal']['root_exit']==receipt.native_exit_code
+        assert job['terminal']['active_processes']==0 and job['terminal']['process_ids']==[]
+        assert job['terminal']['empty_verified'] is True and job['handle_close_errors']==[]
+        assert all(job['terminal'][key] is True for key in ('job_handle_closed','process_handle_closed','primary_thread_handle_closed'))
+        assert not owner._command_requires_process_retention_v1(receipt)
+    def lifecycle_body():
+        nonlocal last_diagnostic
+        import traceback
+        worker=retained/'held-pair.py'
+        worker.write_text(worker_source,encoding='utf-8')
+        cases=[]
+        def native_snapshot(scope):
+            value=dict(scope.membership_observation)
+            assert value['query']['complete'] is True
+            for key in ('total','active','terminated_by_limit','assigned','listed','returned_bytes'): dword(value[key])
+            return value
+        def semantic_snapshot(value):
+            return {key:value[key] for key in ('total','active','terminated_by_limit','assigned','listed','pids')}
+        def checked_pair(path,before):
+            identity=owner._scan_file_identity(before)
+            assert before.st_size<=4096
+            fd=owner._open_regular_worktree_descriptor(path,nonblocking=True)
+            try:
+                opened=os.fstat(fd)
+                assert owner._scan_file_identity(opened)==identity
+                raw=os.read(fd,4097)
+                assert len(raw)==before.st_size and len(raw)<=4096
+                assert owner._scan_same_api_version(os.fstat(fd))==owner._scan_same_api_version(opened)
+                assert owner._scan_same_api_version(path.lstat())==owner._scan_same_api_version(before)
+            finally: os.close(fd)
+            def pairs(items):
+                result={}
+                for key,value in items:
+                    if key in result: raise ValueError('duplicate synchronized pair field')
+                    result[key]=value
+                return result
+            result=json.loads(raw.decode('utf-8'),object_pairs_hook=pairs)
+            assert type(result) is dict and set(result)=={'root_pid','root_creation_filetime_100ns',
+                'child_pid','child_creation_filetime_100ns','popen_events','createprocess_events'}
+            assert all(type(v) is int and 0<v<=(0xffffffffffffffff if 'filetime' in k else U32) for k,v in result.items())
+            assert result['popen_events']==result['createprocess_events']==1
+            return result,dict(bytes=len(raw),path=str(path),generation=identity,complete_utf8=raw.decode('utf-8'))
+        def publish_release(case_root):
+            path=case_root/'release.bin'; temporary=case_root/'.release.bin.pending'
+            assert not os.path.lexists(path) and not os.path.lexists(temporary)
+            with temporary.open('xb') as stream:
+                assert stream.write(b'RELEASE\n')==8
+                stream.flush(); os.fsync(stream.fileno())
+            os.rename(temporary,path)  # Windows: atomic publication, never replace an existing file.
+            owner._fsync_directory(case_root)
+            return dict(path=str(path),bytes=8,write_once=True)
+        for case,cap,mode,seconds in (('process-cap-2',2,'normal',60),('process-cap-1',1,'normal',60),
+                ('whole-job-timeout',2,'timeout',5)):
+            case_root=retained/case; case_root.mkdir()
+            evidence=case_root/'evidence'; evidence.mkdir()
+            copies=case_root/'retained-streams'; copies.mkdir()
+            for name in ('child-ready.json','pair-ready.json','release.bin'):
+                assert not os.path.lexists(case_root/name)
+            end,settle=fresh_deadline(seconds)
+            argv=(sys.executable,'-I','-B','-X','utf8',str(worker),str(REPO_ROOT),str(case_root),
+                mode,str(end),str(settle),'root')
+            kw=operands(argv,case_root,evidence,case,1,end,settle,cap)
+            actual={}; receipt=None; scope=None; child_handle=None; hook_error=None; errors=[]
+            retained_streams={}; stdout=None; stderr=None; result=None
+            witness=dict(state='waiting',readiness_checks=0,ready_reads=0,native_call_slots_reserved=0,
+                native_calls=[],snapshots=[],handle_close_errors=[],release=None,child_settlement=None,
+                lifetime_attribution='not_established',historical_process_trace_complete=False)
+            last_check=0
+            def reserve(count):
+                # Keep the adopted 32-call allowance: five worker queries
+                # plus at most 27 controller calls. Earlier fixed setup/cleanup
+                # keeps its original bounds; each bracket now charges three.
+                assert witness['native_call_slots_reserved']+count<=27
+                witness['native_call_slots_reserved']+=count
+            def query(name,*args,settling=False):
+                nonlocal child_handle
+                scope.check(settling=settling); reserve(1); C.set_last_error(0)
+                value=getattr(scope.api,name)(*args)
+                number=int(value or 0)
+                error=int(C.get_last_error()) if (number==0xffffffff if name=='WaitForSingleObject' else not number) else 0
+                witness['native_calls'].append(dict(operation=name,result=number,error=error))
+                if (number==0xffffffff if name=='WaitForSingleObject' else not number):
+                    raise owner._windows_job_error_v1(name,error)
+                if name=='OpenProcess':
+                    child_handle=number; witness['child_handle']=number
+                scope.check(settling=settling)
+                return number
+            def stamp(handle,settling=False):
+                values=[scope.api.FileTime() for _ in range(4)]
+                query('GetProcessTimes',handle,*(C.byref(value) for value in values),settling=settling)
+                value=(int(values[0].high)<<32)|int(values[0].low)
+                assert value>0
+                return value
+            def take_snapshot(label):
+                reserve(3)
+                try:
+                    try:
+                        scope.membership(bracket=True)
+                    finally:
+                        witness['snapshots'].append(dict(label=label,raw=None if scope.membership_observation is None
+                            else dict(scope.membership_observation)))
+                    value=native_snapshot(scope)
+                    snapshot(semantic_snapshot(value),(scope.process.pid,witness['ready']['child_pid']))
+                    after=value['accounting_after']; before=value['accounting_before']
+                    if after is None or before['active']!=2 or after['active']!=2:
+                        raise ValueError('held pair accounting bracket is not exactly two')
+                    if not before['total']<=after['total'] or after['total']<2:
+                        raise ValueError('held pair lifetime accounting decreased or fell below two')
+                    return value
+                except BaseException:
+                    witness['state']='failed'
+                    if not diagnostic_used:
+                        try: diagnostic_members(scope,scope.membership_observation or {},witness)
+                        except BaseException as error:
+                            witness['diagnostic_secondary_error']=render_error(error)
+                    raise
+            def identity(handle,pid,creation):
+                actual_pid=query('GetProcessId',handle); actual_creation=stamp(handle)
+                image=C.create_unicode_buffer(32768); capacity=scope.api.D(32768)
+                query('QueryFullProcessImageNameW',handle,0,image,C.byref(capacity))
+                assert 0<capacity.value<32768
+                member=scope.api.B()
+                query('IsProcessInJob',handle,scope.handles['job'],C.byref(member))
+                wait=query('WaitForSingleObject',handle,0)
+                value=dict(handle=int(handle),pid=actual_pid,creation_filetime_100ns=actual_creation,
+                    image=image[:capacity.value],explicit_job_member=int(member.value),wait_result=wait)
+                witness.setdefault('identities',[]).append(value)
+                assert actual_pid==pid and actual_creation==creation and member.value==1 and wait==258
+                assert owner._lexical_path_key(Path(value['image']))==owner._lexical_path_key(Path(sys.executable))
+                return value
+            def observer(process):
+                nonlocal child_handle,hook_error,last_check
+                result=original_poll(process)  # Always invoke the genuine poll; never replace its result.
+                if process is not scope.process: return result
+                if result is not None: witness['root_native_poll_result']=result
+                if witness['state'] in ('checking','verified','failed'): return result
+                now=time.monotonic_ns()
+                if now-last_check<10_000_000: return result
+                last_check=now
+                try:
+                    scope.check(); witness['readiness_checks']+=1
+                    assert witness['readiness_checks']<=3000
+                    path=case_root/'pair-ready.json'
+                    try: before=path.lstat()
+                    except FileNotFoundError:
+                        if result is not None: raise RuntimeError('root exited before synchronized pair readiness')
+                        return result
+                    witness['state']='checking'
+                    ready,read_record=checked_pair(path,before); witness['ready_reads']+=1
+                    witness['ready']=ready; witness['ready_file']=read_record
+                    assert witness['ready_reads']==1 and result is None
+                    root_handle=scope.handles['process']; root_pid=scope.process.pid
+                    root_stamp=scope.creation['creation_filetime_100ns']
+                    assert query('GetProcessId',root_handle)==root_pid==ready['root_pid']
+                    assert stamp(root_handle)==root_stamp==ready['root_creation_filetime_100ns']
+                    first=take_snapshot('held-first')
+                    snapshot(semantic_snapshot(first),(root_pid,ready['child_pid']))
+                    assert root_pid!=ready['child_pid']
+                    child_handle=query('OpenProcess',0x00101000,False,ready['child_pid'])
+                    witness['child_handle']=child_handle
+                    flags=scope.api.D(); query('GetHandleInformation',child_handle,C.byref(flags))
+                    witness['child_handle_flags']=int(flags.value); assert not flags.value&1
+                    root_identity=identity(root_handle,root_pid,root_stamp)
+                    child_identity=identity(child_handle,ready['child_pid'],ready['child_creation_filetime_100ns'])
+                    last=take_snapshot('held-last')
+                    snapshot(semantic_snapshot(last),(root_pid,ready['child_pid']))
+                    rechecks=[]
+                    for handle,expected in ((root_handle,root_stamp),(child_handle,ready['child_creation_filetime_100ns'])):
+                        current=stamp(handle); wait=query('WaitForSingleObject',handle,0)
+                        rechecks.append(dict(handle=int(handle),creation_filetime_100ns=current,wait_result=wait))
+                        assert current==expected and wait==258
+                    witness['identity_rechecks']=rechecks
+                    totals=[scope.configured_membership['total'],scope.creation_membership['total'],first['total'],last['total']]
+                    assert all(b>=a for a,b in zip(totals,totals[1:]))
+                    witness['state']='verified'
+                    if mode=='normal': witness['release']=publish_release(case_root)
+                except BaseException as error:
+                    hook_error=error; witness['state']='failed'
+                    witness['error']=str(error); witness['complete_exception']=''.join(traceback.format_exception(error))
+                    raise
+                return result
+            try:
+                with make_scope(**kw) as scope:
+                    original_poll=owner._WindowsJobProcessV1.poll
+                    with monkeypatch.context() as observe_patch:
+                        if cap==2: observe_patch.setattr(owner._WindowsJobProcessV1,'poll',observer)
+                        receipt=owner.supervise_command(argv,cwd=case_root,run_id=kw['run_id'],phase=kw['phase'],
+                            command_index=1,evidence_root=evidence,environment=environment,execution_deadline_ns=end,
+                            output_limits=bounds,output_observation=actual,mirror_stdout=False,mirror_stderr=False)
+                    check_job(receipt,actual)
+            except BaseException as error:
+                errors.append(error)
+            finally:
+                if child_handle is not None:
+                    try:
+                        wait=query('WaitForSingleObject',child_handle,min(10000,max(0,(settle-time.monotonic_ns())//1_000_000)),settling=True)
+                        assert wait==0,'query-held descendant not signaled at settlement'
+                        exit_code=scope.api.D(); query('GetExitCodeProcess',child_handle,C.byref(exit_code),settling=True)
+                        witness['child_settlement']=dict(handle=int(child_handle),wait_result=wait,native_exit=int(exit_code.value))
+                    except BaseException as error: errors.append(error)
+                    finally:
+                        try:
+                            C.set_last_error(0)
+                            if not scope.api.CloseHandle(child_handle):
+                                raise owner._windows_job_error_v1('CloseHandle:query-child',int(C.get_last_error()))
+                            witness['query_child_handle_closed']=True
+                        except BaseException as error:
+                            witness['handle_close_errors'].append(dict(operation='CloseHandle:query-child',error=getattr(error,'winerror',None)))
+                            errors.append(error)
+                if hook_error is not None and all(error is not hook_error for error in errors): errors.append(hook_error)
+                # Guaranteed exceptional path; original evidence is already
+                # outside the wrapper root and survives any failed copy/encoding.
+                retained_streams=retain_streams(evidence,receipt,copies,errors)
+                stdout=retained_streams['stdout']['complete_utf8']; stderr=retained_streams['stderr']['complete_utf8']
+            final_membership=None if scope is None else scope.membership_observation
+            result=dict(case=case,argv=argv,cwd=str(case_root),native_exit=None if receipt is None else receipt.native_exit_code,
+                failure_class=None if receipt is None else receipt.failure_class,complete_stdout=stdout,complete_stderr=stderr,
+                retained_streams=retained_streams,original_evidence_root=str(evidence),
+                original_evidence_retained_outside_disposable_root=True,
+                windows_job=None if scope is None else scope.projection(),witness=witness,
+                configured_empty=None if scope is None else scope.configured_membership,
+                suspended_membership=None if scope is None else scope.creation_membership,
+                suspended_identity=None if scope is None else scope.creation_identity,terminal_membership=final_membership,
+                root_wait_result=None if scope is None or scope.process is None else scope.process.last_wait_result,
+                errors=[''.join(traceback.format_exception(error)) for error in errors],
+                lifetime_attribution='not_established',historical_process_trace_complete=False)
+            last_diagnostic=result
+            with capsys.disabled(): print('WINDOWS_JOB_HELD_PAIR_NATIVE '+json.dumps(result),flush=True)
+            if errors: owner._scan_raise_errors(errors)
+            assert receipt is not None and scope.process.last_wait_result==0
+            launch_records=[json.loads(line) for line in stdout.splitlines() if line.startswith('{')]
+            descendant_flags=[value['descendant_creation_flags'] for value in launch_records if 'descendant_creation_flags' in value]
+            assert descendant_flags and all(type(value) is int and value==0x00000208 for value in descendant_flags)
+            result['descendant_creation_flags']=descendant_flags
+            snapshot(semantic_snapshot(scope.configured_membership),())
+            snapshot(semantic_snapshot(scope.creation_membership),(receipt.pid,))
+            snapshot(semantic_snapshot(final_membership),())
+            totals=[scope.configured_membership['total'],scope.creation_membership['total'],final_membership['total']]
+            assert all(b>=a for a,b in zip(totals,totals[1:]))
+            if cap==1:
+                outcome=json.loads(stdout.splitlines()[-1])
+                assert receipt.native_exit_code==2 and receipt.failure_class=='ENGVR_NATIVE_EXIT_NONZERO'
+                assert outcome['root_pid']==receipt.pid and outcome['creation_audit_counts']=={'subprocess.Popen':1,'_winapi.CreateProcess':1}
+                assert type(outcome['create_error']) is dict or (type(outcome['child_returncode']) is int and outcome['child_returncode']!=0)
+                assert 'OWNED_DESCENDANT_STARTED' not in stdout and child_handle is None
+                assert all(not os.path.lexists(case_root/name) for name in ('child-ready.json','pair-ready.json','release.bin'))
+            else:
+                assert witness['state']=='verified' and witness['query_child_handle_closed'] is True
+                ready=witness['ready']; identities=witness['identities']; rechecks=witness['identity_rechecks']
+                reference=dict(root_pid=receipt.pid,child_pid=ready['child_pid'],
+                    before=semantic_snapshot(scope.creation_membership),held_first=semantic_snapshot(witness['snapshots'][0]['raw']),
+                    held_last=semantic_snapshot(witness['snapshots'][1]['raw']),after=semantic_snapshot(final_membership),
+                    root_handle_verified=identities[0]['pid']==receipt.pid and identities[0]['explicit_job_member']==1,
+                    child_handle_verified=identities[1]['pid']==ready['child_pid'] and identities[1]['explicit_job_member']==1,
+                    root_live_at_barrier=identities[0]['wait_result']==rechecks[0]['wait_result']==258,
+                    child_live_at_barrier=identities[1]['wait_result']==rechecks[1]['wait_result']==258,
+                    creation_identities_match=all(a['creation_filetime_100ns']==b['creation_filetime_100ns'] for a,b in zip(identities,rechecks)),
+                    image_matches=all(owner._lexical_path_key(Path(v['image']))==owner._lexical_path_key(Path(sys.executable)) for v in identities),
+                    root_signaled=scope.process.last_wait_result==0,child_signaled=witness['child_settlement']['wait_result']==0,
+                    configured_cap=scope.configured['active_process_limit'],cap_readback=scope.queried['active_process_limit'],
+                    handle_close_errors=tuple(witness['handle_close_errors']))
+                result['resource_oracle']=pair_reference(reference)
+                assert witness['native_call_slots_reserved']<=27 and witness['readiness_checks']<=3000
+                if mode=='normal':
+                    outcome=json.loads(stdout.splitlines()[-1])
+                    assert receipt.native_exit_code==0 and receipt.failure_class is None and witness['child_settlement']['native_exit']==0
+                    assert outcome['child_returncode']==0 and outcome['child_pid']==ready['child_pid'] and outcome['create_error'] is None
+                    assert outcome['worker_child_handle_closed'] is True and outcome['worker_identity_queries']==4
+                    assert outcome['worker_ready_checks']+witness['readiness_checks']<=6000
+                    assert witness['release'] is not None and 'OWNED_DESCENDANT_STARTED' in stdout
+                else:
+                    assert receipt.failure_class=='ENGVR_PROCESS_TIMEOUT' and receipt.timeout_state=='TRIGGERED'
+                    assert actual['windows_job']['terminal']['termination_attempted'] is True
+                    assert 'OWNED_SLEEPING_DESCENDANT' in stdout and 'OWNED_SLEEPING_PARENT' in stdout
+                    assert witness['release'] is None and not os.path.lexists(case_root/'release.bin')
+            cases.append(result)
+        end,settle=fresh_deadline(); evidence=group/'native-last-close'; evidence.mkdir()
+        argv=(sys.executable,'-I','-B','-X','utf8','-c','print("MUST_NOT_BE_RESUMED")')
+        kw=operands(argv,group,evidence,'native-last-close',1,end,settle,1)
+        with make_scope(**kw) as scope:
+            scope.match(run_id=kw['run_id'],phase=kw['phase'],command_index=1,argv=argv,cwd=group,
+                evidence_root=evidence,environment=environment,execution_deadline_ns=end)
+            process=scope.create_suspended(subprocess.DEVNULL)
+            scope.verify_created()
+            projection=scope.close_suspended_backstop()
+            assert process.poll() is not None and projection['creation']['resume_previous_count'] is None
+            assert projection['creation']['membership_verified_before_resume'] is True and scope.final_close_test
+            assert type(projection['creation']['creation_flags']) is int and projection['creation']['creation_flags']==0x0008060C
+            assert projection['terminal']['termination_attempted'] is False
+            assert all(projection['terminal'][k] for k in ('job_handle_closed','process_handle_closed','primary_thread_handle_closed'))
+            # No running application or independent collector: reuse the original finite drain.
+            stdout_path=evidence/'stdout.bin'; stderr_path=evidence/'stderr.bin'
+            out=stdout_path.open('xb'); err=stderr_path.open('xb')
+            outcomes=[dict(drained_byte_count=0,retained_byte_count=0,retention_limit=16384,
+                cleanup_drained_byte_count=0,evidence_write_enabled=True,mirror=None) for _ in range(2)]
+            terminal=owner._supervise_native_output(process,stdout_stream=out,stderr_stream=err,
+                stdout_outcome=outcomes[0],stderr_outcome=outcomes[1],started_monotonic=time.monotonic(),
+                timeout_seconds=min(10,(settle-time.monotonic_ns())/1e9),termination_grace_seconds=1,platform_name=os.name)
+            assert stdout_path.read_bytes()==stderr_path.read_bytes()==b''
+            cases.append(dict(case='final-handle-close-not-application-success',argv=argv,native_exit=process.returncode,
+                complete_stdout='',complete_stderr='',windows_job=projection,history=scope.history,
+                configured_empty=scope.configured_membership,suspended_membership=scope.creation_membership,
+                suspended_identity=scope.creation_identity,final_close_test=True,root_signaled=True,
+                lifetime_attribution='not_established'))
+        assert count==6
+        assert len(cases)==4
+        with capsys.disabled():
+            print('WINDOWS_JOB_NATIVE_LIFECYCLE '+json.dumps(dict(cases=cases,successful_new_jobs=count,
+                memory_cpu_stress_run=False,full_host_qualified=False,canonical_execution=False)),flush=True)
+        return cases
+    def lifecycle():
+        errors=[]; after=None; cases=None; record=None
+        try:
+            cases=lifecycle_body()
+        except BaseException as error:
+            errors.append(error)
+        finally:
+            # A failed witness must also reach this selected policy after-read.
+            try:
+                if time.monotonic_ns()>=settlement: raise TimeoutError('inherited-policy after-read settlement cutoff')
+                after=inherited_policy()
+                if after!=before: raise ValueError('selected inherited job policy changed')
+            except BaseException as error: errors.append(error)
+            value=dict(last_case=last_diagnostic,completed_cases=cases,inherited_before=before,inherited_after=after,
+                inherited_selected_policy_equal=None if after is None else after==before,
+                primary_and_secondary_errors=[render_error(error) for error in errors],
+                buffer_capacity=8,buffer_bytes=72,paired_execution_cap=2,
+                full_host_qualified=False,canonical_execution=False,attribution='not_established')
+            try:
+                record=write_diagnostic(retained/'membership-diagnostic.json',value)
+            except BaseException as error:
+                errors.append(error)
+            with capsys.disabled():
+                print('WINDOWS_JOB_DIAGNOSTIC_SETTLEMENT '+json.dumps(dict(record=record,
+                    retained_source_root=str(retained),source_root_preserved=True,inherited_before=before,
+                    inherited_after=after,inherited_selected_policy_equal=None if after is None else after==before,
+                    errors=[render_error(error) for error in errors])),flush=True)
+        if errors: owner._scan_raise_errors(errors)
+    return make_scope,check_job,lifecycle
 def _exercise_preflight_transport_v1(tmp_path, monkeypatch, capsys):
     """Synthetic engineering: real original CLI children, no canonical host grant."""
     import copy
@@ -18476,6 +19557,7 @@ def _exercise_preflight_transport_v1(tmp_path, monkeypatch, capsys):
         deadline = min(deadline,int(caps[0]))
         settlement = min(deadline+30_000_000_000,int(caps[1]))
         assert time.monotonic_ns() < deadline < settlement
+    job_scope,check_job,job_lifecycle = _exercise_windows_job_resource_v1(area,monkeypatch,capsys,deadline,settlement)
     transport = dict(frame_byte_limit=2_000_000,header_byte_limit=100_000,lexical_units=100_000,
         depth=32,quoted_bytes=100_000,read_calls=10000,write_calls=10000,chunk_bytes=97,
         retained_buffer_bytes=8_000_000,receiver_byte_limit=20000)
@@ -18483,8 +19565,9 @@ def _exercise_preflight_transport_v1(tmp_path, monkeypatch, capsys):
     limits = dict(zero,attempts=20,bytes=40,entries=30,retained_bytes=50)
     tail = dict(zero,attempts=2,bytes=3,entries=4,retained_bytes=5)
     class SyntheticLease(owner._PreflightHostLeaseV1):
-        def __init__(self, *, fixture_root=root, fixture_process_root=process_root, fixture_run_id=run_id):
+        def __init__(self, *, fixture_root=root, fixture_process_root=process_root, fixture_run_id=run_id, fixture_deadline=deadline):
             self.calls=[]
+            self.deadline=fixture_deadline
             self.root, self.process_root, self.run_id = fixture_root, fixture_process_root, fixture_run_id
         def check_parent(self, root, index_path):
             assert root == self.root
@@ -18492,7 +19575,7 @@ def _exercise_preflight_transport_v1(tmp_path, monkeypatch, capsys):
             self.calls.append('parent')
         def check_launch(self, entry, argv, environment, scratch_roots, deadline_ns):
             assert tuple(argv) == entry.argv and owner._preflight_vector_v1(tuple(argv))
-            assert deadline_ns == deadline and scratch_roots == (self.process_root,)
+            assert deadline_ns == self.deadline and scratch_roots == (self.process_root,)
             assert entry.cwd == str(self.root)
             assert environment[owner.RUN_ID_ENV] == self.run_id
             self.calls.append('launch')
@@ -18844,6 +19927,9 @@ def _exercise_preflight_transport_v1(tmp_path, monkeypatch, capsys):
     for case,payload,expected_exit in (
             ('positive',b'VALUE = 7\n',0),
             ('semantic-rejection',b'import subprocess\nsubprocess.run(["pytest"])\n',1)):
+        fixture_deadline=min(deadline,time.monotonic_ns()+60_000_000_000)
+        fixture_settlement=min(settlement,fixture_deadline+10_000_000_000)
+        assert time.monotonic_ns()<fixture_deadline<fixture_settlement
         case_root=area/('position-4-'+case); case_root.mkdir()
         copied_root=case_root/'repo'; copied_root.mkdir()
         for name,raw in source_bytes.items():
@@ -18858,7 +19944,7 @@ def _exercise_preflight_transport_v1(tmp_path, monkeypatch, capsys):
         assert fixture_probe.failure_operation is None and fixture_paths.filesystem_probe_state=='PASS'
         fixture_run=fixture_paths.run_id
         fixture_process,fixture_evidence=fixture_paths.process_root,fixture_paths.evidence_root
-        fixture_lease=SyntheticLease(fixture_root=copied_root,fixture_process_root=fixture_process,fixture_run_id=fixture_run)
+        fixture_lease=SyntheticLease(fixture_root=copied_root,fixture_process_root=fixture_process,fixture_run_id=fixture_run,fixture_deadline=fixture_deadline)
         fixture_environment={k:v for k,v in os.environ.items() if not k.upper().startswith(('QTT_','PYTHON'))}
         fixture_environment.update(PYTHONDONTWRITEBYTECODE='1',PYTHONNOUSERSITE='1')
         # This additional bounded bootstrap probe imports complete copied modules
@@ -18871,7 +19957,7 @@ def _exercise_preflight_transport_v1(tmp_path, monkeypatch, capsys):
         import_output={}
         import_receipt=owner.supervise_command((sys.executable,'-I','-B','-c',import_code),cwd=copied_root,
             run_id=fixture_run,phase='standalone-pytest-helper',command_index=1,evidence_root=import_evidence,
-            environment=fixture_environment,execution_deadline_ns=deadline,
+            environment=fixture_environment,execution_deadline_ns=fixture_deadline,
             output_limits=dict(stdout_bytes=16384,stderr_bytes=16384,combined_output_bytes=32768),
             output_observation=import_output,mirror_stdout=False,mirror_stderr=False)
         assert import_receipt.native_exit_code==0 and import_receipt.failure_class is None,Path(import_receipt.stderr_path).read_bytes()
@@ -18921,7 +20007,7 @@ def _exercise_preflight_transport_v1(tmp_path, monkeypatch, capsys):
         offset=0; file_rows=[]
         for name in sorted(files,key=lambda name:name.encode('utf-8')):
             file_rows.append([name,offset,len(files[name])]); offset+=len(files[name])
-        fixture_header=dict(identity=fixture_identity,allowance=fixture_limits,deadline_ns=deadline,
+        fixture_header=dict(identity=fixture_identity,allowance=fixture_limits,deadline_ns=fixture_deadline,
             git=dict(executable=None,evidence_root=None),files=file_rows,
             directories=[[name,[list(item) for item in rosters[name]]] for name in sorted(rosters,key=lambda name:name.encode('utf-8'))])
         assert owner._preflight_header_v1(fixture_header,P,fixture_identity)==(rosters,C)
@@ -18930,16 +20016,16 @@ def _exercise_preflight_transport_v1(tmp_path, monkeypatch, capsys):
         fixture_transport=dict(frame_byte_limit=3*F+2*B,header_byte_limit=H,lexical_units=H+B,depth=32,
             quoted_bytes=H+B,read_calls=3*F+2*B+5,write_calls=F,chunk_bytes=chunk,
             retained_buffer_bytes=max(3*F+2*B,3*H+2*B+chunk),receiver_byte_limit=B)
-        fixture_meter=owner._PreflightTransportV1(fixture_transport,settlement)
+        fixture_meter=owner._PreflightTransportV1(fixture_transport,fixture_settlement)
         fixture_observation=owner._PreflightObservationV1(root=copied_root,run_id=fixture_run,occurrence=4,
-            argv=fixture_argv,files=files,directories=rosters,limits=fixture_limits,deadline_ns=deadline)
+            argv=fixture_argv,files=files,directories=rosters,limits=fixture_limits,deadline_ns=fixture_deadline)
         fixture_entry=owner.build_command_evidence_plan(run_id=fixture_run,phase='fast-preflight',commands=[fixture_argv],cwd=copied_root)[0]
         fixture_entry=replace(fixture_entry,command_index=4)
         fixture_environment.update({owner.RUN_ID_ENV:fixture_run,owner.PROCESS_ROOT_ENV:str(fixture_process),
             owner.EVIDENCE_ROOT_ENV:str(fixture_evidence)})
         fixture_launch=owner._PreflightLaunchInputV1(identity=fixture_identity,observation=fixture_observation,
             row_total=fixture_limits,parent_tail_reserve=zero,limits=fixture_transport,parent_meter=fixture_meter,
-            settlement_deadline_ns=settlement,host_lease=fixture_lease,plan_entry=fixture_entry,
+            settlement_deadline_ns=fixture_settlement,host_lease=fixture_lease,plan_entry=fixture_entry,
             environment=fixture_environment,scratch_roots=(fixture_process,),
             output_limits=dict(stdout_bytes=16384,stderr_bytes=16384,combined_output_bytes=32768))
         assert fixture_launch.raw_header==emitted and fixture_launch.extent==F
@@ -18959,16 +20045,21 @@ def _exercise_preflight_transport_v1(tmp_path, monkeypatch, capsys):
             fixed_environment_controls=tuple((key,fixture_environment[key]) for key in (*owner._PREFLIGHT_INPUT_KEYS_V1,
                 owner.RUN_ID_ENV,owner.PROCESS_ROOT_ENV,owner.EVIDENCE_ROOT_ENV)))
         fixture_output={}
-        with fixture_launch,owner._command_projection_v1(fixture_projection):
+        resource_scope=job_scope(run_id=fixture_run,phase='fast-preflight',command_index=4,
+            argv=fixture_argv,cwd=copied_root,evidence_root=fixture_evidence,environment=dict(fixture_environment),
+            active_process_limit=2,process_commit_bytes=268435456,job_commit_bytes=536870912,cpu_rate_10000=2000,
+            execution_deadline_ns=fixture_deadline,settlement_deadline_ns=fixture_settlement)
+        with fixture_launch,owner._command_projection_v1(fixture_projection),resource_scope as resource_measurement:
             fixture_receipt=owner.supervise_command(fixture_argv,cwd=copied_root,run_id=fixture_run,
                 phase='fast-preflight',command_index=4,evidence_root=fixture_evidence,environment=fixture_environment,
-                execution_deadline_ns=deadline,output_limits=fixture_launch.output_limits,output_observation=fixture_output,
+                execution_deadline_ns=fixture_deadline,output_limits=fixture_launch.output_limits,output_observation=fixture_output,
                 launch_input=fixture_launch,preflight_launch=(fixture_argv,dict(fixture_environment)),
                 mirror_stdout=False,mirror_stderr=False)
             fixture_stdout=Path(fixture_receipt.stdout_path).read_bytes().decode('utf-8')
             fixture_stderr=Path(fixture_receipt.stderr_path).read_bytes().decode('utf-8')
             assert fixture_receipt.native_exit_code==expected_exit,fixture_stderr
             assert fixture_receipt.failure_class==(None if expected_exit==0 else 'ENGVR_NATIVE_EXIT_NONZERO'),fixture_stderr
+            check_job(fixture_receipt,fixture_output)
             assert fixture_launch.state=='CONSUMED' and fixture_launch.result is not None
             measured=fixture_launch.result
             assert measured['pid']==fixture_receipt.pid!=os.getpid() and measured['parent_pid']==os.getpid()
@@ -19019,9 +20110,16 @@ def _exercise_preflight_transport_v1(tmp_path, monkeypatch, capsys):
                     readback_bytes=fixture_meter.readback_bytes,read_calls=fixture_meter.read_calls,
                     write_calls=fixture_meter.write_calls,lexical_units=fixture_meter.lexical_units,
                     quoted_bytes=fixture_meter.quoted_bytes,peak_buffers=fixture_meter.peak_buffers),
-                transport_limits=fixture_transport,execution_deadline_ns=deadline,settlement_deadline_ns=settlement,
+                transport_limits=fixture_transport,execution_deadline_ns=fixture_deadline,settlement_deadline_ns=fixture_settlement,
+                windows_job=fixture_output.get('windows_job'),
+                configured_empty=getattr(resource_measurement,'configured_membership',None),
+                suspended_membership=getattr(resource_measurement,'creation_membership',None),
+                suspended_identity=getattr(resource_measurement,'creation_identity',None),
+                terminal_membership=getattr(resource_measurement,'membership_observation',None),
+                lifetime_attribution='not_established',
                 native_host_qualified=False,canonical_run=False,closed_reader=fixture_launch.reader.closed,
                 actual_cleanup=cleanup_record)),flush=True)
+    job_lifecycle()
     # One-shot parent declaration and candidate assembly over a tiny literal
     # no-Git repository. Startup is intentionally not qualified or executed.
     fixture_root=area/'candidate'; fixture_root.mkdir(); (fixture_root/'a.bin').write_bytes(b'abc')
