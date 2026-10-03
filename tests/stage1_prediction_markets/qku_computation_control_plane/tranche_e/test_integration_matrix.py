@@ -113,6 +113,9 @@ def test_frozen_snapshot_and_task_envelope_are_immutable_indexes() -> None:
             requests[0].issuer_ref = "SYNTHETIC::OTHER"
     assert reader.read_calls == 1 and not reader.active
     assert resolver._probability_last_issuer_view_v1["snapshot"] is original
+    from . import _v35_full_bank_engineering, _v35_service_resource_checks
+    _v35_service_resource_checks()
+    _v35_full_bank_engineering()
 
 
 def test_request_time_resolution_performs_no_file_reads(
@@ -175,7 +178,9 @@ def _exercise_synthetic_probability_packet_factory(monkeypatch):
     import sqlite3
     import subprocess
     import time
+    import json
     from . import _synthetic_registered_prediction
+    from . import _v35_service_resource_profile, _v35_service_groups, _v35_service_group_observation
     from src.qtt.stage1_prediction_markets.qku_computation_control_plane import implementation_registry as numerical
     from src.qtt.stage1_prediction_markets.qku_computation_control_plane import input_resolver as inputs
     from src.qtt.stage1_prediction_markets.qku_computation_control_plane import model_risk as risk
@@ -205,7 +210,8 @@ def _exercise_synthetic_probability_packet_factory(monkeypatch):
     with monkeypatch.context() as clock_patch:
         clock_patch.setattr(time, "time_ns", advancing_utc)
         for mode in ("two", "four", "request_copy", "exit_revoked", "checker_value", "checker_revoked",
-                     "service", "service_revoked"):
+                     "service", "service_revoked", "service_resource_old", "service_resource_exact",
+                     "service_resource_count_under", "service_resource_bytes_under"):
             resolver, reader, fence, prepared, entry = _synthetic_registered_prediction()
             initial_issuer_reads = reader.read_calls
             at = prepared.observed_ns
@@ -242,6 +248,12 @@ def _exercise_synthetic_probability_packet_factory(monkeypatch):
                 ("SYNTHETIC::EXISTING-VETO",) if index == 0 else (),
                 (ReasonCode.ST12F_MODEL_RISK_VETO,) if index == 0 else ())
                 for index, name in enumerate(NO_TRADE_CONDITION_IDS_V1))
+            resource_pool = None
+            if mode.startswith('service_resource_'):
+                resource_pool = ('SYNTHETIC::EXISTING-VETO', 'SYNTHETIC::REQUIRED', 'SYNTHETIC::ASSESSMENT', 'SYNTHETIC::\u00e9\U0001f600',
+                    *(f'SYNTHETIC::RESOURCE:{i:04d}' for i in range(996)))
+                assert len(resource_pool) == len(set(resource_pool)) == 1000
+                conditions = tuple(replace(row, evidence_receipt_refs=resource_pool) for row in conditions)
             entry["metadata"].update(scope=scope, cutoffs=(cutoffs, cutoffs), result=result, review=review,
                 model=SimpleNamespace(available_ns=at - 5000, valid_until_ns=expiry), conditions=conditions,
                 read_snapshot=ProbabilityProducerReadSnapshotV1(scope,
@@ -296,7 +308,7 @@ def _exercise_synthetic_probability_packet_factory(monkeypatch):
                 call = dict(base_registry=CanonicalOwnerPacketRegistryV1(), request=request,
                     capability_resolver=resolver, clock_facts=(cutoffs,) * 5, existing_conditions=conditions,
                     limits=limits, deadline_ns=deadline)
-                if mode in ("service", "service_revoked"):
+                if mode in ("service", "service_revoked") or mode.startswith('service_resource_'):
                     controls = tuple(risk.ModelRiskControlEvidenceV1(identity,
                         risk.ModelRiskControlStateV1.BLOCKED_WITH_TYPED_REASON, (),
                         (ReasonCode.ST12F_EVIDENCE_INCOMPLETE,), ("SYNTHETIC::UNQUALIFIED",), False)
@@ -311,6 +323,34 @@ def _exercise_synthetic_probability_packet_factory(monkeypatch):
                         "READY_FOR_INDEPENDENT_REVIEW", "SYNTHETIC::PENDING-REVIEW")
                     resource = ResourceBoundsProfileV1("SYNTHETIC::SERVICE",
                         limits.metadata_limits.max_records, limits.metadata_limits.max_total_bytes, 1, 1, 1)
+                    resource_failure = None
+                    receipt_refs = ('SYNTHETIC::ASSESSMENT',)
+                    if resource_pool is not None:
+                        basis = replace(basis, required_evidence_receipt_refs=resource_pool)
+                        receipt_refs = resource_pool
+                        # Independent expected operands for this bounded synthetic
+                        # integration case, not the builder's observed counters.
+                        assert entry['metadata']['read_snapshot'].revocation_records == ()
+                        assert entry['metadata']['read_snapshot'].publication_records == ()
+                        # The existing risk binder adds the original use ancestry
+                        # to condition 1. Freeze that expectation from input refs,
+                        # before calling the builder; do not learn it from output.
+                        expected_missing_refs = tuple(dict.fromkeys((*resource_pool, *dependencies)))
+                        expected_lengths = (1000,1000,1000,len(expected_missing_refs),1000,1000,1000,1000,1000,1000)
+                        expected_union = len(set(resource_pool).union(dependencies))
+                        resource_count = 9 * 1000 + len(expected_missing_refs)
+                        pool_bytes = sum(len(ref.encode('utf-8')) for ref in resource_pool)
+                        missing_bytes = sum(len(ref.encode('utf-8')) for ref in expected_missing_refs)
+                        resource_bytes = 9 * pool_bytes + missing_bytes
+                        resource = _v35_service_resource_profile(resource)
+                        selected_count, selected_bytes, resource_failure = {
+                            'service_resource_old': (8192, resource_bytes, 'probability risk reference count'),
+                            'service_resource_exact': (resource_count, resource_bytes, None),
+                            'service_resource_count_under': (resource_count-1, resource_bytes, 'probability risk reference count'),
+                            'service_resource_bytes_under': (resource_count, resource_bytes-1, 'probability risk reference bytes'),
+                        }[mode]
+                        resource = replace(resource, maximum_input_cardinality=selected_count,
+                            maximum_input_bytes=selected_bytes)
                     factory_results, assessments, constructed = [], [], []
                     actual_factory = inputs._build_probability_owner_registry_v1
                     actual_adjudicate = risk.ModelRiskEvidenceAdjudicatorV1.adjudicate
@@ -339,18 +379,38 @@ def _exercise_synthetic_probability_packet_factory(monkeypatch):
                         existing_conditions=conditions, assessment_id="SYNTHETIC::RISK",
                         input_lock_id=scope.input_lock_ref, controls=controls, comparison=comparison,
                         adjudication_basis=basis, limitations=("SYNTHETIC::PREPARED-BOUNDARY-ONLY",),
-                        receipt_refs=("SYNTHETIC::ASSESSMENT",), evaluated_ns=time.time_ns(),
+                        receipt_refs=receipt_refs, evaluated_ns=time.time_ns(),
                         deadline_ns=deadline, resource_bounds_profile=resource)
                     with monkeypatch.context() as joined:
                         joined.setattr(inputs, "_build_probability_owner_registry_v1", build_once)
                         joined.setattr(risk.ModelRiskEvidenceAdjudicatorV1, "adjudicate", adjudicate_once)
                         joined.setattr(composition, "QKUComputationControlPlaneV1", construct_once)
-                        if mode == "service_revoked":
+                        if resource_failure is not None:
+                            with pytest.raises(ContractValidationError, match=resource_failure) as rejected:
+                                composition._compose_probability_native_service_v1(**compose_call)
+                            assert rejected.value.reason_code is ReasonCode.RESOURCE_BOUND_EXCEEDED
+                        elif mode == "service_revoked":
                             with pytest.raises(InputAuthorityError) as rejected:
                                 composition._compose_probability_native_service_v1(**compose_call)
                             assert rejected.value.reason_code is ReasonCode.INPUT_PACKET_MISMATCH
                         else:
                             service, assessment = composition._compose_probability_native_service_v1(**compose_call)
+                    if resource_pool is not None:
+                        assert len(factory_results) == 1
+                        actual_groups = _v35_service_groups(receipt_refs, basis, factory_results[0][1])
+                        observation = _v35_service_group_observation(actual_groups)
+                        assert observation['group_lengths'] == expected_lengths
+                        assert observation['group_byte_totals'] == (pool_bytes,pool_bytes,pool_bytes,missing_bytes,*((pool_bytes,)*6))
+                        assert observation['distinct_union_count'] == expected_union
+                        assert observation['total_occurrences'] == resource_count and observation['total_bytes'] == resource_bytes
+                        print(json.dumps(dict(stage='CHEAP_CONNECTED_SERVICE_RESOURCE_GUARD', case=mode,
+                            original_builder_calls=len(factory_results), **observation,
+                            native_guard_reason=resource_failure, production_guard_invoked=True)),flush=True)
+                    if resource_failure is not None:
+                        assert not assessments and not constructed
+                        assert counts['read'] == counts['exit'] == 1 and counts['check'] > 0
+                        assert reader.read_calls == initial_issuer_reads
+                        continue
                     assert len(factory_results) == len(assessments) == len(constructed) == 1
                     assert counts["read"] == counts["exit"] == 1 and counts["check"] > 0
                     assert reader.read_calls == initial_issuer_reads
@@ -376,12 +436,12 @@ def _exercise_synthetic_probability_packet_factory(monkeypatch):
                     assert set(conditions[0].reason_codes) <= set(assessment.no_trade_condition_outcomes[0].reason_codes)
                     with pytest.raises(FrozenInstanceError):
                         service.owner_registry = call["base_registry"]
-                if mode not in ("two", "four", "service"):
+                if mode not in ("two", "four", "service", "service_resource_exact"):
                     with pytest.raises(ContractValidationError):
                         _build_probability_owner_registry_v1(**call, evaluated_ns=time.time_ns())
                     assert all(item["kind"] != "NATIVE_USE" for item in fence._registrations.values())
                 else:
-                    if mode != "service":
+                    if mode not in ("service", "service_resource_exact"):
                         registry, retained = _build_probability_owner_registry_v1(**call, evaluated_ns=time.time_ns())
                     assert counts["read"] == counts["exit"] == 1 and counts["check"] > 0
                     assert len(registry.packets) == len(binding_ids) and len({packet.packet_id for packet in registry.packets}) == len(binding_ids)

@@ -3121,6 +3121,27 @@ class _PreflightAssemblyV1:
                 limits=header['parent_limits']['terminal'],deadline_ns=header['parent_limits']['deadline_ns'])
             self.parent_meter = owner._PreflightTransportV1(header['parent_limits']['transport'],
                 header['parent_limits']['deadline_ns'],native.check)
+            if type(native.host_lease) is owner._LinuxPreflightHostLeaseV1:
+                extents,receivers = [],[]
+                for row,entry in zip(header['rows'],plan,strict=True):
+                    index = entry.command_index
+                    identity = dict(run_id=paths.run_id,phase=FAST_PREFLIGHT_PHASE,command_index=index,original_position=index,
+                        command_count=8,argv=list(entry.argv),repo_root=str(paths.repo_root),process_root=str(paths.process_root),
+                        evidence_root=str(paths.evidence_root),parent_pid=os.getpid())
+                    offset,files = 0,[]
+                    for name,blob in row['files']:
+                        files.append([name,offset,len(blobs[blob])]); offset += len(blobs[blob])
+                    # Startup can only subtract allowance. The full original
+                    # nonnegative integers therefore bound every later decimal
+                    # width, while the actual paths, rosters and body are exact.
+                    frame_header = dict(identity=identity,allowance=row['limits'],deadline_ns=row['deadline_ns'],
+                        git=dict(executable=row['git_executable'],evidence_root=None if row['git_executable'] is None
+                            else str(paths.evidence_root/('preflight-'+str(index))/'git')),files=files,directories=row['directories'])
+                    raw = owner._preflight_canonical_v1(frame_header)
+                    owner._preflight_require_v1(offset <= 268435456 and len(raw) <= 8388608,
+                        'LINUX_PREFLIGHT_ROW_SERIALIZATION_LIMIT')
+                    extents.append(24+len(raw)+offset); receivers.append(owner._preflight_result_bound_v1(identity))
+                native.host_lease.reserve_plan(extents,receivers)
             bindings = {}
             self.rows = header['rows']
             for row, entry in zip(self.rows,plan,strict=True):
@@ -9353,11 +9374,546 @@ def _mapper_resolve_parent_profiles_v1(paths, phase, plan):
     return bindings
 
 
+def _linux_preflight_declaration_v1(source, installation, git, *, origin_ns, repository, interpreter, environment):
+    """Mechanically produce the original declaration; no new wire or command identities."""
+    import site
+    import struct
+    import sysconfig
+    from tools import validation_reliability as o
+    root = pathlib.Path(repository)
+    grants = o._linux_preflight_grants_v1(origin_ns)
+    vectors = tuple((interpreter,script,*(() if n == 6 else ('--repo-root','.')))
+        for n,script in enumerate(o._PREFLIGHT_SCRIPTS_V1,1))
+    files = {pathlib.Path(p).relative_to(root).as_posix():raw for p,raw in source.files.items()
+        if not pathlib.Path(p).is_relative_to(root/'.git')}
+    directories = {('.' if pathlib.Path(p) == root else pathlib.Path(p).relative_to(root).as_posix()):roster
+        for p,roster in source.directories.items() if not pathlib.Path(p).is_relative_to(root/'.git')}
+    index = root/'.git/index'
+    o._preflight_require_v1(str(index) in source.files and
+        sum(map(len,files.values()))+len(source.files[str(index)]) <= 512*1024**2,
+        'LINUX_PREFLIGHT_COMPLETE_CANDIDATE_SNAPSHOT_CAPACITY')
+    stdlib = tuple(dict.fromkeys(str(pathlib.Path(sysconfig.get_path(k)).absolute()) for k in ('stdlib','platstdlib')))
+    sites = tuple(str(pathlib.Path(p).absolute()) for p in site.getsitepackages())
+    executable = pathlib.Path(interpreter)
+    configs = tuple(dict.fromkeys((str(executable.parent/'pyvenv.cfg'),str(executable.parent.parent/'pyvenv.cfg'),
+        str(executable.with_suffix('._pth')),str(executable.parent/f'python{sys.version_info.major}{sys.version_info.minor}._pth'))))
+    search = tuple(dict.fromkeys((repository,str(root/'tools'),str(executable.parent),*stdlib,*sites)))
+    customizers = tuple(str(pathlib.Path(p)/(name+suffix)) for p in search for name in ('sitecustomize','usercustomize')
+        for suffix in ('.py','.pyc','.pyd','.so',''))
+    start_files = dict(installation.files); start_files.update(git.files)
+    start_dirs = dict(installation.directories)
+    absent = []
+    for path in (*configs,*customizers):
+        if path in installation.files or path in source.files:
+            o._preflight_require_v1(path in configs and not path.endswith('._pth'),
+                'LINUX_PREFLIGHT_UNSUPPORTED_STARTUP_CUSTOMIZER:'+path)
+            start_files[path] = (installation.files if path in installation.files else source.files)[path]
+        else:
+            o._preflight_require_v1(not pathlib.Path(path).exists(),'LINUX_PREFLIGHT_UNCAPTURED_STARTUP_PATH:'+path)
+            absent.append(path)
+    blobs = []
+    def add(raw):
+        blobs.append(raw)
+        return len(blobs)-1
+    def file_rows(values):
+        return [[p,add(values[p])] for p in sorted(values,key=lambda s:s.encode('utf-8'))]
+    def directory_rows(values):
+        return [[p,[list(row) for row in values[p]]] for p in sorted(values,key=lambda s:s.encode('utf-8'))]
+    repository_rows = file_rows(files)
+    repository_directories = directory_rows(directories)
+    index_blob = add(source.files[str(index)])
+    startup_files = file_rows(start_files)
+    startup_directories = directory_rows(start_dirs)
+    rows = []
+    for n,(vector,grant) in enumerate(zip(vectors,grants['rows'],strict=True),1):
+        rows.append(dict(original_position=n,argv=list(vector),files=[] if n in (2,6) else repository_rows,
+            directories=[] if n in (2,6) else repository_directories,git_executable='/usr/bin/git' if n in (1,3,5,7,8) else None,
+            **grant))
+    offset = 0; spans = []
+    for raw in blobs:
+        spans.append([offset,len(raw)]); offset += len(raw)
+    o._preflight_require_v1(offset <= 1024**3,'LINUX_PREFLIGHT_DECLARATION_BODY_CAPACITY')
+    header = dict(phase='fast-preflight',repository=dict(root=repository,files=repository_rows,
+        directories=repository_directories,index=[str(index),index_blob],protected_paths=[]),installation=dict(
+        executable=interpreter,version=list(sys.version_info[:3]),abi=[sys.implementation.cache_tag,
+            sysconfig.get_config_var('SOABI'),struct.calcsize('P')*8,sysconfig.get_config_var('Py_GIL_DISABLED'),getattr(sys,'abiflags','')],
+        stdlib_roots=list(stdlib),site_roots=list(sites),loader_environment={k:environment[k] for k in ('PATH','LD_LIBRARY_PATH')},
+        config_paths=list(configs),customizer_paths=list(customizers),startup_basis=dict(files=startup_files,
+            directories=startup_directories,absent=absent)),rows=rows,candidate_limits=grants['candidate_limits'],
+        parent_limits=grants['parent_limits'],blobs=spans)
+    raw = o._preflight_canonical_v1(header)
+    o._preflight_require_v1(len(raw) <= 16*1024**2,'LINUX_PREFLIGHT_DECLARATION_HEADER_CAPACITY')
+    return header,tuple(blobs),struct.pack('>8sQQ',b'QTTPA01\n',len(raw),offset)+raw+b''.join(blobs),vectors,grants
+
+
+def _linux_preflight_eligibility_v1(event,environment,repository):
+    from tools import validation_reliability as o
+    o._preflight_require_v1(type(event) is dict and type(environment) is dict and
+        environment.get('GITHUB_ACTIONS') == 'true' and environment.get('GITHUB_EVENT_NAME') == 'pull_request'
+        and environment.get('GITHUB_REPOSITORY') == 'Q8Meow/QTT_New0526'
+        and environment.get('GITHUB_WORKSPACE') == repository,'LINUX_PREFLIGHT_EPHEMERAL_WORKFLOW_ONLY')
+    pr = event.get('pull_request',{})
+    o._preflight_require_v1(event.get('number') == 298 and type(event.get('number')) is int
+        and event.get('repository',{}).get('full_name') == 'Q8Meow/QTT_New0526'
+        and pr.get('number') == 298 and pr.get('head',{}).get('repo',{}).get('full_name') == 'Q8Meow/QTT_New0526'
+        and pr.get('base',{}).get('repo',{}).get('full_name') == 'Q8Meow/QTT_New0526'
+        and pr.get('base',{}).get('ref') == 'main'
+        and pr.get('head',{}).get('ref') == 'repair/main-cumulative-v35-final-r5-local-20260922'
+        and pr.get('draft') is True,'LINUX_PREFLIGHT_UNADOPTED_REPOSITORY_PR_OR_HEAD')
+
+
+def _linux_preflight_provision_v1():
+    """Only the adopted ephemeral workflow can request the fixed privileged owner."""
+    import base64
+    from tools import validation_reliability as o
+    o._preflight_require_v1(sys.platform == 'linux' and sys.version_info[:3] == (3,14,6),
+        'LINUX_PREFLIGHT_SELECTED_PLATFORM_AND_INTERPRETER')
+    repository = o._linux_preflight_path_v1(str(REPO_ROOT))
+    interpreter = o._linux_preflight_path_v1(sys.executable)
+    installation = o._linux_preflight_path_v1(sys.prefix)
+    o._preflight_require_v1(pathlib.Path(interpreter).is_relative_to(pathlib.Path(installation))
+        and not pathlib.Path(repository).is_relative_to(pathlib.Path(installation)),
+        'LINUX_PREFLIGHT_DISJOINT_INSTALLATION')
+    event_path = pathlib.Path(o._linux_preflight_path_v1(os.environ.get('GITHUB_EVENT_PATH','')))
+    info = event_path.lstat()
+    o._preflight_require_v1(stat.S_ISREG(info.st_mode) and info.st_nlink == 1 and info.st_size <= 1048576,
+        'LINUX_PREFLIGHT_AUTHENTICATED_EVENT_FILE')
+    event_bytes = event_path.read_bytes()
+    o._preflight_require_v1(len(event_bytes) == info.st_size and o._scan_same_api_version(info) ==
+        o._scan_same_api_version(event_path.lstat()),'LINUX_PREFLIGHT_EVENT_CHANGED')
+    event = json.loads(event_bytes)
+    _linux_preflight_eligibility_v1(event,dict(os.environ),repository)
+    bootstrap_paths = ('tools/run_validation_gates.py','tools/validation_reliability.py',
+        'tools/validation_scope_registry.py','tools/ci_branch_context.py')
+    originals = {}
+    for name in bootstrap_paths:
+        path = REPO_ROOT/name
+        before = path.lstat()
+        o._preflight_require_v1(stat.S_ISREG(before.st_mode) and before.st_nlink == 1 and before.st_size <= 2097152,
+            'LINUX_PREFLIGHT_REVIEWED_BOOTSTRAP_FILE')
+        raw = path.read_bytes()
+        o._preflight_require_v1(len(raw) == before.st_size and o._scan_same_api_version(before) ==
+            o._scan_same_api_version(path.lstat()),'LINUX_PREFLIGHT_BOOTSTRAP_CAPTURE_CHANGED')
+        originals[name] = dict(bytes=base64.b64encode(raw).decode('ascii'),version=o._scan_same_api_version(before))
+    ticket_text = os.environ.get('QTT_LINUX_BOOTSTRAP_TICKET')
+    if os.geteuid() != 0:
+        o._preflight_require_v1(ticket_text is None and not any(k.upper().startswith('QTT_LINUX_') for k in os.environ),
+            'LINUX_PREFLIGHT_NO_INHERITED_BOOTSTRAP_SELECTOR')
+        parent = pathlib.Path(o._linux_preflight_path_v1(os.environ.get('RUNNER_TEMP','')))
+        origin = time.monotonic_ns()
+        task = parent/o._linux_preflight_name_v1(os.getpid(),origin)
+        task.mkdir(mode=0o700,exist_ok=False)
+        export_root = task/'native-export'
+        export_root.mkdir(mode=0o700,exist_ok=False)
+        # This workflow output names only the fresh external evidence directory.
+        # It is not forwarded into the privileged controller or service.
+        workflow_output = os.environ.get('GITHUB_OUTPUT')
+        o._preflight_require_v1(type(workflow_output) is str,'LINUX_PREFLIGHT_WORKFLOW_OUTPUT_UNAVAILABLE')
+        output_path = pathlib.Path(o._linux_preflight_path_v1(workflow_output))
+        output_info = output_path.lstat()
+        o._preflight_require_v1(stat.S_ISREG(output_info.st_mode) and output_info.st_nlink == 1
+            and output_info.st_uid == os.getuid(),'LINUX_PREFLIGHT_WORKFLOW_OUTPUT_CUSTODY')
+        descriptor = os.open(output_path,os.O_WRONLY|os.O_APPEND|os.O_NOFOLLOW|os.O_CLOEXEC)
+        try:
+            opened = os.fstat(descriptor)
+            o._preflight_require_v1((opened.st_dev,opened.st_ino) == (output_info.st_dev,output_info.st_ino),
+                'LINUX_PREFLIGHT_WORKFLOW_OUTPUT_DESCRIPTOR')
+            raw_output = ('native_evidence='+str(export_root)+'\n').encode('ascii')
+            o._preflight_require_v1(os.write(descriptor,raw_output) == len(raw_output),'LINUX_PREFLIGHT_WORKFLOW_OUTPUT_SHORT')
+            os.fsync(descriptor)
+        finally: os.close(descriptor)
+        ticket = task/'bootstrap.json'
+        from tools.ci_branch_context import _run_repository_read_process
+        index_query = o._LinuxPreflightQueriesV1(evidence_root=task/'index-evidence',deadline_ns=origin+60*10**9)
+        resolved_index = _run_repository_read_process(REPO_ROOT,
+            ('rev-parse','--path-format=absolute','--git-path','index'),native_query=index_query)
+        index_path = resolved_index.stdout.removesuffix('\n')
+        o._preflight_require_v1(index_path == str(REPO_ROOT/'.git/index'),
+            'LINUX_PREFLIGHT_EXTERNAL_ACTIVE_INDEX')
+        index_info = pathlib.Path(index_path).lstat()
+        o._preflight_require_v1(stat.S_ISREG(index_info.st_mode) and index_info.st_nlink == 1,
+            'LINUX_PREFLIGHT_ACTIVE_INDEX_TYPE')
+        export_info = export_root.lstat()
+        value = dict(export_root=str(export_root),export_identity=(export_info.st_dev,export_info.st_ino),
+            active_index=index_path,index_version=o._scan_same_api_version(index_info),
+            repository=repository,interpreter=interpreter,installation=installation,source=originals,
+            event=base64.b64encode(event_bytes).decode('ascii'),uid=os.getuid(),pid=os.getpid(),origin_ns=origin)
+        o.atomic_write_json(ticket,value)
+        for name,original in originals.items():
+            o._preflight_require_v1((REPO_ROOT/name).read_bytes() == base64.b64decode(original['bytes'])
+                and o._scan_same_api_version((REPO_ROOT/name).lstat()) == tuple(original['version']),
+                'LINUX_PREFLIGHT_BOOTSTRAP_PREPRIVILEGE_CHANGED')
+        env = {key:os.environ[key] for key in ('GITHUB_ACTIONS','GITHUB_EVENT_NAME','GITHUB_REPOSITORY',
+            'GITHUB_WORKSPACE','GITHUB_EVENT_PATH','RUNNER_TEMP')}
+        env.update(PATH=str(pathlib.Path(interpreter).parent)+':/usr/bin',LANG='C.UTF-8',LC_ALL='C.UTF-8',
+            LD_LIBRARY_PATH=installation+'/lib',QTT_LINUX_BOOTSTRAP_TICKET=str(ticket))
+        preserved = ','.join(k for k in env if k != 'PATH')
+        observation = {}
+        receipt = o.supervise_command(('/usr/bin/sudo','-n','--preserve-env='+preserved,interpreter,'-I','-B','-X','utf8',
+            repository+'/tools/run_validation_gates.py','--linux-preflight-provision','--phase','fast-preflight'),
+            cwd=REPO_ROOT,run_id=task.name,phase='fast-preflight-provision',command_index=1,evidence_root=task/'evidence',
+            environment=env,timeout_seconds=3720,execution_deadline_ns=origin+3720*10**9,
+            output_limits=dict(stdout_bytes=128*1024**2,stderr_bytes=128*1024**2,combined_output_bytes=256*1024**2),
+            output_observation=observation)
+        print(json.dumps(dict(linux_controller_receipt=o._json_compatible(receipt),evidence=str(task))),flush=True)
+        return 0 if receipt.failure_class is None and receipt.native_exit_code == 0 else 1
+    o._preflight_require_v1(type(ticket_text) is str,'LINUX_PREFLIGHT_FIXED_PREPRIVILEGE_FREEZE_REQUIRED')
+    ticket = pathlib.Path(o._linux_preflight_path_v1(ticket_text))
+    parent = pathlib.Path(o._linux_preflight_path_v1(os.environ['RUNNER_TEMP']))
+    ticket_info = ticket.lstat()
+    sudo_uid = o._preflight_decimal_v1(os.environ.get('SUDO_UID',''))
+    o._preflight_require_v1(ticket.parent.parent == parent and ticket.name == 'bootstrap.json'
+        and stat.S_ISREG(ticket_info.st_mode) and ticket_info.st_nlink == 1
+        and ticket_info.st_uid == sudo_uid and ticket_info.st_size <= 8*1024**2,
+        'LINUX_PREFLIGHT_BOOTSTRAP_TRANSPORT_CUSTODY')
+    raw = ticket.read_bytes(); frozen = json.loads(raw)
+    o._preflight_require_v1(o._scan_same_api_version(ticket.lstat()) == o._scan_same_api_version(ticket_info)
+        and frozen['uid'] == sudo_uid and frozen['repository'] == repository and frozen['interpreter'] == interpreter
+        and frozen['installation'] == installation and frozen['source'] == o._json_compatible(originals)
+        and base64.b64decode(frozen['event'],validate=True) == event_bytes,
+        'LINUX_PREFLIGHT_FROZEN_BOOTSTRAP_CHANGED')
+    o._preflight_integer_v1(frozen['origin_ns'])
+    o._preflight_require_v1(frozen['active_index'] == str(REPO_ROOT/'.git/index')
+        and tuple(frozen['index_version']) == o._scan_same_api_version(pathlib.Path(frozen['active_index']).lstat()),
+        'LINUX_PREFLIGHT_ORIGINAL_RESOLVED_INDEX_CHANGED')
+    export_root = pathlib.Path(o._linux_preflight_path_v1(frozen['export_root']))
+    export_info = export_root.lstat()
+    o._preflight_require_v1(export_root == ticket.parent/'native-export' and stat.S_ISDIR(export_info.st_mode)
+        and export_info.st_uid == sudo_uid and stat.S_IMODE(export_info.st_mode) == 0o700
+        and (export_info.st_dev,export_info.st_ino) == tuple(frozen['export_identity']),
+        'LINUX_PREFLIGHT_EXPORT_ORIGINAL_OWNED_DIRECTORY')
+    return _linux_preflight_controller_v1(repository,installation,interpreter,event,event_bytes,frozen['origin_ns'],export_root)
+
+
+def _linux_preflight_controller_v1(repository,installation,interpreter,event,event_bytes,origin,export_root):
+    from tools import validation_reliability as o
+    o._preflight_require_v1(os.geteuid() == 0 and time.monotonic_ns() < origin+3500*10**9,
+        'LINUX_PREFLIGHT_CONTROLLER_OWNER_OR_CUTOFF')
+    name = o._linux_preflight_name_v1(os.getpid(),origin)
+    control = pathlib.Path('/run')/(name+'control')
+    runtime = pathlib.Path('/run')/name
+    control.mkdir(mode=0o700,exist_ok=False)
+    runtime.mkdir(mode=0o700,exist_ok=False)
+    control_identity = (control.stat().st_dev,control.stat().st_ino)
+    runtime_identity = (runtime.stat().st_dev,runtime.stat().st_ino)
+    private_root,spool = control/'root',control/'spool'
+    private_root.mkdir(mode=0o755); spool.mkdir(mode=0o700)
+    # The existing supervisor exclusively creates the two manager-bound stream files.
+    for directory in ('declaration','binding','release'):
+        (control/directory).mkdir(mode=0o555)
+    grants = o._linux_preflight_grants_v1(origin)
+    query = o._LinuxPreflightQueriesV1(evidence_root=control/'native-evidence',deadline_ns=grants['settlement_deadline_ns'],
+        reserved_output_bytes=2*67108864)
+    source = scope = None
+    mounted = restored = False
+    failures = []
+    receipt = None
+    try:
+        version = query.command(('/usr/bin/systemctl','--version')).decode('ascii','strict')
+        first = version.splitlines()[0].split()
+        o._preflight_require_v1(len(first) >= 2 and first[0] == 'systemd' and first[1].isdigit()
+            and int(first[1]) >= 255,'LINUX_PREFLIGHT_SYSTEMD_BASELINE')
+        capture_counts = dict(files=0,entries=0)
+        source = o._LinuxPreflightCaptureV1(repository,byte_limit=2*1024**3,
+            deadline_ns=grants['native_deadline_ns'],shared_capture=capture_counts)
+        git_root = pathlib.Path(repository)/'.git'
+        o._preflight_require_v1(git_root.is_dir() and str(git_root/'index') in source.files,
+            'LINUX_PREFLIGHT_ORIGINAL_GIT_ADMINISTRATION')
+        for path in (git_root/'objects/info/alternates',git_root/'commondir',git_root/'gitdir',git_root/'worktrees'):
+            o._preflight_require_v1(not path.exists(),'LINUX_PREFLIGHT_EXTERNAL_GIT_ADMINISTRATION')
+        config = source.files[str(git_root/'config')].decode('utf-8','strict').lower()
+        o._preflight_require_v1(not any(word in config for word in ('extraheader','credential','hookspath','insteadof')),
+            'LINUX_PREFLIGHT_CREDENTIAL_OR_HOOK_CONFIGURATION')
+        for path in source.files:
+            if pathlib.Path(path).parent == git_root/'hooks':
+                o._preflight_require_v1(path.endswith('.sample'),'LINUX_PREFLIGHT_ACTIVE_REPOSITORY_HOOK')
+        install = o._LinuxPreflightCaptureV1(installation,byte_limit=1024**3,
+            deadline_ns=grants['native_deadline_ns'],installation=True,shared_capture=capture_counts)
+        git = o._LinuxPreflightCaptureV1('/usr/bin/git',byte_limit=16*1024**2,
+            deadline_ns=grants['native_deadline_ns'],shared_capture=capture_counts)
+        source.protect()
+        install.copy_installation(control/'installation')
+        environment = o._linux_preflight_environment_v1(repository=repository,installation=installation,
+            runtime=str(runtime),control=str(control))
+        header,blobs,frame,vectors,grants = _linux_preflight_declaration_v1(source,install,git,origin_ns=origin,
+            repository=repository,interpreter=interpreter,environment=environment)
+        o._atomic_write_bytes_v1(control/'declaration/input.bin',frame,control_mode=0o444)
+        o._atomic_write_bytes_v1(control/'declaration/event.json',event_bytes,control_mode=0o444)
+        # Existing installation bytes are the only copied executable source tree.
+        for absolute in ('/usr','/lib','/lib64','/proc','/sys','/dev','/tmp','/var/tmp',repository,installation,
+                str(runtime),str(spool),*(str(control/n) for n in ('declaration','binding','release'))):
+            (private_root/absolute.lstrip('/')).mkdir(parents=True,exist_ok=True,mode=0o755)
+        etc = private_root/'etc'; etc.mkdir(mode=0o755)
+        for filename,raw in (('passwd',b'root:x:0:0:root:/root:/usr/sbin/nologin\n'),
+                ('group',b'root:x:0:\n'),('nsswitch.conf',b'passwd: files\ngroup: files\nhosts: files\n'),
+                ('qtt-gitconfig',('[safe]\n\tdirectory = '+repository+'\n').encode('ascii'))):
+            o._atomic_write_bytes_v1(etc/filename,raw,control_mode=0o444)
+        mounted = True  # A partial native attempt also retains owned mount settlement.
+        query.command(('/usr/bin/mount','-t','tmpfs','-o','size=1073741824,noexec,nodev,nosuid,mode=0700',
+            'qtt-runtime',str(runtime)))
+        mounted = True
+        for directory in ('tmp','var-tmp'):
+            (runtime/directory).mkdir(mode=0o1777)
+            os.chmod(runtime/directory,0o1777)
+        scope = o._LinuxPreflightScopeV1(name=name,query=query,control=control,runtime=runtime,private_root=private_root,
+            spool=spool,repository=repository,installation=installation,interpreter=interpreter,source=source,
+            header=header,blobs=blobs,vectors=vectors,grants=grants,event=event,environment=environment)
+        scope.expected_syscalls = o._linux_preflight_syscalls_v1(query)
+        scope.start_slice()
+        scope.startup_deadline_ns = min(origin+3500*10**9,time.monotonic_ns()+60*10**9)
+        scope.launch_argv = o._linux_preflight_service_argv_v1(name=name,private_root=str(private_root),runtime=str(runtime),
+            control=str(control),spool=str(spool),repository=repository,installation=installation,interpreter=interpreter,
+            startup_deadline_ns=scope.startup_deadline_ns,environment=environment)
+        scope.argv = scope.launch_argv[scope.launch_argv.index('--')+1:]
+        token = o._LINUX_PREFLIGHT_PROCESS_V1.set(scope)
+        try:
+            observed = {}
+            receipt = o.supervise_command(scope.argv,cwd=pathlib.Path(repository),run_id=name,phase='fast-preflight-native-service',
+                command_index=1,evidence_root=spool,environment=environment,timeout_seconds=3600,
+                execution_deadline_ns=grants['execution_deadline_ns'],output_limits=dict(stdout_bytes=64*1024**2,
+                    stderr_bytes=64*1024**2,combined_output_bytes=128*1024**2),output_observation=observed)
+        finally: o._LINUX_PREFLIGHT_PROCESS_V1.reset(token)
+        o._preflight_require_v1(scope.settled and not o._command_requires_process_retention_v1(receipt),
+            'LINUX_PREFLIGHT_NATIVE_CUSTODY_UNRESOLVED')
+    except BaseException as exc:
+        failures.append(exc)
+        if scope is not None and scope.service_created and not scope.settled:
+            try:
+                if not scope.terminated: scope.terminate(10)
+                scope.finish()
+            except BaseException as cleanup_error: failures.append(cleanup_error)
+    settled = scope is None or not scope.service_created or scope.settled
+    exported = []
+    export_bytes = export_entries = 0
+    export_complete = False
+    def export_file(path,destination):
+        nonlocal export_bytes,export_entries
+        o._preflight_require_v1(time.monotonic_ns() < grants['settlement_deadline_ns'],
+            'LINUX_PREFLIGHT_EXPORT_DEADLINE')
+        export_entries += 1
+        before = path.lstat()
+        o._preflight_require_v1(export_entries <= 200000 and stat.S_ISREG(before.st_mode)
+            and before.st_nlink == 1 and before.st_size <= 67108864,
+            'LINUX_PREFLIGHT_EXPORT_REGULAR_OR_EXTENT')
+        export_bytes += before.st_size
+        o._preflight_require_v1(export_bytes <= 256*1024**2+1024**3,
+            'LINUX_PREFLIGHT_EXPORT_ORIGINAL_EVIDENCE_CAPACITY')
+        descriptor = os.open(path,os.O_RDONLY|os.O_NOFOLLOW|os.O_CLOEXEC)
+        try:
+            opened = os.fstat(descriptor)
+            o._preflight_require_v1(o._scan_same_api_version(opened) == o._scan_same_api_version(before),
+                'LINUX_PREFLIGHT_EXPORT_DESCRIPTOR')
+            pieces,extent = [],0
+            while extent < before.st_size:
+                o._preflight_require_v1(time.monotonic_ns() < grants['settlement_deadline_ns'],
+                    'LINUX_PREFLIGHT_EXPORT_READ_DEADLINE')
+                chunk = os.read(descriptor,min(65536,before.st_size-extent))
+                o._preflight_require_v1(chunk,'LINUX_PREFLIGHT_EXPORT_TRUNCATED')
+                pieces.append(chunk); extent += len(chunk)
+            o._preflight_require_v1(os.read(descriptor,1) == b'' and
+                o._scan_same_api_version(os.fstat(descriptor)) == o._scan_same_api_version(opened)
+                == o._scan_same_api_version(path.lstat()),'LINUX_PREFLIGHT_EXPORT_CHANGED')
+            raw = b''.join(pieces)
+        finally: os.close(descriptor)
+        o._atomic_write_bytes_v1(destination,raw,control_mode=0o444)
+        o._preflight_require_v1(destination.read_bytes() == raw,'LINUX_PREFLIGHT_EXPORT_BYTE_COMPARISON')
+        exported.append(dict(source=str(path),destination=str(destination),bytes=len(raw)))
+    def export_tree(path,destination,depth=0):
+        nonlocal export_entries
+        o._preflight_require_v1(depth <= 64 and len(str(path).encode('utf-8')) <= 4096
+            and time.monotonic_ns() < grants['settlement_deadline_ns'],'LINUX_PREFLIGHT_EXPORT_TREE_BOUND')
+        before = path.lstat()
+        o._preflight_require_v1(stat.S_ISDIR(before.st_mode),'LINUX_PREFLIGHT_EXPORT_DIRECTORY')
+        destination.mkdir(mode=0o755,exist_ok=False)
+        with os.scandir(path) as stream:
+            for item in stream:
+                export_entries += 1
+                o._preflight_require_v1(export_entries <= 200000,'LINUX_PREFLIGHT_EXPORT_ENTRIES')
+                child = path/item.name
+                if item.is_dir(follow_symlinks=False): export_tree(child,destination/item.name,depth+1)
+                else: export_file(child,destination/item.name)
+        o._preflight_require_v1(o._scan_same_api_version(path.lstat()) == o._scan_same_api_version(before),
+            'LINUX_PREFLIGHT_EXPORT_DIRECTORY_CHANGED')
+    # The export roots are literal owned evidence surfaces, never the checkout,
+    # index, installation, declaration payload or an arbitrary supplied pathname.
+    report = dict(native_service_receipt=None if receipt is None else o._json_compatible(receipt),
+        native_history=[] if scope is None else o._json_compatible(scope.history),
+        native_queries=query.observations,query_attempts=query.attempts,query_output_bytes=query.retained,
+        capture_counts=None if source is None else source.shared_capture,
+        source_capture_bytes=None if source is None else source.byte_count,
+        source_delivered_read_bytes=None if source is None else source.read_bytes,
+        failures=[repr(e) for e in failures],service_settled=settled,
+        evidence_root=str(control),export_root=str(export_root),canonical_acceptance=False)
+    try:
+        raw = o._preflight_canonical_v1(report)
+        o._preflight_require_v1(len(raw) <= 16*1024**2,'LINUX_PREFLIGHT_NATIVE_REPORT_BOUND')
+        o._atomic_write_bytes_v1(control/'native-result.json',raw)
+        export_file(control/'native-result.json',export_root/'native-result.json')
+        for path,label in ((control/'native-evidence','native'),(spool,'streams'),
+                (runtime/'evidence','application-evidence'),(runtime/'reports','reports'),
+                (runtime/'native-observations','service-native-observations')):
+            if path.exists(): export_tree(path,export_root/label)
+        export_complete = True
+    except BaseException as exc: failures.append(exc)
+    # Attribute restoration follows actual settlement and complete retained bytes.
+    if settled and export_complete:
+        if source is None:
+            restored = True  # Capture failed before any protection transition.
+        else:
+            try:
+                source.deadline_ns = grants['settlement_deadline_ns']
+                source.verify(protected=bool(source.protected))
+                source.restore(); restored = True
+            except BaseException as exc: failures.append(exc)
+    stopped = unmounted = removed = False
+    if settled and restored and export_complete:
+        for kind,source_name in (('timing','timing-fast-preflight.json'),('router','router-fast-preflight.json')):
+            path = runtime/'reports'/source_name
+            if path.exists():
+                try:
+                    destination = pathlib.Path(repository)/'.tmp'/('qtt-validation-'+kind)/'fast-preflight.json'
+                    export_file(path,destination)
+                except BaseException as exc: failures.append(exc)
+        try:
+            if scope is not None:
+                if scope.service_created: query.command(('/usr/bin/systemctl','stop',name+'.service'),settling=True)
+                if scope.slice_created: query.command(('/usr/bin/systemctl','stop',name+'.slice'),settling=True)
+                for descriptor,identity in scope.slice_files.values(): os.close(descriptor)
+                for descriptor in (scope.root_fd,scope.slice_fd,None if scope.process is None else scope.process.pidfd):
+                    if descriptor is not None: os.close(descriptor)
+            stopped = True
+            if mounted: query.command(('/usr/bin/umount',str(runtime)),settling=True)
+            unmounted = True
+            # Stop/unmount receipts are produced after the first export. Preserve
+            # only those newly created files, never overwrite earlier evidence.
+            if (control/'native-evidence').exists():
+                for path in sorted((control/'native-evidence').iterdir()):
+                    destination = export_root/'native'/path.name
+                    if not destination.exists(): export_file(path,destination)
+            for path,identity in ((runtime,runtime_identity),(control,control_identity)):
+                actual = path.lstat()
+                o._preflight_require_v1(path.parent == pathlib.Path('/run') and
+                    (actual.st_dev,actual.st_ino) == identity and stat.S_ISDIR(actual.st_mode),
+                    'LINUX_PREFLIGHT_EXACT_CLEANUP_ROOT')
+                o.remove_exact_run_owned_process_tree(path,expected_run_root=path,
+                    repo_root=repository,evidence_root=export_root)
+            removed = True
+        except BaseException as exc: failures.append(exc)
+    cleanup = dict(service_settled=settled,source_attributes_restored=restored,evidence_export_complete=export_complete,
+        owned_units_stopped=stopped,runtime_unmounted=unmounted,owned_roots_removed=removed,
+        retained_root=None if removed else str(control),exported_files=exported,
+        failures=[repr(e) for e in failures],query_attempts=query.attempts,query_output_bytes=query.retained)
+    try: o.atomic_write_json(export_root/'cleanup.json',cleanup)
+    except BaseException as exc: failures.append(exc)
+    print(json.dumps(dict(linux_native_export=str(export_root),cleanup=cleanup),default=str),flush=True)
+    return 0 if not failures and receipt is not None and receipt.failure_class is None and receipt.native_exit_code == 0 else 1
+
+
+
+def _linux_preflight_enter_v1(startup_deadline_ns):
+    import socket
+    from tools import validation_reliability as o
+    o._preflight_require_v1(sys.platform == 'linux' and os.geteuid() != 0,'LINUX_PREFLIGHT_UNPRIVILEGED_ENTRY_ONLY')
+    control = pathlib.Path(o._linux_preflight_path_v1(os.environ.get('QTT_LINUX_PREFLIGHT_CONTROL','')))
+    runtime = pathlib.Path(o._linux_preflight_path_v1(os.environ.get('QTT_LINUX_PREFLIGHT_RUNTIME','')))
+    query = o._LinuxPreflightQueriesV1(evidence_root=runtime/'native-observations',deadline_ns=startup_deadline_ns)
+    binding,version,chain = o._linux_preflight_control_read_v1(control/'binding/native.json',
+        deadline_ns=startup_deadline_ns,pending=True,query=query)
+    o._preflight_require_v1(binding['profile'] == 'QTT_PR298_LINUX_PREFLIGHT_V1' and
+        binding['startup_deadline_ns'] == startup_deadline_ns and binding['repository'] == str(REPO_ROOT)
+        and binding['runtime'] == str(runtime) and binding['environment'] == o._linux_preflight_environment_v1(
+            repository=str(REPO_ROOT),installation=sys.prefix,runtime=str(runtime),control=str(control)),
+        'LINUX_PREFLIGHT_BOUND_ENTRY_OPERANDS')
+    lease = o._LinuxPreflightHostLeaseV1(binding=binding,control_path=control/'binding/native.json',runtime=runtime,
+        query=query,declaration_chain=tuple((p,tuple(s)) for p,s in binding['declaration_chain']),
+        declaration_version=tuple(binding['declaration_version']))
+    probe = dict(name=binding['name'],pid=os.getpid(),start=lease.initial['start'],passed=False,denials=[])
+    try:
+        for path in (REPO_ROOT/'tools/run_validation_gates.py',control/'binding/native.json',control/'declaration/input.bin'):
+            try: fd = os.open(path,os.O_WRONLY|os.O_NOFOLLOW|os.O_CLOEXEC)
+            except OSError as error:
+                o._preflight_require_v1(error.errno in (13,30),'LINUX_PREFLIGHT_WRITE_PROBE_UNEXPECTED_ERROR')
+                probe['denials'].append(dict(path=str(path),operation='open-write-no-create-no-truncate',errno=error.errno))
+            else:
+                os.close(fd); raise RuntimeError('LINUX_PREFLIGHT_SEALED_WRITE_OPEN_SUCCEEDED')
+        for family in (socket.AF_INET,socket.AF_INET6):
+            try: sock = socket.socket(family,socket.SOCK_STREAM)
+            except OSError as error:
+                probe['denials'].append(dict(family=int(family),operation='socket-create-no-connect',errno=error.errno))
+            else:
+                sock.close(); raise RuntimeError('LINUX_PREFLIGHT_NETWORK_SOCKET_SUCCEEDED')
+        for path in ('/dev/shm','/dev/mqueue','/dev/hugepages'):
+            info = pathlib.Path(path).lstat()
+            o._preflight_require_v1(stat.S_ISDIR(info.st_mode) and stat.S_IMODE(info.st_mode) == 0,
+                'LINUX_PREFLIGHT_REQUIRED_DEVICE_MASK_ABSENT')
+            try: fd = os.open(path,os.O_RDONLY|os.O_DIRECTORY|os.O_NOFOLLOW|os.O_CLOEXEC)
+            except OSError as error:
+                o._preflight_require_v1(error.errno == 13,'LINUX_PREFLIGHT_DEVICE_MASK_QUERY_FAILURE')
+                probe['denials'].append(dict(path=path,operation='directory-read-open',errno=error.errno))
+            else:
+                os.close(fd); raise RuntimeError('LINUX_PREFLIGHT_DEVICE_MASK_ACCESS_SUCCEEDED')
+        lease.check_parent(REPO_ROOT,pathlib.Path(binding['index']))
+        probe['passed'] = True
+    finally:
+        o.atomic_write_json(runtime/'probe.json',probe)
+    release,_,_ = o._linux_preflight_control_read_v1(control/'release/release.json',deadline_ns=startup_deadline_ns,
+        pending=True,query=query)
+    o._preflight_require_v1(release == dict(name=binding['name'],pid=os.getpid(),start=lease.initial['start'],
+        invocation=binding['invocation']),'LINUX_PREFLIGHT_ORIGINAL_RELEASE')
+    query.deadline_ns = binding['grants']['native_deadline_ns']
+    for directory in ('process','evidence','reports'):
+        (runtime/directory).mkdir(mode=0o700,exist_ok=False)
+    native = o._PreflightNativeInputV1(path=binding['declaration'],root=REPO_ROOT,index_path=pathlib.Path(binding['index']),
+        expected_path_version=lease.declaration_version,expected_chain=lease.declaration_chain,
+        limits=binding['grants']['native'],deadline_ns=binding['grants']['native_deadline_ns'],host_lease=lease,
+        capture_limits=binding['grants']['capture'],terminal_limits=binding['grants']['terminal'],git_executable='/usr/bin/git')
+    token = o._LINUX_PREFLIGHT_LEASE_V1.set(lease)
+    try:
+        with o._preflight_native_input_v1(native):
+            return main(['--phase','fast-preflight','--preflight-input',binding['declaration'],
+                '--timing-report',str(runtime/'reports/timing-fast-preflight.json'),
+                '--router-report',str(runtime/'reports/router-fast-preflight.json')])
+    finally:
+        o._LINUX_PREFLIGHT_LEASE_V1.reset(token)
+        o._preflight_require_v1(not lease.children,'LINUX_PREFLIGHT_RETAIN_UNRESOLVED_CHILD_HANDLES')
+
+
+def _linux_preflight_selected_v1(argv, suppliers):
+    request = argparse.ArgumentParser(add_help=False,allow_abbrev=False)
+    request.add_argument('--linux-preflight-provision',action='store_true')
+    request.add_argument('--linux-preflight-enter',action='store_true')
+    request.add_argument('--startup-deadline-ns')
+    request.add_argument('--phase')
+    selected,other = request.parse_known_args(argv)
+    if not (selected.linux_preflight_provision or selected.linux_preflight_enter):
+        if selected.startup_deadline_ns is not None:
+            raise ValueError('Linux startup cutoff requires the closed entry mode')
+        return None
+    if (selected.linux_preflight_provision == selected.linux_preflight_enter or selected.phase != FAST_PREFLIGHT_PHASE
+            or other or any(value is not None for value in suppliers)):
+        raise ValueError('Linux provisioning requires the exact first phase without competing suppliers or arbitrary arguments')
+    if selected.linux_preflight_enter:
+        if selected.startup_deadline_ns is None:
+            raise ValueError('original Linux startup cutoff required')
+        from tools.validation_reliability import _preflight_decimal_v1
+        selected.startup_deadline_ns = _preflight_decimal_v1(selected.startup_deadline_ns)
+    elif selected.startup_deadline_ns is not None:
+        raise ValueError('service startup cutoff is not a controller input')
+    return selected
+
+
 def main(argv: Sequence[str] | None = None, *, scan_capacity_source=None, candidate_source=None, mapper_read_source=None) -> int:
     global _ACTIVE_PREFLIGHT_PATH_V1, _ACTIVE_PREFLIGHT_NATIVE_V1, _ACTIVE_PREFLIGHT_ASSEMBLY_V1
     global _ACTIVE_MAPPER_OCCURRENCES_V1
     global _ACTIVE_MAPPER_READ_PROFILES_V1, _ACTIVE_MAPPER_READ_SOURCE_V1, _MAPPER_READ_SOURCE_ATTEMPTED
     global _ACTIVE_SCAN_CAPACITY_SOURCE, _ACTIVE_SCAN_LAUNCH, _SCAN_CAPACITY_ATTEMPTED, _ACTIVE_CANDIDATE_SOURCE
+    linux = _linux_preflight_selected_v1(sys.argv[1:] if argv is None else list(argv),
+        (scan_capacity_source,candidate_source,mapper_read_source))
+    if linux is not None:
+        from tools import validation_reliability as native
+        if linux.linux_preflight_enter:
+            return _linux_preflight_enter_v1(linux.startup_deadline_ns)
+        return _linux_preflight_provision_v1()
     if not _SCAN_MAIN_LOCK.acquire(blocking=False):
         raise ValueError("central validation invocation already active")
     previous_preflight = (_ACTIVE_PREFLIGHT_PATH_V1, _ACTIVE_PREFLIGHT_NATIVE_V1, _ACTIVE_PREFLIGHT_ASSEMBLY_V1)

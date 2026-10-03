@@ -1219,3 +1219,764 @@ def _probability_memory_cells_v1(self, request, tables):
 
     selected_cells, decoded = _probability_select_committed_cells_v1(request, exact, aggregate)
     return selected_cells, decoded
+
+
+# Fixed artifact-only schema from section 8K.33.2. Receipt storage is unchanged.
+_PROBABILITY_ARTIFACT_SCHEMA_SQL_V1 = """PRAGMA foreign_keys=ON;
+CREATE TABLE artifact_intents (
+ scope TEXT NOT NULL,
+ artifact_ref TEXT NOT NULL,
+ result_ref TEXT NOT NULL,
+ dependencies TEXT NOT NULL,
+ valid_until_ns TEXT NOT NULL,
+ max_bytes INTEGER NOT NULL CHECK(max_bytes>0),
+ max_frames INTEGER NOT NULL CHECK(max_frames>0),
+ PRIMARY KEY(scope,artifact_ref)
+) STRICT, WITHOUT ROWID;
+CREATE TABLE artifact_frames (
+ scope TEXT NOT NULL,
+ artifact_ref TEXT NOT NULL,
+ ordinal INTEGER NOT NULL CHECK(ordinal>=0),
+ end_byte INTEGER NOT NULL CHECK(end_byte>0),
+ raw BLOB NOT NULL CHECK(length(raw) BETWEEN 1 AND 65537 AND substr(raw,-1,1)=x'0a'),
+ PRIMARY KEY(scope,artifact_ref,ordinal),
+ FOREIGN KEY(scope,artifact_ref) REFERENCES artifact_intents(scope,artifact_ref)
+) STRICT, WITHOUT ROWID;
+CREATE TABLE artifact_seals (
+ scope TEXT NOT NULL,
+ artifact_ref TEXT NOT NULL,
+ byte_count INTEGER NOT NULL CHECK(byte_count>0),
+ frame_count INTEGER NOT NULL CHECK(frame_count>0),
+ observed_ns TEXT NOT NULL,
+ PRIMARY KEY(scope,artifact_ref),
+ FOREIGN KEY(scope,artifact_ref) REFERENCES artifact_intents(scope,artifact_ref)
+) STRICT, WITHOUT ROWID;
+CREATE TABLE artifact_aborts (
+ scope TEXT NOT NULL,
+ artifact_ref TEXT NOT NULL,
+ reason TEXT NOT NULL CHECK(reason='UNPUBLISHED_STAGE_ABORTED'),
+ observed_ns TEXT NOT NULL,
+ PRIMARY KEY(scope,artifact_ref),
+ FOREIGN KEY(scope,artifact_ref) REFERENCES artifact_intents(scope,artifact_ref)
+) STRICT, WITHOUT ROWID;
+CREATE TRIGGER artifact_frame_append BEFORE INSERT ON artifact_frames BEGIN
+ SELECT CASE WHEN EXISTS(SELECT 1 FROM artifact_seals WHERE scope=NEW.scope AND artifact_ref=NEW.artifact_ref)
+   OR EXISTS(SELECT 1 FROM artifact_aborts WHERE scope=NEW.scope AND artifact_ref=NEW.artifact_ref)
+   THEN RAISE(ABORT,'artifact already terminal') END;
+ SELECT CASE WHEN NEW.ordinal!=COALESCE((SELECT ordinal+1 FROM artifact_frames
+   WHERE scope=NEW.scope AND artifact_ref=NEW.artifact_ref ORDER BY ordinal DESC LIMIT 1),0)
+   THEN RAISE(ABORT,'frame ordinal gap or replay') END;
+ SELECT CASE WHEN NEW.end_byte!=length(NEW.raw)+COALESCE((SELECT end_byte FROM artifact_frames
+   WHERE scope=NEW.scope AND artifact_ref=NEW.artifact_ref ORDER BY ordinal DESC LIMIT 1),0)
+   THEN RAISE(ABORT,'frame cumulative byte mismatch') END;
+ SELECT CASE WHEN NEW.ordinal>=(SELECT max_frames FROM artifact_intents WHERE scope=NEW.scope AND artifact_ref=NEW.artifact_ref)
+   OR NEW.end_byte>(SELECT max_bytes FROM artifact_intents WHERE scope=NEW.scope AND artifact_ref=NEW.artifact_ref)
+   THEN RAISE(ABORT,'artifact allowance exceeded') END;
+END;
+CREATE TRIGGER artifact_seal_complete BEFORE INSERT ON artifact_seals BEGIN
+ SELECT CASE WHEN EXISTS(SELECT 1 FROM artifact_aborts WHERE scope=NEW.scope AND artifact_ref=NEW.artifact_ref)
+   THEN RAISE(ABORT,'artifact was aborted') END;
+ SELECT CASE WHEN NEW.frame_count!=COALESCE((SELECT ordinal+1 FROM artifact_frames
+   WHERE scope=NEW.scope AND artifact_ref=NEW.artifact_ref ORDER BY ordinal DESC LIMIT 1),0)
+   OR NEW.byte_count!=COALESCE((SELECT end_byte FROM artifact_frames
+   WHERE scope=NEW.scope AND artifact_ref=NEW.artifact_ref ORDER BY ordinal DESC LIMIT 1),0)
+   THEN RAISE(ABORT,'incomplete artifact seal') END;
+END;
+CREATE TRIGGER artifact_abort_unsealed BEFORE INSERT ON artifact_aborts BEGIN
+ SELECT CASE WHEN EXISTS(SELECT 1 FROM artifact_seals WHERE scope=NEW.scope AND artifact_ref=NEW.artifact_ref)
+   THEN RAISE(ABORT,'sealed artifact cannot abort') END;
+ SELECT CASE WHEN EXISTS(SELECT 1 FROM artifact_frames WHERE scope=NEW.scope AND artifact_ref=NEW.artifact_ref)
+   THEN RAISE(ABORT,'abort requires rolled-back unpublished stage') END;
+END;
+
+CREATE TRIGGER artifact_intents_no_update BEFORE UPDATE ON artifact_intents BEGIN SELECT RAISE(ABORT,'append only'); END;
+
+CREATE TRIGGER artifact_intents_no_delete BEFORE DELETE ON artifact_intents BEGIN SELECT RAISE(ABORT,'append only'); END;
+
+CREATE TRIGGER artifact_frames_no_update BEFORE UPDATE ON artifact_frames BEGIN SELECT RAISE(ABORT,'append only'); END;
+
+CREATE TRIGGER artifact_frames_no_delete BEFORE DELETE ON artifact_frames BEGIN SELECT RAISE(ABORT,'append only'); END;
+
+CREATE TRIGGER artifact_seals_no_update BEFORE UPDATE ON artifact_seals BEGIN SELECT RAISE(ABORT,'append only'); END;
+
+CREATE TRIGGER artifact_seals_no_delete BEFORE DELETE ON artifact_seals BEGIN SELECT RAISE(ABORT,'append only'); END;
+
+CREATE TRIGGER artifact_aborts_no_update BEFORE UPDATE ON artifact_aborts BEGIN SELECT RAISE(ABORT,'append only'); END;
+
+CREATE TRIGGER artifact_aborts_no_delete BEFORE DELETE ON artifact_aborts BEGIN SELECT RAISE(ABORT,'append only'); END;"""
+
+
+def _probability_artifact_schema_statements_v1():
+    """Split only the fixed schema, preserving complete trigger bodies."""
+    import sqlite3
+    statements, pending = [], ""
+    for line in _PROBABILITY_ARTIFACT_SCHEMA_SQL_V1.splitlines(keepends=True):
+        pending += line
+        if sqlite3.complete_statement(pending):
+            statements.append(pending.strip())
+            pending = ""
+    if pending.strip() or len(statements) != 16 or statements[0] != "PRAGMA foreign_keys=ON;":
+        raise PersistenceContractError(ReasonCode.INVALID_CONTRACT, "ARTIFACT_FIXED_SCHEMA_INCOMPLETE")
+    # The foreign-key pragma is a connection precondition, outside BEGIN.
+    return tuple(statements[1:])
+
+
+def _probability_artifact_sqlite_options_v1(*, read_only):
+    """Fixed connection options; grants and path custody remain caller-owned.
+
+    This pure policy does not open a database or implement a writer session.
+    Explicit SQL, never Connection.commit/rollback, controls transactions.
+    """
+    import sqlite3
+    if type(read_only) is not bool:
+        raise PersistenceContractError(ReasonCode.INVALID_CONTRACT, "ARTIFACT_CONNECTION_ROLE")
+    return dict(timeout=0.0, detect_types=0, isolation_level=None,
+                check_same_thread=True, cached_statements=0, uri=read_only,
+                autocommit=sqlite3.LEGACY_TRANSACTION_CONTROL)
+
+
+_PROBABILITY_ARTIFACT_CONNECTION_PRAGMAS_V1 = (
+    ("foreign_keys", "ON", 1), ("trusted_schema", "OFF", 0),
+    ("recursive_triggers", "ON", 1), ("busy_timeout", "0", 0),
+    ("mmap_size", "0", 0), ("cache_size", "-2048", -2048),
+    ("temp_store", "MEMORY", 2), ("threads", "0", 0),
+    ("synchronous", "EXTRA", 3),
+)
+
+
+def _artifact_store_require_v1(condition, message):
+    if not condition:
+        raise PersistenceContractError(ReasonCode.PERSISTENCE_CONFLICT, message)
+
+
+class _ProbabilityArtifactSqlConnectionV1:
+    """Private, metered SQL owner; never exposed through an artifact protocol."""
+
+    def __init__(self, store, connection, role):
+        self.store, self.connection, self.role = store, connection, role
+        self.progress_error = None
+        self.new_budget("SETUP:" + role, 128, 512, 512)
+        connection.set_progress_handler(self.progress, 10000)
+
+    def new_budget(self, name, statements, rows, callbacks):
+        self.ledger = dict(name=name, statement_limit=statements, row_limit=rows,
+                           progress_limit=callbacks, statement_attempts=0, row_attempts=0,
+                           returned_rows=0, progress_entries=0, acquired_blob_bytes=0,
+                           attempted_write_bytes=0, reserved_buffer_bytes=0)
+        self.store._ledgers.append(self.ledger)
+
+    def reserve(self, counter, maximum):
+        self.ledger[counter] += 1
+        _artifact_store_require_v1(self.ledger[counter] <= self.ledger[maximum],
+                                   "ARTIFACT_SQL_ALLOWANCE:" + counter)
+
+    def progress(self):
+        try:
+            self.reserve("progress_entries", "progress_limit")
+            self.store._check()
+            return 0
+        except BaseException as error:
+            self.progress_error = error
+            self.store._latch(error)
+            return 1
+
+    def _failure(self, error):
+        self.store._latch(error)
+        if self.progress_error is not None and self.progress_error is not error:
+            raise BaseExceptionGroup("artifact SQL and original progress failure",
+                                     [error, self.progress_error]) from None
+        raise error
+
+    def execute(self, sql, values=(), *, cleanup=False):
+        try:
+            self.reserve("statement_attempts", "statement_limit")
+            self.store._check(allow_failed=cleanup)
+            cursor = self.connection.execute(sql, values)
+            try:
+                self.store._check(allow_failed=cleanup)
+            except BaseException:
+                cursor.close()
+                raise
+            return cursor
+        except BaseException as error:
+            self._failure(error)
+
+    def one(self, cursor, *, cleanup=False):
+        try:
+            self.reserve("row_attempts", "row_limit")
+            self.store._check(allow_failed=cleanup)
+            row = cursor.fetchone()
+            if row is not None:
+                self.ledger["returned_rows"] += 1
+            self.store._check(allow_failed=cleanup)
+            return row
+        except BaseException as error:
+            self._failure(error)
+
+    def scalar(self, sql, values=()):
+        cursor = self.execute(sql, values)
+        try:
+            row = self.one(cursor)
+            _artifact_store_require_v1(row is not None and len(row) == 1,
+                                       "ARTIFACT_SQL_SCALAR")
+            _artifact_store_require_v1(self.one(cursor) is None, "ARTIFACT_SQL_SCALAR_EOF")
+            return row[0]
+        finally:
+            cursor.close()
+
+    def statement(self, sql, values=(), *, cleanup=False):
+        self.execute(sql, values, cleanup=cleanup).close()
+
+    def begin(self, *, write, cleanup=False):
+        _artifact_store_require_v1(not self.connection.in_transaction, "ARTIFACT_TRANSACTION_ALREADY_ACTIVE")
+        self.statement("BEGIN IMMEDIATE" if write else "BEGIN", cleanup=cleanup)
+        _artifact_store_require_v1(self.connection.in_transaction is True, "ARTIFACT_BEGIN_NOT_ACTIVE")
+
+    def end(self, sql, *, cleanup=False):
+        _artifact_store_require_v1(sql in ("COMMIT", "ROLLBACK") and self.connection.in_transaction,
+                                   "ARTIFACT_TRANSACTION_NOT_ACTIVE")
+        self.statement(sql, cleanup=cleanup)
+        _artifact_store_require_v1(self.connection.in_transaction is False, "ARTIFACT_TRANSACTION_NOT_ENDED")
+
+
+class SQLiteProbabilityArtifactStoreV1:
+    """Explicitly injected artifact-only store; no issuer or ledger authority.
+
+    The live custody checker owns exclusive directory custody and its enclosing
+    storage grant. Native SQLite opens the pathname: descriptor comparisons alone
+    do not prevent replacement by an untrusted directory writer. No global store
+    is opened and the reference receipt adapter is not promoted to production.
+    """
+
+    def __init__(self, database_path, *, check_custody, deadline_monotonic_ns,
+                 max_artifact_bytes, max_frames, max_metadata_bytes,
+                 storage_reserved_bytes, create=False):
+        import os
+        import sqlite3
+        from pathlib import Path
+        for value in (deadline_monotonic_ns, max_artifact_bytes, max_frames,
+                      max_metadata_bytes, storage_reserved_bytes):
+            _probability_int_v1(value, 1)
+        _artifact_store_require_v1(max_artifact_bytes <= 67108864 and max_frames <= 8192
+            and max_metadata_bytes <= 262144 and 553648128 <= storage_reserved_bytes <= 2**63-1,
+            "ARTIFACT_FIXED_PROFILE_LIMITS")
+        _artifact_store_require_v1(type(create) is bool and callable(check_custody), "ARTIFACT_CUSTODY_REQUIRED")
+        path = Path(database_path)
+        _artifact_store_require_v1(path.is_absolute() and str(path) not in (":memory:",)
+            and not str(path).startswith("file:") and ".." not in path.parts,
+            "ARTIFACT_ABSOLUTE_LOCAL_PATH_REQUIRED")
+        _artifact_store_require_v1(sqlite3.sqlite_version_info >= (3, 37, 0), "ARTIFACT_STRICT_SQLITE_REQUIRED")
+        self.path, self._custody = path, check_custody
+        self.deadline_monotonic_ns = deadline_monotonic_ns
+        self.max_artifact_bytes, self.max_frames = max_artifact_bytes, max_frames
+        self.max_metadata_bytes, self.storage_reserved_bytes = max_metadata_bytes, storage_reserved_bytes
+        self.pid, self.thread = os.getpid(), threading.get_ident()
+        self._writer = self._reader = self._active = None
+        self._db_fd = None
+        self._identity = self._parent_identity = None
+        self._failure = None
+        self._closed = False
+        self._read_active = False
+        self._ledgers, self._attempts, self._uncertain = [], set(), []
+        self._previous_wall = self._previous_mono = None
+        self.engine_version = sqlite3.sqlite_version
+        try:
+            self._check_path(allow_missing=create)
+            self._check_local_filesystem()
+            self._parent_identity = self._identity_of(path.parent.lstat())
+            self._check(allow_missing=create)
+            if create:
+                fd = os.open(path, os.O_CREAT | os.O_EXCL | os.O_RDWR | getattr(os, "O_BINARY", 0), 0o600)
+                os.close(fd)
+            self._db_fd = os.open(path, os.O_RDONLY | getattr(os, "O_BINARY", 0) | getattr(os, "O_NOFOLLOW", 0))
+            self._identity = self._identity_of(os.fstat(self._db_fd))
+            self._check()
+            self._writer = self._open(read_only=False, fresh=create)
+        except BaseException as error:
+            self._latch(error)
+            try:
+                self.close()
+            except BaseException as close_error:
+                raise BaseExceptionGroup("artifact initialization and handle release", [error, close_error]) from None
+            raise
+
+    @staticmethod
+    def _identity_of(observation):
+        return observation.st_dev, observation.st_ino
+
+    def _latch(self, error):
+        if self._failure is None:
+            self._failure = error
+
+    def _check_local_filesystem(self):
+        import os
+        import sys
+        if os.name == "nt":
+            import ctypes
+            from ctypes import wintypes
+            function = ctypes.WinDLL("kernel32", use_last_error=True).GetDriveTypeW
+            function.argtypes, function.restype = [wintypes.LPCWSTR], wintypes.UINT
+            _artifact_store_require_v1(not str(self.path).startswith("\\\\")
+                and function(self.path.anchor) == 3, "ARTIFACT_LOCAL_FIXED_VOLUME_REQUIRED")
+        elif sys.platform == "linux":
+            # Bounded local mount metadata, never a filesystem contents traversal.
+            with open("/proc/self/mountinfo", "rb") as source:
+                raw = source.read(262145)
+            _artifact_store_require_v1(len(raw) <= 262144, "ARTIFACT_MOUNT_METADATA_LIMIT")
+            choices = []
+            for line in raw.decode("utf-8", "strict").splitlines():
+                fields = line.split()
+                if "-" not in fields or len(fields) < 10:
+                    raise PersistenceContractError(ReasonCode.PERSISTENCE_UNAVAILABLE, "ARTIFACT_MOUNT_METADATA")
+                mount = fields[4].replace("\\040", " ").replace("\\011", "\t").replace("\\134", "\\")
+                if str(self.path) == mount or str(self.path).startswith(mount.rstrip("/") + "/"):
+                    choices.append((len(mount), fields[fields.index("-")+1]))
+            _artifact_store_require_v1(choices and max(choices)[1] in ("ext2", "ext3", "ext4", "xfs", "btrfs", "tmpfs", "overlay"),
+                                       "ARTIFACT_LOCAL_FILESYSTEM_UNESTABLISHED")
+        else:
+            raise PersistenceContractError(ReasonCode.PERSISTENCE_UNAVAILABLE, "ARTIFACT_FILESYSTEM_PROFILE_UNSUPPORTED")
+
+    def _check_path(self, *, allow_missing=False):
+        import os
+        import stat
+        for parent in (self.path.parent, *self.path.parent.parents):
+            observed = parent.lstat()
+            _artifact_store_require_v1(stat.S_ISDIR(observed.st_mode) and not parent.is_symlink()
+                and not getattr(observed, "st_file_attributes", 0) & 0x400, "ARTIFACT_PARENT_LINK_OR_TYPE")
+        if self._parent_identity is not None:
+            _artifact_store_require_v1(self._identity_of(self.path.parent.lstat()) == self._parent_identity,
+                                       "ARTIFACT_PARENT_CHANGED")
+        try:
+            observed = self.path.lstat()
+        except FileNotFoundError:
+            if allow_missing and self._identity is None:
+                return
+            raise
+        _artifact_store_require_v1(stat.S_ISREG(observed.st_mode) and observed.st_nlink == 1
+            and not getattr(observed, "st_file_attributes", 0) & 0x400
+            and observed.st_size <= 268435456, "ARTIFACT_FILE_TYPE_LINK_OR_SIZE")
+        if self._identity is not None:
+            _artifact_store_require_v1(self._identity_of(observed) == self._identity
+                and self._identity_of(os.fstat(self._db_fd)) == self._identity, "ARTIFACT_FILE_REPLACED")
+        total = observed.st_size
+        for suffix in ("-journal", "-wal", "-shm"):
+            sidecar = self.path.with_name(self.path.name + suffix)
+            try:
+                side = sidecar.lstat()
+            except FileNotFoundError:
+                continue
+            _artifact_store_require_v1(stat.S_ISREG(side.st_mode) and side.st_nlink == 1
+                and not getattr(side, "st_file_attributes", 0) & 0x400, "ARTIFACT_RECOVERY_FILE_TYPE")
+            _artifact_store_require_v1(suffix == "-journal", "ARTIFACT_UNEXPECTED_WAL_STATE")
+            total += side.st_size
+        _artifact_store_require_v1(total <= self.storage_reserved_bytes, "ARTIFACT_STORAGE_ENVELOPE")
+
+    def _check(self, *, allow_failed=False, allow_missing=False):
+        try:
+            return self._check_current(allow_failed=allow_failed, allow_missing=allow_missing)
+        except BaseException as error:
+            self._latch(error)
+            raise
+
+    def _check_current(self, *, allow_failed=False, allow_missing=False):
+        import os
+        if self._failure is not None and not allow_failed:
+            raise self._failure
+        _artifact_store_require_v1(not self._closed and (os.getpid(), threading.get_ident()) == (self.pid, self.thread),
+                                   "ARTIFACT_ORIGINAL_PROCESS_THREAD")
+        wall, mono = time.time_ns(), time.monotonic_ns()
+        _probability_ns_v1(wall)
+        _artifact_store_require_v1(mono < self.deadline_monotonic_ns
+            and (self._previous_wall is None or wall >= self._previous_wall)
+            and (self._previous_mono is None or mono >= self._previous_mono), "ARTIFACT_CLOCK_OR_DEADLINE")
+        _artifact_store_require_v1(self._custody(self.path) is None, "ARTIFACT_DIRECTORY_CUSTODY_DENIED")
+        self._check_path(allow_missing=allow_missing)
+        self._previous_wall, self._previous_mono = wall, mono
+        return wall
+
+    def _open(self, *, read_only, fresh=False):
+        import sqlite3
+        self._check()
+        argument = self.path.as_uri() + "?mode=ro" if read_only else str(self.path)
+        connection = sqlite3.connect(argument, **_probability_artifact_sqlite_options_v1(read_only=read_only))
+        connection.row_factory, connection.text_factory = None, str
+        sql = _ProbabilityArtifactSqlConnectionV1(self, connection, "reader" if read_only else "writer")
+        try:
+            connection.enable_load_extension(False)
+            connection.setlimit(sqlite3.SQLITE_LIMIT_ATTACHED, 0)
+            connection.setlimit(sqlite3.SQLITE_LIMIT_LENGTH, 2*self.max_metadata_bytes + 2*65537)
+            connection.setlimit(sqlite3.SQLITE_LIMIT_SQL_LENGTH, 262144)
+            for name, setting, expected in _PROBABILITY_ARTIFACT_CONNECTION_PRAGMAS_V1:
+                sql.statement(f"PRAGMA {name}={setting}")
+                _artifact_store_require_v1(sql.scalar(f"PRAGMA {name}") == expected,
+                                           "ARTIFACT_CONNECTION_PRAGMA:" + name)
+            if fresh:
+                _artifact_store_require_v1(not read_only, "ARTIFACT_READER_CANNOT_INITIALIZE")
+                _artifact_store_require_v1(sql.scalar("PRAGMA journal_mode=DELETE") == "delete", "ARTIFACT_JOURNAL_MODE")
+                sql.statement("PRAGMA page_size=4096")
+            _artifact_store_require_v1(sql.scalar("PRAGMA journal_mode") == "delete"
+                and sql.scalar("PRAGMA page_size") == 4096, "ARTIFACT_EXISTING_FORMAT_MISMATCH")
+            if not read_only:
+                _artifact_store_require_v1(sql.scalar("PRAGMA page_count") <= 65536
+                    and sql.scalar("PRAGMA max_page_count=65536") == 65536, "ARTIFACT_PAGE_CAP")
+            if fresh:
+                sql.begin(write=True)
+                for statement in _probability_artifact_schema_statements_v1():
+                    sql.statement(statement)
+                # Any failed schema COMMIT leaves this exclusively created file
+                # quarantined. No rollback/retry/delete is performed here.
+                sql.end("COMMIT")
+            self._verify_schema(sql)
+            self._check()
+            return sql
+        except BaseException as error:
+            self._latch(error)
+            try:
+                connection.close()
+            except BaseException as cleanup:
+                raise BaseExceptionGroup("artifact connection setup and close", [error, cleanup]) from None
+            raise
+
+    def _verify_schema(self, sql):
+        expected = {}
+        for statement in _probability_artifact_schema_statements_v1():
+            words = statement.split()
+            expected[words[2]] = (words[1].lower(), statement.rstrip(";"))
+        cursor = sql.execute("SELECT length(type),length(name),length(tbl_name),length(CAST(sql AS BLOB)) FROM sqlite_schema LIMIT 17")
+        try:
+            lengths = []
+            while (row := sql.one(cursor)) is not None:
+                _artifact_store_require_v1(len(lengths) < 15 and all(type(v) is int for v in row)
+                    and row[0] <= 7 and row[1] <= 64 and row[2] <= 64
+                    and row[3] <= len(_PROBABILITY_ARTIFACT_SCHEMA_SQL_V1.encode()), "ARTIFACT_SCHEMA_EXTENT")
+                lengths.append(row)
+        finally:
+            cursor.close()
+        _artifact_store_require_v1(len(lengths) == 15, "ARTIFACT_SCHEMA_OBJECT_COUNT")
+        cursor = sql.execute("SELECT type,name,sql FROM sqlite_schema ORDER BY name LIMIT 16")
+        try:
+            actual = {}
+            while (row := sql.one(cursor)) is not None:
+                _artifact_store_require_v1(row[1] not in actual, "ARTIFACT_SCHEMA_ALIAS")
+                actual[row[1]] = (row[0], row[2])
+        finally:
+            cursor.close()
+        _artifact_store_require_v1(actual == expected, "ARTIFACT_SCHEMA_CHANGED")
+
+    def _key(self, scope, artifact_ref):
+        _artifact_store_require_v1(type(scope) is ProbabilityProducerScopeV1, "ARTIFACT_SCOPE_TYPE")
+        scope.__post_init__()
+        _probability_text_v1(artifact_ref)
+        return _bounded_probability_json_v1(scope.as_dict(), max_bytes=self.max_metadata_bytes), artifact_ref
+
+    @property
+    def accounting(self):
+        return tuple(MappingProxyType(dict(row)) for row in self._ledgers)
+
+    @contextmanager
+    def begin_prediction_artifact_v1(self, request):
+        self._check()
+        _artifact_store_require_v1(self._active is None and not self._read_active and type(request) is ProbabilityPredictionArtifactWriteRequestV1,
+                                   "ARTIFACT_SINGLE_ORIGINAL_WRITER")
+        request.__post_init__()
+        _artifact_store_require_v1(request.max_artifact_bytes <= self.max_artifact_bytes
+            and request.max_frames <= self.max_frames and request.deadline_monotonic_ns <= self.deadline_monotonic_ns,
+            "ARTIFACT_REQUEST_EXCEEDS_STORE")
+        key = self._key(request.scope, request.artifact_ref)
+        _artifact_store_require_v1(key not in self._attempts and len(self._attempts) < 4, "ARTIFACT_IDENTITY_ALREADY_ATTEMPTED")
+        _bounded_probability_json_v1(dict(scope=request.scope.as_dict(), artifact_ref=request.artifact_ref,
+            result_ref=request.result_ref, dependency_refs=request.dependency_refs,
+            valid_until_ns=request.valid_until_ns), max_bytes=self.max_metadata_bytes)
+        self._attempts.add(key)
+        session = _SQLiteProbabilityArtifactSessionV1(self, request, key)
+        self._active = session
+        try:
+            session.reserve()
+            yield session
+            _artifact_store_require_v1(session.state in ("SEALED", "ABORTED"), "ARTIFACT_SESSION_NOT_TERMINAL")
+            self._check()
+        except BaseException as error:
+            self._latch(error)
+            errors = [error]
+            if session.state not in ("SEAL_ATTEMPTED", "SEALED", "UNKNOWN", "ABORTED"):
+                try:
+                    session.abort_unpublished_prediction_stage_v1()
+                except BaseException as cleanup:
+                    errors.append(cleanup)
+            if len(errors) > 1:
+                raise BaseExceptionGroup("artifact session and abort", errors) from None
+            raise
+        finally:
+            self._active = None
+
+    @contextmanager
+    def open_prediction_artifact_v1(self, *, artifact_ref, scope, max_bytes, max_frames):
+        import json
+        from .models import ProbabilityPredictionArtifactReadV1, _probability_refs_v1
+        self._check()
+        _probability_int_v1(max_bytes, 1)
+        _probability_int_v1(max_frames, 1)
+        _artifact_store_require_v1(self._active is None and not self._read_active and max_bytes <= self.max_artifact_bytes
+            and max_frames <= self.max_frames, "ARTIFACT_READER_ENVELOPE_OR_ACTIVE_WRITER")
+        key = self._key(scope, artifact_ref)
+        if self._reader is None:
+            self._reader = self._open(read_only=True)
+        sql = self._reader
+        sql.new_budget("READ:" + artifact_ref, 4*max_frames+64, 3*max_frames+32, 4*max_frames+64)
+        self._read_active = True
+        committed = commit_attempted = False
+        try:
+            sql.begin(write=False)
+            cursor = sql.execute("SELECT length(CAST(i.result_ref AS BLOB)),length(CAST(i.dependencies AS BLOB)),length(CAST(i.valid_until_ns AS BLOB)),length(CAST(s.observed_ns AS BLOB)) FROM artifact_intents i JOIN artifact_seals s USING(scope,artifact_ref) WHERE i.scope=? AND i.artifact_ref=?", key)
+            try:
+                sizes = sql.one(cursor)
+                _artifact_store_require_v1(sizes is not None and all(type(n) is int and n > 0 for n in sizes)
+                    and sum(sizes)+len(key[0].encode())+len(artifact_ref.encode()) <= self.max_metadata_bytes,
+                    "ARTIFACT_METADATA_MISSING_OR_OVERSIZE")
+                _artifact_store_require_v1(sql.one(cursor) is None, "ARTIFACT_METADATA_ALIAS")
+            finally:
+                cursor.close()
+            cursor = sql.execute("SELECT i.result_ref,i.dependencies,i.valid_until_ns,s.byte_count,s.frame_count,s.observed_ns FROM artifact_intents i JOIN artifact_seals s USING(scope,artifact_ref) WHERE i.scope=? AND i.artifact_ref=? AND NOT EXISTS(SELECT 1 FROM artifact_aborts a WHERE a.scope=i.scope AND a.artifact_ref=i.artifact_ref)", key)
+            try:
+                metadata = sql.one(cursor)
+                _artifact_store_require_v1(metadata is not None and sql.one(cursor) is None, "ARTIFACT_NOT_CONFIRMED_SEALED")
+            finally:
+                cursor.close()
+            result_ref, dependencies, until, byte_count, frame_count, observed = metadata
+            _probability_text_v1(result_ref)
+            refs = tuple(json.loads(dependencies))
+            _probability_refs_v1(refs, nonempty=True)
+            _artifact_store_require_v1(_bounded_probability_json_v1(refs, max_bytes=self.max_metadata_bytes) == dependencies,
+                                       "ARTIFACT_NONCANONICAL_DEPENDENCIES")
+            _artifact_store_require_v1(type(until) is str and type(observed) is str
+                and str(int(until)) == until and str(int(observed)) == observed, "ARTIFACT_CANONICAL_TIME_TEXT")
+            expiry, sealed_at = int(until), int(observed)
+            _probability_ns_v1(expiry)
+            _probability_ns_v1(sealed_at)
+            _artifact_store_require_v1(type(byte_count) is int and 0 < byte_count <= max_bytes
+                and type(frame_count) is int and 0 < frame_count <= max_frames
+                and sealed_at <= self._check() < expiry, "ARTIFACT_READ_COUNTS_OR_LIFETIME")
+            # Reserve accumulated frames and their joined immutable copy before
+            # acquiring the first BLOB. This is a logical reservation, not RSS.
+            sql.ledger["reserved_buffer_bytes"] = 2*byte_count + 2*self.max_metadata_bytes + 2*65537
+            _artifact_store_require_v1(sql.ledger["reserved_buffer_bytes"] <= 2*max_bytes+2*self.max_metadata_bytes+2*65537,
+                                       "ARTIFACT_READ_BUFFER_RESERVATION")
+            parts, total, count = [], 0, 0
+            cursor = sql.execute("SELECT ordinal,end_byte,length(raw) FROM artifact_frames WHERE scope=? AND artifact_ref=? ORDER BY ordinal", key)
+            try:
+                while (row := sql.one(cursor)) is not None:
+                    ordinal, end, size = row
+                    _artifact_store_require_v1(count < frame_count and type(ordinal) is int and ordinal == count
+                        and type(size) is int and 0 < size <= 65537 and type(end) is int
+                        and end == total+size <= byte_count, "ARTIFACT_FRAME_METADATA")
+                    sql.ledger["acquired_blob_bytes"] += size
+                    raw_cursor = sql.execute("SELECT raw FROM artifact_frames WHERE scope=? AND artifact_ref=? AND ordinal=?", (*key, ordinal))
+                    try:
+                        raw_row = sql.one(raw_cursor)
+                        _artifact_store_require_v1(raw_row is not None, "ARTIFACT_BLOB_MISSING")
+                        raw = raw_row[0]
+                    finally:
+                        raw_cursor.close()
+                    _artifact_store_require_v1(type(raw) is bytes and len(raw) == size and raw.endswith(b"\n"), "ARTIFACT_BLOB_FORMAT")
+                    parts.append(raw)
+                    total, count = end, count+1
+                    _artifact_store_require_v1(self._check() < expiry, "ARTIFACT_READ_EXPIRED")
+            finally:
+                cursor.close()
+            _artifact_store_require_v1((total, count) == (byte_count, frame_count), "ARTIFACT_READ_EOF_COUNTS")
+            raw = b"".join(parts)
+            parts.clear()
+            value = ProbabilityPredictionArtifactReadV1(artifact_ref, scope, raw, total, count,
+                                                       self._check(), expiry, refs)
+            yield value
+            _artifact_store_require_v1(self._check() < expiry, "ARTIFACT_READER_EXIT_EXPIRED")
+            commit_attempted = True
+            sql.end("COMMIT")
+            committed = True
+        except BaseException as error:
+            self._latch(error)
+            if not committed and not commit_attempted and sql.connection.in_transaction:
+                try:
+                    sql.end("ROLLBACK", cleanup=True)
+                except BaseException as cleanup:
+                    raise BaseExceptionGroup("artifact read and settlement", [error, cleanup]) from None
+            raise
+        finally:
+            self._read_active = False
+
+    def close(self):
+        import os
+        _artifact_store_require_v1((os.getpid(), threading.get_ident()) == (self.pid, self.thread)
+            and self._active is None and not self._read_active, "ARTIFACT_CLOSE_OWNERSHIP")
+        if self._closed:
+            return
+        errors = []
+        for owner in (self._reader, self._writer):
+            if owner is not None:
+                try:
+                    owner.connection.close()
+                except BaseException as error:
+                    errors.append(error)
+        if self._db_fd is not None:
+            try:
+                os.close(self._db_fd)
+            except BaseException as error:
+                errors.append(error)
+        self._closed = True
+        # Handle release never changes UNKNOWN to ABORTED or proves noncommit.
+        if errors:
+            raise BaseExceptionGroup("artifact owned handle release", errors)
+
+
+class _SQLiteProbabilityArtifactSessionV1:
+    def __init__(self, store, request, key):
+        self.store, self.request, self.key = store, request, key
+        self.sql = store._writer
+        f = request.max_frames
+        self.sql.new_budget("WRITE:" + request.artifact_ref, 4*f+64, 3*f+32, 4*f+64)
+        self.state = "RESERVING"
+        self.intent_confirmed = False
+        self.count = self.total = 0
+        self.read_count = self.read_bytes = 0
+        self.readback_eof = self._reading = False
+        self._cursor = None
+
+    def _check(self, *, cleanup=False):
+        now = self.store._check(allow_failed=cleanup)
+        self._need(self.store._active is self and self.sql is self.store._writer,
+                   "ARTIFACT_ORIGINAL_SESSION_REQUIRED")
+        self._need(now < self.request.valid_until_ns
+            and time.monotonic_ns() < self.request.deadline_monotonic_ns, "ARTIFACT_REQUEST_EXPIRED")
+        return now
+
+    def _need(self, condition, message):
+        try:
+            _artifact_store_require_v1(condition, message)
+        except BaseException as error:
+            self.store._latch(error)
+            raise
+
+    def _commit(self):
+        try:
+            self.sql.end("COMMIT")
+            self._check()
+        except BaseException as error:
+            self.state = "UNKNOWN"
+            self.store._uncertain.append(self)
+            self.store._latch(error)
+            raise
+
+    def reserve(self):
+        self._check()
+        self.sql.begin(write=True)
+        cursor = self.sql.execute("SELECT scope,artifact_ref FROM artifact_intents LIMIT 5")
+        try:
+            count = 0
+            while self.sql.one(cursor) is not None:
+                count += 1
+                self._need(count < 4, "ARTIFACT_STORE_IDENTITY_CEILING")
+        finally:
+            cursor.close()
+        dependencies = _bounded_probability_json_v1(self.request.dependency_refs, max_bytes=self.store.max_metadata_bytes)
+        self.sql.statement("INSERT INTO artifact_intents VALUES (?,?,?,?,?,?,?)", (*self.key,
+            self.request.result_ref, dependencies, str(self.request.valid_until_ns),
+            self.request.max_artifact_bytes, self.request.max_frames))
+        self._commit()
+        self.intent_confirmed = True
+        self.state = "STAGING"
+        self.sql.begin(write=True)
+
+    def append_prediction_frame_v1(self, frame):
+        self._check()
+        self._need(self.state == "STAGING" and type(frame) is bytes
+            and 0 < len(frame) <= 65537 and frame.endswith(b"\n"), "ARTIFACT_APPEND_STATE_OR_FRAME")
+        self.sql.ledger["attempted_write_bytes"] += len(frame)
+        self._need(self.count < self.request.max_frames
+            and self.total+len(frame) <= self.request.max_artifact_bytes, "ARTIFACT_APPEND_ALLOWANCE")
+        self.sql.statement("INSERT INTO artifact_frames VALUES (?,?,?,?,?)",
+                           (*self.key, self.count, self.total+len(frame), frame))
+        self.count += 1
+        self.total += len(frame)
+        self._check()
+
+    def iter_written_prediction_frames_v1(self):
+        self._check()
+        self._need(self.state == "STAGING" and not self._reading, "ARTIFACT_READBACK_REENTRY")
+        self.state, self._reading = "READBACK", True
+        return self._readback()
+
+    def _readback(self):
+        try:
+            self._cursor = self.sql.execute("SELECT ordinal,end_byte,length(raw) FROM artifact_frames WHERE scope=? AND artifact_ref=? ORDER BY ordinal", self.key)
+            while (row := self.sql.one(self._cursor)) is not None:
+                ordinal, end, size = row
+                self._need(self.read_count < self.count and ordinal == self.read_count
+                    and type(size) is int and 0 < size <= 65537 and end == self.read_bytes+size <= self.total,
+                    "ARTIFACT_STAGED_METADATA")
+                self.sql.ledger["acquired_blob_bytes"] += size
+                cursor = self.sql.execute("SELECT raw FROM artifact_frames WHERE scope=? AND artifact_ref=? AND ordinal=?", (*self.key, ordinal))
+                try:
+                    item = self.sql.one(cursor)
+                    self._need(item is not None and type(item[0]) is bytes and len(item[0]) == size,
+                                               "ARTIFACT_STAGED_BLOB")
+                    raw = item[0]
+                finally:
+                    cursor.close()
+                self.read_count += 1
+                self.read_bytes += size
+                self._check()
+                yield raw
+            self._need((self.read_count, self.read_bytes) == (self.count, self.total), "ARTIFACT_STAGED_EOF_COUNTS")
+            self._check()
+            self.readback_eof = True
+        finally:
+            if self._cursor is not None:
+                self._cursor.close()
+                self._cursor = None
+            self._reading = False
+
+    def seal_prediction_artifact_v1(self):
+        observed = self._check()
+        self._need(self.state == "READBACK" and self.readback_eof
+            and not self._reading and self._cursor is None and self.count > 0
+            and (self.count, self.total) == (self.read_count, self.read_bytes), "ARTIFACT_COMPLETE_READBACK_REQUIRED")
+        self.state = "SEAL_ATTEMPTED"
+        try:
+            self.sql.statement("INSERT INTO artifact_seals VALUES (?,?,?,?,?)",
+                               (*self.key, self.total, self.count, str(observed)))
+            self._commit()
+            self.state = "SEALED"
+            self._check()
+            return ProbabilityPredictionArtifactSealV1(self.request.artifact_ref, self.request.scope,
+                self.request.result_ref, self.total, self.count, observed,
+                self.request.valid_until_ns, self.request.dependency_refs)
+        except BaseException as error:
+            self.state = "UNKNOWN"
+            if self not in self.store._uncertain:
+                self.store._uncertain.append(self)
+            self.store._latch(error)
+            raise
+
+    def abort_unpublished_prediction_stage_v1(self):
+        self._need(self.state not in ("SEAL_ATTEMPTED", "SEALED", "UNKNOWN", "ABORTED"),
+                                   "ARTIFACT_ABORT_FORBIDDEN")
+        self._check(cleanup=True)
+        if self._cursor is not None:
+            self._cursor.close()
+            self._cursor = None
+        if self.sql.connection.in_transaction:
+            self.sql.end("ROLLBACK", cleanup=True)
+        if self.intent_confirmed:
+            try:
+                self.sql.begin(write=True, cleanup=True)
+                self.sql.statement("INSERT INTO artifact_aborts VALUES (?,?,?,?)",
+                    (*self.key, "UNPUBLISHED_STAGE_ABORTED", str(self._check(cleanup=True))), cleanup=True)
+                # Even cleanup publication has a one-shot COMMIT boundary.
+                self.sql.end("COMMIT", cleanup=True)
+                self._check(cleanup=True)
+            except BaseException as error:
+                self.state = "UNKNOWN"
+                self.store._uncertain.append(self)
+                self.store._latch(error)
+                raise
+        self.state = "ABORTED"

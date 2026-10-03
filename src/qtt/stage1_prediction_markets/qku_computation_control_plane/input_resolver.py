@@ -3647,8 +3647,11 @@ def _resolve_probability_admission_snapshot_v1(*, read_request, intent, persiste
             reference_cutoff_ns=model.reference_cutoff_ns, initial_latch=fence._initial_latch_v1)
         state = _reconstruct_probability_state_v1(initial=initial, snapshot=committed, max_catalog_rows=limits.max_catalog_rows)
         if read_request.purpose == "CONSTRUCT_CANDIDATE":
+            prediction_source = fence._construction_inputs_v1
+            if type(prediction_source) is not MappingProxyType or "prediction_parameters" not in prediction_source:
+                prediction_source = None
             _prepare_probability_window_v1(snapshot, intent, state, current_owner_epoch=fence.policy_epoch,
-                                           publication_ns=time.time_ns(), limits=limits)
+                                           publication_ns=time.time_ns(), limits=limits, prediction_source=prediction_source)
         else:
             _validate_probability_admission_v1(snapshot, intent, state, current_owner_epoch=fence.policy_epoch,
                                                publication_ns=time.time_ns(), limits=limits)
@@ -3714,15 +3717,25 @@ def _resolve_committed_prediction_v1(
         _probability_projection_text_v1(row[0], "PROBABILITY_QUERY_ID")
         request_keys.append((row[0], tuple(value.hex() for value in row[1])))
     _probability_projection_names_v1(tuple(row[0] for row in requests), "PROBABILITY_QUERY_ROSTER")
+    # The requested cut identifies the immutable review basis. The completed
+    # review is necessarily appended after that cut. Observe committed metadata
+    # at one actual present cut, while retaining exact basis equality below.
+    # This follows the existing issued-record reconciliation convention; it
+    # does not renew the basis, source cut, issuer lifetime or request deadline.
+    from dataclasses import replace
+    from .persistence import _probability_read_check_v1
+    request_fields = tuple(getattr(read_request, name) for name in read_request.__dataclass_fields__)
+    observed_cut = _probability_read_check_v1(read_request)
+    observed_request = replace(read_request, effective_cutoff_ns=observed_cut, recorded_cutoff_ns=observed_cut)
     with _probability_combined_read_budget_v1(persistence, scope=scope, max_total_bytes=limits.max_total_bytes):
-        with _probability_owned_context_v1(persistence.load_committed_probability_producer_state_v1(read_request)) as discovery:
+        with _probability_owned_context_v1(persistence.load_committed_probability_producer_state_v1(observed_request)) as discovery:
             discovered = {ref: _bounded_probability_json_v1(_probability_control_projection_v1(record),
                           max_bytes=limits.metadata_limits.max_frame_bytes) for ref, record in discovery.records_by_ref.items()}
             issuer_requests = tuple(dict.fromkeys(_probability_record_issuer_request_v1(record)
                 for record in discovery.records_by_ref.values() if record.typed_payload.control_kind in
                 ("ACCEPTANCE_RECEIPT", "PREDICTION_RESULT", "PREDICTION_REVIEW")))
         with issuer_resolver._resolve_probability_issuer_context_v1(issuer_requests, evaluated_ns=time.time_ns()) as issuer_snapshot:
-            with _probability_owned_context_v1(persistence.load_committed_probability_producer_state_v1(read_request)) as snapshot:
+            with _probability_owned_context_v1(persistence.load_committed_probability_producer_state_v1(observed_request)) as snapshot:
                 need(set(snapshot.records_by_ref) == set(discovered), "PROBABILITY_DISCOVERY_IDENTITIES_CHANGED")
                 for ref, canonical in discovered.items():
                     need(_bounded_probability_json_v1(_probability_control_projection_v1(snapshot.records_by_ref[ref]),
@@ -3767,6 +3780,8 @@ def _resolve_committed_prediction_v1(
                 expiry = min(expiry, review_expiry, admitted_model.valid_until_ns, original_cut.valid_until_ns)
                 fence._check_snapshot_v1(snapshot, issuer_snapshot=issuer_snapshot, original_cut=original_cut,
                                          dependency_refs=dependencies, deadline_ns=deadline)
+        need(tuple(getattr(read_request, name) for name in read_request.__dataclass_fields__) == request_fields,
+             "PROBABILITY_ORIGINAL_REVIEW_READ_CHANGED")
         del discovery, discovered
         view = issuer_resolver._probability_last_issuer_view_v1
         fence._check_v1(original_cut=original_cut, dependency_refs=dependencies, evaluated_ns=time.time_ns(), deadline_ns=deadline)
@@ -3839,7 +3854,7 @@ def _probability_receipt_dependency_binding_v1(snapshot, now):
     _probability_require_v1(not set(refs).intersection(snapshot.invalidated_refs), 'DEPENDENCY_INVALIDATED')
     return refs
 
-def _prepare_probability_window_v1(snapshot: _ProbabilityAdmissionSnapshotV1, intent: dict, state: dict, *, current_owner_epoch: int, publication_ns: int, limits: _ProbabilityAdmissionLimitsV1) -> tuple[dict, ProbabilityProducerScopeV1, _ProbabilityAdmissionModelV1, _ProbabilityAdmissionCatalogV1, _ProbabilityAdmissionResultV1 | None, int, tuple[str, ...], dict]:
+def _prepare_probability_window_v1(snapshot: _ProbabilityAdmissionSnapshotV1, intent: dict, state: dict, *, current_owner_epoch: int, publication_ns: int, limits: _ProbabilityAdmissionLimitsV1, prediction_source=None) -> tuple[dict, ProbabilityProducerScopeV1, _ProbabilityAdmissionModelV1, _ProbabilityAdmissionCatalogV1, _ProbabilityAdmissionResultV1 | None, int, tuple[str, ...], dict]:
     """Private detached value construction; accepted source custody is enforced by the calling resolver."""
 
     def encoded(text: str) -> bytes:
@@ -3933,7 +3948,22 @@ def _prepare_probability_window_v1(snapshot: _ProbabilityAdmissionSnapshotV1, in
     _probability_projection_integer_v1(catalog.after_ordinal, 'CATALOG_CURSOR')
     _probability_projection_integer_v1(catalog.complete_through_ns, 'CATALOG_COMPLETENESS_TIME', None)
     _probability_require_v1(catalog.owner_epoch == snapshot.owner_epoch, 'CATALOG_EPOCH_CHANGED')
-    _probability_require_v1(catalog.after_ordinal == state['high_watermark'], 'CATALOG_CURSOR_MISMATCH')
+    # Prediction FINAL rows are retained input custody after FIT/CAL, not the
+    # next economic drift window. The legacy cursor/transition remains exact
+    # whenever this original immutable prediction source is absent.
+    if prediction_source is None:
+        _probability_require_v1(catalog.after_ordinal == state['high_watermark'], 'CATALOG_CURSOR_MISMATCH')
+    else:
+        _probability_require_v1(type(prediction_source) is MappingProxyType and snapshot.result is None and
+            prediction_source.get('binding_ref') == snapshot.snapshot_ref and
+            prediction_source.get('input_lock_ref') == scope.input_lock_ref and
+            type(prediction_source.get('prediction_parameters')) is MappingProxyType,
+            'PROBABILITY_PREDICTION_CUSTODY_SOURCE')
+        parameters = prediction_source['prediction_parameters']
+        _probability_require_v1(parameters['feature_names'] == model.feature_names and
+            parameters['input_lock_id'] == scope.input_lock_ref and
+            tuple(row.ordinal for row in model.reference_clusters) == tuple(range(1, len(model.reference_clusters)+1)) and
+            catalog.after_ordinal == len(model.reference_clusters), 'PROBABILITY_PREDICTION_CUSTODY_CURSOR')
     _probability_require_v1(cutoff <= catalog.complete_through_ns <= snapshot.read_ns, 'CATALOG_NOT_COMPLETE_AT_CUTOFF')
     _probability_require_v1(type(catalog.rows) is tuple and all((type(r) is _ProbabilityMaturityClusterV1 for r in catalog.rows)), 'CATALOG_TYPE')
     _probability_require_v1(all((r.available_ns <= snapshot.read_ns for r in catalog.rows)), 'CATALOG_ROW_NOT_OBSERVED')
@@ -3943,10 +3973,22 @@ def _prepare_probability_window_v1(snapshot: _ProbabilityAdmissionSnapshotV1, in
     if model.precision_protocol_ref is not None:
         refs += (model.precision_protocol_ref,)
     _probability_require_v1(not set(refs) & set(snapshot.invalidated_refs), 'DEPENDENCY_INVALIDATED')
-    effective_state = _probability_copy_v1.deepcopy(state)
-    effective_state['used_rows'] = list(dict.fromkeys((*state['used_rows'], *artifact['final_ids'])))
-    selection_request = _ProbabilityWindowRequestV1(intent['request_id'], intent['receipt_id'], scope, state['head_ref'], state['sequence'], state['high_watermark'], 'WINDOW', cutoff, catalog.catalog_ref, catalog.rows, 'UNAVAILABLE', tuple(dict.fromkeys(refs)), 'SELECTION_ONLY_NOT_A_PUBLISHED_RESULT')
-    selected = _derive_probability_window_v1(effective_state, selection_request, window_size=200, max_catalog_rows=limits.max_catalog_rows)
+    if prediction_source is not None:
+        _probability_require_v1(tuple(row.ordinal for row in catalog.rows) == tuple(range(catalog.after_ordinal+1,
+            catalog.after_ordinal+len(catalog.rows)+1)) and
+            tuple(row.cluster_id for row in catalog.rows) == parameters['final_cluster_ids'] and
+            tuple(rid for row in catalog.rows for rid in row.row_ids) == parameters['final_row_ids'] == tuple(artifact['final_ids']) and
+            not set(reference_ids).intersection(parameters['final_cluster_ids']) and
+            not set(reference_rows).intersection(parameters['final_row_ids']) and
+            all(parameters['final_start_ns'] <= row.available_ns <= row.maturity_ns for row in catalog.rows),
+            'PROBABILITY_PREDICTION_FINAL_CUSTODY')
+        selected = {'disposition': 'PREDICTION_CUSTODY_NO_WINDOW_TRANSITION',
+            'state': _probability_copy_v1.deepcopy(state), 'record': None, 'model_use_authorized': False}
+    else:
+        effective_state = _probability_copy_v1.deepcopy(state)
+        effective_state['used_rows'] = list(dict.fromkeys((*state['used_rows'], *artifact['final_ids'])))
+        selection_request = _ProbabilityWindowRequestV1(intent['request_id'], intent['receipt_id'], scope, state['head_ref'], state['sequence'], state['high_watermark'], 'WINDOW', cutoff, catalog.catalog_ref, catalog.rows, 'UNAVAILABLE', tuple(dict.fromkeys(refs)), 'SELECTION_ONLY_NOT_A_PUBLISHED_RESULT')
+        selected = _derive_probability_window_v1(effective_state, selection_request, window_size=200, max_catalog_rows=limits.max_catalog_rows)
     return (intent, scope, model, catalog, result, cutoff, refs, selected)
 
 def _validate_probability_admission_v1(snapshot: _ProbabilityAdmissionSnapshotV1, intent: dict, state: dict, *, current_owner_epoch: int, publication_ns: int, limits: _ProbabilityAdmissionLimitsV1) -> dict:

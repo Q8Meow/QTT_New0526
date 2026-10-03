@@ -7330,6 +7330,7 @@ def test_runner_restores_only_runtime_side_effects_before_pr142_pr143_and_final_
     monkeypatch, capsys, tmp_path, _central_supervision_test_adapter,
 ):
     import stat
+    _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch)
     _exercise_preflight_observation_v1(tmp_path, monkeypatch)
     _exercise_preflight_candidate_debits_v1(tmp_path, monkeypatch)
     _exercise_preflight_transport_v1(tmp_path, monkeypatch, capsys)
@@ -20224,3 +20225,189 @@ def _exercise_preflight_transport_v1(tmp_path, monkeypatch, capsys):
         scoped.setattr(runner,'_legacy_run_commands_test_adapter_active',lambda:False)
         with pytest.raises(RuntimeError,match='NATIVE_HOST_PROVIDER_UNAVAILABLE'):
             runner.main(['--phase','fast-preflight','--preflight-input',str(area/'missing.bin')])
+
+
+def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
+    """Reference/policy and actual regular-file checks, never Linux qualification."""
+    import ast
+    import io
+    from tools import validation_reliability as o
+    mib,gib = 1024**2,1024**3
+    assert o._linux_preflight_name_v1(17,23) == 'qtt17n23'
+    for pid,tick in ((True,23),(0,23),(17,-1),(17,True)):
+        with pytest.raises(o.ValidationReliabilityError): o._linux_preflight_name_v1(pid,tick)
+    valid = '/opt/hostedtoolcache/Python/3.14.6/x64'
+    assert o._linux_preflight_path_v1(valid) == valid
+    for path in ('relative','/','/a/','/a//b','/a/../b','/a/./b','/a b','/a:b','/a%b','/a\\b','/a\nb','/a\0b','/caf\u00e9'):
+        with pytest.raises(o.ValidationReliabilityError): o._linux_preflight_path_v1(path)
+    root,runtime,control = '/work/QTT_New0526','/run/qtt17n23','/run/qtt17n23control'
+    environment = o._linux_preflight_environment_v1(repository=root,installation=valid,runtime=runtime,control=control)
+    call = dict(name='qtt17n23',private_root=control+'/root',runtime=runtime,control=control,spool=control+'/spool',
+        repository=root,installation=valid,interpreter=valid+'/bin/python',startup_deadline_ns=70000000000,environment=environment)
+    argv = o._linux_preflight_service_argv_v1(**call)
+    assert argv[:4] == ('/usr/bin/systemd-run','--system','--no-ask-password','--expand-environment=no')
+    assert argv.count('--') == 1 and '--unit=qtt17n23.service' in argv and '--slice=qtt17n23.slice' in argv
+    assert not set(argv) & {'--scope','--pty','--pipe','--collect','--shell','--wait'}
+    assert argv[argv.index('--')+1:] == (valid+'/bin/python','-I','-B','-X','utf8',root+'/tools/run_validation_gates.py',
+        '--linux-preflight-enter','--phase','fast-preflight','--startup-deadline-ns','70000000000')
+    properties = [part.removeprefix('--property=') for part in argv if part.startswith('--property=')]
+    assert len(properties) == len({v.split('=',1)[0] for v in properties})
+    required = {'Type=exec','Restart=no','RemainAfterExit=yes','DynamicUser=yes','UMask=0077','NoNewPrivileges=yes',
+        'CapabilityBoundingSet=','AmbientCapabilities=','PrivateDevices=yes','PrivateNetwork=yes','PrivateIPC=yes',
+        'InaccessiblePaths=/dev/shm /dev/mqueue /dev/hugepages','PrivateTmp=no','ProtectSystem=strict','ProtectHome=tmpfs',
+        'MountAPIVFS=yes','ProtectProc=invisible','ProtectControlGroups=yes','ProtectKernelTunables=yes',
+        'ProtectKernelModules=yes','ProtectKernelLogs=yes','RestrictSUIDSGID=yes','RestrictRealtime=yes',
+        'RestrictNamespaces=yes','LockPersonality=yes','RestrictAddressFamilies=AF_UNIX','SystemCallArchitectures=native',
+        'SystemCallFilter=~@mount @reboot @swap @raw-io @module','MemoryAccounting=yes','MemoryMax=6442450944',
+        'MemorySwapMax=0','TasksAccounting=yes','TasksMax=64','CPUAccounting=yes','CPUQuota=200%',
+        'CPUQuotaPeriodSec=100ms','RuntimeMaxSec=3600','TimeoutStartSec=60','TimeoutStopSec=10',
+        'KillMode=control-group','SendSIGKILL=yes','LimitCORE=0','LimitNOFILE=1024','LimitFSIZE=67108864',
+        'RuntimeDirectoryMode=0700','RuntimeDirectoryPreserve=yes','RootDirectory='+control+'/root',
+        'WorkingDirectory='+root,'RuntimeDirectory=qtt17n23','StandardInput=null',
+        'StandardOutput=append:'+control+'/spool/command-1.stdout.bin','StandardError=append:'+control+'/spool/command-1.stderr.bin'}
+    assert required <= set(properties)
+    assert len(properties) == len(required)+3  # Exact two bind lists and writable-path restriction.
+    for field in ('private_root','runtime','control','spool','repository','installation','interpreter'):
+        damaged = {**call,field:call[field]+' bad'}
+        assert damaged[field] != call[field]
+        with pytest.raises(o.ValidationReliabilityError): o._linux_preflight_service_argv_v1(**damaged)
+    for key in ('LD_PRELOAD','GITHUB_TOKEN','SSH_AUTH_SOCK','DBUS_SESSION_BUS_ADDRESS'):
+        damaged = {**environment,key:'unadmitted'}
+        assert damaged != environment
+        with pytest.raises(o.ValidationReliabilityError): o._linux_preflight_service_argv_v1(**{**call,'environment':damaged})
+    policy = o._linux_preflight_grants_v1(23)
+    assert policy['candidate_limits'] == dict(entry_limit=100000,snapshot_byte_limit=512*mib,read_byte_limit=64*gib,
+        deadline_ns=23+3550*10**9)
+    assert policy['native_deadline_ns'] == 23+3560*10**9
+    assert policy['execution_deadline_ns'] == 23+3600*10**9
+    assert policy['settlement_deadline_ns'] == 23+3720*10**9
+    assert tuple(policy['capture'].values()) == (2000000,32*gib,4000000,2*gib,0,0,0,0)
+    assert policy['terminal'] == policy['capture'] and policy['terminal'] is not policy['capture']
+    assert tuple(policy['native'].values()) == (2*gib,16*mib,16000000,64,64*mib,2000000,2000000,65536,2*gib,8*mib)
+    for n,row in enumerate(policy['rows'],1):
+        assert tuple(row['limits'].values())[:4] == (2000000,16*gib,2000000,gib)
+        assert tuple(row['limits'].values())[4:] == ((0,0,0,0) if n in (2,4,6) else (64,16*mib,16*mib,32*mib))
+        assert set(row['parent_tail_reserve'].values()) == {0}
+        assert row['deadline_ns'] == 23+3500*10**9 and row['settlement_deadline_ns'] == 23+3510*10**9
+        assert tuple(row['transport'].values()) == (512*mib,8*mib,4000000,64,64*mib,2000000,2000000,65536,gib,8*mib)
+    assert o._linux_preflight_storage_reservation_v1((64*mib,)*8,(8*mib,)*8,4096) == gib
+    assert o._linux_preflight_storage_reservation_v1((24,)*8,(1024,)*8,4096) == 448*mib+16*4096
+    for position in range(8):
+        damaged = [64*mib]*8; damaged[position] += 1
+        assert tuple(damaged) != (64*mib,)*8
+        with pytest.raises(o.ValidationReliabilityError,match='FILE_INTERSECTION'):
+            o._linux_preflight_storage_reservation_v1(tuple(damaged),(8*mib,)*8,4096)
+    with pytest.raises(o.ValidationReliabilityError): o._linux_preflight_storage_reservation_v1((24,)*8,(8*mib+1,)*8,4096)
+    with pytest.raises(o.ValidationReliabilityError): o._linux_preflight_storage_reservation_v1((24,)*8,(1024,)*8,3)
+    assert o._linux_preflight_ancestor_values_v1(b'max\n',b'max\n',b'max 100000\n') == ('max','max',('max',100000))
+    assert o._linux_preflight_ancestor_values_v1(b'6442450944\n',b'64\n',b'200000 100000\n',owned=True) == (
+        6442450944,64,(200000,100000))
+    for operands in ((b'6442450943\n',b'64\n',b'200000 100000\n'),
+            (b'6442450944\n',b'63\n',b'200000 100000\n'),(b'max\n',b'max\n',b'199999 100000\n'),
+            (b'',b'max\n',b'max 100000\n'),(b'06442450944\n',b'64\n',b'200000 100000\n')):
+        with pytest.raises(o.ValidationReliabilityError): o._linux_preflight_ancestor_values_v1(*operands)
+    with pytest.raises(o.ValidationReliabilityError): o._linux_preflight_ancestor_values_v1(b'max\n',b'64\n',b'200000 100000\n',owned=True)
+    mounts = o._linux_preflight_mounts_v1(b'11 1 0:9 / /run/qtt17n23 rw,nosuid,nodev,noexec - tmpfs qtt-runtime rw,size=1048576k\n')
+    assert len(mounts) == 1 and mounts[0]['device'] == '0:9' and mounts[0]['fs'] == 'tmpfs'
+    assert {'noexec','nodev','nosuid'} <= mounts[0]['options']
+    for raw in (b'11 1 0:9 missing\n',b'11 1 0:9 / /x ro - tmpfs x ro\n'*2):
+        with pytest.raises(o.ValidationReliabilityError): o._linux_preflight_mounts_v1(raw)
+    event = dict(number=298,repository=dict(full_name='Q8Meow/QTT_New0526'),pull_request=dict(number=298,draft=True,
+        head=dict(ref='repair/main-cumulative-v35-final-r5-local-20260922',repo=dict(full_name='Q8Meow/QTT_New0526')),
+        base=dict(ref='main',repo=dict(full_name='Q8Meow/QTT_New0526'))))
+    env = dict(GITHUB_ACTIONS='true',GITHUB_EVENT_NAME='pull_request',GITHUB_REPOSITORY='Q8Meow/QTT_New0526',GITHUB_WORKSPACE=root)
+    runner._linux_preflight_eligibility_v1(event,env,root)
+    import copy
+    for mutate in (lambda d:d.update(number=299),lambda d:d['pull_request'].update(draft=False),
+            lambda d:d['pull_request']['head'].update(ref='main'),
+            lambda d:d['pull_request']['base'].update(ref='other'),
+            lambda d:d['pull_request']['head']['repo'].update(full_name='fork/QTT_New0526')):
+        damaged = copy.deepcopy(event); mutate(damaged); assert damaged != event
+        with pytest.raises(o.ValidationReliabilityError): runner._linux_preflight_eligibility_v1(damaged,env,root)
+    with pytest.raises(o.ValidationReliabilityError): runner._linux_preflight_eligibility_v1(event,{**env,'GITHUB_EVENT_NAME':'workflow_dispatch'},root)
+    assert runner._linux_preflight_selected_v1(['--phase','fast-preflight'],(None,None,None)) is None
+    for arguments in (['--linux-preflight-provision','--phase','all'],
+            ['--linux-preflight-provision','--linux-preflight-enter','--phase','fast-preflight'],
+            ['--linux-preflight-enter','--phase','fast-preflight'],
+            ['--linux-preflight-provision','--phase','fast-preflight','--preflight-input','/outside'],
+            ['--startup-deadline-ns','1']):
+        with pytest.raises(ValueError): runner._linux_preflight_selected_v1(arguments,(None,None,None))
+    with pytest.raises(ValueError): runner._linux_preflight_selected_v1(
+        ['--linux-preflight-provision','--phase','fast-preflight'],(object(),None,None))
+    if sys.platform != 'linux':
+        with pytest.raises(o.ValidationReliabilityError,match='SELECTED_PLATFORM'):
+            runner.main(['--linux-preflight-provision','--phase','fast-preflight'])
+    with monkeypatch.context() as patch:
+        patch.delenv('QTT_LINUX_PREFLIGHT_CONTROL',raising=False)
+        assert o._linux_preflight_git_environment_v1(Path(root),None) == {}
+    # Real tail bytes and real ordinary-file EOF, without a fake native process.
+    area = tmp_path/'linux-profile-reference'; area.mkdir()
+    spool = area/'spool'; spool.write_bytes(b'')
+    tail = o._LinuxPreflightTailV1(spool)
+    destination = io.BytesIO()
+    outcome = dict(retention_limit=32,retained_byte_count=0,drained_byte_count=0,evidence_write_enabled=True)
+    try:
+        assert o._consume_available_pipe(tail,destination,outcome=outcome,native_terminal=False) == (False,False)
+        with spool.open('ab') as stream: stream.write(b'actual regular-file bytes')
+        assert o._consume_available_pipe(tail,destination,outcome=outcome,native_terminal=False) == (True,False)
+        assert destination.getvalue() == b'actual regular-file bytes'
+        assert o._consume_available_pipe(tail,destination,outcome=outcome,native_terminal=False) == (False,False)
+        assert o._consume_available_pipe(tail,destination,outcome=outcome,native_terminal=True) == (False,True)
+        assert outcome['drained_byte_count'] == outcome['retained_byte_count'] == 25
+    finally: tail.close()
+    with spool.open('rb') as ordinary:
+        ordinary.seek(0,2)
+        assert o._consume_available_pipe(ordinary,io.BytesIO(),outcome={},native_terminal=False) == (False,True)
+    # The complete original writer has the final permission transition before
+    # its no-overwrite publication; this is structural evidence on Windows.
+    tree = ast.parse(Path(o.__file__).read_text(encoding='utf-8'))
+    writer = next(n for n in tree.body if isinstance(n,ast.FunctionDef) and n.name == '_atomic_write_bytes_v1')
+    calls = [(n.lineno,ast.unparse(n.func)) for n in ast.walk(writer) if isinstance(n,ast.Call)]
+    assert next(line for line,name in calls if name == 'os.fchmod') < next(line for line,name in calls if name == 'os.link')
+    # Real original startup projection strips Python inputs. This checks the
+    # policy join only; it does not instantiate or approve a native lease.
+    runtime_path = area/'runtime'; runtime_path.mkdir()
+    vector = (sys.executable,'tools/validate_repair_pr_changed_file_scope.py','--repo-root','.')
+    projected,_ = o._preflight_environment_v1(vector,dict(environment),cache_root=runtime_path/'cache')
+    o._linux_preflight_child_environment_v1(environment,projected,runtime_path)
+    for key,value in (('PYTHONPATH','/outside'),('PYTHONUTF8','1'),('LD_LIBRARY_PATH','/outside'),
+            ('GITHUB_TOKEN','fake'),('PYTHONPYCACHEPREFIX',str(tmp_path/'outside'))):
+        damaged = {**projected,key:value}; assert damaged != projected
+        with pytest.raises(o.ValidationReliabilityError):
+            o._linux_preflight_child_environment_v1(environment,damaged,runtime_path)
+    # Independent manager-output operands, not read back from the argv producer.
+    status = dict(Type='exec',Restart='no',RemainAfterExit='yes',DynamicUser='yes',UMask='0077',
+        NoNewPrivileges='yes',CapabilityBoundingSet='',AmbientCapabilities='',PrivateDevices='yes',
+        PrivateNetwork='yes',PrivateIPC='yes',PrivateTmp='no',ProtectSystem='strict',ProtectHome='tmpfs',
+        MountAPIVFS='yes',ProtectProc='invisible',ProtectControlGroups='yes',ProtectKernelTunables='yes',
+        ProtectKernelModules='yes',ProtectKernelLogs='yes',RestrictSUIDSGID='yes',RestrictRealtime='yes',
+        RestrictNamespaces='yes',LockPersonality='yes',RestrictAddressFamilies='AF_UNIX',SystemCallArchitectures='native',
+        MemoryAccounting='yes',MemoryMax='6442450944',MemorySwapMax='0',TasksAccounting='yes',TasksMax='64',
+        CPUAccounting='yes',CPUQuotaPerSecUSec='2s',CPUQuotaPeriodUSec='100ms',RuntimeMaxUSec='1h',
+        TimeoutStartUSec='1min',TimeoutStopUSec='10s',KillMode='control-group',SendSIGKILL='yes',
+        LimitCORE='0',LimitNOFILE='1024',LimitFSIZE='67108864',RuntimeDirectoryMode='0700',
+        RuntimeDirectoryPreserve='yes',StandardInput='null',StandardOutput='append',StandardError='append',
+        RootDirectory=control+'/root',WorkingDirectory=root,RuntimeDirectory='qtt17n23',Slice='qtt17n23.slice',
+        InaccessiblePaths='/dev/shm /dev/mqueue /dev/hugepages',ReadWritePaths=runtime+' /tmp /var/tmp',
+        SystemCallFilter='~mount reboot swapon init_module')
+    options = dict(name='qtt17n23',root=control+'/root',repository=root,runtime=runtime,
+        syscall_filter=frozenset(('mount','reboot','swapon','init_module')))
+    o._linux_preflight_unit_policy_v1(status,**options)
+    for key in status:
+        damaged = {**status,key:status[key]+' changed'}; assert damaged[key] != status[key]
+        with pytest.raises(o.ValidationReliabilityError): o._linux_preflight_unit_policy_v1(damaged,**options)
+        damaged = {k:v for k,v in status.items() if k != key}
+        with pytest.raises(o.ValidationReliabilityError): o._linux_preflight_unit_policy_v1(damaged,**options)
+    original = area/'original-evidence'
+    with original.open('xb') as destination:
+        tail = o._LinuxPreflightTailV1(original,original_evidence=True)
+        counters = dict(retention_limit=64,retained_byte_count=0,drained_byte_count=0,evidence_write_enabled=True)
+        try:
+            with original.open('ab') as writer: writer.write(b'original manager bytes')
+            with monkeypatch.context() as patch:
+                patch.setattr(o,'_write_evidence_chunk',lambda *a:pytest.fail('raw manager evidence was rewritten'))
+                assert o._consume_available_pipe(tail,destination,outcome=counters,native_terminal=True) == (True,False)
+            assert original.read_bytes() == b'original manager bytes'
+            assert counters['retained_byte_count'] == counters['drained_byte_count'] == 22
+        finally: tail.close()
+    print('LINUX_PREFLIGHT_REFERENCE_CHECKS_PASSED; native_systemd_enforcement=NOT_EXECUTED',flush=True)

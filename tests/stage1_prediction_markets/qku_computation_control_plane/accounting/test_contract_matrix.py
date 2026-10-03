@@ -492,6 +492,8 @@ def test_reference_adapter_atomic_commit_rollback_and_replay(adapter_kind, refer
     _assert_f13_transaction_truth(adapter_kind, reference_directory)
     _assert_f14_native_and_storage(adapter_kind, reference_directory)
     _assert_v35_artifact_finalization()
+    _assert_v35_sqlite_artifact_schema(reference_directory)
+    _assert_v35_sqlite_artifact_store(reference_directory)
     _assert_v35_control_storage(adapter_kind, reference_directory)
 
 
@@ -2943,3 +2945,344 @@ def _assert_f14_composition_prefixes():
                 assert out['committed_stage'] == stage and out['runtime_effect_authorized'] is False
                 accepted += 1
     assert (checked,accepted) == (1920,16)
+
+
+def _assert_v35_sqlite_artifact_schema(directory):
+    """Actual fixed-schema reference checks; not a completed artifact backend."""
+    import sqlite3
+    import tempfile
+    from pathlib import Path
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane.persistence import (
+        _probability_artifact_schema_statements_v1,
+        _probability_artifact_sqlite_options_v1,
+        _PROBABILITY_ARTIFACT_CONNECTION_PRAGMAS_V1,
+    )
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane.errors import PersistenceContractError
+    assert sqlite3.sqlite_version_info >= (3, 37, 0)
+    with pytest.raises(PersistenceContractError):
+        _probability_artifact_sqlite_options_v1(read_only=1)
+    statements = _probability_artifact_schema_statements_v1()
+    assert len(statements) == 15
+    assert sum(s.startswith("CREATE TABLE ") for s in statements) == 4
+    assert sum(s.startswith("CREATE TRIGGER ") for s in statements) == 11
+    with tempfile.TemporaryDirectory(prefix="artifact-policy-", dir=directory) as temporary:
+        path = Path(temporary) / "artifact.db"
+        writer = sqlite3.connect(str(path), **_probability_artifact_sqlite_options_v1(read_only=False))
+        reader = None
+        try:
+            writer.row_factory, writer.text_factory = None, str
+            for name, setting, expected in _PROBABILITY_ARTIFACT_CONNECTION_PRAGMAS_V1:
+                writer.execute(f"PRAGMA {name}={setting}").close()
+                assert writer.execute(f"PRAGMA {name}").fetchone() == (expected,)
+            assert writer.execute("PRAGMA journal_mode=DELETE").fetchone() == ("delete",)
+            writer.execute("PRAGMA page_size=4096").close()
+            assert writer.execute("PRAGMA page_size").fetchone() == (4096,)
+            assert writer.execute("PRAGMA max_page_count=65536").fetchone() == (65536,)
+            assert writer.in_transaction is False
+            writer.execute("BEGIN IMMEDIATE").close()
+            assert writer.in_transaction is True
+            for sql in statements:
+                writer.execute(sql).close()
+            writer.execute("COMMIT").close()
+            assert writer.in_transaction is False
+            intent = ("scope", "artifact", "result", "[]", "253402300799999999999", 16, 2)
+            writer.execute("BEGIN IMMEDIATE").close()
+            writer.execute("INSERT INTO artifact_intents VALUES (?,?,?,?,?,?,?)", intent).close()
+            writer.execute("COMMIT").close()
+            reader = sqlite3.connect(path.as_uri() + "?mode=ro", **_probability_artifact_sqlite_options_v1(read_only=True))
+            reader.row_factory, reader.text_factory = None, str
+            for name, setting, expected in _PROBABILITY_ARTIFACT_CONNECTION_PRAGMAS_V1:
+                reader.execute(f"PRAGMA {name}={setting}").close()
+                assert reader.execute(f"PRAGMA {name}").fetchone() == (expected,)
+            writer.execute("BEGIN IMMEDIATE").close()
+            writer.execute("INSERT INTO artifact_frames VALUES (?,?,?,?,?)", ("scope", "artifact", 0, 2, b"a\n")).close()
+            reader.execute("BEGIN").close()
+            assert reader.in_transaction is True
+            assert reader.execute("SELECT count(*) FROM artifact_frames").fetchone() == (0,)
+            reader.execute("COMMIT").close()
+            assert reader.in_transaction is False
+            with pytest.raises(sqlite3.IntegrityError, match="ordinal"):
+                writer.execute("INSERT INTO artifact_frames VALUES (?,?,?,?,?)", ("scope", "artifact", 2, 4, b"b\n"))
+            with pytest.raises(sqlite3.IntegrityError, match="cumulative"):
+                writer.execute("INSERT INTO artifact_frames VALUES (?,?,?,?,?)", ("scope", "artifact", 1, 5, b"b\n"))
+            cursor = writer.execute("SELECT raw FROM artifact_frames ORDER BY ordinal")
+            assert cursor.fetchone() == (b"a\n",)
+            assert cursor.fetchone() is None
+            cursor.close()
+            writer.execute("INSERT INTO artifact_seals VALUES (?,?,?,?,?)", ("scope", "artifact", 2, 1, "1600000000000000000")).close()
+            writer.execute("COMMIT").close()
+            assert writer.in_transaction is False
+            reader.execute("BEGIN").close()
+            assert reader.execute("SELECT raw FROM artifact_frames").fetchone() == (b"a\n",)
+            reader.execute("COMMIT").close()
+            for sql, values in (
+                ("INSERT OR REPLACE INTO artifact_intents VALUES (?,?,?,?,?,?,?)", intent),
+                ("INSERT OR REPLACE INTO artifact_seals VALUES (?,?,?,?,?)", ("scope", "artifact", 2, 1, "1600000000000000001")),
+            ):
+                with pytest.raises(sqlite3.IntegrityError, match="append only"):
+                    writer.execute(sql, values)
+            writer.execute("BEGIN IMMEDIATE").close()
+            writer.execute("INSERT INTO artifact_intents VALUES (?,?,?,?,?,?,?)", ("scope", "aborted", *intent[2:])).close()
+            writer.execute("COMMIT").close()
+            writer.execute("BEGIN IMMEDIATE").close()
+            writer.execute("INSERT INTO artifact_frames VALUES (?,?,?,?,?)", ("scope", "aborted", 0, 2, b"c\n")).close()
+            writer.execute("ROLLBACK").close()
+            assert writer.in_transaction is False
+            writer.execute("BEGIN IMMEDIATE").close()
+            abort = ("scope", "aborted", "UNPUBLISHED_STAGE_ABORTED", "1600000000000000002")
+            writer.execute("INSERT INTO artifact_aborts VALUES (?,?,?,?)", abort).close()
+            writer.execute("COMMIT").close()
+            with pytest.raises(sqlite3.IntegrityError, match="append only"):
+                writer.execute("INSERT OR REPLACE INTO artifact_aborts VALUES (?,?,?,?)", abort)
+            with pytest.raises(sqlite3.IntegrityError, match="already terminal"):
+                writer.execute("INSERT INTO artifact_frames VALUES (?,?,?,?,?)", ("scope", "artifact", 1, 4, b"d\n"))
+            with pytest.raises(sqlite3.IntegrityError, match="sealed artifact"):
+                writer.execute("INSERT INTO artifact_aborts VALUES (?,?,?,?)", ("scope", "artifact", "UNPUBLISHED_STAGE_ABORTED", "1600000000000000003"))
+        finally:
+            if reader is not None:
+                reader.close()
+            writer.close()
+
+
+def _assert_v35_sqlite_artifact_store(directory):
+    """Actual artifact protocols and file storage, with injected failure labels."""
+    import dataclasses
+    import ast
+    import json
+    import os
+    from pathlib import Path
+    import sqlite3
+    import tempfile
+    import time
+    from unittest.mock import patch
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane import persistence as owner
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane.models import (
+        ProbabilityProducerScopeV1, ProbabilityPredictionArtifactWriteRequestV1,
+    )
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane.serialization import _decode_prediction_artifact_v1
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane.errors import PersistenceContractError
+    from tools import independent_validate_qku_computation_control_plane_execution as independent
+    boundary = independent._sqlite_artifact_ownership_failures_v1
+    assert not boundary(ast.parse(Path(owner.__file__).read_text(encoding="utf-8")), "persistence.py")
+    for source in ("import sqlite3", "from sqlite3 import connect", "class PersistenceAdapterV1:\n    import sqlite3",
+                   "class InMemoryPersistenceAdapterV1:\n    from sqlite3 import connect",
+                   "def unrelated():\n    import sqlite3"):
+        assert boundary(ast.parse(source), "persistence.py")
+    for name in ("persistence.py", "economic_math.py"):
+        assert boundary(ast.parse("class SQLiteProbabilityArtifactStoreV1(PersistenceAdapterV1):\n    import sqlite3"), name)
+    assert boundary(ast.parse("def _probability_artifact_sqlite_options_v1():\n    import sqlite3"), "outbox.py")
+    scope = ProbabilityProducerScopeV1("KALSHI_US_DCM_DIRECT", "ENG:model", "ENG:manifest", "ENG:lock",
+        "ENG:reference", "ENG:family", "ENG:policy", "ENG:environment", 1)
+    deadline = time.monotonic_ns() + 60*10**9
+    expiry = time.time_ns() + 60*10**9
+    counts = []
+    with tempfile.TemporaryDirectory(prefix="artifact-store-", dir=directory) as name:
+        root = Path(name)
+        root_identity = (root.stat().st_dev, root.stat().st_ino)
+        def custody(path):
+            assert path.parent == root and not root.is_symlink()
+            assert (root.stat().st_dev, root.stat().st_ino) == root_identity
+        def store(file, *, create=True):
+            return owner.SQLiteProbabilityArtifactStoreV1(root/file, check_custody=custody,
+                deadline_monotonic_ns=deadline, max_artifact_bytes=65536, max_frames=128,
+                max_metadata_bytes=262144, storage_reserved_bytes=553648128, create=create)
+        def request(ref="artifact", **changes):
+            return dataclasses.replace(ProbabilityPredictionArtifactWriteRequestV1(ref, scope, "ENG:result",
+                ("ENG:model", "ENG:lock"), expiry, 65536, 128, deadline), **changes)
+        bank = (-0.0, [True, 3], {"finite": 0.25})
+        first = store("sealed # source.db")
+        try:
+            seal = owner._finalize_prediction_artifact_v1(bank=bank, request=request(), artifact_writer=first)
+            assert seal.result_ref == "ENG:result" and seal.byte_count > 0 and seal.frame_count > 0
+            with first.open_prediction_artifact_v1(artifact_ref="artifact", scope=scope, max_bytes=65536, max_frames=128) as read:
+                original = read.immutable_bytes
+                assert read.byte_count == seal.byte_count and read.frame_count == seal.frame_count
+                assert read.dependency_refs == seal.dependency_refs
+                decoded, decoded_frames = _decode_prediction_artifact_v1(original, max_bytes=65536, max_frames=128)
+                assert decoded == bank and decoded_frames == seal.frame_count
+            counts.extend(dict(v) for v in first.accounting)
+        finally:
+            first.close()
+        reopened = store("sealed # source.db", create=False)
+        try:
+            with reopened.open_prediction_artifact_v1(artifact_ref="artifact", scope=scope, max_bytes=65536, max_frames=128) as read:
+                assert read.immutable_bytes == original
+            with pytest.raises(BaseException):
+                with reopened.begin_prediction_artifact_v1(request()):
+                    raise AssertionError("duplicate intent must not be yielded")
+        finally:
+            reopened.close()
+        # Actual staged EOF, transaction visibility and identity are independent
+        # of the finalizer's original-bank numerical comparison.
+        staged = store("stage.db")
+        observer = None
+        try:
+            with staged.begin_prediction_artifact_v1(request()) as session:
+                assert session.state == "STAGING" and staged._writer.connection.in_transaction
+                session.append_prediction_frame_v1(b"1\n")
+                observer = sqlite3.connect((root/"stage.db").as_uri()+"?mode=ro",
+                    **owner._probability_artifact_sqlite_options_v1(read_only=True))
+                assert observer.execute("SELECT count(*) FROM artifact_intents").fetchone() == (1,)
+                assert observer.execute("SELECT count(*) FROM artifact_frames").fetchone() == (0,)
+                iterator = session.iter_written_prediction_frames_v1()
+                assert next(iterator) == b"1\n"
+                assert not session.readback_eof and session._reading
+                assert next(iterator, None) is None and session.readback_eof and not session._reading
+                seal = session.seal_prediction_artifact_v1()
+                assert session.state == "SEALED" and not staged._writer.connection.in_transaction
+                assert observer.execute("SELECT count(*) FROM artifact_frames").fetchone() == (1,)
+                assert seal.byte_count == 2 and seal.frame_count == 1
+        finally:
+            if observer is not None:
+                observer.close()
+            staged.close()
+        aborted = store("aborted.db")
+        try:
+            with pytest.raises(PersistenceContractError, match="READBACK"):
+                with aborted.begin_prediction_artifact_v1(request()) as session:
+                    session.append_prediction_frame_v1(b"2\n")
+                    iterator = session.iter_written_prediction_frames_v1()
+                    assert next(iterator) == b"2\n"
+                    iterator.close()
+                    assert not session.readback_eof
+                    session.seal_prediction_artifact_v1()
+            assert session.state == "ABORTED" and not aborted._writer.connection.in_transaction
+            assert aborted._writer.connection.execute("SELECT count(*) FROM artifact_frames").fetchone() == (0,)
+            assert aborted._writer.connection.execute("SELECT count(*) FROM artifact_intents").fetchone() == (1,)
+            assert aborted._writer.connection.execute("SELECT count(*) FROM artifact_aborts").fetchone() == (1,)
+            with pytest.raises(PersistenceContractError):
+                with aborted.open_prediction_artifact_v1(artifact_ref="artifact", scope=scope, max_bytes=65536, max_frames=128):
+                    raise AssertionError("an abort is not a published artifact")
+        finally:
+            aborted.close()
+        for case, frame in (("type", True), ("overflow", b"123\n")):
+            denied = store(case+".db")
+            try:
+                with pytest.raises(ComputationControlPlaneError):
+                    with denied.begin_prediction_artifact_v1(request(max_artifact_bytes=2)) as session:
+                        session.append_prediction_frame_v1(frame)
+                assert denied._writer.connection.execute("SELECT count(*) FROM artifact_aborts").fetchone() == (1,)
+                assert denied._writer.connection.execute("SELECT count(*) FROM artifact_seals").fetchone() == (0,)
+            finally:
+                denied.close()
+        # Inject a report failure AFTER a real seal COMMIT, not a power-loss claim.
+        uncertain = store("uncertain.db")
+        actual_statement = owner._ProbabilityArtifactSqlConnectionV1.statement
+        statements = []
+        def reported_failure(sql_owner, sql, values=(), *, cleanup=False):
+            statements.append(sql)
+            result = actual_statement(sql_owner, sql, values, cleanup=cleanup)
+            if sql == "COMMIT" and uncertain._active is not None and uncertain._active.state == "SEAL_ATTEMPTED":
+                raise OSError("INJECTED_AFTER_SEAL_COMMIT_REPORT_FAILURE")
+            return result
+        try:
+            with patch.object(owner._ProbabilityArtifactSqlConnectionV1, "statement", reported_failure):
+                with pytest.raises(OSError, match="INJECTED_AFTER_SEAL_COMMIT"):
+                    owner._finalize_prediction_artifact_v1(bank=bank, request=request(), artifact_writer=uncertain)
+            assert len(uncertain._uncertain) == 1 and uncertain._uncertain[0].state == "UNKNOWN"
+            assert "ROLLBACK" not in statements and not any("INSERT INTO artifact_aborts" in sql for sql in statements)
+            assert uncertain._writer.connection.execute("SELECT count(*) FROM artifact_seals").fetchone() == (1,)
+            with pytest.raises(OSError, match="INJECTED_AFTER_SEAL_COMMIT"):
+                with uncertain.begin_prediction_artifact_v1(request("second")):
+                    raise AssertionError("uncertain store reused")
+        finally:
+            uncertain.close()
+        assert uncertain._uncertain[0].state == "UNKNOWN"
+        # Native progress interruption retains the original custody exception.
+        interrupted = store("interrupted.db")
+        sentinel = RuntimeError("INJECTED_CUSTODY_FAILURE_DURING_SQL_PROGRESS")
+        original_check = interrupted._custody
+        def failing_custody(path):
+            original_check(path)
+            if interrupted._writer.ledger["progress_entries"]:
+                raise sentinel
+        interrupted._custody = failing_custody
+        try:
+            with pytest.raises(BaseExceptionGroup) as caught:
+                interrupted._writer.scalar("WITH RECURSIVE c(x) AS (VALUES(0) UNION ALL SELECT x+1 FROM c WHERE x<100000) SELECT sum(x) FROM c")
+            assert any(error is sentinel for error in caught.value.exceptions)
+            assert interrupted._writer.ledger["progress_entries"] == 1
+        finally:
+            interrupted.close()
+        # A completed seal survives a separate denied receipt append.
+        retained = store("receipt-denied.db")
+        try:
+            seal = owner._finalize_prediction_artifact_v1(bank=bank, request=request(), artifact_writer=retained)
+            from tests.stage1_prediction_markets.qku_computation_control_plane.tranche_e import _synthetic_prediction_receipt_graph
+            _, denied_records, denied_ids, *_ = _synthetic_prediction_receipt_graph()
+            receipt_adapter = SQLiteReferenceAdapterV1(root/"receipt-adapter.db", busy_timeout_ms=0, max_transaction_attempts=1)
+            transaction = receipt_adapter.begin_transaction()
+            try:
+                with pytest.raises(ComputationControlPlaneError, match="ST12A_OWNER_DATA_MISSING: probability append context is absent"):
+                    receipt_adapter.insert_receipt_record(transaction, denied_records[denied_ids["RESULT"]])
+                assert receipt_adapter._connection.execute("SELECT count(*) FROM receipt_records").fetchone() == (0,)
+            finally:
+                transaction.rollback()
+                receipt_adapter.close()
+            with retained.open_prediction_artifact_v1(artifact_ref="artifact", scope=scope, max_bytes=65536, max_frames=128) as read:
+                assert read.byte_count == seal.byte_count and read.immutable_bytes == original
+        finally:
+            retained.close()
+        for field in ("max_artifact_bytes", "max_frames", "deadline_monotonic_ns", "valid_until_ns"):
+            with pytest.raises(ComputationControlPlaneError):
+                request(**{field: True})
+        for kind in ("scope", "reference"):
+            denied = store("sealed # source.db", create=False)
+            try:
+                with pytest.raises(PersistenceContractError, match="METADATA"):
+                    with denied.open_prediction_artifact_v1(
+                        artifact_ref="other" if kind == "reference" else "artifact",
+                        scope=dataclasses.replace(scope, generation=2) if kind == "scope" else scope,
+                        max_bytes=65536, max_frames=128):
+                        raise AssertionError("wrong original identity resolved")
+            finally:
+                denied.close()
+        capacity = store("capacity.db")
+        try:
+            for i in range(4):
+                with capacity.begin_prediction_artifact_v1(request(str(i))) as session:
+                    session.abort_unpublished_prediction_stage_v1()
+            assert capacity._writer.connection.execute("SELECT count(*) FROM artifact_intents").fetchone() == (4,)
+        finally:
+            capacity.close()
+        capacity = store("capacity.db", create=False)
+        try:
+            with pytest.raises(PersistenceContractError, match="IDENTITY_CEILING"):
+                with capacity.begin_prediction_artifact_v1(request("fifth")):
+                    raise AssertionError("persistent identity cap was reset by reopen")
+            assert capacity._writer.connection.execute("SELECT count(*) FROM artifact_intents").fetchone() == (4,)
+        finally:
+            capacity.close()
+        for operation in ("append", "abort"):
+            terminal = store("terminal-"+operation+".db")
+            try:
+                with pytest.raises(PersistenceContractError):
+                    with terminal.begin_prediction_artifact_v1(request()) as session:
+                        session.append_prediction_frame_v1(b"3\n")
+                        assert tuple(session.iter_written_prediction_frames_v1()) == (b"3\n",)
+                        session.seal_prediction_artifact_v1()
+                        if operation == "append":
+                            session.append_prediction_frame_v1(b"4\n")
+                        else:
+                            session.abort_unpublished_prediction_stage_v1()
+                assert terminal._writer.connection.execute("SELECT count(*) FROM artifact_seals").fetchone() == (1,)
+                assert terminal._writer.connection.execute("SELECT count(*) FROM artifact_aborts").fetchone() == (0,)
+            finally:
+                terminal.close()
+        changed = store("schema.db")
+        changed.close()
+        raw_connection = sqlite3.connect(str(root/"schema.db"))
+        try:
+            raw_connection.execute("CREATE TABLE unexpected(value TEXT)")
+        finally:
+            raw_connection.close()
+        with pytest.raises(PersistenceContractError, match="SCHEMA"):
+            store("schema.db", create=False)
+        with pytest.raises(PersistenceContractError, match="CLOCK_OR_DEADLINE"):
+            owner.SQLiteProbabilityArtifactStoreV1(root/"expired.db", check_custody=custody,
+                deadline_monotonic_ns=time.monotonic_ns()-1, max_artifact_bytes=65536,
+                max_frames=128, max_metadata_bytes=262144, storage_reserved_bytes=553648128, create=True)
+        assert not (root/"expired.db").exists()
+        print(json.dumps({"artifact_store_engine": sqlite3.sqlite_version, "qualification": "SYNTHETIC_ARTIFACT_ENGINEERING",
+            "sealed_reopened_bytes": len(original), "sql_accounting": counts,
+            "injected_commit_failure_retained": True, "native_progress_interruption": True}), flush=True)

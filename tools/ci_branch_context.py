@@ -3703,7 +3703,7 @@ def is_pr_or_later_branch(
     return pr_number is not None and pr_number >= minimum_pr
 
 
-def _run_repository_read_process(repo_root: pathlib.Path, selected: Sequence[str]) -> subprocess.CompletedProcess[str]:
+def _run_repository_read_process(repo_root: pathlib.Path, selected: Sequence[str], *, native_query=None) -> subprocess.CompletedProcess[str]:
     from tools.validation_reliability import _preflight_active_v1, _preflight_git_process_v1, _preflight_chain_v1
     observation = _preflight_active_v1(repo_root)
     if observation is not None:
@@ -3739,12 +3739,24 @@ def _run_repository_read_process(repo_root: pathlib.Path, selected: Sequence[str
         "GIT_CONFIG_VALUE_0": "false", "GIT_CONFIG_KEY_1": "protocol.allow",
         "GIT_CONFIG_VALUE_1": "never",
     })
+    from tools.validation_reliability import _linux_preflight_git_environment_v1
+    environment.update(_linux_preflight_git_environment_v1(root,observation))
     prefix = ["git", "--no-pager", "--literal-pathspecs", "-c",
               "core.fsmonitor=false", "-c", "protocol.allow=never"]
     options = dict(cwd=root, env=environment, stdin=subprocess.DEVNULL,
                    shell=False, check=False, capture_output=True,
                    text=True, encoding="utf-8", errors="strict")
+    if native_query is not None:
+        from tools.validation_reliability import _LinuxPreflightQueriesV1
+        if (type(native_query) is not _LinuxPreflightQueriesV1 or observation is not None
+                or tuple(selected) != ('rev-parse','--path-format=absolute','--git-path','index')):
+            raise ValueError('only the original bounded Linux active-index read is selected')
     def acquire(arguments):
+        if native_query is not None:
+            argv = ('/usr/bin/git',*prefix[1:],*arguments)
+            raw = native_query.command(argv,cwd=root,
+                git_environment={k:v for k,v in environment.items() if k.startswith('GIT_')})
+            return subprocess.CompletedProcess(argv,0,raw.decode('utf-8','strict'),'')
         if observation is not None:
             return _preflight_git_process_v1(observation, tuple([*prefix, *arguments]), root=root, environment=environment)
         return subprocess.run([*prefix, *arguments], **options)

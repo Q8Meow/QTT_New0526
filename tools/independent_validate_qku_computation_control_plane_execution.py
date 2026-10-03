@@ -1967,6 +1967,29 @@ def _v35_execution_surface_failures():
     return failures
 
 
+def _sqlite_artifact_ownership_failures_v1(tree, filename):
+    """Independent lexical boundary for the explicit artifact-only selection."""
+    if filename == "sqlite_reference.py":
+        return []
+    selected = {
+        "_probability_artifact_schema_statements_v1",
+        "_probability_artifact_sqlite_options_v1",
+        "SQLiteProbabilityArtifactStoreV1",
+    }
+    failures = []
+    for owner in tree.body:
+        for node in ast.walk(owner):
+            imported = (isinstance(node, ast.Import) and any(a.name.split(".", 1)[0] == "sqlite3" for a in node.names)
+                or isinstance(node, ast.ImportFrom) and node.module and node.module.split(".", 1)[0] == "sqlite3")
+            if imported and not (filename == "persistence.py" and isinstance(owner, (ast.ClassDef, ast.FunctionDef))
+                                and owner.name in selected):
+                failures.append(f"SQLite ownership leaked into {filename}:{getattr(owner, 'name', '<module>')}")
+    stores = [n for n in tree.body if isinstance(n, ast.ClassDef) and n.name == "SQLiteProbabilityArtifactStoreV1"]
+    if stores and (filename != "persistence.py" or len(stores) != 1 or stores[0].bases):
+        failures.append("artifact store must not replace/inherit the receipt ledger")
+    return failures
+
+
 def main() -> int:
     failures: list[str] = []
     try:
@@ -2037,8 +2060,7 @@ def main() -> int:
         }
         if roots & forbidden_imports:
             failures.append(f"forbidden operational import in {name}: {sorted(roots & forbidden_imports)}")
-        if "sqlite3" in roots and name != "sqlite_reference.py":
-            failures.append(f"SQLite ownership leaked into {name}")
+        failures.extend(_sqlite_artifact_ownership_failures_v1(tree, name))
     lifecycle_text = (PACKAGE / "lifecycle.py").read_text(encoding="utf-8")
     outbox_text = (PACKAGE / "outbox.py").read_text(encoding="utf-8")
     persistence_text = (PACKAGE / "persistence.py").read_text(encoding="utf-8")

@@ -3746,6 +3746,13 @@ def _fsync_directory(path: Path) -> None:
 
 def atomic_write_json(path: Path, payload: object) -> None:
     """Atomically publish one immutable external JSON receipt."""
+    encoded = (json.dumps(_json_compatible(payload), indent=2, sort_keys=True) + "\n").encode("utf-8")
+    _atomic_write_bytes_v1(path,encoded)
+
+
+def _atomic_write_bytes_v1(path, encoded, *, control_mode=None):
+    _preflight_require_v1(type(encoded) is bytes and control_mode in (None,0o444),
+        'exact immutable bytes and selected control publication mode required')
 
     destination = Path(os.path.abspath(os.path.normpath(str(path))))
     destination.parent.mkdir(parents=True, exist_ok=True)
@@ -3757,9 +3764,6 @@ def atomic_write_json(path: Path, payload: object) -> None:
     temporary = destination.with_name(
         f".{destination.name}.{os.getpid()}.{secrets.token_hex(4)}.tmp"
     )
-    encoded = (
-        json.dumps(_json_compatible(payload), indent=2, sort_keys=True) + "\n"
-    ).encode("utf-8")
     try:
         with temporary.open("xb") as stream:
             written = stream.write(encoded)
@@ -3769,6 +3773,8 @@ def atomic_write_json(path: Path, payload: object) -> None:
                     f"expected={len(encoded)} written={written}"
                 )
             stream.flush()
+            if control_mode is not None:
+                os.fchmod(stream.fileno(),control_mode)
             os.fsync(stream.fileno())
         os.link(temporary, destination)
         temporary.unlink()
@@ -5531,6 +5537,8 @@ def _consume_available_pipe(
         _scan_output_failure(outcome, exc)
         return False, True
     if not chunk:
+        if type(pipe) is _LinuxPreflightTailV1 and not native_terminal:
+            return False, False
         return False, True
     if "cleanup_drained_byte_count" in outcome and not outcome.get("evidence_write_enabled", True):
         outcome["cleanup_drained_byte_count"] += len(chunk)
@@ -5539,7 +5547,14 @@ def _consume_available_pipe(
     admitted = chunk if remaining is None else chunk[:remaining]
     if outcome.get("evidence_write_enabled", True) and admitted:
         try:
-            _write_evidence_chunk(destination, admitted)
+            if type(pipe) is _LinuxPreflightTailV1 and pipe.original_evidence:
+                # The manager appends to the supervisor's exclusively reserved
+                # file. Drain/account its original bytes without rewriting them.
+                info = os.fstat(destination.fileno())
+                _preflight_require_v1((info.st_dev,info.st_ino) == pipe.identity,
+                    'LINUX_PREFLIGHT_ORIGINAL_EVIDENCE_DESCRIPTOR')
+            else:
+                _write_evidence_chunk(destination, admitted)
         except BaseException as exc:
             _scan_output_failure(outcome, exc)
         else:
@@ -5623,6 +5638,9 @@ def _supervise_native_output(
                     raise ValueError("noninteger native exit")
                 native_exit = polled
                 terminal_at = time.monotonic()
+                if type(process) is _LinuxPreflightProcessV1 and not process.scope.slice_observation():
+                    failure_class = failure_class or 'ENGVR_PROCESS_DESCENDANTS_REMAIN'
+                    terminate_once()
                 if (type(process) is _WindowsJobProcessV1 and not process.scope.final_close_test
                         and not process.scope.membership(settling=True)):
                     process.scope.history.append(dict(root_terminal_nonempty=dict(
@@ -5810,6 +5828,8 @@ def _terminate_owned_process_tree(
     grace_seconds: float,
 ) -> tuple[str, bool]:
     if type(process) is _WindowsJobProcessV1:
+        return process.scope.terminate(grace_seconds)
+    if type(process) is _LinuxPreflightProcessV1:
         return process.scope.terminate(grace_seconds)
     pid = process.pid
     actions: list[str] = []
@@ -6043,6 +6063,7 @@ def supervise_command(
     selected_environment: dict[str, str] | None = None
     receipt = None
     job_scope = None
+    linux_scope = None
     try:
         try:
             if tuple_error is not None:
@@ -6069,6 +6090,13 @@ def supervise_command(
             elif _preflight_vector_v1(selected_argv) and (os.environ if selected_environment is None else selected_environment).get(RUN_ID_ENV):
                 raise ValueError("selected canonical preflight has no parent startup projection")
             job_scope = _WINDOWS_JOB_SCOPE_V1.get()
+            linux_scope = _LINUX_PREFLIGHT_PROCESS_V1.get()
+            if linux_scope is not None:
+                if (type(linux_scope) is not _LinuxPreflightScopeV1 or job_scope is not None
+                        or selected_platform != 'posix' or output_limits is None or launch_input is not None
+                        or phase != 'fast-preflight-native-service'
+                        or execution_deadline_ns != linux_scope.execution_deadline_ns):
+                    raise ValueError('exact isolated Linux service supervision required')
             if job_scope is not None:
                 if type(job_scope) is not _WindowsJobScopeV1 or output_limits is None or selected_platform != 'nt':
                     raise ValueError("explicit bounded Windows job invocation required")
@@ -6094,6 +6122,8 @@ def supervise_command(
                 _execution_remaining_seconds_v1(execution_deadline_ns)
             if job_scope is not None:
                 process = job_scope.create_suspended(original_stdin)
+            elif linux_scope is not None:
+                process = linux_scope.create(selected_argv,receipt_cwd,selected_environment)
             else:
                 process = subprocess.Popen(
                     list(selected_argv),
@@ -6112,13 +6142,16 @@ def supervise_command(
             pid = process.pid
         except Exception as exc:
             owned = getattr(exc, 'owned_process', None)
+            if linux_scope is not None and type(owned) is _LinuxPreflightProcessV1 and owned is linux_scope.process:
+                process = owned
+                pid = process.pid
             if (job_scope is not None and type(owned) is _WindowsJobProcessV1
                     and owned is job_scope.process and owned._info.process):
                 process = owned
                 pid = process.pid
-            if process is not None and job_scope is None:
+            if process is not None and job_scope is None and linux_scope is None:
                 raise
-            start_failure = (str(exc) if job_scope is not None else type(exc).__name__)
+            start_failure = (str(exc) if job_scope is not None or linux_scope is not None else type(exc).__name__)
             failure_class = "ENGVR_PROCESS_START_FAILED"
             if process is None:
                 _close_prestart_evidence_stream(stdout_stream, stdout_outcome)
@@ -6127,17 +6160,21 @@ def supervise_command(
                 _scan_output_failure(stdout_outcome, exc)
         except BaseException as body:
             owned = getattr(body, 'owned_process', None)
+            if (type(linux_scope) is _LinuxPreflightScopeV1 and type(owned) is _LinuxPreflightProcessV1
+                    and owned is linux_scope.process):
+                process = owned
+                pid = process.pid
             if (job_scope is not None and type(owned) is _WindowsJobProcessV1
                     and owned is job_scope.process and owned._info.process):
                 process = owned
                 pid = process.pid
             if process is not None:
-                if job_scope is not None:
+                if job_scope is not None or type(linux_scope) is _LinuxPreflightScopeV1:
                     failures = [body]
                     try:
                         _terminate_owned_process_tree(process,platform_name=selected_platform,
                             grace_seconds=termination_grace_seconds)
-                        job_scope.finish()
+                        (job_scope if job_scope is not None else linux_scope).finish()
                     except BaseException as cleanup_error:
                         failures.append(cleanup_error)
                     _scan_raise_errors(failures)
@@ -6202,6 +6239,13 @@ def supervise_command(
             except Exception as exc:
                 _scan_output_failure(stdout_outcome, exc)
                 failure_class = "ENGVR_PROCESS_TERMINATION_FAILED"
+        if type(linux_scope) is _LinuxPreflightScopeV1:
+            try:
+                if not linux_scope.finish():
+                    failure_class = 'ENGVR_PROCESS_TERMINATION_FAILED'
+            except BaseException as exc:
+                _scan_output_failure(stdout_outcome,exc)
+                failure_class = 'ENGVR_PROCESS_TERMINATION_FAILED'
         try:
             reservation_path.unlink()
         except OSError as exc:
@@ -11133,6 +11177,8 @@ _PREFLIGHT_TRANSPORT_FIELDS_V1 = ('frame_byte_limit', 'header_byte_limit', 'lexi
 _PREFLIGHT_INPUT_KEYS_V1 = ('QTT_PREFLIGHT_INPUT_BYTES', 'QTT_PREFLIGHT_HEADER_LIMIT',
     'QTT_PREFLIGHT_PARSE_LIMITS', 'QTT_PREFLIGHT_ORIGINAL_POSITION', 'QTT_PREFLIGHT_DEADLINE_NS')
 _PREFLIGHT_NATIVE_INPUT_V1 = ContextVar('_PREFLIGHT_NATIVE_INPUT_V1', default=None)
+_LINUX_PREFLIGHT_PROCESS_V1 = ContextVar('_LINUX_PREFLIGHT_PROCESS_V1', default=None)
+_LINUX_PREFLIGHT_LEASE_V1 = ContextVar('_LINUX_PREFLIGHT_LEASE_V1', default=None)
 
 
 def _preflight_require_v1(condition, detail):
@@ -11589,6 +11635,7 @@ def _preflight_cli_v1(main, script_file):
         observation = _PreflightObservationV1(root=Path.cwd(),run_id=identity['run_id'],occurrence=n,
             argv=tuple(identity['argv']),files=files,directories=directories,limits=residual,deadline_ns=deadline,
             git_executable=header['git']['executable'],evidence_root=header['git']['evidence_root'])
+        observation._linux_parent_pid_v1 = identity['parent_pid']
         observation.reserved['entries'] = count; observation.reserved['retained_bytes'] = payload
         observation.retained_entries = count
         failure = 'PREFLIGHT_APPLICATION_EXCEPTION'
@@ -11780,6 +11827,8 @@ class _PreflightLaunchInputV1:
         import struct
         self.prefix = struct.pack('>8sQQ',b'QTTPF01\n',len(self.raw_header),offset)
         self.extent = 24+len(self.raw_header)+offset
+        if type(host_lease) is _LinuxPreflightHostLeaseV1:
+            host_lease.reserve_input(self.identity['original_position'],self.extent,self.result_bound)
         # These immutable operands bind counts to the validated emitted frame,
         # independently of every child-reported ledger. No body copy is made.
         self._basis_frame = (basis_entries,offset,self.prefix,self.raw_header,self.segments)
@@ -12022,3 +12071,1106 @@ def _preflight_command_evidence_v1(receipt, paths, parent_meter):
     try: parent_meter.check()
     except BaseException as exc: errors.append(exc)
     _scan_raise_errors(errors)
+
+
+# Closed, prospective Linux first-phase profile. These literals are policy;
+# observing a number or decoding a declaration never constructs a live lease.
+_LINUX_PREFLIGHT_PROPERTIES_V1 = (
+    ('Type','exec'), ('Restart','no'), ('RemainAfterExit','yes'), ('DynamicUser','yes'),
+    ('UMask','0077'), ('NoNewPrivileges','yes'), ('CapabilityBoundingSet',''),
+    ('AmbientCapabilities',''), ('PrivateDevices','yes'), ('PrivateNetwork','yes'),
+    ('PrivateIPC','yes'), ('InaccessiblePaths','/dev/shm /dev/mqueue /dev/hugepages'),
+    ('PrivateTmp','no'), ('ProtectSystem','strict'), ('ProtectHome','tmpfs'),
+    ('MountAPIVFS','yes'), ('ProtectProc','invisible'), ('ProtectControlGroups','yes'),
+    ('ProtectKernelTunables','yes'), ('ProtectKernelModules','yes'), ('ProtectKernelLogs','yes'),
+    ('RestrictSUIDSGID','yes'), ('RestrictRealtime','yes'), ('RestrictNamespaces','yes'),
+    ('LockPersonality','yes'), ('RestrictAddressFamilies','AF_UNIX'),
+    ('SystemCallArchitectures','native'), ('SystemCallFilter','~@mount @reboot @swap @raw-io @module'),
+    ('MemoryAccounting','yes'), ('MemoryMax','6442450944'), ('MemorySwapMax','0'),
+    ('TasksAccounting','yes'), ('TasksMax','64'), ('CPUAccounting','yes'),
+    ('CPUQuota','200%'), ('CPUQuotaPeriodSec','100ms'), ('RuntimeMaxSec','3600'),
+    ('TimeoutStartSec','60'), ('TimeoutStopSec','10'), ('KillMode','control-group'),
+    ('SendSIGKILL','yes'), ('LimitCORE','0'), ('LimitNOFILE','1024'), ('LimitFSIZE','67108864'),
+    ('RuntimeDirectoryMode','0700'), ('RuntimeDirectoryPreserve','yes'),
+)
+_LINUX_PREFLIGHT_SLICE_PROPERTIES_V1 = (
+    ('Description','s','QTT PR298 first-phase engineering'), ('StopWhenUnneeded','b','false'),
+    ('MemoryAccounting','b','true'), ('MemoryMax','t','6442450944'), ('MemorySwapMax','t','0'),
+    ('TasksAccounting','b','true'), ('TasksMax','t','64'), ('CPUAccounting','b','true'),
+    ('CPUQuotaPerSecUSec','t','2000000'), ('CPUQuotaPeriodUSec','t','100000'),
+)
+
+
+def _linux_preflight_path_v1(value):
+    _preflight_require_v1(type(value) is str and len(value.encode('utf-8')) <= 4096
+        and value.startswith('/') and not value.endswith('/') and
+        all(re.fullmatch(r'[A-Za-z0-9_.-]+', part, flags=re.ASCII) and part not in ('.','..')
+            for part in value[1:].split('/')), 'LINUX_PREFLIGHT_NATIVE_PATH')
+    _preflight_require_v1(len(value[1:].split('/')) <= 64, 'LINUX_PREFLIGHT_NATIVE_PATH_DEPTH')
+    return value
+
+
+def _linux_preflight_name_v1(pid, origin_ns):
+    _preflight_integer_v1(pid,positive=True); _preflight_integer_v1(origin_ns)
+    name = 'qtt'+str(pid)+'n'+str(origin_ns)
+    _preflight_require_v1(len(name) <= 64 and re.fullmatch(r'[A-Za-z0-9]+',name,flags=re.ASCII),
+        'LINUX_PREFLIGHT_NATIVE_NAME')
+    return name
+
+
+def _linux_preflight_grants_v1(origin_ns):
+    _preflight_integer_v1(origin_ns)
+    mib, gib = 1024**2, 1024**3
+    parent = dict(zip(_PREFLIGHT_DIMENSIONS_V1,(2_000_000,32*gib,4_000_000,2*gib,0,0,0,0),strict=True))
+    transport = dict(zip(_PREFLIGHT_TRANSPORT_FIELDS_V1,
+        (2*gib,16*mib,16_000_000,64,64*mib,2_000_000,2_000_000,65536,2*gib,8*mib),strict=True))
+    rows = []
+    for position in range(1,9):
+        git = position in (1,3,5,7,8)
+        rows.append(dict(limits=dict(zip(_PREFLIGHT_DIMENSIONS_V1,
+            (2_000_000,16*gib,2_000_000,gib,64 if git else 0,
+             16*mib if git else 0,16*mib if git else 0,32*mib if git else 0),strict=True)),
+            parent_tail_reserve=dict.fromkeys(_PREFLIGHT_DIMENSIONS_V1,0),
+            deadline_ns=origin_ns+3500*10**9,settlement_deadline_ns=origin_ns+3510*10**9,
+            transport={**transport,'frame_byte_limit':512*mib,'header_byte_limit':8*mib,
+                'lexical_units':4_000_000,'retained_buffer_bytes':gib},
+            application_output_limits=dict(stdout_bytes=16*mib,stderr_bytes=16*mib,combined_output_bytes=32*mib)))
+    return dict(native=transport,capture=dict(parent),terminal=dict(parent),rows=rows,
+        parent_limits=dict(capture=dict(parent),terminal=dict(parent),transport={**transport,'frame_byte_limit':64*gib},
+            deadline_ns=origin_ns+3540*10**9),candidate_limits=dict(entry_limit=100_000,
+            snapshot_byte_limit=512*mib,read_byte_limit=64*gib,deadline_ns=origin_ns+3550*10**9),
+        native_deadline_ns=origin_ns+3560*10**9,execution_deadline_ns=origin_ns+3600*10**9,
+        settlement_deadline_ns=origin_ns+3720*10**9)
+
+
+def _linux_preflight_storage_reservation_v1(extents, receiver_extents, page_size):
+    """Prospective coexistence, including failed work; no deallocation refund."""
+    _preflight_require_v1(type(extents) is tuple and len(extents) == 8 and
+        type(receiver_extents) is tuple and len(receiver_extents) == 8,
+        'LINUX_PREFLIGHT_EIGHT_STORAGE_RESERVATIONS')
+    _preflight_integer_v1(page_size,positive=True)
+    _preflight_require_v1(page_size & (page_size-1) == 0, 'LINUX_PREFLIGHT_PAGE_SIZE')
+    mib = 1024**2
+    for position,(extent,receiver) in enumerate(zip(extents,receiver_extents,strict=True),1):
+        _preflight_integer_v1(extent); _preflight_integer_v1(receiver)
+        _preflight_require_v1(24 <= extent <= 64*mib and receiver <= 8*mib,
+            'LINUX_PREFLIGHT_FILE_INTERSECTION:'+str(position)+':'+str(extent))
+    def pages(n): return ((n+page_size-1)//page_size)*page_size
+    # Two application streams for all eight; two cumulative Git streams for five.
+    allocated = sum(pages(n) for n in (*extents,*receiver_extents,*([16*mib]*26)))
+    allocated += 16*mib+16*mib  # Ancillary envelope and unavailable metadata reserve.
+    _preflight_require_v1(allocated <= 1024*mib, 'LINUX_PREFLIGHT_SHARED_RUNTIME_CAPACITY:'+str(allocated))
+    return allocated
+
+
+def _linux_preflight_ancestor_values_v1(memory, tasks, cpu, *, owned=False):
+    """Only interpret successfully acquired applicable non-root interface bytes."""
+    def decimal(raw):
+        _preflight_require_v1(type(raw) is bytes and re.fullmatch(rb'(0|[1-9][0-9]*)\n',raw),
+            'LINUX_PREFLIGHT_CONTROLLER_DECIMAL')
+        return int(raw)
+    values = []
+    for raw, minimum in ((memory,6442450944),(tasks,64)):
+        if raw == b'max\n':
+            _preflight_require_v1(not owned,'LINUX_PREFLIGHT_OWNED_UNBOUNDED')
+            values.append('max')
+        else:
+            n = decimal(raw)
+            _preflight_require_v1(n == minimum if owned else n >= minimum,'LINUX_PREFLIGHT_ANCESTOR_CAPACITY')
+            values.append(n)
+    _preflight_require_v1(type(cpu) is bytes and re.fullmatch(rb'(max|[1-9][0-9]*) [1-9][0-9]*\n',cpu),
+        'LINUX_PREFLIGHT_CPU_SHAPE')
+    quota,period = cpu.rstrip(b'\n').split(b' '); period = int(period)
+    if quota == b'max':
+        _preflight_require_v1(not owned,'LINUX_PREFLIGHT_OWNED_UNBOUNDED')
+        ratio = ('max',period)
+    else:
+        quota = int(quota)
+        _preflight_require_v1((quota,period) == (200000,100000) if owned else quota >= 2*period,
+            'LINUX_PREFLIGHT_CPU_CAPACITY')
+        ratio = (quota,period)
+    return (*values,ratio)
+
+
+def _linux_preflight_service_argv_v1(*, name, private_root, runtime, control, spool, repository, installation,
+        interpreter, startup_deadline_ns, environment):
+    _preflight_require_v1(type(name) is str and len(name) <= 64 and re.fullmatch(r'qtt[0-9]+n[0-9]+',name),
+        'LINUX_PREFLIGHT_UNIT_NAME')
+    for p in (private_root,runtime,control,spool,repository,installation,interpreter): _linux_preflight_path_v1(p)
+    _preflight_integer_v1(startup_deadline_ns,positive=True)
+    _preflight_require_v1(type(environment) is dict and environment == _linux_preflight_environment_v1(
+        repository=repository,installation=installation,runtime=runtime,control=control),
+        'LINUX_PREFLIGHT_LITERAL_ENVIRONMENT')
+    bindings = [('/usr','/usr'),('/lib','/lib'),('/lib64','/lib64'),(repository,repository),
+        (control+'/installation',installation),*( (control+'/'+n,control+'/'+n) for n in ('declaration','binding','release')),
+        (spool,spool)]
+    for a,b in bindings: _linux_preflight_path_v1(a); _linux_preflight_path_v1(b)
+    properties = (*_LINUX_PREFLIGHT_PROPERTIES_V1,('RootDirectory',private_root),('WorkingDirectory',repository),
+        ('RuntimeDirectory',name),('BindReadOnlyPaths',' '.join(a+':'+b for a,b in bindings)),
+        ('BindPaths',runtime+':'+runtime+' '+runtime+'/tmp:/tmp '+runtime+'/var-tmp:/var/tmp'),
+        ('ReadWritePaths',runtime+' /tmp /var/tmp'),('StandardInput','null'),
+        ('StandardOutput','append:'+spool+'/command-1.stdout.bin'),('StandardError','append:'+spool+'/command-1.stderr.bin'))
+    entry = (interpreter,'-I','-B','-X','utf8',repository+'/tools/run_validation_gates.py',
+        '--linux-preflight-enter','--phase','fast-preflight','--startup-deadline-ns',str(startup_deadline_ns))
+    return tuple(['/usr/bin/systemd-run','--system','--no-ask-password','--expand-environment=no',
+        '--unit='+name+'.service','--slice='+name+'.slice',*('--property='+k+'='+v for k,v in properties),
+        *('--setenv='+k+'='+v for k,v in environment.items()),'--',*entry])
+
+
+def _linux_preflight_environment_v1(*, repository, installation, runtime, control):
+    for path in (repository,installation,runtime,control): _linux_preflight_path_v1(path)
+    return dict(PATH=installation+'/bin:/usr/bin',LD_LIBRARY_PATH=installation+'/lib',LANG='C.UTF-8',LC_ALL='C.UTF-8',
+        TZ='UTC',PYTHONDONTWRITEBYTECODE='1',PYTHONNOUSERSITE='1',PYTHONUTF8='1',PYTHONIOENCODING='utf-8',
+        TEMP=runtime+'/tmp',TMP=runtime+'/tmp',TMPDIR=runtime+'/tmp',
+        QTT_VALIDATION_PROCESS_ROOT=runtime+'/process',QTT_VALIDATION_EVIDENCE_ROOT=runtime+'/evidence',
+        QTT_LINUX_PREFLIGHT_CONTROL=control,QTT_LINUX_PREFLIGHT_RUNTIME=runtime,
+        GITHUB_EVENT_NAME='pull_request',GITHUB_REPOSITORY='Q8Meow/QTT_New0526',
+        GITHUB_HEAD_REF='repair/main-cumulative-v35-final-r5-local-20260922',GITHUB_BASE_REF='main',
+        GITHUB_REF='refs/pull/298/merge',GITHUB_EVENT_PATH=control+'/declaration/event.json',
+        CI='true',GITHUB_ACTIONS='true')
+
+
+def _linux_preflight_child_environment_v1(fixed, environment, runtime):
+    """Validate the original startup projection, without reintroducing stripped keys."""
+    _preflight_require_v1(type(fixed) is dict and type(environment) is dict,
+        'LINUX_PREFLIGHT_ENVIRONMENT_TYPE')
+    exceptions = {PROCESS_ROOT_ENV,EVIDENCE_ROOT_ENV,'TEMP','TMP','TMPDIR'}
+    _preflight_require_v1(all(environment.get(k) == v for k,v in fixed.items()
+        if k not in exceptions and not k.upper().startswith('PYTHON')),
+        'LINUX_PREFLIGHT_ENVIRONMENT')
+    python = {k:v for k,v in environment.items() if k.upper().startswith('PYTHON')}
+    cache = python.get('PYTHONPYCACHEPREFIX')
+    _preflight_require_v1(type(cache) is str and Path(cache).is_absolute()
+        and Path(cache).is_relative_to(Path(runtime))
+        and python == dict(PYTHONDONTWRITEBYTECODE='1',PYTHONNOUSERSITE='1',PYTHONPYCACHEPREFIX=cache),
+        'LINUX_PREFLIGHT_PYTHON_PROJECTION')
+    _preflight_require_v1(not any(k.upper().startswith(
+        ('AWS_','AZURE_','SSH_','ACTIONS_','GH_TOKEN','GITHUB_TOKEN')) for k in environment),
+        'LINUX_PREFLIGHT_CREDENTIAL_ENVIRONMENT')
+
+
+class _LinuxPreflightQueriesV1:
+    """Bounded observations of one owned native profile, using existing supervision."""
+    def __init__(self, *, evidence_root, deadline_ns, reserved_output_bytes=0):
+        _preflight_require_v1(sys.platform == 'linux','LINUX_PREFLIGHT_PLATFORM')
+        self.evidence_root = Path(evidence_root)
+        self.deadline_ns = _preflight_integer_v1(deadline_ns,positive=True)
+        self.pid,self.thread = os.getpid(),threading.get_ident()
+        self.attempts,self.retained,self.failure = 0,0,None
+        _preflight_integer_v1(reserved_output_bytes)
+        self.retained_limit = 256*1024**2-reserved_output_bytes
+        _preflight_require_v1(self.retained_limit > 0,'LINUX_PREFLIGHT_CONTROLLER_OUTPUT_RESERVATION')
+        self.observations = []
+        self.observation = None
+    def check(self, *, settling=False):
+        if self.failure is not None and not settling: raise self.failure
+        _preflight_require_v1((os.getpid(),threading.get_ident()) == (self.pid,self.thread)
+            and time.monotonic_ns() < self.deadline_ns,'LINUX_PREFLIGHT_QUERY_CUSTODY_OR_DEADLINE')
+        self.attempts += 1
+        if self.observation is not None:
+            self.observation.reserve('attempts')
+        _preflight_require_v1(self.attempts <= 32768,'LINUX_PREFLIGHT_QUERY_ATTEMPTS')
+    def record(self, kind, operand, raw):
+        if self.observation is not None:
+            self.observation.received('bytes',len(raw))
+            self.observation.reserve('retained_bytes',len(raw))
+            self.observation.observed['retained_bytes'] += len(raw)
+        self.retained += len(raw)
+        _preflight_require_v1(self.retained <= self.retained_limit,'LINUX_PREFLIGHT_QUERY_OUTPUT')
+        path = self.evidence_root/('native-response-'+str(len(self.observations)+1)+'.bin')
+        _atomic_write_bytes_v1(path,raw)
+        self.observations.append(dict(kind=kind,operand=operand,path=str(path),bytes=len(raw)))
+        return raw
+    def read(self,path,*,settling=False):
+        self.check(settling=settling)
+        _preflight_require_v1(self.retained+1048576 <= self.retained_limit,
+            'LINUX_PREFLIGHT_NATIVE_RESPONSE_RESERVATION')
+        p = Path(path); before = p.lstat()
+        _preflight_require_v1(stat.S_ISREG(before.st_mode) and not stat.S_ISLNK(before.st_mode),
+            'LINUX_PREFLIGHT_NATIVE_READ_TYPE:'+str(path))
+        fd = os.open(p,os.O_RDONLY|os.O_NOFOLLOW|os.O_CLOEXEC)
+        raw = bytearray()
+        recorded = False
+        try:
+            opened = os.fstat(fd)
+            _preflight_require_v1((before.st_dev,before.st_ino) == (opened.st_dev,opened.st_ino),
+                'LINUX_PREFLIGHT_NATIVE_READ_IDENTITY')
+            raw = bytearray()
+            while True:
+                self.check(settling=settling)
+                block = os.read(fd,min(65536,1048577-len(raw)))
+                if not block: break
+                raw.extend(block)
+                if len(raw) > 1048576:
+                    self.record('failed-read-prefix',str(path),bytes(raw[:1048576]))
+                    recorded = True
+                    _preflight_require_v1(False,'LINUX_PREFLIGHT_QUERY_RESPONSE')
+            after = p.lstat()
+            _preflight_require_v1((after.st_dev,after.st_ino) == (opened.st_dev,opened.st_ino),
+                'LINUX_PREFLIGHT_NATIVE_READ_REPLACED')
+            result = self.record('read',str(path),bytes(raw))
+            recorded = True
+            self.check(settling=settling)
+            return result
+        except BaseException as exc:
+            if self.failure is None: self.failure = exc
+            if not recorded and len(raw) <= 1048576:
+                self.record('failed-read-prefix',str(path),bytes(raw))
+            raise
+        finally: os.close(fd)
+    def command(self,argv,*,settling=False,cwd=None,git_environment=None):
+        self.check(settling=settling)
+        _preflight_require_v1(type(argv) is tuple and argv and argv[0] in (
+            '/usr/bin/systemctl','/usr/bin/systemd-run','/usr/bin/systemd-analyze',
+            '/usr/bin/busctl','/usr/bin/mount','/usr/bin/umount','/usr/bin/git'),
+            'LINUX_PREFLIGHT_ADMINISTRATIVE_PROGRAM')
+        for value in argv:
+            _preflight_require_v1(type(value) is str and '\0' not in value and '\n' not in value,
+                'LINUX_PREFLIGHT_ADMINISTRATIVE_ARGUMENT')
+        environment = dict(PATH='/usr/bin',LANG='C.UTF-8',LC_ALL='C.UTF-8')
+        selected_cwd = Path('/') if cwd is None else Path(_linux_preflight_path_v1(str(cwd)))
+        if git_environment is not None:
+            _preflight_require_v1(argv[0] == '/usr/bin/git' and type(git_environment) is dict
+                and all(k.startswith('GIT_') for k in git_environment),
+                'LINUX_PREFLIGHT_GIT_OWNER_ENVIRONMENT')
+            environment.update(git_environment)
+        remaining_output = self.retained_limit-self.retained
+        _preflight_require_v1(remaining_output >= 2,'LINUX_PREFLIGHT_QUERY_OUTPUT_EXHAUSTED')
+        stream_limit = min(1048576,remaining_output//2)
+        token = _LINUX_PREFLIGHT_PROCESS_V1.set(None)
+        try:
+            observation = {}
+            receipt = supervise_command(argv,cwd=selected_cwd,run_id='linux-admin-'+str(self.pid),phase='fast-preflight-native-query',
+                command_index=self.attempts,evidence_root=self.evidence_root,timeout_seconds=10,
+                execution_deadline_ns=self.deadline_ns,environment=environment,
+                output_limits=dict(stdout_bytes=stream_limit,stderr_bytes=stream_limit,combined_output_bytes=2*stream_limit),
+                output_observation=observation,mirror_stdout=False,mirror_stderr=False)
+        finally: _LINUX_PREFLIGHT_PROCESS_V1.reset(token)
+        raw = Path(receipt.stdout_path).read_bytes(); error = Path(receipt.stderr_path).read_bytes()
+        self.retained += len(raw)+len(error)
+        self.observations.append(dict(kind='command',argv=argv,receipt=_json_compatible(receipt)))
+        _preflight_require_v1(self.retained <= self.retained_limit,'LINUX_PREFLIGHT_QUERY_OUTPUT')
+        _preflight_require_v1(not receipt.failure_class and receipt.native_exit_code == 0,
+            'LINUX_PREFLIGHT_NATIVE_COMMAND:'+repr(argv)+':'+str(receipt.native_exit_code)+':'+repr(error))
+        self.check(settling=settling)
+        return raw
+
+
+def _linux_preflight_mounts_v1(raw):
+    _preflight_require_v1(type(raw) is bytes and len(raw) <= 1048576,'LINUX_PREFLIGHT_MOUNT_RESPONSE')
+    rows = []
+    def decode(value):
+        return re.sub(r'\\([0-7]{3})',lambda match: chr(int(match[1],8)),value)
+    for line in raw.decode('utf-8','strict').splitlines():
+        fields = line.split(' ')
+        _preflight_require_v1(fields.count('-') == 1,'LINUX_PREFLIGHT_MOUNT_SHAPE')
+        split = fields.index('-')
+        _preflight_require_v1(split >= 6 and len(fields) == split+4,'LINUX_PREFLIGHT_MOUNT_FIELDS')
+        rows.append(dict(id=int(fields[0]),parent=int(fields[1]),device=fields[2],root=decode(fields[3]),
+            path=decode(fields[4]),options=frozenset(fields[5].split(',')),fs=fields[split+1],
+            source=decode(fields[split+2]),super_options=frozenset(fields[split+3].split(','))))
+    _preflight_require_v1(len(rows) <= 4096 and len({r['id'] for r in rows}) == len(rows),'LINUX_PREFLIGHT_MOUNT_ROSTER')
+    return tuple(rows)
+
+
+def _linux_preflight_project_chain_v1(root_fd, logical, query):
+    """Controller projects the actual held service namespace, including '/'."""
+    _linux_preflight_path_v1(logical)
+    _preflight_require_v1(len(logical[1:].split('/')) <= 64,'LINUX_PREFLIGHT_PROJECTION_DEPTH')
+    owned = os.dup(root_fd)
+    try:
+        result = [('/',_preflight_stamp_v1(os.fstat(owned)))]
+        prefix = ''
+        for component in logical[1:].split('/'):
+            query.check()
+            opened = os.open(component,os.O_PATH|os.O_DIRECTORY|os.O_NOFOLLOW|os.O_CLOEXEC,dir_fd=owned)
+            os.close(owned); owned = opened
+            info = os.fstat(owned)
+            _preflight_require_v1(stat.S_ISDIR(info.st_mode),'LINUX_PREFLIGHT_PROJECT_DIRECTORY')
+            prefix += '/'+component
+            result.append((prefix,_preflight_stamp_v1(info)))
+        return tuple(result)
+    finally: os.close(owned)
+
+
+def _linux_preflight_process_identity_v1(pid,query,*,settling=False):
+    _preflight_integer_v1(pid,positive=True)
+    raw = query.read('/proc/'+str(pid)+'/stat',settling=settling)
+    close = raw.rfind(b') ')
+    _preflight_require_v1(raw.startswith(str(pid).encode()+b' (') and close > 0,'LINUX_PREFLIGHT_PROCESS_STAT')
+    fields = raw[close+2:].split()
+    _preflight_require_v1(len(fields) >= 20 and fields[19].isdigit(),'LINUX_PREFLIGHT_PROCESS_START')
+    namespaces = {}
+    for name in ('mnt','cgroup','ipc','net','pid','user'):
+        query.check(settling=settling)
+        info = os.stat('/proc/'+str(pid)+'/ns/'+name)
+        namespaces[name] = (info.st_dev,info.st_ino)
+    return dict(pid=pid,start=int(fields[19]),namespaces=namespaces)
+
+
+class _LinuxPreflightTailV1:
+    """One actual manager-owned regular spool; live EOF is only pending data."""
+    def __init__(self,path,*,original_evidence=False):
+        self.path = Path(path)
+        self.original_evidence = original_evidence
+        before = self.path.lstat()
+        _preflight_require_v1(stat.S_ISREG(before.st_mode) and before.st_nlink == 1,
+            'LINUX_PREFLIGHT_SPOOL_TYPE')
+        self.stream = self.path.open('rb',buffering=0)
+        opened = os.fstat(self.stream.fileno())
+        _preflight_require_v1((before.st_dev,before.st_ino) == (opened.st_dev,opened.st_ino),
+            'LINUX_PREFLIGHT_SPOOL_IDENTITY')
+        self.identity = (opened.st_dev,opened.st_ino)
+    def fileno(self):
+        info = os.fstat(self.stream.fileno()); path = self.path.lstat()
+        _preflight_require_v1((info.st_dev,info.st_ino) == (path.st_dev,path.st_ino) == self.identity
+            and info.st_nlink == path.st_nlink == 1 and max(info.st_size,path.st_size) <= 67108864,
+            'LINUX_PREFLIGHT_SPOOL_CUSTODY_OR_EXTENT')
+        return self.stream.fileno()
+    def close(self): self.stream.close()
+
+
+def _linux_preflight_control_read_v1(path, *, deadline_ns, pending=False, query=None):
+    """Initial absence is bounded pending; a published failure is never retried."""
+    for attempt in range(600 if pending else 1):
+        _preflight_require_v1(time.monotonic_ns() < deadline_ns,'LINUX_PREFLIGHT_STARTUP_DEADLINE')
+        if query is not None: query.check()
+        try: before = Path(path).lstat()
+        except FileNotFoundError:
+            if not pending: raise
+            time.sleep(0.1)
+            continue
+        _preflight_require_v1(stat.S_ISREG(before.st_mode) and before.st_uid == 0 and
+            stat.S_IMODE(before.st_mode) == 0o444 and before.st_nlink == 1 and before.st_size <= 1048576,
+            'LINUX_PREFLIGHT_CONTROL_PERMISSIONS_OR_EXTENT')
+        chain = _preflight_chain_v1(Path(path).parent)
+        fd = os.open(path,os.O_RDONLY|os.O_NOFOLLOW|os.O_CLOEXEC)
+        try:
+            opened = os.fstat(fd)
+            _preflight_require_v1(_scan_same_api_version(before) == _scan_same_api_version(opened),
+                'LINUX_PREFLIGHT_CONTROL_OPEN')
+            raw = bytearray()
+            while len(raw) < before.st_size:
+                _preflight_require_v1(time.monotonic_ns() < deadline_ns,'LINUX_PREFLIGHT_CONTROL_DEADLINE')
+                part = os.read(fd,min(65536,before.st_size-len(raw)))
+                _preflight_require_v1(bool(part),'LINUX_PREFLIGHT_CONTROL_TRUNCATED')
+                raw.extend(part)
+            _preflight_require_v1(os.read(fd,1) == b'' and
+                _scan_same_api_version(os.fstat(fd)) == _scan_same_api_version(opened) and
+                _scan_same_api_version(Path(path).lstat()) == _scan_same_api_version(before) and
+                _preflight_chain_v1(Path(path).parent) == chain,'LINUX_PREFLIGHT_CONTROL_DRIFT')
+        finally: os.close(fd)
+        _preflight_require_v1(time.monotonic_ns() < deadline_ns,'LINUX_PREFLIGHT_CONTROL_LATE')
+        def pairs(values):
+            result = {}
+            for key,value in values:
+                _preflight_require_v1(key not in result,'LINUX_PREFLIGHT_CONTROL_DUPLICATE')
+                result[key] = value
+            return result
+        if query is not None: query.record('control',str(path),bytes(raw))
+        value = json.loads(raw,object_pairs_hook=pairs,parse_constant=lambda text: (_ for _ in ()).throw(ValueError(text)))
+        _preflight_require_v1(type(value) is dict,'LINUX_PREFLIGHT_CONTROL_RECORD')
+        return value, _scan_same_api_version(before), chain
+    raise RuntimeError('LINUX_PREFLIGHT_STARTUP_PUBLICATION_UNAVAILABLE')
+
+
+def _linux_preflight_cgroup_path_v1(pid,query):
+    raw = query.read('/proc/'+str(pid)+'/cgroup')
+    _preflight_require_v1(raw.count(b'\n') == 1 and raw.startswith(b'0::/'),'LINUX_PREFLIGHT_UNIFIED_MEMBERSHIP')
+    value = raw[3:-1].decode('ascii','strict')
+    _linux_preflight_path_v1(value)
+    return value
+
+
+def _linux_preflight_status_v1(pid,query):
+    raw = query.read('/proc/'+str(pid)+'/status')
+    values = {}
+    for line in raw.decode('ascii','strict').splitlines():
+        key,sep,value = line.partition(':')
+        if key in ('CapInh','CapPrm','CapEff','CapBnd','CapAmb','NoNewPrivs'):
+            _preflight_require_v1(sep and key not in values,'LINUX_PREFLIGHT_STATUS_DUPLICATE')
+            values[key] = value.strip()
+    _preflight_require_v1(set(values) == {'CapInh','CapPrm','CapEff','CapBnd','CapAmb','NoNewPrivs'}
+        and values['NoNewPrivs'] == '1' and all(int(values[k],16) == 0 for k in values if k != 'NoNewPrivs'),
+        'LINUX_PREFLIGHT_CAPABILITY_OR_NO_NEW_PRIVILEGES')
+    return values
+
+
+class _LinuxPreflightHostLeaseV1(_PreflightHostLeaseV1):
+    """Actual unprivileged service identity; cannot be issued by a JSON approval."""
+    def __init__(self, *, binding, control_path, runtime, query, declaration_chain, declaration_version):
+        _preflight_require_v1(sys.platform == 'linux' and os.geteuid() != 0,'LINUX_PREFLIGHT_SERVICE_CONTEXT')
+        self.binding,self.control_path,self.runtime,self.query = binding,Path(control_path),Path(runtime),query
+        self.pid,self.thread = os.getpid(),threading.get_ident()
+        self.failure = None
+        self.children = {}
+        self.reserved_inputs = {}
+        self.storage_reservation = None
+        self.declaration_chain,self.declaration_version = declaration_chain,declaration_version
+        self.root = Path(binding['repository'])
+        self.index = Path(binding['index'])
+        self.deadline_ns = binding['grants']['native_deadline_ns']
+        self.initial = _linux_preflight_process_identity_v1(self.pid,query)
+        self.cgroup = _linux_preflight_cgroup_path_v1(self.pid,query)
+        self.control_version = _scan_same_api_version(self.control_path.lstat())
+        self.control_chain = _preflight_chain_v1(self.control_path.parent)
+        self.check_parent(self.root,self.index)
+    def _check(self):
+        if self.failure is not None: raise self.failure
+        self.query.check()
+
+        _preflight_require_v1((self.pid,self.thread) == (os.getpid(),threading.get_ident())
+            and time.monotonic_ns() < self.deadline_ns,'LINUX_PREFLIGHT_SERVICE_OWNER')
+    def check_parent(self,root,index_path):
+        try:
+            self._check()
+            b = self.binding
+            actual = _linux_preflight_process_identity_v1(self.pid,self.query)
+            _preflight_require_v1(_json_compatible(actual) == b['process'] and actual == self.initial,
+                'LINUX_PREFLIGHT_ORIGINAL_SERVICE_PROCESS')
+            _preflight_require_v1(Path(root) == self.root and Path(index_path) == self.index and
+                self.cgroup == b['service_cgroup'] == _linux_preflight_cgroup_path_v1(self.pid,self.query),
+                'LINUX_PREFLIGHT_SOURCE_AND_CGROUP_ASSOCIATION')
+            _preflight_require_v1(_scan_same_api_version(self.control_path.lstat()) == self.control_version
+                and _preflight_chain_v1(self.control_path.parent) == self.control_chain,'LINUX_PREFLIGHT_CONTROL_GENERATION')
+            _linux_preflight_status_v1(self.pid,self.query)
+            for name,path in (('repository',self.root),('index',self.index)):
+                info = path.lstat()
+                _preflight_require_v1([info.st_dev,info.st_ino] == b['identities'][name] and info.st_uid == 0
+                    and stat.S_IMODE(info.st_mode) & 0o222 == 0,'LINUX_PREFLIGHT_ORIGINAL_SOURCE_OBJECT')
+            base = Path('/sys/fs/cgroup')/self.cgroup.lstrip('/')
+            _linux_preflight_ancestor_values_v1(self.query.read(base/'memory.max'),self.query.read(base/'pids.max'),
+                self.query.read(base/'cpu.max'),owned=True)
+            _preflight_require_v1(self.query.read(base/'memory.swap.max') == b'0\n','LINUX_PREFLIGHT_SWAP')
+            mounts = _linux_preflight_mounts_v1(self.query.read('/proc/self/mountinfo'))
+            for target in (str(self.root),str(self.control_path.parent),b['declaration_parent'],b['installation']):
+                match = [m for m in mounts if m['path'] == target]
+                _preflight_require_v1(len(match) == 1 and 'ro' in match[0]['options'],
+                    'LINUX_PREFLIGHT_READONLY_MOUNT:'+target)
+            allowed = {str(self.runtime),'/tmp','/var/tmp','/dev','/dev/pts','/proc','/sys'}
+            for mount in mounts:
+                if 'rw' in mount['options']:
+                    _preflight_require_v1(mount['path'] in allowed and mount['fs'] in ('tmpfs','devpts','proc','sysfs'),
+                        'LINUX_PREFLIGHT_UNACCOUNTED_WRITABLE_MOUNT:'+mount['path'])
+            runtime_info = self.runtime.lstat()
+            _preflight_require_v1(runtime_info.st_uid == os.geteuid() and stat.S_IMODE(runtime_info.st_mode) == 0o700,
+                'LINUX_PREFLIGHT_RUNTIME_OWNERSHIP')
+            for target in (str(self.runtime),'/tmp','/var/tmp'):
+                match = [m for m in mounts if m['path'] == target]
+                _preflight_require_v1(len(match) == 1 and match[0]['fs'] == 'tmpfs'
+                    and {'noexec','nodev','nosuid'} <= match[0]['options']
+                    and match[0]['device'] == b['runtime_device'],'LINUX_PREFLIGHT_RUNTIME_MOUNT')
+            _preflight_require_v1(_json_compatible(_preflight_chain_v1(Path(b['declaration']).parent)) == b['declaration_chain']
+                and list(_scan_same_api_version(Path(b['declaration']).lstat())) == b['declaration_version'],
+                'LINUX_PREFLIGHT_SERVICE_NAMESPACE_BASIS')
+            self._check()
+        except BaseException as exc:
+            if self.failure is None: self.failure = exc
+            raise
+    def check_launch(self,plan_entry,argv,environment,scratch_roots,deadline_ns):
+        self.check_parent(self.root,self.index)
+        n = plan_entry.command_index
+        _preflight_require_v1(1 <= n <= 8 and tuple(argv) == tuple(self.binding['vectors'][n-1])
+            and deadline_ns == self.binding['grants']['rows'][n-1]['deadline_ns'],
+            'LINUX_PREFLIGHT_ORIGINAL_LAUNCH')
+        _preflight_require_v1(all(Path(p).is_relative_to(self.runtime) for p in scratch_roots),
+            'LINUX_PREFLIGHT_SCRATCH_AUTHORITY')
+        _linux_preflight_child_environment_v1(self.binding['environment'],environment,self.runtime)
+        _preflight_require_v1(self.storage_reservation is not None,
+            'LINUX_PREFLIGHT_TRANSPORT_RESERVATION_REQUIRED')
+    def reserve_plan(self,extents,receivers):
+        self._check()
+        _preflight_require_v1(self.storage_reservation is None,'LINUX_PREFLIGHT_STORAGE_ONE_SHOT')
+        self.storage_reservation = _linux_preflight_storage_reservation_v1(tuple(extents),tuple(receivers),os.sysconf('SC_PAGESIZE'))
+        self.reserved_extents,self.reserved_receivers = tuple(extents),tuple(receivers)
+    def reserve_input(self,position,extent,receiver):
+        self._check()
+        _preflight_require_v1(self.storage_reservation is not None and position not in self.reserved_inputs
+            and extent <= self.reserved_extents[position-1] and receiver <= self.reserved_receivers[position-1]
+            and extent <= 67108864,'LINUX_PREFLIGHT_ACTUAL_INPUT_INTERSECTION')
+        self.reserved_inputs[position] = (extent,receiver)
+    def check_child(self,actual_process):
+        self.check_parent(self.root,self.index)
+        _preflight_require_v1(type(actual_process) is subprocess.Popen and actual_process not in self.children,
+            'LINUX_PREFLIGHT_ORIGINAL_CHILD_HANDLE')
+        identity = _linux_preflight_process_identity_v1(actual_process.pid,self.query)
+        fd = os.pidfd_open(actual_process.pid,0)
+        try:
+            _preflight_require_v1(_linux_preflight_process_identity_v1(actual_process.pid,self.query) == identity
+                and _linux_preflight_cgroup_path_v1(actual_process.pid,self.query) == self.cgroup,
+                'LINUX_PREFLIGHT_CHILD_MEMBERSHIP')
+        except BaseException:
+            os.close(fd); raise
+        self.children[actual_process] = (identity,fd)
+    def check_settled(self,actual_process):
+        self._check()
+        import select
+        _preflight_require_v1(actual_process in self.children and actual_process.poll() is not None,
+            'LINUX_PREFLIGHT_CHILD_TERMINAL')
+        identity,fd = self.children[actual_process]
+        poll = select.poll(); poll.register(fd,select.POLLIN)
+        _preflight_require_v1(bool(poll.poll(0)) and not _posix_process_group_exists(identity['pid']),
+            'LINUX_PREFLIGHT_CHILD_TREE_UNRESOLVED')
+        os.close(fd); del self.children[actual_process]
+        self.query.check()
+
+
+class _LinuxPreflightCaptureV1:
+    """Exact original bytes and authorized metadata transitions, never a checkout copy."""
+    def __init__(self,root,*,byte_limit,deadline_ns,installation=False,shared_capture=None):
+        self.root = Path(_linux_preflight_path_v1(str(root)))
+        self.byte_limit,self.deadline_ns,self.installation = byte_limit,deadline_ns,installation
+        self.files,self.directories,self.original,self.aliases = {},{}, {},{}
+        self.byte_count,self.entries,self.read_bytes = 0,0,0
+        self.shared_capture = dict(files=0,entries=0) if shared_capture is None else shared_capture
+        self.protected = []
+        self._walk(self.root,0)
+    def _check(self,path,depth):
+        _preflight_require_v1(time.monotonic_ns() < self.deadline_ns and depth <= 64
+            and len(str(path).encode('utf-8')) <= 4096,'LINUX_PREFLIGHT_CAPTURE_DEADLINE_OR_PATH')
+    def _walk(self,path,depth):
+        self._check(path,depth)
+        info = path.lstat()
+        if stat.S_ISLNK(info.st_mode) and self.installation:
+            target = path.resolve(strict=True)
+            _preflight_require_v1(target.is_relative_to(self.root) and target != path,
+                'LINUX_PREFLIGHT_INSTALLATION_ALIAS')
+            resolved = target.lstat()
+            _preflight_require_v1(stat.S_ISREG(resolved.st_mode),'LINUX_PREFLIGHT_ALIAS_REGULAR_TARGET')
+            self.aliases[str(path)] = str(target)
+            info = resolved
+            observed_path = target
+        else:
+            observed_path = path
+        _preflight_require_v1(not any(name in ('system.posix_acl_access','system.posix_acl_default')
+            for name in os.listxattr(observed_path,follow_symlinks=False)),'LINUX_PREFLIGHT_UNSUPPORTED_ACL:'+str(path))
+        self.original[str(path)] = dict(device=info.st_dev,inode=info.st_ino,uid=info.st_uid,gid=info.st_gid,
+            mode=stat.S_IMODE(info.st_mode),version=_preflight_stamp_v1(info))
+        if stat.S_ISDIR(info.st_mode):
+            before = _preflight_stamp_v1(info)
+            delivered = []
+            with os.scandir(path) as scan:
+                for entry in scan:
+                    self.entries += 1; self.shared_capture['entries'] += 1
+                    _preflight_require_v1(self.shared_capture['entries'] <= 200000,
+                        'LINUX_PREFLIGHT_CAPTURE_ENTRIES')
+                    delivered.append(entry.name)
+            names = tuple(sorted(delivered,key=lambda text:text.encode('utf-8')))
+            _preflight_require_v1(len({n.casefold() for n in names}) == len(names),'LINUX_PREFLIGHT_CAPTURE_ALIAS')
+            roster = []
+            for name in names:
+                child = path/name
+                self._walk(child,depth+1)
+                roster.append((name,'directory' if str(child) in self.directories else 'file'))
+            _preflight_require_v1(_preflight_stamp_v1(path.lstat()) == before,'LINUX_PREFLIGHT_CAPTURE_DIRECTORY_DRIFT')
+            self.directories[str(path)] = tuple(roster)
+        else:
+            self.shared_capture['files'] += 1
+            _preflight_require_v1(stat.S_ISREG(info.st_mode) and info.st_nlink == 1
+                and self.shared_capture['files'] <= 100000,'LINUX_PREFLIGHT_CAPTURE_REGULAR_FILE:'+str(path))
+            self.byte_count += info.st_size
+            _preflight_require_v1(self.byte_count <= self.byte_limit,'LINUX_PREFLIGHT_CAPTURE_BYTE_CAPACITY')
+            fd = os.open(observed_path,os.O_RDONLY|os.O_NOFOLLOW|os.O_CLOEXEC)
+            try:
+                opened = os.fstat(fd)
+                _preflight_require_v1(_scan_same_api_version(opened) == _scan_same_api_version(info),
+                    'LINUX_PREFLIGHT_CAPTURE_OPEN_CHANGED')
+                pieces = []
+                remaining = info.st_size
+                while remaining:
+                    self._check(path,depth)
+                    block = os.read(fd,min(remaining,65536))
+                    _preflight_require_v1(bool(block),'LINUX_PREFLIGHT_CAPTURE_TRUNCATED')
+                    self.read_bytes += len(block)
+                    pieces.append(block); remaining -= len(block)
+                _preflight_require_v1(os.read(fd,1) == b'' and _scan_same_api_version(os.fstat(fd)) ==
+                    _scan_same_api_version(info) == _scan_same_api_version(observed_path.lstat()),
+                    'LINUX_PREFLIGHT_CAPTURE_FILE_DRIFT')
+                self.files[str(path)] = b''.join(pieces)
+            finally: os.close(fd)
+    def protect(self):
+        _preflight_require_v1(not self.installation and not self.protected and os.geteuid() == 0,
+            'LINUX_PREFLIGHT_PROTECTION_OWNER')
+        for text,original in self.original.items():
+            path = Path(text); info = path.lstat()
+            _preflight_require_v1(_preflight_stamp_v1(info) == original['version'],
+                'LINUX_PREFLIGHT_PREPROTECTION_GENERATION')
+            os.chown(path,0,0,follow_symlinks=False)
+            self.protected.append(text)  # Retain even if the following chmod fails.
+            os.chmod(path,0o555 if stat.S_ISDIR(info.st_mode) or original['mode'] & 0o111 else 0o444,
+                follow_symlinks=False)
+        self.verify(protected=True)
+    def verify(self,*,protected):
+        for text,original in self.original.items():
+            self._check(Path(text),len(Path(text).relative_to(self.root).parts))
+            path = Path(self.aliases.get(text,text)); info = path.lstat()
+            _preflight_require_v1((info.st_dev,info.st_ino) == (original['device'],original['inode']),
+                'LINUX_PREFLIGHT_CAPTURE_OBJECT_CHANGED')
+            if protected:
+                expected = 0o555 if text in self.directories or original['mode'] & 0o111 else 0o444
+                _preflight_require_v1((info.st_uid,info.st_gid,stat.S_IMODE(info.st_mode)) == (0,0,expected),
+                    'LINUX_PREFLIGHT_PROTECTED_ATTRIBUTES')
+            if text in self.files:
+                fd = os.open(path,os.O_RDONLY|os.O_NOFOLLOW|os.O_CLOEXEC)
+                try:
+                    before = os.fstat(fd)
+                    _preflight_require_v1((before.st_dev,before.st_ino) == (info.st_dev,info.st_ino),
+                        'LINUX_PREFLIGHT_VERIFY_DESCRIPTOR')
+                    raw = self.files[text]
+                    for offset in range(0,len(raw),65536):
+                        self._check(path,0)
+                        observed = os.read(fd,min(65536,len(raw)-offset))
+                        self.read_bytes += len(observed)
+                        _preflight_require_v1(observed == raw[offset:offset+65536],
+                            'LINUX_PREFLIGHT_CAPTURE_BYTES_CHANGED:'+text)
+                    _preflight_require_v1(os.read(fd,1) == b'' and _scan_same_api_version(os.fstat(fd)) ==
+                        _scan_same_api_version(before) == _scan_same_api_version(path.lstat()),
+                        'LINUX_PREFLIGHT_VERIFY_CHANGED')
+                finally: os.close(fd)
+            else:
+                with os.scandir(path) as scan: names = tuple(sorted(e.name for e in scan))
+                _preflight_require_v1(names == tuple(sorted(n for n,k in self.directories[text])),
+                    'LINUX_PREFLIGHT_CAPTURE_ROSTER_CHANGED')
+    def copy_installation(self,destination):
+        _preflight_require_v1(self.installation and not Path(destination).exists(),'LINUX_PREFLIGHT_COPY_ONLY_INSTALLATION')
+        destination = Path(destination)
+        for text in sorted(self.directories,key=lambda p:len(Path(p).parts)):
+            target = destination/Path(text).relative_to(self.root)
+            target.mkdir(mode=0o755)
+        for text,raw in self.files.items():
+            target = destination/Path(text).relative_to(self.root)
+            with target.open('xb') as stream:
+                _preflight_require_v1(stream.write(raw) == len(raw),'LINUX_PREFLIGHT_INSTALLATION_COPY_SHORT')
+                os.fchmod(stream.fileno(),0o555 if self.original[text]['mode'] & 0o111 else 0o444)
+                stream.flush(); os.fsync(stream.fileno())
+            _preflight_require_v1(target.read_bytes() == raw,'LINUX_PREFLIGHT_INSTALLATION_COPY_DIFFERS')
+        for text in sorted(self.directories,key=lambda p:len(Path(p).parts),reverse=True):
+            os.chmod(destination/Path(text).relative_to(self.root),0o555)
+        self.verify(protected=False)
+    def restore(self):
+        errors = []
+        for text in reversed(self.protected):
+            try:
+                path = Path(text); original = self.original[text]; info = path.lstat()
+                _preflight_require_v1((info.st_dev,info.st_ino) == (original['device'],original['inode']),
+                    'LINUX_PREFLIGHT_RESTORE_OBJECT_CHANGED')
+                os.chown(path,original['uid'],original['gid'],follow_symlinks=False)
+                os.chmod(path,original['mode'],follow_symlinks=False)
+                actual = path.lstat()
+                _preflight_require_v1((actual.st_uid,actual.st_gid,stat.S_IMODE(actual.st_mode)) ==
+                    (original['uid'],original['gid'],original['mode']),'LINUX_PREFLIGHT_RESTORE_ATTRIBUTES')
+            except BaseException as exc: errors.append(exc)
+        _scan_raise_errors(errors)
+
+
+class _LinuxPreflightProcessV1:
+    """Transient service adapter beneath supervise_command; launcher status is separate."""
+    def __init__(self,scope):
+        self.scope = scope
+        self.pid = None
+        self.returncode = None
+        self.pidfd = None
+        self.next_poll = 0.0
+        self.stdout = _LinuxPreflightTailV1(scope.spool/'command-1.stdout.bin',original_evidence=True)
+        self.stderr = _LinuxPreflightTailV1(scope.spool/'command-1.stderr.bin',original_evidence=True)
+    def poll(self):
+        if self.returncode is not None: return self.returncode
+        if self.pidfd is None: raise RuntimeError('LINUX_PREFLIGHT_MAIN_PIDFD_UNAVAILABLE')
+        if time.monotonic() < self.next_poll: return None
+        self.next_poll = time.monotonic()+0.2
+        self.scope.query.check(settling=True)
+        import select
+        poll = select.poll(); poll.register(self.pidfd,select.POLLIN)
+        if not poll.poll(0): return None
+        status = self.scope.show(self.scope.name+'.service',settling=True)
+        _preflight_require_v1(status['InvocationID'] == self.scope.invocation,
+            'LINUX_PREFLIGHT_TERMINAL_INVOCATION')
+        code,number = int(status['ExecMainCode']),int(status['ExecMainStatus'])
+        if code == 0 and status['ActiveState'] in ('activating','active','deactivating'):
+            # The held pidfd can signal before the manager processes SIGCHLD.
+            # This is a retained pending observation, not a failed witness retry.
+            self.scope.history.append(dict(terminal_manager_pending=status,main_pidfd_terminal=True))
+            return None
+        _preflight_require_v1(code in (1,2,3),'LINUX_PREFLIGHT_NATIVE_EXIT_UNAVAILABLE')
+        self.returncode = number if code == 1 else -number
+        self.scope.history.append(dict(terminal_unit=status,main_pidfd_terminal=True))
+        if self.returncode == 0:
+            _preflight_require_v1(status['Result'] == 'success','LINUX_PREFLIGHT_MANAGER_RESULT')
+        return self.returncode
+    def wait(self,timeout=None):
+        end = self.scope.settlement_deadline_ns if timeout is None else min(self.scope.settlement_deadline_ns,
+            time.monotonic_ns()+int(timeout*10**9))
+        while time.monotonic_ns() < end:
+            result = self.poll()
+            if result is not None: return result
+            time.sleep(0.1)
+        raise subprocess.TimeoutExpired(self.scope.argv,timeout)
+
+
+def _linux_preflight_syscalls_v1(query):
+    """Resolve the five source-owned groups from trusted installed systemd/seccomp."""
+    import ctypes
+    groups = ('@mount','@reboot','@swap','@raw-io','@module')
+    raw = query.command(('/usr/bin/systemd-analyze','--no-pager','syscall-filter',*groups))
+    seen, names = set(),set()
+    for line in raw.decode('ascii','strict').splitlines():
+        word = line.strip()
+        if not word or word.startswith('#'): continue
+        if word.startswith('@'):
+            _preflight_require_v1(word in groups and not line[:1].isspace() and word not in seen,
+                'LINUX_PREFLIGHT_SYSCALL_GROUP_SHAPE')
+            seen.add(word)
+        else:
+            _preflight_require_v1(re.fullmatch('[a-zA-Z0-9_]{1,128}',word) is not None,
+                'LINUX_PREFLIGHT_SYSCALL_NAME')
+            names.add(word)
+    _preflight_require_v1(seen == set(groups) and 0 < len(names) <= 4096,'LINUX_PREFLIGHT_SYSCALL_GROUP_COVERAGE')
+    # No install or fallback: these are the trusted native system libraries used
+    # by the selected manager. Only name/number queries are invoked, never load().
+    native = ctypes.CDLL('libseccomp.so.2')
+    resolve = native.seccomp_syscall_resolve_name
+    resolve.argtypes,resolve.restype = [ctypes.c_char_p],ctypes.c_int
+    name_for = native.seccomp_syscall_resolve_num_arch
+    name_for.argtypes,name_for.restype = [ctypes.c_uint32,ctypes.c_int],ctypes.c_void_p
+    libc = ctypes.CDLL(None); release = libc.free
+    release.argtypes,release.restype = [ctypes.c_void_p],None
+    expected = set()
+    for name in sorted(names):
+        query.check()
+        number = resolve(name.encode('ascii'))
+        if number == -1:
+            query.record('syscall-name-unavailable',name,b'libseccomp native name returned -1')
+            continue
+        pointer = name_for(0,number)
+        _preflight_require_v1(bool(pointer),'LINUX_PREFLIGHT_SYSCALL_NUMBER_NAME')
+        try:
+            value = ctypes.string_at(pointer).decode('ascii','strict')
+            _preflight_require_v1(re.fullmatch('[a-zA-Z0-9_]{1,128}',value) is not None,
+                'LINUX_PREFLIGHT_SYSCALL_RESOLVED_NAME')
+            expected.add(value)
+        finally: release(pointer)
+    _preflight_require_v1(expected,'LINUX_PREFLIGHT_SYSCALL_GROUP_UNAVAILABLE')
+    query.record('syscall-policy',groups,' '.join(sorted(expected)).encode('ascii'))
+    return frozenset(expected)
+
+
+_LINUX_PREFLIGHT_SERVICE_READBACK_V1 = {
+    'Type':'exec','Restart':'no','RemainAfterExit':'yes','DynamicUser':'yes','UMask':'0077',
+    'NoNewPrivileges':'yes','CapabilityBoundingSet':'','AmbientCapabilities':'',
+    'PrivateDevices':'yes','PrivateNetwork':'yes','PrivateIPC':'yes','PrivateTmp':'no',
+    'ProtectSystem':'strict','ProtectHome':'tmpfs','MountAPIVFS':'yes','ProtectProc':'invisible',
+    'ProtectControlGroups':'yes','ProtectKernelTunables':'yes','ProtectKernelModules':'yes',
+    'ProtectKernelLogs':'yes','RestrictSUIDSGID':'yes','RestrictRealtime':'yes','RestrictNamespaces':'yes',
+    'LockPersonality':'yes','RestrictAddressFamilies':'AF_UNIX','SystemCallArchitectures':'native',
+    'MemoryAccounting':'yes','MemoryMax':'6442450944','MemorySwapMax':'0','TasksAccounting':'yes',
+    'TasksMax':'64','CPUAccounting':'yes','CPUQuotaPerSecUSec':'2s','CPUQuotaPeriodUSec':'100ms',
+    'RuntimeMaxUSec':'1h','TimeoutStartUSec':'1min','TimeoutStopUSec':'10s','KillMode':'control-group',
+    'SendSIGKILL':'yes','LimitCORE':'0','LimitNOFILE':'1024','LimitFSIZE':'67108864',
+    'RuntimeDirectoryMode':'0700','RuntimeDirectoryPreserve':'yes','StandardInput':'null',
+    'StandardOutput':'append','StandardError':'append',
+}
+
+
+def _linux_preflight_unit_policy_v1(status, *, name, root, repository, runtime, syscall_filter):
+    _preflight_require_v1(type(status) is dict,'LINUX_PREFLIGHT_UNIT_READBACK_TYPE')
+    expected = {**_LINUX_PREFLIGHT_SERVICE_READBACK_V1,'RootDirectory':root,'WorkingDirectory':repository,
+        'RuntimeDirectory':name,'Slice':name+'.slice'}
+    for key,wanted in expected.items():
+        _preflight_require_v1(status.get(key) == wanted,'LINUX_PREFLIGHT_UNIT_READBACK:'+key)
+    _preflight_require_v1(set(status.get('InaccessiblePaths','').split()) ==
+        {'/dev/shm','/dev/mqueue','/dev/hugepages'},'LINUX_PREFLIGHT_DEVICE_MASK_READBACK')
+    _preflight_require_v1(set(status.get('ReadWritePaths','').split()) == {runtime,'/tmp','/var/tmp'},
+        'LINUX_PREFLIGHT_WRITABLE_PATH_READBACK')
+    filter_text = status.get('SystemCallFilter','')
+    _preflight_require_v1(type(syscall_filter) is frozenset and syscall_filter
+        and filter_text.startswith('~') and set(filter_text[1:].split()) == syscall_filter,
+        'LINUX_PREFLIGHT_SYSCALL_FILTER_READBACK')
+
+
+class _LinuxPreflightScopeV1:
+    """One newly allocated slice, one service and original held native witnesses."""
+    _STATUS = ('InvocationID','ControlGroup','MainPID','ExecMainCode','ExecMainStatus','Result','ActiveState',
+        'MemoryMax','MemorySwapMax','TasksMax','CPUQuotaPerSecUSec','CPUQuotaPeriodUSec','DynamicUser',
+        'NoNewPrivileges','PrivateDevices','PrivateNetwork','PrivateIPC','ProtectSystem','ProtectHome','RuntimeDirectoryMode')
+    _STATUS = tuple(dict.fromkeys((*_STATUS,*_LINUX_PREFLIGHT_SERVICE_READBACK_V1,
+        'RootDirectory','WorkingDirectory','RuntimeDirectory','Slice','InaccessiblePaths','ReadWritePaths','SystemCallFilter',
+        'StopWhenUnneeded')))
+    def __init__(self,*,name,query,control,runtime,private_root,spool,repository,installation,interpreter,
+            source,header,blobs,vectors,grants,event,environment):
+        self.name,self.query = name,query
+        self.control,self.runtime,self.private_root,self.spool = map(Path,(control,runtime,private_root,spool))
+        self.repository,self.installation,self.interpreter = repository,installation,interpreter
+        self.source,self.header,self.blobs,self.vectors,self.grants = source,header,blobs,vectors,grants
+        self.environment,self.event = environment,event
+        self.execution_deadline_ns,self.settlement_deadline_ns = grants['execution_deadline_ns'],grants['settlement_deadline_ns']
+        self.history,self.slice_files = [],{}
+        self.slice_fd,self.root_fd,self.process = None,None,None
+        self.slice_created,self.service_created,self.terminated,self.settled = False,False,False,False
+        self.invocation = None
+    def show(self,unit,*,settling=False):
+        _preflight_require_v1(unit in (self.name+'.slice',self.name+'.service'),'LINUX_PREFLIGHT_EXACT_UNIT')
+        raw = self.query.command(('/usr/bin/systemctl','show','--no-pager',
+            '--property='+','.join(self._STATUS),unit),settling=settling)
+        result = {}
+        for line in raw.decode('utf-8','strict').splitlines():
+            key,sep,value = line.partition('=')
+            _preflight_require_v1(sep and key in self._STATUS and key not in result,'LINUX_PREFLIGHT_UNIT_PROPERTY')
+            result[key] = value
+        required = self._STATUS[:8] if unit.endswith('.service') else ('InvocationID','ControlGroup','ActiveState')
+        _preflight_require_v1(all(key in result for key in required),'LINUX_PREFLIGHT_UNIT_STATUS_INCOMPLETE')
+        return result
+    def start_slice(self):
+        self.query.check()
+        existing = self.query.command(('/usr/bin/systemctl','list-units','--all','--plain','--no-legend',
+            self.name+'.slice',self.name+'.service'))
+        _preflight_require_v1(not existing.strip(),'LINUX_PREFLIGHT_UNIT_COLLISION')
+        values = tuple(v for row in _LINUX_PREFLIGHT_SLICE_PROPERTIES_V1 for v in row)
+        self.slice_created = True  # A denied/ambiguous native return never erases the attempt.
+        self.query.command(('/usr/bin/busctl','--system','--no-pager','call','org.freedesktop.systemd1',
+            '/org/freedesktop/systemd1','org.freedesktop.systemd1.Manager','StartTransientUnit',
+            'ssa(sv)a(sa(sv))',self.name+'.slice','fail',str(len(_LINUX_PREFLIGHT_SLICE_PROPERTIES_V1)),*values,'0'))
+        self.slice_created = True
+        status = self.show(self.name+'.slice')
+        _preflight_require_v1(status['InvocationID'] and status['ControlGroup'] and status['ActiveState'] == 'active',
+            'LINUX_PREFLIGHT_SLICE_NOT_ACTIVE')
+        for key,wanted in dict(StopWhenUnneeded='no',MemoryAccounting='yes',MemoryMax='6442450944',
+                MemorySwapMax='0',TasksAccounting='yes',TasksMax='64',CPUAccounting='yes',
+                CPUQuotaPerSecUSec='2s',CPUQuotaPeriodUSec='100ms').items():
+            _preflight_require_v1(status.get(key) == wanted,'LINUX_PREFLIGHT_SLICE_PROPERTY:'+key)
+        self.slice_invocation,self.slice_cgroup = status['InvocationID'],status['ControlGroup']
+        _linux_preflight_path_v1(self.slice_cgroup)
+        own = _linux_preflight_process_identity_v1(os.getpid(),self.query)
+        manager = _linux_preflight_process_identity_v1(1,self.query)
+        _preflight_require_v1(own['namespaces']['cgroup'] == manager['namespaces']['cgroup']
+            and own['namespaces']['pid'] == manager['namespaces']['pid'],
+            'LINUX_PREFLIGHT_HOST_MANAGER_NAMESPACE')
+        mount = [row for row in _linux_preflight_mounts_v1(self.query.read('/proc/self/mountinfo'))
+            if row['path'] == '/sys/fs/cgroup' and row['fs'] == 'cgroup2' and row['root'] == '/']
+        _preflight_require_v1(len(mount) == 1,'LINUX_PREFLIGHT_TRUE_CGROUP2_ROOT')
+        root = Path('/sys/fs/cgroup')
+        root_fd = os.open(root,os.O_PATH|os.O_DIRECTORY|os.O_NOFOLLOW|os.O_CLOEXEC)
+        try:
+            root_info = os.fstat(root_fd)
+            fdinfo = self.query.read('/proc/'+str(os.getpid())+'/fdinfo/'+str(root_fd))
+            identifiers = [line.split(b':',1)[1].strip() for line in fdinfo.splitlines() if line.startswith(b'mnt_id:')]
+            _preflight_require_v1(identifiers == [str(mount[0]['id']).encode('ascii')],
+                'LINUX_PREFLIGHT_DESCRIPTOR_FILESYSTEM_ASSOCIATION')
+            _preflight_require_v1(str(os.major(root_info.st_dev))+':'+str(os.minor(root_info.st_dev)) == mount[0]['device'],
+                'LINUX_PREFLIGHT_CGROUP_MOUNT_IDENTITY')
+            self.slice_path = root/self.slice_cgroup.lstrip('/')
+            self.slice_fd = os.open(self.slice_path,os.O_PATH|os.O_DIRECTORY|os.O_NOFOLLOW|os.O_CLOEXEC)
+            info = os.fstat(self.slice_fd)
+            self.slice_identity = (info.st_dev,info.st_ino)
+            current = self.slice_path
+            for level in range(33):
+                _preflight_require_v1(level < 32,'LINUX_PREFLIGHT_ANCESTOR_DEPTH')
+                if current == root:
+                    controllers = set(self.query.read(root/'cgroup.controllers').split())
+                    enabled = set(self.query.read(root/'cgroup.subtree_control').split())
+                    _preflight_require_v1({b'cpu',b'memory',b'pids'} <= controllers & enabled,
+                        'LINUX_PREFLIGHT_ROOT_CONTROLLER_AVAILABILITY')
+                    for key in ('memory.max','pids.max','cpu.max'):
+                        _preflight_require_v1(not (root/key).exists(),'LINUX_PREFLIGHT_UNEXPECTED_ROOT_INTERFACE')
+                    self.history.append(dict(verified_root=str(root),nonroot_limits='NOT_APPLICABLE',
+                        mount=sorted((k,str(v)) for k,v in mount[0].items()),manager=manager))
+                    break
+                values = _linux_preflight_ancestor_values_v1(self.query.read(current/'memory.max'),
+                    self.query.read(current/'pids.max'),self.query.read(current/'cpu.max'),owned=current == self.slice_path)
+                _linux_preflight_project_chain_v1(root_fd,'/'+current.relative_to(root).as_posix(),self.query)
+                controllers = set(self.query.read(current/'cgroup.controllers').split())
+                enabled = set(self.query.read(current/'cgroup.subtree_control').split())
+                _preflight_require_v1({b'cpu',b'memory',b'pids'} <= controllers
+                    and (current == self.slice_path or {b'cpu',b'memory',b'pids'} <= enabled),
+                    'LINUX_PREFLIGHT_ANCESTOR_CONTROLLER_ENABLEMENT')
+                usage = {key:self.query.read(current/key).decode('ascii') for key in
+                    ('memory.current','pids.current','cpu.stat','cgroup.events')}
+                self.history.append(dict(ancestor=str(current),values=values,usage=usage))
+                current = current.parent
+            _preflight_require_v1(self.query.read(self.slice_path/'memory.swap.max') == b'0\n','LINUX_PREFLIGHT_SLICE_SWAP')
+            for key in ('cgroup.events','memory.current','memory.peak','memory.events','pids.current','pids.events','cpu.stat'):
+                fd = os.open(key,os.O_RDONLY|os.O_NOFOLLOW|os.O_CLOEXEC,dir_fd=self.slice_fd)
+                self.slice_files[key] = (fd,(os.fstat(fd).st_dev,os.fstat(fd).st_ino))
+        finally: os.close(root_fd)
+    def slice_observation(self):
+        self.query.check(settling=True)
+        info = os.fstat(self.slice_fd); now = self.slice_path.lstat()
+        _preflight_require_v1((info.st_dev,info.st_ino) == (now.st_dev,now.st_ino) == self.slice_identity,
+            'LINUX_PREFLIGHT_HELD_SLICE_UNAVAILABLE')
+        result = {}
+        for key,(fd,identity) in self.slice_files.items():
+            self.query.check(settling=True)
+            current = os.fstat(fd)
+            _preflight_require_v1((current.st_dev,current.st_ino) == identity,'LINUX_PREFLIGHT_SLICE_FILE_CHANGED')
+            os.lseek(fd,0,os.SEEK_SET)
+            raw = os.read(fd,1048577)
+            _preflight_require_v1(len(raw) <= 1048576,'LINUX_PREFLIGHT_SLICE_RESPONSE')
+            result[key] = self.query.record('held-slice',key,raw).decode('ascii','strict')
+        self.history.append(dict(slice_observation=result))
+        events = dict(line.split() for line in result['cgroup.events'].splitlines())
+        _preflight_require_v1(events.get('populated') in ('0','1'),'LINUX_PREFLIGHT_POPULATION_UNAVAILABLE')
+        return events['populated'] == '0'
+    def create(self,argv,cwd,environment):
+        self.query.check()
+        _preflight_require_v1(self.process is None and tuple(argv) == self.argv and str(cwd) == self.repository
+            and environment == self.environment,'LINUX_PREFLIGHT_EXACT_SUPERVISOR_ADAPTER')
+        self.process = _LinuxPreflightProcessV1(self)
+        try:
+            self.service_created = True  # The native attempt may partially create it even if reporting fails.
+            self.query.command(self.launch_argv)
+            status = self.show(self.name+'.service')
+            _preflight_require_v1(status['InvocationID'] and int(status['MainPID']) > 0,
+                'LINUX_PREFLIGHT_MAIN_PROCESS_UNAVAILABLE')
+            self.invocation = status['InvocationID']
+            self.process.pid = int(status['MainPID'])
+            self.process.pidfd = os.pidfd_open(self.process.pid,0)
+            self._bind_and_release(status)
+            return self.process
+        except BaseException as exc:
+            exc.owned_process = self.process
+            raise
+    def _bind_and_release(self,status):
+        import select
+        pid = self.process.pid
+        process = _linux_preflight_process_identity_v1(pid,self.query)
+        controller = _linux_preflight_process_identity_v1(os.getpid(),self.query)
+        _preflight_require_v1(process['namespaces']['ipc'] != controller['namespaces']['ipc']
+            and process['namespaces']['net'] != controller['namespaces']['net']
+            and process['namespaces']['mnt'] != controller['namespaces']['mnt'],
+            'LINUX_PREFLIGHT_PRIVATE_NAMESPACES')
+        _linux_preflight_unit_policy_v1(status,name=self.name,root=str(self.private_root),
+            repository=self.repository,runtime=str(self.runtime),syscall_filter=self.expected_syscalls)
+        cgroup = _linux_preflight_cgroup_path_v1(pid,self.query)
+        _preflight_require_v1(cgroup == status['ControlGroup'] and cgroup.startswith(self.slice_cgroup+'/'),
+            'LINUX_PREFLIGHT_SERVICE_SLICE_MEMBERSHIP')
+        self.root_fd = os.open('/proc/'+str(pid)+'/root',os.O_PATH|os.O_DIRECTORY|os.O_CLOEXEC)
+        root = os.fstat(self.root_fd); expected_root = self.private_root.stat()
+        _preflight_require_v1((root.st_dev,root.st_ino) == (expected_root.st_dev,expected_root.st_ino),
+            'LINUX_PREFLIGHT_ORIGINAL_PRIVATE_ROOT')
+        mounts = _linux_preflight_mounts_v1(self.query.read('/proc/'+str(pid)+'/mountinfo'))
+        mappings = {}
+        for logical,source in ((self.repository,Path(self.repository)),(self.installation,self.control/'installation'),
+                *((str(self.control/name),self.control/name) for name in ('declaration','binding','release'))):
+            chain = _linux_preflight_project_chain_v1(self.root_fd,logical,self.query)
+            view = os.stat(logical.lstrip('/'),dir_fd=self.root_fd,follow_symlinks=False)
+            host = source.stat()
+            _preflight_require_v1((view.st_dev,view.st_ino) == (host.st_dev,host.st_ino),
+                'LINUX_PREFLIGHT_BIND_OBJECT_MAPPING:'+logical)
+            selected = [m for m in mounts if m['path'] == logical]
+            _preflight_require_v1(len(selected) == 1 and 'ro' in selected[0]['options'],
+                'LINUX_PREFLIGHT_BIND_READONLY:'+logical)
+            mappings[logical] = dict(chain=chain,identity=(view.st_dev,view.st_ino),mount={
+                k:sorted(v) if isinstance(v,frozenset) else v for k,v in selected[0].items()})
+        inaccessible = Path('/run/systemd/inaccessible/dir').stat()
+        for path in ('/dev/shm','/dev/mqueue','/dev/hugepages'):
+            selected = [m for m in mounts if m['path'] == path]
+            info = os.stat(path.lstrip('/'),dir_fd=self.root_fd,follow_symlinks=False)
+            _preflight_require_v1(len(selected) == 1 and 'ro' in selected[0]['options']
+                and stat.S_IMODE(info.st_mode) == 0 and info.st_uid == 0
+                and (info.st_dev,info.st_ino) == (inaccessible.st_dev,inaccessible.st_ino),
+                'LINUX_PREFLIGHT_DEVICE_MASK:'+path)
+        runtime_mounts = [m for m in mounts if m['path'] == str(self.runtime)]
+        _preflight_require_v1(len(runtime_mounts) == 1,'LINUX_PREFLIGHT_RUNTIME_ASSOCIATION')
+        declaration = self.control/'declaration/input.bin'
+        projected_chain = _linux_preflight_project_chain_v1(self.root_fd,str(declaration.parent),self.query)
+        info = os.stat(str(declaration).lstrip('/'),dir_fd=self.root_fd,follow_symlinks=False)
+        _preflight_require_v1(_scan_same_api_version(info) == _scan_same_api_version(declaration.stat()),
+            'LINUX_PREFLIGHT_DECLARATION_MAPPING')
+        index = Path(self.repository)/'.git/index'
+        seen_index = os.stat(str(index).lstrip('/'),dir_fd=self.root_fd,follow_symlinks=False)
+        _preflight_require_v1((seen_index.st_dev,seen_index.st_ino) == (index.stat().st_dev,index.stat().st_ino),
+            'LINUX_PREFLIGHT_ORIGINAL_INDEX_MAPPING')
+        poll = select.poll(); poll.register(self.process.pidfd,select.POLLIN)
+        _preflight_require_v1(not poll.poll(0) and process == _linux_preflight_process_identity_v1(pid,self.query),
+            'LINUX_PREFLIGHT_PROJECTION_PROCESS_CHANGED')
+        self.binding = dict(profile='QTT_PR298_LINUX_PREFLIGHT_V1',name=self.name,invocation=self.invocation,
+            boot_id=self.query.read('/proc/sys/kernel/random/boot_id').decode('ascii').strip(),process=process,
+            slice_cgroup=self.slice_cgroup,slice_identity=self.slice_identity,service_cgroup=cgroup,
+            repository=self.repository,index=str(index),installation=self.installation,runtime=str(self.runtime),
+            runtime_device=runtime_mounts[0]['device'],declaration=str(declaration),declaration_parent=str(declaration.parent),
+            declaration_chain=projected_chain,declaration_version=_scan_same_api_version(info),grants=self.grants,
+            startup_deadline_ns=self.startup_deadline_ns,vectors=self.vectors,environment=self.environment,
+            identities=dict(repository=(Path(self.repository).stat().st_dev,Path(self.repository).stat().st_ino),
+                index=(seen_index.st_dev,seen_index.st_ino)),host_service_mappings=mappings)
+        raw = _preflight_canonical_v1(self.binding)
+        _preflight_require_v1(len(raw) <= 1048576,'LINUX_PREFLIGHT_BINDING_RESPONSE_BOUND')
+        _atomic_write_bytes_v1(self.control/'binding/native.json',raw,control_mode=0o444)
+        self.history.append(dict(binding=self.binding))
+        response_path = self.runtime/'probe.json'
+        response = None
+        for attempt in range(600):
+            self.query.check()
+            _preflight_require_v1(time.monotonic_ns() < self.startup_deadline_ns and not poll.poll(0),
+                'LINUX_PREFLIGHT_STARTUP_RESPONSE_DEADLINE')
+            try: raw = self.query.read(response_path)
+            except FileNotFoundError:
+                time.sleep(0.1); continue
+            response = json.loads(raw)
+            break
+        _preflight_require_v1(type(response) is dict and response.get('name') == self.name
+            and response.get('pid') == pid and response.get('start') == process['start']
+            and response.get('passed') is True,'LINUX_PREFLIGHT_STARTUP_PROBE_REJECTED:'+repr(response))
+        self.history.append(dict(actual_probe=response))
+        _atomic_write_bytes_v1(self.control/'release/release.json',_preflight_canonical_v1(
+            dict(name=self.name,pid=pid,start=process['start'],invocation=self.invocation)),control_mode=0o444)
+    def terminate(self,grace_seconds):
+        _preflight_require_v1(not self.terminated,'LINUX_PREFLIGHT_TERMINATION_ALREADY_ATTEMPTED')
+        self.terminated = True
+        self.query.command(('/usr/bin/systemctl','kill','--kill-whom=all','--signal=KILL',self.name+'.service'),settling=True)
+        until = min(self.settlement_deadline_ns,time.monotonic_ns()+int(grace_seconds*10**9))
+        while time.monotonic_ns() < until:
+            if self.process.poll() is not None and self.slice_observation():
+                return 'OWNED_SYSTEMD_KILL;PIDFD_TERMINAL;HELD_SLICE_EMPTY',True
+            time.sleep(0.1)
+        return 'OWNED_SYSTEMD_KILL;SETTLEMENT_UNRESOLVED',False
+    def finish(self):
+        _preflight_require_v1(self.process is not None and self.process.poll() is not None
+            and self.slice_observation(),'LINUX_PREFLIGHT_TERMINAL_CUSTODY_UNESTABLISHED')
+        self.settled = True
+        return True
+
+
+def _linux_preflight_git_environment_v1(root, observation):
+    """An exact sealed Git trust statement, conditional on original native custody."""
+    control = os.environ.get('QTT_LINUX_PREFLIGHT_CONTROL')
+    if control is None: return {}
+    lease = _LINUX_PREFLIGHT_LEASE_V1.get()
+    if type(lease) is _LinuxPreflightHostLeaseV1:
+        lease.check_parent(root,lease.index)
+        config = Path('/etc/qtt-gitconfig')
+        before = config.lstat()
+        _preflight_require_v1(before.st_uid == 0 and stat.S_IMODE(before.st_mode) == 0o444
+            and before.st_nlink == 1 and lease.query.read(config) ==
+                ('[safe]\n\tdirectory = '+str(root)+'\n').encode('ascii')
+            and _scan_same_api_version(config.lstat()) == _scan_same_api_version(before),
+            'LINUX_PREFLIGHT_PARENT_GIT_EXACT_CONFIG')
+        return {'GIT_CONFIG_GLOBAL':str(config)}
+    _preflight_require_v1(sys.platform == 'linux' and os.geteuid() != 0
+        and type(observation) is _PreflightObservationV1 and observation.root == Path(root),
+        'LINUX_PREFLIGHT_GIT_REQUIRES_ORIGINAL_CHILD_OBSERVATION')
+    control = Path(_linux_preflight_path_v1(control))
+    query = getattr(observation,'_linux_native_queries_v1',None)
+    if query is None:
+        query = _LinuxPreflightQueriesV1(evidence_root=observation.evidence_root,deadline_ns=observation.deadline_ns)
+        query.observation = observation
+        observation._linux_native_queries_v1 = query
+        binding,_,_ = _linux_preflight_control_read_v1(control/'binding/native.json',deadline_ns=observation.deadline_ns,query=query)
+        observation._linux_native_binding_v1 = binding
+    binding = observation._linux_native_binding_v1
+    _preflight_require_v1(binding['repository'] == str(root) and binding['profile'] == 'QTT_PR298_LINUX_PREFLIGHT_V1'
+        and getattr(observation,'_linux_parent_pid_v1',None) == binding['process']['pid'] == os.getppid(),
+        'LINUX_PREFLIGHT_GIT_ORIGINAL_PARENT')
+    actual = _linux_preflight_process_identity_v1(os.getppid(),query)
+    _preflight_require_v1(_json_compatible(actual) == binding['process']
+        and _linux_preflight_cgroup_path_v1(os.getpid(),query) == binding['service_cgroup'],
+        'LINUX_PREFLIGHT_GIT_KERNEL_ASSOCIATION')
+    _linux_preflight_status_v1(os.getpid(),query)
+    info = Path(root).lstat()
+    _preflight_require_v1([info.st_dev,info.st_ino] == binding['identities']['repository']
+        and info.st_uid == 0 and stat.S_IMODE(info.st_mode) & 0o222 == 0,
+        'LINUX_PREFLIGHT_GIT_ORIGINAL_REPOSITORY')
+    cfg = Path('/etc/qtt-gitconfig'); before = cfg.lstat()
+    _preflight_require_v1(before.st_uid == 0 and stat.S_IMODE(before.st_mode) == 0o444 and before.st_nlink == 1,
+        'LINUX_PREFLIGHT_GIT_CONFIG_PERMISSIONS')
+    _preflight_require_v1(query.read(cfg) == ('[safe]\n\tdirectory = '+str(root)+'\n').encode('ascii')
+        and _scan_same_api_version(cfg.lstat()) == _scan_same_api_version(before),'LINUX_PREFLIGHT_GIT_EXACT_CONFIG')
+    return {'GIT_CONFIG_GLOBAL':str(cfg)}
