@@ -20410,4 +20410,31 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
             assert original.read_bytes() == b'original manager bytes'
             assert counters['retained_byte_count'] == counters['drained_byte_count'] == 22
         finally: tail.close()
+    # Actual directory observations: the export root is not a single-link file.
+    evidence_directory = area/'directory-export'; evidence_directory.mkdir()
+    original_directory = runner._linux_preflight_export_directory_v1(evidence_directory)
+    assert runner._linux_preflight_export_directory_v1(evidence_directory,original_directory) == original_directory
+    with pytest.raises(ValueError,match='single-link regular file'):
+        o._scan_same_api_version(evidence_directory.lstat())
+    (evidence_directory/'new-child').mkdir()
+    # Windows may retain the directory timestamp for an immediate child create.
+    # Change the real disposable directory's mtime explicitly, then measure it.
+    before_change = evidence_directory.stat()
+    os.utime(evidence_directory,ns=(before_change.st_atime_ns,before_change.st_mtime_ns+1_000_000_000))
+    assert evidence_directory.stat().st_mtime_ns != before_change.st_mtime_ns
+    changed_directory = runner._linux_preflight_export_directory_v1(evidence_directory)
+    assert changed_directory != original_directory
+    with pytest.raises(o.ValidationReliabilityError,match='EXPORT_DIRECTORY_CHANGED'):
+        runner._linux_preflight_export_directory_v1(evidence_directory,original_directory)
+    with pytest.raises(o.ValidationReliabilityError,match='EXPORT_DIRECTORY'):
+        runner._linux_preflight_export_directory_v1(original)
+    # Complete controller source still invokes the directory check before and
+    # after traversal. The regular-file descriptor checks remain independent.
+    controller = next(n for n in ast.parse(Path(runner.__file__).read_text(encoding='utf-8')).body
+        if isinstance(n,ast.FunctionDef) and n.name == '_linux_preflight_controller_v1')
+    export_tree = next(n for n in ast.walk(controller) if isinstance(n,ast.FunctionDef) and n.name == 'export_tree')
+    assert [len(n.args) for n in ast.walk(export_tree) if isinstance(n,ast.Call)
+        and isinstance(n.func,ast.Name) and n.func.id == '_linux_preflight_export_directory_v1'] == [1,2]
+    assert '_scan_same_api_version' not in ast.unparse(export_tree)
+    print('LINUX_PREFLIGHT_EXPORT_DIRECTORY_CHECKS_PASSED; native_systemd_enforcement=NOT_EXECUTED',flush=True)
     print('LINUX_PREFLIGHT_REFERENCE_CHECKS_PASSED; native_systemd_enforcement=NOT_EXECUTED',flush=True)

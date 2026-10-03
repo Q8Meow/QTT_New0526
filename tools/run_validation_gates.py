@@ -9585,6 +9585,18 @@ def _linux_preflight_provision_v1():
     return _linux_preflight_controller_v1(repository,installation,interpreter,event,event_bytes,frozen['origin_ns'],export_root)
 
 
+def _linux_preflight_export_directory_v1(path, previous=None):
+    """Use the existing directory identity owner for retained native evidence."""
+    from tools import validation_reliability as o
+    info = path.lstat()
+    o._preflight_require_v1(stat.S_ISDIR(info.st_mode) and not o._stat_is_reparse_point(info),
+        'LINUX_PREFLIGHT_EXPORT_DIRECTORY:'+str(path))
+    version = o._preflight_stamp_v1(info)
+    o._preflight_require_v1(previous is None or version == previous,
+        'LINUX_PREFLIGHT_EXPORT_DIRECTORY_CHANGED:'+str(path))
+    return version
+
+
 def _linux_preflight_controller_v1(repository,installation,interpreter,event,event_bytes,origin,export_root):
     from tools import validation_reliability as o
     o._preflight_require_v1(os.geteuid() == 0 and time.monotonic_ns() < origin+3500*10**9,
@@ -9605,6 +9617,7 @@ def _linux_preflight_controller_v1(repository,installation,interpreter,event,eve
     query = o._LinuxPreflightQueriesV1(evidence_root=control/'native-evidence',deadline_ns=grants['settlement_deadline_ns'],
         reserved_output_bytes=2*67108864)
     source = scope = None
+    capture_counts = dict(files=0,entries=0)
     mounted = restored = False
     failures = []
     receipt = None
@@ -9613,7 +9626,6 @@ def _linux_preflight_controller_v1(repository,installation,interpreter,event,eve
         first = version.splitlines()[0].split()
         o._preflight_require_v1(len(first) >= 2 and first[0] == 'systemd' and first[1].isdigit()
             and int(first[1]) >= 255,'LINUX_PREFLIGHT_SYSTEMD_BASELINE')
-        capture_counts = dict(files=0,entries=0)
         source = o._LinuxPreflightCaptureV1(repository,byte_limit=2*1024**3,
             deadline_ns=grants['native_deadline_ns'],shared_capture=capture_counts)
         git_root = pathlib.Path(repository)/'.git'
@@ -9722,8 +9734,7 @@ def _linux_preflight_controller_v1(repository,installation,interpreter,event,eve
         nonlocal export_entries
         o._preflight_require_v1(depth <= 64 and len(str(path).encode('utf-8')) <= 4096
             and time.monotonic_ns() < grants['settlement_deadline_ns'],'LINUX_PREFLIGHT_EXPORT_TREE_BOUND')
-        before = path.lstat()
-        o._preflight_require_v1(stat.S_ISDIR(before.st_mode),'LINUX_PREFLIGHT_EXPORT_DIRECTORY')
+        before = _linux_preflight_export_directory_v1(path)
         destination.mkdir(mode=0o755,exist_ok=False)
         with os.scandir(path) as stream:
             for item in stream:
@@ -9732,14 +9743,13 @@ def _linux_preflight_controller_v1(repository,installation,interpreter,event,eve
                 child = path/item.name
                 if item.is_dir(follow_symlinks=False): export_tree(child,destination/item.name,depth+1)
                 else: export_file(child,destination/item.name)
-        o._preflight_require_v1(o._scan_same_api_version(path.lstat()) == o._scan_same_api_version(before),
-            'LINUX_PREFLIGHT_EXPORT_DIRECTORY_CHANGED')
+        _linux_preflight_export_directory_v1(path,before)
     # The export roots are literal owned evidence surfaces, never the checkout,
     # index, installation, declaration payload or an arbitrary supplied pathname.
     report = dict(native_service_receipt=None if receipt is None else o._json_compatible(receipt),
         native_history=[] if scope is None else o._json_compatible(scope.history),
         native_queries=query.observations,query_attempts=query.attempts,query_output_bytes=query.retained,
-        capture_counts=None if source is None else source.shared_capture,
+        capture_counts=capture_counts,capture_complete=source is not None,
         source_capture_bytes=None if source is None else source.byte_count,
         source_delivered_read_bytes=None if source is None else source.read_bytes,
         failures=[repr(e) for e in failures],service_settled=settled,
@@ -9800,6 +9810,8 @@ def _linux_preflight_controller_v1(repository,installation,interpreter,event,eve
             removed = True
         except BaseException as exc: failures.append(exc)
     cleanup = dict(service_settled=settled,source_attributes_restored=restored,evidence_export_complete=export_complete,
+        service_created=scope is not None and scope.service_created,runtime_mount_attempted=mounted,
+        source_protection_attempted=source is not None and bool(source.protected),
         owned_units_stopped=stopped,runtime_unmounted=unmounted,owned_roots_removed=removed,
         retained_root=None if removed else str(control),exported_files=exported,
         failures=[repr(e) for e in failures],query_attempts=query.attempts,query_output_bytes=query.retained)

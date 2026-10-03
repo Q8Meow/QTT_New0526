@@ -12669,7 +12669,11 @@ class _LinuxPreflightCaptureV1:
             _preflight_require_v1(stat.S_ISREG(info.st_mode) and info.st_nlink == 1
                 and self.shared_capture['files'] <= 100000,'LINUX_PREFLIGHT_CAPTURE_REGULAR_FILE:'+str(path))
             self.byte_count += info.st_size
-            _preflight_require_v1(self.byte_count <= self.byte_limit,'LINUX_PREFLIGHT_CAPTURE_BYTE_CAPACITY')
+            _preflight_require_v1(self.byte_count <= self.byte_limit,
+                'LINUX_PREFLIGHT_CAPTURE_BYTE_CAPACITY:'+json.dumps(dict(root=str(self.root),path=str(path),
+                    attempted_bytes=self.byte_count,byte_limit=self.byte_limit,file_bytes=info.st_size,
+                    acquired_bytes=self.read_bytes,files=self.shared_capture['files'],
+                    entries=self.shared_capture['entries'],complete_capture=False),sort_keys=True))
             fd = os.open(observed_path,os.O_RDONLY|os.O_NOFOLLOW|os.O_CLOEXEC)
             try:
                 opened = os.fstat(fd)
