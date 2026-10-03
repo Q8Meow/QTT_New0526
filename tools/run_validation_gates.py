@@ -15,7 +15,10 @@ import inspect
 import json
 import ntpath
 import os
+import stat
 import time
+import threading
+from contextlib import nullcontext
 from typing import Sequence
 
 REPO_ROOT = pathlib.Path(__file__).resolve().parents[1]
@@ -34,6 +37,8 @@ from tools.validation_reliability import (  # noqa: E402
     _require_local_layout,
     _require_active_local_run_cache,
     _local_unlinked_path,
+    _stat_is_reparse_point,
+    _same_observed_file,
     _LOCAL_RUN_NAME,
     PYTEST_BASETEMP_DIR_NAME,
     RUN_ID_ENV,
@@ -53,6 +58,8 @@ from tools.validation_reliability import (  # noqa: E402
     resolve_validation_run_paths,
     semantic_candidate_paths,
     supervise_command,
+    _command_requires_process_retention_v1,
+    _scan_raise_errors,
     text_integrity_failure_codes,
     validate_complete_run_evidence,
     validate_published_completion_receipt,
@@ -85,6 +92,7 @@ PR152_BUILD_REPORT_CACHE_KIND = "qtt_pr152_build_report"
 PR152_BUILD_REPORT_CACHE_SCHEMA_VERSION = 1
 _RUN_COMMANDS_ACTIVE_PATHS: ValidationRunPathsV1 | None = None
 _LAST_COMMAND_RECEIPTS: tuple[CommandExecutionReceiptV1, ...] = ()
+_RUN_COMMANDS_SUPERVISION = None
 _LAST_PLANNED_COMMAND_COUNT: int | None = None
 _LAST_EXPECTED_COMMAND_PLAN: tuple[CommandEvidencePlanEntry, ...] = ()
 _ACTIVE_SEMANTIC_CHANGED_PATHS: tuple[str, ...] | None = None
@@ -94,6 +102,22 @@ _ACTIVE_TEXT_INTEGRITY_STATE = "NOT_RUN"
 _ACTIVE_FILESYSTEM_PROBE: FilesystemProbeReceiptV1 | None = None
 _RUN_PROVENANCE_WRITTEN = False
 _RUN_PROVENANCE_ATTEMPTED = False
+_ACTIVE_CANDIDATE_SOURCE = None
+_ACTIVE_PREFLIGHT_PATH_V1 = None
+_ACTIVE_PREFLIGHT_NATIVE_V1 = None
+_ACTIVE_PREFLIGHT_ASSEMBLY_V1 = None
+_SCAN_MAIN_LOCK = threading.Lock()
+_ACTIVE_SCAN_CAPACITY_SOURCE = None
+_ACTIVE_SCAN_LAUNCH = None
+_SCAN_CAPACITY_ATTEMPTED = False
+
+
+from tools.validation_reliability import (
+    _NestedPytestEvidenceV1, _mapper_nested_pytest_args_v1,
+    _recheck_nested_pytest_custody_v1, _mapper_deadline_controls_v1,
+    _MAPPER_DEADLINE_ENV_KEYS, _execution_remaining_seconds_v1, _command_projection_v1,
+)
+
 _execute_supervised_command = supervise_command
 FAST_PREFLIGHT_PHASE = "fast-preflight"
 DETERMINISTIC_VALIDATORS_PHASE = "deterministic-validators"
@@ -2992,14 +3016,34 @@ def _generated_gate_output_path(
             f"{normalized or '<empty>'}"
         )
 
-    resolved_root = repo_root.resolve()
-    resolved_path = resolved_root.joinpath(*segments).resolve()
-    if not _path_is_relative_to(resolved_path, resolved_root):
+    # Keep the lexical leaf: resolving it before unlink could select a different
+    # file. The existing central reparse predicate is also used on Windows.
+    absolute_root = repo_root.absolute()
+    if ".." in absolute_root.parts:
         raise RuntimeError(
-            "VALIDATION_GATE_UNSAFE_GENERATED_OUTPUT_PATH: "
-            f"{normalized}"
+            "VALIDATION_GATE_UNSAFE_GENERATED_OUTPUT_PATH: " + normalized
         )
-    return resolved_path
+    candidate = absolute_root.joinpath(*segments)
+    chain = [*reversed(absolute_root.parents), absolute_root]
+    current = absolute_root
+    for segment in segments:
+        current = current / segment
+        chain.append(current)
+    for component in chain:
+        try:
+            observed = component.lstat()
+        except FileNotFoundError:
+            # The lexical validation API also supports not-yet-created leaves.
+            break
+        if stat.S_ISLNK(observed.st_mode) or _stat_is_reparse_point(observed):
+            raise RuntimeError(
+                "VALIDATION_GATE_UNSAFE_GENERATED_OUTPUT_PATH: " + normalized
+            )
+        if component != candidate and not stat.S_ISDIR(observed.st_mode):
+            raise RuntimeError(
+                "VALIDATION_GATE_UNSAFE_GENERATED_OUTPUT_PATH: " + normalized
+            )
+    return candidate
 
 
 def _restore_untracked_gate_side_effects(
@@ -3016,101 +3060,695 @@ def _restore_untracked_gate_side_effects(
     unexpected_paths = [
         path for path in new_paths if not _is_tracked_generated_output_path(path)
     ]
-    generated_paths = [
-        path for path in new_paths if _is_tracked_generated_output_path(path)
-    ]
-    resolved_generated_paths = [
-        (path, _generated_gate_output_path(repo_root, path))
-        for path in generated_paths
-    ]
-
-    restored: list[str] = []
-    for path_text, path in resolved_generated_paths:
-        if path.is_symlink() or path.is_file():
-            path.unlink()
-            restored.append(path_text)
-        elif path.exists():
-            raise RuntimeError(
-                "VALIDATION_GATE_GENERATED_OUTPUT_NOT_FILE: "
-                f"{path_text}"
-            )
-
     if unexpected_paths:
         raise RuntimeError(
             "VALIDATION_GATE_UNTRACKED_OUTPUT_OUTSIDE_GENERATED_PREFIX: "
             + ",".join(unexpected_paths)
         )
-    return tuple(restored)
-
-
-def _modified_file_snapshots(
-    repo_root: pathlib.Path,
-    paths: set[str],
-) -> dict[str, bytes | None]:
-    snapshots: dict[str, bytes | None] = {}
-    for path_text in sorted(paths):
-        path = repo_root / path_text
-        snapshots[path_text] = path.read_bytes() if path.exists() else None
-    return snapshots
-
-
-def _restore_modified_file_snapshots(
-    repo_root: pathlib.Path,
-    snapshots: dict[str, bytes | None],
-) -> tuple[str, ...]:
-    restored: list[str] = []
-    for path_text, content in sorted(snapshots.items()):
-        path = repo_root / path_text
-        if content is None:
-            if path.exists() and path.is_file():
-                path.unlink()
-                restored.append(path_text)
+    # Validate the complete selected batch before its first deletion. This is
+    # not an atomic filesystem transaction or an occurrence-authorization grant.
+    prepared: list[tuple[str, pathlib.Path, os.stat_result]] = []
+    for path_text in new_paths:
+        path = _generated_gate_output_path(repo_root, path_text)
+        try:
+            observed = path.lstat()
+        except FileNotFoundError:
             continue
-        if path.exists() and path.read_bytes() == content:
-            continue
-        path.parent.mkdir(parents=True, exist_ok=True)
-        path.write_bytes(content)
-        restored.append(path_text)
-    return tuple(restored)
+        if not stat.S_ISREG(observed.st_mode) or _stat_is_reparse_point(observed):
+            raise RuntimeError(
+                "VALIDATION_GATE_GENERATED_OUTPUT_NOT_FILE: " + path_text
+            )
+        prepared.append((path_text, path, observed))
+    if prepared:
+        raise RuntimeError("VALIDATION_CANDIDATE_BASELINE_REQUIRED")
+    return ()
 
 
-def _restore_tracked_gate_side_effects(
-    repo_root: pathlib.Path,
-    initially_modified_paths: set[str],
-) -> tuple[str, ...]:
-    restore_paths = sorted(_tracked_modified_paths(repo_root) - initially_modified_paths)
-    if not restore_paths:
-        return ()
 
-    path_batches: list[list[str]] = []
-    current_batch: list[str] = []
-    current_length = 0
-    for path in restore_paths:
-        quoted_length = len(subprocess.list2cmdline([path])) + 1
-        if current_batch and current_length + quoted_length > 12_000:
-            path_batches.append(current_batch)
-            current_batch = []
-            current_length = 0
-        current_batch.append(path)
-        current_length += quoted_length
-    if current_batch:
-        path_batches.append(current_batch)
 
-    for path_batch in path_batches:
-        returncode, stdout, stderr = _git_stdout(
-            repo_root,
-            [
-                "restore",
-                "--source=HEAD",
-                "--worktree",
-                "--",
-                *path_batch,
-            ],
-        )
-        if returncode != 0:
-            detail = stderr.strip() or stdout.strip() or "git restore failed"
-            raise RuntimeError(detail)
-    return tuple(restore_paths)
+class _PreflightAssemblyV1:
+    """One actual plan and candidate, with no declaration-created authority."""
+    def __init__(self, native, paths, plan):
+        from tools import validation_reliability as owner
+        self.owner, self.native, self.paths, self.plan = owner, native, paths, plan
+        self.state, self.candidate = 'SELECTED', None
+        self.launches = {}
+        self.failure = None
+        owner._preflight_require_v1(type(plan) is tuple and len(plan) == 8
+            and all(type(e) is CommandEvidencePlanEntry and e.command_index == n
+                and e.run_id == paths.run_id and e.phase == FAST_PREFLIGHT_PHASE and e.cwd == str(paths.repo_root)
+                and owner._preflight_vector_v1(e.argv) and e.argv[1].replace('\\','/') == owner._PREFLIGHT_SCRIPTS_V1[n-1]
+                and e.argv[0] == sys.executable for n,e in enumerate(plan,1)), 'preflight exact full original plan required')
+        try:
+            header, blobs, _ = native.consume(self._validate_declaration)
+            self.header = header
+            self.repository = header['repository']
+            self.files = {p:blobs[i] for p,i in self.repository['files']}
+            self.directories = owner._preflight_rosters_v1(self.repository['directories'])
+            self.installation = dict(header['installation'])
+            basis = self.installation['startup_basis']
+            self.installation['startup_basis'] = dict(files={p:blobs[i] for p,i in basis['files']},
+                directories=owner._preflight_rosters_v1(basis['directories'],absolute=True),absent=tuple(basis['absent']))
+            for key in ('version','abi','stdlib_roots','site_roots','config_paths','customizer_paths'):
+                self.installation[key] = tuple(self.installation[key])
+            self.state = 'INPUTS_VALIDATED'
+            self.native.check()
+            self.capture = owner._PreflightObservationV1(root=paths.repo_root,run_id=paths.run_id,occurrence=1,
+                argv=plan[0].argv,files=self.files,directories=self.directories,
+                limits=header['parent_limits']['capture'],deadline_ns=header['parent_limits']['deadline_ns'])
+            self.terminal = owner._PreflightObservationV1(root=paths.repo_root,run_id=paths.run_id,occurrence=1,
+                argv=plan[0].argv,files=self.files,directories=self.directories,
+                limits=header['parent_limits']['terminal'],deadline_ns=header['parent_limits']['deadline_ns'])
+            self.parent_meter = owner._PreflightTransportV1(header['parent_limits']['transport'],
+                header['parent_limits']['deadline_ns'],native.check)
+            if type(native.host_lease) is owner._LinuxPreflightHostLeaseV1:
+                extents,receivers = [],[]
+                for row,entry in zip(header['rows'],plan,strict=True):
+                    index = entry.command_index
+                    identity = dict(run_id=paths.run_id,phase=FAST_PREFLIGHT_PHASE,command_index=index,original_position=index,
+                        command_count=8,argv=list(entry.argv),repo_root=str(paths.repo_root),process_root=str(paths.process_root),
+                        evidence_root=str(paths.evidence_root),parent_pid=os.getpid())
+                    offset,files = 0,[]
+                    for name,blob in row['files']:
+                        files.append([name,offset,len(blobs[blob])]); offset += len(blobs[blob])
+                    # Startup can only subtract allowance. The full original
+                    # nonnegative integers therefore bound every later decimal
+                    # width, while the actual paths, rosters and body are exact.
+                    frame_header = dict(identity=identity,allowance=row['limits'],deadline_ns=row['deadline_ns'],
+                        git=dict(executable=row['git_executable'],evidence_root=None if row['git_executable'] is None
+                            else str(paths.evidence_root/('preflight-'+str(index))/'git')),files=files,directories=row['directories'])
+                    raw = owner._preflight_canonical_v1(frame_header)
+                    owner._preflight_require_v1(offset <= 268435456 and len(raw) <= 8388608,
+                        'LINUX_PREFLIGHT_ROW_SERIALIZATION_LIMIT')
+                    extents.append(24+len(raw)+offset); receivers.append(owner._preflight_result_bound_v1(identity))
+                native.host_lease.reserve_plan(extents,receivers)
+            bindings = {}
+            self.rows = header['rows']
+            for row, entry in zip(self.rows,plan,strict=True):
+                owner._preflight_require_v1(all(self.files[p] == blobs[i] for p,i in row['files']),
+                    'preflight row byte generation differs')
+                observation = owner._PreflightObservationV1(root=paths.repo_root,run_id=paths.run_id,
+                    occurrence=entry.command_index,argv=entry.argv,files={p:blobs[i] for p,i in row['files']},
+                    directories=owner._preflight_rosters_v1(row['directories']),limits=row['limits'],
+                    deadline_ns=row['deadline_ns'],git_executable=row['git_executable'],
+                    evidence_root=paths.evidence_root/('preflight-'+str(entry.command_index))/'git')
+                binding = {k:v for k,v in self.installation.items() if k != 'executable'}
+                binding['observation'] = observation
+                bindings[entry.command_index] = binding
+            index = self.repository['index']
+            self.candidate = _ValidationCandidateCustodyV1(repo_root=paths.repo_root,plan=plan,
+                observe_paths=self._observe_paths,check_exclusive=native.check,
+                index_path=None if index is None else pathlib.Path(index[0]),
+                effects_by_occurrence={n:() for n in range(1,9)},ignored_paths=tuple(self.repository['protected_paths']),
+                operation_checks={n:self._check_operation for n in range(1,9)},nested_evidence_limits={},
+                preflight_bindings=bindings,**header['candidate_limits'])
+            for name, raw in self.files.items():
+                actual = self.candidate.baseline.get(name)
+                owner._preflight_require_v1(actual is not None and actual[1] == raw,
+                    'preflight candidate basis differs: '+name)
+            if index is not None:
+                owner._preflight_require_v1(self.candidate.index_baseline is not None
+                    and self.candidate.index_baseline[1] == blobs[index[1]],'preflight active index basis differs')
+            self.candidate._preflight_assembly = self
+            self.state = 'CUSTODY_READY'
+        except BaseException as exc:
+            self.failure = exc
+            raise
+
+    def _validate_declaration(self,h,payload):
+        o = self.owner
+        o._preflight_keys_v1(h,('phase','repository','installation','rows','candidate_limits','parent_limits','blobs'))
+        o._preflight_require_v1(h['phase'] == FAST_PREFLIGHT_PHASE, 'preflight declaration phase')
+        o._preflight_require_v1(type(h['blobs']) is list,'preflight blob array')
+        offset, sizes = 0, []
+        for pair in h['blobs']:
+            o._preflight_require_v1(type(pair) is list and len(pair) == 2,'preflight blob range')
+            start,length = (o._preflight_integer_v1(v) for v in pair)
+            o._preflight_require_v1(start == offset and length <= payload-offset,'preflight contiguous declaration body')
+            sizes.append(length); offset += length
+        o._preflight_require_v1(offset == payload,'preflight complete declaration body')
+        used = set()
+        def ref(index):
+            o._preflight_integer_v1(index)
+            o._preflight_require_v1(index < len(sizes),'preflight blob reference')
+            used.add(index)
+        def files(rows,absolute=False):
+            o._preflight_require_v1(type(rows) is list,'preflight declaration file array')
+            names, ordered = {}, []
+            for row in rows:
+                o._preflight_require_v1(type(row) is list and len(row) == 2,'preflight declaration file row')
+                (o._preflight_startup_path_v1 if absolute else o._preflight_relative_v1)(row[0])
+                o._preflight_require_v1(row[0].casefold() not in names,'preflight declaration file alias')
+                names[row[0].casefold()] = row[1]; ordered.append(row[0].encode('utf-8')); ref(row[1])
+            o._preflight_require_v1(ordered == sorted(ordered),'preflight declaration file order')
+        r = h['repository']
+        o._preflight_keys_v1(r,('root','files','directories','index','protected_paths'))
+        o._preflight_startup_path_v1(r['root'])
+        o._preflight_require_v1(r['root'] == str(self.paths.repo_root) == str(self.native.root), 'preflight declaration actual repository')
+        files(r['files']); repository_files = dict(r['files'])
+        directories = o._preflight_rosters_v1(r['directories'])
+        o._preflight_catalog_consistency_v1(repository_files,directories)
+        o._preflight_require_v1(type(r['protected_paths']) is list,'preflight protected path array')
+        protected = [o._preflight_relative_v1(p) for p in r['protected_paths']]
+        o._preflight_require_v1(len({p.casefold() for p in protected}) == len(protected), 'preflight protected path alias')
+        index = r['index']
+        if index is None:
+            o._preflight_require_v1(self.native.index_path is None and not (self.paths.repo_root/'.git').exists(),
+                'preflight actual active index required')
+        else:
+            o._preflight_require_v1(type(index) is list and len(index) == 2,'preflight active index pair')
+            o._preflight_startup_path_v1(index[0]); ref(index[1])
+            o._preflight_require_v1(index[0] == str(self.native.index_path),'preflight native active index identity')
+        install = h['installation']
+        o._preflight_keys_v1(install,('executable','version','abi','stdlib_roots','site_roots','loader_environment',
+            'config_paths','customizer_paths','startup_basis'))
+        o._preflight_require_v1(install['executable'] == sys.executable,'preflight admitted executable identity')
+        o._preflight_require_v1(type(install['version']) is list and len(install['version']) == 3
+            and all(type(v) is int for v in install['version']) and tuple(install['version']) == tuple(sys.version_info[:3]),
+            'preflight installation version')
+        o._preflight_require_v1(type(install['abi']) is list and len(install['abi']) == 5
+            and all(type(install['abi'][i]) is int for i in (2,3)), 'preflight installation ABI scalars')
+        for key in ('stdlib_roots','site_roots','config_paths','customizer_paths'):
+            o._preflight_require_v1(type(install[key]) is list,'preflight installation path array')
+            for path in install[key]: o._preflight_startup_path_v1(path)
+            o._preflight_require_v1(len(set(install[key])) == len(install[key]), 'preflight duplicate installation path')
+        loaders = install['loader_environment']
+        o._preflight_require_v1(type(loaders) is dict and all(type(k) is str and type(v) is str
+            and k and '=' not in k and '\0' not in k+v for k,v in loaders.items())
+            and len({k.upper() for k in loaders}) == len(loaders),'preflight loader environment')
+        basis = install['startup_basis']
+        o._preflight_keys_v1(basis,('files','directories','absent'))
+        files(basis['files'],absolute=True)
+        o._preflight_rosters_v1(basis['directories'],absolute=True)
+        o._preflight_require_v1(type(basis['absent']) is list,'preflight startup absence array')
+        for path in basis['absent']: o._preflight_startup_path_v1(path)
+        all_startup = [row[0] for row in basis['files']]+[row[0] for row in basis['directories']]+basis['absent']
+        o._preflight_require_v1(len({p.casefold() for p in all_startup}) == len(all_startup),'preflight startup status alias')
+        o._preflight_require_v1(install['executable'] in dict(basis['files']),'preflight executable byte basis unavailable')
+        o._preflight_keys_v1(h['candidate_limits'],('entry_limit','snapshot_byte_limit','read_byte_limit','deadline_ns'))
+        for v in h['candidate_limits'].values(): o._preflight_integer_v1(v,positive=True)
+        parent = h['parent_limits']
+        o._preflight_keys_v1(parent,('capture','transport','terminal','deadline_ns'))
+        o._preflight_limits_v1(parent['capture']); o._preflight_limits_v1(parent['terminal'])
+        o._preflight_limits_v1(parent['transport'],transport=True)
+        o._preflight_integer_v1(parent['deadline_ns'],positive=True)
+        o._preflight_require_v1(parent['capture'] == self.native.capture_limits
+            and parent['terminal'] == self.native.terminal_limits,'preflight independently reserved parent tranches differ')
+        o._preflight_require_v1(time.monotonic_ns() < parent['deadline_ns'] <= h['candidate_limits']['deadline_ns']
+            <= self.native.deadline_ns,'preflight parent ancestor deadline')
+        o._preflight_require_v1(type(h['rows']) is list and len(h['rows']) == 8,'preflight all eight rows required')
+        for n,(row,entry) in enumerate(zip(h['rows'],self.plan,strict=True),1):
+            o._preflight_keys_v1(row,('original_position','argv','files','directories','limits','parent_tail_reserve',
+                'deadline_ns','settlement_deadline_ns','transport','application_output_limits','git_executable'))
+            o._preflight_require_v1(type(row['original_position']) is int and row['original_position'] == n
+                and type(row['argv']) is list and tuple(row['argv']) == entry.argv,'preflight original row identity')
+            files(row['files']); row_files = dict(row['files'])
+            row_dirs = o._preflight_rosters_v1(row['directories'])
+            o._preflight_catalog_consistency_v1(row_files,row_dirs)
+            o._preflight_require_v1(all(p in repository_files for p in row_files)
+                and all(directories.get(p) == v for p,v in row_dirs.items()), 'preflight row disagrees with repository facts')
+            limits = o._preflight_limits_v1(row['limits']); tail = o._preflight_limits_v1(row['parent_tail_reserve'])
+            o._preflight_require_v1(all(tail[k] <= limits[k] for k in limits),'preflight parent tail allocation')
+            o._preflight_limits_v1(row['transport'],transport=True)
+            output = row['application_output_limits']
+            o._preflight_keys_v1(output,('stdout_bytes','stderr_bytes','combined_output_bytes'))
+            for v in output.values(): o._preflight_integer_v1(v)
+            o._preflight_require_v1(output['stdout_bytes']+output['stderr_bytes'] <= output['combined_output_bytes'],
+                'preflight application stream relation')
+            for key in ('deadline_ns','settlement_deadline_ns'): o._preflight_integer_v1(row[key],positive=True)
+            o._preflight_require_v1(time.monotonic_ns() < row['deadline_ns'] < row['settlement_deadline_ns']
+                <= parent['deadline_ns'],'preflight row ancestor deadline')
+            git = row['git_executable']
+            if limits['git_attempts'] == 0:
+                o._preflight_require_v1(git is None,'preflight unselected Git executable')
+            else:
+                o._preflight_startup_path_v1(git)
+                o._preflight_require_v1(git == self.native.git_executable and git in dict(basis['files']),
+                    'preflight independently admitted Git byte basis unavailable')
+        o._preflight_require_v1(used == set(range(len(sizes))),'preflight unreferenced declaration blob')
+        return sizes,None
+
+    def _observe_paths(self):
+        o = self.owner
+        budget = self.terminal if self.state == 'SETTLING' else self.capture
+        def walk(root):
+            result = []
+            for path,kind in o._preflight_directory_v1(root):
+                if path == self.paths.repo_root/'.git':
+                    continue  # Active index is independently protected by its original owner.
+                if kind == 'directory': result.extend(walk(path))
+                else: result.append(path.relative_to(self.paths.repo_root).as_posix())
+            return result
+        with o._preflight_observation_v1(budget,run_id=budget.run_id,occurrence=1,
+                argv=budget.argv,root=budget.root):
+            result = tuple(walk(self.paths.repo_root))
+            o._preflight_require_v1(set(result) == set(self.files), 'preflight complete candidate file roster differs')
+        return result
+
+    def candidate_source(self,root,plan):
+        self.owner._preflight_require_v1(root == self.paths.repo_root and plan is self.plan
+            and self.state in ('CUSTODY_READY','PUBLISHED'),'preflight single candidate/plan association')
+        self.native.check()
+        return self.candidate
+
+    def _check_operation(self, *, entry, environment, timeout_seconds, scratch_roots):
+        self.native.check()
+        self.owner._preflight_require_v1(entry is self.plan[entry.command_index-1], 'preflight operation plan identity')
+        result = self.native.host_lease.check_launch(entry,entry.argv,environment,scratch_roots,
+            self.rows[entry.command_index-1]['deadline_ns'])
+        self.owner._preflight_require_v1(result is None,'preflight native operation denied')
+
+    def launch(self,index,environment,projection,scratch_roots):
+        o = self.owner
+        o._preflight_require_v1(self.state in ('PUBLISHED','DISPATCHING') and index not in self.launches,
+            'preflight one-shot dispatch state')
+        self.native.check()
+        row,entry = self.rows[index-1],self.plan[index-1]
+        observation = self.candidate.preflight_bindings[index]['observation']
+        if row['git_executable'] is not None:
+            with o._preflight_observation_v1(observation,run_id=observation.run_id,occurrence=index,
+                    argv=entry.argv,root=self.paths.repo_root), o._preflight_startup_access_v1(observation,self.installation['startup_basis']):
+                o._preflight_read_bytes_v1(pathlib.Path(row['git_executable']))
+        lowered = {k.upper() for k in environment}
+        o._preflight_require_v1(len(lowered) == len(environment) and not any(k in lowered for k in o._PREFLIGHT_INPUT_KEYS_V1)
+            and not any(k.startswith(('QTT_SCAN_','QTT_MAPPER_')) for k in lowered),'preflight competing inherited controls')
+        identity = dict(run_id=self.paths.run_id,phase=FAST_PREFLIGHT_PHASE,command_index=index,original_position=index,
+            command_count=8,argv=list(entry.argv),repo_root=str(self.paths.repo_root),process_root=str(self.paths.process_root),
+            evidence_root=str(self.paths.evidence_root),parent_pid=os.getpid())
+        environment = dict(environment)
+        for key,value in ((o.RUN_ID_ENV,self.paths.run_id),(o.PROCESS_ROOT_ENV,str(self.paths.process_root)),
+                (o.EVIDENCE_ROOT_ENV,str(self.paths.evidence_root))):
+            for old in tuple(environment):
+                if old.upper() == key: del environment[old]
+            environment[key] = value
+        launch = o._PreflightLaunchInputV1(identity=identity,observation=observation,row_total=row['limits'],parent_tail_reserve=row['parent_tail_reserve'],
+            limits=row['transport'],parent_meter=self.parent_meter,settlement_deadline_ns=row['settlement_deadline_ns'],
+            host_lease=self.native.host_lease,plan_entry=entry,environment=environment,scratch_roots=tuple(scratch_roots),
+            output_limits=row['application_output_limits'])
+        environment.update(launch.controls)
+        launch.environment = environment
+        projection = dict(projection)
+        projection['fixed_environment_controls'] += tuple((k,environment[k]) for k in
+            (*o._PREFLIGHT_INPUT_KEYS_V1,o.RUN_ID_ENV,o.PROCESS_ROOT_ENV,o.EVIDENCE_ROOT_ENV))
+        self.candidate._preflight_launch = (entry.argv,dict(environment))
+        self.launches[index] = launch
+        self.state = 'DISPATCHING'
+        return launch,environment,projection
+
+    def reconcile(self,index,receipt):
+        launch = self.launches[index]
+        self.owner._preflight_require_v1(launch.state == 'CLOSED' and launch.result is not None
+            and receipt.pid == launch.process.pid and receipt.native_exit_code == launch.result['application_exit'],
+            'preflight receiver/native terminal reconciliation')
+        self.native.check()
+
+    def settling(self):
+        self.native.check()
+        for launch in self.launches.values():
+            if launch.process is not None:
+                self.owner._preflight_require_v1(launch.process.poll() is not None,'preflight final process settlement unproven')
+                self.owner._preflight_require_v1(self.native.host_lease.check_settled(launch.process) is None,
+                    'preflight final host settlement denied')
+        self.state = 'SETTLING'
+
+
+class _ValidationCandidateCustodyV1:
+    """One explicitly admitted working candidate and occurrence-specific effects.
+
+    The supplied enumeration and exclusive-custody check are the original run
+    owner's inputs. Neither a generated prefix nor this class grants effects.
+    """
+    def __init__(self, *, repo_root, plan, observe_paths, check_exclusive, index_path,
+                 effects_by_occurrence, ignored_paths, entry_limit, snapshot_byte_limit,
+                 read_byte_limit, deadline_ns, operation_checks, nested_evidence_limits=None, preflight_bindings=None):
+        from types import MappingProxyType
+        if preflight_bindings is None:
+            preflight_bindings = {}
+        if (type(preflight_bindings) is not dict
+                or any(type(key) is not int or not 1 <= key <= len(plan) for key in preflight_bindings)):
+            raise ValueError("exact original preflight startup bindings required")
+        self.preflight_bindings = MappingProxyType(dict(preflight_bindings))
+        if (type(plan) is not tuple or not plan or not callable(observe_paths)
+                or not callable(check_exclusive) or type(effects_by_occurrence) is not dict
+                or type(ignored_paths) is not tuple):
+            raise ValueError("original candidate and effect inputs required")
+        for bound in (entry_limit, snapshot_byte_limit, read_byte_limit, deadline_ns):
+            if type(bound) is not int or bound <= 0:
+                raise ValueError("explicit candidate resource limits required")
+        if any(type(key) is not int for key in effects_by_occurrence) or set(effects_by_occurrence) != set(range(1, len(plan) + 1)):
+            raise ValueError("candidate effects do not cover original occurrences")
+        if (type(operation_checks) is not dict or any(type(key) is not int for key in operation_checks) or set(operation_checks) != set(effects_by_occurrence)
+                or any(not callable(check) for check in operation_checks.values())):
+            raise ValueError("original per-occurrence source/input/environment/resource checks required")
+        required_nested = set()
+        for index, entry in enumerate(plan, start=1):
+            vector = entry.argv if type(entry) is CommandEvidencePlanEntry else entry.execution_argv
+            if _mapper_nested_pytest_args_v1(tuple(vector), pathlib.Path(repo_root)) is not None:
+                required_nested.add(index)
+        if nested_evidence_limits is None:
+            nested_evidence_limits = {}
+        if (type(nested_evidence_limits) is not dict
+                or set(nested_evidence_limits) != required_nested):
+            raise ValueError("exact mapper nested-evidence resource bindings required")
+        for index, limits in nested_evidence_limits.items():
+            if (type(index) is not int or type(limits) is not dict
+                    or set(limits) != _NestedPytestEvidenceV1._LIMITS
+                    or any(type(v) is not int or v <= 0 for v in limits.values())
+                    or limits["deadline_ns"] > deadline_ns):
+                raise ValueError("nested evidence limits must fit the original ancestor")
+            _mapper_deadline_controls_v1(limits)
+        nested_reads = sum(v["read_byte_limit"] for v in nested_evidence_limits.values())
+        nested_retained = sum(v["retained_byte_limit"] for v in nested_evidence_limits.values())
+        nested_entries = sum(v["entry_limit"] for v in nested_evidence_limits.values())
+        if (nested_reads >= read_byte_limit or nested_retained >= snapshot_byte_limit
+                or nested_entries >= entry_limit):
+            raise ValueError("nested evidence allocations exceed original candidate allowance")
+        # Reserve once from original totals. Failed or unused work is not refunded.
+        read_byte_limit -= nested_reads
+        snapshot_byte_limit -= nested_retained
+        entry_limit -= nested_entries
+        self.nested_evidence_limits = MappingProxyType({index: MappingProxyType(dict(limits))
+            for index, limits in nested_evidence_limits.items()})
+        self.operation_checks = MappingProxyType(dict(operation_checks))
+        self.root = pathlib.Path(repo_root).absolute()
+        self.plan, self.observe_paths, self.check_exclusive = plan, observe_paths, check_exclusive
+        self.effects = MappingProxyType({i: frozenset(self._paths(value, entry_limit))
+            for i, value in effects_by_occurrence.items()})
+        self.ignored = self._paths(ignored_paths, entry_limit)
+        self.all_effects = frozenset(path for value in self.effects.values() for path in value)
+        self.entry_limit, self.snapshot_byte_limit = entry_limit, snapshot_byte_limit
+        self.remaining_read_bytes, self.deadline_ns = read_byte_limit, deadline_ns
+        self.observed_read_bytes, self.read_attempts = 0, 0
+        self.read_measurement_complete = True
+        self.index_path = None if index_path is None else pathlib.Path(index_path).absolute()
+        if self.index_path is None and (self.root / ".git").exists():
+            raise ValueError("actual active index custody is required")
+        self.process_id, self.thread_id = os.getpid(), threading.get_ident()
+        self.state, self.failure, self.completed_actions = "CAPTURING", None, []
+        self.active_occurrence, self.permitted_since_barrier = None, set()
+        self.completed_occurrences = set()
+        self._check()
+        paths = self._universe()
+        if self.index_path is not None:
+            index_info = self.index_path.lstat()
+            if index_info.st_size > self.snapshot_byte_limit:
+                raise RuntimeError("VALIDATION_CANDIDATE_SNAPSHOT_BUDGET")
+        self.index_baseline = self._read(self.index_path) if self.index_path is not None else None
+        self.index_snapshot_bytes = 0 if self.index_baseline is None else len(self.index_baseline[1])
+        self.baseline = MappingProxyType(self._snapshot(paths, baseline=True))
+        self._settled_snapshot = self.baseline
+        self.state = "BASELINE_READY"
+
+    def prepare_preflight(self, index, entry, *, environment, run_paths):
+        from tools.validation_reliability import (_preflight_vector_v1, _preflight_startup_v1,
+                                                  _preflight_launch_guard_v1, _PreflightObservationV1)
+        argv = tuple(entry.argv if type(entry) is CommandEvidencePlanEntry else entry.execution_argv)
+        if not _preflight_vector_v1(argv):
+            return environment, None
+        self._check()
+        if (type(index) is not int or not 1 <= index <= len(self.plan)
+                or entry is not self.plan[index - 1] or index not in self.preflight_bindings):
+            raise RuntimeError("VALIDATION_PREFLIGHT_STARTUP_BINDING_UNAVAILABLE")
+        binding = self.preflight_bindings[index]
+        if (type(run_paths) is not ValidationRunPathsV1 or run_paths.repo_root != self.root
+                or type(binding) is not dict or type(binding.get("observation")) is not _PreflightObservationV1
+                or binding["observation"].root != self.root
+                or binding["observation"].run_id != run_paths.run_id
+                or binding["observation"].occurrence != index):
+            raise RuntimeError("VALIDATION_PREFLIGHT_STARTUP_ASSOCIATION")
+        projected, receipt = _preflight_startup_v1(argv, environment, binding=binding,
+            cache_root=run_paths.process_root / ("preflight-cache-" + str(index)))
+        self._preflight_launch = (argv, dict(projected))
+        _preflight_launch_guard_v1(argv, projected, expected_argv=argv, expected_environment=projected)
+        return projected, receipt
+
+    @staticmethod
+    def _paths(paths, limit):
+        if type(paths) is not tuple or len(paths) > limit:
+            raise ValueError("complete bounded candidate path tuple required")
+        if (len(set(paths)) != len(paths) or any(type(p) is not str or
+                not _is_portable_relative_repo_path(p) for p in paths)):
+            raise ValueError("invalid or duplicate candidate path")
+        if len({p.casefold() for p in paths}) != len(paths):
+            raise ValueError("candidate path alias")
+        return paths
+
+    def _check(self):
+        if self.failure is not None:
+            raise RuntimeError(f"ENGVR_PREPUBLICATION_CUSTODY_FAILED: terminal candidate failure: {self.failure}") from self.failure
+        if (os.getpid() != self.process_id or threading.get_ident() != self.thread_id
+                or time.monotonic_ns() >= self.deadline_ns or self.check_exclusive() is not None):
+            raise RuntimeError("VALIDATION_CANDIDATE_CUSTODY_UNAVAILABLE")
+
+    def _universe(self):
+        self._check()
+        observed = self._paths(self.observe_paths(), self.entry_limit)
+        result = tuple(sorted(set(observed) | set(self.ignored) | self.all_effects,
+                              key=lambda path: (path.casefold(), path)))
+        self._paths(result, self.entry_limit)
+        return result
+
+    def _read(self, path):
+        try:
+            self._check()
+            self.read_attempts += 1
+            result = self._read_acquisition(path)
+            self._check()
+            return result
+        except BaseException as exc:
+            if self.failure is None:
+                self.failure = exc
+                self.state = "CLEANUP_REJECTED"
+            raise
+
+    def _read_acquisition(self, path):
+        from tools.validation_reliability import (_open_regular_worktree_descriptor,
+                                                  _local_unlinked_path, _scan_same_api_version, _preflight_chain_v1)
+        self._check()
+        _local_unlinked_path(path.parent)
+        ancestor_generation = _preflight_chain_v1(path.parent)
+        try:
+            before = path.lstat()
+        except FileNotFoundError:
+            return None
+        if (not stat.S_ISREG(before.st_mode) or _stat_is_reparse_point(before)
+                or before.st_nlink != 1 or before.st_size + 1 > self.remaining_read_bytes):
+            raise RuntimeError("VALIDATION_CANDIDATE_UNSUPPORTED_OR_UNBOUNDED_FILE: " + str(path))
+        descriptor = _open_regular_worktree_descriptor(path, nonblocking=True)
+        errors = []
+        result = None
+        try:
+            opened = os.fstat(descriptor)
+            if not _same_observed_file(before, opened) or opened.st_nlink != 1:
+                raise RuntimeError("VALIDATION_CANDIDATE_FILE_SUBSTITUTION")
+            data = bytearray()
+            while True:
+                self._check()
+                # Charge every acquired byte, including a changed-size sentinel.
+                requested = min(65536, before.st_size - len(data) + 1)
+                chunk = os.read(descriptor, requested)
+                if type(chunk) is not bytes:
+                    self.read_measurement_complete = False
+                    raise RuntimeError("VALIDATION_CANDIDATE_UNMEASURED_READ")
+                previous = self.remaining_read_bytes
+                self.observed_read_bytes += len(chunk)
+                self.remaining_read_bytes = max(0, previous - len(chunk))
+                if len(chunk) > previous:
+                    raise RuntimeError("VALIDATION_CANDIDATE_READ_BUDGET")
+                self._check()
+                if len(chunk) > requested:
+                    raise RuntimeError("VALIDATION_CANDIDATE_READ_OVERDELIVERY")
+                if not chunk:
+                    break
+                data.extend(chunk)
+                if len(data) > before.st_size:
+                    raise RuntimeError("VALIDATION_CANDIDATE_FILE_GREW")
+            after = path.lstat()
+            if (len(data) != before.st_size or _scan_same_api_version(opened) !=
+                    _scan_same_api_version(os.fstat(descriptor)) or
+                    _scan_same_api_version(before) != _scan_same_api_version(after) or
+                    ancestor_generation != _preflight_chain_v1(path.parent)):
+                raise RuntimeError("VALIDATION_CANDIDATE_UNSTABLE_FILE")
+            result = (stat.S_IMODE(before.st_mode), bytes(data))
+        except BaseException as exc:
+            errors.append(exc)
+        try:
+            os.close(descriptor)
+        except BaseException as exc:
+            errors.append(exc)
+        if len(errors) == 1:
+            raise errors[0]
+        if errors:
+            raise BaseExceptionGroup("candidate read and close failures", errors)
+        self._check()
+        return result
+
+    def _snapshot(self, paths, *, baseline=False):
+        # Complete size preflight before retaining any candidate contents.
+        total = self.index_snapshot_bytes
+        for relative in paths:
+            path = self.root / relative
+            try:
+                info = path.lstat()
+            except FileNotFoundError:
+                continue
+            if not stat.S_ISREG(info.st_mode) or _stat_is_reparse_point(info) or info.st_nlink != 1:
+                raise RuntimeError("VALIDATION_CANDIDATE_UNSUPPORTED_FILE: " + relative)
+            total += info.st_size
+            if total > self.snapshot_byte_limit:
+                raise RuntimeError("VALIDATION_CANDIDATE_SNAPSHOT_BUDGET")
+        if total - self.index_snapshot_bytes > self.remaining_read_bytes:
+            raise RuntimeError("VALIDATION_CANDIDATE_READ_BUDGET")
+        return {relative: self._read(self.root / relative) for relative in paths}
+
+    def begin_occurrence(self, index, entry, *, environment, timeout_seconds, scratch_roots):
+        self._check()
+        if (type(index) is not int or not 1 <= index <= len(self.plan)
+                or entry is not self.plan[index - 1] or self.active_occurrence is not None
+                or index in self.completed_occurrences):
+            raise RuntimeError("VALIDATION_CANDIDATE_ORIGINAL_OCCURRENCE_REQUIRED")
+        from tools.validation_reliability import _preflight_vector_v1, _preflight_launch_guard_v1
+        argv = tuple(entry.argv if type(entry) is CommandEvidencePlanEntry else entry.execution_argv)
+        if _preflight_vector_v1(argv):
+            if not hasattr(self, "_preflight_launch"):
+                raise RuntimeError("VALIDATION_PREFLIGHT_STARTUP_BINDING_UNAVAILABLE")
+            expected_argv, expected_environment = self._preflight_launch
+            _preflight_launch_guard_v1(argv, environment, expected_argv=expected_argv,
+                                      expected_environment=expected_environment)
+        # These are the original operation-specific accepted inputs and resource
+        # controls, not the union of other commands' permissions.
+        if self.operation_checks[index](entry=entry, environment=environment,
+                timeout_seconds=timeout_seconds, scratch_roots=scratch_roots) is not None:
+            raise RuntimeError("VALIDATION_OPERATION_INPUT_RESOURCE_BINDING_FAILED")
+        try:
+            self._occurrence_before = self._snapshot(self._universe())
+            prior = self._settled_snapshot
+            if any(prior.get(p) != self._occurrence_before.get(p)
+                   for p in set(prior) | set(self._occurrence_before)):
+                raise RuntimeError("VALIDATION_CANDIDATE_CHANGED_BETWEEN_OCCURRENCES")
+            if self.index_path is not None and self._read(self.index_path) != self.index_baseline:
+                raise RuntimeError("VALIDATION_CANDIDATE_INDEX_CHANGED")
+        except BaseException as exc:
+            self.failure, self.state = exc, "CLEANUP_REJECTED"
+            raise
+        self.active_occurrence = index
+        self.permitted_since_barrier.update(self.effects[index])
+
+    def end_occurrence(self, index, entry):
+        self._check()
+        if self.active_occurrence != index or entry is not self.plan[index - 1]:
+            raise RuntimeError("VALIDATION_CANDIDATE_PROCESS_ASSOCIATION")
+        try:
+            after = self._snapshot(self._universe())
+            before = self._occurrence_before
+            delta = {p for p in set(before) | set(after) if before.get(p) != after.get(p)}
+            forbidden = delta - self.effects[index]
+            if forbidden:
+                raise RuntimeError("VALIDATION_CANDIDATE_UNADMITTED_EFFECT: " + ",".join(sorted(forbidden)))
+            if self.index_path is not None and self._read(self.index_path) != self.index_baseline:
+                raise RuntimeError("VALIDATION_CANDIDATE_INDEX_CHANGED")
+        except BaseException as exc:
+            self.failure, self.state = exc, "CLEANUP_REJECTED"
+            raise
+        self.completed_occurrences.add(index)
+        self.active_occurrence = None
+        self._settled_snapshot = after
+
+    def restore(self):
+        self._check()
+        if self.active_occurrence is not None:
+            raise RuntimeError("VALIDATION_CANDIDATE_CHILD_STILL_OWNED")
+        applying = False
+        try:
+            self.state = "OBSERVED"
+            paths = self._universe()
+            current = self._snapshot(paths)
+            if any(current.get(p) != self._settled_snapshot.get(p)
+                   for p in set(current) | set(self._settled_snapshot)):
+                raise RuntimeError("VALIDATION_CANDIDATE_CHANGED_BEFORE_RESTORATION")
+            if self.index_path is not None and self._read(self.index_path) != self.index_baseline:
+                raise RuntimeError("VALIDATION_CANDIDATE_INDEX_CHANGED")
+            changed = sorted((p for p in set(current) | set(self.baseline)
+                if current.get(p) != self.baseline.get(p)), key=lambda path: (path.casefold(), path))
+            forbidden = set(changed) - self.permitted_since_barrier
+            if forbidden:
+                raise RuntimeError("VALIDATION_CANDIDATE_UNADMITTED_EFFECT: " + ",".join(sorted(forbidden)))
+            plan = tuple((p, current.get(p), self.baseline.get(p)) for p in changed)
+            self.state = "PLAN_VALIDATED"
+            for relative, before, after in plan:
+                self._check()
+                path = self.root / relative
+                if self._read(path) != before:
+                    raise RuntimeError("VALIDATION_CANDIDATE_CONCURRENT_BEFORE_STATE: " + relative)
+                before_identity = None if before is None else path.lstat()
+                applying = True
+                self.state = "APPLYING"
+                if after is None:
+                    path.unlink()
+                else:
+                    mode, content = after
+                    # No parent creation and no truncation until the original
+                    # observed file handle is checked under exclusive custody.
+                    flags = os.O_WRONLY | int(getattr(os, "O_BINARY", 0))
+                    if before is None:
+                        flags |= os.O_CREAT | os.O_EXCL
+                    else:
+                        flags |= int(getattr(os, "O_NOFOLLOW", 0))
+                    descriptor = os.open(path, flags, mode)
+                    errors = []
+                    try:
+                        info = os.fstat(descriptor)
+                        if not stat.S_ISREG(info.st_mode) or info.st_nlink != 1 or not _same_observed_file(info, path.lstat()):
+                            raise RuntimeError("VALIDATION_CANDIDATE_WRITE_IDENTITY")
+                        if before_identity is not None and not _same_observed_file(before_identity, info):
+                            raise RuntimeError("VALIDATION_CANDIDATE_WRITE_SUBSTITUTION")
+                        os.ftruncate(descriptor, 0)
+                        view = memoryview(content)
+                        while view:
+                            self._check()
+                            count = os.write(descriptor, view)
+                            if type(count) is not int or count <= 0 or count > len(view):
+                                raise OSError("candidate restoration made invalid write progress")
+                            view = view[count:]
+                        os.fsync(descriptor)
+                    except BaseException as exc:
+                        errors.append(exc)
+                    try:
+                        os.close(descriptor)
+                    except BaseException as exc:
+                        errors.append(exc)
+                    if len(errors) == 1:
+                        raise errors[0]
+                    if errors:
+                        raise BaseExceptionGroup("candidate restore and close failures", errors)
+                    os.chmod(path, mode)
+                self.completed_actions.append((relative, before, after))
+            observed = self._snapshot(self._universe())
+            if (any(observed.get(p) != self.baseline.get(p) for p in set(observed) | set(self.baseline)) or
+                    self.index_path is not None and self._read(self.index_path) != self.index_baseline):
+                raise RuntimeError("VALIDATION_CANDIDATE_RESTORATION_READBACK")
+            self.state = "RESTORED_VERIFIED"
+            self.permitted_since_barrier.clear()
+            self._settled_snapshot = self.baseline
+        except BaseException as exc:
+            self.failure = exc
+            self.state = "CLEANUP_INCOMPLETE" if applying else "CLEANUP_REJECTED"
+            raise
+        return tuple(path for path, _, _ in plan)
+
+
+def _restore_tracked_gate_side_effects(repo_root, candidate):
+    if type(candidate) is not _ValidationCandidateCustodyV1 or candidate.root != pathlib.Path(repo_root).absolute():
+        raise RuntimeError("VALIDATION_CANDIDATE_BASELINE_REQUIRED")
+    return candidate.restore()
+
+
+def _restore_modified_file_snapshots(repo_root, candidate):
+    return _restore_tracked_gate_side_effects(repo_root, candidate)
+
+
+def _modified_file_snapshots(repo_root, paths):
+    raise RuntimeError("VALIDATION_CANDIDATE_COMPLETE_BASELINE_REQUIRED")
 
 
 def build_validation_commands(
@@ -6459,16 +7097,34 @@ def _prepare_execution_plan(
         execution = tuple(
             _execution_command_with_qku_root_importlib(list(st12g_adapted))
         )
+        qku_adapted = execution
+        if (len(execution) >= 2
+                and execution[1].replace("\\", "/") == "tools/currentize_pr152_after_generated_artifacts.py"):
+            execution = (execution[0], "-I", "-S", "-B", *execution[1:])
         plan.append(
             ExecutionPlanEntry(
                 registered_argv=registered,
                 timing_identity_argv=st12g_adapted,
                 execution_argv=execution,
                 st12g_adapter_applied=st12g_adapted != registered,
-                qku_root_import_adapter_applied=execution != st12g_adapted,
+                qku_root_import_adapter_applied=qku_adapted != st12g_adapted,
             )
         )
     return tuple(plan)
+
+
+def _prepare_validation_candidate_v1(root, plan, candidate):
+    if root is None:
+        if candidate is not None:
+            raise ValueError("candidate custody has no original repository root")
+        return None
+    if candidate is None and callable(_ACTIVE_CANDIDATE_SOURCE):
+        candidate = _ACTIVE_CANDIDATE_SOURCE(root, plan)
+    if (type(candidate) is not _ValidationCandidateCustodyV1 or candidate.plan is not plan
+            or candidate.root != pathlib.Path(root).absolute() or candidate.state != "BASELINE_READY"):
+        raise RuntimeError("VALIDATION_CANDIDATE_COMPLETE_SOURCE_EFFECT_RESOURCE_BINDING_REQUIRED")
+    candidate._check()
+    return candidate
 
 
 def run_commands(
@@ -6481,7 +7137,14 @@ def run_commands(
     defer_success_markers: bool = False,
     scratch_roots: Sequence[pathlib.Path] = (),
     execution_plan: Sequence[ExecutionPlanEntry] | None = None,
+    candidate_custody=None,
 ) -> int:
+    global _RUN_COMMANDS_SUPERVISION
+    global _LAST_COMMAND_RECEIPTS
+    if _RUN_COMMANDS_SUPERVISION is not None and _RUN_COMMANDS_SUPERVISION["pending"]:
+        print("ENGVR_PROCESS_TERMINATION_FAILED: prior command custody is unresolved",
+              file=sys.stderr, flush=True)
+        return 1
     prepared_plan = (
         _prepare_execution_plan(commands)
         if execution_plan is None
@@ -6503,18 +7166,34 @@ def run_commands(
             flush=True,
         )
         return 2
+    if (_RUN_COMMANDS_SUPERVISION is None
+            or _RUN_COMMANDS_SUPERVISION["paths"] is not active_run_paths
+            or _RUN_COMMANDS_SUPERVISION["phase"] != phase):
+        _RUN_COMMANDS_SUPERVISION = {
+            "paths": active_run_paths, "phase": phase, "pending": False,
+            "receipt": None, "errors": [],
+        }
+    supervision = _RUN_COMMANDS_SUPERVISION
     cleanup_repo_root = (
         _RUN_COMMANDS_CLEANUP_REPO_ROOT if repo_root is None else repo_root
     )
     execution_cwd = (cleanup_repo_root or _repo_root()).resolve()
-    _LAST_EXPECTED_COMMAND_PLAN = build_command_evidence_plan(
-        run_id=active_run_paths.run_id,
-        phase=phase,
-        commands=tuple(entry.execution_argv for entry in prepared_plan),
-        cwd=execution_cwd,
-    )
+    expected_vectors = tuple(entry.execution_argv for entry in prepared_plan)
+    if _RUN_PROVENANCE_WRITTEN:
+        if (tuple(row.argv for row in _LAST_EXPECTED_COMMAND_PLAN) != expected_vectors
+                or any(row.run_id != active_run_paths.run_id or row.phase != phase
+                       or row.cwd != str(execution_cwd) for row in _LAST_EXPECTED_COMMAND_PLAN)):
+            raise ValueError("dispatch differs from the original published evidence plan")
+        if _ACTIVE_SCAN_LAUNCH is not None and _ACTIVE_SCAN_LAUNCH.plan is not _LAST_EXPECTED_COMMAND_PLAN:
+            raise ValueError("dispatch lost original scan plan identity")
+    else:
+        if any(_scan_full_builder_argv(row) for row in expected_vectors):
+            raise ValueError("direct full scanner dispatch lacks original capacity publication")
+        _LAST_EXPECTED_COMMAND_PLAN = build_command_evidence_plan(
+            run_id=active_run_paths.run_id, phase=phase, commands=expected_vectors, cwd=execution_cwd)
     timing_entries: list[TimingEntry] = []
     command_receipts: list[CommandExecutionReceiptV1] = []
+    _LAST_COMMAND_RECEIPTS = ()
     total_started = time.perf_counter()
 
     def finish(returncode: int) -> int:
@@ -6553,35 +7232,35 @@ def run_commands(
             print(SUCCESS_MARKER, flush=True)
         return returncode
 
-    initially_modified_paths: set[str] = set()
-    initially_modified_snapshots: dict[str, bytes | None] = {}
-    initially_untracked_paths: set[str] = set()
-    if cleanup_repo_root is not None:
-        initially_modified_paths = _tracked_modified_paths(cleanup_repo_root)
-        initially_modified_snapshots = _modified_file_snapshots(
-            cleanup_repo_root,
-            initially_modified_paths,
-        )
-        initially_untracked_paths = _untracked_paths(cleanup_repo_root)
+    candidate_custody = _prepare_validation_candidate_v1(
+        cleanup_repo_root, _LAST_EXPECTED_COMMAND_PLAN if _RUN_PROVENANCE_WRITTEN else prepared_plan, candidate_custody)
+
+    restoration_failure: BaseException | None = None
 
     def restore_gate_side_effects() -> None:
+        nonlocal restoration_failure
+        _recheck_nested_pytest_custody_v1(supervision)
+        if supervision["pending"]:
+            raise ValidationReliabilityError(
+                "ENGVR_PROCESS_TERMINATION_FAILED",
+                "restoration skipped while command process custody is unresolved",
+            ) from (supervision["errors"][0] if supervision["errors"] else None)
         if cleanup_repo_root is None:
             return
-        _restore_tracked_gate_side_effects(
-            cleanup_repo_root,
-            initially_modified_paths,
-        )
-        _restore_modified_file_snapshots(
-            cleanup_repo_root,
-            initially_modified_snapshots,
-        )
-        _restore_untracked_gate_side_effects(
-            cleanup_repo_root,
-            initially_untracked_paths,
-        )
+        if restoration_failure is not None:
+            raise RuntimeError(
+                "ENGVR_PREPUBLICATION_CUSTODY_FAILED: "
+                "prior restoration failure; not retried"
+            ) from restoration_failure
+        try:
+            _restore_tracked_gate_side_effects(cleanup_repo_root, candidate_custody)
+        except BaseException as exc:
+            restoration_failure = exc
+            raise
 
     active_validation_processes = 0
     for command_index, plan_entry in enumerate(prepared_plan, start=1):
+        receipt = None
         command_list = list(plan_entry.registered_argv)
         if cleanup_repo_root is not None and (
             _is_pr142_handoff_readiness_validator_command(command_list)
@@ -6626,34 +7305,163 @@ def run_commands(
             command_environment = os.environ.copy()
             command_environment[RUN_ID_ENV] = active_run_paths.run_id
             command_environment[EVIDENCE_ROOT_ENV] = str(active_run_paths.evidence_root)
-            receipt = _execute_supervised_command(
-                execution_command,
-                cwd=execution_cwd,
-                run_id=active_run_paths.run_id,
-                phase=phase,
-                command_index=command_index,
-                evidence_root=active_run_paths.evidence_root,
-                required_markers=expected_markers,
-                timeout_seconds=timeout_seconds,
-                environment=command_environment,
-            )
-            command_receipts.append(receipt)
-        except ValidationReliabilityError as exc:
-            print(str(exc), file=sys.stderr, flush=True)
-            return finish(1)
-        except OSError as exc:
-            print(
-                f"ENGVR_ATOMIC_RECEIPT_WRITE_FAILED: {type(exc).__name__}: {exc}",
-                file=sys.stderr,
-                flush=True,
-            )
-            return finish(1)
-        except (RuntimeError, ValueError) as exc:
-            print(
-                f"ENGVR_PROCESS_START_FAILED: {type(exc).__name__}: {exc}",
-                file=sys.stderr,
-                flush=True,
-            )
+            planned = _LAST_EXPECTED_COMMAND_PLAN[command_index - 1]
+            command_environment = _scan_dispatch_environment(command_environment, planned)
+            original_input = None if _ACTIVE_SCAN_LAUNCH is None else _ACTIVE_SCAN_LAUNCH.launch_inputs.get(command_index)
+            from tools.validation_reliability import _mapper_binding_v1, _mapper_read_controls_v1, _MAPPER_READ_ENV_KEYS_V1
+            mapper_read_binding = None if _ACTIVE_MAPPER_READ_PROFILES_V1 is None else _ACTIVE_MAPPER_READ_PROFILES_V1.get(str(command_index))
+            if any(k.upper() in (*_MAPPER_READ_ENV_KEYS_V1, 'QTT_MAPPER_ACTIVATION_IDENTITY') for k in command_environment):
+                raise ValueError("competing mapper read environment")
+            if mapper_read_binding is not None:
+                mapper_read_binding = _mapper_binding_v1(mapper_read_binding)
+                if tuple(mapper_read_binding["parent_argv"]) != tuple(execution_command):
+                    raise ValueError("mapper read binding lost original command")
+                command_environment.update(_mapper_read_controls_v1(mapper_read_binding))
+            execution_deadline_ns = None
+            deadline_projection = None
+            mapper_arguments = _mapper_nested_pytest_args_v1(tuple(execution_command), execution_cwd)
+            if mapper_arguments is not None:
+                if (original_input is not None or candidate_custody is None
+                        or command_index not in candidate_custody.nested_evidence_limits):
+                    raise ValueError("mapper deadline requires its original ordinary candidate owner")
+                limits = candidate_custody.nested_evidence_limits[command_index]
+                controls = _mapper_deadline_controls_v1(limits)
+                if any(key.upper() in _MAPPER_DEADLINE_ENV_KEYS for key in command_environment):
+                    raise ValueError("competing inherited mapper deadline controls")
+                command_environment.update(controls)
+                execution_deadline_ns = limits["execution_deadline_ns"]
+                remaining = _execution_remaining_seconds_v1(execution_deadline_ns)
+                timeout_seconds = remaining if timeout_seconds is None else min(timeout_seconds, remaining)
+                if mapper_read_binding is not None:
+                    if mapper_read_binding["basis"]["deadline_ns"] != limits["child_execution_deadline_ns"]:
+                        raise ValueError("mapper read allocation exceeds exact child schedule")
+                    controls += _mapper_read_controls_v1(mapper_read_binding)
+                deadline_projection = {"fixed_environment_controls": controls}
+            elif mapper_read_binding is not None:
+                execution_deadline_ns = mapper_read_binding["basis"]["deadline_ns"]
+                remaining = _execution_remaining_seconds_v1(execution_deadline_ns)
+                timeout_seconds = remaining if timeout_seconds is None else min(timeout_seconds,remaining)
+                deadline_projection = {"fixed_environment_controls": _mapper_read_controls_v1(mapper_read_binding)}
+            if candidate_custody is not None:
+                candidate_entry = planned if getattr(candidate_custody, "plan", None) is _LAST_EXPECTED_COMMAND_PLAN else plan_entry
+                command_environment, preflight_projection = candidate_custody.prepare_preflight(
+                    command_index, candidate_entry, environment=command_environment, run_paths=active_run_paths)
+                if preflight_projection is not None:
+                    if deadline_projection is not None:
+                        raise ValueError("competing command environment projections")
+                    deadline_projection = preflight_projection
+                if _ACTIVE_PREFLIGHT_ASSEMBLY_V1 is not None:
+                    if original_input is not None or mapper_read_binding is not None:
+                        raise ValueError("competing preflight dispatch transport")
+                    original_input, command_environment, deadline_projection = _ACTIVE_PREFLIGHT_ASSEMBLY_V1.launch(
+                        command_index, command_environment, deadline_projection, scratch_roots)
+                    execution_deadline_ns = original_input.deadline_ns
+                candidate_custody.begin_occurrence(command_index, planned if getattr(candidate_custody, "plan", None) is _LAST_EXPECTED_COMMAND_PLAN else plan_entry,
+                    environment=command_environment, timeout_seconds=timeout_seconds, scratch_roots=tuple(scratch_roots))
+            if mapper_read_binding is not None and mapper_read_binding['kind'] == 'MAPPER_NATIVE_READ_BINDING_V2':
+                from tools.validation_reliability import _mapper_publish_occurrence_v1, _MAPPER_ACTIVATION_ENV_V1
+                key = str(command_index)
+                if key in _ACTIVE_MAPPER_OCCURRENCES_V1:
+                    raise ValueError("mapper activation already published")
+                activation = _mapper_publish_occurrence_v1(mapper_read_binding, candidate=candidate_custody, entry=planned)
+                _ACTIVE_MAPPER_OCCURRENCES_V1[key] = activation
+                command_environment[_MAPPER_ACTIVATION_ENV_V1] = activation.identity
+                deadline_projection['fixed_environment_controls'] += ((_MAPPER_ACTIVATION_ENV_V1, activation.identity),)
+            nested_gate = None
+            if _mapper_nested_pytest_args_v1(tuple(execution_command), execution_cwd) is not None:
+                if candidate_custody is None or command_index not in candidate_custody.nested_evidence_limits:
+                    raise ValueError("mapper dispatch lacks original nested-evidence limits")
+                nested_gate = _NestedPytestEvidenceV1(
+                    planned=planned, run_paths=active_run_paths, environment=command_environment,
+                    limits=dict(candidate_custody.nested_evidence_limits[command_index]),
+                    check_exclusive=candidate_custody.check_exclusive, mapper_read_binding=mapper_read_binding)
+                gates = supervision.setdefault("nested_evidence", {})
+                if command_index in gates:
+                    raise ValueError("nested custody cannot be dispatched twice")
+                gates[command_index] = nested_gate
+            from tools.validation_reliability import _preflight_vector_v1
+            preflight_launch = (getattr(candidate_custody, "_preflight_launch", None)
+                if _preflight_vector_v1(tuple(execution_command)) else None)
+            with (nullcontext() if original_input is None else original_input), (
+                    nullcontext() if deadline_projection is None else _command_projection_v1(deadline_projection)):
+                supervision["pending"] = True
+                supervision["receipt"] = None
+                receipt = _execute_supervised_command(
+                    execution_command,
+                    cwd=execution_cwd,
+                    run_id=active_run_paths.run_id,
+                    phase=phase,
+                    command_index=command_index,
+                    evidence_root=active_run_paths.evidence_root,
+                    required_markers=expected_markers,
+                    timeout_seconds=timeout_seconds,
+                    environment=command_environment,
+                    **({"preflight_launch": preflight_launch} if preflight_launch is not None else {}),
+                    **({"launch_input": original_input} if original_input is not None else {}),
+                    **({"execution_deadline_ns": execution_deadline_ns}
+                       if execution_deadline_ns is not None else {}),
+                    **({"output_limits": original_input.output_limits, "output_observation": {}}
+                       if _ACTIVE_PREFLIGHT_ASSEMBLY_V1 is not None else {}),
+                )
+                supervision["receipt"] = receipt
+                if type(receipt) is CommandExecutionReceiptV1:
+                    if all(receipt is not earlier for earlier in command_receipts):
+                        command_receipts.append(receipt)
+                    _LAST_COMMAND_RECEIPTS = tuple(command_receipts)
+            if _command_requires_process_retention_v1(receipt):
+                raise ValidationReliabilityError(
+                    "ENGVR_PROCESS_TERMINATION_FAILED",
+                    "command process custody remains unresolved",
+                )
+            if (type(receipt) is not CommandExecutionReceiptV1
+                    or receipt.run_id != active_run_paths.run_id or receipt.phase != phase
+                    or type(receipt.command_index) is not int or receipt.command_index != command_index
+                    or receipt.argv != tuple(execution_command) or receipt.cwd != str(execution_cwd)):
+                raise ValidationReliabilityError(
+                    "ENGVR_PROCESS_TERMINATION_FAILED",
+                    "command receipt differs from the original attempted execution",
+                )
+            if nested_gate is not None:
+                nested_gate.observe(receipt)
+            if _ACTIVE_PREFLIGHT_ASSEMBLY_V1 is not None:
+                _ACTIVE_PREFLIGHT_ASSEMBLY_V1.reconcile(command_index, receipt)
+            supervision["pending"] = False
+            if nested_gate is not None and nested_gate.inconsistent:
+                raise ValidationReliabilityError("ENGVR_ATOMIC_RECEIPT_WRITE_FAILED",
+                    "parent success contradicts terminal nested child failure")
+            if candidate_custody is not None:
+                if type(receipt.native_exit_code) is not int:
+                    raise RuntimeError("VALIDATION_CANDIDATE_CHILD_TERMINAL_UNKNOWN")
+                candidate_custody.end_occurrence(command_index, planned if getattr(candidate_custody, "plan", None) is _LAST_EXPECTED_COMMAND_PLAN else plan_entry)
+        except BaseException as exc:
+            supervision["errors"].append(exc)
+            if receipt is not None:
+                supervision["receipt"] = receipt
+            if type(receipt) is CommandExecutionReceiptV1:
+                if all(receipt is not earlier for earlier in command_receipts):
+                    command_receipts.append(receipt)
+                _LAST_COMMAND_RECEIPTS = tuple(command_receipts)
+            errors_to_inspect = [exc]
+            while errors_to_inspect:
+                error = errors_to_inspect.pop()
+                if isinstance(error, BaseExceptionGroup):
+                    errors_to_inspect.extend(reversed(error.exceptions))
+                attached = getattr(error, "command_receipt", None)
+                if supervision["receipt"] is None and type(attached) is CommandExecutionReceiptV1:
+                    supervision["receipt"] = attached
+                    if all(attached is not earlier for earlier in command_receipts):
+                        command_receipts.append(attached)
+                    _LAST_COMMAND_RECEIPTS = tuple(command_receipts)
+            if isinstance(exc, ValidationReliabilityError):
+                print(str(exc), file=sys.stderr, flush=True)
+            elif isinstance(exc, OSError):
+                print(f"ENGVR_ATOMIC_RECEIPT_WRITE_FAILED: {type(exc).__name__}: {exc}",
+                      file=sys.stderr, flush=True)
+            elif isinstance(exc, (RuntimeError, ValueError)):
+                print(f"ENGVR_PROCESS_START_FAILED: {type(exc).__name__}: {exc}",
+                      file=sys.stderr, flush=True)
+            else:
+                raise
             return finish(1)
         finally:
             active_validation_processes -= 1
@@ -7471,13 +8279,26 @@ def _publish_active_plan_provenance(
     global _LAST_EXPECTED_COMMAND_PLAN
     global _RUN_PROVENANCE_WRITTEN
     global _RUN_PROVENANCE_ATTEMPTED
-    _LAST_PLANNED_COMMAND_COUNT = len(execution_plan)
-    _LAST_EXPECTED_COMMAND_PLAN = build_command_evidence_plan(
+    if (_RUN_PROVENANCE_ATTEMPTED or _SCAN_CAPACITY_ATTEMPTED
+            or _MAPPER_READ_SOURCE_ATTEMPTED or _ACTIVE_SCAN_LAUNCH is not None
+            or _LAST_PLANNED_COMMAND_COUNT is not None or _LAST_EXPECTED_COMMAND_PLAN):
+        raise ValueError("original plan publication/capacity acquisition cannot be retried")
+    selected_plan = build_command_evidence_plan(
         run_id=active_run_paths.run_id,
         phase=phase,
         commands=tuple(entry.execution_argv for entry in execution_plan),
         cwd=active_run_paths.repo_root,
     )
+    # Selection is retained even if either one-shot acquisition fails before
+    # provenance publication. Zero executions cannot erase this plan.
+    _LAST_EXPECTED_COMMAND_PLAN = selected_plan
+    _LAST_PLANNED_COMMAND_COUNT = len(selected_plan)
+    global _ACTIVE_PREFLIGHT_ASSEMBLY_V1, _ACTIVE_CANDIDATE_SOURCE
+    if _ACTIVE_PREFLIGHT_PATH_V1 is not None:
+        _ACTIVE_PREFLIGHT_ASSEMBLY_V1 = _PreflightAssemblyV1(_ACTIVE_PREFLIGHT_NATIVE_V1, active_run_paths, selected_plan)
+        _ACTIVE_CANDIDATE_SOURCE = _ACTIVE_PREFLIGHT_ASSEMBLY_V1.candidate_source
+    launch = _scan_resolve_parent_capacity(active_run_paths, phase, selected_plan)
+    _mapper_resolve_parent_profiles_v1(active_run_paths, phase, _LAST_EXPECTED_COMMAND_PLAN)
     _RUN_PROVENANCE_ATTEMPTED = True
     write_run_provenance(
         active_run_paths,
@@ -7485,12 +8306,23 @@ def _publish_active_plan_provenance(
         phase=phase,
         command_count=len(execution_plan),
         text_integrity_preflight_state=_ACTIVE_TEXT_INTEGRITY_STATE,
+        rp5a_scan_profiles=None if launch is None else launch.profiles,
+        rp5a_reader_profiles=None if launch is None or not launch.reader_profiles else launch.reader_profiles,
+        rp5a_reader_bases=None if launch is None or not launch.reader_bases else launch.reader_bases,
+        rp5a_launch_wire_versions=None if launch is None else launch.rp5a_launch_wire_versions,
+        rp5a_payload_byte_limits=None if launch is None else launch.rp5a_payload_byte_limits,
+        scan_read_limits=None if launch is None else launch.read_limits,
+        scan_deadline_ns=None if launch is None else launch.deadline_ns,
+        mapper_read_profiles=_ACTIVE_MAPPER_READ_PROFILES_V1,
     )
     _RUN_PROVENANCE_WRITTEN = True
+    if _ACTIVE_PREFLIGHT_ASSEMBLY_V1 is not None:
+        _ACTIVE_PREFLIGHT_ASSEMBLY_V1.state = "PUBLISHED"
 
 
 def _main_impl(argv: Sequence[str] | None = None) -> int:
     parser = argparse.ArgumentParser()
+    parser.add_argument("--preflight-input", type=pathlib.Path, help="Bounded first-phase declaration; requires a live native input lease.")
     parser.add_argument(
         "--phase",
         choices=VALIDATION_PHASES,
@@ -7878,120 +8710,205 @@ def _finalize_validation_run(
     receipts: Sequence[CommandExecutionReceiptV1],
     result: int,
     text_state: str,
+    scan_launch=None,
+    _supervision_state=None,
 ) -> tuple[int, str, ValidationCompletionReceiptV1]:
     """Publish cleanup and terminal custody for one already-planned run."""
 
-    cleanup_state = "NOT_RUN"
-    termination_unproven = any(
-        receipt.failure_class == "ENGVR_PROCESS_TERMINATION_FAILED"
-        for receipt in receipts
-    )
-    if termination_unproven:
-        cleanup_state = "SKIPPED_PROCESS_TERMINATION_UNPROVEN"
-        try:
-            atomic_write_json(
-                run_paths.evidence_root / "cleanup.json",
-                {
-                    "schema_version": 1,
-                    "run_id": run_paths.run_id,
-                    "cleanup_target": str(run_paths.cleanup_target),
-                    "cleanup_state": cleanup_state,
-                    "parent_preserved": True,
-                },
+    global _RUN_COMMANDS_SUPERVISION
+    supervision = _supervision_state
+    if (supervision is None and _RUN_COMMANDS_SUPERVISION is not None
+            and (_RUN_COMMANDS_SUPERVISION["paths"] is run_paths
+                 or _RUN_COMMANDS_SUPERVISION["pending"])):
+        supervision = _RUN_COMMANDS_SUPERVISION
+    try:
+        # Revalidate before cleanup, not merely in the post-cleanup report.
+        if supervision is not None:
+            try:
+                _recheck_nested_pytest_custody_v1(supervision)
+                if any(gate.inconsistent for gate in supervision.get("nested_evidence", {}).values()):
+                    result = 1
+            except (ValidationReliabilityError, OSError, ValueError):
+                result = 1  # The helper has latched pending and retained the error.
+        # A mapper receipt cannot pass a direct finalizer call without its live
+        # pre-dispatch gate. Missing state is not an empty-descendant proof.
+        mapper_receipts = [receipt for receipt in receipts
+            if type(receipt) is CommandExecutionReceiptV1 and
+            _mapper_nested_pytest_args_v1(receipt.argv, pathlib.Path(receipt.cwd)) is not None]
+        if mapper_receipts and (supervision is None or any(
+                receipt.command_index not in supervision.get("nested_evidence", {})
+                or supervision["nested_evidence"][receipt.command_index].receipt != receipt
+                or receipt.command_index > len(expected_plan)
+                or supervision["nested_evidence"][receipt.command_index].planned is not expected_plan[receipt.command_index - 1]
+                for receipt in mapper_receipts)):
+            if supervision is None:
+                supervision = {"paths": run_paths, "phase": phase, "pending": True,
+                               "receipt": mapper_receipts[-1], "errors": []}
+            supervision["pending"] = True
+            result = 1
+        termination_unproven = (
+            (_RUN_COMMANDS_SUPERVISION is not None and _RUN_COMMANDS_SUPERVISION["pending"])
+            or (supervision is not None and (supervision["pending"]
+                or supervision["paths"] is not run_paths or supervision["phase"] != phase))
+            or any(_command_requires_process_retention_v1(receipt) for receipt in receipts)
+        )
+        if termination_unproven:
+            if supervision is None:
+                supervision = {"paths": run_paths, "phase": phase, "pending": True,
+                               "receipt": next((receipt for receipt in receipts
+                                   if _command_requires_process_retention_v1(receipt)), None),
+                               "errors": []}
+            supervision["pending"] = True
+            if supervision["receipt"] is None:
+                supervision["receipt"] = next((receipt for receipt in receipts
+                    if _command_requires_process_retention_v1(receipt)), None)
+            if _RUN_COMMANDS_SUPERVISION is None or not _RUN_COMMANDS_SUPERVISION["pending"]:
+                _RUN_COMMANDS_SUPERVISION = supervision
+        # Retain known uncertainty even if independent finalizer identity checks fail.
+        if scan_launch is not None:
+            if (scan_launch.paths is not run_paths or scan_launch.plan is not expected_plan
+                    or scan_launch.phase != phase or len(scan_launch.plan) != planned_count):
+                raise ValueError("finalizer lost original scan launch identity")
+        if _ACTIVE_PREFLIGHT_ASSEMBLY_V1 is not None:
+            if (_ACTIVE_PREFLIGHT_ASSEMBLY_V1.paths is not run_paths
+                    or _ACTIVE_PREFLIGHT_ASSEMBLY_V1.plan is not expected_plan):
+                raise ValueError("finalizer lost original preflight assembly identity")
+            _ACTIVE_PREFLIGHT_ASSEMBLY_V1.settling()
+        cleanup_state = "NOT_RUN"
+        if termination_unproven:
+            cleanup_state = "SKIPPED_PROCESS_TERMINATION_UNPROVEN"
+            try:
+                atomic_write_json(
+                    run_paths.evidence_root / "cleanup.json",
+                    {
+                        "schema_version": 1,
+                        "run_id": run_paths.run_id,
+                        "cleanup_target": str(run_paths.cleanup_target),
+                        "cleanup_state": cleanup_state,
+                        "parent_preserved": True,
+                    },
+                )
+            except RuntimeError as exc:
+                if supervision is not None:
+                    supervision["errors"].append(exc)
+                print(str(exc), file=sys.stderr, flush=True)
+            result = 1
+        else:
+            try:
+                cleanup_state = cleanup_validation_run(run_paths)
+                if _ACTIVE_PREFLIGHT_ASSEMBLY_V1 is not None:
+                    _ACTIVE_PREFLIGHT_ASSEMBLY_V1.native.check()
+                    _ACTIVE_PREFLIGHT_ASSEMBLY_V1.state = "SETTLED"
+            except RuntimeError as exc:
+                cleanup_state = "FAIL"
+                print(str(exc), file=sys.stderr, flush=True)
+                result = 1
+
+        started_count, completed_count, first_failed, terminal_native_exit = (
+            command_attempt_accounting(receipts)
+        )
+        if result == 0 and not (
+            planned_count > 0
+            and len(receipts) == planned_count
+            and started_count == planned_count
+            and completed_count == planned_count
+            and all(receipt.native_exit_code == 0 for receipt in receipts)
+            and all(receipt.failure_class is None for receipt in receipts)
+        ):
+            print(
+                "ENGVR_ATOMIC_RECEIPT_WRITE_FAILED: "
+                "passing command result lacks complete native receipt custody",
+                file=sys.stderr,
+                flush=True,
             )
-        except RuntimeError as exc:
-            print(str(exc), file=sys.stderr, flush=True)
-        result = 1
-    else:
+            result = 1
+        marker_state = (
+            "NOT_RUN"
+            if not receipts
+            else "FAIL"
+            if any(
+                receipt.stdout_marker_state not in {"PASS", "NOT_REQUIRED"}
+                for receipt in receipts
+            )
+            else "PASS"
+        )
+        custody_error: ValidationReliabilityError | None = None
         try:
-            cleanup_state = cleanup_validation_run(run_paths)
-        except RuntimeError as exc:
-            cleanup_state = "FAIL"
+            validate_complete_run_evidence(
+                run_paths,
+                probe,
+                phase=phase,
+                command_count_planned=planned_count,
+                expected_plan=expected_plan,
+                receipts=receipts,
+                cleanup_state=cleanup_state,
+                text_integrity_preflight_state=text_state,
+                rp5a_scan_profiles=None if scan_launch is None else scan_launch.profiles,
+        rp5a_reader_profiles=None if scan_launch is None or not scan_launch.reader_profiles else scan_launch.reader_profiles,
+        rp5a_reader_bases=None if scan_launch is None or not scan_launch.reader_bases else scan_launch.reader_bases,
+        rp5a_launch_wire_versions=None if scan_launch is None else scan_launch.rp5a_launch_wire_versions,
+        rp5a_payload_byte_limits=None if scan_launch is None else scan_launch.rp5a_payload_byte_limits,
+                mapper_read_profiles=_ACTIVE_MAPPER_READ_PROFILES_V1 if planned_count else None,
+                mapper_occurrence_records=_ACTIVE_MAPPER_OCCURRENCES_V1,
+                **({"preflight_meter": _ACTIVE_PREFLIGHT_ASSEMBLY_V1.parent_meter}
+                   if _ACTIVE_PREFLIGHT_ASSEMBLY_V1 is not None else {}),
+            )
+        except ValidationReliabilityError as exc:
+            if supervision is not None:
+                supervision["errors"].append(exc)
+            custody_error = exc
             print(str(exc), file=sys.stderr, flush=True)
             result = 1
-
-    started_count, completed_count, first_failed, terminal_native_exit = (
-        command_attempt_accounting(receipts)
-    )
-    if result == 0 and not (
-        planned_count > 0
-        and len(receipts) == planned_count
-        and started_count == planned_count
-        and completed_count == planned_count
-        and all(receipt.native_exit_code == 0 for receipt in receipts)
-        and all(receipt.failure_class is None for receipt in receipts)
-    ):
-        print(
-            "ENGVR_ATOMIC_RECEIPT_WRITE_FAILED: "
-            "passing command result lacks complete native receipt custody",
-            file=sys.stderr,
-            flush=True,
-        )
-        result = 1
-    marker_state = (
-        "NOT_RUN"
-        if not receipts
-        else "FAIL"
-        if any(
-            receipt.stdout_marker_state not in {"PASS", "NOT_REQUIRED"}
-            for receipt in receipts
-        )
-        else "PASS"
-    )
-    custody_error: ValidationReliabilityError | None = None
-    try:
-        validate_complete_run_evidence(
-            run_paths,
-            probe,
+        completion = ValidationCompletionReceiptV1(
+            run_id=run_paths.run_id,
             phase=phase,
             command_count_planned=planned_count,
-            expected_plan=expected_plan,
-            receipts=receipts,
-            cleanup_state=cleanup_state,
+            command_count_started=started_count,
+            command_count_completed=completed_count,
+            first_failed_command_index_or_null=first_failed,
+            terminal_native_exit_code=(
+                terminal_native_exit
+            ),
+            required_marker_state=marker_state,
+            process_root_cleanup_state=cleanup_state,
+            evidence_root_state=(
+                "PRESENT" if run_paths.evidence_root.is_dir() else "MISSING"
+            ),
             text_integrity_preflight_state=text_state,
+            final_state=(
+                "PASS"
+                if result == 0
+                and cleanup_state.startswith("PASS")
+                and text_state == "PASS"
+                and custody_error is None
+                else "FAIL"
+            ),
         )
-    except ValidationReliabilityError as exc:
-        custody_error = exc
-        print(str(exc), file=sys.stderr, flush=True)
-        result = 1
-    completion = ValidationCompletionReceiptV1(
-        run_id=run_paths.run_id,
-        phase=phase,
-        command_count_planned=planned_count,
-        command_count_started=started_count,
-        command_count_completed=completed_count,
-        first_failed_command_index_or_null=first_failed,
-        terminal_native_exit_code=(
-            terminal_native_exit
-        ),
-        required_marker_state=marker_state,
-        process_root_cleanup_state=cleanup_state,
-        evidence_root_state=(
-            "PRESENT" if run_paths.evidence_root.is_dir() else "MISSING"
-        ),
-        text_integrity_preflight_state=text_state,
-        final_state=(
-            "PASS"
-            if result == 0
-            and cleanup_state.startswith("PASS")
-            and text_state == "PASS"
-            and custody_error is None
-            else "FAIL"
-        ),
-    )
-    try:
-        atomic_write_json(run_paths.evidence_root / "completion.json", completion)
-        validate_published_completion_receipt(
-            run_paths.evidence_root,
-            completion,
-        )
-    except RuntimeError as exc:
-        print(str(exc), file=sys.stderr, flush=True)
-        result = 1
-    return result, cleanup_state, completion
+        try:
+            atomic_write_json(run_paths.evidence_root / "completion.json", completion)
+            validate_published_completion_receipt(
+                run_paths.evidence_root,
+                completion,
+            )
+        except RuntimeError as exc:
+            if supervision is not None:
+                supervision["errors"].append(exc)
+            print(str(exc), file=sys.stderr, flush=True)
+            result = 1
+        return result, cleanup_state, completion
+    except BaseException as exc:
+        if supervision is not None:
+            supervision["errors"].append(exc)
+            _scan_raise_errors(supervision["errors"])
+        raise
 
 
-def main(argv: Sequence[str] | None = None) -> int:
+def _main_owned(argv: Sequence[str] | None = None) -> int:
+    global _RUN_COMMANDS_SUPERVISION
+    if _RUN_COMMANDS_SUPERVISION is not None and _RUN_COMMANDS_SUPERVISION["pending"]:
+        print("ENGVR_PROCESS_TERMINATION_FAILED: prior command custody is unresolved",
+              file=sys.stderr, flush=True)
+        return 1
     raw_argv = list(sys.argv[1:] if argv is None else argv)
     if any(argument in {"-h", "--help"} for argument in raw_argv):
         return _main_impl(raw_argv)
@@ -8000,6 +8917,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     pre_parser = argparse.ArgumentParser(add_help=False)
     pre_parser.add_argument("--phase", choices=VALIDATION_PHASES, default=ALL_PHASE)
     pre_parser.add_argument("--process-root", type=pathlib.Path)
+    pre_parser.add_argument("--preflight-input", type=pathlib.Path)
     pre_parser.add_argument(
         "--validation-mode",
         choices=("auto", "full", "reduced"),
@@ -8008,6 +8926,10 @@ def main(argv: Sequence[str] | None = None) -> int:
     pre_parser.add_argument("--changed-file", action="append", default=[])
     pre_args, _unknown = pre_parser.parse_known_args(raw_argv)
     repo_root = _repo_root()
+    global _ACTIVE_PREFLIGHT_NATIVE_V1
+    if pre_args.preflight_input is not None:
+        from tools.validation_reliability import _preflight_acquire_native_input_v1
+        _ACTIVE_PREFLIGHT_NATIVE_V1 = _preflight_acquire_native_input_v1(pre_args.preflight_input.absolute(), repo_root)
     try:
         run_paths, probe = resolve_validation_run_paths(
             repo_root,
@@ -8043,6 +8965,12 @@ def main(argv: Sequence[str] | None = None) -> int:
     previous_provenance_state = _RUN_PROVENANCE_WRITTEN
     previous_provenance_attempted = _RUN_PROVENANCE_ATTEMPTED
     previous_expected_plan = _LAST_EXPECTED_COMMAND_PLAN
+    previous_supervision = _RUN_COMMANDS_SUPERVISION
+    _RUN_COMMANDS_SUPERVISION = {
+        "paths": run_paths, "phase": pre_args.phase, "pending": False,
+        "receipt": None, "errors": [],
+    }
+    supervision = _RUN_COMMANDS_SUPERVISION
     _RUN_COMMANDS_ACTIVE_PATHS = run_paths
     _ACTIVE_SEMANTIC_CHANGED_PATHS = None
     _ACTIVE_CLASSIFIED_CHANGED_PATHS = None
@@ -8080,51 +9008,945 @@ def main(argv: Sequence[str] | None = None) -> int:
                     flush=True,
                 )
             result = _main_impl(raw_argv)
-    except (OSError, RuntimeError, ValueError) as exc:
+    except BaseException as exc:
+        if all(exc is not earlier for earlier in supervision["errors"]):
+            supervision["errors"].append(exc)
+        if not isinstance(exc, (OSError, RuntimeError, ValueError)):
+            raise
         print(str(exc), file=sys.stderr, flush=True)
         result = 1
     finally:
-        if not _RUN_PROVENANCE_ATTEMPTED:
-            try:
-                _RUN_PROVENANCE_ATTEMPTED = True
-                write_run_provenance(
-                    run_paths,
-                    probe,
-                    phase=pre_args.phase,
-                    command_count=0,
-                    text_integrity_preflight_state=text_state,
-                )
-                _RUN_PROVENANCE_WRITTEN = True
-                _LAST_PLANNED_COMMAND_COUNT = 0
-                _LAST_EXPECTED_COMMAND_PLAN = ()
-            except (RuntimeError, ValueError) as exc:
-                print(str(exc), file=sys.stderr, flush=True)
-                result = 1
-        receipts = _LAST_COMMAND_RECEIPTS
-        planned_count = 0 if _LAST_PLANNED_COMMAND_COUNT is None else _LAST_PLANNED_COMMAND_COUNT
-        result, cleanup_state, _completion = _finalize_validation_run(
-            run_paths=run_paths,
-            probe=probe,
-            phase=pre_args.phase,
-            planned_count=planned_count,
-            expected_plan=_LAST_EXPECTED_COMMAND_PLAN,
-            receipts=receipts,
-            result=result,
-            text_state=text_state,
-        )
-        _RUN_COMMANDS_ACTIVE_PATHS = previous_paths
-        _ACTIVE_SEMANTIC_CHANGED_PATHS = previous_semantic_paths
-        _ACTIVE_CLASSIFIED_CHANGED_PATHS = previous_classified_paths
-        _ACTIVE_TEXT_INTEGRITY_FAILURES = previous_text_failures
-        _ACTIVE_TEXT_INTEGRITY_STATE = previous_text_state
-        _ACTIVE_FILESYSTEM_PROBE = previous_probe
-        _RUN_PROVENANCE_WRITTEN = previous_provenance_state
-        _RUN_PROVENANCE_ATTEMPTED = previous_provenance_attempted
-        _LAST_EXPECTED_COMMAND_PLAN = previous_expected_plan
+        try:
+            if (not _RUN_PROVENANCE_ATTEMPTED and not _RUN_PROVENANCE_WRITTEN
+                    and _LAST_PLANNED_COMMAND_COUNT is None
+                    and not _LAST_EXPECTED_COMMAND_PLAN and not _LAST_COMMAND_RECEIPTS
+                    and _ACTIVE_SCAN_LAUNCH is None and not _SCAN_CAPACITY_ATTEMPTED
+                    and not _MAPPER_READ_SOURCE_ATTEMPTED
+                    and _ACTIVE_MAPPER_READ_PROFILES_V1 is None
+                    and not _ACTIVE_MAPPER_OCCURRENCES_V1
+                    and not supervision["pending"] and supervision["receipt"] is None
+                    and not supervision.get("nested_evidence")):
+                # Only a genuine pre-selection failure may publish zero-plan
+                # provenance. Acquisition and publication are distinct facts.
+                try:
+                    _RUN_PROVENANCE_ATTEMPTED = True
+                    write_run_provenance(
+                        run_paths,
+                        probe,
+                        phase=pre_args.phase,
+                        command_count=0,
+                        text_integrity_preflight_state=text_state,
+                    )
+                    _RUN_PROVENANCE_WRITTEN = True
+                    _LAST_PLANNED_COMMAND_COUNT = 0
+                    _LAST_EXPECTED_COMMAND_PLAN = ()
+                except (RuntimeError, ValueError) as exc:
+                    print(str(exc), file=sys.stderr, flush=True)
+                    result = 1
+            receipts = _LAST_COMMAND_RECEIPTS
+            planned_count = 0 if _LAST_PLANNED_COMMAND_COUNT is None else _LAST_PLANNED_COMMAND_COUNT
+            result, cleanup_state, _completion = _finalize_validation_run(
+                run_paths=run_paths,
+                probe=probe,
+                phase=pre_args.phase,
+                planned_count=planned_count,
+                expected_plan=_LAST_EXPECTED_COMMAND_PLAN,
+                receipts=receipts,
+                result=result,
+                text_state=text_state,
+                scan_launch=_ACTIVE_SCAN_LAUNCH,
+                _supervision_state=supervision,
+            )
+        except BaseException as exc:
+            supervision["errors"].append(exc)
+            _scan_raise_errors(supervision["errors"])
+        finally:
+            _RUN_COMMANDS_ACTIVE_PATHS = previous_paths
+            _ACTIVE_SEMANTIC_CHANGED_PATHS = previous_semantic_paths
+            _ACTIVE_CLASSIFIED_CHANGED_PATHS = previous_classified_paths
+            _ACTIVE_TEXT_INTEGRITY_FAILURES = previous_text_failures
+            _ACTIVE_TEXT_INTEGRITY_STATE = previous_text_state
+            _ACTIVE_FILESYSTEM_PROBE = previous_probe
+            _RUN_PROVENANCE_WRITTEN = previous_provenance_state
+            _RUN_PROVENANCE_ATTEMPTED = previous_provenance_attempted
+            _LAST_EXPECTED_COMMAND_PLAN = previous_expected_plan
+            if not supervision["pending"]:
+                _RUN_COMMANDS_SUPERVISION = previous_supervision
     if result == 0:
         print(f"{PHASE_SUCCESS_MARKER_PREFIX} phase={pre_args.phase}", flush=True)
         print(SUCCESS_MARKER, flush=True)
     return result
+
+
+_V35_MANIFEST_SOURCE_NAMES = {
+    'tools/run_validation_gates.py': (
+        'ALL_PHASE',
+        'ATOMICROWS_BUNDLE_CHECK_SCRIPT',
+        'CHECK_ONLY_VALIDATOR_SCRIPTS',
+        'DEFAULT_GENERATED_OUTPUT_ARGS',
+        'DETERMINISTIC_VALIDATORS_PHASE',
+        'DETERMINISTIC_VALIDATOR_SHARD_COMMAND_RANGES',
+        'DETERMINISTIC_VALIDATOR_SHARD_PHASES',
+        'FAST_PREFLIGHT_PHASE',
+        'FAST_PREFLIGHT_SCRIPT_NAMES',
+        'ISOLATED_SOURCE_EVIDENCE_PYTEST',
+        'ORDERED_PHASES',
+        'POST_VALIDATION_PHASE',
+        'PR138_NON_MUTATING_VALIDATION_SCRIPT',
+        'PR162E_IDEMPOTENCE_TEST_FILE',
+        'PR162E_Q_IDEMPOTENCE_TEST_FILE',
+        'PR162E_Q_TEST_ROOT',
+        'PR162E_TEST_ROOT',
+        'PR166_QB_IDEMPOTENCE_TEST_FILE',
+        'PR166_QB_TEST_ROOT',
+        'PR166_QC_IDEMPOTENCE_TEST_FILE',
+        'PR166_QC_TEST_ROOT',
+        'PR166_Q_IDEMPOTENCE_TEST_FILE',
+        'PR166_Q_TEST_ROOT',
+        'PR166_SF_R2_IDEMPOTENCE_TEST_FILE',
+        'PR166_SF_R2_PYTEST_FILE_GROUPS',
+        'PR166_SF_R2_TEST_ROOT',
+        'PR166_SM2_PYTEST_FILE_GROUPS',
+        'PR166_SM2_TEST_ROOT',
+        'PR166_SM3_IDEMPOTENCE_TEST_FILE',
+        'PR166_SM3_TEST_ROOT',
+        'PR167_IDEMPOTENCE_TEST_FILE',
+        'PR167_TEST_ROOT',
+        'PYTEST_BASETEMP_LEGACY_FIXED_DIR_NAME',
+        'PYTEST_BASETEMP_PARENT',
+        'PYTEST_DURATIONS_ARG',
+        'PYTEST_FRESH_BASETEMP_SCRIPT',
+        'PYTEST_IDEMPOTENCE_HARD_REVIEW_SECONDS',
+        'PYTEST_SHARD_COMMANDS',
+        'PYTEST_SHARD_PHASES',
+        'PYTEST_SUBPROCESS_GROUP_TARGET_SECONDS',
+        'PytestShardCommand',
+        'ST12A_TEST_ROOT',
+        'TRACKED_GENERATED_PATH_PREFIXES',
+        'TimingEntry',
+        '_build_pytest_command',
+        '_command_script_name',
+        '_command_uses_pytest_helper',
+        '_is_tracked_generated_output_path',
+        '_normal_path_text',
+        '_path',
+        '_pr166_sf_r2_pytest_paths',
+        '_pr166_sm2_pytest_paths',
+        '_route_command_generated_outputs_to_temp',
+        '_validation_generated_output',
+        'build_deterministic_validator_commands',
+        'build_deterministic_validator_shard_commands',
+        'build_fast_preflight_commands',
+        'build_phase_commands',
+        'build_phase_manifest',
+        'build_post_validation_commands',
+        'build_pytest_shard_commands',
+        'build_validation_commands',
+    ),
+    'tools/validation_scope_registry.py': (
+        'ST12H_EXACT_VALIDATION_COMMANDS',
+        'build_st12h_validation_commands',
+    ),
+}
+
+
+def _project_probability_validation_manifest_v1(
+    runner_source, scope_source, *, expected_runner_source, expected_scope_source,
+    python_executable, validation_dir, pytest_basetemp, byte_limit, node_limit,
+    command_limit, argument_limit, check_candidate,
+):
+    """Project admitted command declarations; never execute a historical module."""
+    import ast
+    import __future__
+    import types
+    from dataclasses import dataclass
+    from tools.validation_reliability import _scan_candidate_fence
+
+    _scan_candidate_fence(check_candidate)
+    for value in (byte_limit, node_limit, command_limit, argument_limit):
+        if type(value) is not int or value <= 0:
+            raise ValueError("original manifest projection limits required")
+    if (any(type(value) is not bytes for value in (runner_source, scope_source, expected_runner_source, expected_scope_source))
+            or len(runner_source) + len(scope_source) > byte_limit
+            or runner_source != expected_runner_source or scope_source != expected_scope_source):
+        raise ValueError("manifest source differs from independent original byte basis")
+    if (type(python_executable) is not str or not python_executable or validation_dir is None or pytest_basetemp is None):
+        raise ValueError("manifest projection requires explicit execution/path operands")
+    sources = {"tools/run_validation_gates.py": runner_source, "tools/validation_scope_registry.py": scope_source}
+    # These are the two ordered statements in the inspected runner, not a
+    # last-definition-wins exception. Compare structure without source locations.
+    phase_profile = ast.parse("""ORDERED_PHASES = (
+    FAST_PREFLIGHT_PHASE, DETERMINISTIC_VALIDATORS_PHASE,
+    *PYTEST_SHARD_PHASES, POST_VALIDATION_PHASE,
+)
+ORDERED_PHASES = tuple(
+    shard_phase
+    for phase in ORDERED_PHASES
+    for shard_phase in (
+        DETERMINISTIC_VALIDATOR_SHARD_PHASES
+        if phase == DETERMINISTIC_VALIDATORS_PHASE else (phase,)
+    )
+)
+""").body
+    path_constructor_profiles = {
+        name: ast.parse(
+            f'def {name}(file_names: Sequence[str]) -> tuple[str, ...]:\n'
+            f'    return tuple(f"{{{root}}}/{{file_name}}" for file_name in file_names)\n'
+        ).body[0]
+        for name, root in (
+            ("_pr166_sf_r2_pytest_paths", "PR166_SF_R2_TEST_ROOT"),
+            ("_pr166_sm2_pytest_paths", "PR166_SM2_TEST_ROOT"),
+        )
+    }
+    selected = {}
+    total_nodes = 0
+    for owner, raw in sources.items():
+        tree = ast.parse(raw.decode("utf-8", errors="strict"), filename=owner)
+        total_nodes += sum(1 for _ in ast.walk(tree))
+        if total_nodes > node_limit:
+            raise ValueError("manifest AST exceeds original node allowance")
+        roster = _V35_MANIFEST_SOURCE_NAMES[owner]
+        definitions = {}
+        for node in tree.body:
+            names = (node.name,) if isinstance(node, (ast.FunctionDef, ast.ClassDef)) else tuple(
+                target.id for target in (node.targets if isinstance(node, ast.Assign) else (node.target,))
+                if isinstance(target, ast.Name)) if isinstance(node, (ast.Assign, ast.AnnAssign)) else ()
+            for name in names:
+                if name in roster:
+                    if name in definitions and not (
+                            owner == "tools/run_validation_gates.py" and name == "ORDERED_PHASES"):
+                        raise ValueError("duplicate manifest declaration")
+                    definitions.setdefault(name, []).append(node)
+        if set(definitions) != set(roster):
+            raise ValueError("unsupported manifest source declaration profile")
+        if owner == "tools/run_validation_gates.py":
+            if ([ast.dump(node) for node in definitions["ORDERED_PHASES"]]
+                    != [ast.dump(node) for node in phase_profile]):
+                raise ValueError("unsupported ordered phase expansion profile")
+            for name, expected in path_constructor_profiles.items():
+                if [ast.dump(node) for node in definitions[name]] != [ast.dump(expected)]:
+                    raise ValueError("unsupported manifest path constructor profile: " + name)
+        ids = {id(node) for nodes in definitions.values() for node in nodes}
+        selected[owner] = [node for node in tree.body if id(node) in ids]
+    declarations = selected["tools/validation_scope_registry.py"] + selected["tools/run_validation_gates.py"]
+    function_names = {node.name for node in declarations if isinstance(node, ast.FunctionDef)}
+    bare_calls = function_names | {"PytestShardCommand", "TimingEntry", "dataclass", "ValueError",
+                                 "any", "enumerate", "frozenset", "len", "list", "str", "tuple", "type",
+                                 "_default_validation_dir", "_default_pytest_basetemp"}
+    dotted_calls = {"pathlib.Path", "pathlib.PurePath", "pathlib.PurePosixPath", "built.extend", "commands.extend",
+                    "manifest.append", "normalized.startswith", "python_executable.strip", "routed.append",
+                    "routed.extend", "str(value).replace", "token.endswith"}
+    initializer_calls = {"PytestShardCommand", "dataclass", "frozenset", "tuple", "str", "pathlib.Path", "pathlib.PurePath", "pathlib.PurePosixPath"}
+    for declaration in declarations:
+        for node in ast.walk(declaration):
+            if isinstance(node, (ast.Import, ast.ImportFrom, ast.Global, ast.Nonlocal, ast.AsyncFunctionDef,
+                                 ast.Await, ast.Yield, ast.YieldFrom, ast.With, ast.AsyncWith)):
+                raise ValueError("effectful declaration is outside the finite manifest profile")
+            if isinstance(node, ast.Attribute) and node.attr.startswith("__"):
+                raise ValueError("magic lookup is outside the manifest profile")
+            if isinstance(node, ast.Call):
+                name = ast.unparse(node.func)
+                if name not in bare_calls and name not in dotted_calls:
+                    raise ValueError("unselected manifest call: " + name)
+                if isinstance(declaration, (ast.Assign, ast.AnnAssign)) and name not in initializer_calls:
+                    if not (name in path_constructor_profiles and
+                            isinstance(declaration, ast.AnnAssign) and
+                            isinstance(declaration.target, ast.Name) and
+                            declaration.target.id == "PYTEST_SHARD_COMMANDS"):
+                        raise ValueError("unselected manifest initializer: " + name)
+    module_name = "_qtt_v35_finite_manifest_" + str(id(declarations))
+    module = types.ModuleType(module_name)
+
+    def acquisition_default_denied():
+        raise ValueError("manifest acquisition defaults are forbidden")
+
+    namespace = module.__dict__
+    namespace.update({"__builtins__": {"__build_class__": __build_class__, "ValueError": ValueError,
+        "any": any, "enumerate": enumerate, "frozenset": frozenset, "len": len, "list": list,
+        "str": str, "tuple": tuple, "type": type, "bool": bool, "int": int, "float": float, "dict": dict},
+        "pathlib": pathlib, "sys": types.SimpleNamespace(executable=python_executable), "dataclass": dataclass,
+        "_default_validation_dir": acquisition_default_denied, "_default_pytest_basetemp": acquisition_default_denied})
+    # Only inspected declarations enter the temporary module. The future directive
+    # is supplied here, never taken from a historical module's imports.
+    tree = ast.Module(body=declarations, type_ignores=[])
+    tree = ast.fix_missing_locations(tree)
+    if module_name in sys.modules:
+        raise ValueError("finite manifest module identity collision")
+    sys.modules[module_name] = module
+    try:
+        exec(compile(tree, "<admitted-finite-manifest>", "exec", flags=__future__.annotations.compiler_flag, dont_inherit=True), namespace)
+        manifest = namespace["build_phase_manifest"](validation_dir, pytest_basetemp)
+    finally:
+        if sys.modules.get(module_name) is module:
+            del sys.modules[module_name]
+    if type(manifest) is not list:
+        raise ValueError("manifest is not the original list projection")
+    count = arguments = 0
+    for phase in manifest:
+        if (type(phase) is not dict or set(phase) != {"phase", "command_count", "commands"}
+                or type(phase["phase"]) is not str or not phase["phase"]
+                or type(phase["command_count"]) is not int or type(phase["commands"]) is not list
+                or phase["command_count"] != len(phase["commands"])):
+            raise ValueError("invalid original manifest phase projection")
+        for command in phase["commands"]:
+            if type(command) is not list or not command or any(type(part) is not str or not part for part in command):
+                raise ValueError("invalid original manifest command vector")
+            count += 1
+            arguments += len(command)
+            if count > command_limit or arguments > argument_limit:
+                raise ValueError("manifest output allowance exceeded")
+    _scan_candidate_fence(check_candidate)
+    return manifest
+
+
+def _scan_full_builder_argv(argv):
+    from tools.validation_reliability import _rp5a_consumer_role_v1
+    return _rp5a_consumer_role_v1(tuple(argv), _repo_root()) == "SCANNER"
+
+
+def _scan_resolve_parent_capacity(paths, phase, plan):
+    from tools.validation_reliability import _ScanLaunch
+
+    global _SCAN_CAPACITY_ATTEMPTED, _ACTIVE_SCAN_LAUNCH
+    from tools.validation_reliability import _rp5a_consumer_role_v1
+    roles = {row.command_index: _rp5a_consumer_role_v1(row.argv, paths.repo_root) for row in plan}
+    selected = {index for index, role in roles.items() if role is not None}
+    scanners = {index for index, role in roles.items() if role == "SCANNER"}
+    if not selected:
+        return None
+    if _SCAN_CAPACITY_ATTEMPTED:
+        raise ValueError("original scan capacity acquisition cannot be retried")
+    _SCAN_CAPACITY_ATTEMPTED = True
+    if not callable(_ACTIVE_SCAN_CAPACITY_SOURCE):
+        raise ValueError("full RP5A plan requires an independently admitted scan capacity source")
+    launch = _ACTIVE_SCAN_CAPACITY_SOURCE(paths, phase, plan)
+    if (type(launch) is not _ScanLaunch or launch.paths is not paths or launch.plan is not plan
+            or launch.phase != phase or launch.process_id != os.getpid()
+            or launch.thread_id != threading.get_ident() or set(launch.profiles) != scanners
+            or set(launch.launch_inputs) != selected
+            or set(launch.reader_profiles) != selected or set(launch.reader_bases) != selected):
+        raise ValueError("capacity source did not retain exact original run/plan/input coverage")
+    from tools.validation_reliability import _scan_launch_wire_tables_v3
+    wire_binding = _scan_launch_wire_tables_v3(plan, launch.launch_inputs, launch.reader_profiles,
+                                               scanners, paths.repo_root)
+    if wire_binding != (launch.rp5a_launch_wire_versions, launch.rp5a_payload_byte_limits):
+        raise ValueError("capacity source changed the exact original wire/payload binding")
+    _ACTIVE_SCAN_LAUNCH = launch
+    return launch
+
+
+def _scan_dispatch_environment(parent, planned):
+    from tools.validation_reliability import _SCAN_TRANSPORT_KEYS, _scan_child_launch_environment
+
+    if _ACTIVE_SCAN_LAUNCH is not None and planned.command_index in _ACTIVE_SCAN_LAUNCH.launch_inputs:
+        return _scan_child_launch_environment(parent, launch=_ACTIVE_SCAN_LAUNCH, planned=planned)
+    return {key: value for key, value in parent.items() if key.upper() not in _SCAN_TRANSPORT_KEYS}
+
+
+_ACTIVE_MAPPER_OCCURRENCES_V1 = {}
+_ACTIVE_MAPPER_READ_PROFILES_V1 = None
+_ACTIVE_MAPPER_READ_SOURCE_V1 = None
+_MAPPER_READ_SOURCE_ATTEMPTED = False
+
+
+def _mapper_resolve_parent_profiles_v1(paths, phase, plan):
+    from tools.validation_reliability import _mapper_original_position_v1, _mapper_profiles_projection_v1
+    global _MAPPER_READ_SOURCE_ATTEMPTED, _ACTIVE_MAPPER_READ_PROFILES_V1
+    selected = {str(row.command_index): row for row in plan
+                if _mapper_original_position_v1(row.argv, paths.repo_root) is not None}
+    if not selected:
+        if _ACTIVE_MAPPER_READ_SOURCE_V1 is not None:
+            raise ValueError("mapper source cannot attach to an unselected plan")
+        return None
+    if _MAPPER_READ_SOURCE_ATTEMPTED:
+        raise ValueError("mapper input source cannot be reacquired within a run")
+    _MAPPER_READ_SOURCE_ATTEMPTED = True
+    if not callable(_ACTIVE_MAPPER_READ_SOURCE_V1):
+        raise ValueError("mapper source/input/resource binding is required")
+    supplied = _ACTIVE_MAPPER_READ_SOURCE_V1(paths, phase, plan)
+    bindings = _mapper_profiles_projection_v1(supplied, run_id=paths.run_id,
+        phase=phase, command_count=len(plan), paths=paths)
+    if set(bindings) != set(selected) or any(tuple(bindings[key]["parent_argv"]) != row.argv for key,row in selected.items()):
+        raise ValueError("mapper profiles do not cover the exact original plan")
+    if len(plan) > 1 and any(b['kind'] != 'MAPPER_NATIVE_READ_BINDING_V2' for b in bindings.values()):
+        raise ValueError("multi-command mapper plan requires occurrence-time activation")
+    _ACTIVE_MAPPER_READ_PROFILES_V1 = bindings
+    return bindings
+
+
+def _linux_preflight_declaration_v1(source, installation, git, *, origin_ns, repository, interpreter, environment):
+    """Mechanically produce the original declaration; no new wire or command identities."""
+    import site
+    import struct
+    import sysconfig
+    from tools import validation_reliability as o
+    root = pathlib.Path(repository)
+    grants = o._linux_preflight_grants_v1(origin_ns)
+    vectors = tuple((interpreter,script,*(() if n == 6 else ('--repo-root','.')))
+        for n,script in enumerate(o._PREFLIGHT_SCRIPTS_V1,1))
+    files = {pathlib.Path(p).relative_to(root).as_posix():raw for p,raw in source.files.items()
+        if not pathlib.Path(p).is_relative_to(root/'.git')}
+    directories = {('.' if pathlib.Path(p) == root else pathlib.Path(p).relative_to(root).as_posix()):roster
+        for p,roster in source.directories.items() if not pathlib.Path(p).is_relative_to(root/'.git')}
+    index = root/'.git/index'
+    o._preflight_require_v1(str(index) in source.files and
+        sum(map(len,files.values()))+len(source.files[str(index)]) <= 512*1024**2,
+        'LINUX_PREFLIGHT_COMPLETE_CANDIDATE_SNAPSHOT_CAPACITY')
+    stdlib = tuple(dict.fromkeys(str(pathlib.Path(sysconfig.get_path(k)).absolute()) for k in ('stdlib','platstdlib')))
+    sites = tuple(str(pathlib.Path(p).absolute()) for p in site.getsitepackages())
+    executable = pathlib.Path(interpreter)
+    configs = tuple(dict.fromkeys((str(executable.parent/'pyvenv.cfg'),str(executable.parent.parent/'pyvenv.cfg'),
+        str(executable.with_suffix('._pth')),str(executable.parent/f'python{sys.version_info.major}{sys.version_info.minor}._pth'))))
+    search = tuple(dict.fromkeys((repository,str(root/'tools'),str(executable.parent),*stdlib,*sites)))
+    customizers = tuple(str(pathlib.Path(p)/(name+suffix)) for p in search for name in ('sitecustomize','usercustomize')
+        for suffix in ('.py','.pyc','.pyd','.so',''))
+    start_files = dict(installation.files); start_files.update(git.files)
+    start_dirs = dict(installation.directories)
+    absent = []
+    for path in (*configs,*customizers):
+        if path in installation.files or path in source.files:
+            o._preflight_require_v1(path in configs and not path.endswith('._pth'),
+                'LINUX_PREFLIGHT_UNSUPPORTED_STARTUP_CUSTOMIZER:'+path)
+            start_files[path] = (installation.files if path in installation.files else source.files)[path]
+        else:
+            o._preflight_require_v1(not pathlib.Path(path).exists(),'LINUX_PREFLIGHT_UNCAPTURED_STARTUP_PATH:'+path)
+            absent.append(path)
+    blobs = []
+    def add(raw):
+        blobs.append(raw)
+        return len(blobs)-1
+    def file_rows(values):
+        return [[p,add(values[p])] for p in sorted(values,key=lambda s:s.encode('utf-8'))]
+    def directory_rows(values):
+        return [[p,[list(row) for row in values[p]]] for p in sorted(values,key=lambda s:s.encode('utf-8'))]
+    repository_rows = file_rows(files)
+    repository_directories = directory_rows(directories)
+    index_blob = add(source.files[str(index)])
+    startup_files = file_rows(start_files)
+    startup_directories = directory_rows(start_dirs)
+    rows = []
+    for n,(vector,grant) in enumerate(zip(vectors,grants['rows'],strict=True),1):
+        rows.append(dict(original_position=n,argv=list(vector),files=[] if n in (2,6) else repository_rows,
+            directories=[] if n in (2,6) else repository_directories,git_executable='/usr/bin/git' if n in (1,3,5,7,8) else None,
+            **grant))
+    offset = 0; spans = []
+    for raw in blobs:
+        spans.append([offset,len(raw)]); offset += len(raw)
+    o._preflight_require_v1(offset <= 1024**3,'LINUX_PREFLIGHT_DECLARATION_BODY_CAPACITY')
+    header = dict(phase='fast-preflight',repository=dict(root=repository,files=repository_rows,
+        directories=repository_directories,index=[str(index),index_blob],protected_paths=[]),installation=dict(
+        executable=interpreter,version=list(sys.version_info[:3]),abi=[sys.implementation.cache_tag,
+            sysconfig.get_config_var('SOABI'),struct.calcsize('P')*8,sysconfig.get_config_var('Py_GIL_DISABLED'),getattr(sys,'abiflags','')],
+        stdlib_roots=list(stdlib),site_roots=list(sites),loader_environment={k:environment[k] for k in ('PATH','LD_LIBRARY_PATH')},
+        config_paths=list(configs),customizer_paths=list(customizers),startup_basis=dict(files=startup_files,
+            directories=startup_directories,absent=absent)),rows=rows,candidate_limits=grants['candidate_limits'],
+        parent_limits=grants['parent_limits'],blobs=spans)
+    raw = o._preflight_canonical_v1(header)
+    o._preflight_require_v1(len(raw) <= 16*1024**2,'LINUX_PREFLIGHT_DECLARATION_HEADER_CAPACITY')
+    return header,tuple(blobs),struct.pack('>8sQQ',b'QTTPA01\n',len(raw),offset)+raw+b''.join(blobs),vectors,grants
+
+
+def _linux_preflight_eligibility_v1(event,environment,repository):
+    from tools import validation_reliability as o
+    o._preflight_require_v1(type(event) is dict and type(environment) is dict and
+        environment.get('GITHUB_ACTIONS') == 'true' and environment.get('GITHUB_EVENT_NAME') == 'pull_request'
+        and environment.get('GITHUB_REPOSITORY') == 'Q8Meow/QTT_New0526'
+        and environment.get('GITHUB_WORKSPACE') == repository,'LINUX_PREFLIGHT_EPHEMERAL_WORKFLOW_ONLY')
+    pr = event.get('pull_request',{})
+    o._preflight_require_v1(event.get('number') == 298 and type(event.get('number')) is int
+        and event.get('repository',{}).get('full_name') == 'Q8Meow/QTT_New0526'
+        and pr.get('number') == 298 and pr.get('head',{}).get('repo',{}).get('full_name') == 'Q8Meow/QTT_New0526'
+        and pr.get('base',{}).get('repo',{}).get('full_name') == 'Q8Meow/QTT_New0526'
+        and pr.get('base',{}).get('ref') == 'main'
+        and pr.get('head',{}).get('ref') == 'repair/main-cumulative-v35-final-r5-local-20260922'
+        and pr.get('draft') is True,'LINUX_PREFLIGHT_UNADOPTED_REPOSITORY_PR_OR_HEAD')
+
+
+def _linux_preflight_provision_v1():
+    """Only the adopted ephemeral workflow can request the fixed privileged owner."""
+    import base64
+    from tools import validation_reliability as o
+    o._preflight_require_v1(sys.platform == 'linux' and sys.version_info[:3] == (3,14,6),
+        'LINUX_PREFLIGHT_SELECTED_PLATFORM_AND_INTERPRETER')
+    repository = o._linux_preflight_path_v1(str(REPO_ROOT))
+    interpreter = o._linux_preflight_path_v1(sys.executable)
+    installation = o._linux_preflight_path_v1(sys.prefix)
+    o._preflight_require_v1(pathlib.Path(interpreter).is_relative_to(pathlib.Path(installation))
+        and not pathlib.Path(repository).is_relative_to(pathlib.Path(installation)),
+        'LINUX_PREFLIGHT_DISJOINT_INSTALLATION')
+    event_path = pathlib.Path(o._linux_preflight_path_v1(os.environ.get('GITHUB_EVENT_PATH','')))
+    info = event_path.lstat()
+    o._preflight_require_v1(stat.S_ISREG(info.st_mode) and info.st_nlink == 1 and info.st_size <= 1048576,
+        'LINUX_PREFLIGHT_AUTHENTICATED_EVENT_FILE')
+    event_bytes = event_path.read_bytes()
+    o._preflight_require_v1(len(event_bytes) == info.st_size and o._scan_same_api_version(info) ==
+        o._scan_same_api_version(event_path.lstat()),'LINUX_PREFLIGHT_EVENT_CHANGED')
+    event = json.loads(event_bytes)
+    _linux_preflight_eligibility_v1(event,dict(os.environ),repository)
+    bootstrap_paths = ('tools/run_validation_gates.py','tools/validation_reliability.py',
+        'tools/validation_scope_registry.py','tools/ci_branch_context.py')
+    originals = {}
+    for name in bootstrap_paths:
+        path = REPO_ROOT/name
+        before = path.lstat()
+        o._preflight_require_v1(stat.S_ISREG(before.st_mode) and before.st_nlink == 1 and before.st_size <= 2097152,
+            'LINUX_PREFLIGHT_REVIEWED_BOOTSTRAP_FILE')
+        raw = path.read_bytes()
+        o._preflight_require_v1(len(raw) == before.st_size and o._scan_same_api_version(before) ==
+            o._scan_same_api_version(path.lstat()),'LINUX_PREFLIGHT_BOOTSTRAP_CAPTURE_CHANGED')
+        originals[name] = dict(bytes=base64.b64encode(raw).decode('ascii'),version=o._scan_same_api_version(before))
+    ticket_text = os.environ.get('QTT_LINUX_BOOTSTRAP_TICKET')
+    if os.geteuid() != 0:
+        o._preflight_require_v1(ticket_text is None and not any(k.upper().startswith('QTT_LINUX_') for k in os.environ),
+            'LINUX_PREFLIGHT_NO_INHERITED_BOOTSTRAP_SELECTOR')
+        parent = pathlib.Path(o._linux_preflight_path_v1(os.environ.get('RUNNER_TEMP','')))
+        origin = time.monotonic_ns()
+        task = parent/o._linux_preflight_name_v1(os.getpid(),origin)
+        task.mkdir(mode=0o700,exist_ok=False)
+        export_root = task/'native-export'
+        export_root.mkdir(mode=0o700,exist_ok=False)
+        # This workflow output names only the fresh external evidence directory.
+        # It is not forwarded into the privileged controller or service.
+        workflow_output = os.environ.get('GITHUB_OUTPUT')
+        o._preflight_require_v1(type(workflow_output) is str,'LINUX_PREFLIGHT_WORKFLOW_OUTPUT_UNAVAILABLE')
+        output_path = pathlib.Path(o._linux_preflight_path_v1(workflow_output))
+        output_info = output_path.lstat()
+        o._preflight_require_v1(stat.S_ISREG(output_info.st_mode) and output_info.st_nlink == 1
+            and output_info.st_uid == os.getuid(),'LINUX_PREFLIGHT_WORKFLOW_OUTPUT_CUSTODY')
+        descriptor = os.open(output_path,os.O_WRONLY|os.O_APPEND|os.O_NOFOLLOW|os.O_CLOEXEC)
+        try:
+            opened = os.fstat(descriptor)
+            o._preflight_require_v1((opened.st_dev,opened.st_ino) == (output_info.st_dev,output_info.st_ino),
+                'LINUX_PREFLIGHT_WORKFLOW_OUTPUT_DESCRIPTOR')
+            raw_output = ('native_evidence='+str(export_root)+'\n').encode('ascii')
+            o._preflight_require_v1(os.write(descriptor,raw_output) == len(raw_output),'LINUX_PREFLIGHT_WORKFLOW_OUTPUT_SHORT')
+            os.fsync(descriptor)
+        finally: os.close(descriptor)
+        ticket = task/'bootstrap.json'
+        from tools.ci_branch_context import _run_repository_read_process
+        index_query = o._LinuxPreflightQueriesV1(evidence_root=task/'index-evidence',deadline_ns=origin+60*10**9)
+        resolved_index = _run_repository_read_process(REPO_ROOT,
+            ('rev-parse','--path-format=absolute','--git-path','index'),native_query=index_query)
+        index_path = resolved_index.stdout.removesuffix('\n')
+        o._preflight_require_v1(index_path == str(REPO_ROOT/'.git/index'),
+            'LINUX_PREFLIGHT_EXTERNAL_ACTIVE_INDEX')
+        index_info = pathlib.Path(index_path).lstat()
+        o._preflight_require_v1(stat.S_ISREG(index_info.st_mode) and index_info.st_nlink == 1,
+            'LINUX_PREFLIGHT_ACTIVE_INDEX_TYPE')
+        export_info = export_root.lstat()
+        value = dict(export_root=str(export_root),export_identity=(export_info.st_dev,export_info.st_ino),
+            active_index=index_path,index_version=o._scan_same_api_version(index_info),
+            repository=repository,interpreter=interpreter,installation=installation,source=originals,
+            event=base64.b64encode(event_bytes).decode('ascii'),uid=os.getuid(),pid=os.getpid(),origin_ns=origin)
+        o.atomic_write_json(ticket,value)
+        for name,original in originals.items():
+            o._preflight_require_v1((REPO_ROOT/name).read_bytes() == base64.b64decode(original['bytes'])
+                and o._scan_same_api_version((REPO_ROOT/name).lstat()) == tuple(original['version']),
+                'LINUX_PREFLIGHT_BOOTSTRAP_PREPRIVILEGE_CHANGED')
+        env = {key:os.environ[key] for key in ('GITHUB_ACTIONS','GITHUB_EVENT_NAME','GITHUB_REPOSITORY',
+            'GITHUB_WORKSPACE','GITHUB_EVENT_PATH','RUNNER_TEMP')}
+        env.update(PATH=str(pathlib.Path(interpreter).parent)+':/usr/bin',LANG='C.UTF-8',LC_ALL='C.UTF-8',
+            LD_LIBRARY_PATH=installation+'/lib',QTT_LINUX_BOOTSTRAP_TICKET=str(ticket))
+        preserved = ','.join(k for k in env if k != 'PATH')
+        observation = {}
+        receipt = o.supervise_command(('/usr/bin/sudo','-n','--preserve-env='+preserved,interpreter,'-I','-B','-X','utf8',
+            repository+'/tools/run_validation_gates.py','--linux-preflight-provision','--phase','fast-preflight'),
+            cwd=REPO_ROOT,run_id=task.name,phase='fast-preflight-provision',command_index=1,evidence_root=task/'evidence',
+            environment=env,timeout_seconds=3720,execution_deadline_ns=origin+3720*10**9,
+            output_limits=dict(stdout_bytes=128*1024**2,stderr_bytes=128*1024**2,combined_output_bytes=256*1024**2),
+            output_observation=observation)
+        print(json.dumps(dict(linux_controller_receipt=o._json_compatible(receipt),evidence=str(task))),flush=True)
+        return 0 if receipt.failure_class is None and receipt.native_exit_code == 0 else 1
+    o._preflight_require_v1(type(ticket_text) is str,'LINUX_PREFLIGHT_FIXED_PREPRIVILEGE_FREEZE_REQUIRED')
+    ticket = pathlib.Path(o._linux_preflight_path_v1(ticket_text))
+    parent = pathlib.Path(o._linux_preflight_path_v1(os.environ['RUNNER_TEMP']))
+    ticket_info = ticket.lstat()
+    sudo_uid = o._preflight_decimal_v1(os.environ.get('SUDO_UID',''))
+    o._preflight_require_v1(ticket.parent.parent == parent and ticket.name == 'bootstrap.json'
+        and stat.S_ISREG(ticket_info.st_mode) and ticket_info.st_nlink == 1
+        and ticket_info.st_uid == sudo_uid and ticket_info.st_size <= 8*1024**2,
+        'LINUX_PREFLIGHT_BOOTSTRAP_TRANSPORT_CUSTODY')
+    raw = ticket.read_bytes(); frozen = json.loads(raw)
+    o._preflight_require_v1(o._scan_same_api_version(ticket.lstat()) == o._scan_same_api_version(ticket_info)
+        and frozen['uid'] == sudo_uid and frozen['repository'] == repository and frozen['interpreter'] == interpreter
+        and frozen['installation'] == installation and frozen['source'] == o._json_compatible(originals)
+        and base64.b64decode(frozen['event'],validate=True) == event_bytes,
+        'LINUX_PREFLIGHT_FROZEN_BOOTSTRAP_CHANGED')
+    o._preflight_integer_v1(frozen['origin_ns'])
+    o._preflight_require_v1(frozen['active_index'] == str(REPO_ROOT/'.git/index')
+        and tuple(frozen['index_version']) == o._scan_same_api_version(pathlib.Path(frozen['active_index']).lstat()),
+        'LINUX_PREFLIGHT_ORIGINAL_RESOLVED_INDEX_CHANGED')
+    export_root = pathlib.Path(o._linux_preflight_path_v1(frozen['export_root']))
+    export_info = export_root.lstat()
+    o._preflight_require_v1(export_root == ticket.parent/'native-export' and stat.S_ISDIR(export_info.st_mode)
+        and export_info.st_uid == sudo_uid and stat.S_IMODE(export_info.st_mode) == 0o700
+        and (export_info.st_dev,export_info.st_ino) == tuple(frozen['export_identity']),
+        'LINUX_PREFLIGHT_EXPORT_ORIGINAL_OWNED_DIRECTORY')
+    return _linux_preflight_controller_v1(repository,installation,interpreter,event,event_bytes,frozen['origin_ns'],export_root)
+
+
+def _linux_preflight_controller_v1(repository,installation,interpreter,event,event_bytes,origin,export_root):
+    from tools import validation_reliability as o
+    o._preflight_require_v1(os.geteuid() == 0 and time.monotonic_ns() < origin+3500*10**9,
+        'LINUX_PREFLIGHT_CONTROLLER_OWNER_OR_CUTOFF')
+    name = o._linux_preflight_name_v1(os.getpid(),origin)
+    control = pathlib.Path('/run')/(name+'control')
+    runtime = pathlib.Path('/run')/name
+    control.mkdir(mode=0o700,exist_ok=False)
+    runtime.mkdir(mode=0o700,exist_ok=False)
+    control_identity = (control.stat().st_dev,control.stat().st_ino)
+    runtime_identity = (runtime.stat().st_dev,runtime.stat().st_ino)
+    private_root,spool = control/'root',control/'spool'
+    private_root.mkdir(mode=0o755); spool.mkdir(mode=0o700)
+    # The existing supervisor exclusively creates the two manager-bound stream files.
+    for directory in ('declaration','binding','release'):
+        (control/directory).mkdir(mode=0o555)
+    grants = o._linux_preflight_grants_v1(origin)
+    query = o._LinuxPreflightQueriesV1(evidence_root=control/'native-evidence',deadline_ns=grants['settlement_deadline_ns'],
+        reserved_output_bytes=2*67108864)
+    source = scope = None
+    mounted = restored = False
+    failures = []
+    receipt = None
+    try:
+        version = query.command(('/usr/bin/systemctl','--version')).decode('ascii','strict')
+        first = version.splitlines()[0].split()
+        o._preflight_require_v1(len(first) >= 2 and first[0] == 'systemd' and first[1].isdigit()
+            and int(first[1]) >= 255,'LINUX_PREFLIGHT_SYSTEMD_BASELINE')
+        capture_counts = dict(files=0,entries=0)
+        source = o._LinuxPreflightCaptureV1(repository,byte_limit=2*1024**3,
+            deadline_ns=grants['native_deadline_ns'],shared_capture=capture_counts)
+        git_root = pathlib.Path(repository)/'.git'
+        o._preflight_require_v1(git_root.is_dir() and str(git_root/'index') in source.files,
+            'LINUX_PREFLIGHT_ORIGINAL_GIT_ADMINISTRATION')
+        for path in (git_root/'objects/info/alternates',git_root/'commondir',git_root/'gitdir',git_root/'worktrees'):
+            o._preflight_require_v1(not path.exists(),'LINUX_PREFLIGHT_EXTERNAL_GIT_ADMINISTRATION')
+        config = source.files[str(git_root/'config')].decode('utf-8','strict').lower()
+        o._preflight_require_v1(not any(word in config for word in ('extraheader','credential','hookspath','insteadof')),
+            'LINUX_PREFLIGHT_CREDENTIAL_OR_HOOK_CONFIGURATION')
+        for path in source.files:
+            if pathlib.Path(path).parent == git_root/'hooks':
+                o._preflight_require_v1(path.endswith('.sample'),'LINUX_PREFLIGHT_ACTIVE_REPOSITORY_HOOK')
+        install = o._LinuxPreflightCaptureV1(installation,byte_limit=1024**3,
+            deadline_ns=grants['native_deadline_ns'],installation=True,shared_capture=capture_counts)
+        git = o._LinuxPreflightCaptureV1('/usr/bin/git',byte_limit=16*1024**2,
+            deadline_ns=grants['native_deadline_ns'],shared_capture=capture_counts)
+        source.protect()
+        install.copy_installation(control/'installation')
+        environment = o._linux_preflight_environment_v1(repository=repository,installation=installation,
+            runtime=str(runtime),control=str(control))
+        header,blobs,frame,vectors,grants = _linux_preflight_declaration_v1(source,install,git,origin_ns=origin,
+            repository=repository,interpreter=interpreter,environment=environment)
+        o._atomic_write_bytes_v1(control/'declaration/input.bin',frame,control_mode=0o444)
+        o._atomic_write_bytes_v1(control/'declaration/event.json',event_bytes,control_mode=0o444)
+        # Existing installation bytes are the only copied executable source tree.
+        for absolute in ('/usr','/lib','/lib64','/proc','/sys','/dev','/tmp','/var/tmp',repository,installation,
+                str(runtime),str(spool),*(str(control/n) for n in ('declaration','binding','release'))):
+            (private_root/absolute.lstrip('/')).mkdir(parents=True,exist_ok=True,mode=0o755)
+        etc = private_root/'etc'; etc.mkdir(mode=0o755)
+        for filename,raw in (('passwd',b'root:x:0:0:root:/root:/usr/sbin/nologin\n'),
+                ('group',b'root:x:0:\n'),('nsswitch.conf',b'passwd: files\ngroup: files\nhosts: files\n'),
+                ('qtt-gitconfig',('[safe]\n\tdirectory = '+repository+'\n').encode('ascii'))):
+            o._atomic_write_bytes_v1(etc/filename,raw,control_mode=0o444)
+        mounted = True  # A partial native attempt also retains owned mount settlement.
+        query.command(('/usr/bin/mount','-t','tmpfs','-o','size=1073741824,noexec,nodev,nosuid,mode=0700',
+            'qtt-runtime',str(runtime)))
+        mounted = True
+        for directory in ('tmp','var-tmp'):
+            (runtime/directory).mkdir(mode=0o1777)
+            os.chmod(runtime/directory,0o1777)
+        scope = o._LinuxPreflightScopeV1(name=name,query=query,control=control,runtime=runtime,private_root=private_root,
+            spool=spool,repository=repository,installation=installation,interpreter=interpreter,source=source,
+            header=header,blobs=blobs,vectors=vectors,grants=grants,event=event,environment=environment)
+        scope.expected_syscalls = o._linux_preflight_syscalls_v1(query)
+        scope.start_slice()
+        scope.startup_deadline_ns = min(origin+3500*10**9,time.monotonic_ns()+60*10**9)
+        scope.launch_argv = o._linux_preflight_service_argv_v1(name=name,private_root=str(private_root),runtime=str(runtime),
+            control=str(control),spool=str(spool),repository=repository,installation=installation,interpreter=interpreter,
+            startup_deadline_ns=scope.startup_deadline_ns,environment=environment)
+        scope.argv = scope.launch_argv[scope.launch_argv.index('--')+1:]
+        token = o._LINUX_PREFLIGHT_PROCESS_V1.set(scope)
+        try:
+            observed = {}
+            receipt = o.supervise_command(scope.argv,cwd=pathlib.Path(repository),run_id=name,phase='fast-preflight-native-service',
+                command_index=1,evidence_root=spool,environment=environment,timeout_seconds=3600,
+                execution_deadline_ns=grants['execution_deadline_ns'],output_limits=dict(stdout_bytes=64*1024**2,
+                    stderr_bytes=64*1024**2,combined_output_bytes=128*1024**2),output_observation=observed)
+        finally: o._LINUX_PREFLIGHT_PROCESS_V1.reset(token)
+        o._preflight_require_v1(scope.settled and not o._command_requires_process_retention_v1(receipt),
+            'LINUX_PREFLIGHT_NATIVE_CUSTODY_UNRESOLVED')
+    except BaseException as exc:
+        failures.append(exc)
+        if scope is not None and scope.service_created and not scope.settled:
+            try:
+                if not scope.terminated: scope.terminate(10)
+                scope.finish()
+            except BaseException as cleanup_error: failures.append(cleanup_error)
+    settled = scope is None or not scope.service_created or scope.settled
+    exported = []
+    export_bytes = export_entries = 0
+    export_complete = False
+    def export_file(path,destination):
+        nonlocal export_bytes,export_entries
+        o._preflight_require_v1(time.monotonic_ns() < grants['settlement_deadline_ns'],
+            'LINUX_PREFLIGHT_EXPORT_DEADLINE')
+        export_entries += 1
+        before = path.lstat()
+        o._preflight_require_v1(export_entries <= 200000 and stat.S_ISREG(before.st_mode)
+            and before.st_nlink == 1 and before.st_size <= 67108864,
+            'LINUX_PREFLIGHT_EXPORT_REGULAR_OR_EXTENT')
+        export_bytes += before.st_size
+        o._preflight_require_v1(export_bytes <= 256*1024**2+1024**3,
+            'LINUX_PREFLIGHT_EXPORT_ORIGINAL_EVIDENCE_CAPACITY')
+        descriptor = os.open(path,os.O_RDONLY|os.O_NOFOLLOW|os.O_CLOEXEC)
+        try:
+            opened = os.fstat(descriptor)
+            o._preflight_require_v1(o._scan_same_api_version(opened) == o._scan_same_api_version(before),
+                'LINUX_PREFLIGHT_EXPORT_DESCRIPTOR')
+            pieces,extent = [],0
+            while extent < before.st_size:
+                o._preflight_require_v1(time.monotonic_ns() < grants['settlement_deadline_ns'],
+                    'LINUX_PREFLIGHT_EXPORT_READ_DEADLINE')
+                chunk = os.read(descriptor,min(65536,before.st_size-extent))
+                o._preflight_require_v1(chunk,'LINUX_PREFLIGHT_EXPORT_TRUNCATED')
+                pieces.append(chunk); extent += len(chunk)
+            o._preflight_require_v1(os.read(descriptor,1) == b'' and
+                o._scan_same_api_version(os.fstat(descriptor)) == o._scan_same_api_version(opened)
+                == o._scan_same_api_version(path.lstat()),'LINUX_PREFLIGHT_EXPORT_CHANGED')
+            raw = b''.join(pieces)
+        finally: os.close(descriptor)
+        o._atomic_write_bytes_v1(destination,raw,control_mode=0o444)
+        o._preflight_require_v1(destination.read_bytes() == raw,'LINUX_PREFLIGHT_EXPORT_BYTE_COMPARISON')
+        exported.append(dict(source=str(path),destination=str(destination),bytes=len(raw)))
+    def export_tree(path,destination,depth=0):
+        nonlocal export_entries
+        o._preflight_require_v1(depth <= 64 and len(str(path).encode('utf-8')) <= 4096
+            and time.monotonic_ns() < grants['settlement_deadline_ns'],'LINUX_PREFLIGHT_EXPORT_TREE_BOUND')
+        before = path.lstat()
+        o._preflight_require_v1(stat.S_ISDIR(before.st_mode),'LINUX_PREFLIGHT_EXPORT_DIRECTORY')
+        destination.mkdir(mode=0o755,exist_ok=False)
+        with os.scandir(path) as stream:
+            for item in stream:
+                export_entries += 1
+                o._preflight_require_v1(export_entries <= 200000,'LINUX_PREFLIGHT_EXPORT_ENTRIES')
+                child = path/item.name
+                if item.is_dir(follow_symlinks=False): export_tree(child,destination/item.name,depth+1)
+                else: export_file(child,destination/item.name)
+        o._preflight_require_v1(o._scan_same_api_version(path.lstat()) == o._scan_same_api_version(before),
+            'LINUX_PREFLIGHT_EXPORT_DIRECTORY_CHANGED')
+    # The export roots are literal owned evidence surfaces, never the checkout,
+    # index, installation, declaration payload or an arbitrary supplied pathname.
+    report = dict(native_service_receipt=None if receipt is None else o._json_compatible(receipt),
+        native_history=[] if scope is None else o._json_compatible(scope.history),
+        native_queries=query.observations,query_attempts=query.attempts,query_output_bytes=query.retained,
+        capture_counts=None if source is None else source.shared_capture,
+        source_capture_bytes=None if source is None else source.byte_count,
+        source_delivered_read_bytes=None if source is None else source.read_bytes,
+        failures=[repr(e) for e in failures],service_settled=settled,
+        evidence_root=str(control),export_root=str(export_root),canonical_acceptance=False)
+    try:
+        raw = o._preflight_canonical_v1(report)
+        o._preflight_require_v1(len(raw) <= 16*1024**2,'LINUX_PREFLIGHT_NATIVE_REPORT_BOUND')
+        o._atomic_write_bytes_v1(control/'native-result.json',raw)
+        export_file(control/'native-result.json',export_root/'native-result.json')
+        for path,label in ((control/'native-evidence','native'),(spool,'streams'),
+                (runtime/'evidence','application-evidence'),(runtime/'reports','reports'),
+                (runtime/'native-observations','service-native-observations')):
+            if path.exists(): export_tree(path,export_root/label)
+        export_complete = True
+    except BaseException as exc: failures.append(exc)
+    # Attribute restoration follows actual settlement and complete retained bytes.
+    if settled and export_complete:
+        if source is None:
+            restored = True  # Capture failed before any protection transition.
+        else:
+            try:
+                source.deadline_ns = grants['settlement_deadline_ns']
+                source.verify(protected=bool(source.protected))
+                source.restore(); restored = True
+            except BaseException as exc: failures.append(exc)
+    stopped = unmounted = removed = False
+    if settled and restored and export_complete:
+        for kind,source_name in (('timing','timing-fast-preflight.json'),('router','router-fast-preflight.json')):
+            path = runtime/'reports'/source_name
+            if path.exists():
+                try:
+                    destination = pathlib.Path(repository)/'.tmp'/('qtt-validation-'+kind)/'fast-preflight.json'
+                    export_file(path,destination)
+                except BaseException as exc: failures.append(exc)
+        try:
+            if scope is not None:
+                if scope.service_created: query.command(('/usr/bin/systemctl','stop',name+'.service'),settling=True)
+                if scope.slice_created: query.command(('/usr/bin/systemctl','stop',name+'.slice'),settling=True)
+                for descriptor,identity in scope.slice_files.values(): os.close(descriptor)
+                for descriptor in (scope.root_fd,scope.slice_fd,None if scope.process is None else scope.process.pidfd):
+                    if descriptor is not None: os.close(descriptor)
+            stopped = True
+            if mounted: query.command(('/usr/bin/umount',str(runtime)),settling=True)
+            unmounted = True
+            # Stop/unmount receipts are produced after the first export. Preserve
+            # only those newly created files, never overwrite earlier evidence.
+            if (control/'native-evidence').exists():
+                for path in sorted((control/'native-evidence').iterdir()):
+                    destination = export_root/'native'/path.name
+                    if not destination.exists(): export_file(path,destination)
+            for path,identity in ((runtime,runtime_identity),(control,control_identity)):
+                actual = path.lstat()
+                o._preflight_require_v1(path.parent == pathlib.Path('/run') and
+                    (actual.st_dev,actual.st_ino) == identity and stat.S_ISDIR(actual.st_mode),
+                    'LINUX_PREFLIGHT_EXACT_CLEANUP_ROOT')
+                o.remove_exact_run_owned_process_tree(path,expected_run_root=path,
+                    repo_root=repository,evidence_root=export_root)
+            removed = True
+        except BaseException as exc: failures.append(exc)
+    cleanup = dict(service_settled=settled,source_attributes_restored=restored,evidence_export_complete=export_complete,
+        owned_units_stopped=stopped,runtime_unmounted=unmounted,owned_roots_removed=removed,
+        retained_root=None if removed else str(control),exported_files=exported,
+        failures=[repr(e) for e in failures],query_attempts=query.attempts,query_output_bytes=query.retained)
+    try: o.atomic_write_json(export_root/'cleanup.json',cleanup)
+    except BaseException as exc: failures.append(exc)
+    print(json.dumps(dict(linux_native_export=str(export_root),cleanup=cleanup),default=str),flush=True)
+    return 0 if not failures and receipt is not None and receipt.failure_class is None and receipt.native_exit_code == 0 else 1
+
+
+
+def _linux_preflight_enter_v1(startup_deadline_ns):
+    import socket
+    from tools import validation_reliability as o
+    o._preflight_require_v1(sys.platform == 'linux' and os.geteuid() != 0,'LINUX_PREFLIGHT_UNPRIVILEGED_ENTRY_ONLY')
+    control = pathlib.Path(o._linux_preflight_path_v1(os.environ.get('QTT_LINUX_PREFLIGHT_CONTROL','')))
+    runtime = pathlib.Path(o._linux_preflight_path_v1(os.environ.get('QTT_LINUX_PREFLIGHT_RUNTIME','')))
+    query = o._LinuxPreflightQueriesV1(evidence_root=runtime/'native-observations',deadline_ns=startup_deadline_ns)
+    binding,version,chain = o._linux_preflight_control_read_v1(control/'binding/native.json',
+        deadline_ns=startup_deadline_ns,pending=True,query=query)
+    o._preflight_require_v1(binding['profile'] == 'QTT_PR298_LINUX_PREFLIGHT_V1' and
+        binding['startup_deadline_ns'] == startup_deadline_ns and binding['repository'] == str(REPO_ROOT)
+        and binding['runtime'] == str(runtime) and binding['environment'] == o._linux_preflight_environment_v1(
+            repository=str(REPO_ROOT),installation=sys.prefix,runtime=str(runtime),control=str(control)),
+        'LINUX_PREFLIGHT_BOUND_ENTRY_OPERANDS')
+    lease = o._LinuxPreflightHostLeaseV1(binding=binding,control_path=control/'binding/native.json',runtime=runtime,
+        query=query,declaration_chain=tuple((p,tuple(s)) for p,s in binding['declaration_chain']),
+        declaration_version=tuple(binding['declaration_version']))
+    probe = dict(name=binding['name'],pid=os.getpid(),start=lease.initial['start'],passed=False,denials=[])
+    try:
+        for path in (REPO_ROOT/'tools/run_validation_gates.py',control/'binding/native.json',control/'declaration/input.bin'):
+            try: fd = os.open(path,os.O_WRONLY|os.O_NOFOLLOW|os.O_CLOEXEC)
+            except OSError as error:
+                o._preflight_require_v1(error.errno in (13,30),'LINUX_PREFLIGHT_WRITE_PROBE_UNEXPECTED_ERROR')
+                probe['denials'].append(dict(path=str(path),operation='open-write-no-create-no-truncate',errno=error.errno))
+            else:
+                os.close(fd); raise RuntimeError('LINUX_PREFLIGHT_SEALED_WRITE_OPEN_SUCCEEDED')
+        for family in (socket.AF_INET,socket.AF_INET6):
+            try: sock = socket.socket(family,socket.SOCK_STREAM)
+            except OSError as error:
+                probe['denials'].append(dict(family=int(family),operation='socket-create-no-connect',errno=error.errno))
+            else:
+                sock.close(); raise RuntimeError('LINUX_PREFLIGHT_NETWORK_SOCKET_SUCCEEDED')
+        for path in ('/dev/shm','/dev/mqueue','/dev/hugepages'):
+            info = pathlib.Path(path).lstat()
+            o._preflight_require_v1(stat.S_ISDIR(info.st_mode) and stat.S_IMODE(info.st_mode) == 0,
+                'LINUX_PREFLIGHT_REQUIRED_DEVICE_MASK_ABSENT')
+            try: fd = os.open(path,os.O_RDONLY|os.O_DIRECTORY|os.O_NOFOLLOW|os.O_CLOEXEC)
+            except OSError as error:
+                o._preflight_require_v1(error.errno == 13,'LINUX_PREFLIGHT_DEVICE_MASK_QUERY_FAILURE')
+                probe['denials'].append(dict(path=path,operation='directory-read-open',errno=error.errno))
+            else:
+                os.close(fd); raise RuntimeError('LINUX_PREFLIGHT_DEVICE_MASK_ACCESS_SUCCEEDED')
+        lease.check_parent(REPO_ROOT,pathlib.Path(binding['index']))
+        probe['passed'] = True
+    finally:
+        o.atomic_write_json(runtime/'probe.json',probe)
+    release,_,_ = o._linux_preflight_control_read_v1(control/'release/release.json',deadline_ns=startup_deadline_ns,
+        pending=True,query=query)
+    o._preflight_require_v1(release == dict(name=binding['name'],pid=os.getpid(),start=lease.initial['start'],
+        invocation=binding['invocation']),'LINUX_PREFLIGHT_ORIGINAL_RELEASE')
+    query.deadline_ns = binding['grants']['native_deadline_ns']
+    for directory in ('process','evidence','reports'):
+        (runtime/directory).mkdir(mode=0o700,exist_ok=False)
+    native = o._PreflightNativeInputV1(path=binding['declaration'],root=REPO_ROOT,index_path=pathlib.Path(binding['index']),
+        expected_path_version=lease.declaration_version,expected_chain=lease.declaration_chain,
+        limits=binding['grants']['native'],deadline_ns=binding['grants']['native_deadline_ns'],host_lease=lease,
+        capture_limits=binding['grants']['capture'],terminal_limits=binding['grants']['terminal'],git_executable='/usr/bin/git')
+    token = o._LINUX_PREFLIGHT_LEASE_V1.set(lease)
+    try:
+        with o._preflight_native_input_v1(native):
+            return main(['--phase','fast-preflight','--preflight-input',binding['declaration'],
+                '--timing-report',str(runtime/'reports/timing-fast-preflight.json'),
+                '--router-report',str(runtime/'reports/router-fast-preflight.json')])
+    finally:
+        o._LINUX_PREFLIGHT_LEASE_V1.reset(token)
+        o._preflight_require_v1(not lease.children,'LINUX_PREFLIGHT_RETAIN_UNRESOLVED_CHILD_HANDLES')
+
+
+def _linux_preflight_selected_v1(argv, suppliers):
+    request = argparse.ArgumentParser(add_help=False,allow_abbrev=False)
+    request.add_argument('--linux-preflight-provision',action='store_true')
+    request.add_argument('--linux-preflight-enter',action='store_true')
+    request.add_argument('--startup-deadline-ns')
+    request.add_argument('--phase')
+    selected,other = request.parse_known_args(argv)
+    if not (selected.linux_preflight_provision or selected.linux_preflight_enter):
+        if selected.startup_deadline_ns is not None:
+            raise ValueError('Linux startup cutoff requires the closed entry mode')
+        return None
+    if (selected.linux_preflight_provision == selected.linux_preflight_enter or selected.phase != FAST_PREFLIGHT_PHASE
+            or other or any(value is not None for value in suppliers)):
+        raise ValueError('Linux provisioning requires the exact first phase without competing suppliers or arbitrary arguments')
+    if selected.linux_preflight_enter:
+        if selected.startup_deadline_ns is None:
+            raise ValueError('original Linux startup cutoff required')
+        from tools.validation_reliability import _preflight_decimal_v1
+        selected.startup_deadline_ns = _preflight_decimal_v1(selected.startup_deadline_ns)
+    elif selected.startup_deadline_ns is not None:
+        raise ValueError('service startup cutoff is not a controller input')
+    return selected
+
+
+def main(argv: Sequence[str] | None = None, *, scan_capacity_source=None, candidate_source=None, mapper_read_source=None) -> int:
+    global _ACTIVE_PREFLIGHT_PATH_V1, _ACTIVE_PREFLIGHT_NATIVE_V1, _ACTIVE_PREFLIGHT_ASSEMBLY_V1
+    global _ACTIVE_MAPPER_OCCURRENCES_V1
+    global _ACTIVE_MAPPER_READ_PROFILES_V1, _ACTIVE_MAPPER_READ_SOURCE_V1, _MAPPER_READ_SOURCE_ATTEMPTED
+    global _ACTIVE_SCAN_CAPACITY_SOURCE, _ACTIVE_SCAN_LAUNCH, _SCAN_CAPACITY_ATTEMPTED, _ACTIVE_CANDIDATE_SOURCE
+    linux = _linux_preflight_selected_v1(sys.argv[1:] if argv is None else list(argv),
+        (scan_capacity_source,candidate_source,mapper_read_source))
+    if linux is not None:
+        from tools import validation_reliability as native
+        if linux.linux_preflight_enter:
+            return _linux_preflight_enter_v1(linux.startup_deadline_ns)
+        return _linux_preflight_provision_v1()
+    if not _SCAN_MAIN_LOCK.acquire(blocking=False):
+        raise ValueError("central validation invocation already active")
+    previous_preflight = (_ACTIVE_PREFLIGHT_PATH_V1, _ACTIVE_PREFLIGHT_NATIVE_V1, _ACTIVE_PREFLIGHT_ASSEMBLY_V1)
+    previous_occurrences = _ACTIVE_MAPPER_OCCURRENCES_V1
+    previous_mapper = (_ACTIVE_MAPPER_READ_PROFILES_V1, _ACTIVE_MAPPER_READ_SOURCE_V1, _MAPPER_READ_SOURCE_ATTEMPTED)
+    previous = (_ACTIVE_SCAN_CAPACITY_SOURCE, _ACTIVE_SCAN_LAUNCH, _SCAN_CAPACITY_ATTEMPTED, _ACTIVE_CANDIDATE_SOURCE)
+    try:
+        request = argparse.ArgumentParser(add_help=False)
+        request.add_argument("--preflight-input", type=pathlib.Path)
+        request.add_argument("--phase", default=ALL_PHASE)
+        request.add_argument("--validation-mode", default="auto")
+        selected, _ = request.parse_known_args(sys.argv[1:] if argv is None else list(argv))
+        if selected.preflight_input is not None and (selected.phase != FAST_PREFLIGHT_PHASE
+                or selected.validation_mode == "reduced"
+                or any(v is not None for v in (candidate_source, mapper_read_source, scan_capacity_source))):
+            raise ValueError("preflight input requires the full first phase without competing suppliers")
+        _ACTIVE_PREFLIGHT_PATH_V1 = selected.preflight_input
+        _ACTIVE_PREFLIGHT_NATIVE_V1 = _ACTIVE_PREFLIGHT_ASSEMBLY_V1 = None
+        _ACTIVE_MAPPER_OCCURRENCES_V1 = {}
+        _ACTIVE_MAPPER_READ_PROFILES_V1 = None
+        _ACTIVE_MAPPER_READ_SOURCE_V1 = mapper_read_source
+        _MAPPER_READ_SOURCE_ATTEMPTED = False
+        _ACTIVE_SCAN_CAPACITY_SOURCE = scan_capacity_source
+        _ACTIVE_CANDIDATE_SOURCE = candidate_source
+        _ACTIVE_SCAN_LAUNCH = None
+        _SCAN_CAPACITY_ATTEMPTED = False
+        return _main_owned(argv)
+    finally:
+        _ACTIVE_PREFLIGHT_PATH_V1, _ACTIVE_PREFLIGHT_NATIVE_V1, _ACTIVE_PREFLIGHT_ASSEMBLY_V1 = previous_preflight
+        _ACTIVE_SCAN_CAPACITY_SOURCE, _ACTIVE_SCAN_LAUNCH, _SCAN_CAPACITY_ATTEMPTED, _ACTIVE_CANDIDATE_SOURCE = previous
+        _ACTIVE_MAPPER_READ_PROFILES_V1, _ACTIVE_MAPPER_READ_SOURCE_V1, _MAPPER_READ_SOURCE_ATTEMPTED = previous_mapper
+        _ACTIVE_MAPPER_OCCURRENCES_V1 = previous_occurrences
+        _SCAN_MAIN_LOCK.release()
 
 
 if __name__ == "__main__":

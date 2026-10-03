@@ -271,8 +271,8 @@ class AgentOrchService:
     """Thin read API over AGENT-ORCH1 generated contract artifacts."""
 
     def __init__(self, artifact_dir: str | Path | None = None, repo_root: str | Path | None = None) -> None:
-        root = Path(repo_root) if repo_root is not None else _repo_root()
-        self.repo_root = root.resolve()
+        root = (Path(repo_root) if repo_root is not None else _repo_root()).resolve()
+        self.repo_root = root
         self.artifact_dir = Path(artifact_dir) if artifact_dir is not None else root / GENERATED_PREFIX
         if not self.artifact_dir.is_absolute():
             self.artifact_dir = root / self.artifact_dir

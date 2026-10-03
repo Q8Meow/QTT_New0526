@@ -9,6 +9,12 @@ from typing import Any
 from . import constants as c
 from .authority import FORBIDDEN_AUTHORITY_FLAGS, ZERO_AUTHORITY_KEYS
 from .io import read_json, records_from_report_payload, resolve_repo_relative
+from src.qtt.stage1_prediction_markets.qku_computation_control_plane.errors import SerializationSafetyError
+from src.qtt.stage1_prediction_markets.qku_computation_control_plane.serialization import _report_manifest_consistency_v1
+from src.qtt.stage1_prediction_markets.qku_computation_control_plane.serialization import _report_directory_entries_v1
+from src.qtt.stage1_prediction_markets.qku_computation_control_plane.serialization import _report_schema_records_v1
+from src.qtt.stage1_prediction_markets.qku_computation_control_plane.serialization import _report_schema_session_v1
+from src.qtt.stage1_prediction_markets.qku_computation_control_plane.context import is_nonnegative_json_integer_v1
 
 
 @dataclass(frozen=True)
@@ -111,8 +117,9 @@ def validate_artifacts(repo_root: Path) -> ValidationResult:
     _validate_required_inputs(repo_root, failures)
     if failures:
         return ValidationResult(False, tuple(failures))
+    schema_check = _report_schema_session_v1(repo_root, c, read_json, profile="Q")
     records = {
-        filename: records_from_report_payload(repo_root, payload)
+        filename: _report_schema_records_v1(repo_root, payload, read_json, schema_check, filename)
         for filename, payload in reports.items()
     }
     _validate_payload_contracts(repo_root, reports, records, failures)
@@ -173,7 +180,7 @@ def _validate_payload_contracts(
         _expect(payload.get("authority_boundary_ref") == c.AUTHORITY_BOUNDARY_REF, failures, f"{filename} authority boundary mismatch")
         _expect(payload.get("validation_status") == c.VALIDATION_STATUS, failures, f"{filename} validation status mismatch")
         _expect(payload.get("schema_ref") == c.REPORT_SCHEMA_REFS[filename], failures, f"{filename} schema ref mismatch")
-        _expect(payload.get("record_count") == len(records[filename]), failures, f"{filename} record_count mismatch")
+        _expect(is_nonnegative_json_integer_v1(payload.get("record_count")) and payload.get("record_count") == len(records[filename]), failures, f"{filename} record_count mismatch")
         path = repo_root / c.GENERATED_DIR / filename
         _expect(path.stat().st_size <= c.ROOT_REPORT_LIMIT_BYTES, failures, f"{filename} root report exceeds size limit")
         if filename in c.ROW_LEVEL_REPORTS:
@@ -196,6 +203,15 @@ def _validate_manifest(
     records: dict[str, list[dict[str, Any]]],
     failures: list[str],
 ) -> None:
+    try:
+        _report_manifest_consistency_v1(
+            reports, records, c.REPORT_FILENAMES,
+            "PR166_Q_ReportManifest.report.json", c.GENERATED_DIR, c.SCHEMA_DIR,
+            style="Q_ROOT_AND_SHARD", schema_refs=c.REPORT_SCHEMA_REFS,
+        )
+    except SerializationSafetyError as exc:
+        failures.append(str(exc))
+        return
     manifest = records["PR166_Q_ReportManifest.report.json"]
     root_rows = [row for row in manifest if row.get("manifest_entry_class") == "ROOT_REPORT"]
     shard_rows = [row for row in manifest if row.get("manifest_entry_class") == "SHARD_REPORT"]
@@ -245,11 +261,11 @@ def _validate_authority(
 ) -> None:
     for filename, payload in reports.items():
         for key in ZERO_AUTHORITY_KEYS:
-            _expect(payload.get(key, 0) == 0, failures, f"{filename} authority count not zero: {key}")
+            _expect((is_nonnegative_json_integer_v1(payload.get(key, 0)) and payload.get(key, 0) == 0), failures, f"{filename} authority count not zero: {key}")
     for filename, rows in records.items():
         for row in rows:
             for key in ZERO_AUTHORITY_KEYS:
-                _expect(row.get(key, 0) == 0, failures, f"{filename} row {row.get('row_id')} authority count not zero: {key}")
+                _expect((is_nonnegative_json_integer_v1(row.get(key, 0)) and row.get(key, 0) == 0), failures, f"{filename} row {row.get('row_id')} authority count not zero: {key}")
             for flag in FORBIDDEN_AUTHORITY_FLAGS:
                 _expect(row.get(flag) is False, failures, f"{filename} row {row.get('row_id')} authority flag not false: {flag}")
 
@@ -323,11 +339,10 @@ def _validate_no_orphans(records: dict[str, list[dict[str, Any]]], failures: lis
 
 
 def _validate_no_forbidden_sidecars(repo_root: Path, failures: list[str]) -> None:
-    forbidden = [
-        *repo_root.glob("docs/master_plan/generated/PR166_Q_*.sha256"),
-        *repo_root.glob("docs/master_plan/generated/PR166_Q_*checksum*.json"),
-        *repo_root.glob("docs/master_plan/generated/PR166_Q_*digest*.json"),
-    ]
+    from fnmatch import fnmatch
+    paths = _report_directory_entries_v1(repo_root / c.GENERATED_DIR)
+    forbidden = [path for pattern in ("PR166_Q_*.sha256", "PR166_Q_*checksum*.json", "PR166_Q_*digest*.json")
+                 for path in paths if fnmatch(path.name, pattern)]
     _expect(not forbidden, failures, f"forbidden PR166-Q hash/checksum/digest sidecars: {forbidden}")
 
 

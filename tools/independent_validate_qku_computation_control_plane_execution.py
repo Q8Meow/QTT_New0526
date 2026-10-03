@@ -1773,13 +1773,14 @@ def _f14_execution_contract_failures_v1(repo_root):
     tree = ast.parse((owner / 'receipts.py').read_text(encoding='utf-8'))
     discriminator = next(n for n in tree.body if isinstance(n, ast.ClassDef) and n.name == 'EconomicRecordTypeV1')
     values = {ast.literal_eval(n.value) for n in discriminator.body if isinstance(n, ast.Assign)}
-    if values != _F14_EXPECTED_DISCRIMINATORS:
-        failures.append('F14 exact 21-discriminator roster changed')
+    if len(_F14_EXPECTED_DISCRIMINATORS) != 21 or values != _F14_EXPECTED_DISCRIMINATORS | {"PROBABILITY_PRODUCER_CONTROL"}:
+        failures.append('original F14 21 plus sole V35 discriminator roster changed')
     for name, cls in (('persistence.py', 'PersistenceAdapterV1'), ('persistence.py', 'InMemoryPersistenceAdapterV1'),
             ('sqlite_reference.py', 'SQLiteReferenceAdapterV1')):
         tree = ast.parse((owner / name).read_text(encoding='utf-8'))
         methods = set(_class_methods(tree, cls))
-        if (cls == 'PersistenceAdapterV1' and methods != _F14_EXPECTED_METHODS) or not _F14_EXPECTED_METHODS <= methods:
+        expected_methods = _F14_EXPECTED_METHODS | {"load_committed_probability_producer_state_v1"}
+        if len(_F14_EXPECTED_METHODS) != 20 or (cls == 'PersistenceAdapterV1' and methods != expected_methods) or not expected_methods <= methods:
             failures.append('F14 committed reader/interface roster changed: ' + cls)
     handoff = ast.parse((repo_root / 'src/qtt/stage1_prediction_markets/private_state_receipts/handoff.py').read_text(encoding='utf-8'))
     function = next(n for n in handoff.body if isinstance(n, ast.FunctionDef) and n.name == 'run_retail_private_observation_once_v1')
@@ -1790,19 +1791,211 @@ def _f14_execution_contract_failures_v1(repo_root):
         'publisher.resolve_committed_private_observation_v1', 'source_registry.fenced'}
     if not required <= calls:
         failures.append('F14 native/grouped consumer composition is incomplete')
-    text = (repo_root / '.github/workflows/qtt_validation.yml').read_text(encoding='utf-8')
-    line = '          ' + _F14_EXPECTED_NATIVE_INSTALL + '\n'
-    if text.count(line) != 1 or 'run: &install_pytest |\n          python -m pip install pytest==9.1.1\n' + line not in text:
-        failures.append('F14 native install is not the single exact line under the inherited anchor')
+    text = (repo_root / '.github/workflows/qtt_validation.yml').read_bytes().decode('utf-8')
+    if not _f14_ci_dependency_contract_v1(text):
+        failures.append('F14 CI dependencies are not the single complete selected stanza')
     return failures
 
 _F14_EXPECTED_DISCRIMINATORS = frozenset(('DURABLE_COMPUTATION_RECEIPT', 'ECONOMIC_EVENT', 'JOURNAL_TRANSACTION', 'JOURNAL_POSTING', 'STATE_TRANSITION', 'IDEMPOTENCY_CLAIM', 'OUTBOX_INTENT', 'REVERSAL', 'RECONCILIATION_BREAK', 'ORDER_INTENT', 'EXECUTION_CUSTODY', 'MODE_SNAPSHOT_CONTROL', 'ST12F_EVIDENCE_CONTROL', 'PIT_COMMIT_INTENT', 'PIT_COMMIT_COMPLETION', 'PIT_AVAILABILITY', 'PIT_CANONICAL_EVENT', 'PIT_CAPTURE_AND_GAP', 'PIT_CHECKPOINT', 'PRIVATE_OBSERVATION_CLOCK', 'PRIVATE_EVIDENCE_WITNESS'))
 _F14_EXPECTED_METHODS = frozenset(('availability', 'begin_transaction', 'insert_receipt_record', 'insert_value_lineage_edge', 'insert_economic_event', 'insert_journal_transaction', 'insert_journal_posting', 'insert_state_transition', 'acquire_idempotency_claim', 'bind_idempotency_result', 'insert_outbox_intent', 'insert_reversal_link', 'load_committed_reversal_history', 'insert_reconciliation_break', 'get_record', 'load_committed_private_clock_receipt_v1', 'get_idempotency_result', 'reconstruct_as_of', 'load_committed_private_evidence_witness_v1', 'load_committed_private_evidence_snapshot_v1'))
-_F14_EXPECTED_NATIVE_INSTALL = 'python -m pip install --only-binary=:all: --no-deps --index-url https://pypi.org/simple websockets==17.0.1 cryptography==50.0.1 cffi==2.1.1 pycparser==3.0'
+_F14_EXPECTED_CI_SCRIPT = r"""python -m pip install --only-binary=:all: --no-deps --index-url https://pypi.org/simple \
+  pytest==9.1.1 \
+  iniconfig==2.3.0 \
+  packaging==26.0 \
+  pluggy==1.6.0 \
+  pygments==2.21.0 \
+  websockets==17.0.1 \
+  cryptography==50.0.1 \
+  cffi==2.1.1 \
+  pycparser==3.0 \
+  jsonschema==4.26.0 \
+  jsonschema-specifications==2025.9.1 \
+  referencing==0.37.0 \
+  rpds-py==2026.5.1 \
+  attrs==26.1.0
+python -m pip check
+python - <<'PY'
+from importlib.metadata import PackageNotFoundError, version
+
+expected = (
+    ('pytest', '9.1.1'),
+    ('iniconfig', '2.3.0'),
+    ('packaging', '26.0'),
+    ('pluggy', '1.6.0'),
+    ('pygments', '2.21.0'),
+    ('websockets', '17.0.1'),
+    ('cryptography', '50.0.1'),
+    ('cffi', '2.1.1'),
+    ('pycparser', '3.0'),
+    ('jsonschema', '4.26.0'),
+    ('jsonschema-specifications', '2025.9.1'),
+    ('referencing', '0.37.0'),
+    ('rpds-py', '2026.5.1'),
+    ('attrs', '26.1.0'),
+)
+failures = []
+for name, wanted in expected:
+    try:
+        actual = version(name)
+    except PackageNotFoundError:
+        failures.append(f"{name}: missing; required {wanted}")
+    else:
+        if actual != wanted:
+            failures.append(f"{name}: {actual}; required {wanted}")
+if failures:
+    raise SystemExit("CI dependency profile mismatch: " + "; ".join(failures))
+print("Selected CI dependency versions verified.")
+PY"""
+
+
+def _f14_ci_dependency_contract_v1(text):
+    """Independent literal/placement comparison; no production contract verdict."""
+    import re
+
+    if len(text.encode('utf-8')) > 256 * 1024:
+        return False
+    text = text.replace('\r\n', '\n')
+    if '\r' in text or re.search(r'^[ \t]*\t', text, re.MULTILINE):
+        return False
+    expected_step = ('      - name: Install test dependency\n'
+                     '        run: &install_pytest |\n' + '\n'.join(
+                         '          ' + line if line else ''
+                         for line in _F14_EXPECTED_CI_SCRIPT.split('\n')))
+    if (text.count(expected_step + '\n') != 1
+            or len(re.findall(r'&install_pytest\b', text)) != 1
+            or re.search(r'\*install_pytest\b', text)
+            or len(re.findall(r'\bpip3?\s+install\b', text, re.IGNORECASE)) != 1):
+        return False
+    # Build an outline without interpreting any scalar content as a mapping.
+    outline = []
+    scalar_depth = -1
+    for index, raw in enumerate(text.split('\n')):
+        value = raw.lstrip(' ')
+        if not value or value.startswith('#'):
+            continue
+        depth = len(raw) - len(value)
+        if scalar_depth >= 0 and depth > scalar_depth:
+            continue
+        scalar_depth = -1
+        field = re.fullmatch(r'(?:- )?([A-Za-z_][\w-]*):(?: +(.*))?', value)
+        if not field:
+            if re.fullmatch(r'- [A-Za-z_][\w-]*', value):
+                outline.append((index, depth, value))
+                continue
+            return False
+        operand = field.group(2) or ''
+        if operand.startswith(("'", '"')) and not (
+                re.fullmatch(r"'(?:[^']|'')*'", operand)
+                or re.fullmatch(r'"(?:[^"\\]|\\.)*"', operand)):
+            return False
+        if re.fullmatch(r'(?:&[A-Za-z_][\w-]* )?[|>]', operand):
+            scalar_depth = depth
+        elif operand.startswith(('|', '>')):
+            return False
+        outline.append((index, depth, value))
+    # Four actual ancestor declarations, with unique direct controlling keys.
+    lower, upper = -1, len(text.split('\n'))
+    step_outline = ()
+    for depth, declaration, key in (
+            (0, 'jobs:', 'jobs:'), (2, 'validation_shards:', 'validation_shards:'),
+            (4, 'steps:', 'steps:'),
+            (6, '- name: Install test dependency', '- name: Install test dependency')):
+        candidates = [row for row in outline if lower < row[0] < upper
+                      and row[1] == depth and row[2].startswith(key)]
+        if len(candidates) != 1 or candidates[0][2] != declaration:
+            return False
+        lower = candidates[0][0]
+        upper = next((row[0] for row in outline if row[0] > lower and row[1] <= depth), upper)
+        direct = [row[2] for row in outline if lower < row[0] < upper and row[1] == depth + 2]
+        if depth == 0 and any(not re.fullmatch(r'[A-Za-z_][\w-]*:', item) for item in direct):
+            return False
+        if depth == 2 and any(item.startswith(('if:', 'continue-on-error:', 'uses:')) for item in direct):
+            return False
+        if depth == 4 and any(not item.startswith('- name: ') for item in direct):
+            return False
+        if depth == 4:
+            step_outline = tuple(row for row in outline if lower < row[0] < upper)
+        if depth == 6 and direct != ['run: &install_pytest |']:
+            return False
+    if sum(row[2] == '- name: Install test dependency' for row in outline) != 1:
+        return False
+    preceding = [row for row in step_outline if row[0] < lower]
+    if (sum(row[1:] == (6, '- name: Set up Python') for row in preceding) != 1
+            or any(row[1] == 8 and row[2].startswith('run:') for row in preceding)):
+        return False
+    # The entire selected step, including the scalar terminator, is exact.
+    actual_lines = text.split('\n')[lower:upper]
+    while actual_lines and not actual_lines[-1].strip():
+        actual_lines.pop()
+    actual = '\n'.join(actual_lines)
+    return actual == expected_step
+
+
+def _v35_execution_surface_failures():
+    failures = []
+    receipt_tree, persistence_tree = _tree("receipts.py"), _tree("persistence.py")
+    def fields(tree, name):
+        cls = next(node for node in tree.body if isinstance(node, ast.ClassDef) and node.name == name)
+        return tuple(node.target.id for node in cls.body if isinstance(node, ast.AnnAssign) and isinstance(node.target, ast.Name))
+    if fields(receipt_tree, "ProbabilityProducerControlReceiptV1") != (
+            "schema_version", "control_kind", "scope", "effective_ns", "recorded_ns", "available_ns",
+            "dependency_refs", "valid_until_ns", "body"):
+        failures.append("V35 nine-field control payload changed")
+    if len(fields(receipt_tree, "EconomicReceiptEventSpineV1")) != 18:
+        failures.append("original 18-field economic spine changed")
+    new_method = _class_method_node(persistence_tree, "PersistenceAdapterV1", "load_committed_probability_producer_state_v1")
+    if any(ast.unparse(item).endswith("abstractmethod") for item in new_method.decorator_list):
+        failures.append("V35 base reader must be concrete default-deny")
+    if not any(isinstance(node, ast.Raise) for node in ast.walk(new_method)):
+        failures.append("V35 base reader default denial missing")
+    producer_tree = _tree("input_resolver.py")
+    producer = next(node for node in producer_tree.body if isinstance(node, ast.FunctionDef)
+                    and node.name == "_construct_probability_prediction_result_v1")
+    calls = [(node.lineno, ast.unparse(node.func)) for node in ast.walk(producer) if isinstance(node, ast.Call)]
+    stages = ("_probability_construct_prediction_bank_v1", "_finalize_prediction_artifact_v1",
+              "_probability_control_record_v1", "_commit_probability_issued_record_v1")
+    positions = [tuple(line for line, name in calls if name == stage) for stage in stages]
+    if any(len(position) != 1 for position in positions) or [p[0] for p in positions] != sorted(p[0] for p in positions):
+        failures.append("V35 one-attempt artifact-before-receipt order changed")
+    for filename, classname in (("persistence.py", "InMemoryPersistenceAdapterV1"), ("sqlite_reference.py", "SQLiteReferenceAdapterV1")):
+        body = _class_method_node(_tree(filename), classname, "load_committed_probability_producer_state_v1")
+        attributes = _attributes(body)
+        if not {"_active_transaction", "_probability_read_active_v1"} <= attributes:
+            failures.append("V35 committed-only read ownership missing: " + classname)
+        if any(isinstance(n, ast.Call) and ast.unparse(n.func).endswith(".fit") for n in ast.walk(body)):
+            failures.append("V35 committed reader contains numerical work")
+    return failures
+
+
+def _sqlite_artifact_ownership_failures_v1(tree, filename):
+    """Independent lexical boundary for the explicit artifact-only selection."""
+    if filename == "sqlite_reference.py":
+        return []
+    selected = {
+        "_probability_artifact_schema_statements_v1",
+        "_probability_artifact_sqlite_options_v1",
+        "SQLiteProbabilityArtifactStoreV1",
+    }
+    failures = []
+    for owner in tree.body:
+        for node in ast.walk(owner):
+            imported = (isinstance(node, ast.Import) and any(a.name.split(".", 1)[0] == "sqlite3" for a in node.names)
+                or isinstance(node, ast.ImportFrom) and node.module and node.module.split(".", 1)[0] == "sqlite3")
+            if imported and not (filename == "persistence.py" and isinstance(owner, (ast.ClassDef, ast.FunctionDef))
+                                and owner.name in selected):
+                failures.append(f"SQLite ownership leaked into {filename}:{getattr(owner, 'name', '<module>')}")
+    stores = [n for n in tree.body if isinstance(n, ast.ClassDef) and n.name == "SQLiteProbabilityArtifactStoreV1"]
+    if stores and (filename != "persistence.py" or len(stores) != 1 or stores[0].bases):
+        failures.append("artifact store must not replace/inherit the receipt ledger")
+    return failures
 
 
 def main() -> int:
     failures: list[str] = []
+    try:
+        failures.extend(_v35_execution_surface_failures())
+    except (OSError, SyntaxError, ValueError, KeyError, TypeError, StopIteration) as exc:
+        failures.append(f"V35 independent execution surface failed: {exc}")
     receipt_rows: tuple[IndependentMathRowEvidenceV1, ...] = ()
     try:
         trees = {name: _tree(name) for name in NEW_MODULES}
@@ -1867,8 +2060,7 @@ def main() -> int:
         }
         if roots & forbidden_imports:
             failures.append(f"forbidden operational import in {name}: {sorted(roots & forbidden_imports)}")
-        if "sqlite3" in roots and name != "sqlite_reference.py":
-            failures.append(f"SQLite ownership leaked into {name}")
+        failures.extend(_sqlite_artifact_ownership_failures_v1(tree, name))
     lifecycle_text = (PACKAGE / "lifecycle.py").read_text(encoding="utf-8")
     outbox_text = (PACKAGE / "outbox.py").read_text(encoding="utf-8")
     persistence_text = (PACKAGE / "persistence.py").read_text(encoding="utf-8")
@@ -1892,6 +2084,7 @@ def main() -> int:
         "load_committed_private_evidence_witness_v1",
         "load_committed_private_evidence_snapshot_v1",
         "reconstruct_as_of",
+        "load_committed_probability_producer_state_v1",
     }
     if persistence_methods != expected_methods:
         failures.append(f"typed persistence interface mismatch: {sorted(persistence_methods ^ expected_methods)}")

@@ -14,6 +14,11 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
+from tools.validation_reliability import (
+    _preflight_active_v1, _preflight_kind_v1, _preflight_read_bytes_v1,
+    _preflight_read_text_v1, _preflight_directory_v1, _preflight_files_v1,
+)
+
 from tools.repo_path_refs import normalize_repo_ref
 from tools.validation_scope_registry import (
     S1_LAUNCH_GRAPH_ALLOWED_EXACT_PATHS,
@@ -140,13 +145,8 @@ class RouterResult:
 
 
 def _git_stdout(repo_root: Path, args: Sequence[str]) -> tuple[int, str, str]:
-    completed = subprocess.run(
-        ["git", *args],
-        cwd=repo_root,
-        capture_output=True,
-        text=True,
-    )
-    return completed.returncode, completed.stdout, completed.stderr
+    from tools.validation_reliability import _scope_git_text
+    return _scope_git_text(repo_root, args)
 
 
 def _matches_any(path: str, globs: Sequence[str]) -> bool:
@@ -167,64 +167,32 @@ def _normalize_changed_files(paths: Sequence[str]) -> tuple[str, ...]:
 
 
 def _current_branch(repo_root: Path) -> str:
-    rc, stdout, _stderr = _git_stdout(repo_root, ["branch", "--show-current"])
-    if rc == 0 and stdout.strip():
-        return stdout.strip()
-    rc, stdout, _stderr = _git_stdout(repo_root, ["rev-parse", "--abbrev-ref", "HEAD"])
-    if rc == 0:
-        return stdout.strip()
-    return ""
+    from tools.ci_branch_context import current_branch_context
+    from tools.validation_reliability import ValidationReliabilityError
+    value = current_branch_context(repo_root, git_stdout=_git_stdout)
+    if value.git_error or not value.branch:
+        raise ValidationReliabilityError("ENGVR_REMOTE_STATE_DRIFT", "routing branch context unavailable")
+    return value.branch
 
 
-def _diff_name_only(
-    repo_root: Path,
-    base_ref: str,
-    head_ref: str,
-) -> tuple[str, ...]:
-    rc, stdout, _stderr = _git_stdout(
-        repo_root,
-        ["diff", "--name-only", "--diff-filter=ACMRTUXB", f"{base_ref}...{head_ref}"],
-    )
-    if rc == 0:
-        return _normalize_changed_files(stdout.splitlines())
-    return ()
+def _diff_name_only(repo_root: Path, base_ref: str, head_ref: str) -> tuple[str, ...]:
+    from tools.validation_reliability import _scope_git_committed_paths
+    return tuple(sorted(_scope_git_committed_paths(
+        repo_root, base_ref=base_ref, head_ref=head_ref, git_stdout=_git_stdout)))
 
 
 def changed_files_from_git(
-    repo_root: str | Path,
-    *,
-    base_ref: str | None = None,
-    head_ref: str | None = None,
+    repo_root: str | Path, *, base_ref: str | None = None, head_ref: str | None = None,
 ) -> tuple[str, ...]:
-    root = Path(repo_root)
-    head = head_ref or "HEAD"
-    bases: list[str] = []
-    if base_ref:
-        bases.extend([base_ref, f"origin/{base_ref}", f"refs/remotes/origin/{base_ref}"])
-    bases.extend(["origin/main", "main"])
-    cumulative: list[str] = []
-    for base in dict.fromkeys(bases):
-        rc, stdout, _stderr = _git_stdout(
-            root,
-            [
-                "diff",
-                "--name-only",
-                "--diff-filter=ACMRTUXB",
-                f"{base}...{head}",
-            ],
-        )
-        if rc == 0:
-            cumulative.extend(stdout.splitlines())
-            break
-    for args in (
-        ["diff", "--name-only", "--diff-filter=ACMRTUXB", "HEAD"],
-        ["diff", "--cached", "--name-only", "--diff-filter=ACMRTUXB"],
-        ["ls-files", "--others", "--exclude-standard"],
-    ):
-        rc, stdout, _stderr = _git_stdout(root, args)
-        if rc == 0:
-            cumulative.extend(stdout.splitlines())
-    return _normalize_changed_files(cumulative)
+    from tools.validation_reliability import _scope_git_change_snapshot
+    committed, status = _scope_git_change_snapshot(
+        Path(repo_root), base_ref=base_ref, head_ref=head_ref, git_stdout=_git_stdout)
+    paths = set(committed)
+    for _code, destination, original in status:
+        paths.add(destination)
+        if original is not None:
+            paths.add(original)
+    return tuple(sorted(paths))
 
 
 def router_input_from_environment(
@@ -295,25 +263,13 @@ def _is_qku_control_plane_path(path: str) -> bool:
 
 
 def _current_pr152_inventory_counts(repo_root: Path) -> dict[str, int]:
-    generated_root = repo_root / "docs/master_plan/generated"
-    tests_root = repo_root / "tests"
-    tools_root = repo_root / "tools"
-
-    return {
-        "generated_report_count": sum(1 for path in generated_root.rglob("*") if path.is_file())
-        if generated_root.exists()
-        else 0,
-        "test_file_count": sum(
-            1 for path in tests_root.rglob("*.py") if path.is_file()
-        )
-        if tests_root.exists()
-        else 0,
-        "validator_tool_count": sum(
-            1 for path in tools_root.glob("validate_*.py") if path.is_file()
-        )
-        if tools_root.exists()
-        else 0,
-    }
+    _preflight_active_v1(repo_root)
+    return {name: len(_preflight_files_v1(repo_root / relative, pattern, recursive=recursive))
+            if _preflight_kind_v1(repo_root / relative, optional=True) is not None else 0
+            for name, relative, pattern, recursive in (
+                ("generated_report_count", "docs/master_plan/generated", "*", True),
+                ("test_file_count", "tests", "*.py", True),
+                ("validator_tool_count", "tools", "validate_*.py", False))}
 
 
 def _pr152_currentization_report_matches_filesystem(repo_root: Path) -> bool:
@@ -321,10 +277,10 @@ def _pr152_currentization_report_matches_filesystem(repo_root: Path) -> bool:
         repo_root
         / "docs/master_plan/generated/PR152_GrandGlobalDebugLogicalConsistencyAuditEntireQTTRepo.report.json"
     )
-    if not report_path.exists():
+    if not (_preflight_kind_v1(report_path, optional=True) is not None):
         return False
     try:
-        report = json.loads(report_path.read_text(encoding="utf-8"))
+        report = json.loads(_preflight_read_text_v1(report_path))
     except (OSError, json.JSONDecodeError):
         return False
     current = _current_pr152_inventory_counts(repo_root)
@@ -639,4 +595,5 @@ def main(argv: Sequence[str] | None = None) -> int:
 
 
 if __name__ == "__main__":
-    raise SystemExit(main())
+    from tools.validation_reliability import _preflight_cli_v1
+    raise SystemExit(_preflight_cli_v1(main, __file__))

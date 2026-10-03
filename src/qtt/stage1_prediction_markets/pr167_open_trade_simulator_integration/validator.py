@@ -11,6 +11,14 @@ from . import constants as c
 from .authority import FORBIDDEN_AUTHORITY_FLAGS, ZERO_AUTHORITY_KEYS
 from .io import read_json, records_from_report_payload
 from .report_writer import schema_filenames
+from src.qtt.stage1_prediction_markets.qku_computation_control_plane.errors import SerializationSafetyError
+from src.qtt.stage1_prediction_markets.qku_computation_control_plane.serialization import _report_companion_alignment_v1
+from src.qtt.stage1_prediction_markets.qku_computation_control_plane.serialization import _report_manifest_consistency_v1
+from src.qtt.stage1_prediction_markets.qku_computation_control_plane.serialization import _report_directory_entries_v1
+from src.qtt.stage1_prediction_markets.qku_computation_control_plane.serialization import _report_schema_records_v1
+from src.qtt.stage1_prediction_markets.qku_computation_control_plane.serialization import _report_schema_session_v1
+from src.qtt.stage1_prediction_markets.qku_computation_control_plane.context import is_nonnegative_json_integer_v1
+from .report_writer import schema_filename
 
 
 @dataclass(frozen=True)
@@ -23,6 +31,7 @@ def validate_artifacts(repo_root: Path) -> ValidationResult:
     failures: list[str] = []
     payloads: dict[str, dict[str, Any]] = {}
     records: dict[str, list[dict[str, Any]]] = {}
+    schema_check = _report_schema_session_v1(repo_root, c, read_json, profile="SIM", schema_name=schema_filename)
     for filename in c.REPORT_FILENAMES:
         path = repo_root / c.GENERATED_DIR / filename
         if not path.exists():
@@ -30,11 +39,19 @@ def validate_artifacts(repo_root: Path) -> ValidationResult:
             continue
         payload = read_json(path)
         payloads[filename] = payload
-        records[filename] = records_from_report_payload(repo_root, payload)
+        records[filename] = _report_schema_records_v1(repo_root, payload, read_json, schema_check, filename)
     if failures:
         return ValidationResult(ok=False, failures=tuple(failures))
     _validate_schemas(repo_root, payloads, failures)
     _validate_payload_contracts(payloads, records, failures)
+    try:
+        _report_manifest_consistency_v1(
+            payloads, records, c.REPORT_FILENAMES,
+            "PR167_ReportManifest.report.json", c.GENERATED_DIR, c.SCHEMA_DIR,
+            style="ROOT_REFERENCE", schema_refs=None,
+        )
+    except SerializationSafetyError as exc:
+        failures.append(str(exc))
     _validate_inputs(repo_root, records, failures)
     _validate_sources(records, failures)
     _validate_simulator_rows(records, failures)
@@ -73,22 +90,25 @@ def _validate_payload_contracts(
             failures.append(f"BAD_ROADMAP_PR::{filename}")
         if payload.get("created_by_pr") != c.PR_ID:
             failures.append(f"BAD_CREATED_BY_PR::{filename}")
-        if payload.get("record_count") != len(records[filename]):
+        if not is_nonnegative_json_integer_v1(payload.get("record_count")) or payload.get("record_count") != len(records[filename]):
             failures.append(f"BAD_RECORD_COUNT::{filename}")
         for key in ZERO_AUTHORITY_KEYS:
-            if payload.get(key, 0) != 0:
+            if (not is_nonnegative_json_integer_v1(payload.get(key, 0)) or payload.get(key, 0) != 0):
                 failures.append(f"PAYLOAD_FORBIDDEN_AUTHORITY_COUNT::{filename}::{key}")
         if filename in c.ROW_REPORTS and not payload.get("sharded_flag"):
             failures.append(f"ROW_REPORT_NOT_SHARDED::{filename}")
 
 
 def _validate_inputs(repo_root: Path, records: dict[str, list[dict[str, Any]]], failures: list[str]) -> None:
+    lineage_primary = None
     for filename in c.STRICT_INPUT_REPORTS:
         path = repo_root / c.GENERATED_DIR / filename
         if not path.exists():
             failures.append(f"MISSING_INPUT_REPORT::{filename}")
             continue
         expanded = records_from_report_payload(repo_root, read_json(path))
+        if filename == 'PR162E_Q_To_PR167.report.json':
+            lineage_primary = expanded
         if filename in c.EXPECTED_559_INPUTS and len(expanded) != 559:
             failures.append(f"INPUT_COUNT_DRIFT::{filename}::{len(expanded)}")
     input_rows = records["PR167_InputConsumption.report.json"]
@@ -114,6 +134,13 @@ def _validate_inputs(repo_root: Path, records: dict[str, list[dict[str, Any]]], 
             failures.append(f"UPSTREAM_NOT_CONSUMED_OR_TERMINAL::{row.get('row_id')}")
         if not row.get("fields_used"):
             failures.append(f"UPSTREAM_FIELDS_USED_MISSING::{row.get('row_id')}")
+
+    try:
+        _report_companion_alignment_v1(
+            lineage_primary, {name: records[name] for name in c.ROW_REPORTS}
+        )
+    except SerializationSafetyError:
+        failures.append("INPUT_CANDIDATE_LINEAGE_MISMATCH")
 
 
 def _validate_sources(records: dict[str, list[dict[str, Any]]], failures: list[str]) -> None:
@@ -193,7 +220,7 @@ def _validate_simulator_rows(records: dict[str, list[dict[str, Any]]], failures:
 
 def _validate_authority(row: dict[str, Any], failures: list[str], filename: str, row_id: str) -> None:
     for key in ZERO_AUTHORITY_KEYS:
-        if row.get(key, 0) != 0:
+        if (not is_nonnegative_json_integer_v1(row.get(key, 0)) or row.get(key, 0) != 0):
             failures.append(f"ROW_FORBIDDEN_AUTHORITY_COUNT::{filename}::{row_id}::{key}")
     for flag in FORBIDDEN_AUTHORITY_FLAGS:
         if row.get(flag) is not False:
@@ -413,7 +440,7 @@ def _validate_agents_and_no_orphans(records: dict[str, list[dict[str, Any]]], fa
         if row.get("governance_visibility_flag") is not True or row.get("commander_visibility_flag") is not True:
             failures.append(f"AGENT_DAG_VISIBILITY_BAD::{row.get('row_id')}")
     for row in records["PR167_NoOrphanProof.report.json"]:
-        if row.get("no_orphan_status") != "NO_ORPHAN" or row.get("orphan_count") != 0:
+        if row.get("no_orphan_status") != "NO_ORPHAN" or (not is_nonnegative_json_integer_v1(row.get("orphan_count")) or row.get("orphan_count") != 0):
             failures.append(f"NO_ORPHAN_FAIL::{row.get('row_id')}")
 
 
@@ -431,12 +458,15 @@ def _validate_summary(records: dict[str, list[dict[str, Any]]], failures: list[s
     if summary.get("forbidden_authority_counts_all_zero_flag") is not True:
         failures.append("SUMMARY_FORBIDDEN_AUTHORITY_NOT_ZERO")
     for key in ZERO_AUTHORITY_KEYS:
-        if summary.get(key, 0) != 0:
+        if (not is_nonnegative_json_integer_v1(summary.get(key, 0)) or summary.get(key, 0) != 0):
             failures.append(f"SUMMARY_FORBIDDEN_AUTHORITY_COUNT::{key}")
 
 
 def _validate_no_forbidden_sidecars(repo_root: Path, failures: list[str]) -> None:
-    for path in (repo_root / c.GENERATED_DIR).glob("PR167_*"):
+    from fnmatch import fnmatch
+    for path in _report_directory_entries_v1(repo_root / c.GENERATED_DIR):
+        if not fnmatch(path.name, "PR167_*"):
+            continue
         name = path.name.lower()
         if any(token in name for token in ("sha256", "checksum", "freeze", "digest")):
             failures.append(f"FORBIDDEN_HASH_AUTHORITY_ARTIFACT::{path.relative_to(repo_root).as_posix()}")

@@ -278,7 +278,7 @@ def _validate_currentness(repo_root: Path, failures: list[str]) -> None:
     }
     for path, payload in expected_payloads.items():
         full_path = repo_root / path
-        if full_path.exists() and full_path.read_text(encoding="utf-8") != json_dump(payload):
+        if full_path.exists() and full_path.read_bytes().decode("utf-8") != json_dump(payload):
             failures.append(f"PR157_GENERATED_ARTIFACT_NOT_DETERMINISTIC_CURRENT:{path.as_posix()}")
     for shard in expected.atomicrows_shards:
         shard_path = Path(str(shard["shard_path"]))
@@ -295,7 +295,7 @@ def _validate_currentness(repo_root: Path, failures: list[str]) -> None:
             "no_authority_confirmation": dict(c.NO_AUTHORITY_CONFIRMATION),
         }
         full_path = repo_root / shard_path
-        if full_path.exists() and full_path.read_text(encoding="utf-8") != json_dump(payload):
+        if full_path.exists() and full_path.read_bytes().decode("utf-8") != json_dump(payload):
             failures.append(
                 "PR157_GENERATED_ARTIFACT_NOT_DETERMINISTIC_CURRENT:"
                 f"{shard_path.as_posix()}"

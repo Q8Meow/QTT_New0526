@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from collections import Counter
+from contextlib import contextmanager
 from dataclasses import dataclass, replace
 from datetime import datetime, timezone
 from enum import StrEnum
@@ -10,6 +11,9 @@ import json
 import math
 from pathlib import Path
 import re
+import os
+import threading
+import time
 from types import MappingProxyType
 from typing import Any, Iterable, Mapping
 
@@ -20,7 +24,13 @@ from src.qtt.agents.pr169_agent_orch1_resolvers import (
 from src.qtt.dashboard.owner_action_registry import OwnerActionRegistry
 
 from .authority import TRANCHE_A_AUTHORITY
-from .errors import AuthorityDeniedError, ReasonCode
+from .errors import AuthorityDeniedError, OwnerAdapterError, ReasonCode
+from .models import NO_EFFECTS_V1, _probability_ns_v1
+from .protocols import (
+    ProbabilityIssuerContextResolverProtocolV1, ProbabilityIssuerReadRequestV1,
+    ProbabilityIssuerSnapshotV1, ProbabilityIssuerAdmissionV1,
+)
+from .serialization import _native_strict_json, _bounded_probability_json_v1
 from .parameter_policy import (
     ST12E_PARAMETER_CAPABILITY_BINDINGS,
     ST12E_PARAMETER_POLICY_SPECS,
@@ -2035,6 +2045,28 @@ class AgentCapabilityPolicyStoreV1:
         return cls(snapshot)
 
 
+def _probability_issuer_pin_v1(requests, snapshot):
+    """Retain original objects and primitive values, including nested grant scopes."""
+    from .models import ProbabilityProducerScopeV1
+    from .protocols import ProbabilityIssuerContextV1, ProbabilityIssuerGrantV1
+    schemas = (ProbabilityProducerScopeV1, ProbabilityIssuerReadRequestV1,
+               ProbabilityIssuerContextV1, ProbabilityIssuerGrantV1, ProbabilityIssuerSnapshotV1)
+    def pin(value, depth=0):
+        if depth > 8:
+            raise OwnerAdapterError(ReasonCode.OWNER_DATA_MALFORMED, "V35 issuer pin depth")
+        if type(value) in (str, int, bool, type(None)):
+            return (type(value), value)
+        if type(value) is tuple:
+            if len(value) > 4096:
+                raise OwnerAdapterError(ReasonCode.OWNER_DATA_MALFORMED, "V35 issuer pin count")
+            return (id(value), tuple(pin(item, depth + 1) for item in value))
+        if type(value) in schemas:
+            return (type(value), id(value), tuple((name, pin(getattr(value, name), depth + 1))
+                for name in value.__dataclass_fields__))
+        raise OwnerAdapterError(ReasonCode.OWNER_DATA_MALFORMED, "V35 issuer pin type")
+    return pin(requests), pin(snapshot)
+
+
 class AgentCapabilityResolverV1:
     """Default-deny E admission; eligibility never creates authority."""
 
@@ -2042,6 +2074,7 @@ class AgentCapabilityResolverV1:
         self,
         policy_store: AgentCapabilityPolicyStoreV1,
         capability_bundles: Mapping[str, AgentCapabilityBundleV1],
+        *, probability_issuer_reader: ProbabilityIssuerContextResolverProtocolV1 | None = None,
     ) -> None:
         if not isinstance(policy_store, AgentCapabilityPolicyStoreV1):
             raise AuthorityDeniedError(
@@ -2068,6 +2101,257 @@ class AgentCapabilityResolverV1:
             tuple[str, str], tuple[str, str]
         ] = {}
         self.last_decision: AgentCapabilityDecisionV1 | None = None
+        if probability_issuer_reader is not None and not callable(getattr(probability_issuer_reader, "read_probability_issuers", None)):
+            raise OwnerAdapterError(ReasonCode.OWNER_DATA_MALFORMED, "V35 issuer reader has no closed read port")
+        self._probability_issuer_reader = probability_issuer_reader
+        self._probability_issuer_active_v1 = None
+        self._probability_last_issuer_view_v1 = None
+        self._probability_source_fence_v1 = None
+        self._probability_native_use_active_v1 = None
+
+    @property
+    def probability_issuer_reader(self):
+        return self._probability_issuer_reader
+
+    def _probability_issuer_view_current_v1(self, view) -> int:
+        if (self._probability_issuer_active_v1 is not view or view["reader"] is not self.probability_issuer_reader or
+                view["policy"] is not self.policy_store.snapshot or view["process_id"] != os.getpid() or
+                view["thread_id"] != threading.get_ident()):
+            raise OwnerAdapterError(ReasonCode.OWNER_DATA_CONTRADICTORY, "V35 issuer context identity changed")
+        snapshot = view["snapshot"]
+        if _probability_issuer_pin_v1(view["requests"], snapshot) != view["pin"]:
+            raise OwnerAdapterError(ReasonCode.OWNER_DATA_CONTRADICTORY, "V35 issuer original fields changed")
+        if snapshot.entries is not view["entries"] or (snapshot.policy_ref, snapshot.registry_version) != (
+                self.policy_store.snapshot.policy_version, self.policy_store.snapshot.registry_version):
+            raise OwnerAdapterError(ReasonCode.OWNER_DATA_CONTRADICTORY, "V35 issuer policy or entries changed")
+        now = time.time_ns()
+        _probability_ns_v1(now)
+        if now < view["last_ns"] or not snapshot.read_ns <= now < snapshot.valid_until_ns:
+            raise OwnerAdapterError(ReasonCode.OWNER_DATA_STALE, "V35 issuer context expired or clock regressed")
+        view["last_ns"] = now
+        return now
+
+    @contextmanager
+    def _resolve_probability_issuer_context_v1(self, requests, *, evaluated_ns: int):
+        reader = self.probability_issuer_reader
+        if reader is None:
+            raise OwnerAdapterError(ReasonCode.OWNER_DATA_MISSING, "V35_ISSUER_BOUNDARY_UNAVAILABLE")
+        if self._probability_issuer_active_v1 is not None:
+            raise OwnerAdapterError(ReasonCode.OWNER_DATA_CONTRADICTORY, "V35 issuer context is already owned")
+        _probability_ns_v1(evaluated_ns)
+        if (type(requests) is not tuple or not requests or
+                any(type(request) is not ProbabilityIssuerReadRequestV1 for request in requests) or
+                len(set(requests)) != len(requests)):
+            raise OwnerAdapterError(ReasonCode.OWNER_DATA_MALFORMED, "V35 issuer requests must retain unique complete identities")
+        for request in requests:
+            request.__post_init__()
+            request.scope.__post_init__()
+        if any(request.scope != requests[0].scope for request in requests):
+            raise OwnerAdapterError(ReasonCode.OWNER_DATA_CONTRADICTORY, "V35 issuer request scopes disagree")
+        policy = self.policy_store.snapshot
+        body_ok = False
+        body_error = exit_error = None
+        view = None
+        # Claim before calling the provider; reentrant acquisition is denied.
+        pending = object()
+        self._probability_issuer_active_v1 = pending
+        self._probability_last_issuer_view_v1 = None
+        try:
+            with reader.read_probability_issuers(requests, evaluated_ns=evaluated_ns) as snapshot:
+                try:
+                    if type(snapshot) is not ProbabilityIssuerSnapshotV1:
+                        raise OwnerAdapterError(ReasonCode.OWNER_DATA_MALFORMED, "V35 issuer snapshot type")
+                    snapshot.__post_init__()
+                    if (snapshot.read_ns != evaluated_ns or len(snapshot.entries) != len(requests) or
+                            (snapshot.policy_ref, snapshot.registry_version) != (policy.policy_version, policy.registry_version)):
+                        raise OwnerAdapterError(ReasonCode.OWNER_DATA_CONTRADICTORY, "V35 issuer snapshot binding")
+                    view = {"reader": reader, "policy": policy, "snapshot": snapshot, "entries": snapshot.entries,
+                            "requests": requests, "process_id": os.getpid(), "thread_id": threading.get_ident(),
+                            "last_ns": evaluated_ns, "admissions": {},
+                            "pin": _probability_issuer_pin_v1(requests, snapshot)}
+                    self._probability_issuer_active_v1 = view
+                    self._probability_issuer_view_current_v1(view)
+                    yield snapshot
+                    self._probability_issuer_view_current_v1(view)
+                    body_ok = True
+                except BaseException as error:
+                    body_error = error
+                    raise
+        except BaseException as error:
+            exit_error = error
+        failures = []
+        for error in (body_error, exit_error):
+            if error is not None and not any(error is existing for existing in failures):
+                failures.append(error)
+        try:
+            if not failures:
+                if not body_ok or view is None:
+                    raise OwnerAdapterError(ReasonCode.OWNER_DATA_MISSING, "V35 issuer body did not complete")
+                self._probability_issuer_view_current_v1(view)
+                self._probability_last_issuer_view_v1 = view
+        finally:
+            self._probability_issuer_active_v1 = None
+        if len(failures) == 1:
+            raise failures[0]
+        if failures:
+            raise BaseExceptionGroup("V35 issuer body and context-exit failures", failures)
+
+    def _admit_probability_issuer_v1(self, request, *, trusted_snapshot):
+        view = self._probability_issuer_active_v1
+        if type(view) is not dict or trusted_snapshot is not view["snapshot"]:
+            raise OwnerAdapterError(ReasonCode.OWNER_DATA_MISSING, "V35 issuer view was not issued to this read")
+        now = self._probability_issuer_view_current_v1(view)
+        indices = [index for index, original in enumerate(view["requests"]) if original is request]
+        if len(indices) != 1:
+            raise OwnerAdapterError(ReasonCode.OWNER_DATA_CONTRADICTORY, "V35 issuer request is not the original object")
+        index = indices[0]
+        context, grant, decision_text = trusted_snapshot.entries[index]
+        context.__post_init__(); grant.__post_init__()
+        if (grant.role, grant.scope, grant.subject_refs, context.principal_ref) != (
+                request.role, request.scope, request.subject_refs, request.issuer_ref):
+            raise AuthorityDeniedError(ReasonCode.SEGREGATION_OF_DUTIES_VIOLATION, "V35 issuer role, scope or subjects differ")
+        if any(getattr(grant, name) != getattr(context, name) for name in
+               ("principal_ref", "control_domain_ref", "authentication_ref", "session_ref", "process_ref")):
+            raise OwnerAdapterError(ReasonCode.OWNER_DATA_CONTRADICTORY, "V35 context and grant differ")
+        if (grant.policy_ref, grant.policy_epoch, grant.registry_version, grant.process_ref) != (
+                trusted_snapshot.policy_ref, trusted_snapshot.policy_epoch, trusted_snapshot.registry_version, trusted_snapshot.process_ref):
+            raise OwnerAdapterError(ReasonCode.OWNER_DATA_CONTRADICTORY, "V35 grant policy or process changed")
+        expiry = min(trusted_snapshot.valid_until_ns, context.valid_until_ns, grant.valid_until_ns)
+        if not context.available_ns <= grant.available_ns <= trusted_snapshot.read_ns <= now < expiry:
+            raise OwnerAdapterError(ReasonCode.OWNER_DATA_STALE, "V35 issuer grant is not current")
+        dependencies = tuple(dict.fromkeys((trusted_snapshot.snapshot_ref, context.principal_ref, context.control_domain_ref,
+            context.authentication_ref, context.session_ref, context.process_ref, grant.grant_ref, grant.policy_ref, grant.decision_ref)))
+        if set(dependencies).intersection(trusted_snapshot.invalidated_refs):
+            raise OwnerAdapterError(ReasonCode.OWNER_DATA_STALE, "V35 issuer dependency was invalidated")
+        producer_domains = {entry[0].control_domain_ref for original, entry in
+                            zip(view["requests"], trusted_snapshot.entries, strict=True)
+                            if original.role in ("MODEL_BUILD", "COMPUTATION")}
+        if request.role == "MODEL_REVIEW" and context.control_domain_ref in producer_domains:
+            raise AuthorityDeniedError(ReasonCode.SEGREGATION_OF_DUTIES_VIOLATION, "V35 reviewer controls a producing domain")
+        # This is the provider's exact closed V35 decision view, not the legacy
+        # Agent-Orch decision reader and not a locally manufactured receipt.
+        if type(decision_text) is not str or len(decision_text) > 1048576:
+            raise OwnerAdapterError(ReasonCode.OWNER_DATA_MALFORMED, "V35 issuer decision text is unbounded")
+        size = 0
+        for character in decision_text:
+            point = ord(character)
+            if 0xD800 <= point <= 0xDFFF:
+                raise OwnerAdapterError(ReasonCode.OWNER_DATA_MALFORMED, "V35 issuer decision contains a surrogate")
+            size += 1 if point < 0x80 else 2 if point < 0x800 else 3 if point < 0x10000 else 4
+            if size > 1048576:
+                raise OwnerAdapterError(ReasonCode.OWNER_DATA_MALFORMED, "V35 issuer decision exceeds its byte cap")
+        decision = _native_strict_json(decision_text.encode("utf-8"), 1048576)
+        expected = {
+            "row_id": grant.decision_ref, "object_type": "ProbabilityIssuerDecisionViewV1",
+            "object_version": trusted_snapshot.registry_version, "principal_ref": context.principal_ref,
+            "role": request.role, "scope": {field: getattr(request.scope, field) for field in request.scope.__dataclass_fields__},
+            "subject_refs": request.subject_refs, "policy_ref": trusted_snapshot.policy_ref,
+            "policy_epoch": trusted_snapshot.policy_epoch, "purpose": "OFFLINE_PRODUCER_RECEIPT_ATTESTATION",
+            "authentication_ref": context.authentication_ref, "session_ref": context.session_ref,
+            "process_ref": trusted_snapshot.process_ref, "control_plane_only": True,
+            "fake_receipt_created": False, "runtime_side_effect_allowed": False,
+            "source_truth_created": False, "order_submission_created": False, "live_execution_created": False,
+        }
+        canonical = _bounded_probability_json_v1(expected, max_bytes=1048576)
+        if _bounded_probability_json_v1(decision, max_bytes=1048576) != canonical or decision_text != canonical:
+            raise OwnerAdapterError(ReasonCode.OWNER_DATA_CONTRADICTORY, "V35 issuer decision differs from the selected grant")
+        if index not in view["admissions"]:
+            view["admissions"][index] = ProbabilityIssuerAdmissionV1(request.role, request.issuer_ref, dependencies, expiry, NO_EFFECTS_V1)
+        return view["admissions"][index]
+
+    def _probability_use_binding_v1(self, admission, request, prepared_entry, *, evaluated_ns, deadline_ns=None):
+        from .model_risk import ProbabilityNativeUseAdmissionV1
+        from .models import _probability_require_v1 as need
+        fence = self._probability_source_fence_v1
+        need(type(admission) is ProbabilityNativeUseAdmissionV1 and admission.request is request,
+             "PROBABILITY_ORIGINAL_USE_ADMISSION")
+        admission.__post_init__()
+        need(request.prepared_prediction is prepared_entry["object"] and
+             prepared_entry["metadata"]["scope"] == request.producer_scope and
+             prepared_entry["metadata"]["cutoffs"] == (request.effective_cutoff_ns, request.recorded_cutoff_ns),
+             "PROBABILITY_USE_PREPARED_BINDING")
+        need((admission.policy_ref, admission.policy_epoch, admission.registry_version, admission.process_ref,
+              admission.source_generation, admission.invalidation_cut_ref) ==
+             (self.policy_store.snapshot.policy_version, fence.policy_epoch, self.policy_store.snapshot.registry_version,
+              fence.process_ref, fence.generation, fence.cut.checkpoint_ref), "PROBABILITY_USE_SOURCE_CUT")
+        dependencies = (*prepared_entry["dependencies"], request.producer_scope.policy_ref,
+                        admission.accepted_use_decision_ref, admission.accepted_use_policy_ref, admission.accepted_transition_ref)
+        expiry = min(prepared_entry["expiry"], fence.cut.valid_until_ns)
+        if request.outcome_join is not None:
+            outcome = request.outcome_join
+            outcome.__post_init__()
+            need(outcome.available_ns <= evaluated_ns < outcome.valid_until_ns, "PROBABILITY_OUTCOME_EXPIRED")
+            dependencies += outcome.dependency_refs
+            expiry = min(expiry, outcome.valid_until_ns)
+        need(set(dependencies) <= set(admission.dependency_refs) and
+             admission.available_ns <= min(evaluated_ns, request.effective_cutoff_ns, request.recorded_cutoff_ns) and
+             evaluated_ns < admission.valid_until_ns <= expiry, "PROBABILITY_USE_DEPENDENCY_OR_LIFETIME")
+        fence._check_v1(original_cut=prepared_entry["cut"], dependency_refs=admission.dependency_refs,
+                        evaluated_ns=evaluated_ns, deadline_ns=deadline_ns)
+
+    @contextmanager
+    def _resolve_probability_native_use_v1(self, request, *, evaluated_ns: int, deadline_ns: int):
+        from .input_resolver import _ProbabilityDependencyFenceV1, _probability_owned_context_v1
+        from .model_risk import ProbabilityNativeUseRequestV1
+        from .models import _probability_require_v1 as need
+        reader = self.probability_issuer_reader
+        if reader is None or any(not callable(getattr(reader, name, None)) for name in
+                                 ("read_probability_native_use", "check_probability_native_use")):
+            raise OwnerAdapterError(ReasonCode.OWNER_DATA_MISSING, "V35_NATIVE_USE_BOUNDARY_UNAVAILABLE")
+        fence = self._probability_source_fence_v1
+        need(type(request) is ProbabilityNativeUseRequestV1 and type(fence) is _ProbabilityDependencyFenceV1 and
+             fence.issuer_resolver is self and self._probability_native_use_active_v1 is None,
+             "PROBABILITY_NATIVE_USE_OWNERSHIP")
+        request.__post_init__()
+        prepared = fence._registered_v1(request.prepared_prediction, kind="PREDICTION", evaluated_ns=evaluated_ns)
+        need(request.prepared_prediction.state == "SCORE_RESEARCH_ONLY", "PROBABILITY_PREPARED_ABSTENTION")
+        fence._check_v1(original_cut=prepared["cut"], dependency_refs=prepared["dependencies"],
+                        evaluated_ns=evaluated_ns, deadline_ns=deadline_ns)
+        active = object()
+        self._probability_native_use_active_v1 = active
+        try:
+            with _probability_owned_context_v1(reader.read_probability_native_use(
+                    request, evaluated_ns=evaluated_ns, deadline_ns=deadline_ns)) as admission:
+                self._probability_use_binding_v1(admission, request, prepared, evaluated_ns=time.time_ns(), deadline_ns=deadline_ns)
+                yield admission
+                need(self._probability_native_use_active_v1 is active and self.probability_issuer_reader is reader,
+                     "PROBABILITY_NATIVE_USE_REENTRANT_CHANGE")
+                self._probability_use_binding_v1(admission, request, prepared, evaluated_ns=time.time_ns(), deadline_ns=deadline_ns)
+            self._probability_use_binding_v1(admission, request, prepared, evaluated_ns=time.time_ns(), deadline_ns=deadline_ns)
+            entry = fence._register_v1(admission, kind="NATIVE_USE", view=prepared["view"],
+                dependency_refs=admission.dependency_refs, valid_until_ns=admission.valid_until_ns,
+                value_node_limit=prepared["value_node_limit"],
+                metadata={"request": request, "prepared": prepared, "context": request.execution_context.execution_identity_tuple,
+                          "query": request.query_key, "bindings": request.binding_ids, "outcome": request.outcome_join})
+            try:
+                self._check_probability_native_use_v1(admission, evaluated_ns=time.time_ns())
+            except BaseException:
+                # A failed final observation never leaves a registered credential.
+                if fence._registrations.get(id(admission)) is entry:
+                    del fence._registrations[id(admission)]
+                raise
+        finally:
+            self._probability_native_use_active_v1 = None
+
+    def _check_probability_native_use_v1(self, admission, *, evaluated_ns: int) -> None:
+        from .input_resolver import _ProbabilityDependencyFenceV1
+        from .models import _probability_require_v1 as need
+        fence = self._probability_source_fence_v1
+        need(type(fence) is _ProbabilityDependencyFenceV1 and fence.issuer_resolver is self,
+             "PROBABILITY_NATIVE_USE_FENCE_MISSING")
+        entry = fence._registered_v1(admission, kind="NATIVE_USE", evaluated_ns=evaluated_ns)
+        request = entry["metadata"]["request"]
+        prepared = fence._registered_v1(request.prepared_prediction, kind="PREDICTION", evaluated_ns=evaluated_ns)
+        need(admission.request is request and request.execution_context.execution_identity_tuple == entry["metadata"]["context"] and
+             request.query_key == entry["metadata"]["query"] and request.binding_ids == entry["metadata"]["bindings"] and
+             request.outcome_join is entry["metadata"]["outcome"], "PROBABILITY_NATIVE_USE_IDENTITY_CHANGED")
+        self._probability_use_binding_v1(admission, request, prepared, evaluated_ns=evaluated_ns)
+        reader = self.probability_issuer_reader
+        if reader is None or not callable(getattr(reader, "check_probability_native_use", None)):
+            raise OwnerAdapterError(ReasonCode.OWNER_DATA_MISSING, "V35_NATIVE_USE_BOUNDARY_UNAVAILABLE")
+        need(reader is entry["reader"] and reader.check_probability_native_use(admission, evaluated_ns=evaluated_ns) is None,
+             "PROBABILITY_NATIVE_USE_CHECK_DID_NOT_SUCCEED")
+        self._probability_use_binding_v1(admission, request, prepared, evaluated_ns=time.time_ns())
 
     def _agent_orch_receipt_ref(self, task_id: str) -> str:
         task_row = self.policy_store.snapshot.agent_orch_task_rows.get(task_id)

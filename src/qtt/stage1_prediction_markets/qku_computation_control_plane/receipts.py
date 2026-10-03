@@ -5,7 +5,7 @@ from __future__ import annotations
 import copy
 import re
 from dataclasses import dataclass, fields as dataclass_fields
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 from decimal import Decimal
 from enum import StrEnum
 import json
@@ -31,8 +31,17 @@ from .models import (
     TypedValueKindV1,
     TypedValueRecordV1,
     TypedValueV1,
+    ProbabilityProducerScopeV1,
+    _probability_require_v1,
+    _probability_text_v1,
+    _probability_int_v1,
+    _probability_ns_v1,
+    _probability_refs_v1,
 )
-from .serialization import _native_strict_json, deterministic_json, safe_json_loads
+from .serialization import (
+    _native_strict_json, deterministic_json, safe_json_loads,
+    _bounded_probability_json_v1, _probability_transport_tree_v1,
+)
 from .source_rights import reject_secret_material
 from .point_in_time import (
     compose_exact_pit_v3,
@@ -48,6 +57,373 @@ from .point_in_time import (
     PITTransportStateV1,
 )
 from .stage1_launch_graph import Stage1VenueProfileIdV1
+from .model_risk import NoTradeConditionOutcomeV1, NO_TRADE_CONDITION_IDS_V1
+
+
+_PROBABILITY_BODY_FIELDS_V1 = MappingProxyType({
+    "PUBLICATION": ("request_id", "expected_head_ref", "expected_sequence", "expected_high_watermark",
+                    "kind", "cutoff_ns", "catalog_ref", "result_ref", "selected_rows", "family_result", "reason", "after"),
+    "INPUT_BINDING": ("owner_epoch", "objects", "acceptance_manifest_ref"),
+    "ACCEPTANCE_MANIFEST": ("binding_ref", "receipt_refs"),
+    "ACCEPTANCE_RECEIPT": ("role", "binding_ref", "subject_refs", "depends_on", "issuer_ref", "observed_ns", "claims", "issuer_admission_refs"),
+    "REVOCATION_APPLICATION": ("notice_id", "issuer_ref", "stream_ref", "stream_ordinal", "observed_ns", "baseline_ref", "invalidated_dependency_refs"),
+    "PREDICTION_RESULT": ("artifact_ref", "artifact_byte_count", "artifact_frame_count", "input_lock_id",
+                          "prediction_input_lock_id", "plan_id", "producer_ref", "producer_control_domain_ref",
+                          "started_ns", "completed_ns", "input_available_ns"),
+    "PREDICTION_REVIEW": ("result_ref", "artifact_ref", "reviewer_ref", "reviewer_control_domain_ref", "review_state",
+                          "validation_receipt_refs", "use_limit_ref", "model_risk_receipt_ref", "result_commit_observed_ns",
+                          "started_ns", "completed_ns", "blocker_codes"),
+})
+_PROBABILITY_ROLE_CLAIMS_V1 = MappingProxyType({
+    "SOURCE_RIGHTS": ("input_lock_ref", "reference_cohort_ref", "catalog_ref", "input_class"),
+    "ENVIRONMENT": ("environment_ref", "versions", "check_class"),
+    "MODEL_BUILD": ("model_artifact_ref", "feature_names", "model_kind", "reference_cohort_ref", "reference_cutoff_ns",
+                    "artifact_available_ns", "build_class", "export_parity_kind", "started_ns", "completed_ns"),
+    "MODEL_REVIEW": ("model_artifact_ref", "review_class", "scope_of_conclusion", "blocker_codes"),
+    "USE_POLICY": ("policy_ref", "family_ref", "targets", "target_domains", "replicate_count", "precision_protocol_ref",
+                   "limits", "purpose", "permitted_model_use_modes"),
+    "CATALOG": ("catalog_ref", "owner_epoch", "after_ordinal", "complete_through_ns", "row_count", "membership_class"),
+    "COMPUTATION": ("result_ref", "catalog_ref", "owner_epoch", "selection_cutoff_ns", "artifact_available_ns",
+                    "reference_plan_ref", "current_plan_ref", "partition_codes", "targets", "replicate_count",
+                    "reference_record_count", "current_record_count", "run_kind", "completion_class", "started_ns", "completed_ns"),
+})
+_PROBABILITY_ROLE_OWNERS_V1 = MappingProxyType({
+    "SOURCE_RIGHTS": ("source_policy", "input_resolver"), "ENVIRONMENT": ("model_risk", "input_resolver"),
+    "MODEL_BUILD": ("implementation_registry", "implementation_registry"), "MODEL_REVIEW": ("model_risk", "model_risk"),
+    "USE_POLICY": ("model_risk", "model_risk"), "CATALOG": ("source_policy", "input_resolver"),
+    "COMPUTATION": ("implementation_registry", "implementation_registry"),
+})
+_PROBABILITY_BASIS_COMMON_V1 = ("prediction_basis_kind", "protocol_ref", "effective_cutoff_ns", "recorded_cutoff_ns",
+                              "qualification_scope", "purpose", "conclusion", "blocker_codes")
+_PROBABILITY_BASIS_FIELDS_V1 = MappingProxyType({
+    "INDEPENDENT_PREDICTION_VALIDATION": ("protocol_coverage", "result_commit_observed_ns"),
+    "BOUND_PREDICTION_USE_LIMIT": ("parent_use_policy_ref", "feature_names", "query_rule", "permitted_model_use_modes", "maximum_valid_until_ns"),
+    "PREDICTION_MODEL_RISK_BASIS": ("validation_receipt_refs", "use_limit_ref", "conditions", "scope_of_conclusion"),
+})
+_PROBABILITY_PROTOCOL_NAMES_V1 = (
+    "ExperimentProtocolV1", "CandidateAndVariantInventoryV1", "SearchAndResearchBudgetV1", "FalsificationAndNoTradePolicyV1",
+    "ProtocolChangeControlV1", "MetricsDefinitionRegistryV1", "EventTimeAndClockSchemaV1", "EconomicAccountingClassRegistryV1",
+    "MetricUnitAndBasisRegistryV1", "ModelInventoryAndRiskTierV1", "IndependentValidationProtocolV1",
+    "UseLimitAndRollbackPolicyV1", "EvidenceSufficiencyPolicyV1",
+)
+
+
+def _probability_keys_v1(value: object, names) -> None:
+    if type(value) not in (dict, MappingProxyType) or set(value) != set(names):
+        raise ContractValidationError(ReasonCode.SCHEMA_MISMATCH, "PROBABILITY_FIELD_SET")
+
+
+def _probability_reasons_v1(value: object) -> None:
+    _probability_require_v1(type(value) is tuple and len(value) <= 4096 and all(type(code) is ReasonCode for code in value)
+                            and len(value) == len(set(value)), "PROBABILITY_REASON_TUPLE")
+
+
+def _probability_scope_mapping_v1(scope: ProbabilityProducerScopeV1) -> dict:
+    _probability_require_v1(type(scope) is ProbabilityProducerScopeV1, "PROBABILITY_SCOPE")
+    return {field.name: getattr(scope, field.name) for field in dataclass_fields(ProbabilityProducerScopeV1)}
+
+
+def _probability_body_projection_v1(kind: str, body: Mapping) -> dict:
+    """Thin fixed-field enum/condition view before bounded recursive admission."""
+    _probability_keys_v1(body, _PROBABILITY_BODY_FIELDS_V1[kind])
+    result = dict(body)
+    if kind == "PREDICTION_REVIEW":
+        _probability_reasons_v1(body["blocker_codes"])
+        result["blocker_codes"] = tuple(code.value for code in body["blocker_codes"])
+    if kind == "ACCEPTANCE_RECEIPT":
+        claims = body["claims"]
+        _probability_require_v1(type(claims) in (dict, MappingProxyType), "PROBABILITY_CLAIMS")
+        _probability_require_v1(len(claims) <= 4096, "JSON_NODES")
+        result["claims"] = dict(claims)
+        if "blocker_codes" in claims:
+            _probability_reasons_v1(claims["blocker_codes"])
+            result["claims"]["blocker_codes"] = tuple(code.value for code in claims["blocker_codes"])
+        if claims.get("prediction_basis_kind") == "PREDICTION_MODEL_RISK_BASIS":
+            conditions = claims.get("conditions")
+            _probability_require_v1(type(conditions) is tuple and len(conditions) == 8 and
+                                    all(type(row) is NoTradeConditionOutcomeV1 for row in conditions), "PROBABILITY_CONDITIONS")
+            result["claims"]["conditions"] = tuple({
+                "condition_id": row.condition_id, "active": row.active,
+                "evidence_receipt_refs": row.evidence_receipt_refs,
+                "reason_codes": tuple(code.value for code in row.reason_codes),
+            } for row in conditions)
+    return result
+
+
+def _probability_frozen_body_v1(kind: str, body: Mapping) -> Mapping:
+    projected = _probability_body_projection_v1(kind, body)
+    text = _bounded_probability_json_v1(projected, max_bytes=1048576)
+    owned = _native_strict_json(text.encode("utf-8"), 1048576)
+
+    def freeze(value):
+        if type(value) is dict:
+            return MappingProxyType({k: freeze(v) for k, v in value.items()})
+        if type(value) is list:
+            return tuple(freeze(v) for v in value)
+        return value
+
+    if kind == "PREDICTION_REVIEW":
+        owned["blocker_codes"] = tuple(ReasonCode(code) for code in owned["blocker_codes"])
+    if kind == "ACCEPTANCE_RECEIPT":
+        claims = owned["claims"]
+        if "blocker_codes" in claims:
+            claims["blocker_codes"] = tuple(ReasonCode(code) for code in claims["blocker_codes"])
+        if claims.get("prediction_basis_kind") == "PREDICTION_MODEL_RISK_BASIS":
+            claims["conditions"] = tuple(NoTradeConditionOutcomeV1.from_canonical_mapping(row) for row in claims["conditions"])
+    return freeze(owned)
+
+
+@dataclass(frozen=True, slots=True)
+class ProbabilityProducerControlReceiptV1:
+    schema_version: str
+    control_kind: str
+    scope: ProbabilityProducerScopeV1
+    effective_ns: int
+    recorded_ns: int
+    available_ns: int
+    dependency_refs: tuple[str, ...]
+    valid_until_ns: int | None
+    body: Mapping[str, object]
+
+    def __post_init__(self) -> None:
+        if type(self.schema_version) is not str or self.schema_version != "PROBABILITY_PRODUCER_CONTROL_V1" or type(self.control_kind) is not str or self.control_kind not in _PROBABILITY_BODY_FIELDS_V1:
+            raise ContractValidationError(ReasonCode.SCHEMA_MISMATCH, "PROBABILITY_CONTROL_SCHEMA")
+        _probability_scope_mapping_v1(self.scope)
+        for value in (self.effective_ns, self.recorded_ns, self.available_ns):
+            _probability_ns_v1(value)
+        _probability_require_v1(self.effective_ns <= self.recorded_ns <= self.available_ns, "PROBABILITY_CHRONOLOGY")
+        _probability_refs_v1(self.dependency_refs)
+        if self.valid_until_ns is not None:
+            _probability_ns_v1(self.valid_until_ns)
+            _probability_require_v1(self.effective_ns < self.valid_until_ns, "PROBABILITY_VALIDITY_INTERVAL")
+        frozen = _probability_frozen_body_v1(self.control_kind, self.body)
+        _validate_probability_body_v1(self)
+        object.__setattr__(self, "body", frozen)
+        _validate_probability_body_v1(self)
+
+
+def _validate_probability_body_v1(payload: ProbabilityProducerControlReceiptV1) -> None:
+    b, scope, kind = payload.body, payload.scope, payload.control_kind
+    need = _probability_require_v1
+    text, integer, ns, refs = _probability_text_v1, _probability_int_v1, _probability_ns_v1, _probability_refs_v1
+    if kind == "INPUT_BINDING":
+        integer(b["owner_epoch"])
+        text(b["acceptance_manifest_ref"])
+        objects = b["objects"]
+        need(type(objects) is tuple and len(objects) in (3, 4), "PROBABILITY_OBJECTS")
+        for row in objects:
+            _probability_keys_v1(row, ("role", "object_ref", "frame_count", "byte_count"))
+            text(row["object_ref"]); integer(row["frame_count"], 1); integer(row["byte_count"], 1)
+        roles = tuple(row["role"] for row in objects)
+        need(roles in (("MODEL", "CATALOG", "POLICY"), ("MODEL", "CATALOG", "RESULT", "POLICY")), "PROBABILITY_OBJECT_ORDER")
+        refs(tuple(row["object_ref"] for row in objects), nonempty=True)
+        need(objects[0]["object_ref"] == scope.model_artifact_ref and objects[-1]["object_ref"] == scope.policy_ref,
+             "PROBABILITY_OBJECT_SCOPE")
+    elif kind == "ACCEPTANCE_MANIFEST":
+        text(b["binding_ref"]); refs(b["receipt_refs"], nonempty=True)
+        need(len(b["receipt_refs"]) in (6, 7) and b["binding_ref"] not in b["receipt_refs"], "PROBABILITY_MANIFEST")
+    elif kind == "ACCEPTANCE_RECEIPT":
+        _validate_probability_claims_v1(payload)
+    elif kind == "REVOCATION_APPLICATION":
+        for key in ("notice_id", "issuer_ref", "stream_ref", "baseline_ref"):
+            text(b[key])
+        integer(b["stream_ordinal"], 1); ns(b["observed_ns"])
+        refs(b["invalidated_dependency_refs"], nonempty=True)
+        need(payload.effective_ns <= b["observed_ns"] <= payload.recorded_ns, "PROBABILITY_REVOCATION_CLOCK")
+        need({b["notice_id"], b["issuer_ref"], b["baseline_ref"]} <= set(payload.dependency_refs), "PROBABILITY_REVOCATION_DEPENDENCIES")
+    elif kind in ("PREDICTION_RESULT", "PREDICTION_REVIEW"):
+        need(payload.valid_until_ns is not None, "PROBABILITY_PREDICTION_EXPIRY")
+        for key in ("started_ns", "completed_ns"):
+            ns(b[key])
+        text(b["artifact_ref"])
+        need(b["started_ns"] <= b["completed_ns"] == payload.effective_ns, "PROBABILITY_PREDICTION_CLOCK")
+        if kind == "PREDICTION_RESULT":
+            for key in ("input_lock_id", "prediction_input_lock_id", "plan_id", "producer_ref", "producer_control_domain_ref"):
+                text(b[key])
+            integer(b["artifact_byte_count"], 1); integer(b["artifact_frame_count"], 1); ns(b["input_available_ns"])
+            need(b["input_lock_id"] == scope.input_lock_ref and b["input_available_ns"] <= b["started_ns"], "PROBABILITY_RESULT_INPUT")
+        else:
+            for key in ("result_ref", "reviewer_ref", "reviewer_control_domain_ref", "use_limit_ref", "model_risk_receipt_ref"):
+                text(b[key])
+            refs(b["validation_receipt_refs"], nonempty=True)
+            need(len(b["validation_receipt_refs"]) == 1, "PROBABILITY_VALIDATION_SINGLETON")
+            related = (b["result_ref"], *b["validation_receipt_refs"], b["use_limit_ref"], b["model_risk_receipt_ref"])
+            refs(related, nonempty=True)
+            need(set(related) <= set(payload.dependency_refs), "PROBABILITY_REVIEW_DEPENDENCIES")
+            ns(b["result_commit_observed_ns"])
+            need(b["result_commit_observed_ns"] <= b["started_ns"], "PROBABILITY_REVIEW_CLOCK")
+            _probability_reasons_v1(b["blocker_codes"])
+            need(b["review_state"] in ("CALIBRATED_FOR_DECLARED_CONTEXT", "BLOCKED") and
+                 (b["review_state"] == "BLOCKED") == bool(b["blocker_codes"]), "PROBABILITY_REVIEW_STATE")
+    else:
+        text(b["request_id"]); integer(b["expected_sequence"]); integer(b["expected_high_watermark"]); ns(b["cutoff_ns"])
+        if b["expected_head_ref"] is not None:
+            text(b["expected_head_ref"])
+        need((b["expected_head_ref"] is None) == (b["expected_sequence"] == 0), "PROBABILITY_PUBLICATION_PARENT")
+        after = b["after"]
+        _probability_keys_v1(after, ("scope", "head_ref", "sequence", "high_watermark", "last_maturity_ns", "last_cutoff_ns", "bad_streak", "green_streak", "latched"))
+        _probability_keys_v1(after["scope"], _probability_scope_mapping_v1(scope))
+        need(ProbabilityProducerScopeV1(**after["scope"]) == scope, "PROBABILITY_PUBLICATION_SCOPE")
+        text(after["head_ref"])
+        for key in ("sequence", "high_watermark", "bad_streak", "green_streak"):
+            integer(after[key])
+        for key in ("last_maturity_ns", "last_cutoff_ns"):
+            ns(after[key])
+        need(after["sequence"] == b["expected_sequence"] + 1 and after["last_cutoff_ns"] == b["cutoff_ns"], "PROBABILITY_PUBLICATION_SEQUENCE")
+        need(type(after["latched"]) is bool and after["bad_streak"] <= 2 and after["green_streak"] <= 2 and
+             not (after["bad_streak"] and after["green_streak"]) and (after["bad_streak"] < 2 or after["latched"]), "PROBABILITY_PUBLICATION_STREAK")
+        need(b["kind"] in ("WINDOW", "HARD_FAILURE", "EVIDENCE_UNAVAILABLE"), "PROBABILITY_PUBLICATION_KIND")
+        rows = b["selected_rows"]
+        need(type(rows) is tuple, "PROBABILITY_SELECTED_ROWS")
+        if b["kind"] == "WINDOW":
+            text(b["catalog_ref"]); text(b["result_ref"])
+            need(len(rows) == 200 and b["family_result"] in ("MATERIAL_BREACH", "FAMILY_NONREJECTION", "UNAVAILABLE"), "PROBABILITY_WINDOW")
+            clusters, original_rows = [], []
+            prior = None
+            for offset, row in enumerate(rows, 1):
+                _probability_keys_v1(row, ("cluster_id", "row_ids", "ordinal", "maturity_ns", "available_ns"))
+                text(row["cluster_id"]); refs(row["row_ids"], nonempty=True); integer(row["ordinal"], 1)
+                ns(row["available_ns"]); ns(row["maturity_ns"])
+                need(row["ordinal"] == b["expected_high_watermark"] + offset and
+                     row["available_ns"] <= row["maturity_ns"] <= b["cutoff_ns"] and
+                     (prior is None or prior <= row["maturity_ns"]), "PROBABILITY_WINDOW_ORDER")
+                prior = row["maturity_ns"]; clusters.append(row["cluster_id"]); original_rows.extend(row["row_ids"])
+            refs(tuple(clusters)); refs(tuple(original_rows))
+            need(after["high_watermark"] == rows[-1]["ordinal"] and after["last_maturity_ns"] == prior, "PROBABILITY_WINDOW_CURSOR")
+            if b["family_result"] == "UNAVAILABLE":
+                text(b["reason"]); need(after["bad_streak"] == after["green_streak"] == 0, "PROBABILITY_WINDOW_STREAK")
+            else:
+                need(b["reason"] is None, "PROBABILITY_WINDOW_REASON")
+                need((1 <= after["bad_streak"] <= 2 and after["green_streak"] == 0) if b["family_result"] == "MATERIAL_BREACH"
+                     else (1 <= after["green_streak"] <= 2 and after["bad_streak"] == 0), "PROBABILITY_WINDOW_STREAK")
+        else:
+            text(b["reason"])
+            need(b["catalog_ref"] is None and b["result_ref"] is None and not rows and b["family_result"] is None,
+                 "PROBABILITY_NONWINDOW")
+            need(after["high_watermark"] == b["expected_high_watermark"] and after["bad_streak"] == after["green_streak"] == 0,
+                 "PROBABILITY_NONWINDOW_CURSOR")
+            need(b["kind"] != "HARD_FAILURE" or after["latched"], "PROBABILITY_HARD_LATCH")
+
+
+def _validate_probability_claims_v1(payload: ProbabilityProducerControlReceiptV1) -> None:
+    b, s = payload.body, payload.scope
+    need, text, integer, ns, refs = (_probability_require_v1, _probability_text_v1, _probability_int_v1,
+                                    _probability_ns_v1, _probability_refs_v1)
+    role, c = b["role"], b["claims"]
+    need(type(role) is str and role in _PROBABILITY_ROLE_CLAIMS_V1, "PROBABILITY_ROLE")
+    for key in ("binding_ref", "issuer_ref"):
+        text(b[key])
+    refs(b["subject_refs"], nonempty=True); refs(b["depends_on"]); refs(b["issuer_admission_refs"], nonempty=True)
+    ns(b["observed_ns"])
+    need(payload.effective_ns <= b["observed_ns"] <= payload.recorded_ns and payload.valid_until_ns is not None
+         and b["observed_ns"] < payload.valid_until_ns, "PROBABILITY_ACCEPTANCE_CLOCK")
+    need(set((*b["depends_on"], *b["issuer_admission_refs"])) <= set(payload.dependency_refs), "PROBABILITY_ACCEPTANCE_DEPENDENCIES")
+    tag = c.get("prediction_basis_kind")
+    if "prediction_basis_kind" in c:
+        if type(tag) is not str or tag not in _PROBABILITY_BASIS_FIELDS_V1:
+            raise ContractValidationError(ReasonCode.SCHEMA_MISMATCH, "PROBABILITY_BASIS_TAG")
+        _probability_keys_v1(c, (*_PROBABILITY_BASIS_COMMON_V1, *_PROBABILITY_BASIS_FIELDS_V1[tag]))
+        need(role == ("USE_POLICY" if tag == "BOUND_PREDICTION_USE_LIMIT" else "MODEL_REVIEW"), "PROBABILITY_BASIS_ROLE")
+        text(c["protocol_ref"]); ns(c["effective_cutoff_ns"]); ns(c["recorded_cutoff_ns"])
+        need(c["qualification_scope"] in ("SYNTHETIC_REFERENCE", "INDEPENDENT_CHALLENGE", "EMPIRICAL_SELECTED_USE") and
+             c["purpose"] == "BOUNDED_OFFLINE_DIAGNOSTICS_ONLY", "PROBABILITY_BASIS_SCOPE")
+        _probability_reasons_v1(c["blocker_codes"])
+        need(c["conclusion"] in ("SUPPORTED_FOR_REVIEW", "INSUFFICIENT", "INVALID", "OUT_OF_SCOPE") and
+             (c["conclusion"] == "SUPPORTED_FOR_REVIEW") == (not c["blocker_codes"]), "PROBABILITY_BASIS_CONCLUSION")
+        subjects = b["subject_refs"]
+        need(len(subjects) >= 4 and subjects[0] == s.model_artifact_ref, "PROBABILITY_BASIS_SUBJECTS")
+        if tag == "INDEPENDENT_PREDICTION_VALIDATION":
+            coverage = c["protocol_coverage"]
+            need(type(coverage) is tuple and len(coverage) == 13, "PROBABILITY_PROTOCOL_COVERAGE")
+            evidence = []
+            for expected, row in zip(_PROBABILITY_PROTOCOL_NAMES_V1, coverage, strict=True):
+                need(type(row) is tuple and len(row) == 4 and row[0] == expected, "PROBABILITY_PROTOCOL_ORDER")
+                text(row[1]); refs(row[3])
+                need(row[2] in ("SUPPORTED_FOR_REVIEW", "INSUFFICIENT", "INVALID", "OUT_OF_SCOPE"), "PROBABILITY_PROTOCOL_STATE")
+                need(row[2] != "SUPPORTED_FOR_REVIEW" or bool(row[3]), "PROBABILITY_PROTOCOL_EVIDENCE")
+                need(c["conclusion"] != "SUPPORTED_FOR_REVIEW" or row[2] == "SUPPORTED_FOR_REVIEW", "PROBABILITY_PROTOCOL_CONCLUSION")
+                evidence.extend(row[3])
+            union = tuple(dict.fromkeys(evidence))
+            need(subjects[4:] == union and len(b["depends_on"]) >= 3 and b["depends_on"][0] == subjects[1], "PROBABILITY_VALIDATION_DEPENDENCIES")
+            need(b["depends_on"] == (*b["depends_on"][:3], *(ref for ref in union if ref not in b["depends_on"][:3])), "PROBABILITY_VALIDATION_DEPENDENCY_ORDER")
+            ns(c["result_commit_observed_ns"])
+            need(c["result_commit_observed_ns"] <= b["observed_ns"], "PROBABILITY_VALIDATION_COMMIT")
+        elif tag == "BOUND_PREDICTION_USE_LIMIT":
+            text(c["parent_use_policy_ref"]); refs(c["feature_names"], nonempty=True); ns(c["maximum_valid_until_ns"])
+            need(len(subjects) == 4 and b["depends_on"] == (c["parent_use_policy_ref"], subjects[1]), "PROBABILITY_USE_LIMIT_DEPENDENCIES")
+            need(c["query_rule"] == "EXACT_COMMITTED_QUERY_LOCK_AND_ACCEPTED_PARENT_CONTEXT" and
+                 c["permitted_model_use_modes"] == () and payload.valid_until_ns <= c["maximum_valid_until_ns"], "PROBABILITY_USE_LIMIT")
+        else:
+            refs(c["validation_receipt_refs"], nonempty=True); text(c["use_limit_ref"])
+            need(len(c["validation_receipt_refs"]) == 1 and len(subjects) == 4 and
+                 b["depends_on"] == (subjects[1], c["validation_receipt_refs"][0], c["use_limit_ref"]), "PROBABILITY_RISK_DEPENDENCIES")
+            need(c["scope_of_conclusion"] == "PREDICTION_EVIDENCE_ONLY_NOT_ST12F_ECONOMIC_PROMOTION", "PROBABILITY_RISK_SCOPE")
+            need(type(c["conditions"]) is tuple and all(type(row) is NoTradeConditionOutcomeV1 for row in c["conditions"])
+                 and tuple(row.condition_id for row in c["conditions"]) == NO_TRADE_CONDITION_IDS_V1, "PROBABILITY_CONDITIONS")
+        return
+    _probability_keys_v1(c, _PROBABILITY_ROLE_CLAIMS_V1[role])
+    for name in ("model_artifact_ref", "input_lock_ref", "reference_cohort_ref", "environment_ref", "policy_ref", "family_ref"):
+        if name in c:
+            need(type(c[name]) is str and c[name] == getattr(s, name), "PROBABILITY_CLAIM_SCOPE")
+    if role == "SOURCE_RIGHTS":
+        text(c["catalog_ref"])
+        need(c["input_class"] == "SCOPED_DATA_RIGHTS_AND_SOURCE_SEMANTICS_NOT_DOCUMENTATION_ONLY", "PROBABILITY_SOURCE_CLASS")
+    elif role == "ENVIRONMENT":
+        versions = c["versions"]
+        need(type(versions) is tuple and bool(versions), "PROBABILITY_ENVIRONMENT")
+        for row in versions:
+            need(type(row) is tuple and len(row) == 2, "PROBABILITY_ENVIRONMENT_VERSION")
+            text(row[0]); text(row[1])
+        refs(tuple(row[0] for row in versions), nonempty=True)
+        need(c["check_class"] == "TARGET_ENVIRONMENT_WITH_BOUNDED_SYNTHETIC_ADAPTER_PARITY", "PROBABILITY_ENVIRONMENT_CLASS")
+    elif role == "MODEL_REVIEW":
+        _probability_reasons_v1(c["blocker_codes"])
+        need(c["review_class"] == "CONCEPTUAL_AND_IMPLEMENTATION_REVIEW" and
+             c["scope_of_conclusion"] == "BOUNDED_OFFLINE_DIAGNOSTICS_ONLY", "PROBABILITY_MODEL_REVIEW")
+    elif role == "MODEL_BUILD":
+        refs(c["feature_names"], nonempty=True)
+        need(c["model_kind"] in ("CALIBRATED_LOGISTIC", "HUBER") and
+             c["build_class"] == "FROZEN_BASE_PIPELINE_AND_SELECTED_CALIBRATOR" and
+             c["export_parity_kind"] == "ACTUAL_SUBJECT_PIPELINE_ROUNDTRIP", "PROBABILITY_MODEL_BUILD")
+        for key in ("reference_cutoff_ns", "artifact_available_ns", "started_ns", "completed_ns"):
+            ns(c[key])
+        need(c["reference_cutoff_ns"] <= c["started_ns"] <= c["completed_ns"] <= c["artifact_available_ns"] <= b["observed_ns"], "PROBABILITY_MODEL_BUILD_CLOCK")
+    elif role == "CATALOG":
+        text(c["catalog_ref"])
+        for key in ("owner_epoch", "after_ordinal", "row_count"):
+            integer(c[key])
+        ns(c["complete_through_ns"])
+        need(c["complete_through_ns"] <= b["observed_ns"] and
+             c["membership_class"] == "IMMUTABLE_ORIGINAL_OBSERVATION_MEMBERSHIP", "PROBABILITY_CATALOG_CLAIM")
+    else:
+        refs(c["targets"], nonempty=True)
+        need(type(c["replicate_count"]) is int and c["replicate_count"] in (1000, 5000), "PROBABILITY_REPLICATE_COUNT")
+        if role == "USE_POLICY":
+            if c["replicate_count"] == 5000:
+                text(c["precision_protocol_ref"])
+            else:
+                need(c["precision_protocol_ref"] is None, "PROBABILITY_PRECISION_PROTOCOL")
+            need(c["purpose"] == "OFFLINE_PRODUCER_DIAGNOSTICS" and c["permitted_model_use_modes"] == (), "PROBABILITY_USE_POLICY")
+            domains = c["target_domains"]
+            need(type(domains) is tuple and all(type(row) is tuple and len(row) == 2 and row[1] in
+                 ("REAL", "NONNEGATIVE", "UNIT_INTERVAL") for row in domains) and
+                 tuple(row[0] for row in domains) == c["targets"], "PROBABILITY_TARGET_DOMAINS")
+            _probability_keys_v1(c["limits"], ("max_catalog_rows", "max_reference_rows", "max_targets", "max_model_bytes", "max_record_bytes", "max_total_bank_bytes"))
+            for value in c["limits"].values():
+                integer(value, 1)
+            need(c["limits"]["max_model_bytes"] <= 1048576 and c["limits"]["max_record_bytes"] <= 1048576, "PROBABILITY_PARSER_LIMIT")
+        else:
+            for key in ("result_ref", "catalog_ref", "reference_plan_ref", "current_plan_ref"):
+                text(c[key])
+            integer(c["owner_epoch"])
+            for key in ("reference_record_count", "current_record_count"):
+                integer(c[key], 1); need(c[key] == c["replicate_count"], "PROBABILITY_COMPUTATION_COUNT")
+            need(c["partition_codes"] == (3, 4) and all(type(v) is int for v in c["partition_codes"]), "PROBABILITY_DRIFT_PARTITIONS")
+            need(c["run_kind"] == "DRIFT_FUNCTIONAL_RESAMPLING_V36" and c["completion_class"] ==
+                 "COMPLETE_ORDERED_RECORDS_INCLUDING_INVALID", "PROBABILITY_COMPUTATION_CLASS")
+            for key in ("selection_cutoff_ns", "artifact_available_ns", "started_ns", "completed_ns"):
+                ns(c[key])
+            need(c["selection_cutoff_ns"] <= c["started_ns"] <= c["completed_ns"] <= c["artifact_available_ns"] <= b["observed_ns"], "PROBABILITY_COMPUTATION_CLOCK")
 
 
 def _required(value: object, name: str) -> None:
@@ -106,6 +482,7 @@ class EconomicRecordTypeV1(StrEnum):
     PIT_CHECKPOINT = "PIT_CHECKPOINT"
     PRIVATE_OBSERVATION_CLOCK = "PRIVATE_OBSERVATION_CLOCK"
     PRIVATE_EVIDENCE_WITNESS = "PRIVATE_EVIDENCE_WITNESS"
+    PROBABILITY_PRODUCER_CONTROL = "PROBABILITY_PRODUCER_CONTROL"
 
 
 class ModeSnapshotControlClassV1(StrEnum):
@@ -484,6 +861,7 @@ class ST12FEvidenceControlReceiptRecordV1:
 
 ECONOMIC_RECORD_PAYLOAD_CLASS: Mapping[EconomicRecordTypeV1, tuple[str, str]] = MappingProxyType(
     {
+        EconomicRecordTypeV1.PROBABILITY_PRODUCER_CONTROL: ("receipts", "ProbabilityProducerControlReceiptV1"),
         EconomicRecordTypeV1.DURABLE_COMPUTATION_RECEIPT: ("receipts", "DurableComputationExecutionReceiptRecordV1"),
         EconomicRecordTypeV1.ECONOMIC_EVENT: ("receipts", "EconomicEventRecordV1"),
         EconomicRecordTypeV1.JOURNAL_TRANSACTION: ("accounting", "JournalTransactionV1"),
@@ -589,6 +967,160 @@ class EconomicReceiptEventSpineV1:
 
         if self.record_type is EconomicRecordTypeV1.PRIVATE_OBSERVATION_CLOCK:
             _private_clock_validate_spine_v1(self)
+
+        if self.record_type is EconomicRecordTypeV1.PROBABILITY_PRODUCER_CONTROL:
+            _validate_probability_control_spine_v1(self)
+
+
+def _probability_utc_pair_v1(ns: int) -> Mapping[str, object]:
+    _probability_ns_v1(ns)
+    seconds, fraction = divmod(ns, 1_000_000_000)
+    value = datetime(1970, 1, 1, tzinfo=UTC) + timedelta(seconds=seconds)
+    stamp = (f"{value.year:04d}-{value.month:02d}-{value.day:02d}T"
+             f"{value.hour:02d}:{value.minute:02d}:{value.second:02d}.{fraction:09d}Z")
+    pair = _native_utc_receipt_pair(stamp)
+    _probability_require_v1(pair["utc_ns_text"] == str(ns), "PROBABILITY_TIME_PROJECTION")
+    return pair
+
+
+def _probability_control_projection_v1(record: EconomicReceiptEventSpineV1) -> dict:
+    """A fixed-size shallow view; the transport owner admits every occurrence."""
+    payload = record.typed_payload
+    result = {field.name: getattr(record, field.name) for field in dataclass_fields(EconomicReceiptEventSpineV1)}
+    result["record_type"] = record.record_type.value
+    result["typed_payload"] = {
+        "schema_version": payload.schema_version, "control_kind": payload.control_kind,
+        "scope": _probability_scope_mapping_v1(payload.scope),
+        "effective_ns": payload.effective_ns, "recorded_ns": payload.recorded_ns,
+        "available_ns": payload.available_ns, "dependency_refs": payload.dependency_refs,
+        "valid_until_ns": payload.valid_until_ns,
+        "body": _probability_body_projection_v1(payload.control_kind, payload.body),
+    }
+    result["no_effect_flags"] = {field.name: getattr(record.no_effect_flags, field.name)
+                                 for field in dataclass_fields(NoEffectFlagsV1)}
+    return result
+
+
+def _validate_probability_control_spine_v1(record: EconomicReceiptEventSpineV1) -> None:
+    """Pure historical reconstruction checks; this grants no append or use authority."""
+    need = _probability_require_v1
+    need(type(record) is EconomicReceiptEventSpineV1, "PROBABILITY_SPINE_TYPE")
+    if (record.record_type is not EconomicRecordTypeV1.PROBABILITY_PRODUCER_CONTROL or
+            type(record.typed_payload) is not ProbabilityProducerControlReceiptV1 or
+            record.schema_version != "QTT_PROBABILITY_PRODUCER_CONTROL_SPINE_V1"):
+        raise ContractValidationError(ReasonCode.SCHEMA_MISMATCH, "PROBABILITY_SPINE_SCHEMA")
+    payload = record.typed_payload
+    # Reconstruct the exact immutable payload, including its owned nested values.
+    checked = ProbabilityProducerControlReceiptV1(**{
+        field.name: getattr(payload, field.name) for field in dataclass_fields(ProbabilityProducerControlReceiptV1)})
+    need(checked == payload, "PROBABILITY_PAYLOAD_RECONSTRUCTION")
+    for name in ("record_id", "schema_version", "semantic_owner", "implementation_owner", "context_ref",
+                 "causation_id", "correlation_id", "traceparent", "tracestate", "authority_class"):
+        _probability_text_v1(getattr(record, name))
+    need(record.causation_id != record.correlation_id and record.traceparent not in
+         (record.record_id, record.aggregate_id, record.causation_id, record.correlation_id), "PROBABILITY_TRACE_IDENTITY")
+    if type(record.no_effect_flags) is not NoEffectFlagsV1 or any(
+            getattr(record.no_effect_flags, field.name) is not False for field in dataclass_fields(NoEffectFlagsV1)):
+        raise ContractValidationError(ReasonCode.RUNTIME_EFFECT_FORBIDDEN, "PROBABILITY_NO_EFFECT_FLAGS")
+    need(record.authority_class == "NO_EFFECT_MODEL_REVIEW_EVIDENCE", "PROBABILITY_AUTHORITY_CLASS")
+    kind, body = payload.control_kind, payload.body
+    owners = {
+        "PUBLICATION": ("model_risk", "evidence"), "INPUT_BINDING": ("input_resolver", "input_resolver"),
+        "ACCEPTANCE_MANIFEST": ("input_resolver", "input_resolver"), "REVOCATION_APPLICATION": ("source_policy", "source_policy"),
+        "PREDICTION_RESULT": ("implementation_registry", "implementation_registry"), "PREDICTION_REVIEW": ("model_risk", "model_risk"),
+    }
+    expected_owners = _PROBABILITY_ROLE_OWNERS_V1[body["role"]] if kind == "ACCEPTANCE_RECEIPT" else owners[kind]
+    need((record.semantic_owner, record.implementation_owner) == expected_owners, "PROBABILITY_SPINE_OWNER")
+    _probability_int_v1(record.sequence); _probability_int_v1(record.aggregate_version)
+    expected_sequence = body["expected_sequence"] + 1 if kind == "PUBLICATION" else body["stream_ordinal"] if kind == "REVOCATION_APPLICATION" else 0
+    expected_version = expected_sequence if kind in ("PUBLICATION", "REVOCATION_APPLICATION") else 1
+    need((record.sequence, record.aggregate_version) == (expected_sequence, expected_version), "PROBABILITY_SPINE_SEQUENCE")
+    need(record.aggregate_id == deterministic_json(("V35", kind, _probability_scope_mapping_v1(payload.scope))), "PROBABILITY_AGGREGATE")
+    for name, ns in (("effective_at", payload.effective_ns), ("recorded_at", payload.recorded_ns)):
+        value = getattr(record, name)
+        need(type(value) is datetime and value.tzinfo is not None and value.utcoffset() == timedelta(0), "PROBABILITY_SPINE_TIME")
+        pair = _probability_utc_pair_v1(ns)
+        need(value == parse_utc(pair["receipt_utc_floor"], field_name=name), "PROBABILITY_SPINE_TIME_MIRROR")
+    if kind == "PUBLICATION":
+        need(body["after"]["head_ref"] == record.record_id and body["request_id"] != record.record_id and
+             body["expected_head_ref"] != record.record_id, "PROBABILITY_PUBLICATION_IDENTITY")
+    elif kind == "ACCEPTANCE_MANIFEST":
+        need(record.record_id not in (body["binding_ref"], *body["receipt_refs"]), "PROBABILITY_MANIFEST_ALIAS")
+    elif kind == "PREDICTION_REVIEW":
+        need(record.record_id not in (body["result_ref"], *body["validation_receipt_refs"], body["use_limit_ref"],
+                                      body["model_risk_receipt_ref"]), "PROBABILITY_REVIEW_ALIAS")
+    _bounded_probability_json_v1(_probability_control_projection_v1(record), max_bytes=1048576)
+
+
+def _probability_control_spine_from_cells_v1(
+    cells: tuple[str, str, str, str, str], *, expected_record_id: str,
+    expected_scope: ProbabilityProducerScopeV1, max_frame_bytes: int,
+) -> EconomicReceiptEventSpineV1:
+    """Decode five already bounded cells without consulting present authority."""
+    need = _probability_require_v1
+    need(type(cells) is tuple and len(cells) == 5 and all(type(cell) is str for cell in cells), "PROBABILITY_STORAGE_CELLS")
+    need(type(max_frame_bytes) is int and 0 < max_frame_bytes <= 1048576, "PROBABILITY_FRAME_LIMIT")
+    _probability_text_v1(expected_record_id)
+    _probability_scope_mapping_v1(expected_scope)
+    size = 0
+    for char in cells[4]:
+        point = ord(char)
+        need(not 0xD800 <= point <= 0xDFFF, "PROBABILITY_SURROGATE")
+        size += 1 if point < 128 else 2 if point < 2048 else 3 if point < 65536 else 4
+        need(size <= max_frame_bytes, "PROBABILITY_FRAME_LIMIT")
+    row = _native_strict_json(cells[4].encode("utf-8"), max_frame_bytes)
+    _probability_keys_v1(row, (field.name for field in dataclass_fields(EconomicReceiptEventSpineV1)))
+    payload = row["typed_payload"]
+    _probability_keys_v1(payload, (field.name for field in dataclass_fields(ProbabilityProducerControlReceiptV1)))
+    _probability_keys_v1(payload["scope"], (field.name for field in dataclass_fields(ProbabilityProducerScopeV1)))
+    flags = row["no_effect_flags"]
+    _probability_keys_v1(flags, (field.name for field in dataclass_fields(NoEffectFlagsV1)))
+    if any(value is not False for value in flags.values()):
+        raise ContractValidationError(ReasonCode.RUNTIME_EFFECT_FORBIDDEN, "PROBABILITY_NO_EFFECT_FLAGS")
+    if row["record_type"] != EconomicRecordTypeV1.PROBABILITY_PRODUCER_CONTROL.value:
+        raise ContractValidationError(ReasonCode.SCHEMA_MISMATCH, "PROBABILITY_SPINE_DISCRIMINATOR")
+    kind = payload["control_kind"]
+    if type(kind) is not str or kind not in _PROBABILITY_BODY_FIELDS_V1:
+        raise ContractValidationError(ReasonCode.SCHEMA_MISMATCH, "PROBABILITY_CONTROL_KIND")
+    _probability_keys_v1(payload["body"], _PROBABILITY_BODY_FIELDS_V1[kind])
+
+    def tuples(value):
+        if type(value) is list:
+            return tuple(tuples(item) for item in value)
+        if type(value) is dict:
+            return {key: tuples(item) for key, item in value.items()}
+        return value
+
+    body = tuples(payload["body"])
+    if kind == "PREDICTION_REVIEW":
+        body["blocker_codes"] = tuple(ReasonCode(code) for code in body["blocker_codes"])
+    if kind == "ACCEPTANCE_RECEIPT":
+        claims = body["claims"]
+        need(type(claims) is dict, "PROBABILITY_CLAIMS")
+        if "blocker_codes" in claims:
+            claims["blocker_codes"] = tuple(ReasonCode(code) for code in claims["blocker_codes"])
+        if claims.get("prediction_basis_kind") == "PREDICTION_MODEL_RISK_BASIS":
+            conditions = claims.get("conditions")
+            need(type(conditions) is tuple and len(conditions) == 8, "PROBABILITY_CONDITIONS")
+            for index, condition in enumerate(conditions):
+                _probability_keys_v1(condition, ("condition_id", "active", "evidence_receipt_refs", "reason_codes"))
+                need(condition["condition_id"] == NO_TRADE_CONDITION_IDS_V1[index], "PROBABILITY_CONDITION_ORDER")
+            claims["conditions"] = tuple(NoTradeConditionOutcomeV1.from_canonical_mapping(condition) for condition in conditions)
+    need(type(payload["dependency_refs"]) is list, "PROBABILITY_DEPENDENCIES")
+    scope = ProbabilityProducerScopeV1(**payload["scope"])
+    need(scope == expected_scope and row["record_id"] == expected_record_id, "PROBABILITY_STORAGE_IDENTITY")
+    reconstructed_payload = ProbabilityProducerControlReceiptV1(**{
+        **payload, "scope": scope, "body": body, "dependency_refs": tuple(payload["dependency_refs"]),
+    })
+    record = EconomicReceiptEventSpineV1(**{
+        **row, "record_type": EconomicRecordTypeV1.PROBABILITY_PRODUCER_CONTROL,
+        "typed_payload": reconstructed_payload, "no_effect_flags": NO_EFFECTS_V1,
+    })
+    canonical = _bounded_probability_json_v1(_probability_control_projection_v1(record), max_bytes=max_frame_bytes)
+    need(canonical == deterministic_json(record) == cells[4], "PROBABILITY_HYDRATED_ROUNDTRIP")
+    need(cells == (record.record_id, record.effective_at.isoformat(), record.recorded_at.isoformat(), record.aggregate_id, canonical),
+         "PROBABILITY_STORAGE_MIRROR")
+    return record
 
 
 @dataclass(frozen=True, slots=True)
@@ -4177,3 +4709,25 @@ def _f14_singleton_witness_v1(value, expected_id):
     row = _f14_load_canonical_v1(text, _f14_spine_shape_v1(phase))
     body = _f14_load_canonical_v1(row['typed_payload']['canonical_payload_json'], _F14_PHASES[phase])
     return _f14_typed_spine_v1(text, expected_id, phase, body['scope'])
+
+
+def _probability_control_record_v1(*, record_id, payload, context_ref, causation_id, correlation_id, traceparent, tracestate):
+    """Build the existing immutable spine; only an issued append context can persist it."""
+    kind, body = payload.control_kind, payload.body
+    owners = {
+        "PUBLICATION": ("model_risk", "evidence"), "INPUT_BINDING": ("input_resolver", "input_resolver"),
+        "ACCEPTANCE_MANIFEST": ("input_resolver", "input_resolver"), "REVOCATION_APPLICATION": ("source_policy", "source_policy"),
+        "PREDICTION_RESULT": ("implementation_registry", "implementation_registry"), "PREDICTION_REVIEW": ("model_risk", "model_risk"),
+    }
+    semantic, implementation = _PROBABILITY_ROLE_OWNERS_V1[body["role"]] if kind == "ACCEPTANCE_RECEIPT" else owners[kind]
+    sequence = body["expected_sequence"] + 1 if kind == "PUBLICATION" else body["stream_ordinal"] if kind == "REVOCATION_APPLICATION" else 0
+    record = EconomicReceiptEventSpineV1(record_id=record_id, record_type=EconomicRecordTypeV1.PROBABILITY_PRODUCER_CONTROL,
+        schema_version="QTT_PROBABILITY_PRODUCER_CONTROL_SPINE_V1", semantic_owner=semantic, implementation_owner=implementation,
+        context_ref=context_ref, effective_at=parse_utc(_probability_utc_pair_v1(payload.effective_ns)["receipt_utc_floor"], field_name="effective_at"),
+        recorded_at=parse_utc(_probability_utc_pair_v1(payload.recorded_ns)["receipt_utc_floor"], field_name="recorded_at"),
+        causation_id=causation_id, correlation_id=correlation_id, traceparent=traceparent, tracestate=tracestate,
+        sequence=sequence, aggregate_id=deterministic_json(("V35", kind, _probability_scope_mapping_v1(payload.scope))),
+        aggregate_version=sequence if kind in ("PUBLICATION", "REVOCATION_APPLICATION") else 1,
+        authority_class="NO_EFFECT_MODEL_REVIEW_EVIDENCE", typed_payload=payload)
+    _validate_probability_control_spine_v1(record)
+    return record

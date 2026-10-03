@@ -77,6 +77,15 @@ PR169_AGENT_ORCH1_BRANCH = "pr169-agent-orch1"
 PR169_VAL1_BRANCH = "pr169-val1"
 PR169_QKU_FORMULA_EXP1_ROLLBACK_BRANCH = "pr169-qku-formula-exp1-rollback"
 VALIDATION_FIXTURE_BRANCH = "pr-ci-fastfail-validation-context-preflight"
+_VALIDATION_FIXTURE_REGISTERED_REPAIR_BRANCHES = (
+    'repair/main-pr166-sm2-bounded-idempotence-ci',
+    'repair/no-runtime-custody-and-ci-dependency-boundary',
+    'repair/pr153s-source-value-capture-closure-classifier',
+    'repair/pr154-post-merge-pytest-context-hygiene',
+    'repair/pr163-c-main-branch-context-after-merge',
+    'repair/st12-architecture-independent-oracle-closure',
+    'repair/st12-inherited-math-row-receipt-closure',
+)
 ST12A_BRANCH = "agent/st12a-contract-envelope"
 ST12B_BRANCH = "agent/st12b-contextual-computability-v3"
 ST12C_BRANCH = "agent/st12c-deterministic-receipts-accounting-v1"
@@ -3401,13 +3410,7 @@ def explain_pr_scope_decision(branch: str, path: str) -> dict[str, object]:
         }
 
     if branch_name == VALIDATION_FIXTURE_BRANCH:
-        from tools.ci_branch_context import (
-            EXPLICIT_DOWNSTREAM_REPAIR_BRANCH_CHANGED_PATHS,
-        )
-
-        for registered_repair_branch in sorted(
-            EXPLICIT_DOWNSTREAM_REPAIR_BRANCH_CHANGED_PATHS
-        ):
+        for registered_repair_branch in _VALIDATION_FIXTURE_REGISTERED_REPAIR_BRANCHES:
             registered_repair_decision = _registered_exact_repair_scope_decision(
                 registered_repair_branch,
                 normalized,

@@ -19,8 +19,16 @@ def load_rows(key: str) -> list[dict]:
     return [json.loads(line) for line in path.read_text(encoding="utf-8").splitlines() if line.strip()]
 
 
-def assert_rp5a_valid() -> None:
-    assert run_validation()["validation"] == "PR168_RP5A_LEGACY_SEMANTIC_AUDIT_OK"
+def _original_rp5a_read_context():
+    # The selected pytest integration must bind this original session. Test
+    # invocation and ambient environment never manufacture accepted capacity.
+    from tools.build_pr168_rp5a_legacy_semantic_audit import _require_builder_reads_v1
+    return _require_builder_reads_v1()
+
+
+def assert_rp5a_valid(*, builder_read_context=None) -> None:
+    original = _original_rp5a_read_context() if builder_read_context is None else builder_read_context
+    assert run_validation(builder_read_context=original)["validation"] == "PR168_RP5A_LEGACY_SEMANTIC_AUDIT_OK"
 
 
 def file_rows() -> list[dict]:

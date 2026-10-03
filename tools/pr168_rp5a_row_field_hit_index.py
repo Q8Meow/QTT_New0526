@@ -43,18 +43,15 @@ def build_row_field_hits(line_rows: list[dict[str, object]], repo_root: Path) ->
         file_kind = classify_file_kind(file_path)
         suffix = Path(file_path).suffix.lower()
         structured: list[dict[str, object]] = []
-        try:
-            size = (repo_root / file_path).stat().st_size
-        except OSError:
-            size = MAX_STRUCTURED_JSON_BYTES + 1
+        size = (repo_root / file_path).stat().st_size
         structured_candidate = suffix == ".jsonl" or suffix == ".json" or file_path.endswith(".manifest.json") or file_path.endswith(".report.json")
         if structured_candidate and size > MAX_STRUCTURED_JSON_BYTES:
             skipped_large.append(file_path)
         if size <= MAX_STRUCTURED_JSON_BYTES:
             if suffix == ".jsonl":
-                structured = scan_jsonl_file(file_path, repo_root)
+                structured = scan_jsonl_file(file_path, repo_root, max_matches=MAX_TOTAL_LINE_HITS - row_number)
             elif suffix == ".json" or file_path.endswith(".manifest.json") or file_path.endswith(".report.json"):
-                structured = scan_json_file(file_path, repo_root)
+                structured = scan_json_file(file_path, repo_root, max_matches=MAX_TOTAL_LINE_HITS - row_number)
 
         if structured:
             for item in structured:

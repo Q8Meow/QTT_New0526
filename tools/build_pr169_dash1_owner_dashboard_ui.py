@@ -893,7 +893,7 @@ def _ui1r2r3_meta(artifact_id: str, extra: dict[str, Any] | None = None) -> dict
 def _write_json(path: Path, payload: Any) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     serialized = json.dumps(payload, indent=2, sort_keys=True) + "\n"
-    if path.exists() and path.read_text(encoding="utf-8") == serialized:
+    if path.exists() and path.read_bytes().decode("utf-8") == serialized:
         return
     with path.open("w", encoding="utf-8", newline="\n") as handle:
         handle.write(serialized)
@@ -901,7 +901,7 @@ def _write_json(path: Path, payload: Any) -> None:
 
 def _write_text(path: Path, value: str) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
-    if path.exists() and path.read_text(encoding="utf-8") == value:
+    if path.exists() and path.read_bytes().decode("utf-8") == value:
         return
     with path.open("w", encoding="utf-8", newline="\n") as handle:
         handle.write(value)

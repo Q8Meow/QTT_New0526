@@ -241,8 +241,20 @@ def algorithm_test_vector_delta_records() -> list[dict[str, Any]]:
 
 
 def execute_test_vector(record: dict[str, Any]) -> bool:
-    module = importlib.import_module(record["implementation_module"])
-    function = getattr(module, record["implementation_function"])
+    module_name = record["implementation_module"]
+    function_name = record["implementation_function"]
+    declared = {
+        (item["implementation_module"], item["implementation_function"])
+        for item in (*formula_delta_specs(), *algorithm_delta_records())
+    }
+    if (
+        type(module_name) is not str
+        or type(function_name) is not str
+        or (module_name, function_name) not in declared
+    ):
+        raise ValueError("PR162C test-vector callable is not declared")
+    module = importlib.import_module(module_name)
+    function = getattr(module, function_name)
     observed = function(**record["inputs"])
     return _close(observed, record["expected_output"], float(record.get("tolerance", 1e-9)))
 

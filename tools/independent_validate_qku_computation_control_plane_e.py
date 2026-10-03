@@ -1450,6 +1450,51 @@ def validate_domain(domain: str) -> list[str]:
     return failures
 
 
+def _v35_authority_surface_failures():
+    """Independent source contract; no synthetic grant is counted as acceptance."""
+    root = Path(__file__).resolve().parents[1] / "src/qtt/stage1_prediction_markets/qku_computation_control_plane"
+    trees = {name: ast.parse((root / name).read_text(encoding="utf-8"), filename=name)
+             for name in ("protocols.py", "agent_policy.py", "service.py")}
+    fields = {
+        "ProbabilityIssuerReadRequestV1": ("role", "scope", "subject_refs", "issuer_ref"),
+        "ProbabilityIssuerContextV1": ("principal_ref", "control_domain_ref", "authentication_ref", "session_ref", "process_ref", "available_ns", "valid_until_ns"),
+        "ProbabilityIssuerAdmissionV1": ("role", "issuer_ref", "authority_dependency_refs", "valid_until_ns", "no_effect_flags"),
+    }
+    failures = []
+    for name, expected in fields.items():
+        cls = next(node for node in trees['protocols.py'].body if isinstance(node, ast.ClassDef) and node.name == name)
+        actual = tuple(node.target.id for node in cls.body if isinstance(node, ast.AnnAssign) and isinstance(node.target, ast.Name))
+        if actual != expected:
+            failures.append('V35 closed issuer field roster changed: ' + name)
+    resolver = next(node for node in trees['agent_policy.py'].body if isinstance(node, ast.ClassDef) and node.name == 'AgentCapabilityResolverV1')
+    methods = {node.name: node for node in resolver.body if isinstance(node, ast.FunctionDef)}
+    init = methods['__init__']
+    if tuple(arg.arg for arg in init.args.kwonlyargs) != ('probability_issuer_reader',):
+        failures.append('V35 issuer constructor introduced another provider selector')
+    for method, required in {
+        '_resolve_probability_issuer_context_v1': {'read_probability_issuers', '_probability_issuer_view_current_v1'},
+        '_resolve_probability_native_use_v1': {'read_probability_native_use', '_probability_use_binding_v1'},
+        '_check_probability_native_use_v1': {'check_probability_native_use', '_registered_v1'},
+    }.items():
+        calls = {node.func.attr for node in ast.walk(methods[method]) if isinstance(node, ast.Call) and isinstance(node.func, ast.Attribute)}
+        if not required <= calls:
+            failures.append('V35 original issuer/use composition changed: ' + method)
+    service = next(node for node in trees['service.py'].body if isinstance(node, ast.ClassDef) and node.name == 'QKUComputationControlPlaneV1')
+    operations = tuple(node for node in service.body if isinstance(node, ast.FunctionDef) and not node.name.startswith('_'))
+    expected_operations = ('resolve_identity', 'resolve_contextual_computability', 'resolve_applicable_stack',
+        'resolve_required_inputs', 'compute_component', 'compute_stack', 'compare_with_no_trade', 'evaluate_trade_plan',
+        'get_snapshot_view', 'explain_resolution', 'submit_candidate_proposal', 'request_materialization_work_order',
+        'compile_replay_paper_cohort', 'register_replay_paper_result', 'build_evidence_bundle')
+    if tuple(node.name for node in operations) != expected_operations:
+        failures.append('original fifteen public operations changed')
+    for operation in operations:
+        admissions = [node for node in ast.walk(operation) if isinstance(node, ast.Call) and
+                      isinstance(node.func, ast.Name) and node.func.id == '_admit_agent_request']
+        if len(admissions) != 1:
+            failures.append('public operation no longer has one original admission: ' + operation.name)
+    return failures
+
+
 def main(domain: str | None = None) -> int:
     selected = domain or "all"
     domains = tuple(DOMAIN_PREFIXES) if selected == "all" else (selected,)
@@ -1458,6 +1503,10 @@ def main(domain: str | None = None) -> int:
         for current_domain in domains
         for failure in validate_domain(current_domain)
     ]
+    try:
+        failures.extend(_v35_authority_surface_failures())
+    except (OSError, SyntaxError, ValueError, KeyError, TypeError, StopIteration) as exc:
+        failures.append(f"V35 independent authority surface failed: {exc}")
     if failures:
         print("\n".join(dict.fromkeys(failures)), file=sys.stderr)
         return 1

@@ -9,6 +9,7 @@ import json
 from pathlib import Path
 import subprocess
 import sys
+import os
 import time
 import types
 from typing import Any, Mapping, Sequence
@@ -123,6 +124,182 @@ VALIDATION_SCOPE_EVIDENCE_FIELDS = (
     "validation_scope_change_type",
 )
 ValidationScopeSignature = tuple[str, str, tuple[str, ...]]
+
+
+
+from contextvars import ContextVar
+from contextlib import contextmanager
+from dataclasses import dataclass
+
+_BUILDER_READ_SCOPE_V1 = ContextVar("_BUILDER_READ_SCOPE_V1", default=None)
+
+
+@dataclass(frozen=True)
+class _StatusEntry:
+    xy: str
+    path: str
+    original_path: str | None
+
+    def display(self):
+        paths = self.path if self.original_path is None else self.original_path + " -> " + self.path
+        return self.xy + " " + json.dumps(paths, ensure_ascii=True)
+
+
+def _parse_builder_status_v1(chunks, *, byte_limit, record_limit, path_byte_limit):
+    from tools.pr168_rp5a_git_grep_scanner import _scan_wire_bytes, _scan_path_identity
+
+    if any(type(value) is not int or value <= 0 for value in (byte_limit, record_limit, path_byte_limit)):
+        raise ValueError("original status read limits required")
+    data = _scan_wire_bytes(chunks, byte_limit)
+    offset = 0
+    rows = []
+    paths = set()
+    allowed = set(" MADRCU?!")
+    while offset < len(data):
+        if len(rows) >= record_limit or offset + 4 > len(data) or data[offset + 2] != 32:
+            raise ValueError("status record bound/framing failure")
+        xy = bytes(data[offset:offset + 2]).decode("ascii", errors="strict")
+        if (any(value not in allowed for value in xy) or xy in {"  ", "!!"}
+                or ("?" in xy and xy != "??") or "!" in xy):
+            raise ValueError("unknown original Git status code")
+        offset += 3
+        names = []
+        for _ in range(2 if "R" in xy or "C" in xy else 1):
+            try:
+                end = data.index(0, offset)
+            except ValueError as exc:
+                raise ValueError("truncated original Git status path") from exc
+            if not 0 < end - offset <= path_byte_limit:
+                raise ValueError("status path allowance exceeded")
+            path = bytes(data[offset:end]).decode("utf-8", errors="strict")
+            _scan_path_identity(path)
+            names.append(path)
+            offset = end + 1
+        if names[0] in paths:
+            raise ValueError("duplicate original status destination")
+        paths.add(names[0])
+        rows.append(_StatusEntry(xy, names[0], names[1] if len(names) == 2 else None))
+    return tuple(rows)
+
+
+class _Rp5aBuilderReadContext:
+    """An independently supplied builder-read suballocation, separate from scan phases."""
+    def __init__(self, *, ledger, stdout_bytes_per_call, status_record_limit, path_byte_limit,
+                 source_byte_limit, manifest_node_limit, manifest_command_limit, manifest_argument_limit,
+                 expected_historical_source, current_runner_source, expected_current_runner_source,
+                 scope_source, expected_scope_source, python_executable,
+                 check_candidate, before_surfaces, observe_surfaces, expected_baseline_ref=None):
+        from tools.validation_reliability import _ScanReservationLedger
+        if type(ledger) is not _ScanReservationLedger or ledger.invocations or ledger.state != "READY":
+            raise ValueError("builder reads require an original unused separate suballocation")
+        for value in (stdout_bytes_per_call, status_record_limit, path_byte_limit, source_byte_limit,
+                      manifest_node_limit, manifest_command_limit, manifest_argument_limit):
+            if type(value) is not int or value <= 0:
+                raise ValueError("original builder read limits required")
+        for value in (expected_historical_source, current_runner_source, expected_current_runner_source, scope_source, expected_scope_source):
+            if type(value) is not bytes or len(value) > source_byte_limit:
+                raise ValueError("bounded original builder source bytes required")
+        if not callable(check_candidate) or not callable(observe_surfaces):
+            raise ValueError("original candidate/surface owner missing")
+        self.ledger = ledger
+        self.stdout_bytes_per_call = stdout_bytes_per_call
+        self.status_record_limit = status_record_limit
+        self.path_byte_limit = path_byte_limit
+        self.source_byte_limit = source_byte_limit
+        self.manifest_node_limit = manifest_node_limit
+        self.manifest_command_limit = manifest_command_limit
+        self.manifest_argument_limit = manifest_argument_limit
+        self.expected_historical_source = expected_historical_source
+        self.current_runner_source = current_runner_source
+        self.expected_current_runner_source = expected_current_runner_source
+        self.scope_source = scope_source
+        self.expected_scope_source = expected_scope_source
+        self.python_executable = python_executable
+        self.check_candidate = check_candidate
+        self.before_surfaces = before_surfaces
+        self.observe_surfaces = observe_surfaces
+        if expected_baseline_ref is not None and (
+                type(expected_baseline_ref) is not str or len(expected_baseline_ref) not in (40, 64)
+                or any(c not in "0123456789abcdef" for c in expected_baseline_ref)):
+            raise ValueError("original expected baseline reference is invalid")
+        self.expected_baseline_ref = expected_baseline_ref
+        self.resolved_ref = None
+
+    def acquire(self, arguments, parser):
+        from tools.validation_reliability import _execute_scan_with_scratch
+        from tools.pr168_rp5a_git_grep_scanner import _scan_child_environment
+        fixed = {
+            ("status", "--porcelain=v1", "-z", "--untracked-files=all", "--ignore-submodules=none", "--renames", "--find-renames=50%"),
+            ("branch", "--show-current"), ("rev-parse", "--abbrev-ref", "HEAD"),
+            ("rev-parse", "--verify", "HEAD^1"), ("merge-base", "--all", "HEAD", "origin/main"),
+        }
+        arguments = tuple(arguments)
+        blob = ("cat-file", "blob", str(self.resolved_ref) + ":" + VALIDATION_SCOPE_RUNNER_PATH)
+        if arguments not in fixed and (self.resolved_ref is None or arguments != blob):
+            raise ValueError("unselected bounded builder Git read")
+        if dict(self.ledger.profile.child_environment) != _scan_child_environment(dict(self.ledger.profile.child_environment)):
+            raise ValueError("builder read environment was not admitted")
+        prefix = [self.ledger.profile.git_executable, "--no-pager", "--literal-pathspecs",
+                  "-c", "core.fsmonitor=false", "-c", "core.untrackedCache=false",
+                  "-c", "maintenance.auto=false", "-c", "gc.auto=0", "-c", "protocol.allow=never"]
+        return _execute_scan_with_scratch(
+            self.ledger, stdout_bound=self.stdout_bytes_per_call, pattern=None,
+            command=lambda _pattern: [*prefix, *arguments],
+            parser=lambda chunks, code: parser(chunks), check_candidate=self.check_candidate,
+            deadline_ns=self.ledger.profile.deadline_ns, allow_no_match=False)
+
+    def text(self, arguments, *, empty=False):
+        from tools.pr168_rp5a_git_grep_scanner import _scan_wire_bytes
+        def parse(chunks):
+            value = bytes(_scan_wire_bytes(chunks, self.stdout_bytes_per_call)).decode("utf-8", errors="strict")
+            text = value.removesuffix("\n").removesuffix("\r")
+            if (not text and not empty) or any(character in text for character in "\r\n\0"):
+                raise ValueError("builder Git result is not one original token line")
+            return text
+        return self.acquire(arguments, parse)
+
+    def manifest(self, source, expected):
+        from tools.run_validation_gates import _project_probability_validation_manifest_v1
+        return _project_probability_validation_manifest_v1(
+            source, self.scope_source, expected_runner_source=expected, expected_scope_source=self.expected_scope_source,
+            python_executable=self.python_executable, validation_dir=VALIDATION_SCOPE_VALIDATION_DIR,
+            pytest_basetemp=VALIDATION_SCOPE_PYTEST_BASETEMP, byte_limit=self.source_byte_limit,
+            node_limit=self.manifest_node_limit, command_limit=self.manifest_command_limit,
+            argument_limit=self.manifest_argument_limit, check_candidate=self.check_candidate)
+
+
+def _require_builder_reads_v1():
+    value = _BUILDER_READ_SCOPE_V1.get()
+    if type(value) is not _Rp5aBuilderReadContext:
+        raise ValueError("RP5A builder read operation lacks original admitted suballocation/source basis")
+    value.ledger.check()
+    return value
+
+
+@contextmanager
+def _bind_builder_reads_v1(original):
+    if type(original) is not _Rp5aBuilderReadContext or _BUILDER_READ_SCOPE_V1.get() is not None:
+        raise ValueError("original nonreentrant builder read owner required")
+    original.ledger.check()
+    token = _BUILDER_READ_SCOPE_V1.set(original)
+    try:
+        yield original
+    finally:
+        _BUILDER_READ_SCOPE_V1.reset(token)
+
+
+@contextmanager
+def _builder_reads_or_current_v1(original):
+    current = _BUILDER_READ_SCOPE_V1.get()
+    if current is not None:
+        if original is not None and current is not original:
+            raise ValueError("builder reader substitution")
+        yield _require_builder_reads_v1()
+    elif original is not None:
+        with _bind_builder_reads_v1(original):
+            yield original
+    else:
+        raise ValueError("original builder read context required")
 
 
 def _run_text(args: list[str]) -> str:
@@ -498,9 +675,14 @@ def _future_plan_rows(delete_rows: list[dict[str, object]], validation_rows: lis
     return rows
 
 
-def _status_rows() -> list[str]:
-    text = _run_text(["git", "status", "--porcelain=v1", "--untracked-files=all"])
-    return [line for line in text.splitlines() if line.strip()]
+def _status_rows() -> list[_StatusEntry]:
+    owner = _require_builder_reads_v1()
+    result = owner.acquire(
+        ("status", "--porcelain=v1", "-z", "--untracked-files=all", "--ignore-submodules=none", "--renames", "--find-renames=50%"),
+        lambda chunks: _parse_builder_status_v1(chunks, byte_limit=owner.stdout_bytes_per_call,
+                                               record_limit=owner.status_record_limit,
+                                               path_byte_limit=owner.path_byte_limit))
+    return list(result)
 
 
 def _validation_scope_counter(
@@ -557,90 +739,60 @@ def _validation_scope_refs(
 
 
 def _validation_scope_baseline() -> tuple[str, str, str]:
-    branch = current_branch_context(REPO_ROOT).branch
+    owner = _require_builder_reads_v1()
+    def original_git_stdout(root, arguments):
+        if root != REPO_ROOT:
+            raise ValueError("builder branch root changed")
+        # The shared capture established native zero; its stderr bytes are not
+        # exposed to this branch-only compatibility reader.
+        return 0, owner.text(arguments, empty=tuple(arguments) == ("branch", "--show-current")), None
+    branch = current_branch_context(REPO_ROOT, git_stdout=original_git_stdout).branch
     if branch == "main":
-        git_args = ["git", "rev-parse", "HEAD^1"]
+        arguments = ("rev-parse", "--verify", "HEAD^1")
         semantic_label = VALIDATION_SCOPE_MAIN_BASELINE_LABEL
         comparison_mode = VALIDATION_SCOPE_MAIN_COMPARISON_MODE
     else:
-        git_args = ["git", "merge-base", "HEAD", "origin/main"]
+        arguments = ("merge-base", "--all", "HEAD", "origin/main")
         semantic_label = VALIDATION_SCOPE_MERGE_BASELINE_LABEL
         comparison_mode = VALIDATION_SCOPE_MERGE_BASE_COMPARISON_MODE
-    internal_ref = _run_text(git_args)
-    if not internal_ref:
-        raise RuntimeError(
-            "RP5A_VALIDATION_SCOPE_BASELINE_RESOLVE_FAILED:"
-            f"{semantic_label}"
-        )
+    try:
+        internal_ref = owner.text(arguments)
+        if len(internal_ref) not in (40, 64) or any(character not in "0123456789abcdef" for character in internal_ref):
+            raise ValueError("baseline object is not one original Git object token")
+        if owner.expected_baseline_ref is not None and internal_ref != owner.expected_baseline_ref:
+            owner.ledger.hold()
+            raise ValueError("native baseline differs from independently admitted reference")
+        owner.resolved_ref = internal_ref
+    except Exception as exc:
+        raise RuntimeError("RP5A_VALIDATION_SCOPE_BASELINE_RESOLVE_FAILED:" + semantic_label) from exc
     return internal_ref, semantic_label, comparison_mode
 
 
-def _baseline_phase_manifest(
-    internal_ref: str,
-    semantic_label: str,
-) -> list[dict[str, object]]:
-    completed = subprocess.run(
-        [
-            "git",
-            "show",
-            f"{internal_ref}:{VALIDATION_SCOPE_RUNNER_PATH}",
-        ],
-        cwd=REPO_ROOT,
-        check=False,
-        capture_output=True,
-        text=True,
-        encoding="utf-8",
-        errors="replace",
-    )
-    if completed.returncode != 0 or not completed.stdout:
-        detail = completed.stderr.strip() or "baseline runner source is empty"
-        raise RuntimeError(
-            "RP5A_VALIDATION_SCOPE_BASELINE_READ_FAILED:"
-            f"{semantic_label}:{VALIDATION_SCOPE_RUNNER_PATH}:"
-            f"{detail}"
-        )
+def _baseline_phase_manifest(internal_ref: str, semantic_label: str) -> list[dict[str, object]]:
+    from tools.pr168_rp5a_git_grep_scanner import _scan_wire_bytes
 
-    module_name = f"_qtt_rp5a_baseline_runner_{uuid.uuid4().hex}"
-    baseline_module = types.ModuleType(module_name)
-    baseline_module.__file__ = str(REPO_ROOT / VALIDATION_SCOPE_RUNNER_PATH)
-    sys.modules[module_name] = baseline_module
+    owner = _require_builder_reads_v1()
+    if internal_ref != owner.resolved_ref:
+        raise ValueError("historical manifest lost original resolved object")
     try:
-        exec(
-            compile(
-                completed.stdout,
-                baseline_module.__file__,
-                "exec",
-            ),
-            baseline_module.__dict__,
-        )
-        build_manifest = getattr(
-            baseline_module,
-            "build_phase_manifest",
-            None,
-        )
-        if not callable(build_manifest):
-            raise RuntimeError(
-                "RP5A_VALIDATION_SCOPE_BASELINE_MANIFEST_BUILDER_MISSING:"
-                f"{semantic_label}:{VALIDATION_SCOPE_RUNNER_PATH}"
-            )
-        return build_manifest(
-            VALIDATION_SCOPE_VALIDATION_DIR,
-            VALIDATION_SCOPE_PYTEST_BASETEMP,
-        )
+        source = owner.acquire(("cat-file", "blob", internal_ref + ":" + VALIDATION_SCOPE_RUNNER_PATH),
+                               lambda chunks: bytes(_scan_wire_bytes(chunks, owner.source_byte_limit)))
+        if not source:
+            raise ValueError("historical runner blob is empty")
     except Exception as exc:
-        if isinstance(exc, RuntimeError) and str(exc).startswith(
-            "RP5A_VALIDATION_SCOPE_"
-        ):
-            raise
-        raise RuntimeError(
-            "RP5A_VALIDATION_SCOPE_BASELINE_LOAD_FAILED:"
-            f"{semantic_label}:{VALIDATION_SCOPE_RUNNER_PATH}"
-        ) from exc
-    finally:
-        sys.modules.pop(module_name, None)
+        raise RuntimeError("RP5A_VALIDATION_SCOPE_BASELINE_READ_FAILED:" + semantic_label) from exc
+    try:
+        return owner.manifest(source, owner.expected_historical_source)
+    except Exception as exc:
+        raise RuntimeError("RP5A_VALIDATION_SCOPE_BASELINE_LOAD_FAILED:" + semantic_label) from exc
 
 
-def _validation_scope_delta() -> dict[str, object]:
+def _validation_scope_delta(*, builder_read_context=None) -> dict[str, object]:
+    with _builder_reads_or_current_v1(builder_read_context):
+        return _validation_scope_delta_owned_v1()
+
+
+def _validation_scope_delta_owned_v1() -> dict[str, object]:
     (
         internal_ref,
         semantic_label,
@@ -650,9 +802,9 @@ def _validation_scope_delta() -> dict[str, object]:
         _baseline_phase_manifest(internal_ref, semantic_label)
     )
     current_counter = _validation_scope_counter(
-        current_validation_runner.build_phase_manifest(
-            VALIDATION_SCOPE_VALIDATION_DIR,
-            VALIDATION_SCOPE_PYTEST_BASETEMP,
+        _require_builder_reads_v1().manifest(
+            _require_builder_reads_v1().current_runner_source,
+            _require_builder_reads_v1().expected_current_runner_source,
         )
     )
     removed, added = _validation_scope_counter_delta(
@@ -709,12 +861,16 @@ _ALLOWED_CURRENTIZATION_ARTIFACT_PATHS = frozenset(
 )
 
 
-def _status_path(line: str) -> str:
-    return normalize_repo_path(line[3:] if len(line) > 3 else line)
+def _status_path(line: _StatusEntry) -> str:
+    if type(line) is not _StatusEntry:
+        raise TypeError("typed original Git status required")
+    return line.path
 
 
-def _status_code(line: str) -> str:
-    return line[:2].strip()
+def _status_code(line: _StatusEntry) -> str:
+    if type(line) is not _StatusEntry:
+        raise TypeError("typed original Git status required")
+    return line.xy
 
 
 def _is_legacy_generated_artifact_path(path: str) -> bool:
@@ -725,47 +881,57 @@ def _is_legacy_generated_artifact_path(path: str) -> bool:
     )
 
 
-def _no_deletion_proof(baseline_status_rows: list[str] | None = None) -> dict[str, object]:
-    baseline_status_rows = baseline_status_rows or []
-    baseline_legacy_modified = {
-        _status_path(line)
-        for line in baseline_status_rows
-        if _status_code(line) in {"M", "A"}
-        and _is_legacy_generated_artifact_path(_status_path(line))
-    }
+def _no_deletion_proof(baseline_status_rows: list[_StatusEntry] | None = None) -> dict[str, object]:
+    from types import MappingProxyType
+    from tools.validation_reliability import _ScanCandidateSurface, _scan_candidate_fence
+
+    owner = _require_builder_reads_v1()
+    baseline = [] if baseline_status_rows is None else baseline_status_rows
     rows = _status_rows()
-    deleted = [line for line in rows if _status_code(line) == "D" or "D" in line[:2]]
-    moved = [line for line in rows if "R" in line[:2]]
-    legacy_modified = []
-    for line in rows:
-        path = _status_path(line)
-        if (
-            _is_legacy_generated_artifact_path(path)
-            and _status_code(line) in {"M", "A"}
-            and path not in baseline_legacy_modified
-        ):
-            legacy_modified.append(path)
+    for row in (*baseline, *rows):
+        if type(row) is not _StatusEntry or "U" in row.xy or row.xy in {"DD", "AA"}:
+            raise ValueError("unresolved or untyped original status cannot prove no deletion")
+    before = owner.before_surfaces
+    if type(before) is not MappingProxyType:
+        raise ValueError("original immutable candidate surface basis required")
+    for path, surface in before.items():
+        if type(surface) is not _ScanCandidateSurface or surface.path != path:
+            raise ValueError("invalid original candidate surface join")
+    required = set(before)
+    for row in (*baseline, *rows):
+        for path in (row.path, row.original_path):
+            if path is not None and _is_legacy_generated_artifact_path(path):
+                required.add(path)
+    if not required <= set(before):
+        raise ValueError("status endpoint lacks original before-surface evidence")
+    after = owner.observe_surfaces(tuple(sorted(required)))
+    if type(after) is not MappingProxyType or set(after) != required:
+        raise ValueError("original final candidate surface join is incomplete")
+    for path, surface in after.items():
+        if type(surface) is not _ScanCandidateSurface or surface.path != path:
+            raise ValueError("invalid final candidate surface join")
+    baseline_legacy_modified = {
+        row.path for row in baseline if any(value in row.xy for value in "MA")
+        and _is_legacy_generated_artifact_path(row.path)
+    }
+    legacy_modified = sorted(path for path in required
+                             if _is_legacy_generated_artifact_path(path) and before[path] != after[path])
+    deleted = [row.display() for row in rows if "D" in row.xy]
+    moved = [row.display() for row in rows if "R" in row.xy]
     validation_scope_delta = _validation_scope_delta()
-    return {
+    result = {
         **FORBIDDEN_OPERATION_COUNTERS,
-        "deleted_file_count": len(deleted),
-        "moved_file_count": len(moved),
-        "archived_file_count": 0,
-        "legacy_artifact_content_modified_count": len(legacy_modified),
-        **validation_scope_delta,
-        "runtime_stack_generation_count": 0,
-        "trade_simulation_count": 0,
-        "formula_reclaim_count": 0,
-        "active_registry_authority_created_count": 0,
-        "runtime_stack_generation_refs": [],
-        "trade_simulation_refs": [],
-        "formula_reclaim_refs": [],
-        "legacy_modified_refs": legacy_modified[:50],
+        "deleted_file_count": len(deleted), "moved_file_count": len(moved), "archived_file_count": 0,
+        "legacy_artifact_content_modified_count": len(legacy_modified), **validation_scope_delta,
+        "runtime_stack_generation_count": 0, "trade_simulation_count": 0, "formula_reclaim_count": 0,
+        "active_registry_authority_created_count": 0, "runtime_stack_generation_refs": [],
+        "trade_simulation_refs": [], "formula_reclaim_refs": [], "legacy_modified_refs": legacy_modified[:50],
         "preexisting_legacy_artifact_modified_count": len(baseline_legacy_modified),
         "preexisting_legacy_artifact_modified_refs": sorted(baseline_legacy_modified)[:50],
-        "deleted_refs": deleted,
-        "moved_refs": moved,
+        "deleted_refs": deleted, "moved_refs": moved,
     }
+    _scan_candidate_fence(owner.check_candidate)
+    return result
 
 
 def _path_audit_rows(extra_owned_paths: list[str]) -> list[dict[str, object]]:
@@ -1223,7 +1389,12 @@ def _validation_scope_evidence_only_payloads(
 
 def currentize_validation_scope_evidence_only(
 ) -> dict[str, dict[str, Any]]:
-    branch = current_branch_context(REPO_ROOT).branch
+    owner = _require_builder_reads_v1()
+    def reader(root, arguments):
+        if root != REPO_ROOT:
+            raise ValueError("builder branch root changed")
+        return 0, owner.text(arguments, empty=tuple(arguments) == ("branch", "--show-current")), None
+    branch = current_branch_context(REPO_ROOT, git_stdout=reader).branch
     if branch != ST12A_BRANCH:
         raise RuntimeError(
             "RP5A_VALIDATION_SCOPE_EVIDENCE_ONLY_BRANCH_INVALID:"
@@ -1254,7 +1425,51 @@ def _quick_selftest_files(files: list[str]) -> list[str]:
     return [*preferred[:900], *remainder[:100]][:1000]
 
 
-def build_all(*, offline: bool = True, quick_selftest: bool = False) -> dict[str, object]:
+def _require_builder_scan_context(scan_context):
+    from tools.pr168_rp5a_git_grep_scanner import _ScanInvocation
+
+    if type(scan_context) is not _ScanInvocation:
+        raise ValueError("full RP5A build requires the original admitted scan invocation")
+    return scan_context
+
+
+def _merge_scan_incompleteness(scan_stats, *, selection_incomplete=False, row_field_stats=None):
+    if type(scan_stats) is not dict or type(selection_incomplete) is not bool:
+        raise ValueError("invalid original scan status")
+    flag = scan_stats.get("budget_exhausted_flag")
+    state = scan_stats.get("scan_budget_status")
+    reasons = scan_stats.get("budget_exhaustion_reasons")
+    if (type(flag) is not bool or state not in {"SCAN_BUDGET_OK", "SCAN_BUDGET_EXHAUSTED"}
+            or flag != (state == "SCAN_BUDGET_EXHAUSTED") or type(reasons) not in {tuple, list}
+            or any(type(reason) is not str or not reason for reason in reasons)
+            or (not flag and reasons)):
+        raise ValueError("contradictory original scan completeness")
+    result = dict(scan_stats)
+    retained = list(reasons)
+    additions = []
+    if selection_incomplete:
+        additions.append("MAX_FILES_SCANNED")
+    if row_field_stats is not None:
+        if type(row_field_stats) is not dict:
+            raise ValueError("invalid structured scan status")
+        row_flag = row_field_stats.get("row_field_budget_exhausted_flag")
+        omitted = row_field_stats.get("skipped_large_structured_file_count")
+        if type(row_flag) is not bool or type(omitted) is not int or omitted < 0:
+            raise ValueError("invalid structured scan completeness")
+        if row_flag:
+            additions.append("ROW_FIELD_MATCH_LIMIT")
+        if omitted:
+            additions.append("STRUCTURED_SIZE_LIMIT")
+    for reason in additions:
+        if reason not in retained:
+            retained.append(reason)
+    result["budget_exhaustion_reasons"] = retained
+    result["budget_exhausted_flag"] = flag or bool(additions)
+    result["scan_budget_status"] = "SCAN_BUDGET_EXHAUSTED" if result["budget_exhausted_flag"] else "SCAN_BUDGET_OK"
+    return result
+
+
+def build_all(*, offline: bool = True, quick_selftest: bool = False, scan_context=None) -> dict[str, object]:
     timer = PhaseTimer()
     baseline_status_rows = _status_rows()
     _write_checkpoint("start", offline=offline, quick_selftest=quick_selftest)
@@ -1271,7 +1486,8 @@ def build_all(*, offline: bool = True, quick_selftest: bool = False) -> dict[str
     _log_phase("preflight_and_crosswalk", started_at=timer.started_at)
 
     phase = timer.start_phase()
-    all_files = scannable_files(REPO_ROOT)
+    scan_context = _require_builder_scan_context(scan_context)
+    all_files = scannable_files(REPO_ROOT, scan_context=scan_context)
     files = _quick_selftest_files(all_files) if quick_selftest else all_files[:MAX_FILES_SCANNED]
     max_wall_seconds = 180 if quick_selftest else MAX_WALL_SECONDS
     max_files_scanned = len(files) if quick_selftest else MAX_FILES_SCANNED
@@ -1285,7 +1501,9 @@ def build_all(*, offline: bool = True, quick_selftest: bool = False) -> dict[str
         max_matched_files=max_matched_files,
         max_total_line_hits=max_total_line_hits,
         progress_interval_seconds=PROGRESS_INTERVAL_SECONDS,
+        scan_context=scan_context,
     )
+    scan_stats = _merge_scan_incompleteness(scan_stats, selection_incomplete=len(all_files) > len(files))
     timer.mark("rg_two_pass_line_scan", phase)
     checkpoint_scan_stats = {key: value for key, value in scan_stats.items() if key != "files_scanned_count"}
     _write_checkpoint("rg_two_pass_line_scan", files_scanned_count=len(files), line_hit_count=len(line_rows), **checkpoint_scan_stats)
@@ -1293,6 +1511,7 @@ def build_all(*, offline: bool = True, quick_selftest: bool = False) -> dict[str
 
     phase = timer.start_phase()
     hit_rows = build_row_field_hits(line_rows, REPO_ROOT)
+    scan_stats = _merge_scan_incompleteness(scan_stats, row_field_stats=LAST_ROW_FIELD_STATS)
     file_term_map = _group_hits_by_file(hit_rows)
     matched_files = sorted(file_term_map)
     timer.mark("bounded_row_field_hit_index", phase)
@@ -1320,7 +1539,7 @@ def build_all(*, offline: bool = True, quick_selftest: bool = False) -> dict[str
     _log_phase("bounded_dependency_graphs", files_processed=len(files), matched_files=len(matched_files), started_at=timer.started_at)
 
     phase = timer.start_phase()
-    identity_occurrences = scan_identity_occurrences(REPO_ROOT, matched_files)
+    identity_occurrences = scan_identity_occurrences(REPO_ROOT, matched_files, scan_context=scan_context)
     identity_rows = build_identity_dependency_rows(matched_files, identity_occurrences)
     custody_rows = build_identity_custody_rows(matched_files, identity_occurrences)
     agent_rows = build_agent_touchpoint_rows(matched_files, REPO_ROOT)
@@ -1556,14 +1775,116 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     return parser.parse_args(argv)
 
 
-def main(argv: Sequence[str] | None = None) -> int:
+def main(argv: Sequence[str] | None = None, *, scan_context=None) -> int:
     args = parse_args(argv)
     if args.validation_scope_evidence_only:
         currentize_validation_scope_evidence_only()
         return 0
-    build_all(offline=bool(args.offline), quick_selftest=bool(args.quick_selftest))
+    build_all(offline=bool(args.offline), quick_selftest=bool(args.quick_selftest), scan_context=scan_context)
     return 0
 
 
+
+def _rp5a_reconstruct_reader_v1(reader, basis, fence):
+    from types import MappingProxyType
+    from tools.validation_reliability import _Rp5aReadBasisV1, _ScanCandidateFence, _ScanReservationLedger
+    if (type(basis) is not _Rp5aReadBasisV1 or type(fence) is not _ScanCandidateFence
+            or fence.root != REPO_ROOT or Path(reader.repo_root) != REPO_ROOT):
+        raise ValueError("original fixed RP5A reader reconstruction operands required")
+    ledger = _ScanReservationLedger(reader, reader_only=True)
+    try:
+        current, expected_current = fence.read_original_source("tools/run_validation_gates.py", basis.source_byte_limit)
+        scope, expected_scope = fence.read_original_source("tools/validation_scope_registry.py", basis.source_byte_limit)
+        before = MappingProxyType({row.path: row for row in fence.rows if _is_legacy_generated_artifact_path(row.path)})
+        original = _Rp5aBuilderReadContext(
+            ledger=ledger, **{name: getattr(basis, name) for name in tuple(basis.__dataclass_fields__)[2:]},
+            expected_historical_source=basis.historical_runner_bytes,
+            current_runner_source=current, expected_current_runner_source=expected_current,
+            scope_source=scope, expected_scope_source=expected_scope, python_executable=sys.executable,
+            check_candidate=fence, before_surfaces=before, observe_surfaces=fence.observe_surfaces,
+            expected_baseline_ref=basis.baseline_ref)
+        fence()
+        return original
+    except BaseException:
+        ledger.hold()
+        raise
+
+
+@contextmanager
+def _rp5a_bound_reader_v1(original):
+    from tools.validation_reliability import _ScanCandidateFence
+    lease_fence = original.check_candidate
+    if type(lease_fence) is not _ScanCandidateFence or lease_fence.wire_version != 3:
+        lease_fence = None
+    errors = []
+    try:
+        with _bind_builder_reads_v1(original):
+            yield original
+    except BaseException as error:
+        errors.append(error)
+    try:
+        original.check_candidate()
+        original.ledger.check()
+        if original.ledger.active is not None:
+            raise ValueError("RP5A reader exited with an unresolved original reservation")
+    except BaseException as error:
+        errors.append(error)
+    if lease_fence is not None:
+        try:
+            lease_fence.close_payload_lease()
+        except BaseException as error:
+            errors.append(error)
+    if errors:
+        original.ledger.hold()
+        if len(errors) == 1:
+            raise errors[0]
+        raise BaseExceptionGroup("RP5A consumer and original reader exit failed", errors)
+
+
+def _standalone_main_v1(argv=None, *, builder_read_context=None):
+    """Consume the admitted descriptor before the otherwise missing context."""
+    arguments = tuple(sys.argv[1:] if argv is None else argv)
+    args = parse_args(arguments)
+    from tools.pr168_rp5a_git_grep_scanner import _ScanInvocation
+    if builder_read_context is not None:
+        # Retain the original explicitly supplied in-process compatibility route.
+        with _builder_reads_or_current_v1(builder_read_context):
+            if args.validation_scope_evidence_only:
+                return main(arguments)
+            from tools.validation_reliability import _read_scan_bound_launch_fd
+            _, profile, fence = _read_scan_bound_launch_fd(
+                sys.stdin.fileno(), repo_root=REPO_ROOT, environment=os.environ.copy(),
+                explicit_basetemp=None, original_argv=tuple(sys.orig_argv))
+            result = main(arguments, scan_context=_ScanInvocation(profile, check_candidate=fence))
+            fence()
+            return result
+    from tools.validation_reliability import _read_rp5a_bound_launch_fd_v1
+    role = "EVIDENCE" if args.validation_scope_evidence_only else "SCANNER"
+    _, scanner, reader, basis, fence, parent = _read_rp5a_bound_launch_fd_v1(
+        sys.stdin.fileno(), repo_root=REPO_ROOT, environment=os.environ.copy(),
+        explicit_basetemp=None, original_argv=tuple(sys.orig_argv), expected_role=role)
+    scope_owns_lease = False
+    errors = []
+    try:
+        if parent is not None:
+            raise ValueError("standalone RP5A builder cannot inherit pytest delegation")
+        original = _rp5a_reconstruct_reader_v1(reader, basis, fence)
+        invocation = None if scanner is None else _ScanInvocation(scanner, check_candidate=fence)
+        scope_owns_lease = True
+        with _rp5a_bound_reader_v1(original):
+            result = main(arguments, scan_context=invocation)
+            fence()
+    except BaseException as body:
+        errors.append(body)
+    if not scope_owns_lease and fence.wire_version == 3:
+        try:
+            fence.close_payload_lease()
+        except BaseException as error:
+            errors.append(error)
+    from tools.validation_reliability import _scan_raise_errors
+    _scan_raise_errors(errors)
+    return result
+
+
 if __name__ == "__main__":
-    raise SystemExit(main())
+    raise SystemExit(_standalone_main_v1())

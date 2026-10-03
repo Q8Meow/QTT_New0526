@@ -54,12 +54,19 @@ def _run_json(args: list[str]) -> object | None:
 
 
 def collect_preflight(*, offline: bool = False) -> dict[str, Any]:
+    if type(offline) is not bool:
+        raise TypeError("offline must be an exact Boolean")
     existing = report_path("PR168_RP5B_Preflight.report.json")
-    if offline and existing.is_file():
+    if offline:
+        from collections.abc import Mapping
+
+        if not existing.is_file():
+            raise RuntimeError("RP5B_OFFLINE_PREFLIGHT_MISSING")
         payload = read_json(existing)
-        records = payload.get("records")
-        if isinstance(records, dict):
-            return dict(records)
+        records = payload.get("records") if isinstance(payload, Mapping) else None
+        if not isinstance(records, Mapping):
+            raise RuntimeError("RP5B_OFFLINE_PREFLIGHT_RECORDS_INVALID")
+        return dict(records)
 
     current_branch = _run_text(["git", "branch", "--show-current"])
     origin_main_head = _run_text(["git", "rev-parse", "origin/main"])

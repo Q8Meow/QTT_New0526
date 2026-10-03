@@ -6,6 +6,7 @@ from contextlib import contextmanager
 from datetime import datetime
 from pathlib import Path
 import sqlite3
+import time
 from typing import Mapping
 
 from .accounting import (
@@ -35,12 +36,17 @@ from .persistence import (
     PersistenceAdapterV1,
     PersistenceAvailabilityV1,
     PersistenceTransactionV1,
+    _probability_read_check_v1, _probability_read_roots_v1, _probability_read_aggregates_v1,
+    _probability_cell_sizes_v1, _probability_snapshot_from_cells_v1, _probability_require_append_context_v1,
+    _probability_charge_read_v1,
+    _probability_select_committed_cells_v1,
 )
 from .receipts import (
     DurableComputationExecutionReceiptRecordV1, EconomicEventRecordV1,
     EconomicReceiptEventSpineV1, EconomicRecordTypeV1, PrivateObservationClockReceiptV1,
     ValueLineageEdgeV1, _private_clock_reconstruct_spine_v1,
     PrivateEvidenceWitnessV1, _f14_singleton_witness_v1,
+    ProbabilityProducerControlReceiptV1, _validate_probability_control_spine_v1,
 )
 from .rollback import (
     JournalReversalBundleV1,
@@ -172,6 +178,9 @@ class _SQLiteReferenceTransactionV1(PersistenceTransactionV1):
         try:
             self._adapter._connection.execute("COMMIT")
         except sqlite3.Error as exc:
+            if getattr(self._adapter, "_probability_commit_attempt_v1", None) is self:
+                self._adapter._availability = PersistenceAvailabilityV1.INTEGRITY_FAILURE
+                raise PersistenceContractError(ReasonCode.PERSISTENCE_UNAVAILABLE, "PROBABILITY_COMMIT_UNKNOWN") from exc
             try:
                 self._adapter._connection.execute("ROLLBACK")
             except sqlite3.Error:
@@ -214,6 +223,8 @@ class SQLiteReferenceAdapterV1(PersistenceAdapterV1):
         self.busy_timeout_ms = busy_timeout_ms
         self.max_transaction_attempts = max_transaction_attempts
         self._active_transaction: _SQLiteReferenceTransactionV1 | None = None
+        self._probability_read_active_v1 = False
+        self._probability_progress_owned_v1 = False
         self._availability = PersistenceAvailabilityV1.UNAVAILABLE
         try:
             self._connection = sqlite3.connect(
@@ -284,12 +295,16 @@ class SQLiteReferenceAdapterV1(PersistenceAdapterV1):
             raise PersistenceContractError(ReasonCode.PERSISTENCE_UNAVAILABLE, "trusted_schema pragma was not disabled")
 
     def close(self) -> None:
+        if self._probability_read_active_v1:
+            raise TransactionContractError(ReasonCode.TRANSACTION_STATE_INVALID, "probability read owns this connection")
         if self._active_transaction is not None and self._active_transaction.is_active:
             self._active_transaction.rollback()
         self._connection.close()
         self._availability = PersistenceAvailabilityV1.UNAVAILABLE
 
     def begin_transaction(self) -> PersistenceTransactionV1:
+        if self._probability_read_active_v1:
+            raise TransactionContractError(ReasonCode.TRANSACTION_STATE_INVALID, "probability read owns this connection")
         if self._availability is not PersistenceAvailabilityV1.AVAILABLE_REFERENCE:
             raise PersistenceContractError(ReasonCode.PERSISTENCE_UNAVAILABLE, "reference persistence is unavailable")
         if self._active_transaction is not None and self._active_transaction.is_active:
@@ -355,6 +370,10 @@ class SQLiteReferenceAdapterV1(PersistenceAdapterV1):
     def insert_receipt_record(self, transaction: PersistenceTransactionV1, record: EconomicReceiptEventSpineV1) -> None:
         self._transaction(transaction)
         payload = record.typed_payload
+        if (record.record_type is EconomicRecordTypeV1.PROBABILITY_PRODUCER_CONTROL
+                or type(payload) is ProbabilityProducerControlReceiptV1):
+            _validate_probability_control_spine_v1(record)
+            _probability_require_append_context_v1(self, transaction, record)
         if (record.record_type == EconomicRecordTypeV1.PRIVATE_OBSERVATION_CLOCK
                 or type(payload) is PrivateObservationClockReceiptV1):
             record = _private_clock_reconstruct_spine_v1(record, expected_record_id=record.record_id)
@@ -369,6 +388,239 @@ class SQLiteReferenceAdapterV1(PersistenceAdapterV1):
             return
         self._assert_cross_table_identity_available("receipt_records", record.record_id)
         self._insert(transaction, "INSERT INTO receipt_records VALUES(?,?,?,?,?)", (record.record_id, _iso(record.effective_at, "effective_at"), _iso(record.recorded_at, "recorded_at"), record.aggregate_id, deterministic_json(record)), "receipt record")
+
+    def _probability_append_snapshot_v1(self, transaction, request):
+        from dataclasses import replace
+        self._transaction(transaction)
+        if self._probability_progress_owned_v1:
+            raise PersistenceContractError(ReasonCode.PERSISTENCE_CONFLICT, "PROBABILITY_APPEND_PROGRESS_ALREADY_OWNED")
+        now = _probability_read_check_v1(request)
+        request = replace(request, effective_cutoff_ns=now, recorded_cutoff_ns=now)
+        cursors = []
+        failures = []
+        cleanup_failures = []
+        progress_failure = None
+        steps = 0
+        def progress():
+            nonlocal steps, progress_failure
+            steps += 1
+            try:
+                _probability_read_check_v1(request)
+                if steps > request.limits.max_sql_steps:
+                    raise PersistenceContractError(ReasonCode.RESOURCE_BOUND_EXCEEDED, "PROBABILITY_APPEND_SQL_STEPS")
+            except BaseException as error:
+                progress_failure = error
+                return 1
+            return 0
+        try:
+            self._probability_progress_owned_v1 = True
+            self._connection.set_progress_handler(progress, 1)
+            cursors.append(self._connection.cursor())
+            cursors.append(self._connection.cursor())
+            cursors[0].execute("PRAGMA encoding")
+            if cursors[0].fetchone() != ("UTF-8",) or cursors[0].fetchone() is not None:
+                raise PersistenceContractError(ReasonCode.SCHEMA_MISMATCH, "PROBABILITY_SQL_ENCODING")
+            cells, decoded = self._read_probability_receipt_cells_v1(request, *cursors)
+            snapshot = _probability_snapshot_from_cells_v1(request, cells, _probability_read_check_v1(request), decoded_records=decoded)
+        except BaseException as error:
+            failures.append(progress_failure if progress_failure is not None else error)
+        finally:
+            try:
+                self._connection.set_progress_handler(None, 0)
+            except BaseException as error:
+                cleanup_failures.append(error)
+            for cursor in reversed(cursors):
+                try:
+                    cursor.close()
+                except BaseException as error:
+                    cleanup_failures.append(error)
+            if cleanup_failures:
+                self._availability = PersistenceAvailabilityV1.UNAVAILABLE
+            else:
+                self._probability_progress_owned_v1 = False
+            for error in cleanup_failures:
+                if not any(error is original for original in failures):
+                    failures.append(error)
+        if failures:
+            if len(failures) == 1:
+                raise failures[0]
+            raise BaseExceptionGroup("probability append observation cleanup", failures)
+        return snapshot
+
+    def _read_probability_receipt_cells_v1(self, request, metadata_cursor, value_cursor):
+        """Fixed same-snapshot acquisition; no caller SQL, serializer or locator."""
+        metadata_projection = (
+            "SELECT rowid, typeof(record_id), length(CAST(record_id AS BLOB)), "
+            "typeof(effective_at), length(CAST(effective_at AS BLOB)), "
+            "typeof(recorded_at), length(CAST(recorded_at AS BLOB)), "
+            "typeof(aggregate_id), length(CAST(aggregate_id AS BLOB)), "
+            "typeof(payload_json), length(CAST(payload_json AS BLOB)) FROM receipt_records "
+        )
+        by_locator, cells_by_ref = {}, {}
+        total = 0
+
+        def acquire(metadata):
+            nonlocal total
+            _probability_read_check_v1(request)
+            if (type(metadata) is not tuple or len(metadata) != 11 or type(metadata[0]) is not int or
+                    any(metadata[i] != "text" for i in (1, 3, 5, 7, 9))):
+                raise PersistenceContractError(ReasonCode.SCHEMA_MISMATCH, "PROBABILITY_SQL_CELL_TYPE")
+            lengths = tuple(metadata[i] for i in (2, 4, 6, 8, 10))
+            if any(type(size) is not int or size < 0 or size > request.limits.max_frame_bytes for size in lengths):
+                raise PersistenceContractError(ReasonCode.PERSISTENCE_UNAVAILABLE, "PROBABILITY_SQL_CELL_LIMIT")
+            locator = metadata[0]
+            if locator in by_locator:
+                if by_locator[locator][0] != metadata:
+                    raise PersistenceContractError(ReasonCode.PERSISTENCE_CONFLICT, "PROBABILITY_SQL_METADATA_CHANGED")
+                return by_locator[locator][1]
+            if len(by_locator) >= request.limits.max_records or total + sum(lengths) > request.limits.max_total_bytes:
+                raise PersistenceContractError(ReasonCode.PERSISTENCE_UNAVAILABLE, "PROBABILITY_SQL_READ_BUDGET")
+            _probability_charge_read_v1(self, request.scope, sum(lengths))
+            value_cursor.execute(
+                "SELECT record_id, effective_at, recorded_at, aggregate_id, payload_json FROM receipt_records WHERE rowid = ?",
+                (locator,),
+            )
+            cells = value_cursor.fetchone()
+            if cells is None or value_cursor.fetchone() is not None:
+                raise PersistenceContractError(ReasonCode.PERSISTENCE_CONFLICT, "PROBABILITY_SQL_LOCATOR_CHANGED")
+            if _probability_cell_sizes_v1(cells, max_frame_bytes=request.limits.max_frame_bytes) != lengths:
+                raise PersistenceContractError(ReasonCode.PERSISTENCE_CONFLICT, "PROBABILITY_SQL_BYTE_MIRROR")
+            if tuple(len(cell.encode("utf-8", errors="strict")) for cell in cells) != lengths:
+                raise PersistenceContractError(ReasonCode.PERSISTENCE_CONFLICT, "PROBABILITY_SQL_UTF8_MIRROR")
+            if cells[0] in cells_by_ref:
+                raise PersistenceContractError(ReasonCode.PERSISTENCE_CONFLICT, "PROBABILITY_SQL_DUPLICATE_IDENTITY")
+            total += sum(lengths)
+            by_locator[locator] = (metadata, cells)
+            cells_by_ref[cells[0]] = cells
+            _probability_read_check_v1(request)
+            return cells
+
+        def exact(ref, required):
+            _probability_read_check_v1(request)
+            metadata_cursor.execute(metadata_projection + "WHERE record_id = ?", (ref,))
+            metadata = metadata_cursor.fetchone()
+            if metadata is None:
+                if required or request.purpose == "EXACT_REPEAT":
+                    self._assert_cross_table_identity_available("receipt_records", ref)
+                if required:
+                    raise PersistenceContractError(ReasonCode.OWNER_DATA_MISSING, "PROBABILITY_REQUIRED_COMMITTED_RECORD")
+                return None
+            cells = acquire(metadata)
+            if cells[0] != ref or metadata_cursor.fetchone() is not None:
+                raise PersistenceContractError(ReasonCode.PERSISTENCE_CONFLICT, "PROBABILITY_SQL_ROOT_IDENTITY")
+            return cells
+
+        def aggregate(key):
+            metadata_cursor.execute(metadata_projection + "WHERE aggregate_id = ? ORDER BY rowid LIMIT ?",
+                                    (key, request.limits.max_records + 1))
+            while True:
+                _probability_read_check_v1(request)
+                metadata = metadata_cursor.fetchone()
+                if metadata is None:
+                    break
+                cells = acquire(metadata)
+                if cells[3] != key:
+                    raise PersistenceContractError(ReasonCode.PERSISTENCE_CONFLICT, "PROBABILITY_SQL_AGGREGATE_MIRROR")
+                yield cells
+        return _probability_select_committed_cells_v1(request, exact, aggregate)
+
+    @contextmanager
+    def load_committed_probability_producer_state_v1(self, request):
+        started = _probability_read_check_v1(request)
+        if self._availability is not PersistenceAvailabilityV1.AVAILABLE_REFERENCE:
+            raise PersistenceContractError(ReasonCode.PERSISTENCE_UNAVAILABLE, "reference persistence is unavailable")
+        if (self._probability_read_active_v1 or self._probability_progress_owned_v1 or
+                (self._active_transaction is not None and self._active_transaction.is_active) or self._connection.in_transaction):
+            raise PersistenceContractError(ReasonCode.TRANSACTION_STATE_INVALID, "probability read conflicts with connection ownership")
+        self._probability_read_active_v1 = True
+        self._probability_progress_owned_v1 = True
+        registered = begin_attempted = body_ok = False
+        uncertain_handler = False
+        cursors = []
+        body_error = None
+        cleanup_errors = []
+        progress_errors = []
+        steps = 0
+
+        def progress():
+            nonlocal steps
+            try:
+                steps += 1
+                mono = time.monotonic_ns()
+                if type(mono) is not int or steps > request.limits.max_sql_steps or mono >= request.limits.deadline_monotonic_ns:
+                    raise PersistenceContractError(ReasonCode.PERSISTENCE_UNAVAILABLE, "PROBABILITY_SQL_PROGRESS_BUDGET")
+                return 0
+            except BaseException as error:
+                if not progress_errors:
+                    progress_errors.append(error)
+                return 1
+
+        try:
+            try:
+                self._connection.set_progress_handler(progress, 1)
+                registered = True
+            except BaseException:
+                uncertain_handler = True
+                raise
+            cursor = self._connection.cursor()
+            cursors.append(cursor)
+            value_cursor = self._connection.cursor()
+            cursors.append(value_cursor)
+            begin_attempted = True
+            cursor.execute("BEGIN")
+            cursor.execute("PRAGMA encoding")
+            if cursor.fetchone() != ("UTF-8",) or cursor.fetchone() is not None:
+                raise PersistenceContractError(ReasonCode.SCHEMA_MISMATCH, "PROBABILITY_SQL_UTF8_REQUIRED")
+            cells, decoded = self._read_probability_receipt_cells_v1(request, cursor, value_cursor)
+            observed = _probability_read_check_v1(request)
+            if observed < started:
+                raise PersistenceContractError(ReasonCode.INVALID_CONTRACT, "PROBABILITY_READ_CLOCK_REGRESSED")
+            snapshot = _probability_snapshot_from_cells_v1(request, cells, observed, decoded_records=decoded)
+            yield snapshot
+            body_ok = True
+        except BaseException as error:
+            if progress_errors:
+                body_error = progress_errors[0]
+                body_error.__cause__ = error
+            elif isinstance(error, sqlite3.Error):
+                body_error = PersistenceContractError(ReasonCode.PERSISTENCE_UNAVAILABLE, "probability SQLite read failed")
+                body_error.__cause__ = error
+            else:
+                body_error = error
+        finally:
+            if registered or uncertain_handler:
+                try:
+                    self._connection.set_progress_handler(None, 0)
+                except BaseException as error:
+                    uncertain_handler = True
+                    cleanup_errors.append(error)
+            if begin_attempted:
+                try:
+                    if self._connection.in_transaction:
+                        self._connection.execute("ROLLBACK")
+                    if self._connection.in_transaction:
+                        raise PersistenceContractError(ReasonCode.PERSISTENCE_UNAVAILABLE, "PROBABILITY_READ_ROLLBACK_UNCONFIRMED")
+                except BaseException as error:
+                    cleanup_errors.append(error)
+            for cursor in reversed(cursors):
+                try:
+                    cursor.close()
+                except BaseException as error:
+                    cleanup_errors.append(error)
+            if uncertain_handler or cleanup_errors:
+                self._availability = PersistenceAvailabilityV1.UNAVAILABLE
+            else:
+                self._probability_progress_owned_v1 = False
+                self._probability_read_active_v1 = False
+        failures = ([body_error] if body_error is not None else []) + cleanup_errors
+        if len(failures) == 1:
+            raise failures[0]
+        if failures:
+            raise BaseExceptionGroup("probability SQLite read and cleanup failures", failures)
+        if not body_ok:
+            raise PersistenceContractError(ReasonCode.PERSISTENCE_UNAVAILABLE, "PROBABILITY_READ_BODY_NOT_COMPLETED")
+        if _probability_read_check_v1(request) < observed:
+            raise PersistenceContractError(ReasonCode.INVALID_CONTRACT, "PROBABILITY_READ_CLOCK_REGRESSED")
 
     def insert_value_lineage_edge(self, transaction: PersistenceTransactionV1, edge: ValueLineageEdgeV1) -> None:
         self._transaction(transaction)

@@ -168,3 +168,46 @@ def test_pr162_agents_shards_branch_context_and_validation_gate_wiring() -> None
     )
     command_names = [Path(command[1]).name for command in run_validation_gates.build_validation_commands()]
     assert "validate_pr162_safe_nonlive_replay_paper_data_adapter_quantum_forward_bridge.py" in command_names
+
+    # Compact upstream data must preserve rows and reject malformed references.
+    from src.qtt.stage1_prediction_markets.replay_paper_executor_input_run_artifact_generation.compact_records import (
+        expand_payload_records,
+    )
+    dictionary = {"compact_field_by_alias": {"a": "qku_id"},
+                  "compact_string_values": ["fixture-first", "fixture-second"]}
+    assert expand_payload_records(
+        {"records": [{"a": {"$s": 0}}, {"a": {"$s": 1}}]}, dictionary
+    ) == [{"qku_id": "fixture-first"}, {"qku_id": "fixture-second"}]
+    for invalid in (True, False, 0.0, 1.9, "0", "1", None, [], {}):
+        for token in ({"$s": invalid}, {"$l": [invalid]}):
+            with pytest.raises(TypeError):
+                expand_payload_records({"records": [{"a": token}]}, dictionary)
+    for invalid in (-1, -2, 2, 10**30):
+        for token in ({"$s": invalid}, {"$l": [invalid]}):
+            with pytest.raises(IndexError):
+                expand_payload_records({"records": [{"a": token}]}, dictionary)
+    for invalid in ("01", {"0": 1}, False, 0, None):
+        with pytest.raises(TypeError):
+            expand_payload_records({"records": [{"a": {"$l": invalid}}]}, dictionary)
+    for invalid in (None, False, 0, "discarded", []):
+        with pytest.raises(TypeError):
+            expand_payload_records({"records": [{"a": {"$s": 0}}, invalid]}, dictionary)
+    for invalid in (False, 0, "", {}):
+        with pytest.raises(TypeError):
+            expand_payload_records({"records": invalid}, dictionary)
+    for bad in ({"compact_string_values": ["valid", 7]},
+                {"compact_field_by_alias": {"a": "same", "b": "same"}},
+                {"compact_field_by_alias": {"a": 1}}):
+        with pytest.raises((TypeError, ValueError)):
+            expand_payload_records({"records": [{}]}, bad)
+    with pytest.raises(ValueError):
+        expand_payload_records({"records": [{"a": 1, "qku_id": 2}]}, dictionary)
+    original = {"compact_record_defaults": {"nested": {"items": [1]}, "a": "default"},
+                "records": [{"a": "override"}, {}]}
+    expanded = expand_payload_records(original, dictionary)
+    assert expanded[0]["qku_id"] == "override"
+    assert expanded[1]["qku_id"] == "default"
+    expanded[0]["nested"]["items"].append(2)
+    assert expanded[1]["nested"]["items"] == [1]
+    assert original["compact_record_defaults"]["nested"]["items"] == [1]
+    assert expand_payload_records({"records": None}) == []

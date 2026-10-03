@@ -17,7 +17,18 @@ def main() -> int:
     parser.add_argument("--repo-root", default=".")
     args = parser.parse_args()
 
-    result = validate_artifacts(Path(args.repo_root).resolve())
+    from contextlib import nullcontext
+    import os
+    from tools.validation_reliability import (
+        _mapper_read_profile_for_process_v1, _mapper_bound_reads_v1, RUN_ID_ENV,
+    )
+    selected_root = Path(args.repo_root).resolve()
+    binding = None
+    if os.environ.get(RUN_ID_ENV) or any(k.upper().startswith("QTT_MAPPER_") for k in os.environ):
+        _, binding = _mapper_read_profile_for_process_v1(selected_root,
+            environment=os.environ, actual_argv=tuple(sys.orig_argv), role="PARENT")
+    with nullcontext() if binding is None else _mapper_bound_reads_v1(binding):
+        result = validate_artifacts(selected_root)
     if result.ok:
         print("PR162E_Q_QUANTUM_AUTOMAPPER_VALIDATION_OK")
         return 0

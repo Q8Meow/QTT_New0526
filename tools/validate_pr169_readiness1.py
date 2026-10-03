@@ -586,9 +586,8 @@ def _validate_no_placeholders(rows_by_file: dict[str, list[dict[str, Any]]], rep
 
 
 def _source_reads(path: Path) -> set[str]:
-    if not path.exists():
-        return set()
-    tree = ast.parse(path.read_text(encoding="utf-8"))
+    _assert(path.exists(), f"required source module is missing: {path}")
+    tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
     reads: set[str] = set()
     for node in ast.walk(tree):
         if isinstance(node, ast.Constant) and isinstance(node.value, str):

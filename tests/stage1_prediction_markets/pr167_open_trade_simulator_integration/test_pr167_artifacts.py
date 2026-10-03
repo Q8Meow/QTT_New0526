@@ -30,6 +30,126 @@ def test_pr167_inputs_counts_and_required_reports():
         expected = 559 if filename in c.ROW_REPORTS else None
         assert_report_contract(filename, expected)
 
+    from copy import deepcopy
+    from src.qtt.stage1_prediction_markets.pr167_open_trade_simulator_integration import validator as sim_validator
+
+    name = "PR167_FinalSummary.report.json"
+    base = {"roadmap_pr_id":c.PR_ID, "created_by_pr":c.PR_ID, "record_count":1}
+    for count in (True, 1.0, "1", 1.9, None, -1):
+        changed = deepcopy(base)
+        changed["record_count"] = count
+        failures = []
+        sim_validator._validate_payload_contracts({name:changed}, {name:[{}]}, failures)
+        assert failures == [f"BAD_RECORD_COUNT::{name}"]
+    missing = deepcopy(base)
+    del missing["record_count"]
+    failures = []
+    sim_validator._validate_payload_contracts({name:missing}, {name:[{}]}, failures)
+    assert failures == [f"BAD_RECORD_COUNT::{name}"]
+    failures = []
+    sim_validator._validate_payload_contracts({name:base}, {name:[{}]}, failures)
+    assert failures == []
+
+    # Companion association is checked on existing semantic fields, not row order.
+    from copy import deepcopy
+    from types import SimpleNamespace
+    import pytest
+    from src.qtt.stage1_prediction_markets.pr167_open_trade_simulator_integration.report_writer import build_candidate_contexts
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane.errors import SerializationSafetyError
+
+    companion_names = (
+        'PR162E_Q_OpenTradeSimMap.report.json',
+        'PR162E_Q_QUBORecipe.report.json',
+        'PR162E_Q_BQMRecipe.report.json',
+        'PR162E_Q_IsingRecipe.report.json',
+        'PR162E_Q_CQMRecipe.report.json',
+        'PR162E_Q_DQMRecipe.report.json',
+        'PR162E_Q_QuadProgramRecipe.report.json',
+        'PR162E_Q_HybridRecipe.report.json',
+        'PR162E_Q_SolutionInterpretBack.report.json',
+        'PR162E_Q_TestVectors.report.json',
+        'PR162E_Q_MapProof.report.json',
+        'PR162E_Q_FeasibilityChecks.report.json',
+        'PR162E_Q_TCAMapImpact.report.json',
+        'PR162E_Q_OverfitFDRMapRisk.report.json',
+        'PR162E_Q_PortfolioUtilityMap.report.json',
+        'PR162E_Q_RegimeMapMemory.report.json',
+        'PR166_QC_OpenTradeSimHandoff.report.json',
+        'PR166_QC_To_PR167.report.json',
+        'PR166_QC_TCAEvidence.report.json',
+        'PR166_QC_FillNoFillEvidence.report.json',
+        'PR166_QC_LatencyEvidence.report.json',
+        'PR166_QC_QueueRiskEvidence.report.json',
+        'PR166_QC_CapacityCrowdingEvidence.report.json',
+        'PR166_QC_OverfitFDRRetest.report.json',
+        'PR166_QC_PortfolioUtility.report.json',
+        'PR166_QC_ChampChallengerPaper.report.json',
+        'PR166_QC_StillNegativeAfterCosts.report.json',
+        'PR166_QC_ReplayPaperRepairLab.report.json',
+        'PR166_QC_OwnerDashboardReview.report.json',
+        'PR166_QC_ConnectorRouteReadiness.report.json',
+    )
+    primary_name = 'PR162E_Q_To_PR167.report.json'
+    base = {"row_id": "fixture-A", "qku_id": "fixture-QKU", "formula_id": "fixture-formula",
+            "algorithm_id": "fixture-algorithm", "parameter_stack_id": "fixture-parameters-A",
+            "execution_route_id": "fixture-route", "market_scope": "fixture-market",
+            "qku_family": "fixture-family", "model_family": "QUBO", "deterministic_sort_key": "A"}
+    other = {**base, "row_id": "fixture-B", "parameter_stack_id": "fixture-parameters-B", "deterministic_sort_key": "B"}
+    base["candidate_packet_id"] = "fixture-packet-A"
+    other["candidate_packet_id"] = "fixture-packet-B"
+    source_rows = {primary_name: [base, other]}
+    for name in companion_names:
+        source_rows[name] = [{**base, "row_id": name + "::A", "association_value": -7},
+                             {**other, "row_id": name + "::B", "association_value": 11}]
+    source = SimpleNamespace(records=source_rows)
+    clean = build_candidate_contexts(source)
+    assert len(clean) == 2
+    expected = [-7, 11]
+    for name in companion_names:
+        assert [item["companions"][name]["association_value"] for item in clean] == expected
+    name = companion_names[0]
+    source_rows[name][0]["deterministic_sort_key"] = "Z"
+    source_rows[name][1]["deterministic_sort_key"] = "0"
+    source_rows[name].reverse()
+    snapshot = deepcopy(source_rows)
+    aligned = build_candidate_contexts(source)
+    assert [item["companions"][name]["association_value"] for item in aligned] == expected
+    assert source_rows == snapshot
+    for mutation in ("missing", "extra", "duplicate-key", "wrong-key", "duplicate-row-id", "null-key"):
+        changed = deepcopy(source_rows)
+        if mutation == "missing":
+            changed[name].pop()
+        elif mutation == "extra":
+            changed[name].append({**changed[name][0], "row_id": "fixture-extra", "parameter_stack_id": "fixture-extra"})
+        elif mutation == "duplicate-key":
+            changed[name].append({**changed[name][0], "row_id": "fixture-duplicate"})
+        elif mutation == "wrong-key":
+            changed[name][0]["execution_route_id"] = "fixture-unmatched-route"
+        elif mutation == "duplicate-row-id":
+            changed[name][1]["row_id"] = changed[name][0]["row_id"]
+        else:
+            changed[name][0]["qku_id"] = None
+        with pytest.raises(SerializationSafetyError):
+            build_candidate_contexts(SimpleNamespace(records=changed))
+
+    # Existing packet identity must agree even when all context fields agree.
+    for invalid_packet in (None, True, 0, 1.0, "", " ", "foreign-packet"):
+        changed = deepcopy(source_rows)
+        changed[name][0]["candidate_packet_id"] = invalid_packet
+        with pytest.raises(SerializationSafetyError):
+            build_candidate_contexts(SimpleNamespace(records=changed))
+    changed = deepcopy(source_rows)
+    del changed[name][0]["candidate_packet_id"]
+    with pytest.raises(SerializationSafetyError):
+        build_candidate_contexts(SimpleNamespace(records=changed))
+    # Distinct packet identities resolve a legitimately shared six-field context.
+    changed = deepcopy(source_rows)
+    for values in changed.values():
+        for value in values:
+            value["parameter_stack_id"] = "shared-fixture-parameters"
+    aligned = build_candidate_contexts(SimpleNamespace(records=changed))
+    assert [item["companions"][name]["candidate_packet_id"] for item in aligned] == ["fixture-packet-A", "fixture-packet-B"]
+
 
 def test_pr167_source_and_upstream_report_use_ledgers():
     sources = assert_report_contract("PR167_SourceSimParams.report.json")

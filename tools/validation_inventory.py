@@ -13,6 +13,11 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
+from tools.validation_reliability import (
+    _preflight_active_v1, _preflight_kind_v1, _preflight_read_bytes_v1,
+    _preflight_read_text_v1, _preflight_directory_v1, _preflight_files_v1,
+)
+
 from tools import run_validation_gates as runner
 from tools.repo_path_refs import normalize_repo_ref
 from tools.validation_scope_registry import (
@@ -1304,6 +1309,7 @@ def validate_inventory(entries: Sequence[ValidatorInventoryEntry] | None = None)
         failures.append(f"VALIDATION_INVENTORY_UNKNOWN_EXTRA_COMMAND: {validator_id}")
 
     repo_root = Path(__file__).resolve().parents[1]
+    _preflight_active_v1(repo_root)
     normalized_shared_paths: list[str] = []
     rows_by_id = {entry.validator_id: entry for entry in rows}
     for raw_path, owner_ids in SHARED_VALIDATOR_SUPPORT_TOOL_OWNERS.items():
@@ -1332,7 +1338,7 @@ def validate_inventory(entries: Sequence[ValidatorInventoryEntry] | None = None)
                 "VALIDATION_INVENTORY_UNKNOWN_SHARED_SUPPORT_OWNER: "
                 f"{raw_path} {unknown_owner}"
             )
-        if not (repo_root / normalized_path).is_file():
+        if not (_preflight_kind_v1(repo_root / normalized_path, optional=True) == "file"):
             failures.append(
                 f"VALIDATION_INVENTORY_MISSING_SHARED_SUPPORT_TOOL: {raw_path}"
             )
@@ -1402,7 +1408,7 @@ def validate_inventory(entries: Sequence[ValidatorInventoryEntry] | None = None)
                         f"{entry.validator_id} {field_name} {glob} {exc}"
                     )
         for glob in entry.tool_globs:
-            if "*" not in glob and glob.endswith(".py") and not (repo_root / glob).is_file():
+            if "*" not in glob and glob.endswith(".py") and not (_preflight_kind_v1(repo_root / glob, optional=True) == "file"):
                 failures.append(
                     f"VALIDATION_INVENTORY_MISSING_TOOL: {entry.validator_id} {glob}"
                 )

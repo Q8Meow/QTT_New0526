@@ -8568,8 +8568,139 @@ def independently_reconstruct() -> dict[str, bool]:
     return values
 
 
+from fractions import Fraction as _V35Fraction
+
+
+def _v35_hex_ratio(token: str) -> _V35Fraction:
+    """Decode a finite hexadecimal binary numeral using integers only."""
+    sign = -1 if token.startswith('-') else 1
+    body = token[1:] if sign < 0 else token
+    mantissa, exponent = body.split('p')
+    if not mantissa.startswith('0x'):
+        raise ValueError('not a hexadecimal scalar')
+    whole, tail = mantissa[2:].split('.')
+    coefficient = int(whole + tail, 16)
+    power = int(exponent) - 4 * len(tail)
+    return _V35Fraction(sign * coefficient * (1 << max(power, 0)), 1 << max(-power, 0))
+
+def _v35_round_quotient_even(n: int, d: int) -> int:
+    q, r = divmod(n, d)
+    return q + int(2 * r > d or (2 * r == d and q % 2 == 1))
+
+def _v35_binary64_round(value: _V35Fraction) -> _V35Fraction | str:
+    """Return the nearest finite binary64 value, without a floating conversion.
+
+    Nonzero rounding to zero is the contract's explicit FUNCTIONAL_UNDERFLOW;
+    exact cancellation is a legitimate zero. This is not a general input codec.
+    """
+    if not value:
+        return _V35Fraction(0)
+    sign = -1 if value < 0 else 1
+    p, q = (abs(value.numerator), value.denominator)
+    exponent = p.bit_length() - q.bit_length()
+    if p < q << exponent if exponent >= 0 else p << -exponent < q:
+        exponent -= 1
+    power = max(exponent, -1022) - 52
+    numerator = p << max(-power, 0)
+    denominator = q << max(power, 0)
+    significand = _v35_round_quotient_even(numerator, denominator)
+    if not significand:
+        return 'FUNCTIONAL_UNDERFLOW'
+    if significand >= 1 << 53:
+        significand >>= 1
+        power += 1
+    if power > 971:
+        raise OverflowError('binary64 functional overflow')
+    return _V35Fraction(sign * significand * (1 << max(power, 0)), 1 << max(-power, 0))
+
+def _v35_expanded_cluster_mean(clusters: list, plan: list[int]) -> list[_V35Fraction | str] | str:
+    columns = len(clusters[0][0])
+    totals = []
+    for column in range(columns):
+        total = sum((_v35_hex_ratio(row[column]) / (len(plan) * len(clusters[index])) for index in plan for row in clusters[index]), _V35Fraction(0))
+        rounded = _v35_binary64_round(total)
+        if rounded == 'FUNCTIONAL_UNDERFLOW':
+            return rounded
+        totals.append(rounded)
+    return totals
+
+def _v35_expected_reduction(value):
+    return value if isinstance(value, str) else [_v35_hex_ratio(x) for x in value]
+
+def _v35_ceiling(value: _V35Fraction) -> int:
+    return -(-value.numerator // value.denominator)
+
+def _v35_drift_reference(row: dict) -> dict:
+    b, m = (row['B'], len(row['targets']))
+    reference = list(map(_v35_hex_ratio, row['R']))
+    current = list(map(_v35_hex_ratio, row['W']))
+    copies = [(list(map(_v35_hex_ratio, block['R'])), list(map(_v35_hex_ratio, block['W']))) for block in row['blocks'] for _ in range(block['count'])]
+    if len(copies) != b:
+        raise AssertionError('literal replica denominator mismatch')
+    delta = [w - r for r, w in zip(reference, current)]
+    counts = [sum((abs(w[j] - r[j] - delta[j]) >= abs(delta[j]) for r, w in copies)) for j in range(m)]
+    pvalues = [_V35Fraction(1 + n, b + 1) for n in counts]
+    harmonic = sum((_V35Fraction(1, i) for i in range(1, m + 1)), _V35Fraction(0))
+    order = sorted(range(m), key=lambda j: (pvalues[j], j))
+    adjusted = [_V35Fraction(0)] * m
+    for rank, original in enumerate(order):
+        adjusted[original] = min(_V35Fraction(1), min((_V35Fraction(m) * harmonic * pvalues[order[j]] / (j + 1) for j in range(rank, m))))
+    rejected = [i for i, p in enumerate(adjusted) if p <= _V35Fraction(1, 20)]
+    low, high = (_v35_ceiling(_V35Fraction(b, 40)) - 1, _v35_ceiling(_V35Fraction(39 * b, 40)) - 1)
+    outside = []
+    for j in range(m):
+        sorted_reference = sorted((r[j] for r, w in copies))
+        outside.append(current[j] < sorted_reference[low] or current[j] > sorted_reference[high])
+    return dict(exceedances=counts, pvalues=[str(x) for x in pvalues], adjusted=[str(x) for x in adjusted], rejected=rejected, outside=outside, material=[i for i in rejected if outside[i]])
+
+def _v35_check() -> dict:
+    tree = ast.parse((PACKAGE / 'oracle_contracts.py').read_text(encoding='utf-8'))
+    nodes = [node for node in tree.body if isinstance(node, ast.Assign) and any(
+        isinstance(target, ast.Name) and target.id == '_V35_DRIFT_VECTOR_ROWS_V1' for target in node.targets)]
+    if len(nodes) != 1 or not isinstance(nodes[0].value, ast.Call) or len(nodes[0].value.args) != 1 or ast.unparse(nodes[0].value.func) != '_freeze_oracle_value':
+        raise ValueError('V35 independent literal vector owner changed')
+    vectors = ast.literal_eval(nodes[0].value.args[0])
+    comparisons = []
+    for i, row in enumerate(vectors['codec']):
+        assert _v35_hex_ratio(row['token']) == _V35Fraction(row['ratio'])
+        comparisons.append('codec:' + str(i))
+    for row in vectors['reducers']:
+        assert _v35_expanded_cluster_mean(row['clusters'], list(range(len(row['clusters'])))) == _v35_expected_reduction(row['original']), row['case']
+        comparisons.append('reducer-original:' + row['case'])
+        values = [_v35_expanded_cluster_mean(row['clusters'], plan) for plan in row['plans']]
+        assert values == [_v35_expected_reduction(x) for x in row['records']], row['case']
+        comparisons.append('reducer-records:' + row['case'])
+    for row in vectors['tapes']:
+        starts, n, block = (row['starts'], row['n'], row['block'])
+        indices = [starts[0]]
+        assert len(starts) == n
+        if block is None:
+            assert row['uniforms'] == []
+            indices = list(starts)
+        else:
+            assert len(row['uniforms']) == n
+            for i in range(1, n):
+                indices.append((indices[-1] + 1) % n if _v35_hex_ratio(row['uniforms'][i]) > _V35Fraction(1, block) else starts[i])
+        assert indices == row['indices'], row['case']
+        comparisons.append('tape:' + row['case'])
+    for row in vectors['ranks']:
+        assert [_v35_ceiling(row['B'] * _V35Fraction(p)) for p in row['probabilities']] == row['ranks']
+        comparisons.append('ranks:' + str(row['B']))
+    for row in vectors['drift']:
+        actual = _v35_drift_reference(row)
+        assert actual == row['expected'], (row['case'], actual, row['expected'])
+        comparisons.append('drift:' + row['case'])
+    counts = {k: len(vectors[k]) for k in ('codec', 'reducers', 'tapes', 'ranks', 'drift')}
+    assert sum(counts.values()) == 23 and len(comparisons) == 28
+    return dict(outcome='PASS', classification='INDEPENDENT_INTEGER_RATIONAL_RECONSTRUCTION_OF_SUPPLIED_SYNTHETIC_VECTORS', literal_vector_count=23, comparisons=28, vector_family_counts=counts, passed_comparisons=comparisons, QTT_or_subject_reference_imports=0, floating_point_library_imports=0, native_V35_pipeline_executed=False, model_fits_executed=0, independent_external_review=False, protocol_or_market_acceptance_created=False)
+
+
 def main(*, emit_stage1_launch_graph_marker: bool = True) -> int:
     failures: list[str] = []
+    try:
+        _v35_check()
+    except (OSError, SyntaxError, ValueError, KeyError, TypeError, AssertionError, OverflowError) as exc:
+        failures.append(f"V35 independent integer/rational reconstruction failed: {exc}")
     expected_names = frozenset(PRODUCTION_NAMES)
     actual_names = frozenset(path.name for path in PACKAGE.glob("*.py"))
     if len(expected_names) != len(PRODUCTION_NAMES):

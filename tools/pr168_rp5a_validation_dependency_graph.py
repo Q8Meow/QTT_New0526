@@ -9,13 +9,10 @@ from pathlib import Path
 from tools.pr168_rp5a_config import classify_file_kind, normalize_repo_path
 
 
-def _entries_matching(path: str):
-    try:
-        from tools.validation_inventory import entries_matching_path
+def _entries_matching(path: str, *, inventory):
+    from tools.validation_inventory import entries_matching_path
 
-        return list(entries_matching_path(path))
-    except Exception:
-        return []
+    return list(entries_matching_path(path, entries=inventory))
 
 
 def _generated_scan_dependency(path: str) -> bool:
@@ -27,8 +24,13 @@ def _generated_scan_dependency(path: str) -> bool:
 def build_validation_dependency_rows(matched_files: list[str]) -> list[dict[str, object]]:
     rows: list[dict[str, object]] = []
     row_number = 0
+    if not matched_files:
+        return rows
+    from tools.validation_inventory import validation_inventory
+
+    inventory = tuple(validation_inventory())
     for file_path in matched_files:
-        entries = _entries_matching(file_path)
+        entries = _entries_matching(file_path, inventory=inventory)
         for entry in entries:
             row_number += 1
             dep_type = "TEST_FIXTURE" if classify_file_kind(file_path) == "TEST_SOURCE" else "REQUIRED_FILE"

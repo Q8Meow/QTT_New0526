@@ -897,6 +897,38 @@ def test_execution_context_propagates_through_stack(
         for output in response.stack_result.component_outputs
     )
 
+    # Inject invalidation only after constructing the real successful response.
+    # This tests the final consuming boundary, not an issuer or fitted-model grant.
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane import service as service_module
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane.errors import FreshnessError, ReasonCode
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane.input_resolver import CanonicalOwnerPacketRegistryV1
+    original_response = service_module.ComputeStackResponseV1
+    original_guard = CanonicalOwnerPacketRegistryV1._check_probability_packet_refs_v1
+    original_admit = service_module._admit_agent_request
+    built, admitted, guarded = [], [], []
+    def build_response(*args, **kwargs):
+        value = original_response(*args, **kwargs)
+        if value.status is OperationStatusV1.SUCCEEDED:
+            built.append(value)
+        return value
+    def guard_after_response(self, references, *, context):
+        original_guard(self, references, context=context)
+        if built:
+            guarded.append((references, context))
+            raise FreshnessError(ReasonCode.FRESHNESS_VIOLATION, "synthetic invalidation during response construction")
+    def count_admission(owner, original_request):
+        admitted.append(original_request)
+        return original_admit(owner, original_request)
+    monkeypatch.setattr(service_module, "ComputeStackResponseV1", build_response)
+    monkeypatch.setattr(service_module, "_admit_agent_request", count_admission)
+    monkeypatch.setattr(CanonicalOwnerPacketRegistryV1, "_check_probability_packet_refs_v1", guard_after_response)
+    failed = service.compute_stack(request)
+    assert len(admitted) == 1 and admitted[0] is request
+    assert len(built) == len(guarded) == 1
+    assert failed.status is OperationStatusV1.BLOCKED
+    assert failed.context is context and failed.stack_result.component_outputs == ()
+    assert built[0] is not failed and guarded[0][1] is context
+
 
 def test_downstream_routes_views_and_no_effect_records_are_typed() -> None:
     service = _service()

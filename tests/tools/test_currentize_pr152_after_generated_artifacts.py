@@ -51,7 +51,7 @@ def _no_untracked_paths(_root: Path) -> list[str]:
     return []
 
 
-def test_helper_detects_stale_pr152_after_write(tmp_path: Path) -> None:
+def test_helper_detects_stale_pr152_after_write(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     root = _prepared_repo(tmp_path)
 
     with pytest.raises(helper.CurrentizationError) as exc_info:
@@ -65,6 +65,45 @@ def test_helper_detects_stale_pr152_after_write(tmp_path: Path) -> None:
         )
 
     assert "PR152_REPORT_STALE_OR_NONDETERMINISTIC" in exc_info.value.failures
+
+    # One shared record decoder; a renamed protected source must remain visible.
+    from tools import validation_reliability as reliability
+    from src.qtt.stage1_prediction_markets.grand_global_debug_logical_consistency_audit import report as report_module
+    original_name = helper._MASTER_PLAN_PATH.as_posix()
+    destination = "docs/master_plan/generated/renamed_plan.txt"
+    complete = f"R  {destination}\0{original_name}\0"
+    expected_paths = sorted([destination, original_name], key=lambda p: (p.casefold(), p))
+    with monkeypatch.context() as scoped:
+        scoped.setattr(helper, "_run_repository_git", lambda *a, **k: subprocess.CompletedProcess(a, 0, complete, ""))
+        scoped.setattr(report_module, "_git_stdout", lambda *a, **k: (0, complete, ""))
+        scoped.setattr(reliability, "_git_bytes", lambda *a, **k: complete.encode("utf-8"))
+        assert helper._git_status_changed_paths(root) == expected_paths
+        assert report_module._changed_paths(root) == expected_paths
+        assert set(reliability._status_paths(root)) == set(expected_paths)
+        assert reliability._status_record_map(root)[original_name] == "R :SOURCE"
+        assert helper._protected_status_failures(helper._git_status_changed_paths(root))
+        assert report_module._validate_changed_paths(root, tracked_report_write_allowed=True)
+    assert reliability.parse_git_status_porcelain_v1_z(complete) == (("R ", destination, original_name),)
+    for code in (" R", "C ", " C"):
+        raw = f"{code} destination with space\0source with space\0"
+        assert reliability.parse_git_status_porcelain_v1_z(raw.encode("utf-8")) == ((code, "destination with space", "source with space"),)
+    assert reliability.parse_git_status_porcelain_v1_z(b"") == ()
+    assert reliability.parse_git_status_porcelain_v1_z(b"??  literal space \0") == (("??", " literal space ", None),)
+    assert reliability.parse_git_status_porcelain_v1_z(b" M raw-\xff\0")[0][1].encode("utf-8", "surrogateescape") == b"raw-\xff"
+    for invalid in (None, bytearray(b""), b"\0", b" M file", b"R  destination\0", b"R  destination\0\0", b" M\0", b"XY bad\0", b"M? bad\0", b"   clean-is-not-a-record\0", b" M valid\0\0", b" Mfile\0"):
+        with pytest.raises(ValueError):
+            reliability.parse_git_status_porcelain_v1_z(invalid)
+    for partial in (f"R  {destination}\0", " M valid\0\0"):
+        with monkeypatch.context() as scoped:
+            scoped.setattr(helper, "_run_repository_git", lambda *a, **k: subprocess.CompletedProcess(a, 0, partial, ""))
+            scoped.setattr(report_module, "_git_stdout", lambda *a, **k: (0, partial, ""))
+            scoped.setattr(reliability, "_git_bytes", lambda *a, **k: partial.encode("utf-8"))
+            with pytest.raises(helper.CurrentizationError, match="PR152_CURRENTIZATION_GIT_STATUS_UNAVAILABLE"):
+                helper._git_status_changed_paths(root)
+            assert report_module._changed_paths(root) == ["<git-status-unavailable>"]
+            for reader in (reliability._status_paths, reliability._status_record_map):
+                with pytest.raises(reliability.ValidationReliabilityError, match="ENGVR_PREPUBLICATION_CUSTODY_FAILED"):
+                    reader(root)
 
 
 def test_helper_fails_closed_if_untracked_pr_artifacts_exist(tmp_path: Path) -> None:

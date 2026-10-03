@@ -94,6 +94,29 @@ def test_frozen_snapshot_and_task_envelope_are_immutable_indexes() -> None:
     with pytest.raises(TypeError):
         bundle.task_envelope["operation_id"] = "compute_stack"  # type: ignore[index]
 
+    from dataclasses import fields, FrozenInstanceError
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane import models
+    from . import _synthetic_probability_issuance
+    import time
+    for cls, count in ((models.ProbabilityPredictionArtifactWriteRequestV1, 8),
+                       (models.ProbabilityPredictionArtifactSealV1, 8),
+                       (models.ProbabilityPredictionReviewBasisReadRequestV1, 10)):
+        assert len(fields(cls)) == count
+        assert cls.__dataclass_params__.frozen
+    resolver, reader, requests = _synthetic_probability_issuance()
+    now = time.time_ns()
+    with resolver._resolve_probability_issuer_context_v1(requests, evaluated_ns=now) as original:
+        admissions = tuple(resolver._admit_probability_issuer_v1(request, trusted_snapshot=original) for request in requests)
+        assert all(admission.no_effect_flags is models.NO_EFFECTS_V1 for admission in admissions)
+        assert resolver._admit_probability_issuer_v1(requests[0], trusted_snapshot=original) is admissions[0]
+        with pytest.raises(FrozenInstanceError):
+            requests[0].issuer_ref = "SYNTHETIC::OTHER"
+    assert reader.read_calls == 1 and not reader.active
+    assert resolver._probability_last_issuer_view_v1["snapshot"] is original
+    from . import _v35_full_bank_engineering, _v35_service_resource_checks
+    _v35_service_resource_checks()
+    _v35_full_bank_engineering()
+
 
 def test_request_time_resolution_performs_no_file_reads(
     monkeypatch: pytest.MonkeyPatch,
@@ -117,6 +140,327 @@ def test_request_time_resolution_performs_no_file_reads(
 
     assert decision.eligible
     assert decision.runtime_effect_authorized is False
+
+    from . import _synthetic_registered_prediction
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane.errors import ContractValidationError
+    import time
+    probability_resolver, reader, fence, prepared, entry = _synthetic_registered_prediction()
+    reads = reader.read_calls
+    monkeypatch.setattr(Path, "read_bytes", _forbidden_read)
+    monkeypatch.setattr(Path, "open", _forbidden_read)
+    assert fence._registered_v1(prepared, kind="PREDICTION", evaluated_ns=time.time_ns()) is entry
+    with pytest.raises(ContractValidationError):
+        fence._registered_v1(replace(prepared), kind="PREDICTION", evaluated_ns=time.time_ns())
+    assert prepared.model_use_authorized is False and prepared.native_packet_created is False
+    fence._source_synchronized_v1 = False
+    with pytest.raises(ContractValidationError):
+        fence._registered_v1(prepared, kind="PREDICTION", evaluated_ns=time.time_ns())
+    assert reader.read_calls == reads
+
+    _exercise_synthetic_probability_packet_factory(monkeypatch)
+
+
+def _exercise_synthetic_probability_packet_factory(monkeypatch):
+    """Native use/packet integration from an explicitly synthetic issued diagnostic.
+
+    The fixture does not stand in for fitted-model, source, or review acceptance.
+    Its boundary starts at the original registered prepared object; the existing
+    numerical/artifact and committed-reader groups exercise separate preceding
+    ports. This helper does not prove the full producer-to-committed-reader chain.
+    """
+    from contextlib import contextmanager
+    from dataclasses import FrozenInstanceError
+    from datetime import datetime, timedelta, timezone
+    from decimal import Decimal
+    import builtins
+    import io
+    import socket
+    import sqlite3
+    import subprocess
+    import time
+    import json
+    from . import _synthetic_registered_prediction
+    from . import _v35_service_resource_profile, _v35_service_groups, _v35_service_group_observation
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane import implementation_registry as numerical
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane import input_resolver as inputs
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane import model_risk as risk
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane import service as composition
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane.input_resolver import (
+        ProbabilityOutcomeJoinV1, _build_probability_owner_registry_v1,
+        _resolve_formula_input_binding, FORMULA_INPUT_AUTHORITY_BY_MATH_ID)
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane.models import (
+        ComputationExecutionContextV1, ComputationScopeV1, ImplementationVersionPinV1,
+        ProbabilityPredictionReadLimitsV1, ResourceBoundsProfileV1)
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane.model_risk import (
+        ProbabilityNativeUseRequestV1, ProbabilityNativeUseAdmissionV1,
+        NoTradeConditionOutcomeV1, NO_TRADE_CONDITION_IDS_V1)
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane.persistence import (
+        ProbabilityProducerReadLimitsV1, ProbabilityProducerReadSnapshotV1)
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane.receipts import (
+        ProbabilityProducerControlReceiptV1, _probability_control_record_v1)
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane.errors import InputAuthorityError
+
+    tick = [1_800_000_000_000_000_000]
+    def advancing_utc():
+        tick[0] += 1_000_000
+        return tick[0]
+    def forbidden(*args, **kwargs):
+        raise AssertionError("synthetic native-use/packet consumption attempted I/O or numerical fitting")
+
+    with monkeypatch.context() as clock_patch:
+        clock_patch.setattr(time, "time_ns", advancing_utc)
+        for mode in ("two", "four", "request_copy", "exit_revoked", "checker_value", "checker_revoked",
+                     "service", "service_revoked", "service_resource_old", "service_resource_exact",
+                     "service_resource_count_under", "service_resource_bytes_under"):
+            resolver, reader, fence, prepared, entry = _synthetic_registered_prediction()
+            initial_issuer_reads = reader.read_calls
+            at = prepared.observed_ns
+            expiry = prepared.valid_until_ns
+            scope = fence.scope
+            trace = dict(context_ref="SYNTHETIC::PACKET-CONTEXT", causation_id="SYNTHETIC::CAUSE",
+                correlation_id="SYNTHETIC::CORRELATION", traceparent="SYNTHETIC::TRACE", tracestate="SYNTHETIC::STATE")
+            result_body = dict(artifact_ref="SYNTHETIC::ARTIFACT", artifact_byte_count=1, artifact_frame_count=1,
+                input_lock_id=scope.input_lock_ref, prediction_input_lock_id=prepared.prediction_input_lock_ref,
+                plan_id="SYNTHETIC::PLAN", producer_ref="SYNTHETIC::COMPUTATION",
+                producer_control_domain_ref="SYNTHETIC::PRODUCER-DOMAIN", input_available_ns=at - 5000,
+                started_ns=at - 4000, completed_ns=at - 3000)
+            result = _probability_control_record_v1(record_id=prepared.result_ref,
+                payload=ProbabilityProducerControlReceiptV1("PROBABILITY_PRODUCER_CONTROL_V1", "PREDICTION_RESULT",
+                    scope, at - 3000, at - 3000, at - 3000, prepared.dependency_refs, expiry, result_body), **trace)
+            review_dependencies = (prepared.result_ref, "SYNTHETIC::VALIDATION", "SYNTHETIC::USE-LIMIT", "SYNTHETIC::RISK")
+            review_body = dict(result_ref=prepared.result_ref, artifact_ref=result_body["artifact_ref"],
+                reviewer_ref="SYNTHETIC::REVIEWER", reviewer_control_domain_ref="SYNTHETIC::REVIEW-DOMAIN",
+                review_state="CALIBRATED_FOR_DECLARED_CONTEXT", validation_receipt_refs=(review_dependencies[1],),
+                use_limit_ref=review_dependencies[2], model_risk_receipt_ref=review_dependencies[3],
+                result_commit_observed_ns=at - 2000, started_ns=at - 2000, completed_ns=at - 1000, blocker_codes=())
+            review = _probability_control_record_v1(record_id=prepared.review_ref,
+                payload=ProbabilityProducerControlReceiptV1("PROBABILITY_PRODUCER_CONTROL_V1", "PREDICTION_REVIEW",
+                    scope, at - 1000, at - 1000, at - 1000, review_dependencies, expiry, review_body), **trace)
+            cutoffs = time.time_ns()
+            observed = datetime(1970, 1, 1, tzinfo=timezone.utc) + timedelta(microseconds=cutoffs // 1000)
+            context = ComputationExecutionContextV1("SYNTHETIC::PACKET-CONTEXT", observed, observed,
+                "SYNTHETIC::EPOCH", "SYNTHETIC::INPUT-VERSION", timedelta(seconds=30),
+                ComputationScopeV1("SYNTHETIC::MARKET", "SYNTHETIC::VENUE", "SYNTHETIC::EVENT",
+                    "SYNTHETIC::CONTRACT", "SYNTHETIC::NO-EFFECT", "SYNTHETIC::INPUT-SNAPSHOT"), "3.4", "3.4",
+                tuple(ImplementationVersionPinV1(math_id, numerical.IMPLEMENTATION_REGISTRY[math_id].contract.implementation_id)
+                      for math_id in ("MATH-02", "MATH-06")))
+            conditions = tuple(NoTradeConditionOutcomeV1(name, index == 0,
+                ("SYNTHETIC::EXISTING-VETO",) if index == 0 else (),
+                (ReasonCode.ST12F_MODEL_RISK_VETO,) if index == 0 else ())
+                for index, name in enumerate(NO_TRADE_CONDITION_IDS_V1))
+            resource_pool = None
+            if mode.startswith('service_resource_'):
+                resource_pool = ('SYNTHETIC::EXISTING-VETO', 'SYNTHETIC::REQUIRED', 'SYNTHETIC::ASSESSMENT', 'SYNTHETIC::\u00e9\U0001f600',
+                    *(f'SYNTHETIC::RESOURCE:{i:04d}' for i in range(996)))
+                assert len(resource_pool) == len(set(resource_pool)) == 1000
+                conditions = tuple(replace(row, evidence_receipt_refs=resource_pool) for row in conditions)
+            entry["metadata"].update(scope=scope, cutoffs=(cutoffs, cutoffs), result=result, review=review,
+                model=SimpleNamespace(available_ns=at - 5000, valid_until_ns=expiry), conditions=conditions,
+                read_snapshot=ProbabilityProducerReadSnapshotV1(scope,
+                    {prepared.result_ref: result, prepared.review_ref: review}, (), (), at))
+            binding_ids = ("FIVAB::MATH-02::calibrated_model_probability", "FIVAB::MATH-02::calibration_state")
+            outcome = None
+            if mode == "four":
+                binding_ids += ("FIVAB::MATH-06::p_win", "FIVAB::MATH-06::p_void")
+                outcome = ProbabilityOutcomeJoinV1(context.execution_identity_tuple, prepared.request_keys[0],
+                    Decimal("0.8"), "SYNTHETIC::VALIDITY", "SYNTHETIC::FILL-CONDITIONING",
+                    ("SYNTHETIC::VALIDITY", "SYNTHETIC::FILL-CONDITIONING"), at, expiry)
+            request = ProbabilityNativeUseRequestV1(scope, prepared, context, prepared.request_keys[0], binding_ids,
+                outcome, "SYNTHETIC::ACCEPTED-USE", cutoffs, cutoffs)
+            dependencies = tuple(dict.fromkeys((*prepared.dependency_refs, scope.policy_ref,
+                request.selected_use_decision_ref, "SYNTHETIC::USE-POLICY", "SYNTHETIC::USE-TRANSITION",
+                *(outcome.dependency_refs if outcome is not None else ()))))
+            counts = {"read": 0, "check": 0, "exit": 0}
+            admitted = []
+            @contextmanager
+            def read_use(original, *, evaluated_ns, deadline_ns):
+                assert original is request and not reader.active
+                counts["read"] += 1
+                admission = ProbabilityNativeUseAdmissionV1(replace(original) if mode == "request_copy" else original,
+                    original.selected_use_decision_ref, "SYNTHETIC::USE-POLICY", "SYNTHETIC::USE-TRANSITION",
+                    cutoffs, expiry, dependencies, fence.policy.policy_version, fence.policy_epoch,
+                    fence.policy.registry_version, fence.process_ref, fence.generation, fence.cut.checkpoint_ref)
+                admitted.append(admission)
+                try:
+                    yield admission
+                finally:
+                    counts["exit"] += 1
+                    if mode == "exit_revoked":
+                        fence._source_synchronized_v1 = False
+            def check_use(original, *, evaluated_ns):
+                assert original is admitted[0] and counts["exit"] == 1
+                counts["check"] += 1
+                if mode == "checker_revoked":
+                    fence._source_synchronized_v1 = False
+                return True if mode == "checker_value" else None
+            deadline = time.monotonic_ns() + 60_000_000_000
+            limits = ProbabilityPredictionReadLimitsV1(
+                ProbabilityProducerReadLimitsV1(128, 1_000_000, 65536, 1000, deadline), 1_000_000, 256, 1_000_000)
+            with monkeypatch.context() as guard:
+                guard.setattr(reader, "read_probability_native_use", read_use, raising=False)
+                guard.setattr(reader, "check_probability_native_use", check_use, raising=False)
+                guard.setattr(reader, "read_probability_issuers", forbidden)
+                for owner, name in ((builtins, "open"), (io, "open"), (socket, "create_connection"),
+                        (sqlite3, "connect"), (subprocess, "Popen"), (numerical, "_probability_fit_prediction_v1"),
+                        (numerical, "_probability_construct_prediction_bank_v1"),
+                        (numerical, "_probability_construct_continuous_bank_v1")):
+                    guard.setattr(owner, name, forbidden)
+                call = dict(base_registry=CanonicalOwnerPacketRegistryV1(), request=request,
+                    capability_resolver=resolver, clock_facts=(cutoffs,) * 5, existing_conditions=conditions,
+                    limits=limits, deadline_ns=deadline)
+                if mode in ("service", "service_revoked") or mode.startswith('service_resource_'):
+                    controls = tuple(risk.ModelRiskControlEvidenceV1(identity,
+                        risk.ModelRiskControlStateV1.BLOCKED_WITH_TYPED_REASON, (),
+                        (ReasonCode.ST12F_EVIDENCE_INCOMPLETE,), ("SYNTHETIC::UNQUALIFIED",), False)
+                        for identity in risk.MODEL_RISK_CONTROL_IDS_V1)
+                    comparison = risk.PermanentNoTradeEvidenceComparisonV1("SYNTHETIC::COMPARISON",
+                        scope.input_lock_ref, Decimal("0.1"), Decimal("1"), Decimal("0.8"), Decimal("0"), "CANDIDATE")
+                    # Missing lane/control evidence remains unavailable; composing
+                    # this candidate cannot invent a passing review or permission.
+                    basis = risk.ModelRiskAdjudicationBasisV1("MATH-02", observed,
+                        observed + timedelta(seconds=30), ("SYNTHETIC::REQUIRED",), None, None,
+                        Decimal("0.05"), Decimal("0.05"), False, False, ("SYNTHETIC::CAPACITY",),
+                        "READY_FOR_INDEPENDENT_REVIEW", "SYNTHETIC::PENDING-REVIEW")
+                    resource = ResourceBoundsProfileV1("SYNTHETIC::SERVICE",
+                        limits.metadata_limits.max_records, limits.metadata_limits.max_total_bytes, 1, 1, 1)
+                    resource_failure = None
+                    receipt_refs = ('SYNTHETIC::ASSESSMENT',)
+                    if resource_pool is not None:
+                        basis = replace(basis, required_evidence_receipt_refs=resource_pool)
+                        receipt_refs = resource_pool
+                        # Independent expected operands for this bounded synthetic
+                        # integration case, not the builder's observed counters.
+                        assert entry['metadata']['read_snapshot'].revocation_records == ()
+                        assert entry['metadata']['read_snapshot'].publication_records == ()
+                        # The existing risk binder adds the original use ancestry
+                        # to condition 1. Freeze that expectation from input refs,
+                        # before calling the builder; do not learn it from output.
+                        expected_missing_refs = tuple(dict.fromkeys((*resource_pool, *dependencies)))
+                        expected_lengths = (1000,1000,1000,len(expected_missing_refs),1000,1000,1000,1000,1000,1000)
+                        expected_union = len(set(resource_pool).union(dependencies))
+                        resource_count = 9 * 1000 + len(expected_missing_refs)
+                        pool_bytes = sum(len(ref.encode('utf-8')) for ref in resource_pool)
+                        missing_bytes = sum(len(ref.encode('utf-8')) for ref in expected_missing_refs)
+                        resource_bytes = 9 * pool_bytes + missing_bytes
+                        resource = _v35_service_resource_profile(resource)
+                        selected_count, selected_bytes, resource_failure = {
+                            'service_resource_old': (8192, resource_bytes, 'probability risk reference count'),
+                            'service_resource_exact': (resource_count, resource_bytes, None),
+                            'service_resource_count_under': (resource_count-1, resource_bytes, 'probability risk reference count'),
+                            'service_resource_bytes_under': (resource_count, resource_bytes-1, 'probability risk reference bytes'),
+                        }[mode]
+                        resource = replace(resource, maximum_input_cardinality=selected_count,
+                            maximum_input_bytes=selected_bytes)
+                    factory_results, assessments, constructed = [], [], []
+                    actual_factory = inputs._build_probability_owner_registry_v1
+                    actual_adjudicate = risk.ModelRiskEvidenceAdjudicatorV1.adjudicate
+                    actual_service = composition.QKUComputationControlPlaneV1
+
+                    def build_once(**kwargs):
+                        result = actual_factory(**kwargs)
+                        factory_results.append(result)
+                        return result
+
+                    def adjudicate_once(self, **kwargs):
+                        result = actual_adjudicate(self, **kwargs)
+                        assessments.append(result)
+                        return result
+
+                    def construct_once(**kwargs):
+                        result = actual_service(**kwargs)
+                        constructed.append(result)
+                        if mode == "service_revoked":
+                            fence._source_synchronized_v1 = False
+                        return result
+
+                    compose_call = dict(owner_registry=call["base_registry"],
+                        agent_capability_resolver=resolver, native_use_request=request,
+                        clock_facts=call["clock_facts"], prediction_read_limits=limits,
+                        existing_conditions=conditions, assessment_id="SYNTHETIC::RISK",
+                        input_lock_id=scope.input_lock_ref, controls=controls, comparison=comparison,
+                        adjudication_basis=basis, limitations=("SYNTHETIC::PREPARED-BOUNDARY-ONLY",),
+                        receipt_refs=receipt_refs, evaluated_ns=time.time_ns(),
+                        deadline_ns=deadline, resource_bounds_profile=resource)
+                    with monkeypatch.context() as joined:
+                        joined.setattr(inputs, "_build_probability_owner_registry_v1", build_once)
+                        joined.setattr(risk.ModelRiskEvidenceAdjudicatorV1, "adjudicate", adjudicate_once)
+                        joined.setattr(composition, "QKUComputationControlPlaneV1", construct_once)
+                        if resource_failure is not None:
+                            with pytest.raises(ContractValidationError, match=resource_failure) as rejected:
+                                composition._compose_probability_native_service_v1(**compose_call)
+                            assert rejected.value.reason_code is ReasonCode.RESOURCE_BOUND_EXCEEDED
+                        elif mode == "service_revoked":
+                            with pytest.raises(InputAuthorityError) as rejected:
+                                composition._compose_probability_native_service_v1(**compose_call)
+                            assert rejected.value.reason_code is ReasonCode.INPUT_PACKET_MISMATCH
+                        else:
+                            service, assessment = composition._compose_probability_native_service_v1(**compose_call)
+                    if resource_pool is not None:
+                        assert len(factory_results) == 1
+                        actual_groups = _v35_service_groups(receipt_refs, basis, factory_results[0][1])
+                        observation = _v35_service_group_observation(actual_groups)
+                        assert observation['group_lengths'] == expected_lengths
+                        assert observation['group_byte_totals'] == (pool_bytes,pool_bytes,pool_bytes,missing_bytes,*((pool_bytes,)*6))
+                        assert observation['distinct_union_count'] == expected_union
+                        assert observation['total_occurrences'] == resource_count and observation['total_bytes'] == resource_bytes
+                        print(json.dumps(dict(stage='CHEAP_CONNECTED_SERVICE_RESOURCE_GUARD', case=mode,
+                            original_builder_calls=len(factory_results), **observation,
+                            native_guard_reason=resource_failure, production_guard_invoked=True)),flush=True)
+                    if resource_failure is not None:
+                        assert not assessments and not constructed
+                        assert counts['read'] == counts['exit'] == 1 and counts['check'] > 0
+                        assert reader.read_calls == initial_issuer_reads
+                        continue
+                    assert len(factory_results) == len(assessments) == len(constructed) == 1
+                    assert counts["read"] == counts["exit"] == 1 and counts["check"] > 0
+                    assert reader.read_calls == initial_issuer_reads
+                    if mode == "service_revoked":
+                        continue
+                    registry, retained = factory_results[0]
+                    assert service is constructed[0] and type(service) is actual_service
+                    assert assessment is assessments[0] and service.owner_registry is registry
+                    assert service.agent_capability_resolver is resolver and service.resource_bounds_profile is resource
+                    assert service.mode_snapshot_input_resolver is None
+                    assert service.mode_snapshot_owner_projection_adapter is service.mode_snapshot_projection_bundle is None
+                    assert service.computation_evidence_service is None
+                    assert assessment.control_evidence is controls
+                    assert assessment.permanent_no_trade_comparison is comparison
+                    assert assessment.adjudication_basis is basis
+                    assert assessment.terminal_state == "NO_TRADE" and assessment.permanent_no_trade_wins is True
+                    assert assessment.automatic_promotion_allowed is False
+                    assert assessment.champion_challenger_evidence_only is True
+                    assert tuple(row.active for row in assessment.no_trade_condition_outcomes) == (
+                        True, True, True, False, False, False, False, True)
+                    assert set(conditions[0].evidence_receipt_refs) <= set(
+                        assessment.no_trade_condition_outcomes[0].evidence_receipt_refs)
+                    assert set(conditions[0].reason_codes) <= set(assessment.no_trade_condition_outcomes[0].reason_codes)
+                    with pytest.raises(FrozenInstanceError):
+                        service.owner_registry = call["base_registry"]
+                if mode not in ("two", "four", "service", "service_resource_exact"):
+                    with pytest.raises(ContractValidationError):
+                        _build_probability_owner_registry_v1(**call, evaluated_ns=time.time_ns())
+                    assert all(item["kind"] != "NATIVE_USE" for item in fence._registrations.values())
+                else:
+                    if mode not in ("service", "service_resource_exact"):
+                        registry, retained = _build_probability_owner_registry_v1(**call, evaluated_ns=time.time_ns())
+                    assert counts["read"] == counts["exit"] == 1 and counts["check"] > 0
+                    assert len(registry.packets) == len(binding_ids) and len({packet.packet_id for packet in registry.packets}) == len(binding_ids)
+                    assert retained[0] == conditions[0] and retained[0].active
+                    expected = {binding_ids[0]: 0.6, binding_ids[1]: "CALIBRATED_FOR_DECLARED_CONTEXT"}
+                    if mode == "four":
+                        expected.update({binding_ids[2]: Decimal("0.48"), binding_ids[3]: Decimal("0.2")})
+                    for binding in (b for rows in FORMULA_INPUT_AUTHORITY_BY_MATH_ID.values() for b in rows if b.binding_id in binding_ids):
+                        resolved = _resolve_formula_input_binding(binding.math_spec_id, binding=binding, context=context,
+                            owner_registry=registry, caller_assertions=MappingProxyType({}))
+                        assert resolved.value == expected[binding.binding_id]
+                    registry._check_probability_packet_refs_v1(tuple(p.packet_id for p in registry.packets), context=context)
+                    assert prepared.model_use_authorized is prepared.source_authentication is prepared.native_packet_created is False
+                    with pytest.raises(ContractValidationError):
+                        resolver._check_probability_native_use_v1(replace(admitted[0]), evaluated_ns=time.time_ns())
+                    fence._source_synchronized_v1 = False
+                    with pytest.raises(InputAuthorityError):
+                        registry._check_probability_packet_refs_v1((registry.packets[-1].packet_id,), context=context)
+                assert reader.read_calls == initial_issuer_reads
 
 
 def test_service_requires_one_typed_admission_owner_and_no_none_bypass() -> None:
@@ -159,6 +503,20 @@ def test_service_requires_one_typed_admission_owner_and_no_none_bypass() -> None
         not in production_source
     )
 
+    from . import _synthetic_probability_issuance
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane.errors import OwnerAdapterError
+    import time
+    resolver, reader, requests = _synthetic_probability_issuance()
+    missing = AgentCapabilityResolverV1(policy_store(), {})
+    with pytest.raises(OwnerAdapterError):
+        with missing._resolve_probability_issuer_context_v1(requests, evaluated_ns=time.time_ns()):
+            raise AssertionError("missing original issuer was admitted")
+    with pytest.raises(OwnerAdapterError):
+        with resolver._resolve_probability_native_use_v1(object(), evaluated_ns=time.time_ns(),
+                                                        deadline_ns=time.monotonic_ns() + 1_000_000_000):
+            raise AssertionError("issuer attestation became model-use permission")
+    assert reader.read_calls == 0
+
 
 def test_all_fifteen_public_operations_execute_exactly_one_central_admission() -> None:
     exact_operation_names = (
@@ -190,6 +548,16 @@ def test_all_fifteen_public_operations_execute_exactly_one_central_admission() -
     assert structural_counts == {
         operation_name: 1 for operation_name in exact_operation_names
     }
+
+    from . import _synthetic_probability_issuance
+    import time
+    resolver, reader, requests = _synthetic_probability_issuance()
+    with resolver._resolve_probability_issuer_context_v1(requests, evaluated_ns=time.time_ns()) as snapshot:
+        for request in requests:
+            resolver._admit_probability_issuer_v1(request, trusted_snapshot=snapshot)
+    assert resolver.last_decision is None
+    assert tuple(name for name in IMPLEMENTED_OPERATION_IDS) == exact_operation_names
+    assert not any("probability" in name for name in exact_operation_names)
 
 
 def test_eligible_denied_and_no_trade_decisions_control_body_execution() -> None:
