@@ -20232,6 +20232,169 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
     import ast
     import io
     from tools import validation_reliability as o
+    # V2 references run in this original collected group. Windows ABI injection
+    # below tests parsing/error retention, never native Linux custody.
+    import struct
+    import copy
+    import ctypes
+    import stat
+    undef=0xffffffff
+    def acl_bytes(rows):return struct.pack('<I',2)+b''.join(struct.pack('<HHI',*v) for v in rows)
+    base=((1,7,undef),(4,5,undef),(32,1,undef))
+    raw=acl_bytes(base)
+    assert o._linux_acl_parse_v2(raw,default=False,mode=0o751)==base
+    assert o._linux_acl_parse_v2(None,default=False,mode=0o777) is None
+    assert o._linux_acl_parse_v2(struct.pack('<I',2),default=True,mode=0o700)==()
+    named=((1,7,undef),(2,0,123),(4,4,undef),(8,2,456),(16,6,undef),(32,7,undef))
+    parsed=o._linux_acl_parse_v2(acl_bytes(named),default=False,mode=0o767)
+    assert not o._linux_acl_rights_v2(parsed,mode=0o767,owner_uid=1,owner_gid=2,uid=123,groups=(456,),requested=2)
+    assert not o._linux_acl_rights_v2(parsed,mode=0o767,owner_uid=1,owner_gid=2,uid=999,groups=(2,456),requested=6)
+    assert o._linux_acl_rights_v2(parsed,mode=0o767,owner_uid=1,owner_gid=2,uid=999,groups=(456,),requested=2)
+    assert o._linux_acl_rights_v2(parsed,mode=0o767,owner_uid=1,owner_gid=2,uid=999,groups=(),requested=7)
+    assert o._linux_acl_rights_v2(parsed,mode=0o767,owner_uid=1,owner_gid=2,uid=1,groups=(),requested=7)
+    invalid=[b'',struct.pack('<I',2),raw[:-1],struct.pack('<I',3)+raw[4:],raw+b'\0',
+        acl_bytes(((1,8,undef),*base[1:])),acl_bytes(((64,7,undef),*base[1:])),acl_bytes(base[1:]),
+        acl_bytes((*base,base[-1])),acl_bytes((base[1],base[0],base[2])),acl_bytes(((1,7,9),*base[1:])),
+        acl_bytes(((1,7,undef),(2,4,undef),*base[1:])),acl_bytes(((1,7,undef),(2,4,12),*base[1:])),
+        acl_bytes(((1,7,undef),(2,4,13),(2,4,12),*base[1:-1],(16,5,undef),base[-1]))]
+    for damaged in invalid:
+        assert damaged!=raw
+        with pytest.raises(o.ValidationReliabilityError):o._linux_acl_parse_v2(damaged,default=False,mode=0o751)
+    with pytest.raises(o.ValidationReliabilityError,match='MODE_DISAGREEMENT'):
+        o._linux_acl_parse_v2(raw,default=False,mode=0o750)
+    assert o._linux_acl_parse_v2(raw,default=True,mode=0o000)==base
+    if sys.platform!='linux':
+        with pytest.raises(o.ValidationReliabilityError,match='NATIVE_ABI'):o._LinuxSourceNativeV2()
+    # A fixed ABI reference drives the complete existing xattr method. Native
+    # negative return values and errno are preserved, not replaced with success.
+    abi=o._LinuxSourceNativeV2.__new__(o._LinuxSourceNativeV2)
+    abi.ctypes=ctypes;abi.attempt=None;abi.last_acl={}
+    name_buffer=b'system.posix_acl_access\0'
+    calls=[];delivered=[]
+    class ReferenceACL:
+        def flistxattr(self,fd,buffer,size):
+            assert fd==17 and size==65536;calls.append(('list',size))
+            ctypes.memmove(buffer,name_buffer,len(name_buffer));return len(name_buffer)
+        def fgetxattr(self,fd,name,buffer,size):
+            assert fd==17 and size==1028;calls.append(('get',name,size))
+            if name==b'system.posix_acl_access':ctypes.memmove(buffer,raw,len(raw));return len(raw)
+            ctypes.set_errno(61);return -1
+    abi.lib=ReferenceACL()
+    import errno
+    # ENODATA is a Linux errno. Reference mapping is explicitly injected only
+    # for this Windows parsing branch; it cannot create a native generation.
+    with monkeypatch.context() as patch:
+        patch.setattr(errno,'ENODATA',61,raising=False)
+        assert abi.acl(17,attempt=lambda op:None,delivered=delivered.append)==(raw,None)
+        assert delivered==[len(name_buffer),len(raw)] and len(calls)==3
+        assert abi.last_acl['values'][0]['raw_hex']==raw.hex()
+        for damaged in (name_buffer[:-1],name_buffer+name_buffer,b'\0'):
+            with monkeypatch.context() as broken:
+                def names(fd,buffer,size):ctypes.memmove(buffer,damaged,len(damaged));return len(damaged)
+                broken.setattr(abi.lib,'flistxattr',names)
+                with pytest.raises(o.ValidationReliabilityError):abi.acl(17,attempt=lambda op:None,delivered=lambda n:None)
+                assert abi.last_acl['names_hex']==damaged.hex()
+        for number in (1,7,13,34,95):
+            with monkeypatch.context() as broken:
+                def denied(fd,name,buffer,size):ctypes.set_errno(number);return -1
+                broken.setattr(abi.lib,'fgetxattr',denied)
+                with pytest.raises(OSError) as observed:abi.acl(17,attempt=lambda op:None,delivered=lambda n:None)
+                assert observed.value.errno==number and abi.last_acl['failure']['errno']==number
+    # Exact data shapes and geometry do not confer a lease.
+    v2root=str(tmp_path/'v2-original')
+    directory=lambda p,ino,roster:[p,'GIT_ADMIN' if p=='.git' else 'WORKTREE',1,ino,4096,3,4,stat.S_IFDIR|0o555,0,0,2,16,roster]
+    file_row=lambda p,ino,size:[p,'GIT_ADMIN' if p.startswith('.git/') else 'WORKTREE',1,ino,size,3,4,stat.S_IFREG|0o444,0,0,1,16]
+    manifest=dict(basis_kind='NATIVE_IMMUTABLE_V2',run_id='reference-v2',repository_root=v2root,index_path=str(Path(v2root)/'.git/index'),
+        source_root_identity=[1,1],source_generation_ns=5,files=[file_row('.git/index',3,12),file_row('large',4,2*1024**3+1)],
+        directories=[directory('.',1,[['.git','directory'],['large','file']]),directory('.git',2,[['index','file']])],
+        category_totals=dict(R=2*1024**3+1,G=12,I=12))
+    catalog=o._linux_source_manifest_v2(manifest)
+    assert catalog[3]==7 and catalog[0]['large'][4]==2*1024**3+1
+    for mutation in (lambda d:d.update(extra=1),lambda d:d['files'][1].__setitem__(11,0),
+            lambda d:d['files'][1].__setitem__(10,2),lambda d:d['files'][1].__setitem__(8,1001),
+            lambda d:d['files'][1].__setitem__(7,stat.S_IFREG|0o644),lambda d:d['files'][1].__setitem__(1,'GIT_ADMIN'),
+            lambda d:d['directories'][0][12].append(['extra','file']),lambda d:d['files'].append(d['files'][-1]),
+            lambda d:d['category_totals'].update(R=0),lambda d:d.update(source_root_identity=[1,99]),
+            lambda d:d['files'][1].__setitem__(2,2),lambda d:d['files'][1].__setitem__(3,3),
+            lambda d:d['files'][1].__setitem__(0,'x'*4097),lambda d:d['files'][1].__setitem__(0,'/'.join(['x']*65))):
+        damaged=copy.deepcopy(manifest);mutation(damaged);assert damaged!=manifest
+        with pytest.raises(o.ValidationReliabilityError):o._linux_source_manifest_v2(damaged)
+    with pytest.raises(o.ValidationReliabilityError,match='ACTUAL_LEASE_REQUIRED'):
+        o._LinuxImmutableSourceBasisV2({}, {}, 'reference-v2')
+    assert o._linux_preflight_storage_reservation_v1((1048576,)*8,(8*1024**2,)*8,4096)==545259520
+    reference_census=dict(complete_size_census=True,logical_bytes=dict(R=28101722860,G=403209782,I=3446734,S=100,E=16))
+    geometry=runner._linux_preflight_capacity_v2(reference_census,page_size=4096)
+    assert geometry['metadata_admitted'] is True and geometry['immutable_custody_established'] is False
+    assert geometry['constraints']['runtime_reservation_bytes']['observed']==545259520
+    assert geometry['controller_metadata_design_reservation']==512*1024**2 and geometry['native_memory_limit']==6*1024**3
+    incomplete=runner._linux_preflight_capacity_v2({**reference_census,'complete_size_census':False},page_size=4096)
+    assert incomplete['metadata_admitted'] is False and incomplete['constraints']['installation_bytes']['observed'] is None
+    assert incomplete['constraints']['git_executable_bytes']['observed'] is None
+    for category,limit in (('R',64*1024**3),('S',1024**3),('E',16*1024**2)):
+        damaged=copy.deepcopy(reference_census);damaged['logical_bytes'][category]=limit+1
+        assert runner._linux_preflight_capacity_v2(damaged,page_size=4096)['metadata_admitted'] is False
+    # Fixed V2 wire references use real bytes and the complete frame owner.
+    vector=(sys.executable,o._PREFLIGHT_SCRIPTS_V1[3],'--repo-root','.')
+    identity=dict(run_id='reference-v2',phase='fast-preflight',command_index=4,original_position=4,command_count=8,
+        argv=list(vector),repo_root=v2root,process_root=str(tmp_path/'v2process'),evidence_root=str(tmp_path/'v2evidence'),parent_pid=os.getpid())
+    limits=dict(zip(o._PREFLIGHT_DIMENSIONS_V1,(100,1024,100,1024,0,0,0,0),strict=True))
+    manifest_path=tmp_path/'source-basis.json';manifest_path.write_bytes(b'X'*100)
+    descriptor=dict(kind='NATIVE_IMMUTABLE_V2',path=str(manifest_path),physical_version=list(o._scan_same_api_version(manifest_path.lstat())),byte_length=100,catalog_entry_count=7)
+    header=dict(identity=identity,allowance=limits,deadline_ns=time.monotonic_ns()+60*10**9,
+        git=dict(executable=None,evidence_root=None),native_basis=descriptor,selection='ALL_WORKTREE')
+    assert o._preflight_header_v2(header,0,identity)==7
+    with pytest.raises(o.ValidationReliabilityError):o._preflight_header_v1(header,0,identity)
+    for key,value in (('selection','NONE'),('native_basis',{**descriptor,'files':[]})):
+        damaged={**header,key:value};assert damaged!=header
+        with pytest.raises(o.ValidationReliabilityError):o._preflight_header_v2(damaged,0,identity)
+    with pytest.raises(o.ValidationReliabilityError):o._preflight_header_v2(header,1,identity)
+    frame=o._preflight_canonical_v1(header);prefix=struct.pack('>8sQQ',b'QTTPF02\n',len(frame),0)
+    framing=tmp_path/'v2-reference-frame';framing.write_bytes(prefix+frame)
+    transport=dict(frame_byte_limit=1048576,header_byte_limit=1048552,lexical_units=100000,depth=64,quoted_bytes=100000,
+        read_calls=1000,write_calls=1000,chunk_bytes=65536,retained_buffer_bytes=4*1048576,receiver_byte_limit=1048576)
+    with framing.open('rb',buffering=0) as stream:
+        meter=o._PreflightTransportV1(transport,time.monotonic_ns()+60*10**9)
+        decoded,values,count=o._preflight_frame_read_v1(stream.fileno(),magic=(b'QTTPF01\n',b'QTTPF02\n'),extent=24+len(frame),meter=meter,
+            validate=lambda h,p:([],o._preflight_header_v2(h,p,identity)))
+        assert decoded==header and values==[] and count==7 and meter.received==24+len(frame)
+    # Lost seal and partial transitions must fail before an application or restore.
+    partial=o._LinuxImmutableSourceSealV2.__new__(o._LinuxImmutableSourceSealV2)
+    partial.state='FAILED';partial.protected=[{'path':'not-an-operand'}];partial.post={};partial.rows=[{}]
+    with pytest.raises(RuntimeError,match='PARTIAL_PROTECTION_RETAINED'):partial.restore()
+    missing=o._LinuxImmutableSourceBasisV2.__new__(o._LinuxImmutableSourceBasisV2)
+    missing.failure=RuntimeError('original lost seal');missing.state='FAILED'
+    with pytest.raises(RuntimeError,match='original lost seal'):missing.check_live()
+    # Genuine unprivileged Linux xattrs, mask, default inheritance and removal on
+    # disposable fixtures only. Root-owned production copy qualification belongs
+    # to the eligible controller, not to this reference or a mocked uid.
+    if sys.platform=='linux':
+        acl_area=tmp_path/'linux-acl-v2';acl_area.mkdir()
+        inherited=acl_area/'original';inherited.mkdir()
+        native=o._LinuxSourceNativeV2();values=[];attempts=[]
+        default=acl_bytes(((1,7,undef),(2,4,os.getuid()+1),(4,5,undef),(16,5,undef),(32,0,undef)))
+        os.setxattr(inherited,'system.posix_acl_default',default,follow_symlinks=False)
+        original=inherited/'bytes';original.write_bytes(b'original installation reference\n')
+        fd=o._linux_source_open_v2(original)
+        try:
+            observed=native.acl(fd,attempt=attempts.append,delivered=values.append)
+            assert observed[0] is not None and observed[1] is None
+            o._linux_acl_parse_v2(observed[0],default=False,mode=os.fstat(fd).st_mode)
+        finally:os.close(fd)
+        copied=acl_area/'copy';copied.mkdir()
+        fd=o._linux_source_open_v2(copied)
+        try:
+            native.remove_acl(fd)
+            assert native.acl(fd,attempt=attempts.append,delivered=values.append)==(None,None)
+        finally:os.close(fd)
+        target=copied/'bytes'
+        with original.open('rb') as left,target.open('xb') as right:
+            while block:=left.read(65536):assert right.write(block)==len(block)
+        with original.open('rb') as left,target.open('rb') as right:
+            assert left.read(65536)==right.read(65536)==b'original installation reference\n'
+            assert left.read(1)==right.read(1)==b''
+        assert os.getxattr(inherited,'system.posix_acl_default',follow_symlinks=False)==default
+        assert os.getxattr(original,'system.posix_acl_access',follow_symlinks=False)==observed[0]
+        assert sum(values)>0 and len(attempts)>=9
     mib,gib = 1024**2,1024**3
     assert o._linux_preflight_name_v1(17,23) == 'qtt17n23'
     for pid,tick in ((True,23),(0,23),(17,-1),(17,True)):

@@ -3103,8 +3103,18 @@ class _PreflightAssemblyV1:
             header, blobs, _ = native.consume(self._validate_declaration)
             self.header = header
             self.repository = header['repository']
-            self.files = {p:blobs[i] for p,i in self.repository['files']}
-            self.directories = owner._preflight_rosters_v1(self.repository['directories'])
+            self.basis=None
+            if header.get('basis_kind')=='NATIVE_IMMUTABLE_V2':
+                descriptor=self.repository['native_basis']
+                owner._preflight_require_v1(descriptor['byte_length']<=header['parent_limits']['capture']['retained_bytes']
+                    and descriptor['catalog_entry_count']<=header['parent_limits']['capture']['entries'],
+                    'LINUX_V2_PARENT_MANIFEST_ALLOWANCE')
+                self.basis=owner._LinuxImmutableSourceBasisV2(native.host_lease,descriptor,paths.run_id)
+                self.files={p:row for p,row in self.basis.files.items() if row[1]=='WORKTREE'}
+                self.directories={p:v for p,v in self.basis.directories.items() if p!='.git' and not p.startswith('.git/')}
+            else:
+                self.files={p:blobs[i] for p,i in self.repository['files']}
+                self.directories=owner._preflight_rosters_v1(self.repository['directories'])
             self.installation = dict(header['installation'])
             basis = self.installation['startup_basis']
             self.installation['startup_basis'] = dict(files={p:blobs[i] for p,i in basis['files']},
@@ -3115,12 +3125,19 @@ class _PreflightAssemblyV1:
             self.native.check()
             self.capture = owner._PreflightObservationV1(root=paths.repo_root,run_id=paths.run_id,occurrence=1,
                 argv=plan[0].argv,files=self.files,directories=self.directories,
-                limits=header['parent_limits']['capture'],deadline_ns=header['parent_limits']['deadline_ns'])
+                limits=header['parent_limits']['capture'],deadline_ns=header['parent_limits']['deadline_ns'],native_basis=self.basis)
             self.terminal = owner._PreflightObservationV1(root=paths.repo_root,run_id=paths.run_id,occurrence=1,
                 argv=plan[0].argv,files=self.files,directories=self.directories,
-                limits=header['parent_limits']['terminal'],deadline_ns=header['parent_limits']['deadline_ns'])
+                limits=header['parent_limits']['terminal'],deadline_ns=header['parent_limits']['deadline_ns'],native_basis=self.basis)
             self.parent_meter = owner._PreflightTransportV1(header['parent_limits']['transport'],
                 header['parent_limits']['deadline_ns'],native.check)
+            self.parent_meter.native_basis=self.basis
+            if self.basis is not None:
+                self.capture.reserve('entries',self.basis.count)
+                self.capture.reserve('retained_bytes',self.basis.manifest_retained_bytes)
+                self.capture.retained_entries+=self.basis.count
+                self.capture.native_read_observation.update(manifest_acquired_bytes=self.basis.manifest_acquired_bytes,
+                    manifest_retained_bytes=self.basis.manifest_retained_bytes)
             if type(native.host_lease) is owner._LinuxPreflightHostLeaseV1:
                 extents,receivers = [],[]
                 for row,entry in zip(header['rows'],plan,strict=True):
@@ -3128,49 +3145,56 @@ class _PreflightAssemblyV1:
                     identity = dict(run_id=paths.run_id,phase=FAST_PREFLIGHT_PHASE,command_index=index,original_position=index,
                         command_count=8,argv=list(entry.argv),repo_root=str(paths.repo_root),process_root=str(paths.process_root),
                         evidence_root=str(paths.evidence_root),parent_pid=os.getpid())
-                    offset,files = 0,[]
-                    for name,blob in row['files']:
-                        files.append([name,offset,len(blobs[blob])])
-                        offset += len(blobs[blob])
-                    # Startup can only subtract allowance. The full original
-                    # nonnegative integers therefore bound every later decimal
-                    # width, while the actual paths, rosters and body are exact.
-                    frame_header = dict(identity=identity,allowance=row['limits'],deadline_ns=row['deadline_ns'],
-                        git=dict(executable=row['git_executable'],evidence_root=None if row['git_executable'] is None
-                            else str(paths.evidence_root/('preflight-'+str(index))/'git')),files=files,directories=row['directories'])
-                    raw = owner._preflight_canonical_v1(frame_header)
-                    owner._preflight_require_v1(offset <= 268435456 and len(raw) <= 8388608,
-                        'LINUX_PREFLIGHT_ROW_SERIALIZATION_LIMIT')
+                    if self.basis is None:
+                        offset,files=0,[]
+                        for name,blob in row['files']:
+                            files.append([name,offset,len(blobs[blob])])
+                            offset+=len(blobs[blob])
+                        frame_header=dict(identity=identity,allowance=row['limits'],deadline_ns=row['deadline_ns'],
+                            git=dict(executable=row['git_executable'],evidence_root=None if row['git_executable'] is None
+                                else str(paths.evidence_root/('preflight-'+str(index))/'git')),files=files,directories=row['directories'])
+                    else:
+                        offset=0
+                        frame_header=dict(identity=identity,allowance=row['limits'],deadline_ns=row['deadline_ns'],
+                            git=dict(executable=row['git_executable'],evidence_root=None if row['git_executable'] is None
+                                else str(paths.evidence_root/('preflight-'+str(index))/'git')),
+                            native_basis=dict(self.basis.descriptor),selection=row['selection'])
+                    raw=owner._preflight_canonical_v1(frame_header)
+                    owner._preflight_require_v1(offset<=268435456 and len(raw)<=8388608
+                        and (self.basis is None or 24+len(raw)<=1048576),'LINUX_PREFLIGHT_ROW_SERIALIZATION_LIMIT')
                     extents.append(24+len(raw)+offset)
-                    receivers.append(owner._preflight_result_bound_v1(identity))
+                    receivers.append(owner._preflight_result_bound_v1(identity,native_basis=self.basis))
                 native.host_lease.reserve_plan(extents,receivers)
             bindings = {}
             self.rows = header['rows']
             for row, entry in zip(self.rows,plan,strict=True):
-                owner._preflight_require_v1(all(self.files[p] == blobs[i] for p,i in row['files']),
-                    'preflight row byte generation differs')
+                if self.basis is None:
+                    owner._preflight_require_v1(all(self.files[p]==blobs[i] for p,i in row['files']),
+                        'preflight row byte generation differs')
                 observation = owner._PreflightObservationV1(root=paths.repo_root,run_id=paths.run_id,
-                    occurrence=entry.command_index,argv=entry.argv,files={p:blobs[i] for p,i in row['files']},
-                    directories=owner._preflight_rosters_v1(row['directories']),limits=row['limits'],
+                    occurrence=entry.command_index,argv=entry.argv,
+                    files=({p:blobs[i] for p,i in row['files']} if self.basis is None else self.files if row['selection']=='ALL_WORKTREE' else {}),
+                    directories=(owner._preflight_rosters_v1(row['directories']) if self.basis is None else
+                        self.directories if row['selection']=='ALL_WORKTREE' else {}),limits=row['limits'],
                     deadline_ns=row['deadline_ns'],git_executable=row['git_executable'],
-                    evidence_root=paths.evidence_root/('preflight-'+str(entry.command_index))/'git')
+                    evidence_root=paths.evidence_root/('preflight-'+str(entry.command_index))/'git',native_basis=self.basis)
                 binding = {k:v for k,v in self.installation.items() if k != 'executable'}
                 binding['observation'] = observation
                 bindings[entry.command_index] = binding
             index = self.repository['index']
             self.candidate = _ValidationCandidateCustodyV1(repo_root=paths.repo_root,plan=plan,
                 observe_paths=self._observe_paths,check_exclusive=native.check,
-                index_path=None if index is None else pathlib.Path(index[0]),
+                index_path=None if index is None else pathlib.Path(index if self.basis is not None else index[0]),
                 effects_by_occurrence={n:() for n in range(1,9)},ignored_paths=tuple(self.repository['protected_paths']),
                 operation_checks={n:self._check_operation for n in range(1,9)},nested_evidence_limits={},
-                preflight_bindings=bindings,**header['candidate_limits'])
+                preflight_bindings=bindings,native_basis=self.basis,native_observation=self.capture,**header['candidate_limits'])
             for name, raw in self.files.items():
                 actual = self.candidate.baseline.get(name)
-                owner._preflight_require_v1(actual is not None and actual[1] == raw,
+                owner._preflight_require_v1(actual is not None and (actual == raw if self.basis is not None else actual[1] == raw),
                     'preflight candidate basis differs: '+name)
             if index is not None:
                 owner._preflight_require_v1(self.candidate.index_baseline is not None
-                    and self.candidate.index_baseline[1] == blobs[index[1]],'preflight active index basis differs')
+                    and (self.candidate.index_baseline == self.basis.files['.git/index'] if self.basis is not None else self.candidate.index_baseline[1] == blobs[index[1]]),'preflight active index basis differs')
             self.candidate._preflight_assembly = self
             self.state = 'CUSTODY_READY'
         except BaseException as exc:
@@ -3179,7 +3203,11 @@ class _PreflightAssemblyV1:
 
     def _validate_declaration(self,h,payload):
         o = self.owner
-        o._preflight_keys_v1(h,('phase','repository','installation','rows','candidate_limits','parent_limits','blobs'))
+        v2=h.get('basis_kind')=='NATIVE_IMMUTABLE_V2'
+        o._preflight_keys_v1(h,('phase','repository','installation','rows','candidate_limits','parent_limits','blobs',*(['basis_kind'] if v2 else [])))
+        if v2:
+            o._preflight_require_v1(type(self.native.host_lease) is o._LinuxPreflightHostLeaseV1,
+                'LINUX_V2_DECLARATION_ACTUAL_LEASE')
         o._preflight_require_v1(h['phase'] == FAST_PREFLIGHT_PHASE, 'preflight declaration phase')
         o._preflight_require_v1(type(h['blobs']) is list,'preflight blob array')
         offset, sizes = 0, []
@@ -3207,25 +3235,33 @@ class _PreflightAssemblyV1:
                 ref(row[1])
             o._preflight_require_v1(ordered == sorted(ordered),'preflight declaration file order')
         r = h['repository']
-        o._preflight_keys_v1(r,('root','files','directories','index','protected_paths'))
+        o._preflight_keys_v1(r,('root','native_basis','index','protected_paths') if v2 else ('root','files','directories','index','protected_paths'))
         o._preflight_startup_path_v1(r['root'])
-        o._preflight_require_v1(r['root'] == str(self.paths.repo_root) == str(self.native.root), 'preflight declaration actual repository')
-        files(r['files'])
-        repository_files = dict(r['files'])
-        directories = o._preflight_rosters_v1(r['directories'])
-        o._preflight_catalog_consistency_v1(repository_files,directories)
+        o._preflight_require_v1(r['root']==str(self.paths.repo_root)==str(self.native.root),'preflight declaration actual repository')
+        if v2:
+            descriptor=o._linux_source_descriptor_v2(r['native_basis'])
+            o._preflight_require_v1(descriptor==self.native.host_lease.binding.get('native_basis'),'LINUX_V2_DECLARATION_DESCRIPTOR')
+            repository_files=directories=None
+        else:
+            files(r['files'])
+            repository_files=dict(r['files'])
+            directories=o._preflight_rosters_v1(r['directories'])
+            o._preflight_catalog_consistency_v1(repository_files,directories)
         o._preflight_require_v1(type(r['protected_paths']) is list,'preflight protected path array')
-        protected = [o._preflight_relative_v1(p) for p in r['protected_paths']]
-        o._preflight_require_v1(len({p.casefold() for p in protected}) == len(protected), 'preflight protected path alias')
-        index = r['index']
-        if index is None:
+        protected=[o._preflight_relative_v1(p) for p in r['protected_paths']]
+        o._preflight_require_v1(len({p.casefold() for p in protected})==len(protected),'preflight protected path alias')
+        index=r['index']
+        if v2:
+            o._preflight_require_v1(type(index) is str and index==str(self.native.index_path)==str(self.paths.repo_root/'.git/index'),
+                'LINUX_V2_ORIGINAL_INDEX_PATH')
+        elif index is None:
             o._preflight_require_v1(self.native.index_path is None and not (self.paths.repo_root/'.git').exists(),
                 'preflight actual active index required')
         else:
-            o._preflight_require_v1(type(index) is list and len(index) == 2,'preflight active index pair')
+            o._preflight_require_v1(type(index) is list and len(index)==2,'preflight active index pair')
             o._preflight_startup_path_v1(index[0])
             ref(index[1])
-            o._preflight_require_v1(index[0] == str(self.native.index_path),'preflight native active index identity')
+            o._preflight_require_v1(index[0]==str(self.native.index_path),'preflight native active index identity')
         install = h['installation']
         o._preflight_keys_v1(install,('executable','version','abi','stdlib_roots','site_roots','loader_environment',
             'config_paths','customizer_paths','startup_basis'))
@@ -3246,6 +3282,10 @@ class _PreflightAssemblyV1:
         basis = install['startup_basis']
         o._preflight_keys_v1(basis,('files','directories','absent'))
         files(basis['files'],absolute=True)
+        if v2:
+            for path,_ in basis['files']:
+                o._preflight_require_v1(not pathlib.Path(path).is_relative_to(self.paths.repo_root)
+                    or path in install['config_paths'],'LINUX_V2_SOURCE_MASQUERADING_AS_STARTUP')
         o._preflight_rosters_v1(basis['directories'],absolute=True)
         o._preflight_require_v1(type(basis['absent']) is list,'preflight startup absence array')
         for path in basis['absent']: o._preflight_startup_path_v1(path)
@@ -3266,16 +3306,19 @@ class _PreflightAssemblyV1:
             <= self.native.deadline_ns,'preflight parent ancestor deadline')
         o._preflight_require_v1(type(h['rows']) is list and len(h['rows']) == 8,'preflight all eight rows required')
         for n,(row,entry) in enumerate(zip(h['rows'],self.plan,strict=True),1):
-            o._preflight_keys_v1(row,('original_position','argv','files','directories','limits','parent_tail_reserve',
+            o._preflight_keys_v1(row,('original_position','argv',*(['selection'] if v2 else ['files','directories']),'limits','parent_tail_reserve',
                 'deadline_ns','settlement_deadline_ns','transport','application_output_limits','git_executable'))
             o._preflight_require_v1(type(row['original_position']) is int and row['original_position'] == n
                 and type(row['argv']) is list and tuple(row['argv']) == entry.argv,'preflight original row identity')
-            files(row['files'])
-            row_files = dict(row['files'])
-            row_dirs = o._preflight_rosters_v1(row['directories'])
-            o._preflight_catalog_consistency_v1(row_files,row_dirs)
-            o._preflight_require_v1(all(p in repository_files for p in row_files)
-                and all(directories.get(p) == v for p,v in row_dirs.items()), 'preflight row disagrees with repository facts')
+            if v2:
+                o._preflight_require_v1(row['selection']==('NONE' if n in (2,6) else 'ALL_WORKTREE'),'LINUX_V2_ROW_SELECTION')
+            else:
+                files(row['files'])
+                row_files = dict(row['files'])
+                row_dirs = o._preflight_rosters_v1(row['directories'])
+                o._preflight_catalog_consistency_v1(row_files,row_dirs)
+                o._preflight_require_v1(all(p in repository_files for p in row_files)
+                    and all(directories.get(p) == v for p,v in row_dirs.items()), 'preflight row disagrees with repository facts')
             limits = o._preflight_limits_v1(row['limits'])
             tail = o._preflight_limits_v1(row['parent_tail_reserve'])
             o._preflight_require_v1(all(tail[k] <= limits[k] for k in limits),'preflight parent tail allocation')
@@ -3301,6 +3344,11 @@ class _PreflightAssemblyV1:
     def _observe_paths(self):
         o = self.owner
         budget = self.terminal if self.state == 'SETTLING' else self.capture
+        if self.basis is not None:
+            # The following candidate snapshot performs a complete physical
+            # catalog barrier using held ancestors. This is its fixed universe.
+            self.basis.check_live()
+            return tuple(self.files)
         def walk(root):
             result = []
             for path,kind in o._preflight_directory_v1(root):
@@ -3380,6 +3428,7 @@ class _PreflightAssemblyV1:
                 self.owner._preflight_require_v1(self.native.host_lease.check_settled(launch.process) is None,
                     'preflight final host settlement denied')
         self.state = 'SETTLING'
+        if self.basis is not None:self.candidate.native_observation=self.terminal
 
 
 class _ValidationCandidateCustodyV1:
@@ -3390,7 +3439,7 @@ class _ValidationCandidateCustodyV1:
     """
     def __init__(self, *, repo_root, plan, observe_paths, check_exclusive, index_path,
                  effects_by_occurrence, ignored_paths, entry_limit, snapshot_byte_limit,
-                 read_byte_limit, deadline_ns, operation_checks, nested_evidence_limits=None, preflight_bindings=None):
+                 read_byte_limit, deadline_ns, operation_checks, nested_evidence_limits=None, preflight_bindings=None, native_basis=None, native_observation=None):
         from types import MappingProxyType
         if preflight_bindings is None:
             preflight_bindings = {}
@@ -3455,16 +3504,26 @@ class _ValidationCandidateCustodyV1:
             raise ValueError("actual active index custody is required")
         self.process_id, self.thread_id = os.getpid(), threading.get_ident()
         self.state, self.failure, self.completed_actions = "CAPTURING", None, []
+        self.native_basis=native_basis
+        self.native_observation=native_observation
+        if native_basis is not None:
+            from tools.validation_reliability import _LinuxImmutableSourceBasisV2
+            if (type(native_basis) is not _LinuxImmutableSourceBasisV2 or native_basis.root!=self.root
+                    or self.all_effects or self.ignored or self.nested_evidence_limits):
+                raise ValueError('LINUX_V2_EXACT_NO_EFFECT_CANDIDATE')
+            native_basis.check_live()
+            if native_basis.manifest_retained_bytes>self.snapshot_byte_limit:
+                raise RuntimeError('VALIDATION_CANDIDATE_SNAPSHOT_BUDGET')
         self.active_occurrence, self.permitted_since_barrier = None, set()
         self.completed_occurrences = set()
         self._check()
         paths = self._universe()
-        if self.index_path is not None:
+        if self.index_path is not None and self.native_basis is None:
             index_info = self.index_path.lstat()
             if index_info.st_size > self.snapshot_byte_limit:
                 raise RuntimeError("VALIDATION_CANDIDATE_SNAPSHOT_BUDGET")
         self.index_baseline = self._read(self.index_path) if self.index_path is not None else None
-        self.index_snapshot_bytes = 0 if self.index_baseline is None else len(self.index_baseline[1])
+        self.index_snapshot_bytes = (0 if self.index_baseline is None or self.native_basis is not None else len(self.index_baseline[1]))
         self.baseline = MappingProxyType(self._snapshot(paths, baseline=True))
         self._settled_snapshot = self.baseline
         self.state = "BASELINE_READY"
@@ -3535,6 +3594,10 @@ class _ValidationCandidateCustodyV1:
         from tools.validation_reliability import (_open_regular_worktree_descriptor,
                                                   _local_unlinked_path, _scan_same_api_version, _preflight_chain_v1)
         self._check()
+        if self.native_basis is not None:
+            relative=path.relative_to(self.root).as_posix()
+            with self.native_basis.open_entry(relative):
+                return self.native_basis.files[relative]
         _local_unlinked_path(path.parent)
         ancestor_generation = _preflight_chain_v1(path.parent)
         try:
@@ -3594,6 +3657,11 @@ class _ValidationCandidateCustodyV1:
         return result
 
     def _snapshot(self, paths, *, baseline=False):
+        if self.native_basis is not None:
+            self.native_basis.check_live()
+            if len(paths)>self.entry_limit:
+                raise RuntimeError('VALIDATION_CANDIDATE_ENTRY_BUDGET')
+            return self.native_basis.catalog_snapshot(paths,self.native_observation)
         # Complete size preflight before retaining any candidate contents.
         total = self.index_snapshot_bytes
         for relative in paths:
@@ -8947,6 +9015,9 @@ def _main_owned(argv: Sequence[str] | None = None) -> int:
             projected_relative_paths=_projected_validation_relative_paths(
                 pre_args.phase
             ),
+            **({'run_id':_ACTIVE_PREFLIGHT_NATIVE_V1.host_lease.binding['source_run_id']}
+                if _ACTIVE_PREFLIGHT_NATIVE_V1 is not None and
+                getattr(_ACTIVE_PREFLIGHT_NATIVE_V1.host_lease,'binding',{}).get('native_basis') is not None else {}),
         )
     except (OSError, RuntimeError, ValueError) as exc:
         print(str(exc), file=sys.stderr, flush=True)
@@ -9464,6 +9535,25 @@ def _linux_preflight_capacity_v1(census, *, page_size, repeated_config_bytes=Non
         declared_startup_catalog_bytes=startup_catalog, page_size=page_size, checks=checks,
         feasible=admitted, byte_capture_admitted=admitted, unresolved_intersections=blockers,
         reason='Metadata is not custody; all unknown header, startup, receiver and native operands remain unestablished')
+def _linux_preflight_capacity_v2(census,*,page_size):
+    from tools import validation_reliability as o
+    totals=census['logical_bytes']
+    complete=census['complete_size_census']
+    storage=o._linux_preflight_storage_reservation_v1((1048576,)*8,(8*1024**2,)*8,page_size)
+    constraints=dict(original_source_admin_bytes=dict(observed=totals['R']+totals['G'],limit=64*1024**3),
+        installation_bytes=dict(observed=totals['S'] if complete else None,limit=1024**3),
+        git_executable_bytes=dict(observed=totals['E'] if complete else None,limit=16*1024**2),
+        census_serialized_bytes=dict(observed=len(o._preflight_canonical_v1(census)),limit=32*1024**2),
+        runtime_reservation_bytes=dict(observed=storage,limit=1024**3))
+    admitted=complete and all(v['observed'] is not None and v['observed']<=v['limit'] for v in constraints.values())
+    return dict(basis_kind='NATIVE_IMMUTABLE_V2',metadata_admitted=admitted,constraints=constraints,
+        child_frame_limit=1048576,manifest_limit=32*1024**2,journal_limit=32*1024**2,
+        controller_metadata_design_reservation=512*1024**2,native_memory_limit=6*1024**3,
+        original_source_is_copied=False,inline_source_bytes=0,immutable_custody_established=False,
+        actual_outer_frame_bytes=None,actual_startup_body_bytes=None,actual_manifest_bytes=None,actual_journal_bytes=None,
+        capacity_is_semantic_acceptance=False)
+
+
 def _linux_preflight_declaration_v1(source, installation, git, *, origin_ns, repository, interpreter, environment):
     """Mechanically produce the original declaration; no new wire or command identities."""
     import site
@@ -9471,7 +9561,13 @@ def _linux_preflight_declaration_v1(source, installation, git, *, origin_ns, rep
     import sysconfig
     from tools import validation_reliability as o
     root = pathlib.Path(repository)
+    v2=type(source) is o._LinuxImmutableSourceSealV2
     grants = o._linux_preflight_grants_v1(origin_ns)
+    if v2:
+        for row in grants['rows']:
+            row['transport']['frame_byte_limit']=1048576
+            row['transport']['header_byte_limit']=1048552
+
     vectors = tuple((interpreter,script,*(() if n == 6 else ('--repo-root','.')))
         for n,script in enumerate(o._PREFLIGHT_SCRIPTS_V1,1))
     files = {pathlib.Path(p).relative_to(root).as_posix():raw for p,raw in source.files.items()
@@ -9479,8 +9575,8 @@ def _linux_preflight_declaration_v1(source, installation, git, *, origin_ns, rep
     directories = {('.' if pathlib.Path(p) == root else pathlib.Path(p).relative_to(root).as_posix()):roster
         for p,roster in source.directories.items() if not pathlib.Path(p).is_relative_to(root/'.git')}
     index = root/'.git/index'
-    o._preflight_require_v1(str(index) in source.files and
-        sum(map(len,files.values()))+len(source.files[str(index)]) <= 512*1024**2,
+    o._preflight_require_v1(str(index) in source.files and (v2 or
+        sum(map(len,files.values()))+len(source.files[str(index)]) <= 512*1024**2),
         'LINUX_PREFLIGHT_COMPLETE_CANDIDATE_SNAPSHOT_CAPACITY')
     stdlib = tuple(dict.fromkeys(str(pathlib.Path(sysconfig.get_path(k)).absolute()) for k in ('stdlib','platstdlib')))
     sites = tuple(str(pathlib.Path(p).absolute()) for p in site.getsitepackages())
@@ -9498,7 +9594,28 @@ def _linux_preflight_declaration_v1(source, installation, git, *, origin_ns, rep
         if path in installation.files or path in source.files:
             o._preflight_require_v1(path in configs and not path.endswith('._pth'),
                 'LINUX_PREFLIGHT_UNSUPPORTED_STARTUP_CUSTOMIZER:'+path)
-            start_files[path] = (installation.files if path in installation.files else source.files)[path]
+            if path in installation.files:start_files[path]=installation.files[path]
+            elif v2:
+                # Only the already specified startup config operand can be inline.
+                info=pathlib.Path(path).lstat()
+                o._preflight_require_v1(info.st_size<=16*1024**2,'LINUX_V2_STARTUP_CONFIG_BOUND')
+                fd=o._linux_source_open_v2(path)
+                try:
+                    before=os.fstat(fd)
+                    parts=[]
+                    extent=0
+                    while True:
+                        source._check()
+                        raw=os.read(fd,min(65536,before.st_size-extent+1))
+                        extent+=len(raw)
+                        o._preflight_require_v1(extent<=before.st_size,'LINUX_V2_CONFIG_GREW')
+                        if not raw:break
+                        parts.append(raw)
+                    o._preflight_require_v1(extent==before.st_size and o._scan_same_api_version(os.fstat(fd))==o._scan_same_api_version(before)
+                        ==o._scan_same_api_version(pathlib.Path(path).lstat()) and source.native.flags(fd)&0x10,'LINUX_V2_CONFIG_CHANGED')
+                    start_files[path]=b''.join(parts)
+                finally:os.close(fd)
+            else:start_files[path]=source.files[path]
         else:
             o._preflight_require_v1(not pathlib.Path(path).exists(),'LINUX_PREFLIGHT_UNCAPTURED_STARTUP_PATH:'+path)
             absent.append(path)
@@ -9510,16 +9627,17 @@ def _linux_preflight_declaration_v1(source, installation, git, *, origin_ns, rep
         return [[p,add(values[p])] for p in sorted(values,key=lambda s:s.encode('utf-8'))]
     def directory_rows(values):
         return [[p,[list(row) for row in values[p]]] for p in sorted(values,key=lambda s:s.encode('utf-8'))]
-    repository_rows = file_rows(files)
-    repository_directories = directory_rows(directories)
-    index_blob = add(source.files[str(index)])
+    repository_rows = [] if v2 else file_rows(files)
+    repository_directories = [] if v2 else directory_rows(directories)
+    index_blob = None if v2 else add(source.files[str(index)])
     startup_files = file_rows(start_files)
     startup_directories = directory_rows(start_dirs)
     rows = []
     for n,(vector,grant) in enumerate(zip(vectors,grants['rows'],strict=True),1):
-        rows.append(dict(original_position=n,argv=list(vector),files=[] if n in (2,6) else repository_rows,
-            directories=[] if n in (2,6) else repository_directories,git_executable='/usr/bin/git' if n in (1,3,5,7,8) else None,
-            **grant))
+        rows.append(dict(original_position=n,argv=list(vector),
+            **({'selection':'NONE' if n in (2,6) else 'ALL_WORKTREE'} if v2 else
+                dict(files=[] if n in (2,6) else repository_rows,directories=[] if n in (2,6) else repository_directories)),
+            git_executable='/usr/bin/git' if n in (1,3,5,7,8) else None,**grant))
     offset = 0
     spans = []
     for raw in blobs:
@@ -9534,9 +9652,12 @@ def _linux_preflight_declaration_v1(source, installation, git, *, origin_ns, rep
         config_paths=list(configs),customizer_paths=list(customizers),startup_basis=dict(files=startup_files,
             directories=startup_directories,absent=absent)),rows=rows,candidate_limits=grants['candidate_limits'],
         parent_limits=grants['parent_limits'],blobs=spans)
+    if v2:
+        header['basis_kind']='NATIVE_IMMUTABLE_V2'
+        header['repository']=dict(root=repository,native_basis=dict(source.descriptor),index=str(index),protected_paths=[])
     raw = o._preflight_canonical_v1(header)
-    o._preflight_require_v1(len(raw) <= 16*1024**2,'LINUX_PREFLIGHT_DECLARATION_HEADER_CAPACITY')
-    return header,tuple(blobs),struct.pack('>8sQQ',b'QTTPA01\n',len(raw),offset)+raw+b''.join(blobs),vectors,grants
+    o._preflight_require_v1(len(raw) <= 16*1024**2 and 24+len(raw)+offset<=2*1024**3,'LINUX_PREFLIGHT_DECLARATION_HEADER_CAPACITY')
+    return header,tuple(blobs),struct.pack('>8sQQ',b'QTTPA02\n' if v2 else b'QTTPA01\n',len(raw),offset)+raw+b''.join(blobs),vectors,grants
 
 
 def _linux_preflight_eligibility_v1(event,environment,repository):
@@ -9713,7 +9834,7 @@ def _linux_preflight_controller_v1(repository,installation,interpreter,event,eve
         reserved_output_bytes=2*67108864)
     source = scope = None
     capture_counts = dict(files=0,entries=0)
-    census = capacity = None
+    census = capacity = capacity_v2 = install = None
     mounted = restored = False
     failures = []
     receipt = None
@@ -9723,7 +9844,7 @@ def _linux_preflight_controller_v1(repository,installation,interpreter,event,eve
         o._preflight_require_v1(len(first) >= 2 and first[0] == 'systemd' and first[1].isdigit()
             and int(first[1]) >= 255,'LINUX_PREFLIGHT_SYSTEMD_BASELINE')
         metadata = o._LinuxPreflightCensusV1(repository, installation, '/usr/bin/git',
-            deadline_ns=grants['native_deadline_ns'])
+            deadline_ns=grants['native_deadline_ns'],installation_acl=True,setup_uid=int(os.environ['SUDO_UID']))
         census = metadata.run()
         executable = pathlib.Path(interpreter)
         configs = tuple(dict.fromkeys((str(executable.parent/'pyvenv.cfg'),str(executable.parent.parent/'pyvenv.cfg'),
@@ -9733,30 +9854,41 @@ def _linux_preflight_controller_v1(repository,installation,interpreter,event,eve
             if row['kind'] == 'file' and row['role'] == 'repository' and row['path'] in configs)
         capacity = _linux_preflight_capacity_v1(census, page_size=os.sysconf('SC_PAGE_SIZE'),
             repeated_config_bytes=repeated if census['complete_size_census'] else None)
-        o._preflight_require_v1(capacity['byte_capture_admitted'], 'LINUX_PREFLIGHT_CAPTURE_INFEASIBLE')
-        source = o._LinuxPreflightCaptureV1(repository,byte_limit=2*1024**3,
+        capacity_v2=_linux_preflight_capacity_v2(census,page_size=os.sysconf('SC_PAGE_SIZE'))
+        o._preflight_require_v1(capacity_v2['metadata_admitted'],'LINUX_V2_METADATA_CAPACITY_UNAVAILABLE')
+        install=o._LinuxInstallationCopyV2(metadata,installation,deadline_ns=grants['native_deadline_ns'],setup_uid=int(os.environ['SUDO_UID']))
+        install.copy_installation(control/'installation')
+        git=o._LinuxPreflightCaptureV1('/usr/bin/git',byte_limit=16*1024**2,
             deadline_ns=grants['native_deadline_ns'],shared_capture=capture_counts)
-        git_root = pathlib.Path(repository)/'.git'
-        o._preflight_require_v1(git_root.is_dir() and str(git_root/'index') in source.files,
-            'LINUX_PREFLIGHT_ORIGINAL_GIT_ADMINISTRATION')
+        source=o._LinuxImmutableSourceSealV2(metadata,deadline_ns=grants['native_deadline_ns'],workspace=export_root.parent,run_id=name)
+        source.journal_path=control/'source-transition.jsonl'
+        source.primitive_check(query)
+        source.protect()
+        source.readability()
+        git_root=pathlib.Path(repository)/'.git'
+        o._preflight_require_v1(str(git_root/'index') in source.files,'LINUX_PREFLIGHT_ORIGINAL_GIT_ADMINISTRATION')
         for path in (git_root/'objects/info/alternates',git_root/'commondir',git_root/'gitdir',git_root/'worktrees'):
             o._preflight_require_v1(not path.exists(),'LINUX_PREFLIGHT_EXTERNAL_GIT_ADMINISTRATION')
-        config = source.files[str(git_root/'config')].decode('utf-8','strict').lower()
+        config_path=git_root/'config'
+        o._preflight_require_v1(config_path.stat().st_size<=1048576,'LINUX_PREFLIGHT_GIT_CONFIG_BOUND')
+        config=source.read_administration(config_path,1048576).decode('utf-8','strict').lower()
         o._preflight_require_v1(not any(word in config for word in ('extraheader','credential','hookspath','insteadof')),
             'LINUX_PREFLIGHT_CREDENTIAL_OR_HOOK_CONFIGURATION')
         for path in source.files:
-            if pathlib.Path(path).parent == git_root/'hooks':
+            if pathlib.Path(path).parent==git_root/'hooks':
                 o._preflight_require_v1(path.endswith('.sample'),'LINUX_PREFLIGHT_ACTIVE_REPOSITORY_HOOK')
-        install = o._LinuxPreflightCaptureV1(installation,byte_limit=1024**3,
-            deadline_ns=grants['native_deadline_ns'],installation=True,shared_capture=capture_counts)
-        git = o._LinuxPreflightCaptureV1('/usr/bin/git',byte_limit=16*1024**2,
-            deadline_ns=grants['native_deadline_ns'],shared_capture=capture_counts)
-        source.protect()
-        install.copy_installation(control/'installation')
+        source.publish(control/'declaration/source-basis.json')
+        capacity_v2['immutable_custody_established']=True
         environment = o._linux_preflight_environment_v1(repository=repository,installation=installation,
             runtime=str(runtime),control=str(control))
         header,blobs,frame,vectors,grants = _linux_preflight_declaration_v1(source,install,git,origin_ns=origin,
             repository=repository,interpreter=interpreter,environment=environment)
+        capacity_v2['actual_outer_frame_bytes']=len(frame)
+        capacity_v2['actual_startup_body_bytes']=sum(map(len,blobs))
+        capacity_v2['actual_manifest_bytes']=len(source.raw)
+        capacity_v2['actual_journal_bytes']=source.journal_bytes
+        o._preflight_require_v1(len(frame)<=2*1024**3 and len(source.raw)<=32*1024**2
+            and source.journal_bytes<=32*1024**2,'LINUX_V2_SERIALIZED_GEOMETRY')
         o._atomic_write_bytes_v1(control/'declaration/input.bin',frame,control_mode=0o444)
         o._atomic_write_bytes_v1(control/'declaration/event.json',event_bytes,control_mode=0o444)
         # Existing installation bytes are the only copied executable source tree.
@@ -9860,11 +9992,22 @@ def _linux_preflight_controller_v1(repository,installation,interpreter,event,eve
     report = dict(native_service_receipt=None if receipt is None else o._json_compatible(receipt),
         native_history=[] if scope is None else o._json_compatible(scope.history),
         native_queries=query.observations,query_attempts=query.attempts,query_output_bytes=query.retained,
-        capture_counts=capture_counts,capture_complete=source is not None,
+        capture_counts=capture_counts,capture_complete=False,
+        basis_kind='NATIVE_IMMUTABLE_V2',native_basis_state=None if source is None else source.state,
+        native_basis_capacity=capacity_v2,immutable_primitive=None if source is None else source.primitive,
+        installation_copy=None if install is None else dict(verified=install.copy_verified,logical_bytes=install.byte_count,
+            source_read_bytes=install.read_bytes,copied_bytes=install.copy_bytes),
         complete_size_census=False if census is None else census['complete_size_census'],
         capture_capacity=capacity,capture_census=None if census is None else 'capture-census.json',
         source_capture_bytes=None if source is None else source.byte_count,
         source_delivered_read_bytes=None if source is None else source.read_bytes,
+        source_auxiliary_read_bytes=None if source is None else source.auxiliary_read_bytes,
+        source_read_attempts=None if source is None else source.read_attempts,
+        source_metadata_calls=None if source is None else source.metadata_calls,
+        source_last_path=None if source is None else getattr(source,'current_path',None),
+        source_last_operation=None if source is None else getattr(source,'current_operation',None),
+        source_mount_observation=None if source is None else getattr(source,'mount_observation',None),
+        installation_last_path=None if install is None else getattr(install,'current_path',None),
         failures=[repr(e) for e in failures],service_settled=settled,
         evidence_root=str(control),export_root=str(export_root),canonical_acceptance=False)
     try:
@@ -9874,6 +10017,9 @@ def _linux_preflight_controller_v1(repository,installation,interpreter,event,eve
             export_file(control/'capture-census.json',export_root/'capture-census.json')
         o._atomic_write_bytes_v1(control/'native-result.json',raw)
         export_file(control/'native-result.json',export_root/'native-result.json')
+        for path,label in ((control/'source-transition.jsonl','source-transition-before-settlement.jsonl'),
+                (control/'declaration/source-basis.json','source-basis.json')):
+            if path.exists():export_file(path,export_root/label)
         for path,label in ((control/'native-evidence','native'),(spool,'streams'),
                 (runtime/'evidence','application-evidence'),(runtime/'reports','reports'),
                 (runtime/'native-observations','service-native-observations')):
@@ -9887,8 +10033,9 @@ def _linux_preflight_controller_v1(repository,installation,interpreter,event,eve
         else:
             try:
                 source.deadline_ns = grants['settlement_deadline_ns']
-                source.verify(protected=bool(source.protected))
+                if source.protected:source.verify(protected=True)
                 source.restore()
+                if source.journal_path.exists():export_file(source.journal_path,export_root/'source-transition-after-settlement.jsonl')
                 restored = True
             except BaseException as exc: failures.append(exc)
     stopped = unmounted = removed = False
@@ -9928,6 +10075,8 @@ def _linux_preflight_controller_v1(repository,installation,interpreter,event,eve
     cleanup = dict(service_settled=settled,source_attributes_restored=restored,evidence_export_complete=export_complete,
         service_created=scope is not None and scope.service_created,runtime_mount_attempted=mounted,
         source_protection_attempted=source is not None and bool(source.protected),
+        native_basis_state=None if source is None else source.state,
+        immutable_primitive=None if source is None else source.primitive,
         owned_units_stopped=stopped,runtime_unmounted=unmounted,owned_roots_removed=removed,
         retained_root=None if removed else str(control),exported_files=exported,
         failures=[repr(e) for e in failures],query_attempts=query.attempts,query_output_bytes=query.retained)
