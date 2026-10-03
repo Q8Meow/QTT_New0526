@@ -3130,7 +3130,8 @@ class _PreflightAssemblyV1:
                         evidence_root=str(paths.evidence_root),parent_pid=os.getpid())
                     offset,files = 0,[]
                     for name,blob in row['files']:
-                        files.append([name,offset,len(blobs[blob])]); offset += len(blobs[blob])
+                        files.append([name,offset,len(blobs[blob])])
+                        offset += len(blobs[blob])
                     # Startup can only subtract allowance. The full original
                     # nonnegative integers therefore bound every later decimal
                     # width, while the actual paths, rosters and body are exact.
@@ -3140,7 +3141,8 @@ class _PreflightAssemblyV1:
                     raw = owner._preflight_canonical_v1(frame_header)
                     owner._preflight_require_v1(offset <= 268435456 and len(raw) <= 8388608,
                         'LINUX_PREFLIGHT_ROW_SERIALIZATION_LIMIT')
-                    extents.append(24+len(raw)+offset); receivers.append(owner._preflight_result_bound_v1(identity))
+                    extents.append(24+len(raw)+offset)
+                    receivers.append(owner._preflight_result_bound_v1(identity))
                 native.host_lease.reserve_plan(extents,receivers)
             bindings = {}
             self.rows = header['rows']
@@ -3185,7 +3187,8 @@ class _PreflightAssemblyV1:
             o._preflight_require_v1(type(pair) is list and len(pair) == 2,'preflight blob range')
             start,length = (o._preflight_integer_v1(v) for v in pair)
             o._preflight_require_v1(start == offset and length <= payload-offset,'preflight contiguous declaration body')
-            sizes.append(length); offset += length
+            sizes.append(length)
+            offset += length
         o._preflight_require_v1(offset == payload,'preflight complete declaration body')
         used = set()
         def ref(index):
@@ -3199,13 +3202,16 @@ class _PreflightAssemblyV1:
                 o._preflight_require_v1(type(row) is list and len(row) == 2,'preflight declaration file row')
                 (o._preflight_startup_path_v1 if absolute else o._preflight_relative_v1)(row[0])
                 o._preflight_require_v1(row[0].casefold() not in names,'preflight declaration file alias')
-                names[row[0].casefold()] = row[1]; ordered.append(row[0].encode('utf-8')); ref(row[1])
+                names[row[0].casefold()] = row[1]
+                ordered.append(row[0].encode('utf-8'))
+                ref(row[1])
             o._preflight_require_v1(ordered == sorted(ordered),'preflight declaration file order')
         r = h['repository']
         o._preflight_keys_v1(r,('root','files','directories','index','protected_paths'))
         o._preflight_startup_path_v1(r['root'])
         o._preflight_require_v1(r['root'] == str(self.paths.repo_root) == str(self.native.root), 'preflight declaration actual repository')
-        files(r['files']); repository_files = dict(r['files'])
+        files(r['files'])
+        repository_files = dict(r['files'])
         directories = o._preflight_rosters_v1(r['directories'])
         o._preflight_catalog_consistency_v1(repository_files,directories)
         o._preflight_require_v1(type(r['protected_paths']) is list,'preflight protected path array')
@@ -3217,7 +3223,8 @@ class _PreflightAssemblyV1:
                 'preflight actual active index required')
         else:
             o._preflight_require_v1(type(index) is list and len(index) == 2,'preflight active index pair')
-            o._preflight_startup_path_v1(index[0]); ref(index[1])
+            o._preflight_startup_path_v1(index[0])
+            ref(index[1])
             o._preflight_require_v1(index[0] == str(self.native.index_path),'preflight native active index identity')
         install = h['installation']
         o._preflight_keys_v1(install,('executable','version','abi','stdlib_roots','site_roots','loader_environment',
@@ -3249,7 +3256,8 @@ class _PreflightAssemblyV1:
         for v in h['candidate_limits'].values(): o._preflight_integer_v1(v,positive=True)
         parent = h['parent_limits']
         o._preflight_keys_v1(parent,('capture','transport','terminal','deadline_ns'))
-        o._preflight_limits_v1(parent['capture']); o._preflight_limits_v1(parent['terminal'])
+        o._preflight_limits_v1(parent['capture'])
+        o._preflight_limits_v1(parent['terminal'])
         o._preflight_limits_v1(parent['transport'],transport=True)
         o._preflight_integer_v1(parent['deadline_ns'],positive=True)
         o._preflight_require_v1(parent['capture'] == self.native.capture_limits
@@ -3262,12 +3270,14 @@ class _PreflightAssemblyV1:
                 'deadline_ns','settlement_deadline_ns','transport','application_output_limits','git_executable'))
             o._preflight_require_v1(type(row['original_position']) is int and row['original_position'] == n
                 and type(row['argv']) is list and tuple(row['argv']) == entry.argv,'preflight original row identity')
-            files(row['files']); row_files = dict(row['files'])
+            files(row['files'])
+            row_files = dict(row['files'])
             row_dirs = o._preflight_rosters_v1(row['directories'])
             o._preflight_catalog_consistency_v1(row_files,row_dirs)
             o._preflight_require_v1(all(p in repository_files for p in row_files)
                 and all(directories.get(p) == v for p,v in row_dirs.items()), 'preflight row disagrees with repository facts')
-            limits = o._preflight_limits_v1(row['limits']); tail = o._preflight_limits_v1(row['parent_tail_reserve'])
+            limits = o._preflight_limits_v1(row['limits'])
+            tail = o._preflight_limits_v1(row['parent_tail_reserve'])
             o._preflight_require_v1(all(tail[k] <= limits[k] for k in limits),'preflight parent tail allocation')
             o._preflight_limits_v1(row['transport'],transport=True)
             output = row['application_output_limits']
@@ -9400,7 +9410,8 @@ def _linux_preflight_declaration_v1(source, installation, git, *, origin_ns, rep
     search = tuple(dict.fromkeys((repository,str(root/'tools'),str(executable.parent),*stdlib,*sites)))
     customizers = tuple(str(pathlib.Path(p)/(name+suffix)) for p in search for name in ('sitecustomize','usercustomize')
         for suffix in ('.py','.pyc','.pyd','.so',''))
-    start_files = dict(installation.files); start_files.update(git.files)
+    start_files = dict(installation.files)
+    start_files.update(git.files)
     start_dirs = dict(installation.directories)
     absent = []
     for path in (*configs,*customizers):
@@ -9429,9 +9440,11 @@ def _linux_preflight_declaration_v1(source, installation, git, *, origin_ns, rep
         rows.append(dict(original_position=n,argv=list(vector),files=[] if n in (2,6) else repository_rows,
             directories=[] if n in (2,6) else repository_directories,git_executable='/usr/bin/git' if n in (1,3,5,7,8) else None,
             **grant))
-    offset = 0; spans = []
+    offset = 0
+    spans = []
     for raw in blobs:
-        spans.append([offset,len(raw)]); offset += len(raw)
+        spans.append([offset,len(raw)])
+        offset += len(raw)
     o._preflight_require_v1(offset <= 1024**3,'LINUX_PREFLIGHT_DECLARATION_BODY_CAPACITY')
     header = dict(phase='fast-preflight',repository=dict(root=repository,files=repository_rows,
         directories=repository_directories,index=[str(index),index_blob],protected_paths=[]),installation=dict(
@@ -9566,7 +9579,8 @@ def _linux_preflight_provision_v1():
         and stat.S_ISREG(ticket_info.st_mode) and ticket_info.st_nlink == 1
         and ticket_info.st_uid == sudo_uid and ticket_info.st_size <= 8*1024**2,
         'LINUX_PREFLIGHT_BOOTSTRAP_TRANSPORT_CUSTODY')
-    raw = ticket.read_bytes(); frozen = json.loads(raw)
+    raw = ticket.read_bytes()
+    frozen = json.loads(raw)
     o._preflight_require_v1(o._scan_same_api_version(ticket.lstat()) == o._scan_same_api_version(ticket_info)
         and frozen['uid'] == sudo_uid and frozen['repository'] == repository and frozen['interpreter'] == interpreter
         and frozen['installation'] == installation and frozen['source'] == o._json_compatible(originals)
@@ -9609,7 +9623,8 @@ def _linux_preflight_controller_v1(repository,installation,interpreter,event,eve
     control_identity = (control.stat().st_dev,control.stat().st_ino)
     runtime_identity = (runtime.stat().st_dev,runtime.stat().st_ino)
     private_root,spool = control/'root',control/'spool'
-    private_root.mkdir(mode=0o755); spool.mkdir(mode=0o700)
+    private_root.mkdir(mode=0o755)
+    spool.mkdir(mode=0o700)
     # The existing supervisor exclusively creates the two manager-bound stream files.
     for directory in ('declaration','binding','release'):
         (control/directory).mkdir(mode=0o555)
@@ -9655,7 +9670,8 @@ def _linux_preflight_controller_v1(repository,installation,interpreter,event,eve
         for absolute in ('/usr','/lib','/lib64','/proc','/sys','/dev','/tmp','/var/tmp',repository,installation,
                 str(runtime),str(spool),*(str(control/n) for n in ('declaration','binding','release'))):
             (private_root/absolute.lstrip('/')).mkdir(parents=True,exist_ok=True,mode=0o755)
-        etc = private_root/'etc'; etc.mkdir(mode=0o755)
+        etc = private_root/'etc'
+        etc.mkdir(mode=0o755)
         for filename,raw in (('passwd',b'root:x:0:0:root:/root:/usr/sbin/nologin\n'),
                 ('group',b'root:x:0:\n'),('nsswitch.conf',b'passwd: files\ngroup: files\nhosts: files\n'),
                 ('qtt-gitconfig',('[safe]\n\tdirectory = '+repository+'\n').encode('ascii'))):
@@ -9721,7 +9737,8 @@ def _linux_preflight_controller_v1(repository,installation,interpreter,event,eve
                     'LINUX_PREFLIGHT_EXPORT_READ_DEADLINE')
                 chunk = os.read(descriptor,min(65536,before.st_size-extent))
                 o._preflight_require_v1(chunk,'LINUX_PREFLIGHT_EXPORT_TRUNCATED')
-                pieces.append(chunk); extent += len(chunk)
+                pieces.append(chunk)
+                extent += len(chunk)
             o._preflight_require_v1(os.read(descriptor,1) == b'' and
                 o._scan_same_api_version(os.fstat(descriptor)) == o._scan_same_api_version(opened)
                 == o._scan_same_api_version(path.lstat()),'LINUX_PREFLIGHT_EXPORT_CHANGED')
@@ -9773,7 +9790,8 @@ def _linux_preflight_controller_v1(repository,installation,interpreter,event,eve
             try:
                 source.deadline_ns = grants['settlement_deadline_ns']
                 source.verify(protected=bool(source.protected))
-                source.restore(); restored = True
+                source.restore()
+                restored = True
             except BaseException as exc: failures.append(exc)
     stopped = unmounted = removed = False
     if settled and restored and export_complete:
@@ -9847,13 +9865,15 @@ def _linux_preflight_enter_v1(startup_deadline_ns):
                 o._preflight_require_v1(error.errno in (13,30),'LINUX_PREFLIGHT_WRITE_PROBE_UNEXPECTED_ERROR')
                 probe['denials'].append(dict(path=str(path),operation='open-write-no-create-no-truncate',errno=error.errno))
             else:
-                os.close(fd); raise RuntimeError('LINUX_PREFLIGHT_SEALED_WRITE_OPEN_SUCCEEDED')
+                os.close(fd)
+                raise RuntimeError('LINUX_PREFLIGHT_SEALED_WRITE_OPEN_SUCCEEDED')
         for family in (socket.AF_INET,socket.AF_INET6):
             try: sock = socket.socket(family,socket.SOCK_STREAM)
             except OSError as error:
                 probe['denials'].append(dict(family=int(family),operation='socket-create-no-connect',errno=error.errno))
             else:
-                sock.close(); raise RuntimeError('LINUX_PREFLIGHT_NETWORK_SOCKET_SUCCEEDED')
+                sock.close()
+                raise RuntimeError('LINUX_PREFLIGHT_NETWORK_SOCKET_SUCCEEDED')
         for path in ('/dev/shm','/dev/mqueue','/dev/hugepages'):
             info = pathlib.Path(path).lstat()
             o._preflight_require_v1(stat.S_ISDIR(info.st_mode) and stat.S_IMODE(info.st_mode) == 0,
@@ -9863,7 +9883,8 @@ def _linux_preflight_enter_v1(startup_deadline_ns):
                 o._preflight_require_v1(error.errno == 13,'LINUX_PREFLIGHT_DEVICE_MASK_QUERY_FAILURE')
                 probe['denials'].append(dict(path=path,operation='directory-read-open',errno=error.errno))
             else:
-                os.close(fd); raise RuntimeError('LINUX_PREFLIGHT_DEVICE_MASK_ACCESS_SUCCEEDED')
+                os.close(fd)
+                raise RuntimeError('LINUX_PREFLIGHT_DEVICE_MASK_ACCESS_SUCCEEDED')
         lease.check_parent(REPO_ROOT,pathlib.Path(binding['index']))
         probe['passed'] = True
     finally:

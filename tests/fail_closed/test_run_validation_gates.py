@@ -20436,5 +20436,23 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
     assert [len(n.args) for n in ast.walk(export_tree) if isinstance(n,ast.Call)
         and isinstance(n.func,ast.Name) and n.func.id == '_linux_preflight_export_directory_v1'] == [1,2]
     assert '_scan_same_api_version' not in ast.unparse(export_tree)
+    # The existing independent aggregator's readability policy is unchanged.
+    from tools import validate_pr169_val1 as readability_owner
+    actual_repository = Path(runner.__file__).resolve().parents[1]
+    for relative in (Path('tools/run_validation_gates.py'),Path('.github/workflows/qtt_validation.yml')):
+        measured = readability_owner.scan_readability_file(actual_repository,relative)
+        assert measured.pass_, measured
+    readability_probe = area/'readability-mutation.py'
+    readable = 'first = 1\nsecond = 2\n' + '# retained line\n'*10
+    readability_probe.write_text(readable,encoding='utf-8')
+    assert readability_owner.scan_readability_file(area,Path(readability_probe.name)).pass_
+    mutated = readable.replace('first = 1\nsecond = 2','first = 1; second = 2',1)
+    assert mutated != readable
+    readability_probe.write_text(mutated,encoding='utf-8')
+    rejected = readability_owner.scan_readability_file(area,Path(readability_probe.name))
+    assert rejected.semicolon_statement_lines == 1 and not rejected.minified
+    assert not rejected.hidden_bidi_control_chars and not rejected.many_defs_or_classes_on_one_line
+    assert not rejected.pass_
+    print('INDEPENDENT_READABILITY_GUARD_PASSED; SEMICOLON_MUTATION_REJECTED',flush=True)
     print('LINUX_PREFLIGHT_EXPORT_DIRECTORY_CHECKS_PASSED; native_systemd_enforcement=NOT_EXECUTED',flush=True)
     print('LINUX_PREFLIGHT_REFERENCE_CHECKS_PASSED; native_systemd_enforcement=NOT_EXECUTED',flush=True)

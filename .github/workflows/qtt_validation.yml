@@ -131,7 +131,8 @@ jobs:
         env:
           QTT_PR298_NATIVE_ELIGIBLE: ${{ matrix.phase == 'fast-preflight' && github.event_name == 'pull_request' && github.repository == 'Q8Meow/QTT_New0526' && github.event.pull_request.number == 298 && github.event.pull_request.draft == true && github.event.pull_request.head.repo.full_name == 'Q8Meow/QTT_New0526' && github.event.pull_request.base.repo.full_name == 'Q8Meow/QTT_New0526' && github.event.pull_request.head.ref == 'repair/main-cumulative-v35-final-r5-local-20260922' && '1' || '0' }}
         run: |
-          if [ "$QTT_PR298_NATIVE_ELIGIBLE" = "1" ]; then
+          if [ "$QTT_PR298_NATIVE_ELIGIBLE" = "1" ]
+          then
             python -I -B -X utf8 tools/run_validation_gates.py --linux-preflight-provision --phase fast-preflight
           else
             python -B tools/run_validation_gates.py \
