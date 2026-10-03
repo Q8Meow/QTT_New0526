@@ -12615,6 +12615,184 @@ class _LinuxPreflightHostLeaseV1(_PreflightHostLeaseV1):
         self.query.check()
 
 
+class _LinuxPreflightCensusV1:
+    """Bounded metadata observation, never byte capture, custody or a grant."""
+    def __init__(self, repository, installation, git, *, deadline_ns):
+        self.roots = dict(repository=Path(repository), installation=Path(installation), git=Path(git))
+        _preflight_require_v1(all(p.is_absolute() for p in self.roots.values()), 'LINUX_CENSUS_ABSOLUTE_ROOTS')
+        self.deadline_ns = min(deadline_ns, time.monotonic_ns()+600*10**9)
+        self.records = []
+        self.counts = dict(files=0, entries=0, metadata_attempts=0, verification_records=0,
+            direct_regular_file_payload_reads=0, direct_regular_file_payload_bytes=0)
+        self.retained = 0
+        self.complete = False
+        self.started = False
+        self.failures = []
+        self.current_path = None
+        self.current_operation = None
+        self.last_stat = None
+    def _check(self):
+        _preflight_require_v1(time.monotonic_ns() < self.deadline_ns, 'LINUX_CENSUS_DEADLINE')
+    def _attempt(self, operation, path):
+        self.current_path, self.current_operation = str(path), operation
+        self.counts['metadata_attempts'] += 1
+        self._check()
+        _preflight_require_v1(self.counts['metadata_attempts'] <= 2_000_000, 'LINUX_CENSUS_OPERATIONS')
+    def _retain(self, value):
+        self._check()
+        amount = len(_preflight_canonical_v1(value))+1
+        # Reserve bounded envelope/failure/report space before retaining records.
+        _preflight_require_v1(self.retained+amount <= 31*1024**2, 'LINUX_CENSUS_SERIALIZED_CAPACITY')
+        self.retained += amount
+    @staticmethod
+    def _version(info):
+        return [info.st_dev, info.st_ino, info.st_mode, info.st_size, info.st_mtime_ns,
+            info.st_ctime_ns, info.st_nlink, info.st_uid, info.st_gid,
+            getattr(info, 'st_file_attributes', 0), getattr(info, 'st_reparse_tag', 0)]
+    def _stat(self, path):
+        self._attempt('lstat', path)
+        _preflight_require_v1(len(str(path).encode('utf-8')) <= 4096, 'LINUX_CENSUS_PATH_BYTES')
+        info = path.lstat()
+        self.last_stat = dict(path=str(path), version=self._version(info))
+        return info
+    def _acl(self, path):
+        self._attempt('listxattr', path)
+        _preflight_require_v1(hasattr(os, 'listxattr'), 'LINUX_CENSUS_ACL_OBSERVATION_UNAVAILABLE')
+        names = os.listxattr(path, follow_symlinks=False)
+        _preflight_require_v1(not any(n in ('system.posix_acl_access','system.posix_acl_default')
+            for n in names), 'LINUX_CENSUS_UNSUPPORTED_ACL')
+    def _roster(self, path, *, retaining, expected=None):
+        self._attempt('scandir', path)
+        names = []
+        with os.scandir(path) as stream:
+            while True:
+                self._attempt('scandir-next', path)
+                try:
+                    entry = next(stream)
+                except StopIteration:
+                    break
+                self.counts['entries'] += 1
+                _preflight_require_v1(self.counts['entries'] <= 200000, 'LINUX_CENSUS_ENTRIES')
+                _preflight_require_v1(len(str(path/entry.name).encode('utf-8')) <= 4096, 'LINUX_CENSUS_PATH_BYTES')
+                if retaining:
+                    self._retain(entry.name)
+                if expected is not None:
+                    _preflight_require_v1(len(names) < len(expected) and entry.name in expected,
+                        'LINUX_CENSUS_ROSTER_CHANGED')
+                names.append(entry.name)
+        names.sort(key=lambda name:name.encode('utf-8'))
+        _preflight_require_v1(len({n.casefold() for n in names}) == len(names), 'LINUX_CENSUS_CASE_ALIAS')
+        return names
+    def _alias(self, path, root):
+        hops = []
+        current = path
+        for _ in range(64):
+            info = self._stat(current)
+            if not stat.S_ISLNK(info.st_mode):
+                _preflight_require_v1(stat.S_ISREG(info.st_mode) and info.st_nlink == 1
+                    and not _stat_is_reparse_point(info), 'LINUX_CENSUS_ALIAS_REGULAR_TARGET')
+                return current, info, hops
+            self._attempt('readlink', current)
+            target = os.readlink(current)
+            hop = dict(path=str(current), version=self._version(info), target=target)
+            self._retain(hop)
+            hops.append(hop)
+            current = Path(os.path.normpath(str(current.parent/target)))
+            _preflight_require_v1(current.is_relative_to(root) and current != root,
+                'LINUX_CENSUS_ALIAS_OUTSIDE_INSTALLATION')
+            # Never follow an intermediate directory alias, even inside the prefix.
+            for parent in (*reversed(current.relative_to(root).parents),):
+                actual = root/parent
+                parent_info = self._stat(actual)
+                _preflight_require_v1(stat.S_ISDIR(parent_info.st_mode)
+                    and not _stat_is_reparse_point(parent_info), 'LINUX_CENSUS_ALIAS_DIRECTORY')
+        raise ValidationReliabilityError('ENGVR_PREFLIGHT_DENIED', 'LINUX_CENSUS_ALIAS_DEPTH')
+    def _walk(self, role, path, depth):
+        self.current_path, self.current_operation = str(path), 'walk'
+        self._check()
+        _preflight_require_v1(depth <= 64, 'LINUX_CENSUS_DEPTH')
+        info = self._stat(path)
+        observed, hops = path, []
+        if stat.S_ISLNK(info.st_mode) and role == 'installation':
+            observed, info, hops = self._alias(path, self.roots[role])
+        _preflight_require_v1(not _stat_is_reparse_point(info) and
+            (stat.S_ISDIR(info.st_mode) or stat.S_ISREG(info.st_mode) and info.st_nlink == 1),
+            'LINUX_CENSUS_UNSUPPORTED_SOURCE_KIND')
+        self._acl(observed)
+        directory = stat.S_ISDIR(info.st_mode)
+        if not directory:
+            self.counts['files'] += 1
+            _preflight_require_v1(self.counts['files'] <= 100000, 'LINUX_CENSUS_FILES')
+            _preflight_integer_v1(info.st_size)
+        row = dict(role=role, path=str(path), observed_path=str(observed),
+            kind='directory' if directory else 'file', version=self._version(info),
+            logical_bytes=0 if directory else info.st_size, aliases=[], roster=[])
+        self._retain(row)
+        row['aliases'] = hops
+        self.records.append(row)
+        if directory:
+            row['roster'] = self._roster(path, retaining=True)
+            for name in row['roster']:
+                self._walk(role, path/name, depth+1)
+    def _verify(self):
+        for row in self.records:
+            path = Path(row['observed_path'])
+            info = self._stat(path)
+            _preflight_require_v1(self._version(info) == row['version'], 'LINUX_CENSUS_VERSION_CHANGED')
+            self._acl(path)
+            for hop in row['aliases']:
+                alias = Path(hop['path'])
+                _preflight_require_v1(self._version(self._stat(alias)) == hop['version'], 'LINUX_CENSUS_ALIAS_CHANGED')
+                self._attempt('readlink', alias)
+                _preflight_require_v1(os.readlink(alias) == hop['target'], 'LINUX_CENSUS_ALIAS_CHANGED')
+            if row['kind'] == 'directory':
+                _preflight_require_v1(self._roster(path, retaining=False, expected=set(row['roster'])) == row['roster'],
+                    'LINUX_CENSUS_ROSTER_CHANGED')
+                _preflight_require_v1(self._version(self._stat(path)) == row['version'], 'LINUX_CENSUS_VERSION_CHANGED')
+            self.counts['verification_records'] += 1
+        self._check()
+    def run(self):
+        _preflight_require_v1(not self.started, 'LINUX_CENSUS_SINGLE_SWEEP')
+        self.started = True
+        try:
+            for role, root in self.roots.items():
+                self._walk(role, root, 0)
+            self._verify()
+            self.complete = True
+        except Exception as exc:
+            self.failures.append(dict(path=self.current_path, operation=self.current_operation,
+                error=repr(exc)[:2048], errno=getattr(exc, 'errno', None), last_successful_stat=self.last_stat))
+        return self.document()
+    def document(self):
+        totals = dict(R=0, G=0, I=0, S=0, E=0)
+        file_counts = dict.fromkeys(totals, 0)
+        physical = {}
+        largest = dict(R=[], G=[])
+        index_found = False
+        for row in self.records:
+            if row['kind'] != 'file':
+                continue
+            path = Path(row['path'])
+            category = 'S' if row['role'] == 'installation' else 'E' if row['role'] == 'git' else (
+                'G' if path.is_relative_to(self.roots['repository']/'.git') else 'R')
+            amount = row['logical_bytes']
+            totals[category] += amount
+            file_counts[category] += 1
+            physical[tuple(row['version'][:2])] = amount
+            if path == self.roots['repository']/'.git/index':
+                totals['I'], file_counts['I'], index_found = amount, 1, True
+            if category in largest:
+                largest[category].append(dict(path=str(path), bytes=amount))
+                largest[category].sort(key=lambda v:(-v['bytes'], v['path']))
+                del largest[category][20:]
+        return dict(schema='QTT_PR298_CAPTURE_CENSUS_V1', roots={k:str(v) for k,v in self.roots.items()},
+            complete_size_census=self.complete, complete_capture=False, counts=dict(self.counts),
+            logical_bytes=totals, file_counts=file_counts, active_index_found=index_found,
+            physical_unique_files=len(physical), physical_unique_bytes=sum(physical.values()),
+            largest_working_files=largest['R'], largest_git_files=largest['G'], records=self.records,
+            failures=list(self.failures), metadata_retention_accounted_bytes=self.retained,
+            bootstrap_and_manager_io='SEPARATE_NOT_MEASURED_AS_ZERO',
+            observation_is_content_identity=False, observation_is_custody=False, observation_is_authority=False)
 class _LinuxPreflightCaptureV1:
     """Exact original bytes and authorized metadata transitions, never a checkout copy."""
     def __init__(self,root,*,byte_limit,deadline_ns,installation=False,shared_capture=None):

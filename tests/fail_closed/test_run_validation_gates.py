@@ -20455,4 +20455,256 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
     assert not rejected.pass_
     print('INDEPENDENT_READABILITY_GUARD_PASSED; SEMICOLON_MUTATION_REJECTED',flush=True)
     print('LINUX_PREFLIGHT_EXPORT_DIRECTORY_CHECKS_PASSED; native_systemd_enforcement=NOT_EXECUTED',flush=True)
+    # The same selected census owner observes real disposable files. On Windows,
+    # only the unavailable Linux xattr API is supplied as a reference operand;
+    # this does not establish native Linux ACL or containment qualification.
+    import stat
+    census_area = area/'capacity-census'
+    census_area.mkdir()
+    repository,installation,git = census_area/'repo',census_area/'installation',census_area/'git'
+    repository.mkdir()
+    installation.mkdir()
+    (repository/'.git').mkdir()
+    (repository/'.git/index').write_bytes(b'index')
+    (repository/'.git/pack').write_bytes(b'pack bytes')
+    (repository/'untracked').write_bytes(b'working bytes')
+    (repository/'empty').write_bytes(b'')
+    (repository/'empty-directory').mkdir()
+    (installation/'python').write_bytes(b'python bytes')
+    git.write_bytes(b'git')
+    def observe():
+        return o._LinuxPreflightCensusV1(repository,installation,git,
+            deadline_ns=time.monotonic_ns()+60*10**9)
+    with monkeypatch.context() as patch:
+        if not hasattr(os,'listxattr'):
+            patch.setattr(os,'listxattr',lambda *a,**k:[],raising=False)
+        # No direct regular-file payload read is permitted in this entire census.
+        patch.setattr(os,'read',lambda *a:pytest.fail('metadata census read a file body'))
+        patch.setattr(Path,'read_bytes',lambda *a:pytest.fail('metadata census read a file body'))
+        observed = observe().run()
+        assert observed['complete_size_census'] and not observed['complete_capture']
+        assert observed['logical_bytes'] == dict(R=13,G=15,I=5,S=12,E=3)
+        assert observed['file_counts'] == dict(R=2,G=2,I=1,S=1,E=1)
+        assert observed['counts']['direct_regular_file_payload_reads'] == 0
+        assert observed['counts']['verification_records'] == len(observed['records'])
+        assert any(v['path']==str(repository/'empty-directory') and v['roster']==[] for v in observed['records'])
+        measured = runner._linux_preflight_capacity_v1(observed,page_size=4096,repeated_config_bytes=0)
+        by_name = {v['name']:v for v in measured['checks']}
+        assert by_name['source_capture_R_plus_G']['demand_bytes'] == 28
+        assert by_name['candidate_R_plus_I']['demand_bytes'] == 18
+        assert by_name['declaration_body']['demand_bytes'] == 33
+        assert by_name['outer_declaration_ingress']['demand_bytes'] == 57
+        assert by_name['child_file_1']['demand_bytes'] == 37
+        assert by_name['child_file_2']['demand_bytes'] == 24
+        assert measured['declared_startup_catalog_bytes'] == 15
+        assert by_name['retained_child_basis_1']['demand_bytes'] == 28
+        assert by_name['retained_child_basis_2']['demand_bytes'] == 15
+        assert by_name['child_file_1']['disposition'] == 'UNESTABLISHED'
+        assert not measured['byte_capture_admitted']
+        assert measured['active_index_is_subset_of_G']
+        report = dict(capture_capacity=measured,capture_census='capture-census.json')
+        report_raw,census_raw = runner._linux_preflight_metadata_bytes_v1(observed,report,time.monotonic_ns()+10**9)
+        assert report_raw == o._preflight_canonical_v1(report) and census_raw == o._preflight_canonical_v1(observed)
+        with monkeypatch.context() as bound:
+            # Lower only the test operand, never the installed production grant.
+            bound.setattr(runner,'_LINUX_PREFLIGHT_METADATA_BYTES_V1',len(report_raw)+len(census_raw))
+            assert runner._linux_preflight_metadata_bytes_v1(observed,report,time.monotonic_ns()+10**9) == (report_raw,census_raw)
+            bound.setattr(runner,'_LINUX_PREFLIGHT_METADATA_BYTES_V1',len(report_raw)+len(census_raw)-1)
+            with pytest.raises(o.ValidationReliabilityError,match='COMBINED_METADATA_BOUND'):
+                runner._linux_preflight_metadata_bytes_v1(observed,report,time.monotonic_ns()+10**9)
+        assert runner._LINUX_PREFLIGHT_METADATA_BYTES_V1 == 32*mib
+        with pytest.raises(o.ValidationReliabilityError,match='EXPORT_DEADLINE'):
+            runner._linux_preflight_metadata_bytes_v1(observed,report,time.monotonic_ns()-1)
+        # One finite geometry reports every excess together, never first-error only.
+        oversized = {**observed,'logical_bytes':dict(R=3*gib,G=4*gib,I=gib,S=2*gib,E=17*mib)}
+        all_limits = runner._linux_preflight_capacity_v1(oversized,page_size=4096,repeated_config_bytes=19)
+        dispositions = {v['name']:v['disposition'] for v in all_limits['checks']}
+        for key in ('source_capture_R_plus_G','candidate_R_plus_I','installation_logical_S','git_executable_E',
+                'declaration_body','outer_declaration_ingress','row_body_1','child_file_1',
+                'retained_child_basis_1','shared_runtime_files'):
+            assert dispositions[key] == 'EXCEEDS_LIMIT',key
+        assert dispositions['native_memory'] == 'UNESTABLISHED'
+        for value in (True,-1,'1'):
+            damaged = {**observed,'logical_bytes':{**observed['logical_bytes'],'R':value}}
+            with pytest.raises((ValueError,o.ValidationReliabilityError)):
+                runner._linux_preflight_capacity_v1(damaged,page_size=4096)
+        for size,disposition in ((16*mib,'WITHIN_LIMIT'),(16*mib+1,'EXCEEDS_LIMIT')):
+            changed = {**observed,'logical_bytes':{**observed['logical_bytes'],'E':size}}
+            value = runner._linux_preflight_capacity_v1(changed,page_size=4096,repeated_config_bytes=0)
+            assert next(v for v in value['checks'] if v['name']=='git_executable_E')['disposition'] == disposition
+        incomplete = runner._linux_preflight_capacity_v1({**observed,'complete_size_census':False},page_size=4096)
+        assert not incomplete['byte_capture_admitted']
+        assert all(v['disposition']=='UNESTABLISHED' for v in incomplete['checks'])
+        # Independently enumerate each fixed geometry at its boundary and one over.
+        for key,field,cap,overhead in (
+                ('source_capture_R_plus_G','G',2*gib,0),('candidate_R_plus_I','R',512*mib,0),
+                ('installation_logical_S','S',gib,0),('declaration_body','S',gib,0),
+                ('outer_declaration_ingress','S',2*gib,24),('row_body_1','R',256*mib,0),
+                ('child_file_1','R',64*mib,24),('retained_child_basis_1','R',gib,0)):
+            for excess in (0,1):
+                values = dict.fromkeys(('R','G','I','S','E'),0)
+                values[field] = cap-overhead+excess
+                value = runner._linux_preflight_capacity_v1({**observed,'logical_bytes':values},
+                    page_size=4096,repeated_config_bytes=0)
+                check = next(v for v in value['checks'] if v['name']==key)
+                assert check['demand_bytes'] == cap+excess
+                assert check['disposition'] == ('EXCEEDS_LIMIT' if excess else
+                    'WITHIN_LIMIT' if check['demand_kind']=='EXACT_METADATA' else 'UNESTABLISHED')
+        # Actual sparse logical size, never a giant allocated payload or capture.
+        large = repository/'large-untracked'
+        with large.open('w+b') as stream:
+            if os.name == 'nt':
+                import ctypes
+                import msvcrt
+                from ctypes import wintypes
+                ioctl = ctypes.WinDLL('kernel32',use_last_error=True).DeviceIoControl
+                ioctl.argtypes = [wintypes.HANDLE,wintypes.DWORD,wintypes.LPVOID,wintypes.DWORD,
+                    wintypes.LPVOID,wintypes.DWORD,ctypes.POINTER(wintypes.DWORD),wintypes.LPVOID]
+                ioctl.restype = wintypes.BOOL
+                returned = wintypes.DWORD()
+                assert ioctl(msvcrt.get_osfhandle(stream.fileno()),0x900C4,None,0,None,0,
+                    ctypes.byref(returned),None),ctypes.get_last_error()
+            stream.truncate(2*gib+1)
+        assert large.stat().st_size == 2*gib+1
+        huge = observe().run()
+        assert huge['complete_size_census'] and huge['logical_bytes']['R'] == 2*gib+14
+        assert huge['counts']['direct_regular_file_payload_reads'] == 0
+        assert huge['largest_working_files'][0] == dict(path=str(large),bytes=2*gib+1)
+        assert huge['logical_bytes']['G'] == 15 and huge['logical_bytes']['S'] == 12
+        for n in range(25):
+            (repository/('small-'+str(n))).write_bytes(b'x')
+        assert len(observe().run()['largest_working_files']) == 20
+        linked = repository/'hard-link'
+        os.link(repository/'untracked',linked)
+        try:
+            failed = observe().run()
+            assert not failed['complete_size_census'] and 'UNSUPPORTED_SOURCE_KIND' in failed['failures'][0]['error']
+            assert failed['failures'][0]['last_successful_stat']['version'][6] == 2
+        finally:
+            linked.unlink()
+        # Finite link/special operands mutate a fresh actual stat observation.
+        # They are references only when Windows cannot create POSIX file kinds.
+        from types import SimpleNamespace
+        original_lstat = Path.lstat
+        original_readlink = os.readlink
+        alias = installation/'python-alias'
+        alias.write_bytes(b'placeholder')
+        def altered_info(info,mode):
+            return SimpleNamespace(**{name:getattr(info,name) for name in dir(info) if name.startswith('st_')
+                and name!='st_mode'},st_mode=mode)
+        def link_stat(path,*a,**k):
+            info = original_lstat(path,*a,**k)
+            return altered_info(info,stat.S_IFLNK|0o777) if path==alias else info
+        with monkeypatch.context() as fault:
+            fault.setattr(Path,'lstat',link_stat)
+            fault.setattr(os,'readlink',lambda path,*a,**k:'python' if Path(path)==alias else original_readlink(path,*a,**k))
+            aliased = observe().run()
+            assert aliased['complete_size_census'],aliased['failures']
+            assert aliased['logical_bytes']['S'] == 24
+            assert aliased['physical_unique_bytes'] == sum(aliased['logical_bytes'][k] for k in ('R','G','S','E'))-12
+            assert next(v for v in aliased['records'] if v['path']==str(alias))['aliases'][0]['target'] == 'python'
+            fault.setattr(os,'readlink',lambda *a,**k:'../outside')
+            assert 'OUTSIDE_INSTALLATION' in observe().run()['failures'][0]['error']
+            fault.setattr(os,'readlink',lambda *a,**k:'.')
+            assert 'OUTSIDE_INSTALLATION' in observe().run()['failures'][0]['error']
+        source_link = repository/'untracked'
+        for mode in (stat.S_IFLNK|0o777,stat.S_IFIFO|0o600):
+            with monkeypatch.context() as fault:
+                def special_stat(path,*a,**k):
+                    info = original_lstat(path,*a,**k)
+                    return altered_info(info,mode) if path==source_link else info
+                fault.setattr(Path,'lstat',special_stat)
+                assert 'UNSUPPORTED_SOURCE_KIND' in observe().run()['failures'][0]['error']
+        # A bounded real iterator is closed on both scan failure and alias denial.
+        original_scandir = os.scandir
+        for fault_kind in ('scan-error','case-alias'):
+            closed = []
+            class FaultScan:
+                def __init__(self,path):
+                    self.stream = original_scandir(path)
+                    self.first = True
+                    self.pending = None
+                def __enter__(self):
+                    self.stream.__enter__()
+                    return self
+                def __exit__(self,*args):
+                    closed.append(True)
+                    return self.stream.__exit__(*args)
+                def __next__(self):
+                    if fault_kind=='scan-error':
+                        raise PermissionError(13,'reference scan failure')
+                    if self.pending is not None:
+                        result,self.pending = self.pending,None
+                        return result
+                    entry = next(self.stream)
+                    if self.first:
+                        self.first = False
+                        self.pending = SimpleNamespace(name=entry.name.swapcase())
+                    return entry
+            with monkeypatch.context() as fault:
+                fault.setattr(os,'scandir',FaultScan)
+                failed = observe().run()
+            assert not failed['complete_size_census'] and closed
+            assert 'reference scan failure' in failed['failures'][0]['error'] if fault_kind=='scan-error' else (
+                'CASE_ALIAS' in failed['failures'][0]['error'])
+        # Charge the failed operation and retain the actual exception prefix.
+        meter = observe()
+        def denied(*a,**k):
+            raise PermissionError(13,'reference ACL query denied')
+        with monkeypatch.context() as fault:
+            fault.setattr(os,'listxattr',denied)
+            failed = meter.run()
+        assert not failed['complete_size_census'] and failed['counts']['metadata_attempts'] == 2
+        assert failed['failures'][0]['errno'] == 13 and failed['failures'][0]['operation'] == 'listxattr'
+        with monkeypatch.context() as fault:
+            fault.setattr(os,'listxattr',lambda *a,**k:['system.posix_acl_access'])
+            failed = observe().run()
+        assert 'UNSUPPORTED_ACL' in failed['failures'][0]['error']
+        # Actual changed version and roster, during the single verification sweep.
+        for change in ('version','roster'):
+            meter = observe()
+            verify = meter._verify
+            def changed_verify():
+                if change == 'version':
+                    target = repository/'untracked'
+                    info = target.stat()
+                    os.utime(target,ns=(info.st_atime_ns,info.st_mtime_ns+1_000_000_000))
+                else:
+                    (repository/'arrived').write_bytes(b'new')
+                verify()
+            meter._verify = changed_verify
+            failed = meter.run()
+            assert not failed['complete_size_census'] and failed['failures']
+            assert 'CHANGED' in failed['failures'][0]['error']
+        bounded = observe()
+        bounded.retained = 32*mib-65536
+        failed = bounded.run()
+        assert not failed['records'] and 'SERIALIZED_CAPACITY' in failed['failures'][0]['error']
+        bounded = observe()
+        bounded.counts['metadata_attempts'] = 2_000_000
+        failed = bounded.run()
+        assert failed['counts']['metadata_attempts'] == 2_000_001 and 'OPERATIONS' in failed['failures'][0]['error']
+        bounded = observe()
+        bounded.deadline_ns = time.monotonic_ns()-1
+        assert 'DEADLINE' in bounded.run()['failures'][0]['error']
+        for counter,limit,reason in (('files',100000,'FILES'),('entries',200000,'ENTRIES')):
+            bounded = observe()
+            bounded.counts[counter] = limit
+            assert reason in bounded.run()['failures'][0]['error']
+        with pytest.raises(o.ValidationReliabilityError,match='SINGLE_SWEEP'):
+            bounded.run()
+        with pytest.raises(o.ValidationReliabilityError,match='DEPTH'):
+            observe()._walk('repository',repository,65)
+        with pytest.raises(o.ValidationReliabilityError,match='PATH_BYTES'):
+            observe()._stat(repository/('x'*4097))
+    # Fresh no-follow observations and closed real scandir iterators are required.
+    census_source = ast.unparse(next(n for n in ast.parse(Path(o.__file__).read_text(encoding='utf-8')).body
+        if isinstance(n,ast.ClassDef) and n.name=='_LinuxPreflightCensusV1'))
+    assert '.lstat()' in census_source and 'with os.scandir(path)' in census_source
+    assert 'entry.stat' not in census_source and '.read_bytes(' not in census_source and 'os.read(' not in census_source
+    controller_calls = [(n.lineno,ast.unparse(n.func)) for n in ast.walk(controller) if isinstance(n,ast.Call)]
+    assert next(line for line,name in controller_calls if name=='o._LinuxPreflightCensusV1') < min(
+        line for line,name in controller_calls if name=='o._LinuxPreflightCaptureV1')
+    print('CAPTURE_CENSUS_REFERENCE_AND_REAL_FILE_CHECKS_PASSED; direct_payload_reads=0',flush=True)
+
     print('LINUX_PREFLIGHT_REFERENCE_CHECKS_PASSED; native_systemd_enforcement=NOT_EXECUTED',flush=True)

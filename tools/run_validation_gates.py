@@ -9384,6 +9384,86 @@ def _mapper_resolve_parent_profiles_v1(paths, phase, plan):
     return bindings
 
 
+_LINUX_PREFLIGHT_METADATA_BYTES_V1 = 32*1024**2
+
+
+def _linux_preflight_metadata_bytes_v1(census, report, deadline_ns):
+    """Bound the combined original report and optional census before publication."""
+    from tools import validation_reliability as o
+    result = []
+    extent = 0
+    for value in (report, census):
+        if value is None:
+            result.append(None)
+            continue
+        encoded = []
+        for text in json.JSONEncoder(ensure_ascii=True,sort_keys=True,separators=(',',':'),allow_nan=False).iterencode(value):
+            o._preflight_require_v1(time.monotonic_ns() < deadline_ns, 'LINUX_PREFLIGHT_CENSUS_EXPORT_DEADLINE')
+            part = text.encode('ascii')
+            extent += len(part)
+            o._preflight_require_v1(extent <= _LINUX_PREFLIGHT_METADATA_BYTES_V1, 'LINUX_PREFLIGHT_COMBINED_METADATA_BOUND')
+            encoded.append(part)
+        result.append(b''.join(encoded))
+    o._preflight_require_v1(len(result[0]) <= 16*1024**2, 'LINUX_PREFLIGHT_NATIVE_REPORT_BOUND')
+    return tuple(result)
+
+
+def _linux_preflight_capacity_v1(census, *, page_size, repeated_config_bytes=None):
+    """All determinable intersections; an unavailable operand never admits work."""
+    from tools import validation_reliability as o
+    o._preflight_require_v1(type(census) is dict and type(census['complete_size_census']) is bool,
+        'LINUX_CAPACITY_CENSUS_TYPE')
+    o._preflight_integer_v1(page_size, positive=True)
+    o._preflight_require_v1(page_size & (page_size-1) == 0, 'LINUX_CAPACITY_PAGE_SIZE')
+    totals = census['logical_bytes']
+    o._preflight_keys_v1(totals, ('R','G','I','S','E'))
+    for value in totals.values():
+        o._preflight_integer_v1(value)
+    if repeated_config_bytes is not None:
+        o._preflight_integer_v1(repeated_config_bytes)
+    r,g,i,s,e = (totals[k] for k in ('R','G','I','S','E'))
+    complete = census['complete_size_census']
+    mib,gib = 1024**2,1024**3
+    checks = []
+    def add(name, demand, limit, *, exact, missing=None):
+        disposition = 'EXCEEDS_LIMIT' if demand > limit else 'WITHIN_LIMIT' if exact else 'UNESTABLISHED'
+        checks.append(dict(name=name, demand_bytes=demand, limit_bytes=limit,
+            demand_kind='EXACT_METADATA' if exact else 'LOWER_BOUND', disposition=disposition,
+            missing_operand=missing, admission=False))
+    add('source_capture_R_plus_G', r+g, 2*gib, exact=complete)
+    add('candidate_R_plus_I', r+i, 512*mib, exact=complete and census['active_index_found'])
+    add('installation_logical_S', s, gib, exact=complete)
+    add('git_executable_E', e, 16*mib, exact=complete)
+    declaration = r+i+s+e+(0 if repeated_config_bytes is None else repeated_config_bytes)
+    startup_catalog = s+e+(0 if repeated_config_bytes is None else repeated_config_bytes)
+    add('declaration_body', declaration, gib,
+        exact=complete and census['active_index_found'] and repeated_config_bytes is not None,
+        missing=None if repeated_config_bytes is not None else 'declaration.startup_basis repeated config operands')
+    add('outer_declaration_ingress', 24+declaration, 2*gib, exact=False,
+        missing='encoded declaration header; complete selected payload if census is incomplete')
+    frames = []
+    for position in range(1,9):
+        body = 0 if position in (2,6) else r
+        add('row_body_'+str(position), body, 256*mib, exact=complete)
+        add('child_file_'+str(position), 24+body, 64*mib, exact=False,
+            missing='actual emitted header with invocation identity and delegated remaining allowance')
+        add('retained_child_basis_'+str(position), body+startup_catalog, gib, exact=False,
+            missing='startup acquisition debit beyond declared catalog reservation in _PreflightObservationV1')
+        frames.append(24+body)
+    def pages(n):
+        return ((n+page_size-1)//page_size)*page_size
+    runtime = sum(pages(n) for n in (*frames,*([16*mib]*26)))+32*mib
+    add('shared_runtime_files', runtime, gib, exact=False,
+        missing='eight encoded child headers and eight actual identity-bound receiver extents')
+    add('native_memory', 0, 6*gib, exact=False,
+        missing='native MemoryMax enforcement; file sizes do not establish heap or cache demand')
+    blockers = [v['name'] for v in checks if v['disposition'] != 'WITHIN_LIMIT']
+    admitted = complete and census['active_index_found'] and i <= g and not blockers
+    return dict(complete_size_census=complete, active_index_is_subset_of_G=bool(census['active_index_found'] and i <= g),
+        totals=totals, repeated_config_bytes=repeated_config_bytes,
+        declared_startup_catalog_bytes=startup_catalog, page_size=page_size, checks=checks,
+        feasible=admitted, byte_capture_admitted=admitted, unresolved_intersections=blockers,
+        reason='Metadata is not custody; all unknown header, startup, receiver and native operands remain unestablished')
 def _linux_preflight_declaration_v1(source, installation, git, *, origin_ns, repository, interpreter, environment):
     """Mechanically produce the original declaration; no new wire or command identities."""
     import site
@@ -9633,6 +9713,7 @@ def _linux_preflight_controller_v1(repository,installation,interpreter,event,eve
         reserved_output_bytes=2*67108864)
     source = scope = None
     capture_counts = dict(files=0,entries=0)
+    census = capacity = None
     mounted = restored = False
     failures = []
     receipt = None
@@ -9641,6 +9722,18 @@ def _linux_preflight_controller_v1(repository,installation,interpreter,event,eve
         first = version.splitlines()[0].split()
         o._preflight_require_v1(len(first) >= 2 and first[0] == 'systemd' and first[1].isdigit()
             and int(first[1]) >= 255,'LINUX_PREFLIGHT_SYSTEMD_BASELINE')
+        metadata = o._LinuxPreflightCensusV1(repository, installation, '/usr/bin/git',
+            deadline_ns=grants['native_deadline_ns'])
+        census = metadata.run()
+        executable = pathlib.Path(interpreter)
+        configs = tuple(dict.fromkeys((str(executable.parent/'pyvenv.cfg'),str(executable.parent.parent/'pyvenv.cfg'),
+            str(executable.with_suffix('._pth')),str(executable.parent/f'python{sys.version_info.major}{sys.version_info.minor}._pth'))))
+        # Count additional existing source config operands, without reading them.
+        repeated = sum(row['logical_bytes'] for row in census['records']
+            if row['kind'] == 'file' and row['role'] == 'repository' and row['path'] in configs)
+        capacity = _linux_preflight_capacity_v1(census, page_size=os.sysconf('SC_PAGE_SIZE'),
+            repeated_config_bytes=repeated if census['complete_size_census'] else None)
+        o._preflight_require_v1(capacity['byte_capture_admitted'], 'LINUX_PREFLIGHT_CAPTURE_INFEASIBLE')
         source = o._LinuxPreflightCaptureV1(repository,byte_limit=2*1024**3,
             deadline_ns=grants['native_deadline_ns'],shared_capture=capture_counts)
         git_root = pathlib.Path(repository)/'.git'
@@ -9714,9 +9807,10 @@ def _linux_preflight_controller_v1(repository,installation,interpreter,event,eve
     exported = []
     export_bytes = export_entries = 0
     export_complete = False
+    export_deadline = min(grants['settlement_deadline_ns'], time.monotonic_ns()+60*10**9)
     def export_file(path,destination):
         nonlocal export_bytes,export_entries
-        o._preflight_require_v1(time.monotonic_ns() < grants['settlement_deadline_ns'],
+        o._preflight_require_v1(time.monotonic_ns() < export_deadline,
             'LINUX_PREFLIGHT_EXPORT_DEADLINE')
         export_entries += 1
         before = path.lstat()
@@ -9733,7 +9827,7 @@ def _linux_preflight_controller_v1(repository,installation,interpreter,event,eve
                 'LINUX_PREFLIGHT_EXPORT_DESCRIPTOR')
             pieces,extent = [],0
             while extent < before.st_size:
-                o._preflight_require_v1(time.monotonic_ns() < grants['settlement_deadline_ns'],
+                o._preflight_require_v1(time.monotonic_ns() < export_deadline,
                     'LINUX_PREFLIGHT_EXPORT_READ_DEADLINE')
                 chunk = os.read(descriptor,min(65536,before.st_size-extent))
                 o._preflight_require_v1(chunk,'LINUX_PREFLIGHT_EXPORT_TRUNCATED')
@@ -9750,7 +9844,7 @@ def _linux_preflight_controller_v1(repository,installation,interpreter,event,eve
     def export_tree(path,destination,depth=0):
         nonlocal export_entries
         o._preflight_require_v1(depth <= 64 and len(str(path).encode('utf-8')) <= 4096
-            and time.monotonic_ns() < grants['settlement_deadline_ns'],'LINUX_PREFLIGHT_EXPORT_TREE_BOUND')
+            and time.monotonic_ns() < export_deadline,'LINUX_PREFLIGHT_EXPORT_TREE_BOUND')
         before = _linux_preflight_export_directory_v1(path)
         destination.mkdir(mode=0o755,exist_ok=False)
         with os.scandir(path) as stream:
@@ -9767,13 +9861,17 @@ def _linux_preflight_controller_v1(repository,installation,interpreter,event,eve
         native_history=[] if scope is None else o._json_compatible(scope.history),
         native_queries=query.observations,query_attempts=query.attempts,query_output_bytes=query.retained,
         capture_counts=capture_counts,capture_complete=source is not None,
+        complete_size_census=False if census is None else census['complete_size_census'],
+        capture_capacity=capacity,capture_census=None if census is None else 'capture-census.json',
         source_capture_bytes=None if source is None else source.byte_count,
         source_delivered_read_bytes=None if source is None else source.read_bytes,
         failures=[repr(e) for e in failures],service_settled=settled,
         evidence_root=str(control),export_root=str(export_root),canonical_acceptance=False)
     try:
-        raw = o._preflight_canonical_v1(report)
-        o._preflight_require_v1(len(raw) <= 16*1024**2,'LINUX_PREFLIGHT_NATIVE_REPORT_BOUND')
+        raw,census_raw = _linux_preflight_metadata_bytes_v1(census,report,export_deadline)
+        if census is not None:
+            o._atomic_write_bytes_v1(control/'capture-census.json',census_raw)
+            export_file(control/'capture-census.json',export_root/'capture-census.json')
         o._atomic_write_bytes_v1(control/'native-result.json',raw)
         export_file(control/'native-result.json',export_root/'native-result.json')
         for path,label in ((control/'native-evidence','native'),(spool,'streams'),
@@ -9835,7 +9933,9 @@ def _linux_preflight_controller_v1(repository,installation,interpreter,event,eve
         failures=[repr(e) for e in failures],query_attempts=query.attempts,query_output_bytes=query.retained)
     try: o.atomic_write_json(export_root/'cleanup.json',cleanup)
     except BaseException as exc: failures.append(exc)
-    print(json.dumps(dict(linux_native_export=str(export_root),cleanup=cleanup),default=str),flush=True)
+    print(json.dumps(dict(linux_native_export=str(export_root),cleanup=cleanup,
+        complete_size_census=False if census is None else census['complete_size_census'],
+        capacity=capacity),default=str),flush=True)
     return 0 if not failures and receipt is not None and receipt.failure_class is None and receipt.native_exit_code == 0 else 1
 
 
