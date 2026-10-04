@@ -12260,6 +12260,7 @@ _LINUX_PREFLIGHT_PROPERTIES_V1 = (
     ('AmbientCapabilities',''), ('PrivateDevices','yes'), ('PrivateNetwork','yes'),
     ('PrivateIPC','yes'), ('InaccessiblePaths','+/dev/shm +/dev/mqueue +/dev/hugepages'),
     ('PrivateTmp','yes'), ('ProtectSystem','strict'), ('ProtectHome','tmpfs'),
+    ('ReadOnlyPaths','+/home +/root +/run +/run/user'),
     ('MountAPIVFS','yes'), ('ProtectProc','invisible'), ('ProtectControlGroups','yes'),
     ('ProtectKernelTunables','yes'), ('ProtectKernelModules','yes'), ('ProtectKernelLogs','yes'),
     ('RestrictSUIDSGID','yes'), ('RestrictRealtime','yes'), ('RestrictNamespaces','yes'),
@@ -12375,7 +12376,8 @@ def _linux_preflight_service_argv_v1(*, name, private_root, runtime, control, sp
     _preflight_require_v1(type(name) is str and len(name) <= 64 and re.fullmatch(r'qtt[0-9]+n[0-9]+',name),
         'LINUX_PREFLIGHT_UNIT_NAME')
     for p in (private_root,runtime,control,spool,repository,installation,interpreter,
-            '/dev/shm','/dev/mqueue','/dev/hugepages','/tmp','/var/tmp'): _linux_preflight_path_v1(p)
+            '/dev/shm','/dev/mqueue','/dev/hugepages','/tmp','/var/tmp',
+            '/home','/root','/run','/run/user'): _linux_preflight_path_v1(p)
     _preflight_integer_v1(startup_deadline_ns,positive=True)
     _preflight_require_v1(type(environment) is dict and environment == _linux_preflight_environment_v1(
         repository=repository,installation=installation,runtime=runtime,control=control),
@@ -12792,6 +12794,212 @@ def _linux_preflight_status_v1(pid,query,*,credentials=False):
     return values
 
 
+def _linux_preflight_mount_containment_v1(*, pid, process, runtime, query, root_fd=None,
+        mounts=None, private_root=None, mappings=None, history=None, service_process=None):
+    """One bracketed, descriptor-selected view; never infer cover from row order."""
+    parents=('/home','/root','/run','/run/user')
+    allowed={str(runtime),'/tmp','/var/tmp','/dev','/dev/pts','/proc','/sys'}
+    record=dict(pid=pid,parents=[],covered=[],violations=[],descriptors=[])
+    owned_root=None;result={};errors=[]
+    def require(value,label):
+        _preflight_require_v1(value,'LINUX_PREFLIGHT_CONTAINMENT_'+label)
+    def checked(operation,*args,**kwargs):
+        query.check();return operation(*args,**kwargs)
+    def acquire(operation,*args,**kwargs):
+        # The close debit is consumed before acquisition and is never refunded.
+        query.check();query.check();return operation(*args,**kwargs)
+    def failure(where,exc):
+        errors.append(exc);record['violations'].append(dict(operand=where,error=repr(exc)))
+    def close(fd):
+        try:os.close(fd)
+        except BaseException as exc:
+            retained=getattr(query,'containment_retained_descriptors',[])
+            retained.append(fd);query.containment_retained_descriptors=retained
+            failure('close:'+str(fd),exc)
+    def stamp(info):
+        return (info.st_dev,info.st_ino,info.st_mode,info.st_uid,info.st_gid)
+    def within(child,parent):return parent=='/' or child==parent or child.startswith(parent+'/')
+    def fdfields(raw):
+        rows=[line.partition(b':')[2].strip() for line in raw.splitlines() if line.partition(b':')[0]==b'mnt_id']
+        require(len(rows)==1 and re.fullmatch(rb'[1-9][0-9]*',rows[0]) is not None,'FDINFO_MOUNT_ID')
+        return int(rows[0])
+    def walk(path):
+        _linux_preflight_path_v1(path)
+        fd=acquire(os.dup,view)
+        try:
+            chain=[('/',_preflight_stamp_v1(checked(os.fstat,fd)))];prefix=''
+            for part in path[1:].split('/'):
+                new=acquire(os.open,part,os.O_PATH|os.O_DIRECTORY|os.O_NOFOLLOW|os.O_CLOEXEC,dir_fd=fd)
+                previous=fd;fd=new;close(previous)
+                info=checked(os.fstat,fd)
+                require(stat.S_ISDIR(info.st_mode),'DIRECTORY:'+path)
+                prefix+='/'+part;chain.append((prefix,_preflight_stamp_v1(info)))
+            return fd,chain
+        except BaseException:
+            close(fd);raise
+    def witness(path):
+        fd,chain=walk(path)
+        try:
+            before=checked(os.fstat,fd)
+            raw=query.read('/proc/self/fdinfo/'+str(fd))
+            identifier=fdfields(raw)
+            require(identifier in by_id,'FDINFO_UNKNOWN_MOUNT:'+path)
+            selected=by_id[identifier]
+            require(within(path,selected['path']),'FDINFO_COVERING_PATH:'+path)
+            require(str(os.major(before.st_dev))+':'+str(os.minor(before.st_dev))==selected['device'],
+                'FDINFO_DEVICE:'+path)
+            after=checked(os.fstat,fd)
+            require(stamp(before)==stamp(after),'OBJECT_CHANGED:'+path)
+            second,current=walk(path)
+            try:require(chain==current,'CHAIN_CHANGED:'+path)
+            finally:close(second)
+            return dict(chain=chain,identity=(before.st_dev,before.st_ino),mount={
+                k:sorted(v) if isinstance(v,frozenset) else v for k,v in selected.items()}),before,identifier
+        finally:close(fd)
+    try:
+        query.check()
+        _linux_preflight_path_v1(str(runtime))
+        require(_linux_preflight_process_identity_v1(pid,query)==process,'PROCESS_BEFORE')
+        _linux_preflight_status_v1(pid,query)
+        if service_process is not None and service_process['pid']!=pid:
+            require(_json_compatible(_linux_preflight_process_identity_v1(service_process['pid'],query))==
+                _json_compatible(service_process),'SERVICE_PROCESS_BEFORE')
+        cgroup=_linux_preflight_cgroup_path_v1(pid,query)
+        if root_fd is None:
+            require(pid==os.getpid(),'CURRENT_ROOT_OWNER')
+            owned_root=acquire(os.open,'/',os.O_PATH|os.O_DIRECTORY|os.O_NOFOLLOW|os.O_CLOEXEC)
+            view=owned_root
+        else:view=root_fd
+        root_before=checked(os.fstat,view)
+        require(stamp(root_before)==stamp(checked(os.stat,'/proc/'+str(pid)+'/root')),'VIEW_ROOT_BEFORE')
+        before=(_linux_preflight_mounts_v1(query.read('/proc/'+str(pid)+'/mountinfo'))
+            if mounts is None else mounts)
+        require(type(before) is tuple and 0<len(before)<=4096,'MOUNT_ROSTER')
+        by_id={row['id']:row for row in before};require(len(by_id)==len(before),'DUPLICATE_ID')
+        by_path={}
+        for row in before:
+            require(type(row['id']) is int and row['id']>0 and type(row['parent']) is int and row['parent']>0,
+                'MOUNT_IDENTIFIERS')
+            for path in (row['path'],row['root']):
+                if path!='/':_linux_preflight_path_v1(path)
+            require(re.fullmatch(r'[0-9]+:[0-9]+',row['device']) is not None,'MOUNT_DEVICE')
+            by_path.setdefault(row['path'],[]).append(row)
+            current=row;seen=set()
+            while current['id'] in by_id:
+                require(current['id'] not in seen,'MOUNT_GRAPH_CYCLE')
+                seen.add(current['id']);parent=by_id.get(current['parent'])
+                if parent is None:
+                    require(current['path']=='/','MOUNT_GRAPH_ORPHAN');break
+                require(within(current['path'],parent['path']),'MOUNT_GRAPH_PATH')
+                current=parent
+        require(sum(row['parent'] not in by_id for row in before)==1,'MOUNT_GRAPH_ROOT')
+        for path in parents:
+            row=dict(path=path,observation=None,error=None)
+            try:
+                observed,info,identifier=witness(path);row['observation']=observed
+                row['stat']=dict(zip(('device','inode','mode','uid','gid'),stamp(info),strict=True))
+                require('ro' in observed['mount']['options'] and 'rw' not in observed['mount']['options'],
+                    'PARENT_WRITABLE:'+path)
+                require((info.st_uid,info.st_gid)==(0,0) and stat.S_IMODE(info.st_mode)==(0o700 if path=='/root' else 0o755),
+                    'PARENT_OWNER_MODE:'+path)
+                if private_root is not None:
+                    # Only the controller supplies its original private-root owner.
+                    host_fd=acquire(os.open,private_root,os.O_RDONLY|os.O_DIRECTORY|os.O_NOFOLLOW|os.O_CLOEXEC)
+                    try:
+                        host_root=checked(os.fstat,host_fd)
+                        for part in path[1:].split('/'):
+                            new=acquire(os.open,part,os.O_RDONLY|os.O_DIRECTORY|os.O_NOFOLLOW|os.O_CLOEXEC,dir_fd=host_fd)
+                            previous=host_fd;host_fd=new;close(previous)
+                        host=checked(os.fstat,host_fd)
+                        require(stamp(host)==stamp(info) and host.st_dev==host_root.st_dev,'PARENT_HOST_OBJECT:'+path)
+                        native=_LinuxSourceNativeV2()
+                        acl=native.acl(host_fd,attempt=lambda name:query.check(),delivered=lambda count:None)
+                        query.record('containment-parent-acl',path,_preflight_canonical_v1(native.last_acl))
+                        require(acl==(None,None),'PARENT_ACL:'+path)
+                    finally:close(host_fd)
+                else:
+                    require(type(mappings) is dict and path in mappings,'PARENT_MAPPING_MISSING:'+path)
+                    expected=mappings[path]
+                    require(type(expected) is dict and set(expected)=={'chain','identity','mount'}
+                        and _json_compatible(observed)==_json_compatible(expected),'PARENT_MAPPING_CHANGED:'+path)
+                result[path]=observed
+            except BaseException as exc:row['error']=repr(exc);failure(path,exc)
+            record['parents'].append(row)
+        lower_ids=set()
+        for row in before:
+            if 'rw' not in row['options']:continue
+            path=row['path']
+            if path in allowed:
+                if row['fs'] not in ('tmpfs','devpts','proc','sysfs') or len(by_path[path])!=1:
+                    failure(path,ValidationReliabilityError('ENGVR_PREPUBLICATION_CUSTODY_FAILED',
+                        'LINUX_PREFLIGHT_UNACCOUNTED_WRITABLE_MOUNT:'+path))
+                continue
+            evidence=dict(lower={k:sorted(v) if isinstance(v,frozenset) else v for k,v in row.items()},visible=None,error=None)
+            try:
+                require(len(by_path[path])>1,'UNACCOUNTED_WRITABLE_MOUNT:'+path)
+                visible,info,identifier=witness(path);evidence['visible']=visible
+                require(identifier!=row['id'] and by_id[identifier]['path']==path
+                    and 'ro' in by_id[identifier]['options'] and 'rw' not in by_id[identifier]['options'],
+                    'VISIBLE_WRITABLE_OR_UNRELATED:'+path)
+                current=by_id[identifier];ancestors=[]
+                while current['parent'] in by_id:
+                    current=by_id[current['parent']];ancestors.append(current)
+                require(row['id'] not in {a['id'] for a in ancestors},'LOWER_IS_VISIBLE_ANCESTOR:'+path)
+                require(row['parent'] in {a['id'] for a in ancestors},'COVER_ANCESTRY:'+path)
+                between=ancestors[:next(i for i,a in enumerate(ancestors) if a['id']==row['parent'])]
+                require(any(a['path']!=path and a['path']!=by_id[row['parent']]['path']
+                    and within(path,a['path']) and within(a['path'],by_id[row['parent']]['path'])
+                    and 'ro' in a['options'] and 'rw' not in a['options'] for a in between),
+                    'COVER_INTERVENING_MOUNT:'+path)
+                lower_ids.add(row['id'])
+            except BaseException as exc:evidence['error']=repr(exc);failure(path,exc)
+            record['covered'].append(evidence)
+        if lower_ids:
+            # No descriptor inherited beyond standard handles, nor any held
+            # descriptor into an excluded lower mount. Keep the iterator live.
+            directory=acquire(os.scandir,'/proc/'+str(pid)+'/fd')
+            try:
+                for count,entry in enumerate(directory,1):
+                    require(count<=1024 and re.fullmatch(r'[0-9]+',entry.name) is not None,'DESCRIPTOR_ROSTER')
+                    fd=int(entry.name)
+                    raw=query.read('/proc/'+str(pid)+'/fdinfo/'+entry.name)
+                    identifier=fdfields(raw)
+                    flags=[line.partition(b':')[2].strip() for line in raw.splitlines() if line.partition(b':')[0]==b'flags']
+                    require(len(flags)==1 and re.fullmatch(rb'[0-7]+',flags[0]) is not None,'DESCRIPTOR_FLAGS')
+                    value=int(flags[0],8);record['descriptors'].append(dict(fd=fd,mount_id=identifier,flags=value))
+                    require(identifier not in lower_ids and (fd<=2 or value&os.O_CLOEXEC),'INHERITED_OR_COVERED_DESCRIPTOR')
+            finally:
+                try:directory.close()
+                except BaseException as exc:
+                    retained=getattr(query,'containment_retained_descriptors',[])
+                    retained.append(directory);query.containment_retained_descriptors=retained
+                    failure('descriptor-roster-close',exc)
+        after=_linux_preflight_mounts_v1(query.read('/proc/'+str(pid)+'/mountinfo'))
+        require({r['id']:r for r in after}==by_id,'MOUNT_TABLE_CHANGED')
+        require(stamp(checked(os.fstat,view))==stamp(root_before)
+            and stamp(checked(os.stat,'/proc/'+str(pid)+'/root'))==stamp(root_before),'VIEW_ROOT_AFTER')
+        require(_linux_preflight_process_identity_v1(pid,query)==process,'PROCESS_AFTER')
+        _linux_preflight_status_v1(pid,query)
+        require(_linux_preflight_cgroup_path_v1(pid,query)==cgroup,'CGROUP_CHANGED')
+        if service_process is not None and service_process['pid']!=pid:
+            require(_json_compatible(_linux_preflight_process_identity_v1(service_process['pid'],query))==
+                _json_compatible(service_process),'SERVICE_PROCESS_AFTER')
+        query.check()
+    except BaseException as exc:failure('view',exc)
+    finally:
+        if owned_root is not None:close(owned_root)
+    record['complete']=not errors
+    if history is not None:history.append(dict(mount_containment=record))
+    try:query.record('mount-containment',str(pid),_preflight_canonical_v1(record))
+    except BaseException as exc:failure('evidence',exc);record['complete']=False
+    if errors:
+        error=ValidationReliabilityError('ENGVR_PREPUBLICATION_CUSTODY_FAILED',
+            'LINUX_PREFLIGHT_MOUNT_CONTAINMENT:'+repr(record['violations']))
+        if query.failure is None:query.failure=error
+        raise error
+    return result
+
+
 class _LinuxPreflightHostLeaseV1(_PreflightHostLeaseV1):
     """Actual unprivileged service identity; cannot be issued by a JSON approval."""
     def __init__(self, *, binding, control_path, runtime, query, declaration_chain, declaration_version, parent_pid=None):
@@ -12852,11 +13060,8 @@ class _LinuxPreflightHostLeaseV1(_PreflightHostLeaseV1):
                 match = [m for m in mounts if m['path'] == target]
                 _preflight_require_v1(len(match) == 1 and 'ro' in match[0]['options'],
                     'LINUX_PREFLIGHT_READONLY_MOUNT:'+target)
-            allowed = {str(self.runtime),'/tmp','/var/tmp','/dev','/dev/pts','/proc','/sys'}
-            for mount in mounts:
-                if 'rw' in mount['options']:
-                    _preflight_require_v1(mount['path'] in allowed and mount['fs'] in ('tmpfs','devpts','proc','sysfs'),
-                        'LINUX_PREFLIGHT_UNACCOUNTED_WRITABLE_MOUNT:'+mount['path'])
+            _linux_preflight_mount_containment_v1(pid=self.pid,process=actual,runtime=str(self.runtime),
+                query=self.query,mounts=mounts,mappings=b.get('host_service_mappings'),service_process=b['process'])
             self.check_runtime(b,self.runtime,self.query)
             for target in (str(self.runtime),'/tmp','/var/tmp'):
                 match = [m for m in mounts if m['path'] == target]
@@ -14837,12 +15042,13 @@ def _linux_preflight_unit_policy_v1(status, *, name, root, repository, runtime, 
         _preflight_require_v1(status.get(key) == wanted,'LINUX_PREFLIGHT_UNIT_READBACK:'+key)
     for key,logical,label in (
             ('InaccessiblePaths',('/dev/shm','/dev/mqueue','/dev/hugepages'),'LINUX_PREFLIGHT_DEVICE_MASK_READBACK'),
-            ('ReadWritePaths',(runtime,'/tmp','/var/tmp'),'LINUX_PREFLIGHT_WRITABLE_PATH_READBACK')):
+            ('ReadWritePaths',(runtime,'/tmp','/var/tmp'),'LINUX_PREFLIGHT_WRITABLE_PATH_READBACK'),
+            ('ReadOnlyPaths',('/home','/root','/run','/run/user'),'LINUX_PREFLIGHT_READONLY_PARENT_READBACK')):
         for path in logical: _linux_preflight_path_v1(path)
         value=status.get(key)
         _preflight_require_v1(type(value) is str,label)
         tokens=value.split()
-        _preflight_require_v1(len(tokens)==3 and len(set(tokens))==3
+        _preflight_require_v1(len(tokens)==len(logical) and len(set(tokens))==len(logical)
             and set(tokens)=={'+'+path for path in logical},label)
     filter_text = status.get('SystemCallFilter','')
     _preflight_require_v1(type(syscall_filter) is frozenset and syscall_filter
@@ -14856,7 +15062,7 @@ class _LinuxPreflightScopeV1:
         'MemoryMax','MemorySwapMax','TasksMax','CPUQuotaPerSecUSec','CPUQuotaPeriodUSec','DynamicUser',
         'NoNewPrivileges','PrivateDevices','PrivateNetwork','PrivateIPC','ProtectSystem','ProtectHome','RuntimeDirectoryMode')
     _STATUS = tuple(dict.fromkeys((*_STATUS,*_LINUX_PREFLIGHT_SERVICE_READBACK_V1,
-        'RootDirectory','WorkingDirectory','RuntimeDirectory','Slice','InaccessiblePaths','ReadWritePaths','SystemCallFilter',
+        'RootDirectory','WorkingDirectory','RuntimeDirectory','Slice','InaccessiblePaths','ReadWritePaths','ReadOnlyPaths','SystemCallFilter',
         'StopWhenUnneeded')))
     def __init__(self,*,name,query,control,runtime,private_root,spool,repository,installation,interpreter,
             source,header,blobs,vectors,grants,event,environment):
@@ -14952,6 +15158,28 @@ class _LinuxPreflightScopeV1:
                 for k,v in self.runtime_mount.items()},children=self.runtime_children)))
 
     def prepare_view(self):
+        # Create these views only beneath the newly owned private root. Existing
+        # objects are validated; unexpected objects are never repaired in place.
+        for logical,mode in (('/home',0o755),('/root',0o700),('/run',0o755),('/run/user',0o755)):
+            self.query.check()  # reserve close before opening
+            fd=self._runtime_call(os.open,self.private_root,os.O_RDONLY|os.O_DIRECTORY|os.O_NOFOLLOW|os.O_CLOEXEC)
+            try:
+                storage=self._runtime_call(os.fstat,fd).st_dev
+                for part in logical[1:].split('/'):
+                    created=False
+                    try:self._runtime_call(os.mkdir,part,mode=mode,dir_fd=fd);created=True
+                    except FileExistsError:pass
+                    self.query.check()  # next descriptor's close, without refund
+                    new=self._runtime_call(os.open,part,os.O_RDONLY|os.O_DIRECTORY|os.O_NOFOLLOW|os.O_CLOEXEC,dir_fd=fd)
+                    previous=fd;fd=new;os.close(previous)
+                    if created:
+                        self._runtime_call(os.fchown,fd,0,0);self._runtime_call(os.fchmod,fd,mode)
+                    info=self._runtime_call(os.fstat,fd)
+                    _preflight_require_v1(stat.S_ISDIR(info.st_mode) and info.st_dev==storage
+                        and (info.st_uid,info.st_gid)==(0,0) and stat.S_IMODE(info.st_mode)==mode,
+                        'LINUX_PREFLIGHT_PRIVATE_PARENT:'+logical)
+                    self._runtime_acl(fd)
+            finally:os.close(fd)
         for absolute in ('/usr','/lib','/lib64','/proc','/sys','/dev','/tmp','/var/tmp',self.repository,self.installation,
                 str(self.runtime),str(self.spool),*(str(self.control/n) for n in ('declaration','binding','release'))):
             self._runtime_call((self.private_root/absolute.lstrip('/')).mkdir,parents=True,exist_ok=True,mode=0o755)
@@ -15094,6 +15322,8 @@ binding,version,chain=o._linux_preflight_control_read_v1(control/'binding/native
 process=o._linux_preflight_process_identity_v1(os.getpid(),query)
 o._preflight_require_v1(o._json_compatible(process)==binding['process'] and binding['runtime']==str(runtime)
     and o._linux_preflight_cgroup_path_v1(os.getpid(),query)==binding['service_cgroup'],'RUNTIME_FIXTURE_PROCESS')
+o._linux_preflight_mount_containment_v1(pid=os.getpid(),process=process,runtime=str(runtime),query=query,
+    mappings=binding.get('host_service_mappings'))
 credentials=o._LinuxPreflightHostLeaseV1.check_runtime(binding,runtime,query)
 marker=b'QTT runtime roundtrip engineering only\\n'
 rows=[]
@@ -15108,6 +15338,8 @@ for parent in (runtime,Path('/tmp'),Path('/var/tmp')):
     o._preflight_require_v1(raw==marker,'RUNTIME_FIXTURE_BYTES')
     rows.append(dict(path=str(path),bytes=len(raw),hex=raw.hex()))
 o._LinuxPreflightHostLeaseV1.check_runtime(binding,runtime,query)
+o._linux_preflight_mount_containment_v1(pid=os.getpid(),process=process,runtime=str(runtime),query=query,
+    mappings=binding.get('host_service_mappings'))
 o._preflight_require_v1(o._scan_same_api_version((control/'binding/native.json').lstat())==version
     and o._preflight_chain_v1(control/'binding')==chain,'RUNTIME_FIXTURE_BINDING_CHANGED')
 probe=dict(name=binding['name'],pid=os.getpid(),start=process['start'],passed=True,engineering_only=True,
@@ -15322,6 +15554,9 @@ print(json.dumps(probe),flush=True)
                 descriptor=self.process.pidfd;self.process.pidfd=None
                 try:os.close(descriptor)
                 except BaseException as exc:failures.append(exc)
+            if getattr(self.query,'containment_retained_descriptors',()):
+                failures.append(ValidationReliabilityError('ENGVR_PREPUBLICATION_CUSTODY_FAILED',
+                    'LINUX_PREFLIGHT_CONTAINMENT_DESCRIPTOR_CUSTODY_UNRESOLVED'))
             self.history.append(dict(owned_unit_handles_closed=not failures,errors=[repr(e) for e in failures]))
             _scan_raise_errors(failures)
 
@@ -15594,6 +15829,10 @@ print(json.dumps(probe),flush=True)
             mappings[logical] = dict(chain=chain,identity=(view.st_dev,view.st_ino),mount={
                 k:sorted(v) if isinstance(v,frozenset) else v for k,v in selected[0].items()})
         self._check_device_masks(mounts)
+        self._runtime_live(process,cgroup)
+        mappings.update(_linux_preflight_mount_containment_v1(pid=pid,process=process,runtime=str(self.runtime),
+            query=self.query,root_fd=self.root_fd,mounts=mounts,private_root=self.private_root,history=self.history))
+        self._runtime_live(process,cgroup)
         runtime_mounts = [m for m in mounts if m['path'] == str(self.runtime)]
         _preflight_require_v1(len(runtime_mounts) == 1,'LINUX_PREFLIGHT_RUNTIME_ASSOCIATION')
         runtime_binding=self.handoff_runtime(process,cgroup,mounts)

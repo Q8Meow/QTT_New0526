@@ -20985,7 +20985,8 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
     assert len(properties) == len({v.split('=',1)[0] for v in properties})
     required = {'Type=exec','Restart=no','RemainAfterExit=yes','DynamicUser=yes','UMask=0077','NoNewPrivileges=yes',
         'CapabilityBoundingSet=','AmbientCapabilities=','PrivateDevices=yes','PrivateNetwork=yes','PrivateIPC=yes',
-        'InaccessiblePaths=+/dev/shm +/dev/mqueue +/dev/hugepages','PrivateTmp=yes','ProtectSystem=strict','ProtectHome=tmpfs',
+        'InaccessiblePaths=+/dev/shm +/dev/mqueue +/dev/hugepages',
+        'ReadOnlyPaths=+/home +/root +/run +/run/user','PrivateTmp=yes','ProtectSystem=strict','ProtectHome=tmpfs',
         'MountAPIVFS=yes','ProtectProc=invisible','ProtectControlGroups=yes','ProtectKernelTunables=yes',
         'ProtectKernelModules=yes','ProtectKernelLogs=yes','RestrictSUIDSGID=yes','RestrictRealtime=yes',
         'RestrictNamespaces=yes','LockPersonality=yes','RestrictAddressFamilies=AF_UNIX','SystemCallArchitectures=native',
@@ -21003,7 +21004,7 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
     readonly+=' '+ ' '.join(control+'/'+n+':'+control+'/'+n for n in ('declaration','binding','release','spool'))
     assert 'BindReadOnlyPaths='+readonly in properties
     assert {p for p in argv if p.startswith('--setenv=')}=={'--setenv='+k+'='+v for k,v in environment.items()}
-    assert not any(p.startswith(('ReadOnlyPaths=','ExecPaths=','NoExecPaths=')) for p in properties)
+    assert not any(p.startswith(('ExecPaths=','NoExecPaths=')) for p in properties)
     for value in ('+/dev/shm','+/tmp','+/run/qtt17n23'):
         with pytest.raises(o.ValidationReliabilityError,match='NATIVE_PATH'): o._linux_preflight_path_v1(value)
     assert required <= set(properties)
@@ -21129,7 +21130,7 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
         LimitCORE='0',LimitNOFILE='1024',LimitFSIZE='67108864',StandardInput='null',StandardOutput='append',StandardError='append',
         RootDirectory=control+'/root',WorkingDirectory=root,RuntimeDirectory='',Slice='qtt17n23.slice',
         InaccessiblePaths='+/dev/shm +/dev/mqueue +/dev/hugepages',ReadWritePaths='+'+runtime+' +/tmp +/var/tmp',
-        SystemCallFilter='~mount reboot swapon init_module')
+        ReadOnlyPaths='+/home +/root +/run +/run/user',SystemCallFilter='~mount reboot swapon init_module')
     options = dict(name='qtt17n23',root=control+'/root',repository=root,runtime=runtime,
         syscall_filter=frozenset(('mount','reboot','swapon','init_module')))
     o._linux_preflight_unit_policy_v1(status,**options)
@@ -21225,9 +21226,11 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
     with pytest.raises(o.ValidationReliabilityError,match='DEVICE_MASK_READBACK'):
         o._linux_preflight_unit_policy_v1(recorded,**recorded_options)
     prospective={**recorded,'InaccessiblePaths':'+/dev/shm +/dev/mqueue +/dev/hugepages',
-        'ReadWritePaths':'+/run/qtt2557n2660997759221 +/tmp +/var/tmp'}
+        'ReadWritePaths':'+/run/qtt2557n2660997759221 +/tmp +/var/tmp',
+        'ReadOnlyPaths':'+/home +/root +/run +/run/user'}
     o._linux_preflight_unit_policy_v1(prospective,**recorded_options)
     assert {key for key in recorded if recorded[key]!=prospective[key]}=={'InaccessiblePaths','ReadWritePaths'}
+    assert set(prospective)-set(recorded)=={'ReadOnlyPaths'}
     assert recorded==recorded_before
     rejected_private_tmp=0
     for value in ('no','',None,True,1,b'yes',['yes'],{'value':'yes'},'YES'):
@@ -21317,6 +21320,209 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
     o._linux_preflight_unit_policy_v1(status,**options)
     observed=mask_reference(captured_mounts,mask_stats)
     assert all('rw' in row['mounts'][0]['options'] for row in observed['targets'])
+    # Prospective ReadOnlyPaths references; never a rewrite of historical bytes.
+    import itertools
+    readonly_tokens=('+/home','+/root','+/run','+/run/user')
+    for order in itertools.permutations(readonly_tokens):
+        o._linux_preflight_unit_policy_v1({**status,'ReadOnlyPaths':' \t'.join(order)},**options)
+    assert 'ReadOnlyPaths' in o._LinuxPreflightScopeV1._STATUS
+    for value in (None,True,4,b'paths',[],{},'', ' '.join(readonly_tokens[:3]),
+            ' '.join((*readonly_tokens,'+/outside')),' '.join((*readonly_tokens,readonly_tokens[0]))):
+        changed={**status,'ReadOnlyPaths':value};assert changed!=status
+        with pytest.raises(o.ValidationReliabilityError):o._linux_preflight_unit_policy_v1(changed,**options)
+    for position,token in enumerate(readonly_tokens):
+        for replacement in (token[1:],'-'+token[1:],'-'+token,'+'+token,control+'/root'+token[1:],
+                readonly_tokens[(position+1)%4]):
+            changed=list(readonly_tokens);changed[position]=replacement
+            changed={**status,'ReadOnlyPaths':' '.join(changed)};assert changed!=status
+            with pytest.raises(o.ValidationReliabilityError):o._linux_preflight_unit_policy_v1(changed,**options)
+        changed={**status,'ReadOnlyPaths':' '.join(t for i,t in enumerate(readonly_tokens) if i!=position)}
+        with pytest.raises(o.ValidationReliabilityError):o._linux_preflight_unit_policy_v1(changed,**options)
+    # Finite syscall/descriptor references of the complete current helper.
+    # The rows, IDs and stat values here are SYNTHETIC, not native qualification.
+    containment_raw=(
+        b'10 9 0:9 /private/root / ro - tmpfs tmpfs rw\n'
+        b'20 10 0:10 / /proc rw,nosuid,nodev,noexec - proc proc rw\n'
+        b'21 20 0:10 /sys /proc/sys ro,nosuid,nodev,noexec - proc proc rw\n'
+        b'22 20 0:12 / /proc/sys/fs/binfmt_misc rw,nosuid,nodev,noexec - binfmt_misc binfmt_misc rw\n'
+        b'23 21 0:12 / /proc/sys/fs/binfmt_misc ro,nosuid,nodev,noexec - binfmt_misc binfmt_misc rw\n'
+        b'30 10 0:13 / /run/qtt17n23 rw,nosuid,nodev,noexec - tmpfs qtt-runtime rw,size=1048576k\n'
+        b'31 10 0:13 /tmp /tmp rw,nosuid,nodev,noexec - tmpfs qtt-runtime rw,size=1048576k\n'
+        b'32 10 0:13 /var-tmp /var/tmp rw,nosuid,nodev,noexec - tmpfs qtt-runtime rw,size=1048576k\n')
+    parent_paths=('/home','/root','/run','/run/user')
+    root_mount=dict(id=10,parent=9,device='0:9',root='/private/root',path='/',options=['ro'],
+        fs='tmpfs',source='tmpfs',super_options=['rw'])
+    process_reference=dict(pid=7001,start=99,namespaces={'mnt':(4,80),'pid':(4,81)})
+    def containment_reference(*,raw=containment_raw,after=None,fault=None,controller=False,accepted=False,
+            selectors=None,old_parent_devices=None):
+        stats={}
+        for index,path in enumerate(('/',*parent_paths,'/proc','/proc/sys','/proc/sys/fs','/proc/sys/fs/binfmt_misc'),1):
+            stats[path]=dict(st_dev=9 if not path.startswith('/proc') else (12 if path.endswith('binfmt_misc') else 10),
+                st_ino=index,st_mode=stat.S_IFDIR|(0o700 if path=='/root' else 0o755),st_uid=0,st_gid=0,
+                st_size=4096,st_mtime_ns=1,st_ctime_ns=1,st_nlink=2)
+        if old_parent_devices:
+            for path,device in old_parent_devices.items():stats[path]['st_dev']=device
+        def chain(path):
+            paths=['/'];prefix=''
+            for part in path[1:].split('/'):prefix+='/'+part;paths.append(prefix)
+            return [(p,[stats[p][k] for k in ('st_dev','st_ino','st_mode','st_size','st_mtime_ns','st_ctime_ns','st_nlink')]) for p in paths]
+        expected={p:dict(chain=chain(p),identity=[stats[p]['st_dev'],stats[p]['st_ino']],mount=copy.deepcopy(root_mount)) for p in parent_paths}
+        if fault and fault[0]=='mapping':expected[fault[1]]['identity'][1]+=100
+        if fault and fault[0]=='missing-mapping':del expected[fault[1]]
+        if fault and fault[0] in ('uid','gid','mode','kind'):
+            key={'uid':'st_uid','gid':'st_gid','mode':'st_mode','kind':'st_mode'}[fault[0]]
+            stats[fault[1]][key]=1 if fault[0] in ('uid','gid') else stat.S_IFREG if fault[0]=='kind' else stat.S_IFDIR|0o777
+        fd_paths={};next_fd=100;events=[];selected=dict.fromkeys(parent_paths,10)
+        selected['/proc/sys/fs/binfmt_misc']=23
+        if selectors:selected.update(selectors)
+        class ReferenceQuery:
+            failure=None
+            def __init__(self):self.records=[];self.mount_reads=0;self.attempts=0;self.process_reads=0;self.root_stats=0;self.cgroups=0
+            def check(self,**kw):
+                if self.failure is not None:raise self.failure
+                self.attempts+=1;events.append('check')
+                if fault and fault[0]=='budget' and self.attempts==fault[1]:raise RuntimeError('synthetic query allowance exhausted')
+            def read(self,path,**kw):
+                self.check();path=str(path)
+                if path.endswith('/mountinfo'):
+                    self.mount_reads+=1;assert self.mount_reads<=2
+                    return raw if self.mount_reads==1 or after is None else after
+                assert '/fdinfo/' in path,path
+                fd=int(path.rsplit('/',1)[1])
+                if path.startswith('/proc/self/'):
+                    logical,host=fd_paths[fd];identifier=selected[logical]
+                    if fault and fault[0]=='fdinfo' and logical==fault[1]:return fault[2]
+                    return ('pos:\t0\nflags:\t012000000\nmnt_id:\t'+str(identifier)+'\n').encode()
+                identifier=22 if fault and fault[0]=='inherited-covered' and fd==2 else 5
+                flags=0 if fault and fault[0]=='inherited' and fd==4 else 0o2000000
+                return f'pos:\t0\nflags:\t{flags:o}\nmnt_id:\t{identifier}\n'.encode()
+            def record(self,kind,operand,data):
+                self.records.append((kind,operand,json.loads(data)))
+                if fault and fault[0]=='evidence' and kind=='mount-containment':raise OSError('synthetic evidence write failed')
+        q=ReferenceQuery()
+        def allocate(path,host=False):
+            nonlocal next_fd
+            assert events[-2:]==['check','check'],'close must be prepaid before acquisition'
+            next_fd+=1;fd_paths[next_fd]=(path,host);events.append('open');return next_fd
+        def open_reference(path,flags,*args,dir_fd=None,**kwargs):
+            value=str(path).replace('\\','/')
+            assert flags&o.os.O_NOFOLLOW and flags&o.os.O_CLOEXEC and flags&o.os.O_DIRECTORY
+            if dir_fd is None:
+                assert value in ('/','/private-root')
+                return allocate('/',value=='/private-root')
+            parent,host=fd_paths[dir_fd];logical=parent.rstrip('/')+'/'+value
+            if fault and fault[0]=='link' and logical==fault[1]:raise OSError('synthetic no-follow rejection')
+            return allocate(logical,host)
+        def duplicate(fd):return allocate(*fd_paths[fd])
+        def fstat_reference(fd):
+            logical,host=fd_paths[fd];value=dict(stats[logical])
+            if host and fault and fault[0]=='host-object' and logical==fault[1]:value['st_ino']+=100
+            return SimpleNamespace(**value)
+        def root_stat(path,*args,**kwargs):
+            assert str(path)=='/proc/7001/root'
+            q.root_stats+=1;value=dict(stats['/'])
+            if fault and fault[0]=='view-drift' and q.root_stats==2:value['st_ino']+=100
+            return SimpleNamespace(**value)
+        def close_reference(fd):
+            events.append('close')
+            if fault and fault[0]=='close' and not getattr(q,'failed_close',False):
+                q.failed_close=True;raise OSError('synthetic close failure')
+            del fd_paths[fd]
+        class ReferenceDirectory:
+            def __iter__(self):
+                return iter(SimpleNamespace(name=str(fd)) for fd in ((0,1,2,4) if fault and fault[0]=='inherited' else (0,1,2)))
+            def close(self):
+                if fault and fault[0]=='roster-close':raise OSError('synthetic roster close failure')
+        def roster(path):
+            assert path=='/proc/7001/fd' and events[-2:]==['check','check']
+            return ReferenceDirectory()
+        def identity(pid,query,**kw):
+            assert pid==7001 and query is q;q.process_reads+=1
+            value=copy.deepcopy(process_reference)
+            if fault and fault[0]=='process-drift' and q.process_reads==2:value['namespaces']['mnt']=(4,999)
+            return value
+        def status_reference(pid,query,**kw):
+            assert pid==7001 and query is q
+            if fault and fault[0]=='capability':raise RuntimeError('synthetic nonzero capability')
+        def cgroup_reference(pid,query):
+            q.cgroups+=1
+            return '/unit/other' if fault and fault[0]=='cgroup-drift' and q.cgroups==2 else '/unit/service'
+        class ReferenceACL:
+            last_acl={}
+            def acl(self,fd,*,attempt,delivered):
+                attempt('reference-acl')
+                return ('unexpected',None) if fault and fault[0]=='acl' else (None,None)
+        history=[]
+        with monkeypatch.context() as patch:
+            for name,value in (('O_PATH',0x200000),('O_DIRECTORY',0x10000),('O_NOFOLLOW',0x20000),('O_CLOEXEC',0x80000)):
+                patch.setattr(o.os,name,value,raising=False)
+            patch.setattr(o.os,'open',open_reference);patch.setattr(o.os,'dup',duplicate)
+            patch.setattr(o.os,'close',close_reference);patch.setattr(o.os,'fstat',fstat_reference)
+            patch.setattr(o.os,'stat',root_stat);patch.setattr(o.os,'scandir',roster)
+            patch.setattr(o.os,'getpid',lambda:7001)
+            patch.setattr(o.os,'major',lambda value:0,raising=False);patch.setattr(o.os,'minor',lambda value:value,raising=False)
+            patch.setattr(o,'_linux_preflight_process_identity_v1',identity)
+            patch.setattr(o,'_linux_preflight_status_v1',status_reference)
+            patch.setattr(o,'_linux_preflight_cgroup_path_v1',cgroup_reference)
+            patch.setattr(o,'_LinuxSourceNativeV2',ReferenceACL)
+            kw=dict(pid=7001,process=process_reference,runtime='/run/qtt17n23',query=q,
+                private_root=Path('/private-root') if controller else None,mappings=expected,history=history)
+            if accepted:observed=o._linux_preflight_mount_containment_v1(**kw);assert set(observed)==set(parent_paths)
+            else:
+                with pytest.raises(o.ValidationReliabilityError,match='MOUNT_CONTAINMENT'):
+                    o._linux_preflight_mount_containment_v1(**kw)
+                assert q.failure is not None
+                attempts=q.attempts
+                with pytest.raises(o.ValidationReliabilityError):q.check()
+                assert q.attempts==attempts,'failed witness must not be retried'
+        assert len(history)==1 and history[0]['mount_containment']['complete'] is accepted
+        assert q.mount_reads<=2
+        if fault and fault[0]=='close':assert len(fd_paths)==1 and q.containment_retained_descriptors
+        else:assert not fd_paths
+        return history[0]['mount_containment']
+    containment_reference(accepted=True)
+    containment_reference(controller=True,accepted=True)
+    reversed_table=b'\n'.join(reversed(containment_raw.splitlines()))+b'\n'
+    containment_reference(raw=reversed_table,accepted=True)
+    containment_reference(after=reversed_table,accepted=True)
+    for parent in parent_paths:
+        for kind in ('uid','gid','mode','kind','mapping','missing-mapping','link'):
+            containment_reference(fault=(kind,parent))
+        containment_reference(controller=True,fault=('host-object',parent))
+        for raw_id in (b'mnt_id:\t22\n',b'mnt_id:\t999\n',b'mnt_id:\t10\nmnt_id:\t10\n',b'mnt_id:\t+10\n',b'flags:\t0\n'):
+            containment_reference(fault=('fdinfo',parent,raw_id))
+    for fault in (('evidence',),('close',),('roster-close',),('inherited',),('inherited-covered',),
+            ('process-drift',),('view-drift',),('cgroup-drift',),('capability',),('budget',2)):
+        containment_reference(fault=fault)
+    containment_reference(controller=True,fault=('acl',))
+    for old,new in ((b'21 20',b'21 23'),(b'23 21',b'23 999'),
+            (b'/proc/sys ro',b'/other ro'),(b'23 21',b'23 20'),(b'23 21',b'22 21')):
+        changed=containment_raw.replace(old,new);assert changed!=containment_raw
+        containment_reference(raw=changed)
+    for identifier in (22,21,999):
+        containment_reference(selectors={'/proc/sys/fs/binfmt_misc':identifier})
+    containment_reference(after=containment_raw.replace(b'/private/root / ro',b'/private/root / rw'))
+    for row in (b'90 10 0:14 / /run/other rw - tmpfs tmpfs rw\n',
+            b'90 10 0:10 / /proc rw - proc proc rw\n',
+            b'90 10 0:13 / /run/qtt17n23 rw - tmpfs qtt-runtime rw\n'):
+        containment_reference(raw=containment_raw+row)
+    # A correct property string cannot authorize a writable physical parent.
+    o._linux_preflight_unit_policy_v1(status,**options)
+    writable=containment_reference(raw=containment_raw.replace(b'/private/root / ro',b'/private/root / rw'))
+    assert all('PARENT_WRITABLE' in r['error'] for r in writable['parents'])
+    # CAPTURED_OLD_TABLE is filled with the exact retained original bytes below;
+    # its descriptor selections/stat operands remain explicitly synthetic.
+    captured_old_table=b'331 279 0:28 /qtt2528n259165130132control/root / ro,nosuid,nodev shared:333 master:12 - tmpfs tmpfs rw,size=3274488k,nr_inodes=819200,mode=755,inode64\n332 331 0:51 / /dev ro,nosuid,noexec shared:334 - tmpfs tmpfs rw,size=4096k,nr_inodes=65536,mode=755,inode64\n372 332 0:27 / /dev/pts rw,nosuid,noexec,relatime shared:335 master:4 - devpts devpts rw,gid=5,mode=620,ptmxmode=000\n375 332 0:28 /systemd/inaccessible/dir /dev/hugepages ro,nosuid,nodev,noexec shared:336 master:12 - tmpfs tmpfs rw,size=3274488k,nr_inodes=819200,mode=755,inode64\n374 332 0:28 /systemd/inaccessible/dir /dev/mqueue ro,nosuid,nodev,noexec shared:337 master:12 - tmpfs tmpfs rw,size=3274488k,nr_inodes=819200,mode=755,inode64\n373 332 0:28 /systemd/inaccessible/dir /dev/shm ro,nosuid,nodev,noexec shared:338 master:12 - tmpfs tmpfs rw,size=3274488k,nr_inodes=819200,mode=755,inode64\n376 331 0:52 / /home rw,nosuid,relatime shared:339 - tmpfs tmpfs rw,inode64\n377 376 8:1 /home/runner/work/QTT_New0526/QTT_New0526 /home/runner/work/QTT_New0526/QTT_New0526 ro,nosuid,relatime shared:340 master:1 - ext4 /dev/root rw,discard,journal_async_commit,nobarrier,errors=remount-ro,commit=30,data=writeback\n378 331 8:1 /usr/lib /lib ro,nosuid,relatime shared:341 master:1 - ext4 /dev/root rw,discard,journal_async_commit,nobarrier,errors=remount-ro,commit=30,data=writeback\n379 331 8:1 /usr/lib64 /lib64 ro,nosuid,relatime shared:342 master:1 - ext4 /dev/root rw,discard,journal_async_commit,nobarrier,errors=remount-ro,commit=30,data=writeback\n380 331 0:28 /qtt2528n259165130132control/installation /opt/hostedtoolcache/Python/3.14.6/x64 ro,nosuid,nodev shared:343 master:12 - tmpfs tmpfs rw,size=3274488k,nr_inodes=819200,mode=755,inode64\n381 331 0:53 / /proc rw,nosuid,nodev,noexec,relatime shared:344 - proc proc rw,hidepid=invisible\n382 381 0:37 / /proc/sys/fs/binfmt_misc rw,nosuid,nodev,noexec,relatime shared:345 master:48 - binfmt_misc binfmt_misc rw\n383 381 0:53 /acpi /proc/acpi ro,nosuid,nodev,noexec,relatime shared:346 - proc proc rw,hidepid=invisible\n384 381 0:53 /bus /proc/bus ro,nosuid,nodev,noexec,relatime shared:347 - proc proc rw,hidepid=invisible\n385 381 0:53 /fs /proc/fs ro,nosuid,nodev,noexec,relatime shared:348 - proc proc rw,hidepid=invisible\n386 381 0:53 /irq /proc/irq ro,nosuid,nodev,noexec,relatime shared:349 - proc proc rw,hidepid=invisible\n387 381 0:28 /systemd/inaccessible/reg /proc/kallsyms ro,nosuid,nodev,noexec shared:350 master:12 - tmpfs tmpfs rw,size=3274488k,nr_inodes=819200,mode=755,inode64\n388 381 0:28 /systemd/inaccessible/reg /proc/kcore ro,nosuid,nodev,noexec shared:351 master:12 - tmpfs tmpfs rw,size=3274488k,nr_inodes=819200,mode=755,inode64\n389 381 0:28 /systemd/inaccessible/reg /proc/kmsg ro,nosuid,nodev,noexec shared:352 master:12 - tmpfs tmpfs rw,size=3274488k,nr_inodes=819200,mode=755,inode64\n390 381 0:53 /latency_stats /proc/latency_stats ro,nosuid,nodev,noexec,relatime shared:353 - proc proc rw,hidepid=invisible\n391 381 0:53 /mtrr /proc/mtrr ro,nosuid,nodev,noexec,relatime shared:354 - proc proc rw,hidepid=invisible\n392 381 0:53 /scsi /proc/scsi ro,nosuid,nodev,noexec,relatime shared:355 - proc proc rw,hidepid=invisible\n393 381 0:53 /sys /proc/sys ro,nosuid,nodev,noexec,relatime shared:356 - proc proc rw,hidepid=invisible\n394 393 0:37 / /proc/sys/fs/binfmt_misc ro,nosuid,nodev,noexec,relatime shared:357 master:48 - binfmt_misc binfmt_misc rw\n395 381 0:53 /sysrq-trigger /proc/sysrq-trigger ro,nosuid,nodev,noexec,relatime shared:358 - proc proc rw,hidepid=invisible\n396 331 0:54 / /root rw,nosuid,relatime shared:359 - tmpfs tmpfs rw,inode64\n397 331 0:55 / /run rw,nosuid,relatime shared:360 - tmpfs tmpfs rw,inode64\n398 397 0:28 /systemd/propagate/.os-release-stage /run/host/.os-release-stage ro,nosuid,nodev shared:361 master:12 - tmpfs tmpfs rw,size=3274488k,nr_inodes=819200,mode=755,inode64\n399 397 0:48 / /run/qtt2528n259165130132 rw,nosuid,nodev,noexec,relatime shared:362 master:316 - tmpfs qtt-runtime rw,size=1048576k,mode=700,inode64\n400 397 0:28 /qtt2528n259165130132control/binding /run/qtt2528n259165130132control/binding ro,nosuid,nodev shared:363 master:12 - tmpfs tmpfs rw,size=3274488k,nr_inodes=819200,mode=755,inode64\n401 397 0:28 /qtt2528n259165130132control/declaration /run/qtt2528n259165130132control/declaration ro,nosuid,nodev shared:364 master:12 - tmpfs tmpfs rw,size=3274488k,nr_inodes=819200,mode=755,inode64\n402 397 0:28 /qtt2528n259165130132control/release /run/qtt2528n259165130132control/release ro,nosuid,nodev shared:365 master:12 - tmpfs tmpfs rw,size=3274488k,nr_inodes=819200,mode=755,inode64\n403 397 0:28 /qtt2528n259165130132control/spool /run/qtt2528n259165130132control/spool ro,nosuid,nodev shared:366 master:12 - tmpfs tmpfs rw,size=3274488k,nr_inodes=819200,mode=755,inode64\n404 397 0:28 /systemd/propagate/qtt2528n259165130132.service /run/systemd/incoming ro,nosuid,nodev master:12 - tmpfs tmpfs rw,size=3274488k,nr_inodes=819200,mode=755,inode64\n405 397 0:56 / /run/user rw,nosuid,relatime shared:368 - tmpfs tmpfs rw,inode64\n406 331 0:57 / /sys ro,nosuid,nodev,noexec,relatime shared:369 - sysfs sysfs rw\n407 406 0:32 / /sys/firmware/efi/efivars ro,nosuid,nodev,noexec,relatime shared:370 master:10 - efivarfs efivarfs rw\n408 406 0:33 / /sys/fs/bpf ro,nosuid,nodev,noexec,relatime shared:371 master:11 - bpf bpf rw,mode=700\n409 406 0:30 / /sys/fs/cgroup ro,nosuid,nodev,noexec,relatime shared:372 master:8 - cgroup2 cgroup2 rw,nsdelegate,memory_recursiveprot\n410 406 0:36 / /sys/fs/fuse/connections ro,nosuid,nodev,noexec,relatime shared:373 master:19 - fusectl fusectl rw\n411 406 0:31 / /sys/fs/pstore ro,nosuid,nodev,noexec,relatime shared:374 master:9 - pstore none rw\n412 406 0:20 / /sys/kernel/config ro,nosuid,nodev,noexec,relatime shared:375 master:20 - configfs configfs rw\n413 406 0:8 / /sys/kernel/debug ro,nosuid,nodev,noexec,relatime shared:376 master:17 - debugfs debugfs rw\n414 406 0:7 / /sys/kernel/security ro,nosuid,nodev,noexec,relatime shared:377 master:7 - securityfs securityfs rw\n415 406 0:13 / /sys/kernel/tracing ro,nosuid,nodev,noexec,relatime shared:378 master:18 - tracefs tracefs rw\n416 331 0:48 /tmp /tmp rw,nosuid,nodev,noexec,relatime shared:379 master:316 - tmpfs qtt-runtime rw,size=1048576k,mode=700,inode64\n417 331 8:1 /usr /usr ro,nosuid,relatime shared:380 master:1 - ext4 /dev/root rw,discard,journal_async_commit,nobarrier,errors=remount-ro,commit=30,data=writeback\n418 417 0:28 /systemd/inaccessible/dir /usr/lib/modules ro,nosuid,nodev,noexec shared:381 master:12 - tmpfs tmpfs rw,size=3274488k,nr_inodes=819200,mode=755,inode64\n419 331 0:48 /var-tmp /var/tmp rw,nosuid,nodev,noexec,relatime shared:382 master:316 - tmpfs qtt-runtime rw,size=1048576k,mode=700,inode64\n'
+    old_table=containment_reference(raw=captured_old_table,
+        selectors={'/home':376,'/root':396,'/run':397,'/run/user':405,'/proc/sys/fs/binfmt_misc':394},
+        old_parent_devices={'/home':52,'/root':54,'/run':55,'/run/user':56,'/proc/sys/fs/binfmt_misc':37})
+    assert [r['path'] for r in old_table['parents']]==list(parent_paths)
+    assert all('PARENT_WRITABLE' in r['error'] for r in old_table['parents'])
+    assert next(r for r in old_table['covered'] if r['lower']['id']==382)['error'] is None
+    print('LINUX_CONTAINMENT_REFERENCES '+json.dumps(dict(native_execution=False,
+        original_mount_bytes=len(captured_old_table),historical_descriptor_ids_observed=False,
+        four_captured_writable_parents_rejected=True,shared_controller_fixture_lease_predicate=True)),flush=True)
+
     original = area/'original-evidence'
     with original.open('xb') as destination:
         tail = o._LinuxPreflightTailV1(original,original_evidence=True)
