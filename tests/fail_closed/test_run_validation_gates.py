@@ -20608,7 +20608,7 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
             elif argv[:2]==('/usr/bin/systemctl','stop'):
                 words.append('stop');assert words==['stop']
             elif argv[:2]==('/usr/bin/systemctl','show'):
-                if '--all' not in argv:
+                if any(v.startswith('--property=InvocationID,ControlGroup,MainPID,') for v in argv):
                     assert bound
                     fields=dict.fromkeys(o._LinuxPreflightScopeV1._STATUS,'')
                     fields.update({k:v for k,v in main.items() if k in fields})
@@ -20800,6 +20800,155 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
         assert os.getxattr(inherited,'system.posix_acl_default',follow_symlinks=False)==default
         assert os.getxattr(original,'system.posix_acl_access',follow_symlinks=False)==observed[0]
         assert sum(values)>0 and len(attempts)>=9
+    # Runtime owner references exercise real predicates; they do not qualify Linux.
+    import inspect
+    from types import SimpleNamespace
+    kernel=(b'Uid:\t61234\t61234\t61234\t61234\nGid:\t61235\t61235\t61235\t61235\n'
+        b'CapInh:\t0000000000000000\nCapPrm:\t0000000000000000\nCapEff:\t0000000000000000\n'
+        b'CapBnd:\t0000000000000000\nCapAmb:\t0000000000000000\nNoNewPrivs:\t1\n')
+    class RuntimeQueryReference:
+        def __init__(self,raw=kernel):self.raw=raw;self.attempts=0;self.records=[]
+        def read(self,path,**kwargs):assert str(path).startswith('/proc/');self.check();return self.raw
+        def check(self,**kwargs):self.attempts+=1
+        def record(self,kind,operand,raw):self.records.append((kind,operand,raw));return raw
+    credentials=o._linux_preflight_status_v1(123,RuntimeQueryReference(),credentials=True)
+    assert (credentials['Uid'],credentials['Gid'])==(61234,61235)
+    for damaged in (kernel.replace(b'61234',b'0'),kernel.replace(b'61235',b'0'),
+            kernel.replace(b'61234\t61234',b'61234\t61233',1),kernel.replace(b'61235\t61235',b'61235\t61236',1),
+            kernel.replace(b'Uid:',b'UidMissing:'),kernel.replace(b'Gid:',b'GidMissing:'),
+            kernel+b'Uid:\t61234\t61234\t61234\t61234\n',kernel.replace(b'61234\t',b'',1),
+            kernel.replace(b'61235',b'-1'),kernel.replace(b'NoNewPrivs:\t1',b'NoNewPrivs:\t0')):
+        assert damaged!=kernel
+        with pytest.raises(o.ValidationReliabilityError):
+            o._linux_preflight_status_v1(123,RuntimeQueryReference(damaged),credentials=True)
+    # Pending absence increments attempts but cannot create the runtime response tree.
+    pending_root=tmp_path/'runtime-not-handed-off'
+    with monkeypatch.context() as patch:
+        patch.setattr(o.sys,'platform','linux')
+        query=o._LinuxPreflightQueriesV1(evidence_root=pending_root,deadline_ns=time.monotonic_ns()+10**9)
+        assert not pending_root.exists() and query.observations==[]
+        def one_pending(seconds):
+            assert seconds==0.1 and query.attempts==1 and query.observations==[] and not pending_root.exists()
+            raise RuntimeError('reference pending boundary reached')
+        patch.setattr(o.time,'sleep',one_pending)
+        with pytest.raises(RuntimeError,match='reference pending boundary'):
+            o._linux_preflight_control_read_v1(tmp_path/'not-published.json',deadline_ns=query.deadline_ns,pending=True,query=query)
+        assert query.attempts==1 and query.observations==[] and not pending_root.exists()
+    # All production entry work before the bounded binding read is nonpersistent.
+    entry=ast.parse(inspect.getsource(runner._linux_preflight_enter_v1)).body[0]
+    binding_position=next(i for i,node in enumerate(entry.body) if isinstance(node,ast.Assign)
+        and isinstance(node.value,ast.Call) and isinstance(node.value.func,ast.Attribute)
+        and node.value.func.attr=='_linux_preflight_control_read_v1')
+    assert not any(isinstance(node,ast.Call) and isinstance(node.func,ast.Attribute)
+        and node.func.attr in ('mkdir','write_bytes','write_text','record','atomic_write_json','_atomic_write_bytes_v1')
+        for statement in entry.body[:binding_position] for node in ast.walk(statement))
+    reference=o._LinuxPreflightScopeV1.__new__(o._LinuxPreflightScopeV1)
+    reference.query=RuntimeQueryReference()
+    original_info=SimpleNamespace(st_mode=stat.S_IFDIR|0o700,st_dev=91,st_ino=92,st_uid=0,st_gid=0)
+    reference._runtime_call=lambda operation,*args,**kwargs:original_info
+    assert reference._runtime_directory('/run/qtt1n2',(91,92),0,0,0o700) is original_info
+    for field,value in (('st_ino',93),('st_dev',93),('st_uid',61234),('st_gid',61235),
+            ('st_mode',stat.S_IFDIR|0o755),('st_mode',stat.S_IFLNK|0o700)):
+        changed=SimpleNamespace(**{**vars(original_info),field:value})
+        assert vars(changed)!=vars(original_info)
+        reference._runtime_call=lambda *args,_info=changed,**kwargs:_info
+        with pytest.raises(o.ValidationReliabilityError,match='RUNTIME_DIRECTORY'):
+            reference._runtime_directory('/run/qtt1n2',(91,92),0,0,0o700)
+    # A denied descriptor handoff keeps its exact attempted effect, never completion.
+    reference.runtime=Path('/run/qtt1n2');reference.runtime_backing=reference.runtime/'payload'
+    reference.runtime_identity=(91,92);reference.runtime_mounted_identity=(93,94);reference.runtime_fd=17;reference.runtime_envelope_fd=18
+    reference.history=[]
+    reference._runtime_live=lambda *args:None
+    reference._runtime_directory=lambda *args,**kwargs:None
+    reference._runtime_acl=lambda fd:None
+    held=SimpleNamespace(st_dev=93,st_ino=94,st_uid=0,st_gid=0,st_mode=stat.S_IFDIR|0o700)
+    effects=[]
+    def denied_owner(operation,*args,**kwargs):
+        if operation is os.fstat:return held
+        effects.append((operation.__name__,args))
+        raise PermissionError('reference fchown denial')
+    reference._runtime_call=denied_owner
+    with monkeypatch.context() as patch:
+        patch.setattr(o,'_linux_preflight_status_v1',lambda *args,**kwargs:credentials)
+        # fchown is a Linux-only attribute; this finite reference runs on Windows too.
+        patch.setattr(o.os,'fchown',lambda *args:None,raising=False)
+        with pytest.raises(PermissionError,match='reference fchown denial'):
+            reference.handoff_runtime(dict(pid=123),'/reference',())
+    assert len(effects)==1 and effects[0][1]==(17,61234,61235)
+    assert reference.history==[dict(runtime_handoff_attempt=dict(identity=(93,94),uid=61234,gid=61235),complete=False)]
+    held.st_uid=61234
+    with monkeypatch.context() as patch:
+        patch.setattr(o,'_linux_preflight_status_v1',lambda *args,**kwargs:credentials)
+        with pytest.raises(o.ValidationReliabilityError,match='RUNTIME_HELD_ROOT'):
+            reference.handoff_runtime(dict(pid=123),'/reference',())
+    assert len(effects)==1 and len(reference.history)==1
+    # Native failures in the existing ACL owner retain their raw observation.
+    class RuntimeACLReference:
+        def __init__(self):self.last_acl=dict(reference=True)
+        def acl(self,fd,*,attempt,delivered):attempt('reference');return (b'unexpected ACL',None)
+    with monkeypatch.context() as patch:
+        patch.setattr(o,'_LinuxSourceNativeV2',RuntimeACLReference)
+        with pytest.raises(o.ValidationReliabilityError,match='RUNTIME_ACL'):
+            o._LinuxPreflightScopeV1._runtime_acl(reference,17)
+    assert reference.query.records[-1][0]=='runtime-acl'
+    # Held-process and manager-invocation observations cannot drift through handoff.
+    process=dict(pid=123,start=456,namespaces={})
+    live=o._LinuxPreflightScopeV1.__new__(o._LinuxPreflightScopeV1)
+    live.process=SimpleNamespace(pid=123,pidfd=17);live.query=RuntimeQueryReference()
+    live.name='qtt1n2';live.invocation='original';live._startup_manager=lambda:None
+    live.show=lambda unit:dict(InvocationID='original',MainPID='123',ControlGroup='/reference')
+    class PollReference:
+        def register(self,fd,event):assert fd==17
+        def poll(self,timeout):assert timeout==0;return []
+    import select
+    with monkeypatch.context() as patch:
+        patch.setattr(select,'poll',PollReference,raising=False)
+        patch.setattr(select,'POLLIN',1,raising=False)
+        patch.setattr(o,'_linux_preflight_process_identity_v1',lambda *args,**kwargs:process)
+        patch.setattr(o,'_linux_preflight_cgroup_path_v1',lambda *args,**kwargs:'/reference')
+        live._runtime_live(process,'/reference')
+        with pytest.raises(o.ValidationReliabilityError,match='RUNTIME_PROCESS_CHANGED'):
+            live._runtime_live({**process,'start':457},'/reference')
+        live.show=lambda unit:dict(InvocationID='changed',MainPID='123',ControlGroup='/reference')
+        with pytest.raises(o.ValidationReliabilityError,match='RUNTIME_INVOCATION_CHANGED'):
+            live._runtime_live(process,'/reference')
+
+    # Logical aliases are compared to backing children, not merely a device number.
+    def runtime_stat(ino,uid=0,gid=0,mode=0o1777):
+        return SimpleNamespace(st_mode=stat.S_IFDIR|mode,st_dev=91,st_ino=ino,st_uid=uid,st_gid=gid)
+    logical='/run/qtt1n2'
+    original_views={logical:runtime_stat(92,61234,61235,0o700),logical+'/tmp':runtime_stat(93),
+        logical+'/var-tmp':runtime_stat(94),'/tmp':runtime_stat(93),'/var/tmp':runtime_stat(94)}
+    views=dict(original_views)
+    class LogicalRuntimeReference:
+        def __init__(self,path):self.path=str(path)
+        def __str__(self):return self.path
+        def __truediv__(self,child):return type(self)(self.path+'/'+child)
+        def lstat(self):return views[self.path]
+    binding=dict(runtime_identity=[91,92],runtime_uid=61234,runtime_gid=61235,runtime_device='0:91')
+    mount_raw=('31 1 0:91 / '+logical+' rw,noexec,nodev,nosuid - tmpfs qtt-runtime rw,size=1048576k\n'
+        '32 1 0:91 /tmp /tmp rw,noexec,nodev,nosuid - tmpfs qtt-runtime rw,size=1048576k\n'
+        '33 1 0:91 /var-tmp /var/tmp rw,noexec,nodev,nosuid - tmpfs qtt-runtime rw,size=1048576k\n').encode()
+    with monkeypatch.context() as patch:
+        patch.setattr(o,'Path',LogicalRuntimeReference)
+        patch.setattr(o,'_linux_preflight_status_v1',lambda *args,**kwargs:credentials)
+        patch.setattr(o.os,'geteuid',lambda:61234,raising=False)
+        patch.setattr(o.os,'getegid',lambda:61235,raising=False)
+        assert o._LinuxPreflightHostLeaseV1.check_runtime(binding,logical,RuntimeQueryReference(mount_raw))==credentials
+        for key,value in (('runtime_identity',[91,95]),('runtime_uid',61233),('runtime_gid',61236),
+                ('runtime_identity',[True,92]),('runtime_device','0:92')):
+            changed={**binding,key:value};assert changed!=binding
+            with pytest.raises(o.ValidationReliabilityError):
+                o._LinuxPreflightHostLeaseV1.check_runtime(changed,logical,RuntimeQueryReference(mount_raw))
+        views['/tmp']=runtime_stat(95)
+        with pytest.raises(o.ValidationReliabilityError,match='RUNTIME_ALIAS'):
+            o._LinuxPreflightHostLeaseV1.check_runtime(binding,logical,RuntimeQueryReference(mount_raw))
+        views=dict(original_views)
+        for damaged in (mount_raw.replace(b'noexec,',b'',1),mount_raw.replace(b'size=1048576k',b'size=2048k')):
+            assert damaged!=mount_raw
+            with pytest.raises(o.ValidationReliabilityError,match='RUNTIME_ALIAS'):
+                o._LinuxPreflightHostLeaseV1.check_runtime(binding,logical,RuntimeQueryReference(damaged))
+
     mib,gib = 1024**2,1024**3
     assert o._linux_preflight_name_v1(17,23) == 'qtt17n23'
     for pid,tick in ((True,23),(0,23),(17,-1),(17,True)):
@@ -20830,9 +20979,11 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
         'MemorySwapMax=0','TasksAccounting=yes','TasksMax=64','CPUAccounting=yes','CPUQuota=200%',
         'CPUQuotaPeriodSec=100ms','RuntimeMaxSec=3600','TimeoutStartSec=60','TimeoutStopSec=10',
         'KillMode=control-group','SendSIGKILL=yes','LimitCORE=0','LimitNOFILE=1024','LimitFSIZE=67108864',
-        'RuntimeDirectoryMode=0700','RuntimeDirectoryPreserve=yes','RootDirectory='+control+'/root',
-        'WorkingDirectory='+root,'RuntimeDirectory=qtt17n23','StandardInput=null',
+        'RootDirectory='+control+'/root',
+        'WorkingDirectory='+root,'StandardInput=null',
         'StandardOutput=append:'+control+'/spool/command-1.stdout.bin','StandardError=append:'+control+'/spool/command-1.stderr.bin'}
+    assert not any(p.startswith(('RuntimeDirectory=','RuntimeDirectoryMode=','RuntimeDirectoryPreserve=')) for p in properties)
+    assert 'BindPaths='+runtime+'/payload:'+runtime+' '+runtime+'/payload/tmp:/tmp '+runtime+'/payload/var-tmp:/var/tmp' in properties
     assert required <= set(properties)
     assert len(properties) == len(required)+3  # Exact two bind lists and writable-path restriction.
     for field in ('private_root','runtime','control','spool','repository','installation','interpreter'):
@@ -20953,9 +21104,8 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
         MemoryAccounting='yes',MemoryMax='6442450944',MemorySwapMax='0',TasksAccounting='yes',TasksMax='64',
         CPUAccounting='yes',CPUQuotaPerSecUSec='2s',CPUQuotaPeriodUSec='100ms',RuntimeMaxUSec='1h',
         TimeoutStartUSec='1min',TimeoutStopUSec='10s',KillMode='control-group',SendSIGKILL='yes',
-        LimitCORE='0',LimitNOFILE='1024',LimitFSIZE='67108864',RuntimeDirectoryMode='0700',
-        RuntimeDirectoryPreserve='yes',StandardInput='null',StandardOutput='append',StandardError='append',
-        RootDirectory=control+'/root',WorkingDirectory=root,RuntimeDirectory='qtt17n23',Slice='qtt17n23.slice',
+        LimitCORE='0',LimitNOFILE='1024',LimitFSIZE='67108864',StandardInput='null',StandardOutput='append',StandardError='append',
+        RootDirectory=control+'/root',WorkingDirectory=root,RuntimeDirectory='',Slice='qtt17n23.slice',
         InaccessiblePaths='/dev/shm /dev/mqueue /dev/hugepages',ReadWritePaths=runtime+' /tmp /var/tmp',
         SystemCallFilter='~mount reboot swapon init_module')
     options = dict(name='qtt17n23',root=control+'/root',repository=root,runtime=runtime,

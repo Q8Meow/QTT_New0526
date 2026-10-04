@@ -9820,9 +9820,8 @@ def _linux_preflight_controller_v1(repository,installation,interpreter,event,eve
     control = pathlib.Path('/run')/(name+'control')
     runtime = pathlib.Path('/run')/name
     control.mkdir(mode=0o700,exist_ok=False)
-    runtime.mkdir(mode=0o700,exist_ok=False)
     control_identity = (control.stat().st_dev,control.stat().st_ino)
-    runtime_identity = (runtime.stat().st_dev,runtime.stat().st_ino)
+    runtime_backing=runtime/'payload'
     private_root,spool = control/'root',control/'spool'
     private_root.mkdir(mode=0o755)
     spool.mkdir(mode=0o700)
@@ -9866,6 +9865,7 @@ def _linux_preflight_controller_v1(repository,installation,interpreter,event,eve
             'LINUX_V2_SETTLEMENT_RESERVATION')
         source.primitive_check(query)
         source.recovery_check(setup_uid=int(os.environ['SUDO_UID']),evidence_root=control/'native-evidence',query=query,grants=grants)
+        o._LinuxPreflightScopeV1.runtime_fixture(query,grants,repository=repository,installation=installation,interpreter=interpreter)
         source.protect()
         source.readability()
         source.stage='setup'
@@ -9895,26 +9895,12 @@ def _linux_preflight_controller_v1(repository,installation,interpreter,event,eve
             and source.journal_bytes<=32*1024**2,'LINUX_V2_SERIALIZED_GEOMETRY')
         o._atomic_write_bytes_v1(control/'declaration/input.bin',frame,control_mode=0o444)
         o._atomic_write_bytes_v1(control/'declaration/event.json',event_bytes,control_mode=0o444)
-        # Existing installation bytes are the only copied executable source tree.
-        for absolute in ('/usr','/lib','/lib64','/proc','/sys','/dev','/tmp','/var/tmp',repository,installation,
-                str(runtime),str(spool),*(str(control/n) for n in ('declaration','binding','release'))):
-            (private_root/absolute.lstrip('/')).mkdir(parents=True,exist_ok=True,mode=0o755)
-        etc = private_root/'etc'
-        etc.mkdir(mode=0o755)
-        for filename,raw in (('passwd',b'root:x:0:0:root:/root:/usr/sbin/nologin\n'),
-                ('group',b'root:x:0:\n'),('nsswitch.conf',b'passwd: files\ngroup: files\nhosts: files\n'),
-                ('qtt-gitconfig',('[safe]\n\tdirectory = '+repository+'\n').encode('ascii'))):
-            o._atomic_write_bytes_v1(etc/filename,raw,control_mode=0o444)
-        mounted = True  # A partial native attempt also retains owned mount settlement.
-        query.command(('/usr/bin/mount','-t','tmpfs','-o','size=1073741824,noexec,nodev,nosuid,mode=0700',
-            'qtt-runtime',str(runtime)))
-        mounted = True
-        for directory in ('tmp','var-tmp'):
-            (runtime/directory).mkdir(mode=0o1777)
-            os.chmod(runtime/directory,0o1777)
         scope = o._LinuxPreflightScopeV1(name=name,query=query,control=control,runtime=runtime,private_root=private_root,
             spool=spool,repository=repository,installation=installation,interpreter=interpreter,source=source,
             header=header,blobs=blobs,vectors=vectors,grants=grants,event=event,environment=environment)
+        scope.prepare_runtime()
+        mounted=scope.runtime_mount_attempted
+        scope.prepare_view()
         scope.expected_syscalls = o._linux_preflight_syscalls_v1(query)
         scope.start_slice()
         scope.startup_deadline_ns = min(origin+3500*10**9,time.monotonic_ns()+60*10**9)
@@ -9945,7 +9931,8 @@ def _linux_preflight_controller_v1(repository,installation,interpreter,event,eve
     if source is not None and source.failure is None and failures:
         source.failure=failures[0]
         source.state='FAILED'
-    recovery_resources_settled=source is None or all(row['complete'] for row in source.recovery_cases)
+    runtime_fixture=getattr(query,'runtime_fixture_result',None)
+    recovery_resources_settled=(source is None or all(row['complete'] for row in source.recovery_cases)) and (runtime_fixture is None or runtime_fixture['settled'] and runtime_fixture['removed'])
     settled = (scope is None or not scope.service_created or scope.settled) and recovery_resources_settled
     exported = []
     export_bytes = export_entries = 0
@@ -10005,7 +9992,7 @@ def _linux_preflight_controller_v1(repository,installation,interpreter,event,eve
     report = dict(native_service_receipt=None if receipt is None else o._json_compatible(receipt),
         native_history=[] if scope is None else o._json_compatible(scope.history),
         native_queries=query.observations,query_attempts=query.attempts,query_output_bytes=query.retained,
-        capture_counts=capture_counts,capture_complete=False,
+        capture_counts=capture_counts,capture_complete=False,runtime_fixture=runtime_fixture,
         basis_kind='NATIVE_IMMUTABLE_V2',native_basis_state=None if source is None else source.state,
         native_basis_capacity=capacity_v2,immutable_primitive=None if source is None else source.primitive,
         installation_copy=None if install is None else dict(verified=install.copy_verified,logical_bytes=install.byte_count,
@@ -10036,8 +10023,8 @@ def _linux_preflight_controller_v1(repository,installation,interpreter,event,eve
                 (control/'declaration/source-basis.json','source-basis.json')):
             if path.exists():export_file(path,export_root/label,deadline_ns=pre_export_deadline)
         for path,label in ((control/'native-evidence','native'),(spool,'streams'),
-                (runtime/'evidence','application-evidence'),(runtime/'reports','reports'),
-                (runtime/'native-observations','service-native-observations')):
+                (runtime_backing/'evidence','application-evidence'),(runtime_backing/'reports','reports'),
+                (runtime_backing/'native-observations','service-native-observations')):
             if path.exists(): export_tree(path,export_root/label,deadline_ns=pre_export_deadline)
         export_complete = True
     except BaseException as exc: failures.append(exc)
@@ -10067,7 +10054,7 @@ def _linux_preflight_controller_v1(repository,installation,interpreter,event,eve
     stopped = unmounted = removed = False
     if settled and restored and export_complete:
         for kind,source_name in (('timing','timing-fast-preflight.json'),('router','router-fast-preflight.json')):
-            path = runtime/'reports'/source_name
+            path = runtime_backing/'reports'/source_name
             if path.exists():
                 try:
                     destination = pathlib.Path(repository)/'.tmp'/('qtt-validation-'+kind)/'fast-preflight.json'
@@ -10080,7 +10067,7 @@ def _linux_preflight_controller_v1(repository,installation,interpreter,event,eve
             with query.owned_resource_phase():
                 if scope is not None:scope.close_owned_units()
                 stopped = True
-                if mounted: query.command(('/usr/bin/umount',str(runtime)),settling=True)
+                if scope is not None:scope.unmount_runtime()
                 unmounted = True
             # Stop/unmount receipts are produced after the first export. Preserve
             # only those newly created files, never overwrite earlier evidence.
@@ -10092,7 +10079,8 @@ def _linux_preflight_controller_v1(repository,installation,interpreter,event,eve
                     destination = export_root/'native'/path.name
                     if not destination.exists(): export_file(path,destination,deadline_ns=post_export_deadline)
             with query.owned_resource_phase():
-                for path,identity in ((runtime,runtime_identity),(control,control_identity)):
+                if scope is not None:scope.remove_runtime(export_root)
+                for path,identity in ((control,control_identity),):
                     actual = path.lstat()
                     o._preflight_require_v1(path.parent == pathlib.Path('/run') and
                         (actual.st_dev,actual.st_ino) == identity and stat.S_ISDIR(actual.st_mode),
@@ -10107,11 +10095,11 @@ def _linux_preflight_controller_v1(repository,installation,interpreter,event,eve
         startup_output_bytes=getattr(query,'startup_output_bytes',None),
         startup_fixture_output_bytes=getattr(query,'startup_fixture_bytes',None),
         startup_fixture_output_reservation=getattr(query,'startup_fixture_reservation',None),
-        tiny_recovery_resources_settled=recovery_resources_settled,
+        tiny_recovery_resources_settled=recovery_resources_settled,runtime_fixture=runtime_fixture,
         native_history=[] if scope is None else o._json_compatible(scope.history),
         export_elapsed_ns=export_elapsed_ns,pre_export_deadline_ns=pre_export_deadline,
         post_export_deadline_ns=post_export_deadline,service_settled=settled,source_attributes_restored=restored,evidence_export_complete=export_complete,
-        service_created=scope is not None and scope.service_created,runtime_mount_attempted=mounted,
+        service_created=scope is not None and scope.service_created,runtime_mount_attempted=scope is not None and scope.runtime_mount_attempted,
         source_protection_attempted=source is not None and bool(source.protected),
         native_basis_state=None if source is None else source.state,
         immutable_primitive=None if source is None else source.primitive,

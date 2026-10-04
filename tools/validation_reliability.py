@@ -12270,7 +12270,6 @@ _LINUX_PREFLIGHT_PROPERTIES_V1 = (
     ('CPUQuota','200%'), ('CPUQuotaPeriodSec','100ms'), ('RuntimeMaxSec','3600'),
     ('TimeoutStartSec','60'), ('TimeoutStopSec','10'), ('KillMode','control-group'),
     ('SendSIGKILL','yes'), ('LimitCORE','0'), ('LimitNOFILE','1024'), ('LimitFSIZE','67108864'),
-    ('RuntimeDirectoryMode','0700'), ('RuntimeDirectoryPreserve','yes'),
 )
 _LINUX_PREFLIGHT_SLICE_PROPERTIES_V1 = (
     ('Description','s','QTT PR298 first-phase engineering'), ('StopWhenUnneeded','b','false'),
@@ -12372,7 +12371,7 @@ def _linux_preflight_ancestor_values_v1(memory, tasks, cpu, *, owned=False):
 
 
 def _linux_preflight_service_argv_v1(*, name, private_root, runtime, control, spool, repository, installation,
-        interpreter, startup_deadline_ns, environment):
+        interpreter, startup_deadline_ns, environment, installation_source=None):
     _preflight_require_v1(type(name) is str and len(name) <= 64 and re.fullmatch(r'qtt[0-9]+n[0-9]+',name),
         'LINUX_PREFLIGHT_UNIT_NAME')
     for p in (private_root,runtime,control,spool,repository,installation,interpreter): _linux_preflight_path_v1(p)
@@ -12380,13 +12379,17 @@ def _linux_preflight_service_argv_v1(*, name, private_root, runtime, control, sp
     _preflight_require_v1(type(environment) is dict and environment == _linux_preflight_environment_v1(
         repository=repository,installation=installation,runtime=runtime,control=control),
         'LINUX_PREFLIGHT_LITERAL_ENVIRONMENT')
+    _preflight_require_v1(runtime=='/run/'+name,'LINUX_PREFLIGHT_RUNTIME_LOGICAL_PATH')
+    backing=runtime+'/payload'
+    installation_source=control+'/installation' if installation_source is None else _linux_preflight_path_v1(installation_source)
+    _preflight_require_v1(installation_source==control+'/installation' or (control=='/run/'+name[:-1]+'control/runtime-roundtrip-control' and name.endswith('1') and installation_source=='/run/'+name[:-1]+'control/installation'), 'LINUX_PREFLIGHT_INSTALLATION_SOURCE_OPERAND')
     bindings = [('/usr','/usr'),('/lib','/lib'),('/lib64','/lib64'),(repository,repository),
-        (control+'/installation',installation),*( (control+'/'+n,control+'/'+n) for n in ('declaration','binding','release')),
+        (installation_source,installation),*( (control+'/'+n,control+'/'+n) for n in ('declaration','binding','release')),
         (spool,spool)]
     for a,b in bindings: _linux_preflight_path_v1(a); _linux_preflight_path_v1(b)
     properties = (*_LINUX_PREFLIGHT_PROPERTIES_V1,('RootDirectory',private_root),('WorkingDirectory',repository),
-        ('RuntimeDirectory',name),('BindReadOnlyPaths',' '.join(a+':'+b for a,b in bindings)),
-        ('BindPaths',runtime+':'+runtime+' '+runtime+'/tmp:/tmp '+runtime+'/var-tmp:/var/tmp'),
+        ('BindReadOnlyPaths',' '.join(a+':'+b for a,b in bindings)),
+        ('BindPaths',backing+':'+runtime+' '+backing+'/tmp:/tmp '+backing+'/var-tmp:/var/tmp'),
         ('ReadWritePaths',runtime+' /tmp /var/tmp'),('StandardInput','null'),
         ('StandardOutput','append:'+spool+'/command-1.stdout.bin'),('StandardError','append:'+spool+'/command-1.stderr.bin'))
     entry = (interpreter,'-I','-B','-X','utf8',repository+'/tools/run_validation_gates.py',
@@ -12768,7 +12771,7 @@ def _linux_preflight_cgroup_path_v1(pid,query):
     return value
 
 
-def _linux_preflight_status_v1(pid,query):
+def _linux_preflight_status_v1(pid,query,*,credentials=False):
     raw = query.read('/proc/'+str(pid)+'/status')
     values = {}
     for line in raw.decode('ascii','strict').splitlines():
@@ -12779,6 +12782,12 @@ def _linux_preflight_status_v1(pid,query):
     _preflight_require_v1(set(values) == {'CapInh','CapPrm','CapEff','CapBnd','CapAmb','NoNewPrivs'}
         and values['NoNewPrivs'] == '1' and all(int(values[k],16) == 0 for k in values if k != 'NoNewPrivs'),
         'LINUX_PREFLIGHT_CAPABILITY_OR_NO_NEW_PRIVILEGES')
+    if credentials:
+        for key in ('Uid','Gid'):
+            rows=[line.split(':',1)[1].split() for line in raw.decode('ascii','strict').splitlines() if line.startswith(key+':')]
+            _preflight_require_v1(len(rows)==1 and len(rows[0])==4 and all(re.fullmatch(r'[0-9]+',v) for v in rows[0])
+                and len(set(rows[0]))==1 and int(rows[0][0])>0,'LINUX_PREFLIGHT_KERNEL_CREDENTIALS:'+key)
+            values[key]=int(rows[0][0])
     return values
 
 
@@ -12847,9 +12856,7 @@ class _LinuxPreflightHostLeaseV1(_PreflightHostLeaseV1):
                 if 'rw' in mount['options']:
                     _preflight_require_v1(mount['path'] in allowed and mount['fs'] in ('tmpfs','devpts','proc','sysfs'),
                         'LINUX_PREFLIGHT_UNACCOUNTED_WRITABLE_MOUNT:'+mount['path'])
-            runtime_info = self.runtime.lstat()
-            _preflight_require_v1(runtime_info.st_uid == os.geteuid() and stat.S_IMODE(runtime_info.st_mode) == 0o700,
-                'LINUX_PREFLIGHT_RUNTIME_OWNERSHIP')
+            self.check_runtime(b,self.runtime,self.query)
             for target in (str(self.runtime),'/tmp','/var/tmp'):
                 match = [m for m in mounts if m['path'] == target]
                 _preflight_require_v1(len(match) == 1 and match[0]['fs'] == 'tmpfs'
@@ -12862,6 +12869,32 @@ class _LinuxPreflightHostLeaseV1(_PreflightHostLeaseV1):
         except BaseException as exc:
             if self.failure is None: self.failure = exc
             raise
+    @staticmethod
+    def check_runtime(binding,runtime,query):
+        _preflight_require_v1(type(binding.get('runtime_identity')) is list and len(binding['runtime_identity'])==2
+            and all(type(v) is int and v>=0 for v in binding['runtime_identity'])
+            and type(binding.get('runtime_uid')) is int and binding['runtime_uid']>0
+            and type(binding.get('runtime_gid')) is int and binding['runtime_gid']>0,
+            'LINUX_PREFLIGHT_RUNTIME_BINDING_SHAPE')
+        credentials=_linux_preflight_status_v1(os.getpid(),query,credentials=True)
+        _preflight_require_v1(credentials['Uid']==binding['runtime_uid']==os.geteuid()
+            and credentials['Gid']==binding['runtime_gid']==os.getegid(),'LINUX_PREFLIGHT_RUNTIME_CREDENTIAL_BINDING')
+        query.check();info=Path(runtime).lstat()
+        _preflight_require_v1(stat.S_ISDIR(info.st_mode) and [info.st_dev,info.st_ino]==binding['runtime_identity']
+            and (info.st_uid,info.st_gid)==(binding['runtime_uid'],binding['runtime_gid'])
+            and stat.S_IMODE(info.st_mode)==0o700,'LINUX_PREFLIGHT_RUNTIME_OWNERSHIP')
+        mounts=_linux_preflight_mounts_v1(query.read('/proc/self/mountinfo'))
+        for logical,child,mode in ((str(runtime),None,0o700),('/tmp','tmp',0o1777),('/var/tmp','var-tmp',0o1777)):
+            query.check();view=Path(logical).lstat()
+            query.check();expected=(Path(runtime)/child).lstat() if child else info
+            selected=[m for m in mounts if m['path']==logical]
+            _preflight_require_v1(stat.S_ISDIR(view.st_mode) and (view.st_dev,view.st_ino)==(expected.st_dev,expected.st_ino)
+                and stat.S_IMODE(view.st_mode)==mode and len(selected)==1 and selected[0]['fs']=='tmpfs'
+                and selected[0]['device']==binding['runtime_device']
+                and ('size=1048576k' in selected[0]['super_options'] or 'size=1073741824' in selected[0]['super_options'])
+                and {'rw','noexec','nodev','nosuid'}<=selected[0]['options'], 'LINUX_PREFLIGHT_RUNTIME_ALIAS:'+logical)
+        return credentials
+
     def check_launch(self,plan_entry,argv,environment,scratch_roots,deadline_ns):
         self.check_parent(self.root,self.index)
         n = plan_entry.command_index
@@ -14790,7 +14823,7 @@ _LINUX_PREFLIGHT_SERVICE_READBACK_V1 = {
     'TasksMax':'64','CPUAccounting':'yes','CPUQuotaPerSecUSec':'2s','CPUQuotaPeriodUSec':'100ms',
     'RuntimeMaxUSec':'1h','TimeoutStartUSec':'1min','TimeoutStopUSec':'10s','KillMode':'control-group',
     'SendSIGKILL':'yes','LimitCORE':'0','LimitNOFILE':'1024','LimitFSIZE':'67108864',
-    'RuntimeDirectoryMode':'0700','RuntimeDirectoryPreserve':'yes','StandardInput':'null',
+    'StandardInput':'null',
     'StandardOutput':'append','StandardError':'append',
 }
 
@@ -14798,7 +14831,7 @@ _LINUX_PREFLIGHT_SERVICE_READBACK_V1 = {
 def _linux_preflight_unit_policy_v1(status, *, name, root, repository, runtime, syscall_filter):
     _preflight_require_v1(type(status) is dict,'LINUX_PREFLIGHT_UNIT_READBACK_TYPE')
     expected = {**_LINUX_PREFLIGHT_SERVICE_READBACK_V1,'RootDirectory':root,'WorkingDirectory':repository,
-        'RuntimeDirectory':name,'Slice':name+'.slice'}
+        'RuntimeDirectory':'','Slice':name+'.slice'}
     for key,wanted in expected.items():
         _preflight_require_v1(status.get(key) == wanted,'LINUX_PREFLIGHT_UNIT_READBACK:'+key)
     _preflight_require_v1(set(status.get('InaccessiblePaths','').split()) ==
@@ -14839,8 +14872,317 @@ class _LinuxPreflightScopeV1:
         self.closeout_attempts=self.closeout_slice_observations=0
         self.owned_unit_status=None
         self.stop_attempted=self.stop_acknowledged=self.slice_stop_attempted=False
+        self.installation_source=self.control/'installation'
+        self.runtime_backing=self.runtime/'payload'
+        self.runtime_identity=self.runtime_underlay=self.runtime_mounted_identity=self.runtime_mount=None
+        self.runtime_fd=self.runtime_envelope_fd=None
+        self.runtime_envelope_attempted=False
+        self.runtime_mount_attempted=False
+        self.runtime_children={}
     _FAILED_STATUS=('Id','LoadState','ActiveState','SubState','Result','MainPID','ControlPID',
         'ExecMainPID','ExecMainCode','ExecMainStatus','InvocationID','ControlGroup','Slice','Job','Type','Restart','Transient')
+
+    def _runtime_call(self,operation,*args,settling=False,**kwargs):
+        self.query.check(settling=settling)
+        return operation(*args,**kwargs)
+
+    def _runtime_acl(self,fd,*,settling=False):
+        native=_LinuxSourceNativeV2()
+        try:
+            acl=native.acl(fd,attempt=lambda name:self.query.check(settling=settling),delivered=lambda count:None)
+            _preflight_require_v1(acl==(None,None),'LINUX_PREFLIGHT_RUNTIME_ACL')
+        finally:
+            self.query.record('runtime-acl',str(fd),_preflight_canonical_v1(native.last_acl))
+
+    def _runtime_directory(self,path,identity,uid,gid,mode,*,settling=False):
+        info=self._runtime_call(os.lstat,path,settling=settling)
+        _preflight_require_v1(stat.S_ISDIR(info.st_mode) and not stat.S_ISLNK(info.st_mode)
+            and (info.st_dev,info.st_ino)==identity and (info.st_uid,info.st_gid)==(uid,gid)
+            and stat.S_IMODE(info.st_mode)==mode,'LINUX_PREFLIGHT_RUNTIME_DIRECTORY:'+str(path))
+        return info
+
+    def prepare_runtime(self):
+        _preflight_require_v1(str(self.runtime)=='/run/'+self.name and self.runtime_identity is None,
+            'LINUX_PREFLIGHT_RUNTIME_ENVELOPE_OPERAND')
+        self.runtime_envelope_attempted=True
+        self.history.append(dict(runtime_envelope_create_attempt=str(self.runtime)))
+        self._runtime_call(os.mkdir,self.runtime,0o700)
+        info=self._runtime_call(os.lstat,self.runtime)
+        self.runtime_identity=(info.st_dev,info.st_ino)
+        self._runtime_directory(self.runtime,self.runtime_identity,0,0,0o700)
+        self.runtime_envelope_fd=self._runtime_call(os.open,self.runtime,os.O_RDONLY|os.O_DIRECTORY|os.O_NOFOLLOW|os.O_CLOEXEC)
+        self._runtime_acl(self.runtime_envelope_fd)
+        self._runtime_call(os.mkdir,self.runtime_backing,0o700)
+        info=self._runtime_call(os.lstat,self.runtime_backing)
+        self.runtime_underlay=(info.st_dev,info.st_ino)
+        self._runtime_directory(self.runtime_backing,self.runtime_underlay,0,0,0o700)
+        self.runtime_mount_attempted=True
+        self.history.append(dict(runtime_mount_attempt=str(self.runtime_backing),underlay=self.runtime_underlay,
+            envelope=self.runtime_identity))
+        self.query.command(('/usr/bin/mount','-t','tmpfs','-o','size=1073741824,noexec,nodev,nosuid,mode=0700',
+            'qtt-runtime',str(self.runtime_backing)))
+        mounts=_linux_preflight_mounts_v1(self.query.read('/proc/self/mountinfo'))
+        selected=[m for m in mounts if m['path']==str(self.runtime_backing)]
+        _preflight_require_v1(len(selected)==1 and selected[0]['fs']=='tmpfs' and selected[0]['root']=='/'
+            and {'noexec','nodev','nosuid','rw'}<=selected[0]['options']
+            and ('size=1048576k' in selected[0]['super_options'] or 'size=1073741824' in selected[0]['super_options']),
+            'LINUX_PREFLIGHT_RUNTIME_BACKING_MOUNT')
+        self.runtime_mount=selected[0]
+        self.runtime_fd=self._runtime_call(os.open,self.runtime_backing,os.O_RDONLY|os.O_DIRECTORY|os.O_NOFOLLOW|os.O_CLOEXEC)
+        info=self._runtime_call(os.fstat,self.runtime_fd)
+        self.runtime_mounted_identity=(info.st_dev,info.st_ino)
+        _preflight_require_v1(str(os.major(info.st_dev))+':'+str(os.minor(info.st_dev))==self.runtime_mount['device'],
+            'LINUX_PREFLIGHT_RUNTIME_MOUNT_DEVICE')
+        self._runtime_directory(self.runtime_backing,self.runtime_mounted_identity,0,0,0o700)
+        self._runtime_acl(self.runtime_fd)
+        for name in ('tmp','var-tmp'):
+            self._runtime_call(os.mkdir,name,0o1777,dir_fd=self.runtime_fd)
+            self._runtime_call(os.chmod,name,0o1777,dir_fd=self.runtime_fd,follow_symlinks=False)
+            info=self._runtime_call(os.stat,name,dir_fd=self.runtime_fd,follow_symlinks=False)
+            self.runtime_children[name]=(info.st_dev,info.st_ino)
+            self._runtime_directory(self.runtime_backing/name,self.runtime_children[name],0,0,0o1777)
+        self.history.append(dict(runtime_prepared=dict(envelope=self.runtime_identity,underlay=self.runtime_underlay,
+            mounted=self.runtime_mounted_identity,mount={k:sorted(v) if isinstance(v,frozenset) else v
+                for k,v in self.runtime_mount.items()},children=self.runtime_children)))
+
+    def prepare_view(self):
+        for absolute in ('/usr','/lib','/lib64','/proc','/sys','/dev','/tmp','/var/tmp',self.repository,self.installation,
+                str(self.runtime),str(self.spool),*(str(self.control/n) for n in ('declaration','binding','release'))):
+            self._runtime_call((self.private_root/absolute.lstrip('/')).mkdir,parents=True,exist_ok=True,mode=0o755)
+        etc=self.private_root/'etc'
+        self._runtime_call(etc.mkdir,mode=0o755)
+        for name,raw in (('passwd',b'root:x:0:0:root:/root:/usr/sbin/nologin\n'),('group',b'root:x:0:\n'),
+                ('nsswitch.conf',b'passwd: files\ngroup: files\nhosts: files\n'),
+                ('qtt-gitconfig',('[safe]\n\tdirectory = '+self.repository+'\n').encode('ascii'))):
+            self._runtime_call(_atomic_write_bytes_v1,etc/name,raw,control_mode=0o444)
+
+    def _runtime_live(self,process,cgroup):
+        import select
+        poll=select.poll();poll.register(self.process.pidfd,select.POLLIN)
+        self.query.check()
+        _preflight_require_v1(not poll.poll(0) and process==_linux_preflight_process_identity_v1(self.process.pid,self.query)
+            and cgroup==_linux_preflight_cgroup_path_v1(self.process.pid,self.query),
+            'LINUX_PREFLIGHT_RUNTIME_PROCESS_CHANGED')
+        status=self.show(self.name+'.service')
+        _preflight_require_v1(status['InvocationID']==self.invocation and status['MainPID']==str(process['pid'])
+            and status['ControlGroup']==cgroup,'LINUX_PREFLIGHT_RUNTIME_INVOCATION_CHANGED')
+        self._startup_manager()
+
+    def handoff_runtime(self,process,cgroup,mounts):
+        self._runtime_live(process,cgroup)
+        credentials=_linux_preflight_status_v1(process['pid'],self.query,credentials=True)
+        uid,gid=credentials['Uid'],credentials['Gid']
+        self._runtime_directory(self.runtime,self.runtime_identity,0,0,0o700)
+        self._runtime_acl(self.runtime_envelope_fd)
+        self._runtime_directory(self.runtime_backing,self.runtime_mounted_identity,0,0,0o700)
+        held=self._runtime_call(os.fstat,self.runtime_fd)
+        _preflight_require_v1(stat.S_ISDIR(held.st_mode) and (held.st_uid,held.st_gid)==(0,0)
+            and stat.S_IMODE(held.st_mode)==0o700 and (held.st_dev,held.st_ino)==self.runtime_mounted_identity,
+            'LINUX_PREFLIGHT_RUNTIME_HELD_ROOT')
+        self._runtime_acl(self.runtime_fd)
+        effect=dict(runtime_handoff_attempt=dict(identity=self.runtime_mounted_identity,uid=uid,gid=gid),complete=False)
+        self.history.append(effect)
+        self._runtime_call(os.fchown,self.runtime_fd,uid,gid)
+        self._runtime_call(os.fchmod,self.runtime_fd,0o700)
+        handed=self._runtime_call(os.fstat,self.runtime_fd)
+        _preflight_require_v1(stat.S_ISDIR(handed.st_mode) and (handed.st_uid,handed.st_gid)==(uid,gid)
+            and stat.S_IMODE(handed.st_mode)==0o700 and (handed.st_dev,handed.st_ino)==self.runtime_mounted_identity,
+            'LINUX_PREFLIGHT_RUNTIME_HANDOFF_READBACK')
+        self._runtime_directory(self.runtime_backing,self.runtime_mounted_identity,uid,gid,0o700)
+        self._runtime_acl(self.runtime_fd)
+        self._runtime_directory(self.runtime,self.runtime_identity,0,0,0o700)
+        for logical,identity,mode,owner in ((str(self.runtime),self.runtime_mounted_identity,0o700,(uid,gid)),
+                ('/tmp',self.runtime_children['tmp'],0o1777,(0,0)),
+                ('/var/tmp',self.runtime_children['var-tmp'],0o1777,(0,0))):
+            view=self._runtime_call(os.stat,logical.lstrip('/'),dir_fd=self.root_fd,follow_symlinks=False)
+            match=[m for m in mounts if m['path']==logical]
+            _preflight_require_v1(stat.S_ISDIR(view.st_mode) and (view.st_dev,view.st_ino)==identity
+                and (view.st_uid,view.st_gid)==owner and stat.S_IMODE(view.st_mode)==mode
+                and len(match)==1 and match[0]['fs']=='tmpfs' and match[0]['device']==self.runtime_mount['device']
+                and {'rw','noexec','nodev','nosuid'}<=match[0]['options'],
+                'LINUX_PREFLIGHT_RUNTIME_VIEW_MAPPING:'+logical)
+        self._runtime_live(process,cgroup)
+        _preflight_require_v1(_linux_preflight_status_v1(process['pid'],self.query,credentials=True)==credentials,
+            'LINUX_PREFLIGHT_RUNTIME_CREDENTIALS_CHANGED')
+        effect['complete']=True
+        return dict(runtime_identity=list(self.runtime_mounted_identity),runtime_uid=uid,runtime_gid=gid)
+
+    def unmount_runtime(self):
+        _preflight_require_v1(not self.service_created or self.settled,'LINUX_PREFLIGHT_RUNTIME_UNSETTLED')
+        _preflight_require_v1(not self.runtime_envelope_attempted or self.runtime_identity is not None,
+            'LINUX_PREFLIGHT_RUNTIME_ENVELOPE_CREATION_UNRESOLVED')
+        if self.runtime_envelope_fd is not None:
+            self._runtime_acl(self.runtime_envelope_fd,settling=True)
+            fd=self.runtime_envelope_fd;self.runtime_envelope_fd=None
+            self._runtime_call(os.close,fd,settling=True)
+        if self.runtime_fd is not None:
+            fd=self.runtime_fd;self.runtime_fd=None
+            self._runtime_call(os.close,fd,settling=True)
+        if self.runtime_mount_attempted:
+            mounts=_linux_preflight_mounts_v1(self.query.read('/proc/self/mountinfo',settling=True))
+            selected=[m for m in mounts if m['path']==str(self.runtime_backing)]
+            if selected:
+                _preflight_require_v1(len(selected)==1 and self.runtime_mount is not None
+                    and selected[0]==self.runtime_mount,'LINUX_PREFLIGHT_RUNTIME_MOUNT_CHANGED')
+                self.query.command(('/usr/bin/umount',str(self.runtime_backing)),settling=True)
+            else:_preflight_require_v1(self.runtime_mount is None,'LINUX_PREFLIGHT_RUNTIME_MOUNT_LOST')
+        if self.runtime_underlay is not None:
+            self._runtime_directory(self.runtime_backing,self.runtime_underlay,0,0,0o700,settling=True)
+        if self.runtime_identity is not None:
+            self._runtime_directory(self.runtime,self.runtime_identity,0,0,0o700,settling=True)
+        self.history.append(dict(runtime_unmounted=True,underlay=self.runtime_underlay,envelope=self.runtime_identity))
+
+    def remove_runtime(self,evidence_root):
+        if self.runtime_identity is not None:
+            self._runtime_directory(self.runtime,self.runtime_identity,0,0,0o700,settling=True)
+            self._runtime_directory(self.runtime_backing,self.runtime_underlay,0,0,0o700,settling=True)
+            self._runtime_call(remove_exact_run_owned_process_tree,self.runtime,expected_run_root=self.runtime,
+                repo_root=self.repository,evidence_root=evidence_root,settling=True)
+            self.history.append(dict(runtime_envelope_removed=str(self.runtime)))
+
+    @classmethod
+    def runtime_fixture(cls,query,grants,*,repository,installation,interpreter):
+        """One real short runtime roundtrip, before protecting the checkout."""
+        parent=query.evidence_root.parent
+        name=parent.name.removesuffix('control')+'1'
+        control=parent/'runtime-roundtrip-control'
+        query.check();control.mkdir(mode=0o700,exist_ok=False)
+        identity=(control.stat().st_dev,control.stat().st_ino)
+        root,spool=control/'root',query.evidence_root/'runtime-roundtrip-streams'
+        for path,mode in ((root,0o755),(spool,0o700)):query.check();path.mkdir(mode=mode,exist_ok=False)
+        for child in ('binding','release','declaration'):
+            query.check();(control/child).mkdir(mode=0o555)
+        _atomic_write_bytes_v1(control/'declaration/input.bin',b'QTT runtime engineering fixture only\n',control_mode=0o444)
+        runtime=Path('/run')/name
+        environment=_linux_preflight_environment_v1(repository=repository,installation=installation,
+            runtime=str(runtime),control=str(control))
+        limited={**grants,'execution_deadline_ns':min(grants['execution_deadline_ns'],time.monotonic_ns()+60*10**9)}
+        scope=cls(name=name,query=query,control=control,runtime=runtime,private_root=root,spool=spool,
+            repository=repository,installation=installation,interpreter=interpreter,source=None,header=None,
+            blobs=None,vectors=(),grants=limited,event={},environment=environment)
+        scope.installation_source=parent/'installation'
+        result=dict(engineering_only=True,complete=False,settled=False,exported=False,unmounted=False,removed=False)
+        query.runtime_fixture_result=result
+        errors=[];receipt=None
+        try:
+            # Share the already reserved denied-start output tranche, without refund.
+            remaining=query.startup_fixture_reservation-query.startup_fixture_bytes
+            _preflight_require_v1(remaining>=2,'LINUX_PREFLIGHT_RUNTIME_FIXTURE_STREAM_ALLOWANCE')
+            scope.prepare_runtime();scope.prepare_view()
+            scope.expected_syscalls=_linux_preflight_syscalls_v1(query)
+            scope.start_slice()
+            scope.startup_deadline_ns=scope.execution_deadline_ns
+            launch=_linux_preflight_service_argv_v1(name=name,private_root=str(root),runtime=str(runtime),
+                control=str(control),spool=str(spool),repository=repository,installation=installation,
+                installation_source=str(scope.installation_source),interpreter=interpreter,
+                startup_deadline_ns=scope.startup_deadline_ns,environment=environment)
+            program='''import json,os,sys,time
+from pathlib import Path
+sys.path.insert(0,os.getcwd())
+from tools import validation_reliability as o
+control=Path(os.environ['QTT_LINUX_PREFLIGHT_CONTROL'])
+runtime=Path(os.environ['QTT_LINUX_PREFLIGHT_RUNTIME'])
+deadline=int(sys.argv[1])
+query=o._LinuxPreflightQueriesV1(evidence_root=runtime/'native-observations',deadline_ns=deadline)
+binding,version,chain=o._linux_preflight_control_read_v1(control/'binding/native.json',deadline_ns=deadline,pending=True,query=query)
+process=o._linux_preflight_process_identity_v1(os.getpid(),query)
+o._preflight_require_v1(o._json_compatible(process)==binding['process'] and binding['runtime']==str(runtime)
+    and o._linux_preflight_cgroup_path_v1(os.getpid(),query)==binding['service_cgroup'],'RUNTIME_FIXTURE_PROCESS')
+credentials=o._LinuxPreflightHostLeaseV1.check_runtime(binding,runtime,query)
+marker=b'QTT runtime roundtrip engineering only\\n'
+rows=[]
+for parent in (runtime,Path('/tmp'),Path('/var/tmp')):
+    query.check();path=parent/'runtime-marker'
+    fd=os.open(path,os.O_WRONLY|os.O_CREAT|os.O_EXCL|os.O_NOFOLLOW|os.O_CLOEXEC,0o600)
+    try:
+        query.check();o._preflight_require_v1(os.write(fd,marker)==len(marker),'RUNTIME_FIXTURE_WRITE')
+        query.check();os.fsync(fd)
+    finally:os.close(fd)
+    raw=query.read(path)
+    o._preflight_require_v1(raw==marker,'RUNTIME_FIXTURE_BYTES')
+    rows.append(dict(path=str(path),bytes=len(raw),hex=raw.hex()))
+o._LinuxPreflightHostLeaseV1.check_runtime(binding,runtime,query)
+o._preflight_require_v1(o._scan_same_api_version((control/'binding/native.json').lstat())==version
+    and o._preflight_chain_v1(control/'binding')==chain,'RUNTIME_FIXTURE_BINDING_CHANGED')
+probe=dict(name=binding['name'],pid=os.getpid(),start=process['start'],passed=True,engineering_only=True,
+    runtime_identity=binding['runtime_identity'],uid=credentials['Uid'],gid=credentials['Gid'],markers=rows)
+o.atomic_write_json(runtime/'probe.json',probe)
+release,_,_=o._linux_preflight_control_read_v1(control/'release/release.json',deadline_ns=deadline,pending=True,query=query)
+o._preflight_require_v1(release==dict(name=binding['name'],pid=os.getpid(),start=process['start'],invocation=binding['invocation']),
+    'RUNTIME_FIXTURE_RELEASE')
+query.check()
+print(json.dumps(probe),flush=True)
+'''
+            # A literal programme; no archive/JSON expression is evaluated.
+            scope.argv=(interpreter,'-I','-B','-X','utf8','-c',
+                'exec(compile('+repr(program)+',"<qtt-runtime-roundtrip>","exec"))',str(scope.startup_deadline_ns))
+            scope.launch_argv=launch[:launch.index('--')+1]+scope.argv
+            token=_LINUX_PREFLIGHT_PROCESS_V1.set(scope)
+            try:
+                receipt=supervise_command(scope.argv,cwd=Path(repository),run_id=name,phase='fast-preflight-native-service',
+                    command_index=1,evidence_root=spool,environment=environment,timeout_seconds=60,
+                    execution_deadline_ns=scope.execution_deadline_ns,output_limits=dict(stdout_bytes=remaining//2,
+                        stderr_bytes=remaining//2,combined_output_bytes=2*(remaining//2)),output_observation={},
+                    mirror_stdout=False,mirror_stderr=False)
+            finally:_LINUX_PREFLIGHT_PROCESS_V1.reset(token)
+            _preflight_require_v1(scope.settled and scope.startup_error is None and receipt.native_exit_code==0
+                and receipt.failure_class is None and not _command_requires_process_retention_v1(receipt),
+                'LINUX_PREFLIGHT_RUNTIME_FIXTURE_NATIVE_FAILURE')
+        except BaseException as exc:
+            errors.append(exc)
+            if scope.service_created and not scope.settled:
+                try:
+                    if scope.startup_error is not None:scope.recover_failed_start()
+                    else:
+                        if not scope.terminated:scope.terminate(10)
+                        scope.finish()
+                except BaseException as error:errors.append(error)
+        result['settled']=not scope.service_created or scope.settled
+        try:
+            delivered=sum((spool/('command-1.'+stream+'.bin')).stat().st_size for stream in ('stdout','stderr')
+                if (spool/('command-1.'+stream+'.bin')).exists())
+            query.startup_fixture_bytes+=delivered;query.retained+=delivered
+            _preflight_require_v1(query.startup_fixture_bytes<=query.startup_fixture_reservation,
+                'LINUX_PREFLIGHT_RUNTIME_FIXTURE_OUTPUT')
+            if result['settled']:
+                destination=query.evidence_root/'runtime-roundtrip-export'
+                query.check(settling=True);destination.mkdir(mode=0o700)
+                exported=[]
+                for relative in ('runtime-marker','tmp/runtime-marker','var-tmp/runtime-marker','probe.json'):
+                    path=scope.runtime_backing/relative
+                    if path.exists():
+                        raw=query.read(path,settling=True)
+                        if relative.endswith('runtime-marker'):
+                            _preflight_require_v1(raw==b'QTT runtime roundtrip engineering only\n',
+                                'LINUX_PREFLIGHT_RUNTIME_FIXTURE_RETAINED_BYTES')
+                        _atomic_write_bytes_v1(destination/relative,raw)
+                        _preflight_require_v1((destination/relative).read_bytes()==raw,'LINUX_PREFLIGHT_RUNTIME_FIXTURE_EXPORT')
+                        exported.append(relative)
+                native=scope.runtime_backing/'native-observations'
+                if native.exists():
+                    for path in sorted(native.iterdir()):
+                        raw=query.read(path,settling=True)
+                        _atomic_write_bytes_v1(destination/'native-observations'/path.name,raw)
+                        _preflight_require_v1((destination/'native-observations'/path.name).read_bytes()==raw,
+                            'LINUX_PREFLIGHT_RUNTIME_FIXTURE_QUERY_EXPORT')
+                result.update(exported=True,retained_files=exported)
+                if not errors:
+                    _preflight_require_v1(len(exported)==4,'LINUX_PREFLIGHT_RUNTIME_FIXTURE_MISSING_MARKERS')
+                with query.owned_resource_phase():
+                    scope.close_owned_units();scope.unmount_runtime();result['unmounted']=True
+                    scope.remove_runtime(query.evidence_root)
+                    info=control.lstat()
+                    _preflight_require_v1(stat.S_ISDIR(info.st_mode) and (info.st_dev,info.st_ino)==identity,
+                        'LINUX_PREFLIGHT_RUNTIME_FIXTURE_CONTROL_CHANGED')
+                    remove_exact_run_owned_process_tree(control,expected_run_root=control,
+                        repo_root=repository,evidence_root=query.evidence_root)
+                    result['removed']=True
+        except BaseException as exc:errors.append(exc)
+        result.update(complete=not errors,history=scope.history,failures=[repr(e) for e in errors],
+            receipt=None if receipt is None else _json_compatible(receipt))
+        _atomic_write_bytes_v1(query.evidence_root/'runtime-roundtrip-result.json',_preflight_canonical_v1(result))
+        _scan_raise_errors(errors)
+        return result
 
     def _startup_status(self):
         record,raw,error=self.query.startup_diagnostic(self,'status')
@@ -15050,7 +15392,7 @@ class _LinuxPreflightScopeV1:
             _atomic_write_bytes_v1(query.evidence_root/'startup-denial-result.json',_preflight_canonical_v1(result))
     def show(self,unit,*,settling=False):
         _preflight_require_v1(unit in (self.name+'.slice',self.name+'.service'),'LINUX_PREFLIGHT_EXACT_UNIT')
-        raw = self.query.command(('/usr/bin/systemctl','show','--no-pager',
+        raw = self.query.command(('/usr/bin/systemctl','show','--no-pager','--all',
             '--property='+','.join(self._STATUS),unit),settling=settling)
         result = {}
         for line in raw.decode('utf-8','strict').splitlines():
@@ -15202,7 +15544,7 @@ class _LinuxPreflightScopeV1:
             'LINUX_PREFLIGHT_ORIGINAL_PRIVATE_ROOT')
         mounts = _linux_preflight_mounts_v1(self.query.read('/proc/'+str(pid)+'/mountinfo'))
         mappings = {}
-        for logical,source in ((self.repository,Path(self.repository)),(self.installation,self.control/'installation'),
+        for logical,source in ((self.repository,Path(self.repository)),(self.installation,self.installation_source),
                 *((str(self.control/name),self.control/name) for name in ('declaration','binding','release'))):
             chain = _linux_preflight_project_chain_v1(self.root_fd,logical,self.query)
             view = os.stat(logical.lstrip('/'),dir_fd=self.root_fd,follow_symlinks=False)
@@ -15224,6 +15566,7 @@ class _LinuxPreflightScopeV1:
                 'LINUX_PREFLIGHT_DEVICE_MASK:'+path)
         runtime_mounts = [m for m in mounts if m['path'] == str(self.runtime)]
         _preflight_require_v1(len(runtime_mounts) == 1,'LINUX_PREFLIGHT_RUNTIME_ASSOCIATION')
+        runtime_binding=self.handoff_runtime(process,cgroup,mounts)
         declaration = self.control/'declaration/input.bin'
         projected_chain = _linux_preflight_project_chain_v1(self.root_fd,str(declaration.parent),self.query)
         info = os.stat(str(declaration).lstrip('/'),dir_fd=self.root_fd,follow_symlinks=False)
@@ -15240,7 +15583,7 @@ class _LinuxPreflightScopeV1:
             boot_id=self.query.read('/proc/sys/kernel/random/boot_id').decode('ascii').strip(),process=process,
             slice_cgroup=self.slice_cgroup,slice_identity=self.slice_identity,service_cgroup=cgroup,
             repository=self.repository,index=str(index),installation=self.installation,runtime=str(self.runtime),
-            runtime_device=runtime_mounts[0]['device'],declaration=str(declaration),declaration_parent=str(declaration.parent),
+            **runtime_binding,runtime_device=runtime_mounts[0]['device'],declaration=str(declaration),declaration_parent=str(declaration.parent),
             declaration_chain=projected_chain,declaration_version=_scan_same_api_version(info),grants=self.grants,
             startup_deadline_ns=self.startup_deadline_ns,vectors=self.vectors,environment=self.environment,
             identities=dict(repository=(Path(self.repository).stat().st_dev,Path(self.repository).stat().st_ino),
@@ -15253,11 +15596,12 @@ class _LinuxPreflightScopeV1:
                 and manifest.read_bytes()==self.source.raw,'LINUX_V2_MANIFEST_NAMESPACE_BINDING')
             self.binding.update(native_basis=dict(self.source.descriptor),source_run_id=self.source.run_id)
             self.source.state='IN_USE'
+        self._runtime_live(process,cgroup)
         raw = _preflight_canonical_v1(self.binding)
         _preflight_require_v1(len(raw) <= 1048576,'LINUX_PREFLIGHT_BINDING_RESPONSE_BOUND')
         _atomic_write_bytes_v1(self.control/'binding/native.json',raw,control_mode=0o444)
         self.history.append(dict(binding=self.binding))
-        response_path = self.runtime/'probe.json'
+        response_path = self.runtime_backing/'probe.json'
         response = None
         for attempt in range(600):
             self.query.check()
