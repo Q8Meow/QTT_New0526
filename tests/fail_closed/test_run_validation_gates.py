@@ -21597,6 +21597,51 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
     for fault in ('owner','mode','kind','links','identity','query','missing-immutable','flags-drift','close','evidence'):
         write_denial_reference(1,fault=fault)
 
+    # Synthetic environment lifecycle references, not a native host grant.
+    # The complete existing context owner is exercised on success and failure.
+    for prior in (None, '/reference/prior-config'):
+        for outcome in ('pass', 'body-error', 'projection-error', 'wrong-projection'):
+            native = o._PreflightNativeInputV1.__new__(o._PreflightNativeInputV1)
+            native.root = Path(root)
+            native.host_lease = o._LinuxPreflightHostLeaseV1.__new__(o._LinuxPreflightHostLeaseV1)
+            calls = []
+            native.check = lambda: calls.append('checked')
+            def projected(actual_root, observation):
+                assert actual_root == Path(root) and observation is None and calls == ['checked']
+                calls.append('projection')
+                if outcome == 'projection-error': raise RuntimeError('reference trust rejection')
+                return {'GIT_CONFIG_GLOBAL': '/elsewhere'} if outcome == 'wrong-projection' else {'GIT_CONFIG_GLOBAL': '/etc/qtt-gitconfig'}
+            with monkeypatch.context() as patch:
+                if prior is None: patch.delenv('GIT_CONFIG_GLOBAL', raising=False)
+                else: patch.setenv('GIT_CONFIG_GLOBAL', prior)
+                patch.setattr(o, '_linux_preflight_git_environment_v1', projected)
+                assert o._PREFLIGHT_NATIVE_INPUT_V1.get() is None
+                def execute():
+                    with o._preflight_native_input_v1(native):
+                        assert os.environ['GIT_CONFIG_GLOBAL'] == '/etc/qtt-gitconfig'
+                        assert o._PREFLIGHT_NATIVE_INPUT_V1.get() is native
+                        calls.append('body')
+                        if outcome == 'body-error': raise RuntimeError('reference body rejection')
+                if outcome == 'pass': execute()
+                else:
+                    with pytest.raises((RuntimeError, o.ValidationReliabilityError)): execute()
+                assert os.environ.get('GIT_CONFIG_GLOBAL') == prior
+                assert o._PREFLIGHT_NATIVE_INPUT_V1.get() is None
+                assert calls == (['checked', 'projection', 'body'] if outcome in ('pass', 'body-error') else ['checked', 'projection'])
+    # Failed optional legacy queries remain optional outside the native lease;
+    # under native custody their actual exit and complete stderr must survive.
+    for selected in (False, True):
+        token = o._LINUX_PREFLIGHT_LEASE_V1.set(o._LinuxPreflightHostLeaseV1.__new__(o._LinuxPreflightHostLeaseV1) if selected else None)
+        try:
+            with monkeypatch.context() as patch:
+                patch.setattr(o.subprocess, 'run', lambda *a, **k: SimpleNamespace(returncode=128, stdout=b'', stderr=b'reference native Git failure\n'))
+                if selected:
+                    with pytest.raises(o.ValidationReliabilityError, match='exit=128') as failure:
+                        o._git_bytes(Path(root), ('rev-parse', '--verify', 'refs/remotes/origin/main^{commit}'), check=False)
+                    assert repr(b'reference native Git failure\n') in str(failure.value)
+                else: assert o._git_bytes(Path(root), ('rev-parse', '--verify', 'refs/remotes/origin/main^{commit}'), check=False) == b''
+        finally: o._LINUX_PREFLIGHT_LEASE_V1.reset(token)
+
     original = area/'original-evidence'
     with original.open('xb') as destination:
         tail = o._LinuxPreflightTailV1(original,original_evidence=True)

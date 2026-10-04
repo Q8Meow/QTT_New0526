@@ -1863,8 +1863,11 @@ def _git_bytes(
         stderr=subprocess.PIPE,
         check=False,
     )
-    if check and completed.returncode:
+    native_lease = _LINUX_PREFLIGHT_LEASE_V1.get()
+    if completed.returncode and (check or type(native_lease) is _LinuxPreflightHostLeaseV1):
         detail = completed.stderr.decode("utf-8", "replace").strip()
+        if type(native_lease) is _LinuxPreflightHostLeaseV1:
+            detail = f"native Git query {tuple(args)!r}; exit={completed.returncode}; stderr={completed.stderr!r}"
         raise ValidationReliabilityError(
             "ENGVR_PREPUBLICATION_CUSTODY_FAILED",
             detail or f"git {' '.join(args)} failed with {completed.returncode}",
@@ -11900,9 +11903,21 @@ def _preflight_native_input_v1(value):
         'preflight original native input owner required')
     value.check()
     token = _PREFLIGHT_NATIVE_INPUT_V1.set(value)
+    git_previous = {}
     try:
+        if type(value.host_lease) is _LinuxPreflightHostLeaseV1:
+            # Existing exact sealed trust is also required by the original
+            # pre-assembly Git reads. It is never a host configuration change.
+            projection = _linux_preflight_git_environment_v1(value.root, None)
+            _preflight_require_v1(projection == {'GIT_CONFIG_GLOBAL': '/etc/qtt-gitconfig'},
+                'LINUX_PREFLIGHT_NATIVE_INPUT_GIT_PROJECTION')
+            git_previous = {key: os.environ.get(key) for key in projection}
+            os.environ.update(projection)
         yield value
     finally:
+        for key, previous in git_previous.items():
+            if previous is None: os.environ.pop(key, None)
+            else: os.environ[key] = previous
         _PREFLIGHT_NATIVE_INPUT_V1.reset(token)
 
 
