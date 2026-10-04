@@ -12496,7 +12496,9 @@ class _LinuxPreflightQueriesV1:
             _preflight_require_v1(re.fullmatch(r'[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}',scope.boot_id)
                 is not None,'LINUX_PREFLIGHT_STARTUP_DIAGNOSTIC_BOOT')
             stamp=lambda value:value.strftime('%Y-%m-%d %H:%M:%S.%f UTC')
-            argv=('/usr/bin/journalctl','--system','--no-pager','--quiet','--boot='+scope.boot_id,
+            # journalctl v255 parses a 32-hex boot descriptor, not /proc's UUID spelling.
+            # Retain the original observed UUID for all manager identity checks.
+            argv=('/usr/bin/journalctl','--system','--no-pager','--quiet','--boot='+scope.boot_id.replace('-',''),
                 '--unit='+unit,'--since='+stamp(scope.attempt_utc),'--until='+stamp(observed),
                 '--output=json','--all','--lines=201')
         elif kind=='stop':

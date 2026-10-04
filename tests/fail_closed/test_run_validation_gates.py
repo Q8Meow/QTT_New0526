@@ -20598,7 +20598,9 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
                 with (spool/'command-1.stderr.bin').open('ab') as stream:stream.write(b'fixture stderr before denied start\n')
                 if not bound:code=1;err=b'injected launcher setup denial\n'
             elif argv[0]=='/usr/bin/journalctl':
-                assert '--boot='+boot in argv and '--unit=qtt1n2.service' in argv
+                assert '--boot=12345678123412341234123456789abc' in argv
+                assert '--boot='+boot not in argv and '--unit=qtt1n2.service' in argv
+                assert scope.boot_id==boot and bootfile.read_text(encoding='ascii')==boot+'\n'
                 assert '--lines=201' in argv and all('*' not in v for v in argv)
                 assert any(v.startswith('--since=') for v in argv) and any(v.startswith('--until=') for v in argv)
                 if case=='journal-failure':code=1;err=b'injected journal access denial\n'
