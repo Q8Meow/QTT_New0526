@@ -14981,7 +14981,10 @@ class _LinuxPreflightScopeV1:
         control=query.evidence_root.parent
         root=control/'startup-denial-root'
         root.mkdir(mode=0o755,exist_ok=False)
-        root_identity=_scan_same_api_version(root.lstat())[:2]
+        root_info=root.lstat()
+        _preflight_require_v1(stat.S_ISDIR(root_info.st_mode) and not stat.S_ISLNK(root_info.st_mode),
+            'LINUX_PREFLIGHT_DENIED_ROOT_TYPE')
+        root_identity=(root_info.st_dev,root_info.st_ino)
         spool=query.evidence_root/'startup-denial-streams'
         spool.mkdir(mode=0o700,exist_ok=False)
         name=source.run_id.replace('-recovery-3','')+'0'
@@ -15026,7 +15029,9 @@ class _LinuxPreflightScopeV1:
                 'LINUX_PREFLIGHT_DENIED_START_NOT_QUALIFIED')
             scope.close_owned_units()
             with query.owned_resource_phase():
-                _preflight_require_v1(_scan_same_api_version(root.lstat())[:2]==root_identity,
+                root_info=root.lstat()
+                _preflight_require_v1(stat.S_ISDIR(root_info.st_mode) and not stat.S_ISLNK(root_info.st_mode)
+                    and (root_info.st_dev,root_info.st_ino)==root_identity,
                     'LINUX_PREFLIGHT_DENIED_ROOT_CHANGED')
                 # Namespace preparation may create manager-owned mountpoints in
                 # this exact disposable private root. Existing removal owner only.

@@ -20709,6 +20709,25 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
         assert not path.exists()
         o.atomic_write_json(path,dict(native_linux_qualification=False,cases=startup_references))
     print('LINUX_FAILED_START_INJECTED_REFERENCES '+json.dumps(startup_references,sort_keys=True))
+
+    # A real disposable directory reaches the original factory's start boundary;
+    # a single-link regular-file validator cannot stand in for directory identity.
+    factory_area=tmp_path/'startup-factory-reference';factory_area.mkdir()
+    factory_native=factory_area/'native';factory_native.mkdir()
+    factory_source=SimpleNamespace(root=tmp_path,run_id='qtt1n3-recovery-3')
+    factory_query=SimpleNamespace(evidence_root=factory_native,startup_fixture_reservation=0,
+        startup_output_bytes=0,startup_output_limit=32*1024**2)
+    factory_grants=dict(execution_deadline_ns=time.monotonic_ns()+30*10**9,
+        settlement_deadline_ns=time.monotonic_ns()+60*10**9)
+    with monkeypatch.context() as patch:
+        def no_native_start(scope):raise RuntimeError('injected factory boundary before native start')
+        patch.setattr(o._LinuxPreflightScopeV1,'start_slice',no_native_start)
+        with pytest.raises(RuntimeError,match='injected factory boundary before native start'):
+            o._LinuxPreflightScopeV1.denied_start_fixture(factory_source,factory_query,factory_grants)
+    factory_result=json.loads((factory_native/'startup-denial-result.json').read_bytes())
+    assert factory_query.startup_fixture_reservation==2097152
+    assert not factory_result['settled'] and not factory_result['removed'] and factory_result['launcher_receipt'] is None
+    assert (factory_area/'startup-denial-root').is_dir()
     # Execute the existing controller's exceptional export path with a denied
     # query adapter. No native claim or source mutation is supplied by it.
     export_reference=tmp_path/'source-export-failure-reference'
