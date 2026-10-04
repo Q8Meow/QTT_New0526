@@ -20557,6 +20557,158 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
         assert not reference_path.exists()
         o.atomic_write_json(reference_path,dict(native_linux_qualification=False,cases=reference_results))
     print('LINUX_V2_INJECTED_SOURCE_RECOVERY_REFERENCES '+json.dumps(reference_results,sort_keys=True))
+    # Fixed finite failed-start API references run the actual scope/query and
+    # supervisor owners. They are not native Linux execution or a host lease.
+    from datetime import datetime,UTC
+    startup_references=[]
+    actual_supervisor=o.supervise_command
+    def startup_reference(case):
+        area=tmp_path/('startup-'+case);area.mkdir()
+        spool=area/'spool';spool.mkdir()
+        native=area/'native';native.mkdir()
+        held=area/'slice';held.mkdir()
+        events=held/'cgroup.events';events.write_bytes(b'populated 1\n' if case=='nonempty-slice' else b'populated 0\n')
+        boot='12345678-1234-1234-1234-123456789abc'
+        bootfile=area/'boot';bootfile.write_text(boot+'\n',encoding='ascii')
+        manager=dict(pid=1,start=5,namespaces={'pid':(1,2),'mnt':(1,3)})
+        now=time.monotonic_ns();grants=dict(execution_deadline_ns=now+30*10**9,settlement_deadline_ns=now+60*10**9)
+        fd=os.open(events,os.O_RDONLY)
+        held_info=held.lstat();file_info=os.fstat(fd)
+        real_fstat=o.os.fstat;real_read=o._LinuxPreflightQueriesV1.read
+        words=[];status_calls=[];queries=[]
+        main=dict(Id='qtt1n2.service',LoadState='loaded',ActiveState='failed',SubState='failed',Result='exit-code',
+            MainPID='0',ControlPID='0',ExecMainPID='42',ExecMainCode='1',ExecMainStatus='203',
+            InvocationID='a'*32,ControlGroup='',Slice='qtt1n2.slice',Job='',Type='exec',Restart='no',Transient='yes')
+        if case=='live-control':main['ControlPID']='31'
+        if case=='queued-job':main['Job']='17'
+        if case in ('stop-without-proof','absence-after-stop','unavailable-after-stop'):
+            main.update(ActiveState='activating',SubState='start',MainPID='42')
+        if case=='missing-fields':del main['Restart']
+        if case=='conflicting-invocation':main['InvocationID']='b'*32
+        bound=case in ('after-binding','nonterminal-pidfd','conflicting-invocation')
+        poll_values=[] if case=='nonterminal-pidfd' else [(70001,1)]
+        class Poll:
+            def register(self,handle,flags):assert handle==70001 and flags==1
+            def poll(self,timeout):assert timeout==0;return list(poll_values)
+        def administrative(argv,**kw):
+            argv=tuple(argv);queries.append(argv)
+            raw=b'';err=b'';code=0
+            if argv[0]=='/usr/bin/systemd-run':
+                with (spool/'command-1.stdout.bin').open('ab') as stream:stream.write(b'fixture stdout before denied start\n')
+                with (spool/'command-1.stderr.bin').open('ab') as stream:stream.write(b'fixture stderr before denied start\n')
+                if not bound:code=1;err=b'injected launcher setup denial\n'
+            elif argv[0]=='/usr/bin/journalctl':
+                assert '--boot='+boot in argv and '--unit=qtt1n2.service' in argv
+                assert '--lines=201' in argv and all('*' not in v for v in argv)
+                assert any(v.startswith('--since=') for v in argv) and any(v.startswith('--until=') for v in argv)
+                if case=='journal-failure':code=1;err=b'injected journal access denial\n'
+                else:raw=(b'{"MESSAGE":"injected reference, not native diagnosis"}\n'*(201 if case=='journal-cap' else 1))
+            elif argv[:2]==('/usr/bin/systemctl','stop'):
+                words.append('stop');assert words==['stop']
+            elif argv[:2]==('/usr/bin/systemctl','show'):
+                if '--all' not in argv:
+                    assert bound
+                    fields=dict.fromkeys(o._LinuxPreflightScopeV1._STATUS,'')
+                    fields.update({k:v for k,v in main.items() if k in fields})
+                    fields.update(MainPID='42',InvocationID='a'*32,ActiveState='active',MemoryMax='6442450944')
+                else:
+                    status_calls.append(1);fields=dict(main)
+                    if len(status_calls)==2 and case=='absence-after-stop':
+                        fields=dict(Id='qtt1n2.service',LoadState='not-found',ActiveState='inactive',Job='')
+                        code=4
+                    if len(status_calls)==2 and case=='unavailable-after-stop':fields={};code=1;err=b'injected unavailable manager\n'
+                raw=''.join(k+'='+v+'\n' for k,v in fields.items()).encode()
+            else:raise AssertionError(argv)
+            base=Path(kw['evidence_root']);number=kw['command_index']
+            out=base/f'command-{number}.stdout.bin';error=base/f'command-{number}.stderr.bin'
+            out.write_bytes(raw);error.write_bytes(err)
+            observation=dict(combined_output_grant=kw['output_limits']['combined_output_bytes'])
+            for name,data in (('stdout',raw),('stderr',err)):
+                observation[name]=dict(complete=True,overflow=False,errors=[],drained_byte_count=len(data),
+                    cleanup_drained_byte_count=0,retained_byte_count=len(data),retention_limit=kw['output_limits'][name+'_bytes'])
+            receipt=o.CommandExecutionReceiptV1(schema_version=1,run_id='reference-launcher',phase=kw['phase'],
+                command_index=number,argv=argv,cwd=str(area),pid=123,platform='posix',
+                start_time_utc='2026-10-04T00:00:00Z',end_time_utc='2026-10-04T00:00:01Z',elapsed_monotonic_seconds=1.0,
+                native_exit_code=code,start_failure_class=None,timeout_seconds_or_null=10,
+                timeout_state='NOT_TRIGGERED',termination_state='NOT_REQUIRED',stdout_path=str(out),stderr_path=str(error),
+                stdout_byte_count=len(raw),stderr_byte_count=len(err),stdout_required_markers=(),
+                stdout_marker_state='NOT_REQUIRED',stderr_was_nonempty=bool(err),
+                failure_class=None if code==0 else 'ENGVR_NATIVE_EXIT_NONZERO',output_observation=observation)
+            o.atomic_write_json(base/f'command-{number}.json',receipt)
+            return receipt
+        with monkeypatch.context() as patch:
+            patch.setattr(o.sys,'platform','linux')
+            patch.setattr(o,'supervise_command',administrative)
+            patch.setattr(o,'_linux_preflight_process_identity_v1',lambda pid,query,**kw:dict(manager))
+            patch.setattr(o.os,'pidfd_open',lambda pid,flags:70001,raising=False)
+            patch.setattr(o.os,'fstat',lambda n:held_info if n==70000 else real_fstat(n))
+            for name in ('O_NOFOLLOW','O_CLOEXEC'):
+                if not hasattr(o.os,name):patch.setattr(o.os,name,0,raising=False)
+            patch.setitem(sys.modules,'select',SimpleNamespace(poll=Poll,POLLIN=1,POLLERR=8,POLLNVAL=32))
+            query=o._LinuxPreflightQueriesV1(evidence_root=native,deadline_ns=grants['settlement_deadline_ns'],startup_closeout_bytes=32*1024**2)
+            query.read=lambda path,**kw:real_read(query,bootfile if str(path)=='/proc/sys/kernel/random/boot_id' else path,**kw)
+            scope=o._LinuxPreflightScopeV1(name='qtt1n2',query=query,control=area,runtime=area,private_root=area,
+                spool=spool,repository=str(area),installation='',interpreter='/missing-fixture',source=None,
+                header=None,blobs=None,vectors=None,grants=grants,event={},environment={'PATH':'/usr/bin'})
+            scope.slice_created=True;scope.slice_fd=70000;scope.slice_path=held
+            scope.slice_identity=(held_info.st_dev,held_info.st_ino)
+            scope.slice_files={'cgroup.events':(fd,(file_info.st_dev,file_info.st_ino))}
+            scope.slice_cgroup='/qtt1n2.slice';scope.manager_identity=manager;scope.boot_id=boot
+            scope.argv=('/missing-fixture',);scope.launch_argv=('/usr/bin/systemd-run','--unit=qtt1n2.service','--','/missing-fixture')
+            scope._bind_and_release=lambda status:(_ for _ in ()).throw(RuntimeError('injected after binding'))
+            if case=='missing-slice':scope.slice_path=area/'absent-slice'
+            if case=='replaced-slice':
+                replacement=area/'replacement';replacement.mkdir();scope.slice_path=replacement
+            token=o._LINUX_PREFLIGHT_PROCESS_V1.set(scope)
+            try:
+                receipt=actual_supervisor(scope.argv,cwd=area,run_id='reference-scope',phase='fast-preflight-native-service',
+                    command_index=1,evidence_root=spool,timeout_seconds=30,execution_deadline_ns=scope.execution_deadline_ns,
+                    environment=scope.environment,platform_name='posix',mirror_stdout=False,mirror_stderr=False,
+                    output_limits=dict(stdout_bytes=1048576,stderr_bytes=1048576,combined_output_bytes=2097152),output_observation={})
+            except BaseException as exc:
+                print('FAILED_START_REFERENCE_EXCEPTION',case,repr(exc),json.dumps(scope.history,default=str))
+                raise
+            finally:o._LINUX_PREFLIGHT_PROCESS_V1.reset(token)
+            accepted=case in ('before-binding','after-binding','journal-failure','journal-cap','absence-after-stop')
+            assert scope.settled==accepted,(case,scope.history,receipt)
+            assert scope.startup_error is not None
+            assert ((receipt.start_failure_class is None) if bound else bool(receipt.start_failure_class)),(case,receipt,scope.history)
+            assert receipt.native_exit_code is None and (receipt.pid==42 if bound else receipt.pid is None)
+            assert Path(receipt.stdout_path).read_bytes()==b'fixture stdout before denied start\n'
+            assert Path(receipt.stderr_path).read_bytes()==b'fixture stderr before denied start\n'
+            assert receipt.failure_class==('ENGVR_PROCESS_START_FAILED' if accepted or not bound else 'ENGVR_PROCESS_TERMINATION_FAILED'),(case,receipt)
+            assert receipt.output_observation['linux_startup']['resource_settled']==accepted
+            assert o._command_requires_process_retention_v1(receipt)
+            assert scope.closeout_attempts<=6 and scope.closeout_slice_observations<=2
+            assert query.resource_spent_ns<=40*10**9 and query.startup_output_bytes<=32*1024**2
+            assert sum(a[0]=='/usr/bin/systemd-run' for a in queries)==1
+            assert any(a[0]=='/usr/bin/journalctl' for a in queries)
+            assert len(words)<=1
+            # Original native failure never becomes an application exit, and a
+            # second cleanup caller reuses proof/failure without another query.
+            count=len(queries)
+            if accepted:assert scope.finish()
+            else:
+                with pytest.raises(Exception):scope.finish()
+            assert len(queries)==count
+            journals=[v['startup_diagnostic'] for v in scope.history if v.get('startup_diagnostic',{}).get('kind')=='journal']
+            assert len(journals)==1
+            if case in ('journal-failure','journal-cap'):assert not journals[0]['complete']
+            if accepted:
+                assert all(receipt.output_observation[k]['complete'] for k in ('stdout','stderr'))
+            startup_references.append(dict(case=case,resource_settled=scope.settled,native_linux_qualification=False,
+                native_exit=receipt.native_exit_code,pid=receipt.pid,failure_class=receipt.failure_class,
+                history=scope.history,query_attempts=query.attempts,resource_spent_ns=query.resource_spent_ns))
+        os.close(fd)
+    for case in ('before-binding','after-binding','live-control','queued-job','missing-slice','replaced-slice',
+            'nonempty-slice','missing-fields','conflicting-invocation','nonterminal-pidfd','stop-without-proof',
+            'journal-failure','journal-cap','absence-after-stop','unavailable-after-stop'):
+        startup_reference(case)
+    if reference_evidence:
+        path=Path(reference_evidence).parent/'startup-recovery-references.json'
+        assert not path.exists()
+        o.atomic_write_json(path,dict(native_linux_qualification=False,cases=startup_references))
+    print('LINUX_FAILED_START_INJECTED_REFERENCES '+json.dumps(startup_references,sort_keys=True))
     # Execute the existing controller's exceptional export path with a denied
     # query adapter. No native claim or source mutation is supplied by it.
     export_reference=tmp_path/'source-export-failure-reference'

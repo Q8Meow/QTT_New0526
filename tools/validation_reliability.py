@@ -6064,6 +6064,7 @@ def supervise_command(
     receipt = None
     job_scope = None
     linux_scope = None
+    linux_start_failed = False
     try:
         try:
             if tuple_error is not None:
@@ -6145,6 +6146,7 @@ def supervise_command(
             if linux_scope is not None and type(owned) is _LinuxPreflightProcessV1 and owned is linux_scope.process:
                 process = owned
                 pid = process.pid
+                linux_start_failed = True
             if (job_scope is not None and type(owned) is _WindowsJobProcessV1
                     and owned is job_scope.process and owned._info.process):
                 process = owned
@@ -6156,7 +6158,7 @@ def supervise_command(
             if process is None:
                 _close_prestart_evidence_stream(stdout_stream, stdout_outcome)
                 _close_prestart_evidence_stream(stderr_stream, stderr_outcome)
-            else:
+            elif not linux_start_failed:
                 _scan_output_failure(stdout_outcome, exc)
         except BaseException as body:
             owned = getattr(body, 'owned_process', None)
@@ -6186,7 +6188,34 @@ def supervise_command(
                     failures.append(outcome["evidence_error"])
             _scan_raise_errors(failures)
 
-        if process is not None:
+        if linux_start_failed:
+            try:
+                linux_scope.recover_failed_start()
+                termination_state='OWNED_FAILED_START_RESOURCE_SETTLED;NO_APPLICATION_SUCCESS'
+            except BaseException as exc:
+                linux_scope.history.append(dict(supervisor_startup_cleanup_error=repr(exc)))
+                termination_state='OWNED_FAILED_START_RESOURCE_UNRESOLVED'
+                failure_class='ENGVR_PROCESS_TERMINATION_FAILED'
+            # Preserve actual spool bytes even without a completed application
+            # command. A qualified empty slice permits EOF, not an invented exit.
+            for pipe,stream,outcome in ((process.stdout,stdout_stream,stdout_outcome),
+                    (process.stderr,stderr_stream,stderr_outcome)):
+                try:
+                    with linux_scope.query.owned_resource_phase():
+                        for attempt in range(1025):
+                            linux_scope.query.check(settling=True)
+                            consumed,eof=_consume_available_pipe(pipe,stream,outcome=outcome,
+                                native_terminal=linux_scope.settled)
+                            if eof:
+                                outcome['eof_observed']=True
+                                break
+                            if not consumed:
+                                _scan_output_failure(outcome,RuntimeError('LINUX_PREFLIGHT_STARTUP_STREAM_TERMINAL_UNPROVED'))
+                                break
+                        else:_scan_output_failure(outcome,RuntimeError('LINUX_PREFLIGHT_STARTUP_STREAM_BOUND'))
+                except BaseException as exc:_scan_output_failure(outcome,exc)
+                finally:_finalize_owned_output_resources(pipe,stream,outcome=outcome)
+        if process is not None and not linux_start_failed:
             if job_scope is not None and not any('evidence_error' in value for value in (stdout_outcome,stderr_outcome)):
                 try:
                     job_scope.verify_created()
@@ -6332,6 +6361,15 @@ def supervise_command(
                     None if launch_input.result is None else launch_input.result['native_read_observation'])
             if job_scope is not None:
                 bounded_observation['windows_job'] = job_scope.projection()
+            output_observation.update(bounded_observation)
+        if linux_start_failed:
+            # The unchanged receipt schema does not pair a start-failure field
+            # with a genuinely bound PID. Preserve that case in its projection.
+            if pid is not None:start_failure=None
+            else:failure_class='ENGVR_PROCESS_START_FAILED'
+            bounded_observation['linux_startup']=dict(primary_error=repr(linux_scope.startup_error),
+                bound_pid=pid,resource_settled=linux_scope.settled,
+                recovery_error=None if linux_scope.failure_recovery_error is None else repr(linux_scope.failure_recovery_error))
             output_observation.update(bounded_observation)
         receipt = CommandExecutionReceiptV1(
             schema_version=SCHEMA_VERSION,
@@ -12392,7 +12430,7 @@ def _linux_preflight_child_environment_v1(fixed, environment, runtime):
 
 class _LinuxPreflightQueriesV1:
     """Bounded observations of one owned native profile, using existing supervision."""
-    def __init__(self, *, evidence_root, deadline_ns, reserved_output_bytes=0):
+    def __init__(self, *, evidence_root, deadline_ns, reserved_output_bytes=0, startup_closeout_bytes=0):
         _preflight_require_v1(sys.platform == 'linux','LINUX_PREFLIGHT_PLATFORM')
         self.evidence_root = Path(evidence_root)
         self.deadline_ns = _preflight_integer_v1(deadline_ns,positive=True)
@@ -12403,6 +12441,104 @@ class _LinuxPreflightQueriesV1:
         _preflight_require_v1(self.retained_limit > 0,'LINUX_PREFLIGHT_CONTROLLER_OUTPUT_RESERVATION')
         self.observations = []
         self.observation = None
+        _preflight_require_v1(startup_closeout_bytes in (0,32*1024**2)
+            and startup_closeout_bytes < self.retained_limit,'LINUX_PREFLIGHT_STARTUP_OUTPUT_RESERVATION')
+        self.startup_output_limit=startup_closeout_bytes
+        self.startup_output_bytes=0
+        self.startup_fixture_reservation=0
+        self.startup_fixture_bytes=0
+        self.resource_spent_ns=0
+        self.resource_depth=0
+        self._startup_argv=None
+        self.last_command_receipt=None
+    def remaining_output(self):
+        if self.resource_depth:
+            return min(self.retained_limit-self.retained,
+                self.startup_output_limit-self.startup_output_bytes-self.startup_fixture_reservation)
+        return self.retained_limit-self.startup_output_limit-(self.retained-self.startup_output_bytes-self.startup_fixture_bytes)
+
+    @contextmanager
+    def owned_resource_phase(self):
+        """All startup diagnostics and final units/handles share one 40s debit."""
+        if self.resource_depth:
+            yield
+            return
+        start=time.monotonic_ns()
+        previous=self.deadline_ns
+        _preflight_require_v1(self.resource_spent_ns < 40*10**9 and self.startup_output_limit,
+            'LINUX_PREFLIGHT_OWNED_RESOURCE_ALLOWANCE_UNAVAILABLE')
+        self.deadline_ns=min(previous,start+40*10**9-self.resource_spent_ns)
+        self.resource_depth=1
+        try:
+            self.check(settling=True)
+            yield
+            self.check(settling=True)
+        finally:
+            self.resource_spent_ns+=time.monotonic_ns()-start
+            self.resource_depth=0
+            self.deadline_ns=previous
+
+    def startup_diagnostic(self,scope,kind):
+        """Only the failed attempt's fixed unit/status/journal/stop operands."""
+        _preflight_require_v1(type(scope) is _LinuxPreflightScopeV1 and scope.query is self
+            and scope.startup_error is not None and scope.service_created and self.resource_depth==1
+            and scope.closeout_attempts < 6,'LINUX_PREFLIGHT_STARTUP_DIAGNOSTIC_CUSTODY')
+        unit=scope.name+'.service'
+        _preflight_require_v1(re.fullmatch(r'qtt[0-9]+n[0-9]+',scope.name) is not None,
+            'LINUX_PREFLIGHT_STARTUP_DIAGNOSTIC_UNIT')
+        observed=datetime.now(UTC)
+        _preflight_require_v1(scope.attempt_utc is not None and observed>=scope.attempt_utc,
+            'LINUX_PREFLIGHT_STARTUP_DIAGNOSTIC_INTERVAL')
+        if kind=='status':
+            argv=('/usr/bin/systemctl','show','--no-pager','--all',
+                '--property='+','.join(scope._FAILED_STATUS),unit)
+        elif kind=='journal':
+            _preflight_require_v1(re.fullmatch(r'[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}',scope.boot_id)
+                is not None,'LINUX_PREFLIGHT_STARTUP_DIAGNOSTIC_BOOT')
+            stamp=lambda value:value.strftime('%Y-%m-%d %H:%M:%S.%f UTC')
+            argv=('/usr/bin/journalctl','--system','--no-pager','--quiet','--boot='+scope.boot_id,
+                '--unit='+unit,'--since='+stamp(scope.attempt_utc),'--until='+stamp(observed),
+                '--output=json','--all','--lines=201')
+        elif kind=='stop':
+            _preflight_require_v1(scope.owned_unit_status is not None and not scope.stop_attempted,
+                'LINUX_PREFLIGHT_STARTUP_STOP_OWNERSHIP')
+            scope.stop_attempted=True
+            argv=('/usr/bin/systemctl','stop',unit)
+        else:raise ValueError('unsupported startup diagnostic')
+        scope.closeout_attempts+=1
+        self.last_command_receipt=None
+        self._startup_argv=argv
+        error=None;raw=b'';stderr=b''
+        try:
+            raw=self.command(argv,settling=True)
+        except BaseException as exc:
+            error=exc
+        finally:self._startup_argv=None
+        receipt=self.last_command_receipt
+        if receipt is not None and tuple(receipt.argv)==argv:
+            raw=Path(receipt.stdout_path).read_bytes()
+            stderr=Path(receipt.stderr_path).read_bytes()
+        else:receipt=None
+        complete=receipt is not None and all(receipt.output_observation.get(s,{}).get('complete')
+            and not receipt.output_observation[s].get('overflow')
+            and not receipt.output_observation[s].get('errors') for s in ('stdout','stderr'))
+        success=complete and receipt.native_exit_code==0 and receipt.failure_class is None
+        record=dict(kind=kind,argv=list(argv),observation_utc=observed.isoformat(),
+            receipt=None if receipt is None else _json_compatible(receipt),
+            command_settled=receipt is not None and not _command_requires_process_retention_v1(receipt),
+            error=None if error is None else repr(error),complete=complete,success=success)
+        if kind=='journal':
+            records=raw.splitlines()
+            record.update(entry_count=len(records),complete=bool(success and len(records)<201))
+            try:
+                decoded=[json.loads(row) for row in records]
+                _preflight_require_v1(all(type(row) is dict for row in decoded),
+                    'LINUX_PREFLIGHT_STARTUP_JOURNAL_RECORD')
+                record['entries']=decoded
+            except BaseException as exc:
+                record.update(complete=False,decode_error=repr(exc))
+        scope.history.append(dict(startup_diagnostic=record))
+        return record,raw,stderr
     def check(self, *, settling=False):
         if self.failure is not None and not settling: raise self.failure
         _preflight_require_v1((os.getpid(),threading.get_ident()) == (self.pid,self.thread)
@@ -12419,6 +12555,8 @@ class _LinuxPreflightQueriesV1:
             self.observation.reserve('retained_bytes',len(raw))
             self.observation.observed['retained_bytes'] += len(raw)
         self.retained += len(raw)
+        if self.resource_depth:self.startup_output_bytes+=len(raw)
+        _preflight_require_v1(self.remaining_output()>=0,'LINUX_PREFLIGHT_PARTITIONED_QUERY_OUTPUT')
         _preflight_require_v1(self.retained <= self.retained_limit,'LINUX_PREFLIGHT_QUERY_OUTPUT')
         path = self.evidence_root/('native-response-'+str(len(self.observations)+1)+'.bin')
         _atomic_write_bytes_v1(path,raw)
@@ -12426,7 +12564,7 @@ class _LinuxPreflightQueriesV1:
         return raw
     def read(self,path,*,settling=False):
         self.check(settling=settling)
-        _preflight_require_v1(self.retained+1048576 <= self.retained_limit,
+        _preflight_require_v1(self.remaining_output() >= 1048576,
             'LINUX_PREFLIGHT_NATIVE_RESPONSE_RESERVATION')
         p = Path(path); before = p.lstat()
         _preflight_require_v1(stat.S_ISREG(before.st_mode) and not stat.S_ISLNK(before.st_mode),
@@ -12463,9 +12601,10 @@ class _LinuxPreflightQueriesV1:
         finally: os.close(fd)
     def command(self,argv,*,settling=False,cwd=None,git_environment=None):
         self.check(settling=settling)
-        _preflight_require_v1(type(argv) is tuple and argv and argv[0] in (
+        _preflight_require_v1(type(argv) is tuple and argv and (argv[0] in (
             '/usr/bin/systemctl','/usr/bin/systemd-run','/usr/bin/systemd-analyze',
-            '/usr/bin/busctl','/usr/bin/mount','/usr/bin/umount','/usr/bin/git'),
+            '/usr/bin/busctl','/usr/bin/mount','/usr/bin/umount','/usr/bin/git')
+            or (argv[0]=='/usr/bin/journalctl' and argv==self._startup_argv and self.resource_depth==1)),
             'LINUX_PREFLIGHT_ADMINISTRATIVE_PROGRAM')
         for value in argv:
             _preflight_require_v1(type(value) is str and '\0' not in value and '\n' not in value,
@@ -12477,7 +12616,7 @@ class _LinuxPreflightQueriesV1:
                 and all(k.startswith('GIT_') for k in git_environment),
                 'LINUX_PREFLIGHT_GIT_OWNER_ENVIRONMENT')
             environment.update(git_environment)
-        remaining_output = self.retained_limit-self.retained
+        remaining_output = self.remaining_output()
         _preflight_require_v1(remaining_output >= 2,'LINUX_PREFLIGHT_QUERY_OUTPUT_EXHAUSTED')
         stream_limit = min(1048576,remaining_output//2)
         token = _LINUX_PREFLIGHT_PROCESS_V1.set(None)
@@ -12490,7 +12629,9 @@ class _LinuxPreflightQueriesV1:
                 output_observation=observation,mirror_stdout=False,mirror_stderr=False)
         finally: _LINUX_PREFLIGHT_PROCESS_V1.reset(token)
         raw = Path(receipt.stdout_path).read_bytes(); error = Path(receipt.stderr_path).read_bytes()
+        self.last_command_receipt=receipt
         self.retained += len(raw)+len(error)
+        if self.resource_depth:self.startup_output_bytes+=len(raw)+len(error)
         self.observations.append(dict(kind='command',argv=argv,receipt=_json_compatible(receipt)))
         _preflight_require_v1(self.retained <= self.retained_limit,'LINUX_PREFLIGHT_QUERY_OUTPUT')
         _preflight_require_v1(not receipt.failure_class and receipt.native_exit_code == 0,
@@ -13914,7 +14055,7 @@ class _LinuxImmutableSourceSealV2:
             recovery_cases=self.recovery_cases,recovery_reservation=getattr(self,'recovery_reservation',None),
             owned_descriptor_count=len(self.owned))
 
-    def recovery_check(self, *, setup_uid, evidence_root):
+    def recovery_check(self, *, setup_uid, evidence_root, query, grants):
         """Three tiny real same-filesystem rollbacks, before the real checkout."""
         _preflight_require_v1(self.state=='ENUMERATED' and not self.recovery_cases
             and type(setup_uid) is int and setup_uid>0,'LINUX_V2_RECOVERY_FIXTURE_STATE')
@@ -13991,6 +14132,8 @@ class _LinuxImmutableSourceSealV2:
                     result['injected_failure']=repr(exc)
                     _preflight_require_v1(bool(triggered),'LINUX_V2_RECOVERY_NOT_INJECTED')
                 else:raise RuntimeError('LINUX_V2_RECOVERY_FAULT_NOT_EXERCISED')
+                if number==3:
+                    result['denied_start']=_LinuxPreflightScopeV1.denied_start_fixture(trial,query,grants)
                 trial.restore(deadline_ns=self.deadline_ns,processes_settled=True)
                 result['restored']=trial.state=='RESTORED'
                 for row in rows:
@@ -14011,6 +14154,7 @@ class _LinuxImmutableSourceSealV2:
                 raise
             finally:
                 result['evidence']=trial.evidence()
+                if hasattr(trial,'denied_start_result'):result['denied_start']=trial.denied_start_result
                 result['retained_path']=None if result['removed'] else str(area)
         _preflight_require_v1(len(self.recovery_cases)==3 and all(v['complete'] for v in self.recovery_cases),
             'LINUX_V2_RECOVERY_PROOF_REQUIRED')
@@ -14685,6 +14829,218 @@ class _LinuxPreflightScopeV1:
         self.slice_fd,self.root_fd,self.process = None,None,None
         self.slice_created,self.service_created,self.terminated,self.settled = False,False,False,False
         self.invocation = None
+        self.attempt_utc=None
+        self.startup_error=None
+        self.launcher_receipt=None
+        self.failure_recovery_started=False
+        self.failure_recovery_error=None
+        self.closeout_attempts=self.closeout_slice_observations=0
+        self.owned_unit_status=None
+        self.stop_attempted=self.stop_acknowledged=self.slice_stop_attempted=False
+    _FAILED_STATUS=('Id','LoadState','ActiveState','SubState','Result','MainPID','ControlPID',
+        'ExecMainPID','ExecMainCode','ExecMainStatus','InvocationID','ControlGroup','Slice','Job','Type','Restart','Transient')
+
+    def _startup_status(self):
+        record,raw,error=self.query.startup_diagnostic(self,'status')
+        result={}
+        try:
+            for line in raw.decode('utf-8','strict').splitlines():
+                key,sep,value=line.partition('=')
+                _preflight_require_v1(sep and key in self._FAILED_STATUS and key not in result,
+                    'LINUX_PREFLIGHT_FAILED_START_STATUS_SHAPE')
+                result[key]=value
+        finally:
+            record.update(raw_fields=dict(result),missing_fields=[k for k in self._FAILED_STATUS if k not in result])
+        _preflight_require_v1(record['complete'] and record['command_settled'] and record['receipt'] is not None
+            and not record['receipt']['timeout_state']=='TRIGGERED',
+            'LINUX_PREFLIGHT_FAILED_START_STATUS_UNAVAILABLE')
+        if result.get('Id')==self.name+'.service' and result.get('LoadState')=='not-found':
+            _preflight_require_v1(record['receipt']['native_exit_code'] in (0,4)
+                and self.owned_unit_status is not None and self.stop_acknowledged
+                and result.get('ActiveState')=='inactive' and result.get('Job') in ('','0')
+                and 'Job' in result,'LINUX_PREFLIGHT_FAILED_START_ABSENCE_UNOWNED')
+            self.history.append(dict(authentic_absence_after_stop=dict(result)))
+            return result
+        _preflight_require_v1(record['success'] and not record['missing_fields'],
+            'LINUX_PREFLIGHT_FAILED_START_STATUS_INCOMPLETE')
+        _preflight_require_v1(result['Id']==self.name+'.service' and result['LoadState']=='loaded'
+            and result['Slice']==self.name+'.slice' and result['Type']=='exec'
+            and result['Restart']=='no' and result['Transient']=='yes'
+            and re.fullmatch(r'[0-9a-f]{32}',result['InvocationID']) is not None,
+            'LINUX_PREFLIGHT_FAILED_START_UNIT_OWNERSHIP')
+        _preflight_require_v1(result['ControlGroup'] in ('',self.slice_cgroup+'/'+self.name+'.service'),
+            'LINUX_PREFLIGHT_FAILED_START_CONTROL_GROUP')
+        if self.invocation is not None:
+            _preflight_require_v1(result['InvocationID']==self.invocation,
+                'LINUX_PREFLIGHT_FAILED_START_INVOCATION')
+        else:self.invocation=result['InvocationID']
+        self.owned_unit_status=dict(result)
+        return result
+
+    def _startup_terminal(self,status):
+        if status.get('LoadState')=='not-found':return self.stop_acknowledged
+        # systemctl v255 renders the native (uo) Job id 0 as an explicit Job=.
+        # A missing field or a completely blank response is never zero evidence.
+        return (status['ActiveState'] in ('failed','inactive') and status['Job'] in ('','0')
+            and status['MainPID']=='0' and status['ControlPID']=='0')
+
+    def _startup_manager(self):
+        _preflight_require_v1(self.query.read('/proc/sys/kernel/random/boot_id',settling=True)
+            .decode('ascii','strict').strip()==self.boot_id
+            and _linux_preflight_process_identity_v1(1,self.query,settling=True)==self.manager_identity,
+            'LINUX_PREFLIGHT_FAILED_START_MANAGER_CHANGED')
+
+    def _startup_pidfd_terminal(self):
+        if self.process.pidfd is None:return True
+        import select
+        poll=select.poll();poll.register(self.process.pidfd,select.POLLIN)
+        result=poll.poll(0)
+        self.history.append(dict(failed_start_pidfd_observation=result,pid=self.process.pid))
+        return bool(result) and all(fd==self.process.pidfd and flags & select.POLLIN
+            and not flags & (select.POLLERR|select.POLLNVAL) for fd,flags in result)
+
+    def recover_failed_start(self):
+        """Resource settlement only; never manufacture a process PID or exit."""
+        if self.failure_recovery_started:
+            if self.settled:return True
+            raise self.failure_recovery_error or RuntimeError('LINUX_PREFLIGHT_FAILED_START_UNRESOLVED')
+        self.failure_recovery_started=True
+        try:
+            _preflight_require_v1(self.startup_error is not None and self.service_created and self.process is not None
+                and self.launcher_receipt is not None and not _command_requires_process_retention_v1(self.launcher_receipt),
+                'LINUX_PREFLIGHT_FAILED_START_LAUNCHER_UNSETTLED')
+            with self.query.owned_resource_phase():
+                self._startup_manager()
+                status_error=None;status=None
+                try:status=self._startup_status()
+                except BaseException as exc:status_error=exc
+                # Diagnostics precede any stop; journal failure remains secondary.
+                try:self.query.startup_diagnostic(self,'journal')
+                except BaseException as exc:self.history.append(dict(startup_journal_error=repr(exc)))
+                if status_error is not None:raise status_error
+                if not self._startup_terminal(status):
+                    stop,_,_=self.query.startup_diagnostic(self,'stop')
+                    _preflight_require_v1(stop['success'],'LINUX_PREFLIGHT_FAILED_START_STOP_UNACKNOWLEDGED')
+                    self.stop_acknowledged=True
+                    status=self._startup_status()
+                _preflight_require_v1(self._startup_terminal(status),
+                    'LINUX_PREFLIGHT_FAILED_START_UNIT_NOT_TERMINAL')
+                self._startup_manager()
+                _preflight_require_v1(self._startup_pidfd_terminal(),
+                    'LINUX_PREFLIGHT_FAILED_START_BOUND_PIDFD_NONTERMINAL')
+                _preflight_require_v1(self.closeout_slice_observations<2,
+                    'LINUX_PREFLIGHT_FAILED_START_SLICE_OBSERVATION_LIMIT')
+                self.closeout_slice_observations+=1
+                _preflight_require_v1(self.slice_observation(),'LINUX_PREFLIGHT_FAILED_START_SLICE_POPULATED')
+            self.settled=True
+            self.history.append(dict(failed_start_resource_settled=True,application_success=False,
+                primary_error=repr(self.startup_error),terminal_status=status,
+                closeout_commands=self.closeout_attempts,held_slice_observations=self.closeout_slice_observations))
+            return True
+        except BaseException as exc:
+            self.failure_recovery_error=exc
+            self.history.append(dict(failed_start_resource_settled=False,error=repr(exc),
+                primary_error=repr(self.startup_error)))
+            raise
+
+    def close_owned_units(self):
+        """Original exact units and held descriptors; charged to shared 40s."""
+        _preflight_require_v1(not self.service_created or self.settled,
+            'LINUX_PREFLIGHT_UNIT_RELEASE_BEFORE_SETTLEMENT')
+        with self.query.owned_resource_phase():
+            if self.service_created and not self.stop_acknowledged:
+                _preflight_require_v1(not self.stop_attempted,'LINUX_PREFLIGHT_STOP_ALREADY_ATTEMPTED')
+                self.stop_attempted=True
+                self.query.command(('/usr/bin/systemctl','stop',self.name+'.service'),settling=True)
+                self.stop_acknowledged=True
+            if self.slice_created:
+                _preflight_require_v1(not self.slice_stop_attempted,'LINUX_PREFLIGHT_SLICE_STOP_ALREADY_ATTEMPTED')
+                self.slice_stop_attempted=True
+                self.query.command(('/usr/bin/systemctl','stop',self.name+'.slice'),settling=True)
+            failures=[]
+            for key,(descriptor,identity) in tuple(self.slice_files.items()):
+                del self.slice_files[key]
+                try:os.close(descriptor)
+                except BaseException as exc:failures.append(exc)
+            for name in ('root_fd','slice_fd'):
+                descriptor=getattr(self,name)
+                if descriptor is not None:
+                    setattr(self,name,None)
+                    try:os.close(descriptor)
+                    except BaseException as exc:failures.append(exc)
+            if self.process is not None and self.process.pidfd is not None:
+                descriptor=self.process.pidfd;self.process.pidfd=None
+                try:os.close(descriptor)
+                except BaseException as exc:failures.append(exc)
+            self.history.append(dict(owned_unit_handles_closed=not failures,errors=[repr(e) for e in failures]))
+            _scan_raise_errors(failures)
+
+    @classmethod
+    def denied_start_fixture(cls,source,query,grants):
+        """The third tiny seal's single actual intentionally absent executable."""
+        control=query.evidence_root.parent
+        root=control/'startup-denial-root'
+        root.mkdir(mode=0o755,exist_ok=False)
+        root_identity=_scan_same_api_version(root.lstat())[:2]
+        spool=query.evidence_root/'startup-denial-streams'
+        spool.mkdir(mode=0o700,exist_ok=False)
+        name=source.run_id.replace('-recovery-3','')+'0'
+        missing='/qtt-intentionally-absent-fixture-executable'
+        _preflight_require_v1(not (root/missing.lstrip('/')).exists(),'LINUX_PREFLIGHT_DENIED_EXECUTABLE_EXISTS')
+        limited={**grants,'execution_deadline_ns':min(grants['execution_deadline_ns'],time.monotonic_ns()+60*10**9)}
+        scope=cls(name=name,query=query,control=control,runtime=root,private_root=root,spool=spool,
+            repository=str(source.root),installation='',interpreter=missing,source=source,header=None,
+            blobs=None,vectors=None,grants=limited,event={},environment=dict(PATH='/usr/bin',LANG='C.UTF-8',LC_ALL='C.UTF-8'))
+        result=dict(intentional_denial=True,application_launched=False,settled=False,removed=False,root=str(root))
+        source.denied_start_result=result
+        try:
+            _preflight_require_v1(query.startup_fixture_reservation==0 and
+                query.startup_output_bytes+2097152<=query.startup_output_limit,
+                'LINUX_PREFLIGHT_DENIED_STREAM_RESERVATION')
+            query.startup_fixture_reservation=2097152
+            scope.start_slice()
+            scope.argv=(missing,)
+            scope.launch_argv=('/usr/bin/systemd-run','--system','--no-ask-password','--expand-environment=no',
+                '--unit='+name+'.service','--slice='+name+'.slice',
+                *('--property='+k+'='+v for k,v in _LINUX_PREFLIGHT_PROPERTIES_V1),
+                '--property=RootDirectory='+str(root),'--property=WorkingDirectory=/',
+                '--property=StandardInput=null','--property=StandardOutput=append:'+str(spool/'command-1.stdout.bin'),
+                '--property=StandardError=append:'+str(spool/'command-1.stderr.bin'),'--',missing)
+            token=_LINUX_PREFLIGHT_PROCESS_V1.set(scope)
+            try:
+                receipt=supervise_command(scope.argv,cwd=source.root,run_id=name,phase='fast-preflight-native-service',
+                    command_index=1,evidence_root=spool,environment=scope.environment,timeout_seconds=60,
+                    execution_deadline_ns=scope.execution_deadline_ns,output_limits=dict(stdout_bytes=1048576,
+                        stderr_bytes=1048576,combined_output_bytes=2097152),output_observation={},mirror_stdout=False,mirror_stderr=False)
+            finally:_LINUX_PREFLIGHT_PROCESS_V1.reset(token)
+            delivered=sum((spool/('command-1.'+stream+'.bin')).stat().st_size for stream in ('stdout','stderr'))
+            query.startup_fixture_bytes+=delivered
+            query.retained+=delivered
+            _preflight_require_v1(query.startup_fixture_bytes<=query.startup_fixture_reservation,
+                'LINUX_PREFLIGHT_DENIED_STREAM_OUTPUT')
+            result.update(receipt=_json_compatible(receipt),settled=scope.settled)
+            _preflight_require_v1(scope.startup_error is not None and scope.settled
+                and scope.launcher_receipt is not None and scope.launcher_receipt.native_exit_code!=0
+                and receipt.native_exit_code is None and receipt.pid is None
+                and receipt.failure_class=='ENGVR_PROCESS_START_FAILED',
+                'LINUX_PREFLIGHT_DENIED_START_NOT_QUALIFIED')
+            scope.close_owned_units()
+            with query.owned_resource_phase():
+                _preflight_require_v1(_scan_same_api_version(root.lstat())[:2]==root_identity,
+                    'LINUX_PREFLIGHT_DENIED_ROOT_CHANGED')
+                # Namespace preparation may create manager-owned mountpoints in
+                # this exact disposable private root. Existing removal owner only.
+                remove_exact_run_owned_process_tree(root,expected_run_root=root,repo_root=source.root,
+                    evidence_root=query.evidence_root)
+                result['removed']=True
+            return result
+        except BaseException as exc:
+            result['error']=repr(exc)
+            raise
+        finally:
+            result.update(history=scope.history,settled=scope.settled,
+                launcher_receipt=None if scope.launcher_receipt is None else _json_compatible(scope.launcher_receipt))
+            _atomic_write_bytes_v1(query.evidence_root/'startup-denial-result.json',_preflight_canonical_v1(result))
     def show(self,unit,*,settling=False):
         _preflight_require_v1(unit in (self.name+'.slice',self.name+'.service'),'LINUX_PREFLIGHT_EXACT_UNIT')
         raw = self.query.command(('/usr/bin/systemctl','show','--no-pager',
@@ -14719,6 +15075,8 @@ class _LinuxPreflightScopeV1:
         _linux_preflight_path_v1(self.slice_cgroup)
         own = _linux_preflight_process_identity_v1(os.getpid(),self.query)
         manager = _linux_preflight_process_identity_v1(1,self.query)
+        self.manager_identity=manager
+        self.boot_id=self.query.read('/proc/sys/kernel/random/boot_id').decode('ascii','strict').strip()
         _preflight_require_v1(own['namespaces']['cgroup'] == manager['namespaces']['cgroup']
             and own['namespaces']['pid'] == manager['namespaces']['pid'],
             'LINUX_PREFLIGHT_HOST_MANAGER_NAMESPACE')
@@ -14793,8 +15151,16 @@ class _LinuxPreflightScopeV1:
             and environment == self.environment,'LINUX_PREFLIGHT_EXACT_SUPERVISOR_ADAPTER')
         self.process = _LinuxPreflightProcessV1(self)
         try:
+            _preflight_require_v1(not self.service_created,'LINUX_PREFLIGHT_ONE_SHOT_SERVICE')
             self.service_created = True  # The native attempt may partially create it even if reporting fails.
-            self.query.command(self.launch_argv)
+            self.attempt_utc=datetime.now(UTC)
+            self.query.last_command_receipt=None
+            try:self.query.command(self.launch_argv)
+            finally:
+                observed=self.query.last_command_receipt
+                if observed is not None and tuple(observed.argv)==self.launch_argv:
+                    self.launcher_receipt=observed
+                    self.history.append(dict(original_launch_receipt=_json_compatible(observed)))
             status = self.show(self.name+'.service')
             _preflight_require_v1(status['InvocationID'] and int(status['MainPID']) > 0,
                 'LINUX_PREFLIGHT_MAIN_PROCESS_UNAVAILABLE')
@@ -14804,6 +15170,9 @@ class _LinuxPreflightScopeV1:
             self._bind_and_release(status)
             return self.process
         except BaseException as exc:
+            self.startup_error=exc
+            self.history.append(dict(original_startup_error=repr(exc),bound_pid=self.process.pid,
+                bound_pidfd=self.process.pidfd is not None))
             exc.owned_process = self.process
             raise
     def _bind_and_release(self,status):
@@ -14899,6 +15268,8 @@ class _LinuxPreflightScopeV1:
         _atomic_write_bytes_v1(self.control/'release/release.json',_preflight_canonical_v1(
             dict(name=self.name,pid=pid,start=process['start'],invocation=self.invocation)),control_mode=0o444)
     def terminate(self,grace_seconds):
+        if self.startup_error is not None:
+            return 'OWNED_FAILED_START_RESOURCE_SETTLEMENT',self.recover_failed_start()
         _preflight_require_v1(not self.terminated,'LINUX_PREFLIGHT_TERMINATION_ALREADY_ATTEMPTED')
         self.terminated = True
         self.query.command(('/usr/bin/systemctl','kill','--kill-whom=all','--signal=KILL',self.name+'.service'),settling=True)
@@ -14909,6 +15280,7 @@ class _LinuxPreflightScopeV1:
             time.sleep(0.1)
         return 'OWNED_SYSTEMD_KILL;SETTLEMENT_UNRESOLVED',False
     def finish(self):
+        if self.startup_error is not None:return self.recover_failed_start()
         _preflight_require_v1(self.process is not None and self.process.poll() is not None
             and self.slice_observation(),'LINUX_PREFLIGHT_TERMINAL_CUSTODY_UNESTABLISHED')
         self.settled = True

@@ -9831,7 +9831,7 @@ def _linux_preflight_controller_v1(repository,installation,interpreter,event,eve
         (control/directory).mkdir(mode=0o555)
     grants = o._linux_preflight_grants_v1(origin)
     query = o._LinuxPreflightQueriesV1(evidence_root=control/'native-evidence',deadline_ns=grants['settlement_deadline_ns'],
-        reserved_output_bytes=2*67108864)
+        reserved_output_bytes=2*67108864,startup_closeout_bytes=32*1024**2)
     source = scope = None
     capture_counts = dict(files=0,entries=0)
     census = capacity = capacity_v2 = install = None
@@ -9865,7 +9865,7 @@ def _linux_preflight_controller_v1(repository,installation,interpreter,event,eve
         o._preflight_require_v1(time.monotonic_ns() < grants['settlement_deadline_ns']-220*10**9,
             'LINUX_V2_SETTLEMENT_RESERVATION')
         source.primitive_check(query)
-        source.recovery_check(setup_uid=int(os.environ['SUDO_UID']),evidence_root=control/'native-evidence')
+        source.recovery_check(setup_uid=int(os.environ['SUDO_UID']),evidence_root=control/'native-evidence',query=query,grants=grants)
         source.protect()
         source.readability()
         source.stage='setup'
@@ -9930,19 +9930,23 @@ def _linux_preflight_controller_v1(repository,installation,interpreter,event,eve
                 execution_deadline_ns=grants['execution_deadline_ns'],output_limits=dict(stdout_bytes=64*1024**2,
                     stderr_bytes=64*1024**2,combined_output_bytes=128*1024**2),output_observation=observed)
         finally: o._LINUX_PREFLIGHT_PROCESS_V1.reset(token)
-        o._preflight_require_v1(scope.settled and not o._command_requires_process_retention_v1(receipt),
+        o._preflight_require_v1(scope.settled and (scope.startup_error is not None or not o._command_requires_process_retention_v1(receipt)),
             'LINUX_PREFLIGHT_NATIVE_CUSTODY_UNRESOLVED')
+        if scope.startup_error is not None:raise scope.startup_error
     except BaseException as exc:
         failures.append(exc)
         if scope is not None and scope.service_created and not scope.settled:
             try:
-                if not scope.terminated: scope.terminate(10)
-                scope.finish()
+                if scope.startup_error is not None:scope.recover_failed_start()
+                else:
+                    if not scope.terminated:scope.terminate(10)
+                    scope.finish()
             except BaseException as cleanup_error: failures.append(cleanup_error)
     if source is not None and source.failure is None and failures:
         source.failure=failures[0]
         source.state='FAILED'
-    settled = scope is None or not scope.service_created or scope.settled
+    recovery_resources_settled=source is None or all(row['complete'] for row in source.recovery_cases)
+    settled = (scope is None or not scope.service_created or scope.settled) and recovery_resources_settled
     exported = []
     export_bytes = export_entries = 0
     export_complete = False
@@ -10073,16 +10077,11 @@ def _linux_preflight_controller_v1(repository,installation,interpreter,event,eve
             post_export_spent=time.monotonic_ns()-post_export_start
             export_elapsed_ns+=post_export_spent
             post_export_start=None
-            query.deadline_ns=min(grants['settlement_deadline_ns'],time.monotonic_ns()+40*10**9)
-            if scope is not None:
-                if scope.service_created: query.command(('/usr/bin/systemctl','stop',name+'.service'),settling=True)
-                if scope.slice_created: query.command(('/usr/bin/systemctl','stop',name+'.slice'),settling=True)
-                for descriptor,identity in scope.slice_files.values(): os.close(descriptor)
-                for descriptor in (scope.root_fd,scope.slice_fd,None if scope.process is None else scope.process.pidfd):
-                    if descriptor is not None: os.close(descriptor)
-            stopped = True
-            if mounted: query.command(('/usr/bin/umount',str(runtime)),settling=True)
-            unmounted = True
+            with query.owned_resource_phase():
+                if scope is not None:scope.close_owned_units()
+                stopped = True
+                if mounted: query.command(('/usr/bin/umount',str(runtime)),settling=True)
+                unmounted = True
             # Stop/unmount receipts are produced after the first export. Preserve
             # only those newly created files, never overwrite earlier evidence.
             post_export_start=time.monotonic_ns()
@@ -10092,17 +10091,24 @@ def _linux_preflight_controller_v1(repository,installation,interpreter,event,eve
                 for path in sorted((control/'native-evidence').iterdir()):
                     destination = export_root/'native'/path.name
                     if not destination.exists(): export_file(path,destination,deadline_ns=post_export_deadline)
-            for path,identity in ((runtime,runtime_identity),(control,control_identity)):
-                actual = path.lstat()
-                o._preflight_require_v1(path.parent == pathlib.Path('/run') and
-                    (actual.st_dev,actual.st_ino) == identity and stat.S_ISDIR(actual.st_mode),
-                    'LINUX_PREFLIGHT_EXACT_CLEANUP_ROOT')
-                o.remove_exact_run_owned_process_tree(path,expected_run_root=path,
-                    repo_root=repository,evidence_root=export_root)
-            removed = True
+            with query.owned_resource_phase():
+                for path,identity in ((runtime,runtime_identity),(control,control_identity)):
+                    actual = path.lstat()
+                    o._preflight_require_v1(path.parent == pathlib.Path('/run') and
+                        (actual.st_dev,actual.st_ino) == identity and stat.S_ISDIR(actual.st_mode),
+                        'LINUX_PREFLIGHT_EXACT_CLEANUP_ROOT')
+                    o.remove_exact_run_owned_process_tree(path,expected_run_root=path,
+                        repo_root=repository,evidence_root=export_root)
+                removed = True
         except BaseException as exc: failures.append(exc)
     if post_export_start is not None:export_elapsed_ns += time.monotonic_ns()-post_export_start
     cleanup = dict(source_accounting=None if source is None else source.evidence(),
+        owned_resource_spent_ns=getattr(query,'resource_spent_ns',None),
+        startup_output_bytes=getattr(query,'startup_output_bytes',None),
+        startup_fixture_output_bytes=getattr(query,'startup_fixture_bytes',None),
+        startup_fixture_output_reservation=getattr(query,'startup_fixture_reservation',None),
+        tiny_recovery_resources_settled=recovery_resources_settled,
+        native_history=[] if scope is None else o._json_compatible(scope.history),
         export_elapsed_ns=export_elapsed_ns,pre_export_deadline_ns=pre_export_deadline,
         post_export_deadline_ns=post_export_deadline,service_settled=settled,source_attributes_restored=restored,evidence_export_complete=export_complete,
         service_created=scope is not None and scope.service_created,runtime_mount_attempted=mounted,
