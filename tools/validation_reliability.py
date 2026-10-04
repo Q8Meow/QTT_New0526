@@ -12258,7 +12258,7 @@ _LINUX_PREFLIGHT_PROPERTIES_V1 = (
     ('Type','exec'), ('Restart','no'), ('RemainAfterExit','yes'), ('DynamicUser','yes'),
     ('UMask','0077'), ('NoNewPrivileges','yes'), ('CapabilityBoundingSet',''),
     ('AmbientCapabilities',''), ('PrivateDevices','yes'), ('PrivateNetwork','yes'),
-    ('PrivateIPC','yes'), ('InaccessiblePaths','/dev/shm /dev/mqueue /dev/hugepages'),
+    ('PrivateIPC','yes'), ('InaccessiblePaths','+/dev/shm +/dev/mqueue +/dev/hugepages'),
     ('PrivateTmp','yes'), ('ProtectSystem','strict'), ('ProtectHome','tmpfs'),
     ('MountAPIVFS','yes'), ('ProtectProc','invisible'), ('ProtectControlGroups','yes'),
     ('ProtectKernelTunables','yes'), ('ProtectKernelModules','yes'), ('ProtectKernelLogs','yes'),
@@ -12374,7 +12374,8 @@ def _linux_preflight_service_argv_v1(*, name, private_root, runtime, control, sp
         interpreter, startup_deadline_ns, environment, installation_source=None):
     _preflight_require_v1(type(name) is str and len(name) <= 64 and re.fullmatch(r'qtt[0-9]+n[0-9]+',name),
         'LINUX_PREFLIGHT_UNIT_NAME')
-    for p in (private_root,runtime,control,spool,repository,installation,interpreter): _linux_preflight_path_v1(p)
+    for p in (private_root,runtime,control,spool,repository,installation,interpreter,
+            '/dev/shm','/dev/mqueue','/dev/hugepages','/tmp','/var/tmp'): _linux_preflight_path_v1(p)
     _preflight_integer_v1(startup_deadline_ns,positive=True)
     _preflight_require_v1(type(environment) is dict and environment == _linux_preflight_environment_v1(
         repository=repository,installation=installation,runtime=runtime,control=control),
@@ -12390,7 +12391,7 @@ def _linux_preflight_service_argv_v1(*, name, private_root, runtime, control, sp
     properties = (*_LINUX_PREFLIGHT_PROPERTIES_V1,('RootDirectory',private_root),('WorkingDirectory',repository),
         ('BindReadOnlyPaths',' '.join(a+':'+b for a,b in bindings)),
         ('BindPaths',backing+':'+runtime+' '+backing+'/tmp:/tmp '+backing+'/var-tmp:/var/tmp'),
-        ('ReadWritePaths',runtime+' /tmp /var/tmp'),('StandardInput','null'),
+        ('ReadWritePaths','+'+runtime+' +/tmp +/var/tmp'),('StandardInput','null'),
         ('StandardOutput','append:'+spool+'/command-1.stdout.bin'),('StandardError','append:'+spool+'/command-1.stderr.bin'))
     entry = (interpreter,'-I','-B','-X','utf8',repository+'/tools/run_validation_gates.py',
         '--linux-preflight-enter','--phase','fast-preflight','--startup-deadline-ns',str(startup_deadline_ns))
@@ -14834,10 +14835,15 @@ def _linux_preflight_unit_policy_v1(status, *, name, root, repository, runtime, 
         'RuntimeDirectory':'','Slice':name+'.slice'}
     for key,wanted in expected.items():
         _preflight_require_v1(status.get(key) == wanted,'LINUX_PREFLIGHT_UNIT_READBACK:'+key)
-    _preflight_require_v1(set(status.get('InaccessiblePaths','').split()) ==
-        {'/dev/shm','/dev/mqueue','/dev/hugepages'},'LINUX_PREFLIGHT_DEVICE_MASK_READBACK')
-    _preflight_require_v1(set(status.get('ReadWritePaths','').split()) == {runtime,'/tmp','/var/tmp'},
-        'LINUX_PREFLIGHT_WRITABLE_PATH_READBACK')
+    for key,logical,label in (
+            ('InaccessiblePaths',('/dev/shm','/dev/mqueue','/dev/hugepages'),'LINUX_PREFLIGHT_DEVICE_MASK_READBACK'),
+            ('ReadWritePaths',(runtime,'/tmp','/var/tmp'),'LINUX_PREFLIGHT_WRITABLE_PATH_READBACK')):
+        for path in logical: _linux_preflight_path_v1(path)
+        value=status.get(key)
+        _preflight_require_v1(type(value) is str,label)
+        tokens=value.split()
+        _preflight_require_v1(len(tokens)==3 and len(set(tokens))==3
+            and set(tokens)=={'+'+path for path in logical},label)
     filter_text = status.get('SystemCallFilter','')
     _preflight_require_v1(type(syscall_filter) is frozenset and syscall_filter
         and filter_text.startswith('~') and set(filter_text[1:].split()) == syscall_filter,
@@ -15524,6 +15530,37 @@ print(json.dumps(probe),flush=True)
                 bound_pidfd=self.process.pidfd is not None))
             exc.owned_process = self.process
             raise
+    def _check_device_masks(self,mounts):
+        # Acquire every original operand once before deciding. Failed acquisitions
+        # remain errors in the existing history, including failed startup evidence.
+        fields=('st_mode','st_uid','st_gid','st_dev','st_ino')
+        reference=dict(path='/run/systemd/inaccessible/dir',stat=None,error=None)
+        rows=[]
+        for path in ('/dev/shm','/dev/mqueue','/dev/hugepages'):
+            selected=[{k:sorted(v) if isinstance(v,frozenset) else v for k,v in m.items()}
+                for m in mounts if m['path']==path]
+            row=dict(path=path,mounts=selected,stat=None,error=None)
+            try:
+                info=os.stat(path.lstrip('/'),dir_fd=self.root_fd,follow_symlinks=False)
+                row['stat']={key:getattr(info,key) for key in fields}
+            except BaseException as exc: row['error']=repr(exc)
+            rows.append(row)
+        try:
+            info=Path(reference['path']).stat()
+            reference['stat']={key:getattr(info,key) for key in fields}
+        except BaseException as exc: reference['error']=repr(exc)
+        self.history.append(dict(device_mask_observation=dict(reference=reference,targets=rows)))
+        _preflight_require_v1(reference['error'] is None and reference['stat'] is not None,
+            'LINUX_PREFLIGHT_DEVICE_MASK_REFERENCE')
+        expected=reference['stat']
+        for row in rows:
+            info=row['stat'];selected=row['mounts']
+            _preflight_require_v1(row['error'] is None and info is not None and len(selected)==1
+                and 'ro' in selected[0]['options'] and stat.S_ISDIR(info['st_mode'])
+                and stat.S_IMODE(info['st_mode'])==0 and info['st_uid']==0
+                and (info['st_dev'],info['st_ino'])==(expected['st_dev'],expected['st_ino']),
+                'LINUX_PREFLIGHT_DEVICE_MASK:'+row['path'])
+
     def _bind_and_release(self,status):
         import select
         pid = self.process.pid
@@ -15556,14 +15593,7 @@ print(json.dumps(probe),flush=True)
                 'LINUX_PREFLIGHT_BIND_READONLY:'+logical)
             mappings[logical] = dict(chain=chain,identity=(view.st_dev,view.st_ino),mount={
                 k:sorted(v) if isinstance(v,frozenset) else v for k,v in selected[0].items()})
-        inaccessible = Path('/run/systemd/inaccessible/dir').stat()
-        for path in ('/dev/shm','/dev/mqueue','/dev/hugepages'):
-            selected = [m for m in mounts if m['path'] == path]
-            info = os.stat(path.lstrip('/'),dir_fd=self.root_fd,follow_symlinks=False)
-            _preflight_require_v1(len(selected) == 1 and 'ro' in selected[0]['options']
-                and stat.S_IMODE(info.st_mode) == 0 and info.st_uid == 0
-                and (info.st_dev,info.st_ino) == (inaccessible.st_dev,inaccessible.st_ino),
-                'LINUX_PREFLIGHT_DEVICE_MASK:'+path)
+        self._check_device_masks(mounts)
         runtime_mounts = [m for m in mounts if m['path'] == str(self.runtime)]
         _preflight_require_v1(len(runtime_mounts) == 1,'LINUX_PREFLIGHT_RUNTIME_ASSOCIATION')
         runtime_binding=self.handoff_runtime(process,cgroup,mounts)

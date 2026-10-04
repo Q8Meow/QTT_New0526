@@ -20985,7 +20985,7 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
     assert len(properties) == len({v.split('=',1)[0] for v in properties})
     required = {'Type=exec','Restart=no','RemainAfterExit=yes','DynamicUser=yes','UMask=0077','NoNewPrivileges=yes',
         'CapabilityBoundingSet=','AmbientCapabilities=','PrivateDevices=yes','PrivateNetwork=yes','PrivateIPC=yes',
-        'InaccessiblePaths=/dev/shm /dev/mqueue /dev/hugepages','PrivateTmp=yes','ProtectSystem=strict','ProtectHome=tmpfs',
+        'InaccessiblePaths=+/dev/shm +/dev/mqueue +/dev/hugepages','PrivateTmp=yes','ProtectSystem=strict','ProtectHome=tmpfs',
         'MountAPIVFS=yes','ProtectProc=invisible','ProtectControlGroups=yes','ProtectKernelTunables=yes',
         'ProtectKernelModules=yes','ProtectKernelLogs=yes','RestrictSUIDSGID=yes','RestrictRealtime=yes',
         'RestrictNamespaces=yes','LockPersonality=yes','RestrictAddressFamilies=AF_UNIX','SystemCallArchitectures=native',
@@ -20998,6 +20998,14 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
         'StandardOutput=append:'+control+'/spool/command-1.stdout.bin','StandardError=append:'+control+'/spool/command-1.stderr.bin'}
     assert not any(p.startswith(('RuntimeDirectory=','RuntimeDirectoryMode=','RuntimeDirectoryPreserve=')) for p in properties)
     assert 'BindPaths='+runtime+'/payload:'+runtime+' '+runtime+'/payload/tmp:/tmp '+runtime+'/payload/var-tmp:/var/tmp' in properties
+    assert 'ReadWritePaths=+/run/qtt17n23 +/tmp +/var/tmp' in properties
+    readonly='/usr:/usr /lib:/lib /lib64:/lib64 '+root+':'+root+' '+control+'/installation:'+valid
+    readonly+=' '+ ' '.join(control+'/'+n+':'+control+'/'+n for n in ('declaration','binding','release','spool'))
+    assert 'BindReadOnlyPaths='+readonly in properties
+    assert {p for p in argv if p.startswith('--setenv=')}=={'--setenv='+k+'='+v for k,v in environment.items()}
+    assert not any(p.startswith(('ReadOnlyPaths=','ExecPaths=','NoExecPaths=')) for p in properties)
+    for value in ('+/dev/shm','+/tmp','+/run/qtt17n23'):
+        with pytest.raises(o.ValidationReliabilityError,match='NATIVE_PATH'): o._linux_preflight_path_v1(value)
     assert required <= set(properties)
     assert len(properties) == len(required)+3  # Exact two bind lists and writable-path restriction.
     for field in ('private_root','runtime','control','spool','repository','installation','interpreter'):
@@ -21120,7 +21128,7 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
         TimeoutStartUSec='1min',TimeoutStopUSec='10s',KillMode='control-group',SendSIGKILL='yes',
         LimitCORE='0',LimitNOFILE='1024',LimitFSIZE='67108864',StandardInput='null',StandardOutput='append',StandardError='append',
         RootDirectory=control+'/root',WorkingDirectory=root,RuntimeDirectory='',Slice='qtt17n23.slice',
-        InaccessiblePaths='/dev/shm /dev/mqueue /dev/hugepages',ReadWritePaths=runtime+' /tmp /var/tmp',
+        InaccessiblePaths='+/dev/shm +/dev/mqueue +/dev/hugepages',ReadWritePaths='+'+runtime+' +/tmp +/var/tmp',
         SystemCallFilter='~mount reboot swapon init_module')
     options = dict(name='qtt17n23',root=control+'/root',repository=root,runtime=runtime,
         syscall_filter=frozenset(('mount','reboot','swapon','init_module')))
@@ -21210,29 +21218,105 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
         patch.setitem(o._LINUX_PREFLIGHT_SERVICE_READBACK_V1,'PrivateTmp','no')
         with pytest.raises(o.ValidationReliabilityError,match='UNIT_READBACK:PrivateTmp'):
             o._linux_preflight_unit_policy_v1(recorded,**recorded_options)
-    o._linux_preflight_unit_policy_v1(recorded,**recorded_options)
+    # Historical PrivateTmp reference: old access-list operands are preserved,
+    # but no longer qualify the current unit-root policy.
+    assert recorded['InaccessiblePaths']=='/dev/shm /dev/mqueue /dev/hugepages'
+    assert recorded['ReadWritePaths']=='/run/qtt2557n2660997759221 /tmp /var/tmp'
+    with pytest.raises(o.ValidationReliabilityError,match='DEVICE_MASK_READBACK'):
+        o._linux_preflight_unit_policy_v1(recorded,**recorded_options)
+    prospective={**recorded,'InaccessiblePaths':'+/dev/shm +/dev/mqueue +/dev/hugepages',
+        'ReadWritePaths':'+/run/qtt2557n2660997759221 +/tmp +/var/tmp'}
+    o._linux_preflight_unit_policy_v1(prospective,**recorded_options)
+    assert {key for key in recorded if recorded[key]!=prospective[key]}=={'InaccessiblePaths','ReadWritePaths'}
     assert recorded==recorded_before
     rejected_private_tmp=0
     for value in ('no','',None,True,1,b'yes',['yes'],{'value':'yes'},'YES'):
-        damaged={**recorded,'PrivateTmp':value};assert damaged!=recorded
+        damaged={**prospective,'PrivateTmp':value};assert damaged!=prospective
         with pytest.raises(o.ValidationReliabilityError,match='UNIT_READBACK:PrivateTmp'):
             o._linux_preflight_unit_policy_v1(damaged,**recorded_options)
         rejected_private_tmp+=1
-    damaged={key:value for key,value in recorded.items() if key!='PrivateTmp'}
-    assert damaged!=recorded
+    damaged={key:value for key,value in prospective.items() if key!='PrivateTmp'}
+    assert damaged!=prospective
     with pytest.raises(o.ValidationReliabilityError,match='UNIT_READBACK:PrivateTmp'):
         o._linux_preflight_unit_policy_v1(damaged,**recorded_options)
     for key,value in (('DynamicUser','no'),('RuntimeDirectory','qtt2557n2660997759221'),
-            ('MemoryMax','infinity'),('ReadWritePaths',recorded['ReadWritePaths']+' /outside'),
+            ('MemoryMax','infinity'),('ReadWritePaths',prospective['ReadWritePaths']+' /outside'),
             ('ProtectSystem','no'),('SystemCallFilter','~mount')):
-        damaged={**recorded,key:value};assert damaged!=recorded
+        damaged={**prospective,key:value};assert damaged!=prospective
         with pytest.raises(o.ValidationReliabilityError):
             o._linux_preflight_unit_policy_v1(damaged,**recorded_options)
     print('LINUX_PRIVATETMP_RECORDED_REFERENCE '+json.dumps(dict(
         source='37186553401/11296434607/native/command-331.stdout.bin',
-        original_private_tmp_rejected=True,corrected_private_tmp_accepted=True,
+        original_private_tmp_rejected=True,prospective_corrected_private_tmp_accepted=True,
         unchanged_recorded_bytes=len(recorded_raw),private_tmp_mutations_rejected=rejected_private_tmp+1,
         unrelated_recorded_mutations_rejected=6,native_execution=False)),flush=True)
+    # Prospective policy references: all six destinations are independent
+    # literals; mutations change the operand actually passed to the verifier.
+    for key,wanted in (('InaccessiblePaths',('+/dev/shm','+/dev/mqueue','+/dev/hugepages')),
+            ('ReadWritePaths',('+/run/qtt17n23','+/tmp','+/var/tmp'))):
+        for value in (' '.join(wanted),'  '+ '\t'.join(reversed(wanted))+'  '):
+            o._linux_preflight_unit_policy_v1({**status,key:value},**options)
+        invalid=[None,True,3,b'paths',[],{},'', ' '.join(wanted[:2]),' '.join((*wanted,'+/outside')),
+            ' '.join((*wanted,wanted[0]))]
+        for position,token in enumerate(wanted):
+            for replacement in (token[1:],'-'+token[1:],'-'+token,'+'+token,control+'/root'+token[1:]):
+                changed=list(wanted);changed[position]=replacement
+                invalid.append(' '.join(changed))
+            changed=list(wanted);changed[position]=wanted[(position+1)%3]
+            invalid.append(' '.join(changed))
+        for value in invalid:
+            damaged={**status,key:value};assert damaged!=status
+            with pytest.raises(o.ValidationReliabilityError):o._linux_preflight_unit_policy_v1(damaged,**options)
+        damaged={k:v for k,v in status.items() if k!=key}
+        with pytest.raises(o.ValidationReliabilityError):o._linux_preflight_unit_policy_v1(damaged,**options)
+    # Synthetic physical references exercise the complete current scope method.
+    # These stats are NOT observations of the historical failed native masks.
+    mask_paths=('/dev/shm','/dev/mqueue','/dev/hugepages')
+    reference_path='/run/systemd/inaccessible/dir'
+    physical=dict(st_mode=stat.S_IFDIR,st_uid=0,st_gid=0,st_dev=91,st_ino=92)
+    mask_mounts=[dict(path=p,options=frozenset(('ro','nosuid','nodev'))) for p in mask_paths]
+    def mask_reference(rows,stats,fail=None,accepted=False):
+        scope=object.__new__(o._LinuxPreflightScopeV1);scope.root_fd=41;scope.history=[];calls=[]
+        def observe(path,*a,**kw):
+            path=str(path).replace('\\','/')
+            logical=path if path.startswith('/') else '/'+path
+            calls.append(logical)
+            if logical in mask_paths:assert kw==dict(dir_fd=41,follow_symlinks=False)
+            if logical==fail:raise OSError('synthetic acquisition unavailable')
+            return SimpleNamespace(**stats[logical])
+        with monkeypatch.context() as patch:
+            patch.setattr(o.os,'stat',observe)
+            if accepted:scope._check_device_masks(rows)
+            else:
+                with pytest.raises(o.ValidationReliabilityError,match='DEVICE_MASK'):scope._check_device_masks(rows)
+        assert calls==[*mask_paths,reference_path]
+        observation=scope.history[0]['device_mask_observation']
+        assert len(scope.history)==1 and len(observation['targets'])==3
+        assert [r['path'] for r in observation['targets']]==list(mask_paths)
+        if fail:
+            row=observation['reference'] if fail==reference_path else next(r for r in observation['targets'] if r['path']==fail)
+            assert row['stat'] is None and 'synthetic acquisition unavailable' in row['error']
+        return observation
+    mask_stats={p:dict(physical) for p in (*mask_paths,reference_path)}
+    mask_reference(mask_mounts,mask_stats,accepted=True)
+    for path in mask_paths:
+        for field,value in (('st_mode',stat.S_IFDIR|0o400),('st_mode',stat.S_IFREG),('st_uid',1),('st_dev',93),('st_ino',94)):
+            damaged=copy.deepcopy(mask_stats);damaged[path][field]=value;assert damaged!=mask_stats
+            mask_reference(mask_mounts,damaged)
+        mask_reference([r for r in mask_mounts if r['path']!=path],mask_stats)
+        mask_reference([*mask_mounts,next(r for r in mask_mounts if r['path']==path)],mask_stats)
+        mask_reference([{**r,'options':frozenset(('rw','nosuid'))} if r['path']==path else r for r in mask_mounts],mask_stats)
+        mask_reference(mask_mounts,mask_stats,fail=path)
+    mask_reference(mask_mounts,mask_stats,fail=reference_path)
+    # Actual retained mount lines from 37221048179/native-response-71.bin;
+    # only their stat partners below are synthetic reference operands.
+    captured_mounts=o._linux_preflight_mounts_v1(
+        b'405 403 0:26 / /dev/shm rw,nosuid,nodev shared:336 master:3 - tmpfs tmpfs rw,inode64\n'
+        b'406 403 0:49 / /dev/mqueue rw,nosuid,nodev,noexec,relatime shared:338 - mqueue mqueue rw\n'
+        b'407 403 0:35 / /dev/hugepages rw,nosuid,nodev,relatime shared:337 master:15 - hugetlbfs hugetlbfs rw,pagesize=2M\n')
+    o._linux_preflight_unit_policy_v1(status,**options)
+    observed=mask_reference(captured_mounts,mask_stats)
+    assert all('rw' in row['mounts'][0]['options'] for row in observed['targets'])
     original = area/'original-evidence'
     with original.open('xb') as destination:
         tail = o._LinuxPreflightTailV1(original,original_evidence=True)
