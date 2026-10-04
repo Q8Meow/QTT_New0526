@@ -10135,13 +10135,7 @@ def _linux_preflight_enter_v1(startup_deadline_ns):
     probe = dict(name=binding['name'],pid=os.getpid(),start=lease.initial['start'],passed=False,denials=[])
     try:
         for path in (REPO_ROOT/'tools/run_validation_gates.py',control/'binding/native.json',control/'declaration/input.bin'):
-            try: fd = os.open(path,os.O_WRONLY|os.O_NOFOLLOW|os.O_CLOEXEC)
-            except OSError as error:
-                o._preflight_require_v1(error.errno in (13,30),'LINUX_PREFLIGHT_WRITE_PROBE_UNEXPECTED_ERROR')
-                probe['denials'].append(dict(path=str(path),operation='open-write-no-create-no-truncate',errno=error.errno))
-            else:
-                os.close(fd)
-                raise RuntimeError('LINUX_PREFLIGHT_SEALED_WRITE_OPEN_SUCCEEDED')
+            probe['denials'].append(lease.probe_write_denial(path))
         for family in (socket.AF_INET,socket.AF_INET6):
             try: sock = socket.socket(family,socket.SOCK_STREAM)
             except OSError as error:

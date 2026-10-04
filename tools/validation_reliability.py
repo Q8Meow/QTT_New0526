@@ -13075,6 +13075,52 @@ class _LinuxPreflightHostLeaseV1(_PreflightHostLeaseV1):
         except BaseException as exc:
             if self.failure is None: self.failure = exc
             raise
+    def probe_write_denial(self,path):
+        """The three original noncreating probes, including immutable V2 denial."""
+        self._check()
+        path=Path(path)
+        source=self.root/'tools/run_validation_gates.py'
+        _preflight_require_v1(path in (source,self.control_path,Path(self.binding['declaration'])),
+            'LINUX_PREFLIGHT_WRITE_PROBE_OPERAND')
+        row=dict(path=str(path),operation='open-write-no-create-no-truncate',errno=None)
+        self.query.check();self.query.check()  # reserve close if unexpectedly opened
+        try:fd=os.open(path,os.O_WRONLY|os.O_NOFOLLOW|os.O_CLOEXEC)
+        except OSError as error:
+            row['errno']=error.errno
+            if error.errno==1:
+                _preflight_require_v1(path==source and self.binding.get('native_basis',{}).get('kind')=='NATIVE_IMMUTABLE_V2',
+                    'LINUX_PREFLIGHT_WRITE_PROBE_UNEXPECTED_ERROR')
+                self.query.check();self.query.check()  # read-only descriptor and prepaid close
+                fd=os.open(path,os.O_RDONLY|os.O_NOFOLLOW|os.O_CLOEXEC)
+                witness=dict(flags_before=None,flags_after=None,identity=None,complete=False,error=None)
+                try:
+                    self.query.check();before=os.fstat(fd)
+                    witness['identity']=_scan_same_api_version(before)
+                    native=_LinuxSourceNativeV2(attempt=self.query.check)
+                    witness['flags_before']=native.flags(fd)
+                    self.query.check();after=os.fstat(fd)
+                    self.query.check();current=path.lstat()
+                    witness['flags_after']=native.flags(fd)
+                    _preflight_require_v1(stat.S_ISREG(before.st_mode) and before.st_uid==before.st_gid==0
+                        and not stat.S_IMODE(before.st_mode)&0o222 and before.st_nlink==1
+                        and _scan_same_api_version(before)==_scan_same_api_version(after)==_scan_same_api_version(current)
+                        and witness['flags_before']==witness['flags_after'] and witness['flags_before']&16,
+                        'LINUX_PREFLIGHT_IMMUTABLE_WRITE_DENIAL_IDENTITY')
+                    witness['complete']=True
+                except BaseException as exc:witness['error']=repr(exc);raise
+                finally:
+                    try:os.close(fd)
+                    except BaseException as exc:witness['complete']=False;witness['error']=repr(exc);raise
+                    finally:self.query.record('immutable-write-denial',str(path),_preflight_canonical_v1(witness))
+                row['immutable_witness']=witness
+            else:
+                _preflight_require_v1(error.errno in (13,30),'LINUX_PREFLIGHT_WRITE_PROBE_UNEXPECTED_ERROR')
+        else:
+            os.close(fd)
+            raise RuntimeError('LINUX_PREFLIGHT_SEALED_WRITE_OPEN_SUCCEEDED')
+        self._check()
+        return row
+
     @staticmethod
     def check_runtime(binding,runtime,query):
         _preflight_require_v1(type(binding.get('runtime_identity')) is list and len(binding['runtime_identity'])==2

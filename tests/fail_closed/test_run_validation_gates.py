@@ -21523,6 +21523,80 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
         original_mount_bytes=len(captured_old_table),historical_descriptor_ids_observed=False,
         four_captured_writable_parents_rejected=True,shared_controller_fixture_lease_predicate=True)),flush=True)
 
+    # Complete existing-owner calls against finite syscall references. These are
+    # not a native host grant or a replacement for the automatic Linux probe.
+    def write_denial_reference(code,*,operand='source',kind='NATIVE_IMMUTABLE_V2',fault=None):
+        from types import SimpleNamespace
+        import threading
+        lease=o._LinuxPreflightHostLeaseV1.__new__(o._LinuxPreflightHostLeaseV1)
+        lease.pid,lease.thread=os.getpid(),threading.get_ident()
+        lease.failure=None;lease.deadline_ns=time.monotonic_ns()+10**9
+        lease.root=area/'write-probe-repository';lease.control_path=area/'write-probe-binding'
+        lease.binding=dict(declaration=str(area/'write-probe-input'),native_basis=dict(kind=kind))
+        paths=dict(source=lease.root/'tools/run_validation_gates.py',binding=lease.control_path,
+            input=Path(lease.binding['declaration']),other=area/'outside-write-probe')
+        path=paths[operand];events=[];records=[]
+        class ProbeQuery:
+            def check(self):events.append('check')
+            def record(self,kind,path,raw):
+                records.append((kind,path,json.loads(raw)))
+                if fault=='evidence':raise OSError(5,'synthetic evidence write failed')
+        lease.query=ProbeQuery()
+        info=dict(st_dev=8,st_ino=17,st_mode=stat.S_IFREG|0o444,st_size=29,
+            st_mtime_ns=7,st_ctime_ns=8,st_nlink=1,st_uid=0,st_gid=0)
+        def opened(actual,flags,*args,**kwargs):
+            assert Path(actual)==path and flags&o.os.O_NOFOLLOW and flags&o.os.O_CLOEXEC
+            assert events[-2:]==['check','check'];events.append(('open',flags))
+            if flags&o.os.O_WRONLY:
+                if code is None:return 77
+                raise OSError(code,'synthetic native denial',str(path))
+            assert code==1;return 78
+        def closed(fd):
+            assert fd in (77,78);events.append(('close',fd))
+            if fault=='close':raise OSError(5,'synthetic close error')
+        def fstat(fd):
+            assert fd==78
+            value=dict(info)
+            if fault=='owner':value['st_uid']=1
+            if fault=='mode':value['st_mode']=stat.S_IFREG|0o644
+            if fault=='kind':value['st_mode']=stat.S_IFDIR|0o555
+            if fault=='links':value['st_nlink']=2
+            return SimpleNamespace(**value)
+        def lstat(actual,*args,**kwargs):
+            assert Path(actual)==path
+            value=dict(vars(fstat(78)))
+            if fault=='identity':value['st_ino']+=1
+            return SimpleNamespace(**value)
+        class Native:
+            def __init__(self,attempt):self.attempt=attempt;self.calls=0
+            def flags(self,fd,value=None):
+                assert fd==78 and value is None
+                self.attempt();self.calls+=1
+                if fault=='query':raise OSError(5,'synthetic flags unavailable')
+                return 0 if fault=='missing-immutable' else 16|32 if fault=='flags-drift' and self.calls==2 else 16
+        accepted=operand!='other' and (code in (13,30) or code==1 and operand=='source' and kind=='NATIVE_IMMUTABLE_V2' and fault is None)
+        with monkeypatch.context() as patch:
+            for name in ('O_NOFOLLOW','O_CLOEXEC'):
+                if not hasattr(o.os,name):patch.setattr(o.os,name,0x80000,raising=False)
+            patch.setattr(o.os,'open',opened);patch.setattr(o.os,'close',closed)
+            patch.setattr(o.os,'fstat',fstat);patch.setattr(o.os,'lstat',lstat)
+            patch.setattr(o,'_LinuxSourceNativeV2',Native)
+            if accepted:
+                result=lease.probe_write_denial(path)
+                assert result['errno']==code and result['path']==str(path)
+                if code==1:assert result['immutable_witness']['complete'] and records[-1][2]['flags_before']==16
+            else:
+                expected_error=ValueError if fault in ('kind','links') else (o.ValidationReliabilityError,OSError,RuntimeError)
+                with pytest.raises(expected_error):
+                    lease.probe_write_denial(path)
+        if code is None and operand!='other':assert ('close',77) in events
+        if code==1 and operand=='source' and kind=='NATIVE_IMMUTABLE_V2':assert ('close',78) in events and records
+    for operand in ('source','binding','input','other'):
+        for code in (None,1,13,30,2,5,20,28,40):write_denial_reference(code,operand=operand)
+    write_denial_reference(1,kind='SEALED_MEMFD_V1')
+    for fault in ('owner','mode','kind','links','identity','query','missing-immutable','flags-drift','close','evidence'):
+        write_denial_reference(1,fault=fault)
+
     original = area/'original-evidence'
     with original.open('xb') as destination:
         tail = o._LinuxPreflightTailV1(original,original_evidence=True)
