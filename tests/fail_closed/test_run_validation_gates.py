@@ -20357,10 +20357,242 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
         decoded,values,count=o._preflight_frame_read_v1(stream.fileno(),magic=(b'QTTPF01\n',b'QTTPF02\n'),extent=24+len(frame),meter=meter,
             validate=lambda h,p:([],o._preflight_header_v2(h,p,identity)))
         assert decoded==header and values==[] and count==7 and meter.received==24+len(frame)
-    # Lost seal and partial transitions must fail before an application or restore.
-    partial=o._LinuxImmutableSourceSealV2.__new__(o._LinuxImmutableSourceSealV2)
-    partial.state='FAILED';partial.protected=[{'path':'not-an-operand'}];partial.post={};partial.rows=[{}]
-    with pytest.raises(RuntimeError,match='PARTIAL_PROTECTION_RETAINED'):partial.restore()
+    # Finite syscall references exercise the complete current owner. These are
+    # injected API outcomes, never Linux native qualification or a host lease.
+    from types import SimpleNamespace
+    reference_results=[]
+    def source_reference(case):
+        root=Path(tmp_path.anchor)/'source-reference'
+        control=Path(tmp_path.anchor)/'control-reference'
+        nodes={}
+        descriptors={}
+        calls=[]
+        sequence=[100]
+        writes=[0]
+        def make(path,directory=False,data=b''):
+            nodes[str(path)]=dict(st_dev=1,st_ino=len(nodes)+1,
+                st_mode=(stat.S_IFDIR|0o750) if directory else (stat.S_IFREG|0o640),
+                st_size=4096 if directory else len(data),st_mtime_ns=100,st_ctime_ns=100,
+                st_nlink=2 if directory else 1,st_uid=1001,st_gid=1001,
+                flags=0x80000,data=data)
+        for parent in reversed(root.parents): make(parent,True)
+        make(root,True)
+        for number in range(3): make(root/('file'+str(number)),data=b'abc')
+        make(control,True)
+        def resolve(path,dir_fd=None):
+            if isinstance(path,int): return descriptors[path]['path']
+            path=Path(path)
+            return str(Path(descriptors[dir_fd]['path'])/path) if dir_fd is not None else str(path)
+        def note(op,path):
+            calls.append((op,str(path),'journal' if str(path).startswith(str(control)) else 'source'))
+        def info(path):
+            row=nodes[path]
+            return SimpleNamespace(**{k:v for k,v in row.items() if k.startswith('st_')})
+        def opened(path,flags,mode=0o777,*,dir_fd=None):
+            name=resolve(path,dir_fd)
+            note('open',name)
+            if flags&os.O_CREAT:
+                if flags&os.O_EXCL and name in nodes: raise FileExistsError(name)
+                make(Path(name))
+                nodes[name].update(st_mode=stat.S_IFREG|mode,st_uid=0,st_gid=0)
+            if name not in nodes: raise FileNotFoundError(name)
+            sequence[0]+=1
+            fd=sequence[0]
+            descriptors[fd]=dict(path=name,offset=0)
+            return fd
+        def close(fd):
+            path=resolve(fd)
+            note('close',path)
+            del descriptors[fd]
+            if case=='failed-close' and not str(path).startswith(str(control)) and writes[0]==-1:
+                writes[0]=-2
+                raise OSError(5,'injected close outcome unavailable')
+        def fstat(fd):
+            path=resolve(fd);note('fstat',path)
+            return info(path)
+        def stated(path,*,dir_fd=None,follow_symlinks=True):
+            name=resolve(path,dir_fd);note('stat',name)
+            return info(name)
+        def chown(fd,uid,gid):
+            path=resolve(fd);note('chown',path)
+            nodes[path].update(st_uid=uid,st_gid=gid,st_ctime_ns=nodes[path]['st_ctime_ns']+1)
+        def chmod(fd,mode):
+            path=resolve(fd);note('chmod',path)
+            nodes[path].update(st_mode=stat.S_IFMT(nodes[path]['st_mode'])|mode,
+                st_ctime_ns=nodes[path]['st_ctime_ns']+1)
+        class Stream:
+            def __init__(self,path):
+                self.path=path
+                self.names=iter(sorted(Path(n).name for n in nodes if Path(n).parent==Path(path) and n!=path))
+            def __next__(self):
+                note('next',self.path)
+                return SimpleNamespace(name=next(self.names))
+            def close(self): note('scan-close',self.path)
+        def scan(fd):
+            path=resolve(fd);note('scandir',path)
+            return Stream(path)
+        def write(fd,raw):
+            path=resolve(fd);note('write',path)
+            raw=bytes(raw)
+            if case=='torn-journal' and writes[0]==-1:
+                raw=raw[:1]
+            nodes[path]['data']+=raw
+            nodes[path]['st_size']=len(nodes[path]['data'])
+            return len(raw)
+        def sync(fd):note('fsync',resolve(fd))
+        def read(fd,amount):
+            path=resolve(fd);note('read',path)
+            offset=descriptors[fd]['offset']
+            # Deliberately return short non-EOF blocks.
+            data=nodes[path]['data'][offset:offset+min(amount,2)]
+            descriptors[fd]['offset']+=len(data)
+            return data
+        class Native:
+            def __init__(self,attempt=None):self.attempt=attempt
+            def flags(self,fd,value=None):
+                if self.attempt:self.attempt()
+                path=resolve(fd);note('flags-get' if value is None else 'flags-set',path)
+                if value is not None:
+                    nodes[path]['flags']=value
+                    nodes[path]['st_ctime_ns']+=1
+                return nodes[path]['flags']
+        census=o._LinuxPreflightCensusV1.__new__(o._LinuxPreflightCensusV1)
+        census.complete=True
+        census.roots=dict(repository=root)
+        census.records=[]
+        for path in (root,*(root/('file'+str(i)) for i in range(3))):
+            directory=path==root
+            census.records.append(dict(path=str(path),role='repository',kind='directory' if directory else 'file',
+                version=o._LinuxPreflightCensusV1._version(info(str(path))),logical_bytes=0 if directory else 3,
+                roster=['file0','file1','file2'] if directory else []))
+        originals=copy.deepcopy(nodes)
+        with monkeypatch.context() as m:
+            for name,value in (('geteuid',lambda:0),('open',opened),('close',close),('fstat',fstat),
+                    ('stat',stated),('lstat',stated),('fchown',chown),('fchmod',chmod),
+                    ('scandir',scan),('write',write),('fsync',sync),('read',read)):
+                m.setattr(o.os,name,value,raising=False)
+            for name in ('O_NOFOLLOW','O_CLOEXEC','O_DIRECTORY'):
+                if not hasattr(o.os,name):m.setattr(o.os,name,0,raising=False)
+            m.setattr(o,'_LinuxSourceNativeV2',Native)
+            seal=o._LinuxImmutableSourceSealV2(census,deadline_ns=time.monotonic_ns()+60*10**9,
+                workspace=control,run_id='finite-api-reference')
+            seal.journal_path=control/'journal'
+            seal.primitive=dict(complete=True,restored=True,reference_only=True)
+            count=seal.metadata_calls
+            for unused in range(100):seal._check()
+            assert seal.metadata_calls==count==0
+            assert seal.accounting['work']+seal.accounting['settlement']+seal.accounting['unallocated']==2000000
+            injected=[]
+            trigger={'quota':'after-chmod','deadline':'after-chmod','torn-journal':'after-chmod',
+                'foreign-identity':'after-set-immutable','foreign-flags':'after-set-immutable',
+                'primary-cleanup':'after-chmod','failed-close':'after-full-protection',
+                'partial-post':'after-set-immutable'}.get(case,case)
+            def fault(point,path):
+                if point!=trigger or injected:return
+                injected.append((point,path))
+                if case=='quota':
+                    ledger=seal.accounting['stages'][seal.stage]
+                    while ledger['reserved']<ledger['limit']:
+                        seal._meta(os.fstat,seal.anchors[-1][0])
+                    return
+                if case=='deadline':seal.deadline_ns=time.monotonic_ns()-1;return
+                if case=='torn-journal':writes[0]=-1;return
+                if case=='foreign-identity':nodes[path]['st_ino']+=1000
+                if case=='foreign-flags':nodes[path]['flags']|=0x20
+                if case=='partial-post':seal.post.clear()
+                if case=='failed-close':writes[0]=-1
+                raise RuntimeError('injected primary '+case)
+            seal._diagnostic_fault=fault
+            primary=None
+            try:
+                seal.protect()
+                seal.readability()
+                if case=='after-readability':
+                    assert seal.read_bytes==9 and seal.read_attempts==9
+                    seal.verify(protected=True)
+                    seal.verify(protected=True)
+                    fault('after-readability',str(root))
+            except BaseException as exc:
+                primary=exc
+                if seal.failure is None:seal.failure=exc
+            assert injected and primary is not None,case
+            before=copy.deepcopy(seal.accounting['stages'])
+            if case=='torn-journal':writes[0]=0
+            if case=='primary-cleanup':
+                def denied(fd,uid,gid):
+                    path=resolve(fd);note('chown',path)
+                    raise OSError(5,'injected cleanup denial')
+                m.setattr(o.os,'fchown',denied)
+            cleanup=None
+            try:seal.restore(deadline_ns=time.monotonic_ns()+60*10**9,processes_settled=True)
+            except BaseException as exc:cleanup=exc
+            assert seal.forward_failure==repr(primary)
+            assert all(seal.accounting['stages'][k]['reserved']==v['reserved']
+                for k,v in before.items() if k!='settlement')
+            assert seal.metadata_calls==sum(kind=='source' and op!='read' for op,path,kind in calls),case
+            assert seal.journal_counts['work']['calls']+seal.journal_counts['settlement']['calls']==sum(
+                kind=='journal' for op,path,kind in calls)
+            if case in ('foreign-identity','foreign-flags','primary-cleanup','failed-close'):
+                assert cleanup is not None and seal.state=='FAILED'
+            else:
+                assert cleanup is None and seal.state=='RESTORED',(case,cleanup,seal.evidence())
+                for row in census.records:
+                    path=row['path']
+                    for field in ('st_dev','st_ino','st_mode','st_size','st_mtime_ns','st_nlink','st_uid','st_gid','flags','data'):
+                        assert nodes[path][field]==originals[path][field],(case,path,field)
+            assert not descriptors
+            if case=='quota':
+                assert seal.rejected_reservations and seal.accounting['stages']['settlement']['performed']>0
+            reference_results.append(dict(case=case,primary=repr(primary),cleanup=repr(cleanup),
+                metadata_calls=seal.metadata_calls,read_attempts=seal.read_attempts,bytes=seal.read_bytes,
+                state=seal.state,original_latch_retained=seal.forward_failure==repr(primary),
+                prospective_and_actual=seal.accounting,journal=seal.journal_counts))
+    for case in ('before-mutation','after-chown','after-chmod','after-set-immutable',
+            'after-full-protection','during-readability','quota','deadline','torn-journal',
+            'partial-post','foreign-identity','foreign-flags','primary-cleanup','failed-close','after-readability'):
+        source_reference(case)
+    reference_evidence=os.environ.get('QTT_TEST_WINDOWS_JOB_DIAGNOSTIC_EVIDENCE')
+    if reference_evidence:
+        reference_path=Path(reference_evidence).parent/'source-recovery-references.json'
+        assert not reference_path.exists()
+        o.atomic_write_json(reference_path,dict(native_linux_qualification=False,cases=reference_results))
+    print('LINUX_V2_INJECTED_SOURCE_RECOVERY_REFERENCES '+json.dumps(reference_results,sort_keys=True))
+    # Execute the existing controller's exceptional export path with a denied
+    # query adapter. No native claim or source mutation is supplied by it.
+    export_reference=tmp_path/'source-export-failure-reference'
+    export_reference.mkdir()
+    owned_run=export_reference/'run';owned_run.mkdir()
+    exported_run=export_reference/'export';exported_run.mkdir()
+    real_path=Path
+    class DeniedQuery:
+        def __init__(self,**kwargs):
+            self.observations=[];self.attempts=0;self.retained=0
+        def command(self,argv,**kwargs):
+            self.attempts+=1
+            raise RuntimeError('injected initial native query denial')
+    actual_write=o._atomic_write_bytes_v1
+    def failed_export(path,raw,**kwargs):
+        result=actual_write(path,raw,**kwargs)
+        if path.name=='native-result.json':raise OSError(5,'injected export preparation failure')
+        return result
+    with monkeypatch.context() as m:
+        m.setattr(runner,'pathlib',SimpleNamespace(Path=lambda v:owned_run if str(v)=='/run' else real_path(v)))
+        m.setattr(o.os,'geteuid',lambda:0,raising=False)
+        for name in ('O_NOFOLLOW','O_CLOEXEC'):
+            if not hasattr(o.os,name):m.setattr(o.os,name,0,raising=False)
+        m.setattr(o,'_LinuxPreflightQueriesV1',DeniedQuery)
+        m.setattr(o,'_atomic_write_bytes_v1',failed_export)
+        exit_code=runner._linux_preflight_controller_v1(str(tmp_path/'repository'),str(tmp_path/'installation'),
+            str(tmp_path/'interpreter'),{},b'{}',time.monotonic_ns(),exported_run)
+    assert exit_code==1
+    cleanup=json.loads((exported_run/'cleanup.json').read_text(encoding='utf-8'))
+    assert not cleanup['evidence_export_complete'] and not cleanup['owned_roots_removed']
+    assert not cleanup['service_created'] and not cleanup['source_protection_attempted']
+    assert Path(cleanup['retained_root']).is_dir()
+    assert any('injected initial native query denial' in v for v in cleanup['failures'])
+    assert any('injected export preparation failure' in v for v in cleanup['failures'])
+    assert (Path(cleanup['retained_root'])/'native-result.json').is_file()
+
     missing=o._LinuxImmutableSourceBasisV2.__new__(o._LinuxImmutableSourceBasisV2)
     missing.failure=RuntimeError('original lost seal');missing.state='FAILED'
     with pytest.raises(RuntimeError,match='original lost seal'):missing.check_live()
@@ -20440,9 +20672,9 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
         with pytest.raises(o.ValidationReliabilityError): o._linux_preflight_service_argv_v1(**{**call,'environment':damaged})
     policy = o._linux_preflight_grants_v1(23)
     assert policy['candidate_limits'] == dict(entry_limit=100000,snapshot_byte_limit=512*mib,read_byte_limit=64*gib,
-        deadline_ns=23+3550*10**9)
-    assert policy['native_deadline_ns'] == 23+3560*10**9
-    assert policy['execution_deadline_ns'] == 23+3600*10**9
+        deadline_ns=23+3490*10**9)
+    assert policy['native_deadline_ns'] == 23+3490*10**9
+    assert policy['execution_deadline_ns'] == 23+3500*10**9
     assert policy['settlement_deadline_ns'] == 23+3720*10**9
     assert tuple(policy['capture'].values()) == (2000000,32*gib,4000000,2*gib,0,0,0,0)
     assert policy['terminal'] == policy['capture'] and policy['terminal'] is not policy['capture']
@@ -20451,7 +20683,7 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
         assert tuple(row['limits'].values())[:4] == (2000000,16*gib,2000000,gib)
         assert tuple(row['limits'].values())[4:] == ((0,0,0,0) if n in (2,4,6) else (64,16*mib,16*mib,32*mib))
         assert set(row['parent_tail_reserve'].values()) == {0}
-        assert row['deadline_ns'] == 23+3500*10**9 and row['settlement_deadline_ns'] == 23+3510*10**9
+        assert row['deadline_ns'] == 23+3480*10**9 and row['settlement_deadline_ns'] == 23+3490*10**9
         assert tuple(row['transport'].values()) == (512*mib,8*mib,4000000,64,64*mib,2000000,2000000,65536,gib,8*mib)
     assert o._linux_preflight_storage_reservation_v1((64*mib,)*8,(8*mib,)*8,4096) == gib
     assert o._linux_preflight_storage_reservation_v1((24,)*8,(1024,)*8,4096) == 448*mib+16*4096

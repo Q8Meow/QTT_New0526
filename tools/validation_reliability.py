@@ -12272,15 +12272,15 @@ def _linux_preflight_grants_v1(origin_ns):
             (2_000_000,16*gib,2_000_000,gib,64 if git else 0,
              16*mib if git else 0,16*mib if git else 0,32*mib if git else 0),strict=True)),
             parent_tail_reserve=dict.fromkeys(_PREFLIGHT_DIMENSIONS_V1,0),
-            deadline_ns=origin_ns+3500*10**9,settlement_deadline_ns=origin_ns+3510*10**9,
+            deadline_ns=origin_ns+3480*10**9,settlement_deadline_ns=origin_ns+3490*10**9,
             transport={**transport,'frame_byte_limit':512*mib,'header_byte_limit':8*mib,
                 'lexical_units':4_000_000,'retained_buffer_bytes':gib},
             application_output_limits=dict(stdout_bytes=16*mib,stderr_bytes=16*mib,combined_output_bytes=32*mib)))
     return dict(native=transport,capture=dict(parent),terminal=dict(parent),rows=rows,
         parent_limits=dict(capture=dict(parent),terminal=dict(parent),transport={**transport,'frame_byte_limit':64*gib},
-            deadline_ns=origin_ns+3540*10**9),candidate_limits=dict(entry_limit=100_000,
-            snapshot_byte_limit=512*mib,read_byte_limit=64*gib,deadline_ns=origin_ns+3550*10**9),
-        native_deadline_ns=origin_ns+3560*10**9,execution_deadline_ns=origin_ns+3600*10**9,
+            deadline_ns=origin_ns+3490*10**9),candidate_limits=dict(entry_limit=100_000,
+            snapshot_byte_limit=512*mib,read_byte_limit=64*gib,deadline_ns=origin_ns+3490*10**9),
+        native_deadline_ns=origin_ns+3490*10**9,execution_deadline_ns=origin_ns+3500*10**9,
         settlement_deadline_ns=origin_ns+3720*10**9)
 
 
@@ -13141,13 +13141,16 @@ class _LinuxImmutableSourceBasisV2:
         self.failure = None
         self.state = 'READABLE'
         self.metadata_calls = 0
+        self.metadata_reserved = 0
+        self.metadata_rejected = 0
+        self.owned = {}
         self.native = _LinuxSourceNativeV2(self._meta_attempt)
         self.namespace = self._meta(os.stat, '/proc/self/ns/mnt')
         self.user_namespace = self._meta(os.stat, '/proc/self/ns/user')
         self.manifest_acquired_bytes = 0
         self.manifest_retained_bytes = 0
         path = Path(descriptor['path'])
-        fd = _linux_source_open_v2(path, attempt=self._meta_attempt)
+        fd = self._open_path(path)
         try:
             before = self._meta(os.fstat, fd)
             _preflight_require_v1(list(_scan_same_api_version(before)) == descriptor['physical_version'] and before.st_uid == 0 and (stat.S_IMODE(before.st_mode) == 292) and (before.st_size == descriptor['byte_length']), 'LINUX_V2_MANIFEST_PHYSICAL_VERSION')
@@ -13164,7 +13167,7 @@ class _LinuxImmutableSourceBasisV2:
             self.raw = b''.join(parts)
             self.manifest_retained_bytes = len(self.raw)
         finally:
-            os.close(fd)
+            self._close(fd)
         limits = dict(lexical_units=32 * 1024 ** 2, depth=64, quoted_bytes=32 * 1024 ** 2)
         value, _ = _preflight_json_v1(self.raw, limits, lambda: _preflight_require_v1(time.monotonic_ns() < self.deadline_ns, 'LINUX_V2_PARSE_DEADLINE'))
         self.files, self.directory_records, self.directories, count = _linux_source_manifest_v2(value)
@@ -13179,7 +13182,6 @@ class _LinuxImmutableSourceBasisV2:
         if self.failure is not None:
             raise self.failure
         try:
-            self.metadata_calls += 1
             now = time.monotonic_ns()
             _preflight_require_v1(self.metadata_calls <= 2000000 and self.state in ('READABLE', 'IN_USE') and (self.lease.failure is None) and ((self.pid, self.thread) == (os.getpid(), threading.get_ident())) and (self.last_clock <= now < min(self.deadline_ns, self.lease.deadline_ns)), 'LINUX_V2_LIVE_LEASE')
             self.last_clock = now
@@ -13212,7 +13214,7 @@ class _LinuxImmutableSourceBasisV2:
         row = self._entry(relative_path)
         opened = []
         try:
-            fd = _linux_source_open_v2(self.root, attempt=self._meta_attempt)
+            fd = self._open_path(self.root)
             opened.append(('.', fd))
             self.verify_fd('.', fd)
             relative = '.'
@@ -13231,8 +13233,7 @@ class _LinuxImmutableSourceBasisV2:
             self.state = 'FAILED'
             raise
         finally:
-            for name, fd in reversed(opened):
-                os.close(fd)
+            self._close_many([fd for name,fd in reversed(opened)])
 
     def catalog_snapshot(self, paths, observation):
         """A complete metadata barrier with held parents; no application bytes."""
@@ -13240,7 +13241,7 @@ class _LinuxImmutableSourceBasisV2:
         _preflight_require_v1(type(observation) is _PreflightObservationV1 and observation.native_basis is self, 'LINUX_V2_CANDIDATE_OBSERVATION_OWNER')
         expected = {p for p, r in self.files.items() if r[1] == 'WORKTREE'}
         _preflight_require_v1(type(paths) is tuple and set(paths) == expected and (len(paths) == len(expected)), 'LINUX_V2_EXACT_CANDIDATE_CATALOG')
-        root_fd = _linux_source_open_v2(self.root, attempt=self._meta_attempt)
+        root_fd = self._open_path(self.root)
 
         def walk(name, fd):
             observation.reserve('attempts')
@@ -13248,10 +13249,12 @@ class _LinuxImmutableSourceBasisV2:
             before = self._meta(os.fstat, fd)
             _preflight_require_v1(_linux_source_row_v2(name, row[1], before, self.native.flags(fd)) == list(row), 'LINUX_V2_CANDIDATE_GENERATION:' + name)
             if name in self.directories:
-                with self._meta(os.scandir, fd) as stream:
+                with self._scan(fd) as stream:
                     observed = []
-                    for entry in stream:
+                    while True:
                         self._meta_attempt()
+                        try: entry = next(stream)
+                        except StopIteration: break
                         observation.received('entries', 1)
                         _preflight_require_v1(len(observed) < len(self.directories[name]), 'LINUX_V2_CANDIDATE_EXTRA_ENTRY')
                         observed.append(entry.name)
@@ -13263,7 +13266,7 @@ class _LinuxImmutableSourceBasisV2:
                     try:
                         walk(relative, opened)
                     finally:
-                        os.close(opened)
+                        self._close(opened)
             _preflight_require_v1(_preflight_stamp_v1(self._meta(os.fstat, fd)) == _preflight_stamp_v1(before), 'LINUX_V2_CANDIDATE_CHANGED:' + name)
         try:
             walk('.', root_fd)
@@ -13276,7 +13279,7 @@ class _LinuxImmutableSourceBasisV2:
             self.state = 'FAILED'
             raise
         finally:
-            os.close(root_fd)
+            self._close(root_fd)
 
     def status(self, name, *, optional=False):
         self.check_live()
@@ -13303,87 +13306,714 @@ class _LinuxImmutableSourceBasisV2:
             parent = component if parent == '.' else parent + '/' + component
         raise RuntimeError('LINUX_V2_INCOMPLETE_ABSENCE')
 
+    def _reserve(self, amount):
+        _preflight_require_v1(time.monotonic_ns() < self.deadline_ns,
+            'LINUX_V2_METADATA_DEADLINE')
+        if self.metadata_reserved+amount > 2000000:
+            self.metadata_rejected += 1
+            raise ValidationReliabilityError('ENGVR_PREFLIGHT_DENIED','LINUX_V2_METADATA_CAPACITY')
+        self.metadata_reserved += amount
+
     def _meta_attempt(self):
+        self._reserve(1)
         self.metadata_calls += 1
-        _preflight_require_v1(self.metadata_calls <= 2000000 and time.monotonic_ns() < self.deadline_ns, 'LINUX_V2_METADATA_CALL_CAPACITY_OR_DEADLINE')
 
     def _meta(self, function, *args, **kwargs):
+        if function is os.open: return self._open(*args, **kwargs)
         self._meta_attempt()
         return function(*args, **kwargs)
 
+    def _open(self, *args, **kwargs):
+        _preflight_require_v1(len(self.owned)<1023,'LINUX_V2_READER_DESCRIPTOR_CAPACITY')
+        self._reserve(2)
+        self.metadata_calls += 1
+        fd=os.open(*args, **kwargs)
+        self.owned[fd]=True
+        return fd
+
+    def _close(self, fd):
+        _preflight_require_v1(fd in self.owned and self.pid==os.getpid()
+            and self.thread==threading.get_ident(),'LINUX_V2_READER_OWNED_CLOSE')
+        del self.owned[fd]
+        self.metadata_calls += 1
+        try: os.close(fd)
+        except BaseException as exc:
+            if self.failure is None:self.failure=exc
+            self.state='FAILED'
+            raise
+
+    def _close_many(self, handles):
+        errors=[]
+        for fd in handles:
+            try:self._close(fd)
+            except BaseException as exc:errors.append(exc)
+        _scan_raise_errors(errors)
+
+    @contextmanager
+    def _scan(self, fd):
+        self._reserve(2)
+        self.metadata_calls += 1
+        stream=os.scandir(fd)
+        try: yield stream
+        finally:
+            self.metadata_calls += 1
+            stream.close()
+
+    def _open_path(self, path):
+        opened=[]
+        try:
+            for i,component in enumerate(Path(path).parts):
+                opened.append(self._open(component,os.O_RDONLY|os.O_NOFOLLOW|os.O_CLOEXEC
+                    |(os.O_DIRECTORY if i<len(Path(path).parts)-1 else 0),
+                    **({} if not opened else dict(dir_fd=opened[-1]))))
+            self._close_many(reversed(opened[:-1]))
+            return opened[-1]
+        except BaseException as exc:
+            errors=[exc]
+            for fd in reversed(opened):
+                if fd in self.owned:
+                    try:self._close(fd)
+                    except BaseException as cleanup:errors.append(cleanup)
+            _scan_raise_errors(errors)
+
 
 class _LinuxImmutableSourceSealV2:
-    """Controller-private write-ahead transitions on the original checkout only."""
+    """Original-checkout transitions with prepaid, independent rollback custody."""
 
     def __init__(self, census, *, deadline_ns, workspace, run_id):
-        _preflight_require_v1(type(census) is _LinuxPreflightCensusV1 and census.complete and (os.geteuid() == 0), 'LINUX_V2_COMPLETE_CENSUS_REQUIRED')
-        self.census, self.root = (census, census.roots['repository'])
+        _preflight_require_v1(type(census) is _LinuxPreflightCensusV1 and census.complete
+            and os.geteuid() == 0, 'LINUX_V2_COMPLETE_CENSUS_REQUIRED')
+        self.census, self.root = census, census.roots['repository']
         self.rows = [r for r in census.records if r['role'] == 'repository']
-        self.row_index = {row['path']: row for row in self.rows}
-        self.deadline_ns, self.workspace, self.run_id = (deadline_ns, Path(workspace), run_id)
+        self.row_index = {r['path']: r for r in self.rows}
+        self.deadline_ns, self.workspace, self.run_id = deadline_ns, Path(workspace), run_id
+        self.pid, self.thread = os.getpid(), threading.get_ident()
+        self.state, self.failure, self.phase = 'ENUMERATED', None, 'work'
         self.native = _LinuxSourceNativeV2(self._meta_attempt)
-        self.state = 'ENUMERATED'
-        self.failure = None
-        self.journal = []
-        self.journal_bytes = 0
-        self.protected = []
-        self.read_bytes = 0
-        self.read_attempts = 0
-        self.metadata_calls = 0
-        self.byte_count = sum((r['logical_bytes'] for r in self.rows))
-        self.primitive = {}
-        self.post = {}
-        self.original_flags = {}
-        self.journal_path = None
-        self.journal_identity = None
-        self.journal_ids = {row['path']: n for n, row in enumerate(self.rows)}
-        self.auxiliary_read_bytes = 0
+        self.journal, self.journal_bytes, self.journal_path, self.journal_identity = [], 0, None, None
+        self.journal_fd, self.journal_torn = None, False
+        self.journal_ids = {r['path']: n for n, r in enumerate(self.rows)}
+        self.journal_reservation = None
+        self.journal_counts = {p: dict(reserved=0, calls=0, bytes=0, rejected=0,native_reserved=32)
+            for p in ('work', 'settlement')}
+        self.protected, self.post, self.original_flags, self.originals = [], {}, {}, {}
+        self.attempts, self.completed_originals = set(), set()
+        self.read_bytes, self.read_attempts, self.auxiliary_read_bytes = 0, 0, 0
+        self.read_rejected, self.metadata_calls, self.rejected_reservations = 0, 0, []
+        self.owned, self.anchors, self.close_failures = {}, [], []
+        self.close_failure_count=0
+        self.restoration_outcomes = {i:'NOT_OBSERVED' for i in range(len(self.rows))}
+        self.error_count, self.error_examples = 0, []
+        self.primitive, self.recovery_cases = {}, []
+        self.byte_count = sum(r['logical_bytes'] for r in self.rows)
         self.files = {r['path']: None for r in self.rows if r['kind'] == 'file'}
-        self.directories = {r['path']: tuple(((name, self.row_index[str(Path(r['path']) / name)]['kind']) for name in r['roster'])) for r in self.rows if r['kind'] == 'directory'}
-        _preflight_require_v1(self.byte_count <= 64 * 1024 ** 3, 'LINUX_V2_LOGICAL_SOURCE_CAPACITY')
+        self.directories = {r['path']: tuple((name, self.row_index[str(Path(r['path'])/name)]['kind'])
+            for name in r['roster']) for r in self.rows if r['kind'] == 'directory'}
+        n, e, a = len(self.rows), sum(len(r['roster']) for r in self.rows), len(self.root.parts)
+        d = len(self.directories)
+        _preflight_require_v1(n > 0 and e == n-1 and 1 <= a <= 65
+            and self.byte_count <= 64*1024**3, 'LINUX_V2_SOURCE_GEOMETRY')
+        bounds = dict(original=8*n, protection=12*n, postprotection=6*n+2*e,
+            readability=8*n+2*e, postreadability=6*n+2*e, projection=2*n,
+            postpublication=6*n+2*e, terminal=6*n+2*e, setup=4096+16*a,
+            settlement=16*n+2*e+4096+16*a)
+        work = sum(v for k,v in bounds.items() if k != 'settlement')
+        _preflight_require_v1(work == 54*n+10*e+4096+16*a
+            and work+bounds['settlement'] <= 2000000, 'LINUX_V2_PREPAID_SOURCE_CAPACITY')
+        # Open/close, actual observations, terminal iterator calls and unwind
+        # associations are all included; no optimistic size-derived read count.
+        programme = dict(original=5*n+2*d, protection=10*n+2*d,
+            postprotection=5*n+5*d+e, readability=7*n+5*d+e,
+            postreadability=5*n+5*d+e, projection=n+1,
+            postpublication=5*n+5*d+e, terminal=5*n+5*d+e,
+            settlement=12*n+5*d+e+16*a)
+        _preflight_require_v1(all(v <= bounds[k] for k,v in programme.items()),
+            'LINUX_V2_FIXED_STAGE_PROGRAMME_CAPACITY')
+        self.accounting = dict(units='admitted native metadata calls; byte reads and journal separate',
+            nodes=n, edges=e, ancestors=a, work=work, settlement=bounds['settlement'],
+            unallocated=2000000-work-bounds['settlement'], programme=programme,
+            stages={k:dict(limit=v, reserved=0, performed=0, rejected=0) for k,v in bounds.items()})
+        self.stage = 'setup'
+        self.verify_stages = iter(('postprotection','postreadability','postpublication','terminal'))
 
     def _check(self):
+        _preflight_require_v1(os.getpid() == self.pid and threading.get_ident() == self.thread
+            and time.monotonic_ns() < self.deadline_ns and self.phase in ('work','settlement')
+            and (self.failure is None or self.phase == 'settlement'), 'LINUX_V2_SOURCE_PHASE_OR_DEADLINE')
+
+    def _reserve(self, amount):
+        self._check()
+        row = self.accounting['stages'][self.stage]
+        if row['reserved']+amount > row['limit']:
+            row['rejected'] += 1
+            if len(self.rejected_reservations) < 64:
+                self.rejected_reservations.append(dict(stage=self.stage, amount=amount,
+                    reserved=row['reserved'], limit=row['limit']))
+            raise ValidationReliabilityError('ENGVR_PREFLIGHT_DENIED','LINUX_V2_SOURCE_STAGE_CAPACITY:'+self.stage)
+        row['reserved'] += amount
+
+    def _performed(self, stage=None):
         self.metadata_calls += 1
-        _preflight_require_v1(self.metadata_calls <= 2000000 and time.monotonic_ns() < self.deadline_ns, 'LINUX_V2_SOURCE_METADATA_OR_DEADLINE')
+        self.accounting['stages'][self.stage if stage is None else stage]['performed'] += 1
+
+    def _meta_attempt(self):
+        self._reserve(1)
+        self._performed()
+
+    def _meta(self, function, *args, **kwargs):
+        if function is os.open:
+            return self._open(*args, **kwargs)
+        self._meta_attempt()
+        return function(*args, **kwargs)
+
+    def _open(self, *args, **kwargs):
+        _preflight_require_v1(len(self.owned)<1023,'LINUX_V2_DESCRIPTOR_CAPACITY')
+        self._reserve(2)  # The close obligation cannot be spent by later work.
+        stage = self.stage
+        self._performed()
+        fd = os.open(*args, **kwargs)
+        self.owned[fd] = stage
+        return fd
+
+    def _close(self, fd):
+        _preflight_require_v1(fd in self.owned and os.getpid() == self.pid
+            and threading.get_ident() == self.thread, 'LINUX_V2_OWNED_CLOSE')
+        stage = self.owned.pop(fd)
+        self._performed(stage)
+        try:
+            os.close(fd)
+        except BaseException as exc:
+            self.close_failure_count+=1
+            if len(self.close_failures)<64:
+                self.close_failures.append(dict(fd=fd,error=repr(exc).encode('utf-8')[:384].decode('utf-8','replace')))
+            raise
+
+    def _anchor(self):
+        if self.anchors:
+            return self.anchors[-1][0]
+        self.stage = 'setup'
+        parent = None
+        for part in self.root.parts:
+            fd = self._open(part, os.O_RDONLY|os.O_DIRECTORY|os.O_NOFOLLOW|os.O_CLOEXEC,
+                **({} if parent is None else dict(dir_fd=parent)))
+            info = self._meta(os.fstat, fd)
+            self.anchors.append((fd, (info.st_dev,info.st_ino), part))
+            parent = fd
+        _preflight_require_v1(tuple(self.row_index[str(self.root)]['version'][:2])
+            == self.anchors[-1][1], 'LINUX_V2_ROOT_ANCHOR_IDENTITY')
+        return parent
+
+    def _open_path(self, path):
+        """Rare exact administration/primitive path, with prepaid closes."""
+        path = Path(path)
+        parent = None
+        opened = []
+        try:
+            for i, part in enumerate(path.parts):
+                fd = self._open(part, os.O_RDONLY|os.O_NOFOLLOW|os.O_CLOEXEC
+                    | (os.O_DIRECTORY if i < len(path.parts)-1 else 0),
+                    **({} if parent is None else dict(dir_fd=parent)))
+                opened.append(fd)
+                parent = fd
+            for handle in reversed(opened[:-1]):
+                self._close(handle)
+            return opened[-1]
+        except BaseException:
+            for handle in reversed(opened):
+                if handle in self.owned:
+                    self._close(handle)
+            raise
+
+    def _anchors_live(self):
+        previous=self.stage
+        self.stage='setup' if self.phase=='work' else 'settlement'
+        try:
+            for index,(fd,identity,name) in enumerate(self.anchors):
+                info=self._meta(os.fstat,fd)
+                path_info=self._meta(os.stat,name,follow_symlinks=False,
+                    **({} if index==0 else dict(dir_fd=self.anchors[index-1][0])))
+                _preflight_require_v1(stat.S_ISDIR(info.st_mode) and stat.S_ISDIR(path_info.st_mode)
+                    and (info.st_dev,info.st_ino)==identity==(path_info.st_dev,path_info.st_ino),
+                    'LINUX_V2_ANCESTOR_ASSOCIATION')
+        finally:self.stage=previous
+
+    def _roster(self, fd, row):
+        self._reserve(2)
+        stage = self.stage
+        self._performed()
+        stream = os.scandir(fd)
+        names = []
+        try:
+            while True:
+                self._meta_attempt()  # Includes StopIteration and native failures.
+                try:
+                    entry = next(stream)
+                except StopIteration:
+                    break
+                _preflight_require_v1(len(names) < len(row['roster']), 'LINUX_V2_ROSTER_OVERFLOW')
+                names.append(entry.name)
+        finally:
+            self._performed(stage)
+            stream.close()
+        _preflight_require_v1(sorted(names,key=lambda s:s.encode('utf-8')) == row['roster'],
+            'LINUX_V2_SEAL_ROSTER:'+row['path'])
+
+    def _identity(self, fd, row, kind):
+        info, flags = self._meta(os.fstat, fd), self.native.flags(fd)
+        version, original = self.census._version(info), row['version']
+        path = row['path']
+        if kind == 'original':
+            _preflight_require_v1(version == original and not flags & 16,
+                'LINUX_V2_ORIGINAL_GENERATION:'+path)
+        elif kind == 'sealed':
+            _preflight_require_v1(version == self.post.get(path)
+                and flags == self.original_flags[path]|16, 'LINUX_V2_SEAL_GENERATION:'+path)
+        else:
+            _preflight_require_v1(path in self.completed_originals
+                and all(version[i] == original[i] for i in (0,1,3,4,6,9,10))
+                and stat.S_IFMT(version[2]) == stat.S_IFMT(original[2]),
+                'LINUX_V2_RECOVERY_IDENTITY:'+path)
+            mode = 0o555 if row['kind']=='directory' or original[2]&0o111 else 0o444
+            allowed_owner = {(original[7],original[8])}
+            allowed_modes, allowed_flags = {stat.S_IMODE(original[2])}, {self.original_flags[path]}
+            if (path,'chown') in self.attempts: allowed_owner.add((0,0))
+            if (path,'chmod') in self.attempts: allowed_modes.add(mode)
+            if (path,'set-immutable') in self.attempts: allowed_flags.add(self.original_flags[path]|16)
+            _preflight_require_v1((version[7],version[8]) in allowed_owner
+                and stat.S_IMODE(version[2]) in allowed_modes and flags in allowed_flags
+                and (version[5] == original[5] or any((path,op) in self.attempts
+                    for op in ('chown','chmod','set-immutable'))),
+                'LINUX_V2_RECOVERY_FOREIGN_FIELDS:'+path)
+        return info, flags
+
+    def _walk(self, enter, leave=None, *, roster=False, recovering=False):
+        root_fd = self._anchor()
+        self._anchors_live()
+        errors = []
+        def visit(row, fd, parent, name):
+            safe = True
+            try:
+                self._check()
+                enter(row,fd)
+                if row['kind'] == 'directory':
+                    if roster: self._roster(fd,row)
+                    for child_name in row['roster']:
+                        child = self.row_index[str(Path(row['path'])/child_name)]
+                        child_fd = None
+                        try:
+                            child_fd = self._open(child_name,os.O_RDONLY|os.O_NOFOLLOW|os.O_CLOEXEC
+                                | (os.O_DIRECTORY if child['kind']=='directory' else 0),dir_fd=fd)
+                            if not visit(child,child_fd,fd,child_name): safe = False
+                        except BaseException as exc:
+                            if not recovering:
+                                if child_fd is not None:
+                                    closing,child_fd=child_fd,None
+                                    try:self._close(closing)
+                                    except BaseException as close_error:_scan_raise_errors([exc,close_error])
+                                raise
+                            safe = False
+                            self._error(child['path'],exc)
+                            errors.append(exc)
+                        finally:
+                            if child_fd is not None:
+                                try:self._close(child_fd)
+                                except BaseException as exc:
+                                    if not recovering:raise
+                                    safe=False
+                                    self._error(child['path'],exc)
+                                    errors.append(exc)
+                if leave is not None: leave(row,fd,safe)
+                if parent is not None:
+                    at_path = self._meta(os.stat,name,dir_fd=parent,follow_symlinks=False)
+                    _preflight_require_v1((at_path.st_dev,at_path.st_ino)
+                        == tuple(row['version'][:2]), 'LINUX_V2_UNWIND_ASSOCIATION:'+row['path'])
+                return safe
+            except BaseException as exc:
+                if not recovering: raise
+                self._error(row['path'],exc)
+                errors.append(exc)
+                return False
+        parent = self.anchors[-2][0] if len(self.anchors)>1 else None
+        visit(self.row_index[str(self.root)],root_fd,parent,self.root.name)
+        self._anchors_live()
+        return errors
+
+    def _error(self, path, exc):
+        self.error_count += 1
+        self.restoration_outcomes[self.journal_ids[path]] = 'UNRESOLVED'
+        if len(self.error_examples)<64:
+            raw = repr(exc).encode('utf-8')[:384]
+            self.error_examples.append(dict(entry=self.journal_ids[path],error=raw.decode('utf-8','replace')))
+
+    def _jcall(self, function, *args, **kwargs):
+        counts=self.journal_counts[self.phase]
+        if counts['calls']>=counts['native_reserved']:
+            counts['rejected']+=1
+            raise ValidationReliabilityError('ENGVR_PREFLIGHT_DENIED','LINUX_V2_JOURNAL_NATIVE_RESERVATION')
+        counts['calls'] += 1
+        return function(*args, **kwargs)
+
+    def _journal_open(self):
+        _preflight_require_v1(self.journal_path is not None and self.journal_fd is None,
+            'LINUX_V2_JOURNAL_OWNER')
+        self.journal_fd = self._jcall(os.open,self.journal_path,
+            os.O_WRONLY|os.O_APPEND|os.O_CREAT|os.O_EXCL|os.O_NOFOLLOW|os.O_CLOEXEC,0o600)
+        info = self._jcall(os.fstat,self.journal_fd)
+        self.journal_identity = (info.st_dev,info.st_ino)
+        self._journal_identity()
+
+    def _journal_identity(self):
+        fd_info = self._jcall(os.fstat,self.journal_fd)
+        path_info = self._jcall(os.lstat,self.journal_path)
+        _preflight_require_v1((fd_info.st_dev,fd_info.st_ino) == self.journal_identity
+            == (path_info.st_dev,path_info.st_ino) and fd_info.st_uid == 0
+            and fd_info.st_nlink == 1 and stat.S_ISREG(fd_info.st_mode)
+            and stat.S_IMODE(fd_info.st_mode) == 0o600 and fd_info.st_size == self.journal_bytes
+            and self.census._version(fd_info) == self.census._version(path_info), 'LINUX_V2_JOURNAL_CUSTODY')
 
     def _record(self, value):
         self._check()
-        raw = _preflight_canonical_v1(value) + b'\n'
-        size = len(raw)
-        _preflight_require_v1(self.journal_bytes + size <= 32 * 1024 ** 2, 'LINUX_V2_JOURNAL_CAPACITY')
-        _preflight_require_v1(self.journal_path is not None, 'LINUX_V2_JOURNAL_OWNER')
-        flags = os.O_WRONLY | os.O_APPEND | os.O_NOFOLLOW | os.O_CLOEXEC
-        if self.journal_identity is None:
-            flags |= os.O_CREAT | os.O_EXCL
-        fd = self._meta(os.open, self.journal_path, flags, 384)
+        raw = _preflight_canonical_v1(value)+b'\n'
+        counts = self.journal_counts[self.phase]
+        limit = self.journal_reservation[self.phase]
+        prefix = b'\n' if self.journal_torn and self.phase == 'settlement' else b''
+        _preflight_require_v1(not self.journal_torn or self.phase == 'settlement',
+            'LINUX_V2_JOURNAL_TORN_WORK_STOP')
+        raw = prefix+raw
+        if counts['reserved']+len(raw)>limit['bytes'] or counts.get('records',0)+1>limit['records']:
+            counts['rejected']+=1
+            raise ValidationReliabilityError('ENGVR_PREFLIGHT_DENIED','LINUX_V2_JOURNAL_PHASE_CAPACITY')
+        counts['reserved']+=len(raw)
+        counts['records']=counts.get('records',0)+1
+        counts['native_reserved']+=13
+        before_calls=counts['calls']
+        self._journal_identity()
+        view=memoryview(raw)
         try:
-            info = self._meta(os.fstat, fd)
-            _preflight_require_v1(info.st_uid == 0 and info.st_nlink == 1 and stat.S_ISREG(info.st_mode) and (stat.S_IMODE(info.st_mode) == 384) and (info.st_size == self.journal_bytes) and (self.journal_identity is None or self.journal_identity == (info.st_dev, info.st_ino)), 'LINUX_V2_JOURNAL_CUSTODY')
-            self.journal_identity = (info.st_dev, info.st_ino)
-            view = memoryview(raw)
-            while view:
+            for unused in range(8):
                 self._check()
-                count = os.write(fd, view)
-                _preflight_require_v1(0 < count <= len(view), 'LINUX_V2_JOURNAL_WRITE')
-                self.journal_bytes += count
-                view = view[count:]
-            os.fsync(fd)
+                count=self._jcall(os.write,self.journal_fd,view)
+                _preflight_require_v1(0<count<=len(view),'LINUX_V2_JOURNAL_WRITE')
+                self.journal_bytes+=count
+                counts['bytes']+=count
+                view=view[count:]
+                if not view: break
+            _preflight_require_v1(not view,'LINUX_V2_JOURNAL_WRITE_ATTEMPTS')
+            self._jcall(os.fsync,self.journal_fd)
+            self._journal_identity()
+        except BaseException:
+            self.journal_torn=True
+            raise
         finally:
-            os.close(fd)
+            _preflight_require_v1(counts['calls']-before_calls<=13,'LINUX_V2_JOURNAL_NATIVE_BOUND')
+        self.journal_torn=False
         self.journal.append(value)
 
+    def _prepare_journal(self):
+        originals = [dict(entry=self.journal_ids[p],original=v) for p,v in self.originals.items()]
+        original_bytes = sum(len(_preflight_canonical_v1(v))+1 for v in originals)
+        def events(operations):
+            return sum(max(len(_preflight_canonical_v1(dict(entry=i,operation=op,result=result)))+1
+                for result in ('COMPLETED','UNCERTAIN','OBSERVED'))
+                +len(_preflight_canonical_v1(dict(entry=i,operation=op,result='ATTEMPT')))+1
+                for i in range(len(self.rows)) for op in operations)
+        work = original_bytes+events(('chown','chmod','set-immutable'))
+        settlement = events(('restore-flags','restore-owner','restore-mode'))+65536
+        diagnostics=sum(v.get('evidence',{}).get('journal_bytes',0) for v in self.recovery_cases)
+        _preflight_require_v1(work+settlement+diagnostics<=32*1024**2,'LINUX_V2_JOURNAL_PROSPECTIVE_CAPACITY')
+        n=len(self.rows)
+        self.journal_reservation = dict(work=dict(bytes=work,records=7*n),
+            settlement=dict(bytes=settlement,records=6*n+64),native_setup_close=64)
+        self._journal_open()
+        for value in originals:
+            self._record(value)
+            self.completed_originals.add(value['original']['path'])
+
     def _transition(self, path, operation, call):
-        self.current_path, self.current_operation = (str(path), operation)
-        index = self.journal_ids[str(path)]
-        record = dict(entry=index, operation=operation, result='ATTEMPT')
-        self._record(record)
+        path=str(path)
+        self.current_path,self.current_operation=path,operation
+        index=self.journal_ids[path]
+        self._record(dict(entry=index,operation=operation,result='ATTEMPT'))
+        if self.phase=='work': self.attempts.add((path,operation))
         try:
             call()
+            self._fault('after-'+operation,path)
         except BaseException as exc:
-            self._record(dict(entry=index, operation=operation, result='UNCERTAIN', error=repr(exc)[:512], errno=getattr(exc, 'errno', None)))
+            try: self._record(dict(entry=index,operation=operation,result='UNCERTAIN'))
+            except BaseException as record_error:
+                self._error(path,record_error)
             raise
-        else:
-            self._record(dict(entry=index, operation=operation, result='COMPLETED'))
+        self._record(dict(entry=index,operation=operation,result='COMPLETED'))
+
+    def _fault(self, point, path):
+        # Private finite recovery diagnostics set this callback only for their
+        # disposable source tree. It is never serialized or a host grant.
+        hook=getattr(self,'_diagnostic_fault',None)
+        if hook is not None: hook(point,path)
+
+    def protect(self):
+        _preflight_require_v1(self.state=='ENUMERATED' and self.primitive.get('complete')
+            and self.primitive.get('restored'),'LINUX_V2_PRIMITIVE_REQUIRED')
+        self._anchor()
+        self.state='PROTECTING'
+        try:
+            self.stage='original'
+            def acquire(row,fd):
+                info,flags=self._identity(fd,row,'original')
+                path=row['path']
+                self.original_flags[path]=flags
+                self.originals[path]=dict(path=path,version=row['version'],flags=flags,
+                    kind=row['kind'],roster=row['roster'])
+            def acquired(row,fd,safe):
+                if row['kind']=='directory': self._identity(fd,row,'original')
+            self._walk(acquire,acquired)
+            self._prepare_journal()
+            self._fault('before-mutation',str(self.root))
+            self.stage='protection'
+            def change(row,fd):
+                before,flags=self._identity(fd,row,'original')
+                path=row['path']
+                self.protected.append(self.originals[path])
+                self._transition(path,'chown',lambda:self._meta(os.fchown,fd,0,0))
+                mode=0o555 if row['kind']=='directory' or before.st_mode&0o111 else 0o444
+                self._transition(path,'chmod',lambda:self._meta(os.fchmod,fd,mode))
+                self._transition(path,'set-immutable',lambda:self.native.flags(fd,flags|16))
+                after=self._meta(os.fstat,fd)
+                _preflight_require_v1(self.native.flags(fd)==flags|16 and after.st_size==before.st_size
+                    and after.st_mtime_ns==before.st_mtime_ns and after.st_uid==after.st_gid==0
+                    and stat.S_IMODE(after.st_mode)==mode,'LINUX_V2_TRANSITION_READBACK')
+                self.post[path]=self.census._version(after)
+            def changed(row,fd,safe):
+                if row['kind']=='directory': self._identity(fd,row,'sealed')
+            self._walk(change,changed)
+            self.state='SEALED'
+            self.verify(protected=True)
+            self._fault('after-full-protection',str(self.root))
+        except BaseException as exc:
+            self.failure,self.state=exc,'FAILED'
+            raise
+
+    def verify(self, *, protected):
+        try:
+            _preflight_require_v1(protected and self.phase=='work' and len(self.post)==len(self.rows),
+                'LINUX_V2_COMPLETE_SEAL')
+            self.stage=next(self.verify_stages)
+            self._walk(lambda row,fd:self._identity(fd,row,'sealed'),
+                lambda row,fd,safe:self._identity(fd,row,'sealed') if row['kind']=='directory' else None,
+                roster=True)
+        except BaseException as exc:
+            if self.failure is None:self.failure=exc
+            self.state='FAILED'
+            raise
+
+    def _read(self, fd, amount):
+        self._check()
+        if self.read_attempts>=2000000:
+            self.read_rejected+=1
+            raise ValidationReliabilityError('ENGVR_PREFLIGHT_DENIED','LINUX_V2_READ_ATTEMPTS')
+        self.read_attempts+=1
+        block=os.read(fd,amount)
+        self.read_bytes+=len(block)
+        _preflight_require_v1(self.read_bytes<=64*1024**3,'LINUX_V2_READ_BYTE_CAPACITY')
+        return block
+
+    def readability(self):
+        _preflight_require_v1(self.state=='SEALED','LINUX_V2_READABILITY_STATE')
+        try:
+            self.stage='readability'
+            def read(row,fd):
+                self._identity(fd,row,'sealed')
+                if row['kind']=='directory': return
+                self.current_path,self.current_operation=row['path'],'readability'
+                extent=0
+                while True:
+                    self._fault('during-readability',row['path'])
+                    block=self._read(fd,min(65536,row['logical_bytes']-extent+1))
+                    extent+=len(block)
+                    _preflight_require_v1(extent<=row['logical_bytes'],'LINUX_V2_READ_EXTENT')
+                    if not block: break
+                _preflight_require_v1(extent==row['logical_bytes'],'LINUX_V2_READ_TRUNCATED')
+                self._identity(fd,row,'sealed')
+            self._walk(read,lambda row,fd,safe:self._identity(fd,row,'sealed')
+                if row['kind']=='directory' else None,roster=True)
+            self.verify(protected=True)
+            self.state='READABLE'
+        except BaseException as exc:
+            self.failure,self.state=exc,'FAILED'
+            raise
+
+    def restore(self, *, deadline_ns=None, processes_settled=False):
+        _preflight_require_v1(processes_settled and self.phase=='work','LINUX_V2_SINGLE_SETTLEMENT_ENTRY')
+        self.forward_failure=None if self.failure is None else repr(self.failure)
+        self.forward_accounting=json.loads(json.dumps(self.accounting))
+        self.phase,self.stage,self.state='settlement','settlement','SETTLING'
+        if deadline_ns is not None: self.deadline_ns=deadline_ns
+        errors=[]
+        try:
+            self._check()
+            _preflight_require_v1(all(v.get('restored') and v.get('removed') for v in self.recovery_cases),
+                'LINUX_V2_RECOVERY_FIXTURE_UNRESOLVED')
+            if self.attempts:
+                def inspect(row,fd): self._identity(fd,row,'recovery')
+                def recover(row,fd,safe):
+                    path=row['path']
+                    _preflight_require_v1(safe,'LINUX_V2_RETAIN_UNRESOLVED_SUBTREE:'+path)
+                    info,flags=self._identity(fd,row,'recovery')
+                    original=row['version']
+                    changes=(('restore-flags',flags!=self.original_flags[path],
+                        lambda:self.native.flags(fd,self.original_flags[path])),
+                        ('restore-owner',(info.st_uid,info.st_gid)!=(original[7],original[8]),
+                        lambda:self._meta(os.fchown,fd,original[7],original[8])),
+                        ('restore-mode',stat.S_IMODE(info.st_mode)!=stat.S_IMODE(original[2]),
+                        lambda:self._meta(os.fchmod,fd,stat.S_IMODE(original[2]))))
+                    for op,needed,call in changes:
+                        if needed: self._transition(path,op,call)
+                        else:
+                            self._record(dict(entry=self.journal_ids[path],operation=op,result='ATTEMPT'))
+                            self._record(dict(entry=self.journal_ids[path],operation=op,result='OBSERVED'))
+                    after=self._meta(os.fstat,fd)
+                    _preflight_require_v1(all(self.census._version(after)[i]==original[i]
+                        for i in (0,1,2,3,4,6,7,8,9,10)) and self.native.flags(fd)==self.original_flags[path],
+                        'LINUX_V2_RESTORE_READBACK:'+path)
+                    self.restoration_outcomes[self.journal_ids[path]]='RESTORED_READBACK'
+                errors.extend(self._walk(inspect,recover,roster=True,recovering=True))
+            else:
+                _preflight_require_v1(not self.primitive or self.primitive.get('restored'),
+                    'LINUX_V2_PRIMITIVE_RESTORATION_UNRESOLVED')
+        except BaseException as exc: errors.append(exc)
+        finally:
+            for fd,identity,name in reversed(self.anchors):
+                try:
+                    if fd in self.owned: self._close(fd)
+                except BaseException as exc: errors.append(exc)
+            if self.journal_fd is not None:
+                fd,self.journal_fd=self.journal_fd,None
+                try: self._jcall(os.close,fd)
+                except BaseException as exc:
+                    self.close_failure_count+=1
+                    if len(self.close_failures)<64:
+                        self.close_failures.append(dict(journal_fd=fd,error=repr(exc).encode('utf-8')[:384].decode('utf-8','replace')))
+                    errors.append(exc)
+            if self.owned or self.close_failures:
+                errors.append(RuntimeError('LINUX_V2_UNRESOLVED_OWNED_DESCRIPTOR'))
+        self.state='FAILED' if errors else 'RESTORED'
+        self.settlement_errors=[repr(e).encode('utf-8')[:384].decode('utf-8','replace') for e in errors[:64]]
+        if errors:
+            raise ValidationReliabilityError('ENGVR_PREFLIGHT_DENIED',
+                'LINUX_V2_RESTORATION_FAILED:'+str(len(errors))+':see retained indexed outcomes')
+
+    def evidence(self):
+        return dict(accounting=self.accounting, rejected_reservations=self.rejected_reservations,
+            journal_reservation=self.journal_reservation,journal_counts=self.journal_counts,
+            journal_bytes=self.journal_bytes,journal_torn=self.journal_torn,
+            forward_failure=getattr(self,'forward_failure',None),
+            forward_accounting=getattr(self,'forward_accounting',None),
+            restoration_outcomes=self.restoration_outcomes,restoration_error_count=self.error_count,
+            restoration_error_examples=self.error_examples,close_failures=self.close_failures,
+            close_failure_count=self.close_failure_count,settlement_errors=getattr(self,'settlement_errors',[]),
+            recovery_cases=self.recovery_cases,recovery_reservation=getattr(self,'recovery_reservation',None),
+            owned_descriptor_count=len(self.owned))
+
+    def recovery_check(self, *, setup_uid, evidence_root):
+        """Three tiny real same-filesystem rollbacks, before the real checkout."""
+        _preflight_require_v1(self.state=='ENUMERATED' and not self.recovery_cases
+            and type(setup_uid) is int and setup_uid>0,'LINUX_V2_RECOVERY_FIXTURE_STATE')
+        tiny_ancestors=len((self.workspace/'immutable-recovery-1').parts)
+        # For each four-node/three-edge case: original 22, protection 42,
+        # complete verification 28; anchor work <=15A. Restoration <=56+16A.
+        # A further 100 setup operations cover creation, baseline observations
+        # and proved removal of all twelve disposable nodes.
+        reservation=dict(work=dict(limit=3*(92+15*tiny_ancestors),reserved=0),
+            settlement=dict(limit=3*(56+16*tiny_ancestors),reserved=0))
+        total=sum(v['limit'] for v in reservation.values())
+        _preflight_require_v1(self.accounting['stages']['setup']['reserved']+total+100
+            <=self.accounting['stages']['setup']['limit'],'LINUX_V2_RECOVERY_SETUP_PROGRAMME')
+        self._reserve(total)
+        self.recovery_reservation=reservation
+        for number,point in enumerate(('after-chmod','after-set-immutable','after-full-protection'),1):
+            self.stage='setup'
+            area=self.workspace/('immutable-recovery-'+str(number))
+            result=dict(number=number,nodes=4,point=point,synthetic_fault=True,native_operations=True,
+                complete=False,restored=False,removed=False,creation_attempted=True,retained_path=str(area))
+            self.recovery_cases.append(result)
+            self._meta(os.mkdir,area,0o750)
+            children=[area/('payload-'+str(i)) for i in range(3)]
+            for child in children:
+                fd=self._open(child,os.O_RDWR|os.O_CREAT|os.O_EXCL|os.O_NOFOLLOW|os.O_CLOEXEC,0o640)
+                try:
+                    _preflight_require_v1(os.write(fd,b'owned recovery fixture\n')==23,'LINUX_V2_RECOVERY_FIXTURE_WRITE')
+                    os.fsync(fd)
+                finally:self._close(fd)
+            for path in (*children,area):
+                self._meta(os.chown,path,setup_uid,setup_uid,follow_symlinks=False)
+            rows=[]
+            for path,kind,roster in ((area,'directory',[p.name for p in children]),
+                    *((p,'file',[]) for p in children)):
+                info=self._meta(os.lstat,path)
+                _preflight_require_v1(info.st_dev==self.row_index[str(self.root)]['version'][0],
+                    'LINUX_V2_RECOVERY_FIXTURE_FILESYSTEM')
+                rows.append(dict(role='repository',path=str(path),observed_path=str(path),kind=kind,
+                    version=self.census._version(info),logical_bytes=info.st_size if kind=='file' else 0,
+                    roster=roster,aliases=[],acl=None))
+            census=_LinuxPreflightCensusV1.__new__(_LinuxPreflightCensusV1)
+            census.complete=True
+            census.roots=dict(repository=area)
+            census.records=rows
+            trial=type(self)(census,deadline_ns=self.deadline_ns,workspace=self.workspace,
+                run_id=self.run_id+'-recovery-'+str(number))
+            trial.journal_path=Path(evidence_root)/('source-recovery-'+str(number)+'.jsonl')
+            trial.primitive=dict(self.primitive)
+            # Subordinate counters describe the same calls; only this parent's
+            # setup ledger contributes them to the checkout's 2M allocation.
+            performed=trial._performed
+            reserve=trial._reserve
+            def admission(amount):
+                reserve(amount)
+                ledger=reservation[trial.phase]
+                _preflight_require_v1(ledger['reserved']+amount<=ledger['limit'],
+                    'LINUX_V2_RECOVERY_PREPAID_PHASE')
+                ledger['reserved']+=amount
+            def count(stage=None):
+                self._performed()
+                performed(stage)
+            trial._reserve=admission
+            trial._performed=count
+            triggered=[]
+            def inject(actual,path):
+                if actual==point and not triggered:
+                    triggered.append(dict(point=actual,path=path))
+                    raise RuntimeError('LINUX_V2_INJECTED_RECOVERY_DIAGNOSTIC:'+point)
+            trial._diagnostic_fault=inject
+            result['triggered']=triggered
+            try:
+                try: trial.protect()
+                except RuntimeError as exc:
+                    result['injected_failure']=repr(exc)
+                    _preflight_require_v1(bool(triggered),'LINUX_V2_RECOVERY_NOT_INJECTED')
+                else:raise RuntimeError('LINUX_V2_RECOVERY_FAULT_NOT_EXERCISED')
+                trial.restore(deadline_ns=self.deadline_ns,processes_settled=True)
+                result['restored']=trial.state=='RESTORED'
+                for row in rows:
+                    info=self._meta(os.lstat,row['path'])
+                    _preflight_require_v1(all(self.census._version(info)[i]==row['version'][i]
+                        for i in (0,1,2,3,4,6,7,8,9,10)),'LINUX_V2_RECOVERY_FIXTURE_READBACK')
+                for child in children:
+                    fd=self._open(child,os.O_RDONLY|os.O_NOFOLLOW|os.O_CLOEXEC)
+                    try:
+                        _preflight_require_v1(os.read(fd,24)==b'owned recovery fixture\n'
+                            and os.read(fd,1)==b'','LINUX_V2_RECOVERY_FIXTURE_BYTES')
+                    finally:self._close(fd)
+                    self._meta(os.unlink,child)
+                self._meta(os.rmdir,area)
+                result['removed']=result['complete']=True
+            except BaseException as exc:
+                result['failure']=repr(exc)
+                raise
+            finally:
+                result['evidence']=trial.evidence()
+                result['retained_path']=None if result['removed'] else str(area)
+        _preflight_require_v1(len(self.recovery_cases)==3 and all(v['complete'] for v in self.recovery_cases),
+            'LINUX_V2_RECOVERY_PROOF_REQUIRED')
 
     def primitive_check(self, query):
         """One owned same-filesystem primitive; native denial never gets retried."""
@@ -13394,20 +14024,20 @@ class _LinuxImmutableSourceSealV2:
         mounts = _linux_preflight_mounts_v1(query.read('/proc/self/mountinfo'))
         chosen = max((m for m in mounts if self.root.is_relative_to(Path(m['path']))), key=lambda m: len(m['path']))
         _preflight_require_v1(chosen['fs'] == 'ext4' and chosen['root'] == '/' and (not any((Path(m['path']).is_relative_to(self.root) and Path(m['path']) != self.root for m in mounts))), 'LINUX_V2_ORIGINAL_EXT4_NO_SUBMOUNTS')
-        descriptor = _linux_source_open_v2(self.root, attempt=self._meta_attempt)
+        descriptor = self._open_path(self.root)
         try:
             actual = self.native.mount(descriptor)
             info = self._meta(os.fstat, descriptor)
             self.mount_observation = actual
             _preflight_require_v1(actual['magic'] == 61267 and actual['old_id'] == chosen['id'] and (actual['device'] == [os.major(info.st_dev), os.minor(info.st_dev)]) and (not actual['attributes'] & 1048576), 'LINUX_V2_EXT4_IDENTITY_OR_IDMAPPED_VIEW')
         finally:
-            os.close(descriptor)
+            self._close(descriptor)
         _preflight_require_v1(self._meta(self.workspace.stat).st_dev == self._meta(self.root.stat).st_dev and (not self.workspace.is_relative_to(self.root)), 'LINUX_V2_PRIMITIVE_SAME_FILESYSTEM')
         area = self.workspace / 'immutable-primitive'
-        area.mkdir(mode=448, exist_ok=False)
+        self._meta(os.mkdir, area, 448)
         path = area / 'held'
         fd = self._meta(os.open, path, os.O_RDWR | os.O_CREAT | os.O_EXCL | os.O_NOFOLLOW | os.O_CLOEXEC, 384)
-        directory = _linux_source_open_v2(area, attempt=self._meta_attempt)
+        directory = self._open_path(area)
         original = {}
         errors = []
         self.primitive = dict(path=str(area), complete=False, write_denial=None, create_denial=None, restored=False, mount=actual)
@@ -13436,7 +14066,7 @@ class _LinuxImmutableSourceSealV2:
                 self.primitive['create_denial'] = dict(errno=exc.errno, error=str(exc))
                 _preflight_require_v1(exc.errno == 1, 'LINUX_V2_PRIMITIVE_CREATE_DENIAL')
             else:
-                os.close(unexpected)
+                self._close(unexpected)
                 raise RuntimeError('LINUX_V2_PROTECTED_CREATE_SUCCEEDED')
             _preflight_require_v1(os.pread(fd, 25, 0) == b'QTT immutable primitive\n', 'LINUX_V2_PRIMITIVE_BYTES')
             self.primitive['complete'] = True
@@ -13463,118 +14093,24 @@ class _LinuxImmutableSourceSealV2:
             except BaseException as exc:
                 restoration.append(repr(exc))
                 errors.append(exc)
-            os.close(directory)
-            os.close(fd)
+            self._close(directory)
+            self._close(fd)
         self.primitive['original_flags'] = original
         self.primitive['restoration_errors'] = restoration
         self.primitive['restored'] = not restoration
         if not restoration:
-            if path.exists():
-                path.unlink()
-            area.rmdir()
+            if self._meta(path.exists):
+                self._meta(os.unlink, path)
+            self._meta(os.rmdir, area)
             self.primitive['removed'] = True
         if errors:
             self.state = 'FAILED'
             self.failure = errors[0]
         _scan_raise_errors(errors)
 
-    def protect(self):
-        _preflight_require_v1(self.state == 'ENUMERATED' and self.primitive.get('complete') and self.primitive.get('restored'), 'LINUX_V2_PRIMITIVE_REQUIRED')
-        self.state = 'PROTECTING'
-        try:
-            originals = []
-            for row in self.rows:
-                self._check()
-                path = Path(row['path'])
-                fd = _linux_source_open_v2(path, attempt=self._meta_attempt)
-                try:
-                    info = self._meta(os.fstat, fd)
-                    flags = self.native.flags(fd)
-                    _preflight_require_v1(self.census._version(info) == row['version'] and (not flags & 16), 'LINUX_V2_ORIGINAL_FLAGS_OR_GENERATION:' + str(path))
-                    original = dict(path=str(path), version=row['version'], flags=flags, kind=row['kind'], roster=row['roster'])
-                    self._record(dict(entry=self.journal_ids[str(path)], original=original))
-                    originals.append(original)
-                    self.original_flags[str(path)] = flags
-                finally:
-                    os.close(fd)
-            future = sum((len(_preflight_canonical_v1(dict(entry=index, operation=op, result=result))) + 1 for index in range(len(self.rows)) for op in ('chown', 'chmod', 'set-immutable', 'restore-flags', 'restore-owner', 'restore-mode') for result in ('ATTEMPT', 'COMPLETED')))
-            _preflight_require_v1(self.journal_bytes + future + 65536 <= 32 * 1024 ** 2, 'LINUX_V2_JOURNAL_PROSPECTIVE_CAPACITY')
-            for row in self.rows:
-                self._check()
-                path = Path(row['path'])
-                fd = _linux_source_open_v2(path, attempt=self._meta_attempt)
-                try:
-                    before = self._meta(os.fstat, fd)
-                    flags = self.native.flags(fd)
-                    _preflight_require_v1(self.census._version(before) == row['version'] and flags == self.original_flags[str(path)], 'LINUX_V2_PREPROTECTION_GENERATION:' + str(path))
-                    original = originals[self.journal_ids[str(path)]]
-                    self.protected.append(original)
-                    self._transition(path, 'chown', lambda: self._meta(os.fchown, fd, 0, 0))
-                    mode = 365 if row['kind'] == 'directory' or before.st_mode & 73 else 292
-                    self._transition(path, 'chmod', lambda: self._meta(os.fchmod, fd, mode))
-                    self._transition(path, 'set-immutable', lambda: self.native.flags(fd, flags | 16))
-                    info = self._meta(os.fstat, fd)
-                    _preflight_require_v1(self.native.flags(fd) == flags | 16 and info.st_size == before.st_size and (info.st_mtime_ns == before.st_mtime_ns), 'LINUX_V2_TRANSITION_READBACK')
-                    self.post[str(path)] = self.census._version(info)
-                finally:
-                    os.close(fd)
-            self.state = 'SEALED'
-            self.verify(protected=True)
-        except BaseException as exc:
-            self.failure = exc
-            self.state = 'FAILED'
-            raise
-
-    def verify(self, *, protected):
-        _preflight_require_v1(protected and len(self.post) == len(self.rows), 'LINUX_V2_COMPLETE_SEAL')
-        for row in self.rows:
-            self._check()
-            path = Path(row['path'])
-            fd = _linux_source_open_v2(path, attempt=self._meta_attempt)
-            try:
-                _preflight_require_v1(self.census._version(self._meta(os.fstat, fd)) == self.post[str(path)] == self.census._version(self._meta(path.lstat)) and self.native.flags(fd) == self.original_flags[str(path)] | 16, 'LINUX_V2_SEAL_GENERATION:' + str(path))
-                if row['kind'] == 'directory':
-                    with self._meta(os.scandir, fd) as stream:
-                        names = sorted((e.name for e in stream), key=lambda s: s.encode('utf-8'))
-                    _preflight_require_v1(names == row['roster'], 'LINUX_V2_SEAL_ROSTER')
-            finally:
-                os.close(fd)
-
-    def readability(self):
-        _preflight_require_v1(self.state == 'SEALED', 'LINUX_V2_READABILITY_STATE')
-        try:
-            for row in self.rows:
-                if row['kind'] == 'directory':
-                    continue
-                self._check()
-                path = Path(row['path'])
-                fd = _linux_source_open_v2(path, attempt=self._meta_attempt)
-                try:
-                    before = self.census._version(self._meta(os.fstat, fd))
-                    _preflight_require_v1(before == self.post[str(path)] and self.native.flags(fd) & 16, 'LINUX_V2_READ_OPEN')
-                    extent = 0
-                    while True:
-                        self._check()
-                        self.read_attempts += 1
-                        _preflight_require_v1(self.read_attempts <= 2000000, 'LINUX_V2_READ_ATTEMPTS')
-                        block = os.read(fd, min(65536, row['logical_bytes'] - extent + 1))
-                        extent += len(block)
-                        self.read_bytes += len(block)
-                        _preflight_require_v1(self.read_bytes <= 64 * 1024 ** 3 and extent <= row['logical_bytes'], 'LINUX_V2_READ_BYTE_CAPACITY')
-                        if not block:
-                            break
-                    _preflight_require_v1(extent == row['logical_bytes'] and self.census._version(self._meta(os.fstat, fd)) == before == self.census._version(self._meta(path.lstat)) and self.native.flags(fd) & 16, 'LINUX_V2_READ_CHANGED')
-                finally:
-                    os.close(fd)
-            self.verify(protected=True)
-            self.state = 'READABLE'
-        except BaseException as exc:
-            self.failure = exc
-            self.state = 'FAILED'
-            raise
-
     def publish(self, path):
         _preflight_require_v1(self.state == 'READABLE', 'LINUX_V2_PUBLISH_STATE')
+        self.stage = 'projection'
         files = []
         dirs = []
         for row in self.rows:
@@ -13603,10 +14139,11 @@ class _LinuxImmutableSourceSealV2:
 
     def read_administration(self, path, limit):
         """The existing exact Git/config owner, after seal, without an eager tree."""
+        self.stage = 'setup'
         self._check()
         path = Path(path)
         _preflight_require_v1(str(path) in self.files and self.state in ('READABLE', 'IN_USE'), 'LINUX_V2_ADMINISTRATION_OPERAND')
-        fd = _linux_source_open_v2(path, attempt=self._meta_attempt)
+        fd = self._open_path(path)
         try:
             before = self._meta(os.fstat, fd)
             _preflight_require_v1(before.st_size <= limit and self.census._version(before) == self.post[str(path)] and (self.native.flags(fd) == self.original_flags[str(path)] | 16), 'LINUX_V2_ADMINISTRATION_IDENTITY')
@@ -13614,7 +14151,7 @@ class _LinuxImmutableSourceSealV2:
             extent = 0
             while True:
                 self._check()
-                block = os.read(fd, min(65536, before.st_size - extent + 1))
+                block = self._read(fd, min(65536, before.st_size - extent + 1))
                 self.auxiliary_read_bytes += len(block)
                 extent += len(block)
                 _preflight_require_v1(extent <= before.st_size, 'LINUX_V2_ADMINISTRATION_EXTENT')
@@ -13625,45 +14162,9 @@ class _LinuxImmutableSourceSealV2:
             self._check()
             return b''.join(parts)
         finally:
-            os.close(fd)
+            self._close(fd)
 
-    def restore(self):
-        self.state = 'SETTLING'
-        errors = []
-        if not self.protected:
-            _preflight_require_v1(not self.primitive or self.primitive.get('restored') is True, 'LINUX_V2_PRIMITIVE_CLEANUP_UNPROVEN')
-            self.state = 'RESTORED'
-            return
-        if len(self.post) != len(self.rows):
-            raise RuntimeError('LINUX_V2_PARTIAL_PROTECTION_RETAINED')
-        self.verify(protected=True)
-        for original in reversed(self.protected):
-            try:
-                path = Path(original['path'])
-                fd = _linux_source_open_v2(path, attempt=self._meta_attempt)
-                try:
-                    info = self._meta(os.fstat, fd)
-                    v = original['version']
-                    _preflight_require_v1((info.st_dev, info.st_ino) == tuple(v[:2]) and self.native.flags(fd) == original['flags'] | 16, 'LINUX_V2_RESTORE_IDENTITY_OR_FLAGS')
-                    self._transition(path, 'restore-flags', lambda: self.native.flags(fd, original['flags']))
-                    self._transition(path, 'restore-owner', lambda: self._meta(os.fchown, fd, v[7], v[8]))
-                    self._transition(path, 'restore-mode', lambda: self._meta(os.fchmod, fd, stat.S_IMODE(v[2])))
-                    after = self._meta(os.fstat, fd)
-                    _preflight_require_v1((after.st_uid, after.st_gid, after.st_mode, after.st_size, after.st_mtime_ns) == (v[7], v[8], v[2], v[3], v[4]) and self.native.flags(fd) == original['flags'], 'LINUX_V2_RESTORE_READBACK')
-                finally:
-                    os.close(fd)
-            except BaseException as exc:
-                errors.append(exc)
-        self.state = 'FAILED' if errors else 'RESTORED'
-        _scan_raise_errors(errors)
 
-    def _meta_attempt(self):
-        self.metadata_calls += 1
-        _preflight_require_v1(self.metadata_calls <= 2000000 and time.monotonic_ns() < self.deadline_ns, 'LINUX_V2_METADATA_CALL_CAPACITY_OR_DEADLINE')
-
-    def _meta(self, function, *args, **kwargs):
-        self._meta_attempt()
-        return function(*args, **kwargs)
 
 
 class _LinuxPreflightCensusV1:

@@ -9862,15 +9862,19 @@ def _linux_preflight_controller_v1(repository,installation,interpreter,event,eve
             deadline_ns=grants['native_deadline_ns'],shared_capture=capture_counts)
         source=o._LinuxImmutableSourceSealV2(metadata,deadline_ns=grants['native_deadline_ns'],workspace=export_root.parent,run_id=name)
         source.journal_path=control/'source-transition.jsonl'
+        o._preflight_require_v1(time.monotonic_ns() < grants['settlement_deadline_ns']-220*10**9,
+            'LINUX_V2_SETTLEMENT_RESERVATION')
         source.primitive_check(query)
+        source.recovery_check(setup_uid=int(os.environ['SUDO_UID']),evidence_root=control/'native-evidence')
         source.protect()
         source.readability()
+        source.stage='setup'
         git_root=pathlib.Path(repository)/'.git'
         o._preflight_require_v1(str(git_root/'index') in source.files,'LINUX_PREFLIGHT_ORIGINAL_GIT_ADMINISTRATION')
         for path in (git_root/'objects/info/alternates',git_root/'commondir',git_root/'gitdir',git_root/'worktrees'):
-            o._preflight_require_v1(not path.exists(),'LINUX_PREFLIGHT_EXTERNAL_GIT_ADMINISTRATION')
+            o._preflight_require_v1(not source._meta(path.exists),'LINUX_PREFLIGHT_EXTERNAL_GIT_ADMINISTRATION')
         config_path=git_root/'config'
-        o._preflight_require_v1(config_path.stat().st_size<=1048576,'LINUX_PREFLIGHT_GIT_CONFIG_BOUND')
+        o._preflight_require_v1(source._meta(config_path.stat).st_size<=1048576,'LINUX_PREFLIGHT_GIT_CONFIG_BOUND')
         config=source.read_administration(config_path,1048576).decode('utf-8','strict').lower()
         o._preflight_require_v1(not any(word in config for word in ('extraheader','credential','hookspath','insteadof')),
             'LINUX_PREFLIGHT_CREDENTIAL_OR_HOOK_CONFIGURATION')
@@ -9935,14 +9939,19 @@ def _linux_preflight_controller_v1(repository,installation,interpreter,event,eve
                 if not scope.terminated: scope.terminate(10)
                 scope.finish()
             except BaseException as cleanup_error: failures.append(cleanup_error)
+    if source is not None and source.failure is None and failures:
+        source.failure=failures[0]
+        source.state='FAILED'
     settled = scope is None or not scope.service_created or scope.settled
     exported = []
     export_bytes = export_entries = 0
     export_complete = False
-    export_deadline = min(grants['settlement_deadline_ns'], time.monotonic_ns()+60*10**9)
-    def export_file(path,destination):
+    pre_export_deadline = min(grants['settlement_deadline_ns']-190*10**9, time.monotonic_ns()+30*10**9)
+    post_export_deadline = None
+    export_elapsed_ns = 0
+    def export_file(path,destination,*,deadline_ns):
         nonlocal export_bytes,export_entries
-        o._preflight_require_v1(time.monotonic_ns() < export_deadline,
+        o._preflight_require_v1(time.monotonic_ns() < deadline_ns,
             'LINUX_PREFLIGHT_EXPORT_DEADLINE')
         export_entries += 1
         before = path.lstat()
@@ -9959,7 +9968,7 @@ def _linux_preflight_controller_v1(repository,installation,interpreter,event,eve
                 'LINUX_PREFLIGHT_EXPORT_DESCRIPTOR')
             pieces,extent = [],0
             while extent < before.st_size:
-                o._preflight_require_v1(time.monotonic_ns() < export_deadline,
+                o._preflight_require_v1(time.monotonic_ns() < deadline_ns,
                     'LINUX_PREFLIGHT_EXPORT_READ_DEADLINE')
                 chunk = os.read(descriptor,min(65536,before.st_size-extent))
                 o._preflight_require_v1(chunk,'LINUX_PREFLIGHT_EXPORT_TRUNCATED')
@@ -9973,10 +9982,10 @@ def _linux_preflight_controller_v1(repository,installation,interpreter,event,eve
         o._atomic_write_bytes_v1(destination,raw,control_mode=0o444)
         o._preflight_require_v1(destination.read_bytes() == raw,'LINUX_PREFLIGHT_EXPORT_BYTE_COMPARISON')
         exported.append(dict(source=str(path),destination=str(destination),bytes=len(raw)))
-    def export_tree(path,destination,depth=0):
+    def export_tree(path,destination,depth=0,*,deadline_ns):
         nonlocal export_entries
         o._preflight_require_v1(depth <= 64 and len(str(path).encode('utf-8')) <= 4096
-            and time.monotonic_ns() < export_deadline,'LINUX_PREFLIGHT_EXPORT_TREE_BOUND')
+            and time.monotonic_ns() < deadline_ns,'LINUX_PREFLIGHT_EXPORT_TREE_BOUND')
         before = _linux_preflight_export_directory_v1(path)
         destination.mkdir(mode=0o755,exist_ok=False)
         with os.scandir(path) as stream:
@@ -9984,8 +9993,8 @@ def _linux_preflight_controller_v1(repository,installation,interpreter,event,eve
                 export_entries += 1
                 o._preflight_require_v1(export_entries <= 200000,'LINUX_PREFLIGHT_EXPORT_ENTRIES')
                 child = path/item.name
-                if item.is_dir(follow_symlinks=False): export_tree(child,destination/item.name,depth+1)
-                else: export_file(child,destination/item.name)
+                if item.is_dir(follow_symlinks=False): export_tree(child,destination/item.name,depth+1,deadline_ns=deadline_ns)
+                else: export_file(child,destination/item.name,deadline_ns=deadline_ns)
         _linux_preflight_export_directory_v1(path,before)
     # The export roots are literal owned evidence surfaces, never the checkout,
     # index, installation, declaration payload or an arbitrary supplied pathname.
@@ -10004,40 +10013,53 @@ def _linux_preflight_controller_v1(repository,installation,interpreter,event,eve
         source_auxiliary_read_bytes=None if source is None else source.auxiliary_read_bytes,
         source_read_attempts=None if source is None else source.read_attempts,
         source_metadata_calls=None if source is None else source.metadata_calls,
+        source_accounting=None if source is None else source.evidence(),
         source_last_path=None if source is None else getattr(source,'current_path',None),
         source_last_operation=None if source is None else getattr(source,'current_operation',None),
         source_mount_observation=None if source is None else getattr(source,'mount_observation',None),
         installation_last_path=None if install is None else getattr(install,'current_path',None),
         failures=[repr(e) for e in failures],service_settled=settled,
         evidence_root=str(control),export_root=str(export_root),canonical_acceptance=False)
+    pre_export_start=time.monotonic_ns()
     try:
-        raw,census_raw = _linux_preflight_metadata_bytes_v1(census,report,export_deadline)
+        raw,census_raw = _linux_preflight_metadata_bytes_v1(census,report,pre_export_deadline)
         if census is not None:
             o._atomic_write_bytes_v1(control/'capture-census.json',census_raw)
-            export_file(control/'capture-census.json',export_root/'capture-census.json')
+            export_file(control/'capture-census.json',export_root/'capture-census.json',deadline_ns=pre_export_deadline)
         o._atomic_write_bytes_v1(control/'native-result.json',raw)
-        export_file(control/'native-result.json',export_root/'native-result.json')
+        export_file(control/'native-result.json',export_root/'native-result.json',deadline_ns=pre_export_deadline)
         for path,label in ((control/'source-transition.jsonl','source-transition-before-settlement.jsonl'),
                 (control/'declaration/source-basis.json','source-basis.json')):
-            if path.exists():export_file(path,export_root/label)
+            if path.exists():export_file(path,export_root/label,deadline_ns=pre_export_deadline)
         for path,label in ((control/'native-evidence','native'),(spool,'streams'),
                 (runtime/'evidence','application-evidence'),(runtime/'reports','reports'),
                 (runtime/'native-observations','service-native-observations')):
-            if path.exists(): export_tree(path,export_root/label)
+            if path.exists(): export_tree(path,export_root/label,deadline_ns=pre_export_deadline)
         export_complete = True
     except BaseException as exc: failures.append(exc)
-    # Attribute restoration follows actual settlement and complete retained bytes.
-    if settled and export_complete:
+    finally:
+        export_elapsed_ns += time.monotonic_ns()-pre_export_start
+    # The single restoration entry uses only its prepaid settlement allocation.
+    # A failed export retains the sole journal/root; it does not spend rollback.
+    if settled:
         if source is None:
-            restored = True  # Capture failed before any protection transition.
+            restored = True
         else:
             try:
-                source.deadline_ns = grants['settlement_deadline_ns']
-                if source.protected:source.verify(protected=True)
-                source.restore()
-                if source.journal_path.exists():export_file(source.journal_path,export_root/'source-transition-after-settlement.jsonl')
-                restored = True
+                source.restore(deadline_ns=min(grants['settlement_deadline_ns']-70*10**9,
+                    time.monotonic_ns()+120*10**9),processes_settled=True)
+                restored = source.state == 'RESTORED'
             except BaseException as exc: failures.append(exc)
+    post_export_start=time.monotonic_ns()
+    post_export_deadline=min(grants['settlement_deadline_ns']-40*10**9,
+        post_export_start+min(30*10**9,max(0,60*10**9-export_elapsed_ns)))
+    try:
+        if source is not None and source.journal_path is not None and source.journal_path.exists():
+            export_file(source.journal_path,export_root/'source-transition-after-settlement.jsonl',
+                deadline_ns=post_export_deadline)
+    except BaseException as exc:
+        failures.append(exc)
+        export_complete=False
     stopped = unmounted = removed = False
     if settled and restored and export_complete:
         for kind,source_name in (('timing','timing-fast-preflight.json'),('router','router-fast-preflight.json')):
@@ -10045,9 +10067,13 @@ def _linux_preflight_controller_v1(repository,installation,interpreter,event,eve
             if path.exists():
                 try:
                     destination = pathlib.Path(repository)/'.tmp'/('qtt-validation-'+kind)/'fast-preflight.json'
-                    export_file(path,destination)
+                    export_file(path,destination,deadline_ns=post_export_deadline)
                 except BaseException as exc: failures.append(exc)
         try:
+            post_export_spent=time.monotonic_ns()-post_export_start
+            export_elapsed_ns+=post_export_spent
+            post_export_start=None
+            query.deadline_ns=min(grants['settlement_deadline_ns'],time.monotonic_ns()+40*10**9)
             if scope is not None:
                 if scope.service_created: query.command(('/usr/bin/systemctl','stop',name+'.service'),settling=True)
                 if scope.slice_created: query.command(('/usr/bin/systemctl','stop',name+'.slice'),settling=True)
@@ -10059,10 +10085,13 @@ def _linux_preflight_controller_v1(repository,installation,interpreter,event,eve
             unmounted = True
             # Stop/unmount receipts are produced after the first export. Preserve
             # only those newly created files, never overwrite earlier evidence.
+            post_export_start=time.monotonic_ns()
+            post_export_deadline=min(query.deadline_ns,post_export_start+max(0,30*10**9-post_export_spent),
+                post_export_start+max(0,60*10**9-export_elapsed_ns))
             if (control/'native-evidence').exists():
                 for path in sorted((control/'native-evidence').iterdir()):
                     destination = export_root/'native'/path.name
-                    if not destination.exists(): export_file(path,destination)
+                    if not destination.exists(): export_file(path,destination,deadline_ns=post_export_deadline)
             for path,identity in ((runtime,runtime_identity),(control,control_identity)):
                 actual = path.lstat()
                 o._preflight_require_v1(path.parent == pathlib.Path('/run') and
@@ -10072,7 +10101,10 @@ def _linux_preflight_controller_v1(repository,installation,interpreter,event,eve
                     repo_root=repository,evidence_root=export_root)
             removed = True
         except BaseException as exc: failures.append(exc)
-    cleanup = dict(service_settled=settled,source_attributes_restored=restored,evidence_export_complete=export_complete,
+    if post_export_start is not None:export_elapsed_ns += time.monotonic_ns()-post_export_start
+    cleanup = dict(source_accounting=None if source is None else source.evidence(),
+        export_elapsed_ns=export_elapsed_ns,pre_export_deadline_ns=pre_export_deadline,
+        post_export_deadline_ns=post_export_deadline,service_settled=settled,source_attributes_restored=restored,evidence_export_complete=export_complete,
         service_created=scope is not None and scope.service_created,runtime_mount_attempted=mounted,
         source_protection_attempted=source is not None and bool(source.protected),
         native_basis_state=None if source is None else source.state,
