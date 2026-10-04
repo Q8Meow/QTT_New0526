@@ -20940,14 +20940,28 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
             changed={**binding,key:value};assert changed!=binding
             with pytest.raises(o.ValidationReliabilityError):
                 o._LinuxPreflightHostLeaseV1.check_runtime(changed,logical,RuntimeQueryReference(mount_raw))
-        views['/tmp']=runtime_stat(95)
-        with pytest.raises(o.ValidationReliabilityError,match='RUNTIME_ALIAS'):
-            o._LinuxPreflightHostLeaseV1.check_runtime(binding,logical,RuntimeQueryReference(mount_raw))
+        for path in original_views:
+            for field,value in (('st_ino',95),('st_dev',96),('st_mode',stat.S_IFDIR|0o755)):
+                views=dict(original_views)
+                values={**vars(views[path]),field:value};assert values!=vars(views[path])
+                views[path]=SimpleNamespace(**values)
+                if field=='st_mode':
+                    # Mode belongs to the inode, so every alias of that inode
+                    # must carry the same changed mode in this reference.
+                    for alias,info in original_views.items():
+                        if (info.st_dev,info.st_ino)==(original_views[path].st_dev,original_views[path].st_ino):
+                            views[alias]=SimpleNamespace(**{**vars(info),field:value})
+                with pytest.raises(o.ValidationReliabilityError,match='RUNTIME_(ALIAS|OWNERSHIP)'):
+                    o._LinuxPreflightHostLeaseV1.check_runtime(binding,logical,RuntimeQueryReference(mount_raw))
         views=dict(original_views)
-        for damaged in (mount_raw.replace(b'noexec,',b'',1),mount_raw.replace(b'size=1048576k',b'size=2048k')):
-            assert damaged!=mount_raw
-            with pytest.raises(o.ValidationReliabilityError,match='RUNTIME_ALIAS'):
-                o._LinuxPreflightHostLeaseV1.check_runtime(binding,logical,RuntimeQueryReference(damaged))
+        mount_lines=mount_raw.splitlines(keepends=True)
+        for index in range(3):
+            for before,after in ((b'noexec,',b''),(b'nodev,',b''),(b',nosuid',b''),
+                    (b'size=1048576k',b'size=2048k'),(b'0:91',b'0:92'),(b' rw,',b' ro,')):
+                lines=list(mount_lines);lines[index]=lines[index].replace(before,after,1)
+                damaged=b''.join(lines);assert damaged!=mount_raw
+                with pytest.raises(o.ValidationReliabilityError,match='RUNTIME_ALIAS'):
+                    o._LinuxPreflightHostLeaseV1.check_runtime(binding,logical,RuntimeQueryReference(damaged))
 
     mib,gib = 1024**2,1024**3
     assert o._linux_preflight_name_v1(17,23) == 'qtt17n23'
@@ -20971,7 +20985,7 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
     assert len(properties) == len({v.split('=',1)[0] for v in properties})
     required = {'Type=exec','Restart=no','RemainAfterExit=yes','DynamicUser=yes','UMask=0077','NoNewPrivileges=yes',
         'CapabilityBoundingSet=','AmbientCapabilities=','PrivateDevices=yes','PrivateNetwork=yes','PrivateIPC=yes',
-        'InaccessiblePaths=/dev/shm /dev/mqueue /dev/hugepages','PrivateTmp=no','ProtectSystem=strict','ProtectHome=tmpfs',
+        'InaccessiblePaths=/dev/shm /dev/mqueue /dev/hugepages','PrivateTmp=yes','ProtectSystem=strict','ProtectHome=tmpfs',
         'MountAPIVFS=yes','ProtectProc=invisible','ProtectControlGroups=yes','ProtectKernelTunables=yes',
         'ProtectKernelModules=yes','ProtectKernelLogs=yes','RestrictSUIDSGID=yes','RestrictRealtime=yes',
         'RestrictNamespaces=yes','LockPersonality=yes','RestrictAddressFamilies=AF_UNIX','SystemCallArchitectures=native',
@@ -21097,7 +21111,7 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
     # Independent manager-output operands, not read back from the argv producer.
     status = dict(Type='exec',Restart='no',RemainAfterExit='yes',DynamicUser='yes',UMask='0077',
         NoNewPrivileges='yes',CapabilityBoundingSet='',AmbientCapabilities='',PrivateDevices='yes',
-        PrivateNetwork='yes',PrivateIPC='yes',PrivateTmp='no',ProtectSystem='strict',ProtectHome='tmpfs',
+        PrivateNetwork='yes',PrivateIPC='yes',PrivateTmp='yes',ProtectSystem='strict',ProtectHome='tmpfs',
         MountAPIVFS='yes',ProtectProc='invisible',ProtectControlGroups='yes',ProtectKernelTunables='yes',
         ProtectKernelModules='yes',ProtectKernelLogs='yes',RestrictSUIDSGID='yes',RestrictRealtime='yes',
         RestrictNamespaces='yes',LockPersonality='yes',RestrictAddressFamilies='AF_UNIX',SystemCallArchitectures='native',
@@ -21116,6 +21130,109 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
         with pytest.raises(o.ValidationReliabilityError): o._linux_preflight_unit_policy_v1(damaged,**options)
         damaged = {k:v for k,v in status.items() if k != key}
         with pytest.raises(o.ValidationReliabilityError): o._linux_preflight_unit_policy_v1(damaged,**options)
+    # Immutable historical manager bytes from workflow 37186553401, artifact
+    # 11296434607, native/command-331.stdout.bin. This is a policy reference,
+    # not a new process, credential, mount or acceptance observation.
+    recorded_raw=(
+        b'Type=exec\n'
+        b'Restart=no\n'
+        b'TimeoutStartUSec=1min\n'
+        b'TimeoutStopUSec=10s\n'
+        b'RuntimeMaxUSec=1h\n'
+        b'RemainAfterExit=yes\n'
+        b'MainPID=2580\n'
+        b'Result=success\n'
+        b'ExecMainCode=0\n'
+        b'ExecMainStatus=0\n'
+        b'Slice=qtt2557n2660997759221.slice\n'
+        b'ControlGroup=/qtt2557n2660997759221.slice/qtt2557n2660997759221.service\n'
+        b'CPUAccounting=yes\n'
+        b'CPUQuotaPerSecUSec=2s\n'
+        b'CPUQuotaPeriodUSec=100ms\n'
+        b'MemoryAccounting=yes\n'
+        b'MemoryMax=6442450944\n'
+        b'MemorySwapMax=0\n'
+        b'TasksAccounting=yes\n'
+        b'TasksMax=64\n'
+        b'UMask=0077\n'
+        b'LimitFSIZE=67108864\n'
+        b'LimitCORE=0\n'
+        b'LimitNOFILE=1024\n'
+        b'WorkingDirectory=/home/runner/work/QTT_New0526/QTT_New0526\n'
+        b'RootDirectory=/run/qtt2557n266099775922control/runtime-roundtrip-control/root\n'
+        b'StandardInput=null\n'
+        b'StandardOutput=append\n'
+        b'StandardError=append\n'
+        b'CapabilityBoundingSet=\n'
+        b'AmbientCapabilities=\n'
+        b'DynamicUser=yes\n'
+        b'ReadWritePaths=/run/qtt2557n2660997759221 /tmp /var/tmp\n'
+        b'InaccessiblePaths=/dev/shm /dev/mqueue /dev/hugepages\n'
+        b'PrivateTmp=yes\n'
+        b'PrivateDevices=yes\n'
+        b'ProtectKernelTunables=yes\n'
+        b'ProtectKernelModules=yes\n'
+        b'ProtectKernelLogs=yes\n'
+        b'ProtectControlGroups=yes\n'
+        b'PrivateNetwork=yes\n'
+        b'PrivateIPC=yes\n'
+        b'ProtectHome=tmpfs\n'
+        b'ProtectSystem=strict\n'
+        b'NoNewPrivileges=yes\n'
+        b'SystemCallFilter=~chroot delete_module finit_module fsconfig fsmount fsopen fspick init_module ioperm iopl kexec_file_load kexec_load mount mount_setattr move_mount open_tree pciconfig_iobase pciconfig_read pciconfig_write pivot_root reboot s390_pci_mmio_read s390_pci_mmio_write swapoff swapon umount umount2\n'
+        b'SystemCallArchitectures=native\n'
+        b'LockPersonality=yes\n'
+        b'RestrictAddressFamilies=AF_UNIX\n'
+        b'RuntimeDirectoryMode=0755\n'
+        b'RuntimeDirectory=\n'
+        b'RestrictRealtime=yes\n'
+        b'RestrictSUIDSGID=yes\n'
+        b'RestrictNamespaces=yes\n'
+        b'MountAPIVFS=yes\n'
+        b'ProtectProc=invisible\n'
+        b'KillMode=control-group\n'
+        b'SendSIGKILL=yes\n'
+        b'ActiveState=active\n'
+        b'StopWhenUnneeded=no\n'
+        b'InvocationID=e6117eb6964741058d830038cf66d2b5\n'
+    )
+    recorded=dict(line.split('=',1) for line in recorded_raw.decode('utf-8').splitlines())
+    recorded_options=dict(name='qtt2557n2660997759221',
+        root='/run/qtt2557n266099775922control/runtime-roundtrip-control/root',
+        repository='/home/runner/work/QTT_New0526/QTT_New0526',runtime='/run/qtt2557n2660997759221',
+        syscall_filter=frozenset(('chroot delete_module finit_module fsconfig fsmount fsopen fspick '
+            'init_module ioperm iopl kexec_file_load kexec_load mount mount_setattr move_mount open_tree '
+            'pciconfig_iobase pciconfig_read pciconfig_write pivot_root reboot s390_pci_mmio_read '
+            's390_pci_mmio_write swapoff swapon umount umount2').split()))
+    assert recorded['PrivateTmp']=='yes' and recorded['RuntimeDirectory']=='' and recorded['DynamicUser']=='yes'
+    recorded_before=dict(recorded)
+    with monkeypatch.context() as patch:
+        patch.setitem(o._LINUX_PREFLIGHT_SERVICE_READBACK_V1,'PrivateTmp','no')
+        with pytest.raises(o.ValidationReliabilityError,match='UNIT_READBACK:PrivateTmp'):
+            o._linux_preflight_unit_policy_v1(recorded,**recorded_options)
+    o._linux_preflight_unit_policy_v1(recorded,**recorded_options)
+    assert recorded==recorded_before
+    rejected_private_tmp=0
+    for value in ('no','',None,True,1,b'yes',['yes'],{'value':'yes'},'YES'):
+        damaged={**recorded,'PrivateTmp':value};assert damaged!=recorded
+        with pytest.raises(o.ValidationReliabilityError,match='UNIT_READBACK:PrivateTmp'):
+            o._linux_preflight_unit_policy_v1(damaged,**recorded_options)
+        rejected_private_tmp+=1
+    damaged={key:value for key,value in recorded.items() if key!='PrivateTmp'}
+    assert damaged!=recorded
+    with pytest.raises(o.ValidationReliabilityError,match='UNIT_READBACK:PrivateTmp'):
+        o._linux_preflight_unit_policy_v1(damaged,**recorded_options)
+    for key,value in (('DynamicUser','no'),('RuntimeDirectory','qtt2557n2660997759221'),
+            ('MemoryMax','infinity'),('ReadWritePaths',recorded['ReadWritePaths']+' /outside'),
+            ('ProtectSystem','no'),('SystemCallFilter','~mount')):
+        damaged={**recorded,key:value};assert damaged!=recorded
+        with pytest.raises(o.ValidationReliabilityError):
+            o._linux_preflight_unit_policy_v1(damaged,**recorded_options)
+    print('LINUX_PRIVATETMP_RECORDED_REFERENCE '+json.dumps(dict(
+        source='37186553401/11296434607/native/command-331.stdout.bin',
+        original_private_tmp_rejected=True,corrected_private_tmp_accepted=True,
+        unchanged_recorded_bytes=len(recorded_raw),private_tmp_mutations_rejected=rejected_private_tmp+1,
+        unrelated_recorded_mutations_rejected=6,native_execution=False)),flush=True)
     original = area/'original-evidence'
     with original.open('xb') as destination:
         tail = o._LinuxPreflightTailV1(original,original_evidence=True)

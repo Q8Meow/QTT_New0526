@@ -12259,7 +12259,7 @@ _LINUX_PREFLIGHT_PROPERTIES_V1 = (
     ('UMask','0077'), ('NoNewPrivileges','yes'), ('CapabilityBoundingSet',''),
     ('AmbientCapabilities',''), ('PrivateDevices','yes'), ('PrivateNetwork','yes'),
     ('PrivateIPC','yes'), ('InaccessiblePaths','/dev/shm /dev/mqueue /dev/hugepages'),
-    ('PrivateTmp','no'), ('ProtectSystem','strict'), ('ProtectHome','tmpfs'),
+    ('PrivateTmp','yes'), ('ProtectSystem','strict'), ('ProtectHome','tmpfs'),
     ('MountAPIVFS','yes'), ('ProtectProc','invisible'), ('ProtectControlGroups','yes'),
     ('ProtectKernelTunables','yes'), ('ProtectKernelModules','yes'), ('ProtectKernelLogs','yes'),
     ('RestrictSUIDSGID','yes'), ('RestrictRealtime','yes'), ('RestrictNamespaces','yes'),
@@ -14814,7 +14814,7 @@ def _linux_preflight_syscalls_v1(query):
 _LINUX_PREFLIGHT_SERVICE_READBACK_V1 = {
     'Type':'exec','Restart':'no','RemainAfterExit':'yes','DynamicUser':'yes','UMask':'0077',
     'NoNewPrivileges':'yes','CapabilityBoundingSet':'','AmbientCapabilities':'',
-    'PrivateDevices':'yes','PrivateNetwork':'yes','PrivateIPC':'yes','PrivateTmp':'no',
+    'PrivateDevices':'yes','PrivateNetwork':'yes','PrivateIPC':'yes','PrivateTmp':'yes',
     'ProtectSystem':'strict','ProtectHome':'tmpfs','MountAPIVFS':'yes','ProtectProc':'invisible',
     'ProtectControlGroups':'yes','ProtectKernelTunables':'yes','ProtectKernelModules':'yes',
     'ProtectKernelLogs':'yes','RestrictSUIDSGID':'yes','RestrictRealtime':'yes','RestrictNamespaces':'yes',
