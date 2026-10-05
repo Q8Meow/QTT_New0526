@@ -103,6 +103,7 @@ _ACTIVE_FILESYSTEM_PROBE: FilesystemProbeReceiptV1 | None = None
 _RUN_PROVENANCE_WRITTEN = False
 _RUN_PROVENANCE_ATTEMPTED = False
 _ACTIVE_CANDIDATE_SOURCE = None
+_ORDINARY_CANDIDATE_FIRST_V1 = False
 _ACTIVE_PREFLIGHT_PATH_V1 = None
 _ACTIVE_PREFLIGHT_NATIVE_V1 = None
 _ACTIVE_PREFLIGHT_ASSEMBLY_V1 = None
@@ -8375,6 +8376,10 @@ def _publish_active_plan_provenance(
     if _ACTIVE_PREFLIGHT_PATH_V1 is not None:
         _ACTIVE_PREFLIGHT_ASSEMBLY_V1 = _PreflightAssemblyV1(_ACTIVE_PREFLIGHT_NATIVE_V1, active_run_paths, selected_plan)
         _ACTIVE_CANDIDATE_SOURCE = _ACTIVE_PREFLIGHT_ASSEMBLY_V1.candidate_source
+    if _ORDINARY_CANDIDATE_FIRST_V1:
+        # The ordinary entry has no qualified native issuer yet. Preserve its
+        # real C denial before dependent profiles or accepted provenance.
+        _prepare_validation_candidate_v1(active_run_paths.repo_root, selected_plan, None)
     launch = _scan_resolve_parent_capacity(active_run_paths, phase, selected_plan)
     _mapper_resolve_parent_profiles_v1(active_run_paths, phase, _LAST_EXPECTED_COMMAND_PLAN)
     _RUN_PROVENANCE_ATTEMPTED = True
@@ -10205,6 +10210,7 @@ def _linux_preflight_selected_v1(argv, suppliers):
 
 
 def main(argv: Sequence[str] | None = None, *, scan_capacity_source=None, candidate_source=None, mapper_read_source=None) -> int:
+    global _ORDINARY_CANDIDATE_FIRST_V1
     global _ACTIVE_PREFLIGHT_PATH_V1, _ACTIVE_PREFLIGHT_NATIVE_V1, _ACTIVE_PREFLIGHT_ASSEMBLY_V1
     global _ACTIVE_MAPPER_OCCURRENCES_V1
     global _ACTIVE_MAPPER_READ_PROFILES_V1, _ACTIVE_MAPPER_READ_SOURCE_V1, _MAPPER_READ_SOURCE_ATTEMPTED
@@ -10222,6 +10228,7 @@ def main(argv: Sequence[str] | None = None, *, scan_capacity_source=None, candid
     previous_occurrences = _ACTIVE_MAPPER_OCCURRENCES_V1
     previous_mapper = (_ACTIVE_MAPPER_READ_PROFILES_V1, _ACTIVE_MAPPER_READ_SOURCE_V1, _MAPPER_READ_SOURCE_ATTEMPTED)
     previous = (_ACTIVE_SCAN_CAPACITY_SOURCE, _ACTIVE_SCAN_LAUNCH, _SCAN_CAPACITY_ATTEMPTED, _ACTIVE_CANDIDATE_SOURCE)
+    previous_candidate_order = _ORDINARY_CANDIDATE_FIRST_V1
     try:
         request = argparse.ArgumentParser(add_help=False)
         request.add_argument("--preflight-input", type=pathlib.Path)
@@ -10240,12 +10247,15 @@ def main(argv: Sequence[str] | None = None, *, scan_capacity_source=None, candid
         _MAPPER_READ_SOURCE_ATTEMPTED = False
         _ACTIVE_SCAN_CAPACITY_SOURCE = scan_capacity_source
         _ACTIVE_CANDIDATE_SOURCE = candidate_source
+        _ORDINARY_CANDIDATE_FIRST_V1 = (selected.preflight_input is None
+            and all(value is None for value in (candidate_source, mapper_read_source, scan_capacity_source)))
         _ACTIVE_SCAN_LAUNCH = None
         _SCAN_CAPACITY_ATTEMPTED = False
         return _main_owned(argv)
     finally:
         _ACTIVE_PREFLIGHT_PATH_V1, _ACTIVE_PREFLIGHT_NATIVE_V1, _ACTIVE_PREFLIGHT_ASSEMBLY_V1 = previous_preflight
         _ACTIVE_SCAN_CAPACITY_SOURCE, _ACTIVE_SCAN_LAUNCH, _SCAN_CAPACITY_ATTEMPTED, _ACTIVE_CANDIDATE_SOURCE = previous
+        _ORDINARY_CANDIDATE_FIRST_V1 = previous_candidate_order
         _ACTIVE_MAPPER_READ_PROFILES_V1, _ACTIVE_MAPPER_READ_SOURCE_V1, _MAPPER_READ_SOURCE_ATTEMPTED = previous_mapper
         _ACTIVE_MAPPER_OCCURRENCES_V1 = previous_occurrences
         _SCAN_MAIN_LOCK.release()

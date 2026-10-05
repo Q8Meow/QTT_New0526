@@ -2,6 +2,7 @@ name: QTT Validation
 
 on:
   pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
   workflow_dispatch:
     inputs:
       full_validation:
@@ -129,7 +130,7 @@ jobs:
       - name: Run validation shard
         id: validation_run
         env:
-          QTT_PR298_NATIVE_ELIGIBLE: ${{ matrix.phase == 'fast-preflight' && github.event_name == 'pull_request' && github.repository == 'Q8Meow/QTT_New0526' && github.event.pull_request.number == 298 && github.event.pull_request.draft == true && github.event.pull_request.head.repo.full_name == 'Q8Meow/QTT_New0526' && github.event.pull_request.base.repo.full_name == 'Q8Meow/QTT_New0526' && github.event.pull_request.head.ref == 'repair/main-cumulative-v35-final-r5-local-20260922' && '1' || '0' }}
+          QTT_PR298_NATIVE_ELIGIBLE: ${{ matrix.phase == 'fast-preflight' && github.event_name == 'pull_request' && github.repository == 'Q8Meow/QTT_New0526' && github.event.pull_request.number == 298 && github.event.pull_request.draft == true && github.event.pull_request.head.repo.full_name == 'Q8Meow/QTT_New0526' && github.event.pull_request.base.repo.full_name == 'Q8Meow/QTT_New0526' && github.event.pull_request.base.ref == 'main' && github.event.pull_request.head.ref == 'repair/main-cumulative-v35-final-r5-local-20260922' && '1' || '0' }}
         run: |
           if [ "$QTT_PR298_NATIVE_ELIGIBLE" = "1" ]
           then

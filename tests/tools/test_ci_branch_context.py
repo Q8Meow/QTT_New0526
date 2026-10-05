@@ -519,6 +519,54 @@ def test_st12_pull_request_detached_context_uses_exact_github_head_ref(
         )
 
 
+    # The exact V35 head has branch-only compatibility in draft and ready PR
+    # contexts. This does not grant the private draft-only native issuer.
+    v35 = "repair/main-cumulative-v35-final-r5-local-20260922"
+    assert frozenset(gate for gate, policy in context.BRANCH_CONTEXT_GATE_POLICIES.items()
+        if v35 in policy.detached_head_ref_branches) == frozenset({"PR159R", "PR160"})
+    with monkeypatch.context() as v35_context:
+        v35_context.setenv("GITHUB_REF", "refs/pull/298/merge")
+        v35_context.setenv("GITHUB_REF_NAME", "298/merge")
+        v35_context.setenv("GITHUB_BASE_REF", "main")
+        for prefix in ("", "refs/heads/", "refs/remotes/origin/", "origin/"):
+            v35_context.setenv("GITHUB_HEAD_REF", prefix + v35)
+            resolved = context.current_branch_context(
+                REPO_ROOT, git_stdout=lambda *_args: (0, "HEAD", ""),
+            )
+            assert resolved.branch == v35 and resolved.source == "GITHUB_HEAD_REF"
+            assert context.github_actions_pull_request_detached_context_active(
+                branch_returncode=0, branch="HEAD",
+            )
+            for gate in context.BRANCH_CONTEXT_GATE_POLICIES:
+                assert context.is_pull_request_detached_head_context_allowed_for_upstream_pr_gate(
+                    resolved.branch, gate,
+                ) is (gate in {"PR159R", "PR160"})
+            assert not context.is_validation_infrastructure_branch(v35)
+            assert not context.is_validation_execution_branch(v35)
+            assert not context.is_owner_authorized_validation_branch(v35)
+        for rejected in (v35.upper(), v35 + "-copy", "prefix-" + v35, v35 + "/"):
+            v35_context.setenv("GITHUB_HEAD_REF", rejected)
+            for gate in ("PR159R", "PR160"):
+                assert not context.is_pull_request_detached_head_context_allowed_for_upstream_pr_gate(
+                    context.github_actions_head_ref_branch_context(), gate,
+                )
+        v35_context.delenv("GITHUB_HEAD_REF")
+        assert context.github_actions_branch_context() == ""
+        for gate in ("PR159R", "PR160"):
+            assert not context.is_pull_request_detached_head_context_allowed_for_upstream_pr_gate(
+                context.github_actions_branch_context(), gate,
+            )
+    # Detached-only membership must not become ordinary local/main admission.
+    assert not context.is_branch_allowed_for_upstream_pr_gate(v35, "PR160", ancestry_present=True, include_main=True)
+    assert not context.is_branch_allowed_for_upstream_pr_gate(v35, "PR159R", include_main=True)
+    assert context.is_branch_allowed_for_upstream_pr_gate(v35, "PR159R", ancestry_present=True, include_main=True)
+    for gate in ("PR159R", "PR160"):
+        assert not context.is_main_push_context_allowed_for_upstream_pr_gate(v35, gate, ancestry_present=True)
+    assert context.changed_path_allowed_for_explicit_repair_branch(v35, "tools/ci_branch_context.py")
+    for path in ("tools/unlisted.py", ".env", "credentials.json"):
+        assert not context.changed_path_allowed_for_explicit_repair_branch(v35, path)
+
+
 def test_roadmap_pr_number_parses_pr_branches():
     assert context.roadmap_pr_number("pr97-atomicrows-full-bundle-row-expansion-plan") == 97
     assert (

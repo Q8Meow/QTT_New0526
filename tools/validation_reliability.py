@@ -9662,7 +9662,7 @@ class _MapperDiskBasisV1:
     must supervise termination and retain input/evidence custody. The caller
     supplies an independently bound identity; the profile cannot approve itself.
     """
-    def __init__(self, profile, *, expected_position, expected_generation, clock):
+    def __init__(self, profile, *, expected_position, expected_generation, clock, native_observation=None):
         import threading
         self.profile = copy.deepcopy(profile)
         self.shape = _mapper_profile_v1(self.profile)
@@ -9675,6 +9675,17 @@ class _MapperDiskBasisV1:
         self.reserved = {'target_bytes': 0, 'basis_bytes': 0}; self.by_path = {}; self.events = []
         self.root = Path(profile['root']); self.basis = Path(profile['basis'])
         self.entries = {row['path']: row for row in self.profile['entries']}
+        self.native_observation = native_observation
+        if native_observation is not None:
+            _mapper_need_v1(type(native_observation) is _PreflightObservationV1
+                and type(native_observation.native_basis) is _LinuxImmutableSourceBasisV2
+                and native_observation.root == self.root
+                and native_observation.native_basis.root == self.root
+                and native_observation.run_id == native_observation.native_basis.run_id
+                and profile['deadline_ns'] <= min(native_observation.deadline_ns,
+                    native_observation.native_basis.deadline_ns),
+                'BASIS_NATIVE_OBSERVATION_OWNER')
+            native_observation.check()
         self.fd = None
         self._check()
         try:
@@ -9705,6 +9716,8 @@ class _MapperDiskBasisV1:
         except BaseException:
             self.poisoned = True
             raise
+        if self.native_observation is not None:
+            self.native_observation.check()
 
     def _stat(self, path=None, fd=None):
         self._check()
@@ -9734,8 +9747,14 @@ class _MapperDiskBasisV1:
         self.counters[lane + '_read_calls'] += 1
         data = os.read(fd, request)
         if type(data) is not bytes:
+            if self.native_observation is not None:
+                self.native_observation.measurement_complete = False
             self.poisoned = True; raise ValueError('BASIS_UNKNOWN_DELIVERED_BYTES')
         self.counters[lane + '_bytes'] = _mapper_add_v1(self.counters[lane + '_bytes'], len(data))
+        if self.native_observation is not None:
+            key = 'source_bytes_read' if lane == 'target' else 'owned_evidence_bytes_read'
+            self.native_observation.native_read_observation[key] += len(data)
+            self.native_observation.received('bytes', len(data))
         if len(data) > request:
             self.poisoned = True; raise ValueError('BASIS_OVERSIZED_READ')
         self._check(); return data
@@ -9754,16 +9773,25 @@ class _MapperDiskBasisV1:
         self.counters['attempts'] += 1; self.by_path[name] = self.by_path.get(name, 0) + 1
         event = {'path':name,'ordinal':self.counters['attempts'],'outcome':'BEFORE_OPEN', 'target_bytes':0,'basis_bytes':0,'descriptor_closed':False}
         self.events.append(event); before = dict(self.counters)
-        self.busy = True; target_fd = None; primary = None
+        self.busy = True; target_fd = None; primary = None; native_acquisition = None
         try:
             _mapper_need_v1(n + 1 <= limits['single_target_buffer'], 'BASIS_SINGLE_BUFFER_EXHAUSTED')
             for lane, amount in (('target_bytes', n + 1), ('basis_bytes', n)):
                 _mapper_need_v1(amount <= limits[lane] - self.reserved[lane], 'BASIS_RESERVATION_EXHAUSTED')
             self.reserved['target_bytes'] += n + 1; self.reserved['basis_bytes'] += n
+            if self.native_observation is not None:
+                self.native_observation.reserve('attempts')
+                _mapper_need_v1(2 * n + 1 <= self.native_observation.remaining['bytes'],
+                    'BASIS_NATIVE_READ_ALLOWANCE')
+                self.native_observation.reserve('retained_bytes', n)
             self._basis_current(); self._chains(row)
             path = self.root.joinpath(*name.split('/'))
             _mapper_need_v1(self._stamp(path) == row['lstat'], 'BASIS_TARGET_GENERATION_CHANGED')
-            target_fd = os.open(path, os.O_RDONLY | getattr(os,'O_BINARY',0) | getattr(os,'O_NOFOLLOW',0))
+            if self.native_observation is None:
+                target_fd = os.open(path, os.O_RDONLY | getattr(os,'O_BINARY',0) | getattr(os,'O_NOFOLLOW',0))
+            else:
+                native_acquisition = self.native_observation.native_basis.open_entry(name)
+                target_fd = native_acquisition.__enter__()
             os.set_inheritable(target_fd,False)
             _mapper_need_v1(self._stamp(fd=target_fd) == row['fstat'], 'BASIS_TARGET_HANDLE_CHANGED')
             os.lseek(self.fd, row['offset'], os.SEEK_SET)
@@ -9779,6 +9807,8 @@ class _MapperDiskBasisV1:
                     _mapper_need_v1(expected == chunk[compared:compared+len(expected)], 'BASIS_BYTES_DIFFER')
                     compared += len(expected)
                 data.extend(chunk); remaining -= len(chunk)
+                if self.native_observation is not None:
+                    self.native_observation.observed['retained_bytes'] += len(chunk)
             _mapper_need_v1(self._read(target_fd, 1, 'target') == b'', 'BASIS_TARGET_GREW')
             _mapper_need_v1(self._stamp(fd=target_fd) == row['fstat'] and self._stamp(path) == row['lstat'], 'BASIS_POSTREAD_TARGET_CHANGED')
             self._basis_current(); self._chains(row)
@@ -9803,7 +9833,9 @@ class _MapperDiskBasisV1:
             self.busy=False
             if target_fd is not None:
                 try:
-                    os.close(target_fd); event['descriptor_closed']=True
+                    if native_acquisition is None: os.close(target_fd)
+                    else: native_acquisition.__exit__(None, None, None)
+                    event['descriptor_closed']=True
                 except BaseException as close_error:
                     self.poisoned=True
                     if primary is not None: raise BaseExceptionGroup('read and target close failed',[primary,close_error])
@@ -10018,6 +10050,20 @@ def _mapper_publish_occurrence_v1(template, *, candidate, entry):
     live = copy.deepcopy(template)
     live['basis']['generation'] = _mapper_occurrence_generation_v1(template)
     profile = live['basis']; root = Path(profile['root'])
+    native_basis = candidate.native_basis
+    if native_basis is not None:
+        if (type(native_basis) is not _LinuxImmutableSourceBasisV2
+                or native_basis.root != root
+                or native_basis.run_id != template['run_id']
+                or candidate.index_path != native_basis.lease.index
+                or type(candidate.native_observation) is not _PreflightObservationV1
+                or candidate.native_observation.root != root
+                or candidate.native_observation.run_id != template['run_id']
+                or getattr(candidate.native_observation, 'native_basis', None) is not native_basis
+                or candidate.all_effects or candidate.ignored
+                or candidate.nested_evidence_limits):
+            raise ValueError('MAPPER_ACTIVATION_ORIGINAL_CUSTODY_REQUIRED')
+        native_basis.check_live()
     def observe(path=None, fd=None):
         candidate._check(); _scan_deadline(profile['deadline_ns'])
         if usage['metadata_calls'] >= limits['metadata_calls']:
@@ -10029,19 +10075,35 @@ def _mapper_publish_occurrence_v1(template, *, candidate, entry):
         raise ValueError('MAPPER_ACTIVATION_ROOT_REPLACED')
     for row in profile['entries']:
         original = candidate._occurrence_before.get(row['path'])
-        if original is None or len(original[1]) != row['length']:
+        if native_basis is None:
+            if original is None or len(original[1]) != row['length']:
+                raise ValueError('MAPPER_ACTIVATION_INPUT_OUTSIDE_CANDIDATE')
+        elif (type(original) is not tuple or len(original) != 12
+                or native_basis.files.get(row['path']) is not original
+                or original[:2] != (row['path'], 'WORKTREE')):
             raise ValueError('MAPPER_ACTIVATION_INPUT_OUTSIDE_CANDIDATE')
         path = root.joinpath(*row['path'].split('/'))
         if _mapper_chain_v1(path.parent, observe) != row['parent_chain']:
             raise ValueError('MAPPER_ACTIVATION_PARENT_REPLACED')
         before = _mapper_stamp_v1(observe(path))
-        if before[2:4] != row['lstat'][2:4] or stat.S_IMODE(before[2]) != original[0]:
+        if native_basis is None and (
+                before[2:4] != row['lstat'][2:4]
+                or stat.S_IMODE(before[2]) != original[0]):
             raise ValueError('MAPPER_ACTIVATION_MODE_OR_LENGTH')
         fd = _open_regular_worktree_descriptor(path, nonblocking=True)
         errors = []
         try:
+            if native_basis is not None:
+                native_basis.verify_fd(row['path'], fd)
+                if original[4] != row['length']:
+                    raise ValueError('MAPPER_ACTIVATION_INPUT_OUTSIDE_CANDIDATE')
+                if (before[2:4] != row['lstat'][2:4]
+                        or stat.S_IMODE(before[2]) != stat.S_IMODE(original[7])):
+                    raise ValueError('MAPPER_ACTIVATION_MODE_OR_LENGTH')
             opened = _mapper_stamp_v1(observe(fd=fd))
             if opened[:6] != before[:6]: raise ValueError('MAPPER_ACTIVATION_TARGET_SUBSTITUTED')
+            if native_basis is not None:
+                native_basis.verify_fd(row['path'], fd)
         except BaseException as exc: errors.append(exc)
         try: os.close(fd)
         except BaseException as exc: errors.append(exc)
@@ -10059,13 +10121,17 @@ def _mapper_publish_occurrence_v1(template, *, candidate, entry):
     reader = None; errors = []
     try:
         reader = _MapperDiskBasisV1(preflight, expected_position=template['original_position'],
-                                   expected_generation=profile['generation'], clock=time.monotonic_ns)
+                                   expected_generation=profile['generation'], clock=time.monotonic_ns,
+                                   native_observation=None if native_basis is None else candidate.native_observation)
         for row in profile['entries']:
             candidate._check()
             reader.compare_bytes(row['path'])
             usage['files'] += 1
         # An early input may not change while later inputs are being compared.
         for row in profile['entries']:
+            if native_basis is not None:
+                candidate.native_observation.reserve('attempts')
+                native_basis.status(row['path'])
             reader._chains(row)
             if reader._stamp(root.joinpath(*row['path'].split('/'))) != row['lstat']:
                 raise ValueError('MAPPER_ACTIVATION_INPUT_CHANGED_AFTER_COMPARISON')
@@ -13655,7 +13721,7 @@ class _LinuxImmutableSourceBasisV2:
     def open_entry(self, relative_path):
         self.check_live()
         row = self._entry(relative_path)
-        opened = []
+        opened = []; primary = None
         try:
             fd = self._open_path(self.root)
             opened.append(('.', fd))
@@ -13672,11 +13738,16 @@ class _LinuxImmutableSourceBasisV2:
                 self.verify_fd(name, fd)
             self.check_live()
         except BaseException as exc:
+            primary = exc
             self.failure = exc
             self.state = 'FAILED'
             raise
         finally:
-            self._close_many([fd for name,fd in reversed(opened)])
+            try: self._close_many([fd for name,fd in reversed(opened)])
+            except BaseException as close_error:
+                if primary is not None:
+                    _scan_raise_errors([primary, close_error])
+                raise
 
     def catalog_snapshot(self, paths, observation):
         """A complete metadata barrier with held parents; no application bytes."""

@@ -7930,6 +7930,252 @@ def test_runner_restores_only_runtime_side_effects_before_pr142_pr143_and_final_
 
 
 
+    # Finite M catalogue adapter: Linux live/generation ports are synthetic
+    # component oracles, not a native lease, source seal or campaign result.
+    # The mapper supplier, publisher, independent basis and comparator are real.
+    import threading
+    from copy import deepcopy
+    from contextlib import contextmanager
+    mapper_vectors = (
+        (sys.executable, "tools/validate_pr166_qb_bounded_quantum_benchmark.py", "--repo-root", "."),
+        (sys.executable, "tools/validate_pr166_qc_quantum_selected_replay_paper_retest.py", "--repo-root", "."),
+        (sys.executable, "tools/validate_pr162e_q_quantum_automapper.py", "--repo-root", "."),
+    )
+    mapper_cases = ("legacy", "native", "basis-type", "basis-root", "basis-run", "basis-index",
+        "observation-type", "observation-owner", "observation-root", "observation-run",
+        "foreign-process", "foreign-thread", "copied-row", "wrong-path", "wrong-role",
+        "malformed-row", "generation", "byte-mismatch", "verify-error", "verify-close-error",
+        "comparison-open", "comparison-postread", "final-barrier", "native-read-allowance", "native-retained-allowance",
+        "native-deadline", "unknown-delivery")
+    owner_faults = set(mapper_cases[2:10])
+    row_faults = {"copied-row", "wrong-path", "wrong-role", "malformed-row"}
+    def mapper_error_leaves(error):
+        if isinstance(error, BaseExceptionGroup):
+            return tuple(leaf for nested in error.exceptions for leaf in mapper_error_leaves(nested))
+        return (error,)
+    for number, fault in enumerate(mapper_cases):
+        mapper_root = tmp_path / ("mc" + str(number)); mapper_root.mkdir()
+        mapper_paths, _mapper_probe = reliability.resolve_validation_run_paths(mapper_root,
+            explicit_process_root=(tmp_path / ("mp" + str(number))).resolve(),
+            run_id="run_mapper_catalog_" + str(number), projected_relative_paths=("mapper-fixture.json",))
+        mapper_phase = "deterministic-validators-a"
+        mapper_plan = reliability.build_command_evidence_plan(run_id=mapper_paths.run_id,
+            phase=mapper_phase, commands=mapper_vectors, cwd=mapper_root)
+        assert tuple(reliability._mapper_original_position_v1(row.argv, mapper_root)
+            for row in mapper_plan) == (66, 67, 68)
+        mapper_deadline = runner.time.monotonic_ns() + 60_000_000_000
+        with monkeypatch.context() as mapper_patch:
+            suppliers = _central_supervision_test_adapter(resolve_paths=False,
+                deadline_ns=mapper_deadline, patcher=mapper_patch)
+            templates = suppliers["mapper_read_source"](mapper_paths, mapper_phase, mapper_plan)
+            mapper_candidate = suppliers["candidate_source"](mapper_root, mapper_plan)
+            assert type(mapper_candidate) is runner._ValidationCandidateCustodyV1
+            mapper_entry = mapper_plan[2]
+            mapper_candidate.begin_occurrence(3, mapper_entry,
+                environment={}, timeout_seconds=30, scratch_roots=())
+            template = templates["3"]; original_template = deepcopy(template)
+            target = mapper_root / "mapper-fixture.json"
+            reference = Path(template["basis"]["basis"])
+            assert target.read_bytes() == reference.read_bytes() == b"{}\n"
+            reference_version = reliability._mapper_stamp_v1(reference.lstat())
+            assert mapper_candidate._occurrence_before[target.name] == (stat.S_IMODE(target.stat().st_mode), b"{}\n")
+            # Owned negative construction; no owner-repository rebaselining.
+            if fault == "byte-mismatch": target.write_bytes(b"[]\n")
+            live_calls, verified, failing_descriptor = [], [], []
+            verify_fault = OSError("synthetic native verification failed")
+            close_fault = OSError("synthetic mapper descriptor close failed")
+            if fault != "legacy":
+                native = reliability._LinuxImmutableSourceBasisV2.__new__(reliability._LinuxImmutableSourceBasisV2)
+                native.root, native.run_id = mapper_root, mapper_paths.run_id
+                native.pid, native.thread = os.getpid(), threading.get_ident()
+                native.deadline_ns, native.failure, native.state = mapper_deadline, None, "IN_USE"
+                native.lease = reliability._LinuxPreflightHostLeaseV1.__new__(reliability._LinuxPreflightHostLeaseV1)
+                native.lease.root, native.lease.index = mapper_root, mapper_candidate.index_path
+                native.lease.failure, native.lease.deadline_ns = None, mapper_deadline
+                with target.open("rb") as stream:
+                    catalog = tuple(reliability._linux_source_row_v2(target.name, "WORKTREE", os.fstat(stream.fileno()), 0x10))
+                native.files = {target.name: catalog}
+                observation = reliability._PreflightObservationV1.__new__(reliability._PreflightObservationV1)
+                observation.native_basis, observation.root, observation.run_id = native, mapper_root, mapper_paths.run_id
+                observation.pid, observation.thread = os.getpid(), threading.get_ident()
+                observation.deadline_ns, observation.last_clock, observation.failure = mapper_deadline, -1, None
+                observation.measurement_complete = True
+                observation.remaining = dict(attempts=10, bytes=100, retained_bytes=100)
+                observation.observed = dict.fromkeys(observation.remaining, 0)
+                observation.reserved = dict.fromkeys(observation.remaining, 0)
+                observation.native_read_observation = dict(source_bytes_read=0, owned_evidence_bytes_read=0)
+                def native_live():
+                    live_calls.append("checked")
+                    if (native.pid, native.thread) != (os.getpid(), threading.get_ident()):
+                        raise RuntimeError("synthetic native owner mismatch")
+                def native_verify(name, descriptor):
+                    native_live()
+                    assert name == target.name
+                    info = os.fstat(descriptor)
+                    actual = tuple(reliability._linux_source_row_v2(name, "WORKTREE", info, 0x10))
+                    if (actual != native.files[name] or reliability._mapper_stamp_v1(target.lstat())[:6]
+                            != reliability._mapper_stamp_v1(info)[:6]):
+                        raise RuntimeError("synthetic native generation mismatch")
+                    verified.append((name, descriptor))
+                    if fault in ("verify-error", "verify-close-error"):
+                        failing_descriptor.append(descriptor); raise verify_fault
+                native.check_live, native.verify_fd = native_live, native_verify
+                @contextmanager
+                def native_open(name):
+                    descriptor = reliability._open_regular_worktree_descriptor(mapper_root / name)
+                    try:
+                        native_verify(name, descriptor)
+                        if fault == "comparison-open": raise verify_fault
+                        yield descriptor
+                        native_verify(name, descriptor)
+                        if fault == "comparison-postread": raise verify_fault
+                    finally:
+                        os.close(descriptor)
+                def native_status(name):
+                    if fault == "final-barrier": raise verify_fault
+                    with native_open(name): pass
+                    return "file"
+                native.open_entry, native.status = native_open, native_status
+                mapper_candidate.native_basis, mapper_candidate.native_observation = native, observation
+                mapper_candidate._occurrence_before[target.name] = catalog
+                if fault == "basis-type": mapper_candidate.native_basis = SimpleNamespace()
+                elif fault == "basis-root": native.root = tmp_path
+                elif fault == "basis-run": native.run_id = "run_other_mapper_catalog"
+                elif fault == "basis-index": native.lease.index = mapper_root / "foreign-index"
+                elif fault == "observation-type": mapper_candidate.native_observation = SimpleNamespace(native_basis=native)
+                elif fault == "observation-owner": observation.native_basis = reliability._LinuxImmutableSourceBasisV2.__new__(reliability._LinuxImmutableSourceBasisV2)
+                elif fault == "observation-root": observation.root = tmp_path
+                elif fault == "observation-run": observation.run_id = "run_other_mapper_catalog"
+                elif fault == "foreign-process": native.pid += 1
+                elif fault == "foreign-thread": native.thread += 1
+                elif fault == "copied-row":
+                    mapper_candidate._occurrence_before[target.name] = tuple(list(catalog))
+                    assert mapper_candidate._occurrence_before[target.name] is not catalog
+                elif fault in ("wrong-path", "wrong-role", "malformed-row", "generation"):
+                    damaged = list(catalog)
+                    if fault == "wrong-path": damaged[0] = "foreign.json"
+                    elif fault == "wrong-role": damaged[1] = "GIT_ADMIN"
+                    elif fault == "malformed-row": damaged.pop()
+                    else: damaged[3] += 1
+                    damaged = tuple(damaged)
+                    native.files[target.name] = damaged
+                    mapper_candidate._occurrence_before[target.name] = damaged
+                elif fault == "native-read-allowance": observation.remaining['bytes'] = 6
+                elif fault == "native-retained-allowance": observation.remaining['retained_bytes'] = 2
+                elif fault == "native-deadline":
+                    # The supplier's child deadline is fifteen seconds earlier
+                    # than the candidate's; cross that actual bound explicitly.
+                    observation.deadline_ns = template["basis"]["deadline_ns"] - 1
+                    assert template["basis"]["deadline_ns"] > observation.deadline_ns
+            real_open, real_close = reliability._open_regular_worktree_descriptor, os.close
+            opened, closed, close_faults, active = [], [], [], {}
+            def record_open(path, *args, **kwargs):
+                descriptor = real_open(path, *args, **kwargs)
+                assert descriptor not in active
+                active[descriptor] = len(opened); opened.append((Path(path), descriptor))
+                return descriptor
+            def record_close(descriptor):
+                real_close(descriptor)
+                token = active.pop(descriptor, None)
+                if token is not None: closed.append(token)
+                if fault == "verify-close-error" and failing_descriptor and descriptor == failing_descriptor[0] and not close_faults:
+                    close_faults.append(descriptor); raise close_fault
+            mapper_patch.setattr(reliability, "_open_regular_worktree_descriptor", record_open)
+            mapper_patch.setattr(reliability.os, "close", record_close)
+            if fault == "unknown-delivery":
+                actual_read = os.read
+                mapper_patch.setattr(reliability.os, "read", lambda fd, size: memoryview(actual_read(fd, size)))
+            activation = mapper_paths.evidence_root / "mapper-read-3.json"
+            assert not activation.exists()
+            if fault in ("legacy", "native"):
+                record = reliability._mapper_publish_occurrence_v1(template, candidate=mapper_candidate, entry=mapper_entry)
+                assert activation.is_file()
+                binding = record.binding()
+                assert binding["basis"]["generation"] == reliability._mapper_occurrence_generation_v1(template)
+                assert binding["basis"]["basis"] == str(reference)
+                assert binding["basis"]["entries"][0]["offset"] == 0 and binding["basis"]["entries"][0]["length"] == 3
+                usage = mapper_candidate._mapper_activation_usage_v1[3]
+                assert usage["files"] == 1 and usage["target_bytes"] == usage["basis_bytes"] == 3
+                assert len(verified) == (6 if fault == "native" else 0)
+                if fault == "native":
+                    assert live_calls and observation.native_read_observation == dict(source_bytes_read=3, owned_evidence_bytes_read=3)
+                    assert observation.observed == dict(attempts=2, bytes=6, retained_bytes=3)
+                    original_run = observation.run_id
+                    observation.run_id = "run_foreign_direct_comparator"
+                    with pytest.raises(ValueError, match="BASIS_NATIVE_OBSERVATION_OWNER"):
+                        reliability._MapperDiskBasisV1(template['basis'], expected_position=template['original_position'],
+                            expected_generation=template['basis']['generation'], clock=runner.time.monotonic_ns,
+                            native_observation=observation)
+                    observation.run_id = original_run
+            elif fault == "verify-close-error":
+                with pytest.raises(BaseExceptionGroup) as caught:
+                    reliability._mapper_publish_occurrence_v1(template, candidate=mapper_candidate, entry=mapper_entry)
+                assert mapper_error_leaves(caught.value) == (verify_fault, close_fault)
+                assert len(close_faults) == 1 and not activation.exists()
+            else:
+                error_type = OSError if fault in ("verify-error", "comparison-open", "comparison-postread", "final-barrier") else RuntimeError if fault in ("foreign-process", "foreign-thread", "generation", "native-retained-allowance") else ValueError
+                error_text = ("MAPPER_ACTIVATION_ORIGINAL_CUSTODY_REQUIRED" if fault in owner_faults else
+                    "MAPPER_ACTIVATION_INPUT_OUTSIDE_CANDIDATE" if fault in row_faults else
+                    "synthetic native owner mismatch" if fault in ("foreign-process", "foreign-thread") else
+                    "synthetic native generation mismatch" if fault == "generation" else
+                    "BASIS_BYTES_DIFFER" if fault == "byte-mismatch" else
+                    "BASIS_NATIVE_READ_ALLOWANCE" if fault == "native-read-allowance" else
+                    "preflight reservation exhausted: retained_bytes" if fault == "native-retained-allowance" else
+                    "BASIS_NATIVE_OBSERVATION_OWNER" if fault == "native-deadline" else
+                    "BASIS_UNKNOWN_DELIVERED_BYTES" if fault == "unknown-delivery" else "synthetic native verification failed")
+                with pytest.raises(error_type, match=error_text) as caught:
+                    reliability._mapper_publish_occurrence_v1(template, candidate=mapper_candidate, entry=mapper_entry)
+                if fault in ("verify-error", "comparison-open", "comparison-postread", "final-barrier"): assert caught.value is verify_fault
+                assert not activation.exists()
+                if fault == "byte-mismatch":
+                    usage = mapper_candidate._mapper_activation_usage_v1[3]
+                    assert usage["files"] == 0 and usage["target_bytes"] == usage["basis_bytes"] == 3
+                if fault in ("byte-mismatch", "comparison-postread", "final-barrier"):
+                    assert observation.native_read_observation == dict(source_bytes_read=3, owned_evidence_bytes_read=3)
+                    assert observation.observed['bytes'] == 6
+                if fault in ("comparison-open", "native-read-allowance", "native-retained-allowance"):
+                    assert observation.native_read_observation == dict(source_bytes_read=0, owned_evidence_bytes_read=0)
+                if fault == "unknown-delivery":
+                    assert observation.measurement_complete is False
+                    assert observation.native_read_observation == dict(source_bytes_read=0, owned_evidence_bytes_read=0)
+            assert active == {} and sorted(closed) == list(range(len(opened)))
+            for _path, descriptor in opened:
+                with pytest.raises(OSError): os.fstat(descriptor)
+            assert template == original_template and reference.read_bytes() == b"{}\n"
+            assert reliability._mapper_stamp_v1(reference.lstat()) == reference_version
+            assert mapper_candidate._mapper_activation_attempts_v1 == {3}
+            reserved = (mapper_candidate.remaining_read_bytes, mapper_candidate.snapshot_byte_limit,
+                deepcopy(mapper_candidate._mapper_activation_usage_v1))
+            with pytest.raises(ValueError, match="MAPPER_ACTIVATION_NOT_RETRIED"):
+                reliability._mapper_publish_occurrence_v1(template, candidate=mapper_candidate, entry=mapper_entry)
+            assert reserved == (mapper_candidate.remaining_read_bytes, mapper_candidate.snapshot_byte_limit,
+                mapper_candidate._mapper_activation_usage_v1)
+
+    # Original native acquisition body with finite no-child ports: failure
+    # before yield and descriptor-close failure must retain both exceptions.
+    before_yield = reliability._LinuxImmutableSourceBasisV2.__new__(reliability._LinuxImmutableSourceBasisV2)
+    before_yield.root = tmp_path
+    before_yield.check_live = lambda: None
+    before_yield._entry = lambda name: None
+    body_error, close_error = OSError("synthetic native before-yield verification"), OSError("synthetic native before-yield close")
+    held_descriptor = os.open(reference, os.O_RDONLY | getattr(os, 'O_BINARY', 0))
+    before_yield._open_path = lambda root: held_descriptor
+    def fail_before_yield(name, descriptor):
+        assert name == "." and descriptor == held_descriptor
+        raise body_error
+    def fail_owned_close(handles):
+        assert handles == [held_descriptor]
+        os.close(held_descriptor)
+        raise close_error
+    before_yield.verify_fd, before_yield._close_many = fail_before_yield, fail_owned_close
+    with pytest.raises(BaseExceptionGroup) as caught:
+        with before_yield.open_entry("finite-fixture.json"):
+            pytest.fail("failed before-yield acquisition entered its body")
+    assert mapper_error_leaves(caught.value) == (body_error, close_error)
+    assert before_yield.failure is body_error and before_yield.state == "FAILED"
+    with pytest.raises(OSError): os.fstat(held_descriptor)
+
+
 def test_runner_preserves_initially_modified_files_after_final_pytest(
     monkeypatch,
 ):
@@ -14838,6 +15084,26 @@ def test_github_workflow_splits_validation_into_parallel_phase_jobs():
     assert shard_block.count("if: ${{ always() }}") >= 2
     assert "Run canonical validation gates" not in workflow
 
+    # Keep the default PR activities and add the actual ready transition.
+    # These source assertions are not native admission or execution evidence.
+    event_block = workflow.split("on:\n", 1)[1].split("\npermissions:\n", 1)[0]
+    assert event_block.startswith("  pull_request:\n    types: [opened, synchronize, reopened, ready_for_review]\n")
+    assert "  workflow_dispatch:\n    inputs:\n      full_validation:\n" in event_block
+    assert "  push:\n    branches:\n      - main\n" in event_block
+    assert "pull_request_target:" not in event_block
+    eligibility = ("          QTT_PR298_NATIVE_ELIGIBLE: ${{ matrix.phase == 'fast-preflight' "
+        "&& github.event_name == 'pull_request' && github.repository == 'Q8Meow/QTT_New0526' "
+        "&& github.event.pull_request.number == 298 && github.event.pull_request.draft == true "
+        "&& github.event.pull_request.head.repo.full_name == 'Q8Meow/QTT_New0526' "
+        "&& github.event.pull_request.base.repo.full_name == 'Q8Meow/QTT_New0526' "
+        "&& github.event.pull_request.base.ref == 'main' "
+        "&& github.event.pull_request.head.ref == 'repair/main-cumulative-v35-final-r5-local-20260922' "
+        "&& '1' || '0' }}\n")
+    assert shard_block.count(eligibility) == 1
+    assert shard_block.count("          QTT_PR298_NATIVE_ELIGIBLE:") == 1
+    assert "            python -I -B -X utf8 tools/run_validation_gates.py --linux-preflight-provision --phase fast-preflight\n" in shard_block
+    assert "          if [ \"$QTT_PR298_NATIVE_ELIGIBLE\" = \"1\" ]\n" in shard_block
+
 
 def test_github_workflow_aggregate_depends_on_validation_shard_matrix():
     workflow = _workflow_text()
@@ -18449,6 +18715,75 @@ def _exercise_failed_admission_plan_v1(tmp_path, monkeypatch, fixture_factory):
                 assert all(value.process is None and value.reader is None and value.writer is None
                            for value in selected["launch"].launch_inputs.values())
 
+    # The ordinary entry has no adopted native issuer. Its original C denial
+    # precedes dependent M/R acquisition and any accepted header. These are
+    # no-child admission negatives, not ordinary native qualification.
+    for phase in (runner.FAST_PREFLIGHT_PHASE, runner.ALL_PHASE):
+        root = tmp_path / ("ordinary-c-first-" + phase)
+        root.mkdir()
+        selected, acquired, final = {}, [], []
+        previous_order = runner._ORDINARY_CANDIDATE_FIRST_V1
+        with monkeypatch.context() as scoped:
+            scoped.setattr(runner, "_repo_root", lambda: root)
+            fixture_factory(patcher=scoped)
+            real_prepare = runner._prepare_validation_candidate_v1
+            real_finalize = runner._finalize_validation_run
+
+            def prepare(candidate_root, plan, candidate):
+                acquired.append((candidate_root, plan, candidate))
+                assert candidate_root == root and plan is runner._LAST_EXPECTED_COMMAND_PLAN
+                assert candidate is None and runner._ACTIVE_CANDIDATE_SOURCE is None
+                assert runner._ORDINARY_CANDIDATE_FIRST_V1
+                return real_prepare(candidate_root, plan, candidate)
+
+            def no_dependent_work(*args, **kwargs):
+                raise AssertionError("ordinary C denial reached dependent acquisition/publication/dispatch")
+
+            def implementation(_argv):
+                paths = runner._RUN_COMMANDS_ACTIVE_PATHS
+                commands = runner.build_phase_commands(phase,
+                    paths.validation_output_root, paths.pytest_basetemp_root)
+                selected.update(paths=paths, execution=runner._prepare_execution_plan(commands))
+                runner._publish_active_plan_provenance(phase, selected["execution"])
+                no_dependent_work()
+
+            def finalize(**kwargs):
+                final.append(kwargs)
+                assert kwargs["run_paths"] is selected["paths"] and kwargs["phase"] == phase
+                assert kwargs["expected_plan"] is acquired[0][1]
+                assert kwargs["planned_count"] == len(acquired[0][1]) > 0
+                assert kwargs["receipts"] == () and kwargs["scan_launch"] is None
+                assert not runner._SCAN_CAPACITY_ATTEMPTED and not runner._MAPPER_READ_SOURCE_ATTEMPTED
+                assert not runner._RUN_PROVENANCE_ATTEMPTED and not runner._RUN_PROVENANCE_WRITTEN
+                assert not (kwargs["run_paths"].evidence_root / "run.json").exists()
+                assert any(type(error) is RuntimeError and str(error) ==
+                    "VALIDATION_CANDIDATE_COMPLETE_SOURCE_EFFECT_RESOURCE_BINDING_REQUIRED"
+                    for error in kwargs["_supervision_state"]["errors"])
+                with pytest.raises(ValueError, match="cannot be retried"):
+                    runner._publish_active_plan_provenance(phase, selected["execution"])
+                assert len(acquired) == 1
+                outcome = real_finalize(**kwargs)
+                assert outcome[0] == 1 and outcome[1] == "PASS_REMOVED_EXACT_RUN_ROOT"
+                assert outcome[2].final_state == "FAIL"
+                assert outcome[2].command_count_planned == len(acquired[0][1])
+                assert outcome[2].command_count_started == outcome[2].command_count_completed == 0
+                return outcome
+
+            scoped.setattr(runner, "_prepare_validation_candidate_v1", prepare)
+            scoped.setattr(runner, "_main_impl", implementation)
+            scoped.setattr(runner, "_scan_resolve_parent_capacity", no_dependent_work)
+            scoped.setattr(runner, "_mapper_resolve_parent_profiles_v1", no_dependent_work)
+            scoped.setattr(runner, "write_run_provenance", no_dependent_work)
+            scoped.setattr(runner, "_execute_supervised_command", no_dependent_work)
+            scoped.setattr(runner, "_finalize_validation_run", finalize)
+            scoped.setattr(runner, "cleanup_validation_run", reliability.cleanup_validation_run)
+            scoped.setattr(runner, "validate_complete_run_evidence", reliability.validate_complete_run_evidence)
+            scoped.setattr(runner, "validate_published_completion_receipt", reliability.validate_published_completion_receipt)
+            assert runner.main(["--phase", phase]) == 1
+            assert len(acquired) == len(final) == 1
+            assert not selected["paths"].process_root.exists()
+        assert runner._ORDINARY_CANDIDATE_FIRST_V1 is previous_order
+
 
 def _exercise_windows_job_resource_v1(area, monkeypatch, capsys, deadline, settlement):
     """Grouped resource-only qualification; pure injections never claim native work."""
@@ -21067,6 +21402,11 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
         damaged = copy.deepcopy(event); mutate(damaged); assert damaged != event
         with pytest.raises(o.ValidationReliabilityError): runner._linux_preflight_eligibility_v1(damaged,env,root)
     with pytest.raises(o.ValidationReliabilityError): runner._linux_preflight_eligibility_v1(event,{**env,'GITHUB_EVENT_NAME':'workflow_dispatch'},root)
+    for key in ("GITHUB_ACTIONS", "GITHUB_EVENT_NAME", "GITHUB_REPOSITORY", "GITHUB_WORKSPACE"):
+        missing = dict(env)
+        del missing[key]
+        with pytest.raises(o.ValidationReliabilityError):
+            runner._linux_preflight_eligibility_v1(event, missing, root)
     assert runner._linux_preflight_selected_v1(['--phase','fast-preflight'],(None,None,None)) is None
     for arguments in (['--linux-preflight-provision','--phase','all'],
             ['--linux-preflight-provision','--linux-preflight-enter','--phase','fast-preflight'],
