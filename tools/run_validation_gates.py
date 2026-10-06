@@ -3091,8 +3091,19 @@ class _PreflightAssemblyV1:
     """One actual plan and candidate, with no declaration-created authority."""
     def __init__(self, native, paths, plan):
         from tools import validation_reliability as owner
+        actual_owner = (os.getpid(), threading.get_ident())
+        existing_owner = (getattr(self, 'pid', None), getattr(self, 'thread', None))
+        owner._preflight_require_v1(existing_owner in ((None, None), actual_owner),
+            'preflight original assembly construction owner')
+        owner._preflight_require_v1(not getattr(self, '_assembly_init_attempted_v1', False),
+            'preflight assembly construction is single use')
+        self._assembly_init_attempted_v1 = True
         self.owner, self.native, self.paths, self.plan = owner, native, paths, plan
+        self._original_native_input_v1 = native
         self.state, self.candidate = 'SELECTED', None
+        self.basis = self.capture = self.terminal = None
+        self._original_basis_v2 = self._original_candidate_v1 = None
+        self.pid, self.thread = os.getpid(), threading.get_ident()
         self.launches = {}
         self.failure = None
         owner._preflight_require_v1(type(plan) is tuple and len(plan) == 8
@@ -3102,6 +3113,7 @@ class _PreflightAssemblyV1:
                 and e.argv[0] == sys.executable for n,e in enumerate(plan,1)), 'preflight exact full original plan required')
         try:
             header, blobs, _ = native.consume(self._validate_declaration)
+            self._check_original_holders_v1(original_native=native)
             self.header = header
             self.repository = header['repository']
             self.basis=None
@@ -3110,7 +3122,10 @@ class _PreflightAssemblyV1:
                 owner._preflight_require_v1(descriptor['byte_length']<=header['parent_limits']['capture']['retained_bytes']
                     and descriptor['catalog_entry_count']<=header['parent_limits']['capture']['entries'],
                     'LINUX_V2_PARENT_MANIFEST_ALLOWANCE')
-                self.basis=owner._LinuxImmutableSourceBasisV2(native.host_lease,descriptor,paths.run_id)
+                self.basis = owner._LinuxImmutableSourceBasisV2.__new__(owner._LinuxImmutableSourceBasisV2)
+                self._original_basis_v2 = self.basis
+                self._original_basis_v2.__init__(native.host_lease, descriptor, paths.run_id)
+                self._check_original_holders_v1(original_native=native)
                 self.files={p:row for p,row in self.basis.files.items() if row[1]=='WORKTREE'}
                 self.directories={p:v for p,v in self.basis.directories.items() if p!='.git' and not p.startswith('.git/')}
             else:
@@ -3124,18 +3139,23 @@ class _PreflightAssemblyV1:
                 self.installation[key] = tuple(self.installation[key])
             self.state = 'INPUTS_VALIDATED'
             self.native.check()
+            self._check_original_holders_v1(original_native=native)
             self.capture = owner._PreflightObservationV1(root=paths.repo_root,run_id=paths.run_id,occurrence=1,
                 argv=plan[0].argv,files=self.files,directories=self.directories,
                 limits=header['parent_limits']['capture'],deadline_ns=header['parent_limits']['deadline_ns'],native_basis=self.basis)
+            self._check_original_holders_v1(original_native=native)
             self.terminal = owner._PreflightObservationV1(root=paths.repo_root,run_id=paths.run_id,occurrence=1,
                 argv=plan[0].argv,files=self.files,directories=self.directories,
                 limits=header['parent_limits']['terminal'],deadline_ns=header['parent_limits']['deadline_ns'],native_basis=self.basis)
+            self._check_original_holders_v1(original_native=native)
             self.parent_meter = owner._PreflightTransportV1(header['parent_limits']['transport'],
                 header['parent_limits']['deadline_ns'],native.check)
             self.parent_meter.native_basis=self.basis
             if self.basis is not None:
                 self.capture.reserve('entries',self.basis.count)
+                self._check_original_holders_v1(original_native=native)
                 self.capture.reserve('retained_bytes',self.basis.manifest_retained_bytes)
+                self._check_original_holders_v1(original_native=native)
                 self.capture.retained_entries+=self.basis.count
                 self.capture.native_read_observation.update(manifest_acquired_bytes=self.basis.manifest_acquired_bytes,
                     manifest_retained_bytes=self.basis.manifest_retained_bytes)
@@ -3166,6 +3186,7 @@ class _PreflightAssemblyV1:
                     extents.append(24+len(raw)+offset)
                     receivers.append(owner._preflight_result_bound_v1(identity,native_basis=self.basis))
                 native.host_lease.reserve_plan(extents,receivers)
+                self._check_original_holders_v1(original_native=native)
             bindings = {}
             self.rows = header['rows']
             for row, entry in zip(self.rows,plan,strict=True):
@@ -3179,16 +3200,21 @@ class _PreflightAssemblyV1:
                         self.directories if row['selection']=='ALL_WORKTREE' else {}),limits=row['limits'],
                     deadline_ns=row['deadline_ns'],git_executable=row['git_executable'],
                     evidence_root=paths.evidence_root/('preflight-'+str(entry.command_index))/'git',native_basis=self.basis)
+                self._check_original_holders_v1(original_native=native)
                 binding = {k:v for k,v in self.installation.items() if k != 'executable'}
                 binding['observation'] = observation
                 bindings[entry.command_index] = binding
             index = self.repository['index']
-            self.candidate = _ValidationCandidateCustodyV1(repo_root=paths.repo_root,plan=plan,
+            self._check_original_holders_v1(original_native=native)
+            self.candidate = _ValidationCandidateCustodyV1.__new__(_ValidationCandidateCustodyV1)
+            self._original_candidate_v1 = self.candidate
+            self._original_candidate_v1.__init__(repo_root=paths.repo_root,plan=plan,
                 observe_paths=self._observe_paths,check_exclusive=native.check,
                 index_path=None if index is None else pathlib.Path(index if self.basis is not None else index[0]),
                 effects_by_occurrence={n:() for n in range(1,9)},ignored_paths=tuple(self.repository['protected_paths']),
                 operation_checks={n:self._check_operation for n in range(1,9)},nested_evidence_limits={},
                 preflight_bindings=bindings,native_basis=self.basis,native_observation=self.capture,**header['candidate_limits'])
+            self._check_original_holders_v1(original_native=native)
             for name, raw in self.files.items():
                 actual = self.candidate.baseline.get(name)
                 owner._preflight_require_v1(actual is not None and (actual == raw if self.basis is not None else actual[1] == raw),
@@ -3203,6 +3229,7 @@ class _PreflightAssemblyV1:
             raise
 
     def _validate_declaration(self,h,payload):
+        self._check_original_holders_v1()
         o = self.owner
         v2=h.get('basis_kind')=='NATIVE_IMMUTABLE_V2'
         o._preflight_keys_v1(h,('phase','repository','installation','rows','candidate_limits','parent_limits','blobs',*(['basis_kind'] if v2 else [])))
@@ -3340,15 +3367,18 @@ class _PreflightAssemblyV1:
                 o._preflight_require_v1(git == self.native.git_executable and git in dict(basis['files']),
                     'preflight independently admitted Git byte basis unavailable')
         o._preflight_require_v1(used == set(range(len(sizes))),'preflight unreferenced declaration blob')
+        self._check_original_holders_v1()
         return sizes,None
 
     def _observe_paths(self):
+        self._check_original_holders_v1()
         o = self.owner
         budget = self.terminal if self.state == 'SETTLING' else self.capture
         if self.basis is not None:
             # The following candidate snapshot performs a complete physical
             # catalog barrier using held ancestors. This is its fixed universe.
             self.basis.check_live()
+            self._check_original_holders_v1()
             return tuple(self.files)
         def walk(root):
             result = []
@@ -3362,32 +3392,41 @@ class _PreflightAssemblyV1:
                 argv=budget.argv,root=budget.root):
             result = tuple(walk(self.paths.repo_root))
             o._preflight_require_v1(set(result) == set(self.files), 'preflight complete candidate file roster differs')
+        self._check_original_holders_v1()
         return result
 
     def candidate_source(self,root,plan):
+        self._check_original_holders_v1()
         self.owner._preflight_require_v1(root == self.paths.repo_root and plan is self.plan
             and self.state in ('CUSTODY_READY','PUBLISHED'),'preflight single candidate/plan association')
         self.native.check()
+        self._check_original_holders_v1()
         return self.candidate
 
     def _check_operation(self, *, entry, environment, timeout_seconds, scratch_roots):
+        self._check_original_holders_v1()
         self.native.check()
+        self._check_original_holders_v1()
         self.owner._preflight_require_v1(entry is self.plan[entry.command_index-1], 'preflight operation plan identity')
         result = self.native.host_lease.check_launch(entry,entry.argv,environment,scratch_roots,
             self.rows[entry.command_index-1]['deadline_ns'])
+        self._check_original_holders_v1()
         self.owner._preflight_require_v1(result is None,'preflight native operation denied')
 
     def launch(self,index,environment,projection,scratch_roots):
+        self._check_original_holders_v1()
         o = self.owner
         o._preflight_require_v1(self.state in ('PUBLISHED','DISPATCHING') and index not in self.launches,
             'preflight one-shot dispatch state')
         self.native.check()
+        self._check_original_holders_v1()
         row,entry = self.rows[index-1],self.plan[index-1]
         observation = self.candidate.preflight_bindings[index]['observation']
         if row['git_executable'] is not None:
             with o._preflight_observation_v1(observation,run_id=observation.run_id,occurrence=index,
                     argv=entry.argv,root=self.paths.repo_root), o._preflight_startup_access_v1(observation,self.installation['startup_basis']):
                 o._preflight_read_bytes_v1(pathlib.Path(row['git_executable']))
+        self._check_original_holders_v1()
         lowered = {k.upper() for k in environment}
         o._preflight_require_v1(len(lowered) == len(environment) and not any(k in lowered for k in o._PREFLIGHT_INPUT_KEYS_V1)
             and not any(k.startswith(('QTT_SCAN_','QTT_MAPPER_')) for k in lowered),'preflight competing inherited controls')
@@ -3400,36 +3439,68 @@ class _PreflightAssemblyV1:
             for old in tuple(environment):
                 if old.upper() == key: del environment[old]
             environment[key] = value
+        self._check_original_holders_v1()
         launch = o._PreflightLaunchInputV1(identity=identity,observation=observation,row_total=row['limits'],parent_tail_reserve=row['parent_tail_reserve'],
             limits=row['transport'],parent_meter=self.parent_meter,settlement_deadline_ns=row['settlement_deadline_ns'],
             host_lease=self.native.host_lease,plan_entry=entry,environment=environment,scratch_roots=tuple(scratch_roots),
             output_limits=row['application_output_limits'])
+        self._check_original_holders_v1()
         environment.update(launch.controls)
         launch.environment = environment
         projection = dict(projection)
         projection['fixed_environment_controls'] += tuple((k,environment[k]) for k in
             (*o._PREFLIGHT_INPUT_KEYS_V1,o.RUN_ID_ENV,o.PROCESS_ROOT_ENV,o.EVIDENCE_ROOT_ENV))
+        self._check_original_holders_v1()
         self.candidate._preflight_launch = (entry.argv,dict(environment))
         self.launches[index] = launch
         self.state = 'DISPATCHING'
         return launch,environment,projection
 
     def reconcile(self,index,receipt):
+        self._check_original_holders_v1()
         launch = self.launches[index]
         self.owner._preflight_require_v1(launch.state == 'CLOSED' and launch.result is not None
             and receipt.pid == launch.process.pid and receipt.native_exit_code == launch.result['application_exit'],
             'preflight receiver/native terminal reconciliation')
         self.native.check()
+        self._check_original_holders_v1()
+
+    def _check_original_holders_v1(self, *, original_native=None):
+        # The original assembly owns this association, including partial
+        # construction; these checks acquire no physical bytes or resources.
+        from tools import validation_reliability as owner
+        owner._preflight_require_v1(self.owner is owner
+            and type(self.pid) is int and type(self.thread) is int
+            and (self.pid, self.thread) == (os.getpid(), threading.get_ident()),
+            'preflight original assembly owner changed')
+        owner._preflight_require_v1('_original_native_input_v1' in self.__dict__
+            and '_original_basis_v2' in self.__dict__ and '_original_candidate_v1' in self.__dict__
+            and type(self._original_native_input_v1) is owner._PreflightNativeInputV1
+            and self.native is self._original_native_input_v1
+            and (original_native is None or original_native is self._original_native_input_v1)
+            and (self.native.pid, self.native.thread) == (self.pid, self.thread)
+            and self.basis is self._original_basis_v2
+            and (self.basis is None or type(self.basis) is owner._LinuxImmutableSourceBasisV2)
+            and self.candidate is self._original_candidate_v1
+            and (self.candidate is None or type(self.candidate) is _ValidationCandidateCustodyV1),
+            'preflight original resource holder changed during assembly use')
 
     def settling(self):
+        self._check_original_holders_v1()
         self.native.check()
+        self._check_original_holders_v1()
         for launch in self.launches.values():
             if launch.process is not None:
-                self.owner._preflight_require_v1(launch.process.poll() is not None,'preflight final process settlement unproven')
-                self.owner._preflight_require_v1(self.native.host_lease.check_settled(launch.process) is None,
-                    'preflight final host settlement denied')
+                terminal = launch.process.poll()
+                self._check_original_holders_v1()
+                self.owner._preflight_require_v1(terminal is not None,'preflight final process settlement unproven')
+                settlement = self.native.host_lease.check_settled(launch.process)
+                self._check_original_holders_v1()
+                self.owner._preflight_require_v1(settlement is None,'preflight final host settlement denied')
+        self._check_original_holders_v1()
         self.state = 'SETTLING'
-        if self.basis is not None:self.candidate.native_observation=self.terminal
+        if self.basis is not None and self.candidate is not None and self.terminal is not None:
+            self.candidate.native_observation = self.terminal
 
 
 class _ValidationCandidateCustodyV1:
@@ -3460,15 +3531,9 @@ class _ValidationCandidateCustodyV1:
         if (type(operation_checks) is not dict or any(type(key) is not int for key in operation_checks) or set(operation_checks) != set(effects_by_occurrence)
                 or any(not callable(check) for check in operation_checks.values())):
             raise ValueError("original per-occurrence source/input/environment/resource checks required")
-        required_nested = set()
-        for index, entry in enumerate(plan, start=1):
-            vector = entry.argv if type(entry) is CommandEvidencePlanEntry else entry.execution_argv
-            if _mapper_nested_pytest_args_v1(tuple(vector), pathlib.Path(repo_root)) is not None:
-                required_nested.add(index)
         if nested_evidence_limits is None:
             nested_evidence_limits = {}
-        if (type(nested_evidence_limits) is not dict
-                or set(nested_evidence_limits) != required_nested):
+        if type(nested_evidence_limits) is not dict:
             raise ValueError("exact mapper nested-evidence resource bindings required")
         for index, limits in nested_evidence_limits.items():
             if (type(index) is not int or type(limits) is not dict
@@ -3501,33 +3566,92 @@ class _ValidationCandidateCustodyV1:
         self.observed_read_bytes, self.read_attempts = 0, 0
         self.read_measurement_complete = True
         self.index_path = None if index_path is None else pathlib.Path(index_path).absolute()
-        if self.index_path is None and (self.root / ".git").exists():
-            raise ValueError("actual active index custody is required")
         self.process_id, self.thread_id = os.getpid(), threading.get_ident()
         self.state, self.failure, self.completed_actions = "CAPTURING", None, []
-        self.native_basis=native_basis
-        self.native_observation=native_observation
-        if native_basis is not None:
-            from tools.validation_reliability import _LinuxImmutableSourceBasisV2
-            if (type(native_basis) is not _LinuxImmutableSourceBasisV2 or native_basis.root!=self.root
-                    or self.all_effects or self.ignored or self.nested_evidence_limits):
-                raise ValueError('LINUX_V2_EXACT_NO_EFFECT_CANDIDATE')
-            native_basis.check_live()
-            if native_basis.manifest_retained_bytes>self.snapshot_byte_limit:
-                raise RuntimeError('VALIDATION_CANDIDATE_SNAPSHOT_BUDGET')
+        self.index_baseline, self.index_snapshot_bytes = None, 0
+        self.baseline = self._settled_snapshot = None
         self.active_occurrence, self.permitted_since_barrier = None, set()
         self.completed_occurrences = set()
-        self._check()
-        paths = self._universe()
-        if self.index_path is not None and self.native_basis is None:
-            index_info = self.index_path.lstat()
-            if index_info.st_size > self.snapshot_byte_limit:
-                raise RuntimeError("VALIDATION_CANDIDATE_SNAPSHOT_BUDGET")
-        self.index_baseline = self._read(self.index_path) if self.index_path is not None else None
-        self.index_snapshot_bytes = (0 if self.index_baseline is None or self.native_basis is not None else len(self.index_baseline[1]))
-        self.baseline = MappingProxyType(self._snapshot(paths, baseline=True))
-        self._settled_snapshot = self.baseline
-        self.state = "BASELINE_READY"
+        self._read_descriptor, self._read_close_attempted = None, False
+        self._write_descriptor, self._write_close_attempted = None, False
+        self._read_raw_handle_owner = None
+        self._mapper_custody_v1 = {}
+        self._original_mapper_custody_v1 = self._mapper_custody_v1
+        self._read_in_progress = False
+        self._read_acquisition_in_progress = False
+        self.native_basis = None
+        self.native_observation = None
+        self._acquisition_supervision = self._register_partial_capture_v1()
+        try:
+            # Recognition can import the selected wrapper. Retain this actual
+            # partial owner before that import, as before filesystem capture.
+            required_nested = set()
+            for index, entry in enumerate(plan, start=1):
+                vector = entry.argv if type(entry) is CommandEvidencePlanEntry else entry.execution_argv
+                if _mapper_nested_pytest_args_v1(tuple(vector), pathlib.Path(repo_root)) is not None:
+                    required_nested.add(index)
+            if set(nested_evidence_limits) != required_nested:
+                raise ValueError("exact mapper nested-evidence resource bindings required")
+            if self.index_path is None and (self.root / ".git").exists():
+                raise ValueError("actual active index custody is required")
+            if native_basis is not None:
+                from tools.validation_reliability import _LinuxImmutableSourceBasisV2
+                if (type(native_basis) is not _LinuxImmutableSourceBasisV2 or native_basis.root!=self.root
+                        or type(getattr(native_basis, 'run_id', None)) is not str
+                        or any(type(entry) is not CommandEvidencePlanEntry
+                            or entry.run_id != native_basis.run_id or entry.cwd != str(self.root)
+                            for entry in plan)
+                        or self.all_effects or self.ignored or self.nested_evidence_limits):
+                    raise ValueError('LINUX_V2_EXACT_NO_EFFECT_CANDIDATE')
+                self.native_basis = native_basis
+                self.native_observation = native_observation
+                native_basis.check_live()
+                if native_basis.manifest_retained_bytes>self.snapshot_byte_limit:
+                    raise RuntimeError('VALIDATION_CANDIDATE_SNAPSHOT_BUDGET')
+            else:
+                self.native_observation = native_observation
+            self._check()
+            paths = self._universe()
+            if self.index_path is not None and self.native_basis is None:
+                index_info = self.index_path.lstat()
+                if index_info.st_size > self.snapshot_byte_limit:
+                    raise RuntimeError("VALIDATION_CANDIDATE_SNAPSHOT_BUDGET")
+            self.index_baseline = self._read(self.index_path) if self.index_path is not None else None
+            self.index_snapshot_bytes = (0 if self.index_baseline is None or self.native_basis is not None else len(self.index_baseline[1]))
+            self.baseline = MappingProxyType(self._snapshot(paths, baseline=True))
+            self._settled_snapshot = self.baseline
+            self.state = "BASELINE_READY"
+        except BaseException as error:
+            if self.failure is None:
+                self.failure = error
+            self.state = "CLEANUP_REJECTED"
+            if self._acquisition_supervision is not None:
+                self._acquisition_supervision["candidate_admission_error"] = error
+            raise
+
+    def _register_partial_capture_v1(self):
+        supervision = _RUN_COMMANDS_SUPERVISION
+        if (not _ORDINARY_CANDIDATE_FIRST_V1 or supervision is None
+                or not supervision.get("candidate_acquiring", False)):
+            return None
+        paths = _RUN_COMMANDS_ACTIVE_PATHS
+        if (type(self) is not _ValidationCandidateCustodyV1
+                or paths is None or supervision["paths"] is not paths
+                or supervision.get("candidate_owner") != (self.process_id, self.thread_id)
+                or (os.getpid(), threading.get_ident()) != (self.process_id, self.thread_id)
+                or self.root != paths.repo_root or self.plan is not _LAST_EXPECTED_COMMAND_PLAN
+                or not supervision.get("candidate_acquisition_attempted", False)
+                or supervision.get("candidate_admission_complete", False)
+                or any(type(row) is not CommandEvidencePlanEntry
+                    or row.run_id != paths.run_id or row.phase != supervision["phase"]
+                    or row.cwd != str(paths.repo_root) for row in self.plan)):
+            raise ValueError("partial candidate lost original invocation association")
+        if supervision.get("candidate_custody") is not None:
+            raise ValueError("original candidate construction cannot be repeated")
+        # Register before filesystem, native, exclusive or observer acquisition.
+        supervision["candidate_custody"] = self
+        supervision["candidate_deadline_ns"] = self.deadline_ns
+        return supervision
 
     def prepare_preflight(self, index, entry, *, environment, run_paths):
         from tools.validation_reliability import (_preflight_vector_v1, _preflight_startup_v1,
@@ -3579,6 +3703,14 @@ class _ValidationCandidateCustodyV1:
         return result
 
     def _read(self, path):
+        # Reject recursion before callbacks, counters or another acquisition.
+        if (self._read_in_progress or self._read_acquisition_in_progress
+                or self._read_descriptor is not None
+                or self._write_descriptor is not None or self._read_raw_handle_owner is not None):
+            raise RuntimeError("VALIDATION_CANDIDATE_READ_ALREADY_OWNED")
+        if (os.getpid(), threading.get_ident()) != (self.process_id, self.thread_id):
+            raise RuntimeError("VALIDATION_CANDIDATE_CUSTODY_UNAVAILABLE")
+        self._read_in_progress = True
         try:
             self._check()
             self.read_attempts += 1
@@ -3590,72 +3722,94 @@ class _ValidationCandidateCustodyV1:
                 self.failure = exc
                 self.state = "CLEANUP_REJECTED"
             raise
+        finally:
+            self._read_in_progress = False
 
     def _read_acquisition(self, path):
-        from tools.validation_reliability import (_open_regular_worktree_descriptor,
-                                                  _local_unlinked_path, _scan_same_api_version, _preflight_chain_v1)
-        self._check()
-        if self.native_basis is not None:
-            relative=path.relative_to(self.root).as_posix()
-            with self.native_basis.open_entry(relative):
-                return self.native_basis.files[relative]
-        _local_unlinked_path(path.parent)
-        ancestor_generation = _preflight_chain_v1(path.parent)
+        if (os.getpid(), threading.get_ident()) != (self.process_id, self.thread_id):
+            raise RuntimeError("VALIDATION_CANDIDATE_CUSTODY_UNAVAILABLE")
+        if (self._read_acquisition_in_progress or self._read_descriptor is not None
+                or self._write_descriptor is not None or self._read_raw_handle_owner is not None):
+            raise RuntimeError("VALIDATION_CANDIDATE_READ_ALREADY_OWNED")
+        self._read_acquisition_in_progress = True
         try:
-            before = path.lstat()
-        except FileNotFoundError:
-            return None
-        if (not stat.S_ISREG(before.st_mode) or _stat_is_reparse_point(before)
-                or before.st_nlink != 1 or before.st_size + 1 > self.remaining_read_bytes):
-            raise RuntimeError("VALIDATION_CANDIDATE_UNSUPPORTED_OR_UNBOUNDED_FILE: " + str(path))
-        descriptor = _open_regular_worktree_descriptor(path, nonblocking=True)
-        errors = []
-        result = None
-        try:
-            opened = os.fstat(descriptor)
-            if not _same_observed_file(before, opened) or opened.st_nlink != 1:
-                raise RuntimeError("VALIDATION_CANDIDATE_FILE_SUBSTITUTION")
-            data = bytearray()
-            while True:
-                self._check()
-                # Charge every acquired byte, including a changed-size sentinel.
-                requested = min(65536, before.st_size - len(data) + 1)
-                chunk = os.read(descriptor, requested)
-                if type(chunk) is not bytes:
-                    self.read_measurement_complete = False
-                    raise RuntimeError("VALIDATION_CANDIDATE_UNMEASURED_READ")
-                previous = self.remaining_read_bytes
-                self.observed_read_bytes += len(chunk)
-                self.remaining_read_bytes = max(0, previous - len(chunk))
-                if len(chunk) > previous:
-                    raise RuntimeError("VALIDATION_CANDIDATE_READ_BUDGET")
-                self._check()
-                if len(chunk) > requested:
-                    raise RuntimeError("VALIDATION_CANDIDATE_READ_OVERDELIVERY")
-                if not chunk:
-                    break
-                data.extend(chunk)
-                if len(data) > before.st_size:
-                    raise RuntimeError("VALIDATION_CANDIDATE_FILE_GREW")
-            after = path.lstat()
-            if (len(data) != before.st_size or _scan_same_api_version(opened) !=
-                    _scan_same_api_version(os.fstat(descriptor)) or
-                    _scan_same_api_version(before) != _scan_same_api_version(after) or
-                    ancestor_generation != _preflight_chain_v1(path.parent)):
-                raise RuntimeError("VALIDATION_CANDIDATE_UNSTABLE_FILE")
-            result = (stat.S_IMODE(before.st_mode), bytes(data))
-        except BaseException as exc:
-            errors.append(exc)
-        try:
-            os.close(descriptor)
-        except BaseException as exc:
-            errors.append(exc)
-        if len(errors) == 1:
-            raise errors[0]
-        if errors:
-            raise BaseExceptionGroup("candidate read and close failures", errors)
-        self._check()
-        return result
+            from tools.validation_reliability import (_open_regular_worktree_descriptor,
+                                                      _local_unlinked_path, _scan_same_api_version, _preflight_chain_v1)
+            self._check()
+            if self.native_basis is not None:
+                relative=path.relative_to(self.root).as_posix()
+                with self.native_basis.open_entry(relative):
+                    return self.native_basis.files[relative]
+            _local_unlinked_path(path.parent)
+            ancestor_generation = _preflight_chain_v1(path.parent)
+            try:
+                before = path.lstat()
+            except FileNotFoundError:
+                return None
+            if (not stat.S_ISREG(before.st_mode) or _stat_is_reparse_point(before)
+                    or before.st_nlink != 1 or before.st_size + 1 > self.remaining_read_bytes):
+                raise RuntimeError("VALIDATION_CANDIDATE_UNSUPPORTED_OR_UNBOUNDED_FILE: " + str(path))
+            try:
+                descriptor = _open_regular_worktree_descriptor(path, nonblocking=True)
+            except BaseException as error:
+                from tools.validation_reliability import _WorktreeRawHandleOwnerV1
+                raw_owner = getattr(error, "_worktree_raw_handle_owner_v1", None)
+                if type(raw_owner) is _WorktreeRawHandleOwnerV1:
+                    self._read_raw_handle_owner = raw_owner
+                raise
+            self._read_descriptor, self._read_close_attempted = descriptor, False
+            errors = []
+            result = None
+            try:
+                opened = os.fstat(descriptor)
+                if not _same_observed_file(before, opened) or opened.st_nlink != 1:
+                    raise RuntimeError("VALIDATION_CANDIDATE_FILE_SUBSTITUTION")
+                data = bytearray()
+                while True:
+                    self._check()
+                    # Charge every acquired byte, including a changed-size sentinel.
+                    requested = min(65536, before.st_size - len(data) + 1)
+                    chunk = os.read(descriptor, requested)
+                    if type(chunk) is not bytes:
+                        self.read_measurement_complete = False
+                        raise RuntimeError("VALIDATION_CANDIDATE_UNMEASURED_READ")
+                    previous = self.remaining_read_bytes
+                    self.observed_read_bytes += len(chunk)
+                    self.remaining_read_bytes = max(0, previous - len(chunk))
+                    if len(chunk) > previous:
+                        raise RuntimeError("VALIDATION_CANDIDATE_READ_BUDGET")
+                    self._check()
+                    if len(chunk) > requested:
+                        raise RuntimeError("VALIDATION_CANDIDATE_READ_OVERDELIVERY")
+                    if not chunk:
+                        break
+                    data.extend(chunk)
+                    if len(data) > before.st_size:
+                        raise RuntimeError("VALIDATION_CANDIDATE_FILE_GREW")
+                after = path.lstat()
+                if (len(data) != before.st_size or _scan_same_api_version(opened) !=
+                        _scan_same_api_version(os.fstat(descriptor)) or
+                        _scan_same_api_version(before) != _scan_same_api_version(after) or
+                        ancestor_generation != _preflight_chain_v1(path.parent)):
+                    raise RuntimeError("VALIDATION_CANDIDATE_UNSTABLE_FILE")
+                result = (stat.S_IMODE(before.st_mode), bytes(data))
+            except BaseException as exc:
+                errors.append(exc)
+            self._read_close_attempted = True
+            try:
+                os.close(descriptor)
+            except BaseException as exc:
+                errors.append(exc)
+            else:
+                self._read_descriptor = None
+            if len(errors) == 1:
+                raise errors[0]
+            if errors:
+                raise BaseExceptionGroup("candidate read and close failures", errors)
+            self._check()
+            return result
+        finally:
+            self._read_acquisition_in_progress = False
 
     def _snapshot(self, paths, *, baseline=False):
         if self.native_basis is not None:
@@ -3734,6 +3888,13 @@ class _ValidationCandidateCustodyV1:
         self._settled_snapshot = after
 
     def restore(self):
+        original = self._original_mapper_custody_v1
+        if type(original) is not dict or self._mapper_custody_v1 is not original:
+            raise RuntimeError("VALIDATION_MAPPER_RESOURCE_CUSTODY_UNRESOLVED")
+        if original:
+            from tools.validation_reliability import _mapper_parent_resources_retained_v1
+            if _mapper_parent_resources_retained_v1(self):
+                raise RuntimeError("VALIDATION_MAPPER_RESOURCE_CUSTODY_UNRESOLVED")
         self._check()
         if self.active_occurrence is not None:
             raise RuntimeError("VALIDATION_CANDIDATE_CHILD_STILL_OWNED")
@@ -3774,6 +3935,7 @@ class _ValidationCandidateCustodyV1:
                     else:
                         flags |= int(getattr(os, "O_NOFOLLOW", 0))
                     descriptor = os.open(path, flags, mode)
+                    self._write_descriptor, self._write_close_attempted = descriptor, False
                     errors = []
                     try:
                         info = os.fstat(descriptor)
@@ -3785,17 +3947,20 @@ class _ValidationCandidateCustodyV1:
                         view = memoryview(content)
                         while view:
                             self._check()
-                            count = os.write(descriptor, view)
-                            if type(count) is not int or count <= 0 or count > len(view):
+                            count = os.write(descriptor, view[:65536])
+                            if type(count) is not int or count <= 0 or count > min(65536, len(view)):
                                 raise OSError("candidate restoration made invalid write progress")
                             view = view[count:]
                         os.fsync(descriptor)
                     except BaseException as exc:
                         errors.append(exc)
+                    self._write_close_attempted = True
                     try:
                         os.close(descriptor)
                     except BaseException as exc:
                         errors.append(exc)
+                    else:
+                        self._write_descriptor = None
                     if len(errors) == 1:
                         raise errors[0]
                     if errors:
@@ -7141,6 +7306,12 @@ def _write_timing_report(
             "timing report path is inside a tracked generated authority path: "
             f"{_normal_path_text(report_path)}"
         )
+    if _ORDINARY_CANDIDATE_FIRST_V1:
+        error = ValueError("ordinary timing report output lacks genuine owned-output binding")
+        supervision = _RUN_COMMANDS_SUPERVISION
+        if supervision is not None:
+            supervision["errors"].append(error)
+        raise error
     report_path.parent.mkdir(parents=True, exist_ok=True)
     payload = {
         "schema_version": TIMING_SCHEMA_VERSION,
@@ -7192,17 +7363,507 @@ def _prepare_execution_plan(
     return tuple(plan)
 
 
+def _candidate_requires_retention_v1(supervision):
+    if supervision is None:
+        return False
+    if any(supervision.get(name) is not None for name in (
+            'native_resource_settlement_error', 'mapper_settlement_error', 'candidate_settlement_error')):
+        return True
+    candidates = []
+    candidate = supervision.get('candidate_custody')
+    if candidate is not None:
+        if type(candidate) is not _ValidationCandidateCustodyV1:
+            return True
+        candidates.append(candidate)
+    assembly = supervision.get('preflight_assembly')
+    if assembly is not None:
+        if (type(assembly) is not _PreflightAssemblyV1 or any(not hasattr(assembly, name)
+                for name in ('basis', 'candidate', 'native', 'paths', 'plan', 'pid', 'thread', 'state', 'launches', '_original_basis_v2', '_original_candidate_v1', '_original_native_input_v1'))):
+            return True
+        if (assembly.basis is not assembly._original_basis_v2
+                or assembly.candidate is not assembly._original_candidate_v1):
+            return True
+        partial = assembly._original_candidate_v1
+        if partial is not None:
+            if type(partial) is not _ValidationCandidateCustodyV1:
+                return True
+            if all(partial is not previous for previous in candidates):
+                candidates.append(partial)
+    from tools.validation_reliability import (_LinuxImmutableSourceBasisV2, _PreflightNativeInputV1,
+        _mapper_parent_resources_retained_v1)
+    native_input = supervision.get('preflight_native_input')
+    if assembly is not None and (assembly.native is not native_input
+            or assembly._original_native_input_v1 is not native_input):
+        return True
+    if native_input is not None:
+        if (type(native_input) is not _PreflightNativeInputV1
+                or _PreflightNativeInputV1._resources_require_retention_v1(native_input)):
+            return True
+    elif assembly is not None:
+        return True
+    bases = [getattr(assembly, '_original_basis_v2', None)]
+    for candidate in candidates:
+        if (getattr(candidate, '_read_descriptor', None) is not None
+                or getattr(candidate, '_write_descriptor', None) is not None
+                or getattr(candidate, '_read_raw_handle_owner', None) is not None
+                or getattr(candidate, '_read_in_progress', False)
+                or getattr(candidate, '_read_acquisition_in_progress', False)
+                or getattr(candidate, 'state', None) == 'APPLYING'):
+            return True
+        original_mapper = getattr(candidate, '_original_mapper_custody_v1', None)
+        if (type(original_mapper) is not dict
+                or getattr(candidate, '_mapper_custody_v1', None) is not original_mapper
+                or bool(original_mapper) and _mapper_parent_resources_retained_v1(candidate)):
+            return True
+        bases.append(getattr(candidate, 'native_basis', None))
+    for basis in bases:
+        if basis is not None and (type(basis) is not _LinuxImmutableSourceBasisV2
+                or _LinuxImmutableSourceBasisV2._resources_require_retention_v2(basis)):
+            return True
+    return False
+
+
+def _scan_inputs_require_retention_v1(supervision):
+    if supervision is None:
+        return False
+    if (supervision.get("scan_launch_construction_pending")
+            or supervision.get("scan_launch_construction_error") is not None):
+        return True
+    if supervision.get("scan_settlement_error") is not None:
+        return True
+    from tools.validation_reliability import _ScanLaunchInput, _ScanLaunch
+    from types import MappingProxyType
+    launch = supervision.get("scan_launch")
+    if launch is not None and (type(launch) is not _ScanLaunch
+            or type(getattr(launch, "_original_launch_inputs_v1", None)) is not MappingProxyType
+            or launch.launch_inputs is not launch._original_launch_inputs_v1
+            or launch.profiles is not getattr(launch, "_original_profiles_v1", None)
+            or any(type(value) is not _ScanLaunchInput for value in launch._original_launch_inputs_v1.values())):
+        return True
+    for record in supervision.get("scan_input_records", ()):
+        value = record["input"]
+        if type(value) is not _ScanLaunchInput:
+            return True
+        if (value._callback_requires_retention_v1() or value.retention_errors
+                or value.supervision_started and not value.supervision_settled
+                or value.close_errors or value.raw_descriptor is not None or value.raw_handle_owner is not None
+                or value.snapshot_descriptor is not None or value.snapshot_acquiring
+                or value.state == "CLOSED" and (not record["registered"] or not value._release_complete_v1()
+                    or value._custody_record is not record
+                    or (value.identity, value.scratch_root, value.deadline_ns) !=
+                       (record["identity"], record["scratch_root"], record["deadline_ns"]))
+                or value.state != "CLOSED" and (value.allocated_path is not None or value.path is not None
+                    or value.reader is not None or value.writer is not None or value.process is not None)):
+            return True
+    return False
+
+
+def _invocation_requires_retention_v1(supervision):
+    return (_candidate_requires_retention_v1(supervision)
+            or _scan_inputs_require_retention_v1(supervision))
+
+
+def _settle_scan_inputs_v1(supervision, paths, phase, plan):
+    if supervision is None:
+        return
+    previous = supervision.get("scan_settlement_error")
+    if previous is not None:
+        raise previous
+    from tools.validation_reliability import _ScanLaunchInput
+    try:
+        if (supervision.get("scan_launch_construction_pending")
+                or supervision.get("scan_launch_construction_error") is not None):
+            raise RuntimeError("SCAN_LAUNCH_CONSTRUCTION_UNRESOLVED") from supervision.get("scan_launch_construction_error")
+        if not supervision.get("scan_input_records"):
+            return
+        if (supervision["paths"] is not paths or supervision["phase"] != phase
+                or supervision.get("scan_plan") is not plan
+                or supervision.get("scan_owner") != (os.getpid(), threading.get_ident())
+                or supervision["pending"]):
+            raise RuntimeError("SCAN_INPUT_CUSTODY_UNRESOLVED")
+        for record in supervision["scan_input_records"]:
+            value = record["input"]
+            if type(value) is not _ScanLaunchInput:
+                raise ValueError("scan settlement requires the original typed input")
+            if record["registered"] and (value.original_check_candidate is not record["candidate_fence"]
+                    or value.check_candidate is not record["candidate_fence"]):
+                raise RuntimeError("SCAN_INPUT_CALLBACK_ASSOCIATION_CHANGED")
+            if value._callback_requires_retention_v1():
+                _scan_raise_errors(value.original_check_candidate.close_errors or [RuntimeError("SCAN_INPUT_CALLBACK_UNRESOLVED")])
+            if (value.retention_errors or value.supervision_started and not value.supervision_settled):
+                _scan_raise_errors(value.retention_errors or [RuntimeError("SCAN_INPUT_SUPERVISION_UNRESOLVED")])
+            if (value.raw_descriptor is not None or value.raw_handle_owner is not None
+                    or value.snapshot_descriptor is not None or value.snapshot_acquiring or value.close_errors):
+                _scan_raise_errors(value.close_errors or [RuntimeError("SCAN_INPUT_DESCRIPTOR_UNRESOLVED")])
+            if (value.path is None and value.allocated_path is None and value.reader is None
+                    and value.writer is None and value.process is None):
+                continue  # No acquisition: this is not a command/consumption proof.
+            if value.state == "CLOSED":
+                if (not record["registered"] or value._custody_record is not record
+                        or (value.process_id, value.thread_id) != supervision["scan_owner"]
+                        or (value.identity, value.scratch_root, value.deadline_ns) !=
+                           (record["identity"], record["scratch_root"], record["deadline_ns"])
+                        or not value._release_complete_v1()):
+                    raise RuntimeError("SCAN_INPUT_CLOSED_SETTLEMENT_UNPROVEN")
+                continue
+            if (not record["registered"] or value._custody_record is not record
+                    or (value.process_id, value.thread_id) != supervision["scan_owner"]
+                    or (value.identity, value.scratch_root, value.deadline_ns)
+                       != (record["identity"], record["scratch_root"], record["deadline_ns"])
+                    or value.state != "READY" or value.process is not None
+                    or value.close_started or value.reader_close_attempted):
+                raise RuntimeError("SCAN_INPUT_RELEASE_NOT_ADMITTED")
+            if record["settlement_attempted"]:
+                raise RuntimeError("SCAN_INPUT_SETTLEMENT_NOT_RETRIED")
+            record["settlement_attempted"] = True
+            try:
+                value._close()
+            except BaseException as error:
+                record["settlement_error"] = error
+                raise
+            if value.state != "CLOSED":
+                raise RuntimeError("SCAN_INPUT_SETTLEMENT_INCOMPLETE")
+    except BaseException as error:
+        if supervision.get("scan_settlement_error") is None:
+            supervision["scan_settlement_error"] = error
+        if all(error is not previous for previous in supervision["errors"]):
+            supervision["errors"].append(error)
+        raise
+
+
+def _settle_native_candidate_resources_v1(supervision, paths, phase, plan):
+    if supervision is None:
+        return
+    previous = supervision.get('native_resource_settlement_error')
+    if previous is not None:
+        raise previous
+    assembly = supervision.get('preflight_assembly')
+    primary = supervision.get('candidate_custody')
+    # Preserve no-native legacy behavior without extra association or I/O checks.
+    if assembly is None and getattr(primary, 'native_basis', None) is None:
+        return
+    previous = supervision.get('candidate_settlement_error')
+    if previous is not None:
+        raise previous
+    from tools.validation_reliability import _LinuxImmutableSourceBasisV2, _PreflightNativeInputV1
+    actual_owner = (os.getpid(), threading.get_ident())
+    # Foreign admission does not consume the legitimate owner's settlement.
+    if type(assembly) is _PreflightAssemblyV1 and hasattr(assembly, 'pid') and hasattr(assembly, 'thread'):
+        if (assembly.pid, assembly.thread) != actual_owner:
+            raise ValueError('foreign preflight resource settlement owner')
+    candidates = []
+    if primary is not None:
+        candidates.append(primary)
+    partial = getattr(assembly, '_original_candidate_v1', None)
+    if partial is not None and all(partial is not prior for prior in candidates):
+        candidates.append(partial)
+    for candidate in candidates:
+        if (type(candidate) is _ValidationCandidateCustodyV1
+                and hasattr(candidate, 'process_id') and hasattr(candidate, 'thread_id')
+                and (candidate.process_id, candidate.thread_id) != actual_owner):
+            raise ValueError('foreign candidate resource settlement owner')
+    native_input = supervision.get('preflight_native_input')
+    if (type(native_input) is _PreflightNativeInputV1
+            and (getattr(native_input, 'pid', None), getattr(native_input, 'thread', None)) != actual_owner):
+        raise ValueError('foreign native input settlement owner')
+    bases = []
+    def retain_error(error):
+        if supervision.get('native_resource_settlement_error') is None:
+            supervision['native_resource_settlement_error'] = error
+        if all(error is not prior for prior in supervision['errors']):
+            supervision['errors'].append(error)
+    try:
+        if (supervision['paths'] is not paths or supervision['phase'] != phase
+                or supervision['pending'] or _scan_inputs_require_retention_v1(supervision)):
+            raise RuntimeError('LINUX_V2_NATIVE_RESOURCE_PROCESS_CUSTODY_UNRESOLVED')
+        if assembly is not None:
+            if (type(assembly) is not _PreflightAssemblyV1
+                    or any(not hasattr(assembly, name) for name in
+                        ('paths', 'plan', 'pid', 'thread', 'launches', 'state', 'basis', 'candidate', 'native', '_original_basis_v2', '_original_candidate_v1', '_original_native_input_v1'))
+                    or assembly.paths is not paths or assembly.plan is not plan):
+                raise ValueError('preflight resource settlement lost original assembly association')
+            if (assembly.basis is not assembly._original_basis_v2
+                    or assembly.candidate is not assembly._original_candidate_v1):
+                raise ValueError('preflight partial resource holder was replaced')
+            if (any(launch.process is not None for launch in assembly.launches.values())
+                    and assembly.state != 'SETTLING'):
+                raise RuntimeError('preflight native resource child settlement unproven')
+            if (type(native_input) is not _PreflightNativeInputV1 or assembly.native is not native_input
+                    or assembly._original_native_input_v1 is not native_input
+                    or native_input.root != paths.repo_root
+                    or native_input.index_path not in (None, paths.repo_root / '.git/index')
+                    or supervision.get('preflight_native_input_binding') != (native_input.path,
+                        native_input.root, native_input.index_path, native_input.pid, native_input.thread)
+                    or (native_input.pid, native_input.thread) != actual_owner):
+                raise ValueError('preflight resource settlement lost original native input association')
+            if assembly.basis is not None:
+                bases.append(assembly._original_basis_v2)
+        for candidate in candidates:
+            if (type(candidate) is not _ValidationCandidateCustodyV1
+                    or any(not hasattr(candidate, name) for name in
+                        ('process_id', 'thread_id', 'root', 'plan'))
+                    or candidate.root != paths.repo_root or candidate.plan is not plan):
+                raise ValueError('native resource settlement lost original candidate association')
+            basis = getattr(candidate, 'native_basis', None)
+            if basis is not None and all(basis is not prior for prior in bases):
+                bases.append(basis)
+        if any(type(basis) is not _LinuxImmutableSourceBasisV2 for basis in bases):
+            raise ValueError('native resource settlement requires original basis')
+    except BaseException as error:
+        retain_error(error)
+        raise
+    # Live scopes reject outside the settlement/error body, without consuming
+    # their legitimate owner's eventual original finally/close opportunity.
+    for candidate in candidates:
+        if (getattr(candidate, '_read_in_progress', False)
+                or getattr(candidate, '_read_acquisition_in_progress', False)
+                or getattr(candidate, 'state', None) == 'APPLYING'):
+            raise RuntimeError('VALIDATION_CANDIDATE_READ_ALREADY_OWNED')
+    if native_input is not None and (getattr(native_input, '_initializing_v1', True)
+            or getattr(native_input, '_consume_active_v1', True)):
+        _PreflightNativeInputV1._settle_resources_v1(native_input)
+    for basis in bases:
+        if ((getattr(basis, 'pid', None), getattr(basis, 'thread', None)) != actual_owner
+                or getattr(basis, '_initializing_v2', True)
+                or getattr(basis, '_entry_depth', 0)
+                or any(record['acquiring'] or record['yielded']
+                    for record in getattr(basis, '_iterator_records', ()))
+                or getattr(basis, '_iterator_acquisition', None) is not None
+                    and getattr(basis, '_iterator_acquisition')['acquisition_error'] is None
+                or getattr(basis, '_opening_record', None) is not None
+                    and getattr(basis, '_opening_record')['acquiring']):
+            _LinuxImmutableSourceBasisV2._settle_resources_v2(basis)
+    errors = []
+    for candidate in candidates:
+        # Original C finally owns each actual acquisition/one-close. An ended
+        # partial capture conveys retention only, never a guessed-fd closer.
+        if (getattr(candidate, '_read_descriptor', None) is not None
+                or getattr(candidate, '_write_descriptor', None) is not None
+                or getattr(candidate, '_read_raw_handle_owner', None) is not None):
+            errors.append(candidate.failure if isinstance(getattr(candidate, 'failure', None), BaseException)
+                else RuntimeError('VALIDATION_CANDIDATE_RESOURCE_CLOSE_UNPROVEN'))
+    if native_input is not None:
+        try:
+            _PreflightNativeInputV1._settle_resources_v1(native_input)
+        except BaseException as error:
+            errors.append(error)
+    for basis in bases:
+        try:
+            _LinuxImmutableSourceBasisV2._settle_resources_v2(basis)
+            if _LinuxImmutableSourceBasisV2._resources_require_retention_v2(basis):
+                raise RuntimeError('LINUX_V2_NATIVE_RESOURCE_CUSTODY_UNRESOLVED')
+        except BaseException as error:
+            errors.append(error)
+    try:
+        _scan_raise_errors(errors)
+    except BaseException as error:
+        retain_error(error)
+        raise
+
+
+def _check_mapper_barrier_v1(supervision, paths, phase, plan, receipts):
+    # Intermediate C restoration observes ownership/associations only. The
+    # original final activation-byte read belongs to finish/finalizer below.
+    from tools.validation_reliability import (_mapper_parent_record_v1,
+        _mapper_parent_resources_retained_v1, _MapperOccurrenceRecordV1)
+    previous = None if supervision is None else supervision.get('mapper_settlement_error')
+    if previous is not None: raise previous
+    try:
+        candidate = None if supervision is None else supervision.get('candidate_custody')
+        acquired = (type(candidate) is _ValidationCandidateCustodyV1
+            and bool(getattr(candidate, '_original_mapper_custody_v1', {})))
+        if not _ACTIVE_MAPPER_OCCURRENCES_V1 and not acquired:
+            return None  # Unchanged legacy/no-M/first8 default.
+        if (type(supervision) is not dict or supervision.get('paths') is not paths
+                or supervision.get('phase') != phase or supervision.get('pending')
+                or plan is not _LAST_EXPECTED_COMMAND_PLAN or type(plan) is not tuple
+                or type(candidate) is not _ValidationCandidateCustodyV1
+                or candidate.plan is not plan or candidate.root != paths.repo_root
+                or (candidate.process_id, candidate.thread_id) != (os.getpid(), threading.get_ident())
+                or _mapper_parent_resources_retained_v1(candidate)
+                or any(_command_requires_process_retention_v1(r) for r in receipts)
+                or type(_ACTIVE_MAPPER_OCCURRENCES_V1) is not dict):
+            raise RuntimeError('MAPPER_FINAL_CUSTODY_UNRESOLVED')
+        for key, record in _ACTIVE_MAPPER_OCCURRENCES_V1.items():
+            if (type(key) is not str or not key.isdecimal() or str(int(key)) != key
+                    or type(record) is not _MapperOccurrenceRecordV1):
+                raise ValueError('MAPPER_PARENT_RECORD_CHANGED')
+            _mapper_parent_record_v1(candidate._original_mapper_custody_v1[int(key)], record=record)
+        return candidate
+
+    except BaseException as error:
+        if type(supervision) is dict:
+            if supervision.get('mapper_settlement_error') is None:
+                supervision['mapper_settlement_error'] = error
+            errors = supervision.get('errors')
+            if type(errors) is list and all(error is not earlier for earlier in errors):
+                errors.append(error)
+        raise
+
+
+def _settle_mapper_occurrences_v1(supervision, paths, phase, plan, receipts):
+    from tools.validation_reliability import (_mapper_occurrence_evidence_v1,
+        _mapper_final_review_association_v1)
+    previous = None if supervision is None else supervision.get('mapper_settlement_error')
+    if previous is not None: raise previous
+    try:
+        candidate = _check_mapper_barrier_v1(supervision, paths, phase, plan, receipts)
+        if candidate is None: return None
+        original = supervision.get('mapper_final_review')
+        if supervision.get('mapper_settlement_attempted', False):
+            if original is None: raise RuntimeError('MAPPER_FINAL_REVIEW_NOT_RETRIED')
+            _mapper_final_review_association_v1(original, paths, _ACTIVE_MAPPER_READ_PROFILES_V1,
+                _ACTIVE_MAPPER_OCCURRENCES_V1, receipts, candidate=candidate, plan=plan)
+            if original['used']: raise RuntimeError('MAPPER_FINAL_REVIEW_ALREADY_CONSUMED')
+            return original
+        supervision['mapper_settlement_attempted'] = True
+        capture = dict(paths=paths, plan=plan, candidate=candidate,
+            owner=(os.getpid(), threading.get_ident()), deadline_ns=candidate.deadline_ns,
+            profiles=_ACTIVE_MAPPER_READ_PROFILES_V1, records=_ACTIVE_MAPPER_OCCURRENCES_V1,
+            receipts=tuple(receipts), members={}, attempted_members=set(), completed=False, used=False)
+        supervision['mapper_final_review'] = capture
+        _mapper_occurrence_evidence_v1(paths, _ACTIVE_MAPPER_READ_PROFILES_V1,
+            _ACTIVE_MAPPER_OCCURRENCES_V1, receipts, _capture=capture)
+        capture['completed'] = True
+        _mapper_final_review_association_v1(capture, paths, _ACTIVE_MAPPER_READ_PROFILES_V1,
+            _ACTIVE_MAPPER_OCCURRENCES_V1, receipts, candidate=candidate, plan=plan)
+        return capture
+    except BaseException as error:
+        if type(supervision) is dict:
+            if supervision.get('mapper_settlement_error') is None:
+                supervision['mapper_settlement_error'] = error
+            errors = supervision.get('errors')
+            if type(errors) is list and all(error is not earlier for earlier in errors):
+                errors.append(error)
+        raise
+
+
+def _settle_validation_candidate_v1(supervision, paths, phase, plan):
+    if supervision is None:
+        return
+    if (supervision.get('candidate_custody') is not None
+            and supervision.get('candidate_settlement_error') is not None):
+        raise supervision['candidate_settlement_error']
+    _settle_native_candidate_resources_v1(supervision, paths, phase, plan)
+    if supervision.get("candidate_custody") is None:
+        return
+    previous = supervision.get("candidate_settlement_error")
+    if previous is not None:
+        raise previous
+    candidate = supervision["candidate_custody"]
+    try:
+        if (type(candidate) is not _ValidationCandidateCustodyV1
+                or supervision["paths"] is not paths or supervision["phase"] != phase
+                or supervision.get("candidate_owner") != (os.getpid(), threading.get_ident())
+                or (candidate.process_id, candidate.thread_id) != supervision["candidate_owner"]
+                or candidate.root != paths.repo_root or candidate.plan is not plan
+                or type(candidate.deadline_ns) is not int
+                or candidate.deadline_ns != supervision.get("candidate_deadline_ns")):
+            raise ValueError("candidate settlement lost original invocation association")
+        if supervision["pending"] or _invocation_requires_retention_v1(supervision):
+            raise RuntimeError("VALIDATION_CANDIDATE_CUSTODY_UNRESOLVED")
+        if candidate.baseline is None:
+            # Failed construction has no complete restoration authority. Its
+            # already attempted closes must be settled; no child was admitted.
+            if (candidate.state != "CLEANUP_REJECTED" or candidate.failure is None
+                    or supervision.get("candidate_admission_complete", False)
+                    or candidate.active_occurrence is not None):
+                raise RuntimeError("VALIDATION_CANDIDATE_INCOMPLETE_BASELINE")
+            return
+        if supervision.get("candidate_settlement_attempted", False):
+            if (candidate.state != "RESTORED_VERIFIED" or candidate.failure is not None
+                    or candidate._settled_snapshot is not candidate.baseline
+                    or candidate.active_occurrence is not None or candidate.permitted_since_barrier):
+                raise RuntimeError("VALIDATION_CANDIDATE_SETTLEMENT_NOT_RETRIED")
+            candidate._check()
+            return
+        # The original owner settles late M/R/header failures as well as a run.
+        # Do not repeat the final complete barrier already performed by finish.
+        supervision["candidate_settlement_attempted"] = True
+        if (candidate.state == "RESTORED_VERIFIED" and candidate.failure is None
+                and candidate._settled_snapshot is candidate.baseline
+                and candidate.active_occurrence is None and not candidate.permitted_since_barrier):
+            candidate._check()
+        else:
+            candidate.restore()
+    except BaseException as error:
+        if supervision.get("candidate_settlement_error") is None:
+            supervision["candidate_settlement_error"] = error
+        if all(error is not previous for previous in supervision["errors"]):
+            supervision["errors"].append(error)
+        raise
+
+
 def _prepare_validation_candidate_v1(root, plan, candidate):
     if root is None:
+        if _ORDINARY_CANDIDATE_FIRST_V1:
+            raise ValueError("ordinary candidate lost original repository root")
         if candidate is not None:
             raise ValueError("candidate custody has no original repository root")
         return None
-    if candidate is None and callable(_ACTIVE_CANDIDATE_SOURCE):
-        candidate = _ACTIVE_CANDIDATE_SOURCE(root, plan)
-    if (type(candidate) is not _ValidationCandidateCustodyV1 or candidate.plan is not plan
-            or candidate.root != pathlib.Path(root).absolute() or candidate.state != "BASELINE_READY"):
-        raise RuntimeError("VALIDATION_CANDIDATE_COMPLETE_SOURCE_EFFECT_RESOURCE_BINDING_REQUIRED")
-    candidate._check()
+    supervision = None
+    if _ORDINARY_CANDIDATE_FIRST_V1:
+        supervision = _RUN_COMMANDS_SUPERVISION
+        paths = _RUN_COMMANDS_ACTIVE_PATHS
+        if (supervision is None or paths is None or supervision["paths"] is not paths
+                or supervision.get("candidate_owner") != (os.getpid(), threading.get_ident())
+                or paths.repo_root != pathlib.Path(root).absolute()
+                or type(plan) is not tuple or not plan or plan is not _LAST_EXPECTED_COMMAND_PLAN
+                or any(type(row) is not CommandEvidencePlanEntry
+                    or row.run_id != paths.run_id or row.phase != supervision["phase"]
+                    or row.cwd != str(paths.repo_root) for row in plan)):
+            raise ValueError("ordinary candidate lost original invocation association")
+        retained = supervision.get("candidate_custody")
+        if supervision.get("candidate_acquisition_attempted", False):
+            if retained is None:
+                raise ValueError("original candidate acquisition cannot be retried")
+            if not supervision.get("candidate_admission_complete", False):
+                raise ValueError("original candidate admission cannot be retried") from supervision.get("candidate_admission_error")
+            if candidate is not None and candidate is not retained:
+                raise ValueError("ordinary candidate differs from its retained original owner")
+            candidate = retained
+            if (type(candidate.deadline_ns) is not int
+                    or candidate.deadline_ns != supervision["candidate_deadline_ns"]):
+                raise ValueError("ordinary candidate changed its original deadline")
+        else:
+            # Latch before the supplier: failed acquisition cannot be repeated.
+            supervision["candidate_acquisition_attempted"] = True
+            supervision["candidate_admission_complete"] = False
+    try:
+        if candidate is None and callable(_ACTIVE_CANDIDATE_SOURCE):
+            if supervision is not None:
+                supervision["candidate_acquiring"] = True
+            try:
+                candidate = _ACTIVE_CANDIDATE_SOURCE(root, plan)
+            finally:
+                if supervision is not None:
+                    supervision["candidate_acquiring"] = False
+        if (type(candidate) is not _ValidationCandidateCustodyV1 or candidate.plan is not plan
+                or candidate.root != pathlib.Path(root).absolute() or candidate.state != "BASELINE_READY"):
+            raise RuntimeError("VALIDATION_CANDIDATE_COMPLETE_SOURCE_EFFECT_RESOURCE_BINDING_REQUIRED")
+        if supervision is not None:
+            retained = supervision.get("candidate_custody")
+            if retained is not None and candidate is not retained:
+                raise ValueError("ordinary candidate differs from its retained original owner")
+            supervision["candidate_custody"] = candidate
+            if "candidate_deadline_ns" in supervision:
+                if (type(candidate.deadline_ns) is not int
+                        or candidate.deadline_ns != supervision["candidate_deadline_ns"]):
+                    raise ValueError("ordinary candidate changed its original deadline")
+            else:
+                if type(candidate.deadline_ns) is not int:
+                    raise ValueError("ordinary candidate changed its original deadline")
+                supervision["candidate_deadline_ns"] = candidate.deadline_ns
+        candidate._check()
+    except BaseException as error:
+        if supervision is not None:
+            supervision["candidate_admission_complete"] = False
+            supervision["candidate_admission_error"] = error
+            if all(error is not previous for previous in supervision["errors"]):
+                supervision["errors"].append(error)
+        raise
+    if supervision is not None:
+        supervision["candidate_admission_complete"] = True
     return candidate
 
 
@@ -7222,6 +7883,10 @@ def run_commands(
     global _LAST_COMMAND_RECEIPTS
     if _RUN_COMMANDS_SUPERVISION is not None and _RUN_COMMANDS_SUPERVISION["pending"]:
         print("ENGVR_PROCESS_TERMINATION_FAILED: prior command custody is unresolved",
+              file=sys.stderr, flush=True)
+        return 1
+    if _invocation_requires_retention_v1(_RUN_COMMANDS_SUPERVISION):
+        print("ENGVR_PREPUBLICATION_CUSTODY_FAILED: prior candidate custody is unresolved",
               file=sys.stderr, flush=True)
         return 1
     prepared_plan = (
@@ -7245,6 +7910,11 @@ def run_commands(
             flush=True,
         )
         return 2
+    if _ORDINARY_CANDIDATE_FIRST_V1 and (
+            _RUN_COMMANDS_SUPERVISION is None
+            or _RUN_COMMANDS_SUPERVISION["paths"] is not active_run_paths
+            or _RUN_COMMANDS_SUPERVISION["phase"] != phase):
+        raise ValueError("ordinary candidate lost original invocation association")
     if (_RUN_COMMANDS_SUPERVISION is None
             or _RUN_COMMANDS_SUPERVISION["paths"] is not active_run_paths
             or _RUN_COMMANDS_SUPERVISION["phase"] != phase):
@@ -7284,8 +7954,11 @@ def run_commands(
                 print(failure, file=sys.stderr, flush=True)
             returncode = 1
         try:
+            _settle_scan_inputs_v1(supervision, active_run_paths, phase, _LAST_EXPECTED_COMMAND_PLAN)
+            _settle_native_candidate_resources_v1(supervision, active_run_paths, phase, _LAST_EXPECTED_COMMAND_PLAN)
+            _settle_mapper_occurrences_v1(supervision, active_run_paths, phase, _LAST_EXPECTED_COMMAND_PLAN, tuple(command_receipts))
             restore_gate_side_effects()
-        except RuntimeError as exc:
+        except (OSError, RuntimeError, ValueError) as exc:
             print(str(exc), file=sys.stderr, flush=True)
             returncode = 1
         total_elapsed_seconds = time.perf_counter() - total_started
@@ -7303,7 +7976,11 @@ def run_commands(
                     total_elapsed_seconds=total_elapsed_seconds,
                     repo_root=cleanup_repo_root,
                 )
-            except ValueError as exc:
+            except BaseException as exc:
+                if all(exc is not earlier for earlier in supervision["errors"]):
+                    supervision["errors"].append(exc)
+                if not isinstance(exc, ValueError):
+                    raise
                 print(str(exc), file=sys.stderr, flush=True)
                 return 2
         if returncode == 0 and not defer_success_markers:
@@ -7313,6 +7990,18 @@ def run_commands(
 
     candidate_custody = _prepare_validation_candidate_v1(
         cleanup_repo_root, _LAST_EXPECTED_COMMAND_PLAN if _RUN_PROVENANCE_WRITTEN else prepared_plan, candidate_custody)
+
+    if (candidate_custody is not None and _ACTIVE_MAPPER_READ_PROFILES_V1 is not None and any(value['kind'] == 'MAPPER_NATIVE_READ_BINDING_V2'
+            for value in _ACTIVE_MAPPER_READ_PROFILES_V1.values())):
+        if (type(candidate_custody) is not _ValidationCandidateCustodyV1
+                or candidate_custody.plan is not _LAST_EXPECTED_COMMAND_PLAN
+                or candidate_custody.root != active_run_paths.repo_root
+                or (candidate_custody.process_id, candidate_custody.thread_id) != (os.getpid(), threading.get_ident())
+                or supervision.get('candidate_custody') is not None and supervision.get('candidate_custody') is not candidate_custody):
+            raise ValueError('MAPPER_ACTIVATION_ORIGINAL_CUSTODY_REQUIRED')
+        supervision['candidate_custody'] = candidate_custody
+        supervision['candidate_owner'] = (candidate_custody.process_id, candidate_custody.thread_id)
+        supervision['candidate_deadline_ns'] = candidate_custody.deadline_ns
 
     restoration_failure: BaseException | None = None
 
@@ -7324,6 +8013,8 @@ def run_commands(
                 "ENGVR_PROCESS_TERMINATION_FAILED",
                 "restoration skipped while command process custody is unresolved",
             ) from (supervision["errors"][0] if supervision["errors"] else None)
+        _settle_scan_inputs_v1(supervision, active_run_paths, phase, _LAST_EXPECTED_COMMAND_PLAN)
+        _check_mapper_barrier_v1(supervision, active_run_paths, phase, _LAST_EXPECTED_COMMAND_PLAN, tuple(command_receipts))
         if cleanup_repo_root is None:
             return
         if restoration_failure is not None:
@@ -8374,8 +9065,23 @@ def _publish_active_plan_provenance(
     _LAST_PLANNED_COMMAND_COUNT = len(selected_plan)
     global _ACTIVE_PREFLIGHT_ASSEMBLY_V1, _ACTIVE_CANDIDATE_SOURCE
     if _ACTIVE_PREFLIGHT_PATH_V1 is not None:
-        _ACTIVE_PREFLIGHT_ASSEMBLY_V1 = _PreflightAssemblyV1(_ACTIVE_PREFLIGHT_NATIVE_V1, active_run_paths, selected_plan)
-        _ACTIVE_CANDIDATE_SOURCE = _ACTIVE_PREFLIGHT_ASSEMBLY_V1.candidate_source
+        supervision = _RUN_COMMANDS_SUPERVISION
+        if (supervision is None or supervision['paths'] is not active_run_paths
+                or supervision['phase'] != phase or supervision['pending']
+                or supervision.get('preflight_assembly') is not None):
+            raise ValueError('preflight assembly lost original invocation association')
+        assembly = _PreflightAssemblyV1.__new__(_PreflightAssemblyV1)
+        _ACTIVE_PREFLIGHT_ASSEMBLY_V1 = assembly
+        supervision['preflight_assembly'] = assembly
+        supervision['preflight_native_input'] = _ACTIVE_PREFLIGHT_NATIVE_V1
+        from tools.validation_reliability import _PreflightNativeInputV1
+        if type(_ACTIVE_PREFLIGHT_NATIVE_V1) is not _PreflightNativeInputV1:
+            raise ValueError('preflight original native input required')
+        supervision['preflight_native_input_binding'] = (_ACTIVE_PREFLIGHT_NATIVE_V1.path,
+            _ACTIVE_PREFLIGHT_NATIVE_V1.root, _ACTIVE_PREFLIGHT_NATIVE_V1.index_path,
+            _ACTIVE_PREFLIGHT_NATIVE_V1.pid, _ACTIVE_PREFLIGHT_NATIVE_V1.thread)
+        assembly.__init__(_ACTIVE_PREFLIGHT_NATIVE_V1, active_run_paths, selected_plan)
+        _ACTIVE_CANDIDATE_SOURCE = assembly.candidate_source
     if _ORDINARY_CANDIDATE_FIRST_V1:
         # The ordinary entry has no qualified native issuer yet. Preserve its
         # real C denial before dependent profiles or accepted provenance.
@@ -8455,6 +9161,24 @@ def _main_impl(argv: Sequence[str] | None = None) -> int:
         if active_run_paths is None
         else active_run_paths.repo_root
     )
+    pending_router_publication_error = None
+
+    def publish_router_report(writer, report_path, **kwargs):
+        nonlocal pending_router_publication_error
+        if report_path is None:
+            return
+        if not _ORDINARY_CANDIDATE_FIRST_V1:
+            writer(report_path, **kwargs)
+            return
+        # Ordinary output ownership is not supplied by C, a path or an
+        # accepted plan. Preserve routing while withholding the unowned I/O.
+        error = ValueError("ordinary router report output lacks genuine owned-output binding")
+        supervision = _RUN_COMMANDS_SUPERVISION
+        if supervision is None:
+            raise error
+        supervision["errors"].append(error)
+        pending_router_publication_error = error
+
     timing_report_path = args.timing_report
     if timing_report_path is not None and not timing_report_path.is_absolute():
         timing_report_path = repo_root / timing_report_path
@@ -8583,8 +9307,8 @@ def _main_impl(argv: Sequence[str] | None = None) -> int:
                     manual_mode=args.manual_mode,
                 ):
                     commands = _filter_commands_for_rp5d_r1_local_branch_scope(commands)
-                    _write_rp5d_r1_local_branch_scope_report(
-                        args.router_report,
+                    publish_router_report(
+                        _write_rp5d_r1_local_branch_scope_report, args.router_report,
                         repo_root=repo_root,
                         kept_commands=commands,
                     )
@@ -8602,8 +9326,8 @@ def _main_impl(argv: Sequence[str] | None = None) -> int:
                     manual_mode=args.manual_mode,
                 ):
                     commands = _filter_commands_for_rp5f_local_branch_scope(commands)
-                    _write_rp5f_local_branch_scope_report(
-                        args.router_report,
+                    publish_router_report(
+                        _write_rp5f_local_branch_scope_report, args.router_report,
                         repo_root=repo_root,
                         kept_commands=commands,
                     )
@@ -8621,8 +9345,8 @@ def _main_impl(argv: Sequence[str] | None = None) -> int:
                     manual_mode=args.manual_mode,
                 ):
                     commands = _filter_commands_for_rp5g_local_branch_scope(commands)
-                    _write_rp5g_local_branch_scope_report(
-                        args.router_report,
+                    publish_router_report(
+                        _write_rp5g_local_branch_scope_report, args.router_report,
                         repo_root=repo_root,
                         kept_commands=commands,
                     )
@@ -8642,8 +9366,8 @@ def _main_impl(argv: Sequence[str] | None = None) -> int:
                     commands = _filter_commands_for_pr169_readiness1_local_branch_scope(
                         commands
                     )
-                    _write_pr169_readiness1_local_branch_scope_report(
-                        args.router_report,
+                    publish_router_report(
+                        _write_pr169_readiness1_local_branch_scope_report, args.router_report,
                         repo_root=repo_root,
                         kept_commands=commands,
                     )
@@ -8663,8 +9387,8 @@ def _main_impl(argv: Sequence[str] | None = None) -> int:
                     commands = _filter_commands_for_pr169_pretrade1_local_branch_scope(
                         commands
                     )
-                    _write_pr169_pretrade1_local_branch_scope_report(
-                        args.router_report,
+                    publish_router_report(
+                        _write_pr169_pretrade1_local_branch_scope_report, args.router_report,
                         repo_root=repo_root,
                         kept_commands=commands,
                     )
@@ -8684,8 +9408,8 @@ def _main_impl(argv: Sequence[str] | None = None) -> int:
                     commands = _filter_commands_for_pr169_dash1_local_branch_scope(
                         commands
                     )
-                    _write_pr169_dash1_local_branch_scope_report(
-                        args.router_report,
+                    publish_router_report(
+                        _write_pr169_dash1_local_branch_scope_report, args.router_report,
                         repo_root=repo_root,
                         kept_commands=commands,
                     )
@@ -8706,19 +9430,10 @@ def _main_impl(argv: Sequence[str] | None = None) -> int:
                         force_full=args.force_full,
                         manual_mode=args.manual_mode,
                     )
-                    router_report_path = args.router_report
-                    if router_report_path is not None:
-                        if not router_report_path.is_absolute():
-                            router_report_path = repo_root / router_report_path
-                        router_report_path.parent.mkdir(parents=True, exist_ok=True)
-                        router_report_path.write_text(
-                            json.dumps(
-                                router_result.to_json_dict(),
-                                indent=2,
-                                sort_keys=True,
-                            )
-                            + "\n",
-                            encoding="utf-8",
+                    if args.router_report is not None:
+                        publish_router_report(
+                            _write_json_report, args.router_report,
+                            repo_root=repo_root, payload=router_result.to_json_dict(),
                         )
                     print(
                         "QTT_CHANGED_AREA_ROUTER_MODE "
@@ -8738,8 +9453,8 @@ def _main_impl(argv: Sequence[str] | None = None) -> int:
                             router_result=router_result,
                         )
                 else:
-                    _write_full_validation_router_report(
-                        args.router_report,
+                    publish_router_report(
+                        _write_full_validation_router_report, args.router_report,
                         repo_root=repo_root,
                         phase=args.phase,
                         commands=commands,
@@ -8758,6 +9473,8 @@ def _main_impl(argv: Sequence[str] | None = None) -> int:
                             print(failure, file=sys.stderr, flush=True)
                         return 2
                 execution_plan = _prepare_execution_plan(commands)
+                if pending_router_publication_error is not None:
+                    raise pending_router_publication_error
                 if active_run_paths is not None:
                     _publish_active_plan_provenance(args.phase, execution_plan)
                 if _run_commands_accepts_repo_root():
@@ -8805,6 +9522,22 @@ def _finalize_validation_run(
                  or _RUN_COMMANDS_SUPERVISION["pending"])):
         supervision = _RUN_COMMANDS_SUPERVISION
     try:
+        if supervision is not None:
+            candidate = supervision.get("candidate_custody")
+            if type(candidate) is _ValidationCandidateCustodyV1:
+                failure = candidate.failure
+                if failure is not None and all(failure is not error for error in supervision["errors"]):
+                    supervision["errors"].append(failure)
+                if (_invocation_requires_retention_v1(supervision)
+                        and (_RUN_COMMANDS_SUPERVISION is None or
+                             (not _RUN_COMMANDS_SUPERVISION["pending"]
+                              and not _invocation_requires_retention_v1(_RUN_COMMANDS_SUPERVISION)))):
+                    _RUN_COMMANDS_SUPERVISION = supervision
+        if supervision is not None and _scan_inputs_require_retention_v1(supervision):
+            if (_RUN_COMMANDS_SUPERVISION is None or
+                    not (_RUN_COMMANDS_SUPERVISION["pending"] or
+                         _invocation_requires_retention_v1(_RUN_COMMANDS_SUPERVISION))):
+                _RUN_COMMANDS_SUPERVISION = supervision
         # Revalidate before cleanup, not merely in the post-cleanup report.
         if supervision is not None:
             try:
@@ -8857,9 +9590,50 @@ def _finalize_validation_run(
                     or _ACTIVE_PREFLIGHT_ASSEMBLY_V1.plan is not expected_plan):
                 raise ValueError("finalizer lost original preflight assembly identity")
             _ACTIVE_PREFLIGHT_ASSEMBLY_V1.settling()
+        if not termination_unproven:
+            try:
+                _settle_scan_inputs_v1(supervision, run_paths, phase, expected_plan)
+            except (OSError, RuntimeError, ValueError) as error:
+                print("ENGVR_PREPUBLICATION_CUSTODY_FAILED: " + str(error), file=sys.stderr, flush=True)
+                result = 1
+        if (not termination_unproven and supervision is not None and not supervision['pending']
+                and not _scan_inputs_require_retention_v1(supervision)
+                and (_RUN_COMMANDS_SUPERVISION is None or
+                    not _RUN_COMMANDS_SUPERVISION['pending'] and
+                    not _scan_inputs_require_retention_v1(_RUN_COMMANDS_SUPERVISION))):
+            try:
+                _settle_native_candidate_resources_v1(supervision, run_paths, phase, expected_plan)
+            except (OSError, RuntimeError, ValueError) as error:
+                print("ENGVR_PREPUBLICATION_CUSTODY_FAILED: " + str(error), file=sys.stderr, flush=True)
+                result = 1
+        if not termination_unproven:
+            try:
+                _settle_mapper_occurrences_v1(supervision, run_paths, phase, expected_plan, receipts)
+            except (OSError, RuntimeError, ValueError) as error:
+                print("ENGVR_PREPUBLICATION_CUSTODY_FAILED: " + str(error), file=sys.stderr, flush=True)
+                result = 1
+        if (not termination_unproven and not _invocation_requires_retention_v1(supervision)
+                and not _invocation_requires_retention_v1(_RUN_COMMANDS_SUPERVISION)):
+            try:
+                _settle_validation_candidate_v1(supervision, run_paths, phase, expected_plan)
+            except (OSError, RuntimeError, ValueError) as error:
+                print("ENGVR_PREPUBLICATION_CUSTODY_FAILED: " + str(error), file=sys.stderr, flush=True)
+                result = 1
+        candidate_unsettled = (_invocation_requires_retention_v1(supervision)
+            or _invocation_requires_retention_v1(_RUN_COMMANDS_SUPERVISION))
+        if candidate_unsettled:
+            if (_RUN_COMMANDS_SUPERVISION is None or
+                    (not _RUN_COMMANDS_SUPERVISION["pending"]
+                     and not _invocation_requires_retention_v1(_RUN_COMMANDS_SUPERVISION))):
+                _RUN_COMMANDS_SUPERVISION = supervision
+            result = 1
         cleanup_state = "NOT_RUN"
-        if termination_unproven:
-            cleanup_state = "SKIPPED_PROCESS_TERMINATION_UNPROVEN"
+        if termination_unproven or candidate_unsettled:
+            cleanup_state = ("SKIPPED_PROCESS_TERMINATION_UNPROVEN" if termination_unproven
+                             else "FAIL_SCAN_INPUT_CUSTODY_UNRESOLVED" if
+                                 (_scan_inputs_require_retention_v1(supervision) or
+                                  _scan_inputs_require_retention_v1(_RUN_COMMANDS_SUPERVISION))
+                             else "FAIL_CANDIDATE_CUSTODY_UNRESOLVED")
             try:
                 atomic_write_json(
                     run_paths.evidence_root / "cleanup.json",
@@ -8916,6 +9690,9 @@ def _finalize_validation_run(
             else "PASS"
         )
         custody_error: ValidationReliabilityError | None = None
+        from tools.validation_reliability import _MAPPER_FINAL_EVIDENCE_V1
+        final_mapper_proof = None if supervision is None else supervision.get('mapper_final_review')
+        final_mapper_token = _MAPPER_FINAL_EVIDENCE_V1.set(final_mapper_proof)
         try:
             validate_complete_run_evidence(
                 run_paths,
@@ -8942,6 +9719,8 @@ def _finalize_validation_run(
             custody_error = exc
             print(str(exc), file=sys.stderr, flush=True)
             result = 1
+        finally:
+            _MAPPER_FINAL_EVIDENCE_V1.reset(final_mapper_token)
         completion = ValidationCompletionReceiptV1(
             run_id=run_paths.run_id,
             phase=phase,
@@ -8981,7 +9760,33 @@ def _finalize_validation_run(
         return result, cleanup_state, completion
     except BaseException as exc:
         if supervision is not None:
-            supervision["errors"].append(exc)
+            if _scan_inputs_require_retention_v1(supervision):
+                if supervision.get("scan_settlement_error") is None:
+                    supervision["scan_settlement_error"] = exc
+                if (_RUN_COMMANDS_SUPERVISION is None or
+                        not (_RUN_COMMANDS_SUPERVISION["pending"] or
+                             _invocation_requires_retention_v1(_RUN_COMMANDS_SUPERVISION))):
+                    _RUN_COMMANDS_SUPERVISION = supervision
+            candidate = supervision.get("candidate_custody")
+            if (type(candidate) is _ValidationCandidateCustodyV1 and candidate.baseline is not None
+                    and not (candidate.state == "RESTORED_VERIFIED" and candidate.failure is None
+                             and candidate._settled_snapshot is candidate.baseline
+                             and candidate.active_occurrence is None and not candidate.permitted_since_barrier)):
+                if supervision.get("candidate_settlement_error") is None:
+                    supervision["candidate_settlement_error"] = exc
+                if (_RUN_COMMANDS_SUPERVISION is None or
+                        (not _RUN_COMMANDS_SUPERVISION["pending"]
+                         and not _invocation_requires_retention_v1(_RUN_COMMANDS_SUPERVISION))):
+                    _RUN_COMMANDS_SUPERVISION = supervision
+            if all(exc is not error for error in supervision["errors"]):
+                supervision["errors"].append(exc)
+            if _invocation_requires_retention_v1(supervision):
+                if supervision.get("native_resource_settlement_error") is None:
+                    supervision["native_resource_settlement_error"] = exc
+                if (_RUN_COMMANDS_SUPERVISION is None or
+                        (not _RUN_COMMANDS_SUPERVISION["pending"]
+                         and not _invocation_requires_retention_v1(_RUN_COMMANDS_SUPERVISION))):
+                    _RUN_COMMANDS_SUPERVISION = supervision
             _scan_raise_errors(supervision["errors"])
         raise
 
@@ -8990,6 +9795,10 @@ def _main_owned(argv: Sequence[str] | None = None) -> int:
     global _RUN_COMMANDS_SUPERVISION
     if _RUN_COMMANDS_SUPERVISION is not None and _RUN_COMMANDS_SUPERVISION["pending"]:
         print("ENGVR_PROCESS_TERMINATION_FAILED: prior command custody is unresolved",
+              file=sys.stderr, flush=True)
+        return 1
+    if _invocation_requires_retention_v1(_RUN_COMMANDS_SUPERVISION):
+        print("ENGVR_PREPUBLICATION_CUSTODY_FAILED: prior candidate custody is unresolved",
               file=sys.stderr, flush=True)
         return 1
     raw_argv = list(sys.argv[1:] if argv is None else argv)
@@ -9057,6 +9866,8 @@ def _main_owned(argv: Sequence[str] | None = None) -> int:
         "receipt": None, "errors": [],
     }
     supervision = _RUN_COMMANDS_SUPERVISION
+    if _ORDINARY_CANDIDATE_FIRST_V1:
+        supervision["candidate_owner"] = (os.getpid(), threading.get_ident())
     _RUN_COMMANDS_ACTIVE_PATHS = run_paths
     _ACTIVE_SEMANTIC_CHANGED_PATHS = None
     _ACTIVE_CLASSIFIED_CHANGED_PATHS = None
@@ -9156,7 +9967,7 @@ def _main_owned(argv: Sequence[str] | None = None) -> int:
             _RUN_PROVENANCE_WRITTEN = previous_provenance_state
             _RUN_PROVENANCE_ATTEMPTED = previous_provenance_attempted
             _LAST_EXPECTED_COMMAND_PLAN = previous_expected_plan
-            if not supervision["pending"]:
+            if not supervision["pending"] and not _invocation_requires_retention_v1(supervision):
                 _RUN_COMMANDS_SUPERVISION = previous_supervision
     if result == 0:
         print(f"{PHASE_SUCCESS_MARKER_PREFIX} phase={pre_args.phase}", flush=True)
@@ -9393,7 +10204,7 @@ def _scan_full_builder_argv(argv):
 def _scan_resolve_parent_capacity(paths, phase, plan):
     from tools.validation_reliability import _ScanLaunch
 
-    global _SCAN_CAPACITY_ATTEMPTED, _ACTIVE_SCAN_LAUNCH
+    global _SCAN_CAPACITY_ATTEMPTED, _ACTIVE_SCAN_LAUNCH, _RUN_COMMANDS_SUPERVISION
     from tools.validation_reliability import _rp5a_consumer_role_v1
     roles = {row.command_index: _rp5a_consumer_role_v1(row.argv, paths.repo_root) for row in plan}
     selected = {index for index, role in roles.items() if role is not None}
@@ -9405,20 +10216,98 @@ def _scan_resolve_parent_capacity(paths, phase, plan):
     _SCAN_CAPACITY_ATTEMPTED = True
     if not callable(_ACTIVE_SCAN_CAPACITY_SOURCE):
         raise ValueError("full RP5A plan requires an independently admitted scan capacity source")
-    launch = _ACTIVE_SCAN_CAPACITY_SOURCE(paths, phase, plan)
-    if (type(launch) is not _ScanLaunch or launch.paths is not paths or launch.plan is not plan
-            or launch.phase != phase or launch.process_id != os.getpid()
-            or launch.thread_id != threading.get_ident() or set(launch.profiles) != scanners
-            or set(launch.launch_inputs) != selected
-            or set(launch.reader_profiles) != selected or set(launch.reader_bases) != selected):
-        raise ValueError("capacity source did not retain exact original run/plan/input coverage")
-    from tools.validation_reliability import _scan_launch_wire_tables_v3
-    wire_binding = _scan_launch_wire_tables_v3(plan, launch.launch_inputs, launch.reader_profiles,
-                                               scanners, paths.repo_root)
-    if wire_binding != (launch.rp5a_launch_wire_versions, launch.rp5a_payload_byte_limits):
-        raise ValueError("capacity source changed the exact original wire/payload binding")
-    _ACTIVE_SCAN_LAUNCH = launch
-    return launch
+    from tools.validation_reliability import _SCAN_INPUT_ACQUISITION_V1, _ScanLaunchInput, _ScanLaunchIdentity
+    supervision = _RUN_COMMANDS_SUPERVISION
+    if supervision is None:
+        supervision = {"paths": paths, "phase": phase, "pending": False, "receipt": None, "errors": []}
+        _RUN_COMMANDS_SUPERVISION = supervision
+    if supervision["paths"] is not paths or supervision["phase"] != phase or supervision["pending"]:
+        raise ValueError("scan acquisition lost original invocation association")
+    if "scan_plan" in supervision:
+        raise ValueError("scan acquisition already has an original owner record")
+    supervision["scan_plan"] = plan
+    supervision["scan_owner"] = (os.getpid(), threading.get_ident())
+    supervision["scan_input_records"] = []
+    token = _SCAN_INPUT_ACQUISITION_V1.set((supervision, paths, phase, plan, supervision["scan_owner"]))
+    try:
+        launch = _ACTIVE_SCAN_CAPACITY_SOURCE(paths, phase, plan)
+        supervision["scan_launch"] = launch  # Retain every actual return before type/coverage checks.
+        from types import MappingProxyType
+        if type(launch) is _ScanLaunch:
+            original_inputs = getattr(launch, "_original_launch_inputs_v1", None)
+            if type(original_inputs) is not MappingProxyType:
+                raise ValueError("capacity source lost original launch/container association")
+            # A known ordinary issuer-owned mapping can be observed without
+            # invoking caller callbacks. Retain its actual input references
+            # before rejecting any outer or current-container substitution.
+            for value in original_inputs.values():
+                if type(value) is _ScanLaunchInput and not any(
+                        value is row["input"] for row in supervision["scan_input_records"]):
+                    supervision["scan_input_records"].append({"input": value, "registered": False,
+                        "identity": value.identity, "scratch_root": value.scratch_root,
+                        "deadline_ns": value.deadline_ns, "candidate_fence": value.original_check_candidate,
+                        "owner": (value.process_id, value.thread_id), "settlement_attempted": False,
+                        "settlement_error": None})
+            if (launch.paths is not paths or launch.plan is not plan or launch.phase != phase
+                    or launch.process_id != os.getpid() or launch.thread_id != threading.get_ident()
+                    or launch.launch_inputs is not original_inputs
+                    or launch.profiles is not getattr(launch, "_original_profiles_v1", None)):
+                raise ValueError("capacity source lost original launch/container association")
+            for value in original_inputs.values():
+                if (type(value) is _ScanLaunchInput and value.state == "PREPARING" and not value.entry_attempted
+                        and (value.process_id, value.thread_id) == supervision["scan_owner"]
+                        and type(value.identity) is _ScanLaunchIdentity
+                        and type(value.identity.command_index) is int
+                        and 1 <= value.identity.command_index <= len(plan)
+                        and value.identity == _ScanLaunchIdentity(paths.run_id, phase, value.identity.command_index,
+                            len(plan), plan[value.identity.command_index - 1].argv, str(paths.repo_root))
+                        and value.scratch_root != paths.process_root
+                        and value.scratch_root.is_relative_to(paths.process_root)):
+                    value._register_custody_v1()
+    except BaseException as error:
+        supervision["scan_admission_error"] = error
+        supervision["errors"].append(error)
+        raise
+    finally:
+        _SCAN_INPUT_ACQUISITION_V1.reset(token)
+    try:
+        if (type(launch) is not _ScanLaunch or launch.paths is not paths or launch.plan is not plan
+                or launch.phase != phase or launch.process_id != os.getpid()
+                or launch.thread_id != threading.get_ident() or set(launch.profiles) != scanners
+                or set(launch.launch_inputs) != selected
+                or set(launch.reader_profiles) != selected or set(launch.reader_bases) != selected):
+            raise ValueError("capacity source did not retain exact original run/plan/input coverage")
+        for index, value in launch.launch_inputs.items():
+            record = next((row for row in supervision["scan_input_records"] if row["input"] is value), None)
+            if (type(value) is not _ScanLaunchInput or type(index) is not int
+                    or record is None or not record["registered"] or value._custody_record is not record
+                    or (value.process_id, value.thread_id) != supervision["scan_owner"]
+                    or value.identity != _ScanLaunchIdentity(paths.run_id, phase, index, len(plan), plan[index - 1].argv,
+                        str(paths.repo_root))
+                    or (value.identity, value.scratch_root, value.deadline_ns) !=
+                       (record["identity"], record["scratch_root"], record["deadline_ns"])
+                    or value.check_candidate is not record["candidate_fence"]
+                    or value.original_check_candidate is not record["candidate_fence"]
+                    or value._callback_requires_retention_v1() or value.retention_errors
+                    or value.state != "PREPARING" or value.entry_attempted
+                    or value.path is not None or value.allocated_path is not None or value.reader is not None
+                    or value.writer is not None or value.process is not None or value.raw_descriptor is not None
+                    or value.raw_handle_owner is not None or value.snapshot_descriptor is not None
+                    or value.snapshot_acquiring or value.close_started or value.close_errors):
+                raise ValueError("capacity source must retain an unentered original input")
+        from tools.validation_reliability import _scan_launch_wire_tables_v3
+        wire_binding = _scan_launch_wire_tables_v3(plan, launch.launch_inputs, launch.reader_profiles,
+                                                   scanners, paths.repo_root)
+        if wire_binding != (launch.rp5a_launch_wire_versions, launch.rp5a_payload_byte_limits):
+            raise ValueError("capacity source changed the exact original wire/payload binding")
+        _ACTIVE_SCAN_LAUNCH = launch
+        return launch
+    except BaseException as error:
+        if supervision.get("scan_admission_error") is None:
+            supervision["scan_admission_error"] = error
+        if all(error is not previous for previous in supervision["errors"]):
+            supervision["errors"].append(error)
+        raise
 
 
 def _scan_dispatch_environment(parent, planned):
@@ -9938,13 +10827,96 @@ def _linux_preflight_controller_v1(repository,installation,interpreter,event,eve
         source.state='FAILED'
     runtime_fixture=getattr(query,'runtime_fixture_result',None)
     recovery_resources_settled=(source is None or all(row['complete'] for row in source.recovery_cases)) and (runtime_fixture is None or runtime_fixture['settled'] and runtime_fixture['removed'])
-    settled = (scope is None or not scope.service_created or scope.settled) and recovery_resources_settled
+    settled = ((scope is None or not scope.service_created or scope.settled) and recovery_resources_settled
+        and query.command_resources_settled_v1())
     exported = []
     export_bytes = export_entries = 0
     export_complete = False
     pre_export_deadline = min(grants['settlement_deadline_ns']-190*10**9, time.monotonic_ns()+30*10**9)
     post_export_deadline = None
     export_elapsed_ns = 0
+    export_owner=(os.getpid(),threading.get_ident())
+    export_io=dict(read_bytes=0,read_attempts=0,maximum_read_request=0,slots=[],observations=[],operations=[])
+    def export_resources_settled():
+        return ((os.getpid(),threading.get_ident())==export_owner
+            and all(o._mapper_slot_settled_v1(slot) for slot in export_io['slots'])
+            and all(not row['pending'] for row in export_io['operations']))
+    def export_publish(path,raw,*,control_mode=None):
+        operation=dict(kind='atomic-publication',path=str(path),pending=True)
+        export_io['operations'].append(operation)
+        # A failed shared publication has no invented writer-close proof.
+        result=o._atomic_write_bytes_v1(path,raw,control_mode=control_mode)
+        operation['pending']=False
+        return result
+    def export_read(path,*,deadline_ns,expected=None):
+        # Reuse the existing no-follow/descriptor owners. Windows pathname and
+        # handle versions are checked within their own APIs, never conflated.
+        errors=[]
+        pieces=[]
+        extent=0
+        slot=None
+        observation=dict(path=str(path),returned_bytes=0,complete=False,errors=[])
+        export_io['observations'].append(observation)
+        try:
+            o._preflight_require_v1((os.getpid(),threading.get_ident())==export_owner,
+                'LINUX_PREFLIGHT_EXPORT_OWNER')
+            o._local_unlinked_path(path.parent)
+            before=path.lstat()
+            path_version=o._scan_same_api_version(before)
+            o._preflight_require_v1(stat.S_ISREG(before.st_mode) and before.st_nlink==1
+                and not o._stat_is_reparse_point(before) and before.st_size<=67108864
+                and (expected is None or len(expected)==before.st_size),'LINUX_PREFLIGHT_EXPORT_REGULAR_OR_EXTENT')
+            slot=o._mapper_slot_v1(export_owner,export_io['slots'],path,'evidence export')
+            try:
+                o._mapper_slot_opened_v1(slot,o._open_regular_worktree_descriptor(path,nonblocking=True))
+            except BaseException as error:
+                o._mapper_slot_open_error_v1(slot,error)
+                raise
+            finally:slot['acquiring']=False
+            descriptor=slot['returned_fd']
+            os.set_inheritable(descriptor,False)
+            opened=os.fstat(descriptor)
+            handle_version=o._scan_same_api_version(opened)
+            o._preflight_require_v1(stat.S_ISREG(opened.st_mode) and opened.st_nlink==1
+                and not o._stat_is_reparse_point(opened) and o._same_observed_file(before,opened)
+                and before.st_mode==opened.st_mode and o._scan_same_api_version(path.lstat())==path_version,
+                'LINUX_PREFLIGHT_EXPORT_DESCRIPTOR')
+            while True:
+                o._preflight_require_v1((os.getpid(),threading.get_ident())==export_owner
+                    and time.monotonic_ns()<deadline_ns,'LINUX_PREFLIGHT_EXPORT_READ_DEADLINE')
+                request=min(65536,before.st_size-extent+1)
+                export_io['read_attempts']+=1
+                export_io['maximum_read_request']=max(export_io['maximum_read_request'],request)
+                chunk=os.read(descriptor,request)
+                o._preflight_require_v1(type(chunk) is bytes,'LINUX_PREFLIGHT_EXPORT_READ')
+                observation['returned_bytes']+=len(chunk)
+                export_io['read_bytes']+=len(chunk)
+                if not chunk:break
+                offset=extent
+                extent+=len(chunk)
+                # Charge all delivered bytes before bound/content rejection.
+                o._preflight_require_v1(len(chunk)<=request and extent<=before.st_size,
+                    'LINUX_PREFLIGHT_EXPORT_CHANGED')
+                if expected is None:pieces.append(chunk)
+                else:o._preflight_require_v1(chunk==expected[offset:extent],
+                    'LINUX_PREFLIGHT_EXPORT_BYTE_COMPARISON')
+            o._preflight_require_v1(extent==before.st_size
+                and o._scan_same_api_version(os.fstat(descriptor))==handle_version
+                and o._scan_same_api_version(path.lstat())==path_version,'LINUX_PREFLIGHT_EXPORT_CHANGED')
+        except BaseException as error:errors.append(error)
+        finally:
+            if slot is not None:o._mapper_close_slot_v1(slot,errors)
+        if not errors:
+            try:o._preflight_require_v1(o._scan_same_api_version(path.lstat())==path_version,
+                'LINUX_PREFLIGHT_EXPORT_CHANGED_AFTER_CLOSE')
+            except BaseException as error:errors.append(error)
+        observation['errors']=[repr(error) for error in errors]
+        try:o._scan_raise_errors(errors)
+        except BaseException as error:
+            error._linux_preflight_export_owner_v1=slot
+            raise
+        observation['complete']=True
+        return b''.join(pieces) if expected is None else None
     def export_file(path,destination,*,deadline_ns):
         nonlocal export_bytes,export_entries
         o._preflight_require_v1(time.monotonic_ns() < deadline_ns,
@@ -9957,26 +10929,11 @@ def _linux_preflight_controller_v1(repository,installation,interpreter,event,eve
         export_bytes += before.st_size
         o._preflight_require_v1(export_bytes <= 256*1024**2+1024**3,
             'LINUX_PREFLIGHT_EXPORT_ORIGINAL_EVIDENCE_CAPACITY')
-        descriptor = os.open(path,os.O_RDONLY|os.O_NOFOLLOW|os.O_CLOEXEC)
-        try:
-            opened = os.fstat(descriptor)
-            o._preflight_require_v1(o._scan_same_api_version(opened) == o._scan_same_api_version(before),
-                'LINUX_PREFLIGHT_EXPORT_DESCRIPTOR')
-            pieces,extent = [],0
-            while extent < before.st_size:
-                o._preflight_require_v1(time.monotonic_ns() < deadline_ns,
-                    'LINUX_PREFLIGHT_EXPORT_READ_DEADLINE')
-                chunk = os.read(descriptor,min(65536,before.st_size-extent))
-                o._preflight_require_v1(chunk,'LINUX_PREFLIGHT_EXPORT_TRUNCATED')
-                pieces.append(chunk)
-                extent += len(chunk)
-            o._preflight_require_v1(os.read(descriptor,1) == b'' and
-                o._scan_same_api_version(os.fstat(descriptor)) == o._scan_same_api_version(opened)
-                == o._scan_same_api_version(path.lstat()),'LINUX_PREFLIGHT_EXPORT_CHANGED')
-            raw = b''.join(pieces)
-        finally: os.close(descriptor)
-        o._atomic_write_bytes_v1(destination,raw,control_mode=0o444)
-        o._preflight_require_v1(destination.read_bytes() == raw,'LINUX_PREFLIGHT_EXPORT_BYTE_COMPARISON')
+        raw=export_read(path,deadline_ns=deadline_ns)
+        o._preflight_require_v1(o._scan_same_api_version(path.lstat())==o._scan_same_api_version(before),
+            'LINUX_PREFLIGHT_EXPORT_CHANGED')
+        export_publish(destination,raw,control_mode=0o444)
+        export_read(destination,deadline_ns=deadline_ns,expected=raw)
         exported.append(dict(source=str(path),destination=str(destination),bytes=len(raw)))
     def export_tree(path,destination,depth=0,*,deadline_ns):
         nonlocal export_entries
@@ -9984,19 +10941,36 @@ def _linux_preflight_controller_v1(repository,installation,interpreter,event,eve
             and time.monotonic_ns() < deadline_ns,'LINUX_PREFLIGHT_EXPORT_TREE_BOUND')
         before = _linux_preflight_export_directory_v1(path)
         destination.mkdir(mode=0o755,exist_ok=False)
-        with os.scandir(path) as stream:
+        operation=dict(kind='directory-stream',path=str(path),pending=True,
+            close_attempted=False,closed=False)
+        export_io['operations'].append(operation)
+        stream=None
+        errors=[]
+        try:
+            stream=os.scandir(path)
             for item in stream:
                 export_entries += 1
                 o._preflight_require_v1(export_entries <= 200000,'LINUX_PREFLIGHT_EXPORT_ENTRIES')
                 child = path/item.name
                 if item.is_dir(follow_symlinks=False): export_tree(child,destination/item.name,depth+1,deadline_ns=deadline_ns)
                 else: export_file(child,destination/item.name,deadline_ns=deadline_ns)
+        except BaseException as error:errors.append(error)
+        finally:
+            if stream is not None:
+                operation['close_attempted']=True
+                try:
+                    stream.close()
+                    operation['closed']=True
+                    operation['pending']=False
+                except BaseException as error:errors.append(error)
+        o._scan_raise_errors(errors)
         _linux_preflight_export_directory_v1(path,before)
     # The export roots are literal owned evidence surfaces, never the checkout,
     # index, installation, declaration payload or an arbitrary supplied pathname.
     report = dict(native_service_receipt=None if receipt is None else o._json_compatible(receipt),
         native_history=[] if scope is None else o._json_compatible(scope.history),
         native_queries=query.observations,query_attempts=query.attempts,query_output_bytes=query.retained,
+        administrative_supervision=query.command_supervision_evidence_v1(),
         capture_counts=capture_counts,capture_complete=False,runtime_fixture=runtime_fixture,
         basis_kind='NATIVE_IMMUTABLE_V2',native_basis_state=None if source is None else source.state,
         native_basis_capacity=capacity_v2,immutable_primitive=None if source is None else source.primitive,
@@ -10020,9 +10994,9 @@ def _linux_preflight_controller_v1(repository,installation,interpreter,event,eve
     try:
         raw,census_raw = _linux_preflight_metadata_bytes_v1(census,report,pre_export_deadline)
         if census is not None:
-            o._atomic_write_bytes_v1(control/'capture-census.json',census_raw)
+            export_publish(control/'capture-census.json',census_raw)
             export_file(control/'capture-census.json',export_root/'capture-census.json',deadline_ns=pre_export_deadline)
-        o._atomic_write_bytes_v1(control/'native-result.json',raw)
+        export_publish(control/'native-result.json',raw)
         export_file(control/'native-result.json',export_root/'native-result.json',deadline_ns=pre_export_deadline)
         for path,label in ((control/'source-transition.jsonl','source-transition-before-settlement.jsonl'),
                 (control/'declaration/source-basis.json','source-basis.json')):
@@ -10036,7 +11010,9 @@ def _linux_preflight_controller_v1(repository,installation,interpreter,event,eve
     finally:
         export_elapsed_ns += time.monotonic_ns()-pre_export_start
     # The single restoration entry uses only its prepaid settlement allocation.
-    # A failed export retains the sole journal/root; it does not spend rollback.
+    # Unresolved export resources retain the sole journal/root and cannot
+    # spend rollback. A safely closed byte failure still blocks root release.
+    settled = settled and query.command_resources_settled_v1() and export_resources_settled()
     if settled:
         if source is None:
             restored = True
@@ -10064,8 +11040,12 @@ def _linux_preflight_controller_v1(repository,installation,interpreter,event,eve
                 try:
                     destination = pathlib.Path(repository)/'.tmp'/('qtt-validation-'+kind)/'fast-preflight.json'
                     export_file(path,destination,deadline_ns=post_export_deadline)
-                except BaseException as exc: failures.append(exc)
+                except BaseException as exc:
+                    failures.append(exc)
+                    export_complete=False
         try:
+            o._preflight_require_v1(export_complete and query.command_resources_settled_v1() and export_resources_settled(),
+                'LINUX_PREFLIGHT_EXPORT_CUSTODY_UNRESOLVED')
             post_export_spent=time.monotonic_ns()-post_export_start
             export_elapsed_ns+=post_export_spent
             post_export_start=None
@@ -10083,6 +11063,8 @@ def _linux_preflight_controller_v1(repository,installation,interpreter,event,eve
                 for path in sorted((control/'native-evidence').iterdir()):
                     destination = export_root/'native'/path.name
                     if not destination.exists(): export_file(path,destination,deadline_ns=post_export_deadline)
+            o._preflight_require_v1(export_complete and query.command_resources_settled_v1()
+                and export_resources_settled(),'LINUX_PREFLIGHT_EXPORT_CUSTODY_UNRESOLVED')
             with query.owned_resource_phase():
                 if scope is not None:scope.remove_runtime(export_root)
                 for path,identity in ((control,control_identity),):
@@ -10096,6 +11078,16 @@ def _linux_preflight_controller_v1(repository,installation,interpreter,event,eve
         except BaseException as exc: failures.append(exc)
     if post_export_start is not None:export_elapsed_ns += time.monotonic_ns()-post_export_start
     cleanup = dict(source_accounting=None if source is None else source.evidence(),
+        administrative_resources_settled=query.command_resources_settled_v1(),
+        export_resources_settled=export_resources_settled(),
+        export_native_io=dict(read_bytes=export_io['read_bytes'],read_attempts=export_io['read_attempts'],
+            maximum_read_request=export_io['maximum_read_request'],observations=export_io['observations'],
+            operations=export_io['operations'],
+            acquisitions=[dict(path=str(slot['path']),open_unknown=slot['open_unknown'],
+                acquiring=slot['acquiring'],close_attempted=slot['close_attempted'],closed=slot['closed'],
+                raw_handle_debt=slot['raw_owner'] is not None,settled=o._mapper_slot_settled_v1(slot))
+                for slot in export_io['slots']]),
+        administrative_supervision=query.command_supervision_evidence_v1(),
         owned_resource_spent_ns=getattr(query,'resource_spent_ns',None),
         startup_output_bytes=getattr(query,'startup_output_bytes',None),
         startup_fixture_output_bytes=getattr(query,'startup_fixture_bytes',None),
@@ -10111,9 +11103,15 @@ def _linux_preflight_controller_v1(repository,installation,interpreter,event,eve
         owned_units_stopped=stopped,runtime_unmounted=unmounted,owned_roots_removed=removed,
         retained_root=None if removed else str(control),exported_files=exported,
         failures=[repr(e) for e in failures],query_attempts=query.attempts,query_output_bytes=query.retained)
-    try: o.atomic_write_json(export_root/'cleanup.json',cleanup)
+    # The cleanup snapshot precedes this separate external receipt write.
+    # Its actual publication result is observed in the retained parent stream.
+    cleanup_receipt_published=False
+    try:
+        o.atomic_write_json(export_root/'cleanup.json',cleanup)
+        cleanup_receipt_published=True
     except BaseException as exc: failures.append(exc)
     print(json.dumps(dict(linux_native_export=str(export_root),cleanup=cleanup,
+        cleanup_receipt_published=cleanup_receipt_published,
         complete_size_census=False if census is None else census['complete_size_census'],
         capacity=capacity),default=str),flush=True)
     return 0 if not failures and receipt is not None and receipt.failure_class is None and receipt.native_exit_code == 0 else 1
@@ -10215,6 +11213,14 @@ def main(argv: Sequence[str] | None = None, *, scan_capacity_source=None, candid
     global _ACTIVE_MAPPER_OCCURRENCES_V1
     global _ACTIVE_MAPPER_READ_PROFILES_V1, _ACTIVE_MAPPER_READ_SOURCE_V1, _MAPPER_READ_SOURCE_ATTEMPTED
     global _ACTIVE_SCAN_CAPACITY_SOURCE, _ACTIVE_SCAN_LAUNCH, _SCAN_CAPACITY_ATTEMPTED, _ACTIVE_CANDIDATE_SOURCE
+    if _RUN_COMMANDS_SUPERVISION is not None and _RUN_COMMANDS_SUPERVISION["pending"]:
+        print("ENGVR_PROCESS_TERMINATION_FAILED: prior command custody is unresolved",
+              file=sys.stderr, flush=True)
+        return 1
+    if _invocation_requires_retention_v1(_RUN_COMMANDS_SUPERVISION):
+        print("ENGVR_PREPUBLICATION_CUSTODY_FAILED: prior candidate custody is unresolved",
+              file=sys.stderr, flush=True)
+        return 1
     linux = _linux_preflight_selected_v1(sys.argv[1:] if argv is None else list(argv),
         (scan_capacity_source,candidate_source,mapper_read_source))
     if linux is not None:

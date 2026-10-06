@@ -34,6 +34,8 @@ from typing import BinaryIO, Callable, ContextManager, Iterable, Iterator, Mappi
 
 
 _COMMAND_PROJECTION_V1 = ContextVar("_COMMAND_PROJECTION_V1", default=None)
+# A scoped registration binding, not native capacity or cleanup authority.
+_SCAN_INPUT_ACQUISITION_V1 = ContextVar("_SCAN_INPUT_ACQUISITION_V1", default=None)
 
 
 @contextmanager
@@ -696,6 +698,18 @@ def _same_observed_file(
     )
 
 
+@dataclass(slots=True)
+class _WorktreeRawHandleOwnerV1:
+    """The original acquired Windows handle; no close retry is exposed."""
+    handle_value: int
+    path: Path
+    process_id: int
+    thread_id: int
+    transferred: bool = False
+    close_attempted: bool = False
+    closed: bool = False
+
+
 def _open_regular_worktree_descriptor(path: Path, *, nonblocking: bool = False) -> int:
     flags = os.O_RDONLY | int(getattr(os, "O_BINARY", 0))
     if os.name != "nt":
@@ -711,6 +725,7 @@ def _open_regular_worktree_descriptor(path: Path, *, nonblocking: bool = False) 
     from ctypes import wintypes
     import msvcrt
 
+    flags |= int(getattr(os, "O_NOINHERIT", 0))
     kernel32 = ctypes.WinDLL("kernel32", use_last_error=True)
     create_file = kernel32.CreateFileW
     create_file.argtypes = (
@@ -731,8 +746,11 @@ def _open_regular_worktree_descriptor(path: Path, *, nonblocking: bool = False) 
     open_existing = 3
     open_reparse_point = 0x00200000
     sequential_scan = 0x08000000
+    raw_owner = _WorktreeRawHandleOwnerV1(0, path, os.getpid(), threading.get_ident())
+    lexical_path = str(path)
+    invalid_handle = ctypes.c_void_p(-1).value
     handle = create_file(
-        str(path),
+        lexical_path,
         generic_read,
         share_read_write_delete,
         None,
@@ -740,16 +758,28 @@ def _open_regular_worktree_descriptor(path: Path, *, nonblocking: bool = False) 
         open_reparse_point | sequential_scan,
         None,
     )
-    invalid_handle = ctypes.c_void_p(-1).value
-    handle_value = int(handle) if handle is not None else 0
-    if handle_value == invalid_handle:
+    if handle is None or handle == invalid_handle:
         error_code = ctypes.get_last_error()
         raise OSError(error_code, ctypes.FormatError(error_code), str(path))
+    raw_owner.handle_value = handle
     try:
-        return msvcrt.open_osfhandle(handle_value, flags)
-    except BaseException:
-        close_handle(handle)
+        handle_value = int(handle)
+        raw_owner.handle_value = handle_value
+        descriptor = msvcrt.open_osfhandle(handle_value, flags)
+    except BaseException as transfer_error:
+        raw_owner.close_attempted = True
+        try:
+            if not close_handle(handle):
+                raise ctypes.WinError(ctypes.get_last_error())
+        except BaseException as close_error:
+            error = BaseExceptionGroup("worktree descriptor transfer and native close failures",
+                                       [transfer_error, close_error])
+            error._worktree_raw_handle_owner_v1 = raw_owner
+            raise error
+        raw_owner.closed = True
         raise
+    raw_owner.transferred = True
+    return descriptor
 
 
 def _regular_worktree_source(
@@ -6117,6 +6147,8 @@ def supervise_command(
                             or execution_deadline_ns != launch_input.deadline_ns
                             or selected_environment != launch_input.environment):
                         raise ValueError("preflight launch lacks its original bounded projection")
+                if type(launch_input) is _ScanLaunchInput:
+                    launch_input._begin_supervision_v1()
                 original_stdin = launch_input._claim(
                     run_id=run_id, phase=phase, command_index=command_index,
                     argv=selected_argv, cwd=receipt_cwd)
@@ -6143,16 +6175,22 @@ def supervise_command(
                         new_process_group=True,
                     ),
                 )
+            if type(launch_input) is _ScanLaunchInput:
+                launch_input._process_acquired_v1(process)
             pid = process.pid
         except Exception as exc:
             owned = getattr(exc, 'owned_process', None)
             if linux_scope is not None and type(owned) is _LinuxPreflightProcessV1 and owned is linux_scope.process:
                 process = owned
+                if type(launch_input) is _ScanLaunchInput:
+                    launch_input._process_acquired_v1(process)
                 pid = process.pid
                 linux_start_failed = True
             if (job_scope is not None and type(owned) is _WindowsJobProcessV1
                     and owned is job_scope.process and owned._info.process):
                 process = owned
+                if type(launch_input) is _ScanLaunchInput:
+                    launch_input._process_acquired_v1(process)
                 pid = process.pid
             if process is not None and job_scope is None and linux_scope is None:
                 raise
@@ -6168,10 +6206,14 @@ def supervise_command(
             if (type(linux_scope) is _LinuxPreflightScopeV1 and type(owned) is _LinuxPreflightProcessV1
                     and owned is linux_scope.process):
                 process = owned
+                if type(launch_input) is _ScanLaunchInput:
+                    launch_input._process_acquired_v1(process)
                 pid = process.pid
             if (job_scope is not None and type(owned) is _WindowsJobProcessV1
                     and owned is job_scope.process and owned._info.process):
                 process = owned
+                if type(launch_input) is _ScanLaunchInput:
+                    launch_input._process_acquired_v1(process)
                 pid = process.pid
             if process is not None:
                 if job_scope is not None or type(linux_scope) is _LinuxPreflightScopeV1:
@@ -6402,6 +6444,8 @@ def supervise_command(
             output_observation=bounded_observation,
             **(_COMMAND_PROJECTION_V1.get() or {}),
         )
+        if type(launch_input) is _ScanLaunchInput:
+            launch_input._observe_supervision_receipt_v1(receipt)
         try:
             atomic_write_json(receipt_path, receipt)
         except Exception as publication_error:
@@ -7239,31 +7283,66 @@ class _ScanLaunch:
     rp5a_payload_byte_limits: Mapping | None = field(default=None, kw_only=True)
 
     def __post_init__(self):
-        # Own the new mappings even when the caller retained a mappingproxy's
-        # backing dictionary. Preserve every original profile/basis object.
-        if (type(self.reader_profiles) is not MappingProxyType
-                or type(self.reader_bases) is not MappingProxyType):
-            raise TypeError("reader launch mappings must be immutable")
-        _scan_profile_projection(self.reader_profiles)
-        _rp5a_basis_map_projection_v1(self.reader_bases)
-        if set(self.reader_profiles) != set(self.reader_bases):
-            raise ValueError("reader launch mappings require exact coverage")
-        object.__setattr__(self, "reader_profiles", MappingProxyType(dict(self.reader_profiles)))
-        object.__setattr__(self, "reader_bases", MappingProxyType(dict(self.reader_bases)))
-        if (self.rp5a_launch_wire_versions is None) != (self.rp5a_payload_byte_limits is None):
-            raise ValueError("streamed launch tables must appear together")
-        if self.rp5a_launch_wire_versions is not None:
-            if (type(self.rp5a_launch_wire_versions) is not MappingProxyType
-                    or type(self.rp5a_payload_byte_limits) is not MappingProxyType):
-                raise TypeError("streamed launch tables must be immutable")
-            expected = _scan_launch_wire_tables_v3(self.plan, self.launch_inputs, self.reader_profiles,
-                                                   set(self.profiles), self.paths.repo_root)
-            if expected != (self.rp5a_launch_wire_versions, self.rp5a_payload_byte_limits):
-                raise ValueError("streamed launch tables differ from actual original inputs")
-            object.__setattr__(self, "rp5a_launch_wire_versions", MappingProxyType(dict(expected[0])))
-            object.__setattr__(self, "rp5a_payload_byte_limits", MappingProxyType(dict(expected[1])))
-        elif any(item.wire_version == 3 for item in self.launch_inputs.values()):
-            raise ValueError("streamed input requires its exact original launch tables")
+        binding = _SCAN_INPUT_ACQUISITION_V1.get()
+        supervision = None if binding is None else binding[0]
+        if supervision is not None:
+            if (supervision.get("scan_launch_construction_pending")
+                    or supervision.get("scan_launch_construction_error") is not None):
+                raise RuntimeError("original launch construction remains unresolved")
+            # Retain the actual partial object before copying either mapping.
+            # This is uncertainty/ownership bookkeeping, never admission.
+            supervision["scan_launch_construction"] = self
+            supervision["scan_launch_construction_pending"] = True
+        try:
+            # Retain issuer-owned ordinary mappings, preserving each original
+            # input/profile object. A returned proxy cannot delegate traversal
+            # to a subsequently substituted caller mapping. No new wire field.
+            owned_inputs = MappingProxyType(dict(self.launch_inputs))
+            object.__setattr__(self, "launch_inputs", owned_inputs)
+            object.__setattr__(self, "_original_launch_inputs_v1", owned_inputs)
+            for value in owned_inputs.values():
+                if type(value) is _ScanLaunchInput:
+                    _ScanLaunchInput._register_custody_v1(value, retention_only=True)
+            owned_profiles = MappingProxyType(dict(self.profiles))
+            object.__setattr__(self, "profiles", owned_profiles)
+            object.__setattr__(self, "_original_profiles_v1", owned_profiles)
+            # Own the new mappings even when the caller retained a mappingproxy's
+            # backing dictionary. Preserve every original profile/basis object.
+            if (type(self.reader_profiles) is not MappingProxyType
+                    or type(self.reader_bases) is not MappingProxyType):
+                raise TypeError("reader launch mappings must be immutable")
+            _scan_profile_projection(self.reader_profiles)
+            _rp5a_basis_map_projection_v1(self.reader_bases)
+            if set(self.reader_profiles) != set(self.reader_bases):
+                raise ValueError("reader launch mappings require exact coverage")
+            object.__setattr__(self, "reader_profiles", MappingProxyType(dict(self.reader_profiles)))
+            object.__setattr__(self, "reader_bases", MappingProxyType(dict(self.reader_bases)))
+            if (self.rp5a_launch_wire_versions is None) != (self.rp5a_payload_byte_limits is None):
+                raise ValueError("streamed launch tables must appear together")
+            if self.rp5a_launch_wire_versions is not None:
+                if (type(self.rp5a_launch_wire_versions) is not MappingProxyType
+                        or type(self.rp5a_payload_byte_limits) is not MappingProxyType):
+                    raise TypeError("streamed launch tables must be immutable")
+                expected = _scan_launch_wire_tables_v3(self.plan, self.launch_inputs, self.reader_profiles,
+                                                       set(self.profiles), self.paths.repo_root)
+                if expected != (self.rp5a_launch_wire_versions, self.rp5a_payload_byte_limits):
+                    raise ValueError("streamed launch tables differ from actual original inputs")
+                object.__setattr__(self, "rp5a_launch_wire_versions", MappingProxyType(dict(expected[0])))
+                object.__setattr__(self, "rp5a_payload_byte_limits", MappingProxyType(dict(expected[1])))
+            elif any(item.wire_version == 3 for item in self.launch_inputs.values()):
+                raise ValueError("streamed input requires its exact original launch tables")
+        except BaseException as error:
+            if supervision is not None:
+                if supervision.get("scan_launch_construction_error") is None:
+                    supervision["scan_launch_construction_error"] = error
+                if all(error is not previous for previous in supervision["errors"]):
+                    supervision["errors"].append(error)
+            raise
+        else:
+            if supervision is not None:
+                if supervision.get("scan_launch_construction") is not self:
+                    raise RuntimeError("original launch construction association changed")
+                supervision["scan_launch_construction_pending"] = False
 
 
 def _prepare_scan_launch(paths, *, phase, plan, profiles, read_limits, deadline_ns, launch_inputs=None,
@@ -7309,6 +7388,14 @@ def _prepare_scan_launch(paths, *, phase, plan, profiles, read_limits, deadline_
         expected = _ScanLaunchIdentity(paths.run_id, phase, index, len(plan), plan[index - 1].argv, str(paths.repo_root))
         if type(original_input) is not _ScanLaunchInput or original_input.identity != expected:
             raise ValueError("original scan input differs from selected plan")
+        if (original_input.state != "PREPARING" or original_input.entry_attempted
+                or original_input.path is not None or original_input.allocated_path is not None
+                or original_input.reader is not None or original_input.writer is not None
+                or original_input.process is not None or original_input.raw_descriptor is not None
+                or original_input.raw_handle_owner is not None or original_input.snapshot_descriptor is not None
+                or original_input.close_started or original_input.close_errors
+                or (original_input.process_id, original_input.thread_id) != (os.getpid(), threading.get_ident())):
+            raise ValueError("original scan launch requires unentered inputs")
         if readers:
             if original_input.rp5a_read_basis is not bases[index] or original_input.parent_identity is not None:
                 raise ValueError("direct parent input lost original reader basis identity")
@@ -8012,13 +8099,32 @@ def _scan_snapshot_path_v3(carrier, root):
 
 
 @contextmanager
-def _scan_snapshot_descriptor_v3(carrier, root, check):
-    before = _scan_snapshot_path_v3(carrier, root)
+def _scan_snapshot_descriptor_v3(carrier, root, check, *, custody=None):
+    if custody is None:
+        # Preserve the unbound fence/helper path exactly.
+        before = _scan_snapshot_path_v3(carrier, root)
+    else:
+        if (type(custody) not in (_ScanLaunchInput, _ScanCandidateFence) or custody.snapshot_acquiring
+                or custody.snapshot_descriptor is not None or custody.raw_handle_owner is not None
+                or (custody.process_id, custody.thread_id) != (os.getpid(), threading.get_ident())):
+            raise RuntimeError("original snapshot acquisition is already owned or foreign")
+        custody.snapshot_acquiring = True
     descriptor = None
     errors = []
+    before = None if custody is not None else before
     try:
+        if custody is not None:
+            before = _scan_snapshot_path_v3(carrier, root)
         check()
-        descriptor = _open_regular_worktree_descriptor(carrier.snapshot_path, nonblocking=True)
+        try:
+            descriptor = _open_regular_worktree_descriptor(carrier.snapshot_path, nonblocking=True)
+        except BaseException as error:
+            if custody is not None:
+                custody.raw_handle_owner = getattr(error, "_worktree_raw_handle_owner_v1", None)
+            raise
+        if custody is not None:
+            custody.snapshot_descriptor = descriptor
+            custody.snapshot_close_attempted = False
         os.set_inheritable(descriptor, False)
         if _scan_same_api_version(os.fstat(descriptor)) != carrier.snapshot_version:
             raise ValueError("snapshot descriptor differs from original retained version")
@@ -8029,17 +8135,28 @@ def _scan_snapshot_descriptor_v3(carrier, root, check):
         errors.append(error)
     finally:
         if descriptor is not None:
+            if custody is not None:
+                custody.snapshot_close_attempted = True
             try:
                 os.close(descriptor)
             except BaseException as error:
                 errors.append(error)
+                if custody is not None:
+                    custody.close_errors.append(error)
+            else:
+                if custody is not None:
+                    custody.snapshot_descriptor = None
         try:
-            after = _scan_snapshot_path_v3(carrier, root)
-            if _scan_same_api_version(after) != _scan_same_api_version(before):
-                raise ValueError("snapshot pathname changed during/after close")
-            check()
+            if before is not None:
+                after = _scan_snapshot_path_v3(carrier, root)
+                if _scan_same_api_version(after) != _scan_same_api_version(before):
+                    raise ValueError("snapshot pathname changed during/after close")
+                check()
         except BaseException as error:
             errors.append(error)
+        finally:
+            if custody is not None:
+                custody.snapshot_acquiring = False
     _scan_raise_errors(errors)
 
 
@@ -8347,6 +8464,19 @@ class _ScanCandidateFence:
         self.process_id = os.getpid()
         self.thread_id = threading.get_ident()
         self.held = False
+        self.failure = None
+        self.source_descriptor = None
+        self.source_stream = None
+        self.directory_iterator = None
+        self.directory_acquiring = False
+        self.directory_close_attempted = False
+        self.source_close_attempted = False
+        self.source_acquiring = False
+        self.snapshot_descriptor = None
+        self.snapshot_close_attempted = False
+        self.snapshot_acquiring = False
+        self.raw_handle_owner = None
+        self.close_errors = []
         self.last_ns = _scan_deadline(deadline_ns)
         self.identities = {}
         _local_unlinked_path(self.root)
@@ -8355,6 +8485,84 @@ class _ScanCandidateFence:
             self._root_identity_v3 = observed.st_dev, observed.st_ino, observed.st_mode
             self._parent_identities_v3 = {}
             self._all_rows_v3 = self.rows
+
+    def _hold_failure_v1(self, error):
+        # Semantic failure is an original diagnostic, not resource debt or
+        # permission to release a live owner. Keep its first exact identity.
+        if self.failure is None:
+            self.failure = error
+        self.held = True
+
+    def _resources_pending_v1(self):
+        return bool(self.directory_acquiring or self.directory_iterator is not None or self.source_stream is not None
+            or self.source_acquiring or self.source_descriptor is not None
+            or self.snapshot_acquiring or self.snapshot_descriptor is not None
+            or self.raw_handle_owner is not None or self.close_errors)
+
+    def _open_source_v1(self, path, *, nonblocking=True):
+        if ((os.getpid(), threading.get_ident()) != (self.process_id, self.thread_id)
+                or self._resources_pending_v1()):
+            raise RuntimeError("original candidate source acquisition is already owned or foreign")
+        self.source_acquiring = True
+        try:
+            try:
+                descriptor = _open_regular_worktree_descriptor(path, nonblocking=nonblocking)
+            except BaseException as error:
+                self.raw_handle_owner = getattr(error, "_worktree_raw_handle_owner_v1", None)
+                raise
+            self.source_descriptor = descriptor
+            self.source_close_attempted = False
+            return descriptor
+        finally:
+            self.source_acquiring = False
+
+    def _close_source_v1(self):
+        if self.source_descriptor is None and self.source_stream is None:
+            return
+        if self.source_close_attempted:
+            _scan_raise_errors(self.close_errors or [RuntimeError("original candidate close is not retried")])
+        self.source_close_attempted = True
+        try:
+            if self.source_stream is None:
+                os.close(self.source_descriptor)
+            else:
+                self.source_stream.close()
+                if not self.source_stream.closed:
+                    raise RuntimeError("original source stream close did not prove release")
+        except BaseException as error:
+            self.close_errors.append(error)
+            raise
+        else:
+            self.source_descriptor = None
+            self.source_stream = None
+
+    @contextmanager
+    def _directory_entries_v1(self, path):
+        if ((os.getpid(), threading.get_ident()) != (self.process_id, self.thread_id)
+                or self._resources_pending_v1()):
+            raise RuntimeError("original candidate directory acquisition is already owned or foreign")
+        self.directory_acquiring = True
+        try:
+            entries = os.scandir(path)
+            self.directory_iterator = entries
+            self.directory_close_attempted = False
+        finally:
+            self.directory_acquiring = False
+        errors = []
+        try:
+            yield entries
+        except BaseException as error:
+            errors.append(error)
+        finally:
+            self.directory_close_attempted = True
+            try:
+                entries.close()
+            except BaseException as error:
+                self.close_errors.append(error)
+                errors.append(error)
+            else:
+                self.directory_iterator = None
+        _scan_raise_errors(errors)
 
     def _clock(self):
         if self.wire_version == 3 and (os.getpid(), threading.get_ident()) != (self.process_id, self.thread_id):
@@ -8371,7 +8579,7 @@ class _ScanCandidateFence:
         if (os.getpid(), threading.get_ident()) != (self.process_id, self.thread_id):
             raise ValueError("foreign candidate fence owner")
         if self.held:
-            raise ValueError("candidate fence is held")
+            raise ValueError("candidate fence is held") from self.failure
         try:
             self._clock()
             _local_unlinked_path(self.root)
@@ -8400,7 +8608,7 @@ class _ScanCandidateFence:
                     if not stat.S_ISDIR(before.st_mode):
                         raise ValueError("candidate directory changed kind")
                     names = []
-                    with os.scandir(path) as entries:
+                    with self._directory_entries_v1(path) as entries:
                         for entry in entries:
                             if len(names) >= len(row.children):
                                 raise ValueError("candidate directory gained a member")
@@ -8418,7 +8626,7 @@ class _ScanCandidateFence:
                     descriptor = None
                     errors = []
                     try:
-                        descriptor = _open_regular_worktree_descriptor(path, nonblocking=True)
+                        descriptor = self._open_source_v1(path)
                         opened = os.fstat(descriptor)
                         if _scan_file_identity(opened) != _scan_file_identity(before):
                             raise ValueError("candidate selected descriptor differs")
@@ -8443,7 +8651,7 @@ class _ScanCandidateFence:
                     finally:
                         if descriptor is not None:
                             try:
-                                os.close(descriptor)
+                                self._close_source_v1()
                             except BaseException as exc:
                                 errors.append(exc)
                     _scan_raise_errors(errors)
@@ -8451,8 +8659,8 @@ class _ScanCandidateFence:
                         raise ValueError("candidate file changed after close")
                 self._clock()
             self._clock()
-        except BaseException:
-            self.held = True
+        except BaseException as error:
+            self._hold_failure_v1(error)
             raise
         return None
 
@@ -8472,13 +8680,13 @@ class _ScanCandidateFence:
         actual_data = bytearray() if source_limit is not None else None
         expected_data = bytearray() if source_limit is not None else None
         try:
-            current = _open_regular_worktree_descriptor(path, nonblocking=True)
+            current = self._open_source_v1(path)
             opened = os.fstat(current)
             if _scan_file_identity(opened) != _scan_file_identity(before):
                 raise ValueError("streamed candidate selected descriptor differs")
             with ExitStack() as stack:
                 expected = (stack.enter_context(_scan_snapshot_descriptor_v3(
-                    row.content, self.snapshot_root, self._clock)) if self.surface_role == "sender" else None)
+                    row.content, self.snapshot_root, self._clock, custody=self)) if self.surface_role == "sender" else None)
                 offset = 0
                 while offset < expected_length:
                     chunk = _scan_v3_native_read(current, min(_SCAN_V3_CHUNK, expected_length - offset),
@@ -8519,7 +8727,7 @@ class _ScanCandidateFence:
         finally:
             if current is not None:
                 try:
-                    os.close(current)
+                    self._close_source_v1()
                 except BaseException as error:
                     errors.append(error)
             try:
@@ -8533,8 +8741,10 @@ class _ScanCandidateFence:
         return None
 
     def _check_v3(self, *, source_relative=None, source_limit=None):
-        if (os.getpid(), threading.get_ident()) != (self.process_id, self.thread_id) or self.held:
+        if (os.getpid(), threading.get_ident()) != (self.process_id, self.thread_id):
             raise ValueError("foreign or held streamed candidate fence")
+        if self.held:
+            raise ValueError("foreign or held streamed candidate fence") from self.failure
         acquired_source = None
         try:
             self._clock()
@@ -8572,7 +8782,7 @@ class _ScanCandidateFence:
                     if not stat.S_ISDIR(before.st_mode):
                         raise ValueError("candidate directory changed kind")
                     names = []
-                    with os.scandir(path) as entries:
+                    with self._directory_entries_v1(path) as entries:
                         for entry in entries:
                             self._clock()
                             if len(names) >= len(row.children):
@@ -8594,8 +8804,8 @@ class _ScanCandidateFence:
             if self.payload_lease is not None:
                 self.payload_lease._comparison_complete(full_initial=self.rows is self._all_rows_v3)
             self._clock()
-        except BaseException:
-            self.held = True
+        except BaseException as error:
+            self._hold_failure_v1(error)
             if self.payload_lease is not None:
                 self.payload_lease._hold()
             raise
@@ -8606,8 +8816,8 @@ class _ScanCandidateFence:
             return None
         try:
             self.payload_lease.close()
-        except BaseException:
-            self.held = True
+        except BaseException as error:
+            self._hold_failure_v1(error)
             raise
         return None
 
@@ -8646,19 +8856,56 @@ class _ScanCandidateFence:
         path = self.root / relative
         observed = path.lstat()
         data = bytearray()
+        errors = []
         try:
-            with _regular_worktree_source(path, observed).open() as stream:
-                while block := stream.read(min(65536, limit - len(data) + 1)):
-                    self._clock()
-                    self.remaining -= len(block)
-                    if self.remaining < 0 or len(data) + len(block) > limit:
-                        raise ValueError("source acquisition allowance exhausted")
-                    data.extend(block)
+            try:
+                current = os.lstat(path)
+            except OSError as error:
+                raise _WorktreeSurfaceChanged(f"worktree regular file disappeared before open: {path}") from error
+            if (not stat.S_ISREG(current.st_mode) or _stat_is_reparse_point(current)
+                    or not _same_observed_file(observed, current)):
+                raise _WorktreeSurfaceChanged(f"worktree file type or identity changed before open: {path}")
+            try:
+                descriptor = self._open_source_v1(path, nonblocking=False)
+            except OSError as error:
+                raise _WorktreeSurfaceChanged(f"worktree no-follow open failed: {path}: {type(error).__name__}") from error
+            opened = os.fstat(descriptor)
+            if (not stat.S_ISREG(opened.st_mode) or _stat_is_reparse_point(opened)
+                    or not _same_observed_file(current, opened)):
+                raise _WorktreeSurfaceChanged(f"worktree file changed between lstat and open: {path}")
+            self.source_stream = os.fdopen(descriptor, "rb", closefd=True)
+            self.source_descriptor = None
+            while block := self.source_stream.read(min(65536, limit - len(data) + 1)):
+                self._clock()
+                self.remaining -= len(block)
+                if self.remaining < 0 or len(data) + len(block) > limit:
+                    raise ValueError("source acquisition allowance exhausted")
+                data.extend(block)
             if bytes(data) != row.content:
                 raise ValueError("current source differs from original candidate frame")
-        except BaseException:
-            self.held = True
-            raise
+        except BaseException as error:
+            errors.append(error)
+        finally:
+            try:
+                self._close_source_v1()
+            except BaseException as error:
+                errors.append(error)
+            try:
+                try:
+                    final = os.lstat(path)
+                except OSError as error:
+                    raise _WorktreeSurfaceChanged(f"worktree regular file disappeared after read: {path}") from error
+                if (not stat.S_ISREG(final.st_mode) or _stat_is_reparse_point(final)
+                        or not _same_observed_file(observed, final)):
+                    raise _WorktreeSurfaceChanged(f"worktree file changed during bounded read: {path}")
+            except BaseException as error:
+                errors.append(error)
+        if errors:
+            try:
+                _scan_raise_errors(errors)
+            except BaseException as error:
+                self._hold_failure_v1(error)
+                raise
         return bytes(data), row.content
 
 
@@ -9090,6 +9337,7 @@ class _ScanLaunchInput:
         self.scratch_bytes = scratch_bytes
         self.remaining_reread = parent_frame_reread_bytes
         self.check_candidate = check_candidate
+        self.original_check_candidate = check_candidate
         self.process_id = os.getpid()
         self.thread_id = threading.get_ident()
         self.state = "PREPARING"
@@ -9099,7 +9347,26 @@ class _ScanLaunchInput:
         self.writer = None
         self.writer_close_attempted = False
         self.reader_close_attempted = False
+        self.raw_descriptor = None
+        self.raw_close_attempted = False
+        self.raw_handle_owner = None
+        self.allocated_path = None
+        self.close_started = False
+        self.frame_unlinked = False
+        self.close_errors = []
+        self.supervision_receipt = None
+        self.supervision_started = False
+        self.supervision_settled = False
+        self.finish_error = None
+        self.retention_errors = []
+        self.issued = False
+        self.snapshot_descriptor = None
+        self.snapshot_close_attempted = False
+        self.snapshot_acquiring = False
+        self._custody_record = None
         self.process = None
+        self.last_ns = None
+        self._register_custody_v1()
         self.last_ns = _scan_deadline(deadline_ns)
         self.payload = _scan_launch_payload(identity, candidate_files, limits=limits,
                                            candidate_read_bytes=candidate_read_bytes,
@@ -9120,13 +9387,122 @@ class _ScanLaunchInput:
                 or scratch_bytes < self.extent or parent_frame_reread_bytes < required_reads):
             raise ValueError("original launch input allocation cannot cover its measured lifetime")
 
-    def _check(self):
+    def _register_custody_v1(self, *, retention_only=False):
+        binding = _SCAN_INPUT_ACQUISITION_V1.get()
+        if binding is None:
+            return
+        supervision, paths, phase, plan, owner = binding
+        records = supervision["scan_input_records"]
+        record = next((row for row in records if row["input"] is self), None)
+        if record is None:
+            record = {"input": self, "registered": False, "identity": self.identity,
+                "scratch_root": self.scratch_root, "deadline_ns": self.deadline_ns,
+                "candidate_fence": self.original_check_candidate,
+                "owner": (self.process_id, self.thread_id), "settlement_attempted": False,
+                "settlement_error": None}
+            records.append(record)
+        if retention_only:
+            return  # No input/latch/stream mutation on a rejected entry.
+        if self._custody_record is not None and self._custody_record is not record:
+            raise ValueError("scan input has another original invocation owner")
+        # Retention precedes every fallible check; retention grants no release.
+        if (owner != (os.getpid(), threading.get_ident())
+                or record["owner"] != owner or supervision["paths"] is not paths
+                or supervision["phase"] != phase or supervision["scan_plan"] is not plan
+                or type(self.identity) is not _ScanLaunchIdentity
+                or type(self.identity.command_index) is not int
+                or not 1 <= self.identity.command_index <= len(plan)
+                or self.identity != _ScanLaunchIdentity(paths.run_id, phase,
+                    self.identity.command_index, len(plan), plan[self.identity.command_index - 1].argv,
+                    str(paths.repo_root))
+                or _rp5a_consumer_role_v1(self.identity.argv, paths.repo_root) is None
+                or type(self.deadline_ns) is not int
+                or self.scratch_root == paths.process_root
+                or not self.scratch_root.is_relative_to(paths.process_root)
+                or self.scratch_root.is_relative_to(paths.evidence_root)
+                or paths.evidence_root.is_relative_to(self.scratch_root)
+                or self.check_candidate is not record["candidate_fence"]
+                or self.original_check_candidate is not record["candidate_fence"]
+                or (record["identity"], record["scratch_root"], record["deadline_ns"])
+                   != (self.identity, self.scratch_root, self.deadline_ns)):
+            raise ValueError("scan input registration lost original invocation association")
+        for other in records:
+            value = other["input"]
+            if (value is not self and type(value) is _ScanLaunchInput
+                    and value.identity.command_index == self.identity.command_index
+                    and (value.entry_attempted or value.path is not None
+                         or value.raw_descriptor is not None or value.process is not None)):
+                raise ValueError("scan input occurrence already has an acquiring owner")
+        self._custody_record = record
+        record["registered"] = True
+
+    def _release_raw_descriptor_v1(self, body=None):
+        errors = [] if body is None else [body]
+        if self.raw_descriptor is not None:
+            if self.raw_close_attempted:
+                errors.extend(self.close_errors)
+                if not self.close_errors:
+                    errors.append(RuntimeError("raw launch descriptor release is not retried"))
+            else:
+                self.raw_close_attempted = True
+                try:
+                    os.close(self.raw_descriptor)
+                except BaseException as error:
+                    self.close_errors.append(error)
+                    errors.append(error)
+                else:
+                    self.raw_descriptor = None
+        _scan_raise_errors(errors)
+
+    def _begin_supervision_v1(self):
+        if ((os.getpid(), threading.get_ident()) != (self.process_id, self.thread_id)
+                or self.supervision_started or self.state != "READY"):
+            raise ValueError("launch input lacks its original unused supervision binding")
+        self.supervision_started = True
+
+    def _observe_supervision_receipt_v1(self, receipt):
+        # Retain the original observation before its fallible association checks.
+        # Neither a terminal poll nor CONSUMED settles actual supervision.
+        if self.supervision_receipt is not None and self.supervision_receipt is not receipt:
+            raise ValueError("launch input retains its first original supervision receipt")
+        self.supervision_receipt = receipt
+        self.supervision_settled = False
+        if ((os.getpid(), threading.get_ident()) != (self.process_id, self.thread_id)
+                or type(receipt) is not CommandExecutionReceiptV1
+                or (not self.supervision_started and not (self.state == "READY" and not self.issued
+                    and self.process is None and receipt.pid is None and receipt.start_failure_class is not None
+                    and not _command_requires_process_retention_v1(receipt)))
+                or (receipt.run_id, receipt.phase, receipt.command_index, receipt.argv, receipt.cwd)
+                   != (self.identity.run_id, self.identity.phase, self.identity.command_index,
+                       self.identity.argv, self.identity.repo_root)
+                or (receipt.pid is not None if self.process is None else receipt.pid != self.process.pid)):
+            raise ValueError("launch receipt lost original command/process identity")
+        self.supervision_settled = not _command_requires_process_retention_v1(receipt)
+
+    def _release_complete_v1(self):
+        return (self.state == "CLOSED" and self.frame_unlinked and self.close_started
+            and not self.close_errors and not self.retention_errors
+            and not self._callback_requires_retention_v1()
+            and self.raw_descriptor is None and self.raw_handle_owner is None
+            and self.snapshot_descriptor is None and not self.snapshot_acquiring
+            and (not self.supervision_started or self.supervision_settled)
+            and (self.writer is None or self.writer_close_attempted and self.writer.closed)
+            and (self.reader is None or self.reader_close_attempted and self.reader.closed))
+
+    def _callback_requires_retention_v1(self):
+        return (type(self.original_check_candidate) is _ScanCandidateFence
+                and self.original_check_candidate._resources_pending_v1())
+
+    def _check_owner_clock_v1(self):
         if (os.getpid(), threading.get_ident()) != (self.process_id, self.thread_id):
             raise ValueError("foreign launch input owner")
         now = _scan_deadline(self.deadline_ns)
         if now < self.last_ns:
             raise ValueError("launch input clock regressed")
         self.last_ns = now
+
+    def _check(self):
+        self._check_owner_clock_v1()
         if self.wire_version != 3:
             _scan_candidate_fence(self.check_candidate)
         if self.wire_version == 3 and hasattr(self, "directory_identity"):
@@ -9143,8 +9519,33 @@ class _ScanLaunchInput:
         if self.wire_version == 3:
             yield from self._parts_v3()
             return
+        yield from self._control_parts()
+
+    def _control_parts(self):
+        # Canonical fragments are pure encoding. Check the original owner and
+        # clock while batching them; physical I/O retains its full checks.
         yield self.length.to_bytes(4, "big")
-        yield from _scan_launch_parts(self.payload)
+        buffer = bytearray()
+        parts = iter(_scan_launch_parts(self.payload))
+        while True:
+            self._check_owner_clock_v1()
+            try:
+                part = next(parts)
+            except StopIteration:
+                break
+            offset = 0
+            while offset < len(part):
+                self._check_owner_clock_v1()
+                take = min(_SCAN_V3_CHUNK - len(buffer), len(part) - offset)
+                buffer.extend(part[offset:offset + take])
+                offset += take
+                if len(buffer) == _SCAN_V3_CHUNK:
+                    yield bytes(buffer)
+                    buffer.clear()
+        # An encoding failure retains only the actual emitted prefix. Never
+        # flush an unfinished buffer from a failure or cleanup handler.
+        if buffer:
+            yield bytes(buffer)
 
     def _compare(self):
         if self.wire_version == 3:
@@ -9187,23 +9588,11 @@ class _ScanLaunchInput:
             raise ValueError("streamed input cumulative acquisition allowance exhausted")
 
     def _parts_v3(self):
-        yield self.length.to_bytes(4, "big")
-        buffer = bytearray()
-        for part in _scan_launch_parts(self.payload):
-            offset = 0
-            while offset < len(part):
-                take = min(_SCAN_V3_CHUNK - len(buffer), len(part) - offset)
-                buffer.extend(part[offset:offset + take])
-                offset += take
-                if len(buffer) == _SCAN_V3_CHUNK:
-                    yield bytes(buffer)
-                    buffer.clear()
-        if buffer:
-            yield bytes(buffer)
+        yield from self._control_parts()
         for row in self.candidate_files:
             if row.kind != "FILE":
                 continue
-            with _scan_snapshot_descriptor_v3(row.content, self.snapshot_root, self._check) as descriptor:
+            with _scan_snapshot_descriptor_v3(row.content, self.snapshot_root, self._check, custody=self) as descriptor:
                 remaining = row.content.length
                 while remaining:
                     request = min(_SCAN_V3_CHUNK, remaining)
@@ -9296,27 +9685,28 @@ class _ScanLaunchInput:
     def __enter__(self):
         # Refuse duplicate entry before callbacks, allocation or cleanup. A
         # rejected nested entry must not close the original live owner's frame.
+        self._register_custody_v1(retention_only=True)
         if (os.getpid(), threading.get_ident()) != (self.process_id, self.thread_id):
             raise ValueError("foreign launch input owner")
         if self.state != "PREPARING" or self.entry_attempted:
             raise ValueError("launch input entry is single use")
         self.entry_attempted = True
         try:
+            self._register_custody_v1()
             self._check()
             directory = self.scratch_root.lstat()
             self.directory_identity = directory.st_dev, directory.st_ino, directory.st_mode
             descriptor, raw_path = tempfile.mkstemp(prefix="scan-launch-", dir=self.scratch_root)
+            self.raw_descriptor = descriptor
+            self.raw_close_attempted = False
+            self.allocated_path = raw_path
             self.path = Path(raw_path)
             try:
                 os.set_inheritable(descriptor, False)
                 self.writer = os.fdopen(descriptor, "wb", buffering=0)
+                self.raw_descriptor = None
             except BaseException as allocation_error:
-                errors = [allocation_error]
-                try:
-                    os.close(descriptor)
-                except BaseException as close_error:
-                    errors.append(close_error)
-                _scan_raise_errors(errors)
+                self._release_raw_descriptor_v1(allocation_error)
             written = 0
             if self.wire_version == 3:
                 written = self._write_v3()
@@ -9335,22 +9725,30 @@ class _ScanLaunchInput:
             self.writer.flush()
             os.fsync(self.writer.fileno())
             original = os.fstat(self.writer.fileno())
-            reader_fd = _open_regular_worktree_descriptor(self.path, nonblocking=True)
+            try:
+                reader_fd = _open_regular_worktree_descriptor(self.path, nonblocking=True)
+            except BaseException as acquisition_error:
+                self.raw_handle_owner = getattr(acquisition_error, "_worktree_raw_handle_owner_v1", None)
+                raise
+            self.raw_descriptor = reader_fd
+            self.raw_close_attempted = False
             try:
                 os.set_inheritable(reader_fd, False)
                 read_stat = os.fstat(reader_fd)
                 if _scan_file_identity(read_stat) != _scan_file_identity(original):
                     raise ValueError("launch readonly descriptor differs from original writer")
                 self.reader = os.fdopen(reader_fd, "rb", buffering=0)
+                self.raw_descriptor = None
             except BaseException as body:
-                errors = [body]
-                try:
-                    os.close(reader_fd)
-                except BaseException as close_error:
-                    errors.append(close_error)
-                _scan_raise_errors(errors)
+                self._release_raw_descriptor_v1(body)
             self.writer_close_attempted = True
-            self.writer.close()
+            try:
+                self.writer.close()
+                if not self.writer.closed:
+                    raise RuntimeError("launch writer close did not prove release")
+            except BaseException as close_error:
+                self.close_errors.append(close_error)
+                raise
             self.descriptor_version = _scan_same_api_version(os.fstat(self.reader.fileno()))
             self.path_version = _scan_same_api_version(self.path.lstat())
             if _scan_file_identity(os.fstat(self.reader.fileno())) != _scan_file_identity(self.path.lstat()):
@@ -9371,14 +9769,20 @@ class _ScanLaunchInput:
             raise ValueError("launch input does not belong to this original occurrence")
         self._compare()
         self.reader.seek(0)
+        self.issued = True
         self.state = "ISSUED"
         return self.reader
 
+    def _process_acquired_v1(self, process):
+        if self.process is not None and self.process is not process:
+            raise ValueError("launch input already retains its original process")
+        self.process = process
+
     def _attached(self, process):
+        self._process_acquired_v1(process)
         if self.state != "ISSUED" or type(process.pid) is not int or process.pid <= 0:
             self.state = "HELD"
             raise ValueError("launch input lacks actual process association")
-        self.process = process
         self.state = "ATTACHED"
 
     def _finished(self, process, native_exit):
@@ -9390,21 +9794,66 @@ class _ScanLaunchInput:
                 raise ValueError("child did not consume exact original input extent")
             self._compare()
             self.state = "CONSUMED"
-        except BaseException:
+        except BaseException as error:
+            # The supervisor may return a failed receipt with no bounded
+            # output projection. Retain this exact original terminal error
+            # without turning a settled semantic failure into resource debt.
+            if self.finish_error is None:
+                self.finish_error = error
             self.state = "HELD"
             raise
 
     def _close(self, body=None):
         errors = [] if body is None else [body]
-        if self.process is not None and self.process.poll() is None:
+        if (os.getpid(), threading.get_ident()) != (self.process_id, self.thread_id):
+            _scan_raise_errors(errors + [ValueError("foreign launch input owner")])
+        if self.close_started:
+            if self.state == "CLOSED" and not self.close_errors:
+                _scan_raise_errors(errors)
+                return
+            _scan_raise_errors(errors + self.close_errors + ([] if self.close_errors else
+                [RuntimeError("launch input settlement is not retried")]))
+        # A refused live-child release consumes no close attempt. The original
+        # same child's later terminal observation can release streams once;
+        # it does not make a held frame qualified or permit its unlink.
+        if self._callback_requires_retention_v1():
             self.state = "HELD"
-            errors.append(RuntimeError("live child retains original launch input custody"))
+            _scan_raise_errors(errors + self.original_check_candidate.close_errors +
+                ([] if self.original_check_candidate.close_errors else [RuntimeError("original candidate callback resource is unresolved")]))
+        if self.retention_errors:
+            _scan_raise_errors(errors + self.retention_errors)
+        if self.supervision_started and not self.supervision_settled:
+            self.state = "HELD"
+            _scan_raise_errors(errors + [RuntimeError("original supervision settlement is unproven")])
+        if self.process is not None:
+            try:
+                terminal = self.process.poll()
+            except BaseException as error:
+                self.state = "HELD"
+                self.retention_errors.append(error)
+                _scan_raise_errors(errors + [error])
+            if terminal is None:
+                self.state = "HELD"
+                _scan_raise_errors(errors + [RuntimeError("live child retains original launch input custody")])
+            if not self.supervision_started and self.state == "ATTACHED":
+                self.state = "HELD"
+                error = RuntimeError("original input consumption/termination remains unproven")
+                self.retention_errors.append(error)
+                _scan_raise_errors(errors + [error])
+        actual_receipt = self.supervision_receipt
+        if ((self.issued and self.process is None and
+                (actual_receipt is None or actual_receipt.pid is not None
+                 or actual_receipt.start_failure_class is None))
+                or actual_receipt is not None and _command_requires_process_retention_v1(actual_receipt)):
+            self.state = "HELD"
+            errors.append(RuntimeError("issued launch input has no original no-start proof"))
             _scan_raise_errors(errors)
+        self.close_started = True
         safe = self.path is not None and hasattr(self, "path_version")
         if self.wire_version == 3 and self.state == "HELD":
             safe = False
-            if body is None:
-                errors.append(ValueError("held streamed launch retains its original frame evidence"))
+        if self.wire_version == 3 and self.state == "HELD" and body is None:
+            errors.append(ValueError("held launch retains its original frame evidence"))
         if safe:
             try:
                 _local_unlinked_path(self.scratch_root)
@@ -9413,9 +9862,17 @@ class _ScanLaunchInput:
                     raise ValueError("launch scratch identity changed")
                 if _scan_same_api_version(self.path.lstat()) != self.path_version:
                     raise ValueError("launch input path changed before cleanup")
-            except BaseException as exc:
-                errors.append(exc)
+            except BaseException as error:
+                self.close_errors.append(error)
                 safe = False
+        if self.raw_descriptor is not None:
+            try:
+                self._release_raw_descriptor_v1()
+            except BaseException as error:
+                errors.append(error)
+                safe = False
+        if self.raw_handle_owner is not None or self.snapshot_descriptor is not None or self.close_errors:
+            safe = False
         for role in ("writer", "reader"):
             stream = getattr(self, role)
             attempted = role + "_close_attempted"
@@ -9423,18 +9880,21 @@ class _ScanLaunchInput:
                 setattr(self, attempted, True)
                 try:
                     stream.close()
-                except BaseException as exc:
-                    errors.append(exc)
+                    if not stream.closed:
+                        raise RuntimeError("launch stream close did not prove release")
+                except BaseException as error:
+                    self.close_errors.append(error)
                     safe = False
-        if safe:
+        if safe and not self.close_errors:
             try:
                 if _scan_same_api_version(self.path.lstat()) != self.path_version:
                     raise ValueError("launch input path changed at unlink")
                 self.path.unlink()
+                self.frame_unlinked = True
                 self.state = "CLOSED"
-            except BaseException as exc:
-                errors.append(exc)
-        _scan_raise_errors(errors)
+            except BaseException as error:
+                self.close_errors.append(error)
+        _scan_raise_errors(errors + self.close_errors)
 
     def __exit__(self, exc_type, exc, traceback):
         self._close(exc)
@@ -9655,6 +10115,88 @@ def _mapper_profile_v1(profile):
             'target_byte_reservation_envelope': target, 'basis_byte_reservation_envelope': reference,
             'is_authentic_resource_grant': False}
 
+def _mapper_error_contains_v1(outer, inner):
+    return outer is inner or isinstance(outer, BaseExceptionGroup) and any(
+        _mapper_error_contains_v1(member, inner) for member in outer.exceptions)
+
+
+def _mapper_append_error_v1(errors, error):
+    if not any(_mapper_error_contains_v1(previous, error) for previous in errors):
+        errors.append(error)
+
+
+def _mapper_slot_v1(owner, slots, path, kind):
+    if owner != (os.getpid(), threading.get_ident()) or type(slots) is not list:
+        raise ValueError('MAPPER_DESCRIPTOR_OWNER_CHANGED')
+    slot = dict(owner=owner, path=path, kind=kind, acquiring=True,
+                fd=None, returned_fd=None, raw_owner=None, open_unknown=True, close_attempted=False,
+                closed=False, close_error=None, error=None)
+    slots.append(slot)
+    return slot
+
+
+def _mapper_slot_opened_v1(slot, fd):
+    # Preserve the actual returned object before validating it. Invalid results
+    # are debt, never permission to close a guessed numerical descriptor.
+    slot['fd'] = slot['returned_fd'] = fd
+    if type(fd) is not int or fd < 0:
+        raise ValueError('MAPPER_UNVERIFIED_DESCRIPTOR_RESULT')
+    slot['open_unknown'] = False
+
+
+def _mapper_slot_open_error_v1(slot, error):
+    slot['error'] = error
+    raw = getattr(error, '_worktree_raw_handle_owner_v1', None)
+    if raw is not None:
+        slot['raw_owner'] = raw
+
+
+def _mapper_slot_settled_v1(slot):
+    keys = {'owner', 'path', 'kind', 'acquiring', 'fd', 'returned_fd',
+            'raw_owner', 'open_unknown', 'close_attempted', 'closed', 'close_error', 'error'}
+    if (type(slot) is not dict or set(slot) != keys
+            or slot['owner'] != (os.getpid(), threading.get_ident())
+            or any(type(slot[k]) is not bool for k in
+                   ('acquiring', 'open_unknown', 'close_attempted', 'closed'))):
+        return False
+    if slot['acquiring'] or slot['open_unknown'] or slot['raw_owner'] is not None or slot['close_error'] is not None:
+        return False
+    if slot['returned_fd'] is None:
+        return slot['fd'] is None and not slot['close_attempted'] and not slot['closed']
+    return (type(slot['returned_fd']) is int and slot['returned_fd'] >= 0
+            and slot['fd'] is None and slot['close_attempted'] and slot['closed'])
+
+
+def _mapper_close_slot_v1(slot, errors):
+    if _mapper_slot_settled_v1(slot):
+        return
+    if (type(slot) is dict and slot.get('owner') == (os.getpid(), threading.get_ident())
+            and slot.get('acquiring') is False and slot.get('open_unknown') is True
+            and slot.get('returned_fd') is None):
+        if isinstance(slot.get('error'), BaseException): _mapper_append_error_v1(errors, slot['error'])
+        return  # Unknown attempted acquisition has no invented close operand.
+    if (type(slot) is not dict or set(slot) != {'owner', 'path', 'kind', 'acquiring', 'fd', 'returned_fd', 'raw_owner', 'open_unknown', 'close_attempted', 'closed', 'close_error', 'error'}
+            or slot.get('owner') != (os.getpid(), threading.get_ident())
+            or slot.get('acquiring') is not False or slot.get('raw_owner') is not None
+            or type(slot.get('returned_fd')) is not int or slot['returned_fd'] < 0
+            or slot.get('fd') is not slot['returned_fd']):
+        _mapper_append_error_v1(errors, ValueError('MAPPER_DESCRIPTOR_OWNER_CHANGED'))
+        return
+    if slot['close_attempted']:
+        _mapper_append_error_v1(errors, slot['close_error'] or
+                                ValueError('MAPPER_DESCRIPTOR_CLOSE_NOT_RETRIED'))
+        return
+    slot['close_attempted'] = True
+    try:
+        os.close(slot['returned_fd'])
+    except BaseException as error:
+        slot['close_error'] = error
+        _mapper_append_error_v1(errors, error)
+    else:
+        slot['fd'] = None
+        slot['closed'] = True
+
+
 class _MapperDiskBasisV1:
     """Pinned original-generation, disk-backed comparator for one process/thread.
 
@@ -9663,50 +10205,87 @@ class _MapperDiskBasisV1:
     supplies an independently bound identity; the profile cannot approve itself.
     """
     def __init__(self, profile, *, expected_position, expected_generation, clock, native_observation=None):
-        import threading
-        self.profile = copy.deepcopy(profile)
-        self.shape = _mapper_profile_v1(self.profile)
-        _mapper_need_v1(type(expected_position) is int and expected_position == profile['position']
-             and type(expected_generation) is str and expected_generation == profile['generation'], 'BASIS_WRONG_OCCURRENCE_OR_GENERATION')
-        _mapper_need_v1(callable(clock), 'BASIS_CLOCK_REQUIRED')
-        self.clock = clock; self.last_clock = None; self.owner = (os.getpid(), threading.get_ident())
+        owner = (os.getpid(), threading.get_ident())
+        # Admission precedes reset and failure cleanup. A rejected re-init must
+        # neither close a first frame nor consume a foreign owner's opportunity.
+        if self.__dict__.get('owner', owner) != owner:
+            raise ValueError('BASIS_FOREIGN_OWNER')
+        if 'initialization_attempted' in self.__dict__:
+            raise ValueError('BASIS_INITIALIZATION_NOT_RETRIED')
+        self.initialization_attempted = True
+        self.owner = owner
+        self.initializing = True
         self.busy = False; self.poisoned = False; self.closed = False
+        self.close_in_progress = False
+        self.fd = None; self.basis_slot = None; self.target_slot = None
+        self._original_basis_slot_v1 = None; self._original_target_slot_v1 = None
+        self.native_acquisition = None; self._original_native_acquisition_v1 = None; self._original_native_exit_v1 = None; self.native_entered = False
+        self.native_enter_attempted = False; self.native_exit_attempted = False
+        self.native_close_error = None; self.last_owned_error = None
+        self.slots = []; self._original_slots_v1 = self.slots
+        self.native_observation = native_observation
+        self._original_native_observation_v1 = native_observation
+        self._original_native_basis_v1 = (native_observation.native_basis
+            if type(native_observation) is _PreflightObservationV1 else None)
+        self.profile = None; self.shape = None; self.clock = clock; self.last_clock = None
         self.counters = {k: 0 for k in ('attempts', 'target_bytes', 'basis_bytes', 'metadata_calls', 'target_read_calls', 'basis_read_calls')}
         self.reserved = {'target_bytes': 0, 'basis_bytes': 0}; self.by_path = {}; self.events = []
-        self.root = Path(profile['root']); self.basis = Path(profile['basis'])
-        self.entries = {row['path']: row for row in self.profile['entries']}
-        self.native_observation = native_observation
-        if native_observation is not None:
-            _mapper_need_v1(type(native_observation) is _PreflightObservationV1
-                and type(native_observation.native_basis) is _LinuxImmutableSourceBasisV2
-                and native_observation.root == self.root
-                and native_observation.native_basis.root == self.root
-                and native_observation.run_id == native_observation.native_basis.run_id
-                and profile['deadline_ns'] <= min(native_observation.deadline_ns,
-                    native_observation.native_basis.deadline_ns),
-                'BASIS_NATIVE_OBSERVATION_OWNER')
-            native_observation.check()
-        self.fd = None
-        self._check()
         try:
+            self.profile = copy.deepcopy(profile)
+            self.shape = _mapper_profile_v1(self.profile)
+            _mapper_need_v1(type(expected_position) is int and expected_position == profile['position']
+                 and type(expected_generation) is str and expected_generation == profile['generation'], 'BASIS_WRONG_OCCURRENCE_OR_GENERATION')
+            _mapper_need_v1(callable(clock), 'BASIS_CLOCK_REQUIRED')
+            self.root = Path(profile['root']); self.basis = Path(profile['basis'])
+            self.entries = {row['path']: row for row in self.profile['entries']}
+            self.native_observation = native_observation
+            if native_observation is not None:
+                _mapper_need_v1(type(native_observation) is _PreflightObservationV1
+                    and type(native_observation.native_basis) is _LinuxImmutableSourceBasisV2
+                    and native_observation.root == self.root
+                    and native_observation.native_basis.root == self.root
+                    and native_observation.run_id == native_observation.native_basis.run_id
+                    and profile['deadline_ns'] <= min(native_observation.deadline_ns,
+                        native_observation.native_basis.deadline_ns), 'BASIS_NATIVE_OBSERVATION_OWNER')
+                native_observation.check()
+            self._check()
             self._chains()
             _mapper_need_v1(self._stamp(self.basis) == profile['basis_lstat'], 'BASIS_INITIAL_PATH_CHANGED')
-            self.fd = os.open(self.basis, os.O_RDONLY | getattr(os, 'O_BINARY', 0) | getattr(os, 'O_NOFOLLOW', 0))
+            slot = self.basis_slot = _mapper_slot_v1(self.owner, self.slots, self.basis, 'basis')
+            self._original_basis_slot_v1 = slot
+            try:
+                fd = os.open(self.basis, os.O_RDONLY | getattr(os, 'O_BINARY', 0) | getattr(os, 'O_NOFOLLOW', 0))
+                _mapper_slot_opened_v1(slot, fd)
+                self.fd = fd
+            except BaseException as error:
+                _mapper_slot_open_error_v1(slot, error)
+                raise
+            finally:
+                slot['acquiring'] = False
             os.set_inheritable(self.fd, False)
             _mapper_need_v1(self._stamp(fd=self.fd) == profile['basis_fstat'], 'BASIS_INITIAL_HANDLE_CHANGED')
             self._basis_current()
         except BaseException as primary:
             self.poisoned = True
-            if self.fd is not None:
-                fd,self.fd = self.fd,None
-                try: os.close(fd)
-                except BaseException as secondary:
-                    raise BaseExceptionGroup('basis initialization and close failed', [primary, secondary])
-            raise
+            errors = [primary]
+            if self.basis_slot is not None:
+                if self.basis_slot is not self._original_basis_slot_v1 or self.fd is not self.basis_slot['fd']:
+                    errors.append(ValueError('BASIS_DESCRIPTOR_OWNER_CHANGED'))
+                else:
+                    _mapper_close_slot_v1(self.basis_slot, errors)
+                if _mapper_slot_settled_v1(self.basis_slot): self.fd = None
+            try: _scan_raise_errors(errors)
+            except BaseException as retained:
+                self.last_owned_error = retained
+                raise
+        finally:
+            self.initializing = False
 
     def _check(self):
-        import threading
         _mapper_need_v1((os.getpid(), threading.get_ident()) == self.owner, 'BASIS_FOREIGN_OWNER')
+        _mapper_need_v1(self.native_observation is self._original_native_observation_v1
+            and (self.native_observation is None or self.native_observation.native_basis is self._original_native_basis_v1),
+            "BASIS_NATIVE_SCOPE_OWNER_CHANGED")
         _mapper_need_v1(not self.closed and not self.poisoned, 'BASIS_SESSION_UNUSABLE')
         try:
             now = self.clock(); _mapper_int_v1(now, 'clock')
@@ -9721,11 +10300,14 @@ class _MapperDiskBasisV1:
 
     def _stat(self, path=None, fd=None):
         self._check()
+        if fd is not None:
+            basis, target = self._original_basis_slot_v1, self._original_target_slot_v1
+            _mapper_need_v1((basis is not None and self.basis_slot is basis and self.fd is fd and fd is basis['returned_fd']
+                or target is not None and self.target_slot is target and fd is target['returned_fd']), 'BASIS_DESCRIPTOR_OWNER_CHANGED')
         _mapper_need_v1(self.counters['metadata_calls'] < self.profile['limits']['metadata_calls'], 'BASIS_METADATA_EXHAUSTED')
         self.counters['metadata_calls'] += 1
         result = os.fstat(fd) if fd is not None else os.lstat(path)
-        self._check()
-        return result
+        self._check(); return result
 
     def _stamp(self, path=None, fd=None):
         return _mapper_stamp_v1(self._stat(path, fd))
@@ -9739,16 +10321,21 @@ class _MapperDiskBasisV1:
 
     def _basis_current(self):
         self._chains()
+        _mapper_need_v1(self.basis_slot is self._original_basis_slot_v1 and self.basis_slot is not None and self.fd is self.basis_slot['returned_fd']
+            and not self.basis_slot['close_attempted'], 'BASIS_DESCRIPTOR_OWNER_CHANGED')
         _mapper_need_v1(self._stamp(self.basis) == self.profile['basis_lstat'] and self._stamp(fd=self.fd) == self.profile['basis_fstat'], 'BASIS_CHANGED')
 
     def _read(self, fd, request, lane):
         self._check()
+        slot = self._original_target_slot_v1 if lane == 'target' else self._original_basis_slot_v1 if lane == 'basis' else None
+        _mapper_need_v1((lane == 'target' and self.target_slot is slot or lane == 'basis' and self.basis_slot is slot and self.fd is fd), 'BASIS_DESCRIPTOR_OWNER_CHANGED')
+        _mapper_need_v1(slot is not None and fd is slot['returned_fd']
+            and not slot['close_attempted'], 'BASIS_DESCRIPTOR_OWNER_CHANGED')
         _mapper_need_v1(type(request) is int and request > 0, 'BASIS_POSITIVE_READ_REQUIRED')
         self.counters[lane + '_read_calls'] += 1
         data = os.read(fd, request)
         if type(data) is not bytes:
-            if self.native_observation is not None:
-                self.native_observation.measurement_complete = False
+            if self.native_observation is not None: self.native_observation.measurement_complete = False
             self.poisoned = True; raise ValueError('BASIS_UNKNOWN_DELIVERED_BYTES')
         self.counters[lane + '_bytes'] = _mapper_add_v1(self.counters[lane + '_bytes'], len(data))
         if self.native_observation is not None:
@@ -9765,38 +10352,120 @@ class _MapperDiskBasisV1:
     def compare_bytes(self, name):
         return self._acquire(name, lambda value: None, decode_text=False)
 
+    def _native_retained_v1(self):
+        observation, basis = self._original_native_observation_v1, self._original_native_basis_v1
+        if (self.native_observation is not observation
+                or type(observation) is not _PreflightObservationV1
+                or observation.native_basis is not basis
+                or type(basis) is not _LinuxImmutableSourceBasisV2
+                or (basis.pid, basis.thread) != self.owner):
+            return True
+        return _LinuxImmutableSourceBasisV2._resources_require_retention_v2(basis)
+
+    def _close_target_v1(self, errors):
+        slot = self._original_target_slot_v1
+        if self.target_slot is not slot:
+            _mapper_append_error_v1(errors, ValueError('BASIS_TARGET_SLOT_OWNER_CHANGED'))
+            return
+        if slot is None: return
+        if self.native_acquisition is not self._original_native_acquisition_v1:
+            _mapper_append_error_v1(errors, ValueError('BASIS_NATIVE_SCOPE_OWNER_CHANGED'))
+            return
+        if self.native_acquisition is None:
+            _mapper_close_slot_v1(slot, errors)
+            return
+        if not self.native_entered:
+            # A failed generator entry owns its own original finally. Never
+            # manufacture an __exit__ or close its fd outside that owner.
+            try: retained = self._native_retained_v1()
+            except BaseException as error:
+                _mapper_append_error_v1(errors, error); retained = True
+            if not retained:
+                slot['open_unknown'] = False
+                self.native_acquisition = self._original_native_acquisition_v1 = None
+                self._original_native_exit_v1 = None
+            return
+        if self.native_exit_attempted:
+            _mapper_append_error_v1(errors, self.native_close_error or
+                ValueError('BASIS_NATIVE_EXIT_NOT_RETRIED'))
+            return
+        observation, basis = self._original_native_observation_v1, self._original_native_basis_v1
+        if (self.native_observation is not observation
+                or type(observation) is not _PreflightObservationV1
+                or observation.native_basis is not basis
+                or type(basis) is not _LinuxImmutableSourceBasisV2
+                or (basis.pid, basis.thread) != self.owner):
+            _mapper_append_error_v1(errors, ValueError('BASIS_NATIVE_SCOPE_OWNER_CHANGED'))
+            return
+        self.native_exit_attempted = True
+        close_error = None
+        try: self._original_native_exit_v1(None, None, None)
+        except BaseException as error:
+            close_error = error; _mapper_append_error_v1(errors, error)
+        try: retained = self._native_retained_v1()
+        except BaseException as error:
+            _mapper_append_error_v1(errors, error); retained = True
+        if self.native_acquisition is not self._original_native_acquisition_v1 or self.target_slot is not slot:
+            _mapper_append_error_v1(errors, ValueError('BASIS_NATIVE_SCOPE_OWNER_CHANGED')); retained = True
+        if retained:
+            self.native_close_error = close_error or ValueError('BASIS_NATIVE_EXIT_UNSETTLED')
+            slot['close_error'] = self.native_close_error
+            _mapper_append_error_v1(errors, self.native_close_error)
+        else:
+            slot['close_attempted'] = True; slot['closed'] = True; slot['fd'] = None
+            self.native_acquisition = self._original_native_acquisition_v1 = None
+            self._original_native_exit_v1 = None
+
     def _acquire(self, name, parser, *, decode_text):
-        _mapper_portable_relative_v1(name); self._check()
-        _mapper_need_v1(not self.busy and name in self.entries and callable(parser), 'BASIS_REENTRANT_OR_UNBOUND_READ')
-        row = self.entries[name]; limits = self.profile['limits']; n = row['length']
-        _mapper_need_v1(self.counters['attempts'] < limits['attempts'] and self.by_path.get(name, 0) < row['attempt_limit'], 'BASIS_ATTEMPTS_EXHAUSTED')
-        self.counters['attempts'] += 1; self.by_path[name] = self.by_path.get(name, 0) + 1
-        event = {'path':name,'ordinal':self.counters['attempts'],'outcome':'BEFORE_OPEN', 'target_bytes':0,'basis_bytes':0,'descriptor_closed':False}
-        self.events.append(event); before = dict(self.counters)
-        self.busy = True; target_fd = None; primary = None; native_acquisition = None
+        _mapper_need_v1(self.owner == (os.getpid(), threading.get_ident()), 'BASIS_FOREIGN_OWNER')
+        _mapper_need_v1(not self.initializing and not self.close_in_progress and not self.busy
+            and self.native_acquisition is None and self.native_close_error is None
+            and (self.target_slot is None or _mapper_slot_settled_v1(self.target_slot)),
+            'BASIS_REENTRANT_OR_UNBOUND_READ')
+        _mapper_portable_relative_v1(name)
+        _mapper_need_v1(name in self.entries and callable(parser), 'BASIS_REENTRANT_OR_UNBOUND_READ')
+        event = None; before = None; primary = None; errors = []
+        self.busy = True
         try:
+            before = dict(self.counters)
+            self._check()
+            row = self.entries[name]; limits = self.profile['limits']; n = row['length']
+            _mapper_need_v1(self.counters['attempts'] < limits['attempts'] and self.by_path.get(name, 0) < row['attempt_limit'], 'BASIS_ATTEMPTS_EXHAUSTED')
+            self.counters['attempts'] += 1; self.by_path[name] = self.by_path.get(name, 0) + 1
+            event = {'path':name,'ordinal':self.counters['attempts'],'outcome':'BEFORE_OPEN', 'target_bytes':0,'basis_bytes':0,'descriptor_closed':False}
+            self.events.append(event)
             _mapper_need_v1(n + 1 <= limits['single_target_buffer'], 'BASIS_SINGLE_BUFFER_EXHAUSTED')
             for lane, amount in (('target_bytes', n + 1), ('basis_bytes', n)):
                 _mapper_need_v1(amount <= limits[lane] - self.reserved[lane], 'BASIS_RESERVATION_EXHAUSTED')
             self.reserved['target_bytes'] += n + 1; self.reserved['basis_bytes'] += n
             if self.native_observation is not None:
                 self.native_observation.reserve('attempts')
-                _mapper_need_v1(2 * n + 1 <= self.native_observation.remaining['bytes'],
-                    'BASIS_NATIVE_READ_ALLOWANCE')
+                _mapper_need_v1(2 * n + 1 <= self.native_observation.remaining['bytes'], 'BASIS_NATIVE_READ_ALLOWANCE')
                 self.native_observation.reserve('retained_bytes', n)
             self._basis_current(); self._chains(row)
             path = self.root.joinpath(*name.split('/'))
             _mapper_need_v1(self._stamp(path) == row['lstat'], 'BASIS_TARGET_GENERATION_CHANGED')
-            if self.native_observation is None:
-                target_fd = os.open(path, os.O_RDONLY | getattr(os,'O_BINARY',0) | getattr(os,'O_NOFOLLOW',0))
-            else:
-                native_acquisition = self.native_observation.native_basis.open_entry(name)
-                target_fd = native_acquisition.__enter__()
+            self.target_slot = slot = _mapper_slot_v1(self.owner, self.slots, path, 'target')
+            self._original_target_slot_v1 = slot
+            self.native_entered = self.native_enter_attempted = self.native_exit_attempted = False
+            try:
+                if self.native_observation is None:
+                    target_fd = os.open(path, os.O_RDONLY | getattr(os,'O_BINARY',0) | getattr(os,'O_NOFOLLOW',0))
+                else:
+                    self.native_acquisition = self.native_observation.native_basis.open_entry(name)
+                    self._original_native_acquisition_v1 = self.native_acquisition
+                    self._original_native_exit_v1 = self.native_acquisition.__exit__
+                    self.native_enter_attempted = True
+                    target_fd = self.native_acquisition.__enter__()
+                    self.native_entered = True
+                _mapper_slot_opened_v1(slot, target_fd)
+            except BaseException as error:
+                _mapper_slot_open_error_v1(slot, error); raise
+            finally: slot['acquiring'] = False
             os.set_inheritable(target_fd,False)
             _mapper_need_v1(self._stamp(fd=target_fd) == row['fstat'], 'BASIS_TARGET_HANDLE_CHANGED')
             os.lseek(self.fd, row['offset'], os.SEEK_SET)
-            data = bytearray(); remaining = n
-            event['outcome'] = 'READING'
+            data = bytearray(); remaining = n; event['outcome'] = 'READING'
             while remaining:
                 chunk = self._read(target_fd, min(self.profile['chunk_bytes'], remaining), 'target')
                 _mapper_need_v1(bool(chunk), 'BASIS_TARGET_TRUNCATED')
@@ -9807,52 +10476,97 @@ class _MapperDiskBasisV1:
                     _mapper_need_v1(expected == chunk[compared:compared+len(expected)], 'BASIS_BYTES_DIFFER')
                     compared += len(expected)
                 data.extend(chunk); remaining -= len(chunk)
-                if self.native_observation is not None:
-                    self.native_observation.observed['retained_bytes'] += len(chunk)
+                if self.native_observation is not None: self.native_observation.observed['retained_bytes'] += len(chunk)
             _mapper_need_v1(self._read(target_fd, 1, 'target') == b'', 'BASIS_TARGET_GREW')
             _mapper_need_v1(self._stamp(fd=target_fd) == row['fstat'] and self._stamp(path) == row['lstat'], 'BASIS_POSTREAD_TARGET_CHANGED')
             self._basis_current(); self._chains(row)
-            event['outcome']='DECODE'
-            text = (data.decode('utf-8', errors='strict').replace('\r\n','\n').replace('\r','\n')
-                    if decode_text else None)
-            self._check(); event['outcome']='PARSE'; result=parser(text); self._check()
-            # Parser is synchronous. It may not hand out a lazy dependency on fd.
+            event['outcome'] = 'DECODE'
+            text = (data.decode('utf-8', errors='strict').replace('\r\n','\n').replace('\r','\n') if decode_text else None)
+            self._check(); event['outcome'] = 'PARSE'; result = parser(text); self._check()
             self._basis_current(); self._chains(row)
             _mapper_need_v1(self._stamp(path) == row['lstat'], 'BASIS_TARGET_CHANGED_DURING_PARSE')
-            event['outcome']='RETURNED'; return result
-        except BaseException as exc:
-            primary=exc
-            if isinstance(exc,TimeoutError) or isinstance(exc,ValueError) and str(exc).startswith('BASIS_'):
-                self.poisoned=True
-            event['exception_type']=type(exc).__name__
-            event['reason']=str(exc) if str(exc).startswith('BASIS_') else 'ORIGINAL_DECODER_OR_PARSER_EXCEPTION'
-            raise
+            event['outcome'] = 'RETURNED'; return result
+        except BaseException as error:
+            primary = error; _mapper_append_error_v1(errors, error)
+            if isinstance(error,TimeoutError) or isinstance(error,ValueError) and str(error).startswith('BASIS_'): self.poisoned = True
+            if event is not None:
+                event['exception_type'] = type(error).__name__
+                event['reason'] = str(error) if str(error).startswith('BASIS_') else 'ORIGINAL_DECODER_OR_PARSER_EXCEPTION'
         finally:
-            event['target_bytes']=self.counters['target_bytes']-before['target_bytes']
-            event['basis_bytes']=self.counters['basis_bytes']-before['basis_bytes']
-            self.busy=False
-            if target_fd is not None:
-                try:
-                    if native_acquisition is None: os.close(target_fd)
-                    else: native_acquisition.__exit__(None, None, None)
-                    event['descriptor_closed']=True
-                except BaseException as close_error:
-                    self.poisoned=True
-                    if primary is not None: raise BaseExceptionGroup('read and target close failed',[primary,close_error])
-                    raise
-            if primary is None:
+            try:
+                if event is not None and before is not None:
+                    event['target_bytes'] = self.counters['target_bytes'] - before['target_bytes']
+                    event['basis_bytes'] = self.counters['basis_bytes'] - before['basis_bytes']
+            except BaseException as error: _mapper_append_error_v1(errors, error)
+            try: self._close_target_v1(errors)
+            except BaseException as error: _mapper_append_error_v1(errors, error)
+            settled = (self.native_acquisition is None and self._original_native_acquisition_v1 is None
+                and self.target_slot is self._original_target_slot_v1
+                and (self.target_slot is None or _mapper_slot_settled_v1(self.target_slot)))
+            if event is not None and self.target_slot is not None:
+                event['descriptor_closed'] = (settled and type(self.target_slot['returned_fd']) is int
+                    and self.target_slot['returned_fd'] >= 0 and self.target_slot['closed'])
+            if primary is None and not errors and settled:
                 try: self._check()
-                except BaseException:
-                    self.poisoned=True; event['outcome']='FINAL_CHECK_FAILED'; raise
+                except BaseException as error:
+                    self.poisoned = True
+                    if event is not None: event['outcome'] = 'FINAL_CHECK_FAILED'
+                    _mapper_append_error_v1(errors, error)
+            if settled: self.busy = False
+            if not settled and not errors: errors.append(ValueError('BASIS_TARGET_CUSTODY_UNRESOLVED'))
+            try: _scan_raise_errors(errors)
+            except BaseException as retained:
+                self.last_owned_error = retained
+                raise
+
+    def _resources_require_retention_v1(self):
+        if type(self) is not _MapperDiskBasisV1 or self.__dict__.get('owner') != (os.getpid(), threading.get_ident()): return True
+        flags = ('initialization_attempted','initializing','busy','closed','close_in_progress')
+        if any(type(self.__dict__.get(k)) is not bool for k in flags): return True
+        if self.initializing or self.busy or self.close_in_progress: return True
+        original_observation = self.__dict__.get('_original_native_observation_v1')
+        if original_observation is not None:
+            if (type(original_observation) is not _PreflightObservationV1
+                    or type(self.__dict__.get('_original_native_basis_v1')) is not _LinuxImmutableSourceBasisV2):
+                return True
+            try:
+                if _MapperDiskBasisV1._native_retained_v1(self): return True
+            except BaseException: return True
+        if (type(self.__dict__.get('slots')) is not list or self.slots is not self.__dict__.get('_original_slots_v1')
+                or self.__dict__.get('basis_slot') is not self.__dict__.get('_original_basis_slot_v1')
+                or self.__dict__.get('target_slot') is not self.__dict__.get('_original_target_slot_v1')
+                or self.__dict__.get('native_observation') is not self.__dict__.get('_original_native_observation_v1')
+                or (self.__dict__.get('_original_native_observation_v1') is not None
+                    and self._original_native_observation_v1.native_basis is not self.__dict__.get('_original_native_basis_v1'))
+                or any(not _mapper_slot_settled_v1(slot) for slot in self.slots)
+                or self.__dict__.get('native_acquisition') is not None
+                or self.__dict__.get('_original_native_acquisition_v1') is not None
+                or self.__dict__.get('native_close_error') is not None): return True
+        return self.__dict__.get('fd') is not None
 
     def close(self):
-        import threading
-        _mapper_need_v1((os.getpid(),threading.get_ident())==self.owner and not self.busy, 'BASIS_CLOSE_WITHOUT_OWNERSHIP')
-        if self.closed: return
-        self.closed=True
-        if self.fd is not None:
-            fd,self.fd=self.fd,None
-            os.close(fd)
+        _mapper_need_v1(self.__dict__.get('owner') == (os.getpid(), threading.get_ident()), 'BASIS_CLOSE_WITHOUT_OWNERSHIP')
+        _mapper_need_v1(type(self.__dict__.get('initializing')) is bool and not self.initializing
+            and not self.__dict__.get('close_in_progress', True), 'BASIS_CLOSE_WITHOUT_OWNERSHIP')
+        if self.busy or self.native_acquisition is not None or self.native_close_error is not None:
+            if self.last_owned_error is not None: raise self.last_owned_error
+            raise ValueError('BASIS_CLOSE_WITHOUT_OWNERSHIP')
+        if self.closed:
+            _mapper_need_v1(not _MapperDiskBasisV1._resources_require_retention_v1(self), 'BASIS_CLOSED_WITH_RESOURCE_DEBT')
+            return
+        self.close_in_progress = True
+        errors = []
+        try:
+            if self.basis_slot is not None:
+                _mapper_need_v1(self.basis_slot is self._original_basis_slot_v1 and self.fd is self.basis_slot['fd'], 'BASIS_DESCRIPTOR_OWNER_CHANGED')
+                _mapper_close_slot_v1(self.basis_slot, errors)
+                if _mapper_slot_settled_v1(self.basis_slot): self.fd = None
+            _scan_raise_errors(errors)
+            self.closed = True
+        except BaseException as error:
+            self.poisoned = True; self.last_owned_error = error; raise
+        finally: self.close_in_progress = False
+
 
 # Runtime records live under the existing validation evidence owner, never Git.
 _MAPPER_ACTIVATION_ENV_V1 = 'QTT_MAPPER_ACTIVATION_IDENTITY'
@@ -9935,7 +10649,7 @@ def _mapper_activation_identity_v1(text):
     return value
 
 
-def _mapper_read_activation_v1(template, identity, *, expected_raw=None, evidence_review=False):
+def _mapper_read_activation_v1(template, identity, *, expected_raw=None, evidence_review=False, _custody=None):
     """Bounded data read pinned by the original parent's launch environment."""
     template = _mapper_binding_v1(template)
     identity = _mapper_activation_identity_v1(identity)
@@ -9948,7 +10662,14 @@ def _mapper_read_activation_v1(template, identity, *, expected_raw=None, evidenc
     parents = _mapper_chain_v1(path.parent)
     if _mapper_stamp_v1(path.lstat()) != identity:
         raise ValueError('MAPPER_ACTIVATION_PATH_CHANGED')
-    fd = _open_regular_worktree_descriptor(path, nonblocking=True)
+    slots = [] if _custody is None else _custody['slots']
+    slot = _mapper_slot_v1((os.getpid(), threading.get_ident()), slots, path, 'activation-read')
+    try:
+        fd = _open_regular_worktree_descriptor(path, nonblocking=True)
+        _mapper_slot_opened_v1(slot, fd)
+    except BaseException as error:
+        _mapper_slot_open_error_v1(slot, error); raise
+    finally: slot['acquiring'] = False
     errors = []; raw = bytearray()
     try:
         opened = _mapper_stamp_v1(os.fstat(fd))
@@ -9966,8 +10687,7 @@ def _mapper_read_activation_v1(template, identity, *, expected_raw=None, evidenc
                 or _mapper_stamp_v1(path.lstat()) != identity):
             raise ValueError('MAPPER_ACTIVATION_READ_DRIFT')
     except BaseException as exc: errors.append(exc)
-    try: os.close(fd)
-    except BaseException as exc: errors.append(exc)
+    _mapper_close_slot_v1(slot, errors)
     _scan_raise_errors(errors)
     if _mapper_chain_v1(path.parent) != parents or _mapper_stamp_v1(path.lstat()) != identity:
         raise ValueError('MAPPER_ACTIVATION_AFTER_CLOSE_DRIFT')
@@ -9995,11 +10715,91 @@ class _MapperOccurrenceRecordV1:
     def binding(self):
         return _mapper_activation_record_v1(self.template(), json.loads(self.record_json))
 
-    def verify(self):
+    def verify(self, *, _custody=None):
         import threading
         if (os.getpid(), threading.get_ident()) != (self.process_id, self.thread_id):
             raise ValueError('MAPPER_ACTIVATION_FOREIGN_OWNER')
-        return _mapper_read_activation_v1(self.template(), self.identity, expected_raw=self.record_json, evidence_review=True)[0]
+        if _custody is not None:
+            _mapper_parent_record_v1(_custody, record=self)
+        return _mapper_read_activation_v1(self.template(), self.identity, expected_raw=self.record_json, evidence_review=True, _custody=_custody)[0]
+
+
+def _mapper_parent_record_v1(owned, *, record=None):
+    from tools.run_validation_gates import _ValidationCandidateCustodyV1
+    if type(owned) is not dict: raise ValueError('MAPPER_PARENT_RESOURCE_OWNER')
+    candidate = owned.get('candidate')
+    if (type(candidate) is not _ValidationCandidateCustodyV1
+            or owned.get('owner') != (os.getpid(), threading.get_ident())
+            or owned['owner'] != (candidate.process_id, candidate.thread_id)
+            or owned.get('plan') is not candidate.plan
+            or type(owned.get('index')) is not int
+            or not 1 <= owned['index'] <= len(candidate.plan)
+            or owned.get('entry') is not candidate.plan[owned['index'] - 1]
+            or type(owned.get('deadline_ns')) is not int
+            or owned['deadline_ns'] != candidate.deadline_ns
+            or type(getattr(candidate, '_original_mapper_custody_v1', None)) is not dict
+            or candidate._mapper_custody_v1 is not candidate._original_mapper_custody_v1
+            or candidate._original_mapper_custody_v1.get(owned['index']) is not owned
+            or type(owned.get('slots')) is not list
+            or owned['slots'] is not owned.get('original_slots')):
+        raise ValueError('MAPPER_PARENT_RESOURCE_OWNER')
+    if record is not None and owned.get('record') is not record:
+        raise ValueError('MAPPER_PARENT_RECORD_CHANGED')
+    return candidate
+
+
+def _mapper_parent_resources_retained_v1(candidate):
+    from tools.run_validation_gates import _ValidationCandidateCustodyV1
+    if type(candidate) is not _ValidationCandidateCustodyV1: return True
+    original = getattr(candidate, '_original_mapper_custody_v1', None)
+    if type(original) is not dict or candidate._mapper_custody_v1 is not original: return True
+    for owned in original.values():
+        try:
+            _mapper_parent_record_v1(owned)
+            if any(not _mapper_slot_settled_v1(slot) for slot in owned['slots']): return True
+            reader = owned['reader']
+            if reader is not None:
+                if type(reader) is not _MapperDiskBasisV1: return True
+                if _MapperDiskBasisV1._resources_require_retention_v1(reader): return True
+        except BaseException: return True
+    return False
+
+
+_MAPPER_FINAL_EVIDENCE_V1 = ContextVar('_MAPPER_FINAL_EVIDENCE_V1', default=None)
+
+
+def _mapper_final_review_association_v1(proof, paths, templates, records, receipts, *, candidate, plan, completed=True, allow_extension=False):
+    if (type(proof) is not dict or proof.get('paths') is not paths
+            or proof.get('owner') != (os.getpid(), threading.get_ident())
+            or proof.get('candidate') is not candidate or proof.get('plan') is not plan
+            or proof.get('profiles') is not templates or proof.get('records') is not records
+            or type(proof.get('receipts')) is not tuple
+            or (len(proof['receipts']) > len(receipts) if allow_extension else len(proof['receipts']) != len(receipts))
+            or any(old is not current for old, current in zip(proof['receipts'], receipts))
+            or type(proof.get('completed')) is not bool or type(proof.get('used')) is not bool
+            or proof['completed'] is not completed or type(proof.get('members')) is not dict
+            or type(proof.get('attempted_members')) is not set or type(records) is not dict):
+        raise ValueError('MAPPER_FINAL_REVIEW_ASSOCIATION')
+    if (candidate is None or candidate.plan is not plan or candidate.root != paths.repo_root
+            or (candidate.process_id, candidate.thread_id) != proof['owner']
+            or type(proof.get('deadline_ns')) is not int or proof['deadline_ns'] != candidate.deadline_ns
+            or _mapper_parent_resources_retained_v1(candidate)):
+        raise ValueError('MAPPER_FINAL_REVIEW_RESOURCE_UNSETTLED')
+    if completed and not allow_extension and set(proof['members']) != set(records):
+        raise ValueError('MAPPER_FINAL_REVIEW_MEMBERS')
+    if not set(proof['members']) <= set(records): raise ValueError('MAPPER_FINAL_REVIEW_MEMBERS')
+    if proof['attempted_members'] != set(proof['members']):
+        raise ValueError('MAPPER_FINAL_REVIEW_ATTEMPT_UNSETTLED')
+    for key, member in proof['members'].items():
+        value = records.get(key)
+        if (type(value) is not _MapperOccurrenceRecordV1 or type(member) is not tuple or len(member) != 6
+                or value is not member[0]
+                or (value.template_json, value.record_json, value.identity, value.process_id, value.thread_id) != member[1:]
+                or (value.process_id, value.thread_id) != proof['owner']):
+            raise ValueError('MAPPER_FINAL_REVIEW_RECORD_CHANGED')
+        owned = candidate._original_mapper_custody_v1[int(key)]
+        _mapper_parent_record_v1(owned, record=value)
+        if owned.get('final_read') is not member: raise ValueError('MAPPER_FINAL_REVIEW_RECORD_CHANGED')
 
 
 def _mapper_publish_occurrence_v1(template, *, candidate, entry):
@@ -10021,174 +10821,215 @@ def _mapper_publish_occurrence_v1(template, *, candidate, entry):
             or entry.run_id != template['run_id'] or entry.phase != template['phase']
             or len(candidate.plan) != template['command_count']):
         raise ValueError('MAPPER_ACTIVATION_ORIGINAL_CUSTODY_REQUIRED')
-    candidate._check()
+    if (candidate.process_id, candidate.thread_id) != (os.getpid(), threading.get_ident()):
+        raise ValueError('MAPPER_ACTIVATION_ORIGINAL_CUSTODY_REQUIRED')
     attempted = getattr(candidate, '_mapper_activation_attempts_v1', None)
     if attempted is None:
         attempted = set(); candidate._mapper_activation_attempts_v1 = attempted
     index = template['command_index']
     if index in attempted: raise ValueError('MAPPER_ACTIVATION_NOT_RETRIED')
     attempted.add(index)
-    limits = _mapper_activation_limits_v1(template)
-    if limits['evidence_deadline_ns'] > candidate.deadline_ns:
-        raise ValueError('MAPPER_ACTIVATION_EVIDENCE_EXCEEDS_ANCESTOR')
-    # Readback + CLI/parent + optional child + finalizer; reserve even on failure.
-    record_reads = 3 if template['child_argv'] is None else 4
-    total_reads = _mapper_add_v1(_mapper_add_v1(limits['target_bytes'], limits['basis_bytes']),
-                                record_reads * (limits['record_bytes'] + 1))
-    if total_reads > candidate.remaining_read_bytes:
-        raise ValueError('MAPPER_ACTIVATION_ANCESTOR_READ_ALLOWANCE')
-    if limits['record_bytes'] >= candidate.snapshot_byte_limit:
-        raise ValueError('MAPPER_ACTIVATION_ANCESTOR_RETAINED_ALLOWANCE')
-    candidate.remaining_read_bytes -= total_reads
-    candidate.snapshot_byte_limit -= limits['record_bytes']
-    usage = {'files': 0, 'target_bytes': 0, 'basis_bytes': 0, 'metadata_calls': 0}
-    # Failure usage remains on the existing candidate; failed work is not lost.
-    ledger = getattr(candidate, '_mapper_activation_usage_v1', None)
-    if ledger is None:
-        ledger = {}; candidate._mapper_activation_usage_v1 = ledger
-    ledger[index] = usage
-    live = copy.deepcopy(template)
-    live['basis']['generation'] = _mapper_occurrence_generation_v1(template)
-    profile = live['basis']; root = Path(profile['root'])
-    native_basis = candidate.native_basis
-    if native_basis is not None:
-        if (type(native_basis) is not _LinuxImmutableSourceBasisV2
-                or native_basis.root != root
-                or native_basis.run_id != template['run_id']
-                or candidate.index_path != native_basis.lease.index
-                or type(candidate.native_observation) is not _PreflightObservationV1
-                or candidate.native_observation.root != root
-                or candidate.native_observation.run_id != template['run_id']
-                or getattr(candidate.native_observation, 'native_basis', None) is not native_basis
-                or candidate.all_effects or candidate.ignored
-                or candidate.nested_evidence_limits):
-            raise ValueError('MAPPER_ACTIVATION_ORIGINAL_CUSTODY_REQUIRED')
-        native_basis.check_live()
-    def observe(path=None, fd=None):
-        candidate._check(); _scan_deadline(profile['deadline_ns'])
-        if usage['metadata_calls'] >= limits['metadata_calls']:
-            raise ValueError('MAPPER_ACTIVATION_METADATA_ALLOWANCE')
-        usage['metadata_calls'] += 1
-        result = os.fstat(fd) if fd is not None else os.lstat(path)
-        _scan_deadline(profile['deadline_ns']); return result
-    if _mapper_chain_v1(root, observe) != profile['root_chain']:
-        raise ValueError('MAPPER_ACTIVATION_ROOT_REPLACED')
-    for row in profile['entries']:
-        original = candidate._occurrence_before.get(row['path'])
-        if native_basis is None:
-            if original is None or len(original[1]) != row['length']:
+    slots = []
+    owned = dict(candidate=candidate, entry=entry, plan=candidate.plan,
+        owner=(candidate.process_id, candidate.thread_id), index=index,
+        deadline_ns=candidate.deadline_ns, template=template, slots=slots,
+        original_slots=slots, reader=None, record=None, final_read=None, activation_error=None)
+    if (type(candidate._original_mapper_custody_v1) is not dict
+            or candidate._mapper_custody_v1 is not candidate._original_mapper_custody_v1
+            or index in candidate._original_mapper_custody_v1):
+        raise ValueError('MAPPER_ACTIVATION_ORIGINAL_CUSTODY_REQUIRED')
+    candidate._original_mapper_custody_v1[index] = owned
+    _mapper_parent_record_v1(owned)
+    try:
+        candidate._check()
+        limits = _mapper_activation_limits_v1(template)
+        if limits['evidence_deadline_ns'] > candidate.deadline_ns:
+            raise ValueError('MAPPER_ACTIVATION_EVIDENCE_EXCEEDS_ANCESTOR')
+        # Readback + CLI/parent + optional child + finalizer; reserve even on failure.
+        record_reads = 3 if template['child_argv'] is None else 4
+        total_reads = _mapper_add_v1(_mapper_add_v1(limits['target_bytes'], limits['basis_bytes']),
+                                    record_reads * (limits['record_bytes'] + 1))
+        if total_reads > candidate.remaining_read_bytes:
+            raise ValueError('MAPPER_ACTIVATION_ANCESTOR_READ_ALLOWANCE')
+        if limits['record_bytes'] >= candidate.snapshot_byte_limit:
+            raise ValueError('MAPPER_ACTIVATION_ANCESTOR_RETAINED_ALLOWANCE')
+        candidate.remaining_read_bytes -= total_reads
+        candidate.snapshot_byte_limit -= limits['record_bytes']
+        usage = {'files': 0, 'target_bytes': 0, 'basis_bytes': 0, 'metadata_calls': 0}
+        # Failure usage remains on the existing candidate; failed work is not lost.
+        ledger = getattr(candidate, '_mapper_activation_usage_v1', None)
+        if ledger is None:
+            ledger = {}; candidate._mapper_activation_usage_v1 = ledger
+        ledger[index] = usage
+        live = copy.deepcopy(template)
+        live['basis']['generation'] = _mapper_occurrence_generation_v1(template)
+        profile = live['basis']; root = Path(profile['root'])
+        native_basis = candidate.native_basis
+        if native_basis is not None:
+            if (type(native_basis) is not _LinuxImmutableSourceBasisV2
+                    or native_basis.root != root
+                    or native_basis.run_id != template['run_id']
+                    or candidate.index_path != native_basis.lease.index
+                    or type(candidate.native_observation) is not _PreflightObservationV1
+                    or candidate.native_observation.root != root
+                    or candidate.native_observation.run_id != template['run_id']
+                    or getattr(candidate.native_observation, 'native_basis', None) is not native_basis
+                    or candidate.all_effects or candidate.ignored
+                    or candidate.nested_evidence_limits):
+                raise ValueError('MAPPER_ACTIVATION_ORIGINAL_CUSTODY_REQUIRED')
+            native_basis.check_live()
+        def observe(path=None, fd=None):
+            candidate._check(); _scan_deadline(profile['deadline_ns'])
+            if usage['metadata_calls'] >= limits['metadata_calls']:
+                raise ValueError('MAPPER_ACTIVATION_METADATA_ALLOWANCE')
+            usage['metadata_calls'] += 1
+            result = os.fstat(fd) if fd is not None else os.lstat(path)
+            _scan_deadline(profile['deadline_ns']); return result
+        if _mapper_chain_v1(root, observe) != profile['root_chain']:
+            raise ValueError('MAPPER_ACTIVATION_ROOT_REPLACED')
+        for row in profile['entries']:
+            original = candidate._occurrence_before.get(row['path'])
+            if native_basis is None:
+                if original is None or len(original[1]) != row['length']:
+                    raise ValueError('MAPPER_ACTIVATION_INPUT_OUTSIDE_CANDIDATE')
+            elif (type(original) is not tuple or len(original) != 12
+                    or native_basis.files.get(row['path']) is not original
+                    or original[:2] != (row['path'], 'WORKTREE')):
                 raise ValueError('MAPPER_ACTIVATION_INPUT_OUTSIDE_CANDIDATE')
-        elif (type(original) is not tuple or len(original) != 12
-                or native_basis.files.get(row['path']) is not original
-                or original[:2] != (row['path'], 'WORKTREE')):
-            raise ValueError('MAPPER_ACTIVATION_INPUT_OUTSIDE_CANDIDATE')
-        path = root.joinpath(*row['path'].split('/'))
-        if _mapper_chain_v1(path.parent, observe) != row['parent_chain']:
-            raise ValueError('MAPPER_ACTIVATION_PARENT_REPLACED')
-        before = _mapper_stamp_v1(observe(path))
-        if native_basis is None and (
-                before[2:4] != row['lstat'][2:4]
-                or stat.S_IMODE(before[2]) != original[0]):
-            raise ValueError('MAPPER_ACTIVATION_MODE_OR_LENGTH')
-        fd = _open_regular_worktree_descriptor(path, nonblocking=True)
+            path = root.joinpath(*row['path'].split('/'))
+            if _mapper_chain_v1(path.parent, observe) != row['parent_chain']:
+                raise ValueError('MAPPER_ACTIVATION_PARENT_REPLACED')
+            before = _mapper_stamp_v1(observe(path))
+            if native_basis is None and (
+                    before[2:4] != row['lstat'][2:4]
+                    or stat.S_IMODE(before[2]) != original[0]):
+                raise ValueError('MAPPER_ACTIVATION_MODE_OR_LENGTH')
+            slot = _mapper_slot_v1(owned['owner'], owned['slots'], path, 'comparison')
+            try:
+                fd = _open_regular_worktree_descriptor(path, nonblocking=True)
+                _mapper_slot_opened_v1(slot, fd)
+            except BaseException as error:
+                _mapper_slot_open_error_v1(slot, error); raise
+            finally: slot['acquiring'] = False
+            errors = []
+            try:
+                if native_basis is not None:
+                    native_basis.verify_fd(row['path'], fd)
+                    if original[4] != row['length']:
+                        raise ValueError('MAPPER_ACTIVATION_INPUT_OUTSIDE_CANDIDATE')
+                    if (before[2:4] != row['lstat'][2:4]
+                            or stat.S_IMODE(before[2]) != stat.S_IMODE(original[7])):
+                        raise ValueError('MAPPER_ACTIVATION_MODE_OR_LENGTH')
+                opened = _mapper_stamp_v1(observe(fd=fd))
+                if opened[:6] != before[:6]: raise ValueError('MAPPER_ACTIVATION_TARGET_SUBSTITUTED')
+                if native_basis is not None:
+                    native_basis.verify_fd(row['path'], fd)
+            except BaseException as exc: errors.append(exc)
+            _mapper_close_slot_v1(slot, errors)
+            _scan_raise_errors(errors)
+            if _mapper_stamp_v1(observe(path)) != before:
+                raise ValueError('MAPPER_ACTIVATION_TARGET_CHANGED')
+            row['lstat'], row['fstat'] = before, opened
+        preflight = copy.deepcopy(profile)
+        preflight['limits'] = {
+            'attempts':len(profile['entries']), 'target_bytes':sum(x['length']+1 for x in profile['entries']),
+            'basis_bytes':sum(x['length'] for x in profile['entries']),
+            'metadata_calls':limits['metadata_calls'] - usage['metadata_calls'],
+            'single_target_buffer':profile['limits']['single_target_buffer']}
+        for row in preflight['entries']: row['attempt_limit'] = 1
+        reader = None; errors = []
+        try:
+            reader = _MapperDiskBasisV1.__new__(_MapperDiskBasisV1)
+            owned['reader'] = reader
+            _MapperDiskBasisV1.__init__(reader, preflight, expected_position=template['original_position'],
+                                       expected_generation=profile['generation'], clock=time.monotonic_ns,
+                                       native_observation=None if native_basis is None else candidate.native_observation)
+            for row in profile['entries']:
+                candidate._check()
+                reader.compare_bytes(row['path'])
+                usage['files'] += 1
+            # An early input may not change while later inputs are being compared.
+            for row in profile['entries']:
+                if native_basis is not None:
+                    candidate.native_observation.reserve('attempts')
+                    native_basis.status(row['path'])
+                reader._chains(row)
+                if reader._stamp(root.joinpath(*row['path'].split('/'))) != row['lstat']:
+                    raise ValueError('MAPPER_ACTIVATION_INPUT_CHANGED_AFTER_COMPARISON')
+            reader._basis_current()
+        except BaseException as exc:
+            errors.append(exc)
+            if reader is None:
+                # Initializer metadata attempts are not externally observable here.
+                # Never report the known prefix as an exact total after that failure.
+                usage['metadata_calls'] = None
+        if reader is not None:
+            try:
+                if type(getattr(reader, 'counters', None)) is not dict:
+                    raise ValueError('MAPPER_ACTIVATION_COUNTERS_UNOBSERVED')
+                for key in ('target_bytes','basis_bytes','metadata_calls'):
+                    if type(reader.counters.get(key)) is not int or reader.counters[key] < 0:
+                        raise ValueError('MAPPER_ACTIVATION_COUNTERS_UNOBSERVED')
+                usage['target_bytes'] = reader.counters['target_bytes']
+                usage['basis_bytes'] = reader.counters['basis_bytes']
+                usage['metadata_calls'] += reader.counters['metadata_calls']
+            except BaseException as exc:
+                usage['target_bytes'] = usage['basis_bytes'] = usage['metadata_calls'] = None
+                _mapper_append_error_v1(errors, exc)
+            try: _MapperDiskBasisV1.close(reader)
+            except BaseException as exc: _mapper_append_error_v1(errors, exc)
+        _scan_raise_errors(errors)
+        candidate._check(); _scan_deadline(profile['deadline_ns'])
+        record = {'kind':'MAPPER_OCCURRENCE_ACTIVATION_V1','binding':live,'observed':dict(usage)}
+        _mapper_activation_record_v1(template, record)
+        raw = json.dumps(record, ensure_ascii=True, separators=(',', ':'), allow_nan=False).encode('utf-8')
+        if len(raw) > limits['record_bytes']: raise ValueError('MAPPER_ACTIVATION_RECORD_TOO_LARGE')
+        path = _mapper_activation_path_v1(template)
+        _local_unlinked_path(path.parent); parents = _mapper_chain_v1(path.parent)
+        slot = _mapper_slot_v1(owned['owner'], owned['slots'], path, 'activation-write')
+        try:
+            fd = os.open(path, os.O_WRONLY | os.O_CREAT | os.O_EXCL | getattr(os,'O_BINARY',0), 0o600)
+            _mapper_slot_opened_v1(slot, fd)
+        except BaseException as error:
+            _mapper_slot_open_error_v1(slot, error); raise
+        finally: slot['acquiring'] = False
         errors = []
         try:
-            if native_basis is not None:
-                native_basis.verify_fd(row['path'], fd)
-                if original[4] != row['length']:
-                    raise ValueError('MAPPER_ACTIVATION_INPUT_OUTSIDE_CANDIDATE')
-                if (before[2:4] != row['lstat'][2:4]
-                        or stat.S_IMODE(before[2]) != stat.S_IMODE(original[7])):
-                    raise ValueError('MAPPER_ACTIVATION_MODE_OR_LENGTH')
-            opened = _mapper_stamp_v1(observe(fd=fd))
-            if opened[:6] != before[:6]: raise ValueError('MAPPER_ACTIVATION_TARGET_SUBSTITUTED')
-            if native_basis is not None:
-                native_basis.verify_fd(row['path'], fd)
+            view = memoryview(raw)
+            while view:
+                candidate._check(); _scan_deadline(profile['deadline_ns'])
+                n = os.write(fd, view)
+                if type(n) is not int or not 0 < n <= len(view): raise OSError('invalid activation write progress')
+                view = view[n:]
+            os.fsync(fd)
+            final = _mapper_stamp_v1(os.fstat(fd))
+            if final[:6] != _mapper_stamp_v1(path.lstat())[:6]:
+                raise ValueError('MAPPER_ACTIVATION_PUBLICATION_SUBSTITUTED')
         except BaseException as exc: errors.append(exc)
-        try: os.close(fd)
-        except BaseException as exc: errors.append(exc)
+        _mapper_close_slot_v1(slot, errors)
         _scan_raise_errors(errors)
-        if _mapper_stamp_v1(observe(path)) != before:
-            raise ValueError('MAPPER_ACTIVATION_TARGET_CHANGED')
-        row['lstat'], row['fstat'] = before, opened
-    preflight = copy.deepcopy(profile)
-    preflight['limits'] = {
-        'attempts':len(profile['entries']), 'target_bytes':sum(x['length']+1 for x in profile['entries']),
-        'basis_bytes':sum(x['length'] for x in profile['entries']),
-        'metadata_calls':limits['metadata_calls'] - usage['metadata_calls'],
-        'single_target_buffer':profile['limits']['single_target_buffer']}
-    for row in preflight['entries']: row['attempt_limit'] = 1
-    reader = None; errors = []
-    try:
-        reader = _MapperDiskBasisV1(preflight, expected_position=template['original_position'],
-                                   expected_generation=profile['generation'], clock=time.monotonic_ns,
-                                   native_observation=None if native_basis is None else candidate.native_observation)
-        for row in profile['entries']:
-            candidate._check()
-            reader.compare_bytes(row['path'])
-            usage['files'] += 1
-        # An early input may not change while later inputs are being compared.
-        for row in profile['entries']:
-            if native_basis is not None:
-                candidate.native_observation.reserve('attempts')
-                native_basis.status(row['path'])
-            reader._chains(row)
-            if reader._stamp(root.joinpath(*row['path'].split('/'))) != row['lstat']:
-                raise ValueError('MAPPER_ACTIVATION_INPUT_CHANGED_AFTER_COMPARISON')
-        reader._basis_current()
-    except BaseException as exc:
-        errors.append(exc)
-        if reader is None:
-            # Initializer metadata attempts are not externally observable here.
-            # Never report the known prefix as an exact total after that failure.
-            usage['metadata_calls'] = None
-    if reader is not None:
-        usage['target_bytes'] = reader.counters['target_bytes']
-        usage['basis_bytes'] = reader.counters['basis_bytes']
-        usage['metadata_calls'] += reader.counters['metadata_calls']
-        try: reader.close()
-        except BaseException as exc: errors.append(exc)
-    _scan_raise_errors(errors)
-    candidate._check(); _scan_deadline(profile['deadline_ns'])
-    record = {'kind':'MAPPER_OCCURRENCE_ACTIVATION_V1','binding':live,'observed':dict(usage)}
-    _mapper_activation_record_v1(template, record)
-    raw = json.dumps(record, ensure_ascii=True, separators=(',', ':'), allow_nan=False).encode('utf-8')
-    if len(raw) > limits['record_bytes']: raise ValueError('MAPPER_ACTIVATION_RECORD_TOO_LARGE')
-    path = _mapper_activation_path_v1(template)
-    _local_unlinked_path(path.parent); parents = _mapper_chain_v1(path.parent)
-    fd = os.open(path, os.O_WRONLY | os.O_CREAT | os.O_EXCL | getattr(os,'O_BINARY',0), 0o600)
-    errors = []
-    try:
-        view = memoryview(raw)
-        while view:
-            candidate._check(); _scan_deadline(profile['deadline_ns'])
-            n = os.write(fd, view)
-            if type(n) is not int or not 0 < n <= len(view): raise OSError('invalid activation write progress')
-            view = view[n:]
-        os.fsync(fd)
-        final = _mapper_stamp_v1(os.fstat(fd))
-        if final[:6] != _mapper_stamp_v1(path.lstat())[:6]:
-            raise ValueError('MAPPER_ACTIVATION_PUBLICATION_SUBSTITUTED')
-    except BaseException as exc: errors.append(exc)
-    try: os.close(fd)
-    except BaseException as exc: errors.append(exc)
-    _scan_raise_errors(errors)
-    if _mapper_chain_v1(path.parent) != parents:
-        raise ValueError('MAPPER_ACTIVATION_PUBLICATION_PARENT_CHANGED')
-    identity = json.dumps(_mapper_stamp_v1(path.lstat()), separators=(',', ':'))
-    result = _MapperOccurrenceRecordV1(
-        json.dumps(template, ensure_ascii=True, separators=(',', ':'), allow_nan=False).encode('utf-8'),
-        raw, identity, os.getpid(), threading.get_ident())
-    result.verify()
-    candidate._check(); _scan_deadline(profile['deadline_ns'])
-    return result
+        if _mapper_chain_v1(path.parent) != parents:
+            raise ValueError('MAPPER_ACTIVATION_PUBLICATION_PARENT_CHANGED')
+        identity = json.dumps(_mapper_stamp_v1(path.lstat()), separators=(',', ':'))
+        result = _MapperOccurrenceRecordV1(
+            json.dumps(template, ensure_ascii=True, separators=(',', ':'), allow_nan=False).encode('utf-8'),
+            raw, identity, os.getpid(), threading.get_ident())
+        owned['record'] = result
+        result.verify(_custody=owned)
+        candidate._check(); _scan_deadline(profile['deadline_ns'])
+        return result
+
+    except BaseException as error:
+        owned["activation_error"] = error
+        raise
 
 
-def _mapper_occurrence_evidence_v1(paths, templates, records, receipts):
+def _mapper_occurrence_evidence_v1(paths, templates, records, receipts, *, _capture=None):
     """Check the exact activation prefix before final success, without rebinding."""
     if records is None: records = {}
     if type(records) is not dict:
         raise _evidence_failure('invalid mapper activation custody')
+    original_templates = templates
     templates = {} if templates is None else _mapper_plain_v1(templates)
     expected = {str(receipt.command_index) for receipt in receipts
                 if str(receipt.command_index) in templates
@@ -10199,12 +11040,33 @@ def _mapper_occurrence_evidence_v1(paths, templates, records, receipts):
     wanted = {'mapper-read-' + k + '.json' for k in expected}
     if actual != wanted:
         raise _evidence_failure('mapper activation file roster differs')
+    proof = _MAPPER_FINAL_EVIDENCE_V1.get()
+    if proof is not None:
+        if not proof['completed']:
+            raise _evidence_failure('mapper final occurrence read remains failed or partial')
+        if proof['used']: raise _evidence_failure('mapper final read proof already consumed')
+        _mapper_final_review_association_v1(proof, paths, original_templates, records, receipts,
+            candidate=proof['candidate'], plan=proof['plan'])
+        proof['used'] = True
+    if _capture is not None:
+        _mapper_final_review_association_v1(_capture, paths, original_templates, records, receipts,
+            candidate=_capture['candidate'], plan=_capture['plan'], completed=False)
     for key, record in records.items():
         if type(record) is not _MapperOccurrenceRecordV1 or record.template() != templates[key]:
             raise _evidence_failure('mapper activation lost its original template')
-        try: record.verify()
-        except (ValueError, OSError, RuntimeError) as exc:
-            raise _evidence_failure('mapper activation evidence changed: ' + str(exc)) from exc
+        if proof is None and (_capture is None or key not in _capture['members']):
+            if _capture is not None:
+                if key in _capture['attempted_members']:
+                    raise _evidence_failure('mapper final occurrence read cannot be retried')
+                _capture['attempted_members'].add(key)
+            owned = None if _capture is None else _capture['candidate']._original_mapper_custody_v1[int(key)]
+            try: record.verify(_custody=owned)
+            except (ValueError, OSError, RuntimeError) as exc:
+                raise _evidence_failure('mapper activation evidence changed: ' + str(exc)) from exc
+        if _capture is not None and key not in _capture['members']:
+            member = (record, record.template_json, record.record_json, record.identity, record.process_id, record.thread_id)
+            _capture['members'][key] = member
+            owned['final_read'] = member
         receipt = next(x for x in receipts if str(x.command_index) == key)
         if (_MAPPER_ACTIVATION_ENV_V1, record.identity) not in receipt.fixed_environment_controls:
             raise _evidence_failure('mapper activation missing from original process receipt')
@@ -10418,33 +11280,33 @@ def _mapper_bound_reads_v1(binding):
     from src.qtt.stage1_prediction_markets.qku_computation_control_plane import serialization
     b = _mapper_binding_v1(binding)
     family = next(row[1] for row in _REPORT_READ_ROUTES_V1 if row[0] == b['original_position'])
-    reader = _MapperDiskBasisV1(b['basis'], expected_position=b['original_position'],
-        expected_generation=b['basis']['generation'], clock=time.monotonic_ns)
-    if not _MAPPER_READ_LOCK_V1.acquire(blocking=False):
-        reader.close()
-        raise ValueError('MAPPER_CONCURRENT_BINDING')
-    primary = None
-    installed = False
+    if not _MAPPER_READ_LOCK_V1.acquire(blocking=False): raise ValueError('MAPPER_CONCURRENT_BINDING')
+    reader = None; installed = None; errors = []
     try:
-        if serialization._REPORT_READ_BINDING_V1 is not None:
-            raise ValueError('MAPPER_REENTRANT_BINDING')
-        serialization._REPORT_READ_BINDING_V1 = (family, reader)
-        installed = True
+        if serialization._REPORT_READ_BINDING_V1 is not None: raise ValueError('MAPPER_REENTRANT_BINDING')
+        reader = _MapperDiskBasisV1.__new__(_MapperDiskBasisV1)
+        installed = (family, reader)
+        serialization._REPORT_READ_BINDING_V1 = installed
+        _MapperDiskBasisV1.__init__(reader, b['basis'], expected_position=b['original_position'],
+            expected_generation=b['basis']['generation'], clock=time.monotonic_ns)
         yield reader
-    except BaseException as exc:
-        primary = exc
-        raise
+    except BaseException as error: errors.append(error)
     finally:
-        if installed:
-            serialization._REPORT_READ_BINDING_V1 = None
-        try:
-            reader.close()
-        except BaseException as close_error:
-            if primary is not None:
-                raise BaseExceptionGroup('mapper use and close failed', [primary, close_error])
-            raise
-        finally:
-            _MAPPER_READ_LOCK_V1.release()
+        settled = reader is None
+        if reader is not None:
+            try: _MapperDiskBasisV1.close(reader)
+            except BaseException as error: _mapper_append_error_v1(errors, error)
+            try: settled = not _MapperDiskBasisV1._resources_require_retention_v1(reader)
+            except BaseException as error:
+                _mapper_append_error_v1(errors, error); settled = False
+        if settled:
+            if installed is not None:
+                if serialization._REPORT_READ_BINDING_V1 is installed: serialization._REPORT_READ_BINDING_V1 = None
+                else:
+                    errors.append(ValueError('MAPPER_BINDING_OWNER_CHANGED')); settled = False
+            if settled: _MAPPER_READ_LOCK_V1.release()
+        if not settled and not errors: errors.append(ValueError('BASIS_SCOPE_CUSTODY_UNRESOLVED'))
+        _scan_raise_errors(errors)
 
 
 _MAPPER_READ_LOCK_V1 = threading.Lock()
@@ -11807,6 +12669,7 @@ def _preflight_cli_v1(main, script_file):
         dirs,count=_preflight_header_v1(header,payload,identity)
         return [row[2] for row in header['files']],(dirs,count,payload)
     observation = initial = None
+    basis = None
     decoded_kind = None
     decoded = entered = complete = False
     exit_code = None
@@ -11834,7 +12697,8 @@ def _preflight_cli_v1(main, script_file):
             lease=_LinuxPreflightHostLeaseV1(binding=binding,control_path=control/'binding/native.json',runtime=binding['runtime'],query=query,
                 declaration_chain=tuple((p,tuple(s)) for p,s in binding['declaration_chain']),declaration_version=tuple(binding['declaration_version']),
                 parent_pid=identity['parent_pid'])
-            basis=_LinuxImmutableSourceBasisV2(lease,header['native_basis'],binding['source_run_id'])
+            basis = _LinuxImmutableSourceBasisV2.__new__(_LinuxImmutableSourceBasisV2)
+            basis.__init__(lease, header['native_basis'], binding['source_run_id'])
             files={p:row for p,row in basis.files.items() if row[1]=='WORKTREE'} if header['selection']=='ALL_WORKTREE' else {}
             directories={p:v for p,v in basis.directories.items() if p!='.git' and not p.startswith('.git/')} if files else {}
             residual['retained_bytes']-=basis.manifest_retained_bytes
@@ -11858,14 +12722,23 @@ def _preflight_cli_v1(main, script_file):
             exit_code = main()
             _preflight_require_v1(type(exit_code) is int, 'preflight application exact native return required')
             observation.check(); stable()
-            complete = True
-            failure = None if exit_code == 0 else 'PREFLIGHT_APPLICATION_DENIED'
-            result = _preflight_result_v1(identity,observation,initial,meter.received,decoded,entered,exit_code,complete,failure)
-            _preflight_write_result_v1(evidence,result,bound,meter.check)
+        if basis is not None:
+            _LinuxImmutableSourceBasisV2._settle_resources_v2(basis)
+            _preflight_require_v1(not _LinuxImmutableSourceBasisV2._resources_require_retention_v2(basis),
+                'LINUX_V2_CHILD_RESOURCE_SETTLEMENT')
         stable()
+        complete = True
+        failure = None if exit_code == 0 else 'PREFLIGHT_APPLICATION_DENIED'
+        result = _preflight_result_v1(identity,observation,initial,meter.received,decoded,entered,exit_code,complete,failure)
+        _preflight_write_result_v1(evidence,result,bound,meter.check)
         return exit_code
     except BaseException as exc:
         errors.append(exc)
+        if basis is not None:
+            try:
+                _LinuxImmutableSourceBasisV2._settle_resources_v2(basis)
+            except BaseException as cleanup:
+                errors.append(cleanup)
         if observation is not None and observation.failure is not None:
             failure = 'PREFLIGHT_OBSERVATION_FAILED'
         if not (evidence/'receiver.json').exists():
@@ -11909,58 +12782,215 @@ class _PreflightNativeInputV1:
     """Live, source-owned input lease; never reconstructed from declaration JSON."""
     def __init__(self, *, path, root, index_path, expected_path_version, expected_chain,
             limits, deadline_ns, host_lease, capture_limits, terminal_limits, git_executable=None):
-        _preflight_require_v1(isinstance(host_lease,_PreflightHostLeaseV1), 'PREFLIGHT_NATIVE_HOST_PROVIDER_UNAVAILABLE')
-        self.path = Path(_preflight_startup_path_v1(str(path)))
-        self.root = Path(_preflight_startup_path_v1(str(root)))
-        self.index_path = index_path
-        self.expected_path_version, self.expected_chain = expected_path_version, expected_chain
-        self.limits = _preflight_limits_v1(limits,transport=True)
-        self.deadline_ns = _preflight_integer_v1(deadline_ns,positive=True)
-        self.host_lease = host_lease
-        self.git_executable = git_executable
-        self.capture_limits = _preflight_limits_v1(capture_limits)
-        self.terminal_limits = _preflight_limits_v1(terminal_limits)
-        self.pid, self.thread = os.getpid(), threading.get_ident()
-        self.state = 'AVAILABLE'
-        self.meter = _PreflightTransportV1(self.limits,self.deadline_ns,self.check)
+        actual_owner = (os.getpid(), threading.get_ident())
+        _preflight_require_v1((getattr(self, 'pid', None), getattr(self, 'thread', None))
+            in ((None, None), actual_owner), 'preflight native input construction owner')
+        _preflight_require_v1(not getattr(self, '_init_attempted_v1', False),
+            'preflight native input construction is single use')
+        self.pid, self.thread = actual_owner
+        self._init_attempted_v1 = self._initializing_v1 = True
+        self.failure = None
+        self.state = 'PREPARING'
+        self._consume_attempted_v1 = self._consume_active_v1 = self._declaration_release_active_v1 = False
+        self._declaration_acquisition_v1 = self._declaration_record_v1 = None
+        self._declaration_raw_handle_owner_v1 = None
+        self._declaration_original_binding_v1 = self._declaration_release_binding_v1 = None
+        self._declaration_settlement_error_v1 = None
+        try:
+            _preflight_require_v1(isinstance(host_lease,_PreflightHostLeaseV1), 'PREFLIGHT_NATIVE_HOST_PROVIDER_UNAVAILABLE')
+            self.path = Path(_preflight_startup_path_v1(str(path)))
+            self.root = Path(_preflight_startup_path_v1(str(root)))
+            self.index_path = index_path
+            self.expected_path_version, self.expected_chain = expected_path_version, expected_chain
+            self.limits = _preflight_limits_v1(limits,transport=True)
+            self.deadline_ns = _preflight_integer_v1(deadline_ns,positive=True)
+            self.host_lease = host_lease
+            self.git_executable = git_executable
+            self.capture_limits = _preflight_limits_v1(capture_limits)
+            self.terminal_limits = _preflight_limits_v1(terminal_limits)
+            self.meter = _PreflightTransportV1(self.limits,self.deadline_ns,self.check)
+            self.state = 'AVAILABLE'
+        except BaseException as error:
+            self.failure = error
+            self.state = 'FAILED'
+            raise
+        finally:
+            if (os.getpid(), threading.get_ident()) == (self.pid, self.thread):
+                self._initializing_v1 = False
     def check(self):
         _preflight_require_v1((os.getpid(),threading.get_ident()) == (self.pid,self.thread)
             and time.monotonic_ns() < self.deadline_ns, 'preflight native input host/deadline association')
         _preflight_require_v1(self.host_lease.check_parent(self.root,self.index_path) is None,
             'preflight native parent custody rejected')
     def consume(self, validate):
-        self.check()
-        _preflight_require_v1(self.state == 'AVAILABLE','preflight declaration is single use')
+        # Foreign or duplicate entry cannot invoke callbacks or release an
+        # existing live acquisition. A first failed attempt remains one use.
+        _preflight_require_v1((os.getpid(), threading.get_ident()) == (self.pid, self.thread),
+            'preflight native input consume owner')
+        _preflight_require_v1(self.state == 'AVAILABLE' and not self._consume_attempted_v1
+            and not self._consume_active_v1, 'preflight declaration is single use')
+        self._consume_attempted_v1 = self._consume_active_v1 = True
         self.state = 'CONSUMING'
-        fd = None
         errors = []
         result = None
         try:
-            _preflight_require_v1(_preflight_chain_v1(self.path.parent) == self.expected_chain,
-                'preflight declaration ancestor identity')
-            before = self.path.lstat(); _preflight_regular_v1(before)
-            _preflight_require_v1(_scan_same_api_version(before) == self.expected_path_version,
-                'preflight declaration physical identity')
-            fd = _open_regular_worktree_descriptor(self.path,nonblocking=True)
-            opened = os.fstat(fd); _preflight_regular_v1(opened)
-            _preflight_require_v1(_same_observed_file(before,opened),'preflight declaration descriptor identity')
-            result = _preflight_frame_read_v1(fd,magic=(b'QTTPA01\n',b'QTTPA02\n') if
-                type(self.host_lease) is _LinuxPreflightHostLeaseV1 and self.host_lease.binding.get('native_basis') is not None
-                else b'QTTPA01\n',extent=before.st_size,
-                meter=self.meter,validate=validate)
-            _preflight_require_v1(_scan_same_api_version(self.path.lstat()) == self.expected_path_version
-                and _scan_same_api_version(os.fstat(fd)) == _scan_same_api_version(opened)
-                and _preflight_chain_v1(self.path.parent) == self.expected_chain,'preflight declaration drift')
-        except BaseException as exc:
-            errors.append(exc)
-        if fd is not None:
-            try: os.close(fd)
-            except BaseException as exc: errors.append(exc)
-        try: self.check()
-        except BaseException as exc: errors.append(exc)
-        self.state = 'FAILED' if errors else 'CONSUMED'
-        _scan_raise_errors(errors)
-        return result
+            try:
+                self.check()
+                _preflight_require_v1(_preflight_chain_v1(self.path.parent) == self.expected_chain,
+                    'preflight declaration ancestor identity')
+                before = self.path.lstat(); _preflight_regular_v1(before)
+                _preflight_require_v1(_scan_same_api_version(before) == self.expected_path_version,
+                    'preflight declaration physical identity')
+                acquisition = dict(fd=None, original_fd=None, acquiring=True, error=None,
+                    close_attempted=False, closed=False, close_error=None)
+                self._declaration_acquisition_v1 = acquisition
+                fd = _open_regular_worktree_descriptor(self.path,nonblocking=True)
+                acquisition['fd'] = acquisition['original_fd'] = fd
+                acquisition['acquiring'] = False
+                _preflight_require_v1(type(fd) is int and fd >= 0, 'preflight declaration actual descriptor')
+                self._declaration_record_v1 = acquisition
+                self._declaration_original_binding_v1 = (fd, acquisition)
+                self._declaration_acquisition_v1 = None
+                opened = os.fstat(fd); _preflight_regular_v1(opened)
+                _preflight_require_v1(_same_observed_file(before,opened),'preflight declaration descriptor identity')
+                result = _preflight_frame_read_v1(fd,magic=(b'QTTPA01\n',b'QTTPA02\n') if
+                    type(self.host_lease) is _LinuxPreflightHostLeaseV1 and self.host_lease.binding.get('native_basis') is not None
+                    else b'QTTPA01\n',extent=before.st_size,
+                    meter=self.meter,validate=validate)
+                _preflight_require_v1(_scan_same_api_version(self.path.lstat()) == self.expected_path_version
+                    and _scan_same_api_version(os.fstat(fd)) == _scan_same_api_version(opened)
+                    and _preflight_chain_v1(self.path.parent) == self.expected_chain,'preflight declaration drift')
+            except BaseException as error:
+                if self.failure is None:
+                    self.failure = error
+                acquisition = self._declaration_acquisition_v1
+                if acquisition is not None:
+                    acquisition['acquiring'] = False
+                    acquisition['error'] = error
+                raw_owner = getattr(error, '_worktree_raw_handle_owner_v1', None)
+                if raw_owner is not None:
+                    self._declaration_raw_handle_owner_v1 = raw_owner
+                errors.append(error)
+            if self._declaration_record_v1 is not None or self._declaration_original_binding_v1 is not None:
+                try:
+                    self._declaration_release_active_v1 = True
+                    try:
+                        self._close_declaration_v1()
+                    finally:
+                        self._declaration_release_active_v1 = False
+                except BaseException as error:
+                    errors.append(error)
+            try:
+                self.check()
+            except BaseException as error:
+                errors.append(error)
+            if not errors:
+                try:
+                    _preflight_require_v1((os.getpid(), threading.get_ident()) == (self.pid, self.thread)
+                        and self._declaration_acquisition_v1 is None and self._declaration_record_v1 is None
+                        and self._declaration_original_binding_v1 is None and self._declaration_release_binding_v1 is None
+                        and self._declaration_raw_handle_owner_v1 is None and self._declaration_settlement_error_v1 is None,
+                        'preflight declaration final resource association changed')
+                except BaseException as error:
+                    if self._declaration_settlement_error_v1 is None:
+                        self._declaration_settlement_error_v1 = error
+                    errors.append(error)
+            if self.failure is None and errors:
+                self.failure = errors[0]
+            self.state = 'FAILED' if errors else 'CONSUMED'
+            _scan_raise_errors(errors)
+            return result
+        finally:
+            if (os.getpid(), threading.get_ident()) == (self.pid, self.thread):
+                self._consume_active_v1 = False
+
+    def _close_declaration_v1(self):
+        _preflight_require_v1((os.getpid(), threading.get_ident()) == (self.pid, self.thread),
+            'preflight declaration close owner')
+        _preflight_require_v1(not self._consume_active_v1 or self._declaration_release_active_v1,
+            'preflight declaration live scope cannot be closed')
+        binding = self._declaration_original_binding_v1
+        _preflight_require_v1(type(binding) is tuple and len(binding) == 2
+            and type(binding[0]) is int and binding[0] >= 0
+            and self._declaration_record_v1 is binding[1],
+            'preflight declaration original descriptor holder replaced')
+        record = binding[1]
+        _preflight_require_v1(type(record) is dict and type(record['original_fd']) is int
+            and type(record['fd']) is int and record['original_fd'] >= 0
+            and record['fd'] == record['original_fd'] == binding[0],
+            'preflight declaration original descriptor association')
+        if record['close_attempted']:
+            if record['close_error'] is not None:
+                raise record['close_error']
+            raise RuntimeError('preflight declaration close is not retried')
+        self._declaration_release_binding_v1 = binding
+        record['close_attempted'] = True
+        try:
+            os.close(record['original_fd'])
+        except BaseException as error:
+            record['close_error'] = error
+            if self.failure is None:
+                self.failure = error
+            self.state = 'FAILED'
+            raise
+        record['closed'] = True
+        try:
+            _preflight_require_v1(self._declaration_record_v1 is record
+                and self._declaration_original_binding_v1 is binding
+                and self._declaration_release_binding_v1 is binding
+                and type(record['fd']) is int and type(record['original_fd']) is int
+                and record['fd'] == record['original_fd'] == binding[0]
+                and record['close_attempted'] is True and record['closed'] is True,
+                'preflight declaration post-close original association changed')
+        except BaseException as error:
+            if self._declaration_settlement_error_v1 is None:
+                self._declaration_settlement_error_v1 = error
+            if self.failure is None:
+                self.failure = error
+            self.state = 'FAILED'
+            raise
+        self._declaration_record_v1 = None
+        self._declaration_original_binding_v1 = self._declaration_release_binding_v1 = None
+
+    def _resources_require_retention_v1(self):
+        if (getattr(self, 'pid', None), getattr(self, 'thread', None)) != (os.getpid(), threading.get_ident()):
+            return True
+        fields = ('_initializing_v1', '_consume_active_v1', '_declaration_acquisition_v1',
+            '_declaration_record_v1', '_declaration_original_binding_v1', '_declaration_release_binding_v1', '_declaration_raw_handle_owner_v1', '_declaration_settlement_error_v1')
+        if any(not hasattr(self, name) for name in fields):
+            return True
+        if type(self._initializing_v1) is not bool or type(self._consume_active_v1) is not bool:
+            return True
+        return bool(self._initializing_v1 or self._consume_active_v1
+            or self._declaration_acquisition_v1 is not None or self._declaration_record_v1 is not None
+            or self._declaration_original_binding_v1 is not None or self._declaration_release_binding_v1 is not None
+            or self._declaration_raw_handle_owner_v1 is not None or self._declaration_settlement_error_v1 is not None)
+
+    def _settle_resources_v1(self):
+        _preflight_require_v1((os.getpid(), threading.get_ident()) == (self.pid, self.thread),
+            'preflight declaration settlement owner')
+        _preflight_require_v1(self._initializing_v1 is False and self._consume_active_v1 is False,
+            'preflight declaration live scope cannot be settled')
+        if self._declaration_settlement_error_v1 is not None:
+            raise self._declaration_settlement_error_v1
+        try:
+            acquisition = self._declaration_acquisition_v1
+            if acquisition is not None:
+                error = acquisition['error']
+                if error is None:
+                    raise RuntimeError('preflight declaration acquisition remains unproven')
+                raise error
+            if self._declaration_raw_handle_owner_v1 is not None:
+                if isinstance(self.failure, BaseException):
+                    raise self.failure
+                raise RuntimeError('preflight declaration raw handle close remains unproven')
+            if self._declaration_record_v1 is not None or self._declaration_original_binding_v1 is not None:
+                self._close_declaration_v1()
+            if self._resources_require_retention_v1():
+                raise RuntimeError('preflight declaration resource settlement remains unproven')
+        except BaseException as error:
+            self._declaration_settlement_error_v1 = error
+            raise
 
 
 @contextmanager
@@ -12538,6 +13568,11 @@ class _LinuxPreflightQueriesV1:
         self.resource_depth=0
         self._startup_argv=None
         self.last_command_receipt=None
+        self.command_supervisions=[]
+        self._original_command_supervisions=self.command_supervisions
+        self.command_dispatches=0
+        self._last_command_supervision=None
+        self._command_call_record=None
     def remaining_output(self):
         if self.resource_depth:
             return min(self.retained_limit-self.retained,
@@ -12603,11 +13638,14 @@ class _LinuxPreflightQueriesV1:
         except BaseException as exc:
             error=exc
         finally:self._startup_argv=None
-        receipt=self.last_command_receipt
-        if receipt is not None and tuple(receipt.argv)==argv:
-            raw=Path(receipt.stdout_path).read_bytes()
-            stderr=Path(receipt.stderr_path).read_bytes()
-        else:receipt=None
+        receipt=self.command_receipt_for_argv_v1(argv)
+        if receipt is not None:
+            supervision=self._last_command_supervision
+            if (self._command_record_settled_v1(supervision)
+                    and all(supervision['streams'].get(s,{}).get('complete') is True for s in ('stdout','stderr'))):
+                raw=supervision['streams']['stdout']['raw']
+                stderr=supervision['streams']['stderr']['raw']
+            else:receipt=None
         complete=receipt is not None and all(receipt.output_observation.get(s,{}).get('complete')
             and not receipt.output_observation[s].get('overflow')
             and not receipt.output_observation[s].get('errors') for s in ('stdout','stderr'))
@@ -12688,46 +13726,202 @@ class _LinuxPreflightQueriesV1:
                 self.record('failed-read-prefix',str(path),bytes(raw))
             raise
         finally: os.close(fd)
-    def command(self,argv,*,settling=False,cwd=None,git_environment=None):
-        self.check(settling=settling)
-        _preflight_require_v1(type(argv) is tuple and argv and (argv[0] in (
-            '/usr/bin/systemctl','/usr/bin/systemd-run','/usr/bin/systemd-analyze',
-            '/usr/bin/busctl','/usr/bin/mount','/usr/bin/umount','/usr/bin/git')
-            or (argv[0]=='/usr/bin/journalctl' and argv==self._startup_argv and self.resource_depth==1)),
-            'LINUX_PREFLIGHT_ADMINISTRATIVE_PROGRAM')
-        for value in argv:
-            _preflight_require_v1(type(value) is str and '\0' not in value and '\n' not in value,
-                'LINUX_PREFLIGHT_ADMINISTRATIVE_ARGUMENT')
-        environment = dict(PATH='/usr/bin',LANG='C.UTF-8',LC_ALL='C.UTF-8')
-        selected_cwd = Path('/') if cwd is None else Path(_linux_preflight_path_v1(str(cwd)))
-        if git_environment is not None:
-            _preflight_require_v1(argv[0] == '/usr/bin/git' and type(git_environment) is dict
-                and all(k.startswith('GIT_') for k in git_environment),
-                'LINUX_PREFLIGHT_GIT_OWNER_ENVIRONMENT')
-            environment.update(git_environment)
-        remaining_output = self.remaining_output()
-        _preflight_require_v1(remaining_output >= 2,'LINUX_PREFLIGHT_QUERY_OUTPUT_EXHAUSTED')
-        stream_limit = min(1048576,remaining_output//2)
-        token = _LINUX_PREFLIGHT_PROCESS_V1.set(None)
-        try:
-            observation = {}
-            receipt = supervise_command(argv,cwd=selected_cwd,run_id='linux-admin-'+str(self.pid),phase='fast-preflight-native-query',
-                command_index=self.attempts,evidence_root=self.evidence_root,timeout_seconds=10,
-                execution_deadline_ns=self.deadline_ns,environment=environment,
-                output_limits=dict(stdout_bytes=stream_limit,stderr_bytes=stream_limit,combined_output_bytes=2*stream_limit),
-                output_observation=observation,mirror_stdout=False,mirror_stderr=False)
-        finally: _LINUX_PREFLIGHT_PROCESS_V1.reset(token)
-        raw = Path(receipt.stdout_path).read_bytes(); error = Path(receipt.stderr_path).read_bytes()
-        self.last_command_receipt=receipt
-        self.retained += len(raw)+len(error)
-        if self.resource_depth:self.startup_output_bytes+=len(raw)+len(error)
-        self.observations.append(dict(kind='command',argv=argv,receipt=_json_compatible(receipt)))
-        _preflight_require_v1(self.retained <= self.retained_limit,'LINUX_PREFLIGHT_QUERY_OUTPUT')
-        _preflight_require_v1(not receipt.failure_class and receipt.native_exit_code == 0,
-            'LINUX_PREFLIGHT_NATIVE_COMMAND:'+repr(argv)+':'+str(receipt.native_exit_code)+':'+repr(error))
-        self.check(settling=settling)
-        return raw
+    def _command_receipt_associated_v1(self, record):
+        receipt=record['receipt']
+        return (type(receipt) is CommandExecutionReceiptV1
+            and (receipt.run_id,receipt.phase,receipt.command_index,receipt.argv,receipt.cwd) ==
+                (record['run_id'],record['phase'],record['command_index'],record['argv'],record['cwd'])
+            and Path(receipt.stdout_path) == self.evidence_root/('command-'+str(record['command_index'])+'.stdout.bin')
+            and Path(receipt.stderr_path) == self.evidence_root/('command-'+str(record['command_index'])+'.stderr.bin'))
 
+    def _command_receipt_v1(self, record, receipt):
+        # Retention is not authority to read a receipt-chosen output path.
+        record['receipt']=self.last_command_receipt=receipt
+        record['pending']=True
+        _preflight_require_v1(self._command_receipt_associated_v1(record),
+            'LINUX_PREFLIGHT_ADMINISTRATIVE_RECEIPT_ASSOCIATION')
+        record['associated']=True
+        record['pending']=_command_requires_process_retention_v1(receipt)
+
+    def _command_record_settled_v1(self, record):
+        return (record['associated'] is True and record['pending'] is False
+            and record['stream_pending'] is False and self._command_receipt_associated_v1(record)
+            and not _command_requires_process_retention_v1(record['receipt'])
+            and all(slot['complete'] is True and slot['closed'] is True and slot['raw_owner'] is None
+                for slot in record['streams'].values()))
+
+    def _command_records_owned_v1(self):
+        return ((os.getpid(),threading.get_ident()) == (self.pid,self.thread)
+            and self.command_supervisions is self._original_command_supervisions
+            and len(self.command_supervisions) == self.command_dispatches
+            and (not self.command_supervisions or self.command_supervisions[-1] is self._last_command_supervision))
+
+    def _command_dispatch_settled_v1(self):
+        # Every append follows settlement of its predecessor. Dispatch examines
+        # that exact predecessor once; full history is audited at closeout.
+        return (self._command_records_owned_v1() and (not self.command_supervisions
+            or self._command_record_settled_v1(self._last_command_supervision)))
+
+    def command_resources_settled_v1(self):
+        # Administrative custody veto only; service/descendant/storage checks
+        # remain independent. Missing receipts never certify terminal work.
+        return (self._command_records_owned_v1()
+            and all(self._command_record_settled_v1(record) for record in self.command_supervisions))
+
+    def command_receipt_for_argv_v1(self, argv):
+        if not self._command_records_owned_v1() or not self.command_supervisions:
+            return None
+        record=self._last_command_supervision
+        if (record is not self._command_call_record or record['argv'] != argv
+                or self.last_command_receipt is not record['receipt']
+                or record['associated'] is not True or not self._command_receipt_associated_v1(record)):
+            return None
+        return record['receipt']
+
+    def command_supervision_evidence_v1(self):
+        return [dict(argv=record['argv'],cwd=record['cwd'],run_id=record['run_id'],phase=record['phase'],
+            command_index=record['command_index'],associated=record['associated'],pending=record['pending'],
+            stream_pending=record['stream_pending'],
+            streams={name:dict(path=str(slot['path']),bytes=slot['returned_bytes'],retained_prefix_bytes=len(slot['raw']),complete=slot['complete'],
+                acquired=slot['fd'] is not None,raw_handle_debt=slot['raw_owner'] is not None,
+                close_attempted=slot['close_attempted'],closed=slot['closed'],
+                errors=[repr(error) for error in slot['errors']]) for name,slot in record['streams'].items()},
+            receipt=None if type(record['receipt']) is not CommandExecutionReceiptV1 else _json_compatible(record['receipt']),
+            errors=[repr(error) for error in record['errors']]) for record in self.command_supervisions]
+
+    def _command_stream_v1(self, record, name, limit, *, settling):
+        receipt=record['receipt']
+        _preflight_require_v1(self._command_record_settled_v1(record),
+            'LINUX_PREFLIGHT_ADMINISTRATIVE_CUSTODY_UNRESOLVED')
+        record['stream_pending']=True
+        slot=dict(path=self.evidence_root/('command-'+str(record['command_index'])+'.'+name+'.bin'),
+            raw=bytearray(),returned_bytes=0,fd=None,raw_owner=None,error=None,close_attempted=False,closed=False,complete=False,errors=[])
+        record['streams'][name]=slot
+        try:
+            expected=getattr(receipt,name+'_byte_count')
+            _preflight_require_v1(type(expected) is int and 0 <= expected <= limit,
+                'LINUX_PREFLIGHT_ADMINISTRATIVE_STREAM_EXTENT')
+            _local_unlinked_path(self.evidence_root)
+            path,before=_require_direct_regular_evidence_file(self.evidence_root,slot['path'].name)
+            before_version=_scan_same_api_version(before)
+            _preflight_require_v1(before.st_size==expected,'LINUX_PREFLIGHT_ADMINISTRATIVE_STREAM_EXTENT')
+            # Publish sole descriptor ownership before any metadata/read check.
+            slot['fd']=_open_regular_worktree_descriptor(path,nonblocking=True)
+            _preflight_require_v1(type(slot['fd']) is int and slot['fd']>=0,
+                'LINUX_PREFLIGHT_ADMINISTRATIVE_STREAM_DESCRIPTOR')
+            os.set_inheritable(slot['fd'],False)
+            opened=os.fstat(slot['fd']);opened_version=_scan_same_api_version(opened)
+            _preflight_require_v1(_same_observed_file(before,opened)
+                and _scan_same_api_version(path.lstat())==before_version,
+                'LINUX_PREFLIGHT_ADMINISTRATIVE_STREAM_IDENTITY')
+            while True:
+                self.check(settling=settling)
+                request=min(65536,expected-len(slot['raw'])+1)
+                block=os.read(slot['fd'],request)
+                _preflight_require_v1(type(block) is bytes,'LINUX_PREFLIGHT_ADMINISTRATIVE_STREAM_READ')
+                if not block:break
+                slot['returned_bytes']+=len(block)
+                slot['raw'].extend(block[:max(0,expected+1-len(slot['raw']))])
+                # Each returned prefix survives subsequent read/close failures.
+                self.retained+=len(block)
+                if self.resource_depth:self.startup_output_bytes+=len(block)
+                if self.observation is not None:
+                    if self.observation.native_read_observation is not None:
+                        self.observation.native_read_observation['owned_evidence_bytes_read']+=len(block)
+                    self.observation.received('bytes',len(block))
+                    self.observation.reserve('retained_bytes',len(block))
+                    self.observation.observed['retained_bytes']+=len(block)
+                _preflight_require_v1(len(block)<=request and slot['returned_bytes']<=expected
+                    and self.remaining_output()>=0
+                    and self.retained<=self.retained_limit,'LINUX_PREFLIGHT_ADMINISTRATIVE_STREAM_OUTPUT')
+            _preflight_require_v1(len(slot['raw'])==expected
+                and _scan_same_api_version(os.fstat(slot['fd']))==opened_version
+                and _scan_same_api_version(path.lstat())==before_version,
+                'LINUX_PREFLIGHT_ADMINISTRATIVE_STREAM_CHANGED')
+        except BaseException as error:
+            slot['errors'].append(error)
+            _mapper_slot_open_error_v1(slot,error)
+        finally:
+            if type(slot['fd']) is int and slot['fd']>=0:
+                slot['close_attempted']=True
+                try:
+                    os.close(slot['fd'])
+                    slot['closed']=True
+                except BaseException as error:slot['errors'].append(error)
+        _scan_raise_errors(slot['errors'])
+        _preflight_require_v1(_scan_same_api_version(path.lstat())==before_version,
+            'LINUX_PREFLIGHT_ADMINISTRATIVE_STREAM_CHANGED_AFTER_CLOSE')
+        slot['raw']=bytes(slot['raw']);slot['complete']=True
+        record['stream_pending']=False
+        return slot['raw']
+
+    def command(self,argv,*,settling=False,cwd=None,git_environment=None):
+        record=None
+        try:
+            _preflight_require_v1((os.getpid(),threading.get_ident())==(self.pid,self.thread),
+                'LINUX_PREFLIGHT_QUERY_CUSTODY_OR_DEADLINE')
+            self._command_call_record=None
+            self.check(settling=settling)
+            _preflight_require_v1(self._command_dispatch_settled_v1(),
+                'LINUX_PREFLIGHT_ADMINISTRATIVE_CUSTODY_UNRESOLVED')
+            _preflight_require_v1(type(argv) is tuple and argv and (argv[0] in (
+                '/usr/bin/systemctl','/usr/bin/systemd-run','/usr/bin/systemd-analyze',
+                '/usr/bin/busctl','/usr/bin/mount','/usr/bin/umount','/usr/bin/git')
+                or (argv[0]=='/usr/bin/journalctl' and argv==self._startup_argv and self.resource_depth==1)),
+                'LINUX_PREFLIGHT_ADMINISTRATIVE_PROGRAM')
+            for value in argv:
+                _preflight_require_v1(type(value) is str and '\0' not in value and '\n' not in value,
+                    'LINUX_PREFLIGHT_ADMINISTRATIVE_ARGUMENT')
+            environment=dict(PATH='/usr/bin',LANG='C.UTF-8',LC_ALL='C.UTF-8')
+            selected_cwd=Path('/') if cwd is None else Path(_linux_preflight_path_v1(str(cwd)))
+            if git_environment is not None:
+                _preflight_require_v1(argv[0]=='/usr/bin/git' and type(git_environment) is dict
+                    and all(k.startswith('GIT_') for k in git_environment),'LINUX_PREFLIGHT_GIT_OWNER_ENVIRONMENT')
+                environment.update(git_environment)
+            remaining_output=self.remaining_output()
+            _preflight_require_v1(remaining_output>=2,'LINUX_PREFLIGHT_QUERY_OUTPUT_EXHAUSTED')
+            stream_limit=min(1048576,remaining_output//2)
+            token=_LINUX_PREFLIGHT_PROCESS_V1.set(None)
+            errors=[]
+            try:
+                record=dict(run_id='linux-admin-'+str(self.pid),phase='fast-preflight-native-query',
+                    command_index=self.attempts,argv=argv,cwd=str(selected_cwd),associated=False,pending=True,
+                    stream_pending=False,receipt=None,streams={},errors=[])
+                self.command_supervisions.append(record)
+                self.command_dispatches+=1;self._last_command_supervision=self._command_call_record=record
+                self.last_command_receipt=None
+                observation={}
+                try:
+                    receipt=supervise_command(argv,cwd=selected_cwd,run_id=record['run_id'],phase=record['phase'],
+                        command_index=record['command_index'],evidence_root=self.evidence_root,timeout_seconds=10,
+                        execution_deadline_ns=self.deadline_ns,environment=environment,
+                        output_limits=dict(stdout_bytes=stream_limit,stderr_bytes=stream_limit,combined_output_bytes=2*stream_limit),
+                        output_observation=observation,mirror_stdout=False,mirror_stderr=False)
+                except BaseException as error:
+                    errors.append(error);record['errors'].append(error)
+                    try:
+                        attached=getattr(error,'command_receipt',None)
+                        if attached is not None:self._command_receipt_v1(record,attached)
+                    except BaseException as association_error:errors.append(association_error)
+                else:
+                    try:self._command_receipt_v1(record,receipt)
+                    except BaseException as association_error:errors.append(association_error)
+            finally:
+                try:_LINUX_PREFLIGHT_PROCESS_V1.reset(token)
+                except BaseException as reset_error:errors.append(reset_error)
+            _scan_raise_errors(errors)
+            _preflight_require_v1(not record['pending'],'LINUX_PREFLIGHT_ADMINISTRATIVE_CUSTODY_UNRESOLVED')
+            raw=self._command_stream_v1(record,'stdout',stream_limit,settling=settling)
+            error=self._command_stream_v1(record,'stderr',stream_limit,settling=settling)
+            self.observations.append(dict(kind='command',argv=argv,receipt=_json_compatible(receipt)))
+            _preflight_require_v1(not receipt.failure_class and receipt.native_exit_code==0,
+                'LINUX_PREFLIGHT_NATIVE_COMMAND:'+repr(argv)+':'+str(receipt.native_exit_code)+':'+repr(error))
+            self.check(settling=settling)
+            return raw
+        except BaseException as error:
+            if self.failure is None:self.failure=error
+            if record is not None and not any(error is old for old in record['errors']):record['errors'].append(error)
+            raise
 
 def _linux_preflight_mounts_v1(raw):
     _preflight_require_v1(type(raw) is bytes and len(raw) <= 1048576,'LINUX_PREFLIGHT_MOUNT_RESPONSE')
@@ -13640,52 +14834,92 @@ class _LinuxImmutableSourceBasisV2:
     """One process view of the controller-sealed original inode generation."""
 
     def __init__(self, lease, descriptor, run_id):
-        _preflight_require_v1(type(lease) is _LinuxPreflightHostLeaseV1, 'LINUX_V2_ACTUAL_LEASE_REQUIRED')
-        lease.check_parent(lease.root, lease.index)
-        descriptor = _linux_source_descriptor_v2(descriptor)
-        _preflight_require_v1(descriptor == lease.binding.get('native_basis') and descriptor['path'] == str(lease.control_path.parent.parent / 'declaration/source-basis.json'), 'LINUX_V2_CONTROLLER_DESCRIPTOR_BINDING')
-        self.lease, self.descriptor, self.root = (lease, dict(descriptor), lease.root)
-        self.pid, self.thread = (os.getpid(), threading.get_ident())
-        self.deadline_ns = lease.deadline_ns
-        self.failure = None
-        self.state = 'READABLE'
-        self.metadata_calls = 0
-        self.metadata_reserved = 0
-        self.metadata_rejected = 0
-        self.owned = {}
-        self.native = _LinuxSourceNativeV2(self._meta_attempt)
-        self.namespace = self._meta(os.stat, '/proc/self/ns/mnt')
-        self.user_namespace = self._meta(os.stat, '/proc/self/ns/user')
-        self.manifest_acquired_bytes = 0
-        self.manifest_retained_bytes = 0
-        path = Path(descriptor['path'])
-        fd = self._open_path(path)
+        # Admission precedes field resets and all callbacks/native acquisition.
+        actual_owner = (os.getpid(), threading.get_ident())
+        existing_owner = (getattr(self, 'pid', None), getattr(self, 'thread', None))
+        _preflight_require_v1(existing_owner in ((None, None), actual_owner),
+            'LINUX_V2_READER_CONSTRUCTION_OWNER')
+        _preflight_require_v1(not getattr(self, '_init_attempted_v2', False),
+            'LINUX_V2_READER_CONSTRUCTION_SINGLE_USE')
+        self.pid, self.thread = actual_owner
+        self._init_attempted_v2 = True
+        self._initializing_v2 = True
         try:
-            before = self._meta(os.fstat, fd)
-            _preflight_require_v1(list(_scan_same_api_version(before)) == descriptor['physical_version'] and before.st_uid == 0 and (stat.S_IMODE(before.st_mode) == 292) and (before.st_size == descriptor['byte_length']), 'LINUX_V2_MANIFEST_PHYSICAL_VERSION')
-            parts = []
-            while self.manifest_acquired_bytes < before.st_size:
-                _preflight_require_v1(time.monotonic_ns() < self.deadline_ns, 'LINUX_V2_MANIFEST_DEADLINE')
-                block = os.read(fd, min(65536, before.st_size - self.manifest_acquired_bytes))
-                self.manifest_acquired_bytes += len(block)
-                _preflight_require_v1(block and self.manifest_acquired_bytes <= before.st_size, 'LINUX_V2_MANIFEST_DELIVERY')
-                parts.append(block)
-            sentinel = os.read(fd, 1)
-            self.manifest_acquired_bytes += len(sentinel)
-            _preflight_require_v1(sentinel == b'' and list(_scan_same_api_version(self._meta(os.fstat, fd))) == descriptor['physical_version'] == list(_scan_same_api_version(self._meta(path.lstat))), 'LINUX_V2_MANIFEST_CHANGED')
-            self.raw = b''.join(parts)
-            self.manifest_retained_bytes = len(self.raw)
+            self.failure = None
+            self.state = 'READABLE'
+            self.metadata_calls = self.metadata_reserved = self.metadata_rejected = 0
+            self.owned = {}
+            self.close_errors = []
+            self._opening_record = None
+            self._iterator_records = []
+            self._iterator_acquisition = None
+            self._entry_depth = 0
+            self._resource_settlement_error = None
+            self.last_clock = -1
+            self.lease = lease
+            self.descriptor = self.root = self.deadline_ns = self.native = None
+            self.namespace = self.user_namespace = None
+            self.manifest_acquired_bytes = self.manifest_retained_bytes = 0
+            self.raw = None
+            self.files = self.directory_records = self.directories = None
+            self.run_id = run_id
+            self.count = None
+            try:
+                _preflight_require_v1(type(lease) is _LinuxPreflightHostLeaseV1, 'LINUX_V2_ACTUAL_LEASE_REQUIRED')
+                lease.check_parent(lease.root, lease.index)
+                descriptor = _linux_source_descriptor_v2(descriptor)
+                _preflight_require_v1(descriptor == lease.binding.get('native_basis') and descriptor['path'] == str(lease.control_path.parent.parent / 'declaration/source-basis.json'), 'LINUX_V2_CONTROLLER_DESCRIPTOR_BINDING')
+                self.descriptor, self.root = dict(descriptor), lease.root
+                self.deadline_ns = lease.deadline_ns
+                self.native = _LinuxSourceNativeV2(self._meta_attempt)
+                self.namespace = self._meta(os.stat, '/proc/self/ns/mnt')
+                self.user_namespace = self._meta(os.stat, '/proc/self/ns/user')
+                path = Path(descriptor['path'])
+                fd = self._open_path(path)
+                primary = None
+                try:
+                    before = self._meta(os.fstat, fd)
+                    _preflight_require_v1(list(_scan_same_api_version(before)) == descriptor['physical_version'] and before.st_uid == 0 and (stat.S_IMODE(before.st_mode) == 292) and (before.st_size == descriptor['byte_length']), 'LINUX_V2_MANIFEST_PHYSICAL_VERSION')
+                    parts = []
+                    while self.manifest_acquired_bytes < before.st_size:
+                        _preflight_require_v1(time.monotonic_ns() < self.deadline_ns, 'LINUX_V2_MANIFEST_DEADLINE')
+                        block = os.read(fd, min(65536, before.st_size - self.manifest_acquired_bytes))
+                        self.manifest_acquired_bytes += len(block)
+                        _preflight_require_v1(block and self.manifest_acquired_bytes <= before.st_size, 'LINUX_V2_MANIFEST_DELIVERY')
+                        parts.append(block)
+                    sentinel = os.read(fd, 1)
+                    self.manifest_acquired_bytes += len(sentinel)
+                    _preflight_require_v1(sentinel == b'' and list(_scan_same_api_version(self._meta(os.fstat, fd))) == descriptor['physical_version'] == list(_scan_same_api_version(self._meta(path.lstat))), 'LINUX_V2_MANIFEST_CHANGED')
+                    self.raw = b''.join(parts)
+                    self.manifest_retained_bytes = len(self.raw)
+                except BaseException as exc:
+                    primary = exc
+                    self._remember_failure_v2(exc)
+                    raise
+                finally:
+                    try:
+                        self._close(fd)
+                    except BaseException as cleanup:
+                        if primary is not None:
+                            _scan_raise_errors([primary, cleanup])
+                        raise
+                limits = dict(lexical_units=32 * 1024 ** 2, depth=64, quoted_bytes=32 * 1024 ** 2)
+                value, _ = _preflight_json_v1(self.raw, limits, lambda: _preflight_require_v1(time.monotonic_ns() < self.deadline_ns, 'LINUX_V2_PARSE_DEADLINE'))
+                self.files, self.directory_records, self.directories, count = _linux_source_manifest_v2(value)
+                _preflight_require_v1(value['repository_root'] == str(self.root) and value['index_path'] == str(lease.index) and (value['run_id'] == run_id) and (count == descriptor['catalog_entry_count']) and (value['source_generation_ns'] <= time.monotonic_ns()), 'LINUX_V2_MANIFEST_RUN_BINDING')
+                self.count = count
+                self.state = 'IN_USE'
+                self.check_live()
+            except BaseException as exc:
+                self._remember_failure_v2(exc)
+                raise
+        except BaseException as exc:
+            if hasattr(self, 'failure') and hasattr(self, 'state'):
+                self._remember_failure_v2(exc)
+            raise
         finally:
-            self._close(fd)
-        limits = dict(lexical_units=32 * 1024 ** 2, depth=64, quoted_bytes=32 * 1024 ** 2)
-        value, _ = _preflight_json_v1(self.raw, limits, lambda: _preflight_require_v1(time.monotonic_ns() < self.deadline_ns, 'LINUX_V2_PARSE_DEADLINE'))
-        self.files, self.directory_records, self.directories, count = _linux_source_manifest_v2(value)
-        _preflight_require_v1(value['repository_root'] == str(self.root) and value['index_path'] == str(lease.index) and (value['run_id'] == run_id) and (count == descriptor['catalog_entry_count']) and (value['source_generation_ns'] <= time.monotonic_ns()), 'LINUX_V2_MANIFEST_RUN_BINDING')
-        self.run_id = run_id
-        self.count = count
-        self.state = 'IN_USE'
-        self.last_clock = -1
-        self.check_live()
+            if (self.pid, self.thread) == actual_owner == (os.getpid(), threading.get_ident()):
+                self._initializing_v2 = False
 
     def check_live(self):
         if self.failure is not None:
@@ -13719,10 +14953,13 @@ class _LinuxImmutableSourceBasisV2:
 
     @contextmanager
     def open_entry(self, relative_path):
-        self.check_live()
-        row = self._entry(relative_path)
+        _preflight_require_v1((self.pid, self.thread) == (os.getpid(), threading.get_ident()),
+            'LINUX_V2_READER_OWNED_SCOPE')
+        self._entry_depth += 1
         opened = []; primary = None
         try:
+            self.check_live()
+            row = self._entry(relative_path)
             fd = self._open_path(self.root)
             opened.append(('.', fd))
             self.verify_fd('.', fd)
@@ -13739,61 +14976,93 @@ class _LinuxImmutableSourceBasisV2:
             self.check_live()
         except BaseException as exc:
             primary = exc
-            self.failure = exc
-            self.state = 'FAILED'
+            if (self.pid, self.thread) == (os.getpid(), threading.get_ident()):
+                self._remember_failure_v2(exc)
             raise
         finally:
-            try: self._close_many([fd for name,fd in reversed(opened)])
+            try:
+                self._close_many([fd for name,fd in reversed(opened)])
             except BaseException as close_error:
                 if primary is not None:
                     _scan_raise_errors([primary, close_error])
                 raise
+            finally:
+                # A foreign exit cannot change the legitimate owner's scope.
+                if (self.pid, self.thread) == (os.getpid(), threading.get_ident()):
+                    self._entry_depth -= 1
 
     def catalog_snapshot(self, paths, observation):
         """A complete metadata barrier with held parents; no application bytes."""
-        self.check_live()
-        _preflight_require_v1(type(observation) is _PreflightObservationV1 and observation.native_basis is self, 'LINUX_V2_CANDIDATE_OBSERVATION_OWNER')
-        expected = {p for p, r in self.files.items() if r[1] == 'WORKTREE'}
-        _preflight_require_v1(type(paths) is tuple and set(paths) == expected and (len(paths) == len(expected)), 'LINUX_V2_EXACT_CANDIDATE_CATALOG')
-        root_fd = self._open_path(self.root)
-
-        def walk(name, fd):
-            observation.reserve('attempts')
-            row = self._entry(name)
-            before = self._meta(os.fstat, fd)
-            _preflight_require_v1(_linux_source_row_v2(name, row[1], before, self.native.flags(fd)) == list(row), 'LINUX_V2_CANDIDATE_GENERATION:' + name)
-            if name in self.directories:
-                with self._scan(fd) as stream:
-                    observed = []
-                    while True:
-                        self._meta_attempt()
-                        try: entry = next(stream)
-                        except StopIteration: break
-                        observation.received('entries', 1)
-                        _preflight_require_v1(len(observed) < len(self.directories[name]), 'LINUX_V2_CANDIDATE_EXTRA_ENTRY')
-                        observed.append(entry.name)
-                        observation.retained_entries += 1
-                _preflight_require_v1(sorted(observed, key=lambda v: v.encode('utf-8')) == [n for n, k in self.directories[name]], 'LINUX_V2_CANDIDATE_ROSTER:' + name)
-                for child, kind in self.directories[name]:
-                    relative = child if name == '.' else name + '/' + child
-                    opened = self._meta(os.open, child, os.O_RDONLY | os.O_NOFOLLOW | os.O_CLOEXEC | os.O_NONBLOCK | (os.O_DIRECTORY if kind == 'directory' else 0), dir_fd=fd)
-                    try:
-                        walk(relative, opened)
-                    finally:
-                        self._close(opened)
-            _preflight_require_v1(_preflight_stamp_v1(self._meta(os.fstat, fd)) == _preflight_stamp_v1(before), 'LINUX_V2_CANDIDATE_CHANGED:' + name)
+        _preflight_require_v1((self.pid, self.thread) == (os.getpid(), threading.get_ident()),
+            'LINUX_V2_READER_OWNED_SCOPE')
+        self._entry_depth += 1
         try:
-            walk('.', root_fd)
-            root_info = self._meta(os.fstat, root_fd)
-            _preflight_require_v1(_preflight_stamp_v1(root_info) == _preflight_stamp_v1(self._meta(self.root.lstat)), 'LINUX_V2_CANDIDATE_ROOT_REPLACED')
             self.check_live()
-            return {p: self.files[p] for p in paths}
+            _preflight_require_v1(type(observation) is _PreflightObservationV1 and observation.native_basis is self, 'LINUX_V2_CANDIDATE_OBSERVATION_OWNER')
+            expected = {p for p, r in self.files.items() if r[1] == 'WORKTREE'}
+            _preflight_require_v1(type(paths) is tuple and set(paths) == expected and (len(paths) == len(expected)), 'LINUX_V2_EXACT_CANDIDATE_CATALOG')
+            root_fd = self._open_path(self.root)
+
+            def walk(name, fd):
+                observation.reserve('attempts')
+                row = self._entry(name)
+                before = self._meta(os.fstat, fd)
+                _preflight_require_v1(_linux_source_row_v2(name, row[1], before, self.native.flags(fd)) == list(row), 'LINUX_V2_CANDIDATE_GENERATION:' + name)
+                if name in self.directories:
+                    with self._scan(fd) as stream:
+                        observed = []
+                        while True:
+                            self._meta_attempt()
+                            try: entry = next(stream)
+                            except StopIteration: break
+                            observation.received('entries', 1)
+                            _preflight_require_v1(len(observed) < len(self.directories[name]), 'LINUX_V2_CANDIDATE_EXTRA_ENTRY')
+                            observed.append(entry.name)
+                            observation.retained_entries += 1
+                    _preflight_require_v1(sorted(observed, key=lambda v: v.encode('utf-8')) == [n for n, k in self.directories[name]], 'LINUX_V2_CANDIDATE_ROSTER:' + name)
+                    for child, kind in self.directories[name]:
+                        relative = child if name == '.' else name + '/' + child
+                        opened = self._meta(os.open, child, os.O_RDONLY | os.O_NOFOLLOW | os.O_CLOEXEC | os.O_NONBLOCK | (os.O_DIRECTORY if kind == 'directory' else 0), dir_fd=fd)
+                        child_error = None
+                        try:
+                            walk(relative, opened)
+                        except BaseException as exc:
+                            child_error = exc
+                            self._remember_failure_v2(exc)
+                            raise
+                        finally:
+                            try:
+                                self._close(opened)
+                            except BaseException as cleanup:
+                                if child_error is not None:
+                                    _scan_raise_errors([child_error, cleanup])
+                                raise
+                _preflight_require_v1(_preflight_stamp_v1(self._meta(os.fstat, fd)) == _preflight_stamp_v1(before), 'LINUX_V2_CANDIDATE_CHANGED:' + name)
+            primary = None
+            try:
+                walk('.', root_fd)
+                root_info = self._meta(os.fstat, root_fd)
+                _preflight_require_v1(_preflight_stamp_v1(root_info) == _preflight_stamp_v1(self._meta(self.root.lstat)), 'LINUX_V2_CANDIDATE_ROOT_REPLACED')
+                self.check_live()
+                return {p: self.files[p] for p in paths}
+            except BaseException as exc:
+                primary = exc
+                self._remember_failure_v2(exc)
+                raise
+            finally:
+                try:
+                    self._close(root_fd)
+                except BaseException as cleanup:
+                    if primary is not None:
+                        _scan_raise_errors([primary, cleanup])
+                    raise
         except BaseException as exc:
-            self.failure = exc
-            self.state = 'FAILED'
+            if (self.pid, self.thread) == (os.getpid(), threading.get_ident()):
+                self._remember_failure_v2(exc)
             raise
         finally:
-            self._close(root_fd)
+            if (self.pid, self.thread) == (os.getpid(), threading.get_ident()):
+                self._entry_depth -= 1
 
     def status(self, name, *, optional=False):
         self.check_live()
@@ -13837,57 +15106,261 @@ class _LinuxImmutableSourceBasisV2:
         self._meta_attempt()
         return function(*args, **kwargs)
 
+    def _remember_failure_v2(self, error):
+        if self.failure is None:
+            self.failure = error
+        self.state = 'FAILED'
+
+    def _remember_close_error_v2(self, error):
+        if all(error is not previous for previous in self.close_errors):
+            self.close_errors.append(error)
+        self._remember_failure_v2(error)
+
+    def _resources_require_retention_v2(self):
+        # Pure same-owner resource facts: no status query, read or extra barrier.
+        if (getattr(self, 'pid', None), getattr(self, 'thread', None)) != (os.getpid(), threading.get_ident()):
+            return True
+        fields = ('_initializing_v2', 'owned', 'close_errors', '_opening_record', '_iterator_records',
+            '_iterator_acquisition', '_entry_depth', '_resource_settlement_error')
+        if any(not hasattr(self, name) for name in fields):
+            return True
+        if (type(self._initializing_v2) is not bool
+                or type(self.owned) is not dict or type(self.close_errors) is not list
+                or type(self._iterator_records) is not list
+                or type(self._entry_depth) is not int or self._entry_depth < 0):
+            return True
+        return bool(self._initializing_v2 or self.owned or self.close_errors or self._opening_record is not None
+            or self._iterator_records or self._iterator_acquisition is not None
+            or self._entry_depth or self._resource_settlement_error is not None)
+
+    def _settle_resources_v2(self):
+        _preflight_require_v1((self.pid, self.thread) == (os.getpid(), threading.get_ident()),
+            'LINUX_V2_READER_OWNED_CLOSE')
+        _preflight_require_v1(getattr(self, '_initializing_v2', True) is False,
+            'LINUX_V2_READER_CONSTRUCTION_ACTIVE')
+        if self._resource_settlement_error is not None:
+            raise self._resource_settlement_error
+        iterator_acquisition = self._iterator_acquisition
+        if iterator_acquisition is not None:
+            original = iterator_acquisition.get('acquisition_error')
+            if isinstance(original, BaseException):
+                self._resource_settlement_error = original
+                raise original
+        # A live yielded/acquiring scope remains owned by its original finally.
+        # Rejection precedes every close latch, counter and syscall.
+        _preflight_require_v1(self._entry_depth == 0 and self._iterator_acquisition is None
+            and all(not record['acquiring'] and record['yielded'] is False
+                for record in self._iterator_records), 'LINUX_V2_READER_SCOPE_UNSETTLED')
+        pending = self._opening_record
+        if pending is not None:
+            _preflight_require_v1(not pending['acquiring'], 'LINUX_V2_READER_ACQUISITION_UNSETTLED')
+            fd = pending['fd']
+            if type(fd) is not int or fd < 0:
+                original = pending.get('acquisition_error')
+                if not isinstance(original, BaseException):
+                    try:
+                        _preflight_require_v1(False, 'LINUX_V2_READER_DESCRIPTOR')
+                    except BaseException as exc:
+                        original = exc
+                self._resource_settlement_error = original
+                raise original
+        errors = []
+        for record in tuple(self._iterator_records):
+            try:
+                self._close_iterator_v2(record)
+            except BaseException as exc:
+                errors.append(exc)
+        handles = list(self.owned)
+        if pending is not None and pending['fd'] not in self.owned:
+            handles.append(pending['fd'])
+        for fd in handles:
+            try:
+                self._close(fd)
+            except BaseException as exc:
+                errors.append(exc)
+        errors.extend(self.close_errors)
+        if errors:
+            try:
+                _scan_raise_errors(errors)
+            except BaseException as exc:
+                self._resource_settlement_error = exc
+                raise
+
     def _open(self, *args, **kwargs):
-        _preflight_require_v1(len(self.owned)<1023,'LINUX_V2_READER_DESCRIPTOR_CAPACITY')
+        _preflight_require_v1((self.pid, self.thread) == (os.getpid(), threading.get_ident()),
+            'LINUX_V2_READER_OWNED_OPEN')
+        if self.failure is not None:
+            raise self.failure
+        _preflight_require_v1(self._opening_record is None and len(self.owned) < 1023,
+            'LINUX_V2_READER_DESCRIPTOR_CAPACITY')
         self._reserve(2)
         self.metadata_calls += 1
-        fd=os.open(*args, **kwargs)
-        self.owned[fd]=True
-        return fd
-
-    def _close(self, fd):
-        _preflight_require_v1(fd in self.owned and self.pid==os.getpid()
-            and self.thread==threading.get_ident(),'LINUX_V2_READER_OWNED_CLOSE')
-        del self.owned[fd]
-        self.metadata_calls += 1
-        try: os.close(fd)
+        record = dict(fd=None, acquiring=True, close_attempted=False,
+            closed=False, error=None, acquisition_error=None)
+        self._opening_record = record
+        try:
+            fd = os.open(*args, **kwargs)
+            record['fd'] = fd
+            record['acquiring'] = False
+            _preflight_require_v1(type(fd) is int and fd >= 0, 'LINUX_V2_READER_DESCRIPTOR')
+            self.owned[fd] = record
+            self._opening_record = None
+            return fd
         except BaseException as exc:
-            if self.failure is None:self.failure=exc
-            self.state='FAILED'
+            # No descriptor is invented when the call did not deliver one.
+            # Boxing/interruption or an unknown callback can fail after kernel
+            # acquisition, so absence of a Python return is not release proof.
+            record['acquiring'] = False
+            if record['acquisition_error'] is None:
+                record['acquisition_error'] = exc
+            self._remember_failure_v2(exc)
             raise
 
+    def _close(self, fd):
+        _preflight_require_v1((self.pid, self.thread) == (os.getpid(), threading.get_ident()),
+            'LINUX_V2_READER_OWNED_CLOSE')
+        # Exact admission precedes lookup: True must not alias descriptor 1.
+        if type(fd) is not int or fd < 0:
+            pending = self._opening_record
+            if (type(pending) is dict and type(fd) in (int, bool)
+                    and type(pending.get('fd')) is type(fd) and pending['fd'] == fd):
+                original = pending.get('acquisition_error')
+                if isinstance(original, BaseException):
+                    raise original
+            _preflight_require_v1(False, 'LINUX_V2_READER_DESCRIPTOR')
+        record = self.owned.get(fd)
+        if record is None:
+            pending = self._opening_record
+            if pending is not None and type(pending.get('fd')) is int and pending['fd'] == fd:
+                record = pending
+        _preflight_require_v1(type(record) is dict and type(record.get('fd')) is int
+            and record['fd'] == fd and not record['acquiring'] and not record['closed'],
+            'LINUX_V2_READER_OWNED_CLOSE')
+        if record['close_attempted']:
+            if record['error'] is not None:
+                raise record['error']
+            raise RuntimeError('LINUX_V2_READER_CLOSE_UNPROVEN')
+        record['close_attempted'] = True
+        self.metadata_calls += 1
+        try:
+            os.close(fd)
+        except BaseException as exc:
+            record['error'] = exc
+            self._remember_close_error_v2(exc)
+            raise
+        else:
+            record['closed'] = True
+            if self.owned.get(fd) is record:
+                del self.owned[fd]
+            if self._opening_record is record:
+                self._opening_record = None
+
     def _close_many(self, handles):
-        errors=[]
+        errors = []
         for fd in handles:
-            try:self._close(fd)
-            except BaseException as exc:errors.append(exc)
+            try:
+                # _close performs exact admission before any mapping lookup.
+                self._close(fd)
+            except BaseException as exc:
+                errors.append(exc)
         _scan_raise_errors(errors)
+
+    def _close_iterator_v2(self, record):
+        _preflight_require_v1((self.pid, self.thread) == (os.getpid(), threading.get_ident())
+            and any(record is item for item in self._iterator_records)
+            and record['stream'] is not None and not record['acquiring']
+            and record['yielded'] is False and not record['closed'],
+            'LINUX_V2_READER_OWNED_ITERATOR_CLOSE')
+        _preflight_require_v1(record['stream'] is record['original_stream']
+            and record['close_callable'] is record['original_close_callable']
+            and record['close_callable'] is not None
+            and getattr(record['close_callable'], '__self__', None) is record['original_stream'],
+            'LINUX_V2_READER_ORIGINAL_ITERATOR_CLOSE')
+        if record['close_attempted']:
+            if record['error'] is not None:
+                raise record['error']
+            raise RuntimeError('LINUX_V2_READER_ITERATOR_CLOSE_UNPROVEN')
+        record['close_attempted'] = True
+        self.metadata_calls += 1
+        try:
+            record['close_callable']()
+        except BaseException as exc:
+            record['error'] = exc
+            self._remember_close_error_v2(exc)
+            raise
+        else:
+            record['closed'] = True
+            self._iterator_records[:] = [item for item in self._iterator_records if item is not record]
 
     @contextmanager
     def _scan(self, fd):
+        _preflight_require_v1((self.pid, self.thread) == (os.getpid(), threading.get_ident())
+            and self._iterator_acquisition is None, 'LINUX_V2_READER_OWNED_ITERATOR')
+        if self.failure is not None:
+            raise self.failure
         self._reserve(2)
         self.metadata_calls += 1
-        stream=os.scandir(fd)
-        try: yield stream
+        record = dict(stream=None, original_stream=None, close_callable=None,
+            original_close_callable=None, acquiring=True, yielded=False,
+            close_attempted=False, closed=False, error=None, acquisition_error=None)
+        self._iterator_records.append(record)
+        self._iterator_acquisition = record
+        primary = None
+        try:
+            stream = os.scandir(fd)
+            record['stream'] = stream
+            record['original_stream'] = stream
+            # Retain the actual returned object before fallible attribute work.
+            close_callable = stream.close
+            record['close_callable'] = close_callable
+            record['original_close_callable'] = close_callable
+            _preflight_require_v1(getattr(close_callable, '__self__', None) is stream,
+                'LINUX_V2_READER_ORIGINAL_ITERATOR_CLOSE')
+            record['acquiring'] = False
+            self._iterator_acquisition = None
+            record['yielded'] = True
+            yield stream
+        except BaseException as exc:
+            primary = exc
+            if (self.pid, self.thread) == (os.getpid(), threading.get_ident()):
+                if record['acquiring']:
+                    record['acquiring'] = False
+                    record['acquisition_error'] = exc
+                self._remember_failure_v2(exc)
+            raise
         finally:
-            self.metadata_calls += 1
-            stream.close()
+            if self._iterator_acquisition is None:
+                try:
+                    _preflight_require_v1((self.pid, self.thread) == (os.getpid(), threading.get_ident()),
+                        'LINUX_V2_READER_OWNED_CLOSE')
+                    record['yielded'] = False
+                    self._close_iterator_v2(record)
+                except BaseException as cleanup:
+                    if primary is not None:
+                        _scan_raise_errors([primary, cleanup])
+                    raise
 
     def _open_path(self, path):
-        opened=[]
+        opened = []
         try:
-            for i,component in enumerate(Path(path).parts):
-                opened.append(self._open(component,os.O_RDONLY|os.O_NOFOLLOW|os.O_CLOEXEC
-                    |(os.O_DIRECTORY if i<len(Path(path).parts)-1 else 0),
+            for i, component in enumerate(Path(path).parts):
+                opened.append(self._open(component, os.O_RDONLY | os.O_NOFOLLOW | os.O_CLOEXEC
+                    | (os.O_DIRECTORY if i < len(Path(path).parts) - 1 else 0),
                     **({} if not opened else dict(dir_fd=opened[-1]))))
             self._close_many(reversed(opened[:-1]))
             return opened[-1]
         except BaseException as exc:
-            errors=[exc]
-            for fd in reversed(opened):
-                if fd in self.owned:
-                    try:self._close(fd)
-                    except BaseException as cleanup:errors.append(cleanup)
+            errors = [exc]
+            # Previously attempted closes remain recorded and are never retried.
+            # A target/other parent acquired before that failure is still closed.
+            handles = [fd for fd in reversed(opened)
+                if type(fd) is int and fd >= 0 and fd in self.owned
+                    and not self.owned[fd]['close_attempted']]
+            try:
+                self._close_many(handles)
+            except BaseException as cleanup:
+                errors.append(cleanup)
+            self._remember_failure_v2(exc)
             _scan_raise_errors(errors)
 
 
@@ -15879,8 +17352,8 @@ print(json.dumps(probe),flush=True)
             self.query.last_command_receipt=None
             try:self.query.command(self.launch_argv)
             finally:
-                observed=self.query.last_command_receipt
-                if observed is not None and tuple(observed.argv)==self.launch_argv:
+                observed=self.query.command_receipt_for_argv_v1(self.launch_argv)
+                if observed is not None:
                     self.launcher_receipt=observed
                     self.history.append(dict(original_launch_receipt=_json_compatible(observed)))
             status = self.show(self.name+'.service')

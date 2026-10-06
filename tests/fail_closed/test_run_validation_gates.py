@@ -7989,6 +7989,10 @@ def test_runner_restores_only_runtime_side_effects_before_pr142_pr143_and_final_
                 native.root, native.run_id = mapper_root, mapper_paths.run_id
                 native.pid, native.thread = os.getpid(), threading.get_ident()
                 native.deadline_ns, native.failure, native.state = mapper_deadline, None, "IN_USE"
+                native.owned, native.close_errors, native._iterator_records = {}, [], []
+                native._initializing_v2 = False
+                native._opening_record = native._iterator_acquisition = native._resource_settlement_error = None
+                native._entry_depth = 0
                 native.lease = reliability._LinuxPreflightHostLeaseV1.__new__(reliability._LinuxPreflightHostLeaseV1)
                 native.lease.root, native.lease.index = mapper_root, mapper_candidate.index_path
                 native.lease.failure, native.lease.deadline_ns = None, mapper_deadline
@@ -8022,15 +8026,57 @@ def test_runner_restores_only_runtime_side_effects_before_pr142_pr143_and_final_
                 native.check_live, native.verify_fd = native_live, native_verify
                 @contextmanager
                 def native_open(name):
-                    descriptor = reliability._open_regular_worktree_descriptor(mapper_root / name)
+                    # Explicit syscall-only no-child fixture, not a native Linux
+                    # lease. Reflect its actual acquisition/scope in the original
+                    # native owner's pure predicate without changing any M/read
+                    # accounting, verification calls or selected source bytes.
+                    record = dict(fd=None, acquiring=True, close_attempted=False,
+                        closed=False, error=None, acquisition_error=None)
+                    native._entry_depth += 1
+                    native._opening_record = record
+                    errors = []
+                    descriptor = None
                     try:
-                        native_verify(name, descriptor)
-                        if fault == "comparison-open": raise verify_fault
-                        yield descriptor
-                        native_verify(name, descriptor)
-                        if fault == "comparison-postread": raise verify_fault
+                        try:
+                            descriptor = reliability._open_regular_worktree_descriptor(mapper_root / name)
+                            record['fd'] = descriptor
+                            record['acquiring'] = False
+                            if type(descriptor) is not int or descriptor < 0:
+                                raise ValueError("synthetic native actual descriptor required")
+                            native.owned[descriptor] = record
+                            native._opening_record = None
+                            native_verify(name, descriptor)
+                            if fault == "comparison-open": raise verify_fault
+                            assert native._resources_require_retention_v2()
+                            yield descriptor
+                            native_verify(name, descriptor)
+                            if fault == "comparison-postread": raise verify_fault
+                        except BaseException as error:
+                            if native.failure is None:
+                                native.failure = error
+                            native.state = "FAILED"
+                            if native._opening_record is record:
+                                record['acquiring'] = False
+                                record['acquisition_error'] = error
+                            errors.append(error)
+                        if type(descriptor) is int and descriptor >= 0:
+                            record['close_attempted'] = True
+                            try:
+                                os.close(descriptor)
+                            except BaseException as error:
+                                record['error'] = error
+                                native.close_errors.append(error)
+                                if native.failure is None:
+                                    native.failure = error
+                                native.state = "FAILED"
+                                errors.append(error)
+                            else:
+                                record['closed'] = True
+                                if native.owned.get(descriptor) is record:
+                                    del native.owned[descriptor]
+                        reliability._scan_raise_errors(errors)
                     finally:
-                        os.close(descriptor)
+                        native._entry_depth -= 1
                 def native_status(name):
                     if fault == "final-barrier": raise verify_fault
                     with native_open(name): pass
@@ -8151,10 +8197,378 @@ def test_runner_restores_only_runtime_side_effects_before_pr142_pr143_and_final_
             assert reserved == (mapper_candidate.remaining_read_bytes, mapper_candidate.snapshot_byte_limit,
                 mapper_candidate._mapper_activation_usage_v1)
 
+
+    # Actual finite M resources, with explicit no-child fault ports. These
+    # component cases grant no native lease, process proof or domain acceptance.
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane import serialization
+    m_custody_faults = ('normal', 'check-recursion', 'parse-recursion',
+        'target-close-recursion', 'basis-close-recursion', 'target-close-error',
+        'basis-close-error', 'body-and-close', 'constructor-and-close', 'open-no-return')
+    for m_number, m_fault in enumerate(m_custody_faults):
+        m_root = tmp_path / ('m-owned-' + str(m_number)); m_root.mkdir()
+        m_paths, m_probe = reliability.resolve_validation_run_paths(m_root,
+            explicit_process_root=(tmp_path / ('m-owned-p-' + str(m_number))).resolve(),
+            run_id='run_mapper_owned_' + str(m_number), projected_relative_paths=('mapper-fixture.json',))
+        m_plan = reliability.build_command_evidence_plan(run_id=m_paths.run_id,
+            phase='deterministic-validators-a', commands=mapper_vectors, cwd=m_root)
+        m_deadline = runner.time.monotonic_ns() + 60_000_000_000
+        with monkeypatch.context() as m_patch:
+            m_suppliers = _central_supervision_test_adapter(resolve_paths=False,
+                deadline_ns=m_deadline, patcher=m_patch)
+            m_templates = m_suppliers['mapper_read_source'](m_paths, 'deterministic-validators-a', m_plan)
+            m_template = m_templates['3']; m_profile = m_template['basis']
+            m_reference = Path(m_profile['basis']); m_target = m_root / 'mapper-fixture.json'
+            m_real_open, m_real_close = os.open, os.close
+            m_reader = reliability._MapperDiskBasisV1.__new__(reliability._MapperDiskBasisV1)
+            m_body = OSError('synthetic mapper owned body')
+            m_close_error = OSError('synthetic mapper owned close')
+            m_calls = []; m_held = []; m_rejections = []
+            m_fail_close = [False]
+            def m_reject_read():
+                old = dict(m_reader.counters)
+                old_basis = m_reader.fd
+                with pytest.raises(ValueError, match='BASIS_REENTRANT_OR_UNBOUND_READ'):
+                    m_reader.read_json(m_target.name, json.loads)
+                assert m_reader.counters == old and m_reader.fd is old_basis
+                m_rejections.append('read')
+            def m_open(path, flags, *args, **kwargs):
+                if m_fault == 'open-no-return' and Path(path) == m_target:
+                    m_calls.append(('unreturned-open', Path(path)))
+                    raise MemoryError('synthetic no-child no-return open')
+                descriptor = m_real_open(path, flags, *args, **kwargs)
+                m_calls.append(('open', descriptor, Path(path)))
+                return descriptor
+            def m_close(descriptor):
+                m_calls.append(('close', descriptor))
+                is_target = m_reader.target_slot is not None and descriptor is m_reader.target_slot['returned_fd']
+                is_basis = m_reader.basis_slot is not None and descriptor is m_reader.basis_slot['returned_fd']
+                if (m_fault == 'target-close-recursion' and is_target
+                        or m_fault == 'basis-close-recursion' and is_basis):
+                    m_reject_read()
+                if (m_fault in ('target-close-error','body-and-close') and is_target
+                        or m_fault in ('basis-close-error','constructor-and-close') and is_basis):
+                    if not m_fail_close[0]:
+                        m_fail_close[0] = True; m_held.append(descriptor)
+                        raise m_close_error
+                m_real_close(descriptor)
+            m_patch.setattr(reliability.os, 'open', m_open)
+            m_patch.setattr(reliability.os, 'close', m_close)
+            original_check = reliability._MapperDiskBasisV1._check
+            check_attempts = []
+            def m_check(value):
+                if value is m_reader and m_fault == 'check-recursion' and not check_attempts:
+                    check_attempts.append('before-open'); m_reject_read()
+                original_check(value)
+            m_patch.setattr(reliability._MapperDiskBasisV1, '_check', m_check)
+            original_inherit = reliability.os.set_inheritable
+            def m_inherit(descriptor, inherited):
+                if m_fault == 'constructor-and-close' and descriptor is m_reader.fd:
+                    raise m_body
+                original_inherit(descriptor, inherited)
+            m_patch.setattr(reliability.os, 'set_inheritable', m_inherit)
+            if m_fault == 'constructor-and-close':
+                with pytest.raises(BaseExceptionGroup) as m_caught:
+                    reliability._MapperDiskBasisV1.__init__(m_reader, m_profile,
+                        expected_position=m_template['original_position'],
+                        expected_generation=m_profile['generation'], clock=runner.time.monotonic_ns)
+                assert mapper_error_leaves(m_caught.value) == (m_body, m_close_error)
+            else:
+                reliability._MapperDiskBasisV1.__init__(m_reader, m_profile,
+                    expected_position=m_template['original_position'],
+                    expected_generation=m_profile['generation'], clock=runner.time.monotonic_ns)
+                before_init = dict(m_reader.__dict__)
+                with pytest.raises(ValueError, match='BASIS_INITIALIZATION_NOT_RETRIED'):
+                    reliability._MapperDiskBasisV1.__init__(m_reader, m_profile,
+                        expected_position=m_template['original_position'],
+                        expected_generation=m_profile['generation'], clock=runner.time.monotonic_ns)
+                assert m_reader.__dict__ == before_init
+                def m_parser(text):
+                    if m_fault == 'parse-recursion': m_reject_read()
+                    if m_fault == 'body-and-close': raise m_body
+                    return json.loads(text)
+                if m_fault == 'target-close-error':
+                    with pytest.raises(OSError) as m_caught: m_reader.read_json(m_target.name, m_parser)
+                    assert m_caught.value is m_close_error
+                elif m_fault == 'body-and-close':
+                    with pytest.raises(BaseExceptionGroup) as m_caught: m_reader.read_json(m_target.name, m_parser)
+                    assert mapper_error_leaves(m_caught.value) == (m_body, m_close_error)
+                elif m_fault == 'open-no-return':
+                    with pytest.raises(MemoryError) as m_caught: m_reader.read_json(m_target.name, m_parser)
+                    assert type(m_caught.value) is MemoryError
+                    assert m_reader.target_slot['returned_fd'] is None and m_reader.target_slot['open_unknown']
+                else:
+                    assert m_reader.read_json(m_target.name, m_parser) == {}
+            if m_fault in ('target-close-error','body-and-close','constructor-and-close','open-no-return'):
+                assert reliability._MapperDiskBasisV1._resources_require_retention_v1(m_reader)
+                close_count = sum(row[0] == 'close' for row in m_calls)
+                with pytest.raises(BaseException): reliability._MapperDiskBasisV1.close(m_reader)
+                assert sum(row[0] == 'close' for row in m_calls) == close_count
+            elif m_fault == 'basis-close-error':
+                with pytest.raises(OSError) as m_caught: reliability._MapperDiskBasisV1.close(m_reader)
+                assert m_caught.value is m_close_error
+                count = sum(row[0] == 'close' for row in m_calls)
+                with pytest.raises(OSError) as m_retry: reliability._MapperDiskBasisV1.close(m_reader)
+                assert m_retry.value is m_close_error and sum(row[0] == 'close' for row in m_calls) == count
+            else:
+                reliability._MapperDiskBasisV1.close(m_reader)
+                assert m_reader.closed and not reliability._MapperDiskBasisV1._resources_require_retention_v1(m_reader)
+            if m_fault in ('check-recursion','parse-recursion','target-close-recursion','basis-close-recursion'):
+                assert m_rejections
+            # The explicit no-child oracle permits disposal of only the exact
+            # fault-fixture fd after retention/no-retry decisions were proved.
+            for descriptor in m_held:
+                os.fstat(descriptor); m_real_close(descriptor)
+            if m_fault in ('target-close-error','body-and-close','open-no-return') and m_reader.fd is not None:
+                os.fstat(m_reader.fd); m_real_close(m_reader.fd)
+            assert m_reference.read_bytes() == m_target.read_bytes() == b'{}\n'
+
+    # Each original activation owns one final reserved read. A later safe
+    # barrier extends receipt/proof membership without rereading earlier M.
+    m_root = tmp_path / 'm-proof-prefix'; m_root.mkdir()
+    m_paths, m_probe = reliability.resolve_validation_run_paths(m_root,
+        explicit_process_root=(tmp_path / 'm-proof-prefix-p').resolve(),
+        run_id='run_mapper_final_prefix', projected_relative_paths=('mapper-fixture.json',))
+    m_phase = 'deterministic-validators-a'
+    m_plan = reliability.build_command_evidence_plan(run_id=m_paths.run_id,
+        phase=m_phase, commands=mapper_vectors, cwd=m_root)
+    with monkeypatch.context() as m_patch:
+        m_suppliers = _central_supervision_test_adapter(resolve_paths=False,
+            deadline_ns=runner.time.monotonic_ns()+60_000_000_000, patcher=m_patch)
+        m_templates = m_suppliers['mapper_read_source'](m_paths, m_phase, m_plan)
+        m_candidate = m_suppliers['candidate_source'](m_root, m_plan)
+        m_records = {}; m_receipts = []; m_counts = {}
+        m_sup = dict(paths=m_paths, phase=m_phase, pending=False, receipt=None, errors=[], candidate_custody=m_candidate)
+        m_patch.setattr(runner, '_ACTIVE_MAPPER_READ_PROFILES_V1', m_templates)
+        m_patch.setattr(runner, '_ACTIVE_MAPPER_OCCURRENCES_V1', m_records)
+        m_patch.setattr(runner, '_LAST_EXPECTED_COMMAND_PLAN', m_plan)
+        original_verify = reliability._MapperOccurrenceRecordV1.verify
+        def m_verify(value, **kwargs):
+            m_counts[value.identity] = m_counts.get(value.identity, 0) + 1
+            return original_verify(value, **kwargs)
+        m_patch.setattr(reliability._MapperOccurrenceRecordV1, 'verify', m_verify)
+        for m_index in (1, 2):
+            m_entry = m_plan[m_index-1]
+            m_candidate.begin_occurrence(m_index, m_entry, environment={}, timeout_seconds=30, scratch_roots=())
+            m_record = reliability._mapper_publish_occurrence_v1(m_templates[str(m_index)], candidate=m_candidate, entry=m_entry)
+            m_records[str(m_index)] = m_record
+            m_candidate.end_occurrence(m_index, m_entry)
+            m_receipt = reliability.CommandExecutionReceiptV1(schema_version=1, run_id=m_paths.run_id,
+                phase=m_phase, command_index=m_index, argv=m_entry.argv, cwd=str(m_root),
+                pid=7822, platform=os.name, start_time_utc='2026-08-24T00:00:00Z',
+                end_time_utc='2026-08-24T00:00:01Z', elapsed_monotonic_seconds=1.0,
+                native_exit_code=0, start_failure_class=None, timeout_seconds_or_null=None,
+                timeout_state='NOT_CONFIGURED', termination_state='NOT_REQUIRED',
+                stdout_path=str(m_paths.evidence_root/('command-'+str(m_index)+'.stdout.bin')),
+                stderr_path=str(m_paths.evidence_root/('command-'+str(m_index)+'.stderr.bin')),
+                stdout_byte_count=0, stderr_byte_count=0, stdout_required_markers=(),
+                stdout_marker_state='NOT_REQUIRED', stderr_was_nonempty=False, failure_class=None,
+                fixed_environment_controls=((reliability._MAPPER_ACTIVATION_ENV_V1, m_record.identity),))
+            m_receipts.append(m_receipt)
+            # New M members after an intermediate restoration need no new
+            # quota and receive no early final-byte proof. These receipts are
+            # no-child custody oracles, not native/domain acceptance.
+            assert runner._check_mapper_barrier_v1(m_sup, m_paths, m_phase, m_plan, tuple(m_receipts)) is m_candidate
+            assert all(count == 1 for count in m_counts.values())
+            assert 'mapper_final_review' not in m_sup
+            assert not runner._candidate_requires_retention_v1(m_sup)
+        m_proof = runner._settle_mapper_occurrences_v1(m_sup, m_paths, m_phase, m_plan, tuple(m_receipts))
+        assert m_proof['completed'] and set(m_proof['members']) == set(m_records)
+        assert all(count == 2 for count in m_counts.values())  # publication + final, no child oracle read.
+        before_counts = dict(m_counts)
+        assert runner._settle_mapper_occurrences_v1(m_sup, m_paths, m_phase, m_plan, tuple(m_receipts)) is m_proof
+        assert m_counts == before_counts
+        m_token = reliability._MAPPER_FINAL_EVIDENCE_V1.set(m_proof)
+        try:
+            reliability._mapper_occurrence_evidence_v1(m_paths, m_templates, m_records, tuple(m_receipts))
+            assert m_counts == before_counts and m_proof['used']
+            with pytest.raises(reliability.ValidationReliabilityError):
+                reliability._mapper_occurrence_evidence_v1(m_paths, m_templates, m_records, tuple(m_receipts))
+        finally: reliability._MAPPER_FINAL_EVIDENCE_V1.reset(m_token)
+        assert reliability._MAPPER_FINAL_EVIDENCE_V1.get() is None
+
+        # A mutated record is rejected before another byte read. The exact
+        # same SUP keeps the association error even if its C return is later
+        # missing; these remain explicit no-child retention oracles.
+        bad_sup = dict(m_sup); bad_sup['errors'] = []
+        bad_sup.pop('mapper_settlement_error', None)
+        with monkeypatch.context() as bad_record:
+            bad_record.setitem(m_records, '1', object())
+            with pytest.raises(ValueError) as bad_assoc:
+                runner._check_mapper_barrier_v1(bad_sup,m_paths,m_phase,m_plan,tuple(m_receipts))
+            assert bad_sup['mapper_settlement_error'] is bad_assoc.value
+            assert bad_sup['errors'] == [bad_assoc.value] and m_counts == before_counts
+            bad_sup['candidate_custody'] = None
+            assert runner._candidate_requires_retention_v1(bad_sup)
+            with pytest.raises(ValueError) as bad_again:
+                runner._settle_mapper_occurrences_v1(bad_sup,m_paths,m_phase,m_plan,tuple(m_receipts))
+            assert bad_again.value is bad_assoc.value and m_counts == before_counts
+        with monkeypatch.context() as missing_member:
+            missing_member.delitem(m_candidate._original_mapper_custody_v1[1], 'reader')
+            assert reliability._mapper_parent_resources_retained_v1(m_candidate) is True
+            assert m_counts == before_counts
+        with pytest.raises(RuntimeError, match='MAPPER_FINAL_CUSTODY_UNRESOLVED'):
+            runner._settle_mapper_occurrences_v1(None,m_paths,m_phase,m_plan,tuple(m_receipts))
+        assert m_counts == before_counts
+
+    # The original bound scope owns its real mutex and actual tuple through
+    # initializer/body/close faults. The lock here is an owned no-child fixture.
+    for s_number, s_fault in enumerate(('normal','body-and-basis-close','constructor-and-basis-close')):
+        s_root = tmp_path / ('m-bound-' + str(s_number)); s_root.mkdir()
+        s_paths, _s_probe = reliability.resolve_validation_run_paths(s_root,
+            explicit_process_root=(tmp_path / ('m-bound-p-' + str(s_number))).resolve(),
+            run_id='run_mapper_bound_'+str(s_number), projected_relative_paths=('mapper-fixture.json',))
+        s_plan = reliability.build_command_evidence_plan(run_id=s_paths.run_id,
+            phase='deterministic-validators-a', commands=mapper_vectors, cwd=s_root)
+        s_original_binding = serialization._REPORT_READ_BINDING_V1
+        with monkeypatch.context() as s_patch:
+            s_patch.setattr(serialization, '_REPORT_READ_BINDING_V1', s_original_binding)
+            s_suppliers = _central_supervision_test_adapter(resolve_paths=False,
+                deadline_ns=runner.time.monotonic_ns()+60_000_000_000, patcher=s_patch)
+            s_template = s_suppliers['mapper_read_source'](s_paths,'deterministic-validators-a',s_plan)['3']
+            s_lock = threading.Lock(); s_patch.setattr(reliability,'_MAPPER_READ_LOCK_V1',s_lock)
+            s_original_close, s_original_inherit = os.close, os.set_inheritable
+            s_held = []; s_close_calls = []; s_body = OSError('synthetic bound body'); s_close = OSError('synthetic bound close')
+            def s_current():
+                value = serialization._REPORT_READ_BINDING_V1
+                assert type(value) is tuple and len(value) == 2
+                return value[1]
+            def s_close_port(fd):
+                value = s_current(); s_close_calls.append(fd)
+                if s_fault != 'normal' and fd is value.fd:
+                    s_held.append(fd); raise s_close
+                s_original_close(fd)
+            def s_inherit_port(fd, inherited):
+                if s_fault == 'constructor-and-basis-close' and fd is s_current().fd: raise s_body
+                s_original_inherit(fd,inherited)
+            s_patch.setattr(reliability.os,'close',s_close_port)
+            s_patch.setattr(reliability.os,'set_inheritable',s_inherit_port)
+            if s_fault == 'normal':
+                with reliability._mapper_bound_reads_v1(s_template) as value:
+                    assert s_lock.locked() and s_current() is value
+                    assert value.read_json('mapper-fixture.json',json.loads) == {}
+                assert not s_lock.locked() and serialization._REPORT_READ_BINDING_V1 is None
+            else:
+                with pytest.raises(BaseExceptionGroup) as s_caught:
+                    with reliability._mapper_bound_reads_v1(s_template):
+                        raise s_body
+                assert mapper_error_leaves(s_caught.value) == (s_body,s_close)
+                assert s_lock.locked() and reliability._MapperDiskBasisV1._resources_require_retention_v1(s_current())
+                before = tuple(s_close_calls)
+                with pytest.raises(ValueError,match='MAPPER_CONCURRENT_BINDING'):
+                    with reliability._mapper_bound_reads_v1(s_template): pytest.fail('held M scope reentered')
+                assert tuple(s_close_calls) == before
+                for fd in s_held: os.fstat(fd); s_original_close(fd)
+                # No-child oracle disposal is fixture-only. No production
+                # resource marker is reset or unresolved close retried.
+                s_patch.setattr(serialization,'_REPORT_READ_BINDING_V1',None)
+        assert serialization._REPORT_READ_BINDING_V1 is s_original_binding
+
+    # A parent actual comparison close fault stays with its original C before
+    # _mapper_publish returns; a late report error cannot make that C disposable.
+    p_root = tmp_path / 'm-parent-close'; p_root.mkdir()
+    p_paths, p_probe = reliability.resolve_validation_run_paths(p_root,
+        explicit_process_root=(tmp_path/'m-parent-close-p').resolve(),run_id='run_mapper_parent_close',
+        projected_relative_paths=('mapper-fixture.json',))
+    p_phase = 'deterministic-validators-a'
+    p_plan = reliability.build_command_evidence_plan(run_id=p_paths.run_id,phase=p_phase,commands=mapper_vectors,cwd=p_root)
+    with monkeypatch.context() as p_patch:
+        p_suppliers = _central_supervision_test_adapter(resolve_paths=False,
+            deadline_ns=runner.time.monotonic_ns()+60_000_000_000,patcher=p_patch)
+        p_templates = p_suppliers['mapper_read_source'](p_paths,p_phase,p_plan)
+        p_candidate = p_suppliers['candidate_source'](p_root,p_plan)
+        p_candidate.begin_occurrence(3,p_plan[2],environment={},timeout_seconds=30,scratch_roots=())
+        p_fault = OSError('synthetic parent comparison close'); p_real_close = os.close
+        p_held = []; p_calls = []; p_deleted = []; p_report = RuntimeError('synthetic late cleanup report')
+        def p_close(fd):
+            p_calls.append(fd)
+            if not p_held: p_held.append(fd); raise p_fault
+            p_real_close(fd)
+        p_patch.setattr(reliability.os,'close',p_close)
+        with pytest.raises(OSError) as p_caught:
+            reliability._mapper_publish_occurrence_v1(p_templates['3'],candidate=p_candidate,entry=p_plan[2])
+        assert p_caught.value is p_fault
+        p_owned = p_candidate._original_mapper_custody_v1[3]
+        assert p_owned['slots'][0]['fd'] is p_held[0] and p_owned['slots'][0]['close_error'] is p_fault
+        p_sup = dict(paths=p_paths,phase=p_phase,pending=False,receipt=None,errors=[],candidate_custody=p_candidate,
+            candidate_owner=(os.getpid(),threading.get_ident()),candidate_deadline_ns=p_candidate.deadline_ns)
+        assert runner._candidate_requires_retention_v1(p_sup) and p_sup['pending'] is False
+        p_patch.setattr(runner,'_RUN_COMMANDS_SUPERVISION',p_sup)
+        p_patch.setattr(runner,'_LAST_EXPECTED_COMMAND_PLAN',p_plan)
+        p_patch.setattr(runner,'_ACTIVE_MAPPER_READ_PROFILES_V1',p_templates)
+        p_patch.setattr(runner,'_ACTIVE_MAPPER_OCCURRENCES_V1',{})
+        p_patch.setattr(runner,'_ACTIVE_PREFLIGHT_ASSEMBLY_V1',None)
+        def p_write(path,payload):
+            if Path(path).name == 'cleanup.json': raise p_report
+            return reliability.atomic_write_json(path,payload)
+        p_patch.setattr(runner,'atomic_write_json',p_write)
+        p_patch.setattr(runner,'cleanup_validation_run',lambda paths: p_deleted.append(paths))
+        try:
+            outcome = runner._finalize_validation_run(run_paths=p_paths,probe=p_probe,phase=p_phase,
+                planned_count=3,expected_plan=p_plan,receipts=(),result=1,text_state='NOT_RUN',_supervision_state=p_sup)
+            assert outcome[0] == 1
+        except BaseException as p_final_error:
+            assert p_report in mapper_error_leaves(p_final_error) or p_report in p_sup['errors']
+        assert p_deleted == [] and p_paths.process_root.is_dir()
+        assert runner._RUN_COMMANDS_SUPERVISION is p_sup and runner._candidate_requires_retention_v1(p_sup)
+        assert p_sup['pending'] is False and p_report in p_sup['errors']
+        assert p_calls == p_held
+        for fd in p_held: os.fstat(fd); p_real_close(fd)
+
+    # This source-order fault port is explicitly no-child: an original R
+    # terminal-release failure prevents native/M owners from being entered.
+    # It is neither a native termination proof nor a successful M byte proof.
+    order_root = tmp_path / 'm-r-order'; order_root.mkdir()
+    order_paths, _order_probe = reliability.resolve_validation_run_paths(order_root,
+        explicit_process_root=(tmp_path/'m-r-order-p').resolve(),
+        run_id='run_mapper_R_before_final', projected_relative_paths=('mapper-fixture.json',))
+    order_events = []; order_error = RuntimeError('synthetic terminal R release debt')
+    order_originals = {name:getattr(runner,name) for name in (
+        '_RUN_COMMANDS_SUPERVISION','_LAST_EXPECTED_COMMAND_PLAN','_LAST_COMMAND_RECEIPTS',
+        '_LAST_PLANNED_COMMAND_COUNT','_RUN_PROVENANCE_WRITTEN','_RUN_COMMANDS_CLEANUP_REPO_ROOT',
+        '_ORDINARY_CANDIDATE_FIRST_V1','_ACTIVE_SCAN_LAUNCH',
+        '_ACTIVE_MAPPER_READ_PROFILES_V1','_ACTIVE_MAPPER_OCCURRENCES_V1')}
+    with monkeypatch.context() as order_patch:
+        # Register original objects before run_commands' direct assignments.
+        for name,value in order_originals.items(): order_patch.setattr(runner,name,value)
+        order_patch.setattr(runner,'_RUN_COMMANDS_SUPERVISION',None)
+        order_patch.setattr(runner,'_RUN_PROVENANCE_WRITTEN',False)
+        order_patch.setattr(runner,'_RUN_COMMANDS_CLEANUP_REPO_ROOT',None)
+        order_patch.setattr(runner,'_ORDINARY_CANDIDATE_FIRST_V1',False)
+        order_patch.setattr(runner,'_ACTIVE_SCAN_LAUNCH',None)
+        order_patch.setattr(runner,'_ACTIVE_MAPPER_READ_PROFILES_V1',None)
+        order_patch.setattr(runner,'_ACTIVE_MAPPER_OCCURRENCES_V1',{})
+        def order_R(supervision,paths,phase,plan):
+            order_events.append('R')
+            assert paths is order_paths and phase == 'deterministic-validators-a'
+            assert plan is runner._LAST_EXPECTED_COMMAND_PLAN and supervision['pending'] is False
+            supervision['scan_settlement_error'] = order_error
+            supervision['errors'].append(order_error)
+            raise order_error
+        def order_forbidden(*args,**kwargs):
+            pytest.fail('terminal R debt entered a later native/M settlement owner')
+        order_patch.setattr(runner,'_settle_scan_inputs_v1',order_R)
+        order_patch.setattr(runner,'_settle_native_candidate_resources_v1',order_forbidden)
+        order_patch.setattr(runner,'_settle_mapper_occurrences_v1',order_forbidden)
+        # Empty control selection executes only the existing finish closure;
+        # no supervisor, producer, reader or domain command is dispatched.
+        assert runner.run_commands((),phase='deterministic-validators-a',run_paths=order_paths,
+            defer_success_markers=True) == 1
+        assert order_events == ['R']
+        assert runner._RUN_COMMANDS_SUPERVISION['scan_settlement_error'] is order_error
+        assert runner._RUN_COMMANDS_SUPERVISION['pending'] is False
+    assert all(getattr(runner,name) is value for name,value in order_originals.items())
+
+
     # Original native acquisition body with finite no-child ports: failure
     # before yield and descriptor-close failure must retain both exceptions.
     before_yield = reliability._LinuxImmutableSourceBasisV2.__new__(reliability._LinuxImmutableSourceBasisV2)
     before_yield.root = tmp_path
+    before_yield.pid, before_yield.thread = os.getpid(), threading.get_ident()
+    before_yield.failure, before_yield.state = None, "IN_USE"
+    before_yield.owned, before_yield.close_errors, before_yield._iterator_records = {}, [], []
+    before_yield._initializing_v2 = False
+    before_yield._opening_record = before_yield._iterator_acquisition = before_yield._resource_settlement_error = None
+    before_yield._entry_depth = 0
     before_yield.check_live = lambda: None
     before_yield._entry = lambda name: None
     body_error, close_error = OSError("synthetic native before-yield verification"), OSError("synthetic native before-yield close")
@@ -8174,6 +8588,575 @@ def test_runner_restores_only_runtime_side_effects_before_pr142_pr143_and_final_
     assert mapper_error_leaves(caught.value) == (body_error, close_error)
     assert before_yield.failure is body_error and before_yield.state == "FAILED"
     with pytest.raises(OSError): os.fstat(held_descriptor)
+
+    # Finite syscall ports below exercise the actual native resource owner.
+    # They create no native child and do not qualify Linux/controller authority.
+    def finite_native_resources():
+        value = reliability._LinuxImmutableSourceBasisV2.__new__(reliability._LinuxImmutableSourceBasisV2)
+        value.pid, value.thread = os.getpid(), threading.get_ident()
+        value.failure, value.state = None, "IN_USE"
+        value.deadline_ns = time.monotonic_ns() + 30_000_000_000
+        value.metadata_calls = value.metadata_reserved = value.metadata_rejected = 0
+        value.owned, value.close_errors, value._iterator_records = {}, [], []
+        value._initializing_v2 = False
+        value._opening_record = value._iterator_acquisition = value._resource_settlement_error = None
+        value._entry_depth = 0
+        return value
+
+    for invalid_descriptor in (True, -1):
+        invalid = finite_native_resources()
+        closed_invalid = []
+        with monkeypatch.context() as native_port:
+            native_port.setattr(reliability.os, "open", lambda *args, **kwargs: invalid_descriptor)
+            native_port.setattr(reliability.os, "close", lambda fd: closed_invalid.append(fd))
+            with pytest.raises(reliability.ValidationReliabilityError) as invalid_open:
+                invalid._open("finite-no-child")
+            original_invalid = invalid_open.value
+            retained_invalid = invalid._opening_record
+            assert retained_invalid["fd"] is invalid_descriptor and retained_invalid["acquisition_error"] is original_invalid
+            for release in (lambda: invalid._close(invalid_descriptor),
+                    lambda: invalid._close_many([invalid_descriptor]), invalid._settle_resources_v2,
+                    invalid._settle_resources_v2):
+                with pytest.raises(reliability.ValidationReliabilityError) as invalid_release:
+                    release()
+                assert invalid_release.value is original_invalid
+            assert closed_invalid == [] and invalid.metadata_calls == 1 and invalid.metadata_reserved == 2
+            assert invalid._opening_record is retained_invalid and not retained_invalid["close_attempted"]
+            assert invalid.failure is original_invalid and invalid._resources_require_retention_v2()
+
+    raised_open = finite_native_resources()
+    kernel_open_fault = OSError("synthetic original os.open no-return failure")
+    raised_closes = []
+    def native_raise_open(*args, **kwargs):
+        raise kernel_open_fault
+    with monkeypatch.context() as native_port:
+        native_port.setattr(reliability.os, "open", native_raise_open)
+        native_port.setattr(reliability.os, "close", lambda fd: raised_closes.append(fd))
+        with pytest.raises(OSError) as no_return:
+            raised_open._open("finite-no-child")
+        assert no_return.value is kernel_open_fault and raised_open._opening_record["acquisition_error"] is kernel_open_fault
+        with pytest.raises(OSError) as unknown_release:
+            raised_open._settle_resources_v2()
+        assert unknown_release.value is kernel_open_fault
+        assert raised_closes == [] and raised_open.metadata_calls == 1 and raised_open.metadata_reserved == 2
+        assert raised_open.failure is kernel_open_fault and raised_open._resources_require_retention_v2()
+
+    close_owned = finite_native_resources()
+    finite_fd = os.open(reference, os.O_RDONLY | getattr(os, "O_BINARY", 0))
+    actual_close = os.close
+    close_failure = OSError("synthetic original native close uncertain")
+    close_attempts = []
+    def finite_close_fault(fd):
+        close_attempts.append(fd)
+        assert fd == finite_fd
+        actual_close(fd)
+        raise close_failure
+    with monkeypatch.context() as native_port:
+        native_port.setattr(reliability.os, "open", lambda *args, **kwargs: finite_fd)
+        assert close_owned._open("finite-no-child") == finite_fd
+        native_port.setattr(reliability.os, "close", finite_close_fault)
+        for release in (lambda: close_owned._close(finite_fd),
+                lambda: close_owned._close_many([finite_fd]), close_owned._settle_resources_v2,
+                close_owned._settle_resources_v2):
+            with pytest.raises(OSError) as close_result:
+                release()
+            assert close_result.value is close_failure
+        assert close_attempts == [finite_fd] and close_owned.metadata_calls == close_owned.metadata_reserved == 2
+        assert close_owned.owned[finite_fd]["error"] is close_failure and close_owned._resources_require_retention_v2()
+    with pytest.raises(OSError): os.fstat(finite_fd)
+
+    class FiniteIteratorPort:
+        def __init__(self, failure=None):
+            self.failure, self.closes = failure, 0
+        def close(self):
+            self.closes += 1
+            if self.failure is not None:
+                raise self.failure
+
+    iterator_basis = finite_native_resources()
+    iterator_port = FiniteIteratorPort()
+    with monkeypatch.context() as native_port:
+        native_port.setattr(reliability.os, "scandir", lambda fd: iterator_port)
+        with iterator_basis._scan(4567) as active_iterator:
+            iterator_record = iterator_basis._iterator_records[0]
+            assert active_iterator is iterator_port and iterator_record["yielded"] is True
+            iterator_state = dict(iterator_record)
+            for release in (iterator_basis._settle_resources_v2,
+                    lambda: iterator_basis._close_iterator_v2(iterator_record)):
+                with pytest.raises(reliability.ValidationReliabilityError):
+                    release()
+                assert iterator_record == iterator_state and iterator_port.closes == 0
+                assert iterator_basis.metadata_calls == 1 and iterator_basis.metadata_reserved == 2
+            assert iterator_basis._resources_require_retention_v2()
+        assert iterator_port.closes == 1 and iterator_record["yielded"] is False and iterator_record["closed"]
+        assert iterator_basis.metadata_calls == iterator_basis.metadata_reserved == 2
+        assert not iterator_basis._resources_require_retention_v2()
+
+    iterator_failure = finite_native_resources()
+    iterator_body_fault = OSError("synthetic native iterator body")
+    iterator_close_fault = OSError("synthetic native iterator close")
+    failed_iterator = FiniteIteratorPort(iterator_close_fault)
+    with monkeypatch.context() as native_port:
+        native_port.setattr(reliability.os, "scandir", lambda fd: failed_iterator)
+        with pytest.raises(BaseExceptionGroup) as failed_scope:
+            with iterator_failure._scan(4567):
+                raise iterator_body_fault
+        assert mapper_error_leaves(failed_scope.value) == (iterator_body_fault, iterator_close_fault)
+        failed_record = iterator_failure._iterator_records[0]
+        with pytest.raises(OSError) as failed_release:
+            iterator_failure._close_iterator_v2(failed_record)
+        assert failed_release.value is iterator_close_fault and failed_iterator.closes == 1
+        assert iterator_failure.metadata_calls == iterator_failure.metadata_reserved == 2
+        assert iterator_failure.failure is iterator_body_fault and iterator_failure._resources_require_retention_v2()
+
+    no_resources_failed = finite_native_resources()
+    no_resources_failed.failure, no_resources_failed.state = body_error, "FAILED"
+    assert not no_resources_failed._resources_require_retention_v2()
+    no_resources_failed._settle_resources_v2()
+    assert no_resources_failed.failure is body_error and no_resources_failed.state == "FAILED"
+
+    reuse_basis = reliability._LinuxImmutableSourceBasisV2.__new__(reliability._LinuxImmutableSourceBasisV2)
+    with pytest.raises(reliability.ValidationReliabilityError):
+        reuse_basis.__init__({}, {}, "finite-no-lease")
+    first_failed_init = dict(reuse_basis.__dict__)
+    with pytest.raises(reliability.ValidationReliabilityError, match="LINUX_V2_READER_CONSTRUCTION_SINGLE_USE"):
+        reuse_basis.__init__({}, {}, "finite-no-lease")
+    assert reuse_basis.__dict__ == first_failed_init and not reuse_basis._resources_require_retention_v2()
+    foreign_init = reliability._LinuxImmutableSourceBasisV2.__new__(reliability._LinuxImmutableSourceBasisV2)
+    foreign_init.pid, foreign_init.thread = os.getpid(), threading.get_ident() + 1
+    foreign_initial = dict(foreign_init.__dict__)
+    with pytest.raises(reliability.ValidationReliabilityError, match="LINUX_V2_READER_CONSTRUCTION_OWNER"):
+        foreign_init.__init__({}, {}, "finite-no-lease")
+    assert foreign_init.__dict__ == foreign_initial and not hasattr(foreign_init, "_init_attempted_v2")
+
+    iterator_acquisition = finite_native_resources()
+    iterator_acquire_fault = OSError("synthetic no-return iterator acquisition")
+    def fail_iterator_acquire(fd):
+        raise iterator_acquire_fault
+    with monkeypatch.context() as native_port:
+        native_port.setattr(reliability.os, "scandir", fail_iterator_acquire)
+        with pytest.raises(OSError) as iterator_no_return:
+            with iterator_acquisition._scan(4567):
+                pytest.fail("failed iterator acquisition entered its body")
+        assert iterator_no_return.value is iterator_acquire_fault
+        unknown_iterator_record = iterator_acquisition._iterator_acquisition
+        assert unknown_iterator_record["stream"] is None and unknown_iterator_record["acquisition_error"] is iterator_acquire_fault
+        with pytest.raises(OSError) as iterator_no_release:
+            iterator_acquisition._settle_resources_v2()
+        assert iterator_no_release.value is iterator_acquire_fault
+        assert not unknown_iterator_record["close_attempted"] and iterator_acquisition.metadata_calls == 1
+        assert iterator_acquisition.metadata_reserved == 2 and iterator_acquisition._resources_require_retention_v2()
+
+    iterator_close_lookup = finite_native_resources()
+    lookup_failure = OSError("synthetic returned iterator close lookup")
+    class FailedCloseLookupPort:
+        @property
+        def close(self):
+            raise lookup_failure
+    returned_iterator = FailedCloseLookupPort()
+    with monkeypatch.context() as native_port:
+        native_port.setattr(reliability.os, "scandir", lambda fd: returned_iterator)
+        with pytest.raises(OSError) as lookup_result:
+            with iterator_close_lookup._scan(4567):
+                pytest.fail("failed close lookup entered its body")
+        assert lookup_result.value is lookup_failure
+        lookup_record = iterator_close_lookup._iterator_acquisition
+        assert lookup_record["stream"] is returned_iterator and lookup_record["close_callable"] is None
+        assert lookup_record["acquisition_error"] is lookup_failure and not lookup_record["close_attempted"]
+        with pytest.raises(OSError) as lookup_release:
+            iterator_close_lookup._settle_resources_v2()
+        assert lookup_release.value is lookup_failure and iterator_close_lookup.metadata_calls == 1
+        assert iterator_close_lookup.metadata_reserved == 2 and iterator_close_lookup._resources_require_retention_v2()
+
+    chain_basis = finite_native_resources()
+    chain_fds = [os.open(reference, os.O_RDONLY | getattr(os, "O_BINARY", 0)) for _ in range(2)]
+    chain_remaining = iter(chain_fds)
+    chain_close_calls = []
+    chain_fault = OSError("synthetic first native parent close")
+    def close_chain_port(fd):
+        chain_close_calls.append(fd)
+        actual_close(fd)
+        if fd == chain_fds[0]:
+            raise chain_fault
+    with monkeypatch.context() as native_port:
+        for flag in ("O_NOFOLLOW", "O_CLOEXEC", "O_DIRECTORY"):
+            if not hasattr(reliability.os, flag):
+                native_port.setattr(reliability.os, flag, 0, raising=False)
+        native_port.setattr(reliability.os, "open", lambda *args, **kwargs: next(chain_remaining))
+        native_port.setattr(reliability.os, "close", close_chain_port)
+        with pytest.raises(OSError) as chain_result:
+            chain_basis._open_path("finite-parent/finite-leaf")
+        assert chain_result.value is chain_fault and chain_close_calls == chain_fds
+        assert tuple(chain_basis.owned) == (chain_fds[0],) and chain_basis.owned[chain_fds[0]]["error"] is chain_fault
+        with pytest.raises(OSError) as chain_release:
+            chain_basis._settle_resources_v2()
+        assert chain_release.value is chain_fault and chain_close_calls == chain_fds
+        assert chain_basis.metadata_calls == chain_basis.metadata_reserved == 4 and chain_basis._resources_require_retention_v2()
+    for descriptor in chain_fds:
+        with pytest.raises(OSError): os.fstat(descriptor)
+
+    # Explicit no-I/O constructor callback: exact type alone is not a lease
+    # grant; the callback deliberately rejects before descriptor/native setup.
+    constructing = reliability._LinuxImmutableSourceBasisV2.__new__(reliability._LinuxImmutableSourceBasisV2)
+    constructor_lease = reliability._LinuxPreflightHostLeaseV1.__new__(reliability._LinuxPreflightHostLeaseV1)
+    constructor_lease.root, constructor_lease.index = tmp_path, None
+    constructor_fault = OSError("synthetic no-I/O constructor callback")
+    constructor_checks = []
+    def constructor_no_io(root, index):
+        assert root == tmp_path and index is None
+        before_active = dict(constructing.__dict__)
+        assert constructing._initializing_v2 is True and constructing._resources_require_retention_v2()
+        with pytest.raises(reliability.ValidationReliabilityError, match="LINUX_V2_READER_CONSTRUCTION_ACTIVE"):
+            constructing._settle_resources_v2()
+        assert constructing.__dict__ == before_active
+        with pytest.raises(reliability.ValidationReliabilityError, match="LINUX_V2_READER_CONSTRUCTION_SINGLE_USE"):
+            constructing.__init__(constructor_lease, {}, "finite-no-grant")
+        assert constructing.__dict__ == before_active
+        constructor_checks.append(True)
+        raise constructor_fault
+    constructor_lease.check_parent = constructor_no_io
+    with pytest.raises(OSError) as constructed_failure:
+        constructing.__init__(constructor_lease, {}, "finite-no-grant")
+    assert constructed_failure.value is constructor_fault and constructor_checks == [True]
+    assert constructing.failure is constructor_fault and constructing._initializing_v2 is False
+    assert constructing.metadata_calls == constructing.metadata_reserved == 0 and not constructing._resources_require_retention_v2()
+
+    census_scope = finite_native_resources()
+    census_fault = OSError("synthetic no-I/O census callback")
+    census_checks = []
+    def census_no_io():
+        census_before = dict(census_scope.__dict__)
+        assert census_scope._entry_depth == 1 and census_scope._resources_require_retention_v2()
+        with pytest.raises(reliability.ValidationReliabilityError, match="LINUX_V2_READER_SCOPE_UNSETTLED"):
+            census_scope._settle_resources_v2()
+        assert census_scope.__dict__ == census_before
+        census_checks.append(True)
+        raise census_fault
+    census_scope.check_live = census_no_io
+    with pytest.raises(OSError) as census_failure:
+        census_scope.catalog_snapshot((), None)
+    assert census_failure.value is census_fault and census_checks == [True]
+    assert census_scope.failure is census_fault and census_scope._entry_depth == 0
+    assert census_scope.metadata_calls == census_scope.metadata_reserved == 0 and not census_scope._resources_require_retention_v2()
+
+    # Original SUP/assembly resource records, typed only for finite close
+    # mechanics. No first8 plan, lease, controller or startup is qualified.
+    # A partial C owner reference cannot create a guessed-descriptor closer.
+    partial_c = runner._ValidationCandidateCustodyV1.__new__(runner._ValidationCandidateCustodyV1)
+    partial_c.root, partial_c.plan = mapper_paths.repo_root, mapper_plan
+    partial_c.process_id, partial_c.thread_id = os.getpid(), threading.get_ident()
+    partial_c.state, partial_c.failure = "CLEANUP_REJECTED", body_error
+    partial_c.baseline, partial_c.active_occurrence, partial_c.native_basis = None, None, None
+    partial_c._read_in_progress = partial_c._read_acquisition_in_progress = False
+    partial_c._read_raw_handle_owner = partial_c._write_descriptor = None
+    partial_c._read_close_attempted = partial_c._write_close_attempted = True
+    partial_descriptor = os.open(reference, os.O_RDONLY | getattr(os, "O_BINARY", 0))
+    partial_c._read_descriptor = partial_descriptor
+    partial_c.restore = lambda: pytest.fail("partial C must not acquire restoration authority")
+    partial_assembly = runner._PreflightAssemblyV1.__new__(runner._PreflightAssemblyV1)
+    partial_assembly.paths, partial_assembly.plan = mapper_paths, mapper_plan
+    partial_assembly.pid, partial_assembly.thread = os.getpid(), threading.get_ident()
+    partial_assembly.basis, partial_assembly.candidate = None, partial_c
+    partial_assembly._original_basis_v2, partial_assembly._original_candidate_v1 = None, partial_c
+    partial_assembly.launches, partial_assembly.state = {}, "SELECTED"
+    partial_native = reliability._PreflightNativeInputV1.__new__(reliability._PreflightNativeInputV1)
+    partial_native.pid, partial_native.thread = os.getpid(), threading.get_ident()
+    partial_native._initializing_v1 = partial_native._consume_active_v1 = False
+    partial_native._declaration_acquisition_v1 = partial_native._declaration_record_v1 = None
+    partial_native._declaration_raw_handle_owner_v1 = partial_native._declaration_settlement_error_v1 = None
+    partial_native._declaration_original_binding_v1 = partial_native._declaration_release_binding_v1 = None
+    partial_native.root, partial_native.index_path = mapper_paths.repo_root, None
+    partial_native.path = reference
+    partial_assembly.native = partial_assembly._original_native_input_v1 = partial_native
+    partial_supervision = dict(paths=mapper_paths, phase=mapper_phase, pending=False,
+        receipt=None, errors=[body_error], preflight_assembly=partial_assembly,
+        preflight_native_input=partial_native, preflight_native_input_binding=(reference,
+            mapper_paths.repo_root, None, partial_native.pid, partial_native.thread))
+    try:
+        assert runner._candidate_requires_retention_v1(partial_supervision)
+        with monkeypatch.context() as native_port:
+            native_port.setattr(runner, "_ACTIVE_PREFLIGHT_PATH_V1", reference)
+            native_port.setattr(runner.os, "close", lambda fd: pytest.fail("partial C external close is forbidden"))
+            for _ in range(2):
+                with pytest.raises(OSError) as partial_result:
+                    runner._settle_validation_candidate_v1(partial_supervision, mapper_paths, mapper_phase, mapper_plan)
+                assert partial_result.value is body_error
+            assert partial_c._read_descriptor == partial_descriptor and partial_c._read_close_attempted
+            assert partial_supervision["native_resource_settlement_error"] is body_error
+        assert os.fstat(partial_descriptor).st_size >= 0
+        assert partial_c.baseline is None and partial_c.failure is body_error
+    finally:
+        # Explicit no-child fixture teardown; never a production debt escape.
+        os.close(partial_descriptor)
+
+    # Declaration syscall/frame ports below are finite no-child fault oracles.
+    # They preserve the actual original input consume/metadata/close reliability.
+    def declaration_fixture():
+        value = reliability._PreflightNativeInputV1.__new__(reliability._PreflightNativeInputV1)
+        value.pid, value.thread = os.getpid(), threading.get_ident()
+        value._init_attempted_v1 = True
+        value._initializing_v1 = value._consume_attempted_v1 = value._consume_active_v1 = False
+        value._declaration_release_active_v1 = False
+        value._declaration_acquisition_v1 = value._declaration_record_v1 = None
+        value._declaration_raw_handle_owner_v1 = value._declaration_settlement_error_v1 = None
+        value._declaration_original_binding_v1 = value._declaration_release_binding_v1 = None
+        value.failure, value.state = None, "AVAILABLE"
+        value.path, value.root, value.index_path = reference, mapper_paths.repo_root, None
+        value.expected_chain = reliability._preflight_chain_v1(reference.parent)
+        value.expected_path_version = reliability._scan_same_api_version(reference.lstat())
+        value.meter, value.host_lease = None, SimpleNamespace()
+        value.check = lambda: None
+        return value
+
+    original_open = reliability._open_regular_worktree_descriptor
+    original_os_close = os.close
+    for declaration_case in ("positive", "body-close", "unknown-open", "invalid-fd", "raw-handle"):
+        declaration = declaration_fixture()
+        declaration_body = OSError("synthetic declaration body fault")
+        declaration_close = OSError("synthetic declaration close fault")
+        declaration_fd, declaration_calls = None, []
+        def declaration_open(path, **kwargs):
+            nonlocal declaration_fd
+            assert path == reference and kwargs == {"nonblocking": True}
+            if declaration_case == "unknown-open":
+                raise declaration_body
+            if declaration_case == "raw-handle":
+                declaration_body._worktree_raw_handle_owner_v1 = raw_handle = SimpleNamespace(
+                    close_attempted=True, closed=False)
+                raise declaration_body
+            if declaration_case == "invalid-fd":
+                return True
+            declaration_fd = original_open(path, **kwargs)
+            return declaration_fd
+        def declaration_close_port(fd):
+            assert type(fd) is int and fd == declaration_fd
+            declaration_calls.append(fd)
+            original_os_close(fd)
+            if declaration_case == "body-close":
+                raise declaration_close
+        def declaration_frame(fd, **kwargs):
+            assert fd == declaration_fd
+            before = dict(declaration.__dict__)
+            with pytest.raises(reliability.ValidationReliabilityError):
+                declaration.consume(lambda value: value)
+            assert declaration.__dict__ == before
+            with pytest.raises(reliability.ValidationReliabilityError):
+                declaration._settle_resources_v1()
+            assert declaration.__dict__ == before
+            if declaration_case == "body-close":
+                raise declaration_body
+            return ("literal-header", "literal-blobs", "literal-third")
+        with monkeypatch.context() as declaration_port:
+            declaration_port.setattr(reliability, "_open_regular_worktree_descriptor", declaration_open)
+            declaration_port.setattr(reliability.os, "close", declaration_close_port)
+            declaration_port.setattr(reliability, "_preflight_frame_read_v1", declaration_frame)
+            if declaration_case == "positive":
+                assert declaration.consume(lambda value: value) == ("literal-header", "literal-blobs", "literal-third")
+                assert declaration.state == "CONSUMED" and not declaration._resources_require_retention_v1()
+            elif declaration_case == "body-close":
+                with pytest.raises(BaseExceptionGroup) as declaration_result:
+                    declaration.consume(lambda value: value)
+                assert declaration_result.value.exceptions == (declaration_body, declaration_close)
+                assert declaration.failure is declaration_body
+                for _ in range(2):
+                    with pytest.raises(OSError) as close_result:
+                        declaration._settle_resources_v1()
+                    assert close_result.value is declaration_close
+                assert declaration._declaration_record_v1['close_attempted']
+            else:
+                with pytest.raises((reliability.ValidationReliabilityError, OSError)):
+                    declaration.consume(lambda value: value)
+                assert declaration._resources_require_retention_v1() and declaration_calls == []
+                assert declaration._declaration_acquisition_v1['fd'] is (True if declaration_case == "invalid-fd" else None)
+                original_error = declaration.failure
+                for _ in range(2):
+                    with pytest.raises(BaseException) as acquisition_result:
+                        declaration._settle_resources_v1()
+                    assert acquisition_result.value is original_error
+                if declaration_case == "raw-handle":
+                    assert declaration._declaration_raw_handle_owner_v1 is declaration_body._worktree_raw_handle_owner_v1
+            before = dict(declaration.__dict__)
+            with pytest.raises(reliability.ValidationReliabilityError):
+                declaration.consume(lambda value: value)
+            assert declaration.__dict__ == before
+            assert declaration_calls == ([] if declaration_fd is None else [declaration_fd])
+        if declaration_fd is not None:
+            with pytest.raises(OSError): os.fstat(declaration_fd)
+
+    no_native_defaults = dict(pending=True, errors=[])
+    runner._settle_native_candidate_resources_v1(no_native_defaults, None, "not-selected", ())
+    assert no_native_defaults == dict(pending=True, errors=[])
+    # First pre-acquisition callback recursion must reject without changing the
+    # original owner's chance to finish its one actual attempt.
+    before_acquisition = declaration_fixture()
+    first_callback_error = OSError("synthetic declaration admission callback")
+    callback_visits = []
+    def declaration_first_check():
+        callback_visits.append(before_acquisition.state)
+        if len(callback_visits) == 1:
+            before = dict(before_acquisition.__dict__)
+            with pytest.raises(reliability.ValidationReliabilityError):
+                before_acquisition.consume(lambda value: value)
+            assert before_acquisition.__dict__ == before
+            raise first_callback_error
+    before_acquisition.check = declaration_first_check
+    with pytest.raises(OSError) as first_result:
+        before_acquisition.consume(lambda value: value)
+    assert first_result.value is first_callback_error and callback_visits == ["CONSUMING", "CONSUMING"]
+    assert before_acquisition.state == "FAILED" and not before_acquisition._resources_require_retention_v1()
+
+    foreign_declaration = declaration_fixture()
+    with monkeypatch.context() as declaration_port:
+        declaration_port.setattr(foreign_declaration, "thread", foreign_declaration.thread + 1)
+        before = dict(foreign_declaration.__dict__)
+        with pytest.raises(reliability.ValidationReliabilityError):
+            foreign_declaration.consume(lambda value: value)
+        assert foreign_declaration.__dict__ == before
+    assert foreign_declaration.state == "AVAILABLE" and not foreign_declaration._consume_attempted_v1
+    before = dict(foreign_declaration.__dict__)
+    with pytest.raises(reliability.ValidationReliabilityError):
+        foreign_declaration.__init__(path=reference, root=mapper_paths.repo_root, index_path=None,
+            expected_path_version=(), expected_chain=(), limits={}, deadline_ns=1,
+            host_lease=None, capture_limits={}, terminal_limits={})
+    assert foreign_declaration.__dict__ == before
+    # Original partial-holder substitution is a no-child association fault.
+    # Neither a foreign closer nor whole-root cleanup becomes authorized.
+    for replaced_holder in ("basis", "candidate"):
+        original_basis = finite_native_resources()
+        held_fd = original_basis._open(reference, os.O_RDONLY | getattr(os, "O_BINARY", 0))
+        original_partial = runner._ValidationCandidateCustodyV1.__new__(runner._ValidationCandidateCustodyV1)
+        original_partial.root, original_partial.plan = mapper_paths.repo_root, mapper_plan
+        original_partial.process_id, original_partial.thread_id = os.getpid(), threading.get_ident()
+        original_partial.failure, original_partial.state = body_error, "CLEANUP_REJECTED"
+        original_partial.native_basis = original_basis
+        original_partial._read_descriptor = original_partial._write_descriptor = original_partial._read_raw_handle_owner = None
+        original_partial._read_in_progress = original_partial._read_acquisition_in_progress = False
+        holder_assembly = runner._PreflightAssemblyV1.__new__(runner._PreflightAssemblyV1)
+        holder_assembly.paths, holder_assembly.plan = mapper_paths, mapper_plan
+        holder_assembly.pid, holder_assembly.thread = os.getpid(), threading.get_ident()
+        holder_assembly.native, holder_assembly.launches, holder_assembly.state = partial_native, {}, "SELECTED"
+        holder_assembly._original_native_input_v1 = partial_native
+        holder_assembly.basis = holder_assembly._original_basis_v2 = original_basis
+        holder_assembly.candidate = holder_assembly._original_candidate_v1 = original_partial
+        setattr(holder_assembly, replaced_holder, SimpleNamespace())
+        holder_supervision = dict(paths=mapper_paths, phase=mapper_phase, pending=False,
+            errors=[body_error], preflight_assembly=holder_assembly, preflight_native_input=partial_native,
+            preflight_native_input_binding=(reference, mapper_paths.repo_root, None, partial_native.pid, partial_native.thread))
+        before_counts = (original_basis.metadata_calls, original_basis.metadata_reserved)
+        try:
+            with monkeypatch.context() as holder_port:
+                holder_port.setattr(runner.os, "close", lambda fd: pytest.fail("replaced holder must not close a descriptor"))
+                with pytest.raises(ValueError, match="partial resource holder was replaced") as replaced_error:
+                    runner._settle_native_candidate_resources_v1(holder_supervision, mapper_paths, mapper_phase, mapper_plan)
+            assert runner._invocation_requires_retention_v1(holder_supervision)
+            assert holder_supervision['native_resource_settlement_error'] is replaced_error.value
+            assert holder_supervision['errors'] == [body_error, replaced_error.value]
+            assert original_partial.failure is body_error and original_basis.owned[held_fd]['close_attempted'] is False
+            assert before_counts == (original_basis.metadata_calls, original_basis.metadata_reserved)
+            assert os.fstat(held_fd).st_size >= 0
+        finally:
+            # Explicit original finite no-child fd owner releases after the
+            # association/retention oracle; no baseline restoration is selected.
+            original_basis._settle_resources_v2()
+
+    replaced_declaration = declaration_fixture()
+    declaration_original_fd = declaration_foreign_fd = None
+    def replace_declaration_record(fd, **kwargs):
+        nonlocal declaration_original_fd, declaration_foreign_fd
+        declaration_original_fd = fd
+        declaration_foreign_fd = os.open(reference, os.O_RDONLY | getattr(os, "O_BINARY", 0))
+        replaced_declaration._declaration_record_v1 = dict(fd=declaration_foreign_fd,
+            original_fd=declaration_foreign_fd, acquiring=False, error=None,
+            close_attempted=False, closed=False, close_error=None)
+        return None
+    try:
+        with monkeypatch.context() as declaration_port:
+            declaration_port.setattr(reliability, "_preflight_frame_read_v1", replace_declaration_record)
+            declaration_port.setattr(reliability.os, "close", lambda fd: pytest.fail("replaced declaration must not close foreign fd"))
+            with pytest.raises(reliability.ValidationReliabilityError, match="original descriptor holder replaced") as replaced_error:
+                replaced_declaration.consume(lambda value: value)
+        assert replaced_declaration.failure is replaced_error.value and replaced_declaration._resources_require_retention_v1()
+        assert replaced_declaration._declaration_original_binding_v1[0] == declaration_original_fd
+        assert replaced_declaration._declaration_original_binding_v1[1]['close_attempted'] is False
+        assert os.fstat(declaration_original_fd).st_size >= 0 and os.fstat(declaration_foreign_fd).st_size >= 0
+    finally:
+        # Both real finite fds are independently observed no-child fixtures;
+        # this teardown never clears the production owner's retained debt.
+        if declaration_original_fd is not None: original_os_close(declaration_original_fd)
+        if declaration_foreign_fd is not None: original_os_close(declaration_foreign_fd)
+    # Successful native close with changed aliases is still a failed release.
+    # This finite no-child port proves the actual original fd closed once, while
+    # preserving association debt and never closing the foreign substitute.
+    for release_mutation in ("replace-record", "clear-record", "clear-binding", "clear-release", "mutate-fd"):
+        release_input = declaration_fixture()
+        release_original_fd = None
+        release_foreign_fd = os.open(reference, os.O_RDONLY | getattr(os, "O_BINARY", 0))
+        release_calls = []
+        release_actual_binding = []
+        def release_frame(fd, **kwargs):
+            nonlocal release_original_fd
+            release_original_fd = fd
+            return None
+        def release_close_port(fd):
+            assert fd == release_original_fd and fd != release_foreign_fd
+            release_calls.append(fd)
+            binding = release_input._declaration_original_binding_v1
+            release_actual_binding.append(binding)
+            original_os_close(fd)
+            if release_mutation == "replace-record":
+                release_input._declaration_record_v1 = dict(fd=release_foreign_fd,
+                    original_fd=release_foreign_fd, close_attempted=False, closed=False)
+            elif release_mutation == "clear-record":
+                release_input._declaration_record_v1 = None
+            elif release_mutation == "clear-binding":
+                release_input._declaration_original_binding_v1 = None
+            elif release_mutation == "clear-release":
+                release_input._declaration_release_binding_v1 = None
+            else:
+                binding[1]['fd'] = binding[1]['original_fd'] = release_foreign_fd
+        try:
+            with monkeypatch.context() as release_port:
+                release_port.setattr(reliability, "_preflight_frame_read_v1", release_frame)
+                release_port.setattr(reliability.os, "close", release_close_port)
+                with pytest.raises(reliability.ValidationReliabilityError, match="post-close original association changed") as release_result:
+                    release_input.consume(lambda value: value)
+                for _ in range(2):
+                    with pytest.raises(reliability.ValidationReliabilityError) as repeated_release:
+                        release_input._settle_resources_v1()
+                    assert repeated_release.value is release_result.value
+            assert release_calls == [release_original_fd] and release_actual_binding[0][0] == release_original_fd
+            assert release_actual_binding[0][1]['close_attempted'] and release_actual_binding[0][1]['closed']
+            assert release_input.state == "FAILED" and release_input.failure is release_result.value
+            assert release_input._declaration_settlement_error_v1 is release_result.value
+            assert release_input._resources_require_retention_v1() and os.fstat(release_foreign_fd).st_size >= 0
+            with pytest.raises(OSError): os.fstat(release_original_fd)
+        finally:
+            original_os_close(release_foreign_fd)
+    # A final custody callback cannot install a foreign current slot and earn
+    # successful consumption after the original fd has already closed once.
+    final_callback_input = declaration_fixture()
+    final_callback_foreign = os.open(reference, os.O_RDONLY | getattr(os, "O_BINARY", 0))
+    final_callback_visits = []
+    def change_final_declaration_callback():
+        final_callback_visits.append(final_callback_input.state)
+        if len(final_callback_visits) == 2:
+            final_callback_input._declaration_record_v1 = dict(fd=final_callback_foreign,
+                original_fd=final_callback_foreign, close_attempted=False, closed=False)
+    final_callback_input.check = change_final_declaration_callback
+    try:
+        with monkeypatch.context() as final_callback_port:
+            final_callback_port.setattr(reliability, "_preflight_frame_read_v1", lambda fd, **kwargs: None)
+            with pytest.raises(reliability.ValidationReliabilityError, match="final resource association changed") as final_callback_result:
+                final_callback_input.consume(lambda value: value)
+            for _ in range(2):
+                with pytest.raises(reliability.ValidationReliabilityError) as final_callback_repeat:
+                    final_callback_input._settle_resources_v1()
+                assert final_callback_repeat.value is final_callback_result.value
+        assert final_callback_visits == ["CONSUMING", "CONSUMING"]
+        assert final_callback_input.state == "FAILED" and final_callback_input.failure is final_callback_result.value
+        assert final_callback_input._resources_require_retention_v1() and os.fstat(final_callback_foreign).st_size >= 0
+    finally:
+        original_os_close(final_callback_foreign)
 
 
 def test_runner_preserves_initially_modified_files_after_final_pytest(
@@ -14131,6 +15114,45 @@ def test_runner_timing_report_writes_only_when_requested(monkeypatch, tmp_path):
     assert payload["slowest_entries"]
     assert payload["total_elapsed_seconds"] >= 0
 
+    # Finite no-child output negatives: no ordinary output owner is supplied.
+    # C restoration or an existing path grants no permission to publish here.
+    timing_before = report_path.read_bytes()
+    output_primary = OSError("original execution failure retained with output denial")
+    output_supervision = {"pending": False, "errors": [output_primary]}
+    denied_timing = tmp_path / "ordinary-timing-unowned" / "report.json"
+    with monkeypatch.context() as output_ports:
+        output_ports.setattr(runner, "_ORDINARY_CANDIDATE_FIRST_V1", True)
+        output_ports.setattr(runner, "_RUN_COMMANDS_SUPERVISION", output_supervision)
+        for output_path in (denied_timing, report_path):
+            with pytest.raises(ValueError, match="ordinary timing report output lacks genuine owned-output binding") as output_denial:
+                runner._write_timing_report(output_path, phase="owned-output-negative",
+                    entries=(), total_elapsed_seconds=0.0, repo_root=tmp_path)
+            assert output_supervision["errors"][-1] is output_denial.value
+        assert output_supervision["errors"][0] is output_primary
+        assert len(output_supervision["errors"]) == 3
+        assert not denied_timing.exists() and not denied_timing.parent.exists()
+        assert report_path.read_bytes() == timing_before
+
+    # The original legacy diagnostic path keeps its return/raise behavior.
+    # These injected writer failures acquire no stream and create no child.
+    for output_error in (ValueError("original timing validation failure"),
+                         OSError("original timing publication failure")):
+        def fail_timing_publication(*args, **kwargs):
+            raise output_error
+        with monkeypatch.context() as output_fault:
+            output_fault.setattr(runner, "_ORDINARY_CANDIDATE_FIRST_V1", False)
+            output_fault.setattr(runner, "_write_timing_report", fail_timing_publication)
+            if isinstance(output_error, ValueError):
+                assert runner.run_commands([["python", "ok.py"]], phase="timing-output-fault",
+                    timing_report_path=denied_timing) == 2
+            else:
+                with pytest.raises(OSError) as output_failure:
+                    runner.run_commands([["python", "ok.py"]], phase="timing-output-fault",
+                        timing_report_path=denied_timing)
+                assert output_failure.value is output_error
+            assert sum(error is output_error for error in runner._RUN_COMMANDS_SUPERVISION["errors"]) == 1
+        assert not denied_timing.exists() and report_path.read_bytes() == timing_before
+
 
 def test_runner_rejects_tracked_generated_timing_report_path(monkeypatch):
     class Completed:
@@ -14511,6 +15533,99 @@ def test_runner_returns_zero_when_all_mocked_commands_pass(monkeypatch, capsys, 
     assert completed_bindings[0]["rp5a_payload_byte_limits"] is launch.rp5a_payload_byte_limits
     assert not mixed_paths.process_root.exists()
     capsys.readouterr()
+
+    # All ordinary router publication branches are finite no-child negatives.
+    # Branch/router ports below are decision oracles, not native or output grants.
+    report_scope_names = (
+        "_rp5d_r1_local_branch_scope_active", "_rp5f_local_branch_scope_active",
+        "_rp5g_local_branch_scope_active", "_pr169_readiness1_local_branch_scope_active",
+        "_pr169_pretrade1_local_branch_scope_active", "_pr169_dash1_local_branch_scope_active",
+    )
+    report_original_prepare = runner._prepare_execution_plan
+    for report_case in ("full", "routed", "rejected", *report_scope_names):
+        report_root = tmp_path / ("ordinary-router-output-" + report_case)
+        report_root.mkdir()
+        report_paths, _report_probe = reliability.resolve_validation_run_paths(report_root,
+            explicit_process_root=(tmp_path / ("router-output-parent-" + report_case)).resolve())
+        report_leaf = report_root / "unowned-output" / "router.json"
+        report_before = None
+        if report_case == "routed":
+            report_leaf.parent.mkdir()
+            report_leaf.write_bytes(b"original owned fixture report\n")
+            report_before = report_leaf.read_bytes()
+        report_primary = OSError("original failure remains beside router denial")
+        report_supervision = {"paths": report_paths, "phase": runner.FAST_PREFLIGHT_PHASE,
+            "pending": False, "receipt": None, "errors": [report_primary]}
+        report_plans, report_decisions, report_dispatches = [], [], []
+        report_rejection = "original finite router rejection"
+        def report_prepare(commands):
+            selected = report_original_prepare(commands)
+            report_plans.append(selected)
+            return selected
+        def report_decision(*args, **kwargs):
+            report_decisions.append((args, kwargs))
+            return SimpleNamespace(full_validation_required=True,
+                full_validation_reason="finite decision oracle",
+                fail_closed_reasons=(report_rejection,) if report_case == "rejected" else (),
+                to_json_dict=lambda: {"full_validation_required": True,
+                    "fail_closed_reasons": [report_rejection] if report_case == "rejected" else []})
+        def report_must_not_dispatch(*args, **kwargs):
+            report_dispatches.append((args, kwargs))
+            pytest.fail("unowned ordinary output reached acquisition/provenance/dispatch")
+        try:
+            with monkeypatch.context() as report_ports:
+                report_ports.setattr(runner, "_RUN_COMMANDS_ACTIVE_PATHS", report_paths)
+                report_ports.setattr(runner, "_RUN_COMMANDS_SUPERVISION", report_supervision)
+                report_ports.setattr(runner, "_ORDINARY_CANDIDATE_FIRST_V1", True)
+                report_ports.setattr(runner, "_ACTIVE_SEMANTIC_CHANGED_PATHS", None)
+                report_ports.setattr(runner, "_ACTIVE_CLASSIFIED_CHANGED_PATHS", None)
+                report_ports.setattr(runner, "_ACTIVE_TEXT_INTEGRITY_FAILURES", ())
+                report_ports.setattr(runner, "_prepare_execution_plan", report_prepare)
+                report_ports.setattr(runner, "_router_result_for_current_context", report_decision)
+                report_ports.setattr(ci_branch_context, "current_branch_context",
+                    lambda _root: SimpleNamespace(branch="main"))
+                report_ports.setattr(runner, "_current_git_branch", lambda _root: "main")
+                for report_scope_name in report_scope_names:
+                    report_ports.setattr(runner, report_scope_name,
+                        lambda **kwargs: False)
+                if report_case in report_scope_names:
+                    report_ports.setattr(runner, report_case, lambda **kwargs: True)
+                for report_call_name in ("_publish_active_plan_provenance", "_execute_supervised_command",
+                                         "_scan_resolve_parent_capacity", "_mapper_resolve_parent_profiles_v1",
+                                         "run_commands"):
+                    report_ports.setattr(runner, report_call_name, report_must_not_dispatch)
+                report_phase = (runner.DETERMINISTIC_VALIDATORS_PHASE
+                    if report_case in report_scope_names else runner.FAST_PREFLIGHT_PHASE)
+                report_mode = ("reduced" if report_case in ("routed", "rejected") else
+                    "auto" if report_case in report_scope_names else "full")
+                report_argv = ["--phase", report_phase, "--validation-mode", report_mode,
+                    "--router-report", "unowned-output/router.json"]
+                if report_case in ("routed", "rejected"):
+                    report_argv += ["--changed-file", "tools/run_validation_gates.py"]
+                if report_case == "rejected":
+                    assert runner._main_impl(report_argv) == 2
+                    assert report_plans == []
+                else:
+                    with pytest.raises(ValueError, match="ordinary router report output lacks genuine owned-output binding") as report_denial:
+                        runner._main_impl(report_argv)
+                    assert report_supervision["errors"][-1] is report_denial.value
+                    assert len(report_plans) == 1
+                report_output = capsys.readouterr()
+                if report_case == "rejected":
+                    assert report_rejection in report_output.err
+                assert report_supervision["errors"][0] is report_primary
+                assert len(report_supervision["errors"]) == 2
+                assert type(report_supervision["errors"][-1]) is ValueError
+                assert str(report_supervision["errors"][-1]) == "ordinary router report output lacks genuine owned-output binding"
+                assert len(report_decisions) == (1 if report_case in ("routed", "rejected") else 0)
+                assert report_dispatches == [] and report_supervision["pending"] is False
+                if report_before is None:
+                    assert not report_leaf.exists() and not report_leaf.parent.exists()
+                else:
+                    assert report_leaf.read_bytes() == report_before
+        finally:
+            # Every possible dispatch port above is an explicit no-child oracle.
+            assert reliability.cleanup_validation_run(report_paths) == "PASS_REMOVED_EXACT_RUN_ROOT"
 
 
 def test_runner_sets_run_local_no_runtime_scan_cache_env(monkeypatch, tmp_path):
@@ -15796,6 +16911,285 @@ def _assert_process_supervision_contract(monkeypatch, tmp_path: Path) -> None:
         malformed = copy(start_receipt)
         object.__setattr__(malformed, field, value)
         assert reliability._command_requires_process_retention_v1(malformed) is True
+
+
+    # First-error diagnostics are exercised here inside the original supervised
+    # process group. Finite fixture bytes are independent; none grants a domain
+    # scanner, repository effect, larger deadline, or new receipt interpretation.
+    import stat
+    diagnostic_limits = reliability._ScanRunReadLimits(100_000, 5_000, 32, 3)
+    diagnostic_basis = reliability._Rp5aReadBasisV1("1" * 40, b"# finite historical fixture\n",
+        100_000, 20, 512, 100_000, 5_000, 100, 1_000)
+    diagnostic_module_root = str(Path(reliability.__file__).resolve().parents[1])
+    diagnostic_child = (
+        "import os,sys\nfrom pathlib import Path\n"
+        + "sys.path.insert(0," + repr(diagnostic_module_root) + ")\n"
+        + "from tools import validation_reliability as v\n"
+        + "root=Path(sys.argv[1]);deadline=int(sys.argv[2]);version=int(sys.argv[3]);status=int(sys.argv[4])\n"
+        + "identity=v._ScanLaunchIdentity('first-error-fixture','unit-supervision',1,1,tuple(sys.orig_argv),str(root))\n"
+        + "limits=v._ScanRunReadLimits(100000,5000,32,3)\n"
+        + "basis=v._Rp5aReadBasisV1('1'*40,b'# finite historical fixture\\n',100000,20,512,100000,5000,100,1000)\n"
+        + "parsed=v._read_scan_launch_fd(sys.stdin.fileno(),limits=limits,deadline_ns=deadline,"
+          "expected_identity=identity,expected_wire_version=version,"
+          "expected_rp5a_read_basis=None if version==1 else basis,expected_payload_bytes=4 if version==3 else None)\n"
+        + "lease=parsed[5] if version==3 else None;errors=[]\n"
+        + "try:\n"
+        + "    fence=v._ScanCandidateFence(root,parsed[1],limits=limits,candidate_read_bytes=parsed[2],deadline_ns=deadline,"
+          "**({'wire_version':3,'surface_role':'receiver','payload_lease':lease} if version==3 else {}))\n"
+        + "    fence()\n"
+        + "    assert os.lseek(sys.stdin.fileno(),0,os.SEEK_CUR)==4+os.fstat(sys.stdin.fileno()).st_size-4\n"
+        + "    assert lease is None or lease.initial_consumption_complete\n"
+        + "except BaseException as error:errors.append(error)\n"
+        + "try:\n"
+        + "    if lease is not None:lease.close()\n"
+        + "except BaseException as error:errors.append(error)\n"
+        + "v._scan_raise_errors(errors)\nprint('FINITE_INPUT_COMPLETE',flush=True)\nraise SystemExit(status)\n")
+
+    def diagnostic_input(version, suffix, native_status=0):
+        home = tmp_path / ("first-error-" + str(version) + "-" + suffix)
+        home.mkdir()
+        root, scratch, snapshots = home / "repo", home / "input", home / "snapshots"
+        root.mkdir(); scratch.mkdir(); snapshots.mkdir()
+        source, saved = root / "data.bin", snapshots / "original.bin"
+        original = b"A\x00\xffB"
+        source.write_bytes(original); saved.write_bytes(original)
+        mode = stat.S_IMODE(source.lstat().st_mode)
+        rows = (reliability._ScanCandidateSurface("data.bin", "FILE", mode, original, ()),)
+        extras = {}
+        if version == 3:
+            fd = reliability._open_regular_worktree_descriptor(saved)
+            try:
+                saved_version = reliability._scan_same_api_version(os.fstat(fd))
+            finally:
+                os.close(fd)
+            carrier = reliability._ScanDiskSnapshotV3("data.bin", saved, saved_version,
+                reliability._scan_file_identity(source.lstat()), mode, 4)
+            rows = (reliability._ScanCandidateSurface("data.bin", "FILE", mode, carrier, ()),)
+            extras = {"wire_version": 3, "surface_role": "sender", "snapshot_root": snapshots}
+        deadline = time.monotonic_ns() + 120_000_000_000
+        argv = (sys.executable, "-B", "-c", diagnostic_child, str(root), str(deadline), str(version), str(native_status))
+        identity = reliability._ScanLaunchIdentity("first-error-fixture", "unit-supervision", 1, 1, argv, str(root))
+        fence = reliability._ScanCandidateFence(root, rows, limits=diagnostic_limits,
+            candidate_read_bytes=10_000_000, deadline_ns=deadline, **extras)
+        value = reliability._ScanLaunchInput(identity, rows, limits=diagnostic_limits,
+            candidate_read_bytes=10_000_000, deadline_ns=deadline, scratch_root=scratch,
+            scratch_bytes=100_000, parent_frame_reread_bytes=1_000_000, check_candidate=fence,
+            rp5a_read_basis=None if version == 1 else diagnostic_basis,
+            **({"wire_version": 3, "snapshot_root": snapshots} if version == 3 else {}))
+        return home, value, fence
+
+    # These are actual finite children under the unchanged native supervisor,
+    # decoder and candidate owner. The parent-only clock fault is labeled as an
+    # injected diagnostic stimulus, never proof of a native deadline failure.
+    for version in (1, 2, 3):
+        for native_status in (0, 7):
+            home, value, fence = diagnostic_input(version, "healthy-" + str(native_status), native_status)
+            assert reliability._rp5a_consumer_role_v1(value.identity.argv, value.identity.repo_root) is None
+            with value:
+                diagnostic_receipt = reliability.supervise_command(value.identity.argv,
+                    cwd=Path(value.identity.repo_root), run_id=value.identity.run_id, phase=value.identity.phase,
+                    command_index=1, evidence_root=home / "evidence", launch_input=value,
+                    required_markers=("FINITE_INPUT_COMPLETE",), timeout_seconds=30,
+                    environment={**os.environ, "PYTHONDONTWRITEBYTECODE": "1"},
+                    mirror_stdout=False, mirror_stderr=False)
+                assert value.finish_error is None and fence.failure is None
+            assert diagnostic_receipt.native_exit_code == native_status
+            assert diagnostic_receipt.failure_class == (None if native_status == 0 else "ENGVR_NATIVE_EXIT_NONZERO")
+            assert diagnostic_receipt.output_observation is None and diagnostic_receipt.stdout_marker_state == "PASS"
+            assert not reliability._command_requires_process_retention_v1(diagnostic_receipt)
+            assert value.supervision_receipt is diagnostic_receipt and value._release_complete_v1()
+
+        home, value, fence = diagnostic_input(version, "terminal-fault")
+        first = OSError("injected original parent terminal comparison fault")
+        original_clock = fence._clock
+        def parent_terminal_fault():
+            if value.state == "ATTACHED":
+                raise first
+            original_clock()
+        with monkeypatch.context() as fault:
+            fault.setattr(fence, "_clock", parent_terminal_fault)
+            value.__enter__()
+            diagnostic_receipt = reliability.supervise_command(value.identity.argv,
+                cwd=Path(value.identity.repo_root), run_id=value.identity.run_id, phase=value.identity.phase,
+                command_index=1, evidence_root=home / "evidence", launch_input=value,
+                required_markers=("FINITE_INPUT_COMPLETE",), timeout_seconds=30,
+                environment={**os.environ, "PYTHONDONTWRITEBYTECODE": "1"},
+                mirror_stdout=False, mirror_stderr=False)
+        assert diagnostic_receipt.native_exit_code == 0 and diagnostic_receipt.failure_class == "ENGVR_ATOMIC_RECEIPT_WRITE_FAILED"
+        assert diagnostic_receipt.output_observation is None and diagnostic_receipt.termination_state == "NOT_REQUIRED"
+        assert not reliability._command_requires_process_retention_v1(diagnostic_receipt)
+        assert value.finish_error is first and fence.failure is first and value.state == "HELD"
+        before = dict(fence.__dict__)
+        with pytest.raises(ValueError) as repeated_fence:
+            fence()
+        assert repeated_fence.value.__cause__ is first and fence.__dict__ == before
+        first_state, first_remaining = value.state, value.remaining_reread
+        with pytest.raises(ValueError):
+            value._finished(value.process, 0)
+        assert value.finish_error is first and value.remaining_reread == first_remaining and value.state == first_state
+        with monkeypatch.context() as foreign:
+            foreign.setattr(fence, "thread_id", fence.thread_id + 1)
+            before = dict(fence.__dict__)
+            with pytest.raises(ValueError) as denied_foreign:
+                fence()
+            assert denied_foreign.value.__cause__ is None and fence.__dict__ == before
+        if version == 3:
+            with pytest.raises(ValueError, match="held launch retains its original frame evidence"):
+                value._close()
+            assert value.reader.closed and value.path.exists() and value.finish_error is first
+            # Known safely terminal finite fixture only; no production held-frame
+            # release, child-tree settlement, or outer-root cleanup is invented.
+            value.path.unlink()
+        else:
+            value._close()
+            assert value._release_complete_v1() and value.finish_error is first and not value.path.exists()
+
+    # Genuine independent four-byte mismatch: metadata is valid on initial
+    # fixture construction. This is not rebasing a mutated repository baseline.
+    for version in (1, 3):
+        home, value, unused_fence = diagnostic_input(version, "byte-mismatch")
+        source = Path(value.identity.repo_root) / "data.bin"
+        source.write_bytes(b"WXYZ")
+        rows = value.candidate_files
+        extras = {}
+        if version == 3:
+            old = rows[0].content
+            carrier = reliability._ScanDiskSnapshotV3(old.path, old.snapshot_path, old.snapshot_version,
+                reliability._scan_file_identity(source.lstat()), old.mode, old.length)
+            rows = (reliability._ScanCandidateSurface(old.path, "FILE", old.mode, carrier, ()),)
+            extras = {"wire_version": 3, "surface_role": "sender", "snapshot_root": value.snapshot_root}
+        mismatch = reliability._ScanCandidateFence(Path(value.identity.repo_root), rows,
+            limits=diagnostic_limits, candidate_read_bytes=1000, deadline_ns=value.deadline_ns, **extras)
+        with pytest.raises(ValueError) as first_mismatch:
+            mismatch()
+        assert mismatch.failure is first_mismatch.value and mismatch.held
+        assert mismatch.remaining == (992 if version == 3 else 996)
+        before = dict(mismatch.__dict__)
+        with pytest.raises(ValueError) as repeated_mismatch:
+            mismatch()
+        assert repeated_mismatch.value.__cause__ is first_mismatch.value and mismatch.__dict__ == before
+
+    # All following close/owner ports are explicit no-child fixture faults. The
+    # real close occurs once before the injected error; no retry is authorized.
+    home, value, fence = diagnostic_input(1, "body-close")
+    value.__enter__()
+    body = OSError("original finite body error")
+    close = OSError("injected error after original reader close")
+    actual_reader = value.reader
+    closes = []
+    class ReaderCloseFault:
+        @property
+        def closed(self):
+            return actual_reader.closed
+        def close(self):
+            closes.append(actual_reader)
+            actual_reader.close()
+            raise close
+    value.reader = ReaderCloseFault()
+    with pytest.raises(BaseExceptionGroup) as body_close:
+        value._close(body)
+    assert body_close.value.exceptions == (body, close) and closes == [actual_reader]
+    assert actual_reader.closed and value.close_errors == [close] and value.finish_error is None
+    before = dict(value.__dict__)
+    with pytest.raises(OSError) as repeated_close:
+        value._close()
+    assert repeated_close.value is close and closes == [actual_reader] and value.__dict__ == before
+    value.path.unlink()  # Known no-child test fixture; actual reader already closed.
+
+    home, value, fence = diagnostic_input(1, "foreign-before-use")
+    with monkeypatch.context() as foreign:
+        foreign.setattr(value, "thread_id", value.thread_id + 1)
+        before = dict(value.__dict__)
+        with pytest.raises(ValueError, match="foreign launch input owner"):
+            value.__enter__()
+        assert value.__dict__ == before and value.finish_error is None and not value.entry_attempted
+    with value:
+        assert value.finish_error is None and fence.failure is None
+    assert value._release_complete_v1()
+
+
+    # Decode-only fixture: the exact original lease really closes before the
+    # injected close-reporting error. It is never a process/tree qualification.
+    home, value, unused_fence = diagnostic_input(3, "lease-close")
+    with value:
+        parsed = reliability._read_scan_launch_fd(value.reader.fileno(), limits=diagnostic_limits,
+            deadline_ns=value.deadline_ns, expected_identity=value.identity, expected_wire_version=3,
+            expected_rp5a_read_basis=diagnostic_basis, expected_payload_bytes=4)
+        lease = parsed[5]
+        receiver = reliability._ScanCandidateFence(Path(value.identity.repo_root), parsed[1],
+            limits=diagnostic_limits, candidate_read_bytes=parsed[2], deadline_ns=value.deadline_ns,
+            wire_version=3, surface_role="receiver", payload_lease=lease)
+        receiver()
+        close = OSError("injected report error after actual finite lease close")
+        real_lease_close = reliability._ScanPayloadLeaseV3.close
+        lease_closes = []
+        def report_after_lease_close(selected):
+            if selected is not lease:
+                return real_lease_close(selected)
+            lease_closes.append(selected)
+            real_lease_close(selected)
+            raise close
+        with monkeypatch.context() as lease_port:
+            lease_port.setattr(reliability._ScanPayloadLeaseV3, "close", report_after_lease_close)
+            with pytest.raises(OSError) as failed_lease_close:
+                receiver.close_payload_lease()
+        assert failed_lease_close.value is close and receiver.failure is close and lease.closed
+        before = dict(receiver.__dict__)
+        with pytest.raises(ValueError) as repeated_lease_denial:
+            receiver()
+        assert repeated_lease_denial.value.__cause__ is close and receiver.__dict__ == before
+        assert lease_closes == [lease] and value.finish_error is None
+    assert value._release_complete_v1()
+
+    # This labeled no-child binary stream port acquires and closes the genuine
+    # finite descriptor. It returns deliberately wrong bytes and reports a close
+    # error after the real close; both ORIGINAL errors must remain in the group.
+    home, value, unused_fence = diagnostic_input(1, "source-body-close")
+    source = Path(value.identity.repo_root) / "tools/run_validation_gates.py"
+    source.parent.mkdir()
+    source.write_bytes(b"ABCD")
+    row = reliability._ScanCandidateSurface("tools/run_validation_gates.py", "FILE",
+        stat.S_IMODE(source.lstat().st_mode), b"ABCD", ())
+    source_fence = reliability._ScanCandidateFence(Path(value.identity.repo_root), (row,),
+        limits=diagnostic_limits, candidate_read_bytes=10_000, deadline_ns=value.deadline_ns)
+    close = OSError("injected report error after original finite source close")
+    real_fdopen = os.fdopen
+    finite_streams, finite_closes = [], []
+    class FiniteSourceFault:
+        def __init__(self, actual):
+            self.actual = actual
+        @property
+        def closed(self):
+            return self.actual.closed
+        def fileno(self):
+            return self.actual.fileno()
+        def read(self, count):
+            data = self.actual.read(count)
+            return b"WXYZ" if data == b"ABCD" else data
+        def close(self):
+            finite_closes.append(self.actual)
+            self.actual.close()
+            raise close
+    def finite_source_port(descriptor, mode="r", buffering=-1, **kwargs):
+        actual = real_fdopen(descriptor, mode, buffering, **kwargs)
+        finite_streams.append(actual)
+        return FiniteSourceFault(actual)
+    with monkeypatch.context() as source_port:
+        source_port.setattr(os, "fdopen", finite_source_port)
+        with pytest.raises(BaseExceptionGroup) as failed_source:
+            source_fence.read_original_source("tools/run_validation_gates.py", 100)
+    assert len(failed_source.value.exceptions) == 2 and failed_source.value.exceptions[1] is close
+    assert isinstance(failed_source.value.exceptions[0], ValueError)
+    assert str(failed_source.value.exceptions[0]) == "current source differs from original candidate frame"
+    assert source_fence.failure is failed_source.value and source_fence.held
+    assert len(finite_streams) == 1 and finite_closes == finite_streams and finite_streams[0].closed
+    assert source_fence._resources_pending_v1() and source_fence.close_errors == [close]
+    before = dict(source_fence.__dict__)
+    with pytest.raises(ValueError) as repeated_source_denial:
+        source_fence()
+    assert repeated_source_denial.value.__cause__ is failed_source.value and source_fence.__dict__ == before
+    assert finite_closes == finite_streams  # No second native close or guessed descriptor.
+
 
 def _assert_mirror_isolation_contract(monkeypatch, tmp_path: Path) -> None:
     marker = "MIRROR_OK"
@@ -18785,6 +20179,1761 @@ def _exercise_failed_admission_plan_v1(tmp_path, monkeypatch, fixture_factory):
         assert runner._ORDINARY_CANDIDATE_FIRST_V1 is previous_order
 
 
+    # One real finite C object through publication and dispatch. The child
+    # port is an explicit no-child oracle; this is not native ordinary admission.
+    for fault in ("success", "candidate", "candidate-check", "scan", "mapper", "publication"):
+        root = tmp_path / ("ordinary-retained-c-" + fault)
+        root.mkdir()
+        (root / "source.py").write_bytes(b"independent owned candidate\n")
+        paths, probe = reliability.resolve_validation_run_paths(root,
+            explicit_process_root=(tmp_path / ("retained-parent-" + fault)).resolve(),
+            run_id="run_retained_candidate_" + fault.replace("-", "_"),
+            projected_relative_paths=("command-1.stdout.bin",))
+        commands = [[runner.sys.executable, "tools/example_gate.py"]]
+        execution = runner._prepare_execution_plan(commands)
+        original_scan = runner._scan_resolve_parent_capacity
+        original_mapper = runner._mapper_resolve_parent_profiles_v1
+        primary = OSError("original no-child admission fault: " + fault)
+        calls, retained, dispatches, restores = [], [], [], []
+        supervision = dict(paths=paths, phase=runner.ALL_PHASE, pending=False,
+                           candidate_owner=(os.getpid(), runner.threading.get_ident()),
+                           receipt=None, errors=[])
+
+        def candidate_source(candidate_root, plan):
+            calls.append("candidate")
+            assert candidate_root == root and plan is runner._LAST_EXPECTED_COMMAND_PLAN
+            assert supervision["candidate_acquisition_attempted"] is True
+            with pytest.raises(ValueError, match="candidate acquisition cannot be retried"):
+                original_prepare(root, plan, None)
+            if fault == "candidate":
+                raise primary
+            value = _synthetic_candidate_custody_v1(root, plan,
+                observed_paths=lambda: ("source.py",), effects=())
+            retained.append(value)
+            original_restore = value.restore
+            def restore():
+                restores.append(value)
+                return original_restore()
+            value.restore = restore
+            if fault == "candidate-check":
+                def refuse_final_check():
+                    assert supervision["candidate_custody"] is value
+                    raise primary
+                value._check = refuse_final_check
+            return value
+
+        def scan(active_paths, phase, plan):
+            calls.append("scan")
+            assert supervision["candidate_custody"] is retained[0]
+            assert active_paths is paths and plan is retained[0].plan
+            if fault == "scan":
+                raise primary
+            return original_scan(active_paths, phase, plan)
+
+        def mapper(active_paths, phase, plan):
+            calls.append("mapper")
+            assert supervision["candidate_custody"] is retained[0]
+            assert active_paths is paths and plan is retained[0].plan
+            if fault == "mapper":
+                raise primary
+            return original_mapper(active_paths, phase, plan)
+
+        def publish(*args, **kwargs):
+            calls.append("publication")
+            assert supervision["candidate_custody"] is retained[0]
+            if fault == "publication":
+                raise primary
+            return reliability.write_run_provenance(*args, **kwargs)
+
+        def no_child(command, **kwargs):
+            dispatches.append(tuple(command))
+            assert supervision["candidate_custody"] is retained[0]
+            assert retained[0].active_occurrence == 1 and calls.count("candidate") == 1
+            return reliability.CommandExecutionReceiptV1(
+                schema_version=1, run_id=paths.run_id, phase=runner.ALL_PHASE,
+                command_index=1, argv=tuple(command), cwd=str(root), pid=4321,
+                platform=os.name, start_time_utc="2026-08-24T00:00:00Z",
+                end_time_utc="2026-08-24T00:00:01Z", elapsed_monotonic_seconds=1.0,
+                native_exit_code=0, start_failure_class=None, timeout_seconds_or_null=None,
+                timeout_state="NOT_CONFIGURED", termination_state="NOT_REQUIRED",
+                stdout_path=str(paths.evidence_root / "command-1.stdout.bin"),
+                stderr_path=str(paths.evidence_root / "command-1.stderr.bin"),
+                stdout_byte_count=0, stderr_byte_count=0, stdout_required_markers=(),
+                stdout_marker_state="NOT_REQUIRED", stderr_was_nonempty=False, failure_class=None)
+
+        def prepare(candidate_root, plan, candidate):
+            if not supervision.get("candidate_acquisition_attempted", False):
+                before = dict(supervision)
+                with pytest.raises(ValueError, match="original invocation association"):
+                    original_prepare(candidate_root, tuple(list(plan)), candidate)
+                assert supervision == before and calls == []
+                with monkeypatch.context() as foreign_owner:
+                    foreign_owner.setattr(runner.threading, "get_ident", lambda: before["candidate_owner"][1]+1)
+                    with pytest.raises(ValueError, match="original invocation association"):
+                        original_prepare(candidate_root, plan, candidate)
+                    assert supervision == before and calls == []
+                with pytest.raises(ValueError, match="original repository root"):
+                    original_prepare(None, plan, candidate)
+                assert supervision == before and calls == []
+            return original_prepare(candidate_root, plan, candidate)
+
+        try:
+            with monkeypatch.context() as scoped:
+                fixture_factory(patcher=scoped)
+                original_prepare = runner._prepare_validation_candidate_v1
+                for name, value in (
+                    ("_RUN_COMMANDS_ACTIVE_PATHS", paths), ("_RUN_COMMANDS_SUPERVISION", supervision),
+                    ("_ACTIVE_FILESYSTEM_PROBE", probe), ("_ORDINARY_CANDIDATE_FIRST_V1", True),
+                    ("_ACTIVE_CANDIDATE_SOURCE", candidate_source),
+                    ("_prepare_validation_candidate_v1", prepare),
+                    ("_ACTIVE_PREFLIGHT_PATH_V1", None), ("_ACTIVE_PREFLIGHT_ASSEMBLY_V1", None),
+                    ("_ACTIVE_SCAN_LAUNCH", None), ("_ACTIVE_SCAN_CAPACITY_SOURCE", None),
+                    ("_SCAN_CAPACITY_ATTEMPTED", False), ("_MAPPER_READ_SOURCE_ATTEMPTED", False),
+                    ("_ACTIVE_MAPPER_READ_SOURCE_V1", None), ("_ACTIVE_MAPPER_READ_PROFILES_V1", None),
+                    ("_ACTIVE_MAPPER_OCCURRENCES_V1", {}),
+                    ("_RUN_PROVENANCE_WRITTEN", False), ("_RUN_PROVENANCE_ATTEMPTED", False),
+                    ("_LAST_PLANNED_COMMAND_COUNT", None), ("_LAST_EXPECTED_COMMAND_PLAN", ()),
+                    ("_LAST_COMMAND_RECEIPTS", ()), ("_scan_resolve_parent_capacity", scan),
+                    ("_mapper_resolve_parent_profiles_v1", mapper), ("write_run_provenance", publish),
+                    ("_execute_supervised_command", no_child)):
+                    scoped.setattr(runner, name, value)
+                if fault == "success":
+                    runner._publish_active_plan_provenance(runner.ALL_PHASE, execution)
+                    selected_plan = retained[0].plan
+                    initial_reads = retained[0].read_attempts
+                    assert original_prepare(root, selected_plan, None) is retained[0]
+                    assert retained[0].read_attempts == initial_reads
+                    with monkeypatch.context() as deadline_change:
+                        deadline_change.setattr(retained[0], "deadline_ns", retained[0].deadline_ns+1)
+                        with pytest.raises(ValueError, match="original deadline"):
+                            original_prepare(root, selected_plan, None)
+                    assert retained[0].read_attempts == initial_reads
+                    for foreign in (tuple(list(selected_plan)),):
+                        with pytest.raises(ValueError, match="original invocation association"):
+                            original_prepare(root, foreign, None)
+                    another = _synthetic_candidate_custody_v1(root, selected_plan,
+                        observed_paths=lambda: ("source.py",), effects=())
+                    with pytest.raises(ValueError, match="retained original owner"):
+                        original_prepare(root, selected_plan, another)
+                    with monkeypatch.context() as legacy:
+                        legacy.setattr(runner, "_ORDINARY_CANDIDATE_FIRST_V1", False)
+                        assert original_prepare(root, selected_plan, another) is another
+                    assert supervision["candidate_custody"] is retained[0]
+                    with monkeypatch.context() as foreign_paths:
+                        foreign_paths.setattr(runner, "_RUN_COMMANDS_ACTIVE_PATHS", replace(paths))
+                        with pytest.raises(ValueError, match="original invocation association"):
+                            original_prepare(root, selected_plan, None)
+                    with pytest.raises(ValueError, match="original invocation association"):
+                        runner.run_commands(commands, repo_root=root, execution_plan=execution,
+                            run_paths=replace(paths), defer_success_markers=True)
+                    assert runner._RUN_COMMANDS_SUPERVISION is supervision and dispatches == []
+                    assert supervision["candidate_custody"] is retained[0]
+                    assert runner.run_commands(commands, repo_root=root, execution_plan=execution,
+                        run_paths=paths, defer_success_markers=True) == 0
+                    assert calls == ["candidate", "scan", "mapper", "publication"]
+                    assert dispatches == [tuple(commands[0])] and restores == [retained[0]]
+                    assert retained[0].state == "RESTORED_VERIFIED" and not supervision["pending"]
+                else:
+                    with pytest.raises(OSError) as failure:
+                        runner._publish_active_plan_provenance(runner.ALL_PHASE, execution)
+                    assert failure.value is primary and dispatches == [] and restores == []
+                    assert not runner._RUN_PROVENANCE_WRITTEN
+                    assert not (paths.evidence_root / "run.json").exists()
+                    selected_plan = runner._LAST_EXPECTED_COMMAND_PLAN
+                    prior_calls = tuple(calls)
+                    with pytest.raises(ValueError, match="cannot be retried"):
+                        runner._publish_active_plan_provenance(runner.ALL_PHASE, execution)
+                    assert tuple(calls) == prior_calls
+                    if fault == "candidate":
+                        assert "candidate_custody" not in supervision
+                        with pytest.raises(ValueError, match="candidate acquisition cannot be retried"):
+                            original_prepare(root, selected_plan, None)
+                    else:
+                        assert supervision["candidate_custody"] is retained[0]
+                        assert retained[0].plan is selected_plan and calls.count("candidate") == 1
+                        if fault == "candidate-check":
+                            assert supervision["candidate_admission_error"] is primary
+                            assert supervision["candidate_admission_complete"] is False
+                            with pytest.raises(ValueError, match="candidate admission cannot be retried") as rejected:
+                                original_prepare(root, selected_plan, None)
+                            assert rejected.value.__cause__ is primary
+                    assert supervision["candidate_acquisition_attempted"] is True
+                if fault in ("success", "scan", "mapper", "publication", "candidate-check"):
+                    before_restores = tuple(restores)
+                    cleanup_attempts = []
+                    scoped.setattr(runner, "cleanup_validation_run", lambda owned:
+                        cleanup_attempts.append(owned) or reliability.cleanup_validation_run(owned))
+                    outcome = runner._finalize_validation_run(run_paths=paths, probe=probe,
+                        phase=runner.ALL_PHASE, planned_count=len(selected_plan), expected_plan=selected_plan,
+                        receipts=(), result=1, text_state="PASS", _supervision_state=supervision)
+                    assert outcome[0] == 1 and outcome[2].final_state == "FAIL"
+                    if fault == "candidate-check":
+                        assert outcome[1].startswith("FAIL") and cleanup_attempts == []
+                        assert supervision["candidate_settlement_error"] is primary
+                        assert runner._candidate_requires_retention_v1(supervision) and paths.process_root.is_dir()
+                        before_repeat = dict(supervision)
+                        previous_restores = tuple(restores)
+                        with pytest.raises(OSError) as repeated:
+                            runner._settle_validation_candidate_v1(supervision, paths, runner.ALL_PHASE, selected_plan)
+                        assert repeated.value is primary and supervision == before_repeat
+                        assert tuple(restores) == previous_restores
+                    else:
+                        assert outcome[1] == "PASS_REMOVED_EXACT_RUN_ROOT" and cleanup_attempts == [paths]
+                        assert retained[0].state == "RESTORED_VERIFIED"
+                        assert retained[0]._settled_snapshot is retained[0].baseline
+                        assert restores == [retained[0]]
+                        assert len(restores) == len(before_restores) + (fault != "success")
+                        assert not runner._candidate_requires_retention_v1(supervision)
+                assert (root / "source.py").read_bytes() == b"independent owned candidate\n"
+        finally:
+            # All selected child ports above prove no native child was started.
+            assert dispatches == [] or fault == "success"
+            if (paths.evidence_root / "cleanup.json").exists():
+                retained_cleanup = (paths.evidence_root / "cleanup.json").read_bytes()
+                if paths.process_root.exists():
+                    reliability.remove_exact_run_owned_process_tree(paths.process_root,
+                        expected_run_root=paths.process_root, repo_root=root, evidence_root=paths.evidence_root)
+                assert not paths.process_root.exists()
+                assert (paths.evidence_root / "cleanup.json").read_bytes() == retained_cleanup
+            else:
+                assert reliability.cleanup_validation_run(paths) == "PASS_REMOVED_EXACT_RUN_ROOT"
+
+
+    # Constructor failures retain the real partial C before the supplier
+    # returns. These are finite owned file reads and explicit no-child faults.
+    for fault in ("observer", "prefix", "close", "read-close", "double", "different-return", "deadline-type", "wrapper-import", "native-root", "native-run"):
+        root = tmp_path / ("partial-c-" + fault)
+        root.mkdir()
+        (root / "a.py").write_bytes(b"independent first file\n")
+        (root / "z.py").write_bytes(b"independent last file\n")
+        index = root / "original-index"
+        index.write_bytes(b"independent staged bytes\n")
+        paths, probe = reliability.resolve_validation_run_paths(root,
+            explicit_process_root=(tmp_path / ("partial-parent-" + fault)).resolve(),
+            run_id="run_partial_candidate_" + fault.replace("-", "_"),
+            projected_relative_paths=("command-1.stdout.bin",))
+        commands = [[runner.sys.executable, "tools/example_gate.py"]]
+        nested = {}
+        deadline = runner.time.monotonic_ns() + 60_000_000_000
+        if fault == "wrapper-import":
+            commands = [[runner.sys.executable, "tools/run_pytest_fresh_basetemp.py",
+                "tests/stage1_prediction_markets/pr166_qb_bounded_quantum_benchmark/test_pr166_qb_idempotence.py",
+                "-q", "--durations=50", "--basetemp", str(paths.pytest_basetemp_root)]]
+            # Reuse the finite one-hop fixture allocations, never native grants.
+            nested[1] = dict(entry_limit=3*len(commands)+2+4,
+                file_byte_limit=100_000, retained_byte_limit=1_000_000,
+                read_byte_limit=(2*len(commands)+16)*6*100_000,
+                child_execution_deadline_ns=deadline-15_000_000_000,
+                execution_deadline_ns=deadline-10_000_000_000, deadline_ns=deadline)
+        execution = runner._prepare_execution_plan(commands)
+        primary = OSError("original partial candidate fault: " + fault)
+        read_fault = OSError("original candidate read failure")
+        calls, reads, retained, closes, cleanups = [], [], [], [], []
+        supervision = dict(paths=paths, phase=runner.ALL_PHASE, pending=False,
+            candidate_owner=(os.getpid(), runner.threading.get_ident()), receipt=None, errors=[])
+        original_read = runner._ValidationCandidateCustodyV1._read_acquisition
+        original_close = runner.os.close
+        original_os_read = runner.os.read
+        real_cleanup = reliability.cleanup_validation_run
+        held_fd = None
+
+        # Exact-class negative fixtures, never valid native grants. They have
+        # no lease, manifest, descriptor or owned resource to release.
+        unadmitted_basis = unadmitted_observation = None
+        native_product_calls = []
+        if fault in ("wrapper-import", "native-root", "native-run"):
+            native_basis_type = reliability._LinuxImmutableSourceBasisV2
+            unadmitted_basis = object.__new__(native_basis_type)
+            unadmitted_basis.root = root if fault == "native-run" else root / "foreign-product-root"
+            unadmitted_basis.run_id = paths.run_id + "_other" if fault == "native-run" else paths.run_id
+            unadmitted_basis.pid, unadmitted_basis.thread = supervision["candidate_owner"]
+            unadmitted_observation = object()
+            unadmitted_before = dict(unadmitted_basis.__dict__)
+
+        def no_unadmitted_native_product(*args, **kwargs):
+            native_product_calls.append((args, kwargs))
+            raise AssertionError("unadmitted native operand was consulted or settled")
+
+        def observed_paths():
+            value = supervision["candidate_custody"]
+            if not retained:
+                retained.append(value)
+            assert value.root == root and value.plan is runner._LAST_EXPECTED_COMMAND_PLAN
+            assert value.state == "CAPTURING" and value.baseline is value._settled_snapshot is None
+            assert supervision["candidate_acquiring"] and not supervision["candidate_admission_complete"]
+            with pytest.raises(ValueError, match="candidate admission cannot be retried"):
+                real_prepare(root, value.plan, None)
+            if fault == "observer":
+                raise primary
+            return ("a.py", "z.py")
+
+        def read(value, path):
+            reads.append(path.name)
+            assert supervision["candidate_custody"] is value
+            if fault == "prefix" and path.name == "z.py":
+                raise primary
+            return original_read(value, path)
+
+        def fail_one_close(fd):
+            nonlocal held_fd
+            value = supervision.get("candidate_custody")
+            if fault in ("close", "read-close") and value is not None and value._read_descriptor == fd:
+                held_fd = fd
+                closes.append(fd)
+                raise primary  # Explicit fixture: this fd was not closed.
+            return original_close(fd)
+
+        def fail_read(fd, count):
+            value = supervision.get("candidate_custody")
+            if fault == "read-close" and value is not None and value._read_descriptor == fd:
+                raise read_fault
+            return original_os_read(fd, count)
+
+        def source(candidate_root, plan):
+            calls.append("candidate")
+            assert candidate_root == root and supervision["candidate_acquiring"]
+            if fault in ("wrapper-import", "native-root", "native-run"):
+                value = runner._ValidationCandidateCustodyV1(repo_root=root, plan=plan,
+                    observe_paths=no_dependent_work, check_exclusive=no_dependent_work, index_path=index,
+                    effects_by_occurrence={i: () for i in range(1, len(plan) + 1)}, ignored_paths=(),
+                    entry_limit=100 + sum(v["entry_limit"] for v in nested.values()),
+                    snapshot_byte_limit=1_000_000 + sum(v["retained_byte_limit"] for v in nested.values()),
+                    read_byte_limit=100_000_000 + sum(v["read_byte_limit"] for v in nested.values()),
+                    deadline_ns=deadline, nested_evidence_limits=nested,
+                    operation_checks={i: no_dependent_work for i in range(1, len(plan) + 1)},
+                    native_basis=unadmitted_basis, native_observation=unadmitted_observation)
+            else:
+                value = _synthetic_candidate_custody_v1(root, plan,
+                    observed_paths=observed_paths, effects=(), index_path=index,
+                    deadline_ns=deadline, nested_evidence_limits=nested)
+            if fault == "double":
+                _synthetic_candidate_custody_v1(root, plan,
+                    observed_paths=lambda: ("a.py", "z.py"), effects=(), index_path=index)
+                raise AssertionError("second constructor unexpectedly completed")
+            if fault == "deadline-type":
+                class EqualDeadline(int):
+                    pass
+                value.deadline_ns = EqualDeadline(value.deadline_ns)
+                return value
+            if fault == "different-return":
+                with monkeypatch.context() as independent_fixture:
+                    independent_fixture.setattr(runner, "_ORDINARY_CANDIDATE_FIRST_V1", False)
+                    independent_fixture.setattr(runner._ValidationCandidateCustodyV1, "_read_acquisition", original_read)
+                    other = _synthetic_candidate_custody_v1(root, plan,
+                        observed_paths=lambda: ("a.py", "z.py"), effects=(), index_path=index)
+                assert other is not value
+                return other
+            raise AssertionError("partial fault unexpectedly completed")
+
+        def no_dependent_work(*args, **kwargs):
+            raise AssertionError("partial capture reached publication or dispatch")
+
+        def cleanup(actual):
+            cleanups.append(actual)
+            return real_cleanup(actual)
+
+        import builtins
+        original_import = builtins.__import__
+        import_calls = []
+        def refuse_selected_import(name, globals=None, locals=None, fromlist=(), level=0):
+            if (name == "tools.run_pytest_fresh_basetemp"
+                    and "_split_pytest_options_v1" in (fromlist or ())
+                    and supervision.get("candidate_acquiring")):
+                value = supervision["candidate_custody"]
+                assert type(value) is runner._ValidationCandidateCustodyV1
+                assert value.root == root and value.plan is runner._LAST_EXPECTED_COMMAND_PLAN
+                assert (value.process_id, value.thread_id) == supervision["candidate_owner"]
+                assert value.state == "CAPTURING" and value.failure is None
+                assert value.baseline is value._settled_snapshot is None and value.completed_actions == []
+                assert value._read_descriptor is value._write_descriptor is value._read_raw_handle_owner is None
+                assert not value._read_close_attempted and not value._write_close_attempted
+                assert not value._read_in_progress and not value._read_acquisition_in_progress
+                assert value._original_mapper_custody_v1 is value._mapper_custody_v1
+                assert value.native_basis is value.native_observation is None
+                assert value.deadline_ns == deadline and not supervision["candidate_admission_complete"]
+                retained.append(value)
+                import_calls.append((name, tuple(fromlist)))
+                raise primary
+            return original_import(name, globals, locals, fromlist, level)
+
+        try:
+            with monkeypatch.context() as scoped:
+                fixture_factory(patcher=scoped)
+                real_prepare = runner._prepare_validation_candidate_v1
+                if fault == "wrapper-import":
+                    scoped.setattr(builtins, "__import__", refuse_selected_import)
+                for name, value in (
+                    ("_RUN_COMMANDS_ACTIVE_PATHS", paths), ("_RUN_COMMANDS_SUPERVISION", supervision),
+                    ("_ACTIVE_FILESYSTEM_PROBE", probe), ("_ORDINARY_CANDIDATE_FIRST_V1", True),
+                    ("_ACTIVE_CANDIDATE_SOURCE", source), ("_prepare_validation_candidate_v1", real_prepare),
+                    ("_ACTIVE_PREFLIGHT_PATH_V1", None), ("_ACTIVE_PREFLIGHT_ASSEMBLY_V1", None),
+                    ("_ACTIVE_SCAN_LAUNCH", None), ("_ACTIVE_SCAN_CAPACITY_SOURCE", None),
+                    ("_SCAN_CAPACITY_ATTEMPTED", False), ("_MAPPER_READ_SOURCE_ATTEMPTED", False),
+                    ("_ACTIVE_MAPPER_READ_SOURCE_V1", None), ("_ACTIVE_MAPPER_READ_PROFILES_V1", None),
+                    ("_ACTIVE_MAPPER_OCCURRENCES_V1", {}), ("_RUN_PROVENANCE_WRITTEN", False),
+                    ("_RUN_PROVENANCE_ATTEMPTED", False), ("_LAST_PLANNED_COMMAND_COUNT", None),
+                    ("_LAST_EXPECTED_COMMAND_PLAN", ()), ("_LAST_COMMAND_RECEIPTS", ()),
+                    ("_scan_resolve_parent_capacity", no_dependent_work),
+                    ("_mapper_resolve_parent_profiles_v1", no_dependent_work),
+                    ("write_run_provenance", no_dependent_work), ("_execute_supervised_command", no_dependent_work),
+                    ("cleanup_validation_run", cleanup)):
+                    scoped.setattr(runner, name, value)
+                scoped.setattr(runner._ValidationCandidateCustodyV1, "_read_acquisition", read)
+                scoped.setattr(runner.os, "close", fail_one_close)
+                scoped.setattr(runner.os, "read", fail_read)
+                if fault in ("wrapper-import", "native-root", "native-run"):
+                    for method in ("check_live", "_resources_require_retention_v2", "_settle_resources_v2", "_close"):
+                        scoped.setattr(native_basis_type, method, no_unadmitted_native_product)
+                with pytest.raises((OSError, ValueError, BaseExceptionGroup)) as caught:
+                    runner._publish_active_plan_provenance(runner.ALL_PHASE, execution)
+                if fault == "deadline-type":
+                    assert "original deadline" in str(caught.value)
+                    assert type(supervision["candidate_deadline_ns"]) is int
+                    assert type(supervision["candidate_custody"].deadline_ns) is not int
+                elif fault == "different-return":
+                    assert "retained original owner" in str(caught.value)
+                elif fault == "double":
+                    assert "construction cannot be repeated" in str(caught.value)
+                elif fault == "read-close":
+                    assert caught.value.exceptions == (read_fault, primary)
+                elif fault in ("native-root", "native-run"):
+                    assert type(caught.value) is ValueError
+                    assert str(caught.value) == "LINUX_V2_EXACT_NO_EFFECT_CANDIDATE"
+                    retained.append(supervision["candidate_custody"])
+                else:
+                    assert caught.value is primary
+                value = retained[0]
+                if fault == "wrapper-import":
+                    assert len(import_calls) == 1 and reads == [] and closes == []
+                    assert value.observed_read_bytes == value.read_attempts == 0
+                    assert supervision["pending"] is False
+                assert supervision["candidate_custody"] is value and calls == ["candidate"]
+                assert supervision["candidate_admission_error"] is caught.value
+                assert supervision["candidate_acquiring"] is False and not supervision["pending"]
+                assert not supervision["candidate_admission_complete"] and not runner._RUN_PROVENANCE_WRITTEN
+                assert not (paths.evidence_root / "run.json").exists()
+                if fault in ("double", "different-return", "deadline-type"):
+                    assert value.state == "BASELINE_READY" and value.failure is None
+                else:
+                    assert value.failure is caught.value and value.state == "CLEANUP_REJECTED"
+                    assert value.baseline is value._settled_snapshot is None and value.completed_actions == []
+                if fault == "prefix":
+                    expected = len(b"independent staged bytes\n") + len(b"independent first file\n")
+                    assert reads == ["original-index", "a.py", "z.py"]
+                    assert value.observed_read_bytes == expected and value.remaining_read_bytes == 100_000_000 - expected
+                    assert value.index_baseline == (runner.stat.S_IMODE(index.stat().st_mode), b"independent staged bytes\n")
+                previous_reads = tuple(reads)
+                with pytest.raises(ValueError, match="candidate admission cannot be retried") as retry:
+                    real_prepare(root, value.plan, None)
+                assert retry.value.__cause__ is caught.value and tuple(reads) == previous_reads
+                assert runner._candidate_requires_retention_v1(supervision) is (fault in ("close", "read-close"))
+                if fault in ("wrapper-import", "native-root", "native-run"):
+                    assert value.native_basis is value.native_observation is None
+                    assert reads == [] and closes == [] and value.observed_read_bytes == value.read_attempts == 0
+                    assert unadmitted_basis.__dict__ == unadmitted_before and native_product_calls == []
+                    runner._settle_validation_candidate_v1(supervision, paths, runner.ALL_PHASE, value.plan)
+                    assert value.failure is caught.value and value.state == "CLEANUP_REJECTED"
+                    assert value.native_basis is value.native_observation is None
+                    assert unadmitted_basis.__dict__ == unadmitted_before and native_product_calls == []
+                    assert not supervision.get("native_resource_settlement_error")
+                    assert not supervision.get("candidate_settlement_error")
+                if fault in ("close", "read-close"):
+                    assert value._read_descriptor == held_fd and value._read_close_attempted
+                    assert closes == [held_fd] and os.fstat(held_fd).st_size == index.stat().st_size
+                    assert runner.run_commands(commands, repo_root=root, execution_plan=execution,
+                        run_paths=paths, defer_success_markers=True) == 1
+                    assert runner._main_owned(["--help"]) == 1
+                    scoped.setattr(runner, "_linux_preflight_selected_v1", no_dependent_work)
+                    assert runner.main(["--linux-preflight-provision"]) == 1
+                    outcome = runner._finalize_validation_run(run_paths=paths, probe=probe,
+                        phase=runner.ALL_PHASE, planned_count=len(value.plan), expected_plan=value.plan,
+                        receipts=(), result=1, text_state="PASS", _supervision_state=supervision)
+                    assert outcome[0] == 1 and outcome[1].startswith("FAIL") and outcome[2].final_state == "FAIL"
+                    assert cleanups == [] and paths.process_root.is_dir() and not supervision["pending"]
+                    assert runner._RUN_COMMANDS_SUPERVISION is supervision and value._read_descriptor == held_fd
+                    assert closes == [held_fd] and any(error is caught.value for error in supervision["errors"])
+                assert (root / "a.py").read_bytes() == b"independent first file\n"
+                assert (root / "z.py").read_bytes() == b"independent last file\n"
+                assert index.read_bytes() == b"independent staged bytes\n"
+        finally:
+            # The fixture proves no child and owns this explicitly unclosed fd.
+            # This is teardown only, never production settlement/retry credit.
+            if held_fd is not None:
+                original_close(held_fd)
+            if (paths.evidence_root / "cleanup.json").exists():
+                retained_cleanup = (paths.evidence_root / "cleanup.json").read_bytes()
+                if paths.process_root.exists():
+                    reliability.remove_exact_run_owned_process_tree(paths.process_root,
+                        expected_run_root=paths.process_root, repo_root=root, evidence_root=paths.evidence_root)
+                assert not paths.process_root.exists()
+                assert (paths.evidence_root / "cleanup.json").read_bytes() == retained_cleanup
+            else:
+                assert real_cleanup(paths) == "PASS_REMOVED_EXACT_RUN_ROOT"
+
+
+    # A callback cannot replace an active acquisition, even before open.
+    # These finite reads have no process; rejected recursion earns no debit.
+    recursion_root = tmp_path / "candidate-read-recursion"
+    recursion_root.mkdir()
+    recursion_source = recursion_root / "source.py"
+    recursion_source.write_bytes(b"independent recursion input\n")
+    recursion_plan = runner._prepare_execution_plan([[runner.sys.executable, "tools/example_gate.py"]])
+    with monkeypatch.context() as explicit_fixture:
+        explicit_fixture.setattr(runner, "_ORDINARY_CANDIDATE_FIRST_V1", False)
+        recursive_c = _synthetic_candidate_custody_v1(recursion_root, recursion_plan,
+            observed_paths=lambda: ("source.py",), effects=())
+    stages = []
+    def exclusive_recursion():
+        stage = recursive_c._read_descriptor is not None
+        if recursive_c._read_in_progress and stage not in stages:
+            before = dict(recursive_c.__dict__)
+            stages.append(stage)
+            with pytest.raises(RuntimeError, match="READ_ALREADY_OWNED"):
+                recursive_c._read(recursion_source)
+            assert recursive_c.__dict__ == before
+            if stage:
+                with pytest.raises(RuntimeError, match="READ_ALREADY_OWNED"):
+                    recursive_c._read_acquisition(recursion_source)
+                assert recursive_c.__dict__ == before
+        return None
+    recursive_c.check_exclusive = exclusive_recursion
+    previous = recursive_c.observed_read_bytes
+    assert recursive_c._read(recursion_source)[1] == b"independent recursion input\n"
+    assert stages == [False, True] and recursive_c.failure is None
+    assert recursive_c.observed_read_bytes - previous == len(b"independent recursion input\n")
+    assert recursive_c._read_descriptor is None and not recursive_c._read_in_progress
+
+    # Direct acquisition callbacks are rejected before another file open.
+    # This also preserves the actual outer fd when its one close fails. These
+    # are no-child file fixtures, not process or kernel-handle qualification.
+    for acquisition_fault in ("success", "close"):
+        acquisition_root = tmp_path / ("candidate-direct-acquisition-" + acquisition_fault)
+        acquisition_root.mkdir()
+        acquisition_source = acquisition_root / "source.py"
+        acquisition_source.write_bytes(b"independent acquisition callback\n")
+        with monkeypatch.context() as explicit_fixture:
+            explicit_fixture.setattr(runner, "_ORDINARY_CANDIDATE_FIRST_V1", False)
+            acquisition_c = _synthetic_candidate_custody_v1(acquisition_root, recursion_plan,
+                observed_paths=lambda: ("source.py",), effects=())
+        acquisition_stages, acquisition_opens, acquisition_closes = [], [], []
+        original_open = reliability._open_regular_worktree_descriptor
+        original_close = os.close
+        acquisition_close_error = OSError("original acquisition callback close fault")
+        def acquisition_callback():
+            if acquisition_c._read_acquisition_in_progress:
+                stage = acquisition_c._read_descriptor is not None
+                if stage not in acquisition_stages:
+                    acquisition_stages.append(stage)
+                    before = dict(acquisition_c.__dict__)
+                    counts = (len(acquisition_opens), len(acquisition_closes))
+                    with pytest.raises(RuntimeError, match="READ_ALREADY_OWNED"):
+                        acquisition_c._read_acquisition(acquisition_source)
+                    assert acquisition_c.__dict__ == before
+                    with pytest.raises(RuntimeError, match="READ_ALREADY_OWNED"):
+                        acquisition_c._read(acquisition_source)
+                    assert acquisition_c.__dict__ == before
+                    assert (len(acquisition_opens), len(acquisition_closes)) == counts
+        def acquisition_open(path, **kwargs):
+            value = original_open(path, **kwargs)
+            acquisition_opens.append(value)
+            return value
+        def acquisition_close(descriptor):
+            if descriptor in acquisition_opens:
+                acquisition_closes.append(descriptor)
+                if acquisition_fault == "close":
+                    raise acquisition_close_error
+            return original_close(descriptor)
+        acquisition_c.check_exclusive = acquisition_callback
+        previous_reads = acquisition_c.observed_read_bytes
+        try:
+            with monkeypatch.context() as syscall_fixture:
+                syscall_fixture.setattr(reliability, "_open_regular_worktree_descriptor", acquisition_open)
+                syscall_fixture.setattr(os, "close", acquisition_close)
+                if acquisition_fault == "success":
+                    assert acquisition_c._read(acquisition_source)[1] == b"independent acquisition callback\n"
+                    assert acquisition_c.failure is None and acquisition_c._read_descriptor is None
+                else:
+                    with pytest.raises(OSError) as acquisition_error:
+                        acquisition_c._read(acquisition_source)
+                    assert acquisition_error.value is acquisition_close_error
+                    assert acquisition_c.failure is acquisition_close_error
+                    assert acquisition_c._read_descriptor == acquisition_opens[0]
+                    assert acquisition_c._read_close_attempted and acquisition_c.state == "CLEANUP_REJECTED"
+                    assert runner._candidate_requires_retention_v1(dict(candidate_custody=acquisition_c))
+                    before = dict(acquisition_c.__dict__)
+                    with pytest.raises(RuntimeError, match="READ_ALREADY_OWNED"):
+                        acquisition_c._read_acquisition(acquisition_source)
+                    assert acquisition_c.__dict__ == before
+                assert acquisition_stages == [False, True]
+                assert len(acquisition_opens) == 1 and acquisition_closes == acquisition_opens
+                assert not acquisition_c._read_in_progress and not acquisition_c._read_acquisition_in_progress
+                assert acquisition_c.observed_read_bytes - previous_reads == len(b"independent acquisition callback\n")
+        finally:
+            # The synthetic failed close performed no native close. This exact
+            # real fixture fd is closed once after the syscall port is restored.
+            if acquisition_c._read_descriptor is not None:
+                original_close(acquisition_c._read_descriptor)
+
+    # Lost finalizer identity cannot discard a completed but unsettled C.
+    identity_root = tmp_path / "candidate-finalizer-identity"
+    identity_root.mkdir()
+    (identity_root / "source.py").write_bytes(b"independent finalizer input\n")
+    identity_paths, identity_probe = reliability.resolve_validation_run_paths(identity_root,
+        explicit_process_root=(tmp_path / "identity-parent").resolve(),
+        run_id="run_candidate_finalizer_identity", projected_relative_paths=("command-1.stdout.bin",))
+    identity_plan = reliability.build_command_evidence_plan(run_id=identity_paths.run_id,
+        phase=runner.ALL_PHASE, commands=([runner.sys.executable, "tools/example_gate.py"],), cwd=identity_root)
+    with monkeypatch.context() as explicit_fixture:
+        explicit_fixture.setattr(runner, "_ORDINARY_CANDIDATE_FIRST_V1", False)
+        identity_c = _synthetic_candidate_custody_v1(identity_root, identity_plan,
+            observed_paths=lambda: ("source.py",), effects=())
+    identity_supervision = dict(paths=identity_paths, phase=runner.ALL_PHASE, pending=False,
+        candidate_owner=(os.getpid(), runner.threading.get_ident()), receipt=None, errors=[],
+        candidate_custody=identity_c, candidate_deadline_ns=identity_c.deadline_ns,
+        candidate_admission_complete=True)
+    identity_calls = []
+    def no_identity_effect(*args, **kwargs):
+        identity_calls.append((args, kwargs))
+        raise AssertionError("lost finalizer identity reached another effect")
+    try:
+        with monkeypatch.context() as scoped:
+            scoped.setattr(runner, "_RUN_COMMANDS_SUPERVISION", identity_supervision)
+            scoped.setattr(runner, "_ACTIVE_PREFLIGHT_ASSEMBLY_V1", None)
+            scoped.setattr(runner, "cleanup_validation_run", no_identity_effect)
+            scoped.setattr(identity_c, "restore", no_identity_effect)
+            scoped.setattr(runner, "_linux_preflight_selected_v1", no_identity_effect)
+            foreign_launch = SimpleNamespace(paths=identity_paths, phase=runner.ALL_PHASE,
+                plan=tuple(list(identity_plan)))
+            with pytest.raises(ValueError, match="finalizer lost original scan launch identity") as identity_error:
+                runner._finalize_validation_run(run_paths=identity_paths, probe=identity_probe,
+                    phase=runner.ALL_PHASE, planned_count=1, expected_plan=identity_plan,
+                    receipts=(), result=1, text_state="PASS", scan_launch=foreign_launch,
+                    _supervision_state=identity_supervision)
+            assert identity_supervision["candidate_settlement_error"] is identity_error.value
+            assert identity_supervision["errors"] == [identity_error.value]
+            assert identity_c.state == "BASELINE_READY" and identity_c.failure is None
+            assert runner._candidate_requires_retention_v1(identity_supervision)
+            assert identity_paths.process_root.is_dir() and identity_calls == []
+            assert runner.main(["--linux-preflight-provision"]) == 1
+            before = dict(identity_supervision)
+            with pytest.raises(ValueError) as identity_repeat:
+                runner._settle_validation_candidate_v1(identity_supervision, identity_paths, runner.ALL_PHASE, identity_plan)
+            assert identity_repeat.value is identity_error.value and identity_supervision == before
+            assert identity_calls == [] and not identity_supervision["pending"]
+    finally:
+        # A no-child read-only fixture; the failed identity report is untouched.
+        assert reliability.cleanup_validation_run(identity_paths) == "PASS_REMOVED_EXACT_RUN_ROOT"
+
+    # Returned write handles also remain owned after an unproven close. The
+    # original readback cannot run or erase that handle, and no retry is made.
+    for write_fault in ("close", "write-close"):
+        write_root = tmp_path / ("candidate-write-" + write_fault)
+        write_root.mkdir()
+        write_source = write_root / "output.json"
+        write_source.write_bytes(b"independent baseline report\n")
+        write_paths, write_probe = reliability.resolve_validation_run_paths(write_root,
+            explicit_process_root=(tmp_path / ("write-parent-" + write_fault)).resolve(),
+            run_id="run_candidate_write_" + write_fault.replace("-", "_"),
+            projected_relative_paths=("command-1.stdout.bin",))
+        write_commands = [[runner.sys.executable, "tools/example_gate.py"]]
+        write_plan = reliability.build_command_evidence_plan(run_id=write_paths.run_id,
+            phase=runner.ALL_PHASE, commands=write_commands, cwd=write_root)
+        with monkeypatch.context() as explicit_fixture:
+            explicit_fixture.setattr(runner, "_ORDINARY_CANDIDATE_FIRST_V1", False)
+            write_c = _synthetic_candidate_custody_v1(write_root, write_plan,
+                observed_paths=lambda: ("output.json",), effects=("output.json",))
+        write_c.begin_occurrence(1, write_plan[0], environment={}, timeout_seconds=1, scratch_roots=())
+        write_source.write_bytes(b"admitted synthetic child report\n")
+        write_c.end_occurrence(1, write_plan[0])
+        write_supervision = dict(paths=write_paths, phase=runner.ALL_PHASE, pending=False,
+            candidate_owner=(os.getpid(), runner.threading.get_ident()), receipt=None, errors=[],
+            candidate_custody=write_c, candidate_deadline_ns=write_c.deadline_ns,
+            candidate_admission_complete=True)
+        original_close = runner.os.close
+        original_write = runner.os.write
+        body = OSError("original restoration write fault")
+        close = OSError("original restoration close fault")
+        actual_close_attempts, acquired_write_requests, cleanup_attempts = [], [], []
+        held_write = None
+        def unproven_write_close(fd):
+            nonlocal held_write
+            if write_c._write_descriptor == fd:
+                held_write = fd
+                actual_close_attempts.append(fd)
+                raise close  # Explicit oracle: this owned descriptor is open.
+            return original_close(fd)
+        def observe_write(fd, value):
+            acquired_write_requests.append(len(value))
+            if write_fault == "write-close":
+                raise body
+            return original_write(fd, value)
+        try:
+            with monkeypatch.context() as scoped:
+                scoped.setattr(runner, "_RUN_COMMANDS_SUPERVISION", write_supervision)
+                scoped.setattr(runner, "_ACTIVE_PREFLIGHT_ASSEMBLY_V1", None)
+                scoped.setattr(runner.os, "close", unproven_write_close)
+                scoped.setattr(runner.os, "write", observe_write)
+                scoped.setattr(runner, "cleanup_validation_run", lambda value: cleanup_attempts.append(value))
+                with pytest.raises((OSError, BaseExceptionGroup)) as failed:
+                    write_c.restore()
+                if write_fault == "write-close":
+                    assert failed.value.exceptions == (body, close)
+                else:
+                    assert failed.value is close
+                assert write_c.failure is failed.value and write_c.state == "CLEANUP_INCOMPLETE"
+                assert actual_close_attempts == [held_write] and write_c._write_close_attempted
+                assert write_c._write_descriptor == held_write and os.fstat(held_write).st_nlink == 1
+                assert acquired_write_requests and max(acquired_write_requests) <= 65536
+                assert runner._candidate_requires_retention_v1(write_supervision)
+                with pytest.raises(RuntimeError, match="READ_ALREADY_OWNED"):
+                    write_c._read(write_source)
+                with pytest.raises(RuntimeError, match="terminal candidate failure"):
+                    write_c.restore()
+                outcome = runner._finalize_validation_run(run_paths=write_paths, probe=write_probe,
+                    phase=runner.ALL_PHASE, planned_count=1, expected_plan=write_plan,
+                    receipts=(), result=1, text_state="PASS", _supervision_state=write_supervision)
+                assert outcome[0] == 1 and outcome[1].startswith("FAIL") and outcome[2].final_state == "FAIL"
+                assert cleanup_attempts == [] and write_paths.process_root.is_dir()
+                assert write_c._write_descriptor == held_write and actual_close_attempts == [held_write]
+                assert not write_supervision["pending"] and runner._RUN_COMMANDS_SUPERVISION is write_supervision
+                assert any(error is failed.value for error in write_supervision["errors"])
+        finally:
+            # Only this no-child fixture closes its explicitly open handle.
+            if held_write is not None:
+                original_close(held_write)
+            if (write_paths.evidence_root / "cleanup.json").exists():
+                retained_cleanup = (write_paths.evidence_root / "cleanup.json").read_bytes()
+                if write_paths.process_root.exists():
+                    reliability.remove_exact_run_owned_process_tree(write_paths.process_root,
+                        expected_run_root=write_paths.process_root, repo_root=write_root,
+                        evidence_root=write_paths.evidence_root)
+                assert not write_paths.process_root.exists()
+                assert (write_paths.evidence_root / "cleanup.json").read_bytes() == retained_cleanup
+            else:
+                assert reliability.cleanup_validation_run(write_paths) == "PASS_REMOVED_EXACT_RUN_ROOT"
+
+
+    # Exercise the original Windows opener through explicit syscall/CRT
+    # no-handle oracles. These are not native transfer/termination evidence.
+    import ctypes
+    original_opener = reliability._open_regular_worktree_descriptor
+    original_os = reliability.os
+    raw_root = tmp_path / "candidate-raw-handle"
+    raw_root.mkdir()
+    raw_file = raw_root / "source.py"
+    raw_file.write_bytes(b"independent raw-handle input\n")
+    raw_primary = OSError("original CRT transfer fault")
+    raw_close_error = OSError("original native close fault")
+    raw_calls = []
+    raw_errors = []
+    selected_raw_fault = "success"
+    class NativeCall:
+        def __init__(self, implementation):
+            self.implementation = implementation
+        def __call__(self, *args):
+            return self.implementation(*args)
+    def create_native(*args):
+        raw_calls.append(("create", args))
+        return ctypes.c_void_p(-1).value if selected_raw_fault == "invalid" else 123456
+    def transfer_native(handle, flags):
+        raw_calls.append(("transfer", (handle, flags)))
+        if selected_raw_fault != "success":
+            raise raw_primary
+        return 31337
+    def close_native(handle):
+        raw_calls.append(("close", (handle,)))
+        if selected_raw_fault == "close-error":
+            raise raw_close_error
+        return selected_raw_fault != "close"
+    fake_kernel = SimpleNamespace(CreateFileW=NativeCall(create_native), CloseHandle=NativeCall(close_native))
+    fake_os = SimpleNamespace(name="nt", O_RDONLY=original_os.O_RDONLY,
+        O_BINARY=int(getattr(original_os, "O_BINARY", 0)), O_NOINHERIT=128,
+        getpid=original_os.getpid)
+    def original_opener_with_syscall_fixture(path, *, nonblocking=False):
+        with monkeypatch.context() as syscall_fixture:
+            syscall_fixture.setattr(reliability, "os", fake_os)
+            syscall_fixture.setattr(ctypes, "WinDLL", lambda *args, **kwargs: fake_kernel, raising=False)
+            syscall_fixture.setattr(ctypes, "get_last_error", lambda: 32, raising=False)
+            syscall_fixture.setattr(ctypes, "FormatError", lambda code: "synthetic original native error", raising=False)
+            syscall_fixture.setattr(ctypes, "WinError", lambda code: raw_close_error, raising=False)
+            syscall_fixture.setitem(sys.modules, "msvcrt", SimpleNamespace(open_osfhandle=transfer_native))
+            return original_opener(path, nonblocking=nonblocking)
+    # Carrier construction and owner identity must precede CreateFileW.
+    # These ports acquire no kernel handle, so failure must have no native call.
+    original_raw_owner, original_threading = reliability._WorktreeRawHandleOwnerV1, reliability.threading
+    for preparation_fault in ("carrier", "identity", "thread"):
+        raw_calls.clear()
+        preparation_error = OSError("original raw owner preparation fault")
+        def fail_raw_preparation(*args, **kwargs):
+            raise preparation_error
+        with monkeypatch.context() as preparation_fixture:
+            if preparation_fault == "carrier":
+                preparation_fixture.setattr(reliability, "_WorktreeRawHandleOwnerV1", fail_raw_preparation)
+            elif preparation_fault == "identity":
+                preparation_fixture.setattr(fake_os, "getpid", fail_raw_preparation)
+            else:
+                preparation_fixture.setattr(reliability, "threading", SimpleNamespace(get_ident=fail_raw_preparation))
+            with pytest.raises(OSError) as preparation_failure:
+                original_opener_with_syscall_fixture(raw_file)
+            assert preparation_failure.value is preparation_error and raw_calls == []
+        assert reliability.os is original_os
+        assert reliability._WorktreeRawHandleOwnerV1 is original_raw_owner and reliability.threading is original_threading
+
+    for selected_raw_fault in ("success", "invalid", "transfer", "close", "close-error"):
+        raw_calls.clear()
+        if selected_raw_fault == "success":
+            assert original_opener_with_syscall_fixture(raw_file) == 31337
+            assert [name for name, _ in raw_calls] == ["create", "transfer"]
+            assert raw_calls[1][1] == (123456, fake_os.O_RDONLY | fake_os.O_BINARY | fake_os.O_NOINHERIT)
+        else:
+            with pytest.raises((OSError, BaseExceptionGroup)) as raw_failure:
+                original_opener_with_syscall_fixture(raw_file)
+            if selected_raw_fault == "invalid":
+                assert [name for name, _ in raw_calls] == ["create"]
+            elif selected_raw_fault == "transfer":
+                assert raw_failure.value is raw_primary
+                assert [name for name, _ in raw_calls] == ["create", "transfer", "close"]
+            else:
+                assert raw_failure.value.exceptions == (raw_primary, raw_close_error)
+                raw_owner = raw_failure.value._worktree_raw_handle_owner_v1
+                assert type(raw_owner) is reliability._WorktreeRawHandleOwnerV1
+                assert raw_owner.handle_value == 123456 and raw_owner.path == raw_file
+                assert (raw_owner.process_id, raw_owner.thread_id) == (os.getpid(), runner.threading.get_ident())
+                assert raw_owner.close_attempted and not raw_owner.closed and not raw_owner.transferred
+                assert [name for name, _ in raw_calls] == ["create", "transfer", "close"]
+                raw_errors.append(raw_failure.value)
+        assert raw_calls[0][1][1:7] == (0x80000000, 0x1 | 0x2 | 0x4, None, 3, 0x00200000 | 0x08000000, None)
+        assert reliability.os is original_os
+
+    # The real C captures that same typed original raw owner before helper
+    # return. The syscall fixture has no OS handle or child to release.
+    raw_paths, raw_probe = reliability.resolve_validation_run_paths(raw_root,
+        explicit_process_root=(tmp_path / "raw-parent").resolve(), run_id="run_candidate_raw_handle",
+        projected_relative_paths=("command-1.stdout.bin",))
+    raw_supervision = dict(paths=raw_paths, phase=runner.ALL_PHASE, pending=False,
+        candidate_owner=(os.getpid(), runner.threading.get_ident()), receipt=None, errors=[])
+    raw_execution = runner._prepare_execution_plan([[runner.sys.executable, "tools/example_gate.py"]])
+    selected_raw_fault = "close"
+    raw_calls.clear()
+    raw_dependents = []
+    def raw_no_effect(*args, **kwargs):
+        raw_dependents.append((args, kwargs))
+        raise AssertionError("unsettled raw handle reached another effect")
+    def raw_source(root, plan):
+        return _synthetic_candidate_custody_v1(root, plan,
+            observed_paths=lambda: ("source.py",), effects=(), index_path=raw_file)
+    try:
+        with monkeypatch.context() as scoped:
+            fixture_factory(patcher=scoped)
+            for name, value in (("_RUN_COMMANDS_ACTIVE_PATHS", raw_paths),
+                    ("_RUN_COMMANDS_SUPERVISION", raw_supervision), ("_ACTIVE_FILESYSTEM_PROBE", raw_probe),
+                    ("_ORDINARY_CANDIDATE_FIRST_V1", True), ("_ACTIVE_CANDIDATE_SOURCE", raw_source),
+                    ("_prepare_validation_candidate_v1", real_prepare), ("_ACTIVE_PREFLIGHT_PATH_V1", None),
+                    ("_ACTIVE_PREFLIGHT_ASSEMBLY_V1", None), ("_ACTIVE_SCAN_LAUNCH", None),
+                    ("_SCAN_CAPACITY_ATTEMPTED", False), ("_MAPPER_READ_SOURCE_ATTEMPTED", False),
+                    ("_RUN_PROVENANCE_ATTEMPTED", False), ("_RUN_PROVENANCE_WRITTEN", False),
+                    ("_LAST_PLANNED_COMMAND_COUNT", None), ("_LAST_EXPECTED_COMMAND_PLAN", ()),
+                    ("_LAST_COMMAND_RECEIPTS", ()), ("_scan_resolve_parent_capacity", raw_no_effect),
+                    ("_mapper_resolve_parent_profiles_v1", raw_no_effect), ("write_run_provenance", raw_no_effect),
+                    ("cleanup_validation_run", raw_no_effect), ("_linux_preflight_selected_v1", raw_no_effect)):
+                scoped.setattr(runner, name, value)
+            scoped.setattr(reliability, "_open_regular_worktree_descriptor", original_opener_with_syscall_fixture)
+            with pytest.raises(BaseExceptionGroup) as captured:
+                runner._publish_active_plan_provenance(runner.ALL_PHASE, raw_execution)
+            raw_c = raw_supervision["candidate_custody"]
+            assert captured.value.exceptions == (raw_primary, raw_close_error)
+            assert raw_c.failure is captured.value and raw_c.baseline is None
+            assert raw_c._read_descriptor is None and raw_c._read_raw_handle_owner is captured.value._worktree_raw_handle_owner_v1
+            assert raw_c._read_raw_handle_owner.path == raw_file and raw_c.state == "CLEANUP_REJECTED"
+            assert runner._candidate_requires_retention_v1(raw_supervision)
+            assert runner.main(["--linux-preflight-provision"]) == 1
+            assert runner.run_commands([[runner.sys.executable, "tools/example_gate.py"]],
+                repo_root=raw_root, execution_plan=raw_execution, run_paths=raw_paths) == 1
+            with pytest.raises(RuntimeError, match="READ_ALREADY_OWNED"):
+                raw_c._read(raw_file)
+            outcome = runner._finalize_validation_run(run_paths=raw_paths, probe=raw_probe,
+                phase=runner.ALL_PHASE, planned_count=1, expected_plan=raw_c.plan,
+                receipts=(), result=1, text_state="PASS", _supervision_state=raw_supervision)
+            assert outcome[0] == 1 and outcome[1].startswith("FAIL") and outcome[2].final_state == "FAIL"
+            assert any(error is captured.value for error in raw_supervision["errors"])
+            assert raw_paths.process_root.is_dir() and raw_dependents == [] and not raw_supervision["pending"]
+            assert [name for name, _ in raw_calls] == ["create", "transfer", "close"]
+            report_error = OSError("original late raw-custody report fault")
+            scoped.setattr(runner, "atomic_write_json", lambda *args, **kwargs:
+                (_ for _ in ()).throw(report_error))
+            with pytest.raises(BaseExceptionGroup) as late_report:
+                runner._finalize_validation_run(run_paths=raw_paths, probe=raw_probe,
+                    phase=runner.ALL_PHASE, planned_count=1, expected_plan=raw_c.plan,
+                    receipts=(), result=1, text_state="PASS", _supervision_state=raw_supervision)
+            assert late_report.value.exceptions == (captured.value, report_error)
+            assert raw_c._read_raw_handle_owner is captured.value._worktree_raw_handle_owner_v1
+            assert raw_paths.process_root.is_dir() and runner._RUN_COMMANDS_SUPERVISION is raw_supervision
+            assert [name for name, _ in raw_calls] == ["create", "transfer", "close"]
+    finally:
+        # No real syscall handle exists; preserve any original cleanup report.
+        if (raw_paths.evidence_root / "cleanup.json").exists():
+            retained_cleanup = (raw_paths.evidence_root / "cleanup.json").read_bytes()
+            reliability.remove_exact_run_owned_process_tree(raw_paths.process_root,
+                expected_run_root=raw_paths.process_root, repo_root=raw_root, evidence_root=raw_paths.evidence_root)
+            assert (raw_paths.evidence_root / "cleanup.json").read_bytes() == retained_cleanup
+        else:
+            assert reliability.cleanup_validation_run(raw_paths) == "PASS_REMOVED_EXACT_RUN_ROOT"
+        assert not raw_paths.process_root.exists()
+
+    # Original R close failures are sticky, even if the close port completed
+    # before raising. These are no-child oracles with real finite frame files;
+    # their explicit teardown is not production process-release authority.
+    for close_phase in ("before", "after"):
+        r_root = tmp_path / ("input-close-custody-" + close_phase)
+        r_root.mkdir()
+        scratch = r_root / "frame"
+        scratch.mkdir()
+        r_identity = reliability._ScanLaunchIdentity("run_input_close", "fixture", 1, 1,
+            ("fixture-python", "transport-diagnostic"), str(r_root))
+        r_limits = reliability._ScanRunReadLimits(100_000, 1000, 16, 1)
+        r_value = reliability._ScanLaunchInput(r_identity, (), limits=r_limits,
+            candidate_read_bytes=100_000, deadline_ns=runner.time.monotonic_ns()+60_000_000_000,
+            scratch_root=scratch, scratch_bytes=100_000, parent_frame_reread_bytes=100_000,
+            check_candidate=lambda: None)
+        r_value.__enter__()
+        original_reader = r_value.reader
+        close_error = OSError("original finite reader close failure")
+        late_error = OSError("original later reporting failure")
+        closes = []
+        class FailingReaderClose:
+            @property
+            def closed(self):
+                return original_reader.closed
+            def close(self):
+                closes.append(close_phase)
+                if close_phase == "after":
+                    original_reader.close()
+                raise close_error
+        r_value.reader = FailingReaderClose()
+        try:
+            with pytest.raises(OSError) as first_close:
+                r_value._close()
+            assert first_close.value is close_error and r_value.close_errors == [close_error]
+            assert r_value.path.exists() and r_value.state == "READY"
+            before = dict(r_value.__dict__)
+            with pytest.raises(OSError) as second_close:
+                r_value._close()
+            assert second_close.value is close_error and r_value.__dict__ == before and closes == [close_phase]
+            with pytest.raises(BaseExceptionGroup) as combined_close:
+                r_value._close(late_error)
+            assert combined_close.value.exceptions == (late_error, close_error)
+            assert r_value.__dict__ == before and r_value.path.exists() and closes == [close_phase]
+            records = {"scan_input_records": [{"input": r_value, "registered": False}]}
+            assert runner._scan_inputs_require_retention_v1(records)
+        finally:
+            if not original_reader.closed:
+                original_reader.close()
+
+    # Numeric transfer failure preserves its original fd and its single failed
+    # close. No process is created, and the fault port performs no native close.
+    raw_root = tmp_path / "input-raw-custody"
+    raw_root.mkdir()
+    raw_identity = reliability._ScanLaunchIdentity("run_input_raw", "fixture", 1, 1,
+        ("fixture-python", "transport-diagnostic"), str(raw_root))
+    raw_value = reliability._ScanLaunchInput(raw_identity, (), limits=r_limits,
+        candidate_read_bytes=100_000, deadline_ns=runner.time.monotonic_ns()+60_000_000_000,
+        scratch_root=raw_root, scratch_bytes=100_000, parent_frame_reread_bytes=100_000,
+        check_candidate=lambda: None)
+    transfer_error = OSError("original launch transfer failure")
+    raw_close_error = OSError("original launch numeric close failure")
+    raw_closes = []
+    real_fdopen, real_os_close = os.fdopen, os.close
+    def fail_frame_transfer(descriptor, *args, **kwargs):
+        raise transfer_error
+    def fail_frame_close(descriptor):
+        raw_closes.append(descriptor)
+        raise raw_close_error
+    try:
+        with monkeypatch.context() as raw_fault:
+            raw_fault.setattr(os, "fdopen", fail_frame_transfer)
+            raw_fault.setattr(os, "close", fail_frame_close)
+            with pytest.raises(BaseExceptionGroup) as failed_transfer:
+                raw_value.__enter__()
+            original_errors = []
+            pending_errors = [failed_transfer.value]
+            while pending_errors:
+                error = pending_errors.pop()
+                if isinstance(error, BaseExceptionGroup):
+                    pending_errors.extend(error.exceptions)
+                else:
+                    original_errors.append(error)
+            assert transfer_error in original_errors and raw_close_error in original_errors
+            assert raw_closes == [raw_value.raw_descriptor] and raw_value.raw_close_attempted
+            before = dict(raw_value.__dict__)
+            with pytest.raises(OSError) as repeated_raw_close:
+                raw_value._close()
+            assert repeated_raw_close.value is raw_close_error and raw_value.__dict__ == before
+            assert raw_closes == [raw_value.raw_descriptor]
+    finally:
+        if raw_value.raw_descriptor is not None:
+            real_os_close(raw_value.raw_descriptor)
+    assert os.fdopen is real_fdopen and os.close is real_os_close
+
+    # Genuine original supervisor no-start evidence remains releasable. The
+    # nonexistent executable is an actual failed start, with no child created;
+    # no synthetic receipt or alternative termination classifier is supplied.
+    absent_program = tmp_path / "input-custody-absent-python.exe"
+    assert not absent_program.exists()
+    no_start_root = tmp_path / "input-original-no-start"
+    no_start_root.mkdir()
+    no_start_evidence = tmp_path / "input-original-no-start.evidence"
+    no_start_evidence.mkdir()
+    no_start_identity = reliability._ScanLaunchIdentity("run_input_no_start", "fixture", 1, 1,
+        (str(absent_program), "transport-diagnostic"), str(no_start_root))
+    no_start_input = reliability._ScanLaunchInput(no_start_identity, (), limits=r_limits,
+        candidate_read_bytes=100_000, deadline_ns=runner.time.monotonic_ns()+60_000_000_000,
+        scratch_root=no_start_root, scratch_bytes=100_000, parent_frame_reread_bytes=100_000,
+        check_candidate=lambda: None)
+    with no_start_input:
+        original_start = reliability.supervise_command(no_start_identity.argv, cwd=no_start_root,
+            run_id=no_start_identity.run_id, phase=no_start_identity.phase, command_index=1,
+            evidence_root=no_start_evidence, launch_input=no_start_input, timeout_seconds=1,
+            mirror_stdout=False, mirror_stderr=False)
+        assert original_start.pid is None and original_start.start_failure_class is not None
+        assert not reliability._command_requires_process_retention_v1(original_start)
+        assert no_start_input.supervision_receipt is original_start and no_start_input.state == "ISSUED"
+    assert no_start_input.state == "CLOSED" and not no_start_input.path.exists()
+
+    # The exact supplier call registers a real finite input before return or
+    # failure. It grants no SCANNER execution. All attached process ports below
+    # are explicit no-child oracles, whose fixture teardown closes only their
+    # known local fd after the fault ports have been restored.
+    from tools import pr168_rp5a_git_grep_scanner as scan_owner
+    for supplier_fault in ("lazy", "ready", "throw", "issued", "attached", "foreign", "mutated", "mapping", "proxy-mapping"):
+        holder_root = tmp_path / ("input-supplier-custody-" + supplier_fault)
+        holder_root.mkdir()
+        holder_source = holder_root / "fixture.py"
+        holder_bytes = b"# independent finite input baseline\n"
+        holder_source.write_bytes(holder_bytes)
+        holder_paths, holder_probe = reliability.resolve_validation_run_paths(holder_root,
+            explicit_process_root=(tmp_path / ("input-supplier-parent-" + supplier_fault)).resolve())
+        holder_argv = (sys.executable, "tools/build_pr168_rp5a_legacy_semantic_audit.py", "--repo-root", ".")
+        holder_plan = reliability.build_command_evidence_plan(run_id=holder_paths.run_id, phase=runner.ALL_PHASE,
+            commands=(holder_argv,), cwd=holder_root)
+        holder_supervision = {"paths": holder_paths, "phase": runner.ALL_PHASE, "pending": False,
+            "receipt": None, "errors": []}
+        holder_primary = OSError("original supplier failed after frame acquisition")
+        holder_values, holder_calls = [], []
+        holder_end = runner.time.monotonic_ns()+60_000_000_000
+        holder_basis = reliability._Rp5aReadBasisV1("1" * 40, b"# synthetic historical runner\n",
+            4096, 10, 256, 4096, 1000, 100, 1000)
+        holder_limits = reliability._ScanRunReadLimits(100_000, 1000, 16, 2)
+        def holder_supplier(paths, phase, plan):
+            holder_calls.append((paths, phase, plan))
+            roots = {}
+            for role in ("input", "reader", "scanner"):
+                roots[role] = paths.process_root / role
+                roots[role].mkdir()
+            program = shutil.which("git")
+            assert program is not None
+            program = str(Path(program).resolve())
+            surface = reliability._ScanCandidateSurface(holder_source.name, "FILE",
+                holder_source.stat().st_mode & 0o7777, holder_bytes, ())
+            profile = reliability._Rp5aScanProfile(paths.run_id, 1, str(holder_root), str(roots["reader"]),
+                (surface.path,), 1, len(surface.path.encode())+1, ((surface.path, len(holder_bytes)),),
+                program, program, "git", tuple(scan_owner._scan_child_environment(os.environ).items()),
+                100_000, 100_000, 4096, 100_000, holder_end, 3)
+            holder_identity = reliability._ScanLaunchIdentity(paths.run_id, phase, 1, 1, plan[0].argv, str(holder_root))
+            if supplier_fault == "foreign":
+                holder_identity = replace(holder_identity, run_id="run_foreign_fixture")
+            fence = reliability._ScanCandidateFence(holder_root, (surface,), limits=holder_limits,
+                candidate_read_bytes=100_000, deadline_ns=holder_end)
+            value = reliability._ScanLaunchInput(holder_identity, (surface,), limits=holder_limits,
+                candidate_read_bytes=100_000, deadline_ns=holder_end, scratch_root=roots["input"],
+                scratch_bytes=100_000, parent_frame_reread_bytes=100_000, check_candidate=fence,
+                rp5a_read_basis=holder_basis)
+            holder_values.append(value)
+            launch = reliability._prepare_scan_launch(paths, phase=phase, plan=plan,
+                profiles={1: replace(profile, scratch_root=str(roots["scanner"]))},
+                reader_profiles={1: profile}, reader_bases={1: holder_basis},
+                read_limits=holder_limits, deadline_ns=holder_end, launch_inputs={1: value})
+            if supplier_fault == "mutated":
+                value.identity = replace(value.identity, run_id="run_mutated_after_preparation")
+            if supplier_fault in ("mapping", "proxy-mapping"):
+                class UnverifiedMapping:
+                    def __getitem__(self, key):
+                        pytest.fail("unverified mapping must not supply a member")
+                    def __iter__(self):
+                        pytest.fail("unverified mapping must not be iterated")
+                    def __len__(self):
+                        pytest.fail("unverified mapping must not be measured")
+                    def values(self):
+                        pytest.fail("unverified mapping must not run a callback")
+                unverified = UnverifiedMapping()
+                if supplier_fault == "proxy-mapping":
+                    from types import MappingProxyType
+                    unverified = MappingProxyType(unverified)
+                object.__setattr__(launch, "launch_inputs", unverified)
+            if supplier_fault not in ("lazy", "mutated", "mapping", "proxy-mapping"):
+                value.__enter__()
+                if supplier_fault == "throw":
+                    raise holder_primary
+                if supplier_fault in ("issued", "attached"):
+                    value._claim(run_id=paths.run_id, phase=phase, command_index=1,
+                        argv=plan[0].argv, cwd=holder_root)
+                if supplier_fault == "attached":
+                    child = SimpleNamespace(pid=4321, returncode=None)
+                    child.poll = lambda: child.returncode
+                    value._attached(child)
+            return launch
+        try:
+            with monkeypatch.context() as holder_ports:
+                holder_ports.setattr(runner, "_RUN_COMMANDS_SUPERVISION", holder_supervision)
+                holder_ports.setattr(runner, "_SCAN_CAPACITY_ATTEMPTED", False)
+                holder_ports.setattr(runner, "_ACTIVE_SCAN_LAUNCH", None)
+                holder_ports.setattr(runner, "_ACTIVE_SCAN_CAPACITY_SOURCE", holder_supplier)
+                if supplier_fault == "lazy":
+                    actual_launch = runner._scan_resolve_parent_capacity(holder_paths, runner.ALL_PHASE, holder_plan)
+                    assert actual_launch.plan is holder_plan and actual_launch.launch_inputs[1] is holder_values[0]
+                    assert holder_values[0].state == "PREPARING" and not holder_values[0].entry_attempted
+                    assert not runner._scan_inputs_require_retention_v1(holder_supervision)
+                else:
+                    with pytest.raises((OSError, ValueError)) as supplier_error:
+                        runner._scan_resolve_parent_capacity(holder_paths, runner.ALL_PHASE, holder_plan)
+                    if supplier_fault == "throw":
+                        assert supplier_error.value is holder_primary
+                    assert holder_supervision["scan_admission_error"] is supplier_error.value
+                    assert holder_supervision["errors"][0] is supplier_error.value
+                records = holder_supervision["scan_input_records"]
+                assert len(records) == 1
+                assert records[0]["input"]._custody_record is (None if supplier_fault == "foreign" else records[0])
+                assert holder_calls == [(holder_paths, runner.ALL_PHASE, holder_plan)]
+                assert holder_supervision["pending"] is False and holder_supervision["receipt"] is None
+                with pytest.raises(ValueError, match="cannot be retried"):
+                    runner._scan_resolve_parent_capacity(holder_paths, runner.ALL_PHASE, holder_plan)
+                assert len(holder_calls) == 1
+                if supplier_fault in ("ready", "throw"):
+                    value = holder_values[0]
+                    assert runner._scan_inputs_require_retention_v1(holder_supervision) and value.path.exists()
+                    runner._settle_scan_inputs_v1(holder_supervision, holder_paths, runner.ALL_PHASE, holder_plan)
+                    assert value.state == "CLOSED" and not value.path.exists() and records[0]["settlement_attempted"]
+                    before = dict(value.__dict__)
+                    runner._settle_scan_inputs_v1(holder_supervision, holder_paths, runner.ALL_PHASE, holder_plan)
+                    assert value.__dict__ == before and not runner._scan_inputs_require_retention_v1(holder_supervision)
+                elif supplier_fault in ("issued", "attached"):
+                    value = holder_values[0]
+                    before = dict(value.__dict__)
+                    with pytest.raises(RuntimeError, match="RELEASE_NOT_ADMITTED") as release_error:
+                        runner._settle_scan_inputs_v1(holder_supervision, holder_paths, runner.ALL_PHASE, holder_plan)
+                    assert holder_supervision["scan_settlement_error"] is release_error.value
+                    assert value.__dict__ == before and value.path.exists()
+                    with pytest.raises(RuntimeError) as later_release:
+                        runner._settle_scan_inputs_v1(holder_supervision, holder_paths, runner.ALL_PHASE, holder_plan)
+                    assert later_release.value is release_error.value and value.__dict__ == before
+                    assert runner._invocation_requires_retention_v1(holder_supervision)
+                elif supplier_fault == "foreign":
+                    value = records[0]["input"]
+                    assert not records[0]["registered"] and value.path is None and value.reader is None
+                    assert not holder_values and not runner._scan_inputs_require_retention_v1(holder_supervision)
+        finally:
+            # Exact no-child fixture knowledge only: production settlement never
+            # uses this forced release, nor is an ISSUED state proof of no child.
+            for value in holder_values:
+                if value.reader is not None and not value.reader.closed:
+                    value.reader.close()
+                if value.writer is not None and not value.writer.closed:
+                    value.writer.close()
+            if holder_paths.process_root.exists():
+                reliability.cleanup_validation_run(holder_paths)
+
+    # Retention precedes supplier-time duplicate-entry/foreign-owner rejection,
+    # but those rejected entries leave the original object's state exactly as it
+    # was. The actual finite frame here was acquired before the supplier call.
+    preceding_root = tmp_path / "input-preceding-custody"
+    preceding_root.mkdir()
+    preceding_paths, _preceding_probe = reliability.resolve_validation_run_paths(preceding_root,
+        explicit_process_root=(tmp_path / "input-preceding-parent").resolve())
+    preceding_scratch = preceding_paths.process_root / "input"
+    preceding_scratch.mkdir()
+    preceding_argv = (sys.executable, "tools/build_pr168_rp5a_legacy_semantic_audit.py", "--repo-root", ".")
+    preceding_plan = reliability.build_command_evidence_plan(run_id=preceding_paths.run_id,
+        phase=runner.ALL_PHASE, commands=(preceding_argv,), cwd=preceding_root)
+    preceding_identity = reliability._ScanLaunchIdentity(preceding_paths.run_id, runner.ALL_PHASE, 1, 1,
+        preceding_plan[0].argv, str(preceding_root))
+    preceding_input = reliability._ScanLaunchInput(preceding_identity, (), limits=r_limits,
+        candidate_read_bytes=100_000, deadline_ns=runner.time.monotonic_ns()+60_000_000_000,
+        scratch_root=preceding_scratch, scratch_bytes=100_000, parent_frame_reread_bytes=100_000,
+        check_candidate=lambda: None)
+    preceding_input.__enter__()
+    preceding_supervision = {"paths": preceding_paths, "phase": runner.ALL_PHASE,
+        "pending": False, "receipt": None, "errors": []}
+    preceding_calls = []
+    def preceding_supplier(paths, phase, plan):
+        preceding_calls.append((paths, phase, plan))
+        preceding_input.__enter__()
+        pytest.fail("an entered input cannot return as fresh capacity")
+    before = dict(preceding_input.__dict__)
+    position = preceding_input.reader.tell()
+    try:
+        with monkeypatch.context() as preceding_ports:
+            preceding_ports.setattr(runner, "_RUN_COMMANDS_SUPERVISION", preceding_supervision)
+            preceding_ports.setattr(runner, "_SCAN_CAPACITY_ATTEMPTED", False)
+            preceding_ports.setattr(runner, "_ACTIVE_SCAN_LAUNCH", None)
+            preceding_ports.setattr(runner, "_ACTIVE_SCAN_CAPACITY_SOURCE", preceding_supplier)
+            with pytest.raises(ValueError, match="entry is single use") as rejected_preceding:
+                runner._scan_resolve_parent_capacity(preceding_paths, runner.ALL_PHASE, preceding_plan)
+            assert preceding_input.__dict__ == before and preceding_input.reader.tell() == position
+            assert preceding_calls == [(preceding_paths, runner.ALL_PHASE, preceding_plan)]
+            preceding_record, = preceding_supervision["scan_input_records"]
+            assert preceding_record["input"] is preceding_input and not preceding_record["registered"]
+            assert preceding_supervision["errors"][0] is rejected_preceding.value
+            assert not preceding_supervision["pending"] and runner._invocation_requires_retention_v1(preceding_supervision)
+            with pytest.raises(RuntimeError, match="RELEASE_NOT_ADMITTED") as refused_preceding:
+                runner._settle_scan_inputs_v1(preceding_supervision, preceding_paths, runner.ALL_PHASE, preceding_plan)
+            assert preceding_input.__dict__ == before and preceding_input.path.exists()
+            with pytest.raises(RuntimeError) as later_preceding:
+                runner._settle_scan_inputs_v1(preceding_supervision, preceding_paths, runner.ALL_PHASE, preceding_plan)
+            assert later_preceding.value is refused_preceding.value and preceding_input.__dict__ == before
+    finally:
+        # This fixture's no-child provenance is independent of production admission.
+        preceding_input.reader.close()
+        reliability.cleanup_validation_run(preceding_paths)
+
+    # Actual returned process association is retained before a fallible PID port.
+    # These objects have no operating-system child and grant no terminal proof.
+    process_root = tmp_path / "input-process-association"
+    process_root.mkdir()
+    process_identity = reliability._ScanLaunchIdentity("run_process_association", "fixture", 1, 1,
+        ("fixture-python", "transport-diagnostic"), str(process_root))
+    process_input = reliability._ScanLaunchInput(process_identity, (), limits=r_limits,
+        candidate_read_bytes=100_000, deadline_ns=runner.time.monotonic_ns()+60_000_000_000,
+        scratch_root=process_root, scratch_bytes=100_000, parent_frame_reread_bytes=100_000,
+        check_candidate=lambda: None)
+    process_input.__enter__()
+    process_input._claim(run_id=process_identity.run_id, phase=process_identity.phase, command_index=1,
+        argv=process_identity.argv, cwd=process_root)
+    process_error = OSError("original process PID observation failure")
+    class NoChildPidFault:
+        @property
+        def pid(self):
+            raise process_error
+        def poll(self):
+            return None
+    process_object = NoChildPidFault()
+    try:
+        with pytest.raises(OSError) as failed_process_association:
+            process_input._attached(process_object)
+        assert failed_process_association.value is process_error and process_input.process is process_object
+        before = dict(process_input.__dict__)
+        with pytest.raises(ValueError, match="original process"):
+            process_input._process_acquired_v1(SimpleNamespace(pid=1234, returncode=0))
+        assert process_input.__dict__ == before and process_input.process is process_object
+        with pytest.raises(RuntimeError, match="live child"):
+            process_input._close()
+        assert process_input.process is process_object and not process_input.close_started and process_input.path.exists()
+    finally:
+        process_input.reader.close()  # Exact no-child fixture proof, not a production release.
+
+    # Original body/status failures remain together. These finite frames and
+    # process objects are explicit no-child fixtures, not descendant proofs.
+    def finite_input(label):
+        local = tmp_path / ("input-status-" + label)
+        local.mkdir()
+        identity = reliability._ScanLaunchIdentity("run_status_" + label, "fixture", 1, 1,
+            ("fixture-python", "transport-diagnostic"), str(local))
+        value = reliability._ScanLaunchInput(identity, (), limits=r_limits,
+            candidate_read_bytes=100_000, deadline_ns=runner.time.monotonic_ns()+60_000_000_000,
+            scratch_root=local, scratch_bytes=100_000, parent_frame_reread_bytes=100_000,
+            check_candidate=lambda: None)
+        value.__enter__()
+        value._claim(run_id=identity.run_id, phase=identity.phase, command_index=1,
+            argv=identity.argv, cwd=local)
+        return value
+
+    for observation in ("terminal", "poll", "foreign", "receipt"):
+        value = finite_input(observation)
+        child = SimpleNamespace(pid=3344, returncode=7)
+        body_error = OSError("original body failure: " + observation)
+        poll_error = OSError("original terminal observation failure")
+        polls = []
+        def observed_poll():
+            polls.append(child)
+            if observation == "poll":
+                raise poll_error
+            return child.returncode
+        child.poll = observed_poll
+        value._attached(child)
+        try:
+            if observation == "receipt":
+                value.supervision_started = True  # Explicit no-child receipt-port fault.
+                bad_receipt = reliability.CommandExecutionReceiptV1(
+                    schema_version=1, run_id="run_foreign_receipt", phase=value.identity.phase,
+                    command_index=1, argv=value.identity.argv, cwd=value.identity.repo_root, pid=3344,
+                    platform=os.name, start_time_utc="2026-08-24T00:00:00Z",
+                    end_time_utc="2026-08-24T00:00:01Z", elapsed_monotonic_seconds=1.0,
+                    native_exit_code=7, start_failure_class=None, timeout_seconds_or_null=None,
+                    timeout_state="NOT_CONFIGURED", termination_state="NOT_REQUIRED",
+                    stdout_path=str(value.scratch_root / "stdout.bin"), stderr_path=str(value.scratch_root / "stderr.bin"),
+                    stdout_byte_count=0, stderr_byte_count=0, stdout_required_markers=(),
+                    stdout_marker_state="NOT_REQUIRED", stderr_was_nonempty=False, failure_class="ENGVR_NATIVE_EXIT_NONZERO")
+                with pytest.raises(ValueError, match="original command/process"):
+                    value._observe_supervision_receipt_v1(bad_receipt)
+                assert value.supervision_receipt is bad_receipt and not value.supervision_settled
+            before = dict(value.__dict__)
+            with monkeypatch.context() as status_fault:
+                if observation == "foreign":
+                    status_fault.setattr(value, "thread_id", value.thread_id + 1)
+                    before = dict(value.__dict__)
+                with pytest.raises(BaseExceptionGroup) as refused_status:
+                    value._close(body_error)
+                assert refused_status.value.exceptions[0] is body_error
+                if observation == "poll":
+                    assert refused_status.value.exceptions[1] is poll_error and value.retention_errors == [poll_error]
+                if observation == "foreign":
+                    assert value.__dict__ == before and polls == []
+            assert not value.close_started and not value.reader.closed and value.path.exists()
+            if observation in ("terminal", "poll"):
+                before = dict(value.__dict__)
+                poll_count = len(polls)
+                with pytest.raises(BaseException):
+                    value._close(body_error)
+                assert value.__dict__ == before and len(polls) == poll_count
+        finally:
+            value.reader.close()  # Known no-child fixture; never production settlement.
+
+    # The existing genuine no-start case uses the original supervisor receipt,
+    # not a synthetic terminal poll. Its binding is retained after frame removal.
+    assert no_start_input.supervision_started and no_start_input.supervision_settled
+    assert no_start_input.supervision_receipt is original_start and no_start_input._release_complete_v1()
+
+    # R close debt joins the actual finalizer, C restoration, public entry guard
+    # and cleanup/report owners. C remains the existing engineering-only finite
+    # fixture; no SCANNER, Linux service or command child is dispatched.
+    for close_fault in ("ready", "reader-before", "reader-after", "source-before", "source-after",
+                        "snapshot-before", "snapshot-after", "fence-snapshot-before", "fence-snapshot-after",
+                        "directory-before", "directory-after"):
+        root = tmp_path / ("input-finalizer-" + close_fault)
+        root.mkdir()
+        live = root / "candidate.txt"
+        live.write_bytes(b"ABCD")
+        paths, probe = reliability.resolve_validation_run_paths(root,
+            explicit_process_root=(tmp_path / ("input-finalizer-parent-" + close_fault)).resolve())
+        scratch = paths.process_root / "input"
+        scratch.mkdir()
+        argv = (sys.executable, "tools/build_pr168_rp5a_legacy_semantic_audit.py", "--repo-root", ".")
+        plan = reliability.build_command_evidence_plan(run_id=paths.run_id, phase=runner.ALL_PHASE,
+            commands=(argv,), cwd=root)
+        supervision = {"paths": paths, "phase": runner.ALL_PHASE, "pending": False, "receipt": None,
+            "errors": [], "candidate_owner": (os.getpid(), runner.threading.get_ident()),
+            "scan_plan": plan, "scan_owner": (os.getpid(), runner.threading.get_ident()), "scan_input_records": []}
+        primary = OSError("original prepublication fault: " + close_fault)
+        close_error = OSError("original retained callback/stream close: " + close_fault)
+        report_error = RuntimeError("original late cleanup/completion reporting failure")
+        values, restores, releases, selected_descriptors = [], [], [], []
+        real_close = os.close
+        real_open = reliability._open_regular_worktree_descriptor
+        snapshot_area = tmp_path / ("input-snapshots-" + close_fault)
+        snapshot_area.mkdir()
+        saved = snapshot_area / "baseline"
+        saved.write_bytes(b"ABCD")
+        saved_fd = real_open(saved)
+        try:
+            saved_version = reliability._scan_same_api_version(os.fstat(saved_fd))
+        finally:
+            real_close(saved_fd)
+        row = reliability._ScanCandidateSurface(live.name, "FILE", live.stat().st_mode & 0o7777, b"ABCD", ())
+        version = 3 if "snapshot" in close_fault else 1
+        carrier = reliability._ScanDiskSnapshotV3(live.name, saved, saved_version,
+            reliability._scan_file_identity(live.lstat()), row.mode, 4)
+        rows = ((reliability._ScanCandidateSurface(live.name, "FILE", row.mode, carrier, ()),)
+            if version == 3 else (row,))
+        if close_fault.startswith("directory"):
+            rows = (reliability._ScanCandidateSurface(".", "DIRECTORY", root.stat().st_mode & 0o7777,
+                b"", (live.name,)),)
+        end = runner.time.monotonic_ns()+60_000_000_000
+        extras = {"wire_version": 3, "surface_role": "sender", "snapshot_root": snapshot_area} if version == 3 else {}
+        fence = reliability._ScanCandidateFence(root, rows, limits=r_limits,
+            candidate_read_bytes=100_000, deadline_ns=end, **extras)
+        original_reader = None
+        actual_iterator = None
+        value = None
+        cleanup_before = None
+        try:
+            with monkeypatch.context() as joins:
+                fixture_factory(patcher=joins)
+                real_prepare = runner._prepare_validation_candidate_v1
+                def original_candidate(candidate_root, candidate_plan):
+                    value = _synthetic_candidate_custody_v1(candidate_root, candidate_plan,
+                        observed_paths=lambda: (live.name,), effects=())
+                    values.append(value)
+                    original_restore = value.restore
+                    def restore_once():
+                        restores.append(value)
+                        return original_restore()
+                    value.restore = restore_once
+                    return value
+                for name, value in (("_RUN_COMMANDS_ACTIVE_PATHS", paths), ("_RUN_COMMANDS_SUPERVISION", supervision),
+                    ("_ACTIVE_FILESYSTEM_PROBE", probe), ("_ORDINARY_CANDIDATE_FIRST_V1", True),
+                    ("_ACTIVE_CANDIDATE_SOURCE", original_candidate), ("_LAST_EXPECTED_COMMAND_PLAN", plan),
+                    ("_ACTIVE_PREFLIGHT_ASSEMBLY_V1", None), ("_ACTIVE_SCAN_LAUNCH", None),
+                    ("_ACTIVE_MAPPER_READ_PROFILES_V1", None), ("_ACTIVE_MAPPER_OCCURRENCES_V1", {}),
+                    ("cleanup_validation_run", reliability.cleanup_validation_run),
+                    ("validate_complete_run_evidence", reliability.validate_complete_run_evidence),
+                    ("validate_published_completion_receipt", reliability.validate_published_completion_receipt)):
+                    joins.setattr(runner, name, value)
+                candidate = real_prepare(root, plan, None)
+                token = reliability._SCAN_INPUT_ACQUISITION_V1.set((supervision, paths, runner.ALL_PHASE,
+                    plan, supervision["scan_owner"]))
+                try:
+                    identity = reliability._ScanLaunchIdentity(paths.run_id, runner.ALL_PHASE, 1, 1, argv, str(root))
+                    value = reliability._ScanLaunchInput(identity, rows, limits=r_limits, candidate_read_bytes=100_000,
+                        deadline_ns=end, scratch_root=scratch, scratch_bytes=100_000, parent_frame_reread_bytes=100_000,
+                        check_candidate=fence, rp5a_read_basis=holder_basis if version == 3 else None,
+                        **({"wire_version": 3, "snapshot_root": snapshot_area} if version == 3 else {}))
+                finally:
+                    reliability._SCAN_INPUT_ACQUISITION_V1.reset(token)
+                record, = supervision["scan_input_records"]
+                assert record["input"] is value and record["candidate_fence"] is fence and record["registered"]
+                if close_fault.startswith(("source", "snapshot", "fence-snapshot")):
+                    def observed_close(descriptor):
+                        expected_descriptor = (value.snapshot_descriptor if close_fault.startswith("snapshot")
+                            else fence.snapshot_descriptor if close_fault.startswith("fence-snapshot")
+                            else fence.source_descriptor)
+                        if expected_descriptor is not None and descriptor == expected_descriptor:
+                            selected_descriptors.append(descriptor)
+                            releases.append(descriptor)
+                            if close_fault.endswith("after"):
+                                real_close(descriptor)
+                            raise close_error
+                        return real_close(descriptor)
+                    with monkeypatch.context() as callback_fault:
+                        callback_fault.setattr(os, "close", observed_close)
+                        with pytest.raises(BaseException) as callback_failure:
+                            value.__enter__()
+                    assert value.state == "HELD" and releases == [selected_descriptors[0]]
+                    if close_fault.startswith("snapshot"):
+                        assert value.snapshot_descriptor == selected_descriptors[0] and value.close_errors == [close_error]
+                        assert not fence.held and not fence.close_errors
+                    else:
+                        assert fence.held and fence.close_errors == [close_error] and value._callback_requires_retention_v1()
+                    if version == 1:
+                        assert value.path is None  # Failure really precedes frame allocation.
+                elif close_fault.startswith("directory"):
+                    real_scandir = os.scandir
+                    def entries_for_fault(path):
+                        nonlocal actual_iterator
+                        before = dict(fence.__dict__)
+                        with pytest.raises(RuntimeError, match="already owned"):
+                            with fence._directory_entries_v1(path):
+                                pytest.fail("recursive directory acquisition cannot enter")
+                        assert fence.__dict__ == before and fence.directory_acquiring
+                        actual_iterator = real_scandir(path)
+                        class OwnedEntries:
+                            def __iter__(self):
+                                return iter(actual_iterator)
+                            def close(self):
+                                releases.append(actual_iterator)
+                                if close_fault.endswith("after"):
+                                    actual_iterator.close()
+                                raise close_error
+                        return OwnedEntries()
+                    with monkeypatch.context() as directory_fault:
+                        directory_fault.setattr(os, "scandir", entries_for_fault)
+                        with pytest.raises(BaseException):
+                            value.__enter__()
+                    assert value.path is None and fence.held and fence.close_errors == [close_error]
+                    assert fence.directory_iterator is not None and fence.directory_close_attempted
+                else:
+                    value.__enter__()
+                    original_reader = value.reader
+                    if close_fault != "ready":
+                        class FinalizerReader:
+                            @property
+                            def closed(self):
+                                return original_reader.closed
+                            def close(self):
+                                releases.append(original_reader)
+                                if close_fault.endswith("after"):
+                                    original_reader.close()
+                                raise close_error
+                        value.reader = FinalizerReader()
+                supervision["errors"].append(primary)
+                result, cleanup, completion = runner._finalize_validation_run(run_paths=paths, probe=probe,
+                    phase=runner.ALL_PHASE, planned_count=1, expected_plan=plan, receipts=(), result=1,
+                    text_state="PASS", _supervision_state=supervision)
+                assert result == 1 and completion.final_state == "FAIL" and not supervision["pending"]
+                if close_fault == "ready":
+                    assert cleanup == "PASS_REMOVED_EXACT_RUN_ROOT" and not paths.process_root.exists()
+                    assert value._release_complete_v1() and restores == [candidate]
+                    assert candidate.state == "RESTORED_VERIFIED" and candidate._settled_snapshot is candidate.baseline
+                else:
+                    assert cleanup == "FAIL_SCAN_INPUT_CUSTODY_UNRESOLVED" and paths.process_root.exists()
+                    assert restores == [] and runner._RUN_COMMANDS_SUPERVISION is supervision
+                    assert runner._invocation_requires_retention_v1(supervision)
+                    assert supervision["scan_settlement_error"] is close_error
+                    first_release = tuple(releases)
+                    def no_dependent_effect(*args, **kwargs):
+                        pytest.fail("retained original R forbids dependent work")
+                    with monkeypatch.context() as no_work:
+                        for name in ("_linux_preflight_selected_v1", "_main_impl", "_prepare_execution_plan",
+                                     "_execute_supervised_command", "cleanup_validation_run"):
+                            no_work.setattr(runner, name, no_dependent_effect)
+                        assert runner.main([]) == 1
+                        assert runner.run_commands([list(argv)], repo_root=root, run_paths=paths) == 1
+                        with pytest.raises(OSError) as repeated_settlement:
+                            runner._settle_scan_inputs_v1(supervision, paths, runner.ALL_PHASE, plan)
+                        assert repeated_settlement.value is close_error
+                        def failed_report(path, payload):
+                            raise report_error
+                        no_work.setattr(runner, "atomic_write_json", failed_report)
+                        again = runner._finalize_validation_run(run_paths=paths, probe=probe,
+                            phase=runner.ALL_PHASE, planned_count=1, expected_plan=plan, receipts=(), result=1,
+                            text_state="PASS", _supervision_state=supervision)
+                        assert again[0] == 1 and again[1] == cleanup
+                    assert tuple(releases) == first_release and restores == []
+                    assert supervision["scan_settlement_error"] is close_error
+                    assert any(error is primary for error in supervision["errors"])
+                    assert any(error is report_error for error in supervision["errors"])
+                    cleanup_before = (paths.evidence_root / "cleanup.json").read_bytes()
+        finally:
+            # Teardown uses proven fixture/no-child knowledge after restoring all
+            # fault ports. Never retry a descriptor whose close actually happened.
+            if selected_descriptors and close_fault.endswith("before"):
+                real_close(selected_descriptors[0])
+            if actual_iterator is not None and close_fault.endswith("before"):
+                actual_iterator.close()
+            if original_reader is not None and not original_reader.closed:
+                original_reader.close()
+            if value is not None:
+                for stream in (value.writer, value.reader):
+                    if stream is not None and stream is not original_reader and not stream.closed:
+                        stream.close()
+            if paths.process_root.exists():
+                reliability.remove_exact_run_owned_process_tree(paths.process_root, expected_run_root=paths.process_root,
+                    repo_root=root, evidence_root=paths.evidence_root)
+            if cleanup_before is not None:
+                assert (paths.evidence_root / "cleanup.json").read_bytes() == cleanup_before
+
+    # A returning close is checked, rather than inferred from an attempted
+    # call. Only this no-child port withholds the actual writer close.
+    writer_root = tmp_path / "input-returning-writer-close"
+    writer_root.mkdir()
+    writer_identity = reliability._ScanLaunchIdentity("run_returning_writer", "fixture", 1, 1,
+        ("fixture-python", "transport-diagnostic"), str(writer_root))
+    writer_value = reliability._ScanLaunchInput(writer_identity, (), limits=r_limits,
+        candidate_read_bytes=100_000, deadline_ns=runner.time.monotonic_ns()+60_000_000_000,
+        scratch_root=writer_root, scratch_bytes=100_000, parent_frame_reread_bytes=100_000,
+        check_candidate=lambda: None)
+    writer_streams, writer_attempts = [], []
+    original_fdopen = os.fdopen
+    class ReturningWriter:
+        def __init__(self, stream):
+            self.stream = stream
+        @property
+        def closed(self):
+            return self.stream.closed
+        def write(self, data):
+            return self.stream.write(data)
+        def flush(self):
+            return self.stream.flush()
+        def fileno(self):
+            return self.stream.fileno()
+        def close(self):
+            writer_attempts.append(self)
+    def returning_writer(descriptor, mode, **kwargs):
+        stream = original_fdopen(descriptor, mode, **kwargs)
+        if mode == "wb":
+            writer_streams.append(stream)
+            return ReturningWriter(stream)
+        return stream
+    try:
+        with monkeypatch.context() as writer_fault:
+            writer_fault.setattr(os, "fdopen", returning_writer)
+            with pytest.raises(BaseException) as refused_writer:
+                writer_value.__enter__()
+        assert writer_value.state == "HELD" and writer_value.writer_close_attempted
+        assert len(writer_attempts) == 1 and not writer_streams[0].closed and writer_value.close_errors
+        assert writer_value.path.exists() and not writer_value.frame_unlinked
+        first_error = writer_value.close_errors[0]
+        with pytest.raises(BaseException):
+            writer_value._close()
+        assert writer_value.close_errors[0] is first_error and len(writer_attempts) == 1
+    finally:
+        for stream in writer_streams:
+            stream.close()  # Known fixture stream, after the no-op close port is gone.
+
+    # Foreign/untyped return values are retained before shape validation. This
+    # private malformed-return fixture is not capacity or release authority.
+    for returned_kind in ("untyped", "foreign", "foreign-owned"):
+        return_root = tmp_path / ("input-return-" + returned_kind)
+        return_root.mkdir()
+        return_paths, _return_probe = reliability.resolve_validation_run_paths(return_root,
+            explicit_process_root=(tmp_path / ("input-return-parent-" + returned_kind)).resolve())
+        return_argv = (sys.executable, "tools/build_pr168_rp5a_legacy_semantic_audit.py", "--repo-root", ".")
+        return_plan = reliability.build_command_evidence_plan(run_id=return_paths.run_id,
+            phase=runner.ALL_PHASE, commands=(return_argv,), cwd=return_root)
+        return_supervision = {"paths": return_paths, "phase": runner.ALL_PHASE, "pending": False,
+            "receipt": None, "errors": []}
+        foreign_area = tmp_path / ("input-return-foreign-" + returned_kind)
+        foreign_area.mkdir()
+        foreign_identity = reliability._ScanLaunchIdentity("run_foreign_return", "fixture", 1, 1,
+            ("fixture-python", "transport-diagnostic"), str(foreign_area))
+        foreign_value = reliability._ScanLaunchInput(foreign_identity, (), limits=r_limits,
+            candidate_read_bytes=100_000, deadline_ns=runner.time.monotonic_ns()+60_000_000_000,
+            scratch_root=foreign_area, scratch_bytes=100_000, parent_frame_reread_bytes=100_000,
+            check_candidate=lambda: None)
+        if returned_kind == "foreign-owned":
+            foreign_value.__enter__()
+        actual_return = (object() if returned_kind == "untyped" else reliability._ScanLaunch(return_paths,
+            runner.ALL_PHASE, return_plan, {}, r_limits, foreign_value.deadline_ns, os.getpid(),
+            runner.threading.get_ident(), launch_inputs={1: foreign_value}))
+        if returned_kind == "foreign-owned":
+            object.__setattr__(actual_return, "paths", replace(return_paths))
+        before = dict(foreign_value.__dict__)
+        try:
+            with monkeypatch.context() as return_ports:
+                return_ports.setattr(runner, "_RUN_COMMANDS_SUPERVISION", return_supervision)
+                return_ports.setattr(runner, "_SCAN_CAPACITY_ATTEMPTED", False)
+                return_ports.setattr(runner, "_ACTIVE_SCAN_LAUNCH", None)
+                return_ports.setattr(runner, "_ACTIVE_SCAN_CAPACITY_SOURCE", lambda *args: actual_return)
+                with pytest.raises(ValueError, match=("original launch/container association" if returned_kind == "foreign-owned"
+                        else "exact original run/plan/input coverage")) as rejected_return:
+                    runner._scan_resolve_parent_capacity(return_paths, runner.ALL_PHASE, return_plan)
+                assert return_supervision["scan_launch"] is actual_return
+                assert return_supervision["scan_admission_error"] is rejected_return.value
+                assert foreign_value.__dict__ == before
+                if returned_kind != "foreign-owned":
+                    assert not tuple(foreign_area.iterdir())
+                if returned_kind == "untyped":
+                    assert runner._scan_inputs_require_retention_v1(return_supervision)
+                else:
+                    record, = return_supervision["scan_input_records"]
+                    assert record["input"] is foreign_value and not record["registered"]
+                    assert foreign_value._custody_record is None
+                    if returned_kind == "foreign-owned":
+                        assert runner._scan_inputs_require_retention_v1(return_supervision) and foreign_value.path.exists()
+                        with pytest.raises(RuntimeError, match="RELEASE_NOT_ADMITTED"):
+                            runner._settle_scan_inputs_v1(return_supervision, return_paths, runner.ALL_PHASE, return_plan)
+                        assert foreign_value.__dict__ == before and foreign_value.path.exists()
+        finally:
+            if foreign_value.reader is not None and not foreign_value.reader.closed:
+                foreign_value.reader.close()  # Proven no-child fixture only, not foreign production cleanup.
+            reliability.remove_exact_run_owned_process_tree(return_paths.process_root,
+                expected_run_root=return_paths.process_root, repo_root=return_root, evidence_root=return_paths.evidence_root)
+
+    # These two constructor faults are explicit no-child fixtures. A failed
+    # custom copy is unresolved acquisition, not an observed member inventory.
+    for copy_stage in ("profile", "input"):
+        constructor_root = tmp_path / ("input-constructor-" + copy_stage)
+        constructor_root.mkdir()
+        constructor_paths, constructor_probe = reliability.resolve_validation_run_paths(constructor_root,
+            explicit_process_root=(tmp_path / ("input-constructor-parent-" + copy_stage)).resolve())
+        constructor_argv = (sys.executable, "tools/build_pr168_rp5a_legacy_semantic_audit.py", "--repo-root", ".")
+        constructor_plan = reliability.build_command_evidence_plan(run_id=constructor_paths.run_id,
+            phase=runner.ALL_PHASE, commands=(constructor_argv,), cwd=constructor_root)
+        constructor_supervision = {"paths": constructor_paths, "phase": runner.ALL_PHASE,
+            "pending": False, "receipt": None, "errors": []}
+        foreign_area = tmp_path / ("input-constructor-foreign-" + copy_stage)
+        foreign_area.mkdir()
+        foreign_identity = reliability._ScanLaunchIdentity("run_foreign_constructor", "fixture", 1, 1,
+            ("fixture-python", "transport-diagnostic"), str(foreign_area))
+        foreign_value = reliability._ScanLaunchInput(foreign_identity, (), limits=r_limits,
+            candidate_read_bytes=100_000, deadline_ns=runner.time.monotonic_ns()+60_000_000_000,
+            scratch_root=foreign_area, scratch_bytes=100_000, parent_frame_reread_bytes=100_000,
+            check_candidate=lambda: None)
+        foreign_value.__enter__()
+        before = dict(foreign_value.__dict__)
+        position = foreign_value.reader.tell()
+        constructor_error = OSError("original " + copy_stage + " mapping copy failed")
+        traversals = []
+        class CopyFault:
+            original = foreign_value
+            def keys(self):
+                traversals.append(copy_stage)
+                raise constructor_error
+            def __getitem__(self, key):
+                pytest.fail("failed constructor copy cannot obtain a member")
+        fault_mapping = CopyFault()
+        def constructor_supplier(paths, phase, plan):
+            return reliability._ScanLaunch(paths, phase, plan,
+                fault_mapping if copy_stage == "profile" else {}, r_limits, foreign_value.deadline_ns,
+                os.getpid(), runner.threading.get_ident(),
+                launch_inputs={1: foreign_value} if copy_stage == "profile" else fault_mapping)
+        try:
+            with monkeypatch.context() as constructor_ports:
+                constructor_ports.setattr(runner, "_RUN_COMMANDS_SUPERVISION", constructor_supervision)
+                constructor_ports.setattr(runner, "_SCAN_CAPACITY_ATTEMPTED", False)
+                constructor_ports.setattr(runner, "_ACTIVE_SCAN_LAUNCH", None)
+                constructor_ports.setattr(runner, "_ACTIVE_SCAN_CAPACITY_SOURCE", constructor_supplier)
+                with pytest.raises(OSError) as rejected_constructor:
+                    runner._scan_resolve_parent_capacity(constructor_paths, runner.ALL_PHASE, constructor_plan)
+                assert rejected_constructor.value is constructor_error
+                partial = constructor_supervision["scan_launch_construction"]
+                assert type(partial) is reliability._ScanLaunch and "scan_launch" not in constructor_supervision
+                assert constructor_supervision["scan_launch_construction_pending"]
+                assert constructor_supervision["scan_launch_construction_error"] is constructor_error
+                assert constructor_supervision["scan_admission_error"] is constructor_error
+                assert foreign_value.__dict__ == before and foreign_value.reader.tell() == position
+                assert foreign_value.path.exists() and foreign_value._custody_record is None
+                if copy_stage == "profile":
+                    record, = constructor_supervision["scan_input_records"]
+                    assert record["input"] is foreign_value and not record["registered"]
+                    assert partial._original_launch_inputs_v1[1] is foreign_value
+                else:
+                    assert constructor_supervision["scan_input_records"] == [] and partial.launch_inputs is fault_mapping
+                assert runner._scan_inputs_require_retention_v1(constructor_supervision)
+                with pytest.raises(RuntimeError, match="CONSTRUCTION_UNRESOLVED") as settlement_failure:
+                    runner._settle_scan_inputs_v1(constructor_supervision, constructor_paths, runner.ALL_PHASE, constructor_plan)
+                assert settlement_failure.value.__cause__ is constructor_error
+                with pytest.raises(RuntimeError) as repeated_settlement:
+                    runner._settle_scan_inputs_v1(constructor_supervision, constructor_paths, runner.ALL_PHASE, constructor_plan)
+                assert repeated_settlement.value is settlement_failure.value
+                from tools.validation_reliability import _SCAN_INPUT_ACQUISITION_V1
+                token = _SCAN_INPUT_ACQUISITION_V1.set((constructor_supervision, constructor_paths,
+                    runner.ALL_PHASE, constructor_plan, constructor_supervision["scan_owner"]))
+                try:
+                    with pytest.raises(RuntimeError, match="construction remains unresolved"):
+                        constructor_supplier(constructor_paths, runner.ALL_PHASE, constructor_plan)
+                finally:
+                    _SCAN_INPUT_ACQUISITION_V1.reset(token)
+                assert constructor_supervision["scan_launch_construction"] is partial and traversals == [copy_stage]
+                result, cleanup, completion = runner._finalize_validation_run(run_paths=constructor_paths,
+                    probe=constructor_probe, phase=runner.ALL_PHASE, planned_count=1,
+                    expected_plan=constructor_plan, receipts=(), result=1, text_state="PASS",
+                    _supervision_state=constructor_supervision)
+                assert result == 1 and cleanup == "FAIL_SCAN_INPUT_CUSTODY_UNRESOLVED" and completion.final_state == "FAIL"
+                assert constructor_paths.process_root.exists() and foreign_value.path.exists()
+                assert foreign_value.__dict__ == before and foreign_value.reader.tell() == position
+                assert any(error is constructor_error for error in constructor_supervision["errors"])
+        finally:
+            foreign_value.reader.close()  # Known no-child fixture, never production foreign cleanup.
+            reliability.remove_exact_run_owned_process_tree(constructor_paths.process_root,
+                expected_run_root=constructor_paths.process_root, repo_root=constructor_root,
+                evidence_root=constructor_paths.evidence_root)
+
+    # Definite original validation failure before _claim remains a genuine
+    # no-start receipt. The existing supervisor validates this invalid environment;
+    # no child is created and no receipt is synthesized or classifier replaced.
+    invalid_root = tmp_path / "input-original-preclaim-no-start"
+    invalid_root.mkdir()
+    invalid_evidence = tmp_path / "input-original-preclaim-no-start.evidence"
+    invalid_evidence.mkdir()
+    invalid_identity = reliability._ScanLaunchIdentity("run_preclaim_no_start", "fixture", 1, 1,
+        (sys.executable, "transport-diagnostic"), str(invalid_root))
+    invalid_input = reliability._ScanLaunchInput(invalid_identity, (), limits=r_limits,
+        candidate_read_bytes=100_000, deadline_ns=runner.time.monotonic_ns()+60_000_000_000,
+        scratch_root=invalid_root, scratch_bytes=100_000, parent_frame_reread_bytes=100_000,
+        check_candidate=lambda: None)
+    with invalid_input:
+        original_preclaim = reliability.supervise_command(invalid_identity.argv, cwd=invalid_root,
+            run_id=invalid_identity.run_id, phase=invalid_identity.phase, command_index=1,
+            evidence_root=invalid_evidence, environment={"fixture": object()}, launch_input=invalid_input,
+            timeout_seconds=1, mirror_stdout=False, mirror_stderr=False)
+        assert original_preclaim.pid is None and original_preclaim.start_failure_class is not None
+        assert not reliability._command_requires_process_retention_v1(original_preclaim)
+        assert invalid_input.supervision_receipt is original_preclaim and invalid_input.supervision_settled
+        assert not invalid_input.supervision_started and not invalid_input.issued and invalid_input.state == "READY"
+    assert invalid_input._release_complete_v1() and not invalid_input.path.exists()
+
+
+
+
+
 def _exercise_windows_job_resource_v1(area, monkeypatch, capsys, deadline, settlement):
     """Grouped resource-only qualification; pure injections never claim native work."""
     import ctypes as C
@@ -20501,9 +23650,147 @@ def _exercise_preflight_transport_v1(tmp_path, monkeypatch, capsys):
         assert assembly.candidate.baseline['a.bin'][1] == b'abc'
         assert set(assembly.candidate.effects) == set(range(1,9)) and not any(assembly.candidate.effects.values())
         assert assembly.candidate.nested_evidence_limits == {} and assembly.launches == {}
+        assembly_before_reentry = dict(assembly.__dict__)
+        with pytest.raises(owner.ValidationReliabilityError, match='assembly construction is single use'):
+            assembly.__init__(native, paths, plan)
+        assert assembly.__dict__ == assembly_before_reentry
         with pytest.raises(RuntimeError,match='single use'):
             native.consume(assembly._validate_declaration)
     assert owner._PREFLIGHT_NATIVE_INPUT_V1.get() is None
+    # Explicit no-child fault ports wrap the real original consume/C capture;
+    # they are neither a Linux lease nor startup/first8 native qualification.
+    for changed_boundary in ("post-consume", "post-native-check", "post-candidate"):
+        for changed_holder in ("native", "basis", "candidate"):
+            changed_native = source(declaration)
+            changed_assembly = runner._PreflightAssemblyV1.__new__(runner._PreflightAssemblyV1)
+            consume_original = changed_native.consume
+            check_original = changed_native.check
+            candidate_constructor = runner._ValidationCandidateCustodyV1.__init__
+            holder_substitutions = []
+            substitute = SimpleNamespace(check=lambda: pytest.fail("substituted native callback must not run"))
+            def inject_holder():
+                holder_substitutions.append(changed_holder)
+                setattr(changed_assembly, changed_holder, substitute)
+            def changed_consume(validate):
+                result = consume_original(validate)
+                inject_holder()
+                return result
+            def changed_check():
+                result = check_original()
+                if changed_native.state == "CONSUMED":
+                    inject_holder()
+                return result
+            def changed_candidate_constructor(value, *args, **kwargs):
+                result = candidate_constructor(value, *args, **kwargs)
+                inject_holder()
+                return result
+            with monkeypatch.context() as holder_fault:
+                if changed_boundary == "post-consume":
+                    holder_fault.setattr(changed_native, "consume", changed_consume)
+                elif changed_boundary == "post-native-check":
+                    holder_fault.setattr(changed_native, "check", changed_check)
+                else:
+                    holder_fault.setattr(runner._ValidationCandidateCustodyV1, "__init__", changed_candidate_constructor)
+                with owner._preflight_native_input_v1(changed_native):
+                    with pytest.raises(owner.ValidationReliabilityError, match="original .*holder changed") as changed_error:
+                        changed_assembly.__init__(changed_native, paths, plan)
+            assert holder_substitutions == [changed_holder]
+            assert changed_assembly.failure is changed_error.value and getattr(changed_assembly, changed_holder) is substitute
+            assert changed_native.state == "CONSUMED" and not changed_native._resources_require_retention_v1()
+            assert changed_assembly._original_basis_v2 is None
+            if changed_boundary == "post-candidate":
+                assert type(changed_assembly._original_candidate_v1) is runner._ValidationCandidateCustodyV1
+                assert changed_assembly._original_candidate_v1.baseline['a.bin'][1] == b'abc'
+            else:
+                assert changed_assembly._original_candidate_v1 is None
+            assert not (paths.evidence_root/'run.json').exists() and changed_assembly.launches == {}
+    # The same pure original-holder validator governs operational callback
+    # returns as well as construction. All process objects here are explicit
+    # no-child oracles and establish no native host/descendant qualification.
+    process_oracle = SimpleNamespace(pid=7654, poll=lambda: 0)
+    closed_oracle = SimpleNamespace(state="CLOSED", result={"application_exit": 0}, process=process_oracle)
+    receipt_oracle = SimpleNamespace(pid=7654, native_exit_code=0)
+    assembly_operations = {
+        "candidate": lambda: assembly.candidate_source(fixture_root, plan),
+        "operation": lambda: assembly._check_operation(entry=plan[0], environment={}, timeout_seconds=1, scratch_roots=()),
+        "launch": lambda: assembly.launch(1, {}, {"fixed_environment_controls": ()}, ()),
+        "reconcile": lambda: assembly.reconcile(1, receipt_oracle),
+        "settling": assembly.settling,
+    }
+    for operation_name, invoke_operation in assembly_operations.items():
+        for changed_holder in ("native", "basis", "candidate"):
+            operational_calls = []
+            native_check_original = native.check
+            original_holders = (assembly._original_native_input_v1, assembly._original_basis_v2, assembly._original_candidate_v1)
+            substitute = SimpleNamespace(check=lambda: pytest.fail("substituted operational native callback must not run"))
+            def replace_after_native_check():
+                result = native_check_original()
+                operational_calls.append(operation_name)
+                setattr(assembly, changed_holder, substitute)
+                return result
+            with monkeypatch.context() as operational_fault:
+                operational_fault.setattr(assembly, changed_holder, getattr(assembly, changed_holder))
+                operational_fault.setattr(assembly, "launches", {1: closed_oracle} if operation_name == "reconcile" else {})
+                operational_fault.setattr(native, "check", replace_after_native_check)
+                if operation_name == "launch":
+                    operational_fault.setattr(assembly, "state", "PUBLISHED")
+                with pytest.raises(owner.ValidationReliabilityError, match="original resource holder changed"):
+                    invoke_operation()
+                assert operational_calls == [operation_name] and getattr(assembly, changed_holder) is substitute
+                assert original_holders == (assembly._original_native_input_v1, assembly._original_basis_v2, assembly._original_candidate_v1)
+                assert assembly.state == ("PUBLISHED" if operation_name == "launch" else "CUSTODY_READY") and not (paths.evidence_root/'run.json').exists()
+            assert (assembly.native, assembly.basis, assembly.candidate) == original_holders
+
+    for callback_name in ("operation", "settlement"):
+        for changed_holder in ("native", "basis", "candidate"):
+            host_calls = []
+            substitute = SimpleNamespace(check=lambda: pytest.fail("substituted host-return callback must not run"))
+            def replace_after_host_call(*args):
+                host_calls.append(callback_name)
+                setattr(assembly, changed_holder, substitute)
+                return None
+            with monkeypatch.context() as host_fault:
+                host_fault.setattr(assembly, changed_holder, getattr(assembly, changed_holder))
+                host_fault.setattr(assembly, "launches", {1: closed_oracle} if callback_name == "settlement" else {})
+                host_fault.setattr(native.host_lease,
+                    "check_launch" if callback_name == "operation" else "check_settled", replace_after_host_call)
+                with pytest.raises(owner.ValidationReliabilityError, match="original resource holder changed"):
+                    assembly_operations["operation" if callback_name == "operation" else "settling"]()
+                assert host_calls == [callback_name] and getattr(assembly, changed_holder) is substitute
+                assert assembly.state == "CUSTODY_READY" and not (paths.evidence_root/'run.json').exists()
+
+    with monkeypatch.context() as foreign_assembly_owner:
+        foreign_assembly_owner.setattr(assembly, "thread", assembly.thread + 1)
+        foreign_assembly_owner.setattr(native, "check", lambda: pytest.fail("foreign assembly owner must reject before callbacks"))
+        before_foreign = dict(assembly.__dict__)
+        with pytest.raises(owner.ValidationReliabilityError, match="original assembly owner changed"):
+            assembly.candidate_source(fixture_root, plan)
+        assert assembly.__dict__ == before_foreign
+    assert assembly.native is assembly._original_native_input_v1 and assembly.candidate is assembly._original_candidate_v1
+    # Even simultaneous current/private native alias replacement cannot
+    # replace the original constructor-local witness before another callback.
+    # Construct the unused foreign fixture before freezing the selected
+    # declaration's actual ancestor stamps. A later sibling creation is a
+    # genuine namespace change and must not be rebased or hidden from consume.
+    twin_foreign = source(declaration)
+    twin_native = source(declaration)
+    assert twin_native.expected_chain == owner._preflight_chain_v1(twin_native.path.parent)
+    twin_assembly = runner._PreflightAssemblyV1.__new__(runner._PreflightAssemblyV1)
+    twin_consume_original = twin_native.consume
+    def replace_both_native_aliases(validate):
+        result = twin_consume_original(validate)
+        twin_assembly.native = twin_assembly._original_native_input_v1 = twin_foreign
+        return result
+    with monkeypatch.context() as twin_port:
+        twin_port.setattr(twin_native, "consume", replace_both_native_aliases)
+        twin_port.setattr(twin_foreign, "check", lambda: pytest.fail("foreign constructor native callback must not run"))
+        with owner._preflight_native_input_v1(twin_native):
+            with pytest.raises(owner.ValidationReliabilityError, match="original resource holder changed") as twin_error:
+                twin_assembly.__init__(twin_native, paths, plan)
+    assert twin_assembly.failure is twin_error.value and twin_native.state == "CONSUMED" and twin_foreign.state == "AVAILABLE"
+    assert twin_assembly._original_basis_v2 is None and twin_assembly._original_candidate_v1 is None
+    assert not twin_native._resources_require_retention_v1() and not twin_foreign._resources_require_retention_v1()
+    assert twin_assembly.launches == {} and not (paths.evidence_root/'run.json').exists()
     for mutate in (lambda h:h.__setitem__('host_lease',True),
             lambda h:h['rows'].pop(),lambda h:h['rows'][7].__setitem__('original_position',1),
             lambda h:h['rows'][2].__setitem__('git_executable',sys.executable),
@@ -20567,6 +23854,22 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
     import ast
     import io
     from tools import validation_reliability as o
+    def bind_administrative_fixture_cwd(query, root, patch):
+        # Windows no-child references project the Linux working-directory port
+        # onto this exact disposable directory. The real Query still selects,
+        # dispatches and validates its receipt against that supplied binding.
+        # Production Linux paths/defaults and native-supervisor checks are intact.
+        if os.name != 'nt':return
+        original_path=o._linux_preflight_path_v1
+        original_command=query.command
+        literal='/qtt_test_administrative_cwd'
+        def project_owned_cwd(value):
+            admitted=original_path(value)
+            return str(root) if admitted==literal else admitted
+        patch.setattr(o,'_linux_preflight_path_v1',project_owned_cwd)
+        def bound_command(argv,**kwargs):
+            return original_command(argv,**({'cwd':literal} if 'cwd' not in kwargs else {}),**kwargs)
+        query.command=bound_command
     # V2 references run in this original collected group. Windows ABI injection
     # below tests parsing/error retention, never native Linux custody.
     import struct
@@ -20963,8 +24266,8 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
             for name,data in (('stdout',raw),('stderr',err)):
                 observation[name]=dict(complete=True,overflow=False,errors=[],drained_byte_count=len(data),
                     cleanup_drained_byte_count=0,retained_byte_count=len(data),retention_limit=kw['output_limits'][name+'_bytes'])
-            receipt=o.CommandExecutionReceiptV1(schema_version=1,run_id='reference-launcher',phase=kw['phase'],
-                command_index=number,argv=argv,cwd=str(area),pid=123,platform='posix',
+            receipt=o.CommandExecutionReceiptV1(schema_version=1,run_id=kw['run_id'],phase=kw['phase'],
+                command_index=number,argv=argv,cwd=str(kw['cwd']),pid=123,platform='posix',
                 start_time_utc='2026-10-04T00:00:00Z',end_time_utc='2026-10-04T00:00:01Z',elapsed_monotonic_seconds=1.0,
                 native_exit_code=code,start_failure_class=None,timeout_seconds_or_null=10,
                 timeout_state='NOT_TRIGGERED',termination_state='NOT_REQUIRED',stdout_path=str(out),stderr_path=str(error),
@@ -20984,6 +24287,7 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
             patch.setitem(sys.modules,'select',SimpleNamespace(poll=Poll,POLLIN=1,POLLERR=8,POLLNVAL=32))
             query=o._LinuxPreflightQueriesV1(evidence_root=native,deadline_ns=grants['settlement_deadline_ns'],startup_closeout_bytes=32*1024**2)
             query.read=lambda path,**kw:real_read(query,bootfile if str(path)=='/proc/sys/kernel/random/boot_id' else path,**kw)
+            bind_administrative_fixture_cwd(query,area,patch)
             scope=o._LinuxPreflightScopeV1(name='qtt1n2',query=query,control=area,runtime=area,private_root=area,
                 spool=spool,repository=str(area),installation='',interpreter='/missing-fixture',source=None,
                 header=None,blobs=None,vectors=None,grants=grants,event={},environment={'PATH':'/usr/bin'})
@@ -21078,6 +24382,8 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
         def command(self,argv,**kwargs):
             self.attempts+=1
             raise RuntimeError('injected initial native query denial')
+        def command_resources_settled_v1(self):return False
+        def command_supervision_evidence_v1(self):return []
     actual_write=o._atomic_write_bytes_v1
     def failed_export(path,raw,**kwargs):
         result=actual_write(path,raw,**kwargs)
@@ -21100,6 +24406,134 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
     assert any('injected initial native query denial' in v for v in cleanup['failures'])
     assert any('injected export preparation failure' in v for v in cleanup['failures'])
     assert (Path(cleanup['retained_root'])/'native-result.json').is_file()
+
+    # Actual controller and Query owners: the supervisor alone is a no-child
+    # unknown-dispatch oracle. Successful evidence export cannot release roots.
+    controller_area=tmp_path/'administrative-unresolved-controller'
+    controller_area.mkdir()
+    controller_run=controller_area/'run';controller_run.mkdir()
+    controller_export=controller_area/'export';controller_export.mkdir()
+    original_query=o._LinuxPreflightQueriesV1
+    captured_queries=[];controller_dispatches=[]
+    controller_primary=OSError('original unresolved administrative controller command')
+    controller_primary.owned_process=object()
+    def capture_query(**kwargs):
+        value=original_query(**kwargs);captured_queries.append(value);return value
+    def unresolved_administration(argv,**kwargs):
+        controller_dispatches.append((argv,kwargs));raise controller_primary
+    # The UID/path fixture is Linux-shaped; Windows readonly unlink semantics
+    # do not qualify Linux publication. Delegate actual write-once byte custody
+    # with only that fixture's Linux mode stimulus omitted on Windows.
+    def controller_fixture_publication(path,raw,**kwargs):
+        if os.name=='nt' and kwargs.get('control_mode')==0o444:kwargs['control_mode']=None
+        return actual_write(path,raw,**kwargs)
+    with monkeypatch.context() as controller_patch:
+        controller_patch.setattr(o,'_atomic_write_bytes_v1',controller_fixture_publication)
+        controller_patch.setattr(o.sys,'platform','linux')
+        controller_patch.setattr(runner,'pathlib',SimpleNamespace(Path=lambda v:controller_run if str(v)=='/run' else real_path(v)))
+        controller_patch.setattr(o.os,'geteuid',lambda:0,raising=False)
+        controller_patch.setattr(o,'_LinuxPreflightQueriesV1',capture_query)
+        controller_patch.setattr(o,'supervise_command',unresolved_administration)
+        exit_code=runner._linux_preflight_controller_v1(str(tmp_path/'repository'),str(tmp_path/'installation'),
+            str(tmp_path/'interpreter'),{},b'{}',time.monotonic_ns(),controller_export)
+    actual_cleanup=json.loads((controller_export/'cleanup.json').read_bytes())
+    assert exit_code==1 and len(controller_dispatches)==len(captured_queries)==1
+    assert not actual_cleanup['administrative_resources_settled'] and not actual_cleanup['owned_roots_removed']
+    assert actual_cleanup['evidence_export_complete'] and Path(actual_cleanup['retained_root']).is_dir()
+    assert captured_queries[0].failure is controller_primary and captured_queries[0].command_supervisions[0]['pending']
+    assert any('original unresolved administrative controller command' in error for error in actual_cleanup['failures'])
+
+    assert actual_cleanup['export_resources_settled']
+    successful_export=actual_cleanup['export_native_io']
+    assert successful_export['read_bytes']==2*actual_cleanup['exported_files'][0]['bytes']
+    assert all(row['closed'] and row['settled'] for row in successful_export['acquisitions'])
+
+    # Original controller/export owners, real disposable file operands; only
+    # explicit no-child/failure ports below are synthetic. No native Linux or
+    # process-termination proof is inferred from these exceptional references.
+    original_open=o._open_regular_worktree_descriptor
+    original_read=os.read;original_close=os.close;original_scandir=os.scandir
+    original_raise=o._scan_raise_errors
+    for fault in ('read-close','payload','publication','directory-close'):
+        area=tmp_path/('controller-export-'+fault);area.mkdir()
+        owned=area/'run';owned.mkdir();destination=area/'export';destination.mkdir()
+        descriptors={};faulted=[];groups=[]
+        read_failure=OSError('original exporter read failure')
+        close_failure=OSError('original exporter close report failure')
+        publication_failure=OSError('original exporter publication uncertainty')
+        def safe_terminal_query(**kwargs):
+            value=original_query(**kwargs)
+            bind_administrative_fixture_cwd(value,value.evidence_root,export_patch)
+            return value
+        def no_child_administration(argv,**kwargs):
+            root=kwargs['evidence_root'];root.mkdir(parents=True,exist_ok=True)
+            out=root/('command-'+str(kwargs['command_index'])+'.stdout.bin')
+            err=root/('command-'+str(kwargs['command_index'])+'.stderr.bin')
+            out.write_bytes(b'');err.write_bytes(b'')
+            if fault=='directory-close':(root/'sentinel.bin').write_bytes(b'owned')
+            return o.CommandExecutionReceiptV1(schema_version=o.SCHEMA_VERSION,
+                run_id=kwargs['run_id'],phase=kwargs['phase'],command_index=kwargs['command_index'],argv=argv,
+                cwd=str(kwargs['cwd']),pid=None,platform='posix',start_time_utc='2026-10-06T00:00:00Z',
+                end_time_utc='2026-10-06T00:00:01Z',elapsed_monotonic_seconds=1,native_exit_code=None,
+                start_failure_class='FileNotFoundError',timeout_seconds_or_null=None,timeout_state='NOT_CONFIGURED',
+                termination_state='NOT_REQUIRED',stdout_path=str(out),stderr_path=str(err),stdout_byte_count=0,
+                stderr_byte_count=0,stdout_required_markers=(),stdout_marker_state='NOT_REQUIRED',
+                stderr_was_nonempty=False,failure_class='ENGVR_PROCESS_START_FAILED')
+        def opened(path,**kwargs):
+            fd=original_open(path,**kwargs);descriptors[fd]=Path(path);return fd
+        def acquired(fd,count):
+            path=descriptors.get(fd)
+            if path is not None and not faulted:
+                if fault=='read-close' and path.name=='native-result.json':faulted.append(fd);raise read_failure
+                if fault=='payload' and path.parent==destination:
+                    raw=original_read(fd,count);faulted.append(fd)
+                    return bytes([raw[0]^1])+raw[1:] if raw else raw
+            return original_read(fd,count)
+        def closed(fd):
+            result=original_close(fd)
+            if fault=='read-close' and faulted==[fd]:
+                faulted.append('closed-by-no-child-oracle');raise close_failure
+            return result
+        def published(path,raw,**kwargs):
+            result=controller_fixture_publication(path,raw,**kwargs)
+            if fault=='publication' and Path(path).parent==destination and Path(path).name=='native-result.json':raise publication_failure
+            return result
+        class DirectoryCloseOracle:
+            def __init__(self,stream):self.stream=stream
+            def __iter__(self):return iter(self.stream)
+            def close(self):
+                self.stream.close()  # Explicit no-child oracle owns teardown.
+                raise close_failure
+        def directory(path):
+            stream=original_scandir(path)
+            return DirectoryCloseOracle(stream) if fault=='directory-close' and Path(path).name=='native-evidence' else stream
+        def raised(errors):
+            groups.append(tuple(errors));return original_raise(errors)
+        with monkeypatch.context() as export_patch:
+            export_patch.setattr(o.sys,'platform','linux')
+            export_patch.setattr(runner,'pathlib',SimpleNamespace(Path=lambda v:owned if str(v)=='/run' else real_path(v)))
+            export_patch.setattr(o.os,'geteuid',lambda:0,raising=False)
+            export_patch.setattr(o,'_LinuxPreflightQueriesV1',safe_terminal_query)
+            export_patch.setattr(o,'supervise_command',no_child_administration)
+            export_patch.setattr(o,'_open_regular_worktree_descriptor',opened)
+            export_patch.setattr(o.os,'read',acquired);export_patch.setattr(o.os,'close',closed)
+            export_patch.setattr(o.os,'scandir',directory)
+            export_patch.setattr(o,'_atomic_write_bytes_v1',published)
+            export_patch.setattr(o,'_scan_raise_errors',raised)
+            result=runner._linux_preflight_controller_v1(str(tmp_path/'repository'),str(tmp_path/'installation'),
+                str(tmp_path/'interpreter'),{},b'{}',time.monotonic_ns(),destination)
+        record=json.loads((destination/'cleanup.json').read_bytes())
+        assert result==1 and not record['evidence_export_complete'] and not record['owned_roots_removed']
+        assert Path(record['retained_root']).is_dir() and record['administrative_resources_settled']
+        assert record['source_attributes_restored'] is (fault=='payload')
+        if fault=='payload':
+            assert record['export_resources_settled'] and record['export_native_io']['read_bytes']>0
+            assert any('LINUX_PREFLIGHT_EXPORT_BYTE_COMPARISON' in error for error in record['failures'])
+        else:
+            assert not record['export_resources_settled']
+        if fault=='read-close':
+            assert any(read_failure in errors and close_failure in errors for errors in groups)
+            assert faulted[-1]=='closed-by-no-child-oracle'
 
     missing=o._LinuxImmutableSourceBasisV2.__new__(o._LinuxImmutableSourceBasisV2)
     missing.failure=RuntimeError('original lost seal');missing.state='FAILED'
@@ -21156,6 +24590,204 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
         assert damaged!=kernel
         with pytest.raises(o.ValidationReliabilityError):
             o._linux_preflight_status_v1(123,RuntimeQueryReference(damaged),credentials=True)
+    # Original administrative owner; all supervision/fault ports below are
+    # explicit no-child fixtures, not native Linux enforcement/termination proof.
+    import dataclasses
+    admin_vector=('/usr/bin/systemctl','--version')
+    faults=('success','nonzero','prestart','unknown','unproven','wrong-run','wrong-phase','wrong-index',
+        'wrong-cwd','wrong-path','shape','terminal-exception','stdout','stderr','partial-read',
+        'close','read-close','reset','body-reset','overdelivery')
+    for fault in faults:
+        with monkeypatch.context() as admin_patch:
+            admin_patch.setattr(o.sys,'platform','linux')
+            admin=o._LinuxPreflightQueriesV1(evidence_root=tmp_path/('admin-'+fault),
+                deadline_ns=time.monotonic_ns()+60*10**9)
+            admin.evidence_root.mkdir()
+            bind_administrative_fixture_cwd(admin,admin.evidence_root,admin_patch)
+            starts=[];opens=[];reads=[];closes=[];actual=[];fd_names={}
+            primary=OSError('original administrative '+fault+' fault')
+            secondary=OSError('original administrative close/reset fault')
+            primary.owned_process=object() if fault in ('unknown','body-reset') else None
+            def no_child_admin(argv,**kwargs):
+                starts.append((argv,kwargs))
+                if fault in ('unknown','body-reset'):raise primary
+                stdout=admin.evidence_root/('command-'+str(kwargs['command_index'])+'.stdout.bin')
+                stderr=admin.evidence_root/('command-'+str(kwargs['command_index'])+'.stderr.bin')
+                stdout.write_bytes(b'' if fault=='prestart' else b'version\n');stderr.write_bytes(b'')
+                receipt=o.CommandExecutionReceiptV1(schema_version=o.SCHEMA_VERSION,
+                    run_id=kwargs['run_id'],phase=kwargs['phase'],command_index=kwargs['command_index'],argv=argv,
+                    cwd=str(kwargs['cwd']),pid=None if fault=='prestart' else 12345,platform='posix',
+                    start_time_utc='2026-10-06T00:00:00Z',end_time_utc='2026-10-06T00:00:01Z',
+                    elapsed_monotonic_seconds=1,native_exit_code=None if fault=='prestart' else 7 if fault=='nonzero' else 0,
+                    start_failure_class='FileNotFoundError' if fault=='prestart' else None,
+                    timeout_seconds_or_null=None,timeout_state='NOT_CONFIGURED',
+                    termination_state='TERMINAL:UNPROVEN' if fault=='unproven' else 'NOT_REQUIRED',
+                    stdout_path=str(stdout),stderr_path=str(stderr),stdout_byte_count=0 if fault=='prestart' else 8,stderr_byte_count=0,
+                    stdout_required_markers=(),stdout_marker_state='NOT_REQUIRED',stderr_was_nonempty=False,
+                    failure_class='ENGVR_PROCESS_START_FAILED' if fault=='prestart' else 'ENGVR_NATIVE_EXIT_NONZERO'
+                        if fault=='nonzero' else 'ENGVR_PROCESS_TERMINATION_FAILED' if fault=='unproven' else None)
+                changes={'wrong-run':dict(run_id='foreign-run'),'wrong-phase':dict(phase='foreign-phase'),
+                    'wrong-index':dict(command_index=kwargs['command_index']+1),'wrong-cwd':dict(cwd=str(tmp_path)),
+                    'wrong-path':dict(stdout_path=str(tmp_path/'foreign-output.bin'))}.get(fault,{})
+                receipt=dataclasses.replace(receipt,**changes)
+                if fault=='shape':receipt=object()
+                actual.append(receipt)
+                if fault=='terminal-exception':primary.command_receipt=receipt;raise primary
+                return receipt
+            admin_patch.setattr(o,'supervise_command',no_child_admin)
+            original_open=o._open_regular_worktree_descriptor;original_read=os.read;original_close=os.close
+            def tracked_open(path,**kwargs):
+                opens.append(path)
+                fd=original_open(path,**kwargs);fd_names[fd]=path.name
+                return fd
+            def tracked_read(fd,request):
+                reads.append((fd,request));name=fd_names.get(fd,'')
+                if ((fault in ('stdout','read-close') and name.endswith('stdout.bin'))
+                        or (fault=='stderr' and name.endswith('stderr.bin'))):raise primary
+                if fault=='overdelivery' and name.endswith('stdout.bin'):return b'X'*(request+1)
+                if fault=='partial-read' and name.endswith('stdout.bin'):
+                    if sum(item[0]==fd for item in reads)==1:return original_read(fd,3)
+                    raise primary
+                return original_read(fd,min(request,3))  # Legitimate short reads.
+            def tracked_close(fd):
+                closes.append(fd);original_close(fd)
+                # The fixture actually releases its descriptor; production sees
+                # only this explicit failed-close oracle and must retain debt.
+                if fault in ('close','read-close'):raise secondary
+            admin_patch.setattr(o,'_open_regular_worktree_descriptor',tracked_open)
+            admin_patch.setattr(os,'read',tracked_read);admin_patch.setattr(os,'close',tracked_close)
+            context=o._LINUX_PREFLIGHT_PROCESS_V1
+            if fault in ('reset','body-reset'):
+                class ResetFault:
+                    def set(self,value):assert value is None;return object()
+                    def reset(self,token):raise secondary
+                admin_patch.setattr(o,'_LINUX_PREFLIGHT_PROCESS_V1',ResetFault())
+            if fault=='success':
+                assert admin.command(admin_vector)==b'version\n'
+                assert admin.command(admin_vector)==b'version\n' and len(starts)==2
+                assert admin.failure is None and admin.command_resources_settled_v1() and admin.retained==16
+                assert admin.command_receipt_for_argv_v1(admin_vector) is actual[-1]
+            else:
+                with pytest.raises(BaseException) as caught:admin.command(admin_vector)
+                assert admin.failure is caught.value and len(starts)==1
+                if fault in ('unknown','terminal-exception','stdout','stderr','partial-read'):assert caught.value is primary
+                if fault in ('read-close','body-reset'):
+                    assert isinstance(caught.value,BaseExceptionGroup) and caught.value.exceptions==(primary,secondary)
+                if fault in ('close','reset'):assert caught.value is secondary
+                unsafe=fault in ('unknown','unproven','wrong-run','wrong-phase','wrong-index','wrong-cwd',
+                    'wrong-path','shape','stdout','stderr','partial-read','close','read-close','body-reset','overdelivery')
+                assert admin.command_resources_settled_v1() is (not unsafe)
+                if unsafe:
+                    original=admin.command_supervisions[0];before=len(admin.command_supervisions)
+                    with pytest.raises(o.ValidationReliabilityError,match='ADMINISTRATIVE_CUSTODY_UNRESOLVED'):
+                        admin.command(admin_vector,settling=True)
+                    assert len(starts)==1 and len(admin.command_supervisions)==before
+                    assert admin.command_supervisions[0] is original and admin.failure is caught.value
+                    controller=ast.parse(inspect.getsource(runner._linux_preflight_controller_v1)).body[0]
+                    expression=next(node.value for node in controller.body if isinstance(node,ast.Assign)
+                        and any(isinstance(target,ast.Name) and target.id=='settled' for target in node.targets))
+                    assert not eval(compile(ast.Expression(expression),'<original controller settlement>','eval'),
+                        dict(scope=None,recovery_resources_settled=True,query=admin))
+                else:
+                    with pytest.raises(BaseException):admin.command(admin_vector)
+                    assert len(starts)==1
+                record=admin.command_supervisions[0]
+                assert any(error is caught.value for error in record['errors'])
+                if actual:assert record['receipt'] is actual[0] and admin.last_command_receipt is actual[0]
+                else:assert record['receipt'] is None and record['pending']
+                if fault in ('unproven','wrong-run','wrong-phase','wrong-index','wrong-cwd','wrong-path','shape','terminal-exception','reset'):
+                    assert opens==reads==closes==[] and admin.retained==0
+                if fault=='stderr':assert admin.retained==8 and record['streams']['stdout']['raw']==b'version\n'
+                if fault=='partial-read':assert admin.retained==3 and record['streams']['stdout']['raw']==b'ver'
+                if fault=='overdelivery':
+                    assert admin.retained==10 and record['streams']['stdout']['returned_bytes']==10
+                    assert record['streams']['stdout']['raw']==b'X'*9 and not record['streams']['stdout']['complete']
+                if fault in ('close','read-close'):assert len(closes)==1 and not record['streams']['stdout']['closed']
+                if fault in ('nonzero','prestart','terminal-exception'):
+                    with pytest.raises(BaseException):admin.command(admin_vector,settling=True)
+                    assert len(starts)==2 and admin.command_resources_settled_v1() and admin.failure is caught.value
+                    with pytest.raises(BaseException):admin.command(admin_vector)
+                    assert len(starts)==2 and admin.command_receipt_for_argv_v1(admin_vector) is None
+            assert all(request<=65536 for _,request in reads)
+            assert o._LINUX_PREFLIGHT_PROCESS_V1 is context or fault in ('reset','body-reset')
+            evidence=admin.command_supervision_evidence_v1()
+            assert len(evidence)==len(admin.command_supervisions) and all(row['argv']==admin_vector for row in evidence)
+    # Exercise the real caught-error diagnostic consumer too. The Scope object
+    # here is only a no-child caller fixture, never successful native admission.
+    for defect in ('run_id','phase','command_index','cwd','stdout_path','shape'):
+        with monkeypatch.context() as diagnostic_patch:
+            diagnostic_patch.setattr(o.sys,'platform','linux')
+            admin=o._LinuxPreflightQueriesV1(evidence_root=tmp_path/('diagnostic-'+defect),
+                deadline_ns=time.monotonic_ns()+60*10**9,startup_closeout_bytes=32*1024**2)
+            admin.evidence_root.mkdir()
+            bind_administrative_fixture_cwd(admin,admin.evidence_root,diagnostic_patch)
+            fake_scope=object.__new__(o._LinuxPreflightScopeV1)
+            fake_scope.query=admin;fake_scope.startup_error=OSError('original startup fault')
+            fake_scope.service_created=True;fake_scope.closeout_attempts=0;fake_scope.name='qtt123n456'
+            fake_scope.attempt_utc=o.datetime.now(o.UTC);fake_scope.history=[]
+            returned=[];output_opens=[]
+            def wrong_diagnostic(argv,**kwargs):
+                receipt=o.CommandExecutionReceiptV1(schema_version=o.SCHEMA_VERSION,
+                    run_id=kwargs['run_id'],phase=kwargs['phase'],command_index=kwargs['command_index'],argv=argv,
+                    cwd=str(kwargs['cwd']),pid=12345,platform='posix',start_time_utc='2026-10-06T00:00:00Z',
+                    end_time_utc='2026-10-06T00:00:01Z',elapsed_monotonic_seconds=1,native_exit_code=0,
+                    start_failure_class=None,timeout_seconds_or_null=None,timeout_state='NOT_CONFIGURED',
+                    termination_state='NOT_REQUIRED',stdout_path=str(admin.evidence_root/('command-'+str(kwargs['command_index'])+'.stdout.bin')),
+                    stderr_path=str(admin.evidence_root/('command-'+str(kwargs['command_index'])+'.stderr.bin')),
+                    stdout_byte_count=0,stderr_byte_count=0,stdout_required_markers=(),stdout_marker_state='NOT_REQUIRED',
+                    stderr_was_nonempty=False,failure_class=None)
+                changes=dict(run_id='foreign',phase='foreign',command_index=kwargs['command_index']+1,
+                    cwd=str(tmp_path),stdout_path=str(tmp_path/'foreign-stream'))
+                receipt=object() if defect=='shape' else dataclasses.replace(receipt,**{defect:changes[defect]})
+                returned.append(receipt);return receipt
+            diagnostic_patch.setattr(o,'supervise_command',wrong_diagnostic)
+            def forbidden_open(path,**kwargs):output_opens.append(path);raise AssertionError('unassociated receipt read')
+            diagnostic_patch.setattr(o,'_open_regular_worktree_descriptor',forbidden_open)
+            with admin.owned_resource_phase():record,raw,stderr=admin.startup_diagnostic(fake_scope,'status')
+            assert not record['complete'] and not record['success'] and not record['command_settled']
+            assert raw==stderr==b'' and not output_opens and len(returned)==1
+            assert admin.last_command_receipt is returned[0] and admin.command_supervisions[0]['receipt'] is returned[0]
+            assert admin.command_receipt_for_argv_v1(tuple(record['argv'])) is None and not admin.command_resources_settled_v1()
+    # A genuinely successful earlier same-vector receipt cannot certify a
+    # later unresolved attempt. Only the supervisor is a no-child fault oracle.
+    with monkeypatch.context() as stale_patch:
+        stale_patch.setattr(o.sys,'platform','linux')
+        admin=o._LinuxPreflightQueriesV1(evidence_root=tmp_path/'admin-stale-success',
+            deadline_ns=time.monotonic_ns()+60*10**9)
+        admin.evidence_root.mkdir();bind_administrative_fixture_cwd(admin,admin.evidence_root,stale_patch)
+        starts=[];old_receipts=[]
+        current_error=OSError('original later same-vector unknown dispatch')
+        current_error.owned_process=object()
+        def one_success_then_unknown(argv,**kwargs):
+            starts.append((argv,kwargs))
+            if len(starts)>1:raise current_error
+            out=admin.evidence_root/('command-'+str(kwargs['command_index'])+'.stdout.bin')
+            err=admin.evidence_root/('command-'+str(kwargs['command_index'])+'.stderr.bin')
+            out.write_bytes(b'prior-success');err.write_bytes(b'')
+            receipt=o.CommandExecutionReceiptV1(schema_version=o.SCHEMA_VERSION,run_id=kwargs['run_id'],
+                phase=kwargs['phase'],command_index=kwargs['command_index'],argv=argv,cwd=str(kwargs['cwd']),
+                pid=12345,platform='posix',start_time_utc='2026-10-06T00:00:00Z',end_time_utc='2026-10-06T00:00:01Z',
+                elapsed_monotonic_seconds=1,native_exit_code=0,start_failure_class=None,timeout_seconds_or_null=None,
+                timeout_state='NOT_CONFIGURED',termination_state='NOT_REQUIRED',stdout_path=str(out),stderr_path=str(err),
+                stdout_byte_count=13,stderr_byte_count=0,stdout_required_markers=(),stdout_marker_state='NOT_REQUIRED',
+                stderr_was_nonempty=False,failure_class=None)
+            old_receipts.append(receipt);return receipt
+        stale_patch.setattr(o,'supervise_command',one_success_then_unknown)
+        assert admin.command(admin_vector)==b'prior-success' and admin.command_resources_settled_v1()
+        assert admin.command_receipt_for_argv_v1(admin_vector) is old_receipts[0]
+        with pytest.raises(OSError) as caught:admin.command(admin_vector)
+        assert caught.value is current_error and len(starts)==2 and admin.retained==13
+        assert admin.command_supervisions[0]['receipt'] is old_receipts[0] and admin.command_supervisions[1]['receipt'] is None
+        assert admin.command_receipt_for_argv_v1(admin_vector) is None and not admin.command_resources_settled_v1()
+        with pytest.raises(o.ValidationReliabilityError,match='ADMINISTRATIVE_CUSTODY_UNRESOLVED'):
+            admin.command(admin_vector,settling=True)
+        assert len(starts)==2 and len(admin.command_supervisions)==2 and admin.failure is current_error
+    with monkeypatch.context() as admin_patch:
+        admin_patch.setattr(o.sys,'platform','linux')
+        never=o._LinuxPreflightQueriesV1(evidence_root=tmp_path/'never-admin',deadline_ns=time.monotonic_ns()+60*10**9)
+        with pytest.raises(o.ValidationReliabilityError,match='ADMINISTRATIVE_PROGRAM'):never.command(('/unselected/program',))
+        assert never.failure is not None and never.command_supervisions==[]
+        assert never.command_resources_settled_v1() and not never.evidence_root.exists()
     # Pending absence increments attempts but cannot create the runtime response tree.
     pending_root=tmp_path/'runtime-not-handed-off'
     with monkeypatch.context() as patch:

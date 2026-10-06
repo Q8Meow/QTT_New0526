@@ -305,6 +305,7 @@ def test_scan_uses_git_grep_when_rg_is_unavailable(monkeypatch, tmp_path) -> Non
     written_requests = []
     real_read = owner.os.read
     real_fdopen = owner.os.fdopen
+    short_read_results, short_write_results = [], []
     class ShortStream:
         def __init__(self, stream):
             self.stream = stream
@@ -312,10 +313,14 @@ def test_scan_uses_git_grep_when_rg_is_unavailable(monkeypatch, tmp_path) -> Non
             return getattr(self.stream, name)
         def write(self, value):
             written_requests.append(len(value))
-            return self.stream.write(value[:16381])
+            count = self.stream.write(value[:16381])
+            short_write_results.append(count)
+            return count
         def read(self, count):
             requested.append(count)
-            return self.stream.read(min(count, 16381))
+            block = self.stream.read(min(count, 16381))
+            short_read_results.append(len(block))
+            return block
     def short_read(fd, count):
         requested.append(count)
         return real_read(fd, min(count, 16381))
@@ -363,6 +368,135 @@ def test_scan_uses_git_grep_when_rg_is_unavailable(monkeypatch, tmp_path) -> Non
     assert initial_allowance - transport.remaining_reread == expected_reads
     assert max(requested) <= 65_536 and max(written_requests) <= 65_536
     assert 65_536 in requested and len(written_requests) > 3
+
+    # Canonical control batching preserves every version's literal bytes and
+    # charges the actual three readbacks. These processes are no-child oracles.
+    byte_rows = tuple(owner._ScanCandidateSurface(row.path, row.kind, row.mode,
+        data[row.path] if row.kind == "FILE" else b"", row.children) for row in surfaces)
+    byte_entries = [[row.path, row.kind, row.mode,
+        data[row.path].hex() if row.kind == "FILE" else "", list(row.children)] for row in byte_rows]
+    cases = ((1, identity3, None), (2, identity3, None), (2, nested, identity3), (3, identity3, None))
+    for number, (version, chosen_identity, parent) in enumerate(cases):
+        expected = (expected_packet if version == 3 else literal_packet(literal_control(chosen_identity,
+            version=version, parent=parent_literal if parent is not None else None, entries=byte_entries)))
+        case_root = tmp_path / ("canonical-batch-" + str(number))
+        case_root.mkdir()
+        budget = 100 * (len(expected) + 2 * total + 1)
+        case_rows = surfaces if version == 3 else byte_rows
+        options = {"wire_version":3, "surface_role":"sender", "snapshot_root":snapshots} if version == 3 else {}
+        actual_fence = owner._ScanCandidateFence(v3_root, case_rows, limits=limits3,
+            candidate_read_bytes=budget, deadline_ns=deadline3, **options)
+        calls = []
+        def checked_candidate():
+            calls.append("full-candidate")
+            actual_fence()
+        value = owner._ScanLaunchInput(chosen_identity, case_rows, limits=limits3,
+            candidate_read_bytes=allowance, deadline_ns=deadline3, scratch_root=case_root,
+            scratch_bytes=3_000_000, parent_frame_reread_bytes=20_000_000,
+            check_candidate=checked_candidate, rp5a_read_basis=None if version == 1 else basis3,
+            parent_identity=parent, **({"wire_version":3, "snapshot_root":snapshots} if version == 3 else {}))
+        control_parts = tuple(value._control_parts())
+        assert b"".join(control_parts) == expected[:4 + value.length]
+        assert control_parts[0] == value.length.to_bytes(4, "big")
+        assert all(len(part) == 65536 for part in control_parts[1:-1])
+        assert max(map(len, control_parts)) <= 65536
+        raw_fragment_count = sum(1 for _ in owner._scan_launch_parts(value.payload))
+        before = value.remaining_reread
+        prior_reads, prior_writes = len(requested), len(written_requests)
+        prior_read_results, prior_write_results = len(short_read_results), len(short_write_results)
+        with monkeypatch.context() as short:
+            short.setattr(owner.os, "read", short_read)
+            short.setattr(owner.os, "fdopen", lambda *args, **kwargs: ShortStream(real_fdopen(*args, **kwargs)))
+            with value:
+                assert value.path.read_bytes() == expected
+                value._claim(run_id=chosen_identity.run_id, phase=chosen_identity.phase,
+                    command_index=1, argv=chosen_identity.argv, cwd=v3_root)
+                child = SimpleNamespace(pid=3456, returncode=None)
+                child.poll = lambda: child.returncode
+                value._attached(child)
+                decoded = owner._read_scan_launch_fd(value.reader.fileno(), limits=limits3,
+                    deadline_ns=deadline3, expected_identity=chosen_identity, expected_wire_version=version,
+                    expected_parent_identity=parent, expected_rp5a_read_basis=None if version == 1 else basis3,
+                    expected_payload_bytes=total if version == 3 else None)
+                if version == 3:
+                    checked = owner._ScanCandidateFence(v3_root, decoded[1], limits=limits3,
+                        candidate_read_bytes=allowance, deadline_ns=deadline3, wire_version=3,
+                        surface_role="receiver", payload_lease=decoded[5])
+                    checked()
+                    checked.close_payload_lease()
+                child.returncode = 7
+                value._finished(child, 7)
+                assert value.state == "CONSUMED"
+        assert value.state == "CLOSED" and not value.path.exists()
+        assert before - value.remaining_reread == (total + 3 * (value.extent + total) if version == 3 else 3 * value.extent)
+        assert max(requested[prior_reads:] + written_requests[prior_writes:]) <= 65536
+        if version == 3:
+            assert len(calls) == 3
+        else:
+            positive_reads = sum(count > 0 for count in short_read_results[prior_read_results:])
+            positive_writes = sum(count > 0 for count in short_write_results[prior_write_results:])
+            assert len(calls) == positive_writes + positive_reads + 8
+            assert sum(short_read_results[prior_read_results:]) == 3 * value.extent
+            assert len(calls) < raw_fragment_count
+
+        # Failed encoding delivers only already emitted chunks, retains the
+        # original error/frame and does not flush buffered bytes or refund reads.
+        fault_root = tmp_path / ("canonical-batch-failure-" + str(number))
+        fault_root.mkdir()
+        failed = owner._ScanLaunchInput(chosen_identity, case_rows, limits=limits3,
+            candidate_read_bytes=allowance, deadline_ns=deadline3, scratch_root=fault_root,
+            scratch_bytes=3_000_000, parent_frame_reread_bytes=20_000_000,
+            check_candidate=checked_candidate, rp5a_read_basis=None if version == 1 else basis3,
+            parent_identity=parent, **({"wire_version":3, "snapshot_root":snapshots} if version == 3 else {}))
+        encoding_fault = OSError("original canonical encoding fault")
+        def fail_encoding(payload):
+            yield b"X" * 65536
+            yield b"unfinished-control"
+            raise encoding_fault
+        with monkeypatch.context() as fault:
+            fault.setattr(owner, "_scan_launch_parts", fail_encoding)
+            with pytest.raises(OSError) as caught:
+                failed.__enter__()
+        assert caught.value is encoding_fault and failed.state == "HELD"
+        assert failed.writer.closed and failed.reader is None
+        assert failed.path.read_bytes() == failed.length.to_bytes(4, "big") + b"X" * 65536
+        assert failed.remaining_reread == 20_000_000 and not failed.issued
+        before_members = tuple(fault_root.iterdir())
+        with pytest.raises(ValueError, match="single use"):
+            failed.__enter__()
+        assert tuple(fault_root.iterdir()) == before_members and failed.path.exists()
+
+        # Pure tiny fragments cannot defer owner/clock rejection until a later
+        # full output chunk. This oracle acquires no file and starts no child.
+        for defect in ("foreign-owner", "deadline", "clock-regression"):
+            events = []
+            original_clock = value.last_ns
+            def tiny_fragments(payload):
+                yield b"a"
+                events.append("prefix")
+                if defect == "foreign-owner":
+                    value.thread_id += 1
+                elif defect == "deadline":
+                    value.deadline_ns = 1
+                else:
+                    value.last_ns = value.deadline_ns
+                yield b"b"
+                events.append("unreached")
+            with monkeypatch.context() as fault:
+                fault.setattr(owner, "_scan_launch_parts", tiny_fragments)
+                fault.setattr(value, "thread_id", value.thread_id)
+                fault.setattr(value, "deadline_ns", value.deadline_ns)
+                fault.setattr(value, "last_ns", original_clock)
+                parts = value._control_parts()
+                assert next(parts) == value.length.to_bytes(4, "big")
+                with pytest.raises((ValueError, TimeoutError)) as rejected:
+                    next(parts)
+                assert ("foreign launch input owner" if defect == "foreign-owner" else
+                    "original scan deadline expired" if defect == "deadline" else
+                    "launch input clock regressed") in str(rejected.value)
+                assert events == ["prefix"]
+                parts.close()
+            assert value.state == "CLOSED" and not value.path.exists()
 
     # Closed control/extent matrix, independently altered literal packets.
     malformed = []
