@@ -15,11 +15,12 @@ class CompiledTerm:
         pattern = spec.term_text_or_regex if spec.is_regex else re.escape(spec.term_text_or_regex)
         self.regex = re.compile(pattern, re.IGNORECASE)
 
-    def matches(self, text: str) -> list[str]:
-        values: list[str] = []
+    def iter_matches(self, text: str):
         for match in self.regex.finditer(text):
-            values.append(match.group(0))
-        return values
+            yield match.group(0)
+
+    def matches(self, text: str) -> list[str]:
+        return list(self.iter_matches(text))
 
 
 COMPILED_TERMS = tuple(CompiledTerm(spec) for spec in TERM_TAXONOMY)
@@ -30,29 +31,35 @@ def taxonomy_rows() -> list[dict[str, object]]:
     return [spec.to_row() for spec in TERM_TAXONOMY]
 
 
-def match_text(text: object) -> list[dict[str, object]]:
+def iter_text_matches(text: object, *, max_matches: int | None = None):
+    if max_matches is not None and (type(max_matches) is not int or max_matches < 0):
+        raise ValueError("match allowance must be an exact nonnegative integer")
+    if max_matches == 0:
+        return
     haystack = "" if text is None else str(text)
-    matches: list[dict[str, object]] = []
     seen: set[tuple[str, str]] = set()
     for compiled in COMPILED_TERMS:
-        for value in compiled.matches(haystack):
+        for value in compiled.iter_matches(haystack):
             key = (compiled.spec.term_id, value.lower())
             if key in seen:
                 continue
             seen.add(key)
-            matches.append(
-                {
-                    "term_id": compiled.spec.term_id,
-                    "term_text_or_regex": compiled.spec.report_safe_text_or_regex,
-                    "matched_text": value,
-                    "term_family": compiled.spec.term_family,
-                    "severity": compiled.spec.severity,
-                    "canonical_future_interpretation": compiled.spec.canonical_future_interpretation,
-                    "old_semantic_risk": compiled.spec.old_semantic_risk,
-                    "is_regex": compiled.spec.is_regex,
-                }
-            )
-    return matches
+            yield {
+                "term_id": compiled.spec.term_id,
+                "term_text_or_regex": compiled.spec.report_safe_text_or_regex,
+                "matched_text": value,
+                "term_family": compiled.spec.term_family,
+                "severity": compiled.spec.severity,
+                "canonical_future_interpretation": compiled.spec.canonical_future_interpretation,
+                "old_semantic_risk": compiled.spec.old_semantic_risk,
+                "is_regex": compiled.spec.is_regex,
+            }
+            if max_matches is not None and len(seen) >= max_matches:
+                return
+
+
+def match_text(text: object, *, max_matches: int | None = None) -> list[dict[str, object]]:
+    return list(iter_text_matches(text, max_matches=max_matches))
 
 
 def term_ids_from_matches(matches: Iterable[dict[str, object]]) -> list[str]:

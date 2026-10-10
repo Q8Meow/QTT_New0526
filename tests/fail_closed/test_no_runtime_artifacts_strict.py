@@ -21,26 +21,78 @@ def _strict_options() -> ScanOptions:
     )
 
 
+_CI_TEST_SCRIPT = r"""python -m pip install --only-binary=:all: --no-deps --index-url https://pypi.org/simple \
+  pytest==9.1.1 \
+  iniconfig==2.3.0 \
+  packaging==26.0 \
+  pluggy==1.6.0 \
+  pygments==2.21.0 \
+  websockets==17.0.1 \
+  cryptography==50.0.1 \
+  cffi==2.1.1 \
+  pycparser==3.0 \
+  jsonschema==4.26.0 \
+  jsonschema-specifications==2025.9.1 \
+  referencing==0.37.0 \
+  rpds-py==2026.5.1 \
+  attrs==26.1.0
+python -m pip check
+python - <<'PY'
+from importlib.metadata import PackageNotFoundError, version
+
+expected = (
+    ('pytest', '9.1.1'),
+    ('iniconfig', '2.3.0'),
+    ('packaging', '26.0'),
+    ('pluggy', '1.6.0'),
+    ('pygments', '2.21.0'),
+    ('websockets', '17.0.1'),
+    ('cryptography', '50.0.1'),
+    ('cffi', '2.1.1'),
+    ('pycparser', '3.0'),
+    ('jsonschema', '4.26.0'),
+    ('jsonschema-specifications', '2025.9.1'),
+    ('referencing', '0.37.0'),
+    ('rpds-py', '2026.5.1'),
+    ('attrs', '26.1.0'),
+)
+failures = []
+for name, wanted in expected:
+    try:
+        actual = version(name)
+    except PackageNotFoundError:
+        failures.append(f"{name}: missing; required {wanted}")
+    else:
+        if actual != wanted:
+            failures.append(f"{name}: {actual}; required {wanted}")
+if failures:
+    raise SystemExit("CI dependency profile mismatch: " + "; ".join(failures))
+print("Selected CI dependency versions verified.")
+PY"""
+
+
 def _write_ci_validation_workflow(tmp_path, install_commands: list[str]) -> Path:
     workflow = tmp_path / ".github" / "workflows" / "qtt_validation.yml"
-    workflow.parent.mkdir(parents=True)
-    install_command_block = "\n".join(f"          {command}" for command in install_commands)
+    workflow.parent.mkdir(parents=True, exist_ok=True)
+    install_command_block = "\n".join(
+        "          " + line if line else ""
+        for command in install_commands for line in command.split("\n")
+    )
+    phases = "\n".join(f"          - phase: synthetic-{n}" for n in range(13))
     workflow.write_text(
-        "\n".join(
-            [
-                "name: QTT Validation",
-                "jobs:",
-                "  validation:",
-                "    steps:",
-                "      - name: Install test dependency",
-                "        run: |",
-                install_command_block,
-                "      - name: Run canonical validation gates",
-                "        run: python tools/run_validation_gates.py",
-                "",
-            ]
-        ),
-        encoding="utf-8",
+        "name: QTT Validation\njobs:\n  validation_shards:\n"
+        "    strategy:\n      matrix:\n        include:\n" + phases + "\n"
+        "    steps:\n      - name: Set up Python\n"
+        "        uses: actions/setup-python@v5\n        with:\n"
+        "          python-version: '3.14.6'\n"
+        "      - name: Install test dependency\n        run: &install_pytest |\n"
+        + install_command_block + "\n"
+        "      - name: Run canonical validation gates\n"
+        "        run: python tools/run_validation_gates.py\n"
+        "  validation:\n    needs:\n      - validation_shards\n    steps:\n"
+        "      - name: Set up Python\n        uses: actions/setup-python@v5\n"
+        "        with:\n          python-version: '3.14.6'\n",
+        encoding="utf-8", newline="\n",
     )
     return workflow
 
@@ -85,12 +137,12 @@ def test_scanner_rejects_flagged_runtime_paths_and_install_scripts(tmp_path):
 def test_scanner_allows_exact_ci_test_dependency_pytest_install(
     tmp_path, install_command
 ):
-    _assert_f14_dual_install_slots(tmp_path)
+    # Retain both collected legacy operands as explicit obsolete negatives.
     _write_ci_validation_workflow(tmp_path, [install_command])
-
-    violations = scan_repository(tmp_path, _strict_options())
-
-    assert violations == []
+    assert any("pip install command" in row for row in scan_repository(tmp_path, _strict_options()))
+    _write_ci_validation_workflow(tmp_path, [_CI_TEST_SCRIPT])
+    assert scan_repository(tmp_path, _strict_options()) == []
+    _assert_f14_dual_install_slots(tmp_path)
 
 
 @pytest.mark.parametrize(
@@ -197,7 +249,7 @@ def test_scanner_rejects_non_pip_package_installs_in_ci_workflow(
 def test_scanner_rejects_package_install_scripts_even_with_allowed_ci_dependency(
     tmp_path,
 ):
-    _write_ci_validation_workflow(tmp_path, ["python -m pip install pytest"])
+    _write_ci_validation_workflow(tmp_path, [_CI_TEST_SCRIPT])
     scripts = tmp_path / "scripts"
     scripts.mkdir()
     (scripts / "install.sh").write_text("#!/bin/sh\n", encoding="utf-8")
@@ -1130,19 +1182,141 @@ _F14_TEST_NATIVE_INSTALL = 'python -m pip install --only-binary=:all: --no-deps 
 
 
 def _assert_f14_dual_install_slots(tmp_path):
+    """Historical helper name; the adopted policy has one complete install."""
     from pathlib import PurePosixPath
-    path=PurePosixPath('.github/workflows/qtt_validation.yml')
-    for pytest_line in ('python -m pip install pytest', 'python -m pip install pytest==9.1.1'):
-        text=pytest_line+'\n'+_F14_TEST_NATIVE_INSTALL+'\n'
-        file=tmp_path/'dual-install.txt';file.write_text(text,encoding='utf-8')
-        assert scanner._scan_text_content(path,text,['forbid_package_install_scripts']) == []
-        assert scanner._scan_package_install_text_file(path,file) == []
-        for extra in (pytest_line,_F14_TEST_NATIVE_INSTALL,_F14_TEST_NATIVE_INSTALL.replace('17.0.1','17.0.2'),
-                _F14_TEST_NATIVE_INSTALL+' extra==1',_F14_TEST_NATIVE_INSTALL+'; echo unsafe',
-                _F14_TEST_NATIVE_INSTALL.replace('--only-binary=:all: ','')):
-            bad=text+extra+'\n';file.write_text(bad,encoding='utf-8')
-            assert scanner._scan_text_content(path,bad,['forbid_package_install_scripts'])
-            assert scanner._scan_package_install_text_file(path,file)
-        file.write_text(text,encoding='utf-8')
-        assert scanner._scan_text_content(PurePosixPath('.github/workflows/other.yml'),text,
-            ['forbid_package_install_scripts'])
+    from tools import independent_validate_qku_computation_control_plane_execution as independent
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane import source_policy
+
+    path = PurePosixPath('.github/workflows/qtt_validation.yml')
+    workflow = _write_ci_validation_workflow(tmp_path, [_CI_TEST_SCRIPT])
+    text = workflow.read_bytes().decode('utf-8')
+    expected_command = (
+        'python -m pip install --only-binary=:all: --no-deps --index-url https://pypi.org/simple '
+        'pytest==9.1.1 iniconfig==2.3.0 packaging==26.0 pluggy==1.6.0 pygments==2.21.0 '
+        'websockets==17.0.1 cryptography==50.0.1 cffi==2.1.1 pycparser==3.0 '
+        'jsonschema==4.26.0 jsonschema-specifications==2025.9.1 referencing==0.37.0 '
+        'rpds-py==2026.5.1 attrs==26.1.0'
+    )
+    for valid in (text, text.replace('\n', '\r\n'),
+                  text.replace('          PY\n', '          PY\n\n'),
+                  text.replace('          PY\n', '          PY\n      \n')):
+        workflow.write_bytes(valid.encode('utf-8'))
+        line = valid.splitlines().index('          ' + _CI_TEST_SCRIPT.split('\n')[0]) + 1
+        assert scanner._ci_validation_dependency_block_v1(valid) == (line, expected_command)
+        assert scanner._scan_text_content(path, valid, ['forbid_package_install_scripts']) == []
+        assert scanner._scan_package_install_text_file(path, workflow) == []
+        assert scan_repository(tmp_path, _strict_options()) == []
+        assert source_policy._st12h_validate_workflow_contract(tmp_path) == (path.as_posix(),)
+        assert independent._f14_ci_dependency_contract_v1(valid)
+    import re
+    actual_match = re.search(r'python -m pip install\b', text)
+    assert actual_match is not None
+    hits = {}
+    assert scanner._is_ci_test_dependency_allowlisted_pip_install(path, text, actual_match, hits)
+    assert not scanner._is_ci_test_dependency_allowlisted_pip_install(path, text, actual_match, hits)
+    mutants = []
+
+    def mutate(old, new, count=1):
+        assert old != new and text.count(old) == count, old
+        changed = text.replace(old, new, 1)
+        assert changed != text
+        start = text.index(old)
+        assert changed == text[:start] + new + text[start + len(old):]
+        mutants.append(changed)
+
+    # Every pin is independently required in both the command and version check.
+    for pin in expected_command.split()[8:]:
+        name, version = pin.split('==')
+        command_line = next(row for row in text.splitlines() if row.strip().startswith(pin)) + '\n'
+        mutate(command_line, '')
+        mutate(command_line, command_line.replace(version, '0.0.0'))
+        mutate(command_line, command_line + command_line)
+        expected_row = f"              ('{name}', '{version}'),\n"
+        mutate(expected_row, '')
+        mutate(expected_row, expected_row.replace(version, '0.0.0'))
+        mutate(expected_row, expected_row + expected_row)
+    run = '        run: &install_pytest |\n'
+    step = '      - name: Install test dependency\n'
+    for old, new, count in (
+        ('--only-binary=:all:', '--no-binary=:all:', 1),
+        ('--no-deps ', '', 1),
+        ('--index-url https://pypi.org/simple', '--index-url https://example.invalid/simple', 1),
+        ('--no-deps ', '--no-deps --extra-index-url https://example.invalid/simple ', 1),
+        ('pytest==9.1.1', 'pytest[extra]==9.1.1', 1),
+        ('pytest==9.1.1', '-r requirements.txt', 1),
+        ('pytest==9.1.1', 'pytest==9.1.1 extra==1', 1),
+        ('attrs==26.1.0\n', 'attrs==26.1.0 || true\n', 1),
+        ('attrs==26.1.0\n', 'attrs==26.1.0; echo unsafe\n', 1),
+        ('pytest==9.1.1 \\\n', 'pytest==9.1.1\n', 1),
+        ('          python -m pip check\n', '', 1),
+        ('          python -m pip check\n', '          python -m pip check || true\n', 1),
+        ('if actual != wanted:', 'if actual == wanted:', 1),
+        ('              raise SystemExit', '              print', 1),
+        ("          python - <<'PY'", "          cat <<'PY'", 1),
+        (run, run + '          : <<\'DEAD\'\n', 1),
+        (run, '        run: |\n', 1),
+        (run, run + '        run: &install_pytest |\n', 1),
+        (run, run + '        run: |\n', 1),
+        (run, '        if: false\n' + run, 1),
+        (run, run + '        continue-on-error: true\n', 1),
+        (run, '        uses: example/action@v1\n' + run, 1),
+        (run, '        run: "&install_pytest |\n', 1),
+        (step, '      - name: Wrong step\n', 1),
+        (step, step + step, 1),
+        (step, '      - name: Dead\n        run: |\n' + '          ' + step, 1),
+        ('  validation_shards:\n', '  wrong_job:\n', 1),
+        ('  validation_shards:\n', '  validation_shards:\n  validation_shards:\n', 1),
+        ('  validation_shards:\n', '  validation_shards:\n    if: false\n', 1),
+        ('  validation_shards:\n', '  validation_shards:\n    uses: example/workflow@v1\n', 1),
+        ('  validation_shards:\n', '  validation_shards: {}\n', 1),
+        ('jobs:\n', 'jobs: {}\njobs:\n', 1),
+        ('jobs:\n', 'jobs: |\n', 1),
+        ('jobs:\n', '"jobs":\n', 1),
+        ('jobs:\n', 'description: "dead\njobs:\n', 1),
+        ('    steps:\n', '    steps:\n    steps:\n', 2),
+        ('    steps:\n', '    steps: []\n', 2),
+        ('    steps:\n', '    <<: *inherited\n    steps:\n', 2),
+        ('    steps:\n', '\tsteps:\n', 2),
+        ('jobs:\n', 'jobs:\r', 1),
+    ):
+        mutate(old, new, count)
+    for extra in ('python -m pip install pytest', 'python -m pip install pytest==9.1.1',
+                  _F14_TEST_NATIVE_INSTALL, '# python -m pip install pytest',
+                  'run: *install_pytest', 'run: &install_pytest echo dead'):
+        mutants.append(text + extra + '\n')
+    for old_command in ('python -m pip install pytest', 'python -m pip install pytest==9.1.1', _F14_TEST_NATIVE_INSTALL):
+        original_scalar = '\n'.join('          ' + line if line else '' for line in _CI_TEST_SCRIPT.split('\n'))
+        mutate(original_scalar, '          ' + old_command)
+    selected_step = step + run + original_scalar + '\n'
+    assert text.count(selected_step) == 1
+    moved = text.replace(selected_step, '', 1)
+    setup_step = ('      - name: Set up Python\n'
+                  '        uses: actions/setup-python@v5\n        with:\n'
+                  "          python-version: '3.14.6'\n")
+    assert moved.count(setup_step) == 2
+    mutants.append(moved.replace(setup_step, selected_step + setup_step, 1))
+    assert moved.count('  validation:\n') == 1
+    mutants.append(moved.replace('  validation:\n', selected_step + '  validation:\n', 1))
+    mutants.append('\n'.join('# ' + row for row in text.splitlines()) + '\n')
+    mutants.append('name: Dead\nrun: |\n' + '\n'.join('  ' + row for row in text.splitlines()) + '\n')
+    mutants.append(text + '#' + 'x' * (500000 + 1 - len((text + '#\n').encode('utf-8'))) + '\n')
+    for bad in mutants:
+        assert bad != text
+        workflow.write_bytes(bad.encode('utf-8'))
+        assert scanner._ci_validation_dependency_block_v1(bad) is None
+        assert scanner._scan_text_content(path, bad, ['forbid_package_install_scripts'])
+        assert scanner._scan_package_install_text_file(path, workflow)
+        assert scan_repository(tmp_path, _strict_options())
+        assert not independent._f14_ci_dependency_contract_v1(bad)
+        with pytest.raises(source_policy.SourcePolicyError) as failure:
+            source_policy._st12h_validate_workflow_contract(tmp_path)
+        assert failure.value.reason_code.value == 'ST12A_SOURCE_EPOCH_STALE'
+    workflow.write_bytes(text.encode('utf-8'))
+    other = PurePosixPath('.github/workflows/other.yml')
+    assert scanner._scan_text_content(other, text, ['forbid_package_install_scripts'])
+    assert scanner._scan_package_install_text_file(other, workflow)
+    # A valid install never exempts another forbidden action in the same file.
+    for forbidden, flag in (('submit_order()', 'forbid_order_execution'),
+                            ('fetch_private_state(account_id)', 'forbid_private_state_fetch'),
+                            ("requests.get('https://example.invalid')", 'forbid_source_retrieval')):
+        assert scanner._scan_text_content(path, text + forbidden + '\n', ['forbid_package_install_scripts', flag])

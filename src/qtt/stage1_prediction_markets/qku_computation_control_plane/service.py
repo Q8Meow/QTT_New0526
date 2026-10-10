@@ -1119,38 +1119,47 @@ class QKUComputationControlPlaneV1:
             context_admission_blocker=context_admission_blocker,
             stack_admission_blocker=stack_admission_blocker,
         )
-        states = {
-            state.state: state
-            for state in (
-                snapshot.resolution.specification,
-                snapshot.resolution.fixture,
-                snapshot.resolution.context,
-                snapshot.resolution.stack,
-            )
-        }
-        blockers = tuple(
-            dict.fromkeys(
-                _COMPUTABILITY_TO_OPERATION_BLOCKER.get(
-                    blocker, OperationBlockerCodeV1.CONTEXT_BINDING_INVALID
+        def response_for(snapshot):
+            states = {
+                state.state: state
+                for state in (
+                    snapshot.resolution.specification,
+                    snapshot.resolution.fixture,
+                    snapshot.resolution.context,
+                    snapshot.resolution.stack,
                 )
-                for required in request.required_computability_classes
-                for blocker in states[required].blocker_codes
+            }
+            blockers = tuple(
+                dict.fromkeys(
+                    _COMPUTABILITY_TO_OPERATION_BLOCKER.get(
+                        blocker, OperationBlockerCodeV1.CONTEXT_BINDING_INVALID
+                    )
+                    for required in request.required_computability_classes
+                    for blocker in states[required].blocker_codes
+                )
             )
-        )
-        status = (
-            OperationStatusV1.SUCCEEDED
-            if not blockers
-            else OperationStatusV1.BLOCKED
-        )
-        return ResolveContextualComputabilityResponseV1(
-            **_common_response(
-                request,
-                status=status,
-                blocker_codes=blockers,
-                receipt_refs=snapshot.receipt_refs,
-            ),
-            computability=snapshot.resolution,
-        )
+            status = (
+                OperationStatusV1.SUCCEEDED
+                if not blockers
+                else OperationStatusV1.BLOCKED
+            )
+            return ResolveContextualComputabilityResponseV1(
+                **_common_response(
+                    request,
+                    status=status,
+                    blocker_codes=blockers,
+                    receipt_refs=snapshot.receipt_refs,
+                ),
+                computability=snapshot.resolution,
+            )
+
+        response = response_for(snapshot)
+        try:
+            self.owner_registry._check_probability_packet_refs_v1(snapshot._consumed_packet_refs_v1, context=context)
+        except EXPECTED_PUBLIC_OPERATION_ERRORS as error:
+            from .contextual_computability import _probability_block_contextual_snapshot_v1
+            return response_for(_probability_block_contextual_snapshot_v1(snapshot, error))
+        return response
 
     def resolve_applicable_stack(
         self, request: ResolveApplicableStackRequestV1
@@ -1234,6 +1243,26 @@ class QKUComputationControlPlaneV1:
                 )
                 packet_refs.extend(resolved.packet_refs)
                 receipt_refs.extend(resolved.receipt_refs)
+            result = InputResolutionV1(
+                **_result_common(
+                    request,
+                    terminal_route="EXACT_OWNER_INPUTS_RESOLVED",
+                    evidence_refs=tuple(dict.fromkeys(receipt_refs)),
+                ),
+                component_ids=request.component_ids,
+                resolved_input_names=tuple(names),
+                owner_packet_refs=tuple(dict.fromkeys(packet_refs)),
+            )
+            response = ResolveRequiredInputsResponseV1(
+                **_common_response(
+                    request,
+                    status=OperationStatusV1.SUCCEEDED,
+                    receipt_refs=tuple(dict.fromkeys(receipt_refs)),
+                ),
+                input_resolution=result,
+            )
+            self.owner_registry._check_probability_packet_refs_v1(tuple(dict.fromkeys(packet_refs)), context=context)
+            return response
         except EXPECTED_PUBLIC_OPERATION_ERRORS as exc:
             disposition = PublicFallbackBoundaryV1.translate(exc)
             result = InputResolutionV1(
@@ -1253,24 +1282,6 @@ class QKUComputationControlPlaneV1:
                 ),
                 input_resolution=result,
             )
-        result = InputResolutionV1(
-            **_result_common(
-                request,
-                terminal_route="EXACT_OWNER_INPUTS_RESOLVED",
-                evidence_refs=tuple(dict.fromkeys(receipt_refs)),
-            ),
-            component_ids=request.component_ids,
-            resolved_input_names=tuple(names),
-            owner_packet_refs=tuple(dict.fromkeys(packet_refs)),
-        )
-        return ResolveRequiredInputsResponseV1(
-            **_common_response(
-                request,
-                status=OperationStatusV1.SUCCEEDED,
-                receipt_refs=tuple(dict.fromkeys(receipt_refs)),
-            ),
-            input_resolution=result,
-        )
 
     def compute_component(
         self, request: ComputeComponentRequestV1
@@ -1316,25 +1327,27 @@ class QKUComputationControlPlaneV1:
                 execution_context=context,
                 receipt_refs=resolved.receipt_refs,
             )
+            result = ComponentResultV1(
+                **_result_common(
+                    request,
+                    terminal_route="DETERMINISTIC_COMPONENT_RESULT",
+                    evidence_refs=resolved.receipt_refs,
+                ),
+                component_id=request.component_id,
+                formula_output=output,
+            )
+            response = ComputeComponentResponseV1(
+                **_common_response(
+                    request,
+                    status=OperationStatusV1.SUCCEEDED,
+                    receipt_refs=resolved.receipt_refs,
+                ),
+                component_result=result,
+            )
+            self.owner_registry._check_probability_packet_refs_v1(resolved.packet_refs, context=context)
+            return response
         except EXPECTED_PUBLIC_OPERATION_ERRORS as exc:
             return _blocked_component(request, exc)
-        result = ComponentResultV1(
-            **_result_common(
-                request,
-                terminal_route="DETERMINISTIC_COMPONENT_RESULT",
-                evidence_refs=resolved.receipt_refs,
-            ),
-            component_id=request.component_id,
-            formula_output=output,
-        )
-        return ComputeComponentResponseV1(
-            **_common_response(
-                request,
-                status=OperationStatusV1.SUCCEEDED,
-                receipt_refs=resolved.receipt_refs,
-            ),
-            component_result=result,
-        )
 
     def compute_stack(
         self, request: ComputeStackRequestV1
@@ -1391,29 +1404,32 @@ class QKUComputationControlPlaneV1:
                     strict=True,
                 )
             )
+            result = StackResultV1(
+                **_result_common(
+                    request,
+                    terminal_route="DETERMINISTIC_DEPENDENCY_CLOSED_STACK_RESULT",
+                    evidence_refs=execution.receipt_refs,
+                ),
+                stack_id=request.stack_id,
+                component_outputs=outputs,
+                conversion_receipt_refs=(
+                    execution.conversion_receipt.receipt_id,
+                    execution.propagation_receipt.receipt_id,
+                ),
+            )
+            response = ComputeStackResponseV1(
+                **_common_response(
+                    request,
+                    status=OperationStatusV1.SUCCEEDED,
+                    receipt_refs=execution.receipt_refs,
+                ),
+                stack_result=result,
+            )
+            self.owner_registry.with_internal_computation_receipt(execution.dependency_packet)._check_probability_packet_refs_v1(
+                tuple(dict.fromkeys(ref for row in execution.component_inputs for ref in row.packet_refs)), context=context)
+            return response
         except EXPECTED_PUBLIC_OPERATION_ERRORS as exc:
             return _blocked_stack(request, exc)
-        result = StackResultV1(
-            **_result_common(
-                request,
-                terminal_route="DETERMINISTIC_DEPENDENCY_CLOSED_STACK_RESULT",
-                evidence_refs=execution.receipt_refs,
-            ),
-            stack_id=request.stack_id,
-            component_outputs=outputs,
-            conversion_receipt_refs=(
-                execution.conversion_receipt.receipt_id,
-                execution.propagation_receipt.receipt_id,
-            ),
-        )
-        return ComputeStackResponseV1(
-            **_common_response(
-                request,
-                status=OperationStatusV1.SUCCEEDED,
-                receipt_refs=execution.receipt_refs,
-            ),
-            stack_result=result,
-        )
 
     def compare_with_no_trade(
         self, request: CompareWithNoTradeRequestV1
@@ -1661,3 +1677,85 @@ if len(REGISTERED_FORMULA_STACKS) != 1 or len(IMPLEMENTATION_REGISTRY) != 30:
         ReasonCode.INVALID_CONTRACT,
         "central service requires exactly 30 components and one registered stack",
     )
+
+
+def _compose_probability_native_service_v1(
+    *, owner_registry: CanonicalOwnerPacketRegistryV1,
+    agent_capability_resolver: AgentCapabilityResolverV1,
+    native_use_request: ProbabilityNativeUseRequestV1,
+    clock_facts: tuple[int, int, int, int, int],
+    prediction_read_limits: ProbabilityPredictionReadLimitsV1,
+    existing_conditions: tuple[NoTradeConditionOutcomeV1, ...],
+    assessment_id: str, input_lock_id: str,
+    controls: tuple[ModelRiskControlEvidenceV1, ...], comparison: PermanentNoTradeEvidenceComparisonV1,
+    adjudication_basis: ModelRiskAdjudicationBasisV1, limitations: tuple[str, ...], receipt_refs: tuple[str, ...],
+    evaluated_ns: int, deadline_ns: int, repo_root: str | Path | None = None,
+    identity_adapter: RP5CIdentityAdapterV1 | None = None, persistence_adapter: PersistenceAdapterV1 | None = None,
+    latency_budget_profile: LatencyBudgetProfileV1 | None = None,
+    resource_bounds_profile: ResourceBoundsProfileV1 | None = None,
+    replay_paper_cohort_compiler: ReplayPaperCohortCompilerProtocolV1 | None = None,
+    computation_evidence_service: ComputationEvidenceServiceProtocolV1 | None = None,
+) -> tuple[QKUComputationControlPlaneV1, ModelRiskEvidenceAssessmentV1]:
+    """Construct one inactive candidate and its uncommitted, unaltered risk assessment."""
+    from .input_resolver import _build_probability_owner_registry_v1, CurrentModeSnapshotInputResolverV1
+    from .model_risk import (ModelRiskEvidenceAdjudicatorV1, ModelRiskAdjudicationBasisV1,
+                            PermanentNoTradeEvidenceComparisonV1, ModelRiskControlEvidenceV1,
+                            NO_TRADE_CONDITION_IDS_V1)
+    from .models import _probability_require_v1 as need
+    from .latency_policy import utc_event_time_ns, local_duration_now_ns
+    if type(resource_bounds_profile) is not ResourceBoundsProfileV1:
+        raise ContractValidationError(ReasonCode.RESOURCE_BOUND_EXCEEDED, "probability composition requires explicit resource bounds")
+    need(type(adjudication_basis) is ModelRiskAdjudicationBasisV1 and
+         type(comparison) is PermanentNoTradeEvidenceComparisonV1 and type(controls) is tuple and
+         all(type(row) is ModelRiskControlEvidenceV1 for row in controls), "PROBABILITY_COMPOSITION_RISK_INPUTS")
+    registry, conditions = _build_probability_owner_registry_v1(base_registry=owner_registry,
+        request=native_use_request, capability_resolver=agent_capability_resolver, clock_facts=clock_facts,
+        existing_conditions=existing_conditions, limits=prediction_read_limits,
+        evaluated_ns=evaluated_ns, deadline_ns=deadline_ns)
+    need(tuple(row.condition_id for row in conditions) == NO_TRADE_CONDITION_IDS_V1,
+         "PROBABILITY_COMPOSITION_CONDITIONS")
+    for before, after in zip(existing_conditions, conditions, strict=True):
+        need((not before.active or after.active) and set(before.reason_codes) <= set(after.reason_codes) and
+             set(before.evidence_receipt_refs) <= set(after.evidence_receipt_refs), "PROBABILITY_COMPOSITION_VETO_RETENTION")
+    groups = (receipt_refs, adjudication_basis.required_evidence_receipt_refs,
+              *(row.evidence_receipt_refs for row in conditions))
+    need(all(type(group) is tuple for group in groups), "PROBABILITY_COMPOSITION_REFERENCE_TYPES")
+    count = sum(len(group) for group in groups)
+    if count > resource_bounds_profile.maximum_input_cardinality:
+        raise ContractValidationError(ReasonCode.RESOURCE_BOUND_EXCEEDED, "probability risk reference count")
+    byte_count = 0
+    for group in groups:
+        for ref in group:
+            need(type(ref) is str and bool(ref), "PROBABILITY_COMPOSITION_REFERENCE_TEXT")
+            for char in ref:
+                point = ord(char)
+                need(not 0xD800 <= point <= 0xDFFF, "PROBABILITY_COMPOSITION_REFERENCE_SURROGATE")
+                byte_count += 1 if point < 128 else 2 if point < 2048 else 3 if point < 65536 else 4
+                if byte_count > resource_bounds_profile.maximum_input_bytes:
+                    raise ContractValidationError(ReasonCode.RESOURCE_BOUND_EXCEEDED, "probability risk reference bytes")
+    retained = tuple(dict.fromkeys(ref for group in groups for ref in group))
+    assessment = ModelRiskEvidenceAdjudicatorV1().adjudicate(assessment_id=assessment_id, input_lock_id=input_lock_id,
+        controls=controls, conditions=conditions, comparison=comparison, adjudication_basis=adjudication_basis,
+        limitations=limitations, receipt_refs=retained)
+    bindings = registry._probability_guard_bindings[len(owner_registry._probability_guard_bindings):]
+    need(len(bindings) == len(native_use_request.binding_ids) and
+         all(resolver is agent_capability_resolver and admission.request is native_use_request
+             for packet, admission, resolver in bindings), "PROBABILITY_COMPOSITION_ORIGINAL_GUARDS")
+    packet_refs = tuple(packet.packet_id for packet, _, _ in bindings)
+    registry._check_probability_packet_refs_v1(packet_refs, context=native_use_request.execution_context)
+    mode_resolver = None if repo_root is None else CurrentModeSnapshotInputResolverV1(repo_root=repo_root,
+        owner_registry=registry, canonical_f_evidence_owner=computation_evidence_service)
+    service = QKUComputationControlPlaneV1(owner_registry=registry, agent_capability_resolver=agent_capability_resolver,
+        identity_adapter=identity_adapter, persistence_adapter=persistence_adapter, mode_snapshot_input_resolver=mode_resolver,
+        mode_snapshot_owner_projection_adapter=None, mode_snapshot_projection_bundle=None,
+        latency_budget_profile=latency_budget_profile, resource_bounds_profile=resource_bounds_profile,
+        replay_paper_cohort_compiler=replay_paper_cohort_compiler, computation_evidence_service=computation_evidence_service)
+    need(service.owner_registry is registry and service.agent_capability_resolver is agent_capability_resolver and
+         service.computation_evidence_service is computation_evidence_service and
+         (mode_resolver is None or (mode_resolver.owner_registry is registry and
+          (computation_evidence_service is None or mode_resolver.canonical_f_evidence_owner is computation_evidence_service))),
+         "PROBABILITY_COMPOSITION_OWNER_IDENTITY")
+    result = (service, assessment)
+    need(local_duration_now_ns() < deadline_ns, "PROBABILITY_COMPOSITION_DEADLINE")
+    registry._check_probability_packet_refs_v1(packet_refs, context=native_use_request.execution_context)
+    return result

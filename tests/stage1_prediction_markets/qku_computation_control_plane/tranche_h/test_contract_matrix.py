@@ -93,8 +93,56 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: '3.14.6'
-      - run: |
-          python -m pip install pytest==9.1.1
+      - name: Install test dependency
+        run: &install_pytest |
+          python -m pip install --only-binary=:all: --no-deps --index-url https://pypi.org/simple \\
+            pytest==9.1.1 \\
+            iniconfig==2.3.0 \\
+            packaging==26.0 \\
+            pluggy==1.6.0 \\
+            pygments==2.21.0 \\
+            websockets==17.0.1 \\
+            cryptography==50.0.1 \\
+            cffi==2.1.1 \\
+            pycparser==3.0 \\
+            jsonschema==4.26.0 \\
+            jsonschema-specifications==2025.9.1 \\
+            referencing==0.37.0 \\
+            rpds-py==2026.5.1 \\
+            attrs==26.1.0
+          python -m pip check
+          python - <<'PY'
+          from importlib.metadata import PackageNotFoundError, version
+
+          expected = (
+              ('pytest', '9.1.1'),
+              ('iniconfig', '2.3.0'),
+              ('packaging', '26.0'),
+              ('pluggy', '1.6.0'),
+              ('pygments', '2.21.0'),
+              ('websockets', '17.0.1'),
+              ('cryptography', '50.0.1'),
+              ('cffi', '2.1.1'),
+              ('pycparser', '3.0'),
+              ('jsonschema', '4.26.0'),
+              ('jsonschema-specifications', '2025.9.1'),
+              ('referencing', '0.37.0'),
+              ('rpds-py', '2026.5.1'),
+              ('attrs', '26.1.0'),
+          )
+          failures = []
+          for name, wanted in expected:
+              try:
+                  actual = version(name)
+              except PackageNotFoundError:
+                  failures.append(f"{{name}}: missing; required {{wanted}}")
+              else:
+                  if actual != wanted:
+                      failures.append(f"{{name}}: {{actual}}; required {{wanted}}")
+          if failures:
+              raise SystemExit("CI dependency profile mismatch: " + "; ".join(failures))
+          print("Selected CI dependency versions verified.")
+          PY
   validation:
     needs:
       - validation_shards

@@ -5,43 +5,43 @@ from __future__ import annotations
 
 from collections import defaultdict
 from pathlib import Path
+import io
+from tools.pr168_rp5a_json_scanner import _read_structured_text
 
 from tools.pr168_rp5a_config import IDENTITY_REGEXES, MAX_IDENTITY_REFS_PER_FILE, REPO_ROOT, should_scan_path
 from tools.pr168_rp5a_git_grep_scanner import git_tracked_files
 
 
-def scan_identity_occurrences(repo_root: Path = REPO_ROOT, files: list[str] | None = None) -> dict[str, dict[str, object]]:
+def scan_identity_occurrences(repo_root: Path = REPO_ROOT, files: list[str] | None = None, *, scan_context=None) -> dict[str, dict[str, object]]:
     occurrences: dict[str, dict[str, object]] = {}
-    scan_files = files if files is not None else git_tracked_files(repo_root)
+    scan_files = files if files is not None else git_tracked_files(repo_root, scan_context=scan_context)
     for file_path in scan_files:
         if not should_scan_path(file_path):
             continue
         identity_count_for_file = 0
-        try:
-            with (repo_root / file_path).open("r", encoding="utf-8", errors="replace") as handle:
-                for line in handle:
-                    for identity_type, regex in IDENTITY_REGEXES.items():
-                        for match in regex.finditer(line):
-                            if identity_count_for_file >= MAX_IDENTITY_REFS_PER_FILE:
-                                break
-                            identity_ref = match.group(0)
-                            key = f"{identity_type}:{identity_ref}"
-                            bucket = occurrences.setdefault(
-                                key,
-                                {
-                                    "identity_ref": identity_ref,
-                                    "identity_type": identity_type,
-                                    "file_refs": set(),
-                                },
-                            )
-                            bucket["file_refs"].add(file_path)
-                            identity_count_for_file += 1
+        text = _read_structured_text(repo_root / file_path, errors="replace")
+        with io.StringIO(text, newline=None) as handle:
+            for line in handle:
+                for identity_type, regex in IDENTITY_REGEXES.items():
+                    for match in regex.finditer(line):
                         if identity_count_for_file >= MAX_IDENTITY_REFS_PER_FILE:
                             break
+                        identity_ref = match.group(0)
+                        key = f"{identity_type}:{identity_ref}"
+                        bucket = occurrences.setdefault(
+                            key,
+                            {
+                                "identity_ref": identity_ref,
+                                "identity_type": identity_type,
+                                "file_refs": set(),
+                            },
+                        )
+                        bucket["file_refs"].add(file_path)
+                        identity_count_for_file += 1
                     if identity_count_for_file >= MAX_IDENTITY_REFS_PER_FILE:
                         break
-        except OSError:
-            continue
+                if identity_count_for_file >= MAX_IDENTITY_REFS_PER_FILE:
+                    break
     return occurrences
 
 

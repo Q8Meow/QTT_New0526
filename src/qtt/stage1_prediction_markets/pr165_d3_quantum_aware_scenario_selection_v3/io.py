@@ -4,6 +4,8 @@ import json, subprocess
 from pathlib import Path
 from typing import Any
 from . import constants as c
+from src.qtt.stage1_prediction_markets.qku_computation_control_plane.serialization import _expand_report_records_v1
+from src.qtt.stage1_prediction_markets.qku_computation_control_plane.serialization import _report_json_object_v1
 def resolve_repo_relative(repo_root: Path, value: str | Path) -> Path:
     path = Path(value); return path if path.is_absolute() else repo_root / path
 def normalize_repo_ref(value: str | Path) -> str:
@@ -11,15 +13,11 @@ def normalize_repo_ref(value: str | Path) -> str:
 def json_text(payload: Any, *, compact: bool = False) -> str:
     return json.dumps(payload, indent=None if compact else 2, sort_keys=True, separators=(",", ":") if compact else None) + "\n"
 def read_json(path: Path) -> Any:
-    return json.loads(path.read_text(encoding="utf-8"))
+    return _report_json_object_v1(path.read_text(encoding="utf-8"))
 def write_json(path: Path, payload: Any, *, compact: bool = False) -> None:
     path.parent.mkdir(parents=True, exist_ok=True); path.write_text(json_text(payload, compact=compact), encoding="utf-8")
 def records_from_report_payload(repo_root: Path, payload: dict[str, Any]) -> list[dict[str, Any]]:
-    rows = list(payload.get("records") or [])
-    for shard_ref in payload.get("shard_files") or payload.get("shard_paths") or []:
-        shard_path = resolve_repo_relative(repo_root, shard_ref)
-        if shard_path.exists(): rows.extend(read_json(shard_path).get("records") or [])
-    return rows
+    return _expand_report_records_v1(repo_root, payload, read_json)
 def ensure_branch(repo_root: Path) -> None:
     branch = _current_branch(repo_root)
     if branch in {c.EXPECTED_BRANCH, c.BASE_BRANCH}: return

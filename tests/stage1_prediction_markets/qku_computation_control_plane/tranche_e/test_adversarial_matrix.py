@@ -444,6 +444,35 @@ def test_peer_challenge_boolean_cannot_bypass_independence_evidence() -> None:
     assert ReasonCode.PEER_CHALLENGE_REQUIRED in decision.reason_codes
     assert not decision.eligible
 
+    from . import _synthetic_probability_issuance
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane.errors import OwnerAdapterError
+    from dataclasses import replace
+    from unittest.mock import patch
+    import time
+    resolver, reader, requests = _synthetic_probability_issuance(same_domain=True)
+    with pytest.raises(AuthorityDeniedError):
+        with resolver._resolve_probability_issuer_context_v1(requests, evaluated_ns=time.time_ns()) as snapshot:
+            resolver._admit_probability_issuer_v1(requests[-1], trusted_snapshot=snapshot)
+    assert not reader.active and resolver._probability_last_issuer_view_v1 is None
+    resolver, reader, requests = _synthetic_probability_issuance()
+    with resolver._resolve_probability_issuer_context_v1(requests, evaluated_ns=time.time_ns()) as snapshot:
+        with pytest.raises(OwnerAdapterError):
+            resolver._admit_probability_issuer_v1(replace(requests[0]), trusted_snapshot=snapshot)
+        with pytest.raises(OwnerAdapterError):
+            resolver._admit_probability_issuer_v1(requests[0], trusted_snapshot=replace(snapshot))
+    foreign = type("ProbabilityIssuerSnapshotV1", (), {})
+    for transform in (lambda value: foreign(), lambda value: replace(value, valid_until_ns=value.read_ns + 1)):
+        resolver, reader, requests = _synthetic_probability_issuance(transform=transform)
+        with pytest.raises(OwnerAdapterError):
+            with resolver._resolve_probability_issuer_context_v1(requests, evaluated_ns=time.time_ns()):
+                raise AssertionError("foreign or expired synthetic snapshot passed")
+        assert not reader.active
+    resolver, reader, requests = _synthetic_probability_issuance()
+    with patch("src.qtt.stage1_prediction_markets.qku_computation_control_plane.agent_policy.time.time_ns", return_value=99):
+        with pytest.raises(OwnerAdapterError):
+            with resolver._resolve_probability_issuer_context_v1(requests, evaluated_ns=100):
+                raise AssertionError("regressed observation passed")
+
 
 def test_independent_peer_challenge_uses_existing_identity_and_receipt() -> None:
     snapshot = make_resolver().policy_store.snapshot
@@ -472,6 +501,110 @@ def test_independent_peer_challenge_uses_existing_identity_and_receipt() -> None
     assert decision.eligible
     assert peer_receipt_ref in decision.evidence_refs
     assert decision.peer_sod_disposition == "PEER_CHALLENGE_AND_SOD_ENFORCED"
+
+    from . import _synthetic_probability_issuance
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane.errors import OwnerAdapterError
+    import time
+    resolver, reader, requests = _synthetic_probability_issuance()
+    with resolver._resolve_probability_issuer_context_v1(requests, evaluated_ns=time.time_ns()) as snapshot:
+        admissions = tuple(resolver._admit_probability_issuer_v1(request, trusted_snapshot=snapshot) for request in requests)
+    assert admissions[-1].issuer_ref == requests[-1].issuer_ref
+    assert snapshot.entries[-1][0].control_domain_ref not in {entry[0].control_domain_ref for entry in snapshot.entries[1:3]}
+    assert not reader.active
+    original = RuntimeError("synthetic original body failure")
+    resolver, reader, requests = _synthetic_probability_issuance(suppress=True)
+    with pytest.raises(RuntimeError) as failed:
+        with resolver._resolve_probability_issuer_context_v1(requests, evaluated_ns=time.time_ns()):
+            raise original
+    assert failed.value is original and resolver._probability_last_issuer_view_v1 is None
+    cleanup = RuntimeError("synthetic original cleanup failure")
+    def fail_exit(_snapshot):
+        raise cleanup
+    resolver, reader, requests = _synthetic_probability_issuance(on_exit=fail_exit)
+    with pytest.raises(BaseExceptionGroup) as grouped:
+        with resolver._resolve_probability_issuer_context_v1(requests, evaluated_ns=time.time_ns()):
+            raise original
+    assert grouped.value.exceptions == (original, cleanup)
+    def mutate_grant(snapshot):
+        object.__setattr__(snapshot.entries[0][1], "principal_ref", "SYNTHETIC::SUBSTITUTED")
+    resolver, reader, requests = _synthetic_probability_issuance(on_exit=mutate_grant)
+    with pytest.raises(OwnerAdapterError):
+        with resolver._resolve_probability_issuer_context_v1(requests, evaluated_ns=time.time_ns()) as snapshot:
+            resolver._admit_probability_issuer_v1(requests[0], trusted_snapshot=snapshot)
+    assert resolver._probability_last_issuer_view_v1 is None and not reader.active
+    from . import _synthetic_registered_prediction
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane.errors import ContractValidationError
+    resolver, reader, fence, prepared, entry = _synthetic_registered_prediction()
+    # An equal-looking integer must not replace an exact-false authority flag.
+    object.__setattr__(prepared, "model_use_authorized", 0)
+    with pytest.raises(ContractValidationError, match="ORIGINAL_OBJECT_REQUIRED"):
+        fence._registered_v1(prepared, kind="PREDICTION", evaluated_ns=time.time_ns())
+    assert reader.read_calls == 1
+    resolver, reader, fence, prepared, entry = _synthetic_registered_prediction()
+    object.__setattr__(entry["view"]["snapshot"].entries[0][1], "principal_ref", "SYNTHETIC::LATE-SUBSTITUTION")
+    with pytest.raises(ContractValidationError, match="ORIGINAL_SOURCE_ISSUER_CHANGED"):
+        fence._registered_v1(prepared, kind="PREDICTION", evaluated_ns=time.time_ns())
+    assert reader.read_calls == 1 and not reader.active
+
+    _exercise_synthetic_prediction_review_graph()
+
+
+def _exercise_synthetic_prediction_review_graph():
+    """Synthetic committed-cut joins, not independent model certification."""
+    import time
+    from dataclasses import replace
+    from . import _synthetic_prediction_receipt_graph
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane.evidence import ComputationEvidenceServiceV1
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane.errors import ContractValidationError
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane.persistence import ProbabilityProducerReadSnapshotV1
+    scope, records, ids, protocols, admissions, conditions, cutoff = _synthetic_prediction_receipt_graph()
+    evaluated = time.time_ns()
+    def snapshot(rows):
+        return ProbabilityProducerReadSnapshotV1(scope, rows, (rows[ids["PUBLICATION"]],),
+                                                 (rows[ids["REVOCATION"]],), evaluated)
+    committed = snapshot(records)
+    def check(rows=records, **overrides):
+        selected = snapshot(rows)
+        values = dict(basis_request=None, committed_snapshot=selected, issuer_admissions=admissions,
+            expected_protocol_bindings=protocols, existing_conditions=conditions, evaluated_ns=evaluated)
+        values.update(overrides)
+        return ComputationEvidenceServiceV1._resolve_probability_prediction_review_v1(
+            scope, rows[ids["RESULT"]], rows[ids["REVIEW"]], **values)
+    retained, dependencies, expiry = check()
+    assert all(not row.active for row in retained)
+    assert {ids[key] for key in ("RESULT", "REVIEW", "VALIDATION", "USE-LIMIT", "RISK", "BINDING", "MANIFEST")} <= set(dependencies)
+    assert expiry == records[ids["RESULT"]].typed_payload.valid_until_ns
+    assert records[ids["VALIDATION"]].typed_payload.body["claims"]["qualification_scope"] == "SYNTHETIC_REFERENCE"
+    for changed_protocols in (protocols[:-1], (*protocols[:10], (protocols[10][0], "SYNTHETIC::OTHER-VERSION"), *protocols[11:])):
+        with pytest.raises(ContractValidationError):
+            check(expected_protocol_bindings=changed_protocols)
+    with pytest.raises(ContractValidationError, match="ORIGINAL_COMMITTED_RESULT"):
+        ComputationEvidenceServiceV1._resolve_probability_prediction_review_v1(scope,
+            replace(records[ids["RESULT"]]), records[ids["REVIEW"]], basis_request=None, committed_snapshot=committed,
+            issuer_admissions=admissions, expected_protocol_bindings=protocols, existing_conditions=conditions, evaluated_ns=evaluated)
+    for mode in ("early_validation", "changed_cut", "expired_basis", "revoked_basis", "blocked_basis", "missing_issuer"):
+        rows = dict(records)
+        key = ids["REVOCATION"] if mode == "revoked_basis" else ids["VALIDATION"]
+        original = rows[key]
+        payload, body = original.typed_payload, dict(original.typed_payload.body)
+        if mode == "revoked_basis":
+            body["invalidated_dependency_refs"] = (ids["VALIDATION"],)
+        elif mode != "expired_basis" and mode != "missing_issuer":
+            claims = dict(body["claims"])
+            if mode == "early_validation":
+                claims["result_commit_observed_ns"] = rows[ids["RESULT"]].typed_payload.available_ns - 1
+            elif mode == "changed_cut":
+                claims["effective_cutoff_ns"] = cutoff - 1
+            else:
+                claims.update(conclusion="INSUFFICIENT", blocker_codes=(ReasonCode.ST12F_MODEL_RISK_VETO,))
+            body["claims"] = claims
+        changes = {"body": body}
+        if mode == "expired_basis":
+            changes["valid_until_ns"] = evaluated
+        rows[key] = replace(original, typed_payload=replace(payload, **changes))
+        with pytest.raises(ContractValidationError):
+            check(rows, **({"issuer_admissions": tuple(row for row in admissions if row.role != "MODEL_REVIEW")}
+                           if mode == "missing_issuer" else {}))
 
 
 def test_optional_task_scope_requires_an_explicit_absence_token() -> None:

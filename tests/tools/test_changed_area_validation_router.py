@@ -347,40 +347,14 @@ def test_qku_shared_integration_paths_use_the_exact_allowlists() -> None:
 
 def test_local_git_change_collection_unions_all_four_surfaces(monkeypatch):
     outputs = {
-        (
-            "diff",
-            "--name-only",
-            "--diff-filter=ACMRTUXB",
-            "origin/main...HEAD",
-        ): "committed.py\nshared.py\n",
-        (
-            "diff",
-            "--name-only",
-            "--diff-filter=ACMRTUXB",
-            "HEAD",
-        ): "unstaged.py\nshared.py\n",
-        (
-            "diff",
-            "--cached",
-            "--name-only",
-            "--diff-filter=ACMRTUXB",
-        ): "staged.py\n",
-        ("ls-files", "--others", "--exclude-standard"): "untracked.py\n",
+        ("merge-base", "--all", "refs/remotes/origin/main", "HEAD"): "a" * 40 + "\n",
+        ("diff", "--name-only", "-z", "--no-renames", "--no-ext-diff", "--no-textconv", "--ignore-submodules=none", "a" * 40, "HEAD", "--"): "committed.py\0shared.py\0deleted.py\0",
+        ("status", "--porcelain=v1", "-z", "--untracked-files=all", "--ignore-submodules=none"):
+            " M unstaged.py\0 M shared.py\0M  staged.py\0?? untracked.py\0R  new.py\0old.py\0",
     }
-
-    monkeypatch.setattr(
-        router,
-        "_git_stdout",
-        lambda _root, args: (0, outputs[tuple(args)], ""),
-    )
-
+    monkeypatch.setattr(router, "_git_stdout", lambda _root, args: (0, outputs[tuple(args)], ""))
     assert router.changed_files_from_git(REPO_ROOT) == (
-        "committed.py",
-        "shared.py",
-        "staged.py",
-        "unstaged.py",
-        "untracked.py",
-    )
+        "committed.py", "deleted.py", "new.py", "old.py", "shared.py", "staged.py", "unstaged.py", "untracked.py")
 
 
 def test_st12e_paths_route_all_six_e_validators() -> None:

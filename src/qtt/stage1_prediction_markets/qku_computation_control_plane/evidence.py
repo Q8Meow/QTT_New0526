@@ -1814,9 +1814,161 @@ class IndependentEvidenceReviewV1:
 
 
 class ComputationEvidenceServiceV1:
+    @staticmethod
+    def _probability_calibration_token_v1(*, review, admission, capability_resolver, evaluated_ns):
+        """Project the original admitted independent review under separate use authority."""
+        from .models import _probability_require_v1 as need
+        fence = capability_resolver._probability_source_fence_v1
+        need(fence is not None, "PROBABILITY_CALIBRATION_SOURCE")
+        use = fence._registered_v1(admission, kind="NATIVE_USE", evaluated_ns=evaluated_ns)
+        prepared = use["metadata"]["prepared"]
+        prediction = prepared["object"]
+        need(prepared["metadata"]["review"] is review and review.record_id == prediction.review_ref and
+             prediction.state == "SCORE_RESEARCH_ONLY" and not prediction.blocker_codes and
+             not review.typed_payload.body["blocker_codes"], "PROBABILITY_CALIBRATION_REVIEW")
+        need(capability_resolver._check_probability_native_use_v1(admission, evaluated_ns=evaluated_ns) is None,
+             "PROBABILITY_CALIBRATION_USE")
+        return "CALIBRATED_FOR_DECLARED_CONTEXT"
+
     """One evidence owner over injected compiler, review, and ST12-C owners."""
 
     supports_typed_reference_query = True
+
+    @staticmethod
+    def _resolve_probability_prediction_review_v1(
+        scope, result_spine, review_spine, *, basis_request, committed_snapshot,
+        issuer_admissions, expected_protocol_bindings, existing_conditions, evaluated_ns,
+    ):
+        """Pure join of an already admitted, bounded prediction evidence cut."""
+        from .input_resolver import _probability_selected_record_v1, _probability_current_record_v1
+        from .models import ProbabilityPredictionReviewBasisReadRequestV1, _probability_require_v1 as need
+        from .model_risk import NoTradeConditionOutcomeV1, NO_TRADE_CONDITION_IDS_V1
+        from .protocols import ProbabilityIssuerAdmissionV1
+        from .receipts import _PROBABILITY_PROTOCOL_NAMES_V1
+
+        snapshot = committed_snapshot
+        need((review_spine is None) != (basis_request is None), "PROBABILITY_EXACT_REVIEW_SOURCE")
+        need(_probability_selected_record_v1(snapshot, result_spine.record_id, scope, "PREDICTION_RESULT") is result_spine,
+             "PROBABILITY_ORIGINAL_COMMITTED_RESULT")
+        result, rb = result_spine.typed_payload, result_spine.typed_payload.body
+        _probability_current_record_v1(result_spine, snapshot, evaluated_ns)
+        roots = tuple(record for ref in result.dependency_refs
+                      if (record := snapshot.records_by_ref.get(ref)) is not None and
+                      record.typed_payload.control_kind == "INPUT_BINDING")
+        need(len(roots) == 1, "PROBABILITY_RESULT_UNIQUE_ROOT")
+        binding = roots[0]
+        manifest = _probability_selected_record_v1(snapshot, binding.typed_payload.body["acceptance_manifest_ref"], scope,
+                                                    "ACCEPTANCE_MANIFEST")
+        legacy = tuple(_probability_selected_record_v1(snapshot, ref, scope, "ACCEPTANCE_RECEIPT")
+                       for ref in manifest.typed_payload.body["receipt_refs"])
+        need(tuple(record.typed_payload.body["role"] for record in legacy) ==
+             ("SOURCE_RIGHTS", "ENVIRONMENT", "MODEL_BUILD", "MODEL_REVIEW", "USE_POLICY", "CATALOG"),
+             "PROBABILITY_REVIEW_ORIGINAL_ANCESTRY")
+        parents = {record.typed_payload.body["role"]: record for record in legacy}
+        if review_spine is not None:
+            need(_probability_selected_record_v1(snapshot, review_spine.record_id, scope, "PREDICTION_REVIEW") is review_spine,
+                 "PROBABILITY_ORIGINAL_COMMITTED_REVIEW")
+            review = review_spine.typed_payload
+            b = review.body
+            need(b["result_ref"] == result_spine.record_id and b["artifact_ref"] == rb["artifact_ref"] and
+                 result.available_ns <= b["result_commit_observed_ns"] <= b["started_ns"] and
+                 b["completed_ns"] <= review.recorded_ns, "PROBABILITY_REVIEW_RESULT_CHRONOLOGY")
+            validation_refs, use_ref, risk_ref = b["validation_receipt_refs"], b["use_limit_ref"], b["model_risk_receipt_ref"]
+            _probability_current_record_v1(review_spine, snapshot, evaluated_ns)
+        else:
+            need(type(basis_request) is ProbabilityPredictionReviewBasisReadRequestV1 and
+                 basis_request.scope == scope and basis_request.result_ref == result_spine.record_id and
+                 basis_request.binding_ref == binding.record_id, "PROBABILITY_BASIS_WORK_ORDER")
+            validation_refs, use_ref, risk_ref = (basis_request.validation_receipt_refs,
+                                                 basis_request.use_limit_ref, basis_request.model_risk_receipt_ref)
+        selected_refs = (*validation_refs, use_ref, risk_ref)
+        need(len(validation_refs) == 1 and len(set(selected_refs)) == 3 and not set(selected_refs).intersection(
+            (result_spine.record_id, *(record.record_id for record in legacy),
+             *((review_spine.record_id,) if review_spine is not None else ()))), "PROBABILITY_BASIS_ALIAS")
+        basis = tuple(_probability_selected_record_v1(snapshot, ref, scope, "ACCEPTANCE_RECEIPT") for ref in selected_refs)
+        need(type(expected_protocol_bindings) is tuple and len(expected_protocol_bindings) == 13 and
+             all(type(row) is tuple and len(row) == 2 and type(row[1]) is str and row[1] for row in expected_protocol_bindings) and
+             tuple(row[0] for row in expected_protocol_bindings) == _PROBABILITY_PROTOCOL_NAMES_V1 and
+             len({row[1] for row in expected_protocol_bindings}) == 13, "PROBABILITY_ACCEPTED_PROTOCOL_ROSTER")
+        protocol_ref = dict(expected_protocol_bindings)["IndependentValidationProtocolV1"]
+        prefix = (scope.model_artifact_ref, result_spine.record_id, rb["artifact_ref"], rb["prediction_input_lock_id"])
+        tags = ("INDEPENDENT_PREDICTION_VALIDATION", "BOUND_PREDICTION_USE_LIMIT", "PREDICTION_MODEL_RISK_BASIS")
+        dependencies, expiries, blockers, cuts, qualifications = [], [result.valid_until_ns], [], [], []
+        need(type(issuer_admissions) is tuple and issuer_admissions and
+             all(type(row) is ProbabilityIssuerAdmissionV1 for row in issuer_admissions), "PROBABILITY_REVIEW_ISSUER_ADMISSIONS")
+        for record, tag in zip(basis, tags, strict=True):
+            p, body = record.typed_payload, record.typed_payload.body
+            c = body["claims"]
+            need(c.get("prediction_basis_kind") == tag and body["binding_ref"] == binding.record_id and
+                 body["subject_refs"][:4] == prefix and c["protocol_ref"] == protocol_ref,
+                 "PROBABILITY_BASIS_SUBJECT_OR_PROTOCOL")
+            _probability_current_record_v1(record, snapshot, evaluated_ns)
+            matches = tuple(a for a in issuer_admissions if a.role == body["role"] and a.issuer_ref == body["issuer_ref"]
+                            and set(body["issuer_admission_refs"]) <= set(a.authority_dependency_refs))
+            need(bool(matches), "PROBABILITY_BASIS_ORIGINAL_ISSUER")
+            cuts.append((c["effective_cutoff_ns"], c["recorded_cutoff_ns"]))
+            qualifications.append(c["qualification_scope"])
+            need(c["effective_cutoff_ns"] <= evaluated_ns and c["recorded_cutoff_ns"] <= evaluated_ns,
+                 "PROBABILITY_BASIS_FUTURE_CUT")
+            blockers.extend(c["blocker_codes"])
+            dependencies.extend((record.record_id, *p.dependency_refs, *body["issuer_admission_refs"]))
+            expiries.extend((p.valid_until_ns, *(a.valid_until_ns for a in matches)))
+        need(len(set(cuts)) == len(set(qualifications)) == 1, "PROBABILITY_BASIS_CONTEXT_CONFLICT")
+        if basis_request is not None:
+            need(cuts[0] == (basis_request.effective_cutoff_ns, basis_request.recorded_cutoff_ns), "PROBABILITY_BASIS_CUTOFF")
+        validation, use, risk = (record.typed_payload for record in basis)
+        vc, uc, rc = (p.body["claims"] for p in (validation, use, risk))
+        coverage = vc["protocol_coverage"]
+        need(tuple((row[0], row[1]) for row in coverage) == expected_protocol_bindings, "PROBABILITY_PROTOCOL_VERSION_MISMATCH")
+        evidence = tuple(dict.fromkeys(ref for row in coverage for ref in row[3]))
+        vp = (result_spine.record_id, parents["MODEL_BUILD"].record_id, parents["MODEL_REVIEW"].record_id)
+        need(validation.body["subject_refs"] == (*prefix, *evidence) and
+             validation.body["depends_on"] == (*vp, *(ref for ref in evidence if ref not in vp)), "PROBABILITY_VALIDATION_DAG")
+        need(result.available_ns <= vc["result_commit_observed_ns"] <= validation.body["observed_ns"], "PROBABILITY_VALIDATION_COMMIT_OBSERVATION")
+        parent_use = parents["USE_POLICY"]
+        need(uc["parent_use_policy_ref"] == parent_use.record_id and use.body["depends_on"] == (parent_use.record_id, result_spine.record_id) and
+             parent_use.typed_payload.available_ns <= rb["started_ns"] and
+             uc["maximum_valid_until_ns"] <= parent_use.typed_payload.valid_until_ns and
+             uc["feature_names"] == parents["MODEL_BUILD"].typed_payload.body["claims"]["feature_names"], "PROBABILITY_BOUND_PARENT_USE_POLICY")
+        need(rc["validation_receipt_refs"] == validation_refs and rc["use_limit_ref"] == use_ref and
+             risk.body["depends_on"] == (result_spine.record_id, validation_refs[0], use_ref), "PROBABILITY_RISK_BASIS_DAG")
+        for p in (validation, use, risk):
+            for ref in p.body["depends_on"]:
+                parent = snapshot.records_by_ref.get(ref)
+                if parent is not None:
+                    need(parent.typed_payload.available_ns <= p.body["observed_ns"], "PROBABILITY_REVIEW_PARENT_NOT_VISIBLE")
+        if review_spine is not None:
+            review = review_spine.typed_payload
+            need(all(record.typed_payload.available_ns <= review.body["started_ns"] for record in basis),
+                 "PROBABILITY_FINAL_REVIEW_PRECEDES_BASIS")
+            need(set((binding.record_id, manifest.record_id, *(row.record_id for row in legacy), *selected_refs)) <=
+                 set(review.dependency_refs), "PROBABILITY_FINAL_REVIEW_ANCESTRY")
+            need(review.body["review_state"] != "CALIBRATED_FOR_DECLARED_CONTEXT" or not blockers,
+                 "PROBABILITY_SUPPORTED_REVIEW_WITH_BLOCKED_BASIS")
+            blockers.extend(review.body["blocker_codes"])
+            dependencies.extend((review_spine.record_id, *review.dependency_refs))
+            expiries.append(review.valid_until_ns)
+        dependencies.extend((result_spine.record_id, *result.dependency_refs, binding.record_id, manifest.record_id,
+                             *(row.record_id for row in legacy), *evidence))
+        for admission in issuer_admissions:
+            dependencies.extend(admission.authority_dependency_refs)
+            expiries.append(admission.valid_until_ns)
+        expiry = min(*expiries, uc["maximum_valid_until_ns"])
+        need(evaluated_ns < expiry, "PROBABILITY_REVIEW_EXPIRED")
+        need(type(existing_conditions) is tuple and all(type(row) is NoTradeConditionOutcomeV1 for row in existing_conditions) and
+             tuple(row.condition_id for row in existing_conditions) == NO_TRADE_CONDITION_IDS_V1, "PROBABILITY_CURRENT_CONDITIONS_REQUIRED")
+        dependencies = tuple(dict.fromkeys(dependencies))
+        invalidated = {ref for record in snapshot.revocation_records for ref in record.typed_payload.body["invalidated_dependency_refs"]}
+        need(not invalidated.intersection(dependencies), "PROBABILITY_REVIEW_INVALIDATED")
+        merged = []
+        for current, stored in zip(existing_conditions, rc["conditions"], strict=True):
+            extra = bool(blockers) and current.condition_id in ("MISSING_OR_STALE_REQUIRED_EVIDENCE", "INDEPENDENT_REVIEW_NOT_CLOSED")
+            reasons = (*current.reason_codes, *stored.reason_codes, *(blockers if extra else ()),
+                       *((ReasonCode.ST12F_MODEL_RISK_VETO,) if extra else ()))
+            merged.append(NoTradeConditionOutcomeV1(current.condition_id, current.active or stored.active or extra,
+                tuple(dict.fromkeys((*current.evidence_receipt_refs, *stored.evidence_receipt_refs, *dependencies))),
+                tuple(dict.fromkeys(reasons))))
+        return tuple(merged), dependencies, expiry
 
     def __init__(
         self,
@@ -4820,3 +4972,89 @@ if (
         ReasonCode.SCHEMA_MISMATCH,
         "ST12-F canonical contract denominator differs from owner closure",
     )
+
+
+def _append_probability_prediction_review_v1(*, basis_request, review_ref, reviewer_request, persistence,
+    issuer_resolver, expected_protocol_bindings, existing_conditions, spine_metadata, readback_request):
+    """Review only a freshly committed result; retain blocked independent outcomes."""
+    import time
+    from .models import ProbabilityPredictionReviewBasisReadRequestV1, _probability_require_v1 as need
+    from .protocols import ProbabilityIssuerReadRequestV1
+    from .receipts import (_probability_control_projection_v1, ProbabilityProducerControlReceiptV1,
+                           _probability_control_record_v1)
+    from .serialization import _bounded_probability_json_v1
+    from .persistence import _probability_combined_read_budget_v1
+    from .input_resolver import (_ProbabilityDependencyFenceV1, _probability_owned_context_v1,
+        _probability_record_issuer_request_v1, _probability_join_issuer_v1, _join_probability_acceptance_v1,
+        _commit_probability_issued_record_v1)
+    need(type(basis_request) is ProbabilityPredictionReviewBasisReadRequestV1 and
+         type(reviewer_request) is ProbabilityIssuerReadRequestV1, "PROBABILITY_REVIEW_REQUEST_TYPES")
+    scope = basis_request.scope
+    fence = issuer_resolver._probability_source_fence_v1
+    need(type(fence) is _ProbabilityDependencyFenceV1 and fence.persistence is persistence and
+         (reviewer_request.scope, reviewer_request.role, reviewer_request.subject_refs) ==
+         (scope, "MODEL_REVIEW", (scope.model_artifact_ref, basis_request.result_ref)), "PROBABILITY_REVIEW_SOURCE")
+    original_cut = fence.cut
+    deadline = basis_request.limits.deadline_monotonic_ns
+    with _probability_combined_read_budget_v1(persistence, scope=scope, max_total_bytes=basis_request.limits.max_total_bytes):
+        with _probability_owned_context_v1(persistence.load_committed_probability_producer_state_v1(basis_request)) as discovery:
+            canonical = {ref: _bounded_probability_json_v1(_probability_control_projection_v1(record),
+                         max_bytes=basis_request.limits.max_frame_bytes) for ref, record in discovery.records_by_ref.items()}
+            requests = tuple(dict.fromkeys((*(_probability_record_issuer_request_v1(record)
+                for record in discovery.records_by_ref.values() if record.typed_payload.control_kind in
+                ("ACCEPTANCE_RECEIPT", "PREDICTION_RESULT")), reviewer_request)))
+        with issuer_resolver._resolve_probability_issuer_context_v1(requests, evaluated_ns=time.time_ns()) as issuer_snapshot:
+            with _probability_owned_context_v1(persistence.load_committed_probability_producer_state_v1(basis_request)) as committed:
+                need(set(canonical) == set(committed.records_by_ref) and all(
+                     canonical[ref] == _bounded_probability_json_v1(_probability_control_projection_v1(record),
+                         max_bytes=basis_request.limits.max_frame_bytes) for ref, record in committed.records_by_ref.items()),
+                     "PROBABILITY_REVIEW_COMMITTED_CUT_CHANGED")
+                admissions = tuple(issuer_resolver._admit_probability_issuer_v1(request, trusted_snapshot=issuer_snapshot)
+                                   for request in requests)
+                _, dependencies, expiry = _join_probability_acceptance_v1(scope, basis_request.binding_ref,
+                    committed_snapshot=committed, issuer_requests=requests, issuer_snapshot=issuer_snapshot,
+                    issuer_admissions=admissions, evaluated_ns=time.time_ns(), require_result=False)
+                for record in committed.records_by_ref.values():
+                    if record.typed_payload.control_kind in ("ACCEPTANCE_RECEIPT", "PREDICTION_RESULT"):
+                        _probability_join_issuer_v1(record, issuer_requests=requests, issuer_snapshot=issuer_snapshot,
+                                                   issuer_admissions=admissions, evaluated_ns=time.time_ns())
+                result = committed.records_by_ref[basis_request.result_ref]
+                conditions, refs, review_expiry = ComputationEvidenceServiceV1._resolve_probability_prediction_review_v1(
+                    scope, result, None, basis_request=basis_request, committed_snapshot=committed,
+                    issuer_admissions=admissions, expected_protocol_bindings=expected_protocol_bindings,
+                    existing_conditions=existing_conditions, evaluated_ns=time.time_ns())
+                dependencies = tuple(dict.fromkeys((*dependencies, *refs)))
+                expiry = min(expiry, review_expiry, original_cut.valid_until_ns)
+                fence._check_snapshot_v1(committed, issuer_snapshot=issuer_snapshot, original_cut=original_cut,
+                                         dependency_refs=dependencies, deadline_ns=deadline)
+        view = issuer_resolver._probability_last_issuer_view_v1
+    started = time.time_ns()
+    index = next(i for i, request in enumerate(requests) if request is reviewer_request)
+    reviewer = issuer_snapshot.entries[index][0]
+    producer_domains = {issuer_snapshot.entries[i][0].control_domain_ref for i, request in enumerate(requests)
+                        if request.role in ("MODEL_BUILD", "COMPUTATION")}
+    need(reviewer.control_domain_ref not in producer_domains and committed.read_completed_ns <= started,
+         "PROBABILITY_REVIEW_CONTROL_INDEPENDENCE")
+    blockers = []
+    for ref in (*basis_request.validation_receipt_refs, basis_request.use_limit_ref, basis_request.model_risk_receipt_ref):
+        blockers.extend(committed.records_by_ref[ref].typed_payload.body["claims"]["blocker_codes"])
+    for condition in conditions:
+        if condition.active and condition.condition_id in ("MISSING_OR_STALE_REQUIRED_EVIDENCE", "INDEPENDENT_REVIEW_NOT_CLOSED"):
+            blockers.extend((*condition.reason_codes, ReasonCode.ST12F_MODEL_RISK_VETO))
+    blockers = tuple(dict.fromkeys(blockers))
+    completed = time.time_ns()
+    body = dict(result_ref=result.record_id, artifact_ref=result.typed_payload.body["artifact_ref"],
+        reviewer_ref=reviewer.principal_ref, reviewer_control_domain_ref=reviewer.control_domain_ref,
+        review_state="BLOCKED" if blockers else "CALIBRATED_FOR_DECLARED_CONTEXT",
+        validation_receipt_refs=basis_request.validation_receipt_refs, use_limit_ref=basis_request.use_limit_ref,
+        model_risk_receipt_ref=basis_request.model_risk_receipt_ref, result_commit_observed_ns=committed.read_completed_ns,
+        started_ns=started, completed_ns=completed, blocker_codes=blockers)
+    payload = ProbabilityProducerControlReceiptV1(schema_version="PROBABILITY_PRODUCER_CONTROL_V1",
+        control_kind="PREDICTION_REVIEW", scope=scope, effective_ns=completed, recorded_ns=completed, available_ns=completed,
+        dependency_refs=dependencies, valid_until_ns=expiry, body=body)
+    record = _probability_control_record_v1(record_id=review_ref, payload=payload, **spine_metadata)
+    entry = fence._register_v1(record, kind="APPEND", view=view, dependency_refs=dependencies,
+        valid_until_ns=expiry, value_node_limit=basis_request.limits.max_total_bytes,
+        metadata={"committed_snapshot": committed, "conditions": conditions})
+    return _commit_probability_issued_record_v1(fence=fence, record=record, entry=entry,
+        read_request=basis_request, readback_request=readback_request)

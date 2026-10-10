@@ -18,12 +18,12 @@ def json_dump(payload: Any) -> str:
 
 def write_json(path: Path, payload: Any) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json_dump(payload), encoding="utf-8")
+    path.write_text(json_dump(payload), encoding="utf-8", newline="\n")
 
 
 def write_text(path: Path, payload: str) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(payload, encoding="utf-8")
+    path.write_text(payload, encoding="utf-8", newline="\n")
 
 
 def as_mapping(value: Any) -> Mapping[str, Any]:

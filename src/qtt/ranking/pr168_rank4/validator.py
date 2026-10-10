@@ -61,8 +61,8 @@ OWNER_QUESTION_ONLY_FILENAMES = (
 )
 
 
-def _generated_file_texts(generated_dir: Path) -> dict[str, str]:
-    return {path.name: path.read_text(encoding="utf-8") for path in sorted(generated_dir.glob("*"), key=lambda p: p.name) if path.is_file()}
+def _generated_file_bytes(generated_dir: Path) -> dict[str, bytes]:
+    return {path.name: path.read_bytes() for path in sorted(generated_dir.glob("*"), key=lambda p: p.name) if path.is_file()}
 
 
 def _row_files(generated_dir: Path) -> dict[str, list[dict[str, Any]]]:
@@ -283,11 +283,11 @@ def _failures(generated_dir: Path) -> list[str]:
 def _assert_deterministic(generated_dir: Path) -> None:
     from .builder import run_layer
 
-    before = _generated_file_texts(generated_dir)
+    before = _generated_file_bytes(generated_dir)
     run_layer(out_dir=generated_dir)
-    middle = _generated_file_texts(generated_dir)
+    middle = _generated_file_bytes(generated_dir)
     run_layer(out_dir=generated_dir)
-    after = _generated_file_texts(generated_dir)
+    after = _generated_file_bytes(generated_dir)
     if before != middle or middle != after:
         raise Rank4ValidationError("RANK4 generated outputs are not deterministic across repeated runs")
 

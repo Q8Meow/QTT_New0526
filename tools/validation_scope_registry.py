@@ -3,6 +3,11 @@
 
 from __future__ import annotations
 
+import sys as _ordinary_initial_sys_v1
+if '_ORDINARY_INITIALIZED_MODULE_CODE_V1' in globals():
+    raise RuntimeError('CONTROL_ONE_INITIALIZED_MODULE_CODE')
+_ORDINARY_INITIALIZED_MODULE_CODE_V1 = _ordinary_initial_sys_v1._getframe(0).f_code
+
 from fnmatch import fnmatchcase
 
 from tools.ci_branch_context import (
@@ -77,6 +82,15 @@ PR169_AGENT_ORCH1_BRANCH = "pr169-agent-orch1"
 PR169_VAL1_BRANCH = "pr169-val1"
 PR169_QKU_FORMULA_EXP1_ROLLBACK_BRANCH = "pr169-qku-formula-exp1-rollback"
 VALIDATION_FIXTURE_BRANCH = "pr-ci-fastfail-validation-context-preflight"
+_VALIDATION_FIXTURE_REGISTERED_REPAIR_BRANCHES = (
+    'repair/main-pr166-sm2-bounded-idempotence-ci',
+    'repair/no-runtime-custody-and-ci-dependency-boundary',
+    'repair/pr153s-source-value-capture-closure-classifier',
+    'repair/pr154-post-merge-pytest-context-hygiene',
+    'repair/pr163-c-main-branch-context-after-merge',
+    'repair/st12-architecture-independent-oracle-closure',
+    'repair/st12-inherited-math-row-receipt-closure',
+)
 ST12A_BRANCH = "agent/st12a-contract-envelope"
 ST12B_BRANCH = "agent/st12b-contextual-computability-v3"
 ST12C_BRANCH = "agent/st12c-deterministic-receipts-accounting-v1"
@@ -89,6 +103,69 @@ ST12G_INDEPENDENT_ARCHITECTURE_SCRIPT_NAME = (
     "independent_validate_qku_computation_control_plane_architecture.py"
 )
 ST12G_ARCHITECTURE_ADDITIVE_MODULES = ("existing_owner_projection.py",)
+
+
+def _ordinary_control_selected_source_unit_v1(tree, selected):
+ import ast
+ if type(tree) is not ast.Module or type(selected) is not tuple:
+  raise ValueError('CONTROL_SELECTED_SOURCE_TREE_AND_FIELDS')
+ keys = set()
+ for item in selected:
+  if (type(item) is not tuple or len(item) != 2 or type(item[0]) is not str
+    or type(item[1]) is not int or item[1] <= 0 or item in keys):
+   raise ValueError('CONTROL_SELECTED_SOURCE_DECLARATION_FIELDS')
+  keys.add(item)
+ definitions = []
+ def visit(nodes, prefix):
+  for node in nodes:
+   if isinstance(node, ast.ClassDef):
+    visit(node.body, prefix + node.name + '.')
+   elif isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+    qualname = prefix + node.name
+    code_line = min([node.lineno] + [d.lineno for d in node.decorator_list])
+    definitions.append((qualname, node.lineno, code_line, node))
+    visit(node.body, qualname + '.<locals>.')
+   else:
+    for _, value in ast.iter_fields(node):
+     if type(value) is list:
+      visit([child for child in value if isinstance(child, ast.AST)], prefix)
+     elif isinstance(value, ast.AST):
+      visit([value], prefix)
+ visit(tree.body, '')
+ if not keys:
+  return tree, tuple(definitions)
+ wanted = []
+ for key in keys:
+  matches = tuple(row[3] for row in definitions if row[:2] == key)
+  if len(matches) != 1:
+   raise ValueError('CONTROL_SELECTED_SOURCE_ONE_DECLARATION')
+  wanted.append(matches[0])
+ identities = {id(node) for node in wanted}
+ body = []
+ for statement in tree.body:
+  future = isinstance(statement, (ast.Import, ast.ImportFrom))
+  if future or any(id(node) in identities for node in ast.walk(statement)):
+   body.append(statement)
+ if keys and not body:
+  raise ValueError('CONTROL_SELECTED_SOURCE_ENCLOSING_CONTEXT')
+ unit = ast.Module(body=body, type_ignores=tree.type_ignores)
+ return unit, tuple(definitions)
+
+
+def _ordinary_readonly_source_family_plan_v1(module_rows, entry, *, fresh_execution=None):
+ """Calculate actual SOURCE call edges; this pure result issues no grant."""
+ from tools.validation_inventory import _facet_reg_fn_readonly_source_family_plan_v1 as _d
+ return _d(module_rows, entry, fresh_execution=fresh_execution)
+
+
+def _ordinary_readonly_source_cli_projection_v1(tree, entry):
+ """Calculate immutable defaults for the already selected repo-root-only vector."""
+ from tools.validation_inventory import _facet_reg_fn_readonly_source_cli_projection_v1 as _d
+ return _d(tree, entry)
+
+def _ordinary_readonly_source_family_cli_v1(tree, entry):
+ """Check the unchanged selected repo-root-only vector against its complete parser."""
+ return _ordinary_readonly_source_cli_projection_v1(tree,entry)['unknown']
 
 
 def build_st12g_architecture_validation_command(
@@ -3401,13 +3478,7 @@ def explain_pr_scope_decision(branch: str, path: str) -> dict[str, object]:
         }
 
     if branch_name == VALIDATION_FIXTURE_BRANCH:
-        from tools.ci_branch_context import (
-            EXPLICIT_DOWNSTREAM_REPAIR_BRANCH_CHANGED_PATHS,
-        )
-
-        for registered_repair_branch in sorted(
-            EXPLICIT_DOWNSTREAM_REPAIR_BRANCH_CHANGED_PATHS
-        ):
+        for registered_repair_branch in _VALIDATION_FIXTURE_REGISTERED_REPAIR_BRANCHES:
             registered_repair_decision = _registered_exact_repair_scope_decision(
                 registered_repair_branch,
                 normalized,
@@ -3570,3 +3641,15333 @@ def _forbidden_reason(normalized: str) -> str | None:
                 continue
             return f"forbidden_token:{token}"
     return None
+
+
+def _ordinary_scope_restore_suffix_values_v1(f, d, edges, action_count, file_actions, attributes, attribute_files, attribute_directories, tf, td, t, e, depth, file_count, index_depth, parent_depth, binding_checks, query_reads, query_bytes, anchor_count, disposals, raw_bytes, write_bytes, index_bytes, owed, retirement):
+ row_bytes = 128 * f + 160 * d
+ control_writes = (32 + 97 * (2 * action_count + file_actions)
+  + row_bytes + 8 * edges + 128 * (2 + retirement))
+ control_reads = (control_writes + 10 * row_bytes + 128 * f + 48 * edges
+  + 512 + 32 + 97 * (8 * action_count + 2 * file_actions)
+  + 2 * attributes * (row_bytes + 97 * action_count)
+  + 2 * (128 * attribute_files + 160 * d * attribute_directories)
+  + 128 * tf + 160 * d * td)
+ namespace_calls = 3 * (e * (16 + 12 * (depth + 1)) + 16 * d)
+ paired_calls = 4 * file_count * (32 + 12 * (depth + 1))
+ index_calls = 2 * (32 + 12 * (index_depth + 1))
+ restore_calls = action_count * (32 + 12 * (depth + 1))
+ final_attribute_calls = t * (16 + 12 * (depth + 1))
+ query_calls = query_reads * (38 + 12 * parent_depth)
+ storage_calls = binding_checks * (12 + 2 * anchor_count)
+ disposal_calls = 16 * disposals
+ flag_reads = 10 * file_count + 4 + attribute_files + 2 * disposals + 2 * attributes + t
+ flag_writes = disposals + attributes
+ ioctls = flag_reads + flag_writes + binding_checks
+ native_reads = control_reads + 4 * flag_reads + 232 * binding_checks + query_bytes
+ native_writes = control_writes + 4 * flag_writes + 232 * binding_checks
+ raw_reads = 8 * raw_bytes + write_bytes + 4 * index_bytes
+ raw_reads += 8 * file_count + attribute_files + 4 + query_bytes + query_reads
+ raw_writes = write_bytes + query_bytes
+ extra_handles = max(2 * depth + 4, index_depth + 3, parent_depth + 2)
+ base_calls = (namespace_calls + paired_calls + index_calls + restore_calls
+  + final_attribute_calls + query_calls + storage_calls + disposal_calls + ioctls + owed)
+ suffix_demand = dict(raw_read_bytes=raw_reads, raw_write_bytes=raw_writes,
+  raw_retained_bytes=0, action_rows=action_count,
+  metadata_calls=(base_calls + 2 * raw_reads + raw_writes + query_bytes + query_reads
+   + 2 * control_reads + 4 * control_writes + 1),
+  metadata_read_bytes=control_reads + 6 * d * 65536,
+  metadata_write_bytes=control_writes,
+  native_control_calls=control_reads + 2 * control_writes + ioctls + 1,
+  native_control_read_bytes=native_reads, native_control_write_bytes=native_writes,
+  handle_peak=owed + extra_handles)
+ return (suffix_demand, row_bytes, raw_reads)
+
+
+def _ordinary_scope_receiver_io_values_v1(row_count, roles, maxima, control_depth, mapper_calls, mapper_control, r_native):
+ unit = 1048577
+ app_io_reads = row_count*5*unit
+ app_io_calls = row_count*(5*unit+3*6+2*(600+5)+6*control_depth+2+11)
+ r_io_reads = r_io_calls = 0
+ for role in roles:
+  if role is None: continue
+  invocations = maxima['reader_invocations'] + (maxima['reader_invocations'] if role=='SCANNER' else 0)
+  fixed_hop = role=='PYTEST'
+  owners = 2 if fixed_hop else 1
+  extra = 2*max(0,maxima['metadata_bytes']-1048576)
+  native_reads = 6*invocations+(invocations+1 if fixed_hop else 0)
+  r_io_reads += extra+maxima['metadata_bytes']+1 + owners*(5*unit+extra+native_reads*unit)
+  r_io_calls += (extra+maxima['metadata_bytes']+7
+   + owners*(5*unit+3*6+2*(600+5)+6*control_depth+2+11+extra
+    + native_reads*(unit+6)+invocations*(12+7+2*control_depth+2)+1))
+ external_control = app_io_reads+r_io_reads+mapper_control+r_native
+ base_external_calls = app_io_calls+r_io_calls+mapper_calls
+ return (app_io_reads, app_io_calls, r_io_reads, r_io_calls, external_control, base_external_calls)
+
+
+def _ordinary_scope_candidate_io_values_v1(later_files, directory_count, edges, path_bytes, entries, generations, retirements, actions, file_actions, barriers, n, attributes, attribute_files, attribute_directories, transformed_files, transformed_directories, rolling_rows, captures, transforms, binding_checks, later_bytes, mutable, restoration_bytes, index, query_bytes, query_reads, source_bytes, namespace_sweeps, depth, index_depth, query_parent_depth, anchor_count, rolling_allocations, initial_files, owed):
+ row_bytes, roster_bytes = 128 * later_files + 160 * directory_count, 8 * edges
+ immutable_bytes = path_bytes + 8 * (entries + 1) + 32 + 16 * entries
+ action_write_bytes = 64 + 97 * (3 * actions + file_actions)
+ header_write_bytes = 128 * (2 * generations + retirements)
+ control_writes = (immutable_bytes + generations * (row_bytes + roster_bytes)
+  + 128 + action_write_bytes + header_write_bytes)
+ control_reads = (control_writes + barriers * (row_bytes + roster_bytes + 256)
+  + (n + 1) * 128 * later_files
+  + (n + 1) * (3 * row_bytes + 2 * roster_bytes)
+  + 9 * row_bytes + 2 * roster_bytes + 32
+  + 97 * (9 * actions + 2 * file_actions)
+  + 2 * attributes * (row_bytes + 97 * actions)
+  + 3 * (128 * attribute_files + 160 * directory_count * attribute_directories)
+  + 128 * transformed_files + 160 * directory_count * transformed_directories
+  + 128 * rolling_rows)
+ current_pairs = captures + barriers * (later_files + 1) + (n + 1) * later_files
+ raw_pairs = (n + 3) * later_files
+ flag_reads = (2 * captures + 2 * current_pairs + 4 * raw_pairs + 2 * captures
+  + attribute_files + 2 * attributes + transforms + 6)
+ flag_writes = captures + captures + attributes + 3
+ ioctls = flag_reads + flag_writes + binding_checks
+ raw_reads = ((21 + 8 * n) * (later_bytes + later_files) + sum(mutable)
+  + restoration_bytes + (13 + 4 * n) * (index + 1) + query_bytes + query_reads)
+ raw_writes = source_bytes + sum(mutable) + restoration_bytes + index + query_bytes
+ retained = source_bytes + sum(mutable) + index
+ namespace_calls = namespace_sweeps * (entries * (16 + 12 * (depth + 1)) + 16 * directory_count)
+ paired_calls = current_pairs * (32 + 12 * (depth + 1)) + raw_pairs * 64
+ capture_calls = captures * (32 + 6 * (depth + 1))
+ index_calls = (barriers + 1) * (32 + 12 * (index_depth + 1))
+ restore_calls = actions * (32 + 12 * (depth + 1))
+ final_attribute_calls = transforms * (16 + 12 * (depth + 1))
+ query_calls = query_reads * (38 + 12 * query_parent_depth)
+ storage_calls = binding_checks * (12 + 2 * anchor_count)
+ carrier_calls = 16 * captures + rolling_allocations
+ extra_handles = max(2 * depth + 4, index_depth + 3, query_parent_depth + 2)
+ handle_peak = owed + 14 + 3 + extra_handles
+ base_calls = (namespace_calls + paired_calls + capture_calls + index_calls
+  + restore_calls + final_attribute_calls + query_calls + storage_calls
+  + carrier_calls + ioctls + handle_peak)
+ demand = dict(initial_raw_bytes=source_bytes, initial_file_count=initial_files,
+  later_raw_byte_cap=later_bytes, later_file_count_cap=later_files,
+  mutable_file_byte_caps_by_occurrence=mutable, raw_read_bytes=raw_reads,
+  raw_write_bytes=raw_writes, raw_retained_bytes=retained, action_rows=actions,
+  metadata_calls=(base_calls + 2 * raw_reads + raw_writes + query_bytes + query_reads
+   + 2 * control_reads + 4 * control_writes + 1),
+  metadata_read_bytes=control_reads + namespace_sweeps * 65536,
+  metadata_write_bytes=control_writes,
+  native_control_calls=control_reads + 2 * control_writes + ioctls + 1,
+  native_control_read_bytes=control_reads + 4 * flag_reads + 232 * binding_checks + query_bytes,
+  native_control_write_bytes=control_writes + 4 * flag_writes + 232 * binding_checks,
+  handle_peak=handle_peak)
+ return (demand, captures, current_pairs, raw_pairs, control_reads, control_writes, flag_reads, flag_writes, handle_peak)
+
+
+
+
+def _ordinary_scope_source_literal_value_v1(node, known):
+ """Calculate only the original fixed-literal AST expression language."""
+ import ast
+ import pathlib
+ def value(node):
+  if isinstance(node, ast.Constant) and type(node.value) in (str, int, bool, type(None)):
+   return node.value
+  if isinstance(node, ast.Name) and node.id in known:
+   return known[node.id]
+  if isinstance(node, (ast.Tuple, ast.List)):
+   return tuple(value(item) for item in node.elts)
+  if isinstance(node, ast.Dict):
+   if any(key is None for key in node.keys):
+    raise ValueError('not a literal dictionary')
+   keys = tuple(value(key) for key in node.keys)
+   if len(set(keys)) != len(keys):
+    raise ValueError('not a unique literal dictionary')
+   return dict(zip(keys, (value(member) for member in node.values)))
+  if isinstance(node, ast.BinOp) and isinstance(node.op, ast.Div):
+   return str(pathlib.PurePosixPath(value(node.left)) / value(node.right))
+  if isinstance(node, ast.BinOp) and isinstance(node.op, ast.Add):
+   return value(node.left) + value(node.right)
+  if isinstance(node, ast.Call) and not node.keywords and len(node.args) == 1 and (
+    isinstance(node.func, ast.Name) and node.func.id == 'Path'
+    or isinstance(node.func, ast.Attribute) and isinstance(node.func.value, ast.Name)
+    and node.func.value.id == 'pathlib' and node.func.attr == 'Path'):
+   return str(pathlib.PurePosixPath(value(node.args[0])))
+  raise ValueError('not a source-fixed literal constant')
+ return value(node)
+
+
+def _ordinary_scope_source_fixture_parents_v1(relative, path_set):
+ components = relative.split('/')[:-1]
+ result = []
+ if 'conftest.py' in path_set: result.append('conftest.py')
+ for end in range(1, len(components) + 1):
+  directory = '/'.join(components[:end])
+  for name in ('__init__.py', 'conftest.py'):
+   value = directory + '/' + name
+   if value in path_set: result.append(value)
+ return tuple(result)
+
+
+def _ordinary_scope_source_module_targets_v1(module, relative, module_paths, path_set):
+ possibilities = tuple(module_paths.get(module, ()))
+ local = '/'.join((*relative.split('/')[:-1], *module.split('.'))) + '.py'
+ local_init = local[:-3] + '/__init__.py'
+ if not possibilities:
+  possibilities = tuple(value for value in (local, local_init) if value in path_set)
+ return tuple(dict.fromkeys(possibilities))
+
+
+def _ordinary_scope_source_module_map_v1(python_paths):
+ module_paths = {}
+ for relative in python_paths:
+  parts = relative[:-3].split('/')
+  if parts[-1] == '__init__': parts = parts[:-1]
+  names = ('.'.join(parts),)
+  if parts and parts[0] == 'src': names += ('.'.join(parts[1:]),)
+  for name in names:
+   if name: module_paths.setdefault(name, []).append(relative)
+ return module_paths
+
+
+def _ordinary_scope_source_import_events_v1(tree, text, relative, module_paths,
+  path_set):
+ """Yield original syntax facts in order; no source or permission record enters."""
+ import ast
+ native_names = frozenset(('Popen', 'run', 'call', 'check_call', 'check_output',
+  'Thread', 'ThreadPoolExecutor', 'ProcessPoolExecutor', 'Process',
+  'fork', 'forkpty', 'posix_spawn', 'posix_spawnp', 'start_new_thread',
+  'system', 'execv', 'execve', 'execl', 'execlp', 'execvp', 'execvpe'))
+ dynamic_names = frozenset(('__import__', 'import_module'))
+ def resolve(module):
+  return _ordinary_scope_source_module_targets_v1(module, relative, module_paths, path_set)
+ package = relative[:-3].split('/')
+ if package[-1] != '__init__': package = package[:-1]
+ if package and package[0] == 'src': package = package[1:]
+ for node in ast.walk(tree):
+  requested = []
+  if isinstance(node, ast.Import): requested.extend(alias.name for alias in node.names)
+  elif isinstance(node, ast.ImportFrom):
+   base = node.module or ''
+   if node.level:
+    if node.level > len(package) + 1:
+     yield ('UNRESOLVED', node.lineno, ast.get_source_segment(text, node),
+      'relative import above sealed package')
+     continue
+    prefix = package[:len(package) - node.level + 1]
+    base = '.'.join((*prefix, *base.split('.'))) if base else '.'.join(prefix)
+   if base: requested.append(base)
+   requested.extend(base + '.' + alias.name for alias in node.names
+    if alias.name != '*' and base and resolve(base + '.' + alias.name))
+  if requested:
+   call = ast.get_source_segment(text, node)
+   for module in requested:
+    yield ('IMPORT', node.lineno, call, module, resolve(module))
+  if isinstance(node, ast.Call):
+   name = (node.func.id if isinstance(node.func, ast.Name)
+    else node.func.attr if isinstance(node.func, ast.Attribute) else None)
+   if name in native_names:
+    yield ('NATIVE', node.lineno, ast.get_source_segment(text, node))
+   if name in dynamic_names:
+    call = ast.get_source_segment(text, node)
+    yield ('DYNAMIC', node.lineno, call)
+    if (node.args and isinstance(node.args[0], ast.Constant)
+      and type(node.args[0].value) is str):
+     targets = resolve(node.args[0].value)
+     if len(targets) == 1: yield ('PENDING', targets)
+     elif targets: yield ('UNRESOLVED', node.lineno, call,
+      'ambiguous literal dynamic import: ' + repr(targets))
+    else:
+     yield ('UNRESOLVED', node.lineno, call,
+      'nonliteral dynamic source selection requires original callee binding')
+
+
+def _ordinary_data_initial_carrier_request_v1():
+ fields = ('scope', 'source', 'programme', 'carrier_request',
+  'registration_attempted', 'initialized', 'allocations', 'credit_originals',
+  'errors', 'carrier_original', 'meter', 'limits', 'remaining', 'observed',
+  'cutoffs', 'deadline_ns', 'existing_heap', 'existing_raw', 'runtime_layout',
+  'data_file_byte_limit', 'bootstrap_components', 'original_existing_heap', 'original')
+ objects, key_occurrences = 1, len(fields)
+ total_capacity = 8 * objects + 6 * key_occurrences
+ index_width = 2 if total_capacity >= 256 else 1
+ dict_requests = 64 * objects + 2 * (32 * objects
+  + total_capacity * index_width + (2 * total_capacity // 3) * 16)
+ list_requests = 56 * 3 + 2 * 8 * (6 * 3)
+ tuple_requests = 40 + 8 * 10 + 40 + 8 * 18
+ return dict_requests + list_requests + tuple_requests
+
+
+def _ordinary_runtime7_map_line_registry_v1(line):
+ from tools import validation_reliability as owner
+ require=owner._preflight_require_v1
+ require(type(line) is bytes and 0<len(line)<=1048576,
+  'ORDINARY_RUNTIME7_ORIGINAL_MAP_LINE_LIMIT')
+ parts=line.split(None,5)
+ require(len(parts) in (5,6),'ORDINARY_RUNTIME7_MAP_FIELDS')
+ ends=parts[0].split(b'-');dev=parts[3].split(b':')
+ require(len(ends)==2 and len(dev)==2
+  and all(0<len(value)<=16 and all(c in b'0123456789abcdefABCDEF' for c in value)
+   for value in (ends[0],ends[1],parts[2],dev[0],dev[1]))
+  and len(parts[4])<=20 and parts[4].isdigit()
+  and len(parts[1])==4 and parts[1][0:1] in (b'r',b'-')
+  and parts[1][1:2] in (b'w',b'-') and parts[1][2:3] in (b'x',b'-')
+  and parts[1][3:4] in (b'p',b's'),'ORDINARY_RUNTIME7_MAP_SUPPORTED_ABI')
+ a,b=int(ends[0],16),int(ends[1],16)
+ offset,major,minor,inode=int(parts[2],16),int(dev[0],16),int(dev[1],16),int(parts[4])
+ require(0<=a<b<(1<<64) and 0<=offset<(1<<64) and 0<=inode<(1<<64),
+  'ORDINARY_RUNTIME7_MAP_SCALAR_BOUND')
+ return (a,b,parts[1],offset,major,minor,inode)
+    # Displayed pathname is deliberately not an identity operand.
+
+
+def _ordinary_runtime7_installation_roles_registry_v1(programme, runtime_roles, rows, *,
+  runner, current_owner):
+ from tools import validation_reliability as owner
+ require=owner._preflight_require_v1
+ census=programme['census']
+ scope=census._ordinary_meter_scope_v1
+ host=scope._ordinary_host_preparation_v1
+ attempt=host['controller_runtime_role_attempt']
+ old=attempt['success_original']
+ require(type(old) is tuple and len(old)==16 and old[0] is attempt
+  and old[1] is scope and old[2] is host and old[3] is census
+  and old[4]==current_owner
+  and old[5] is runtime_roles is attempt['roles'] is host['controller_runtime_roles']
+  and attempt['runner'] is runner is scope._ordinary_runner_owner_v1
+  is scope._ordinary_original_runner_owner_v1
+  and old[6] is attempt['modules'] and old[7] is attempt['module_snapshots']
+  and old[8] is attempt['native_rows'] and old[9] is attempt['raws']
+  and old[10] is attempt['symbols'] and old[11] is attempt['file_observations']
+  and old[12] is attempt['errors'] and old[13] is attempt['rows']
+  and old[14]==attempt['start'] and old[15] is attempt['api_observation']
+  and attempt['complete'] and not attempt['errors'],
+  'ORDINARY_RUNTIME7_INSTALLER_SAME_ACTUAL_SUPPLIER')
+ require(type(runtime_roles) is tuple and len(runtime_roles)==7
+  and tuple(item[0] for item in runtime_roles)==
+   ('executable','libpython','_json','_sre','json.__init__','json.decoder','json.scanner'),
+  'ORDINARY_RUNTIME7_INSTALLER_EXACT_ROLE_ROSTER')
+ for role,mode,row in runtime_roles:
+  require(type(row) is dict and row['kind']=='file'
+   and any(row is original for original in rows),
+   'ORDINARY_RUNTIME7_INSTALLER_ORIGINAL_CENSUS_FILE')
+  if role=='executable':allowed=('EXECUTABLE',)
+  elif role=='libpython':allowed=('MAPPED_LIBRARY','STATIC_IN_EXECUTABLE')
+  elif role in ('_json','_sre'):allowed=('BUILTIN','EXTENSION_FILE')
+  else:allowed=('PYTHON_SOURCE',)
+  require(mode in allowed,'ORDINARY_RUNTIME7_INSTALLER_ACTUAL_SUPPORTED_MODE')
+ return runtime_roles
+
+def _ordinary_scope_query_pool_geometry_v1(n, prefix_inodes, view_inodes, host_nonquery_inodes,
+  nonquery_continuous_cells, administrative_bytes, atomic_payload_bytes,
+  prefix_commands, prefix_responses):
+ values = (n, prefix_inodes, view_inodes, host_nonquery_inodes,
+  nonquery_continuous_cells, administrative_bytes, atomic_payload_bytes,
+  prefix_commands, prefix_responses)
+ if not all(type(value) is int and 0 <= value < 1 << 63 for value in values):
+  raise ValueError('ORDINARY_QUERY_POOL_EXACT_SOURCE_GEOMETRY')
+ if n == 0 or atomic_payload_bytes != 1048576 or (prefix_commands, prefix_responses) != (512, 4096):
+  raise ValueError('ORDINARY_QUERY_POOL_ORIGINAL_PREFIX_AND_PAYLOAD_CELLS')
+ closure_cells = 5 * prefix_commands + 2 * prefix_responses + 32
+ fixed = (2 * prefix_inodes + view_inodes + host_nonquery_inodes
+  + 2 * nonquery_continuous_cells + closure_cells + 62)
+ cells = (131072 - fixed) // 2
+ if cells <= 0:
+  raise ValueError('ORDINARY_QUERY_POOL_NO_INDEPENDENT_HOST_INODES')
+ commands, responses = cells // 4, cells
+ query_bytes = (administrative_bytes - 6 * 2 * 65536) // 2
+ if commands == 0 or query_bytes < 1048576:
+  raise ValueError('ORDINARY_QUERY_POOL_ORIGINAL_RECEIVER_INTERSECTION')
+ return (cells, commands, responses, query_bytes, closure_cells, fixed, values)
+
+def _ordinary_scope_query_source_values_v1(n, git, readers, scanners, nested, depth, bindings):
+ values = (n, git, readers, scanners, nested, depth, bindings)
+ if not all(type(value) is int and 0 <= value < 1 << 63 for value in values):
+  raise ValueError('ORDINARY_QUERY_SOURCE_TYPED_MULTIPLICITIES')
+ if not (n > 0 and 1 <= depth <= 32 and git <= n and scanners <= readers <= n
+   and nested <= n and bindings > 0):
+  raise ValueError('ORDINARY_QUERY_SOURCE_COMPLETE_SELECTED_TOPOLOGY')
+ projections = 3
+ commands = 3 * projections + 5 + (8 if git else 0) + 3 * n
+ host_observations = 5 + (2 if git else 0) + 4 * n + 29 * git
+ configuration_reads = 29 * git
+ parent_identity_reads = 0
+ captures = 10 if readers else 0
+ callbacks = 4 * captures + 1 if captures else 0
+ if readers:
+  host_observations += 4 + 2 * readers + 2 * callbacks
+  configuration_reads += 1 + readers + callbacks
+  parent_identity_reads = 6 * captures
+ responses = (4 * depth * host_observations + configuration_reads
+  + parent_identity_reads + 8 * n + 2057 * readers + scanners
+  + 2 * nested + 3 + 3 * projections + 3)
+ binding_reads = 4 * depth + 1
+ standalone = n + 4 * n + 2 * readers + 3 * scanners + 10 + captures
+ failure_commands, failure_responses = 35, 1026 if readers else 0
+ failure_checks = 4 * failure_commands + failure_responses + 1
+ failure_cells = 4 * failure_commands + failure_responses
+ checks = (4 * commands + responses + bindings * binding_reads + standalone
+  + binding_reads + failure_checks + 6)
+ cells = 4 * commands + responses + bindings * binding_reads + failure_cells
+ return dict(commands=commands, responses=responses, bindings=bindings,
+  binding_reads=binding_reads, standalone_checks=standalone,
+  active_binding_prefix=binding_reads, failure_checks=failure_checks,
+  failure_cells=failure_cells, future_response_reservation=1048576,
+  checks=checks, cells=cells, source_values=values,
+  source_operations=(projections, captures, callbacks, host_observations,
+   configuration_reads, parent_identity_reads, failure_commands, failure_responses))
+
+def _ordinary_scope_query_role_values_v1(prefix_commands, prefix_responses):
+ if (type(prefix_commands) is not int or type(prefix_responses) is not int
+   or (prefix_commands,prefix_responses)!=(512,4096)):
+  raise ValueError('ORDINARY_QUERY_ROLE_ORIGINAL_PREFIX_SOURCE_CELLS')
+ command_rows=(('issuer',4),('policy_prepare',2),('controller_startup',33),
+  ('controller_pending_and_final',33),('controller_stop',1),
+  ('first_failure_kill',1),('policy_remove',1))
+ response_rows=(('native_issuer',5),('initial_profile',1),('policy_prepare',3),
+  ('role_profile',1),('pid_and_cgroup_binding',7),('policy_remove',1),
+  ('host_failed_prefix',3*(2+4*32)),('selected_manager_authority',4))
+ parent_commands=sum(value for _,value in command_rows)
+ parent_responses=sum(value for _,value in response_rows)
+ parent=4*prefix_commands+prefix_responses
+ receiver=65536-parent
+ if not (4*parent_commands+parent_responses+4*35+1<=parent<65536
+   and receiver>0):
+  raise ValueError('ORDINARY_QUERY_ROLE_COMPLETE_PARENT_SOURCE_AND_SUFFIX')
+ return (0,parent,receiver,parent_commands,parent_responses,35,
+  command_rows,response_rows,(prefix_commands,prefix_responses))
+
+
+# Fixed ordinary facets; native/source startup funding precedes first import.
+
+def _facet_fn_source_literal_table_v1(scope, record, name, *, source_byte_limit, source_node_limit):
+ import tools.validation_reliability as _f
+ import ast
+ _f._preflight_require_v1(type(name) is str and name in (
+  '_ordinary_deterministic_fixed_sources_v1', '_ordinary_source_fixed_recipes_v1')
+  and type(source_byte_limit) is int and source_byte_limit > 0
+  and type(source_node_limit) is int and source_node_limit > 0,
+  'ORDINARY_SOURCE_LITERAL_EXACT_TABLE_AND_LIMITS')
+ tree, observed = _f._ordinary_source_operand_v1(scope, record, 'tools/validation_inventory.py',
+  source_byte_limit=source_byte_limit, source_node_limit=source_node_limit)
+ _f._preflight_require_v1(type(tree) is ast.Module and type(observed) is dict
+  and observed['path'] == 'tools/validation_inventory.py'
+  and observed['source_form'] == 'PYTHON' and observed['complete']
+  and observed['error'] is None and type(observed['text']) is str
+  and type(observed['raw_bytes']) is int
+  and 0 <= observed['raw_bytes'] <= source_byte_limit
+  and len(observed['text'].encode('utf-8')) == observed['raw_bytes']
+  and type(observed['nodes']) is int and 0 < observed['nodes'] <= source_node_limit,
+  'ORDINARY_SOURCE_LITERAL_COMPLETE_ORIGINAL_OBSERVATION')
+ original_tree = ast.parse(observed['text'], filename=observed['path'])
+ _f._preflight_require_v1(sum(1 for node in ast.walk(original_tree)) == observed['nodes']
+  and ast.dump(tree, include_attributes=False)
+   == ast.dump(original_tree, include_attributes=False),
+  'ORDINARY_SOURCE_LITERAL_RETAINED_AST_AND_CAPTURED_TEXT')
+ definitions = tuple(node for node in original_tree.body
+  if isinstance(node, ast.FunctionDef) and node.name == name)
+ _f._preflight_require_v1(len(definitions) == 1,
+  'ORDINARY_SOURCE_LITERAL_ONE_PRIVATE_DEFINITION')
+ definition = definitions[0]
+ args = definition.args
+ _f._preflight_require_v1(not definition.decorator_list and not definition.type_params
+  and definition.returns is None and definition.type_comment is None and not args.posonlyargs
+  and not args.args and args.vararg is None and not args.kwonlyargs
+  and args.kwarg is None and not args.defaults and not args.kw_defaults
+  and len(definition.body) == 1 and isinstance(definition.body[0], ast.Return)
+  and definition.body[0].value is not None,
+  'ORDINARY_SOURCE_LITERAL_PURE_SINGLE_RETURN')
+ value = ast.literal_eval(definition.body[0].value)
+ _f._preflight_require_v1(type(value) is tuple and value,
+  'ORDINARY_SOURCE_LITERAL_EXACT_NONEMPTY_TABLE')
+ if name == '_ordinary_deterministic_fixed_sources_v1' and value[0] == 'SOURCE_BODY_REFERENCES_V1':
+  return _f._ordinary_deterministic_literal_references_v1(value)
+ return value
+
+
+def _facet_fn_deterministic_literal_references_v1(value):
+ import tools.validation_reliability as _f
+ _f._preflight_require_v1(type(value) is tuple and len(value) == 3
+  and value[0] == 'SOURCE_BODY_REFERENCES_V1' and type(value[1]) is tuple
+  and value[1] and type(value[2]) is tuple and value[2],
+  'ORDINARY_SOURCE_LITERAL_BODY_REFERENCE_COMPONENT')
+ bodies, recipes = value[1:]
+ names, body_values = [], []
+ for body in bodies:
+  _f._preflight_require_v1(type(body) is tuple and len(body) == 2
+   and type(body[0]) is str and type(body[1]) is str and body[1],
+   'ORDINARY_SOURCE_LITERAL_COMPLETE_BODY_OPERAND')
+  _f._mapper_portable_relative_v1(body[0])
+  _f._preflight_require_v1(body[0].endswith('.py') and body not in body_values,
+   'ORDINARY_SOURCE_LITERAL_UNIQUE_BODY_PATH')
+  names.append(body[0]); body_values.append(body)
+ result, keys, used = [], [], set()
+ for recipe in recipes:
+  _f._preflight_require_v1(type(recipe) is tuple and len(recipe) == 5
+   and type(recipe[0]) is str and recipe[0] and recipe[0] not in keys
+   and type(recipe[1]) is str and recipe[1] and type(recipe[2]) is tuple
+   and type(recipe[3]) is tuple and type(recipe[4]) is tuple,
+   'ORDINARY_SOURCE_LITERAL_ORIGINAL_RECIPE_ABI')
+  keys.append(recipe[0]); selected, paths = [], []
+  for reference in recipe[2]:
+   _f._preflight_require_v1(type(reference) is tuple and len(reference) == 2
+    and type(reference[0]) is str and type(reference[1]) is int
+    and 0 <= reference[1] < len(bodies) and reference[0] == bodies[reference[1]][0]
+    and reference[0] not in paths,
+    'ORDINARY_SOURCE_LITERAL_EXACT_ORDERED_BODY_REFERENCE')
+   paths.append(reference[0]); used.add(reference[1]); selected.append(bodies[reference[1]])
+  result.append((recipe[0],recipe[1],tuple(selected),recipe[3],recipe[4]))
+ _f._preflight_require_v1(used == set(range(len(bodies))), 'ORDINARY_SOURCE_LITERAL_NO_UNREFERENCED_BODY')
+ return tuple(result)
+
+
+def _facet_fn_deterministic_fixed_sources_v1(scope, record, *, source_byte_limit, source_node_limit):
+ import tools.validation_reliability as _f
+ return _f._ordinary_source_literal_table_v1(scope, record, '_ordinary_deterministic_fixed_sources_v1',
+  source_byte_limit=source_byte_limit, source_node_limit=source_node_limit)
+
+
+def _facet_fn_deterministic_run_output_operands_v1(argv, output_root, flags):
+ import tools.validation_reliability as _f
+ _f._preflight_require_v1(type(argv) is tuple and argv
+  and all(type(item) is str and item and '\x00' not in item for item in argv)
+  and type(output_root) is type(_f.Path()) and output_root.is_absolute()
+  and type(flags) is tuple and flags and len(flags) == len(set(flags))
+  and all(type(flag) is str and flag.startswith('--') for flag in flags),
+  'ORDINARY_DETERMINISTIC_ORIGINAL_RUN_OUTPUT_OPERANDS')
+ result = []
+ for flag in flags:
+  positions = tuple(index for index, item in enumerate(argv) if item == flag)
+  _f._preflight_require_v1(len(positions) == 1 and positions[0] + 1 < len(argv),
+   'ORDINARY_DETERMINISTIC_ONE_ACTUAL_OUTPUT_FLAG')
+  actual = _f.Path(argv[positions[0] + 1])
+  _f._preflight_require_v1(actual.is_absolute() and actual != output_root
+   and actual.is_relative_to(output_root) and '..' not in actual.parts
+   and actual.name not in ('', '.', '..')
+   and str(actual) == _f.os.path.normpath(str(actual))
+   and all(actual != prior[1] for prior in result),
+   'ORDINARY_DETERMINISTIC_EXACT_DISJOINT_RUN_OUTPUT_LEAF')
+  result.append((flag, actual))
+ return tuple(result)
+
+
+def _facet_fn_deterministic_source_ingredients_check_v1(scope, record):
+ import tools.validation_reliability as _f
+ _f._preflight_require_v1(type(scope) is _f._LinuxPreflightScopeV1 and type(record) is dict
+  and record is scope._ordinary_deterministic_source_ingredients_v1
+   is scope._ordinary_original_deterministic_source_ingredients_v1
+  and record['scope'] is scope and record['source'] is scope.source
+  and record['check'] is record['original_check'] is _f._ordinary_deterministic_source_ingredients_check_v1
+  and not record['errors'], 'ORDINARY_DETERMINISTIC_SAME_SOURCE_COMPONENT')
+ original = record['original']
+ _f._preflight_require_v1(type(original) is tuple and len(original) == 12
+  and original[0] is record and original[1] is scope and original[2] is record['paths']
+  and original[3] is record['plan'] and original[4] is record['execution_plan']
+  and original[5] is record['source']
+  and original[6] is record['source_selection'] is scope._ordinary_source_selection_v1
+   is scope._ordinary_original_source_selection_v1
+  and original[7] is record['bound_rows'] and original[8] is record['rows']
+  and original[9] is record['source_operands'] and original[10] is record['errors']
+  and original[11] is record['rp_predecessor_join']
+  and len(record['rows']) == len(record['bound_rows']) == len(record['row_originals']),
+  'ORDINARY_DETERMINISTIC_ORIGINAL_COMPONENT_IDENTITIES')
+ runner = scope._ordinary_runner_owner_v1
+ actual = runner._ordinary_phase_occurrence_selection_v1(scope, record['paths'], record['plan'],
+  record['execution_plan'], phase=record['plan'][0].phase if record['plan'] else record['source_selection'].phase)
+ _f._preflight_require_v1(actual is record['bound_rows'],
+  'ORDINARY_DETERMINISTIC_ORIGINAL_BOUND_ROWS')
+ for observed, retained in record['original_source_items']:
+  _f._preflight_require_v1(any(observed is item for item in record['source_operands'])
+   and tuple(observed.items()) == retained and observed['attempted'] and observed['complete']
+   and observed['error'] is None and scope.source.row_index[observed['row']['path']] is observed['row']
+   and tuple(scope.source.post[observed['row']['path']]) == observed['version'],
+   'ORDINARY_DETERMINISTIC_ORIGINAL_SOURCE_OBSERVATIONS')
+  if observed['source_form'] in ('BINARY', 'JSON', 'JSONL'):
+   _f._ordinary_source_data_operand_check_v1(scope, record, observed,
+    observed['value'], published=True)
+  if observed.get('source_form') == 'ABSENT':
+   parts = observed['relative_parts']
+   index = observed['missing_index']
+   _f._preflight_require_v1(type(parts) is tuple and parts
+    and type(index) is int and 0 <= index < len(parts)
+    and tuple(_f._mapper_portable_relative_v1(observed['path']).parts) == parts,
+    'ORDINARY_ABSENT_PORTABLE_ORIGINAL_COMPONENTS')
+   parent = _f.Path(scope.source.root).joinpath(*parts[:index])
+   row = observed['row']
+   _f._preflight_require_v1(observed['scope'] is scope
+    and observed['source'] is scope.source
+    and str(parent) == row['path'] and row['role'] == 'repository'
+    and row['kind'] == 'directory'
+    and observed['missing_component'] == parts[index]
+    and type(observed['parent_roster']) is tuple
+    and observed['parent_roster'] == tuple(row['roster'])
+    and parts[index] not in observed['parent_roster']
+    and observed['before_version'] == observed['after_version']
+     == observed['version']
+    and observed['before_flags'] == observed['after_flags']
+     == (scope.source.original_flags[row['path']] | 16)
+    and type(observed['errors']) is list and not observed['errors'],
+    'ORDINARY_ABSENT_FROZEN_ORIGINAL_DIRECTORY_WITNESS')
+
+ for row, frozen in zip(record['rows'], record['row_originals']):
+  _f._preflight_require_v1(row is frozen[0] and tuple(row.items()) == frozen[1]
+   and row['bound_row'] is frozen[2] and row['bound_row'] is record['bound_rows'][row['ordinal'] - 1]
+   and row['entry'] is row['bound_row'][0] and row['execution'] is row['bound_row'][1]
+   and row['source_position'] == row['bound_row'][2]
+   and all(target is expected and tuple(target.items()) == fields
+    for target, (expected, fields) in zip(row['targets'], frozen[3]))
+   and len(row['targets']) == len(frozen[3])
+   and all(target is expected and tuple(target.items()) == fields
+    for target, (expected, fields) in zip(row['run_output_effects'], frozen[4]))
+   and len(row['run_output_effects']) == len(frozen[4]),
+   'ORDINARY_DETERMINISTIC_FROZEN_OCCURRENCE_AND_EFFECT_OPERANDS')
+  if row['native_programme'] is not None:
+   native = row['native_programme']
+   _f._preflight_require_v1(native['check'](scope, native) is native,
+    'ORDINARY_DETERMINISTIC_SAME_NATIVE_SOURCE_PRODUCT')
+ _f._ordinary_rp_predecessor_check_v1(scope, record)
+ if record['rp_predecessor_join']['rp_row'] is not None:
+  _f._ordinary_rp_writer_check_v1(scope, record, record['rp_predecessor_join'],
+   require_native=True)
+ return record
+
+
+def _facet_fn_master_plan_python_native_v1(scope, bound_row, operands, grammar):
+    """Bind one source-defined stdlib-only body, never a generic Python role.
+
+    The prior deterministic recipe owner compares its entire protected module
+    to the original literal. The installation owner supplies the independently
+    qualified runtime. This source product does not grant its V-output writes.
+    """
+    import tools.validation_reliability as _f
+    import ast
+    runner = scope._ordinary_runner_owner_v1
+    source = scope.source
+    _f._preflight_require_v1(type(scope) is _f._LinuxPreflightScopeV1
+     and runner is scope._ordinary_original_runner_owner_v1
+     and runner is _f.sys.modules.get(getattr(runner, '__name__', None))
+     and type(source) is _f._LinuxImmutableSourceSealV2 and source.state == 'READABLE'
+     and source.failure is None and type(bound_row) is tuple and len(bound_row) == 3
+     and any(bound_row is item for item in scope._ordinary_source_selection_v1._bound)
+     and type(operands) is tuple and len(operands) == 1
+     and type(grammar) is tuple and len(grammar) == 1,
+     'ORDINARY_MASTER_PLAN_ONE_ORIGINAL_PYTHON_SOURCE_ROW')
+    entry, execution, position = bound_row
+    requested = execution.registered_argv
+    _f._preflight_require_v1(type(requested) is tuple and len(requested) == 10
+     and requested[:2] == (_f.sys.executable, 'tools/master_plan_ingest.py')
+     and requested[2::2] == ('--input', '--section-manifest-out', '--traceability-out', '--scope-report-out')
+     and execution.execution_argv == entry.argv == (requested[0], '-I', '-S', '-B', *requested[1:])
+     and entry.cwd == str(scope._ordinary_bound_paths_v1.repo_root),
+     'ORDINARY_MASTER_PLAN_ISOLATED_ORIGINAL_EFFECTIVE_ARGV')
+    operand = operands[0]
+    tree, cached = scope._ordinary_source_operand_cache_v1[(operand['path'], 'PYTHON')]
+    _f._preflight_require_v1(cached is operand and operand['complete'] and operand['error'] is None
+     and operand['path'] == 'tools/master_plan_ingest.py'
+     and grammar[0][0] is operand and grammar[0][1] == '<module>'
+     and grammar[0][2] == operand['text']
+     and ast.dump(tree, include_attributes=False) == ast.dump(ast.parse(operand['text']), include_attributes=False),
+     'ORDINARY_MASTER_PLAN_SAME_PROTECTED_COMPLETE_MODULE')
+    imports = tuple((type(node).__name__, getattr(node, 'module', None),
+     tuple((alias.name, alias.asname) for alias in node.names), getattr(node, 'level', 0))
+     for node in ast.walk(tree) if isinstance(node, (ast.Import, ast.ImportFrom)))
+    _f._preflight_require_v1(imports == (
+     ('ImportFrom', '__future__', (('annotations', None),), 0),
+     ('Import', None, (('argparse', None),), 0),
+     ('ImportFrom', 'collections', (('Counter', None),), 0),
+     ('Import', None, (('json', None),), 0),
+     ('Import', None, (('pathlib', None),), 0),
+     ('Import', None, (('re', None),), 0)),
+     'ORDINARY_MASTER_PLAN_ORIGINAL_STDLIB_IMPORT_COHORT')
+    input_name = requested[3]
+    _f._mapper_portable_relative_v1(input_name)
+    input_path = scope._ordinary_bound_paths_v1.repo_root.joinpath(*input_name.split('/'))
+    input_row = source.row_index.get(str(input_path))
+    _f._preflight_require_v1(input_name == 'docs/master_plan/QTT_MasterPlan_Current.md'
+     and input_row is not None and input_row['role'] == 'repository'
+     and input_row['kind'] == 'file' and str(input_path) in source.files
+     and str(input_path) in source.post and type(input_row['logical_bytes']) is int
+     and 0 <= input_row['logical_bytes'] <= 128 << 20,
+     'ORDINARY_MASTER_PLAN_ORIGINAL_PROTECTED_INPUT_OPERAND')
+    resource = scope._ordinary_resource_programme_v1
+    original_resource = scope._ordinary_original_resource_programme_v1
+    _f._preflight_require_v1(resource is original_resource[0]
+     and tuple(resource.items()) == original_resource[1]
+     and resource['fd_demand'][1:] == (12, 8),
+     'ORDINARY_MASTER_PLAN_ORIGINAL_PREFIX_AND_FILE_CELLS')
+    main = tuple(node for node in tree.body if isinstance(node, ast.FunctionDef) and node.name == 'main')
+    markers = tuple(call for node in main for call in ast.walk(node)
+     if isinstance(call, ast.Call) and isinstance(call.func, ast.Name) and call.func.id == 'print')
+    _f._preflight_require_v1(len(main) == len(markers) == 1 and len(markers[0].args) == 1
+     and not markers[0].keywords and isinstance(markers[0].args[0], ast.Constant)
+     and markers[0].args[0].value == 'MASTER_PLAN_INGEST_OK',
+     'ORDINARY_MASTER_PLAN_SOURCE_FIXED_SUCCESS_STREAM')
+    native_calls = tuple(call for item in grammar for call in item[3])
+    return _f._ordinary_native_source_programme_v1(scope, bound_row, operands, grammar,
+     cohorts=((('APPLICATION',), operands, native_calls),),
+     bootstrap_fd_demand=resource['fd_demand'][1], application_fd_demand=resource['fd_demand'][2],
+     nofile=max(resource['fd_demand'][1], resource['fd_demand'][2], 4),
+     stdout_minimum=len(markers[0].args[0].value.encode('utf-8')) + 1)
+
+
+def _facet_fn_python_repository_loader_v1(scope, source_names, stdlib, *, fallback_names=(), namespace_names=()):
+ """Join captured repository helpers to the original installed resolver."""
+ import tools.validation_reliability as _f
+ source = scope.source
+ _f._preflight_require_v1(type(scope) is _f._LinuxPreflightScopeV1
+  and type(source) is _f._LinuxImmutableSourceSealV2 and source.state == 'READABLE'
+  and source.failure is None and type(source_names) is tuple and len(source_names) >= 1
+  and all(type(name) is str and name.startswith('tools/') and name.endswith('.py')
+   and (name, 'PYTHON') in scope._ordinary_source_operand_cache_v1 for name in source_names)
+  and type(stdlib) is frozenset and type(fallback_names) is tuple
+  and type(namespace_names) is tuple and all(type(name) is str and name.isidentifier() for name in namespace_names),
+  'ORDINARY_PYTHON_RECIPE_SAME_CAPTURED_HELPER_GRAPH')
+ root = scope._ordinary_bound_paths_v1.repo_root
+ tools_path = str(root / 'tools')
+ def loader_name(name, stem):
+  return (name in (stem, stem + '.py', stem + '.pyc')
+   or name.startswith(stem + '.') and name.endswith(('.so', '.pyd')))
+ def source_roster(path):
+  row = source.row_index.get(str(path))
+  _f._preflight_require_v1(row is not None and row['kind'] == 'directory'
+   and any(row is item for item in source.rows)
+   and str(path) in source.post
+   and source.directories.get(str(path)) == tuple(
+    (name, source.row_index[str(path / name)]['kind']) for name in row['roster']),
+   'ORDINARY_PYTHON_RECIPE_COMPLETE_SOURCE_DIRECTORY')
+  return row['roster']
+ root_names, tools_names = source_roster(root), source_roster(root / 'tools')
+ _f._preflight_require_v1(not any(loader_name(name, 'tools') and name != 'tools' for name in root_names)
+  and not any(loader_name(name, '__init__') for name in tools_names),
+  'ORDINARY_PYTHON_RECIPE_ORIGINAL_TOOLS_NAMESPACE_ROSTER')
+ for relative in source_names:
+  basename = _f.Path(relative).stem
+  _f._preflight_require_v1(basename + '.py' in tools_names
+   and source.row_index[str(root / relative)]['kind'] == 'file'
+   and not any(loader_name(name, basename) and name != basename + '.py' for name in tools_names),
+   'ORDINARY_PYTHON_RECIPE_NO_ALTERNATIVE_HELPER_LOADER')
+ installation = scope._ordinary_installation_copy_v1
+ _f._preflight_require_v1(installation is scope._ordinary_original_installation_copy_v1
+  and installation['complete'] and not installation['errors']
+  and scope._ordinary_installation_record_v1(installation['install']) is installation
+  and scope.interpreter == _f.sys.executable and _f.sys.implementation.name == 'cpython'
+  and tuple(_f.sys.version_info[:3]) == (3, 14, 6)
+  and _f.sys.implementation.cache_tag == 'cpython-314' and getattr(_f.sys, 'abiflags', '') == ''
+  and _f.Path(_f.sys.prefix) == _f.Path(_f.sys.base_prefix) == _f.Path(_f.sys.exec_prefix)
+   == _f.Path(_f.sys.base_exec_prefix) == installation['census'].roots['installation']
+  and _f.sys.platlibdir in ('lib', 'lib64')
+  and _f.sys._stdlib_dir == str(_f.Path(_f.sys.prefix) / _f.sys.platlibdir / 'python3.14'),
+  'ORDINARY_PYTHON_RECIPE_SAME_ISOLATED_COPIED_INTERPRETER')
+ install_rows = installation['install'].row_index
+ std_roots = (_f.Path(_f.sys._stdlib_dir),)
+ roots = (std_roots[0], std_roots[0] / 'lib-dynload')
+ std_names = set(stdlib)
+ for path in roots:
+  row = install_rows.get(str(path))
+  _f._preflight_require_v1(path.is_relative_to(_f.Path(_f.sys.prefix))
+   and row is not None and row['kind'] == 'directory'
+   and any(row is item for item in installation['rows'])
+   and installation['install'].directories.get(str(path)) == tuple(
+    (name, install_rows[str(path / name)]['kind']) for name in row['roster'])
+   and not any(loader_name(name, stem) for name in row['roster'] for stem in ('tools', *namespace_names)),
+   'ORDINARY_PYTHON_RECIPE_ISOLATED_INSTALLATION_SEARCH_ROSTER')
+  for name in row['roster']:
+   if name.endswith(('.py', '.pyc', '.so', '.pyd')):
+    std_names.add(name.split('.', 1)[0])
+   elif (install_rows[str(path / name)]['kind'] == 'directory'
+     and name.isidentifier() and name != '__pycache__'
+     and any(loader_name(child, '__init__')
+      for child in install_rows[str(path / name)]['roster'])):
+    std_names.add(name)
+ _f._preflight_require_v1(not any(loader_name(name, stem) for stem in std_names
+   for name in root_names), 'ORDINARY_PYTHON_RECIPE_NO_REPOSITORY_STDLIB_SHADOW')
+ executable = _f.Path(_f.sys.executable).absolute()
+ configs = (executable.parent / 'pyvenv.cfg', executable.parent.parent / 'pyvenv.cfg',
+  executable.parent / 'pybuilddir.txt')
+ zips = (std_roots[0].parent / 'python314.zip',)
+ _f._preflight_require_v1(all(path.is_relative_to(_f.Path(_f.sys.prefix))
+  and str(path) not in install_rows for path in (*configs, *zips))
+  and not any(_f.Path(row['path']).name.endswith('._pth') for row in installation['rows']),
+  'ORDINARY_PYTHON_RECIPE_NO_UNJOINED_PATH_CONFIGURATION_OR_ZIP_LOADER')
+ _f._preflight_require_v1(not any(loader_name(name, stem) for stem in fallback_names
+  for name in root_names), 'ORDINARY_PYTHON_RECIPE_NO_UNCAPTURED_FALLBACK_LOADER')
+ return installation
+
+
+def _facet_fn_deterministic_python_native_v1(scope, bound_row, operands, grammar):
+    """Close only the three original RUN_OUTPUT source recipes' Python graph.
+
+    The existing recipe supplier has acquired and compared whole protected
+    source bodies. This port narrows startup and joins those same bodies to
+    the original installation/cohort owner; it grants no V output operation.
+    """
+    import tools.validation_reliability as _f
+    import ast
+    entry, execution, position = bound_row
+    requested = execution.registered_argv
+    if requested[:2] == (_f.sys.executable, 'tools/master_plan_ingest.py'):
+     return _f._ordinary_master_plan_python_native_v1(scope, bound_row, operands, grammar)
+    source = scope.source
+    selection = scope._ordinary_source_selection_v1
+    _f._preflight_require_v1(type(scope) is _f._LinuxPreflightScopeV1
+     and type(source) is _f._LinuxImmutableSourceSealV2 and source.state == 'READABLE'
+     and source.failure is None and source._ordinary_meter_scope_v1 is scope
+     and selection is scope._ordinary_original_source_selection_v1
+     and type(bound_row) is tuple and len(bound_row) == 3
+     and any(bound_row is item for item in selection._bound)
+     and type(requested) is tuple and len(requested) >= 2
+     and requested[0] == _f.sys.executable and type(operands) is tuple
+     and type(grammar) is tuple and len(operands) == len(grammar),
+     'ORDINARY_PYTHON_RECIPE_ORIGINAL_SELECTED_PROTECTED_SOURCE')
+    module = requested[1]
+    if module == 'tools/validate_qtt_owner_global_override_authority.py':
+     source_names = (module,)
+     expected_tail = ('--mode', 'dev', '--repo-root', '.', '--out')
+    else:
+     _f._preflight_require_v1(module == 'tools/validate_atomicrows_row_family_source_manifest_currentization.py',
+      'ORDINARY_PYTHON_RECIPE_NO_GENERIC_PYTHON_ROLE')
+     source_names = (module, 'tools/build_master_plan_section_coverage_report.py',
+      'tools/validate_master_plan_section_coverage.py', 'tools/master_plan_ingest.py')
+     expected_tail = ('--repo-root', '.', '--out')
+    pycache_operand = None
+    effective = (requested[0], '-I', '-S', '-B', *requested[1:])
+    if len(source_names) > 1:
+     _f._preflight_require_v1(type(entry.command_index) is int and entry.command_index > 0,
+      'ORDINARY_PYTHON_RECIPE_ORIGINAL_ORDINAL')
+     cache_path = (scope._ordinary_image_v1['mount_path'] / 'runtime'
+      / ('p' + str(entry.command_index)) / 'pycache')
+     effective = (requested[0], '-I', '-S', '-B', '-X',
+      'pycache_prefix=' + str(cache_path), *requested[1:])
+     pycache_operand = (cache_path, bound_row, operands, grammar, scope._ordinary_installation_copy_v1)
+    _f._preflight_require_v1(len(requested) == 3 + len(expected_tail)
+     and requested[2:-1] == expected_tail
+     and entry.argv == execution.execution_argv == effective
+     and entry.cwd == str(scope._ordinary_bound_paths_v1.repo_root),
+     'ORDINARY_PYTHON_RECIPE_EXACT_ISOLATED_ORIGINAL_VECTOR')
+    _f._ordinary_deterministic_run_output_operands_v1(requested,
+     scope._ordinary_bound_paths_v1.validation_output_root, ('--out',))
+    _f._preflight_require_v1(tuple(item['path'] for item in operands) == source_names
+     and all(item[0] is operand and item[1] == '<module>' and item[2] == operand['text']
+      and type(item[3]) is tuple for item, operand in zip(grammar, operands, strict=True)),
+     'ORDINARY_PYTHON_RECIPE_WHOLE_ORDERED_IMPORT_BODIES')
+    stdlib = frozenset(('__future__', 'argparse', 'collections', 'dataclasses',
+     'json', 'pathlib', 're', 'sys', 'typing'))
+    module_names = frozenset(name[:-3].replace('/', '.') for name in source_names)
+    trees = []
+    for operand in operands:
+     tree, observed = scope._ordinary_source_operand_cache_v1[(operand['path'], 'PYTHON')]
+     _f._preflight_require_v1(observed is operand and operand['complete'] and operand['error'] is None
+      and ast.dump(tree, include_attributes=False)
+       == ast.dump(ast.parse(operand['text']), include_attributes=False),
+      'ORDINARY_PYTHON_RECIPE_SAME_COMPLETE_SOURCE_CACHE')
+     trees.append(tree)
+     for node in ast.walk(tree):
+      if isinstance(node, ast.Import):
+       _f._preflight_require_v1(all(alias.name in stdlib for alias in node.names),
+        'ORDINARY_PYTHON_RECIPE_CLOSED_STDLIB_IMPORT')
+      elif isinstance(node, ast.ImportFrom):
+       _f._preflight_require_v1(node.level == 0 and node.module is not None
+        and all(alias.name != '*' for alias in node.names)
+        and (node.module in stdlib or node.module in module_names
+         or node.module == 'tools' and all('tools.' + alias.name in module_names for alias in node.names)),
+        'ORDINARY_PYTHON_RECIPE_CLOSED_REPOSITORY_IMPORT')
+      elif isinstance(node, ast.Call):
+       _f._preflight_require_v1(not isinstance(node.func, ast.Name)
+        or node.func.id not in ('eval', 'exec', '__import__', 'open'),
+        'ORDINARY_PYTHON_RECIPE_NO_DYNAMIC_SOURCE_OR_NATIVE_PROVIDER')
+    if len(source_names) > 1:
+     _f._ordinary_python_repository_loader_v1(scope, source_names, stdlib)
+     bootstrap = "_REPO_ROOT = pathlib.Path(__file__).resolve().parents[1]"
+     insert = "if str(_REPO_ROOT) not in sys.path:\n    sys.path.insert(0, str(_REPO_ROOT))"
+     for operand, tree in zip(operands[:3], trees[:3], strict=True):
+      _f._preflight_require_v1(any(ast.dump(node, include_attributes=False)
+        == ast.dump(ast.parse(bootstrap).body[0], include_attributes=False) for node in tree.body)
+       and any(ast.dump(node, include_attributes=False)
+        == ast.dump(ast.parse(insert).body[0], include_attributes=False) for node in tree.body),
+       'ORDINARY_PYTHON_RECIPE_ORIGINAL_REPOSITORY_BOOTSTRAP')
+    primary = trees[0]
+    marker = tuple(node for node in primary.body if isinstance(node, ast.Assign)
+     and len(node.targets) == 1 and isinstance(node.targets[0], ast.Name)
+     and node.targets[0].id == 'SUCCESS_MARKER' and isinstance(node.value, ast.Constant)
+     and type(node.value.value) is str)
+    _f._preflight_require_v1(len(marker) == 1 and any(isinstance(node, ast.Call)
+     and isinstance(node.func, ast.Name) and node.func.id == 'print'
+     and len(node.args) == 1 and isinstance(node.args[0], ast.Name)
+     and node.args[0].id == 'SUCCESS_MARKER' and not node.keywords for node in ast.walk(primary)),
+     'ORDINARY_PYTHON_RECIPE_SOURCE_FIXED_SUCCESS_MARKER')
+    resource = scope._ordinary_resource_programme_v1
+    original_resource = scope._ordinary_original_resource_programme_v1
+    _f._preflight_require_v1(resource is original_resource[0]
+     and tuple(resource.items()) == original_resource[1]
+     and type(resource['fd_demand']) is tuple and len(resource['fd_demand']) == 3
+     and resource['fd_demand'][1:] == (12, 8),
+     'ORDINARY_PYTHON_RECIPE_ORIGINAL_DESCRIPTOR_PREFIX_CELLS')
+    native_calls = tuple(call for item in grammar for call in item[3])
+    return _f._ordinary_native_source_programme_v1(scope, bound_row, operands, grammar,
+     cohorts=((('APPLICATION',), operands, native_calls),),
+     bootstrap_fd_demand=resource['fd_demand'][1], application_fd_demand=resource['fd_demand'][2],
+     nofile=max(resource['fd_demand'][1], resource['fd_demand'][2], 4),
+     stdout_minimum=len(marker[0].value.value.encode('utf8')) + 1,
+     **({} if pycache_operand is None else {'pycache_operand': pycache_operand}))
+
+
+def _facet_fn_pr138_source_names_v1():
+ import tools.validation_reliability as _f
+ return ('tools/run_validation_gates.py', 'tools/ci_branch_context.py',
+  'src/qtt/__init__.py',
+  'src/qtt/stage1_prediction_markets/atomicrows_semantic_contract/__init__.py',
+  'src/qtt/stage1_prediction_markets/atomicrows_semantic_contract/constants.py',
+  'src/qtt/stage1_prediction_markets/atomicrows_semantic_contract/model.py',
+  'src/qtt/stage1_prediction_markets/atomicrows_semantic_contract/schema.py',
+  'src/qtt/stage1_prediction_markets/atomicrows_semantic_contract/fixtures.py',
+  'src/qtt/stage1_prediction_markets/atomicrows_semantic_contract/report.py',
+  'src/qtt/stage1_prediction_markets/atomicrows_semantic_contract/validator.py')
+
+
+def _facet_fn_pr138_execution_argv_v1(scope, registered, command_index):
+ import tools.validation_reliability as _f
+ runner = scope._ordinary_runner_owner_v1
+ _f._preflight_require_v1(type(scope) is _f._LinuxPreflightScopeV1
+  and runner is scope._ordinary_original_runner_owner_v1
+  and registered == (_f.sys.executable, '-c', runner.PR138_NON_MUTATING_VALIDATION_SCRIPT)
+  and type(command_index) is int and command_index > 0,
+  'ORDINARY_PR138_ORIGINAL_LITERAL_EXECUTION')
+ cache = scope._ordinary_image_v1['mount_path'] / 'runtime' / ('p' + str(command_index)) / 'pycache'
+ prefix = 'import sys;sys.path.insert(0,' + repr(scope.repository) + ')\n'
+ return (_f.sys.executable, '-I', '-S', '-B', '-X', 'pycache_prefix=' + str(cache),
+  '-c', prefix + registered[2])
+
+
+def _facet_fn_pr138_native_v1(scope, bound_row, operands, grammar):
+ import tools.validation_reliability as _f
+ import ast
+ entry, execution, position = bound_row
+ source, runner = scope.source, scope._ordinary_runner_owner_v1
+ _f._preflight_require_v1(type(scope) is _f._LinuxPreflightScopeV1
+  and type(source) is _f._LinuxImmutableSourceSealV2 and source.state == 'READABLE'
+  and source.failure is None and source._ordinary_meter_scope_v1 is scope
+  and scope._ordinary_source_selection_v1 is scope._ordinary_original_source_selection_v1
+  and any(bound_row is row for row in scope._ordinary_source_selection_v1._bound)
+  and tuple(item['path'] for item in operands) == _f._ordinary_pr138_source_names_v1()
+  and len(grammar) == len(operands) and type(entry.command_index) is int
+  and entry.argv == execution.execution_argv == _f._ordinary_pr138_execution_argv_v1(scope,
+   execution.registered_argv, entry.command_index)
+  and entry.cwd == scope.repository,
+  'ORDINARY_PR138_ORIGINAL_LITERAL_PACKAGE_AND_OCCURRENCE')
+ stdlib = frozenset(('__future__','copy','dataclasses','json','os','pathlib','re','subprocess','typing'))
+ namespace_names = ('src','src/qtt','src/qtt/stage1_prediction_markets',
+  'src/qtt/stage1_prediction_markets/atomicrows_semantic_contract')
+ source_names = _f._ordinary_pr138_source_names_v1()
+ imported = frozenset(name[:-3].replace('/','.') for name in source_names[1:] if not name.endswith('/__init__.py'))
+ init_names = frozenset(name[:-12].replace('/','.') for name in source_names if name.endswith('/__init__.py'))
+ for operand,item in zip(operands,grammar,strict=True):
+  tree, observed = scope._ordinary_source_operand_cache_v1[(operand['path'],'PYTHON')]
+  _f._preflight_require_v1(observed is operand and operand['complete'] and operand['error'] is None
+   and item[0] is operand and item[1] == '<module>' and item[2] == operand['text'],
+   'ORDINARY_PR138_SAME_PROTECTED_WHOLE_PACKAGE_SOURCE')
+  if operand is operands[0]:
+   assignments = tuple(node for node in tree.body if isinstance(node,ast.Assign)
+    and any(isinstance(target,ast.Name) and target.id=='PR138_NON_MUTATING_VALIDATION_SCRIPT'
+     for target in node.targets))
+   _f._preflight_require_v1(len(assignments)==1
+    and ast.literal_eval(assignments[0].value)==execution.registered_argv[2],
+    'ORDINARY_PR138_ORIGINAL_SOURCE_SELECTED_LITERAL_BODY')
+   continue
+  selected_nodes = tuple(ast.walk(tree))
+  if operand['path'] == 'tools/ci_branch_context.py':
+   functions = {node.name:node for node in tree.body if isinstance(node,ast.FunctionDef)}
+   pending = ['github_actions_pull_request_detached_context_active',
+    'github_actions_main_push_context_active','is_repair_branch','roadmap_pr_number',
+    'is_downstream_or_main_validation_branch','is_downstream_roadmap_branch']
+   reached = set()
+   while pending:
+    name = pending.pop()
+    if name in reached:continue
+    _f._preflight_require_v1(name in functions,'ORDINARY_PR138_RETAINED_BRANCH_HELPER_BODY')
+    reached.add(name)
+    pending.extend(node.func.id for node in ast.walk(functions[name]) if isinstance(node,ast.Call)
+     and isinstance(node.func,ast.Name) and node.func.id in functions and node.func.id not in reached)
+   selected_nodes = tuple(node for item in tree.body
+    if not isinstance(item,(ast.FunctionDef,ast.ClassDef)) for node in ast.walk(item))
+   selected_nodes += tuple(node for name in sorted(reached) for node in ast.walk(functions[name]))
+  for node in selected_nodes:
+   if isinstance(node,ast.Import):
+    _f._preflight_require_v1(all(alias.name in stdlib for alias in node.names),
+     'ORDINARY_PR138_CAPTURED_STDLIB_IMPORT')
+   elif isinstance(node,ast.ImportFrom):
+    module = node.module or ''
+    if node.level:
+     parent = operand['path'].rsplit('/',1)[0].replace('/','.')
+     _f._preflight_require_v1(node.level==1 and operand['path'].startswith(namespace_names[-1]+'/'),
+      'ORDINARY_PR138_EXACT_RELATIVE_PACKAGE')
+     allowed = (parent+'.'+module in imported if module
+      else all(parent+'.'+alias.name in imported for alias in node.names))
+    else:
+     allowed = (module in stdlib or module in imported
+      or module=='tools' and all('tools.'+alias.name in imported for alias in node.names))
+    _f._preflight_require_v1(allowed and all(alias.name!='*' for alias in node.names),
+     'ORDINARY_PR138_NO_UNCAPTURED_IMPORT_PROVIDER')
+ _f._ordinary_python_repository_loader_v1(scope,('tools/ci_branch_context.py',),stdlib,
+  namespace_names=('src',))
+ def loader_name(name,stem):
+  return name in (stem,stem+'.py',stem+'.pyc') or name.startswith(stem+'.') and name.endswith(('.so','.pyd'))
+ def roster(path):
+  row = source.row_index.get(str(path))
+  _f._preflight_require_v1(row is not None and row['kind']=='directory'
+   and any(row is old for old in source.rows) and str(path) in source.post
+   and source.directories.get(str(path)) == tuple((name,source.row_index[str(path/name)]['kind']) for name in row['roster']),
+   'ORDINARY_PR138_COMPLETE_ORIGINAL_PACKAGE_ROSTER')
+  return row['roster']
+ root = _f.Path(scope.repository)
+ for relative in namespace_names:
+  path = root/relative;names = roster(path);parent_names = roster(path.parent)
+  _f._preflight_require_v1(path.name in parent_names
+   and not any(loader_name(name,path.name) and name!=path.name for name in parent_names),
+   'ORDINARY_PR138_NO_ALTERNATIVE_PACKAGE_LOADER')
+  expected_init = relative.replace('/','.') in init_names
+  _f._preflight_require_v1(('__init__.py' in names)==expected_init
+   and not any(loader_name(name,'__init__') and (not expected_init or name!='__init__.py') for name in names),
+   'ORDINARY_PR138_EXACT_INITIALIZER_OR_NAMESPACE_ABSENCE')
+ for relative in source_names[2:]:
+  path = root/relative;names = roster(path.parent)
+  _f._preflight_require_v1(path.name in names
+   and source.row_index[str(path)]['kind']=='file'
+   and not any(loader_name(name,path.stem) and name!=path.name for name in names),
+   'ORDINARY_PR138_NO_ALTERNATIVE_SOURCE_MODULE_LOADER')
+ validator = operands[-1]
+ tree, _ = scope._ordinary_source_operand_cache_v1[(validator['path'],'PYTHON')]
+ bodies = {node.name:node for node in tree.body if isinstance(node,ast.FunctionDef)}
+ spawn = tuple(node for node in ast.walk(bodies['_git_stdout']) if isinstance(node,ast.Call)
+  and isinstance(node.func,ast.Attribute) and isinstance(node.func.value,ast.Name)
+  and node.func.value.id=='subprocess' and node.func.attr=='run')
+ _f._preflight_require_v1(len(spawn)==1 and ast.dump(spawn[0].args[0],include_attributes=False)
+  == ast.dump(ast.parse('["git", *args]',mode='eval').body,include_attributes=False)
+  and {keyword.arg:ast.dump(keyword.value,include_attributes=False) for keyword in spawn[0].keywords}
+   == {key:ast.dump(ast.parse(value,mode='eval').body,include_attributes=False)
+    for key,value in (('cwd','repo_root'),('check','False'),('capture_output','True'),('text','True'))}
+  and ast.get_source_segment(validator['text'],spawn[0]) in grammar[-1][3],
+  'ORDINARY_PR138_ORIGINAL_SEQUENTIAL_GIT_PIPE_OWNER')
+ resource = scope._ordinary_resource_programme_v1
+ _f._preflight_require_v1(resource is scope._ordinary_original_resource_programme_v1[0]
+  and tuple(resource.items())==scope._ordinary_original_resource_programme_v1[1]
+  and resource['fd_demand'][1:] == (12,8),
+  'ORDINARY_PR138_ORIGINAL_NATIVE_DESCRIPTOR_INTERSECTIONS')
+ calls = (ast.get_source_segment(validator['text'],spawn[0]),)
+ cache = scope._ordinary_image_v1['mount_path']/'runtime'/('p'+str(entry.command_index))/'pycache'
+ return _f._ordinary_native_source_programme_v1(scope,bound_row,operands,grammar,
+  cohorts=((('APPLICATION','GIT'),(validator,),calls),),
+  bootstrap_fd_demand=resource['fd_demand'][1],application_fd_demand=9,nofile=12,
+  uses_git=True,pycache_operand=(cache,bound_row,operands,grammar,scope._ordinary_installation_copy_v1))
+
+
+def _facet_fn_readonly_git_cli_execution_v1(scope, registered, command_index):
+ import tools.validation_reliability as _f
+ _f._preflight_require_v1(type(scope) is _f._LinuxPreflightScopeV1
+  and type(registered) is tuple and len(registered) == 4
+  and registered[0] == _f.sys.executable and registered[2:] == ('--repo-root', '.')
+  and registered[1] in (
+   'tools/validate_atomicrows_semantic_field_coverage_enrichment_plan.py',
+   'tools/validate_atomicrows_semantic_value_materialization_owner_authorization_gate.py',
+   'tools/validate_atomicrows_semantic_value_materialization_authorization_handoff_readiness_gate.py')
+  and type(command_index) is int and command_index > 0,
+  'ORDINARY_READONLY_GIT_CLI_EXACT_ORIGINAL_VECTOR')
+ cache = scope._ordinary_image_v1['mount_path'] / 'runtime' / ('p' + str(command_index)) / 'pycache'
+ return (registered[0], '-I', '-S', '-B', '-X', 'pycache_prefix=' + str(cache), *registered[1:])
+
+
+def _facet_fn_readonly_git_cli_branch_v1(scope):
+ import tools.validation_reliability as _f
+ runner, selection = scope._ordinary_runner_owner_v1, scope._ordinary_source_selection_v1
+ binding = runner._ordinary_ci_require_binding_v1(scope, phase=selection._original[2])
+ environment = binding['environment']
+ candidates = ('GITHUB_HEAD_REF', 'GITHUB_REF_NAME', 'GITHUB_REF', 'BRANCH_NAME', 'CI_COMMIT_REF_NAME')
+ selected = None
+ for key in candidates:
+  raw = environment.get(key, '')
+  _f._preflight_require_v1(type(raw) is str, 'ORDINARY_READONLY_GIT_CLI_ORIGINAL_BRANCH_VALUE')
+  text = raw.strip()
+  if not text or text == 'HEAD' or text.startswith('refs/pull/') or _f.re.match(r'^[0-9]+/(head|merge)$', text):
+   continue
+  for prefix in ('refs/heads/', 'refs/remotes/origin/', 'origin/'):
+   if text.startswith(prefix):
+    text = text[len(prefix):]
+    break
+  if text:
+   selected = (key, raw)
+   break
+ _f._preflight_require_v1(selected is not None,
+  'ORDINARY_READONLY_GIT_CLI_SOURCE_PROVED_STANDARD_BRANCH_RETURN')
+ base = getattr(scope, '_ordinary_post_base_environment_v1', None)
+ if base is not None:
+  _f._preflight_require_v1(base[0] is scope and base[1] is scope._ordinary_bound_paths_v1
+   and base[2] is scope._ordinary_bound_plan_v1
+   and type(base[4]) is dict and tuple(base[4].items()) == base[5]
+   and all(base[4].get(key, '') == environment.get(key, '') for key in candidates),
+   'ORDINARY_READONLY_GIT_CLI_SAME_ORIGINAL_BRANCH_ENVIRONMENT')
+ return binding
+
+
+def _facet_fn_readonly_git_cli_native_v1(scope, bound_row, operands, grammar):
+ import tools.validation_reliability as _f
+ import ast
+ import base64
+ entry, execution, position = bound_row
+ source, selection = scope.source, scope._ordinary_source_selection_v1
+ requested = execution.registered_argv
+ _f._preflight_require_v1(type(scope) is _f._LinuxPreflightScopeV1
+  and selection is scope._ordinary_original_source_selection_v1
+  and any(bound_row is item for item in selection._bound)
+  and type(source) is _f._LinuxImmutableSourceSealV2 and source.state == 'READABLE'
+  and source.failure is None and source._ordinary_meter_scope_v1 is scope
+  and entry.argv == execution.execution_argv
+   == _f._ordinary_readonly_git_cli_execution_v1(scope, requested, entry.command_index)
+  and entry.cwd == scope.repository and type(operands) is tuple and len(operands) >= 2
+  and operands[0]['path'] == requested[1] and operands[-1]['path'] == 'tools/validation_reliability.py'
+  and len(grammar) == len(operands), 'ORDINARY_READONLY_GIT_CLI_SAME_SOURCE_OCCURRENCE')
+ binding = _f._ordinary_readonly_git_cli_branch_v1(scope)
+ receiver = scope._ordinary_controller_receiver_v1
+ original = receiver['original']
+ _f._preflight_require_v1(receiver is scope._ordinary_original_controller_receiver_v1
+  and original[0] is receiver and original[1] is scope and original[3] is receiver['bootstrap']
+  and original[4] == receiver['owner'] == (_f.os.getpid(), _f.threading.get_ident())
+  and binding['receiver'] is receiver and binding['bootstrap'] is receiver['bootstrap']
+  and receiver['scope'] is scope and receiver['joined'] and not receiver['errors'],
+  'ORDINARY_READONLY_GIT_CLI_ACTUAL_BOOTSTRAP_SOURCE_OWNER')
+ bootstrap = receiver['bootstrap']
+ for relative, failure in (
+   ('tools/validation_scope_registry.py', 'ORDINARY_READONLY_GIT_CLI_CURRENT_REGISTRY_EQUALS_AUTHENTICATED_BOOTSTRAP'),
+   ('tools/validation_reliability.py', 'ORDINARY_READONLY_GIT_CLI_CURRENT_REL_EQUALS_AUTHENTICATED_BOOTSTRAP')):
+  selected = tuple(item for item in operands if item['path'] == relative)
+  captured = bootstrap['source'][relative]
+  _f._preflight_require_v1(len(selected) == 1 and type(captured) is dict
+   and set(captured) == {'bytes', 'version'} and type(captured['bytes']) is str
+   and base64.b64encode(selected[0]['text'].encode('utf8')).decode('ascii') == captured['bytes'], failure)
+ names = tuple(item['path'] for item in operands)
+ _f._preflight_require_v1(len(names) == len(set(names)), 'ORDINARY_READONLY_GIT_CLI_COMPLETE_UNIQUE_GRAPH')
+ imported = frozenset(name[:-3].replace('/', '.') for name in names if not name.endswith('/__init__.py'))
+ packages = frozenset(name[:-12].replace('/', '.') for name in names if name.endswith('/__init__.py'))
+ stdlib = set()
+ native = []
+ for operand, item in zip(operands, grammar, strict=True):
+  tree, observed = scope._ordinary_source_operand_cache_v1[(operand['path'], 'PYTHON')]
+  _f._preflight_require_v1(observed is operand and item[0] is operand and item[1] == '<module>'
+   and item[2] == operand['text'] and operand['complete'] and operand['error'] is None,
+   'ORDINARY_READONLY_GIT_CLI_WHOLE_PROTECTED_GRAPH')
+  for node in tree.body:
+   if isinstance(node, ast.Import):
+    _f._preflight_require_v1(all(alias.name.split('.')[0] not in ('tools', 'src') for alias in node.names),
+     'ORDINARY_READONLY_GIT_CLI_NO_UNCAPTURED_REPOSITORY_IMPORT')
+    stdlib.update(alias.name.split('.')[0] for alias in node.names)
+   elif isinstance(node, ast.ImportFrom):
+    module = node.module or ''
+    if node.level:
+     _f._preflight_require_v1(node.level == 1, 'ORDINARY_READONLY_GIT_CLI_EXACT_PACKAGE_EDGE')
+     module = operand['path'].rsplit('/', 1)[0].replace('/', '.') + ('.' + module if module else '')
+    if module.split('.')[0] in ('tools', 'src'):
+     _f._preflight_require_v1(module in imported or module in packages
+      or all(module + '.' + alias.name in imported for alias in node.names),
+      'ORDINARY_READONLY_GIT_CLI_CAPTURED_INITIALIZATION_IMPORT')
+    else:
+     stdlib.add(module.split('.')[0])
+  if operand['path'].endswith('/report.py') and '/grand_global_debug_logical_consistency_audit/' not in operand['path']:
+   functions = {node.name: node for node in tree.body if isinstance(node, ast.FunctionDef)}
+   if '_git_stdout' in functions:
+    calls = tuple(node for node in ast.walk(functions['_git_stdout'])
+     if isinstance(node, ast.Call) and isinstance(node.func, ast.Attribute)
+     and isinstance(node.func.value, ast.Name) and node.func.value.id == 'subprocess'
+     and node.func.attr == 'run')
+    _f._preflight_require_v1(len(calls) == 1 and ast.dump(calls[0].args[0], include_attributes=False)
+     == ast.dump(ast.parse('["git", *args]', mode='eval').body, include_attributes=False)
+     and {keyword.arg: ast.dump(keyword.value, include_attributes=False) for keyword in calls[0].keywords}
+     == {key: ast.dump(ast.parse(value, mode='eval').body, include_attributes=False)
+      for key, value in (('cwd', 'repo_root'), ('check', 'False'), ('capture_output', 'True'), ('text', 'True'))},
+     'ORDINARY_READONLY_GIT_CLI_ORIGINAL_SEQUENTIAL_GIT_OWNER')
+    native.append((operand, ast.get_source_segment(operand['text'], calls[0])))
+ cli = scope._ordinary_source_operand_cache_v1[(requested[1], 'PYTHON')][0]
+ main = next(node for node in cli.body if isinstance(node, ast.FunctionDef) and node.name == 'main')
+ guards = tuple(node for node in ast.walk(main) if isinstance(node, ast.If)
+  and isinstance(node.test, ast.Attribute) and node.test.attr == 'write_artifacts')
+ _f._preflight_require_v1(len(guards) == 1 and len(guards[0].body) == 1 and not guards[0].orelse
+  and isinstance(guards[0].body[0], ast.Expr) and isinstance(guards[0].body[0].value, ast.Call)
+  and isinstance(guards[0].body[0].value.func, ast.Name)
+  and guards[0].body[0].value.func.id == 'write_all_artifacts'
+  and '--write-artifacts' not in requested and len(native) == 1,
+  'ORDINARY_READONLY_GIT_CLI_ORIGINAL_WRITER_GUARD_AND_SELECTED_NATIVE_CALL')
+ tools = tuple(name for name in names if name.startswith('tools/'))
+ installation = _f._ordinary_python_repository_loader_v1(scope, tools, frozenset(stdlib), namespace_names=('src',))
+ root = _f.Path(scope.repository)
+ selected_packages = tuple(dict.fromkeys(parent.as_posix() for name in names if name.startswith('src/')
+  for parent in reversed(_f.Path(name).parents) if parent.as_posix() != '.'))
+ def alternative(name, stem):
+  return name in (stem, stem + '.py', stem + '.pyc') or name.startswith(stem + '.') and name.endswith(('.so', '.pyd'))
+ for relative in selected_packages:
+  path = root / relative
+  row, parent = source.row_index.get(str(path)), source.row_index.get(str(path.parent))
+  _f._preflight_require_v1(row is not None and parent is not None and row['kind'] == parent['kind'] == 'directory'
+   and str(path) in source.post and str(path.parent) in source.post
+   and source.directories[str(path)] == tuple((name, source.row_index[str(path/name)]['kind']) for name in row['roster'])
+   and path.name in parent['roster']
+   and not any(alternative(name, path.name) and name != path.name for name in parent['roster'])
+   and ('__init__.py' in row['roster']) == (relative.replace('/', '.') in packages)
+   and not any(alternative(name, '__init__') and name != '__init__.py' for name in row['roster']),
+   'ORDINARY_READONLY_GIT_CLI_ORIGINAL_PACKAGE_AND_NAMESPACE_ROSTERS')
+ for name in names:
+  if not name.startswith('src/') or name.endswith('/__init__.py'): continue
+  path = root / name
+  row = source.row_index[str(path.parent)]
+  _f._preflight_require_v1(path.name in row['roster'] and source.row_index[str(path)]['kind'] == 'file'
+   and not any(alternative(name, path.stem) and name != path.name for name in row['roster']),
+   'ORDINARY_READONLY_GIT_CLI_NO_ALTERNATE_MODULE_LOADER')
+ resource = scope._ordinary_resource_programme_v1
+ _f._preflight_require_v1(resource is scope._ordinary_original_resource_programme_v1[0]
+  and tuple(resource.items()) == scope._ordinary_original_resource_programme_v1[1]
+  and resource['fd_demand'][1:] == (12, 8), 'ORDINARY_READONLY_GIT_CLI_BASELINE_FD_PROGRAMME')
+ calls = tuple(call for operand, call in native)
+ cohort_operands = tuple(operand for operand, call in native)
+ cache = scope._ordinary_image_v1['mount_path'] / 'runtime' / ('p' + str(entry.command_index)) / 'pycache'
+ return _f._ordinary_native_source_programme_v1(scope, bound_row, operands, grammar,
+  cohorts=((('APPLICATION', 'GIT'), cohort_operands, calls),), bootstrap_fd_demand=12,
+  application_fd_demand=9, nofile=12, uses_git=True,
+  pycache_operand=(cache, bound_row, operands, grammar, installation))
+
+
+def _facet_fn_deterministic_readonly_argv_v1(scope, registered, command_index):
+ import tools.validation_reliability as _f
+ _f._preflight_require_v1(type(scope) is _f._LinuxPreflightScopeV1 and type(registered) is tuple
+  and len(registered) > 2 and registered[0] == _f.sys.executable
+  and registered[1] in ('tools/master_plan_traceability_check.py', 'tools/validate_first_pr_scope.py'),
+  'ORDINARY_READONLY_ORIGINAL_EXECUTION_RECIPE')
+ if registered[1] == 'tools/validate_first_pr_scope.py':
+  return (registered[0], '-I', '-S', '-B', *registered[1:])
+ _f._preflight_require_v1(type(command_index) is int and command_index > 0,
+  'ORDINARY_READONLY_ORIGINAL_OCCURRENCE_ORDINAL')
+ root = _f.Path(scope.repository)
+ cache = scope._ordinary_image_v1['mount_path'] / 'runtime' / ('p' + str(command_index)) / 'pycache'
+ prefix = ("import runpy,sys;sys.path.insert(0," + repr(str(root))
+  + ");sys.argv=sys.argv[1:];runpy.run_path(sys.argv[0],run_name='__main__')")
+ return (registered[0], '-I', '-S', '-B', '-X', 'pycache_prefix=' + str(cache),
+  '-c', prefix, *registered[1:])
+
+
+def _facet_fn_deterministic_readonly_native_v1(scope, bound_row, operands, grammar):
+ """Close the original traceability/scope consumers after their V producer."""
+ import tools.validation_reliability as _f
+ import ast
+ entry, execution, position = bound_row
+ registered = execution.registered_argv
+ paths, source = scope._ordinary_bound_paths_v1, scope.source
+ selection = scope._ordinary_source_selection_v1
+ _f._preflight_require_v1(type(scope) is _f._LinuxPreflightScopeV1
+  and type(source) is _f._LinuxImmutableSourceSealV2 and source.state == 'READABLE'
+  and source.failure is None and source._ordinary_meter_scope_v1 is scope
+  and selection is scope._ordinary_original_source_selection_v1
+  and any(bound_row is item for item in selection._bound)
+  and entry.cwd == str(paths.repo_root) == scope.repository
+  and entry.argv == execution.execution_argv
+   == _f._ordinary_deterministic_readonly_argv_v1(scope, registered, entry.command_index),
+  'ORDINARY_READONLY_SAME_SOURCE_PHASE_AND_EXECUTION')
+ module = registered[1]
+ if module == 'tools/master_plan_traceability_check.py':
+  names = (module, 'tools/master_plan_ingest.py')
+  _f._preflight_require_v1(registered == (_f.sys.executable, module,
+   '--master-plan', 'docs/master_plan/QTT_MasterPlan_Current.md',
+   '--section-manifest', str(paths.validation_output_root / 'SectionManifest.json'),
+   '--traceability-report', str(paths.validation_output_root / 'TraceabilityReport.json')),
+   'ORDINARY_TRACEABILITY_ORIGINAL_ROUTED_INPUTS')
+  marker = 'TRACEABILITY_GATE_OK'
+ else:
+  names = (module,)
+  _f._preflight_require_v1(registered == (_f.sys.executable, module, '--repo-root', '.',
+   '--scope-report', str(paths.validation_output_root / 'FirstPrScopeReport.json'),
+   '--block-runtime', '--block-live', '--block-sha', '--block-companion-package',
+   '--block-profit-claims', '--block-source-retrieval', '--block-source-acceptance',
+   '--block-connector-binding', '--block-private-state-fetch', '--block-order-execution',
+   '--block-neural-training', '--block-neural-inference', '--block-external-repo-clone',
+   '--block-package-install-scripts'), 'ORDINARY_SCOPE_ORIGINAL_ROUTED_INPUTS')
+  marker = 'FIRST_PR_SCOPE_GATE_OK'
+ _f._preflight_require_v1(type(operands) is tuple and type(grammar) is tuple
+  and tuple(item['path'] for item in operands) == names and len(operands) == len(grammar),
+  'ORDINARY_READONLY_CAPTURED_ORDERED_IMPORT_GRAPH')
+ stdlib = frozenset(('__future__','argparse','collections','dataclasses','json','pathlib','re','sys','typing'))
+ repository_imports = frozenset(('tools.master_plan_ingest','master_plan_ingest'))
+ for operand, item in zip(operands, grammar, strict=True):
+  tree, observed = scope._ordinary_source_operand_cache_v1[(operand['path'],'PYTHON')]
+  _f._preflight_require_v1(observed is operand and operand['complete'] and operand['error'] is None
+   and item[0] is operand and item[1] == '<module>' and item[2] == operand['text']
+   and ast.dump(tree, include_attributes=False) == ast.dump(ast.parse(operand['text']),include_attributes=False),
+   'ORDINARY_READONLY_WHOLE_ACTUAL_CALLEE_SOURCE')
+  for node in ast.walk(tree):
+   if isinstance(node,ast.Import):
+    _f._preflight_require_v1(all(alias.name in stdlib for alias in node.names),
+     'ORDINARY_READONLY_NO_UNSELECTED_IMPORT_PROVIDER')
+   elif isinstance(node,ast.ImportFrom):
+    _f._preflight_require_v1(node.level == 0 and node.module in stdlib | repository_imports
+     and all(alias.name != '*' for alias in node.names),
+     'ORDINARY_READONLY_CLOSED_CAPTURED_REPOSITORY_IMPORT')
+   elif isinstance(node,ast.Call) and isinstance(node.func,ast.Name):
+    _f._preflight_require_v1(node.func.id not in ('eval','exec','__import__','open'),
+     'ORDINARY_READONLY_NO_DYNAMIC_SOURCE_OR_NATIVE_PROVIDER')
+ cache = None
+ if len(names) > 1:
+  install = _f._ordinary_python_repository_loader_v1(scope, names, stdlib,
+   fallback_names=('master_plan_ingest',))
+  cache = (scope._ordinary_image_v1['mount_path'] / 'runtime'
+   / ('p'+str(entry.command_index)) / 'pycache', bound_row, operands, grammar, install)
+ primary = ast.parse(operands[0]['text'])
+ prints = tuple(node for node in ast.walk(primary) if isinstance(node,ast.Call)
+  and isinstance(node.func,ast.Name) and node.func.id == 'print')
+ _f._preflight_require_v1(len(prints) == 1 and len(prints[0].args) == 1 and not prints[0].keywords
+  and (isinstance(prints[0].args[0],ast.Constant) and prints[0].args[0].value == marker
+   or isinstance(prints[0].args[0],ast.Name) and prints[0].args[0].id == 'SUCCESS_MARKER'
+    and any(isinstance(node,ast.Assign) and isinstance(node.value,ast.Constant)
+     and node.value.value == marker and any(isinstance(target,ast.Name)
+      and target.id == 'SUCCESS_MARKER' for target in node.targets) for node in primary.body)),
+  'ORDINARY_READONLY_SOURCE_FIXED_OUTPUT')
+ resource = scope._ordinary_resource_programme_v1
+ _f._preflight_require_v1(resource is scope._ordinary_original_resource_programme_v1[0]
+  and tuple(resource.items()) == scope._ordinary_original_resource_programme_v1[1]
+  and resource['fd_demand'][1:] == (12,8), 'ORDINARY_READONLY_ORIGINAL_DESCRIPTOR_CELLS')
+ calls = tuple(call for item in grammar for call in item[3])
+ return _f._ordinary_native_source_programme_v1(scope,bound_row,operands,grammar,
+  cohorts=((('APPLICATION',),operands,calls),),bootstrap_fd_demand=12,
+  application_fd_demand=8,nofile=12,stdout_minimum=len(marker.encode('utf8'))+1,
+  **({} if cache is None else {'pycache_operand':cache}))
+
+
+def _facet_fn_readonly_source_family_execution_v1(scope, registered, command_index):
+ import tools.validation_reliability as _f
+ _f._preflight_require_v1(type(scope) is _f._LinuxPreflightScopeV1 and scope._ordinary_selected_v1()
+  and type(registered) is tuple and len(registered)==4
+  and registered[0]==_f.sys.executable and type(registered[1]) is str
+  and registered[1].startswith('tools/') and registered[1].endswith('.py')
+  and registered[2:]==('--repo-root','.')
+  and type(command_index) is int and command_index>0,
+  'ORDINARY_READONLY_SOURCE_FAMILY_ORIGINAL_VECTOR')
+ _f._mapper_portable_relative_v1(registered[1])
+ cache=scope._ordinary_image_v1['mount_path']/'runtime'/('p'+str(command_index))/'pycache'
+ return (registered[0],'-I','-S','-B','-X','pycache_prefix='+str(cache),*registered[1:])
+
+
+def _facet_fn_readonly_source_packages_v1(scope, names):
+ import tools.validation_reliability as _f
+ source=scope.source
+ _f._preflight_require_v1(type(source) is _f._LinuxImmutableSourceSealV2 and source.state=='READABLE'
+  and source.failure is None and type(names) is tuple and names
+  and len(names)==len(set(names)) and all((name,'PYTHON') in scope._ordinary_source_operand_cache_v1 for name in names),
+  'ORDINARY_READONLY_SOURCE_PACKAGES_ORIGINAL_CAPTURE')
+ root=_f.Path(source.root)
+ packages=frozenset(name[:-12].replace('/','.') for name in names if name.endswith('/__init__.py'))
+ directories=tuple(dict.fromkeys(parent.as_posix() for name in names for parent in reversed(_f.Path(name).parents)
+  if parent.as_posix()!='.'))
+ def alternative(value,stem):
+  return value in (stem,stem+'.py',stem+'.pyc') or value.startswith(stem+'.') and value.endswith(('.so','.pyd'))
+ for relative in directories:
+  path=root/relative
+  row,parent=source.row_index.get(str(path)),source.row_index.get(str(path.parent))
+  _f._preflight_require_v1(row is not None and parent is not None and row['kind']==parent['kind']=='directory'
+   and str(path) in source.post and str(path.parent) in source.post
+   and source.directories[str(path)]==tuple((name,source.row_index[str(path/name)]['kind']) for name in row['roster'])
+   and path.name in parent['roster']
+   and not any(alternative(name,path.name) and name!=path.name for name in parent['roster'])
+   and ('__init__.py' in row['roster'])==(relative.replace('/','.') in packages)
+   and not any(alternative(name,'__init__') and name!='__init__.py' for name in row['roster']),
+   'ORDINARY_READONLY_SOURCE_PACKAGE_NATIVE_SOURCE_ROSTERS')
+ for name in names:
+  if name.endswith('/__init__.py'):continue
+  path=root/name;row=source.row_index[str(path.parent)]
+  _f._preflight_require_v1(path.name in row['roster'] and source.row_index[str(path)]['kind']=='file'
+   and not any(alternative(other,path.stem) and other!=path.name for other in row['roster']),
+   'ORDINARY_READONLY_SOURCE_NO_ALTERNATE_MODULE_LOADER')
+ return names
+
+
+def _facet_fn_readonly_source_family_v1(scope, record, row, *, source_byte_limit, source_node_limit):
+    """Acquire the one actual SOURCE graph and close the fixed JSON/Path reader family.
+
+    An unknown import, callback, receiver, CLI or effect is retained as an exact
+    source fact. Only the same original native/cell/resource owner can issue a
+    closed source-derived row; this function runs no application or validator.
+    """
+    import tools.validation_reliability as _f
+    import ast
+    from tools.validation_scope_registry import (
+     _ordinary_readonly_source_family_plan_v1, _ordinary_readonly_source_family_cli_v1)
+    source,selection=scope.source,scope._ordinary_source_selection_v1
+    _f._preflight_require_v1(type(scope) is _f._LinuxPreflightScopeV1 and type(record) is dict
+     and record['scope'] is scope and record['source'] is source
+     and record is scope._ordinary_deterministic_source_ingredients_v1
+     and type(row) is dict and any(row is item for item in record['rows'])
+     and selection is scope._ordinary_original_source_selection_v1
+     and any(row['bound_row'] is item for item in selection._bound)
+     and type(source) is _f._LinuxImmutableSourceSealV2 and source.state=='READABLE'
+     and source.failure is None and source._ordinary_meter_scope_v1 is scope,
+     'ORDINARY_READONLY_SOURCE_FAMILY_SAME_PRE_C_OWNER')
+    entry,execution,position=row['bound_row']
+    registered=execution.registered_argv
+    if not (len(registered)==4 and registered[0]==_f.sys.executable and type(registered[1]) is str
+      and registered[1].startswith('tools/') and registered[1].endswith('.py')
+      and registered[2:]==('--repo-root','.')):
+     return False
+    _f._preflight_require_v1(entry is row['entry'] and execution is row['execution'] and position==row['source_position']
+     and entry.cwd==scope.repository==str(record['paths'].repo_root)
+     and entry.argv==execution.execution_argv
+      ==_f._ordinary_readonly_source_family_execution_v1(scope,registered,entry.command_index),
+     'ORDINARY_READONLY_SOURCE_FAMILY_ACTUAL_REGISTERED_AND_EFFECTIVE_ARGV')
+    module=registered[1]
+    original_tree,original_observed=_f._ordinary_source_operand_v1(scope,record,module,
+     source_byte_limit=source_byte_limit,source_node_limit=source_node_limit)
+    cli_unknown=_ordinary_readonly_source_family_cli_v1(original_tree,module)
+    if cli_unknown:
+     row['unresolved_source_facts']=cli_unknown
+     return True
+    pending=[module];modules=[];observations=[];names=set()
+    root=_f.Path(source.root)
+    def selected(relative):
+     value=source.row_index.get(str(root.joinpath(*relative.split('/'))))
+     return value is not None and value['role']=='repository' and value['kind']=='file' and str(root.joinpath(*relative.split('/'))) in source.post
+    def resolve(name):
+     _f._preflight_require_v1(type(name) is str and name and all(part.isidentifier() for part in name.split('.')),
+      'ORDINARY_READONLY_SOURCE_LITERAL_IMPORT_NAME')
+     stem=name.replace('.','/')
+     values=tuple(path for path in (stem+'.py',stem+'/__init__.py') if selected(path))
+     _f._preflight_require_v1(len(values)<=1,'ORDINARY_READONLY_SOURCE_NO_AMBIGUOUS_MODULE_FILE')
+     return values[0] if values else None
+    def parent_initializers(relative):
+     return tuple((parent/'__init__.py').as_posix() for parent in reversed(_f.Path(relative).parents)
+      if parent.as_posix()!='.' and selected((parent/'__init__.py').as_posix()))
+    def initialization(node):
+     if isinstance(node,(ast.FunctionDef,ast.AsyncFunctionDef,ast.Lambda)):
+      for child in (*getattr(node,'decorator_list',()),*getattr(getattr(node,'args',None),'defaults',()),
+        *tuple(value for value in getattr(getattr(node,'args',None),'kw_defaults',()) if value is not None)):
+       yield from initialization(child)
+      return
+     if node in tree.body and isinstance(node,ast.If) and ast.dump(node.test,include_attributes=False)==ast.dump(ast.parse('__name__ == "__main__"',mode='eval').body,include_attributes=False):return
+     yield node
+     for child in ast.iter_child_nodes(node):yield from initialization(child)
+    while pending:
+     relative=pending.pop(0)
+     if relative in names:continue
+     _f._preflight_require_v1(len(names)<source_node_limit,'ORDINARY_READONLY_SOURCE_ORIGINAL_MODULE_NODE_ALLOWANCE')
+     names.add(relative)
+     tree,observation=_f._ordinary_source_operand_v1(scope,record,relative,
+      source_byte_limit=source_byte_limit,source_node_limit=source_node_limit)
+     modules.append((relative,observation['text'],tree));observations.append(observation)
+     for parent in parent_initializers(relative):
+      if parent not in names:pending.append(parent)
+     package=(relative[:-12].replace('/','.') if relative.endswith('/__init__.py') else relative.rsplit('/',1)[0].replace('/','.'))
+     for node in initialization(tree):
+      if isinstance(node,ast.Import):targets=tuple(alias.name for alias in node.names)
+      elif isinstance(node,ast.ImportFrom):
+       name=node.module or ''
+       if node.level:
+        components=package.split('.')
+        _f._preflight_require_v1(0<node.level<=len(components),'ORDINARY_READONLY_SOURCE_ORIGINAL_RELATIVE_PACKAGE')
+        name='.'.join(components[:len(components)-node.level+1])+('.'+name if name else '')
+       targets=(name,*tuple(name+'.'+alias.name for alias in node.names if alias.name!='*'))
+      else:continue
+      for target in targets:
+       if target.split('.')[0] not in ('tools','src'):continue
+       actual=resolve(target)
+       if actual is not None and actual not in names:pending.extend((*parent_initializers(actual),actual))
+    calculation=_ordinary_readonly_source_family_plan_v1(tuple(modules),module,fresh_execution=entry.argv)
+    row['source_operands']=tuple(observations)
+    calls=calculation['selected_call_nodes']
+    grammar=tuple((observation,'<module>',observation['text'],tuple(ast.get_source_segment(observation['text'],node)
+      for path,node in calls if path==observation['path'] and isinstance(node.func,ast.Attribute)
+      and (node.func.attr in ('read_text','read_bytes','exists','glob','rglob','iterdir','stat','lstat','is_file','is_dir','resolve','cwd')
+       or any((path,node.lineno)==item[:2] for item in (*calculation['initialization_operations'],*calculation['native_process_operations'])))
+      or path==observation['path'] and any((path,node.lineno)==item[:2] for item in calculation['initialization_operations'])))
+     for observation in observations)
+    row['call_grammar']=grammar
+    if calculation['unresolved']:
+     row['unresolved_source_facts']=calculation['unresolved']
+     return True
+    _f._preflight_require_v1(calculation['value_domain']=='CURRENT_SOURCE_JSON_PATH_DATA_ONLY'
+     and not calculation['write_operations']
+     and calculation['module_rows']==tuple(modules) and calculation['entry']==module,
+     'ORDINARY_READONLY_SOURCE_CLOSED_ACTUAL_CALL_AND_VALUE_DOMAIN')
+    _f._ordinary_readonly_source_packages_v1(scope,tuple(value['path'] for value in observations))
+    tools=tuple(value['path'] for value in observations if value['path'].startswith('tools/'))
+    installation=_f._ordinary_python_repository_loader_v1(scope,tools,calculation['stdlib_roots'],namespace_names=('src',))
+    resource=scope._ordinary_resource_programme_v1
+    _f._preflight_require_v1(resource is scope._ordinary_original_resource_programme_v1[0]
+     and tuple(resource.items())==scope._ordinary_original_resource_programme_v1[1]
+     and resource['fd_demand'][1:]==(12,8),
+     'ORDINARY_READONLY_SOURCE_ORIGINAL_DESCRIPTOR_BASELINE')
+    cache=scope._ordinary_image_v1['mount_path']/'runtime'/('p'+str(entry.command_index))/'pycache'
+    operands=row['source_operands']
+    native_calls=tuple(call for item in grammar for call in item[3])
+    uses_git=bool(calculation['native_process_operations'])
+    if calculation['native_data_operations']:
+     row['unresolved_source_facts']=tuple((path,line,'initialized_installation_source_native_'+kind)
+      for path,line,kind,_ in calculation['native_data_operations'])
+     return True
+    row['unresolved_source_facts']=()
+    row['native_programme']=_f._ordinary_native_source_programme_v1(scope,row['bound_row'],operands,grammar,
+     cohorts=((('APPLICATION','GIT') if uses_git else ('APPLICATION',),operands,native_calls),),bootstrap_fd_demand=12,
+     application_fd_demand=9 if uses_git else 8,nofile=12,uses_git=uses_git,
+     pycache_operand=(cache,row['bound_row'],operands,grammar,installation))
+    row['unresolved_source_facts']=()
+    return True
+
+
+def _facet_fn_readonly_source_family_check_v1(scope, bound_row, operands, grammar, *, _native_facts=False):
+ """Recheck the actual original SOURCE row; no wire/cache field is authority."""
+ import tools.validation_reliability as _f
+ import ast
+ from tools.validation_scope_registry import (
+  _ordinary_readonly_source_family_plan_v1, _ordinary_readonly_source_family_cli_v1)
+ selection,source=scope._ordinary_source_selection_v1,scope.source
+ component=scope._ordinary_deterministic_source_ingredients_v1
+ _f._preflight_require_v1(type(scope) is _f._LinuxPreflightScopeV1
+  and component is scope._ordinary_original_deterministic_source_ingredients_v1
+  and component['scope'] is scope and component['source'] is source
+  and selection is scope._ordinary_original_source_selection_v1
+  and any(bound_row is item for item in selection._bound)
+  and type(operands) is tuple and operands and len(operands)==len(grammar)
+  and type(source) is _f._LinuxImmutableSourceSealV2 and source.state=='READABLE'
+  and source.failure is None and source._ordinary_meter_scope_v1 is scope,
+  'ORDINARY_READONLY_SOURCE_FAMILY_ACTUAL_COMPONENT_CHECK')
+ _f._preflight_require_v1(type(_native_facts) is bool,'ORDINARY_READONLY_SOURCE_FAMILY_PRIVATE_NATIVE_PROJECTION')
+ rows=tuple(row for row in component['rows'] if row['bound_row'] is bound_row)
+ _f._preflight_require_v1(len(rows)==1 and rows[0]['source_operands'] is operands
+  and rows[0]['call_grammar'] is grammar and not component['errors']
+  and not rows[0]['unresolved_source_facts'],
+  'ORDINARY_READONLY_SOURCE_FAMILY_EXACT_SOURCE_ROW_CHECK')
+ entry,execution,position=bound_row
+ _f._preflight_require_v1(entry is rows[0]['entry'] and execution is rows[0]['execution']
+  and position==rows[0]['source_position']
+  and entry.argv==execution.execution_argv==_f._ordinary_readonly_source_family_execution_v1(scope,execution.registered_argv,entry.command_index)
+  and operands[0]['path']==execution.registered_argv[1],
+  'ORDINARY_READONLY_SOURCE_FAMILY_CHECKED_VECTOR')
+ names=tuple(operand['path'] for operand in operands)
+ _f._preflight_require_v1(len(names)==len(set(names)),'ORDINARY_READONLY_SOURCE_FAMILY_CHECKED_UNIQUE_GRAPH')
+ modules=[]
+ for operand,item in zip(operands,grammar,strict=True):
+  tree,actual=scope._ordinary_source_operand_cache_v1[(operand['path'],'PYTHON')]
+  _f._preflight_require_v1(actual is operand and item[0] is operand and item[1]=='<module>'
+   and item[2]==operand['text'] and operand['complete'] and operand['error'] is None
+   and source.row_index[operand['row']['path']] is operand['row']
+   and tuple(source.post[operand['row']['path']])==operand['version'],
+   'ORDINARY_READONLY_SOURCE_FAMILY_CHECKED_WHOLE_BODY')
+  modules.append((operand['path'],operand['text'],tree))
+ _f._preflight_require_v1(not _ordinary_readonly_source_family_cli_v1(modules[0][2],names[0]),
+  'ORDINARY_READONLY_SOURCE_FAMILY_CHECKED_CLI')
+ calculated=_ordinary_readonly_source_family_plan_v1(tuple(modules),names[0],fresh_execution=entry.argv)
+ _f._preflight_require_v1(not calculated['unresolved'] and calculated['value_domain']=='CURRENT_SOURCE_JSON_PATH_DATA_ONLY',
+  'ORDINARY_READONLY_SOURCE_FAMILY_CHECKED_CALL_AND_DATA_CLOSURE')
+ def initialization(node):
+  if isinstance(node,(ast.FunctionDef,ast.AsyncFunctionDef,ast.Lambda)):
+   for child in (*getattr(node,'decorator_list',()),*getattr(getattr(node,'args',None),'defaults',()),
+     *tuple(value for value in getattr(getattr(node,'args',None),'kw_defaults',()) if value is not None)):
+    yield from initialization(child)
+   return
+  if node in tree.body and isinstance(node,ast.If) and ast.dump(node.test,include_attributes=False)==ast.dump(ast.parse('__name__ == "__main__"',mode='eval').body,include_attributes=False):return
+  yield node
+  for child in ast.iter_child_nodes(node):yield from initialization(child)
+ root=_f.Path(source.root)
+ for relative,text,tree in modules:
+  package=relative[:-12].replace('/','.') if relative.endswith('/__init__.py') else relative.rsplit('/',1)[0].replace('/','.')
+  for node in initialization(tree):
+   if isinstance(node,ast.Import):targets=tuple(alias.name for alias in node.names)
+   elif isinstance(node,ast.ImportFrom):
+    name=node.module or ''
+    if node.level:
+     pieces=package.split('.')
+     _f._preflight_require_v1(0<node.level<=len(pieces),'ORDINARY_READONLY_SOURCE_CHECKED_RELATIVE_PACKAGE')
+     name='.'.join(pieces[:len(pieces)-node.level+1])+('.'+name if name else '')
+    targets=(name,*tuple(name+'.'+alias.name for alias in node.names if alias.name!='*'))
+   else:continue
+   for target in targets:
+    if target.split('.')[0] not in ('tools','src'):continue
+    stem=target.replace('.','/')
+    actual=tuple(path for path in (stem+'.py',stem+'/__init__.py')
+     if source.row_index.get(str(root/path)) is not None and source.row_index[str(root/path)]['kind']=='file')
+    _f._preflight_require_v1(len(actual)<=1 and all(path in names for path in actual),
+     'ORDINARY_READONLY_SOURCE_CHECKED_COMPLETE_INITIALIZATION_GRAPH')
+ _f._ordinary_readonly_source_packages_v1(scope,names)
+ return (names,calculated) if _native_facts else names
+
+
+def _facet_fn_deterministic_source_ingredients_v1(scope, paths, plan, execution_plan,
+     source, *, source_byte_limit, source_node_limit):
+    """Compile original deterministic facts without granting unknown effects.
+
+    The final original effect installer consumes this component with the
+    other genuine source components. An unresolved source fact never means a
+    read-only application or an empty native/effect programme.
+    """
+    import tools.validation_reliability as _f
+    import ast
+    runner = scope._ordinary_runner_owner_v1
+    _f._preflight_require_v1(type(scope) is _f._LinuxPreflightScopeV1
+     and runner is scope._ordinary_original_runner_owner_v1
+     and runner is _f.sys.modules.get(getattr(runner, '__name__', None))
+     and type(source) is _f._LinuxImmutableSourceSealV2 and source is scope.source
+     and source.state == 'READABLE' and source.failure is None
+     and source._ordinary_meter_scope_v1 is scope
+     and paths is scope._ordinary_bound_paths_v1 and plan is scope._ordinary_bound_plan_v1
+     and execution_plan is scope._ordinary_execution_plan_v1
+     and type(plan) is tuple and len(plan) == len(execution_plan)
+     and type(source_byte_limit) is int and source_byte_limit > 0
+     and type(source_node_limit) is int and source_node_limit > 0
+     and not hasattr(scope, '_ordinary_deterministic_source_ingredients_v1'),
+     'ORDINARY_DETERMINISTIC_EXACT_ORIGINAL_PRE_C_COMPILER')
+    selection = scope._ordinary_source_selection_v1
+    _f._preflight_require_v1(selection is scope._ordinary_original_source_selection_v1
+     and selection.phase in runner.DETERMINISTIC_VALIDATOR_SHARD_PHASES,
+     'ORDINARY_DETERMINISTIC_ORIGINAL_SELECTED_PHASE')
+    bound_rows = runner._ordinary_phase_occurrence_selection_v1(scope, paths, plan,
+     execution_plan, phase=selection.phase)
+    record = dict(scope=scope, paths=paths, plan=plan, execution_plan=execution_plan,
+     source=source, source_selection=selection, bound_rows=bound_rows,
+     rows=[], source_operands=[], errors=[], rp_predecessor_join={})
+    record['original'] = (record, scope, paths, plan, execution_plan, source, selection,
+     bound_rows, record['rows'], record['source_operands'], record['errors'],
+     record['rp_predecessor_join'])
+    record['check'] = record['original_check'] = _f._ordinary_deterministic_source_ingredients_check_v1
+    scope._ordinary_deterministic_source_ingredients_v1 = record
+    scope._ordinary_original_deterministic_source_ingredients_v1 = record
+    try:
+     recipes = _f._ordinary_deterministic_fixed_sources_v1(scope, record,
+      source_byte_limit=source_byte_limit, source_node_limit=source_node_limit)
+     for ordinal, bound_row in enumerate(bound_rows, 1):
+      entry, execution, position = bound_row
+      source_row = selection.rows[ordinal - 1]
+      _f._preflight_require_v1(source_row[0] == position and type(source_row[3]) is tuple
+       and len(source_row[3]) >= 2 and source_row[3][0] == _f.sys.executable
+       and entry is plan[ordinal - 1] and execution is execution_plan[ordinal - 1]
+       and entry.argv == execution.execution_argv and entry.cwd == str(paths.repo_root)
+       and entry.command_index == ordinal and entry.run_id == paths.run_id,
+       'ORDINARY_DETERMINISTIC_ACTUAL_MANIFEST_SOURCE_AND_EXECUTION_OCCURRENCE')
+      module = source_row[3][1]
+      row = dict(entry=entry, execution=execution, source_position=position,
+       bound_row=bound_row, ordinal=ordinal, targets=(), source_operands=(),
+       native_programme=None, run_output_effects=(), call_grammar=(),
+       unresolved_source_facts=(), source_module=module)
+      record['rows'].append(row)
+      literal = source_row[3] == (_f.sys.executable, '-c', runner.PR138_NON_MUTATING_VALIDATION_SCRIPT)
+      selected_key = source_row[3][2] if literal else module
+      if not literal:
+       _f._mapper_portable_relative_v1(module)
+       _f._preflight_require_v1(module.endswith('.py'), 'ORDINARY_DETERMINISTIC_ACTUAL_MODULE_OPERAND')
+      tree, observed = _f._ordinary_source_operand_v1(scope, record,
+       'tools/run_validation_gates.py' if literal else module,
+       source_byte_limit=source_byte_limit, source_node_limit=source_node_limit)
+      row['source_operands'] = (observed,)
+      row['call_grammar'] = ((observed, '<module>', observed['text'], ()),)
+      matches = tuple(recipe for recipe in recipes if recipe[0] == selected_key)
+      _f._preflight_require_v1(len(matches) <= 1, 'ORDINARY_DETERMINISTIC_ONE_REVIEWED_SOURCE_RECIPE')
+      if not matches:
+       if not _f._ordinary_readonly_source_family_v1(scope, record, row,
+         source_byte_limit=source_byte_limit, source_node_limit=source_node_limit):
+        row['unresolved_source_facts'] = (
+         ('selected_module_transitive_application_and_native_programme', module, position),)
+       continue
+      _, kind, source_bodies, output_flags, body_facts = matches[0]
+      operands = [observed] if literal else []
+      grammar = [(observed, '<module>', observed['text'], ())] if literal else []
+      for relative, expected_body in source_bodies:
+       actual_tree, operand = _f._ordinary_source_operand_v1(scope, record, relative,
+        source_byte_limit=source_byte_limit, source_node_limit=source_node_limit)
+       _f._preflight_require_v1(ast.dump(actual_tree, include_attributes=False)
+        == ast.dump(ast.parse(expected_body), include_attributes=False),
+        'ORDINARY_DETERMINISTIC_REVIEWED_WHOLE_SOURCE_BODY:' + relative)
+       operands.append(operand)
+       calls = tuple(ast.get_source_segment(operand['text'], node)
+        for node in ast.walk(actual_tree) if isinstance(node, ast.Call)
+        and isinstance(node.func, ast.Attribute) and node.func.attr in
+         ('read_text', 'write_text', 'open', 'read', 'write', 'stat',
+         'lstat', 'exists', 'is_file', 'mkdir', 'glob', 'rglob',
+         'unlink', 'replace', 'rename', 'run', 'Popen'))
+       grammar.append((operand, '<module>', operand['text'], calls))
+      if kind == 'READ_ONLY_GIT_CLI':
+       _f._preflight_require_v1(type(body_facts) is tuple and len(body_facts) == 1
+        and type(body_facts[0]) is tuple and len(body_facts[0]) == 3
+        and body_facts[0][:2] == ('AUTHENTIC_BOOTSTRAP_SOURCE', 'tools/validation_scope_registry.py')
+        and type(body_facts[0][2]) is int and 0 <= body_facts[0][2] <= len(operands)
+        and not any(item['path'] == body_facts[0][1] for item in operands),
+        'ORDINARY_READONLY_GIT_CLI_ORIGINAL_REGISTRY_GRAPH_POSITION')
+       actual_tree, operand = _f._ordinary_source_operand_v1(scope, record, body_facts[0][1],
+        source_byte_limit=source_byte_limit, source_node_limit=source_node_limit)
+       operands.insert(body_facts[0][2], operand)
+       grammar.insert(body_facts[0][2], (operand, '<module>', operand['text'], ()))
+       actual_tree, operand = _f._ordinary_source_operand_v1(scope, record, 'tools/validation_reliability.py',
+        source_byte_limit=source_byte_limit, source_node_limit=source_node_limit)
+       operands.append(operand)
+       grammar.append((operand, '<module>', operand['text'], ()))
+      row['source_operands'], row['call_grammar'] = tuple(operands), tuple(grammar)
+      if kind == 'GFP':
+       row['targets'] = _f._ordinary_deterministic_gfp_targets_v1(scope, record, row,
+        body_facts[0], body_facts[1], source_byte_limit=source_byte_limit,
+        source_node_limit=source_node_limit)
+      elif kind == 'GFP_VALIDATOR':
+       _f._preflight_require_v1(type(body_facts) is tuple and len(body_facts) == 2
+        and body_facts[0] == 'GFP_VALIDATOR_NO_REPORT_WRITES'
+        and type(body_facts[1]) is str and 74 <= position <= 91
+        and not output_flags and not row['targets'],
+        'ORDINARY_GFP_VALIDATOR_REVIEWED_SOURCE_MODE')
+       row['rp_report_write_status'] = 'SOURCE_BOUND_GFP_VALIDATOR_NO_REPORT_WRITES'
+      elif kind not in ('RUN_OUTPUT', 'READ_ONLY', 'READ_ONLY_GIT_LITERAL', 'READ_ONLY_GIT_CLI'):
+       row['unresolved_source_facts'] = tuple(body_facts)
+       continue
+      _f._preflight_require_v1(not any(flag in entry.argv for flag in
+       ('--write-schema', '--write-manifest', '--write-fixture')),
+       'ORDINARY_DETERMINISTIC_SELECTED_V_ONLY_WRITE_BRANCH')
+      outputs = (_f._ordinary_deterministic_run_output_operands_v1(entry.argv,
+       paths.validation_output_root, output_flags) if kind == 'RUN_OUTPUT' else ())
+      row['run_output_effects'] = tuple(dict(path=actual, flag=flag, kind='FILE',
+       actions=('CREATE', 'WRITE'), source_operands=row['source_operands'],
+       parent_paths=tuple(parent for parent in reversed(actual.parents)
+        if parent == paths.validation_output_root or parent.is_relative_to(paths.validation_output_root)),
+       consumer_programme_required=('original_run_output_storage_owner',
+        'native_view_mapping_and_uid', 'final_consumer_read_handback'))
+       for flag, actual in outputs)
+      resource = scope._ordinary_resource_programme_v1
+      original_resource = scope._ordinary_original_resource_programme_v1
+      _f._preflight_require_v1(resource is original_resource[0]
+       and tuple(resource.items()) == original_resource[1]
+       and type(resource['fd_demand']) is tuple and len(resource['fd_demand']) == 3
+       and resource['fd_demand'][1:] == (12, 8),
+       'ORDINARY_DETERMINISTIC_ORIGINAL_BOOTSTRAP_AND_APPLICATION_COHORT')
+      if kind in ('RUN_OUTPUT', 'READ_ONLY', 'READ_ONLY_GIT_LITERAL', 'READ_ONLY_GIT_CLI'):
+       supplier = (_f._ordinary_deterministic_python_native_v1 if kind == 'RUN_OUTPUT'
+        else _f._ordinary_deterministic_readonly_native_v1 if kind == 'READ_ONLY'
+        else _f._ordinary_readonly_git_cli_native_v1 if kind == 'READ_ONLY_GIT_CLI'
+        else _f._ordinary_pr138_native_v1)
+       row['native_programme'] = supplier(scope, bound_row, row['source_operands'], row['call_grammar'])
+       continue
+      native_calls = tuple(call for item in grammar for call in item[3])
+      row['native_programme'] = _f._ordinary_native_source_programme_v1(scope, bound_row,
+       row['source_operands'], row['call_grammar'],
+       cohorts=((('APPLICATION', 'GIT') if kind == 'GFP' else ('APPLICATION',),
+        row['source_operands'], native_calls),),
+       bootstrap_fd_demand=resource['fd_demand'][1],
+       application_fd_demand=max(resource['fd_demand'][2], 4),
+       nofile=max(resource['fd_demand'][1], resource['fd_demand'][2], 4),
+       uses_git=kind == 'GFP')
+     _f._ordinary_rp_predecessor_source_v1(scope, record,
+      source_byte_limit=source_byte_limit, source_node_limit=source_node_limit)
+     join = record['rp_predecessor_join']
+     if join['rp_row'] is not None:
+      _f._ordinary_rp_writer_source_v1(scope, record, join)
+      rp = join['rp_row']
+      resource = scope._ordinary_resource_programme_v1
+      _f._ordinary_rp_writer_compile_native_v1(scope, record, join,
+       record['bound_rows'][rp['ordinal'] - 1], resource)
+     for row in record['rows']:
+      row['original'] = (row, row['entry'], row['execution'], row['source_position'],
+       row['bound_row'], row['targets'], row['source_operands'], row['native_programme'],
+       row['run_output_effects'], row['call_grammar'], row['unresolved_source_facts'])
+     record['row_originals'] = tuple((row, tuple(row.items()), row['bound_row'],
+      tuple((target, tuple(target.items())) for target in row['targets']),
+      tuple((target, tuple(target.items())) for target in row['run_output_effects']))
+      for row in record['rows'])
+     record['original_source_items'] = tuple((item, tuple(item.items()))
+      for item in record['source_operands'])
+     return _f._ordinary_deterministic_source_ingredients_check_v1(scope, record)
+    except BaseException as error:
+     if not any(error is prior for prior in record['errors']): record['errors'].append(error)
+     if not any(error is prior for prior in scope._ordinary_factory_errors_v1):
+      scope._ordinary_factory_errors_v1.append(error)
+     raise
+
+
+def _facet_fn_deterministic_gfp_names_v1(root_names, sharded_names, *, qku_count,
+  candidate_count, atomicrows_count, pr154_count, label_count_cap, name_limit):
+ import tools.validation_reliability as _f
+ values = (qku_count, candidate_count, atomicrows_count, pr154_count, label_count_cap, name_limit)
+ _f._preflight_require_v1(type(root_names) is tuple and type(sharded_names) is tuple
+  and len(root_names) == len(set(root_names))
+  and len(sharded_names) == len(set(sharded_names))
+  and set(sharded_names).issubset(root_names)
+  and all(type(value) is int and value >= 0 for value in values)
+  and name_limit > 0, 'ORDINARY_GFP_INDEPENDENT_CARDINALITY_AND_NAME_ALLOWANCE')
+ inventory_count = qku_count + candidate_count + atomicrows_count + pr154_count
+ counts = {
+  'PR168_GFP_CanonicalRowKeyMap.report.json': inventory_count,
+  'PR168_GFP_FormulaAssignmentMatrix.report.json': inventory_count,
+  'PR168_GFP_AuthoritativeTruthOverlay.report.json': inventory_count,
+  'PR168_GFP_QKUComputationCoverage.report.json': qku_count,
+  'PR168_GFP_CandidatePacketV1ComputationCoverage.report.json': candidate_count,
+  'PR168_GFP_AtomicRowsComputationCoverage.report.json': atomicrows_count,
+ }
+ for name in sharded_names:
+  _f._preflight_require_v1(type(name) is str and _f.Path(name).name == name
+   and name.startswith('PR168_GFP_') and name.endswith('.report.json'),
+   'ORDINARY_GFP_ORIGINAL_LITERAL_ROOT_NAME')
+  if name not in counts:
+   _f._preflight_require_v1(name in (
+    'PR168_GFP_GlobalLabelInventory.report.json',
+    'PR168_GFP_HistoricalLabelSupersessionMap.report.json',
+    'PR168_GFP_GlobalFalsePositiveAudit.report.json',
+    'PR168_GFP_GlobalFalseNegativeAudit.report.json',
+    'PR168_GFP_GlobalChampionChallengerWatchAudit.report.json',
+    'PR168_GFP_GlobalAlphaProfitEdgeClaimAudit.report.json',
+    'PR168_GFP_GlobalQuantumReadyClaimAudit.report.json',
+    'PR168_GFP_GlobalReplayPaperClaimAudit.report.json',
+    'PR168_GFP_GlobalPositiveLabelDemotion.report.json',
+    'PR168_GFP_GlobalNegativeLabelDemotion.report.json',
+    'PR168_GFP_GlobalChampionChallengerWatchDemotion.report.json',
+    'PR168_GFP_GlobalRepairLabelDemotion.report.json',
+    'PR168_GFP_GlobalNoTradeReaudit.report.json',
+    'PR168_GFP_GlobalLiveEligibilityDemotion.report.json'),
+    'ORDINARY_GFP_SOURCE_FIXED_SHARDED_ROLE')
+   counts[name] = label_count_cap
+ total = len(root_names) + sum((counts[name] + 999) // 1000 for name in sharded_names)
+ _f._preflight_require_v1(total <= name_limit, 'ORDINARY_GFP_PROSPECTIVE_NAME_ALLOCATION')
+ names = tuple('docs/master_plan/generated/' + name for name in root_names)
+ for name in sharded_names:
+  names += tuple('docs/master_plan/generated/pr168_gfp_shards/'
+   + f'{_f.Path(name).stem}.shard_{index:04d}.json'
+   for index in range(1, (counts[name] + 999) // 1000 + 1))
+ _f._preflight_require_v1(len(names) == total and len(names) == len(set(names)),
+  'ORDINARY_GFP_EXACT_LINEAR_ORIGINAL_FORMATTER')
+ return names, tuple((name, counts[name]) for name in sharded_names)
+
+
+def _facet_fn_deterministic_gfp_targets_v1(scope, record, row, root_names, sharded_names,
+     *, source_byte_limit, source_node_limit):
+    """Acquire finite SOURCE inputs and retain a conservative exact name set.
+
+    This does not calculate formulas, classify source claims or execute the
+    domain builder. Label cardinality is bounded by original per-file/per-type
+    grouping, and every prospective name still has independent native/resource
+    admission through the same final effect owner.
+    """
+    import tools.validation_reliability as _f
+    def json_operand(relative):
+     value, observation = _f._ordinary_source_operand_v1(scope, record, relative,
+      source_byte_limit=source_byte_limit, source_node_limit=source_node_limit,
+      source_form='JSON')
+     _f._preflight_require_v1(type(value) is dict, 'ORDINARY_GFP_ORIGINAL_MANIFEST_OBJECT')
+     return value
+    def sharded_count(relative):
+     manifest = json_operand(relative)
+     _f._preflight_require_v1(type(manifest['shard_files']) is list,
+      'ORDINARY_GFP_ORIGINAL_INPUT_SHARD_SEQUENCE')
+     count = 0
+     for selected in manifest['shard_files']:
+      _f._preflight_require_v1(type(selected) is str,
+       'ORDINARY_GFP_ORIGINAL_LITERAL_INPUT_SHARD_PATH')
+      _f._mapper_portable_relative_v1(selected)
+      records = json_operand(selected).get('records', [])
+      _f._preflight_require_v1(type(records) is list,
+       'ORDINARY_GFP_ORIGINAL_INPUT_RECORD_SEQUENCE')
+      count += len(records)  # Preserve repeated original shard observations.
+     return count
+    qku_count = sharded_count('docs/master_plan/generated/PR161C_QKU9360PrimaryMaterializationRegistry.report.json')
+    candidate_count = sharded_count('docs/master_plan/generated/PR162D_QKUReplayPaperCandidateExpansion.report.json')
+    pr154 = json_operand('docs/master_plan/generated/PR154_AtomicRowsParameterDefaultValueMaterializationGate.report.json')
+    pr154_records = pr154.get('per_target_materialization_records', [])
+    _f._preflight_require_v1(type(pr154_records) is list, 'ORDINARY_GFP_ORIGINAL_PR154_SEQUENCE')
+    raw, observed = _f._ordinary_source_operand_v1(scope, record,
+     'docs/master_plan/atomic_rows/AtomicRows.bundle.jsonl',
+     source_byte_limit=source_byte_limit, source_node_limit=source_node_limit,
+     source_form='BINARY')
+    text = raw.decode('utf-8', 'strict').replace('\r\n', '\n').replace('\r', '\n')
+    atomicrows_count = sum(1 for line in text.split('\n') if line.strip())
+    eligible = 0
+    for original_row in record['source'].rows:
+     if original_row['role'] != 'repository' or original_row['kind'] != 'file':
+      continue
+     actual = _f.Path(original_row['path'])
+     relative = actual.relative_to(_f.Path(record['source'].root)).as_posix()
+     if relative.split('/', 1)[0] not in ('docs', 'src', 'tools', 'tests'):
+      continue
+     if relative.startswith('docs/master_plan/generated/PR168_GFP_') or '/pr168_gfp_shards/' in relative:
+      continue
+     if ('pr168_gfp_real_computation' in relative or relative.startswith('tests/pr168_gfp')
+       or actual.name.startswith('validate_pr168_gfp_')):
+      continue
+     if actual.suffix.lower() in ('.json', '.jsonl', '.md', '.py', '.txt'):
+      eligible += 1
+    names, bounds = _f._ordinary_deterministic_gfp_names_v1(root_names, sharded_names,
+     qku_count=qku_count, candidate_count=candidate_count,
+     atomicrows_count=atomicrows_count, pr154_count=len(pr154_records),
+     label_count_cap=10 * eligible, name_limit=source_node_limit)
+    row['cardinality_inputs'] = (qku_count, candidate_count, atomicrows_count,
+     len(pr154_records), eligible, 10, bounds)
+    source_operands = tuple(record['source_operands'])
+    selected = tuple(dict.fromkeys((*names, 'docs/master_plan/generated',
+     'docs/master_plan/generated/pr168_gfp_shards')))
+    targets = []
+    for relative in selected:
+     path = _f.Path(record['paths'].repo_root).joinpath(*relative.split('/'))
+     original_row = record['source'].row_index.get(str(_f.Path(record['source'].root).joinpath(*relative.split('/'))))
+     kind = 'FILE' if relative in names else 'DIRECTORY'
+     _f._preflight_require_v1(original_row is None or original_row['role'] == 'repository'
+      and original_row['kind'] == ('file' if kind == 'FILE' else 'directory'),
+      'ORDINARY_GFP_ORIGINAL_TARGET_KIND')
+     targets.append(dict(path=relative, kind=kind,
+      actions=('CREATE', 'WRITE') if kind == 'FILE' else ('CREATE',),
+      original_members=() if original_row is None else (relative,),
+      required_members=selected,
+      parent_paths=tuple(str(parent) for parent in reversed(_f.PurePosixPath(relative).parents)
+       if str(parent) != '.'), source_operands=source_operands))
+    return tuple(targets)
+
+
+def _facet_fn_native_source_programme_check_v1(scope, record):
+ import tools.validation_reliability as _f
+ _pytest_need = _f._preflight_require_v1
+ import ast
+ _pytest_need(type(scope) is _f._LinuxPreflightScopeV1 and type(record) is dict
+  and record['scope'] is scope and record['source'] is scope.source
+  and record['check'] is record['original_check'] is _f._ordinary_native_source_programme_check_v1,
+  'ORDINARY_NATIVE_SOURCE_PROGRAMME_ORIGINAL_CHECKER')
+ original = record['original']
+ _pytest_need(type(original) is tuple and len(original) == 8
+  and original[0] is record and original[1] is scope
+  and original[2] is record['bound_row'] and original[3] is record['source_operands']
+  and original[4] is record['call_grammar'] and original[5] is record['tool_operands']
+  and original[6] is record['errors'] and original[7] == (_f.os.getpid(), _f.threading.get_ident())
+  and not record['errors'] and tuple((key, value) for key, value in record.items()
+   if key != 'original_items') == record['original_items'],
+  'ORDINARY_NATIVE_SOURCE_PROGRAMME_FROZEN_IDENTITY_AND_VALUES')
+ selection = scope._ordinary_source_selection_v1
+ bound_row = record['bound_row']
+ _pytest_need(selection is scope._ordinary_original_source_selection_v1
+  and any(bound_row is row for row in selection._bound)
+  and type(bound_row) is tuple and len(bound_row) == 3
+  and record['entry'] is bound_row[0] and record['execution'] is bound_row[1]
+  and type(record['source_position']) is int and record['source_position'] == bound_row[2],
+  'ORDINARY_NATIVE_SOURCE_PROGRAMME_EXACT_SELECTED_OCCURRENCE')
+ for operand, snapshot in record['original_source_items']:
+  _pytest_need(any(operand is item for item in record['source_operands'])
+   and tuple(operand.items()) == snapshot and operand['complete']
+   and operand['error'] is None,
+   'ORDINARY_NATIVE_SOURCE_PROGRAMME_ORIGINAL_SOURCE_OPERAND')
+  if operand['source_form'] == 'PYTHON':
+   _pytest_need(operand['row'] is scope.source.row_index[operand['row']['path']]
+    and operand['version'] == tuple(scope.source.post[operand['row']['path']]),
+    'ORDINARY_NATIVE_SOURCE_PROGRAMME_ORIGINAL_REPOSITORY_SOURCE')
+   cache = scope._ordinary_source_operand_cache_v1
+   tree, observed = cache[(operand['path'], 'PYTHON')]
+   _pytest_need(cache is scope._ordinary_original_source_operand_cache_v1,
+    'ORDINARY_NATIVE_SOURCE_PROGRAMME_ORIGINAL_REPOSITORY_CACHE')
+  else:
+   _pytest_need(operand['source_form'] == 'INSTALLATION_PYTHON',
+    'ORDINARY_NATIVE_SOURCE_PROGRAMME_PYTHON_SOURCE_DOMAIN')
+   graph = scope._ordinary_pytest_source_graph_v1
+   _pytest_need(graph is scope._ordinary_original_pytest_source_graph_v1
+    and _f._ordinary_pytest_source_graph_check_v1(scope, graph) is graph
+    and any(operand is value for value in graph['installation_source_operands'])
+    and operand['capture_owner'] is graph,
+    'ORDINARY_NATIVE_SOURCE_PROGRAMME_ORIGINAL_INSTALLED_GRAPH_CAPTURE')
+   cache = graph['installation_operand_cache']
+   tree, observed = cache[(operand['path'], 'INSTALLATION_PYTHON')]
+  _pytest_need(observed is operand and ast.dump(tree, include_attributes=False)
+   == ast.dump(ast.parse(operand['text']), include_attributes=False),
+   'ORDINARY_NATIVE_SOURCE_PROGRAMME_RETAINED_AST_BODY')
+ for operand, name, body, native_calls in record['call_grammar']:
+  _pytest_need(any(operand is item for item in record['source_operands'])
+   and type(name) is str and name and type(body) is str
+   and type(native_calls) is tuple,
+   'ORDINARY_NATIVE_SOURCE_PROGRAMME_CLOSED_BODY_GRAMMAR')
+  cache = (scope._ordinary_source_operand_cache_v1 if operand['source_form'] == 'PYTHON'
+   else scope._ordinary_pytest_source_graph_v1['installation_operand_cache'])
+  tree, observed = cache[(operand['path'], operand['source_form'])]
+  _pytest_need(observed is operand, 'ORDINARY_NATIVE_SOURCE_PROGRAMME_SAME_OPERAND_CACHE')
+  if name == '<module>':
+   _pytest_need(body == operand['text'],
+    'ORDINARY_NATIVE_SOURCE_PROGRAMME_FULL_MODULE_BODY')
+   selected = tree
+  else:
+   selected = tree
+   for part in name.split('.'):
+    matches = tuple(node for node in getattr(selected, 'body', ())
+     if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef))
+     and node.name == part)
+    _pytest_need(len(matches) == 1,
+     'ORDINARY_NATIVE_SOURCE_PROGRAMME_EXACT_QUALIFIED_BODY')
+    selected = matches[0]
+   _pytest_need(ast.dump(ast.parse(body).body[0], include_attributes=False)
+    == ast.dump(selected, include_attributes=False),
+    'ORDINARY_NATIVE_SOURCE_PROGRAMME_BODY_EQUALITY')
+  actual_calls = (tuple(ast.get_source_segment(operand['text'], node)
+   for node in ast.walk(selected) if isinstance(node, ast.Call)) if native_calls else ())
+  _pytest_need(all(type(call) is str and call in actual_calls for call in native_calls),
+   'ORDINARY_NATIVE_SOURCE_PROGRAMME_NATIVE_CALL_OPERANDS')
+ installation = scope._ordinary_installation_copy_v1
+ _pytest_need(installation is scope._ordinary_original_installation_copy_v1
+  and installation['complete'] and not installation['errors']
+  and scope._ordinary_installation_record_v1(installation['install']) is installation
+  and record['tool_operands'][0] is installation,
+  'ORDINARY_NATIVE_SOURCE_PROGRAMME_ACTUAL_INSTALLATION_HOLDER')
+ if len(record['tool_operands']) == 2:
+  _pytest_need(record['tool_operands'][1] is scope._ordinary_git_bindings_v1
+   and record['tool_operands'][1]['original_source'] is scope.source,
+   'ORDINARY_NATIVE_SOURCE_PROGRAMME_ACTUAL_GIT_SOURCE_BINDING')
+ _pytest_need(len(record['tool_operands']) in (1, 2)
+  and type(record['cohorts']) is tuple and record['cohorts']
+  and all(type(cohort) is tuple and len(cohort) == 3
+   and type(cohort[0]) is tuple and cohort[0]
+   and all(type(actor) is str and actor for actor in cohort[0])
+   and type(cohort[1]) is tuple
+   and all(any(operand is item for item in record['source_operands']) for operand in cohort[1])
+   and type(cohort[2]) is tuple and (cohort[2] or len(cohort[0]) == 1)
+   and all(type(call) is str and any(call in grammar[3] for grammar in record['call_grammar']
+    if any(grammar[0] is operand for operand in cohort[1])) for call in cohort[2])
+   for cohort in record['cohorts'])
+  and type(record['tasks']) is int and record['tasks'] == max(len(item[0]) for item in record['cohorts'])
+  and all(type(record[key]) is int and record[key] > 0 for key in
+   ('nofile', 'bootstrap_fd_demand', 'application_fd_demand'))
+  and record['nofile'] >= max(record['bootstrap_fd_demand'], record['application_fd_demand'])
+  and all(type(record[key]) is int and record[key] >= 0 for key in ('stdout_minimum', 'stderr_minimum')),
+  'ORDINARY_NATIVE_SOURCE_PROGRAMME_SOURCE_COHORT_AND_PREFIX_MINIMA')
+ if 'pycache_operand' in record:
+  cache = record['pycache_operand']
+  _pytest_need(type(cache) is tuple and len(cache) == 5,
+   'ORDINARY_PYTHON_RECIPE_ORIGINAL_SOURCE_OWNED_CACHE_OPERAND')
+  entry, execution, position = bound_row
+  source_names = ('tools/validate_atomicrows_row_family_source_manifest_currentization.py',
+   'tools/build_master_plan_section_coverage_report.py',
+   'tools/validate_master_plan_section_coverage.py', 'tools/master_plan_ingest.py')
+  if execution.registered_argv == (_f.sys.executable, '-c', scope._ordinary_runner_owner_v1.PR138_NON_MUTATING_VALIDATION_SCRIPT):
+   source_names = _f._ordinary_pr138_source_names_v1()
+   _pytest_need(record['tasks'] == 2 and record['bootstrap_fd_demand'] == 12
+    and record['application_fd_demand'] == 9 and record['nofile'] == 12
+    and len(record['tool_operands']) == 2
+    and record['cohorts'][0][0] == ('APPLICATION', 'GIT'),
+    'ORDINARY_PR138_SOURCE_NATIVE_EXACT_ACTOR_AND_FD_MINIMA')
+   expected_argv = _f._ordinary_pr138_execution_argv_v1(scope, execution.registered_argv, entry.command_index)
+  elif execution.registered_argv[1:2] in (('tools/validate_atomicrows_semantic_field_coverage_enrichment_plan.py',), ('tools/validate_atomicrows_semantic_value_materialization_owner_authorization_gate.py',), ('tools/validate_atomicrows_semantic_value_materialization_authorization_handoff_readiness_gate.py',)):
+   source_names = tuple(item['path'] for item in record['source_operands'])
+   _pytest_need(record['tasks'] == 2 and record['bootstrap_fd_demand'] == 12
+    and record['application_fd_demand'] == 9 and record['nofile'] == 12
+    and len(record['tool_operands']) == 2 and record['cohorts'][0][0] == ('APPLICATION', 'GIT')
+    and source_names[0] == execution.registered_argv[1]
+    and source_names[-1] == 'tools/validation_reliability.py',
+    'ORDINARY_READONLY_GIT_CLI_SOURCE_NATIVE_EXACT_MINIMA')
+   _f._ordinary_readonly_git_cli_branch_v1(scope)
+   expected_argv = _f._ordinary_readonly_git_cli_execution_v1(scope, execution.registered_argv, entry.command_index)
+  elif execution.registered_argv[:2] == (_f.sys.executable, 'tools/master_plan_traceability_check.py'):
+   source_names = ('tools/master_plan_traceability_check.py', 'tools/master_plan_ingest.py')
+   expected_argv = _f._ordinary_deterministic_readonly_argv_v1(scope,
+    execution.registered_argv, entry.command_index)
+  elif (len(execution.registered_argv)==4 and execution.registered_argv[2:]==('--repo-root','.')
+    and execution.registered_argv[1] not in source_names):
+   source_names,family = _f._ordinary_readonly_source_family_check_v1(scope, bound_row,
+    record['source_operands'], record['call_grammar'],_native_facts=True)
+   uses_git=bool(family['native_process_operations'])
+   _pytest_need(record['tasks']==(2 if uses_git else 1) and record['bootstrap_fd_demand']==12
+    and record['application_fd_demand']==(9 if uses_git else 8) and record['nofile']==12
+    and len(record['tool_operands'])==(2 if uses_git else 1) and len(record['cohorts'])==1
+    and record['cohorts'][0][0]==(('APPLICATION','GIT') if uses_git else ('APPLICATION',)),
+    'ORDINARY_READONLY_SOURCE_FAMILY_EXACT_NATIVE_MINIMA')
+   expected_argv = _f._ordinary_readonly_source_family_execution_v1(scope,
+    execution.registered_argv, entry.command_index)
+  else:
+   expected_argv = (execution.registered_argv[0], '-I', '-S', '-B', '-X',
+    'pycache_prefix=' + str(cache[0]), *execution.registered_argv[1:])
+  _pytest_need(type(cache) is tuple and len(cache) == 5
+   and cache[1] is bound_row and cache[2] is record['source_operands']
+   and cache[3] is record['call_grammar'] and cache[4] is installation
+   and type(entry.command_index) is int and entry.command_index > 0
+   and cache[0] == scope._ordinary_image_v1['mount_path'] / 'runtime'
+    / ('p' + str(entry.command_index)) / 'pycache'
+   and tuple(item['path'] for item in record['source_operands']) == source_names
+   and (execution.registered_argv[:2] == (_f.sys.executable, source_names[0])
+    or source_names == _f._ordinary_pr138_source_names_v1()
+    and execution.registered_argv == (_f.sys.executable, '-c', scope._ordinary_runner_owner_v1.PR138_NON_MUTATING_VALIDATION_SCRIPT))
+   and entry.argv == execution.execution_argv == expected_argv
+   and all(item[0] is operand and item[1] == '<module>' and item[2] == operand['text']
+    for operand, item in zip(record['source_operands'], record['call_grammar'], strict=True)),
+   'ORDINARY_PYTHON_RECIPE_ORIGINAL_SOURCE_OWNED_CACHE_OPERAND')
+ return record
+
+
+def _facet_fn_native_source_programme_v1(scope, bound_row, source_operands, call_grammar,
+  *, cohorts, bootstrap_fd_demand, application_fd_demand, nofile,
+  stdout_minimum=0, stderr_minimum=0, uses_git=False, pycache_operand=None):
+ import tools.validation_reliability as _f
+ _f._preflight_require_v1(type(scope) is _f._LinuxPreflightScopeV1 and type(bound_row) is tuple
+  and len(bound_row) == 3 and type(source_operands) is tuple and source_operands
+  and type(call_grammar) is tuple and call_grammar and type(cohorts) is tuple and cohorts
+  and type(uses_git) is bool,
+  'ORDINARY_NATIVE_SOURCE_PROGRAMME_TYPED_SOURCE_RECIPE')
+ installation = scope._ordinary_installation_copy_v1
+ tools = (installation, scope._ordinary_git_bindings_v1) if uses_git else (installation,)
+ record = dict(scope=scope, source=scope.source, entry=bound_row[0], execution=bound_row[1],
+  source_position=bound_row[2], bound_row=bound_row, source_operands=source_operands,
+  call_grammar=call_grammar, tool_operands=tools, cohorts=cohorts,
+  bootstrap_fd_demand=bootstrap_fd_demand, application_fd_demand=application_fd_demand,
+  nofile=nofile, tasks=max(len(cohort[0]) for cohort in cohorts),
+  stdout_minimum=stdout_minimum, stderr_minimum=stderr_minimum, errors=[])
+ if pycache_operand is not None:
+  record['pycache_operand'] = pycache_operand
+ record['check'] = record['original_check'] = _f._ordinary_native_source_programme_check_v1
+ record['original_source_items'] = tuple((item, tuple(item.items())) for item in source_operands)
+ record['original'] = (record, scope, bound_row, source_operands, call_grammar,
+  tools, record['errors'], (_f.os.getpid(), _f.threading.get_ident()))
+ record['original_items'] = tuple(record.items())
+ return _f._ordinary_native_source_programme_check_v1(scope, record)
+
+
+def _facet_fn_selected_transport_environment_v1(scope, entry, environment):
+ import tools.validation_reliability as _f
+ runner = scope._ordinary_runner_owner_v1
+ selection = scope._ordinary_source_selection_v1
+ _f._preflight_require_v1(type(scope) is _f._LinuxPreflightScopeV1
+  and runner is scope._ordinary_original_runner_owner_v1
+  and type(selection) is runner._OrdinarySourceSelectionV1
+  and selection is scope._ordinary_original_source_selection_v1
+  and type(entry) is _f.CommandEvidencePlanEntry
+  and entry.phase == selection._original[2] != runner.POST_VALIDATION_PHASE
+  and type(environment) is dict
+  and all(type(key) is str and type(value) is str for key, value in environment.items()),
+  'ORDINARY_SELECTED_NATIVE_ORIGINAL_RUNNER_AND_BASE_ENVIRONMENT')
+ selection._guard()
+ paths, plan = scope._ordinary_bound_paths_v1, scope._ordinary_bound_plan_v1
+ bound_rows = runner._ordinary_phase_occurrence_selection_v1(scope, paths, plan,
+  scope._ordinary_execution_plan_v1, phase=selection._original[2])
+ _f._preflight_require_v1(any(entry is row[0] for row in bound_rows)
+  and entry is plan[entry.command_index - 1]
+  and entry.run_id == paths.run_id and entry.cwd == str(paths.repo_root),
+  'ORDINARY_SELECTED_NATIVE_SOURCE_ROW_AND_ALLOCATED_OCCURRENCE')
+ child = {key: value for key, value in environment.items()
+  if key.upper() not in _f._SCAN_TRANSPORT_KEYS}
+ role = _f._rp5a_consumer_role_v1(entry.argv, paths.repo_root)
+ if role is None:
+  return child
+ policy = runner._ordinary_rp5a_source_policy_checked_v1(
+  scope._ordinary_resource_programme_v1['rp5a_source_policy'], scope)
+ selected = tuple(_f._rp5a_consumer_role_v1(row[0].argv, paths.repo_root)
+  for row in bound_rows)
+ profile_count = sum(1 + int(value == 'SCANNER') for value in selected if value is not None)
+ maxima = policy['maxima']
+ limits = _f._ScanRunReadLimits(maxima['metadata_bytes'], maxima['metadata_nodes'],
+  maxima['metadata_depth'], profile_count)
+ controlled = {_f.RUN_ID_ENV, _f.EVIDENCE_ROOT_ENV, _f.PROCESS_ROOT_ENV}
+ child = {key: value for key, value in child.items() if key.upper() not in controlled}
+ child.update({_f.RUN_ID_ENV: paths.run_id, _f.EVIDENCE_ROOT_ENV: str(paths.evidence_root),
+  _f.PROCESS_ROOT_ENV: str(paths.process_root)})
+ values = (entry.command_index, entry.phase, len(plan), policy['original_cutoffs'][1],
+  limits.byte_limit, limits.node_limit, limits.depth_limit, limits.profile_limit)
+ child.update({key: str(value) for key, value in zip(_f._SCAN_TRANSPORT_KEYS, values, strict=True)})
+ return child
+
+
+def _facet_fn_selected_occurrence_programme_v1(scope, paths, plan, execution_plan,
+  resource_programme, *, environment):
+ import tools.validation_reliability as _f
+ _pytest_need = _f._preflight_require_v1
+ runner = scope._ordinary_runner_owner_v1
+ _pytest_need(type(scope) is _f._LinuxPreflightScopeV1
+  and runner is scope._ordinary_original_runner_owner_v1
+  and runner is _f.sys.modules.get(getattr(runner, '__name__', None))
+  and type(environment) is dict and all(type(key) is str and type(value) is str
+   for key, value in environment.items())
+  and len({key.upper() for key in environment}) == len(environment),
+  'ORDINARY_SELECTED_NATIVE_ORIGINAL_RUNNER_AND_BASE_ENVIRONMENT')
+ if entry_phase := scope._ordinary_source_selection_v1._original[2]:
+  if entry_phase in runner.PYTEST_SHARD_COMMANDS:
+   controller = scope._ordinary_controller_run_v1
+   saved = controller['candidate_environment_original']
+   _pytest_need(controller is scope._ordinary_original_controller_run_v1
+    and saved[0] is controller and saved[1] is scope
+    and saved[2] is controller['candidate_environment'] is environment
+    and saved[3] == tuple(environment.items())
+    and saved[4] is _f._ordinary_supported_candidate_v1
+    and saved[5] is saved[4].__code__
+    and saved[6] == (_f.os.getpid(), _f.threading.get_ident()),
+    'ORDINARY_SELECTED_PYTEST_SAME_ORIGINAL_CANDIDATE_ENVIRONMENT')
+ scope._ordinary_precursor_ready_v1()
+ selection = scope._ordinary_source_selection_v1
+ _pytest_need(selection is scope._ordinary_original_source_selection_v1
+  and paths is scope._ordinary_bound_paths_v1 and plan is scope._ordinary_bound_plan_v1
+  and execution_plan is scope._ordinary_execution_plan_v1
+  and resource_programme is scope._ordinary_resource_programme_v1
+  and resource_programme is scope._ordinary_original_resource_programme_v1[0]
+  and selection._original[2] != runner.POST_VALIDATION_PHASE,
+  'ORDINARY_SELECTED_NATIVE_EXACT_NON_POST_BINDING')
+ bound_rows = runner._ordinary_phase_occurrence_selection_v1(scope, paths, plan,
+  execution_plan, phase=selection._original[2])
+ effects = scope._ordinary_effect_programme_record_v1()
+ _pytest_need(effects['bound_rows'] is bound_rows
+  and len(effects['rows']) == len(bound_rows),
+  'ORDINARY_SELECTED_NATIVE_COMPLETE_SOURCE_EFFECT_ROWS')
+ allocations = _f._ordinary_phase_allocation_rows_v1(scope, resource_programme)
+ _pytest_need(type(allocations) is tuple and len(allocations) == len(bound_rows)
+  and not hasattr(scope, '_ordinary_post_base_environment_v1'),
+  'ORDINARY_SELECTED_NATIVE_ONE_BASE_ENVIRONMENT_AND_ALLOCATIONS')
+ scope._ordinary_post_base_environment_v1 = (scope, paths, plan, resource_programme,
+  environment, tuple(environment.items()), (_f.os.getpid(), _f.threading.get_ident()))
+ origin, app_end, custody_end, final_end = resource_programme['original_cutoffs']
+ startup_end = origin + 3 * (app_end - origin) // 4
+ _pytest_need(_f.time.monotonic_ns() < startup_end < app_end < custody_end < final_end,
+  'ORDINARY_SELECTED_NATIVE_ORIGINAL_FIXED_WINDOWS')
+ runtime_root = scope._ordinary_image_v1['mount_path'] / 'runtime'
+ git_controls = tuple((key, value) for key, value in
+  scope._ordinary_parent_git_environment_v1(paths.repo_root).items() if key.startswith('GIT_'))
+ compiled = []
+ rp5a_keys = ('rp5a_reader_output_bytes', 'rp5a_reader_scratch_bytes', 'rp5a_reader_readback_bytes',
+  'rp5a_scanner_output_bytes', 'rp5a_scanner_scratch_bytes', 'rp5a_scanner_readback_bytes',
+  'rp5a_candidate_read_bytes', 'rp5a_frame_scratch_bytes', 'rp5a_frame_reread_bytes',
+  'rp5a_fence_metadata_calls', 'rp5a_fence_native_read_bytes',
+  'rp5a_manager_fdinfo_records', 'rp5a_manager_fdinfo_bytes', 'rp5a_manager_borrow_fds')
+ for ordinal, (bound_row, effect, allocation) in enumerate(zip(bound_rows, effects['rows'], allocations), 1):
+  entry, execution, position = bound_row
+  native = _f._ordinary_native_source_programme_check_v1(scope, effect['native_programme'])
+  _pytest_need(effect['entry'] is entry and effect['execution'] is execution
+   and effect['bound_row'] is bound_row and native['bound_row'] is bound_row
+   and allocation['native_programme'] is native
+   and allocation['source_position'] == position
+   and entry is plan[ordinal - 1] and execution is execution_plan[ordinal - 1]
+   and entry.command_index == ordinal and entry.phase == selection._original[2]
+   and entry.argv == execution.execution_argv and entry.cwd == str(paths.repo_root),
+   'ORDINARY_SELECTED_NATIVE_SOURCE_ROW_AND_ALLOCATED_OCCURRENCE')
+  cell = runtime_root / ('p' + str(ordinal))
+  selected_environment = _f._ordinary_selected_transport_environment_v1(scope, entry, environment)
+  for key in tuple(selected_environment):
+   if key.upper().startswith('GIT_'): del selected_environment[key]
+  selected_git_controls = (git_controls if len(native['tool_operands']) != 2
+   else tuple(scope._ordinary_selected_git_environment_v1(native).items()))
+  selected_environment.update(selected_git_controls)
+  if len(native['tool_operands']) == 2:
+   selected_environment['PATH'] = '/usr/bin'
+  for key in ('TMPDIR', 'TEMP', 'TMP'):
+   selected_environment[key] = str(cell)
+  selected_environment['QTT_LINUX_PREFLIGHT_CONTROL'] = str(scope.control)
+  selected_environment['QTT_LINUX_PREFLIGHT_RUNTIME'] = str(cell)
+  row = dict(entry=entry, execution_entry=execution, original_position=position,
+   argv=entry.argv, environment=selected_environment,
+   deadline_ns=app_end, startup_deadline_ns=startup_end,
+   stdout_bytes=allocation['stdout_bytes'], stderr_bytes=allocation['stderr_bytes'],
+   tasks=allocation['tasks'], nofile=allocation['nofile'],
+   startup_observation_limit=32, terminal_pending_observation_limit=32,
+   runtime_bytes=None, runtime_inodes=None, runtime_path=cell,
+   bootstrap_fd_demand=allocation['bootstrap_fd_demand'],
+   application_fd_demand=allocation['application_fd_demand'], git_controls=selected_git_controls)
+  role = _f._rp5a_consumer_role_v1(entry.argv, paths.repo_root)
+  if role is not None:
+   for key in rp5a_keys: row[key] = allocation[key]
+  compiled.append(row)
+ return tuple(compiled)
+
+
+def _facet_fn_compile_selected_process_programme_v1(scope, occurrence_program, fd_program):
+ import tools.validation_reliability as _f
+ import resource
+ runner = scope._ordinary_runner_owner_v1
+ selection = scope._ordinary_source_selection_v1
+ _f._preflight_require_v1(type(scope) is _f._LinuxPreflightScopeV1
+  and selection is scope._ordinary_original_source_selection_v1
+  and selection._original[2] != runner.POST_VALIDATION_PHASE
+  and type(occurrence_program) is tuple and occurrence_program
+  and type(fd_program) is dict
+  and tuple(fd_program.items()) == (('controller', 1536), ('fork_prefix', 1536),
+   ('application', 64), ('launcher', 64), ('query', 64),
+   ('prefix_capture', 128), ('manager_borrow', 128), ('additional', 576))
+  and sum(fd_program.values()) == 4096,
+  'ORDINARY_SELECTED_NATIVE_ORIGINAL_WHOLE_OWNER_FD_PARTITION')
+ soft, hard = scope._ordinary_factory_call_v1(resource.getrlimit, resource.RLIMIT_NOFILE)
+ _f._preflight_require_v1(soft == hard == fd_program['controller'],
+  'ORDINARY_SELECTED_NATIVE_CONTROLLER_ACTUAL_FD_LIMIT')
+ bound_rows = runner._ordinary_phase_occurrence_selection_v1(scope,
+  scope._ordinary_bound_paths_v1, scope._ordinary_bound_plan_v1,
+  scope._ordinary_execution_plan_v1, phase=selection._original[2])
+ effects = scope._ordinary_effect_programme_record_v1()
+ allocations = _f._ordinary_phase_allocation_rows_v1(scope, scope._ordinary_resource_programme_v1)
+ _f._preflight_require_v1(len(bound_rows) == len(occurrence_program) == len(effects['rows'])
+  == len(allocations) and effects['bound_rows'] is bound_rows,
+  'ORDINARY_SELECTED_NATIVE_WHOLE_ROW_COVERAGE')
+ required = {'entry', 'execution_entry', 'original_position', 'argv', 'environment',
+  'deadline_ns', 'startup_deadline_ns', 'stdout_bytes', 'stderr_bytes', 'tasks', 'nofile',
+  'startup_observation_limit', 'terminal_pending_observation_limit', 'runtime_bytes',
+  'runtime_inodes', 'runtime_path', 'bootstrap_fd_demand', 'application_fd_demand', 'git_controls'}
+ rp5a_keys = {'rp5a_reader_output_bytes', 'rp5a_reader_scratch_bytes', 'rp5a_reader_readback_bytes',
+  'rp5a_scanner_output_bytes', 'rp5a_scanner_scratch_bytes', 'rp5a_scanner_readback_bytes',
+  'rp5a_candidate_read_bytes', 'rp5a_frame_scratch_bytes', 'rp5a_frame_reread_bytes',
+  'rp5a_fence_metadata_calls', 'rp5a_fence_native_read_bytes',
+  'rp5a_manager_fdinfo_records', 'rp5a_manager_fdinfo_bytes', 'rp5a_manager_borrow_fds'}
+ base = scope._ordinary_post_base_environment_v1
+ _f._preflight_require_v1(base[0] is scope and base[1] is scope._ordinary_bound_paths_v1
+  and base[2] is scope._ordinary_bound_plan_v1
+  and base[3] is scope._ordinary_resource_programme_v1
+  and type(base[4]) is dict and tuple(base[4].items()) == base[5]
+  and base[6] == (_f.os.getpid(), _f.threading.get_ident()),
+  'ORDINARY_SELECTED_NATIVE_ORIGINAL_BASE_ENVIRONMENT')
+ for ordinal, (row, bound_row, effect, allocation) in enumerate(
+   zip(occurrence_program, bound_rows, effects['rows'], allocations), 1):
+  entry, execution, position = bound_row
+  native = _f._ordinary_native_source_programme_check_v1(scope, effect['native_programme'])
+  role = _f._rp5a_consumer_role_v1(entry.argv, _f.Path(scope.repository))
+  _f._preflight_require_v1(type(row) is dict and set(row) == required | (rp5a_keys if role is not None else set())
+   and row['entry'] is entry and row['execution_entry'] is execution
+   and row['original_position'] == position and type(row['original_position']) is int
+   and row['argv'] == entry.argv == execution.execution_argv
+   and entry.command_index == ordinal and entry.phase == selection._original[2]
+   and entry.cwd == scope.repository and allocation['native_programme'] is native
+   and effect['bound_row'] is native['bound_row'] is bound_row
+   and all(type(row[key]) is int and row[key] == allocation[key]
+    and row[key] >= native[key] for key in
+    ('tasks', 'nofile', 'bootstrap_fd_demand', 'application_fd_demand'))
+   and row['nofile'] <= fd_program['application']
+   and all(type(row[key]) is int and row[key] == allocation[key] and row[key] > 0
+    for key in ('stdout_bytes', 'stderr_bytes'))
+   and row['stdout_bytes'] >= native['stdout_minimum']
+   and row['stderr_bytes'] >= native['stderr_minimum']
+   and row['startup_observation_limit'] == row['terminal_pending_observation_limit'] == 32
+   and type(row['startup_observation_limit']) is int and type(row['terminal_pending_observation_limit']) is int
+   and type(row['environment']) is dict
+   and all(type(key) is str and type(value) is str for key, value in row['environment'].items())
+   and type(row['git_controls']) is tuple
+   and type(row['deadline_ns']) is int and type(row['startup_deadline_ns']) is int
+   and _f.time.monotonic_ns() < row['startup_deadline_ns'] < row['deadline_ns']
+    <= scope.execution_deadline_ns
+   and row['runtime_bytes'] is None and row['runtime_inodes'] is None
+   and row['runtime_path'] == scope._ordinary_image_v1['mount_path'] / 'runtime' / ('p' + str(ordinal)),
+   'ORDINARY_SELECTED_NATIVE_EXACT_SOURCE_REQUIREMENTS_AND_QUOTAS')
+  expected_environment = _f._ordinary_selected_transport_environment_v1(scope, entry, base[4])
+  for key in tuple(expected_environment):
+   if key.upper().startswith('GIT_'): del expected_environment[key]
+  expected_environment.update(row['git_controls'])
+  if len(native['tool_operands']) == 2:
+   _f._preflight_require_v1(row['git_controls'] == tuple(scope._ordinary_selected_git_environment_v1(native).items()),
+    'ORDINARY_SELECTED_NATIVE_SOURCE_GIT_CONTROLS')
+   expected_environment['PATH'] = '/usr/bin'
+  for key in ('TMPDIR', 'TEMP', 'TMP'):
+   expected_environment[key] = str(row['runtime_path'])
+  expected_environment['QTT_LINUX_PREFLIGHT_CONTROL'] = str(scope.control)
+  expected_environment['QTT_LINUX_PREFLIGHT_RUNTIME'] = str(row['runtime_path'])
+  _f._preflight_require_v1(row['environment'] == expected_environment
+   and (role is None or all(type(row[key]) is int and row[key] == allocation[key]
+    and row[key] >= 0 for key in rp5a_keys)),
+   'ORDINARY_SELECTED_NATIVE_EXACT_CONTROL_ENVIRONMENT_AND_R_TRANCHES')
+ scope._ordinary_fd_program_v1 = fd_program
+ scope._ordinary_original_fd_program_v1 = (fd_program, tuple(fd_program.items()))
+ scope._ordinary_occurrence_program_v1 = occurrence_program
+ scope._ordinary_original_occurrence_program_v1 = tuple((row, tuple(row.items())) for row in occurrence_program)
+ scope._ordinary_original_occurrence_environments_v1 = tuple((row, row['environment'],
+  tuple(row['environment'].items())) for row in occurrence_program)
+ scope._ordinary_occurrences_v1 = []
+ scope._ordinary_original_occurrences_v1 = scope._ordinary_occurrences_v1
+ scope._ordinary_current_occurrence_v1 = None
+ scope._ordinary_launch_prefix_v1 = None
+ return occurrence_program
+
+
+def _facet_fn_optional_compile_cache_v1(scope):
+ """The original POST447 cache is absent only on an actual other phase."""
+ import tools.validation_reliability as _f
+ runner = getattr(scope, '_ordinary_runner_owner_v1', None)
+ selection = getattr(scope, '_ordinary_source_selection_v1', None)
+ if (runner is not None and type(selection) is runner._OrdinarySourceSelectionV1
+   and selection is scope._ordinary_original_source_selection_v1):
+  selection._guard()
+  if selection._original[2] != runner.POST_VALIDATION_PHASE:
+   _f._preflight_require_v1(runner is scope._ordinary_original_runner_owner_v1
+    and runner is _f.sys.modules.get(getattr(runner, '__name__', None))
+    and not hasattr(scope, '_ordinary_compile_cache_v1')
+    and not hasattr(scope, '_ordinary_original_compile_cache_v1'),
+    'ORDINARY_NON_POST_HAS_NO_FOREIGN_COMPILE_CACHE')
+   return None
+ return scope._ordinary_compile_cache_record_v1()
+
+
+def _facet_fn_selected_environment_v1(scope, entry, environment):
+ import tools.validation_reliability as _f
+ selection = scope._ordinary_source_selection_v1
+ runner = scope._ordinary_runner_owner_v1
+ _f._preflight_require_v1(type(scope) is _f._LinuxPreflightScopeV1
+  and runner is scope._ordinary_original_runner_owner_v1
+  and selection is scope._ordinary_original_source_selection_v1
+  and selection._original[2] != runner.POST_VALIDATION_PHASE
+  and _f._LINUX_PREFLIGHT_PROCESS_V1.get() is scope,
+  'ORDINARY_SELECTED_ENVIRONMENT_ACTUAL_PHASE_OWNER')
+ original = scope._ordinary_post_base_environment_v1
+ _f._preflight_require_v1(type(original) is tuple and len(original) == 7
+  and original[0] is scope and original[1] is scope._ordinary_bound_paths_v1
+  and original[2] is scope._ordinary_bound_plan_v1
+  and original[3] is scope._ordinary_resource_programme_v1
+  and type(original[4]) is dict and tuple(original[4].items()) == original[5]
+  and original[6] == (_f.os.getpid(), _f.threading.get_ident())
+  and type(environment) is dict,
+  'ORDINARY_SELECTED_ENVIRONMENT_UNCHANGED_INDEPENDENT_BASE')
+ expected_base = _f._ordinary_selected_transport_environment_v1(scope, entry, original[4])
+ _f._preflight_require_v1(environment == expected_base,
+  'ORDINARY_SELECTED_ENVIRONMENT_UNCHANGED_INDEPENDENT_BASE')
+ if _f._rp5a_consumer_role_v1(entry.argv, _f.Path(scope.repository)) is not None:
+  _f._preflight_require_v1(scope._ordinary_rp5a_environment_v1(entry, original[4]) == expected_base,
+   'ORDINARY_R_ORIGINAL_PHASE_ENVIRONMENT_TYPES')
+ row = scope._ordinary_programme_for_entry_v1(entry)
+ _f._preflight_require_v1(row['entry'] is entry and entry.phase == selection._original[2]
+  and row['runtime_path'] == scope._ordinary_image_v1['mount_path'] / 'runtime' / ('p' + str(entry.command_index))
+  and type(row['git_controls']) is tuple,
+  'ORDINARY_SELECTED_ENVIRONMENT_ORIGINAL_RUNTIME_AND_GIT_PROGRAMME')
+ projected = dict(environment)
+ for key in tuple(projected):
+  if key.upper().startswith('GIT_'): del projected[key]
+ projected.update(row['git_controls'])
+ effect = scope._ordinary_effect_programme_record_v1()['rows'][entry.command_index - 1]
+ _f._preflight_require_v1(effect['entry'] is entry, 'ORDINARY_SELECTED_ENVIRONMENT_SOURCE_ROW')
+ native = _f._ordinary_native_source_programme_check_v1(scope, effect['native_programme'])
+ if len(native['tool_operands']) == 2:
+  _f._preflight_require_v1(row['git_controls'] == tuple(scope._ordinary_selected_git_environment_v1(native).items()),
+   'ORDINARY_SELECTED_ENVIRONMENT_SOURCE_GIT_CONTROLS')
+  projected['PATH'] = '/usr/bin'
+ for key in ('TMPDIR', 'TEMP', 'TMP'):
+  projected[key] = str(row['runtime_path'])
+ projected['QTT_LINUX_PREFLIGHT_CONTROL'] = str(scope.control)
+ projected['QTT_LINUX_PREFLIGHT_RUNTIME'] = str(row['runtime_path'])
+ _f._preflight_require_v1(projected == row['environment'],
+  'ORDINARY_SELECTED_ENVIRONMENT_EXACT_COMPILED_PROJECTION')
+ return projected
+
+
+def _facet_fn_selected_policy_projection_v1(scope, programme):
+ import tools.validation_reliability as _f
+ runner = scope._ordinary_runner_owner_v1
+ selection = scope._ordinary_source_selection_v1
+ _f._preflight_require_v1(type(scope) is _f._LinuxPreflightScopeV1
+  and runner is scope._ordinary_original_runner_owner_v1
+  and runner is _f.sys.modules.get(getattr(runner, '__name__', None))
+  and type(selection) is runner._OrdinarySourceSelectionV1
+  and selection is scope._ordinary_original_source_selection_v1
+  and type(programme) is dict
+  and any(programme is row for row in scope._ordinary_occurrence_program_v1)
+  and programme['entry'].phase == selection._original[2]
+  and type(programme['tasks']) is int and programme['tasks'] > 0,
+  'ORDINARY_NATIVE_POLICY_EXACT_SELECTED_PHASE_AND_ROW')
+ phase = selection._original[2]
+ fork_filter = '~clone clone3 fork vfork mount umount2 pivot_root unshare setns quotactl'
+ if phase == runner.POST_VALIDATION_PHASE:
+  _f._preflight_require_v1(programme['tasks'] == 1,
+   'ORDINARY_POST_ORIGINAL_SINGLE_TASK_POLICY')
+  return phase, 1, fork_filter
+ effects = scope._ordinary_effect_programme_record_v1()
+ bound_rows = runner._ordinary_phase_occurrence_selection_v1(scope,
+  scope._ordinary_bound_paths_v1, scope._ordinary_bound_plan_v1,
+  scope._ordinary_execution_plan_v1, phase=phase)
+ allocations = _f._ordinary_phase_allocation_rows_v1(scope, scope._ordinary_resource_programme_v1)
+ ordinal = programme['entry'].command_index - 1
+ _f._preflight_require_v1(type(ordinal) is int and 0 <= ordinal < len(bound_rows)
+  and effects['bound_rows'] is bound_rows
+  and programme is scope._ordinary_occurrence_program_v1[ordinal]
+  and programme['entry'] is bound_rows[ordinal][0]
+  and programme['execution_entry'] is bound_rows[ordinal][1]
+  and programme['original_position'] == bound_rows[ordinal][2]
+  and len(allocations) == len(bound_rows),
+  'ORDINARY_NATIVE_POLICY_SOURCE_POSITION_AND_ALLOCATION')
+ native = _f._ordinary_native_source_programme_check_v1(scope,
+  effects['rows'][ordinal]['native_programme'])
+ allocation = allocations[ordinal]
+ _f._preflight_require_v1(native['bound_row'] is bound_rows[ordinal]
+  and allocation['native_programme'] is native
+  and programme['tasks'] == allocation['tasks'] >= native['tasks']
+  and programme['nofile'] == allocation['nofile'] >= native['nofile']
+  and native['tasks'] == max(len(cohort[0]) for cohort in native['cohorts']),
+  'ORDINARY_NATIVE_POLICY_SOURCE_COHORT_NOT_FREE_TASK_GRANT')
+ if native['tasks'] > 1:
+  fork_filter = '~mount umount2 pivot_root unshare setns quotactl'
+ return phase, programme['tasks'], fork_filter
+
+
+def _facet_fn_source_fixed_recipes_v1(scope, record, *, source_byte_limit, source_node_limit):
+ import tools.validation_reliability as _f
+ return _f._ordinary_source_literal_table_v1(scope, record, '_ordinary_source_fixed_recipes_v1',
+  source_byte_limit=source_byte_limit, source_node_limit=source_node_limit)
+
+
+def _facet_fn_phase_source_geometry_v1(runner, phase, root):
+    """Project only the original constructor's finite SOURCE recipe.
+
+    This pre-acquisition geometry creates no plan, role, filename or native
+    authority. Its complete constructor bodies are joined to protected SOURCE
+    before it contributes a resource product; actual selected rows are joined
+    separately at the original publisher.
+    """
+    import tools.validation_reliability as _f
+    _f._preflight_require_v1(type(phase) is str and phase in runner.ORDERED_PHASES
+     and phase != runner.POST_VALIDATION_PHASE
+     and type(root) is type(_f.Path('/')) and root.is_absolute()
+     and (type(_f._LINUX_PREFLIGHT_PROCESS_V1.get()) is not _f._LinuxPreflightScopeV1
+      or getattr(_f._LINUX_PREFLIGHT_PROCESS_V1.get(), '_ordinary_source_selection_v1', None) is None),
+     'ORDINARY_PHASE_ORIGINAL_UNSELECTED_CONSTRUCTOR')
+    names = ('build_phase_manifest', 'build_phase_commands',
+     'build_validation_commands', 'build_deterministic_validator_commands',
+     'build_pytest_shard_commands', '_route_command_generated_outputs_to_temp',
+     '_path', '_ordinary_pytest_source_capture_v1', '_ordinary_outer_native_suffix_v1')
+    constructors = tuple((name, getattr(runner, name), getattr(runner, name).__code__)
+     for name in names)
+    manifest = runner.build_phase_manifest(validation_dir=root / 'validation-output',
+     pytest_basetemp=root / 'pytest-root')
+    _f._preflight_require_v1(type(manifest) is list
+     and tuple(row['phase'] for row in manifest) == runner.ORDERED_PHASES
+     and all(type(row) is dict and set(row) == {'phase','command_count','commands'}
+      and type(row['command_count']) is int and row['command_count'] == len(row['commands'])
+      and type(row['commands']) is list and row['commands'] and all(type(argv) is list and argv
+      and all(type(value) is str and '\0' not in value for value in argv)
+      for argv in row['commands']) for row in manifest),
+     'ORDINARY_PHASE_EXACT_ORIGINAL_CONSTRUCTOR_PROJECTION')
+    position, selected = 0, []
+    for phase_row in manifest:
+     name, rows = phase_row['phase'], phase_row['commands']
+     for local, argv in enumerate(rows, 1):
+      position += 1
+      if name == phase:
+       requested = tuple(argv)
+       role = _f._rp5a_consumer_role_v1(requested, runner.REPO_ROOT)
+       mapper = _f._mapper_original_position_v1(requested, runner.REPO_ROOT)
+       selected.append((position, local, requested, role, mapper))
+    registry = runner.PYTEST_SHARD_COMMANDS
+    captured_registry = tuple((name, rows, tuple((row, row.paths, row.ignores,
+     row.reason, row.runtime_budget_seconds, row.historical_runtime_seconds,
+     row.known_historical_heavy, row.bounded_idempotence) for row in rows))
+     for name, rows in registry.items())
+    result = dict(runner=runner, phase=phase, root=root, rows=tuple(selected),
+     constructors=constructors, registry=registry,
+     registry_values=captured_registry, count=len(selected),
+     nested_positions=tuple(row[0] for row in selected
+      if phase in registry or row[4] is not None))
+    result['original'] = (result, tuple(result.items()), constructors, registry,
+     captured_registry, result['rows'])
+    return result
+
+
+def _facet_fn_phase_ceiling_values_v1(programme, *, runner, phase, root):
+ import tools.validation_reliability as _f
+ if phase == runner.POST_VALIDATION_PHASE:
+  return programme
+ geometry = _f._ordinary_phase_source_geometry_v1(runner, phase, root)
+ limits = programme['limits']
+ n = geometry['count']
+ m = sum(row[4] is not None for row in geometry['rows'])
+ limits['action_record_limit'] = 1 << 20
+ cumulative = (n + 1) * limits['generation_byte_limit'] + limits['index_byte_limit']
+ if m:
+  limits['extra_held_byte_limit'] = limits['generation_byte_limit']
+  limits['extra_held_carrier_limit'] = m
+  cumulative += limits['extra_held_byte_limit']
+  limits['mapper_activation_read_reserve'] = m * (
+   2 * limits['generation_byte_limit'] + 4 * ((32 << 20) + 1))
+  limits['mapper_activation_retained_reserve'] = m * (32 << 20)
+  cumulative += limits['mapper_activation_retained_reserve']
+ _f._preflight_require_v1(cumulative <= limits['raw_write_byte_limit'],
+  'ORDINARY_PHASE_CUMULATIVE_CAPTURE_ENVELOPE_WITHIN_RAW_WRITE')
+ limits['raw_retained_byte_limit'] = cumulative
+ programme['control_layout'] = tuple(runner._ValidationCandidateCustodyV1.
+  _disk_control_layout_v1(limits).items())
+ evidence = programme['evidence_programme']
+ evidence['application_occurrence_count'] = geometry['count']
+ output = programme['output_partition']
+ stream = output['application_bytes'] // (2 * geometry['count'])
+ output['application_stream_bytes'] = stream
+ output['application_bytes'] = 2 * geometry['count'] * stream
+ output['administrative_bytes'] = (output['delivered_bytes']
+  - output['prefix_bytes'] - output['application_bytes'])
+ programme['phase_source'] = geometry
+ programme['original'] = (programme, limits, tuple(limits.items()),
+  programme['control_layout'], programme['fd_program'],
+  tuple(programme['fd_program'].items()), output, tuple(output.items()),
+  evidence, tuple(evidence.items()), programme['original_cutoffs'], geometry)
+ return programme
+
+
+def _facet_fn_phase_source_join_v1(scope, resource):
+ import tools.validation_reliability as _f
+ import ast
+ import __future__
+ runner, source = scope._ordinary_runner_owner_v1, scope.source
+ geometry = resource['ceiling_programme'].get('phase_source')
+ _f._preflight_require_v1(type(geometry) is dict and geometry['runner'] is runner
+  and type(source) is _f._LinuxImmutableSourceSealV2 and source.state == 'READABLE'
+  and source is resource['source'] and geometry['phase'] == scope._ordinary_phase_v1
+  and geometry['original'][0] is geometry
+  and tuple((key, value) for key, value in geometry.items() if key != 'original')
+   == geometry['original'][1]
+  and geometry['registry'] is runner.PYTEST_SHARD_COMMANDS,
+  'ORDINARY_PHASE_SAME_SOURCE_CONSTRUCTOR_GEOMETRY')
+ path = source.root / 'tools' / 'run_validation_gates.py'
+ row = source.row_index.get(str(path))
+ _f._preflight_require_v1(row is not None and row['kind'] == 'file'
+  and 0 < row['logical_bytes'] <= 16 << 20,
+  'ORDINARY_PHASE_AUTHENTIC_ORIGINAL_CONSTRUCTOR_SOURCE')
+ raw = source.read_administration(path, 16 << 20)
+ tree = ast.parse(raw.decode('utf-8', 'strict'), filename=str(path))
+ _f._preflight_require_v1(sum(1 for _ in ast.walk(tree)) <= 1_000_000,
+  'ORDINARY_PHASE_SOURCE_AST_LIMIT')
+ definitions = {node.name: node for node in tree.body if isinstance(node, ast.FunctionDef)}
+ for name, function, code in geometry['constructors']:
+  _f._preflight_require_v1(getattr(runner, name) is function and function.__code__ is code
+   and name in definitions and definitions[name].decorator_list == [],
+   'ORDINARY_PHASE_ORIGINAL_CONSTRUCTOR_OBJECT:' + name)
+  unit = ast.Module(body=[definitions[name]], type_ignores=[])
+  compiled = compile(unit, code.co_filename, 'exec',
+   flags=code.co_flags & __future__.annotations.compiler_flag, dont_inherit=True)
+  bodies = tuple(value for value in compiled.co_consts if type(value) is type(code))
+  _f._preflight_require_v1(len(bodies) == 1 and bodies[0] == code,
+   'ORDINARY_PHASE_PROTECTED_EXACT_CONSTRUCTOR_BODY:' + name)
+ for name, rows, values in geometry['registry_values']:
+  _f._preflight_require_v1(runner.PYTEST_SHARD_COMMANDS.get(name) is rows
+   and tuple((row, row.paths, row.ignores, row.reason,
+    row.runtime_budget_seconds, row.historical_runtime_seconds,
+    row.known_historical_heavy, row.bounded_idempotence) for row in rows) == values,
+   'ORDINARY_PHASE_ORIGINAL_SEVEN_FIELD_REGISTRY')
+ catalogue = _f._ordinary_source_fixed_catalogue_v1(scope, source,
+  phase=geometry['phase'], source_byte_limit=16 << 20, source_node_limit=1_000_000)
+ return geometry, catalogue
+
+
+def _facet_fn_phase_allocation_rows_v1(scope, resource):
+ import tools.validation_reliability as _f
+ _f._preflight_require_v1(type(scope) is _f._LinuxPreflightScopeV1,
+  'ORDINARY_PHASE_ALLOCATIONS_TYPED_SCOPE')
+ return scope._ordinary_phase_allocation_record_v1(resource, issued=True)['rows']
+
+
+def _facet_fn_phase_allocations_v1(scope, paths, plan, execution_plan,
+  resource_programme, effect_programme):
+ import tools.validation_reliability as _f
+ if type(resource_programme) is dict and 'phase_allocations' not in resource_programme:
+  _f._ordinary_phase_candidate_limits_v1(scope, resource_programme)
+  _f._preflight_require_v1(paths is scope._ordinary_bound_paths_v1
+   and plan is scope._ordinary_bound_plan_v1
+   and execution_plan is scope._ordinary_execution_plan_v1
+    is scope._ordinary_original_execution_plan_v1
+   and effect_programme is scope._ordinary_effect_programme_record_v1(),
+   'ORDINARY_PHASE_ORIGINAL_POST_ALLOCATION_ROUTE')
+  return None
+ return scope._ordinary_issue_phase_allocations_v1(paths, plan, execution_plan,
+  resource_programme, effect_programme)
+
+
+def _facet_fn_phase_candidate_limits_v1(scope, resource):
+ import tools.validation_reliability as _f
+ if 'phase_allocations' not in resource:
+  _f._preflight_require_v1(type(scope) is _f._LinuxPreflightScopeV1
+   and resource is scope._ordinary_resource_programme_v1
+   and tuple(resource.items()) == scope._ordinary_original_resource_programme_v1[1]
+   and scope._ordinary_phase_v1 == scope._ordinary_runner_owner_v1.POST_VALIDATION_PHASE
+   and 'phase_source' not in resource['ceiling_programme'],
+   'ORDINARY_PHASE_ORIGINAL_POST_CANDIDATE_LIMITS')
+  return resource['limits']['raw_retained_byte_limit'], resource['limits']['raw_read_byte_limit']
+ record = scope._ordinary_phase_allocation_record_v1(resource, issued=True)
+ balance = record['complement']['remaining']
+ return balance['raw_retained_byte_limit'], balance['raw_read_byte_limit']
+
+
+def _facet_fn_phase_ceiling_checked_v1(programme):
+ import tools.validation_reliability as _f
+ _f._preflight_require_v1(type(programme) is dict and set(programme) ==
+  {'limits','control_layout','fd_program','output_partition','evidence_programme',
+  'original_cutoffs','phase_source','original'},
+  'ORDINARY_PHASE_EXACT_EARLY_PROGRAMME')
+ original, geometry = programme['original'], programme['phase_source']
+ _f._preflight_require_v1(type(original) is tuple and len(original) == 12
+  and original[0] is programme and original[1] is programme['limits']
+  and original[2] == tuple(programme['limits'].items())
+  and original[3] is programme['control_layout'] and original[4] is programme['fd_program']
+  and original[5] == tuple(programme['fd_program'].items())
+  and original[6] is programme['output_partition']
+  and original[7] == tuple(programme['output_partition'].items())
+  and original[8] is programme['evidence_programme']
+  and original[9] == tuple(programme['evidence_programme'].items())
+  and original[10] is programme['original_cutoffs'] and original[11] is geometry
+  and type(geometry) is dict and geometry['original'][0] is geometry
+  and geometry['original'][1] == tuple((key,value) for key,value in geometry.items() if key!='original')
+  and geometry['original'][2] is geometry['constructors']
+  and geometry['original'][3] is geometry['registry']
+  and geometry['original'][4] is geometry['registry_values']
+  and geometry['original'][5] is geometry['rows']
+  and geometry['runner'].PYTEST_SHARD_COMMANDS is geometry['registry']
+  and type(geometry['count']) is int and geometry['count'] == len(geometry['rows']) > 0
+  and type(geometry['nested_positions']) is tuple
+  and geometry['nested_positions'] == tuple(row[0] for row in geometry['rows']
+   if geometry['phase'] in geometry['registry'] or row[4] is not None)
+  and geometry['phase'] in geometry['runner'].ORDERED_PHASES
+  and geometry['phase'] != geometry['runner'].POST_VALIDATION_PHASE
+  and programme['evidence_programme']['application_occurrence_count'] == geometry['count']
+  and sum(programme['fd_program'].values()) == 4096
+  and sum(programme['output_partition'][key] for key in
+   ('prefix_bytes','administrative_bytes','application_bytes')) == programme['output_partition']['delivered_bytes']
+  and 2*geometry['count']*programme['output_partition']['application_stream_bytes']
+   == programme['output_partition']['application_bytes'],
+  'ORDINARY_PHASE_ORIGINAL_EARLY_PROGRAMME_VALUES')
+ for name, function, code in geometry['constructors']:
+  _f._preflight_require_v1(getattr(geometry['runner'],name) is function and function.__code__ is code,
+   'ORDINARY_PHASE_UNCHANGED_CONSTRUCTOR_OBJECT')
+ for name,rows,values in geometry['registry_values']:
+  _f._preflight_require_v1(geometry['registry'].get(name) is rows
+   and tuple((row,row.paths,row.ignores,row.reason,row.runtime_budget_seconds,
+    row.historical_runtime_seconds,row.known_historical_heavy,row.bounded_idempotence)
+    for row in rows)==values, 'ORDINARY_PHASE_UNCHANGED_REGISTRY_VALUES')
+ _f._preflight_require_v1(tuple(geometry['runner']._ValidationCandidateCustodyV1.
+  _disk_control_layout_v1(programme['limits']).items())==programme['control_layout'],
+  'ORDINARY_PHASE_ORIGINAL_CONTROL_CAPACITY')
+ return programme
+
+
+def _facet_fn_output_owner_limits_v1(programme, role, *, query_source=None):
+    """Select disjoint actual original administrative-output owners only.
+
+    The outer original suffix has six commands, each with two64-KiB streams.
+    The remaining original128-MiB administrative category has distinct parent
+    and receiver owners. This does not change the table, grant a Query vector,
+    or claim that every possible body fits a selected quota.
+    """
+    import tools.validation_reliability as _f
+    _f._preflight_require_v1(type(programme) is dict and role in ('PROVISION','PARENT','RECEIVER')
+     and type(role) is str, 'ORDINARY_OUTPUT_ORIGINAL_OWNER_ROLE')
+    frozen, output = programme['original'], programme['output_partition']
+    _f._preflight_require_v1(type(frozen) is tuple and len(frozen) in (11,12)
+     and frozen[0] is programme and frozen[6] is output and tuple(output.items())==frozen[7]
+     and output['administrative_bytes'] >= 6*2*65536,
+     'ORDINARY_OUTPUT_ORIGINAL_SHARED_ADMINISTRATIVE_CATEGORY')
+    outer = 6*2*65536
+    receiver, remainder = divmod(output['administrative_bytes']-outer,2)
+    parent = receiver+remainder
+    selected=dict(query_bytes=0 if role=='PROVISION' else parent if role=='PARENT' else receiver,
+     parent_query_bytes=parent, receiver_administration_bytes=receiver, outer_suffix_bytes=outer)
+    if query_source is not None:
+     evidence=programme['evidence_programme']
+     _f._preflight_require_v1(type(query_source) is tuple and len(query_source)==2
+      and query_source==(evidence['query_command_count'],evidence['native_response_count'])
+      and evidence is frozen[8] and tuple(evidence.items())==frozen[9],
+      'ORDINARY_QUERY_ROLE_SOURCE_SAME_ORIGINAL_PREFIX_PROGRAMME')
+     from tools.validation_scope_registry import _ordinary_scope_query_role_values_v1
+     values=_ordinary_scope_query_role_values_v1(*query_source)
+     selected.update(query_source=query_source,query_attempts=values[
+      ('PROVISION','PARENT','RECEIVER').index(role)],
+      parent_source_envelope=values[3:5],live_controller_failure_commands=values[5],
+      role_source=values)
+     _f._preflight_require_v1(sum(values[:3])==evidence['administrative_attempts']==65536,
+      'ORDINARY_QUERY_THREE_ORIGINAL_ROLES_ONE_UNCHANGED_ATTEMPT_POOL')
+    return selected
+
+
+def _facet_fn_source_fixed_catalogue_v1(scope, source, *, phase, source_byte_limit, source_node_limit):
+    """Retain the original writer catalogue before resources and paths exist.
+
+    Declared names are an envelope for the actual later source selection, not
+    permission from a command label or proof that every application succeeds.
+    The original compiler must still bind the actual plan, effects and native
+    programmes before C/APP admission.
+    """
+    import tools.validation_reliability as _f
+    import pathlib
+    runner = scope._ordinary_runner_owner_v1
+    _f._preflight_require_v1(runner is scope._ordinary_original_runner_owner_v1
+     and runner is _f.sys.modules.get(getattr(runner, '__name__', None)),
+     'ORDINARY_SOURCE_COMPILER_ORIGINAL_RUNNER_OWNER')
+    ORDERED_PHASES = runner.ORDERED_PHASES
+    PYTEST_SHARD_COMMANDS = runner.PYTEST_SHARD_COMMANDS
+    PytestShardCommand = runner.PytestShardCommand
+    _OrdinarySourceSelectionV1 = runner._OrdinarySourceSelectionV1
+    import ast
+    from tools import validation_reliability as owner
+    need = owner._preflight_require_v1
+    need(type(scope) is owner._LinuxPreflightScopeV1 and source is scope.source
+     and type(source) is owner._LinuxImmutableSourceSealV2 and source.state == 'READABLE'
+     and source.failure is None and source._ordinary_meter_scope_v1 is scope
+     and type(phase) is str and phase in ORDERED_PHASES
+     and phase == scope._ordinary_controller_bootstrap_v1['value']['phase']
+     and type(source_byte_limit) is int and source_byte_limit > 0
+     and type(source_node_limit) is int and source_node_limit > 0
+     and not hasattr(scope, '_ordinary_source_fixed_catalogue_v1'),
+     'ORDINARY_SOURCE_CATALOGUE_ORIGINAL_PRE_PLAN_OWNER')
+    record = dict(scope=scope, source=source, phase=phase, runner=runner,
+     prospective_names=(), source_paths=(), source_operands=[], registry=None,
+     registry_fields=(), errors=[])
+    scope._ordinary_source_fixed_catalogue_v1 = scope._ordinary_original_source_fixed_catalogue_v1 = record
+    record['original'] = (record, scope, source, record['runner'], record['source_operands'],
+     record['errors'], phase, (_f.os.getpid(), _f.threading.get_ident()))
+    try:
+     source_recipes = _f._ordinary_source_fixed_recipes_v1(scope, record,
+      source_byte_limit=source_byte_limit, source_node_limit=source_node_limit)
+     names = tuple(dict.fromkeys(name for recipe in source_recipes for name in recipe[2]))
+     operands = tuple(dict.fromkeys(name for recipe in source_recipes for name in
+      (recipe[0], *(body[0] for body in recipe[3]), *(binding[0] for binding in recipe[4]))))
+     for name in (*names, *operands): owner._mapper_portable_relative_v1(name)
+     record['prospective_names'], record['source_paths'] = names, operands
+     if phase in PYTEST_SHARD_COMMANDS:
+      registry = PYTEST_SHARD_COMMANDS[phase]
+      need(type(registry) is tuple and registry and all(type(item) is PytestShardCommand for item in registry),
+       'ORDINARY_SOURCE_CATALOGUE_ORIGINAL_PYTEST_REGISTRY')
+      fields = tuple((item, _OrdinarySourceSelectionV1._pytest_source_fields_v1(item))
+       for item in registry)
+      record['registry'], record['registry_fields'] = registry, fields
+     record['original_values'] = (record['prospective_names'], record['source_paths'],
+      record['registry'], record['registry_fields'])
+     record['original_source_items'] = tuple((item, _f._ordinary_effect_value_snapshot_v1(item))
+      for item in record['source_operands'])
+     return _f._ordinary_source_fixed_catalogue_checked_v1(scope, record)
+    except BaseException as error:
+     record['errors'].append(error)
+     if all(error is not prior for prior in scope._ordinary_factory_errors_v1):
+      scope._ordinary_factory_errors_v1.append(error)
+     raise
+
+
+def _facet_fn_source_fixed_catalogue_checked_v1(scope, record):
+ import tools.validation_reliability as _f
+ import pathlib
+ runner = scope._ordinary_runner_owner_v1
+ _f._preflight_require_v1(runner is scope._ordinary_original_runner_owner_v1
+  and runner is _f.sys.modules.get(getattr(runner, '__name__', None)),
+  'ORDINARY_SOURCE_COMPILER_ORIGINAL_RUNNER_OWNER')
+ PYTEST_SHARD_COMMANDS = runner.PYTEST_SHARD_COMMANDS
+ _OrdinarySourceSelectionV1 = runner._OrdinarySourceSelectionV1
+ from tools import validation_reliability as owner
+ need = owner._preflight_require_v1
+ original = record['original']
+ need(record is scope._ordinary_source_fixed_catalogue_v1 is scope._ordinary_original_source_fixed_catalogue_v1
+  and original[0] is record and original[1] is scope and original[2] is record['source'] is scope.source
+  and original[3] is record['runner'] is runner
+  and original[4] is record['source_operands'] and original[5] is record['errors']
+  and original[6] == record['phase'] == scope._ordinary_controller_bootstrap_v1['value']['phase']
+  and original[7] == (_f.os.getpid(), _f.threading.get_ident()) and not record['errors']
+  and (record['prospective_names'], record['source_paths'], record['registry'], record['registry_fields'])
+   == record['original_values'], 'ORDINARY_SOURCE_CATALOGUE_ORIGINAL_RECORD')
+ source = record['source']
+ need(len(record['source_operands']) == len(record['original_source_items']),
+  'ORDINARY_SOURCE_CATALOGUE_EXACT_SOURCE_OBSERVATION_COUNT')
+ for observed, (original_observed, original_values) in zip(record['source_operands'], record['original_source_items']):
+  need(observed is original_observed and _f._ordinary_effect_value_snapshot_v1(observed) == original_values,
+   'ORDINARY_SOURCE_CATALOGUE_ORIGINAL_OBSERVATION_VALUES')
+  path = source.root.joinpath(*observed['path'].split('/'))
+  need(observed['attempted'] and observed['complete'] and observed['error'] is None
+   and source.row_index.get(str(path)) is observed['row']
+   and tuple(source.post[str(path)]) == observed['version']
+   and observed['source_form'] == 'PYTHON'
+   and type(observed['raw_bytes']) is int
+   and observed['raw_bytes'] == observed['row']['logical_bytes'],
+   'ORDINARY_SOURCE_CATALOGUE_RETAINED_SOURCE_OPERAND')
+ if record['registry'] is not None:
+  need(PYTEST_SHARD_COMMANDS[record['phase']] is record['registry']
+   and len(record['registry']) == len(record['registry_fields']),
+   'ORDINARY_SOURCE_CATALOGUE_ORIGINAL_REGISTRY_OBJECT')
+  for item, (original_item, fields) in zip(record['registry'], record['registry_fields']):
+   need(item is original_item and _OrdinarySourceSelectionV1._pytest_source_fields_v1(item) == fields,
+    'ORDINARY_SOURCE_CATALOGUE_ORIGINAL_TYPED_FIELDS')
+ return record
+
+
+def _facet_fn_effect_value_snapshot_v1(value):
+ import tools.validation_reliability as _f
+ if type(value) in (str, bytes, int, bool, type(None)):
+  return type(value), value
+ if type(value) in (tuple, list):
+  return type(value), tuple(_f._ordinary_effect_value_snapshot_v1(item) for item in value)
+ if type(value) is dict:
+  return dict, tuple((_f._ordinary_effect_value_snapshot_v1(key),
+   _f._ordinary_effect_value_snapshot_v1(item)) for key, item in value.items())
+ raise ValueError('ORDINARY_EFFECTS_UNSUPPORTED_ORIGINAL_LITERAL_VALUE')
+
+
+def _facet_fn_pytest_fixed_effects_check_v1(scope, record):
+ import tools.validation_reliability as _f
+ import pathlib
+ runner = scope._ordinary_runner_owner_v1
+ _f._preflight_require_v1(runner is scope._ordinary_original_runner_owner_v1
+  and runner is _f.sys.modules.get(getattr(runner, '__name__', None)),
+  'ORDINARY_SOURCE_COMPILER_ORIGINAL_RUNNER_OWNER')
+ from tools import validation_reliability as owner
+ need = owner._preflight_require_v1
+ original = record['original']
+ need(type(original) is tuple and len(original) == 15
+  and original[11] is record['check'] is record['original_check']
+   is _f._ordinary_pytest_fixed_effects_check_v1
+  and original[12] is record['check'].__code__
+  and original[13] is _facet_fn_pytest_fixed_repository_effects_v1
+  and original[14] is _facet_fn_pytest_fixed_repository_effects_v1.__code__,
+  'ORDINARY_EFFECTS_ORIGINAL_FIXED_CHECKER_AND_PRODUCER_CODE')
+ need(type(scope) is owner._LinuxPreflightScopeV1 and original[0] is record
+  and original[1] is scope and scope._ordinary_pytest_fixed_effects_v1 is record
+  and scope._ordinary_original_pytest_fixed_effects_v1 is record
+  and original[2] is record['paths'] is scope._ordinary_bound_paths_v1
+  and original[3] is record['plan'] is scope._ordinary_bound_plan_v1
+  and original[4] is record['execution_plan'] is scope._ordinary_execution_plan_v1
+  and original[5] is record['source'] is scope.source
+  and original[6] is record['rows'] and original[7] is record['source_operands']
+  and original[8] is record['errors'] and original[9] == (_f.os.getpid(), _f.threading.get_ident())
+  and original[10] is record['target_source_rows'] and not record['errors']
+  and record['source_selection'] is record['original_source_selection'][0]
+  and record['bound_rows'] is record['original_source_selection'][1]
+  and tuple(record['bound_rows']) == record['original_source_selection'][2]
+  and runner._ordinary_phase_occurrence_selection_v1(scope, record['paths'],
+   record['plan'], record['execution_plan'], phase=record['plan'][0].phase) is record['bound_rows']
+  and record['source'].state == 'READABLE' and record['source'].failure is None,
+  'ORDINARY_EFFECTS_ORIGINAL_COMPILATION_OWNER')
+ source, paths = record['source'], record['paths']
+ need(len(record['rows']) == len(record['original_rows']) == len(record['plan'])
+  and len(record['source_operands']) == len(record['original_source_items'])
+  and tuple(record['target_source_rows']) == record['original_target_sources'],
+  'ORDINARY_EFFECTS_NO_ADDED_OR_REMOVED_ORIGINAL_OPERAND')
+ for ordinal, (row, frozen) in enumerate(zip(record['rows'], record['original_rows'])):
+  need(frozen[0] is row and frozen[1] is row['original']
+   and frozen[1][0] is row and frozen[1][1] is row['entry'] is record['plan'][ordinal]
+   and frozen[1][2] is row['execution'] is record['execution_plan'][ordinal]
+   and frozen[1][3] is row['selected']
+   and row['bound_row'] is record['bound_rows'][ordinal]
+   and record['source_selection'].pytest_source_for_bound_row(row['bound_row']) is row['selected']
+   and frozen[1][4] is row['targets'] and frozen[1][5] is row['source_operands']
+   and frozen[2] is row['original_target_items'] and frozen[3] is row['original_source_items']
+   and len(row['targets']) == len(frozen[2])
+   and len(row['source_operands']) == len(frozen[3]),
+   'ORDINARY_EFFECTS_ORIGINAL_ROW_AND_TARGET_SET')
+  for values, selected in ((row['targets'], frozen[2]), (row['source_operands'], frozen[3])):
+   for value, (actual, snapshot) in zip(values, selected):
+    need(value is actual and _f._ordinary_effect_value_snapshot_v1(value) == snapshot,
+     'ORDINARY_EFFECTS_ORIGINAL_ITEM_VALUE_CHANGED')
+ for value, (actual, snapshot) in zip(record['source_operands'], record['original_source_items']):
+  path = paths.repo_root.joinpath(*value['path'].split('/'))
+  need(value is actual and _f._ordinary_effect_value_snapshot_v1(value) == snapshot
+   and value['complete'] and value['attempted'] and value['error'] is None
+   and source.row_index.get(str(path)) is value['row']
+   and tuple(source.post[str(path)]) == value['version'],
+   'ORDINARY_EFFECTS_ORIGINAL_SOURCE_IDENTITY_AND_VERSION')
+ for target, relative, row, snapshot, version in record['target_source_rows']:
+  path = paths.repo_root.joinpath(*relative.split('/'))
+  need(source.row_index.get(str(path)) is row and target['path'] == relative
+   and (row is None or _f._ordinary_effect_value_snapshot_v1(row) == snapshot
+    and tuple(source.post[str(path)]) == version),
+   'ORDINARY_EFFECTS_ORIGINAL_TARGET_SOURCE_IDENTITY_AND_VERSION')
+ return record
+
+
+def _facet_fn_pytest_fixed_repository_effects_v1(scope, paths, plan, execution_plan,
+     source, *, source_byte_limit, source_node_limit):
+    """Compile the source-fixed repository writer targets of actual pytest rows.
+
+    This is a supplement to the original phase application programme, never a
+    read-only/default grant for unclassified callees. Its exact target table is
+    code, joined to the original bodies before C acquires the candidate.
+    """
+    import tools.validation_reliability as _f
+    import pathlib
+    runner = scope._ordinary_runner_owner_v1
+    _f._preflight_require_v1(runner is scope._ordinary_original_runner_owner_v1
+     and runner is _f.sys.modules.get(getattr(runner, '__name__', None)),
+     'ORDINARY_SOURCE_COMPILER_ORIGINAL_RUNNER_OWNER')
+    PYTEST_SHARD_COMMANDS = runner.PYTEST_SHARD_COMMANDS
+    PytestShardCommand = runner.PytestShardCommand
+    ValidationRunPathsV1 = runner.ValidationRunPathsV1
+    ExecutionPlanEntry = runner.ExecutionPlanEntry
+    REPO_ROOT = runner.REPO_ROOT
+    import ast
+    from tools import validation_reliability as owner
+    need = owner._preflight_require_v1
+    need(type(scope) is owner._LinuxPreflightScopeV1
+     and type(paths) is ValidationRunPathsV1 and scope.source is source
+     and type(source) is owner._LinuxImmutableSourceSealV2
+     and source.state == 'READABLE' and source.failure is None
+     and source.root == paths.repo_root == REPO_ROOT
+     and source._ordinary_meter_scope_v1 is scope and source.census.complete
+     and source.pid == scope.query.pid == _f.os.getpid()
+     and source.thread == scope.query.thread == _f.threading.get_ident()
+     and plan is scope._ordinary_bound_plan_v1
+     and paths is scope._ordinary_bound_paths_v1
+     and execution_plan is scope._ordinary_execution_plan_v1
+     and type(plan) is tuple and len(plan) == len(execution_plan)
+     and plan and plan[0].phase in PYTEST_SHARD_COMMANDS
+     and type(source_byte_limit) is int and source_byte_limit > 0
+     and type(source_node_limit) is int and source_node_limit > 0,
+     'ORDINARY_EFFECTS_EXACT_PRE_C_SOURCE_AND_ORIGINAL_PHASE_PLAN')
+    need(not hasattr(scope, '_ordinary_pytest_fixed_effects_v1'),
+     'ORDINARY_EFFECTS_ONE_SOURCE_COMPILATION_ATTEMPT')
+    record = dict(scope=scope, paths=paths, plan=plan, execution_plan=execution_plan,
+     source=source, rows=[], source_operands=[], errors=[], target_source_rows=[])
+    record['check'] = record['original_check'] = _f._ordinary_pytest_fixed_effects_check_v1
+    record['original'] = (record, scope, paths, plan, execution_plan, source,
+     record['rows'], record['source_operands'], record['errors'],
+     (_f.os.getpid(), _f.threading.get_ident()), record['target_source_rows'],
+     record['check'], record['check'].__code__,
+     _facet_fn_pytest_fixed_repository_effects_v1,
+     _facet_fn_pytest_fixed_repository_effects_v1.__code__)
+    selection = scope._ordinary_source_selection_v1
+    bound_rows = runner._ordinary_phase_occurrence_selection_v1(
+     scope, paths, plan, execution_plan, phase=plan[0].phase)
+    need(selection is scope._ordinary_original_source_selection_v1,
+     'ORDINARY_EFFECTS_ORIGINAL_SOURCE_SELECTION_HOLDER')
+    record['source_selection'] = selection
+    record['bound_rows'] = bound_rows
+    record['original_source_selection'] = (selection, bound_rows, tuple(bound_rows))
+    scope._ordinary_pytest_fixed_effects_v1 = scope._ordinary_original_pytest_fixed_effects_v1 = record
+    try:
+     compiled_sources = {}
+     def acquire(relative):
+      if relative in compiled_sources:
+       return compiled_sources[relative]
+      owner._mapper_portable_relative_v1(relative)
+      path = paths.repo_root.joinpath(*relative.split('/'))
+      row = source.row_index.get(str(path))
+      need(row is not None and row['role'] == 'repository' and row['kind'] == 'file'
+       and str(path) in source.files and str(path) in source.post
+       and type(row['logical_bytes']) is int and 0 <= row['logical_bytes'] <= source_byte_limit,
+       'ORDINARY_EFFECTS_AUTHENTIC_SOURCE_OPERAND:' + relative)
+      observation = dict(path=relative, row=row, version=tuple(source.post[str(path)]),
+       attempted=True, raw_bytes=None, complete=False, error=None)
+      record['source_operands'].append(observation)
+      try:
+       raw = source.read_administration(path, source_byte_limit)
+       need(type(raw) is bytes and len(raw) == row['logical_bytes'],
+        'ORDINARY_EFFECTS_COMPLETE_SOURCE_EXTENT:' + relative)
+       tree = ast.parse(raw.decode('utf-8', 'strict'), filename=relative)
+       need(sum(1 for node in ast.walk(tree)) <= source_node_limit,
+        'ORDINARY_EFFECTS_ORIGINAL_SOURCE_AST_ALLOWANCE')
+       observation['raw_bytes'] = len(raw)
+       observation['complete'] = True
+       compiled_sources[relative] = (tree, observation)
+       return tree, observation
+      except BaseException as error:
+       observation['error'] = error
+       raise
+     from tools.validation_scope_registry import _ordinary_scope_source_literal_value_v1
+     def literal_constants(tree, *, imported=()):
+      known = dict(imported)
+      def value(node):
+       return _ordinary_scope_source_literal_value_v1(node, known)
+      for statement in tree.body:
+       targets = statement.targets if isinstance(statement, ast.Assign) else (statement.target,) if isinstance(statement, ast.AnnAssign) else ()
+       if targets and all(isinstance(target, ast.Name) for target in targets):
+        try:
+         selected = value(statement.value)
+        except (ValueError, TypeError, KeyError):
+         continue
+        for target in targets: known[target.id] = selected
+       elif isinstance(statement, ast.Expr) and isinstance(statement.value, ast.Call):
+        call = statement.value
+        if (isinstance(call.func, ast.Attribute) and isinstance(call.func.value, ast.Name)
+          and call.func.attr == 'update' and len(call.args) == 1 and not call.keywords
+          and type(known.get(call.func.value.id)) is dict):
+         addition = value(call.args[0])
+         need(type(addition) is dict and not set(addition).intersection(known[call.func.value.id]),
+          'ORDINARY_EFFECTS_ORIGINAL_LITERAL_UPDATE_KEYS')
+         known[call.func.value.id].update(addition)
+      return known
+     def relative_names(tree_root):
+      prefix = tree_root + '/'
+      values = tuple(pathlib.Path(row['path']).relative_to(paths.repo_root).as_posix()
+       for row in source.rows if row['role'] == 'repository'
+       and pathlib.Path(row['path']) != paths.repo_root
+       and (pathlib.Path(row['path']).relative_to(paths.repo_root).as_posix() == tree_root
+        or pathlib.Path(row['path']).relative_to(paths.repo_root).as_posix().startswith(prefix)))
+      need(len(values) == len(set(values)), 'ORDINARY_EFFECTS_EXACT_ORIGINAL_TREE_MEMBERS')
+      return values
+     def parents(relative):
+      owner._mapper_portable_relative_v1(relative)
+      return tuple(str(parent) for parent in reversed(pathlib.PurePosixPath(relative).parents)
+       if str(parent) != '.')
+     catalogue = _f._ordinary_source_fixed_catalogue_checked_v1(scope, scope._ordinary_source_fixed_catalogue_v1)
+     need(catalogue['source'] is source and catalogue['phase'] == plan[0].phase,
+      'ORDINARY_EFFECTS_SAME_EARLY_SOURCE_CATALOGUE')
+     recipes = _f._ordinary_source_fixed_recipes_v1(scope, record,
+      source_byte_limit=source_byte_limit, source_node_limit=source_node_limit)
+     selective_deletions = ({'module': 'tests/stage1_prediction_markets/pr167_open_trade_simulator_integration/test_pr167_idempotence.py', 'directory': 'docs/master_plan/generated/pr167_shards', 'pattern': 'PR167_*.report.json', 'writer': ('src/qtt/stage1_prediction_markets/pr167_open_trade_simulator_integration/report_writer.py', '_clear_previous_shards', 'def _clear_previous_shards(repo_root: Path) -> None:\r\n    shard_dir = repo_root / c.SHARD_DIR\r\n    if not shard_dir.exists():\r\n        return\r\n    for path in shard_dir.glob("PR167_*.report.json"):\r\n        path.unlink()'), 'source_bindings': (('src/qtt/stage1_prediction_markets/pr167_open_trade_simulator_integration/constants.py', 'SHARD_DIR', 'docs/master_plan/generated/pr167_shards'),), 'semantics': 'Only actual admitted immediate children matching the original literal glob are DELETE FILE operands; no directory-wide writable prefix or historical manifest count. Prospective shards also carry CREATE/WRITE/DELETE for idempotent second execution.'},)
+     for ordinal, bound_row in enumerate(bound_rows, 1):
+      entry, execution, original_position = bound_row
+      selected = selection.pytest_source_for_bound_row(bound_row)
+      need(type(entry) is _f.CommandEvidencePlanEntry and type(execution) is ExecutionPlanEntry
+       and entry is plan[ordinal - 1] and execution is execution_plan[ordinal - 1]
+       and entry.command_index == ordinal and entry.phase == plan[0].phase
+       and entry.run_id == paths.run_id and entry.cwd == str(paths.repo_root)
+       and entry.argv == execution.execution_argv and type(selected) is PytestShardCommand
+       and type(original_position) is int and original_position > 0,
+       'ORDINARY_EFFECTS_ACTUAL_ORIGINAL_PYTEST_CONSTRUCTOR')
+      row = dict(entry=entry, execution=execution, selected=selected, bound_row=bound_row,
+       targets=[], source_operands=[], other_application_programme_required=True)
+      record['rows'].append(row)
+      def selected_module(module):
+       return any((module == target or module.startswith(target.rstrip('/') + '/'))
+        and not any(module == ignored or module.startswith(ignored.rstrip('/') + '/')
+         for ignored in selected.ignores) for target in selected.paths)
+      for module, tree_root, prospective, writers, bindings in recipes:
+       if not selected_module(module): continue
+       module_tree, observation = acquire(module)
+       row['source_operands'].append(observation)
+       for operand, name, expected_body in writers:
+        tree, observed = acquire(operand)
+        row['source_operands'].append(observed)
+        actual = tuple(node for node in tree.body if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)) and node.name == name)
+        expected = ast.parse(expected_body).body
+        need(len(actual) == len(expected) == 1
+         and ast.dump(actual[0], include_attributes=False) == ast.dump(expected[0], include_attributes=False),
+         'ORDINARY_EFFECTS_ORIGINAL_REACHED_WRITER_BODY:' + operand + ':' + name)
+       for operand, name, expected_value in bindings:
+        tree, observed = acquire(operand)
+        row['source_operands'].append(observed)
+        if name.startswith('@AST:'):
+         declared = name[5:]
+         actual = tuple(statement for statement in tree.body if
+          isinstance(statement, ast.AnnAssign) and isinstance(statement.target, ast.Name)
+           and statement.target.id == declared
+          or isinstance(statement, ast.Assign) and any(isinstance(target, ast.Name)
+           and target.id == declared for target in statement.targets))
+         expected = ast.parse(expected_value).body
+         need(len(actual) == len(expected) == 1
+          and ast.dump(actual[0], include_attributes=False) == ast.dump(expected[0], include_attributes=False),
+          'ORDINARY_EFFECTS_ORIGINAL_CONDITIONAL_TARGET_DECLARATION:' + operand + ':' + declared)
+        else:
+         imported = tuple((prior_name, prior_value) for prior_operand, prior_name, prior_value in bindings
+          if prior_operand != operand and not prior_name.startswith('@AST:'))
+         values = literal_constants(tree, imported=imported)
+         need(name in values and type(values[name]) is type(expected_value) and values[name] == expected_value,
+          'ORDINARY_EFFECTS_ORIGINAL_LITERAL_TARGET:' + operand + ':' + name)
+       original_members = () if tree_root is None else relative_names(tree_root)
+       required_members = set(prospective)
+       if tree_root is not None:
+        required_members.add(tree_root)
+        for leaf in prospective:
+         need(leaf.startswith(tree_root + '/'), 'ORDINARY_EFFECTS_NO_TREE_TARGET_ESCAPE')
+         required_members.update(parent for parent in parents(leaf)
+          if parent == tree_root or parent.startswith(tree_root + '/'))
+        targets = tuple(dict.fromkeys((*original_members, *sorted(required_members))))
+       else:
+        targets = prospective
+       for relative in targets:
+        original_row = source.row_index.get(str(paths.repo_root.joinpath(*relative.split('/'))))
+        need(original_row is None or original_row['role'] == 'repository'
+         and original_row['kind'] in ('file', 'directory'), 'ORDINARY_EFFECTS_ORIGINAL_PRESENT_KIND')
+        kind = ('DIRECTORY' if relative in required_members and relative not in prospective
+         or original_row is not None and original_row['kind'] == 'directory' else 'FILE')
+        target = dict(path=relative, kind=kind,
+         actions=('CREATE', 'WRITE') if tree_root is None else ('CREATE', 'WRITE', 'DELETE') if kind == 'FILE' else ('CREATE', 'DELETE'),
+         original_members=original_members, required_members=tuple(sorted(required_members)),
+         parent_paths=parents(relative), source_operands=tuple(row['source_operands']))
+        row['targets'].append(target)
+        record['target_source_rows'].append((target, relative, original_row,
+         None if original_row is None else _f._ordinary_effect_value_snapshot_v1(original_row),
+         None if original_row is None else tuple(source.post[original_row['path']])))
+      for deletion in selective_deletions:
+       if not selected_module(deletion['module']):
+        continue
+       from fnmatch import fnmatchcase
+       directory = deletion['directory']
+       parent = pathlib.PurePosixPath(directory)
+       actual = tuple(relative for relative in relative_names(directory)
+        if pathlib.PurePosixPath(relative).parent == parent
+        and fnmatchcase(pathlib.PurePosixPath(relative).name, deletion['pattern']))
+       prefix = directory + '/'
+       for target in row['targets']:
+        if target['path'].startswith(prefix) and pathlib.PurePosixPath(target['path']).parent == parent:
+         target['actions'] = ('CREATE', 'WRITE', 'DELETE')
+       known = {target['path'] for target in row['targets']}
+       for relative in actual:
+        if relative in known:
+         continue
+        source_row = source.row_index[str(paths.repo_root.joinpath(*relative.split('/')))]
+        need(source_row['role'] == 'repository' and source_row['kind'] == 'file',
+         'ORDINARY_EFFECTS_ORIGINAL_SELECTIVE_UNLINK_FILE')
+        target = dict(path=relative, kind='FILE', actions=('DELETE',),
+         original_members=actual, required_members=(), parent_paths=parents(relative),
+         source_operands=tuple(row['source_operands']))
+        row['targets'].append(target)
+        record['target_source_rows'].append((target, relative, source_row,
+         _f._ordinary_effect_value_snapshot_v1(source_row), tuple(source.post[source_row['path']])))
+      merged = {}
+      for target in row['targets']:
+       prior = merged.get(target['path'])
+       if prior is None:
+        merged[target['path']] = target
+        continue
+       need(prior['kind'] == target['kind'], 'ORDINARY_EFFECTS_NO_TARGET_KIND_ALIAS')
+       prior['actions'] = tuple(action for action in ('CREATE', 'WRITE', 'DELETE')
+        if action in prior['actions'] or action in target['actions'])
+       prior['source_operands'] += target['source_operands']
+      row['targets'] = tuple(merged.values())
+      row['source_operands'] = tuple(row['source_operands'])
+      row['original'] = (row, entry, execution, selected, row['targets'], row['source_operands'])
+      row['original_target_items'] = tuple((target, _f._ordinary_effect_value_snapshot_v1(target))
+       for target in row['targets'])
+      row['original_source_items'] = tuple((operand, _f._ordinary_effect_value_snapshot_v1(operand))
+       for operand in row['source_operands'])
+     source.verify(protected=True)
+     record['original_rows'] = tuple((row, row['original'], row['original_target_items'],
+      row['original_source_items']) for row in record['rows'])
+     record['original_source_items'] = tuple((operand, _f._ordinary_effect_value_snapshot_v1(operand))
+      for operand in record['source_operands'])
+     record['original_target_sources'] = tuple(record['target_source_rows'])
+     _f._ordinary_pytest_fixed_effects_check_v1(scope, record)
+     return record
+    except BaseException as error:
+     record['errors'].append(error)
+     if not any(error is actual for actual in scope._ordinary_factory_errors_v1):
+      scope._ordinary_factory_errors_v1.append(error)
+     raise
+
+
+def _facet_fn_supported_post_sources_v1(scope, record, bound_rows, *, source_byte_limit, source_node_limit):
+ import tools.validation_reliability as _f
+ import ast
+ runner = scope._ordinary_runner_owner_v1
+ tree, observed = _f._ordinary_source_operand_v1(scope, record, 'tools/run_validation_gates.py',
+  source_byte_limit=source_byte_limit, source_node_limit=source_node_limit)
+ originals = {}
+ for name in ('build_post_validation_commands', '_ordinary_post_execution_argv_v1'):
+  matches = tuple(node for node in tree.body if isinstance(node, ast.FunctionDef) and node.name == name)
+  _f._preflight_require_v1(len(matches) == 1, 'ORDINARY_POST_SOURCE_ONE_ORIGINAL_CONSTRUCTOR')
+  originals[name] = (observed, name, ast.get_source_segment(observed['text'], matches[0]), ())
+ constants = tuple(node for node in tree.body if isinstance(node, ast.Assign)
+  and any(isinstance(target, ast.Name) and target.id == 'ATOMICROWS_BUNDLE_CHECK_SCRIPT'
+   for target in node.targets))
+ _f._preflight_require_v1(len(constants) == 1
+  and ast.literal_eval(constants[0].value) == runner.ATOMICROWS_BUNDLE_CHECK_SCRIPT,
+  'ORDINARY_POST_ORIGINAL_LITERAL_SCRIPT_SOURCE')
+ script = ast.parse(runner.ATOMICROWS_BUNDLE_CHECK_SCRIPT)
+ forbidden = ('write_bytes', 'write_text', 'unlink', 'rmdir', 'mkdir', 'replace', 'rename',
+  'Popen', 'run', 'call', 'check_call', 'check_output')
+ _f._preflight_require_v1(not any(isinstance(node, ast.Call) and isinstance(node.func, ast.Attribute)
+  and node.func.attr in forbidden for node in ast.walk(script)),
+  'ORDINARY_POST_LITERAL_ATOMICROWS_ORIGINAL_READ_PROGRAMME')
+ _f._preflight_require_v1(type(bound_rows) is tuple and len(bound_rows) == 4
+  and tuple(row[2] for row in bound_rows) == (447, 448, 449, 450),
+  'ORDINARY_POST_ORIGINAL_FOUR_SOURCE_OCCURRENCES')
+ rows = []
+ for ordinal, bound in enumerate(bound_rows, 1):
+  entry, execution, source_position = bound
+  registered = execution.registered_argv
+  if ordinal == 1:
+   _f._preflight_require_v1(registered == (scope.interpreter, '-m', 'compileall', '-q', 'tools', 'tests', 'src')
+    and execution.execution_argv[1:4] == ('-I', '-S', '-B')
+    and '-j' in execution.execution_argv
+    and execution.execution_argv[execution.execution_argv.index('-j') + 1] == '1',
+    'ORDINARY_POST_SOURCE_CACHE_ONLY_SINGLE_PROCESS_COMPILER')
+  elif ordinal in (2, 3):
+   expected = (('git', 'diff', '--check') if ordinal == 2 else
+    ('git', 'diff', '--exit-code', '--', 'docs/master_plan/QTT_MasterPlan_Current.md'))
+   _f._preflight_require_v1(registered == expected
+    and execution.execution_argv == ('git', '--no-pager', 'diff', '--no-ext-diff', '--no-textconv',
+     '--ignore-submodules=none', '--submodule=short', *expected[2:]),
+    'ORDINARY_POST_SOURCE_STRONGER_DIFF_PROGRAMME')
+  else:
+   _f._preflight_require_v1(registered == (scope.interpreter, '-c', runner.ATOMICROWS_BUNDLE_CHECK_SCRIPT)
+    and execution.execution_argv == (scope.interpreter, '-I', '-S', '-B', '-c', runner.ATOMICROWS_BUNDLE_CHECK_SCRIPT),
+    'ORDINARY_POST_SOURCE_ISOLATED_LITERAL_READ_PROGRAMME')
+  native = _f._ordinary_native_source_programme_v1(scope, bound, (observed,),
+   tuple(originals.values()), cohorts=((('APPLICATION',), (observed,), ()),),
+   bootstrap_fd_demand=12, application_fd_demand=8, nofile=64,
+   stdout_minimum=0, stderr_minimum=0, uses_git=ordinal in (2, 3))
+  rows.append(dict(entry=entry, execution=execution, bound_row=bound,
+   source_position=source_position, targets=(), source_operands=(observed,),
+   native_programme=native, run_output_effects=(),
+   source_programme='original POST cache/compiler, protected diff, or literal AtomicRows reader'))
+ return tuple(rows)
+
+
+def _facet_fn_run_output_recipe_v1(scope, effects):
+ import tools.validation_reliability as _f
+ paths = scope._ordinary_bound_paths_v1
+ scratch = scope._ordinary_run_scratch_roots_v1
+ _f._preflight_require_v1(effects is scope._ordinary_effect_programme_v1
+  is scope._ordinary_original_effect_programme_v1
+  and effects['paths'] is paths and effects['plan'] is scope._ordinary_bound_plan_v1
+  and effects['source'] is scope.source and effects['source_selection']
+   is scope._ordinary_source_selection_v1
+  and scratch is scope._ordinary_original_run_scratch_roots_v1
+  and scratch['paths'] is paths and scratch['roots'][0] == paths.validation_output_root
+  and not hasattr(scope, '_ordinary_run_outputs_v1'),
+  'ORDINARY_V_ONE_ORIGINAL_SOURCE_RECIPE')
+ rows = []
+ for effect_row in effects['rows']:
+  for spec in effect_row['run_output_effects']:
+   path = spec['path']
+   _f._preflight_require_v1(type(spec) is dict and spec['kind'] == 'FILE'
+    and spec['actions'] == ('CREATE', 'WRITE')
+    and type(path) is type(_f.Path()) and path.is_absolute()
+    and path != paths.validation_output_root
+    and path.is_relative_to(paths.validation_output_root)
+    and spec['source_operands'] is effect_row['source_operands']
+    and spec['consumer_programme_required'] == ('original_run_output_storage_owner',
+     'native_view_mapping_and_uid', 'final_consumer_read_handback')
+    and spec['parent_paths'] == tuple(parent for parent in reversed(path.parents)
+     if parent == paths.validation_output_root
+      or parent.is_relative_to(paths.validation_output_root))
+    and effect_row['entry'] is effect_row['bound_row'][0]
+    and effect_row['execution'] is effect_row['bound_row'][1]
+    and effect_row['entry'].argv == effect_row['execution'].execution_argv
+    and _f._ordinary_deterministic_run_output_operands_v1(effect_row['entry'].argv,
+     paths.validation_output_root, (spec['flag'],)) == ((spec['flag'], path),)
+    and not any(path == prior['path'] for prior in rows),
+    'ORDINARY_V_EXACT_SOURCE_SELECTED_FILE_AND_FLAG')
+   _f._linux_preflight_path_v1(str(path))
+   rows.append(dict(effect_row=effect_row, spec=spec, path=path,
+    entry=effect_row['entry'], bound_row=effect_row['bound_row'],
+    source_operands=effect_row['source_operands'], leaf_limit=128 << 20,
+    parent_slot=None, parent_identity=None, parent_chain=None,
+    slot=None, identity=None, original_version=None, occurrence=None,
+    create_attempted=False, created=False, handoff_attempted=False,
+    handed=False, uid=None, gid=None, handback_attempted=False,
+    handback_complete=False, readback_attempted=False,
+    readback_complete=False, observed_extent=None, observed_read_bytes=0,
+    final_version=None, final_attributes=None, completion=None,
+    original_completion=None, errors=[]))
+ rows = tuple(rows)
+ result = dict(scope=scope, effects=effects, paths=paths, source=scope.source,
+  scratch=scratch, image=scope._ordinary_host_output_image_v1, rows=rows,
+  row_originals=tuple((row, row['effect_row'], row['spec'], tuple(row['spec'].items()),
+   row['path'], row['entry'], row['bound_row'], row['source_operands'], row['leaf_limit'],
+   row['errors']) for row in rows),
+  namespace=None, namespace_original=None, cleanup_attempted=False,
+  cleanup_complete=False, errors=[])
+ depths = tuple(len(row['path'].parts) - 1 for row in rows)
+ result['demand'] = dict(file_count=len(rows),
+  file_bytes=sum(row['leaf_limit'] for row in rows),
+  parent_read_bytes=2 * sum(row['leaf_limit'] for row in rows),
+  metadata_minimum=sum(64 + 32 * depth * depth + 2 * ((row['leaf_limit'] + 65535) // 65536)
+   for row, depth in zip(rows, depths, strict=True)),
+  native_control_calls=2 * len(rows), native_control_read_bytes=768 * len(rows),
+  native_control_write_bytes=24 * len(rows),
+  simultaneous_descriptors=2 * len(rows) + 2 + max(depths, default=0),
+  namespace_file_count=len(rows), namespace_directory_count=len(set(
+   parent for row in rows for parent in row['spec']['parent_paths'])))
+ result['demand_original'] = tuple(result['demand'].items())
+ result['original'] = (result, scope, effects, paths, scope.source, scratch,
+  result['image'], rows, result['row_originals'], result['demand'],
+  result['demand_original'], result['errors'], (_f.os.getpid(), _f.threading.get_ident()))
+ scope._ordinary_run_outputs_v1 = scope._ordinary_original_run_outputs_v1 = result
+ return result
+
+
+def _facet_fn_run_output_recipe_check_v1(scope, *, settling=False):
+ import tools.validation_reliability as _f
+ record = getattr(scope, '_ordinary_run_outputs_v1', None)
+ effects = scope._ordinary_effect_programme_v1
+ if record is None:
+  _f._preflight_require_v1(effects is scope._ordinary_original_effect_programme_v1
+   and type(effects['original']) is tuple and effects['original'][0] is effects
+   and effects['original'][1] is scope and effects['original'][8] is effects['rows']
+   and effects['original'][13] is effects['row_originals']
+   and len(effects['rows']) == len(effects['row_originals'])
+   and all(row is frozen[0] and tuple(row.items()) == frozen[1]
+    and row['run_output_effects'] == ()
+    for row, frozen in zip(effects['rows'], effects['row_originals'], strict=True)),
+   'ORDINARY_V_ABSENCE_REQUIRES_ORIGINAL_ZERO_OUTPUT_PROGRAMME')
+  return None
+ original = record['original']
+ _f._preflight_require_v1(record is scope._ordinary_original_run_outputs_v1
+  and type(original) is tuple and len(original) == 13
+  and original[0] is record and original[1] is scope and original[2] is effects
+  and effects is scope._ordinary_original_effect_programme_v1
+  and original[3] is record['paths'] is scope._ordinary_bound_paths_v1
+  and original[4] is record['source'] is scope.source
+  and original[5] is record['scratch'] is scope._ordinary_original_run_scratch_roots_v1
+  and original[6] is record['image'] is scope._ordinary_host_output_image_v1
+  and original[7] is record['rows'] and original[8] is record['row_originals']
+  and original[9] is record['demand'] and original[10] == tuple(record['demand'].items())
+  and original[11] is record['errors'] and original[12] == (_f.os.getpid(), _f.threading.get_ident())
+  and len(record['rows']) == len(record['row_originals']) and not record['errors'],
+  'ORDINARY_V_SAME_FROZEN_SOURCE_RECIPE')
+ for row, retained in zip(record['rows'], record['row_originals'], strict=True):
+  _f._preflight_require_v1(row is retained[0] and row['effect_row'] is retained[1]
+   and row['spec'] is retained[2] and tuple(row['spec'].items()) == retained[3]
+   and row['path'] == retained[4] and row['entry'] is retained[5]
+   and row['bound_row'] is retained[6] and row['source_operands'] is retained[7]
+   and row['leaf_limit'] == retained[8] and type(row['leaf_limit']) is int
+   and row['errors'] is retained[9] and not row['errors']
+   and any(row['effect_row'] is value for value in effects['rows'])
+   and any(row['spec'] is value for value in row['effect_row']['run_output_effects']),
+   'ORDINARY_V_RETAINED_SOURCE_FILE_VALUES')
+ scope._ordinary_factory_check_v1(settling=settling)
+ return record
+
+
+def _facet_fn_supported_effect_programme_check_v1(scope, record):
+ """Check the complete supported rows; unsupported rows never enter this product."""
+ import tools.validation_reliability as _f
+ _f._preflight_require_v1(type(scope) is _f._LinuxPreflightScopeV1 and type(record) is dict
+  and record is scope._ordinary_effect_programme_v1 is scope._ordinary_original_effect_programme_v1
+  and record['scope'] is scope and record['source'] is scope.source
+  and record['check'] is record['original_check'] is _f._ordinary_supported_effect_programme_check_v1
+  and record['paths'] is scope._ordinary_bound_paths_v1
+  and record['plan'] is scope._ordinary_bound_plan_v1
+  and record['execution_plan'] is scope._ordinary_execution_plan_v1
+  and not record['errors'], 'ORDINARY_SUPPORTED_EFFECT_ORIGINAL_FACTORY')
+ original = record['original']
+ _f._preflight_require_v1(type(original) is tuple and len(original) == 15
+  and original[0] is record and original[1] is scope and original[2] is record['source']
+  and original[3] is record['paths'] and original[4] is record['plan']
+  and original[5] is record['execution_plan'] and original[6] is record['source_selection']
+   is scope._ordinary_source_selection_v1 is scope._ordinary_original_source_selection_v1
+  and original[7] is record['bound_rows'] and original[8] is record['rows']
+  and original[9] is record['source_operands'] and original[10] is record['errors']
+  and original[11] == (_f.os.getpid(), _f.threading.get_ident())
+  and original[12] is record['components'] and original[13] is record['row_originals']
+  and original[14] is record['source_originals'] and record['unresolved_rows'] == []
+  and type(record['rows']) is tuple and len(record['rows']) == len(record['bound_rows'])
+   == len(record['row_originals']) == len(record['plan']) > 0,
+  'ORDINARY_SUPPORTED_EFFECT_FROZEN_SOURCE_SELECTION_AND_ROWS')
+ runner = scope._ordinary_runner_owner_v1
+ _f._preflight_require_v1(runner._ordinary_phase_occurrence_selection_v1(scope, record['paths'],
+  record['plan'], record['execution_plan'], phase=record['source_selection']._original[2])
+   is record['bound_rows'], 'ORDINARY_SUPPORTED_EFFECT_ACTUAL_BOUND_ROWS')
+ for component in record['components']:
+  _f._preflight_require_v1(component['check'] is component['original_check']
+   and component['check'](scope, component) is component,
+   'ORDINARY_SUPPORTED_EFFECT_SAME_COMPONENT_CHECK')
+ for ordinal, (row, retained) in enumerate(zip(record['rows'], record['row_originals'], strict=True)):
+  bound = record['bound_rows'][ordinal]
+  _f._preflight_require_v1(row is retained[0] and tuple(row.items()) == retained[1]
+   and row['entry'] is bound[0] and row['execution'] is bound[1]
+   and row['bound_row'] is bound and row['source_position'] == bound[2]
+   and row['targets'] is retained[2] and row['source_operands'] is retained[3]
+   and row['native_programme'] is retained[4]
+   and tuple(_f._ordinary_effect_value_snapshot_v1(target) for target in row['targets']) == retained[5],
+   'ORDINARY_SUPPORTED_EFFECT_ORIGINAL_TARGET_AND_SOURCE_VALUES')
+  _f._ordinary_native_source_programme_check_v1(scope, row['native_programme'])
+ for observed, retained in record['source_originals']:
+  _f._preflight_require_v1(any(observed is item for item in record['source_operands'])
+   and _f._ordinary_effect_value_snapshot_v1(observed) == retained and observed['complete']
+   and observed['error'] is None and observed['row'] is scope.source.row_index[observed['row']['path']]
+   and tuple(scope.source.post[observed['row']['path']]) == observed['version'],
+   'ORDINARY_SUPPORTED_EFFECT_RETAINED_PYTHON_AND_DATA_OPERANDS')
+ if record['candidate_demand_arithmetic'] is not None:
+  runner._ordinary_candidate_demand_arithmetic_checked_v1(scope, record, record['candidate_demand_arithmetic'])
+ else:
+  _f._preflight_require_v1(record['demand_attempted'] and record['candidate_demand'] is None
+   and scope._ordinary_candidate_v1 is None,
+   'ORDINARY_SUPPORTED_EFFECT_ONLY_ORIGINAL_PRE_C_DEMAND_DERIVATION')
+ _f._ordinary_run_output_recipe_check_v1(scope)
+ return record
+
+
+def _facet_fn_control_typed_literal_v1(value):
+ import tools.validation_reliability as _f
+ import math
+ _f._ordinary_control_dictionary_keys_v1(math.__dict__)
+ if value is None: return ('NoneType',)
+ if type(value) in (bool, int, str, bytes): return (type(value).__name__, value)
+ if type(value) is float:
+  if not math.isfinite(value): raise ValueError('CONTROL_DEFAULT_NONFINITE_UNSUPPORTED')
+  return ('float', value.hex())
+ if type(value) in (tuple, list):
+  return (type(value).__name__, tuple(_f._ordinary_control_typed_literal_v1(x) for x in value))
+ if type(value) is dict:
+  return ('dict', tuple((_f._ordinary_control_typed_literal_v1(k),
+   _f._ordinary_control_typed_literal_v1(v)) for k, v in value.items()))
+ raise ValueError('CONTROL_DEFAULT_LITERAL_TYPE_UNSUPPORTED')
+
+
+def _facet_fn_control_literal_equal_v1(expected, actual):
+ from tools.validation_reliability import _facet_fn_control_literal_values_v1
+ return _facet_fn_control_literal_values_v1(expected, actual)
+
+
+def _facet_fn_control_code_source_equal_v1(expected, actual):
+ import tools.validation_reliability as _f
+ import types
+ _f._ordinary_control_dictionary_keys_v1(types.__dict__)
+ pending = [(expected, actual)]
+ fields = ('co_filename', 'co_name', 'co_qualname', 'co_stacksize',
+  'co_nlocals', 'co_varnames', 'co_cellvars', 'co_freevars')
+ while pending:
+  left, right = pending.pop()
+  if type(left) is not types.CodeType or type(right) is not types.CodeType:
+   return False
+  if left != right or any(getattr(left, k) != getattr(right, k) for k in fields):
+   return False
+  if len(left.co_consts) != len(right.co_consts): return False
+  for first, second in zip(left.co_consts, right.co_consts):
+   if type(first) is types.CodeType or type(second) is types.CodeType:
+    if type(first) is not types.CodeType or type(second) is not types.CodeType:
+     return False
+    pending.append((first, second))
+ return True
+
+
+def _facet_fn_control_dictionary_keys_v1(namespace):
+ import tools.validation_reliability as _f
+ if type(namespace) is not dict:
+  raise ValueError('CONTROL_EXACT_NATIVE_DICTIONARY_REQUIRED')
+ for key in namespace:
+  if type(key) is not str:
+   raise ValueError('CONTROL_FOREIGN_DICTIONARY_KEY')
+ return namespace
+
+
+def _facet_fn_control_member_v1(value, path):
+ import tools.validation_reliability as _f
+ import types
+ _f._ordinary_control_dictionary_keys_v1(types.__dict__)
+ origin = value
+ if type(value) in (_f._LinuxImmutableSourceSealV2, _f._LinuxSourceNativeV2):
+  source = (value if type(value) is _f._LinuxImmutableSourceSealV2
+   else value.__dict__.get('_ordinary_source_owner_v1'))
+  if type(source) is not _f._LinuxImmutableSourceSealV2:
+   raise ValueError('CONTROL_ORIGINAL_SOURCE_NATIVE_OWNER')
+  scope = source.__dict__.get('_ordinary_meter_scope_v1')
+  if type(scope) is not _f._LinuxPreflightScopeV1:
+   raise ValueError('CONTROL_ORIGINAL_SOURCE_NATIVE_SCOPE')
+  record = scope._ordinary_source_meter_projection_v1(source)
+  if type(value) is _f._LinuxSourceNativeV2 and path == ('attempt',):
+   attempt = value.__dict__.get('attempt')
+   if (value is not record['native'] or type(attempt) is not types.MethodType
+     or attempt.__self__ is not source or attempt.__func__ is not
+      _f._LinuxImmutableSourceSealV2.__dict__['_ordinary_source_native_attempt_v1']):
+    raise ValueError('CONTROL_ORIGINAL_SOURCE_NATIVE_CALLBACK')
+   return attempt.__func__
+  if value is not source:
+   raise ValueError('CONTROL_SOURCE_NATIVE_MEMBER_UNSUPPORTED')
+  if path == ('native', 'flags'):
+   return _f._LinuxSourceNativeV2.__dict__['flags']
+  if path == ('census', '_version'):
+   scope._ordinary_census_meter_projection_v1(source.census)
+   return _f._ordinary_control_member_v1(_f, ('_LinuxPreflightCensusV1','_version'))
+  if path == ('_ordinary_meter_scope_v1', '_ordinary_source_meter_event_v1'):
+   return _f._LinuxPreflightScopeV1.__dict__['_ordinary_source_meter_event_v1']
+  raise ValueError('CONTROL_ORIGINAL_SOURCE_MEMBER_UNSUPPORTED')
+ if type(path) is not tuple:
+  raise ValueError('CONTROL_MEMBER_PATH')
+ for segment in path:
+  if type(segment) is not str:
+   raise ValueError('CONTROL_MEMBER_SEGMENT')
+  if type(value) is types.ModuleType:
+   namespace = value.__dict__
+  elif type(value) is type:  # reject every custom metaclass
+   namespace = value.__dict__
+  elif type(value) is dict:
+   namespace = value
+  else:
+   raise ValueError('CONTROL_NONDICTIONARY_MEMBER_ORIGIN_UNSUPPORTED')
+  if type(namespace) is dict:
+   _f._ordinary_control_dictionary_keys_v1(namespace)
+  else:
+   for key in namespace:
+    if type(key) is not str:
+     raise ValueError('CONTROL_FOREIGN_CLASS_DICTIONARY_KEY')
+  value = namespace[segment]
+ if (origin is _f and path == ('_LinuxPreflightCensusV1','_version')):
+  cls = _f.__dict__['_LinuxPreflightCensusV1']
+  descriptor = cls.__dict__['_version']
+  if (type(cls) is not type or value is not descriptor
+    or type(descriptor) is not staticmethod
+    or type(descriptor.__func__) is not types.FunctionType
+    or descriptor.__func__.__globals__ is not _f.__dict__
+    or descriptor.__func__.__qualname__ != '_LinuxPreflightCensusV1._version'):
+   raise ValueError('CONTROL_ONLY_ORIGINAL_CENSUS_STATICMETHOD')
+  return descriptor.__func__
+ return value
+
+
+def _facet_fn_control_source_sites_v1(definition):
+ import tools.validation_reliability as _f
+ import ast
+ _f._ordinary_control_dictionary_keys_v1(ast.__dict__)
+ sites = []
+ for node in ast.walk(definition):
+  if isinstance(node, ast.Call): kind = 'CALL'
+  elif isinstance(node, ast.Attribute): kind = 'ATTRIBUTE'
+  elif isinstance(node, (ast.Import, ast.ImportFrom)): kind = 'IMPORT'
+  else: continue
+  sites.append((kind, node.lineno, node.col_offset,
+   node.end_lineno, node.end_col_offset,
+   ast.dump(node, include_attributes=False)))
+ return tuple(sites)
+
+
+def _facet_fn_control_programme_check_v1(scope, programme):
+ import tools.validation_reliability as _f
+ if (type(programme) is not dict
+   or programme is not scope._ordinary_control_source_programme_v1
+   or programme is not scope._ordinary_original_control_source_programme_v1):
+  raise ValueError('CONTROL_SAME_ORIGINAL_SOURCE_PROGRAMME')
+ _f._ordinary_control_dictionary_keys_v1(programme)
+ old = scope._ordinary_control_source_programme_original_v1
+ fields = ('scope', 'source', 'resource', 'query', 'owner', 'module_inputs',
+  'selectors', 'default_rows', 'site_rows', 'platform_targets', 'native_binding_primitives',
+  'operation_rows', 'operation_sources', 'operation_snapshots',
+  'interpreter_storage_request', 'errors')
+ if (type(old) is not tuple or len(old) != len(fields) + 1
+   or old[0] is not programme
+   or programme.get('original') is not old
+   or any(programme.get(key) is not old[index + 1]
+    for index, key in enumerate(fields))):
+  raise ValueError('CONTROL_ORIGINAL_SOURCE_PROGRAMME_FIELDS')
+ resource = programme['resource']
+ original_resource = scope._ordinary_original_resource_programme_v1
+ _f._ordinary_control_dictionary_keys_v1(resource)
+ if (programme['scope'] is not scope or programme['source'] is not scope.source
+   or programme['query'] is not scope.query
+   or programme['owner'] is not scope._ordinary_factory_owner_v1
+   or resource is not scope._ordinary_resource_programme_v1
+   or type(original_resource) is not tuple or len(original_resource) < 2
+   or original_resource[0] is not resource
+   or tuple(resource.items()) != original_resource[1]):
+  raise ValueError('CONTROL_ORIGINAL_SOURCE_RESOURCE_OWNER')
+ for key in ('module_inputs', 'selectors', 'default_rows', 'site_rows',
+   'platform_targets', 'native_binding_primitives', 'operation_rows',
+   'operation_sources', 'operation_snapshots'):
+  if type(programme[key]) is not tuple:
+   raise ValueError('CONTROL_ORIGINAL_SOURCE_TABLE_TUPLES')
+ if (type(programme['interpreter_storage_request']) is not int
+   or programme['interpreter_storage_request'] < 0
+   or type(programme['errors']) is not list):
+  raise ValueError('CONTROL_ORIGINAL_SOURCE_LIFETIME_FIELDS')
+ if programme['errors']:
+  raise ValueError('CONTROL_PRIOR_SOURCE_PRODUCER_ERROR')
+ return programme
+
+
+def _facet_fn_control_default_binding_v1(function, node, actual, row, *,
+  native_binding_primitives):
+ import tools.validation_reliability as _f
+ import ast, types
+ _f._ordinary_control_dictionary_keys_v1(ast.__dict__)
+ _f._ordinary_control_dictionary_keys_v1(types.__dict__)
+ if type(row) is not tuple or len(row) != 9:
+  raise ValueError('CONTROL_EVALUATED_DEFAULT_ROW')
+ label, slot, expression, kind, observation, original, root, native_type, descriptor = row
+ if expression != ast.dump(node, include_attributes=False) or observation is None:
+  raise ValueError('CONTROL_DEFAULT_ORIGINAL_SOURCE_EXPRESSION')
+ path, leaf = [], node
+ while isinstance(leaf, ast.Attribute):
+  path.insert(0, leaf.attr); leaf = leaf.value
+ if not isinstance(leaf, ast.Name):
+  raise ValueError('CONTROL_DEFAULT_ONLY_FIXED_NAME_ATTRIBUTE')
+ namespace = _f._ordinary_control_dictionary_keys_v1(function.__globals__)
+ builtin_namespace = _f._ordinary_control_dictionary_keys_v1(function.__builtins__)
+ if leaf.id in namespace: current_root = namespace[leaf.id]
+ else:
+  current_root = builtin_namespace[leaf.id]
+ if current_root is not root:
+  raise ValueError('CONTROL_DEFAULT_ORIGINAL_ROOT')
+ if kind == 'FIXED_DICTIONARY_VALUE':
+  expected = _f._ordinary_control_member_v1(root, tuple(path))
+  if expected is not original or actual is not original:
+   raise ValueError('CONTROL_DEFAULT_FIXED_VALUE_IDENTITY')
+ elif kind == 'PATTERN_MATCH_NATIVE_DEFAULT':
+  pattern_namespace = native_type.__dict__ if type(native_type) is type else None
+  if pattern_namespace is not None:
+   for key in pattern_namespace:
+    if type(key) is not str:
+     raise ValueError('CONTROL_FOREIGN_PATTERN_TYPE_DICTIONARY_KEY')
+  if (leaf.id != 'WHITESPACE' or tuple(path) != ('match',)
+    or type(native_type) is not type or type(root) is not native_type
+    or type(descriptor) is not types.MethodDescriptorType
+    or pattern_namespace.get('match') is not descriptor
+    or descriptor.__objclass__ is not native_type
+    or descriptor.__name__ != 'match'
+    or descriptor.__qualname__ != 'Pattern.match'):
+   raise ValueError('CONTROL_DEFAULT_ORIGINAL_PATTERN_DESCRIPTOR')
+  if type(native_binding_primitives) is not tuple or len(native_binding_primitives) != 3:
+   raise ValueError('CONTROL_ORIGINAL_NATIVE_BINDING_PRIMITIVES')
+  original_type, original_issubclass, original_PyCFunctionType = native_binding_primitives
+  if (not original_issubclass(original_type(original), original_PyCFunctionType)
+    or not original_issubclass(original_type(actual), original_PyCFunctionType)
+    or original_type(actual) is not original_type(original)
+    or original.__self__ is not root or actual.__self__ is not root
+    or original.__name__ != 'match' or actual.__name__ != 'match'
+    or original.__qualname__ != 'Pattern.match'
+    or actual.__qualname__ != 'Pattern.match'):
+   raise ValueError('CONTROL_DEFAULT_ORIGINAL_PATTERN_METHOD')
+ else:
+  raise ValueError('CONTROL_EVALUATED_DEFAULT_KIND_UNSUPPORTED')
+ return row
+
+
+def _facet_fn_control_defaults_check_v1(function, definition, label, default_rows, *,
+  native_binding_primitives):
+ import tools.validation_reliability as _f
+ import ast
+ _f._ordinary_control_dictionary_keys_v1(ast.__dict__)
+ positional_nodes = tuple(definition.args.defaults)
+ keyword_nodes = tuple((arg.arg, node) for arg, node in
+  zip(definition.args.kwonlyargs, definition.args.kw_defaults) if node is not None)
+ defaults, keywords = function.__defaults__, function.__kwdefaults__
+ if keywords is not None:
+  _f._ordinary_control_dictionary_keys_v1(keywords)
+ if (not positional_nodes and defaults is not None
+   or positional_nodes and (type(defaults) is not tuple or len(defaults) != len(positional_nodes))
+   or not keyword_nodes and keywords is not None
+   or keyword_nodes and (type(keywords) is not dict
+    or tuple(keywords) != tuple(name for name, _ in keyword_nodes))):
+  raise ValueError('CONTROL_SOURCE_DEFAULT_CONTAINER_SHAPE')
+ selected_rows = tuple(row for row in default_rows if row[0] == label)
+ used, checks = [], []
+ values = tuple(('POSITIONAL', index, node, defaults[index])
+  for index, node in enumerate(positional_nodes))
+ values += tuple(('KEYWORD', name, node, keywords[name]) for name, node in keyword_nodes)
+ for kind, index, node, actual in values:
+  slot = (kind, index)
+  matches = tuple(row for row in selected_rows if row[1] == slot)
+  try:
+   expected = ast.literal_eval(node)
+  except (ValueError, TypeError, SyntaxError):
+   if len(matches) != 1:
+    raise ValueError('CONTROL_EVALUATED_DEFAULT_ORIGINAL_BINDING_REQUIRED')
+   _f._ordinary_control_default_binding_v1(function, node, actual, matches[0],
+    native_binding_primitives=native_binding_primitives)
+   used.append(matches[0]); checks.append((slot, node, matches[0], None))
+  else:
+   if matches or not _f._ordinary_control_literal_equal_v1(expected, actual):
+    raise ValueError('CONTROL_SOURCE_LITERAL_DEFAULT')
+   checks.append((slot, node, None, expected))
+ if len(used) != len(selected_rows):
+  raise ValueError('CONTROL_EXACT_EVALUATED_DEFAULT_ROSTER')
+ return defaults, keywords, tuple(checks)
+
+
+def _facet_fn_control_defaults_recheck_v1(function, checks, defaults, keywords, *,
+  native_binding_primitives):
+ import tools.validation_reliability as _f
+ if function.__defaults__ is not defaults or function.__kwdefaults__ is not keywords:
+  raise ValueError('CONTROL_ORIGINAL_DEFAULT_CONTAINER')
+ if keywords is not None:
+  _f._ordinary_control_dictionary_keys_v1(keywords)
+ for slot, node, row, expected in checks:
+  actual = defaults[slot[1]] if slot[0] == 'POSITIONAL' else keywords[slot[1]]
+  if row is None:
+   if not _f._ordinary_control_literal_equal_v1(expected, actual):
+    raise ValueError('CONTROL_RETAINED_LITERAL_DEFAULT')
+  else:
+   _f._ordinary_control_default_binding_v1(function, node, actual, row,
+    native_binding_primitives=native_binding_primitives)
+ return function
+
+
+def _facet_fn_control_bindings_check_v1(function, bindings, closure_values):
+ import tools.validation_reliability as _f
+ _f._ordinary_control_dictionary_keys_v1(function.__globals__)
+ _f._ordinary_control_dictionary_keys_v1(function.__builtins__)
+ for binding in bindings:
+  if type(binding) is not tuple or len(binding) != 4:
+   raise ValueError('CONTROL_GLOBAL_BINDING_FIELDS')
+  root_name, origin, original_root, members = binding
+  if type(root_name) is not str or type(origin) is not str:
+   raise ValueError('CONTROL_EXACT_BINDING_NAMES')
+  if origin == 'global':
+   current = function.__globals__[root_name]
+  elif origin == 'builtin':
+   if root_name in function.__globals__:
+    raise ValueError('CONTROL_BUILTIN_SHADOW')
+   current = function.__builtins__[root_name]
+  else: raise ValueError('CONTROL_GLOBAL_ORIGIN')
+  if current is not original_root or type(members) is not tuple:
+   raise ValueError('CONTROL_GLOBAL_ROOT_OR_MEMBERS')
+  for path, original_member in members:
+   if not path or _f._ordinary_control_member_v1(current, path) is not original_member:
+    raise ValueError('CONTROL_FIXED_MEMBER_IDENTITY')
+ cells = function.__closure__ or ()
+ if len(cells) != len(closure_values) or len(cells) != len(function.__code__.co_freevars):
+  raise ValueError('CONTROL_CLOSURE_ROSTER')
+ for cell, original_value in zip(cells, closure_values):
+  if cell.cell_contents is not original_value:
+   raise ValueError('CONTROL_CLOSURE_IDENTITY')
+ return function
+
+
+def _facet_fn_control_code_site_route_v1(owner, path, target, boundary, site):
+ import tools.validation_reliability as _f
+ import dis, types
+ if (type(owner) is not types.FunctionType or type(path) is not tuple
+   or type(target) is not types.CodeType or type(site) is not tuple
+   or len(site) != 6 or type(site[0]) is not str or type(site[5]) is not str
+   or any(type(value) is not int for value in site[1:5])
+   or boundary not in ('CODE_SITE', 'LEXICAL_CALL')):
+  raise ValueError('CONTROL_SOURCE_CHILD_CODE_ROUTE')
+ parent = owner.__code__
+ current = parent
+ for position in path:
+  if (type(position) is not int or not 0 <= position < len(current.co_consts)
+    or type(current.co_consts[position]) is not types.CodeType):
+   raise ValueError('CONTROL_SOURCE_CHILD_CODE_POSITION')
+  current = current.co_consts[position]
+ if current is not target:
+  raise ValueError('CONTROL_SOURCE_CHILD_CODE_IDENTITY')
+ if boundary == 'CODE_SITE':
+  if site[0] != 'ATTRIBUTE':
+   raise ValueError('CONTROL_METADATA_CODE_SITE_ONLY')
+  return target
+ if (site[0] != 'CALL' or not path
+   or type(target.co_name) is not str or type(target.co_qualname) is not str
+   or not target.co_qualname.startswith(parent.co_qualname + '.<locals>.')):
+  raise ValueError('CONTROL_DIRECT_SOURCE_LEXICAL_CALL_REQUIRED')
+ prefix = "Call(func=Name(id=" + repr(target.co_name) + ", ctx=Load())"
+ if not site[5].startswith(prefix):
+  raise ValueError('CONTROL_SOURCE_LEXICAL_SYMBOL_DISPATCH')
+ instructions = tuple(_f._ordinary_control_bytecode_v1(parent))
+ loads = tuple(index for index, instruction in enumerate(instructions)
+  if instruction[1] == 'LOAD_CONST' and instruction[3] is target)
+ stores = tuple(index for index, instruction in enumerate(instructions)
+  if instruction[1] in ('STORE_FAST', 'STORE_DEREF')
+  and instruction[3] == target.co_name)
+ if (len(loads) != 1 or len(stores) != 1 or loads[0] >= stores[0]
+   or not any(instruction[1] == 'MAKE_FUNCTION'
+    for instruction in instructions[loads[0] + 1:stores[0]])):
+  raise ValueError('CONTROL_SOURCE_LEXICAL_MAKE_AND_STORE')
+ if any(instruction[1] in ('CALL', 'CALL_FUNCTION_EX')
+   for instruction in instructions[loads[0] + 1:stores[0]]):
+  raise ValueError('CONTROL_SOURCE_LEXICAL_DECORATOR_OR_FACTORY')
+ pending = [parent]
+ while pending:
+  code = pending.pop()
+  for instruction in _f._ordinary_control_bytecode_v1(code):
+   if (instruction[1] in ('STORE_FAST', 'STORE_DEREF', 'STORE_GLOBAL',
+     'STORE_NAME', 'DELETE_FAST', 'DELETE_DEREF', 'DELETE_GLOBAL', 'DELETE_NAME')
+     and instruction[3] == target.co_name
+     and not (code is parent and instruction[0] == instructions[stores[0]][0])):
+    raise ValueError('CONTROL_SOURCE_LEXICAL_DESCENDANT_REBIND')
+  pending.extend(value for value in code.co_consts if type(value) is types.CodeType)
+ return target
+
+
+def _facet_fn_control_lexical_activation_v1(scope, product, parent, children, values):
+ import tools.validation_reliability as _f
+ import types
+ rows = _f._ordinary_control_source_product_check_v1(scope, product)
+ matching = tuple(row for row in rows if row[1] is parent)
+ facet = _facet_fn_source_data_lexical_admission_v1
+ delegated = tuple(row for row in rows if row[1] is facet)
+ if (len(matching) != 1 or type(parent) is not types.FunctionType
+   or parent.__code__ is not matching[0][2]
+   or parent is not _f._ordinary_source_data_lexical_admission_v1
+   or len(delegated) != 1 or type(facet) is not types.FunctionType
+   or facet.__code__ is not delegated[0][2]
+   or type(parent.__name__) is not str
+   or parent.__name__ != '_ordinary_source_data_lexical_admission_v1'
+   or type(children) is not tuple or type(values) is not tuple
+   or len(children) != 3 or len(values) != 3):
+  raise ValueError('CONTROL_ORIGINAL_LEXICAL_ACTIVATION_PARENT')
+ counts, limits, raw = values
+ if (type(counts) is not dict or any(type(key) is not str for key in counts)
+   or any(type(value) is not int or value < 0 for value in counts.values())
+   or type(limits) is not tuple or len(limits) != 6
+   or any(type(value) is not int or value < 0 for value in limits)
+   or type(raw) is not bytes):
+  raise ValueError('CONTROL_ORIGINAL_LEXICAL_ACTIVATION_VALUES')
+ expected_names = ('checkpoint', 'visit', 'bump')
+ available = {'_f': _f, 'counts': counts, 'limits': limits, 'raw': raw}
+ available.update(zip(expected_names, children))
+ parent_code = delegated[0][2]
+ child_rows = []
+ for name, function in zip(expected_names, children):
+  candidates = tuple((index, child) for index, child in enumerate(parent_code.co_consts)
+   if type(child) is types.CodeType
+   and child.co_qualname == parent_code.co_qualname + '.<locals>.' + name)
+  if (len(candidates) != 1 or type(function) is not types.FunctionType
+    or function.__code__ is not candidates[0][1]
+    or function.__globals__ is not facet.__globals__
+    or function.__builtins__ is not facet.__builtins__
+    or function.__defaults__ is not None or function.__kwdefaults__ is not None):
+   raise ValueError('CONTROL_ACTUAL_SOURCE_LEXICAL_FUNCTION')
+  code = candidates[0][1]
+  cells = function.__closure__
+  if type(cells) is not tuple or len(cells) != len(code.co_freevars):
+   raise ValueError('CONTROL_ACTUAL_SOURCE_LEXICAL_CELLS')
+  for key, cell in zip(code.co_freevars, cells):
+   if (key not in available or type(cell) is not types.CellType
+     or cell.cell_contents is not available[key]):
+    raise ValueError('CONTROL_ACTUAL_SOURCE_LEXICAL_CELL_IDENTITY')
+  child_rows.append((name, function, code, candidates[0][0], cells,
+   tuple(available[key] for key in code.co_freevars)))
+ return _f._ordinary_control_lexical_forward_activation_v1(scope,
+  (scope, product, parent, matching[0], children, values, tuple(child_rows)))
+
+
+def _facet_fn_control_sites_check_v1(scope, label, expected_sites, site_rows, selectors,
+  platform_targets, module_inputs, operation_sources):
+ import tools.validation_reliability as _f
+ import sys, types
+ _f._ordinary_control_dictionary_keys_v1(sys.__dict__)
+ _f._ordinary_control_dictionary_keys_v1(sys.modules)
+ _f._ordinary_control_dictionary_keys_v1(types.__dict__)
+ selected = tuple(row for row in site_rows if row[0] == label)
+ if (tuple(row[1] for row in selected) != expected_sites
+   or len({row[1] for row in selected}) != len(selected)):
+  raise ValueError('CONTROL_EXACT_SOURCE_TRANSITIVE_SITE_COVERAGE')
+ functions = tuple(row[4] for row in selectors)
+ for row in selected:
+  if type(row) is not tuple or len(row) != 3 or type(row[2]) is not tuple or not row[2]:
+   raise ValueError('CONTROL_ORIGINAL_SITE_ROUTE_TABLE_REQUIRED')
+  for route in row[2]:
+   if type(route) is not tuple or len(route) != 6:
+    raise ValueError('CONTROL_ORIGINAL_SITE_ROUTE_FIELDS')
+   owner, path, target, boundary, original_caller, original_fields = route
+   if (type(path) is not tuple or type(original_fields) is not tuple
+     or len(original_fields) != 4 or original_fields[0] is not original_caller
+     or original_fields[1] is not scope or original_fields[2] is not scope.source
+     or original_fields[3] != row[1]
+     or not (any(original_caller is selected[4] for selected in selectors)
+      or any(original_caller is item for item in module_inputs)
+      or any(original_caller is item[0] for item in operation_sources))
+     ):
+    raise ValueError('CONTROL_ORIGINAL_SITE_ROUTE_BINDING')
+   if boundary in ('CODE_SITE', 'LEXICAL_CALL'):
+    if not any(owner is item for item in functions):
+     raise ValueError('CONTROL_ORIGINAL_SOURCE_CODE_SITE_OWNER')
+    if owner is not original_caller:
+     if boundary != 'LEXICAL_CALL':
+      raise ValueError('CONTROL_ORIGINAL_SOURCE_CODE_SITE_OWNER')
+     _f._ordinary_control_lexical_forward_route_v1(scope,owner,path,target,
+      original_caller,row[1],selectors)
+    else:
+     _f._ordinary_control_code_site_route_v1(owner, path, target, boundary, row[1])
+    continue
+   if type(owner) in (_f._LinuxImmutableSourceSealV2,_f._LinuxSourceNativeV2):
+    acquisition=scope._ordinary_control_module_inputs_v1['selection']['route_acquisition']
+    matches=tuple(item for item in acquisition['member_bindings']
+     if item['owner'] is owner and item['path']==path and item['target'] is target)
+    if not matches:
+     raise ValueError('CONTROL_ORIGINAL_SOURCE_MEMBER_CAPTURE')
+    for item in matches:
+     old=item['original'];source=scope.source
+     raw=(source.native.attempt if type(owner) is _f._LinuxSourceNativeV2
+      else source.census if path==('census','_version')
+      else source.native if path==('native','flags') else scope)
+     if (type(old) is not tuple or len(old)!=8 or old[0] is not item
+       or old[1] is not scope or old[2] is not source or old[3] is not owner
+       or old[4] is not item['path'] or old[5] is not target
+       or old[6] is not item['raw'] or old[6] is not raw
+       or old[7] is not item['record']
+       or old[7] is not scope._ordinary_source_meter_projection_v1(source)):
+      raise ValueError('CONTROL_ORIGINAL_SOURCE_MEMBER_INTERVAL')
+   if target is _f._LinuxPreflightCensusV1.__dict__['_version'].__func__:
+    acquisition=scope._ordinary_control_module_inputs_v1['selection']['route_acquisition']
+    matches=tuple(item['static_original'] for item in acquisition['observations']
+     if item.get('function') is target and 'static_original' in item)
+    if (len(matches)!=1 or matches[0][0] is not _f._LinuxPreflightCensusV1
+      or matches[0][1] is not _f._LinuxPreflightCensusV1.__dict__['_version']
+      or matches[0][2] is not target):
+     raise ValueError('CONTROL_ORIGINAL_CENSUS_STATIC_DESCRIPTOR_INTERVAL')
+   if _f._ordinary_control_member_v1(owner, path) is not target:
+    raise ValueError('CONTROL_ORIGINAL_SITE_ROUTE_BINDING')
+   if boundary == 'PYTHON':
+    if target is _f.ValidationReliabilityError:
+     _f._ordinary_control_error_constructor_route_v1(scope,target,original_caller,
+      row[1],selectors,module_inputs,platform_targets)
+    elif type(target) is not types.FunctionType or not any(target is f for f in functions):
+     raise ValueError('CONTROL_TRANSITIVE_PYTHON_SOURCE_SELECTOR_REQUIRED')
+   elif boundary == 'TRUSTED_PLATFORM':
+    if type(target) is types.FunctionType or not any(target is item for item in platform_targets):
+     raise ValueError('CONTROL_ORIGINAL_TRUSTED_PLATFORM_BOUNDARY')
+   elif boundary == 'SOURCE_MODULE':
+    if type(target) is types.ModuleType:
+     _f._ordinary_control_dictionary_keys_v1(target.__dict__)
+    current_name = (target.__dict__.get('__name__')
+     if type(target) is types.ModuleType else None)
+    if (type(target) is not types.ModuleType
+      or type(current_name) is not str
+      or sys.modules.get(current_name) is not target
+      or not (any(target is item[1] for item in module_inputs)
+       or any(target is item for item in platform_targets))):
+     raise ValueError('CONTROL_ORIGINAL_IMPORTED_MODULE')
+   else:
+    raise ValueError('CONTROL_SITE_BOUNDARY_UNSUPPORTED')
+ return selected
+
+
+def _facet_fn_control_source_product_v1(scope, programme):
+ import tools.validation_reliability as _f
+ import dis, sys, types
+ _f._ordinary_control_dictionary_keys_v1(dis.__dict__)
+ _f._ordinary_control_dictionary_keys_v1(sys.__dict__)
+ _f._ordinary_control_dictionary_keys_v1(sys.modules)
+ _f._ordinary_control_dictionary_keys_v1(types.__dict__)
+ programme = _f._ordinary_control_programme_check_v1(scope, programme)
+ if (programme.get('attempted') is not False or programme.get('product') is not None
+   or hasattr(scope, '_ordinary_control_source_product_record_v1')):
+  raise ValueError('CONTROL_ONE_ORIGINAL_SOURCE_PRODUCER_ATTEMPT')
+ programme['attempted'] = True  # latch BEFORE compile/default/member lookup
+ try:
+  module_inputs, selectors = programme['module_inputs'], programme['selectors']
+  for selected in selectors:
+   if (type(selected) is not tuple or len(selected) != 7
+     or type(selected[1]) is not str or type(selected[2]) is not str
+     or type(selected[3]) is not int or selected[3] <= 0):
+    raise ValueError('CONTROL_SELECTED_DECLARATION_FIELDS')
+  modules = {}
+  for item in module_inputs:
+   if type(item) is not tuple or len(item) != 7:
+    raise ValueError('CONTROL_MODULE_INPUT_FIELDS')
+   name, module, observation, raw, filename, flags, optimize = item
+   if type(module) is types.ModuleType:
+    _f._ordinary_control_dictionary_keys_v1(module.__dict__)
+   current_name = (module.__dict__.get('__name__')
+    if type(module) is types.ModuleType else None)
+   if (type(name) is not str or name in modules
+     or type(module) is not types.ModuleType
+     or type(current_name) is not str or current_name != name
+     or sys.modules.get(name) is not module or observation is None):
+    raise ValueError('CONTROL_FIXED_ORIGINAL_MODULE')
+   selected_declarations = tuple((row[2], row[3]) for row in selectors if row[1] == name)
+   retained = _f._ordinary_control_initialized_compiled_reuse_v1(scope,item,selectors)
+   modules[name] = (item, retained if retained is not None else
+     _f._ordinary_control_compiled_selections_v1(raw, filename,
+       flags=flags, optimize=optimize, selected=selected_declarations))
+  rows, associations, labels = [], [], set()
+  for selected in selectors:
+   if type(selected) is not tuple or len(selected) != 7:
+    raise ValueError('CONTROL_SELECTED_DECLARATION_FIELDS')
+   label, module_name, qualname, declaration_line, function, bindings, closure_values = selected
+   if (type(label) is not str or label in labels or type(module_name) is not str
+     or type(qualname) is not str or type(declaration_line) is not int
+     or declaration_line <= 0 or type(function) is not types.FunctionType
+     or type(bindings) is not tuple or type(closure_values) is not tuple):
+    raise ValueError('CONTROL_SELECTED_ORIGINAL_FUNCTION')
+   labels.add(label)
+   item, compiled = modules[module_name]
+   name, module, observation, raw, filename, flags, optimize = item
+   current_function_module = function.__module__
+   current_module_name = module.__dict__.get('__name__')
+   if (type(current_function_module) is not str
+     or type(current_module_name) is not str
+     or current_function_module != module_name
+     or current_module_name != module_name
+     or function.__globals__ is not module.__dict__):
+    raise ValueError('CONTROL_ACTUAL_FIXED_GLOBAL_OWNER')
+   definitions = tuple(x for x in compiled[2]
+    if x[0] == qualname and x[1] == declaration_line)
+   if len(definitions) != 1:
+    raise ValueError('CONTROL_SOURCE_DECLARATION_OCCURRENCE')
+   _, _, code_line, definition = definitions[0]
+   expected = tuple(c for c in compiled[1]
+    if c.co_qualname == qualname and c.co_firstlineno == code_line)
+   if len(expected) != 1:
+    raise ValueError('CONTROL_SOURCE_COMPILED_CODE_OCCURRENCE')
+   expected, actual = expected[0], function.__code__
+   if not _f._ordinary_control_code_source_equal_v1(expected, actual):
+    raise ValueError('CONTROL_WHOLE_SOURCE_CODE_ASSOCIATION')
+   defaults, keywords, checks = _f._ordinary_control_defaults_check_v1(
+    function, definition, label, programme['default_rows'],
+    native_binding_primitives=programme['native_binding_primitives'])
+   pending, required = [actual], set()
+   while pending:
+    code = pending.pop()
+    required.update(instruction[3] for instruction in _f._ordinary_control_bytecode_v1(code)
+     if instruction[1] == 'LOAD_GLOBAL')
+    pending.extend(x for x in code.co_consts if type(x) is types.CodeType)
+   if (any(type(b) is not tuple or len(b) != 4 for b in bindings)
+     or len({b[0] for b in bindings}) != len(bindings)
+     or {b[0] for b in bindings} != required):
+    raise ValueError('CONTROL_EXACT_GLOBAL_ROOT_BINDING_COVERAGE')
+   _f._ordinary_control_bindings_check_v1(function, bindings, closure_values)
+   sites = _f._ordinary_control_source_sites_v1(definition)
+   routes = _f._ordinary_control_sites_check_v1(scope, label, sites, programme['site_rows'],
+    selectors, programme['platform_targets'], module_inputs, programme['operation_sources'])
+   row = (label, function, actual, observation)
+   rows.append(row)
+   associations.append((row, expected, item, selected, defaults, keywords,
+    checks, function.__closure__, bindings, closure_values, sites, routes))
+  if (any(row[0] not in labels for row in programme['default_rows'])
+    or any(row[0] not in labels for row in programme['site_rows'])):
+   raise ValueError('CONTROL_NO_FOREIGN_DEFAULT_OR_SITE_ROWS')
+  product = dict(scope=scope, source=scope.source, resource=programme['resource'],
+   programme=programme, rows=tuple(rows), associations=tuple(associations),
+   modules=tuple(modules.values()))
+  old = (product, scope, scope.source, programme['resource'], programme,
+   product['rows'], product['associations'], product['modules'])
+  product['original'] = old
+  programme['product'] = product
+  scope._ordinary_control_source_product_record_v1 = product
+  scope._ordinary_original_control_source_product_record_v1 = product
+  scope._ordinary_control_source_product_original_v1 = old
+  return product
+ except BaseException as error:
+  if all(error is not prior for prior in programme['errors']):
+   programme['errors'].append(error)
+  if all(error is not prior for prior in scope._ordinary_factory_errors_v1):
+   scope._ordinary_factory_errors_v1.append(error)
+  raise
+
+
+def _facet_fn_control_source_product_check_v1(scope, product):
+ import tools.validation_reliability as _f
+ import sys, types
+ _f._ordinary_control_dictionary_keys_v1(sys.__dict__)
+ _f._ordinary_control_dictionary_keys_v1(sys.modules)
+ _f._ordinary_control_dictionary_keys_v1(types.__dict__)
+ if (type(product) is not dict
+   or product is not scope._ordinary_control_source_product_record_v1
+   or product is not scope._ordinary_original_control_source_product_record_v1):
+  raise ValueError('CONTROL_SAME_ORIGINAL_SOURCE_PRODUCT')
+ _f._ordinary_control_dictionary_keys_v1(product)
+ old = scope._ordinary_control_source_product_original_v1
+ fields = ('scope', 'source', 'resource', 'programme', 'rows', 'associations', 'modules')
+ if (type(old) is not tuple or len(old) != 8 or old[0] is not product
+   or product.get('original') is not old
+   or any(product.get(key) is not old[index + 1] for index, key in enumerate(fields))):
+  raise ValueError('CONTROL_SOURCE_PRODUCT_ORIGINAL_POINTERS')
+ programme = _f._ordinary_control_programme_check_v1(scope, product['programme'])
+ if (programme['attempted'] is not True or programme['product'] is not product
+   or product['scope'] is not scope or product['source'] is not scope.source
+   or product['resource'] is not programme['resource']):
+  raise ValueError('CONTROL_ORIGINAL_SOURCE_PRODUCT_OWNER')
+ rows, associations = product['rows'], product['associations']
+ if type(rows) is not tuple or type(associations) is not tuple or len(rows) != len(associations):
+  raise ValueError('CONTROL_SOURCE_PRODUCT_ROSTER')
+ for item, compiled in product['modules']:
+  name, module, observation, raw, filename, flags, optimize = item
+  if type(module) is types.ModuleType:
+   _f._ordinary_control_dictionary_keys_v1(module.__dict__)
+  current_name = (module.__dict__.get('__name__')
+   if type(module) is types.ModuleType else None)
+  if (type(name) is not str or type(module) is not types.ModuleType
+    or type(current_name) is not str or current_name != name
+    or sys.modules.get(name) is not module):
+   raise ValueError('CONTROL_CANONICAL_MODULE_NAME_OR_BINDING_CHANGED')
+ for row, association in zip(rows, associations):
+  function, item, selected = row[1], association[2], association[3]
+  current_function_module = (function.__module__
+   if type(function) is types.FunctionType else None)
+  if type(item[1]) is types.ModuleType:
+   _f._ordinary_control_dictionary_keys_v1(item[1].__dict__)
+  current_module_name = (item[1].__dict__.get('__name__')
+   if type(item[1]) is types.ModuleType else None)
+  if (association[0] is not row or function is not selected[4]
+    or type(function) is not types.FunctionType
+    or type(item[0]) is not str or type(item[1]) is not types.ModuleType
+    or type(current_function_module) is not str
+    or type(current_module_name) is not str
+    or current_function_module != item[0]
+    or current_module_name != item[0]
+    or function.__globals__ is not item[1].__dict__
+    or function.__code__ is not row[2] or row[3] is not item[2]
+    or function.__closure__ is not association[7]):
+   raise ValueError('CONTROL_RETAINED_ORIGINAL_SOURCE_FUNCTION')
+  _f._ordinary_control_defaults_recheck_v1(function, association[6], association[4], association[5],
+   native_binding_primitives=programme['native_binding_primitives'])
+  _f._ordinary_control_bindings_check_v1(function, association[8], association[9])
+  routes = _f._ordinary_control_sites_check_v1(scope, row[0], association[10],
+   programme['site_rows'], programme['selectors'], programme['platform_targets'],
+   programme['module_inputs'], programme['operation_sources'])
+  if (len(routes) != len(association[11])
+    or any(a is not b for a, b in zip(routes, association[11]))
+    or not _f._ordinary_control_code_source_equal_v1(association[1], row[2])):
+   raise ValueError('CONTROL_RETAINED_INDEPENDENT_SOURCE_OR_ROUTES')
+ return rows
+
+
+def _facet_fn_control_operation_rows_check_v1(scope, source_product, operation_rows,
+  interpreter_storage_request):
+ import tools.validation_reliability as _f
+ _f._ordinary_control_source_product_check_v1(scope, source_product)
+ programme = _f._ordinary_control_programme_check_v1(scope, source_product['programme'])
+ if (type(interpreter_storage_request) is not int
+   or operation_rows is not programme['operation_rows']
+   or interpreter_storage_request != programme['interpreter_storage_request']):
+  raise ValueError('CONTROL_SAME_ORIGINAL_OPERATION_ROWS_AND_STORAGE')
+ snapshots = programme['operation_snapshots']
+ if len(snapshots) != len(operation_rows):
+  raise ValueError('CONTROL_ORIGINAL_OPERATION_SNAPSHOT_ROSTER')
+ for row, snapshot in zip(operation_rows, snapshots):
+  if type(row) is not tuple or len(row) != 10 or type(snapshot) is not tuple or len(snapshot) != 6:
+   raise ValueError('CONTROL_OPERATION_SNAPSHOT_FIELDS')
+  old_row, code, counts, sites, operation, source_operation = snapshot
+  if (type(counts) is not tuple or len(counts) != 7
+    or any(type(value) is not int or value < 0 for value in counts)
+    or any(type(value) is not int or value < 0 for value in row[1:8])):
+   raise ValueError('CONTROL_ORIGINAL_OPERATION_TYPED_COUNTS')
+  if (old_row is not row or row[0] is not code or row[8] is not sites
+    or row[9] is not operation or tuple(row[1:8]) != counts
+    or not any(source_operation is s for s in programme['operation_sources'])):
+   raise ValueError('CONTROL_ORIGINAL_OPERATION_IMMUTABLE_BINDING')
+  if (type(source_operation) is not tuple or len(source_operation) != 5
+    or source_operation[0] is not operation
+    or source_operation[1] is not scope or source_operation[2] is not scope.source
+    or type(source_operation[3]) is not tuple or not source_operation[3]
+    or type(source_operation[4]) is not tuple
+    or not any(row is original_row for original_row in source_operation[4])):
+   raise ValueError('CONTROL_ORIGINAL_OPERATION_SOURCE_OWNER')
+  if type(sites) is not tuple or row[1] > 0 and not sites:
+   raise ValueError('CONTROL_ORIGINAL_ACTIVATION_CALLER_SITES')
+ return programme
+
+
+def _facet_fn_control_frame_demands_v1(scope, source_product, operation_rows, *,
+  frame_basicsize, traceback_basicsize, function_basicsize, cell_basicsize,
+  tuple_prefix, gc_header_size, pointer_size, interpreter_storage_request):
+ import tools.validation_reliability as _f
+ import types
+ _f._ordinary_control_dictionary_keys_v1(types.__dict__)
+ roots = _f._ordinary_control_source_product_check_v1(scope, source_product)
+ _f._ordinary_control_operation_rows_check_v1(scope, source_product, operation_rows,
+  interpreter_storage_request)
+ sizes = (frame_basicsize, traceback_basicsize, function_basicsize,
+  cell_basicsize, tuple_prefix, gc_header_size, pointer_size, interpreter_storage_request)
+ if any(type(x) is not int or x < 0 for x in sizes) or pointer_size == 0:
+  raise ValueError('CONTROL_AUTHENTIC_LAYOUT_OPERANDS')
+ codes, pending = [], [row[2] for row in roots]
+ while pending:
+  code = pending.pop()
+  if not any(code is x for x in codes): codes.append(code)
+  pending.extend(x for x in code.co_consts if type(x) is types.CodeType)
+ if type(operation_rows) is not tuple or len(operation_rows) != len(codes):
+  raise ValueError('CONTROL_OPERATION_CODE_INCIDENCE_ROSTER')
+ seen, demands, components = [], [], []
+ for item in operation_rows:
+  code, calls, live, retained_frames, tracebacks, functions, closure_tuples, cells, call_sites, operation = item
+  if (type(code) is not types.CodeType or not any(code is x for x in codes)
+    or any(code is x for x in seen)):
+   raise ValueError('CONTROL_OPERATION_ASSOCIATED_CODE')
+  counts = (calls, live, retained_frames, tracebacks, functions, closure_tuples, cells)
+  if any(type(x) is not int or x < 0 for x in counts) or live > calls or retained_frames > calls:
+   raise ValueError('CONTROL_SOURCE_INCIDENCE_COUNTS')
+  seen.append(code)
+  slots = code.co_nlocals + len(code.co_cellvars) + len(code.co_freevars) + code.co_stacksize
+  one_frame = frame_basicsize + gc_header_size + pointer_size * slots
+  frame_request = one_frame * (live + retained_frames)
+  traceback_request = (traceback_basicsize + gc_header_size) * tracebacks
+  function_request = (function_basicsize + gc_header_size) * functions
+  closure_request = ((tuple_prefix + pointer_size * len(code.co_freevars)) * closure_tuples
+   + (cell_basicsize + gc_header_size) * cells)
+  prefix = code.co_qualname + '@' + str(code.co_firstlineno)
+  components.extend(((prefix + '/frames', frame_request),
+   (prefix + '/tracebacks', traceback_request),
+   (prefix + '/functions', function_request),
+   (prefix + '/closure_tuples_cells', closure_request)))
+  demands.append((item, one_frame, frame_request, traceback_request, function_request, closure_request))
+ components.append(('source_live_interpreter_storage', interpreter_storage_request))
+ return dict(materialized_incidence_rows=tuple(demands), programme_components=tuple(components),
+  requested_bytes=sum(size for _, size in components),
+  original_source_product=source_product, original_operation_rows=operation_rows,
+  exact_allocator_coverage=False, native_permission_issued=False)
+
+
+def _facet_fn_control_installation_binding_check_v1(scope, record, source_product,
+  operation_rows, interpreter_storage_request):
+ import tools.validation_reliability as _f
+ if (type(record) is not dict or record is not scope._ordinary_installation_copy_v1
+   or record is not scope._ordinary_original_installation_copy_v1):
+  raise ValueError('CONTROL_ORIGINAL_INSTALLATION_OWNER')
+ _f._ordinary_control_dictionary_keys_v1(record)
+ _f._ordinary_control_operation_rows_check_v1(scope, source_product, operation_rows,
+  interpreter_storage_request)
+ old = record.get('controller_source_frame_original')
+ if (type(old) is not tuple or len(old) != 9
+   or old[0] is not record or old[1] is not scope or old[2] is not scope.source
+   or old[3] is not source_product['resource'] or old[4] is not source_product
+   or old[5] is not operation_rows or old[6] != interpreter_storage_request
+   or old[7] is not source_product['programme']
+   or old[8] is not scope._ordinary_control_source_product_original_v1
+   or record.get('controller_source_product') is not source_product
+   or record.get('controller_operation_rows') is not operation_rows
+   or record.get('controller_interpreter_storage_request') != interpreter_storage_request):
+  raise ValueError('CONTROL_ORIGINAL_INSTALLER_SOURCE_FRAME_BINDING')
+ return record
+
+
+def _facet_fn_control_source_programme_bind_v1(scope, *,
+  module_inputs, selectors, default_rows, site_rows, platform_targets,
+  native_binding_primitives, operation_rows, operation_sources, operation_snapshots,
+  interpreter_storage_request):
+ import tools.validation_reliability as _f
+ if any(hasattr(scope, name) for name in (
+   '_ordinary_control_source_programme_v1',
+   '_ordinary_original_control_source_programme_v1',
+   '_ordinary_control_source_programme_original_v1')):
+  raise ValueError('CONTROL_ONE_SOURCE_PROGRAMME_REGISTRATION')
+ resource = scope._ordinary_resource_programme_v1
+ programme = dict(scope=scope, source=scope.source, resource=resource,
+  query=scope.query, owner=scope._ordinary_factory_owner_v1,
+  module_inputs=module_inputs, selectors=selectors, default_rows=default_rows,
+  site_rows=site_rows, platform_targets=platform_targets,
+  native_binding_primitives=native_binding_primitives, operation_rows=operation_rows, operation_sources=operation_sources,
+  operation_snapshots=operation_snapshots,
+  interpreter_storage_request=interpreter_storage_request,
+  errors=[], attempted=False, product=None)
+ fields = ('scope', 'source', 'resource', 'query', 'owner', 'module_inputs',
+  'selectors', 'default_rows', 'site_rows', 'platform_targets', 'native_binding_primitives',
+  'operation_rows', 'operation_sources', 'operation_snapshots',
+  'interpreter_storage_request', 'errors')
+ old = (programme,) + tuple(programme[key] for key in fields)
+ programme['original'] = old
+ scope._ordinary_control_source_programme_v1 = programme
+ scope._ordinary_original_control_source_programme_v1 = programme
+ scope._ordinary_control_source_programme_original_v1 = old
+ try:
+  return _f._ordinary_control_programme_check_v1(scope, programme)
+ except BaseException as error:
+  programme['errors'].append(error)
+  if all(error is not prior for prior in scope._ordinary_factory_errors_v1):
+   scope._ordinary_factory_errors_v1.append(error)
+  raise
+
+
+def _facet_fn_control_installation_bind_v1(scope, record, source_product,
+  operation_rows, interpreter_storage_request):
+ import tools.validation_reliability as _f
+ _f._ordinary_control_dictionary_keys_v1(record)
+ if (type(record) is not dict or record.get('scope') is not scope
+   or record is not scope._ordinary_installation_copy_v1
+   or record is not scope._ordinary_original_installation_copy_v1):
+  raise ValueError('CONTROL_ORIGINAL_INSTALLATION_RECORD')
+ old = record.get('original')
+ if (type(old) is not tuple or len(old) != 17 or old[0] is not record
+   or old[1] is not scope or old[2] is not record['install']
+   or old[3] is not record['census'] or old[4] is not record['programme']
+   or old[5] is not record['image'] or old[6] is not record['destination']
+   or old[7] is not record['install'].rows or old[8] is not record['native']
+   or old[9] is not record['files'] or old[10] is not record['directories']
+   or old[11] is not record['active_slots'] or old[12] is not record['errors']
+   or type(record['errors']) is not list or old[13] is not record['owner']
+   or old[14] is not scope._ordinary_meter_v1
+   or old[15] is not record['source_paths'] or old[16] is not record['target_paths']):
+  raise ValueError('CONTROL_INSTALLATION_ORIGINAL_17')
+ if any(key in record for key in ('controller_source_frame_binding_attempted',
+   'controller_source_frame_binding_errors', 'controller_source_frame_original',
+   'controller_source_product', 'controller_operation_rows',
+   'controller_interpreter_storage_request')):
+  raise ValueError('CONTROL_ONE_INSTALLER_SOURCE_FRAME_BINDING')
+ record['controller_source_frame_binding_attempted'] = True
+ errors = []
+ record['controller_source_frame_binding_errors'] = errors
+ try:
+  _f._ordinary_control_operation_rows_check_v1(scope, source_product,
+   operation_rows, interpreter_storage_request)
+  record['controller_source_product'] = source_product
+  record['controller_operation_rows'] = operation_rows
+  record['controller_interpreter_storage_request'] = interpreter_storage_request
+  record['controller_source_frame_original'] = (
+   record, scope, scope.source, source_product['resource'], source_product,
+   operation_rows, interpreter_storage_request, source_product['programme'],
+   scope._ordinary_control_source_product_original_v1)
+  return _f._ordinary_control_installation_binding_check_v1(scope, record,
+   source_product, operation_rows, interpreter_storage_request)
+ except BaseException as error:
+  errors.append(error)
+  if all(error is not prior for prior in record['errors']):
+   record['errors'].append(error)
+  if all(error is not prior for prior in scope._ordinary_factory_errors_v1):
+   scope._ordinary_factory_errors_v1.append(error)
+  raise
+
+
+def _facet_fn_runtime7_bootstrap_class_source_v1(raw, bootstrap_module, *,
+  compile_filename, compile_flags, optimize, native_primitives,
+  original_source_observation):
+ """Bind the original loaded ModuleSpec to complete independently acquired Source."""
+ import tools.validation_reliability as _f
+ import ast
+ import dis
+ import types
+ from tools.validation_reliability import (
+  _ordinary_control_code_source_equal_v1,
+  _ordinary_control_dictionary_keys_v1,
+  _ordinary_control_literal_equal_v1)
+ _ordinary_control_dictionary_keys_v1(ast.__dict__)
+ _ordinary_control_dictionary_keys_v1(types.__dict__)
+ if (type(native_primitives) is not tuple or len(native_primitives) != 3
+   or native_primitives[0] is not type
+   or native_primitives[1] is not issubclass
+   or native_primitives[2] is not type(len)):
+  raise ValueError('ORDINARY_RUNTIME7_ORIGINAL_BOOTSTRAP_PRIMITIVES')
+ if (type(bootstrap_module) is not types.ModuleType
+   or type(raw) is not bytes or not raw
+   or type(compile_filename) is not str
+   or compile_filename != '<frozen importlib._bootstrap>'
+   or type(compile_flags) is not int or compile_flags != 0
+   or type(optimize) is not int or optimize != 0):
+  raise ValueError('ORDINARY_RUNTIME7_INSTALLED_BOOTSTRAP_SOURCE_POLICY')
+ namespace = _ordinary_control_dictionary_keys_v1(bootstrap_module.__dict__)
+ tree = compile(raw, compile_filename, 'exec', flags=ast.PyCF_ONLY_AST,
+  dont_inherit=True, optimize=optimize)
+ root = compile(tree, compile_filename, 'exec', flags=compile_flags,
+  dont_inherit=True, optimize=optimize)
+ classes = tuple(node for node in tree.body
+  if type(node) is ast.ClassDef and node.name == 'ModuleSpec')
+ if len(classes) != 1:
+  raise ValueError('ORDINARY_RUNTIME7_ONE_COMPLETE_MODULESPEC_DECLARATION')
+ declaration = classes[0]
+ if declaration.bases or declaration.keywords or declaration.decorator_list:
+  raise ValueError('ORDINARY_RUNTIME7_MODULESPEC_SOURCE_NATIVE_CLASS')
+ class_codes = tuple(code for code in root.co_consts
+  if type(code) is types.CodeType and code.co_qualname == 'ModuleSpec')
+ if len(class_codes) != 1:
+  raise ValueError('ORDINARY_RUNTIME7_COMPLETE_MODULESPEC_CLASS_CODE')
+ original_class = namespace.get('ModuleSpec')
+ if type(original_class) is not type:
+  raise ValueError('ORDINARY_RUNTIME7_EXACT_ORIGINAL_MODULESPEC_TYPE')
+ class_namespace = original_class.__dict__
+ if type(class_namespace) is not type(type.__dict__):
+  raise ValueError('ORDINARY_RUNTIME7_EXACT_ORIGINAL_CLASS_DICTIONARY')
+ for key in class_namespace:
+  if type(key) is not str:
+   raise ValueError('ORDINARY_RUNTIME7_EXACT_ORIGINAL_CLASS_KEY')
+ source_module = class_namespace.get('__module__')
+ if (type(original_source_observation) is not dict
+   or original_source_observation['complete'] is not True
+   or original_source_observation['error'] is not None
+   or original_source_observation['raw'] is not raw):
+  raise ValueError('ORDINARY_RUNTIME7_COMPLETE_PAIRED_BOOTSTRAP_SOURCE')
+ source_qualname = declaration.name
+ original_bases = original_class.__bases__
+ original_mro = original_class.__mro__
+ if (type(source_module) is not str
+   or type(original_bases) is not tuple or len(original_bases) != 1
+   or original_bases[0] is not object
+   or type(original_mro) is not tuple or len(original_mro) != 2
+   or original_mro[0] is not original_class or original_mro[1] is not object
+   or source_module != '_frozen_importlib' or source_qualname != 'ModuleSpec'):
+  raise ValueError('ORDINARY_RUNTIME7_MODULESPEC_ORIGINAL_BASES_AND_NAME')
+ expected_codes = tuple(code for code in class_codes[0].co_consts
+  if type(code) is types.CodeType)
+ methods = []
+ member_names = []
+ generated = {'__module__', '__firstlineno__', '__static_attributes__',
+  '__dict__', '__weakref__', '__doc__', '__hash__'}
+ for node in declaration.body:
+  if type(node) is ast.Expr and type(node.value) is ast.Constant and type(node.value.value) is str:
+   continue
+  if type(node) is not ast.FunctionDef:
+   raise ValueError('ORDINARY_RUNTIME7_MODULESPEC_DECLARATION_BODY_REQUIRED')
+  if node.name not in member_names:
+   member_names.append(node.name)
+  decorators = node.decorator_list
+  accessor = None
+  if not decorators:
+   function = class_namespace.get(node.name)
+  elif (len(decorators) == 1 and type(decorators[0]) is ast.Name
+    and decorators[0].id == 'property'):
+   accessor = 'fget'
+  elif (len(decorators) == 1 and type(decorators[0]) is ast.Attribute
+    and type(decorators[0].value) is ast.Name
+    and decorators[0].value.id == node.name
+    and decorators[0].attr in ('setter', 'deleter')):
+   accessor = 'fset' if decorators[0].attr == 'setter' else 'fdel'
+  else:
+   raise ValueError('ORDINARY_RUNTIME7_MODULESPEC_SOURCE_DECORATOR_REQUIRED')
+  if accessor is not None:
+   original_property = class_namespace.get(node.name)
+   if type(original_property) is not property:
+    raise ValueError('ORDINARY_RUNTIME7_ORIGINAL_MODULESPEC_NATIVE_PROPERTY')
+   function = getattr(original_property, accessor)
+  if type(function) is not types.FunctionType or function.__globals__ is not namespace:
+   raise ValueError('ORDINARY_RUNTIME7_ORIGINAL_MODULESPEC_FUNCTION')
+  code_line = min((node.lineno,) + tuple(item.lineno for item in node.decorator_list))
+  source_codes = tuple(code for code in expected_codes
+   if code.co_qualname == 'ModuleSpec.' + node.name
+   and code.co_firstlineno == code_line)
+  if len(source_codes) != 1 or not _ordinary_control_code_source_equal_v1(
+    source_codes[0], function.__code__):
+   raise ValueError('ORDINARY_RUNTIME7_MODULESPEC_COMPLETE_CODE_SOURCE_EQUALITY')
+  actual_defaults = function.__defaults__
+  source_defaults = tuple(ast.literal_eval(value) for value in node.args.defaults)
+  if source_defaults:
+   if not _ordinary_control_literal_equal_v1(source_defaults, actual_defaults):
+    raise ValueError('ORDINARY_RUNTIME7_MODULESPEC_SOURCE_POSITIONAL_DEFAULTS')
+  elif actual_defaults is not None:
+   raise ValueError('ORDINARY_RUNTIME7_MODULESPEC_UNEXPECTED_POSITIONAL_DEFAULTS')
+  source_keywords = tuple((argument.arg, ast.literal_eval(value))
+   for argument, value in zip(node.args.kwonlyargs, node.args.kw_defaults)
+   if value is not None)
+  actual_keywords = function.__kwdefaults__
+  if source_keywords:
+   if type(actual_keywords) is not dict:
+    raise ValueError('ORDINARY_RUNTIME7_MODULESPEC_SOURCE_KEYWORD_DEFAULTS')
+   _ordinary_control_dictionary_keys_v1(actual_keywords)
+   if tuple(actual_keywords) != tuple(name for name, value in source_keywords):
+    raise ValueError('ORDINARY_RUNTIME7_MODULESPEC_SOURCE_KEYWORD_ROSTER')
+   if any(not _ordinary_control_literal_equal_v1(value, actual_keywords[name])
+     for name, value in source_keywords):
+    raise ValueError('ORDINARY_RUNTIME7_MODULESPEC_SOURCE_KEYWORD_VALUES')
+  elif actual_keywords is not None:
+   raise ValueError('ORDINARY_RUNTIME7_MODULESPEC_UNEXPECTED_KEYWORD_DEFAULTS')
+  methods.append((node, function, source_codes[0], function.__code__,
+   actual_defaults, actual_keywords, accessor))
+ if set(class_namespace) != generated | set(member_names):
+  raise ValueError('ORDINARY_RUNTIME7_MODULESPEC_COMPLETE_CLASS_ROSTER')
+ source_fields = {}
+ prior = None
+ for instruction in _f._ordinary_control_bytecode_v1(class_codes[0]):
+  if instruction[1] == 'STORE_NAME' and instruction[3] in ('__doc__', '__static_attributes__'):
+   if (prior is None or prior[1] != 'LOAD_CONST'
+     or instruction[3] in source_fields):
+    raise ValueError('ORDINARY_RUNTIME7_CLASS_GENERATED_COMPILED_SOURCE')
+   source_fields[instruction[3]] = prior[3]
+  prior = instruction
+ if set(source_fields) != {'__doc__', '__static_attributes__'}:
+  raise ValueError('ORDINARY_RUNTIME7_CLASS_GENERATED_COMPILED_SOURCE')
+ source_doc = source_fields['__doc__']
+ source_attributes = source_fields['__static_attributes__']
+ static_attributes = class_namespace['__static_attributes__']
+ if (type(source_doc) is not str or type(source_attributes) is not tuple
+   or any(type(value) is not str for value in source_attributes)
+   or type(static_attributes) is not tuple
+   or any(type(value) is not str for value in static_attributes)
+   or static_attributes != source_attributes
+   or type(class_namespace['__firstlineno__']) is not int
+   or class_namespace['__firstlineno__'] != declaration.lineno
+   or type(class_namespace['__doc__']) is not str
+   or class_namespace['__doc__'] != source_doc
+   or class_namespace['__hash__'] is not None):
+  raise ValueError('ORDINARY_RUNTIME7_MODULESPEC_GENERATED_SOURCE_FIELDS')
+ descriptor = class_namespace['__dict__']
+ if (type(descriptor) is not types.GetSetDescriptorType
+   or descriptor.__objclass__ is not original_class
+   or descriptor.__name__ != '__dict__'):
+  raise ValueError('ORDINARY_RUNTIME7_MODULESPEC_ORIGINAL_NATIVE_GETSET')
+ return dict(module=bootstrap_module, source_raw=raw, source_tree=tree,
+  source_root_code=root, source_class_code=class_codes[0], source_class=declaration,
+  original_class=original_class, original_descriptor=descriptor,
+  original_bases=original_bases, original_mro=original_mro,
+  source_observation=original_source_observation,
+  class_fields=tuple(class_namespace.items()), expected_qualname=source_qualname,
+  native_primitives=native_primitives, methods=tuple(methods),
+  compiler_policy=(compile_filename, compile_flags, optimize),
+  generated_compiler_fields=(source_doc, source_attributes))
+
+
+def _facet_fn_pytest_source_graph_v1(scope, paths, plan, execution_plan, source,
+  *, source_byte_limit, source_node_limit):
+ """Acquire authentic selected Python/fixture/import bodies, without a grant."""
+ import tools.validation_reliability as _f
+ _pytest_need = _f._preflight_require_v1
+ import ast
+ import fnmatch
+ import shlex
+ from tools.validation_scope_registry import (_ordinary_scope_source_fixture_parents_v1,
+  _ordinary_scope_source_module_map_v1,
+  _ordinary_scope_source_import_events_v1)
+ runner = scope._ordinary_runner_owner_v1
+ selection = scope._ordinary_source_selection_v1
+ _pytest_need(type(scope) is _f._LinuxPreflightScopeV1
+  and runner is scope._ordinary_original_runner_owner_v1
+  and selection is scope._ordinary_original_source_selection_v1
+  and paths is scope._ordinary_bound_paths_v1 and plan is scope._ordinary_bound_plan_v1
+  and execution_plan is scope._ordinary_execution_plan_v1 and source is scope.source
+  and source.state == 'READABLE' and source.failure is None
+  and selection._original[2] in runner.PYTEST_SHARD_COMMANDS
+  and type(source_byte_limit) is int and source_byte_limit > 0
+  and type(source_node_limit) is int and source_node_limit > 0
+  and not hasattr(scope, '_ordinary_pytest_source_graph_v1'),
+  'ORDINARY_PYTEST_GRAPH_ONE_ORIGINAL_SOURCE_SELECTION')
+ bound_rows = runner._ordinary_phase_occurrence_selection_v1(scope, paths, plan, execution_plan,
+  phase=selection._original[2])
+ record = dict(scope=scope, paths=paths, plan=plan, execution_plan=execution_plan,
+  source=source, source_selection=selection, bound_rows=bound_rows, rows=[],
+  source_operands=[], installation_source_operands=[], module_sources=[], errors=[], raw_bytes=0, nodes=0,
+  source_byte_limit=source_byte_limit, source_node_limit=source_node_limit,
+  phase=selection._original[2], complete=False, installation_operand_cache={},
+  installed_module_records=[], installed_import_edges=[], installed_unresolved_edges=[],
+  installed_manifests=[], installed_entrypoints=[], installed_selection_rows=[],
+  dependency_profile_nodes=0)
+ record['original_installation_operand_cache'] = record['installation_operand_cache']
+ record['installed_acquisition_original'] = (record, record['installation_operand_cache'],
+  record['installed_module_records'], record['installed_import_edges'],
+  record['installed_unresolved_edges'], record['installed_manifests'],
+  record['installed_entrypoints'], record['installed_selection_rows'],
+  _facet_fn_pytest_source_graph_v1, _facet_fn_pytest_source_graph_v1.__code__,
+  _f._ordinary_pytest_installation_source_v1, _f._ordinary_pytest_installation_source_v1.__code__)
+ record['check'] = record['original_check'] = _f._ordinary_pytest_source_graph_check_v1
+ scope._ordinary_pytest_source_graph_v1 = scope._ordinary_original_pytest_source_graph_v1 = record
+ record['original'] = (record, scope, paths, plan, execution_plan, source, selection,
+  bound_rows, record['rows'], record['source_operands'], record['module_sources'],
+  record['errors'], source_byte_limit, source_node_limit, record['phase'],
+  (_f.os.getpid(), _f.threading.get_ident()), record['installation_source_operands'])
+ try:
+  # The existing effect owner retains this acquisition before its first read.
+  effect = scope._ordinary_effect_programme_v1
+  _pytest_need(type(effect) is dict
+   and effect is scope._ordinary_original_effect_programme_v1
+   and effect['scope'] is scope and effect['source'] is source
+   and effect['paths'] is paths and effect['plan'] is plan
+   and effect['execution_plan'] is execution_plan
+   and effect['source_selection'] is selection
+   and effect['bound_rows'] is bound_rows and effect['rows'] == ()
+   and effect['check'] is effect['original_check']
+    is _f._ordinary_supported_effect_programme_check_v1
+   and not effect['errors'] and type(effect['components']) is tuple
+   and len(effect['components']) == 1
+   and effect['components'][0] is scope._ordinary_pytest_fixed_effects_v1
+    is scope._ordinary_original_pytest_fixed_effects_v1,
+   'ORDINARY_PYTEST_GRAPH_SAME_IN_PROGRESS_EFFECT_OWNER')
+  component = effect['components'][0]
+  _pytest_need(component['scope'] is scope
+   and component['source'] is source and component['paths'] is paths
+   and component['plan'] is plan and component['execution_plan'] is execution_plan
+   and component['source_selection'] is selection
+   and component['bound_rows'] is bound_rows
+   and _f._ordinary_pytest_fixed_effects_check_v1(scope, component) is component,
+   'ORDINARY_PYTEST_GRAPH_ORIGINAL_FIXED_WRITER_COMPONENT')
+  effect['components'] = (component, record)
+  root = _f.Path(source.root)
+  python_paths = []
+  for actual in source.files:
+   row = source.row_index.get(actual)
+   if row is None or row['role'] != 'repository' or row['kind'] != 'file': continue
+   path = _f.Path(actual)
+   _pytest_need(path.is_relative_to(root), 'ORDINARY_PYTEST_GRAPH_SOURCE_ROOT')
+   relative = path.relative_to(root).as_posix()
+   if relative.endswith('.py'): python_paths.append(relative)
+  _pytest_need(len(python_paths) == len(set(python_paths)),
+   'ORDINARY_PYTEST_GRAPH_ORIGINAL_UNIQUE_SOURCE_PATHS')
+  python_paths = tuple(python_paths)
+  path_set = frozenset(python_paths)
+  module_paths = _ordinary_scope_source_module_map_v1(python_paths)
+  controller = scope._ordinary_controller_run_v1
+  environment_original = controller['candidate_environment_original']
+  _pytest_need(controller is scope._ordinary_original_controller_run_v1
+   and controller['original'][0] is controller and controller['original'][1] is scope
+   and type(environment_original) is tuple and len(environment_original) == 7
+   and environment_original[0] is controller and environment_original[1] is scope
+   and environment_original[2] is controller['candidate_environment']
+   and environment_original[3] == tuple(controller['candidate_environment'].items())
+   and environment_original[4] is _f._ordinary_supported_candidate_v1
+   and environment_original[5] is environment_original[4].__code__
+   and environment_original[6] == (_f.os.getpid(), _f.threading.get_ident()),
+   'ORDINARY_PYTEST_GRAPH_ORIGINAL_PRE_C_ENVIRONMENT_SOURCE')
+  record['candidate_environment_original'] = environment_original
+  installation = scope._ordinary_installation_record_v1(scope._ordinary_installation_copy_v1['install'])
+  install = installation['install']
+  installed_paths = {}
+  manifests = {}
+  for original_row, target, original_version in installation['target_versions']:
+   if original_row['kind'] != 'file': continue
+   parts = _f.Path(original_row['path']).relative_to(install.root).parts
+   if 'site-packages' not in parts: continue
+   at = parts.index('site-packages')
+   relative = '/'.join(parts[at + 1:])
+   suffix = '/'.join(parts[at:])
+   if relative.endswith('.py'):
+    _pytest_need(relative not in installed_paths,
+     'ORDINARY_PYTEST_GRAPH_UNIQUE_INSTALLED_MODULE_PATH')
+    installed_paths[relative] = suffix
+   if len(parts) > at + 2 and parts[at + 1].endswith('.dist-info'):
+    if parts[-1] in ('METADATA', 'entry_points.txt'):
+     manifest_files = manifests.setdefault(parts[at + 1], {})
+     _pytest_need(parts[-1] not in manifest_files,
+      'ORDINARY_PYTEST_GRAPH_UNIQUE_INSTALLED_MANIFEST_INPUT')
+     manifest_files[parts[-1]] = suffix
+  record['installed_path_originals'] = tuple(installed_paths.items())
+  installed_module_map = _ordinary_scope_source_module_map_v1(tuple(installed_paths))
+  installed_path_set = frozenset(installed_paths)
+  installed_by_path = {}
+  def installed(relative):
+   suffix = installed_paths[relative]
+   key = (suffix, 'INSTALLATION_PYTHON')
+   if key in record['installation_operand_cache']:
+    return record['installation_operand_cache'][key]
+   return _f._ordinary_pytest_installation_source_v1(scope, record, suffix,
+    source_byte_limit=source_byte_limit, source_node_limit=source_node_limit)
+  def data(suffix):
+   key = (suffix, 'INSTALLATION_DATA')
+   if key in record['installation_operand_cache']:
+    return record['installation_operand_cache'][key][1]
+   return _f._ordinary_pytest_installation_source_v1(scope, record, suffix,
+    source_byte_limit=source_byte_limit, source_node_limit=source_node_limit)[1]
+  def qualified_bodies(tree, text):
+   result = []
+   def visit(node, prefix):
+    if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)):
+     name = '.'.join((*prefix, node.name))
+     result.append((name, node, ast.get_source_segment(text, node)))
+     prefix = (*prefix, node.name)
+    for child in ast.iter_child_nodes(node): visit(child, prefix)
+   visit(tree, ())
+   return tuple(result)
+  def acquire_installed_closure(pending):
+   pending = list(pending)
+   while pending:
+    relative = pending.pop(0)
+    if relative in installed_by_path: continue
+    tree, observed = installed(relative)
+    bodies = qualified_bodies(tree, observed['text'])
+    module_record = dict(source=observed, path=relative, tree=tree,
+     body=observed['text'], bodies=bodies, imports=[], native_sites=[],
+     dynamic_sites=[], caller_edges=[])
+    installed_by_path[relative] = module_record
+    record['installed_module_records'].append(module_record)
+    for name, body_node, body in bodies:
+     if not isinstance(body_node, (ast.FunctionDef, ast.AsyncFunctionDef)): continue
+     for call in ast.walk(body_node):
+      if not isinstance(call, ast.Call): continue
+      callee = None
+      if isinstance(call.func, ast.Name):
+       prefix = name.split('.')[:-1]
+       possibilities = ('.'.join((*prefix, call.func.id)), call.func.id)
+       matches = tuple(value for value in bodies if value[0] in possibilities)
+       if len(matches) == 1: callee = matches[0]
+      elif (isinstance(call.func, ast.Attribute)
+        and isinstance(call.func.value, ast.Name)
+        and call.func.value.id in ('self', 'cls')):
+       qualified = '.'.join((*name.split('.')[:-1], call.func.attr))
+       matches = tuple(value for value in bodies if value[0] == qualified)
+       if len(matches) == 1: callee = matches[0]
+      module_record['caller_edges'].append((observed, name, body_node,
+       call, ast.get_source_segment(observed['text'], call), callee))
+    for fact in _ordinary_scope_source_import_events_v1(tree, observed['text'], relative,
+      installed_module_map, installed_path_set):
+     if fact[0] == 'IMPORT':
+      edge = (observed, *fact[1:])
+      module_record['imports'].append(edge)
+      record['installed_import_edges'].append(edge)
+      if len(fact[4]) == 1: pending.extend(fact[4])
+      elif fact[4]: record['installed_unresolved_edges'].append((observed, *fact[1:]))
+     elif fact[0] == 'PENDING': pending.extend(fact[1])
+     elif fact[0] == 'UNRESOLVED': record['installed_unresolved_edges'].append((observed, *fact[1:]))
+     elif fact[0] == 'NATIVE': module_record['native_sites'].append((observed, *fact[1:]))
+     else: module_record['dynamic_sites'].append((observed, *fact[1:]))
+   return tuple(installed_by_path[value] for value in installed_by_path)
+  workflow_raw, workflow_source = _f._ordinary_source_operand_v1(scope, record,
+   '.github/workflows/qtt_validation.yml', source_byte_limit=source_byte_limit,
+   source_node_limit=source_node_limit, source_form='BINARY')
+  record['raw_bytes'] += workflow_source['raw_bytes']; record['nodes'] += workflow_source['nodes']
+  workflow_entry = record['source_operand_cache'][('.github/workflows/qtt_validation.yml', 'BINARY')]
+  record['workflow_config_original'] = (workflow_source, workflow_raw, workflow_entry,
+   workflow_source['row'], workflow_source['version'],
+   runner._facet_fn_pytest_config_original_route_v1,
+   runner._facet_fn_pytest_config_original_route_v1.__code__)
+  _pytest_need(workflow_entry[0] is workflow_raw and workflow_entry[1] is workflow_source,
+   'ORDINARY_PYTEST_FIXED_WORKFLOW_ORIGINAL_RAW_AND_CACHE_BEFORE_PARSE')
+  workflow_lines = workflow_raw.decode('utf-8', 'strict').splitlines()
+  profiles = []
+  for at, line in enumerate(workflow_lines):
+   if line.lstrip() != "python - <<'PY'": continue
+   indent = line[:len(line) - len(line.lstrip())]
+   end = next((j for j in range(at + 1, len(workflow_lines))
+    if workflow_lines[j] == indent + 'PY'), None)
+   _pytest_need(end is not None, 'ORDINARY_PYTEST_PROFILE_SOURCE_HEREDOC_COMPLETE')
+   block = workflow_lines[at + 1:end]
+   _pytest_need(all(not value or value.startswith(indent) for value in block),
+    'ORDINARY_PYTEST_PROFILE_SOURCE_EXACT_INDENTATION')
+   body = '\n'.join(value[len(indent):] if value else '' for value in block) + '\n'
+   tree = ast.parse(body)
+   values = tuple(node for node in tree.body if isinstance(node, ast.Assign)
+    and len(node.targets) == 1 and isinstance(node.targets[0], ast.Name)
+    and node.targets[0].id == 'expected')
+   if not values: continue
+   _pytest_need(len(values) == 1, 'ORDINARY_PYTEST_ONE_ORIGINAL_PROFILE_ASSIGNMENT')
+   profile = ast.literal_eval(values[0].value)
+   _pytest_need(type(profile) is tuple and len(profile) == 14
+    and all(type(value) is tuple and len(value) == 2
+     and all(type(part) is str and part for part in value) for value in profile),
+    'ORDINARY_PYTEST_PROFILE_FROM_ACTUAL_WORKFLOW_SOURCE')
+   profiles.append((workflow_source, body, tree, values[0], profile))
+  _pytest_need(len(profiles) == 1, 'ORDINARY_PYTEST_ONE_PROTECTED_WORKFLOW_PROFILE')
+  record['dependency_profile'] = profiles[0]
+  record['dependency_profile_nodes'] = sum(1 for value in ast.walk(profiles[0][2]))
+  record['nodes'] += record['dependency_profile_nodes']
+  def normalize(name): return name.lower().replace('_', '-').replace('.', '-')
+  for directory, names in manifests.items():
+   _pytest_need('METADATA' in names, 'ORDINARY_PYTEST_INSTALLED_METADATA_SOURCE_EXISTS')
+   metadata = data(names['METADATA'])
+   fields = {}; previous_header = None
+   for line in metadata['text'].splitlines():
+    if not line: break
+    if line[:1].isspace():
+     _pytest_need(previous_header not in ('Name', 'Version'),
+      'ORDINARY_PYTEST_PROFILE_HEADER_FOLD_REQUIRES_ORIGINAL_PARSER')
+     continue
+    key, separator, value = line.partition(':')
+    previous_header = key if separator else None
+    if key in ('Name', 'Version'):
+     _pytest_need(separator and key not in fields and value.strip(),
+      'ORDINARY_PYTEST_UNIQUE_INSTALLED_PROFILE_HEADER')
+     fields[key] = value.strip()
+   _pytest_need(set(fields) == {'Name', 'Version'},
+    'ORDINARY_PYTEST_ACTUAL_INSTALLED_DISTRIBUTION_IDENTITY')
+   manifest = (metadata, fields['Name'], fields['Version'])
+   record['installed_manifests'].append(manifest)
+   if 'entry_points.txt' not in names: continue
+   points = data(names['entry_points.txt'])
+   group = None
+   for line in points['text'].splitlines():
+    if not line.strip() or line.lstrip().startswith(('#', ';')): continue
+    value = line.strip()
+    if value.startswith('[') and value.endswith(']'):
+     group = value[1:-1]; continue
+    if group != 'pytest11': continue
+    key, separator, specification = value.partition('=')
+    _pytest_need(separator and key.strip() and specification.strip()
+     and not line[:1].isspace(), 'ORDINARY_PYTEST_ENTRYPOINT_LITERAL_SOURCE')
+    module, separator, attribute = specification.strip().partition(':')
+    _pytest_need(all(part.isidentifier() for part in module.split('.'))
+     and (not separator or all(part.isidentifier() for part in attribute.split('.'))),
+     'ORDINARY_PYTEST_ENTRYPOINT_SOURCE_QUALIFIED_NAME')
+    record['installed_entrypoints'].append((manifest, points, key.strip(),
+     specification.strip(), module, attribute if separator else None))
+  for name, wanted in record['dependency_profile'][4]:
+   matches = tuple(value for value in record['installed_manifests'] if normalize(value[1]) == normalize(name))
+   _pytest_need(len(matches) == 1 and matches[0][2] == wanted,
+    'ORDINARY_PYTEST_ORIGINAL_WORKFLOW_PROFILE_AND_COPIED_MANIFEST_MATCH')
+  config_tree, config_source = installed('_pytest/config/__init__.py')
+  assignments = {}
+  for node in config_tree.body:
+   if isinstance(node, ast.Assign) and len(node.targets) == 1 and isinstance(node.targets[0], ast.Name):
+    assignments.setdefault(node.targets[0].id, []).append(node.value)
+   elif isinstance(node, ast.AnnAssign) and isinstance(node.target, ast.Name) and node.value is not None:
+    assignments.setdefault(node.target.id, []).append(node.value)
+  def literal_names(node, resolving=()):
+   if isinstance(node, ast.Constant) and type(node.value) is str: return (node.value,)
+   if isinstance(node, ast.Name):
+    _pytest_need(node.id not in resolving and len(assignments.get(node.id, ())) == 1,
+     'ORDINARY_PYTEST_PLUGIN_LITERAL_ORIGINAL_NAME')
+    return literal_names(assignments[node.id][0], (*resolving, node.id))
+   if isinstance(node, ast.Starred): return literal_names(node.value, resolving)
+   if isinstance(node, (ast.Tuple, ast.List, ast.Set)):
+    return tuple(value for child in node.elts for value in literal_names(child, resolving))
+   if isinstance(node, ast.BinOp) and isinstance(node.op, ast.Add):
+    return (*literal_names(node.left, resolving), *literal_names(node.right, resolving))
+   raise ValueError('ORDINARY_PYTEST_PLUGIN_NONLITERAL_SELECTION_REQUIRES_ORIGINAL_CALLER')
+  essential = literal_names(ast.Name(id='essential_plugins', ctx=ast.Load()))
+  defaults = literal_names(ast.Name(id='default_plugins', ctx=ast.Load()))
+  builtins = literal_names(ast.Name(id='builtin_plugins', ctx=ast.Load()))
+  _pytest_need(all(name in builtins for name in defaults)
+   and all(name in defaults for name in essential), 'ORDINARY_PYTEST_ACTUAL_BUILTIN_PLUGIN_SOURCE')
+  record['plugin_literals'] = (config_source, essential, defaults, builtins,
+   tuple((name, assignments[name][0]) for name in ('essential_plugins', 'default_plugins', 'builtin_plugins')))
+  acquire_installed_closure(('pytest/__main__.py', 'pytest/__init__.py',
+   '_pytest/config/__init__.py', '_pytest/main.py', '_pytest/fixtures.py', '_pytest/tmpdir.py',
+   'pluggy/_manager.py', 'pluggy/_callers.py', 'pluggy/_hooks.py',
+   *(name for plugin in defaults for name in installed_module_map.get('_pytest.' + plugin, ()))))
+  _pytest_need(record['raw_bytes'] <= source_byte_limit and record['nodes'] <= source_node_limit,
+   'ORDINARY_PYTEST_INSTALLED_GRAPH_CUMULATIVE_SOURCE_ALLOWANCE')
+  installation_tree, installation_python = installed('_pytest/python.py')
+  selector_calls = tuple(node for node in ast.walk(installation_tree)
+   if isinstance(node, ast.Call) and isinstance(node.func, ast.Attribute)
+   and node.func.attr == 'addini' and node.args and isinstance(node.args[0], ast.Constant)
+   and node.args[0].value == 'python_files')
+  _pytest_need(len(selector_calls) == 1, 'ORDINARY_PYTEST_ORIGINAL_PYTHON_FILE_SELECTOR')
+  selector_defaults = tuple(keyword.value for keyword in selector_calls[0].keywords if keyword.arg == 'default')
+  _pytest_need(len(selector_defaults) == 1, 'ORDINARY_PYTEST_ORIGINAL_SELECTOR_DEFAULT')
+  patterns = ast.literal_eval(selector_defaults[0])
+  _pytest_need(type(patterns) is list and patterns and all(type(value) is str and value
+   and '/' not in value and '\\' not in value for value in patterns),
+   'ORDINARY_PYTEST_ORIGINAL_FILENAME_PATTERNS')
+  record['python_file_patterns'] = tuple(patterns)
+  record['selector_body'] = ast.get_source_segment(installation_python['text'], selector_calls[0])
+  observed_by_path = {}
+  tree_by_path = {}
+  def acquire(relative):
+   if relative in observed_by_path: return tree_by_path[relative], observed_by_path[relative]
+   tree, observed = _f._ordinary_source_operand_v1(scope, record, relative,
+    source_byte_limit=source_byte_limit, source_node_limit=source_node_limit)
+   _pytest_need(ast.dump(tree, include_attributes=False)
+    == ast.dump(ast.parse(observed['text']), include_attributes=False),
+    'ORDINARY_PYTEST_GRAPH_RETAINED_AST_IS_ACTUAL_CAPTURED_BODY')
+   record['raw_bytes'] += observed['raw_bytes']
+   record['nodes'] += observed['nodes']
+   _pytest_need(record['raw_bytes'] <= source_byte_limit
+    and record['nodes'] <= source_node_limit,
+    'ORDINARY_PYTEST_GRAPH_CUMULATIVE_SOURCE_AND_AST_ALLOWANCE')
+   observed_by_path[relative] = observed
+   tree_by_path[relative] = tree
+   return tree, observed
+  config_raw, config_observed = _f._ordinary_source_operand_v1(scope, record, 'pytest.ini',
+   source_byte_limit=source_byte_limit, source_node_limit=source_node_limit, source_form='BINARY')
+  record['raw_bytes'] += config_observed['raw_bytes']
+  record['nodes'] += config_observed['nodes']
+  _pytest_need(record['raw_bytes'] <= source_byte_limit and record['nodes'] <= source_node_limit,
+   'ORDINARY_PYTEST_GRAPH_CUMULATIVE_SOURCE_AND_AST_ALLOWANCE')
+  config_lines = tuple(value.strip() for value in config_raw.decode('utf-8', 'strict').splitlines()
+   if value.strip() and not value.lstrip().startswith(('#', ';')))
+  _pytest_need(config_lines and config_lines[0] == '[pytest]'
+   and all('=' in value and value.split('=', 1)[0].strip() == 'addopts'
+    for value in config_lines[1:]) and len(config_lines) <= 2,
+   'ORDINARY_PYTEST_SOURCE_CONFIG_NO_UNPROVED_COLLECTION_SELECTOR')
+  record['config_source'] = config_observed
+  record['config_bytes'] = config_raw
+  record['config_lines'] = config_lines
+  def parents(relative):
+   return _ordinary_scope_source_fixture_parents_v1(relative, path_set)
+  for bound in bound_rows:
+   selected = selection.pytest_source_for_bound_row(bound)
+   entry, execution, position = bound
+   row = dict(entry=entry, execution=execution, source_position=position, bound_row=bound,
+    selected=selected, selected_fields=selection._pytest_source_fields_v1(selected),
+    selected_modules=(), source_operands=[], module_records=[],
+    import_edges=[], external_imports=[], unresolved_imports=[],
+    native_call_sites=[], dynamic_call_sites=[], runtime_roles=(),
+    native_programme=None, unresolved_source_facts=[])
+   record['rows'].append(row)
+   literals = tuple(selected.paths)
+   ignored = tuple(selected.ignores)
+   for value in (*literals, *ignored): _f._mapper_portable_relative_v1(value)
+   def ignored_path(relative):
+    return any(relative == value or relative.startswith(value.rstrip('/') + '/') for value in ignored)
+   roots = []
+   for literal in literals:
+    selected_paths = ((literal,) if literal in path_set else tuple(relative for relative in python_paths
+     if relative.startswith(literal.rstrip('/') + '/')
+     and any(fnmatch.fnmatchcase(_f.Path(relative).name, pattern)
+      for pattern in record['python_file_patterns'])))
+    _pytest_need(selected_paths, 'ORDINARY_PYTEST_GRAPH_SELECTED_PATH_EXISTS')
+    roots.extend(value for value in selected_paths if not ignored_path(value))
+   row['selected_modules'] = tuple(dict.fromkeys(roots))
+   _pytest_need(row['selected_modules'], 'ORDINARY_PYTEST_GRAPH_NONEMPTY_EXACT_SELECTION')
+   environment = controller['candidate_environment']
+   config_options = shlex.split(config_lines[1].split('=', 1)[1]) if len(config_lines) == 2 else []
+   options = (*config_options, *shlex.split(environment.get('PYTEST_ADDOPTS', '')),
+    *execution.registered_argv)
+   requested = []; disabled = []; disable_autoload = '--disable-plugin-autoload' in options
+   at = 0
+   while at < len(options):
+    value = options[at]
+    if value == '-p':
+     at += 1
+     _pytest_need(at < len(options), 'ORDINARY_PYTEST_PLUGIN_OPTION_HAS_ARGUMENT')
+     value = options[at]
+    elif value.startswith('-p') and len(value) > 2: value = value[2:]
+    else:
+     at += 1; continue
+    (disabled if value.startswith('no:') else requested).append(value[3:] if value.startswith('no:') else value)
+    at += 1
+   _pytest_need(not any(value in essential for value in disabled),
+    'ORDINARY_PYTEST_ORIGINAL_ESSENTIAL_PLUGIN_OPTION')
+   env_plugins = environment.get('PYTEST_PLUGINS')
+   env_plugins = tuple(env_plugins.split(',')) if env_plugins else ()
+   # This is a source selection input, not a runtime caller/Native permission.
+   selection_fact = (row, bound, environment_original, config_observed,
+    tuple(options), tuple(requested), tuple(disabled), disable_autoload,
+    environment.get('PYTEST_DISABLE_PLUGIN_AUTOLOAD'), env_plugins,
+    tuple(record['installed_entrypoints']), record['plugin_literals'])
+   record['installed_selection_rows'].append(selection_fact)
+   row['installed_selection'] = selection_fact
+   plugin_candidates = []
+   for value in (*requested, *env_plugins):
+    if value in builtins: value = '_pytest.' + value
+    candidates = tuple(installed_module_map.get(value, ()))
+    candidates += tuple(relative for relative in module_paths.get(value, ()) if relative in path_set)
+    if len(candidates) == 1:
+     plugin_candidates.append((value, candidates[0]))
+    else:
+     row['unresolved_source_facts'].append('actual requested plugin Source binding: ' + repr(value))
+   # Acquire every declared pytest11 candidate rather than assume autoload is disabled.
+   for manifest, points, name, specification, module, attribute in record['installed_entrypoints']:
+    candidates = tuple(installed_module_map.get(module, ()))
+    if len(candidates) == 1: plugin_candidates.append((module, candidates[0]))
+    else: row['unresolved_source_facts'].append('actual installed pytest11 Source binding: ' + repr(specification))
+    if attribute is not None:
+     row['unresolved_source_facts'].append('actual entrypoint object/caller binding: ' + repr(specification))
+   acquire_installed_closure(value for name, value in plugin_candidates if value in installed_paths)
+   row['installed_plugin_candidates'] = tuple(plugin_candidates)
+   pending = list(('tools/run_pytest_fresh_basetemp.py', 'tools/validation_reliability.py',
+    *row['selected_modules'], *(value for name, value in plugin_candidates if value in path_set)))
+   seen = set()
+   while pending:
+    relative = pending.pop(0)
+    if relative in seen: continue
+    _pytest_need(relative in path_set, 'ORDINARY_PYTEST_GRAPH_BOUND_LOCAL_SOURCE_EXISTS')
+    seen.add(relative)
+    tree, observed = acquire(relative)
+    row['source_operands'].append(observed)
+    module_record = dict(source=observed, path=relative, body=observed['text'],
+     imports=[], native_sites=[], dynamic_sites=[])
+    row['module_records'].append(module_record)
+    if not any(value is observed for value in record['module_sources']):
+     record['module_sources'].append(observed)
+    pending.extend(value for value in parents(relative) if value not in seen)
+    for declaration in tree.body:
+     declared = (declaration.value if isinstance(declaration, ast.Assign)
+      and len(declaration.targets) == 1 and isinstance(declaration.targets[0], ast.Name)
+      and declaration.targets[0].id == 'pytest_plugins' else
+      declaration.value if isinstance(declaration, ast.AnnAssign)
+      and isinstance(declaration.target, ast.Name)
+      and declaration.target.id == 'pytest_plugins' else None)
+     if declared is None: continue
+     try: specs = ast.literal_eval(declared)
+     except (ValueError, TypeError):
+      row['unresolved_source_facts'].append('nonliteral original pytest_plugins caller: ' + relative)
+      continue
+     specs = tuple(specs.split(',')) if type(specs) is str else specs
+     if type(specs) not in (tuple, list) or not all(type(value) is str for value in specs):
+      row['unresolved_source_facts'].append('nonstring original pytest_plugins caller: ' + relative)
+      continue
+     for spec in specs:
+      requested_module = '_pytest.' + spec if spec in builtins else spec
+      local = tuple(module_paths.get(requested_module, ()))
+      copied = tuple(installed_module_map.get(requested_module, ()))
+      if len(local) + len(copied) != 1:
+       row['unresolved_source_facts'].append('original pytest_plugins module binding: ' + repr(spec))
+      elif local: pending.extend(local)
+      else: acquire_installed_closure(copied)
+    for fact in _ordinary_scope_source_import_events_v1(tree, observed['text'], relative,
+      module_paths, path_set):
+     kind = fact[0]
+     if kind == 'IMPORT':
+      edge = (observed, *fact[1:])
+      targets = fact[4]
+      module_record['imports'].append(edge); row['import_edges'].append(edge)
+      if len(targets) > 1:
+       row['unresolved_imports'].append((observed, fact[1], fact[2],
+        'ambiguous sealed module paths: ' + repr(targets)))
+      elif targets: pending.extend(targets)
+      else: row['external_imports'].append(edge)
+     elif kind == 'UNRESOLVED':
+      row['unresolved_imports'].append((observed, *fact[1:]))
+     elif kind == 'PENDING':
+      pending.extend(fact[1])
+     else:
+      site = (observed, *fact[1:])
+      if kind == 'NATIVE':
+       module_record['native_sites'].append(site); row['native_call_sites'].append(site)
+      else:
+       module_record['dynamic_sites'].append(site); row['dynamic_call_sites'].append(site)
+   row['runtime_roles'] = ((paths.process_root, 'PROCESS_KEEPER'),
+    (paths.pytest_basetemp_root, 'DISPOSABLE_BASETEMP'),
+    (paths.process_root / 'pytest-cache', 'PYTEST_CACHE'),
+    (paths.validation_output_root, 'VALIDATION_OUTPUT'),
+    (paths.evidence_root, 'NESTED_EVIDENCE_PARENT'))
+   row['unresolved_source_facts'].extend((
+    'captured installed fixture/plugin caller syntax still requires actual hook-object and fixture-parameter binding',
+    'real versus synthetic native sites and simultaneous source cohorts must join original native programme',
+    'isolated logical/physical runtime and parent nested-evidence consumers require original native mapping'))
+   row['unresolved_source_facts'].extend(value[3] for value in row['unresolved_imports'])
+   row['original'] = (row, bound, selected, row['selected_fields'], row['selected_modules'],
+    tuple(row['source_operands']), tuple(row['module_records']),
+    tuple(row['import_edges']), tuple(row['external_imports']), tuple(row['unresolved_imports']),
+    tuple(row['native_call_sites']), tuple(row['dynamic_call_sites']), row['runtime_roles'],
+    tuple(row['unresolved_source_facts']))
+  record['installed_source_originals'] = tuple((value, tuple(value.items()))
+   for value in record['installation_source_operands'])
+  record['installed_cache_originals'] = tuple(record['installation_operand_cache'].items())
+  record['installed_module_originals'] = tuple((value, value['source'], value['path'], value['tree'],
+   value['body'], value['bodies'], tuple(value['imports']), tuple(value['native_sites']),
+   tuple(value['dynamic_sites']), tuple(value['caller_edges']))
+   for value in record['installed_module_records'])
+  record['installed_semantic_originals'] = (tuple(record['installed_import_edges']),
+   tuple(record['installed_unresolved_edges']), tuple(record['installed_manifests']),
+   tuple(record['installed_entrypoints']), tuple(record['installed_selection_rows']),
+   record['plugin_literals'], record['dependency_profile'], record['dependency_profile_nodes'],
+   record['candidate_environment_original'])
+  record['row_originals'] = tuple((row, row['original']) for row in record['rows'])
+  record['module_originals'] = tuple((row, tuple(_f._ordinary_effect_value_snapshot_v1(value)
+   for value in row['module_records'])) for row in record['rows'])
+  record['collection_original'] = (record['python_file_patterns'], record['selector_body'],
+   installation_python, config_observed, config_lines, config_raw)
+  record['source_originals'] = tuple((observed, _f._ordinary_effect_value_snapshot_v1(observed))
+   for observed in record['source_operands'])
+  record['complete'] = True
+  return _f._ordinary_pytest_source_graph_check_v1(scope, record)
+ except BaseException as error:
+  record['errors'].append(error)
+  if all(error is not prior for prior in scope._ordinary_factory_errors_v1):
+   scope._ordinary_factory_errors_v1.append(error)
+  raise
+
+
+
+
+def _facet_fn_supported_effect_programme_v1(scope, paths, plan, execution_plan, source,
+  *, source_byte_limit, source_node_limit):
+ import tools.validation_reliability as _f
+ runner = scope._ordinary_runner_owner_v1
+ selection = scope._ordinary_source_selection_v1
+ _f._preflight_require_v1(type(scope) is _f._LinuxPreflightScopeV1
+  and runner is scope._ordinary_original_runner_owner_v1
+  and runner is _f.sys.modules.get(getattr(runner, '__name__', None))
+  and selection is scope._ordinary_original_source_selection_v1
+  and paths is scope._ordinary_bound_paths_v1 and plan is scope._ordinary_bound_plan_v1
+  and execution_plan is scope._ordinary_execution_plan_v1 and source is scope.source
+  and source.state == 'READABLE' and source.failure is None
+  and not hasattr(scope, '_ordinary_effect_programme_v1'),
+  'ORDINARY_SUPPORTED_EFFECT_ONE_ACTUAL_PRE_C_FACTORY')
+ bound_rows = runner._ordinary_phase_occurrence_selection_v1(scope, paths, plan, execution_plan,
+  phase=selection._original[2])
+ record = dict(scope=scope, paths=paths, plan=plan, execution_plan=execution_plan,
+  source=source, source_selection=selection, bound_rows=bound_rows, rows=(),
+  source_operands=[], components=(), errors=[], unresolved_rows=[],
+  demand_attempted=False, candidate_demand=None, candidate_demand_arithmetic=None)
+ record['check'] = record['original_check'] = _f._ordinary_supported_effect_programme_check_v1
+ scope._ordinary_effect_programme_v1 = scope._ordinary_original_effect_programme_v1 = record
+ try:
+  phase = selection._original[2]
+  if phase == runner.POST_VALIDATION_PHASE:
+   assembled = _f._ordinary_supported_post_sources_v1(scope, record, bound_rows,
+    source_byte_limit=source_byte_limit, source_node_limit=source_node_limit)
+  elif phase in runner.PYTEST_SHARD_COMMANDS:
+   component = _f._ordinary_pytest_fixed_repository_effects_v1(scope, paths, plan, execution_plan,
+    source, source_byte_limit=source_byte_limit, source_node_limit=source_node_limit)
+   record['components'] = (component,)
+   graph = _f._ordinary_pytest_source_graph_v1(scope, paths, plan, execution_plan, source,
+    source_byte_limit=source_byte_limit, source_node_limit=source_node_limit)
+   _f._preflight_require_v1(_f._ordinary_pytest_source_graph_check_v1(scope, graph) is graph
+    and type(record['components']) is tuple and len(record['components']) == 2
+    and record['components'][0] is component and record['components'][1] is graph
+    and graph['bound_rows'] is bound_rows
+    and len(graph['rows']) == len(component['rows']) == len(bound_rows),
+    'ORDINARY_SELECTED_PYTEST_SAME_ACQUIRED_GRAPH_COMPONENT')
+   for row, graph_row in zip(component['rows'], graph['rows'], strict=True):
+    selected = selection.pytest_source_for_bound_row(row['bound_row'])
+    _f._preflight_require_v1(graph_row['bound_row'] is row['bound_row']
+     and graph_row['selected'] is selected is row['selected']
+     and graph_row['native_programme'] is None
+     and graph_row['unresolved_source_facts'],
+     'ORDINARY_SELECTED_PYTEST_ORIGINAL_ACQUIRED_ROW_NOT_NATIVE_GRANT')
+    record['unresolved_rows'].append((row['bound_row'], tuple(selected.paths),
+     'selected pytest application/native programme still requires original associations: '
+      + repr(tuple(graph_row['unresolved_source_facts']))))
+   raise ValueError('ORDINARY_SELECTED_PYTEST_NATIVE_SOURCE_PROGRAMME_REQUIRED:'
+    + repr(tuple((bound[2], paths, reason) for bound, paths, reason in record['unresolved_rows'])))
+  else:
+   component = _f._ordinary_deterministic_source_ingredients_v1(scope, paths, plan, execution_plan,
+    source, source_byte_limit=source_byte_limit, source_node_limit=source_node_limit)
+   record['components'] = (component,)
+   assembled = []
+   for row in component['rows']:
+    if row['native_programme'] is None or row['unresolved_source_facts']:
+     record['unresolved_rows'].append((row['bound_row'], row['source_module'],
+      row['unresolved_source_facts']))
+     continue
+    assembled.append(dict(entry=row['entry'], execution=row['execution'],
+     bound_row=row['bound_row'], source_position=row['source_position'], targets=row['targets'],
+     source_operands=row['source_operands'], native_programme=row['native_programme'],
+     run_output_effects=row['run_output_effects'], source_programme=row))
+   if record['unresolved_rows']:
+    raise ValueError('ORDINARY_SELECTED_DETERMINISTIC_SOURCE_EDGE_REQUIRED:'
+     + repr(tuple((bound[2], module, reason) for bound, module, reason in record['unresolved_rows'])))
+   assembled = tuple(assembled)
+  _f._preflight_require_v1(len(assembled) == len(bound_rows)
+   and all(row['bound_row'] is bound for row, bound in zip(assembled, bound_rows, strict=True)),
+   'ORDINARY_SUPPORTED_EFFECT_COMPLETE_SELECTED_ROW_ASSEMBLY')
+  record['rows'] = tuple(assembled)
+  for row in record['rows']:
+   for observed in (*row['source_operands'],
+     *(operand for target in row['targets'] for operand in target['source_operands'])):
+    if not any(observed is prior for prior in record['source_operands']):
+     record['source_operands'].append(observed)
+  for component in record['components']:
+   for observed in component['source_operands']:
+    if not any(observed is prior for prior in record['source_operands']):
+     record['source_operands'].append(observed)
+  record['source_operands'] = tuple(record['source_operands'])
+  record['row_originals'] = tuple((row, tuple(row.items()), row['targets'], row['source_operands'],
+   row['native_programme'], tuple(_f._ordinary_effect_value_snapshot_v1(target) for target in row['targets']))
+   for row in record['rows'])
+  record['source_originals'] = tuple((observed, _f._ordinary_effect_value_snapshot_v1(observed))
+   for observed in record['source_operands'])
+  record['original'] = (record, scope, source, paths, plan, execution_plan, selection,
+   bound_rows, record['rows'], record['source_operands'], record['errors'],
+   (_f.os.getpid(), _f.threading.get_ident()), record['components'], record['row_originals'],
+   record['source_originals'])
+  _f._ordinary_run_output_recipe_v1(scope, record)
+  record['demand_attempted'] = True
+  record['candidate_demand'], record['candidate_demand_arithmetic'] = runner._ordinary_candidate_demand_from_source_v1(
+   scope, record, source.census)
+  source.verify(protected=True)
+  return _f._ordinary_supported_effect_programme_check_v1(scope, record)
+ except BaseException as error:
+  record['errors'].append(error)
+  if all(error is not prior for prior in scope._ordinary_factory_errors_v1):
+   scope._ordinary_factory_errors_v1.append(error)
+  raise
+
+
+def _facet_m_prefix_adopt_v1(self, host):
+ import tools.validation_reliability as _f
+ _f._preflight_require_v1(type(self) is _f._LinuxPreflightScopeV1
+  and host is self._ordinary_host_preparation_v1
+  and host is self._ordinary_original_host_preparation_v1
+  and host['scope'] is self
+  and (_f.os.getpid(), _f.threading.get_ident()) == (self.query.pid, self.query.thread)
+  and not hasattr(self, '_ordinary_prefix_original_v1'),
+  'ORDINARY_ONE_ORIGINAL_NATIVE_PREFIX_ADOPTION')
+ self._ordinary_prefix_adoption_attempted_v1 = True
+ ceiling = host['ceiling_programme']
+ _f._preflight_require_v1(ceiling is host['original_ceiling_programme']
+  and ceiling['original'][0] is ceiling,
+  'ORDINARY_PREFIX_ORIGINAL_SOURCE_FIXED_CEILINGS')
+ meter, limits, remaining, observed = host['original_meter']
+ _f._preflight_require_v1(host['meter'] is meter and meter['limits'] is limits is ceiling['limits']
+  and meter['remaining'] is remaining and meter['observed'] is observed
+  and tuple(limits.items()) == host['original_limit_values'] == ceiling['original'][2]
+  and meter['owner'] == (_f.os.getpid(), _f.threading.get_ident())
+  and meter['deadline_ns'] == host['original_cutoffs'][3]
+  and set(limits) == set(remaining) == set(observed)
+  and all(type(remaining[key]) is int and type(observed[key]) is int
+   and remaining[key] >= 0 and observed[key] >= 0
+   and remaining[key] == max(0, limits[key] - observed[key]) for key in limits),
+  'ORDINARY_PREFIX_ACTUAL_PREDECESSOR_NONRESET_METER')
+ slots, iterators, errors = host['prefix_slots'], host['prefix_iterators'], host['prefix_errors']
+ counts, debts, images = host['prefix_counts'], host['prefix_close_debt'], host['image_records']
+ _f._preflight_require_v1(slots is host['original_prefix_slots'] and type(slots) is list
+  and iterators is host['original_prefix_iterators'] and type(iterators) is list
+  and errors is host['original_prefix_errors'] and type(errors) is list
+  and counts is host['original_prefix_counts'] and type(counts) is dict
+  and set(counts) == {'metadata_call', 'raw_read', 'raw_write',
+   'native_control_read', 'native_control_write', 'native_control_call'}
+  and all(type(value) is int and value >= 0 for value in counts.values())
+  and type(debts) is list and images is host['original_image_records']
+  and type(images) is list, 'ORDINARY_PREFIX_ACTUAL_NATIVE_CUSTODY_ALIASES')
+ self._ordinary_factory_owner_v1 = meter['owner']
+ self._ordinary_meter_v1 = meter
+ self._ordinary_original_meter_v1 = host['original_meter']
+ self._ordinary_factory_limit_values_v1 = host['original_limit_values']
+ self._ordinary_factory_slots_v1 = self._ordinary_original_factory_slots_v1 = slots
+ self._ordinary_storage_slots_v1 = slots
+ self._ordinary_factory_iterators_v1 = self._ordinary_original_factory_iterators_v1 = iterators
+ self._ordinary_factory_errors_v1 = self._ordinary_storage_errors_v1 = errors
+ self._ordinary_factory_counts_v1 = counts
+ self._ordinary_image_records_v1 = self._ordinary_original_image_records_v1 = images
+ self._ordinary_prefix_close_records_v1 = debts
+ self._ordinary_original_prefix_close_records_v1 = debts
+ self._ordinary_close_debt_v1 = sum(not row['close_attempted'] for row in slots)
+ self._ordinary_close_debt_v1 += sum(not row['close_attempted'] for row in iterators)
+ self._ordinary_factory_closed_slots_v1 = host['closed_slot_count']
+ self._ordinary_closed_slot_count_v1 = host['closed_slot_count']
+ self._ordinary_factory_original_v1 = None
+ self._ordinary_factory_attempted_v1 = False
+ self._ordinary_candidate_v1 = None
+ self._ordinary_active_image_v1 = None
+ self._ordinary_image_v1 = None
+ self._ordinary_host_output_image_v1 = None
+ self._ordinary_storage_ready_v1 = False
+ self._ordinary_native_v1 = host['native']
+ self._ordinary_native_v1._ordinary_scope_owner_v1 = self
+ _f._preflight_require_v1(type(self._ordinary_native_v1) is _f._LinuxSourceNativeV2
+  and self._ordinary_native_v1.attempt.__self__ is self
+  and self._ordinary_native_v1.attempt.__func__ is _f._LinuxPreflightScopeV1._ordinary_native_attempt_v1,
+  'ORDINARY_PREFIX_ORIGINAL_QUALIFIED_NATIVE_PRIMITIVE')
+ self._ordinary_administrative_vectors_v1 = ()
+ self._ordinary_administrative_attempts_v1 = set()
+ self._ordinary_administrative_record_v1 = None
+ self._ordinary_administrative_records_v1 = []
+ self._ordinary_original_administrative_records_v1 = self._ordinary_administrative_records_v1
+ self._ordinary_run_binding_v1 = dict(paths=None, plan=None, bound=False, original=None)
+ self._ordinary_original_run_binding_v1 = self._ordinary_run_binding_v1
+ self._ordinary_fixed_files_v1 = []
+ self._ordinary_query_projections_v1 = []
+ self._ordinary_current_query_projection_v1 = None
+ self._ordinary_control_publications_v1 = []
+ self._ordinary_original_control_publications_v1 = self._ordinary_control_publications_v1
+ self._ordinary_core_outputs_v1 = []
+ self._ordinary_original_core_outputs_v1 = self._ordinary_core_outputs_v1
+ self._ordinary_native_output_phases_v1 = []
+ self._ordinary_native_output_phase_v1 = None
+ self._ordinary_original_native_output_phase_v1 = None
+ self.query._ordinary_scope_v1 = self
+ self.query._ordinary_reads_v1 = []
+ self.query._ordinary_resource_phase_record_v1 = None
+ self.query._ordinary_original_resource_phase_record_v1 = None
+ self.query._ordinary_resource_phase_records_v1 = []
+ self._ordinary_prefix_original_v1 = (host, ceiling, meter, limits, remaining, observed,
+  slots, iterators, errors, counts, debts, images, self._ordinary_native_v1,
+  host['original_cutoffs'])
+ self._ordinary_prefix_accounting_original_v1 = (None, None, limits, None,
+  host['root_parent'], host['root_parent_slot'], host['original_cutoffs'],
+  None, ceiling['control_layout'])
+ return host
+
+
+def _facet_m_prefix_checked_v1(self):
+ import tools.validation_reliability as _f
+ original = self._ordinary_prefix_original_v1
+ host, ceiling, meter, limits, remaining, observed, slots, iterators, errors, counts, debts, images, native, cuts = original
+ _f._preflight_require_v1(type(self) is _f._LinuxPreflightScopeV1
+  and host is self._ordinary_host_preparation_v1 is self._ordinary_original_host_preparation_v1
+  and host['scope'] is self and host['ceiling_programme'] is host['original_ceiling_programme'] is ceiling
+  and ceiling['limits'] is limits and host['meter'] is self._ordinary_meter_v1 is meter
+  and host['original_meter'] is self._ordinary_original_meter_v1
+  and meter['limits'] is limits and meter['remaining'] is remaining and meter['observed'] is observed
+  and meter['owner'] == self._ordinary_factory_owner_v1 == (_f.os.getpid(), _f.threading.get_ident())
+  and host['prefix_slots'] is host['original_prefix_slots'] is self._ordinary_factory_slots_v1 is slots
+  and host['prefix_iterators'] is host['original_prefix_iterators'] is self._ordinary_factory_iterators_v1 is iterators
+  and host['prefix_errors'] is host['original_prefix_errors'] is self._ordinary_factory_errors_v1 is errors
+  and host['prefix_counts'] is host['original_prefix_counts'] is self._ordinary_factory_counts_v1 is counts
+  and host['prefix_close_debt'] is self._ordinary_original_prefix_close_records_v1 is debts
+  and host['image_records'] is host['original_image_records'] is self._ordinary_image_records_v1 is images
+  and native is self._ordinary_native_v1 is host['native']
+  and cuts is host['original_cutoffs'] and meter['deadline_ns'] == cuts[3]
+  and tuple(limits.items()) == self._ordinary_factory_limit_values_v1
+  and self.execution_deadline_ns == cuts[1] and self.settlement_deadline_ns == cuts[3],
+  'ORDINARY_ORIGINAL_PREFIX_ACCOUNTING_ASSOCIATIONS')
+ return self._ordinary_prefix_accounting_original_v1
+
+
+def _facet_m_post_c_accounting_checked_v1(self):
+ import tools.validation_reliability as _f
+ record = self._ordinary_post_c_accounting_v1
+ original = record['original']
+ _f._preflight_require_v1(record is self._ordinary_original_post_c_accounting_v1
+  and type(original) is tuple and len(original) == 16
+  and original[0] is record and original[1] is self
+  and record['scope'] is self and record['candidate'] is original[2]
+  is self._ordinary_candidate_v1 and record['state'] is original[3]
+  and record['witness'] is original[4] and record['complete']
+  and record['errors'] is original[15] and not record['errors']
+  and original[14] == self._ordinary_factory_owner_v1 ==
+   (_f.os.getpid(), _f.threading.get_ident()), 'ORDINARY_POST_C_ORIGINAL_STAGE')
+ candidate, state, witness = original[2:5]
+ meter, limits, remaining, observed = self._ordinary_original_meter_v1
+ _f._preflight_require_v1(state is candidate._ordinary_disk_state_v1
+  is candidate._original_ordinary_disk_state_v1
+  and witness is state['completion_witness'] is state['original_completion_witness']
+  and type(witness) is tuple and len(witness) == 10
+  and witness[0] is candidate and witness[1] is state
+  and witness[2] is candidate._ordinary_disk_config_v1 is state['config']
+  and witness[4] is original[5] is state['final_barriers']
+  and witness[5] is original[6] is candidate.baseline
+  and witness[6] is original[7] is candidate._settled_snapshot
+  and state['allocations'] is original[8]
+  and len(state['allocations']) == original[9] == len(witness[7])
+  and witness[9] == original[14]
+  and candidate.state == 'RESTORED_VERIFIED' and candidate.failure is None
+  and candidate.active_occurrence is None and not state['borrows']
+  and not state['slots'] and not state['iterator_records'] and not state['close_debt']
+  and not state['errors'] and state['pending_capture'] is None
+  and state['release_attempted'] and state['released']
+  and meter is original[10] is state['meter'] is self._ordinary_meter_v1
+  and limits is original[11] is state['limits']
+  and remaining is original[12] is state['remaining']
+  and observed is original[13] is state['observed'],
+  'ORDINARY_POST_C_COMPLETION_AND_NONRESET_ACCOUNTING')
+ return original
+
+
+def _facet_m_output_phase_checked_v1(self):
+ import tools.validation_reliability as _f
+ self._ordinary_post_c_accounting_checked_v1()
+ phase, stage = self._ordinary_output_phase_v1, self._ordinary_output_stage_v1
+ _f._preflight_require_v1(type(phase) is tuple and len(phase) == 4
+  and phase is self._ordinary_original_output_phase_v1
+  and type(stage) is tuple and len(stage) == 14
+  and stage is self._ordinary_original_output_stage_v1
+  and stage[0] is phase and phase[0] is self
+  and phase[1] is self._ordinary_candidate_v1 and phase[2] is self.source
+  and stage[1] is self._ordinary_post_c_accounting_v1
+  is self._ordinary_original_post_c_accounting_v1,
+  'ORDINARY_ORIGINAL_C_SOURCE_OUTPUT_STAGE')
+ source, release, original = phase[2], stage[11], stage[12]
+ _f._preflight_require_v1(source.rows is stage[2] and source.row_index is stage[3]
+  and source.original_flags is stage[4] and source.originals is stage[5]
+  and source.restoration_outcomes is stage[6] and source.journal_ids is stage[7]
+  and source.owned is stage[8] and not source.owned
+  and source.close_failures is stage[9] and not source.close_failures
+  and source.settlement_errors is stage[10] and not source.settlement_errors
+  and source.state == 'RESTORED' and source.phase == 'settlement'
+  and source.journal_fd is None and not source.journal_torn
+  and release is self._ordinary_view_release_v1 is self._ordinary_original_view_release_v1
+  and release['original'] is original and original[0] is release
+  and original[1] is self and original[2] is phase[1] and original[3] is source
+  and original[5] is phase[3] and original[6] is self._ordinary_image_v1
+  and release['complete'] and original[6]['disposed']
+  and release['policy_unloaded'] and original[9]['unloaded']
+  and release['errors'] is original[10] and not release['errors']
+  and self._ordinary_output_phase_errors_v1 is stage[13]
+  is self._ordinary_original_output_phase_errors_v1 and not stage[13],
+  'ORDINARY_SAME_ORIGINAL_CLOSED_SOURCE_AND_VIEW_STAGE')
+ return phase
+
+
+def _facet_m_factory_check_v1(self, *, settling=False):
+ import tools.validation_reliability as _f
+ _f._preflight_require_v1(self._ordinary_factory_owner_v1 ==
+  (_f.os.getpid(), _f.threading.get_ident()) and type(self) is _f._LinuxPreflightScopeV1,
+  'ORDINARY_FACTORY_ORIGINAL_OWNER')
+ original = self._ordinary_factory_original_v1
+ if original is None:
+  prefix = self._ordinary_prefix_checked_v1()
+  _f._preflight_require_v1(_f.time.monotonic_ns() < prefix[6][3 if settling else 1],
+   'ORDINARY_PREFIX_ORIGINAL_CUTOFF')
+  if not settling: _f._scan_raise_errors(self._ordinary_factory_errors_v1)
+  return prefix
+ _f._preflight_require_v1(tuple(original[2].items()) == self._ordinary_factory_limit_values_v1,
+  'ORDINARY_ORIGINAL_FACTORY_LIMIT_VALUES')
+ physical, volumes, members, extent, inodes = self._ordinary_physical_original_v1
+ _f._preflight_require_v1(original[3] is physical and physical['volumes'] is volumes
+  and tuple(physical.items()) == self._ordinary_physical_values_v1
+  and all(any(role == name and record is actual for name, actual in volumes)
+   and tuple(record.items()) == fields for role, record, fields in members),
+  'ORDINARY_ORIGINAL_PHYSICAL_PROGRAMME_VALUES')
+ cutoff = original[6][3 if settling else 1]
+ _f._preflight_require_v1(_f.time.monotonic_ns() < cutoff,
+  'ORDINARY_FACTORY_ORIGINAL_CUTOFF')
+ if not settling: _f._scan_raise_errors(self._ordinary_factory_errors_v1)
+ return original
+
+
+def _facet_m_factory_debit_v1(self, kind, amount=1, *, settling=False):
+ import tools.validation_reliability as _f
+ original = self._ordinary_factory_original_v1
+ if original is None: original = self._ordinary_prefix_checked_v1()
+ _f._preflight_require_v1(type(self) is _f._LinuxPreflightScopeV1
+  and self._ordinary_factory_owner_v1 == (_f.os.getpid(), _f.threading.get_ident())
+  and type(amount) is int and 0 <= amount < 1 << 63
+  and kind in self._ordinary_factory_counts_v1, 'ORDINARY_FACTORY_EXACT_ACTUAL_DEBIT')
+ key = {'metadata_call': 'metadata_call_limit', 'raw_read': 'raw_read_byte_limit',
+  'raw_write': 'raw_write_byte_limit', 'native_control_read': 'native_control_read_limit',
+  'native_control_write': 'native_control_write_limit',
+  'native_control_call': 'native_control_call_limit'}[kind]
+ meter, limits, remaining, observed = self._ordinary_original_meter_v1
+ _f._preflight_require_v1(self._ordinary_meter_v1 is meter and meter['limits'] is limits
+  and meter['remaining'] is remaining and meter['observed'] is observed
+  and limits is original[2] and tuple(limits.items()) == self._ordinary_factory_limit_values_v1
+  and meter['owner'] == self._ordinary_factory_owner_v1
+  and meter['deadline_ns'] == original[6][3] and key in remaining,
+  'ORDINARY_FACTORY_ORIGINAL_METER_ASSOCIATION')
+ previous = remaining[key]
+ _f._preflight_require_v1(type(previous) is int and previous >= 0,
+  'ORDINARY_FACTORY_ORIGINAL_SPENDABLE_BALANCE')
+ self._ordinary_factory_counts_v1[kind] += amount
+ errors = []
+ census_record = getattr(self, '_ordinary_census_active_v1', None)
+ if census_record is not None:
+  census_record = self._ordinary_census_meter_projection_v1(census_record['census'])
+  _f._preflight_require_v1(census_record['active'] and not census_record['finished'],
+   'ORDINARY_CENSUS_ACTUAL_PREFIX_ACCOUNTING')
+  census_record['counters'][kind] += amount
+  if kind == 'metadata_call': census_record['census'].counts['metadata_attempts'] += amount
+ candidate = self._ordinary_candidate_v1
+ delivered = kind in ('raw_read', 'raw_write', 'native_control_read')
+ direct = False
+ if candidate is None:
+  direct = True
+ elif (candidate._ordinary_disk_state_v1['released']
+   and getattr(self, '_ordinary_post_c_accounting_v1', None) is not None):
+  completed = self._ordinary_post_c_accounting_checked_v1()
+  state = candidate._ordinary_disk_state_v1
+  _f._preflight_require_v1(settling and completed[1] is self
+   and completed[2] is candidate and completed[3] is state
+   and state is candidate._original_ordinary_disk_state_v1
+   and state['meter'] is meter and state['remaining'] is remaining
+   and state['observed'] is observed and state['limits'] is limits,
+   'ORDINARY_ORIGINAL_POST_C_HOST_RAW_METER')
+  if getattr(self, '_ordinary_output_phase_v1', None) is not None:
+   self._ordinary_output_phase_checked_v1()
+  direct = True
+ elif settling and getattr(self, '_ordinary_native_output_phase_v1', None) is not None:
+  self._ordinary_native_output_phase_checked_v1()
+  state = candidate._ordinary_disk_state_v1
+  _f._preflight_require_v1(state is candidate._original_ordinary_disk_state_v1
+   and state['candidate'] is candidate and state['scope'] is self
+   and state['config'] is candidate._ordinary_disk_config_v1
+   and state['meter'] is meter and state['remaining'] is remaining
+   and state['observed'] is observed and state['limits'] is limits,
+   'ORDINARY_NATIVE_OUTPUT_ORIGINAL_SHARED_METER')
+  direct = True
+  if key == 'raw_read_byte_limit':
+   prior_read = candidate.remaining_read_bytes
+   candidate.observed_read_bytes += amount
+   candidate.remaining_read_bytes = max(0, prior_read - amount)
+   if amount > prior_read:
+    errors.append(ValueError('ORDINARY_NATIVE_OUTPUT_CANDIDATE_READ_PREFIX',
+     prior_read, amount, candidate.observed_read_bytes))
+ else:
+  c_settling = settling and kind not in ('raw_read', 'raw_write')
+  try:
+   candidate._disk_charge_v1(key, amount, settling=c_settling, delivered=delivered)
+  except BaseException as error:
+   if not any(error is actual for actual in self._ordinary_factory_errors_v1):
+    self._ordinary_factory_errors_v1.append(error)
+   raise
+ if direct:
+  observed[key] += amount
+  remaining[key] = max(0, previous - amount)
+  try: self._ordinary_phase_complement_debit_v1(key, amount)
+  except BaseException as error: errors.append(error)
+  if amount > previous:
+   errors.append(ValueError('ORDINARY_FACTORY_CUMULATIVE_LIMIT', kind,
+    previous, amount, observed[key], limits[key]))
+ if census_record is not None and census_record['census'].counts['metadata_attempts'] > 2_000_000:
+  errors.append(ValueError('LINUX_CENSUS_OPERATIONS'))
+ for error in errors:
+  if not any(error is actual for actual in self._ordinary_factory_errors_v1):
+   self._ordinary_factory_errors_v1.append(error)
+ try: self._ordinary_factory_check_v1(settling=settling)
+ except BaseException as error: errors.append(error)
+ for error in errors:
+  if not any(error is actual for actual in self._ordinary_factory_errors_v1):
+   self._ordinary_factory_errors_v1.append(error)
+ _f._scan_raise_errors(errors)
+
+
+def _facet_m_factory_slot_v1(self, path, kind, *, settling=False):
+ import tools.validation_reliability as _f
+ original = self._ordinary_factory_check_v1(settling=settling)
+ _f._preflight_require_v1(self._ordinary_pending_close_calls_v1(self._ordinary_candidate_v1)
+   < original[2]['native_handle_limit']
+  and (settling or self._ordinary_meter_v1['remaining']['metadata_call_limit']
+   >= 2 + self._ordinary_pending_close_calls_v1(self._ordinary_candidate_v1)),
+  'ORDINARY_FACTORY_HELD_SLOT_CAP')
+ slot = _f._mapper_slot_v1(self._ordinary_factory_owner_v1,
+  self._ordinary_factory_slots_v1, _f.Path(path), kind)
+ self._ordinary_close_debt_v1 += 1
+ return slot
+
+
+def _facet_m_pending_close_calls_v1(self, candidate):
+ import tools.validation_reliability as _f
+ _f._preflight_require_v1(self._ordinary_factory_owner_v1 ==
+  (_f.os.getpid(), _f.threading.get_ident()) and self._ordinary_factory_slots_v1
+  is self._ordinary_original_factory_slots_v1
+  and self._ordinary_factory_iterators_v1 is self._ordinary_original_factory_iterators_v1
+  and type(self._ordinary_close_debt_v1) is int and self._ordinary_close_debt_v1 >= 0,
+  'ORDINARY_FACTORY_ORIGINAL_CLOSE_RESERVATION')
+ result = self._ordinary_close_debt_v1
+ records = getattr(self, '_ordinary_source_meter_records_v1', ())
+ if records:
+  _f._preflight_require_v1(records is self._ordinary_original_source_meter_records_v1
+   and len(records) <= 4, 'ORDINARY_SOURCE_CLOSE_ORIGINAL_ASSOCIATIONS')
+  result += sum(len(row['source'].owned) + int(row['source'].journal_fd is not None)
+   for row in records)
+ if candidate is not None:
+  _f._preflight_require_v1(candidate is self._ordinary_candidate_v1
+   and candidate._ordinary_disk_config_v1 is self._ordinary_storage_original_v1['config'],
+   'ORDINARY_FACTORY_ORIGINAL_C_CLOSE_RESERVATION')
+  state = candidate._ordinary_disk_state_v1
+  _f._preflight_require_v1(state is candidate._original_ordinary_disk_state_v1
+   and state['slots'] is state['original_slots']
+   and state['iterator_records'] is state['original_iterator_records']
+   and type(state['close_debt']) is int and state['close_debt'] >= 0,
+   'ORDINARY_FACTORY_ORIGINAL_C_CLOSE_DEBT')
+  result += state['close_debt']
+ return result
+
+
+def _facet_m_installation_meter_attach_v1(self, install, programme):
+ import tools.validation_reliability as _f
+ self._ordinary_factory_check_v1()
+ census = self._ordinary_census_meter_projection_v1(install.census)
+ image = self._ordinary_host_output_image_v1
+ _f._preflight_require_v1(type(install) is _f._LinuxInstallationCopyV2
+  and census['finished'] and census['census'] is install.census
+  and install.census.complete and image['mounted'] and image['allocation_complete']
+  and image is next(row for row in self._ordinary_image_records_v1 if row['role'] == 'HOST_OUTPUT')
+  and image['original_scope'] is self and install.root == _f.Path(self.installation)
+  and install.deadline_ns == self.execution_deadline_ns
+  and install.byte_count == install.read_bytes == install.copy_bytes == 0
+  and not install.copy_verified and not hasattr(self, '_ordinary_installation_copy_v1')
+  and not hasattr(install, '_ordinary_meter_scope_v1')
+  and programme is self._ordinary_census_programme_v1['installation_programme']
+  and programme['census'] is install.census
+  and len(programme['rows']) == len(install.rows)
+  and all(compiled is actual for compiled, actual in zip(programme['rows'], install.rows)),
+  'ORDINARY_INSTALLATION_ORIGINAL_CENSUS_AND_ACQUIRED_HOST')
+ destination = image['mount_path'] / 'installation'
+ _f._preflight_require_v1(programme['destination'] == destination,
+  'ORDINARY_INSTALLATION_COMPILED_DESTINATION_IS_ACTUAL_HOST_ROOT')
+ record = dict(scope=self, install=install, census=census, programme=programme,
+  image=image, destination=destination, rows=install.rows, native=install.native,
+  files=install.files, directories=install.directories, owner=self._ordinary_factory_owner_v1,
+  source_paths=frozenset(_f.Path(row['observed_path']) for row in install.rows),
+  target_paths=frozenset(destination / _f.Path(row['path']).relative_to(install.root)
+   for row in install.rows),
+  active_slots={}, copy_attempted=False, complete=False, root_slot=None,
+  target_versions=None, raw_read=0, raw_write=0, native_control_read=0,
+  maximum_read_request=0, maximum_write_request=0,
+  native_calls=0, current_collector=None, completed_collectors=0, errors=[])
+ record['original'] = (record, self, install, census, programme, image, destination,
+  install.rows, install.native, install.files, install.directories,
+  record['active_slots'], record['errors'], record['owner'], self._ordinary_meter_v1,
+  record['source_paths'], record['target_paths'])
+ self._ordinary_installation_copy_v1 = self._ordinary_original_installation_copy_v1 = record
+ install._ordinary_meter_scope_v1, install._ordinary_meter_record_v1 = self, record
+ install.native.attempt = install._ordinary_native_attempt_v1
+ return record
+
+
+def _facet_m_installation_record_v1(self, install, *, settling=False):
+ import tools.validation_reliability as _f
+ self._ordinary_factory_check_v1(settling=settling)
+ record = self._ordinary_installation_copy_v1
+ original = record['original']
+ _f._preflight_require_v1(record is self._ordinary_original_installation_copy_v1
+  and type(install) is _f._LinuxInstallationCopyV2 and original[0] is record
+  and original[1] is self and original[2] is install and record['scope'] is self
+  and record['install'] is install and install._ordinary_meter_scope_v1 is self
+  and install._ordinary_meter_record_v1 is record
+  and original[3] is record['census'] and original[4] is record['programme']
+  and original[5] is record['image'] is self._ordinary_host_output_image_v1
+  and original[6] is record['destination'] and original[7] is record['rows'] is install.rows
+  and original[8] is record['native'] is install.native
+  and original[9] is record['files'] is install.files
+  and original[10] is record['directories'] is install.directories
+  and original[11] is record['active_slots'] and original[12] is record['errors']
+  and original[13] == (_f.os.getpid(), _f.threading.get_ident())
+  and original[14] is self._ordinary_meter_v1
+  and original[15] is record['source_paths'] and original[16] is record['target_paths']
+  and install.native.attempt.__self__ is install
+  and install.native.attempt.__func__ is _f._LinuxInstallationCopyV2._ordinary_native_attempt_v1,
+  'ORDINARY_INSTALLATION_ORIGINAL_LIVE_OWNER')
+ if not settling: _f._scan_raise_errors(record['errors'])
+ return record
+
+
+def _facet_m_selected_git_control_record_v1(self, argv):
+ import tools.validation_reliability as _f
+ record = getattr(self, '_ordinary_current_selected_git_control_v1', None)
+ if record is None: return None
+ proof = record['proof']; original = record['original']
+ _f._preflight_require_v1(type(record) is dict and proof is self._ordinary_selected_git_proof_v1
+  and proof['scope'] is self and not proof['complete'] and not proof['errors']
+  and original == (record, proof, record['ordinal'], record['argv'], record['expected'], record['errors'])
+  and original[0] is record and original[1] is proof and original[3] is argv
+  and any(record is item for item in proof['records'])
+  and type(record['ordinal']) is int and 1 <= record['ordinal'] <= 8
+  and record['attempted'] and not record['verified'] and not record['errors']
+  and record['environment'] is proof['environment']
+  and record['argv'] is argv
+  and (argv[2:], record['expected']) == self._ordinary_selected_git_vectors_v1()[record['ordinal']-1]
+  and argv[:2] == ('/usr/bin/git', '--no-pager'),
+  'ORDINARY_SELECTED_GIT_SOURCE_FIXED_NATIVE_QUERY')
+ for programme, native, environment, values in proof['programmes']:
+  _f._ordinary_native_source_programme_check_v1(self, native)
+  _f._preflight_require_v1(programme is self._ordinary_programme_for_entry_v1(programme['entry'])
+   and tuple(environment.items()) == values
+   and {key:value for key,value in programme['environment'].items() if key.startswith('GIT_')} == environment
+   and environment == self._ordinary_selected_git_environment_v1(native),
+   'ORDINARY_SELECTED_GIT_SAME_SOURCE_AND_ENVIRONMENT')
+ self._ordinary_selected_git_loader_v1(proof)
+ return record
+
+
+def _facet_m_post_git_control_record_v1(self, argv):
+ import tools.validation_reliability as _f
+ record = getattr(self, '_ordinary_current_post_git_control_v1', None)
+ if record is None: return None
+ original = record['original']
+ _f._preflight_require_v1(type(record) is dict and original[0] is record
+  and original[1] is self and original[2] is record['entry']
+  and original[3] is record['programme'] and original[4] is record['environment']
+  and original[5] == tuple(record['environment'].items())
+  and original[6] is record['argv'] and original[7] == record['expected']
+  and original[8] is record['errors'] and record['argv'] is argv
+  and any(record is row for row in self._ordinary_post_git_control_records_v1)
+  and any(row is record['programme'] and row['entry'] is record['entry']
+   and tuple(row.items()) == fields
+   for row, fields in self._ordinary_original_occurrence_program_v1)
+  and any(row is record['programme'] and environment is row['environment']
+   and tuple(environment.items()) == values
+   for row, environment, values in self._ordinary_original_occurrence_environments_v1)
+  and record['entry'].phase == 'post-validation'
+  and record['entry'].command_index == 2 and record['programme']['original_position'] == 448
+  and record['attempted'] and not record['verified'] and not record['errors'],
+  'ORDINARY_POST_GIT_SOURCE_SELECTED_CONTROL_QUERY')
+ return record
+
+
+def _facet_m_prepare_filesystem_v1(self, physical, *, role):
+ import tools.validation_reliability as _f
+ import struct
+ original = self._ordinary_factory_check_v1()
+ paths, plan, limits, global_physical, parent, parent_slot, cutoffs, tools, controls = original
+ _f._preflight_require_v1(role in ('VIEW', 'HOST_OUTPUT') and any(name == role and row is physical
+  for name, row in global_physical['volumes']) and self._ordinary_active_image_v1 is None
+  and not any(row['role'] == role for row in self._ordinary_image_records_v1),
+  'ORDINARY_SINGLE_ORIGINAL_VOLUME_PREPARATION')
+ image = dict(self._ordinary_image_template_v1, role=role, physical=physical,
+  physical_values=tuple(physical.items()), extent=physical['image_extent'],
+  original_scope=self, original_factory=original, formatter_record=None,
+  post_format_info=None, errors=[])
+ self._ordinary_image_records_v1.append(image)
+ setattr(self, '_ordinary_image_v1' if role == 'VIEW' else '_ordinary_host_output_image_v1', image)
+ self._ordinary_active_image_v1 = image
+ image['allocation_attempted'] = True
+ parent_fd = parent_slot['returned_fd']
+ info = self._ordinary_factory_call_v1(_f.os.fstat, parent_fd)
+ named = self._ordinary_factory_call_v1(_f.os.lstat, parent)
+ _f._preflight_require_v1(_f.stat.S_ISDIR(info.st_mode) and _f.stat.S_ISDIR(named.st_mode)
+  and (info.st_dev, info.st_ino) == (named.st_dev, named.st_ino)
+  and (info.st_uid, info.st_gid, _f.stat.S_IMODE(info.st_mode)) == (0, 0, 0o700)
+  and _f._preflight_chain_v1(parent) == self._ordinary_factory_parent_chain_v1,
+  'ORDINARY_FACTORY_ORIGINAL_IMAGE_PARENT')
+ free = self._ordinary_factory_call_v1(_f.os.fstatvfs, parent_fd)
+ _f._preflight_require_v1(free.f_bavail * free.f_frsize >=
+  sum(row['image_extent'] for name, row in global_physical['volumes']
+   if not any(item['role'] == name and item['allocation_complete']
+    for item in self._ordinary_image_records_v1)) + physical['spare_floor'],
+  'ORDINARY_FACTORY_CALLER_AVAILABLE_SPACE')
+ path = parent / ('ordinary-view.ext4' if role == 'VIEW' else 'ordinary-host-output.ext4')
+ image['path'] = path
+ image['slot'] = slot = self._ordinary_factory_slot_v1(path, 'ORDINARY_BACKING_IMAGE')
+ image_fd = self._ordinary_factory_open_v1(slot, path.name,
+  _f.os.O_RDWR | _f.os.O_CREAT | _f.os.O_EXCL | _f.os.O_NOFOLLOW | _f.os.O_CLOEXEC,
+  parent_fd=parent_fd)
+ self._ordinary_factory_call_v1(_f.os.posix_fallocate, image_fd, 0, physical['image_extent'])
+ self._ordinary_factory_call_v1(_f.os.fsync, image_fd)
+ info = self._ordinary_factory_call_v1(_f.os.fstat, image_fd)
+ named = self._ordinary_factory_call_v1(_f.os.stat, path.name,
+  dir_fd=parent_fd, follow_symlinks=False)
+ _f._preflight_require_v1(_f.stat.S_ISREG(info.st_mode) and info.st_nlink == 1
+  and _f.stat.S_ISREG(named.st_mode) and named.st_nlink == 1
+  and _f._same_observed_file(info, named) and info.st_size == physical['image_extent']
+  and info.st_blocks * 512 >= physical['image_extent']
+  and (info.st_uid, info.st_gid, _f.stat.S_IMODE(info.st_mode)) == (0, 0, 0o600),
+  'ORDINARY_FACTORY_ACTUAL_PHYSICAL_PREALLOCATION')
+ image['info'] = info
+ image['allocation_complete'] = True
+ control = image['loop_control_slot'] = self._ordinary_factory_slot_v1(
+  _f.Path('/dev/loop-control'), 'ORDINARY_LOOP_CONTROL')
+ control_fd = self._ordinary_factory_open_v1(control, '/dev/loop-control',
+  _f.os.O_RDWR | _f.os.O_NOFOLLOW | _f.os.O_CLOEXEC)
+ control_info = self._ordinary_factory_call_v1(_f.os.fstat, control_fd)
+ _f._preflight_require_v1(_f.stat.S_ISCHR(control_info.st_mode)
+  and (_f.os.major(control_info.st_rdev), _f.os.minor(control_info.st_rdev)) == (10, 237),
+  'ORDINARY_FACTORY_ACTUAL_LOOP_CONTROL')
+ number = self._ordinary_factory_ioctl_v1(control_fd, 0x4C82)
+ _f._preflight_require_v1(type(number) is int and 0 <= number < 1 << 20,
+  'ORDINARY_FACTORY_LOOP_CANDIDATE_NUMBER')
+ image['loop_number'] = number
+ device = image['loop_device'] = _f.Path('/dev/loop' + str(number))
+ loop_slot = image['loop_slot'] = self._ordinary_factory_slot_v1(device, 'ORDINARY_LOOP_DEVICE')
+ loop_fd = self._ordinary_factory_open_v1(loop_slot, str(device),
+  _f.os.O_RDWR | _f.os.O_NOFOLLOW | _f.os.O_CLOEXEC)
+ loop_info = self._ordinary_factory_call_v1(_f.os.fstat, loop_fd)
+ _f._preflight_require_v1(_f.stat.S_ISBLK(loop_info.st_mode)
+  and (_f.os.major(loop_info.st_rdev), _f.os.minor(loop_info.st_rdev)) == (7, number),
+  'ORDINARY_FACTORY_ACTUAL_LOOP_DEVICE')
+ loop_info64 = struct.pack('<QQQQQIIII64s64s32sQQ', 0, 0, 0, 0,
+  physical['image_extent'], 0, 0, 0, 4, b'', b'', b'', 0, 0)
+ config = struct.pack('<II', image_fd, 4096) + loop_info64 + bytes(64)
+ _f._preflight_require_v1(len(config) == 304, 'ORDINARY_FACTORY_LOOP_ABI_EXTENT')
+ image['loop_configure_attempted'] = True
+ returned_config = self._ordinary_factory_ioctl_v1(loop_fd, 0x4C0A,
+  config, read_extent=304, write_extent=304)
+ _f._preflight_require_v1(returned_config == config,
+  'ORDINARY_FACTORY_LOOP_CONFIG_RETURNED_ARGUMENT')
+ image['loop_configure_complete'] = True
+ status = self._ordinary_factory_ioctl_v1(loop_fd, 0x4C05, bytes(232), read_extent=232)
+ _f._preflight_require_v1(type(status) is bytes and len(status) == 232,
+  'ORDINARY_FACTORY_LOOP_STATUS_EXTENT')
+ observed = struct.unpack('<QQQQQIIII64s64s32sQQ', status)
+ _f._preflight_require_v1(observed[0] == info.st_dev and observed[1] == info.st_ino
+  and observed[3] == 0 and observed[4] == physical['image_extent']
+  and observed[5] == number and observed[6:9] == (0, 0, 4),
+  'ORDINARY_FACTORY_ATOMIC_LOOP_BACKING_ASSOCIATION')
+ capacity = self._ordinary_factory_ioctl_v1(loop_fd, 0x80081272, bytes(8), read_extent=8)
+ _f._preflight_require_v1(type(capacity) is bytes and len(capacity) == 8
+  and struct.unpack('<Q', capacity)[0] == physical['image_extent'],
+  'ORDINARY_FACTORY_ACTUAL_LOOP_GEOMETRY')
+ image['loop_status'] = status
+ mount_path = image['mount_path'] = parent / ('ordinary-view-volume' if role == 'VIEW' else 'ordinary-host-output-volume')
+ self._ordinary_factory_call_v1(_f.os.mkdir, mount_path.name, 0o700, dir_fd=parent_fd)
+ image['format_attempted'] = True
+ features = ('-O', 'quota,project') if role == 'VIEW' else ()
+ extended = 'nodiscard,lazy_itable_init=0,lazy_journal_init=0' + (',quotatype=prjquota' if role == 'VIEW' else '')
+ mk = (str(tools[0]['path']), '-t', 'ext4', '-b', '4096', '-I', '256',
+  *features, '-N', str(physical['inode_request']), '-m', '0', '-E',
+  extended, '-F', str(device),
+  str(physical['filesystem_blocks']))
+ self._ordinary_factory_command_v1(mk)
+ formatter = self._ordinary_administrative_records_v1[-1]
+ _f._preflight_require_v1(formatter['scope'] is self and formatter['argv'] is mk
+  and formatter['purpose'] == 'FORMAT_IMAGE:' + role
+  and formatter['returned'] and formatter['error'] is None
+  and type(formatter['receipt']) is _f.CommandExecutionReceiptV1,
+  'ORDINARY_ORIGINAL_ACTUAL_FORMATTER_RECEIPT')
+ image['formatter_record'] = formatter
+ after_format = self._ordinary_factory_call_v1(_f.os.fstat, image_fd)
+ named_after_format = self._ordinary_factory_call_v1(_f.os.stat, path.name,
+  dir_fd=parent_fd, follow_symlinks=False)
+ _f._preflight_require_v1((after_format.st_dev, after_format.st_ino) == (info.st_dev, info.st_ino)
+  and _f._same_observed_file(after_format, named_after_format)
+  and after_format.st_size == physical['image_extent']
+  and after_format.st_blocks * 512 >= physical['image_extent'],
+  'ORDINARY_NO_DISCARD_POST_FORMAT_PHYSICAL_RESERVATION')
+ image['post_format_info'] = after_format
+ image['formatted'] = True
+ superblock = bytearray()
+ while len(superblock) < 1024:
+  requested = min(65536, 1024 - len(superblock))
+  raw = self._ordinary_factory_call_v1(_f.os.pread, loop_fd,
+   requested, 1024 + len(superblock))
+  _f._preflight_require_v1(type(raw) is bytes, 'ORDINARY_FACTORY_UNKNOWN_SUPERBLOCK_RETURN')
+  self._ordinary_factory_debit_v1('native_control_read', len(raw))
+  _f._preflight_require_v1(raw and len(raw) <= requested,
+   'ORDINARY_FACTORY_SUPERBLOCK_PROGRESS_EXTENT')
+  superblock.extend(raw)
+ magic = struct.unpack_from('<H', superblock, 56)[0]
+ inodes = struct.unpack_from('<I', superblock, 0)[0]
+ blocks = struct.unpack_from('<I', superblock, 4)[0]
+ incompatible = struct.unpack_from('<I', superblock, 96)[0]
+ if incompatible & 0x80: blocks |= struct.unpack_from('<I', superblock, 336)[0] << 32
+ _f._preflight_require_v1(magic == 0xEF53 and struct.unpack_from('<I', superblock, 24)[0] == 2
+  and blocks == physical['filesystem_blocks']
+  and physical['minimum_inodes'] <= inodes <= global_physical['inode_request']
+  and inodes + sum(item['filesystem']['inodes'] for item in self._ordinary_image_records_v1
+   if item is not image and item['filesystem'] is not None) <= global_physical['inode_request'],
+  'ORDINARY_FACTORY_ACTUAL_EXT4_BLOCK_INODE_GEOMETRY')
+ image['superblock'] = bytes(superblock)
+ image['mount_attempted'] = True
+ self._ordinary_factory_command_v1(('/usr/bin/mount', '-t', 'ext4', '-o',
+  'nodev,nosuid,noexec' + (',prjquota' if role == 'VIEW' else ''), str(device), str(mount_path)))
+ mounts = _f._linux_preflight_mounts_v1(self.query.read('/proc/self/mountinfo'))
+ selected = [row for row in mounts if row['path'] == str(mount_path)]
+ _f._preflight_require_v1(len(selected) == 1 and selected[0]['fs'] == 'ext4'
+  and {'rw', 'nodev', 'nosuid', 'noexec'} <= selected[0]['options']
+  and selected[0]['device'] == '7:' + str(number)
+  and (role != 'VIEW' or 'prjquota' in selected[0]['super_options']),
+  'ORDINARY_FACTORY_ACTUAL_EXT4_MOUNT')
+ image['mounted'] = True
+ image['mount_record'] = selected[0]
+ mounted_slot = image['mount_slot'] = self._ordinary_factory_slot_v1(mount_path, 'ORDINARY_VOLUME_ROOT')
+ mounted_fd = self._ordinary_factory_open_v1(mounted_slot, str(mount_path),
+  _f.os.O_RDONLY | _f.os.O_DIRECTORY | _f.os.O_NOFOLLOW | _f.os.O_CLOEXEC)
+ mounted_info = self._ordinary_factory_call_v1(_f.os.fstat, mounted_fd)
+ actual = self._ordinary_factory_call_v1(_f.os.fstatvfs, mounted_fd)
+ _f._preflight_require_v1(_f.stat.S_ISDIR(mounted_info.st_mode)
+  and (_f.os.major(mounted_info.st_dev), _f.os.minor(mounted_info.st_dev)) == (7, number)
+  and actual.f_frsize == 4096 and actual.f_files == inodes
+  and 0 < actual.f_blocks <= blocks
+  and actual.f_bavail * actual.f_frsize >= physical['inner_usable_bytes'],
+  'ORDINARY_FACTORY_ACTUAL_USABLE_VOLUME_INTERSECTION')
+ native = _f._LinuxSourceNativeV2(attempt=self._ordinary_native_attempt_v1)
+ mount = self._ordinary_native_mount_v1(mounted_fd)
+ _f._preflight_require_v1(mount['magic'] == 0xEF53 and mount['device'] == [7, number]
+  and mount['old_id'] == selected[0]['id'] and not mount['attributes'] & 0x100000,
+  'ORDINARY_FACTORY_HELD_EXT4_MOUNT_NO_IDMAP')
+ image['filesystem'] = dict(blocks=blocks, usable_blocks=actual.f_blocks,
+  available_blocks=actual.f_bavail, inodes=inodes, mount=mount,
+  root_identity=(mounted_info.st_dev, mounted_info.st_ino))
+ self.history.append(dict(ordinary_image_prepared=dict(path=str(path), extent=image['extent'],
+  loop_number=number, backing_identity=(info.st_dev, info.st_ino),
+  actual_blocks=blocks, actual_inodes=inodes, mount_id=selected[0]['id'])))
+ image['filesystem']['available_inodes'] = actual.f_favail
+ self._ordinary_active_image_v1 = None
+ return image
+
+
+def _facet_m_source_file_bound_v1(self, row):
+ import tools.validation_reliability as _f
+ source = self._ordinary_host_original_v1[0]
+ bindings = self._ordinary_git_bindings_v1
+ _f._preflight_require_v1(source is self.source and source.state == 'READABLE'
+  and source.failure is None and bindings['original_source'] is source
+  and bindings['original_queries'] is self._ordinary_git_queries_v1
+  and source.row_index.get(row['path']) is row,
+  'ORDINARY_FILE_ROLE_ORIGINAL_PROTECTED_SOURCE')
+ index_row = source.row_index.get(str(bindings['index']))
+ proof = None
+ path = _f.Path(row['path'])
+ if path.is_relative_to(bindings['lexical_path']):
+  tail = path.relative_to(bindings['lexical_path']).as_posix()
+  tail = '' if tail == '.' else tail
+  old = bindings['source_records_original']
+  _f._preflight_require_v1(old[0] is bindings and old[1] is source
+   and old[2] is bindings['lexical_row']
+   and old[3] is bindings['source_records']
+   and old[4] is bindings['source_record_originals'],
+   'ORDINARY_GIT_SAME_PROTECTED_SOURCE_CATALOGUE')
+  operand = bindings['source_records'].get(tail)
+  proof = bindings['source_record_originals'].get(tail)
+  _f._preflight_require_v1(type(proof) is tuple and len(proof) == 5
+   and proof[0] is operand and proof[1] is row
+   and operand['source_row'] is row
+   and operand['descriptor_version'] is proof[2]
+   and source.post[row['path']] is proof[2]
+   and operand['identity'] == tuple(proof[2][:2])
+   and operand['kind'] == proof[4]
+   and row['logical_bytes'] == proof[3] == proof[2][3]
+   and proof[4] == ('FILE' if row['kind'] == 'file' else 'DIRECTORY'),
+   'ORDINARY_GIT_EXACT_SOURCE_ROW_AND_FIXED_EXTENT')
+ role = 'INDEX' if row is index_row else 'GIT_ADMIN' if proof is not None else 'APPLICATION_SOURCE'
+ bound = 16 << 20 if role == 'INDEX' else proof[3] if proof is not None else 128 << 20
+ if row['kind'] == 'file':
+  _f._preflight_require_v1(type(row['logical_bytes']) is int
+   and 0 <= row['logical_bytes'] <= bound,
+   'ORDINARY_TYPED_SOURCE_FILE_BOUND')
+ return role, bound, proof
+
+
+def _facet_m_disk_file_bound_v1(self, binding, relative, observed=None, *, length=None):
+ import tools.validation_reliability as _f
+ bindings = self._ordinary_git_bindings_v1
+ _f._preflight_require_v1(type(relative) is str and
+  any(binding is root for root in self._ordinary_roots_v1),
+  'ORDINARY_DISK_ORIGINAL_ROLE_ROOT')
+ matches = [record for record in self._ordinary_namespace_projections_v1
+  if record['view_root'] is binding and
+  (relative == record['relative'] or relative.startswith(record['relative'] + '/'))]
+ _f._preflight_require_v1(len(matches) <= 1, 'ORDINARY_GIT_UNIQUE_PROTECTED_PROJECTION')
+ proof = None
+ if matches:
+  record = matches[0]
+  _f._preflight_require_v1(any(record is item for item in bindings['original_projections'])
+   and record['original_source'] is self.source and record['bound']
+   and record['readonly'] and not record['errors']
+   and 'ro' in record['readonly_mount']['options']
+   and record['source_records'] is bindings['source_records']
+   and record['source_record_originals'] is bindings['source_record_originals'],
+   'ORDINARY_GIT_ACTUAL_READONLY_ROLE_PROJECTION')
+  tail = relative[len(record['relative']):].lstrip('/')
+  operand = record['source_records'].get(tail)
+  _f._preflight_require_v1(operand is not None, 'ORDINARY_GIT_NO_NEW_PROTECTED_CHILD')
+  role, bound, proof = self._ordinary_source_file_bound_v1(operand['source_row'])
+  _f._preflight_require_v1(proof is record['source_record_originals'].get(tail)
+   and proof[4] == 'FILE', 'ORDINARY_GIT_ORIGINAL_FILE_ROLE')
+  if observed is not None:
+   _f._preflight_require_v1(self.source.census._version(observed) == proof[2],
+    'ORDINARY_GIT_FIXED_NATIVE_BASELINE_VERSION')
+  if length is not None:
+   _f._preflight_require_v1(length == proof[3], 'ORDINARY_GIT_FIXED_BASELINE_LENGTH')
+ else:
+  row = (self.source.row_index.get(str(_f.Path(self.repository) / relative))
+   if binding['logical_path'] == _f.Path(self.repository) else None)
+  if row is not None:
+   role, bound, source_proof = self._ordinary_source_file_bound_v1(row)
+   _f._preflight_require_v1(source_proof is None,
+    'ORDINARY_GIT_INPUT_REQUIRES_ACTUAL_PROJECTION')
+  else:
+   role, bound = 'APPLICATION_SOURCE', 128 << 20
+ size = observed.st_size if observed is not None else length
+ _f._preflight_require_v1(type(size) is int and 0 <= size <= bound,
+  'ORDINARY_DISK_ROLE_FILE_EXTENT')
+ return role, bound, proof
+
+
+def _facet_m_require_non_git_mutation_v1(self, relative):
+ import tools.validation_reliability as _f
+ _f._preflight_require_v1(type(relative) is str,
+  'ORDINARY_MUTATION_EXACT_RELATIVE_STRING')
+ bindings = self._ordinary_git_bindings_v1
+ _f._preflight_require_v1(bindings['original_source'] is self.source
+  and self.source.state == 'READABLE' and self.source.failure is None
+  and bindings['source_records_original'][0] is bindings,
+  'ORDINARY_MUTATION_SAME_PROTECTED_GIT_OWNER')
+ root = bindings['lexical_path'].relative_to(_f.Path(self.repository)).as_posix()
+ _f._preflight_require_v1(relative != root and not relative.startswith(root + '/'),
+  'ORDINARY_PROTECTED_GIT_MUTATION_FORBIDDEN')
+
+
+def _facet_m_projection_for_source_row_v1(self, row):
+ import tools.validation_reliability as _f
+ bindings = self._ordinary_git_bindings_v1
+ source = self._ordinary_host_original_v1[0]
+ _f._preflight_require_v1(bindings is not None and bindings['original_source'] is source
+  and bindings['original_queries'] is self._ordinary_git_queries_v1,
+  'ORDINARY_GIT_ORIGINAL_SEMANTIC_HOLDER')
+ if row is bindings['lexical_row']:
+  return bindings
+ return None
+
+
+def _facet_m_census_meter_attach_v1(self, census):
+ import tools.validation_reliability as _f
+ self._ordinary_prefix_checked_v1()
+ _f._preflight_require_v1(type(census) is _f._LinuxPreflightCensusV1
+  and not census.started and not census.complete and not census.records
+  and census.counts['metadata_attempts'] == census.xattr_bytes == 0
+  and census.counts['direct_regular_file_payload_reads'] == 0
+  and not hasattr(census, '_ordinary_meter_scope_v1')
+  and not hasattr(self, '_ordinary_census_meter_v1'),
+  'ORDINARY_ONE_LIVE_CENSUS_METER_BEFORE_FIRST_OBSERVATION')
+ record = dict(scope=self, census=census, meter=self._ordinary_meter_v1,
+  rows=census.records, counts=census.counts, failures=census.failures,
+  counters=dict.fromkeys(self._ordinary_factory_counts_v1, 0),
+  native=census.acl_native, original=None, active=True, finished=False, errors=[])
+ record['original'] = (record, self, census, record['meter'], record['rows'],
+  record['counts'], record['failures'], record['counters'], record['native'], record['errors'])
+ self._ordinary_census_meter_v1 = self._ordinary_original_census_meter_v1 = record
+ self._ordinary_census_active_v1 = record
+ census._ordinary_meter_scope_v1 = self
+ census._ordinary_meter_record_v1 = record
+ if census.acl_native is not None:
+  census.acl_native.attempt = lambda: self._ordinary_factory_debit_v1('native_control_call')
+ return record
+
+
+def _facet_m_census_meter_projection_v1(self, census):
+ import tools.validation_reliability as _f
+ record = self._ordinary_census_meter_v1
+ original = record['original']
+ _f._preflight_require_v1(record is self._ordinary_original_census_meter_v1
+  and original[0] is record and original[1] is self
+  and original[2] is record['census'] is census
+  and original[3] is record['meter'] is self._ordinary_meter_v1
+  and original[4] is record['rows'] is census.records
+  and original[5] is record['counts'] is census.counts
+  and original[6] is record['failures'] is census.failures
+  and original[7] is record['counters']
+  and original[8] is record['native'] is census.acl_native
+  and original[9] is record['errors']
+  and census._ordinary_meter_scope_v1 is self
+  and census._ordinary_meter_record_v1 is record
+  and (_f.os.getpid(), _f.threading.get_ident()) == self._ordinary_factory_owner_v1,
+  'ORDINARY_ORIGINAL_CENSUS_LIVE_METER_ASSOCIATION')
+ return record
+
+
+def _facet_m_source_meter_attach_v1(self, source, *, parent=None):
+ import tools.validation_reliability as _f
+ _f._preflight_require_v1(type(self) is _f._LinuxPreflightScopeV1
+  and type(source) is _f._LinuxImmutableSourceSealV2
+  and (source.pid, source.thread) == (_f.os.getpid(), _f.threading.get_ident())
+  == self._ordinary_factory_owner_v1 and source.state == 'ENUMERATED'
+  and source.phase == 'work' and source.failure is None
+  and not hasattr(source, '_ordinary_meter_scope_v1')
+  and not source.owned and not source.anchors and source.journal_fd is None
+  and source.metadata_calls == source.read_attempts == source.read_bytes
+  == source.auxiliary_read_bytes == source.journal_bytes == 0
+  and all(row['calls'] == row['bytes'] == 0 for row in source.journal_counts.values()),
+  'ORDINARY_ORIGINAL_SOURCE_METER_ATTACHMENT')
+ if parent is None:
+  _f._preflight_require_v1(source is self.source
+   and not getattr(self, '_ordinary_source_meter_records_v1', ()),
+   'ORDINARY_ONE_PRIMARY_SOURCE_METER')
+  self._ordinary_source_meter_records_v1 = []
+  self._ordinary_original_source_meter_records_v1 = self._ordinary_source_meter_records_v1
+ else:
+  _f._preflight_require_v1(parent is self.source and type(parent) is _f._LinuxImmutableSourceSealV2
+   and parent._ordinary_meter_scope_v1 is self
+   and source.run_id.startswith(parent.run_id + '-recovery-')
+   and len(source.rows) == 4 and source.census.complete
+   and any(row['retained_path'] == str(source.root)
+    for row in parent.recovery_cases), 'ORDINARY_ORIGINAL_SUBORDINATE_SOURCE_METER')
+ meter, limits, remaining, observed = self._ordinary_original_meter_v1
+ _f._preflight_require_v1(self._ordinary_meter_v1 is meter and meter['limits'] is limits
+  and meter['remaining'] is remaining and meter['observed'] is observed
+  and tuple(limits.items()) == self._ordinary_factory_limit_values_v1,
+  'ORDINARY_SOURCE_SAME_NONRESET_PREFIX_METER')
+ record = dict(scope=self, source=source, parent=parent, meter=meter,
+  counters=dict(metadata_call=0, raw_read=0, raw_write=0,
+   native_control_call=0, native_control_read=0, native_control_write=0),
+  initial=(source.metadata_calls, source.read_attempts, source.read_bytes,
+   source.auxiliary_read_bytes, source.journal_bytes,
+   tuple((phase, counts['calls'], counts['bytes'])
+    for phase, counts in source.journal_counts.items())),
+  global_before=tuple(observed.items()), native=source.native,
+  original_native_attempt=source.native.attempt, errors=[])
+ record['original'] = (record, self, source, parent, meter, record['counters'],
+  record['initial'], record['global_before'], source.native,
+  record['original_native_attempt'], record['errors'])
+ self._ordinary_source_meter_records_v1.append(record)
+ source._ordinary_meter_scope_v1 = self
+ source._ordinary_source_meter_record_v1 = record
+ source.native._ordinary_source_owner_v1 = source
+ source.native.attempt = source._ordinary_source_native_attempt_v1
+ return record
+
+
+def _facet_m_source_meter_projection_v1(self, source=None):
+ import tools.validation_reliability as _f
+ selected = self.source if source is None else source
+ records = self._ordinary_source_meter_records_v1
+ _f._preflight_require_v1(records is self._ordinary_original_source_meter_records_v1
+  and len(records) <= 4 and (_f.os.getpid(), _f.threading.get_ident())
+  == self._ordinary_factory_owner_v1, 'ORDINARY_ORIGINAL_SOURCE_PROJECTION_OWNER')
+ matches = [row for row in records if row['source'] is selected]
+ _f._preflight_require_v1(len(matches) == 1, 'ORDINARY_EXACT_SOURCE_PROJECTION')
+ row = matches[0]
+ original = row['original']
+ meter, limits, remaining, observed = self._ordinary_original_meter_v1
+ _f._preflight_require_v1(original[0] is row and original[1] is self
+  and original[2] is selected and original[3] is row['parent']
+  and original[4] is row['meter'] is meter and original[5] is row['counters']
+  and original[6] is row['initial'] and original[7] is row['global_before']
+  and original[8] is row['native'] is selected.native
+  and original[10] is row['errors']
+  and selected._ordinary_meter_scope_v1 is self
+  and selected._ordinary_source_meter_record_v1 is row
+  and selected.native._ordinary_source_owner_v1 is selected
+  and selected.native.attempt.__self__ is selected
+  and selected.native.attempt.__func__ is _f._LinuxImmutableSourceSealV2._ordinary_source_native_attempt_v1
+  and meter is self._ordinary_meter_v1 and meter['limits'] is limits
+  and meter['remaining'] is remaining and meter['observed'] is observed,
+  'ORDINARY_SOURCE_PROJECTION_ORIGINAL_ASSOCIATIONS')
+ return row
+
+
+def _facet_m_source_meter_event_v1(self, source, kind, amount=1, *, closing=False):
+ import tools.validation_reliability as _f
+ row = self._ordinary_source_meter_projection_v1(source)
+ _f._preflight_require_v1(kind in row['counters'] and type(amount) is int
+  and 0 <= amount < 1 << 63 and type(closing) is bool,
+  'ORDINARY_EXACT_SOURCE_NATIVE_PREFIX')
+ row['counters'][kind] += amount
+ meter, limits, remaining, observed = self._ordinary_original_meter_v1
+ key = {'metadata_call': 'metadata_call_limit', 'raw_read': 'raw_read_byte_limit',
+  'raw_write': 'raw_write_byte_limit', 'native_control_call': 'native_control_call_limit',
+  'native_control_read': 'native_control_read_limit',
+  'native_control_write': 'native_control_write_limit'}[kind]
+ previous = remaining[key]
+ _f._preflight_require_v1(type(previous) is int and previous >= 0,
+  'ORDINARY_SOURCE_ORIGINAL_SPENDABLE_BALANCE')
+ observed[key] += amount
+ remaining[key] = max(0, previous - amount)
+ self._ordinary_factory_counts_v1[kind] += amount
+ errors = []
+ if amount > previous:
+  errors.append(ValueError('ORDINARY_SOURCE_GLOBAL_CUMULATIVE_CAPACITY', kind,
+   previous, amount, observed[key], limits[key]))
+ try:
+  if closing:
+   _f._preflight_require_v1(kind == 'metadata_call'
+    and getattr(source, '_ordinary_closing_descriptor_v1', None) is not None,
+    'ORDINARY_SOURCE_ORIGINAL_CLOSE_ONLY')
+   cutoff = self.settlement_deadline_ns
+  elif source.phase == 'settlement':
+   _f._preflight_require_v1(source.state == 'SETTLING', 'ORDINARY_SOURCE_ACTUAL_RESTORATION_PHASE')
+   cutoff = self.settlement_deadline_ns
+  else:
+   _f._preflight_require_v1(source.phase == 'work', 'ORDINARY_SOURCE_ORIGINAL_WORK_PHASE')
+   cutoff = self.execution_deadline_ns
+   if getattr(self.query, '_ordinary_resource_phase_record_v1', None) is not None:
+    phase = self.query._ordinary_resource_phase_record_v1
+    _f._preflight_require_v1(phase is self.query._ordinary_original_resource_phase_record_v1
+     and phase['scope'] is self and phase['entered'] and not phase['exited'],
+     'ORDINARY_SOURCE_ACTUAL_C_SETTLEMENT_PHASE')
+    cutoff = self._ordinary_host_preparation_v1['original_cutoffs'][2]
+  _f._preflight_require_v1(_f.time.monotonic_ns() < cutoff, 'ORDINARY_SOURCE_ORIGINAL_FIXED_CUTOFF')
+ except BaseException as error: errors.append(error)
+ for error in errors:
+  if not any(error is actual for actual in row['errors']): row['errors'].append(error)
+  if not any(error is actual for actual in self._ordinary_factory_errors_v1):
+   self._ordinary_factory_errors_v1.append(error)
+ _f._scan_raise_errors(errors)
+ return row
+
+
+def _facet_m_require_supervision_settled_v1(self, candidate, supervision):
+ import tools.validation_reliability as _f
+ original = self._ordinary_storage_original_v1
+ runner = self._ordinary_runner_owner_v1
+ selection = getattr(self, '_ordinary_source_selection_v1', None)
+ _f._preflight_require_v1(runner is self._ordinary_original_runner_owner_v1
+  and type(selection) is runner._OrdinarySourceSelectionV1
+  and selection is getattr(self, '_ordinary_original_source_selection_v1', None)
+  and type(selection._original) is tuple and len(selection._original) == 19
+  and selection._original[0] is self and selection._original[1] is original['paths']
+  and selection._original[5] is runner
+  and selection._original[6] is self._ordinary_original_run_binding_v1
+  and type(selection._original[2]) is str and selection._original[2] in runner.ORDERED_PHASES,
+  'ORDINARY_ORIGINAL_SUPERVISION_SOURCE_PHASE')
+ phase = selection._original[2]
+ selection.bound_rows(original['paths'], original['plan'],
+  self._ordinary_execution_plan_v1, phase=phase)
+ _f._preflight_require_v1(candidate is self._ordinary_candidate_v1
+  and candidate._ordinary_disk_config_v1 is original['config']
+  and candidate.plan is original['plan']
+  and supervision is candidate._acquisition_supervision
+  and supervision is runner._RUN_COMMANDS_SUPERVISION
+  and type(supervision) is dict and supervision['candidate_custody'] is candidate
+  and supervision['paths'] is original['paths'] and supervision['phase'] == phase
+  and not supervision['pending'] and self.query.command_resources_settled_v1(),
+  'ORDINARY_ORIGINAL_SUPERVISION_NATIVE_CUSTODY')
+ receipt = supervision.get('receipt')
+ if receipt is not None:
+  _f._preflight_require_v1(type(receipt) is _f.CommandExecutionReceiptV1
+   and receipt.phase == phase and receipt.run_id == original['paths'].run_id
+   and not _f._command_requires_process_retention_v1(receipt),
+   'ORDINARY_ORIGINAL_SUPERVISION_ACTUAL_TERMINAL_RECEIPT')
+  entries = [entry for entry in original['plan'] if entry.command_index == receipt.command_index]
+  _f._preflight_require_v1(len(entries) == 1,
+   'ORDINARY_ORIGINAL_SUPERVISION_PLANNED_RECEIPT')
+  record = self._ordinary_occurrence_record_v1(entries[0])
+  _f._preflight_require_v1(record['receipt'] is receipt and not record['pending']
+   and (receipt.run_id, receipt.phase, receipt.command_index, receipt.argv, receipt.cwd)
+    == (record['entry'].run_id, record['entry'].phase, record['entry'].command_index,
+     record['argv'], record['cwd']),
+   'ORDINARY_ORIGINAL_SUPERVISION_RECEIPT_OCCURRENCE_JOIN')
+  if record.get('no_launch') is not None:
+   self._ordinary_never_launched_v1(record, settled=True)
+  else:
+   _f._preflight_require_v1(type(receipt.native_exit_code) is int and type(record['terminal']) is dict
+    and record['terminal']['native_exit'] == receipt.native_exit_code,
+    'ORDINARY_ORIGINAL_SUPERVISION_ACTUAL_NATIVE_TERMINAL')
+  return receipt
+ state = candidate._ordinary_disk_state_v1
+ _f._preflight_require_v1(state is candidate._original_ordinary_disk_state_v1
+  and state['candidate'] is candidate and state['config'] is original['config']
+  and candidate.baseline is state['baseline_generation']
+  and candidate.baseline is not None and candidate.baseline['complete'] is True
+  and candidate.index_baseline is not None and state['index_allocation'] is not None
+  and any(state['index_allocation'] is item for item in state['allocations'])
+  and state['index_allocation']['sealed'] and state['index_allocation']['writer_closed']
+  and not state['index_allocation']['errors'] and state['pending_capture'] is None
+  and not supervision.get('candidate_acquiring', False)
+  and supervision.get('candidate_admission_complete', False)
+  and supervision.get('preflight_native_input') is None
+  and not supervision.get('scan_input_records')
+  and self._ordinary_occurrences_v1 is self._ordinary_original_occurrences_v1,
+  'ORDINARY_COMPLETE_C_BEFORE_AUTHENTIC_NO_DISPATCH_SETTLEMENT')
+ for selected in self._ordinary_occurrences_v1:
+  _f._preflight_require_v1(selected is self._ordinary_occurrence_record_v1(selected['entry'])
+   and selected['scope'] is self and not selected['dispatch_attempted']
+   and not selected['launcher_attempted'] and selected['process'] is None
+   and selected['launcher'] is None and selected['receipt'] is None
+   and selected['binding'] is None and not selected['release_attempted']
+   and not selected['released'] and selected['output_outcomes'] is None
+   and selected['application_pidfd_slot'] is None and selected['root_slot'] is None
+   and selected['cgroup_slot'] is None and selected['cgroup_event_slot'] is None
+   and not selected['pending'], 'ORDINARY_RETAINED_OCCURRENCE_GENUINELY_NEVER_DISPATCHED')
+ return None
+
+
+def _facet_m_effect_programme_record_v1(self):
+ import tools.validation_reliability as _f
+ programme = getattr(self, '_ordinary_effect_programme_v1', None)
+ if programme is None:
+  return None
+ _f._preflight_require_v1(programme is self._ordinary_original_effect_programme_v1
+  and type(programme) is dict and programme['scope'] is self
+  and programme['source'] is self.source
+  and programme['paths'] is self._ordinary_bound_paths_v1
+  and programme['plan'] is self._ordinary_bound_plan_v1
+  and programme['execution_plan'] is self._ordinary_execution_plan_v1
+  and programme['check'] is programme['original_check']
+  and callable(programme['check']) and not programme['errors'],
+  'ORDINARY_EFFECT_ORIGINAL_SOURCE_COMPILED_PROGRAMME')
+ _f._preflight_require_v1(programme['check'](self, programme) is programme,
+  'ORDINARY_EFFECT_ORIGINAL_COMPILER_CHECK_RESULT')
+ return programme
+
+
+def _facet_m_prepare_view_effects_v1(self):
+ import tools.validation_reliability as _f
+ programme = self._ordinary_effect_programme_record_v1()
+ if programme is None:
+  return None
+ self._ordinary_factory_check_v1()
+ _f._preflight_require_v1(self._ordinary_transfer_complete_v1
+  and not hasattr(self, '_ordinary_view_effects_v1')
+  and not hasattr(self, '_ordinary_storage_frozen_v1'),
+  'ORDINARY_EFFECT_VIEW_TRANSFORM_PRECEDES_C_AND_STORAGE_FREEZE')
+ record = dict(scope=self, source=self.source, programme=programme,
+  root_slot=self._ordinary_view_root_slot_v1, root_path=self._ordinary_view_path_v1,
+  transitions=[], exposures=[], complete=False, errors=[])
+ record['original'] = (record, self, self.source, programme, record['root_slot'],
+  record['root_path'], record['transitions'], record['exposures'], record['errors'],
+  self._ordinary_factory_owner_v1)
+ self._ordinary_view_effects_v1 = self._ordinary_original_view_effects_v1 = record
+ need = _f._preflight_require_v1
+ source, root = self.source, record['root_path']
+ try:
+  selected = {}
+  for row in programme['rows']:
+   need(row['entry'] is programme['plan'][row['entry'].command_index - 1]
+    and row['execution'] is programme['execution_plan'][row['entry'].command_index - 1]
+    and type(row['targets']) is tuple, 'ORDINARY_EFFECT_EXACT_ORIGINAL_ROW')
+   rules, anchors = {}, []
+   for target in row['targets']:
+    relative, kind, actions = target['path'], target['kind'], target['actions']
+    _f._mapper_portable_relative_v1(relative)
+    self._ordinary_require_non_git_mutation_v1(relative)
+    for parent_name in target['parent_paths']:
+     self._ordinary_require_non_git_mutation_v1(parent_name)
+    need(kind in ('FILE', 'DIRECTORY') and type(actions) is tuple and actions
+     and len(actions) == len(set(actions))
+     and all(action in ('CREATE', 'WRITE', 'DELETE') for action in actions)
+     and not (kind == 'DIRECTORY' and 'WRITE' in actions),
+     'ORDINARY_EFFECT_EXACT_TARGET_KIND_AND_ACTIONS')
+    logical = _f.Path(self.repository).joinpath(*relative.split('/'))
+    present = source.row_index.get(str(logical))
+    need(present is None or present['role'] == 'repository'
+     and present['kind'] == ('file' if kind == 'FILE' else 'directory'),
+     'ORDINARY_EFFECT_NO_ORIGINAL_TARGET_KIND_SWITCH')
+    previous = rules.get(relative)
+    need(previous is None or previous == kind, 'ORDINARY_EFFECT_NO_TARGET_ALIAS')
+    rules[relative] = kind
+    if present is not None:
+     selected.setdefault(relative, dict(kind=kind, source_row=present,
+      selected_mode=0o666 if kind == 'FILE' else 0o777, targets=[]))['targets'].append(target)
+    parent = _f.Path(relative).parent
+    while str(parent) != '.':
+     parent_relative = parent.as_posix()
+     self._ordinary_require_non_git_mutation_v1(parent_relative)
+     parent_logical = _f.Path(self.repository).joinpath(*parent_relative.split('/'))
+     parent_row = source.row_index.get(str(parent_logical))
+     need(parent_relative in target['parent_paths'],
+      'ORDINARY_EFFECT_ORIGINAL_PARENT_TARGET_COVERAGE')
+     if parent_row is not None:
+      need(parent_row['role'] == 'repository' and parent_row['kind'] == 'directory',
+       'ORDINARY_EFFECT_ORIGINAL_PARENT_DIRECTORY')
+      anchor = (str(root / parent_relative), str(parent_logical), parent_relative)
+      if anchor not in anchors:
+       anchors.append(anchor)
+      if 'CREATE' in actions or 'DELETE' in actions:
+       rules[parent_relative] = 'DIRECTORY'
+       selected.setdefault(parent_relative, dict(kind='DIRECTORY',
+        source_row=parent_row, selected_mode=0o777, targets=[]))['targets'].append(target)
+      break
+     need('CREATE' in actions, 'ORDINARY_EFFECT_NO_UNADMITTED_ABSENT_PARENT')
+     rules[parent_relative] = 'DIRECTORY'
+     parent = parent.parent
+    else:
+     raise ValueError('ORDINARY_EFFECT_REPOSITORY_ROOT_WRITE_DENIED')
+   exposure = dict(entry=row['entry'], row=row, anchors=tuple(anchors),
+    rules=tuple(rules.items()), targets=row['targets'])
+   exposure['original'] = (exposure, row, row['entry'], exposure['anchors'],
+    exposure['rules'], row['targets'])
+   record['exposures'].append(exposure)
+  for relative, choice in sorted(selected.items(), key=lambda value: (len(value[0].split('/')), value[0])):
+   self._ordinary_require_non_git_mutation_v1(relative)
+   source_row = choice['source_row']
+   source_version = tuple(source.post[source_row['path']])
+   original = source.originals[source_row['path']]['version']
+   path, kind = root / relative, choice['kind']
+   transfer = None
+   if kind == 'FILE':
+    matches = tuple(value for value in self._ordinary_transfer_rows_v1
+     if value['source_row'] is source_row and value['path'] == path)
+    need(len(matches) == 1, 'ORDINARY_EFFECT_ORIGINAL_COMPLETE_FILE_TRANSFER')
+    transfer = matches[0]
+    need(transfer['copied'] and transfer['compared'] and transfer['sealed']
+     and not transfer['errors'] and tuple(transfer['source_version']) == source_version,
+     'ORDINARY_EFFECT_ORIGINAL_FILE_TRANSFER_WITNESS')
+   transition = dict(scope=self, programme=programme, relative=relative, path=path,
+    kind=kind, source_row=source_row, source_version=source_version,
+    source_mode=_f.stat.S_IMODE(original[2]), selected_mode=choice['selected_mode'],
+    transfer_row=transfer, effect_targets=tuple(choice['targets']),
+    slot=None, before=None, before_named=None, after=None, after_named=None,
+    native_before=None, native_after=None, clear_attempted=False,
+    mode_attempted=False, complete=False, errors=[])
+   record['transitions'].append(transition)
+   errors = transition['errors']
+   try:
+    slot = self._ordinary_cache_open_relative_v1(record['root_slot'], relative,
+     directory=kind == 'DIRECTORY')
+    transition['slot'] = slot
+    descriptor = slot['returned_fd']
+    before = transition['before'] = self._ordinary_factory_call_v1(_f.os.fstat, descriptor)
+    named = transition['before_named'] = self._ordinary_factory_call_v1(_f.os.lstat, path)
+    need(_f._same_observed_file(before, named)
+     and (_f.stat.S_ISREG(before.st_mode) and before.st_nlink == 1 if kind == 'FILE'
+      else _f.stat.S_ISDIR(before.st_mode))
+     and (before.st_uid, before.st_gid, _f.stat.S_IMODE(before.st_mode))
+      == (original[7], original[8], _f.stat.S_IMODE(original[2]))
+     and before.st_dev == self._ordinary_image_v1['filesystem']['root_identity'][0],
+     'ORDINARY_EFFECT_ORIGINAL_VIEW_PERMISSION_OPERAND')
+    if transfer is not None:
+     need(_f._scan_same_api_version(before) == transfer['view_version'],
+      'ORDINARY_EFFECT_ORIGINAL_FILE_BEFORE_TRANSFORM')
+    native = _f._LinuxSourceNativeV2(attempt=self._ordinary_native_attempt_v1)
+    self._ordinary_factory_debit_v1('native_control_read', 4)
+    flags = transition['native_before'] = native.flags(descriptor)
+    need(type(flags) is int and flags & 16,
+     'ORDINARY_EFFECT_ORIGINAL_VIEW_NATIVE_SEAL')
+    transition['clear_attempted'] = True
+    self._ordinary_factory_debit_v1('native_control_write', 4)
+    native.flags(descriptor, flags & ~16)
+    transition['mode_attempted'] = True
+    self._ordinary_factory_call_v1(_f.os.fchmod, descriptor, choice['selected_mode'])
+    self._ordinary_factory_call_v1(_f.os.fsync, descriptor)
+    self._ordinary_factory_debit_v1('native_control_read', 4)
+    transition['native_after'] = native.flags(descriptor)
+    after = transition['after'] = self._ordinary_factory_call_v1(_f.os.fstat, descriptor)
+    named = transition['after_named'] = self._ordinary_factory_call_v1(_f.os.lstat, path)
+    need(_f._same_observed_file(after, named)
+     and (before.st_dev, before.st_ino, _f.stat.S_IFMT(before.st_mode), before.st_size,
+      before.st_mtime_ns, before.st_nlink, before.st_uid, before.st_gid)
+      == (after.st_dev, after.st_ino, _f.stat.S_IFMT(after.st_mode), after.st_size,
+       after.st_mtime_ns, after.st_nlink, after.st_uid, after.st_gid)
+     and _f.stat.S_IMODE(after.st_mode) == choice['selected_mode']
+     and transition['native_after'] == flags & ~16,
+     'ORDINARY_EFFECT_ACTUAL_VIEW_ONLY_PERMISSION_TRANSITION')
+    transition['before_version'] = (_f._scan_same_api_version(before) if kind == 'FILE'
+     else self._ordinary_directory_version_v1(before))
+    transition['after_version'] = (_f._scan_same_api_version(after) if kind == 'FILE'
+     else self._ordinary_directory_version_v1(after))
+    transition['attributes'] = (_f.stat.S_IMODE(after.st_mode), after.st_uid,
+     after.st_gid, transition['native_after'])
+    transition['original'] = (transition, self, programme, relative, path, kind,
+     source_row, source_version, transfer, transition['effect_targets'],
+     transition['before_version'], transition['after_version'],
+     transition['attributes'], flags, transition['native_after'],
+     before, transition['before_named'], after, transition['after_named'],
+     slot, transition['source_mode'], transition['selected_mode'])
+   except BaseException as error:
+    errors.append(error)
+   finally:
+    if transition['slot'] is not None:
+     try: self._ordinary_factory_close_v1(transition['slot'], settling=True)
+     except BaseException as error: errors.append(error)
+   _f._scan_raise_errors(errors)
+   transition['complete'] = True
+  self.source.verify(protected=True)
+  record['original_transitions'] = tuple((value, value['original']) for value in record['transitions'])
+  record['original_exposures'] = tuple((value, value['original']) for value in record['exposures'])
+  record['complete'] = True
+  component = getattr(self, '_ordinary_deterministic_source_ingredients_v1', None)
+  if component is not None and component['rp_predecessor_join']['rp_row'] is not None:
+   _f._ordinary_rp_writer_check_v1(self, component,
+    component['rp_predecessor_join'], require_native=True,
+    require_view=True, require_exposed=True)
+ except BaseException as error:
+  record['errors'].append(error)
+  if not any(error is actual for actual in self._ordinary_factory_errors_v1):
+   self._ordinary_factory_errors_v1.append(error)
+  raise
+ return record
+
+
+def _facet_m_view_effect_record_v1(self):
+ import tools.validation_reliability as _f
+ programme = self._ordinary_effect_programme_record_v1()
+ if programme is None:
+  return None
+ record = self._ordinary_view_effects_v1
+ original = record['original']
+ _f._preflight_require_v1(record is self._ordinary_original_view_effects_v1
+  and original[0] is record and original[1] is self and original[2] is self.source
+  and original[3] is programme and original[4] is record['root_slot']
+  and original[5] == record['root_path'] == self._ordinary_view_path_v1
+  and original[6] is record['transitions'] and original[7] is record['exposures']
+  and original[8] is record['errors'] and original[9] == self._ordinary_factory_owner_v1
+  and record['complete'] is True and not record['errors']
+  and len(record['transitions']) == len(record['original_transitions'])
+  and len(record['exposures']) == len(record['original_exposures']),
+  'ORDINARY_EFFECT_ORIGINAL_COMPLETED_VIEW_TRANSFORM')
+ for value, (actual, frozen) in zip(record['transitions'], record['original_transitions']):
+  _f._preflight_require_v1(value is actual and value['original'] is frozen and frozen[0] is value
+   and frozen[1] is self and frozen[2] is programme and frozen[3] == value['relative']
+   and frozen[4] == value['path'] and frozen[5] == value['kind']
+   and frozen[6] is value['source_row'] and frozen[7] is value['source_version']
+   and frozen[8] is value['transfer_row'] and frozen[9] is value['effect_targets']
+   and frozen[10] is value['before_version'] and frozen[11] is value['after_version']
+   and frozen[12] is value['attributes'] and type(value['native_before']) is int
+   and frozen[13] == value['native_before'] and type(value['native_after']) is int
+   and frozen[14] == value['native_after'] and frozen[15] is value['before']
+   and frozen[16] is value['before_named'] and frozen[17] is value['after']
+   and frozen[18] is value['after_named'] and frozen[19] is value['slot']
+   and type(value['source_mode']) is int and frozen[20] == value['source_mode']
+   and type(value['selected_mode']) is int and frozen[21] == value['selected_mode']
+   and value['clear_attempted'] is True and value['mode_attempted'] is True
+   and value['complete'] is True and not value['errors']
+   and _f._mapper_slot_settled_v1(value['slot'])
+   and self.source.row_index.get(value['source_row']['path']) is value['source_row']
+   and tuple(self.source.post[value['source_row']['path']]) == value['source_version'],
+   'ORDINARY_EFFECT_ORIGINAL_NATIVE_TRANSFORM_ITEM')
+ for value, (actual, frozen) in zip(record['exposures'], record['original_exposures']):
+  _f._preflight_require_v1(value is actual and value['original'] is frozen and frozen[0] is value
+   and frozen[1] is value['row'] and frozen[2] is value['entry']
+   and frozen[3] is value['anchors'] and frozen[4] is value['rules']
+   and frozen[5] is value['targets'] and value['targets'] is value['row']['targets'],
+   'ORDINARY_EFFECT_ORIGINAL_NATIVE_EXPOSURE_ITEM')
+ return record
+
+
+def _facet_m_candidate_demand_checked_v1(self, programme):
+ import tools.validation_reliability as _f
+ need = _f._preflight_require_v1
+ need(programme is self._ordinary_effect_programme_record_v1(),
+  'ORDINARY_RESTORE_SAME_SOURCE_COMPILED_EFFECT_PROGRAMME')
+ demand = programme['candidate_demand']
+ keys = {'initial_raw_bytes', 'initial_file_count', 'later_raw_byte_cap',
+  'later_file_count_cap', 'mutable_file_byte_caps_by_occurrence',
+  'raw_read_bytes', 'raw_write_bytes', 'raw_retained_bytes', 'action_rows',
+  'metadata_calls', 'metadata_read_bytes', 'metadata_write_bytes',
+  'native_control_calls', 'native_control_read_bytes', 'native_control_write_bytes',
+  'handle_peak'}
+ need(type(demand) is dict and set(demand) == keys
+  and all(type(value) is int and 0 <= value < 1 << 63
+   for key, value in demand.items() if key != 'mutable_file_byte_caps_by_occurrence')
+  and type(demand['mutable_file_byte_caps_by_occurrence']) is tuple
+  and len(demand['mutable_file_byte_caps_by_occurrence']) == len(programme['plan'])
+  and all(type(value) is int and 0 <= value < 1 << 63
+   for value in demand['mutable_file_byte_caps_by_occurrence']),
+  'ORDINARY_RESTORE_EXACT_SOURCE_COMPILED_CANDIDATE_DEMAND')
+ return demand
+
+
+def _facet_m_restore_suffix_checked_v1(self, record):
+ import tools.validation_reliability as _f
+ original = record['original']
+ need = _f._preflight_require_v1
+ need(type(original) is tuple and len(original) == 14
+  and record is self._ordinary_restore_suffix_v1 is self._ordinary_original_restore_suffix_v1
+  and original[0] is record and original[1] is self
+  and record['candidate'] is original[2] is self._ordinary_candidate_v1
+  and record['state'] is original[3] is original[2]._ordinary_disk_state_v1
+  and record['programme'] is original[4] is self._ordinary_effect_programme_record_v1()
+  and record['candidate_demand'] is original[5]
+   is self._ordinary_candidate_demand_checked_v1(original[4])
+  and tuple(original[5].items()) == original[6]
+  and record['actions'] is original[7] and record['suffix_demand'] is original[8]
+  and tuple(original[8].items()) == original[9]
+  and record['multiplicities'] is original[10]
+  and record['remaining_before_admission'] is original[11]
+  and original[12] == self._ordinary_storage_owner_v1
+  and record['errors'] is original[13] and not record['errors'],
+  'ORDINARY_RESTORE_ORIGINAL_NONRENEWABLE_SUFFIX_PROGRAMME')
+ return record
+
+
+def _facet_m_rp5a_capture_record_v1(self, row, *, settling=False):
+ import tools.validation_reliability as _f
+ original = row['original']
+ _f._preflight_require_v1(type(row) is dict and row['scope'] is self
+  and self._ordinary_rp5a_captures_v1 is self._ordinary_original_rp5a_captures_v1
+  and any(row is item for item in self._ordinary_rp5a_captures_v1)
+  and any(row is item for item in row['binding']['captures'])
+  and type(original) is tuple and len(original) == 10
+  and original[0] is row and original[1] is self and original[2] is row['binding']
+  and original[3] is row['ledger'] and original[4] is row['scratch']
+  and original[5] is row['argv'] and original[6] is row['cwd']
+  and original[7] == tuple(row['environment'].items())
+  and original[8] == row['deadline_ns']
+  and original[9] == (_f.os.getpid(), _f.threading.get_ident()),
+  'ORDINARY_RP5A_ORIGINAL_CAPTURE_NATIVE_ASSOCIATION')
+ if 'effective_argv' in row or 'effective_argv_original' in row:
+  fixed = row['effective_argv_original']
+  _f._preflight_require_v1(type(fixed) is tuple and len(fixed) == 5
+   and fixed[0] is row and fixed[1] is row['argv'] and fixed[2] is row['cwd']
+   and fixed[3] == _f._ordinary_rp5a_git_requested_v1(row['argv'], row['cwd'])
+   and fixed[4] is row['effective_argv'],
+   'ORDINARY_R_ORIGINAL_EFFECTIVE_PARENT_VECTOR')
+ if not settling: _f._scan_deadline(row['deadline_ns'])
+ return row
+
+
+def _facet_m_never_launched_v1(self, record, *, settled=False):
+ import tools.validation_reliability as _f
+ witness = record.get('no_launch')
+ _f._preflight_require_v1(type(witness) is tuple and len(witness) == 9
+  and record is self._ordinary_occurrence_record_v1(record['entry'])
+  and any(record is row for row in self._ordinary_occurrences_v1)
+  and witness[0] is record and witness[1] is self
+  and witness[2] is record['original'] and witness[3] is record['process']
+  and witness[4] is self.startup_error is record['launcher_error']
+  and any(witness[4] is error for error in record['errors'])
+  and witness[5] is record['programme'] and witness[6] is record['output_outcomes']
+  and witness[8] == self._ordinary_factory_owner_v1 == (_f.os.getpid(), _f.threading.get_ident())
+  and record['dispatch_attempted'] and not record['launcher_attempted']
+  and record['launcher'] is None and record['launcher_slot'] is None
+  and record['application_pidfd_slot'] is None and record['root_slot'] is None
+  and record['cgroup_slot'] is None and record['cgroup_event_slot'] is None
+  and record['invocation'] is None and record['cgroup'] is None
+  and record['identity'] is None and record['binding'] is None
+  and not record['release_attempted'] and not record['released']
+  and record['terminal'] is None and record['actors_terminal'] is None
+  and not record['stop_attempted'] and not record['kill_attempted'] and not record['stopped'],
+  'ORDINARY_ORIGINAL_CREATE_PREFIX_BEFORE_NATIVE_POPEN')
+ process, core = witness[3], witness[7]
+ _f._preflight_require_v1(type(process) is _f._LinuxPreflightProcessV1 and process.scope is self
+  and process._ordinary_record_v1 is record
+  and (process.pid, process.pidfd, process.returncode, process.stdout, process.stderr)
+   == (None, None, None, None, None)
+  and any(core is row for row in self._ordinary_core_outputs_v1)
+  and core['producer'] is record and core['process'] is None
+  and core['original_process'] is None and core['pipes'] is None
+  and core['outcomes'] is record['output_outcomes'],
+  'ORDINARY_UNEXPORTED_PROXY_HAS_NO_NATIVE_RIGHTS_OR_STREAMS')
+ if settled:
+  _f._preflight_require_v1(type(core['outcomes']) is tuple and len(core['outcomes']) == 2
+   and all(outcome.get('writer_closed') is True
+    and outcome.get('evidence_complete') is True
+    and outcome.get('eof_observed') is not True and 'evidence_error' not in outcome
+    for outcome in core['outcomes'])
+   and all(stream['complete'] and not stream['errors']
+    and stream['adapter'].closed and _f._mapper_slot_settled_v1(stream['slot'])
+    for stream in core['streams'].values()),
+   'ORDINARY_ORIGINAL_PRESTART_WRITERS_ACTUALLY_CLOSED_WITHOUT_NATIVE_EOF')
+  receipt = record['receipt']
+  if receipt is not None:
+   _f._preflight_require_v1(type(receipt) is _f.CommandExecutionReceiptV1
+    and (receipt.run_id, receipt.phase, receipt.command_index, receipt.argv, receipt.cwd)
+     == (record['entry'].run_id, record['entry'].phase, record['entry'].command_index,
+      record['argv'], record['cwd'])
+    and receipt.pid is None and receipt.native_exit_code is None
+    and receipt.start_failure_class is not None
+    and receipt.failure_class == 'ENGVR_PROCESS_START_FAILED'
+    and receipt.termination_state == 'NOT_REQUIRED'
+    and not _f._command_requires_process_retention_v1(receipt) and not record['pending'],
+    'ORDINARY_ORIGINAL_NO_LAUNCH_FAILED_RECEIPT_NOT_NATIVE_SUCCESS')
+ return witness
+
+
+def _facet_m_prepare_rp5a_source_v1(self, paths, plan, bound_rows, *, occurrence_programme):
+    """Join the genuine original source policy once before C acquisition.
+
+    Native observations come only from the original bounded capture owner.
+    Current C rows/profiles/input are constructed later at actual BEGIN.
+    """
+    import tools.validation_reliability as _f
+    from types import MappingProxyType
+    self._ordinary_precursor_ready_v1()
+    runner = self._ordinary_runner_owner_v1
+    resource = self._ordinary_resource_programme_v1
+    resource_original = self._ordinary_original_resource_programme_v1
+    _f._preflight_require_v1(resource is resource_original[0]
+     and tuple(resource.items()) == resource_original[1]
+     and paths is self._ordinary_bound_paths_v1 and plan is self._ordinary_bound_plan_v1
+     and type(bound_rows) is tuple and len(bound_rows) == len(plan)
+     and bound_rows is self._ordinary_source_selection_v1.bound_rows(paths, plan,
+      self._ordinary_execution_plan_v1, phase=plan[0].phase)
+     and occurrence_programme is self._ordinary_occurrence_program_v1
+     and len(occurrence_programme) == len(plan)
+     and not getattr(self, '_ordinary_rp5a_source_attempted_v1', False),
+     'ORDINARY_R_ACTUAL_SOURCE_SELECTION_BEFORE_C_ONE_USE')
+    policy = runner._ordinary_rp5a_source_policy_checked_v1(resource['rp5a_source_policy'], self)
+    selected = tuple((entry, execution, position,
+     _f._rp5a_consumer_role_v1(entry.argv, paths.repo_root))
+     for entry, execution, position in bound_rows
+     if _f._rp5a_consumer_role_v1(entry.argv, paths.repo_root) is not None)
+    if not selected:
+     return None
+    self._ordinary_rp5a_source_attempted_v1 = True
+    build = dict(scope=self, policy=policy, paths=paths, plan=plan, bound_rows=bound_rows,
+     occurrence_programme=occurrence_programme, native_programmes=[], surface_programmes=[],
+     parent_result=None, parent_basis_limits=None, parent_profile=None, parent_environment=None,
+     parent_native=None, parent_native_original=None, programme=None, context=None,
+     complete=False, complete_original=None, errors=[])
+    build['original'] = (build, self, policy, paths, plan, bound_rows,
+     occurrence_programme, build['native_programmes'], build['surface_programmes'], build['errors'])
+    self._ordinary_rp5a_source_build_v1 = self._ordinary_original_rp5a_source_build_v1 = build
+    try:
+     effects = self._ordinary_effect_programme_record_v1()
+     _f._preflight_require_v1(effects['paths'] is paths and effects['plan'] is plan
+      and effects['source'] is self.source and not effects['errors'],
+      'ORDINARY_R_SAME_COMPLETE_SELECTED_EFFECT_NAMES')
+     prospective = tuple(target['path'] for row in effects['rows'] for target in row['targets'])
+     for name in prospective:
+      _f._mapper_portable_relative_v1(name)
+     maxima = policy['maxima']
+     file_names = tuple(_f.Path(row['path']).relative_to(self.source.root).as_posix()
+      for row in self.source.rows if row['role'] == 'repository' and row['kind'] == 'file')
+     all_names = tuple(dict.fromkeys((*file_names, *prospective)))
+     path_count = len(all_names)
+     inventory_bytes = sum(len(name.encode('utf-8')) + 1 for name in all_names)
+     path_bytes = max((len(name.encode('utf-8')) for name in all_names), default=0)
+     _f._preflight_require_v1(0 < path_count <= maxima['namespace_names']
+      and 0 < path_bytes <= maxima['path_bytes'] and inventory_bytes > 0,
+      'ORDINARY_R_PRE_C_COMPLETE_ORIGINAL_NAME_GEOMETRY')
+     status_bound = path_count * (3 + 2 * (path_bytes + 1))
+     stdout_bound = max(maxima['source_bytes'], status_bound, inventory_bytes, 1025, 65)
+     basis_limits = MappingProxyType(dict(stdout_bytes_per_call=stdout_bound,
+      status_record_limit=path_count, path_byte_limit=path_bytes,
+      source_byte_limit=maxima['source_bytes'], manifest_node_limit=maxima['metadata_nodes'],
+      manifest_command_limit=maxima['manifest_commands'],
+      manifest_argument_limit=maxima['manifest_arguments']))
+     prefix = resource['rp5a_parent_allocation']
+     _f._preflight_require_v1(type(prefix) is dict and set(prefix) ==
+      {'output_bytes', 'scratch_bytes', 'readback_bytes', 'original'}
+      and prefix['original'] == (prefix, policy,
+       tuple((key, value) for key, value in prefix.items() if key != 'original'))
+      and all(type(prefix[key]) is int and prefix[key] > 0
+       for key in ('output_bytes', 'scratch_bytes', 'readback_bytes'))
+      and prefix['scratch_bytes'] >= stdout_bound + maxima['stderr_bytes']
+      and prefix['output_bytes'] >= inventory_bytes + maxima['source_bytes']
+      and prefix['readback_bytes'] >= prefix['output_bytes'],
+      'ORDINARY_R_ORIGINAL_PREFIX_SUBALLOCATION_NOT_WHOLE_CAP')
+     parent_root = paths.process_root / 'rp5a-parent-basis'
+     self._ordinary_factory_call_v1(_f.os.mkdir, parent_root, 0o700)
+     parent_environment = self._ordinary_rp5a_git_environment_v1()
+     parent_profile = _f._Rp5aScanProfile(paths.run_id, 1, str(paths.repo_root), str(parent_root),
+      (), path_count, inventory_bytes, (), '/usr/bin/git', '/usr/bin/git', 'git',
+      tuple(parent_environment.items()), prefix['output_bytes'], prefix['scratch_bytes'],
+      maxima['stderr_bytes'], prefix['readback_bytes'], policy['original_cutoffs'][1],
+      maxima['parent_invocations'])
+     parent_ledger = _f._ScanReservationLedger(parent_profile)
+     native = dict(entry=None, profile=parent_profile, basis=None, ledger=parent_ledger,
+      role='PARENT_BASIS', parent=self._ordinary_controller_receiver_v1)
+     native['original'] = (native, self, None, parent_profile, None, parent_ledger,
+      'PARENT_BASIS', native['parent'])
+     build['parent_basis_limits'] = basis_limits
+     build['parent_profile'] = parent_profile
+     build['parent_environment'] = tuple(parent_environment.items())
+     build['parent_native'] = native
+     build['parent_native_original'] = native['original']
+     build['native_programmes'].append(native)
+     self._ordinary_register_rp5a_capture_ledger_v1(parent_ledger, native)
+     parent = runner._ordinary_rp5a_acquire_parent_basis_v1(self, parent_ledger,
+      basis_limits=basis_limits, check_candidate=self._ordinary_rp5a_parent_source_check_v1)
+     build['parent_result'] = parent
+     branch_control = '.git/refs/heads/' + parent['branch']
+     _f._mapper_portable_relative_v1(branch_control)
+     profile_count = sum(1 + int(role == 'SCANNER') for _, _, _, role in selected)
+     limits = _f._ScanRunReadLimits(maxima['metadata_bytes'], maxima['metadata_nodes'],
+      maxima['metadata_depth'], profile_count)
+     programme = dict(scope=self, source=self.source, census=self.source.census,
+      paths=paths, plan=plan, occurrences=(), parent_profile=parent_profile,
+      parent_basis_limits=basis_limits, read_limits=limits,
+      deadline_ns=policy['original_cutoffs'][1], policy=policy)
+     rows = []
+     for entry, execution, position, role in selected:
+      actual = self._ordinary_programme_for_entry_v1(entry)
+      _f._preflight_require_v1(actual['entry'] is entry
+       and actual['execution_entry'] is execution and actual['original_position'] == position
+       and actual['deadline_ns'] == policy['original_cutoffs'][1],
+       'ORDINARY_R_ORIGINAL_SELECTED_NATIVE_OCCURRENCE')
+      fields = ('rp5a_reader_output_bytes', 'rp5a_reader_scratch_bytes', 'rp5a_reader_readback_bytes',
+       'rp5a_scanner_output_bytes', 'rp5a_scanner_scratch_bytes', 'rp5a_scanner_readback_bytes',
+       'rp5a_candidate_read_bytes', 'rp5a_frame_scratch_bytes', 'rp5a_frame_reread_bytes')
+      _f._preflight_require_v1(all(type(actual.get(key)) is int and 0 <= actual[key] < 1 << 63
+       for key in fields)
+       and all(actual[key] > 0 for key in fields if 'scanner' not in key)
+       and all((actual[key] > 0) is (role == 'SCANNER') for key in fields if 'scanner' in key)
+       and actual['rp5a_manager_fdinfo_records'] == maxima['manager_fdinfo_records']
+       and actual['rp5a_manager_fdinfo_bytes'] == maxima['manager_fdinfo_bytes']
+       and actual['rp5a_manager_borrow_fds'] == maxima['manager_borrow_fds'],
+       'ORDINARY_R_PRESELECTED_DISJOINT_ROLE_SUBALLOCATIONS')
+      if role == 'SCANNER':
+       originals = tuple(name for name in parent['inventory'] if policy['should_scan_path'](name))
+       names = tuple(dict.fromkeys((*originals, 'tools/run_validation_gates.py',
+        'tools/validation_scope_registry.py')))
+      else:
+       names = tuple(sorted(set((*policy['reader_names'], *policy['absent_names'],
+        *policy['fixed_controls'], branch_control))))
+      ancestors = {'.'}
+      for name in names:
+       parent_name = _f.Path(name).parent
+       while str(parent_name) != '.':
+        ancestors.add(parent_name.as_posix())
+        parent_name = parent_name.parent
+      names = tuple(dict.fromkeys((*names, *sorted(ancestors))))
+      _f._preflight_require_v1(len(names) <= maxima['namespace_names'],
+       'ORDINARY_R_COMPLETE_SELECTED_ROW_CARDINALITY')
+      selected_environment = self._ordinary_rp5a_git_environment_v1(actual['environment'])
+      cell = actual['runtime_path']
+      reader_root, scanner_root = cell / 'rp5a-reader', cell / 'rp5a-scanner'
+      _f._preflight_require_v1(type(cell) is type(_f.Path('/')) and cell.is_absolute()
+       and reader_root != scanner_root,
+       'ORDINARY_R_ORIGINAL_DISTINCT_NATIVE_RUNTIME_CELLS')
+      def profile_values(root, selected_role):
+       stem = 'rp5a_' + selected_role + '_'
+       return dict(run_id=paths.run_id, command_index=entry.command_index,
+        repo_root=str(paths.repo_root), scratch_root=str(root),
+        inventory_path_limit=path_count, inventory_utf8_limit=inventory_bytes,
+        git_executable='/usr/bin/git', search_executable='/usr/bin/git', search_engine='git',
+        child_environment=tuple(selected_environment.items()),
+        output_bytes=actual[stem + 'output_bytes'], scratch_bytes=actual[stem + 'scratch_bytes'],
+        stderr_bytes_per_call=maxima['stderr_bytes'], readback_bytes=actual[stem + 'readback_bytes'],
+        deadline_ns=actual['deadline_ns'], max_invocations=maxima['reader_invocations'])
+      wire = 3 if role == 'SCANNER' else 2
+      surface = dict(entry=entry, names=names, wire_version=wire, read_limits=limits,
+       candidate_read_bytes=actual['rp5a_candidate_read_bytes'],
+       deadline_ns=actual['deadline_ns'], role=role, source=self.source)
+      surface['original'] = (surface, self, entry, names, wire, limits,
+       surface['candidate_read_bytes'], surface['deadline_ns'], self.source)
+      build['surface_programmes'].append(surface)
+      row = dict(entry=entry, role=role, wire_version=wire, names=names,
+       reader_limits=profile_values(reader_root, 'reader'),
+       scanner_limits=profile_values(scanner_root, 'scanner') if wire == 3 else None,
+       read_limits=limits, payload_byte_limit=maxima['payload_bytes'] if wire == 3 else 0,
+       frame_scratch_bytes=actual['rp5a_frame_scratch_bytes'],
+       frame_reread_bytes=actual['rp5a_frame_reread_bytes'],
+       candidate_read_bytes=actual['rp5a_candidate_read_bytes'],
+       deadline_ns=actual['deadline_ns'], binding_byte_limit=maxima['metadata_bytes'],
+       fence_metadata_calls=actual['rp5a_fence_metadata_calls'],
+       fence_native_read_bytes=actual['rp5a_fence_native_read_bytes'],
+       input_scratch_root=paths.process_root / ('rp5a-input-' + str(entry.command_index)),
+       surface_programme=surface, rp5a_manager_fdinfo_records=maxima['manager_fdinfo_records'],
+       rp5a_manager_fdinfo_bytes=maxima['manager_fdinfo_bytes'],
+       rp5a_manager_borrow_fds=maxima['manager_borrow_fds'], source=self.source)
+      self._ordinary_factory_call_v1(_f.os.mkdir, row['input_scratch_root'], 0o700)
+      row['original'] = (row, self, programme,
+       tuple((key, value) for key, value in row.items() if key != 'original'))
+      rows.append(row)
+     programme['occurrences'] = tuple(rows)
+     programme['original'] = (programme, self, resource,
+      tuple((key, value) for key, value in programme.items() if key != 'original'))
+     build['programme'] = programme
+     self._ordinary_rp5a_programme_v1 = self._ordinary_original_rp5a_programme_v1 = programme
+     context = self._ordinary_bind_rp5a_source_v1(programme, parent)
+     build['context'] = context
+     build['complete_original'] = (build, programme, programme['original'],
+      tuple(build['native_programmes']), tuple(build['surface_programmes']),
+      parent, context, context['original'], _f._preflight_canonical_v1(context['table']))
+     build['complete'] = True
+     self._ordinary_rp5a_source_build_checked_v1()
+     for entry, execution, position, role in selected:
+      actual = self._ordinary_programme_for_entry_v1(entry)
+      _f._preflight_require_v1(self._ordinary_rp5a_environment_v1(entry, actual['environment'])
+       == actual['environment'], 'ORDINARY_R_ORIGINAL_PHASE_ENVIRONMENT_TYPES')
+     return context
+    except BaseException as error:
+     build['errors'].append(error)
+     if all(error is not prior for prior in self._ordinary_factory_errors_v1):
+      self._ordinary_factory_errors_v1.append(error)
+     raise
+
+
+
+
+def _facet_m_bind_rp5a_source_v1(self, source_programme, parent_result):
+ import tools.validation_reliability as _f
+ self.check()
+ resource = self._ordinary_resource_programme_v1
+ original = self._ordinary_original_resource_programme_v1
+ fields = {'scope', 'source', 'census', 'paths', 'plan', 'occurrences',
+  'parent_profile', 'parent_basis_limits', 'read_limits', 'deadline_ns', 'policy', 'original'}
+ _f._preflight_require_v1(resource is original[0] and tuple(resource.items()) == original[1]
+  and type(source_programme) is dict and set(source_programme) == fields
+  and source_programme is self._ordinary_rp5a_programme_v1
+   is self._ordinary_original_rp5a_programme_v1
+  and source_programme['policy'] is resource['rp5a_source_policy']
+  and source_programme['scope'] is self and source_programme['source'] is self.source
+  and source_programme['census'] is self.source.census
+  and type(source_programme['paths']) is _f.ValidationRunPathsV1
+  and type(source_programme['plan']) is tuple and source_programme['plan']
+  and type(source_programme['occurrences']) is tuple
+  and type(source_programme['parent_profile']) is _f._Rp5aScanProfile
+  and source_programme['parent_basis_limits'] is
+   self._ordinary_rp5a_source_build_checked_v1()['parent_basis_limits']
+  and type(source_programme['read_limits']) is _f._ScanRunReadLimits
+  and type(source_programme['deadline_ns']) is int
+  and _f.time.monotonic_ns() < source_programme['deadline_ns'] <= self.execution_deadline_ns
+  and not hasattr(self, '_ordinary_rp5a_source_v1'),
+  'ORDINARY_R_ORIGINAL_PRE_C_SOURCE_SELECTED_PROGRAMME')
+ frozen = source_programme['original']
+ _f._preflight_require_v1(type(frozen) is tuple and len(frozen) == 4
+  and frozen[0] is source_programme and frozen[1] is self
+  and frozen[2] is resource and frozen[3] == tuple((key, value)
+   for key, value in source_programme.items() if key != 'original')
+  and parent_result is self._ordinary_rp5a_parent_basis_v1
+   is self._ordinary_original_rp5a_parent_basis_v1
+  and parent_result['original'] == (parent_result, self, parent_result['ledger'],
+   parent_result['programme'], source_programme['parent_basis_limits'], self.source,
+   parent_result['captures'], parent_result['errors'])
+  and parent_result['ledger'].profile is source_programme['parent_profile']
+  and parent_result['complete'] is True and not parent_result['errors']
+  and type(parent_result['edge_proof']) is tuple and len(parent_result['edge_proof']) == 5
+  and parent_result['edge_proof'][0] is parent_result
+  and parent_result['edge_proof'][1] is self
+  and parent_result['edge_proof'][2] is parent_result['source_operands']
+  and parent_result['edge_proof'][3] == tuple(parent_result['captures'][:3])
+  and parent_result['edge_proof'][4] == tuple((row, row['arguments'], row['native_record'], row['value'])
+   for row in parent_result['captures'][:3])
+  and all(row['returned'] and not row['errors'] and row['native_record']['capture_settled']
+   and row['native_record']['closed'] and not row['native_record']['pending']
+   for row in parent_result['captures'][:3])
+  and type(parent_result['inventory']) is tuple and type(parent_result['basis']) is _f._Rp5aReadBasisV1
+  and parent_result['basis'].historical_runner_bytes is parent_result['historical_runner']
+  and parent_result['basis'].baseline_ref == parent_result['baseline_ref'],
+  'ORDINARY_R_ACTUAL_ORIGINAL_NATIVE_BASIS_AND_SOURCE_ASSOCIATION')
+ self._ordinary_rp5a_capture_resources_v1()
+ paths, plan = source_programme['paths'], source_programme['plan']
+ roles = {entry.command_index: _f._rp5a_consumer_role_v1(entry.argv, paths.repo_root) for entry in plan}
+ _f._preflight_require_v1(len(plan) == len(set(entry.command_index for entry in plan))
+  and all(entry.command_index == index and entry.run_id == paths.run_id
+   and entry.phase == plan[0].phase and entry.cwd == str(paths.repo_root)
+   for index, entry in enumerate(plan, 1))
+  and {row['entry'].command_index for row in source_programme['occurrences']} ==
+   {index for index, role in roles.items() if role is not None}
+  and len(source_programme['occurrences']) == len({index for index, role in roles.items() if role is not None}),
+  'ORDINARY_R_COMPLETE_ORIGINAL_WHOLE_PLAN_ROLE_COVERAGE')
+ table = {}
+ rows = {}
+ for row in source_programme['occurrences']:
+  row_fields = {'entry', 'role', 'wire_version', 'names', 'reader_limits', 'scanner_limits',
+   'read_limits', 'payload_byte_limit', 'frame_scratch_bytes', 'frame_reread_bytes',
+   'candidate_read_bytes', 'deadline_ns', 'binding_byte_limit', 'input_scratch_root',
+   'fence_metadata_calls', 'fence_native_read_bytes',
+   'surface_programme', 'rp5a_manager_fdinfo_records', 'rp5a_manager_fdinfo_bytes',
+   'rp5a_manager_borrow_fds', 'source', 'original'}
+  _f._preflight_require_v1(type(row) is dict and set(row) == row_fields
+   and row['entry'] is plan[row['entry'].command_index - 1]
+   and row['role'] == roles[row['entry'].command_index]
+   and row['source'] is self.source and type(row['original']) is tuple
+   and len(row['original']) == 4 and row['original'][0] is row
+   and row['original'][1] is self and row['original'][2] is source_programme
+   and row['original'][3] == tuple((key, value) for key, value in row.items() if key != 'original')
+   and type(row['input_scratch_root']) is type(_f.Path('/'))
+   and row['input_scratch_root'] != paths.process_root
+   and row['input_scratch_root'].is_relative_to(paths.process_root)
+   and not row['input_scratch_root'].is_relative_to(paths.evidence_root)
+   and not paths.evidence_root.is_relative_to(row['input_scratch_root'])
+   and any(row['surface_programme'] is actual for actual in
+    self._ordinary_rp5a_source_build_checked_v1()['surface_programmes'])
+   and row['surface_programme']['entry'] is row['entry']
+   and row['surface_programme']['names'] is row['names']
+   and row['surface_programme']['wire_version'] == row['wire_version']
+   and row['surface_programme']['read_limits'] is row['read_limits']
+   and row['surface_programme']['candidate_read_bytes'] == row['candidate_read_bytes']
+   and row['surface_programme']['deadline_ns'] == row['deadline_ns']
+   and row['surface_programme']['role'] == row['role']
+   and type(row['rp5a_manager_fdinfo_records']) is int and row['rp5a_manager_fdinfo_records'] == 1024
+   and type(row['rp5a_manager_fdinfo_bytes']) is int and row['rp5a_manager_fdinfo_bytes'] == 65536
+   and type(row['rp5a_manager_borrow_fds']) is int and row['rp5a_manager_borrow_fds'] == 128,
+   'ORDINARY_R_FROZEN_PHASE_LIMITS_AND_ORIGINAL_SURFACE_ROLE')
+  key = str(row['entry'].command_index)
+  table[key] = {name: row[name] for name in ('role', 'wire_version', 'names', 'reader_limits',
+   'scanner_limits', 'payload_byte_limit', 'frame_scratch_bytes', 'frame_reread_bytes',
+   'candidate_read_bytes', 'deadline_ns', 'binding_byte_limit',
+   'fence_metadata_calls', 'fence_native_read_bytes')}
+  table[key].update(argv=row['entry'].argv, expected_inventory=parent_result['inventory'],
+   reader_basis=_f._rp5a_basis_projection_v1(parent_result['basis']),
+   read_limits=_f.asdict(row['read_limits']))
+  rows[key] = row
+ projected = _f._ordinary_rp5a_table_projection_v1(table, run_id=paths.run_id,
+  phase=plan[0].phase, command_count=len(plan), repo_root=paths.repo_root)
+ _f._preflight_require_v1(sum(1 + int(row['role'] == 'SCANNER') for row in source_programme['occurrences'])
+  <= source_programme['read_limits'].profile_limit,
+  'ORDINARY_R_WHOLE_HEADER_PROFILE_COUNT_ALLOCATION')
+ context = dict(scope=self, programme=source_programme, parent_result=parent_result,
+  paths=paths, plan=plan, table=projected, rows=rows, issued=[], errors=[])
+ context['original'] = (context, self, source_programme, parent_result, paths, plan,
+  projected, _f._preflight_canonical_v1(projected), rows, tuple(rows.items()), context['issued'], context['errors'])
+ self._ordinary_rp5a_source_v1 = self._ordinary_original_rp5a_source_v1 = context
+ return context
+
+
+def _facet_m_occurrence_record_v1(self, entry):
+ import tools.validation_reliability as _f
+ _f._preflight_require_v1(type(entry) is _f.CommandEvidencePlanEntry
+  and any(entry is row for row in self._ordinary_storage_original_v1['plan']),
+  'ORDINARY_ORIGINAL_PLANNED_ENTRY')
+ matches = [row for row in self._ordinary_occurrences_v1 if row['entry'] is entry]
+ _f._preflight_require_v1(len(matches) == 1, 'ORDINARY_ORIGINAL_OCCURRENCE_ASSOCIATION')
+ record = matches[0]
+ original = record['original']
+ _f._preflight_require_v1(original[0] is record and original[1] is self
+  and original[2] is entry and original[3] is record['programme']
+  and original[4] is record['argv'] and original[5] == record['cwd']
+  and original[6] is record['environment']
+  and tuple(record['environment'].items()) == original[7]
+  and original[8] is record['output_limits']
+  and tuple(record['output_limits'].items()) == original[9]
+  and record['deadline_ns'] == original[10]
+  and original[11] == (_f.os.getpid(), _f.threading.get_ident()),
+  'ORDINARY_NATIVE_OCCURRENCE_ORIGINAL_VALUES')
+ return record
+
+
+def _facet_m_select_source_occurrences_v1(self, paths, phase, V, P):
+ import tools.validation_reliability as _f
+ _f._preflight_require_v1(
+  getattr(self, '_ordinary_source_selection_attempted_v1', False) is False,
+  'ORDINARY_SOURCE_SELECTION_NO_RETRY',
+ )
+ self._ordinary_source_selection_attempted_v1 = True
+ self._ordinary_precursor_ready_v1()
+ runner = self._ordinary_runner_owner_v1
+ _f._preflight_require_v1(
+  runner is self._ordinary_original_runner_owner_v1
+  and self._ordinary_run_binding_v1 is self._ordinary_original_run_binding_v1
+  and not self._ordinary_run_binding_v1['bound']
+  and paths is self._ordinary_evidence_paths_v1
+  and paths is self._ordinary_original_evidence_paths_v1
+  and paths is runner._RUN_COMMANDS_ACTIVE_PATHS
+  and not hasattr(self, '_ordinary_source_selection_v1')
+  and not hasattr(self, '_ordinary_original_source_selection_v1'),
+  'ORDINARY_SOURCE_SELECTION_ORIGINAL_OWNER_REGISTRATION',
+ )
+ selection = runner._OrdinarySourceSelectionV1.__new__(runner._OrdinarySourceSelectionV1)
+ self._ordinary_source_selection_v1 = selection
+ self._ordinary_original_source_selection_v1 = selection
+ selection.__init__(self, paths, phase, V, P)
+ return selection
+
+
+def _facet_m_bind_run_v1(self, paths, plan, *, execution_plan):
+ import tools.validation_reliability as _f
+ self._ordinary_precursor_ready_v1()
+ binding = self._ordinary_run_binding_v1
+ _f._preflight_require_v1(not binding['bound'] and type(paths) is _f.ValidationRunPathsV1
+  and type(plan) is tuple and plan
+  and type(execution_plan) is tuple and len(execution_plan) == len(plan)
+  and all(type(row) is self._ordinary_runner_owner_v1.ExecutionPlanEntry
+   and entry.argv == row.execution_argv for row, entry in zip(execution_plan, plan)),
+  'ORDINARY_ORIGINAL_REGISTERED_EFFECTIVE_PLAN_ASSOCIATION')
+ source_selection = getattr(self, '_ordinary_source_selection_v1', None)
+ _f._preflight_require_v1(
+  type(source_selection) is self._ordinary_runner_owner_v1._OrdinarySourceSelectionV1
+  and source_selection is getattr(self, '_ordinary_original_source_selection_v1', None),
+  'ORDINARY_ORIGINAL_SELECTED_SOURCE_BINDING',
+ )
+ source_selection._guard()
+ selected_phase = source_selection._original[2]
+ _f._preflight_require_v1(type(selected_phase) is str
+  and selected_phase in self._ordinary_runner_owner_v1.ORDERED_PHASES,
+  'ORDINARY_ORIGINAL_SELECTED_SOURCE_PHASE')
+ _f._preflight_require_v1(
+  (binding['paths'] is None or binding['paths'] is paths)
+  and str(paths.repo_root) == self.repository
+  and self._ordinary_runner_owner_v1._RUN_COMMANDS_ACTIVE_PATHS is paths
+  and paths is self._ordinary_evidence_paths_v1
+  and paths is self._ordinary_original_evidence_paths_v1
+  and all(type(entry) is _f.CommandEvidencePlanEntry and entry.run_id == paths.run_id
+   and entry.cwd == self.repository and entry.phase == selected_phase
+   and entry.command_index == ordinal for ordinal, entry in enumerate(plan, 1)),
+  'ORDINARY_ONE_ORIGINAL_PUBLISHER_PLAN_BINDING')
+ source_selection.bind(paths, plan, execution_plan=execution_plan)
+ binding['paths'], binding['plan'], binding['bound'] = paths, plan, True
+ binding['original'] = (binding, paths, plan, self._ordinary_factory_owner_v1)
+ self._ordinary_bound_plan_v1 = plan
+ self._ordinary_bound_paths_v1 = paths
+ self._ordinary_execution_plan_v1 = execution_plan
+ self._ordinary_original_execution_plan_v1 = execution_plan
+ return binding
+
+
+def _facet_m_programme_for_entry_v1(self, entry):
+ import tools.validation_reliability as _f
+ if self._ordinary_phase_v1 == self._ordinary_runner_owner_v1.POST_VALIDATION_PHASE:
+  self._ordinary_ready_v1()
+ else:
+  self._ordinary_precursor_lineage_v1(ready=True)
+ matches = [(row, values) for row, values in self._ordinary_original_occurrence_program_v1
+  if row['entry'] is entry]
+ _f._preflight_require_v1(len(matches) == 1 and any(matches[0][0] is row
+  for row in self._ordinary_occurrence_program_v1)
+  and tuple(matches[0][0].items()) == matches[0][1],
+  'ORDINARY_ORIGINAL_FROZEN_OCCURRENCE_PROGRAMME')
+ selected = matches[0][0]
+ environments = [(row, environment, values) for row, environment, values
+  in self._ordinary_original_occurrence_environments_v1 if row is selected]
+ _f._preflight_require_v1(len(environments) == 1 and selected['environment'] is environments[0][1]
+  and tuple(selected['environment'].items()) == environments[0][2],
+  'ORDINARY_ORIGINAL_OCCURRENCE_ENVIRONMENT_VALUES')
+ return selected
+
+
+def _facet_m_compile_process_programme_v1(self, occurrence_program, fd_program):
+ import tools.validation_reliability as _f
+ selection = getattr(self, "_ordinary_source_selection_v1", None)
+ if (selection is not None and selection is self._ordinary_original_source_selection_v1
+   and selection._original[2] != self._ordinary_runner_owner_v1.POST_VALIDATION_PHASE):
+  return _f._ordinary_compile_selected_process_programme_v1(self, occurrence_program, fd_program)
+ _f._preflight_require_v1(type(occurrence_program) is tuple and len(occurrence_program) == 4
+  and tuple(row['entry'].command_index for row in occurrence_program) == (1, 2, 3, 4)
+  and tuple(row['original_position'] for row in occurrence_program) == (447, 448, 449, 450)
+  and type(fd_program) is dict and set(fd_program) == {'controller', 'fork_prefix',
+   'application', 'launcher', 'query', 'prefix_capture', 'manager_borrow', 'additional'}
+  and tuple(fd_program.items()) == (('controller', 1536), ('fork_prefix', 1536),
+   ('application', 64), ('launcher', 64), ('query', 64),
+   ('prefix_capture', 128), ('manager_borrow', 128), ('additional', 576))
+  and sum(fd_program.values()) == 4096,
+  'ORDINARY_SOURCE_FIXED_WHOLE_OWNER_FD_PARTITION')
+ import resource
+ soft, hard = self._ordinary_factory_call_v1(resource.getrlimit, resource.RLIMIT_NOFILE)
+ _f._preflight_require_v1(soft == hard == fd_program['controller'],
+  'ORDINARY_NATIVE_CONTROLLER_FD_HARD_LIMIT')
+ original_plan = self._ordinary_bound_plan_v1
+ required = {'entry', 'execution_entry', 'original_position', 'argv', 'environment', 'deadline_ns', 'startup_deadline_ns',
+  'stdout_bytes', 'stderr_bytes', 'tasks', 'nofile', 'startup_observation_limit',
+  'terminal_pending_observation_limit', 'runtime_bytes', 'runtime_inodes',
+  'runtime_path', 'bootstrap_fd_demand', 'application_fd_demand', 'git_controls'}
+ for row in occurrence_program:
+  entry = row['entry']
+  execution_entry = row['execution_entry']
+  _f._preflight_require_v1(type(row) is dict and set(row) == required
+   and type(entry) is _f.CommandEvidencePlanEntry and any(entry is item for item in original_plan)
+   and type(execution_entry) is self._ordinary_runner_owner_v1.ExecutionPlanEntry
+   and self._ordinary_execution_plan_v1[entry.command_index - 1] is execution_entry
+   and entry.argv == execution_entry.execution_argv and row['argv'] == entry.argv
+   and type(row['original_position']) is int
+   and row['original_position'] == 446 + entry.command_index
+   and entry.phase == 'post-validation' and entry.cwd == self.repository
+   and type(row['argv']) is tuple and row['argv'] and row['tasks'] == 1
+   and type(row['tasks']) is int and type(row['nofile']) is int
+   and row['nofile'] == fd_program['application']
+   and type(row['environment']) is dict
+   and all(type(k) is str and type(v) is str for k, v in row['environment'].items())
+   and type(row['deadline_ns']) is int and type(row['startup_deadline_ns']) is int
+   and _f.time.monotonic_ns() < row['startup_deadline_ns'] < row['deadline_ns']
+   <= self.execution_deadline_ns
+   and row['startup_observation_limit'] == row['terminal_pending_observation_limit'] == 32
+   and all(type(row[k]) is int and 0 < row[k] < 1 << 63 for k in
+    ('stdout_bytes', 'stderr_bytes',
+    'bootstrap_fd_demand', 'application_fd_demand', 'startup_observation_limit',
+    'terminal_pending_observation_limit'))
+   and row['runtime_bytes'] is None and row['runtime_inodes'] is None
+   and max(row['bootstrap_fd_demand'], row['application_fd_demand']) <= row['nofile'],
+   'ORDINARY_SOURCE_COMPILED_POST_OCCURRENCE')
+  if row['original_position'] == 447:
+   _f._preflight_require_v1(execution_entry.registered_argv[1:4] == ('-m', 'compileall', '-q')
+    and execution_entry.registered_argv[4:] == ('tools', 'tests', 'src')
+    and '-j' in row['argv'] and row['argv'][row['argv'].index('-j') + 1] == '1',
+    'ORDINARY_COMPILEALL_SINGLE_PROCESS_SOURCE_PROGRAMME')
+  elif row['original_position'] in (448, 449):
+   registered_diff = (('git', 'diff', '--check') if row['original_position'] == 448 else
+    ('git', 'diff', '--exit-code', '--', 'docs/master_plan/QTT_MasterPlan_Current.md'))
+   _f._preflight_require_v1(execution_entry.registered_argv == registered_diff
+    and row['argv'] == ('git', '--no-pager', 'diff', '--no-ext-diff', '--no-textconv',
+     '--ignore-submodules=none', '--submodule=short', *registered_diff[2:])
+    and type(row['git_controls']) is tuple and row['git_controls']
+    and all(type(pair) is tuple and len(pair) == 2 and
+     all(type(value) is str for value in pair) for pair in row['git_controls']),
+    'ORDINARY_DIFF_ORIGINAL_GIT_PROGRAMME')
+  else:
+   registered_atomic = (self.interpreter, '-c',
+    self._ordinary_runner_owner_v1.ATOMICROWS_BUNDLE_CHECK_SCRIPT)
+   _f._preflight_require_v1(execution_entry.registered_argv == registered_atomic
+    and row['argv'] == (registered_atomic[0], '-I', '-S', '-B', *registered_atomic[1:])
+    and row['git_controls'] == (), 'ORDINARY_LITERAL_ATOMIC_ROW_PROGRAMME')
+ self._ordinary_fd_program_v1 = fd_program
+ self._ordinary_original_fd_program_v1 = (fd_program, tuple(fd_program.items()))
+ self._ordinary_occurrence_program_v1 = occurrence_program
+ self._ordinary_original_occurrence_program_v1 = tuple((row, tuple(row.items())) for row in occurrence_program)
+ self._ordinary_original_occurrence_environments_v1 = tuple((row, row['environment'],
+  tuple(row['environment'].items())) for row in occurrence_program)
+ self._ordinary_occurrences_v1 = []
+ self._ordinary_original_occurrences_v1 = self._ordinary_occurrences_v1
+ self._ordinary_current_occurrence_v1 = None
+ self._ordinary_launch_prefix_v1 = None
+ return occurrence_program
+
+
+def _facet_m_nested_selection_v1(self, entry):
+ import tools.validation_reliability as _f
+ selection = self._ordinary_source_selection_v1
+ _f._preflight_require_v1(selection is self._ordinary_original_source_selection_v1,
+  'ORDINARY_NESTED_ORIGINAL_SELECTED_CONSTRUCTOR')
+ selection._guard()
+ effects = self._ordinary_effect_programme_record_v1()
+ rows = tuple(row for row in effects['rows'] if row['entry'] is entry)
+ _f._preflight_require_v1(len(rows) == 1, 'ORDINARY_NESTED_EXACT_SELECTED_SOURCE_ROW')
+ row = rows[0]
+ positions = tuple(index for index, selected in enumerate(selection._bound)
+  if selected is row['bound_row'])
+ _f._preflight_require_v1(len(positions) == 1,
+  'ORDINARY_NESTED_SAME_ORIGINAL_BOUND_ROW')
+ command = selection.rows[positions[0]][2]
+ matches = tuple(selected for constructor, commands, refs, values
+  in selection._pytest_manifest_rows if constructor[0] == selection.phase
+  for selected, original_command in zip(constructor[2], refs, strict=True)
+  if original_command is command)
+ mapper = _f._mapper_original_position_v1(row['execution'].registered_argv,
+  self._ordinary_bound_paths_v1.repo_root)
+ _f._preflight_require_v1(len(matches) <= 1 and not (matches and mapper is not None),
+  'ORDINARY_NESTED_UNAMBIGUOUS_ORIGINAL_SOURCE_CONSTRUCTOR')
+ if not matches and mapper is None: return None
+ native = _f._ordinary_native_source_programme_check_v1(self, row['native_programme'])
+ selected = (selection.pytest_source_for_bound_row(row['bound_row'])
+  if matches else row['bound_row'])
+ _f._preflight_require_v1(not matches or selected is matches[0],
+  'ORDINARY_NESTED_IDENTICAL_ORIGINAL_SHARD_OBJECT')
+ vector = row['execution'].execution_argv
+ _f._preflight_require_v1(type(vector) is tuple and vector == entry.argv
+  and vector[0] == self.interpreter and native['bound_row'] is row['bound_row']
+  and any(operand['path'] == 'tools/run_pytest_fresh_basetemp.py'
+   for operand in native['source_operands']),
+  'ORDINARY_NESTED_ORIGINAL_WRAPPER_VECTOR')
+ offset = 1
+ while offset < len(vector) and vector[offset] in ('-B', '-I', '-u'): offset += 1
+ _f._preflight_require_v1(offset < len(vector) and _f.Path(vector[offset]) in (
+  _f.Path('tools/run_pytest_fresh_basetemp.py'),
+  _f.Path(entry.cwd) / 'tools/run_pytest_fresh_basetemp.py'),
+  'ORDINARY_NESTED_SOURCE_SELECTED_WRAPPER_SCRIPT')
+ arguments = tuple(vector[offset + 1:])
+ _f._preflight_require_v1(mapper is None or arguments ==
+  _f._mapper_nested_pytest_args_v1(vector, _f.Path(entry.cwd)),
+  'ORDINARY_NESTED_EXACT_ORIGINAL_M_WRAPPER_SCOPE')
+ return row, arguments, selected
+
+
+def _facet_m_nested_gate_begin_v1(self, gate, occurrence):
+ # This is an association to the original gate, not a wire grant.
+ import tools.validation_reliability as _f
+ _f._preflight_require_v1(type(gate) is _f._NestedPytestEvidenceV1
+  and occurrence is self._ordinary_current_occurrence_v1
+  and occurrence is self._ordinary_occurrence_record_v1(gate.planned)
+  and not occurrence['dispatch_attempted'] and 'nested_evidence' not in occurrence
+  and gate.paths is self._ordinary_evidence_paths_v1
+   is self._ordinary_original_evidence_paths_v1
+  and self._ordinary_candidate_v1.active_occurrence == gate.planned.command_index
+  and dict(gate.limits) == dict(self._ordinary_candidate_v1.nested_evidence_limits[
+   gate.planned.command_index]), 'ORDINARY_NESTED_ORIGINAL_GATE_AND_C_ALLOCATION')
+ effects = self._ordinary_effect_programme_record_v1()
+ rows = tuple(row for row in effects['rows'] if row['entry'] is gate.planned)
+ _f._preflight_require_v1(len(rows) == 1, 'ORDINARY_NESTED_SAME_SOURCE_EFFECT_ROW')
+ native = _f._ordinary_native_source_programme_check_v1(self, rows[0]['native_programme'])
+ selection = self._ordinary_source_selection_v1
+ positive = self._ordinary_nested_selection_v1(gate.planned)
+ _f._preflight_require_v1(positive is not None and positive[0] is rows[0],
+  'ORDINARY_NESTED_POSITIVE_ACTUAL_SOURCE_ASSOCIATION')
+ selected = positive[2]
+ _f._preflight_require_v1(native['bound_row'] is rows[0]['bound_row']
+  and selected is self._ordinary_nested_selection_v1(gate.planned)[2]
+  and any(operand['path'] == 'tools/run_pytest_fresh_basetemp.py'
+   for operand in native['source_operands'])
+  and any(operand['path'] == 'tools/validation_reliability.py'
+   for operand in native['source_operands']), 'ORDINARY_NESTED_ACTUAL_WRAPPER_NATIVE_SOURCES')
+ cells = tuple(cell for cell in self._ordinary_original_runtime_cells_v1
+  if cell['entry'] is gate.planned and cell['programme'] is occurrence['programme'])
+ _f._preflight_require_v1(len(cells) == 1 and not cells[0]['handed']
+  and not cells[0]['slot']['closed'], 'ORDINARY_NESTED_ORIGINAL_UNRELEASED_CELL')
+ cell = cells[0]
+ row = dict(scope=self, gate=gate, occurrence=occurrence, candidate=self._ordinary_candidate_v1,
+  source=self.source, effects=effects, native=native, selected=selected,
+  cell=cell, paths=gate.paths, physical_root=cell['path'] / 'evidence', root_slot=None,
+  root_identity=None, occupied=(), occupied_rows=[], header=None, header_copy=None,
+  prepared=False, handed=False, handoff_attempted=False, physical_identity=None,
+  selected_name=None, physical_saved={}, transfer_rows=[], transferred=False,
+  transfer_attempted=False, child_slot=None, public_child_slot=None,
+  close_attempted=False, closed=False, errors=[])
+ row['original'] = (row, self, gate, occurrence, row['candidate'], self.source,
+  effects, native, selected, cell, gate.paths, row['physical_root'], row['occupied_rows'],
+  row['physical_saved'], row['transfer_rows'], row['errors'], self._ordinary_factory_owner_v1)
+ occurrence['nested_evidence'] = row
+ gate._ordinary_evidence_v1 = row
+ return row
+
+
+def _facet_m_nested_gate_record_v1(self, gate, *, settling=False):
+ import tools.validation_reliability as _f
+ row = gate._ordinary_evidence_v1
+ original = row['original']
+ _f._preflight_require_v1(type(original) is tuple and len(original) == 17
+  and original[0] is row and original[1] is self and original[2] is gate
+  and original[3] is row['occurrence'] and row['occurrence']['nested_evidence'] is row
+  and original[4] is row['candidate'] is self._ordinary_candidate_v1
+  and original[5] is row['source'] is self.source
+  and original[6] is row['effects'] is self._ordinary_effect_programme_record_v1()
+  and original[7] is row['native']
+  and _f._ordinary_native_source_programme_check_v1(self, row['native']) is row['native']
+  and original[8] is row['selected'] and original[9] is row['cell']
+  and any(row['cell'] is cell for cell in self._ordinary_original_runtime_cells_v1)
+  and original[10] is row['paths'] is gate.paths is self._ordinary_original_evidence_paths_v1
+  and original[11] == row['physical_root'] == row['cell']['path'] / 'evidence'
+  and original[12] is row['occupied_rows'] and original[13] is row['physical_saved']
+  and original[14] is row['transfer_rows'] and original[15] is row['errors']
+  and original[16] == self._ordinary_factory_owner_v1
+  and row['occurrence'] is self._ordinary_occurrence_record_v1(gate.planned)
+  and (type(settling) is bool and settling or not row['errors']),
+  'ORDINARY_NESTED_RETAINED_ORIGINAL_ASSOCIATION')
+ return row
+
+
+def _facet_m_nested_source_pyc_checked_v1(self):
+ import tools.validation_reliability as _f
+ policy = getattr(self, '_ordinary_policy_v1', None)
+ if policy is None or 'source_pyc' not in policy:
+  return None
+ record = policy['source_pyc']
+ original = record['original']
+ _f._preflight_require_v1(type(original) is tuple and len(original) == 13
+  and original[0] is record and original[1] is self
+  and original[2] is policy and policy['original_scope'] is self
+  and policy['original_factory'] is self._ordinary_factory_original_v1
+  and original[3] is self.source is record['source']
+  and original[4] is self._ordinary_effect_programme_record_v1()
+  and original[5] is self._ordinary_view_effect_record_v1()
+  and tuple(record['rows']) == original[6]
+  and record['declaration'] == original[7] and record['variable'] == original[8]
+  and original[9] == self._ordinary_factory_owner_v1 and record['planned'] == original[10]
+  and record['complete'] is True and not record['errors'],
+  'ORDINARY_NESTED_SOURCE_PYC_ORIGINAL_COMPLETED_OBSERVATION')
+ for row, native, frozen in original[12]:
+  _f._preflight_require_v1(any(row is item for item in original[4]['rows'])
+   and any(row is actual and native is value for actual, value in original[11])
+   and row['native_programme'] is native and native['original_items'] is frozen
+   and tuple((key, value) for key, value in native.items()
+    if key != 'original_items') == frozen
+   and native['check'] is native['original_check'] is _f._ordinary_native_source_programme_check_v1,
+   'ORDINARY_SHARED_SOURCE_PYC_UNCHANGED_ORIGINAL_NATIVE_PRODUCT')
+ for source_row, source_version, transfer, relative, slot, before, named, flags, after, current, aliases in record['rows']:
+  _f._preflight_require_v1(self.source.row_index.get(source_row['path']) is source_row
+   and tuple(self.source.post[source_row['path']]) == source_version
+   and any(transfer is item for item in self._ordinary_transfer_rows_v1)
+   and transfer['source_row'] is source_row and transfer['copied']
+   and transfer['compared'] and transfer['sealed'] and not transfer['errors']
+   and transfer['view_version'] == _f._scan_same_api_version(before)
+   and _f._scan_same_api_version(before) == _f._scan_same_api_version(after)
+   and _f._scan_same_api_version(named) == _f._scan_same_api_version(current)
+   and _f._same_observed_file(before, named) and _f._same_observed_file(after, current)
+   and flags & 16 and _f._mapper_slot_settled_v1(slot)
+   and aliases == (str(self._ordinary_view_path_v1 / relative),
+    str(_f.Path(self.repository) / relative)),
+   'ORDINARY_NESTED_SOURCE_PYC_EXACT_PROTECTED_ALIAS')
+ return record
+
+
+def _facet_m_phase_resource_begin_v1(self, resource):
+ import tools.validation_reliability as _f
+ _f._preflight_require_v1(type(self) is _f._LinuxPreflightScopeV1
+  and resource['scope'] is self and resource['source'] is self.source
+  and not hasattr(self, '_ordinary_phase_allocations_v1'),
+  'ORDINARY_PHASE_SINGLE_RESOURCE_REGISTRATION')
+ geometry, catalogue = _f._ordinary_phase_source_join_v1(self, resource)
+ runner = self._ordinary_runner_owner_v1
+ has_reader = any(row[3] is not None for row in geometry['rows'])
+ policy = (runner._ordinary_rp5a_source_policy_v1(self, self.source.census, self.source,
+  ceiling_programme=resource['ceiling_programme'],
+  original_cutoffs=resource['original_cutoffs']) if has_reader else None)
+ _f._preflight_require_v1(type(catalogue) is dict and catalogue['scope'] is self
+  and catalogue['source'] is self.source,
+  'ORDINARY_PHASE_SAME_SOURCE_CATALOGUE')
+ names = catalogue['prospective_names']
+ demands = (runner._ordinary_rp5a_source_demands_v1(policy, prospective_names=names)
+  if has_reader else None)
+ record = dict(scope=self, source=self.source, resource=resource,
+  geometry=geometry, catalogue=catalogue, rp5a_policy=policy,
+  rp5a_demands=demands, meter=self._ordinary_meter_v1,
+  owner=(_f.os.getpid(), _f.threading.get_ident()), rows=(), issuing=False,
+  issued=False, paths=None, plan=None, execution_plan=None,
+  effect_programme=None, pools=None, complement=None,
+  mapper_sources=None, mapper_demands=(), reservations=[], errors=[])
+ record['original'] = (record, self, self.source, resource, geometry,
+  catalogue, policy, demands, record['meter'], record['owner'],
+  record['reservations'], record['errors'])
+ self._ordinary_phase_allocations_v1 = self._ordinary_original_phase_allocations_v1 = record
+ resource['phase_allocations'] = record
+ if has_reader: resource['rp5a_source_policy'] = policy
+ resource['rp5a_parent_allocation'] = {}
+ return record
+
+
+def _facet_m_phase_allocation_record_v1(self, resource, *, issued=False):
+ import tools.validation_reliability as _f
+ record = getattr(self, '_ordinary_phase_allocations_v1', None)
+ _f._preflight_require_v1(type(record) is dict
+  and record is self._ordinary_original_phase_allocations_v1
+  and record is resource['phase_allocations']
+  and type(record['original']) is tuple and len(record['original']) == 12
+  and record['original'][0] is record and record['original'][1] is self
+  and record['original'][2] is self.source and record['original'][3] is resource
+  and record['original'][4] is record['geometry']
+  and record['original'][5] is record['catalogue']
+  and record['original'][6] is record['rp5a_policy']
+  and record['original'][7] is record['rp5a_demands']
+  and record['original'][8] is record['meter']
+  and record['original'][9] == record['owner']
+  and record['original'][10] is record['reservations']
+  and record['original'][11] is record['errors']
+  and record['meter'] is self._ordinary_meter_v1
+  and record['owner'] == (_f.os.getpid(), _f.threading.get_ident())
+  and type(record['rows']) is tuple and type(issued) is bool
+  and (not issued or record['issued']) and not record['errors'],
+  'ORDINARY_PHASE_ORIGINAL_PARTITION_RECORD')
+ if record['issued']:
+  original = record['issued_original']
+  _f._preflight_require_v1(type(original) is tuple and len(original) == 11
+   and original[0] is record and original[1] is record['paths']
+   and original[2] is record['plan'] and original[3] is record['execution_plan']
+   and original[4] is record['effect_programme'] and original[5] is record['rows']
+   and original[6] == tuple((row, tuple(row.items())) for row in record['rows'])
+   and original[7] is record['pools'] and original[8] == tuple(record['pools'].items())
+   and original[9] is record['complement']
+   and original[10] == tuple(record['complement']['limits'].items()),
+   'ORDINARY_PHASE_FROZEN_ISSUED_PARTITION')
+ return record
+
+
+def _facet_m_issue_phase_allocations_v1(self, paths, plan, execution_plan,
+     resource, effect_programme):
+    """Partition the actual remaining whole-owner quotas once.
+
+    SOURCE envelopes determine possible work. Selected quotas determine
+    what each original owner can spend, and actual acquired prefixes alone
+    determine consumption. A failure or one-byte-progress path can exhaust
+    a quota; it cannot reset, refund or create another partition.
+    """
+    import tools.validation_reliability as _f
+    record = self._ordinary_phase_allocation_record_v1(resource)
+    _f._preflight_require_v1(not record['issuing'] and not record['issued']
+     and paths is self._ordinary_bound_paths_v1 and plan is self._ordinary_bound_plan_v1
+     and execution_plan is self._ordinary_execution_plan_v1
+     and effect_programme is self._ordinary_effect_programme_record_v1()
+     and resource is self._ordinary_resource_programme_v1
+     and tuple(resource.items()) == self._ordinary_original_resource_programme_v1[1]
+     and self._ordinary_candidate_v1 is None,
+     'ORDINARY_PHASE_ONE_ISSUANCE_BEFORE_C')
+    record['issuing'] = True
+    record['paths'], record['plan'], record['execution_plan'] = paths, plan, execution_plan
+    record['effect_programme'] = effect_programme
+    try:
+     runner = self._ordinary_runner_owner_v1
+     selection = self._ordinary_source_selection_v1
+     bound = selection.bound_rows(paths, plan, execution_plan,
+      phase=record['geometry']['phase'])
+     _f._preflight_require_v1(type(bound) is tuple and bound
+      and len(bound) == len(plan) == len(effect_programme['rows'])
+      and len(bound) <= record['geometry']['count'],
+      'ORDINARY_PHASE_EXACT_ACTUAL_SOURCE_SELECTION')
+     rows, sources, roles = [], [], []
+     for (entry, execution, position), effect in zip(bound, effect_programme['rows'], strict=True):
+      native = _f._ordinary_native_source_programme_check_v1(self, effect['native_programme'])
+      _f._preflight_require_v1(native['bound_row'] is effect['native_programme']['bound_row']
+       and native['entry'] is effect['entry'] is entry
+       and native['execution'] is effect['execution'] is execution
+       and native['source_position'] == position
+       and (entry, execution, position) == native['bound_row'],
+       'ORDINARY_PHASE_IDENTICAL_SOURCE_NATIVE_REQUIREMENTS')
+      sources.append(native)
+      role = _f._rp5a_consumer_role_v1(execution.registered_argv, paths.repo_root)
+      roles.append(role)
+      rows.append(dict(source_position=position, native_programme=native,
+       stdout_bytes=native['stdout_minimum'], stderr_bytes=native['stderr_minimum'],
+       tasks=native['tasks'], nofile=native['nofile'],
+       bootstrap_fd_demand=native['bootstrap_fd_demand'],
+       application_fd_demand=native['application_fd_demand']))
+     mapper = getattr(self, '_ordinary_mapper_sources_v1', None)
+     mapper_demands = ()
+     selected_m = tuple(entry for entry in plan
+      if _f._mapper_original_position_v1(entry.argv, paths.repo_root) is not None)
+     if selected_m:
+      _f._preflight_require_v1(type(mapper) is dict and mapper['complete']
+       and mapper is self._ordinary_original_mapper_sources_v1
+       and mapper['scope'] is self and mapper['paths'] is paths
+       and mapper['plan'] is plan and not mapper['errors'],
+       'ORDINARY_PHASE_GENUINE_COMPLETE_M_SOURCE_PROGRAMME')
+      logical = tuple(paths.process_root / 'runtime' /
+       ('p' + str(occurrence['entry'].command_index)) / 'mapper-basis'
+       for occurrence in mapper['occurrences'])
+      mapper_demands = runner._ordinary_mapper_demands_v1(mapper,
+       record_byte_limit=32 << 20, basis_logical_paths=logical)
+     record['mapper_sources'], record['mapper_demands'] = mapper, mapper_demands
+     c_demand = self._ordinary_candidate_demand_checked_v1(effect_programme)
+     v_recipe = _f._ordinary_run_output_recipe_check_v1(self)
+     v_demand = v_recipe['demand'] if v_recipe is not None else None
+     limits = record['meter']['limits']; remaining = record['meter']['remaining']
+     if v_demand is not None:
+      _f._preflight_require_v1(v_demand['simultaneous_descriptors']
+       + self._ordinary_pending_close_calls_v1(None) <= limits['native_handle_limit'],
+       'ORDINARY_V_EXACT_NEW_HANDLE_COHORT_WITHIN_SHARED_CAP')
+     _f._preflight_require_v1(limits is resource['limits']
+      and all(type(remaining[key]) is int and remaining[key] >= 0 for key in limits),
+      'ORDINARY_PHASE_UNRESET_SHARED_REMAINING_POOLS')
+     demand = record['rp5a_demands']
+     r_count, scanners = sum(role is not None for role in roles), sum(role == 'SCANNER' for role in roles)
+     parent = demand['parent'] if r_count else None
+     prefix = resource['rp5a_parent_allocation']
+     _f._preflight_require_v1(type(prefix) is dict and not prefix,
+      'ORDINARY_PHASE_PARENT_ONE_ALLOCATED_OBJECT')
+     prefix.update(output_bytes=parent['output_bytes'] if parent else 0,
+      scratch_bytes=parent['scratch_bytes'] if parent else 0,
+      readback_bytes=max(parent['readback_bytes'], parent['output_bytes']) if parent else 0)
+     prefix['original'] = (prefix, record['rp5a_policy'],
+      tuple((key, value) for key, value in prefix.items() if key != 'original'))
+     parent_output = prefix['output_bytes'] if r_count else 0
+     parent_reads = prefix['readback_bytes'] if r_count else 0
+     required_app = sum(max(1, native['stdout_minimum']) + max(1, native['stderr_minimum'])
+      for native in sources)
+     r_output_min = (record['rp5a_policy']['maxima']['source_bytes']
+      + demand['geometry']['inventory_bytes']) if r_count else 0
+     r_outputs = r_count * r_output_min + scanners * r_output_min
+     output_total = resource['ceiling_programme']['output_partition']['delivered_bytes']
+     prefix_output = resource['ceiling_programme']['output_partition']['prefix_bytes']
+     observed_query = self.query.retained
+     app_total = resource['ceiling_programme']['output_partition']['application_bytes']
+     outside_outputs = _f._ordinary_output_owner_limits_v1(resource['ceiling_programme'],'RECEIVER')
+     administrative_total = outside_outputs['receiver_administration_bytes']
+     required_admin = observed_query + parent_output + r_outputs + 1048576
+     _f._preflight_require_v1(required_app <= app_total and required_admin <= administrative_total,
+      'ORDINARY_PHASE_SOURCE_MINIMA_WITHIN_ORIGINAL_OUTPUT_CATEGORIES')
+     app_share, app_rest = divmod(app_total-required_app, 2*len(rows))
+     for position,row in enumerate(rows):
+      row['stdout_bytes'] = max(1,row['stdout_bytes'])+app_share+(app_rest if position==0 else 0)
+      row['stderr_bytes'] = max(1,row['stderr_bytes'])+app_share
+     share,rest = divmod(administrative_total-required_admin, 1+r_count+scanners)
+     query_output = observed_query+1048576+share+rest
+     mapper_external = sum(row['target_read_bytes'] + row['basis_read_bytes']
+      + row['activation_ancestor_read_debit'] for row in mapper_demands)
+     frame_reads = sum((demand['scanner'] if role == 'SCANNER' else demand['reader'])['frame_reread_bytes']
+      for role in roles if role is not None)
+     ledger_reads = (r_count + scanners) * (r_output_min + share)
+     raw_reserved = parent_reads + mapper_external + frame_reads + ledger_reads
+     installation = self._ordinary_installation_record_v1(
+      self._ordinary_installation_copy_v1['install'])
+     _f._preflight_require_v1(installation is self._ordinary_original_installation_copy_v1
+      and installation['complete'] and not installation['errors']
+      and installation['scope'] is self,
+      'ORDINARY_PHASE_ACTUAL_COMPLETED_INSTALLATION_STAGE')
+     planned_install = resource['installation_programme']
+     whole = resource['raw_programme']
+     scope_future_read = (whole[-2] - whole[3] - planned_install['raw_programme'][0]
+      + sum(item['constructor_original_read_bytes'] + item['constructor_readback_bytes']
+       for item in mapper_demands))
+     scope_future_write = (whole[-1] - whole[4] - planned_install['raw_programme'][1]
+      + sum(item['constructor_raw_write_bytes'] for item in mapper_demands))
+     if v_demand is not None:
+      scope_future_read += v_demand['parent_read_bytes']
+     _f._preflight_require_v1(scope_future_read >= 0 and scope_future_write >= 0,
+      'ORDINARY_PHASE_DISJOINT_REMAINING_SOURCE_STAGES')
+     raw_available = (remaining['raw_read_byte_limit'] - c_demand['raw_read_bytes']
+      - scope_future_read - raw_reserved)
+     _f._preflight_require_v1(raw_available >= 0,
+      'ORDINARY_PHASE_ALL_ORIGINAL_RAW_OWNERS_WITHIN_SHARED_POOL')
+     q = raw_available // (2 * r_count) if r_count else 0
+     reader_minimum = (record['rp5a_policy']['scanner_grammar']['parent_full_fences']
+      * (demand['reader']['file_payload_byte_envelope']
+       + demand['reader']['directory_byte_envelope'])) if r_count else 0
+     _f._preflight_require_v1(all(q >= (demand['scanner']['parent_pair_bytes']
+      if role == 'SCANNER' else reader_minimum) for role in roles if role is not None),
+      'ORDINARY_PHASE_DISTINCT_PARENT_CHILD_CANDIDATE_MINIMUM')
+     control_depth = len((self.control/'binding').parents)+1
+     from tools.validation_scope_registry import _ordinary_scope_receiver_io_values_v1
+     mapper_calls = sum(item['reader_metadata_calls'] + item['activation_metadata_calls']
+      for item in mapper_demands)
+     mapper_control = sum(item['activation_record_read_bytes'] for item in mapper_demands)
+     r_native = sum(demand['receiver']['possible_fence_native_read_bytes']
+      for role in roles if role == 'SCANNER')
+     app_io_reads, app_io_calls, r_io_reads, r_io_calls, external_control, base_external_calls = (
+      _ordinary_scope_receiver_io_values_v1(len(rows), tuple(roles),
+       record['rp5a_policy']['maxima'] if r_count else {}, control_depth,
+       mapper_calls, mapper_control, r_native))
+     old_native = resource['native_demand']
+     installation_native = planned_install['native_programme']
+     scope_future_calls = max(0,old_native[0]-installation_native[0])
+     scope_future_native_read = max(0,old_native[4]-installation_native[2])
+     scope_future_metadata_read = max(0,old_native[1]-installation_native[2])
+     if v_demand is not None:
+      scope_future_calls += v_demand['metadata_minimum']
+      scope_future_native_read += v_demand['native_control_read_bytes']
+      _f._preflight_require_v1(v_demand['native_control_calls']
+       <= remaining['native_control_call_limit'] - c_demand['native_control_calls']
+        - max(0,old_native[3]-installation_native[1])
+       and v_demand['native_control_write_bytes']
+       <= remaining['native_control_write_limit'] - c_demand['native_control_write_bytes']
+        - max(0,old_native[5]-installation_native[3]),
+       'ORDINARY_V_NATIVE_FIXED_STRUCTURES_WITHIN_ORIGINAL_POOLS')
+     r_calls_available = (remaining['metadata_call_limit']
+      - c_demand['metadata_calls']-scope_future_calls-base_external_calls)
+     _f._preflight_require_v1(r_calls_available >= 0
+      and external_control <= remaining['native_control_read_limit']
+       - c_demand['native_control_read_bytes']-scope_future_native_read
+      and external_control <= remaining['metadata_read_limit']
+       - c_demand['metadata_read_bytes']-scope_future_metadata_read,
+      'ORDINARY_PHASE_DISTINCT_APPLICATION_R_M_IO_INTERSECTIONS')
+     calls = r_calls_available//max(1,r_count)
+     r_raw_write = parent_output + r_outputs + (r_count + scanners) * share + sum(
+      (demand['scanner'] if role == 'SCANNER' else demand['reader'])['frame_scratch_bytes']
+      for role in roles if role is not None)
+     _f._preflight_require_v1(r_raw_write <= remaining['raw_write_byte_limit']
+      - c_demand['raw_write_bytes'] - scope_future_write,
+      'ORDINARY_PHASE_DISTINCT_FRAME_AND_LEDGER_WRITE_POOL')
+     for row, role in zip(rows, roles, strict=True):
+      if role is not None:
+       selected = demand['scanner'] if role == 'SCANNER' else demand['reader']
+       reader_output = r_output_min + share
+       row.update(rp5a_reader_output_bytes=reader_output,
+        rp5a_reader_scratch_bytes=demand['reader']['scratch_bytes'],
+        rp5a_reader_readback_bytes=reader_output,
+        rp5a_scanner_output_bytes=reader_output if role == 'SCANNER' else 0,
+        rp5a_scanner_scratch_bytes=selected['scratch_bytes'] if role == 'SCANNER' else 0,
+        rp5a_scanner_readback_bytes=reader_output if role == 'SCANNER' else 0,
+        rp5a_candidate_read_bytes=q, rp5a_frame_scratch_bytes=selected['frame_scratch_bytes'],
+        rp5a_frame_reread_bytes=selected['frame_reread_bytes'],
+        rp5a_fence_metadata_calls=calls,
+        rp5a_fence_native_read_bytes=demand['receiver']['possible_fence_native_read_bytes']
+         if role == 'SCANNER' else 0,
+        rp5a_manager_fdinfo_records=1024, rp5a_manager_fdinfo_bytes=65536,
+        rp5a_manager_borrow_fds=128)
+      row['original'] = (row, tuple(row.items()))
+     r_raw_read = raw_reserved + 2 * r_count * q
+     external = dict(raw_read_byte_limit=r_raw_read, raw_write_byte_limit=r_raw_write,
+      metadata_call_limit=base_external_calls+r_count * calls,
+      metadata_read_limit=external_control, native_control_read_limit=external_control)
+     complementary = {key: remaining[key] - external.get(key, 0) for key in limits}
+     mapper_retained = sum(item['activation_retained_debit'] for item in mapper_demands)
+     _f._preflight_require_v1(mapper_retained <= complementary['raw_retained_byte_limit'],
+      'ORDINARY_PHASE_DISTINCT_M_RETAINED_RESERVATION')
+     complementary['raw_retained_byte_limit'] -= mapper_retained
+     _f._preflight_require_v1(complementary['raw_read_byte_limit'] >= c_demand['raw_read_bytes']+scope_future_read
+      and complementary['raw_write_byte_limit'] >= c_demand['raw_write_bytes']+scope_future_write
+      and complementary['raw_retained_byte_limit'] >= c_demand['raw_retained_bytes']
+      and complementary['metadata_call_limit'] >= c_demand['metadata_calls']+scope_future_calls,
+      'ORDINARY_PHASE_GENUINE_C_SCOPE_COMPLEMENT_MINIMA')
+     complement = dict(limits=complementary, remaining=dict(complementary),
+      observed={key: 0 for key in limits}, original_remaining=tuple(remaining.items()),
+      errors=[])
+     pools = dict(output_total=output_total, prefix_output=prefix_output,
+      outside_query_output=outside_outputs['parent_query_bytes'],
+      outer_suffix_output=outside_outputs['outer_suffix_bytes'],
+      query_output=query_output, parent_output=parent_output,
+      application_output=sum(row['stdout_bytes'] + row['stderr_bytes'] for row in rows),
+      rp5a_output=r_outputs + (r_count + scanners) * share,
+      external_raw_read=r_raw_read, external_raw_write=r_raw_write,
+      external_metadata_calls=base_external_calls+r_count*calls, external_native_read=external_control,
+      app_io_read_reservation=app_io_reads, r_io_read_reservation=r_io_reads,
+      mapper_control_read_reservation=mapper_control, fence_native_read_reservation=r_native,
+      mapper_activation_read=sum(row['activation_ancestor_read_debit'] for row in mapper_demands),
+      mapper_activation_retained=mapper_retained,
+      scope_future_read=scope_future_read, scope_future_write=scope_future_write,
+      run_output_programme=v_recipe, run_output_demand=v_demand,
+      completed_installation=installation, completed_installation_original=installation['original'])
+     _f._preflight_require_v1(sum(pools[key] for key in ('prefix_output','query_output',
+      'parent_output','application_output','rp5a_output','outside_query_output','outer_suffix_output')) == output_total,
+      'ORDINARY_PHASE_CLOSED_OUTPUT_PARTITION')
+     record['rows'], record['pools'], record['complement'] = tuple(rows), pools, complement
+     _f._preflight_require_v1(resource['rp5a_parent_allocation'] is prefix,
+      'ORDINARY_PHASE_IDENTICAL_PARENT_ALLOCATION')
+     self._ordinary_query_pool_refine_v1(paths, plan, execution_plan, resource,
+      effect_programme, record, tuple(sources), tuple(roles))
+     record['issued'] = True
+     record['issued_original'] = (record, paths, plan, execution_plan, effect_programme,
+      record['rows'], tuple((row, tuple(row.items())) for row in rows),
+      pools, tuple(pools.items()), complement, tuple(complementary.items()))
+     return record['rows']
+    except BaseException as error:
+     record['errors'].append(error)
+     raise
+
+
+def _facet_m_phase_complement_debit_v1(self, channel, amount):
+ import tools.validation_reliability as _f
+ record = getattr(self, '_ordinary_phase_allocations_v1', None)
+ if record is None or not record['issued']:
+  return
+ _f._preflight_require_v1(record is self._ordinary_original_phase_allocations_v1
+  and record['original'][0] is record and record['original'][1] is self
+  and record['meter'] is self._ordinary_meter_v1
+  and record['owner'] == (_f.os.getpid(), _f.threading.get_ident()),
+  'ORDINARY_PHASE_RETAINED_DELIVERY_OWNER')
+ balance = record['complement']
+ _f._preflight_require_v1(type(amount) is int and 0 <= amount < 1 << 63
+  and channel in balance['remaining'], 'ORDINARY_PHASE_EXACT_ACTUAL_PREFIX')
+ previous = balance['remaining'][channel]
+ balance['observed'][channel] += amount
+ balance['remaining'][channel] = max(0, previous - amount)
+ if amount > previous:
+  error = ValueError('ORDINARY_PHASE_COMPLEMENT_EXHAUSTED', channel,
+   previous, amount, balance['observed'][channel], balance['limits'][channel])
+  balance['errors'].append(error)
+  record['errors'].append(error)
+  raise error
+
+
+def _facet_m_phase_mapper_reserve_v1(self, owned, reads, retained):
+ import tools.validation_reliability as _f
+ record = self._ordinary_phase_allocation_record_v1(
+  self._ordinary_resource_programme_v1, issued=True)
+ candidate = self._ordinary_candidate_v1
+ _f._mapper_parent_record_v1(owned)
+ _f._preflight_require_v1(owned['candidate'] is candidate
+  and owned is candidate._original_mapper_custody_v1[owned['index']]
+  and owned['entry'] is candidate.plan[owned['index'] - 1]
+  and owned['plan'] is record['plan'] is candidate.plan
+  and type(reads) is int and reads > 0 and type(retained) is int and retained > 0,
+  'ORDINARY_PHASE_ACTUAL_M_ANCESTOR_RESERVATION')
+ selected = tuple(item for item in record['mapper_demands']
+  if item['entry'] is owned['entry'])
+ _f._preflight_require_v1(len(selected) == 1
+  and reads <= selected[0]['activation_ancestor_read_debit']
+  and retained <= selected[0]['activation_retained_debit']
+  and all(item[0] is not owned for item in record['reservations']),
+  'ORDINARY_PHASE_SOURCE_BOUND_ONE_NONREFUNDABLE_M_RESERVATION')
+ record['reservations'].append((owned, selected[0], reads, retained))
+ observed_reads = sum(item[2] for item in record['reservations'])
+ observed_retained = sum(item[3] for item in record['reservations'])
+ _f._preflight_require_v1(observed_reads <= record['pools']['mapper_activation_read']
+  and observed_retained <= record['pools']['mapper_activation_retained'],
+  'ORDINARY_PHASE_SHARED_M_RESERVATION_EXHAUSTED')
+ return selected[0]
+
+
+def _facet_m_phase_query_output_remaining_v1(self):
+ import tools.validation_reliability as _f
+ host = self._ordinary_host_preparation_v1
+ _f._preflight_require_v1(host is self._ordinary_original_host_preparation_v1
+  and host['scope'] is self and host['meter'] is self._ordinary_meter_v1
+  and host['ceiling_programme'] is host['original_ceiling_programme'],
+  'ORDINARY_QUERY_AUTHENTIC_ORIGINAL_OUTPUT_ALLOCATION')
+ caps = host['ceiling_programme']
+ association = self._ordinary_query_output_owner_v1
+ _f._preflight_require_v1(association is self._ordinary_original_query_output_owner_v1
+  and type(association) is tuple and len(association) == 6
+  and association[0] is self and association[1] is host
+  and type(association[2]) is dict and association[2]['phase'] == self._ordinary_phase_v1
+  and tuple(association[4].items()) == association[5]
+  and association[4] == _f._ordinary_output_owner_limits_v1(caps,association[3],
+   query_source=association[4].get('query_source')),
+  'ORDINARY_QUERY_SAME_ORIGINAL_OUTPUT_OWNER_TRANCHE')
+ remaining = association[4]['query_bytes'] - self.query.retained
+ record = getattr(self, '_ordinary_phase_allocations_v1', None)
+ if record is not None and record['issued']:
+  self._ordinary_phase_allocation_record_v1(record['resource'], issued=True)
+  remaining = min(remaining, record['pools']['query_output'] - self.query.retained)
+ return remaining
+
+
+def _facet_m_query_attempt_owner_v1(self):
+ import tools.validation_reliability as _f
+ association = getattr(self, '_ordinary_query_output_owner_v1', None)
+ if association is None:
+  return None
+ _f._preflight_require_v1(type(association) is tuple and len(association) == 6
+  and type(association[4]) is dict, 'ORDINARY_QUERY_ORIGINAL_ROLE_ASSOCIATION_SHAPE')
+ if 'query_source' not in association[4]:
+  return None
+ host = self._ordinary_host_preparation_v1
+ _f._preflight_require_v1(association is self._ordinary_original_query_output_owner_v1
+  and type(association) is tuple and len(association) == 6
+  and association[0] is self and association[1] is host
+  is self._ordinary_original_host_preparation_v1
+  and type(association[2]) is dict and association[2]['phase'] == self._ordinary_phase_v1
+  and tuple(association[4].items()) == association[5]
+  and association[4] == _f._ordinary_output_owner_limits_v1(host['ceiling_programme'],
+   association[3], query_source=association[4]['query_source'])
+  and self.query._ordinary_scope_v1 is self,
+  'ORDINARY_QUERY_SOURCE_ISSUED_ORIGINAL_ROLE')
+ return association
+
+
+def _facet_m_query_attempt_limit_v1(self):
+ import tools.validation_reliability as _f
+ association = self._ordinary_query_attempt_owner_v1()
+ return 65536 if association is None else association[4]['query_attempts']
+
+
+def _facet_m_query_role_debit_v1(self, *, settling=False):
+ import tools.validation_reliability as _f
+ association = self._ordinary_query_attempt_owner_v1()
+ if association is None:
+  return
+ role, quota, query = association[3], association[4], self.query
+ try:
+  _f._preflight_require_v1(query.attempts <= quota['query_attempts'],
+   'ORDINARY_QUERY_DISJOINT_SOURCE_ROLE_ATTEMPTS')
+  if role != 'PARENT':
+   return
+  commands = sum(row.get('query_role_completion') is not None
+   and row['query_role_completion'][0] == 'command'
+   and row['query_role_completion'][1] is row for row in query.command_supervisions)
+  responses = sum(row.get('query_role_completion') is not None
+   and row['query_role_completion'][0] == 'response'
+   and row['query_role_completion'][1] is row for row in query._ordinary_reads_v1)
+  maximum_commands, maximum_responses = quota['parent_source_envelope']
+  _f._preflight_require_v1(commands <= maximum_commands and responses <= maximum_responses,
+   'ORDINARY_PARENT_COMPLETE_SOURCE_OPERATION_COUNTS')
+  future = 4 * (maximum_commands - commands) + maximum_responses - responses
+  row = getattr(self, '_ordinary_controller_role_v1', None)
+  failed = (settling and row is not None
+   and row is self._ordinary_original_controller_role_v1
+   and row['scope'] is self and row['kill_attempted']
+   and row is self._ordinary_controller_record_v1(settling=True))
+  if failed:
+   native_terminal = row['observed_native_exit'] is not None
+   pending = 0 if native_terminal else 32 - row['terminal_pending_observations']
+   _f._preflight_require_v1(0 <= pending <= 32,
+    'ORDINARY_PARENT_UNCHANGED_PENDING_SOURCE_LIMIT')
+   future = 4 * (pending + (not native_terminal)
+    + (not row['stopped']) + 1)
+  else:
+   future += 4 * quota['live_controller_failure_commands'] + 1
+  _f._preflight_require_v1(query.attempts + future <= quota['query_attempts'],
+   'ORDINARY_PARENT_FUNDED_COMPLETE_SOURCE_AND_NATIVE_SETTLEMENT')
+ except BaseException as error:
+  if query.failure is None:
+   query.failure = error
+  raise
+
+
+def _facet_m_query_role_complete_v1(self, kind, record):
+ import tools.validation_reliability as _f
+ association = self._ordinary_query_attempt_owner_v1()
+ if association is None or association[3] != 'PARENT':
+  return
+ _f._preflight_require_v1(kind in ('command', 'response')
+  and 'query_role_completion' not in record,
+  'ORDINARY_PARENT_ONE_REAL_QUERY_OPERATION_COMPLETION')
+ query = self.query
+ if kind == 'command':
+  _f._preflight_require_v1(record is query._command_call_record
+   and any(record is item for item in query.command_supervisions)
+   and query._command_record_settled_v1(record)
+   and not record['pending'] and not record['stream_pending']
+   and not record['errors'] and record['receipt'] is query.last_command_receipt
+   and set(record['streams']) == {'stdout', 'stderr'}
+   and all(item['complete'] and not item['errors'] for item in record['streams'].values()),
+   'ORDINARY_PARENT_COMPLETE_COMMAND_AND_BOTH_EOF')
+ else:
+  _f._preflight_require_v1(any(record is item for item in query._ordinary_reads_v1)
+   and record['complete'] and record['recorded'] and not record['errors']
+   and _f._mapper_slot_settled_v1(record['slot']) and record['publication'] is not None,
+   'ORDINARY_PARENT_COMPLETE_RESPONSE_CLOSE_AND_PUBLICATION')
+ record['query_role_completion'] = (kind, record)
+
+
+def _facet_m_query_pool_checked_v1(self):
+ import tools.validation_reliability as _f
+ programme = getattr(self, '_ordinary_census_programme_v1', None)
+ if programme is None:
+  return None
+ host = self._ordinary_host_preparation_v1
+ caps = host['ceiling_programme']
+ if 'phase_source' not in caps:
+  return None
+ pool = programme['query_pool']
+ saved = pool['original']
+ _f._preflight_require_v1(type(pool) is dict and pool is self._ordinary_original_query_pool_v1
+  and programme is self._ordinary_original_census_programme_v1
+  and saved[0] is pool and saved[1] is self and saved[2] is self.query
+  and saved[3] is caps and saved[4] is caps['phase_source']
+  and saved[5] is pool['limits'] and saved[6] == tuple(pool['limits'].items())
+  and saved[7] is pool['geometry'] and saved[8] is pool['errors']
+  and saved[9] == self._ordinary_factory_owner_v1
+  and pool['owner'] == (_f.os.getpid(), _f.threading.get_ident())
+  and pool['limits']['whole_administrative_attempts'] == 65536
+  and pool['limits']['administrative_attempts'] == self._ordinary_query_attempt_limit_v1()
+  and pool['progress'] is self._ordinary_original_query_progress_v1,
+  'ORDINARY_QUERY_POOL_ORIGINAL_SOURCE_OWNER_AND_PROGRESS')
+ self._ordinary_host_retained_lineage_v1(host)
+ refined = pool['refinement']
+ if refined is not None:
+  _f._preflight_require_v1(refined is self._ordinary_original_query_refinement_v1
+   and refined[0] is pool and refined[1] is self
+   and refined[2] is self._ordinary_bound_paths_v1
+   and refined[3] is self._ordinary_bound_plan_v1
+   and refined[4] is self._ordinary_execution_plan_v1
+   and refined[5] is self._ordinary_resource_programme_v1
+   and refined[6] is self._ordinary_effect_programme_v1
+   and refined[7] is self._ordinary_phase_allocations_v1
+   and refined[8] is pool['demand']
+   and refined[9] == tuple(pool['demand'].items())
+   and refined[10] == pool['baseline']
+   and refined[11] is refined[6]['candidate_demand_arithmetic']
+   and (refined[7]['issuing'] or refined[7]['issued'])
+   and refined[7]['paths'] is refined[2] and refined[7]['plan'] is refined[3]
+   and refined[7]['execution_plan'] is refined[4]
+   and refined[7]['effect_programme'] is refined[6],
+   'ORDINARY_QUERY_POOL_SAME_SOURCE_PHASE_REFINEMENT')
+ else:
+  _f._preflight_require_v1(pool['demand'] is None and pool['baseline'] is None
+   and pool['progress'] == (0, 0, 0),
+   'ORDINARY_QUERY_POOL_NO_UNISSUED_COMPLETION_CREDIT')
+ return pool
+
+
+def _facet_m_query_pool_role_v1(self, pool):
+ import tools.validation_reliability as _f
+ host = self._ordinary_host_preparation_v1
+ handoff = getattr(self, '_ordinary_evidence_handoff_v1', None)
+ returned = getattr(self, '_ordinary_evidence_return_v1', None)
+ counts = (self.query.command_dispatches, len(self.query._ordinary_reads_v1))
+ if handoff is None:
+  _f._preflight_require_v1(self._ordinary_evidence_domain_v1 is host['prefix_continuous_evidence'],
+   'ORDINARY_QUERY_ORIGINAL_PREFIX_ROLE')
+  return ('PREFIX', counts)
+ _f._preflight_require_v1(handoff is self._ordinary_original_evidence_handoff_v1
+  and handoff['scope'] is self and handoff['query'] is self.query
+  and handoff['query_boundary'] is handoff['original_query_boundary']
+  and type(handoff['query_boundary']) is tuple and len(handoff['query_boundary']) == 2,
+  'ORDINARY_QUERY_ORIGINAL_HANDOFF_COUNTER_BOUNDARY')
+ start = handoff['query_boundary']
+ if returned is None:
+  if self._ordinary_evidence_domain_v1 is host['prefix_continuous_evidence']:
+   return ('PREFIX', counts)
+  _f._preflight_require_v1(self._ordinary_evidence_domain_v1 is host['continuous_evidence']
+   is host['original_continuous_evidence'] and handoff['copied'],
+   'ORDINARY_QUERY_ACTUAL_HOST_DOMAIN')
+  return ('HOST', tuple(value - before for value, before in zip(counts, start, strict=True)))
+ _f._preflight_require_v1(returned is self._ordinary_original_evidence_return_v1
+  and returned['scope'] is self and returned['prefix'] is host['prefix_continuous_evidence']
+  and returned['query_boundary'] is returned['original_query_boundary']
+  and self._ordinary_evidence_domain_v1 is host['prefix_continuous_evidence'],
+  'ORDINARY_QUERY_ACTUAL_ORIGINAL_PREFIX_RETURN')
+ finish = returned['query_boundary']
+ return ('PREFIX', tuple(before + value - terminal for before, value, terminal
+  in zip(start, counts, finish, strict=True)))
+
+
+def _facet_m_query_pool_remaining_v1(self, pool, *, settling=False):
+ import tools.validation_reliability as _f
+ demand = pool['demand']
+ if demand is None:
+  return (0, 0, 0)
+ commands, responses, bindings = pool['progress']
+ remaining_commands = demand['commands'] - commands
+ remaining_responses = demand['responses'] - responses
+ remaining_bindings = demand['bindings'] - bindings
+ _f._preflight_require_v1(min(remaining_commands, remaining_responses, remaining_bindings) >= 0,
+  'ORDINARY_QUERY_SOURCE_COMPLETION_NOT_AN_ATTEMPT')
+ optional = getattr(self.query, '_ordinary_optional_observation_v1', None)
+ current = getattr(self, '_ordinary_current_occurrence_v1', None)
+ failed_settlement = (settling and optional is None and current is not None
+  and current is self._ordinary_occurrence_record_v1(current['entry'])
+  and current['kill_attempted'])
+ suffix = 0 if failed_settlement else demand['failure_checks']
+ checks = (4 * remaining_commands + remaining_responses
+  + remaining_bindings * demand['binding_reads']
+  + demand['standalone_checks'] + demand['active_binding_prefix'] + suffix)
+ cells = 4 * remaining_commands + remaining_responses + remaining_bindings * demand['binding_reads']
+ if not failed_settlement:
+  cells += demand['failure_cells']
+ return (checks, cells, demand['future_response_reservation'])
+
+
+def _facet_m_query_pool_debit_v1(self, kind, *, settling=False):
+ import tools.validation_reliability as _f
+ pool = self._ordinary_query_pool_checked_v1()
+ if pool is None:
+  return
+ _f._preflight_require_v1(kind in ('check', 'command', 'response') and type(settling) is bool,
+  'ORDINARY_QUERY_POOL_TYPED_ACQUISITION')
+ role, (commands, responses) = self._ordinary_query_pool_role_v1(pool)
+ commands += kind == 'command'
+ responses += kind == 'response'
+ caps = self._ordinary_host_preparation_v1['ceiling_programme']['evidence_programme']
+ try:
+  if role == 'PREFIX':
+   _f._preflight_require_v1(commands <= caps['query_command_count']
+    and responses <= caps['native_response_count'],
+    'ORDINARY_QUERY_ORIGINAL_PREFIX_CELL_CEILINGS')
+  else:
+   physical = 4 * commands + responses
+   _f._preflight_require_v1(physical <= pool['limits']['cells'],
+    'ORDINARY_QUERY_SHARED_HOST_PHYSICAL_CELL_CEILING')
+  checks, future_cells, reservation = self._ordinary_query_pool_remaining_v1(pool,
+   settling=settling)
+  if pool['refinement'] is not None:
+   _f._preflight_require_v1(self.query.attempts + checks <= pool['limits']['administrative_attempts'],
+    'ORDINARY_QUERY_FUNDED_SOURCE_AND_ONE_LIVE_SETTLEMENT')
+   if role == 'HOST':
+    _f._preflight_require_v1(4 * commands + responses + future_cells
+     <= pool['limits']['cells'], 'ORDINARY_QUERY_FUNDED_FUTURE_PHYSICAL_CELLS')
+   optional = getattr(self.query, '_ordinary_optional_observation_v1', None)
+   if optional is not None:
+    _f._preflight_require_v1(optional[0] is self and optional[1] is self.query
+     and optional[2] is self._ordinary_current_occurrence_v1
+     and optional[3] is optional[2]['original']
+     and optional[4] in ('startup-repeat', 'terminal-repeat')
+     and optional[5] == (_f.os.getpid(), _f.threading.get_ident())
+     and not optional[2]['kill_attempted']
+     and self.query.remaining_output() >= reservation,
+     'ORDINARY_QUERY_OPTIONAL_ORIGINAL_LIVE_OWNER_AND_OUTPUT_SUFFIX')
+ except BaseException as error:
+  pool['errors'].append(error)
+  if self.query.failure is None:
+   self.query.failure = error
+  raise
+
+
+def _facet_m_query_pool_complete_v1(self, kind, record):
+ import tools.validation_reliability as _f
+ pool = self._ordinary_query_pool_checked_v1()
+ if pool is None or pool['refinement'] is None:
+  return
+ _f._preflight_require_v1(kind in ('command', 'response')
+  and 'query_pool_completion' not in record,
+  'ORDINARY_QUERY_ONE_REAL_OPERATION_COMPLETION')
+ query = self.query
+ if kind == 'command':
+  _f._preflight_require_v1(record is query._command_call_record
+   and any(record is row for row in query.command_supervisions)
+   and not record['pending'] and not record['stream_pending']
+   and query._command_record_settled_v1(record) and not record['errors']
+   and record['receipt'] is query.last_command_receipt
+   and set(record['streams']) == {'stdout', 'stderr'}
+   and all(row['complete'] and not row['errors'] for row in record['streams'].values()),
+   'ORDINARY_QUERY_COMPLETE_TERMINAL_STREAMS_AND_TRAILING_CHECK')
+ else:
+  _f._preflight_require_v1(any(record is row for row in query._ordinary_reads_v1)
+   and record['complete'] and record['recorded'] and not record['errors']
+   and _f._mapper_slot_settled_v1(record['slot'])
+   and record['publication'] is not None,
+   'ORDINARY_QUERY_COMPLETE_RESPONSE_VERSION_CLOSE_AND_PUBLICATION')
+ optional = getattr(query, '_ordinary_optional_observation_v1', None)
+ current = getattr(self, '_ordinary_current_occurrence_v1', None)
+ failure = current is not None and current['kill_attempted']
+ binding = getattr(query, '_ordinary_query_binding_progress_v1', None)
+ record['query_pool_completion'] = (pool, kind, record,
+  pool['refinement'], optional, binding, failure)
+ if optional is not None or failure or (kind == 'response' and binding is not None):
+  return
+ before = pool['progress']
+ after = (before[0] + (kind == 'command'), before[1] + (kind == 'response'), before[2])
+ _f._preflight_require_v1(after[0] <= pool['demand']['commands']
+  and after[1] <= pool['demand']['responses'],
+  'ORDINARY_QUERY_COMPLETION_WITHIN_ORIGINAL_SOURCE_OPERATIONS')
+ pool['progress'] = self._ordinary_original_query_progress_v1 = after
+
+
+def _facet_m_query_pool_refine_v1(self, paths, plan, execution_plan, resource,
+  effect_programme, allocation, native_sources, roles):
+ import tools.validation_reliability as _f
+ pool = self._ordinary_query_pool_checked_v1()
+ if pool is None:
+  return
+ _f._preflight_require_v1(pool['refinement'] is None and pool['progress'] == (0, 0, 0)
+  and allocation is self._ordinary_phase_allocations_v1
+  and allocation['issuing'] and not allocation['issued']
+  and resource is self._ordinary_resource_programme_v1
+  and effect_programme is self._ordinary_effect_programme_record_v1()
+  and tuple(resource.items()) == self._ordinary_original_resource_programme_v1[1]
+  and len(native_sources) == len(roles) == len(plan)
+  and self._ordinary_candidate_v1 is None,
+  'ORDINARY_QUERY_ONE_SOURCE_REFINEMENT_BEFORE_C')
+ lineage = self._ordinary_host_retained_lineage_v1(self._ordinary_host_preparation_v1)
+ common, root = lineage[5], _f.Path('/sys/fs/cgroup')
+ _f._preflight_require_v1(common.is_relative_to(root), 'ORDINARY_QUERY_SOURCE_NATIVE_TOPOLOGY')
+ depth = len(common.relative_to(root).parts) + 1
+ arithmetic = effect_programme['candidate_demand_arithmetic']
+ _f._preflight_require_v1(depth <= 32 and arithmetic['multiplicities'][6] == depth,
+  'ORDINARY_QUERY_SAME_CURRENT_C_BINDING_TOPOLOGY')
+ nested = sum(self._ordinary_nested_selection_v1(entry) is not None for entry in plan)
+ git = sum(len(native['tool_operands']) == 2 for native in native_sources)
+ from tools.validation_scope_registry import _ordinary_scope_query_source_values_v1
+ demand = _ordinary_scope_query_source_values_v1(len(plan), git,
+  sum(role is not None for role in roles), sum(role == 'SCANNER' for role in roles),
+  nested, depth, arithmetic['multiplicities'][5])
+ baseline = (self.query.attempts, self.query.command_dispatches,
+  len(self.query._ordinary_reads_v1), self.query.retained)
+ role, (commands, responses) = self._ordinary_query_pool_role_v1(pool)
+ _f._preflight_require_v1(role == 'HOST' and baseline[0] + demand['checks'] <= pool['limits']['administrative_attempts']
+  and 4 * commands + responses + demand['cells'] <= pool['limits']['cells']
+  and self.query.remaining_output() >= demand['future_response_reservation'],
+  'ORDINARY_QUERY_WHOLE_SOURCE_AND_FAILURE_WITHIN_ALREADY_ACQUIRED_ROLE')
+ pool['demand'], pool['baseline'] = demand, baseline
+ pool['refinement'] = self._ordinary_original_query_refinement_v1 = (
+  pool, self, paths, plan, execution_plan, resource, effect_programme,
+  allocation, demand, tuple(demand.items()), baseline, arithmetic,
+  tuple(native_sources), tuple(roles), lineage)
+
+
+def _facet_m_query_response_capacity_v1(self):
+ import tools.validation_reliability as _f
+ pool = self._ordinary_query_pool_checked_v1()
+ maximum = self._ordinary_host_preparation_v1['ceiling_programme']['evidence_programme']['native_response_count']
+ if pool is None:
+  return maximum
+ role, (commands, responses) = self._ordinary_query_pool_role_v1(pool)
+ available = ((maximum - responses) if role == 'PREFIX'
+  else pool['limits']['cells'] - 4 * commands - responses)
+ _f._preflight_require_v1(available >= 0, 'ORDINARY_QUERY_CURRENT_ROLE_RESPONSE_PREFIX_CAPACITY')
+ return len(self.query._ordinary_reads_v1) + available
+
+
+def _facet_m_core_evidence_request_v1(self, *, argv, cwd, run_id, phase, command_index,
+  evidence_root, output_limits):
+ import tools.validation_reliability as _f
+ settling = self._ordinary_effective_settlement_v1()
+ self._ordinary_continuous_evidence_v1(settling=settling)
+ query = self.query
+ query_record = getattr(query, '_command_call_record', None)
+ if (type(query_record) is dict and query_record is query._last_command_supervision
+   and query_record is query.command_supervisions[-1]
+   and query_record['pending'] and query_record['receipt'] is None
+   and (run_id, phase, command_index, tuple(argv), str(cwd)) ==
+    (query_record['run_id'], query_record['phase'], query_record['command_index'],
+    query_record['argv'], query_record['cwd'])
+   and _f.Path(evidence_root) == query.evidence_root):
+  producer, role = query_record, 'native-response'
+ elif getattr(self, '_ordinary_controller_attempted_v1', False):
+  producer = self._ordinary_controller_record_v1()
+  _f._preflight_require_v1((run_id, phase, command_index, tuple(argv), str(cwd), output_limits)
+   == (producer['run_id'], producer['phase'], 1, producer['argv'],
+    self.repository, producer['output_limits'])
+   and evidence_root == producer['evidence_root'] and not producer['dispatch_attempted'],
+   'ORDINARY_CONTROLLER_ORIGINAL_CORE_REQUEST')
+  role = 'controller-evidence'
+ else:
+  producer = self._ordinary_current_occurrence_v1
+  _f._preflight_require_v1(producer is self._ordinary_occurrence_record_v1(producer['entry'])
+   and (run_id, phase, command_index, tuple(argv), str(cwd), output_limits) ==
+    (producer['entry'].run_id, producer['entry'].phase, producer['entry'].command_index,
+    producer['argv'], producer['cwd'], producer['output_limits'])
+   and _f.Path(evidence_root) == self._ordinary_evidence_paths_v1.evidence_root
+   and not producer['dispatch_attempted'], 'ORDINARY_EXACT_APP_EVIDENCE_REQUEST')
+  role = 'run-evidence'
+ _f._preflight_require_v1(type(command_index) is int and command_index > 0
+  and type(output_limits) is dict and set(output_limits) ==
+   {'stdout_bytes', 'stderr_bytes', 'combined_output_bytes'}
+  and all(type(value) is int and 0 <= value < 1 << 63 for value in output_limits.values())
+  and output_limits['stdout_bytes'] + output_limits['stderr_bytes']
+   <= output_limits['combined_output_bytes'], 'ORDINARY_PRESELECTED_CORE_OUTPUT_BOUNDS')
+ _f._preflight_require_v1(not any(row['producer'] is producer for row in self._ordinary_core_outputs_v1),
+  'ORDINARY_ONE_CORE_RESERVATION_PER_ACTUAL_COMMAND')
+ return producer, role, settling
+
+
+def _facet_m_native_output_phase_checked_v1(self):
+ import tools.validation_reliability as _f
+ phase = self._ordinary_native_output_phase_v1
+ _f._preflight_require_v1(phase is self._ordinary_original_native_output_phase_v1
+  and type(phase) is dict and phase['scope'] is self and phase['active']
+  and not phase['finished'] and phase['owner'] == (_f.os.getpid(), _f.threading.get_ident())
+  and phase['cutoff'] == self.settlement_deadline_ns
+  and any(phase['core_output'] is row for row in self._ordinary_core_outputs_v1),
+  'ORDINARY_ACTUAL_NATIVE_OUTPUT_SETTLEMENT_OWNER')
+ original = phase['original']
+ row = phase['core_output']
+ _f._preflight_require_v1(type(original) is tuple and len(original) == 10
+  and original[0] is phase and original[1] is self and original[2] is row
+  and original[3] is phase['process'] and original[4] is phase['outcomes']
+  and original[5] is phase['pipes'] and original[6] == phase['reason']
+  and original[7] == phase['owner'] and original[8] == phase['cutoff']
+  and original[9] is phase['errors'] and row['process'] is phase['process']
+  and row['outcomes'] is phase['outcomes'] and row['pipes'] is phase['pipes'],
+  'ORDINARY_ORIGINAL_NATIVE_OUTPUT_SETTLEMENT_ASSOCIATIONS')
+ return phase
+
+
+def _facet_m_compile_cache_record_v1(self):
+ import tools.validation_reliability as _f
+ record = self._ordinary_compile_cache_v1
+ programme = record['programme']
+ original = programme['original']
+ _f._preflight_require_v1(record is self._ordinary_original_compile_cache_v1
+  and record['scope'] is self and record['owner'] == self._ordinary_factory_owner_v1
+  and original[0] is programme
+  and original[1] == tuple((key, value) for key, value in programme.items() if key != 'original')
+  and original[2] is programme['source_programme']
+  and original[3] == tuple((value[0], value[0]['path'], tuple(value[0]['version']), value[0]['logical_bytes'])
+   for value in programme['source_programme'])
+  and original[4] is programme['directories'] and original[5] is programme['runtime']
+  and original[6] is programme['bounds'] and original[7] == tuple(programme['bounds'].items())
+  and programme['scope'] is self and programme['paths'] is self._ordinary_bound_paths_v1
+  and programme['plan'] is self._ordinary_bound_plan_v1
+  and programme['entry'] is self._ordinary_bound_plan_v1[0]
+  and programme['execution_entry'] is self._ordinary_execution_plan_v1[0]
+  and programme['resource_programme'] is self._ordinary_resource_programme_v1
+  and programme['logical_root'] == programme['paths'].process_root / 'bytecode'
+  and programme['physical_root'] == self._ordinary_image_v1['mount_path'] / 'runtime' / 'p1' / 'bytecode'
+  and record['original'] == (record, self, programme, record['owner'], record['errors']),
+  'ORDINARY_COMPILE_CACHE_ORIGINAL_PROGRAMME')
+ install, copier, copied_root, interpreter, version, implementation, tag, magic, optimization = programme['runtime']
+ _f._preflight_require_v1(install is self._ordinary_installation_copy_v1
+  and install is self._ordinary_original_installation_copy_v1
+  and install['install'] is copier and install['root_slot'] is copied_root
+  and install['complete'] and not install['errors'] and not copied_root['closed']
+  and self._ordinary_installation_record_v1(copier,
+   settling=self._ordinary_effective_settlement_v1()) is install
+  and interpreter == self.interpreter and implementation == 'cpython'
+  and version == (3, 14, 6) and type(tag) is str and type(magic) is bytes
+  and len(magic) == 4 and optimization == 0,
+  'ORDINARY_COMPILE_CACHE_ACTUAL_COPIED_RUNTIME_ASSOCIATION')
+ if record['finalized']:
+  _f._preflight_require_v1(record['candidate'] is self._ordinary_candidate_v1
+   and record['sources'] is record['original_sources']
+   and record['source_originals'] is record['original_source_originals']
+   and type(record['sources']) is tuple and len(record['sources']) == len(record['source_originals'])
+   and all(saved[0] is row and saved == (row, row['source'], row['logical'], row['relative'], row['root'],
+    row['name_ordinal'], row['file_ordinal'], row['packed'], row['actual'], row['header'])
+    and row['complete'] and not row['errors']
+    for row, saved in zip(record['sources'], record['source_originals'], strict=True))
+   and record['interpreter']['complete'] and not record['interpreter']['errors'],
+   'ORDINARY_COMPILE_CACHE_ORIGINAL_FROZEN_ACTUAL_VIEW_HEADERS')
+ return record
+
+
+def _facet_m_bind_compile_cache_programme_v1(self, programme):
+ import tools.validation_reliability as _f
+ _f._preflight_require_v1(type(programme) is dict and programme['scope'] is self
+  and not hasattr(self, '_ordinary_compile_cache_v1'),
+  'ORDINARY_COMPILE_CACHE_SINGLE_ORIGINAL_PROGRAMME')
+ record = dict(scope=self, programme=programme, owner=self._ordinary_factory_owner_v1,
+  prepare_attempted=False, prepared=False, slot=None, identity=None, mount=None,
+  finalize_attempted=False, finalized=False, candidate=None, sources=None,
+  check_attempted=False, checked=False, occurrence=None, result=None,
+  interpreter=None, handed=False, handoff_attempted=False, mapping=None, errors=[])
+ record['original'] = (record, self, programme, record['owner'], record['errors'])
+ self._ordinary_compile_cache_v1 = self._ordinary_original_compile_cache_v1 = record
+ self._ordinary_compile_cache_record_v1()
+ return record
+
+
+def _facet_m_select_occurrence_v1(self, entry, *, argv, cwd, environment,
+  run_id, phase, command_index, deadline_ns, output_limits, launch_input=None):
+ import tools.validation_reliability as _f
+ self._ordinary_application_ready_v1()
+ self._ordinary_port_context_v1(self._ordinary_candidate_v1)
+ selected_phase = 'post-validation'
+ if phase != selected_phase:
+  runner = self._ordinary_runner_owner_v1
+  selection = self._ordinary_source_selection_v1
+  _f._preflight_require_v1(type(selection) is runner._OrdinarySourceSelectionV1
+   and selection is self._ordinary_original_source_selection_v1,
+   'ORDINARY_ORIGINAL_SELECTED_SOURCE_BINDING')
+  selection._guard()
+  selected_phase = selection._original[2]
+  _f._preflight_require_v1(type(selected_phase) is str
+   and selected_phase in runner.ORDERED_PHASES and phase == selected_phase,
+   'ORDINARY_ORIGINAL_SELECTED_SOURCE_PHASE')
+ _f._preflight_require_v1(type(entry) is _f.CommandEvidencePlanEntry
+  and any(entry is row for row in self._ordinary_storage_original_v1['plan'])
+  and launch_input is None and phase == selected_phase
+  and (run_id, phase, command_index) == (entry.run_id, entry.phase, entry.command_index)
+  and str(cwd) == entry.cwd == self.repository
+  and self._ordinary_current_occurrence_v1 is None
+  and not self._ordinary_effective_settlement_v1(), 'ORDINARY_POST_EXACT_OCCURRENCE_SELECTION')
+ choices = [row for row in self._ordinary_occurrence_program_v1 if row['entry'] is entry]
+ _f._preflight_require_v1(len(choices) == 1, 'ORDINARY_POST_SOURCE_PROGRAMME_COVERAGE')
+ programme = self._ordinary_programme_for_entry_v1(entry)
+ _f._preflight_require_v1(programme is choices[0], 'ORDINARY_ORIGINAL_PROGRAMME_ROW_IDENTITY')
+ if selected_phase != 'post-validation':
+  native_phase, tasks, syscall_filter = _f._ordinary_selected_policy_projection_v1(self, programme)
+  _f._preflight_require_v1(native_phase == selected_phase,
+   'ORDINARY_NATIVE_POLICY_EXACT_SELECTED_PHASE_AND_ROW')
+  role = _f._rp5a_consumer_role_v1(entry.argv, _f.Path(entry.cwd))
+  if role is not None:
+   context = self._ordinary_rp5a_source_context_v1()
+   selected = context['rows'].get(str(entry.command_index))
+   _f._preflight_require_v1(context['plan'] is self._ordinary_storage_original_v1['plan']
+    and type(selected) is dict and selected['entry'] is entry
+    and selected['role'] == role
+    and context['table'][str(entry.command_index)]['role'] == role
+    and not any(row['entry'] is entry for row in context['issued']),
+    'ORDINARY_R_ORIGINAL_COMPLETE_CONSTRUCTOR_BEFORE_SOURCE_USE')
+ self._ordinary_require_post_git_controls_v1(entry)
+ _f._preflight_require_v1(tuple(argv) == programme['argv']
+  and environment == programme['environment']
+  and deadline_ns == programme['deadline_ns'] <= self.execution_deadline_ns
+  and output_limits == dict(stdout_bytes=programme['stdout_bytes'],
+   stderr_bytes=programme['stderr_bytes'],
+   combined_output_bytes=programme['stdout_bytes'] + programme['stderr_bytes']),
+  'ORDINARY_POST_ORIGINAL_EFFECTIVE_PROJECTION')
+ record = dict(scope=self, entry=entry, programme=programme, argv=tuple(argv),
+  cwd=str(cwd), environment=environment, deadline_ns=deadline_ns, output_limits=output_limits,
+  name=self.name + 'p' + str(entry.command_index), pending=False, dispatch_attempted=False,
+  process=None, launcher=None, launcher_attempted=False, launcher_error=None,
+  launcher_slot=None, application_pidfd_slot=None, root_slot=None, cgroup_slot=None,
+  cgroup_event_slot=None, invocation=None, cgroup=None, identity=None,
+  loaded_profile=self._ordinary_policy_v1['profile_names'][entry.command_index],
+  binding=None, release_attempted=False, released=False, output_outcomes=None,
+  receipt=None, terminal=None, stop_attempted=False, kill_attempted=False, stopped=False,
+  startup_observations=0, terminal_pending_observations=0, errors=[])
+ record['actors_terminal'] = None
+ record['no_launch'] = None
+ record['recovery_attempted'] = False
+ record['retire_attempted'] = False
+ record['retired'] = False
+ record['original'] = (record, self, entry, programme, record['argv'], record['cwd'],
+  environment, tuple(environment.items()), output_limits, tuple(output_limits.items()),
+  deadline_ns, self._ordinary_storage_owner_v1)
+ self._ordinary_occurrences_v1.append(record)
+ self._ordinary_current_occurrence_v1 = record
+ return record
+
+
+def _facet_m_run_output_namespace_checked_v1(self, programme):
+ import tools.validation_reliability as _f
+ record = _f._ordinary_run_output_recipe_check_v1(self)
+ if record is None or not record['rows']:
+  _f._preflight_require_v1(programme is self._ordinary_resource_programme_v1['namespace_programme'],
+   'ORDINARY_V_UNCHANGED_ZERO_OUTPUT_NAMESPACE')
+  return programme
+ original = record['namespace_original']
+ _f._preflight_require_v1(type(original) is tuple and len(original) == 6
+  and original[0] is programme is record['namespace']
+  and original[1] is self._ordinary_resource_programme_v1['namespace_programme']
+  and original[2] == tuple(programme.items())
+  and original[4] is record['demand'] and original[5] == tuple(record['demand'].items()),
+  'ORDINARY_V_FROZEN_NAMESPACE_REFINEMENT')
+ return programme
+
+
+def _facet_m_run_output_native_check_v1(self, occurrence):
+ import tools.validation_reliability as _f
+ recipe = _f._ordinary_run_output_recipe_check_v1(self, settling=True)
+ proof = occurrence['run_output_native']
+ original = proof['original']
+ _f._preflight_require_v1(proof is occurrence['original_run_output_native']
+  and type(original) is tuple and len(original) == 7
+  and original[0] is proof and original[1] is occurrence
+  and original[2] is recipe and original[3] is occurrence['original_native_principal']
+   is occurrence['native_principal']
+  and original[4] is proof['rows'] and original[6] is proof['errors']
+  and proof['complete'] and not proof['errors']
+  and len(original[5]) == len(proof['rows'])
+  and all(item is kept[0] and tuple(item.items()) == kept[1]
+   and item['row'] is kept[2] and item['source_slot'] is kept[3] is item['row']['slot']
+   and tuple(item['native'].items()) == kept[4]
+   and tuple(item['mount'].items()) == kept[5]
+   and item['complete'] and not item['errors']
+   and _f._mapper_slot_settled_v1(item['namespace_slot'])
+   and any(item['row'] is row for row in recipe['rows'])
+   for item, kept in zip(proof['rows'], original[5], strict=True)),
+  'ORDINARY_V_ORIGINAL_COMPLETE_NATIVE_FILE_PROOF')
+ return proof
+
+
+def _facet_m_prepare_namespace_v1(self):
+ import tools.validation_reliability as _f
+ self._ordinary_factory_check_v1()
+ image = self._ordinary_host_output_image_v1
+ install = self._ordinary_installation_copy_v1
+ config = self._ordinary_parent_git_config_v1
+ cache = _f._ordinary_optional_compile_cache_v1(self)
+ _f._preflight_require_v1(image['mounted'] and not image['disposed']
+  and self.private_root == image['mount_path'] / 'root'
+  and not hasattr(self, '_ordinary_namespace_v1'),
+  'ORDINARY_NAMESPACE_SINGLE_REAL_ROOT_CONSTRUCTION')
+ bindings = self._ordinary_namespace_bindings_v1()
+ selected = [('/' + name, 'DIRECTORY') for name in
+  ('usr', 'lib', 'lib64', 'proc', 'sys', 'dev', 'tmp', 'var', 'var/tmp',
+  'home', 'root', 'run', 'run/user', 'run/credentials',
+  'dev/shm', 'dev/mqueue', 'dev/hugepages')]
+ selected.extend((logical, 'FILE' if logical == str(config['path']) else 'DIRECTORY')
+  for physical, logical in bindings)
+ selected.extend((str(row['runtime_path']), 'DIRECTORY')
+  for row in self._ordinary_occurrence_program_v1)
+ selected.extend(self._ordinary_effect_namespace_targets_v1())
+ if getattr(self, '_ordinary_effect_programme_v1', None) is not None:
+  selected.extend(self._ordinary_run_output_namespace_targets_v1())
+ known_targets = tuple(dict.fromkeys(selected))
+ programme = self._ordinary_resource_programme_v1['namespace_programme']
+ if getattr(self, '_ordinary_effect_programme_v1', None) is not None:
+  programme = self._ordinary_run_output_namespace_programme_v1(programme, known_targets)
+ original = programme['original']
+ directories, files = set(), set()
+ for path, kind in known_targets:
+  pieces = path[1:].split('/')
+  _f._preflight_require_v1(0 < len(pieces) <= 64 and kind in ('FILE', 'DIRECTORY'),
+   'ORDINARY_NAMESPACE_SOURCE_COMPILED_KNOWN_TARGET_SHAPE')
+  for ordinal in range(1, len(pieces) + (kind == 'DIRECTORY')):
+   directories.add('/' + '/'.join(pieces[:ordinal]))
+  if kind == 'FILE': files.add(path)
+ _f._preflight_require_v1(type(original) is tuple and len(original) == 9
+  and original[0] is programme and original[1] is programme['known_targets']
+  and original[2] is programme['directory_paths'] and original[3] is programme['file_paths']
+  and original[4:] == (programme['reserved_run_depth'], programme['reserved_directory_count'],
+   programme['reserved_file_count'], programme['allocated_block_bytes'], programme['inode_count'])
+  and programme['known_targets'] == known_targets
+  and all(type(programme[key]) is int for key in ('reserved_run_depth',
+   'reserved_directory_count', 'reserved_file_count', 'allocated_block_bytes', 'inode_count'))
+  and programme['directory_paths'] == tuple(sorted(directories))
+  and programme['file_paths'] == tuple(sorted(files))
+  and programme['reserved_run_depth'] == 64
+  and programme['reserved_directory_count'] == len(directories) + 64 + 1
+   + (1 if 'nested_evidence_programme' in self._ordinary_resource_programme_v1 else 0)
+  and programme['reserved_file_count'] == len(files)
+   + (1 if 'nested_evidence_programme' in self._ordinary_resource_programme_v1 else 0)
+  and len(files) == 1 + (len(self._ordinary_run_outputs_v1['rows'])
+   if getattr(self, '_ordinary_run_outputs_v1', None) is not None else 0)
+  and programme['inode_count'] == programme['reserved_directory_count'] + programme['reserved_file_count']
+  and programme['allocated_block_bytes'] == 4096 * programme['inode_count'],
+  'ORDINARY_NAMESPACE_ORIGINAL_PREALLOCATION_PROGRAMME')
+ nested = getattr(self, '_ordinary_nested_limit_product_v1', None)
+ if nested is not None:
+  _f._preflight_require_v1(nested is self._ordinary_original_nested_limit_product_v1
+   and nested['resource'] is self._ordinary_resource_programme_v1
+   and nested['limits'] and nested['paths'] is self._ordinary_bound_paths_v1,
+   'ORDINARY_NAMESPACE_SAME_ACTUAL_NESTED_SOURCE_PRODUCT')
+  paths = nested['paths']
+  selected.extend(((str(paths.process_root), 'DIRECTORY'),
+   (str(paths.evidence_root), 'DIRECTORY'), (str(paths.evidence_root / 'run.json'), 'FILE')))
+ if cache is not None:
+  selected.append((str(cache['programme']['logical_root']), 'DIRECTORY'))
+ targets = []
+ for path, kind in selected:
+  _f._linux_preflight_path_v1(path)
+  _f._preflight_require_v1(path != '/' and len(path[1:].split('/')) <= 64,
+   'ORDINARY_NAMESPACE_FINITE_TARGET_DEPTH')
+  previous = next((value for value in targets if value[0] == path), None)
+  _f._preflight_require_v1(previous is None or previous == (path, kind),
+   'ORDINARY_NAMESPACE_NO_TARGET_KIND_COLLISION')
+  if previous is None: targets.append((path, kind))
+ actual_directories = set(directories)
+ for path, kind in targets:
+  pieces = path[1:].split('/')
+  for ordinal in range(1, len(pieces) + (kind == 'DIRECTORY')):
+   actual_directories.add('/' + '/'.join(pieces[:ordinal]))
+ actual_files = {name for name, kind in targets if kind == 'FILE'}
+ _f._preflight_require_v1(len(actual_directories) + 1 <= programme['reserved_directory_count']
+  and len(actual_files) <= programme['reserved_file_count']
+  and not (actual_directories & actual_files), 'ORDINARY_NAMESPACE_ACTUAL_NAMES_WITHIN_ORIGINAL_RESERVATION')
+ record = dict(scope=self, image=image, root=self.private_root, install=install,
+  config=config, cache=cache, bindings=bindings, targets=tuple(targets),
+  programme=programme, known_targets=known_targets,
+  root_slot=None, identity=None, target_records=[], created=[],
+  inaccessible_root_slot=None, inaccessible_slot=None, inaccessible_info=None,
+  complete=False, errors=[])
+ record['original'] = (record, self, image, self.private_root, install, config,
+  cache, bindings, record['targets'], record['target_records'], record['created'], record['errors'], programme)
+ self._ordinary_namespace_v1 = self._ordinary_original_namespace_v1 = record
+ try:
+  parent = image['mount_slot']['returned_fd']
+  self._ordinary_factory_call_v1(_f.os.mkdir, 'root', 0o755, dir_fd=parent)
+  slot = self._ordinary_factory_slot_v1(self.private_root, 'ORDINARY_ROOT_DIRECTORY')
+  record['root_slot'] = slot
+  fd = self._ordinary_factory_open_v1(slot, 'root', _f.os.O_RDONLY | _f.os.O_DIRECTORY
+   | _f.os.O_NOFOLLOW | _f.os.O_CLOEXEC, parent_fd=parent)
+  self._ordinary_factory_call_v1(_f.os.fchmod, fd, 0o755)
+  info = self._ordinary_factory_call_v1(_f.os.fstat, fd)
+  named = self._ordinary_factory_call_v1(_f.os.stat, 'root', dir_fd=parent, follow_symlinks=False)
+  _f._preflight_require_v1(_f._same_observed_file(info, named) and _f.stat.S_ISDIR(info.st_mode)
+   and info.st_dev == image['filesystem']['root_identity'][0]
+   and (info.st_uid, info.st_gid, _f.stat.S_IMODE(info.st_mode)) == (0, 0, 0o755),
+   'ORDINARY_ACTUAL_OWNED_NAMESPACE_ROOT')
+  record['identity'] = (info.st_dev, info.st_ino)
+  for target in record['targets']:
+   self._ordinary_prepare_namespace_target_v1(record, target)
+  mask = _f.Path('/run/systemd/inaccessible/dir')
+  source_root = self._ordinary_factory_slot_v1(_f.Path('/'), 'ORDINARY_INACCESSIBLE_BORROW_ROOT')
+  record['inaccessible_root_slot'] = source_root
+  source_errors = []
+  try:
+   root_fd = self._ordinary_factory_open_v1(source_root, '/',
+    _f.os.O_PATH | _f.os.O_DIRECTORY | _f.os.O_NOFOLLOW | _f.os.O_CLOEXEC)
+   root_info = self._ordinary_factory_call_v1(_f.os.fstat, root_fd)
+   root_named = self._ordinary_factory_call_v1(_f.os.lstat, '/')
+   _f._preflight_require_v1(_f._same_observed_file(root_info, root_named)
+    and _f.stat.S_ISDIR(root_info.st_mode), 'ORDINARY_INACCESSIBLE_BORROW_ROOT_ASSOCIATION')
+   source_slot = self._ordinary_cache_open_relative_v1(source_root,
+    mask.as_posix().lstrip('/'), directory=True, path_only=True)
+   record['inaccessible_slot'] = source_slot
+   source_info = self._ordinary_factory_call_v1(_f.os.fstat, source_slot['returned_fd'])
+  except BaseException as error: source_errors.append(error)
+  finally:
+   if not source_root['close_attempted']:
+    try: self._ordinary_factory_close_v1(source_root, settling=True)
+    except BaseException as error: source_errors.append(error)
+  _f._scan_raise_errors(source_errors)
+  _f._preflight_require_v1(_f.stat.S_ISDIR(source_info.st_mode)
+   and (source_info.st_uid, source_info.st_gid, _f.stat.S_IMODE(source_info.st_mode)) == (0, 0, 0),
+   'ORDINARY_ACTUAL_NATIVE_INACCESSIBLE_BORROW')
+  record['inaccessible_info'] = source_info
+  record['complete'] = True
+ except BaseException as error:
+  record['errors'].append(error)
+  self._ordinary_factory_errors_v1.append(error)
+  raise
+ return record
+
+
+def _facet_m_namespace_record_v1(self):
+ import tools.validation_reliability as _f
+ record = self._ordinary_namespace_v1
+ original = record['original']
+ _f._preflight_require_v1(record is self._ordinary_original_namespace_v1
+  and type(original) is tuple and len(original) == 13
+  and original[0] is record and original[1] is self
+  and original[2] is record['image'] is self._ordinary_host_output_image_v1
+  and original[3] == record['root'] == self.private_root
+  and original[4] is record['install'] is self._ordinary_installation_copy_v1
+   is self._ordinary_original_installation_copy_v1
+  and original[5] is record['config'] is self._ordinary_parent_git_config_v1
+   is self._ordinary_original_parent_git_config_v1
+  and original[6] is record['cache'] is _f._ordinary_optional_compile_cache_v1(self)
+  and original[7] is record['bindings'] and original[8] is record['targets']
+  and original[9] is record['target_records'] and original[10] is record['created']
+  and original[11] is record['errors'] and original[12] is record['programme']
+  and record['image'] is self._ordinary_host_output_image_v1
+  and record['bindings'] == self._ordinary_namespace_bindings_v1()
+  and (self._ordinary_run_output_namespace_checked_v1(record['programme']) is record['programme']
+   if getattr(self, '_ordinary_effect_programme_v1', None) is not None
+   else record['programme'] is self._ordinary_resource_programme_v1['namespace_programme'])
+  and record['complete'] and not record['errors']
+  and len(record['target_records']) == len(record['targets'])
+  and all(row['complete'] and not row['errors'] for row in record['target_records'])
+  and not record['root_slot']['closed'] and not record['inaccessible_slot']['closed'],
+  'ORDINARY_NAMESPACE_ORIGINAL_COMPLETE_NATIVE_TARGETS')
+ return record
+
+
+def _facet_m_rp5a_protection_v1(self, record, *, mounts, credentials, actual_root):
+ import tools.validation_reliability as _f
+ material = self._ordinary_rp5a_material_v1(record)
+ if material is None or material[6].wire_version != 3:
+  return None
+ import fcntl
+ value, candidate, entry, generation = material[6], material[2], material[3], material[4]
+ _f._preflight_require_v1(record is self._ordinary_current_occurrence_v1
+  and record['process'] is self.process and entry is record['entry']
+  and not record['released'] and material[8] is not None
+  and _f._rp5a_consumer_role_v1(record['argv'], _f.Path(record['cwd'])) == 'SCANNER',
+  'ORDINARY_R_PROTECTION_SAME_ONLY_ACTIVE_WRITER_AND_C_BORROW')
+ observation = dict(scope=self, record=record, material=material, policy=self._ordinary_policy_v1,
+  mounts=mounts, credentials=credentials, root=actual_root, files=[],
+  unsupported=[], errors=[], projection=None, canonical=None, original=None)
+ record['rp5a_protection_observation'] = observation
+ policy = observation['policy']
+ source = policy['source']
+ _f._preflight_require_v1(policy['original_scope'] is self
+  and policy['original_factory'] is self._ordinary_factory_original_v1
+  and policy['loaded'] and not policy['unload_attempted'] and not policy['errors']
+  and any(source is item for item in policy['files']) and source['sealed'] and source['readback_complete']
+  and source['write_complete'] and not source['errors']
+  and _f._mapper_slot_settled_v1(source['writer']) and _f._mapper_slot_settled_v1(source['reader'])
+  and _f._scan_same_api_version(self._ordinary_factory_call_v1(_f.os.lstat, source['path'])) == source['version'],
+  'ORDINARY_R_PROTECTION_ACTUAL_SEALED_LOADED_POLICY_SOURCE')
+ loads = tuple(row for row in self._ordinary_administrative_records_v1
+  if row['purpose'] == 'LOAD_POLICY')
+ _f._preflight_require_v1(len(loads) == 1 and loads[0]['scope'] is self
+  and loads[0]['original'] is self._ordinary_factory_original_v1
+  and loads[0]['returned'] and loads[0]['error'] is None
+  and type(loads[0]['receipt']) is _f.CommandExecutionReceiptV1
+  and loads[0]['receipt'].argv == loads[0]['effective_argv']
+  and loads[0]['receipt'].native_exit_code == 0
+  and not _f._command_requires_process_retention_v1(loads[0]['receipt'])
+  and self.query.command_resources_settled_v1(),
+  'ORDINARY_R_PROTECTION_ORIGINAL_POLICY_LOADER_TERMINAL_RECEIPT')
+ complete_source = source['expected'].decode('ascii', 'strict')
+ start = 'profile ' + record['loaded_profile'] + ' flags=(attach_disconnected,mediate_deleted) {\n'
+ _f._preflight_require_v1(complete_source.count(start) == 1,
+  'ORDINARY_R_PROTECTION_EXACT_SELECTED_PROFILE_SOURCE')
+ offset = complete_source.index(start)
+ end = complete_source.find('\n}\n', offset)
+ _f._preflight_require_v1(end >= offset, 'ORDINARY_R_PROTECTION_COMPLETE_SELECTED_PROFILE_SOURCE')
+ selected_source = complete_source[offset:end + 3]
+ runtime = str(record['programme']['runtime_path'])
+ writes = _f._ordinary_rp5a_protection_profile_v1(selected_source, record['loaded_profile'], runtime=runtime)
+ if writes is None:
+  observation['unsupported'].append('CURRENT_PROFILE_SOURCE_GRAMMAR')
+  return None
+ anchors, effect_rules = self._ordinary_effect_native_exposure_v1(entry)
+ expected_files = tuple(str(_f.Path(self.repository) / path) for path, kind in effect_rules if kind == 'FILE')
+ expected_directories = tuple(str(_f.Path(self.repository) / path) for path, kind in effect_rules if kind == 'DIRECTORY')
+ _f._preflight_require_v1(writes[:2] == (expected_files, expected_directories)
+  and writes[2] == (runtime,), 'ORDINARY_R_PROTECTION_CURRENT_SOURCE_OWNED_WRITER_RULES')
+ for left, right in ((_f.Path(self.repository), _f.Path(runtime)),
+   (_f.Path(self.repository), self.control), (_f.Path(runtime), self.control)):
+  _f._preflight_require_v1(not left.is_relative_to(right) and not right.is_relative_to(left),
+   'ORDINARY_R_PROTECTION_CONTROL_RUNTIME_VIEW_NONOVERLAP')
+ frame = self._ordinary_rp5a_handoff_record_v1(record)
+ _f._preflight_require_v1(frame['original_input'] is value and frame['parent_fields'] is not None
+  and frame['source_original'] == (frame['parent_fields'], frame['handle_version'], frame['descriptor'])
+  and value.writer is not None and value.writer.closed and value.reader is not None and not value.reader.closed
+  and value.snapshot_descriptor is None and value.raw_descriptor is None and value.raw_handle_owner is None,
+  'ORDINARY_R_PROTECTION_ORIGINAL_READONLY_FRAME_AND_CLOSED_WRITER')
+ self._ordinary_factory_debit_v1('native_control_call')
+ frame_flags = self._ordinary_factory_call_v1(fcntl.fcntl, value.reader.fileno(), fcntl.F_GETFL)
+ self._ordinary_factory_debit_v1('native_control_read', 4)
+ held_frame = self._ordinary_factory_call_v1(_f.os.fstat, value.reader.fileno())
+ _f._preflight_require_v1(frame_flags & _f.os.O_ACCMODE == _f.os.O_RDONLY
+  and _f._scan_same_api_version(held_frame) == frame['handle_version'] == value.descriptor_version,
+  'ORDINARY_R_PROTECTION_SAME_READONLY_FRAME_DESCRIPTOR')
+ parent_mounts = _f._linux_preflight_mounts_v1(self.query.read('/proc/self/mountinfo'))
+ frame_mount = _f._ordinary_rp5a_protection_mount_v1(parent_mounts, value.path)
+ if (frame_mount is None or frame_mount['id'] != frame['parent_fields'][2]
+   or frame_mount['device'] != str(_f.os.major(held_frame.st_dev)) + ':' + str(_f.os.minor(held_frame.st_dev))):
+  observation['unsupported'].append('FRAME_PHYSICAL_MOUNT_ASSOCIATION')
+  return None
+ internal = _f.PurePosixPath(frame_mount['root']) / _f.PurePosixPath(str(value.path)).relative_to(
+  _f.PurePosixPath(frame_mount['path']))
+ frame_aliases = []
+ for mounted in mounts:
+  root = _f.PurePosixPath(mounted['root'])
+  if mounted['device'] == frame_mount['device'] and internal.is_relative_to(root):
+   alias = _f.PurePosixPath(mounted['path']) / internal.relative_to(root)
+   effective = _f._ordinary_rp5a_protection_mount_v1(mounts, alias)
+   if effective is not None and effective['id'] == mounted['id']:
+    frame_aliases.append(str(alias))
+ if frame_aliases:
+  observation['unsupported'].append(('FRAME_PATH_EXPOSED_IN_APPLICATION', tuple(frame_aliases)))
+  return None
+ root_slot = record['root_slot']
+ rows = tuple(row for row in value.candidate_files if row.kind == 'FILE')
+ repository = self._ordinary_factory_call_v1(_f.os.stat, self.repository.lstrip('/'),
+  dir_fd=root_slot['returned_fd'], follow_symlinks=False)
+ root_bindings = tuple(root for root in candidate._ordinary_disk_state_v1['roots']
+  if root['logical_path'] == _f.Path(self.repository))
+ _f._preflight_require_v1(len(root_bindings) == 1
+  and (repository.st_dev, repository.st_ino) == root_bindings[0]['root_identity'],
+  'ORDINARY_R_PROTECTION_ACTUAL_NATIVE_CANDIDATE_ROOT')
+ for row in rows:
+  slot = None
+  named = None
+  errors = []
+  selected = dict(row=row, slot=None, named=None, opened=None, after=None, closed=None, flags=None)
+  observation['files'].append(selected)
+  try:
+   logical = _f.Path(self.repository) / row.path
+   relative = str(logical).lstrip('/')
+   named = selected['named'] = self._ordinary_factory_call_v1(_f.os.stat, relative,
+    dir_fd=root_slot['returned_fd'], follow_symlinks=False)
+   _f._preflight_require_v1(_f._scan_file_identity(named) == row.content.source_identity
+    and _f.stat.S_IMODE(named.st_mode) == row.mode,
+    'ORDINARY_R_PROTECTION_ORIGINAL_C_FILE_PATH')
+   slot = selected['slot'] = self._ordinary_cache_open_relative_v1(root_slot, relative)
+   opened = selected['opened'] = self._ordinary_factory_call_v1(_f.os.fstat, slot['returned_fd'])
+   _f._preflight_require_v1(_f._scan_file_identity(opened) == _f._scan_file_identity(named),
+    'ORDINARY_R_PROTECTION_NOFOLLOW_SAME_NATIVE_FILE')
+   try:
+    flags = self._ordinary_native_v1.flags(slot['returned_fd'])
+    self._ordinary_factory_debit_v1('native_control_read', 4)
+   except OSError as unsupported:
+    if unsupported.errno not in (22, 25, 95):
+     raise
+    observation['unsupported'].append((row.path, unsupported))
+    flags = None
+   selected['flags'] = flags
+   coverage = _f._ordinary_rp5a_protection_kind_v1(logical, flags, mounts, writes)
+   if coverage is None:
+    observation['unsupported'].append((row.path, 'UNCOVERED_FILE_OR_ALIAS'))
+   selected['coverage'] = coverage
+   after = selected['after'] = self._ordinary_factory_call_v1(_f.os.fstat, slot['returned_fd'])
+   _f._preflight_require_v1(_f._scan_same_api_version(after) == _f._scan_same_api_version(opened)
+    and _f._scan_same_api_version(self._ordinary_factory_call_v1(_f.os.stat, relative,
+     dir_fd=root_slot['returned_fd'], follow_symlinks=False)) == _f._scan_same_api_version(named),
+    'ORDINARY_R_PROTECTION_NATIVE_FILE_STABILITY')
+  except BaseException as error:
+   errors.append(error)
+  finally:
+   if slot is not None and not slot['close_attempted']:
+    try: self._ordinary_factory_close_v1(slot)
+    except BaseException as error: errors.append(error)
+   try:
+    selected['closed'] = self._ordinary_factory_call_v1(_f.os.stat,
+     str(_f.Path(self.repository) / row.path).lstrip('/'),
+     dir_fd=root_slot['returned_fd'], follow_symlinks=False)
+    if named is not None:
+     _f._preflight_require_v1(_f._scan_same_api_version(selected['closed']) == _f._scan_same_api_version(named),
+      'ORDINARY_R_PROTECTION_NATIVE_FILE_AFTER_CLOSE')
+   except BaseException as error: errors.append(error)
+  observation['errors'].extend(errors)
+  _f._scan_raise_errors(errors)
+ if observation['unsupported']:
+  return None
+ receipt = loads[0]['receipt']
+ projection = dict(profile_source=selected_source,
+  loader_receipt={name: _f._json_compatible(getattr(receipt, name)) for name in (
+   'argv', 'native_exit_code', 'failure_class', 'start_failure_class', 'timeout_state', 'termination_state')},
+  pid=record['process'].pid, start=record['identity']['start'], invocation=record['invocation'],
+  phase=entry.phase, command_index=entry.command_index, candidate_generation=generation['ordinal'],
+  private_root_identity=(actual_root.st_dev, actual_root.st_ino, actual_root.st_mode),
+  repository_identity=(repository.st_dev, repository.st_ino, repository.st_mode),
+  credentials=dict(credentials), runtime=runtime, control=str(self.control),
+  mounts=tuple({name: sorted(value) if type(value) is frozenset else value
+   for name, value in mount.items()} for mount in mounts),
+  file_writes=writes[0], directory_writes=writes[1], frame_version=value.descriptor_version,
+  frame_flags=frame_flags, frame_aliases=(), files=tuple((item['row'].path,
+   _f._scan_same_api_version(item['named']), _f._scan_same_api_version(item['opened']),
+   item['flags'], item['coverage'][1], item['coverage'][0]) for item in observation['files']))
+ observation['projection'] = projection
+ observation['canonical'] = _f._preflight_canonical_v1(projection)
+ observation['original'] = (observation, self, record, material, policy, source,
+  source['expected'], loads[0], receipt, mounts, credentials, actual_root,
+  frame, frame['source_original'], tuple(observation['files']), projection, observation['canonical'])
+ _f._preflight_require_v1(self._ordinary_rp5a_material_v1(record) is material
+  and record is self._ordinary_current_occurrence_v1
+  and _f._preflight_canonical_v1(projection) == observation['canonical'],
+  'ORDINARY_R_PROTECTION_FINAL_ORIGINAL_NATIVE_PRODUCT_JOIN')
+ return projection
+
+
+def _facet_m_rp5a_handoff_record_v1(self, record):
+ import tools.validation_reliability as _f
+ handoff = record['rp5a_input_handoff']
+ original = handoff['original']
+ _f._preflight_require_v1(type(original) is tuple and len(original) == 8
+  and original[0] is handoff and original[1] is record and original[2] is self
+  and original[3] is handoff['material'] and original[4] is record['rp5a_input']
+  is handoff['original_input'] and original[5] == self._ordinary_factory_owner_v1
+  == handoff['owner'] and original[6] is handoff['observations']
+  and original[7] is handoff['errors'], 'ORDINARY_R_ORIGINAL_HANDOFF_OWNER')
+ if handoff['source_original'] is not None:
+  _f._preflight_require_v1(handoff['source_original'] == (
+   handoff['parent_fields'], handoff['handle_version'], handoff['descriptor']),
+   'ORDINARY_R_ORIGINAL_HANDOFF_SOURCE_OBSERVATION')
+ return handoff
+
+
+def _facet_m_query_projection_v1(self, query, argv, *, settling=False):
+ import tools.validation_reliability as _f
+ row = self._ordinary_current_query_projection_v1
+ _f._preflight_require_v1(query is self.query and type(row) is dict
+  and row['scope'] is self and row['effective'] is argv
+  and row['settling'] is settling and not row['completed']
+  and any(row is value for value in self._ordinary_query_projections_v1)
+  and row['loader'] is self._ordinary_host_preparation_v1['original_prlimit'],
+  'ORDINARY_QUERY_ORIGINAL_EFFECTIVE_ASSOCIATION')
+ requested = row['requested']
+ if getattr(self, '_ordinary_current_controller_query_v1', None) is not None:
+  return self._ordinary_controller_query_projection_v1(query, argv, requested,
+   settling=settling)
+ issuer = getattr(self, '_ordinary_issuer_v1', None)
+ if issuer is not None and issuer['current_query'] is not None:
+  return self._ordinary_issuer_query_projection_v1(query, argv, requested,
+   settling=settling)
+ administrative = self._ordinary_administrative_record_v1
+ parent = getattr(self, '_ordinary_parent_git_record_v1', None)
+ if administrative is not None:
+  _f._preflight_require_v1(administrative['scope'] is self
+   and administrative['argv'] is requested
+   and administrative['effective_argv'] is argv
+   and administrative['purpose'] == self._ordinary_factory_native_vector_v1(
+    requested, settling=settling), 'ORDINARY_QUERY_FACTORY_ORIGINAL_PROGRAMME')
+ elif parent is not None:
+  _f._preflight_require_v1(parent['scope'] is self and parent['semantic_argv'] is requested
+   and parent['argv'] is argv and not settling,
+   'ORDINARY_QUERY_PARENT_GIT_ORIGINAL_PROGRAMME')
+ elif getattr(self, '_ordinary_git_resolution_v1', None) is not None:
+  record = self._ordinary_git_resolution_v1
+  selected = (('git_dir', ('--git-dir',)), ('common_dir', ('--git-common-dir',)),
+   ('index', ('--git-path', 'index')))
+  _f._preflight_require_v1(record['effective_argv'] is argv and record['argv'] is requested
+   and any(record['kind'] == kind and requested == ('/usr/bin/git',
+    '--no-optional-locks', 'rev-parse', '--path-format=absolute', *suffix)
+    for kind, suffix in selected), 'ORDINARY_QUERY_SEMANTIC_GIT_DISCOVERY')
+ else:
+  record = self._ordinary_current_occurrence_v1
+  _f._preflight_require_v1(record is not None and record['dispatch_attempted']
+   and record is self._ordinary_occurrence_record_v1(record['entry']),
+   'ORDINARY_QUERY_ACTUAL_OCCURRENCE_PROGRAMME')
+  properties = tuple(dict.fromkeys((*self._STATUS, 'AppArmorProfile', 'LimitNOFILE',
+   'LimitNOFILESoft', 'LimitFSIZE', 'LimitFSIZESoft', 'Type', 'Restart', 'Delegate')))
+  show = ('/usr/bin/systemctl', 'show', '--no-pager', '--all',
+   '--property=' + ','.join(properties), record['name'] + '.service')
+  stop = ('/usr/bin/systemctl', 'stop', record['name'] + '.service')
+  kill = ('/usr/bin/systemctl', 'kill', '--kill-whom=all', '--signal=KILL',
+   record['name'] + '.service')
+  _f._preflight_require_v1(requested == show
+   or (settling and requested == stop and record['stop_attempted'] and not record['stopped'])
+   or (settling and requested == kill and record['kill_attempted']),
+   'ORDINARY_QUERY_CLOSED_OCCURRENCE_VECTOR')
+ return requested
+
+
+def _facet_m_parent_settlement_checked_v1(self):
+ import tools.validation_reliability as _f
+ record = self._ordinary_parent_settlement_v1
+ _f._preflight_require_v1(record is self._ordinary_original_parent_settlement_v1
+  and tuple((name,value) for name,value in record.items() if name != 'original') == record['original']
+  and record['scope'] is self and record['parent'] is self._ordinary_parent_factory_v1
+  is self._ordinary_original_parent_factory_v1
+  and record['controller'] is self._ordinary_controller_role_v1
+  is self._ordinary_original_controller_role_v1
+  and record['terminal'] is record['controller']['terminal']
+  and record['controller']['closed'] and not record['controller']['pending']
+  and record['receipt'] is record['parent']['receipt']
+  and type(record['receipt']) is _f.CommandExecutionReceiptV1
+  and not _f._command_requires_process_retention_v1(record['receipt'])
+  and record['owner'] == (_f.os.getpid(), _f.threading.get_ident())
+  and record['cutoff'] == self.settlement_deadline_ns
+  and _f.time.monotonic_ns() < record['cutoff'] and self.source is None
+  and self._ordinary_candidate_v1 is None,
+  'ORDINARY_PARENT_REAL_TERMINAL_SETTLEMENT_ASSOCIATION')
+ return record
+
+
+def _facet_m_queue_parent_report_v1(self, role, path, encoded_payload, *, original_writer):
+ import tools.validation_reliability as _f
+ self._ordinary_require_host_preparation_v1(self._ordinary_host_preparation_v1)
+ _f._preflight_require_v1(role in ('TIMING', 'ROUTER') and type(role) is str
+  and type(encoded_payload) is bytes and type(path) is type(_f.Path(self.repository))
+  and self._ordinary_parent_report_cells_v1 is self._ordinary_original_parent_report_cells_v1,
+  'ORDINARY_IMMUTABLE_ORIGINAL_REPORT_BODY')
+ cell = next(row for row in self._ordinary_parent_report_cells_v1 if row['root']['spec']['role'] == role)
+ _f._preflight_require_v1(path == cell['original_target'] and cell['payload'] is None
+  and cell['writer'] is None and not cell['publication_attempted'],
+  'ORDINARY_SINGLE_SELECTED_REPORT_BODY')
+ writers = self._ordinary_runner_report_writers_v1
+ if role == 'TIMING':
+  _f._preflight_require_v1(original_writer is writers[0], 'ORDINARY_ORIGINAL_TIMING_WRITER')
+ else:
+  producer = self._ordinary_router_producer_v1
+  _f._preflight_require_v1(producer is self._ordinary_original_router_producer_v1
+   and type(producer) is tuple and producer[0] is self
+   and tuple(producer[3].items()) == producer[4]
+   and original_writer is writers[1], 'ORDINARY_ORIGINAL_ROUTER_JSON_WRITER')
+ spec = cell['root']['spec']
+ _f._preflight_require_v1(tuple(spec.items()) == cell['root']['values']
+  and len(encoded_payload) <= spec['reserved_new_bytes']
+  and self._ordinary_parent_output_bytes_v1 + len(encoded_payload)
+   <= sum(row['reserved_new_bytes'] for row in self._ordinary_output_programme_v1),
+  'ORDINARY_SOURCE_SELECTED_REPORT_ENCODING_CAPACITY')
+ cell['writer'] = original_writer
+ cell['payload'] = cell['original_payload'] = encoded_payload
+ self._ordinary_parent_output_bytes_v1 += len(encoded_payload)
+ cell['original_body'] = (cell, original_writer, encoded_payload, cell['target'], cell['root'], cell['errors'])
+ return cell
+
+
+def _facet_m_issuer_memory_programme_v1(self, programme):
+ import tools.validation_reliability as _f
+ host = self._ordinary_host_preparation_v1
+ _f._preflight_require_v1(type(programme) is dict and set(programme) ==
+  {'scope', 'ceiling', 'prefix', 'common_memory', 'original'}
+  and programme['scope'] is self
+  and programme['ceiling'] is host['ceiling_programme'] is host['original_ceiling_programme']
+  and programme['prefix'] is host['prefix_programme'] is host['original_prefix_programme'],
+  'ORDINARY_ISSUER_ORIGINAL_CONFIGURED_POLICY')
+ original = programme['original']; ceiling = programme['ceiling']
+ _f._preflight_require_v1(type(original) is tuple and len(original) == 6
+  and original[0] is programme and original[1] is self
+  and original[2] is ceiling and original[3] is programme['prefix']
+  and original[4] == programme['common_memory']
+  and original[5] is host['original_cutoffs']
+  and ceiling['original'][0] is ceiling
+  and ceiling['original'][1] is ceiling['limits']
+  and ceiling['original'][2] == tuple(ceiling['limits'].items())
+  and type(programme['common_memory']) is int
+  and programme['common_memory'] == ceiling['limits']['heap_byte_limit'] == 4 << 30,
+  'ORDINARY_ISSUER_SOURCE_SELECTED_POLICY_VALUE')
+ return programme
+
+
+def _facet_m_issuer_query_projection_v1(self, query, effective, requested, *, settling=False):
+ import tools.validation_reliability as _f
+ record = self._ordinary_issuer_v1
+ row = record['current_query']
+ _f._preflight_require_v1(record is self._ordinary_original_issuer_v1
+  and record['original'][0] is record and query is self.query
+  and row is not None and row['scope'] is self and row['issuer'] is record
+  and any(row is value for value in record['queries'])
+  and row['argv'] is requested and row['effective'] is effective
+  and row['settling'] is settling and row['attempted'] and not row['returned']
+  and any(name == row['purpose'] and vector is requested
+   for name, vector in record['selected_vectors']),
+  'ORDINARY_ISSUER_ORIGINAL_QUERY_PROJECTION')
+ return requested
+
+
+def _facet_m_controller_record_v1(self, *, settling=False):
+ import tools.validation_reliability as _f
+ row = self._ordinary_controller_role_v1
+ original = row['original']
+ _f._preflight_require_v1(row is self._ordinary_original_controller_role_v1
+  and type(original) is tuple and len(original) == 14
+  and original[0] is row and original[1] is self and original[2] is row['host']
+  and original[3] is row['bootstrap'] and original[4] is row['argv']
+  and original[5] is row['environment']
+  and tuple(row['environment'].items()) == original[6]
+  and (row['run_id'], row['phase']) == original[7:9]
+  and original[9] is row['evidence_root'] and original[10] is row['output_limits']
+  and tuple(row['output_limits'].items()) == original[11]
+  and original[12] == row['owner'] == (_f.os.getpid(), _f.threading.get_ident())
+  and original[13] is row['errors'], 'ORDINARY_CONTROLLER_ORIGINAL_LOCAL_ASSOCIATIONS')
+ p = row['programme']
+ _f._preflight_require_v1(type(p) is dict, 'ORDINARY_CONTROLLER_PREPARATION_REMAINS_INCOMPLETE')
+ frozen = p['original']
+ _f._preflight_require_v1(frozen[0] is p and frozen[1] is p['ceilings']
+  and frozen[2] is p['limits'] and tuple(p['limits'].items()) == frozen[3]
+  and frozen[4] is p['fd_program'] and tuple(p['fd_program'].items()) == frozen[5]
+  and frozen[6] is p['cutoffs'] and frozen[7] is p['policy']
+  and tuple((key, value) for key, value in p.items() if key != 'original') == frozen[8]
+  and frozen[9] is p['launcher_environment']
+  and tuple(p['launcher_environment'].items()) == frozen[10]
+   == (('PATH', '/usr/bin'), ('LANG', 'C.UTF-8'), ('LC_ALL', 'C.UTF-8')),
+  'ORDINARY_CONTROLLER_ORIGINAL_COMPILED_ROLE')
+ self._ordinary_factory_check_v1(settling=settling)
+ if not settling: _f._scan_raise_errors(row['errors'])
+ return row
+
+
+def _facet_m_controller_resource_close_ready_v1(self, row, receipt):
+ import tools.validation_reliability as _f
+ if 'direct_native_hold' in row:
+  return self._ordinary_direct_controller_close_ready_v1(row, receipt)
+ _f._preflight_require_v1(row is self._ordinary_controller_record_v1(settling=True)
+  and row['supervisor_receipt'] is receipt and type(receipt) is _f.CommandExecutionReceiptV1,
+  'ORDINARY_CONTROLLER_RESOURCE_CLOSE_ORIGINAL_RECEIPT')
+ original = row['receipt_original']; core = row['receipt_core']
+ process, launcher, terminal = row['process'], row['launcher'], row['terminal']
+ _f._preflight_require_v1(type(original) is tuple and len(original) == 7
+  and original[0] is row and original[1] is core and original[2] is receipt
+  and original[3] is core['original_process'] and original[4] is core['outcomes']
+  and original[5] is core['pipes'] and original[6] == tuple(
+   core['streams'][name]['path'] for name in ('stdout', 'stderr'))
+  and core['producer'] is row and core['process'] is process
+  and core['outcomes'] is row['output_outcomes'] and self.settled
+  and type(terminal) is tuple and len(terminal) == 10
+  and terminal[0] is row and terminal[1] is process and terminal[2] is launcher
+  and terminal[3] is row['pidfd_slot'] and terminal[4] is row['cgroup_event_slot']
+  and terminal[5] is row['terminal_status'] and terminal[6] is row['stop_receipt']
+  and terminal[7] is core['outcomes'] and type(terminal[8]) is int
+  and terminal[8] == process.returncode and type(terminal[9]) is int
+  and terminal[9] == launcher.returncode and row['stopped']
+  and core['pipes'] == (process.stdout, process.stderr)
+  and all(pipe is not None and pipe.closed for pipe in core['pipes'])
+  and all(outcome.get('eof_observed') is True and outcome.get('writer_closed') is True
+   for outcome in core['outcomes'])
+  and all(stream['adapter'].closed and _f._mapper_slot_settled_v1(stream['slot'])
+   for stream in core['streams'].values())
+  and (receipt.run_id, receipt.phase, receipt.command_index, receipt.argv, receipt.cwd)
+   == (row['run_id'], row['phase'], 1, row['argv'], self.repository)
+  and (receipt.stdout_path, receipt.stderr_path) == tuple(str(path) for path in original[6])
+  and (receipt.stdout_byte_count, receipt.stderr_byte_count) == tuple(
+   core['streams'][name]['final_version'][2] for name in ('stdout', 'stderr')),
+  'ORDINARY_CONTROLLER_RESOURCE_CLOSE_ACTUAL_TERMINAL_AND_STREAMS')
+ _f._preflight_require_v1(all(call['query_record'] is not None
+  and self.query._command_record_settled_v1(call['query_record'])
+  for call in row.get('queries', ())), 'ORDINARY_CONTROLLER_QUERY_DEBT_BEFORE_RETIREMENT')
+ if not _f._command_requires_process_retention_v1(receipt):
+  return receipt.pid == process.pid and receipt.native_exit_code == process.returncode
+ if row['actors_terminal'] is not None:
+  witness = row['actors_terminal']
+  return (type(witness) is tuple and len(witness) == 10 and witness[0] is row
+   and witness[1] is process and witness[2] is launcher
+   and witness[3] is row['pidfd_slot'] and witness[4] is row['cgroup_event_slot']
+   and witness[5] is row['terminal_status'] and witness[6] is row['stop_receipt']
+   and witness[7] == process.returncode and witness[8] == launcher.returncode
+   and receipt.pid == process.pid and receipt.native_exit_code is None
+   and receipt.failure_class == 'ENGVR_PROCESS_START_FAILED'
+   and receipt.termination_state == 'OWNED_FAILED_START_RESOURCE_SETTLED;NO_APPLICATION_SUCCESS')
+ result = row['termination_result']
+ return (type(result) is tuple and len(result) == 2 and result[1] is True
+  and receipt.termination_state == result[0] and receipt.pid == process.pid
+  and receipt.native_exit_code == process.returncode
+  and receipt.failure_class in ('ENGVR_PROCESS_TIMEOUT', 'ENGVR_ATOMIC_RECEIPT_WRITE_FAILED',
+   'ENGVR_PROCESS_OUTPUT_LIMIT', 'ENGVR_PROCESS_DESCENDANTS_REMAIN'))
+
+
+def _facet_m_native_process_record_v1(self):
+ import tools.validation_reliability as _f
+ if getattr(self, '_ordinary_controller_attempted_v1', False):
+  return self._ordinary_controller_record_v1(settling=True)
+ return self._ordinary_current_occurrence_v1
+
+
+def _facet_m_controller_query_projection_v1(self, query, argv, requested, *, settling):
+ import tools.validation_reliability as _f
+ call = self._ordinary_current_controller_query_v1
+ _f._preflight_require_v1(type(call) is dict and call['scope'] is self and query is self.query
+  and call['effective'] is argv and call['requested'] is requested
+  and call['settling'] is settling and call['query_record'] is None,
+  'ORDINARY_CONTROLLER_ACTUAL_QUERY_PROJECTION')
+ if 'receiver' in call:
+  row = call['receiver']
+  _f._preflight_require_v1(row is self._ordinary_controller_receiver_v1
+   is self._ordinary_original_controller_receiver_v1
+   and any(call is item for item in row['queries']) and call['purpose'] == 'self-show'
+   and not settling and requested == ('/usr/bin/systemctl', 'show', '--no-pager', '--all',
+    '--property=InvocationID,MainPID,ControlGroup,Slice,AppArmorProfile', row['unit']),
+   'ORDINARY_CONTROLLER_CLOSED_RECEIVER_MANAGER_VECTOR')
+ else:
+  row = self._ordinary_controller_record_v1(settling=settling)
+  _f._preflight_require_v1(call['controller'] is row and any(call is item for item in row['queries']),
+   'ORDINARY_CONTROLLER_QUERY_ORIGINAL_PARENT_RECORD')
+  properties = tuple(dict.fromkeys((*self._STATUS, 'AppArmorProfile', 'User', 'Group',
+   'Type', 'Restart', 'RemainAfterExit', 'Delegate', 'LimitNOFILE', 'LimitNOFILESoft',
+   'LimitFSIZE', 'LimitFSIZESoft', 'CPUQuotaPeriodUSec', 'StandardInput', 'StandardOutput', 'StandardError')))
+  show = ('/usr/bin/systemctl', 'show', '--no-pager', '--all',
+   '--property=' + ','.join(properties), row['name'] + '.service')
+  stop = ('/usr/bin/sudo', '-n', '--', '/usr/bin/systemctl', 'stop', row['name'] + '.service')
+  kill = ('/usr/bin/sudo', '-n', '--', '/usr/bin/systemctl', 'kill',
+   '--kill-whom=all', '--signal=KILL', row['name'] + '.service')
+  _f._preflight_require_v1((call['purpose'] == 'show' and requested == show)
+   or (call['purpose'] == 'stop' and settling and row['stop_attempted'] and requested == stop)
+   or (call['purpose'] == 'kill' and settling and row['kill_attempted'] and requested == kill),
+   'ORDINARY_CONTROLLER_CLOSED_NATIVE_ADMIN_VECTOR')
+ return requested
+
+
+def _facet_m_source_data_allocator_prepare_v1(self, programme):
+ import tools.validation_reliability as _f
+ self._ordinary_factory_check_v1()
+ source = self.source
+ self._ordinary_source_meter_projection_v1(source)
+ _f._preflight_require_v1(type(programme) is dict
+  and programme['scope'] is self and programme['source'] is source
+  and programme['rows'] is source.rows
+  and source.state == 'READABLE' and source.failure is None
+  and not hasattr(self, '_ordinary_resource_programme_v1')
+  and not hasattr(self, '_ordinary_data_allocator_v1')
+  and 'data_allocation_programme' not in programme,
+  'ORDINARY_DATA_ONE_PREFREEZE_CARRIER')
+ from tools.validation_scope_registry import _ordinary_data_initial_carrier_request_v1
+ request = _ordinary_data_initial_carrier_request_v1()
+ _f._preflight_require_v1(type(programme.get('data_initial_carrier_request')) is int
+  and programme['data_initial_carrier_request'] == request
+  and request > 0 and programme['limits']['heap_byte_limit']
+   == self._ordinary_meter_v1['limits']['heap_byte_limit'],
+  'ORDINARY_DATA_PREFUNDED_CARRIER_SOURCE_REQUEST')
+ state = dict(scope=self, source=source, programme=programme,
+  carrier_request=request, registration_attempted=False,
+  initialized=False, allocations=[], credit_originals=[], errors=[])
+ state['carrier_original'] = (state, self, source, programme,
+  self._ordinary_original_meter_v1, self._ordinary_factory_owner_v1,
+  state['errors'], state['allocations'], state['credit_originals'], request)
+ self._ordinary_data_carrier_original_v1 = state['carrier_original']
+ programme['data_allocation_programme'] = state
+ self._ordinary_data_allocator_v1 = self._ordinary_original_data_allocator_v1 = state
+ return state
+
+
+def _facet_m_source_data_allocator_register_v1(self, programme, *,
+  existing_heap_demand, existing_raw_retained_demand,
+  runtime_layout, work_deadline_ns, data_file_byte_limit):
+ """Fill the original pre-frozen DATA carrier once; no resource refreeze."""
+ import tools.validation_reliability as _f
+ source = self.source
+ self._ordinary_source_meter_projection_v1(source)
+ meter, limits, remaining, observed = self._ordinary_original_meter_v1
+ resource = self._ordinary_original_resource_programme_v1
+ state = self._ordinary_data_allocator_v1
+ carrier = state['carrier_original']
+ _f._preflight_require_v1(type(programme) is dict
+  and programme is self._ordinary_resource_programme_v1 is resource[0]
+  and tuple(programme.items()) == resource[1]
+  and programme['scope'] is self and programme['source'] is source
+  and programme['rows'] is source.rows
+  and programme['original_cutoffs'] is self._ordinary_host_preparation_v1['original_cutoffs']
+  and state is self._ordinary_original_data_allocator_v1
+  is programme['data_allocation_programme']
+  and carrier is self._ordinary_data_carrier_original_v1
+  and type(carrier) is tuple and len(carrier) == 10
+  and carrier[0] is state and carrier[1] is self and carrier[2] is source
+  and carrier[3] is programme and carrier[4] is self._ordinary_original_meter_v1
+  and carrier[5] is self._ordinary_factory_owner_v1 and carrier[6] is state['errors']
+  and carrier[7] is state['allocations'] and carrier[8] is state['credit_originals']
+  and carrier[9] is state['carrier_request']
+  and state['carrier_request'] == programme['data_initial_carrier_request']
+  and state['scope'] is self and state['source'] is source
+  and state['programme'] is programme and not state['errors']
+  and state['registration_attempted'] is False and state['initialized'] is False
+  and not state['allocations'] and not state['credit_originals']
+  and (_f.os.getpid(), _f.threading.get_ident()) == self._ordinary_factory_owner_v1,
+  'ORDINARY_DATA_ONE_ORIGINAL_ALLOCATOR')
+ state['registration_attempted'] = True
+ try:
+  _f._preflight_require_v1(type(data_file_byte_limit) is int
+   and 0 < data_file_byte_limit <= 128 << 20,
+   'ORDINARY_DATA_ORIGINAL_FILE_CEILING_OPERAND')
+  _f._ordinary_data_nonnegative_v1(existing_heap_demand, 'ORDINARY_DATA_EXISTING_HEAP')
+  _f._ordinary_data_nonnegative_v1(existing_raw_retained_demand, 'ORDINARY_DATA_EXISTING_RAW')
+  _f._preflight_require_v1(existing_heap_demand <= limits['heap_byte_limit']
+   and existing_raw_retained_demand <= limits['raw_retained_byte_limit']
+   and type(work_deadline_ns) is int
+   and work_deadline_ns in programme['original_cutoffs'][1:3],
+   'ORDINARY_DATA_ORIGINAL_RESOURCE_INTERSECTION')
+  _f._ordinary_data_runtime_layout_check_v1(self, programme, runtime_layout)
+  bootstrap_components = _f._ordinary_data_registration_components_v1(runtime_layout)
+  bootstrap_heap = sum(size for _, size in bootstrap_components)
+  original_existing_heap = existing_heap_demand
+  existing_heap_demand += bootstrap_heap
+  _f._preflight_require_v1(existing_heap_demand <= limits['heap_byte_limit'],
+   'ORDINARY_DATA_PREISSUED_CONTROLLER_AND_CATALOGUE_CREDIT')
+  state.update(meter=meter, limits=limits, remaining=remaining, observed=observed,
+   cutoffs=programme['original_cutoffs'], deadline_ns=work_deadline_ns,
+   existing_heap=existing_heap_demand, existing_raw=existing_raw_retained_demand,
+   runtime_layout=runtime_layout, data_file_byte_limit=data_file_byte_limit,
+   bootstrap_components=bootstrap_components,
+   original_existing_heap=original_existing_heap)
+  state['original'] = (state, self, source, programme, meter, limits,
+   remaining, observed, state['cutoffs'], work_deadline_ns,
+   existing_heap_demand, existing_raw_retained_demand,
+   runtime_layout, state['allocations'], data_file_byte_limit,
+   state['credit_originals'], bootstrap_components, original_existing_heap)
+  state['initialized'] = True
+  return state
+ except BaseException as error:
+  if all(error is not prior for prior in state['errors']): state['errors'].append(error)
+  if all(error is not prior for prior in self._ordinary_factory_errors_v1):
+   self._ordinary_factory_errors_v1.append(error)
+  raise
+
+
+def _facet_m_source_data_allocator_projection_v1(self):
+ import tools.validation_reliability as _f
+ state = self._ordinary_data_allocator_v1
+ _f._preflight_require_v1(type(state) is dict
+  and state is self._ordinary_original_data_allocator_v1
+  and state.get('registration_attempted') is True
+  and state.get('initialized') is True and not state['errors']
+  and state['carrier_original'] is self._ordinary_data_carrier_original_v1
+  and state['carrier_original'][7] is state['allocations']
+  and state['carrier_original'][8] is state['credit_originals']
+  and state['carrier_original'][9] is state['carrier_request'],
+  'ORDINARY_DATA_INITIALIZED_ORIGINAL_CARRIER')
+ original = state['original']
+ source = state['source']
+ self._ordinary_source_meter_projection_v1(source)
+ meter, limits, remaining, observed = self._ordinary_original_meter_v1
+ resource = self._ordinary_original_resource_programme_v1
+ _f._preflight_require_v1(state is self._ordinary_original_data_allocator_v1
+  and original == (state, self, source, state['programme'], meter, limits,
+   remaining, observed, state['cutoffs'], state['deadline_ns'],
+   state['existing_heap'], state['existing_raw'],
+   state['runtime_layout'], state['allocations'], state['data_file_byte_limit'],
+   state['credit_originals'], state['bootstrap_components'],
+   state['original_existing_heap'])
+  and state['meter'] is meter and state['limits'] is limits
+  and state['remaining'] is remaining and state['observed'] is observed
+  and original[13] is state['allocations']
+  and original[15] is state['credit_originals']
+  and state['programme'] is self._ordinary_resource_programme_v1
+  is resource[0]
+  and tuple(state['programme'].items()) == resource[1]
+  and tuple(limits.items()) == resource[2]
+  and state['programme']['data_allocation_programme'] is state
+  and state['cutoffs'] is state['programme']['original_cutoffs']
+  and source is self.source
+  and (_f.os.getpid(), _f.threading.get_ident()) == self._ordinary_factory_owner_v1,
+  'ORDINARY_DATA_ORIGINAL_ALLOCATOR_PROJECTION')
+ _f._ordinary_data_runtime_layout_check_v1(self, state['programme'], state['runtime_layout'])
+ _f._preflight_require_v1(state['original'][16] is state['bootstrap_components']
+  and state['existing_heap'] == state['original_existing_heap']
+   + sum(size for _, size in state['bootstrap_components']),
+  'ORDINARY_DATA_BOOTSTRAP_CREDIT_FROZEN')
+ self._ordinary_source_data_live_credit_v1(state)
+ source._check()
+ _f._preflight_require_v1(_f.time.monotonic_ns() < state['deadline_ns'],
+  'ORDINARY_DATA_ORIGINAL_WORK_DEADLINE')
+ return state
+
+
+def _facet_m_source_data_heap_issue_v1(self, allocation, *,
+  stage, managed_demand, payload_demand, request):
+ """Issue independent coexisting policy credits, not an allocation-fit claim."""
+ import tools.validation_reliability as _f
+ state = self._ordinary_source_data_allocator_projection_v1()
+ _f._preflight_require_v1(any(item is allocation for item in state['allocations'])
+  and stage in ('scan', 'construction')
+  and allocation['error'] is None
+  and allocation['raw_complete']
+  and stage not in allocation['stages']
+  and type(request) is tuple,
+  'ORDINARY_DATA_STAGE_ONE_ATTEMPT')
+ _f._ordinary_data_nonnegative_v1(managed_demand, 'ORDINARY_DATA_STAGE_MANAGED_DEMAND')
+ _f._ordinary_data_nonnegative_v1(payload_demand, 'ORDINARY_DATA_STAGE_PAYLOAD_DEMAND')
+ heap_live, raw_live = self._ordinary_source_data_live_credit_v1(state)
+ _f._preflight_require_v1(managed_demand
+  <= state['limits']['heap_byte_limit'] - state['existing_heap'] - heap_live
+  and payload_demand
+  <= state['limits']['raw_retained_byte_limit'] - state['existing_raw'] - raw_live,
+  'ORDINARY_DATA_INDEPENDENT_COEXISTING_CREDIT')
+ issued = dict(stage=stage, request=request, managed_demand=managed_demand,
+  payload_demand=payload_demand, deadline_ns=state['deadline_ns'],
+  attempted=False, complete=False, error=None)
+ credit = (issued, allocation, stage, managed_demand, payload_demand,
+  state['deadline_ns'], request)
+ issued['original_credit'] = credit
+ state['credit_originals'].append(credit)
+ allocation['stages'][stage] = issued
+ return issued
+
+
+def _facet_m_source_data_raw_issue_v1(self, component, row, *, kind):
+ import tools.validation_reliability as _f
+ state = self._ordinary_source_data_allocator_projection_v1()
+ source = state['source']
+ _f._preflight_require_v1(type(component) is dict and component['scope'] is self
+  and component is self._ordinary_deterministic_source_ingredients_v1
+   is self._ordinary_original_deterministic_source_ingredients_v1
+  and component['source'] is source
+  and kind in ('BINARY', 'JSON', 'JSONL')
+  and source.row_index.get(row['path']) is row
+  and row['role'] == 'repository' and row['kind'] == 'file'
+  and row['path'] in source.post
+  and type(row['logical_bytes']) is int
+  and 0 <= row['logical_bytes'] <= state['data_file_byte_limit'],
+  'ORDINARY_DATA_ORIGINAL_ROW_REQUEST')
+ source_role, source_bound, git_proof = self._ordinary_source_file_bound_v1(row)
+ _f._preflight_require_v1(source_role == 'APPLICATION_SOURCE' and git_proof is None,
+  'ORDINARY_DATA_ADMINISTRATIVE_SOURCE_ROLE_FORBIDDEN')
+ n = row['logical_bytes']
+ layout = state['runtime_layout']
+ _f._preflight_require_v1(layout is not None,
+  'ORDINARY_DATA_FIXED_BUFFER_LAYOUT_UNSUPPORTED')
+ _f._preflight_require_v1(tuple((key, value) for key, value in layout.items()
+  if key != 'original') == layout['original'],
+  'ORDINARY_DATA_RUNTIME_LAYOUT_UNCHANGED')
+ components, _, _ = _f._ordinary_data_components_v1(layout, stage='raw',
+  parser_programme='RAW_BYTES_V1', n=n, bounds=None,
+  catalogue_entries=len(state['credit_originals']))
+ q = min(65536, n + 1)
+ heap_demand = sum(size for _, size in components)
+ payload_demand = 2 * n + 2 * q
+ pending_raw = sum(max(item['read_exposure'] - item['actual_read'], 0)
+  for item in state['allocations'] if item['raw_credit_open'])
+ pending_attempts = sum(max(item['attempt_exposure']
+  - (source.read_attempts - item['attempt_start']), 0)
+  for item in state['allocations'] if item['raw_credit_open'])
+ heap_live, payload_live = self._ordinary_source_data_live_credit_v1(state)
+ available_attempts = 2000000 - source.read_attempts - pending_attempts
+ _f._preflight_require_v1(n + 1 <= state['remaining']['raw_read_byte_limit'] - pending_raw
+  and n + 1 <= (64 << 30) - source.read_bytes - pending_raw
+  and heap_demand <= state['limits']['heap_byte_limit'] - state['existing_heap'] - heap_live
+  and payload_demand <= state['limits']['raw_retained_byte_limit']
+   - state['existing_raw'] - payload_live
+  and available_attempts > 0
+  and not any(item['raw_credit_open'] for item in state['allocations']),
+  'ORDINARY_DATA_RAW_INDEPENDENT_ISSUANCE')
+ allocation = dict(scope=self, source=source, component=component, row=row,
+  path=row['path'], version=tuple(source.post[row['path']]), kind=kind,
+  n=n, layout=layout, deadline_ns=state['deadline_ns'],
+  data_byte_limit=state['data_file_byte_limit'],
+  heap_live=heap_demand, payload_live=payload_demand,
+  read_exposure=n + 1, attempt_exposure=available_attempts,
+  attempt_start=source.read_attempts, byte_start=source.read_bytes,
+  actual_read=0, raw_credit_open=True, raw_running=False, raw_attempted=False,
+  raw_complete=False, raw=None, error=None, stages={})
+ function, code = _f._ordinary_data_emitter_basis_v1(self, layout)
+ allocation["managed_request_products"] = {}
+ allocation["managed_request_products_original"] = (
+  allocation, allocation["managed_request_products"], function, code, layout)
+
+ allocation['raw_component_requests'] = components
+ allocation['original'] = (allocation, self, source, component, row,
+  allocation['path'], allocation['version'], kind, n, layout,
+  state['deadline_ns'], n + 1, available_attempts,
+  allocation['attempt_start'], allocation['byte_start'], allocation['data_byte_limit'])
+ credit = (allocation, allocation, 'raw', heap_demand, payload_demand,
+  state['deadline_ns'], allocation['original'])
+ allocation['raw_original_credit'] = credit
+ state['credit_originals'].append(credit)
+ state['allocations'].append(allocation)
+ return allocation
+
+
+def _facet_m_source_data_live_credit_v1(self, state):
+ import tools.validation_reliability as _f
+ credits = state['credit_originals']
+ allocations = state['allocations']
+ _f._preflight_require_v1(state['original'][13] is allocations
+  and state['original'][15] is credits
+  and type(credits) is list and type(allocations) is list,
+  'ORDINARY_DATA_ORIGINAL_CREDIT_CATALOGUE')
+ heap = payload = raw_count = 0
+ seen = []
+ for credit in credits:
+  _f._preflight_require_v1(type(credit) is tuple and len(credit) == 7,
+   'ORDINARY_DATA_FROZEN_CREDIT_SHAPE')
+  entry, allocation, stage, managed, retained, deadline, basis = credit
+  _f._preflight_require_v1(not any(entry is item for item in seen)
+   and any(allocation is item for item in allocations)
+   and type(managed) is int and managed >= 0
+   and type(retained) is int and retained >= 0
+   and deadline == state['deadline_ns'],
+   'ORDINARY_DATA_FROZEN_CREDIT_OWNER')
+  seen.append(entry)
+  if stage == 'raw':
+   raw_count += 1
+   _f._preflight_require_v1(entry is allocation
+    and allocation['raw_original_credit'] is credit
+    and basis is allocation['original'],
+    'ORDINARY_DATA_ORIGINAL_RAW_CREDIT')
+  else:
+   _f._preflight_require_v1(stage in ('scan', 'construction')
+    and entry['original_credit'] is credit
+    and allocation['stages'].get(stage) is entry
+    and entry['stage'] == stage
+    and entry['request'] is basis
+    and entry['managed_demand'] == managed
+    and entry['payload_demand'] == retained
+    and entry['deadline_ns'] == deadline,
+    'ORDINARY_DATA_ORIGINAL_STAGE_CREDIT')
+  heap += managed
+  payload += retained
+ _f._preflight_require_v1(raw_count == len(allocations),
+  'ORDINARY_DATA_ALL_RAW_CREDITS_REGISTERED')
+ for allocation in allocations:
+  _f._preflight_require_v1(sum(credit[0] is allocation and credit[2] == 'raw'
+   for credit in credits) == 1,
+   'ORDINARY_DATA_ONE_RAW_CREDIT')
+  for stage, entry in allocation['stages'].items():
+   _f._preflight_require_v1(sum(credit[0] is entry
+    and credit[1] is allocation and credit[2] == stage
+    for credit in credits) == 1,
+    'ORDINARY_DATA_ALL_STAGE_CREDITS_REGISTERED')
+ return heap, payload
+
+
+def _facet_m_source_data_managed_request_v1(self, allocation, *,
+  stage, bounds=None, scan=None):
+ import tools.validation_reliability as _f
+ state = self._ordinary_source_data_allocator_projection_v1()
+ self._ordinary_source_data_raw_binding_check_v1(allocation)
+ layout = state["runtime_layout"]
+ record = layout["installation_record"]
+ if (layout is not state["original"][12]
+   or layout is not record.get("controller_constructor_layout")
+   or layout.get("constructor_source_observation") is not
+    record.get("controller_constructor_observation")
+   or layout.get("layout_error_owner") is not
+    record.get("controller_constructor_layout_errors")
+   or layout["layout_error_owner"]):
+  raise ValueError("SOURCE_DATA_EXACT_INSTALLER_ISSUED_LAYOUT")
+ _f._ordinary_data_runtime_layout_check_v1(self, state["programme"], layout)
+ function, code = _f._ordinary_data_emitter_basis_v1(self, layout)
+ products = allocation["managed_request_products"]
+ original_products = allocation["managed_request_products_original"]
+ if (type(products) is not dict or type(original_products) is not tuple
+   or len(original_products) != 5
+   or original_products[0] is not allocation
+   or original_products[1] is not products
+   or original_products[2] is not function
+   or original_products[3] is not code
+   or original_products[4] is not layout
+   or stage not in ("scan", "construction") or stage in products):
+  raise ValueError("SOURCE_DATA_ONE_ORIGINAL_REQUEST_PRODUCER")
+ producer = dict(allocation=allocation, stage=stage, source_method=function,
+  source_code=code, layout=layout, request=None, request_fields=None,
+  error=None, grant_attempted=False, issued=False)
+ producer["original"] = (producer, allocation, stage, function, code, layout, products)
+ products[stage] = producer
+ try:
+  if stage == "scan":
+   if scan is not None or type(bounds) is not tuple or len(bounds) != 6:
+    raise ValueError("SOURCE_DATA_SCAN_REQUEST_ARGUMENTS")
+   if bounds[5] != allocation["deadline_ns"]:
+    raise ValueError("SOURCE_DATA_ORIGINAL_SCAN_CUTOFF")
+   source_demand = None
+  else:
+   if bounds is not None or type(scan) is not dict or (
+     scan.get("complete") is not True or scan.get("error") is not None):
+    raise ValueError("SOURCE_DATA_COMPLETE_SCAN_REQUEST")
+   original_scan = scan.get("original")
+   if (type(original_scan) is not tuple or len(original_scan) != 9
+     or original_scan[0] is not scan
+     or original_scan[1] is not allocation["raw"]
+     or original_scan[6] is not scan["demand"]
+     or original_scan[7] != tuple(scan["demand"].items())
+     or original_scan[8] != allocation["parser_programme"]
+     or original_scan[4][5] != allocation["deadline_ns"]):
+    raise ValueError("SOURCE_DATA_ORIGINAL_SCAN_DEMAND_BINDING")
+   bounds = original_scan[4]
+   source_demand = original_scan[6]
+  components, payload, derived_bounds = _f._ordinary_data_components_v1(
+   layout, stage=stage, parser_programme=allocation["parser_programme"],
+   n=allocation["n"], bounds=bounds, demand=source_demand,
+   catalogue_entries=len(state["credit_originals"]))
+  request = dict(scope=self, source=self.source, allocation=allocation,
+   stage=stage, bounds=derived_bounds,
+   runtime_programme=state["programme"]["runtime_programme"],
+   constructor_source_observation=record["controller_constructor_observation"],
+   component_requests=components, payload_byte_request=payload)
+  fields = tuple((key, value) for key, value in request.items())
+  request["original"] = fields
+  producer["request"] = request
+  producer["request_fields"] = fields
+  producer["original"] = (producer, allocation, stage, function, code,
+   layout, products, request, fields)
+  return request
+ except BaseException as error:
+  if producer["error"] is None:
+   producer["error"] = error
+  if allocation["error"] is None:
+   allocation["error"] = error
+  if all(error is not old for old in self._ordinary_factory_errors_v1):
+   self._ordinary_factory_errors_v1.append(error)
+  raise
+
+
+def _facet_m_source_data_runtime_layout_v1(self, programme, *,
+  runtime_roles, control_source_rows, delegated_control_rows,
+  source_product, operation_rows, interpreter_storage_request):
+ import tools.validation_reliability as _f
+ record = self._ordinary_installation_copy_v1
+ if (type(record) is not dict or record.get("scope") is not self
+   or record is not self._ordinary_original_installation_copy_v1):
+  raise ValueError("SOURCE_DATA_ORIGINAL_INSTALLATION_RECORD")
+ old = record.get("original")
+ if (type(old) is not tuple or len(old) != 17 or old[0] is not record
+   or old[1] is not self or old[2] is not record["install"]
+   or old[3] is not record["census"] or old[4] is not record["programme"]
+   or old[5] is not record["image"] or old[6] is not record["destination"]
+   or old[7] is not record["install"].rows or old[8] is not record["native"]
+   or old[9] is not record["files"] or old[10] is not record["directories"]
+   or old[11] is not record["active_slots"] or old[12] is not record["errors"]
+   or type(record["errors"]) is not list or old[13] is not record["owner"]
+   or old[14] is not self._ordinary_meter_v1
+   or old[15] is not record["source_paths"]
+   or old[16] is not record["target_paths"]):
+  raise ValueError("SOURCE_DATA_INSTALLATION_ORIGINAL_17")
+ if any(key in record for key in ("controller_constructor_layout",
+   "controller_constructor_layout_attempted",
+   "controller_constructor_layout_errors")):
+  raise ValueError("SOURCE_DATA_ONE_CONTROLLER_LAYOUT_ATTEMPT")
+ record["controller_constructor_layout_attempted"] = True
+ errors = []
+ record["controller_constructor_layout_errors"] = errors
+ try:
+  _f._ordinary_control_installation_binding_check_v1(self, record,
+   source_product, operation_rows, interpreter_storage_request)
+  associated = _f._ordinary_control_source_product_check_v1(self, source_product)
+  expected = control_source_rows + delegated_control_rows
+  if (len(associated) != len(expected) or any(
+    a[0] != b[0] or a[1] is not b[1] or a[2] is not b[2] or a[3] is not b[3]
+    for a, b in zip(associated, expected))):
+   raise ValueError('SOURCE_DATA_SAME_ORIGINAL_RUNTIME_CALLER_SOURCE_ROWS')
+  observation = record.get("controller_constructor_observation")
+  if observation is None:
+   observation = self._ordinary_source_data_observe_current_runtime_v1(
+    programme, runtime_roles=runtime_roles,
+    control_source_rows=control_source_rows,
+    delegated_control_rows=delegated_control_rows)
+  layout = _f._ordinary_data_layout_collect_v1(self, record, observation,
+   runtime_programme=programme["runtime_programme"],
+   control_source_rows=control_source_rows,
+   delegated_control_rows=delegated_control_rows,
+   source_product=source_product, operation_rows=operation_rows,
+   interpreter_storage_request=interpreter_storage_request)
+  record["controller_constructor_layout"] = layout
+  return layout
+ except BaseException as error:
+  errors.append(error)
+  if all(error is not prior_error for prior_error in record["errors"]):
+   record["errors"].append(error)
+  if all(error is not prior_error for prior_error in self._ordinary_factory_errors_v1):
+   self._ordinary_factory_errors_v1.append(error)
+  raise
+
+
+def _facet_m_source_data_managed_request_issue_v1(self, allocation, *,
+  stage, bounds, managed_request):
+ import tools.validation_reliability as _f
+ state = self._ordinary_source_data_allocator_projection_v1()
+ self._ordinary_source_data_raw_binding_check_v1(allocation)
+ layout = state["runtime_layout"]
+ function, code = _f._ordinary_data_emitter_basis_v1(self, layout)
+ products = allocation["managed_request_products"]
+ old_products = allocation["managed_request_products_original"]
+ _f._preflight_require_v1(type(old_products) is tuple and len(old_products) == 5
+  and old_products[0] is allocation and old_products[1] is products
+  and old_products[2] is function and old_products[3] is code
+  and old_products[4] is layout and stage in products,
+  "ORDINARY_DATA_ORIGINAL_EMITTER_OWNER")
+ producer = products[stage]
+ frozen = producer["original"]
+ _f._preflight_require_v1(type(frozen) is tuple and len(frozen) == 9
+  and frozen[0] is producer and frozen[1] is allocation
+  and frozen[2] == stage and frozen[3] is function and frozen[4] is code
+  and frozen[5] is layout and frozen[6] is products
+  and producer["error"] is None and allocation["error"] is None
+  and producer["grant_attempted"] is False and producer["issued"] is False,
+  "ORDINARY_DATA_ONE_SOURCE_EMITTED_GRANT_ATTEMPT")
+ producer["grant_attempted"] = True
+ try:
+  _f._preflight_require_v1(type(managed_request) is dict
+   and managed_request is frozen[7] is producer["request"]
+   and frozen[8] is producer["request_fields"]
+   and managed_request["original"] is frozen[8]
+   and tuple((key, value) for key, value in managed_request.items()
+    if key != "original") == frozen[8]
+   and managed_request["scope"] is self
+   and managed_request["source"] is state["source"]
+   and managed_request["allocation"] is allocation
+   and managed_request["stage"] == stage
+   and managed_request["bounds"] == bounds
+   and managed_request["runtime_programme"] is state["programme"]["runtime_programme"]
+   and managed_request["constructor_source_observation"] is
+    layout["installation_record"]["controller_constructor_observation"]
+   and type(managed_request["component_requests"]) is tuple
+   and bool(managed_request["component_requests"]),
+   "ORDINARY_DATA_EXACT_EMITTER_REQUEST_OR_FIELDS_CHANGED")
+  names = []
+  managed_demand = 0
+  for name, size in managed_request["component_requests"]:
+   _f._preflight_require_v1(type(name) is str and name and name not in names,
+    "ORDINARY_DATA_LAYOUT_COMPONENT")
+   names.append(name)
+   managed_demand += _f._ordinary_data_nonnegative_v1(size,
+    "ORDINARY_DATA_SOURCE_SIZED_COMPONENT")
+  payload_demand = _f._ordinary_data_nonnegative_v1(
+   managed_request["payload_byte_request"], "ORDINARY_DATA_STAGE_PAYLOAD_REQUEST")
+  issued = self._ordinary_source_data_heap_issue_v1(allocation,
+   stage=stage, managed_demand=managed_demand, payload_demand=payload_demand,
+   request=bounds)
+  issued["managed_request"] = managed_request
+  issued["request_producer"] = producer
+  producer["issued"] = True
+  return issued
+ except BaseException as error:
+  if producer["error"] is None:
+   producer["error"] = error
+  if allocation["error"] is None:
+   allocation["error"] = error
+  if all(error is not old for old in self._ordinary_factory_errors_v1):
+   self._ordinary_factory_errors_v1.append(error)
+  raise
+
+
+def _facet_m_source_data_raw_binding_check_v1(self, allocation):
+ """Validate the original raw result before any scanner or decoder work."""
+ import tools.validation_reliability as _f
+ state = _f._ordinary_source_data_operand_original_v1(self,
+  allocation['component'], allocation)
+ source = state['source']
+ original = allocation['original']
+ result = allocation['raw_result_original']
+ _f._preflight_require_v1(any(item is allocation for item in state['allocations'])
+  and type(original) is tuple and len(original) == 16
+  and original[0] is allocation and original[1] is self
+  and original[2] is source and original[3] is allocation['component']
+  and original[4] is allocation['row'] and original[9] is allocation['layout']
+  and original == (allocation, self, source, allocation['component'],
+   allocation['row'], allocation['path'], allocation['version'],
+   allocation['kind'], allocation['n'], allocation['layout'],
+   allocation['deadline_ns'], allocation['read_exposure'],
+   allocation['attempt_exposure'], allocation['attempt_start'],
+   allocation['byte_start'], allocation['data_byte_limit'])
+  and source.row_index[allocation['path']] is allocation['row']
+  and tuple(source.post[allocation['path']]) == allocation['version']
+  and allocation['raw_attempted'] and allocation['raw_complete']
+  and not allocation['raw_running'] and not allocation['raw_credit_open']
+  and allocation['error'] is None
+  and type(allocation['raw']) is bytes
+  and len(allocation['raw']) == allocation['n']
+  and type(result) is tuple and len(result) == 6
+  and result[0] is allocation and result[1] is allocation['raw']
+  and result[2] == allocation['version'] and result[3] == allocation['n']
+  and result[4] == allocation['actual_read'] == allocation['n']
+  and type(result[5]) is int
+  and result[5] == allocation['actual_read_attempts']
+  and 0 < result[5] <= allocation['attempt_exposure'],
+  'ORDINARY_DATA_ORIGINAL_COMPLETED_RAW_RESULT')
+ self._ordinary_source_data_live_credit_v1(state)
+ return allocation
+
+
+def _facet_m_source_data_scan_v1(self, allocation, *,
+  maximum_depth, jsonl_span_limit, managed_request):
+ import tools.validation_reliability as _f
+ state = _f._ordinary_source_data_operand_original_v1(self,
+  allocation['component'], allocation)
+ self._ordinary_source_data_raw_binding_check_v1(allocation)
+ _f._preflight_require_v1(allocation['kind'] in ('JSON', 'JSONL')
+  and allocation['raw_complete'] and type(allocation['raw']) is bytes
+  and len(allocation['raw']) == allocation['n']
+  and type(maximum_depth) is int and 1 <= maximum_depth <= allocation['n'] + 1
+  and type(jsonl_span_limit) is int and 1 <= jsonl_span_limit <= allocation['n'] + 1,
+  'ORDINARY_DATA_SCAN_ORIGINAL_RAW_AND_FINITE_COUNTS')
+ n = len(allocation['raw'])
+ _f._preflight_require_v1(type(managed_request) is dict
+  and managed_request['payload_byte_request'] == 0,
+  'ORDINARY_DATA_SCAN_RAW_ALIAS_ONLY')
+ allowance = dict(raw_byte_limit=allocation['data_byte_limit'],
+  utf8_codepoint_limit=n, maximum_depth=maximum_depth,
+  jsonl_span_limit=jsonl_span_limit, lexical_visit_limit=32 * n + 32,
+  deadline_ns=state['deadline_ns'])
+ bounds = tuple(allowance.items())
+ issued = self._ordinary_source_data_managed_request_issue_v1(allocation,
+  stage='scan', bounds=bounds, managed_request=managed_request)
+ issued['allowance'] = allowance
+ retained = {}
+ issued['retained_record'] = retained
+ issued['attempted'] = True
+ try:
+  scan = _f._ordinary_source_data_lexical_admission_v1(allocation['raw'],
+   kind=allocation['kind'], scan_allowance=allowance, record=retained,
+   parser_programme=allocation['parser_programme'],
+   source_binding=(self, state['runtime_layout']['original_source_association'],
+    _f._ordinary_source_data_lexical_admission_v1))
+  issued['scan'] = scan
+  issued['complete'] = True
+  return scan
+ except BaseException as error:
+  issued['error'] = error
+  allocation['error'] = error
+  allocation['errors'] = (error,)
+  if not any(error is prior for prior in self._ordinary_factory_errors_v1):
+   self._ordinary_factory_errors_v1.append(error)
+  raise
+
+
+def _facet_m_source_data_frozen_check_v1(self, allocation):
+ """Component checker only; native programme Python operands stay unchanged."""
+ import tools.validation_reliability as _f
+ state = _f._ordinary_source_data_operand_original_v1(self,
+  allocation['component'], allocation)
+ self._ordinary_source_data_raw_binding_check_v1(allocation)
+ original = allocation['original']
+ _f._preflight_require_v1(any(item is allocation for item in state['allocations'])
+  and original == (allocation, self, state['source'], allocation['component'],
+   allocation['row'], allocation['path'], allocation['version'],
+   allocation['kind'], allocation['n'], allocation['layout'],
+   allocation['deadline_ns'], allocation['read_exposure'],
+   allocation['attempt_exposure'], allocation['attempt_start'],
+   allocation['byte_start'], allocation['data_byte_limit'])
+  and state['source'].row_index[allocation['path']] is allocation['row']
+  and tuple(state['source'].post[allocation['path']]) == allocation['version']
+  and allocation['raw_attempted'] and allocation['raw_complete']
+  and not allocation['raw_running'] and not allocation['raw_credit_open']
+  and allocation['error'] is None
+  and type(allocation['raw']) is bytes
+  and len(allocation['raw']) == allocation['n'],
+  'ORDINARY_DATA_FROZEN_ORIGINAL_RAW_ALLOCATION')
+ for name, issued in allocation['stages'].items():
+  _f._preflight_require_v1(name in ('scan', 'construction')
+   and issued['stage'] == name and issued['attempted']
+   and issued['complete'] and issued['error'] is None
+   and issued['deadline_ns'] == state['deadline_ns']
+   and tuple(issued['allowance'].items()) == issued['request']
+   and tuple((key, value)
+    for key, value in issued['managed_request'].items()
+    if key != 'original') == issued['managed_request']['original'],
+   'ORDINARY_DATA_FROZEN_STAGE')
+ _f._preflight_require_v1((allocation['kind'] == 'BINARY'
+   and not allocation['stages']) or
+  (allocation['kind'] in ('JSON', 'JSONL')
+   and tuple(allocation['stages']) == ('scan', 'construction')),
+  'ORDINARY_DATA_FROZEN_SELECTED_INTERPRETATION')
+ if allocation['kind'] != 'BINARY':
+  scan = allocation['stages']['scan']['scan']
+  _f._preflight_require_v1(type(scan) is dict
+   and scan['raw'] is allocation['raw']
+   and type(scan['original']) is tuple and len(scan['original']) == 9
+   and scan['parser_programme'] == allocation['parser_programme']
+   and scan['original'][8] == allocation['parser_programme'],
+   'ORDINARY_DATA_FROZEN_SOURCE_SELECTED_PARSER')
+ return allocation
+
+
+def _facet_fn_data_nonnegative_v1(value, marker):
+ import tools.validation_reliability as _f
+ _f._preflight_require_v1(type(value) is int and value >= 0, marker)
+ return value
+
+
+def _facet_fn_data_align_v1(value, alignment):
+ import tools.validation_reliability as _f
+ if type(value) is not int or value < 0 or type(alignment) is not int or alignment <= 0:
+  raise ValueError("SOURCE_DATA_LAYOUT_ALIGNMENT")
+ return ((value + alignment - 1) // alignment) * alignment
+
+
+def _facet_fn_data_size_v1(layout, name):
+ import tools.validation_reliability as _f
+ sizes = layout["sizes"]
+ for observed_name, value in sizes:
+  if observed_name == name:
+   if type(value) is not int or value < 0:
+    raise ValueError("SOURCE_DATA_LAYOUT_SIZE")
+   return value
+ raise ValueError("SOURCE_DATA_LAYOUT_SIZE_MISSING")
+
+
+def _facet_fn_data_bytes_request_v1(layout, length):
+ import tools.validation_reliability as _f
+ return _f._ordinary_data_size_v1(layout, "bytes_prefix") + length
+
+
+def _facet_fn_data_buffer_request_v1(layout, length):
+ import tools.validation_reliability as _f
+ return (_f._ordinary_data_size_v1(layout, "bytearray_prefix")
+  + (length + 1 if length else 0))
+
+
+def _facet_fn_data_unicode_request_v1(layout, codepoints):
+ import tools.validation_reliability as _f
+ return _f._ordinary_data_size_v1(layout, "unicode_prefix") + 4 * (codepoints + 1)
+
+
+def _facet_fn_data_tuple_request_v1(layout, slots):
+ import tools.validation_reliability as _f
+ return (_f._ordinary_data_size_v1(layout, "tuple_prefix")
+  + _f._ordinary_data_size_v1(layout, "pointer") * slots)
+
+
+def _facet_fn_data_list_requests_v1(layout, objects, total_slots):
+ import tools.validation_reliability as _f
+ capacity = total_slots + total_slots // 8 + 6 * objects
+ return (_f._ordinary_data_size_v1(layout, "list_prefix") * objects
+  + 2 * _f._ordinary_data_size_v1(layout, "pointer") * capacity)
+
+
+def _facet_fn_data_dict_requests_v1(layout, objects, key_occurrences, *, general=False):
+ import tools.validation_reliability as _f
+ if not objects:
+  if key_occurrences:
+   raise ValueError("SOURCE_DATA_DICT_KEYS_WITHOUT_OBJECT")
+  return 0
+ total_capacity = 8 * objects + 6 * key_occurrences
+ maximum_capacity = 8 + 6 * key_occurrences
+ index_width = (1 if maximum_capacity < 256 else
+  2 if maximum_capacity < 65536 else
+  4 if maximum_capacity < 1 << 32 else 8)
+ entry_width = _f._ordinary_data_size_v1(layout,
+  "dict_general_entry" if general else "dict_unicode_entry")
+ tables = (_f._ordinary_data_size_v1(layout, "dict_keys_prefix") * objects
+  + total_capacity * index_width + (2 * total_capacity // 3) * entry_width)
+ return _f._ordinary_data_size_v1(layout, "dict_prefix") * objects + 2 * tables
+
+
+def _facet_fn_data_integer_requests_v1(layout, tokens, decimal_digits):
+ import tools.validation_reliability as _f
+ bits = _f._ordinary_data_size_v1(layout, "int_digit_bits")
+ digit_bytes = _f._ordinary_data_size_v1(layout, "int_digit_bytes")
+ digits = (4 * decimal_digits + bits - 1) // bits + 2 * tokens
+ return (_f._ordinary_data_size_v1(layout, "int_prefix") * tokens
+  + digit_bytes * digits)
+
+
+def _facet_fn_data_dtoa_requests_v1(layout):
+ import tools.validation_reliability as _f
+ owners = ("bb", "bd", "bd0", "bs", "delta", "replacement")
+ bit_bound = 4 * 40 + 3 * 535 + (535 + 1074 + 1) + 32
+ words = (bit_bound + 31) // 32
+ pool = 0
+ while (1 << pool) < words:
+  pool += 1
+ if pool > 7:
+  raise ValueError("SOURCE_DATA_DTOA_POOL_SOURCE_BOUND")
+ header = _f._ordinary_data_size_v1(layout, "dtoa_bigint_size")
+ double_bytes = _f._ordinary_data_size_v1(layout, "double")
+ one_owner = 0
+ for index in range(pool + 1):
+  requested = header + ((1 << index) - 1) * 4
+  one_owner += _f._ordinary_data_align_v1(requested, double_bytes)
+ return len(owners) * one_owner
+
+
+def _facet_fn_data_control_components_v1(layout, *, demand_fields,
+  record_fields, span_limit, depth_limit, catalogue_entries):
+ import tools.validation_reliability as _f
+ pointer = _f._ordinary_data_size_v1(layout, "pointer")
+ if (type(catalogue_entries) is not int or not 0 <= catalogue_entries <= 3 * (2000000 + 1)
+   or type(depth_limit) is not int or not 0 <= depth_limit <= (1 << 27) + 1
+   or type(span_limit) is not int or not 0 <= span_limit <= (1 << 27) + 1):
+  raise ValueError("SOURCE_DATA_SUPPORTED_CONTROL_OPERANDS")
+ scalar = _f._ordinary_data_size_v1(layout, "control_integer")
+ components = []
+ components.append(("data_allocation_stage_and_cache_records",
+  _f._ordinary_data_dict_requests_v1(layout, 5, 34 + 2 + 20 + 2 * 20)))
+ components.append(("emitter_owned_products_and_two_stage_records",
+  _f._ordinary_data_dict_requests_v1(layout, 3, 2 + 2 * 11)))
+ components.append(("emitter_product_owner_and_stage_originals",
+  _f._ordinary_data_tuple_request_v1(layout, 5)
+  + 2 * (_f._ordinary_data_tuple_request_v1(layout, 7)
+   + _f._ordinary_data_tuple_request_v1(layout, 9))))
+ components.append(("emitter_source_basis_validation",
+  _f._ordinary_data_tuple_request_v1(layout, 1)
+  + _f._ordinary_data_tuple_request_v1(layout, 2)))
+
+ components.append(("data_raw_original_and_result",
+  _f._ordinary_data_tuple_request_v1(layout, 16)
+  + _f._ordinary_data_tuple_request_v1(layout, 6)))
+ components.append(("scanner_record", _f._ordinary_data_dict_requests_v1(
+  layout, 1, record_fields)))
+ components.append(("scanner_counts_and_demand", _f._ordinary_data_dict_requests_v1(
+  layout, 2, 2 * demand_fields)))
+ components.append(("scanner_counter_values", 2 * demand_fields * scalar))
+ components.append(("scanner_active_frames", _f._ordinary_data_list_requests_v1(
+  layout, depth_limit, 2 * depth_limit)))
+ components.append(("scanner_stack", _f._ordinary_data_list_requests_v1(
+  layout, 1, depth_limit)))
+ components.append(("scanner_frame_scalar_values", 2 * depth_limit * scalar))
+ components.append(("scanner_span_pairs", span_limit * (
+  _f._ordinary_data_tuple_request_v1(layout, 2) + 2 * scalar)))
+ components.append(("scanner_span_list", _f._ordinary_data_list_requests_v1(
+  layout, 1, span_limit)))
+ components.append(("scanner_span_freeze", _f._ordinary_data_tuple_request_v1(
+  layout, span_limit)))
+ components.append(("scanner_demand_pairs", demand_fields *
+  _f._ordinary_data_tuple_request_v1(layout, 2)))
+ components.append(("scanner_demand_freeze", _f._ordinary_data_tuple_request_v1(
+  layout, demand_fields)))
+ components.append(("scanner_original", _f._ordinary_data_tuple_request_v1(layout, 9)))
+ components.append(("scanner_demand_revalidation", demand_fields *
+  _f._ordinary_data_tuple_request_v1(layout, 2)
+  + _f._ordinary_data_tuple_request_v1(layout, demand_fields)))
+ components.append(("allowance_validation_lists", _f._ordinary_data_list_requests_v1(
+  layout, 2, 6 + 8)))
+ components.append(("allowance_validation_tuples",
+  _f._ordinary_data_tuple_request_v1(layout, 6)
+  + _f._ordinary_data_tuple_request_v1(layout, 8)))
+ components.append(("allowance_objects", _f._ordinary_data_dict_requests_v1(
+  layout, 2, 6 + 8)))
+ components.append(("catalogue_validation_seen_lists",
+  _f._ordinary_data_list_requests_v1(layout, 2, 2 * (catalogue_entries + 1))))
+ components.append(("catalogue_new_credit_tuple",
+  _f._ordinary_data_tuple_request_v1(layout, 7)))
+ for name, size in layout["fixed_programme_components"]:
+  components.append(("fixed_programme/" + name, size))
+ families = 64 + len(layout["fixed_programme_components"])
+ components.append(("request_component_pairs", families *
+  _f._ordinary_data_tuple_request_v1(layout, 2)))
+ components.append(("request_component_list_and_freeze",
+  _f._ordinary_data_list_requests_v1(layout, 1, families)
+  + _f._ordinary_data_tuple_request_v1(layout, families)))
+ components.append(("request_component_integer_values", families * scalar))
+ components.append(("request_fixed_component_names",
+  len(layout["fixed_programme_components"]) *
+   _f._ordinary_data_size_v1(layout, "unicode_prefix")
+  + 4 * (layout["fixed_name_codepoints"]
+   + 17 * len(layout["fixed_programme_components"]))))
+ components.append(("request_original_and_fields",
+  _f._ordinary_data_dict_requests_v1(layout, 2, 2 * 10)
+  + 9 * _f._ordinary_data_tuple_request_v1(layout, 2)
+  + _f._ordinary_data_tuple_request_v1(layout, 9)))
+ components.append(("issuer_validation_tuple_carriers",
+  _f._ordinary_data_tuple_request_v1(layout, catalogue_entries + 1)
+  + _f._ordinary_data_tuple_request_v1(layout, 7)))
+ return components
+
+
+def _facet_fn_data_components_v1(layout, *, stage, parser_programme, n,
+  bounds, demand=None, catalogue_entries=0):
+ import tools.validation_reliability as _f
+ if parser_programme not in ("RAW_BYTES_V1", "JSON_DEFAULT_V1",
+   "JSONL_SPLITLINES_TUPLE_V1", "JSONL_TEXTIO_LIST_V1"):
+  raise ValueError("SOURCE_DATA_PARSER_PROGRAMME")
+ if type(n) is not int or not 0 <= n <= 1 << 27:
+  raise ValueError("SOURCE_DATA_ORIGINAL_EXTENT")
+ if stage == "raw":
+  q = min(65536, n + 1)
+  parts = [
+   ("raw_exact_buffer", _f._ordinary_data_buffer_request_v1(layout, n)),
+   ("raw_immutable_result", _f._ordinary_data_bytes_request_v1(layout, n)),
+   ("raw_read_block", _f._ordinary_data_bytes_request_v1(layout, q)),
+   ("raw_rhs_bytearray", _f._ordinary_data_buffer_request_v1(layout, q)),
+   ("raw_slice", _f._ordinary_data_size_v1(layout, "slice")),
+   ("raw_slice_indices", 2 * _f._ordinary_data_size_v1(layout, "control_integer")),
+  ]
+  parts.extend(_f._ordinary_data_control_components_v1(layout,
+   demand_fields=24, record_fields=24, span_limit=0, depth_limit=0,
+   catalogue_entries=catalogue_entries))
+  return tuple(parts), q, None
+ if stage == "scan":
+  if type(bounds) is not tuple or len(bounds) != 6:
+   raise ValueError("SOURCE_DATA_SCAN_BOUNDS")
+  depth, spans = bounds[2], bounds[3]
+  parts = _f._ordinary_data_control_components_v1(layout, demand_fields=24,
+   record_fields=24, span_limit=spans, depth_limit=depth,
+   catalogue_entries=catalogue_entries)
+  return tuple(parts), 0, bounds
+ if stage != "construction" or type(demand) is not dict:
+  raise ValueError("SOURCE_DATA_CONSTRUCTION_DEMAND")
+ names = ("raw_bytes", "utf8_codepoints", "decoded_codepoints", "json_nodes",
+  "json_string_codepoints_bound", "json_number_bytes",
+  "json_container_slots", "json_records", "maximum_depth",
+  "maximum_decode_slice_bytes", "maximum_decoded_line_codepoints",
+  "lexical_visits", "clock_checks", "splitline_records", "splitline_codepoints",
+  "json_string_tokens", "json_array_tokens", "json_object_tokens",
+  "json_object_keys", "json_integer_tokens", "json_integer_digits",
+  "maximum_integer_digits", "json_float_tokens",
+  "maximum_float_significant_digits")
+ if set(demand) != set(names) or any(type(demand[k]) is not int or demand[k] < 0
+   for k in names) or demand["raw_bytes"] != n:
+  raise ValueError("SOURCE_DATA_ORIGINAL_CLASS_DEMAND")
+ if demand["maximum_integer_digits"] > 6000:
+  raise ValueError("SOURCE_DATA_UNSUPPORTED_PYLONG_DECIMAL")
+ if demand["maximum_float_significant_digits"] > 40:
+  raise ValueError("SOURCE_DATA_UNSUPPORTED_DTOA_BIGCOMP")
+ S, A, O, K = (demand[k] for k in ("json_string_tokens", "json_array_tokens",
+  "json_object_tokens", "json_object_keys"))
+ I, F = demand["json_integer_tokens"], demand["json_float_tokens"]
+ R = demand["json_records"]
+ generic = parser_programme == "JSONL_SPLITLINES_TUPLE_V1"
+ physical = parser_programme == "JSONL_TEXTIO_LIST_V1"
+ if not (generic or physical or parser_programme == "JSON_DEFAULT_V1"):
+  raise ValueError("SOURCE_DATA_DECODE_PROGRAMME")
+ array_slots = demand["json_container_slots"] - 2 * K - (
+  (2 if generic else 1) * R if generic or physical else 0)
+ if array_slots < 0:
+  raise ValueError("SOURCE_DATA_ARRAY_SLOT_DEMAND")
+ parts = [
+  ("json_arrays", _f._ordinary_data_list_requests_v1(layout, A, array_slots)),
+  ("json_objects", _f._ordinary_data_dict_requests_v1(layout, O, K)),
+  ("json_key_memo", _f._ordinary_data_dict_requests_v1(layout, 1, K)),
+  ("json_string_results", S * _f._ordinary_data_size_v1(layout, "unicode_prefix")
+   + 4 * (demand["json_string_codepoints_bound"] + S)),
+  ("json_current_string_writer", 2 * _f._ordinary_data_unicode_request_v1(layout,
+   demand["json_string_codepoints_bound"]
+   + demand["json_string_codepoints_bound"] // 4)),
+  ("json_unicode_writer_struct", _f._ordinary_data_size_v1(layout, "unicode_writer")),
+  ("json_integer_results", _f._ordinary_data_integer_requests_v1(layout,
+   I, demand["json_integer_digits"])),
+  ("json_integer_replacement", _f._ordinary_data_integer_requests_v1(layout,
+   1 if I else 0, demand["maximum_integer_digits"] if I else 0)),
+  ("json_float_results", F * _f._ordinary_data_size_v1(layout, "float")),
+  ("json_nonfinite_constant_token", _f._ordinary_data_unicode_request_v1(layout, 9)
+   if F else 0),
+  ("json_number_ascii_token", _f._ordinary_data_bytes_request_v1(layout,
+   demand["json_number_bytes"]) if I or F else 0),
+  ("json_dtoa_retained_pool_requests", _f._ordinary_data_dtoa_requests_v1(layout) if F else 0),
+  ("json_scanner_return_tuple", _f._ordinary_data_tuple_request_v1(layout, 2)),
+  ("json_scanner_return_index", _f._ordinary_data_size_v1(layout, "control_integer")),
+  ("json_whitespace_match", _f._ordinary_data_size_v1(layout, "regex_match")),
+  ("json_whitespace_sre_stack", _f._ordinary_data_size_v1(layout, "regex_stack")),
+ ]
+ if physical:
+  line = demand["maximum_decoded_line_codepoints"]
+  q = demand["maximum_decode_slice_bytes"]
+  parts.extend([
+   ("physical_jsonl_current_bytes", _f._ordinary_data_bytes_request_v1(layout, q)),
+   ("physical_jsonl_current_unicode", 2 * _f._ordinary_data_unicode_request_v1(layout, line)),
+   ("physical_jsonl_result_list", _f._ordinary_data_list_requests_v1(layout, 1, R)),
+  ])
+  payload = q
+ else:
+  parts.append(("source_full_decoded_text", 2 * _f._ordinary_data_unicode_request_v1(
+   layout, demand["utf8_codepoints"])))
+  payload = 0
+  if generic:
+   parts.extend([
+    ("generic_splitlines_strings",
+     demand["splitline_records"] * _f._ordinary_data_size_v1(layout, "unicode_prefix")
+     + 4 * (demand["splitline_codepoints"] + demand["splitline_records"])),
+    ("generic_splitlines_list", _f._ordinary_data_list_requests_v1(
+     layout, 1, demand["splitline_records"])),
+    ("generic_strip_temporary", _f._ordinary_data_unicode_request_v1(
+     layout, demand["maximum_decoded_line_codepoints"])),
+    ("generic_values_list", _f._ordinary_data_list_requests_v1(layout, 1, R)),
+    ("generic_final_tuple", _f._ordinary_data_tuple_request_v1(layout, R)),
+   ])
+ parts.append(("constructor_error_message",
+  _f._ordinary_data_unicode_request_v1(layout,
+   n + layout["fixed_error_codepoints"] + 2 * 39)))
+ parts.extend(_f._ordinary_data_control_components_v1(layout, demand_fields=24,
+  record_fields=24, span_limit=R if generic or physical else 0,
+  depth_limit=demand["maximum_depth"], catalogue_entries=catalogue_entries))
+ heap = sum(size for _, size in parts)
+ ctor_bounds = tuple(demand[k] for k in ("decoded_codepoints", "json_nodes",
+  "json_string_codepoints_bound", "json_number_bytes",
+  "json_container_slots", "json_records")) + (heap, bounds[5])
+ return tuple(parts), payload, ctor_bounds
+
+
+def _facet_fn_data_code_tree_v1(code):
+ import tools.validation_reliability as _f
+ import types
+ if type(code) is not types.CodeType:
+  raise ValueError("SOURCE_DATA_AUTHENTIC_CODE_OBJECT")
+ result = [code]
+ for item in code.co_consts:
+  if type(item) is types.CodeType:
+   result.extend(_f._ordinary_data_code_tree_v1(item))
+ return tuple(result)
+
+
+def _facet_fn_data_controller_observation_check_v1(scope, install_record, observation):
+ import tools.validation_reliability as _f
+ import sys
+ import json
+ if (type(install_record) is not dict
+   or install_record is not scope._ordinary_installation_copy_v1
+   or install_record is not scope._ordinary_original_installation_copy_v1
+   or install_record["scope"] is not scope):
+  raise ValueError("SOURCE_DATA_ORIGINAL_INSTALLATION_RECORD")
+ old = install_record["original"]
+ install = install_record["install"]
+ if (type(old) is not tuple or len(old) != 17 or old[0] is not install_record
+   or old[1] is not scope or old[2] is not install
+   or old[3] is not install_record["census"]
+   or old[4] is not install_record["programme"]
+   or old[5] is not install_record["image"]
+   or old[6] is not install_record["destination"]
+   or old[7] is not install.rows or old[8] is not install.native
+   or old[9] is not install.files or old[10] is not install.directories
+   or old[11] is not install_record["active_slots"]
+   or old[12] is not install_record["errors"]
+   or old[13] is not install_record["owner"]
+   or old[14] is not scope._ordinary_meter_v1
+   or old[15] is not install_record["source_paths"]
+   or old[16] is not install_record["target_paths"]
+   or old[13] != (_f.os.getpid(), _f.threading.get_ident())):
+  raise ValueError("SOURCE_DATA_INSTALLATION_ORIGINAL_17")
+ if (type(observation) is not dict
+   or observation is not install_record.get("controller_constructor_observation")
+   or observation.get("scope") is not scope
+   or observation.get("installation_record") is not install_record
+   or observation.get("census") is not install_record["census"]
+   or observation.get("native_owner") is not install.native):
+  raise ValueError("SOURCE_DATA_EXACT_CONTROLLER_OBSERVATION")
+ frozen = observation["original"]
+ if type(frozen) is not tuple or frozen != tuple(
+   (key,value) for key,value in observation.items() if key != "original"):
+  raise ValueError("SOURCE_DATA_OBSERVATION_FIELDS_CHANGED")
+ attempt = observation["attempt"]
+ old_attempt = attempt["original"]
+ if (attempt is not install_record["controller_constructor_observation_attempt"]
+   or type(old_attempt) is not tuple or len(old_attempt) != 5
+   or old_attempt[0] is not attempt or old_attempt[1] is not scope
+   or old_attempt[2] is not install_record
+   or old_attempt[3] != install_record["owner"]
+   or old_attempt[4] is not attempt["errors"]
+   or attempt["complete"] is not True
+   or attempt["result"] is not observation or attempt["errors"]):
+  raise ValueError("SOURCE_DATA_ORIGINAL_OBSERVATION_ATTEMPT")
+ origin = observation["runtime_origin"]
+ original_origin = origin["original"]
+ if (origin is not install_record["controller_runtime_origin"]
+   or type(original_origin) is not tuple or len(original_origin) != 7
+   or original_origin[0] is not origin or original_origin[1] is not install_record
+   or original_origin[2] is not install.native
+   or original_origin[3] != install_record["owner"]
+   or original_origin[4] is not origin["actor"]
+   or original_origin[5] is not origin["role_rows"]
+   or original_origin[6] is not origin["errors"]
+   or origin["complete"] is not True or origin["errors"]):
+  raise ValueError("SOURCE_DATA_ORIGINAL_NATIVE_ORIGIN")
+ actor = observation["actor"]
+ if (actor is not origin["actor"] or type(actor) is not tuple or len(actor) != 4
+   or actor[0] != _f.os.getpid() or actor[2] != _f.threading.get_ident()
+   or actor[3] != _f.threading.get_native_id()):
+  raise ValueError("SOURCE_DATA_SAME_CURRENT_CONTROLLER")
+ for role,mode,row,version,raw,alias,binding,public in observation["role_snapshots"]:
+  if (install.row_index.get(row["path"]) is not row
+    or row["kind"] != "file" or tuple(row["version"]) != version
+    or type(raw) is not bytes or install.files.get(row["path"]) is not raw):
+   raise ValueError("SOURCE_DATA_INSTALLER_GENERATION_CHANGED")
+  if role == "executable":
+   current = (sys.executable,)
+  elif role == "libpython":
+   current = (mode,)
+  else:
+   module_name = "json" if role == "json.__init__" else role
+   module = sys.modules[module_name]
+   spec = module.__spec__
+   current = (module,spec,spec.origin,spec.loader,
+    getattr(module,"__file__",None),getattr(module,"__cached__",None))
+  if current != public:
+   raise ValueError("SOURCE_DATA_LOADED_ORIGIN_CHANGED")
+ if any(sys.modules.get(name) is not module for name,module in observation["module_objects"]):
+  raise ValueError("SOURCE_DATA_LOADED_MODULE_CHANGED")
+ decoder = json._default_decoder
+ actual = dict(observation["module_objects"])
+ whitespace = actual["json.decoder"].WHITESPACE
+ if (observation["decoder_objects"] != (json.loads,decoder,json.JSONDecoder.decode,
+   json.JSONDecoder.raw_decode,decoder.scan_once,decoder.parse_int,
+   decoder.parse_float,decoder.parse_constant,whitespace)
+   or type(decoder) is not json.JSONDecoder or decoder.strict is not True
+   or decoder.object_hook is not None or decoder.object_pairs_hook is not None
+   or decoder.parse_int is not int or decoder.parse_float is not float
+   or getattr(decoder.parse_constant,"__self__",None) is not actual["json.decoder"]._CONSTANTS
+   or getattr(decoder.parse_constant,"__name__",None) != "__getitem__"
+   or actual["json.scanner"].make_scanner is not actual["_json"].make_scanner
+   or type(decoder.scan_once) is not actual["_json"].make_scanner
+   or whitespace.pattern != r"[ \t\n\r]*" or whitespace.groups != 0):
+  raise ValueError("SOURCE_DATA_DEFAULT_DECODER_CHANGED")
+ public_runtime = (sys.implementation.name,tuple(sys.version_info[:3]),
+  sys._is_gil_enabled(),sys.int_info.bits_per_digit,
+  sys.int_info.sizeof_digit,sys.float_repr_style,
+  (sys.float_info.mant_dig,sys.float_info.max_exp,sys.float_info.min_exp))
+ if (sys.gettrace() is not None or sys.getprofile() is not None
+   or public_runtime != observation["public_runtime"]):
+  raise ValueError("SOURCE_DATA_OBSERVED_RUNTIME_OR_CALLBACKS_CHANGED")
+ for rows in (observation["control_source_rows"],observation["delegated_control_rows"]):
+  for name,function,code,source_observation in rows:
+   if function.__code__ is not code:
+    raise ValueError("SOURCE_DATA_ACTUAL_CONTROL_CODE_CHANGED")
+ return observation
+
+
+def _ordinary_initial_abi_observation_v1():
+    """Observe the original supported ABI; issue no Source or heap permission.
+
+    The original calling programme owns and prospectively funds this entire
+    import/probe/frame/error prefix. Its actual native/startup/Source binding
+    remains a caller obligation. No caller supplies a positive layout.
+    """
+    import sys
+    import json
+    if (sys.implementation.name != "cpython"
+      or tuple(sys.version_info[:3]) != (3, 14, 6)
+      or not sys._is_gil_enabled()
+      or sys.gettrace() is not None or sys.getprofile() is not None):
+     raise ValueError("SOURCE_DATA_UNSUPPORTED_CONTROLLER_INTERPRETER")
+    whitespace = json.decoder.WHITESPACE
+    if whitespace.pattern != r"[ \t\n\r]*" or whitespace.groups != 0:
+     raise ValueError("SOURCE_DATA_ORIGINAL_WHITESPACE_REGEX")
+    gc = sys.getsizeof([]) - list.__basicsize__
+    sizes = dict(pointer=8, double=8, gc=gc,
+     bytes_prefix=bytes.__basicsize__, bytearray_prefix=bytearray.__basicsize__,
+     unicode_prefix=str.__basicsize__, tuple_prefix=tuple.__basicsize__ + gc,
+     list_prefix=list.__basicsize__ + gc, dict_prefix=dict.__basicsize__ + gc,
+     dict_keys_prefix=32, dict_unicode_entry=16, dict_general_entry=24,
+     int_prefix=int.__basicsize__, int_digit_bits=sys.int_info.bits_per_digit,
+     int_digit_bytes=sys.int_info.sizeof_digit, float=float.__basicsize__,
+     slice=slice.__basicsize__ + gc,
+     unicode_writer=56, dtoa_bigint_size=32,
+     regex_match=sys.getsizeof(whitespace.match("")),
+     regex_stack=56 + 56 // 4 + 1024,
+     control_integer=int.__basicsize__ + 4 * ((128 + 29) // 30))
+    if (gc != 16 or sizes["bytes_prefix"] != 33
+      or sizes["bytearray_prefix"] != 56 or sizes["unicode_prefix"] != 64
+      or sizes["tuple_prefix"] != 48 or sizes["list_prefix"] != 56
+      or sizes["dict_prefix"] != 64 or sizes["int_prefix"] != 24
+      or sizes["int_digit_bits"] != 30 or sizes["int_digit_bytes"] != 4
+      or sizes["float"] != 24):
+     raise ValueError("SOURCE_DATA_ACTUAL_SUPPORTED_OBJECT_LAYOUT")
+    tiny = (("bytes", tuple(sys.getsizeof(bytes(i)) for i in (0, 1, 2))),
+     ("bytearray", tuple(sys.getsizeof(bytearray(i)) for i in (0, 1, 2))),
+     ("tuple", tuple(sys.getsizeof((None,) * i) for i in (0, 1, 2))),
+     ("list", sys.getsizeof([])), ("dict", sys.getsizeof({})),
+     ("unicode_ascii", sys.getsizeof("ab")),
+     ("unicode_ucs2", sys.getsizeof("\u0100\u0100")),
+     ("unicode_ucs4", sys.getsizeof("\U00010000\U00010000")))
+    if (tiny[0][1] != (33, 34, 35) or tiny[1][1] != (56, 58, 59)
+      or tiny[2][1] != (48, 56, 64) or tiny[3][1] != 56
+      or tiny[4][1] != 64 or tiny[5][1] != 43
+      or tiny[6][1] != 62 or tiny[7][1] != 68):
+     raise ValueError("SOURCE_DATA_ACTUAL_TINY_LAYOUT_MISMATCH")
+    return sizes, tiny
+
+
+def _facet_fn_data_layout_collect_v1(scope, install_record, observation,
+  *, runtime_programme, control_source_rows, delegated_control_rows,
+  source_product, operation_rows, interpreter_storage_request):
+ import gc
+ import tools.validation_reliability as _f
+ import sys
+ import types
+ import json
+ _f._ordinary_control_installation_binding_check_v1(scope, install_record,
+  source_product, operation_rows, interpreter_storage_request)
+ original = _f._ordinary_data_controller_observation_check_v1(
+  scope, install_record, observation)
+ if (sys.implementation.name != "cpython"
+   or tuple(sys.version_info[:3]) != (3, 14, 6)
+   or not sys._is_gil_enabled()
+   or sys.gettrace() is not None or sys.getprofile() is not None):
+  raise ValueError("SOURCE_DATA_UNSUPPORTED_CONTROLLER_INTERPRETER")
+ modules = original["module_objects"]
+ if (type(modules) is not tuple or tuple(name for name, _ in modules) !=
+   ("json", "json.decoder", "json.scanner", "_json", "_sre")
+   or any(sys.modules.get(name) is not module for name, module in modules)):
+  raise ValueError("SOURCE_DATA_LOADED_MODULE_IDENTITY")
+ actual = dict(modules)
+ decoder = json._default_decoder
+ scanner = actual["json.scanner"]
+ _json = actual["_json"]
+ if (json is not actual["json"] or type(decoder) is not json.JSONDecoder
+   or decoder.strict is not True or decoder.object_hook is not None
+   or decoder.object_pairs_hook is not None or decoder.parse_int is not int
+   or decoder.parse_float is not float
+   or decoder.parse_constant.__self__ is not actual["json.decoder"]._CONSTANTS
+   or scanner.make_scanner is not _json.make_scanner
+   or type(decoder.scan_once) is not _json.make_scanner
+   or scanner.c_make_scanner is not _json.make_scanner
+   or actual["json.decoder"].scanstring is not _json.scanstring):
+  raise ValueError("SOURCE_DATA_ORIGINAL_DEFAULT_DECODER_BINDING")
+ whitespace = actual["json.decoder"].WHITESPACE
+ if whitespace.pattern != r"[ \t\n\r]*" or whitespace.groups != 0:
+  raise ValueError("SOURCE_DATA_ORIGINAL_WHITESPACE_REGEX")
+ if original["decoder_objects"] != (json.loads, decoder,
+   json.JSONDecoder.decode, json.JSONDecoder.raw_decode,
+   decoder.scan_once, decoder.parse_int, decoder.parse_float,
+   decoder.parse_constant, whitespace):
+  raise ValueError("SOURCE_DATA_ACTUAL_DECODER_OBJECT_OBSERVATION")
+ sizes, tiny = _ordinary_initial_abi_observation_v1()
+ if (type(control_source_rows) is not tuple or not control_source_rows
+   or type(delegated_control_rows) is not tuple
+   or original["delegated_control_rows"] is not delegated_control_rows):
+  raise ValueError("SOURCE_DATA_ORIGINAL_CONTROL_SOURCE_CLOSURE")
+ all_codes = []
+ code_rows = []
+ for name, function, actual_code, source_observation in control_source_rows + delegated_control_rows:
+  if (type(function) is not types.FunctionType or function.__code__ is not actual_code
+    or original["control_source_rows"] is not control_source_rows):
+   raise ValueError("SOURCE_DATA_CONTROL_COMPILED_SOURCE_ASSOCIATION")
+  tree = _f._ordinary_data_code_tree_v1(function.__code__)
+  code_rows.append((name, function, actual_code, source_observation, tree))
+  for code in tree:
+   if all(code is not seen for seen in all_codes):
+    all_codes.append(code)
+ associated_rows = _f._ordinary_control_source_product_check_v1(scope, source_product)
+ expected_rows = control_source_rows + delegated_control_rows
+ if (len(associated_rows) != len(expected_rows) or any(
+   a[0] != b[0] or a[1] is not b[1] or a[2] is not b[2] or a[3] is not b[3]
+   for a, b in zip(associated_rows, expected_rows))):
+  raise ValueError("SOURCE_DATA_SAME_ORIGINAL_SOURCE_ASSOCIATION")
+ incidence = _f._ordinary_control_frame_demands_v1(scope, source_product, operation_rows,
+  frame_basicsize=types.FrameType.__basicsize__,
+  traceback_basicsize=types.TracebackType.__basicsize__,
+  function_basicsize=types.FunctionType.__basicsize__,
+  cell_basicsize=types.CellType.__basicsize__,
+  tuple_prefix=sizes["tuple_prefix"], gc_header_size=gc, pointer_size=8,
+  interpreter_storage_request=interpreter_storage_request)
+ fixed = list(incidence["programme_components"])
+ required_roots = ("raw_binding", "allocator_projection", "live_credit",
+  "managed_issue", "scan_issue", "construction_issue", "emitter",
+  "lexical", "construction", "json.loads", "JSONDecoder.decode",
+  "JSONDecoder.raw_decode", "align", "size", "bytes_request",
+  "buffer_request", "unicode_request", "tuple_request", "list_requests",
+  "dict_requests", "integer_requests", "dtoa_requests",
+  "control_components", "components")
+ if tuple(row[0] for row in control_source_rows) != required_roots:
+  raise ValueError("SOURCE_DATA_FIXED_ORIGINAL_CONTROL_ROOTS")
+ fixed.extend((("source_iterator_carriers",
+  sum(t.__basicsize__ + gc for t in
+   (type(iter(())), type(iter([])), type(iter({})),
+   type(iter({}.items())), type(enumerate(())), type(iter(range(0)))))
+  + types.GeneratorType.__basicsize__ + gc),
+  ("source_bound_method", types.MethodType.__basicsize__ + gc),
+  ("source_exception_carriers",
+   ValueError.__basicsize__ + gc + MemoryError.__basicsize__ + gc
+   + json.JSONDecodeError.__basicsize__ + gc)))
+ result = dict(scope=scope, source=scope.source,
+  runtime_programme=runtime_programme,
+  constructor_law="ORIGINAL_FIXED_BYTES_BYTEARRAY_V1",
+  decoder_law="CPYTHON_3_14_6_GIL_LP64_DEFAULT_JSON_V1",
+  bytes_type=bytes, buffer_type=bytearray,
+  bytes_empty=tiny[0][1][0], bytes_one=tiny[0][1][1], bytes_two=tiny[0][1][2],
+  buffer_empty=tiny[1][1][0], buffer_one=tiny[1][1][1], buffer_two=tiny[1][1][2],
+  fixed_control_demand=sum(size for _, size in fixed),
+  original_source_association=source_product,
+  original_operation_frame_rows=operation_rows,
+  frame_incidence=incidence,
+  constructor_source_observation=original, installation_record=install_record,
+  controller_identity=original["actor"],
+  runtime_origin=original["runtime_origin"],
+  layout_error_owner=install_record["controller_constructor_layout_errors"],
+  sizes=tuple(sizes.items()), tiny_layout_observations=tiny,
+  control_code_rows=tuple(code_rows),
+  fixed_name_codepoints=sum(len(name) for name, _ in fixed),
+  fixed_error_codepoints=sum(len(value) for code in all_codes
+   for value in code.co_consts if type(value) is str) + len(
+    "Exceeds the limit for integer string conversion: value has digits"),
+  startup_storage_components=(("dtoa_p5_cache_request_upper", 776),
+   ("dtoa_inline_private_storage", 2304)),
+  fixed_programme_components=tuple(fixed),
+  raw_fixed_programme_components=tuple(fixed),
+  decoder_objects=original["decoder_objects"], public_runtime=original["public_runtime"],
+  delegated_control_rows=delegated_control_rows)
+ result["original"] = tuple((key, value) for key, value in result.items()
+  if key != "original")
+ return result
+
+
+def _facet_fn_data_runtime_layout_check_v1(scope, programme, layout):
+ import tools.validation_reliability as _f
+ if type(layout) is not dict:
+  raise ValueError("SOURCE_DATA_REAL_INSTALLER_LAYOUT")
+ record = layout["installation_record"]
+ errors = record["controller_constructor_layout_errors"]
+ if (record is not scope._ordinary_installation_copy_v1
+   or record is not scope._ordinary_original_installation_copy_v1
+   or record.get("controller_constructor_layout") is not layout
+   or record.get("controller_constructor_layout_attempted") is not True
+   or layout.get("layout_error_owner") is not errors or errors
+   or layout.get("scope") is not scope or layout.get("source") is not scope.source
+   or layout.get("runtime_programme") is not programme["runtime_programme"]
+   or layout.get("constructor_source_observation") is not
+    record.get("controller_constructor_observation")
+   or layout.get("constructor_law") != "ORIGINAL_FIXED_BYTES_BYTEARRAY_V1"
+   or layout.get("decoder_law") != "CPYTHON_3_14_6_GIL_LP64_DEFAULT_JSON_V1"
+   or layout.get("bytes_type") is not bytes
+   or layout.get("buffer_type") is not bytearray):
+  raise ValueError("SOURCE_DATA_EXACT_INSTALLER_ISSUED_LAYOUT")
+ original = layout["original"]
+ if type(original) is not tuple or original != tuple(
+   (key,value) for key,value in layout.items() if key != "original"):
+  raise ValueError("SOURCE_DATA_LAYOUT_FIELDS_CHANGED")
+ _f._ordinary_data_controller_observation_check_v1(
+  scope, record, layout["constructor_source_observation"])
+ for key in ("sizes","fixed_programme_components",
+   "raw_fixed_programme_components","startup_storage_components"):
+  table = layout[key]
+  if type(table) is not tuple:
+   raise ValueError("SOURCE_DATA_IMMUTABLE_LAYOUT_TABLE")
+  seen = []
+  for name,size in table:
+   if (type(name) is not str or not name or name in seen
+     or type(size) is not int or not 0 <= size < 1 << 127):
+    raise ValueError("SOURCE_DATA_LAYOUT_COMPONENT")
+   seen.append(name)
+ for name,function,code,source_observation,code_tree in layout["control_code_rows"]:
+  if function.__code__ is not code:
+   raise ValueError("SOURCE_DATA_LAYOUT_CONTROL_CODE_CHANGED")
+ return layout
+
+
+def _facet_fn_data_registration_components_v1(layout):
+ import tools.validation_reliability as _f
+ credit_slots = 3 * (2000000 + 1)
+ components = [
+  ("allocator_state_record", _f._ordinary_data_dict_requests_v1(layout, 1, 20)),
+  ("allocator_original18", _f._ordinary_data_tuple_request_v1(layout, 18)),
+  ("allocator_empty_catalogues", _f._ordinary_data_list_requests_v1(layout, 2, 0)),
+  ("preissue_catalogue_seen_peak", _f._ordinary_data_list_requests_v1(
+   layout, 2, 2 * credit_slots)),
+  ("preissue_catalogue_counter_values",
+   8 * _f._ordinary_data_size_v1(layout, "control_integer")),
+  ("runtime_layout_record", _f._ordinary_data_dict_requests_v1(layout, 1, 32)),
+  ("runtime_layout_sizes_table", 32 *
+   _f._ordinary_data_tuple_request_v1(layout, 2)
+   + _f._ordinary_data_tuple_request_v1(layout, 32)),
+  ("runtime_layout_tiny_table", 16 *
+   _f._ordinary_data_tuple_request_v1(layout, 3)),
+ ]
+ components.extend(("controller_bootstrap/" + name, size)
+  for name, size in layout["fixed_programme_components"])
+ components.extend(("controller_startup/" + name, size)
+  for name, size in layout["startup_storage_components"])
+ return tuple(components)
+
+
+def _facet_fn_source_data_limits_v1(value, fields):
+ import tools.validation_reliability as _f
+ if type(value) is not dict or len(value) != len(fields):
+  raise ValueError("SOURCE_DATA_EXACT_ALLOWANCE_FIELDS")
+ result = []
+ for field in fields:
+  item = value.get(field)
+  if type(item) is not int or item < 0:
+   raise ValueError("SOURCE_DATA_ALLOWANCE_INTEGER")
+  if field in ("deadline_ns", "retained_heap_byte_limit") and item == 0:
+   raise ValueError("SOURCE_DATA_POSITIVE_LIFETIME_OR_HEAP")
+  result.append(item)
+ return tuple(result)
+
+
+def _facet_fn_source_data_utf8_scalar_v1(raw, index, end, visit):
+ import tools.validation_reliability as _f
+ first = visit(index)
+ if first < 0x80:
+  return first, 1
+ if 0xC2 <= first <= 0xDF:
+  width, value, minimum = 2, first & 0x1F, 0x80
+ elif 0xE0 <= first <= 0xEF:
+  width, value, minimum = 3, first & 0x0F, 0x800
+ elif 0xF0 <= first <= 0xF4:
+  width, value, minimum = 4, first & 0x07, 0x10000
+ else:
+  raise ValueError("SOURCE_DATA_INVALID_UTF8")
+ if index + width > end:
+  raise ValueError("SOURCE_DATA_TRUNCATED_UTF8")
+ for offset in range(1, width):
+  item = visit(index + offset)
+  if not 0x80 <= item <= 0xBF:
+   raise ValueError("SOURCE_DATA_INVALID_UTF8_CONTINUATION")
+  value = (value << 6) | (item & 0x3F)
+ if value < minimum or 0xD800 <= value <= 0xDFFF or value > 0x10FFFF:
+  raise ValueError("SOURCE_DATA_INVALID_UTF8_SCALAR")
+ return value, width
+
+
+def _facet_fn_source_data_json_span_v1(raw, start, end, record, bump, visit):
+ import tools.validation_reliability as _f
+ index, root_done = start, False
+ stack = []
+ record["active_stack"] = stack
+
+ def complete_value():
+  nonlocal root_done
+  if not stack:
+   root_done = True
+  elif stack[-1][0] == 91:
+   bump("json_container_slots", 1)
+   stack[-1][1] = 1
+  else:
+   bump("json_container_slots", 2)
+   stack[-1][1] = 3
+
+ def string_token(position):
+  bump('json_string_tokens', 1)
+  position += 1
+  while position < end:
+   item = visit(position)
+   if item == 34:
+    return position + 1
+   if item < 0x20:
+    raise ValueError("SOURCE_DATA_JSON_LITERAL_CONTROL")
+   if item == 92:
+    position += 1
+    if position >= end:
+     raise ValueError("SOURCE_DATA_JSON_ESCAPE_EOF")
+    escaped = visit(position)
+    if escaped == 117:
+     if position + 4 >= end:
+      raise ValueError("SOURCE_DATA_JSON_UNICODE_ESCAPE_EOF")
+     for offset in range(1, 5):
+      digit = visit(position + offset)
+      if not (48 <= digit <= 57 or 65 <= digit <= 70 or 97 <= digit <= 102):
+       raise ValueError("SOURCE_DATA_JSON_UNICODE_ESCAPE")
+     position += 5
+    elif escaped in (34, 92, 47, 98, 102, 110, 114, 116):
+     position += 1
+    else:
+     raise ValueError("SOURCE_DATA_JSON_ESCAPE")
+    bump("json_string_codepoints_bound", 1)
+   elif item < 0x80:
+    bump("json_string_codepoints_bound", 1)
+    position += 1
+   else:
+    _, width = _f._ordinary_source_data_utf8_scalar_v1(raw, position, end, visit)
+    bump("json_string_codepoints_bound", 1)
+    position += width
+  raise ValueError("SOURCE_DATA_JSON_STRING_EOF")
+
+ def number_token(position):
+  digits, first_nonzero, last_nonzero = 0, None, None
+  floating = False
+
+  def mantissa_digit(item):
+   nonlocal digits, first_nonzero, last_nonzero
+   digits += 1
+   if item != 48:
+    if first_nonzero is None:
+     first_nonzero = digits
+    last_nonzero = digits
+
+  if visit(position) == 45:
+   bump("json_number_bytes", 1)
+   position += 1
+  if position >= end:
+   raise ValueError("SOURCE_DATA_JSON_NUMBER_EOF")
+  item = visit(position)
+  if item == 48:
+   mantissa_digit(item)
+   bump("json_number_bytes", 1)
+   position += 1
+  elif 49 <= item <= 57:
+   while position < end:
+    item = visit(position)
+    if not 48 <= item <= 57:
+     break
+    mantissa_digit(item)
+    bump("json_number_bytes", 1)
+    position += 1
+  else:
+   raise ValueError("SOURCE_DATA_JSON_NUMBER")
+  if position < end and visit(position) == 46:
+   floating = True
+   bump("json_number_bytes", 1)
+   position += 1
+   if position >= end or not 48 <= visit(position) <= 57:
+    raise ValueError("SOURCE_DATA_JSON_FRACTION")
+   while position < end:
+    item = visit(position)
+    if not 48 <= item <= 57:
+     break
+    mantissa_digit(item)
+    bump("json_number_bytes", 1)
+    position += 1
+  if position < end and visit(position) in (69, 101):
+   floating = True
+   bump("json_number_bytes", 1)
+   position += 1
+   if position < end and visit(position) in (43, 45):
+    bump("json_number_bytes", 1)
+    position += 1
+   if position >= end or not 48 <= visit(position) <= 57:
+    raise ValueError("SOURCE_DATA_JSON_EXPONENT")
+   while position < end and 48 <= visit(position) <= 57:
+    bump("json_number_bytes", 1)
+    position += 1
+  if floating:
+   significant = (0 if first_nonzero is None
+    else last_nonzero - first_nonzero + 1)
+   bump("json_float_tokens", 1)
+   record["counts"]["maximum_float_significant_digits"] = max(
+    record["counts"]["maximum_float_significant_digits"], significant)
+   if significant > 40:
+    raise ValueError("SOURCE_DATA_UNSUPPORTED_DTOA_BIGCOMP")
+  else:
+   bump("json_integer_tokens", 1)
+   bump("json_integer_digits", digits)
+   record["counts"]["maximum_integer_digits"] = max(
+    record["counts"]["maximum_integer_digits"], digits)
+   if digits > 6000:
+    raise ValueError("SOURCE_DATA_UNSUPPORTED_PYLONG_DECIMAL")
+  return position
+
+ while True:
+  while index < end and visit(index) in (32, 9, 10, 13):
+   index += 1
+  if not stack and root_done:
+   if index != end:
+    raise ValueError("SOURCE_DATA_JSON_EXTRA_DATA")
+   record["active_stack"] = None
+   return
+  if stack:
+   container, state = stack[-1]
+   if container == 91 and state == 1:
+    if index < end and visit(index) == 93:
+     index += 1; stack.pop(); complete_value(); continue
+    if index >= end or visit(index) != 44:
+     raise ValueError("SOURCE_DATA_JSON_ARRAY_DELIMITER")
+    index += 1; stack[-1][1] = 2; continue
+   if container == 123 and state == 3:
+    if index < end and visit(index) == 125:
+     index += 1; stack.pop(); complete_value(); continue
+    if index >= end or visit(index) != 44:
+     raise ValueError("SOURCE_DATA_JSON_OBJECT_DELIMITER")
+    index += 1; stack[-1][1] = 4; continue
+   if container == 123 and state == 1:
+    if index >= end or visit(index) != 58:
+     raise ValueError("SOURCE_DATA_JSON_COLON")
+    index += 1; stack[-1][1] = 2; continue
+   if container == 123 and state in (0, 4):
+    if state == 0 and index < end and visit(index) == 125:
+     index += 1; stack.pop(); complete_value(); continue
+    if index >= end or visit(index) != 34:
+     raise ValueError("SOURCE_DATA_JSON_OBJECT_KEY")
+    bump('json_object_keys', 1)
+    bump("json_nodes", 1)
+    index = string_token(index)
+    stack[-1][1] = 1
+    continue
+   if container == 91 and state == 0 and index < end and visit(index) == 93:
+    index += 1; stack.pop(); complete_value(); continue
+  if index >= end:
+   raise ValueError("SOURCE_DATA_JSON_VALUE_EOF")
+  item = visit(index)
+  bump("json_nodes", 1)
+  if item in (91, 123):
+   bump('json_array_tokens' if item == 91 else 'json_object_tokens', 1)
+   depth = len(stack) + 1
+   record["counts"]["maximum_depth"] = max(record["counts"]["maximum_depth"], depth)
+   if depth > record["scan_limits"][2]:
+    raise ValueError("SOURCE_DATA_JSON_DEPTH")
+   stack.append([item, 0])
+   index += 1
+   continue
+  if item == 34:
+   index = string_token(index)
+  else:
+   literal = None
+   if item == 110: literal = b"null"
+   elif item == 116: literal = b"true"
+   elif item == 102: literal = b"false"
+   elif item == 78: literal = b"NaN"
+   elif item == 73: literal = b"Infinity"
+   elif item == 45 and index + 1 < end and visit(index + 1) == 73:
+    literal = b"-Infinity"
+   if literal is not None:
+    for offset, expected in enumerate(literal):
+     if index + offset >= end or visit(index + offset) != expected:
+      raise ValueError("SOURCE_DATA_JSON_LITERAL")
+    index += len(literal)
+    if literal in (b"NaN", b"Infinity", b"-Infinity"):
+     bump("json_float_tokens", 1)
+     bump("json_number_bytes", len(literal))
+   elif item == 45 or 48 <= item <= 57:
+    index = number_token(index)
+   else:
+    raise ValueError("SOURCE_DATA_JSON_VALUE")
+  complete_value()
+
+
+def _facet_fn_source_data_lexical_admission_v1(raw, *, kind, scan_allowance, record,
+  parser_programme=None, source_binding=None):
+ import tools.validation_reliability as _f
+ if type(record) is not dict or record:
+  raise ValueError("SOURCE_DATA_NEW_RETAINED_SCAN_RECORD")
+ record.update(raw=raw, kind=kind, scan_allowance=scan_allowance, scan_attempted=True,
+  complete=False, construction_attempted=False, constructed=False, error=None,
+  active_stack=None, active_spans=None, current_text=None, partial_values=None,
+  decoded_text=None, partial_lines=None, parser_programme=parser_programme)
+ fields = ("raw_byte_limit", "utf8_codepoint_limit", "maximum_depth",
+  "jsonl_span_limit", "lexical_visit_limit", "deadline_ns")
+ counts = dict(raw_bytes=0, utf8_codepoints=0, decoded_codepoints=0,
+  json_nodes=0, json_string_codepoints_bound=0, json_number_bytes=0,
+  json_container_slots=0, json_records=0, maximum_depth=0,
+  maximum_decode_slice_bytes=0, maximum_decoded_line_codepoints=0,
+  lexical_visits=0, clock_checks=0,
+  splitline_records=0, splitline_codepoints=0,
+  json_string_tokens=0, json_array_tokens=0, json_object_tokens=0,
+  json_object_keys=0, json_integer_tokens=0, json_integer_digits=0,
+  maximum_integer_digits=0, json_float_tokens=0,
+  maximum_float_significant_digits=0)
+ record["counts"] = counts
+ try:
+  limits = _f._ordinary_source_data_limits_v1(scan_allowance, fields)
+  record["scan_limits"] = limits
+  if type(raw) is not bytes or type(kind) is not str or kind not in ("JSON", "JSONL"):
+   raise ValueError("SOURCE_DATA_RAW_KIND")
+  if parser_programme is None:
+   parser_programme = ('JSON_DEFAULT_V1' if kind == 'JSON'
+    else 'JSONL_TEXTIO_LIST_V1')
+  if ((kind == 'JSON' and parser_programme != 'JSON_DEFAULT_V1') or
+    (kind == 'JSONL' and parser_programme not in
+     ('JSONL_TEXTIO_LIST_V1', 'JSONL_SPLITLINES_TUPLE_V1'))):
+   raise ValueError('SOURCE_DATA_SELECTED_PARSER_PROGRAMME')
+  record['parser_programme'] = parser_programme
+  counts["raw_bytes"] = len(raw)
+  if len(raw) > limits[0]:
+   raise ValueError("SOURCE_DATA_RAW_ALLOWANCE")
+
+  def checkpoint():
+   counts["clock_checks"] += 1
+   if _f.time.monotonic_ns() >= limits[5]:
+    raise ValueError("SOURCE_DATA_SCAN_DEADLINE")
+
+  def visit(position):
+   counts["lexical_visits"] += 1
+   if counts["lexical_visits"] > limits[4]:
+    raise ValueError("SOURCE_DATA_LEXICAL_VISIT_ALLOWANCE")
+   if counts["lexical_visits"] % 4096 == 0:
+    checkpoint()
+   return raw[position]
+
+  def bump(name, amount):
+   counts[name] += amount
+
+  if source_binding is not None:
+   if (type(source_binding) is not tuple or len(source_binding) != 3
+     or source_binding[2] is not _f._ordinary_source_data_lexical_admission_v1):
+    raise ValueError('CONTROL_ORIGINAL_LEXICAL_ACTIVATION_BINDING')
+   record['source_lexical_binding'] = _f._ordinary_control_lexical_activation_v1(
+    source_binding[0], source_binding[1], source_binding[2],
+    (checkpoint, visit, bump), (counts, limits, raw))
+
+  checkpoint()
+  index = 0
+  while index < len(raw):
+   _, width = _f._ordinary_source_data_utf8_scalar_v1(raw, index, len(raw), visit)
+   counts["utf8_codepoints"] += 1
+   if counts["utf8_codepoints"] > limits[1]:
+    raise ValueError("SOURCE_DATA_UTF8_ALLOWANCE")
+   index += width
+  spans = []
+  record["active_spans"] = spans
+  if kind == "JSON":
+   counts["json_records"] = 1
+   counts["decoded_codepoints"] = counts["utf8_codepoints"]
+   counts["maximum_decoded_line_codepoints"] = counts["utf8_codepoints"]
+   _f._ordinary_source_data_json_span_v1(raw, 0, len(raw), record, bump, visit)
+  else:
+   generic = parser_programme == 'JSONL_SPLITLINES_TUPLE_V1'
+   linebreaks = ((10, 11, 12, 13, 28, 29, 30, 0x85, 0x2028, 0x2029)
+    if generic else (10, 13))
+   whitespace = (9, 10, 11, 12, 13, 28, 29, 30, 31, 32, 0x85, 0xA0,
+    0x1680, 0x2000, 0x2001, 0x2002, 0x2003, 0x2004, 0x2005,
+    0x2006, 0x2007, 0x2008, 0x2009, 0x200A, 0x2028, 0x2029,
+    0x202F, 0x205F, 0x3000)
+   counts['json_nodes'] = 2 if generic else 1
+   index, start, blank, line_codepoints = 0, 0, True, 0
+
+   def admit_line(end):
+    if generic:
+     counts['splitline_records'] += 1
+     counts['splitline_codepoints'] += line_codepoints
+     counts['maximum_decoded_line_codepoints'] = max(
+      counts['maximum_decoded_line_codepoints'], line_codepoints)
+    if not blank:
+     counts["json_records"] += 1
+     if counts["json_records"] > limits[3]:
+      raise ValueError("SOURCE_DATA_JSONL_SPAN_ALLOWANCE")
+     if not generic:
+      counts["decoded_codepoints"] += line_codepoints
+     if not generic:
+      counts["maximum_decode_slice_bytes"] = max(
+       counts["maximum_decode_slice_bytes"], end - start)
+     counts["maximum_decoded_line_codepoints"] = max(
+      counts["maximum_decoded_line_codepoints"], line_codepoints)
+     spans.append((start, end))
+
+   while index < len(raw):
+    scalar, width = _f._ordinary_source_data_utf8_scalar_v1(raw, index, len(raw), visit)
+    if scalar in linebreaks:
+     admit_line(index)
+     index += width
+     if scalar == 13 and index < len(raw) and visit(index) == 10:
+      index += 1
+     start, blank, line_codepoints = index, True, 0
+    else:
+     line_codepoints += 1
+     if scalar not in whitespace:
+      blank = False
+     index += width
+   if start < len(raw):
+    admit_line(len(raw))
+   if generic:
+    counts['decoded_codepoints'] = (counts['utf8_codepoints']
+     + counts['splitline_codepoints'])
+   for start, end in spans:
+    checkpoint()
+    bump('json_container_slots', 2 if generic else 1)
+    _f._ordinary_source_data_json_span_v1(raw, start, end, record, bump, visit)
+  checkpoint()
+  if _f._ordinary_source_data_limits_v1(scan_allowance, fields) != limits:
+   raise ValueError("SOURCE_DATA_SCAN_ALLOWANCE_DRIFT")
+  frozen_spans = tuple(spans)
+  demand = dict(counts)
+  frozen_demand = tuple(demand.items())
+  record["spans"], record["demand"] = frozen_spans, demand
+  record["original"] = (record, raw, kind, scan_allowance, limits,
+   frozen_spans, demand, frozen_demand, parser_programme)
+  record["complete"] = True
+  record["active_spans"] = None
+  return record
+ except BaseException as error:
+  if record["error"] is None:
+   record["error"] = error
+  raise
+
+
+def _facet_fn_source_data_operand_original_v1(scope, record, allocation):
+ """Validate the selected DATA law against the original same-owner row."""
+ import tools.validation_reliability as _f
+ state = scope._ordinary_source_data_allocator_projection_v1()
+ original = allocation['operand_original']
+ _f._preflight_require_v1(type(original) is tuple and len(original) == 11
+  and original[0] is allocation and original[1] is scope
+  and original[2] is state['source'] and original[3] is record
+  and original[4] is allocation['row']
+  and original[5] == allocation['path']
+  and original[6] == allocation['version']
+  and original[7] == allocation['source_form']
+  and original[8] == allocation['parser_programme']
+  and original[9] == allocation['data_node_limit']
+  and original[10] == allocation['relative']
+  and record is scope._ordinary_deterministic_source_ingredients_v1
+   is scope._ordinary_original_deterministic_source_ingredients_v1
+  and allocation['component'] is record
+  and type(allocation['parser_programme']) is str
+  and type(allocation['data_node_limit']) is int
+  and allocation['data_node_limit'] == allocation['n'] + (
+   2 if allocation['parser_programme'] == 'JSONL_SPLITLINES_TUPLE_V1' else 1)
+  and ((allocation['source_form'] == 'BINARY'
+    and allocation['kind'] == 'BINARY'
+    and allocation['parser_programme'] == 'RAW_BYTES_V1')
+   or (allocation['source_form'] == 'JSON'
+    and allocation['kind'] == 'JSON'
+    and allocation['parser_programme'] == 'JSON_DEFAULT_V1')
+   or (allocation['source_form'] == 'JSONL'
+    and allocation['kind'] == 'JSONL'
+    and allocation['parser_programme'] in (
+     'JSONL_SPLITLINES_TUPLE_V1', 'JSONL_TEXTIO_LIST_V1'))),
+  'ORDINARY_DATA_ORIGINAL_OPERAND_PARSER_BINDING')
+ return state
+
+
+def _facet_fn_source_data_operand_check_v1(scope, record, observed, value,
+  *, published):
+ """Check the actual cached product without another read or decode."""
+ import tools.validation_reliability as _f
+ _f._preflight_require_v1(type(observed) is dict and type(published) is bool
+  and type(observed['data_allocation']) is dict,
+  'ORDINARY_DATA_OBSERVATION_SHAPE')
+ allocation = observed['data_allocation']
+ state = _f._ordinary_source_data_operand_original_v1(scope, record, allocation)
+ scope._ordinary_source_data_frozen_check_v1(allocation)
+ original = observed['data_original']
+ cache = record['source_operand_cache']
+ entry = observed['cache_entry']
+ _f._preflight_require_v1(type(original) is tuple and len(original) == 16
+  and original[0] is observed and original[1] is scope
+  and original[2] is state['source'] and original[3] is record
+  and original[4] is observed['row']
+  and original[5] == observed['version']
+  and original[6] == observed['source_form']
+  and original[7] == observed['parser_programme']
+  and original[8] is allocation and original[9] is value
+  and observed['value'] is value
+  and original[10] is allocation['raw']
+  and observed['raw'] is allocation['raw']
+  and original[11] is observed['text']
+  and original[12] == observed['nodes']
+  and original[13] == observed['data_node_limit']
+  and original[14] is cache and original[15] is entry
+  and cache is record['original_source_operand_cache']
+   is scope._ordinary_source_operand_cache_v1
+   is scope._ordinary_original_source_operand_cache_v1
+  and type(entry) is tuple and len(entry) == 2
+  and entry[0] is value and entry[1] is observed
+  and (not published or cache[observed['cache_key']] is entry)
+  and observed['complete'] and observed['error'] is None
+  and observed['attempted']
+  and observed['row'] is allocation['row']
+  and observed['version'] == allocation['version']
+  and observed['source_form'] == allocation['source_form']
+  and observed['parser_programme'] == allocation['parser_programme']
+  and observed['raw_bytes'] == allocation['n']
+  and type(observed['nodes']) is int
+  and 0 < observed['nodes'] <= allocation['data_node_limit']
+  and observed['data_node_limit'] == allocation['data_node_limit']
+  and observed['node_count_kind'] == 'SOURCE_LEXICAL_UPPER_BOUND_V1'
+  and observed['path'] == allocation['relative']
+  and observed['cache_key'] == (
+   observed['path'], observed['source_form'], observed['parser_programme']),
+  'ORDINARY_DATA_FROZEN_CACHE_PRODUCT')
+ if allocation['kind'] == 'BINARY':
+  _f._preflight_require_v1(value is allocation['raw']
+   and observed['text'] is None and observed['nodes'] == 1,
+   'ORDINARY_DATA_ORIGINAL_BINARY_PRODUCT')
+ else:
+  scan_issue = allocation['stages']['scan']
+  construction = allocation['stages']['construction']
+  scan = scan_issue['scan']
+  _f._preflight_require_v1(type(scan) is dict
+   and scan['raw'] is allocation['raw']
+   and scan['parser_programme'] == allocation['parser_programme']
+   and scan['result'] is value
+   and construction['value'] is value
+   and observed['nodes'] == scan['demand']['json_nodes'],
+   'ORDINARY_DATA_ORIGINAL_PARSED_PRODUCT')
+  if allocation['parser_programme'] == 'JSONL_TEXTIO_LIST_V1':
+   _f._preflight_require_v1(type(value) is list and observed['text'] is None,
+    'ORDINARY_DATA_ORIGINAL_TEXTIO_LIST_PRODUCT')
+  else:
+   _f._preflight_require_v1(type(observed['text']) is str
+    and observed['text'] is scan['decoded_text']
+    and (allocation['parser_programme'] != 'JSONL_SPLITLINES_TUPLE_V1'
+     or type(value) is tuple),
+    'ORDINARY_DATA_ORIGINAL_RETAINED_DECODED_TEXT')
+ return allocation
+
+
+def _facet_fn_rp_join_freeze_v1(value):
+ import tools.validation_reliability as _f
+ if value is None or type(value) in (bool, int, str, bytes):
+  return (type(value).__name__, value)
+ if type(value) is float:
+  return ('float', value.hex())
+ if type(value) in (tuple, list):
+  return (type(value).__name__, tuple(_f._ordinary_rp_join_freeze_v1(x) for x in value))
+ if type(value) is dict:
+  return ('dict', tuple((_f._ordinary_rp_join_freeze_v1(k), _f._ordinary_rp_join_freeze_v1(v))
+   for k, v in value.items()))
+ if type(value) is frozenset:
+  return ('frozenset', tuple(sorted(value)))
+ raise TypeError('unsupported RP metadata value')
+
+
+def _facet_fn_rp_join_slot_v1(scope, relative):
+ import tools.validation_reliability as _f
+ _f._mapper_portable_relative_v1(relative)
+ source = scope.source
+ path = _f.Path(source.root).joinpath(*relative.split('/'))
+ row = source.row_index.get(str(path))
+ if row is not None:
+  _f._preflight_require_v1(row['role'] == 'repository' and row['kind'] == 'file'
+   and str(path) in source.files and str(path) in source.post,
+   'ORDINARY_RP_PRESENT_SOURCE_FILE')
+  return dict(relative=relative, source_row=row,
+   source_version=tuple(source.post[str(path)]), absent_parent=None,
+   absent_version=None, absent_suffix=())
+ parent, suffix = path.parent, [path.name]
+ while str(parent) not in source.row_index:
+  _f._preflight_require_v1(parent != source.root and parent.is_relative_to(source.root),
+   'ORDINARY_RP_ABSENCE_REQUIRES_ORIGINAL_SOURCE_PARENT')
+  suffix.insert(0, parent.name)
+  parent = parent.parent
+ anchor = source.row_index[str(parent)]
+ _f._preflight_require_v1(anchor['role'] == 'repository' and anchor['kind'] == 'directory'
+  and str(parent) in source.directories and suffix[0] not in anchor['roster']
+  and str(parent) in source.post,
+  'ORDINARY_RP_ABSENCE_COMPLETE_PROTECTED_ROSTER')
+ return dict(relative=relative, source_row=None, source_version=None,
+  absent_parent=anchor, absent_version=tuple(source.post[str(parent)]),
+  absent_suffix=tuple(suffix))
+
+
+def _facet_fn_rp_join_raw_v1(scope, component, join, relative, *, required,
+  source_byte_limit, source_node_limit, data_parser='JSON_DEFAULT_V1'):
+ import tools.validation_reliability as _f
+ slot = _f._ordinary_rp_join_slot_v1(scope, relative)
+ acquisition = dict(slot=slot, observed=None, raw=None, value=None,
+  parser_programme=data_parser, data_allocation=None)
+ join['acquisitions'].append(acquisition)
+ _f._preflight_require_v1(data_parser in ('JSON_DEFAULT_V1', 'JSONL_TEXTIO_LIST_V1'),
+  'ORDINARY_RP_SOURCE_SELECTED_DATA_PARSER')
+ if slot['source_row'] is None:
+  _f._preflight_require_v1(not required, 'ORDINARY_RP_REQUIRED_SOURCE_OPERAND_ABSENT:' + relative)
+  observed = _f._ordinary_source_absent_operand_v1(scope, component, relative)
+  acquisition['observed'] = observed
+  _f._preflight_require_v1(type(observed) is dict
+   and observed['row'] is slot['absent_parent']
+   and observed['version'] == slot['absent_version']
+   and any(item is observed for item in component['source_operands']),
+   'ORDINARY_RP_ORIGINAL_ABSENT_SOURCE_OBSERVATION')
+  return acquisition
+ value, observed = _f._ordinary_source_operand_v1(scope, component, relative,
+  source_byte_limit=source_byte_limit, source_node_limit=source_node_limit,
+  source_form=('JSON' if data_parser == 'JSON_DEFAULT_V1' else 'JSONL'),
+  data_parser=data_parser)
+ allocation = observed['data_allocation']
+ scope._ordinary_source_data_frozen_check_v1(allocation)
+ raw = allocation['raw']
+ _f._preflight_require_v1(type(raw) is bytes and observed['complete']
+  and observed['error'] is None and observed['row'] is slot['source_row']
+  and observed['version'] == slot['source_version']
+  and observed['value'] is value
+  and observed['parser_programme'] == data_parser
+  and observed['source_form'] == ('JSON' if data_parser == 'JSON_DEFAULT_V1' else 'JSONL')
+  and allocation['component'] is component
+  and allocation['row'] is slot['source_row'],
+  'ORDINARY_RP_ORIGINAL_ONCE_CONSTRUCTED_DATA')
+ acquisition.update(observed=observed, raw=raw, value=value, data_allocation=allocation)
+ acquisition['data_original'] = (acquisition, observed, allocation, raw, value, data_parser)
+ return acquisition
+
+
+def _facet_fn_rp_join_decode_v1(scope, acquisition, *, source_node_limit):
+ import tools.validation_reliability as _f
+ original = acquisition.get('data_original')
+ _f._preflight_require_v1(type(original) is tuple and len(original) == 6
+  and original[0] is acquisition
+  and original[1] is acquisition['observed']
+  and original[2] is acquisition['data_allocation']
+  and original[3] is acquisition['raw']
+  and original[4] is acquisition['value']
+  and original[5] == acquisition['parser_programme'] == 'JSON_DEFAULT_V1'
+  and acquisition['observed']['value'] is original[4]
+  and acquisition['observed']['parser_programme'] == original[5],
+  'ORDINARY_RP_FROZEN_CONSTRUCTED_JSON_ASSOCIATION')
+ _f._ordinary_source_data_operand_check_v1(scope, original[2]['component'],
+  original[1], original[4], published=True)
+ scope.source._check()
+ return original[4]
+
+
+def _facet_fn_rp_join_records_v1(scope, component, join, relative, *,
+  required, gfp_header, source_byte_limit, source_node_limit):
+ import tools.validation_reliability as _f
+ header = _f._ordinary_rp_join_raw_v1(scope, component, join, relative, required=required,
+  source_byte_limit=source_byte_limit, source_node_limit=source_node_limit)
+ result = dict(header=header, refs=(), shards=(), records=(), keys=frozenset())
+ if header['raw'] is None:
+  return result
+ report = _f._ordinary_rp_join_decode_v1(scope, header, source_node_limit=source_node_limit)
+ _f._preflight_require_v1(type(report) is dict, 'ORDINARY_RP_ORIGINAL_HEADER_OBJECT')
+ if gfp_header:
+  refs = report['shard_files']
+  _f._preflight_require_v1(type(refs) is list, 'ORDINARY_GFP_SOURCE_ORDERED_SHARD_LIST')
+ else:
+  refs = (report.get('summary', {}).get('shard_files') or
+   report.get('shard_files') or report.get('shard_paths') or [])
+ shards, rows = [], []
+ if refs:
+  for selected in refs:
+   _f._preflight_require_v1(not gfp_header or type(selected) is str,
+    'ORDINARY_GFP_LITERAL_SOURCE_SHARD_OPERAND')
+   original_ref = str(selected)
+   acquisition = _f._ordinary_rp_join_raw_v1(scope, component, join, original_ref,
+    required=True, source_byte_limit=source_byte_limit,
+    source_node_limit=source_node_limit)
+   shards.append((original_ref, acquisition))
+   payload = _f._ordinary_rp_join_decode_v1(scope, acquisition, source_node_limit=source_node_limit)
+   records = payload.get('records', [])
+   _f._preflight_require_v1(type(records) is list, 'ORDINARY_RP_ORIGINAL_SHARD_RECORDS')
+   rows.extend(records)
+ elif not gfp_header:
+  rows = list(report.get('records', []))
+ _f._preflight_require_v1(all(type(row) is dict for row in rows),
+  'ORDINARY_RP_SELECTED_RECORD_OBJECTS')
+ result.update(refs=tuple(str(x) for x in refs), shards=tuple(shards), records=tuple(rows))
+ mapping = {str(row.get('qku_id')): row for row in rows if row.get('qku_id')
+  and str(row.get('qku_id')) != 'NOT_APPLICABLE_FOR_THIS_ROW_TERMINAL_BY_NATURE'}
+ result['keys'] = frozenset(mapping)
+ return result
+
+
+def _facet_fn_rp_predecessor_source_v1(scope, component, *,
+  source_byte_limit, source_node_limit):
+ import tools.validation_reliability as _f
+ _f._preflight_require_v1(component is scope._ordinary_deterministic_source_ingredients_v1
+  is scope._ordinary_original_deterministic_source_ingredients_v1
+  and component['scope'] is scope and component['source'] is scope.source
+  and type(component['rp_predecessor_join']) is dict and not component['rp_predecessor_join']
+  and type(source_byte_limit) is int and source_byte_limit > 0
+  and type(source_node_limit) is int and source_node_limit > 0,
+  'ORDINARY_RP_SINGLE_ORIGINAL_COMPONENT_JOIN')
+ join = component['rp_predecessor_join']
+ join['attempted'] = True  # Existing retained holder makes every later prefix sticky.
+ join.update(scope=scope, component=component, acquisitions=[], lanes=(), rp_row=None,
+  predecessors=(), gfp_row=None, assignment_keys=(), F=None, M_upper=None,
+  effect_files=(), source_complete=False, view_attempted=False, view_complete=False,
+  view_bindings=(), view_tree=None, prospective_overlaps=(), overlaps=(), M_exact=None,
+  name_metadata=None, helper_pins=(), errors=[])
+ try:
+  join['helper_pins'] = tuple((name, _f.__dict__[name]) for name in (
+   '_ordinary_rp_join_freeze_v1', '_ordinary_rp_join_slot_v1',
+   '_ordinary_rp_join_raw_v1', '_ordinary_source_absent_operand_v1',
+   '_ordinary_rp_join_decode_v1',
+   '_ordinary_rp_join_records_v1', '_ordinary_rp_predecessor_source_v1',
+   '_ordinary_rp_join_source_snapshot_v1', '_ordinary_rp_predecessor_check_v1',
+   '_ordinary_rp_predecessor_bind_view_v1', '_ordinary_rp_join_view_snapshot_v1',
+   '_ordinary_gfp_rp_assignment_keys_v1', '_ordinary_rp_assignment_keys_v1',
+   '_ordinary_rp_name_metadata_for_admissible_M_v1'))
+  matches = tuple(row for row in component['rows']
+   if row['source_position'] == 92)
+  _f._preflight_require_v1(len(matches) <= 1, 'ORDINARY_RP_ONE_SOURCE_OCCURRENCE')
+  if not matches:
+   join['source_complete'] = True
+   join['frozen_source'] = _f._ordinary_rp_join_source_snapshot_v1(join)
+   return join
+  rp = matches[0]
+  _f._preflight_require_v1(component['source_selection'].phase == 'deterministic-validators-b'
+   and rp['source_module'] == 'tools/build_pr168_rp_formula_based_replay_paper_recompute.py',
+   'ORDINARY_RP_ORIGINAL_B20_SOURCE_OCCURRENCE')
+  previous = tuple(component['rows'][:rp['ordinal'] - 1])
+  _f._preflight_require_v1(all(73 <= row['source_position'] <= 91 for row in previous),
+   'ORDINARY_RP_PHASE_LOCAL_B_PREDECESSORS_ONLY')
+  gfp = tuple(row for row in previous if row['source_position'] == 73)
+  _f._preflight_require_v1(len(gfp) <= 1, 'ORDINARY_RP_ONE_SELECTED_GFP_BUILDER')
+  for row in previous:
+   if row['source_position'] == 73:
+    _f._preflight_require_v1(row['source_module'] ==
+     'tools/build_pr168_gfp_global_formula_discovery_real_computation.py'
+     and row['targets'] and not row['unresolved_source_facts'],
+     'ORDINARY_RP_REVIEWED_GFP_BUILDER_EFFECTS')
+   else:
+    _f._preflight_require_v1(row.get('rp_report_write_status') ==
+     'SOURCE_BOUND_GFP_VALIDATOR_NO_REPORT_WRITES'
+     and not row['targets'] and not row['unresolved_source_facts']
+     and row['native_programme'] is not None,
+     'ORDINARY_RP_REVIEWED_GFP_VALIDATOR_AND_NONEMPTY_NATIVE_COHORT')
+  join.update(rp_row=rp, predecessors=previous, gfp_row=gfp[0] if gfp else None)
+  lanes = tuple(_f._ordinary_rp_join_records_v1(scope, component, join, path,
+   required=False, gfp_header=False, source_byte_limit=source_byte_limit,
+   source_node_limit=source_node_limit) for path in (
+   'docs/master_plan/generated/PR165_D2_PredictionMarketProbabilityEdgeLedger.report.json',
+   'docs/master_plan/generated/PR165_D2_MicrostructureFeatureLedger.report.json',
+   'docs/master_plan/generated/PR165_D2_TCADecompositionSelectionLedger.report.json',
+   'docs/master_plan/generated/PR165_D2_NetEdgeAdjustedCandidateRanking.report.json'))
+  join['lanes'] = lanes
+  if gfp:
+   q = _f._ordinary_rp_join_records_v1(scope, component, join,
+    'docs/master_plan/generated/PR161C_QKU9360PrimaryMaterializationRegistry.report.json',
+    required=True, gfp_header=True, source_byte_limit=source_byte_limit,
+    source_node_limit=source_node_limit)
+   c = _f._ordinary_rp_join_records_v1(scope, component, join,
+    'docs/master_plan/generated/PR162D_QKUReplayPaperCandidateExpansion.report.json',
+    required=True, gfp_header=True, source_byte_limit=source_byte_limit,
+    source_node_limit=source_node_limit)
+   p = _f._ordinary_rp_join_raw_v1(scope, component, join,
+    'docs/master_plan/generated/PR154_AtomicRowsParameterDefaultValueMaterializationGate.report.json',
+    required=True, source_byte_limit=source_byte_limit, source_node_limit=source_node_limit)
+   p_rows = _f._ordinary_rp_join_decode_v1(scope, p, source_node_limit=source_node_limit).get(
+    'per_target_materialization_records', [])
+   a = _f._ordinary_rp_join_raw_v1(scope, component, join,
+    'docs/master_plan/atomic_rows/AtomicRows.bundle.jsonl', required=True,
+    source_byte_limit=source_byte_limit, source_node_limit=source_node_limit,
+    data_parser='JSONL_TEXTIO_LIST_V1')
+   a_rows = a['value']
+   _f._preflight_require_v1(type(p_rows) is list and type(a_rows) is list
+    and a['parser_programme'] == 'JSONL_TEXTIO_LIST_V1'
+    and a['observed']['value'] is a_rows,
+    'ORDINARY_RP_GFP_AUTHENTIC_ATOMIC_AND_PR154_ROWS')
+   keys = _f._ordinary_gfp_rp_assignment_keys_v1(qku_records=q['records'],
+    candidate_records=c['records'], atomicrow_records=a_rows, pr154_records=p_rows,
+    qku_report_path=q['header']['slot']['relative'],
+    candidate_report_path=c['header']['slot']['relative'],
+    atomicrows_jsonl_path=a['slot']['relative'], pr154_report_path=p['slot']['relative'])
+   join['F'] = 35
+   join['effect_files'] = tuple(target for target in gfp[0]['targets'] if target['kind'] == 'FILE')
+  else:
+   assignments = _f._ordinary_rp_join_records_v1(scope, component, join,
+    'docs/master_plan/generated/PR168_GFP_FormulaAssignmentMatrix.report.json',
+    required=True, gfp_header=False, source_byte_limit=source_byte_limit,
+    source_node_limit=source_node_limit)
+   formula = _f._ordinary_rp_join_raw_v1(scope, component, join,
+    'docs/master_plan/generated/PR168_GFP_SelectedFormulaExpressionRegistry.report.json',
+    required=True, source_byte_limit=source_byte_limit, source_node_limit=source_node_limit)
+   header = _f._ordinary_rp_join_decode_v1(scope, formula, source_node_limit=source_node_limit)
+   keys = _f._ordinary_rp_assignment_keys_v1(assignments['records'])
+   join['F'] = len(header['records'])  # Original RP header-only registry read.
+  intersection = frozenset.intersection(*(lane['keys'] for lane in lanes))
+  join['assignment_keys'] = keys
+  scope.source._check()
+  join['M_upper'] = sum(key is not None and key in intersection for key in keys)
+  scope.source._check()
+  effect_names = frozenset(target['path'] for target in join['effect_files'])
+  prospective = tuple(acquisition for lane in lanes
+   for acquisition in (lane['header'], *(item[1] for item in lane['shards']))
+   if acquisition['slot']['relative'] in effect_names)
+  _f._preflight_require_v1(not any(acquisition is lane['header']
+   for acquisition in prospective for lane in lanes),
+   'ORDINARY_RP_PROSPECTIVE_HEADER_REPLACEMENT_NOT_PROVED')
+  join['prospective_overlaps'] = prospective
+  join['M_exact'] = join['M_upper'] if not prospective or join['M_upper'] == 0 else None
+  admissible = (join['M_exact'],) if join['M_exact'] is not None else range(join['M_upper'] + 1)
+  join['name_metadata'] = _f._ordinary_rp_name_metadata_for_admissible_M_v1(
+   N=len(keys), F=join['F'], admissible_M=admissible, maximum_future_names=32768)
+  scope.source._check()
+  rp['rp_name_metadata'] = join['name_metadata']
+  join['source_complete'] = True
+  join['frozen_source'] = _f._ordinary_rp_join_source_snapshot_v1(join)
+  return join
+ except BaseException as error:
+  join['errors'].append(error)
+  if not any(error is old for old in component['errors']): component['errors'].append(error)
+  if not any(error is old for old in scope._ordinary_factory_errors_v1):
+   scope._ordinary_factory_errors_v1.append(error)
+  raise
+
+
+def _facet_fn_rp_join_source_snapshot_v1(join):
+ import tools.validation_reliability as _f
+ return (join['scope'], join['component'], join['helper_pins'], join['rp_row'], join['predecessors'],
+  join['gfp_row'], tuple((x, x['slot'], tuple(x['slot'].items()), x['observed'], x['raw'],
+   x['value'], x['parser_programme'], x['data_allocation'], x.get('data_original'))
+   for x in join['acquisitions']),
+  _f._ordinary_rp_join_freeze_v1(tuple((lane['refs'], lane['keys']) for lane in join['lanes'])),
+  join['assignment_keys'], join['F'], join['M_upper'], join['M_exact'],
+  join['prospective_overlaps'], _f._ordinary_rp_join_freeze_v1(join['name_metadata']), join['effect_files'],
+  tuple((x, tuple(x.items())) for x in join['effect_files']))
+
+
+def _facet_fn_rp_predecessor_check_v1(scope, component, *, require_view=False, require_exposed=False):
+ import tools.validation_reliability as _f
+ join = component['rp_predecessor_join']
+ _f._preflight_require_v1(type(join) is dict and join['scope'] is scope
+  and join['component'] is component and join['source_complete'] and not join['errors']
+  and _f._ordinary_rp_join_source_snapshot_v1(join) == join['frozen_source']
+  and component is scope._ordinary_deterministic_source_ingredients_v1
+   is scope._ordinary_original_deterministic_source_ingredients_v1
+  and component['source'] is scope.source
+  and scope._ordinary_host_original_v1[0] is scope.source,
+  'ORDINARY_RP_ORIGINAL_SOURCE_JOIN')
+ _f._preflight_require_v1(all(_f.__dict__.get(name) is function for name, function in join['helper_pins']),
+  'ORDINARY_RP_ORIGINAL_METADATA_HELPER_IDENTITIES')
+ for acquisition in join['acquisitions']:
+  slot, observed = acquisition['slot'], acquisition['observed']
+  row = slot['source_row']
+  if row is None:
+   anchor = slot['absent_parent']
+   _f._preflight_require_v1(scope.source.row_index.get(anchor['path']) is anchor
+    and tuple(scope.source.post[anchor['path']]) == slot['absent_version']
+    and slot['absent_suffix'][0] not in anchor['roster']
+    and type(observed) is dict and observed['row'] is anchor
+    and observed['version'] == slot['absent_version']
+    and observed['complete'] and observed['error'] is None
+    and observed['source_form'] == 'ABSENT' and not observed['errors']
+    and observed['source'] is scope.source
+    and observed['path'] == slot['relative'] and observed['suffix'] == slot['absent_suffix']
+    and type(observed.get('absence_original')) is tuple
+    and len(observed['absence_original']) == 12
+    and observed['absence_original'][:7] == (observed,scope,scope.source,
+     anchor,slot['absent_version'],slot['relative'],slot['absent_suffix'])
+    and observed['absence_original'][7] is observed['no_entry']
+    and type(observed['no_entry']) is FileNotFoundError and observed['no_entry'].errno == 2
+    and observed['absence_original'][8] is observed['opened']
+    and observed['absence_original'][9] == tuple((cell,tuple(cell.items())) for cell in observed['opened'])
+    and observed['absence_original'][10] == observed['owner'] == (_f.os.getpid(),_f.threading.get_ident())
+    and observed['absence_original'][11] is observed['errors']
+    and all(cell['closed'] and cell['fd'] not in scope.source.owned for cell in observed['opened'])
+    and any(item is observed for item in component['source_operands']),
+    'ORDINARY_RP_ORIGINAL_ABSENT_GENERATION')
+  else:
+   _f._preflight_require_v1(scope.source.row_index.get(row['path']) is row
+    and tuple(scope.source.post[row['path']]) == slot['source_version']
+    and observed['row'] is row and observed['version'] == slot['source_version']
+    and observed['complete'] and observed['error'] is None,
+    'ORDINARY_RP_ORIGINAL_PRESENT_GENERATION')
+   original = acquisition.get('data_original')
+   _f._preflight_require_v1(type(original) is tuple and len(original) == 6
+    and original[0] is acquisition and original[1] is observed
+    and original[2] is acquisition['data_allocation']
+    and original[3] is acquisition['raw']
+    and original[4] is acquisition['value'] is observed['value']
+    and original[5] == acquisition['parser_programme'] == observed['parser_programme'],
+    'ORDINARY_RP_ORIGINAL_ONCE_CONSTRUCTED_DATA_BINDING')
+   _f._ordinary_source_data_operand_check_v1(scope, component, observed,
+    original[4], published=True)
+ if require_view:
+  _f._preflight_require_v1(join['view_complete'] and not join['errors']
+   and _f._ordinary_rp_join_view_snapshot_v1(scope, join) == join['frozen_view'],
+   'ORDINARY_RP_COMPLETED_ORIGINAL_VIEW_JOIN')
+  if require_exposed:
+   view = scope._ordinary_view_effect_record_v1()
+   _f._preflight_require_v1(view is not None and view['complete'] and not view['errors'],
+    'ORDINARY_RP_ACTUAL_VIEW_EXPOSURE_REQUIRED')
+   for binding in join['view_bindings']:
+    if binding['source_row'] is not None:
+     after = scope._ordinary_view_operand_version_v1(binding['source_row'],
+      binding['source_version'], binding['transfer'])
+     before = binding['version']
+     _f._preflight_require_v1(after[:4] == before[:4]
+      and _f.stat.S_IFMT(after[5]) == _f.stat.S_IFMT(before[5]),
+      'ORDINARY_RP_ORIGINAL_VIEW_CONTENT_AND_IDENTITY_AFTER_EXPOSURE')
+  else:
+   _f._preflight_require_v1(getattr(scope, '_ordinary_view_effects_v1', None) is None,
+    'ORDINARY_RP_PRE_EXPOSURE_METADATA_ONLY')
+ return join
+
+
+def _facet_fn_rp_predecessor_bind_view_v1(scope):
+ import tools.validation_reliability as _f
+ component = scope._ordinary_deterministic_source_ingredients_v1
+ join = _f._ordinary_rp_predecessor_check_v1(scope, component)
+ _f._preflight_require_v1(not join['view_attempted'] and scope._ordinary_transfer_complete_v1,
+  'ORDINARY_RP_SINGLE_COMPLETE_SOURCE_VIEW_JOIN')
+ join['view_attempted'] = True
+ try:
+  _f._preflight_require_v1(getattr(scope, '_ordinary_view_effects_v1', None) is None
+   and not hasattr(scope, '_ordinary_storage_frozen_v1'),
+   'ORDINARY_RP_VIEW_JOIN_PRECEDES_EXPOSURE_AND_C')
+  root = scope._ordinary_view_path_v1
+  trees = tuple(tree for tree in scope._ordinary_tree_transfers_v1
+   if tree['role'] == 'VIEW' and tree['target_path'] == root
+   and tree['source_row'] is scope.source.row_index[str(scope.source.root)])
+  _f._preflight_require_v1(len(trees) == 1 and trees[0]['complete'] and not trees[0]['errors']
+   and trees[0]['source'] is scope.source
+   and trees[0]['target_slot'] is scope._ordinary_view_root_slot_v1,
+   'ORDINARY_RP_ACTUAL_COMPLETE_ONE_TO_ONE_VIEW_TREE')
+  join['view_tree'] = trees[0]
+  bindings = []
+  def bind(slot):
+   path = root.joinpath(*slot['relative'].split('/'))
+   row = slot['source_row']
+   if row is None:
+    return dict(relative=slot['relative'], path=path, source_row=None,
+     source_version=None, transfer=None, version=None,
+     absent_parent=slot['absent_parent'], absent_suffix=slot['absent_suffix'])
+   matches = tuple(x for x in scope._ordinary_transfer_rows_v1
+    if x['source_row'] is row and x['path'] == path)
+   _f._preflight_require_v1(len(matches) == 1, 'ORDINARY_RP_ONE_ACTUAL_VIEW_TRANSFER')
+   transfer = matches[0]
+   _f._preflight_require_v1(transfer['copied'] and transfer['compared'] and transfer['sealed']
+    and not transfer['errors'] and transfer['source_row'] is row
+    and tuple(transfer['source_version']) == slot['source_version']
+    and type(transfer['view_version']) is tuple and len(transfer['view_version']) == 6
+    and _f.stat.S_IMODE(transfer['view_version'][5])
+     == _f.stat.S_IMODE(scope.source.originals[row['path']]['version'][2]),
+    'ORDINARY_RP_ORIGINAL_PROTECTED_VIEW_TRANSFER')
+   version = transfer['view_version']
+   return dict(relative=slot['relative'], path=path, source_row=row,
+    source_version=slot['source_version'], transfer=transfer, version=version,
+    absent_parent=None, absent_suffix=())
+  for acquisition in join['acquisitions']:
+   bindings.append(bind(acquisition['slot']))
+  effects = tuple(bind(_f._ordinary_rp_join_slot_v1(scope, target['path']))
+   for target in join['effect_files'])
+  bindings.extend(effects)
+  lane_occurrences = tuple(acquisition for lane in join['lanes']
+   for acquisition in (lane['header'], *(x[1] for x in lane['shards'])))
+  overlaps = []
+  for acquisition in lane_occurrences:
+   binding = next(x for x in bindings if x['relative'] == acquisition['slot']['relative'])
+   for effect in effects:
+    same_slot = binding['path'] == effect['path']
+    same_file = (binding['version'] is not None and effect['version'] is not None
+     and binding['version'][:2] == effect['version'][:2])
+    if same_slot or same_file:
+     _f._preflight_require_v1(not any(acquisition is lane['header'] for lane in join['lanes']),
+      'ORDINARY_RP_HEADER_OVERLAP_REQUIRES_ACTUAL_PROSPECTIVE_HEADER')
+     overlaps.append((acquisition, effect))
+  join['view_bindings'], join['overlaps'] = tuple(bindings), tuple(overlaps)
+  actual_overlaps = tuple(acquisition for acquisition in lane_occurrences
+   if any(acquisition is actual for actual, effect in overlaps))
+  _f._preflight_require_v1(len(actual_overlaps) == len(join['prospective_overlaps'])
+   and all(actual is expected for actual, expected
+    in zip(actual_overlaps, join['prospective_overlaps'], strict=True)),
+   'ORDINARY_RP_ACTUAL_VIEW_AGREES_WITH_PROSPECTIVE_SLOT_JOIN')
+  join['frozen_view'] = _f._ordinary_rp_join_view_snapshot_v1(scope, join)
+  join['view_complete'] = True
+  return _f._ordinary_rp_predecessor_check_v1(scope, component, require_view=True)
+ except BaseException as error:
+  join['errors'].append(error)
+  if not any(error is old for old in component['errors']): component['errors'].append(error)
+  if not any(error is old for old in scope._ordinary_factory_errors_v1):
+   scope._ordinary_factory_errors_v1.append(error)
+  raise
+
+
+def _facet_fn_rp_join_view_snapshot_v1(scope, join):
+ import tools.validation_reliability as _f
+ return (join['view_tree'], tuple(join['view_tree'].items()), scope._ordinary_view_root_slot_v1,
+  scope._ordinary_view_path_v1,
+  tuple((x, tuple(x.items())) for x in join['view_bindings']),
+  join['overlaps'], join['M_exact'],
+  _f._ordinary_rp_join_freeze_v1(join['name_metadata']))
+
+
+def _facet_fn_rp_writer_slot_v1(scope, relative, kind):
+ import tools.validation_reliability as _f
+ _f._mapper_portable_relative_v1(relative)
+ _f._preflight_require_v1(kind in ('file', 'directory'),
+  'ORDINARY_RP_WRITER_SOURCE_SLOT_KIND')
+ source = scope.source
+ path = _f.Path(source.root).joinpath(*relative.split('/'))
+ row = source.row_index.get(str(path))
+ slot = dict(relative=relative, kind=kind, source_row=row, source_version=None,
+  absent_parent=None, absent_version=None, absent_suffix=(), row_shape=None)
+ if row is not None:
+  collection = source.files if kind == 'file' else source.directories
+  _f._preflight_require_v1(row['role'] == 'repository' and row['kind'] == kind
+   and row['path'] == str(path) and str(path) in collection and str(path) in source.post,
+   'ORDINARY_RP_WRITER_PRESENT_ORIGINAL_SLOT')
+  slot['source_version'] = tuple(source.post[str(path)])
+  slot['row_shape'] = (row['path'], row['role'], row['kind'],
+   tuple(row['roster']) if kind == 'directory' else None)
+ else:
+  parent, suffix = path.parent, [path.name]
+  while str(parent) not in source.row_index:
+   _f._preflight_require_v1(parent != source.root and parent.is_relative_to(source.root),
+    'ORDINARY_RP_WRITER_ABSENCE_REQUIRES_ORIGINAL_PARENT')
+   suffix.insert(0, parent.name)
+   parent = parent.parent
+  anchor = source.row_index[str(parent)]
+  _f._preflight_require_v1(anchor['role'] == 'repository' and anchor['kind'] == 'directory'
+   and str(parent) in source.directories and str(parent) in source.post
+   and suffix[0] not in anchor['roster'],
+   'ORDINARY_RP_WRITER_ABSENCE_COMPLETE_ORIGINAL_ROSTER')
+  slot['absent_parent'] = anchor
+  slot['absent_version'] = tuple(source.post[str(parent)])
+  slot['absent_suffix'] = tuple(suffix)
+  slot['row_shape'] = (anchor['path'], anchor['role'], anchor['kind'], tuple(anchor['roster']))
+ slot['original'] = (slot, relative, kind, row, slot['source_version'],
+  slot['absent_parent'], slot['absent_version'], slot['absent_suffix'], slot['row_shape'])
+ return slot
+
+
+def _facet_fn_rp_writer_snapshot_v1(programme):
+ import tools.validation_reliability as _f
+ return (programme['scope'], programme['component'], programme['join'], programme['row'],
+  programme['source'], programme['name_metadata'], programme['source_operands'],
+  programme['call_grammar'], programme['helper_pins'],
+  _f._ordinary_rp_join_freeze_v1(programme['name_metadata']),
+  tuple((slot, slot['original']) for slot in programme['slots']),
+  programme['stale_files'], programme['matching_nonfiles'],
+  programme['directory_targets'], programme['report_order'],
+  tuple((target, tuple(target.keys()), target['path'], target['kind'],
+   target['actions'], target['original_members'], target['required_members'],
+   target['parent_paths'], target['source_operands']) for target in programme['targets']))
+
+
+def _facet_fn_rp_writer_source_v1(scope, component, join):
+ import tools.validation_reliability as _f
+ _f._preflight_require_v1(join is _f._ordinary_rp_predecessor_check_v1(scope, component)
+  and join['rp_row'] is not None and not join.get('writer_attempted', False),
+  'ORDINARY_RP_WRITER_SINGLE_ORIGINAL_JOIN')
+ join['writer_attempted'] = True
+ join['writer_programme'] = None
+ join['writer_original_programme'] = None
+ join['writer_original_snapshot'] = None
+ try:
+  source, row = scope.source, join['rp_row']
+  _f._preflight_require_v1(row is component['rows'][row['ordinal'] - 1]
+   and row['source_position'] == 92
+   and row['source_module'] == 'tools/build_pr168_rp_formula_based_replay_paper_recompute.py'
+   and not row['targets'],
+   'ORDINARY_RP_WRITER_ORIGINAL_UNCOMPILED_OCCURRENCE')
+  metadata = join['name_metadata']
+  _f._preflight_require_v1(metadata is row['rp_name_metadata']
+   and type(metadata['future_file_names']) is tuple
+   and metadata['future_file_name_count'] == len(metadata['future_file_names'])
+   and len(metadata['future_file_names']) == len(set(metadata['future_file_names']))
+   and type(metadata['family_total_sets']) is tuple
+   and len(metadata['family_total_sets']) == 123,
+   'ORDINARY_RP_WRITER_ORIGINAL_LITERAL_NAME_PRODUCT')
+  generated = 'docs/master_plan/generated'
+  shard_directory = generated + '/pr168_rp_shards'
+  shard_slot = _f._ordinary_rp_writer_slot_v1(scope, shard_directory, 'directory')
+  shard_row = shard_slot['source_row']
+  stale, matching_nonfiles = [], []
+  report_order = tuple(filename for filename, unused_totals in metadata['family_total_sets'])
+  _f._preflight_require_v1(len(set(report_order)) == len(report_order),
+   'ORDINARY_RP_WRITER_UNIQUE_ORIGINAL_REPORT_FAMILIES')
+  for filename, totals in metadata['family_total_sets']:
+   _f._preflight_require_v1(type(filename) is str and '/' not in filename
+    and type(totals) is tuple
+    and all(type(total) is int and total >= 2 for total in totals)
+    and totals == tuple(sorted(set(totals))),
+    'ORDINARY_RP_WRITER_SOURCE_FAMILY_TOTALS')
+   prefix, suffix = _f.PurePosixPath(filename).stem + '.part_', '.report.json'
+   if shard_row is None:
+    continue
+   for name in shard_row['roster']:
+    if not (name.startswith(prefix) and name.endswith(suffix)):
+     continue
+    relative = shard_directory + '/' + name
+    captured = source.row_index.get(str(_f.Path(source.root).joinpath(*relative.split('/'))))
+    _f._preflight_require_v1(captured is not None and captured['role'] == 'repository'
+     and captured['kind'] in ('file', 'directory'),
+     'ORDINARY_RP_WRITER_COMPLETE_ORIGINAL_GLOB_MEMBER')
+    slot = _f._ordinary_rp_writer_slot_v1(scope, relative, captured['kind'])
+    (stale if captured['kind'] == 'file' else matching_nonfiles).append(slot)
+
+  actions = {}
+  for relative in metadata['future_file_names']:
+   _f._mapper_portable_relative_v1(relative)
+   if relative.startswith(generated + '/') and '/' not in relative[len(generated) + 1:]:
+    _f._preflight_require_v1(relative[len(generated) + 1:] in report_order,
+     'ORDINARY_RP_WRITER_ORIGINAL_ROOT_REPORT')
+    chosen = ('CREATE', 'WRITE')
+   else:
+    _f._preflight_require_v1(relative.startswith(shard_directory + '/')
+     and '/' not in relative[len(shard_directory) + 1:],
+     'ORDINARY_RP_WRITER_LITERAL_SHARD_NAMESPACE')
+    chosen = (('CREATE', 'WRITE', 'DELETE')
+     if '_of_{total}.report.json' in relative else ('CREATE', 'WRITE'))
+   actions[relative] = chosen
+  for slot in stale:
+   relative = slot['relative']
+   prior = actions.get(relative, ())
+   actions[relative] = tuple(action for action in ('CREATE', 'WRITE', 'DELETE')
+    if action in prior or action == 'DELETE')
+
+  for effect in join['effect_files']:
+   relative = effect['path']
+   _f._preflight_require_v1(relative not in actions
+    and relative != generated and relative != shard_directory
+    and not any(relative.startswith(shard_directory + '/' +
+     _f.PurePosixPath(filename).stem + '.part_') and relative.endswith('.report.json')
+     for filename in report_order),
+    'ORDINARY_RP_WRITER_PREDECESSOR_NAMESPACE_GENERATION')
+
+  directories = {generated}
+  if any(totals for unused_filename, totals in metadata['family_total_sets']):
+   directories.add(shard_directory)
+  for relative in tuple(directories):
+   for parent in reversed(_f.PurePosixPath(relative).parents):
+    if str(parent) == '.':
+     continue
+    captured = source.row_index.get(str(_f.Path(source.root).joinpath(*parent.parts)))
+    if captured is None:
+     directories.add(str(parent))
+    else:
+     _f._preflight_require_v1(captured['role'] == 'repository'
+      and captured['kind'] == 'directory',
+      'ORDINARY_RP_WRITER_ORIGINAL_MKDIR_ANCESTOR')
+  selected = tuple(sorted((*actions, *directories)))
+  targets, slots = [], [shard_slot, *stale, *matching_nonfiles]
+  for relative in selected:
+   kind = 'DIRECTORY' if relative in directories else 'FILE'
+   slot = _f._ordinary_rp_writer_slot_v1(scope, relative,
+    'directory' if kind == 'DIRECTORY' else 'file')
+   slots.append(slot)
+   targets.append(dict(path=relative, kind=kind,
+    actions=('CREATE',) if kind == 'DIRECTORY' else actions[relative],
+    original_members=() if slot['source_row'] is None else (relative,),
+    required_members=selected,
+    parent_paths=tuple(str(parent) for parent in reversed(_f.PurePosixPath(relative).parents)
+     if str(parent) != '.'),
+    source_operands=row['source_operands']))
+  programme = dict(scope=scope, component=component, join=join, row=row,
+   source=source, name_metadata=metadata, source_operands=row['source_operands'],
+   call_grammar=row['call_grammar'], slots=tuple(slots),
+   stale_files=tuple(stale), matching_nonfiles=tuple(matching_nonfiles),
+   directory_targets=tuple(sorted(directories)), targets=tuple(targets),
+   report_order=report_order, native_attempted=False, native_programme=None,
+   view_attempted=False, view_complete=False, view_bindings=(), view_tree=None,
+   frozen_view=None)
+  programme['helper_pins'] = tuple((name, _f.__dict__[name]) for name in (
+   '_ordinary_rp_writer_slot_v1', '_ordinary_rp_writer_snapshot_v1',
+   '_ordinary_rp_writer_source_v1', '_ordinary_rp_writer_check_v1',
+   '_ordinary_rp_writer_compile_native_v1', '_ordinary_rp_writer_bind_view_v1'))
+  programme['original'] = _f._ordinary_rp_writer_snapshot_v1(programme)
+  join['writer_programme'] = join['writer_original_programme'] = programme
+  join['writer_original_snapshot'] = programme['original']
+  row['targets'] = programme['targets']
+  return programme
+ except BaseException as error:
+  join['errors'].append(error)
+  if not any(error is old for old in component['errors']): component['errors'].append(error)
+  if not any(error is old for old in scope._ordinary_factory_errors_v1):
+   scope._ordinary_factory_errors_v1.append(error)
+  raise
+
+
+def _facet_fn_rp_writer_check_v1(scope, component, join, *, require_native=False,
+  require_view=False, require_exposed=False):
+ import tools.validation_reliability as _f
+ _f._preflight_require_v1(join is _f._ordinary_rp_predecessor_check_v1(scope, component,
+  require_view=require_view, require_exposed=require_exposed)
+  and join.get('writer_attempted') is True and not join['errors'],
+  'ORDINARY_RP_WRITER_ORIGINAL_CHECKED_JOIN')
+ programme, row = join['writer_programme'], join['rp_row']
+ _f._preflight_require_v1(type(programme) is dict and programme is join['writer_original_programme']
+  and programme['original'] is join['writer_original_snapshot']
+  and programme['scope'] is scope
+  and programme['component'] is component and programme['join'] is join
+  and programme['row'] is row and programme['source'] is scope.source
+  and programme['name_metadata'] is join['name_metadata'] is row['rp_name_metadata']
+  and programme['source_operands'] is row['source_operands']
+  and programme['call_grammar'] is row['call_grammar']
+  and row['targets'] is programme['targets']
+  and len(programme['targets']) == len(programme['original'][15])
+  and all(target is old[0] and target['source_operands'] is programme['source_operands']
+   for target, old in zip(programme['targets'], programme['original'][15], strict=True))
+  and len(programme['slots']) == len(programme['original'][10])
+  and all(slot is old[0] for slot, old in
+   zip(programme['slots'], programme['original'][10], strict=True))
+  and _f._ordinary_rp_writer_snapshot_v1(programme) == programme['original']
+  and all(_f.__dict__.get(name) is helper for name, helper in programme['helper_pins']),
+  'ORDINARY_RP_WRITER_ORIGINAL_PROGRAMME_AND_HELPERS')
+ source = scope.source
+ for slot in programme['slots']:
+  original = slot['original']
+  _f._preflight_require_v1(type(original) is tuple and len(original) == 9
+   and original[0] is slot and original[1:3] == (slot['relative'], slot['kind'])
+   and original[3] is slot['source_row'] and original[4] == slot['source_version']
+   and original[5] is slot['absent_parent'] and original[6:] ==
+    (slot['absent_version'], slot['absent_suffix'], slot['row_shape']),
+   'ORDINARY_RP_WRITER_ORIGINAL_SLOT_RECORD')
+  captured = slot['source_row']
+  if captured is not None:
+   _f._preflight_require_v1(source.row_index.get(captured['path']) is captured
+    and tuple(source.post[captured['path']]) == slot['source_version']
+    and (captured['path'], captured['role'], captured['kind'],
+     tuple(captured['roster']) if slot['kind'] == 'directory' else None)
+     == slot['row_shape'],
+    'ORDINARY_RP_WRITER_PRESENT_SOURCE_GENERATION')
+  else:
+   anchor = slot['absent_parent']
+   path = _f.Path(source.root).joinpath(*slot['relative'].split('/'))
+   _f._preflight_require_v1(str(path) not in source.row_index
+    and source.row_index.get(anchor['path']) is anchor
+    and tuple(source.post[anchor['path']]) == slot['absent_version']
+    and (anchor['path'], anchor['role'], anchor['kind'], tuple(anchor['roster']))
+     == slot['row_shape']
+    and slot['absent_suffix'][0] not in anchor['roster'],
+    'ORDINARY_RP_WRITER_ABSENT_SOURCE_GENERATION')
+ if require_native:
+  resource = scope._ordinary_resource_programme_v1
+  original_resource = scope._ordinary_original_resource_programme_v1
+  _f._preflight_require_v1(resource is original_resource[0]
+   and tuple(resource.items()) == original_resource[1]
+   and type(resource['fd_demand']) is tuple and len(resource['fd_demand']) == 3
+   and resource['fd_demand'][1:] == (12, 8),
+   'ORDINARY_RP_WRITER_FROZEN_ORIGINAL_RESOURCE')
+  _f._preflight_require_v1(programme['native_attempted'] is True
+   and programme['native_programme'] is not None
+   and row['native_programme'] is programme['native_programme']
+   and type(programme['native_original']) is tuple and len(programme['native_original']) == 11
+   and programme['native_original'][0] is programme
+   and programme['native_original'][1] is programme['native_programme']
+   and programme['native_original'][2] is scope
+   and programme['native_original'][3] is component
+   and programme['native_original'][4] is join
+   and programme['native_original'][5] is row
+   and programme['native_original'][6] is component['bound_rows'][row['ordinal'] - 1]
+   and programme['native_original'][7] is resource
+   and programme['native_original'][8] is row['source_operands']
+   and programme['native_original'][9] is row['call_grammar']
+   and programme['native_original'][10] == tuple(
+    call for item in row['call_grammar'] for call in item[3]),
+   'ORDINARY_RP_WRITER_ORIGINAL_NATIVE_CONSTRUCTION')
+  native = programme['native_programme']
+  _f._preflight_require_v1(native['check'](scope, native) is native,
+   'ORDINARY_RP_WRITER_SAME_ORIGINAL_NATIVE_SOURCE_PRODUCT')
+ if require_view:
+  _f._preflight_require_v1(programme['view_attempted'] is True
+   and programme['view_complete'] is True
+   and programme['view_tree'] is join['view_tree']
+   and any(programme['view_tree'] is tree for tree in scope._ordinary_tree_transfers_v1)
+   and programme['frozen_view'] == (programme['view_tree'],
+    tuple(programme['view_tree'].items()),
+    tuple((binding, tuple(binding.items())) for binding in programme['view_bindings'])),
+   'ORDINARY_RP_WRITER_ORIGINAL_COMPLETED_VIEW_NAMESPACE')
+  for binding, original in zip(programme['view_bindings'], programme['frozen_view'][2], strict=True):
+   _f._preflight_require_v1(binding is original[0], 'ORDINARY_RP_WRITER_ORIGINAL_VIEW_BINDING')
+   transfer = binding['transfer']
+   _f._preflight_require_v1(any(transfer is actual for actual in scope._ordinary_transfer_rows_v1)
+    and transfer['source_row'] is binding['source_row']
+    and transfer['path'] == binding['path']
+    and tuple(transfer['source_version']) == binding['source_version']
+    and transfer['view_version'] == binding['version']
+    and transfer['copied'] and transfer['compared'] and transfer['sealed']
+    and not transfer['errors'],
+    'ORDINARY_RP_WRITER_ORIGINAL_VIEW_FILE')
+   if require_exposed:
+    after = scope._ordinary_view_operand_version_v1(binding['source_row'],
+     binding['source_version'], transfer)
+    before = binding['version']
+    _f._preflight_require_v1(after[:4] == before[:4]
+     and _f.stat.S_IFMT(after[5]) == _f.stat.S_IFMT(before[5]),
+     'ORDINARY_RP_WRITER_VIEW_FILE_CONTENT_AFTER_EXPOSURE')
+ return programme
+
+
+def _facet_fn_rp_writer_compile_native_v1(scope, component, join, bound_row, resource):
+ import tools.validation_reliability as _f
+ programme = _f._ordinary_rp_writer_check_v1(scope, component, join)
+ row = join['rp_row']
+ _f._preflight_require_v1(bound_row is component['bound_rows'][row['ordinal'] - 1]
+  and not row['unresolved_source_facts'] and not programme['native_attempted'],
+  'ORDINARY_RP_WRITER_GENUINE_NATIVE_COMPILER_OPERANDS')
+ original_resource = scope._ordinary_original_resource_programme_v1
+ _f._preflight_require_v1(resource is scope._ordinary_resource_programme_v1
+  is original_resource[0] and tuple(resource.items()) == original_resource[1]
+  and type(resource['fd_demand']) is tuple and len(resource['fd_demand']) == 3
+  and resource['fd_demand'][1:] == (12, 8),
+  'ORDINARY_RP_WRITER_ORIGINAL_RESOURCE_COHORT')
+ programme['native_attempted'] = True
+ try:
+  native_calls = tuple(call for item in row['call_grammar'] for call in item[3])
+  result = _f._ordinary_native_source_programme_v1(scope, bound_row,
+   row['source_operands'], row['call_grammar'],
+   cohorts=((('APPLICATION',), row['source_operands'], native_calls),),
+   bootstrap_fd_demand=resource['fd_demand'][1],
+   application_fd_demand=max(resource['fd_demand'][2], 4),
+   nofile=max(resource['fd_demand'][1], resource['fd_demand'][2], 4),
+   uses_git=False)
+  programme['native_programme'] = result
+  programme['native_original'] = (programme, result, scope, component, join, row,
+   bound_row, resource, row['source_operands'], row['call_grammar'], native_calls)
+  row['native_programme'] = result
+  return result
+ except BaseException as error:
+  join['errors'].append(error)
+  if not any(error is old for old in component['errors']): component['errors'].append(error)
+  if not any(error is old for old in scope._ordinary_factory_errors_v1):
+   scope._ordinary_factory_errors_v1.append(error)
+  raise
+
+
+def _facet_fn_rp_writer_bind_view_v1(scope, component, join):
+ import tools.validation_reliability as _f
+ programme = _f._ordinary_rp_writer_check_v1(scope, component, join, require_native=True)
+ _f._preflight_require_v1(join['view_complete'] and not programme['view_attempted']
+  and getattr(scope, '_ordinary_view_effects_v1', None) is None,
+  'ORDINARY_RP_WRITER_SINGLE_PRE_EXPOSURE_VIEW_JOIN')
+ programme['view_attempted'] = True
+ try:
+  _f._ordinary_rp_predecessor_check_v1(scope, component, require_view=True)
+  root, tree = scope._ordinary_view_path_v1, join['view_tree']
+  bindings = []
+  for slot in programme['slots']:
+   captured = slot['source_row']
+   if captured is None or slot['kind'] != 'file':
+    continue
+   path = root.joinpath(*slot['relative'].split('/'))
+   matches = tuple(transfer for transfer in scope._ordinary_transfer_rows_v1
+    if transfer['source_row'] is captured and transfer['path'] == path)
+   _f._preflight_require_v1(len(matches) == 1, 'ORDINARY_RP_WRITER_ONE_ACTUAL_VIEW_FILE')
+   transfer = matches[0]
+   _f._preflight_require_v1(transfer['copied'] and transfer['compared'] and transfer['sealed']
+    and not transfer['errors'] and tuple(transfer['source_version']) == slot['source_version']
+    and type(transfer['view_version']) is tuple and len(transfer['view_version']) == 6,
+    'ORDINARY_RP_WRITER_PROTECTED_VIEW_FILE_TRANSFER')
+   bindings.append(dict(source_row=captured, source_version=slot['source_version'],
+    path=path, transfer=transfer, version=transfer['view_version']))
+  programme['view_tree'], programme['view_bindings'] = tree, tuple(bindings)
+  programme['frozen_view'] = (tree, tuple(tree.items()),
+   tuple((binding, tuple(binding.items())) for binding in programme['view_bindings']))
+  programme['view_complete'] = True
+  return _f._ordinary_rp_writer_check_v1(scope, component, join,
+   require_native=True, require_view=True)
+ except BaseException as error:
+  join['errors'].append(error)
+  if not any(error is old for old in component['errors']): component['errors'].append(error)
+  if not any(error is old for old in scope._ordinary_factory_errors_v1):
+   scope._ordinary_factory_errors_v1.append(error)
+  raise
+
+
+def _facet_fn_rp_key_from_fields_v1(canonical_row_key, source_row_pointer,
+         row_pointer=None):
+ import tools.validation_reliability as _f
+ key = str(canonical_row_key or "")
+ if key.startswith("QKU::"):
+  return key.split("QKU::", 1)[1]
+ pointer = str(source_row_pointer or row_pointer or "")
+ if ":QKU-" in pointer:
+  return "QKU-" + pointer.split(":QKU-", 1)[1]
+ return None
+
+
+def _facet_fn_rp_assignment_keys_v1(records):
+ import tools.validation_reliability as _f
+ return tuple(_f._ordinary_rp_key_from_fields_v1(
+  row.get("canonical_row_key"), row.get("source_row_pointer"),
+  row.get("row_pointer")) for row in records)
+
+
+def _facet_fn_gfp_rp_assignment_keys_v1(*, qku_records, candidate_records,
+  atomicrow_records, pr154_records, qku_report_path, candidate_report_path,
+  atomicrows_jsonl_path, pr154_report_path):
+ import tools.validation_reliability as _f
+ def pointer(path, index, row_id=None):
+  suffix = f"#{index:06d}"
+  if row_id:
+   suffix = f"{suffix}:{row_id}"
+  return f"{_f.Path(path).as_posix()}{suffix}"
+
+ keys = []
+ for index, row in enumerate(qku_records, start=1):
+  qku_id = str(row.get("qku_id"))
+  keys.append(_f._ordinary_rp_key_from_fields_v1(
+   f"QKU::{qku_id}", pointer(qku_report_path, index, qku_id)))
+ for index, row in enumerate(candidate_records, start=1):
+  qku_id = str(row.get("qku_id"))
+  keys.append(_f._ordinary_rp_key_from_fields_v1(
+   f"QKU::{qku_id}", pointer(
+    candidate_report_path, index, str(row.get("queue_id")))))
+ for index, row in enumerate(atomicrow_records, start=1):
+  row_id = str(row.get("exact_row_id")
+   or row.get("source_record_stable_identity") or row.get("row_index"))
+  keys.append(_f._ordinary_rp_key_from_fields_v1(
+   f"QKU::QKU-ATOMICROW-{row_id}", pointer(
+    atomicrows_jsonl_path, index, str(row.get("exact_row_id")))))
+ for index, row in enumerate(pr154_records, start=1):
+  row_id = str(row.get("pr154_record_id")
+   or row.get("source_pr153s_target_id") or row.get("target_field_path"))
+  keys.append(_f._ordinary_rp_key_from_fields_v1(
+   f"PR154::{row_id}", pointer(
+    pr154_report_path, index, str(row.get("pr154_record_id")))))
+ return tuple(keys)
+
+
+def _facet_fn_rp_report_row_ranges_v1(N, F, M):
+ import tools.validation_reliability as _f
+ return (
+  ("PR168_RP_ReadReceipt.report.json", 34, 34),  # kernel:784
+  ("PR168_RP_InputConsumption.report.json", 34, 34),  # kernel:785
+  ("PR168_RP_StrictInputConsumptionLedger.report.json", 34, 34),  # kernel:786
+  ("PR168_RP_PR168GFPTruthOverlayConsumption.report.json", 1, 1),  # kernel:787
+  ("PR168_RP_PR165D2AgentArtifactDiscovery.report.json", 1, 1),  # kernel:788
+  ("PR168_RP_FormulaExecutionUniverse.report.json", F, F),  # kernel:789
+  ("PR168_RP_InputAvailabilityMatrix.report.json", N, N),  # kernel:790
+  ("PR168_RP_ReplayInputAvailability.report.json", N, N),  # kernel:791
+  ("PR168_RP_PaperInputAvailability.report.json", N, N),  # kernel:792
+  ("PR168_RP_MissingDefaultResolutionQueue.report.json", M, M),  # kernel:793
+  ("PR168_RP_MissingValueCandidateFillQueue.report.json", N - M, N - M),  # kernel:794
+  ("PR168_RP_ExternalScoutingCandidateLedger.report.json", 9, 9),  # kernel:795
+  ("PR168_RP_ComputedReplayResults.report.json", M, M),  # kernel:796
+  ("PR168_RP_ComputedPaperResults.report.json", M, M),  # kernel:797
+  ("PR168_RP_ReplayPaperComparison.report.json", M, M),  # kernel:798
+  ("PR168_RP_ComputedPnLEvidence.report.json", M, M),  # kernel:799
+  ("PR168_RP_PreTradeSimulationCandidates.report.json", 7 * M, 7 * M),  # kernel:800
+  ("PR168_RP_OrderPolicyCandidateRanking.report.json", 7 * M, 7 * M),  # kernel:801
+  ("PR168_RP_NoTradeCandidateComparison.report.json", 7 * M, 7 * M),  # kernel:802
+  ("PR168_RP_ScenarioLadderResults.report.json", M, M),  # kernel:803
+  ("PR168_RP_LatencyBudgetResults.report.json", 7 * M, 7 * M),  # kernel:804
+  ("PR168_RP_LivePreTradeDecisionGateSeed.report.json", 1, 1),  # kernel:805
+  ("PR168_RP_HotPathPrecomputeCandidateSeed.report.json", 4, 4),  # kernel:806
+  ("PR168_RP_LiveExcludedHeavyComputationLedger.report.json", 7, 7),  # kernel:807
+  ("PR168_RP_EdgeAttribution.report.json", M, M),  # kernel:808
+  ("PR168_RP_AlphaSourceDecomposition.report.json", M, M),  # kernel:809
+  ("PR168_RP_EdgeCaptureMechanismIndex.report.json", M, M),  # kernel:810
+  ("PR168_RP_ExecutionAdjustedEdge.report.json", M, M),  # kernel:811
+  ("PR168_RP_ExecutionAdjustedRankingSeed.report.json", M, M),  # kernel:812
+  ("PR168_RP_TCADecomposition.report.json", M, M),  # kernel:813
+  ("PR168_RP_ImplementationShortfall.report.json", M, M),  # kernel:814
+  ("PR168_RP_ExecutionCostAttribution.report.json", M, M),  # kernel:815
+  ("PR168_RP_TCACostDominanceFailureReasons.report.json", 0, M),  # kernel:816
+  ("PR168_RP_FillQueueLatencyResults.report.json", M, M),  # kernel:817
+  ("PR168_RP_OrderBookDepthSweep.report.json", M, M),  # kernel:818
+  ("PR168_RP_PredictionMarketMicrostructureFeatures.report.json", M, M),  # kernel:819
+  ("PR168_RP_OrderTypeSizingPriceCandidateRepair.report.json", 7 * M, 7 * M),  # kernel:820
+  ("PR168_RP_CapacityCrowdingResults.report.json", M, M),  # kernel:821
+  ("PR168_RP_CapacityScalingCurveSeed.report.json", M, M),  # kernel:822
+  ("PR168_RP_SizeReductionRecoveryCandidates.report.json", 0, M),  # kernel:823
+  ("PR168_RP_ProbabilityCalibration.report.json", M, M),  # kernel:824
+  ("PR168_RP_CalibrationRepairQueue.report.json", M, M),  # kernel:825
+  ("PR168_RP_OverfitFDRResults.report.json", M, M),  # kernel:826
+  ("PR168_RP_MultipleTestingFamilyLedger.report.json", M, M),  # kernel:827
+  ("PR168_RP_RepairAttemptMultiplicityLedger.report.json", 0, M),  # kernel:828
+  ("PR168_RP_LowerConfidenceBoundResults.report.json", M, M),  # kernel:829
+  ("PR168_RP_PortfolioMarginalUtilityResults.report.json", M, M),  # kernel:830
+  ("PR168_RP_RiskDiversificationResults.report.json", M, M),  # kernel:831
+  ("PR168_RP_ClusterCommonDriverExposure.report.json", M, M),  # kernel:832
+  ("PR168_RP_PortfolioRepairCandidateQueue.report.json", 0, M),  # kernel:833
+  ("PR168_RP_RegimeConditionedMemorySeed.report.json", M, M),  # kernel:834
+  ("PR168_RP_ScenarioOutcomeSeed.report.json", M, M),  # kernel:835
+  ("PR168_RP_ConditionScopedNegativeMemorySeed.report.json", 0, M),  # kernel:836
+  ("PR168_RP_ConditionScopedPositiveRepairMemorySeed.report.json", 0, 0),  # kernel:837
+  ("PR168_RP_PreTradeRegimeMemorySeed.report.json", M, M),  # kernel:838
+  ("PR168_RP_ChampionChallengerEligibility.report.json", M, M),  # kernel:839
+  ("PR168_RP_ChampionChallengerReasonCodes.report.json", 3, 3),  # kernel:840
+  ("PR168_RP_RepairedCandidateChampionChallengerEligibility.report.json", 0, 0),  # kernel:841
+  ("PR168_RP_PreTradeChampionChallengerEligibility.report.json", 7 * M, 7 * M),  # kernel:842
+  ("PR168_RP_QuantumObjectiveRecompute.report.json", N, N),  # kernel:843
+  ("PR168_RP_QuantumStructuralReadiness.report.json", N, N),  # kernel:844
+  ("PR168_RP_QuantumCoefficientMapInputGaps.report.json", 0, N),  # kernel:845
+  ("PR168_RP_ClassicalFallbackResults.report.json", N, N),  # kernel:846
+  ("PR168_RP_StrongestClassicalComparatorMap.report.json", N, N),  # kernel:847
+  ("PR168_RP_QKUCombinationQUBOObjectiveSeed.report.json", 0, N),  # kernel:848
+  ("PR168_RP_OrderPolicySelectionQUBOSeed.report.json", 0, N),  # kernel:849
+  ("PR168_RP_QKUCombinationCandidateResults.report.json", M, M),  # kernel:850
+  ("PR168_RP_QKUCombinationNegativeRecoveryResults.report.json", 0, M),  # kernel:851
+  ("PR168_RP_MarginalUtilitySelectionResults.report.json", M, M),  # kernel:852
+  ("PR168_RP_ParetoFrontierRankingSeed.report.json", M, M),  # kernel:853
+  ("PR168_RP_OrderPolicyCombinationSelectionResults.report.json", 7 * M, 7 * M),  # kernel:854
+  ("PR168_RP_ComputedPositiveEdgeCandidates.report.json", 0, M),  # kernel:855
+  ("PR168_RP_RepairedPositiveCandidateEvidence.report.json", 0, 0),  # kernel:856
+  ("PR168_RP_ComputedNegativeEdgeCandidates.report.json", 0, M),  # kernel:857
+  ("PR168_RP_ComputedNeutralOrZeroEdgeCandidates.report.json", 0, M),  # kernel:858
+  ("PR168_RP_NegativeCandidateReasonCodes.report.json", 0, 14 if M else 0),  # kernel:859
+  ("PR168_RP_NegativeToPositiveRecoveryAttempts.report.json", 0, M),  # kernel:860
+  ("PR168_RP_NegativeRecoveryCandidateFactory.report.json", 0, M),  # kernel:861
+  ("PR168_RP_TrueNegativeAfterRecoveryExhaustion.report.json", 0, M),  # kernel:862
+  ("PR168_RP_OldPositiveTruthCorrection.report.json", 1, 1),  # kernel:863
+  ("PR168_RP_OldNegativeTruthCorrection.report.json", 1, 1),  # kernel:864
+  ("PR168_RP_ActionableInputGapQueue.report.json", N - M, N - M),  # kernel:865
+  ("PR168_RP_AgentDutySourceGapQueue.report.json", 0, 1),  # kernel:866
+  ("PR168_RP_TargetedFormulaExpansionQueue.report.json", N - M, N - M),  # kernel:867
+  ("PR168_RP_ConnectorCandidateRouteMap.report.json", M, M),  # kernel:868
+  ("PR168_RP_ConnectorSemanticBindingNonCreationAudit.report.json", M, M),  # kernel:869
+  ("PR168_RP_To_PR168_RANK_ComputedRanking.report.json", M, M),  # kernel:870
+  ("PR168_RP_To_PR168_RANK_PreTradeRankingSeed.report.json", 7 * M, 7 * M),  # kernel:871
+  ("PR168_RP_To_PR166_QC_R2_RedoWithComputedEvidence.report.json", 0, N),  # kernel:872
+  ("PR168_RP_To_PR162E_Q_QuantumMapperGaps.report.json", 0, N),  # kernel:873
+  ("PR168_RP_To_PR162E_PR162F_FormulaPluginIntakeGaps.report.json", N - M, N - M),  # kernel:874
+  ("PR168_RP_To_RuntimeFormulaAllowlistHotPathCacheSeed.report.json", 4, 4),  # kernel:875
+  ("PR168_RP_To_ExecutionRouterLiveGateFutureHandoff.report.json", 1, 1),  # kernel:876
+  ("PR168_RP_To_OwnerDashboardComputedTruth.report.json", M + min(N - M, 1000), M + min(N - M, 1000)),  # kernel:877
+  ("PR168_RP_RouteTriage.report.json", 7, 7),  # kernel:878
+  ("PR168_RP_CommandActionMatrix.report.json", 7, 7),  # kernel:879
+  ("PR168_RP_DAGUpstreamDownstreamOrchestration.report.json", 130, 130),  # kernel:880
+  ("PR168_RP_FullMasterPlanSectionCrosswalk.report.json", 7, 7),  # kernel:881
+  ("PR168_RP_MarketSpecificSectionIndexes.report.json", 3, 3),  # kernel:882
+  ("PR168_RP_Stage1PredictionMarketActivationIndex.report.json", 3, 3),  # kernel:883
+  ("PR168_RP_FutureMarketDormancyIndex.report.json", 1, 1),  # kernel:884
+  ("PR168_RP_ReportConsumerCrosswalk.report.json", 123, 123),  # kernel:885
+  ("PR168_RP_ArtifactConsumerDAG.report.json", 130, 130),  # kernel:886
+  ("PR168_RP_MetricConsumerDAG.report.json", 130, 130),  # kernel:887
+  ("PR168_RP_AgentDutyDAG.report.json", 130, 130),  # kernel:888
+  ("PR168_RP_PRDependencyDAG.report.json", 130, 130),  # kernel:889
+  ("PR168_RP_ArtifactInformationValueDAG.report.json", 130, 130),  # kernel:890
+  ("PR168_RP_ConnectorCandidateRouteDAG.report.json", 130, 130),  # kernel:891
+  ("PR168_RP_PreTradeDecisionDAG.report.json", 130, 130),  # kernel:892
+  ("PR168_RP_OrderPolicyConsumerDAG.report.json", 130, 130),  # kernel:893
+  ("PR168_RP_LiveCandidateHandoffDAG.report.json", 130, 130),  # kernel:894
+  ("PR168_RP_ArtifactMap.report.json", 123, 123),  # kernel:895
+  ("PR168_RP_FileConsumerMap.report.json", 123, 123),  # kernel:896
+  ("PR168_RP_ValueLineageMap.report.json", 4 * M + min(N - M, 1000), 4 * M + min(N - M, 1000)),  # kernel:897
+  ("PR168_RP_MetricConsumerMap.report.json", 8, 8),  # kernel:898
+  ("PR168_RP_QKUFormulaComputationLineage.report.json", N, N),  # kernel:899
+  ("PR168_RP_AgentDutyOrchestrationCrosswalk.report.json", 1, 1),  # kernel:900
+  ("PR168_RP_AgentWorkOrders.report.json", 7, 7),  # kernel:901
+  ("PR168_RP_NoOrphanProof.report.json", 123, 123),  # kernel:902
+  ("PR168_RP_AuthorityBoundaryAudit.report.json", 8, 8),  # kernel:903
+  ("PR168_RP_ValidationScopeRegistryIntegration.report.json", 1, 1),  # kernel:904
+  ("PR168_RP_WindowsLinuxCompatibilityAudit.report.json", 6, 6),  # kernel:905
+  ("PR168_RP_FinalSummary.report.json", 1, 1),  # kernel:906
+ )
+
+
+def _facet_fn_rp_name_metadata_for_admissible_M_v1(*, N, F,
+  admissible_M, maximum_future_names):
+ import tools.validation_reliability as _f
+ if (type(N) is not int or N < 0 or type(F) is not int or F < 0
+   or type(maximum_future_names) is not int
+   or not 0 <= maximum_future_names <= 32768
+   or type(admissible_M) not in (tuple, range)
+   or not 0 < len(admissible_M) <= N + 1):
+  raise ValueError("original finite M set and future-name allowance required")
+ skeleton = _f._ordinary_rp_report_row_ranges_v1(N, F, 0)
+ families = [[filename, set(), 0] for filename, unused_low, unused_high in skeleton]
+ proposed = len(families)
+ if proposed > maximum_future_names:
+  raise ValueError("source-derived root headers exceed original ceiling")
+ previous = -1
+ for M in admissible_M:
+  if type(M) is not int or not previous < M <= N:
+   raise ValueError("original admissible M set must be increasing within N")
+  previous = M
+  ranges = _f._ordinary_rp_report_row_ranges_v1(N, F, M)
+  if len(ranges) != len(families):
+   raise ValueError("source family roster changed")
+  for family, (filename, low, high) in zip(families, ranges, strict=True):
+   if filename != family[0] or not 0 <= low <= high:
+    raise ValueError("source family identity or row range differs")
+   if high <= 1000:
+    continue
+   top = (high + 999) // 1000
+   totals = ((top,) if low == high else
+    range(max(2, (max(low, 1001) + 999) // 1000), top + 1))
+   for total in totals:
+    if total in family[1]:
+     continue
+    next_count = proposed + total + max(0, total - family[2])
+    if next_count > maximum_future_names:
+     raise ValueError("union of admissible M names exceeds original ceiling")
+    proposed = next_count
+    family[1].add(total)
+    family[2] = max(family[2], total)
+
+ names = []
+ root = _f.Path("docs/master_plan/generated")
+ shards = root / "pr168_rp_shards"
+ family_totals = []
+ for filename, totals, top in families:
+  ordered_totals = tuple(sorted(totals))
+  family_totals.append((filename, ordered_totals))
+  names.append((root / filename).as_posix())
+  stem = _f.Path(filename).stem
+  for index in range(1, top + 1):
+   names.append((shards /
+    f"{stem}.part_{index:04d}_of_{{total}}.report.json").as_posix())
+  for total in ordered_totals:
+   for index in range(1, total + 1):
+    names.append((shards /
+     f"{stem}.part_{index:04d}_of_{total:04d}.report.json").as_posix())
+ if len(names) != proposed or len(set(names)) != proposed:
+  raise ValueError("source-derived literal union roster differs")
+ return dict(N=N, F=F, M=None, admissible_M=tuple(admissible_M),
+  family_total_sets=tuple(family_totals),
+  future_file_names=tuple(names), future_file_name_count=proposed)
+
+
+def _facet_run_rp5a_source_demands_v1(policy, *, prospective_names):
+    """Derive source geometry and all R owner multiplicities; issue no quotas.
+
+    A possible native result is an envelope, not mandatory successful work.
+    The original central compiler partitions its remaining shared pools once;
+    the existing ledgers/fences may then deny before this possible envelope.
+    """
+    import tools.run_validation_gates as _f
+    from tools import validation_reliability as owner
+    require = owner._preflight_require_v1
+    original = policy.get('original') if type(policy) is dict else None
+    require(type(original) is tuple and len(original) == 9 and original[0] is policy
+     and original[1] is policy['scope'] and original[2] is policy['source']
+     and original[3] is policy['census'] and original[4] is policy['ceiling_programme']
+     and original[5] is policy['original_cutoffs']
+     and original[6] == tuple((key, value) for key, value in policy.items() if key != 'original')
+     and original[7] == tuple(policy['maxima'].items())
+     and original[8] == tuple(policy['scanner_grammar'].items())
+     and type(prospective_names) is tuple and all(type(name) is str for name in prospective_names)
+     and len(prospective_names) == len(set(prospective_names)),
+     'ORDINARY_R_DEMAND_ORIGINAL_SOURCE_POLICY_AND_NAME_CATALOGUE')
+    caps = _f._ordinary_post_ceiling_checked_v1(policy['ceiling_programme'])
+    maxima, grammar = policy['maxima'], policy['scanner_grammar']
+    files = {}
+    root = policy['census'].roots['repository']
+    for row, path, role, kind, length, version, roster, protected in policy['original_rows']:
+     require(policy['source'].row_index.get(path) is row and row['logical_bytes'] == length
+      and tuple(row['version']) == version and tuple(row['roster']) == roster
+      and tuple(policy['source'].post[path]) == protected,
+      'ORDINARY_R_DEMAND_ORIGINAL_METADATA_NOT_REBASED')
+     if role == 'repository' and kind == 'file':
+      files[_f.pathlib.Path(path).relative_to(root).as_posix()] = length
+    for name in prospective_names:
+     owner._mapper_portable_relative_v1(name)
+    all_names = tuple(dict.fromkeys((*files, *prospective_names)))
+    widths = tuple(len(name.encode('utf-8')) for name in all_names)
+    count, path_width = len(all_names), max(widths, default=0)
+    require(0 < count <= maxima['namespace_names'] and 0 < path_width <= maxima['path_bytes'],
+     'ORDINARY_R_DEMAND_COMPLETE_SOURCE_NAME_GEOMETRY')
+    inventory = sum(width + 1 for width in widths)
+    status = count * (3 + 2 * (path_width + 1))
+    config = len(b'core.repositoryformatversion\0')
+    modes = 7 * count
+    token = maxima['path_bytes'] + 1
+    stdout_once = max(inventory, status, modes, maxima['source_bytes'], token, 128, config)
+    parent_stdout = inventory + status + maxima['source_bytes'] + 4 * token + 128 + config + modes
+    parent_calls = maxima['parent_invocations']
+    parent = dict(invocations=parent_calls, output_bytes=parent_stdout + parent_calls * maxima['stderr_bytes'],
+     scratch_bytes=stdout_once + maxima['stderr_bytes'], readback_bytes=parent_stdout,
+     inventory_bytes=inventory, status_bytes=status, index_mode_bytes=modes,
+     token_bytes=token, historical_source_bytes=maxima['source_bytes'],
+     config_name_bytes=config, version_bytes=128,
+     source_operand_acquisitions=3, config_index_file_acquisitions=6,
+     source_operand_header_bytes=36)
+    control = maxima['metadata_bytes']
+    raw = maxima['payload_bytes']
+    frame = 4 + control + raw
+    directory = caps['limits']['namespace_entry_limit'] * maxima['path_bytes']
+    scanner_names = tuple(name for name in all_names if policy['should_scan_path'](name))
+    selected = min(len(scanner_names), grammar['max_files'])
+    name_calls = (selected + grammar['batch_size'] - 1) // grammar['batch_size']
+    line_files = min(selected, grammar['max_matched_files'])
+    line_calls = (line_files + grammar['batch_size'] - 1) // grammar['batch_size']
+    mandatory_scanner_git = 1 + name_calls
+    possible_scanner_git = mandatory_scanner_git + line_calls
+    scanner_line_output = min(raw, line_files * grammar['stdout_line_bytes']) + line_files * (
+     grammar['max_line_hits'] + 1) * (path_width + len(str(grammar['stdout_line_bytes'] + 1)) + 3)
+    scanner_stdout = 2 * inventory + scanner_line_output
+    scanner_output = scanner_stdout + possible_scanner_git * maxima['stderr_bytes']
+    scanner_scratch = max(inventory, grammar['batch_size'] * (
+     grammar['stdout_line_bytes'] + (grammar['max_line_hits'] + 1) * (
+      path_width + len(str(grammar['stdout_line_bytes'] + 1)) + 3))) + maxima['stderr_bytes']
+    pair = 2 * raw + directory
+    selected_fixed_pairs = grammar['scanner_fixed_fences'] + 1
+    full_mandatory = selected_fixed_pairs + grammar['full_fences_per_git'] * mandatory_scanner_git
+    full_possible = selected_fixed_pairs + grammar['full_fences_per_git'] * possible_scanner_git
+    reduced_possible = selected_fixed_pairs * pair + (
+     grammar['full_fences_per_git'] * possible_scanner_git) * directory
+    scanner = dict(mandatory_git_calls=mandatory_scanner_git,
+     possible_git_calls=possible_scanner_git, names_git_calls=name_calls, possible_lines_git_calls=line_calls,
+     output_bytes=scanner_output, scratch_bytes=scanner_scratch, readback_bytes=scanner_stdout,
+     parent_pair_bytes=grammar['parent_full_fences'] * pair,
+     child_full_mandatory_bytes=full_mandatory * pair,
+     child_full_possible_bytes=full_possible * pair,
+     child_native_reduced_possible_bytes=reduced_possible,
+     child_fixed_full_pairs=selected_fixed_pairs,
+     frame_scratch_bytes=frame, frame_reread_bytes=7 * raw + 3 * (4 + control),
+     emission_snapshot_bytes=raw, parent_full_readbacks=3,
+     candidate_allowance_owner_multiplicity=2)
+    reader_calls = maxima['reader_invocations']
+    reader_raw = min(raw, control // 2)
+    reader_directory = min(directory, control)
+    selected_reader_names = tuple(dict.fromkeys((*policy['reader_names'],
+     *policy['absent_names'], *policy['fixed_controls'])))
+    reader = dict(possible_git_calls=reader_calls,
+     selected_source_names=selected_reader_names,
+     file_payload_byte_envelope=reader_raw,
+     directory_byte_envelope=reader_directory,
+     output_bytes=reader_calls * (stdout_once + maxima['stderr_bytes']),
+     scratch_bytes=stdout_once + maxima['stderr_bytes'], readback_bytes=reader_calls * stdout_once,
+     child_boundary_bytes=(grammar['reader_fixed_fences'] + grammar['reader_fences_per_git'] * reader_calls)
+      * (reader_raw + reader_directory),
+     frame_scratch_bytes=4 + control, frame_reread_bytes=3 * (4 + control),
+     candidate_allowance_owner_multiplicity=2)
+    receiver = dict(native_reads_per_git=6, native_read_bytes_per_operand=1048577,
+     native_namespace_observations_per_git=12, manager_fdinfo_records=maxima['manager_fdinfo_records'],
+     manager_fdinfo_bytes=maxima['manager_fdinfo_bytes'], manager_borrow_fds=maxima['manager_borrow_fds'],
+     header_reads_per_process=1, binding_reads_per_process=1, release_reads_per_process=1,
+     max_binding_bytes=control, max_header_bytes=control, max_release_bytes=1048576,
+     raw_request_bytes=maxima['raw_chunk_bytes'])
+    namespace_rows = maxima['namespace_names']
+    file_rows = min(count, namespace_rows)
+    relative_components = max((len(name.split('/')) for name in all_names), default=1)
+    root_chain = len(_f.pathlib.Path(root).parents) + 1
+    parent_chain = root_chain + max(0, relative_components - 1)
+    directory_entries = caps['limits']['namespace_entry_limit']
+    control_chain = len((policy['scope'].control / 'binding').parents) + 1
+    common_row_calls = root_chain + 1 + namespace_rows * (parent_chain + 2) + directory_entries + 4 * namespace_rows
+    full_callback_calls = common_row_calls + 9 * raw + 10 * file_rows + 8
+    proof_preamble_calls = 2 * (1 + control_chain) + 3
+    proof_callback_calls = common_row_calls + 11 * file_rows + 8 + proof_preamble_calls
+    proof_bind_calls = 2 * (1048577 + 6) + 8 * file_rows + 4
+    proof_bind_bytes = 2 * 1048577 + 4 * file_rows + 4
+    repeated_callbacks = grammar['full_fences_per_git'] * possible_scanner_git
+    final_extra_calls = 2 * proof_preamble_calls + 11 * file_rows + 4
+    receiver.update(
+     source_namespace_row_envelope=namespace_rows, source_file_row_envelope=file_rows,
+     source_relative_component_envelope=relative_components,
+     source_root_chain_depth=root_chain, source_control_chain_depth=control_chain,
+     source_directory_entry_envelope=directory_entries,
+     full_file_fixed_calls=10, full_file_positive_calls_per_byte=9,
+     proved_file_callback_calls=11, whole_lease_complete_calls=8, whole_lease_close_calls=4,
+     proof_bind_calls=proof_bind_calls, proof_bind_native_bytes=proof_bind_bytes,
+     full_callback_metadata_calls=full_callback_calls,
+     native_proved_callback_metadata_calls=proof_callback_calls,
+     full_possible_fence_metadata_calls=full_possible * full_callback_calls + proof_bind_calls + final_extra_calls,
+     native_reduced_possible_fence_metadata_calls=selected_fixed_pairs * full_callback_calls
+      + repeated_callbacks * proof_callback_calls + proof_bind_calls + final_extra_calls,
+     possible_fence_native_read_bytes=proof_bind_bytes + 4 * file_rows * (full_possible + 1),
+     parent_protection_file_metadata_calls=5 * parent_chain + 7,
+     parent_protection_file_native_bytes=4,
+     parent_protection_fixed_metadata_calls=4,
+     parent_protection_mountinfo_queries=1,
+     parent_protection_mountinfo_bytes=1048576)
+    result = dict(policy=policy, prospective_names=prospective_names,
+     geometry=dict(names=count, path_bytes=path_width, inventory_bytes=inventory,
+      control_byte_cap=control, payload_byte_cap=raw, directory_byte_envelope=directory),
+     parent=parent, scanner=scanner, reader=reader, receiver=receiver)
+    result['original'] = (result, policy, prospective_names, tuple(result['geometry'].items()),
+     tuple(parent.items()), tuple(scanner.items()), tuple(reader.items()), tuple(receiver.items()))
+    return result
+
+
+def _facet_run_mapper_source_grammar_v1(constants_raw, writer_raw, helpers_raw, artifacts_raw, idempotence_raw, *, node_limit):
+    """Compile only the existing finite report-acquisition grammar, without exec.
+
+    The caller acquired these complete bodies through the original immutable
+    source owner. This result selects no operation and grants no resources.
+    Successful helper caches receive no credit in the all-outcome envelope.
+    """
+    import tools.run_validation_gates as _f
+    import ast
+    from tools import validation_reliability as owner
+    need = owner._preflight_require_v1
+    need(type(node_limit) is int and node_limit > 0, 'ORDINARY_M_SOURCE_NODE_LIMIT')
+    trees = []
+    consumed = 0
+    for raw in (constants_raw, writer_raw, helpers_raw, artifacts_raw, idempotence_raw):
+     need(type(raw) is bytes, 'ORDINARY_M_SOURCE_EXACT_BYTES')
+     tree = ast.parse(raw.decode('utf-8', 'strict'))
+     consumed += sum(1 for _ in ast.walk(tree))
+     need(consumed <= node_limit, 'ORDINARY_M_SOURCE_NODE_ALLOCATION')
+     trees.append(tree)
+    constants_tree, writer_tree, helpers_tree, artifacts_tree, idempotence_tree = trees
+    values = {}
+    def value(node, environment):
+     if isinstance(node, ast.Name) and node.id in environment:
+      return environment[node.id]
+     if isinstance(node, ast.Attribute) and isinstance(node.value, ast.Name) and node.value.id == 'c':
+      need(node.attr in values, 'ORDINARY_M_UNKNOWN_CONSTANT')
+      return values[node.attr]
+     if isinstance(node, ast.Call) and isinstance(node.func, ast.Name) and node.func.id == 'Path':
+      need(len(node.args) == 1 and not node.keywords, 'ORDINARY_M_LITERAL_PATH')
+      return _f.pathlib.PurePosixPath(value(node.args[0], environment))
+     if isinstance(node, ast.BinOp) and isinstance(node.op, ast.Div):
+      left, right = value(node.left, environment), value(node.right, environment)
+      need(type(left) is _f.pathlib.PurePosixPath and type(right) is str, 'ORDINARY_M_LITERAL_PATH_JOIN')
+      return left / right
+     return ast.literal_eval(node)
+    for node in constants_tree.body:
+     assignments = ([(target, node.value) for target in node.targets]
+      if isinstance(node, ast.Assign) else
+      [(node.target, node.value)] if isinstance(node, ast.AnnAssign) else ())
+     for target, expression in assignments:
+      if isinstance(target, ast.Name):
+       try:
+        values[target.id] = value(expression, values)
+       except (TypeError, ValueError, KeyError):
+        continue
+    for key in ('REPORT_FILENAMES', 'STRICT_INPUT_REPORTS'):
+     roster = values.get(key)
+     need(type(roster) is tuple and roster and len(roster) == len(set(roster))
+      and all(type(name) is str and name and '/' not in name and '\\' not in name
+       for name in roster), 'ORDINARY_M_ORIGINAL_LITERAL_ROSTER:' + key)
+     for name in roster:
+      owner._mapper_portable_relative_v1(name)
+    for key in ('GENERATED_DIR', 'SCHEMA_DIR'):
+     need(type(values.get(key)) is _f.pathlib.PurePosixPath, 'ORDINARY_M_ORIGINAL_LITERAL_DIRECTORY')
+     owner._mapper_portable_relative_v1(values[key].as_posix())
+
+    schemas = [node for node in writer_tree.body
+     if isinstance(node, ast.FunctionDef) and node.name == 'schema_filename']
+    need(len(schemas) == 1, 'ORDINARY_M_ORIGINAL_SCHEMA_OWNER')
+    schema = schemas[0]
+    need(len(schema.args.args) == 1 and schema.args.args[0].arg == 'report_filename'
+     and not schema.args.posonlyargs and not schema.args.kwonlyargs
+     and schema.args.vararg is None and schema.args.kwarg is None
+     and not schema.args.defaults and not schema.decorator_list,
+     'ORDINARY_M_SCHEMA_SIGNATURE')
+    loop = [node for node in schema.body if isinstance(node, ast.For)]
+    need(len(loop) == 1 and isinstance(loop[0].target, ast.Name)
+     and loop[0].target.id == 'acronym' and not loop[0].orelse,
+     'ORDINARY_M_SCHEMA_FINITE_LOOP')
+    acronyms = ast.literal_eval(loop[0].iter)
+    need(type(acronyms) is tuple and acronyms and len(acronyms) == len(set(acronyms))
+     and all(type(item) is str and item and item.isascii() and item.isupper() for item in acronyms),
+     'ORDINARY_M_SCHEMA_LITERAL_ACRONYMS')
+    replacements = [node for node in ast.walk(schema)
+     if isinstance(node, ast.Call) and isinstance(node.func, ast.Attribute)
+     and node.func.attr == 'replace' and len(node.args) == 2
+     and all(isinstance(item, ast.Constant) and type(item.value) is str for item in node.args)
+     and node.args[0].value != '__']
+    need(len(replacements) == 1, 'ORDINARY_M_SCHEMA_LITERAL_PREFIX')
+    prefix, replacement = (item.value for item in replacements[0].args)
+    templates = (
+     'def schema_filename(report_filename: str) -> str:\n'
+     '    stem = report_filename.removesuffix(".report.json")\n'
+     '    stem = stem.replace(PREFIX, REPLACEMENT)\n'
+     '    for acronym in ACRONYMS:\n'
+     '        stem = stem.replace(acronym, f"_{acronym.lower()}_")\n'
+     '    snake = re.sub(r"(?<=[a-z0-9])(?=[A-Z])", "_", stem).replace("__", "_").strip("_").lower()\n'
+     '    return f"{snake}.schema.json"\n',
+     'def schema_filename(report_filename: str) -> str:\n'
+     '    stem = report_filename.removesuffix(".report.json").replace(PREFIX, REPLACEMENT)\n'
+     '    for acronym in ACRONYMS:\n'
+     '        stem = stem.replace(acronym, f"_{acronym.lower()}_")\n'
+     '    snake = re.sub(r"(?<=[a-z0-9])(?=[A-Z])", "_", stem).replace("__", "_").strip("_").lower()\n'
+     '    return f"{snake}.schema.json"\n')
+    expected = tuple(ast.parse(template.replace('PREFIX', repr(prefix))
+     .replace('REPLACEMENT', repr(replacement)).replace('ACRONYMS', repr(acronyms))).body[0]
+     for template in templates)
+    need(any(ast.dump(schema, include_attributes=False) == ast.dump(node, include_attributes=False)
+     for node in expected), 'ORDINARY_M_SCHEMA_SOURCE_GRAMMAR_CHANGED')
+    schema_names = []
+    for name in values['REPORT_FILENAMES']:
+     stem = name.removesuffix('.report.json').replace(prefix, replacement)
+     for acronym in acronyms:
+      stem = stem.replace(acronym, '_' + acronym.lower() + '_')
+     snake = _f.re.sub(r'(?<=[a-z0-9])(?=[A-Z])', '_', stem).replace('__', '_').strip('_').lower()
+     schema_names.append(snake + '.schema.json')
+    need(len(schema_names) == len(set(schema_names)), 'ORDINARY_M_SCHEMA_ALIAS')
+
+    helpers = {node.name: node for node in helpers_tree.body if isinstance(node, ast.FunctionDef)}
+    need(len(helpers) == sum(isinstance(node, ast.FunctionDef) for node in helpers_tree.body)
+     and {'payload', 'records', 'summary', 'assert_report_contract'} <= set(helpers),
+     'ORDINARY_M_ORIGINAL_HELPER_SET')
+    events = []
+    active = []
+    def has_read(node):
+     return any(isinstance(child, ast.Call) and isinstance(child.func, ast.Name)
+      and child.func.id in (*helpers, 'read_json', 'records_from_report_payload', 'validate_artifacts')
+      for child in ast.walk(node))
+    def expressions(node, environment, selected_test):
+     if isinstance(node, ast.Call):
+      for argument in node.args:
+       expressions(argument, environment, selected_test)
+      for keyword in node.keywords:
+       expressions(keyword.value, environment, selected_test)
+      if isinstance(node.func, ast.Name):
+       name = node.func.id
+       if name in helpers:
+        need(name not in active, 'ORDINARY_M_HELPER_RECURSION')
+        function = helpers[name]
+        need(not function.args.vararg and not function.args.kwarg
+         and not function.args.posonlyargs and not function.args.kwonlyargs
+         and len(node.args) <= len(function.args.args), 'ORDINARY_M_HELPER_CALL_SHAPE')
+        bound = {}
+        for parameter, argument in zip(function.args.args, node.args):
+         try:
+          bound[parameter.arg] = value(argument, environment)
+         except (TypeError, ValueError, KeyError):
+          need(parameter.arg != 'filename', 'ORDINARY_M_HELPER_FILENAME_NOT_LITERAL')
+        for keyword in node.keywords:
+         need(keyword.arg is not None, 'ORDINARY_M_HELPER_KEYWORD_EXPANSION')
+         try:
+          bound[keyword.arg] = value(keyword.value, environment)
+         except (TypeError, ValueError, KeyError):
+          need(keyword.arg != 'filename', 'ORDINARY_M_HELPER_FILENAME_NOT_LITERAL')
+        active.append(name)
+        try:
+         statements(function.body, bound, selected_test)
+        finally:
+         active.pop()
+       elif name == 'read_json':
+        need(active and active[-1] == 'payload' and len(node.args) == 1 and not node.keywords
+         and type(environment.get('filename')) is str, 'ORDINARY_M_HELPER_RAW_READ_GRAMMAR')
+        report = environment['filename']
+        need(report in values['REPORT_FILENAMES'], 'ORDINARY_M_HELPER_UNSELECTED_REPORT')
+        events.append(('ROOT', report, selected_test, node.lineno))
+       elif name == 'records_from_report_payload':
+        need(active and active[-1] == 'records' and len(node.args) == 2 and not node.keywords
+         and type(environment.get('filename')) is str, 'ORDINARY_M_HELPER_EXPANSION_GRAMMAR')
+        events.append(('SHARDS', environment['filename'], selected_test, node.lineno))
+       elif name == 'validate_artifacts':
+        need(not active, 'ORDINARY_M_NESTED_VALIDATOR_GRAMMAR')
+        events.append(('VALIDATOR', None, selected_test, node.lineno))
+      return
+     for child in ast.iter_child_nodes(node):
+      if not isinstance(child, (ast.stmt, ast.Lambda)):
+       expressions(child, environment, selected_test)
+    def statements(nodes, environment, selected_test):
+     for node in nodes:
+      if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)):
+       need(not has_read(node), 'ORDINARY_M_NESTED_READ_SCOPE')
+       continue
+      if isinstance(node, (ast.While, ast.AsyncFor)) and has_read(node):
+       raise ValueError('ORDINARY_M_NONFINITE_READ_LOOP')
+      if isinstance(node, ast.For):
+       expressions(node.iter, environment, selected_test)
+       if any(has_read(child) for child in (*node.body, *node.orelse)):
+        try:
+         selected = value(node.iter, environment)
+        except (TypeError, ValueError, KeyError) as error:
+         raise ValueError('ORDINARY_M_NONLITERAL_READ_LOOP') from error
+        need(type(selected) in (tuple, list) and isinstance(node.target, ast.Name),
+         'ORDINARY_M_FINITE_READ_LOOP_SHAPE')
+        for item in selected:
+         nested = dict(environment)
+         nested[node.target.id] = item
+         statements(node.body, nested, selected_test)
+        statements(node.orelse, dict(environment), selected_test)
+       continue
+      for _, item in ast.iter_fields(node):
+       if isinstance(item, list):
+        for child in item:
+         if isinstance(child, ast.expr):
+          expressions(child, environment, selected_test)
+         elif isinstance(child, ast.ExceptHandler):
+          statements(child.body, dict(environment), selected_test)
+        nested = [child for child in item if isinstance(child, ast.stmt)]
+        if nested:
+         statements(nested, dict(environment), selected_test)
+       elif isinstance(item, ast.expr):
+        expressions(item, environment, selected_test)
+      if isinstance(node, ast.Assign):
+       try:
+        assigned = value(node.value, environment)
+       except (TypeError, ValueError, KeyError):
+        continue
+       for target in node.targets:
+        if isinstance(target, ast.Name):
+         environment[target.id] = assigned
+    tests = tuple(node for node in artifacts_tree.body
+     if isinstance(node, ast.FunctionDef) and node.name.startswith('test_'))
+    need(tests and len({node.name for node in tests}) == len(tests), 'ORDINARY_M_ARTIFACT_DECLARATIONS')
+    for test in tests:
+     need(not test.decorator_list and all(argument.arg == 'monkeypatch'
+      for argument in test.args.args), 'ORDINARY_M_UNACCOUNTED_TEST_FIXTURE_OR_PARAMETERIZATION')
+     statements(test.body, {}, test.name)
+
+    idem = {node.name: node for node in idempotence_tree.body if isinstance(node, ast.FunctionDef)}
+    originals = tuple(node for node in idem.values() if node.name.startswith('test_'))
+    need(len(originals) == 1 and not originals[0].args.args and not originals[0].decorator_list
+     and set(idem) == {'bounded_snapshot', 'assert_bounded_idempotence_equal', originals[0].name},
+     'ORDINARY_M_IDEMPOTENCE_DECLARATIONS')
+    expected_snapshot = ast.parse('def bounded_snapshot():\n    payloads, shards = build_payloads_with_shards(REPO_ROOT)\n    return payloads, shards\n').body[0]
+    expected_assertion = ast.parse('def assert_bounded_idempotence_equal(left, right):\n    assert left == right\n').body[0]
+    expected_test = ast.parse('def ' + originals[0].name + '():\n    assert_bounded_idempotence_equal(bounded_snapshot(), bounded_snapshot())\n').body[0]
+    need(all(ast.dump(actual, include_attributes=False) == ast.dump(expected_node, include_attributes=False)
+     for actual, expected_node in ((idem['bounded_snapshot'], expected_snapshot),
+      (idem['assert_bounded_idempotence_equal'], expected_assertion), (originals[0], expected_test))),
+     'ORDINARY_M_IDEMPOTENCE_SOURCE_GRAMMAR_CHANGED')
+    return dict(report_names=values['REPORT_FILENAMES'], upstream_names=values['STRICT_INPUT_REPORTS'],
+     generated_dir=values['GENERATED_DIR'].as_posix(), schema_dir=values['SCHEMA_DIR'].as_posix(),
+     schema_names=tuple(schema_names), events=tuple(events),
+     collected_names=tuple(test.name for test in tests), source_ast_nodes=consumed,
+     idempotence_source_acquisitions=2)
+
+
+def _facet_run_mapper_sources_v1(paths, phase, plan, *, scope, census, source, parser_limits, source_node_limit):
+    """Acquire the exact original M input programme before C acquisition.
+
+    Complete source and report reads use the original protected source owner;
+    raw inputs are released per file. Only ordered declarations/metadata are
+    retained. This is an engineering INPUT_BYTES programme, not an output oracle.
+    """
+    import tools.run_validation_gates as _f
+    from tools import validation_reliability as owner
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane import serialization
+    from types import MappingProxyType
+    need = owner._preflight_require_v1
+    need(type(scope) is owner._LinuxPreflightScopeV1 and type(census) is owner._LinuxPreflightCensusV1
+     and type(source) is owner._LinuxImmutableSourceSealV2 and type(paths) is _f.ValidationRunPathsV1
+     and type(plan) is tuple and plan and type(phase) is str
+     and (source.pid, source.thread) == (scope.query.pid, scope.query.thread)
+     == (_f.os.getpid(), _f.threading.get_ident())
+     and source.census is census and source.root == paths.repo_root
+     and source.state == 'READABLE' and source.failure is None and census.complete and not census.failures
+     and source._ordinary_meter_scope_v1 is scope and census._ordinary_meter_scope_v1 is scope
+     and type(parser_limits) is owner._ScanRunReadLimits
+     and type(source_node_limit) is int and source_node_limit > 0,
+     'ORDINARY_M_ORIGINAL_PRE_C_SOURCE_BINDING')
+    programme = scope._ordinary_resource_programme_v1
+    original_programme = scope._ordinary_original_resource_programme_v1
+    need(programme['source'] is source and programme['census'] is census
+     and programme['rows'] is source.rows and programme['scope'] is scope
+     and type(original_programme) is tuple and original_programme[0] is programme
+     and tuple(programme.items()) == original_programme[1]
+     and programme['limits'] is scope._ordinary_meter_v1['limits']
+     and programme['limits']['mapper_activation_read_reserve'] > 0
+     and programme['limits']['mapper_activation_retained_reserve'] > 0
+     and programme['limits']['extra_held_carrier_limit'] > 0
+     and programme['limits']['extra_held_byte_limit'] > 0
+     and not hasattr(scope, '_ordinary_mapper_sources_v1'),
+     'ORDINARY_M_EXPLICIT_SELECTED_PHASE_ALLOCATION_REQUIRED')
+    selected = tuple((entry, owner._mapper_original_position_v1(entry.argv, paths.repo_root))
+     for entry in plan if owner._mapper_original_position_v1(entry.argv, paths.repo_root) is not None)
+    need(selected and len({position for _, position in selected}) == len(selected)
+     and all(type(entry) is _f.CommandEvidencePlanEntry and entry.run_id == paths.run_id
+      and entry.phase == phase and entry.cwd == str(paths.repo_root)
+      and type(entry.command_index) is int and 1 <= entry.command_index <= len(plan)
+      and entry is plan[entry.command_index - 1] for entry, _ in selected),
+     'ORDINARY_M_EXACT_ORIGINAL_OCCURRENCES')
+    record = dict(scope=scope, source=source, census=census, paths=paths, phase=phase, plan=plan,
+     selected=selected, parser_limits=parser_limits, source_node_limit=source_node_limit,
+     sources=[], headers={}, families={}, occurrences=[], complete=False, errors=[])
+    record['original'] = (record, scope, source, census, paths, phase, plan, selected,
+     parser_limits, source_node_limit, record['sources'], record['headers'],
+     record['families'], record['occurrences'], record['errors'])
+    scope._ordinary_mapper_sources_v1 = scope._ordinary_original_mapper_sources_v1 = record
+    try:
+     def acquire(relative):
+      owner._mapper_portable_relative_v1(relative)
+      path = paths.repo_root.joinpath(*relative.split('/'))
+      row = source.row_index.get(str(path))
+      need(row is not None and row['kind'] == 'file' and row['role'] == 'repository'
+       and str(path) in source.files and source.post.get(str(path)) is not None
+       and type(row['logical_bytes']) is int and 0 <= row['logical_bytes'] <= parser_limits.byte_limit,
+       'ORDINARY_M_MISSING_AUTHENTIC_INPUT:' + relative)
+      observation = dict(relative=relative, source_row=row, original_version=tuple(source.post[str(path)]),
+       read_attempted=True, complete=False, bytes=None, error=None)
+      record['sources'].append(observation)
+      try:
+       raw = source.read_administration(path, parser_limits.byte_limit)
+       need(type(raw) is bytes and len(raw) == row['logical_bytes'], 'ORDINARY_M_SOURCE_EXTENT')
+       observation['bytes'] = len(raw)
+       observation['complete'] = True
+       return raw, row, observation['original_version']
+      except BaseException as error:
+       observation['error'] = error
+       raise
+     def header(relative, *, nested=False):
+      if relative not in record['headers']:
+       raw, row, version = acquire(relative)
+       value = owner._scan_owned_json(raw, parser_limits)
+       need(isinstance(value, MappingProxyType), 'ORDINARY_M_INPUT_JSON_OBJECT')
+       def plain(item):
+        if isinstance(item, MappingProxyType):
+         return {key: plain(member) for key, member in item.items()}
+        if type(item) is tuple:
+         return [plain(member) for member in item]
+        return item
+       controls = {key: plain(value[key]) for key in
+        ('shard_files', 'shard_paths', 'sharded_flag', 'shard_manifest_refs') if key in value}
+       refs = serialization._report_shard_refs_v1(controls)
+       serialization._report_shard_descriptors_v1(controls, refs, required=False)
+       for ref in refs:
+        owner._mapper_portable_relative_v1(ref)
+       record['headers'][relative] = dict(relative=relative, source_row=row, version=version, refs=refs)
+      result = record['headers'][relative]
+      need(not nested or not result['refs'], 'ORDINARY_M_NESTED_REPORT_SHARDS')
+      return result
+     for entry, position in selected:
+      route = next(row for row in owner._REPORT_READ_ROUTES_V1 if row[0] == position)
+      family = route[1]
+      if family not in record['families']:
+       pytest_route = next(row for row in owner._REPORT_READ_ROUTES_V1
+        if row[1] == family and row[3] is not None)
+       package = _f.pathlib.PurePosixPath(pytest_route[3][0]).parts[2]
+       prefix = 'src/qtt/stage1_prediction_markets/' + package + '/'
+       test_prefix = 'tests/stage1_prediction_markets/' + package + '/'
+       idempotence = _f.pathlib.PurePosixPath(pytest_route[3][0]).name
+       artifact = idempotence.replace('_idempotence.py', '_artifacts.py')
+       raw_sources = tuple(acquire(relative)[0] for relative in
+        (prefix + 'constants.py', prefix + 'report_writer.py', test_prefix + 'helpers.py',
+        test_prefix + artifact, test_prefix + idempotence))
+       remaining_nodes = source_node_limit - sum(row['source_ast_nodes']
+        for row in record['families'].values())
+       grammar = _f._ordinary_mapper_source_grammar_v1(*raw_sources, node_limit=remaining_nodes)
+       record['families'][family] = grammar
+      grammar = record['families'][family]
+      acquisition_order = []
+      def root(name):
+       relative = grammar['generated_dir'] + '/' + name
+       acquisition_order.append(relative)
+       return relative
+      def expansion(name, *, root_read):
+       relative = root(name) if root_read else grammar['generated_dir'] + '/' + name
+       for ref in header(relative)['refs']:
+        header(ref, nested=True)
+        acquisition_order.append(ref)
+      def validator():
+       acquisition_order.extend(grammar['schema_dir'] + '/' + name for name in grammar['schema_names'])
+       for name in grammar['report_names']:
+        expansion(name, root_read=True)
+       for name in grammar['upstream_names']:
+        expansion(name, root_read=True)
+      if route[2] is not None:
+       validator()
+      elif route[3][0].endswith('_idempotence.py'):
+       for _ in range(grammar['idempotence_source_acquisitions']):
+        for name in grammar['upstream_names']:
+         expansion(name, root_read=True)
+      else:
+       for kind, name, test_name, line in grammar['events']:
+        if kind == 'ROOT':
+         root(name)
+        elif kind == 'SHARDS':
+         expansion(name, root_read=False)
+        elif kind == 'VALIDATOR':
+         validator()
+        else:
+         raise ValueError('ORDINARY_M_UNKNOWN_COMPILED_EVENT')
+      counts = {}
+      for relative in acquisition_order:
+       owner._mapper_portable_relative_v1(relative)
+       counts[relative] = counts.get(relative, 0) + 1
+      need(counts, 'ORDINARY_M_EMPTY_ORIGINAL_PROGRAMME')
+      rows = []
+      for relative, multiplicity in counts.items():
+       path = paths.repo_root.joinpath(*relative.split('/'))
+       source_row = source.row_index.get(str(path))
+       need(source_row is not None and source_row['kind'] == 'file'
+        and source_row['role'] == 'repository' and str(path) in source.files
+        and str(path) in source.post, 'ORDINARY_M_UNAVAILABLE_SELECTED_FILE:' + relative)
+       length = source_row['logical_bytes']
+       need(type(length) is int and 0 <= length < 1 << 63
+        and length < parser_limits.byte_limit, 'ORDINARY_M_SELECTED_FILE_BOUND')
+       rows.append((relative, multiplicity, length, source_row, tuple(source.post[str(path)])))
+      extent = sum(row[2] for row in rows)
+      attempts = sum(row[1] for row in rows)
+      target = sum(row[1] * (row[2] + 1) for row in rows)
+      basis = sum(row[1] * row[2] for row in rows)
+      for amount in (extent, attempts, target, basis):
+       owner._mapper_int_v1(amount, 'compiled_source_extent')
+      need(extent <= programme['limits']['carrier_file_byte_limit'],
+       'ORDINARY_M_COMPARATOR_INDEPENDENT_SINGLE_FILE_CEILING')
+      occurrence = dict(entry=entry, position=position, family=family, grammar=grammar,
+       acquisition_order=tuple(acquisition_order), inputs=tuple(rows), extent=extent,
+       attempts=attempts, target_bytes=target, basis_bytes=basis,
+       single_target_buffer=max(row[2] + 1 for row in rows))
+      occurrence['original'] = (occurrence, entry, position, family, grammar,
+       occurrence['acquisition_order'], occurrence['inputs'], extent,
+       attempts, target, basis, occurrence['single_target_buffer'])
+      record['occurrences'].append(occurrence)
+     need(len(record['occurrences']) <= programme['limits']['extra_held_carrier_limit']
+      and sum(row['extent'] for row in record['occurrences']) <= programme['limits']['extra_held_byte_limit'],
+      'ORDINARY_M_MATERIAL_EXCEEDS_INDEPENDENT_HELD_ALLOCATION')
+     need(all(row['complete'] and row['error'] is None for row in record['sources']),
+      'ORDINARY_M_COMPLETE_ORIGINAL_INPUT_SOURCE_PROGRAMME')
+     record['sealed'] = (tuple(tuple(row.items()) for row in record['sources']),
+      tuple((name, tuple(row.items())) for name, row in record['headers'].items()),
+      tuple((name, tuple(row.items())) for name, row in record['families'].items()),
+      tuple(tuple(row.items()) for row in record['occurrences']))
+     record['complete'] = True
+     return record
+    except BaseException as error:
+     record['errors'].append(error)
+     raise
+
+
+def _facet_run_mapper_demands_v1(record, *, record_byte_limit, basis_logical_paths):
+    """Exact original-owner units; this pure projection creates no grant.
+
+    Each supplied basis logical name is independently source-selected before
+    namespace allocation. Its actual physical leaf/parent stamps are required
+    later. Original C and the shared native programme retain all separate work.
+    """
+    import tools.run_validation_gates as _f
+    from tools import validation_reliability as owner
+    need = owner._preflight_require_v1
+    need(type(record) is dict and record['complete'] is True and not record['errors']
+     and record is record['scope']._ordinary_mapper_sources_v1
+     is record['scope']._ordinary_original_mapper_sources_v1
+     and type(record_byte_limit) is int and 0 < record_byte_limit < 1 << 63
+     and type(basis_logical_paths) is tuple
+     and len(basis_logical_paths) == len(record['occurrences']),
+     'ORDINARY_M_ORIGINAL_COMPLETE_DEMAND_OPERANDS')
+    root = record['paths'].repo_root
+    root_chain = len((*reversed(root.parents), root))
+    result = []
+    for occurrence, logical_basis in zip(record['occurrences'], basis_logical_paths, strict=True):
+     basis = owner._mapper_absolute_v1(str(logical_basis))
+     need(type(logical_basis) is type(root) and not basis.is_relative_to(root)
+      and not root.is_relative_to(basis.parent), 'ORDINARY_M_INDEPENDENT_LOGICAL_BASIS_TARGET')
+     basis_chain = len((*reversed(basis.parent.parents), basis.parent))
+     parents = tuple(len((*reversed((root / path).parent.parents), (root / path).parent))
+      for path, _, _, _, _ in occurrence['inputs'])
+     initialization = 2 * (root_chain + basis_chain) + 4
+     reader_metadata = initialization + sum(count * (6 * (root_chain + basis_chain) + 3 * parent + 11)
+      for (_, count, _, _, _), parent in zip(occurrence['inputs'], parents, strict=True))
+     activation_metadata = 4 * root_chain + 3 * basis_chain + 6 + sum(
+      7 * (root_chain + basis_chain) + 5 * parent + 15 for parent in parents)
+     nested = occurrence['position'] in (429, 430, 431, 432, 433, 434)
+     record_reads = 4 if nested else 3
+     unique = len(occurrence['inputs'])
+     extent = occurrence['extent']
+     activation_target = extent + unique
+     activation_basis = extent
+     activation_record_reads = record_reads * (record_byte_limit + 1)
+     selected = dict(entry=occurrence['entry'], original_position=occurrence['position'],
+      input_programme=occurrence, logical_basis=basis,
+      constructor_original_read_bytes=extent + unique,
+      constructor_raw_write_bytes=extent,
+      constructor_readback_bytes=2 * extent + unique + 1,
+      constructor_control_read_bytes=256 * unique,
+      retained_comparator_bytes=extent, retained_comparator_carriers=1,
+      acquisition_attempts=occurrence['attempts'], target_read_bytes=occurrence['target_bytes'],
+      basis_read_bytes=occurrence['basis_bytes'],
+      target_read_call_bound=occurrence['target_bytes'], basis_read_call_bound=occurrence['basis_bytes'],
+      reader_metadata_calls=reader_metadata,
+      wrapper_parent_initialization_metadata_calls=initialization if nested else 0,
+      activation_target_bytes=activation_target, activation_basis_bytes=activation_basis,
+      activation_metadata_calls=activation_metadata, activation_record_reads=record_reads,
+      activation_record_read_bytes=activation_record_reads,
+      activation_ancestor_read_debit=activation_target + activation_basis + activation_record_reads,
+      activation_retained_debit=record_byte_limit,
+      nested_parent_count=1 if nested else 0, nested_child_count=1 if nested else 0,
+      logical_root_chain_length=root_chain, logical_basis_chain_length=basis_chain,
+      logical_parent_chain_lengths=parents)
+     for key, value in selected.items():
+      if type(value) is int:
+       owner._mapper_int_v1(value, key)
+     result.append(selected)
+    need(len({str(row['logical_basis']) for row in result}) == len(result),
+     'ORDINARY_M_LOGICAL_BASIS_TARGET_ALIAS')
+    return tuple(result)
+
+
+def _facet_fn_post_installation_programme_v1(census, *, destination, controller_runtime_roles=None):
+    """Derive installation payload geometry from the complete original census.
+
+    This is part of the original resource compiler, not a copy owner or a
+    capacity grant. Every lexical FILE row needs its own independent copied
+    target even when its accepted installation alias observes another row's
+    source inode. Actual native wrappers and close debts remain Scope-owned.
+    """
+    import tools.run_validation_gates as _f
+    from tools import validation_reliability as owner
+    require = owner._preflight_require_v1
+    require(type(census) is owner._LinuxPreflightCensusV1 and census.complete
+     and not census.failures and type(census.setup_uid) is int and census.setup_uid > 0,
+     'ORDINARY_COMPILER_COMPLETE_INSTALLATION_CENSUS')
+    root = census.roots['installation']
+    require(type(destination) is type(_f.pathlib.Path('/')) and destination.is_absolute()
+     and not destination.is_relative_to(root) and not root.is_relative_to(destination)
+     and not destination.is_relative_to(census.roots['repository'])
+     and not census.roots['repository'].is_relative_to(destination),
+     'ORDINARY_COMPILER_INDEPENDENT_INSTALLATION_TARGET')
+    rows = tuple(row for row in census.records if row['role'] == 'installation')
+    row_index = {row['path']: row for row in rows}
+    require(type(root) is type(_f.pathlib.Path('/')) and root.is_absolute() and rows
+     and len(row_index) == len(rows) and row_index.get(str(root)) is rows[0]
+     and rows[0]['kind'] == 'directory',
+     'ORDINARY_COMPILER_ORIGINAL_INSTALLATION_ROOT_AND_ORDER')
+    files, directories, original_rows = [], [], []
+    logical_bytes, edges, path_bytes, alias_hops, alias_bytes = 0, 0, 0, 0, 0
+    source_observations, source_walk_pairs = 0, 0
+    source_observation_calls, direct_extra_calls, alias_return_bytes, roster_return_bytes = 0, 0, 0, 0
+    for row in rows:
+     path, observed = _f.pathlib.Path(row['path']), _f.pathlib.Path(row['observed_path'])
+     require(type(row) is dict and path.is_absolute() and observed.is_absolute()
+      and path.is_relative_to(root) and observed.is_relative_to(root)
+      and type(row['version']) is list and len(row['version']) == 11
+      and row['version'][7] in (0, census.setup_uid)
+      and not row['version'][2] & (_f.stat.S_ISUID | _f.stat.S_ISGID)
+      and type(row['logical_bytes']) is int and row['logical_bytes'] >= 0
+      and type(row['roster']) is list and type(row['aliases']) is list
+      and type(row['acl']) is list and len(row['acl']) == 2,
+      'ORDINARY_COMPILER_COMPLETE_INSTALLATION_ROW')
+     path_bytes += len(str(path).encode('utf-8')) + len(str(observed).encode('utf-8'))
+     require(len(str(path).encode('utf-8')) <= 4096
+      and len(str(observed).encode('utf-8')) <= 4096,
+      'ORDINARY_COMPILER_INSTALLATION_PATH_EXTENT')
+     if path != root:
+      parent = row_index.get(str(path.parent))
+      require(parent is not None and parent['kind'] == 'directory'
+       and path.name in parent['roster'],
+       'ORDINARY_COMPILER_COMPLETE_INSTALLATION_PARENT_ROSTER')
+      edges += 1
+     aliases = []
+     for hop in row['aliases']:
+      alias = _f.pathlib.Path(hop['path'])
+      require(type(hop) is dict and set(hop) == {'path', 'version', 'target'}
+       and alias.is_absolute() and alias.is_relative_to(root)
+       and type(hop['version']) is list and len(hop['version']) == 11
+       and _f.stat.S_ISLNK(hop['version'][2]) and type(hop['target']) is str
+       and len(str(alias).encode('utf-8')) <= 4096
+       and len(hop['target'].encode('utf-8')) <= 4096,
+       'ORDINARY_COMPILER_ORIGINAL_INSTALLATION_ALIAS')
+      aliases.append((hop, (hop['path'], tuple(hop['version']), hop['target'])))
+      alias_hops += 1
+      alias_bytes += len(hop['target'].encode('utf-8'))
+      path_bytes += len(str(alias).encode('utf-8')) + len(hop['target'].encode('utf-8'))
+     if row['kind'] == 'file':
+      require(_f.stat.S_ISREG(row['version'][2]) and row['version'][6] == 1
+       and row['version'][3] == row['logical_bytes'] and not row['roster'],
+       'ORDINARY_COMPILER_INSTALLATION_FILE_ATTRIBUTES')
+      logical_bytes += row['logical_bytes']
+      files.append(row)
+      observations = 4
+     else:
+      require(row['kind'] == 'directory' and _f.stat.S_ISDIR(row['version'][2])
+       and row['logical_bytes'] == 0 and not row['aliases'] and path == observed
+       and len(row['roster']) == len(set(row['roster']))
+       and all(type(name) is str and name not in ('', '.', '..')
+        and '/' not in name and '\\' not in name
+        and row_index.get(str(path / name)) is not None
+        for name in row['roster']),
+       'ORDINARY_COMPILER_COMPLETE_INSTALLATION_DIRECTORY')
+      directories.append(row)
+      observations = 2
+     source_observations += observations
+     source_observation_calls += observations * (3 * len(observed.parts) + 6 + 2 * len(aliases))
+     alias_return_bytes += observations * sum(len(value[0]['target'].encode('utf-8')) for value in aliases)
+     target = destination / path.relative_to(root)
+     if row['kind'] == 'file':
+      direct_extra_calls += 6 * len(observed.parts) + 6 * len(target.parts) + 17 + 4 * row['logical_bytes']
+     else:
+      direct_extra_calls += 6 * len(target.parts) + 22 + 3 * len(row['roster'])
+      roster_return_bytes += 3 * sum(len(name.encode('utf-8')) for name in row['roster'])
+     source_walk_pairs += observations * (len(observed.parts))
+     original_rows.append((row, (row['path'], row['observed_path'], row['role'],
+      row['kind'], tuple(row['version']), row['logical_bytes'], tuple(row['roster']),
+      tuple(row['acl'])), tuple(aliases)))
+    f, d, e = len(files), len(directories), len(rows)
+    require(files and directories and edges == e - 1 and logical_bytes <= 1 << 30,
+     'ORDINARY_COMPILER_ORIGINAL_INSTALLATION_ONE_GIB_CEILING')
+    block = 4096
+    copied_file_blocks = sum(((row['logical_bytes'] + block - 1) // block) * block
+     for row in files)
+    raw_buffer_bytes = 2 * logical_bytes + 6 * 65536
+    acl_acquisitions = 5 * f + 4 * d
+    native_calls = 3 * acl_acquisitions + 2 * (f + d)
+    direct_calls = source_observation_calls + direct_extra_calls + 2 + e + 3 + 1
+    control_reads = acl_acquisitions * (65536 + 2 * 1028) + alias_return_bytes + roster_return_bytes
+    programme = dict(census=census, root=root, destination=destination, rows=rows, original_rows=tuple(original_rows),
+     geometry=(f, d, e, edges, logical_bytes, copied_file_blocks + d * block,
+      e, path_bytes, alias_hops, alias_bytes),
+     raw_programme=(3 * (logical_bytes + f), logical_bytes, raw_buffer_bytes),
+     observation_programme=(source_observations, source_walk_pairs,
+      acl_acquisitions, acl_acquisitions * (65536 + 2 * 1028),
+      2 * (f + d), 3 * d),
+     direct_peak=(3, 1),
+     native_programme=(direct_calls + native_calls, native_calls, control_reads,
+      source_observation_calls, direct_extra_calls, alias_return_bytes, roster_return_bytes),
+     collector_programme=(2 * logical_bytes + 6 * 65536, len(rows), path_bytes, 2, 1))
+    if controller_runtime_roles is not None:
+     require(type(controller_runtime_roles) is tuple and len(controller_runtime_roles)==7
+      and tuple(item[0] for item in controller_runtime_roles)==
+       ('executable','libpython','_json','_sre',
+       'json.__init__','json.decoder','json.scanner'),
+      'ORDINARY_COMPILER_SELECTED_CONTROLLER_RUNTIME_ROLE_ROSTER')
+     for role, mode, row in controller_runtime_roles:
+      require(type(mode) is str and type(row) is dict
+       and row['kind']=='file' and any(row is original for original in rows),
+       'ORDINARY_COMPILER_RUNTIME_ROLE_ORIGINAL_FILE_ROW')
+      if role=='executable':
+       require(mode=='EXECUTABLE','ORDINARY_COMPILER_RUNTIME_EXECUTABLE_MODE')
+      elif role=='libpython':
+       require(mode in ('MAPPED_LIBRARY','STATIC_IN_EXECUTABLE'),
+        'ORDINARY_COMPILER_RUNTIME_LIBPYTHON_MODE')
+      else:
+       require(mode in ('BUILTIN','FROZEN','EXTENSION_FILE',
+        'PYTHON_SOURCE','PYTHON_BYTECODE'),
+        'ORDINARY_COMPILER_RUNTIME_MODULE_MODE')
+     programme['controller_runtime_roles']=controller_runtime_roles
+    programme['original'] = (programme, tuple(programme.items()), census, root,
+     rows, tuple(original_rows))
+    return programme
+
+
+
+
+def _facet_run_post_namespace_programme_v1(scope, *, root_parent, ceiling_programme=None):
+    """Compile actual namespace target names before the HOST image allocation.
+
+    The late original RUN path is not minted here. Its independently selected
+    maximum64 component chain is refined against the authentic resolver's
+    object before any target creation. No dictionary supplies native authority.
+    """
+    import tools.run_validation_gates as _f
+    from tools import validation_reliability as owner
+    require = owner._preflight_require_v1
+    require(type(scope) is owner._LinuxPreflightScopeV1
+     and type(root_parent) is type(_f.pathlib.Path('/')) and root_parent.is_absolute(),
+     'ORDINARY_COMPILER_NAMESPACE_ORIGINAL_SCOPE_AND_PARENT')
+    view = root_parent / 'ordinary-view-volume'
+    control = root_parent / 'ordinary-host-output-volume' / 'control'
+    config = view / 'parent-gitconfig'
+    fixed = ('/usr', '/lib', '/lib64', '/proc', '/sys', '/dev', '/tmp', '/var', '/var/tmp',
+     '/home', '/root', '/run', '/run/user', '/run/credentials',
+     '/dev/shm', '/dev/mqueue', '/dev/hugepages')
+    bindings = ('/usr', '/lib', '/lib64', scope.repository, scope.installation,
+     *(str(control / name) for name in ('declaration', 'binding', 'release')),
+     str(config))
+    selected = [(value, 'DIRECTORY') for value in fixed]
+    selected.extend((value, 'FILE' if value == str(config) else 'DIRECTORY')
+     for value in bindings)
+    nested = None if ceiling_programme is None else _f._ordinary_nested_resource_demand_v1(
+     _f._ordinary_post_ceiling_checked_v1(ceiling_programme))
+    count = 4 if ceiling_programme is None else ceiling_programme['evidence_programme']['application_occurrence_count']
+    selected.extend((str(view / 'runtime' / ('p' + str(index))), 'DIRECTORY')
+     for index in range(1, count + 1))
+    known_targets = tuple(dict.fromkeys(selected))
+    directories, files, kinds = set(), set(), {}
+    for spelling, kind in known_targets:
+     path = _f.pathlib.Path(spelling)
+     require(type(spelling) is str and path.is_absolute() and path.parts[0] == '/'
+      and str(path) == spelling and len(path.parts[1:]) <= 64
+      and len(spelling.encode('utf-8')) <= 4096
+      and spelling != '/' and '\x00' not in spelling
+      and kind in ('DIRECTORY', 'FILE')
+      and all(part not in ('', '.', '..') for part in path.parts[1:]),
+      'ORDINARY_COMPILER_FINITE_NAMESPACE_TARGET')
+     require(spelling not in kinds or kinds[spelling] == kind,
+      'ORDINARY_COMPILER_NAMESPACE_KIND_COLLISION')
+     kinds[spelling] = kind
+     pieces = path.parts[1:]
+     for index in range(1, len(pieces) + (kind == 'DIRECTORY')):
+      directories.add('/' + '/'.join(pieces[:index]))
+     if kind == 'FILE': files.add(spelling)
+    require(len(files) == 1 and not (directories & files),
+     'ORDINARY_COMPILER_ONE_EXISTING_GIT_CONFIG_TARGET')
+    directory_paths, file_paths = tuple(sorted(directories)), tuple(sorted(files))
+    reserved_directories, reserved_files = len(directory_paths) + 64 + 1 + (1 if nested else 0), 1 + (1 if nested else 0)
+    inodes = reserved_directories + reserved_files
+    result = dict(known_targets=known_targets, reserved_run_depth=64,
+     directory_paths=directory_paths, file_paths=file_paths,
+     reserved_directory_count=reserved_directories, reserved_file_count=reserved_files,
+     allocated_block_bytes=4096 * inodes, inode_count=inodes)
+    result['original'] = (result, known_targets, directory_paths, file_paths, 64,
+     reserved_directories, reserved_files, result['allocated_block_bytes'], inodes)
+    return result
+
+
+def _facet_run_post_census_programme_v1(census, *, ceiling_programme, prefix_programme, phase=None):
+    """Compile both image demands from complete original metadata before copies.
+
+    No source bytes are acquired here. Formatter overhead is an independent
+    engineering tranche; actual allocated blocks/superblock/statvfs readbacks
+    must establish required usable bytes and inodes before native release.
+    """
+    import tools.run_validation_gates as _f
+    from tools import validation_reliability as owner
+    require = owner._preflight_require_v1
+    caps = _f._ordinary_post_ceiling_checked_v1(ceiling_programme)
+    prefix = _f._ordinary_post_prefix_checked_v1(prefix_programme, caps)
+    census_scope = getattr(census, '_ordinary_meter_scope_v1', None)
+    require(type(census_scope) is owner._LinuxPreflightScopeV1,
+     'ORDINARY_COMPILER_LIVE_CENSUS_ORIGINAL_SCOPE')
+    require(phase is None or (type(phase) is str and phase == census_scope._ordinary_phase_v1
+     and phase in _f.ORDERED_PHASES and (phase == _f.POST_VALIDATION_PHASE
+      or caps['phase_source']['phase'] == phase)),
+     'ORDINARY_COMPILER_SAME_ORIGINAL_SELECTED_PHASE')
+    census_projection = census_scope._ordinary_census_meter_projection_v1(census)
+    census_original = census_projection['original']
+    require(type(census_projection) is dict and type(census_original) is tuple
+     and len(census_original) == 10 and census_original[0] is census_projection
+     and census_original[1] is census_scope
+     and census_original[2] is census_projection['census'] is census
+     and census_original[3] is census_projection['meter'] is census_scope._ordinary_meter_v1
+     and census_projection['meter']['limits'] is caps['limits']
+     and census_original[4] is census_projection['rows'] is census.records
+     and census_original[5] is census_projection['counts'] is census.counts
+     and census_original[6] is census_projection['failures'] is census.failures
+     and census_original[7] is census_projection['counters']
+     and census_original[8] is census_projection['native'] is census.acl_native
+     and census_original[9] is census_projection['errors']
+     and not census_projection['active'] and census_projection['finished']
+     and not census_projection['errors'] and not census_projection['failures']
+     and census.started and census_projection['counters']['metadata_call'] > 0
+     and census_projection['counters']['metadata_call'] == census.counts['metadata_attempts']
+     and census_projection['counters']['raw_read'] == 0
+     and census_scope._ordinary_host_preparation_v1['prefix_programme'] is prefix
+     and census_scope._ordinary_host_preparation_v1['original_prefix_programme'] is prefix,
+     'ORDINARY_COMPILER_COMPLETE_LIVE_CENSUS_SAME_METER_NOT_RETRO_DEBITED')
+    require(type(census) is owner._LinuxPreflightCensusV1 and census.complete
+     and not census.failures and census.counts['direct_regular_file_payload_reads'] == 0
+     and census.counts['direct_regular_file_payload_bytes'] == 0,
+     'ORDINARY_COMPILER_COMPLETE_METADATA_BEFORE_SOURCE_CAPTURE')
+    host = census_scope._ordinary_host_preparation_v1
+    prefix_parent = census_scope._ordinary_prefix_parent_v1
+    require(prefix_parent is census_scope._ordinary_original_prefix_parent_v1
+     and prefix_parent['host'] is host and prefix_parent['complete']
+     and not prefix_parent['errors'] and prefix_parent['path'] is host['root_parent']
+     and prefix_parent['slot'] is host['root_parent_slot']
+     and prefix_parent['slot']['returned_fd'] is not None
+     and not prefix_parent['slot']['closed'] and not prefix_parent['slot']['close_attempted'],
+     'ORDINARY_COMPILER_ORIGINAL_NATIVE_PREFIX_PARENT_ASSOCIATION')
+    installation_programme = _f._ordinary_post_installation_programme_v1(census,
+     destination=host['root_parent'] / 'ordinary-host-output-volume' / 'installation')
+    namespace_programme = _f._ordinary_post_namespace_programme_v1(census_scope,
+     root_parent=host['root_parent'], ceiling_programme=caps)
+    rows = [row for row in census.records if row['role'] == 'repository']
+    row_index = {row['path']: row for row in rows}
+    root = census.roots['repository']
+    require(rows and root.is_absolute() and len(row_index) == len(rows)
+     and row_index[str(root)]['kind'] == 'directory',
+     'ORDINARY_COMPILER_COMPLETE_ORIGINAL_CENSUS_ROOT')
+    files, directories, edges, spellings, names, identities = [], [], 0, [], set(), set()
+    python_rows, cache_parents = [], set()
+    report_geometry = []
+    total_bytes = 0
+    for row in rows:
+     path = _f.pathlib.Path(row['path'])
+     require(path.is_relative_to(root) and row['role'] == 'repository'
+      and row['kind'] in ('file', 'directory')
+      and type(row['version']) is list and len(row['version']) == 11
+      and type(row['logical_bytes']) is int and row['logical_bytes'] >= 0
+      and row['observed_path'] == row['path']
+      and row['aliases'] == [] and row['acl'] in (None, [None, None]),
+      'ORDINARY_COMPILER_COMPLETE_NATIVE_ROW')
+     relative = path.relative_to(root).as_posix()
+     relative = '' if relative == '.' else relative
+     encoded = relative.encode('utf-8', 'strict')
+     require(relative not in names and len(encoded) <= 4096
+      and (row['version'][0], row['version'][1]) not in identities,
+      'ORDINARY_COMPILER_NAMESPACE_ALIAS_OR_PATH')
+     names.add(relative)
+     identities.add((row['version'][0], row['version'][1]))
+     spellings.append((relative, len(encoded)))
+     if relative:
+      parent_name = path.parent.relative_to(root).as_posix()
+      parent_name = '' if parent_name == '.' else parent_name
+      parent = row_index.get(str(path.parent))
+      require(parent is not None and parent['kind'] == 'directory'
+       and path.name in parent['roster'], 'ORDINARY_COMPILER_COMPLETE_PARENT_ROSTER')
+      edges += 1
+     if row['kind'] == 'file':
+      require(_f.stat.S_ISREG(row['version'][2]) and row['version'][6] == 1
+       and row['version'][3] == row['logical_bytes'],
+       'ORDINARY_COMPILER_NATIVE_SOURCE_FILE_CEILING')
+      total_bytes += row['logical_bytes']
+      files.append(row)
+      parts = path.relative_to(root).parts
+      if (parts and parts[0] in ('tools', 'tests', 'src') and path.suffix == '.py'
+        and '__pycache__' not in parts):
+       python_rows.append(row)
+       for count in range(1, len(path.parent.parts)):
+        cache_parents.add(path.parent.parts[1:count + 1])
+     else:
+      require(_f.stat.S_ISDIR(row['version'][2]) and row['logical_bytes'] == 0
+       and type(row['roster']) is list and len(row['roster']) == len(set(row['roster']))
+       and all(row_index.get(str(path / name)) is not None for name in row['roster']),
+       'ORDINARY_COMPILER_COMPLETE_DIRECTORY_ROSTER')
+      directories.append(row)
+    require(total_bytes > 0 and files and directories and edges == len(rows) - 1
+     and total_bytes <= 32 << 30 and len(files) <= 32768
+     and len(directories) <= 4096 and edges <= 65536 and len(rows) <= 65536,
+     'ORDINARY_COMPILER_COMPLETE_GENERATION_CEILINGS')
+    path_bytes = sum(length for spelling, length in spellings)
+    longest_path = max(length for spelling, length in spellings)
+    require(0 < path_bytes <= 256 << 20 and longest_path > 0 and python_rows,
+     'ORDINARY_COMPILER_COMPLETE_PATH_POOL_AND_COMPILE_INPUTS')
+    for role, directory_name in (('TIMING', 'qtt-validation-timing'), ('ROUTER', 'qtt-validation-router')):
+     target_root = root / '.tmp' / directory_name
+     target_row = row_index.get(str(target_root))
+     require(target_row is not None and target_row['kind'] == 'directory',
+      'ORDINARY_COMPILER_PREBIRTH_REPORT_ROOT:' + role)
+     selected_rows = tuple(row for row in rows
+      if _f.pathlib.Path(row['path']).is_relative_to(target_root))
+     require(selected_rows and any(target_row is row for row in selected_rows),
+      'ORDINARY_COMPILER_COMPLETE_REPORT_PREIMAGE:' + role)
+     payload = sum(row['logical_bytes'] for row in selected_rows if row['kind'] == 'file')
+     present_files = sum(row['kind'] == 'file' for row in selected_rows)
+     present_dirs = len(selected_rows) - present_files
+     report_geometry.append((role, target_root, target_row, selected_rows,
+      payload, present_files, present_dirs, len(selected_rows) - 1))
+    n = caps['evidence_programme']['application_occurrence_count']
+    f, d, j, e = len(files), len(directories), edges, len(rows)
+    index_cap = 16 << 20
+    namespace_sweeps, full_barriers = 4 + 3 * n, 4 + 2 * n
+    c_raw_reads = (11 + 6 * n) * (total_bytes + f) + (9 + 4 * n) * (index_cap + 1)
+    c_raw_writes = total_bytes + index_cap
+    output_body_bytes = caps['output_partition']['report_body_bytes']
+    report_preimage_bytes = sum(row[4] for row in report_geometry)
+    report_preimage_files = sum(row[5] for row in report_geometry)
+    report_preimage_dirs = sum(row[6] for row in report_geometry)
+    report_preimage_edges = sum(row[7] for row in report_geometry)
+    output = caps['output_partition']
+    delivered_output, prefix_output = output['delivered_bytes'], output['prefix_bytes']
+    administrative_output, application_output = output['administrative_bytes'], output['application_bytes']
+    stream_bytes = output['application_stream_bytes']
+    require(2 * n * stream_bytes == application_output,
+     'ORDINARY_COMPILER_CLOSED_OUTPUT_PARTITION')
+    raw_read_demand = (installation_programme['raw_programme'][0] + c_raw_reads + 3 * (total_bytes + f)
+     + 3 * (report_preimage_bytes + report_preimage_files)
+     + 2 * output_body_bytes + delivered_output)
+    raw_write_demand = (installation_programme['raw_programme'][1] + c_raw_writes
+     + total_bytes + report_preimage_bytes + output_body_bytes)
+    require(raw_read_demand <= 512 << 40 and raw_write_demand <= 128 << 40,
+     'ORDINARY_COMPILER_WHOLE_C_AND_PREPARATION_RAW_INTERSECTION')
+    compile_members = len(python_rows)
+    compile_runtime_inodes = 2 * compile_members + len(cache_parents) + 2
+    compile_source_bytes = sum(row['logical_bytes'] for row in python_rows)
+    compile_name_bytes = sum(len(row['path'].encode('utf-8')) + 64 for row in python_rows)
+    compile_runtime_bytes = min((128 << 20) + 16 * compile_source_bytes
+     + compile_name_bytes + compile_runtime_inodes * 4096, 32 << 30)
+    bootstrap_cache_bytes, bootstrap_cache_inodes = n * 4096, n
+    bootstrap_cache_metadata_calls, bootstrap_cache_fd_peak = 21 * n, n + 1
+    runtime_total_bytes = compile_runtime_bytes + (n - 1) * 4096 + bootstrap_cache_bytes
+    runtime_total_inodes = compile_runtime_inodes + (n - 1) + bootstrap_cache_inodes
+    source_depth_sum = sum(len(_f.pathlib.Path(row['path']).relative_to(root).parts)
+     for row in python_rows)
+    cache_directory_depth_sum = sum(len(parts) for parts in cache_parents)
+    interpreter = _f.pathlib.Path(census_scope.interpreter)
+    require(interpreter.is_relative_to(census.roots['installation'])
+     and any(row['path'] == str(interpreter) and row['kind'] == 'file'
+      for row in installation_programme['rows']),
+     'ORDINARY_COMPILER_ORIGINAL_INSTALLED_INTERPRETER_ROW')
+    interpreter_depth = len(interpreter.relative_to(census.roots['installation']).parts)
+    source_header_calls = 5 * source_depth_sum + compile_members
+    C_header_bytes, C_header_calls = 128 * compile_members, 129 * compile_members
+    cache_metadata_calls = (source_header_calls + C_header_calls + 6 * 64 + 4
+     + 9 + 5 * interpreter_depth + 5
+     + 5 * cache_directory_depth_sum + 11 * len(cache_parents)
+     + 18 * compile_members + runtime_total_bytes - bootstrap_cache_bytes
+     + 5 + 5 * 64 + 4 + bootstrap_cache_metadata_calls)
+    cache_name_bytes = (sum(len(parts[-1].encode('utf-8')) for parts in cache_parents)
+     + 2 * compile_name_bytes + 21 * compile_members)
+    cache_native_calls = 4 + C_header_bytes
+    cache_native_read = 1536 + C_header_bytes + cache_name_bytes
+    cache_native_write = 48
+    cache_raw_read = runtime_total_bytes - bootstrap_cache_bytes + 2 * compile_members
+    cache_demand = dict(source_file_count=compile_members,
+     directory_count=len(cache_parents), source_depth_sum=source_depth_sum,
+     directory_depth_sum=cache_directory_depth_sum, reserved_target_depth=64,
+     interpreter_depth=interpreter_depth, source_header_metadata_calls=source_header_calls,
+     C_header_read_bytes=C_header_bytes, C_header_metadata_calls=C_header_calls,
+     metadata_calls=cache_metadata_calls, native_control_calls=cache_native_calls,
+     native_control_read_bytes=cache_native_read, native_control_write_bytes=cache_native_write,
+     raw_read_bytes=cache_raw_read,
+     physical_write_allowance=runtime_total_bytes - bootstrap_cache_bytes,
+     header_retained_bytes=32 * compile_members, native_name_read_bytes=cache_name_bytes)
+    raw_read_demand += cache_raw_read
+    raw_write_demand += runtime_total_bytes - bootstrap_cache_bytes
+    known_depths = tuple(len(_f.pathlib.Path(name).parts[1:])
+     for name, kind in namespace_programme['known_targets'])
+    installation_depth = len(census.roots['installation'].parts[1:])
+    config_depth = len((host['root_parent'] / 'ordinary-view-volume' / 'parent-gitconfig').parts[1:])
+    namespace_prepare_calls = 7 * (1 + sum(known_depths) + 64) + 26
+    namespace_APP_calls = 5 * (installation_depth + config_depth) + 70
+    namespace_demand = (namespace_prepare_calls, n * namespace_APP_calls,
+     n * 16, n * 6144, n * 192,
+     max((*known_depths, 64, 4, installation_depth, config_depth, 2)) + 1)
+    require(runtime_total_bytes > 0 and runtime_total_inodes <= 131072 - prefix[5],
+     'ORDINARY_COMPILER_RUNTIME_NAME_AND_INODE_CEILINGS')
+    row_bytes = 128 * f + 160 * d + 8 * j
+    immutable_control_bytes = path_bytes + 8 * (e + 1) + 32 + 16 * e
+    post_git_control_programme = (8, 1, 8, 19, 458, 496, 520)
+    if 'phase_source' in caps:
+     vectors = owner._LinuxPreflightScopeV1._ordinary_selected_git_vectors_v1()
+     selected_arguments = sum(2 * len(value.encode('ascii')) + 2
+      for suffix, expected in vectors for value in ('/usr/bin/git', '--no-pager', *suffix))
+     post_git_control_programme = (*post_git_control_programme[:6], max(520, selected_arguments))
+    control_write_demand = (2 * post_git_control_programme[6] + immutable_control_bytes + (n + 1) * row_bytes
+     + (8 + 6 * n) * 128 + 32 + 128)
+    control_read_demand = (C_header_bytes + control_write_demand + (full_barriers + n + 4)
+     * (row_bytes + 128) + (n + 1) * immutable_control_bytes)
+    namespace_path_bytes = sum(len(name.encode('utf-8'))
+     for name in namespace_programme['directory_paths'] + namespace_programme['file_paths'])
+    namespace_metadata = (namespace_sweeps * (path_bytes + 160 * e)
+     + namespace_path_bytes + cache_demand['header_retained_bytes'])
+    if 'phase_source' in caps:
+     namespace_metadata = (3*(path_bytes+160*e)+namespace_path_bytes
+      +cache_demand['header_retained_bytes']+immutable_control_bytes)
+    depth = max(len(_f.pathlib.Path(row['path']).relative_to(root).parts) for row in rows)
+    metadata_base_calls = (namespace_sweeps + 4) * (e * (16 + 12 * (depth + 1)) + 16 * d)
+    other_raw_attempt_bound = (raw_read_demand + raw_write_demand
+     - installation_programme['raw_programme'][0]
+     - installation_programme['raw_programme'][1]
+     - cache_raw_read - (runtime_total_bytes - bootstrap_cache_bytes))
+    other_control_read_demand = control_read_demand - C_header_bytes
+    require(other_raw_attempt_bound >= 0 and other_control_read_demand >= 0,
+     'ORDINARY_COMPILER_DISJOINT_PLANNED_NATIVE_ATTEMPT_BOUNDS')
+    scratch_observation_calls = 6 * (n + 2)
+    metadata_calls = (installation_programme['native_programme'][0] + cache_metadata_calls
+     + namespace_prepare_calls + n * namespace_APP_calls
+     + metadata_base_calls + other_raw_attempt_bound
+     + other_control_read_demand + control_write_demand + 65536 + scratch_observation_calls)
+    native_control_calls = (installation_programme['native_programme'][1] + cache_native_calls
+     + n * 16 + metadata_base_calls + other_control_read_demand + control_write_demand + 65536)
+    native_control_read = (installation_programme['native_programme'][2] + cache_native_read
+     + n * 6144 + other_control_read_demand + 8 * metadata_base_calls + delivered_output)
+    native_control_write = cache_native_write + n * 192 + control_write_demand + 8 * metadata_base_calls
+    temporary_native_demand = (19 + 21*n + 20, 7 + 9*n + 10, 256 + 384*n + 14, 100 + 112*n, 11*n)
+    metadata_calls += temporary_native_demand[0] + temporary_native_demand[4]
+    native_control_calls += temporary_native_demand[1] + temporary_native_demand[4]
+    native_control_read += temporary_native_demand[2]
+    native_control_write += temporary_native_demand[3]
+    nested_demand = _f._ordinary_nested_resource_demand_v1(caps)
+    if nested_demand is not None:
+     raw_read_demand += nested_demand[6]
+     raw_write_demand += nested_demand[7]
+     metadata_calls += nested_demand[10]
+     native_control_calls += nested_demand[11]
+     native_control_read += nested_demand[12]
+     native_control_write += nested_demand[13]
+    policy_pyc_rows = tuple(row for row in files if _f.pathlib.Path(row['path']).suffix == '.pyc') if 'phase_source' in caps else ()
+    policy_pyc_demand = None
+    if policy_pyc_rows:
+     policy_pyc_depth = sum(len(_f.pathlib.Path(row['path']).relative_to(root).parts)
+      for row in policy_pyc_rows)
+     policy_pyc_demand = (len(policy_pyc_rows), 5*policy_pyc_depth
+      + 7*len(policy_pyc_rows) + 4*len(root.parts), len(policy_pyc_rows), 4*len(policy_pyc_rows))
+     metadata_calls += policy_pyc_demand[1]
+     native_control_calls += policy_pyc_demand[2]
+     native_control_read += policy_pyc_demand[3]
+    metadata_read = native_control_read + 65536 * d + (0 if nested_demand is None else nested_demand[14])
+    metadata_write = native_control_write
+    limits = caps['limits']
+    layout = dict(caps['control_layout'])
+    require(namespace_metadata + control_write_demand <= limits['metadata_byte_limit']
+     and c_raw_writes <= limits['raw_retained_byte_limit']
+     and raw_read_demand <= limits['raw_read_byte_limit']
+     and raw_write_demand <= limits['raw_write_byte_limit']
+     and metadata_calls <= limits['metadata_call_limit']
+     and metadata_read <= limits['metadata_read_limit']
+     and metadata_write <= limits['metadata_write_limit']
+     and native_control_calls <= limits['native_control_call_limit']
+     and native_control_read <= limits['native_control_read_limit']
+     and native_control_write <= limits['native_control_write_limit'],
+     'ORDINARY_COMPILER_COMPLETE_DEMAND_WITHIN_ORIGINAL_CEILINGS')
+    block = 4096
+    rounded_files = sum(((row['logical_bytes'] + block - 1) // block) * block for row in files)
+    raw_carrier_blocks = rounded_files + ((index_cap + block - 1) // block) * block
+    controls_blocks = sum(((length + block - 1) // block) * block for length in layout.values())
+    if 'phase_source' in caps:
+     geometry = caps['phase_source']
+     mapper_present = any(row[4] is not None for row in geometry['rows'])
+     reader_present = any(row[3] is not None for row in geometry['rows'])
+     rolling_peak = rounded_files + 2*limits['generation_byte_limit'] + index_cap
+     mapper_peak = limits['extra_held_byte_limit'] if mapper_present else 0
+     scanner_present = any(row[3]=='SCANNER' for row in geometry['rows'])
+     frame_peak = (4+(32<<20)+(limits['generation_byte_limit'] if scanner_present else 0)) if reader_present else 0
+     raw_carrier_blocks = max(raw_carrier_blocks,rolling_peak)+mapper_peak+frame_peak
+    evidence = caps['evidence_programme']
+    qcommands, qresponses = evidence['query_command_count'], evidence['native_response_count']
+    app_persistent_cells, app_atomic_cells = 3 + n * 3 + n, 3 + n
+    query_cells, binding_cells, release_cells = 5 * qcommands + 2 * qresponses, 2 * n, 2 * n
+    query_geometry = None
+    if 'phase_source' in caps:
+     from tools.validation_scope_registry import _ordinary_scope_query_pool_geometry_v1
+     query_geometry = _ordinary_scope_query_pool_geometry_v1(n, prefix[5],
+      e + f + 1 + 7 + 4 + 20000 + 32,
+      installation_programme['geometry'][6] + namespace_programme['inode_count']
+       + report_preimage_files + report_preimage_dirs + 6 + 32 + 16,
+      app_persistent_cells + app_atomic_cells + binding_cells + release_cells + 16,
+      administrative_output, evidence['atomic_payload_bytes'], qcommands, qresponses)
+     query_cells, qcommands, qresponses = query_geometry[:3]
+    continuous_cells = app_persistent_cells + app_atomic_cells + query_cells + binding_cells + release_cells + 16
+    receipt_bytes = (3 + n + qcommands) * evidence['atomic_payload_bytes']
+    continuous_bytes = (3 * administrative_output + 2 * application_output + receipt_bytes
+     + binding_cells * evidence['binding_payload_bytes'] + release_cells * evidence['release_payload_bytes'])
+    export_bytes, export_inodes = 2 * continuous_bytes, 2 * continuous_cells
+    if 'phase_source' in caps:
+     closeout_cells = query_geometry[4]
+     closeout_bytes = 2*administrative_output + closeout_cells*evidence['atomic_payload_bytes']
+     export_bytes = (continuous_bytes+prefix[4]+closeout_bytes
+      +output_body_bytes+(32<<20)+(64<<20))
+     export_inodes = continuous_cells+prefix[5]+closeout_cells
+    source_control_bytes, source_control_inodes = (32 << 20) + (64 << 20), 16
+    temporary_programme = (1, 16 << 30, 20000, n)
+    require(runtime_total_bytes + (0 if nested_demand is None else nested_demand[15]) <= temporary_programme[1]
+     and 1 + runtime_total_inodes + (0 if nested_demand is None else nested_demand[16]) <= temporary_programme[2],
+     'ORDINARY_TEMP_COMPILED_DEMAND_WITHIN_ONE_SHARED_BYTE_AND_COMBINED_INODE_CAP')
+    view_minimum_inodes = e + f + 1 + 7 + 4 + temporary_programme[2] + 32
+    host_minimum_inodes = (installation_programme['geometry'][6] + namespace_programme['inode_count']
+     + report_preimage_files + report_preimage_dirs + 2 * 3 + 32
+     + continuous_cells + export_inodes + source_control_inodes)
+    view_payload = (rounded_files + d * block + raw_carrier_blocks + controls_blocks
+     + temporary_programme[1] + (4 + 32) * block)
+    host_payload = (installation_programme['geometry'][5] + namespace_programme['allocated_block_bytes']
+     + sum(((row['logical_bytes'] + block - 1) // block) * block
+     for spec in report_geometry for row in spec[3] if row['kind'] == 'file')
+     + report_preimage_dirs * block + output_body_bytes + (2 * 3 + 32) * block
+     + continuous_bytes + export_bytes + (continuous_cells + export_inodes) * block
+     + source_control_bytes + source_control_inodes * block)
+    volumes = []
+    volume_arithmetic = []
+    for role, payload, inodes in (('VIEW', view_payload, view_minimum_inodes),
+           ('HOST_OUTPUT', host_payload, host_minimum_inodes)):
+     requested_inodes = ((inodes + 31) // 32) * 32
+     inode_allowance = ((requested_inodes * 256 + block - 1) // block) * block
+     format_headroom, spare = 1 << 30, 1 << 30
+     extent = ((payload + inode_allowance + format_headroom + spare + block - 1) // block) * block
+     record = dict(image_extent=extent, filesystem_blocks=extent // block,
+      inode_request=requested_inodes, minimum_inodes=inodes, block_size=block,
+      spare_floor=spare, inner_usable_bytes=payload)
+     volumes.append((role, record))
+     volume_arithmetic.append((role, payload, inodes, requested_inodes,
+      inode_allowance, format_headroom, spare, extent))
+    physical = dict(volumes=tuple(volumes),
+     allocated_extent=prefix[4] + sum(record['image_extent'] for role, record in volumes),
+     inode_request=131072 - prefix[5])
+    require(physical['allocated_extent'] <= limits['allocated_storage_byte_limit']
+     and sum(record['inode_request'] for role, record in volumes) <= physical['inode_request']
+     and namespace_metadata + control_write_demand + prefix[4]
+      + installation_programme['collector_programme'][0]
+      + (0 if nested_demand is None else nested_demand[9]) <= limits['heap_byte_limit'],
+     'ORDINARY_COMPILER_WHOLE_PHYSICAL_INTERSECTION')
+    fd_program = caps['fd_program']
+    controller_storage_additional = (2 * (depth + 1) + 14 + 5 + 2 * 4 + 2 * 8 + 32
+     + installation_programme['direct_peak'][0] + namespace_demand[5] + 3 + 1
+     + bootstrap_cache_fd_peak + (0 if nested_demand is None else nested_demand[17])
+     + (1 if 'phase_source' in caps else 0))
+    application_fd_demand, bootstrap_fd_demand = 8, 12
+    require(bootstrap_fd_demand <= fd_program['application'],
+     'ORDINARY_COMPILER_SOURCE_FIXED_DESCRIPTOR_SUBPARTITIONS')
+    data_initial_carrier_request = 0
+    if phase is not None:
+     from tools.validation_scope_registry import _ordinary_data_initial_carrier_request_v1
+     data_initial_carrier_request = _ordinary_data_initial_carrier_request_v1()
+     require(type(data_initial_carrier_request) is int and data_initial_carrier_request > 0
+      and namespace_metadata + control_write_demand + prefix[4]
+       + installation_programme['collector_programme'][0]
+       + (0 if nested_demand is None else nested_demand[9])
+       + data_initial_carrier_request <= limits['heap_byte_limit'],
+      'ORDINARY_DATA_INITIAL_CARRIER_WITHIN_ORIGINAL_HEAP')
+    programme = dict(census=census, ceiling_programme=caps,
+     prefix_programme=prefix, census_predecessor=census_projection, rows=rows,
+     original_rows=tuple((row, (row['path'], row['observed_path'], row['role'], row['kind'],
+      tuple(row['version']), row['logical_bytes'], tuple(row['roster']),
+      None if row['acl'] is None else tuple(row['acl']))) for row in rows),
+     limits=limits, control_layout=caps['control_layout'], physical_program=physical,
+     installation_programme=installation_programme, namespace_programme=namespace_programme,
+     cache_demand=cache_demand, namespace_demand=namespace_demand,
+     bootstrap_cache_demand=(n, bootstrap_cache_bytes, bootstrap_cache_inodes,
+      bootstrap_cache_metadata_calls, n, 1, 2 * n),
+     fd_program=fd_program, report_geometry=tuple(report_geometry),
+     geometry=(f,d,j,e,path_bytes,longest_path,total_bytes,index_cap),
+     raw_programme=(n,namespace_sweeps,full_barriers,c_raw_reads,c_raw_writes,raw_read_demand,raw_write_demand),
+     output_partition=(delivered_output,prefix_output,administrative_output,application_output,stream_bytes,output_body_bytes),
+     temporary_programme=temporary_programme, temporary_native_demand=temporary_native_demand,
+     runtime_programme=(tuple(python_rows),compile_source_bytes,compile_name_bytes,
+      runtime_total_bytes,runtime_total_inodes,4096,1),
+     fd_demand=(controller_storage_additional,bootstrap_fd_demand,application_fd_demand),
+     evidence_programme=(evidence,app_persistent_cells,app_atomic_cells,query_cells,binding_cells,
+      release_cells,continuous_cells,continuous_bytes,export_bytes,export_inodes),
+     post_git_control_programme=post_git_control_programme,
+     native_demand=(metadata_calls,metadata_read,metadata_write,native_control_calls,native_control_read,native_control_write),
+     physical_arithmetic=tuple(volume_arithmetic),source_control=(source_control_bytes,source_control_inodes))
+    if phase is not None: programme['data_initial_carrier_request'] = data_initial_carrier_request
+    if query_geometry is not None:
+     pool = dict(scope=census_scope, query=census_scope.query, limits=dict(
+      cells=query_geometry[0], administrative_attempts=census_scope._ordinary_query_attempt_limit_v1(),
+      whole_administrative_attempts=65536,
+      receiver_output_bytes=query_geometry[3]), geometry=query_geometry,
+      demand=None, baseline=None, progress=(0,0,0), refinement=None,
+      owner=census_scope._ordinary_factory_owner_v1, errors=[])
+     pool['original'] = (pool,census_scope,census_scope.query,caps,caps['phase_source'],
+      pool['limits'],tuple(pool['limits'].items()),query_geometry,pool['errors'],pool['owner'])
+     programme['query_pool'] = pool
+     census_scope._ordinary_original_query_pool_v1 = pool
+     census_scope._ordinary_original_query_progress_v1 = pool['progress']
+    if nested_demand is not None: programme['nested_evidence_programme'] = nested_demand
+    if policy_pyc_demand is not None: programme['policy_source_pyc_demand'] = policy_pyc_demand
+    programme['original'] = (programme, tuple(programme.items()),
+     tuple((role, record, tuple(record.items())) for role, record in physical['volumes']))
+    return programme
+
+
+def _facet_run_post_resource_programme_v1(scope, census, source, *, original_cutoffs,
+     host_preparation, ceiling_programme, census_programme, phase=None):
+    """Join actual SourceSeal/native products to the already compiled demand.
+
+    Original Source counters are overlapping observations: actual callbacks
+    already debit the same meter. This join never subtracts or reissues them.
+    """
+    import tools.run_validation_gates as _f
+    from tools import validation_reliability as owner
+    require = owner._preflight_require_v1
+    caps = _f._ordinary_post_ceiling_checked_v1(ceiling_programme)
+    require(phase is None or (type(phase) is str and phase == scope._ordinary_phase_v1
+     and phase in _f.ORDERED_PHASES and (phase == _f.POST_VALIDATION_PHASE
+      or caps['phase_source']['phase'] == phase)),
+     'ORDINARY_COMPILER_SAME_RESOURCE_SELECTED_PHASE')
+    require(type(scope) is owner._LinuxPreflightScopeV1
+     and type(census) is owner._LinuxPreflightCensusV1
+     and type(source) is owner._LinuxImmutableSourceSealV2
+     and scope.source is source and source.census is census and census.complete
+     and source.state == 'READABLE' and not census.failures and source.failure is None
+     and scope.query.failure is None and source.phase == 'work'
+     and (source.pid,source.thread) == (scope.query.pid,scope.query.thread)
+      == (_f.os.getpid(),_f.threading.get_ident())
+     and source.anchors and len(source.post) == len(source.rows)
+     and original_cutoffs is caps['original_cutoffs']
+     and original_cutoffs[1] == scope.execution_deadline_ns
+     and original_cutoffs[3] == scope.settlement_deadline_ns
+     and source.deadline_ns >= original_cutoffs[3]
+     and host_preparation is scope._ordinary_host_preparation_v1
+     and host_preparation is scope._ordinary_original_host_preparation_v1
+     and host_preparation['ceiling_programme'] is caps
+     and host_preparation['original_ceiling_programme'] is caps,
+     'ORDINARY_COMPILER_ORIGINAL_COMPLETE_SOURCE_AND_NATIVE_PREFIX')
+    require(not hasattr(scope,'_ordinary_resource_programme_v1'),
+     'ORDINARY_COMPILER_ONE_ORIGINAL_RESOURCE_ASSOCIATION')
+    original = census_programme['original']
+    require(original[0] is census_programme and census_programme['census'] is census
+     and census_programme['ceiling_programme'] is caps
+     and tuple((key,value) for key,value in census_programme.items() if key != 'original') == original[1]
+     and tuple((role,record,tuple(record.items())) for role,record
+      in census_programme['physical_program']['volumes']) == original[2]
+     and len(source.rows) == len(census_programme['rows'])
+     and all(source.row_index.get(row['path']) is row
+      and any(row is item for item in source.rows)
+      and (row['path'],row['observed_path'],row['role'],row['kind'],tuple(row['version']),
+       row['logical_bytes'],tuple(row['roster']),None if row['acl'] is None else tuple(row['acl'])) == values
+      and row['aliases'] == [] for row,values in census_programme['original_rows']),
+     'ORDINARY_COMPILER_SAME_COMPLETE_CENSUS_DEMAND')
+    meter,limits,remaining,observed = host_preparation['original_meter']
+    require(host_preparation['meter'] is meter and meter['limits'] is limits is caps['limits']
+     and meter['remaining'] is remaining and meter['observed'] is observed
+     and tuple(limits.items()) == host_preparation['original_limit_values'] == caps['original'][2]
+     and scope._ordinary_meter_v1 is meter and scope._ordinary_original_meter_v1 == host_preparation['original_meter']
+     and meter['owner'] == (_f.os.getpid(),_f.threading.get_ident()) and meter['deadline_ns'] == original_cutoffs[3]
+     and set(remaining) == set(observed) == set(limits)
+     and all(type(remaining[key]) is int and type(observed[key]) is int
+      and remaining[key] >= 0 and observed[key] >= 0
+      and remaining[key]+observed[key] == limits[key] for key in limits),
+     'ORDINARY_COMPILER_ORIGINAL_NONRESET_PREFIX_METER')
+    census_projection = scope._ordinary_census_meter_projection_v1(census)
+    require(census_projection is census_programme['census_predecessor']
+     and census_projection['scope'] is scope and census_projection['census'] is census
+     and census_projection['meter'] is meter and census_projection['finished']
+     and not census_projection['active'] and not census_projection['errors']
+     and census_projection['counters']['metadata_call'] == census.counts['metadata_attempts']
+     and census_projection['counters']['raw_read'] == 0,
+     'ORDINARY_COMPILER_RETAINED_CENSUS_PREFIX_NO_COUNTER_RESET')
+    projection = scope._ordinary_source_meter_projection_v1(source)
+    require(projection['scope'] is scope and projection['source'] is source
+     and projection['parent'] is None and projection['meter'] is meter
+     and not projection['errors'] and projection['counters']['raw_read'] == source.read_bytes
+     and source.journal_bytes <= projection['counters']['raw_write'],
+     'ORDINARY_COMPILER_REAL_SOURCE_NATIVE_DEBITS_NOT_REPLAYED')
+    prefix = _f._ordinary_post_prefix_checked_v1(census_programme['prefix_programme'], caps)
+    prefix_record = host_preparation['prefix_tmpfs']
+    prefix_original = prefix_record['original']
+    require(host_preparation['prefix_programme'] is prefix
+     and host_preparation['original_prefix_programme'] is prefix
+     and prefix_record is host_preparation['original_prefix_tmpfs']
+     and prefix_record['scope'] is scope and not prefix_record['errors']
+     and not prefix_record['unmounted'] and prefix_record['source_programme'] is prefix
+     and type(prefix_original) is tuple and len(prefix_original) == 11
+     and prefix_original[0] is prefix_record and prefix_original[1] is scope
+     and prefix_original[2] is prefix_record['mount_path']
+     and prefix_original[3] is prefix_record['root_slot']
+     and prefix_original[4] == prefix_record['root_identity']
+     and prefix_original[5] == prefix_record['root_version']
+     and prefix_original[6] is prefix_record['native_mount']
+     and prefix_original[7] is prefix_record['statvfs']
+     and prefix_original[8] is prefix
+     and prefix_original[9] is prefix_record['user_slots']
+     and prefix_original[10] is prefix_record['errors']
+     and prefix_record['statvfs'].f_blocks * prefix_record['statvfs'].f_frsize == prefix[4]
+     and 0 < prefix_record['statvfs'].f_files <= prefix[5],
+     'ORDINARY_COMPILER_SAME_ACTUAL_PREFIX_NATIVE_GEOMETRY')
+    continuous = host_preparation['continuous_evidence']
+    require(continuous is host_preparation['original_continuous_evidence']
+     and continuous['scope'] is scope and continuous['owner'] == meter['owner']
+     and not continuous['errors'] and continuous['image']['mounted']
+     and not continuous['image']['disposed'] and continuous['image']['role'] == 'HOST_OUTPUT',
+     'ORDINARY_COMPILER_ACTUAL_ADOPTED_HOST_IMAGE')
+    physical = census_programme['physical_program']
+    host_image = continuous['image']
+    host_physical = dict(physical['volumes'])['HOST_OUTPUT']
+    require(host_image['physical'] is host_physical and host_image['extent'] == host_physical['image_extent']
+     and host_image['filesystem'] is not None
+     and host_image['filesystem']['inodes'] >= host_physical['minimum_inodes']
+     and host_image['filesystem']['available_blocks'] * 4096 >= host_physical['inner_usable_bytes'],
+     'ORDINARY_COMPILER_SAME_REAL_HOST_GEOMETRY_NOT_SECOND_IMAGE')
+    raw_future = census_programme['raw_programme'][-2:]
+    native_future = census_programme['native_demand']
+    require(raw_future[0] <= remaining['raw_read_byte_limit']
+     and raw_future[1] <= remaining['raw_write_byte_limit']
+     and all(amount <= remaining[key] for amount,key in zip(native_future,
+      ('metadata_call_limit','metadata_read_limit','metadata_write_limit',
+      'native_control_call_limit','native_control_read_limit','native_control_write_limit'))),
+     'ORDINARY_COMPILER_FULL_FUTURE_DEMAND_PLUS_ACTUAL_PREFIX_WITHIN_CAPS')
+    prefix_slots = host_preparation['prefix_slots']
+    slot_keys = {'owner', 'path', 'kind', 'acquiring', 'fd', 'returned_fd',
+     'raw_owner', 'open_unknown', 'close_attempted', 'closed', 'close_error', 'error'}
+    require(type(prefix_slots) is list and prefix_slots is host_preparation['original_prefix_slots']
+     and all(type(slot) is dict and set(slot) == slot_keys
+      and slot['owner'] == meter['owner'] and slot['error'] is None
+      and slot['close_error'] is None and slot['raw_owner'] is None
+      and not slot['acquiring'] and not slot['open_unknown']
+      and all(type(slot[key]) is bool for key in
+       ('acquiring','open_unknown','close_attempted','closed'))
+      and (owner._mapper_slot_settled_v1(slot)
+       or (type(slot['returned_fd']) is int and slot['returned_fd'] >= 0
+        and slot['fd'] is slot['returned_fd']
+        and not slot['close_attempted'] and not slot['closed'])) for slot in prefix_slots),
+     'ORDINARY_COMPILER_REAL_PREFIX_DESCRIPTOR_ASSOCIATION')
+    held = tuple(slot for slot in prefix_slots if slot['returned_fd'] is not None and not slot['closed'])
+    require(len({id(slot) for slot in held}) == len(held)
+     and len({slot['returned_fd'] for slot in held}) == len(held),
+     'ORDINARY_COMPILER_NATIVE_DESCRIPTOR_ALIAS_REJECTED')
+    storage_additional,bootstrap_fd_demand,application_fd_demand = census_programme['fd_demand']
+    controller_peak = len(held)+len(source.anchors)+storage_additional
+    require(controller_peak <= caps['fd_program']['controller'],
+     'ORDINARY_COMPILER_REAL_PREFIX_AND_FUTURE_DESCRIPTOR_INTERSECTION')
+    programme = dict(census_programme)
+    del programme['original']
+    programme.update(scope=scope,source=source,rows=source.rows,original_cutoffs=original_cutoffs,
+     host_preparation=host_preparation,source_predecessor=projection,
+     fd_demand=(controller_peak,bootstrap_fd_demand,application_fd_demand),
+     actual_prefix=(meter,tuple(observed.items()),prefix_slots,held,host_image,continuous))
+    if phase is not None:
+     scope._ordinary_source_data_allocator_prepare_v1(programme)
+    if 'phase_source' in caps:
+     scope._ordinary_phase_resource_begin_v1(programme)
+    scope._ordinary_resource_programme_v1 = programme
+    scope._ordinary_original_resource_programme_v1 = (programme,tuple(programme.items()),
+     tuple(limits.items()),programme['control_layout'],physical,
+     tuple((role,record,tuple(record.items())) for role,record in physical['volumes']),
+     tuple(caps['fd_program'].items()))
+    return programme
+
+
+def _facet_run_rp5a_acquire_parent_basis_v1(scope, ledger, *, basis_limits, check_candidate):
+    """Use the original bounded Git reader to produce actual finite R inputs.
+
+    The selected limits already belong to the same frozen native phase
+    programme. Git values are original returned observations, never a JSON
+    accepted flag or fabricated baseline. This does not invoke any builder.
+    """
+    import tools.run_validation_gates as _f
+    from types import MappingProxyType, MethodType
+    import re
+    from tools import validation_reliability as owner
+    from tools.pr168_rp5a_git_grep_scanner import (
+     _scan_child_environment, _scan_parse_names, _scan_wire_bytes, _scan_path_identity, _scan_admitted_paths)
+    from tools.ci_branch_context import current_branch_context
+    from tools.build_pr168_rp5a_legacy_semantic_audit import _parse_builder_status_v1
+    need = owner._preflight_require_v1
+    need(type(scope) is owner._LinuxPreflightScopeV1
+     and owner._LINUX_PREFLIGHT_PROCESS_V1.get() is scope
+     and scope._ordinary_selected_v1() and type(ledger) is owner._ScanReservationLedger
+     and type(basis_limits) is MappingProxyType and set(basis_limits) ==
+      {'stdout_bytes_per_call', 'status_record_limit', 'path_byte_limit', 'source_byte_limit',
+      'manifest_node_limit', 'manifest_command_limit', 'manifest_argument_limit'}
+     and all(type(value) is int and value > 0 for value in basis_limits.values()),
+     'ORDINARY_RP5A_ACTUAL_PARENT_BASIS_OWNERS_AND_LIMITS')
+    resource = scope._ordinary_resource_programme_v1
+    frozen = scope._ordinary_original_resource_programme_v1
+    need(resource is frozen[0] and tuple(resource.items()) == frozen[1]
+     and basis_limits is scope._ordinary_rp5a_source_build_checked_v1()['parent_basis_limits']
+     and not getattr(scope, '_ordinary_rp5a_parent_basis_attempted_v1', False)
+     and ledger.state == 'READY' and ledger.invocations == 0 and ledger.active is None
+     and type(check_candidate) is MethodType
+     and check_candidate.__self__ is scope
+     and check_candidate.__func__ is owner._LinuxPreflightScopeV1._ordinary_rp5a_parent_source_check_v1,
+     'ORDINARY_RP5A_INDEPENDENT_PARENT_BASIS_PROGRAMME')
+    matches = tuple(row for row in scope._ordinary_rp5a_capture_ledgers_v1
+     if row['ledger'] is ledger and row['programme']['role'] == 'PARENT_BASIS')
+    need(len(matches) == 1, 'ORDINARY_RP5A_ORIGINAL_PARENT_NATIVE_LEDGER')
+    scope._ordinary_rp5a_parent_basis_attempted_v1 = True
+    result = dict(scope=scope, ledger=ledger, programme=matches[0]['programme'],
+     basis_limits=basis_limits, source=scope.source, captures=[], inventory=None,
+     head=None, branch=None, baseline_ref=None, historical_runner=None,
+     status_rows=None, basis=None, source_operands=None, edge_proof=None, complete=False, errors=[])
+    result['original'] = (result, scope, ledger, result['programme'], basis_limits,
+     scope.source, result['captures'], result['errors'])
+    scope._ordinary_rp5a_parent_basis_v1 = scope._ordinary_original_rp5a_parent_basis_v1 = result
+    profile = ledger.profile
+    environment = dict(profile.child_environment)
+    need(environment == scope._ordinary_rp5a_git_environment_v1()
+     and _f.pathlib.Path(profile.repo_root) == _f.pathlib.Path(scope.repository)
+     and profile.deadline_ns <= scope.execution_deadline_ns,
+     'ORDINARY_RP5A_ORIGINAL_GIT_ENVIRONMENT_AND_CUTOFF')
+    prefix = (profile.git_executable, '--no-pager', '--literal-pathspecs',
+     '-c', 'core.fsmonitor=false', '-c', 'core.untrackedCache=false',
+     '-c', 'maintenance.auto=false', '-c', 'gc.auto=0', '-c', 'protocol.allow=never')
+    config_names = ('config', '--local', '--no-includes', '--null', '--name-only', '--get-regexp',
+     r'^(core\.repositoryformatversion|include\.path|includeif\..*\.path|filter\..*\.(clean|smudge|process)|extensions\.worktreeconfig)$')
+    index_modes = ('ls-files', '-z', '--format=%(objectmode)')
+    fixed = {('--version',), config_names, index_modes,
+     ('ls-files', '--cached', '--full-name', '-z'), ('rev-parse', '--verify', 'HEAD'),
+     ('branch', '--show-current'), ('rev-parse', '--abbrev-ref', 'HEAD'),
+     ('rev-parse', '--verify', 'HEAD^1'), ('merge-base', '--all', 'HEAD', 'origin/main'),
+     ('status', '--porcelain=v1', '-z', '--untracked-files=all', '--ignore-submodules=none',
+     '--renames', '--find-renames=50%')}
+    def acquire(arguments, bound, parser):
+     arguments = tuple(arguments)
+     blob = ('cat-file', 'blob', str(result['baseline_ref']) + ':tools/run_validation_gates.py')
+     need(arguments in fixed or result['baseline_ref'] is not None and arguments == blob,
+      'ORDINARY_RP5A_ORIGINAL_PARENT_GIT_VECTOR')
+     before_count = len(matches[0]['captures'])
+     row = dict(arguments=arguments, bound=bound, native_record=None,
+      value=None, returned=False, errors=[])
+     result['captures'].append(row)
+     try:
+      value = owner._execute_scan_with_scratch(ledger, stdout_bound=bound, pattern=None,
+       command=lambda _pattern: (*prefix, *arguments), parser=parser,
+       check_candidate=check_candidate, deadline_ns=profile.deadline_ns, allow_no_match=False)
+      need(len(matches[0]['captures']) == before_count + 1,
+       'ORDINARY_RP5A_PARENT_ACTUAL_CAPTURE_MULTIPLICITY')
+      actual = matches[0]['captures'][-1]
+      row['native_record'] = actual
+      need(actual['capture_settled'] and actual['closed'] and not actual['pending']
+       and type(actual['native_terminal'][4]) is int and actual['native_terminal'][4] == 0
+       and ledger.state == 'READY' and ledger.active is None,
+       'ORDINARY_RP5A_PARENT_ACTUAL_ZERO_TERMINAL_AND_EOF')
+      row['value'], row['returned'] = value, True
+      return value
+     except BaseException as error:
+      row['errors'].append(error)
+      if len(matches[0]['captures']) == before_count + 1:
+       row['native_record'] = matches[0]['captures'][-1]
+      result['errors'].append(error)
+      raise
+    def token(arguments):
+     def parse(chunks, code):
+      need(type(code) is int and code == 0, 'ORDINARY_RP5A_PARENT_GIT_TOKEN_EXIT')
+      raw = bytes(_scan_wire_bytes(chunks, basis_limits['stdout_bytes_per_call']))
+      value = raw.decode('utf-8', 'strict').removesuffix('\n').removesuffix('\r')
+      need(all(c not in value for c in ('\n', '\r', '\0')),
+       'ORDINARY_RP5A_PARENT_SINGLE_NATIVE_TOKEN')
+      return value
+     return acquire(arguments, basis_limits['stdout_bytes_per_call'], parse)
+    try:
+     source_operands = scope._ordinary_post_git_source_operands_v1()
+     result['source_operands'] = source_operands
+     index_entries = source_operands[1][4][2]
+     def edge_parser(kind):
+      def parse(chunks, code):
+       need(type(code) is int and code == 0, 'ORDINARY_R_PREFIX_NATIVE_ZERO_EXIT')
+       bound = (128 if kind == 'VERSION' else len(b'core.repositoryformatversion\0')
+        if kind == 'CONFIG_NAMES' else 7 * index_entries)
+       raw = bytes(_scan_wire_bytes(chunks, bound))
+       return scope._ordinary_post_git_edge_bytes_v1(kind, raw,
+        index_entries=index_entries if kind == 'INDEX_MODES' else None)
+      return parse
+     acquire(('--version',), 128, edge_parser('VERSION'))
+     acquire(config_names, len(b'core.repositoryformatversion\0'), edge_parser('CONFIG_NAMES'))
+     acquire(index_modes, 7 * index_entries, edge_parser('INDEX_MODES'))
+     scope._ordinary_post_git_source_operands_v1(original=source_operands)
+     edges = tuple(result['captures'])
+     need(len(edges) == 3 and all(row['returned'] and row['native_record'] is not None for row in edges),
+      'ORDINARY_R_ORIGINAL_NATIVE_PREFIX_COMPLETE')
+     result['edge_proof'] = (result, scope, source_operands, edges,
+      tuple((row, row['arguments'], row['native_record'], row['value']) for row in edges))
+     inventory_bound = profile.inventory_utf8_limit
+     def parse_original_inventory(chunks, code):
+      need(type(code) is int and code == 0, 'ORDINARY_RP5A_PARENT_NATIVE_INVENTORY_EXIT')
+      raw = bytes(_scan_wire_bytes(chunks, inventory_bound))
+      need(not raw or raw.endswith(b'\0'), 'ORDINARY_RP5A_PARENT_COMPLETE_NUL_INVENTORY')
+      names = tuple(part.decode('utf-8', 'strict') for part in raw.split(b'\0')[:-1]) if raw else ()
+      return _scan_admitted_paths(names, path_limit=profile.inventory_path_limit,
+       byte_limit=profile.inventory_utf8_limit)
+     inventory = acquire(('ls-files', '--cached', '--full-name', '-z'), inventory_bound,
+      parse_original_inventory)
+     need(not profile.expected_inventory or inventory == profile.expected_inventory,
+      'ORDINARY_RP5A_PARENT_ORIGINAL_INDEX_INVENTORY')
+     for path in inventory:
+      _scan_path_identity(path)
+      need(str(_f.pathlib.Path(scope.repository) / path) in scope.source.row_index,
+       'ORDINARY_RP5A_INDEX_MEMBER_HAS_ORIGINAL_PROTECTED_SOURCE')
+     result['inventory'] = inventory
+     head = token(('rev-parse', '--verify', 'HEAD'))
+     need(re.fullmatch(r'(?:[0-9a-f]{40}|[0-9a-f]{64})', head) is not None,
+      'ORDINARY_RP5A_PARENT_ACTUAL_CURRENT_REFERENCE')
+     result['head'] = head
+     def branch_reader(root, arguments):
+      need(_f.pathlib.Path(root) == _f.pathlib.Path(scope.repository), 'ORDINARY_RP5A_ORIGINAL_BRANCH_ROOT')
+      return 0, token(tuple(arguments)), None
+     branch = current_branch_context(_f.pathlib.Path(scope.repository), git_stdout=branch_reader).branch
+     need(type(branch) is str and branch, 'ORDINARY_RP5A_ORIGINAL_EFFECTIVE_BRANCH')
+     result['branch'] = branch
+     baseline = token(('rev-parse', '--verify', 'HEAD^1') if branch == 'main'
+      else ('merge-base', '--all', 'HEAD', 'origin/main'))
+     need(re.fullmatch(r'(?:[0-9a-f]{40}|[0-9a-f]{64})', baseline) is not None,
+      'ORDINARY_RP5A_PARENT_ACTUAL_UNIQUE_BASELINE')
+     result['baseline_ref'] = baseline
+     historical = acquire(('cat-file', 'blob', baseline + ':tools/run_validation_gates.py'),
+      basis_limits['source_byte_limit'],
+      lambda chunks, code: bytes(_scan_wire_bytes(chunks, basis_limits['source_byte_limit']))
+       if type(code) is int and code == 0 else (_ for _ in ()).throw(ValueError('native historical source exit')))
+     need(historical, 'ORDINARY_RP5A_ACTUAL_COMPLETE_HISTORICAL_RUNNER')
+     result['historical_runner'] = historical
+     status = acquire(('status', '--porcelain=v1', '-z', '--untracked-files=all',
+      '--ignore-submodules=none', '--renames', '--find-renames=50%'),
+      basis_limits['stdout_bytes_per_call'],
+      lambda chunks, code: _parse_builder_status_v1(chunks,
+       byte_limit=basis_limits['stdout_bytes_per_call'],
+       record_limit=basis_limits['status_record_limit'],
+       path_byte_limit=basis_limits['path_byte_limit'])
+       if type(code) is int and code == 0 else (_ for _ in ()).throw(ValueError('native status exit')))
+     result['status_rows'] = status
+     scope._ordinary_post_git_source_operands_v1(original=result['source_operands'])
+     result['basis'] = owner._Rp5aReadBasisV1(baseline, historical, **dict(basis_limits))
+     owner._scan_candidate_fence(check_candidate)
+     ledger.check()
+     scope._ordinary_rp5a_capture_resources_v1()
+     need(not result['errors'] and ledger.state == 'READY' and ledger.active is None
+      and all(row['returned'] and row['native_record'] is not None for row in result['captures']),
+      'ORDINARY_RP5A_COMPLETE_PARENT_BASIS_WITH_NATIVE_CUSTODY')
+     result['complete'] = True
+     return result
+    except BaseException:
+     ledger.hold()
+     raise
+
+
+def _facet_run_bootstrap_query_constructor_request_v1(layout, native_root, receiver):
+ import tools.run_validation_gates as _f
+ p = _f._ordinary_data_size_v1(layout, 'pointer')
+ gc = _f._ordinary_data_size_v1(layout, 'gc')
+ cls = _f._LinuxPreflightQueriesV1
+ if (p != 8 or gc != 16 or type(receiver) is not bool
+   or type(cls) is not type or cls.__bases__ != (object,)
+   or '__slots__' in cls.__dict__ or '__new__' in cls.__dict__
+   or cls.__itemsize__ != 0 or cls.__basicsize__ != 2*p
+   or cls.__flags__ & ((1<<14)|(1<<2)|(1<<3)|(1<<4))
+    != ((1<<14)|(1<<2)|(1<<3)|(1<<4))):
+  raise ValueError('ORDINARY_FIXED_QUERY_ORIGINAL_CONSTRUCTOR_SOURCE_ABI')
+ native_type = _f.Path.__new__.__globals__['PosixPath']
+ if type(native_root) is not native_type:
+  raise ValueError('ORDINARY_FIXED_QUERY_ORIGINAL_NATIVE_ROOT_TYPE')
+ raw = native_root._raw_paths
+ if (type(raw) is not list or not raw
+   or any(type(part) is not str or '\0' in part for part in raw)):
+  raise ValueError('ORDINARY_FIXED_QUERY_ORIGINAL_PATH_OPERANDS')
+ operands = len(raw)
+ extent = sum(len(part) for part in raw) + operands
+ paths = [(operands+1, extent+7)]
+ if receiver: paths.append((operands+2, extent+16))
+ prefix_operands = operands+1+int(receiver)
+ prefix_extent = extent+7+9*int(receiver)
+ paths.extend(((prefix_operands+1, prefix_extent+6),
+  (prefix_operands+1, prefix_extent+6)))
+ path_request = 0
+ for count, chars in paths:
+  path_request += (11*p+gc
+   +_f._ordinary_data_list_requests_v1(layout,4,count+3*(chars+1))
+   +2*((chars+1)*_f._ordinary_data_size_v1(layout,'unicode_prefix')
+    +4*(chars+(chars+1)))
+   +(2*count+6)*_f._ordinary_data_unicode_request_v1(layout,chars)
+   +4*_f._ordinary_data_tuple_request_v1(layout,count+2)
+   +_f._ordinary_data_dict_requests_v1(layout,1,0)
+   +_f._ordinary_data_tuple_request_v1(layout,3))
+ inline = _f._ordinary_data_align_v1(30,p)+(30+1)*p
+ return (('original_query_instance_and_fields', cls.__basicsize__+gc+2*p+inline
+    +_f._ordinary_data_dict_requests_v1(layout,1,30)),
+  ('original_query_empty_lists',_f._ordinary_data_list_requests_v1(layout,2,0)),
+  ('original_query_prefix_paths',path_request))
+
+
+def _facet_fn_runtime7_bootstrap_arena_request_v1(layout, requests, object_slots):
+ import tools.validation_reliability as _f
+ if (_f._ordinary_data_size_v1(layout, 'pointer') != 8
+   or type(requests) is not tuple or type(object_slots) is not int
+   or object_slots < 0):
+  raise ValueError('BOOTSTRAP_ARENA_TYPED_LP64_REQUESTS')
+ small, largest, large_count, large_bytes = 0, 0, 0, 0
+ for size, count in requests:
+  if type(size) is not int or type(count) is not int or size <= 0 or count < 0:
+   raise ValueError('BOOTSTRAP_ARENA_TYPED_REQUEST_CELL')
+  aligned = _f._ordinary_data_align_v1(size, 8)
+  if aligned >= 8192:
+   large_count += count
+   large_bytes += count * (32 + aligned)
+  else:
+   small += count * aligned
+   if count: largest = max(largest, aligned)
+ blocks = 1 + large_count + (small // (8192 - largest + 8) if largest else 0)
+ return (24 + (32 + 8192) * blocks + large_bytes
+  + _f._ordinary_data_list_requests_v1(layout, 1, object_slots))
+
+
+def _facet_fn_runtime7_bootstrap_parser_core_request_v1(layout, raw, physical_lines):
+ import tools.validation_reliability as _f
+ if type(raw) is not bytes or type(physical_lines) is not int or physical_lines < 0:
+  raise ValueError('BOOTSTRAP_PARSER_SOURCE_BOUND')
+ if _f._ordinary_data_size_v1(layout, 'pointer') != 8:
+  raise ValueError('BOOTSTRAP_PARSER_LP64_OPERAND')
+ tokens = 2 * len(raw) + 2 * physical_lines + 3
+ capacity = 1
+ while capacity < tokens: capacity *= 2
+ memo_count = (28 + 29) * tokens
+ memo_arena = _f._ordinary_runtime7_bootstrap_arena_request_v1(layout,
+  ((32, memo_count),), 2 * tokens)
+ token_objects_and_resize = 56 * capacity + 8 * (capacity + capacity // 2)
+ token_bytes = tokens * _f._ordinary_data_size_v1(layout, 'bytes_prefix') + len(raw)
+ return dict(tokens=tokens, token_capacity=capacity, memo_count=memo_count,
+  memo_arena_request=memo_arena,
+  token_objects_and_resize=token_objects_and_resize,
+  token_bytes_request=token_bytes,
+  parser_core_request=memo_arena + token_objects_and_resize + token_bytes)
+
+
+def _facet_fn_control_parser_arena_request_v1(layout, requests, object_slots):
+ import tools.validation_reliability as _f
+ if (_f._ordinary_data_size_v1(layout,'pointer') != 8 or type(requests) is not tuple
+   or type(object_slots) is not int or object_slots < 0):
+  raise ValueError('CONTROL_PARSER_ORIGINAL_LP64_ARENA_REQUEST')
+ small,large,large_count=0,0,0
+ for size,count in requests:
+  if type(size) is not int or size <= 0 or type(count) is not int or count < 0:
+   raise ValueError('CONTROL_PARSER_ARENA_REQUEST_CELL')
+  aligned=(size+7)//8*8
+  if aligned >= 8192:
+   large+=aligned*count;large_count+=count
+  else: small+=aligned*count
+ headers=32*(1+large_count+2*(small//4096))
+ return (24+2*small+8192*(1+large_count)+large+headers
+  +_f._ordinary_data_list_requests_v1(layout,1,object_slots))
+
+
+def _facet_fn_control_before_tokenize_components_v1(layout, raw, native_sizes):
+ import tools.validation_reliability as _f
+ if type(raw) is not bytes or type(native_sizes) is not tuple or len(native_sizes) != 3:
+  raise ValueError('CONTROL_TOKENIZER_ORIGINAL_SOURCE_AND_NATIVE_LAYOUT')
+ state,iterator,initial=native_sizes
+ if any(type(n) is not int or n <= 0 for n in native_sizes):
+  raise ValueError('CONTROL_TOKENIZER_QUALIFIED_NATIVE_SIZE_OPERANDS')
+ if _f._ordinary_source_byte_cookie_domain_v1(raw) not in ('ABSENT','UTF8'):
+  raise ValueError('CONTROL_TOKENIZER_ORIGINAL_UTF8_COOKIE_DOMAIN')
+ size,a,d,p,lines,tokens=_f._ordinary_source_byte_token_upper_v1(raw)
+ source_span=size+lines+2
+ rows=(('SOURCE_RAW',_f._ordinary_data_bytes_request_v1(layout,size)),
+  ('SOURCE_STRICT_TEXT',_f._ordinary_data_unicode_request_v1(layout,size)),
+  ('SOURCE_PHYSICAL_LINES',lines*_f._ordinary_data_size_v1(layout,'unicode_prefix')
+   +4*(size+lines)+size+lines+_f._ordinary_data_list_requests_v1(layout,1,lines)),
+  ('TOKENIZER_STATE',state+iterator),
+  ('TOKENIZER_NATIVE_BUFFERS',5*(initial+source_span)+150*(source_span+1)+2*source_span),
+  ('TOKENIZER_YIELD_OVERLAP',2*(2*_f._ordinary_data_unicode_request_v1(layout,size)
+   +3*_f._ordinary_data_tuple_request_v1(layout,5)
+   +5*_f._ordinary_data_size_v1(layout,'int_prefix'))),
+  ('SOURCE_PARTITION_TABLE',_f._ordinary_data_list_requests_v1(layout,1,tokens)
+   +tokens*(_f._ordinary_data_tuple_request_v1(layout,2)
+    +2*_f._ordinary_data_size_v1(layout,'int_prefix'))))
+ return rows,('SOURCE_RAW','SOURCE_STRICT_TEXT','SOURCE_PHYSICAL_LINES','SOURCE_PARTITION_TABLE')
+
+
+def _facet_fn_control_before_parse_components_v1(layout, raw, profile):
+ import tools.validation_reliability as _f
+ if type(raw) is not bytes or type(profile) is not tuple or len(profile) != 8:
+  raise ValueError('CONTROL_PARSER_ORIGINAL_SOURCE_PROFILE')
+ tokens,requests,object_slots,helpers,arrays,nodes,lists,slots=profile
+ if (type(requests) is not tuple or any(type(n) is not int or n < 0
+   for n in (tokens,object_slots,helpers,arrays,nodes,lists,slots)) or tokens <= 0):
+  raise ValueError('CONTROL_PARSER_PROFILE_COMPONENT_FIELDS')
+ if _f._ordinary_data_size_v1(layout,'pointer') != 8:
+  raise ValueError('CONTROL_PARSER_ORIGINAL_LP64_LAYOUT')
+ capacity=1
+ while capacity < tokens: capacity*=2
+ arena=_f._ordinary_control_parser_arena_request_v1(layout,
+  ((32,57*tokens),)+requests,2*tokens+object_slots)
+ dictionary=_f._ordinary_data_dict_requests_v1(layout,1,12)
+ scalar=_f._ordinary_data_size_v1(layout,'int_prefix')        +_f._ordinary_data_size_v1(layout,'int_digit_bytes')*((max(1,len(raw).bit_length())
+   +_f._ordinary_data_size_v1(layout,'int_digit_bits')-1)
+    //_f._ordinary_data_size_v1(layout,'int_digit_bits')+2)
+ converted=(nodes*(24+_f._ordinary_data_size_v1(layout,'gc')+dictionary+4*scalar)
+  +_f._ordinary_data_list_requests_v1(layout,lists,slots))
+ rows=(('PARSER_TOKEN_TABLE',56*capacity+8*(capacity+capacity//2)),
+  ('PARSER_TOKEN_BYTES',tokens*_f._ordinary_data_size_v1(layout,'bytes_prefix')
+   +2*len(raw)+2*tokens),
+  ('PARSER_SHARED_ARENA',arena),('PARSER_HELPER_OBJECTS',helpers),
+  ('PARSER_GENERATED_LOCAL_ARRAYS',arrays),('PYTHON_AST1_CONVERSION',converted),
+  ('SOURCE_CONTAINER_TEXT',_f._ordinary_data_unicode_request_v1(layout,len(raw))
+   +_f._ordinary_data_bytes_request_v1(layout,len(raw))))
+ return rows,('PYTHON_AST1_CONVERSION','SOURCE_CONTAINER_TEXT')
+
+
+def _facet_fn_source_byte_token_upper_v1(raw):
+ import tools.validation_reliability as _f
+ if type(raw) is not bytes:
+  raise ValueError('SOURCE_TOKEN_RAW_BYTES')
+ size = len(raw)
+ position = identifier_runs = digit_run_bytes = other_bytes = 0
+ line_separators = 0
+ while position < size:
+  value = raw[position]
+  if value in (10, 13):
+   line_separators += 1
+   position += 1
+  elif value in (9, 12, 32):
+   position += 1
+  elif value == 95 or 65 <= value <= 90 or 97 <= value <= 122:
+   identifier_runs += 1
+   position += 1
+   while position < size:
+    value = raw[position]
+    if not (value == 95 or 48 <= value <= 57
+      or 65 <= value <= 90 or 97 <= value <= 122):
+     break
+    position += 1
+  elif 48 <= value <= 57:
+   start = position
+   position += 1
+   while position < size:
+    value = raw[position]
+    if not (value == 95 or 48 <= value <= 57
+      or 65 <= value <= 90 or 97 <= value <= 122):
+     break
+    position += 1
+   digit_run_bytes += position - start
+  else:
+   other_bytes += 1
+   position += 1
+ physical_line_upper = line_separators + 1
+ lexical_upper = identifier_runs + digit_run_bytes + 2 * other_bytes
+ token_upper = lexical_upper + 3 * physical_line_upper + 3
+ return (size, identifier_runs, digit_run_bytes, other_bytes,
+  physical_line_upper, token_upper)
+
+
+def _facet_fn_source_byte_cookie_domain_v1(raw):
+ import tools.validation_reliability as _f
+ if type(raw) is not bytes:
+  raise ValueError('SOURCE_COOKIE_RAW_BYTES')
+ size, position, lines, found = len(raw), 0, 0, False
+ while position < size and lines < 2:
+  value = raw[position]
+  if value in (10, 13):
+   lines += 1
+   position += 1
+   if value == 13 and position < size and raw[position] == 10:
+    position += 1
+   continue
+  if raw[position:position + 6] == b'coding':
+   cursor = position + 6
+   if cursor < size and raw[cursor] in (58, 61):
+    cursor += 1
+    while cursor < size and raw[cursor] in (9, 32):
+     cursor += 1
+    start = cursor
+    while cursor < size:
+     value = raw[cursor]
+     if not (48 <= value <= 57 or 65 <= value <= 90
+       or 97 <= value <= 122 or value in (45, 46, 95)):
+      break
+     cursor += 1
+    if cursor > start:
+     found = True
+     normal = raw[start:min(cursor, start + 12)].lower().replace(b'_', b'-')
+     if normal != b'utf-8' and not normal.startswith(b'utf-8-'):
+      return 'OTHER'
+  position += 1
+ return 'UTF8' if found else 'ABSENT'
+
+
+def _facet_fn_control_source_container_units_v1(raw, selected, *, flags):
+ import tools.validation_reliability as _f
+ import _tokenize, token, ast
+ if (type(raw) is not bytes or type(selected) is not tuple or not selected
+   or any(type(x) is not tuple or len(x) != 2 or type(x[0]) is not str
+    or not x[0] or type(x[1]) is not int or x[1] <= 0 for x in selected)
+   or len(set(selected)) != len(selected) or type(flags) is not int or flags < 0):
+  raise ValueError('CONTROL_PARTITION_ORIGINAL_SOURCE_SELECTION')
+ if _f._ordinary_source_byte_cookie_domain_v1(raw) not in ('ABSENT', 'UTF8'):
+  raise ValueError('CONTROL_PARTITION_ORIGINAL_SOURCE_COOKIE')
+ text = raw.decode('utf-8', 'strict')
+ if text.startswith('\ufeff'):
+  text = text[1:]
+ lines, start, p = [], 0, 0
+ while p < len(text):
+  if text[p] in '\r\n':
+   p += 1
+   if text[p-1] == '\r' and p < len(text) and text[p] == '\n': p += 1
+   lines.append(text[start:p]); start = p
+  else: p += 1
+ if start < len(text): lines.append(text[start:])
+ stream = iter(lines)
+ def readline():
+  return next(stream, '')
+ rows, comments, beginning, depth, at_start, decorating = [], {}, None, 0, True, False
+ extra = bool(flags & ast.PyCF_TYPE_COMMENTS)
+ native = _tokenize.TokenizerIter(readline, extra_tokens=extra)
+ for kind, spelling, first, last, line in native:
+  if kind == token.COMMENT:
+   value=spelling[1:].lstrip(' \t') if spelling.startswith('#') else ''
+   value=value[5:].lstrip(' \t') if value.startswith('type:') else ''
+   if (value.startswith('ignore') and (len(value)==6
+     or ord(value[6]) < 128 and not value[6].isalnum())):
+    comments[first[0]] = (first[1],spelling)
+   continue
+  if kind == token.NL: continue
+  if kind == token.INDENT: depth += 1; continue
+  if kind == token.DEDENT: depth -= 1; continue
+  if depth < 0: raise ValueError('CONTROL_PARTITION_INDENT_DEBT')
+  if kind == token.NEWLINE: at_start = True; continue
+  if kind == token.ENDMARKER: break
+  if at_start and depth == 0:
+   continuation = spelling in ('elif', 'else', 'except', 'finally')
+   if beginning is None:
+    beginning = first[0]
+   elif not continuation and not decorating:
+    rows.append((beginning, first[0]-1)); beginning = first[0]
+   if spelling == '@': decorating = True
+   elif spelling in ('def', 'class', 'async'): decorating = False
+  at_start = False
+ if depth or decorating: raise ValueError('CONTROL_PARTITION_INCOMPLETE_CONTAINER')
+ if beginning is not None: rows.append((beginning, len(lines)))
+ selected_rows = []
+ for a, b in rows:
+  keys = tuple(item for item in selected if a <= item[1] <= b)
+  if keys: selected_rows.append((keys, a, b))
+ if sum(len(keys) for keys,a,b in selected_rows) != len(selected):
+  raise ValueError('CONTROL_PARTITION_SELECTED_SOURCE_LINE')
+ imports = []
+ for first, last in rows:
+  segment = ''.join(lines[first-1:last])
+  if segment.lstrip().startswith(('from ', 'import ')):
+   imports.append((first, last))
+ def cells():
+  for keys, a, b in selected_rows:
+   kept = ((a, b), *imports)
+   unit = ''.join(line if any(first <= i <= last for first,last in kept)
+    else ((('0' + ' ' * max(0,comments[i][0]-1))
+      if line[:comments[i][0]].strip() else '') + comments[i][1]
+     if i in comments else '')
+    + ('\r\n' if line.endswith('\r\n') else '\r' if line.endswith('\r') else '\n')
+    for i,line in enumerate(lines,1))
+   yield keys, unit, (a, b)
+ return cells()
+
+
+def _facet_m_initialized_storage_v1(self, *, native_input, attempt, delivered, deadline_ns):
+    """Observe complete current VM backing; never issue startup authority.
+
+    The original qualified pre-birth Source programme funds THIS getter,
+    its parser, callbacks, frames and retained failures before entry. This
+    is the original fixed /proc maps ABI, not an intern-table introspector,
+    allocator grant, RSS measurement or reservation of physical memory.
+    """
+    import tools.validation_reliability as _f
+    owner = (_f.os.getpid(), _f.threading.get_ident())
+    binding = native_input.get('initialized_storage_original') if type(native_input) is dict else None
+    _f._preflight_require_v1(type(binding) is tuple and len(binding) == 5
+     and binding[0] is native_input and binding[1] is self and binding[2] == owner
+     and binding[3] is native_input['initialized_storage_attempts']
+     and type(binding[3]) is list and not binding[3]
+     and binding[4] is native_input['errors'] and type(binding[4]) is list and not binding[4],
+     'ORDINARY_INITIAL_STORAGE_ORIGINAL_NATIVE_INPUT_ATTEMPT_OWNER')
+    _f._preflight_require_v1(type(self) is _f._LinuxSourceNativeV2
+     and _f.sys.platform == 'linux' and type(deadline_ns) is int
+     and deadline_ns > _f.time.monotonic_ns(),
+     'ORDINARY_INITIAL_STORAGE_ACTUAL_NATIVE_OWNER_AND_DEADLINE')
+    path = _f.Path('/proc') / str(owner[0]) / 'maps'
+    record = dict(native=self, owner=owner, path=path, deadline_ns=deadline_ns,
+     descriptor=None, close_attempted=False, closed=False, complete=False,
+     path_before=None, handle_before=None, path_after=None, handle_after=None,
+     raw=None, entries=None, mapped_extent=None, requests=[], errors=[])
+    record['original'] = (record,self,owner,path,deadline_ns,record['requests'],record['errors'])
+    fd = None
+    data = bytearray()
+    record['partial_raw'] = data
+    record['last_returned_raw'] = None
+    record['component_slots'] = []
+    binding[3].append(record)
+    def checked(operation):
+     _f._preflight_require_v1((_f.os.getpid(), _f.threading.get_ident()) == owner
+      and _f.time.monotonic_ns() < deadline_ns,
+      'ORDINARY_INITIAL_STORAGE_SAME_OWNER_UNRENEWED_DEADLINE')
+     attempt(operation)
+    try:
+     from tools.validation_scope_registry import _ordinary_runtime7_map_line_registry_v1
+     checked('INITIAL_MAPS_PATH_BEFORE')
+     named = _f.os.lstat(path)
+     record['path_before'] = _f._scan_same_api_version(named)
+     _f._preflight_require_v1(_f.stat.S_ISREG(named.st_mode) and named.st_nlink == 1,
+      'ORDINARY_INITIAL_STORAGE_REGULAR_NATIVE_MAPS')
+     def component_close(slot):
+      record['component_slots'].append(slot)
+      checked('INITIAL_MAPS_COMPONENT_ONE_CLOSE')
+     fd = _f._linux_source_open_v2(path, attempt=lambda: checked('INITIAL_MAPS_COMPONENT_OPEN'),
+      close_attempt=component_close)
+     record['descriptor'] = fd
+     checked('INITIAL_MAPS_HANDLE_BEFORE')
+     opened = _f.os.fstat(fd)
+     record['handle_before'] = _f._scan_same_api_version(opened)
+     checked('INITIAL_MAPS_DESCRIPTOR_INHERITANCE')
+     _f._preflight_require_v1(_f.stat.S_ISREG(opened.st_mode) and opened.st_nlink == 1
+      and (named.st_dev,named.st_ino,_f.stat.S_IFMT(named.st_mode)) ==
+       (opened.st_dev,opened.st_ino,_f.stat.S_IFMT(opened.st_mode))
+      and not _f.os.get_inheritable(fd),
+      'ORDINARY_INITIAL_STORAGE_NATIVE_NAME_HANDLE_JOIN')
+     while True:
+      requested = min(65536, 1048576 + 1 - len(data))
+      _f._preflight_require_v1(requested > 0, 'ORDINARY_INITIAL_STORAGE_RAW_BOUND')
+      checked('INITIAL_MAPS_RAW_READ')
+      record['requests'].append(requested)
+      raw = _f.os.read(fd, requested)
+      record['last_returned_raw'] = raw
+      delivered(len(raw))
+      _f._preflight_require_v1(type(raw) is bytes and len(raw) <= requested,
+       'ORDINARY_INITIAL_STORAGE_ACTUAL_RETURNED_REQUEST')
+      data.extend(raw)
+      _f._preflight_require_v1(len(data) <= 1048576,
+       'ORDINARY_INITIAL_STORAGE_COMPLETE_MAPS_BYTE_LAW')
+      if not raw:
+       break
+     checked('INITIAL_MAPS_HANDLE_AFTER')
+     record['handle_after'] = _f._scan_same_api_version(_f.os.fstat(fd))
+     checked('INITIAL_MAPS_PATH_AFTER')
+     record['path_after'] = _f._scan_same_api_version(_f.os.lstat(path))
+     _f._preflight_require_v1(record['handle_after'] == record['handle_before']
+      and record['path_after'] == record['path_before'],
+      'ORDINARY_INITIAL_STORAGE_SEPARATE_NATIVE_METADATA_STABLE')
+     record['raw'] = bytes(data)
+     _f._preflight_require_v1(record['raw'] and record['raw'].endswith(b'\n'),
+      'ORDINARY_INITIAL_STORAGE_COMPLETE_MAPS_ROWS')
+     entries = []
+     extent, previous = 0, 0
+     for line in record['raw'].split(b'\n')[:-1]:
+      checked('INITIAL_MAPS_ORIGINAL_ROW_PARSE')
+      entry = _ordinary_runtime7_map_line_registry_v1(line)
+      _f._preflight_require_v1(entry[0] >= previous and entry[1] - entry[0] < (1 << 63)
+       and extent <= (1 << 63) - 1 - (entry[1] - entry[0]),
+       'ORDINARY_INITIAL_STORAGE_ORDERED_COMPLETE_VMA_DOMAIN')
+      extent += entry[1] - entry[0]
+      previous = entry[1]
+      entries.append(entry)
+     _f._preflight_require_v1(entries and extent > 0,
+      'ORDINARY_INITIAL_STORAGE_NO_PARTIAL_OR_EMPTY_CREDIT')
+     record['entries'], record['mapped_extent'] = tuple(entries), extent
+    except BaseException as error:
+     record['errors'].append(error)
+     if not any(error is value for value in binding[4]): binding[4].append(error)
+    finally:
+     if fd is not None:
+      try:
+       checked('INITIAL_MAPS_DESCRIPTOR_ONE_CLOSE')
+       record['close_attempted'] = True
+       _f.os.close(fd)
+       record['closed'] = True
+      except BaseException as error:
+       record['errors'].append(error)
+       if not any(error is value for value in binding[4]): binding[4].append(error)
+    _f._scan_raise_errors(record['errors'])
+    try:
+     _f._preflight_require_v1(record['closed'] and record['entries'] is not None
+      and (_f.os.getpid(), _f.threading.get_ident()) == owner
+      and _f.time.monotonic_ns() < deadline_ns,
+      'ORDINARY_INITIAL_STORAGE_ORIGINAL_ONE_CLOSE_AND_COMPLETE_OWNER')
+     record['success_original'] = (record,self,owner,path,record['path_before'],record['handle_before'],
+      record['path_after'],record['handle_after'],record['raw'],record['entries'],
+      record['mapped_extent'],record['requests'],record['errors'],deadline_ns)
+     record['complete'] = True
+    except BaseException as error:
+     record['errors'].append(error)
+     if not any(error is value for value in binding[4]): binding[4].append(error)
+     raise
+    return record
+
+
+def _facet_fn_control_fixed_delegate_roster_v1():
+ from tools.run_validation_gates import _facet_fn_control_fixed_delegates_v1
+ return _facet_fn_control_fixed_delegates_v1()
+
+
+def _facet_fn_initialized_storage_data_request_v1(layout):
+ from tools import validation_reliability as _f
+ p = _f._ordinary_data_size_v1(layout, 'pointer')
+ bits = _f._ordinary_data_size_v1(layout, 'int_digit_bits')
+ digit = _f._ordinary_data_size_v1(layout, 'int_digit_bytes')
+ if p != 8 or bits != 30 or digit != 4:
+  raise ValueError('ORDINARY_INITIAL_STORAGE_SUPPORTED_STOCK_LP64_DATA_ABI')
+ maximum = 1048576
+ read = 65536
+ rows = maximum // 17
+ integer = _f._ordinary_data_size_v1(layout, 'int_prefix') + (64 + bits - 1) // bits * digit
+ metadata_integer = _f._ordinary_data_size_v1(layout, 'int_prefix') + (94 + bits - 1) // bits * digit
+ requests = _f._ordinary_data_list_requests_v1(layout, 1, maximum + 1) + read * integer + 4 * integer
+ raw = _f._ordinary_data_size_v1(layout, 'bytearray_prefix') + 2 * (maximum + 1 + (maximum + 1) // 8 + 7) + _f._ordinary_data_bytes_request_v1(layout, maximum) + _f._ordinary_data_bytes_request_v1(layout, read)
+ split = _f._ordinary_data_list_requests_v1(layout, 2, 2 * (rows + 1)) + (rows + 1) * _f._ordinary_data_size_v1(layout, 'bytes_prefix') + maximum + _f._ordinary_data_list_requests_v1(layout, 3, 10) + _f._ordinary_data_bytes_request_v1(layout, maximum) + 10 * _f._ordinary_data_bytes_request_v1(layout, 16)
+ entries = _f._ordinary_data_list_requests_v1(layout, 1, rows) + _f._ordinary_data_tuple_request_v1(layout, rows) + rows * (_f._ordinary_data_tuple_request_v1(layout, 7) + 6 * integer + _f._ordinary_data_bytes_request_v1(layout, 4)) + 4 * integer
+ records = _f._ordinary_data_dict_requests_v1(layout, 1, 22) + _f._ordinary_data_tuple_request_v1(layout, 7) + _f._ordinary_data_tuple_request_v1(layout, 14) + _f._ordinary_data_tuple_request_v1(layout, 2) + 4 * (_f._ordinary_data_tuple_request_v1(layout, 6) + _f._ordinary_data_tuple_request_v1(layout, 4) + 6 * metadata_integer) + _f._ordinary_data_list_requests_v1(layout, 3, 5)
+ component_slots = _f._ordinary_data_dict_requests_v1(layout, 4, 4 * 7) + _f._ordinary_data_list_requests_v1(layout, 3, 4 + 4 + 5) + 4 * integer
+ components = (('original_complete_maps_request_log', requests), ('original_partial_final_and_last_returned_raw', raw), ('original_split_slice_and_active_parser_operands', split), ('original_complete_map_entries_and_converted_scalars', entries), ('original_getter_record_versions_and_attempt_error_pointers', records), ('original_no_follow_component_slots_and_close_admission', component_slots))
+ return dict(raw_limit=maximum, overflow_detection_extent=maximum + 1, maximum_read_request=read, admitted_row_upper=rows, returned_integer_bytes=integer, record_fields=22, original_slots=7, success_slots=14, components=components, data_request=sum((value for _, value in components)), remaining_original_source_components=('held_native_acquisition_and_one_close', 'fixed_Path_stat_result_and_fspath_operands', 'original_getter_parser_callback_frames_and_stack', 'retained_body_callback_parser_and_close_failures', 'original_Source_and_native_code_before_first_use'))
+
+
+def _facet_fn_control_ast_original_v1(definition, *, original=None):
+ from tools import validation_reliability as _f
+ import ast, types
+ if original is not None:
+  if type(original) is not tuple or len(original) != 3 or original[0] is not definition or (type(original[1]) is not types.GetSetDescriptorType) or (original[1].__objclass__ is not ast.AST) or (original[1].__name__ != '__dict__') or (type(original[2]) is not tuple) or (len(original[2]) != 2):
+   raise ValueError('CONTROL_REUSE_ORIGINAL_AST_FIELD_GRAPH')
+  descriptor = original[1]
+  rows, classes = original[2]
+  if type(rows) is not tuple or type(classes) is not tuple:
+   raise ValueError('CONTROL_REUSE_ORIGINAL_AST_GRAPH_ROSTERS')
+  for row in classes:
+   if type(row) is not tuple or len(row) != 4:
+    raise ValueError('CONTROL_REUSE_ORIGINAL_AST_CLASS_ROW')
+   cls, fields, bases, mro = row
+   if type(fields) is not tuple or type(bases) is not tuple or type(mro) is not tuple or any((type(pair) is not tuple or len(pair) != 2 or type(pair[0]) is not str for pair in fields)):
+    raise ValueError('CONTROL_REUSE_ORIGINAL_AST_CLASS_FIELDS')
+   if type(cls) is not type or type.__getattribute__(cls, '__bases__') is not bases or type.__getattribute__(cls, '__mro__') is not mro:
+    raise ValueError('CONTROL_REUSE_ORIGINAL_AST_CLASS_CHANGED')
+   namespace = type.__getattribute__(cls, '__dict__')
+   if type(namespace) is not types.MappingProxyType or len(namespace) != len(fields) or any((type(key) is not str for key in namespace)) or any((name not in namespace or namespace[name] is not value for name, value in fields)):
+    raise ValueError('CONTROL_REUSE_ORIGINAL_AST_CLASS_DICTIONARY_CHANGED')
+  for row in rows:
+   if type(row) is not tuple or len(row) != 5:
+    raise ValueError('CONTROL_REUSE_ORIGINAL_AST_NODE_ROW')
+   kind, value, old_type, old_container, fields = row
+   if type(kind) is not str or type(old_type) is not type or type(fields) is not tuple or (kind == 'NODE' and any((type(pair) is not tuple or len(pair) != 2 or type(pair[0]) is not str for pair in fields))):
+    raise ValueError('CONTROL_REUSE_ORIGINAL_AST_NODE_FIELDS')
+   if type(value) is not old_type:
+    raise ValueError('CONTROL_REUSE_ORIGINAL_AST_TYPE_CHANGED')
+   if kind == 'NODE':
+    current = descriptor.__get__(value, old_type)
+    if type(current) is not dict or current is not old_container or len(current) != len(fields) or any((type(key) is not str for key in current)):
+     raise ValueError('CONTROL_REUSE_ORIGINAL_AST_FIELDS_CHANGED')
+    for name, prior in fields:
+     if name not in current or current[name] is not prior:
+      raise ValueError('CONTROL_REUSE_ORIGINAL_AST_FIELD_CHANGED')
+   elif kind == 'LIST':
+    if old_type is not list or value is not old_container or len(value) != len(fields) or any((list.__getitem__(value, index) is not prior for index, prior in enumerate(fields))):
+     raise ValueError('CONTROL_REUSE_ORIGINAL_AST_LIST_CHANGED')
+   else:
+    raise ValueError('CONTROL_REUSE_ORIGINAL_AST_GRAPH_KIND')
+  return original
+ descriptor = ast.AST.__dict__['__dict__']
+ if type(descriptor) is not types.GetSetDescriptorType or descriptor.__objclass__ is not ast.AST or descriptor.__name__ != '__dict__':
+  raise ValueError('CONTROL_REUSE_ORIGINAL_AST_NATIVE_DICTIONARY')
+ primitives = (str, bytes, int, float, complex, bool, type(None), type(Ellipsis))
+ rows, pending, seen, classes, seen_classes = ([], [definition], set(), [], set())
+ while pending:
+  value = pending.pop()
+  if type(value) in primitives:
+   continue
+  identity = id(value)
+  if identity in seen:
+   continue
+  seen.add(identity)
+  old_type = type(value)
+  if old_type is list:
+   fields = tuple(value)
+   rows.append(('LIST', value, old_type, value, fields))
+   pending.extend(fields)
+  elif type(old_type) is type and old_type.__module__ == 'ast' and (ast.AST in old_type.__mro__):
+   current = descriptor.__get__(value, old_type)
+   if type(current) is not dict or any((type(key) is not str for key in current)):
+    raise ValueError('CONTROL_REUSE_ORIGINAL_AST_FIELD_DICTIONARY')
+   for cls in old_type.__mro__:
+    if cls not in seen_classes:
+     if type(cls) is not type:
+      raise ValueError('CONTROL_REUSE_ORIGINAL_AST_NATIVE_CLASS')
+     seen_classes.add(cls)
+     namespace = type.__getattribute__(cls, '__dict__')
+     if type(namespace) is not types.MappingProxyType or any((type(key) is not str for key in namespace)):
+      raise ValueError('CONTROL_REUSE_ORIGINAL_AST_NATIVE_CLASS_DICTIONARY')
+     classes.append((cls, tuple(namespace.items()), cls.__bases__, cls.__mro__))
+   fields = tuple(current.items())
+   rows.append(('NODE', value, old_type, current, fields))
+   pending.extend((prior for _, prior in fields))
+  else:
+   raise ValueError('CONTROL_REUSE_ORIGINAL_AST_FIELD_TYPE')
+ return (definition, descriptor, (tuple(rows), tuple(classes)))
+
+def _facet_fn_control_initialized_compiled_reuse_v1(scope, item, selectors):
+ from tools import validation_reliability as _f
+ acquisition = getattr(scope, '_ordinary_control_module_inputs_v1', None)
+ if acquisition is None:
+  return None
+ import ast, types
+ if type(scope) is not _f._LinuxPreflightScopeV1 or type(acquisition) is not dict or acquisition is not scope._ordinary_original_control_module_inputs_v1 or (acquisition['original'] is not scope._ordinary_control_module_inputs_original_v1) or (not acquisition['complete']) or acquisition['errors'] or (acquisition['scope'] is not scope) or (acquisition['source'] is not scope.source) or (acquisition['heap']['active'] is not acquisition['stage']) or (acquisition['stage']['error'] is not None) or (acquisition['stage']['complete'] is not False):
+  raise ValueError('CONTROL_REUSE_ORIGINAL_ACTIVE_MODULE_ACQUISITION')
+ selection = acquisition['selection']
+ original = selection['original']
+ result = acquisition['result_original']
+ if type(original) is not tuple or original[0] is not selection or original[1] is not scope or (original[2] is not scope.source) or (selection['stage'] is not acquisition['stage']) or (selectors is not selection['result'][0]) or (selection['module_inputs'] is not acquisition['result']) or (result[0] is not acquisition['result']) or (result[1] is not acquisition) or (result[2] is not acquisition['original']) or (result[3] is not acquisition['observations']) or (result[4] is not acquisition['rows']) or (not any((item is row for row in acquisition['result']))):
+  raise ValueError('CONTROL_REUSE_IDENTICAL_SOURCE_SELECTION_AND_ROW')
+ route = selection['route_acquisition']
+ old = route['original']
+ if type(old) is not tuple or len(old) != 9 or old[0] is not route or (old[1] is not selection) or (old[2] is not scope) or (old[3] is not scope.source) or (old[4] is not acquisition['stage']) or (old[5] is not route['rows']) or (old[6] is not route['sites']) or (old[7] is not route['unresolved']) or (old[8] is not route['observations']) or (route['error'] is not None) or (route['complete'] is not True) or (route['result'] is not selection['routes']):
+  raise ValueError('CONTROL_REUSE_COMPLETE_ORIGINAL_ROUTE_ACQUISITION')
+ compiled = route['compiled_inputs']
+ frozen = route['compiled_inputs_original']
+ if type(compiled) is not dict or type(frozen) is not tuple or len(frozen) != 2 or (frozen[0] is not compiled) or (tuple(compiled) != tuple((name for name, _ in frozen[1]))) or any((compiled[name] is not value for name, value in frozen[1])):
+  raise ValueError('CONTROL_REUSE_FROZEN_ORIGINAL_COMPILER_PRODUCTS')
+ name, module, observation, raw, filename, flags, optimize = item
+ row_original = observation['result_original']
+ if type(row_original) is not tuple or len(row_original) != 6 or row_original[0] is not item or (row_original[1] is not observation) or (row_original[2] is not raw) or (row_original[3] is not observation['compiled']) or (row_original[4] is not observation['root']) or (row_original[5] is not observation['witness']) or (observation['row'] is not item) or (type(module) is not types.ModuleType) or (type(raw) is not bytes) or (type(filename) is not str) or (flags != 0) or (type(flags) is not int) or (optimize != 0) or (type(optimize) is not int):
+  raise ValueError('CONTROL_REUSE_ORIGINAL_RAW_AND_INITIALIZER_CONTEXT')
+ if name not in compiled:
+  return None
+ retained = compiled[name]
+ for selected in selectors:
+  if selected[1] != name:
+   continue
+  function = selected[4]
+  observed = tuple((row for row in route['observations'] if row.get('selector') is selected and row.get('function') is function))
+  if len(observed) != 1:
+   raise ValueError('CONTROL_REUSE_ONE_ORIGINAL_FUNCTION_OBSERVATION')
+  current = observed[0]
+  original = current['source_original']
+  if type(function) is not types.FunctionType or current['item'] is not item or current['code'] is not function.__code__ or (function.__globals__ is not module.__dict__) or (function.__module__ != name) or (type(original) is not tuple) or (len(original) != 4) or (original[0] is not retained) or (original[1] is not current['definition']) or (original[3] is not function.__code__) or (not any((code is original[2] for code in retained[1]))) or (not any((row[3] is original[1] for row in retained[2]))) or (not _f._ordinary_control_code_source_equal_v1(original[2], original[3])):
+   raise ValueError('CONTROL_REUSE_ORIGINAL_SOURCE_FUNCTION_AND_CODE')
+  graph = current['definition_original']
+  graph_original = current['definition_original_association']
+  if type(graph_original) is not tuple or len(graph_original) != 3 or graph_original[0] is not current or (graph_original[1] is not original) or (graph_original[2] is not graph):
+   raise ValueError('CONTROL_REUSE_ORIGINAL_AST_SNAPSHOT_ASSOCIATION')
+  _f._ordinary_control_ast_original_v1(original[1], original=graph)
+ return retained
+
+
+def _facet_fn_control_initialized_routes_v1(scope, stage, selection):
+ import tools.validation_reliability as _facet
+ import ast, dis, sys, types
+ a = scope._ordinary_control_module_inputs_v1
+ _facet._preflight_require_v1(type(scope) is _facet._LinuxPreflightScopeV1
+  and type(scope.source) is _facet._LinuxImmutableSourceSealV2
+  and selection is a['selection'] and selection['original'][1] is scope
+  and selection['original'][2] is scope.source and selection['stage'] is stage
+  and a['heap']['active'] is stage and stage['error'] is None
+  and not selection.get('routes_attempted', False), 'CONTROL_ORIGINAL_ROUTE_ACQUISITION')
+ selection['routes_attempted'] = True
+ rows, sites, unresolved, observations = [], [], [], []
+ record = dict(selection=selection, scope=scope, source=scope.source, stage=stage,
+  rows=rows, sites=sites, unresolved=unresolved, observations=observations,
+  error=None, complete=False, result=None)
+ record['original'] = (record, selection, scope, scope.source, stage,
+  rows, sites, unresolved, observations)
+ selection['route_acquisition'] = record
+ record['member_bindings'] = []
+ record['error_constructor'] = dict(namespace=None,facts=None,init=None,observation=None,source_original=None,dictionary_snapshot=None,original=None)
+ try:
+  modules = {row[0]: row for row in selection['module_inputs']}
+  selected, roots, delegated = (selection[key] for key in ('selected','roots','delegated'))
+  fixed = _facet._ordinary_control_fixed_delegate_roster_v1()
+  functions, definitions, logical = {}, {}, {}
+  compiled_inputs={}
+  record['compiled_inputs']=compiled_inputs
+  for module_name in sorted({row[0] for row in fixed}):
+   item=modules[module_name];observation=item[2]
+   retained=observation['compiled']
+   if retained is None:
+    capture=dict(item=item,selected=None,compiled=None)
+    observations.append(capture)
+    declarations=tuple((qualified,_facet._ordinary_control_member_v1(item[1],tuple(qualified.split('.'))).__code__.co_firstlineno)
+     for name,qualified,_,_ in fixed if name==module_name)
+    capture['selected']=declarations
+    retained=_facet._ordinary_control_compiled_selections_v1(item[3],item[4],
+     flags=item[5],optimize=item[6],selected=declarations)
+    capture['compiled']=retained
+   compiled_inputs[module_name]=retained
+  for module_name, qualified, logical_module, logical_class in fixed:
+   item = modules[module_name]
+   module, observation = item[1], item[2]
+   current = dict(item=item, function=None, code=None, definition=None,
+    original=None, selector=None, root=None)
+   observations.append(current)
+   function = _facet._ordinary_control_member_v1(module, tuple(qualified.split('.')))
+   current['function'] = function
+   if module_name == 'tools.validation_reliability' and qualified == '_LinuxPreflightCensusV1._version':
+    cls = module.__dict__['_LinuxPreflightCensusV1']
+    current['static_original'] = (cls, cls.__dict__['_version'], function)
+   _facet._preflight_require_v1(type(function) is types.FunctionType
+    and function.__globals__ is module.__dict__ and function.__module__ == module_name,
+    'CONTROL_ORIGINAL_DELEGATE_FUNCTION')
+   code = function.__code__
+   current['code'] = code
+   _facet._preflight_require_v1(type(code) is types.CodeType, 'CONTROL_ORIGINAL_DELEGATE_CODE')
+   current['original'] = (current,item,module,observation,function,code,
+    function.__globals__,function.__builtins__,function.__defaults__,
+    function.__kwdefaults__,function.__closure__)
+   compiled = compiled_inputs[module_name]
+   _facet._preflight_require_v1(type(compiled) is tuple and len(compiled) == 3,
+    'CONTROL_ORIGINAL_RETAINED_OWNER_DEFINITIONS')
+   declared = tuple(row for row in compiled[2]
+    if row[0] == function.__qualname__ and row[2] == code.co_firstlineno)
+   expected = tuple(c for c in compiled[1]
+    if c.co_qualname == function.__qualname__ and c.co_firstlineno == code.co_firstlineno)
+   _facet._preflight_require_v1(len(declared) == len(expected) == 1
+    and _facet._ordinary_control_code_source_equal_v1(expected[0],code),
+    'CONTROL_ORIGINAL_DELEGATE_SOURCE_CODE')
+   definition = declared[0][3]
+   current['definition'] = definition
+   current['source_original']=(compiled,definition,expected[0],code)
+   current['definition_original']=_facet._ordinary_control_ast_original_v1(definition)
+   current['definition_original_association']=(current,current['source_original'],current['definition_original'])
+   key=(module_name,qualified)
+   _facet._preflight_require_v1(key not in functions, 'CONTROL_ONE_FIXED_DELEGATE_DECLARATION')
+   functions[key], definitions[key] = function, definition
+   logical[key]=(logical_module,logical_class)
+   present=tuple(row for row in selected if row[4] is function)
+   _facet._preflight_require_v1(len(present) <= 1, 'CONTROL_ONE_FIXED_SELECTOR_FUNCTION')
+   if present:
+    current['selector']=present[0]
+    continue
+   names, pending=set(),[code]
+   while pending:
+    child=pending.pop()
+    names.update(i[3] for i in _facet._ordinary_control_bytecode_v1(child) if i[1]=='LOAD_GLOBAL')
+    pending.extend(c for c in child.co_consts if type(c) is types.CodeType)
+   namespace=_facet._ordinary_control_dictionary_keys_v1(function.__globals__)
+   builtins=_facet._ordinary_control_dictionary_keys_v1(function.__builtins__)
+   bindings=tuple((name,'global' if name in namespace else 'builtin',
+    namespace[name] if name in namespace else builtins[name],()) for name in sorted(names))
+   cells=tuple(cell.cell_contents for cell in (function.__closure__ or ()))
+   label='delegated.'+module_name+'.'+qualified
+   selector=(label,module_name,function.__qualname__,declared[0][1],function,bindings,cells)
+   root=(label,function,code,observation)
+   current['selector'], current['root']=selector,root
+   selected.append(selector)
+   delegated.append(root)
+  constructor=record['error_constructor']
+  init_key=('tools.validation_reliability','ValidationReliabilityError.__init__')
+  if init_key in functions:
+   cls=modules[init_key[0]][1].__dict__['ValidationReliabilityError']
+   constructor['init']=functions[init_key]
+   constructor['namespace']=cls.__dict__
+   constructor['dictionary_snapshot']=tuple(constructor['namespace'].items())
+   constructor['observation']=modules[init_key[0]][2]
+   observed=next(o for o in observations if o.get('function') is functions[init_key])
+   constructor['source_original']=observed['source_original']
+   builtin=functions[init_key].__builtins__
+   base=builtin['BaseException'];native_object=builtin['object']
+   constructor['facts']=(builtin,type(cls),cls.__bases__,cls.__mro__,
+    builtin['RuntimeError'].__dict__['__new__'],base.__dict__['__init__'],
+    native_object.__dict__['__setattr__'],builtin['super'])
+   constructor['original']=(constructor,record,modules[init_key[0]][1],cls,
+    constructor['namespace'],constructor['facts'],constructor['init'],
+    constructor['observation'],constructor['source_original'],constructor['dictionary_snapshot'])
+  code_sites=[]
+  record['code_sites']=code_sites
+  for key,function in functions.items():
+   definition, code=definitions[key],function.__code__
+   selector=next(row for row in selected if row[4] is function)
+   label=selector[0]
+   code_sites.append((label,_facet._ordinary_control_source_site_codes_v1(function,definition)))
+   aliases={}
+   for node in ast.walk(definition):
+    if isinstance(node,ast.ImportFrom) and node.module:
+     module=sys.modules.get(node.module)
+     if type(module) is types.ModuleType:
+      for alias in node.names:
+       if alias.name!='*':aliases[alias.asname or alias.name]=(module,(alias.name,))
+    elif isinstance(node,ast.Import):
+     for alias in node.names:
+      name=alias.name if alias.asname else alias.name.split('.')[0]
+      module=sys.modules.get(name)
+      if type(module) is types.ModuleType:aliases[alias.asname or name]=(module,())
+   for site in _facet._ordinary_control_source_sites_v1(definition):
+    routes=[]
+    row=(label,site,routes)
+    sites.append(row)
+    fields=(function,scope,scope.source,site)
+    if site[0]=='ATTRIBUTE':
+     routes.append((function,(),code,'CODE_SITE',function,fields))
+     continue
+    node=next(n for n in ast.walk(definition)
+     if isinstance(n,(ast.Call,ast.Import,ast.ImportFrom))
+     and (n.lineno,n.col_offset,n.end_lineno,n.end_col_offset)==site[1:5]
+     and ast.dump(n,include_attributes=False)==site[5])
+    if site[0]=='IMPORT':
+     names=((node.module,) if isinstance(node,ast.ImportFrom)
+      else tuple(alias.name for alias in node.names))
+     for name in names:
+      target=sys.modules.get(name)
+      if any(target is item[1] for item in selection['module_inputs']):
+       routes.append((sys.modules,(name,),target,'SOURCE_MODULE',function,fields))
+      else:unresolved.append((label,site,'ORIGINAL_PLATFORM_MODULE',name,target,function,fields))
+     continue
+    if (function is constructor['init'] and isinstance(node.func,ast.Attribute)
+      and node.func.attr=='__init__' and isinstance(node.func.value,ast.Call)
+      and isinstance(node.func.value.func,ast.Name) and node.func.value.func.id=='super'
+      and not node.func.value.args and not node.func.value.keywords):
+     base=constructor['facts'][0]['BaseException']
+     routes.append((base,('__init__',),constructor['facts'][5],
+      'TRUSTED_PLATFORM',function,fields))
+     continue
+    expression=node.func
+    segments=[]
+    while isinstance(expression,ast.Attribute):
+     segments.insert(0,expression.attr);expression=expression.value
+    owner=path=target=None
+    if isinstance(expression,ast.Name):
+     name=expression.id
+     namespace=function.__globals__;builtins=function.__builtins__
+     if name in aliases:
+      owner,path=aliases[name];path=path+tuple(segments)
+     elif name=='self' and logical[key][1] is not None:
+      if (logical[key][1]=='_LinuxSourceNativeV2' and tuple(segments)==('attempt',)
+        and key==('tools.validation_reliability','_LinuxSourceNativeV2._call')):
+       owner,path=scope.source.native,('attempt',)
+      elif (logical[key][1]=='_LinuxImmutableSourceSealV2'
+        and tuple(segments) in (('native','flags'),('census','_version'),
+         ('_ordinary_meter_scope_v1','_ordinary_source_meter_event_v1'))):
+       owner,path=scope.source,tuple(segments)
+      else:
+       owner=modules[logical[key][0]][1]
+       path=(logical[key][1],)+tuple(segments)
+     elif name=='scope' and segments:
+      owner=modules['tools.validation_reliability'][1]
+      path=('_LinuxPreflightScopeV1',)+tuple(segments)
+     elif name=='source' and segments:
+      if tuple(segments) in (('native','flags'),('census','_version')):
+       owner,path=scope.source,tuple(segments)
+      else:
+       owner=modules['tools.validation_reliability'][1]
+       path=('_LinuxImmutableSourceSealV2',)+tuple(segments)
+     elif name in namespace:
+      owner,path=namespace,(name,)+tuple(segments)
+     elif name in builtins:
+      owner,path=builtins,(name,)+tuple(segments)
+     else:
+      forwarded = (key[0]=='tools.validation_scope_registry'
+       and (key[1]=='_facet_fn_source_data_utf8_scalar_v1' and name=='visit'
+        or key[1]=='_facet_fn_source_data_json_span_v1' and name in ('visit','bump')))
+      if forwarded and not segments:
+       scanner=functions[('tools.validation_scope_registry','_facet_fn_source_data_lexical_admission_v1')]
+       children=tuple((index,c) for index,c in enumerate(scanner.__code__.co_consts)
+        if type(c) is types.CodeType and c.co_name==name)
+       _facet._preflight_require_v1(len(children)==1,'CONTROL_ONE_ORIGINAL_FORWARDED_CHILD')
+       child_path=(children[0][0],);child=children[0][1]
+       _facet._ordinary_control_lexical_forward_route_v1(scope,scanner,child_path,child,function,site,tuple(selected))
+       routes.append((scanner,child_path,child,'LEXICAL_CALL',function,fields))
+       continue
+      children=tuple((index,c) for index,c in enumerate(code.co_consts)
+       if type(c) is types.CodeType and c.co_name==name)
+      if not segments and len(children)==1:
+       candidate_path=(children[0][0],);child=children[0][1]
+       _facet._ordinary_control_code_site_route_v1(function,candidate_path,child,'LEXICAL_CALL',site)
+       routes.append((function,candidate_path,child,'LEXICAL_CALL',function,fields))
+       continue
+    if owner is not None:
+     source_owned=type(owner) in (_facet._LinuxImmutableSourceSealV2,_facet._LinuxSourceNativeV2)
+     if source_owned:
+      binding=dict(owner=owner,path=path,target=None,raw=None,record=None,original=None)
+      record['member_bindings'].append(binding)
+      target=_facet._ordinary_control_member_v1(owner,path)
+      original_source=scope.source
+      original_meter=scope._ordinary_source_meter_projection_v1(original_source)
+      raw=(original_source.native.attempt if type(owner) is _facet._LinuxSourceNativeV2
+       else original_source.census if path==('census','_version')
+       else original_source.native if path==('native','flags') else scope)
+      binding['target'],binding['raw'],binding['record']=target,raw,original_meter
+      binding['original']=(binding,scope,original_source,owner,path,target,raw,original_meter)
+     value=owner
+     supported=not source_owned
+     for segment in (() if source_owned else path):
+      if type(value) in (types.ModuleType,type):namespace=value.__dict__
+      elif type(value) is dict:namespace=value
+      else:supported=False;break
+      if segment not in namespace:supported=False;break
+      value=namespace[segment]
+     if supported:target=_facet._ordinary_control_member_v1(owner,path)
+    if (constructor['original'] is not None and target is constructor['original'][3]
+      and function is modules['tools.validation_reliability'][1].__dict__['_preflight_require_v1']):
+     routes.append((owner,path,target,'PYTHON',function,fields))
+    elif (function is constructor['init'] and target is constructor['facts'][7]
+      and isinstance(node.func,ast.Name) and node.func.id=='super'
+      and not node.args and not node.keywords):
+     routes.append((owner,path,target,'TRUSTED_PLATFORM',function,fields))
+    elif type(target) is types.FunctionType and any(target is row[4] for row in selected):
+     routes.append((owner,path,target,'PYTHON',function,fields))
+    else:
+     unresolved.append((label,site,'ORIGINAL_CALL_TARGET',owner,path,target,function,fields))
+   rows.append((selector,function,definition,code,tuple(aliases.items())))
+  _facet._preflight_require_v1(a['heap']['active'] is stage and stage['error'] is None
+   and scope.source is record['original'][3] and selection is a['selection'],
+   'CONTROL_ORIGINAL_DELEGATE_ROUTE_INTERVAL')
+  result=(tuple(rows),tuple((label,site,tuple(routes)) for label,site,routes in sites),tuple(unresolved))
+  record['compiled_inputs_original']=(compiled_inputs,tuple(compiled_inputs.items()))
+  record['code_sites_original']=(code_sites,tuple(code_sites))
+  record['result_original']=(result,record,record['original'],rows,sites,unresolved,observations)
+  record['result'],record['complete']=result,True
+  return result
+ except BaseException as error:
+  escaping=[error]
+  try:record['error']=error
+  except BaseException as recording:escaping.append(recording)
+  for caught in tuple(escaping):
+   try:
+    if all(caught is not e for e in selection['errors']):selection['errors'].append(caught)
+   except BaseException as recording:escaping.append(recording)
+   try:
+    owner_errors=scope._ordinary_factory_errors_v1
+    _facet._preflight_require_v1(type(owner_errors) is list,'CONTROL_ORIGINAL_SCOPE_ERROR_LIST')
+    if all(caught is not e for e in owner_errors):owner_errors.append(caught)
+   except BaseException as recording:escaping.append(recording)
+  _facet._scan_raise_errors(escaping)
+  raise
+
+
+def _facet_fn_control_bytecode_v1(code):
+ from tools.validation_inventory import _facet_fn_control_bytecode_values_v1
+ return _facet_fn_control_bytecode_values_v1(code)
+
+
+def _facet_fn_control_lexical_forward_route_v1(scope, owner, path, target, caller, site, selectors):
+ import tools.validation_reliability as _facet
+ import ast, types
+ from tools import validation_scope_registry as reg
+ scalar=reg._facet_fn_source_data_utf8_scalar_v1
+ span=reg._facet_fn_source_data_json_span_v1
+ scanner=reg._facet_fn_source_data_lexical_admission_v1
+ wrapper_scalar=_facet._ordinary_source_data_utf8_scalar_v1
+ wrapper_span=_facet._ordinary_source_data_json_span_v1
+ if (owner is not scanner or type(caller) is not types.FunctionType
+   or not (caller is scalar or caller is span)
+   or type(target) is not types.CodeType
+   or target.co_name not in (('visit',) if caller is scalar else ('visit','bump'))
+   or any(not any(function is row[4] for row in selectors)
+    for function in (scanner,scalar,span,wrapper_scalar,wrapper_span))):
+  raise ValueError('CONTROL_ORIGINAL_LEXICAL_FORWARD_OWNER')
+ _facet._ordinary_control_code_site_route_v1(owner,path,target,'LEXICAL_CALL',site)
+ a=scope._ordinary_control_module_inputs_v1
+ if (a is not scope._ordinary_original_control_module_inputs_v1
+   or a['original'] is not scope._ordinary_control_module_inputs_original_v1
+   or a['scope'] is not scope or a['source'] is not scope.source
+   or not a['complete'] or a['errors']
+   or a['result'] is not a['result_original'][0]):
+  raise ValueError('CONTROL_ORIGINAL_LEXICAL_FORWARD_SOURCE')
+ definitions={}
+ for function in (scanner,scalar,span,wrapper_scalar,wrapper_span):
+  rows=tuple(row for row in a['result'] if row[1].__dict__ is function.__globals__)
+  if len(rows)!=1:raise ValueError('CONTROL_ORIGINAL_LEXICAL_FORWARD_MODULE')
+  module,observation=rows[0][1],rows[0][2]
+  old=observation['original']
+  if (module is not old[1] or module.__dict__ is not old[2]
+    or observation['raw'] is not observation['result_original'][2]
+    or observation['compiled'] is not observation['result_original'][3]):
+   raise ValueError('CONTROL_ORIGINAL_LEXICAL_FORWARD_OBSERVATION')
+  compiled=observation['compiled'];code=function.__code__
+  actual=tuple(row for row in compiled[2]
+   if row[0]==function.__qualname__ and row[2]==code.co_firstlineno)
+  expected=tuple(c for c in compiled[1]
+   if c.co_qualname==function.__qualname__ and c.co_firstlineno==code.co_firstlineno)
+  if (len(actual)!=1 or len(expected)!=1
+    or not _facet._ordinary_control_code_source_equal_v1(expected[0],code)):
+   raise ValueError('CONTROL_ORIGINAL_LEXICAL_FORWARD_WHOLE_CODE')
+  definitions[function]=actual[0][3]
+ formal=target.co_name
+ position=3 if caller is scalar else (4 if formal=='bump' else 5)
+ arguments=definitions[caller].args
+ vector=arguments.posonlyargs+arguments.args
+ if (arguments.vararg is not None or arguments.kwarg is not None
+   or len(vector)!=(4 if caller is scalar else 6) or vector[position].arg!=formal):
+  raise ValueError('CONTROL_ORIGINAL_LEXICAL_FORWARD_FORMAL')
+ actual_sites=tuple(node for node in ast.walk(definitions[caller])
+  if isinstance(node,ast.Call)
+  and (node.lineno,node.col_offset,node.end_lineno,node.end_col_offset)==site[1:5]
+  and ast.dump(node,include_attributes=False)==site[5])
+ if (len(actual_sites)!=1 or not isinstance(actual_sites[0].func,ast.Name)
+   or actual_sites[0].func.id!=formal):
+  raise ValueError('CONTROL_ORIGINAL_LEXICAL_FORWARD_CALL_SITE')
+ for node in ast.walk(definitions[caller]):
+  if (isinstance(node,ast.Name) and node.id==formal
+    and isinstance(node.ctx,(ast.Store,ast.Del))):
+   raise ValueError('CONTROL_ORIGINAL_LEXICAL_FORWARD_REBIND')
+ source_links=((scanner,wrapper_scalar,'_f._ordinary_source_data_utf8_scalar_v1',3,'visit'),
+  (scanner,wrapper_span,'_f._ordinary_source_data_json_span_v1',4,'bump'),
+  (scanner,wrapper_span,'_f._ordinary_source_data_json_span_v1',5,'visit'),
+  (span,wrapper_scalar,'_f._ordinary_source_data_utf8_scalar_v1',3,'visit'))
+ retained=[]
+ for parent,child,spelling,index,name in source_links:
+  member=spelling.split('.')[-1]
+  calls=tuple(node for node in ast.walk(definitions[parent])
+   if isinstance(node,ast.Call) and isinstance(node.func,ast.Attribute)
+   and isinstance(node.func.value,ast.Name) and node.func.value.id=='_f'
+   and node.func.attr==member)
+  namespace=_facet._ordinary_control_dictionary_keys_v1(wrapper_scalar.__globals__)
+  if (not calls or child.__globals__ is not namespace or namespace.get(member) is not child):
+   raise ValueError('CONTROL_ORIGINAL_LEXICAL_FORWARD_SOURCE_LINK')
+  imports=tuple(node for node in ast.walk(definitions[parent])
+   if isinstance(node,ast.Import)
+   and tuple((alias.name,alias.asname) for alias in node.names)
+    ==(('tools.validation_reliability','_f'),))
+  if (len(imports)!=1 or any(isinstance(node,ast.Name) and node.id=='_f'
+    and isinstance(node.ctx,(ast.Store,ast.Del)) for node in ast.walk(definitions[parent]))):
+   raise ValueError('CONTROL_ORIGINAL_LEXICAL_FORWARD_FIXED_IMPORT')
+  for node in calls:
+   _facet._ordinary_control_lexical_forward_arguments_v1(node,index,name,
+    4 if child is wrapper_scalar else 6)
+  retained.append((parent,child,index,name,calls))
+ for wrapper,facet in ((wrapper_scalar,scalar),(wrapper_span,span)):
+  body=definitions[wrapper].body
+  offset=(1 if body and isinstance(body[0],ast.Expr)
+   and isinstance(body[0].value,ast.Constant) and type(body[0].value.value) is str else 0)
+  body=body[offset:]
+  if (len(body)!=2 or not isinstance(body[0],ast.ImportFrom)
+    or body[0].module!='tools.validation_scope_registry'
+    or tuple((alias.name,alias.asname) for alias in body[0].names)!=((facet.__name__,'_d'),)
+    or not isinstance(body[1],ast.Return) or not isinstance(body[1].value,ast.Call)):
+   raise ValueError('CONTROL_ORIGINAL_LEXICAL_FORWARD_WRAPPER')
+  call=body[1].value
+  args=definitions[wrapper].args
+  vector=args.posonlyargs+args.args
+  if (not isinstance(call.func,ast.Name) or call.func.id!='_d' or call.keywords
+    or len(call.args)!=len(vector)
+    or any(not isinstance(actual,ast.Name) or actual.id!=formal.arg
+     for actual,formal in zip(call.args,vector))):
+   raise ValueError('CONTROL_ORIGINAL_LEXICAL_FORWARD_WRAPPER_ARGUMENT')
+  retained.append((wrapper,facet,call))
+ return (scope,scope.source,owner,path,target,caller,site,tuple(retained),tuple(definitions.items()))
+
+
+def _facet_fn_initial_native_observations_v1(native, *, native_input, early_profile, original_cutoffs=None):
+    """Acquire current kernel/manager facts on the original retained attempt.
+
+    The protected original before-birth request selects the fixed operands and
+    prospectively funds this complete prefix. Current facts do not issue that
+    earlier request or authorize a domain operation, a service, or a cleanup.
+    """
+    import tools.validation_reliability as _f
+    _f._preflight_require_v1(type(native) is _f._LinuxSourceNativeV2
+     and type(native_input) is dict and native_input.get('native_instance') is native
+     and native_input.get('native_init_returned') is True
+     and native_input.get('owner') == (_f.os.getpid(), _f.threading.get_ident())
+     and type(early_profile) is tuple and len(early_profile) == 12
+     and early_profile is native_input.get('early_profile')
+     and early_profile[0] is native_input
+     and early_profile[1] is native_input.get('source_generation')
+     and early_profile[2] is native_input.get('native_generation')
+     and early_profile[3] is native_input.get('startup_source')
+     and early_profile[4] is native_input['entry_attempt']['phase']
+     and early_profile[5] is native_input.get('original_origin_request')
+     and early_profile[6] is None
+     and type(early_profile[7]) is tuple and early_profile[7]
+     and type(early_profile[8]) is int and early_profile[8] > 0
+     and type(early_profile[9]) is int and early_profile[9] > 0
+     and type(early_profile[10]) is type(_f._ordinary_initial_native_observations_v1)
+     and early_profile[11] is early_profile[10].__code__,
+     'ORDINARY_INITIAL_ORIGINAL_EARLY_PROFILE_AND_CURRENT_NATIVE_OWNER')
+    request = native_input['original_origin_request']
+    operands = native_input.get('initial_operands')
+    original = native_input.get('initial_operands_original')
+    names = ('role', 'native_root', 'evidence_root', 'stem', 'actor_cgroup',
+     'ancestor_cgroup', 'common_cgroup', 'bootstrap_cgroup', 'holder_cgroup')
+    _f._preflight_require_v1(type(request) is dict
+     and type(request.get('original')) is tuple and len(request['original']) == 15
+     and request['original'][0] is request and request['original'][1] is native_input
+     and request['source_generation'] is native_input['source_generation']
+     and request['native_generation'] is native_input['native_generation']
+     and request['startup'] is native_input['startup_source']
+     and type(operands) is dict and set(operands) == set(names)
+     and type(original) is tuple and len(original) == 14
+     and original[0] is operands and original[1] is native_input
+     and original[2] is request and original[3] is early_profile
+     and original[4] is native_input['owner']
+     and all(original[i + 5] is operands[name] for i, name in enumerate(names))
+     and native_input.get('current_native_observation') is None,
+     'ORDINARY_INITIAL_FIXED_SOURCE_OPERANDS_AND_ONE_USE')
+    owner, errors = native_input['owner'], native_input['errors']
+    _f._preflight_require_v1(type(errors) is list and not errors
+     and operands['role'] in ('PROVISION', 'PARENT', 'RECEIVER')
+     and type(operands['stem']) is str
+     and _f.re.fullmatch(r'qtt[1-9][0-9]{0,18}n[1-9][0-9]{0,18}p(?:[1-9]|1[0-3])', operands['stem'])
+     and all(type(operands[name]) is str
+      and _f.re.fullmatch(r'/(?:[A-Za-z0-9_-]+(?:\.(?:slice|scope|service))?/)*'
+       r'[A-Za-z0-9_-]+\.(?:slice|scope|service)', operands[name])
+      for name in ('ancestor_cgroup', 'common_cgroup',
+       'bootstrap_cgroup', 'holder_cgroup'))
+     and type(operands['actor_cgroup']) is str
+     and type(operands['native_root']) is type(_f.Path('/'))
+     and operands['native_root'].is_absolute()
+     and type(operands['evidence_root']) is type(_f.Path('/'))
+     and operands['evidence_root'] == (operands['native_root'] / 'prefix'
+      / 'receiver' / 'query' if operands['role'] == 'RECEIVER'
+      else operands['native_root'] / 'prefix' / 'query'),
+     'ORDINARY_INITIAL_FIXED_NATIVE_NAMES_AND_EVIDENCE_ROLE')
+    ancestor_name = operands['ancestor_cgroup'].rsplit('/', 1)[-1]
+    common_name = ancestor_name[:-6] + '-' + operands['stem'] + '.slice'
+    bootstrap_name = operands['stem'] + 'bootstrap.scope'
+    holder_name = operands['stem'] + 'controller.service'
+    _f._preflight_require_v1(ancestor_name.endswith('.slice')
+     and operands['common_cgroup'] == operands['ancestor_cgroup'] + '/' + common_name
+     and operands['bootstrap_cgroup'] == operands['common_cgroup'] + '/' + bootstrap_name
+     and operands['holder_cgroup'] == operands['ancestor_cgroup'] + '/' + holder_name
+     and operands['actor_cgroup'] == (operands['common_cgroup'] + '/'
+      + operands['stem'] + 'controller' if operands['role'] == 'RECEIVER'
+      else operands['bootstrap_cgroup'])
+     and operands['holder_cgroup'] != operands['actor_cgroup'],
+     'ORDINARY_INITIAL_SEPARATE_LIVING_HOLDER_AND_COMMON_BOOTSTRAP')
+    record = _f._ordinary_initial_physical_prefix_v1(native,native_input,early_profile,operands,original)
+
+    def checked(operation):
+     _f._ordinary_initial_native_debit_v1(native_input, operation,
+      settling=operation == 'ONE_CLOSE')
+
+    def call(operation, function, *args, **kwargs):
+     checked(operation)
+     return function(*args, **kwargs)
+
+    def delivered(slot, block, request_bytes):
+     _f._preflight_require_v1(type(block) is bytes, 'ORDINARY_INITIAL_NATIVE_READ_BYTES')
+     slot['last_returned'] = block
+     slot['returned_bytes'] += len(block)
+     slot['prefix'].extend(block)
+     _f._ordinary_initial_native_debit_v1(native_input, 'READ_NATIVE_RETURNED_BYTES',
+      raw=block, request_bytes=request_bytes)
+
+    def close(slot):
+     _f._preflight_require_v1(not slot['close_admission_attempted']
+      and not slot['close_attempted'] and not slot['closed']
+      and type(slot['returned_fd']) is int and slot['returned_fd'] >= 0,
+      'ORDINARY_INITIAL_NATIVE_ONE_CLOSE')
+     slot['close_admission_attempted'] = True
+     checked('ONE_CLOSE')
+     slot['close_attempted'] = True
+     try:
+      _f.os.close(slot['returned_fd'])
+      slot['closed'] = True
+     except BaseException as error:
+      slot['errors'].append(error)
+      raise
+
+    def opened(path, *, directory=False, held=False):
+     path = _f.Path(_f._ordinary_initial_path_stock_v1(native_input,path))
+     _f._preflight_require_v1(path.is_absolute() and '..' not in path.parts
+      and '.' not in path.parts and '\\' not in str(path)
+      and len(path.parts) <= 65 and len(str(path).encode('utf-8')) <= 4096,
+      'ORDINARY_INITIAL_FIXED_NOFOLLOW_OPERAND')
+     previous = None
+     for index, component in enumerate(('/', *path.parts[1:])):
+      current = dict(owner=owner, path=_f.Path('/') if index == 0 else previous['path'] / component,
+       component=component, parent=previous, returned_fd=None,
+       open_attempted=False, close_admission_attempted=False,
+       close_attempted=False, closed=False, held=False, errors=[])
+      record['slots'].append(current)
+      try:
+       final = index == len(path.parts) - 1
+       flags = _f.os.O_RDONLY | _f.os.O_NOFOLLOW | _f.os.O_CLOEXEC | _f.os.O_NONBLOCK
+       if not final or directory:
+        flags |= _f.os.O_DIRECTORY
+       named = call('NOFOLLOW_PATH_METADATA', _f.os.stat, component,
+        **({} if previous is None else {'dir_fd': previous['returned_fd']}),
+        follow_symlinks=False)
+       current['path_version'] = _f._preflight_stamp_v1(named)
+       current['uid'], current['gid'] = named.st_uid, named.st_gid
+       checked('NOFOLLOW_COMPONENT_OPEN')
+       current['open_attempted'] = True
+       current['returned_fd'] = _f.os.open(component, flags,
+        **({} if previous is None else {'dir_fd': previous['returned_fd']}))
+       observed = call('OPENED_HANDLE_METADATA', _f.os.fstat, current['returned_fd'])
+       current['handle_version'] = _f._preflight_stamp_v1(observed)
+       _f._preflight_require_v1(not _f.stat.S_ISLNK(named.st_mode)
+        and (_f.stat.S_ISDIR(named.st_mode) if not final or directory else _f.stat.S_ISREG(named.st_mode))
+        and _f._same_observed_file(named, observed)
+        and (observed.st_uid, observed.st_gid) == (current['uid'], current['gid'])
+        and (not final or directory or observed.st_nlink == 1)
+        and not call('OPENED_DESCRIPTOR_INHERITANCE', _f.os.get_inheritable, current['returned_fd'])
+        and _f._preflight_stamp_v1(call('NOFOLLOW_PATH_REJOIN', _f.os.stat, component,
+         **({} if previous is None else {'dir_fd': previous['returned_fd']}),
+         follow_symlinks=False)) == current['path_version'],
+        'ORDINARY_INITIAL_NOFOLLOW_PATH_HANDLE_ASSOCIATION')
+       if previous is not None:
+        close(previous)
+       previous = current
+      except BaseException as error:
+       current['errors'].append(error)
+       # Actual remaining FDs and failed/denied one-close attempts
+       # remain on the original acquisition; no broad cleanup occurs.
+       raise
+     current['held'] = held
+     return current
+
+    def rejoin(slot, *, directory=False):
+     _f._preflight_require_v1(slot['owner'] is owner and not slot['close_attempted']
+      and not slot['closed'] and type(slot['returned_fd']) is int,
+      'ORDINARY_INITIAL_ORIGINAL_HELD_DESCRIPTOR')
+     current = call('HELD_HANDLE_REJOIN', _f.os.fstat, slot['returned_fd'])
+     named = call('HELD_PATH_REJOIN', _f.os.lstat, slot['path'])
+     expected_path, expected_handle = slot.get('last_output_version',
+      (slot['path_version'], slot['handle_version']))
+     _f._preflight_require_v1(_f._preflight_stamp_v1(current) == expected_handle
+      and _f._preflight_stamp_v1(named) == expected_path
+      and _f._same_observed_file(named, current)
+      and (current.st_uid, current.st_gid, named.st_uid, named.st_gid)
+       == (slot['uid'], slot['gid'], slot['uid'], slot['gid'])
+      and (_f.stat.S_ISDIR(current.st_mode) if directory else _f.stat.S_ISREG(current.st_mode))
+      and (directory or current.st_nlink == 1)
+      and not call('HELD_DESCRIPTOR_INHERITANCE', _f.os.get_inheritable, slot['returned_fd']),
+      'ORDINARY_INITIAL_SAME_HELD_PATH_AND_HANDLE_VERSION')
+     parent = slot['parent']
+     while parent is not None:
+      observed = call('NOFOLLOW_ORIGINAL_ANCESTOR_REJOIN', _f.os.lstat, parent['path'])
+      _f._preflight_require_v1(_f.stat.S_ISDIR(observed.st_mode)
+       and (observed.st_dev, observed.st_ino, observed.st_mode,
+        observed.st_uid, observed.st_gid)
+        == (*parent['path_version'][:3], parent['uid'], parent['gid']),
+       'ORDINARY_INITIAL_SAME_ORIGINAL_NOFOLLOW_ANCESTOR')
+      parent = parent['parent']
+
+    def read(path, *, limit=1048576, keep=False, original_stream=None):
+     slot = dict(path=_f.Path(path), owner=owner,
+      prefix=bytearray() if original_stream is None else original_stream['raw'], last_returned=None,
+      returned_bytes=0, fd_slot=None, complete=False, raw=None,
+      errors=[] if original_stream is None else original_stream['errors'])
+     if original_stream is not None:
+      original_stream['read_record'] = slot
+     record['reads'].append(slot)
+     body_errors = slot['errors']
+     try:
+      slot['fd_slot'] = opened(slot['path'], held=keep)
+      if original_stream is not None:
+       original_stream['fd'] = slot['fd_slot']['returned_fd']
+       original_stream['fd_slot'] = slot['fd_slot']
+      while True:
+       request_bytes = _f._ordinary_initial_native_quantum_v1(native_input,
+        min(65536, limit + 1 - len(slot['prefix'])))
+       _f._preflight_require_v1(request_bytes > 0, 'ORDINARY_INITIAL_NATIVE_READ_EXTENT')
+       block = call('READ_NATIVE_BYTES', _f.os.read, slot['fd_slot']['returned_fd'], request_bytes)
+       delivered(slot, block, request_bytes)
+       _f._preflight_require_v1(slot['returned_bytes'] <= limit,
+        'ORDINARY_INITIAL_NATIVE_READ_OVERFLOW')
+       if not block:
+        break
+      rejoin(slot['fd_slot'])
+      slot['raw'] = bytes(slot['prefix'])
+     except BaseException as error:
+      body_errors.append(error)
+     if slot['fd_slot'] is not None and not keep:
+      try:
+       close(slot['fd_slot'])
+      except BaseException as error:
+       body_errors.append(error)
+      if original_stream is not None:
+       original_stream['close_attempted'] = slot['fd_slot']['close_attempted']
+       original_stream['closed'] = slot['fd_slot']['closed']
+     try:
+      _f._scan_raise_errors(body_errors)
+      if not keep:
+       _f._preflight_require_v1(_f._preflight_stamp_v1(call('READ_PATH_AFTER_CLOSE',
+        _f.os.lstat, slot['path'])) == slot['fd_slot']['path_version'],
+        'ORDINARY_INITIAL_NATIVE_PATH_CHANGED_AFTER_CLOSE')
+      slot['complete'] = True
+      if original_stream is not None:
+       original_stream['raw'] = slot['raw']
+       original_stream['returned_bytes'] = slot['returned_bytes']
+       original_stream['complete'] = True
+     except BaseException as error:
+      if not any(error is old for old in body_errors):
+       body_errors.append(error)
+      raise
+     return slot['raw'], slot['fd_slot']
+
+    def stream(command, name):
+     receipt = command['receipt']
+     path = operands['evidence_root'] / ('command-' + str(command['command_index']) + '.' + name + '.bin')
+     _f._preflight_require_v1(getattr(receipt, name + '_path') == str(path)
+      and type(getattr(receipt, name + '_byte_count')) is int
+      and 0 <= getattr(receipt, name + '_byte_count') <= 4096,
+      'ORDINARY_INITIAL_ORIGINAL_MANAGER_STREAM_LOCATOR')
+     raw, slot = read(path, limit=4096, original_stream=command['streams'][name])
+     _f._preflight_require_v1(len(raw) == getattr(receipt, name + '_byte_count'),
+      'ORDINARY_INITIAL_ORIGINAL_MANAGER_STREAM_EXTENT')
+     return raw
+
+    def manager(unit, properties):
+     _f._preflight_require_v1(not record['pending']
+      and all(not value['pending'] and not value['stream_pending']
+       and not value['errors'] for value in record['commands']),
+      'ORDINARY_INITIAL_PRIOR_NATIVE_COMMAND_UNRESOLVED')
+     argv = ('/usr/bin/systemctl', 'show', '--no-pager', '--all',
+      '--property=' + ','.join(properties), unit)
+     command = dict(argv=argv, cwd='/', run_id='linux-admin-' + str(owner[0]),
+      phase='fast-preflight-native-query', command_index=len(record['commands']) + 1,
+      receipt=None, associated=False, pending=True, dispatch_attempted=False,
+      stream_pending=True, streams={}, errors=[], evidence_root=operands['evidence_root'])
+     for name in ('stdout', 'stderr'):
+      command['streams'][name] = dict(path=operands['evidence_root'] /
+       ('command-' + str(command['command_index']) + '.' + name + '.bin'),
+       raw=bytearray(), returned_bytes=0, fd=None, raw_owner=None,
+       error=None, close_attempted=False, closed=False, complete=False, errors=[])
+     record['commands'].append(command)
+     record['pending'] = True
+     try:
+      checked('SUPERVISE_FIXED_READONLY_MANAGER')
+      observation = {}
+      _f._preflight_require_v1(_f._LINUX_PREFLIGHT_PROCESS_V1.get() is None,
+       'ORDINARY_INITIAL_NO_LATER_SCOPE_USED_AS_EARLY_OWNER')
+      command['dispatch_attempted'] = True
+      receipt = _f.supervise_command(argv, cwd=_f.Path(command['cwd']), run_id=command['run_id'],
+       phase=command['phase'], command_index=command['command_index'],
+       evidence_root=operands['evidence_root'], timeout_seconds=10,
+       execution_deadline_ns=native_input['original_execution_cutoff_ns'],
+       environment=dict(PATH='/usr/bin', LANG='C.UTF-8', LC_ALL='C.UTF-8'),
+       output_limits=dict(stdout_bytes=4096, stderr_bytes=4096, combined_output_bytes=8192),
+       output_observation=observation, mirror_stdout=False, mirror_stderr=False,
+       _ordinary_initial_native_input_v1=native_input)
+      command['receipt'] = receipt
+     except BaseException as error:
+      command['errors'].append(error)
+      attached = getattr(error, 'command_receipt', None)
+      if attached is not None:
+       command['receipt'] = attached
+      if not command['dispatch_attempted']:
+       command['pending'] = record['pending'] = False
+      never_started = command.get('supervision_never_started_original')
+      if (type(never_started) is tuple and len(never_started) == 4
+        and never_started[0] is command.get('supervision_original')
+        and never_started[1] is error and never_started[2] is command
+        and never_started[3] is False
+        and command.get('supervision_process_attempted') is False
+        and command.get('supervision_process') is None):
+       command['pending'] = record['pending'] = False
+     receipt = command['receipt']
+     if receipt is not None:
+      try:
+       _f._preflight_require_v1(type(receipt) is _f.CommandExecutionReceiptV1
+        and (receipt.argv, receipt.cwd, receipt.run_id, receipt.phase, receipt.command_index)
+         == (argv, str(command['cwd']), command['run_id'], command['phase'], command['command_index'])
+        and receipt.registered_argv in ((), argv),
+        'ORDINARY_INITIAL_REAL_MANAGER_RECEIPT_ASSOCIATION')
+       command['associated'] = True
+       command['pending'] = _f._command_requires_process_retention_v1(receipt)
+       record['pending'] = command['pending']
+      except BaseException as error:
+       command['errors'].append(error)
+     _f._scan_raise_errors(command['errors'])
+     _f._preflight_require_v1(command['associated'] and not command['pending'],
+      'ORDINARY_INITIAL_NATIVE_COMMAND_NOT_SAFELY_TERMINAL')
+     stdout, stderr = stream(command, 'stdout'), stream(command, 'stderr')
+     values = _f._ordinary_initial_manager_receipt_v1(receipt, stdout, stderr,
+      argv=argv, cwd=_f.Path(command['cwd']), run_id=command['run_id'], phase=command['phase'],
+      command_index=command['command_index'], properties=properties)
+     command['values'] = values
+     command['stream_pending'] = False
+     output_journal(command)
+     return values, stdout
+
+    def output_journal(command):
+     # This directory is an existing dynamic output role. Its immutable
+     # initial observation remains separate from these exact eight owners'
+     # completed create-new stream/receipt and reservation-release effects.
+     slot = record['evidence_root_slot']
+     previous = slot.get('last_output_version',
+      (slot['path_version'], slot['handle_version']))
+     named = call('QUERY_OUTPUT_PATH_METADATA', _f.os.lstat, slot['path'])
+     opened_info = call('QUERY_OUTPUT_HANDLE_METADATA', _f.os.fstat, slot['returned_fd'])
+     _f._preflight_require_v1(_f.stat.S_ISDIR(named.st_mode)
+      and _f._same_observed_file(named, opened_info)
+      and (named.st_dev, named.st_ino, named.st_mode, named.st_uid, named.st_gid,
+       opened_info.st_uid, opened_info.st_gid)
+       == (*slot['path_version'][:3], slot['uid'], slot['gid'], slot['uid'], slot['gid']),
+      'ORDINARY_INITIAL_QUERY_OUTPUT_SAME_PHYSICAL_OWNER_DIRECTORY')
+     expected = tuple(sorted('command-' + str(index) + suffix
+      for index in range(1, command['command_index'] + 1)
+      for suffix in ('.stdout.bin', '.stderr.bin', '.json')))
+     actual = tuple(sorted(call('QUERY_OUTPUT_EXACT_MEMBERSHIP', _f.os.listdir, slot['returned_fd'])))
+     _f._preflight_require_v1(actual == expected,
+      'ORDINARY_INITIAL_QUERY_ONLY_ORIGINAL_COMPLETED_OUTPUT_MEMBERS')
+     members = []
+     for name in actual:
+      info = call('QUERY_OUTPUT_MEMBER_METADATA', _f.os.stat, name,
+       dir_fd=slot['returned_fd'], follow_symlinks=False)
+      _f._preflight_require_v1(_f.stat.S_ISREG(info.st_mode) and info.st_nlink == 1
+       and (info.st_uid, info.st_gid) == (slot['uid'], slot['gid'])
+       and not _f.stat.S_IMODE(info.st_mode) & 0o022,
+       'ORDINARY_INITIAL_QUERY_ORIGINAL_SINGLE_LINK_OUTPUT')
+      members.append((name, _f._preflight_stamp_v1(info)))
+     current = (_f._preflight_stamp_v1(named), _f._preflight_stamp_v1(opened_info))
+     record['output_journal'].append((command, previous, current, expected, tuple(members)))
+     slot['last_output_version'] = current
+     rejoin(slot, directory=True)
+
+    def six(values, unit, group):
+     _f._preflight_require_v1(values['Id'] == unit and values['LoadState'] == 'loaded'
+      and values['Transient'] == 'yes' and values['ActiveState'] == 'active'
+      and values['ControlGroup'] == group
+      and _f.re.fullmatch(r'[0-9a-f]{32}', values['InvocationID']),
+      'ORDINARY_INITIAL_SAME_ACTIVE_ORIGINAL_MANAGER_GENERATION')
+
+    try:
+     import select
+     pid = owner[0]
+     # This fixed hook still awaits its genuine protected Source-programme issuer.
+     # Neither profile[6]=None nor a non-None port shape supplies that authority.
+     _f._preflight_require_v1(False,
+      'ORDINARY_INITIAL_ORIGINAL_PROTECTED_PROGRAMME_ISSUER_NOT_IMPLEMENTED')
+     capacity = _f._ordinary_initial_prefix_capacity_v1(native_input, original_cutoffs=original_cutoffs)
+     role_root = _f._role_root_acquire_v1(native, native_input)
+     current_root = role_root['slot']
+     if operands['role'] in ('PARENT', 'RECEIVER'):
+      storage = _f._ordinary_initial_prefix_storage_v1(native, native_input=native_input,
+       root_slot=current_root, original_cutoffs=capacity[1],
+       ceiling_programme=capacity[2], prefix_programme=capacity[3])
+      evidence_root = storage['query_slot']
+     else:
+      # PROVISION adopts only its original earlier prebuild storage.
+      evidence_root = opened(operands['evidence_root'], directory=True, held=True)
+     record['native_root_slot'], record['evidence_root_slot'] = current_root, evidence_root
+     record['output_journal'] = []
+     actual_uid, actual_gid = role_root['account']
+     expected_account = (actual_uid, actual_gid) if operands['role'] == 'PROVISION' else (0, 0)
+     _f._preflight_require_v1((actual_uid > 0 if operands['role'] == 'PROVISION'
+      else (actual_uid, actual_gid) == (0, 0)) and all(
+      (slot['uid'], slot['gid']) == expected_account
+      and _f.stat.S_IMODE(slot['handle_version'][2]) == 0o700
+      for slot in (current_root, evidence_root))
+      and call('ORIGINAL_QUERY_INITIAL_MEMBERSHIP', _f.os.listdir, evidence_root['returned_fd']) == [],
+      'ORDINARY_INITIAL_ADOPT_FRESH_PRIVATE_ORIGINAL_ACCOUNT_ROOTS')
+     actor_proc = opened('/proc/' + str(pid), directory=True, held=True)
+     actor_before = _f._ordinary_initial_actor_stat_v1(read('/proc/' + str(pid) + '/stat', limit=65536)[0], pid)
+     membership = read('/proc/' + str(pid) + '/cgroup')[0]
+     _f._preflight_require_v1(membership == ('0::' + operands['actor_cgroup'] + '\n').encode('ascii'),
+      'ORDINARY_INITIAL_ACTUAL_CURRENT_ACTOR_CGROUP')
+     record['actor'] = (pid, actor_before[2], owner[1], role_root['pending_actor'][2])
+     fields6 = ('Id', 'LoadState', 'Transient', 'InvocationID', 'ControlGroup', 'ActiveState')
+     ancestor_values, ancestor_raw = manager(ancestor_name, (*fields6, 'ActiveEnterTimestampMonotonic'))
+     six(ancestor_values, ancestor_name, operands['ancestor_cgroup'])
+     _, origin = _f._ordinary_initial_manager_origin_v1(ancestor_raw, unit=ancestor_name,
+      control_group=operands['ancestor_cgroup'], invocation=ancestor_values['InvocationID'])
+     # This is continuity to the ORIGINAL separately protected origin request.
+     # The later observation is never promoted to its earlier causal grant.
+     _f._preflight_require_v1(origin == native_input.get('original_origin_ns')
+      and early_profile[6] is None
+      and native_input.get('original_settlement_cutoff_ns') == origin + 3720 * 10**9
+      and original_cutoffs is role_root['original_cutoffs']
+      and native_input.get('original_execution_cutoff_ns') == origin + 3600 * 10**9,
+      'ORDINARY_INITIAL_SAME_ORIGINAL_ORIGIN_AND_UNRENEWED_CUTOFF')
+     record['origin_ns'] = origin
+     common_values, _ = manager(common_name, fields6)
+     six(common_values, common_name, operands['common_cgroup'])
+     bootstrap_values, _ = manager(bootstrap_name, fields6)
+     six(bootstrap_values, bootstrap_name, operands['bootstrap_cgroup'])
+     holder_values, _ = manager(holder_name, (*fields6, 'MainPID'))
+     six(holder_values, holder_name, operands['holder_cgroup'])
+     _f._preflight_require_v1(_f.re.fullmatch(r'[1-9][0-9]{0,9}', holder_values['MainPID']),
+      'ORDINARY_INITIAL_ACTUAL_MANAGER_HOLDER_PID')
+     holder_pid = int(holder_values['MainPID'])
+     _f._preflight_require_v1(holder_pid < 1 << 31 and holder_pid != pid,
+      'ORDINARY_INITIAL_DISTINCT_LIVING_HOLDER')
+     _f._preflight_require_v1(operands['role'] != 'PROVISION' or actor_before[1] == holder_pid,
+      'ORDINARY_INITIAL_ACTUAL_ORIGINAL_GATED_CHILD_PARENT')
+     holder_proc = opened('/proc/' + str(holder_pid), directory=True, held=True)
+     holder_before = _f._ordinary_initial_actor_stat_v1(
+      read('/proc/' + str(holder_pid) + '/stat', limit=65536)[0], holder_pid)
+     pidfd = dict(owner=owner, returned_fd=None, open_attempted=False,
+      close_admission_attempted=False, close_attempted=False, closed=False,
+      held=True, errors=[])
+     record['slots'].append(pidfd)
+     checked('ORIGINAL_HOLDER_PIDFD_OPEN')
+     pidfd['open_attempted'] = True
+     pidfd['returned_fd'] = _f.os.pidfd_open(holder_pid, 0)
+     pidfd_metadata = call('PIDFD_METADATA', _f.os.fstat, pidfd['returned_fd'])
+     pidfd['handle_version'] = (pidfd_metadata.st_dev, pidfd_metadata.st_ino,
+      pidfd_metadata.st_mode, pidfd_metadata.st_size, pidfd_metadata.st_mtime_ns,
+      pidfd_metadata.st_ctime_ns, pidfd_metadata.st_nlink)
+     _f._preflight_require_v1(not call('PIDFD_INHERITANCE', _f.os.get_inheritable, pidfd['returned_fd']),
+      'ORDINARY_INITIAL_NONINHERITED_ORIGINAL_PIDFD')
+     poll = select.poll()
+     call('ORIGINAL_PIDFD_POLL_REGISTER', poll.register, pidfd['returned_fd'], select.POLLIN)
+     _f._preflight_require_v1(not call('ORIGINAL_HOLDER_LIVENESS', poll.poll, 0)
+      and read('/proc/' + str(holder_pid) + '/cgroup')[0]
+       == ('0::' + operands['holder_cgroup'] + '\n').encode('ascii'),
+      'ORDINARY_INITIAL_ORIGINAL_HOLDER_LIVE_KERNEL_MEMBERSHIP')
+     group_root = _f.Path('/sys/fs/cgroup')
+     held = {}
+     for name in ('ancestor_cgroup', 'common_cgroup', 'bootstrap_cgroup', 'holder_cgroup'):
+      held[name] = opened(group_root / operands[name].lstrip('/'), directory=True, held=True)
+     if operands['role'] == 'RECEIVER':
+      held['actor_cgroup'] = opened(group_root / operands['actor_cgroup'].lstrip('/'),
+       directory=True, held=True)
+     events, events_slot = read(group_root / operands['holder_cgroup'].lstrip('/') / 'cgroup.events', keep=True)
+     _f._preflight_require_v1(events == b'populated 1\nfrozen 0\n',
+      'ORDINARY_INITIAL_LIVING_HOLDER_EVENTS')
+     controls = tuple((name, read(group_root / operands['ancestor_cgroup'].lstrip('/') / name)[0])
+      for name in ('memory.max', 'memory.swap.max', 'pids.max', 'cpu.max'))
+     _f._preflight_require_v1(dict(controls)['memory.max'].strip() == b'4294967296'
+      and dict(controls)['memory.swap.max'].strip() == b'0'
+      and dict(controls)['pids.max'].strip() == b'256'
+      and dict(controls)['cpu.max'].split() == [b'200000', b'100000'],
+      'ORDINARY_INITIAL_ORIGINAL_AGGREGATE_KERNEL_BOUND')
+     attr_current = read('/proc/' + str(pid) + '/attr/current')[0]
+     holder_attr_current = read('/proc/' + str(holder_pid) + '/attr/current')[0]
+     _f._preflight_require_v1(attr_current == holder_attr_current
+      and attr_current == (operands['stem'] + 'controller (enforce)\n').encode('ascii'),
+      'ORDINARY_INITIAL_SAME_ACTUAL_KERNEL_ENFORCED_CONTROLLER_LABEL')
+     ancestor_after, after_raw = manager(ancestor_name, (*fields6, 'ActiveEnterTimestampMonotonic'))
+     common_after, _ = manager(common_name, fields6)
+     bootstrap_after, _ = manager(bootstrap_name, fields6)
+     holder_after, _ = manager(holder_name, (*fields6, 'MainPID'))
+     _f._preflight_require_v1(ancestor_after == ancestor_values and after_raw == ancestor_raw
+      and common_after == common_values and bootstrap_after == bootstrap_values
+      and holder_after == holder_values,
+      'ORDINARY_INITIAL_SAME_ORIGINAL_MANAGER_GENERATIONS_AFTER_PHYSICAL_ACQUISITION')
+     for slot in (*held.values(), current_root, evidence_root, actor_proc, holder_proc):
+      rejoin(slot, directory=True)
+     rejoin(events_slot)
+     _f._preflight_require_v1(not call('ORIGINAL_HOLDER_FINAL_LIVENESS', poll.poll, 0)
+      and _f._ordinary_initial_actor_stat_v1(read('/proc/' + str(pid) + '/stat', limit=65536)[0], pid) == actor_before
+      and _f._ordinary_initial_actor_stat_v1(read('/proc/' + str(holder_pid) + '/stat', limit=65536)[0], holder_pid) == holder_before,
+      'ORDINARY_INITIAL_SAME_ACTOR_AND_HOLDER_AFTER_ALL_NATIVE_READS')
+     # Confirm the SAME origin prefix and still-held original kernel objects;
+     # the eight existing manager commands do not issue a renewed allowance.
+     prebind = native_input['origin_prebind']
+     prebind_result = native_input['origin_prebind_result_original']
+     _f._preflight_require_v1(prebind['complete'] is True
+      and prebind_result is prebind['result_original'] and len(prebind_result) == 12
+      and prebind_result[0] is prebind and prebind_result[1] is prebind['original']
+      and prebind_result[2] is operands and prebind_result[3] is original
+      and prebind['owner'] is owner and prebind['errors'] is errors
+      and prebind['operations'] is record['operations']
+      and request['observation'] is prebind
+      and request['ancestor'] is prebind['held_cgroups']['ancestor']
+      and origin == prebind['origin_ns'] == prebind['cutoffs'][0]
+      and record['actor'][:2] == (prebind['actor'][0], prebind['actor'][2])
+      and (holder_pid, holder_before[2]) == (prebind['holder'][0], prebind['holder'][2]),
+      'ORDINARY_INITIAL_MANAGER_CONFIRMS_ORIGINAL_PREBIND')
+     for name, slot in prebind['held_cgroups'].items():
+      rejoin(slot, directory=True)
+      current = held[name + '_cgroup'] if name in ('ancestor', 'common', 'bootstrap', 'holder') else held['actor_cgroup']
+      _f._preflight_require_v1(slot['path_version'] == current['path_version']
+       and slot['handle_version'] == current['handle_version'],
+       'ORDINARY_INITIAL_SAME_PREBIND_CGROUP_GENERATION')
+     rejoin(prebind['root'], directory=True)
+     _f._preflight_require_v1(prebind['role'] == operands['role']
+      and (prebind['role'] == 'PARENT' or prebind['root']['path_version'] == current_root['path_version']
+       and prebind['root']['handle_version'] == current_root['handle_version']),
+      'ORDINARY_INITIAL_SAME_PREBIND_ROLE_ROOT')
+     original_poll = call('ORIGINAL_PREBIND_PIDFD_POLL', select.poll)
+     for slot in prebind['living_pidfds']:
+      _f._preflight_require_v1(not slot['closed'] and not slot['close_attempted']
+       and _f._preflight_stamp_v1(call('ORIGINAL_PREBIND_PIDFD_METADATA', _f.os.fstat,
+        slot['returned_fd'])) == slot['handle_version']
+       and not call('ORIGINAL_PREBIND_PIDFD_INHERITANCE', _f.os.get_inheritable, slot['returned_fd']),
+       'ORDINARY_INITIAL_SAME_PREBIND_LIVING_DESCRIPTOR')
+      call('ORIGINAL_PREBIND_PIDFD_REGISTER', original_poll.register, slot['returned_fd'], select.POLLIN)
+     _f._preflight_require_v1(not call('ORIGINAL_PREBIND_FINAL_LIVENESS', original_poll.poll, 0),
+      'ORDINARY_INITIAL_ORIGINAL_PREBIND_BORROWERS_STILL_LIVING')
+     record['origin_prebind_join'] = (prebind, prebind_result, record['original'],
+      record['commands'][0], origin, request)
+     record['holder'] = (holder_pid, holder_before[2])
+     record['holder_pidfd_slot'] = pidfd
+     record['holder_events_slot'] = events_slot
+     record['held_cgroups'] = held
+     record['kernel_controls'] = controls
+     record['native_root_slot'] = current_root
+     record['evidence_root_slot'] = evidence_root
+     record['actor_proc_slot'] = actor_proc
+     record['holder_proc_slot'] = holder_proc
+     record['manager_before'] = (ancestor_values, common_values, bootstrap_values, holder_values)
+     record['manager_after'] = (ancestor_after, common_after, bootstrap_after, holder_after)
+     record['result_original'] = (record, record['original'], record['actor'],
+      origin, record['holder'], pidfd, events_slot, held, controls,
+      current_root, evidence_root, record['manager_before'], record['manager_after'],
+      request, early_profile, errors)
+     record['complete'] = True
+     return record
+    except BaseException as error:
+     if not any(error is old for old in errors):
+      errors.append(error)
+     raise
+
+def _facet_fn_initial_manager_receipt_v1(receipt, stdout, stderr, *,
+  argv, cwd, run_id, phase, command_index, properties):
+ """Join real original supervisor output; never issue birth permission."""
+ import tools.validation_reliability as _f
+ _f._preflight_require_v1(type(argv) is tuple and argv
+  and all(type(value) is str and value for value in argv)
+  and type(cwd) is type(_f.Path('/')) and cwd.is_absolute()
+  and type(run_id) is str and run_id and type(phase) is str and phase
+  and type(command_index) is int and command_index > 0
+  and type(properties) is tuple and properties
+  and len(set(properties)) == len(properties)
+  and all(type(value) is str and value for value in properties),
+  'ORDINARY_INITIAL_FIXED_MANAGER_OBSERVATION_OPERANDS')
+ _f._preflight_require_v1(type(receipt) is _f.CommandExecutionReceiptV1
+  and not _f._command_requires_process_retention_v1(receipt)
+  and receipt.argv == argv and receipt.registered_argv in ((), argv)
+  and receipt.cwd == str(cwd) and receipt.run_id == run_id
+  and receipt.phase == phase and receipt.command_index == command_index
+  and receipt.platform == 'posix' and type(receipt.pid) is int and receipt.pid > 0
+  and type(receipt.native_exit_code) is int and receipt.native_exit_code == 0
+  and receipt.start_failure_class is None and receipt.failure_class is None
+  and type(stdout) is bytes and type(stderr) is bytes and stderr == b''
+  and type(receipt.stdout_byte_count) is int and receipt.stdout_byte_count == len(stdout)
+  and type(receipt.stderr_byte_count) is int and receipt.stderr_byte_count == 0
+  and receipt.stderr_was_nonempty is False
+  and 0 < len(stdout) <= 4096 and stdout.endswith(b'\n')
+  and b'\r' not in stdout and b'\0' not in stdout
+  and all(value < 128 for value in stdout),
+  'ORDINARY_INITIAL_ACTUAL_MANAGER_RECEIPT_AND_COMPLETE_BYTES')
+ observation = receipt.output_observation
+ _f._preflight_require_v1(type(observation) is dict and all(
+  type(observation.get(name)) is dict
+  and observation[name].get('complete') is True
+  and observation[name].get('overflow') is False
+  and type(observation[name].get('errors')) is list
+  and not observation[name]['errors']
+  and type(observation[name].get('drained_byte_count')) is int
+  and type(observation[name].get('retained_byte_count')) is int
+  and observation[name]['drained_byte_count']
+   == observation[name]['retained_byte_count']
+   == getattr(receipt, name + '_byte_count')
+  for name in ('stdout', 'stderr')),
+  'ORDINARY_INITIAL_BOTH_ORIGINAL_STREAMS_TERMINAL_AND_EOF')
+ values = {}
+ for line in stdout[:-1].split(b'\n'):
+  key, separator, value = line.partition(b'=')
+  name = key.decode('ascii')
+  _f._preflight_require_v1(separator == b'=' and name in properties
+   and name not in values and value and b'=' not in value,
+   'ORDINARY_INITIAL_MANAGER_CLOSED_UNIQUE_FIELD')
+  values[name] = value.decode('ascii')
+ _f._preflight_require_v1(set(values) == set(properties),
+  'ORDINARY_INITIAL_MANAGER_COMPLETE_FIXED_FIELD_SET')
+ return values
+
+
+def _facet_fn_initial_actor_stat_v1(raw, pid):
+ """Decode current factual identity; no path or parent is granted here."""
+ import tools.validation_reliability as _f
+ _f._preflight_require_v1(type(raw) is bytes and 0 < len(raw) <= 65536
+  and raw.endswith(b'\n') and b'\0' not in raw
+  and type(pid) is int and 0 < pid < (1 << 31)
+  and raw.startswith(str(pid).encode('ascii') + b' ('),
+  'ORDINARY_INITIAL_ACTOR_ORIGINAL_STAT_BYTES')
+ closing = raw.rfind(b') ')
+ _f._preflight_require_v1(closing > 0,
+  'ORDINARY_INITIAL_ACTOR_STAT_ASSOCIATION')
+ fields = raw[closing + 2:].split()
+ _f._preflight_require_v1(len(fields) >= 20 and len(fields[0]) == 1
+  and fields[0] in (b'R', b'S', b'D', b'Z', b'T', b't', b'X', b'x', b'K', b'W', b'P', b'I')
+  and _f.re.fullmatch(rb'(0|[1-9][0-9]{0,9})', fields[1]) is not None
+  and _f.re.fullmatch(rb'[1-9][0-9]{0,19}', fields[19]) is not None,
+  'ORDINARY_INITIAL_ACTOR_ORIGINAL_PARENT_AND_START')
+ parent, start = int(fields[1]), int(fields[19])
+ _f._preflight_require_v1(parent < (1 << 31) and start < (1 << 64),
+  'ORDINARY_INITIAL_ACTOR_NATIVE_INTEGER_DOMAIN')
+ return pid, parent, start
+
+
+
+
+def _facet_fn_initial_prefix_storage_v1(native, *, native_input, root_slot,
+     original_cutoffs, ceiling_programme, prefix_programme):
+    """Acquire or adopt only the original fixed early storage programme.
+
+    Capacity operands are pure Source data. Every actual operation below also
+    requires the identical issued early Source debit and original watchdog.
+    The root suffix neither issues that debit nor supplies an original cutoff.
+    """
+    import tools.validation_reliability as _f
+    _f._ordinary_initial_preloader_return_check_v1(native_input)
+    record = native_input['current_native_observation']
+    operands, owner, errors = record['operands'], record['owner'], record['errors']
+    runner = native_input['entry_original'][4]
+    require = _f._preflight_require_v1
+    require(type(native) is _f._LinuxSourceNativeV2 and native is record['native']
+     and native_input['native_instance'] is native
+     and native_input['native_init_returned'] is True
+     and owner == (_f.os.getpid(), _f.threading.get_ident())
+     and native_input.get('early_prefix') is None
+     and operands['role'] in ('PARENT', 'RECEIVER')
+     and any(root_slot is slot for slot in record['slots']) and root_slot['held'] is True
+     and root_slot['path'] == operands['native_root']
+     and type(root_slot['returned_fd']) is int and not root_slot['closed']
+     and not root_slot['close_attempted']
+     and (root_slot['uid'], root_slot['gid']) == (0, 0)
+     and type(original_cutoffs) is tuple and len(original_cutoffs) == 4
+     and all(type(value) is int for value in original_cutoffs)
+     and original_cutoffs == (native_input['original_origin_ns'],
+      native_input['original_origin_ns'] + 3500 * 10**9,
+      native_input['original_execution_cutoff_ns'],
+      native_input['original_settlement_cutoff_ns'])
+     and native_input['original_origin_request']['origin_ns'] == original_cutoffs[0]
+     and native_input['original_origin_request']['deadline_ns'] == original_cutoffs[3],
+     'ORDINARY_INITIAL_PREFIX_ORIGINAL_SOURCE_AND_HELD_ROOT')
+    runner._ordinary_post_ceiling_checked_v1(ceiling_programme)
+    runner._ordinary_post_prefix_checked_v1(prefix_programme, ceiling_programme)
+    require(ceiling_programme['original_cutoffs'] is original_cutoffs
+     and prefix_programme[10] is ceiling_programme
+     and prefix_programme[11] is original_cutoffs,
+     'ORDINARY_INITIAL_PREFIX_IDENTICAL_PURE_SOURCE_PROGRAMMES')
+    storage = dict(native_input=native_input, observation=record, native=native,
+     owner=owner, role=operands['role'], root=operands['native_root'], root_slot=root_slot,
+     original_cutoffs=original_cutoffs, ceiling_programme=ceiling_programme,
+     prefix_programme=prefix_programme, slots=[], effects=[], errors=errors,
+     mount_path=operands['native_root'] / 'prefix', mount_slot=None,
+     underlay=None, mount_attempted=False, mounted=False, native_mount=None,
+     statvfs=None, receiver_slot=None, query_slot=None, complete=False,
+     handoff_attempted=False, handed_off=False, close_records=[])
+    native_input['early_prefix'] = storage
+    storage['original'] = (storage, native_input, record, native, owner, root_slot,
+     original_cutoffs, ceiling_programme, prefix_programme, storage['slots'],
+     storage['effects'], errors, storage['close_records'])
+
+    def call(operation, function, *args, **kwargs):
+     _f._ordinary_initial_native_debit_v1(native_input, operation)
+     return function(*args, **kwargs)
+
+    def identity(info):
+     return (info.st_dev, info.st_ino, info.st_mode, info.st_uid, info.st_gid)
+
+    def entries(slot):
+     names = call('PREFIX_DIRECTORY_MEMBERSHIP', _f.os.listdir, slot['returned_fd'])
+     require(type(names) is list and len(names) <= prefix_programme[5]
+      and all(type(name) is str and name not in ('', '.', '..')
+       and '/' not in name and '\\' not in name
+       and len(name.encode('utf-8')) <= 4096 for name in names)
+      and len(set(names)) == len(names), 'ORDINARY_INITIAL_PREFIX_BOUNDED_MEMBERSHIP')
+     result = {}
+     for name in names:
+      info = call('PREFIX_MEMBER_METADATA', _f.os.stat, name,
+       dir_fd=slot['returned_fd'], follow_symlinks=False)
+      require(not _f.stat.S_ISLNK(info.st_mode), 'ORDINARY_INITIAL_PREFIX_NONREPARSE_MEMBER')
+      result[name] = _f._preflight_stamp_v1(info)
+     return result
+
+    def rejoin(slot):
+     info = call('PREFIX_HELD_HANDLE_REJOIN', _f.os.fstat, slot['returned_fd'])
+     named = call('PREFIX_HELD_PATH_REJOIN', _f.os.lstat, slot['path'])
+     require(_f.stat.S_ISDIR(info.st_mode) and identity(info) == identity(named)
+      == slot['identity'] and not call('PREFIX_INHERITANCE_REJOIN',
+       _f.os.get_inheritable, slot['returned_fd']),
+      'ORDINARY_INITIAL_PREFIX_SAME_PATH_HANDLE_AND_ACCOUNT')
+     return named, info
+
+    def open_directory(parent, name):
+     slot = dict(owner=owner, path=parent['path'] / name, parent=parent,
+      returned_fd=None, open_attempted=False, close_admission_attempted=False,
+      close_attempted=False, closed=False, held=True, errors=[])
+     storage['slots'].append(slot)
+     record['slots'].append(slot)
+     before = call('PREFIX_OPEN_PATH_METADATA', _f.os.stat, name,
+      dir_fd=parent['returned_fd'], follow_symlinks=False)
+     slot['path_version'] = _f._preflight_stamp_v1(before)
+     _f._ordinary_initial_native_debit_v1(native_input, 'PREFIX_NOFOLLOW_OPEN')
+     slot['open_attempted'] = True
+     slot['returned_fd'] = _f.os.open(name, _f.os.O_RDONLY | _f.os.O_DIRECTORY | _f.os.O_NOFOLLOW | _f.os.O_CLOEXEC,
+      dir_fd=parent['returned_fd'])
+     info = call('PREFIX_OPEN_HANDLE_METADATA', _f.os.fstat, slot['returned_fd'])
+     slot['handle_version'] = _f._preflight_stamp_v1(info)
+     slot['identity'] = identity(info)
+     slot['uid'], slot['gid'] = info.st_uid, info.st_gid
+     require(_f.stat.S_ISDIR(before.st_mode) and identity(before) == identity(info)
+      and (info.st_uid, info.st_gid, _f.stat.S_IMODE(info.st_mode)) == (0, 0, 0o700),
+      'ORDINARY_INITIAL_PREFIX_OPEN_ORIGINAL_ORDINARY_DIRECTORY')
+     rejoin(slot)
+     return slot
+
+    def mkdir_directory(parent, name):
+     before = entries(parent)
+     require(name not in before, 'ORDINARY_INITIAL_PREFIX_CREATE_NEW_DESCENDANT')
+     named_before, handle_before = rejoin(parent)
+     effect = dict(parent=parent, name=name, before=before, named_before=named_before,
+      handle_before=handle_before, attempted=False, returned=False, after=None, slot=None,
+      named_after=None, handle_after=None)
+     storage['effects'].append(effect)
+     _f._ordinary_initial_native_debit_v1(native_input, 'PREFIX_CREATE_NEW_DIRECTORY')
+     effect['attempted'] = True
+     _f.os.mkdir(name, 0o700, dir_fd=parent['returned_fd'])
+     effect['returned'] = True
+     child = effect['slot'] = open_directory(parent, name)
+     after = effect['after'] = entries(parent)
+     require(set(after) == {*before, name}
+      and all(after[key] == version for key, version in before.items())
+      and after[name] == child['path_version'],
+      'ORDINARY_INITIAL_PREFIX_EXACT_SELECTED_DIRECTORY_EFFECT')
+     named_after, handle_after = rejoin(parent)
+     effect['named_after'], effect['handle_after'] = named_after, handle_after
+     # Only the selected child creation advances this dynamic directory's
+     # observed generation; the complete membership effect is retained.
+     parent['last_output_version'] = (_f._preflight_stamp_v1(named_after), _f._preflight_stamp_v1(handle_after))
+     return child
+
+    try:
+     root_slot['identity'] = (*root_slot['handle_version'][:3], root_slot['uid'], root_slot['gid'])
+     rejoin(root_slot)
+     if storage['role'] == 'PARENT':
+      underlay = mkdir_directory(root_slot, 'prefix')
+      storage['underlay'] = call('PREFIX_UNDERLAY_METADATA', _f.os.fstat, underlay['returned_fd'])
+      # The underlay descriptor has its own one-close journal. The
+      # mounted descriptor is reopened after the actual native return.
+      close_record = dict(slot=underlay, admission_attempted=True, close_attempted=False,
+       closed=False, errors=[])
+      storage['close_records'].append(close_record)
+      underlay['close_admission_attempted'] = True
+      _f._ordinary_initial_native_debit_v1(native_input, 'ONE_CLOSE', settling=True)
+      close_record['close_attempted'] = underlay['close_attempted'] = True
+      try:
+       _f.os.close(underlay['returned_fd'])
+       close_record['closed'] = underlay['closed'] = True
+      except BaseException as error:
+       close_record['errors'].append(error)
+       underlay['errors'].append(error)
+       raise
+      c = native.ctypes
+      native.lib.mount.argtypes = (c.c_char_p, c.c_char_p, c.c_char_p, c.c_ulong, c.c_void_p)
+      native.lib.mount.restype = c.c_int
+      options = ('size=' + str(prefix_programme[4]) + ',nr_inodes='
+       + str(prefix_programme[5]) + ',mode=0700,uid=0,gid=0').encode('ascii')
+      _f._ordinary_initial_native_debit_v1(native_input, 'PREFIX_FIXED_NATIVE_MOUNT_PROGRAMME')
+      storage['mount_attempted'] = True
+      returned = native._call(native.lib.mount, b'tmpfs', _f.os.fsencode(storage['mount_path']),
+       b'tmpfs', 2 | 4 | 8, c.c_char_p(options))
+      require(returned == 0, 'ORDINARY_INITIAL_PREFIX_ACTUAL_MOUNT_RETURN')
+      storage['mounted'] = True
+     mount = storage['mount_slot'] = open_directory(root_slot, 'prefix')
+     mounted = storage['native_mount'] = call('PREFIX_FIXED_MOUNT_QUERY_PROGRAMME', native.mount, mount['returned_fd'])
+     usage = storage['statvfs'] = call('PREFIX_ACTUAL_CAPACITY', _f.os.fstatvfs, mount['returned_fd'])
+     storage['native_mount_original'] = (mounted['unique_id'], mounted['old_id'],
+      tuple(mounted['device']), mounted['magic'], mounted['attributes'], mounted['raw_hex'])
+     require(mounted['magic'] == 0x01021994 and usage.f_blocks * usage.f_frsize == prefix_programme[4]
+      and 0 < usage.f_files <= prefix_programme[5]
+      and type(usage.f_namemax) is int and 0 < usage.f_namemax <= 255
+      and (storage['underlay'] is None or mount['identity'][0] != storage['underlay'].st_dev),
+      'ORDINARY_INITIAL_PREFIX_ACTUAL_BOUND_STORAGE_AND_MOUNT')
+     selected_root = mount
+     if storage['role'] == 'RECEIVER':
+      selected_root = storage['receiver_slot'] = mkdir_directory(mount, 'receiver')
+     query = storage['query_slot'] = mkdir_directory(selected_root, 'query')
+     require(query['path'] == operands['evidence_root'] and entries(query) == {},
+      'ORDINARY_INITIAL_PREFIX_ORIGINAL_FRESH_QUERY_ROOT')
+     for slot in (root_slot, mount, selected_root, query):
+      named, info = rejoin(slot)
+      slot['last_output_version'] = (_f._preflight_stamp_v1(named), _f._preflight_stamp_v1(info))
+     storage['result_original'] = (storage, storage['original'], mount, mounted, usage,
+      selected_root, query, storage['effects'], errors, storage['native_mount_original'])
+     storage['complete'] = True
+     return storage
+    except BaseException as error:
+     if not any(error is old for old in errors):
+      errors.append(error)
+     raise
+
+
+def _facet_fn_initial_prefix_handoff_v1(scope, host, prefix, storage):
+ """Close early duplicate directory FDs only after genuine Scope adoption."""
+ import tools.validation_reliability as _f
+ native_input = storage['native_input']
+ _f._ordinary_initial_prefix_adoption_checked_v1(native_input, role=storage['role'], root=storage['root'],
+  original_cutoffs=host['original_cutoffs'], ceiling_programme=host['ceiling_programme'],
+  prefix_programme=host['prefix_programme'])
+ actual = prefix['native_mount']
+ _f._preflight_require_v1(type(scope) is _f._LinuxPreflightScopeV1
+  and host is scope._ordinary_host_preparation_v1 is scope._ordinary_original_host_preparation_v1
+  and prefix is host['prefix_tmpfs'] is host['original_prefix_tmpfs']
+  and prefix['scope'] is scope and prefix['source_programme'] is storage['prefix_programme']
+  and scope.query.evidence_root == storage['query_slot']['path']
+  and scope.query.command_resources_settled_v1()
+  and (actual['unique_id'], actual['old_id'], tuple(actual['device']), actual['magic'],
+   actual['attributes'], actual['raw_hex']) == storage['native_mount_original']
+  and (prefix['statvfs'].f_blocks * prefix['statvfs'].f_frsize == storage['prefix_programme'][4])
+  and prefix['root_identity'] == (storage['result_original'][5]['identity'][0],
+   storage['result_original'][5]['identity'][1])
+  and not storage['handoff_attempted'] and not storage['handed_off'],
+  'ORDINARY_INITIAL_PREFIX_ONE_GENUINE_INDEPENDENT_ADOPTION')
+ storage['handoff_attempted'] = True
+ errors = []
+ storage['handoff_original'] = (storage, scope, host, prefix, storage['result_original'], errors)
+ try:
+  for slot in reversed(storage['slots']):
+   if slot['closed']:
+    continue
+   close_record = dict(slot=slot, admission_attempted=False, close_attempted=False,
+    closed=False, errors=[])
+   storage['close_records'].append(close_record)
+   try:
+    _f._preflight_require_v1(not slot['close_admission_attempted'] and not slot['close_attempted'],
+     'ORDINARY_INITIAL_PREFIX_NO_CLOSE_RETRY_OR_FORGOTTEN_DEBT')
+    close_record['admission_attempted'] = slot['close_admission_attempted'] = True
+    _f._ordinary_initial_native_debit_v1(native_input, 'ONE_CLOSE', settling=True)
+    close_record['close_attempted'] = slot['close_attempted'] = True
+    _f.os.close(slot['returned_fd'])
+    close_record['closed'] = slot['closed'] = True
+   except BaseException as error:
+    close_record['errors'].append(error)
+    if not any(error is old for old in slot['errors']):
+     slot['errors'].append(error)
+    errors.append(error)
+  if not errors:
+   storage['handed_off'] = True
+ except BaseException as error:
+  errors.append(error)
+ for error in errors:
+  for retained in (storage['errors'], host['prefix_errors']):
+   if not any(error is old for old in retained):
+    retained.append(error)
+ _f._scan_raise_errors(errors)
+ return storage
+
+
+def _facet_fn_control_current_staged_request_v1(layout, installation):
+ import tools.validation_reliability as _f
+ producer=_f._ordinary_control_current_staged_request_v1
+ if type(installation)is not dict:raise ValueError('CONTROL_CURRENT_ORIGINAL_INSTALLATION')
+ old=installation['original'];profile=installation['control_request_profile_original']
+ if(type(old)is not tuple or len(old)!=17 or old[0]is not installation
+  or type(profile)is not tuple or len(profile)!=7 or profile[0]is not installation
+  or profile[1]is not old[1]or profile[2]is not old[2]or profile[6]is not producer
+  or type(profile[1])is not _f._LinuxPreflightScopeV1
+  or installation['complete']is not True or installation['errors']):
+  raise ValueError('CONTROL_CURRENT_STAGED_ORIGINAL_PROFILE')
+ scope=profile[1];source=scope.source
+ native=scope._ordinary_bootstrap_runtime_v1['acquisition']['native_product']
+ current=native['source_generation'];native_input=native['native_input']
+ if(type(source)is not _f._LinuxImmutableSourceSealV2
+  or current['control_profile_original']is not profile[5]or current['errors']
+  or source.state!='READABLE'or source.failure is not None):
+  raise ValueError('CONTROL_CURRENT_STAGED_SOURCE_CONTINUITY')
+ if type(profile[5])is not tuple or len(profile[5])!=8:
+  raise ValueError('CONTROL_CURRENT_STAGED_EXACT_SOURCE_ORIGINAL')
+ generation,original,rows,originals,payload,fn,code,attempt=profile[5]
+ if type(generation)is not dict or type(attempt)is not dict:
+  raise ValueError('CONTROL_CURRENT_STAGED_EXACT_SOURCE_OWNER')
+ ao=attempt['original']
+ if(generation is not current or generation['original']is not original
+  or type(original)is not tuple or len(original)!=17
+  or original[0]is not generation or original[1]is not native_input
+  or generation['control_source_originals']is not rows or payload is not profile[4]
+  or native_input['preloader_source_attempt']['control_profile_attempt']is not attempt
+  or type(ao)is not tuple or len(ao)!=9 or ao[0]is not attempt
+  or ao[1]is not generation or ao[2]is not original or ao[3]is not native_input
+  or ao[4]is not generation['native_input_binding']or ao[5]is not generation['protected_inputs']
+  or ao[6]is not rows or ao[7]is not attempt['profiles']or ao[8]is not attempt['errors']
+  or not attempt['complete']or attempt['errors']or attempt['result']is not profile[5]
+  or attempt['source_generation']is not generation or attempt['source_original']is not original
+  or attempt['producer']is not fn or attempt['producer_code']is not code
+  or fn is not _f._ordinary_control_current_profile_literals_v1 or fn.__code__ is not code
+  or type(profile[3])is not tuple or len(profile[3])!=4
+  or type(originals)is not tuple or len(originals)!=4 or type(rows)is not list or len(rows)!=4
+  or type(payload)is not tuple or len(payload)!=2
+  or type(payload[0])is not tuple or len(payload[0])!=4):
+  raise ValueError('CONTROL_CURRENT_STAGED_PROTECTED_SOURCE_OWNER')
+ retained_ast=0;parser_scratch=0;parser_facts=[]
+ for binding,fixed,owned,record in zip(profile[3],payload[0],originals,rows):
+  if type(binding)is not tuple or len(binding)!=7 or type(owned)is not tuple or len(owned)!=7:
+   raise ValueError('CONTROL_CURRENT_STAGED_EXACT_BINDING')
+  held,ro,file_row,version,raw,baseline,row=binding
+  if type(record)is not dict or type(record['filename'])is not str:
+   raise ValueError('CONTROL_CURRENT_STAGED_EXACT_SOURCE_RECORD')
+  key=record['filename'];captured=source.files[key]
+  if(held is not record or record['original']is not ro
+   or type(ro)is not tuple or len(ro)!=10 or ro[0]is not record or ro[1]is not generation
+   or ro[2]is not generation['native_input_binding']or ro[3]is not record['input4']
+   or ro[4]is not record['source_row']or ro[5]is not record['baseline_row']
+   or ro[6]is not raw or ro[7]is not baseline or ro[8]is not record['acquisition']
+   or ro[9]is not record['acquisition_original']or record['profile']is not owned
+   or owned[0]is not record or owned[1]is not ro or owned[2]is not fixed
+   or owned[3]is not raw or owned[4]is not baseline or owned[5]is not fn or owned[6]is not code
+   or row is not fixed or source.row_index[key]is not file_row or source.post[key]is not version
+   or type(raw)is not bytes or type(baseline)is not bytes or raw!=baseline
+   or captured is not None and (type(captured)is not bytes or captured!=raw)
+   or len(raw)!=fixed[1]):
+   raise ValueError('CONTROL_CURRENT_STAGED_FULL_ORIGINAL_BYTES')
+  parts,held=_f._ordinary_control_current_parser_request_v1(layout,raw,fixed[5])
+  total=sum(n for _,n in parts);ast_request=sum(n for name,n in parts if name in held)
+  parser_scratch=max(parser_scratch,total-ast_request)
+  retained_ast+=ast_request;parser_facts.append((fixed[0],total,ast_request))
+ compiler=_f._ordinary_control_compiler_source_projection_v1(layout,payload[1])
+ retained_code=compiler[0][1]+compiler[6][1]
+ retained=retained_ast+retained_code
+ peak=max(retained+parser_scratch,retained_ast+parser_scratch+sum(n for _,n in compiler))
+ components=(('current_control_retained_AST_and_expected_Code',retained),
+  ('current_control_one_active_compile_parse_scratch',peak-retained))
+ return dict(original_installation=installation,original_profile=profile,
+  profile_producer=producer,compiler_components=compiler,parser_facts=tuple(parser_facts),
+  components=components,retained_names=('current_control_retained_AST_and_expected_Code',),
+  staged_request=peak)
+
+
+def _facet_fn_control_compiler_source_projection_v1(layout, components):
+ import tools.validation_reliability as _f
+ keys=('bytes_prefix','unicode_prefix','tuple_prefix','list_prefix',
+  'dict_prefix','dict_keys_prefix','dict_general_entry','int_digit_bytes')
+ labels=('original_control_all_retained_expected_Code_names_and_constants',
+  'original_control_one_active_CFG_and_actual_threaded_NOP_storage',
+  'original_control_one_active_assembler_old_new_overlap',
+  'original_control_one_active_final_optimized_instruction_sequence',
+  'original_control_one_active_enclosing_scope_sequences_and_unit_state',
+  'original_control_one_active_module_symbol_constant_cache_and_analysis_tables',
+  'original_control_Source_selected_folded_constants')
+ if(_f._ordinary_data_size_v1(layout,'pointer')!=8 or _f._ordinary_data_size_v1(layout,'gc')!=16
+  or type(components)is not tuple or len(components)!=len(labels)):
+  raise ValueError('CONTROL_ORIGINAL_COMPILER_PROJECTION_LAYOUT')
+ result=[]
+ for expected,row in zip(labels,components):
+  if(type(row)is not tuple or len(row)!=2 or row[0]!=expected
+   or type(row[1])is not tuple or len(row[1])!=len(keys)+1
+   or any(type(n)is not int or n<0 for n in row[1])):
+   raise ValueError('CONTROL_ORIGINAL_COMPILER_INCIDENCE_PROJECTION')
+  value=row[1][0]
+  for key,count in zip(keys,row[1][1:]):value+=count*_f._ordinary_data_size_v1(layout,key)
+  result.append((expected,value))
+ return tuple(result)

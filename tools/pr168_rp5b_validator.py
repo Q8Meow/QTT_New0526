@@ -55,7 +55,10 @@ def _git_deleted_files() -> set[str]:
             errors="replace",
         )
         if completed.returncode != 0:
-            continue
+            raise RuntimeError(
+                f"RP5B deletion query failed ({completed.returncode}): {args!r}; "
+                f"stderr={completed.stderr!r}; stdout={completed.stdout!r}"
+            )
         deleted.update(_deleted_files_from_git_output(args, completed.stdout))
     return deleted
 

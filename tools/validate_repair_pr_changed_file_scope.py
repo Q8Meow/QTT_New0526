@@ -59,18 +59,9 @@ class _ChangedPath:
         return self.source == "worktree" and self.status == "??"
 
 
-def _git(
-    repo_root: Path,
-    args: Sequence[str],
-) -> tuple[int, str, str]:
-    completed = subprocess.run(
-        ["git", *args],
-        cwd=repo_root,
-        check=False,
-        capture_output=True,
-        text=True,
-    )
-    return completed.returncode, completed.stdout.rstrip(), completed.stderr.rstrip()
+def _git(repo_root: Path, args: Sequence[str]) -> tuple[int, str, str]:
+    from tools.validation_reliability import _scope_git_text
+    return _scope_git_text(repo_root, args)
 
 
 def _normalize_repo_path(path: str) -> str | None:
@@ -130,22 +121,21 @@ def _explicit_repair_branches_with_scope() -> frozenset[str]:
 
 
 def _changed_worktree_entries_from_git(repo_root: Path) -> tuple[_ChangedPath, ...]:
-    rc, stdout, _stderr = _git(
-        repo_root,
-        ("status", "--porcelain", "--untracked-files=all"),
+    from tools.validation_reliability import (
+        _scope_required_query, _scope_git_path, parse_git_status_porcelain_v1_z,
     )
-    if rc != 0 or not stdout.strip():
-        return ()
-    entries = {
-        _ChangedPath(
-            path=path,
-            source="worktree",
-            status=_porcelain_status(line),
-        )
-        for line in stdout.splitlines()
-        for path in (_normalize_status_path(line),)
-        if path
-    }
+    raw = _scope_required_query(repo_root,
+        ("status", "--porcelain=v1", "-z", "--untracked-files=all", "--ignore-submodules=none"), _git)
+    entries = []
+    seen = set()
+    for code, destination, original in parse_git_status_porcelain_v1_z(raw):
+        _scope_git_path(destination)
+        if destination in seen or code == "!!":
+            raise ValueError("invalid duplicate/ignored status record")
+        seen.add(destination)
+        entries.append(_ChangedPath(destination, "worktree", code))
+        if original is not None:
+            entries.append(_ChangedPath(_scope_git_path(original), "worktree", code))
     return tuple(sorted(entries, key=lambda entry: (entry.path, entry.status)))
 
 
@@ -154,29 +144,18 @@ def _changed_worktree_files_from_git(repo_root: Path) -> tuple[str, ...]:
 
 
 def _changed_file_entries_from_git(repo_root: Path) -> tuple[_ChangedPath, ...]:
-    worktree_entries = _changed_worktree_entries_from_git(repo_root)
-    if worktree_entries:
-        return worktree_entries
-
-    diff_commands = (
-        ("diff", "--name-only", "HEAD^1", "HEAD"),
-        ("diff", "--name-only", "origin/main...HEAD"),
-        ("diff", "--name-only", "main...HEAD"),
-    )
-    for args in diff_commands:
-        rc, stdout, _stderr = _git(repo_root, args)
-        if rc == 0 and stdout.strip():
-            return tuple(
-                _ChangedPath(path=path, source="diff", status="committed")
-                for line in stdout.splitlines()
-                for path in (_normalize_repo_path(line),)
-                if path
-            )
-    return ()
+    from tools.validation_reliability import _scope_git_change_snapshot
+    committed, status = _scope_git_change_snapshot(repo_root, git_stdout=_git)
+    entries = [_ChangedPath(path, "diff", "committed") for path in committed]
+    for code, destination, original in status:
+        entries.append(_ChangedPath(destination, "worktree", code))
+        if original is not None:
+            entries.append(_ChangedPath(original, "worktree", code))
+    return tuple(sorted(set(entries), key=lambda entry: (entry.path, entry.source, entry.status)))
 
 
 def _changed_files_from_git(repo_root: Path) -> tuple[str, ...]:
-    return tuple(entry.path for entry in _changed_file_entries_from_git(repo_root))
+    return tuple(sorted({entry.path for entry in _changed_file_entries_from_git(repo_root)}))
 
 
 def _changed_files_for_repair_scope_from_git(
@@ -261,8 +240,11 @@ def _check_static_scope_matrix(failures: list[str]) -> None:
 
 
 def _check_current_repair_branch_scope(repo_root: Path, failures: list[str]) -> None:
-    branch = context.current_branch_context(repo_root).branch
-    normalized = context.normalize_branch_context(branch)
+    branch_context = context.current_branch_context(repo_root)
+    normalized = context.normalize_branch_context(branch_context.branch)
+    if branch_context.git_error or not normalized:
+        failures.append("repair scope branch context unavailable")
+        return
     if not context.is_repair_branch(normalized):
         return
 
@@ -304,4 +286,5 @@ def main(argv: Sequence[str] | None = None) -> int:
 
 
 if __name__ == "__main__":
-    raise SystemExit(main())
+    from tools.validation_reliability import _preflight_cli_v1
+    raise SystemExit(_preflight_cli_v1(main, __file__))

@@ -552,7 +552,7 @@ def test_runtime_parameter_hold_and_terminal_application_receipt(
     assert "NOT_TERMINAL_CONSUMER" in compiled.compiler_role
 
 
-def test_unit_conversion_and_dependency_stack_propagate_actual_value() -> None:
+def test_unit_conversion_and_dependency_stack_propagate_actual_value(monkeypatch) -> None:
     context = _context(
         "CTX::STACK",
         component_ids=("MATH-01", "MATH-02"),
@@ -640,6 +640,25 @@ def test_unit_conversion_and_dependency_stack_propagate_actual_value() -> None:
     assert execution.conversion_receipt.no_authority_flag is True
     assert execution.propagation_receipt.no_authority_flag is True
     assert execution.no_authority_flag is True
+
+    # Observe the real stable direct-plus-ancestor handoff through MATH-01.
+    calls = []
+    original_guard = CanonicalOwnerPacketRegistryV1._check_probability_packet_refs_v1
+    def observe_guard(self, references, *, context):
+        calls.append((self, references, context))
+        return original_guard(self, references, context=context)
+    monkeypatch.setattr(CanonicalOwnerPacketRegistryV1, "_check_probability_packet_refs_v1", observe_guard)
+    registry = CanonicalOwnerPacketRegistryV1((*math_01_packets, *math_02_packets))
+    repeated = ApplicableStackResolverV1.execute(stack_id=STACK_ID, component_ids=("MATH-01", "MATH-02"),
+        context=context, owner_registry=registry,
+        caller_assertions_by_math_id={"MATH-01": math_01_assertions, "MATH-02": math_02_assertions})
+    expected_refs = tuple(dict.fromkeys(ref for inputs in repeated.component_inputs for ref in inputs.packet_refs))
+    assert calls[-1][1:] == (expected_refs, context)
+    assert len(expected_refs) == len(set(expected_refs))
+    assert {packet.packet_id for packet in math_01_packets} <= set(expected_refs)
+    assert repeated.dependency_packet.packet_id in expected_refs
+    assert repeated.component_outputs == (Decimal("0.47"), 0.14)
+    assert calls[-1][0]._probability_guard_bindings is registry._probability_guard_bindings
 
 
 def _assert_f12_exact_utc() -> None:

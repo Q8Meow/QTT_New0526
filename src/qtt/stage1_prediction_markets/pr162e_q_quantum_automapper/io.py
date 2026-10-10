@@ -3,11 +3,14 @@
 from __future__ import annotations
 
 import json
+import os
 from pathlib import Path
 import subprocess
 from typing import Any
 
 from . import constants as c
+from src.qtt.stage1_prediction_markets.qku_computation_control_plane.serialization import _expand_report_records_v1
+from src.qtt.stage1_prediction_markets.qku_computation_control_plane.serialization import _report_json_object_v1, _report_read_json_v1
 
 
 def resolve_repo_relative(repo_root: Path, value: str | Path) -> Path:
@@ -26,8 +29,11 @@ def json_text(payload: Any, *, compact: bool = False) -> str:
     return json.dumps(payload, indent=None if compact else 2, sort_keys=True, separators=separators) + "\n"
 
 
+# Active report acquisition state is owned by serialization, not this module.
+
+
 def read_json(path: Path) -> Any:
-    return json.loads(path.read_text(encoding="utf-8"))
+    return _report_read_json_v1(path, family='MAPPER')
 
 
 def write_json(path: Path, payload: Any, *, compact: bool = False) -> None:
@@ -36,13 +42,7 @@ def write_json(path: Path, payload: Any, *, compact: bool = False) -> None:
 
 
 def records_from_report_payload(repo_root: Path, payload: dict[str, Any]) -> list[dict[str, Any]]:
-    rows = list(payload.get("records") or [])
-    for shard_ref in payload.get("shard_files") or payload.get("shard_paths") or []:
-        shard_path = resolve_repo_relative(repo_root, shard_ref)
-        if shard_path.exists():
-            shard_payload = read_json(shard_path)
-            rows.extend(shard_payload.get("records") or [])
-    return rows
+    return _expand_report_records_v1(repo_root, payload, read_json)
 
 
 def ensure_branch(repo_root: Path) -> None:

@@ -2,10 +2,10 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, fields as dataclass_fields
 from datetime import datetime
 from pathlib import Path
-from typing import TYPE_CHECKING, Mapping, Protocol, runtime_checkable
+from typing import TYPE_CHECKING, ContextManager, Iterator, Mapping, Protocol, runtime_checkable
 
 from .errors import ContractValidationError, OwnerAdapterError, ReasonCode
 from .models import (
@@ -20,11 +20,15 @@ from .models import (
     ST12FEvidenceReferenceV1,
     SupervisionEnvelopeV1,
     validate_reference_identity_classes,
+    ProbabilityProducerScopeV1, NoEffectFlagsV1, NO_EFFECTS_V1,
+    _probability_text_v1, _probability_int_v1, _probability_ns_v1,
+    _probability_refs_v1, _probability_require_v1,
 )
 
 if TYPE_CHECKING:
     from .agent_policy import AgentCapabilityDecisionV1
     from .cohort_compiler import ReplayPaperCohortCompilationRecordV1
+    from .model_risk import ProbabilityNativeUseRequestV1, ProbabilityNativeUseAdmissionV1
     from .evidence import (
         BuiltEvidenceBundleOutcomeV1,
         ComputationEvidenceBundleV1,
@@ -43,7 +47,160 @@ if TYPE_CHECKING:
         CompileReplayPaperCohortRequestV1,
         ComputationExecutionContextV1,
         RegisterReplayPaperResultRequestV1,
+        ProbabilityProducerScopeV1,
+        ProbabilityPredictionArtifactReadV1,
+        ProbabilityPredictionArtifactWriteRequestV1,
+        ProbabilityPredictionArtifactSealV1,
     )
+
+
+class ProbabilityPredictionArtifactReaderProtocolV1(Protocol):
+    def open_prediction_artifact_v1(
+        self, *, artifact_ref: str, scope: ProbabilityProducerScopeV1,
+        max_bytes: int, max_frames: int,
+    ) -> ContextManager[ProbabilityPredictionArtifactReadV1]: ...
+
+
+class ProbabilityPredictionArtifactWriterProtocolV1(Protocol):
+    def begin_prediction_artifact_v1(
+        self, request: ProbabilityPredictionArtifactWriteRequestV1,
+    ) -> ContextManager[ProbabilityPredictionArtifactWriteSessionProtocolV1]: ...
+
+
+class ProbabilityPredictionArtifactWriteSessionProtocolV1(Protocol):
+    def append_prediction_frame_v1(self, frame: bytes) -> None: ...
+
+    def iter_written_prediction_frames_v1(self) -> Iterator[bytes]: ...
+
+    def seal_prediction_artifact_v1(self) -> ProbabilityPredictionArtifactSealV1: ...
+
+    def abort_unpublished_prediction_stage_v1(self) -> None: ...
+
+
+_PROBABILITY_ISSUER_ROLES_V1 = ("SOURCE_RIGHTS", "ENVIRONMENT", "MODEL_BUILD", "MODEL_REVIEW", "USE_POLICY", "CATALOG", "COMPUTATION")
+
+
+@dataclass(frozen=True, slots=True)
+class ProbabilityIssuerReadRequestV1:
+    role: str
+    scope: ProbabilityProducerScopeV1
+    subject_refs: tuple[str, ...]
+    issuer_ref: str
+
+    def __post_init__(self) -> None:
+        _probability_require_v1(type(self.role) is str and self.role in _PROBABILITY_ISSUER_ROLES_V1 and
+                                type(self.scope) is ProbabilityProducerScopeV1, "PROBABILITY_ISSUER_REQUEST")
+        _probability_refs_v1(self.subject_refs, nonempty=True)
+        _probability_text_v1(self.issuer_ref)
+
+
+@dataclass(frozen=True, slots=True)
+class ProbabilityIssuerContextV1:
+    principal_ref: str
+    control_domain_ref: str
+    authentication_ref: str
+    session_ref: str
+    process_ref: str
+    available_ns: int
+    valid_until_ns: int
+
+    def __post_init__(self) -> None:
+        for name in ("principal_ref", "control_domain_ref", "authentication_ref", "session_ref", "process_ref"):
+            _probability_text_v1(getattr(self, name))
+        _probability_ns_v1(self.available_ns); _probability_ns_v1(self.valid_until_ns)
+        _probability_require_v1(self.available_ns < self.valid_until_ns, "PROBABILITY_ISSUER_LIFETIME")
+
+
+@dataclass(frozen=True, slots=True)
+class ProbabilityIssuerGrantV1:
+    grant_ref: str
+    principal_ref: str
+    control_domain_ref: str
+    authentication_ref: str
+    session_ref: str
+    process_ref: str
+    policy_ref: str
+    policy_epoch: int
+    role: str
+    scope: ProbabilityProducerScopeV1
+    subject_refs: tuple[str, ...]
+    decision_ref: str
+    registry_version: str
+    available_ns: int
+    valid_until_ns: int
+    purpose: str
+    authority_class: str
+
+    def __post_init__(self) -> None:
+        for name in ("grant_ref", "principal_ref", "control_domain_ref", "authentication_ref", "session_ref", "process_ref",
+                     "policy_ref", "decision_ref", "registry_version"):
+            _probability_text_v1(getattr(self, name))
+        _probability_int_v1(self.policy_epoch)
+        _probability_require_v1(type(self.role) is str and self.role in _PROBABILITY_ISSUER_ROLES_V1 and
+                                type(self.scope) is ProbabilityProducerScopeV1, "PROBABILITY_ISSUER_GRANT")
+        _probability_refs_v1(self.subject_refs, nonempty=True)
+        _probability_ns_v1(self.available_ns); _probability_ns_v1(self.valid_until_ns)
+        _probability_require_v1(self.available_ns < self.valid_until_ns, "PROBABILITY_ISSUER_LIFETIME")
+        _probability_require_v1(type(self.purpose) is str and self.purpose == "OFFLINE_PRODUCER_RECEIPT_ATTESTATION" and
+                                type(self.authority_class) is str and self.authority_class == "SCOPED_NO_EFFECT_ISSUER_ATTESTATION",
+                                "PROBABILITY_ISSUER_AUTHORITY")
+
+
+@dataclass(frozen=True, slots=True)
+class ProbabilityIssuerSnapshotV1:
+    snapshot_ref: str
+    policy_ref: str
+    policy_epoch: int
+    registry_version: str
+    process_ref: str
+    read_ns: int
+    valid_until_ns: int
+    invalidated_refs: tuple[str, ...]
+    entries: tuple[tuple[ProbabilityIssuerContextV1, ProbabilityIssuerGrantV1, str], ...]
+
+    def __post_init__(self) -> None:
+        for name in ("snapshot_ref", "policy_ref", "registry_version", "process_ref"):
+            _probability_text_v1(getattr(self, name))
+        _probability_int_v1(self.policy_epoch)
+        _probability_ns_v1(self.read_ns); _probability_ns_v1(self.valid_until_ns)
+        _probability_require_v1(self.read_ns < self.valid_until_ns, "PROBABILITY_ISSUER_LIFETIME")
+        _probability_refs_v1(self.invalidated_refs)
+        _probability_require_v1(type(self.entries) is tuple and bool(self.entries) and all(
+            type(entry) is tuple and len(entry) == 3 and type(entry[0]) is ProbabilityIssuerContextV1 and
+            type(entry[1]) is ProbabilityIssuerGrantV1 and type(entry[2]) is str for entry in self.entries),
+            "PROBABILITY_ISSUER_ENTRIES")
+
+
+@dataclass(frozen=True, slots=True)
+class ProbabilityIssuerAdmissionV1:
+    role: str
+    issuer_ref: str
+    authority_dependency_refs: tuple[str, ...]
+    valid_until_ns: int
+    no_effect_flags: NoEffectFlagsV1
+
+    def __post_init__(self) -> None:
+        _probability_require_v1(type(self.role) is str and self.role in _PROBABILITY_ISSUER_ROLES_V1, "PROBABILITY_ISSUER_ROLE")
+        _probability_text_v1(self.issuer_ref)
+        _probability_refs_v1(self.authority_dependency_refs, nonempty=True)
+        _probability_ns_v1(self.valid_until_ns)
+        if type(self.no_effect_flags) is not NoEffectFlagsV1 or any(
+                getattr(self.no_effect_flags, field.name) is not False for field in dataclass_fields(NoEffectFlagsV1)):
+            raise ContractValidationError(ReasonCode.RUNTIME_EFFECT_FORBIDDEN, "PROBABILITY_ISSUER_EFFECTS")
+
+
+class ProbabilityIssuerContextResolverProtocolV1(Protocol):
+    def read_probability_issuers(
+        self, requests: tuple[ProbabilityIssuerReadRequestV1, ...], *, evaluated_ns: int,
+    ) -> ContextManager[ProbabilityIssuerSnapshotV1]: ...
+
+
+class ProbabilityNativeUseReaderProtocolV1(Protocol):
+    def read_probability_native_use(
+        self, request: ProbabilityNativeUseRequestV1, *, evaluated_ns: int, deadline_ns: int,
+    ) -> ContextManager[ProbabilityNativeUseAdmissionV1]: ...
+
+    def check_probability_native_use(self, admission: ProbabilityNativeUseAdmissionV1, *, evaluated_ns: int) -> None: ...
 
 
 @runtime_checkable

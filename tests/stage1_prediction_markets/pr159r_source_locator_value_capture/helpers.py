@@ -11,7 +11,9 @@ def counts(artifacts):
 
 def no_authority_records(payload):
     return all(
-        all(value is False for value in record.get("no_authority_confirmation", {}).values())
+        isinstance(record.get("no_authority_confirmation"), dict)
+        and set(record["no_authority_confirmation"]) == set(c.NO_AUTHORITY_CONFIRMATION)
+        and all(value is False for value in record["no_authority_confirmation"].values())
         for record in payload["records"]
     )
 

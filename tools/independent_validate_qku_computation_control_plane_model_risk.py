@@ -401,9 +401,90 @@ def _adjudicate(
     )
 
 
+def _v35_independent_condition_matrix():
+    """Independent Boolean table; production provides only the observed outcome."""
+    from decimal import localcontext, ROUND_DOWN, ROUND_UP, Inexact, Overflow
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane.context import decimal_context_v1
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane.errors import NumericDomainError
+    names = ("NEGATIVE_OR_ZERO_EXECUTION_ADJUSTED_LCB", "MISSING_OR_STALE_REQUIRED_EVIDENCE",
+             "REPLAY_OR_PAPER_LANE_MISSING", "LOCK_OR_SCOPE_CONFLICT",
+             "UNCERTAINTY_OR_MODEL_RISK_DOMINATES_EDGE", "CAPACITY_OR_LIQUIDITY_HARD_VETO",
+             "STRONGEST_CLASSICAL_OR_NO_TRADE_DOMINATES", "INDEPENDENT_REVIEW_NOT_CLOSED")
+    controls, comparison = _controls(), _comparison()
+    basis = _basis(independent_review_state="CLOSED_INDEPENDENTLY_VALIDATED")
+    for mask in range(256):
+        conditions = tuple(NoTradeConditionOutcomeV1(name, bool(mask & (1 << bit)),
+            (f"SYNTHETIC::INDEPENDENT::{bit}",),
+            (ReasonCode.ST12F_MODEL_RISK_VETO,) if mask & (1 << bit) else ())
+            for bit, name in enumerate(names))
+        result = ModelRiskEvidenceAdjudicatorV1().adjudicate(
+            assessment_id="SYNTHETIC::V35::" + str(mask), input_lock_id="LOCK::1",
+            controls=controls, conditions=conditions, comparison=comparison,
+            adjudication_basis=basis, limitations=("SYNTHETIC_ONLY",), receipt_refs=("R::ASSESSMENT",))
+        expected = ("NO_TRADE" if any(mask & (1 << bit) for bit in range(7)) else
+                    "READY_FOR_INDEPENDENT_REVIEW" if mask & 128 else "CLOSED_INDEPENDENTLY_VALIDATED")
+        if (result.terminal_state != expected or result.control_evidence is not controls
+                or result.permanent_no_trade_comparison is not comparison or result.adjudication_basis is not basis
+                or result.automatic_promotion_allowed is not False):
+            raise ValueError("V35 independent condition decision or original basis mismatch: " + str(mask))
+        for before, after in zip(conditions, result.no_trade_condition_outcomes, strict=True):
+            if (before.condition_id != after.condition_id or before.active is not after.active
+                    or not set(before.reason_codes) <= set(after.reason_codes)
+                    or not set(before.evidence_receipt_refs) <= set(after.evidence_receipt_refs)):
+                raise ValueError("V35 incoming condition evidence was lost")
+    for precision, rounding in ((2, ROUND_DOWN), (9, ROUND_UP), (50, ROUND_DOWN)):
+        with localcontext() as context:
+            context.prec, context.rounding, context.Emin, context.Emax = precision, rounding, -10, 10
+            before = (context.prec, context.rounding, context.Emin, context.Emax,
+                      context.capitals, context.clamp, dict(context.traps), dict(context.flags))
+            result = _adjudicate(controls=controls, comparison=comparison, basis=basis)
+            if result.terminal_state != "CLOSED_INDEPENDENTLY_VALIDATED":
+                raise ValueError("V35 exact admitted reserve comparison changed")
+            reserves = replace(basis,
+                uncertainty_reserve=Decimal("0.50000000000000000000000000004"),
+                model_risk_reserve=Decimal("0.50000000000000000000000000004"))
+            edge = replace(comparison, candidate_utility=Decimal("1.00000000000000000000000000007"))
+            result = _adjudicate(controls=controls, comparison=edge, basis=reserves)
+            if (result.terminal_state != "NO_TRADE" or not result.no_trade_condition_outcomes[4].active
+                    or result.permanent_no_trade_comparison is not edge or result.adjudication_basis is not reserves):
+                raise ValueError("V35 exact reserve boundary lost its original veto or basis")
+            for candidate, classical, no_trade, winner in (
+                    ("1.004", "1.003", "1.002", "CANDIDATE"),
+                    ("1", "1", "1", "NO_TRADE"),
+                    ("1", "1", "0.9", "STRONGEST_CLASSICAL")):
+                ordered = replace(comparison, candidate_utility=Decimal(candidate),
+                    strongest_classical_utility=Decimal(classical), no_trade_utility=Decimal(no_trade),
+                    strongest_comparator=winner)
+                if (ordered.strongest_comparator != winner or
+                        (ordered.candidate_utility, ordered.strongest_classical_utility, ordered.no_trade_utility)
+                        != (Decimal(candidate), Decimal(classical), Decimal(no_trade))):
+                    raise ValueError("V35 exact comparator ordering or original values changed")
+            overflow_operand = Decimal((0, (9,), decimal_context_v1().Emax))
+            for uncertainty, model_risk, cause in (
+                    (Decimal("1"), Decimal("1E-34"), Inexact),
+                    (overflow_operand, overflow_operand, Overflow)):
+                unrepresentable = replace(basis, uncertainty_reserve=uncertainty, model_risk_reserve=model_risk)
+                try:
+                    _adjudicate(controls=controls, comparison=comparison, basis=unrepresentable)
+                except NumericDomainError as rejected:
+                    if rejected.reason_code is not ReasonCode.INVALID_NUMERIC_INPUT or type(rejected.__cause__) is not cause:
+                        raise ValueError("V35 reserve failure lost its original Decimal cause") from rejected
+                else:
+                    raise ValueError("V35 unrepresentable reserve sum was admitted")
+            trailing_zero = replace(basis,
+                uncertainty_reserve=Decimal("1.0000000000000000000000000000000000"), model_risk_reserve=Decimal("0"))
+            result = _adjudicate(controls=controls, comparison=comparison, basis=trailing_zero)
+            if result.terminal_state != "NO_TRADE" or not result.no_trade_condition_outcomes[4].active:
+                raise ValueError("V35 exact trailing-zero reserve sum was rounded or rejected")
+            if before != (context.prec, context.rounding, context.Emin, context.Emax,
+                          context.capitals, context.clamp, dict(context.traps), dict(context.flags)):
+                raise ValueError("V35 canonical arithmetic changed the caller's Decimal context")
+
+
 def main() -> int:
     try:
         receipt_row = _build_math45_receipt()
+        _v35_independent_condition_matrix()
     except (OSError, SyntaxError, ValueError, KeyError, TypeError) as exc:
         print(f"QKU_MODEL_RISK_INDEPENDENT_VALIDATION_FAILED::{exc}", file=sys.stderr)
         return 1

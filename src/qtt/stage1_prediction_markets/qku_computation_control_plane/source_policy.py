@@ -4552,21 +4552,25 @@ def _st12h_validate_repository_topology(repo_root: Path) -> tuple[str, ...]:
 
 
 def _st12h_workflow_contract_state(workflow_path: Path) -> Mapping[str, object]:
+    from tools.validate_no_runtime_artifacts import _ci_validation_dependency_block_v1
+
     try:
-        text = workflow_path.read_text(encoding="utf-8")
+        with workflow_path.open(encoding="utf-8", newline="") as source:
+            text = source.read(500000 + 1)
     except OSError as exc:
         raise SourcePolicyError(
             ReasonCode.SOURCE_EPOCH_MISSING,
             "current validation workflow is unavailable",
         ) from exc
-    if len(text.encode("utf-8")) > 256 * 1024:
+    if len(text.encode("utf-8")) > 500000:
         raise SourcePolicyError(
             ReasonCode.SOURCE_EPOCH_STALE,
             "current validation workflow exceeds the bounded contract parser limit",
         )
     setup_actions: list[str] = []
     python_versions: list[str] = []
-    pytest_installs: list[str] = []
+    dependency_block = _ci_validation_dependency_block_v1(text)
+    pytest_installs = () if dependency_block is None else (dependency_block[1],)
     phases: list[str] = []
     aggregate_needs: list[str] = []
     in_validation_job = False
@@ -4587,8 +4591,6 @@ def _st12h_workflow_contract_state(workflow_path: Path) -> Mapping[str, object]:
             python_versions.append(
                 stripped.partition(":")[2].strip().strip("'\"")
             )
-        elif stripped == "python -m pip install pytest==9.1.1":
-            pytest_installs.append(stripped)
         elif stripped.startswith("- phase:"):
             phases.append(stripped.partition(":")[2].strip())
         elif in_validation_job and in_needs and stripped.startswith("- "):
@@ -4605,12 +4607,14 @@ def _st12h_workflow_contract_state(workflow_path: Path) -> Mapping[str, object]:
 
 
 def _st12h_validate_workflow_contract(repo_root: Path) -> tuple[str, ...]:
+    from tools.validate_no_runtime_artifacts import _CI_VALIDATION_INSTALL_COMMAND_V1
+
     workflow_path = ".github/workflows/qtt_validation.yml"
     state = _st12h_workflow_contract_state(repo_root / workflow_path)
     if (
         state["setup_actions"] != ("actions/setup-python@v5", "actions/setup-python@v5")
         or state["python_versions"] != ("3.14.6", "3.14.6")
-        or state["pytest_installs"] != ("python -m pip install pytest==9.1.1",)
+        or state["pytest_installs"] != (_CI_VALIDATION_INSTALL_COMMAND_V1,)
         or len(state["phases"]) != 13
         or state["aggregate_needs"] != ("validation_shards",)
     ):

@@ -60,9 +60,9 @@ OWNER_QUESTION_ONLY_FILENAMES = (
 )
 
 
-def _generated_file_texts(generated_dir: Path) -> dict[str, str]:
+def _generated_file_bytes(generated_dir: Path) -> dict[str, bytes]:
     return {
-        path.name: path.read_text(encoding="utf-8")
+        path.name: path.read_bytes()
         for path in sorted(generated_dir.glob("*"), key=lambda p: p.name)
         if path.is_file()
     }
@@ -315,11 +315,11 @@ def _failures(generated_dir: Path) -> list[str]:
 def _assert_deterministic(generated_dir: Path) -> None:
     from .builder import run_layer
 
-    before = _generated_file_texts(generated_dir)
+    before = _generated_file_bytes(generated_dir)
     run_layer(out_dir=generated_dir)
-    middle = _generated_file_texts(generated_dir)
+    middle = _generated_file_bytes(generated_dir)
     run_layer(out_dir=generated_dir)
-    after = _generated_file_texts(generated_dir)
+    after = _generated_file_bytes(generated_dir)
     if before != middle or middle != after:
         raise Qopt1ValidationError("QOPT1 generated outputs are not deterministic across repeated runs")
 

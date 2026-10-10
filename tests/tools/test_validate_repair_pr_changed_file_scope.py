@@ -20,74 +20,63 @@ def _force_pr166_sm2_repair_branch(monkeypatch: pytest.MonkeyPatch) -> None:
 
 
 def _fake_status_git(lines: Sequence[str]):
-    def fake_git(
-        repo_root: Path,
-        args: Sequence[str],
-    ) -> tuple[int, str, str]:
-        if tuple(args) == ("status", "--porcelain", "--untracked-files=all"):
-            return 0, "\n".join(lines), ""
-        raise AssertionError(f"unexpected fallback diff query: {tuple(args)!r}")
-
+    def fake_git(repo_root: Path, args: Sequence[str]) -> tuple[int, str, str]:
+        if tuple(args) == ("merge-base", "--all", "refs/remotes/origin/main", "HEAD"):
+            return 0, "a" * 40 + "\n", ""
+        if tuple(args) == ("diff", "--name-only", "-z", "--no-renames", "--no-ext-diff", "--no-textconv", "--ignore-submodules=none", "a" * 40, "HEAD", "--"):
+            return 0, "", ""
+        if tuple(args) == ("status", "--porcelain=v1", "-z", "--untracked-files=all", "--ignore-submodules=none"):
+            return 0, "".join(line.replace("\\", "/") + "\0" for line in lines), ""
+        raise AssertionError(f"unexpected exact scope query: {tuple(args)!r}")
     return fake_git
 
 
 def test_changed_files_from_git_prefers_worktree_status(monkeypatch):
-    calls: list[tuple[str, ...]] = []
-
-    def fake_git(
-        repo_root: Path,
-        args: Sequence[str],
-    ) -> tuple[int, str, str]:
-        calls.append(tuple(args))
-        if tuple(args) == ("status", "--porcelain", "--untracked-files=all"):
-            return (
-                0,
-                "\n".join(
-                    (
-                        " M tools/ci_branch_context.py",
-                        "M tests\\tools\\test_validate_repair_pr_changed_file_scope.py",
-                        "?? src/qtt/stage1_prediction_markets/bounded_idempotence.py",
-                        "R  old_name.py -> tests/tools/test_ci_branch_context.py",
-                    )
-                ),
-                "",
-            )
-        raise AssertionError(f"unexpected fallback diff query: {tuple(args)!r}")
-
+    # The original identity now guards cumulative-plus-dirty behavior, not the bug.
+    calls = []
+    def fake_git(root, args):
+        args = tuple(args)
+        calls.append(args)
+        if args[0] == "merge-base":
+            return 0, "a" * 40 + "\n", ""
+        if args[0] == "diff":
+            return 0, "earlier-commit.py\0deleted.py\0", ""
+        assert args == ("status", "--porcelain=v1", "-z", "--untracked-files=all", "--ignore-submodules=none")
+        return 0, (" M tools/ci_branch_context.py\0"
+            "M  tests/tools/test_validate_repair_pr_changed_file_scope.py\0"
+            "?? src/qtt/stage1_prediction_markets/bounded_idempotence.py\0"
+            "R  tests/tools/test_ci_branch_context.py\0old_name.py\0"), ""
     monkeypatch.setattr(validator, "_git", fake_git)
-
     assert validator._changed_files_from_git(Path(".")) == (
+        "deleted.py", "earlier-commit.py", "old_name.py",
         "src/qtt/stage1_prediction_markets/bounded_idempotence.py",
-        "tests/tools/test_ci_branch_context.py",
-        "tests/tools/test_validate_repair_pr_changed_file_scope.py",
-        "tools/ci_branch_context.py",
-    )
-    assert calls == [("status", "--porcelain", "--untracked-files=all")]
+        "tests/tools/test_ci_branch_context.py", "tests/tools/test_validate_repair_pr_changed_file_scope.py",
+        "tools/ci_branch_context.py")
+    assert [a[0] for a in calls] == ["merge-base", "diff", "status"]
+    assert calls[1][1:7] == ("--name-only", "-z", "--no-renames", "--no-ext-diff", "--no-textconv", "--ignore-submodules=none")
 
 
 def test_changed_files_from_git_falls_back_to_committed_diff(monkeypatch):
-    calls: list[tuple[str, ...]] = []
-
-    def fake_git(
-        repo_root: Path,
-        args: Sequence[str],
-    ) -> tuple[int, str, str]:
+    import pytest
+    from tools.validation_reliability import ValidationReliabilityError
+    calls = []
+    def fake_git(root, args):
         calls.append(tuple(args))
-        if tuple(args) == ("status", "--porcelain", "--untracked-files=all"):
-            return 0, "", ""
-        if tuple(args) == ("diff", "--name-only", "HEAD^1", "HEAD"):
-            return 0, "tools\\ci_branch_context.py\n", ""
-        raise AssertionError(f"unexpected diff query: {tuple(args)!r}")
-
+        if args[0] == "merge-base":
+            return 0, "a" * 40 + "\n", ""
+        if args[0] == "diff":
+            return 0, "tools/ci_branch_context.py\0", ""
+        return 0, "", ""
     monkeypatch.setattr(validator, "_git", fake_git)
-
-    assert validator._changed_files_from_git(Path(".")) == (
-        "tools/ci_branch_context.py",
-    )
-    assert calls == [
-        ("status", "--porcelain", "--untracked-files=all"),
-        ("diff", "--name-only", "HEAD^1", "HEAD"),
-    ]
+    assert validator._changed_files_from_git(Path(".")) == ("tools/ci_branch_context.py",)
+    assert [a[0] for a in calls] == ["merge-base", "diff", "status"]
+    for broken in ((False, "", ""), (1, "", "native denied"), (0, "unterminated", ""),
+                   (0, "a.py\0A.py\0", ""), (0, "a.py\0a.py\0", "")):
+        def malformed(root, args):
+            return fake_git(root, args) if args[0] == "merge-base" else broken
+        monkeypatch.setattr(validator, "_git", malformed)
+        with pytest.raises(ValidationReliabilityError):
+            validator._changed_files_from_git(Path("."))
 
 
 def test_untracked_validation_router_runtime_artifact_is_ignored(monkeypatch):

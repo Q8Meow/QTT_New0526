@@ -35,21 +35,12 @@ class RP5DValidationError(AssertionError):
     """Raised when RP5D generated surfaces violate their contract."""
 
 
-def _generated_file_texts() -> dict[str, str]:
+def _generated_file_bytes() -> dict[str, bytes]:
     return {
-        path.name: path.read_text(encoding="utf-8")
+        path.name: path.read_bytes()
         for path in sorted(GENERATED_DIR.glob("*"), key=lambda p: p.name)
         if path.is_file()
     }
-
-
-def _restore_generated_file_texts(snapshot: dict[str, str]) -> None:
-    GENERATED_DIR.mkdir(parents=True, exist_ok=True)
-    for path in GENERATED_DIR.iterdir():
-        if path.is_file() and path.name not in snapshot:
-            path.unlink()
-    for name, text in snapshot.items():
-        (GENERATED_DIR / name).write_text(text, encoding="utf-8")
 
 
 def _row_files() -> dict[str, list[dict[str, Any]]]:
@@ -343,14 +334,10 @@ def _failures() -> list[str]:
 def _assert_deterministic() -> None:
     from .runner import run_layer
 
-    before = _generated_file_texts()
-    try:
-        run_layer(offline=True)
-        middle = _generated_file_texts()
-        run_layer(offline=True)
-        after = _generated_file_texts()
-    finally:
-        _restore_generated_file_texts(before)
+    run_layer(offline=True)
+    middle = _generated_file_bytes()
+    run_layer(offline=True)
+    after = _generated_file_bytes()
     if middle != after:
         raise RP5DValidationError("RP5D generated outputs are not deterministic across repeated runs")
 

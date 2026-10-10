@@ -10,6 +10,11 @@ import re
 import subprocess
 from typing import Any, Mapping, Sequence
 
+from tools.validation_reliability import (
+    _preflight_active_v1, _preflight_kind_v1, _preflight_read_bytes_v1,
+    _preflight_read_text_v1, _preflight_directory_v1, _preflight_files_v1,
+)
+
 from tools.ci_branch_context import (
     VALIDATION_INFRASTRUCTURE_CHANGED_PATHS,
     current_branch_context,
@@ -17,6 +22,7 @@ from tools.ci_branch_context import (
     is_pr_or_later_branch,
     is_validation_infrastructure_changed_path,
 )
+from tools.validation_reliability import parse_git_status_porcelain_v1_z
 from tools.validation_scope_registry import is_pr_scoped_changed_path_allowed
 
 from . import constants as c
@@ -30,7 +36,7 @@ def json_dump(value: Any) -> str:
 
 
 def _read_text(path: Path) -> str:
-    return path.read_text(encoding="utf-8")
+    return _preflight_read_text_v1(path)
 
 
 def _read_json(path: Path) -> dict[str, Any]:
@@ -390,7 +396,7 @@ def _validation_infrastructure_delta_policy_failures(repo_root: Path) -> list[st
         key=_stable_path_key,
     ):
         path = repo_root / rel_path
-        if not path.is_file():
+        if not (_preflight_kind_v1(path, optional=True) == "file"):
             failures.append(
                 "PR152_VALIDATION_INFRASTRUCTURE_DELTA_POLICY_MISSING_TOOL: "
                 f"{rel_path}"
@@ -528,8 +534,11 @@ def _project_validation_infrastructure_report_counts(
     repo_root: Path,
     report: dict[str, Any],
 ) -> dict[str, Any]:
+    tracked_path = repo_root / c.REPORT_PATH
+    if _preflight_kind_v1(tracked_path, optional=True) is None:
+        return report
     try:
-        tracked_report = _read_json(repo_root / c.REPORT_PATH)
+        tracked_report = _read_json(tracked_path)
     except (OSError, ValueError, json.JSONDecodeError):
         return report
     diagnostics = report_payload_mismatch_diagnostics(
@@ -559,7 +568,7 @@ def _read_required_text(
     failures: list[str],
 ) -> str:
     path = root / rel_path
-    if not path.exists():
+    if not (_preflight_kind_v1(path, optional=True) is not None):
         failures.append(f"PR152_UPSTREAM_REPORT_MISSING: {key}: {rel_path.as_posix()}")
         return ""
     try:
@@ -578,7 +587,7 @@ def _read_required_json(
     failures: list[str],
 ) -> dict[str, Any]:
     path = root / rel_path
-    if not path.exists():
+    if not (_preflight_kind_v1(path, optional=True) is not None):
         failures.append(f"PR152_UPSTREAM_REPORT_MISSING: {key}: {rel_path.as_posix()}")
         return {}
     try:
@@ -592,12 +601,12 @@ def _read_required_json(
 
 def _optional_payload(root: Path, rel_path: Path, failures: list[str]) -> Any:
     path = root / rel_path
-    if not path.exists():
+    if not (_preflight_kind_v1(path, optional=True) is not None):
         return None
-    if path.is_dir():
+    if (_preflight_kind_v1(path) == "directory"):
         return {
-            "directory_entry_count": len(list(path.iterdir())),
-            "directory_file_names": sorted(child.name for child in path.iterdir()),
+            "directory_entry_count": len(list((child for child, _kind in _preflight_directory_v1(path)))),
+            "directory_file_names": sorted(child.name for child in (child for child, _kind in _preflight_directory_v1(path))),
             "present": True,
         }
     if path.suffix == ".json":
@@ -621,8 +630,8 @@ def _optional_payload(root: Path, rel_path: Path, failures: list[str]) -> Any:
 def _crosswalk_payload(root: Path, failures: list[str]) -> tuple[dict[str, Any], dict[str, Any]]:
     alias_path = root / c.PR136_SECTION_CROSSWALK_ALIAS_PATH
     canonical_path = root / c.PR136_SECTION_CROSSWALK_CANONICAL_PATH
-    alias_exists = alias_path.exists()
-    canonical_exists = canonical_path.exists()
+    alias_exists = (_preflight_kind_v1(alias_path, optional=True) is not None)
+    canonical_exists = (_preflight_kind_v1(canonical_path, optional=True) is not None)
     selected = (
         c.PR136_SECTION_CROSSWALK_ALIAS_PATH
         if alias_exists
@@ -665,27 +674,29 @@ def _path_records(paths: Sequence[Path | str], present: set[str], required: bool
 
 
 def _git_stdout(repo_root: Path, args: Sequence[str]) -> tuple[int, str, str]:
-    completed = subprocess.run(
-        ["git", *args],
-        cwd=repo_root,
-        check=False,
-        capture_output=True,
-        text=True,
-    )
+    from tools.ci_branch_context import _run_pr152_repository_read
+
+    completed = _run_pr152_repository_read(repo_root, args)
     return completed.returncode, completed.stdout, completed.stderr
 
 
 def _tracked_files(repo_root: Path) -> tuple[list[str], str, int]:
-    if not repo_root.exists():
+    observation = _preflight_active_v1(repo_root)
+    if _preflight_kind_v1(repo_root, optional=True) is None:
         return [], "deterministic path traversal", 0
     rc, stdout, _stderr = _git_stdout(repo_root, ["ls-files", "-z"])
+    if observation is not None:
+        from tools.validation_reliability import _scope_nul_paths
+        if type(rc) is not int or rc != 0 or type(stdout) is not str or type(_stderr) is not str:
+            observation.fail(f"tracked inventory Git failed: exit={rc}; stderr={_stderr!r}")
+        return _stable_sorted_repo_paths(_scope_nul_paths(stdout)), "git ls-files -z", 0
     if rc == 0 and stdout:
         return _stable_sorted_repo_paths(stdout.split("\0")), "git ls-files -z", 0
 
     excluded_count = 0
     paths: list[str] = []
     for path in sorted(
-        repo_root.rglob("*"),
+        _preflight_files_v1(repo_root, recursive=True, include_directories=True),
         key=lambda item: _stable_path_key(item.relative_to(repo_root)),
     ):
         rel = path.relative_to(repo_root).as_posix()
@@ -693,14 +704,14 @@ def _tracked_files(repo_root: Path) -> tuple[list[str], str, int]:
         if parts.intersection(c.INVENTORY_EXCLUDED_LOCAL_RUNTIME_PATTERNS):
             excluded_count += 1
             continue
-        if path.is_file():
+        if (_preflight_kind_v1(path, optional=True) == "file"):
             paths.append(rel)
     return _stable_sorted_repo_paths(paths), "deterministic path traversal", excluded_count
 
 
 def _is_text_file(path: Path) -> bool:
     try:
-        data = path.read_bytes()
+        data = _preflight_read_bytes_v1(path)
     except OSError:
         return False
     if b"\x00" in data:
@@ -888,7 +899,7 @@ def load_static_evidence(repo_root: Path | str) -> tuple[dict[str, Any], list[st
     for rel_path in c.OPTIONAL_CONTEXT_ARTIFACTS:
         payload = _optional_payload(root, rel_path, failures)
         optional_payloads[rel_path.as_posix()] = payload
-        if (root / rel_path).exists():
+        if (_preflight_kind_v1(root / rel_path, optional=True) is not None):
             present.add(rel_path.as_posix())
 
     inventory = _repo_inventory(root)
@@ -1222,10 +1233,10 @@ def _scan_pr152_files(root: Path) -> dict[str, Any]:
         ):
             continue
         path = root / rel_path
-        if not path.exists() or path.suffix != ".py":
+        if not (_preflight_kind_v1(path, optional=True) is not None) or path.suffix != ".py":
             continue
         inspected.append(rel_path)
-        text = path.read_text(encoding="utf-8")
+        text = _preflight_read_text_v1(path)
         try:
             tree = ast.parse(text)
         except SyntaxError:
@@ -1301,6 +1312,19 @@ def _build_payload(evidence: Mapping[str, Any]) -> dict[str, Any]:
     root = Path(evidence["repo_root"])
     payloads = _mapping(evidence.get("json_payloads"))
     present = set(str(path) for path in evidence.get("present_paths", set()))
+    # The already-selected PR136 alias satisfies this one required input role.
+    # Report actual consumed paths; do not mark an unread canonical file consumed.
+    required_paths = tuple(
+        c.PR136_SECTION_CROSSWALK_ALIAS_PATH
+        if (
+            path == c.PR136_SECTION_CROSSWALK_CANONICAL_PATH
+            and evidence["alias_resolution"].get("alias_used") is True
+            and evidence["alias_resolution"].get("selected_path")
+            == c.PR136_SECTION_CROSSWALK_ALIAS_PATH.as_posix()
+        )
+        else path
+        for path in c.REQUIRED_UPSTREAM_ARTIFACTS
+    )
     inventory_record = _mapping(evidence.get("inventory"))
     tracked = [str(path) for path in inventory_record.get("tracked_files", [])]
     inventory = _mapping(inventory_record.get("audit"))
@@ -1325,11 +1349,11 @@ def _build_payload(evidence: Mapping[str, Any]) -> dict[str, Any]:
             "random_ids_allowed": False,
             "tracked_timestamp_policy": c.STATIC_TIME,
         },
-        "upstream_artifact_inputs": _path_records(c.REQUIRED_UPSTREAM_ARTIFACTS, present, True),
+        "upstream_artifact_inputs": _path_records(required_paths, present, True),
         "optional_context_inputs": _path_records(c.OPTIONAL_CONTEXT_ARTIFACTS, present, False),
         "orchestration_preflight_receipt": {
             "alias_resolution": evidence["alias_resolution"],
-            "all_required_inputs_consumed": all(path.as_posix() in present for path in c.REQUIRED_UPSTREAM_ARTIFACTS),
+            "all_required_inputs_consumed": all(path.as_posix() in present for path in required_paths),
             "owner_source_packet_consumed": c.SOURCE_EVIDENCE_PACKET_PATH.as_posix() in present,
             "pr149_report_consumed": c.PR149_REPORT_PATH.as_posix() in present,
             "pr150_report_consumed": c.PR150_REPORT_PATH.as_posix() in present,
@@ -1477,6 +1501,7 @@ def _build_payload(evidence: Mapping[str, Any]) -> dict[str, Any]:
 
 
 def build_report(repo_root: Path | str) -> dict[str, Any]:
+    _preflight_active_v1(repo_root)
     root = Path(repo_root).resolve()
     evidence, failures = load_static_evidence(root)
     if failures:
@@ -1679,18 +1704,15 @@ def _changed_paths(repo_root: Path) -> list[str]:
     )
     if status_rc != 0:
         return ["<git-status-unavailable>"]
+    try:
+        records = parse_git_status_porcelain_v1_z(status_out)
+    except ValueError:
+        return ["<git-status-unavailable>"]
     paths: list[str] = []
-    records = [record for record in status_out.split("\0") if record]
-    index = 0
-    while index < len(records):
-        line = records[index]
-        if not line.strip():
-            index += 1
-            continue
-        code = line[:2]
-        path = line[3:] if len(line) > 3 and line[2] == " " else line[2:].strip()
-        paths.append(_normalize_repo_relative_path(path))
-        index += 2 if code[:1] in {"R", "C"} or code[1:] in {"R", "C"} else 1
+    for _code, destination, original in records:
+        paths.append(destination)
+        if original is not None:
+            paths.append(original)
     return _stable_sorted_repo_paths(paths)
 
 
@@ -1743,7 +1765,7 @@ def _validate_changed_paths(
     *,
     tracked_report_write_allowed: bool = False,
 ) -> list[str]:
-    branch = current_branch_context(repo_root).branch
+    branch = current_branch_context(repo_root, git_stdout=_git_stdout).branch
     failures: list[str] = []
     sidecar = _forbidden_bundle_sidecar_path()
     for path in _changed_paths(repo_root):
@@ -1789,9 +1811,9 @@ def validate_repository_artifacts(
     try:
         actual_report = _read_json(root / c.REPORT_PATH)
     except (OSError, ValueError, json.JSONDecodeError) as exc:
-        actual_report = {}
+        actual_report = None
         failures.append(f"PR152_REPORT_INVALID: {c.REPORT_PATH.as_posix()}: {exc}")
-    if actual_report and actual_report != expected_report:
+    if actual_report is not None and actual_report != expected_report:
         diagnostics = report_payload_mismatch_diagnostics(
             actual_report,
             expected_report,
@@ -1806,14 +1828,14 @@ def validate_repository_artifacts(
                     diagnostics,
                 )
             )
-    if actual_report and actual_report != expected_report and diagnostics:
+    if actual_report is not None and actual_report != expected_report and diagnostics:
         failures.append("PR152_REPORT_STALE_OR_NONDETERMINISTIC")
         for diagnostic in diagnostics:
             failures.append(
                 "PR152_REPORT_STALE_OR_NONDETERMINISTIC_DETAIL: "
                 f"{_format_report_mismatch_diagnostic(diagnostic)}"
             )
-    if actual_report:
+    if actual_report is not None:
         failures.extend(validate_report_payload(actual_report))
 
     failures.extend(

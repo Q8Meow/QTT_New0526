@@ -93,6 +93,13 @@ def test_pr208_generated_reports_do_not_contain_backslash_path_refs_if_present()
 
     assert path_invariant_failures(REPO_ROOT, reports) == ()
 
+    from tools import validation_reliability as owner
+    from unittest.mock import patch
+    with patch.object(owner.os, "scandir", side_effect=PermissionError("synthetic enumeration denied")):
+        with pytest.raises(owner.ValidationReliabilityError, match="enumeration denied"):
+            pr208_generated_reports(REPO_ROOT)
+
+
 
 def test_validator_inventory_globs_are_posix_for_cross_platform_ci():
     for entry in validation_inventory.validation_inventory():

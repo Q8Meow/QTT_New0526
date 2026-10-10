@@ -22,6 +22,8 @@ from .io import (
     resolve_repo_relative,
     write_json,
 )
+from src.qtt.stage1_prediction_markets.qku_computation_control_plane.serialization import _report_carry_candidate_lineage_v1
+from src.qtt.stage1_prediction_markets.qku_computation_control_plane.serialization import _report_companion_alignment_v1
 
 
 @dataclass(frozen=True)
@@ -67,7 +69,10 @@ def build_payloads_with_shards(repo_root: Path) -> tuple[dict[str, dict[str, Any
     source = load_sources(repo_root)
     contexts = build_candidate_contexts(source)
     selected = select_retest_subset(contexts)
-    evidence_rows = [materialize_evidence(ctx, selected) for ctx in contexts]
+    evidence_rows = [
+        _report_carry_candidate_lineage_v1(ctx["handoff"], materialize_evidence(ctx, selected))
+        for ctx in contexts
+    ]
     row_payloads = build_row_payloads(source, evidence_rows)
     row_payloads["PR166_QC_ReportManifest.report.json"] = []
     payloads, shard_payloads = payloads_from_rows(row_payloads)
@@ -146,17 +151,13 @@ def build_candidate_contexts(source: SourceData) -> list[dict[str, Any]]:
         "PR166_QB_NoOrphanProof.report.json",
         "PR166_Q_PR166_QC_QuantumSelectedReplayPaperRetestHandoff.report.json",
     )
-    companions = {
-        name: sorted(
-            source.records[name],
-            key=lambda item: str(item.get("deterministic_sort_key") or item.get("row_id")),
-        )
-        for name in companion_names
-    }
+    companions = _report_companion_alignment_v1(
+        handoffs, {name: source.records[name] for name in companion_names}
+    )
     contexts: list[dict[str, Any]] = []
     for index, row in enumerate(handoffs, start=1):
         companion = {
-            name: rows[index - 1] if index <= len(rows) else {}
+            name: rows[index - 1]
             for name, rows in companions.items()
         }
         contexts.append(
@@ -213,7 +214,12 @@ def select_retest_subset(contexts: list[dict[str, Any]]) -> set[str]:
     for ctx in ranked:
         if len(selected) >= c.RETEST_CAPS["max_actual_replay_paper_rows_default_ci"]:
             break
-        selected.add(str(ctx["upstream_pr166_qb_row_ref"]))
+        row_ref = str(ctx["upstream_pr166_qb_row_ref"])
+        role = str(ctx["benchmark_role"])
+        if row_ref in selected or per_role[role] >= c.RETEST_CAPS["max_rows_per_role_default_ci"]:
+            continue
+        selected.add(row_ref)
+        per_role[role] += 1
     return selected
 
 

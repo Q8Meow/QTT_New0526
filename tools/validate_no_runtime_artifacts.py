@@ -361,17 +361,63 @@ PACKAGE_INSTALL_LINE_HINTS = (
     "conda ",
 )
 
-# CI_TEST_DEPENDENCY_ALLOWLIST is the only package-install exception: CI may
-# install one exact approved pytest dependency before running the repository's
-# canonical validation gates.
-CI_TEST_DEPENDENCY_ALLOWLIST = {
-    pathlib.PurePosixPath(".github/workflows/qtt_validation.yml"): frozenset(
-        {
-            "python -m pip install pytest",
-            "python -m pip install pytest==9.1.1",
-        }
-    ),
-}
+# The only install exception is the complete selected executable CI stanza.
+CI_TEST_DEPENDENCY_ALLOWLIST = frozenset({
+    pathlib.PurePosixPath(".github/workflows/qtt_validation.yml"),
+})
+_CI_VALIDATION_DEPENDENCY_SCRIPT_V1 = r"""python -m pip install --only-binary=:all: --no-deps --index-url https://pypi.org/simple \
+  pytest==9.1.1 \
+  iniconfig==2.3.0 \
+  packaging==26.0 \
+  pluggy==1.6.0 \
+  pygments==2.21.0 \
+  websockets==17.0.1 \
+  cryptography==50.0.1 \
+  cffi==2.1.1 \
+  pycparser==3.0 \
+  jsonschema==4.26.0 \
+  jsonschema-specifications==2025.9.1 \
+  referencing==0.37.0 \
+  rpds-py==2026.5.1 \
+  attrs==26.1.0
+python -m pip check
+python - <<'PY'
+from importlib.metadata import PackageNotFoundError, version
+
+expected = (
+    ('pytest', '9.1.1'),
+    ('iniconfig', '2.3.0'),
+    ('packaging', '26.0'),
+    ('pluggy', '1.6.0'),
+    ('pygments', '2.21.0'),
+    ('websockets', '17.0.1'),
+    ('cryptography', '50.0.1'),
+    ('cffi', '2.1.1'),
+    ('pycparser', '3.0'),
+    ('jsonschema', '4.26.0'),
+    ('jsonschema-specifications', '2025.9.1'),
+    ('referencing', '0.37.0'),
+    ('rpds-py', '2026.5.1'),
+    ('attrs', '26.1.0'),
+)
+failures = []
+for name, wanted in expected:
+    try:
+        actual = version(name)
+    except PackageNotFoundError:
+        failures.append(f"{name}: missing; required {wanted}")
+    else:
+        if actual != wanted:
+            failures.append(f"{name}: {actual}; required {wanted}")
+if failures:
+    raise SystemExit("CI dependency profile mismatch: " + "; ".join(failures))
+print("Selected CI dependency versions verified.")
+PY"""
+_CI_VALIDATION_INSTALL_COMMAND_V1 = " ".join(
+    _CI_VALIDATION_DEPENDENCY_SCRIPT_V1.partition("python -m pip check")[0]
+    .replace(chr(92), " ").split()
+)
+
 
 CONTENT_PATTERNS = {
     "forbid_source_retrieval": [
@@ -1069,7 +1115,113 @@ def _matched_line(text: str, match: re.Match[str]) -> str:
     return text[line_start:line_end].strip()
 
 
-_F14_NATIVE_INSTALL = 'python -m pip install --only-binary=:all: --no-deps --index-url https://pypi.org/simple websockets==17.0.1 cryptography==50.0.1 cffi==2.1.1 pycparser==3.0'
+def _ci_validation_dependency_block_v1(text: str) -> tuple[int, str] | None:
+    """Recognize this one block layout as data; this is not a YAML interpreter."""
+    if not isinstance(text, str):
+        return None
+    try:
+        if len(text.encode("utf-8")) > 500000:
+            return None
+    except UnicodeError:
+        return None
+    text = text.replace("\r\n", "\n")
+    if "\r" in text or re.search(r"^[ \t]*\t", text, re.MULTILINE):
+        return None
+    if (len(re.findall(r"&install_pytest\b", text)) != 1
+            or re.search(r"\*install_pytest\b", text)):
+        return None
+    lines = text.split("\n")
+    outline: list[tuple[int, int, str, str, str]] = []
+    scalar_indent = None
+    for number, line in enumerate(lines, 1):
+        body = line.lstrip(" ")
+        if not body or body.startswith("#"):
+            continue
+        indent = len(line) - len(body)
+        if scalar_indent is not None and indent > scalar_indent:
+            continue
+        scalar_indent = None
+        field = re.fullmatch(r"(?:- )?([A-Za-z_][\w-]*):(?: +(.*))?", body)
+        if field is None:
+            # The current layout also has plain sequence items (e.g. needs).
+            if re.fullmatch(r"- [A-Za-z_][\w-]*", body):
+                outline.append((number, indent, body, "", ""))
+                continue
+            return None
+        key, value = field.group(1), field.group(2) or ""
+        if value.startswith(("'", '"')) and not (
+            re.fullmatch(r"'(?:[^']|'')*'", value)
+            or re.fullmatch(r'"(?:[^"\\]|\\.)*"', value)
+        ):
+            return None
+        if re.fullmatch(r"(?:&[A-Za-z_][\w-]* )?[|>]", value):
+            scalar_indent = indent
+        elif value.startswith(("|", ">")):
+            return None
+        outline.append((number, indent, body, key, value))
+
+    def children(parent, indent):
+        position = outline.index(parent) + 1
+        descendants = []
+        for row in outline[position:]:
+            if row[1] <= parent[1]:
+                break
+            if row[1] == indent:
+                descendants.append(row)
+        return descendants
+
+    roots = [row for row in outline if row[1] == 0]
+    jobs = [row for row in roots if row[3] == "jobs"]
+    if len(jobs) != 1 or jobs[0][2] != "jobs:":
+        return None
+    job_rows = children(jobs[0], 2)
+    if any(not re.fullmatch(r"[A-Za-z_][\w-]*:", row[2]) for row in job_rows):
+        return None
+    selected = [row for row in job_rows if row[3] == "validation_shards"]
+    if len(selected) != 1:
+        return None
+    job_fields = children(selected[0], 4)
+    if any(row[3] in {"if", "continue-on-error", "uses"} for row in job_fields):
+        return None
+    steps = [row for row in job_fields if row[3] == "steps"]
+    if len(steps) != 1 or steps[0][2] != "steps:":
+        return None
+    step_rows = children(steps[0], 6)
+    if any(not row[2].startswith("- name: ") for row in step_rows):
+        return None
+    installs = [row for row in outline if row[2] == "- name: Install test dependency"]
+    if len(installs) != 1 or installs[0] not in step_rows:
+        return None
+    preceding = step_rows[:step_rows.index(installs[0])]
+    if (sum(row[2] == "- name: Set up Python" for row in preceding) != 1
+            or any(field[3] == "run" for step in preceding for field in children(step, 8))):
+        return None
+    install_fields = children(installs[0], 8)
+    if len(install_fields) != 1 or install_fields[0][2] != "run: &install_pytest |":
+        return None
+    run_line = install_fields[0][0]
+    end = run_line
+    while end < len(lines):
+        line = lines[end]
+        if line.strip() and len(line) - len(line.lstrip(" ")) <= 8:
+            break
+        end += 1
+    scalar_lines = lines[run_line:end]
+    while scalar_lines and not scalar_lines[-1].strip():
+        scalar_lines.pop()
+    scalar = "\n".join(scalar_lines)
+    expected = "\n".join("          " + line if line else ""
+                         for line in _CI_VALIDATION_DEPENDENCY_SCRIPT_V1.split("\n"))
+    if scalar != expected:
+        return None
+    # Text in comments/heredocs or another step must not create a second slot.
+    pip_pattern = next(pattern for label, pattern in CONTENT_PATTERNS["forbid_package_install_scripts"]
+                       if label == "pip install command")
+    matches = list(re.finditer(pip_pattern, text, re.IGNORECASE | re.MULTILINE))
+    install_line = run_line + 1
+    if len(matches) != 1 or text.count("\n", 0, matches[0].start()) + 1 != install_line:
+        return None
+    return install_line, _CI_VALIDATION_INSTALL_COMMAND_V1
 
 
 def _is_ci_test_dependency_allowlisted_pip_install(
@@ -1078,14 +1230,12 @@ def _is_ci_test_dependency_allowlisted_pip_install(
     match: re.Match[str],
     allowlist_hits: dict[tuple[pathlib.PurePosixPath, str], int],
 ) -> bool:
-    allowed_commands = CI_TEST_DEPENDENCY_ALLOWLIST.get(path)
-    if allowed_commands is None:
+    if path not in CI_TEST_DEPENDENCY_ALLOWLIST:
         return False
-    line = _matched_line(text, match)
-    slot = "pytest" if line in allowed_commands else "native" if line == _F14_NATIVE_INSTALL else None
-    if slot is None:
+    block = _ci_validation_dependency_block_v1(text)
+    if block is None or text.count("\n", 0, match.start()) + 1 != block[0]:
         return False
-    key = (path, slot)
+    key = (path, block[1])
     allowlist_hits[key] = allowlist_hits.get(key, 0) + 1
     return allowlist_hits[key] == 1
 
@@ -1131,6 +1281,15 @@ def _scan_package_install_text_file(
 ) -> list[str]:
     violations: list[str] = []
     ci_test_dependency_allowlist_hits: dict[tuple[pathlib.PurePosixPath, str], int] = {}
+    if path in CI_TEST_DEPENDENCY_ALLOWLIST:
+        try:
+            with source_path.open(encoding="utf-8", newline="") as source:
+                text = source.read(500000 + 1)
+        except (OSError, UnicodeError) as exc:
+            return [f"unable to scan package install text in {path}: {exc.__class__.__name__}"]
+        if len(text.encode("utf-8")) > 500000:
+            return [f"CI dependency workflow exceeds bounded contract limit: {path}"]
+        return _scan_text_content(path, text, ["forbid_package_install_scripts"])
     try:
         lines = source_path.open(encoding="utf-8", errors="ignore")
     except OSError as exc:
@@ -1274,7 +1433,20 @@ def scan_repository(
             continue
 
         stats.content_files_scanned += 1
-        text = path.read_text(encoding="utf-8", errors="ignore")
+        if rel in CI_TEST_DEPENDENCY_ALLOWLIST:
+            try:
+                with path.open(encoding="utf-8", newline="") as source:
+                    text = source.read(500000 + 1)
+            except UnicodeError:
+                violations.append(f"CI dependency workflow is not UTF-8: {rel}")
+                maybe_progress()
+                continue
+            if len(text.encode("utf-8")) > 500000:
+                violations.append(f"CI dependency workflow exceeds bounded contract limit: {rel}")
+                maybe_progress()
+                continue
+        else:
+            text = path.read_text(encoding="utf-8", errors="ignore")
         if path.suffix.lower() == ".py":
             violations.extend(_scan_python_content(rel, text, enabled_flags))
         else:

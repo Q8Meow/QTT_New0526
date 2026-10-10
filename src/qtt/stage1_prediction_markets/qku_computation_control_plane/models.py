@@ -7,8 +7,12 @@ from datetime import datetime
 from decimal import Decimal
 from enum import Enum, StrEnum
 import re
+import math
 from types import MappingProxyType
-from typing import ClassVar, Mapping, TypeVar
+from typing import ClassVar, Mapping, TypeVar, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from .persistence import ProbabilityProducerReadLimitsV1
 
 from .context import ComputationContextKeyV1, parse_utc
 from .errors import ContractValidationError, ReasonCode
@@ -59,6 +63,279 @@ class NoEffectFlagsV1:
 
 
 NO_EFFECTS_V1 = NoEffectFlagsV1()
+
+
+def _probability_require_v1(ok: bool, detail: str) -> None:
+    if not ok:
+        raise ContractValidationError(ReasonCode.INVALID_CONTRACT, detail)
+
+
+def _probability_text_v1(value: object) -> None:
+    _probability_require_v1(
+        type(value) is str and 0 < len(value) <= 1024
+        and value == value.strip()
+        and all(ord(c) >= 32 and ord(c) != 127 and not 0xD800 <= ord(c) <= 0xDFFF for c in value),
+        "PROBABILITY_IDENTITY",
+    )
+
+
+def _probability_int_v1(value: object, minimum: int = 0) -> None:
+    _probability_require_v1(type(value) is int and minimum <= value and value.bit_length() <= 512,
+                            "PROBABILITY_INTEGER")
+
+
+def _probability_ns_v1(value: object) -> None:
+    # Calendar years 1 through 9999; no float timestamp or truncation toward zero.
+    _probability_require_v1(type(value) is int and
+                            -62135596800000000000 <= value <= 253402300799999999999,
+                            "PROBABILITY_UTC_NANOSECONDS")
+
+
+def _probability_refs_v1(value: object, *, nonempty: bool = False) -> None:
+    _probability_require_v1(type(value) is tuple and len(value) <= 4096 and (bool(value) or not nonempty),
+                            "PROBABILITY_REFERENCE_TUPLE")
+    for reference in value:
+        _probability_text_v1(reference)
+    _probability_require_v1(len(set(value)) == len(value), "PROBABILITY_REFERENCE_DUPLICATE")
+
+
+@dataclass(frozen=True, slots=True)
+class ProbabilityProducerScopeV1:
+    """Closed producer identity; constructing a scope confers no authority."""
+
+    profile_id: str
+    model_artifact_ref: str
+    cell_manifest_ref: str
+    input_lock_ref: str
+    reference_cohort_ref: str
+    family_ref: str
+    policy_ref: str
+    environment_ref: str
+    generation: int
+
+    def __post_init__(self) -> None:
+        for definition in dataclass_fields(self):
+            if definition.name != "generation":
+                _probability_text_v1(getattr(self, definition.name))
+        _probability_require_v1(self.profile_id in (
+            "GEMINI_TITAN_DIRECT", "POLYMARKET_US_RETAIL_DIRECT", "KALSHI_US_DCM_DIRECT",
+        ), "PROBABILITY_PROFILE_EXCLUDED")
+        _probability_int_v1(self.generation)
+
+    def as_dict(self) -> dict:
+        return {field.name: getattr(self, field.name) for field in dataclass_fields(self)}
+
+
+@dataclass(frozen=True, slots=True)
+class ProbabilityPredictionArtifactWriteRequestV1:
+    artifact_ref: str
+    scope: ProbabilityProducerScopeV1
+    result_ref: str
+    dependency_refs: tuple[str, ...]
+    valid_until_ns: int
+    max_artifact_bytes: int
+    max_frames: int
+    deadline_monotonic_ns: int
+
+    def __post_init__(self) -> None:
+        _probability_text_v1(self.artifact_ref)
+        _probability_text_v1(self.result_ref)
+        _probability_require_v1(type(self.scope) is ProbabilityProducerScopeV1, "PROBABILITY_SCOPE")
+        _probability_refs_v1(self.dependency_refs, nonempty=True)
+        _probability_ns_v1(self.valid_until_ns)
+        for value in (self.max_artifact_bytes, self.max_frames, self.deadline_monotonic_ns):
+            _probability_int_v1(value, 1)
+
+
+@dataclass(frozen=True, slots=True)
+class ProbabilityPredictionArtifactSealV1:
+    artifact_ref: str
+    scope: ProbabilityProducerScopeV1
+    result_ref: str
+    byte_count: int
+    frame_count: int
+    observed_ns: int
+    valid_until_ns: int
+    dependency_refs: tuple[str, ...]
+
+    def __post_init__(self) -> None:
+        _probability_text_v1(self.artifact_ref)
+        _probability_text_v1(self.result_ref)
+        _probability_require_v1(type(self.scope) is ProbabilityProducerScopeV1, "PROBABILITY_SCOPE")
+        _probability_int_v1(self.byte_count, 1)
+        _probability_int_v1(self.frame_count, 1)
+        _probability_ns_v1(self.observed_ns)
+        _probability_ns_v1(self.valid_until_ns)
+        _probability_require_v1(self.observed_ns < self.valid_until_ns, "PROBABILITY_ARTIFACT_EXPIRED")
+        _probability_refs_v1(self.dependency_refs, nonempty=True)
+
+
+@dataclass(frozen=True, slots=True)
+class ProbabilityPredictionArtifactReadV1:
+    artifact_ref: str
+    scope: ProbabilityProducerScopeV1
+    immutable_bytes: bytes
+    byte_count: int
+    frame_count: int
+    observed_ns: int
+    valid_until_ns: int
+    dependency_refs: tuple[str, ...]
+
+    def __post_init__(self) -> None:
+        _probability_text_v1(self.artifact_ref)
+        _probability_require_v1(type(self.scope) is ProbabilityProducerScopeV1, "PROBABILITY_SCOPE")
+        _probability_int_v1(self.byte_count, 1)
+        _probability_int_v1(self.frame_count, 1)
+        _probability_require_v1(type(self.immutable_bytes) is bytes and
+                                self.byte_count == len(self.immutable_bytes), "PROBABILITY_ARTIFACT_BYTES")
+        _probability_ns_v1(self.observed_ns)
+        _probability_ns_v1(self.valid_until_ns)
+        _probability_require_v1(self.observed_ns < self.valid_until_ns, "PROBABILITY_ARTIFACT_EXPIRED")
+        _probability_refs_v1(self.dependency_refs, nonempty=True)
+
+
+@dataclass(frozen=True, slots=True)
+class CompiledProbabilityPredictionV1:
+    """Detached data-only numerical state; no source or model-use permission."""
+
+    kind: str
+    feature_names: tuple[str, ...]
+    means: tuple[float, ...]
+    scales: tuple[float, ...]
+    coefficients: tuple[float, ...]
+    intercept: float
+    calibration: tuple[float, float] | None
+
+    def __post_init__(self) -> None:
+        _probability_require_v1(type(self.kind) is str and self.kind in ("CALIBRATED_LOGISTIC", "HUBER"), "MODEL_KIND")
+        _probability_refs_v1(self.feature_names, nonempty=True)
+        for values in (self.means, self.scales, self.coefficients):
+            _probability_require_v1(type(values) is tuple and len(values) == len(self.feature_names) and
+                                    all(type(x) is float and math.isfinite(x) for x in values), "COMPILED_SHAPE")
+        _probability_require_v1(all(x > 0 for x in self.scales) and type(self.intercept) is float and
+                                math.isfinite(self.intercept), "COMPILED_SCALE_INTERCEPT")
+        _probability_require_v1(
+            (self.kind == "HUBER" and self.calibration is None) or
+            (self.kind == "CALIBRATED_LOGISTIC" and type(self.calibration) is tuple and len(self.calibration) == 2
+             and all(type(x) is float and math.isfinite(x) for x in self.calibration)), "COMPILED_CALIBRATION")
+
+
+@dataclass(frozen=True, slots=True)
+class ProbabilityPredictionReadRequestV1:
+    scope: ProbabilityProducerScopeV1
+    purpose: str
+    result_ref: str
+    review_ref: str | None
+    effective_cutoff_ns: int
+    recorded_cutoff_ns: int
+    limits: ProbabilityProducerReadLimitsV1
+
+    def __post_init__(self) -> None:
+        from .persistence import ProbabilityProducerReadLimitsV1
+        _probability_require_v1(type(self.scope) is ProbabilityProducerScopeV1 and
+                                type(self.limits) is ProbabilityProducerReadLimitsV1, "PROBABILITY_READ_TYPES")
+        _probability_text_v1(self.result_ref)
+        _probability_ns_v1(self.effective_cutoff_ns); _probability_ns_v1(self.recorded_cutoff_ns)
+        _probability_require_v1(type(self.purpose) is str and self.purpose in
+                                ("REVIEW_COMMITTED_RESULT", "ADMIT_COMMITTED_PREDICTION"), "PROBABILITY_READ_PURPOSE")
+        if self.purpose == "REVIEW_COMMITTED_RESULT":
+            _probability_require_v1(self.review_ref is None, "PROBABILITY_REVIEW_ABSENT")
+        else:
+            _probability_text_v1(self.review_ref)
+            _probability_require_v1(self.review_ref != self.result_ref, "PROBABILITY_REVIEW_ALIAS")
+
+
+@dataclass(frozen=True, slots=True)
+class ProbabilityPredictionReviewBasisReadRequestV1:
+    scope: ProbabilityProducerScopeV1
+    purpose: str
+    result_ref: str
+    validation_receipt_refs: tuple[str, ...]
+    use_limit_ref: str
+    model_risk_receipt_ref: str
+    effective_cutoff_ns: int
+    recorded_cutoff_ns: int
+    limits: ProbabilityProducerReadLimitsV1
+    binding_ref: str
+
+    def __post_init__(self) -> None:
+        from .persistence import ProbabilityProducerReadLimitsV1
+        _probability_require_v1(type(self.scope) is ProbabilityProducerScopeV1 and
+                                type(self.limits) is ProbabilityProducerReadLimitsV1, "PROBABILITY_READ_TYPES")
+        _probability_require_v1(type(self.purpose) is str and self.purpose == "ASSEMBLE_INDEPENDENT_PREDICTION_REVIEW",
+                                "PROBABILITY_READ_PURPOSE")
+        _probability_refs_v1(self.validation_receipt_refs, nonempty=True)
+        _probability_require_v1(len(self.validation_receipt_refs) == 1, "PROBABILITY_VALIDATION_SINGLETON")
+        _probability_refs_v1((self.result_ref, *self.validation_receipt_refs, self.use_limit_ref,
+                             self.model_risk_receipt_ref, self.binding_ref), nonempty=True)
+        _probability_ns_v1(self.effective_cutoff_ns); _probability_ns_v1(self.recorded_cutoff_ns)
+
+
+@dataclass(frozen=True, slots=True)
+class ProbabilityPredictionReadLimitsV1:
+    metadata_limits: ProbabilityProducerReadLimitsV1
+    max_artifact_bytes: int
+    max_frames: int
+    max_total_bytes: int
+
+    def __post_init__(self) -> None:
+        from .persistence import ProbabilityProducerReadLimitsV1
+        _probability_require_v1(type(self.metadata_limits) is ProbabilityProducerReadLimitsV1, "PROBABILITY_METADATA_LIMITS")
+        for value in (self.max_artifact_bytes, self.max_frames, self.max_total_bytes):
+            _probability_int_v1(value, 1)
+
+
+@dataclass(frozen=True, slots=True)
+class PreparedProbabilityPredictionV1:
+    state: str
+    result_ref: str
+    review_ref: str
+    input_lock_ref: str
+    prediction_input_lock_ref: str
+    feature_names: tuple[str, ...]
+    request_keys: tuple[tuple[str, tuple[str, ...]], ...]
+    values: tuple[tuple[str, float, float, float], ...] | None
+    dependency_refs: tuple[str, ...]
+    observed_ns: int
+    valid_until_ns: int
+    generation: int
+    blocker_codes: tuple[ReasonCode, ...]
+    model_use_authorized: bool = False
+    source_authentication: bool = False
+    native_packet_created: bool = False
+
+    def __post_init__(self) -> None:
+        from .serialization import _probability_binary64_v1
+        _probability_require_v1(type(self.state) is str and self.state in ("ABSTAIN", "SCORE_RESEARCH_ONLY"), "PROBABILITY_PREPARED_STATE")
+        for reference in (self.result_ref, self.review_ref, self.input_lock_ref, self.prediction_input_lock_ref):
+            _probability_text_v1(reference)
+        _probability_require_v1(self.result_ref != self.review_ref, "PROBABILITY_RESULT_REVIEW_ALIAS")
+        _probability_refs_v1(self.feature_names, nonempty=True)
+        _probability_refs_v1(self.dependency_refs, nonempty=True)
+        _probability_require_v1(type(self.request_keys) is tuple and bool(self.request_keys), "PROBABILITY_QUERY_KEYS")
+        for query in self.request_keys:
+            _probability_require_v1(type(query) is tuple and len(query) == 2 and type(query[1]) is tuple and
+                                    len(query[1]) == len(self.feature_names), "PROBABILITY_QUERY_KEY")
+            _probability_text_v1(query[0])
+            for value in query[1]:
+                _probability_binary64_v1(value)
+        _probability_refs_v1(tuple(query[0] for query in self.request_keys), nonempty=True)
+        _probability_ns_v1(self.observed_ns); _probability_ns_v1(self.valid_until_ns)
+        _probability_require_v1(self.observed_ns < self.valid_until_ns, "PROBABILITY_PREPARED_EXPIRY")
+        _probability_int_v1(self.generation)
+        _probability_require_v1(type(self.blocker_codes) is tuple and all(type(code) is ReasonCode for code in self.blocker_codes)
+                                and len(set(self.blocker_codes)) == len(self.blocker_codes), "PROBABILITY_PREPARED_REASONS")
+        _probability_require_v1((self.state == "ABSTAIN") == bool(self.blocker_codes), "PROBABILITY_PREPARED_BLOCKERS")
+        if self.state == "ABSTAIN":
+            _probability_require_v1(self.values is None, "PROBABILITY_BLOCKED_VALUES")
+        else:
+            _probability_require_v1(type(self.values) is tuple and len(self.values) == len(self.request_keys), "PROBABILITY_PREPARED_VALUES")
+            for query, row in zip(self.request_keys, self.values, strict=True):
+                _probability_require_v1(type(row) is tuple and len(row) == 4 and row[0] == query[0] and
+                                        all(type(value) is float and math.isfinite(value) and 0 <= value <= 1 for value in row[1:])
+                                        and row[2] <= row[3], "PROBABILITY_PREPARED_VALUE")
+        if any(value is not False for value in (self.model_use_authorized, self.source_authentication, self.native_packet_created)):
+            raise ContractValidationError(ReasonCode.RUNTIME_EFFECT_FORBIDDEN, "prepared diagnostics confer no permission")
 
 
 @dataclass(frozen=True, slots=True)
@@ -4875,3 +5152,555 @@ class ST12HValidationCurrentizationOperationsPublicationReportV1:
                 ReasonCode.SOURCE_EPOCH_STALE,
                 "tracked report must reject every stale receipt class",
             )
+
+
+# Detached probability projections: values alone never establish source authority.
+import copy as _probability_copy_v1
+
+
+def _probability_projection_text_v1(value, name):
+    _probability_text_v1(value)
+    return value
+
+
+def _probability_projection_integer_v1(value, name, minimum=0):
+    _probability_require_v1(type(value) is int and value.bit_length() <= 512, name)
+    _probability_require_v1(minimum is None or value >= minimum, name)
+    if minimum is None:
+        _probability_ns_v1(value)
+    return value
+
+
+def _probability_projection_names_v1(value, name, *, empty=False):
+    _probability_require_v1(type(value) is tuple and (empty or bool(value)), name)
+    for item in value:
+        _probability_projection_text_v1(item, name)
+    _probability_require_v1(len(value) == len(set(value)), name)
+    return value
+
+
+_PROBABILITY_WINDOW_EVENT_KINDS_V1 = frozenset(('WINDOW', 'HARD_FAILURE', 'EVIDENCE_UNAVAILABLE'))
+_PROBABILITY_WINDOW_RESULTS_V1 = frozenset(('MATERIAL_BREACH', 'FAMILY_NONREJECTION', 'UNAVAILABLE'))
+
+
+@dataclass(frozen=True, slots=True)
+class _ProbabilityMaturityClusterV1:
+    cluster_id: str
+    row_ids: tuple[str, ...]
+    ordinal: int
+    maturity_ns: int
+    available_ns: int
+
+    def __post_init__(self) -> None:
+        _probability_projection_text_v1(self.cluster_id, 'CLUSTER_ID')
+        _probability_projection_names_v1(self.row_ids, 'SOURCE_ROW_IDS')
+        _probability_projection_integer_v1(self.ordinal, 'ORDINAL', 1)
+        _probability_projection_integer_v1(self.maturity_ns, 'MATURITY_NS', None)
+        _probability_projection_integer_v1(self.available_ns, 'AVAILABLE_NS', None)
+        _probability_require_v1(self.available_ns <= self.maturity_ns, 'AVAILABILITY_AFTER_MATURITY')
+
+    def as_dict(self) -> dict:
+        return {'cluster_id': self.cluster_id, 'row_ids': list(self.row_ids), 'ordinal': self.ordinal, 'maturity_ns': self.maturity_ns, 'available_ns': self.available_ns}
+
+@dataclass(frozen=True, slots=True)
+class _ProbabilityWindowRequestV1:
+    request_id: str
+    receipt_id: str
+    scope: ProbabilityProducerScopeV1
+    expected_head_ref: str | None
+    expected_sequence: int
+    expected_high_watermark: int
+    kind: str
+    cutoff_ns: int
+    catalog_ref: str | None
+    catalog: tuple[_ProbabilityMaturityClusterV1, ...]
+    family_result: str | None
+    evidence_refs: tuple[str, ...]
+    reason: str | None
+
+    def __post_init__(self) -> None:
+        _probability_projection_text_v1(self.request_id, 'REQUEST_ID')
+        _probability_projection_text_v1(self.receipt_id, 'RECEIPT_ID')
+        _probability_require_v1(type(self.scope) is ProbabilityProducerScopeV1, 'SCOPE_TYPE')
+        if self.expected_head_ref is not None:
+            _probability_projection_text_v1(self.expected_head_ref, 'HEAD_REF')
+        _probability_projection_integer_v1(self.expected_sequence, 'SEQUENCE')
+        _probability_projection_integer_v1(self.expected_high_watermark, 'HIGH_WATERMARK')
+        _probability_projection_integer_v1(self.cutoff_ns, 'CUTOFF_NS', None)
+        _probability_require_v1(type(self.kind) is str and self.kind in _PROBABILITY_WINDOW_EVENT_KINDS_V1, 'EVENT_KIND')
+        _probability_require_v1(type(self.catalog) is tuple and all((type(r) is _ProbabilityMaturityClusterV1 for r in self.catalog)), 'CATALOG_TYPE')
+        _probability_projection_names_v1(self.evidence_refs, 'EVIDENCE_REFS')
+        if self.kind == 'WINDOW':
+            _probability_projection_text_v1(self.catalog_ref, 'CATALOG_REF')
+            _probability_require_v1(type(self.family_result) is str and self.family_result in _PROBABILITY_WINDOW_RESULTS_V1, 'FAMILY_RESULT')
+            if self.family_result == 'UNAVAILABLE':
+                _probability_projection_text_v1(self.reason, 'UNAVAILABLE_REASON')
+            else:
+                _probability_require_v1(self.reason is None, 'RESULT_REASON_MISMATCH')
+        else:
+            _probability_require_v1(self.catalog_ref is None and self.catalog == () and (self.family_result is None), 'NO_FAKE_HARD_WINDOW')
+            _probability_projection_text_v1(self.reason, 'EVENT_REASON')
+
+    def as_dict(self) -> dict:
+        return {'request_id': self.request_id, 'receipt_id': self.receipt_id, 'scope': self.scope.as_dict(), 'expected_head_ref': self.expected_head_ref, 'expected_sequence': self.expected_sequence, 'expected_high_watermark': self.expected_high_watermark, 'kind': self.kind, 'cutoff_ns': self.cutoff_ns, 'catalog_ref': self.catalog_ref, 'catalog': [r.as_dict() for r in self.catalog], 'family_result': self.family_result, 'evidence_refs': list(self.evidence_refs), 'reason': self.reason}
+
+    @classmethod
+    def from_dict(cls, value: object) -> '_ProbabilityWindowRequestV1':
+        _probability_require_v1(type(value) is dict and set(value) == set(cls.__dataclass_fields__), 'REQUEST_FIELDS')
+        x = _probability_copy_v1.deepcopy(value)
+        _probability_require_v1(type(x['scope']) is dict and set(x['scope']) == set(ProbabilityProducerScopeV1.__dataclass_fields__), 'SCOPE_FIELDS')
+        x['scope'] = ProbabilityProducerScopeV1(**x['scope'])
+        _probability_require_v1(type(x['catalog']) is list, 'CATALOG_WIRE_TYPE')
+        rows = []
+        for y in x['catalog']:
+            _probability_require_v1(type(y) is dict and set(y) == set(_ProbabilityMaturityClusterV1.__dataclass_fields__), 'CATALOG_ROW_FIELDS')
+            _probability_require_v1(type(y['row_ids']) is list, 'SOURCE_ROW_WIRE_TYPE')
+            y['row_ids'] = tuple(y['row_ids'])
+            rows.append(_ProbabilityMaturityClusterV1(**y))
+        x['catalog'] = tuple(rows)
+        _probability_require_v1(type(x['evidence_refs']) is list, 'EVIDENCE_WIRE_TYPE')
+        x['evidence_refs'] = tuple(x['evidence_refs'])
+        return cls(**x)
+
+@dataclass(frozen=True, slots=True)
+class _ProbabilityAdmissionModelV1:
+    scope: ProbabilityProducerScopeV1
+    feature_names: tuple[str, ...]
+    model_kind: str
+    export_text: str
+    reference_clusters: tuple[_ProbabilityMaturityClusterV1, ...]
+    reference_cutoff_ns: int
+    available_ns: int
+    valid_until_ns: int
+    targets: tuple[str, ...]
+    target_domains: tuple[tuple[str, str], ...]
+    replicate_count: int
+    precision_protocol_ref: str | None
+    dependency_refs: tuple[str, ...]
+
+@dataclass(frozen=True, slots=True)
+class _ProbabilityAdmissionCatalogV1:
+    catalog_ref: str
+    scope: ProbabilityProducerScopeV1
+    owner_epoch: int
+    after_ordinal: int
+    complete_through_ns: int
+    rows: tuple[_ProbabilityMaturityClusterV1, ...]
+    dependency_refs: tuple[str, ...]
+
+@dataclass(frozen=True, slots=True)
+class _ProbabilityAdmissionResultV1:
+    result_ref: str
+    scope: ProbabilityProducerScopeV1
+    owner_epoch: int
+    catalog_ref: str
+    selection_cutoff_ns: int
+    available_ns: int
+    cluster_ids: tuple[str, ...]
+    original_row_ids: tuple[str, ...]
+    targets: tuple[str, ...]
+    reference_plan_ref: str
+    current_plan_ref: str
+    partition_codes: tuple[int, int]
+    replicate_count: int
+    reference_values: tuple[tuple[str, str], ...]
+    current_values: tuple[tuple[str, str], ...]
+    reference_records: tuple[str, ...]
+    current_records: tuple[str, ...]
+    dependency_refs: tuple[str, ...]
+
+@dataclass(frozen=True, slots=True)
+class _ProbabilityAdmissionSnapshotV1:
+    snapshot_ref: str
+    owner_epoch: int
+    read_ns: int
+    model: _ProbabilityAdmissionModelV1
+    catalog: _ProbabilityAdmissionCatalogV1
+    result: _ProbabilityAdmissionResultV1 | None
+    expected_environment: tuple[tuple[str, str], ...]
+    invalidated_refs: tuple[str, ...]
+    receipt_dependency_refs: tuple[str, ...] = ()
+    receipt_valid_until_ns: int | None = None
+
+@dataclass(frozen=True, slots=True)
+class _ProbabilityAdmissionLimitsV1:
+    max_catalog_rows: int
+    max_reference_rows: int
+    max_targets: int
+    max_model_bytes: int
+    max_record_bytes: int
+    max_total_bank_bytes: int
+
+@dataclass(frozen=True, slots=True)
+class _ProbabilityBinaryDriftFamilyV1:
+    family_ref: str
+    feature_names: tuple[str, ...]
+    missingness_names: tuple[str, ...]
+    composition_names: tuple[str, ...]
+    calibration_material: bool
+
+
+@dataclass(frozen=True, slots=True)
+class _ProbabilityRevocationCutV1:
+    checkpoint_ref: str
+    stream_ordinal: int
+    head_ref: str | None
+    invalidated_refs: tuple[str, ...]
+    checked_ns: int
+    valid_until_ns: int
+
+    def __post_init__(self):
+        _probability_text_v1(self.checkpoint_ref)
+        _probability_int_v1(self.stream_ordinal)
+        if self.head_ref is not None:
+            _probability_text_v1(self.head_ref)
+        _probability_projection_names_v1(self.invalidated_refs, "PROBABILITY_INVALIDATIONS", empty=True)
+        _probability_ns_v1(self.checked_ns); _probability_ns_v1(self.valid_until_ns)
+        _probability_require_v1(self.checked_ns < self.valid_until_ns, "PROBABILITY_CHECKPOINT_LIFETIME")
+
+
+@dataclass(frozen=True, slots=True)
+class _ProbabilityRevocationNoticeV1:
+    notice_id: str
+    issuer_ref: str
+    stream_ref: str
+    stream_ordinal: int
+    scope: ProbabilityProducerScopeV1
+    dependency_refs: tuple[str, ...]
+    effective_ns: int
+    observed_ns: int
+
+    def __post_init__(self):
+        for value in (self.notice_id, self.issuer_ref, self.stream_ref):
+            _probability_text_v1(value)
+        _probability_int_v1(self.stream_ordinal, 1)
+        _probability_require_v1(type(self.scope) is ProbabilityProducerScopeV1, "PROBABILITY_SCOPE")
+        _probability_projection_names_v1(self.dependency_refs, "PROBABILITY_INVALIDATIONS")
+        _probability_ns_v1(self.effective_ns); _probability_ns_v1(self.observed_ns)
+        _probability_require_v1(self.effective_ns <= self.observed_ns, "PROBABILITY_NOTICE_CLOCK")
+
+
+@dataclass(frozen=True, slots=True)
+class _ProbabilityMaterializationReadBudgetV1:
+    max_frames: int
+    max_total_bytes: int
+    max_frame_bytes: int
+    max_history_records: int
+
+    def __post_init__(self):
+        for field in dataclass_fields(self):
+            _probability_int_v1(getattr(self, field.name), 1)
+        _probability_require_v1(self.max_frame_bytes <= 1048576, "PROBABILITY_MATERIALIZATION_FRAME_CAP")
+
+
+_PROBABILITY_TASK_IDS_V2 = (
+    "PM-SETTLEMENT-YES-V2", "PM-BINARY-FAIR-VALUE-V2", "PM-QAML-FILL-V2", "PM-QAML-MARKOUT-V2",
+    "PM-TLD-POSITIVE-CASH-V2", "PM-TLD-CASH-V2", "PM-PORR-POSITIVE-CASH-V2", "PM-PORR-CASH-V2",
+)
+
+
+def _probability_datetime_ns_v1(value):
+    from datetime import timezone
+    _probability_require_v1(type(value) is datetime and value.tzinfo is timezone.utc, "PROBABILITY_DATETIME_UTC")
+    delta = value - datetime(1970, 1, 1, tzinfo=timezone.utc)
+    return ((delta.days * 86400 + delta.seconds) * 1000000 + delta.microseconds) * 1000
+
+
+_PROBABILITY_FEATURE_PACK_NAMES_V2 = MappingProxyType({
+    "TVP-01": ("market_yes_mid_probability", "log1p_hours_to_scheduled_resolution", "spread_ticks",
+               "touch_imbalance", "microprice_displacement_ticks", "log1p_touch_depth_contracts"),
+    "QSP-01": ("spread_ticks", "touch_depth_total_contracts", "best_bid_depth_contracts", "best_ask_depth_contracts"),
+    "QSP-02": ("touch_imbalance", "microprice_displacement_ticks", "spread_ticks"),
+    "DSP-01": ("touch_imbalance", "microprice_displacement_ticks", "spread_ticks"),
+    "QSP-03": ("trade_flow_imbalance", "signed_touch_depletion_ratio", "spread_ticks"),
+    "DSP-02": ("trade_flow_imbalance", "signed_touch_depletion_ratio", "spread_ticks"),
+    "QSP-04": ("inventory_signed_contracts", "fill_weighted_adverse_markout", "spread_ticks"),
+    "DSP-03": ("spread_shock_z", "depth_shock_z", "touch_imbalance"),
+    "DSP-04": ("cross_contract_residual_ticks", "related_contract_count", "relation_graph_confidence"),
+    "RSP-01": ("event_age_ms", "scheduled_to_actual_release_lag_ms", "pre_release_spread_ticks", "pre_release_touch_depth_total"),
+    "RSP-02": ("event_age_ms", "official_revision_ordinal", "pre_release_spread_ticks", "pre_release_touch_depth_total"),
+    "RSP-03": ("event_age_ms", "reference_value_delta_normalized", "source_revision_ordinal", "pre_release_spread_ticks"),
+    "RSP-04": ("event_age_ms", "independent_official_source_count", "corroboration_latency_ms", "disagreement_indicator"),
+})
+
+
+@dataclass(frozen=True, slots=True)
+class ProbabilityModelCellManifestV2:
+    cell_manifest_id: str
+    task_id: str
+    profile_id: str
+    scope_id: str
+    feature_pack_id: str
+    ordered_feature_names: tuple[str, ...]
+    feature_units: tuple[str, ...]
+    label_contract_id: str
+    horizon_or_lead_bucket: str
+    dependence_cluster_rule_id: str
+    split_policy_id: str
+    estimator_policy_id: str
+    calibration_policy_id: str
+    uncertainty_policy_id: str
+    ood_policy_id: str
+    drift_policy_id: str
+    source_capability_refs: tuple[str, ...]
+    valid_until_utc: datetime
+
+    def __post_init__(self):
+        for name in self.__dataclass_fields__:
+            value = getattr(self, name)
+            if name not in ("ordered_feature_names", "feature_units", "source_capability_refs", "valid_until_utc"):
+                _probability_text_v1(value)
+        _probability_require_v1(self.task_id in _PROBABILITY_TASK_IDS_V2 and self.profile_id in
+            ("GEMINI_TITAN_DIRECT", "POLYMARKET_US_RETAIL_DIRECT", "KALSHI_US_DCM_DIRECT"), "PROBABILITY_MANIFEST_TASK_PROFILE")
+        _probability_refs_v1(self.ordered_feature_names, nonempty=True)
+        _probability_require_v1(self.feature_pack_id in _PROBABILITY_FEATURE_PACK_NAMES_V2 and
+             self.ordered_feature_names == _PROBABILITY_FEATURE_PACK_NAMES_V2[self.feature_pack_id],
+             "PROBABILITY_MANIFEST_FROZEN_FEATURE_PACK")
+        _probability_refs_v1(self.source_capability_refs, nonempty=True)
+        _probability_require_v1(type(self.feature_units) is tuple and len(self.feature_units) == len(self.ordered_feature_names),
+                                "PROBABILITY_MANIFEST_FEATURE_UNITS")
+        for unit in self.feature_units:
+            _probability_text_v1(unit)
+        _probability_datetime_ns_v1(self.valid_until_utc)
+
+
+@dataclass(frozen=True, slots=True)
+class SelectedFeatureVectorV2:
+    profile_id: str
+    venue_scope_id: str
+    market_id: str
+    contract_id: str
+    outcome_orientation: str
+    side_or_not_applicable: str
+    task_id: str
+    cell_manifest_id: str
+    dependence_cluster_id: str
+    lead_time_bucket_or_horizon: str
+    feature_pack_id: str
+    feature_schema_version: str
+    ordered_feature_names: tuple[str, ...]
+    ordered_feature_values: tuple[float, ...]
+    feature_units: tuple[str, ...]
+    feature_missing_bitmap: tuple[bool, ...]
+    available_to_strategy_at_utc: datetime
+    observed_at_utc: datetime
+    effective_at_utc: datetime
+    received_at_utc: datetime
+    processed_at_utc: datetime
+    durable_commit_sequence: int
+    source_sequence_or_none: int | None
+    canonical_event_id: str
+    source_snapshot_ref: str
+    source_rights_receipt_ref: str
+    pit_receipt_ref: str
+    freshness_receipt_ref: str
+    book_continuity_receipt_ref: str
+    capability_receipt_ref: str
+    contract_semantics_ref: str
+
+    def __post_init__(self):
+        vectors = (self.ordered_feature_names, self.ordered_feature_values, self.feature_units, self.feature_missing_bitmap)
+        _probability_require_v1(all(type(row) is tuple for row in vectors) and len({len(row) for row in vectors}) == 1 and
+                                bool(self.ordered_feature_names), "PROBABILITY_FEATURE_VECTOR_SHAPE")
+        _probability_refs_v1(self.ordered_feature_names, nonempty=True)
+        _probability_require_v1(all(type(value) is float and math.isfinite(value) for value in self.ordered_feature_values) and
+                                all(type(value) is bool for value in self.feature_missing_bitmap), "PROBABILITY_FEATURE_VECTOR_VALUES")
+        for name in self.__dataclass_fields__:
+            value = getattr(self, name)
+            if name.endswith("_utc"):
+                _probability_datetime_ns_v1(value)
+            elif name in ("durable_commit_sequence", "source_sequence_or_none"):
+                if value is not None or name == "durable_commit_sequence":
+                    _probability_int_v1(value)
+            elif name not in ("ordered_feature_names", "ordered_feature_values", "feature_units", "feature_missing_bitmap"):
+                _probability_text_v1(value)
+        for unit in self.feature_units:
+            _probability_text_v1(unit)
+        _probability_require_v1(self.task_id in _PROBABILITY_TASK_IDS_V2, "PROBABILITY_FEATURE_TASK")
+
+
+@dataclass(frozen=True, slots=True)
+class SelectedLabelRecordV2:
+    label_contract_id: str
+    contract_or_decision_id: str
+    dependence_cluster_id: str
+    target_kind: Literal["BINARY", "CONTINUOUS"]
+    target_value: int | Decimal | None
+    target_unit: str
+    target_evidence_class: Literal["REALIZED", "COUNTERFACTUAL_REPLAY"]
+    decision_available_at_utc: datetime
+    label_matured_at_utc: datetime | None
+    label_became_knowable_at_utc: datetime | None
+    censor_state: Literal["MATURED", "PENDING", "CENSORED", "REVISED_INVALID"]
+    authority_receipt_ref: str
+    accounting_receipt_ref: str | None
+    revision_version: str
+
+    def __post_init__(self):
+        for name in ("label_contract_id", "contract_or_decision_id", "dependence_cluster_id", "target_unit",
+                     "authority_receipt_ref", "revision_version"):
+            _probability_text_v1(getattr(self, name))
+        if self.accounting_receipt_ref is not None:
+            _probability_text_v1(self.accounting_receipt_ref)
+        _probability_require_v1(self.target_kind in ("BINARY", "CONTINUOUS") and
+             self.target_evidence_class in ("REALIZED", "COUNTERFACTUAL_REPLAY") and
+             self.censor_state in ("MATURED", "PENDING", "CENSORED", "REVISED_INVALID"), "PROBABILITY_LABEL_CLASS")
+        _probability_datetime_ns_v1(self.decision_available_at_utc)
+        for value in (self.label_matured_at_utc, self.label_became_knowable_at_utc):
+            if value is not None:
+                _probability_datetime_ns_v1(value)
+        if self.censor_state == "MATURED":
+            _probability_require_v1(self.label_matured_at_utc is not None and self.label_became_knowable_at_utc is not None,
+                                    "PROBABILITY_MATURED_CLOCKS")
+            if self.target_kind == "BINARY":
+                _probability_require_v1(type(self.target_value) is int and self.target_value in (0, 1), "PROBABILITY_BINARY_TARGET")
+            else:
+                _probability_require_v1(type(self.target_value) is Decimal and self.target_value.is_finite(), "PROBABILITY_CONTINUOUS_TARGET")
+        else:
+            _probability_require_v1(self.target_value is None, "PROBABILITY_CENSORED_TARGET")
+
+
+@dataclass(frozen=True, slots=True)
+class ProbabilityScoreResultV2:
+    request_id: str
+    task_id: str
+    artifact_id: str
+    raw_margin: float
+    calibrated_probability: float
+    epistemic_lower: float
+    epistemic_upper: float
+    uncertainty_packet_ref: str
+    evaluated_at_utc: datetime
+    valid_until_utc: datetime
+    evidence_level: str
+    use_limit_ref: str
+    result_state: Literal["SCORE_RESEARCH_ONLY"]
+
+    def __post_init__(self):
+        for name in ("request_id", "task_id", "artifact_id", "uncertainty_packet_ref", "evidence_level", "use_limit_ref"):
+            _probability_text_v1(getattr(self, name))
+        _probability_require_v1(self.task_id in ("PM-SETTLEMENT-YES-V2", "PM-QAML-FILL-V2",
+            "PM-TLD-POSITIVE-CASH-V2", "PM-PORR-POSITIVE-CASH-V2"), "PROBABILITY_SCORE_TASK")
+        _probability_require_v1(all(type(value) is float and math.isfinite(value) for value in
+            (self.raw_margin, self.calibrated_probability, self.epistemic_lower, self.epistemic_upper)),
+            "PROBABILITY_SCORE_BINARY64")
+        _probability_require_v1(0.0 <= self.calibrated_probability <= 1.0 and
+            0.0 <= self.epistemic_lower <= self.epistemic_upper <= 1.0, "PROBABILITY_SCORE_DOMAIN")
+        _probability_require_v1(_probability_datetime_ns_v1(self.evaluated_at_utc) <
+            _probability_datetime_ns_v1(self.valid_until_utc), "PROBABILITY_SCORE_EXPIRY")
+        _probability_require_v1(type(self.result_state) is str and self.result_state == "SCORE_RESEARCH_ONLY",
+                                "PROBABILITY_SCORE_RESEARCH_ONLY")
+
+@dataclass(frozen=True, slots=True)
+class ContinuousScoreResultV2:
+    request_id: str
+    task_id: str
+    artifact_id: str
+    predicted_value: Decimal
+    lower_value: Decimal
+    upper_value: Decimal
+    unit: str
+    uncertainty_packet_ref: str
+    evidence_level: str
+    use_limit_ref: str
+    result_state: Literal["SCORE_RESEARCH_ONLY"]
+
+    def __post_init__(self):
+        for name in ("request_id", "task_id", "artifact_id", "unit", "uncertainty_packet_ref", "evidence_level", "use_limit_ref"):
+            _probability_text_v1(getattr(self, name))
+        _probability_require_v1(self.task_id in ("PM-QAML-MARKOUT-V2", "PM-TLD-CASH-V2", "PM-PORR-CASH-V2"),
+                                "PROBABILITY_CONTINUOUS_SCORE_TASK")
+        _probability_require_v1(all(type(value) is Decimal and value.is_finite() for value in
+            (self.predicted_value, self.lower_value, self.upper_value)) and self.lower_value <= self.upper_value,
+            "PROBABILITY_CONTINUOUS_SCORE_DOMAIN")
+        _probability_require_v1(type(self.result_state) is str and self.result_state == "SCORE_RESEARCH_ONLY",
+                                "PROBABILITY_SCORE_RESEARCH_ONLY")
+
+@dataclass(frozen=True, slots=True)
+class _ContinuousRefitBankV1:
+    """Private signed, request-locked working bank; no probability/use authority.
+
+    The original model and its conformal envelope remain a separate diagnostic.
+    Plans plus original row rosters reconstruct every temporary occurrence.
+    Records retain the four-field BootstrapReplicateRecord as bounded JSON text.
+    This projection is not a new public receipt or a probability artifact schema.
+    """
+
+    plan_id: str
+    input_lock_id: str
+    prediction_input_lock_id: str
+    unit: str
+    feature_names: tuple[str, ...]
+    requests: tuple
+    replicate_count: int
+    master_seed: int
+    method: str
+    block_length: int | None
+    numpy_version: str
+    ordered_cluster_ids: tuple
+    ordered_row_ids_by_cluster: tuple
+    final_row_ids: tuple[str, ...]
+    partition_codes: tuple[int, int]
+    plans: tuple
+    occurrence_prefix: str
+    expanded_row_counts: tuple
+    original_predictions: tuple[tuple[str, str], ...]
+    records: tuple[str, ...]
+    actual_fit_calls: tuple[tuple[str, int], ...]
+    state: str
+    descriptive_bounds: tuple[tuple[str, str, str], ...] | None
+
+    def __post_init__(self):
+        for value in (self.plan_id, self.input_lock_id, self.prediction_input_lock_id,
+                      self.unit, self.numpy_version, self.occurrence_prefix):
+            _probability_text_v1(value)
+        _probability_require_v1(type(self.replicate_count) is int and self.replicate_count in (1000, 5000),
+                                "CONTINUOUS_REFIT_DENOMINATOR")
+        _probability_int_v1(self.master_seed)
+        for value in (self.feature_names, self.requests, self.ordered_cluster_ids,
+                      self.ordered_row_ids_by_cluster, self.final_row_ids, self.partition_codes,
+                      self.plans, self.expanded_row_counts,
+                      self.original_predictions, self.records, self.actual_fit_calls):
+            _probability_require_v1(type(value) is tuple, "CONTINUOUS_REFIT_IMMUTABLE_PROJECTION")
+        _probability_require_v1(self.partition_codes == (1, 2) and
+                                all(type(code) is int for code in self.partition_codes), "CONTINUOUS_PARTITION_CODES")
+        _probability_require_v1(type(self.method) is str and self.method in
+            ("PAIRED_IID_CLUSTERS", "PAIRED_STATIONARY_CLUSTERS") and
+            ((self.method == "PAIRED_IID_CLUSTERS" and self.block_length is None) or
+             (self.method == "PAIRED_STATIONARY_CLUSTERS" and type(self.block_length) is int and self.block_length >= 1)),
+            "CONTINUOUS_REFIT_PLAN_METHOD")
+        _probability_require_v1(len(self.actual_fit_calls) == 3 and
+            all(type(item) is tuple and len(item) == 2 and type(item[0]) is str and
+                type(item[1]) is int and item[1] >= 0 for item in self.actual_fit_calls) and
+            tuple(name for name, _ in self.actual_fit_calls) ==
+                ("base_fit_calls", "calibration_fit_calls", "calibration_verification_calls") and
+            1 <= self.actual_fit_calls[0][1] <= self.replicate_count + 1 and
+            self.actual_fit_calls[1][1] == self.actual_fit_calls[2][1] == 0,
+            "CONTINUOUS_REFIT_ACTUAL_WORK")
+        _probability_require_v1(len(self.plans) == len(self.expanded_row_counts) == len(self.records) ==
+                                self.replicate_count and all(type(row) is str for row in self.records),
+                                "CONTINUOUS_REFIT_COMPLETE_ORDINALS")
+        _probability_require_v1(self.state in ("COMPLETE", "UNAVAILABLE_INVALID_REPLICATE") and
+            ((self.state == "COMPLETE" and type(self.descriptive_bounds) is tuple) or
+             (self.state == "UNAVAILABLE_INVALID_REPLICATE" and self.descriptive_bounds is None)),
+            "CONTINUOUS_REFIT_STATE")
+
+
+@dataclass(frozen=True, slots=True)
+class ProbabilityModelAbstentionV2:
+    request_id: str
+    reason_code: str
+    failed_gate: str
+    attempted_artifact_id: str | None
+    fallback_scope: str | None
+    terminal_route: Literal["ABSTAIN", "NO_TRADE", "SAFE_HOLD"]
+    receipt_ref: str
+
+    def __post_init__(self):
+        for name in ("request_id", "reason_code", "failed_gate", "receipt_ref"):
+            _probability_text_v1(getattr(self, name))
+        for value in (self.attempted_artifact_id, self.fallback_scope):
+            if value is not None:
+                _probability_text_v1(value)
+        _probability_require_v1(type(self.terminal_route) is str and
+            self.terminal_route in ("ABSTAIN", "NO_TRADE", "SAFE_HOLD"), "PROBABILITY_ABSTENTION_ROUTE")

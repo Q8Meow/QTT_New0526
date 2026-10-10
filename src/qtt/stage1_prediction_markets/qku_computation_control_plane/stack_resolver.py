@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import timedelta
 from decimal import Decimal
 from types import MappingProxyType
@@ -250,6 +250,7 @@ class RegisteredSnapshotComputationBundleV1:
 
 @dataclass(frozen=True, slots=True)
 class _StackComponentContextClosureV1:
+    consumed_owner_packet_refs: tuple[str, ...] = field(kw_only=True)
     math_spec_id: str
     blocker_reasons: tuple[ReasonCode, ...]
     resolved_external_input_receipt_refs: tuple[str, ...]
@@ -259,7 +260,10 @@ class _StackComponentContextClosureV1:
 
     def __post_init__(self) -> None:
         if (
-            not self.math_spec_id
+            type(self.consumed_owner_packet_refs) is not tuple
+            or any(type(ref) is not str or not ref for ref in self.consumed_owner_packet_refs)
+            or len(set(self.consumed_owner_packet_refs)) != len(self.consumed_owner_packet_refs)
+            or not self.math_spec_id
             or not isinstance(self.blocker_reasons, tuple)
             or any(
                 not isinstance(reason, ReasonCode)
@@ -368,6 +372,10 @@ class _SelectedStackContextClosureV1:
                 )
             )
         )
+
+    @property
+    def consumed_owner_packet_refs(self) -> tuple[str, ...]:
+        return tuple(dict.fromkeys(ref for row in self.component_closures for ref in row.consumed_owner_packet_refs))
 
     def component_for(
         self, math_spec_id: str
@@ -678,7 +686,7 @@ class ApplicableStackResolverV1:
             execution_context=context,
             conversion_receipt_id=conversion_receipt.receipt_id,
         )
-        return FormulaStackExecutionV1(
+        result = FormulaStackExecutionV1(
             stack=stack,
             execution_context=context,
             component_inputs=(math_01_inputs, math_02_inputs),
@@ -698,6 +706,9 @@ class ApplicableStackResolverV1:
                 )
             ),
         )
+        downstream_registry._check_probability_packet_refs_v1(
+            tuple(dict.fromkeys(ref for row in result.component_inputs for ref in row.packet_refs)), context=context)
+        return result
 
 
 def _registered_data_flow_edge_for_binding(
@@ -833,6 +844,7 @@ def _preflight_registered_stack_context_closure(
         blockers: list[ReasonCode] = (
             [global_blocker] if global_blocker is not None else []
         )
+        consumed_packets: list[str] = []
         external_receipts: list[str] = []
         dependency_inputs: list[str] = []
         dependency_edges: list[str] = []
@@ -880,6 +892,7 @@ def _preflight_registered_stack_context_closure(
                                 ReasonCode.DEPENDENCY_CLOSURE_FAILED
                             )
                             continue
+                        consumed_packets.extend(producer_closure.consumed_owner_packet_refs)
                         dependency_inputs.append(binding.binding_id)
                         continue
                     resolved = _resolve_formula_input_binding(
@@ -897,6 +910,7 @@ def _preflight_registered_stack_context_closure(
                 ) as exc:
                     blockers.append(exc.reason_code)
                     continue
+                consumed_packets.append(resolved.packet_id)
                 external_receipts.extend(
                     (
                         resolved.producer_receipt_id,
@@ -907,6 +921,7 @@ def _preflight_registered_stack_context_closure(
         component_closures.append(
             _StackComponentContextClosureV1(
                 math_spec_id=component_id,
+                consumed_owner_packet_refs=tuple(dict.fromkeys(consumed_packets)),
                 blocker_reasons=tuple(dict.fromkeys(blockers)),
                 resolved_external_input_receipt_refs=tuple(
                     dict.fromkeys(external_receipts)
@@ -926,7 +941,7 @@ def _preflight_registered_stack_context_closure(
             for reason in closure.blocker_reasons
         )
     )
-    return _SelectedStackContextClosureV1(
+    result = _SelectedStackContextClosureV1(
         execution_context=context,
         stack_id=stack.stack_id,
         stack_version=stack.stack_version,
@@ -955,6 +970,11 @@ def _preflight_registered_stack_context_closure(
             )
         ),
     )
+    try:
+        owner_registry._check_probability_packet_refs_v1(result.consumed_owner_packet_refs, context=context)
+    except (InputAuthorityError, PointInTimeError, FreshnessError) as error:
+        raise StackResolutionError(error.reason_code, "selected stack inputs are no longer current") from error
+    return result
 
 
 def preflight_snapshot_computation_bundle(

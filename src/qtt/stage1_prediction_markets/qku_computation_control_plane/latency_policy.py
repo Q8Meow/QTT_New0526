@@ -161,6 +161,11 @@ def local_duration_now_ns() -> int:
     return clock() if clock is not None else time.monotonic_ns()
 
 
+def utc_event_time_ns() -> int:
+    """UTC event observation for an original probability admission's final check."""
+    return time.time_ns()
+
+
 def measure_callable(callable_: Callable[[], _T]) -> tuple[_T, int]:
     """Measure one bounded local callable without wall-clock subtraction."""
 

@@ -18,6 +18,15 @@ from .io import (
     resolve_repo_relative,
     write_json,
 )
+from src.qtt.stage1_prediction_markets.qku_computation_control_plane.errors import ContractValidationError
+from fractions import Fraction
+from src.qtt.stage1_prediction_markets.qku_computation_control_plane.errors import NumericDomainError
+from src.qtt.stage1_prediction_markets.qku_computation_control_plane.errors import ReasonCode
+from src.qtt.stage1_prediction_markets.qku_computation_control_plane.serialization import _report_carry_candidate_lineage_v1
+from src.qtt.stage1_prediction_markets.qku_computation_control_plane.serialization import _report_companion_alignment_v1
+from src.qtt.stage1_prediction_markets.qku_computation_control_plane.context import finite_float
+from src.qtt.stage1_prediction_markets.qku_computation_control_plane.context import is_finite_json_number_v1
+from .io import json_text
 
 
 @dataclass(frozen=True)
@@ -63,21 +72,35 @@ def build_payloads_with_shards(repo_root: Path) -> tuple[dict[str, dict[str, Any
     source = load_sources(repo_root)
     contexts = build_candidate_contexts(source)
     deep_refs = select_deep_mapping_subset(contexts)
-    mapping_rows = [materialize_mapping(ctx, deep_refs) for ctx in contexts]
+    mapping_rows = [
+        _report_carry_candidate_lineage_v1(ctx["handoff"], materialize_mapping(ctx, deep_refs))
+        for ctx in contexts
+    ]
     row_payloads = build_row_payloads(source, mapping_rows)
-    row_payloads["PR162E_Q_ReportManifest.report.json"] = []
-    payloads, shard_payloads = payloads_from_rows(row_payloads)
-    for _ in range(3):
-        row_payloads["PR162E_Q_ReportManifest.report.json"] = build_manifest_rows(payloads)
-        payloads, shard_payloads = payloads_from_rows(row_payloads)
-    row_payloads["PR162E_Q_ReportConsumerCrosswalk.report.json"] = build_crosswalk_rows(payloads)
-    row_payloads["PR162E_Q_ArtifactMap.report.json"] = build_artifact_map_rows(
-        payloads,
-        shard_payloads,
+    auxiliary = (
+        "PR162E_Q_ReportManifest.report.json",
+        "PR162E_Q_ReportConsumerCrosswalk.report.json",
+        "PR162E_Q_ArtifactMap.report.json",
     )
+    # These three inline projections must not change the domain shard inventory.
+    if any(name not in c.REPORT_FILENAMES or name in c.ROW_REPORTS for name in auxiliary):
+        raise ValueError("mapper auxiliary projection topology changed")
+    for name in auxiliary:
+        row_payloads[name] = []
     payloads, shard_payloads = payloads_from_rows(row_payloads)
-    row_payloads["PR162E_Q_ReportManifest.report.json"] = build_manifest_rows(payloads)
-    payloads, shard_payloads = payloads_from_rows(row_payloads)
+    # First round fixes auxiliary lengths; second binds all advertised counts.
+    # This is a bounded construction, not a retry-until-passing loop.
+    for _ in range(2):
+        row_payloads[auxiliary[2]] = build_artifact_map_rows(payloads, shard_payloads)
+        row_payloads[auxiliary[1]] = build_crosswalk_rows(payloads)
+        row_payloads[auxiliary[0]] = build_manifest_rows(payloads)
+        payloads, shard_payloads = payloads_from_rows(row_payloads)
+    if (
+        build_manifest_rows(payloads) != row_payloads[auxiliary[0]]
+        or build_crosswalk_rows(payloads) != row_payloads[auxiliary[1]]
+        or build_artifact_map_rows(payloads, shard_payloads) != row_payloads[auxiliary[2]]
+    ):
+        raise ValueError("mapper auxiliary projections did not converge")
     missing = sorted(set(c.REPORT_FILENAMES) - set(payloads))
     if missing:
         raise RuntimeError(f"{c.PR_ID} payload map missing reports: {missing}")
@@ -138,16 +161,12 @@ def build_candidate_contexts(source: SourceData) -> list[dict[str, Any]]:
         "PR166_Q_ObjectiveVariableConstraintPenaltyMap.report.json",
         "PR166_Q_QuantumClassicalHybridRaceLedger.report.json",
     )
-    companions = {
-        name: sorted(
-            source.records[name],
-            key=lambda item: str(item.get("deterministic_sort_key") or item.get("row_id")),
-        )
-        for name in companion_names
-    }
+    companions = _report_companion_alignment_v1(
+        handoffs, {name: source.records[name] for name in companion_names}
+    )
     contexts: list[dict[str, Any]] = []
     for index, row in enumerate(handoffs, start=1):
-        companion = {name: rows[index - 1] if index <= len(rows) else {} for name, rows in companions.items()}
+        companion = {name: rows[index - 1] for name, rows in companions.items()}
         contexts.append(
             {
                 "index": index,
@@ -197,10 +216,11 @@ def select_deep_mapping_subset(contexts: list[dict[str, Any]]) -> set[str]:
     for ctx in ranked:
         if len(selected) >= c.MAP_CAPS["max_deep_mapping_rows_default_ci"]:
             break
+        ref = str(ctx["upstream_pr166_qc_row_ref"])
         family = str(ctx["model_family"])
-        if per_family[family] >= c.MAP_CAPS["max_rows_per_model_family_default_ci"]:
+        if ref in selected or per_family[family] >= c.MAP_CAPS["max_rows_per_model_family_default_ci"]:
             continue
-        selected.add(str(ctx["upstream_pr166_qc_row_ref"]))
+        selected.add(ref)
         per_family[family] += 1
     return selected
 
@@ -270,7 +290,7 @@ def materialize_mapping(ctx: dict[str, Any], deep_refs: set[str]) -> dict[str, A
     embedding_complexity = _round(_clamp((estimated_binary_vars / 64.0) + (1.0 - sparsity) * 0.35, 0.0, 2.0))
     proof_status = "PROOF_VECTOR_COMPUTED_DETERMINISTIC_NO_SOLVER" if not structural_only else "STRUCTURAL_PROOF_VECTOR_COMPUTED_NO_SOLVER"
     no_constraint_reason = "" if constraints else "NO_NATIVE_CONSTRAINTS_REQUIRED_FOR_SELECTED_UNCONSTRAINED_MODEL"
-    native_constraint = selected_family in {"CQM", "QuadraticProgram"} or len(constraints) > 0
+    native_constraint = selected_family in {"CQM", "QuadraticProgram"}
 
     refs = _refs(idx)
     formula_family_id = f"PR162E_Q_FORMULA_FAMILY::{_slug(ctx['formula_id'])[:48]}"
@@ -279,6 +299,8 @@ def materialize_mapping(ctx: dict[str, Any], deep_refs: set[str]) -> dict[str, A
     duplicate_cluster = f"PR162E_Q_DUP_CLUSTER::{_slug(ctx['qku_family'])[:24]}::{idx % 53:02d}"
     near_duplicate_cluster = str(row.get("near_duplicate_cluster_id") or f"PR162E_Q_NEAR_DUP::{idx % 59:02d}")
     yes_no_side = "YES" if idx % 2 == 0 else "NO"
+    decision_variables = _decision_variables(idx)
+    variable_domains = _variable_domains(selected_family)
     common = {
         **_base_report_row("PR162E_Q_MapEligibility.report.json", idx),
         "row_id": f"PR162E_Q_MAP::{idx:05d}",
@@ -302,8 +324,8 @@ def materialize_mapping(ctx: dict[str, Any], deep_refs: set[str]) -> dict[str, A
         "formula_family_id": formula_family_id,
         "objective_family_id": objective_family_id,
         "canonical_objective_signature": canonical_objective_signature,
-        "canonical_variable_signature": "x_select,x_precompute,x_retest,x_owner_review,x_size_bits,x_side_case",
-        "canonical_constraint_signature": "budget<=1;precompute=>select;retest_or_repair_route",
+        "canonical_variable_signature": ",".join(item["name"] for item in decision_variables),
+        "canonical_constraint_signature": json_text(constraints, compact=True).rstrip("\n"),
         "duplicate_mapping_cluster_id": duplicate_cluster,
         "near_duplicate_mapping_cluster_id": near_duplicate_cluster,
         "canonicalization_reason": "CANONICALIZED_BY_QKU_FORMULA_ALGORITHM_MODEL_FAMILY_AND_UNIT_NORMALIZED_OBJECTIVE",
@@ -325,14 +347,14 @@ def materialize_mapping(ctx: dict[str, Any], deep_refs: set[str]) -> dict[str, A
         "objective_linear_terms": linear,
         "objective_quadratic_terms": quadratic,
         "higher_order_terms": [],
-        "decision_variables": _decision_variables(idx),
-        "variable_domains": _variable_domains(selected_family),
+        "decision_variables": decision_variables,
+        "variable_domains": variable_domains,
         "binary_encoding": _binary_encoding(),
         "integer_encoding": _integer_encoding(),
         "spin_encoding": _spin_encoding(),
         "one_hot_encoding": _one_hot_encoding(),
         "continuous_variable_handling": "NO_CONTINUOUS_DECISION_VARIABLES; CONTINUOUS_SCORES_ENTER_AS_COEFFICIENTS_ONLY",
-        "discrete_case_handling": "DQM_CASES_SKIP_PRECOMPUTE_RETEST_OWNER_REVIEW_WITH_ONE_HOT_FALLBACK",
+        "discrete_case_handling": "TWO_CASE_PER_ORIGINAL_BINARY_VARIABLE;ONE_HOT_ONLY_WHEN_ORIGINAL_CONSTRAINT_REQUIRES",
         "constraints": constraints,
         "constraint_senses": [item["sense"] for item in constraints],
         "constraint_native_flag": native_constraint,
@@ -341,9 +363,9 @@ def materialize_mapping(ctx: dict[str, Any], deep_refs: set[str]) -> dict[str, A
         "penalty_terms": _penalty_terms(penalty_weight, constraints),
         "penalty_weight_candidates": [penalty_weight, _round(penalty_weight * 1.5), _round(penalty_weight * 2.0)],
         "penalty_selection_reason": "PENALTY_EXCEEDS_OBJECTIVE_DYNAMIC_RANGE_AND_REMAINS_WITHIN_DEFAULT_SWEEP_CAP",
-        "slack_variable_plan": "SLACK_ROUTE_FOR_LINEAR_INEQUALITIES_IN_CQM_OR_QUADRATICPROGRAM; BINARY_SLACK_FOR_QUBO_FALLBACK",
+        "slack_variable_plan": "NO_ADDITIONAL_SLACK_FOR_SELECTED_SOURCE_BOUND_BINARY_CONSTRAINTS",
         "ancilla_variable_plan": "ANCILLA_NOT_REQUIRED_FOR_CURRENT_QUADRATIC_TERMS; RESERVED_FOR_HIGHER_ORDER_REPAIR",
-        "coefficient_scaling_status": "SCALED_TO_UNIT_INTERVAL_WITH_DYNAMIC_RANGE_RECORDED",
+        "coefficient_scaling_status": "UNSCALED_MODEL_COEFFICIENTS_WITH_SOURCE_MAXIMUM_MAGNITUDE_PROXY",
         "coefficient_dynamic_range": _round(max(abs(value) for value in [*linear.values(), *quadratic.values(), offset, penalty_weight])),
         "unit_normalization_ref": refs["unit"],
         "probability_unit": "PROBABILITY_0_TO_1",
@@ -810,13 +832,40 @@ def build_final_summary(source: SourceData, rows: list[dict[str, Any]]) -> dict[
 
 
 def build_crosswalk_rows(payloads: dict[str, dict[str, Any]]) -> list[dict[str, Any]]:
+    # Values originate in the existing acquisition ledger, not a zero fallback.
+    ledger = payloads["PR162E_Q_InputConsumption.report.json"]["records"]
+    if type(ledger) is not list:
+        raise ValueError("mapper input-consumption records are not a list")
+    counts: dict[str, int] = {}
+    for row in ledger:
+        if type(row) is not dict:
+            raise ValueError("mapper input-consumption row is not an object")
+        name = row.get("source_report_ref")
+        count = row.get("expanded_record_count")
+        if (
+            type(name) is not str or name not in c.STRICT_INPUT_REPORTS
+            or name in counts or type(count) is not int or count < 0
+        ):
+            raise ValueError("invalid mapper input-consumption count or identity")
+        counts[name] = count
+    if set(counts) != set(c.STRICT_INPUT_REPORTS):
+        raise ValueError("incomplete mapper input-consumption roster")
     rows: list[dict[str, Any]] = []
     index = 1
     for filename in c.STRICT_INPUT_REPORTS:
-        rows.append(_crosswalk_row(index, filename, produced_by=_source_pr_for_report(filename), consumed=True))
+        rows.append(_crosswalk_row(
+            index, filename, produced_by=_source_pr_for_report(filename),
+            consumed=True, payload={"record_count": counts[filename]},
+        ))
         index += 1
     for filename in c.REPORT_FILENAMES:
-        rows.append(_crosswalk_row(index, filename, produced_by=c.PR_ID, consumed=False, payload=payloads.get(filename)))
+        payload = payloads[filename]
+        count = payload.get("record_count")
+        if type(count) is not int or count < 0:
+            raise ValueError("invalid mapper generated-report count")
+        rows.append(_crosswalk_row(
+            index, filename, produced_by=c.PR_ID, consumed=False, payload=payload,
+        ))
         index += 1
     return rows
 
@@ -1108,6 +1157,12 @@ def _row_id_for_report(filename: str, index: int) -> str:
 
 
 def _interpret_fields(index: int) -> dict[str, Any]:
+    # This is a projection of the existing inverse mapping, not a decoder or
+    # permission to replace a canonical execution-route identity.
+    if type(index) is not int or index < 1:
+        raise ContractValidationError(ReasonCode.INVALID_CONTRACT, "invalid interpretation context")
+    cases = ["case_skip", "case_precompute", "case_retest", "case_owner_review"]
+    size = ["x_size_0", "x_size_1", "x_size_2"]
     return {
         "encoded_variable_name": "x_select",
         "original_variable_name": "select_candidate",
@@ -1118,17 +1173,23 @@ def _interpret_fields(index: int) -> dict[str, Any]:
         "encoded_domain": "{0,1}",
         "original_domain": "NONLIVE_SELECT_OR_SKIP_DECISION",
         "transform_type": "identity",
-        "reverse_transform_rule": "select_candidate = int(x_select); spin variables use x=(s+1)/2; one-hot cases map argmax case to route label",
-        "feasibility_check_rule": "all binary variables in {0,1}; one-hot sums to one when active; route constraints satisfied",
+        "reverse_transform_rule": "select_candidate = bool(x_select); first convert every spin with x=(s+1)/2; candidate_size=x_size_0+2*x_size_1+4*x_size_2; preserve all route_bits; route_case is the unique active case or null; execution_route_id is unchanged",
+        "feasibility_check_rule": "complete exact-domain sample; all original constraints satisfied; one-hot only when dqm_case_one_hot is present; never use argmax to repair an infeasible or ambiguous sample",
         "lost_information_flag": False,
         "lost_information_reason": "",
         "downstream_agent_consumer": "Replay Agent",
         "interpret_back_entries": [
-            {"encoded_variable_name": "x_select", "original_variable_name": "select_candidate", "transform_type": "identity"},
-            {"encoded_variable_name": "x_precompute", "original_variable_name": "quantum_precompute_route", "transform_type": "identity"},
-            {"encoded_variable_name": "s_select", "original_variable_name": "select_candidate", "transform_type": "spin_conversion", "reverse_transform_rule": "x=(s+1)/2"},
-            {"encoded_variable_name": "case_retest", "original_variable_name": "execution_route_id", "transform_type": "one_hot"},
+            {"encoded_variable_name": "x_select", "original_variable_name": "select_candidate", "transform_type": "identity", "output_type": "boolean"},
+            {"encoded_variable_name": "x_precompute", "original_variable_name": "quantum_precompute_route", "transform_type": "identity", "output_type": "boolean"},
+            {"encoded_variable_name": "s_select", "original_variable_name": "select_candidate", "transform_type": "spin_conversion", "reverse_transform_rule": "x=(s+1)/2", "output_type": "boolean"},
+            {"encoded_variable_name": "case_retest", "original_variable_name": "route_bits.retest", "transform_type": "identity", "output_type": "integer_0_or_1"},
+            {"encoded_variable_name": "x_retest", "original_variable_name": "replay_paper_retest_route", "transform_type": "identity", "output_type": "boolean"},
+            {"encoded_variable_name": "x_owner_review", "original_variable_name": "owner_review_route", "transform_type": "identity", "output_type": "boolean"},
+            {"encoded_variables": size, "original_variable_name": "candidate_size", "transform_type": "binary_expansion", "weights": [1, 2, 4], "output_domain": [0, 7]},
+            {"encoded_variables": cases, "original_variable_name": "route_bits", "transform_type": "identity", "case_names": ["skip", "precompute", "retest", "owner_review"]},
+            {"encoded_variables": cases, "original_variable_name": "route_case", "transform_type": "unique_active_or_null", "requires_one_hot_only_when": "dqm_case_one_hot"},
         ],
+        "spin_to_binary_variables": {row["name"].replace("x_", "s_"): row["name"] for row in _decision_variables(index)},
         "test_vector_ref": f"PR162E_Q_TEST_VECTOR::{index:05d}",
         "proof_vector_ref": f"PR162E_Q_PROOF::{index:05d}",
     }
@@ -1360,19 +1421,83 @@ def _handoff_fields(filename: str, row: dict[str, Any], index: int) -> dict[str,
 
 
 def _proof_fields(row: dict[str, Any], index: int, linear: dict[str, float], quadratic: dict[str, float], constraints: list[dict[str, Any]], penalty_weight: float) -> dict[str, Any]:
+    # This is an explicit deterministic test witness, not an observed trade size
+    # or a proof that an unconstrained minimum satisfies the original constraints.
+    if type(row) is not dict or type(index) is not int or index < 1:
+        raise ContractValidationError(ReasonCode.INVALID_CONTRACT, "invalid proof context")
+    for name in ("still_negative_after_costs_flag", "paper_retest_flag", "owner_dashboard_review_flag"):
+        if type(row.get(name)) is not bool:
+            raise ContractValidationError(ReasonCode.INCOMPLETE_CONTRACT, "proof control flag must be an explicit Boolean")
+    if _mapping_fraction_v1(penalty_weight, "penalty_weight") < 0:
+        raise NumericDomainError(ReasonCode.OUT_OF_DOMAIN, "negative penalty weight")
     assignment = {
-        "x_select": 1,
-        "x_precompute": 1,
-        "x_retest": 1 if row["still_negative_after_costs_flag"] or row["paper_retest_flag"] else 0,
-        "x_owner_review": 1 if row["owner_dashboard_review_flag"] else 0,
-        "case_skip": 0,
-        "case_precompute": 0,
-        "case_retest": 1,
-        "case_owner_review": 0,
+        "x_select": 1, "x_precompute": 1,
+        "x_retest": int(row["still_negative_after_costs_flag"] or row["paper_retest_flag"]),
+        "x_owner_review": int(row["owner_dashboard_review_flag"]),
+        "x_size_0": 0, "x_size_1": 0, "x_size_2": 0,
+        "case_skip": 0, "case_precompute": 0, "case_retest": 1, "case_owner_review": 0,
     }
-    original = _round(sum(linear.get(k, 0.0) * v for k, v in assignment.items()) + sum(quadratic.get(k, 0.0) for k in quadratic if all(assignment.get(part, 0) for part in k.split("*"))))
-    penalty = _round(0.0 if _constraints_satisfied(assignment, constraints) else penalty_weight)
-    encoded = _round(original + penalty)
+    if not _constraints_satisfied(assignment, constraints):
+        raise ContractValidationError(ReasonCode.VALIDATION_FAILED, "selected proof witness is infeasible")
+    if type(linear) is not dict or type(quadratic) is not dict:
+        raise ContractValidationError(ReasonCode.INVALID_CONTRACT, "invalid proof coefficients")
+    original = Fraction(0)
+    for name, value in linear.items():
+        if name not in assignment:
+            raise ContractValidationError(ReasonCode.INCOMPLETE_CONTRACT, "objective variable has no assignment")
+        original += _mapping_fraction_v1(value, name) * assignment[name]
+    for pair, value in quadratic.items():
+        if type(pair) is not str or len(pair.split("*")) != 2 or any(name not in assignment for name in pair.split("*")):
+            raise ContractValidationError(ReasonCode.INVALID_CONTRACT, "invalid proof objective pair")
+        left, right = pair.split("*")
+        original += _mapping_fraction_v1(value, pair) * assignment[left] * assignment[right]
+    recipe = row.get("recipe_payload")
+    if type(recipe) is not dict or any(type(recipe.get(key)) is not dict for key in ("qubo", "bqm", "ising")):
+        raise ContractValidationError(ReasonCode.INCOMPLETE_CONTRACT, "proof requires actual emitted binary recipes")
+    qubo, bqm, ising = recipe["qubo"], recipe["bqm"], recipe["ising"]
+    if qubo.get("objective_sense") != "minimize_energy" or bqm.get("vartype") != "BINARY" or ising.get("vartype") != "SPIN" or ising.get("binary_to_spin_rule") != "x=(s+1)/2":
+        raise ContractValidationError(ReasonCode.INVALID_CONTRACT, "incompatible energy basis")
+    if type(qubo.get("Q")) is not dict or type(bqm.get("linear")) is not dict or type(bqm.get("quadratic")) is not dict or type(ising.get("h")) is not dict or type(ising.get("J")) is not dict:
+        raise ContractValidationError(ReasonCode.INVALID_CONTRACT, "invalid energy coefficient objects")
+    offset = _mapping_fraction_v1(qubo.get("offset"), "qubo_offset")
+    energy = offset
+    for pair, value in qubo["Q"].items():
+        if type(pair) is not str or len(pair.split(",")) != 2 or any(name not in assignment for name in pair.split(",")):
+            raise ContractValidationError(ReasonCode.INVALID_CONTRACT, "invalid emitted QUBO pair")
+        left, right = pair.split(",")
+        energy += _mapping_fraction_v1(value, pair) * assignment[left] * assignment[right]
+    spin = {name.replace("x_", "s_"): 2 * bit - 1 for name, bit in assignment.items()}
+    ising_energy = _mapping_fraction_v1(ising.get("offset"), "ising_offset")
+    for name, value in ising["h"].items():
+        if name not in spin:
+            raise ContractValidationError(ReasonCode.INVALID_CONTRACT, "unknown emitted spin")
+        ising_energy += _mapping_fraction_v1(value, name) * spin[name]
+    for pair, value in ising["J"].items():
+        if type(pair) is not str or len(pair.split(",")) != 2 or any(name not in spin for name in pair.split(",")):
+            raise ContractValidationError(ReasonCode.INVALID_CONTRACT, "invalid emitted Ising pair")
+        left, right = pair.split(",")
+        ising_energy += _mapping_fraction_v1(value, pair) * spin[left] * spin[right]
+    bqm_energy = _mapping_fraction_v1(bqm.get("offset"), "bqm_offset")
+    for name, value in bqm["linear"].items():
+        if name not in assignment:
+            raise ContractValidationError(ReasonCode.INVALID_CONTRACT, "unknown emitted BQM variable")
+        bqm_energy += _mapping_fraction_v1(value, name) * assignment[name]
+    for pair, value in bqm["quadratic"].items():
+        if type(pair) is not str or len(pair.split("*")) != 2 or any(name not in assignment for name in pair.split("*")):
+            raise ContractValidationError(ReasonCode.INVALID_CONTRACT, "invalid emitted BQM pair")
+        left, right = pair.split("*")
+        bqm_energy += _mapping_fraction_v1(value, pair) * assignment[left] * assignment[right]
+    base_offset = _mapping_fraction_v1(row["objective_terms"]["offset"], "objective energy offset")
+    if recipe.get("constraint_encoding", {}).get("original_constraints") != constraints or recipe["constraint_encoding"].get("penalty_weight") != penalty_weight:
+        raise ContractValidationError(ReasonCode.INVALID_CONTRACT, "proof constraint binding mismatch")
+    if qubo.get("constraint_penalties_embedded") is not True:
+        raise ContractValidationError(ReasonCode.INVALID_CONTRACT, "constraint compilation required")
+    decoded = _mapping_solution_v1(row, assignment)
+    normalized = base_offset - energy
+    delta = normalized - original
+    tolerance = Fraction(1, 1_000_000_000)
+    if any(abs(value) > tolerance for value in (delta, ising_energy - energy, bqm_energy - energy)):
+        raise ContractValidationError(ReasonCode.VALIDATION_FAILED, "actual emitted energy disagrees with proof witness")
     return {
         "proof_vector_id": f"PR162E_Q_PROOF::{index:05d}",
         "mapping_row_ref": f"PR162E_Q_MAP::{index:05d}",
@@ -1381,16 +1506,21 @@ def _proof_fields(row: dict[str, Any], index: int, linear: dict[str, float], qua
             "quantum_precompute_route": bool(assignment["x_precompute"]),
             "replay_paper_retest_route": bool(assignment["x_retest"]),
             "owner_review_route": bool(assignment["x_owner_review"]),
+            "candidate_size": 0, "route_case": "retest", "route_bits": decoded["original_variable_assignment"]["route_bits"],
         },
         "encoded_variable_assignment": assignment,
-        "original_objective_value": original,
-        "encoded_objective_value": encoded,
-        "objective_delta": _round(encoded - original - penalty),
+        "original_objective_value": _mapping_float_v1(original, "original_objective_value"),
+        "encoded_objective_value": _mapping_float_v1(normalized, "encoded_objective_value"),
+        "objective_delta": _mapping_float_v1(delta, "objective_delta"),
+        "encoded_energy_value": _mapping_float_v1(energy, "encoded_energy_value"),
+        "ising_energy_value": _mapping_float_v1(ising_energy, "ising_energy_value"),
+        "bqm_energy_value": _mapping_float_v1(bqm_energy, "bqm_energy_value"),
         "constraint_satisfaction_original": "SATISFIED",
-        "constraint_satisfaction_encoded": "SATISFIED" if penalty == 0 else "PENALIZED",
-        "penalty_value": penalty,
-        "feasibility_match_flag": penalty == 0,
+        "constraint_satisfaction_encoded": "SATISFIED",
+        "penalty_value": 0.0,
+        "feasibility_match_flag": True,
         "interpret_back_match_flag": True,
+        "proof_scope": "CONSTRAINED_BINARY_ENERGY_AND_FEASIBLE_WITNESS",
     }
 
 
@@ -1445,31 +1575,111 @@ def _recipe_payload(
     refs: dict[str, str],
     structural_only: bool,
 ) -> dict[str, Any]:
+    import math
+    def outward(value, name):
+        result = _mapping_float_v1(value, name)
+        if Fraction(result) < value:
+            result = finite_float(math.nextafter(result, math.inf), field_name=name)
+        return result
+    domains = _variable_domains(selected_family)
+    names = tuple(domains["binary"])
+    if type(structural_only) is not bool or type(refs) is not dict or any(type(refs.get(k)) is not str or not refs[k].strip() for k in ("hybrid", "to_pr166_qc")):
+        raise ContractValidationError(ReasonCode.INVALID_CONTRACT, "invalid recipe context")
+    if type(ising) is not dict or "qubo_offset" not in ising:
+        raise ContractValidationError(ReasonCode.INCOMPLETE_CONTRACT, "missing objective-energy offset")
+    offset = ising["qubo_offset"]
+    base_offset = _mapping_fraction_v1(offset, "objective offset")
+    expected_q = _qubo_matrix(linear, quadratic, offset)
+    if q_matrix != expected_q or ising != _ising_from_qubo(expected_q, offset):
+        raise ContractValidationError(ReasonCode.VALIDATION_FAILED, "objective conversion operands disagree")
+    if any(name not in names for name in linear):
+        raise ContractValidationError(ReasonCode.INVALID_CONTRACT, "undeclared native objective variable")
+    penalty, penalty_constant = _mapping_penalty_polynomial_v1(constraints)
+    selected = {row["name"] for row in constraints}
+    if not {"select_requires_one_route", "owner_review_for_negative_or_repair", "bounded_candidate_size"} <= selected:
+        raise ContractValidationError(ReasonCode.INCOMPLETE_CONTRACT, "native constraint roster incomplete")
+    if ("dqm_case_one_hot" in selected) != (selected_family == "DQM") or ("structural_sparse_route" in selected) != structural_only:
+        raise ContractValidationError(ReasonCode.INVALID_CONTRACT, "constraint branch disagrees with recipe context")
+    weight = _mapping_fraction_v1(penalty_weight, "penalty_weight")
+    if weight < 0:
+        raise NumericDomainError(ReasonCode.OUT_OF_DOMAIN, "negative penalty")
+    exact = {f"{name},{name}": Fraction(0) for name in names}
+    for name, value in linear.items():
+        exact[f"{name},{name}"] -= _mapping_fraction_v1(value, name)
+    for pair, value in quadratic.items():
+        normalized = ",".join(sorted(pair.split("*")))
+        exact[normalized] = exact.get(normalized, Fraction(0)) - _mapping_fraction_v1(value, pair)
+    objective_span = sum((abs(v) for v in exact.values()), Fraction(0))
+    active = bool(penalty or penalty_constant)
+    if active and weight <= objective_span:
+        raise NumericDomainError(ReasonCode.OUT_OF_DOMAIN, "penalty does not dominate objective variation")
+    for key, value in penalty.items():
+        exact[key] = exact.get(key, Fraction(0)) + weight * value
+    exact_offset = base_offset + weight * penalty_constant
+    compiled_q = {key: _mapping_float_v1(value, key) for key, value in exact.items()}
+    compiled_offset = _mapping_float_v1(exact_offset, "compiled offset")
+    q_error = abs(Fraction(compiled_offset) - exact_offset) + sum(abs(Fraction(compiled_q[k]) - v) for k, v in exact.items())
+    tolerance = Fraction(1, 1_000_000_000)
+    if q_error > tolerance:
+        raise NumericDomainError(ReasonCode.OUT_OF_DOMAIN, "compiled coefficient export loses parity")
+    compiled_ising = _ising_from_qubo(compiled_q, compiled_offset)
+    # Certify the whole forward spin conversion, not just one sampled bit string.
+    h = {name.replace("x_", "s_"): Fraction(0) for name in names}
+    j: dict[str, Fraction] = {}
+    spin_constant = Fraction(compiled_offset)
+    for pair, value in compiled_q.items():
+        left, right = (name.replace("x_", "s_") for name in pair.split(","))
+        value = Fraction(value)
+        if left == right:
+            h[left] += value / 2
+            spin_constant += value / 2
+        else:
+            key = ",".join(sorted((left, right)))
+            j[key] = j.get(key, Fraction(0)) + value / 4
+            h[left] += value / 4
+            h[right] += value / 4
+            spin_constant += value / 4
+    spin_error = abs(Fraction(compiled_ising["offset"]) - spin_constant)
+    spin_error += sum(abs(Fraction(compiled_ising["h"][k]) - v) for k, v in h.items())
+    spin_error += sum(abs(Fraction(compiled_ising["J"][k]) - v) for k, v in j.items())
+    total_error = q_error + spin_error
+    if total_error > tolerance or (active and weight - objective_span <= 2 * total_error):
+        raise NumericDomainError(ReasonCode.OUT_OF_DOMAIN, "export error consumes feasibility separation")
+    b_linear = {name: compiled_q[f"{name},{name}"] for name in names}
+    b_quadratic = {pair.replace(",", "*"): value for pair, value in compiled_q.items() if len(set(pair.split(","))) == 2}
     return {
         "selected_family": selected_family,
-        "qubo": {"objective_sense": "minimize_energy", "Q": q_matrix, "offset": 0.0, "penalty_weight": penalty_weight},
-        "bqm": {"vartype": "BINARY", "linear": linear, "quadratic": quadratic, "offset": 0.0},
-        "ising": {"vartype": "SPIN", "h": ising["h"], "J": ising["J"], "offset": ising["offset"], "binary_to_spin_rule": "x=(s+1)/2"},
-        "cqm": {"objective": {"linear": linear, "quadratic": quadratic}, "constraints": constraints, "native_constraint_flag": True},
-        "dqm": {"cases": ["skip", "precompute", "retest", "owner_review"], "one_hot_fallback": True, "case_interactions": quadratic},
-        "quadratic_program": {
-            "objective": {"sense": "maximize", "linear": linear, "quadratic": quadratic},
-            "variables": _decision_variables(1),
-            "constraints": constraints,
-            "converter_sequence": [
-                "InequalityToEquality",
-                "IntegerToBinary",
-                "LinearEqualityToPenalty",
-                "LinearInequalityToPenalty",
-                "MaximizeToMinimize",
-                "QuadraticProgramToQubo",
-            ],
+        "qubo": {"objective_sense": "minimize_energy", "Q": compiled_q, "offset": compiled_offset, "penalty_weight": penalty_weight, "constraint_penalties_embedded": True, "original_model_constraint_check_required": True},
+        "bqm": {"vartype": "BINARY", "linear": b_linear, "quadratic": b_quadratic, "offset": compiled_offset},
+        "ising": {"vartype": "SPIN", "h": compiled_ising["h"], "J": compiled_ising["J"], "offset": compiled_ising["offset"], "binary_to_spin_rule": "x=(s+1)/2"},
+        "cqm": {"objective": {"sense": "minimize", "linear": {name: _mapping_float_v1(-_mapping_fraction_v1(value, name), name) for name, value in linear.items()}, "quadratic": {pair: _mapping_float_v1(-_mapping_fraction_v1(value, pair), pair) for pair, value in quadratic.items()}, "offset": offset}, "variables": _decision_variables(1), "constraints": constraints, "native_constraint_flag": True},
+        "dqm": {
+            "cases": ["skip", "precompute", "retest", "owner_review"],
+            "one_hot_fallback": True, "case_interactions": dict(quadratic),
+            "native_encoding": "TWO_CASE_PER_ORIGINAL_BINARY_VARIABLE",
+            "legacy_case_fields_role": "ROUTE_DESCRIPTION_NOT_NATIVE_BIAS_TABLES",
+            "variables": {name: [0, 1] for name in names},
+            "linear_biases": {name: [0.0, value] for name, value in b_linear.items()},
+            "quadratic_biases": {pair: [[0.0, 0.0], [0.0, value]] for pair, value in b_quadratic.items()},
+            "offset": compiled_offset,
         },
-        "hybrid": {
-            "quantum_precompute_route": refs["hybrid"],
-            "classical_hot_path_fallback": "CLASSICAL_FALLBACK_REQUIRED_NO_LIVE_AUTHORITY",
-            "replay_paper_retest_route": refs["to_pr166_qc"],
-            "structural_only_flag": structural_only,
+        "quadratic_program": {
+            "objective": {"sense": "maximize", "linear": dict(linear), "quadratic": dict(quadratic), "offset": 0},
+            "variables": _decision_variables(1), "constraints": constraints,
+            "converter_sequence": ["InequalityToEquality", "IntegerToBinary", "LinearEqualityToPenalty", "LinearInequalityToPenalty", "MaximizeToMinimize", "QuadraticProgramToQubo"],
+            "converter_sequence_role": "RETAINED_LEGACY_DESCRIPTION_NOT_EXECUTED_FOR_THIS_COMPILED_RECIPE",
+            "compiled_binary_recipe_ref": "qubo",
+        },
+        "hybrid": {"quantum_precompute_route": refs["hybrid"], "classical_hot_path_fallback": "CLASSICAL_FALLBACK_REQUIRED_NO_LIVE_AUTHORITY", "replay_paper_retest_route": refs["to_pr166_qc"], "structural_only_flag": structural_only},
+        "constraint_encoding": {
+            "method": "SOURCE_BOUND_BINARY_VIOLATION_SQUARES_NO_SLACK",
+            "variables": list(names), "additional_binary_variables": 0,
+            "objective_energy_offset": offset, "penalty_weight": penalty_weight,
+            "penalty_polynomial": penalty, "penalty_constant": penalty_constant,
+            "objective_span_upper_bound": outward(objective_span, "objective_span"),
+            "uniform_export_error_bound": outward(total_error, "export error"),
+            "original_constraints": constraints,
+            "original_model_check_required": True,
         },
     }
 
@@ -1494,30 +1704,63 @@ def _quadratic_terms(queue_risk: float, concentration: float, crowding: float) -
 
 
 def _qubo_matrix(linear: dict[str, float], quadratic: dict[str, float], offset: float) -> dict[str, float]:
-    matrix: dict[str, float] = {f"{name},{name}": _round(-value + offset * 0.01) for name, value in linear.items()}
+    # U(x) is the existing linear + quadratic maximization objective.
+    # E(x) = offset - U(x): an additive offset must never alter a diagonal.
+    _mapping_fraction_v1(offset, "offset")
+    if type(linear) is not dict or type(quadratic) is not dict:
+        raise ContractValidationError(ReasonCode.INVALID_CONTRACT, "mapping coefficients must be objects")
+    matrix: dict[str, float] = {}
+    for name, value in linear.items():
+        if type(name) is not str or not name.strip() or any(mark in name for mark in (",", "*")):
+            raise ContractValidationError(ReasonCode.INVALID_CONTRACT, "invalid mapping variable name")
+        matrix[f"{name},{name}"] = _mapping_float_v1(-_mapping_fraction_v1(value, name), name)
     for pair, value in quadratic.items():
+        if type(pair) is not str or len(pair.split("*")) != 2:
+            raise ContractValidationError(ReasonCode.INVALID_CONTRACT, "invalid quadratic pair")
         left, right = pair.split("*")
-        matrix[f"{left},{right}"] = _round(-value)
+        if left not in linear or right not in linear or left == right:
+            raise ContractValidationError(ReasonCode.INVALID_CONTRACT, "quadratic pair must name two declared variables")
+        matrix[f"{left},{right}"] = _mapping_float_v1(-_mapping_fraction_v1(value, pair), pair)
     return matrix
 
 
 def _ising_from_qubo(q_matrix: dict[str, float], offset: float) -> dict[str, Any]:
-    h: dict[str, float] = {}
-    j: dict[str, float] = {}
-    ising_offset = offset
-    for key, coeff in q_matrix.items():
+    if type(q_matrix) is not dict:
+        raise ContractValidationError(ReasonCode.INVALID_CONTRACT, "QUBO must be an object")
+    h: dict[str, Fraction] = {}
+    j: dict[str, Fraction] = {}
+    names: dict[str, str] = {}
+    terms = []
+    for key, value in q_matrix.items():
+        if type(key) is not str or len(key.split(",")) != 2:
+            raise ContractValidationError(ReasonCode.INVALID_CONTRACT, "invalid QUBO pair")
         left, right = key.split(",")
+        for name in (left, right):
+            if not name.strip():
+                raise ContractValidationError(ReasonCode.INVALID_CONTRACT, "empty QUBO variable")
+            spin = name.replace("x_", "s_")
+            if spin in names and names[spin] != name:
+                raise ContractValidationError(ReasonCode.INVALID_CONTRACT, "binary-to-spin name collision")
+            names[spin] = name
+            h.setdefault(spin, Fraction(0))
+        terms.append((left.replace("x_", "s_"), right.replace("x_", "s_"), _mapping_fraction_v1(value, key)))
+    ising_offset = _mapping_fraction_v1(offset, "offset")
+    for left, right, coeff in terms:
         if left == right:
-            h[left.replace("x_", "s_")] = _round(h.get(left.replace("x_", "s_"), 0.0) + coeff / 2.0)
-            ising_offset += coeff / 2.0
+            h[left] += coeff / 2
+            ising_offset += coeff / 2
         else:
-            s_left = left.replace("x_", "s_")
-            s_right = right.replace("x_", "s_")
-            j[f"{s_left},{s_right}"] = _round(coeff / 4.0)
-            h[s_left] = _round(h.get(s_left, 0.0) + coeff / 4.0)
-            h[s_right] = _round(h.get(s_right, 0.0) + coeff / 4.0)
-            ising_offset += coeff / 4.0
-    return {"h": h, "J": j, "offset": _round(ising_offset)}
+            pair = ",".join(sorted((left, right)))
+            j[pair] = j.get(pair, Fraction(0)) + coeff / 4
+            h[left] += coeff / 4
+            h[right] += coeff / 4
+            ising_offset += coeff / 4
+    return {
+        "h": {name: _mapping_float_v1(value, name) for name, value in h.items()},
+        "J": {name: _mapping_float_v1(value, name) for name, value in j.items()},
+        "offset": _mapping_float_v1(ising_offset, "ising_offset"),
+        "qubo_offset": offset,
+    }
 
 
 def _constraints(index: int, selected_family: str, still_negative: bool, structural_only: bool) -> list[dict[str, Any]]:
@@ -1540,6 +1783,10 @@ def _penalty_terms(penalty_weight: float, constraints: list[dict[str, Any]]) -> 
 
 
 def _decision_variables(index: int) -> list[dict[str, Any]]:
+    # All eleven labels already occur in the original constraints/encodings.
+    # No new mathematical decision or order-size policy is introduced.
+    if type(index) is not int or index < 1:
+        raise ContractValidationError(ReasonCode.INVALID_CONTRACT, "invalid variable context")
     return [
         {"name": "x_select", "type": "binary", "original_field": "candidate_selected_flag"},
         {"name": "x_precompute", "type": "binary", "original_field": "quantum_precompute_route_flag"},
@@ -1548,17 +1795,26 @@ def _decision_variables(index: int) -> list[dict[str, Any]]:
         {"name": "x_size_0", "type": "binary", "original_field": "order_size_bit_0"},
         {"name": "x_size_1", "type": "binary", "original_field": "order_size_bit_1"},
         {"name": "x_size_2", "type": "binary", "original_field": "order_size_bit_2"},
-        {"name": "case_retest", "type": "discrete_case", "original_field": "execution_route_case"},
+        {"name": "case_retest", "type": "binary", "original_field": "execution_route_case", "case_value": "retest"},
+        {"name": "case_skip", "type": "binary", "original_field": "execution_route_case", "case_value": "skip"},
+        {"name": "case_precompute", "type": "binary", "original_field": "execution_route_case", "case_value": "precompute"},
+        {"name": "case_owner_review", "type": "binary", "original_field": "execution_route_case", "case_value": "owner_review"},
     ]
 
 
 def _variable_domains(selected_family: str) -> dict[str, Any]:
+    names = [row["name"] for row in _decision_variables(1)]
+    if selected_family not in ("QUBO", "BQM", "Ising", "CQM", "DQM", "QuadraticProgram"):
+        raise ContractValidationError(ReasonCode.INVALID_CONTRACT, "unsupported selected model family")
     return {
-        "binary": {"x_select": [0, 1], "x_precompute": [0, 1], "x_retest": [0, 1], "x_owner_review": [0, 1]},
+        "binary": {name: [0, 1] for name in names},
         "integer": {"candidate_size": [0, 7]},
-        "spin": {"s_select": [-1, 1], "s_precompute": [-1, 1]},
+        "spin": {name.replace("x_", "s_"): [-1, 1] for name in names},
         "discrete": {"route_case": ["skip", "precompute", "retest", "owner_review"]},
         "selected_family_native": selected_family,
+        "integer_is_derived": True,
+        "route_case_requires_one_hot_constraint": True,
+        "route_bits_preserved_when_not_one_hot": True,
     }
 
 
@@ -1596,17 +1852,32 @@ def _estimated_qubits(binary_vars: int, embedding_complexity: float) -> int:
 
 
 def _constraints_satisfied(assignment: dict[str, int], constraints: list[dict[str, Any]]) -> bool:
+    if type(assignment) is not dict or type(constraints) is not list:
+        raise ContractValidationError(ReasonCode.INVALID_CONTRACT, "assignment/constraint shape")
+    for name, value in assignment.items():
+        if type(name) is not str or not name.strip() or type(value) is not int or value not in (0, 1):
+            raise ContractValidationError(ReasonCode.INVALID_CONTRACT, "assignment must contain named exact binary integers")
+    residuals = []
+    seen = set()
+    # Validate every constraint before returning an infeasibility result.
     for constraint in constraints:
-        total = sum(float(value) * assignment.get(name, 0) for name, value in constraint.get("linear", {}).items())
-        sense = constraint.get("sense")
-        rhs = float(constraint.get("rhs", 0))
-        if sense == "GE" and total + 1e-9 < rhs:
-            return False
-        if sense == "LE" and total - 1e-9 > rhs:
-            return False
-        if sense == "EQ" and abs(total - rhs) > 1e-9:
-            return False
-    return True
+        if type(constraint) is not dict or set(constraint) != {"name", "linear", "sense", "rhs"}:
+            raise ContractValidationError(ReasonCode.INVALID_CONTRACT, "unsupported constraint shape")
+        name, linear, sense = constraint["name"], constraint["linear"], constraint["sense"]
+        if type(name) is not str or not name.strip() or name in seen or type(linear) is not dict:
+            raise ContractValidationError(ReasonCode.INVALID_CONTRACT, "invalid or duplicate constraint")
+        if type(sense) is not str or sense not in ("GE", "LE", "EQ"):
+            raise ContractValidationError(ReasonCode.INVALID_CONTRACT, "unknown constraint sense")
+        seen.add(name)
+        total = Fraction(0)
+        for variable, coeff in linear.items():
+            if type(variable) is not str or variable not in assignment:
+                raise ContractValidationError(ReasonCode.INCOMPLETE_CONTRACT, "constraint variable has no assignment")
+            total += _mapping_fraction_v1(coeff, variable) * assignment[variable]
+        delta = total - _mapping_fraction_v1(constraint["rhs"], name + ":rhs")
+        residuals.append(-delta if sense == "GE" else delta if sense == "LE" else abs(delta))
+    tolerance = Fraction(1, 1_000_000_000)
+    return all(value <= tolerance for value in residuals)
 
 
 def _automapper_disposition(
@@ -1889,3 +2160,97 @@ def _round(value: float, digits: int = 6) -> float:
 
 def _slug(value: object) -> str:
     return re.sub(r"[^A-Za-z0-9]+", "_", str(value)).strip("_").upper() or "NA"
+
+def _mapping_fraction_v1(value: object, field: str) -> Fraction:
+    """Exact value of an already-decoded finite JSON scalar, not a new default."""
+    if not is_finite_json_number_v1(value):
+        raise NumericDomainError(ReasonCode.INVALID_NUMERIC_INPUT, f"invalid mapping scalar: {field}")
+    return Fraction(value)
+
+def _mapping_float_v1(value: Fraction, field: str) -> float:
+    """Single checked export boundary; never quantize an intermediate coefficient."""
+    try:
+        return finite_float(float(value), field_name=field)
+    except OverflowError as exc:
+        raise NumericDomainError(ReasonCode.OUT_OF_DOMAIN, f"mapping scalar overflows float: {field}") from exc
+
+def _mapping_penalty_polynomial_v1(constraints: list[dict[str, Any]]) -> tuple[dict[str, int], int]:
+    """Exact violation-squared polynomials for the existing six constraint forms.
+
+    This is a closed source-bound selection, not an arbitrary constraint parser.
+    A new or changed form requires a reviewed semantic successor, never guessing.
+    """
+    if type(constraints) is not list:
+        raise ContractValidationError(ReasonCode.INVALID_CONTRACT, "constraints must be a list")
+    cases = ("case_skip", "case_precompute", "case_retest", "case_owner_review")
+    forms = {
+        "select_requires_one_route": ({"x_select": 1, "x_precompute": -1}, "GE", (0,)),
+        "owner_review_for_negative_or_repair": ({"x_owner_review": 1, "x_retest": 1}, "GE", (0, 1)),
+        "bounded_candidate_size": ({"x_size_0": 1, "x_size_1": 2, "x_size_2": 4}, "LE", (7,)),
+        "dqm_case_one_hot": ({name: 1 for name in cases}, "EQ", (1,)),
+        "structural_sparse_route": ({"x_precompute": 1}, "GE", (1,)),
+        "capacity_guard": ({"x_select": 1, "x_owner_review": 1}, "LE", (2,)),
+    }
+    polynomial: dict[str, int] = {}
+    constant = 0
+    seen: set[str] = set()
+    def add(left, right, value):
+        key = ",".join(sorted((left, right)))
+        polynomial[key] = polynomial.get(key, 0) + value
+    for row in constraints:
+        if type(row) is not dict or set(row) != {"name", "linear", "sense", "rhs"}:
+            raise ContractValidationError(ReasonCode.INVALID_CONTRACT, "malformed constraint")
+        name = row["name"]
+        if type(name) is not str or name not in forms or name in seen:
+            raise ContractValidationError(ReasonCode.INVALID_CONTRACT, "unsupported or repeated constraint")
+        expected, sense, rhs_values = forms[name]
+        values = row["linear"]
+        if type(values) is not dict or values != expected or any(type(v) is not int for v in values.values()):
+            raise ContractValidationError(ReasonCode.INVALID_CONTRACT, "changed constraint coefficients")
+        if type(row["rhs"]) is not int or row["rhs"] not in rhs_values or type(row["sense"]) is not str or row["sense"] != sense:
+            raise ContractValidationError(ReasonCode.INVALID_CONTRACT, "changed constraint bound or sense")
+        seen.add(name)
+        if name == "select_requires_one_route":
+            add("x_precompute", "x_precompute", 1)
+            add("x_select", "x_precompute", -1)
+        elif name == "owner_review_for_negative_or_repair" and row["rhs"] == 1:
+            constant += 1
+            add("x_owner_review", "x_owner_review", -1)
+            add("x_retest", "x_retest", -1)
+            add("x_owner_review", "x_retest", 1)
+        elif name == "dqm_case_one_hot":
+            constant += 1
+            for index, left in enumerate(cases):
+                add(left, left, -1)
+                for right in cases[index + 1:]:
+                    add(left, right, 2)
+        elif name == "structural_sparse_route":
+            constant += 1
+            add("x_precompute", "x_precompute", -1)
+        # The other forms are tautologies on their explicitly binary domains.
+    return {key: value for key, value in polynomial.items() if value}, constant
+
+def _mapping_solution_v1(row: dict[str, Any], sample: dict[str, int], *, sample_kind: str = "BINARY") -> dict[str, Any]:
+    """Decode a complete selected binary/spin/two-case sample; no repair or release."""
+    if type(row) is not dict or type(sample) is not dict or type(sample_kind) is not str or sample_kind not in ("BINARY", "SPIN", "DQM"):
+        raise ContractValidationError(ReasonCode.INVALID_CONTRACT, "invalid sample envelope")
+    names = tuple(item["name"] for item in _decision_variables(1))
+    expected = {name.replace("x_", "s_") if sample_kind == "SPIN" else name for name in names}
+    if set(sample) != expected:
+        raise ContractValidationError(ReasonCode.INCOMPLETE_CONTRACT, "sample variable roster mismatch")
+    domain = (-1, 1) if sample_kind == "SPIN" else (0, 1)
+    if any(type(value) is not int or value not in domain for value in sample.values()):
+        raise ContractValidationError(ReasonCode.INVALID_CONTRACT, "sample value outside explicit domain")
+    bits = {name: (sample[name.replace("x_", "s_")] + 1) // 2 if sample_kind == "SPIN" else sample[name] for name in names}
+    if not _constraints_satisfied(bits, row["constraints"]):
+        raise ContractValidationError(ReasonCode.VALIDATION_FAILED, "original model sample infeasible")
+    cases = {case: bits["case_" + case] for case in ("skip", "precompute", "retest", "owner_review")}
+    active_cases = [name for name, value in cases.items() if value]
+    # Non-DQM source branches do not impose one-hot: do not fabricate a case.
+    return {"encoded_variable_assignment": bits,
+            "original_variable_assignment": {
+                "select_candidate": bool(bits["x_select"]), "quantum_precompute_route": bool(bits["x_precompute"]),
+                "replay_paper_retest_route": bool(bits["x_retest"]), "owner_review_route": bool(bits["x_owner_review"]),
+                "candidate_size": bits["x_size_0"] + 2*bits["x_size_1"] + 4*bits["x_size_2"],
+                "route_case": active_cases[0] if len(active_cases) == 1 else None, "route_bits": cases,
+            }}

@@ -17,6 +17,12 @@ from .enums import (
 )
 from .io import read_json, records_from_report_payload, resolve_repo_relative
 from .models import REQUIRED_ROW_FIELDS
+from src.qtt.stage1_prediction_markets.qku_computation_control_plane.errors import SerializationSafetyError
+from src.qtt.stage1_prediction_markets.qku_computation_control_plane.serialization import _report_manifest_consistency_v1
+from src.qtt.stage1_prediction_markets.qku_computation_control_plane.serialization import _report_directory_entries_v1
+from src.qtt.stage1_prediction_markets.qku_computation_control_plane.serialization import _report_schema_records_v1
+from src.qtt.stage1_prediction_markets.qku_computation_control_plane.serialization import _report_schema_session_v1
+from src.qtt.stage1_prediction_markets.qku_computation_control_plane.context import is_nonnegative_json_integer_v1
 
 
 class PR165D3ValidationError(RuntimeError):
@@ -31,6 +37,7 @@ def validate_repo(repo_root: Path) -> dict[str, Any]:
     payloads: dict[str, dict[str, Any]] = {}
     records_by_report: dict[str, list[dict[str, Any]]] = {}
 
+    schema_check = _report_schema_session_v1(repo_root, c, read_json, profile="D3")
     for report in c.REPORT_FILENAMES:
         path = root_dir / report
         if not path.exists():
@@ -38,14 +45,14 @@ def validate_repo(repo_root: Path) -> dict[str, Any]:
             continue
         payload = read_json(path)
         payloads[report] = payload
-        rows = records_from_report_payload(repo_root, payload)
+        rows = _report_schema_records_v1(repo_root, payload, read_json, schema_check, report)
         records_by_report[report] = rows
         expected_schema = c.REPORT_SCHEMA_REFS[report]
         _expect(payload.get("roadmap_pr_id") == c.PR_ID, errors, f"{report}: roadmap_pr_id mismatch")
         _expect(payload.get("created_by_pr") == c.PR_ID, errors, f"{report}: created_by_pr mismatch")
         _expect(payload.get("report_name") == report, errors, f"{report}: report_name mismatch")
         _expect(payload.get("schema_ref") == expected_schema, errors, f"{report}: schema_ref mismatch")
-        _expect(int(payload.get("record_count", -1)) == len(rows), errors, f"{report}: record_count mismatch")
+        _expect(is_nonnegative_json_integer_v1(payload.get("record_count")) and payload.get("record_count") == len(rows), errors, f"{report}: record_count mismatch")
         _expect((schema_dir / expected_schema).exists(), errors, f"{report}: missing schema {expected_schema}")
         _expect(path.stat().st_size <= c.ROOT_REPORT_LIMIT_BYTES, errors, f"{report}: root report exceeds size limit")
         for shard_ref in payload.get("shard_files", []):
@@ -61,6 +68,14 @@ def validate_repo(repo_root: Path) -> dict[str, Any]:
     _expect((schema_dir / "pr165_d3_common.schema.json").exists(), errors, "missing common schema")
     _expect(len(list(schema_dir.glob("*.schema.json"))) >= len(c.SCHEMA_FILENAMES), errors, "schema inventory is incomplete")
 
+    try:
+        _report_manifest_consistency_v1(
+            payloads, records_by_report, c.REPORT_FILENAMES,
+            "PR165_D3_ReportManifest.report.json", c.GENERATED_DIR, c.SCHEMA_DIR,
+            style="D3_ROOT_REFERENCE", schema_refs=c.REPORT_SCHEMA_REFS,
+        )
+    except SerializationSafetyError as exc:
+        errors.append(str(exc))
     manifest = records_by_report.get("PR165_D3_ReportManifest.report.json", [])
     _expect(len(manifest) == len(c.REPORT_FILENAMES), errors, "manifest does not cover all required reports")
     manifest_names = {row.get("manifest_report_name") for row in manifest}
@@ -108,7 +123,7 @@ def _validate_row(report: str, row: dict[str, Any], errors: list[str]) -> None:
         _expect(row.get(field) is False, errors, f"{report}:{row.get('row_id')}: {field} must be false")
     for key in ZERO_AUTHORITY_KEYS:
         if key in row:
-            _expect(row.get(key) == 0, errors, f"{report}:{row.get('row_id')}: {key} must be zero")
+            _expect((is_nonnegative_json_integer_v1(row.get(key)) and row.get(key) == 0), errors, f"{report}:{row.get('row_id')}: {key} must be zero")
     for value in _walk_values(row):
         if isinstance(value, str) and value in FORBIDDEN_STATUS_VALUES:
             errors.append(f"{report}:{row.get('row_id')}: forbidden status value emitted")
@@ -131,22 +146,22 @@ def _validate_summary(summary: dict[str, Any], records_by_report: dict[str, list
         "non_live_order_candidate_rows": len(records_by_report.get("PR165_D3_OrderCandidateLedger.report.json", [])),
     }
     for key, expected in expected_pairs.items():
-        _expect(summary.get(key) == expected, errors, f"final summary {key} mismatch: {summary.get(key)} != {expected}")
+        _expect(is_nonnegative_json_integer_v1(summary.get(key)) and summary.get(key) == expected, errors, f"final summary {key} mismatch: {summary.get(key)} != {expected}")
     for key in ZERO_AUTHORITY_KEYS:
-        _expect(summary.get(key, 0) == 0, errors, f"final summary {key} must be zero")
+        _expect((is_nonnegative_json_integer_v1(summary.get(key, 0)) and summary.get(key, 0) == 0), errors, f"final summary {key} must be zero")
     _expect(summary.get("selected_rows_are_not_live_or_profit_evidence") is True, errors, "final summary must declare selected rows non-live/non-profit")
-    _expect(summary.get("timeout_ms") == 3600000, errors, "final summary timeout_ms must be 3600000")
+    _expect(is_nonnegative_json_integer_v1(summary.get("timeout_ms")) and summary.get("timeout_ms") == 3600000, errors, "final summary timeout_ms must be 3600000")
 
 
 def _validate_generated_forbidden_files(repo_root: Path, errors: list[str]) -> None:
-    for path in (repo_root / c.GENERATED_DIR).glob("PR165_D3_*"):
-        if path.suffix in {".sha256", ".sha", ".hash"} or "checksum" in path.name.lower():
-            errors.append(f"forbidden hash/checksum artifact generated: {path}")
-    shard_dir = repo_root / c.SHARD_DIR
-    if shard_dir.exists():
-        for path in shard_dir.glob("*"):
+    from fnmatch import fnmatch
+    for path in _report_directory_entries_v1(repo_root / c.GENERATED_DIR):
+        if fnmatch(path.name, "PR165_D3_*"):
             if path.suffix in {".sha256", ".sha", ".hash"} or "checksum" in path.name.lower():
-                errors.append(f"forbidden hash/checksum shard generated: {path}")
+                errors.append(f"forbidden hash/checksum artifact generated: {path}")
+    for path in _report_directory_entries_v1(repo_root / c.SHARD_DIR, allow_absent=True):
+        if path.suffix in {".sha256", ".sha", ".hash"} or "checksum" in path.name.lower():
+            errors.append(f"forbidden hash/checksum shard generated: {path}")
 
 
 def _walk_values(value: Any) -> Iterable[Any]:

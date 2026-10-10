@@ -23,6 +23,8 @@ from .io import (
     resolve_repo_relative,
     write_json,
 )
+from src.qtt.stage1_prediction_markets.qku_computation_control_plane.serialization import _report_carry_candidate_lineage_v1
+from src.qtt.stage1_prediction_markets.qku_computation_control_plane.serialization import _report_companion_alignment_v1
 
 
 @dataclass(frozen=True)
@@ -68,7 +70,10 @@ def build_payloads_with_shards(repo_root: Path) -> tuple[dict[str, dict[str, Any
     source = load_sources(repo_root)
     contexts = build_candidate_contexts(source)
     selected = select_actual_sim_subset(contexts)
-    sim_rows = assign_simulator_roles([materialize_sim_row(ctx, selected) for ctx in contexts])
+    sim_rows = assign_simulator_roles([
+        _report_carry_candidate_lineage_v1(ctx["map"], materialize_sim_row(ctx, selected))
+        for ctx in contexts
+    ])
     row_payloads = build_row_payloads(source, sim_rows)
     row_payloads["PR167_ReportManifest.report.json"] = []
     payloads, shard_payloads = payloads_from_rows(row_payloads)
@@ -148,10 +153,12 @@ def build_candidate_contexts(source: SourceData) -> list[dict[str, Any]]:
         "PR166_QC_OwnerDashboardReview.report.json",
         "PR166_QC_ConnectorRouteReadiness.report.json",
     )
-    companions = {name: _sorted_rows(source.records[name]) for name in companion_names}
+    companions = _report_companion_alignment_v1(
+        primary, {name: source.records[name] for name in companion_names}
+    )
     contexts: list[dict[str, Any]] = []
     for index, row in enumerate(primary, start=1):
-        companion = {name: rows[index - 1] if index <= len(rows) else {} for name, rows in companions.items()}
+        companion = {name: rows[index - 1] for name, rows in companions.items()}
         contexts.append({"index": index, "map": row, "companions": companion})
     return contexts
 

@@ -8,14 +8,17 @@ from datetime import datetime, timedelta
 from decimal import Decimal
 from enum import Enum
 import json
+import math
 import ntpath
 import re
 from pathlib import PureWindowsPath
 import unicodedata
 from typing import Any
+from types import MappingProxyType
 
 from .context import _native_bounded_decimal, _native_require, _native_text
 from .errors import ContractValidationError, ReasonCode, SerializationSafetyError
+from .context import is_nonnegative_json_integer_v1
 
 
 @dataclass(frozen=True, slots=True)
@@ -369,6 +372,315 @@ def _native_strict_json(raw: bytes, max_bytes: int = 65536) -> Any:
 
     visit(result)
     return result
+
+
+def _probability_transport_admission_v1(value: object, *, max_bytes: int) -> tuple[object, int]:
+    """Admit every occurrence and retain its exact serialized byte measurement."""
+    _native_require(type(max_bytes) is int and 0 < max_bytes <= 1048576, "JSON_BUDGET")
+    used = nodes = 0
+    active: set[int] = set()
+
+    def charge(count: int) -> None:
+        nonlocal used
+        _native_require(count <= max_bytes - used, "JSON_BOUND")
+        used += count
+
+    def visit(item: object, depth: int) -> object:
+        nonlocal nodes
+        nodes += 1
+        _native_require(nodes <= 4096, "JSON_NODES")
+        _native_require(depth <= 16, "JSON_DEPTH")
+        if item is None:
+            charge(4)
+            return None
+        if type(item) is bool:
+            charge(4 if item else 5)
+            return item
+        if type(item) is int:
+            _native_require(-10**101 < item < 10**101, "NUMBER_BOUND")
+            charge(len(str(item)))
+            return item
+        if type(item) is datetime:
+            _native_require(item.tzinfo is timezone.utc, "PROBABILITY_UTC")
+            item = item.isoformat()
+        if type(item) is str:
+            _native_require(len(item) + 2 <= max_bytes - used, "JSON_BOUND")
+            charge(2)
+            for character in item:
+                point = ord(character)
+                _native_require(not 0xD800 <= point <= 0xDFFF, "SURROGATE")
+                if character in '"\\\b\f\n\r\t':
+                    charge(2)
+                elif point < 32:
+                    charge(6)
+                else:
+                    charge(1 if point < 128 else 2 if point < 2048 else 3 if point < 65536 else 4)
+            return item
+        _native_require(type(item) in (dict, MappingProxyType, list, tuple), "PROBABILITY_WIRE_TYPE")
+        _native_require(depth < 16, "JSON_DEPTH")
+        _native_require(id(item) not in active, "PROBABILITY_WIRE_CYCLE")
+        mapping = type(item) in (dict, MappingProxyType)
+        _native_require(len(item) * (2 if mapping else 1) <= 4096 - nodes, "JSON_NODES")
+        charge(2 + max(0, len(item) - 1) + (len(item) if mapping else 0))
+        active.add(id(item))
+        try:
+            if mapping:
+                # Check keys before sorting; foreign comparison/formatting is forbidden.
+                _native_require(all(type(key) is str for key in item), "PROBABILITY_WIRE_KEY")
+                return {visit(key, depth + 1): visit(item[key], depth + 1) for key in sorted(item)}
+            return [visit(child, depth + 1) for child in item]
+        finally:
+            active.remove(id(item))
+
+    owned = visit(value, 0)
+    return owned, used
+
+
+def _probability_transport_tree_v1(value: object, *, max_bytes: int) -> object:
+    """Retain the existing tree-only interface for admitted frame consumers."""
+    return _probability_transport_admission_v1(value, max_bytes=max_bytes)[0]
+
+
+def _bounded_probability_json_v1(value: object, *, max_bytes: int) -> str:
+    """V35-only bounded transport; retain the existing secret/path/parser policy."""
+    owned, measured = _probability_transport_admission_v1(value, max_bytes=max_bytes)
+    encoded = deterministic_json(owned)
+    raw = encoded.encode("utf-8")
+    _native_require(len(raw) == measured, "PROBABILITY_WIRE_BYTE_COUNT")
+    _native_strict_json(raw, max_bytes)
+    return encoded
+
+
+def _probability_binary64_v1(value: object, *, probability: bool = False) -> float:
+    """Decode canonical finite binary64 without crossing the Decimal boundary."""
+    _native_require(type(probability) is bool, "PROBABILITY_CODEC_MODE")
+    _native_require(type(value) is str and len(value) <= 80, "BINARY64_TEXT")
+    _native_require(value.startswith(("0x", "-0x")), "BINARY64_TEXT")
+    try:
+        decoded = float.fromhex(value)
+    except (ValueError, OverflowError) as exc:
+        raise ContractValidationError(ReasonCode.SCHEMA_MISMATCH, "BINARY64_TEXT") from exc
+    _native_require(math.isfinite(decoded) and decoded.hex() == value, "BINARY64_CANONICAL")
+    if probability:
+        _native_require(0.0 <= decoded <= 1.0 and value != "-0x0.0p+0", "PREDICTION_SCALAR")
+    return decoded
+
+
+def _probability_frame_bytes_v1(ordinal: int, path: list, tag: str, content: object) -> bytes:
+    """Encode one frame without building an unbounded tagged intermediate tree."""
+    parts: list[str] = []
+    used = nodes = 0
+    active: set[int] = set()
+
+    def emit(token: str) -> None:
+        nonlocal used
+        size = len(token.encode("utf-8"))
+        _native_require(size <= 65536 - used, "JSON_BOUND")
+        used += size
+        parts.append(token)
+
+    def node(depth: int, *, container: bool = False) -> None:
+        nonlocal nodes
+        nodes += 1
+        _native_require(nodes <= 4096, "JSON_NODES")
+        _native_require(depth < 16 if container else depth <= 16, "JSON_DEPTH")
+
+    def scalar(value: object, depth: int) -> None:
+        node(depth)
+        # Admission measures string code points before allocating escaped text.
+        _probability_transport_tree_v1(value, max_bytes=max(1, 65536 - used))
+        emit(json.dumps(value, ensure_ascii=False, allow_nan=False, separators=(",", ":")))
+
+    def array(values: object, depth: int, child) -> None:
+        node(depth, container=True)
+        _native_require(len(values) <= 4096 - nodes, "JSON_NODES")
+        emit("[")
+        for index, value in enumerate(values):
+            if index:
+                emit(",")
+            child(value, depth + 1)
+        emit("]")
+
+    def tagged(name: str, value: object, depth: int, child) -> None:
+        node(depth, container=True)
+        emit("{")
+        scalar(name, depth + 1)
+        emit(":")
+        child(value, depth + 1)
+        emit("}")
+
+    def wire(value: object, depth: int) -> None:
+        if value is None or type(value) in (bool, int, str):
+            scalar(value, depth)
+            return
+        if type(value) is float:
+            _native_require(math.isfinite(value), "PREDICTION_WIRE_NONFINITE")
+            tagged("binary64", value.hex(), depth, scalar)
+            return
+        _native_require(type(value) in (dict, MappingProxyType, tuple, list), "PREDICTION_WIRE_TYPE")
+        _native_require(id(value) not in active, "PREDICTION_WIRE_CYCLE")
+        active.add(id(value))
+        try:
+            if type(value) in (dict, MappingProxyType):
+                # Every mapping pair needs at least a key, value and pair node.
+                _native_require(len(value) * 3 + 3 <= 4096 - nodes, "JSON_NODES")
+                _native_require(all(type(key) is str for key in value), "PREDICTION_WIRE_KEY")
+                keys = sorted(value)
+
+                def pair(key, pair_depth):
+                    node(pair_depth, container=True)
+                    emit("[")
+                    scalar(key, pair_depth + 1)
+                    emit(",")
+                    wire(value[key], pair_depth + 1)
+                    emit("]")
+
+                tagged("mapping", keys, depth, lambda items, d: array(items, d, pair))
+            elif type(value) is tuple:
+                tagged("tuple", value, depth, lambda items, d: array(items, d, wire))
+            else:
+                array(value, depth, wire)
+        finally:
+            active.remove(id(value))
+
+    # Sorted canonical frame keys. Logical paths are not filesystem paths.
+    node(0, container=True)
+    emit("{")
+    scalar("content", 1)
+    emit(":")
+    if tag == "VALUE":
+        wire(content, 1)
+    elif tag == "MAPPING":
+        array(content, 1, scalar)
+    else:
+        scalar(content, 1)
+    for key, value in (("ordinal", ordinal), ("path", path), ("tag", tag)):
+        emit(",")
+        scalar(key, 1)
+        emit(":")
+        if key == "path":
+            array(value, 1, scalar)
+        else:
+            scalar(value, 1)
+    emit("}")
+    raw = "".join(parts).encode("utf-8")
+    _native_strict_json(raw, 65536)
+    return raw + b"\n"
+
+
+def _iter_prediction_artifact_frames_v1(bank: object, *, max_bytes: int, max_frames: int):
+    """Stream the fixed depth-first format; charge each LF before yielding it."""
+    _native_require(type(max_bytes) is int and max_bytes > 0 and
+                    type(max_frames) is int and max_frames > 0, "PREDICTION_ARTIFACT_BUDGET")
+    ordinal = total = 0
+    active: set[int] = set()
+
+    def emit(value: object, path: list):
+        nonlocal ordinal, total
+        _native_require(len(path) <= 16 and ordinal < max_frames, "PREDICTION_FRAME_BUDGET")
+        _native_require(id(value) not in active, "PREDICTION_WIRE_CYCLE")
+        try:
+            frame = _probability_frame_bytes_v1(ordinal, path, "VALUE", value)
+        except ContractValidationError as exc:
+            # Only the inherited representation bounds allow subdivision.
+            if str(exc).split(": ", 1)[-1] not in {"JSON_BOUND", "JSON_NODES", "JSON_DEPTH"}:
+                raise
+            _native_require(type(value) in (dict, MappingProxyType, tuple, list),
+                            "PREDICTION_FRAME_SCALAR_TOO_LARGE")
+            _native_require(len(value) <= max_frames - ordinal - 1, "PREDICTION_FRAME_BUDGET")
+            mapping = type(value) in (dict, MappingProxyType)
+            if mapping:
+                _native_require(all(type(k) is str for k in value), "PREDICTION_WIRE_KEY")
+                # Header itself must fit before retaining its sorted key roster.
+                _native_require(len(value) <= 4096 - 9 - len(path), "JSON_NODES")
+                keys = sorted(value)
+                frame = _probability_frame_bytes_v1(ordinal, path, "MAPPING", keys)
+            else:
+                frame = _probability_frame_bytes_v1(
+                    ordinal, path, "TUPLE" if type(value) is tuple else "LIST", len(value))
+            _native_require(len(frame) <= max_bytes - total, "PREDICTION_ARTIFACT_BUDGET")
+            total += len(frame)
+            ordinal += 1
+            yield frame
+            active.add(id(value))
+            try:
+                for key in keys if mapping else range(len(value)):
+                    yield from emit(value[key], [*path, key])
+            finally:
+                active.remove(id(value))
+        else:
+            _native_require(len(frame) <= max_bytes - total, "PREDICTION_ARTIFACT_BUDGET")
+            total += len(frame)
+            ordinal += 1
+            yield frame
+
+    yield from emit(bank, [])
+
+
+def _decode_prediction_artifact_v1(raw: bytes, *, max_bytes: int, max_frames: int) -> tuple[object, int]:
+    """Decode only the data-only framed grammar; no type-selected construction."""
+    import io
+
+    _native_require(type(raw) is bytes and type(max_bytes) is int and 0 < len(raw) <= max_bytes
+                    and type(max_frames) is int and max_frames > 0, "PREDICTION_ARTIFACT_BUDGET")
+    stream = io.BytesIO(raw)
+    ordinal = 0
+
+    def unwire(value):
+        if value is None or type(value) in (bool, int, str):
+            return value
+        if type(value) is list:
+            return [unwire(v) for v in value]
+        _native_require(type(value) is dict and len(value) == 1, "PREDICTION_WIRE_TAG")
+        if set(value) == {"binary64"}:
+            return _probability_binary64_v1(value["binary64"])
+        if set(value) == {"tuple"}:
+            _native_require(type(value["tuple"]) is list, "PREDICTION_WIRE_TUPLE")
+            return tuple(unwire(v) for v in value["tuple"])
+        _native_require(set(value) == {"mapping"} and type(value["mapping"]) is list,
+                        "PREDICTION_WIRE_TAG")
+        rows = value["mapping"]
+        _native_require(all(type(row) is list and len(row) == 2 and type(row[0]) is str for row in rows),
+                        "PREDICTION_WIRE_MAPPING")
+        keys = [row[0] for row in rows]
+        _native_require(keys == sorted(keys) and len(keys) == len(set(keys)), "PREDICTION_WIRE_MAPPING")
+        return {key: unwire(value) for key, value in rows}
+
+    def read(path: list, depth: int):
+        nonlocal ordinal
+        _native_require(depth <= 16 and ordinal < max_frames, "PREDICTION_FRAME_BUDGET")
+        line = stream.readline(65538)
+        _native_require(line.endswith(b"\n") and len(line) <= 65537, "PREDICTION_FRAME_BYTES")
+        frame = _native_strict_json(line[:-1], 65536)
+        _native_require(type(frame) is dict and set(frame) == {"ordinal", "path", "tag", "content"},
+                        "PREDICTION_FRAME_FIELDS")
+        _native_require(type(frame["ordinal"]) is int and frame["ordinal"] == ordinal and
+                        type(frame["path"]) is list and len(frame["path"]) == len(path) and
+                        all(type(a) is type(b) and a == b for a, b in zip(frame["path"], path)),
+                        "PREDICTION_FRAME_ORDER")
+        _native_require(type(frame["tag"]) is str, "PREDICTION_FRAME_TAG")
+        # Reject Decimal real tokens rather than coercing them during canonicalization.
+        owned = _probability_transport_tree_v1(frame, max_bytes=65536)
+        canonical = json.dumps(owned, sort_keys=True, ensure_ascii=False, allow_nan=False,
+                               separators=(",", ":")).encode("utf-8") + b"\n"
+        _native_require(canonical == line, "PREDICTION_FRAME_CANONICAL")
+        ordinal += 1
+        tag, content = frame["tag"], frame["content"]
+        if tag == "VALUE":
+            return unwire(content)
+        if tag == "MAPPING":
+            _native_require(type(content) is list and all(type(k) is str for k in content) and
+                            content == sorted(content) and len(content) == len(set(content)) and
+                            len(content) <= max_frames - ordinal, "PREDICTION_FRAME_CONTAINER")
+            return {key: read([*path, key], depth + 1) for key in content}
+        _native_require(tag in ("TUPLE", "LIST") and type(content) is int and
+                        0 <= content <= max_frames - ordinal, "PREDICTION_FRAME_CONTAINER")
+        values = [read([*path, i], depth + 1) for i in range(content)]
+        return tuple(values) if tag == "TUPLE" else values
+
+    result = read([], 0)
+    _native_require(stream.read(1) == b"", "PREDICTION_TRAILING_FRAME")
+    return result, ordinal
 
 
 # F14 isolated native/value serialization. Existing global codecs stay unchanged.
@@ -1063,3 +1375,753 @@ _F14_SHAPE_LIMITS = {
 
 
 }
+
+
+# Closed frame codec for the four existing input-artifact roles.
+_PROBABILITY_INPUT_ROLES_V1 = ('MODEL', 'CATALOG', 'RESULT', 'POLICY')
+_PROBABILITY_INPUT_TUPLES_V1 = {
+    'MODEL': frozenset(('feature_names', 'reference_clusters', 'targets', 'target_domains', 'dependency_refs')),
+    'CATALOG': frozenset(('rows', 'dependency_refs')),
+    'RESULT': frozenset(('cluster_ids', 'original_row_ids', 'targets', 'partition_codes',
+                         'reference_values', 'current_values', 'reference_records', 'current_records', 'dependency_refs')),
+    'POLICY': frozenset(('expected_environment',)),
+}
+
+
+def _probability_input_classes_v1():
+    from .models import (_ProbabilityAdmissionModelV1, _ProbabilityAdmissionCatalogV1,
+                         _ProbabilityAdmissionResultV1, _ProbabilityAdmissionLimitsV1)
+    return {'MODEL': _ProbabilityAdmissionModelV1, 'CATALOG': _ProbabilityAdmissionCatalogV1,
+            'RESULT': _ProbabilityAdmissionResultV1, 'POLICY': _ProbabilityAdmissionLimitsV1}
+
+
+def _probability_input_canonical_v1(value):
+    return _bounded_probability_json_v1(value, max_bytes=1048576)
+
+
+def _probability_input_fields_v1(role):
+    from .models import ProbabilityProducerScopeV1, _ProbabilityMaturityClusterV1, _ProbabilityAdmissionLimitsV1, _ProbabilityMaterializationReadBudgetV1, _probability_require_v1, _probability_projection_integer_v1, _probability_projection_text_v1
+    _probability_require_v1(role in _PROBABILITY_INPUT_ROLES_V1, 'MATERIALIZATION_ROLE')
+    fields = tuple(_probability_input_classes_v1()[role].__dataclass_fields__)
+    return fields + (('expected_environment',) if role == 'POLICY' else ())
+
+def _validate_probability_input_fields_v1(role, values):
+    from .models import ProbabilityProducerScopeV1, _ProbabilityMaturityClusterV1, _ProbabilityAdmissionLimitsV1, _ProbabilityMaterializationReadBudgetV1, _probability_require_v1, _probability_projection_integer_v1, _probability_projection_text_v1
+    'Storage shape validation only; numerical admission remains its old owner.'
+    signed = {'MODEL': {'reference_cutoff_ns', 'available_ns', 'valid_until_ns'}, 'CATALOG': {'complete_through_ns'}, 'RESULT': {'selection_cutoff_ns', 'available_ns'}, 'POLICY': set()}
+    integers = {'MODEL': {'replicate_count'}, 'CATALOG': {'owner_epoch', 'after_ordinal'}, 'RESULT': {'owner_epoch', 'replicate_count'}, 'POLICY': set(_ProbabilityAdmissionLimitsV1.__dataclass_fields__)}
+    pairs = {'target_domains', 'reference_values', 'current_values', 'expected_environment'}
+    for name, value in values.items():
+        if name == 'scope':
+            _probability_require_v1(type(value) is ProbabilityProducerScopeV1, 'MATERIALIZATION_SCOPE')
+        elif name in ('reference_clusters', 'rows'):
+            _probability_require_v1(type(value) is tuple and all((type(x) is _ProbabilityMaturityClusterV1 for x in value)), 'MATERIALIZATION_CATALOG_ROW')
+        elif name in signed[role]:
+            _probability_projection_integer_v1(value, 'MATERIALIZATION_FIELD_TYPE', None)
+        elif name in integers[role]:
+            minimum = 1 if role == 'POLICY' or name == 'replicate_count' else 0
+            _probability_projection_integer_v1(value, 'MATERIALIZATION_FIELD_TYPE', minimum)
+        elif name in pairs:
+            _probability_require_v1(type(value) is tuple and all((type(row) is tuple and len(row) == 2 and all((type(x) is str for x in row)) for row in value)), 'MATERIALIZATION_PAIRS')
+        elif name == 'partition_codes':
+            _probability_require_v1(type(value) is tuple and len(value) == 2 and all((type(x) is int for x in value)) and (value == (3, 4)), 'MATERIALIZATION_PARTITION')
+        elif name in _PROBABILITY_INPUT_TUPLES_V1[role]:
+            _probability_require_v1(type(value) is tuple and all((type(x) is str for x in value)), 'MATERIALIZATION_FIELD_TYPE')
+        elif name == 'precision_protocol_ref' and value is None:
+            pass
+        else:
+            _probability_require_v1(type(value) is str, 'MATERIALIZATION_FIELD_TYPE')
+            if name != 'export_text':
+                _probability_projection_text_v1(value, 'MATERIALIZATION_FIELD_TYPE')
+
+def _iter_probability_input_object_frames_v1(role, obj, *, budget, expected_environment=None):
+    """Emit only the four fixed data-only schemas, charging before each yield."""
+    from .models import (ProbabilityProducerScopeV1, _ProbabilityMaturityClusterV1,
+                         _ProbabilityMaterializationReadBudgetV1, _probability_require_v1)
+    need = _probability_require_v1
+    need(type(role) is str and role in _PROBABILITY_INPUT_ROLES_V1, "MATERIALIZATION_ROLE")
+    need(type(budget) is _ProbabilityMaterializationReadBudgetV1 and
+         type(obj) is _probability_input_classes_v1()[role], "MATERIALIZATION_OBJECT_TYPE")
+    budget.__post_init__()
+    values = {name: getattr(obj, name) for name in obj.__dataclass_fields__}
+    if role == "POLICY":
+        values["expected_environment"] = expected_environment
+    else:
+        need(expected_environment is None, "MATERIALIZATION_UNEXPECTED_ENVIRONMENT")
+    _validate_probability_input_fields_v1(role, values)
+    count = 1 + len(values)
+    for name in _PROBABILITY_INPUT_TUPLES_V1[role]:
+        need(len(values[name]) <= budget.max_frames - count, "MATERIALIZATION_ARTIFACT_BUDGET")
+        count += len(values[name])
+    need(count <= budget.max_frames, "MATERIALIZATION_ARTIFACT_BUDGET")
+    total = 0
+
+    def project(value):
+        if type(value) in (ProbabilityProducerScopeV1, _ProbabilityMaturityClusterV1):
+            value.__post_init__()
+            return {name: getattr(value, name) for name in value.__dataclass_fields__}
+        return value
+
+    def frame(value):
+        nonlocal total
+        text = _bounded_probability_json_v1(value, max_bytes=min(budget.max_frame_bytes,
+                                                                budget.max_total_bytes - total))
+        raw = text.encode("utf-8", "strict")
+        need(total + len(raw) <= budget.max_total_bytes, "MATERIALIZATION_ARTIFACT_BUDGET")
+        total += len(raw)
+        return raw
+
+    yield frame({"schema_version": "V35_INPUT_OBJECT_REFERENCE_V1", "role": role})
+    for name in _probability_input_fields_v1(role):
+        value = values[name]
+        if name in _PROBABILITY_INPUT_TUPLES_V1[role]:
+            yield frame({"field": name, "count": len(value)})
+            for item in value:
+                yield frame({"item": project(item)})
+        else:
+            yield frame({"field": name, "value": project(value)})
+
+
+def _decode_probability_input_object_v1(role, frames, budget):
+    from .models import ProbabilityProducerScopeV1, _ProbabilityMaturityClusterV1, _ProbabilityAdmissionLimitsV1, _ProbabilityMaterializationReadBudgetV1, _probability_require_v1, _probability_projection_integer_v1, _probability_projection_text_v1
+    'Closed, ordered, frame-bounded parser; never imports a payload class name.'
+    _probability_require_v1(type(budget) is _ProbabilityMaterializationReadBudgetV1, 'MATERIALIZATION_READ_BUDGET')
+    _probability_require_v1(type(frames) is tuple and all((type(frame) is bytes for frame in frames)), 'MATERIALIZATION_ARTIFACT_TYPE')
+    _probability_require_v1(len(frames) <= budget.max_frames and sum(map(len, frames)) <= budget.max_total_bytes, 'MATERIALIZATION_ARTIFACT_BUDGET')
+    position = 0
+
+    def take():
+        nonlocal position
+        _probability_require_v1(position < len(frames), 'MATERIALIZATION_FRAME_MISSING')
+        raw = frames[position]
+        position += 1
+        value = _native_strict_json(raw, budget.max_frame_bytes)
+        _probability_require_v1(type(value) is dict, 'MATERIALIZATION_FRAME_SHAPE')
+        _probability_require_v1(_probability_input_canonical_v1(value).encode('utf-8') == raw, 'MATERIALIZATION_NONCANONICAL')
+        return value
+    _probability_require_v1(take() == {'schema_version': 'V35_INPUT_OBJECT_REFERENCE_V1', 'role': role}, 'MATERIALIZATION_OBJECT_HEADER')
+    values = {}
+    for name in _probability_input_fields_v1(role):
+        row = take()
+        if name in _PROBABILITY_INPUT_TUPLES_V1[role]:
+            _probability_require_v1(set(row) == {'field', 'count'} and row['field'] == name, 'MATERIALIZATION_FIELD_ORDER')
+            count = _probability_projection_integer_v1(row['count'], 'MATERIALIZATION_COUNT')
+            _probability_require_v1(count <= budget.max_frames and count <= len(frames) - position, 'MATERIALIZATION_COUNT')
+            items = []
+            for _ in range(count):
+                item = take()
+                _probability_require_v1(set(item) == {'item'}, 'MATERIALIZATION_ITEM_SHAPE')
+                items.append(item['item'])
+            values[name] = tuple(items)
+        else:
+            _probability_require_v1(set(row) == {'field', 'value'} and row['field'] == name, 'MATERIALIZATION_FIELD_ORDER')
+            values[name] = row['value']
+    _probability_require_v1(position == len(frames), 'MATERIALIZATION_TRAILING_FRAMES')
+    if 'scope' in values:
+        _probability_require_v1(type(values['scope']) is dict and set(values['scope']) == set(ProbabilityProducerScopeV1.__dataclass_fields__), 'MATERIALIZATION_SCOPE')
+        values['scope'] = ProbabilityProducerScopeV1(**values['scope'])
+    for name in ('reference_clusters', 'rows'):
+        if name in values:
+            restored = []
+            for row in values[name]:
+                _probability_require_v1(type(row) is dict and set(row) == set(_ProbabilityMaturityClusterV1.__dataclass_fields__), 'MATERIALIZATION_CATALOG_ROW')
+                row = dict(row)
+                _probability_require_v1(type(row['row_ids']) is list, 'MATERIALIZATION_ROW_IDS')
+                row['row_ids'] = tuple(row['row_ids'])
+                restored.append(_ProbabilityMaturityClusterV1(**row))
+            values[name] = tuple(restored)
+    for name in ('target_domains', 'reference_values', 'current_values', 'expected_environment'):
+        if name in values:
+            _probability_require_v1(all((type(row) is list and len(row) == 2 for row in values[name])), 'MATERIALIZATION_PAIRS')
+            values[name] = tuple((tuple(row) for row in values[name]))
+    _validate_probability_input_fields_v1(role, values)
+    environment = values.pop('expected_environment', None)
+    obj = _probability_input_classes_v1()[role](**values)
+    return (obj, environment)
+
+# One process-local report acquisition binding. The runner installs this only
+# inside its admitted lifecycle; a family is source-fixed, never caller-selected
+# by profile JSON. This is not an authority or a sandbox.
+_REPORT_READ_BINDING_V1 = None
+
+
+def _report_read_json_v1(path, *, family):
+    from pathlib import Path
+    import os
+    if type(family) is not str or family not in ("QB", "QC", "MAPPER"):
+        raise ValueError("REPORT_UNKNOWN_READER_FAMILY")
+    active = _REPORT_READ_BINDING_V1
+    if active is not None:
+        selected_family, reader = active
+        if selected_family != family:
+            raise ValueError("REPORT_READER_FAMILY_MISMATCH")
+        path = Path(path)
+        selected = path if path.is_absolute() else reader.root / path
+        return reader.read_json(selected.relative_to(reader.root).as_posix(), _report_json_object_v1)
+    if any(key.upper().startswith("QTT_MAPPER_") for key in os.environ):
+        raise ValueError("MAPPER_PROFILE_PRESENT_WITHOUT_ACTIVE_READER")
+    return _report_json_object_v1(path.read_text(encoding="utf-8"))
+
+
+def _report_json_object_v1(text: str) -> dict[str, Any]:
+    """Decode one report object; this creates no schema or source acceptance."""
+    if type(text) is not str:
+        raise SerializationSafetyError(ReasonCode.SERIALIZATION_UNSAFE, "report JSON must be text")
+
+    def object_pairs(pairs):
+        result = {}
+        for key, value in pairs:
+            if key in result:
+                raise SerializationSafetyError(ReasonCode.SERIALIZATION_UNSAFE, "duplicate report JSON key")
+            result[key] = value
+        return result
+
+    def finite_number(token):
+        value = float(token)
+        if not math.isfinite(value):
+            raise SerializationSafetyError(ReasonCode.SERIALIZATION_UNSAFE, "nonfinite report JSON number")
+        return value
+
+    def reject_constant(_token):
+        raise SerializationSafetyError(ReasonCode.SERIALIZATION_UNSAFE, "nonfinite report JSON constant")
+
+    value = json.loads(text, object_pairs_hook=object_pairs, parse_float=finite_number, parse_constant=reject_constant)
+    if type(value) is not dict:
+        raise SerializationSafetyError(ReasonCode.SERIALIZATION_UNSAFE, "report JSON root must be an object")
+    # Stack storage follows depth; do not flatten all rows or all string values.
+    stack = [iter((value,))]
+    while stack:
+        try:
+            item = next(stack[-1])
+        except StopIteration:
+            stack.pop()
+            continue
+        if type(item) is str:
+            if any(0xD800 <= ord(char) <= 0xDFFF for char in item):
+                raise SerializationSafetyError(ReasonCode.SERIALIZATION_UNSAFE, "unpaired report Unicode surrogate")
+        elif type(item) is dict:
+            stack.append(iter(part for pair in item.items() for part in pair))
+        elif type(item) is list:
+            stack.append(iter(item))
+    return value
+
+def _report_directory_entries_v1(directory, *, allow_absent=False):
+    """Return a complete flat inventory or raise; never hide scan failures.
+
+    Names alone are inventoried. Entries are not opened or recursively followed.
+    This is a validation-only helper, not a sandbox or a resource admission owner.
+    """
+    import os
+    import stat
+    from pathlib import Path
+
+    if not isinstance(directory, Path) or type(allow_absent) is not bool:
+        raise SerializationSafetyError(ReasonCode.PATH_UNSAFE, "invalid report directory request")
+    path = directory.absolute()
+    chain = (*reversed(path.parents), path)
+
+    def stamp(item):
+        value = item.lstat()
+        if (not stat.S_ISDIR(value.st_mode)
+                or getattr(value, "st_file_attributes", 0)
+                   & getattr(stat, "FILE_ATTRIBUTE_REPARSE_POINT", 0x400)):
+            raise SerializationSafetyError(ReasonCode.PATH_UNSAFE, "unsafe report directory ancestry")
+        return (value.st_dev, value.st_ino, value.st_mode, value.st_size,
+                value.st_mtime_ns, value.st_ctime_ns)
+
+    before = []
+    for item in chain:
+        try:
+            value = stamp(item)
+        except FileNotFoundError:
+            if not allow_absent or item != path:
+                raise
+            # Absence is permitted only for the requested optional leaf.
+            for parent, expected in before:
+                if stamp(parent) != expected:
+                    raise SerializationSafetyError(ReasonCode.PATH_UNSAFE, "report directory changed")
+            try:
+                path.lstat()
+            except FileNotFoundError:
+                return ()
+            raise SerializationSafetyError(ReasonCode.PATH_UNSAFE, "report directory appeared")
+        before.append((item, value))
+    with os.scandir(path) as entries:
+        names = tuple(sorted(entry.name for entry in entries))
+    for item, expected in before:
+        if stamp(item) != expected:
+            raise SerializationSafetyError(ReasonCode.PATH_UNSAFE, "report directory changed")
+    return tuple(directory / name for name in names)
+
+def _report_rows_v1(payload: Any) -> list[dict[str, Any]]:
+    """Require an explicit row array; preserve row objects and order."""
+    if type(payload) is not dict:
+        raise SerializationSafetyError(ReasonCode.SERIALIZATION_UNSAFE, "report payload must be an object")
+    rows = payload.get("records")
+    if type(rows) is not list or any(type(row) is not dict for row in rows):
+        raise SerializationSafetyError(ReasonCode.SERIALIZATION_UNSAFE, "report records must be an explicit object array")
+    return rows
+
+def _report_shard_refs_v1(payload: Any) -> tuple[str, ...]:
+    """Resolve legacy aliases once; never discard a conflicting declaration."""
+    if type(payload) is not dict:
+        raise SerializationSafetyError(ReasonCode.SERIALIZATION_UNSAFE, "report payload must be an object")
+    if "sharded_flag" in payload and type(payload["sharded_flag"]) is not bool:
+        raise SerializationSafetyError(ReasonCode.SERIALIZATION_UNSAFE, "report sharded_flag must be boolean")
+    aliases = []
+    for key in ("shard_files", "shard_paths"):
+        refs = payload[key] if key in payload else []
+        if type(refs) is not list or any(type(ref) is not str for ref in refs):
+            raise SerializationSafetyError(ReasonCode.SERIALIZATION_UNSAFE, "report shard references must be text arrays")
+        for ref in refs:
+            if validate_relative_path(ref) != ref:
+                raise SerializationSafetyError(ReasonCode.PATH_UNSAFE, "report shard reference must be canonical")
+        aliases.append(refs)
+    primary, secondary = aliases
+    if primary and secondary and primary != secondary:
+        raise SerializationSafetyError(ReasonCode.SERIALIZATION_UNSAFE, "conflicting report shard aliases")
+    selected = primary or secondary
+    if payload.get("sharded_flag") is False and selected:
+        raise SerializationSafetyError(ReasonCode.SERIALIZATION_UNSAFE, "nonsharded report declares shards")
+    if payload.get("sharded_flag") is True and not selected:
+        raise SerializationSafetyError(ReasonCode.SERIALIZATION_UNSAFE, "sharded report has no declared shards")
+    return tuple(selected)
+
+def _report_shard_descriptors_v1(payload, refs, *, required):
+    """Check declared descriptor occurrences without collapsing repeated paths."""
+    if type(required) is not bool:
+        raise SerializationSafetyError(ReasonCode.SERIALIZATION_UNSAFE, "invalid descriptor policy")
+    if "shard_manifest_refs" not in payload:
+        if required and refs:
+            raise SerializationSafetyError(ReasonCode.SERIALIZATION_UNSAFE, "missing shard descriptors")
+        return () if not refs else None
+    declarations = payload["shard_manifest_refs"]
+    if type(declarations) is not list or len(declarations) != len(refs):
+        raise SerializationSafetyError(ReasonCode.SERIALIZATION_UNSAFE, "shard descriptor count mismatch")
+    for ordinal, (ref, declaration) in enumerate(zip(refs, declarations), start=1):
+        if (type(declaration) is not dict
+                or declaration.get("shard_path") != ref
+                or not is_nonnegative_json_integer_v1(declaration.get("shard_index"))
+                or declaration["shard_index"] != ordinal
+                or not is_nonnegative_json_integer_v1(declaration.get("row_count"))):
+            raise SerializationSafetyError(ReasonCode.SERIALIZATION_UNSAFE, "invalid ordered shard descriptor")
+    return tuple(declarations)
+
+def _expand_report_records_v1(repo_root, payload, read_json):
+    """Expand one layer, checking each present count against that actual read.
+
+    This does not authenticate data, resolve physical custody, or grant resources.
+    Repeated paths remain separate reads. Counts are never coerced or defaulted.
+    """
+    inline = _report_rows_v1(payload)
+    refs = _report_shard_refs_v1(payload)
+    declarations = _report_shard_descriptors_v1(payload, refs, required=False)
+    if payload.get("sharded_flag") is True and inline:
+        raise SerializationSafetyError(ReasonCode.SERIALIZATION_UNSAFE, "compact sharded root duplicates inline records")
+    rows = list(inline)
+    for ordinal, ref in enumerate(refs):
+        shard = read_json(repo_root / ref)
+        shard_rows = _report_rows_v1(shard)
+        if _report_shard_refs_v1(shard):
+            raise SerializationSafetyError(ReasonCode.SERIALIZATION_UNSAFE, "nested report shards are not supported")
+        if "record_count" in shard:
+            count = shard["record_count"]
+            if not is_nonnegative_json_integer_v1(count) or count != len(shard_rows):
+                raise SerializationSafetyError(ReasonCode.SERIALIZATION_UNSAFE, "shard observed count mismatch")
+        if declarations is not None and declarations[ordinal]["row_count"] != len(shard_rows):
+            raise SerializationSafetyError(ReasonCode.SERIALIZATION_UNSAFE, "shard descriptor differs from observed row count")
+        rows.extend(shard_rows)
+    return rows
+
+def _report_manifest_consistency_v1(
+    payloads, records, report_names, manifest_name, generated_dir, schema_dir,
+    *, style, schema_refs=None,
+):
+    """Check decoded inventory declarations, not schema validity or input custody.
+
+    All arguments come from the fixed validator owner. Repeated identical shard
+    paths retain their ordinal occurrences. No filesystem, source, solver, mode,
+    or order operation is performed by this function.
+    """
+    def require(condition, detail):
+        if not condition:
+            raise SerializationSafetyError(
+                ReasonCode.SERIALIZATION_UNSAFE,
+                f"report manifest {manifest_name}: {detail}",
+            )
+
+    def text(value):
+        return type(value) is str and bool(value)
+
+    def path(value):
+        require(text(value), "path must be nonempty text")
+        require(validate_relative_path(value) == value, "path is not canonical")
+        return value
+
+    require(style in ("Q_ROOT_AND_SHARD", "ROOT_REFERENCE", "D3_ROOT_REFERENCE"), "unknown layout")
+    names = tuple(report_names)
+    require(all(text(name) and "/" not in name and "\\" not in name for name in names), "invalid report roster")
+    require(len(names) == len(set(names)) and manifest_name in names, "invalid report identity set")
+    for name in names:
+        path(name)
+    require(type(payloads) is dict and set(payloads) == set(names), "payload inventory mismatch")
+    require(type(records) is dict and set(records) == set(names), "expanded inventory mismatch")
+    generated = path(str(generated_dir).replace("\\", "/"))
+    schemas = path(str(schema_dir).replace("\\", "/"))
+    if schema_refs is not None:
+        require(type(schema_refs) is dict and set(schema_refs) == set(names), "schema binding inventory mismatch")
+
+    roots = {}
+    shard_owners = {}
+    for name in names:
+        payload = payloads[name]
+        inline = _report_rows_v1(payload)
+        expanded = records[name]
+        require(type(expanded) is list and all(type(row) is dict for row in expanded), f"{name}: invalid expanded records")
+        require(is_nonnegative_json_integer_v1(payload.get("record_count")), f"{name}: invalid root count")
+        require(payload["record_count"] == len(expanded), f"{name}: root count mismatch")
+        require(type(payload.get("sharded_flag")) is bool, f"{name}: invalid sharded flag")
+        refs = _report_shard_refs_v1(payload)
+        require(not refs or not inline, f"{name}: compact root has inline rows")
+        schema = payload.get("schema_ref")
+        path(schema)
+        require("/" not in schema, f"{name}: schema reference is not a filename")
+        if schema_refs is not None:
+            require(schema == schema_refs[name], f"{name}: wrong schema binding")
+        if style == "D3_ROOT_REFERENCE":
+            require(payload.get("report_name") == name, f"{name}: root identity mismatch")
+        else:
+            require(payload.get("report_filename") == name, f"{name}: root identity mismatch")
+        omitted = payload.get("records_omitted_for_sharding_flag", False)
+        require(type(omitted) is bool, f"{name}: invalid omitted flag")
+        require(omitted is bool(refs), f"{name}: omitted flag disagrees with shard declarations")
+        if "shard_count" in payload or refs:
+            require(is_nonnegative_json_integer_v1(payload.get("shard_count")), f"{name}: invalid shard count")
+            require(payload["shard_count"] == len(refs), f"{name}: shard count mismatch")
+        declarations = _report_shard_descriptors_v1(
+            payload, refs, required=(style != "D3_ROOT_REFERENCE"),
+        )
+        if declarations is not None:
+            total = sum(declaration["row_count"] for declaration in declarations)
+            require(not refs or total == len(expanded), f"{name}: shard declared total mismatch")
+        for ref in refs:
+            require(ref not in shard_owners or shard_owners[ref] == name, "one shard path declares multiple root owners")
+            shard_owners[ref] = name
+        roots[name] = (payload, schema, refs, declarations, omitted)
+
+    manifest = records[manifest_name]
+    seen = set()
+    actual_shards = {name: [] for name in names}
+    for row in manifest:
+        if style == "Q_ROOT_AND_SHARD":
+            kind = row.get("manifest_entry_class")
+            require(kind in ("ROOT_REPORT", "SHARD_REPORT"), "unknown manifest entry class")
+            if kind == "SHARD_REPORT":
+                parent = row.get("parent_report_filename")
+                require(text(parent) and parent in roots, "unknown shard parent")
+                actual_shards[parent].append(row)
+                continue
+            name = row.get("report_filename")
+            count_key, schema_key, path_key = "row_count", "schema_path", "report_path"
+        elif style == "ROOT_REFERENCE":
+            name = row.get("report_ref")
+            count_key, schema_key, path_key = "record_count", "schema_ref", "report_path"
+        else:
+            name = row.get("manifest_report_name")
+            count_key, schema_key, path_key = "record_count", "referenced_schema_ref", "root_report_path"
+        require(text(name) and name in roots and name not in seen, "unknown or duplicate root entry")
+        seen.add(name)
+        payload, schema, refs, declarations, omitted = roots[name]
+        require(row.get(path_key) == f"{generated}/{name}", f"{name}: manifest root path mismatch")
+        expected_schema = f"{schemas}/{schema}" if style == "Q_ROOT_AND_SHARD" else schema
+        require(row.get(schema_key) == expected_schema, f"{name}: manifest schema mismatch")
+        require(is_nonnegative_json_integer_v1(row.get(count_key)) and row[count_key] == len(records[name]),
+                f"{name}: manifest root count mismatch")
+        if style == "Q_ROOT_AND_SHARD":
+            require(row.get("report_name") == name.removesuffix(".report.json"), f"{name}: manifest root name mismatch")
+            expected_kind = "SHARDED_COMPACT_ROOT" if refs else "ROOT_WITH_RECORDS"
+            require(row.get("compact_or_sharded_flag") == expected_kind, f"{name}: manifest root kind mismatch")
+        else:
+            require(type(row.get("sharded_flag")) is bool and row["sharded_flag"] is payload["sharded_flag"],
+                    f"{name}: manifest sharded flag mismatch")
+            require(type(row.get("shard_files")) is list and tuple(row["shard_files"]) == refs,
+                    f"{name}: manifest shard path/order mismatch")
+            if style == "D3_ROOT_REFERENCE":
+                require(type(row.get("records_omitted_for_sharding_flag")) is bool and row["records_omitted_for_sharding_flag"] is omitted,
+                        f"{name}: manifest omitted flag mismatch")
+                require(is_nonnegative_json_integer_v1(row.get("shard_count")) and row["shard_count"] == len(refs),
+                        f"{name}: manifest shard count mismatch")
+    require(seen == set(names), "manifest root inventory incomplete")
+    if style == "Q_ROOT_AND_SHARD":
+        for name in names:
+            _payload, schema, refs, declarations, _omitted = roots[name]
+            rows = actual_shards[name]
+            require(len(rows) == len(refs), f"{name}: manifest shard multiplicity mismatch")
+            for row, ref, declaration in zip(rows, refs, declarations):
+                filename = ref.rsplit("/", 1)[-1]
+                require(row.get("report_path") == ref, f"{name}: manifest shard path/order mismatch")
+                require(row.get("report_filename") == filename and row.get("report_name") == filename.removesuffix(".report.json"),
+                        f"{name}: manifest shard identity mismatch")
+                require(row.get("schema_path") == f"{schemas}/{schema}", f"{name}: manifest shard schema mismatch")
+                require(is_nonnegative_json_integer_v1(row.get("row_count")) and row["row_count"] == declaration["row_count"],
+                        f"{name}: manifest shard row count mismatch")
+                require(row.get("compact_or_sharded_flag") == "SHARD_REPORT" and row.get("consumed_by_report") == name,
+                        f"{name}: manifest shard parent declaration mismatch")
+
+def _report_schema_templates_v1(constants, *, profile, schema_name=None):
+    """Independent schema contract for the six selected generated-report owners.
+
+    constants and schema_name are fixed source-owner bindings, never payload data.
+    This is a schema oracle, not another report builder or an evidence authority.
+    """
+    if profile not in ("Q", "QB", "QC", "MAPPER", "SIM", "D3"):
+        raise SerializationSafetyError(ReasonCode.SERIALIZATION_UNSAFE, "unknown schema profile")
+    names = tuple(constants.REPORT_FILENAMES)
+    if not names or len(names) != len(set(names)):
+        raise SerializationSafetyError(ReasonCode.SERIALIZATION_UNSAFE, "invalid report roster")
+    refs = (dict(constants.REPORT_SCHEMA_REFS) if profile in ("Q", "D3")
+            else {name: schema_name(name) for name in names})
+    if set(refs) != set(names) or len(set(refs.values())) != len(names):
+        raise SerializationSafetyError(ReasonCode.SERIALIZATION_UNSAFE, "invalid schema map")
+    for name in (*names, *refs.values()):
+        if type(name) is not str or "/" in name or validate_relative_path(name) != name:
+            raise SerializationSafetyError(ReasonCode.PATH_UNSAFE, "schema identity must be a canonical filename")
+    dialect = "https://json-schema.org/draft/2020-12/schema"
+    schemas = {}
+    if profile == "Q":
+        common = "pr166_q_common.schema.json"
+        schemas[common] = {
+            "$schema": dialect, "$id": common, "title": "PR166-Q common generated report row", "type": "object",
+            "required": ["row_id", "created_by_pr", "source_pr", "qku_id", "formula_id", "algorithm_id", "computability_disposition",
+                         "quantum_backend_execution_flag", "quantum_advantage_claim_flag", "live_order_authority_flag", "profit_evidence_flag",
+                         "source_truth_acceptance_flag", "connector_semantic_binding_flag", "private_state_fetch_flag", "runtime_cash_receipt_flag"],
+            "properties": {"row_id": {"type": "string"}, "created_by_pr": {"const": constants.PR_ID},
+                           "computability_disposition": {"enum": list(constants.COMPUTABILITY_DISPOSITIONS)}},
+        }
+        for name in names:
+            schemas[refs[name]] = {
+                "$schema": dialect, "$id": refs[name], "title": name, "type": "object",
+                "required": ["report_filename", "roadmap_pr_id", "created_by_pr", "authority_class", "authority_boundary_ref", "schema_ref", "record_count", "records"],
+                "properties": {
+                    "report_filename": {"const": name}, "roadmap_pr_id": {"const": constants.PR_ID}, "created_by_pr": {"const": constants.PR_ID},
+                    "authority_class": {"const": constants.AUTHORITY_CLASS}, "authority_boundary_ref": {"const": constants.AUTHORITY_BOUNDARY_REF},
+                    "schema_ref": {"const": refs[name]}, "record_count": {"type": "integer", "minimum": 0},
+                    "records": {"type": "array", "items": {"$ref": common}},
+                }, "additionalProperties": True,
+            }
+    elif profile == "D3":
+        common = "pr165_d3_common.schema.json"
+        schemas[common] = {
+            "$schema": dialect, "$id": common, "title": "PR165-D3 common report schema", "type": "object",
+            "required": ["roadmap_pr_id", "created_by_pr", "report_name", "record_count", "schema_ref", "validator_ref"],
+            "properties": {
+                "roadmap_pr_id": {"const": constants.PR_ID}, "created_by_pr": {"const": constants.PR_ID}, "report_name": {"type": "string"},
+                "record_count": {"type": "integer", "minimum": 0}, "records": {"type": "array"},
+                "shard_files": {"type": "array", "items": {"type": "string"}}, "forbidden_authority_counts": {"type": "object"},
+            }, "additionalProperties": True,
+        }
+        for name in names:
+            schemas[refs[name]] = {
+                "$schema": dialect, "$id": refs[name], "title": name.removesuffix(".report.json"),
+                "allOf": [{"$ref": common}], "type": "object",
+                "properties": {"report_name": {"const": name}, "schema_ref": {"const": refs[name]},
+                               "roadmap_pr_id": {"const": constants.PR_ID}, "created_by_pr": {"const": constants.PR_ID}},
+                "additionalProperties": True,
+            }
+    else:
+        for name in names:
+            schemas[refs[name]] = {
+                "$schema": dialect, "$id": refs[name], "type": "object",
+                "required": ["report_name", "roadmap_pr_id", "created_by_pr", "schema_ref", "record_count", "records"],
+                "properties": {
+                    "report_name": {"type": "string"}, "roadmap_pr_id": {"const": constants.PR_ID}, "created_by_pr": {"const": constants.PR_ID},
+                    "schema_ref": {"const": refs[name]}, "record_count": {"type": "integer", "minimum": 0}, "records": {"type": "array"},
+                    "sharded_flag": {"type": "boolean"}, "shard_files": {"type": "array", "items": {"type": "string"}},
+                }, "additionalProperties": True,
+            }
+    return refs, schemas
+
+def _report_schema_session_v1(repo_root, constants, read_json, *, profile, schema_name=None):
+    """Load the exact selected schemas once per invocation; never fetch references.
+
+    Physical file custody and the declared environment remain existing-owner duties.
+    JSON Schema handles vocabulary semantics; stronger QTT count/row laws remain.
+    """
+    from jsonschema import Draft202012Validator
+    from jsonschema.exceptions import ValidationError
+    from referencing import Registry, Resource
+    from referencing.exceptions import NoSuchResource
+
+    refs, expected = _report_schema_templates_v1(constants, profile=profile, schema_name=schema_name)
+    loaded = {}
+    for filename, template in expected.items():
+        observed = read_json(repo_root / constants.SCHEMA_DIR / filename)
+        # Preserve type and ordered arrays, ignore only JSON object order/formatting.
+        if json.dumps(observed, sort_keys=True, allow_nan=False) != json.dumps(template, sort_keys=True, allow_nan=False):
+            raise SerializationSafetyError(ReasonCode.SERIALIZATION_UNSAFE, "schema differs from source-defined contract: " + filename)
+        Draft202012Validator.check_schema(observed)
+        loaded[filename] = observed
+
+    def no_retrieval(uri):
+        raise NoSuchResource(ref=uri)
+
+    base = "https://qtt.invalid/selected-report-schemas/"
+    registry = Registry(retrieve=no_retrieval).with_resources(
+        (base + filename, Resource.from_contents(schema)) for filename, schema in loaded.items()
+    )
+    root_validators = {name: Draft202012Validator({"$ref": base + filename}, registry=registry) for name, filename in refs.items()}
+    shard_validators = {}
+    for name, filename in refs.items():
+        if profile == "D3":
+            # D3's writer does not put report_name/validator_ref in shard envelopes.
+            schema = {
+                "$schema": "https://json-schema.org/draft/2020-12/schema", "type": "object",
+                "required": ["roadmap_pr_id", "created_by_pr", "parent_report", "schema_ref", "shard_index", "record_count", "records", "forbidden_authority_counts"],
+                "properties": {
+                    "roadmap_pr_id": {"const": constants.PR_ID}, "created_by_pr": {"const": constants.PR_ID}, "parent_report": {"const": name},
+                    "schema_ref": {"const": filename}, "shard_index": {"type": "integer", "minimum": 1},
+                    "record_count": {"type": "integer", "minimum": 0}, "records": {"type": "array", "items": {"type": "object"}},
+                    "forbidden_authority_counts": {"type": "object"},
+                }, "additionalProperties": True,
+            }
+        else:
+            schema = json.loads(json.dumps(loaded[filename]))
+            schema["$id"] = base + "shard-" + filename
+            if profile == "Q":
+                # Shard identity is its own filename, not the root-schema const.
+                schema["properties"]["report_filename"] = {"type": "string"}
+        Draft202012Validator.check_schema(schema)
+        shard_validators[name] = Draft202012Validator(schema, registry=registry)
+
+    def check(name, payload, *, shard_ref=None, ordinal=None, shard_count=None):
+        if name not in root_validators:
+            raise SerializationSafetyError(ReasonCode.SERIALIZATION_UNSAFE, "unselected schema report")
+        _report_rows_v1(payload)
+        count = payload.get("record_count")
+        if not is_nonnegative_json_integer_v1(count):
+            raise SerializationSafetyError(ReasonCode.SERIALIZATION_UNSAFE, "schema report count must be an observed integer")
+        validator = root_validators[name] if shard_ref is None else shard_validators[name]
+        try:
+            validator.validate(payload)
+        except ValidationError:
+            raise SerializationSafetyError(ReasonCode.SERIALIZATION_UNSAFE, "report violates source-defined schema: " + name) from None
+        if shard_ref is None:
+            if payload.get("report_name") != name or (profile != "D3" and payload.get("report_filename") != name):
+                raise SerializationSafetyError(ReasonCode.SERIALIZATION_UNSAFE, "root report identity mismatch")
+            return
+        if (type(ordinal) is not int or ordinal < 1 or type(shard_count) is not int or shard_count < ordinal
+                or not is_nonnegative_json_integer_v1(payload.get("shard_index")) or payload["shard_index"] != ordinal):
+            raise SerializationSafetyError(ReasonCode.SERIALIZATION_UNSAFE, "shard ordinal mismatch")
+        if payload["record_count"] != len(payload["records"]):
+            raise SerializationSafetyError(ReasonCode.SERIALIZATION_UNSAFE, "shard schema count mismatch")
+        if profile == "Q":
+            leaf = shard_ref.rsplit("/", 1)[-1]
+            valid_parent = (payload.get("parent_report_filename") == name and payload.get("report_filename") == leaf and payload.get("report_name") == leaf)
+        elif profile == "D3":
+            valid_parent = payload.get("parent_report") == name
+        else:
+            valid_parent = (payload.get("root_report_ref") == (constants.GENERATED_DIR / name).as_posix()
+                            and payload.get("report_name") == name and payload.get("report_filename") == name
+                            and is_nonnegative_json_integer_v1(payload.get("shard_count")) and payload["shard_count"] == shard_count)
+        if not valid_parent:
+            raise SerializationSafetyError(ReasonCode.SERIALIZATION_UNSAFE, "shard parent identity mismatch")
+    return check
+
+def _report_schema_records_v1(repo_root, payload, read_json, check, report_name):
+    """Validate the actual root and each actual child without extra report reads."""
+    check(report_name, payload)
+    refs = _report_shard_refs_v1(payload)
+    read_ordinal = 0
+
+    def checked_reader(path):
+        nonlocal read_ordinal
+        child = read_json(path)
+        read_ordinal += 1
+        check(report_name, child, shard_ref=refs[read_ordinal - 1], ordinal=read_ordinal, shard_count=len(refs))
+        return child
+
+    return _expand_report_records_v1(repo_root, payload, checked_reader)
+
+def _report_companion_alignment_v1(primary, companions):
+    """Match existing packet lineage and verify context without issuing identity.
+
+    Packet identifiers must already be carried from admitted producer inputs.
+    This local relation check does not accept source generations or runtime use.
+    Preserve primary order and original row objects; no sorting, I/O or cache.
+    """
+    fields = (
+        "qku_id", "formula_id", "algorithm_id", "parameter_stack_id",
+        "execution_route_id", "market_scope",
+    )
+
+    def indexed(rows, label):
+        if type(rows) is not list:
+            raise SerializationSafetyError(ReasonCode.SERIALIZATION_UNSAFE,
+                                           "companion rows must be an exact list: " + label)
+        by_packet = {}
+        row_ids = set()
+        for row in rows:
+            if type(row) is not dict:
+                raise SerializationSafetyError(ReasonCode.SERIALIZATION_UNSAFE,
+                                               "companion row must be an object: " + label)
+            row_id = row.get("row_id")
+            if type(row_id) is not str or not row_id.strip() or row_id in row_ids:
+                raise SerializationSafetyError(ReasonCode.SERIALIZATION_UNSAFE,
+                                               "missing or duplicate companion row identity: " + label)
+            row_ids.add(row_id)
+            packet = row.get("candidate_packet_id")
+            if type(packet) is not str or not packet.strip():
+                raise SerializationSafetyError(ReasonCode.SERIALIZATION_UNSAFE,
+                                               "missing or malformed candidate packet identity: " + label)
+            if packet in by_packet:
+                raise SerializationSafetyError(ReasonCode.SERIALIZATION_UNSAFE,
+                                               "ambiguous candidate packet identity: " + label)
+            key = tuple(row.get(field) for field in fields)
+            if any(type(value) is not str or not value.strip() for value in key):
+                raise SerializationSafetyError(ReasonCode.SERIALIZATION_UNSAFE,
+                                               "missing or malformed companion key: " + label)
+            by_packet[packet] = row
+        return by_packet
+
+    if type(companions) is not dict or any(type(name) is not str or not name for name in companions):
+        raise SerializationSafetyError(ReasonCode.SERIALIZATION_UNSAFE,
+                                       "companion roster must be a named mapping")
+    primary_index = indexed(primary, "primary")
+    aligned = {}
+    for name, rows in companions.items():
+        index = indexed(rows, name)
+        if index.keys() != primary_index.keys():
+            raise SerializationSafetyError(ReasonCode.SERIALIZATION_UNSAFE,
+                                           "candidate packet coverage mismatch: " + name)
+        selected = []
+        for packet, source in primary_index.items():
+            companion = index[packet]
+            if any(source[field] != companion[field] for field in fields):
+                raise SerializationSafetyError(ReasonCode.SERIALIZATION_UNSAFE,
+                                               "candidate packet context mismatch: " + name)
+            selected.append(companion)
+        aligned[name] = selected
+        del index
+    return aligned
+
+def _report_carry_candidate_lineage_v1(source_row, produced_row):
+    """Carry a supplied packet identifier into a new report row, never invent it.
+
+    The producer retains its own row_id and every economic field. A conflicting
+    explicit lineage value is a failure, not an invitation to overwrite it.
+    """
+    if type(source_row) is not dict or type(produced_row) is not dict:
+        raise SerializationSafetyError(ReasonCode.SERIALIZATION_UNSAFE,
+                                       "candidate lineage requires source and output objects")
+    packet = source_row.get("candidate_packet_id")
+    if type(packet) is not str or not packet.strip():
+        raise SerializationSafetyError(ReasonCode.SERIALIZATION_UNSAFE,
+                                       "candidate lineage must be present in the producer input")
+    if "candidate_packet_id" in produced_row:
+        present = produced_row["candidate_packet_id"]
+        if type(present) is not str or present != packet:
+            raise SerializationSafetyError(ReasonCode.SERIALIZATION_UNSAFE,
+                                           "producer output contradicts its candidate lineage")
+    result = dict(produced_row)
+    result["candidate_packet_id"] = packet
+    return result

@@ -229,8 +229,12 @@ def test_no_validation_scope_removal(monkeypatch) -> None:
             )
     assert preflight_dispatches == [(committed_preflight_path, True)]
 
-    live_evidence = _validation_scope_delta()
-    branch = current_branch_context(repo_root).branch
+    original_context = builder._require_builder_reads_v1()
+    live_evidence = _validation_scope_delta(builder_read_context=original_context)
+    def original_git_reader(root, arguments):
+        assert root == repo_root
+        return 0, original_context.text(arguments, empty=tuple(arguments) == ("branch", "--show-current")), None
+    branch = current_branch_context(repo_root, git_stdout=original_git_reader).branch
     assert validator._validation_scope_failures(
         report,
         final_summary,
@@ -417,9 +421,8 @@ def test_no_validation_scope_removal(monkeypatch) -> None:
                 )
             ),
         )
-    evidence_only_payloads = (
-        builder._validation_scope_evidence_only_payloads()
-    )
+    with builder._builder_reads_or_current_v1(original_context):
+        evidence_only_payloads = builder._validation_scope_evidence_only_payloads()
     assert tuple(evidence_only_payloads) == (
         "PR168_RP5A_NoDeletionProof.report.json",
         "PR168_RP5A_FinalSummary.report.json",
@@ -705,7 +708,7 @@ def test_no_validation_scope_removal(monkeypatch) -> None:
             else original_read_json(path)
         ),
     )
-    detailed_count_failures = validator._failures()
+    detailed_count_failures = validator._failures(builder_read_context=original_context)
     assert any(
         failure.startswith(
             "FILES_SCANNED_DETAILED_OWNER_COUNT_MISMATCH:"
@@ -731,7 +734,7 @@ def test_no_validation_scope_removal(monkeypatch) -> None:
             else original_read_json(path)
         ),
     )
-    classification_count_failures = validator._failures()
+    classification_count_failures = validator._failures(builder_read_context=original_context)
     assert any(
         failure.startswith(
             "FINAL_DELETE_CLASSIFICATION_COUNT_MISMATCH:"
@@ -743,19 +746,19 @@ def test_no_validation_scope_removal(monkeypatch) -> None:
     baseline_cases = (
         (
             "main",
-            ("git", "rev-parse", "HEAD^1"),
+            ("rev-parse", "--verify", "HEAD^1"),
             VALIDATION_SCOPE_MAIN_BASELINE_LABEL,
             VALIDATION_SCOPE_MAIN_COMPARISON_MODE,
         ),
         (
             ST12A_BRANCH,
-            ("git", "merge-base", "HEAD", "origin/main"),
+            ("merge-base", "--all", "HEAD", "origin/main"),
             VALIDATION_SCOPE_MERGE_BASELINE_LABEL,
             VALIDATION_SCOPE_MERGE_BASE_COMPARISON_MODE,
         ),
         (
             "ordinary/downstream",
-            ("git", "merge-base", "HEAD", "origin/main"),
+            ("merge-base", "--all", "HEAD", "origin/main"),
             VALIDATION_SCOPE_MERGE_BASELINE_LABEL,
             VALIDATION_SCOPE_MERGE_BASE_COMPARISON_MODE,
         ),
@@ -767,28 +770,52 @@ def test_no_validation_scope_removal(monkeypatch) -> None:
         expected_mode,
     ) in baseline_cases:
         git_calls = []
+        # The original opaque-identity roundtrip remains the invariant. Its
+        # synthetic native-reader token must now satisfy R5's Git wire grammar;
+        # no spelling of an object id supplies source authority.
+        native_token = "a" * 40 if context_branch == "main" else "b" * 64
+        # This suffix replaces the native read with its independent literal
+        # oracle. Bind the corresponding expected identity only in that same
+        # synthetic branch case; the real prefix retains its admitted basis.
+        monkeypatch.setattr(original_context, "expected_baseline_ref", native_token)
         monkeypatch.setattr(
             builder,
             "current_branch_context",
-            lambda _root, value=context_branch: BranchContext(
+            lambda _root, *, git_stdout, value=context_branch: BranchContext(
                 branch=value,
                 source="test",
             ),
         )
         monkeypatch.setattr(
-            builder,
-            "_run_text",
-            lambda args, calls=git_calls: (
-                calls.append(tuple(args)) or "internal-git-ref"
+            original_context,
+            "text",
+            lambda args, calls=git_calls, token=native_token: (
+                calls.append(tuple(args)) or token
             ),
         )
         internal_ref, semantic_label, comparison_mode = (
             builder._validation_scope_baseline()
         )
-        assert internal_ref == "internal-git-ref"
+        assert internal_ref == native_token
+        assert original_context.resolved_ref == native_token
         assert semantic_label == expected_label
         assert comparison_mode == expected_mode
         assert git_calls == [expected_command]
+        # The old opaque fixture is deliberately malformed as a native wire
+        # token. Reject it without replacing the last original resolved value.
+        git_calls.clear()
+        monkeypatch.setattr(original_context, "text", lambda args, calls=git_calls:
+                            calls.append(tuple(args)) or "internal-git-ref")
+        try:
+            builder._validation_scope_baseline()
+        except RuntimeError as exc:
+            assert str(exc) == "RP5A_VALIDATION_SCOPE_BASELINE_RESOLVE_FAILED:" + expected_label
+            assert isinstance(exc.__cause__, ValueError)
+            assert str(exc.__cause__) == "baseline object is not one original Git object token"
+        else:
+            raise AssertionError("malformed native object token was accepted")
+        assert git_calls == [expected_command]
+        assert original_context.resolved_ref == native_token
 
     try:
         builder.currentize_validation_scope_evidence_only()

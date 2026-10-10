@@ -6,7 +6,7 @@ from tools import build_pr169_agent_orch1 as builder
 from .conftest import ARTIFACT_DIR, jsonl
 
 
-def test_agent_orch_service_lists_core_artifacts():
+def test_agent_orch_service_lists_core_artifacts(tmp_path, monkeypatch):
     api = resolvers.AgentOrchService(ARTIFACT_DIR)
     manifest = api.load_manifest()
     assert manifest["canonical_registry_ref"] == builder.REGISTRY_REF
@@ -17,6 +17,27 @@ def test_agent_orch_service_lists_core_artifacts():
     assert api.list_tasks()
     assert api.list_task_envelopes()
     assert api.list_workflows()
+
+
+    # Relative and absolute inputs resolve to the same repository-bound artifact.
+    fixture_root = tmp_path / "repo"
+    fixture_artifacts = fixture_root / resolvers.GENERATED_PREFIX
+    fixture_artifacts.mkdir(parents=True)
+    (fixture_artifacts / "manifest.json").write_text('{"fixture_only":true}\n', encoding="utf-8")
+    for supplied_root, supplied_artifact in (
+        ("repo", None),
+        ("repo", resolvers.GENERATED_PREFIX),
+        (fixture_root, None),
+        ("repo", fixture_artifacts),
+    ):
+        with monkeypatch.context() as owned:
+            owned.chdir(tmp_path)
+            selected = resolvers.AgentOrchService(
+                repo_root=supplied_root, artifact_dir=supplied_artifact
+            )
+            assert selected.repo_root == fixture_root
+            assert selected.artifact_dir == fixture_artifacts
+            assert selected.load_manifest() == {"fixture_only": True}
 
 
 def test_agent_orch_service_task_and_receipt_lookup():

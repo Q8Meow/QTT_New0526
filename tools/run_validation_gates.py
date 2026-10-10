@@ -1,6 +1,11 @@
 #!/usr/bin/env python3
 from __future__ import annotations
 
+import sys as _ordinary_initial_sys_v1
+if '_ORDINARY_INITIALIZED_MODULE_CODE_V1' in globals():
+    raise RuntimeError('CONTROL_ONE_INITIALIZED_MODULE_CODE')
+_ORDINARY_INITIALIZED_MODULE_CODE_V1 = _ordinary_initial_sys_v1._getframe(0).f_code
+
 import argparse
 import contextlib
 from copy import deepcopy
@@ -8,6 +13,9 @@ from dataclasses import dataclass
 from datetime import UTC, datetime
 import hashlib
 import pathlib
+from pathlib import Path
+import re
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -15,12 +23,73 @@ import inspect
 import json
 import ntpath
 import os
+import stat
 import time
+import threading
+from contextlib import nullcontext
 from typing import Sequence
 
 REPO_ROOT = pathlib.Path(__file__).resolve().parents[1]
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
+
+# File entry and canonical imports must retain this same initialized module.
+# The fixed Source/delegate closure joins its actual module name and globals.
+_ORDINARY_ORIGINAL_SCRIPT_ENTRY_V1 = __name__ == "__main__"
+if _ORDINARY_ORIGINAL_SCRIPT_ENTRY_V1:
+ _ordinary_script_owner_v1 = sys.modules.get("__main__")
+ _ordinary_script_name_v1 = "tools.run_validation_gates"
+ if (type(_ordinary_script_owner_v1) is not type(sys)
+   or _ordinary_script_owner_v1.__dict__ is not globals()
+   or ( _ordinary_script_name_v1 in sys.modules
+     and sys.modules[_ordinary_script_name_v1] is not _ordinary_script_owner_v1)):
+  raise RuntimeError("original runner script module/cache owner mismatch")
+ if "tools" in sys.modules:
+  _ordinary_script_package_v1 = sys.modules["tools"]
+ else:
+  import tools as _ordinary_script_package_v1
+ if (type(_ordinary_script_package_v1) is not type(sys)
+   or sys.modules.get("tools") is not _ordinary_script_package_v1):
+  raise RuntimeError("original runner tools package/cache owner mismatch")
+ _ordinary_script_package_dict_v1 = _ordinary_script_package_v1.__dict__
+ _ordinary_script_boot_v1 = sys.modules.get("_frozen_importlib")
+ _ordinary_script_external_v1 = sys.modules.get("_frozen_importlib_external")
+ if (type(_ordinary_script_boot_v1) is not type(sys)
+   or type(_ordinary_script_external_v1) is not type(sys)):
+  raise RuntimeError("original runner pinned namespace implementation unavailable")
+ _ordinary_script_spec_v1 = _ordinary_script_package_dict_v1.get("__spec__")
+ _ordinary_script_path_v1 = _ordinary_script_package_dict_v1.get("__path__")
+ _ordinary_script_loader_v1 = _ordinary_script_package_dict_v1.get("__loader__")
+ if (type(_ordinary_script_spec_v1) is not _ordinary_script_boot_v1.__dict__.get("ModuleSpec")
+   or type(_ordinary_script_path_v1) is not _ordinary_script_external_v1.__dict__.get("_NamespacePath")
+   or type(_ordinary_script_loader_v1) is not _ordinary_script_external_v1.__dict__.get("NamespaceLoader")):
+  raise RuntimeError("original runner tools namespace implementation mismatch")
+ # Read exact pinned-instance dictionaries: never invoke path recalculation,
+ # a user property, an arbitrary iterator, or a duck-typed namespace provider.
+ _ordinary_script_spec_dict_v1 = object.__getattribute__(_ordinary_script_spec_v1, "__dict__")
+ _ordinary_script_path_dict_v1 = object.__getattribute__(_ordinary_script_path_v1, "__dict__")
+ _ordinary_script_loader_dict_v1 = object.__getattribute__(_ordinary_script_loader_v1, "__dict__")
+ _ordinary_script_paths_v1 = _ordinary_script_path_dict_v1.get("_path")
+ if (type(_ordinary_script_package_dict_v1.get("__name__")) is not str
+   or _ordinary_script_package_dict_v1["__name__"] != "tools"
+   or _ordinary_script_package_dict_v1.get("__file__") is not None
+   or type(_ordinary_script_spec_dict_v1.get("name")) is not str
+   or _ordinary_script_spec_dict_v1["name"] != "tools"
+   or _ordinary_script_spec_dict_v1.get("origin") is not None
+   or _ordinary_script_spec_dict_v1.get("loader") is not _ordinary_script_loader_v1
+   or _ordinary_script_spec_dict_v1.get("submodule_search_locations") is not _ordinary_script_path_v1
+   or _ordinary_script_loader_dict_v1.get("_path") is not _ordinary_script_path_v1
+   or type(_ordinary_script_paths_v1) is not list or len(_ordinary_script_paths_v1) != 1
+   or type(_ordinary_script_paths_v1[0]) is not str
+   or _ordinary_script_paths_v1[0] != str(REPO_ROOT / "tools")
+   or ("run_validation_gates" in _ordinary_script_package_dict_v1
+     and _ordinary_script_package_dict_v1["run_validation_gates"] is not _ordinary_script_owner_v1)):
+  raise RuntimeError("original runner tools namespace/root/child owner mismatch")
+ # All collision and root checks precede these three identity associations.
+ # No second runner is imported or executed; __main__ keeps this same owner.
+ __name__ = _ordinary_script_name_v1
+ sys.modules[_ordinary_script_name_v1] = _ordinary_script_owner_v1
+ _ordinary_script_package_dict_v1["run_validation_gates"] = _ordinary_script_owner_v1
 
 from tools.validation_scope_registry import (  # noqa: E402
     ST12G_ARCHITECTURE_ADDITIVE_MODULES,
@@ -34,6 +103,8 @@ from tools.validation_reliability import (  # noqa: E402
     _require_local_layout,
     _require_active_local_run_cache,
     _local_unlinked_path,
+    _stat_is_reparse_point,
+    _same_observed_file,
     _LOCAL_RUN_NAME,
     PYTEST_BASETEMP_DIR_NAME,
     RUN_ID_ENV,
@@ -53,10 +124,30 @@ from tools.validation_reliability import (  # noqa: E402
     resolve_validation_run_paths,
     semantic_candidate_paths,
     supervise_command,
+    _command_requires_process_retention_v1,
+    _scan_raise_errors,
     text_integrity_failure_codes,
     validate_complete_run_evidence,
     validate_published_completion_receipt,
     write_run_provenance,
+)
+
+from tools.validation_reliability import (
+    _LinuxPreflightQueriesV1,
+    _LinuxPreflightScopeV1,
+    _LinuxSourceNativeV2,
+    _ordinary_bootstrap_fixed_constructor_request_v1,
+    _ordinary_control_before_parse_components_v1,
+    _ordinary_control_before_tokenize_components_v1,
+    _ordinary_data_align_v1,
+    _ordinary_data_bytes_request_v1,
+    _ordinary_data_dict_requests_v1,
+    _ordinary_data_list_requests_v1,
+    _ordinary_data_size_v1,
+    _ordinary_data_tuple_request_v1,
+    _ordinary_data_unicode_request_v1,
+    _ordinary_runtime7_bootstrap_staged_request_v1,
+    _ordinary_control_current_staged_request_v1,
 )
 
 SUCCESS_MARKER = "QTT_VALIDATION_GATES_OK"
@@ -85,6 +176,7 @@ PR152_BUILD_REPORT_CACHE_KIND = "qtt_pr152_build_report"
 PR152_BUILD_REPORT_CACHE_SCHEMA_VERSION = 1
 _RUN_COMMANDS_ACTIVE_PATHS: ValidationRunPathsV1 | None = None
 _LAST_COMMAND_RECEIPTS: tuple[CommandExecutionReceiptV1, ...] = ()
+_RUN_COMMANDS_SUPERVISION = None
 _LAST_PLANNED_COMMAND_COUNT: int | None = None
 _LAST_EXPECTED_COMMAND_PLAN: tuple[CommandEvidencePlanEntry, ...] = ()
 _ACTIVE_SEMANTIC_CHANGED_PATHS: tuple[str, ...] | None = None
@@ -94,6 +186,23 @@ _ACTIVE_TEXT_INTEGRITY_STATE = "NOT_RUN"
 _ACTIVE_FILESYSTEM_PROBE: FilesystemProbeReceiptV1 | None = None
 _RUN_PROVENANCE_WRITTEN = False
 _RUN_PROVENANCE_ATTEMPTED = False
+_ACTIVE_CANDIDATE_SOURCE = None
+_ORDINARY_CANDIDATE_FIRST_V1 = False
+_ACTIVE_PREFLIGHT_PATH_V1 = None
+_ACTIVE_PREFLIGHT_NATIVE_V1 = None
+_ACTIVE_PREFLIGHT_ASSEMBLY_V1 = None
+_SCAN_MAIN_LOCK = threading.Lock()
+_ACTIVE_SCAN_CAPACITY_SOURCE = None
+_ACTIVE_SCAN_LAUNCH = None
+_SCAN_CAPACITY_ATTEMPTED = False
+
+
+from tools.validation_reliability import (
+    _NestedPytestEvidenceV1, _mapper_nested_pytest_args_v1,
+    _recheck_nested_pytest_custody_v1, _mapper_deadline_controls_v1,
+    _MAPPER_DEADLINE_ENV_KEYS, _execution_remaining_seconds_v1, _command_projection_v1,
+)
+
 _execute_supervised_command = supervise_command
 FAST_PREFLIGHT_PHASE = "fast-preflight"
 DETERMINISTIC_VALIDATORS_PHASE = "deterministic-validators"
@@ -2992,14 +3101,34 @@ def _generated_gate_output_path(
             f"{normalized or '<empty>'}"
         )
 
-    resolved_root = repo_root.resolve()
-    resolved_path = resolved_root.joinpath(*segments).resolve()
-    if not _path_is_relative_to(resolved_path, resolved_root):
+    # Keep the lexical leaf: resolving it before unlink could select a different
+    # file. The existing central reparse predicate is also used on Windows.
+    absolute_root = repo_root.absolute()
+    if ".." in absolute_root.parts:
         raise RuntimeError(
-            "VALIDATION_GATE_UNSAFE_GENERATED_OUTPUT_PATH: "
-            f"{normalized}"
+            "VALIDATION_GATE_UNSAFE_GENERATED_OUTPUT_PATH: " + normalized
         )
-    return resolved_path
+    candidate = absolute_root.joinpath(*segments)
+    chain = [*reversed(absolute_root.parents), absolute_root]
+    current = absolute_root
+    for segment in segments:
+        current = current / segment
+        chain.append(current)
+    for component in chain:
+        try:
+            observed = component.lstat()
+        except FileNotFoundError:
+            # The lexical validation API also supports not-yet-created leaves.
+            break
+        if stat.S_ISLNK(observed.st_mode) or _stat_is_reparse_point(observed):
+            raise RuntimeError(
+                "VALIDATION_GATE_UNSAFE_GENERATED_OUTPUT_PATH: " + normalized
+            )
+        if component != candidate and not stat.S_ISDIR(observed.st_mode):
+            raise RuntimeError(
+                "VALIDATION_GATE_UNSAFE_GENERATED_OUTPUT_PATH: " + normalized
+            )
+    return candidate
 
 
 def _restore_untracked_gate_side_effects(
@@ -3016,101 +3145,3954 @@ def _restore_untracked_gate_side_effects(
     unexpected_paths = [
         path for path in new_paths if not _is_tracked_generated_output_path(path)
     ]
-    generated_paths = [
-        path for path in new_paths if _is_tracked_generated_output_path(path)
-    ]
-    resolved_generated_paths = [
-        (path, _generated_gate_output_path(repo_root, path))
-        for path in generated_paths
-    ]
-
-    restored: list[str] = []
-    for path_text, path in resolved_generated_paths:
-        if path.is_symlink() or path.is_file():
-            path.unlink()
-            restored.append(path_text)
-        elif path.exists():
-            raise RuntimeError(
-                "VALIDATION_GATE_GENERATED_OUTPUT_NOT_FILE: "
-                f"{path_text}"
-            )
-
     if unexpected_paths:
         raise RuntimeError(
             "VALIDATION_GATE_UNTRACKED_OUTPUT_OUTSIDE_GENERATED_PREFIX: "
             + ",".join(unexpected_paths)
         )
-    return tuple(restored)
-
-
-def _modified_file_snapshots(
-    repo_root: pathlib.Path,
-    paths: set[str],
-) -> dict[str, bytes | None]:
-    snapshots: dict[str, bytes | None] = {}
-    for path_text in sorted(paths):
-        path = repo_root / path_text
-        snapshots[path_text] = path.read_bytes() if path.exists() else None
-    return snapshots
-
-
-def _restore_modified_file_snapshots(
-    repo_root: pathlib.Path,
-    snapshots: dict[str, bytes | None],
-) -> tuple[str, ...]:
-    restored: list[str] = []
-    for path_text, content in sorted(snapshots.items()):
-        path = repo_root / path_text
-        if content is None:
-            if path.exists() and path.is_file():
-                path.unlink()
-                restored.append(path_text)
+    # Validate the complete selected batch before its first deletion. This is
+    # not an atomic filesystem transaction or an occurrence-authorization grant.
+    prepared: list[tuple[str, pathlib.Path, os.stat_result]] = []
+    for path_text in new_paths:
+        path = _generated_gate_output_path(repo_root, path_text)
+        try:
+            observed = path.lstat()
+        except FileNotFoundError:
             continue
-        if path.exists() and path.read_bytes() == content:
-            continue
-        path.parent.mkdir(parents=True, exist_ok=True)
-        path.write_bytes(content)
-        restored.append(path_text)
-    return tuple(restored)
+        if not stat.S_ISREG(observed.st_mode) or _stat_is_reparse_point(observed):
+            raise RuntimeError(
+                "VALIDATION_GATE_GENERATED_OUTPUT_NOT_FILE: " + path_text
+            )
+        prepared.append((path_text, path, observed))
+    if prepared:
+        raise RuntimeError("VALIDATION_CANDIDATE_BASELINE_REQUIRED")
+    return ()
 
 
-def _restore_tracked_gate_side_effects(
-    repo_root: pathlib.Path,
-    initially_modified_paths: set[str],
-) -> tuple[str, ...]:
-    restore_paths = sorted(_tracked_modified_paths(repo_root) - initially_modified_paths)
-    if not restore_paths:
-        return ()
 
-    path_batches: list[list[str]] = []
-    current_batch: list[str] = []
-    current_length = 0
-    for path in restore_paths:
-        quoted_length = len(subprocess.list2cmdline([path])) + 1
-        if current_batch and current_length + quoted_length > 12_000:
-            path_batches.append(current_batch)
-            current_batch = []
-            current_length = 0
-        current_batch.append(path)
-        current_length += quoted_length
-    if current_batch:
-        path_batches.append(current_batch)
 
-    for path_batch in path_batches:
-        returncode, stdout, stderr = _git_stdout(
-            repo_root,
-            [
-                "restore",
-                "--source=HEAD",
-                "--worktree",
-                "--",
-                *path_batch,
-            ],
-        )
-        if returncode != 0:
-            detail = stderr.strip() or stdout.strip() or "git restore failed"
-            raise RuntimeError(detail)
-    return tuple(restore_paths)
+class _PreflightAssemblyV1:
+    """One actual plan and candidate, with no declaration-created authority."""
+    def __init__(self, native, paths, plan):
+        from tools import validation_reliability as owner
+        actual_owner = (os.getpid(), threading.get_ident())
+        existing_owner = (getattr(self, 'pid', None), getattr(self, 'thread', None))
+        owner._preflight_require_v1(existing_owner in ((None, None), actual_owner),
+            'preflight original assembly construction owner')
+        owner._preflight_require_v1(not getattr(self, '_assembly_init_attempted_v1', False),
+            'preflight assembly construction is single use')
+        self._assembly_init_attempted_v1 = True
+        self.owner, self.native, self.paths, self.plan = owner, native, paths, plan
+        self._original_native_input_v1 = native
+        self.state, self.candidate = 'SELECTED', None
+        self.basis = self.capture = self.terminal = None
+        self._original_basis_v2 = self._original_candidate_v1 = None
+        self.pid, self.thread = os.getpid(), threading.get_ident()
+        self.launches = {}
+        self.failure = None
+        owner._preflight_require_v1(type(plan) is tuple and len(plan) == 8
+            and all(type(e) is CommandEvidencePlanEntry and e.command_index == n
+                and e.run_id == paths.run_id and e.phase == FAST_PREFLIGHT_PHASE and e.cwd == str(paths.repo_root)
+                and owner._preflight_vector_v1(e.argv) and e.argv[1].replace('\\','/') == owner._PREFLIGHT_SCRIPTS_V1[n-1]
+                and e.argv[0] == sys.executable for n,e in enumerate(plan,1)), 'preflight exact full original plan required')
+        try:
+            header, blobs, _ = native.consume(self._validate_declaration)
+            self._check_original_holders_v1(original_native=native)
+            self.header = header
+            self.repository = header['repository']
+            self.basis=None
+            if header.get('basis_kind')=='NATIVE_IMMUTABLE_V2':
+                descriptor=self.repository['native_basis']
+                owner._preflight_require_v1(descriptor['byte_length']<=header['parent_limits']['capture']['retained_bytes']
+                    and descriptor['catalog_entry_count']<=header['parent_limits']['capture']['entries'],
+                    'LINUX_V2_PARENT_MANIFEST_ALLOWANCE')
+                self.basis = owner._LinuxImmutableSourceBasisV2.__new__(owner._LinuxImmutableSourceBasisV2)
+                self._original_basis_v2 = self.basis
+                self._original_basis_v2.__init__(native.host_lease, descriptor, paths.run_id)
+                self._check_original_holders_v1(original_native=native)
+                self.files={p:row for p,row in self.basis.files.items() if row[1]=='WORKTREE'}
+                self.directories={p:v for p,v in self.basis.directories.items() if p!='.git' and not p.startswith('.git/')}
+            else:
+                self.files={p:blobs[i] for p,i in self.repository['files']}
+                self.directories=owner._preflight_rosters_v1(self.repository['directories'])
+            self.installation = dict(header['installation'])
+            basis = self.installation['startup_basis']
+            self.installation['startup_basis'] = dict(files={p:blobs[i] for p,i in basis['files']},
+                directories=owner._preflight_rosters_v1(basis['directories'],absolute=True),absent=tuple(basis['absent']))
+            for key in ('version','abi','stdlib_roots','site_roots','config_paths','customizer_paths'):
+                self.installation[key] = tuple(self.installation[key])
+            self.state = 'INPUTS_VALIDATED'
+            self.native.check()
+            self._check_original_holders_v1(original_native=native)
+            self.capture = owner._PreflightObservationV1(root=paths.repo_root,run_id=paths.run_id,occurrence=1,
+                argv=plan[0].argv,files=self.files,directories=self.directories,
+                limits=header['parent_limits']['capture'],deadline_ns=header['parent_limits']['deadline_ns'],native_basis=self.basis)
+            self._check_original_holders_v1(original_native=native)
+            self.terminal = owner._PreflightObservationV1(root=paths.repo_root,run_id=paths.run_id,occurrence=1,
+                argv=plan[0].argv,files=self.files,directories=self.directories,
+                limits=header['parent_limits']['terminal'],deadline_ns=header['parent_limits']['deadline_ns'],native_basis=self.basis)
+            self._check_original_holders_v1(original_native=native)
+            self.parent_meter = owner._PreflightTransportV1(header['parent_limits']['transport'],
+                header['parent_limits']['deadline_ns'],native.check)
+            self.parent_meter.native_basis=self.basis
+            if self.basis is not None:
+                self.capture.reserve('entries',self.basis.count)
+                self._check_original_holders_v1(original_native=native)
+                self.capture.reserve('retained_bytes',self.basis.manifest_retained_bytes)
+                self._check_original_holders_v1(original_native=native)
+                self.capture.retained_entries+=self.basis.count
+                self.capture.native_read_observation.update(manifest_acquired_bytes=self.basis.manifest_acquired_bytes,
+                    manifest_retained_bytes=self.basis.manifest_retained_bytes)
+            if type(native.host_lease) is owner._LinuxPreflightHostLeaseV1:
+                extents,receivers = [],[]
+                for row,entry in zip(header['rows'],plan,strict=True):
+                    index = entry.command_index
+                    identity = dict(run_id=paths.run_id,phase=FAST_PREFLIGHT_PHASE,command_index=index,original_position=index,
+                        command_count=8,argv=list(entry.argv),repo_root=str(paths.repo_root),process_root=str(paths.process_root),
+                        evidence_root=str(paths.evidence_root),parent_pid=os.getpid())
+                    if self.basis is None:
+                        offset,files=0,[]
+                        for name,blob in row['files']:
+                            files.append([name,offset,len(blobs[blob])])
+                            offset+=len(blobs[blob])
+                        frame_header=dict(identity=identity,allowance=row['limits'],deadline_ns=row['deadline_ns'],
+                            git=dict(executable=row['git_executable'],evidence_root=None if row['git_executable'] is None
+                                else str(paths.evidence_root/('preflight-'+str(index))/'git')),files=files,directories=row['directories'])
+                    else:
+                        offset=0
+                        frame_header=dict(identity=identity,allowance=row['limits'],deadline_ns=row['deadline_ns'],
+                            git=dict(executable=row['git_executable'],evidence_root=None if row['git_executable'] is None
+                                else str(paths.evidence_root/('preflight-'+str(index))/'git')),
+                            native_basis=dict(self.basis.descriptor),selection=row['selection'])
+                    raw=owner._preflight_canonical_v1(frame_header)
+                    owner._preflight_require_v1(offset<=268435456 and len(raw)<=8388608
+                        and (self.basis is None or 24+len(raw)<=1048576),'LINUX_PREFLIGHT_ROW_SERIALIZATION_LIMIT')
+                    extents.append(24+len(raw)+offset)
+                    receivers.append(owner._preflight_result_bound_v1(identity,native_basis=self.basis))
+                native.host_lease.reserve_plan(extents,receivers)
+                self._check_original_holders_v1(original_native=native)
+            bindings = {}
+            self.rows = header['rows']
+            for row, entry in zip(self.rows,plan,strict=True):
+                if self.basis is None:
+                    owner._preflight_require_v1(all(self.files[p]==blobs[i] for p,i in row['files']),
+                        'preflight row byte generation differs')
+                observation = owner._PreflightObservationV1(root=paths.repo_root,run_id=paths.run_id,
+                    occurrence=entry.command_index,argv=entry.argv,
+                    files=({p:blobs[i] for p,i in row['files']} if self.basis is None else self.files if row['selection']=='ALL_WORKTREE' else {}),
+                    directories=(owner._preflight_rosters_v1(row['directories']) if self.basis is None else
+                        self.directories if row['selection']=='ALL_WORKTREE' else {}),limits=row['limits'],
+                    deadline_ns=row['deadline_ns'],git_executable=row['git_executable'],
+                    evidence_root=paths.evidence_root/('preflight-'+str(entry.command_index))/'git',native_basis=self.basis)
+                self._check_original_holders_v1(original_native=native)
+                binding = {k:v for k,v in self.installation.items() if k != 'executable'}
+                binding['observation'] = observation
+                bindings[entry.command_index] = binding
+            index = self.repository['index']
+            self._check_original_holders_v1(original_native=native)
+            self.candidate = _ValidationCandidateCustodyV1.__new__(_ValidationCandidateCustodyV1)
+            self._original_candidate_v1 = self.candidate
+            self._original_candidate_v1.__init__(repo_root=paths.repo_root,plan=plan,
+                observe_paths=self._observe_paths,check_exclusive=native.check,
+                index_path=None if index is None else pathlib.Path(index if self.basis is not None else index[0]),
+                effects_by_occurrence={n:() for n in range(1,9)},ignored_paths=tuple(self.repository['protected_paths']),
+                operation_checks={n:self._check_operation for n in range(1,9)},nested_evidence_limits={},
+                preflight_bindings=bindings,native_basis=self.basis,native_observation=self.capture,**header['candidate_limits'])
+            self._check_original_holders_v1(original_native=native)
+            for name, raw in self.files.items():
+                actual = self.candidate.baseline.get(name)
+                owner._preflight_require_v1(actual is not None and (actual == raw if self.basis is not None else actual[1] == raw),
+                    'preflight candidate basis differs: '+name)
+            if index is not None:
+                owner._preflight_require_v1(self.candidate.index_baseline is not None
+                    and (self.candidate.index_baseline == self.basis.files['.git/index'] if self.basis is not None else self.candidate.index_baseline[1] == blobs[index[1]]),'preflight active index basis differs')
+            self.candidate._preflight_assembly = self
+            self.state = 'CUSTODY_READY'
+        except BaseException as exc:
+            self.failure = exc
+            raise
+
+    def _validate_declaration(self,h,payload):
+        self._check_original_holders_v1()
+        o = self.owner
+        v2=h.get('basis_kind')=='NATIVE_IMMUTABLE_V2'
+        o._preflight_keys_v1(h,('phase','repository','installation','rows','candidate_limits','parent_limits','blobs',*(['basis_kind'] if v2 else [])))
+        if v2:
+            o._preflight_require_v1(type(self.native.host_lease) is o._LinuxPreflightHostLeaseV1,
+                'LINUX_V2_DECLARATION_ACTUAL_LEASE')
+        o._preflight_require_v1(h['phase'] == FAST_PREFLIGHT_PHASE, 'preflight declaration phase')
+        o._preflight_require_v1(type(h['blobs']) is list,'preflight blob array')
+        offset, sizes = 0, []
+        for pair in h['blobs']:
+            o._preflight_require_v1(type(pair) is list and len(pair) == 2,'preflight blob range')
+            start,length = (o._preflight_integer_v1(v) for v in pair)
+            o._preflight_require_v1(start == offset and length <= payload-offset,'preflight contiguous declaration body')
+            sizes.append(length)
+            offset += length
+        o._preflight_require_v1(offset == payload,'preflight complete declaration body')
+        used = set()
+        def ref(index):
+            o._preflight_integer_v1(index)
+            o._preflight_require_v1(index < len(sizes),'preflight blob reference')
+            used.add(index)
+        def files(rows,absolute=False):
+            o._preflight_require_v1(type(rows) is list,'preflight declaration file array')
+            names, ordered = {}, []
+            for row in rows:
+                o._preflight_require_v1(type(row) is list and len(row) == 2,'preflight declaration file row')
+                (o._preflight_startup_path_v1 if absolute else o._preflight_relative_v1)(row[0])
+                o._preflight_require_v1(row[0].casefold() not in names,'preflight declaration file alias')
+                names[row[0].casefold()] = row[1]
+                ordered.append(row[0].encode('utf-8'))
+                ref(row[1])
+            o._preflight_require_v1(ordered == sorted(ordered),'preflight declaration file order')
+        r = h['repository']
+        o._preflight_keys_v1(r,('root','native_basis','index','protected_paths') if v2 else ('root','files','directories','index','protected_paths'))
+        o._preflight_startup_path_v1(r['root'])
+        o._preflight_require_v1(r['root']==str(self.paths.repo_root)==str(self.native.root),'preflight declaration actual repository')
+        if v2:
+            descriptor=o._linux_source_descriptor_v2(r['native_basis'])
+            o._preflight_require_v1(descriptor==self.native.host_lease.binding.get('native_basis'),'LINUX_V2_DECLARATION_DESCRIPTOR')
+            repository_files=directories=None
+        else:
+            files(r['files'])
+            repository_files=dict(r['files'])
+            directories=o._preflight_rosters_v1(r['directories'])
+            o._preflight_catalog_consistency_v1(repository_files,directories)
+        o._preflight_require_v1(type(r['protected_paths']) is list,'preflight protected path array')
+        protected=[o._preflight_relative_v1(p) for p in r['protected_paths']]
+        o._preflight_require_v1(len({p.casefold() for p in protected})==len(protected),'preflight protected path alias')
+        index=r['index']
+        if v2:
+            o._preflight_require_v1(type(index) is str and index==str(self.native.index_path)==str(self.paths.repo_root/'.git/index'),
+                'LINUX_V2_ORIGINAL_INDEX_PATH')
+        elif index is None:
+            o._preflight_require_v1(self.native.index_path is None and not (self.paths.repo_root/'.git').exists(),
+                'preflight actual active index required')
+        else:
+            o._preflight_require_v1(type(index) is list and len(index)==2,'preflight active index pair')
+            o._preflight_startup_path_v1(index[0])
+            ref(index[1])
+            o._preflight_require_v1(index[0]==str(self.native.index_path),'preflight native active index identity')
+        install = h['installation']
+        o._preflight_keys_v1(install,('executable','version','abi','stdlib_roots','site_roots','loader_environment',
+            'config_paths','customizer_paths','startup_basis'))
+        o._preflight_require_v1(install['executable'] == sys.executable,'preflight admitted executable identity')
+        o._preflight_require_v1(type(install['version']) is list and len(install['version']) == 3
+            and all(type(v) is int for v in install['version']) and tuple(install['version']) == tuple(sys.version_info[:3]),
+            'preflight installation version')
+        o._preflight_require_v1(type(install['abi']) is list and len(install['abi']) == 5
+            and all(type(install['abi'][i]) is int for i in (2,3)), 'preflight installation ABI scalars')
+        for key in ('stdlib_roots','site_roots','config_paths','customizer_paths'):
+            o._preflight_require_v1(type(install[key]) is list,'preflight installation path array')
+            for path in install[key]: o._preflight_startup_path_v1(path)
+            o._preflight_require_v1(len(set(install[key])) == len(install[key]), 'preflight duplicate installation path')
+        loaders = install['loader_environment']
+        o._preflight_require_v1(type(loaders) is dict and all(type(k) is str and type(v) is str
+            and k and '=' not in k and '\0' not in k+v for k,v in loaders.items())
+            and len({k.upper() for k in loaders}) == len(loaders),'preflight loader environment')
+        basis = install['startup_basis']
+        o._preflight_keys_v1(basis,('files','directories','absent'))
+        files(basis['files'],absolute=True)
+        if v2:
+            for path,_ in basis['files']:
+                o._preflight_require_v1(not pathlib.Path(path).is_relative_to(self.paths.repo_root)
+                    or path in install['config_paths'],'LINUX_V2_SOURCE_MASQUERADING_AS_STARTUP')
+        o._preflight_rosters_v1(basis['directories'],absolute=True)
+        o._preflight_require_v1(type(basis['absent']) is list,'preflight startup absence array')
+        for path in basis['absent']: o._preflight_startup_path_v1(path)
+        all_startup = [row[0] for row in basis['files']]+[row[0] for row in basis['directories']]+basis['absent']
+        o._preflight_require_v1(len({p.casefold() for p in all_startup}) == len(all_startup),'preflight startup status alias')
+        o._preflight_require_v1(install['executable'] in dict(basis['files']),'preflight executable byte basis unavailable')
+        o._preflight_keys_v1(h['candidate_limits'],('entry_limit','snapshot_byte_limit','read_byte_limit','deadline_ns'))
+        for v in h['candidate_limits'].values(): o._preflight_integer_v1(v,positive=True)
+        parent = h['parent_limits']
+        o._preflight_keys_v1(parent,('capture','transport','terminal','deadline_ns'))
+        o._preflight_limits_v1(parent['capture'])
+        o._preflight_limits_v1(parent['terminal'])
+        o._preflight_limits_v1(parent['transport'],transport=True)
+        o._preflight_integer_v1(parent['deadline_ns'],positive=True)
+        o._preflight_require_v1(parent['capture'] == self.native.capture_limits
+            and parent['terminal'] == self.native.terminal_limits,'preflight independently reserved parent tranches differ')
+        o._preflight_require_v1(time.monotonic_ns() < parent['deadline_ns'] <= h['candidate_limits']['deadline_ns']
+            <= self.native.deadline_ns,'preflight parent ancestor deadline')
+        o._preflight_require_v1(type(h['rows']) is list and len(h['rows']) == 8,'preflight all eight rows required')
+        for n,(row,entry) in enumerate(zip(h['rows'],self.plan,strict=True),1):
+            o._preflight_keys_v1(row,('original_position','argv',*(['selection'] if v2 else ['files','directories']),'limits','parent_tail_reserve',
+                'deadline_ns','settlement_deadline_ns','transport','application_output_limits','git_executable'))
+            o._preflight_require_v1(type(row['original_position']) is int and row['original_position'] == n
+                and type(row['argv']) is list and tuple(row['argv']) == entry.argv,'preflight original row identity')
+            if v2:
+                o._preflight_require_v1(row['selection']==('NONE' if n in (2,6) else 'ALL_WORKTREE'),'LINUX_V2_ROW_SELECTION')
+            else:
+                files(row['files'])
+                row_files = dict(row['files'])
+                row_dirs = o._preflight_rosters_v1(row['directories'])
+                o._preflight_catalog_consistency_v1(row_files,row_dirs)
+                o._preflight_require_v1(all(p in repository_files for p in row_files)
+                    and all(directories.get(p) == v for p,v in row_dirs.items()), 'preflight row disagrees with repository facts')
+            limits = o._preflight_limits_v1(row['limits'])
+            tail = o._preflight_limits_v1(row['parent_tail_reserve'])
+            o._preflight_require_v1(all(tail[k] <= limits[k] for k in limits),'preflight parent tail allocation')
+            o._preflight_limits_v1(row['transport'],transport=True)
+            output = row['application_output_limits']
+            o._preflight_keys_v1(output,('stdout_bytes','stderr_bytes','combined_output_bytes'))
+            for v in output.values(): o._preflight_integer_v1(v)
+            o._preflight_require_v1(output['stdout_bytes']+output['stderr_bytes'] <= output['combined_output_bytes'],
+                'preflight application stream relation')
+            for key in ('deadline_ns','settlement_deadline_ns'): o._preflight_integer_v1(row[key],positive=True)
+            o._preflight_require_v1(time.monotonic_ns() < row['deadline_ns'] < row['settlement_deadline_ns']
+                <= parent['deadline_ns'],'preflight row ancestor deadline')
+            git = row['git_executable']
+            if limits['git_attempts'] == 0:
+                o._preflight_require_v1(git is None,'preflight unselected Git executable')
+            else:
+                o._preflight_startup_path_v1(git)
+                o._preflight_require_v1(git == self.native.git_executable and git in dict(basis['files']),
+                    'preflight independently admitted Git byte basis unavailable')
+        o._preflight_require_v1(used == set(range(len(sizes))),'preflight unreferenced declaration blob')
+        self._check_original_holders_v1()
+        return sizes,None
+
+    def _observe_paths(self):
+        self._check_original_holders_v1()
+        o = self.owner
+        budget = self.terminal if self.state == 'SETTLING' else self.capture
+        if self.basis is not None:
+            # The following candidate snapshot performs a complete physical
+            # catalog barrier using held ancestors. This is its fixed universe.
+            self.basis.check_live()
+            self._check_original_holders_v1()
+            return tuple(self.files)
+        def walk(root):
+            result = []
+            for path,kind in o._preflight_directory_v1(root):
+                if path == self.paths.repo_root/'.git':
+                    continue  # Active index is independently protected by its original owner.
+                if kind == 'directory': result.extend(walk(path))
+                else: result.append(path.relative_to(self.paths.repo_root).as_posix())
+            return result
+        with o._preflight_observation_v1(budget,run_id=budget.run_id,occurrence=1,
+                argv=budget.argv,root=budget.root):
+            result = tuple(walk(self.paths.repo_root))
+            o._preflight_require_v1(set(result) == set(self.files), 'preflight complete candidate file roster differs')
+        self._check_original_holders_v1()
+        return result
+
+    def candidate_source(self,root,plan):
+        self._check_original_holders_v1()
+        self.owner._preflight_require_v1(root == self.paths.repo_root and plan is self.plan
+            and self.state in ('CUSTODY_READY','PUBLISHED'),'preflight single candidate/plan association')
+        self.native.check()
+        self._check_original_holders_v1()
+        return self.candidate
+
+    def _check_operation(self, *, entry, environment, timeout_seconds, scratch_roots):
+        self._check_original_holders_v1()
+        self.native.check()
+        self._check_original_holders_v1()
+        self.owner._preflight_require_v1(entry is self.plan[entry.command_index-1], 'preflight operation plan identity')
+        result = self.native.host_lease.check_launch(entry,entry.argv,environment,scratch_roots,
+            self.rows[entry.command_index-1]['deadline_ns'])
+        self._check_original_holders_v1()
+        self.owner._preflight_require_v1(result is None,'preflight native operation denied')
+
+    def launch(self,index,environment,projection,scratch_roots):
+        self._check_original_holders_v1()
+        o = self.owner
+        o._preflight_require_v1(self.state in ('PUBLISHED','DISPATCHING') and index not in self.launches,
+            'preflight one-shot dispatch state')
+        self.native.check()
+        self._check_original_holders_v1()
+        row,entry = self.rows[index-1],self.plan[index-1]
+        observation = self.candidate.preflight_bindings[index]['observation']
+        if row['git_executable'] is not None:
+            with o._preflight_observation_v1(observation,run_id=observation.run_id,occurrence=index,
+                    argv=entry.argv,root=self.paths.repo_root), o._preflight_startup_access_v1(observation,self.installation['startup_basis']):
+                o._preflight_read_bytes_v1(pathlib.Path(row['git_executable']))
+        self._check_original_holders_v1()
+        lowered = {k.upper() for k in environment}
+        o._preflight_require_v1(len(lowered) == len(environment) and not any(k in lowered for k in o._PREFLIGHT_INPUT_KEYS_V1)
+            and not any(k.startswith(('QTT_SCAN_','QTT_MAPPER_')) for k in lowered),'preflight competing inherited controls')
+        identity = dict(run_id=self.paths.run_id,phase=FAST_PREFLIGHT_PHASE,command_index=index,original_position=index,
+            command_count=8,argv=list(entry.argv),repo_root=str(self.paths.repo_root),process_root=str(self.paths.process_root),
+            evidence_root=str(self.paths.evidence_root),parent_pid=os.getpid())
+        environment = dict(environment)
+        for key,value in ((o.RUN_ID_ENV,self.paths.run_id),(o.PROCESS_ROOT_ENV,str(self.paths.process_root)),
+                (o.EVIDENCE_ROOT_ENV,str(self.paths.evidence_root))):
+            for old in tuple(environment):
+                if old.upper() == key: del environment[old]
+            environment[key] = value
+        self._check_original_holders_v1()
+        launch = o._PreflightLaunchInputV1(identity=identity,observation=observation,row_total=row['limits'],parent_tail_reserve=row['parent_tail_reserve'],
+            limits=row['transport'],parent_meter=self.parent_meter,settlement_deadline_ns=row['settlement_deadline_ns'],
+            host_lease=self.native.host_lease,plan_entry=entry,environment=environment,scratch_roots=tuple(scratch_roots),
+            output_limits=row['application_output_limits'])
+        self._check_original_holders_v1()
+        environment.update(launch.controls)
+        launch.environment = environment
+        projection = dict(projection)
+        projection['fixed_environment_controls'] += tuple((k,environment[k]) for k in
+            (*o._PREFLIGHT_INPUT_KEYS_V1,o.RUN_ID_ENV,o.PROCESS_ROOT_ENV,o.EVIDENCE_ROOT_ENV))
+        self._check_original_holders_v1()
+        self.candidate._preflight_launch = (entry.argv,dict(environment))
+        self.launches[index] = launch
+        self.state = 'DISPATCHING'
+        return launch,environment,projection
+
+    def reconcile(self,index,receipt):
+        self._check_original_holders_v1()
+        launch = self.launches[index]
+        self.owner._preflight_require_v1(launch.state == 'CLOSED' and launch.result is not None
+            and receipt.pid == launch.process.pid and receipt.native_exit_code == launch.result['application_exit'],
+            'preflight receiver/native terminal reconciliation')
+        self.native.check()
+        self._check_original_holders_v1()
+
+    def _check_original_holders_v1(self, *, original_native=None):
+        # The original assembly owns this association, including partial
+        # construction; these checks acquire no physical bytes or resources.
+        from tools import validation_reliability as owner
+        owner._preflight_require_v1(self.owner is owner
+            and type(self.pid) is int and type(self.thread) is int
+            and (self.pid, self.thread) == (os.getpid(), threading.get_ident()),
+            'preflight original assembly owner changed')
+        owner._preflight_require_v1('_original_native_input_v1' in self.__dict__
+            and '_original_basis_v2' in self.__dict__ and '_original_candidate_v1' in self.__dict__
+            and type(self._original_native_input_v1) is owner._PreflightNativeInputV1
+            and self.native is self._original_native_input_v1
+            and (original_native is None or original_native is self._original_native_input_v1)
+            and (self.native.pid, self.native.thread) == (self.pid, self.thread)
+            and self.basis is self._original_basis_v2
+            and (self.basis is None or type(self.basis) is owner._LinuxImmutableSourceBasisV2)
+            and self.candidate is self._original_candidate_v1
+            and (self.candidate is None or type(self.candidate) is _ValidationCandidateCustodyV1),
+            'preflight original resource holder changed during assembly use')
+
+    def settling(self):
+        self._check_original_holders_v1()
+        self.native.check()
+        self._check_original_holders_v1()
+        for launch in self.launches.values():
+            if launch.process is not None:
+                terminal = launch.process.poll()
+                self._check_original_holders_v1()
+                self.owner._preflight_require_v1(terminal is not None,'preflight final process settlement unproven')
+                settlement = self.native.host_lease.check_settled(launch.process)
+                self._check_original_holders_v1()
+                self.owner._preflight_require_v1(settlement is None,'preflight final host settlement denied')
+        self._check_original_holders_v1()
+        self.state = 'SETTLING'
+        if self.basis is not None and self.candidate is not None and self.terminal is not None:
+            self.candidate.native_observation = self.terminal
+
+
+class _ValidationCandidateCustodyV1:
+    """One explicitly admitted working candidate and occurrence-specific effects.
+
+    The supplied enumeration and exclusive-custody check are the original run
+    owner's inputs. Neither a generated prefix nor this class grants effects.
+    """
+    def __init__(self, *, repo_root, plan, observe_paths, check_exclusive, index_path,
+                 effects_by_occurrence, ignored_paths, entry_limit, snapshot_byte_limit,
+                 read_byte_limit, deadline_ns, operation_checks, nested_evidence_limits=None, preflight_bindings=None, native_basis=None, native_observation=None, _ordinary_disk=None):
+        from types import MappingProxyType
+        if preflight_bindings is None:
+            preflight_bindings = {}
+        if (type(preflight_bindings) is not dict
+                or any(type(key) is not int or not 1 <= key <= len(plan) for key in preflight_bindings)):
+            raise ValueError("exact original preflight startup bindings required")
+        self.preflight_bindings = MappingProxyType(dict(preflight_bindings))
+        if (type(plan) is not tuple or not plan or not callable(observe_paths)
+                or not callable(check_exclusive) or type(effects_by_occurrence) is not dict
+                or type(ignored_paths) is not tuple):
+            raise ValueError("original candidate and effect inputs required")
+        for bound in (entry_limit, snapshot_byte_limit, read_byte_limit, deadline_ns):
+            if type(bound) is not int or bound <= 0:
+                raise ValueError("explicit candidate resource limits required")
+        if any(type(key) is not int for key in effects_by_occurrence) or set(effects_by_occurrence) != set(range(1, len(plan) + 1)):
+            raise ValueError("candidate effects do not cover original occurrences")
+        if (type(operation_checks) is not dict or any(type(key) is not int for key in operation_checks) or set(operation_checks) != set(effects_by_occurrence)
+                or any(not callable(check) for check in operation_checks.values())):
+            raise ValueError("original per-occurrence source/input/environment/resource checks required")
+        if nested_evidence_limits is None:
+            nested_evidence_limits = {}
+        if type(nested_evidence_limits) is not dict:
+            raise ValueError("exact mapper nested-evidence resource bindings required")
+        ordinary_nested = None
+        if _ordinary_disk is not None and nested_evidence_limits:
+            scope = _ordinary_disk['scope']
+            ordinary_nested = scope._ordinary_nested_limit_product_v1
+            if (ordinary_nested is not scope._ordinary_original_nested_limit_product_v1
+                    or ordinary_nested['plan'] is not plan
+                    or ordinary_nested['limits'] is not nested_evidence_limits
+                    or ordinary_nested['scope'] is not scope
+                    or ordinary_nested['original'][0] is not ordinary_nested
+                    or ordinary_nested['original'][15] is not ordinary_nested['positive']
+                    or ordinary_nested['original'][16] != ordinary_nested['wrapper_count']
+                    or ordinary_nested['original'][17] is not scope._ordinary_resource_programme_v1['nested_evidence_programme']
+                    or ordinary_nested['original'][13] != tuple((key, value, tuple(value.items()))
+                        for key, value in nested_evidence_limits.items())):
+                raise ValueError('ORDINARY_C_ORIGINAL_NESTED_LIMIT_PRODUCER')
+        for index, limits in nested_evidence_limits.items():
+            generic_nested = ordinary_nested is not None and _mapper_nested_pytest_args_v1(
+                plan[index - 1].argv, pathlib.Path(repo_root)) is None
+            keys = (_NestedPytestEvidenceV1._LIMITS - {'child_execution_deadline_ns'}
+                if generic_nested else _NestedPytestEvidenceV1._LIMITS)
+            if (type(index) is not int or type(limits) is not dict
+                    or set(limits) != keys
+                    or any(type(v) is not int or v <= 0 for v in limits.values())
+                    or limits["deadline_ns"] > deadline_ns):
+                raise ValueError("nested evidence limits must fit the original ancestor")
+            if generic_nested:
+                if not limits['execution_deadline_ns'] < limits['deadline_ns']:
+                    raise ValueError('ordinary nested execution exceeds original custody cutoff')
+                _execution_remaining_seconds_v1(limits['execution_deadline_ns'])
+            else:
+                _mapper_deadline_controls_v1(limits)
+        nested_reads = sum(v["read_byte_limit"] for v in nested_evidence_limits.values())
+        nested_retained = sum(v["retained_byte_limit"] for v in nested_evidence_limits.values())
+        nested_entries = sum(v["entry_limit"] for v in nested_evidence_limits.values())
+        if (nested_reads >= read_byte_limit or nested_retained >= snapshot_byte_limit
+                or nested_entries >= entry_limit):
+            raise ValueError("nested evidence allocations exceed original candidate allowance")
+        # Reserve once from original totals. Failed or unused work is not refunded.
+        read_byte_limit -= nested_reads
+        snapshot_byte_limit -= nested_retained
+        entry_limit -= nested_entries
+        self.nested_evidence_limits = MappingProxyType({index: MappingProxyType(dict(limits))
+            for index, limits in nested_evidence_limits.items()})
+        self.operation_checks = MappingProxyType(dict(operation_checks))
+        self.root = pathlib.Path(repo_root).absolute()
+        self.plan, self.observe_paths, self.check_exclusive = plan, observe_paths, check_exclusive
+        self.effects = MappingProxyType({i: frozenset(self._paths(value, entry_limit))
+            for i, value in effects_by_occurrence.items()})
+        self.ignored = self._paths(ignored_paths, entry_limit)
+        self.all_effects = frozenset(path for value in self.effects.values() for path in value)
+        self.entry_limit, self.snapshot_byte_limit = entry_limit, snapshot_byte_limit
+        self.remaining_read_bytes, self.deadline_ns = read_byte_limit, deadline_ns
+        self.observed_read_bytes, self.read_attempts = 0, 0
+        self.read_measurement_complete = True
+        self.index_path = None if index_path is None else pathlib.Path(index_path).absolute()
+        self.process_id, self.thread_id = os.getpid(), threading.get_ident()
+        self.state, self.failure, self.completed_actions = "CAPTURING", None, []
+        self.index_baseline, self.index_snapshot_bytes = None, 0
+        self.baseline = self._settled_snapshot = None
+        self.active_occurrence, self.permitted_since_barrier = None, set()
+        self.completed_occurrences = set()
+        self._read_descriptor, self._read_close_attempted = None, False
+        self._write_descriptor, self._write_close_attempted = None, False
+        self._read_raw_handle_owner = None
+        self._mapper_custody_v1 = {}
+        self._original_mapper_custody_v1 = self._mapper_custody_v1
+        self._read_in_progress = False
+        self._read_acquisition_in_progress = False
+        self.native_basis = None
+        self.native_observation = None
+        self._ordinary_disk_config_v1 = _ordinary_disk
+        self._ordinary_disk_state_v1 = None if _ordinary_disk is None else {}
+        self._original_ordinary_disk_state_v1 = self._ordinary_disk_state_v1
+        self._acquisition_supervision = self._register_partial_capture_v1()
+        try:
+            if _ordinary_disk is not None and native_basis is not None:
+                raise ValueError("ORDINARY_DISK_COMPETING_FIRST_EIGHT_OWNER")
+            # Recognition can import the selected wrapper. Retain this actual
+            # partial owner before that import, as before filesystem capture.
+            required_nested = set()
+            for index, entry in enumerate(plan, start=1):
+                vector = entry.argv if type(entry) is CommandEvidencePlanEntry else entry.execution_argv
+                if _mapper_nested_pytest_args_v1(tuple(vector), pathlib.Path(repo_root)) is not None:
+                    required_nested.add(index)
+            if ordinary_nested is not None:
+                required_nested = {entry.command_index for entry, selected in ordinary_nested['positive']}
+                if any(scope._ordinary_nested_selection_v1(entry) is None
+                        for entry, selected in ordinary_nested['positive']):
+                    raise ValueError('ORDINARY_C_ORIGINAL_SELECTED_WRAPPER_CHANGED')
+            if set(nested_evidence_limits) != required_nested:
+                raise ValueError("exact mapper nested-evidence resource bindings required")
+            if self.index_path is None and (self.root / ".git").exists():
+                raise ValueError("actual active index custody is required")
+            if native_basis is not None:
+                from tools.validation_reliability import _LinuxImmutableSourceBasisV2
+                if (type(native_basis) is not _LinuxImmutableSourceBasisV2 or native_basis.root!=self.root
+                        or type(getattr(native_basis, 'run_id', None)) is not str
+                        or any(type(entry) is not CommandEvidencePlanEntry
+                            or entry.run_id != native_basis.run_id or entry.cwd != str(self.root)
+                            for entry in plan)
+                        or self.all_effects or self.ignored or self.nested_evidence_limits):
+                    raise ValueError('LINUX_V2_EXACT_NO_EFFECT_CANDIDATE')
+                self.native_basis = native_basis
+                self.native_observation = native_observation
+                native_basis.check_live()
+                if native_basis.manifest_retained_bytes>self.snapshot_byte_limit:
+                    raise RuntimeError('VALIDATION_CANDIDATE_SNAPSHOT_BUDGET')
+            else:
+                self.native_observation = native_observation
+            if _ordinary_disk is not None:
+                self._disk_initialize_v1(_ordinary_disk)
+                return
+            self._check()
+            paths = self._universe()
+            if self.index_path is not None and self.native_basis is None:
+                index_info = self.index_path.lstat()
+                if index_info.st_size > self.snapshot_byte_limit:
+                    raise RuntimeError("VALIDATION_CANDIDATE_SNAPSHOT_BUDGET")
+            self.index_baseline = self._read(self.index_path) if self.index_path is not None else None
+            self.index_snapshot_bytes = (0 if self.index_baseline is None or self.native_basis is not None else len(self.index_baseline[1]))
+            self.baseline = MappingProxyType(self._snapshot(paths, baseline=True))
+            self._settled_snapshot = self.baseline
+            self.state = "BASELINE_READY"
+        except BaseException as error:
+            if self.failure is None:
+                self.failure = error
+            self.state = "CLEANUP_REJECTED"
+            if self._acquisition_supervision is not None:
+                self._acquisition_supervision["candidate_admission_error"] = error
+            raise
+
+    def _register_partial_capture_v1(self):
+        supervision = _RUN_COMMANDS_SUPERVISION
+        if (not _ORDINARY_CANDIDATE_FIRST_V1 or supervision is None
+                or not supervision.get("candidate_acquiring", False)):
+            return None
+        paths = _RUN_COMMANDS_ACTIVE_PATHS
+        if (type(self) is not _ValidationCandidateCustodyV1
+                or paths is None or supervision["paths"] is not paths
+                or supervision.get("candidate_owner") != (self.process_id, self.thread_id)
+                or (os.getpid(), threading.get_ident()) != (self.process_id, self.thread_id)
+                or self.root != paths.repo_root or self.plan is not _LAST_EXPECTED_COMMAND_PLAN
+                or not supervision.get("candidate_acquisition_attempted", False)
+                or supervision.get("candidate_admission_complete", False)
+                or any(type(row) is not CommandEvidencePlanEntry
+                    or row.run_id != paths.run_id or row.phase != supervision["phase"]
+                    or row.cwd != str(paths.repo_root) for row in self.plan)):
+            raise ValueError("partial candidate lost original invocation association")
+        if supervision.get("candidate_custody") is not None:
+            raise ValueError("original candidate construction cannot be repeated")
+        # Register before filesystem, native, exclusive or observer acquisition.
+        supervision["candidate_custody"] = self
+        supervision["candidate_deadline_ns"] = self.deadline_ns
+        return supervision
+
+    def prepare_preflight(self, index, entry, *, environment, run_paths):
+        from tools.validation_reliability import (_preflight_vector_v1, _preflight_startup_v1,
+                                                  _preflight_launch_guard_v1, _PreflightObservationV1)
+        argv = tuple(entry.argv if type(entry) is CommandEvidencePlanEntry else entry.execution_argv)
+        if not _preflight_vector_v1(argv):
+            return environment, None
+        self._check()
+        if (type(index) is not int or not 1 <= index <= len(self.plan)
+                or entry is not self.plan[index - 1] or index not in self.preflight_bindings):
+            raise RuntimeError("VALIDATION_PREFLIGHT_STARTUP_BINDING_UNAVAILABLE")
+        binding = self.preflight_bindings[index]
+        if (type(run_paths) is not ValidationRunPathsV1 or run_paths.repo_root != self.root
+                or type(binding) is not dict or type(binding.get("observation")) is not _PreflightObservationV1
+                or binding["observation"].root != self.root
+                or binding["observation"].run_id != run_paths.run_id
+                or binding["observation"].occurrence != index):
+            raise RuntimeError("VALIDATION_PREFLIGHT_STARTUP_ASSOCIATION")
+        projected, receipt = _preflight_startup_v1(argv, environment, binding=binding,
+            cache_root=run_paths.process_root / ("preflight-cache-" + str(index)))
+        self._preflight_launch = (argv, dict(projected))
+        _preflight_launch_guard_v1(argv, projected, expected_argv=argv, expected_environment=projected)
+        return projected, receipt
+
+    @staticmethod
+    def _paths(paths, limit):
+        if type(paths) is not tuple or len(paths) > limit:
+            raise ValueError("complete bounded candidate path tuple required")
+        if (len(set(paths)) != len(paths) or any(type(p) is not str or
+                not _is_portable_relative_repo_path(p) for p in paths)):
+            raise ValueError("invalid or duplicate candidate path")
+        if len({p.casefold() for p in paths}) != len(paths):
+            raise ValueError("candidate path alias")
+        return paths
+
+    def _check(self):
+        if self.failure is not None:
+            raise RuntimeError(f"ENGVR_PREPUBLICATION_CUSTODY_FAILED: terminal candidate failure: {self.failure}") from self.failure
+        if (os.getpid() != self.process_id or threading.get_ident() != self.thread_id
+                or time.monotonic_ns() >= self.deadline_ns or self.check_exclusive() is not None):
+            raise RuntimeError("VALIDATION_CANDIDATE_CUSTODY_UNAVAILABLE")
+
+    def _universe(self):
+        self._check()
+        observed = self._paths(self.observe_paths(), self.entry_limit)
+        result = tuple(sorted(set(observed) | set(self.ignored) | self.all_effects,
+                              key=lambda path: (path.casefold(), path)))
+        self._paths(result, self.entry_limit)
+        return result
+
+    def _read(self, path):
+        # Reject recursion before callbacks, counters or another acquisition.
+        if (self._read_in_progress or self._read_acquisition_in_progress
+                or self._read_descriptor is not None
+                or self._write_descriptor is not None or self._read_raw_handle_owner is not None):
+            raise RuntimeError("VALIDATION_CANDIDATE_READ_ALREADY_OWNED")
+        if (os.getpid(), threading.get_ident()) != (self.process_id, self.thread_id):
+            raise RuntimeError("VALIDATION_CANDIDATE_CUSTODY_UNAVAILABLE")
+        self._read_in_progress = True
+        try:
+            self._check()
+            self.read_attempts += 1
+            result = self._read_acquisition(path)
+            self._check()
+            return result
+        except BaseException as exc:
+            if self.failure is None:
+                self.failure = exc
+                self.state = "CLEANUP_REJECTED"
+            raise
+        finally:
+            self._read_in_progress = False
+
+    def _read_acquisition(self, path):
+        if (os.getpid(), threading.get_ident()) != (self.process_id, self.thread_id):
+            raise RuntimeError("VALIDATION_CANDIDATE_CUSTODY_UNAVAILABLE")
+        if (self._read_acquisition_in_progress or self._read_descriptor is not None
+                or self._write_descriptor is not None or self._read_raw_handle_owner is not None):
+            raise RuntimeError("VALIDATION_CANDIDATE_READ_ALREADY_OWNED")
+        self._read_acquisition_in_progress = True
+        try:
+            from tools.validation_reliability import (_open_regular_worktree_descriptor,
+                                                      _local_unlinked_path, _scan_same_api_version, _preflight_chain_v1)
+            self._check()
+            if self.native_basis is not None:
+                relative=path.relative_to(self.root).as_posix()
+                with self.native_basis.open_entry(relative):
+                    return self.native_basis.files[relative]
+            _local_unlinked_path(path.parent)
+            ancestor_generation = _preflight_chain_v1(path.parent)
+            try:
+                before = path.lstat()
+            except FileNotFoundError:
+                return None
+            if (not stat.S_ISREG(before.st_mode) or _stat_is_reparse_point(before)
+                    or before.st_nlink != 1 or before.st_size + 1 > self.remaining_read_bytes):
+                raise RuntimeError("VALIDATION_CANDIDATE_UNSUPPORTED_OR_UNBOUNDED_FILE: " + str(path))
+            try:
+                descriptor = _open_regular_worktree_descriptor(path, nonblocking=True)
+            except BaseException as error:
+                from tools.validation_reliability import _WorktreeRawHandleOwnerV1
+                raw_owner = getattr(error, "_worktree_raw_handle_owner_v1", None)
+                if type(raw_owner) is _WorktreeRawHandleOwnerV1:
+                    self._read_raw_handle_owner = raw_owner
+                raise
+            self._read_descriptor, self._read_close_attempted = descriptor, False
+            errors = []
+            result = None
+            try:
+                opened = os.fstat(descriptor)
+                if not _same_observed_file(before, opened) or opened.st_nlink != 1:
+                    raise RuntimeError("VALIDATION_CANDIDATE_FILE_SUBSTITUTION")
+                data = bytearray()
+                while True:
+                    self._check()
+                    # Charge every acquired byte, including a changed-size sentinel.
+                    requested = min(65536, before.st_size - len(data) + 1)
+                    chunk = os.read(descriptor, requested)
+                    if type(chunk) is not bytes:
+                        self.read_measurement_complete = False
+                        raise RuntimeError("VALIDATION_CANDIDATE_UNMEASURED_READ")
+                    previous = self.remaining_read_bytes
+                    self.observed_read_bytes += len(chunk)
+                    self.remaining_read_bytes = max(0, previous - len(chunk))
+                    if len(chunk) > previous:
+                        raise RuntimeError("VALIDATION_CANDIDATE_READ_BUDGET")
+                    self._check()
+                    if len(chunk) > requested:
+                        raise RuntimeError("VALIDATION_CANDIDATE_READ_OVERDELIVERY")
+                    if not chunk:
+                        break
+                    data.extend(chunk)
+                    if len(data) > before.st_size:
+                        raise RuntimeError("VALIDATION_CANDIDATE_FILE_GREW")
+                after = path.lstat()
+                if (len(data) != before.st_size or _scan_same_api_version(opened) !=
+                        _scan_same_api_version(os.fstat(descriptor)) or
+                        _scan_same_api_version(before) != _scan_same_api_version(after) or
+                        ancestor_generation != _preflight_chain_v1(path.parent)):
+                    raise RuntimeError("VALIDATION_CANDIDATE_UNSTABLE_FILE")
+                result = (stat.S_IMODE(before.st_mode), bytes(data))
+            except BaseException as exc:
+                errors.append(exc)
+            self._read_close_attempted = True
+            try:
+                os.close(descriptor)
+            except BaseException as exc:
+                errors.append(exc)
+            else:
+                self._read_descriptor = None
+            if len(errors) == 1:
+                raise errors[0]
+            if errors:
+                raise BaseExceptionGroup("candidate read and close failures", errors)
+            self._check()
+            return result
+        finally:
+            self._read_acquisition_in_progress = False
+
+    def _snapshot(self, paths, *, baseline=False):
+        if self.native_basis is not None:
+            self.native_basis.check_live()
+            if len(paths)>self.entry_limit:
+                raise RuntimeError('VALIDATION_CANDIDATE_ENTRY_BUDGET')
+            return self.native_basis.catalog_snapshot(paths,self.native_observation)
+        # Complete size preflight before retaining any candidate contents.
+        total = self.index_snapshot_bytes
+        for relative in paths:
+            path = self.root / relative
+            try:
+                info = path.lstat()
+            except FileNotFoundError:
+                continue
+            if not stat.S_ISREG(info.st_mode) or _stat_is_reparse_point(info) or info.st_nlink != 1:
+                raise RuntimeError("VALIDATION_CANDIDATE_UNSUPPORTED_FILE: " + relative)
+            total += info.st_size
+            if total > self.snapshot_byte_limit:
+                raise RuntimeError("VALIDATION_CANDIDATE_SNAPSHOT_BUDGET")
+        if total - self.index_snapshot_bytes > self.remaining_read_bytes:
+            raise RuntimeError("VALIDATION_CANDIDATE_READ_BUDGET")
+        return {relative: self._read(self.root / relative) for relative in paths}
+
+    def begin_occurrence(self, index, entry, *, environment, timeout_seconds, scratch_roots):
+        self._check()
+        if (type(index) is not int or not 1 <= index <= len(self.plan)
+                or entry is not self.plan[index - 1] or self.active_occurrence is not None
+                or index in self.completed_occurrences):
+            raise RuntimeError("VALIDATION_CANDIDATE_ORIGINAL_OCCURRENCE_REQUIRED")
+        from tools.validation_reliability import _preflight_vector_v1, _preflight_launch_guard_v1
+        argv = tuple(entry.argv if type(entry) is CommandEvidencePlanEntry else entry.execution_argv)
+        if _preflight_vector_v1(argv):
+            if not hasattr(self, "_preflight_launch"):
+                raise RuntimeError("VALIDATION_PREFLIGHT_STARTUP_BINDING_UNAVAILABLE")
+            expected_argv, expected_environment = self._preflight_launch
+            _preflight_launch_guard_v1(argv, environment, expected_argv=expected_argv,
+                                      expected_environment=expected_environment)
+        # These are the original operation-specific accepted inputs and resource
+        # controls, not the union of other commands' permissions.
+        if self.operation_checks[index](entry=entry, environment=environment,
+                timeout_seconds=timeout_seconds, scratch_roots=scratch_roots) is not None:
+            raise RuntimeError("VALIDATION_OPERATION_INPUT_RESOURCE_BINDING_FAILED")
+        if self._ordinary_disk_state_v1 is not None:
+            return self._disk_begin_occurrence_v1(index, entry)
+        try:
+            self._occurrence_before = self._snapshot(self._universe())
+            prior = self._settled_snapshot
+            if any(prior.get(p) != self._occurrence_before.get(p)
+                   for p in set(prior) | set(self._occurrence_before)):
+                raise RuntimeError("VALIDATION_CANDIDATE_CHANGED_BETWEEN_OCCURRENCES")
+            if self.index_path is not None and self._read(self.index_path) != self.index_baseline:
+                raise RuntimeError("VALIDATION_CANDIDATE_INDEX_CHANGED")
+        except BaseException as exc:
+            self.failure, self.state = exc, "CLEANUP_REJECTED"
+            raise
+        self.active_occurrence = index
+        self.permitted_since_barrier.update(self.effects[index])
+
+    def end_occurrence(self, index, entry):
+        self._check()
+        if self.active_occurrence != index or entry is not self.plan[index - 1]:
+            raise RuntimeError("VALIDATION_CANDIDATE_PROCESS_ASSOCIATION")
+        if self._ordinary_disk_state_v1 is not None:
+            return self._disk_end_occurrence_v1(index, entry)
+        try:
+            after = self._snapshot(self._universe())
+            before = self._occurrence_before
+            delta = {p for p in set(before) | set(after) if before.get(p) != after.get(p)}
+            forbidden = delta - self.effects[index]
+            if forbidden:
+                raise RuntimeError("VALIDATION_CANDIDATE_UNADMITTED_EFFECT: " + ",".join(sorted(forbidden)))
+            if self.index_path is not None and self._read(self.index_path) != self.index_baseline:
+                raise RuntimeError("VALIDATION_CANDIDATE_INDEX_CHANGED")
+        except BaseException as exc:
+            self.failure, self.state = exc, "CLEANUP_REJECTED"
+            raise
+        self.completed_occurrences.add(index)
+        self.active_occurrence = None
+        self._settled_snapshot = after
+
+    def restore(self):
+        original = self._original_mapper_custody_v1
+        if type(original) is not dict or self._mapper_custody_v1 is not original:
+            raise RuntimeError("VALIDATION_MAPPER_RESOURCE_CUSTODY_UNRESOLVED")
+        if original:
+            from tools.validation_reliability import _mapper_parent_resources_retained_v1
+            if _mapper_parent_resources_retained_v1(self):
+                raise RuntimeError("VALIDATION_MAPPER_RESOURCE_CUSTODY_UNRESOLVED")
+        self._check()
+        if self.active_occurrence is not None:
+            raise RuntimeError("VALIDATION_CANDIDATE_CHILD_STILL_OWNED")
+        if self._ordinary_disk_state_v1 is not None:
+            return self._disk_restore_v1()
+        applying = False
+        try:
+            self.state = "OBSERVED"
+            paths = self._universe()
+            current = self._snapshot(paths)
+            if any(current.get(p) != self._settled_snapshot.get(p)
+                   for p in set(current) | set(self._settled_snapshot)):
+                raise RuntimeError("VALIDATION_CANDIDATE_CHANGED_BEFORE_RESTORATION")
+            if self.index_path is not None and self._read(self.index_path) != self.index_baseline:
+                raise RuntimeError("VALIDATION_CANDIDATE_INDEX_CHANGED")
+            changed = sorted((p for p in set(current) | set(self.baseline)
+                if current.get(p) != self.baseline.get(p)), key=lambda path: (path.casefold(), path))
+            forbidden = set(changed) - self.permitted_since_barrier
+            if forbidden:
+                raise RuntimeError("VALIDATION_CANDIDATE_UNADMITTED_EFFECT: " + ",".join(sorted(forbidden)))
+            plan = tuple((p, current.get(p), self.baseline.get(p)) for p in changed)
+            self.state = "PLAN_VALIDATED"
+            for relative, before, after in plan:
+                self._check()
+                path = self.root / relative
+                if self._read(path) != before:
+                    raise RuntimeError("VALIDATION_CANDIDATE_CONCURRENT_BEFORE_STATE: " + relative)
+                before_identity = None if before is None else path.lstat()
+                applying = True
+                self.state = "APPLYING"
+                if after is None:
+                    path.unlink()
+                else:
+                    mode, content = after
+                    # No parent creation and no truncation until the original
+                    # observed file handle is checked under exclusive custody.
+                    flags = os.O_WRONLY | int(getattr(os, "O_BINARY", 0))
+                    if before is None:
+                        flags |= os.O_CREAT | os.O_EXCL
+                    else:
+                        flags |= int(getattr(os, "O_NOFOLLOW", 0))
+                    descriptor = os.open(path, flags, mode)
+                    self._write_descriptor, self._write_close_attempted = descriptor, False
+                    errors = []
+                    try:
+                        info = os.fstat(descriptor)
+                        if not stat.S_ISREG(info.st_mode) or info.st_nlink != 1 or not _same_observed_file(info, path.lstat()):
+                            raise RuntimeError("VALIDATION_CANDIDATE_WRITE_IDENTITY")
+                        if before_identity is not None and not _same_observed_file(before_identity, info):
+                            raise RuntimeError("VALIDATION_CANDIDATE_WRITE_SUBSTITUTION")
+                        os.ftruncate(descriptor, 0)
+                        view = memoryview(content)
+                        while view:
+                            self._check()
+                            count = os.write(descriptor, view[:65536])
+                            if type(count) is not int or count <= 0 or count > min(65536, len(view)):
+                                raise OSError("candidate restoration made invalid write progress")
+                            view = view[count:]
+                        os.fsync(descriptor)
+                    except BaseException as exc:
+                        errors.append(exc)
+                    self._write_close_attempted = True
+                    try:
+                        os.close(descriptor)
+                    except BaseException as exc:
+                        errors.append(exc)
+                    else:
+                        self._write_descriptor = None
+                    if len(errors) == 1:
+                        raise errors[0]
+                    if errors:
+                        raise BaseExceptionGroup("candidate restore and close failures", errors)
+                    os.chmod(path, mode)
+                self.completed_actions.append((relative, before, after))
+            observed = self._snapshot(self._universe())
+            if (any(observed.get(p) != self.baseline.get(p) for p in set(observed) | set(self.baseline)) or
+                    self.index_path is not None and self._read(self.index_path) != self.index_baseline):
+                raise RuntimeError("VALIDATION_CANDIDATE_RESTORATION_READBACK")
+            self.state = "RESTORED_VERIFIED"
+            self.permitted_since_barrier.clear()
+            self._settled_snapshot = self.baseline
+        except BaseException as exc:
+            self.failure = exc
+            self.state = "CLEANUP_INCOMPLETE" if applying else "CLEANUP_REJECTED"
+            raise
+        return tuple(path for path, _, _ in plan)
+
+    # Private, explicitly selected ordinary read-only backend. The default
+    # constructor and the first-eight immutable route do not call these methods.
+    def _disk_effect_programme_v1(self):
+     state = self._disk_light_v1()
+     programme = state.get("effect_programme")
+     if programme is None:
+      if self.all_effects:
+       raise ValueError("ORDINARY_DISK_EFFECT_PROGRAMME_REQUIRED")
+      return None
+     scope = state["scope"]
+     if (programme is not scope._ordinary_effect_programme_v1
+       or programme is not scope._ordinary_original_effect_programme_v1
+       or programme["scope"] is not scope or programme["paths"] is not state["config"]["paths"]
+       or programme["plan"] is not self.plan or programme["source"] is not scope.source
+       or programme["execution_plan"] is not scope._ordinary_execution_plan_v1
+       or programme["check"] is not programme["original_check"]
+       or not callable(programme["check"]) or programme["errors"]
+       or type(programme["rows"]) is not tuple or len(programme["rows"]) != len(self.plan)):
+      raise ValueError("ORDINARY_DISK_ORIGINAL_EFFECT_PROGRAMME")
+     if programme["check"](scope, programme) is not programme:
+      raise ValueError("ORDINARY_DISK_EFFECT_PROGRAMME_CHECK")
+     for index, row in enumerate(programme["rows"], 1):
+      if row["entry"] is not self.plan[index - 1] or type(row["targets"]) is not tuple:
+       raise ValueError("ORDINARY_DISK_EFFECT_OCCURRENCE_IDENTITY")
+      selected = frozenset(target["path"] for target in row["targets"])
+      parents = frozenset(parent for target in row["targets"] for parent in target["parent_paths"])
+      if selected | parents != self.effects[index]:
+       raise ValueError("ORDINARY_DISK_EFFECT_NAMES_DISAGREE")
+     return programme
+
+    def _disk_effect_targets_v1(self, index=None):
+     programme = self._disk_effect_programme_v1()
+     if programme is None:
+      return (), frozenset()
+     if index is None:
+      rows = programme["rows"]
+     elif type(index) is int and 1 <= index <= len(self.plan):
+      rows = (programme["rows"][index - 1],)
+     else:
+      raise ValueError("ORDINARY_DISK_EFFECT_INDEX")
+     targets = tuple(target for row in rows for target in row["targets"])
+     parents = frozenset(parent for target in targets for parent in target["parent_paths"])
+     for target in targets:
+      if (target["kind"] not in {"FILE", "DIRECTORY"}
+        or type(target["actions"]) is not tuple or not target["actions"]
+        or not set(target["actions"]) <= {"WRITE", "CREATE", "DELETE"}
+        or not _is_portable_relative_repo_path(target["path"])
+        or type(target["parent_paths"]) is not tuple
+        or any(not _is_portable_relative_repo_path(parent) for parent in target["parent_paths"])):
+       raise ValueError("ORDINARY_DISK_EFFECT_TARGET_SHAPE")
+     return targets, parents
+
+    def _disk_generation_rows_v1(self, generation):
+     import struct
+     state = self._disk_light_v1()
+     if not any(generation is value for value in state["regions"].values()):
+      raise ValueError("ORDINARY_DISK_FOREIGN_ROW_GENERATION")
+     result = {}
+     for index in range(generation["file_count"]):
+      row = self._disk_file_row_v1(generation, index)
+      if row[0] in result:
+       raise ValueError("ORDINARY_DISK_DUPLICATE_FILE_ROW")
+      result[row[0]] = (1, row)
+     for index in range(generation["directory_count"]):
+      raw = self._disk_control_read_v1("DIRECTORY_HEADERS",
+       128 + 160 * (generation["directory_start"] + index), 160)
+      row = struct.unpack("<20Q", raw)
+      if row[2] in result:
+       raise ValueError("ORDINARY_DISK_DUPLICATE_DIRECTORY_ROW")
+      result[row[2]] = (2, row)
+     if set(result) != set(range(len(state["names"]))):
+      raise ValueError("ORDINARY_DISK_GENERATION_ROW_COVERAGE")
+     return result
+
+    def _disk_raw_rows_equal_v1(self, left, right):
+     state = self._disk_light_v1()
+     if left[3:6] != right[3:6]:
+      return False
+     if not left[3]:
+      return True
+     descriptors, errors = [], []
+     equal = True
+     try:
+      for row in (left, right):
+       if not 0 < row[2] <= len(state["allocations"]):
+        raise ValueError("ORDINARY_DISK_COMPARE_CARRIER")
+       descriptors.append(self._disk_snapshot_open_v1(
+        state["allocations"][row[2] - 1], tuple(row[6:12])))
+      remaining = left[5]
+      while remaining:
+       first = self._disk_read_v1(descriptors[0]["returned_fd"], min(65536, remaining))
+       if not first:
+        raise ValueError("ORDINARY_DISK_CARRIER_TRUNCATION")
+       position = 0
+       while position < len(first):
+        second = self._disk_read_v1(descriptors[1]["returned_fd"], len(first) - position)
+        if not second:
+         raise ValueError("ORDINARY_DISK_CARRIER_TRUNCATION")
+        if second != first[position:position + len(second)]:
+         equal = False
+        position += len(second)
+       remaining -= len(first)
+      for slot, row in zip(descriptors, (left, right)):
+       if self._disk_read_v1(slot["returned_fd"], 1):
+        raise ValueError("ORDINARY_DISK_CARRIER_SUFFIX")
+       if self._disk_version_v1(self._disk_call_v1(os.fstat, slot["returned_fd"])) != tuple(row[6:12]):
+        raise ValueError("ORDINARY_DISK_CARRIER_CHANGED_DURING_COMPARE")
+       state["scope"].check_carrier(state["allocations"][row[2] - 1], tuple(row[6:12]))
+     except BaseException as error:
+      errors.append(error)
+     for slot in reversed(descriptors):
+      self._disk_close_v1(slot, errors)
+     self._disk_raise_v1(errors)
+     return equal
+
+    def _disk_mutable_generation_check_v1(self, before, after, *, restoring=False):
+     state = self._disk_light_v1()
+     before_rows, after_rows = self._disk_generation_rows_v1(before), self._disk_generation_rows_v1(after)
+     targets, parents = self._disk_effect_targets_v1(None if restoring else self.active_occurrence)
+     repository = next(root for root in state["roots"] if root["logical_path"] == self.root)
+     for target in targets:
+      state["scope"]._ordinary_require_non_git_mutation_v1(target["path"])
+     for relative in parents:
+      state["scope"]._ordinary_require_non_git_mutation_v1(relative)
+     target_map = {}
+     for target in targets:
+      target_map.setdefault(target["path"], []).append(target)
+     direct_membership = {}
+     for relative, selected in target_map.items():
+      if any(set(target["actions"]) & {"CREATE", "DELETE"} for target in selected):
+       parent, _, leaf = relative.rpartition("/")
+       direct_membership.setdefault(parent, set()).add(leaf)
+     for relative in parents:
+      parent, _, leaf = relative.rpartition("/")
+      direct_membership.setdefault(parent, set()).add(leaf)
+     baseline_rows = self._disk_generation_rows_v1(self.baseline)
+     for ordinal, key in enumerate(state["names"]):
+      prior_kind, prior = before_rows[ordinal]
+      next_kind, following = after_rows[ordinal]
+      if prior_kind != next_kind:
+       raise ValueError("ORDINARY_DISK_EFFECT_KIND_CONVERSION")
+      relative = key[1]
+      selected = target_map.get(relative, ()) if key[0] == repository["domain_id"] else ()
+      if next_kind == 1:
+       changed = (prior[3:6] != following[3:6] or prior[12:16] != following[12:16]
+        or not self._disk_raw_rows_equal_v1(prior, following))
+       if not changed:
+        continue
+       if not selected or any(target["kind"] != "FILE" for target in selected):
+        raise ValueError("ORDINARY_DISK_UNADMITTED_FILE_EFFECT:" + relative)
+       actions = set(action for target in selected for action in target["actions"])
+       required = "CREATE" if not prior[3] and following[3] else "DELETE" if prior[3] and not following[3] else "WRITE"
+       if not restoring and required not in actions:
+        raise ValueError("ORDINARY_DISK_UNADMITTED_FILE_ACTION:" + relative)
+       if following[3] and following[4] & ~0o777:
+        raise ValueError("ORDINARY_DISK_UNADMITTED_FILE_MODE")
+       continue
+      if prior[5] != following[5]:
+       actions = set(action for target in selected for action in target["actions"])
+       required = "CREATE" if prior[5] == 0 and following[5] == 2 else "DELETE" if prior[5] == 2 and following[5] == 0 else None
+       prospective_parent = (key[0] == repository["domain_id"] and relative in parents
+        and baseline_rows[ordinal][0] == 2 and baseline_rows[ordinal][1][5] == 0
+        and (required == "CREATE" or restoring and required == "DELETE"))
+       if not prospective_parent and (required is None or not selected
+         or any(target["kind"] != "DIRECTORY" for target in selected)
+         or not restoring and required not in actions):
+        raise ValueError("ORDINARY_DISK_UNADMITTED_DIRECTORY_ACTION:" + relative)
+       continue
+      if prior[5] == 0:
+       continue
+      # Metadata caused by exact admitted direct child transitions is
+      # observed, never replaced by invented old size/time/link values.
+      identity_and_attributes = (prior[10], prior[11], prior[12], prior[17], prior[18])
+      following_attributes = (following[10], following[11], following[12], following[17], following[18])
+      if identity_and_attributes != following_attributes:
+       if not restoring or not selected or any(target["kind"] != "DIRECTORY" for target in selected):
+        raise ValueError("ORDINARY_DISK_PROTECTED_DIRECTORY_ATTRIBUTES:" + relative)
+      def children(row, generation):
+       return tuple(state["names"][self._disk_control_uint_v1("ROSTER", 8 * (row[7] + offset))][1]
+        for offset in range(row[8]))
+      original_children, current_children = children(prior, before), children(following, after)
+      changed_children = set(original_children) ^ set(current_children)
+      allowed = direct_membership.get(relative, set()) if key[0] == repository["domain_id"] else set()
+      if any(name.rpartition("/")[2] not in allowed for name in changed_children):
+       raise ValueError("ORDINARY_DISK_UNADMITTED_DIRECTORY_MEMBERSHIP:" + relative)
+      if prior[13:17] != following[13:17] and not allowed and not selected:
+       raise ValueError("ORDINARY_DISK_PROTECTED_DIRECTORY_METADATA:" + relative)
+     return None
+
+    def _disk_control_uint_v1(self, role, offset):
+     import struct
+     return struct.unpack("<Q", self._disk_control_read_v1(role, offset, 8))[0]
+
+    def _disk_restore_words_v1(self, tag, words):
+     import struct
+     if (type(tag) is not int or tag not in {1, 2} or type(words) is not tuple or len(words) != 12
+       or any(type(value) is not int or not 0 <= value < 1 << 64 for value in words)):
+      raise ValueError("ORDINARY_DISK_RESTORE_TYPED_RECORD")
+     if words[1] == 0 or words[2] == 0 or words[3] <= words[2] or words[10] > 1 and tag == 2:
+      raise ValueError("ORDINARY_DISK_RESTORE_RECORD_ASSOCIATION")
+     if tag == 1:
+      if words[4] not in {0, 1} or words[7] not in {0, 1} or words[11] not in {0, 1, 2, 3}:
+       raise ValueError("ORDINARY_DISK_RESTORE_FILE_RECORD")
+     elif (words[4] not in {1, 2, 3} or words[5] not in {0, 2} or words[7] not in {0, 2}
+       or words[11] not in {0, 1, 2, 3}
+       or (words[5] == 0) != (words[6] == (1 << 64) - 1)
+       or (words[7] == 0) != (words[8] == (1 << 64) - 1)):
+      raise ValueError("ORDINARY_DISK_RESTORE_DIRECTORY_RECORD")
+     elif (words[5], words[7]) != {1: (0, 2), 2: (2, 0), 3: (2, 2)}[words[4]]:
+      raise ValueError("ORDINARY_DISK_RESTORE_DIRECTORY_OPCODE_KINDS")
+     return bytes((tag,)) + struct.pack("<12Q", *words)
+
+    def _disk_action_record_v1(self, ordinal):
+     import struct
+     state = self._disk_light_v1()
+     if type(ordinal) is not int or not 0 <= ordinal < state["action_count"]:
+      raise IndexError("ordinary restore action ordinal")
+     raw = self._disk_control_read_v1("ACTIONS", 32 + 97 * ordinal, 97)
+     words = struct.unpack("<12Q", raw[1:])
+     if self._disk_restore_words_v1(raw[0], words) != raw or words[1] != ordinal + 1 or words[9 if raw[0] == 2 else 10] != ordinal + 1:
+      raise ValueError("ORDINARY_DISK_RESTORE_ACTION_CHANGED")
+     return raw[0], words
+
+    def _disk_action_write_v1(self, ordinal, tag, words, *, transition=False):
+     state = self._disk_light_v1()
+     if type(ordinal) is not int or not 0 <= ordinal < state["limits"]["action_record_limit"]:
+      raise ValueError("ORDINARY_DISK_RESTORE_ACTION_CAPACITY")
+     transition_binding = None
+     if transition:
+      prior_tag, prior = self._disk_action_record_v1(ordinal)
+      if prior_tag != tag:
+       raise ValueError("ORDINARY_DISK_RESTORE_ACTION_TERMINAL_TRANSITION")
+      if tag == 1:
+       valid = prior[:-1] == words[:-1] and (prior[11], words[11]) in {(0, 1), (1, 2), (2, 3)}
+      else:
+       valid = (prior[:-2] == words[:-2] and (prior[10:], words[10:]) in {
+        ((0, 0), (1, 0)), ((1, 0), (1, 1)), ((1, 0), (1, 2)), ((1, 0), (1, 3))})
+      if not valid:
+       raise ValueError("ORDINARY_DISK_RESTORE_ACTION_TERMINAL_TRANSITION")
+      transition_binding = (self, state["restore_plan_original"], ordinal, prior_tag, prior, tag, words)
+     self._disk_control_write_v1("ACTIONS", 32 + 97 * ordinal,
+      self._disk_restore_words_v1(tag, words), _action_transition_v1=transition_binding)
+
+    def _disk_restoration_plan_v1(self):
+     state = self._disk_light_v1()
+     if state["action_count"] or state["restore_plan_original"] is not None:
+      raise RuntimeError("ORDINARY_DISK_RESTORE_PLAN_NOT_RETRIED")
+     before, after = self._settled_snapshot, self.baseline
+     before_rows, baseline_rows = self._disk_generation_rows_v1(before), self._disk_generation_rows_v1(after)
+     targets, parents = self._disk_effect_targets_v1()
+     target_paths = frozenset(target["path"] for target in targets)
+     selected_paths = target_paths | parents
+     next_generation = state["next_generation"] + 1
+     before_directories = {path: before["directory_start"] + index for index, path in
+      enumerate(ordinal for ordinal, (kind, _) in before_rows.items() if kind == 2)}
+     baseline_directories = {path: after["directory_start"] + index for index, path in
+      enumerate(ordinal for ordinal, (kind, _) in baseline_rows.items() if kind == 2)}
+     # Plan directly into the original reserved packed control. This is
+     # metadata only: no restoration payload list or parallel raw store.
+     for pass_number in range(4):
+      ordered = sorted(range(len(state["names"])), key=lambda ordinal:
+       (state["names"][ordinal][1].count("/"), state["names"][ordinal][1].casefold(), state["names"][ordinal][1]),
+       reverse=pass_number in {2, 3})
+      for path_ordinal in ordered:
+       relative = state["names"][path_ordinal][1]
+       kind, current = before_rows[path_ordinal]
+       original_kind, baseline = baseline_rows[path_ordinal]
+       if original_kind != kind:
+        raise ValueError("ORDINARY_DISK_RESTORE_KIND_CHANGED")
+       words, tag = None, kind
+       if kind == 1 and pass_number == 1:
+        changed = (current[3:6] != baseline[3:6] or current[12:16] != baseline[12:16]
+         or not self._disk_raw_rows_equal_v1(current, baseline))
+        if changed:
+         if relative not in target_paths:
+          raise ValueError("ORDINARY_DISK_RESTORE_UNADMITTED_FILE")
+         words = (path_ordinal, 0, before["ordinal"], next_generation,
+          *current[3:6], *baseline[3:6], 0, 0)
+       elif kind == 2:
+        opcode = 1 if current[5] == 0 and baseline[5] == 2 else 2 if current[5] == 2 and baseline[5] == 0 else 3 if current[5] == baseline[5] == 2 else None
+        selected_pass = 0 if opcode == 1 else 2 if opcode == 2 else 3
+        if opcode is not None and pass_number == selected_pass:
+         if opcode != 3 or (current[12], current[17], current[18]) != (baseline[12], baseline[17], baseline[18]):
+          if relative not in selected_paths:
+           raise ValueError("ORDINARY_DISK_RESTORE_UNADMITTED_DIRECTORY")
+          words = (path_ordinal, 0, before["ordinal"], next_generation, opcode,
+           current[5], (1 << 64) - 1 if not current[5] else before_directories[path_ordinal],
+           baseline[5], (1 << 64) - 1 if not baseline[5] else baseline_directories[path_ordinal], 0, 0, 0)
+       if words is None:
+        continue
+       state["scope"]._ordinary_require_non_git_mutation_v1(relative)
+       ordinal = state["action_count"]
+       if ordinal >= state["limits"]["action_record_limit"]:
+        raise ValueError("ORDINARY_DISK_RESTORE_COMPLETE_PLAN_CAPACITY")
+       values = list(words)
+       values[1] = values[9 if tag == 2 else 10] = ordinal + 1
+       self._disk_action_write_v1(ordinal, tag, tuple(values))
+       state["action_count"] += 1
+     # All exact source effects, carrier bindings, live before state and
+     # capacity are verified before any native mutation is attempted.
+     self._disk_compare_live(before)
+     self.state = "PLAN_VALIDATED"
+     state["scope"]._ordinary_restore_plan_ready_v1(self, state["action_count"])
+     original = (self, state, before, after, next_generation, state["action_count"],
+      state["controls"]["ACTIONS"], state["effect_programme"], (self.process_id, self.thread_id))
+     state["restore_plan_original"] = original
+     import struct
+     self._disk_control_write_v1("ACTIONS", 0, struct.pack("<4Q", 1, state["action_count"], 96, 1),
+      _action_transition_v1=(self, original, "PLAN_HEADER"))
+     return original
+
+    def _disk_mutation_parent_v1(self, binding, relative):
+     parent, separator, name = relative.rpartition("/")
+     if not relative or not _is_portable_relative_repo_path(relative):
+      raise ValueError("ORDINARY_DISK_RESTORE_RELATIVE_NAME")
+     descriptor, slots = self._disk_bound_open_v1(binding, parent, directory=True)
+     return descriptor, slots, name
+
+    def _disk_restore_file_v1(self, binding, relative, current, baseline):
+     state = self._disk_light_v1()
+     state["scope"]._ordinary_require_non_git_mutation_v1(relative)
+     descriptor, slots, name = self._disk_mutation_parent_v1(binding, relative)
+     errors, writer, expected = [], None, None
+     try:
+      observed = None
+      try:
+       observed = self._disk_call_v1(os.stat, name, dir_fd=descriptor, follow_symlinks=False)
+      except FileNotFoundError:
+       if current[3]:
+        raise
+      if (observed is not None) != bool(current[3]):
+       raise ValueError("ORDINARY_DISK_RESTORE_BEFORE_PRESENCE")
+      if observed is not None and (not stat.S_ISREG(observed.st_mode) or observed.st_nlink != 1
+        or (observed.st_dev, observed.st_ino, observed.st_size, observed.st_mtime_ns) != current[12:16]
+        or stat.S_IMODE(observed.st_mode) != current[4]):
+       raise ValueError("ORDINARY_DISK_RESTORE_BEFORE_IDENTITY")
+      if baseline[3] == 0:
+       if observed is not None:
+        self._disk_call_v1(os.unlink, name, dir_fd=descriptor)
+        self._disk_call_v1(os.fsync, descriptor)
+      else:
+       flags = os.O_WRONLY | os.O_NOFOLLOW
+       if observed is None:
+        flags |= os.O_CREAT | os.O_EXCL
+       writer = self._disk_open_v1(name, flags, mode=baseline[4], dir_fd=descriptor, kind="SOURCE")
+       actual = self._disk_call_v1(os.fstat, writer["returned_fd"])
+       named = self._disk_call_v1(os.stat, name, dir_fd=descriptor, follow_symlinks=False)
+       if (not stat.S_ISREG(actual.st_mode) or actual.st_nlink != 1
+         or self._disk_version_v1(actual) != self._disk_version_v1(named)
+         or observed is not None and (actual.st_dev, actual.st_ino) != (observed.st_dev, observed.st_ino)):
+        raise ValueError("ORDINARY_DISK_RESTORE_WRITER_IDENTITY")
+       expected = self._disk_snapshot_open_v1(state["allocations"][baseline[2] - 1], tuple(baseline[6:12]))
+       self._disk_call_v1(os.ftruncate, writer["returned_fd"], 0)
+       remaining = baseline[5]
+       while remaining:
+        raw = self._disk_read_v1(expected["returned_fd"], min(65536, remaining))
+        if not raw:
+         raise ValueError("ORDINARY_DISK_RESTORE_BASELINE_TRUNCATION")
+        self._disk_write_v1(writer["returned_fd"], raw)
+        remaining -= len(raw)
+       if self._disk_read_v1(expected["returned_fd"], 1):
+        raise ValueError("ORDINARY_DISK_RESTORE_BASELINE_SUFFIX")
+       if self._disk_version_v1(self._disk_call_v1(os.fstat, expected["returned_fd"])) != tuple(baseline[6:12]):
+        raise ValueError("ORDINARY_DISK_RESTORE_BASELINE_CHANGED")
+       state["scope"]._ordinary_restore_operand_attributes_v1(self, relative, "FILE",
+        writer["returned_fd"], baseline)
+       self._disk_call_v1(os.fsync, writer["returned_fd"])
+       self._disk_call_v1(os.fsync, descriptor)
+     except BaseException as error:
+      errors.append(error)
+     if expected is not None:
+      self._disk_close_v1(expected, errors)
+     if writer is not None:
+      self._disk_close_v1(writer, errors)
+     for slot in reversed(slots):
+      self._disk_close_v1(slot, errors)
+     self._disk_raise_v1(errors)
+
+    def _disk_restore_directory_v1(self, binding, relative, opcode, current, baseline):
+     state = self._disk_light_v1()
+     state["scope"]._ordinary_require_non_git_mutation_v1(relative)
+     descriptor, slots, name = self._disk_mutation_parent_v1(binding, relative)
+     errors, directory = [], None
+     try:
+      before = None
+      try:
+       before = self._disk_call_v1(os.stat, name, dir_fd=descriptor, follow_symlinks=False)
+      except FileNotFoundError:
+       if opcode != 1:
+        raise
+      if opcode == 1:
+       if before is not None:
+        raise ValueError("ORDINARY_DISK_RESTORE_DIRECTORY_UNEXPECTED_PRESENT")
+       self._disk_call_v1(os.mkdir, name, stat.S_IMODE(baseline[12]), dir_fd=descriptor)
+      else:
+       if (before is None or not stat.S_ISDIR(before.st_mode) or _stat_is_reparse_point(before)
+         or (before.st_dev, before.st_ino, before.st_mode, before.st_uid, before.st_gid)
+         != (current[10], current[11], current[12], current[17], current[18])):
+        raise ValueError("ORDINARY_DISK_RESTORE_DIRECTORY_BEFORE_IDENTITY")
+      if opcode == 2:
+       # Native rmdir rejects every unexpected child. No recursive
+       # deletion, broad tree exception or deletion of an ancestor.
+       self._disk_call_v1(os.rmdir, name, dir_fd=descriptor)
+      else:
+       directory = self._disk_open_v1(name, os.O_RDONLY | os.O_NOFOLLOW | os.O_DIRECTORY,
+        dir_fd=descriptor, kind="DIRECTORY")
+       info = self._disk_call_v1(os.fstat, directory["returned_fd"])
+       named = self._disk_call_v1(os.stat, name, dir_fd=descriptor, follow_symlinks=False)
+       if self._disk_version_v1(info) != self._disk_version_v1(named):
+        raise ValueError("ORDINARY_DISK_RESTORE_DIRECTORY_NAME_HANDLE")
+       state["scope"]._ordinary_restore_operand_attributes_v1(self, relative, "DIRECTORY",
+        directory["returned_fd"], baseline)
+       self._disk_call_v1(os.fsync, directory["returned_fd"])
+      self._disk_call_v1(os.fsync, descriptor)
+     except BaseException as error:
+      errors.append(error)
+     if directory is not None:
+      self._disk_close_v1(directory, errors)
+     for slot in reversed(slots):
+      self._disk_close_v1(slot, errors)
+     self._disk_raise_v1(errors)
+
+    def _disk_apply_restore_plan_v1(self, original):
+     state = self._disk_light_v1()
+     if (original is not state["restore_plan_original"] or original[0] is not self
+       or original[1] is not state or original[2] is not self._settled_snapshot
+       or original[3] is not self.baseline or original[5] != state["action_count"]
+       or original[6] is not state["controls"]["ACTIONS"]
+       or original[7] is not state["effect_programme"]
+       or original[8] != (os.getpid(), threading.get_ident())):
+      raise ValueError("ORDINARY_DISK_ORIGINAL_RESTORE_PLAN")
+     before_rows = self._disk_generation_rows_v1(self._settled_snapshot)
+     baseline_rows = self._disk_generation_rows_v1(self.baseline)
+     self.state = "APPLYING"
+     for ordinal in range(state["action_count"]):
+      tag, words = self._disk_action_record_v1(ordinal)
+      if words[11] or words[2:4] != (original[2]["ordinal"], original[4]):
+       raise ValueError("ORDINARY_DISK_RESTORE_ACTION_ALREADY_ATTEMPTED")
+      key = state["names"][words[0]]
+      binding = next(root for root in state["roots"] if root["domain_id"] == key[0])
+      current, baseline = before_rows[words[0]][1], baseline_rows[words[0]][1]
+      if before_rows[words[0]][0] != tag or baseline_rows[words[0]][0] != tag:
+       raise ValueError("ORDINARY_DISK_RESTORE_ACTION_KIND_ASSOCIATION")
+      if tag == 1:
+       if words[4:10] != (*current[3:6], *baseline[3:6]):
+        raise ValueError("ORDINARY_DISK_RESTORE_FILE_ACTION_STATES")
+      else:
+       before_index = ((1 << 64) - 1 if current[5] == 0 else original[2]["directory_start"] +
+        next(index for index, path in enumerate(path for path, (kind, _) in before_rows.items() if kind == 2) if path == words[0]))
+       after_index = ((1 << 64) - 1 if baseline[5] == 0 else self.baseline["directory_start"] +
+        next(index for index, path in enumerate(path for path, (kind, _) in baseline_rows.items() if kind == 2) if path == words[0]))
+       if words[5:9] != (current[5], before_index, baseline[5], after_index):
+        raise ValueError("ORDINARY_DISK_RESTORE_DIRECTORY_ACTION_ROWS")
+      state["scope"]._ordinary_require_non_git_mutation_v1(key[1])
+      attempted = list(words)
+      if tag == 2:
+       attempted[10] = 1
+      else:
+       attempted[11] = 1
+      self._disk_action_write_v1(ordinal, tag, tuple(attempted), transition=True)
+      state["restore_mutation_started"] = True
+      try:
+       if tag == 1:
+        self._disk_restore_file_v1(binding, key[1], current, baseline)
+       else:
+        self._disk_restore_directory_v1(binding, key[1], words[4], current, baseline)
+      except BaseException as error:
+       if tag == 2:
+        attempted[11] = 2
+        try:
+         self._disk_action_write_v1(ordinal, tag, tuple(attempted), transition=True)
+        except BaseException as reporting:
+         self._disk_raise_v1([error, reporting])
+       raise
+      attempted[11] = 2 if tag == 1 else 1
+      self._disk_action_write_v1(ordinal, tag, tuple(attempted), transition=True)
+      state["completed_action_count"] += 1
+     return None
+
+    def _disk_restored_semantics_v1(self, generation):
+     state = self._disk_light_v1()
+     original = self._disk_generation_rows_v1(self.baseline)
+     restored = self._disk_generation_rows_v1(generation)
+     for ordinal in range(len(state["names"])):
+      kind, before = original[ordinal]
+      after_kind, after = restored[ordinal]
+      if kind != after_kind:
+       raise ValueError("ORDINARY_DISK_RESTORE_FINAL_KIND")
+      if kind == 1:
+       if not self._disk_raw_rows_equal_v1(before, after):
+        raise ValueError("ORDINARY_DISK_RESTORE_FINAL_BYTES_MODE_OR_PRESENCE")
+      elif (before[5] != after[5] or before[5] == 2 and
+        (before[12], before[17], before[18]) != (after[12], after[17], after[18])):
+       raise ValueError("ORDINARY_DISK_RESTORE_FINAL_DIRECTORY_ATTRIBUTES")
+      elif before[5] == 2:
+       prior = tuple(self._disk_control_uint_v1("ROSTER", 8 * (before[7] + offset)) for offset in range(before[8]))
+       following = tuple(self._disk_control_uint_v1("ROSTER", 8 * (after[7] + offset)) for offset in range(after[8]))
+       if prior != following:
+        raise ValueError("ORDINARY_DISK_RESTORE_FINAL_DIRECTORY_ROSTER")
+     state["scope"]._ordinary_restored_operands_check_v1(self, generation)
+     if state["completed_action_count"] != state["action_count"]:
+      raise RuntimeError("ORDINARY_DISK_RESTORE_ACTIONS_INCOMPLETE")
+     for ordinal in range(state["action_count"]):
+      tag, words = self._disk_action_record_v1(ordinal)
+      if tag == 1:
+       self._disk_action_write_v1(ordinal, tag, (*words[:-1], 3), transition=True)
+      elif words[10:] != (1, 1):
+       raise RuntimeError("ORDINARY_DISK_RESTORE_DIRECTORY_NOT_SUCCESSFUL")
+     state["actions_verified"] = True
+
+    def _disk_mutable_programme_demand_v1(self, raw_bytes, file_count, nodes):
+     # Admission reads the existing source-selected product. Neither a
+     # current quota nor wire/body state can grant a larger allocation.
+     state = self._disk_light_v1()
+     programme = self._disk_effect_programme_v1()
+     scope = state['scope']
+     resource = scope._ordinary_resource_programme_v1
+     original = scope._ordinary_original_resource_programme_v1
+     keys = {'initial_raw_bytes', 'initial_file_count', 'later_raw_byte_cap',
+      'later_file_count_cap', 'mutable_file_byte_caps_by_occurrence',
+      'raw_read_bytes', 'raw_write_bytes', 'raw_retained_bytes', 'action_rows',
+      'metadata_calls', 'metadata_read_bytes', 'metadata_write_bytes',
+      'native_control_calls', 'native_control_read_bytes',
+      'native_control_write_bytes', 'handle_peak'}
+     if (not self.all_effects or type(resource) is not dict
+       or type(original) is not tuple or len(original) != 9
+       or resource is not original[0] or tuple(resource.items()) != original[1]
+       or tuple(resource['limits'].items()) != original[2]
+       or resource['limits'] is not state['limits']
+       or resource['control_layout'] is not original[3]
+       or resource['physical_program'] is not original[4]
+       or tuple((role, record, tuple(record.items())) for role, record in
+        resource['physical_program']['volumes']) != original[5]
+       or tuple(resource['fd_program'].items()) != original[6]
+       or resource['scope'] is not scope or resource['source'] is not scope.source
+       or programme is not original[8]):
+      raise ValueError('ORDINARY_DISK_ORIGINAL_MUTABLE_RESOURCE_PRODUCT')
+     demand = resource['candidate_demand']
+     if (type(demand) is not dict or set(demand) != keys
+       or demand is not programme['candidate_demand']
+       or tuple(demand.items()) != original[7]
+       or any(type(demand[name]) is not int or not 0 <= demand[name] < 1 << 63
+        for name in keys - {'mutable_file_byte_caps_by_occurrence'})
+       or type(demand['mutable_file_byte_caps_by_occurrence']) is not tuple
+       or len(demand['mutable_file_byte_caps_by_occurrence']) != len(self.plan)
+       or any(type(value) is not int or not 0 <= value < 1 << 63
+        for value in demand['mutable_file_byte_caps_by_occurrence'])
+       or demand['initial_raw_bytes'] != raw_bytes
+       or demand['initial_file_count'] != file_count
+       or demand['later_raw_byte_cap'] < raw_bytes
+       or demand['later_file_count_cap'] < file_count):
+      raise ValueError('ORDINARY_DISK_FROZEN_SOURCE_SELECTED_CANDIDATE_DEMAND')
+     targets, parents = self._disk_effect_targets_v1()
+     repository = next(root for root in state['roots'] if root['logical_path'] == self.root)
+     file_targets = frozenset(target['path'] for target in targets if target['kind'] == 'FILE')
+     restoration_bytes = sum(node[2].st_size for key, node in nodes.items()
+      if key[0] == repository['domain_id'] and key[1] in file_targets
+      and node[2] is not None and stat.S_ISREG(node[2].st_mode))
+     selected_names = frozenset(target['path'] for target in targets) | parents
+     count, x, f_star, index = (len(self.plan), demand['later_raw_byte_cap'],
+      demand['later_file_count_cap'], state['limits']['index_byte_limit'])
+     mutable_bytes = sum(demand['mutable_file_byte_caps_by_occurrence'])
+     # Complete C operations, separate from already charged Scope/source
+     # work: initial 7*S; each occurrence <=8*X+M_i; final restore <=14*X+T.
+     # Each physical comparison charges BOTH operands, EOF requests and
+     # tagged INDEX independently. No reserve/debit or successful refund.
+     minimum_read = (21 + 8 * count) * (x + f_star) + mutable_bytes + restoration_bytes
+     minimum_read += (13 + 4 * count) * (index + 1)
+     minimum_write = raw_bytes + mutable_bytes + restoration_bytes + index
+     minimum_retained = raw_bytes + mutable_bytes + index
+     if (demand['raw_read_bytes'] < minimum_read
+       or demand['raw_write_bytes'] < minimum_write
+       or demand['raw_retained_bytes'] < minimum_retained
+       or demand['action_rows'] < len(selected_names)
+       or demand['later_raw_byte_cap'] > state['limits']['generation_byte_limit']
+       or demand['later_file_count_cap'] > state['limits']['file_generation_rows']):
+      raise ValueError('ORDINARY_DISK_COMPLETE_MUTABLE_OPERATION_PROGRAMME')
+     channels = {'raw_read_bytes':'raw_read_byte_limit',
+      'raw_write_bytes':'raw_write_byte_limit', 'raw_retained_bytes':'raw_retained_byte_limit',
+      'metadata_calls':'metadata_call_limit', 'metadata_read_bytes':'metadata_read_limit',
+      'metadata_write_bytes':'metadata_write_limit', 'native_control_calls':'native_control_call_limit',
+      'native_control_read_bytes':'native_control_read_limit',
+      'native_control_write_bytes':'native_control_write_limit'}
+     boundary = state['c_initial_meter_original']
+     if (type(boundary) is not tuple or len(boundary) != 6
+       or boundary is not state['original_c_initial_meter_original']
+       or boundary[0] is not self or boundary[1] is not state
+       or boundary[2] is not state['meter']
+       or boundary[4] != (os.getpid(), threading.get_ident())
+       or boundary[4] != (self.process_id, self.thread_id)
+       or boundary[5] != self.deadline_ns
+       or type(boundary[3]) is not tuple):
+      raise ValueError('ORDINARY_DISK_ORIGINAL_C_LOCAL_DEBIT_BOUNDARY')
+     observed_before = dict(boundary[3])
+     if (set(observed_before) != set(state['observed'])
+       or any(type(observed_before[key]) is not int or observed_before[key] < 0
+        or type(state['observed'][key]) is not int
+        or state['observed'][key] < observed_before[key] for key in observed_before)):
+      raise ValueError('ORDINARY_DISK_C_LOCAL_PREFIX_DEBITS')
+     actual_prefix = {name:state['observed'][channel] - observed_before[channel]
+      for name, channel in channels.items()}
+     future = {name:demand[name] - actual_prefix[name] for name in channels}
+     if (any(future[name] < 0 or future[name] > state['remaining'][channel]
+        for name, channel in channels.items())
+       or future['raw_read_bytes'] > self.remaining_read_bytes
+       or demand['action_rows'] > state['limits']['action_record_limit']
+       or demand['handle_peak'] > state['limits']['native_handle_limit']):
+      raise ValueError('ORDINARY_DISK_COMPLETE_MUTABLE_DEMAND_BEFORE_ACQUISITION')
+     state['planned_c_local_prefix'] = (boundary, tuple(state['observed'].items()),
+      tuple(actual_prefix.items()), tuple(future.items()))
+     return demand, restoration_bytes
+
+    def _disk_action_audit_checked_v1(self, token, *, delivered=False):
+     state = self._ordinary_disk_state_v1
+     if (type(state) is not dict or state is not self._original_ordinary_disk_state_v1
+       or state['candidate'] is not self or state['config'] is not self._ordinary_disk_config_v1
+       or token is not state.get('action_audit_active')
+       or token is not state.get('original_action_audit_active')
+       or type(token) is not tuple or len(token) != 9
+       or token[0] is not self or token[1] is not state
+       or token[2] is not state['controls']['ACTIONS']
+       or token[3] is not token[2]['reader_slot']
+       or token[6] != (os.getpid(), threading.get_ident())
+       or token[6] != (self.process_id, self.thread_id)
+       or type(delivered) is not bool or token[7] != self.deadline_ns
+       or not delivered and time.monotonic_ns() >= token[7]
+       or token[8] is not state['scope']
+       or state['scope'] is not state['config']['scope']
+       or state['meter'] is not state['scope']._ordinary_meter_v1
+       or state['meter']['limits'] is not state['limits']
+       or state['meter']['remaining'] is not state['remaining']
+       or state['meter']['observed'] is not state['observed']
+       or state['meter']['owner'] != (self.process_id, self.thread_id)
+       or state['meter']['deadline_ns'] != self.deadline_ns):
+      raise RuntimeError('ORDINARY_DISK_ACTION_AUDIT_ORIGINAL_OWNER')
+     control, reader = token[2], token[3]
+     if (not any(control is original for original in state['scope'].ordinary_controls)
+       or control['role'] != 'ACTIONS'
+       or any(reader[name] for name in ('acquiring', 'open_unknown', 'closed', 'close_attempted'))
+       or type(reader['returned_fd']) is not int or reader['returned_fd'] < 0
+       or type(token[4]) is not int or type(token[5]) is not int
+       or not 0 <= token[4] <= control['extent']
+       or not 0 < token[5] <= 97 or token[4] + token[5] > control['extent']
+       or not any(start <= token[4] and token[4] + token[5] <= start + count
+        for start, count in control['initialized'])):
+      raise RuntimeError('ORDINARY_DISK_ACTION_AUDIT_CHECKED_CELL_ONLY')
+     if not delivered:
+      state['scope']._ordinary_factory_check_v1(settling=True)
+     return state
+
+    def _disk_action_audit_read_v1(self, offset, length):
+     # This metadata-only reader cannot reopen RAW, change a row, settle a
+     # child or grant restoration. Failure/RAW disposal retain the same C.
+     state = self._ordinary_disk_state_v1
+     if type(state) is not dict or state.get('action_audit_active') is not None:
+      raise RuntimeError('ORDINARY_DISK_ACTION_AUDIT_NONREENTRANT')
+     control = state['controls']['ACTIONS']
+     token = (self, state, control, control['reader_slot'], offset, length,
+      (os.getpid(), threading.get_ident()), self.deadline_ns, state['scope'])
+     state['action_audit_active'] = state['original_action_audit_active'] = token
+     try:
+      self._disk_action_audit_checked_v1(token)
+      descriptor = token[3]['returned_fd']
+      self._disk_charge_v1('metadata_call_limit', 1, settling=True)
+      before = os.fstat(descriptor)
+      if self._disk_version_v1(before) != control['version']:
+       raise RuntimeError('ORDINARY_DISK_ACTION_AUDIT_CONTROL_VERSION')
+      result = bytearray()
+      while len(result) < length:
+       self._disk_action_audit_checked_v1(token)
+       self._disk_charge_v1('metadata_call_limit', 1, settling=True)
+       self._disk_charge_v1('native_control_call_limit', 1, settling=True)
+       raw = os.pread(descriptor, length - len(result), offset + len(result))
+       if type(raw) is not bytes:
+        raise ValueError('ORDINARY_DISK_ACTION_AUDIT_NATIVE_BYTES')
+       self._disk_charge_v1('metadata_read_limit', len(raw), settling=True,
+        delivered=True, additional_channel='native_control_read_limit', _action_audit_v1=token)
+       if not raw or len(raw) > length - len(result):
+        raise RuntimeError('ORDINARY_DISK_ACTION_AUDIT_TRUNCATED_OR_OVERDELIVERED')
+       result.extend(raw)
+      self._disk_charge_v1('metadata_call_limit', 1, settling=True)
+      after = os.fstat(descriptor)
+      self._disk_charge_v1('metadata_call_limit', 1, settling=True)
+      named = os.lstat(control['path'])
+      if self._disk_version_v1(after) != control['version'] or self._disk_version_v1(named) != control['version']:
+       raise RuntimeError('ORDINARY_DISK_ACTION_AUDIT_NAME_HANDLE_VERSION')
+      self._disk_action_audit_checked_v1(token)
+      return bytes(result)
+     except BaseException as error:
+      if not any(error is actual for actual in state['errors']):
+       state['errors'].append(error)
+      raise
+     finally:
+      state['action_audit_active'] = state['original_action_audit_active'] = None
+
+    def _disk_completed_action_record_v1(self, ordinal):
+     import struct
+     state = self._ordinary_disk_state_v1
+     if type(ordinal) is not int or not 0 <= ordinal < state['action_count']:
+      raise IndexError('ordinary completed-action ordinal')
+     raw = self._disk_action_audit_read_v1(32 + 97 * ordinal, 97)
+     words = struct.unpack('<12Q', raw[1:])
+     if (self._disk_restore_words_v1(raw[0], words) != raw
+       or words[1] != ordinal + 1 or words[9 if raw[0] == 2 else 10] != ordinal + 1
+       or not 0 <= words[0] < len(state['names'])):
+      raise ValueError('ORDINARY_DISK_COMPLETED_ACTION_CELL')
+     completed = words[11] >= 2 if raw[0] == 1 else words[10:] == (1, 1)
+     return completed, raw[0], words
+
+    def _disk_completed_actions_view_v1(self):
+     candidate, state = self, self._ordinary_disk_state_v1
+     class CompletedActions:
+      # A read-only projection; every cell is owned/read by original C.
+      __slots__ = ()
+      def __len__(view):
+       return sum(candidate._disk_completed_action_record_v1(index)[0]
+        for index in range(state['action_count']))
+      def __bool__(view):
+       return any(candidate._disk_completed_action_record_v1(index)[0]
+        for index in range(state['action_count']))
+      def __iter__(view):
+       for index in range(state['action_count']):
+        complete, tag, words = candidate._disk_completed_action_record_v1(index)
+        if complete:
+         yield state['names'][words[0]][1], tag, words
+     result = CompletedActions()
+     state['completed_view'] = state['original_completed_view'] = result
+     return result
+
+    def _disk_source_kind_v1(self, key, info, absent_directories, *, initial, future_directories=None):
+     state = self._disk_light_v1()
+     if initial:
+      if type(future_directories) is not frozenset:
+       raise ValueError('ORDINARY_DISK_SOURCE_SELECTED_DIRECTORY_NAMES')
+      repository = next(root for root in state['roots'] if root['logical_path'] == self.root)
+      future_directory = key[0] == repository['domain_id'] and key[1] in future_directories
+      kind = 2 if info is not None and stat.S_ISDIR(info.st_mode) or info is None and (key in absent_directories or future_directory) else 1
+      state['logical_kinds'][key] = kind
+     else:
+      if key not in state['logical_kinds']:
+       raise ValueError('ORDINARY_DISK_UNADMITTED_NEW_LOGICAL_NAME')
+      kind = state['logical_kinds'][key]
+     if info is not None and (stat.S_ISDIR(info.st_mode) != (kind == 2)):
+      raise ValueError('ORDINARY_DISK_LOGICAL_KIND_CHANGED')
+     return kind
+
+    @staticmethod
+    def _disk_uint_v1(value, *, positive=False, extent=False):
+     if (type(value) is not int or value < int(positive)
+       or value > ((1 << 63) - 1 if extent else (1 << 64) - 1)):
+      raise ValueError("ORDINARY_DISK_EXACT_INTEGER")
+     return value
+
+    @classmethod
+    def _disk_control_layout_v1(cls, limits):
+     # This pure layout computation allocates or grants nothing. The native
+     # Scope independently holds the complete physically enforced program.
+     keys = {
+      "baseline_byte_limit", "generation_byte_limit", "index_byte_limit",
+      "namespace_entry_limit", "path_pool_byte_limit", "single_path_byte_limit",
+      "action_record_limit", "diagnostic_owner_byte_limit", "raw_read_byte_limit",
+      "raw_write_byte_limit", "raw_retained_byte_limit", "extra_held_byte_limit",
+      "extra_held_carrier_limit", "metadata_byte_limit", "metadata_call_limit",
+      "metadata_read_limit", "metadata_write_limit", "native_control_read_limit",
+      "native_control_write_limit", "native_control_call_limit", "heap_byte_limit",
+      "native_handle_limit", "carrier_file_byte_limit", "allocated_storage_byte_limit",
+      "mapper_activation_read_reserve", "mapper_activation_retained_reserve",
+      "file_baseline_rows", "file_generation_rows", "directory_baseline_rows",
+      "directory_generation_rows", "roster_baseline_edges", "roster_generation_edges",
+     }
+     if type(limits) is not dict or set(limits) != keys:
+      raise ValueError("ORDINARY_DISK_EXACT_LIMITS")
+     for value in limits.values():
+      cls._disk_uint_v1(value, extent=True)
+     for key in keys - {"action_record_limit", "mapper_activation_read_reserve",
+         "mapper_activation_retained_reserve", "extra_held_byte_limit",
+         "extra_held_carrier_limit"}:
+      if limits[key] == 0:
+       raise ValueError("ORDINARY_DISK_POSITIVE_LIMIT_REQUIRED")
+     ceilings = {
+      "baseline_byte_limit": 32 << 30, "generation_byte_limit": 32 << 30,
+      "index_byte_limit": 16 << 20, "namespace_entry_limit": 65536,
+      "single_path_byte_limit": 4096, "path_pool_byte_limit": 256 << 20,
+      "action_record_limit": 1048576, "file_baseline_rows": 32768,
+      "file_generation_rows": 32768, "directory_baseline_rows": 4096,
+      "directory_generation_rows": 4096, "roster_baseline_edges": 65536,
+      "roster_generation_edges": 65536, "raw_read_byte_limit": 512 << 40,
+      "raw_write_byte_limit": 128 << 40, "heap_byte_limit": 4 << 30,
+      "native_handle_limit": 4096, "carrier_file_byte_limit": 32 << 30,
+      "allocated_storage_byte_limit": 256 << 30,
+     }
+     if any(limits[key] > bound for key, bound in ceilings.items()):
+      raise ValueError("ORDINARY_DISK_SOURCE_CEILING")
+     f0, f = limits["file_baseline_rows"], limits["file_generation_rows"]
+     d0, d = limits["directory_baseline_rows"], limits["directory_generation_rows"]
+     j0, j = limits["roster_baseline_edges"], limits["roster_generation_edges"]
+     e, u, a = (limits[key] for key in ("namespace_entry_limit", "path_pool_byte_limit", "action_record_limit"))
+     layout = {
+      "FILE_HEADERS": 128 * (f0 + 2 * f + 1),
+      "DIRECTORY_HEADERS": 128 + 160 * (d0 + 2 * d),
+      "ROSTER": 8 * (j0 + 2 * j), "PATH_POOL": u,
+      "OFFSETS": 8 * (e + 1), "BINDING": 32 + 16 * e,
+      "ACTIONS": 32 + 97 * a,
+     }
+     for value in layout.values():
+      cls._disk_uint_v1(value, extent=True)
+     if sum(layout.values()) > min(1 << 30, limits["metadata_byte_limit"]):
+      raise ValueError("ORDINARY_DISK_CONTROL_GEOMETRY")
+     return layout
+
+    def _disk_light_v1(self):
+     state = self._ordinary_disk_state_v1
+     if (type(state) is not dict or state is not self._original_ordinary_disk_state_v1
+       or state["candidate"] is not self or state["config"] is not self._ordinary_disk_config_v1
+       or (os.getpid(), threading.get_ident()) != (self.process_id, self.thread_id)
+       or time.monotonic_ns() >= self.deadline_ns or self.failure is not None
+       or state.get("released", False)):
+      raise RuntimeError("ORDINARY_DISK_OWNER_OR_CUTOFF")
+     if state["slots"] is not state["original_slots"] or state["iterator_records"] is not state["original_iterator_records"]:
+      raise RuntimeError("ORDINARY_DISK_ORIGINAL_ACTIVE_RESOURCE_LIST")
+     config, meter = state["config"], state["meter"]
+     if (state["scope"] is not config["scope"] or state["roots"] is not config["roots"]
+       or state["limits"] is not config["limits"]
+       or meter is not state["scope"]._ordinary_meter_v1
+       or meter["limits"] is not state["limits"]
+       or meter["remaining"] is not state["remaining"]
+       or meter["observed"] is not state["observed"]
+       or meter["owner"] != (self.process_id, self.thread_id)
+       or meter["deadline_ns"] != config["deadline_ns"]
+       or self.deadline_ns != config["deadline_ns"]
+       or self.deadline_ns != state["scope"].settlement_deadline_ns):
+      raise RuntimeError("ORDINARY_DISK_ORIGINAL_METER_AND_BINDING_ALIASES")
+     phase = getattr(state["scope"].query, "_ordinary_resource_phase_record_v1", None)
+     if phase is not None or self.state in {"OBSERVED", "PLAN_VALIDATED", "RESTORED_VERIFIED"}:
+      # The original Scope validates the actual retained phase object and
+      # Process records. An unfinished logical C token is not live native
+      # input exposure and may settle only through that original proof.
+      state["scope"]._ordinary_require_settlement_phase_v1(self)
+     elif time.monotonic_ns() >= state["scope"].execution_deadline_ns:
+      raise RuntimeError("ORDINARY_DISK_ORIGINAL_EXECUTION_CUTOFF")
+     return state
+
+    def _disk_charge_v1(self, channel, amount, *, settling=False, delivered=False,
+      additional_channel=None, _action_audit_v1=None):
+     # Actual native prefixes must be charged before a late deadline/error
+     # rejects them. This selected branch grants no new operation or credit.
+     if _action_audit_v1 is not None:
+      if not (delivered and settling and channel == "metadata_read_limit"
+        and additional_channel == "native_control_read_limit"):
+       raise ValueError("ORDINARY_DISK_ACTION_AUDIT_READ_CHANNEL_ONLY")
+      self._disk_action_audit_checked_v1(_action_audit_v1, delivered=True)
+     if type(delivered) is not bool or type(settling) is not bool:
+      raise ValueError("ORDINARY_DISK_EXACT_DEBIT_MODE")
+     if delivered:
+      state = self._ordinary_disk_state_v1
+      pairs = {"metadata_read_limit": "native_control_read_limit",
+        "metadata_write_limit": "native_control_write_limit"}
+      allowed = ({"metadata_read_limit", "metadata_write_limit", "native_control_read_limit",
+         "native_control_write_limit"} if settling else
+        {"raw_read_byte_limit", "raw_write_byte_limit", *pairs,
+         "native_control_read_limit", "native_control_write_limit"})
+      if (channel not in allowed or additional_channel != pairs.get(channel)):
+       raise ValueError("ORDINARY_DISK_DELIVERED_BYTE_CHANNELS")
+      if (state is not self._original_ordinary_disk_state_v1
+        or state.get("candidate") is not self
+        or state.get("config") is not self._ordinary_disk_config_v1
+        or (os.getpid(), threading.get_ident()) != (self.process_id, self.thread_id)):
+       raise RuntimeError("ORDINARY_DISK_DELIVERED_PREFIX_ORIGINAL_OWNER")
+      meter = state["meter"]
+      if (meter is not state["scope"]._ordinary_meter_v1
+        or meter["limits"] is not state["limits"]
+        or meter["remaining"] is not state["remaining"]
+        or meter["observed"] is not state["observed"]
+        or meter["owner"] != (self.process_id, self.thread_id)
+        or meter["deadline_ns"] != self.deadline_ns
+        or self.deadline_ns != state["config"]["deadline_ns"]):
+       raise RuntimeError("ORDINARY_DISK_DELIVERED_PREFIX_ORIGINAL_METER")
+     elif settling:
+      state = self._ordinary_disk_state_v1
+      if (state is not self._original_ordinary_disk_state_v1 or state.get("candidate") is not self
+        or (os.getpid(), threading.get_ident()) != (self.process_id, self.thread_id)
+        or time.monotonic_ns() >= self.deadline_ns
+        or channel not in {"metadata_call_limit", "native_control_call_limit",
+            "native_control_read_limit", "native_control_write_limit",
+            "metadata_read_limit", "metadata_write_limit"}):
+       raise RuntimeError("ORDINARY_DISK_ORIGINAL_SETTLEMENT_TRANCHE_REQUIRED")
+     else:
+      state = self._disk_light_v1()
+     if not delivered and additional_channel is not None:
+      raise ValueError("ORDINARY_DISK_ADDITIONAL_DELIVERED_CHANNEL_ONLY")
+     self._disk_uint_v1(amount, extent=True)
+     channels = (channel,) if additional_channel is None else (channel, additional_channel)
+     if any(value not in state["remaining"] for value in channels):
+      raise ValueError("ORDINARY_DISK_UNKNOWN_TRANCHE")
+     # Both overlapping control envelopes receive the delivered prefix even
+     # if the first allocation/deadline subsequently proves exhausted.
+     errors = []
+     for value in channels:
+      available = state["remaining"][value]
+      state["observed"][value] += amount
+      state["remaining"][value] = max(0, available - amount)
+      try: state["scope"]._ordinary_phase_complement_debit_v1(value, amount)
+      except BaseException as error: errors.append(error)
+      if amount > available:
+       errors.append(RuntimeError("ORDINARY_DISK_RESOURCE_EXHAUSTED: " + value,
+        available, amount, state["observed"][value], state["limits"][value]))
+     if channel == "raw_read_byte_limit":
+      available = self.remaining_read_bytes
+      self.observed_read_bytes += amount
+      self.remaining_read_bytes = max(0, available - amount)
+      if amount > available:
+       errors.append(RuntimeError("VALIDATION_CANDIDATE_READ_BUDGET",
+        available, amount, self.observed_read_bytes))
+     if delivered:
+      try:
+       if settling:
+        # Native control prefixes from genuine VIEW/OUTPUT closure
+        # retain their debit after C's body/release lifecycle ended.
+        # RAW OUTPUT uses Scope's separate exact original phase join.
+        if _action_audit_v1 is None:
+         state["scope"]._ordinary_require_settlement_phase_v1(self)
+        else:
+         self._disk_action_audit_checked_v1(_action_audit_v1)
+        if time.monotonic_ns() >= self.deadline_ns:
+         raise RuntimeError("ORDINARY_DISK_ORIGINAL_SETTLEMENT_CUTOFF")
+       else:
+        self._disk_light_v1()
+      except BaseException as error:
+       errors.append(error)
+     if errors:
+      self._disk_fail_v1(errors[0])
+     self._disk_raise_v1(errors)
+
+    def _disk_call_v1(self, function, *arguments, **keywords):
+     state = self._disk_light_v1()
+     owed = state["scope"]._ordinary_pending_close_calls_v1(self)
+     if type(owed) is not int or owed < state["close_debt"] or state["remaining"]["metadata_call_limit"] < owed + 1:
+      raise RuntimeError("ORDINARY_DISK_PREPAID_CLOSE_CAPACITY")
+     self._disk_charge_v1("metadata_call_limit", 1)
+     return function(*arguments, **keywords)
+
+    @staticmethod
+    def _disk_version_v1(info):
+     # This explicit backend observes directory descriptors as directories;
+     # the unchanged legacy scan helper accepts regular FILEs only.
+     if stat.S_ISDIR(info.st_mode) and not _stat_is_reparse_point(info):
+      version = (info.st_dev, info.st_ino, info.st_mode, info.st_size,
+       info.st_mtime_ns, info.st_ctime_ns, info.st_nlink, info.st_uid, info.st_gid)
+      count = 9
+     elif stat.S_ISREG(info.st_mode) and info.st_nlink == 1 and not _stat_is_reparse_point(info):
+      from tools.validation_reliability import _scan_same_api_version
+      version = _scan_same_api_version(info)
+      count = 6
+     else:
+      raise ValueError("ORDINARY_DISK_NATIVE_VERSION_KIND")
+     if (type(version) is not tuple or len(version) != count
+       or any(type(value) is not int or value < 0 or value >= 1 << 64 for value in version)):
+      raise ValueError("ORDINARY_DISK_NATIVE_VERSION")
+     return version
+
+    def _disk_fail_v1(self, error):
+     if self.failure is None:
+      self.failure = error
+     self.state = "CLEANUP_REJECTED"
+     state = self._ordinary_disk_state_v1
+     if all(error is not previous for previous in state["errors"]):
+      state["errors"].append(error)
+
+    def _disk_open_v1(self, path, flags, *, dir_fd=None, kind="SOURCE", mode=None):
+     from tools.validation_reliability import (_mapper_slot_v1, _mapper_slot_opened_v1,
+               _mapper_slot_open_error_v1)
+     state = self._disk_light_v1()
+     if mode is not None and (type(mode) is not int or not 0 <= mode <= 0o7777):
+      raise ValueError("ORDINARY_DISK_EXACT_OPEN_MODE")
+     if len(state["slots"]) >= state["limits"]["native_handle_limit"]:
+      raise RuntimeError("ORDINARY_DISK_DESCRIPTOR_ENVELOPE")
+     owed = state["scope"]._ordinary_pending_close_calls_v1(self)
+     if (type(owed) is not int or owed < state["close_debt"]
+       or owed >= state["limits"]["native_handle_limit"]
+       or state["remaining"]["metadata_call_limit"] < owed + 2):
+      raise RuntimeError("ORDINARY_DISK_PREPAID_OPEN_CLOSE")
+     slot = _mapper_slot_v1((self.process_id, self.thread_id), state["slots"], path, kind)
+     state["close_debt"] += 1
+     try:
+      descriptor = self._disk_call_v1(os.open, path, flags,
+       *(() if mode is None else (mode,)), dir_fd=dir_fd)
+      _mapper_slot_opened_v1(slot, descriptor)
+      self._disk_call_v1(os.set_inheritable, descriptor, False)
+     except BaseException as error:
+      _mapper_slot_open_error_v1(slot, error)
+      raise
+     finally:
+      slot["acquiring"] = False
+     return slot
+
+    def _disk_close_v1(self, slot, errors):
+     from tools.validation_reliability import _mapper_close_slot_v1, _mapper_slot_settled_v1
+     state = self._ordinary_disk_state_v1
+     # Settlement keeps the original cutoff/owner and the original close
+     # attempt even after a body failure; it never retries a failed close.
+     if (os.getpid(), threading.get_ident()) != (self.process_id, self.thread_id):
+      errors.append(ValueError("foreign ordinary disk close owner"))
+      return
+     if state["slots"] is not state["original_slots"] or not any(slot is original for original in state["slots"]):
+      errors.append(ValueError("foreign ordinary disk slot"))
+      return
+     if slot.get("close_attempted", False):
+      if not _mapper_slot_settled_v1(slot):
+       original = slot.get("close_error") or slot.get("error")
+       if original is not None and all(original is not item for item in errors):
+        errors.append(original)
+      return
+     if (slot["acquiring"] or slot["open_unknown"] or slot["raw_owner"] is not None
+       or slot["owner"] != (self.process_id, self.thread_id)
+       or type(slot["returned_fd"]) is not int or slot["returned_fd"] < 0
+       or slot["fd"] is not slot["returned_fd"]):
+      # The original helper reports unknown acquisition without an
+      # invented numerical close. No actual-close charge is manufactured.
+      _mapper_close_slot_v1(slot, errors)
+      return
+     state["observed"]["metadata_call_limit"] += 1
+     state["remaining"]["metadata_call_limit"] -= 1
+     if state["remaining"]["metadata_call_limit"] < 0 or time.monotonic_ns() >= self.deadline_ns:
+      errors.append(RuntimeError("ORDINARY_DISK_PREPAID_CLOSE_UNAVAILABLE"))
+      return
+     try:
+      _mapper_close_slot_v1(slot, errors)
+     except BaseException as error:
+      errors.append(error)
+     else:
+      if slot["close_attempted"]:
+       state["close_debt"] -= 1
+      if _mapper_slot_settled_v1(slot):
+       state["slots"].remove(slot)
+       state["closed_slots"] += 1
+
+    def _disk_iterator_v1(self, descriptor):
+     state = self._disk_light_v1()
+     owed = state["scope"]._ordinary_pending_close_calls_v1(self)
+     if (type(owed) is not int or owed < state["close_debt"]
+       or owed >= state["limits"]["native_handle_limit"]
+       or state["remaining"]["metadata_call_limit"] < owed + 2):
+      raise RuntimeError("ORDINARY_DISK_PREPAID_ITERATOR_CLOSE")
+     record = {"candidate": self, "owner": (self.process_id, self.thread_id), "parent_fd": descriptor,
+      "iterator": None, "acquiring": True, "close_attempted": False, "closed": False,
+      "error": None, "close_error": None}
+     state["iterator_records"].append(record)
+     state["close_debt"] += 1
+     try:
+      record["iterator"] = self._disk_call_v1(os.scandir, descriptor)
+     except BaseException as error:
+      record["error"] = error
+      raise
+     finally:
+      record["acquiring"] = False
+     return record
+
+    def _disk_close_iterator_v1(self, record, errors):
+     state = self._ordinary_disk_state_v1
+     if (state["iterator_records"] is not state["original_iterator_records"]
+       or not any(record is original for original in state["iterator_records"])
+       or record["candidate"] is not self
+       or record["owner"] != (os.getpid(), threading.get_ident())):
+      errors.append(ValueError("foreign ordinary directory iterator"))
+      return
+     if record["close_attempted"]:
+      if record["close_error"] is not None and all(record["close_error"] is not item for item in errors):
+       errors.append(record["close_error"])
+      return
+     if record["acquiring"] or record["iterator"] is None:
+      errors.append(record["error"] or RuntimeError("ORDINARY_DISK_ITERATOR_ACQUISITION_UNRESOLVED"))
+      return
+     if state["remaining"]["metadata_call_limit"] < 1 or time.monotonic_ns() >= self.deadline_ns:
+      errors.append(RuntimeError("ORDINARY_DISK_PREPAID_ITERATOR_SETTLEMENT_UNAVAILABLE"))
+      return
+     state["observed"]["metadata_call_limit"] += 1
+     state["remaining"]["metadata_call_limit"] -= 1
+     record["close_attempted"] = True
+     state["close_debt"] -= 1
+     try:
+      result = record["iterator"].close()
+      if result is not None:
+       raise ValueError("ORDINARY_DISK_ITERATOR_CLOSE_RESULT")
+     except BaseException as error:
+      record["close_error"] = error
+      errors.append(error)
+     else:
+      record["closed"] = True
+      state["iterator_records"].remove(record)
+      state["closed_iterators"] += 1
+
+    @staticmethod
+    def _disk_raise_v1(errors):
+     from tools.validation_reliability import _scan_raise_errors
+     _scan_raise_errors(errors)
+
+    def _disk_root_v1(self, binding):
+     state = self._disk_light_v1()
+     if not any(binding is original for original in state["roots"]):
+      raise ValueError("ORDINARY_DISK_FOREIGN_ROOT")
+     slot = binding["root_slot"]
+     descriptor = slot["returned_fd"]
+     if (type(descriptor) is not int or descriptor < 0 or slot["closed"]
+       or slot["close_attempted"] or slot["acquiring"] or slot["open_unknown"]):
+      raise RuntimeError("ORDINARY_DISK_ROOT_DESCRIPTOR_DEBT")
+     info = self._disk_call_v1(os.fstat, descriptor)
+     version = self._disk_version_v1(info)
+     original = binding["root_version"]
+     mutable = bool(self.all_effects) and binding["logical_path"] == self.root
+     if (not stat.S_ISDIR(info.st_mode) or (info.st_dev, info.st_ino) != binding["root_identity"]
+       or (version[:3] + version[7:] != original[:3] + original[7:] if mutable else version != original)):
+      raise RuntimeError("ORDINARY_DISK_ROOT_CHANGED")
+     return descriptor
+
+    def _disk_bound_open_v1(self, binding, relative, *, directory=False):
+     # Open every actual parent from the retained VIEW root. No absolute
+     # pathname or slash-bearing open can follow an unchecked parent.
+     if type(relative) is not str or (relative and not _is_portable_relative_repo_path(relative)):
+      raise ValueError("ORDINARY_DISK_RELATIVE_NAME")
+     descriptor = self._disk_root_v1(binding)
+     slots, errors, result = [], [], None
+     try:
+      pieces = relative.split("/") if relative else []
+      for ordinal, name in enumerate(pieces):
+       parent = ordinal < len(pieces) - 1 or directory
+       before = self._disk_call_v1(os.stat, name, dir_fd=descriptor, follow_symlinks=False)
+       flags = os.O_RDONLY | os.O_NOFOLLOW | (os.O_DIRECTORY if parent else 0)
+       slot = self._disk_open_v1(name, flags, dir_fd=descriptor,
+        kind="DIRECTORY" if parent else "SOURCE")
+       slots.append(slot)
+       actual = self._disk_call_v1(os.fstat, slot["returned_fd"])
+       after = self._disk_call_v1(os.stat, name, dir_fd=descriptor, follow_symlinks=False)
+       if (self._disk_version_v1(actual) != self._disk_version_v1(before)
+         or self._disk_version_v1(after) != self._disk_version_v1(before)
+         or _stat_is_reparse_point(actual)
+         or parent and not stat.S_ISDIR(actual.st_mode)
+         or not parent and (not stat.S_ISREG(actual.st_mode) or actual.st_nlink != 1)):
+        raise RuntimeError("ORDINARY_DISK_NAME_HANDLE_ASSOCIATION")
+       descriptor = slot["returned_fd"]
+      result = (descriptor, tuple(slots))
+     except BaseException as error:
+      errors.append(error)
+      for slot in reversed(slots):
+       self._disk_close_v1(slot, errors)
+      self._disk_raise_v1(errors)
+     return result
+
+    def _disk_read_v1(self, descriptor, requested, *, control=False, offset=None):
+     self._disk_uint_v1(requested, positive=True, extent=True)
+     if requested > 65536:
+      raise ValueError("ORDINARY_DISK_CHUNK")
+     channel = "metadata_read_limit" if control else "raw_read_byte_limit"
+     state = self._disk_light_v1()
+     available = state["remaining"][channel]
+     if control:
+      available = min(available, state["remaining"]["native_control_read_limit"])
+     else:
+      available = min(available, self.remaining_read_bytes)
+     if requested > available:
+      raise RuntimeError("ORDINARY_DISK_READ_REQUEST_ALLOCATION")
+     if control:
+      # This is an actual native control attempt even when pread raises;
+      # delivered byte charges remain separate from attempt admission.
+      self._disk_charge_v1("native_control_call_limit", 1)
+     self.read_attempts += 1
+     value = self._disk_call_v1(os.read if offset is None else os.pread,
+      descriptor, requested, *(() if offset is None else (offset,)))
+     if type(value) is not bytes:
+      self.read_measurement_complete = False
+      raise ValueError("ORDINARY_DISK_NATIVE_BYTES")
+     self._disk_charge_v1(channel, len(value), delivered=True,
+      additional_channel="native_control_read_limit" if control else None)
+     if len(value) > requested:
+      raise ValueError("ORDINARY_DISK_READ_OVERDELIVERY")
+     return value
+
+    def _disk_write_v1(self, descriptor, data, *, control=False, offset=None):
+     if type(data) is not bytes:
+      raise ValueError("ORDINARY_DISK_WRITE_BYTES")
+     position = 0
+     while position < len(data):
+      part = data[position:position + 65536]
+      state = self._disk_light_v1()
+      allowance = state["remaining"]["metadata_write_limit" if control else "raw_write_byte_limit"]
+      if control:
+       allowance = min(allowance, state["remaining"]["native_control_write_limit"])
+      if len(part) > allowance:
+       raise RuntimeError("ORDINARY_DISK_WRITE_REQUEST_ALLOCATION")
+      if control:
+       self._disk_charge_v1("native_control_call_limit", 1)
+      count = self._disk_call_v1(os.write if offset is None else os.pwrite,
+       descriptor, part, *(() if offset is None else (offset + position,)))
+      if type(count) is not int:
+       raise ValueError("ORDINARY_DISK_WRITE_RESULT")
+      if count > 0:
+       self._disk_charge_v1("metadata_write_limit" if control else "raw_write_byte_limit", count,
+        delivered=True, additional_channel="native_control_write_limit" if control else None)
+      if not 0 < count <= len(part):
+       raise OSError("ORDINARY_DISK_ZERO_OR_INVALID_WRITE_PROGRESS")
+      position += count
+
+    def _disk_control_v1(self, role):
+     state = self._disk_light_v1()
+     control = state["controls"][role]
+     if (not any(control is original for original in state["scope"].ordinary_controls)
+       or control["role"] != role or control["errors"]):
+      raise RuntimeError("ORDINARY_DISK_CONTROL_ASSOCIATION")
+     return control
+
+    def _disk_control_read_v1(self, role, offset, length):
+     self._disk_uint_v1(offset, extent=True)
+     self._disk_uint_v1(length, extent=True)
+     control = self._disk_control_v1(role)
+     if offset + length > control["extent"]:
+      raise ValueError("ORDINARY_DISK_CONTROL_RANGE")
+     if not any(start <= offset and offset + length <= start + count
+       for start, count in control["initialized"]):
+      raise ValueError("ORDINARY_DISK_UNINITIALIZED_CONTROL_READ")
+     slot = control["reader_slot"]
+     descriptor = slot["returned_fd"]
+     if slot["closed"] or slot["acquiring"] or slot["open_unknown"]:
+      raise RuntimeError("ORDINARY_DISK_CONTROL_READER_DEBT")
+     result = bytearray()
+     while len(result) < length:
+      part = self._disk_read_v1(descriptor, min(65536, length - len(result)),
+            control=True, offset=offset + len(result))
+      if not part:
+       raise OSError("ORDINARY_DISK_CONTROL_TRUNCATED")
+      result.extend(part)
+     if self._disk_version_v1(self._disk_call_v1(os.fstat, descriptor)) != control["version"]:
+      raise RuntimeError("ORDINARY_DISK_CONTROL_VERSION_CHANGED")
+     return bytes(result)
+
+    def _disk_control_write_v1(self, role, offset, data, *, replace_header=False, _action_transition_v1=None):
+     # Only unpublished bytes or the one role header may transition. A
+     # published B0 FILE/DIR/roster region is never rewritten.
+     state = self._disk_light_v1()
+     control = self._disk_control_v1(role)
+     self._disk_uint_v1(offset, extent=True)
+     if type(data) is not bytes or len(data) > 65536 or offset + len(data) > control["extent"]:
+      raise ValueError("ORDINARY_DISK_CONTROL_WRITE_RANGE")
+     if control["sealed"]:
+      raise ValueError("ORDINARY_DISK_SEALED_CONTROL_WRITE")
+     overlaps = [(start, count) for start, count in control["initialized"]
+        if offset < start + count and start < offset + len(data)]
+     if _action_transition_v1 is not None:
+      import struct
+      token = _action_transition_v1
+      original = state.get("restore_plan_original")
+      if (role != "ACTIONS" or replace_header or type(token) is not tuple or len(token) not in {3, 7}
+        or original is None or token[0] is not self or token[1] is not original
+        or original[0] is not self or original[1] is not state
+        or original[6] is not control or original[5] != state["action_count"]
+        or original[8] != (os.getpid(), threading.get_ident())):
+       raise ValueError("ORDINARY_DISK_ORIGINAL_ACTION_TRANSITION")
+      if len(token) == 3 and token[2] == "PLAN_HEADER":
+       if (offset != 0 or len(data) != 32 or state.get("action_header_published", False)
+         or data != struct.pack("<4Q", 1, state["action_count"], 96, 1)
+         or self._disk_control_read_v1(role, 0, 32) != struct.pack("<4Q", 1, 0, 96, 1)):
+        raise ValueError("ORDINARY_DISK_ACTION_PLAN_HEADER_TRANSITION")
+       for ordinal in range(state["action_count"]):
+        tag, words = self._disk_action_record_v1(ordinal)
+        if words[11] or tag == 2 and words[10]:
+         raise ValueError("ORDINARY_DISK_ACTION_PLAN_ALREADY_ATTEMPTED")
+      elif len(token) == 7:
+       ordinal, prior_tag, prior, tag, words = token[2:]
+       if (type(ordinal) is not int or not 0 <= ordinal < state["action_count"]
+         or offset != 32 + 97 * ordinal or len(data) != 97
+         or not state.get("action_header_published", False)
+         or prior_tag != tag or data != self._disk_restore_words_v1(tag, words)
+         or self._disk_control_read_v1(role, offset, 97) != self._disk_restore_words_v1(prior_tag, prior)):
+        raise ValueError("ORDINARY_DISK_ACTION_CELL_TRANSITION")
+       valid = (prior[:-1] == words[:-1] and (prior[11], words[11]) in {(0, 1), (1, 2), (2, 3)}) if tag == 1 else (
+        prior[:-2] == words[:-2] and (prior[10:], words[10:]) in {
+         ((0, 0), (1, 0)), ((1, 0), (1, 1)), ((1, 0), (1, 2)), ((1, 0), (1, 3))})
+       if not valid:
+        raise ValueError("ORDINARY_DISK_ACTION_CELL_FORBIDDEN_TRANSITION")
+      else:
+       raise ValueError("ORDINARY_DISK_ACTION_TRANSITION_SHAPE")
+     if overlaps and not (_action_transition_v1 is not None or
+       replace_header and role == "DIRECTORY_HEADERS" and offset == 0 and len(data) == 128):
+      raise ValueError("ORDINARY_DISK_PUBLISHED_REGION_WRITE")
+     writer, reader = control["writer_slot"], control["reader_slot"]
+     if any(slot["closed"] or slot["acquiring"] or slot["open_unknown"]
+      or type(slot["returned_fd"]) is not int for slot in (writer, reader)):
+      raise RuntimeError("ORDINARY_DISK_CONTROL_SLOT_DEBT")
+     self._disk_charge_v1("native_control_call_limit", 1)
+     state["control_transitions"] += 1
+     self._disk_write_v1(writer["returned_fd"], data, control=True, offset=offset)
+     self._disk_call_v1(os.fsync, writer["returned_fd"])
+     position = 0
+     while position < len(data):
+      actual = self._disk_read_v1(reader["returned_fd"], min(65536, len(data) - position),
+            control=True, offset=offset + position)
+      if not actual or actual != data[position:position + len(actual)]:
+       raise RuntimeError("ORDINARY_DISK_CONTROL_READBACK")
+      position += len(actual)
+     version = self._disk_version_v1(self._disk_call_v1(os.fstat, reader["returned_fd"]))
+     named = self._disk_version_v1(self._disk_call_v1(os.lstat, control["path"]))
+     if named != version:
+      raise RuntimeError("ORDINARY_DISK_CONTROL_NAME_HANDLE")
+     # Publication occurs after all byte and association checks. On any
+     # failed write/readback the unchanged region record is retained debt.
+     control["version"] = version
+     if _action_transition_v1 is not None and offset == 0:
+      state["action_header_published"] = True
+     if not overlaps:
+      intervals = sorted((*control["initialized"], (offset, len(data))))
+      merged = []
+      for start, count in intervals:
+       if merged and merged[-1][0] + merged[-1][1] == start:
+        old_start, old_count = merged[-1]
+        merged[-1] = (old_start, old_count + count)
+       else:
+        merged.append((start, count))
+      control["initialized"] = tuple(merged)
+      self._disk_charge_v1("metadata_byte_limit", len(data))
+
+    def _disk_words_v1(self, role, offset, words):
+     import struct
+     for value in words:
+      self._disk_uint_v1(value)
+     self._disk_control_write_v1(role, offset, struct.pack("<" + "Q" * len(words), *words))
+
+    def _disk_no_aux_v1(self, descriptor):
+     # No ACL helper substitution: that helper has a different three-call
+     # program and cannot certify unrelated xattrs absent.
+     import ctypes
+     library = self._ordinary_disk_state_v1["libc"]
+     buffer = ctypes.create_string_buffer(65536)
+     count = self._disk_call_v1(library.flistxattr, descriptor, buffer, 65536)
+     if count < 0:
+      raise OSError(ctypes.get_errno(), "ordinary directory flistxattr failed")
+     self._disk_charge_v1("metadata_read_limit", count)
+     if count != 0:
+      raise ValueError("ORDINARY_DISK_DIRECTORY_AUXILIARY_UNSUPPORTED")
+
+    def _disk_namespace_v1(self, declarations):
+     state = self._disk_light_v1()
+     limits = state["limits"]
+     nodes, seen_physical = {}, set()
+     sentinel = (1 << 64) - 1
+
+     def deliver(binding, relative, info, parent):
+      key = (binding["domain_id"], relative)
+      if key in nodes or len(nodes) >= limits["namespace_entry_limit"]:
+       raise ValueError("ORDINARY_DISK_NAMESPACE_CARDINALITY_OR_ALIAS")
+      if relative and not _is_portable_relative_repo_path(relative):
+       raise ValueError("ORDINARY_DISK_NAMESPACE_NAME")
+      encoded = relative.encode("utf-8", errors="strict")
+      if len(encoded) > limits["single_path_byte_limit"]:
+       raise ValueError("ORDINARY_DISK_NAMESPACE_PATH_EXTENT")
+      if info is not None:
+       if _stat_is_reparse_point(info) or not (stat.S_ISDIR(info.st_mode) or stat.S_ISREG(info.st_mode)):
+        raise ValueError("ORDINARY_DISK_UNSUPPORTED_NAMESPACE_TYPE")
+       if stat.S_ISREG(info.st_mode) and info.st_nlink != 1:
+        raise ValueError("ORDINARY_DISK_SOURCE_FILE_ROLE")
+       self._disk_version_v1(info)
+       identity = (info.st_dev, info.st_ino)
+       if identity in seen_physical:
+        raise ValueError("ORDINARY_DISK_UNPROVED_PHYSICAL_ALIAS")
+       seen_physical.add(identity)
+       # The actual Scope mapping owner checks both private VIEW
+       # children and separately authenticated original readonly Git
+       # projections. A foreign device is never accepted by label.
+       state["scope"]._ordinary_namespace_mapping_v1(binding, relative, info)
+       if stat.S_ISREG(info.st_mode):
+        state["scope"]._ordinary_disk_file_bound_v1(binding, relative, info)
+      nodes[key] = (binding, relative, info, parent)
+      self._disk_charge_v1("metadata_byte_limit", len(encoded) + 160)
+
+     def walk(binding, relative, descriptor, parent):
+      before = self._disk_call_v1(os.fstat, descriptor)
+      if not stat.S_ISDIR(before.st_mode):
+       raise ValueError("ORDINARY_DISK_DIRECTORY_REQUIRED")
+      self._disk_no_aux_v1(descriptor)
+      deliver(binding, relative, before, parent)
+      iterator_record, errors, entries = None, [], []
+      try:
+       iterator_record = self._disk_iterator_v1(descriptor)
+       iterator = iterator_record["iterator"]
+       while True:
+        try:
+         entry = self._disk_call_v1(next, iterator)
+        except StopIteration:
+         break
+        if type(entry.name) is not str or "/" in entry.name or entry.name in {"", ".", ".."}:
+         raise ValueError("ORDINARY_DISK_NATIVE_CHILD_NAME")
+        entries.append(entry.name)
+        if len(entries) > limits["namespace_entry_limit"]:
+         raise ValueError("ORDINARY_DISK_NATIVE_ROSTER_LIMIT")
+       if len({name.casefold() for name in entries}) != len(entries):
+        raise ValueError("ORDINARY_DISK_NATIVE_CASE_ALIAS")
+       for name in sorted(entries, key=lambda value: (value.casefold(), value)):
+        child = name if not relative else relative + "/" + name
+        info = self._disk_call_v1(os.stat, name, dir_fd=descriptor, follow_symlinks=False)
+        if stat.S_ISDIR(info.st_mode):
+         slot = self._disk_open_v1(name, os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW,
+               dir_fd=descriptor, kind="DIRECTORY")
+         close_errors = []
+         try:
+          actual = self._disk_call_v1(os.fstat, slot["returned_fd"])
+          if self._disk_version_v1(actual) != self._disk_version_v1(info):
+           raise ValueError("ORDINARY_DISK_DIRECTORY_SUBSTITUTION")
+          walk(binding, child, slot["returned_fd"], (binding["domain_id"], relative))
+          named = self._disk_call_v1(os.stat, name, dir_fd=descriptor, follow_symlinks=False)
+          if self._disk_version_v1(named) != self._disk_version_v1(info):
+           raise ValueError("ORDINARY_DISK_DIRECTORY_CHANGED")
+         except BaseException as error:
+          close_errors.append(error)
+         self._disk_close_v1(slot, close_errors)
+         self._disk_raise_v1(close_errors)
+        else:
+         deliver(binding, child, info, (binding["domain_id"], relative))
+      except BaseException as error:
+       errors.append(error)
+      if iterator_record is not None:
+       self._disk_close_iterator_v1(iterator_record, errors)
+      self._disk_raise_v1(errors)
+      self._disk_no_aux_v1(descriptor)
+      after = self._disk_call_v1(os.fstat, descriptor)
+      if self._disk_version_v1(after) != self._disk_version_v1(before):
+       raise ValueError("ORDINARY_DISK_DIRECTORY_ROSTER_CHANGED")
+
+     for binding in state["roots"]:
+      walk(binding, "", self._disk_root_v1(binding), sentinel)
+     # C's original sorted observation/effect/ignored selection is included
+     # as protected observations. Every actual child is still censused.
+     repository = next(binding for binding in state["roots"] if binding["logical_path"] == self.root)
+     for relative in declarations:
+      key = (repository["domain_id"], relative)
+      if key in nodes:
+       continue
+      pieces = relative.split("/")
+      for count in range(1, len(pieces) + 1):
+       child = "/".join(pieces[:count])
+       child_key = (repository["domain_id"], child)
+       parent_key = (repository["domain_id"], "/".join(pieces[:count - 1]))
+       if child_key not in nodes:
+        # Its first missing frontier follows an actually held and
+        # completely enumerated present parent or that frontier.
+        deliver(repository, child, None, parent_key)
+     ordered = tuple(sorted(nodes, key=lambda pair: (pair[0], pair[1].casefold(), pair[1])))
+     if sum(len(name.encode("utf-8")) for _, name in ordered) > limits["path_pool_byte_limit"]:
+      raise ValueError("ORDINARY_DISK_PATH_POOL_LIMIT")
+     return ordered, nodes
+
+    def _disk_snapshot_open_v1(self, allocation, expected):
+     state = self._disk_light_v1()
+     state["scope"].check_carrier(allocation, expected)
+     path = allocation["path"]
+     before = self._disk_call_v1(os.lstat, path)
+     slot = self._disk_open_v1(path, os.O_RDONLY | os.O_NOFOLLOW, kind="BASELINE")
+     errors = []
+     try:
+      actual = self._disk_call_v1(os.fstat, slot["returned_fd"])
+      if (not stat.S_ISREG(actual.st_mode) or actual.st_nlink != 1 or _stat_is_reparse_point(actual)
+        or self._disk_version_v1(before) != expected or self._disk_version_v1(actual) != expected):
+       raise ValueError("ORDINARY_DISK_BASELINE_NAME_HANDLE")
+     except BaseException as error:
+      errors.append(error)
+     if errors:
+      self._disk_close_v1(slot, errors)
+      self._disk_raise_v1(errors)
+     return slot
+
+    def _disk_compare_file_v1(self, binding, relative, row, allocation):
+     state = self._disk_light_v1()
+     expected = tuple(row[6:12])
+     source, source_slots = self._disk_bound_open_v1(binding, relative)
+     baseline, errors = None, []
+     try:
+      before = self._disk_call_v1(os.fstat, source)
+      state["scope"]._ordinary_disk_file_bound_v1(binding, relative, before, length=row[5])
+      if (not stat.S_ISREG(before.st_mode) or before.st_nlink != 1
+        or (before.st_dev, before.st_ino, before.st_size, before.st_mtime_ns) != tuple(row[12:16])
+        or stat.S_IMODE(before.st_mode) != row[4]):
+       raise ValueError("ORDINARY_DISK_CURRENT_SOURCE_ASSOCIATION")
+      baseline = self._disk_snapshot_open_v1(allocation, expected)
+      descriptor = baseline["returned_fd"]
+      remaining = row[5]
+      while remaining:
+       left = self._disk_read_v1(source, min(65536, remaining))
+       if not left:
+        raise ValueError("ORDINARY_DISK_SOURCE_TRUNCATION")
+       position = 0
+       while position < len(left):
+        right = self._disk_read_v1(descriptor, len(left) - position)
+        if not right or right != left[position:position + len(right)]:
+         raise ValueError("ORDINARY_DISK_INDEPENDENT_BYTES_DIFFER")
+        position += len(right)
+       remaining -= len(left)
+       if self._disk_version_v1(self._disk_call_v1(os.fstat, descriptor)) != expected:
+        raise ValueError("ORDINARY_DISK_BASELINE_CHANGED_DURING_READ")
+      if self._disk_read_v1(source, 1) or self._disk_read_v1(descriptor, 1):
+       raise ValueError("ORDINARY_DISK_PHYSICAL_FILE_SUFFIX")
+      if self._disk_version_v1(self._disk_call_v1(os.fstat, source)) != self._disk_version_v1(before):
+       raise ValueError("ORDINARY_DISK_SOURCE_CHANGED_DURING_READ")
+      state["scope"].check_carrier(allocation, expected)
+     except BaseException as error:
+      errors.append(error)
+     if baseline is not None:
+      self._disk_close_v1(baseline, errors)
+     for slot in reversed(source_slots):
+      self._disk_close_v1(slot, errors)
+     self._disk_raise_v1(errors)
+     # Parent/name re-acquisition is independent of the descriptor version;
+     # Windows pathname/handle ctime are never substituted for each other.
+     source, slots = self._disk_bound_open_v1(binding, relative)
+     errors = []
+     try:
+      if self._disk_version_v1(self._disk_call_v1(os.fstat, source)) != self._disk_version_v1(before):
+       raise ValueError("ORDINARY_DISK_SOURCE_PATH_REPLACED")
+     except BaseException as error:
+      errors.append(error)
+     for slot in reversed(slots):
+      self._disk_close_v1(slot, errors)
+     self._disk_raise_v1(errors)
+
+    def _disk_capture_file_v1(self, binding, relative, ordinal, generation, *, index=False):
+     state = self._disk_light_v1()
+     source, slots = self._disk_bound_open_v1(binding, relative)
+     errors, allocation, row = [], None, None
+     try:
+      before = self._disk_call_v1(os.fstat, source)
+      length = before.st_size
+      role, bound, proof = state["scope"]._ordinary_disk_file_bound_v1(binding, relative, before)
+      if index:
+       bound = min(bound, state["limits"]["index_byte_limit"])
+      if length > bound or not stat.S_ISREG(before.st_mode) or before.st_nlink != 1:
+       raise ValueError("ORDINARY_DISK_CAPTURE_FILE_LIMIT")
+      state["next_carrier"] += 1
+      allocation = state["scope"].create_carrier(state["next_carrier"], length)
+      # The exact Scope allocation is retained before its writer is used.
+      state["allocations"].append(allocation)
+      writer = allocation["writer_slot"]
+      if (allocation["ordinal"] != state["next_carrier"] or allocation["length"] != length
+        or allocation["writer_fd"] != writer["returned_fd"] or writer["closed"]):
+       raise ValueError("ORDINARY_DISK_ALLOCATION_ASSOCIATION")
+      remaining = length
+      while remaining:
+       raw = self._disk_read_v1(source, min(65536, remaining))
+       if not raw:
+        raise ValueError("ORDINARY_DISK_CAPTURE_TRUNCATION")
+       self._disk_write_v1(writer["returned_fd"], raw)
+       remaining -= len(raw)
+      if self._disk_read_v1(source, 1):
+       raise ValueError("ORDINARY_DISK_CAPTURE_GROWTH")
+      if self._disk_version_v1(self._disk_call_v1(os.fstat, source)) != self._disk_version_v1(before):
+       raise ValueError("ORDINARY_DISK_CAPTURE_SOURCE_CHANGED")
+      state["scope"].seal_carrier(allocation)
+      version = allocation["version"]
+      if (not allocation["sealed"] or not allocation["writer_closed"]
+        or type(version) is not tuple or len(version) != 6 or version[2] != length
+        or (version[0], version[1]) == (before.st_dev, before.st_ino)):
+       raise ValueError("ORDINARY_DISK_INDEPENDENT_NATIVE_SEAL")
+      # Scope create charged this original declared carrier occupation
+      # before writer exposure, including failure prefixes/empty FILEs.
+      # Sealing never debits that same physical payload a second time.
+      row = (ordinal, generation, allocation["ordinal"], 1, stat.S_IMODE(before.st_mode), length,
+       *version, before.st_dev, before.st_ino, before.st_size, before.st_mtime_ns)
+      for value in row:
+       self._disk_uint_v1(value)
+     except BaseException as error:
+      errors.append(error)
+     for slot in reversed(slots):
+      self._disk_close_v1(slot, errors)
+     self._disk_raise_v1(errors)
+     # Source during emission plus source AND independent sealed backing
+     # during this pair are three distinct raw acquisitions, all charged.
+     self._disk_compare_file_v1(binding, relative, row, allocation)
+     return row
+
+    def _disk_file_row_v1(self, generation, ordinal, *, index=False):
+     import struct
+     state = self._disk_light_v1()
+     limits = state["limits"]
+     position = limits["file_baseline_rows"] + 2 * limits["file_generation_rows"] if index else generation["file_start"] + ordinal
+     return struct.unpack("<16Q", self._disk_control_read_v1("FILE_HEADERS", 128 * position, 128))
+
+    def _disk_publish_directory_v1(self, generation, *, pending=None):
+     import struct
+     state = self._disk_light_v1()
+     baseline = state["baseline_generation"]
+     if baseline is not None and not baseline["complete"]:
+      baseline = None
+     for value in (baseline, generation, pending):
+      if value is not None and not any(value is original for original in state["regions"].values()):
+       raise ValueError("ORDINARY_DISK_HEADER_ORIGINAL_GENERATION")
+     if generation is not None and not generation["complete"]:
+      raise ValueError("ORDINARY_DISK_UNVERIFIED_SETTLED_HEADER")
+     if pending is not None and state["capturing_generation"] is not pending:
+      raise ValueError("ORDINARY_DISK_UNOWNED_PENDING_HEADER")
+     if pending is not None and (pending is baseline or pending is generation):
+      raise ValueError("ORDINARY_DISK_OVERLAPPING_PENDING_HEADER")
+     sentinel = (1 << 64) - 1
+     def role(value):
+      if value is None:
+       return sentinel, 0
+      if value["directory_count"] < len(state["roots"]):
+       raise ValueError("ORDINARY_DISK_HEADER_REAL_ROOTS_REQUIRED")
+      return value["directory_start"], value["directory_count"]
+     # These are actual initialized primary regions. A baseline/settled
+     # alias occurs once in regions; old unborrowed regions retire through
+     # their original transition before their capacity can be reused.
+     owned_edges = sum(value["roster_count"] for value in state["regions"].values())
+     words = (0x3130524944545451, 1,
+      *role(baseline), *role(generation), *role(pending), owned_edges, len(state["names"]),
+      state["path_bytes"], 0, len(state["roots"]), self.process_id, self.thread_id, 0)
+     for value in words:
+      self._disk_uint_v1(value)
+     self._disk_control_write_v1("DIRECTORY_HEADERS", 0, struct.pack("<16Q", *words),
+           replace_header=bool(state["directory_header_published"]))
+     state["directory_header_published"] = True
+     state["directory_header_roles"] = (baseline, generation, pending)
+     state["directory_header_words"] = words
+
+    def _disk_rolling_disposal_context_v1(self, generation):
+     state = self._disk_light_v1()
+     token, supervision = self._occurrence_before, self._acquisition_supervision
+     roles = state['directory_header_roles']
+     if (not self.all_effects or self.state != 'BASELINE_READY' or self.failure is not None
+       or state['errors'] or state['slots'] or state['iterator_records'] or state['close_debt']
+       or any(row['errors'] or not row['sealed'] or not row['writer_closed']
+        for row in state['allocations'])
+       or state['borrows'] or state['pending_capture'] is not None
+       or state['capturing_generation'] is not None or state['release_attempted']
+       or state['action_count'] or state['restore_mutation_started']
+       or state['final_barriers'] is not None
+       or generation is self.baseline or generation['region'] == 0
+       or state['regions'].get(generation['region']) is not generation
+       or not generation['complete'] or generation is self._settled_snapshot
+       or state['verified_generations'].get(generation['ordinal']) is None
+       or self._settled_snapshot is None or not self._settled_snapshot['complete']
+       or state['regions'].get(self._settled_snapshot['region']) is not self._settled_snapshot
+       or state['verified_generations'].get(self._settled_snapshot['ordinal']) != state['full_barriers']
+       or type(roles) is not tuple or len(roles) != 3
+       or roles[0] is not self.baseline or roles[1] is not self._settled_snapshot or roles[2] is not None
+       or supervision is not _RUN_COMMANDS_SUPERVISION or type(supervision) is not dict
+       or supervision['candidate_custody'] is not self or supervision['pending']
+       or supervision['paths'] is not state['config']['paths'] or supervision['errors']
+       or type(token) is not dict or token['candidate'] is not self
+       or token['generation'] is not generation or token['released'] is not True
+       or token['occurrence'] != self.active_occurrence
+       or token['consumer'] is not self.plan[self.active_occurrence - 1]
+       or token['paths'] is not state['config']['paths'] or token['plan'] is not self.plan):
+      raise RuntimeError('ORDINARY_DISK_ROLLING_RAW_LAST_USER_CONTEXT')
+     record = state['scope']._ordinary_occurrence_record_v1(token['consumer'])
+     receipt = supervision['receipt']
+     if (record is not token['native_record'] or record['errors']
+       or receipt is not record['receipt'] or receipt.native_exit_code != 0
+       or receipt.failure_class is not None):
+      raise RuntimeError('ORDINARY_DISK_ROLLING_RAW_FAILED_OCCURRENCE_RETAINED')
+     terminal = state['scope']._ordinary_require_occurrence_terminal_v1(record, receipt)
+     launch_input = record.get('rp5a_input')
+     if launch_input is not None:
+      from tools.validation_reliability import _ScanLaunchInput
+      material, handoff = record.get('rp5a_material'), record.get('rp5a_input_handoff')
+      original = material.get('original') if type(material) is dict else None
+      if (type(material) is not dict or set(material) != {'scope', 'candidate', 'entry', 'generation',
+        'borrow', 'input', 'reader', 'scanner', 'basis', 'projection', 'canonical', 'policy',
+        'identity', 'fence', 'snapshot_root', 'supervision', 'original'}
+        or material['scope'] is not state['scope'] or record['rp5a_launch'] is not material['projection']
+        or type(original) is not tuple or len(original) != 17 or original[0] is not material
+        or original[1] is not state['scope'] or original[2] is not self
+        or original[3] is not token['consumer'] or original[4] is not generation
+        or original[5] is not token or original[6] is not launch_input
+        or not all(original[position] is material[name] for position, name in enumerate((
+         'candidate', 'entry', 'generation', 'borrow', 'input', 'reader', 'scanner',
+         'basis', 'projection', 'canonical', 'policy', 'identity', 'fence',
+         'snapshot_root', 'supervision'), 2))
+        or original[16] is not supervision or type(launch_input) is not _ScanLaunchInput
+        or not launch_input._release_complete_v1()
+        or launch_input.process is not record['process']
+        or launch_input.supervision_receipt is not receipt
+        or not launch_input.supervision_started or not launch_input.supervision_settled
+        or launch_input.finish_error is not None
+        or type(handoff) is not dict or handoff['record'] is not record
+        or handoff['scope'] is not state['scope'] or handoff['material'] is not original
+        or handoff['original_input'] is not launch_input or handoff['errors']
+        or handoff['released'] is not True or handoff['release_observation'] is None
+        or terminal.get('rp5a_input_handoff') is not handoff):
+       raise RuntimeError('ORDINARY_DISK_ROLLING_RAW_TRANSPORT_BORROW_RETAINED')
+     elif record.get('rp5a_material') is not None or record.get('rp5a_launch') is not None:
+      raise RuntimeError('ORDINARY_DISK_ROLLING_RAW_INCOMPLETE_TRANSPORT_ASSOCIATION')
+     if not state['scope'].query.command_resources_settled_v1():
+      raise RuntimeError('ORDINARY_DISK_ROLLING_RAW_ADMINISTRATIVE_BORROW_RETAINED')
+     return state, token, supervision, record, receipt, terminal
+
+    def _disk_rolling_disposal_checked_v1(self, allocation, original):
+     state = self._ordinary_disk_state_v1
+     if (type(original) is not tuple or len(original) != 13
+       or original[0] is not self or original[1] is not state
+       or original is not state['rolling_disposal']
+       or original is not state['original_rolling_disposal']
+       or not any(allocation is row for row in original[5])):
+      raise RuntimeError('ORDINARY_DISK_ROLLING_RAW_ORIGINAL_DISPOSAL_PROGRAMME')
+     current, token, supervision, record, receipt, terminal = self._disk_rolling_disposal_context_v1(original[2])
+     if (current is not state or original[3] is not self._settled_snapshot
+       or len(original[4]) != len(state['regions'])
+       or any(state['regions'].get(region) is not generation for region, generation in original[4])
+       or original[6] != tuple((name, control['version']) for name, control in state['controls'].items())
+       or original[7] is not token or original[8] is not supervision
+       or original[9] is not record or original[10] is not receipt
+       or original[11] is not terminal or original[12] != state['full_barriers']
+       or allocation['disposed'] or allocation['errors'] or not allocation['sealed']
+       or not allocation['writer_closed']):
+      raise RuntimeError('ORDINARY_DISK_ROLLING_RAW_CHANGED_DISPOSAL_ASSOCIATION')
+     return original
+
+    def _disk_retire_raw_v1(self, generation):
+     # R2 end-barrier last-user disposal uses C's original carrier/witness
+     # owner. It never restores a cumulative debit or deletes a source copy.
+     state = self._disk_light_v1()
+     if not self.all_effects or generation['region'] == 0:
+      return
+     if state['rolling_disposal'] is not None or state['original_rolling_disposal'] is not None:
+      raise RuntimeError('ORDINARY_DISK_ROLLING_RAW_NOT_REENTERED')
+     state, token, supervision, record, receipt, terminal = self._disk_rolling_disposal_context_v1(generation)
+     protected, retiring = set(), set()
+     # Complete immutable B0/current/other retained region metadata is
+     # acquired before any unseal/unlink. Shared backing counts only once.
+     for region, value in state['regions'].items():
+      if not value['complete'] or state['verified_generations'].get(value['ordinal']) is None:
+       raise RuntimeError('ORDINARY_DISK_ROLLING_RAW_INCOMPLETE_GENERATION_RETAINED')
+      target = retiring if value is generation else protected
+      for ordinal in range(value['file_count']):
+       row = self._disk_file_row_v1(value, ordinal)
+       if row[1] != value['ordinal'] or row[3] not in (0, 1):
+        raise ValueError('ORDINARY_DISK_ROLLING_RAW_ORIGINAL_FILE_ROW')
+       if not row[3]:
+        if any(row[2:]): raise ValueError('ORDINARY_DISK_ROLLING_RAW_EXACT_ABSENCE')
+        continue
+       if not 0 < row[2] <= len(state['allocations']):
+        raise ValueError('ORDINARY_DISK_ROLLING_RAW_ALLOCATION_ORDINAL')
+       allocation = state['allocations'][row[2] - 1]
+       if (allocation['ordinal'] != row[2] or allocation['length'] != row[5]
+         or allocation['version'] != tuple(row[6:12]) or allocation['disposed']
+         or allocation['errors'] or not allocation['sealed'] or not allocation['writer_closed']):
+        raise ValueError('ORDINARY_DISK_ROLLING_RAW_SEALED_ALLOCATION_ASSOCIATION')
+       target.add(row[2])
+     protected.add(state['index_allocation']['ordinal'])
+     allocations = tuple(state['allocations'][ordinal - 1] for ordinal in sorted(retiring - protected))
+     if not allocations:
+      return
+     original = (self, state, generation, self._settled_snapshot,
+      tuple(state['regions'].items()), allocations,
+      tuple((name, control['version']) for name, control in state['controls'].items()),
+      token, supervision, record, receipt, terminal, state['full_barriers'])
+     state['rolling_disposal'] = state['original_rolling_disposal'] = original
+     # Retain the exact whole disposition plan on any native/close failure.
+     # The native witness preserves every actual attempted disposal prefix.
+     for allocation in allocations:
+      state['scope'].dispose_carrier(allocation, _rolling_retirement_v1=original)
+      if not allocation['disposed'] or allocation['errors']:
+       raise RuntimeError('ORDINARY_DISK_ROLLING_RAW_NATIVE_DISPOSAL_UNPROVEN')
+     state['rolling_disposal'] = state['original_rolling_disposal'] = None
+
+    def _disk_retire_region_v1(self, generation):
+     state = self._disk_light_v1()
+     if (generation["region"] == 0 or not generation["complete"]
+       or generation is self._settled_snapshot
+       or any(token["generation"] is generation for token in state["borrows"])
+       or state["verified_generations"].get(generation["ordinal"]) is None):
+      raise RuntimeError("ORDINARY_DISK_REGION_RETIREMENT_UNPROVEN")
+     ranges = {
+      "FILE_HEADERS": (128 * generation["file_start"], 128 * generation["file_count"]),
+      "DIRECTORY_HEADERS": (128 + 160 * generation["directory_start"], 160 * generation["directory_count"]),
+      "ROSTER": (8 * generation["roster_start"], 8 * generation["roster_count"]),
+     }
+     # Original generation and exact observed publication/zero-borrow
+     # associations precede retirement; unchanged B0 bytes cannot retire.
+     record = (generation, tuple(ranges.items()), state["verified_generations"][generation["ordinal"]])
+     state["retirements"].append(record)
+     state["scope"].check_storage_binding(self, state["config"])
+     for role, (offset, length) in ranges.items():
+      control = state["controls"][role]
+      kept = []
+      for start, count in control["initialized"]:
+       if start < offset + length and offset < start + count:
+        if start < offset:
+         kept.append((start, offset - start))
+        if start + count > offset + length:
+         kept.append((offset + length, start + count - offset - length))
+       else:
+        kept.append((start, count))
+      control["initialized"] = tuple(kept)
+     if state["regions"].get(generation["region"]) is not generation:
+      raise RuntimeError("ORDINARY_DISK_RETIRED_REGION_SUBSTITUTED")
+     del state["regions"][generation["region"]]
+     self._disk_publish_directory_v1(self._settled_snapshot)
+     state["scope"].check_storage_binding(self, state["config"])
+
+    def _disk_capture_generation(self, paths, generation_ordinal, stage):
+     from types import MappingProxyType
+     state = self._disk_light_v1()
+     if (type(paths) is not tuple or type(stage) is not str or stage not in {"BASELINE", "SETTLED", "FINAL"}
+       or type(generation_ordinal) is not int or generation_ordinal != state["next_generation"] + 1):
+      raise ValueError("ORDINARY_DISK_GENERATION_ASSOCIATION")
+     if state["borrows"] and stage != "SETTLED":
+      raise RuntimeError("ORDINARY_DISK_GENERATION_BORROWED")
+     if state["pending_capture"] is not None:
+      raise RuntimeError("ORDINARY_DISK_CAPTURE_NOT_REENTERED")
+     # Reserve ordinal and retain the actual partial capture association
+     # before namespace/control/raw acquisitions. Failure never refunds it.
+     pending = {"candidate": self, "paths": paths, "ordinal": generation_ordinal,
+       "stage": stage, "region": None, "file_rows": 0, "directory_rows": 0,
+       "roster_edges": 0, "complete": False}
+     state["pending_capture"] = pending
+     state["next_generation"] = generation_ordinal
+     names, nodes = self._disk_namespace_v1(paths)
+     limits = state["limits"]
+     absent_directories = {node[3] for node in nodes.values()
+          if node[3] in nodes and nodes[node[3]][2] is None}
+     present_files = tuple(node[2] for node in nodes.values()
+          if node[2] is not None and stat.S_ISREG(node[2].st_mode))
+     initial = stage == "BASELINE"
+     targets, parents = self._disk_effect_targets_v1() if initial else ((), frozenset())
+     future_directories = parents | frozenset(target["path"] for target in targets
+      if target["kind"] == "DIRECTORY")
+     kinds = {key: self._disk_source_kind_v1(key, node[2], absent_directories,
+      initial=initial, future_directories=future_directories) for key, node in nodes.items()}
+     file_rows = sum(kind == 1 for kind in kinds.values())
+     directory_rows = len(nodes) - file_rows
+     roster_edges = sum(node[2] is not None and node[3] != (1 << 64) - 1 for node in nodes.values())
+     raw_bytes = sum(info.st_size for info in present_files)
+     initial = stage == "BASELINE"
+     if (file_rows > limits["file_baseline_rows" if initial else "file_generation_rows"]
+       or directory_rows > limits["directory_baseline_rows" if initial else "directory_generation_rows"]
+       or roster_edges > limits["roster_baseline_edges" if initial else "roster_generation_edges"]
+       or raw_bytes > limits["baseline_byte_limit" if initial else "generation_byte_limit"]):
+      raise ValueError("ORDINARY_DISK_COMPLETE_GENERATION_PREFLIGHT")
+     if initial:
+      # Conservative complete selected C demand, distinct from already
+      # charged Scope preparation/HOST-to-VIEW/native/control work.
+      count = len(self.plan)
+      demand = (11 + 6 * count) * (raw_bytes + len(present_files))
+      demand += (9 + 4 * count) * (limits["index_byte_limit"] + 1)
+      writes = raw_bytes + limits["index_byte_limit"]
+      retained = writes
+      if self.all_effects:
+       selected_demand, restoration_bytes = self._disk_mutable_programme_demand_v1(
+        raw_bytes, len(present_files), nodes)
+       demand, writes, retained = (selected_demand["raw_read_bytes"],
+        selected_demand["raw_write_bytes"], selected_demand["raw_retained_bytes"])
+      if (demand > min(state["remaining"]["raw_read_byte_limit"], self.remaining_read_bytes)
+        or writes > state["remaining"]["raw_write_byte_limit"]
+        or retained > state["remaining"]["raw_retained_byte_limit"]):
+       raise ValueError("ORDINARY_DISK_COMPLETE_RAW_PROGRAM_PREFLIGHT")
+      state["planned_raw_program"] = (count, raw_bytes, len(present_files),
+       limits["index_byte_limit"], demand, writes, retained) if self.all_effects else (count, raw_bytes, len(present_files),
+       limits["index_byte_limit"], demand, writes)
+     if stage == "BASELINE":
+      state["names"], state["path_bytes"] = names, sum(len(name.encode("utf-8")) for _, name in names)
+      lookup = {key: index for index, key in enumerate(names)}
+      state["lookup"] = lookup
+      offset = 0
+      for ordinal, (domain, relative) in enumerate(names):
+       encoded = relative.encode("utf-8")
+       self._disk_words_v1("OFFSETS", 8 * ordinal, (offset,))
+       if encoded:
+        self._disk_control_write_v1("PATH_POOL", offset, encoded)
+       offset += len(encoded)
+       parent = nodes[(domain, relative)][3]
+       self._disk_words_v1("BINDING", 32 + 16 * ordinal,
+        (domain, (1 << 64) - 1 if parent == (1 << 64) - 1 else lookup[parent]))
+      self._disk_words_v1("OFFSETS", 8 * len(names), (offset,))
+      self._disk_words_v1("BINDING", 0, (1, len(names), 16, len(state["roots"])))
+      self._disk_words_v1("ACTIONS", 0, (1, 0, 96, 1))
+      for role in ("PATH_POOL", "OFFSETS", "BINDING"):
+       state["scope"].seal_carrier(state["controls"][role])
+     elif names != state["names"]:
+      raise ValueError("ORDINARY_DISK_READONLY_NAMESPACE_CHANGED")
+     baseline = stage == "BASELINE"
+     region = 0 if baseline else 1 + (generation_ordinal % 2)
+     pending["region"] = region
+     if region in state["regions"]:
+      previous = state["regions"][region]
+      if previous is self._settled_snapshot or any(token["generation"] is previous for token in state["borrows"]):
+       raise RuntimeError("ORDINARY_DISK_ROLLING_REGION_STILL_OWNED")
+      # A retired region can be reused only after its original complete
+      # barrier and zero borrowers, through recorded control transitions.
+      if not previous["complete"]:
+       raise RuntimeError("ORDINARY_DISK_INCOMPLETE_REGION")
+      self._disk_retire_region_v1(previous)
+     fstart = 0 if baseline else limits["file_baseline_rows"] + (region - 1) * limits["file_generation_rows"]
+     dstart = 0 if baseline else limits["directory_baseline_rows"] + (region - 1) * limits["directory_generation_rows"]
+     jstart = 0 if baseline else limits["roster_baseline_edges"] + (region - 1) * limits["roster_generation_edges"]
+     file_count = directory_count = edge_count = byte_count = 0
+     children_by_parent = {}
+     for child in names:
+      parent = nodes[child][3]
+      if nodes[child][2] is not None:
+       children_by_parent.setdefault(parent, []).append(state["lookup"][child])
+     capture_targets = (frozenset(target["path"] for target in
+      self._disk_effect_targets_v1(self.active_occurrence)[0] if target["kind"] == "FILE")
+      if stage == "SETTLED" and self.all_effects else frozenset())
+     for ordinal, key in enumerate(names):
+      binding, relative, info, parent = nodes[key]
+      if kinds[key] == 1:
+       if file_count >= limits["file_baseline_rows" if baseline else "file_generation_rows"]:
+        raise ValueError("ORDINARY_DISK_FILE_ROW_CAPACITY")
+       if info is None:
+        row = (ordinal, generation_ordinal, 0, 0, 0, 0, *([0] * 10))
+       elif baseline or (stage == "SETTLED" and self.all_effects
+         and binding["logical_path"] == self.root
+         and relative in capture_targets):
+        row = self._disk_capture_file_v1(binding, relative, ordinal, generation_ordinal)
+       else:
+        prior_index = state["baseline_file_ordinals"].get(ordinal)
+        if prior_index is None:
+         raise ValueError("ORDINARY_DISK_READONLY_FILE_KIND_CHANGED")
+        expected_generation = self.baseline if stage == "FINAL" else self._settled_snapshot
+        prior = self._disk_file_row_v1(expected_generation, prior_index)
+        role, bound, proof = state["scope"]._ordinary_disk_file_bound_v1(binding, relative, info)
+        if proof is not None and tuple(prior[12:16]) != (
+          proof[2][0], proof[2][1], proof[3], proof[2][4]):
+         raise ValueError("ORDINARY_GIT_FINAL_ORIGINAL_BASELINE_IDENTITY")
+        if stage == "FINAL":
+         if not prior[3] or prior[4:6] != (stat.S_IMODE(info.st_mode), info.st_size):
+          raise ValueError("ORDINARY_DISK_FINAL_B0_LOGICAL_FILE_STATE")
+         # A restored inode is a new actual generation. Only
+         # B0 payload/mode is borrowed, never B0 source identity.
+         prior = (ordinal, generation_ordinal, *prior[2:12], info.st_dev,
+          info.st_ino, info.st_size, info.st_mtime_ns)
+        allocation = state["allocations"][prior[2] - 1]
+        # A new control generation may genuinely share B0 backing
+        # only after the fresh full source-vs-B0 byte comparison.
+        self._disk_compare_file_v1(binding, relative, prior, allocation)
+        row = (ordinal, generation_ordinal, *prior[2:12], info.st_dev,
+         info.st_ino, info.st_size, info.st_mtime_ns)
+       byte_count += row[5]
+       if byte_count > limits["baseline_byte_limit" if baseline else "generation_byte_limit"]:
+        raise ValueError("ORDINARY_DISK_RAW_GENERATION_LIMIT")
+       self._disk_words_v1("FILE_HEADERS", 128 * (fstart + file_count), row)
+       if baseline:
+        state["baseline_file_ordinals"][ordinal] = file_count
+       file_count += 1
+       pending["file_rows"] = file_count
+      else:
+       if directory_count >= limits["directory_baseline_rows" if baseline else "directory_generation_rows"]:
+        raise ValueError("ORDINARY_DISK_DIRECTORY_ROW_CAPACITY")
+       children = tuple(children_by_parent.get(key, ()))
+       if edge_count + len(children) > limits["roster_baseline_edges" if baseline else "roster_generation_edges"]:
+        raise ValueError("ORDINARY_DISK_ROSTER_CAPACITY")
+       for child in children:
+        self._disk_words_v1("ROSTER", 8 * (jstart + edge_count), (child,))
+        edge_count += 1
+       prefix = (1, binding["domain_id"], ordinal,
+        (1 << 64) - 1 if parent == (1 << 64) - 1 else state["lookup"][parent], generation_ordinal)
+       if info is None:
+        if children:
+         raise ValueError("ORDINARY_DISK_ABSENT_DIRECTORY_POPULATED")
+        row = (*prefix, 0, 0, *([0] * 13))
+       else:
+        row = (*prefix, 2, 1, jstart + edge_count - len(children) if children else 0, len(children), 0,
+         info.st_dev, info.st_ino, info.st_mode, info.st_size, info.st_mtime_ns,
+         info.st_ctime_ns, info.st_nlink, info.st_uid, info.st_gid, 0)
+       self._disk_words_v1("DIRECTORY_HEADERS", 128 + 160 * (dstart + directory_count), row)
+       directory_count += 1
+       pending["directory_rows"] = directory_count
+       pending["roster_edges"] = edge_count
+     generation_record = {"ordinal": generation_ordinal, "region": region,
+      "stage": stage, "file_start": fstart, "file_count": file_count,
+      "directory_start": dstart, "directory_count": directory_count,
+      "roster_start": jstart, "roster_count": edge_count, "raw_bytes": byte_count,
+      "complete": False}
+     generation = MappingProxyType(generation_record)
+     state["regions"][region] = generation
+     if baseline:
+      state["baseline_generation"] = generation
+     state["capturing_generation"] = generation
+     try:
+      self._disk_publish_directory_v1(self._settled_snapshot, pending=generation)
+      self._disk_compare_live(generation, include_index=not baseline)
+      generation_record["complete"] = True
+      pending["complete"] = True
+      state["pending_capture"] = None
+     finally:
+      state["capturing_generation"] = None
+     return generation
+
+    def _disk_compare_live(self, generation, include_index=True):
+     import struct
+     state = self._disk_light_v1()
+     if (not any(generation is original for original in state["regions"].values())
+       or not generation["complete"] and state["capturing_generation"] is not generation
+       or type(include_index) is not bool):
+      raise ValueError("ORDINARY_DISK_FOREIGN_GENERATION")
+     state["scope"].check_storage_binding(self, state["config"])
+     if (not state["directory_header_published"]
+       or struct.unpack("<16Q", self._disk_control_read_v1("DIRECTORY_HEADERS", 0, 128))
+       != state["directory_header_words"]):
+      raise ValueError("ORDINARY_DISK_ORIGINAL_DIRECTORY_ROLE_HEADER_CHANGED")
+     names, nodes = self._disk_namespace_v1(self._universe())
+     if names != state["names"]:
+      raise ValueError("ORDINARY_DISK_COMPLETE_NAMESPACE_CHANGED")
+     covered = set()
+     children_by_parent = {}
+     for child in names:
+      if nodes[child][2] is not None:
+       children_by_parent.setdefault(nodes[child][3], []).append(state["lookup"][child])
+     for index in range(generation["file_count"]):
+      row = self._disk_file_row_v1(generation, index)
+      if row[0] >= len(names) or row[0] in covered:
+       raise ValueError("ORDINARY_DISK_FILE_CONTROL_PATH_COVERAGE")
+      covered.add(row[0])
+      key = names[row[0]]
+      binding, relative, info, _ = nodes[key]
+      if row[1] != generation["ordinal"] or row[3] not in {0, 1}:
+       raise ValueError("ORDINARY_DISK_FILE_CONTROL_IDENTITY")
+      if row[3] == 0:
+       if info is not None or any(row[2:]):
+        raise ValueError("ORDINARY_DISK_ABSENCE_CHANGED")
+      else:
+       if info is None or not stat.S_ISREG(info.st_mode):
+        raise ValueError("ORDINARY_DISK_FILE_KIND_CHANGED")
+       if not 0 < row[2] <= len(state["allocations"]) or row[4] > 0o7777:
+        raise ValueError("ORDINARY_DISK_FILE_CARRIER_OR_MODE")
+       allocation = state["allocations"][row[2] - 1]
+       if (allocation["ordinal"] != row[2] or allocation["length"] != row[5]
+         or allocation["version"] != tuple(row[6:12])):
+        raise ValueError("ORDINARY_DISK_ORIGINAL_FILE_CARRIER_BINDING")
+       self._disk_compare_file_v1(binding, relative, row, allocation)
+     total_edges = 0
+     for index in range(generation["directory_count"]):
+      raw = self._disk_control_read_v1("DIRECTORY_HEADERS", 128 + 160 * (generation["directory_start"] + index), 160)
+      row = struct.unpack("<20Q", raw)
+      if row[2] >= len(names) or row[2] in covered:
+       raise ValueError("ORDINARY_DISK_DIRECTORY_PATH_COVERAGE")
+      covered.add(row[2])
+      key = names[row[2]]
+      binding, relative, info, parent = nodes[key]
+      if (row[:3] != (1, binding["domain_id"], state["lookup"][key])
+        or row[4] != generation["ordinal"]
+        or row[3] != ((1 << 64) - 1 if parent == (1 << 64) - 1 else state["lookup"][parent])):
+       raise ValueError("ORDINARY_DISK_DIRECTORY_CONTROL_CHANGED")
+      if row[5] == 0:
+       if info is not None or any(row[6:]):
+        raise ValueError("ORDINARY_DISK_ABSENT_DIRECTORY_CHANGED")
+       continue
+      if (row[5] != 2 or row[6] != 1 or info is None or not stat.S_ISDIR(info.st_mode)
+        or row[10:19] != (info.st_dev, info.st_ino, info.st_mode, info.st_size,
+         info.st_mtime_ns, info.st_ctime_ns, info.st_nlink, info.st_uid, info.st_gid)
+        or row[9] or row[19]):
+       raise ValueError("ORDINARY_DISK_PRESENT_DIRECTORY_CHANGED")
+      children = tuple(children_by_parent.get(key, ()))
+      if (len(children) != row[8]
+        or row[7] != (generation["roster_start"] + total_edges if children else 0)):
+       raise ValueError("ORDINARY_DISK_DIRECTORY_ROSTER_CHANGED")
+      for offset, child in enumerate(children):
+       if struct.unpack("<Q", self._disk_control_read_v1("ROSTER", 8 * (row[7] + offset), 8))[0] != child:
+        raise ValueError("ORDINARY_DISK_DIRECTORY_CHILD_CHANGED")
+      total_edges += len(children)
+     if total_edges != generation["roster_count"] or covered != set(range(len(names))):
+      raise ValueError("ORDINARY_DISK_COMPLETE_ROSTER_COVERAGE")
+     if include_index:
+      row = self._disk_file_row_v1(generation, 0, index=True)
+      if (row != self.index_baseline or row[0] != state["limits"]["namespace_entry_limit"]
+        or row[1] != 1 or row[3] != 1
+        or row[2] != state["index_allocation"]["ordinal"]):
+       raise ValueError("ORDINARY_DISK_SEPARATELY_TAGGED_ORIGINAL_INDEX")
+      binding, relative = state["index_binding"]
+      self._disk_compare_file_v1(binding, relative, row, state["index_allocation"])
+     state["scope"].check_storage_binding(self, state["config"])
+     state["full_barriers"] += 1
+     state["verified_generations"][generation["ordinal"]] = state["full_barriers"]
+
+    def _disk_borrow(self, generation, actual_consumer):
+     state = self._disk_light_v1()
+     if (actual_consumer is not self.plan[self.active_occurrence - 1]
+       or generation is not self._settled_snapshot or not generation["complete"]):
+      raise ValueError("ORDINARY_DISK_ORIGINAL_BORROW_ASSOCIATION")
+     record = state["scope"]._ordinary_occurrence_record_v1(actual_consumer)
+     token = {"candidate": self, "generation": generation, "consumer": actual_consumer,
+       "occurrence": self.active_occurrence, "released": False,
+       "paths": state["config"]["paths"], "plan": self.plan, "native_record": record}
+     state["borrows"].append(token)
+     return token
+
+    def _disk_release_borrow(self, actual_token, actual_terminal_owner):
+     state = self._disk_light_v1()
+     from tools.validation_reliability import _command_requires_process_retention_v1
+     if (actual_terminal_owner is not self._acquisition_supervision
+       or actual_terminal_owner is not _RUN_COMMANDS_SUPERVISION
+       or actual_terminal_owner["candidate_custody"] is not self
+       or actual_terminal_owner["paths"] is not state["config"]["paths"]
+       or actual_terminal_owner["pending"] or not any(actual_token is original for original in state["borrows"])
+       or actual_token["released"] or actual_token["candidate"] is not self):
+      raise RuntimeError("ORDINARY_DISK_BORROW_TERMINAL_OWNER_REQUIRED")
+     receipt = actual_terminal_owner["receipt"]
+     if (type(receipt) is not CommandExecutionReceiptV1
+       or receipt.command_index != actual_token["occurrence"]
+       or receipt.run_id != state["config"]["paths"].run_id
+       or _command_requires_process_retention_v1(receipt)):
+      raise RuntimeError("ORDINARY_DISK_BORROW_CHILD_UNRESOLVED")
+     if (actual_token["plan"] is not self.plan or actual_token["paths"] is not state["config"]["paths"]
+       or state["scope"]._ordinary_occurrence_record_v1(actual_token["consumer"]) is not actual_token["native_record"]):
+      raise RuntimeError("ORDINARY_DISK_BORROW_NATIVE_RECORD_CHANGED")
+     state["scope"]._ordinary_require_occurrence_terminal_v1(actual_token["native_record"], receipt)
+     actual_token["released"] = True
+     state["borrows"].remove(actual_token)
+
+    def _disk_rp5a_surfaces_v1(self, entry, programme, generation):
+     """Read the selected complete C generation through its original store."""
+     import struct
+     from types import MappingProxyType
+     from tools.validation_reliability import (_ScanCandidateSurface, _ScanDiskSnapshotV3,
+      _ScanRunReadLimits, _mapper_slot_settled_v1, _scan_candidate_path)
+     state = self._disk_light_v1()
+     scope = state['scope']
+     resource = scope._ordinary_resource_programme_v1
+     original = scope._ordinary_original_resource_programme_v1
+     fields = {'entry', 'names', 'wire_version', 'read_limits', 'candidate_read_bytes',
+      'deadline_ns', 'role', 'source', 'original'}
+     if (resource is not original[0] or tuple(resource.items()) != original[1]
+       or not any(programme is value for value in
+        scope._ordinary_rp5a_source_build_checked_v1()['surface_programmes'])
+       or type(programme) is not dict or set(programme) != fields
+       or programme['entry'] is not entry or entry is not self.plan[entry.command_index - 1]
+       or type(programme['names']) is not tuple or not programme['names']
+       or type(programme['wire_version']) is not int or programme['wire_version'] not in (2, 3)
+       or type(programme['read_limits']) is not _ScanRunReadLimits
+       or type(programme['candidate_read_bytes']) is not int or programme['candidate_read_bytes'] <= 0
+       or type(programme['deadline_ns']) is not int or programme['deadline_ns'] <= time.monotonic_ns()
+       or programme['role'] not in ('SCANNER', 'VALIDATE', 'PYTEST', 'EVIDENCE')
+       or programme['wire_version'] == 3 and programme['role'] != 'SCANNER'
+       or programme['source'] is not scope._ordinary_host_original_v1[0]):
+      raise ValueError('ORDINARY_R_ORIGINAL_SOURCE_SELECTED_SURFACE_PROGRAMME')
+     frozen = programme['original']
+     if (type(frozen) is not tuple or len(frozen) != 9
+       or frozen[0] is not programme or frozen[1] is not scope or frozen[2] is not entry
+       or frozen[3] is not programme['names'] or frozen[4] != programme['wire_version']
+       or frozen[5] is not programme['read_limits'] or frozen[6] != programme['candidate_read_bytes']
+       or frozen[7] != programme['deadline_ns'] or frozen[8] is not programme['source']
+       or type(generation) is not MappingProxyType or generation is not self._settled_snapshot
+       or generation['complete'] is not True or state['regions'].get(generation['region']) is not generation
+       or state['pending_capture'] is not None or state['capturing_generation'] is not None
+       or not 0 < state['verified_generations'].get(generation['ordinal'], 0) <= state['full_barriers']):
+      raise ValueError('ORDINARY_R_COMPLETE_CURRENT_SETTLED_SOURCE_GENERATION')
+     names = programme['names']
+     if len(names) != len(set(names)):
+      raise ValueError('ORDINARY_R_SOURCE_SELECTED_DUPLICATE_NAMES')
+     for path in names: _scan_candidate_path(path, root_allowed=path == '.')
+     repository = next(root for root in state['roots'] if root['logical_path'] == self.root)
+     selected = {}
+     for path in names:
+      relative = '' if path == '.' else path
+      ordinal = state['lookup'].get((repository['domain_id'], relative))
+      if type(ordinal) is not int or state['names'][ordinal] != (repository['domain_id'], relative):
+       raise ValueError('ORDINARY_R_COMPLETE_CURRENT_C_MEMBERSHIP')
+      selected[ordinal] = path
+     file_rows = {}
+     for index in range(generation['file_count']):
+      row = self._disk_file_row_v1(generation, index)
+      if row[0] not in selected: continue
+      if row[0] in file_rows or row[1] != generation['ordinal'] or row[3] not in (0, 1):
+       raise ValueError('ORDINARY_R_CURRENT_FILE_HEADER_COVERAGE')
+      file_rows[row[0]] = row
+     directory_rows = {}
+     for index in range(generation['directory_count']):
+      raw = self._disk_control_read_v1('DIRECTORY_HEADERS',
+       128 + 160 * (generation['directory_start'] + index), 160)
+      row = struct.unpack('<20Q', raw)
+      if row[2] not in selected: continue
+      if (row[2] in directory_rows or row[:2] != (1, repository['domain_id'])
+        or row[4] != generation['ordinal'] or row[5] not in (0, 2)):
+       raise ValueError('ORDINARY_R_CURRENT_DIRECTORY_HEADER_COVERAGE')
+      directory_rows[row[2]] = row
+     if set(file_rows) & set(directory_rows) or set(file_rows) | set(directory_rows) != set(selected):
+      raise ValueError('ORDINARY_R_SELECTED_COMPLETE_ROW_COVERAGE')
+     payload = sum(row[5] for row in file_rows.values() if row[3] == 1)
+     # Legacy independently finite reader contents must fit their original
+     # hex-control bound BEFORE any payload is materialized. V3 never uses
+     # this finite-reader buffer branch or an aggregate-corpus byte ceiling.
+     if programme['wire_version'] == 2 and 2 * payload > programme['read_limits'].byte_limit:
+      raise ValueError('ORDINARY_R_FINITE_LEGACY_READER_PAYLOAD_BOUND')
+     rows = []
+     for path in names:
+      ordinal = state['lookup'][(repository['domain_id'], '' if path == '.' else path)]
+      if ordinal in file_rows:
+       row = file_rows[ordinal]
+       if row[3] == 0:
+        if any(row[2:]): raise ValueError('ORDINARY_R_EXACT_CURRENT_FILE_ABSENCE')
+        rows.append(_ScanCandidateSurface(path, 'ABSENT', 0, b'', ()))
+        continue
+       if not 0 < row[2] <= len(state['allocations']) or row[4] > 0o7777:
+        raise ValueError('ORDINARY_R_CURRENT_SEALED_FILE_HEADER')
+       allocation = state['allocations'][row[2] - 1]
+       if (allocation['ordinal'] != row[2] or allocation['length'] != row[5]
+         or allocation['version'] != tuple(row[6:12]) or allocation['sealed'] is not True
+         or allocation['writer_closed'] is not True or allocation['disposed'] is not False
+         or allocation['errors']):
+        raise ValueError('ORDINARY_R_CURRENT_INDEPENDENT_C_ALLOCATION')
+       scope.check_carrier(allocation, tuple(row[6:12]))
+       if programme['wire_version'] == 3:
+        content = _ScanDiskSnapshotV3(path, allocation['path'], tuple(row[6:12]),
+         tuple(row[12:16]), row[4], row[5])
+       else:
+        slot, errors, data = None, [], bytearray()
+        try:
+         slot = self._disk_snapshot_open_v1(allocation, tuple(row[6:12]))
+         remaining = row[5]
+         while remaining:
+          part = self._disk_read_v1(slot['returned_fd'], min(65536, remaining))
+          if not part or len(part) > remaining: raise ValueError('ORDINARY_R_FINITE_EXPECTED_BYTES_TRUNCATED')
+          data.extend(part)
+          remaining -= len(part)
+         if self._disk_read_v1(slot['returned_fd'], 1): raise ValueError('ORDINARY_R_FINITE_EXPECTED_BYTES_GREW')
+         if self._disk_version_v1(self._disk_call_v1(os.fstat, slot['returned_fd'])) != tuple(row[6:12]):
+          raise ValueError('ORDINARY_R_FINITE_EXPECTED_BYTES_CHANGED')
+        except BaseException as error: errors.append(error)
+        self._disk_close_v1(slot, errors)
+        self._disk_raise_v1(errors)
+        if not _mapper_slot_settled_v1(slot): raise ValueError('ORDINARY_R_FINITE_EXPECTED_CLOSE_DEBT')
+        scope.check_carrier(allocation, tuple(row[6:12]))
+        content = bytes(data)
+       rows.append(_ScanCandidateSurface(path, 'FILE', row[4], content, ()))
+      else:
+       row = directory_rows[ordinal]
+       if row[5] == 0:
+        if any(row[6:]): raise ValueError('ORDINARY_R_EXACT_CURRENT_DIRECTORY_ABSENCE')
+        rows.append(_ScanCandidateSurface(path, 'ABSENT', 0, b'', ()))
+        continue
+       if (row[6] != 1 or row[9] or row[19] or row[8] > generation['roster_count']
+         or row[8] and not generation['roster_start'] <= row[7] <= generation['roster_start'] + generation['roster_count'] - row[8]):
+        raise ValueError('ORDINARY_R_COMPLETE_DIRECTORY_ROSTER_RANGE')
+       children = []
+       for offset in range(row[8]):
+        child, = struct.unpack('<Q', self._disk_control_read_v1('ROSTER', 8 * (row[7] + offset), 8))
+        if not 0 <= child < len(state['names']): raise ValueError('ORDINARY_R_ROSTER_CHILD_MEMBERSHIP')
+        domain, relative = state['names'][child]
+        if domain != repository['domain_id'] or str(pathlib.PurePosixPath(relative).parent) != (path or '.'):
+         raise ValueError('ORDINARY_R_EXACT_DIRECTORY_CHILD_PARENT')
+        children.append(pathlib.PurePosixPath(relative).name)
+       rows.append(_ScanCandidateSurface(path, 'DIRECTORY', stat.S_IMODE(row[12]), b'', tuple(children)))
+     self._disk_light_v1()
+     return tuple(rows), payload, state['config']['snapshot_root']
+
+
+    def _disk_mapper_source_programme_v1(self):
+     from types import MappingProxyType
+     from tools.validation_reliability import (_LinuxImmutableSourceSealV2,
+      _LinuxPreflightCensusV1, _mapper_original_position_v1)
+     state = self._disk_light_v1()
+     scope = state['scope']
+     record = getattr(scope, '_ordinary_mapper_sources_v1', None)
+     if (type(record) is not dict or record is not getattr(scope, '_ordinary_original_mapper_sources_v1', None)
+       or record['scope'] is not scope or record['paths'] is not state['config']['paths']
+       or record['plan'] is not self.plan or state['config']['plan'] is not self.plan
+       or type(record['source']) is not _LinuxImmutableSourceSealV2
+       or type(record['census']) is not _LinuxPreflightCensusV1
+       or record['source'].census is not record['census']
+       or record['source']._ordinary_meter_scope_v1 is not scope
+       or record['census']._ordinary_meter_scope_v1 is not scope
+       or record['source'].state not in ('READABLE', 'IN_USE')
+       or record['source'].failure is not None or not record['census'].complete
+       or record['census'].failures or record['complete'] is not True or record['errors']
+       or (record['source'].pid, record['source'].thread) != (self.process_id, self.thread_id)):
+      raise ValueError('ORDINARY_M_ORIGINAL_COMPLETE_PRE_C_INPUT_PROGRAMME')
+     original = record['original']
+     if (type(original) is not tuple or len(original) != 15
+       or original != (record, scope, record['source'], record['census'], record['paths'],
+        record['phase'], self.plan, record['selected'], record['parser_limits'],
+        record['source_node_limit'], record['sources'], record['headers'],
+        record['families'], record['occurrences'], record['errors'])
+       or record['sealed'] != (tuple(tuple(row.items()) for row in record['sources']),
+        tuple((name, tuple(row.items())) for name, row in record['headers'].items()),
+        tuple((name, tuple(row.items())) for name, row in record['families'].items()),
+        tuple(tuple(row.items()) for row in record['occurrences']))):
+      raise ValueError('ORDINARY_M_ORIGINAL_PRE_C_INPUT_FIELDS_CHANGED')
+     selected = tuple((entry, _mapper_original_position_v1(entry.argv, self.root))
+      for entry in self.plan if _mapper_original_position_v1(entry.argv, self.root) is not None)
+     if (selected != record['selected'] or len(selected) != len(record['occurrences'])
+       or any(entry is not occurrence['entry'] or position != occurrence['position']
+        for (entry, position), occurrence in zip(selected, record['occurrences'], strict=True))):
+      raise ValueError('ORDINARY_M_ORIGINAL_SELECTED_OCCURRENCE_ROSTER')
+     if (type(self.baseline) is not MappingProxyType or self.baseline is not state['baseline_generation']
+       or not self.baseline['complete'] or state['regions'].get(0) is not self.baseline
+       or type(state['verified_generations'].get(self.baseline['ordinal'])) is not int
+       or not 0 < state['verified_generations'][self.baseline['ordinal']] <= state['full_barriers']
+       or state['pending_capture'] is not None or state['capturing_generation'] is not None):
+      raise ValueError('ORDINARY_M_COMPLETE_ORIGINAL_C_INPUT_GENERATION')
+     return record
+
+    def _disk_mapper_original_input_v1(self, compiled_row):
+     from tools.validation_reliability import _mapper_slot_settled_v1
+     record = self._disk_mapper_source_programme_v1()
+     state = self._ordinary_disk_state_v1
+     if (type(compiled_row) is not tuple or len(compiled_row) != 5
+       or not any(compiled_row is row for occurrence in record['occurrences'] for row in occurrence['inputs'])):
+      raise ValueError('ORDINARY_M_ORIGINAL_COMPILED_INPUT_ROW')
+     path, attempts, length, source_row, source_version = compiled_row
+     self._disk_uint_v1(attempts, positive=True, extent=True)
+     self._disk_uint_v1(length, extent=True)
+     self._paths((path,), self.entry_limit)
+     source = record['source']
+     original_path = self.root.joinpath(*path.split('/'))
+     if (source.row_index.get(str(original_path)) is not source_row
+       or str(original_path) not in source.post
+       or tuple(source.post[str(original_path)]) != source_version
+       or str(original_path) not in source.files or source_row['kind'] != 'file'
+       or source_row['role'] != 'repository' or source_row['logical_bytes'] != length
+       or type(source_version) is not tuple or len(source_version) != 11
+       or source_version[3] != length or source_version[6] != 1
+       or not stat.S_ISREG(source_version[2])):
+      raise ValueError('ORDINARY_M_IMMUTABLE_SOURCE_AND_C_INPUT_ASSOCIATION')
+     repository = next(binding for binding in state['roots'] if binding['logical_path'] == self.root)
+     scope = state['scope']
+     if (scope._ordinary_host_original_v1[0] is not source
+       or not scope._ordinary_transfer_complete_v1
+       or (scope._ordinary_factory_owner_v1 != (self.process_id, self.thread_id))
+       or repository['view_path'] != scope._ordinary_view_path_v1):
+      raise ValueError('ORDINARY_M_ORIGINAL_VIEW_TRANSFER_OWNER')
+     transfers = tuple(transfer for transfer in scope._ordinary_tree_transfers_v1
+      if transfer['scope'] is scope and transfer['role'] == 'VIEW'
+      and transfer['source'] is source and transfer['source_row'] is source.row_index[str(self.root)]
+      and transfer['target_slot'] is repository['root_slot']
+      and transfer['target_path'] == repository['view_path'])
+     if (len(transfers) != 1 or not transfers[0]['complete'] or transfers[0]['errors']
+       or type(transfers[0]['first_row']) is not int or type(transfers[0]['final_row']) is not int
+       or not 0 <= transfers[0]['first_row'] <= transfers[0]['final_row'] <= len(scope._ordinary_transfer_rows_v1)
+       or any(not _mapper_slot_settled_v1(slot) for slot in transfers[0]['source_slots'])):
+      raise ValueError('ORDINARY_M_COMPLETE_ORIGINAL_VIEW_TREE_TRANSFER')
+     transfer_rows = scope._ordinary_transfer_rows_v1[transfers[0]['first_row']:transfers[0]['final_row']]
+     matches = tuple(transfer for transfer in transfer_rows
+      if transfer['source_row'] is source_row and transfer['path'] == repository['view_path'] / path)
+     if (len(matches) != 1 or matches[0]['length'] != length
+       or tuple(matches[0]['source_version']) != source_version
+       or any(matches[0][field] is not True for field in ('copied', 'compared', 'sealed'))
+       or matches[0]['errors'] or type(matches[0]['view_version']) is not tuple
+       or len(matches[0]['view_version']) != 6 or matches[0]['view_version'][2] != length
+       or stat.S_IMODE(matches[0]['view_version'][5]) != stat.S_IMODE(source.originals[source_row['path']]['version'][2])
+       or matches[0]['view_version'][:2] == source_version[:2]
+       or any(not _mapper_slot_settled_v1(matches[0][field]) for field in ('writer', 'reader'))):
+      raise ValueError('ORDINARY_M_ORIGINAL_SOURCE_TO_INDEPENDENT_VIEW_BYTES')
+     view_version = scope._ordinary_view_operand_version_v1(source_row, source_version, matches[0])
+     ordinal = state['lookup'].get((repository['domain_id'], path))
+     index = state['baseline_file_ordinals'].get(ordinal)
+     if index is None:
+      raise ValueError('ORDINARY_M_ORIGINAL_C_INPUT_FILE_REQUIRED')
+     row = self._disk_file_row_v1(self.baseline, index)
+     if (row[0] != ordinal or row[1] != self.baseline['ordinal'] or row[3] != 1
+       or not 1 <= row[2] <= len(state['allocations'])
+       or row[4] != stat.S_IMODE(view_version[5]) or row[5] != length
+       or tuple(row[12:16]) != tuple(view_version[:4])):
+      raise ValueError('ORDINARY_M_ORIGINAL_C_HEADER_AND_PROTECTED_SOURCE_DIFFER')
+     allocation = state['allocations'][row[2] - 1]
+     if (allocation['ordinal'] != row[2] or allocation['length'] != length
+       or allocation['version'] != tuple(row[6:12]) or not allocation['sealed']
+       or not allocation['writer_closed'] or allocation['disposed'] or allocation['errors']):
+      raise ValueError('ORDINARY_M_ORIGINAL_C_SEALED_SEGMENT_REQUIRED')
+     state['scope'].check_carrier(allocation, tuple(row[6:12]))
+     return row, allocation
+
+    def _disk_mapper_material_v1(self, entry):
+        """Produce one independent comparator from original C INPUT_BYTES.
+
+        There is no semantic/output oracle here. All original input rows and
+        ordered lengths are frozen before creating this same-Scope carrier.
+        Construction borrows B0 until copy, native seal, two-sided readback,
+        name/descriptor checks and explicit close have all succeeded.
+        """
+        state = self._disk_light_v1()
+        programme = self._disk_mapper_source_programme_v1()
+        if (self.active_occurrence is not None or self._settled_snapshot is not self.baseline
+          or self.state != 'BASELINE_READY' or state['release_attempted']
+          or entry is not self.plan[entry.command_index - 1]):
+         raise ValueError('ORDINARY_M_CONSTRUCTION_PRECEDES_OCCURRENCE_AND_TRANSITION')
+        selected = tuple(row for row in programme['occurrences'] if row['entry'] is entry)
+        if len(selected) != 1:
+         raise ValueError('ORDINARY_M_UNSELECTED_MATERIAL_OCCURRENCE')
+        compiled = selected[0]
+        materials = state.setdefault('mapper_materials', [])
+        if any(row['entry'] is entry for row in materials):
+         raise ValueError('ORDINARY_M_MATERIAL_CONSTRUCTION_NOT_RETRIED')
+        record = dict(candidate=self, scope=state['scope'], plan=self.plan, paths=state['config']['paths'],
+         programme=programme, compiled=compiled, entry=entry, generation=self.baseline,
+         source_borrow=None, input_rows=None, allocation=None, copying=False,
+         copy_complete=False, readback_complete=False, source_released=False,
+         complete=False, errors=[])
+        record['original'] = (record, self, state, state['scope'], self.plan, state['config']['paths'],
+         programme, compiled, entry, self.baseline, record['errors'])
+        materials.append(record)
+        errors = record['errors']
+        try:
+         input_rows = tuple(self._disk_mapper_original_input_v1(row) for row in compiled['inputs'])
+         if sum(row[0][5] for row in input_rows) != compiled['extent']:
+          raise ValueError('ORDINARY_M_ORIGINAL_SEGMENT_EXTENT')
+         record['input_rows'] = input_rows
+         # This is the original C's material-construction borrow, not a
+         # fabricated native occurrence token or a new candidate authority.
+         record['source_borrow'] = (self, self.baseline, programme, compiled, input_rows)
+         self._disk_charge_v1('extra_held_carrier_limit', 1)
+         self._disk_charge_v1('extra_held_byte_limit', compiled['extent'])
+         state['next_carrier'] += 1
+         record['copying'] = True
+         allocation = state['scope'].create_carrier(state['next_carrier'], compiled['extent'])
+         record['allocation'] = allocation
+         state['allocations'].append(allocation)
+         writer = allocation['writer_slot']
+         if (allocation['ordinal'] != state['next_carrier'] or allocation['length'] != compiled['extent']
+           or allocation['writer_fd'] != writer['returned_fd'] or writer['closed']
+           or allocation['errors']):
+          raise ValueError('ORDINARY_M_ACTUAL_PARTIAL_MATERIAL_FACTORY_ASSOCIATION')
+         for row, expected_allocation in input_rows:
+          original = None
+          owned_errors = []
+          try:
+           original = self._disk_snapshot_open_v1(expected_allocation, tuple(row[6:12]))
+           remaining = row[5]
+           while remaining:
+            raw = self._disk_read_v1(original['returned_fd'], min(65536, remaining))
+            if not raw:
+             raise ValueError('ORDINARY_M_ORIGINAL_SEGMENT_TRUNCATED')
+            self._disk_write_v1(writer['returned_fd'], raw)
+            remaining -= len(raw)
+           if self._disk_read_v1(original['returned_fd'], 1):
+            raise ValueError('ORDINARY_M_ORIGINAL_SEGMENT_PHYSICAL_SUFFIX')
+           if self._disk_version_v1(self._disk_call_v1(os.fstat, original['returned_fd'])) != tuple(row[6:12]):
+            raise ValueError('ORDINARY_M_ORIGINAL_SEGMENT_DESCRIPTOR_CHANGED')
+           state['scope'].check_carrier(expected_allocation, tuple(row[6:12]))
+          except BaseException as error:
+           owned_errors.append(error)
+          if original is not None:
+           self._disk_close_v1(original, owned_errors)
+          self._disk_raise_v1(owned_errors)
+          state['scope'].check_carrier(expected_allocation, tuple(row[6:12]))
+         written = self._disk_call_v1(os.fstat, writer['returned_fd'])
+         if (not stat.S_ISREG(written.st_mode) or written.st_nlink != 1
+           or written.st_size != compiled['extent']):
+          raise ValueError('ORDINARY_M_COMPLETE_COMPARATOR_EXTENT')
+         # Only this registered M comparator receives readonly leaf access;
+         # all B0 carriers and the private0700 backing remain unchanged.
+         self._disk_call_v1(os.fchmod, writer['returned_fd'], 0o444)
+         state['scope'].seal_carrier(allocation)
+         if (not allocation['sealed'] or not allocation['writer_closed']
+           or allocation['version'][2] != compiled['extent']):
+          raise ValueError('ORDINARY_M_ACTUAL_SEALED_COMPARATOR')
+         record['copy_complete'] = True
+         actual = None
+         paired_errors = []
+         try:
+          actual = self._disk_snapshot_open_v1(allocation, allocation['version'])
+          for row, expected_allocation in input_rows:
+           original = None
+           owned_errors = []
+           try:
+            original = self._disk_snapshot_open_v1(expected_allocation, tuple(row[6:12]))
+            remaining = row[5]
+            while remaining:
+             left = self._disk_read_v1(actual['returned_fd'], min(65536, remaining))
+             if not left:
+              raise ValueError('ORDINARY_M_COMPARATOR_TRUNCATED')
+             position = 0
+             while position < len(left):
+              right = self._disk_read_v1(original['returned_fd'], len(left) - position)
+              if not right or right != left[position:position + len(right)]:
+               raise ValueError('ORDINARY_M_COMPARATOR_DIFFERS_FROM_ORIGINAL_INPUT')
+              position += len(right)
+             remaining -= len(left)
+            if self._disk_read_v1(original['returned_fd'], 1):
+             raise ValueError('ORDINARY_M_ORIGINAL_SEGMENT_PHYSICAL_SUFFIX')
+            if self._disk_version_v1(self._disk_call_v1(os.fstat, original['returned_fd'])) != tuple(row[6:12]):
+             raise ValueError('ORDINARY_M_ORIGINAL_SEGMENT_DESCRIPTOR_CHANGED')
+            state['scope'].check_carrier(expected_allocation, tuple(row[6:12]))
+           except BaseException as error:
+            owned_errors.append(error)
+           if original is not None:
+            self._disk_close_v1(original, owned_errors)
+           self._disk_raise_v1(owned_errors)
+           state['scope'].check_carrier(expected_allocation, tuple(row[6:12]))
+          if self._disk_read_v1(actual['returned_fd'], 1):
+           raise ValueError('ORDINARY_M_COMPARATOR_PHYSICAL_SUFFIX')
+          if self._disk_version_v1(self._disk_call_v1(os.fstat, actual['returned_fd'])) != allocation['version']:
+           raise ValueError('ORDINARY_M_COMPARATOR_DESCRIPTOR_CHANGED')
+          state['scope'].check_carrier(allocation, allocation['version'])
+         except BaseException as error:
+          paired_errors.append(error)
+         if actual is not None:
+          self._disk_close_v1(actual, paired_errors)
+         self._disk_raise_v1(paired_errors)
+         state['scope'].check_carrier(allocation, allocation['version'])
+         record['readback_complete'] = True
+         # The actual original generation and immutable source association
+         # are still required after the entire independent comparison.
+         if self._disk_mapper_source_programme_v1() is not programme:
+          raise ValueError('ORDINARY_M_INPUT_PROGRAMME_CHANGED_DURING_COPY')
+         for compiled_row in compiled['inputs']:
+          self._disk_mapper_original_input_v1(compiled_row)
+         record['copying'] = False
+         record['source_released'] = True
+         record['source_borrow'] = None
+         record['complete'] = True
+         return record
+        except BaseException as error:
+         errors.append(error)
+         # Preserve original partial carrier/descriptor/source-borrow debt.
+         # The source borrow is never released by a failed prefix or a
+         # metadata-only walk; the original Scope and C keep all evidence.
+         self._disk_fail_v1(error)
+         raise
+
+    def _disk_mapper_expected_metadata_v1(self, path, *, entry):
+     # Only the identical original active disk borrow supplies this metadata.
+     # The independent mapper basis still performs the subsequent byte proof.
+     state = self._disk_light_v1()
+     try:
+      from types import MappingProxyType
+      self._paths((path,), self.entry_limit)
+      token = self._occurrence_before
+      index = self.active_occurrence
+      token_keys = {"candidate", "generation", "consumer", "occurrence",
+         "released", "paths", "plan", "native_record"}
+      if (type(index) is not int or not 1 <= index <= len(self.plan)
+        or self.state != "BASELINE_READY" or state["release_attempted"]
+        or type(token) is not dict or set(token) != token_keys
+        or not any(token is original for original in state["borrows"])
+        or token["candidate"] is not self or token["released"] is not False
+        or type(token["occurrence"]) is not int or token["occurrence"] != index
+        or entry is not self.plan[index - 1] or token["consumer"] is not entry
+        or token["plan"] is not self.plan or state["config"]["plan"] is not self.plan
+        or token["paths"] is not state["config"]["paths"]
+        or entry.run_id != token["paths"].run_id
+        or state["scope"]._ordinary_occurrence_record_v1(entry) is not token["native_record"]):
+       raise ValueError("ORDINARY_DISK_MAPPER_ORIGINAL_OCCURRENCE_BORROW")
+      generation = token["generation"]
+      if (type(generation) is not MappingProxyType
+        or generation is not self._settled_snapshot or generation["complete"] is not True
+        or state["regions"].get(generation["region"]) is not generation
+        or state["baseline_generation"] is not self.baseline
+        or state["pending_capture"] is not None or state["capturing_generation"] is not None
+        or type(generation["ordinal"]) is not int
+        or type(state["full_barriers"]) is not int or state["full_barriers"] <= 0
+        or type(state["verified_generations"].get(generation["ordinal"])) is not int
+        or not 0 < state["verified_generations"][generation["ordinal"]] <= state["full_barriers"]):
+       raise ValueError("ORDINARY_DISK_MAPPER_COMPLETE_CAPTURED_GENERATION")
+      repository = next(binding for binding in state["roots"] if binding["logical_path"] == self.root)
+      ordinal = state["lookup"].get((repository["domain_id"], path))
+      file_index = state["baseline_file_ordinals"].get(ordinal)
+      if (type(ordinal) is not int or not 0 <= ordinal < len(state["names"])
+        or state["names"][ordinal] != (repository["domain_id"], path)
+        or type(file_index) is not int or not 0 <= file_index < generation["file_count"]):
+       raise ValueError("ORDINARY_DISK_MAPPER_CAPTURED_FILE_MEMBERSHIP")
+      row = self._disk_file_row_v1(generation, file_index)
+      if (row[:2] != (ordinal, generation["ordinal"]) or row[3] != 1
+        or not 0 < row[2] <= len(state["allocations"]) or row[4] > 0o7777):
+       raise ValueError("ORDINARY_DISK_MAPPER_CAPTURED_FILE_HEADER")
+      self._disk_uint_v1(row[5], extent=True)
+      allocation = state["allocations"][row[2] - 1]
+      if (type(allocation) is not dict or allocation["ordinal"] != row[2]
+        or allocation["length"] != row[5] or allocation["version"] != tuple(row[6:12])
+        or allocation["sealed"] is not True or allocation["writer_closed"] is not True
+        or allocation["disposed"] is not False or allocation["errors"]):
+       raise ValueError("ORDINARY_DISK_MAPPER_ORIGINAL_SEALED_ALLOCATION")
+      state["scope"].check_carrier(allocation)
+      self._disk_light_v1()
+      return row[4], row[5]
+     except BaseException as error:
+      self._disk_fail_v1(error)
+      raise
+
+    def _disk_logical_before_state(self, path):
+     state = self._disk_light_v1()
+     repository = next(binding for binding in state["roots"] if binding["logical_path"] == self.root)
+     ordinal = state["lookup"].get((repository["domain_id"], path))
+     index = state["baseline_file_ordinals"].get(ordinal)
+     if index is None:
+      raise ValueError("ORDINARY_DISK_FINITE_FILE_STATE_REQUIRED")
+     row = self._disk_file_row_v1(self._settled_snapshot, index)
+     return row[3], row[4], row[5]
+
+    def _disk_initialize_v1(self, config):
+     from tools.validation_reliability import _LinuxPreflightScopeV1, _LinuxSourceNativeV2
+     state = self._ordinary_disk_state_v1
+     if (type(config) is not dict or set(config) != {"scope", "paths", "plan", "deadline_ns", "snapshot_root", "roots", "limits"}
+       or type(config["scope"]) is not _LinuxPreflightScopeV1
+       or type(config["paths"]) is not ValidationRunPathsV1 or config["paths"].repo_root != self.root
+       or config["plan"] is not self.plan or config["deadline_ns"] != self.deadline_ns
+       or type(config["roots"]) is not tuple or not config["roots"]
+       or self.native_basis is not None or sys.platform != "linux"):
+      raise ValueError("ORDINARY_DISK_EXACT_READONLY_BINDING")
+     if (type(config["scope"].execution_deadline_ns) is not int
+       or type(config["scope"].settlement_deadline_ns) is not int
+       or not time.monotonic_ns() < config["scope"].execution_deadline_ns
+        < config["scope"].settlement_deadline_ns == self.deadline_ns):
+      raise ValueError("ORDINARY_DISK_ORIGINAL_EXECUTION_AND_SETTLEMENT_CUTOFFS")
+     layout = self._disk_control_layout_v1(config["limits"])
+     resource = getattr(config["scope"], "_ordinary_resource_programme_v1", None)
+     phase_partition = (resource.get("phase_allocations")
+      if type(resource) is dict else None)
+     if phase_partition is None:
+      if (config["limits"]["raw_retained_byte_limit"] > self.snapshot_byte_limit
+        or config["limits"]["raw_read_byte_limit"] > self.remaining_read_bytes
+        or config["limits"]["mapper_activation_read_reserve"]
+        or config["limits"]["mapper_activation_retained_reserve"]):
+       raise ValueError("ORDINARY_DISK_ORIGINAL_RESIDUAL_ALLOCATION")
+     else:
+      from tools.validation_reliability import _ordinary_phase_candidate_limits_v1
+      if _ordinary_phase_candidate_limits_v1(config["scope"], resource) != (
+        self.snapshot_byte_limit, self.remaining_read_bytes):
+       raise ValueError("ORDINARY_DISK_ORIGINAL_ISSUED_PHASE_COMPLEMENT")
+     meter = config["scope"]._ordinary_meter_v1
+     if (type(meter) is not dict or set(meter) != {"limits", "remaining", "observed", "owner", "deadline_ns"}
+       or meter["limits"] is not config["limits"]
+       or meter["owner"] != (self.process_id, self.thread_id)
+       or meter["deadline_ns"] != self.deadline_ns
+       or any(type(meter[key]) is not dict or set(meter[key]) != set(config["limits"])
+        for key in ("remaining", "observed"))
+       or any(type(meter[key][name]) is not int or meter[key][name] < 0
+        for key in ("remaining", "observed") for name in config["limits"])
+       or any(meter["remaining"][name] != max(0, config["limits"][name] - meter["observed"][name])
+        for name in config["limits"])):
+      raise ValueError("ORDINARY_DISK_ORIGINAL_CUMULATIVE_METER")
+     predecessor_reads = meter["observed"]["raw_read_byte_limit"]
+     if phase_partition is None:
+      if predecessor_reads > self.remaining_read_bytes:
+       raise ValueError("ORDINARY_DISK_PREDECESSOR_READ_DEMAND")
+      self.remaining_read_bytes -= predecessor_reads
+     # Preserve actual prefix observations. The issued C complement already
+     # excludes them; the original shared meter is never reset or refunded.
+     self.observed_read_bytes += predecessor_reads
+     state.update({"candidate": self, "config": config, "scope": config["scope"],
+      "roots": config["roots"], "limits": config["limits"], "meter": meter,
+      "remaining": meter["remaining"], "observed": meter["observed"],
+      "slots": [], "closed_slots": 0, "iterator_records": [], "closed_iterators": 0,
+      "close_debt": 0, "allocations": [], "borrows": [], "regions": {},
+      "next_generation": 0, "next_carrier": 0, "baseline_generation": None,
+      "baseline_file_ordinals": {}, "control_transitions": 0, "full_barriers": 0,
+      "final_barriers": None, "directory_header_published": False, "release_attempted": False,
+      "directory_header_roles": None, "directory_header_words": None,
+      "capturing_generation": None, "verified_generations": {}, "retirements": [],
+      "rolling_disposal": None, "original_rolling_disposal": None,
+      "pending_capture": None, "logical_kinds": {},
+      "effect_programme": getattr(config["scope"], "_ordinary_effect_programme_v1", None),
+      "action_count": 0, "completed_action_count": 0, "restore_plan_original": None,
+      "action_header_published": False, "actions_verified": False,
+      "action_audit_active": None, "original_action_audit_active": None,
+      "restore_mutation_started": False,
+      "released": False, "completion_witness": None,
+      "original_completion_witness": None, "errors": []})
+     state["original_slots"] = state["slots"]
+     state["original_iterator_records"] = state["iterator_records"]
+     if self.all_effects:
+      boundary = (self, state, meter, tuple(meter["observed"].items()),
+       (self.process_id, self.thread_id), self.deadline_ns)
+      state["c_initial_meter_original"] = state["original_c_initial_meter_original"] = boundary
+     native = state["scope"]._ordinary_native_v1
+     if type(native) is not _LinuxSourceNativeV2:
+      raise ValueError("ORDINARY_DISK_ORIGINAL_NATIVE_ABI_OWNER")
+     state["libc"] = native.lib
+     root_keys = {"domain_id", "logical_path", "view_path", "root_slot", "root_identity",
+        "root_version", "ancestry", "mount_id"}
+     if (any(type(root) is not dict or set(root) != root_keys
+       or type(root["domain_id"]) is not int or root["domain_id"] != index
+       or type(root["logical_path"]) is not type(self.root) or not root["logical_path"].is_absolute()
+       or type(root["view_path"]) is not type(self.root) or not root["view_path"].is_absolute()
+       or ".." in root["view_path"].parts for index, root in enumerate(state["roots"]))
+       or sum(root["logical_path"] == self.root for root in state["roots"]) != 1):
+      raise ValueError("ORDINARY_DISK_ACTUAL_FROZEN_VIEW_MAP")
+     controls = state["scope"].ordinary_controls
+     if (type(controls) is not tuple or len(controls) != 7
+       or {control["role"] for control in controls} != set(layout)):
+      raise ValueError("ORDINARY_DISK_SEVEN_ORIGINAL_CONTROLS_REQUIRED")
+     state["controls"] = {control["role"]: control for control in controls}
+     if any(control["extent"] != layout[control["role"]] or control["initialized"] != ()
+      or control["sealed"] or control["errors"] for control in controls):
+      raise ValueError("ORDINARY_DISK_FRESH_CONTROL_GEOMETRY")
+     state["scope"].check_storage_binding(self, config)
+     self._disk_effect_programme_v1()
+     if self.all_effects and state["limits"]["action_record_limit"] == 0:
+      raise ValueError("ORDINARY_DISK_MUTABLE_ACTION_PROGRAMME_REQUIRED")
+     if self.all_effects:
+      self.completed_actions = self._disk_completed_actions_view_v1()
+     self._check()
+     baseline = self._disk_capture_generation(self._universe(), 1, "BASELINE")
+     # INDEX is separately tagged. Its real absolute resolved name must
+     # actually be inside one admitted root; copied index authority denies.
+     matches = []
+     if self.index_path is None:
+      raise ValueError("ORDINARY_DISK_ORIGINAL_ACTIVE_INDEX_REQUIRED")
+     for root in state["roots"]:
+      try:
+       relative = self.index_path.relative_to(root["logical_path"]).as_posix()
+      except ValueError:
+       continue
+      if relative:
+       matches.append((root, relative))
+     if len(matches) != 1:
+      raise ValueError("ORDINARY_DISK_OPAQUE_INDEX_NATIVE_MAPPING_REQUIRED")
+     state["index_binding"] = matches[0]
+     index = self._disk_capture_file_v1(*matches[0], state["limits"]["namespace_entry_limit"], 1, index=True)
+     state["index_allocation"] = state["allocations"][index[2] - 1]
+     position = state["limits"]["file_baseline_rows"] + 2 * state["limits"]["file_generation_rows"]
+     self._disk_words_v1("FILE_HEADERS", 128 * position, index)
+     self.index_baseline, self.index_snapshot_bytes = index, index[5]
+     self.baseline = self._settled_snapshot = baseline
+     # B0's alias exists only after fresh complete paired bytes/namespace;
+     # publication is still followed by the independently tagged INDEX.
+     self._disk_compare_live(baseline)
+     self._disk_publish_directory_v1(baseline)
+     state["scope"].check_storage_binding(self, config)
+     self.state = "BASELINE_READY"
+
+    def _disk_begin_occurrence_v1(self, index, entry):
+     state = self._disk_light_v1()
+     if (self.state != "BASELINE_READY" or state["release_attempted"]
+       or getattr(state["scope"].query, "_ordinary_resource_phase_record_v1", None) is not None):
+      raise RuntimeError("ORDINARY_DISK_OCCURRENCE_AFTER_RELEASE")
+     try:
+      self._disk_compare_live(self._settled_snapshot)
+      self.active_occurrence = index
+      self._occurrence_before = self._disk_borrow(self._settled_snapshot, entry)
+     except BaseException as error:
+      self._disk_fail_v1(error)
+      raise
+
+    def _disk_end_occurrence_v1(self, index, entry):
+     state = self._disk_light_v1()
+     try:
+      self._disk_release_borrow(self._occurrence_before, self._acquisition_supervision)
+      record = state["scope"]._ordinary_occurrence_record_v1(entry)
+      if record.get("no_launch") is not None:
+       state["scope"]._ordinary_never_launched_v1(record, settled=True)
+       self._disk_compare_live(self._settled_snapshot)
+       self.completed_occurrences.add(index)
+       self.active_occurrence = None
+       return
+      previous = self._settled_snapshot
+      generation = self._disk_capture_generation(self._universe(), state["next_generation"] + 1, "SETTLED")
+      if self.all_effects:
+       self._disk_mutable_generation_check_v1(previous, generation)
+      self._disk_publish_directory_v1(generation)
+      self._settled_snapshot = generation
+      if previous["region"] != 0:
+       self._disk_retire_raw_v1(previous)
+       self._disk_retire_region_v1(previous)
+      self.completed_occurrences.add(index)
+      self.active_occurrence = None
+     except BaseException as error:
+      self._disk_fail_v1(error)
+      raise
+
+    def _disk_restore_v1(self):
+     state = self._disk_light_v1()
+     if self.active_occurrence is not None or state["borrows"]:
+      raise RuntimeError("ORDINARY_DISK_CHILD_OR_BORROW_STILL_OWNED")
+     if state["final_barriers"] is not None:
+      raise RuntimeError("ORDINARY_DISK_RESTORE_NOT_RETRIED")
+     try:
+      self.state = "OBSERVED"
+      before = state["full_barriers"]
+      self._disk_compare_live(self._settled_snapshot)
+      if self.all_effects:
+       original = self._disk_restoration_plan_v1()
+       self.state = "PLAN_VALIDATED"
+       self._disk_apply_restore_plan_v1(original)
+       final = self._disk_capture_generation(self._universe(), original[4], "FINAL")
+       self._disk_mutable_generation_check_v1(self._settled_snapshot, final, restoring=True)
+       self._disk_restored_semantics_v1(final)
+       self._disk_compare_live(final)
+       self._disk_publish_directory_v1(final)
+       self._settled_snapshot = final
+       state["final_barriers"] = (before + 1, state["full_barriers"], self.baseline, final)
+       self.state = "RESTORED_VERIFIED"
+       self.permitted_since_barrier.clear()
+       self._disk_release_storage_v1()
+       return tuple(relative for relative, _tag, _words in self.completed_actions)
+      self.state = "PLAN_VALIDATED"
+      # Read-only post selects no mutation/actions, but both original
+      # complete restoration barriers and independent INDEX stay real.
+      self._disk_compare_live(self.baseline)
+      state["final_barriers"] = (before + 1, before + 2, self.baseline, self._settled_snapshot)
+      self.state = "RESTORED_VERIFIED"
+      self.permitted_since_barrier.clear()
+      self._disk_release_storage_v1()
+     except BaseException as error:
+      self._disk_fail_v1(error)
+      if state["restore_mutation_started"]:
+       self.state = "CLEANUP_INCOMPLETE"
+      raise
+     return ()
+
+    def _disk_settled_for_disposal_v1(self):
+     state = self._ordinary_disk_state_v1
+     supervision = self._acquisition_supervision
+     return (type(state) is dict and state is self._original_ordinary_disk_state_v1
+      and state.get("candidate") is self and self.state == "RESTORED_VERIFIED"
+      and self.failure is None and self.active_occurrence is None and not state["borrows"]
+      and not state["slots"] and not state["iterator_records"] and not state["close_debt"]
+      and not state["errors"] and state["final_barriers"] is not None
+      and state["final_barriers"][1] == state["full_barriers"]
+      and state["final_barriers"][2] is self.baseline
+      and state["final_barriers"][3] is self._settled_snapshot
+      and supervision is _RUN_COMMANDS_SUPERVISION and type(supervision) is dict
+      and supervision["candidate_custody"] is self and not supervision["pending"]
+      and supervision["paths"] is state["config"]["paths"]
+      and (os.getpid(), threading.get_ident()) == (self.process_id, self.thread_id))
+
+    def _disk_release_storage_v1(self):
+     state = self._disk_light_v1()
+     if state["release_attempted"] or not self._disk_settled_for_disposal_v1():
+      raise RuntimeError("ORDINARY_DISK_RELEASE_OWNER_OR_BARRIER")
+     state["scope"].check_storage_binding(self, state["config"])
+     state["release_attempted"] = True
+     errors = []
+     for allocation in state["allocations"]:
+      try:
+       if allocation["disposed"]:
+        state["scope"]._ordinary_require_disposed_carrier_v1(allocation)
+       else:
+        state["scope"].dispose_carrier(allocation)
+      except BaseException as error:
+       errors.append(error)
+     state["errors"].extend(errors)
+     self._disk_raise_v1(errors)
+     if any(not allocation["disposed"] or allocation["errors"] for allocation in state["allocations"]):
+      raise RuntimeError("ORDINARY_DISK_DISPOSAL_UNPROVEN")
+     state["released"] = True
+     # Seal this stage only after the actual complete source/INDEX barriers,
+     # original supervision settlement and every raw carrier disposal. Later
+     # main-global teardown/HOST output does not make C live or rebaseline it.
+     witness = (self, state, state["config"], self._acquisition_supervision,
+      state["final_barriers"], self.baseline, self._settled_snapshot,
+      tuple(state["allocations"]), state["full_barriers"],
+      (self.process_id, self.thread_id))
+     state["completion_witness"] = state["original_completion_witness"] = witness
+
+    def _disk_resources_require_retention_v1(self):
+     state = self._ordinary_disk_state_v1
+     if state is None:
+      return False
+     if (type(state) is not dict or state is not self._original_ordinary_disk_state_v1
+       or state.get("candidate") is not self or state.get("slots") or state.get("iterator_records")
+       or state.get("close_debt") or state.get("borrows")
+       or state.get("errors") or state.get("pending_capture") is not None or self.failure is not None):
+      return True
+     if self.state == "RESTORED_VERIFIED":
+      return not state.get("released", False)
+     # Normal sealed B0 occupation must not bar its own complete final proof.
+     return any(not allocation["sealed"] or not allocation["writer_closed"]
+       or allocation["errors"] for allocation in state["allocations"])
+
+    def _disk_settlement_context_v1(self, supervision, paths, phase, plan):
+     from tools.validation_reliability import _LinuxPreflightScopeV1
+     state, config = self._ordinary_disk_state_v1, self._ordinary_disk_config_v1
+     if (type(self) is not _ValidationCandidateCustodyV1 or type(state) is not dict
+       or state is not self._original_ordinary_disk_state_v1
+       or state.get("candidate") is not self or state.get("config") is not config
+       or type(config) is not dict or type(config.get("scope")) is not _LinuxPreflightScopeV1
+       or config["scope"] is not state["scope"]
+       or config is not config["scope"]._ordinary_storage_original_v1["config"]
+       or tuple(config.items()) != config["scope"]._ordinary_config_values_v1
+       or config["scope"]._ordinary_candidate_v1 is not self
+       or supervision is not self._acquisition_supervision or type(supervision) is not dict
+       or supervision["candidate_custody"] is not self
+       or supervision["paths"] is not paths or config["paths"] is not paths
+       or config["plan"] is not plan or self.plan is not plan
+       or self.root != paths.repo_root or supervision["phase"] != phase
+       or (os.getpid(), threading.get_ident()) != (self.process_id, self.thread_id)):
+      raise RuntimeError("ORDINARY_DISK_ORIGINAL_FINAL_SETTLEMENT_ASSOCIATION")
+     if self._disk_completed_restore_v1():
+      # An already sealed completed stage needs no fresh phase, live VIEW
+      # check, repeated barrier or restored main-global association.
+      return nullcontext()
+     if supervision is not _RUN_COMMANDS_SUPERVISION:
+      raise RuntimeError("ORDINARY_DISK_ACTIVE_SETTLEMENT_GLOBAL_ASSOCIATION")
+     scope = state["scope"]
+     phase_record = getattr(scope.query, "_ordinary_resource_phase_record_v1", None)
+     if phase_record is not None:
+      scope._ordinary_require_settlement_phase_v1(self)
+      return nullcontext(phase_record)
+     return scope.query.ordinary_owned_resource_phase_v1(scope, self)
+
+    def _disk_settle_occurrence_v1(self, supervision, paths, phase, plan):
+     # Caller is inside the SAME original Query phase. A pending=False flag,
+     # outer exit or copied receipt cannot release an actual logical borrow.
+     state = self._ordinary_disk_state_v1
+     scope = state["scope"]
+     scope._ordinary_require_settlement_phase_v1(self)
+     if (supervision is not self._acquisition_supervision or supervision is not _RUN_COMMANDS_SUPERVISION
+       or supervision["candidate_custody"] is not self or supervision["paths"] is not paths
+       or state["config"]["paths"] is not paths or state["config"]["plan"] is not plan
+       or plan is not self.plan or supervision["phase"] != phase or supervision["pending"]):
+      raise RuntimeError("ORDINARY_DISK_ORIGINAL_OCCURRENCE_SETTLEMENT_ASSOCIATION")
+     record = scope._ordinary_current_occurrence_v1
+     if record is None:
+      if self.active_occurrence is not None or state["borrows"]:
+       raise RuntimeError("ORDINARY_DISK_ACTIVE_BORROW_WITHOUT_NATIVE_RECORD")
+      return
+     entry = record["entry"]
+     index = entry.command_index
+     if (type(index) is not int or not 1 <= index <= len(plan) or entry is not plan[index - 1]
+       or record is not scope._ordinary_occurrence_record_v1(entry)):
+      raise RuntimeError("ORDINARY_DISK_ORIGINAL_PENDING_OCCURRENCE_ENTRY")
+     if (not record["dispatch_attempted"] and not record["launcher_attempted"]
+       and record["process"] is None and record["launcher"] is None
+       and record["receipt"] is None and not record["pending"]):
+      # Definite no dispatch is not a fabricated terminal/byte proof. A
+      # failed C.begin retains its failure and cannot be made qualified.
+      if self.active_occurrence is not None or state["borrows"]:
+       raise RuntimeError("ORDINARY_DISK_UNISSUED_LOGICAL_BORROW_RETAINED")
+      return
+     receipt = supervision.get("receipt")
+     scope._ordinary_require_occurrence_terminal_v1(record, receipt)
+     if self.active_occurrence is not None:
+      if (self.active_occurrence != index or self.failure is not None
+        or state["pending_capture"] is not None or record["retire_attempted"]):
+       raise RuntimeError("ORDINARY_DISK_FAILED_END_BARRIER_NOT_RETRIED")
+      if record.get("no_launch") is None:
+       scope._ordinary_check_compile_cache_v1(record)
+      self.end_occurrence(index, entry)
+     elif index not in self.completed_occurrences or state["borrows"]:
+      raise RuntimeError("ORDINARY_DISK_ORIGINAL_END_COMPLETION_REQUIRED")
+     # Actual retirement is one-shot; its own partial-close failure remains
+     # retained and cannot be retried by the outer finalizer.
+     scope._ordinary_retire_occurrence_v1(record, receipt)
+
+    def _disk_settle_transient_v1(self, supervision, paths, phase, plan):
+     state = self._ordinary_disk_state_v1
+     if (supervision is not self._acquisition_supervision or supervision is not _RUN_COMMANDS_SUPERVISION
+       or supervision["candidate_custody"] is not self or supervision["paths"] is not paths
+       or paths is not self._ordinary_disk_config_v1["paths"] or plan is not self.plan
+       or supervision["phase"] != phase or supervision["pending"]
+       or (os.getpid(), threading.get_ident()) != (self.process_id, self.thread_id)):
+      raise RuntimeError("ORDINARY_DISK_TRANSIENT_ORIGINAL_SETTLEMENT_REQUIRED")
+     errors = []
+     for record in tuple(state["iterator_records"]):
+      self._disk_close_iterator_v1(record, errors)
+     for slot in tuple(state["slots"]):
+      self._disk_close_v1(slot, errors)
+     for error in errors:
+      if all(error is not previous for previous in state["errors"]):
+       state["errors"].append(error)
+     self._disk_raise_v1(errors)
+
+    def _disk_completed_restore_v1(self):
+     state = self._ordinary_disk_state_v1
+     if type(state) is not dict or state is not self._original_ordinary_disk_state_v1:
+      return False
+     witness = state.get("completion_witness")
+     if (type(witness) is not tuple or len(witness) != 10
+       or witness is not state.get("original_completion_witness")):
+      return False
+     supervision = witness[3]
+     return (witness[0] is self and witness[1] is state
+      and witness[2] is state["config"] is self._ordinary_disk_config_v1
+      and supervision is self._acquisition_supervision and type(supervision) is dict
+      and supervision["candidate_custody"] is self and not supervision["pending"]
+      and supervision["paths"] is state["config"]["paths"]
+      and witness[4] is state["final_barriers"]
+      and witness[5] is self.baseline and witness[6] is self._settled_snapshot
+      and len(witness[7]) == len(state["allocations"])
+      and all(actual is original for actual, original in zip(state["allocations"], witness[7]))
+      and witness[8] == state["full_barriers"] == state["final_barriers"][1]
+      and state["final_barriers"][2] is self.baseline
+      and state["final_barriers"][3] is self._settled_snapshot
+      and witness[9] == (self.process_id, self.thread_id) == (os.getpid(), threading.get_ident())
+      and self.state == "RESTORED_VERIFIED" and self.failure is None
+      and self.active_occurrence is None and not state["borrows"]
+      and not state["slots"] and not state["iterator_records"] and not state["close_debt"]
+      and not state["errors"] and state["pending_capture"] is None
+      and state["release_attempted"] and state["released"]
+      and all(allocation["disposed"] and not allocation["errors"]
+        for allocation in state["allocations"]))
+
+    def _restoration_complete_v1(self):
+     if getattr(self, "_ordinary_disk_state_v1", None) is not None:
+      return self._disk_completed_restore_v1()
+     return (self.state == "RESTORED_VERIFIED" and self.failure is None
+       and self._settled_snapshot is self.baseline and self.active_occurrence is None
+       and not self.permitted_since_barrier)
+
+
+def _restore_tracked_gate_side_effects(repo_root, candidate):
+    if type(candidate) is not _ValidationCandidateCustodyV1 or candidate.root != pathlib.Path(repo_root).absolute():
+        raise RuntimeError("VALIDATION_CANDIDATE_BASELINE_REQUIRED")
+    return candidate.restore()
+
+
+def _restore_modified_file_snapshots(repo_root, candidate):
+    return _restore_tracked_gate_side_effects(repo_root, candidate)
+
+
+def _modified_file_snapshots(repo_root, paths):
+    raise RuntimeError("VALIDATION_CANDIDATE_COMPLETE_BASELINE_REQUIRED")
 
 
 def build_validation_commands(
@@ -6128,6 +10110,29 @@ def _build_pytest_command(
     return built
 
 
+def _ordinary_pytest_source_capture_v1(phase, selected, commands, *, copies=None):
+ # Defaults retain the original constructor without another source owner.
+ if not _ORDINARY_CANDIDATE_FIRST_V1 or phase not in PYTEST_SHARD_COMMANDS:
+  return
+ from tools.validation_reliability import _LINUX_PREFLIGHT_PROCESS_V1, _LinuxPreflightScopeV1
+ scope = _LINUX_PREFLIGHT_PROCESS_V1.get()
+ if type(scope) is not _LinuxPreflightScopeV1:
+  return
+ selection = getattr(scope, '_ordinary_source_selection_v1', None)
+ if selection is None:
+  return
+ if (type(selection) is not _OrdinarySourceSelectionV1
+   or selection is not getattr(scope, '_ordinary_original_source_selection_v1', None)
+   or selection._scope is not scope
+   or scope._ordinary_runner_owner_v1 is not sys.modules[__name__]
+   or scope._ordinary_original_runner_owner_v1 is not sys.modules[__name__]):
+  raise ValueError('ORDINARY_PYTEST_ORIGINAL_MANIFEST_CONSTRUCTOR_OWNER')
+ if copies is None:
+  selection._capture_pytest_constructor_v1(phase, selected, commands)
+ else:
+  selection._capture_pytest_manifest_v1(phase, commands, copies)
+
+
 def build_pytest_shard_commands(
     phase: str,
     pytest_basetemp: pathlib.Path | str | None = None,
@@ -6139,7 +10144,10 @@ def build_pytest_shard_commands(
         if pytest_basetemp is None
         else pathlib.Path(pytest_basetemp)
     )
-    return [_build_pytest_command(command, basetemp) for command in PYTEST_SHARD_COMMANDS[phase]]
+    selected = PYTEST_SHARD_COMMANDS[phase]
+    commands = [_build_pytest_command(command, basetemp) for command in selected]
+    _ordinary_pytest_source_capture_v1(phase, selected, commands)
+    return commands
 
 
 def build_post_validation_commands() -> list[list[str]]:
@@ -6201,11 +10209,13 @@ def build_phase_manifest(
             validation_dir=validation_dir,
             pytest_basetemp=pytest_basetemp,
         )
+        copies = [list(command) for command in commands]
+        _ordinary_pytest_source_capture_v1(phase, None, commands, copies=copies)
         manifest.append(
             {
                 "phase": phase,
                 "command_count": len(commands),
-                "commands": [list(command) for command in commands],
+                "commands": copies,
             }
         )
     return manifest
@@ -6424,7 +10434,15 @@ def _write_timing_report(
             "timing report path is inside a tracked generated authority path: "
             f"{_normal_path_text(report_path)}"
         )
-    report_path.parent.mkdir(parents=True, exist_ok=True)
+    host_scope = _ordinary_host_report_scope_v1()
+    if _ORDINARY_CANDIDATE_FIRST_V1 and host_scope is None:
+        error = ValueError("ordinary timing report output lacks genuine owned-output binding")
+        supervision = _RUN_COMMANDS_SUPERVISION
+        if supervision is not None:
+            supervision["errors"].append(error)
+        raise error
+    if host_scope is None:
+        report_path.parent.mkdir(parents=True, exist_ok=True)
     payload = {
         "schema_version": TIMING_SCHEMA_VERSION,
         "generated_at_utc": datetime.now(UTC).isoformat().replace("+00:00", "Z"),
@@ -6441,6 +10459,10 @@ def _write_timing_report(
             _timing_entry_payload(entry) for entry in _slowest_timing_entries(entries)
         ],
     }
+    if host_scope is not None:
+        _ordinary_queue_encoded_parent_report_v1(
+            host_scope, "TIMING", report_path, payload, _write_timing_report)
+        return
     report_path.write_text(
         json.dumps(payload, indent=2, sort_keys=True) + "\n",
         encoding="utf-8",
@@ -6451,7 +10473,7 @@ def _prepare_execution_plan(
     commands: Sequence[Sequence[str]],
 ) -> tuple[ExecutionPlanEntry, ...]:
     plan: list[ExecutionPlanEntry] = []
-    for command in commands:
+    for command_index, command in enumerate(commands, start=1):
         registered = tuple(str(part) for part in command)
         st12g_adapted = tuple(
             _execution_command_with_st12g_architecture_roster(list(registered))
@@ -6459,16 +10481,562 @@ def _prepare_execution_plan(
         execution = tuple(
             _execution_command_with_qku_root_importlib(list(st12g_adapted))
         )
+        qku_adapted = execution
+        execution = _ordinary_post_execution_argv_v1(registered, execution, command_index=command_index)
+        if (len(execution) >= 2
+                and execution[1].replace("\\", "/") == "tools/currentize_pr152_after_generated_artifacts.py"):
+            execution = (execution[0], "-I", "-S", "-B", *execution[1:])
         plan.append(
             ExecutionPlanEntry(
                 registered_argv=registered,
                 timing_identity_argv=st12g_adapted,
                 execution_argv=execution,
                 st12g_adapter_applied=st12g_adapted != registered,
-                qku_root_import_adapter_applied=execution != st12g_adapted,
+                qku_root_import_adapter_applied=qku_adapted != st12g_adapted,
             )
         )
     return tuple(plan)
+
+
+def _candidate_requires_retention_v1(supervision):
+    if supervision is None:
+        return False
+    if any(supervision.get(name) is not None for name in (
+            'native_resource_settlement_error', 'mapper_settlement_error', 'candidate_settlement_error')):
+        return True
+    candidates = []
+    candidate = supervision.get('candidate_custody')
+    if candidate is not None:
+        if type(candidate) is not _ValidationCandidateCustodyV1:
+            return True
+        candidates.append(candidate)
+    assembly = supervision.get('preflight_assembly')
+    if assembly is not None:
+        if (type(assembly) is not _PreflightAssemblyV1 or any(not hasattr(assembly, name)
+                for name in ('basis', 'candidate', 'native', 'paths', 'plan', 'pid', 'thread', 'state', 'launches', '_original_basis_v2', '_original_candidate_v1', '_original_native_input_v1'))):
+            return True
+        if (assembly.basis is not assembly._original_basis_v2
+                or assembly.candidate is not assembly._original_candidate_v1):
+            return True
+        partial = assembly._original_candidate_v1
+        if partial is not None:
+            if type(partial) is not _ValidationCandidateCustodyV1:
+                return True
+            if all(partial is not previous for previous in candidates):
+                candidates.append(partial)
+    from tools.validation_reliability import (_LinuxImmutableSourceBasisV2, _PreflightNativeInputV1,
+        _mapper_parent_resources_retained_v1)
+    native_input = supervision.get('preflight_native_input')
+    if assembly is not None and (assembly.native is not native_input
+            or assembly._original_native_input_v1 is not native_input):
+        return True
+    if native_input is not None:
+        if (type(native_input) is not _PreflightNativeInputV1
+                or _PreflightNativeInputV1._resources_require_retention_v1(native_input)):
+            return True
+    elif assembly is not None:
+        return True
+    bases = [getattr(assembly, '_original_basis_v2', None)]
+    for candidate in candidates:
+        if (getattr(candidate, '_ordinary_disk_state_v1', None) is not None
+                and candidate._disk_resources_require_retention_v1()):
+            return True
+        if (getattr(candidate, '_read_descriptor', None) is not None
+                or getattr(candidate, '_write_descriptor', None) is not None
+                or getattr(candidate, '_read_raw_handle_owner', None) is not None
+                or getattr(candidate, '_read_in_progress', False)
+                or getattr(candidate, '_read_acquisition_in_progress', False)
+                or getattr(candidate, 'state', None) == 'APPLYING'):
+            return True
+        original_mapper = getattr(candidate, '_original_mapper_custody_v1', None)
+        if (type(original_mapper) is not dict
+                or getattr(candidate, '_mapper_custody_v1', None) is not original_mapper
+                or bool(original_mapper) and _mapper_parent_resources_retained_v1(candidate)):
+            return True
+        bases.append(getattr(candidate, 'native_basis', None))
+    for basis in bases:
+        if basis is not None and (type(basis) is not _LinuxImmutableSourceBasisV2
+                or _LinuxImmutableSourceBasisV2._resources_require_retention_v2(basis)):
+            return True
+    return False
+
+
+def _scan_inputs_require_retention_v1(supervision):
+    if supervision is None:
+        return False
+    if (supervision.get("scan_launch_construction_pending")
+            or supervision.get("scan_launch_construction_error") is not None):
+        return True
+    if supervision.get("scan_settlement_error") is not None:
+        return True
+    from tools.validation_reliability import _ScanLaunchInput, _ScanLaunch
+    from types import MappingProxyType
+    launch = supervision.get("scan_launch")
+    if launch is not None and (type(launch) is not _ScanLaunch
+            or type(getattr(launch, "_original_launch_inputs_v1", None)) is not MappingProxyType
+            or launch.launch_inputs is not launch._original_launch_inputs_v1
+            or launch.profiles is not getattr(launch, "_original_profiles_v1", None)
+            or any(type(value) is not _ScanLaunchInput for value in launch._original_launch_inputs_v1.values())):
+        return True
+    for record in supervision.get("scan_input_records", ()):
+        value = record["input"]
+        if type(value) is not _ScanLaunchInput:
+            return True
+        if (value._callback_requires_retention_v1() or value.retention_errors
+                or value.supervision_started and not value.supervision_settled
+                or value.close_errors or value.raw_descriptor is not None or value.raw_handle_owner is not None
+                or value.snapshot_descriptor is not None or value.snapshot_acquiring
+                or value.state == "CLOSED" and (not record["registered"] or not value._release_complete_v1()
+                    or value._custody_record is not record
+                    or (value.identity, value.scratch_root, value.deadline_ns) !=
+                       (record["identity"], record["scratch_root"], record["deadline_ns"]))
+                or value.state != "CLOSED" and (value.allocated_path is not None or value.path is not None
+                    or value.reader is not None or value.writer is not None or value.process is not None)):
+            return True
+    return False
+
+
+def _invocation_requires_retention_v1(supervision):
+    return (_candidate_requires_retention_v1(supervision)
+            or _scan_inputs_require_retention_v1(supervision))
+
+
+def _settle_scan_inputs_v1(supervision, paths, phase, plan):
+    if supervision is None:
+        return
+    previous = supervision.get("scan_settlement_error")
+    if previous is not None:
+        raise previous
+    from tools.validation_reliability import _ScanLaunchInput
+    try:
+        if (supervision.get("scan_launch_construction_pending")
+                or supervision.get("scan_launch_construction_error") is not None):
+            raise RuntimeError("SCAN_LAUNCH_CONSTRUCTION_UNRESOLVED") from supervision.get("scan_launch_construction_error")
+        if not supervision.get("scan_input_records"):
+            return
+        if (supervision["paths"] is not paths or supervision["phase"] != phase
+                or supervision.get("scan_plan") is not plan
+                or supervision.get("scan_owner") != (os.getpid(), threading.get_ident())
+                or supervision["pending"]):
+            raise RuntimeError("SCAN_INPUT_CUSTODY_UNRESOLVED")
+        for record in supervision["scan_input_records"]:
+            value = record["input"]
+            if type(value) is not _ScanLaunchInput:
+                raise ValueError("scan settlement requires the original typed input")
+            if record["registered"] and (value.original_check_candidate is not record["candidate_fence"]
+                    or value.check_candidate is not record["candidate_fence"]):
+                raise RuntimeError("SCAN_INPUT_CALLBACK_ASSOCIATION_CHANGED")
+            if value._callback_requires_retention_v1():
+                _scan_raise_errors(value.original_check_candidate.close_errors or [RuntimeError("SCAN_INPUT_CALLBACK_UNRESOLVED")])
+            if (value.retention_errors or value.supervision_started and not value.supervision_settled):
+                _scan_raise_errors(value.retention_errors or [RuntimeError("SCAN_INPUT_SUPERVISION_UNRESOLVED")])
+            if (value.raw_descriptor is not None or value.raw_handle_owner is not None
+                    or value.snapshot_descriptor is not None or value.snapshot_acquiring or value.close_errors):
+                _scan_raise_errors(value.close_errors or [RuntimeError("SCAN_INPUT_DESCRIPTOR_UNRESOLVED")])
+            if (value.path is None and value.allocated_path is None and value.reader is None
+                    and value.writer is None and value.process is None):
+                continue  # No acquisition: this is not a command/consumption proof.
+            if value.state == "CLOSED":
+                if (not record["registered"] or value._custody_record is not record
+                        or (value.process_id, value.thread_id) != supervision["scan_owner"]
+                        or (value.identity, value.scratch_root, value.deadline_ns) !=
+                           (record["identity"], record["scratch_root"], record["deadline_ns"])
+                        or not value._release_complete_v1()):
+                    raise RuntimeError("SCAN_INPUT_CLOSED_SETTLEMENT_UNPROVEN")
+                continue
+            if (not record["registered"] or value._custody_record is not record
+                    or (value.process_id, value.thread_id) != supervision["scan_owner"]
+                    or (value.identity, value.scratch_root, value.deadline_ns)
+                       != (record["identity"], record["scratch_root"], record["deadline_ns"])
+                    or value.state != "READY" or value.process is not None
+                    or value.close_started or value.reader_close_attempted):
+                raise RuntimeError("SCAN_INPUT_RELEASE_NOT_ADMITTED")
+            if record["settlement_attempted"]:
+                raise RuntimeError("SCAN_INPUT_SETTLEMENT_NOT_RETRIED")
+            record["settlement_attempted"] = True
+            try:
+                value._close()
+            except BaseException as error:
+                record["settlement_error"] = error
+                raise
+            if value.state != "CLOSED":
+                raise RuntimeError("SCAN_INPUT_SETTLEMENT_INCOMPLETE")
+    except BaseException as error:
+        if supervision.get("scan_settlement_error") is None:
+            supervision["scan_settlement_error"] = error
+        if all(error is not previous for previous in supervision["errors"]):
+            supervision["errors"].append(error)
+        raise
+
+
+def _settle_native_candidate_resources_v1(supervision, paths, phase, plan):
+    if supervision is None:
+        return
+    previous = supervision.get('native_resource_settlement_error')
+    if previous is not None:
+        raise previous
+    assembly = supervision.get('preflight_assembly')
+    primary = supervision.get('candidate_custody')
+    # Preserve no-native legacy behavior without extra association or I/O checks.
+    if assembly is None and getattr(primary, 'native_basis', None) is None:
+        if getattr(primary, '_ordinary_disk_state_v1', None) is not None:
+            with primary._disk_settlement_context_v1(supervision, paths, phase, plan):
+                if primary._disk_completed_restore_v1():
+                    # Exact caller association was checked above, but this
+                    # sealed stage needs no live VIEW/resource/barrier replay.
+                    return
+                primary._disk_settle_transient_v1(supervision, paths, phase, plan)
+                primary._disk_settle_occurrence_v1(supervision, paths, phase, plan)
+        return
+    previous = supervision.get('candidate_settlement_error')
+    if previous is not None:
+        raise previous
+    from tools.validation_reliability import _LinuxImmutableSourceBasisV2, _PreflightNativeInputV1
+    actual_owner = (os.getpid(), threading.get_ident())
+    # Foreign admission does not consume the legitimate owner's settlement.
+    if type(assembly) is _PreflightAssemblyV1 and hasattr(assembly, 'pid') and hasattr(assembly, 'thread'):
+        if (assembly.pid, assembly.thread) != actual_owner:
+            raise ValueError('foreign preflight resource settlement owner')
+    candidates = []
+    if primary is not None:
+        candidates.append(primary)
+    partial = getattr(assembly, '_original_candidate_v1', None)
+    if partial is not None and all(partial is not prior for prior in candidates):
+        candidates.append(partial)
+    for candidate in candidates:
+        if (type(candidate) is _ValidationCandidateCustodyV1
+                and hasattr(candidate, 'process_id') and hasattr(candidate, 'thread_id')
+                and (candidate.process_id, candidate.thread_id) != actual_owner):
+            raise ValueError('foreign candidate resource settlement owner')
+    native_input = supervision.get('preflight_native_input')
+    if (type(native_input) is _PreflightNativeInputV1
+            and (getattr(native_input, 'pid', None), getattr(native_input, 'thread', None)) != actual_owner):
+        raise ValueError('foreign native input settlement owner')
+    bases = []
+    def retain_error(error):
+        if supervision.get('native_resource_settlement_error') is None:
+            supervision['native_resource_settlement_error'] = error
+        if all(error is not prior for prior in supervision['errors']):
+            supervision['errors'].append(error)
+    try:
+        if (supervision['paths'] is not paths or supervision['phase'] != phase
+                or supervision['pending'] or _scan_inputs_require_retention_v1(supervision)):
+            raise RuntimeError('LINUX_V2_NATIVE_RESOURCE_PROCESS_CUSTODY_UNRESOLVED')
+        if assembly is not None:
+            if (type(assembly) is not _PreflightAssemblyV1
+                    or any(not hasattr(assembly, name) for name in
+                        ('paths', 'plan', 'pid', 'thread', 'launches', 'state', 'basis', 'candidate', 'native', '_original_basis_v2', '_original_candidate_v1', '_original_native_input_v1'))
+                    or assembly.paths is not paths or assembly.plan is not plan):
+                raise ValueError('preflight resource settlement lost original assembly association')
+            if (assembly.basis is not assembly._original_basis_v2
+                    or assembly.candidate is not assembly._original_candidate_v1):
+                raise ValueError('preflight partial resource holder was replaced')
+            if (any(launch.process is not None for launch in assembly.launches.values())
+                    and assembly.state != 'SETTLING'):
+                raise RuntimeError('preflight native resource child settlement unproven')
+            if (type(native_input) is not _PreflightNativeInputV1 or assembly.native is not native_input
+                    or assembly._original_native_input_v1 is not native_input
+                    or native_input.root != paths.repo_root
+                    or native_input.index_path not in (None, paths.repo_root / '.git/index')
+                    or supervision.get('preflight_native_input_binding') != (native_input.path,
+                        native_input.root, native_input.index_path, native_input.pid, native_input.thread)
+                    or (native_input.pid, native_input.thread) != actual_owner):
+                raise ValueError('preflight resource settlement lost original native input association')
+            if assembly.basis is not None:
+                bases.append(assembly._original_basis_v2)
+        for candidate in candidates:
+            if (type(candidate) is not _ValidationCandidateCustodyV1
+                    or any(not hasattr(candidate, name) for name in
+                        ('process_id', 'thread_id', 'root', 'plan'))
+                    or candidate.root != paths.repo_root or candidate.plan is not plan):
+                raise ValueError('native resource settlement lost original candidate association')
+            basis = getattr(candidate, 'native_basis', None)
+            if basis is not None and all(basis is not prior for prior in bases):
+                bases.append(basis)
+        if any(type(basis) is not _LinuxImmutableSourceBasisV2 for basis in bases):
+            raise ValueError('native resource settlement requires original basis')
+    except BaseException as error:
+        retain_error(error)
+        raise
+    # Live scopes reject outside the settlement/error body, without consuming
+    # their legitimate owner's eventual original finally/close opportunity.
+    for candidate in candidates:
+        if (getattr(candidate, '_read_in_progress', False)
+                or getattr(candidate, '_read_acquisition_in_progress', False)
+                or getattr(candidate, 'state', None) == 'APPLYING'):
+            raise RuntimeError('VALIDATION_CANDIDATE_READ_ALREADY_OWNED')
+    if native_input is not None and (getattr(native_input, '_initializing_v1', True)
+            or getattr(native_input, '_consume_active_v1', True)):
+        _PreflightNativeInputV1._settle_resources_v1(native_input)
+    for basis in bases:
+        if ((getattr(basis, 'pid', None), getattr(basis, 'thread', None)) != actual_owner
+                or getattr(basis, '_initializing_v2', True)
+                or getattr(basis, '_entry_depth', 0)
+                or any(record['acquiring'] or record['yielded']
+                    for record in getattr(basis, '_iterator_records', ()))
+                or getattr(basis, '_iterator_acquisition', None) is not None
+                    and getattr(basis, '_iterator_acquisition')['acquisition_error'] is None
+                or getattr(basis, '_opening_record', None) is not None
+                    and getattr(basis, '_opening_record')['acquiring']):
+            _LinuxImmutableSourceBasisV2._settle_resources_v2(basis)
+    errors = []
+    for candidate in candidates:
+        # Original C finally owns each actual acquisition/one-close. An ended
+        # partial capture conveys retention only, never a guessed-fd closer.
+        if (getattr(candidate, '_read_descriptor', None) is not None
+                or getattr(candidate, '_write_descriptor', None) is not None
+                or getattr(candidate, '_read_raw_handle_owner', None) is not None):
+            errors.append(candidate.failure if isinstance(getattr(candidate, 'failure', None), BaseException)
+                else RuntimeError('VALIDATION_CANDIDATE_RESOURCE_CLOSE_UNPROVEN'))
+    if native_input is not None:
+        try:
+            _PreflightNativeInputV1._settle_resources_v1(native_input)
+        except BaseException as error:
+            errors.append(error)
+    for basis in bases:
+        try:
+            _LinuxImmutableSourceBasisV2._settle_resources_v2(basis)
+            if _LinuxImmutableSourceBasisV2._resources_require_retention_v2(basis):
+                raise RuntimeError('LINUX_V2_NATIVE_RESOURCE_CUSTODY_UNRESOLVED')
+        except BaseException as error:
+            errors.append(error)
+    try:
+        _scan_raise_errors(errors)
+    except BaseException as error:
+        retain_error(error)
+        raise
+
+
+def _check_mapper_barrier_v1(supervision, paths, phase, plan, receipts):
+    # Intermediate C restoration observes ownership/associations only. The
+    # original final activation-byte read belongs to finish/finalizer below.
+    from tools.validation_reliability import (_mapper_parent_record_v1,
+        _mapper_parent_resources_retained_v1, _MapperOccurrenceRecordV1)
+    previous = None if supervision is None else supervision.get('mapper_settlement_error')
+    if previous is not None: raise previous
+    try:
+        candidate = None if supervision is None else supervision.get('candidate_custody')
+        acquired = (type(candidate) is _ValidationCandidateCustodyV1
+            and bool(getattr(candidate, '_original_mapper_custody_v1', {})))
+        if not _ACTIVE_MAPPER_OCCURRENCES_V1 and not acquired:
+            return None  # Unchanged legacy/no-M/first8 default.
+        if (type(supervision) is not dict or supervision.get('paths') is not paths
+                or supervision.get('phase') != phase or supervision.get('pending')
+                or plan is not _LAST_EXPECTED_COMMAND_PLAN or type(plan) is not tuple
+                or type(candidate) is not _ValidationCandidateCustodyV1
+                or candidate.plan is not plan or candidate.root != paths.repo_root
+                or (candidate.process_id, candidate.thread_id) != (os.getpid(), threading.get_ident())
+                or _mapper_parent_resources_retained_v1(candidate)
+                or any(_command_requires_process_retention_v1(r) for r in receipts)
+                or type(_ACTIVE_MAPPER_OCCURRENCES_V1) is not dict):
+            raise RuntimeError('MAPPER_FINAL_CUSTODY_UNRESOLVED')
+        for key, record in _ACTIVE_MAPPER_OCCURRENCES_V1.items():
+            if (type(key) is not str or not key.isdecimal() or str(int(key)) != key
+                    or type(record) is not _MapperOccurrenceRecordV1):
+                raise ValueError('MAPPER_PARENT_RECORD_CHANGED')
+            _mapper_parent_record_v1(candidate._original_mapper_custody_v1[int(key)], record=record)
+        return candidate
+
+    except BaseException as error:
+        if type(supervision) is dict:
+            if supervision.get('mapper_settlement_error') is None:
+                supervision['mapper_settlement_error'] = error
+            errors = supervision.get('errors')
+            if type(errors) is list and all(error is not earlier for earlier in errors):
+                errors.append(error)
+        raise
+
+
+def _settle_mapper_occurrences_v1(supervision, paths, phase, plan, receipts):
+    from tools.validation_reliability import (_mapper_occurrence_evidence_v1,
+        _mapper_final_review_association_v1)
+    previous = None if supervision is None else supervision.get('mapper_settlement_error')
+    if previous is not None: raise previous
+    try:
+        candidate = _check_mapper_barrier_v1(supervision, paths, phase, plan, receipts)
+        if candidate is None: return None
+        original = supervision.get('mapper_final_review')
+        if supervision.get('mapper_settlement_attempted', False):
+            if original is None: raise RuntimeError('MAPPER_FINAL_REVIEW_NOT_RETRIED')
+            _mapper_final_review_association_v1(original, paths, _ACTIVE_MAPPER_READ_PROFILES_V1,
+                _ACTIVE_MAPPER_OCCURRENCES_V1, receipts, candidate=candidate, plan=plan)
+            if original['used']: raise RuntimeError('MAPPER_FINAL_REVIEW_ALREADY_CONSUMED')
+            return original
+        supervision['mapper_settlement_attempted'] = True
+        capture = dict(paths=paths, plan=plan, candidate=candidate,
+            owner=(os.getpid(), threading.get_ident()), deadline_ns=candidate.deadline_ns,
+            profiles=_ACTIVE_MAPPER_READ_PROFILES_V1, records=_ACTIVE_MAPPER_OCCURRENCES_V1,
+            receipts=tuple(receipts), members={}, attempted_members=set(), completed=False, used=False)
+        supervision['mapper_final_review'] = capture
+        _mapper_occurrence_evidence_v1(paths, _ACTIVE_MAPPER_READ_PROFILES_V1,
+            _ACTIVE_MAPPER_OCCURRENCES_V1, receipts, _capture=capture)
+        capture['completed'] = True
+        _mapper_final_review_association_v1(capture, paths, _ACTIVE_MAPPER_READ_PROFILES_V1,
+            _ACTIVE_MAPPER_OCCURRENCES_V1, receipts, candidate=candidate, plan=plan)
+        return capture
+    except BaseException as error:
+        if type(supervision) is dict:
+            if supervision.get('mapper_settlement_error') is None:
+                supervision['mapper_settlement_error'] = error
+            errors = supervision.get('errors')
+            if type(errors) is list and all(error is not earlier for earlier in errors):
+                errors.append(error)
+        raise
+
+
+def _settle_validation_candidate_v1(supervision, paths, phase, plan):
+    if supervision is None:
+        return
+    if (supervision.get('candidate_custody') is not None
+            and supervision.get('candidate_settlement_error') is not None):
+        raise supervision['candidate_settlement_error']
+    _settle_native_candidate_resources_v1(supervision, paths, phase, plan)
+    if supervision.get("candidate_custody") is None:
+        return
+    previous = supervision.get("candidate_settlement_error")
+    if previous is not None:
+        raise previous
+    candidate = supervision["candidate_custody"]
+    try:
+        if (type(candidate) is not _ValidationCandidateCustodyV1
+                or supervision["paths"] is not paths or supervision["phase"] != phase
+                or supervision.get("candidate_owner") != (os.getpid(), threading.get_ident())
+                or (candidate.process_id, candidate.thread_id) != supervision["candidate_owner"]
+                or candidate.root != paths.repo_root or candidate.plan is not plan
+                or type(candidate.deadline_ns) is not int
+                or candidate.deadline_ns != supervision.get("candidate_deadline_ns")):
+            raise ValueError("candidate settlement lost original invocation association")
+        if supervision["pending"] or _invocation_requires_retention_v1(supervision):
+            raise RuntimeError("VALIDATION_CANDIDATE_CUSTODY_UNRESOLVED")
+        if candidate.baseline is None:
+            # Failed construction has no complete restoration authority. Its
+            # already attempted closes must be settled; no child was admitted.
+            if (candidate.state != "CLEANUP_REJECTED" or candidate.failure is None
+                    or supervision.get("candidate_admission_complete", False)
+                    or candidate.active_occurrence is not None):
+                raise RuntimeError("VALIDATION_CANDIDATE_INCOMPLETE_BASELINE")
+            return
+        if supervision.get("candidate_settlement_attempted", False):
+            if not candidate._restoration_complete_v1():
+                raise RuntimeError("VALIDATION_CANDIDATE_SETTLEMENT_NOT_RETRIED")
+            if getattr(candidate, "_ordinary_disk_state_v1", None) is None:
+                candidate._check()
+            return
+        # The original owner settles late M/R/header failures as well as a run.
+        # Do not repeat the final complete barrier already performed by finish.
+        supervision["candidate_settlement_attempted"] = True
+        if candidate._restoration_complete_v1():
+            if getattr(candidate, "_ordinary_disk_state_v1", None) is None:
+                candidate._check()
+        else:
+            if getattr(candidate, "_ordinary_disk_state_v1", None) is not None:
+                with candidate._disk_settlement_context_v1(supervision, paths, phase, plan):
+                    candidate.restore()
+            else:
+                candidate.restore()
+    except BaseException as error:
+        if supervision.get("candidate_settlement_error") is None:
+            supervision["candidate_settlement_error"] = error
+        if all(error is not previous for previous in supervision["errors"]):
+            supervision["errors"].append(error)
+        raise
+
+
+def _prepare_validation_candidate_v1(root, plan, candidate):
+    if root is None:
+        if _ORDINARY_CANDIDATE_FIRST_V1:
+            raise ValueError("ordinary candidate lost original repository root")
+        if candidate is not None:
+            raise ValueError("candidate custody has no original repository root")
+        return None
+    supervision = None
+    if _ORDINARY_CANDIDATE_FIRST_V1:
+        supervision = _RUN_COMMANDS_SUPERVISION
+        paths = _RUN_COMMANDS_ACTIVE_PATHS
+        if (supervision is None or paths is None or supervision["paths"] is not paths
+                or supervision.get("candidate_owner") != (os.getpid(), threading.get_ident())
+                or paths.repo_root != pathlib.Path(root).absolute()
+                or type(plan) is not tuple or not plan or plan is not _LAST_EXPECTED_COMMAND_PLAN
+                or any(type(row) is not CommandEvidencePlanEntry
+                    or row.run_id != paths.run_id or row.phase != supervision["phase"]
+                    or row.cwd != str(paths.repo_root) for row in plan)):
+            raise ValueError("ordinary candidate lost original invocation association")
+        retained = supervision.get("candidate_custody")
+        if supervision.get("candidate_acquisition_attempted", False):
+            if retained is None:
+                raise ValueError("original candidate acquisition cannot be retried")
+            if not supervision.get("candidate_admission_complete", False):
+                raise ValueError("original candidate admission cannot be retried") from supervision.get("candidate_admission_error")
+            if candidate is not None and candidate is not retained:
+                raise ValueError("ordinary candidate differs from its retained original owner")
+            candidate = retained
+            if (type(candidate.deadline_ns) is not int
+                    or candidate.deadline_ns != supervision["candidate_deadline_ns"]):
+                raise ValueError("ordinary candidate changed its original deadline")
+        else:
+            # Latch before the supplier: failed acquisition cannot be repeated.
+            supervision["candidate_acquisition_attempted"] = True
+            supervision["candidate_admission_complete"] = False
+    try:
+        if candidate is None and callable(_ACTIVE_CANDIDATE_SOURCE):
+            if supervision is not None:
+                supervision["candidate_acquiring"] = True
+            try:
+                candidate = _ACTIVE_CANDIDATE_SOURCE(root, plan)
+            finally:
+                if supervision is not None:
+                    supervision["candidate_acquiring"] = False
+        if (type(candidate) is not _ValidationCandidateCustodyV1 or candidate.plan is not plan
+                or candidate.root != pathlib.Path(root).absolute() or candidate.state != "BASELINE_READY"):
+            raise RuntimeError("VALIDATION_CANDIDATE_COMPLETE_SOURCE_EFFECT_RESOURCE_BINDING_REQUIRED")
+        if supervision is not None:
+            retained = supervision.get("candidate_custody")
+            if retained is not None and candidate is not retained:
+                raise ValueError("ordinary candidate differs from its retained original owner")
+            supervision["candidate_custody"] = candidate
+            if "candidate_deadline_ns" in supervision:
+                if (type(candidate.deadline_ns) is not int
+                        or candidate.deadline_ns != supervision["candidate_deadline_ns"]):
+                    raise ValueError("ordinary candidate changed its original deadline")
+            else:
+                if type(candidate.deadline_ns) is not int:
+                    raise ValueError("ordinary candidate changed its original deadline")
+                supervision["candidate_deadline_ns"] = candidate.deadline_ns
+        from tools.validation_reliability import _LINUX_PREFLIGHT_PROCESS_V1, _LinuxPreflightScopeV1
+        ordinary_scope = _LINUX_PREFLIGHT_PROCESS_V1.get()
+        if (type(ordinary_scope) is _LinuxPreflightScopeV1
+                and ordinary_scope._ordinary_selected_v1()):
+            config = ordinary_scope._ordinary_ready_v1()
+            if (supervision is None or candidate._ordinary_disk_config_v1 is not config
+                    or config["scope"] is not ordinary_scope or config["paths"] is not paths
+                    or config["plan"] is not plan
+                    or _ACTIVE_CANDIDATE_SOURCE is not ordinary_scope._ordinary_original_candidate_source_v1):
+                raise ValueError("ORDINARY_ACTUAL_CANDIDATE_CONFIG_ASSOCIATION")
+            ordinary_scope.check_storage_binding(candidate, config)
+            if supervision.get("candidate_admission_complete", False):
+                # The publisher already completed native finalization. The
+                # original run_commands reuse validates that SAME grant;
+                # neither a second constructor nor a second grant is issued.
+                capacity = ordinary_scope._ordinary_application_ready_v1()
+                if (capacity["candidate"] is not candidate or capacity["config"] is not config
+                        or capacity is not ordinary_scope._ordinary_application_capacity_v1
+                        or capacity is not ordinary_scope._ordinary_original_application_capacity_v1):
+                    raise ValueError("ORDINARY_RETAINED_CANDIDATE_NATIVE_CAPACITY_ASSOCIATION")
+            else:
+                # Sole transition after genuine full B0, INDEX and controls.
+                # Original failed-admission latches prohibit a second attempt.
+                ordinary_scope._ordinary_finalize_application_capacity_v1(candidate)
+        candidate._check()
+    except BaseException as error:
+        if supervision is not None:
+            supervision["candidate_admission_complete"] = False
+            supervision["candidate_admission_error"] = error
+            if all(error is not previous for previous in supervision["errors"]):
+                supervision["errors"].append(error)
+        raise
+    if supervision is not None:
+        supervision["candidate_admission_complete"] = True
+    return candidate
 
 
 def run_commands(
@@ -6481,7 +11049,19 @@ def run_commands(
     defer_success_markers: bool = False,
     scratch_roots: Sequence[pathlib.Path] = (),
     execution_plan: Sequence[ExecutionPlanEntry] | None = None,
+    candidate_custody=None,
 ) -> int:
+    global _RUN_COMMANDS_SUPERVISION
+    global _LAST_COMMAND_RECEIPTS
+    global _ACTIVE_SCAN_LAUNCH
+    if _RUN_COMMANDS_SUPERVISION is not None and _RUN_COMMANDS_SUPERVISION["pending"]:
+        print("ENGVR_PROCESS_TERMINATION_FAILED: prior command custody is unresolved",
+              file=sys.stderr, flush=True)
+        return 1
+    if _invocation_requires_retention_v1(_RUN_COMMANDS_SUPERVISION):
+        print("ENGVR_PREPUBLICATION_CUSTODY_FAILED: prior candidate custody is unresolved",
+              file=sys.stderr, flush=True)
+        return 1
     prepared_plan = (
         _prepare_execution_plan(commands)
         if execution_plan is None
@@ -6503,18 +11083,39 @@ def run_commands(
             flush=True,
         )
         return 2
+    if _ORDINARY_CANDIDATE_FIRST_V1 and (
+            _RUN_COMMANDS_SUPERVISION is None
+            or _RUN_COMMANDS_SUPERVISION["paths"] is not active_run_paths
+            or _RUN_COMMANDS_SUPERVISION["phase"] != phase):
+        raise ValueError("ordinary candidate lost original invocation association")
+    if (_RUN_COMMANDS_SUPERVISION is None
+            or _RUN_COMMANDS_SUPERVISION["paths"] is not active_run_paths
+            or _RUN_COMMANDS_SUPERVISION["phase"] != phase):
+        _RUN_COMMANDS_SUPERVISION = {
+            "paths": active_run_paths, "phase": phase, "pending": False,
+            "receipt": None, "errors": [],
+        }
+    supervision = _RUN_COMMANDS_SUPERVISION
     cleanup_repo_root = (
         _RUN_COMMANDS_CLEANUP_REPO_ROOT if repo_root is None else repo_root
     )
     execution_cwd = (cleanup_repo_root or _repo_root()).resolve()
-    _LAST_EXPECTED_COMMAND_PLAN = build_command_evidence_plan(
-        run_id=active_run_paths.run_id,
-        phase=phase,
-        commands=tuple(entry.execution_argv for entry in prepared_plan),
-        cwd=execution_cwd,
-    )
+    expected_vectors = tuple(entry.execution_argv for entry in prepared_plan)
+    if _RUN_PROVENANCE_WRITTEN:
+        if (tuple(row.argv for row in _LAST_EXPECTED_COMMAND_PLAN) != expected_vectors
+                or any(row.run_id != active_run_paths.run_id or row.phase != phase
+                       or row.cwd != str(execution_cwd) for row in _LAST_EXPECTED_COMMAND_PLAN)):
+            raise ValueError("dispatch differs from the original published evidence plan")
+        if _ACTIVE_SCAN_LAUNCH is not None and _ACTIVE_SCAN_LAUNCH.plan is not _LAST_EXPECTED_COMMAND_PLAN:
+            raise ValueError("dispatch lost original scan plan identity")
+    else:
+        if any(_scan_full_builder_argv(row) for row in expected_vectors):
+            raise ValueError("direct full scanner dispatch lacks original capacity publication")
+        _LAST_EXPECTED_COMMAND_PLAN = build_command_evidence_plan(
+            run_id=active_run_paths.run_id, phase=phase, commands=expected_vectors, cwd=execution_cwd)
     timing_entries: list[TimingEntry] = []
     command_receipts: list[CommandExecutionReceiptV1] = []
+    _LAST_COMMAND_RECEIPTS = ()
     total_started = time.perf_counter()
 
     def finish(returncode: int) -> int:
@@ -6526,8 +11127,20 @@ def run_commands(
                 print(failure, file=sys.stderr, flush=True)
             returncode = 1
         try:
-            restore_gate_side_effects()
-        except RuntimeError as exc:
+            if getattr(candidate_custody, "_ordinary_disk_state_v1", None) is not None:
+                with candidate_custody._disk_settlement_context_v1(
+                        supervision, active_run_paths, phase, _LAST_EXPECTED_COMMAND_PLAN):
+                    _settle_scan_inputs_v1(supervision, active_run_paths, phase, _LAST_EXPECTED_COMMAND_PLAN)
+                    _settle_native_candidate_resources_v1(supervision, active_run_paths, phase, _LAST_EXPECTED_COMMAND_PLAN)
+                    _settle_mapper_occurrences_v1(supervision, active_run_paths, phase, _LAST_EXPECTED_COMMAND_PLAN, tuple(command_receipts))
+                    if not candidate_custody._disk_completed_restore_v1():
+                        restore_gate_side_effects()
+            else:
+                _settle_scan_inputs_v1(supervision, active_run_paths, phase, _LAST_EXPECTED_COMMAND_PLAN)
+                _settle_native_candidate_resources_v1(supervision, active_run_paths, phase, _LAST_EXPECTED_COMMAND_PLAN)
+                _settle_mapper_occurrences_v1(supervision, active_run_paths, phase, _LAST_EXPECTED_COMMAND_PLAN, tuple(command_receipts))
+                restore_gate_side_effects()
+        except (OSError, RuntimeError, ValueError) as exc:
             print(str(exc), file=sys.stderr, flush=True)
             returncode = 1
         total_elapsed_seconds = time.perf_counter() - total_started
@@ -6545,7 +11158,11 @@ def run_commands(
                     total_elapsed_seconds=total_elapsed_seconds,
                     repo_root=cleanup_repo_root,
                 )
-            except ValueError as exc:
+            except BaseException as exc:
+                if all(exc is not earlier for earlier in supervision["errors"]):
+                    supervision["errors"].append(exc)
+                if not isinstance(exc, ValueError):
+                    raise
                 print(str(exc), file=sys.stderr, flush=True)
                 return 2
         if returncode == 0 and not defer_success_markers:
@@ -6553,35 +11170,50 @@ def run_commands(
             print(SUCCESS_MARKER, flush=True)
         return returncode
 
-    initially_modified_paths: set[str] = set()
-    initially_modified_snapshots: dict[str, bytes | None] = {}
-    initially_untracked_paths: set[str] = set()
-    if cleanup_repo_root is not None:
-        initially_modified_paths = _tracked_modified_paths(cleanup_repo_root)
-        initially_modified_snapshots = _modified_file_snapshots(
-            cleanup_repo_root,
-            initially_modified_paths,
-        )
-        initially_untracked_paths = _untracked_paths(cleanup_repo_root)
+    candidate_custody = _prepare_validation_candidate_v1(
+        cleanup_repo_root, _LAST_EXPECTED_COMMAND_PLAN if _RUN_PROVENANCE_WRITTEN else prepared_plan, candidate_custody)
+
+    if (candidate_custody is not None and _ACTIVE_MAPPER_READ_PROFILES_V1 is not None and any(value['kind'] == 'MAPPER_NATIVE_READ_BINDING_V2'
+            for value in _ACTIVE_MAPPER_READ_PROFILES_V1.values())):
+        if (type(candidate_custody) is not _ValidationCandidateCustodyV1
+                or candidate_custody.plan is not _LAST_EXPECTED_COMMAND_PLAN
+                or candidate_custody.root != active_run_paths.repo_root
+                or (candidate_custody.process_id, candidate_custody.thread_id) != (os.getpid(), threading.get_ident())
+                or supervision.get('candidate_custody') is not None and supervision.get('candidate_custody') is not candidate_custody):
+            raise ValueError('MAPPER_ACTIVATION_ORIGINAL_CUSTODY_REQUIRED')
+        supervision['candidate_custody'] = candidate_custody
+        supervision['candidate_owner'] = (candidate_custody.process_id, candidate_custody.thread_id)
+        supervision['candidate_deadline_ns'] = candidate_custody.deadline_ns
+
+    restoration_failure: BaseException | None = None
 
     def restore_gate_side_effects() -> None:
+        nonlocal restoration_failure
+        _recheck_nested_pytest_custody_v1(supervision)
+        if supervision["pending"]:
+            raise ValidationReliabilityError(
+                "ENGVR_PROCESS_TERMINATION_FAILED",
+                "restoration skipped while command process custody is unresolved",
+            ) from (supervision["errors"][0] if supervision["errors"] else None)
+        _settle_scan_inputs_v1(supervision, active_run_paths, phase, _LAST_EXPECTED_COMMAND_PLAN)
+        _check_mapper_barrier_v1(supervision, active_run_paths, phase, _LAST_EXPECTED_COMMAND_PLAN, tuple(command_receipts))
         if cleanup_repo_root is None:
             return
-        _restore_tracked_gate_side_effects(
-            cleanup_repo_root,
-            initially_modified_paths,
-        )
-        _restore_modified_file_snapshots(
-            cleanup_repo_root,
-            initially_modified_snapshots,
-        )
-        _restore_untracked_gate_side_effects(
-            cleanup_repo_root,
-            initially_untracked_paths,
-        )
+        if restoration_failure is not None:
+            raise RuntimeError(
+                "ENGVR_PREPUBLICATION_CUSTODY_FAILED: "
+                "prior restoration failure; not retried"
+            ) from restoration_failure
+        try:
+            _restore_tracked_gate_side_effects(cleanup_repo_root, candidate_custody)
+        except BaseException as exc:
+            restoration_failure = exc
+            raise
 
     active_validation_processes = 0
     for command_index, plan_entry in enumerate(prepared_plan, start=1):
+        receipt = None
+        ordinary_scope = ordinary_record = ordinary_output_limits = None
         command_list = list(plan_entry.registered_argv)
         if cleanup_repo_root is not None and (
             _is_pr142_handoff_readiness_validator_command(command_list)
@@ -6626,34 +11258,227 @@ def run_commands(
             command_environment = os.environ.copy()
             command_environment[RUN_ID_ENV] = active_run_paths.run_id
             command_environment[EVIDENCE_ROOT_ENV] = str(active_run_paths.evidence_root)
-            receipt = _execute_supervised_command(
-                execution_command,
-                cwd=execution_cwd,
-                run_id=active_run_paths.run_id,
-                phase=phase,
-                command_index=command_index,
-                evidence_root=active_run_paths.evidence_root,
-                required_markers=expected_markers,
-                timeout_seconds=timeout_seconds,
-                environment=command_environment,
-            )
-            command_receipts.append(receipt)
-        except ValidationReliabilityError as exc:
-            print(str(exc), file=sys.stderr, flush=True)
-            return finish(1)
-        except OSError as exc:
-            print(
-                f"ENGVR_ATOMIC_RECEIPT_WRITE_FAILED: {type(exc).__name__}: {exc}",
-                file=sys.stderr,
-                flush=True,
-            )
-            return finish(1)
-        except (RuntimeError, ValueError) as exc:
-            print(
-                f"ENGVR_PROCESS_START_FAILED: {type(exc).__name__}: {exc}",
-                file=sys.stderr,
-                flush=True,
-            )
+            planned = _LAST_EXPECTED_COMMAND_PLAN[command_index - 1]
+            command_environment = _scan_dispatch_environment(command_environment, planned)
+            original_input = None if _ACTIVE_SCAN_LAUNCH is None else _ACTIVE_SCAN_LAUNCH.launch_inputs.get(command_index)
+            from tools.validation_reliability import _mapper_binding_v1, _mapper_read_controls_v1, _MAPPER_READ_ENV_KEYS_V1
+            mapper_read_binding = None if _ACTIVE_MAPPER_READ_PROFILES_V1 is None else _ACTIVE_MAPPER_READ_PROFILES_V1.get(str(command_index))
+            if any(k.upper() in (*_MAPPER_READ_ENV_KEYS_V1, 'QTT_MAPPER_ACTIVATION_IDENTITY') for k in command_environment):
+                raise ValueError("competing mapper read environment")
+            if mapper_read_binding is not None:
+                mapper_read_binding = _mapper_binding_v1(mapper_read_binding)
+                if tuple(mapper_read_binding["parent_argv"]) != tuple(execution_command):
+                    raise ValueError("mapper read binding lost original command")
+                command_environment.update(_mapper_read_controls_v1(mapper_read_binding))
+            execution_deadline_ns = None
+            deadline_projection = None
+            mapper_arguments = _mapper_nested_pytest_args_v1(tuple(execution_command), execution_cwd)
+            if mapper_arguments is not None:
+                if (original_input is not None or candidate_custody is None
+                        or command_index not in candidate_custody.nested_evidence_limits):
+                    raise ValueError("mapper deadline requires its original ordinary candidate owner")
+                limits = candidate_custody.nested_evidence_limits[command_index]
+                controls = _mapper_deadline_controls_v1(limits)
+                if any(key.upper() in _MAPPER_DEADLINE_ENV_KEYS for key in command_environment):
+                    raise ValueError("competing inherited mapper deadline controls")
+                command_environment.update(controls)
+                execution_deadline_ns = limits["execution_deadline_ns"]
+                remaining = _execution_remaining_seconds_v1(execution_deadline_ns)
+                timeout_seconds = remaining if timeout_seconds is None else min(timeout_seconds, remaining)
+                if mapper_read_binding is not None:
+                    if mapper_read_binding["basis"]["deadline_ns"] != limits["child_execution_deadline_ns"]:
+                        raise ValueError("mapper read allocation exceeds exact child schedule")
+                    controls += _mapper_read_controls_v1(mapper_read_binding)
+                deadline_projection = {"fixed_environment_controls": controls}
+            elif mapper_read_binding is not None:
+                execution_deadline_ns = mapper_read_binding["basis"]["deadline_ns"]
+                remaining = _execution_remaining_seconds_v1(execution_deadline_ns)
+                timeout_seconds = remaining if timeout_seconds is None else min(timeout_seconds,remaining)
+                deadline_projection = {"fixed_environment_controls": _mapper_read_controls_v1(mapper_read_binding)}
+            if candidate_custody is not None:
+                candidate_entry = planned if getattr(candidate_custody, "plan", None) is _LAST_EXPECTED_COMMAND_PLAN else plan_entry
+                command_environment, preflight_projection = candidate_custody.prepare_preflight(
+                    command_index, candidate_entry, environment=command_environment, run_paths=active_run_paths)
+                if preflight_projection is not None:
+                    if deadline_projection is not None:
+                        raise ValueError("competing command environment projections")
+                    deadline_projection = preflight_projection
+                if _ACTIVE_PREFLIGHT_ASSEMBLY_V1 is not None:
+                    if original_input is not None or mapper_read_binding is not None:
+                        raise ValueError("competing preflight dispatch transport")
+                    original_input, command_environment, deadline_projection = _ACTIVE_PREFLIGHT_ASSEMBLY_V1.launch(
+                        command_index, command_environment, deadline_projection, scratch_roots)
+                    execution_deadline_ns = original_input.deadline_ns
+                if getattr(candidate_custody, "_ordinary_disk_state_v1", None) is not None:
+                    from tools.validation_reliability import _LINUX_PREFLIGHT_PROCESS_V1, _LinuxPreflightScopeV1
+                    ordinary_scope = candidate_custody._ordinary_disk_config_v1["scope"]
+                    if (type(ordinary_scope) is not _LinuxPreflightScopeV1
+                            or not ordinary_scope._ordinary_selected_v1()
+                            or _LINUX_PREFLIGHT_PROCESS_V1.get() is not ordinary_scope
+                            or original_input is not None or mapper_read_binding is not None
+                            or _ACTIVE_PREFLIGHT_ASSEMBLY_V1 is not None or deadline_projection is not None):
+                        raise ValueError("ORDINARY_ORIGINAL_NATIVE_DISPATCH_BINDING")
+                    programme = ordinary_scope._ordinary_programme_for_entry_v1(candidate_entry)
+                    execution_deadline_ns = programme["deadline_ns"]
+                    remaining = _execution_remaining_seconds_v1(execution_deadline_ns)
+                    timeout_seconds = remaining if timeout_seconds is None else min(timeout_seconds, remaining)
+                    ordinary_output_limits = dict(stdout_bytes=programme["stdout_bytes"],
+                        stderr_bytes=programme["stderr_bytes"],
+                        combined_output_bytes=programme["stdout_bytes"] + programme["stderr_bytes"])
+                    command_environment = _ordinary_post_environment_v1(ordinary_scope, candidate_entry, command_environment)
+                    ordinary_record = ordinary_scope._ordinary_select_occurrence_v1(candidate_entry,
+                        argv=tuple(execution_command), cwd=execution_cwd, environment=command_environment,
+                        run_id=active_run_paths.run_id, phase=phase, command_index=command_index,
+                        deadline_ns=execution_deadline_ns, output_limits=ordinary_output_limits,
+                        launch_input=original_input)
+                candidate_custody.begin_occurrence(command_index, candidate_entry,
+                    environment=command_environment, timeout_seconds=timeout_seconds, scratch_roots=tuple(scratch_roots))
+                if ordinary_record is not None:
+                    actual_rp5a_launch = ordinary_scope._ordinary_prepare_rp5a_material_v1(
+                        ordinary_record, candidate_custody, supervision=supervision)
+                    if actual_rp5a_launch is not None:
+                        _ACTIVE_SCAN_LAUNCH = actual_rp5a_launch
+                        supervision['scan_launch'] = actual_rp5a_launch
+                        original_input = ordinary_record['rp5a_input']
+            if mapper_read_binding is not None and mapper_read_binding['kind'] == 'MAPPER_NATIVE_READ_BINDING_V2':
+                from tools.validation_reliability import _mapper_publish_occurrence_v1, _MAPPER_ACTIVATION_ENV_V1
+                key = str(command_index)
+                if key in _ACTIVE_MAPPER_OCCURRENCES_V1:
+                    raise ValueError("mapper activation already published")
+                activation = _mapper_publish_occurrence_v1(mapper_read_binding, candidate=candidate_custody, entry=planned)
+                _ACTIVE_MAPPER_OCCURRENCES_V1[key] = activation
+                command_environment[_MAPPER_ACTIVATION_ENV_V1] = activation.identity
+                deadline_projection['fixed_environment_controls'] += ((_MAPPER_ACTIVATION_ENV_V1, activation.identity),)
+            nested_gate = None
+            ordinary_nested = (ordinary_scope._ordinary_nested_selection_v1(candidate_entry)
+                if ordinary_record is not None else None)
+            if (ordinary_nested is not None or _mapper_nested_pytest_args_v1(
+                    tuple(execution_command), execution_cwd) is not None):
+                if candidate_custody is None or command_index not in candidate_custody.nested_evidence_limits:
+                    raise ValueError("mapper dispatch lacks original nested-evidence limits")
+                nested_gate = _NestedPytestEvidenceV1(
+                    planned=planned, run_paths=active_run_paths, environment=command_environment,
+                    limits=dict(candidate_custody.nested_evidence_limits[command_index]),
+                    check_exclusive=candidate_custody.check_exclusive, mapper_read_binding=mapper_read_binding,
+                    _ordinary_binding=None if ordinary_nested is None else (ordinary_scope, ordinary_record))
+                gates = supervision.setdefault("nested_evidence", {})
+                if command_index in gates:
+                    raise ValueError("nested custody cannot be dispatched twice")
+                gates[command_index] = nested_gate
+            from tools.validation_reliability import _preflight_vector_v1
+            preflight_launch = (getattr(candidate_custody, "_preflight_launch", None)
+                if _preflight_vector_v1(tuple(execution_command)) else None)
+            with (nullcontext() if original_input is None else original_input), (
+                    nullcontext() if deadline_projection is None else _command_projection_v1(deadline_projection)):
+                supervision["pending"] = True
+                supervision["receipt"] = None
+                receipt = _execute_supervised_command(
+                    execution_command,
+                    cwd=execution_cwd,
+                    run_id=active_run_paths.run_id,
+                    phase=phase,
+                    command_index=command_index,
+                    evidence_root=active_run_paths.evidence_root,
+                    required_markers=expected_markers,
+                    timeout_seconds=timeout_seconds,
+                    environment=command_environment,
+                    **({"preflight_launch": preflight_launch} if preflight_launch is not None else {}),
+                    **({"launch_input": original_input} if original_input is not None else {}),
+                    **({"execution_deadline_ns": execution_deadline_ns}
+                       if execution_deadline_ns is not None else {}),
+                    **({"output_limits": original_input.output_limits, "output_observation": {}}
+                       if _ACTIVE_PREFLIGHT_ASSEMBLY_V1 is not None else {}),
+                    **({"output_limits": ordinary_output_limits, "output_observation": {}}
+                       if ordinary_record is not None else {}),
+                )
+                supervision["receipt"] = receipt
+                if type(receipt) is CommandExecutionReceiptV1:
+                    if all(receipt is not earlier for earlier in command_receipts):
+                        command_receipts.append(receipt)
+                    _LAST_COMMAND_RECEIPTS = tuple(command_receipts)
+            if _command_requires_process_retention_v1(receipt):
+                raise ValidationReliabilityError(
+                    "ENGVR_PROCESS_TERMINATION_FAILED",
+                    "command process custody remains unresolved",
+                )
+            if (type(receipt) is not CommandExecutionReceiptV1
+                    or receipt.run_id != active_run_paths.run_id or receipt.phase != phase
+                    or type(receipt.command_index) is not int or receipt.command_index != command_index
+                    or receipt.argv != tuple(execution_command) or receipt.cwd != str(execution_cwd)):
+                raise ValidationReliabilityError(
+                    "ENGVR_PROCESS_TERMINATION_FAILED",
+                    "command receipt differs from the original attempted execution",
+                )
+            supervision["pending"] = False
+            if ordinary_record is not None:
+                ordinary_scope._ordinary_observe_receipt_v1(ordinary_record, receipt)
+            if nested_gate is not None:
+                nested_gate.observe(receipt)
+            if _ACTIVE_PREFLIGHT_ASSEMBLY_V1 is not None:
+                _ACTIVE_PREFLIGHT_ASSEMBLY_V1.reconcile(command_index, receipt)
+            if nested_gate is not None and nested_gate.inconsistent:
+                raise ValidationReliabilityError("ENGVR_ATOMIC_RECEIPT_WRITE_FAILED",
+                    "parent success contradicts terminal nested child failure")
+            if candidate_custody is not None:
+                if type(receipt.native_exit_code) is not int:
+                    if ordinary_record is None or ordinary_record.get("no_launch") is None:
+                        raise RuntimeError("VALIDATION_CANDIDATE_CHILD_TERMINAL_UNKNOWN")
+                    ordinary_scope._ordinary_never_launched_v1(ordinary_record, settled=True)
+                if ordinary_record is not None:
+                    # The actual terminal Process/receipt already joined above.
+                    # C's logical borrow and complete end barrier settle under
+                    # the SAME original fixed cutoff, never a renewed allowance.
+                    with ordinary_scope.query.ordinary_owned_resource_phase_v1(ordinary_scope, candidate_custody):
+                        if ordinary_record.get("no_launch") is None:
+                            ordinary_scope._ordinary_check_compile_cache_v1(ordinary_record)
+                        candidate_custody.end_occurrence(command_index, candidate_entry)
+                        ordinary_scope._ordinary_retire_occurrence_v1(ordinary_record, receipt)
+                else:
+                    candidate_custody.end_occurrence(command_index, planned if getattr(candidate_custody, "plan", None) is _LAST_EXPECTED_COMMAND_PLAN else plan_entry)
+        except BaseException as exc:
+            supervision["errors"].append(exc)
+            if receipt is not None:
+                supervision["receipt"] = receipt
+            if type(receipt) is CommandExecutionReceiptV1:
+                if all(receipt is not earlier for earlier in command_receipts):
+                    command_receipts.append(receipt)
+                _LAST_COMMAND_RECEIPTS = tuple(command_receipts)
+            errors_to_inspect = [exc]
+            while errors_to_inspect:
+                error = errors_to_inspect.pop()
+                if isinstance(error, BaseExceptionGroup):
+                    errors_to_inspect.extend(reversed(error.exceptions))
+                attached = getattr(error, "command_receipt", None)
+                if supervision["receipt"] is None and type(attached) is CommandExecutionReceiptV1:
+                    supervision["receipt"] = attached
+                    if all(attached is not earlier for earlier in command_receipts):
+                        command_receipts.append(attached)
+                    _LAST_COMMAND_RECEIPTS = tuple(command_receipts)
+            if ordinary_record is not None and ordinary_record["receipt"] is None:
+                actual_receipt = supervision["receipt"]
+                if type(actual_receipt) is CommandExecutionReceiptV1:
+                    try:
+                        # Observation is one-shot against the actual original
+                        # Process/stream record, including a publication fault.
+                        ordinary_scope._ordinary_observe_receipt_v1(ordinary_record, actual_receipt)
+                        if not _command_requires_process_retention_v1(actual_receipt):
+                            ordinary_scope._ordinary_require_occurrence_terminal_v1(ordinary_record, actual_receipt)
+                    except BaseException as observation_error:
+                        if all(observation_error is not prior for prior in supervision["errors"]):
+                            supervision["errors"].append(observation_error)
+                    else:
+                        if not _command_requires_process_retention_v1(actual_receipt):
+                            supervision["pending"] = False
+            if isinstance(exc, ValidationReliabilityError):
+                print(str(exc), file=sys.stderr, flush=True)
+            elif isinstance(exc, OSError):
+                print(f"ENGVR_ATOMIC_RECEIPT_WRITE_FAILED: {type(exc).__name__}: {exc}",
+                      file=sys.stderr, flush=True)
+            elif isinstance(exc, (RuntimeError, ValueError)):
+                print(f"ENGVR_PROCESS_START_FAILED: {type(exc).__name__}: {exc}",
+                      file=sys.stderr, flush=True)
+            else:
+                raise
             return finish(1)
         finally:
             active_validation_processes -= 1
@@ -6822,6 +11647,11 @@ def _write_json_report(
         return
     if not report_path.is_absolute():
         report_path = repo_root / report_path
+    host_scope = _ordinary_host_report_scope_v1()
+    if host_scope is not None:
+        _ordinary_queue_encoded_parent_report_v1(
+            host_scope, "ROUTER", report_path, payload, _write_json_report)
+        return
     report_path.parent.mkdir(parents=True, exist_ok=True)
     report_path.write_text(
         json.dumps(payload, indent=2, sort_keys=True) + "\n",
@@ -6867,40 +11697,49 @@ def _current_git_branch(repo_root: pathlib.Path) -> str:
     return os.environ.get("GITHUB_HEAD_REF", "").strip()
 
 
+def _ordinary_foreign_filter_source_result_v1(commands, *, branch):
+ from tools.ci_branch_context import (
+  is_owner_authorized_validation_branch,
+  is_validation_infrastructure_branch,
+ )
+
+ if not (
+  is_owner_authorized_validation_branch(branch)
+  or is_validation_infrastructure_branch(branch)
+ ):
+  return [list(command) for command in commands], tuple(range(len(commands)))
+
+ kept = []
+ kept_input_ordinals = []
+ read_only_upstream_builders = []
+ for input_ordinal, command in enumerate(commands):
+  command_list = list(command)
+  script_name = _command_script_name(command_list)
+  if script_name not in OWNER_VALIDATION_READ_ONLY_UPSTREAM_BUILDER_SCRIPT_NAMES:
+   kept.append(command_list)
+   kept_input_ordinals.append(input_ordinal)
+   continue
+  read_only_upstream_builders.append(script_name)
+
+ if read_only_upstream_builders:
+  print(
+   "QTT_OWNER_AUTHORIZED_VALIDATION_UPSTREAM_BUILDERS_READ_ONLY "
+   f"branch={branch} "
+   f"scripts={','.join(sorted(read_only_upstream_builders))}",
+   flush=True,
+  )
+ return kept, tuple(kept_input_ordinals)
+
+
+
 def _filter_foreign_branch_guarded_builders_for_owner_validation(
     commands: Sequence[Sequence[str]],
     *,
     branch: str,
 ) -> list[list[str]]:
-    from tools.ci_branch_context import (
-        is_owner_authorized_validation_branch,
-        is_validation_infrastructure_branch,
-    )
-
-    if not (
-        is_owner_authorized_validation_branch(branch)
-        or is_validation_infrastructure_branch(branch)
-    ):
-        return [list(command) for command in commands]
-
-    kept: list[list[str]] = []
-    read_only_upstream_builders: list[str] = []
-    for command in commands:
-        command_list = list(command)
-        script_name = _command_script_name(command_list)
-        if script_name not in OWNER_VALIDATION_READ_ONLY_UPSTREAM_BUILDER_SCRIPT_NAMES:
-            kept.append(command_list)
-            continue
-        read_only_upstream_builders.append(script_name)
-
-    if read_only_upstream_builders:
-        print(
-            "QTT_OWNER_AUTHORIZED_VALIDATION_UPSTREAM_BUILDERS_READ_ONLY "
-            f"branch={branch} "
-            f"scripts={','.join(sorted(read_only_upstream_builders))}",
-            flush=True,
-        )
+    kept, _ = _ordinary_foreign_filter_source_result_v1(commands, branch=branch)
     return kept
+
 
 
 def _rp5d_r1_local_branch_scope_active(
@@ -7352,38 +12191,49 @@ def _write_pr169_dash1_local_branch_scope_report(
     )
 
 
+def _ordinary_router_filter_source_result_v1(commands, *, phase, router_result):
+ from tools.validation_inventory import canonical_command, validator_id_for_command
+
+ required = set(router_result.required_validators)
+ phase_by_command = {}
+ if phase == ALL_PHASE:
+  for phase_record in build_phase_manifest():
+   record_phase = str(phase_record["phase"])
+   for record_command in phase_record["commands"]:
+    phase_by_command[canonical_command(record_command)] = record_phase
+ kept = []
+ kept_input_ordinals = []
+ skipped = []
+ for input_ordinal, command in enumerate(commands):
+  command_list = list(command)
+  command_phase = phase_by_command.get(canonical_command(command_list), phase)
+  validator_id = validator_id_for_command(command_list, command_phase)
+  if validator_id in required:
+   kept.append(command_list)
+   kept_input_ordinals.append(input_ordinal)
+  else:
+   skipped.append(validator_id)
+ if skipped:
+  print(
+   "QTT_CHANGED_AREA_ROUTER_SKIPPED "
+   f"phase={phase} validators={','.join(sorted(skipped))}",
+   flush=True,
+  )
+ return kept, tuple(kept_input_ordinals)
+
+
+
 def _filter_commands_for_router_result(
     commands: Sequence[Sequence[str]],
     *,
     phase: str,
     router_result,
 ) -> list[list[str]]:
-    from tools.validation_inventory import canonical_command, validator_id_for_command
-
-    required = set(router_result.required_validators)
-    phase_by_command: dict[tuple[str, ...], str] = {}
-    if phase == ALL_PHASE:
-        for phase_record in build_phase_manifest():
-            record_phase = str(phase_record["phase"])
-            for record_command in phase_record["commands"]:
-                phase_by_command[canonical_command(record_command)] = record_phase
-    kept: list[list[str]] = []
-    skipped: list[str] = []
-    for command in commands:
-        command_list = list(command)
-        command_phase = phase_by_command.get(canonical_command(command_list), phase)
-        validator_id = validator_id_for_command(command_list, command_phase)
-        if validator_id in required:
-            kept.append(command_list)
-        else:
-            skipped.append(validator_id)
-    if skipped:
-        print(
-            "QTT_CHANGED_AREA_ROUTER_SKIPPED "
-            f"phase={phase} validators={','.join(sorted(skipped))}",
-            flush=True,
-        )
+    kept, _ = _ordinary_router_filter_source_result_v1(
+        commands, phase=phase, router_result=router_result
+    )
     return kept
+
 
 
 def _validation_text_integrity_preflight(
@@ -7471,13 +12321,55 @@ def _publish_active_plan_provenance(
     global _LAST_EXPECTED_COMMAND_PLAN
     global _RUN_PROVENANCE_WRITTEN
     global _RUN_PROVENANCE_ATTEMPTED
-    _LAST_PLANNED_COMMAND_COUNT = len(execution_plan)
-    _LAST_EXPECTED_COMMAND_PLAN = build_command_evidence_plan(
+    if (_RUN_PROVENANCE_ATTEMPTED or _SCAN_CAPACITY_ATTEMPTED
+            or _MAPPER_READ_SOURCE_ATTEMPTED or _ACTIVE_SCAN_LAUNCH is not None
+            or _LAST_PLANNED_COMMAND_COUNT is not None or _LAST_EXPECTED_COMMAND_PLAN):
+        raise ValueError("original plan publication/capacity acquisition cannot be retried")
+    selected_plan = build_command_evidence_plan(
         run_id=active_run_paths.run_id,
         phase=phase,
         commands=tuple(entry.execution_argv for entry in execution_plan),
         cwd=active_run_paths.repo_root,
     )
+    # Selection is retained even if either one-shot acquisition fails before
+    # provenance publication. Zero executions cannot erase this plan.
+    _LAST_EXPECTED_COMMAND_PLAN = selected_plan
+    _LAST_PLANNED_COMMAND_COUNT = len(selected_plan)
+    global _ACTIVE_PREFLIGHT_ASSEMBLY_V1, _ACTIVE_CANDIDATE_SOURCE
+    if _ACTIVE_PREFLIGHT_PATH_V1 is not None:
+        supervision = _RUN_COMMANDS_SUPERVISION
+        if (supervision is None or supervision['paths'] is not active_run_paths
+                or supervision['phase'] != phase or supervision['pending']
+                or supervision.get('preflight_assembly') is not None):
+            raise ValueError('preflight assembly lost original invocation association')
+        assembly = _PreflightAssemblyV1.__new__(_PreflightAssemblyV1)
+        _ACTIVE_PREFLIGHT_ASSEMBLY_V1 = assembly
+        supervision['preflight_assembly'] = assembly
+        supervision['preflight_native_input'] = _ACTIVE_PREFLIGHT_NATIVE_V1
+        from tools.validation_reliability import _PreflightNativeInputV1
+        if type(_ACTIVE_PREFLIGHT_NATIVE_V1) is not _PreflightNativeInputV1:
+            raise ValueError('preflight original native input required')
+        supervision['preflight_native_input_binding'] = (_ACTIVE_PREFLIGHT_NATIVE_V1.path,
+            _ACTIVE_PREFLIGHT_NATIVE_V1.root, _ACTIVE_PREFLIGHT_NATIVE_V1.index_path,
+            _ACTIVE_PREFLIGHT_NATIVE_V1.pid, _ACTIVE_PREFLIGHT_NATIVE_V1.thread)
+        assembly.__init__(_ACTIVE_PREFLIGHT_NATIVE_V1, active_run_paths, selected_plan)
+        _ACTIVE_CANDIDATE_SOURCE = assembly.candidate_source
+    if _ORDINARY_CANDIDATE_FIRST_V1:
+        from tools.validation_reliability import _LINUX_PREFLIGHT_PROCESS_V1, _LinuxPreflightScopeV1
+        ordinary_scope = _LINUX_PREFLIGHT_PROCESS_V1.get()
+        if (type(ordinary_scope) is _LinuxPreflightScopeV1
+                and ordinary_scope._ordinary_selected_v1()):
+            ordinary_scope._ordinary_precursor_ready_v1()
+            if (_ACTIVE_CANDIDATE_SOURCE is not ordinary_scope._ordinary_candidate_source_v1
+                    or _ACTIVE_CANDIDATE_SOURCE is not ordinary_scope._ordinary_original_candidate_source_v1):
+                raise ValueError("ORDINARY_PUBLISHER_ORIGINAL_SUPPLIER")
+            # This exact tuple is the original plan; no earlier reconstructed
+            # tuple or JSON object supplies native/candidate authority.
+            ordinary_scope._ordinary_bind_run_v1(active_run_paths, selected_plan, execution_plan=execution_plan)
+        _prepare_validation_candidate_v1(active_run_paths.repo_root, selected_plan, None)
+    launch = _scan_resolve_parent_capacity(active_run_paths, phase, selected_plan)
+    _mapper_resolve_parent_profiles_v1(active_run_paths, phase, _LAST_EXPECTED_COMMAND_PLAN)
+    original_rp5a_programme = _ordinary_rp5a_publication_programme_v1(active_run_paths, phase, selected_plan)
     _RUN_PROVENANCE_ATTEMPTED = True
     write_run_provenance(
         active_run_paths,
@@ -7485,12 +12377,25 @@ def _publish_active_plan_provenance(
         phase=phase,
         command_count=len(execution_plan),
         text_integrity_preflight_state=_ACTIVE_TEXT_INTEGRITY_STATE,
+        rp5a_scan_profiles=None if launch is None else launch.profiles,
+        rp5a_reader_profiles=None if launch is None or not launch.reader_profiles else launch.reader_profiles,
+        rp5a_reader_bases=None if launch is None or not launch.reader_bases else launch.reader_bases,
+        rp5a_launch_wire_versions=None if launch is None else launch.rp5a_launch_wire_versions,
+        rp5a_payload_byte_limits=None if launch is None else launch.rp5a_payload_byte_limits,
+        scan_read_limits=None if launch is None else launch.read_limits,
+        scan_deadline_ns=None if launch is None else launch.deadline_ns,
+        mapper_read_profiles=_ACTIVE_MAPPER_READ_PROFILES_V1,
+        **({"rp5a_occurrence_programmes": original_rp5a_programme}
+           if original_rp5a_programme is not None else {}),
     )
     _RUN_PROVENANCE_WRITTEN = True
+    if _ACTIVE_PREFLIGHT_ASSEMBLY_V1 is not None:
+        _ACTIVE_PREFLIGHT_ASSEMBLY_V1.state = "PUBLISHED"
 
 
 def _main_impl(argv: Sequence[str] | None = None) -> int:
     parser = argparse.ArgumentParser()
+    parser.add_argument("--preflight-input", type=pathlib.Path, help="Bounded first-phase declaration; requires a live native input lease.")
     parser.add_argument(
         "--phase",
         choices=VALIDATION_PHASES,
@@ -7540,6 +12445,29 @@ def _main_impl(argv: Sequence[str] | None = None) -> int:
         if active_run_paths is None
         else active_run_paths.repo_root
     )
+    pending_router_publication_error = None
+
+    def publish_router_report(writer, report_path, **kwargs):
+        nonlocal pending_router_publication_error
+        if report_path is None:
+            return
+        if not _ORDINARY_CANDIDATE_FIRST_V1:
+            writer(report_path, **kwargs)
+            return
+        # The original native parent owns only these two selected report
+        # bodies; the genuine original writer still produces the complete JSON.
+        host_scope = _ordinary_host_report_scope_v1()
+        if host_scope is not None:
+            host_scope._ordinary_select_router_producer_v1(writer, report_path, kwargs)
+            writer(report_path, **kwargs)
+            return
+        error = ValueError("ordinary router report output lacks genuine owned-output binding")
+        supervision = _RUN_COMMANDS_SUPERVISION
+        if supervision is None:
+            raise error
+        supervision["errors"].append(error)
+        pending_router_publication_error = error
+
     timing_report_path = args.timing_report
     if timing_report_path is not None and not timing_report_path.is_absolute():
         timing_report_path = repo_root / timing_report_path
@@ -7589,10 +12517,19 @@ def _main_impl(argv: Sequence[str] | None = None) -> int:
                 )
             )
             with pytest_temp_context as pytest_temp_dir:
-                commands = build_phase_commands(
-                    args.phase,
-                    pathlib.Path(temp_dir),
-                    pathlib.Path(pytest_temp_dir),
+                ordinary_source_selection = _ordinary_source_selection_for_main_v1(
+                    active_run_paths, args.phase,
+                    (active_run_paths.validation_output_root
+                     if active_run_paths is not None else pathlib.Path(temp_dir)),
+                    (active_run_paths.pytest_basetemp_root
+                     if active_run_paths is not None else pathlib.Path(pytest_temp_dir)),
+                )
+                commands = (
+                    ordinary_source_selection.commands
+                    if ordinary_source_selection is not None
+                    else build_phase_commands(
+                        args.phase, pathlib.Path(temp_dir), pathlib.Path(pytest_temp_dir)
+                    )
                 )
                 topology_failures = _st12h_runner_topology_failures()
                 if topology_failures:
@@ -7604,7 +12541,11 @@ def _main_impl(argv: Sequence[str] | None = None) -> int:
                     current_branch_context,
                 )
 
-                branch_context = current_branch_context(repo_root)
+                branch_context = (
+                    ordinary_source_selection.current_branch_context(repo_root)
+                    if ordinary_source_selection is not None
+                    else current_branch_context(repo_root)
+                )
                 protected_predecessor_changes: tuple[str, ...] = ()
                 if branch_context.branch == ST12H_IMPLEMENTATION_BRANCH:
                     try:
@@ -7634,9 +12575,10 @@ def _main_impl(argv: Sequence[str] | None = None) -> int:
                     return 2
 
                 commands = (
-                    _filter_foreign_branch_guarded_builders_for_owner_validation(
-                        commands,
-                        branch=branch_context.branch,
+                    ordinary_source_selection.foreign_filter()
+                    if ordinary_source_selection is not None
+                    else _filter_foreign_branch_guarded_builders_for_owner_validation(
+                        commands, branch=branch_context.branch
                     )
                 )
                 if _ACTIVE_SEMANTIC_CHANGED_PATHS is None:
@@ -7668,8 +12610,8 @@ def _main_impl(argv: Sequence[str] | None = None) -> int:
                     manual_mode=args.manual_mode,
                 ):
                     commands = _filter_commands_for_rp5d_r1_local_branch_scope(commands)
-                    _write_rp5d_r1_local_branch_scope_report(
-                        args.router_report,
+                    publish_router_report(
+                        _write_rp5d_r1_local_branch_scope_report, args.router_report,
                         repo_root=repo_root,
                         kept_commands=commands,
                     )
@@ -7687,8 +12629,8 @@ def _main_impl(argv: Sequence[str] | None = None) -> int:
                     manual_mode=args.manual_mode,
                 ):
                     commands = _filter_commands_for_rp5f_local_branch_scope(commands)
-                    _write_rp5f_local_branch_scope_report(
-                        args.router_report,
+                    publish_router_report(
+                        _write_rp5f_local_branch_scope_report, args.router_report,
                         repo_root=repo_root,
                         kept_commands=commands,
                     )
@@ -7706,8 +12648,8 @@ def _main_impl(argv: Sequence[str] | None = None) -> int:
                     manual_mode=args.manual_mode,
                 ):
                     commands = _filter_commands_for_rp5g_local_branch_scope(commands)
-                    _write_rp5g_local_branch_scope_report(
-                        args.router_report,
+                    publish_router_report(
+                        _write_rp5g_local_branch_scope_report, args.router_report,
                         repo_root=repo_root,
                         kept_commands=commands,
                     )
@@ -7727,8 +12669,8 @@ def _main_impl(argv: Sequence[str] | None = None) -> int:
                     commands = _filter_commands_for_pr169_readiness1_local_branch_scope(
                         commands
                     )
-                    _write_pr169_readiness1_local_branch_scope_report(
-                        args.router_report,
+                    publish_router_report(
+                        _write_pr169_readiness1_local_branch_scope_report, args.router_report,
                         repo_root=repo_root,
                         kept_commands=commands,
                     )
@@ -7748,8 +12690,8 @@ def _main_impl(argv: Sequence[str] | None = None) -> int:
                     commands = _filter_commands_for_pr169_pretrade1_local_branch_scope(
                         commands
                     )
-                    _write_pr169_pretrade1_local_branch_scope_report(
-                        args.router_report,
+                    publish_router_report(
+                        _write_pr169_pretrade1_local_branch_scope_report, args.router_report,
                         repo_root=repo_root,
                         kept_commands=commands,
                     )
@@ -7769,8 +12711,8 @@ def _main_impl(argv: Sequence[str] | None = None) -> int:
                     commands = _filter_commands_for_pr169_dash1_local_branch_scope(
                         commands
                     )
-                    _write_pr169_dash1_local_branch_scope_report(
-                        args.router_report,
+                    publish_router_report(
+                        _write_pr169_dash1_local_branch_scope_report, args.router_report,
                         repo_root=repo_root,
                         kept_commands=commands,
                     )
@@ -7779,31 +12721,34 @@ def _main_impl(argv: Sequence[str] | None = None) -> int:
                         f"phase={args.phase} full_validation_required=False",
                         flush=True,
                     )
-                elif _changed_area_routing_active(
-                    validation_mode=args.validation_mode,
-                    changed_files=effective_changed_files,
-                ):
-                    router_result = _router_result_for_current_context(
-                        repo_root,
+                elif (
+                    ordinary_source_selection.routing_active(
+                        validation_mode=args.validation_mode,
                         changed_files=effective_changed_files,
-                        base_ref=args.base_ref,
-                        head_ref=args.head_ref,
-                        force_full=args.force_full,
-                        manual_mode=args.manual_mode,
                     )
-                    router_report_path = args.router_report
-                    if router_report_path is not None:
-                        if not router_report_path.is_absolute():
-                            router_report_path = repo_root / router_report_path
-                        router_report_path.parent.mkdir(parents=True, exist_ok=True)
-                        router_report_path.write_text(
-                            json.dumps(
-                                router_result.to_json_dict(),
-                                indent=2,
-                                sort_keys=True,
-                            )
-                            + "\n",
-                            encoding="utf-8",
+                    if ordinary_source_selection is not None
+                    else _changed_area_routing_active(
+                        validation_mode=args.validation_mode,
+                        changed_files=effective_changed_files,
+                    )
+                ):
+                    router_result = (
+                        ordinary_source_selection.router_result_for_current_context(
+                            repo_root, changed_files=effective_changed_files,
+                            base_ref=args.base_ref, head_ref=args.head_ref,
+                            force_full=args.force_full, manual_mode=args.manual_mode,
+                        )
+                        if ordinary_source_selection is not None
+                        else _router_result_for_current_context(
+                            repo_root, changed_files=effective_changed_files,
+                            base_ref=args.base_ref, head_ref=args.head_ref,
+                            force_full=args.force_full, manual_mode=args.manual_mode,
+                        )
+                    )
+                    if args.router_report is not None:
+                        publish_router_report(
+                            _write_json_report, args.router_report,
+                            repo_root=repo_root, payload=router_result.to_json_dict(),
                         )
                     print(
                         "QTT_CHANGED_AREA_ROUTER_MODE "
@@ -7817,14 +12762,16 @@ def _main_impl(argv: Sequence[str] | None = None) -> int:
                             print(reason, file=sys.stderr, flush=True)
                         return 2
                     if not router_result.full_validation_required:
-                        commands = _filter_commands_for_router_result(
-                            commands,
-                            phase=args.phase,
-                            router_result=router_result,
+                        commands = (
+                            ordinary_source_selection.router_filter()
+                            if ordinary_source_selection is not None
+                            else _filter_commands_for_router_result(
+                                commands, phase=args.phase, router_result=router_result
+                            )
                         )
                 else:
-                    _write_full_validation_router_report(
-                        args.router_report,
+                    publish_router_report(
+                        _write_full_validation_router_report, args.router_report,
                         repo_root=repo_root,
                         phase=args.phase,
                         commands=commands,
@@ -7842,7 +12789,16 @@ def _main_impl(argv: Sequence[str] | None = None) -> int:
                         for failure in selected_command_failures:
                             print(failure, file=sys.stderr, flush=True)
                         return 2
-                execution_plan = _prepare_execution_plan(commands)
+                if (ordinary_source_selection is not None
+                        and commands is not ordinary_source_selection.commands):
+                    raise ValueError('ORDINARY_SOURCE_SELECTION_ACTUAL_FINAL_COMMANDS')
+                execution_plan = (
+                    ordinary_source_selection.project()
+                    if ordinary_source_selection is not None
+                    else _prepare_execution_plan(commands)
+                )
+                if pending_router_publication_error is not None:
+                    raise pending_router_publication_error
                 if active_run_paths is not None:
                     _publish_active_plan_provenance(args.phase, execution_plan)
                 if _run_commands_accepts_repo_root():
@@ -7878,120 +12834,300 @@ def _finalize_validation_run(
     receipts: Sequence[CommandExecutionReceiptV1],
     result: int,
     text_state: str,
+    scan_launch=None,
+    _supervision_state=None,
 ) -> tuple[int, str, ValidationCompletionReceiptV1]:
     """Publish cleanup and terminal custody for one already-planned run."""
 
-    cleanup_state = "NOT_RUN"
-    termination_unproven = any(
-        receipt.failure_class == "ENGVR_PROCESS_TERMINATION_FAILED"
-        for receipt in receipts
-    )
-    if termination_unproven:
-        cleanup_state = "SKIPPED_PROCESS_TERMINATION_UNPROVEN"
-        try:
-            atomic_write_json(
-                run_paths.evidence_root / "cleanup.json",
-                {
-                    "schema_version": 1,
-                    "run_id": run_paths.run_id,
-                    "cleanup_target": str(run_paths.cleanup_target),
-                    "cleanup_state": cleanup_state,
-                    "parent_preserved": True,
-                },
+    global _RUN_COMMANDS_SUPERVISION
+    supervision = _supervision_state
+    if (supervision is None and _RUN_COMMANDS_SUPERVISION is not None
+            and (_RUN_COMMANDS_SUPERVISION["paths"] is run_paths
+                 or _RUN_COMMANDS_SUPERVISION["pending"])):
+        supervision = _RUN_COMMANDS_SUPERVISION
+    try:
+        if supervision is not None:
+            candidate = supervision.get("candidate_custody")
+            if type(candidate) is _ValidationCandidateCustodyV1:
+                failure = candidate.failure
+                if failure is not None and all(failure is not error for error in supervision["errors"]):
+                    supervision["errors"].append(failure)
+                if (_invocation_requires_retention_v1(supervision)
+                        and (_RUN_COMMANDS_SUPERVISION is None or
+                             (not _RUN_COMMANDS_SUPERVISION["pending"]
+                              and not _invocation_requires_retention_v1(_RUN_COMMANDS_SUPERVISION)))):
+                    _RUN_COMMANDS_SUPERVISION = supervision
+        if supervision is not None and _scan_inputs_require_retention_v1(supervision):
+            if (_RUN_COMMANDS_SUPERVISION is None or
+                    not (_RUN_COMMANDS_SUPERVISION["pending"] or
+                         _invocation_requires_retention_v1(_RUN_COMMANDS_SUPERVISION))):
+                _RUN_COMMANDS_SUPERVISION = supervision
+        # Revalidate before cleanup, not merely in the post-cleanup report.
+        if supervision is not None:
+            try:
+                _recheck_nested_pytest_custody_v1(supervision)
+                if any(gate.inconsistent for gate in supervision.get("nested_evidence", {}).values()):
+                    result = 1
+            except (ValidationReliabilityError, OSError, ValueError):
+                result = 1  # The helper has latched pending and retained the error.
+        # A mapper receipt cannot pass a direct finalizer call without its live
+        # pre-dispatch gate. Missing state is not an empty-descendant proof.
+        mapper_receipts = [receipt for receipt in receipts
+            if type(receipt) is CommandExecutionReceiptV1 and
+            _mapper_nested_pytest_args_v1(receipt.argv, pathlib.Path(receipt.cwd)) is not None]
+        if mapper_receipts and (supervision is None or any(
+                receipt.command_index not in supervision.get("nested_evidence", {})
+                or supervision["nested_evidence"][receipt.command_index].receipt != receipt
+                or receipt.command_index > len(expected_plan)
+                or supervision["nested_evidence"][receipt.command_index].planned is not expected_plan[receipt.command_index - 1]
+                for receipt in mapper_receipts)):
+            if supervision is None:
+                supervision = {"paths": run_paths, "phase": phase, "pending": True,
+                               "receipt": mapper_receipts[-1], "errors": []}
+            supervision["pending"] = True
+            result = 1
+        termination_unproven = (
+            (_RUN_COMMANDS_SUPERVISION is not None and _RUN_COMMANDS_SUPERVISION["pending"])
+            or (supervision is not None and (supervision["pending"]
+                or supervision["paths"] is not run_paths or supervision["phase"] != phase))
+            or any(_command_requires_process_retention_v1(receipt) for receipt in receipts)
+        )
+        if termination_unproven:
+            if supervision is None:
+                supervision = {"paths": run_paths, "phase": phase, "pending": True,
+                               "receipt": next((receipt for receipt in receipts
+                                   if _command_requires_process_retention_v1(receipt)), None),
+                               "errors": []}
+            supervision["pending"] = True
+            if supervision["receipt"] is None:
+                supervision["receipt"] = next((receipt for receipt in receipts
+                    if _command_requires_process_retention_v1(receipt)), None)
+            if _RUN_COMMANDS_SUPERVISION is None or not _RUN_COMMANDS_SUPERVISION["pending"]:
+                _RUN_COMMANDS_SUPERVISION = supervision
+        # Retain known uncertainty even if independent finalizer identity checks fail.
+        if scan_launch is not None:
+            if (scan_launch.paths is not run_paths or scan_launch.plan is not expected_plan
+                    or scan_launch.phase != phase or len(scan_launch.plan) != planned_count):
+                raise ValueError("finalizer lost original scan launch identity")
+        if _ACTIVE_PREFLIGHT_ASSEMBLY_V1 is not None:
+            if (_ACTIVE_PREFLIGHT_ASSEMBLY_V1.paths is not run_paths
+                    or _ACTIVE_PREFLIGHT_ASSEMBLY_V1.plan is not expected_plan):
+                raise ValueError("finalizer lost original preflight assembly identity")
+            _ACTIVE_PREFLIGHT_ASSEMBLY_V1.settling()
+        if not termination_unproven:
+            try:
+                _settle_scan_inputs_v1(supervision, run_paths, phase, expected_plan)
+            except (OSError, RuntimeError, ValueError) as error:
+                print("ENGVR_PREPUBLICATION_CUSTODY_FAILED: " + str(error), file=sys.stderr, flush=True)
+                result = 1
+        if (not termination_unproven and supervision is not None and not supervision['pending']
+                and not _scan_inputs_require_retention_v1(supervision)
+                and (_RUN_COMMANDS_SUPERVISION is None or
+                    not _RUN_COMMANDS_SUPERVISION['pending'] and
+                    not _scan_inputs_require_retention_v1(_RUN_COMMANDS_SUPERVISION))):
+            try:
+                _settle_native_candidate_resources_v1(supervision, run_paths, phase, expected_plan)
+            except (OSError, RuntimeError, ValueError) as error:
+                print("ENGVR_PREPUBLICATION_CUSTODY_FAILED: " + str(error), file=sys.stderr, flush=True)
+                result = 1
+        if not termination_unproven:
+            try:
+                _settle_mapper_occurrences_v1(supervision, run_paths, phase, expected_plan, receipts)
+            except (OSError, RuntimeError, ValueError) as error:
+                print("ENGVR_PREPUBLICATION_CUSTODY_FAILED: " + str(error), file=sys.stderr, flush=True)
+                result = 1
+        if (not termination_unproven and not _invocation_requires_retention_v1(supervision)
+                and not _invocation_requires_retention_v1(_RUN_COMMANDS_SUPERVISION)):
+            try:
+                _settle_validation_candidate_v1(supervision, run_paths, phase, expected_plan)
+            except (OSError, RuntimeError, ValueError) as error:
+                print("ENGVR_PREPUBLICATION_CUSTODY_FAILED: " + str(error), file=sys.stderr, flush=True)
+                result = 1
+        candidate_unsettled = (_invocation_requires_retention_v1(supervision)
+            or _invocation_requires_retention_v1(_RUN_COMMANDS_SUPERVISION))
+        if candidate_unsettled:
+            if (_RUN_COMMANDS_SUPERVISION is None or
+                    (not _RUN_COMMANDS_SUPERVISION["pending"]
+                     and not _invocation_requires_retention_v1(_RUN_COMMANDS_SUPERVISION))):
+                _RUN_COMMANDS_SUPERVISION = supervision
+            result = 1
+        cleanup_state = "NOT_RUN"
+        if termination_unproven or candidate_unsettled:
+            cleanup_state = ("SKIPPED_PROCESS_TERMINATION_UNPROVEN" if termination_unproven
+                             else "FAIL_SCAN_INPUT_CUSTODY_UNRESOLVED" if
+                                 (_scan_inputs_require_retention_v1(supervision) or
+                                  _scan_inputs_require_retention_v1(_RUN_COMMANDS_SUPERVISION))
+                             else "FAIL_CANDIDATE_CUSTODY_UNRESOLVED")
+            try:
+                atomic_write_json(
+                    run_paths.evidence_root / "cleanup.json",
+                    {
+                        "schema_version": 1,
+                        "run_id": run_paths.run_id,
+                        "cleanup_target": str(run_paths.cleanup_target),
+                        "cleanup_state": cleanup_state,
+                        "parent_preserved": True,
+                    },
+                )
+            except RuntimeError as exc:
+                if supervision is not None:
+                    supervision["errors"].append(exc)
+                print(str(exc), file=sys.stderr, flush=True)
+            result = 1
+        else:
+            try:
+                cleanup_state = cleanup_validation_run(run_paths)
+                if _ACTIVE_PREFLIGHT_ASSEMBLY_V1 is not None:
+                    _ACTIVE_PREFLIGHT_ASSEMBLY_V1.native.check()
+                    _ACTIVE_PREFLIGHT_ASSEMBLY_V1.state = "SETTLED"
+            except RuntimeError as exc:
+                cleanup_state = "FAIL"
+                print(str(exc), file=sys.stderr, flush=True)
+                result = 1
+
+        started_count, completed_count, first_failed, terminal_native_exit = (
+            command_attempt_accounting(receipts)
+        )
+        if result == 0 and not (
+            planned_count > 0
+            and len(receipts) == planned_count
+            and started_count == planned_count
+            and completed_count == planned_count
+            and all(receipt.native_exit_code == 0 for receipt in receipts)
+            and all(receipt.failure_class is None for receipt in receipts)
+        ):
+            print(
+                "ENGVR_ATOMIC_RECEIPT_WRITE_FAILED: "
+                "passing command result lacks complete native receipt custody",
+                file=sys.stderr,
+                flush=True,
             )
-        except RuntimeError as exc:
-            print(str(exc), file=sys.stderr, flush=True)
-        result = 1
-    else:
+            result = 1
+        marker_state = (
+            "NOT_RUN"
+            if not receipts
+            else "FAIL"
+            if any(
+                receipt.stdout_marker_state not in {"PASS", "NOT_REQUIRED"}
+                for receipt in receipts
+            )
+            else "PASS"
+        )
+        original_rp5a_programme = _ordinary_rp5a_publication_programme_v1(run_paths, phase, expected_plan)
+        if original_rp5a_programme is not None:
+            scan_launch = None  # Actual per-occurrence launches are retained in original custody records.
+        custody_error: ValidationReliabilityError | None = None
+        from tools.validation_reliability import _MAPPER_FINAL_EVIDENCE_V1
+        final_mapper_proof = None if supervision is None else supervision.get('mapper_final_review')
+        final_mapper_token = _MAPPER_FINAL_EVIDENCE_V1.set(final_mapper_proof)
         try:
-            cleanup_state = cleanup_validation_run(run_paths)
-        except RuntimeError as exc:
-            cleanup_state = "FAIL"
+            validate_complete_run_evidence(
+                run_paths,
+                probe,
+                phase=phase,
+                command_count_planned=planned_count,
+                expected_plan=expected_plan,
+                receipts=receipts,
+                cleanup_state=cleanup_state,
+                text_integrity_preflight_state=text_state,
+                rp5a_scan_profiles=None if scan_launch is None else scan_launch.profiles,
+        rp5a_reader_profiles=None if scan_launch is None or not scan_launch.reader_profiles else scan_launch.reader_profiles,
+        rp5a_reader_bases=None if scan_launch is None or not scan_launch.reader_bases else scan_launch.reader_bases,
+        rp5a_launch_wire_versions=None if scan_launch is None else scan_launch.rp5a_launch_wire_versions,
+        rp5a_payload_byte_limits=None if scan_launch is None else scan_launch.rp5a_payload_byte_limits,
+                mapper_read_profiles=_ACTIVE_MAPPER_READ_PROFILES_V1 if planned_count else None,
+                mapper_occurrence_records=_ACTIVE_MAPPER_OCCURRENCES_V1,
+                **({"rp5a_occurrence_programmes": original_rp5a_programme}
+                   if original_rp5a_programme is not None else {}),
+                **({"preflight_meter": _ACTIVE_PREFLIGHT_ASSEMBLY_V1.parent_meter}
+                   if _ACTIVE_PREFLIGHT_ASSEMBLY_V1 is not None else {}),
+            )
+        except ValidationReliabilityError as exc:
+            if supervision is not None:
+                supervision["errors"].append(exc)
+            custody_error = exc
             print(str(exc), file=sys.stderr, flush=True)
             result = 1
-
-    started_count, completed_count, first_failed, terminal_native_exit = (
-        command_attempt_accounting(receipts)
-    )
-    if result == 0 and not (
-        planned_count > 0
-        and len(receipts) == planned_count
-        and started_count == planned_count
-        and completed_count == planned_count
-        and all(receipt.native_exit_code == 0 for receipt in receipts)
-        and all(receipt.failure_class is None for receipt in receipts)
-    ):
-        print(
-            "ENGVR_ATOMIC_RECEIPT_WRITE_FAILED: "
-            "passing command result lacks complete native receipt custody",
-            file=sys.stderr,
-            flush=True,
-        )
-        result = 1
-    marker_state = (
-        "NOT_RUN"
-        if not receipts
-        else "FAIL"
-        if any(
-            receipt.stdout_marker_state not in {"PASS", "NOT_REQUIRED"}
-            for receipt in receipts
-        )
-        else "PASS"
-    )
-    custody_error: ValidationReliabilityError | None = None
-    try:
-        validate_complete_run_evidence(
-            run_paths,
-            probe,
+        finally:
+            _MAPPER_FINAL_EVIDENCE_V1.reset(final_mapper_token)
+        completion = ValidationCompletionReceiptV1(
+            run_id=run_paths.run_id,
             phase=phase,
             command_count_planned=planned_count,
-            expected_plan=expected_plan,
-            receipts=receipts,
-            cleanup_state=cleanup_state,
+            command_count_started=started_count,
+            command_count_completed=completed_count,
+            first_failed_command_index_or_null=first_failed,
+            terminal_native_exit_code=(
+                terminal_native_exit
+            ),
+            required_marker_state=marker_state,
+            process_root_cleanup_state=cleanup_state,
+            evidence_root_state=(
+                "PRESENT" if run_paths.evidence_root.is_dir() else "MISSING"
+            ),
             text_integrity_preflight_state=text_state,
+            final_state=(
+                "PASS"
+                if result == 0
+                and cleanup_state.startswith("PASS")
+                and text_state == "PASS"
+                and custody_error is None
+                else "FAIL"
+            ),
         )
-    except ValidationReliabilityError as exc:
-        custody_error = exc
-        print(str(exc), file=sys.stderr, flush=True)
-        result = 1
-    completion = ValidationCompletionReceiptV1(
-        run_id=run_paths.run_id,
-        phase=phase,
-        command_count_planned=planned_count,
-        command_count_started=started_count,
-        command_count_completed=completed_count,
-        first_failed_command_index_or_null=first_failed,
-        terminal_native_exit_code=(
-            terminal_native_exit
-        ),
-        required_marker_state=marker_state,
-        process_root_cleanup_state=cleanup_state,
-        evidence_root_state=(
-            "PRESENT" if run_paths.evidence_root.is_dir() else "MISSING"
-        ),
-        text_integrity_preflight_state=text_state,
-        final_state=(
-            "PASS"
-            if result == 0
-            and cleanup_state.startswith("PASS")
-            and text_state == "PASS"
-            and custody_error is None
-            else "FAIL"
-        ),
-    )
-    try:
-        atomic_write_json(run_paths.evidence_root / "completion.json", completion)
-        validate_published_completion_receipt(
-            run_paths.evidence_root,
-            completion,
-        )
-    except RuntimeError as exc:
-        print(str(exc), file=sys.stderr, flush=True)
-        result = 1
-    return result, cleanup_state, completion
+        try:
+            atomic_write_json(run_paths.evidence_root / "completion.json", completion)
+            validate_published_completion_receipt(
+                run_paths.evidence_root,
+                completion,
+            )
+        except RuntimeError as exc:
+            if supervision is not None:
+                supervision["errors"].append(exc)
+            print(str(exc), file=sys.stderr, flush=True)
+            result = 1
+        return result, cleanup_state, completion
+    except BaseException as exc:
+        if supervision is not None:
+            if _scan_inputs_require_retention_v1(supervision):
+                if supervision.get("scan_settlement_error") is None:
+                    supervision["scan_settlement_error"] = exc
+                if (_RUN_COMMANDS_SUPERVISION is None or
+                        not (_RUN_COMMANDS_SUPERVISION["pending"] or
+                             _invocation_requires_retention_v1(_RUN_COMMANDS_SUPERVISION))):
+                    _RUN_COMMANDS_SUPERVISION = supervision
+            candidate = supervision.get("candidate_custody")
+            if (type(candidate) is _ValidationCandidateCustodyV1 and candidate.baseline is not None
+                    and not candidate._restoration_complete_v1()):
+                if supervision.get("candidate_settlement_error") is None:
+                    supervision["candidate_settlement_error"] = exc
+                if (_RUN_COMMANDS_SUPERVISION is None or
+                        (not _RUN_COMMANDS_SUPERVISION["pending"]
+                         and not _invocation_requires_retention_v1(_RUN_COMMANDS_SUPERVISION))):
+                    _RUN_COMMANDS_SUPERVISION = supervision
+            if all(exc is not error for error in supervision["errors"]):
+                supervision["errors"].append(exc)
+            if _invocation_requires_retention_v1(supervision):
+                if supervision.get("native_resource_settlement_error") is None:
+                    supervision["native_resource_settlement_error"] = exc
+                if (_RUN_COMMANDS_SUPERVISION is None or
+                        (not _RUN_COMMANDS_SUPERVISION["pending"]
+                         and not _invocation_requires_retention_v1(_RUN_COMMANDS_SUPERVISION))):
+                    _RUN_COMMANDS_SUPERVISION = supervision
+            _scan_raise_errors(supervision["errors"])
+        raise
 
 
-def main(argv: Sequence[str] | None = None) -> int:
+def _main_owned(argv: Sequence[str] | None = None) -> int:
+    global _RUN_COMMANDS_SUPERVISION
+    if _RUN_COMMANDS_SUPERVISION is not None and _RUN_COMMANDS_SUPERVISION["pending"]:
+        print("ENGVR_PROCESS_TERMINATION_FAILED: prior command custody is unresolved",
+              file=sys.stderr, flush=True)
+        return 1
+    if _invocation_requires_retention_v1(_RUN_COMMANDS_SUPERVISION):
+        print("ENGVR_PREPUBLICATION_CUSTODY_FAILED: prior candidate custody is unresolved",
+              file=sys.stderr, flush=True)
+        return 1
     raw_argv = list(sys.argv[1:] if argv is None else argv)
     if any(argument in {"-h", "--help"} for argument in raw_argv):
         return _main_impl(raw_argv)
@@ -8000,6 +13136,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     pre_parser = argparse.ArgumentParser(add_help=False)
     pre_parser.add_argument("--phase", choices=VALIDATION_PHASES, default=ALL_PHASE)
     pre_parser.add_argument("--process-root", type=pathlib.Path)
+    pre_parser.add_argument("--preflight-input", type=pathlib.Path)
     pre_parser.add_argument(
         "--validation-mode",
         choices=("auto", "full", "reduced"),
@@ -8008,6 +13145,10 @@ def main(argv: Sequence[str] | None = None) -> int:
     pre_parser.add_argument("--changed-file", action="append", default=[])
     pre_args, _unknown = pre_parser.parse_known_args(raw_argv)
     repo_root = _repo_root()
+    global _ACTIVE_PREFLIGHT_NATIVE_V1
+    if pre_args.preflight_input is not None:
+        from tools.validation_reliability import _preflight_acquire_native_input_v1
+        _ACTIVE_PREFLIGHT_NATIVE_V1 = _preflight_acquire_native_input_v1(pre_args.preflight_input.absolute(), repo_root)
     try:
         run_paths, probe = resolve_validation_run_paths(
             repo_root,
@@ -8015,6 +13156,9 @@ def main(argv: Sequence[str] | None = None) -> int:
             projected_relative_paths=_projected_validation_relative_paths(
                 pre_args.phase
             ),
+            **({'run_id':_ACTIVE_PREFLIGHT_NATIVE_V1.host_lease.binding['source_run_id']}
+                if _ACTIVE_PREFLIGHT_NATIVE_V1 is not None and
+                getattr(_ACTIVE_PREFLIGHT_NATIVE_V1.host_lease,'binding',{}).get('native_basis') is not None else {}),
         )
     except (OSError, RuntimeError, ValueError) as exc:
         print(str(exc), file=sys.stderr, flush=True)
@@ -8043,6 +13187,14 @@ def main(argv: Sequence[str] | None = None) -> int:
     previous_provenance_state = _RUN_PROVENANCE_WRITTEN
     previous_provenance_attempted = _RUN_PROVENANCE_ATTEMPTED
     previous_expected_plan = _LAST_EXPECTED_COMMAND_PLAN
+    previous_supervision = _RUN_COMMANDS_SUPERVISION
+    _RUN_COMMANDS_SUPERVISION = {
+        "paths": run_paths, "phase": pre_args.phase, "pending": False,
+        "receipt": None, "errors": [],
+    }
+    supervision = _RUN_COMMANDS_SUPERVISION
+    if _ORDINARY_CANDIDATE_FIRST_V1:
+        supervision["candidate_owner"] = (os.getpid(), threading.get_ident())
     _RUN_COMMANDS_ACTIVE_PATHS = run_paths
     _ACTIVE_SEMANTIC_CHANGED_PATHS = None
     _ACTIVE_CLASSIFIED_CHANGED_PATHS = None
@@ -8055,6 +13207,12 @@ def main(argv: Sequence[str] | None = None) -> int:
     _LAST_PLANNED_COMMAND_COUNT = None
     _LAST_EXPECTED_COMMAND_PLAN = ()
     try:
+        from tools.validation_reliability import _LINUX_PREFLIGHT_PROCESS_V1, _LinuxPreflightScopeV1
+        ordinary_evidence_scope = _LINUX_PREFLIGHT_PROCESS_V1.get()
+        if (type(ordinary_evidence_scope) is _LinuxPreflightScopeV1
+                and ordinary_evidence_scope._ordinary_selected_v1()):
+            ordinary_evidence_scope._ordinary_precursor_ready_v1()
+            ordinary_evidence_scope._ordinary_bind_evidence_paths_v1(run_paths)
         records, text_failures, semantic_paths = (
             _validation_text_integrity_preflight(repo_root)
         )
@@ -8080,52 +13238,7861 @@ def main(argv: Sequence[str] | None = None) -> int:
                     flush=True,
                 )
             result = _main_impl(raw_argv)
-    except (OSError, RuntimeError, ValueError) as exc:
+    except BaseException as exc:
+        if all(exc is not earlier for earlier in supervision["errors"]):
+            supervision["errors"].append(exc)
+        if not isinstance(exc, (OSError, RuntimeError, ValueError)):
+            raise
         print(str(exc), file=sys.stderr, flush=True)
         result = 1
     finally:
-        if not _RUN_PROVENANCE_ATTEMPTED:
-            try:
-                _RUN_PROVENANCE_ATTEMPTED = True
-                write_run_provenance(
-                    run_paths,
-                    probe,
-                    phase=pre_args.phase,
-                    command_count=0,
-                    text_integrity_preflight_state=text_state,
-                )
-                _RUN_PROVENANCE_WRITTEN = True
-                _LAST_PLANNED_COMMAND_COUNT = 0
-                _LAST_EXPECTED_COMMAND_PLAN = ()
-            except (RuntimeError, ValueError) as exc:
-                print(str(exc), file=sys.stderr, flush=True)
-                result = 1
-        receipts = _LAST_COMMAND_RECEIPTS
-        planned_count = 0 if _LAST_PLANNED_COMMAND_COUNT is None else _LAST_PLANNED_COMMAND_COUNT
-        result, cleanup_state, _completion = _finalize_validation_run(
-            run_paths=run_paths,
-            probe=probe,
-            phase=pre_args.phase,
-            planned_count=planned_count,
-            expected_plan=_LAST_EXPECTED_COMMAND_PLAN,
-            receipts=receipts,
-            result=result,
-            text_state=text_state,
-        )
-        _RUN_COMMANDS_ACTIVE_PATHS = previous_paths
-        _ACTIVE_SEMANTIC_CHANGED_PATHS = previous_semantic_paths
-        _ACTIVE_CLASSIFIED_CHANGED_PATHS = previous_classified_paths
-        _ACTIVE_TEXT_INTEGRITY_FAILURES = previous_text_failures
-        _ACTIVE_TEXT_INTEGRITY_STATE = previous_text_state
-        _ACTIVE_FILESYSTEM_PROBE = previous_probe
-        _RUN_PROVENANCE_WRITTEN = previous_provenance_state
-        _RUN_PROVENANCE_ATTEMPTED = previous_provenance_attempted
-        _LAST_EXPECTED_COMMAND_PLAN = previous_expected_plan
+        try:
+            if (not _RUN_PROVENANCE_ATTEMPTED and not _RUN_PROVENANCE_WRITTEN
+                    and _LAST_PLANNED_COMMAND_COUNT is None
+                    and not _LAST_EXPECTED_COMMAND_PLAN and not _LAST_COMMAND_RECEIPTS
+                    and _ACTIVE_SCAN_LAUNCH is None and not _SCAN_CAPACITY_ATTEMPTED
+                    and not _MAPPER_READ_SOURCE_ATTEMPTED
+                    and _ACTIVE_MAPPER_READ_PROFILES_V1 is None
+                    and not _ACTIVE_MAPPER_OCCURRENCES_V1
+                    and not supervision["pending"] and supervision["receipt"] is None
+                    and not supervision.get("nested_evidence")):
+                # Only a genuine pre-selection failure may publish zero-plan
+                # provenance. Acquisition and publication are distinct facts.
+                try:
+                    _RUN_PROVENANCE_ATTEMPTED = True
+                    write_run_provenance(
+                        run_paths,
+                        probe,
+                        phase=pre_args.phase,
+                        command_count=0,
+                        text_integrity_preflight_state=text_state,
+                    )
+                    _RUN_PROVENANCE_WRITTEN = True
+                    _LAST_PLANNED_COMMAND_COUNT = 0
+                    _LAST_EXPECTED_COMMAND_PLAN = ()
+                except (RuntimeError, ValueError) as exc:
+                    print(str(exc), file=sys.stderr, flush=True)
+                    result = 1
+            receipts = _LAST_COMMAND_RECEIPTS
+            planned_count = 0 if _LAST_PLANNED_COMMAND_COUNT is None else _LAST_PLANNED_COMMAND_COUNT
+            result, cleanup_state, _completion = _finalize_validation_run(
+                run_paths=run_paths,
+                probe=probe,
+                phase=pre_args.phase,
+                planned_count=planned_count,
+                expected_plan=_LAST_EXPECTED_COMMAND_PLAN,
+                receipts=receipts,
+                result=result,
+                text_state=text_state,
+                scan_launch=_ACTIVE_SCAN_LAUNCH,
+                _supervision_state=supervision,
+            )
+        except BaseException as exc:
+            supervision["errors"].append(exc)
+            _scan_raise_errors(supervision["errors"])
+        finally:
+            _RUN_COMMANDS_ACTIVE_PATHS = previous_paths
+            _ACTIVE_SEMANTIC_CHANGED_PATHS = previous_semantic_paths
+            _ACTIVE_CLASSIFIED_CHANGED_PATHS = previous_classified_paths
+            _ACTIVE_TEXT_INTEGRITY_FAILURES = previous_text_failures
+            _ACTIVE_TEXT_INTEGRITY_STATE = previous_text_state
+            _ACTIVE_FILESYSTEM_PROBE = previous_probe
+            _RUN_PROVENANCE_WRITTEN = previous_provenance_state
+            _RUN_PROVENANCE_ATTEMPTED = previous_provenance_attempted
+            _LAST_EXPECTED_COMMAND_PLAN = previous_expected_plan
+            if not supervision["pending"] and not _invocation_requires_retention_v1(supervision):
+                _RUN_COMMANDS_SUPERVISION = previous_supervision
     if result == 0:
         print(f"{PHASE_SUCCESS_MARKER_PREFIX} phase={pre_args.phase}", flush=True)
         print(SUCCESS_MARKER, flush=True)
     return result
 
 
-if __name__ == "__main__":
+_V35_MANIFEST_SOURCE_NAMES = {
+    'tools/run_validation_gates.py': (
+        'ALL_PHASE',
+        'ATOMICROWS_BUNDLE_CHECK_SCRIPT',
+        'CHECK_ONLY_VALIDATOR_SCRIPTS',
+        'DEFAULT_GENERATED_OUTPUT_ARGS',
+        'DETERMINISTIC_VALIDATORS_PHASE',
+        'DETERMINISTIC_VALIDATOR_SHARD_COMMAND_RANGES',
+        'DETERMINISTIC_VALIDATOR_SHARD_PHASES',
+        'FAST_PREFLIGHT_PHASE',
+        'FAST_PREFLIGHT_SCRIPT_NAMES',
+        'ISOLATED_SOURCE_EVIDENCE_PYTEST',
+        'ORDERED_PHASES',
+        'POST_VALIDATION_PHASE',
+        'PR138_NON_MUTATING_VALIDATION_SCRIPT',
+        'PR162E_IDEMPOTENCE_TEST_FILE',
+        'PR162E_Q_IDEMPOTENCE_TEST_FILE',
+        'PR162E_Q_TEST_ROOT',
+        'PR162E_TEST_ROOT',
+        'PR166_QB_IDEMPOTENCE_TEST_FILE',
+        'PR166_QB_TEST_ROOT',
+        'PR166_QC_IDEMPOTENCE_TEST_FILE',
+        'PR166_QC_TEST_ROOT',
+        'PR166_Q_IDEMPOTENCE_TEST_FILE',
+        'PR166_Q_TEST_ROOT',
+        'PR166_SF_R2_IDEMPOTENCE_TEST_FILE',
+        'PR166_SF_R2_PYTEST_FILE_GROUPS',
+        'PR166_SF_R2_TEST_ROOT',
+        'PR166_SM2_PYTEST_FILE_GROUPS',
+        'PR166_SM2_TEST_ROOT',
+        'PR166_SM3_IDEMPOTENCE_TEST_FILE',
+        'PR166_SM3_TEST_ROOT',
+        'PR167_IDEMPOTENCE_TEST_FILE',
+        'PR167_TEST_ROOT',
+        'PYTEST_BASETEMP_LEGACY_FIXED_DIR_NAME',
+        'PYTEST_BASETEMP_PARENT',
+        'PYTEST_DURATIONS_ARG',
+        'PYTEST_FRESH_BASETEMP_SCRIPT',
+        'PYTEST_IDEMPOTENCE_HARD_REVIEW_SECONDS',
+        'PYTEST_SHARD_COMMANDS',
+        'PYTEST_SHARD_PHASES',
+        'PYTEST_SUBPROCESS_GROUP_TARGET_SECONDS',
+        'PytestShardCommand',
+        'ST12A_TEST_ROOT',
+        'TRACKED_GENERATED_PATH_PREFIXES',
+        'TimingEntry',
+        '_build_pytest_command',
+        '_command_script_name',
+        '_command_uses_pytest_helper',
+        '_is_tracked_generated_output_path',
+        '_normal_path_text',
+        '_path',
+        '_pr166_sf_r2_pytest_paths',
+        '_pr166_sm2_pytest_paths',
+        '_route_command_generated_outputs_to_temp',
+        '_validation_generated_output',
+        'build_deterministic_validator_commands',
+        'build_deterministic_validator_shard_commands',
+        'build_fast_preflight_commands',
+        'build_phase_commands',
+        'build_phase_manifest',
+        'build_post_validation_commands',
+        'build_pytest_shard_commands',
+        'build_validation_commands',
+    ),
+    'tools/validation_scope_registry.py': (
+        'ST12H_EXACT_VALIDATION_COMMANDS',
+        'build_st12h_validation_commands',
+    ),
+}
+
+
+def _project_probability_validation_manifest_v1(
+    runner_source, scope_source, *, expected_runner_source, expected_scope_source,
+    python_executable, validation_dir, pytest_basetemp, byte_limit, node_limit,
+    command_limit, argument_limit, check_candidate,
+):
+    """Project admitted command declarations; never execute a historical module."""
+    import ast
+    import __future__
+    import types
+    from dataclasses import dataclass
+    from tools.validation_reliability import _scan_candidate_fence, _LINUX_PREFLIGHT_PROCESS_V1
+
+    _scan_candidate_fence(check_candidate)
+    for value in (byte_limit, node_limit, command_limit, argument_limit):
+        if type(value) is not int or value <= 0:
+            raise ValueError("original manifest projection limits required")
+    if (any(type(value) is not bytes for value in (runner_source, scope_source, expected_runner_source, expected_scope_source))
+            or len(runner_source) + len(scope_source) > byte_limit
+            or runner_source != expected_runner_source or scope_source != expected_scope_source):
+        raise ValueError("manifest source differs from independent original byte basis")
+    if (type(python_executable) is not str or not python_executable or validation_dir is None or pytest_basetemp is None):
+        raise ValueError("manifest projection requires explicit execution/path operands")
+    sources = {"tools/run_validation_gates.py": runner_source, "tools/validation_scope_registry.py": scope_source}
+    # These are the two ordered statements in the inspected runner, not a
+    # last-definition-wins exception. Compare structure without source locations.
+    phase_profile = ast.parse("""ORDERED_PHASES = (
+    FAST_PREFLIGHT_PHASE, DETERMINISTIC_VALIDATORS_PHASE,
+    *PYTEST_SHARD_PHASES, POST_VALIDATION_PHASE,
+)
+ORDERED_PHASES = tuple(
+    shard_phase
+    for phase in ORDERED_PHASES
+    for shard_phase in (
+        DETERMINISTIC_VALIDATOR_SHARD_PHASES
+        if phase == DETERMINISTIC_VALIDATORS_PHASE else (phase,)
+    )
+)
+""").body
+    path_constructor_profiles = {
+        name: ast.parse(
+            f'def {name}(file_names: Sequence[str]) -> tuple[str, ...]:\n'
+            f'    return tuple(f"{{{root}}}/{{file_name}}" for file_name in file_names)\n'
+        ).body[0]
+        for name, root in (
+            ("_pr166_sf_r2_pytest_paths", "PR166_SF_R2_TEST_ROOT"),
+            ("_pr166_sm2_pytest_paths", "PR166_SM2_TEST_ROOT"),
+        )
+    }
+    selected = {}
+    total_nodes = 0
+    for owner, raw in sources.items():
+        tree = ast.parse(raw.decode("utf-8", errors="strict"), filename=owner)
+        total_nodes += sum(1 for _ in ast.walk(tree))
+        if total_nodes > node_limit:
+            raise ValueError("manifest AST exceeds original node allowance")
+        roster = _V35_MANIFEST_SOURCE_NAMES[owner]
+        definitions = {}
+        for node in tree.body:
+            names = (node.name,) if isinstance(node, (ast.FunctionDef, ast.ClassDef)) else tuple(
+                target.id for target in (node.targets if isinstance(node, ast.Assign) else (node.target,))
+                if isinstance(target, ast.Name)) if isinstance(node, (ast.Assign, ast.AnnAssign)) else ()
+            for name in names:
+                if name in roster:
+                    if name in definitions and not (
+                            owner == "tools/run_validation_gates.py" and name == "ORDERED_PHASES"):
+                        raise ValueError("duplicate manifest declaration")
+                    definitions.setdefault(name, []).append(node)
+        if set(definitions) != set(roster):
+            raise ValueError("unsupported manifest source declaration profile")
+        if owner == "tools/run_validation_gates.py":
+            if ([ast.dump(node) for node in definitions["ORDERED_PHASES"]]
+                    != [ast.dump(node) for node in phase_profile]):
+                raise ValueError("unsupported ordered phase expansion profile")
+            for name, expected in path_constructor_profiles.items():
+                if [ast.dump(node) for node in definitions[name]] != [ast.dump(expected)]:
+                    raise ValueError("unsupported manifest path constructor profile: " + name)
+        ids = {id(node) for nodes in definitions.values() for node in nodes}
+        selected[owner] = [node for node in tree.body if id(node) in ids]
+    # The real capture hook is a no-op under its original ScopeNone branch.
+    # Admit only those exact observation expressions; never execute the hook
+    # or expand the finite projection's closed call/effect grammar.
+    tree = ast.parse(runner_source)
+    hooks = [n for n in tree.body if isinstance(n, ast.FunctionDef) and n.name == "_ordinary_pytest_source_capture_v1"]
+    prefix = ast.parse("if not _ORDINARY_CANDIDATE_FIRST_V1 or phase not in PYTEST_SHARD_COMMANDS: return\nfrom tools.validation_reliability import _LINUX_PREFLIGHT_PROCESS_V1, _LinuxPreflightScopeV1\nscope = _LINUX_PREFLIGHT_PROCESS_V1.get()\nif type(scope) is not _LinuxPreflightScopeV1: return").body
+    for declaration in selected["tools/run_validation_gates.py"]:
+        expression = {"build_pytest_shard_commands": "_ordinary_pytest_source_capture_v1(phase, selected, commands)",
+                      "build_phase_manifest": "_ordinary_pytest_source_capture_v1(phase, None, commands, copies=copies)"}.get(getattr(declaration, "name", None))
+        if expression is None: continue
+        profile = ast.dump(ast.parse(expression).body[0])
+        matches = [n for n in ast.walk(declaration) if isinstance(n, ast.Expr) and ast.dump(n) == profile]
+        if not matches: continue
+        if (len(matches) != 1 or _LINUX_PREFLIGHT_PROCESS_V1.get() is not None or len(hooks) != 1
+                or [ast.dump(n) for n in hooks[0].body[:4]] != [ast.dump(n) for n in prefix]):
+            raise ValueError("manifest capture requires original ScopeNone profile")
+        for parent in ast.walk(declaration):
+            if matches[0] in getattr(parent, "body", ()):
+                parent.body.remove(matches[0])
+                break
+    declarations = selected["tools/validation_scope_registry.py"] + selected["tools/run_validation_gates.py"]
+    function_names = {node.name for node in declarations if isinstance(node, ast.FunctionDef)}
+    bare_calls = function_names | {"PytestShardCommand", "TimingEntry", "dataclass", "ValueError",
+                                 "any", "enumerate", "frozenset", "len", "list", "str", "tuple", "type",
+                                 "_default_validation_dir", "_default_pytest_basetemp"}
+    dotted_calls = {"pathlib.Path", "pathlib.PurePath", "pathlib.PurePosixPath", "built.extend", "commands.extend",
+                    "manifest.append", "normalized.startswith", "python_executable.strip", "routed.append",
+                    "routed.extend", "str(value).replace", "token.endswith"}
+    initializer_calls = {"PytestShardCommand", "dataclass", "frozenset", "tuple", "str", "pathlib.Path", "pathlib.PurePath", "pathlib.PurePosixPath"}
+    for declaration in declarations:
+        for node in ast.walk(declaration):
+            if isinstance(node, (ast.Import, ast.ImportFrom, ast.Global, ast.Nonlocal, ast.AsyncFunctionDef,
+                                 ast.Await, ast.Yield, ast.YieldFrom, ast.With, ast.AsyncWith)):
+                raise ValueError("effectful declaration is outside the finite manifest profile")
+            if isinstance(node, ast.Attribute) and node.attr.startswith("__"):
+                raise ValueError("magic lookup is outside the manifest profile")
+            if isinstance(node, ast.Call):
+                name = ast.unparse(node.func)
+                if name not in bare_calls and name not in dotted_calls:
+                    raise ValueError("unselected manifest call: " + name)
+                if isinstance(declaration, (ast.Assign, ast.AnnAssign)) and name not in initializer_calls:
+                    if not (name in path_constructor_profiles and
+                            isinstance(declaration, ast.AnnAssign) and
+                            isinstance(declaration.target, ast.Name) and
+                            declaration.target.id == "PYTEST_SHARD_COMMANDS"):
+                        raise ValueError("unselected manifest initializer: " + name)
+    module_name = "_qtt_v35_finite_manifest_" + str(id(declarations))
+    module = types.ModuleType(module_name)
+
+    def acquisition_default_denied():
+        raise ValueError("manifest acquisition defaults are forbidden")
+
+    namespace = module.__dict__
+    namespace.update({"__builtins__": {"__build_class__": __build_class__, "ValueError": ValueError,
+        "any": any, "enumerate": enumerate, "frozenset": frozenset, "len": len, "list": list,
+        "str": str, "tuple": tuple, "type": type, "bool": bool, "int": int, "float": float, "dict": dict},
+        "pathlib": pathlib, "sys": types.SimpleNamespace(executable=python_executable), "dataclass": dataclass,
+        "_default_validation_dir": acquisition_default_denied, "_default_pytest_basetemp": acquisition_default_denied})
+    # Only inspected declarations enter the temporary module. The future directive
+    # is supplied here, never taken from a historical module's imports.
+    tree = ast.Module(body=declarations, type_ignores=[])
+    tree = ast.fix_missing_locations(tree)
+    if module_name in sys.modules:
+        raise ValueError("finite manifest module identity collision")
+    sys.modules[module_name] = module
+    try:
+        exec(compile(tree, "<admitted-finite-manifest>", "exec", flags=__future__.annotations.compiler_flag, dont_inherit=True), namespace)
+        manifest = namespace["build_phase_manifest"](validation_dir, pytest_basetemp)
+    finally:
+        if sys.modules.get(module_name) is module:
+            del sys.modules[module_name]
+    if type(manifest) is not list:
+        raise ValueError("manifest is not the original list projection")
+    count = arguments = 0
+    for phase in manifest:
+        if (type(phase) is not dict or set(phase) != {"phase", "command_count", "commands"}
+                or type(phase["phase"]) is not str or not phase["phase"]
+                or type(phase["command_count"]) is not int or type(phase["commands"]) is not list
+                or phase["command_count"] != len(phase["commands"])):
+            raise ValueError("invalid original manifest phase projection")
+        for command in phase["commands"]:
+            if type(command) is not list or not command or any(type(part) is not str or not part for part in command):
+                raise ValueError("invalid original manifest command vector")
+            count += 1
+            arguments += len(command)
+            if count > command_limit or arguments > argument_limit:
+                raise ValueError("manifest output allowance exceeded")
+    _scan_candidate_fence(check_candidate)
+    return manifest
+
+
+def _ordinary_rp5a_original_reader_names_v1():
+ return (
+  '.git/index',
+  '.gitattributes',
+  '.gitignore',
+  'docs/master_plan/generated/PR168_RP5A_AgentCrosswalkTouchpoints.report.json',
+  'docs/master_plan/generated/PR168_RP5A_ConsumerGraph.report.json',
+  'docs/master_plan/generated/PR168_RP5A_CrossGraphConsistency.report.json',
+  'docs/master_plan/generated/PR168_RP5A_DeleteEligibilityDraft.report.json',
+  'docs/master_plan/generated/PR168_RP5A_FinalSummary.report.json',
+  'docs/master_plan/generated/PR168_RP5A_FutureRP5BPlan.report.json',
+  'docs/master_plan/generated/PR168_RP5A_IdentityCustodyGraph.report.json',
+  'docs/master_plan/generated/PR168_RP5A_Input.report.json',
+  'docs/master_plan/generated/PR168_RP5A_LegacyFileSemanticAudit.report.json',
+  'docs/master_plan/generated/PR168_RP5A_LegacyPRSemanticAudit.report.json',
+  'docs/master_plan/generated/PR168_RP5A_NoDeletionProof.report.json',
+  'docs/master_plan/generated/PR168_RP5A_NoOrphanAuditTouchpoints.report.json',
+  'docs/master_plan/generated/PR168_RP5A_PathAudit.report.json',
+  'docs/master_plan/generated/PR168_RP5A_Preflight.report.json',
+  'docs/master_plan/generated/PR168_RP5A_QKUFormulaIdentityDependency.report.json',
+  'docs/master_plan/generated/PR168_RP5A_RowFieldSemanticHitIndex.report.json',
+  'docs/master_plan/generated/PR168_RP5A_ScanPerformance.report.json',
+  'docs/master_plan/generated/PR168_RP5A_StaleSemanticBlastRadius.report.json',
+  'docs/master_plan/generated/PR168_RP5A_TermTaxonomy.report.json',
+  'docs/master_plan/generated/PR168_RP5A_ValidationDependencyGraph.report.json',
+  'docs/master_plan/generated/PR168_RP5A_ValidationTimeRisk.report.json',
+  'docs/master_plan/generated/PR168_RP5A_WrongConceptTermIndex.report.json',
+  'docs/master_plan/generated/rp5a/agent_touchpoint_rows.jsonl',
+  'docs/master_plan/generated/rp5a/agent_touchpoint_rows.manifest.json',
+  'docs/master_plan/generated/rp5a/blast_radius_rows.jsonl',
+  'docs/master_plan/generated/rp5a/blast_radius_rows.manifest.json',
+  'docs/master_plan/generated/rp5a/consumer_graph_rows.jsonl',
+  'docs/master_plan/generated/rp5a/consumer_graph_rows.manifest.json',
+  'docs/master_plan/generated/rp5a/delete_eligibility_rows.jsonl',
+  'docs/master_plan/generated/rp5a/delete_eligibility_rows.manifest.json',
+  'docs/master_plan/generated/rp5a/future_rp5b_plan_rows.jsonl',
+  'docs/master_plan/generated/rp5a/future_rp5b_plan_rows.manifest.json',
+  'docs/master_plan/generated/rp5a/identity_custody_rows.jsonl',
+  'docs/master_plan/generated/rp5a/identity_custody_rows.manifest.json',
+  'docs/master_plan/generated/rp5a/input_rows.jsonl',
+  'docs/master_plan/generated/rp5a/input_rows.manifest.json',
+  'docs/master_plan/generated/rp5a/legacy_file_semantic_rows.jsonl',
+  'docs/master_plan/generated/rp5a/legacy_file_semantic_rows.manifest.json',
+  'docs/master_plan/generated/rp5a/legacy_pr_semantic_rows.jsonl',
+  'docs/master_plan/generated/rp5a/legacy_pr_semantic_rows.manifest.json',
+  'docs/master_plan/generated/rp5a/qku_formula_identity_dependency_rows.jsonl',
+  'docs/master_plan/generated/rp5a/qku_formula_identity_dependency_rows.manifest.json',
+  'docs/master_plan/generated/rp5a/row_field_semantic_hit_rows.jsonl',
+  'docs/master_plan/generated/rp5a/row_field_semantic_hit_rows.manifest.json',
+  'docs/master_plan/generated/rp5a/term_taxonomy_rows.jsonl',
+  'docs/master_plan/generated/rp5a/term_taxonomy_rows.manifest.json',
+  'docs/master_plan/generated/rp5a/validation_dependency_rows.jsonl',
+  'docs/master_plan/generated/rp5a/validation_dependency_rows.manifest.json',
+  'docs/master_plan/generated/rp5a/validation_time_risk_rows.jsonl',
+  'docs/master_plan/generated/rp5a/validation_time_risk_rows.manifest.json',
+  'docs/master_plan/generated/rp5a/wrong_concept_term_rows.jsonl',
+  'docs/master_plan/generated/rp5a/wrong_concept_term_rows.manifest.json',
+  'pytest.ini',
+  'tests/__init__.py',
+  'tests/pr168_rp5a/_helpers.py',
+  'tests/pr168_rp5a/test_cross_graph_consistency.py',
+  'tests/pr168_rp5a/test_no_validation_scope_removal.py',
+  'tools/build_pr168_rp5a_legacy_semantic_audit.py',
+  'tools/ci_branch_context.py',
+  'tools/pr168_rp5a_agent_touchpoints.py',
+  'tools/pr168_rp5a_blast_radius.py',
+  'tools/pr168_rp5a_config.py',
+  'tools/pr168_rp5a_consumer_graph.py',
+  'tools/pr168_rp5a_cross_graph_consistency.py',
+  'tools/pr168_rp5a_delete_eligibility.py',
+  'tools/pr168_rp5a_git_grep_scanner.py',
+  'tools/pr168_rp5a_identity_custody.py',
+  'tools/pr168_rp5a_identity_dependency.py',
+  'tools/pr168_rp5a_json_scanner.py',
+  'tools/pr168_rp5a_pr_metadata_scanner.py',
+  'tools/pr168_rp5a_report_writer.py',
+  'tools/pr168_rp5a_row_field_hit_index.py',
+  'tools/pr168_rp5a_term_taxonomy.py',
+  'tools/pr168_rp5a_validation_dependency_graph.py',
+  'tools/pr168_rp5a_validator.py',
+  'tools/repo_path_refs.py',
+  'tools/run_pytest_fresh_basetemp.py',
+  'tools/run_validation_gates.py',
+  'tools/validate_pr168_rp5a_legacy_semantic_audit.py',
+  'tools/validation_inventory.py',
+  'tools/validation_reliability.py',
+  'tools/validation_scope_registry.py',
+ )
+
+
+def _ordinary_rp5a_original_source_names_v1():
+ return (
+  'tests/__init__.py',
+  'tests/pr168_rp5a/_helpers.py',
+  'tests/pr168_rp5a/test_cross_graph_consistency.py',
+  'tests/pr168_rp5a/test_no_validation_scope_removal.py',
+  'tools/build_pr168_rp5a_legacy_semantic_audit.py',
+  'tools/ci_branch_context.py',
+  'tools/pr168_rp5a_agent_touchpoints.py',
+  'tools/pr168_rp5a_blast_radius.py',
+  'tools/pr168_rp5a_config.py',
+  'tools/pr168_rp5a_consumer_graph.py',
+  'tools/pr168_rp5a_cross_graph_consistency.py',
+  'tools/pr168_rp5a_delete_eligibility.py',
+  'tools/pr168_rp5a_git_grep_scanner.py',
+  'tools/pr168_rp5a_identity_custody.py',
+  'tools/pr168_rp5a_identity_dependency.py',
+  'tools/pr168_rp5a_json_scanner.py',
+  'tools/pr168_rp5a_pr_metadata_scanner.py',
+  'tools/pr168_rp5a_report_writer.py',
+  'tools/pr168_rp5a_row_field_hit_index.py',
+  'tools/pr168_rp5a_term_taxonomy.py',
+  'tools/pr168_rp5a_validation_dependency_graph.py',
+  'tools/pr168_rp5a_validator.py',
+  'tools/repo_path_refs.py',
+  'tools/run_pytest_fresh_basetemp.py',
+  'tools/run_validation_gates.py',
+  'tools/validate_pr168_rp5a_legacy_semantic_audit.py',
+  'tools/validation_inventory.py',
+  'tools/validation_reliability.py',
+  'tools/validation_scope_registry.py',
+ )
+
+
+def _ordinary_rp5a_source_policy_v1(scope, census, source, *, ceiling_programme, original_cutoffs):
+    """Freeze original R source grammar before paths, plan or C acquisitions.
+
+    The protected census supplies source geometry, not a future Git inventory,
+    profile, wire extent or generated answer. The selected native constructor
+    later joins actual source-selected occurrences once, before the first C.
+    """
+    from tools import validation_reliability as owner
+    from tools.pr168_rp5a_git_grep_scanner import should_scan_path
+    require = owner._preflight_require_v1
+    caps = _ordinary_post_ceiling_checked_v1(ceiling_programme)
+    require(type(scope) is owner._LinuxPreflightScopeV1
+     and type(source) is owner._LinuxImmutableSourceSealV2
+     and type(census) is owner._LinuxPreflightCensusV1
+     and source is scope.source and source.census is census
+     and census.complete and not census.failures and source.state == 'READABLE'
+     and source.failure is None and source.phase == 'work'
+     and original_cutoffs is caps['original_cutoffs']
+     and source.deadline_ns >= original_cutoffs[3]
+     and (source.pid, source.thread) == (scope.query.pid, scope.query.thread)
+      == (os.getpid(), threading.get_ident()),
+     'ORDINARY_R_EARLY_ORIGINAL_SOURCE_AND_NATIVE_OWNER')
+    scope.query.check()
+    source._check()
+    require(not hasattr(scope, '_ordinary_rp5a_source_policy_v1'),
+     'ORDINARY_R_EARLY_POLICY_SINGLE_PRODUCTION')
+    root = census.roots['repository']
+    require(root == pathlib.Path(scope.repository) and root.is_absolute()
+     and source.rows and source.anchors and len(source.post) == len(source.rows),
+     'ORDINARY_R_EARLY_COMPLETE_PROTECTED_SOURCE')
+    # These exact original finite reader operands were selected by the retained
+    # real-reader input-basis owner. Only their names are reused, never old bytes,
+    # old sizes, old observations or successful-result denominators.
+    reader_names = _ordinary_rp5a_original_reader_names_v1()
+    source_names = _ordinary_rp5a_original_source_names_v1()
+    absent_names = ('__init__.py', 'conftest.py', 'tests/conftest.py',
+     'tests/pr168_rp5a/__init__.py', 'tests/pr168_rp5a/conftest.py',
+     'tools/__init__.py', 'tools/conftest.py')
+    fixed_controls = ('.git/index', '.git/HEAD', '.git/config', '.git/packed-refs',
+     '.git/info/exclude', '.git/objects/info/alternates', '.git/refs/remotes/origin/main')
+    original_rows, repository_names, scanner_names = [], [], []
+    for row in source.rows:
+     path = pathlib.Path(row['path'])
+     require(source.row_index.get(str(path)) is row
+      and row['observed_path'] == str(path) and row['aliases'] == []
+      and row['path'] in source.post and row['kind'] in ('file', 'directory'),
+      'ORDINARY_R_EARLY_ORIGINAL_SOURCE_ROW')
+     original_rows.append((row, row['path'], row['role'], row['kind'],
+      row['logical_bytes'], tuple(row['version']), tuple(row['roster']),
+      tuple(source.post[row['path']])))
+     if row['role'] != 'repository':
+      continue
+     require(path.is_relative_to(root), 'ORDINARY_R_EARLY_REPOSITORY_ROW')
+     relative = path.relative_to(root).as_posix()
+     if relative == '.':
+      continue
+     owner._mapper_portable_relative_v1(relative)
+     repository_names.append(relative)
+     if row['kind'] == 'file' and should_scan_path(relative):
+      require(0 <= row['logical_bytes'] <= 128 << 20,
+       'ORDINARY_R_EARLY_SCANNABLE_FILE_CEILING')
+      scanner_names.append(relative)
+    require(repository_names and len(repository_names) == len(set(repository_names))
+     and len(repository_names) <= caps['limits']['namespace_entry_limit']
+     and sum(row['logical_bytes'] for row in source.rows
+      if row['role'] == 'repository' and row['kind'] == 'file') <= 32 << 30,
+     'ORDINARY_R_EARLY_COMPLETE_REPOSITORY_CEILINGS')
+    for name in source_names:
+     row = source.row_index.get(str(root / name))
+     require(row is not None and row['kind'] == 'file'
+      and row['role'] == 'repository' and 0 < row['logical_bytes'] <= 16 << 20,
+      'ORDINARY_R_EARLY_ORIGINAL_FINITE_SOURCE_OPERAND:' + name)
+    # The original FILE ceiling and generation pool are distinct. No current
+    # report length grants a tighter future writer bound, and no cap is a claim
+    # that the legacy v2 representation will fit its four-byte header.
+    maxima = dict(file_bytes=128 << 20, payload_bytes=32 << 30,
+     source_bytes=16 << 20, metadata_bytes=32 << 20, metadata_nodes=1_000_000,
+     metadata_depth=64, namespace_names=65536, path_bytes=4096,
+     reader_invocations=4096, parent_invocations=10, stderr_bytes=1 << 20,
+     manifest_commands=10_000, manifest_arguments=100_000,
+     manager_fdinfo_records=1024, manager_fdinfo_bytes=65536, manager_borrow_fds=128,
+     raw_chunk_bytes=65536, legacy_frame_extent=(1 << 32) + 3)
+    # This is the existing scanner's literal batching/limit programme. Demand
+    # is calculated for the independently bound complete inventory later, not
+    # from observed successful Git-call counts.
+    scanner_grammar = dict(batch_size=50, max_files=100_000,
+     max_matched_files=25_000, max_line_hits=50, stdout_line_bytes=2_000_000,
+     full_fences_per_git=7, reader_fences_per_git=4,
+     parent_full_fences=3, scanner_fixed_fences=12, reader_fixed_fences=12)
+    policy = dict(scope=scope, source=source, census=census, ceiling_programme=caps,
+     original_cutoffs=original_cutoffs, reader_names=reader_names,
+     source_names=source_names, absent_names=absent_names,
+     fixed_controls=fixed_controls, repository_names=tuple(repository_names),
+     scanner_names=tuple(scanner_names), original_rows=tuple(original_rows),
+     maxima=maxima, scanner_grammar=scanner_grammar, should_scan_path=should_scan_path)
+    policy['original'] = (policy, scope, source, census, caps, original_cutoffs,
+     tuple((key, value) for key, value in policy.items() if key != 'original'),
+     tuple(maxima.items()), tuple(scanner_grammar.items()))
+    scope._ordinary_rp5a_source_policy_v1 = policy
+    scope._ordinary_original_rp5a_source_policy_v1 = policy
+    return policy
+
+
+def _ordinary_rp5a_source_demands_v1(policy, *, prospective_names):
+    """Derive source geometry and all R owner multiplicities; issue no quotas.
+
+    A possible native result is an envelope, not mandatory successful work.
+    The original central compiler partitions its remaining shared pools once;
+    the existing ledgers/fences may then deny before this possible envelope.
+    """
+    from tools.validation_scope_registry import _facet_run_rp5a_source_demands_v1 as _d
+    return _d(policy, prospective_names=prospective_names)
+
+def _ordinary_rp5a_source_policy_checked_v1(policy, scope):
+ from tools import validation_reliability as owner
+ require = owner._preflight_require_v1
+ original = policy.get('original') if type(policy) is dict else None
+ require(type(scope) is owner._LinuxPreflightScopeV1 and type(policy) is dict
+  and policy is scope._ordinary_rp5a_source_policy_v1
+   is scope._ordinary_original_rp5a_source_policy_v1
+  and type(original) is tuple and len(original) == 9
+  and original[0] is policy and original[1] is scope and original[2] is scope.source
+  and original[3] is scope.source.census and original[4] is policy['ceiling_programme']
+  and original[5] is policy['original_cutoffs']
+  and original[6] == tuple((key, value) for key, value in policy.items() if key != 'original')
+  and original[7] == tuple(policy['maxima'].items())
+  and original[8] == tuple(policy['scanner_grammar'].items())
+  and scope._ordinary_resource_programme_v1['rp5a_source_policy'] is policy,
+  'ORDINARY_R_EARLY_POLICY_IDENTICAL_FROZEN_SOURCE_AND_RESOURCE')
+ for row, path, role, kind, length, version, roster, protected in policy['original_rows']:
+  require(scope.source.row_index.get(path) is row and row['path'] == path
+   and row['role'] == role and row['kind'] == kind and row['logical_bytes'] == length
+   and tuple(row['version']) == version and tuple(row['roster']) == roster
+   and tuple(scope.source.post[path]) == protected,
+   'ORDINARY_R_EARLY_POLICY_ORIGINAL_METADATA_NOT_REBASED')
+ return policy
+
+
+def _ordinary_rp5a_acquire_parent_basis_v1(scope, ledger, *, basis_limits, check_candidate):
+    """Use the original bounded Git reader to produce actual finite R inputs.
+
+    The selected limits already belong to the same frozen native phase
+    programme. Git values are original returned observations, never a JSON
+    accepted flag or fabricated baseline. This does not invoke any builder.
+    """
+    from tools.validation_scope_registry import _facet_run_rp5a_acquire_parent_basis_v1 as _d
+    return _d(scope, ledger, basis_limits=basis_limits, check_candidate=check_candidate)
+
+
+def _scan_full_builder_argv(argv):
+    from tools.validation_reliability import _rp5a_consumer_role_v1
+    return _rp5a_consumer_role_v1(tuple(argv), _repo_root()) == "SCANNER"
+
+
+def _ordinary_rp5a_publication_programme_v1(paths, phase, plan):
+ """Retain only source-selected whole-plan policy in the original header."""
+ from tools import validation_reliability as owner
+ scope = owner._LINUX_PREFLIGHT_PROCESS_V1.get()
+ if type(scope) is not owner._LinuxPreflightScopeV1 or not scope._ordinary_selected_v1():
+  return None
+ selected = {row.command_index for row in plan
+  if owner._rp5a_consumer_role_v1(row.argv, paths.repo_root) is not None}
+ if not selected:
+  return None
+ context = scope._ordinary_rp5a_source_context_v1()
+ owner._preflight_require_v1(context['paths'] is paths and context['plan'] is plan
+  and plan is scope._ordinary_bound_plan_v1 and paths is scope._ordinary_bound_paths_v1
+  and plan is _LAST_EXPECTED_COMMAND_PLAN and all(row.phase == phase for row in plan)
+  and set(context['table']) == {str(index) for index in selected},
+  'ORDINARY_R_ORIGINAL_WHOLE_SOURCE_PROGRAMME_PUBLICATION')
+ return context['table']
+
+
+def _scan_resolve_parent_capacity(paths, phase, plan):
+    from tools.validation_reliability import _ScanLaunch
+
+    global _SCAN_CAPACITY_ATTEMPTED, _ACTIVE_SCAN_LAUNCH, _RUN_COMMANDS_SUPERVISION
+    from tools.validation_reliability import _rp5a_consumer_role_v1
+    roles = {row.command_index: _rp5a_consumer_role_v1(row.argv, paths.repo_root) for row in plan}
+    selected = {index for index, role in roles.items() if role is not None}
+    scanners = {index for index, role in roles.items() if role == "SCANNER"}
+    if not selected:
+        return None
+    if _SCAN_CAPACITY_ATTEMPTED:
+        raise ValueError("original scan capacity acquisition cannot be retried")
+    _SCAN_CAPACITY_ATTEMPTED = True
+    original_programme = _ordinary_rp5a_publication_programme_v1(paths, phase, plan)
+    if original_programme is not None:
+        if _ACTIVE_SCAN_CAPACITY_SOURCE is not None or _ACTIVE_SCAN_LAUNCH is not None:
+            raise ValueError("competing ordinary RP5A capacity source")
+        return None
+    if not callable(_ACTIVE_SCAN_CAPACITY_SOURCE):
+        raise ValueError("full RP5A plan requires an independently admitted scan capacity source")
+    from tools.validation_reliability import _SCAN_INPUT_ACQUISITION_V1, _ScanLaunchInput, _ScanLaunchIdentity
+    supervision = _RUN_COMMANDS_SUPERVISION
+    if supervision is None:
+        supervision = {"paths": paths, "phase": phase, "pending": False, "receipt": None, "errors": []}
+        _RUN_COMMANDS_SUPERVISION = supervision
+    if supervision["paths"] is not paths or supervision["phase"] != phase or supervision["pending"]:
+        raise ValueError("scan acquisition lost original invocation association")
+    if "scan_plan" in supervision:
+        raise ValueError("scan acquisition already has an original owner record")
+    supervision["scan_plan"] = plan
+    supervision["scan_owner"] = (os.getpid(), threading.get_ident())
+    supervision["scan_input_records"] = []
+    token = _SCAN_INPUT_ACQUISITION_V1.set((supervision, paths, phase, plan, supervision["scan_owner"]))
+    try:
+        launch = _ACTIVE_SCAN_CAPACITY_SOURCE(paths, phase, plan)
+        supervision["scan_launch"] = launch  # Retain every actual return before type/coverage checks.
+        from types import MappingProxyType
+        if type(launch) is _ScanLaunch:
+            original_inputs = getattr(launch, "_original_launch_inputs_v1", None)
+            if type(original_inputs) is not MappingProxyType:
+                raise ValueError("capacity source lost original launch/container association")
+            # A known ordinary issuer-owned mapping can be observed without
+            # invoking caller callbacks. Retain its actual input references
+            # before rejecting any outer or current-container substitution.
+            for value in original_inputs.values():
+                if type(value) is _ScanLaunchInput and not any(
+                        value is row["input"] for row in supervision["scan_input_records"]):
+                    supervision["scan_input_records"].append({"input": value, "registered": False,
+                        "identity": value.identity, "scratch_root": value.scratch_root,
+                        "deadline_ns": value.deadline_ns, "candidate_fence": value.original_check_candidate,
+                        "owner": (value.process_id, value.thread_id), "settlement_attempted": False,
+                        "settlement_error": None})
+            if (launch.paths is not paths or launch.plan is not plan or launch.phase != phase
+                    or launch.process_id != os.getpid() or launch.thread_id != threading.get_ident()
+                    or launch.launch_inputs is not original_inputs
+                    or launch.profiles is not getattr(launch, "_original_profiles_v1", None)):
+                raise ValueError("capacity source lost original launch/container association")
+            for value in original_inputs.values():
+                if (type(value) is _ScanLaunchInput and value.state == "PREPARING" and not value.entry_attempted
+                        and (value.process_id, value.thread_id) == supervision["scan_owner"]
+                        and type(value.identity) is _ScanLaunchIdentity
+                        and type(value.identity.command_index) is int
+                        and 1 <= value.identity.command_index <= len(plan)
+                        and value.identity == _ScanLaunchIdentity(paths.run_id, phase, value.identity.command_index,
+                            len(plan), plan[value.identity.command_index - 1].argv, str(paths.repo_root))
+                        and value.scratch_root != paths.process_root
+                        and value.scratch_root.is_relative_to(paths.process_root)):
+                    value._register_custody_v1()
+    except BaseException as error:
+        supervision["scan_admission_error"] = error
+        supervision["errors"].append(error)
+        raise
+    finally:
+        _SCAN_INPUT_ACQUISITION_V1.reset(token)
+    try:
+        if (type(launch) is not _ScanLaunch or launch.paths is not paths or launch.plan is not plan
+                or launch.phase != phase or launch.process_id != os.getpid()
+                or launch.thread_id != threading.get_ident() or set(launch.profiles) != scanners
+                or set(launch.launch_inputs) != selected
+                or set(launch.reader_profiles) != selected or set(launch.reader_bases) != selected):
+            raise ValueError("capacity source did not retain exact original run/plan/input coverage")
+        for index, value in launch.launch_inputs.items():
+            record = next((row for row in supervision["scan_input_records"] if row["input"] is value), None)
+            if (type(value) is not _ScanLaunchInput or type(index) is not int
+                    or record is None or not record["registered"] or value._custody_record is not record
+                    or (value.process_id, value.thread_id) != supervision["scan_owner"]
+                    or value.identity != _ScanLaunchIdentity(paths.run_id, phase, index, len(plan), plan[index - 1].argv,
+                        str(paths.repo_root))
+                    or (value.identity, value.scratch_root, value.deadline_ns) !=
+                       (record["identity"], record["scratch_root"], record["deadline_ns"])
+                    or value.check_candidate is not record["candidate_fence"]
+                    or value.original_check_candidate is not record["candidate_fence"]
+                    or value._callback_requires_retention_v1() or value.retention_errors
+                    or value.state != "PREPARING" or value.entry_attempted
+                    or value.path is not None or value.allocated_path is not None or value.reader is not None
+                    or value.writer is not None or value.process is not None or value.raw_descriptor is not None
+                    or value.raw_handle_owner is not None or value.snapshot_descriptor is not None
+                    or value.snapshot_acquiring or value.close_started or value.close_errors):
+                raise ValueError("capacity source must retain an unentered original input")
+        from tools.validation_reliability import _scan_launch_wire_tables_v3
+        wire_binding = _scan_launch_wire_tables_v3(plan, launch.launch_inputs, launch.reader_profiles,
+                                                   scanners, paths.repo_root)
+        if wire_binding != (launch.rp5a_launch_wire_versions, launch.rp5a_payload_byte_limits):
+            raise ValueError("capacity source changed the exact original wire/payload binding")
+        _ACTIVE_SCAN_LAUNCH = launch
+        return launch
+    except BaseException as error:
+        if supervision.get("scan_admission_error") is None:
+            supervision["scan_admission_error"] = error
+        if all(error is not previous for previous in supervision["errors"]):
+            supervision["errors"].append(error)
+        raise
+
+
+def _scan_dispatch_environment(parent, planned):
+    from tools.validation_reliability import _SCAN_TRANSPORT_KEYS, _scan_child_launch_environment, _rp5a_consumer_role_v1
+
+    from tools.validation_reliability import _LINUX_PREFLIGHT_PROCESS_V1, _LinuxPreflightScopeV1
+    scope = _LINUX_PREFLIGHT_PROCESS_V1.get()
+    if type(scope) is _LinuxPreflightScopeV1 and scope._ordinary_selected_v1():
+        if _rp5a_consumer_role_v1(planned.argv, pathlib.Path(planned.cwd)) is not None:
+            return scope._ordinary_rp5a_environment_v1(planned, parent)
+    if _ACTIVE_SCAN_LAUNCH is not None and planned.command_index in _ACTIVE_SCAN_LAUNCH.launch_inputs:
+        return _scan_child_launch_environment(parent, launch=_ACTIVE_SCAN_LAUNCH, planned=planned)
+    return {key: value for key, value in parent.items() if key.upper() not in _SCAN_TRANSPORT_KEYS}
+
+
+_ACTIVE_MAPPER_OCCURRENCES_V1 = {}
+_ACTIVE_MAPPER_READ_PROFILES_V1 = None
+_ACTIVE_MAPPER_READ_SOURCE_V1 = None
+_MAPPER_READ_SOURCE_ATTEMPTED = False
+
+
+def _mapper_resolve_parent_profiles_v1(paths, phase, plan):
+    from tools.validation_reliability import _mapper_original_position_v1, _mapper_profiles_projection_v1
+    global _MAPPER_READ_SOURCE_ATTEMPTED, _ACTIVE_MAPPER_READ_PROFILES_V1
+    selected = {str(row.command_index): row for row in plan
+                if _mapper_original_position_v1(row.argv, paths.repo_root) is not None}
+    if not selected:
+        if _ACTIVE_MAPPER_READ_SOURCE_V1 is not None:
+            raise ValueError("mapper source cannot attach to an unselected plan")
+        return None
+    if _MAPPER_READ_SOURCE_ATTEMPTED:
+        raise ValueError("mapper input source cannot be reacquired within a run")
+    _MAPPER_READ_SOURCE_ATTEMPTED = True
+    if not callable(_ACTIVE_MAPPER_READ_SOURCE_V1):
+        raise ValueError("mapper source/input/resource binding is required")
+    supplied = _ACTIVE_MAPPER_READ_SOURCE_V1(paths, phase, plan)
+    bindings = _mapper_profiles_projection_v1(supplied, run_id=paths.run_id,
+        phase=phase, command_count=len(plan), paths=paths)
+    if set(bindings) != set(selected) or any(tuple(bindings[key]["parent_argv"]) != row.argv for key,row in selected.items()):
+        raise ValueError("mapper profiles do not cover the exact original plan")
+    if len(plan) > 1 and any(b['kind'] != 'MAPPER_NATIVE_READ_BINDING_V2' for b in bindings.values()):
+        raise ValueError("multi-command mapper plan requires occurrence-time activation")
+    _ACTIVE_MAPPER_READ_PROFILES_V1 = bindings
+    return bindings
+
+
+def _ordinary_mapper_source_grammar_v1(constants_raw, writer_raw, helpers_raw, artifacts_raw, idempotence_raw, *, node_limit):
+    """Compile only the existing finite report-acquisition grammar, without exec.
+
+    The caller acquired these complete bodies through the original immutable
+    source owner. This result selects no operation and grants no resources.
+    Successful helper caches receive no credit in the all-outcome envelope.
+    """
+    from tools.validation_scope_registry import _facet_run_mapper_source_grammar_v1 as _d
+    return _d(constants_raw, writer_raw, helpers_raw, artifacts_raw, idempotence_raw, node_limit=node_limit)
+
+
+def _ordinary_mapper_sources_v1(paths, phase, plan, *, scope, census, source, parser_limits, source_node_limit):
+    """Acquire the exact original M input programme before C acquisition.
+
+    Complete source and report reads use the original protected source owner;
+    raw inputs are released per file. Only ordered declarations/metadata are
+    retained. This is an engineering INPUT_BYTES programme, not an output oracle.
+    """
+    from tools.validation_scope_registry import _facet_run_mapper_sources_v1 as _d
+    return _d(paths, phase, plan, scope=scope, census=census, source=source, parser_limits=parser_limits, source_node_limit=source_node_limit)
+
+
+def _ordinary_mapper_demands_v1(record, *, record_byte_limit, basis_logical_paths):
+    """Exact original-owner units; this pure projection creates no grant.
+
+    Each supplied basis logical name is independently source-selected before
+    namespace allocation. Its actual physical leaf/parent stamps are required
+    later. Original C and the shared native programme retain all separate work.
+    """
+    from tools.validation_scope_registry import _facet_run_mapper_demands_v1 as _d
+    return _d(record, record_byte_limit=record_byte_limit, basis_logical_paths=basis_logical_paths)
+
+
+_LINUX_PREFLIGHT_METADATA_BYTES_V1 = 32*1024**2
+
+
+def _linux_preflight_metadata_bytes_v1(census, report, deadline_ns):
+    """Bound the combined original report and optional census before publication."""
+    from tools import validation_reliability as o
+    result = []
+    extent = 0
+    for value in (report, census):
+        if value is None:
+            result.append(None)
+            continue
+        encoded = []
+        for text in json.JSONEncoder(ensure_ascii=True,sort_keys=True,separators=(',',':'),allow_nan=False).iterencode(value):
+            o._preflight_require_v1(time.monotonic_ns() < deadline_ns, 'LINUX_PREFLIGHT_CENSUS_EXPORT_DEADLINE')
+            part = text.encode('ascii')
+            extent += len(part)
+            o._preflight_require_v1(extent <= _LINUX_PREFLIGHT_METADATA_BYTES_V1, 'LINUX_PREFLIGHT_COMBINED_METADATA_BOUND')
+            encoded.append(part)
+        result.append(b''.join(encoded))
+    o._preflight_require_v1(len(result[0]) <= 16*1024**2, 'LINUX_PREFLIGHT_NATIVE_REPORT_BOUND')
+    return tuple(result)
+
+
+def _linux_preflight_capacity_v1(census, *, page_size, repeated_config_bytes=None):
+    """All determinable intersections; an unavailable operand never admits work."""
+    from tools import validation_reliability as o
+    o._preflight_require_v1(type(census) is dict and type(census['complete_size_census']) is bool,
+        'LINUX_CAPACITY_CENSUS_TYPE')
+    o._preflight_integer_v1(page_size, positive=True)
+    o._preflight_require_v1(page_size & (page_size-1) == 0, 'LINUX_CAPACITY_PAGE_SIZE')
+    totals = census['logical_bytes']
+    o._preflight_keys_v1(totals, ('R','G','I','S','E'))
+    for value in totals.values():
+        o._preflight_integer_v1(value)
+    if repeated_config_bytes is not None:
+        o._preflight_integer_v1(repeated_config_bytes)
+    r,g,i,s,e = (totals[k] for k in ('R','G','I','S','E'))
+    complete = census['complete_size_census']
+    mib,gib = 1024**2,1024**3
+    checks = []
+    def add(name, demand, limit, *, exact, missing=None):
+        disposition = 'EXCEEDS_LIMIT' if demand > limit else 'WITHIN_LIMIT' if exact else 'UNESTABLISHED'
+        checks.append(dict(name=name, demand_bytes=demand, limit_bytes=limit,
+            demand_kind='EXACT_METADATA' if exact else 'LOWER_BOUND', disposition=disposition,
+            missing_operand=missing, admission=False))
+    add('source_capture_R_plus_G', r+g, 2*gib, exact=complete)
+    add('candidate_R_plus_I', r+i, 512*mib, exact=complete and census['active_index_found'])
+    add('installation_logical_S', s, gib, exact=complete)
+    add('git_executable_E', e, 16*mib, exact=complete)
+    declaration = r+i+s+e+(0 if repeated_config_bytes is None else repeated_config_bytes)
+    startup_catalog = s+e+(0 if repeated_config_bytes is None else repeated_config_bytes)
+    add('declaration_body', declaration, gib,
+        exact=complete and census['active_index_found'] and repeated_config_bytes is not None,
+        missing=None if repeated_config_bytes is not None else 'declaration.startup_basis repeated config operands')
+    add('outer_declaration_ingress', 24+declaration, 2*gib, exact=False,
+        missing='encoded declaration header; complete selected payload if census is incomplete')
+    frames = []
+    for position in range(1,9):
+        body = 0 if position in (2,6) else r
+        add('row_body_'+str(position), body, 256*mib, exact=complete)
+        add('child_file_'+str(position), 24+body, 64*mib, exact=False,
+            missing='actual emitted header with invocation identity and delegated remaining allowance')
+        add('retained_child_basis_'+str(position), body+startup_catalog, gib, exact=False,
+            missing='startup acquisition debit beyond declared catalog reservation in _PreflightObservationV1')
+        frames.append(24+body)
+    def pages(n):
+        return ((n+page_size-1)//page_size)*page_size
+    runtime = sum(pages(n) for n in (*frames,*([16*mib]*26)))+32*mib
+    add('shared_runtime_files', runtime, gib, exact=False,
+        missing='eight encoded child headers and eight actual identity-bound receiver extents')
+    add('native_memory', 0, 6*gib, exact=False,
+        missing='native MemoryMax enforcement; file sizes do not establish heap or cache demand')
+    blockers = [v['name'] for v in checks if v['disposition'] != 'WITHIN_LIMIT']
+    admitted = complete and census['active_index_found'] and i <= g and not blockers
+    return dict(complete_size_census=complete, active_index_is_subset_of_G=bool(census['active_index_found'] and i <= g),
+        totals=totals, repeated_config_bytes=repeated_config_bytes,
+        declared_startup_catalog_bytes=startup_catalog, page_size=page_size, checks=checks,
+        feasible=admitted, byte_capture_admitted=admitted, unresolved_intersections=blockers,
+        reason='Metadata is not custody; all unknown header, startup, receiver and native operands remain unestablished')
+def _linux_preflight_capacity_v2(census,*,page_size):
+    from tools import validation_reliability as o
+    totals=census['logical_bytes']
+    complete=census['complete_size_census']
+    storage=o._linux_preflight_storage_reservation_v1((1048576,)*8,(8*1024**2,)*8,page_size)
+    constraints=dict(original_source_admin_bytes=dict(observed=totals['R']+totals['G'],limit=64*1024**3),
+        installation_bytes=dict(observed=totals['S'] if complete else None,limit=1024**3),
+        git_executable_bytes=dict(observed=totals['E'] if complete else None,limit=16*1024**2),
+        census_serialized_bytes=dict(observed=len(o._preflight_canonical_v1(census)),limit=32*1024**2),
+        runtime_reservation_bytes=dict(observed=storage,limit=1024**3))
+    admitted=complete and all(v['observed'] is not None and v['observed']<=v['limit'] for v in constraints.values())
+    return dict(basis_kind='NATIVE_IMMUTABLE_V2',metadata_admitted=admitted,constraints=constraints,
+        child_frame_limit=1048576,manifest_limit=32*1024**2,journal_limit=32*1024**2,
+        controller_metadata_design_reservation=512*1024**2,native_memory_limit=6*1024**3,
+        original_source_is_copied=False,inline_source_bytes=0,immutable_custody_established=False,
+        actual_outer_frame_bytes=None,actual_startup_body_bytes=None,actual_manifest_bytes=None,actual_journal_bytes=None,
+        capacity_is_semantic_acceptance=False)
+
+
+def _linux_preflight_declaration_v1(source, installation, git, *, origin_ns, repository, interpreter, environment):
+    """Mechanically produce the original declaration; no new wire or command identities."""
+    import site
+    import struct
+    import sysconfig
+    from tools import validation_reliability as o
+    root = pathlib.Path(repository)
+    v2=type(source) is o._LinuxImmutableSourceSealV2
+    grants = o._linux_preflight_grants_v1(origin_ns)
+    if v2:
+        for row in grants['rows']:
+            row['transport']['frame_byte_limit']=1048576
+            row['transport']['header_byte_limit']=1048552
+
+    vectors = tuple((interpreter,script,*(() if n == 6 else ('--repo-root','.')))
+        for n,script in enumerate(o._PREFLIGHT_SCRIPTS_V1,1))
+    files = {pathlib.Path(p).relative_to(root).as_posix():raw for p,raw in source.files.items()
+        if not pathlib.Path(p).is_relative_to(root/'.git')}
+    directories = {('.' if pathlib.Path(p) == root else pathlib.Path(p).relative_to(root).as_posix()):roster
+        for p,roster in source.directories.items() if not pathlib.Path(p).is_relative_to(root/'.git')}
+    index = root/'.git/index'
+    o._preflight_require_v1(str(index) in source.files and (v2 or
+        sum(map(len,files.values()))+len(source.files[str(index)]) <= 512*1024**2),
+        'LINUX_PREFLIGHT_COMPLETE_CANDIDATE_SNAPSHOT_CAPACITY')
+    stdlib = tuple(dict.fromkeys(str(pathlib.Path(sysconfig.get_path(k)).absolute()) for k in ('stdlib','platstdlib')))
+    sites = tuple(str(pathlib.Path(p).absolute()) for p in site.getsitepackages())
+    executable = pathlib.Path(interpreter)
+    configs = tuple(dict.fromkeys((str(executable.parent/'pyvenv.cfg'),str(executable.parent.parent/'pyvenv.cfg'),
+        str(executable.with_suffix('._pth')),str(executable.parent/f'python{sys.version_info.major}{sys.version_info.minor}._pth'))))
+    search = tuple(dict.fromkeys((repository,str(root/'tools'),str(executable.parent),*stdlib,*sites)))
+    customizers = tuple(str(pathlib.Path(p)/(name+suffix)) for p in search for name in ('sitecustomize','usercustomize')
+        for suffix in ('.py','.pyc','.pyd','.so',''))
+    start_files = dict(installation.files)
+    start_files.update(git.files)
+    start_dirs = dict(installation.directories)
+    absent = []
+    for path in (*configs,*customizers):
+        if path in installation.files or path in source.files:
+            o._preflight_require_v1(path in configs and not path.endswith('._pth'),
+                'LINUX_PREFLIGHT_UNSUPPORTED_STARTUP_CUSTOMIZER:'+path)
+            if path in installation.files:start_files[path]=installation.files[path]
+            elif v2:
+                # Only the already specified startup config operand can be inline.
+                info=pathlib.Path(path).lstat()
+                o._preflight_require_v1(info.st_size<=16*1024**2,'LINUX_V2_STARTUP_CONFIG_BOUND')
+                fd=o._linux_source_open_v2(path)
+                try:
+                    before=os.fstat(fd)
+                    parts=[]
+                    extent=0
+                    while True:
+                        source._check()
+                        raw=os.read(fd,min(65536,before.st_size-extent+1))
+                        extent+=len(raw)
+                        o._preflight_require_v1(extent<=before.st_size,'LINUX_V2_CONFIG_GREW')
+                        if not raw:break
+                        parts.append(raw)
+                    o._preflight_require_v1(extent==before.st_size and o._scan_same_api_version(os.fstat(fd))==o._scan_same_api_version(before)
+                        ==o._scan_same_api_version(pathlib.Path(path).lstat()) and source.native.flags(fd)&0x10,'LINUX_V2_CONFIG_CHANGED')
+                    start_files[path]=b''.join(parts)
+                finally:os.close(fd)
+            else:start_files[path]=source.files[path]
+        else:
+            o._preflight_require_v1(not pathlib.Path(path).exists(),'LINUX_PREFLIGHT_UNCAPTURED_STARTUP_PATH:'+path)
+            absent.append(path)
+    blobs = []
+    def add(raw):
+        blobs.append(raw)
+        return len(blobs)-1
+    def file_rows(values):
+        return [[p,add(values[p])] for p in sorted(values,key=lambda s:s.encode('utf-8'))]
+    def directory_rows(values):
+        return [[p,[list(row) for row in values[p]]] for p in sorted(values,key=lambda s:s.encode('utf-8'))]
+    repository_rows = [] if v2 else file_rows(files)
+    repository_directories = [] if v2 else directory_rows(directories)
+    index_blob = None if v2 else add(source.files[str(index)])
+    startup_files = file_rows(start_files)
+    startup_directories = directory_rows(start_dirs)
+    rows = []
+    for n,(vector,grant) in enumerate(zip(vectors,grants['rows'],strict=True),1):
+        rows.append(dict(original_position=n,argv=list(vector),
+            **({'selection':'NONE' if n in (2,6) else 'ALL_WORKTREE'} if v2 else
+                dict(files=[] if n in (2,6) else repository_rows,directories=[] if n in (2,6) else repository_directories)),
+            git_executable='/usr/bin/git' if n in (1,3,5,7,8) else None,**grant))
+    offset = 0
+    spans = []
+    for raw in blobs:
+        spans.append([offset,len(raw)])
+        offset += len(raw)
+    o._preflight_require_v1(offset <= 1024**3,'LINUX_PREFLIGHT_DECLARATION_BODY_CAPACITY')
+    header = dict(phase='fast-preflight',repository=dict(root=repository,files=repository_rows,
+        directories=repository_directories,index=[str(index),index_blob],protected_paths=[]),installation=dict(
+        executable=interpreter,version=list(sys.version_info[:3]),abi=[sys.implementation.cache_tag,
+            sysconfig.get_config_var('SOABI'),struct.calcsize('P')*8,sysconfig.get_config_var('Py_GIL_DISABLED'),getattr(sys,'abiflags','')],
+        stdlib_roots=list(stdlib),site_roots=list(sites),loader_environment={k:environment[k] for k in ('PATH','LD_LIBRARY_PATH')},
+        config_paths=list(configs),customizer_paths=list(customizers),startup_basis=dict(files=startup_files,
+            directories=startup_directories,absent=absent)),rows=rows,candidate_limits=grants['candidate_limits'],
+        parent_limits=grants['parent_limits'],blobs=spans)
+    if v2:
+        header['basis_kind']='NATIVE_IMMUTABLE_V2'
+        header['repository']=dict(root=repository,native_basis=dict(source.descriptor),index=str(index),protected_paths=[])
+    raw = o._preflight_canonical_v1(header)
+    o._preflight_require_v1(len(raw) <= 16*1024**2 and 24+len(raw)+offset<=2*1024**3,'LINUX_PREFLIGHT_DECLARATION_HEADER_CAPACITY')
+    return header,tuple(blobs),struct.pack('>8sQQ',b'QTTPA02\n' if v2 else b'QTTPA01\n',len(raw),offset)+raw+b''.join(blobs),vectors,grants
+
+
+def _linux_preflight_eligibility_v1(event,environment,repository):
+    from tools import validation_reliability as o
+    o._preflight_require_v1(type(event) is dict and type(environment) is dict and
+        environment.get('GITHUB_ACTIONS') == 'true' and environment.get('GITHUB_EVENT_NAME') == 'pull_request'
+        and environment.get('GITHUB_REPOSITORY') == 'Q8Meow/QTT_New0526'
+        and environment.get('GITHUB_WORKSPACE') == repository,'LINUX_PREFLIGHT_EPHEMERAL_WORKFLOW_ONLY')
+    pr = event.get('pull_request',{})
+    o._preflight_require_v1(event.get('number') == 298 and type(event.get('number')) is int
+        and event.get('repository',{}).get('full_name') == 'Q8Meow/QTT_New0526'
+        and pr.get('number') == 298 and pr.get('head',{}).get('repo',{}).get('full_name') == 'Q8Meow/QTT_New0526'
+        and pr.get('base',{}).get('repo',{}).get('full_name') == 'Q8Meow/QTT_New0526'
+        and pr.get('base',{}).get('ref') == 'main'
+        and pr.get('head',{}).get('ref') == 'repair/main-cumulative-v35-final-r5-local-20260922'
+        and pr.get('draft') is True,'LINUX_PREFLIGHT_UNADOPTED_REPOSITORY_PR_OR_HEAD')
+
+
+def _linux_preflight_provision_v1():
+    """Only the adopted ephemeral workflow can request the fixed privileged owner."""
+    import base64
+    from tools import validation_reliability as o
+    o._preflight_require_v1(sys.platform == 'linux' and sys.version_info[:3] == (3,14,6),
+        'LINUX_PREFLIGHT_SELECTED_PLATFORM_AND_INTERPRETER')
+    repository = o._linux_preflight_path_v1(str(REPO_ROOT))
+    interpreter = o._linux_preflight_path_v1(sys.executable)
+    installation = o._linux_preflight_path_v1(sys.prefix)
+    o._preflight_require_v1(pathlib.Path(interpreter).is_relative_to(pathlib.Path(installation))
+        and not pathlib.Path(repository).is_relative_to(pathlib.Path(installation)),
+        'LINUX_PREFLIGHT_DISJOINT_INSTALLATION')
+    event_path = pathlib.Path(o._linux_preflight_path_v1(os.environ.get('GITHUB_EVENT_PATH','')))
+    info = event_path.lstat()
+    o._preflight_require_v1(stat.S_ISREG(info.st_mode) and info.st_nlink == 1 and info.st_size <= 1048576,
+        'LINUX_PREFLIGHT_AUTHENTICATED_EVENT_FILE')
+    event_bytes = event_path.read_bytes()
+    o._preflight_require_v1(len(event_bytes) == info.st_size and o._scan_same_api_version(info) ==
+        o._scan_same_api_version(event_path.lstat()),'LINUX_PREFLIGHT_EVENT_CHANGED')
+    event = json.loads(event_bytes)
+    _linux_preflight_eligibility_v1(event,dict(os.environ),repository)
+    bootstrap_paths = ('tools/run_validation_gates.py','tools/validation_reliability.py',
+        'tools/validation_scope_registry.py','tools/ci_branch_context.py')
+    originals = {}
+    for name in bootstrap_paths:
+        path = REPO_ROOT/name
+        before = path.lstat()
+        o._preflight_require_v1(stat.S_ISREG(before.st_mode) and before.st_nlink == 1 and before.st_size <= 2097152,
+            'LINUX_PREFLIGHT_REVIEWED_BOOTSTRAP_FILE')
+        raw = path.read_bytes()
+        o._preflight_require_v1(len(raw) == before.st_size and o._scan_same_api_version(before) ==
+            o._scan_same_api_version(path.lstat()),'LINUX_PREFLIGHT_BOOTSTRAP_CAPTURE_CHANGED')
+        originals[name] = dict(bytes=base64.b64encode(raw).decode('ascii'),version=o._scan_same_api_version(before))
+    ticket_text = os.environ.get('QTT_LINUX_BOOTSTRAP_TICKET')
+    if os.geteuid() != 0:
+        o._preflight_require_v1(ticket_text is None and not any(k.upper().startswith('QTT_LINUX_') for k in os.environ),
+            'LINUX_PREFLIGHT_NO_INHERITED_BOOTSTRAP_SELECTOR')
+        parent = pathlib.Path(o._linux_preflight_path_v1(os.environ.get('RUNNER_TEMP','')))
+        origin = time.monotonic_ns()
+        task = parent/o._linux_preflight_name_v1(os.getpid(),origin)
+        task.mkdir(mode=0o700,exist_ok=False)
+        export_root = task/'native-export'
+        export_root.mkdir(mode=0o700,exist_ok=False)
+        # This workflow output names only the fresh external evidence directory.
+        # It is not forwarded into the privileged controller or service.
+        workflow_output = os.environ.get('GITHUB_OUTPUT')
+        o._preflight_require_v1(type(workflow_output) is str,'LINUX_PREFLIGHT_WORKFLOW_OUTPUT_UNAVAILABLE')
+        output_path = pathlib.Path(o._linux_preflight_path_v1(workflow_output))
+        output_info = output_path.lstat()
+        o._preflight_require_v1(stat.S_ISREG(output_info.st_mode) and output_info.st_nlink == 1
+            and output_info.st_uid == os.getuid(),'LINUX_PREFLIGHT_WORKFLOW_OUTPUT_CUSTODY')
+        descriptor = os.open(output_path,os.O_WRONLY|os.O_APPEND|os.O_NOFOLLOW|os.O_CLOEXEC)
+        try:
+            opened = os.fstat(descriptor)
+            o._preflight_require_v1((opened.st_dev,opened.st_ino) == (output_info.st_dev,output_info.st_ino),
+                'LINUX_PREFLIGHT_WORKFLOW_OUTPUT_DESCRIPTOR')
+            raw_output = ('native_evidence='+str(export_root)+'\n').encode('ascii')
+            o._preflight_require_v1(os.write(descriptor,raw_output) == len(raw_output),'LINUX_PREFLIGHT_WORKFLOW_OUTPUT_SHORT')
+            os.fsync(descriptor)
+        finally: os.close(descriptor)
+        ticket = task/'bootstrap.json'
+        from tools.ci_branch_context import _run_repository_read_process
+        index_query = o._LinuxPreflightQueriesV1(evidence_root=task/'index-evidence',deadline_ns=origin+60*10**9)
+        resolved_index = _run_repository_read_process(REPO_ROOT,
+            ('rev-parse','--path-format=absolute','--git-path','index'),native_query=index_query)
+        index_path = resolved_index.stdout.removesuffix('\n')
+        o._preflight_require_v1(index_path == str(REPO_ROOT/'.git/index'),
+            'LINUX_PREFLIGHT_EXTERNAL_ACTIVE_INDEX')
+        index_info = pathlib.Path(index_path).lstat()
+        o._preflight_require_v1(stat.S_ISREG(index_info.st_mode) and index_info.st_nlink == 1,
+            'LINUX_PREFLIGHT_ACTIVE_INDEX_TYPE')
+        export_info = export_root.lstat()
+        value = dict(export_root=str(export_root),export_identity=(export_info.st_dev,export_info.st_ino),
+            active_index=index_path,index_version=o._scan_same_api_version(index_info),
+            repository=repository,interpreter=interpreter,installation=installation,source=originals,
+            event=base64.b64encode(event_bytes).decode('ascii'),uid=os.getuid(),pid=os.getpid(),origin_ns=origin)
+        o.atomic_write_json(ticket,value)
+        for name,original in originals.items():
+            o._preflight_require_v1((REPO_ROOT/name).read_bytes() == base64.b64decode(original['bytes'])
+                and o._scan_same_api_version((REPO_ROOT/name).lstat()) == tuple(original['version']),
+                'LINUX_PREFLIGHT_BOOTSTRAP_PREPRIVILEGE_CHANGED')
+        env = {key:os.environ[key] for key in ('GITHUB_ACTIONS','GITHUB_EVENT_NAME','GITHUB_REPOSITORY',
+            'GITHUB_WORKSPACE','GITHUB_EVENT_PATH','RUNNER_TEMP')}
+        env.update(PATH=str(pathlib.Path(interpreter).parent)+':/usr/bin',LANG='C.UTF-8',LC_ALL='C.UTF-8',
+            LD_LIBRARY_PATH=installation+'/lib',QTT_LINUX_BOOTSTRAP_TICKET=str(ticket))
+        preserved = ','.join(k for k in env if k != 'PATH')
+        observation = {}
+        receipt = o.supervise_command(('/usr/bin/sudo','-n','--preserve-env='+preserved,interpreter,'-I','-B','-X','utf8',
+            repository+'/tools/run_validation_gates.py','--linux-preflight-provision','--phase','fast-preflight'),
+            cwd=REPO_ROOT,run_id=task.name,phase='fast-preflight-provision',command_index=1,evidence_root=task/'evidence',
+            environment=env,timeout_seconds=3720,execution_deadline_ns=origin+3720*10**9,
+            output_limits=dict(stdout_bytes=128*1024**2,stderr_bytes=128*1024**2,combined_output_bytes=256*1024**2),
+            output_observation=observation)
+        print(json.dumps(dict(linux_controller_receipt=o._json_compatible(receipt),evidence=str(task))),flush=True)
+        return 0 if receipt.failure_class is None and receipt.native_exit_code == 0 else 1
+    o._preflight_require_v1(type(ticket_text) is str,'LINUX_PREFLIGHT_FIXED_PREPRIVILEGE_FREEZE_REQUIRED')
+    ticket = pathlib.Path(o._linux_preflight_path_v1(ticket_text))
+    parent = pathlib.Path(o._linux_preflight_path_v1(os.environ['RUNNER_TEMP']))
+    ticket_info = ticket.lstat()
+    sudo_uid = o._preflight_decimal_v1(os.environ.get('SUDO_UID',''))
+    o._preflight_require_v1(ticket.parent.parent == parent and ticket.name == 'bootstrap.json'
+        and stat.S_ISREG(ticket_info.st_mode) and ticket_info.st_nlink == 1
+        and ticket_info.st_uid == sudo_uid and ticket_info.st_size <= 8*1024**2,
+        'LINUX_PREFLIGHT_BOOTSTRAP_TRANSPORT_CUSTODY')
+    raw = ticket.read_bytes()
+    frozen = json.loads(raw)
+    o._preflight_require_v1(o._scan_same_api_version(ticket.lstat()) == o._scan_same_api_version(ticket_info)
+        and frozen['uid'] == sudo_uid and frozen['repository'] == repository and frozen['interpreter'] == interpreter
+        and frozen['installation'] == installation and frozen['source'] == o._json_compatible(originals)
+        and base64.b64decode(frozen['event'],validate=True) == event_bytes,
+        'LINUX_PREFLIGHT_FROZEN_BOOTSTRAP_CHANGED')
+    o._preflight_integer_v1(frozen['origin_ns'])
+    o._preflight_require_v1(frozen['active_index'] == str(REPO_ROOT/'.git/index')
+        and tuple(frozen['index_version']) == o._scan_same_api_version(pathlib.Path(frozen['active_index']).lstat()),
+        'LINUX_PREFLIGHT_ORIGINAL_RESOLVED_INDEX_CHANGED')
+    export_root = pathlib.Path(o._linux_preflight_path_v1(frozen['export_root']))
+    export_info = export_root.lstat()
+    o._preflight_require_v1(export_root == ticket.parent/'native-export' and stat.S_ISDIR(export_info.st_mode)
+        and export_info.st_uid == sudo_uid and stat.S_IMODE(export_info.st_mode) == 0o700
+        and (export_info.st_dev,export_info.st_ino) == tuple(frozen['export_identity']),
+        'LINUX_PREFLIGHT_EXPORT_ORIGINAL_OWNED_DIRECTORY')
+    return _linux_preflight_controller_v1(repository,installation,interpreter,event,event_bytes,frozen['origin_ns'],export_root)
+
+
+def _linux_preflight_export_directory_v1(path, previous=None):
+    """Use the existing directory identity owner for retained native evidence."""
+    from tools import validation_reliability as o
+    info = path.lstat()
+    o._preflight_require_v1(stat.S_ISDIR(info.st_mode) and not o._stat_is_reparse_point(info),
+        'LINUX_PREFLIGHT_EXPORT_DIRECTORY:'+str(path))
+    version = o._preflight_stamp_v1(info)
+    o._preflight_require_v1(previous is None or version == previous,
+        'LINUX_PREFLIGHT_EXPORT_DIRECTORY_CHANGED:'+str(path))
+    return version
+
+
+def _ordinary_ci_eligibility_v1(event, environment, repository, *, phase):
+ """Project actual original workflow data; never supply native permission."""
+ from tools import validation_reliability as owner
+ require = owner._preflight_require_v1
+ controls = ('GITHUB_ACTIONS', 'GITHUB_EVENT_NAME', 'GITHUB_REPOSITORY',
+  'GITHUB_WORKSPACE', 'GITHUB_REF', 'GITHUB_REF_NAME', 'GITHUB_SHA',
+  'GITHUB_HEAD_REF', 'GITHUB_BASE_REF', 'GITHUB_RUN_ID', 'GITHUB_RUN_ATTEMPT')
+ require(type(event) is dict and type(environment) is dict
+  and isinstance(repository, pathlib.Path) and repository == REPO_ROOT
+  and repository.is_absolute() and type(phase) is str and phase in ORDERED_PHASES
+  and all(type(environment.get(key)) is str for key in controls)
+  and environment['GITHUB_ACTIONS'] == 'true'
+  and environment['GITHUB_REPOSITORY'] == 'Q8Meow/QTT_New0526'
+  and environment['GITHUB_WORKSPACE'] == str(repository),
+  'ORDINARY_CI_ORIGINAL_WORKFLOW_CONTROLS')
+ owner._preflight_decimal_v1(environment['GITHUB_RUN_ID'])
+ owner._preflight_decimal_v1(environment['GITHUB_RUN_ATTEMPT'])
+ def revision(value):
+  return type(value) is str and len(value) == 40 and all(
+   character in '0123456789abcdef' for character in value)
+ name = environment['GITHUB_EVENT_NAME']
+ current = environment['GITHUB_SHA']
+ ref = environment['GITHUB_REF']
+ require(revision(current), 'ORDINARY_CI_ORIGINAL_SOURCE_REVISION')
+ repository_event = event.get('repository')
+ require(type(repository_event) is dict
+  and repository_event.get('full_name') == 'Q8Meow/QTT_New0526',
+  'ORDINARY_CI_ORIGINAL_EVENT_REPOSITORY')
+ if name == 'pull_request':
+  pr = event.get('pull_request')
+  require(type(pr) is dict and type(pr.get('draft')) is bool
+   and type(event.get('number')) is int and event['number'] == 298
+   and type(pr.get('number')) is int and pr['number'] == 298
+   and event.get('action') in ('opened', 'synchronize', 'reopened', 'ready_for_review'),
+   'ORDINARY_CI_ORIGINAL_PR_EVENT')
+  head = pr.get('head')
+  base = pr.get('base')
+  require(type(head) is dict and type(base) is dict
+   and type(head.get('repo')) is dict and type(base.get('repo')) is dict
+   and head['repo'].get('full_name') == base['repo'].get('full_name')
+    == 'Q8Meow/QTT_New0526'
+   and head.get('ref') == 'repair/main-cumulative-v35-final-r5-local-20260922'
+   and base.get('ref') == 'main' and revision(head.get('sha')) and revision(base.get('sha'))
+   and ref == 'refs/pull/298/merge' and environment['GITHUB_REF_NAME'] == '298/merge'
+   and environment['GITHUB_HEAD_REF'] == head['ref']
+   and environment['GITHUB_BASE_REF'] == base['ref']
+   and (event['action'] != 'ready_for_review' or pr['draft'] is False),
+   'ORDINARY_CI_AUTHENTIC_OWN_TEST_MERGE')
+  # The separately adopted draft fast route remains the original first8.
+  require(not (pr['draft'] is True and phase == FAST_PREFLIGHT_PHASE),
+   'ORDINARY_CI_DRAFT_FAST_RETAINS_FIRST8_OWNER')
+  return (name, environment['GITHUB_REPOSITORY'], ref, current,
+   head['sha'], base['sha'], phase)
+ require(name in ('push', 'workflow_dispatch') and ref == 'refs/heads/main'
+  and environment['GITHUB_REF_NAME'] == 'main'
+  and environment['GITHUB_HEAD_REF'] == environment['GITHUB_BASE_REF'] == '',
+  'ORDINARY_CI_AUTHENTIC_MAIN_EVENT')
+ if name == 'push':
+  require(event.get('ref') == ref and event.get('after') == current
+   and event.get('deleted') is False, 'ORDINARY_CI_ORIGINAL_MAIN_PUSH')
+ else:
+  inputs = event.get('inputs')
+  require(event.get('ref') in ('main', ref) and type(inputs) is dict
+   and set(inputs) == {'full_validation'} and inputs['full_validation'] in ('true', 'false'),
+   'ORDINARY_CI_ORIGINAL_MANUAL_MAIN')
+  # The existing router owns full/reduced selection. The event projection
+  # neither changes its mode nor converts its input into a permission.
+ return (name, environment['GITHUB_REPOSITORY'], ref, current, current, None, phase)
+
+
+def _ordinary_ci_checkout_binding_v1(scope, host, bootstrap, *, phase):
+ """Bind the original event to actual protected checkout bytes and Git result."""
+ import base64
+ from tools import validation_reliability as owner
+ require = owner._preflight_require_v1
+ require(type(scope) is owner._LinuxPreflightScopeV1
+  and host is scope._ordinary_host_preparation_v1 is scope._ordinary_original_host_preparation_v1
+  and type(bootstrap) is dict and type(phase) is str and phase == bootstrap['phase'],
+  'ORDINARY_CI_ORIGINAL_NATIVE_SCOPE_AND_PHASE')
+ receiver = scope._ordinary_controller_receiver_v1
+ require(receiver is scope._ordinary_original_controller_receiver_v1
+  and receiver['scope'] is scope and receiver['host'] is host
+  and receiver['bootstrap'] is bootstrap and receiver['joined'] and not receiver['errors']
+  and receiver['owner'] == (os.getpid(), threading.get_ident())
+  and not hasattr(scope, '_ordinary_workflow_binding_v1'),
+  'ORDINARY_CI_ORIGINAL_RECEIVED_CONTROLLER')
+ scope._ordinary_precursor_ready_v1()
+ controls = ('GITHUB_ACTIONS', 'GITHUB_EVENT_NAME', 'GITHUB_REPOSITORY',
+  'GITHUB_WORKSPACE', 'GITHUB_REF', 'GITHUB_REF_NAME', 'GITHUB_SHA',
+  'GITHUB_HEAD_REF', 'GITHUB_BASE_REF', 'GITHUB_RUN_ID', 'GITHUB_RUN_ATTEMPT')
+ environment = bootstrap['environment']
+ require(type(environment) is dict and all(type(environment.get(key)) is str
+  and os.environ.get(key) == environment[key] for key in controls)
+  and type(bootstrap['event']) is str,
+  'ORDINARY_CI_ORIGINAL_FROZEN_STANDARD_CONTROLS')
+ event_bytes = base64.b64decode(bootstrap['event'], validate=True)
+ require(0 < len(event_bytes) <= 1048576, 'ORDINARY_CI_ORIGINAL_EVENT_EXTENT')
+ # Preserve the original authenticated event decoder. The event bytes are
+ # the actual frozen input; only selected fields receive typed eligibility.
+ event = json.loads(event_bytes)
+ projection = _ordinary_ci_eligibility_v1(event, environment, REPO_ROOT, phase=phase)
+ record = dict(scope=scope, host=host, bootstrap=bootstrap, receiver=receiver,
+  environment=environment, environment_values=tuple(environment.items()),
+  event_bytes=event_bytes, event=event, projection=projection,
+  owner=(os.getpid(), threading.get_ident()), query=None, result=None,
+  checkout=None, complete=False, errors=[])
+ scope._ordinary_workflow_binding_v1 = scope._ordinary_original_workflow_binding_v1 = record
+ record['original'] = (record, scope, host, bootstrap, receiver, environment,
+  record['environment_values'], event_bytes, event, projection, record['owner'], record['errors'])
+ try:
+  root = scope._ordinary_parent_git_root_v1(REPO_ROOT)
+  git_environment = dict(GIT_CEILING_DIRECTORIES=str(REPO_ROOT.parent),
+   GIT_OPTIONAL_LOCKS='0', GIT_TERMINAL_PROMPT='0', GIT_NO_REPLACE_OBJECTS='1',
+   GIT_NO_LAZY_FETCH='1', GIT_ALLOW_PROTOCOL='', GIT_CONFIG_NOSYSTEM='1',
+   GIT_CONFIG_SYSTEM=os.devnull, GIT_TRACE2='0', GIT_TRACE2_PERF='0', GIT_TRACE2_EVENT='0',
+   GIT_CONFIG_COUNT='2', GIT_CONFIG_KEY_0='core.fsmonitor', GIT_CONFIG_VALUE_0='false',
+   GIT_CONFIG_KEY_1='protocol.allow', GIT_CONFIG_VALUE_1='never',
+   **scope._ordinary_parent_git_environment_v1(root))
+  requested = ('git', '--no-pager', '--literal-pathspecs', '-c',
+   'core.fsmonitor=false', '-c', 'protocol.allow=never',
+   'rev-list', '--parents', '-n', '1', 'HEAD')
+  result = record['result'] = scope._ordinary_parent_git_process_v1(
+   requested, root=root, environment=git_environment)
+  matches = [row for row in scope._ordinary_parent_git_queries_v1
+   if row['requested_argv'] is requested]
+  require(len(matches) == 1, 'ORDINARY_CI_ORIGINAL_BOUNDED_CHECKOUT_QUERY')
+  query = record['query'] = matches[0]
+  require(query['scope'] is scope and query['returned'] and not query['errors']
+   and type(result) is subprocess.CompletedProcess and type(result.returncode) is int
+   and result.returncode == 0 and type(result.stdout) is str and type(result.stderr) is str
+   and result.stderr == '' and result.stdout.endswith('\n') and result.stdout.count('\n') == 1,
+   'ORDINARY_CI_ACTUAL_TERMINAL_CHECKOUT_RESULT')
+  fields = tuple(result.stdout[:-1].split(' '))
+  require(fields and all(type(value) is str and len(value) == 40
+   and all(character in '0123456789abcdef' for character in value) for value in fields)
+   and ' '.join(fields) + '\n' == result.stdout and fields[0] == projection[3]
+   and (projection[0] != 'pull_request' or fields[1:] == (projection[5], projection[4])),
+   'ORDINARY_CI_ACTUAL_EVENT_CHECKOUT_AND_CURRENT_BASE')
+  record['checkout'] = fields
+  scope._ordinary_precursor_ready_v1()
+  require(tuple(environment.items()) == record['environment_values']
+   and all(os.environ.get(key) == environment[key] for key in controls)
+   and _ordinary_ci_eligibility_v1(event, environment, REPO_ROOT, phase=phase) == projection,
+   'ORDINARY_CI_ORIGINAL_CONTROLS_AFTER_CHECKOUT')
+  record['complete'] = True
+  return record
+ except BaseException as error:
+  record['errors'].append(error)
+  if not any(error is actual for actual in scope._ordinary_factory_errors_v1):
+   scope._ordinary_factory_errors_v1.append(error)
+  raise
+
+
+def _ordinary_ci_require_binding_v1(scope, *, phase):
+ """Retain the same received event/checkout association at original main."""
+ from tools import validation_reliability as owner
+ record = scope._ordinary_workflow_binding_v1
+ require = owner._preflight_require_v1
+ original = record['original']
+ require(type(scope) is owner._LinuxPreflightScopeV1
+  and record is scope._ordinary_original_workflow_binding_v1
+  and original[0] is record and original[1] is scope
+  and original[2] is record['host'] and original[3] is record['bootstrap']
+  and original[4] is record['receiver'] and original[5] is record['environment']
+  and original[6] is record['environment_values'] and original[7] is record['event_bytes']
+  and original[8] is record['event'] and original[9] is record['projection']
+  and original[10] == record['owner'] and original[11] is record['errors']
+  and record['owner'] == (os.getpid(), threading.get_ident())
+  and record['complete'] and not record['errors']
+  and record['receiver'] is scope._ordinary_controller_receiver_v1
+  and record['receiver'] is scope._ordinary_original_controller_receiver_v1
+  and record['receiver']['joined'] and not record['receiver']['errors']
+  and record['bootstrap'] is record['receiver']['bootstrap']
+  and record['environment'] is record['bootstrap']['environment']
+  and tuple(record['environment'].items()) == record['environment_values']
+  and phase == record['bootstrap']['phase'] == record['projection'][6]
+  and record['checkout'][0] == record['projection'][3],
+  'ORDINARY_CI_SAME_ORIGINAL_WORKFLOW_AND_CHECKOUT_BINDING')
+ scope._ordinary_precursor_ready_v1()
+ require(_ordinary_ci_eligibility_v1(record['event'], record['environment'], REPO_ROOT,
+  phase=phase) == record['projection'], 'ORDINARY_CI_ORIGINAL_SELECTED_PHASE_RECHECK')
+ return record
+
+
+def _ordinary_received_controller_run_v1(scope, host, bootstrap):
+    """Run only complete supported source rows in the received controller.
+
+    The original selection and same-owner compiler bind the actual phase;
+    unsupported application/native rows deny before C or APP dispatch.
+    The same process's final publisher owns restoration and native closure.
+    """
+    from tools import validation_reliability as owner
+    require = owner._preflight_require_v1
+    require(type(scope) is owner._LinuxPreflightScopeV1
+     and type(host) is dict and host is scope._ordinary_host_preparation_v1
+     is scope._ordinary_original_host_preparation_v1 and host['scope'] is scope
+     and type(bootstrap) is dict and type(bootstrap['phase']) is str
+     and bootstrap['phase'] in ORDERED_PHASES
+     and not hasattr(scope, '_ordinary_controller_run_v1'),
+     'ORDINARY_RECEIVED_ORIGINAL_SELECTED_PHASE_SOURCE_BODY')
+    receiver = scope._ordinary_controller_receiver_v1
+    require(receiver is scope._ordinary_original_controller_receiver_v1
+     and receiver['scope'] is scope and receiver['host'] is host
+     and receiver['bootstrap'] is bootstrap and receiver['joined'] and not receiver['errors']
+     and receiver['owner'] == (os.getpid(), threading.get_ident())
+     and scope.source is None and scope._ordinary_factory_original_v1 is None,
+     'ORDINARY_RECEIVED_CONTROLLER_BEFORE_CENSUS_AND_SOURCE')
+    record = dict(scope=scope, host=host, bootstrap=bootstrap, receiver=receiver,
+     owner=(os.getpid(), threading.get_ident()), phase=bootstrap['phase'],
+     census=None, census_programme=None, source=None, install=None,
+     resource_programme=None, candidate=None, workflow=None, main_status=None,
+     candidate_source=None, candidate_attempted=False, supervision=None, errors=[])
+    record['original'] = (record, scope, host, bootstrap, receiver, record['owner'], record['errors'])
+    scope._ordinary_controller_run_v1 = scope._ordinary_original_controller_run_v1 = record
+    try:
+     require(owner._LINUX_PREFLIGHT_PROCESS_V1.get() is scope,
+      'ORDINARY_RECEIVED_CONTROLLER_ORIGINAL_CONTEXT')
+     scope._ordinary_require_host_preparation_v1(host)
+     cuts = host['original_cutoffs']
+     ceiling = _ordinary_post_ceiling_checked_v1(host['ceiling_programme'])
+     prefix = _ordinary_post_prefix_checked_v1(host['prefix_programme'], ceiling)
+     require(host['original_ceiling_programme'] is ceiling
+      and host['original_prefix_programme'] is prefix and cuts is ceiling['original_cutoffs']
+      and type(host['tools']) is tuple and len(host['tools']) == 2
+      and type(bootstrap['uid']) is int and bootstrap['uid'] > 0
+      and bootstrap['repository'] == scope.repository == str(REPO_ROOT)
+      and bootstrap['installation'] == scope.installation
+      and bootstrap['interpreter'] == scope.interpreter == sys.executable,
+      'ORDINARY_RECEIVED_SAME_FROZEN_SOURCE_AND_NATIVE_PROGRAMME')
+     actual_runner = sys.modules[__name__]
+     require(not hasattr(scope, '_ordinary_runner_owner_v1'),
+      'ORDINARY_ONE_ACTUAL_RUNNER_MODULE_ASSOCIATION')
+     scope._ordinary_runner_owner_v1 = actual_runner
+     scope._ordinary_original_runner_owner_v1 = actual_runner
+     census = record['census'] = owner._LinuxPreflightCensusV1(
+      scope.repository, scope.installation, '/usr/bin/git',
+      deadline_ns=scope.execution_deadline_ns, installation_acl=True,
+      setup_uid=bootstrap['uid'])
+     scope._ordinary_census_meter_attach_v1(census)
+     census.run()
+     programme = record['census_programme'] = _ordinary_post_census_programme_v1(
+      census, ceiling_programme=ceiling, prefix_programme=prefix, phase=record['phase'])
+     require(not hasattr(scope, '_ordinary_census_programme_v1'),
+      'ORDINARY_ONE_ACTUAL_CENSUS_PROGRAMME')
+     scope._ordinary_census_programme_v1 = programme
+     scope._ordinary_original_census_programme_v1 = programme
+     limits = programme['limits']
+     physical = programme['physical_program']
+     layout = programme['control_layout']
+     scope._ordinary_factory_begin_v1(paths=None, plan=None, limits=limits,
+      physical_program=physical, root_parent=host['root_parent'],
+      root_parent_slot=host['root_parent_slot'], original_cutoffs=cuts,
+      tools=host['tools'], control_layout=layout)
+     scope._ordinary_prepare_filesystem_v1(dict(physical['volumes'])['HOST_OUTPUT'], role='HOST_OUTPUT')
+     _ordinary_bind_host_continuous_evidence_v1(scope, host, scope._ordinary_host_output_image_v1)
+     scope._ordinary_handoff_evidence_v1(host['continuous_evidence'])
+     # Native source protection uses the original same-filesystem external
+     # workspace. The tmpfs/image evidence roots cannot replace that anchor.
+     workspace = pathlib.Path(bootstrap['export_root']).parent
+     source = record['source'] = owner._LinuxImmutableSourceSealV2(
+      census, deadline_ns=scope.settlement_deadline_ns, workspace=workspace,
+      run_id=scope.name)
+     scope.source = source
+     source.journal_path = scope.control / 'source-transition.jsonl'
+     scope._ordinary_source_meter_attach_v1(source)
+     source.primitive_check(scope.query)
+     source.protect()
+     source.readability()
+     # Ordinary C obtains its full B0 and separately tagged active INDEX
+     # through the original disk owner. No ordinary consumer uses the
+     # first-eight manifest's descriptor, raw bytes or pathname.
+     install = record['install'] = owner._LinuxInstallationCopyV2(
+      census, scope.installation, deadline_ns=scope.execution_deadline_ns,
+      setup_uid=bootstrap['uid'])
+     scope._ordinary_installation_meter_attach_v1(install, programme['installation_programme'])
+     install.copy_installation(programme['installation_programme']['destination'])
+     # Complete copy uses every original installation row, independent of
+     # runtime roles. Source/ABI construction is independently funded before
+     # this same-owner supplier; its observations never supply that funding.
+     runtime_roles = scope._ordinary_runtime7_roles_v1(census, host=host, runner=actual_runner)
+     scope._ordinary_runtime7_installation_roles_v1(programme['installation_programme'],
+      runtime_roles, programme['installation_programme']['rows'], runner=actual_runner)
+     record['controller_runtime_roles'] = runtime_roles
+     resources = record['resource_programme'] = _ordinary_post_resource_programme_v1(
+      scope, census, source, original_cutoffs=cuts, host_preparation=host,
+      ceiling_programme=ceiling, census_programme=programme, phase=record['phase'])
+     if record['phase'] is not None:
+      current_installation = scope._ordinary_installation_record_v1(install)
+      owner._ordinary_control_current_profile_bind_v1(scope, current_installation)
+      compiler_heap = scope._ordinary_bootstrap_runtime_v1['acquisition']['heap_record']
+      compiler_stage = None
+      try:
+       compiler_stage = actual_runner._ordinary_bootstrap_source_stage_v1(
+        compiler_heap, 'BEFORE_COMPILE')
+       record['control_source_stage'] = compiler_stage
+       module_inputs = owner._ordinary_control_initialized_module_inputs_v1(
+        scope, compiler_stage)
+       record['control_module_inputs'] = module_inputs
+       record['control_root_selections'] = owner._ordinary_control_initialized_selections_v1(
+        scope, compiler_stage, module_inputs)
+       require(hasattr(scope, '_ordinary_control_source_inputs_v1'),
+        'CONTROL_AUTHENTIC_SOURCE_INPUT_PRODUCER_UNISSUED')
+       owner._ordinary_controller_data_source_initialize_v1(scope, resources,
+        scope._ordinary_control_source_inputs_v1,
+        _ordinary_source_stage_v1=compiler_stage)
+       compiler_stage = None
+      except BaseException as error:
+       compiler_errors = [error]
+       if (compiler_stage is not None and compiler_heap['active'] is compiler_stage
+         and compiler_stage['error'] is None and not compiler_stage['complete']):
+        try:
+         actual_runner._ordinary_bootstrap_heap_stage_failed_v1(
+          compiler_heap, compiler_stage, error)
+        except BaseException as accounting_error:
+         compiler_errors.append(accounting_error)
+       for caught in tuple(compiler_errors):
+        for errors in (record['errors'], scope._ordinary_factory_errors_v1):
+         try:
+          if all(caught is not previous for previous in errors): errors.append(caught)
+         except BaseException as recording_error:
+          compiler_errors.append(recording_error)
+       owner._scan_raise_errors(compiler_errors)
+       raise
+     scope._ordinary_prepare_precursor_v1(paths=None, limits=limits,
+      physical_program=physical, root_parent=host['root_parent'],
+      root_parent_slot=host['root_parent_slot'], original_cutoffs=cuts,
+      tools=host['tools'], control_layout=layout, host_preparation=host)
+     _ordinary_prepare_parent_outputs_v1(scope, resources)
+     record['workflow'] = _ordinary_ci_checkout_binding_v1(scope, host, bootstrap,
+      phase=record['phase'])
+     names = tuple(pathlib.Path(row['path']).relative_to(REPO_ROOT).as_posix()
+      for row in programme['rows'] if pathlib.Path(row['path']) != REPO_ROOT)
+     require(type(names) is tuple and names and len(names) == len(set(names)),
+      'ORDINARY_COMPLETE_ORIGINAL_CENSUS_CANDIDATE_NAMES')
+     record['candidate_names'] = names
+     record['original_candidate_names'] = names
+     def exclusive():
+      require(record is scope._ordinary_controller_run_v1 is scope._ordinary_original_controller_run_v1
+       and record['owner'] == (os.getpid(), threading.get_ident())
+       and owner._LINUX_PREFLIGHT_PROCESS_V1.get() is scope,
+       'ORDINARY_CANDIDATE_SAME_RECEIVED_OWNER')
+      scope._ordinary_host_check_v1()
+     def observe():
+      exclusive()
+      require(record['candidate_names'] is record['original_candidate_names'] is names,
+       'ORDINARY_CANDIDATE_ORIGINAL_COMPLETE_NAME_TUPLE')
+      return names
+     def operation(*, entry, environment, timeout_seconds, scratch_roots):
+      exclusive()
+      return owner._ordinary_supported_operation_check_v1(scope,
+       scope._ordinary_effect_programme_v1, entry=entry, environment=environment,
+       timeout_seconds=timeout_seconds, scratch_roots=scratch_roots)
+     def candidate_source(root, plan):
+      return owner._ordinary_supported_candidate_v1(scope, record, root, plan,
+       observe=observe, exclusive=exclusive, operation=operation)
+     record['candidate_source'] = candidate_source
+     scope._ordinary_candidate_source_v1 = scope._ordinary_original_candidate_source_v1 = candidate_source
+     run_parent = scope._ordinary_continuous_subroot_v1('RUN_EVIDENCE')[1]
+     record['report_paths'] = (REPO_ROOT / '.tmp' / 'qtt-validation-timing' / (record['phase'] + '.json'),
+      REPO_ROOT / '.tmp' / 'qtt-validation-router' / (record['phase'] + '.json'))
+     _ordinary_ci_require_binding_v1(scope, phase=record['phase'])
+     record['main_status'] = main(['--phase', record['phase'], '--process-root', str(run_parent),
+      '--timing-report', str(record['report_paths'][0]), '--router-report', str(record['report_paths'][1])],
+      candidate_source=candidate_source)
+     record['supervision'] = _RUN_COMMANDS_SUPERVISION
+     require(type(record['main_status']) is int and record['main_status'] == 0,
+      'ORDINARY_RECEIVED_CONTROLLER_ORIGINAL_MAIN_FAILED')
+    except BaseException as error:
+     record['errors'].append(error)
+     if not any(error is actual for actual in scope._ordinary_factory_errors_v1):
+      scope._ordinary_factory_errors_v1.append(error)
+     record['candidate'] = getattr(scope, '_ordinary_candidate_v1', record['candidate'])
+     record['supervision'] = _RUN_COMMANDS_SUPERVISION
+    # No body status releases protection or proves a child terminal. The
+    # existing final publisher receives this retained actual owner record.
+    return record
+
+
+def _ordinary_prefix_programme_v1(ceiling_programme):
+ """Bound all original prefix cells; the pure result grants no native argv."""
+ from tools import validation_reliability as o
+ _ordinary_post_ceiling_checked_v1(ceiling_programme)
+ caps = ceiling_programme
+ operations = ('COMMON_SHOW', 'BOOTSTRAP_SHOW', 'COMMON_SHOW_AFTER', 'BOOTSTRAP_SHOW_AFTER',
+  'MANAGER_SHOW', 'PRLIMIT_VERSION', 'FORMATTER_VERSION', 'INITIAL_GIT_DIR',
+  'INITIAL_GIT_COMMON_DIR', 'INITIAL_GIT_INDEX', 'HOST_FORMAT', 'HOST_MOUNT',
+  'HOST_MOUNT_READBACK', 'CONTROLLER_POLICY_COMPILE', 'CONTROLLER_POLICY_LOAD',
+  'CONTROLLER_POLICY_REMOVE')
+ commands = caps['evidence_programme']['query_command_count']
+ responses = caps['evidence_programme']['native_response_count']
+ outer, source, index = 256 << 20, (4 * 2 + 16 + 2 + 2) << 20, caps['limits']['index_byte_limit']
+ cells = 16 + 7 + 1 + 5 * commands + 2 * responses + 16
+ metadata = cells * 65536
+ # Query's original cumulative retained-output owner independently caps
+ # command and native-response bytes together. Three explicit retained
+ # copies cover the native stream, complete response and copied handoff.
+ streams = 3 * caps['output_partition']['administrative_bytes']
+ receipts = commands * caps['evidence_programme']['atomic_payload_bytes']
+ controls = (32 << 20) + (64 << 20) + (8 << 20) + 16 * 4096
+ demand = outer + source + index + streams + receipts + controls + metadata
+ extent = ((demand + (1 << 20) - 1) // (1 << 20)) * (1 << 20)
+ inodes = ((cells + 63) // 64) * 64
+ return (1, operations, commands, responses, extent, inodes,
+  outer, source, index, metadata, caps, caps['original_cutoffs'])
+
+
+def _ordinary_prefix_debit_v1(scope, host, kind, amount):
+ from tools import validation_reliability as o
+ o._preflight_require_v1(type(scope) is o._LinuxPreflightScopeV1
+  and host is scope._ordinary_host_preparation_v1
+  is scope._ordinary_original_host_preparation_v1
+  and host['scope'] is scope and host['owner'] ==
+  (os.getpid(), threading.get_ident()) and type(amount) is int and amount >= 0,
+  'ORDINARY_PREFIX_ACTUAL_OWNER_AND_DELIVERY')
+ # The receiver owns these identical counters from the first native read.
+ # Its original delivery path charges before later cutoff/cap rejection;
+ # after C release it also requires the genuine OUTPUT-stage association.
+ o._LinuxPreflightScopeV1._ordinary_factory_debit_v1(scope, kind, amount,
+  settling=o._LinuxPreflightScopeV1._ordinary_effective_settlement_v1(scope))
+
+
+def _ordinary_prefix_call_v1(scope, host, function, *args, **kwargs):
+ from tools import validation_reliability as o
+ try:
+  return o._LinuxPreflightScopeV1._ordinary_factory_call_v1(scope,
+   function, *args, **kwargs,
+   settling=o._LinuxPreflightScopeV1._ordinary_effective_settlement_v1(scope))
+ except BaseException as error:
+  host['prefix_errors'].append(error)
+  raise
+
+
+def _ordinary_prefix_open_v1(scope, host, path, kind, *, directory=False):
+ from tools import validation_reliability as o
+ slots = host['prefix_slots']
+ o._preflight_require_v1(slots is host['original_prefix_slots'],
+  'ORDINARY_PREFIX_ORIGINAL_SLOT_LIST')
+ slot = o._LinuxPreflightScopeV1._ordinary_factory_slot_v1(scope, path, kind,
+  settling=o._LinuxPreflightScopeV1._ordinary_effective_settlement_v1(scope))
+ host['prefix_close_debt'].append(slot)
+ try:
+  flags = os.O_RDONLY | os.O_NOFOLLOW | os.O_CLOEXEC | os.O_NONBLOCK
+  if directory: flags |= os.O_DIRECTORY
+  # The SAME Scope saves the returned descriptor before validation.
+  o._LinuxPreflightScopeV1._ordinary_factory_open_v1(scope, slot, path, flags,
+   settling=o._LinuxPreflightScopeV1._ordinary_effective_settlement_v1(scope))
+ except BaseException as error:
+  o._mapper_slot_open_error_v1(slot, error)
+  host['prefix_errors'].append(error)
+  raise
+ finally:
+  slot['acquiring'] = False
+ return slot
+
+
+def _ordinary_prefix_read_v1(scope, host, path, *, limit=65536):
+ from tools import validation_reliability as o
+ o._preflight_require_v1(type(limit) is int and 0 < limit <= 1048576,
+  'ORDINARY_PREFIX_CLOSED_READ_BOUND')
+ slot = _ordinary_prefix_open_v1(scope, host, pathlib.Path(path), 'ORDINARY_PREFIX_READ')
+ errors = []
+ raw = bytearray()
+ try:
+  before = _ordinary_prefix_call_v1(scope, host, os.fstat, slot['returned_fd'])
+  named = _ordinary_prefix_call_v1(scope, host, os.lstat, path)
+  o._preflight_require_v1(stat.S_ISREG(before.st_mode)
+   and not stat.S_ISLNK(named.st_mode)
+   and (before.st_dev, before.st_ino) == (named.st_dev, named.st_ino),
+   'ORDINARY_PREFIX_NATIVE_READ_IDENTITY')
+  while True:
+   request = min(65536, limit + 1 - len(raw))
+   block = _ordinary_prefix_call_v1(scope, host, os.read,
+    slot['returned_fd'], request)
+   o._preflight_require_v1(type(block) is bytes, 'ORDINARY_PREFIX_UNKNOWN_READ_RETURN')
+   _ordinary_prefix_debit_v1(scope, host, 'native_control_read', len(block))
+   raw.extend(block)
+   o._preflight_require_v1(len(block) <= request and len(raw) <= limit,
+    'ORDINARY_PREFIX_NATIVE_READ_BOUND')
+   if not block: break
+  final = _ordinary_prefix_call_v1(scope, host, os.fstat, slot['returned_fd'])
+  after = _ordinary_prefix_call_v1(scope, host, os.lstat, path)
+  o._preflight_require_v1((final.st_dev, final.st_ino) == (before.st_dev, before.st_ino)
+   == (after.st_dev, after.st_ino), 'ORDINARY_PREFIX_NATIVE_READ_REPLACED')
+ except BaseException as error:
+  errors.append(error)
+  host['prefix_errors'].append(error)
+  o._mapper_slot_open_error_v1(slot, error)
+ finally:
+  if not slot['close_attempted']:
+   try:
+    o._LinuxPreflightScopeV1._ordinary_factory_close_v1(scope, slot,
+     settling=o._LinuxPreflightScopeV1._ordinary_effective_settlement_v1(scope))
+   except BaseException as error: errors.append(error)
+  host['closed_slot_count'] = scope._ordinary_factory_closed_slots_v1
+ o._scan_raise_errors(errors)
+ return bytes(raw)
+
+
+def _ordinary_prefix_open_pidfd_v1(scope, host, pid, starttime):
+ from tools import validation_reliability as o
+ slot = o._LinuxPreflightScopeV1._ordinary_factory_slot_v1(scope,
+  '/proc/' + str(pid), 'ORDINARY_ORIGINAL_PARENT_PIDFD')
+ host['prefix_close_debt'].append(slot)
+ try:
+  _ordinary_prefix_debit_v1(scope, host, 'metadata_call', 1)
+  o._mapper_slot_opened_v1(slot, os.pidfd_open(pid, 0))
+  current = _ordinary_prefix_read_v1(scope, host, '/proc/' + str(pid) + '/stat')
+  o._preflight_require_v1(type(starttime) is int and starttime > 0
+   and int(current.rsplit(b') ', 1)[1].split()[19]) == starttime,
+   'ORDINARY_PREFIX_ACTUAL_PARENT_START_IDENTITY')
+ except BaseException as error:
+  o._mapper_slot_open_error_v1(slot, error)
+  host['prefix_errors'].append(error)
+  raise
+ finally: slot['acquiring'] = False
+ return slot
+
+
+def _ordinary_prefix_tool_v1(scope, host, path):
+ from tools import validation_reliability as o
+ slot = _ordinary_prefix_open_v1(scope, host, path, 'ORDINARY_PREFIX_INSTALLED_TOOL')
+ info = _ordinary_prefix_call_v1(scope, host, os.fstat, slot['returned_fd'])
+ named = _ordinary_prefix_call_v1(scope, host, os.lstat, path)
+ version = o._scan_same_api_version(info)
+ o._preflight_require_v1(version == o._scan_same_api_version(named)
+  and info.st_uid == 0 and not stat.S_IMODE(info.st_mode) & 0o022,
+  'ORDINARY_PREFIX_ACTUAL_ROOT_OWNED_TOOL')
+ o._preflight_require_v1(0 < info.st_size <= 2 << 20,
+  'ORDINARY_PREFIX_INSTALLED_TOOL_FULL_BASELINE_BOUND')
+ raw = bytearray()
+ while True:
+  requested = min(65536, info.st_size + 1 - len(raw))
+  block = _ordinary_prefix_call_v1(scope, host, os.read, slot['returned_fd'], requested)
+  o._preflight_require_v1(type(block) is bytes, 'ORDINARY_PREFIX_TOOL_UNKNOWN_READ')
+  _ordinary_prefix_debit_v1(scope, host, 'raw_read', len(block))
+  raw.extend(block)
+  o._preflight_require_v1(len(block) <= requested and len(raw) <= info.st_size,
+   'ORDINARY_PREFIX_TOOL_FULL_EXTENT')
+  if not block: break
+ after = _ordinary_prefix_call_v1(scope, host, os.fstat, slot['returned_fd'])
+ named_after = _ordinary_prefix_call_v1(scope, host, os.lstat, path)
+ o._preflight_require_v1(len(raw) == info.st_size
+  and o._scan_same_api_version(after) == o._scan_same_api_version(named_after) == version,
+  'ORDINARY_PREFIX_INSTALLED_TOOL_FULL_BASELINE')
+ baseline = bytes(raw)
+ return dict(path=path, slot=slot, original_slot=slot,
+  path_version=version, handle_version=version, baseline=baseline,
+  original=(path, slot, version, (info.st_uid, info.st_gid), baseline))
+
+
+def _ordinary_acquire_continuous_evidence_v1(scope, host, image, *, role):
+ """One physical owner acquires the five source-fixed evidence roots."""
+ from tools import validation_reliability as o
+ o._preflight_require_v1(role in ('PREFIX', 'HOST_OUTPUT')
+  and host is scope._ordinary_host_preparation_v1
+  is scope._ordinary_original_host_preparation_v1,
+  'ORDINARY_ORIGINAL_EVIDENCE_IMAGE_ROLE')
+ if role == 'PREFIX':
+  o._preflight_require_v1(image is host['prefix_tmpfs'] is host['original_prefix_tmpfs']
+   and image['original'][0] is image and image['original'][1] is scope,
+   'ORDINARY_ACTUAL_PREFIX_MOUNT_RECORD')
+  root_path, root_slot = image['mount_path'], image['root_slot']
+  identity, version = image['root_identity'], image['root_version']
+  key = 'prefix_continuous_evidence'
+ else:
+  o._preflight_require_v1(image is scope._ordinary_host_output_image_v1
+   and image['mounted'] and not image['disposed']
+   and image['mount_record'] is not None and image['filesystem'] is not None,
+   'ORDINARY_ACTUAL_HOST_IMAGE_RECORD')
+  root_path, root_slot = image['mount_path'], image['mount_slot']
+  actual = _ordinary_prefix_call_v1(scope, host, os.fstat, root_slot['returned_fd'])
+  named = _ordinary_prefix_call_v1(scope, host, os.lstat, root_path)
+  o._preflight_require_v1(stat.S_ISDIR(actual.st_mode)
+   and (actual.st_dev, actual.st_ino) == (named.st_dev, named.st_ino)
+   and (actual.st_uid, actual.st_gid, stat.S_IMODE(actual.st_mode)) == (0, 0, 0o700),
+   'ORDINARY_HOST_EVIDENCE_NATIVE_ROOT')
+  identity, version = (actual.st_dev, actual.st_ino), o._preflight_stamp_v1(actual)
+  key = 'continuous_evidence'
+ o._preflight_require_v1(key not in host, 'ORDINARY_ONE_ACTUAL_EVIDENCE_DOMAIN')
+ errors = []
+ record = dict(scope=scope, owner=host['owner'], image=image,
+  root_path=root_path, root_slot=root_slot,
+  root_identity=identity, root_version=version,
+  subroots=None, original=None, errors=errors)
+ host[key] = host['original_' + key] = record
+ creations = []
+ image['evidence_child_creations'] = image['original_evidence_child_creations'] = creations
+ rows = []
+ parent_fd = root_slot['returned_fd']
+ try:
+  for role, basename in (('QUERY', 'query'), ('CONTROL', 'control'),
+    ('RUN_EVIDENCE', 'run-evidence'), ('EXPORT_PRIVATE', 'export-private'),
+    ('EXPORT_PUBLIC', 'export-public')):
+   path = root_path / basename
+   creation = dict(role=role, path=path, parent=root_slot,
+    absent=None, mkdir_attempted=False, mkdir_returned=False,
+    slot=None, actual=None, errors=errors)
+   creations.append(creation)
+   try:
+    named = scope._ordinary_factory_call_v1(os.stat, basename,
+     dir_fd=parent_fd, follow_symlinks=False)
+    creation['absent'] = False
+   except FileNotFoundError:
+    # This exact expected absence is a source-selected observation,
+    # not failed metadata or permission for any other name.
+    creation['absent'] = True
+    creation['mkdir_attempted'] = True
+    _ordinary_prefix_call_v1(scope, host, os.mkdir, basename, 0o700,
+     dir_fd=parent_fd)
+    creation['mkdir_returned'] = True
+    named = _ordinary_prefix_call_v1(scope, host, os.stat, basename,
+     dir_fd=parent_fd, follow_symlinks=False)
+   slot = _ordinary_prefix_open_v1(scope, host, path,
+    'ORDINARY_' + role + '_EVIDENCE_ROOT', directory=True)
+   creation['slot'] = slot
+   actual = _ordinary_prefix_call_v1(scope, host, os.fstat, slot['returned_fd'])
+   creation['actual'] = actual
+   o._preflight_require_v1(stat.S_ISDIR(actual.st_mode)
+    and (actual.st_dev, actual.st_ino) == (named.st_dev, named.st_ino)
+    and actual.st_dev == identity[0]
+    and (actual.st_uid, actual.st_gid, stat.S_IMODE(actual.st_mode)) == (0, 0, 0o700),
+    'ORDINARY_ACTUAL_PREFIX_ROLE_DIRECTORY')
+   rows.append((role, path, slot, (actual.st_dev, actual.st_ino),
+    o._preflight_stamp_v1(actual)))
+  record['subroots'] = tuple(rows)
+  record['original'] = (record, scope, host['owner'], image,
+   record['root_path'], record['root_slot'], record['root_identity'],
+   record['root_version'], record['subroots'], errors)
+  return record
+ except BaseException as error:
+  errors.append(error)
+  host['prefix_errors'].append(error)
+  raise
+
+
+def _ordinary_prefix_continuous_evidence_v1(scope, host, prefix):
+ from tools import validation_reliability as o
+ record = _ordinary_acquire_continuous_evidence_v1(scope, host, prefix, role='PREFIX')
+ o._preflight_require_v1(scope.query.evidence_root == record['subroots'][0][1]
+  and scope.control == record['subroots'][1][1],
+  'ORDINARY_PREFIX_ORIGINAL_QUERY_CONTROL_PATHS')
+ return o._LinuxPreflightScopeV1._ordinary_bind_initial_evidence_domain_v1(scope, record)
+
+
+def _ordinary_bind_host_continuous_evidence_v1(scope, host, image):
+ return _ordinary_acquire_continuous_evidence_v1(scope, host, image, role='HOST_OUTPUT')
+
+
+def _ordinary_host_report_scope_v1():
+ """Select the original already acquired native HOST owner, never a flag grant."""
+ from tools import validation_reliability as owner
+ scope = owner._LINUX_PREFLIGHT_PROCESS_V1.get()
+ if type(scope) is not owner._LinuxPreflightScopeV1:
+  return None
+ if not owner._LinuxPreflightScopeV1._ordinary_selected_v1(scope):
+  return None
+ record = getattr(scope, "_ordinary_host_preparation_v1", None)
+ if record is None or record is not getattr(scope, "_ordinary_original_host_preparation_v1", None):
+  raise ValueError("ordinary HOST preparation lost its original owner")
+ settling = owner._LinuxPreflightScopeV1._ordinary_effective_settlement_v1(scope)
+ owner._LinuxPreflightScopeV1._ordinary_require_host_preparation_v1(scope, record, settling=settling)
+ return scope
+
+
+def _ordinary_queue_encoded_parent_report_v1(scope, role, path, payload, writer):
+ """Freeze the original producer's UTF-8 body; bytes do not grant capacity."""
+ from tools import validation_reliability as owner
+ if type(scope) is not owner._LinuxPreflightScopeV1 or type(payload) is not dict:
+  raise ValueError("ordinary report producer lost its original native owner")
+ encoded = (json.dumps(payload, indent=2, sort_keys=True) + "\n").encode("utf-8")
+ return owner._LinuxPreflightScopeV1._ordinary_queue_parent_report_v1(
+  scope, role, path, encoded, original_writer=writer)
+
+
+def _ordinary_register_host_preparation_v1(scope, claim, *, ceiling_programme, prefix_programme=None):
+ """Register original owners before effects; do not pretend they are confined."""
+ from tools import validation_reliability as o
+ o._preflight_require_v1(type(scope) is o._LinuxPreflightScopeV1
+  and (scope.query.pid, scope.query.thread) == (os.getpid(), threading.get_ident())
+  and sys.platform == 'linux' and not hasattr(scope, '_ordinary_host_preparation_v1'),
+  'ORDINARY_PREFIX_ONE_LOCAL_REGISTRATION')
+ _ordinary_post_ceiling_checked_v1(ceiling_programme)
+ limits = ceiling_programme['limits']
+ host = dict(scope=scope, owner=(os.getpid(), threading.get_ident()),
+  ceiling_programme=ceiling_programme, original_ceiling_programme=ceiling_programme,
+  meter=dict(limits=limits, remaining=dict(limits), observed=dict.fromkeys(limits, 0),
+   owner=(os.getpid(), threading.get_ident()), deadline_ns=ceiling_programme['original_cutoffs'][3]),
+  prefix_slots=[], prefix_iterators=[], prefix_errors=[], prefix_close_debt=[],
+  prefix_counts=dict(metadata_call=0, raw_read=0, raw_write=0,
+   native_control_read=0, native_control_write=0, native_control_call=0),
+  closed_slot_count=0, image_records=[], claim=claim, complete=False,
+  root_parent=None, root_parent_slot=None, original_cutoffs=ceiling_programme['original_cutoffs'])
+ scope._ordinary_host_preparation_v1 = scope._ordinary_original_host_preparation_v1 = host
+ host['original_meter'] = (host['meter'], limits, host['meter']['remaining'], host['meter']['observed'])
+ host['original_limit_values'] = tuple(limits.items())
+ for name in ('prefix_slots', 'prefix_iterators', 'prefix_errors', 'prefix_close_debt',
+   'prefix_counts', 'image_records'):
+  host['original_' + name] = host[name]
+ selected_prefix = (_ordinary_prefix_programme_v1(ceiling_programme) if prefix_programme is None
+  else _ordinary_post_prefix_checked_v1(prefix_programme, ceiling_programme))
+ host['prefix_programme'] = host['original_prefix_programme'] = selected_prefix
+ host['original'] = (host, scope, host['owner'], claim, ceiling_programme,
+  host['original_meter'], host['prefix_slots'], host['prefix_iterators'],
+  host['prefix_errors'], host['prefix_close_debt'], host['prefix_counts'], host['image_records'])
+ host['native'] = o._LinuxSourceNativeV2(attempt=scope._ordinary_native_attempt_v1)
+ host['native']._ordinary_scope_owner_v1 = scope
+ scope._ordinary_prefix_adopt_v1(host)
+ return host
+
+
+def _ordinary_host_tools_v1(scope, host):
+ """Observe the original formatter/parser roles, preserving selected paths."""
+ from tools import validation_reliability as o
+ o._preflight_require_v1(not hasattr(scope, '_ordinary_prefix_tools_v1'),
+  'ORDINARY_PREFIX_SINGLE_TOOL_SELECTION')
+ rows = []
+ scope._ordinary_prefix_tools_v1 = rows
+ for role, name in (('MKE2FS', 'mke2fs'), ('APPARMOR_PARSER', 'apparmor_parser')):
+  selected = shutil.which(name, path='/usr/sbin:/usr/bin')
+  o._preflight_require_v1(type(selected) is str, 'ORDINARY_PREFIX_SELECTED_TOOL_ABSENT:' + role)
+  path = Path(o._linux_preflight_path_v1(selected))
+  row = dict(path=path, version=None, chain=None, role=role)
+  rows.append(row)
+  chain = scope._ordinary_factory_chain_v1(path.parent)
+  before = scope._ordinary_factory_call_v1(os.lstat, path)
+  o._preflight_require_v1(stat.S_ISREG(before.st_mode) and before.st_nlink == 1
+   and before.st_uid == 0 and not stat.S_IMODE(before.st_mode) & 0o022,
+   'ORDINARY_PREFIX_SAFE_INSTALLED_TOOL:' + role)
+  row['version'], row['chain'] = o._scan_same_api_version(before), chain
+ result = tuple(rows)
+ scope._ordinary_prefix_tools_original_v1 = result
+ host['tools'] = host['original_tools'] = result
+ return result
+
+
+def _ordinary_workflow_native_units_v1(value, native_hold):
+ """Project original native locators; actual custody remains the same owner."""
+ from tools import validation_reliability as owner
+ require = owner._preflight_require_v1
+ fields = ('owner', 'service_unit', 'invocation', 'holder_identity',
+  'holder_pidfd_slot', 'holder_cgroup', 'holder_cgroup_slot',
+  'holder_events_slot', 'ancestor_cgroup', 'ancestor_slot', 'cutoffs',
+  'errors', 'holder_kernel_observations', 'native_input',
+  'native_generation', 'source_generation', 'startup')
+ require(type(value) is dict and type(value.get('environment')) is dict
+  and type(native_hold) is dict and type(native_hold.get('original')) is tuple
+  and len(native_hold['original']) == 18 and native_hold['original'][0] is native_hold
+  and all(native_hold['original'][index + 1] is native_hold[key]
+   for index, key in enumerate(fields)), 'ORDINARY_NATIVE_UNITS_ORIGINAL_HOLDER')
+ environment = value['environment']
+ run = owner._preflight_decimal_v1(environment.get('GITHUB_RUN_ID', ''))
+ attempt = owner._preflight_decimal_v1(environment.get('GITHUB_RUN_ATTEMPT', ''))
+ phase = value['phase']
+ require(type(phase) is str and phase in ORDERED_PHASES
+  and 0 < run <= 9999999999999999999 and 0 < attempt <= 9999999999999999999,
+  'ORDINARY_NATIVE_UNITS_ORIGINAL_RUN_ATTEMPT_PHASE')
+ stem = 'qtt' + str(run) + 'n' + str(attempt) + 'p' + str(ORDERED_PHASES.index(phase) + 1)
+ ancestor = native_hold['ancestor_cgroup']
+ require(type(ancestor) is str and ancestor.startswith('/') and not ancestor.endswith('/')
+  and '//' not in ancestor and all(part not in ('', '.', '..')
+   for part in ancestor.split('/')[1:]), 'ORDINARY_NATIVE_UNITS_REAL_ANCESTOR_LOCATOR')
+ parent = ancestor.rsplit('/', 1)[1]
+ require(parent.endswith('.slice') and re.fullmatch(r'[A-Za-z0-9_-]+\.slice', parent) is not None,
+  'ORDINARY_NATIVE_UNITS_SOURCE_SELECTED_SLICE_PARENT')
+ common = parent.removesuffix('.slice') + '-' + stem + '.slice'
+ bootstrap = stem + 'bootstrap.scope'
+ require(len(stem) <= 45 and len(common.encode('ascii')) <= 64
+  and len(bootstrap.encode('ascii')) <= 64,
+  'ORDINARY_NATIVE_UNITS_EXISTING_NATIVE_SPELLING_CAP')
+ return stem, common, bootstrap
+
+
+def _ordinary_bootstrap_scope_v1(value, name, *, native_root, receiver=False):
+ """Rejoin original native/local runtime; construct Scope around SAME Query."""
+ import base64
+ from tools import validation_reliability as o
+ attempt = _ORDINARY_BOOTSTRAP_RUNTIME_ATTEMPT_V1
+ o._preflight_require_v1(type(attempt) is dict and attempt.get("complete") is True
+  and type(attempt.get("result")) is dict,
+  "ORDINARY_BOOTSTRAP_ACTUAL_COMPLETED_RUNTIME_CAPTURE_REQUIRED")
+ runtime_capture = attempt["result"]
+ _ordinary_bootstrap_runtime_anchors_v1(runtime_capture)
+ acquisition = runtime_capture["acquisition"]
+ o._preflight_require_v1(acquisition is _ORDINARY_BOOTSTRAP_ACQUISITION_V1
+  is _ORDINARY_BOOTSTRAP_ORIGINAL_ACQUISITION_V1
+  and runtime_capture is _ORDINARY_BOOTSTRAP_RUNTIME_ATTEMPT_V1["result"]
+  and not acquisition["errors"] and not _ORDINARY_BOOTSTRAP_RUNTIME_ATTEMPT_V1["errors"]
+  and native_root is runtime_capture["native_root"]
+  and value["origin_ns"]==runtime_capture["origin_ns"]
+  and value["phase"]==runtime_capture["phase"],
+  "ORDINARY_BOOTSTRAP_PREPARSE_ORIGINAL_RUNTIME_INPUT")
+ origin = runtime_capture["origin_ns"]
+ capacity = o._ordinary_initial_prefix_capacity_checked_v1(acquisition["native_input"])
+ cuts, ceiling = capacity["original_cutoffs"], capacity["ceiling_programme"]
+ o._preflight_require_v1(cuts == (origin,origin+3500*10**9,origin+3600*10**9,origin+3720*10**9)
+  and capacity["runner"] is sys.modules[__name__]
+  and capacity["root"] is native_root and capacity["phase"] == value["phase"],
+  "ORDINARY_BOOTSTRAP_SAME_EARLY_CAPACITY_AND_UNRENEWED_CUTOFFS")
+ prefix = native_root/"prefix"/"receiver" if receiver else native_root/"prefix"
+ query = runtime_capture["query"]
+ o._preflight_require_v1(type(query) is o._LinuxPreflightQueriesV1
+  and query is acquisition["query"] and query.evidence_root==prefix/"query"
+  and query.deadline_ns==cuts[3]
+  and (query.pid,query.thread)==(os.getpid(),threading.get_ident()),
+  "ORDINARY_BOOTSTRAP_SAME_EARLY_QUERY")
+ heap_record = acquisition["heap_record"]
+ heap_stage = None
+ try:
+  query.check()
+  heap_stage = _ordinary_bootstrap_source_stage_v1(heap_record, "BOOTSTRAP_EVENT_BASE64")
+  event_bytes = base64.b64decode(value["event"],validate=True)
+  _ordinary_bootstrap_heap_stage_complete_v1(heap_record, heap_stage, event_bytes)
+  heap_stage = None
+  heap_stage = _ordinary_bootstrap_source_stage_v1(heap_record, "BOOTSTRAP_EVENT_JSON")
+  _ordinary_bootstrap_runtime_anchors_v1(runtime_capture)
+  _ordinary_stock_runtime_check_v1(runtime_capture["stock"])
+  event = json.loads(event_bytes)
+  _ordinary_bootstrap_heap_stage_complete_v1(heap_record, heap_stage, event)
+  heap_stage = None
+  heap_stage = _ordinary_bootstrap_source_stage_v1(heap_record, "BOOTSTRAP_SCOPE_CONSTRUCTION")
+  environment = dict(value["environment"])
+  _ordinary_ci_eligibility_v1(event,environment,Path(value["repository"]),phase=value["phase"])
+  scope = o._LinuxPreflightScopeV1(name=name,query=query,control=prefix/"control",
+   runtime=native_root/"runtime",private_root=native_root,spool=prefix/"run-evidence",
+   repository=value["repository"],installation=value["installation"],interpreter=value["interpreter"],
+   source=None,header=None,blobs=None,vectors=None,
+   grants=dict(execution_deadline_ns=cuts[1],settlement_deadline_ns=cuts[3]),
+   event=event,environment=environment)
+  scope._ordinary_phase_v1 = value["phase"]
+  native_stem, common_unit, bootstrap_unit = _ordinary_workflow_native_units_v1(
+   value, runtime_capture["native_hold"])
+  claim = dict(prefix_root=str(prefix),profile=name+"controller",
+   scope_unit=bootstrap_unit,common_slice=common_unit,
+   original_cutoffs=cuts,parent_pid=os.getpid(),event=event)
+  host = _ordinary_register_host_preparation_v1(scope,claim,ceiling_programme=ceiling,
+   prefix_programme=capacity["prefix_programme"])
+  role = "RECEIVER" if receiver else "PROVISION" if os.getpid()==value["pid"] else "PARENT"
+  o._preflight_require_v1(role==runtime_capture["role"]
+   and ((role=="PROVISION" and os.geteuid()==value["uid"])
+    or (role in ("PARENT","RECEIVER") and os.geteuid()==0)),
+   "ORDINARY_BOOTSTRAP_ACTUAL_SOURCE_OUTPUT_AND_NATIVE_BORROW_ROLE")
+  quota = o._ordinary_output_owner_limits_v1(ceiling,role,query_source=(
+   ceiling["evidence_programme"]["query_command_count"],
+   ceiling["evidence_programme"]["native_response_count"]))
+  association = (scope,host,value,role,quota,tuple(quota.items()))
+  scope._ordinary_query_output_owner_v1 = scope._ordinary_original_query_output_owner_v1 = association
+  _ordinary_bootstrap_heap_stage_complete_v1(heap_record, heap_stage, (scope, host))
+  heap_stage = None
+  _ordinary_bootstrap_runtime_adopt_v1(runtime_capture,scope,host,value)
+  _ordinary_bootstrap_heap_adopt_v1(scope, acquisition["heap_record"], ceiling, host, value)
+  return scope,host
+ except BaseException as error:
+  if heap_stage is not None and heap_record["active"] is heap_stage:
+   try:
+    _ordinary_bootstrap_heap_stage_failed_v1(heap_record, heap_stage, error)
+   except BaseException as accounting_error:
+    if all(accounting_error is not prior for prior in acquisition["errors"]):
+     acquisition["errors"].append(accounting_error)
+  if all(error is not prior for prior in acquisition["errors"]):
+   acquisition["errors"].append(error)
+  if query.failure is None:
+   query.failure=error
+  raise
+
+
+def _ordinary_linux_parent_v1(value):
+ """Prepare original native owners, then synchronously supervise one controller."""
+ from tools import validation_reliability as o
+ o._preflight_require_v1(os.geteuid() == 0 and 'QTT_LINUX_CONTROLLER_UNIT' not in os.environ,
+  'ORDINARY_ORIGINAL_TRUSTED_ROOT_PREPARATION_ENTRY')
+ origin = value['origin_ns']
+ name = o._linux_preflight_name_v1(os.getpid(), origin)
+ acquisition = _ORDINARY_BOOTSTRAP_ACQUISITION_V1
+ o._preflight_require_v1(type(acquisition) is dict
+  and acquisition is _ORDINARY_BOOTSTRAP_ORIGINAL_ACQUISITION_V1
+  and acquisition['role'] == 'PARENT' and acquisition['origin_ns'] == origin
+  and acquisition['phase'] == value['phase'], 'ORDINARY_PARENT_ORIGINAL_EARLY_NATIVE_ROOT')
+ native_root = acquisition['native_root']
+ o._preflight_require_v1(type(native_root) is type(Path('/'))
+  and native_root == Path('/run') / (name + 'ordinary'),
+  'ORDINARY_PARENT_SAME_ACQUIRED_TASK_NATIVE_ROOT')
+ scope, host = _ordinary_bootstrap_scope_v1(value, name, native_root=native_root)
+ receipt = issuer = None
+ errors = []
+ record = dict(scope=scope, host=host, bootstrap=value, receipt=None, issuer=None,
+  policy=None, export=None, cleanup=None, errors=errors, runner=sys.modules[__name__],
+  owner=(os.getpid(), threading.get_ident()))
+ scope._ordinary_runner_module_name_v1 = __name__
+ scope._ordinary_parent_factory_v1 = scope._ordinary_original_parent_factory_v1 = record
+ record['original'] = (record, scope, host, value, errors, record['owner'])
+ try:
+  # These registrations precede the first native mkdir/mount. The root
+  # preloader is the trusted original preparation actor, not an APP.
+  memory = dict(scope=scope, ceiling=host['ceiling_programme'], prefix=host['prefix_programme'],
+   common_memory=host['ceiling_programme']['limits']['heap_byte_limit'])
+  memory['original'] = (memory, scope, memory['ceiling'], memory['prefix'],
+   memory['common_memory'], host['original_cutoffs'])
+  issuer = record['issuer'] = scope._ordinary_issue_prefix_v1(host=host,
+   source_programme=host['prefix_programme'], memory_programme=memory)
+  _ordinary_prefix_continuous_evidence_v1(scope, host, host['prefix_tmpfs'])
+  host['prlimit'] = host['original_prlimit'] = _ordinary_prefix_tool_v1(
+   scope, host, Path('/usr/bin/prlimit'))
+  scope._ordinary_issue_native_owners_v1(issuer)
+  host['cgroup'], host['common_cgroup'] = issuer['bootstrap'][1], issuer['common'][1]
+  host['slice_name'], host['slice_cgroup'] = host['claim']['common_slice'], issuer['common'][5]['ControlGroup']
+  host['profile'] = scope.query.read('/proc/self/attr/current').decode('ascii').strip()
+  scope._ordinary_require_host_preparation_v1(host)
+  host['complete'] = True
+  tools = _ordinary_host_tools_v1(scope, host)
+  published = scope._ordinary_publish_controller_bootstrap_v1(value)
+  record['policy'] = scope._ordinary_prepare_controller_policy_v1(host, tools, value)
+  environment = dict(value['environment'])
+  environment.update(PATH=str(Path(value['interpreter']).parent) + ':/usr/bin',
+   LANG='C.UTF-8', LC_ALL='C.UTF-8', LD_LIBRARY_PATH=value['installation'] + '/lib',
+   QTT_LINUX_BOOTSTRAP_TICKET=str(published['target']),
+   QTT_LINUX_CONTROLLER_UNIT=scope._ordinary_initial_native_holder_v1['service_unit'],
+   QTT_LINUX_COMMON_SLICE=host['slice_name'])
+  argv = (value['interpreter'], '-I', '-B', '-X', 'utf8',
+   value['repository'] + '/tools/run_validation_gates.py', '--linux-preflight-provision',
+   '--phase', value['phase'])
+  receipt = record['receipt'] = _ordinary_execute_controller_v1(scope, argv=argv,
+   environment=environment, run_id=name, phase=value['phase'],
+   evidence_root=scope.control / 'controller-evidence',
+   output_limits=_ordinary_prefix_output_limits_v1(host['ceiling_programme'], 'CONTROLLER'),
+   host=host, bootstrap=published)
+  o._preflight_require_v1(type(receipt) is o.CommandExecutionReceiptV1
+   and not o._command_requires_process_retention_v1(receipt),
+   'ORDINARY_CONTROLLER_REAL_TERMINAL_PARENT_RESULT')
+ except BaseException as error:
+  errors.append(error)
+  attached = getattr(error, 'command_receipt', None)
+  if type(attached) is o.CommandExecutionReceiptV1:
+   receipt = record['receipt'] = attached
+ # Cleanup/export is through the original parent's exact actual objects.
+ # A returned JSON report is data and never retires the controller itself.
+ try:
+  record['cleanup'] = _ordinary_parent_durable_finish_v1(record)
+ except BaseException as error:
+  errors.append(error)
+ print(json.dumps(dict(ordinary_parent_result=o._json_compatible(receipt),
+  evidence=value['export_root'], retained_root=str(native_root),
+  failures=[repr(error) for error in errors]), default=str), flush=True)
+ return 0 if not errors and receipt is not None and receipt.failure_class is None and receipt.native_exit_code == 0 else 1
+
+
+def _ordinary_received_controller_prefix_v1(value):
+ """Join the original actual managed birth, not a wire-granted Scope."""
+ from tools import validation_reliability as o
+ unit = os.environ.get('QTT_LINUX_CONTROLLER_UNIT')
+ common = os.environ.get('QTT_LINUX_COMMON_SLICE')
+ o._preflight_require_v1(type(unit) is str and unit.endswith('controller.service')
+  and type(common) is str, 'ORDINARY_FRESH_NATIVE_CONTROLLER_LOCATORS')
+ acquisition = _ORDINARY_BOOTSTRAP_ACQUISITION_V1
+ o._preflight_require_v1(type(acquisition) is dict
+  and acquisition is _ORDINARY_BOOTSTRAP_ORIGINAL_ACQUISITION_V1
+  and acquisition['role'] == 'RECEIVER' and acquisition['origin_ns'] == value['origin_ns']
+  and acquisition['phase'] == value['phase'], 'ORDINARY_RECEIVER_ORIGINAL_EARLY_NATIVE_ROOT')
+ native_root = acquisition['native_root']
+ o._preflight_require_v1(type(native_root) is type(Path('/'))
+  and native_root.parent == Path('/run') and native_root.name.endswith('ordinary'),
+  'ORDINARY_RECEIVER_ACQUIRED_TASK_NATIVE_ROOT')
+ name = native_root.name.removesuffix('ordinary')
+ matched = re.fullmatch(r'qtt([1-9][0-9]*)n([0-9]+)', name)
+ native_stem, selected_common, selected_bootstrap = _ordinary_workflow_native_units_v1(
+  value, acquisition['native_hold'])
+ o._preflight_require_v1(matched is not None and int(matched[2]) == value['origin_ns']
+  and unit == acquisition['native_hold']['service_unit'] and common == selected_common,
+  'ORDINARY_FRESH_SEPARATE_ORIGINAL_HOLDER_AND_PARENT_TASK')
+ parent_pid = int(matched[1])
+ scope, host = _ordinary_bootstrap_scope_v1(value, name, native_root=native_root, receiver=True)
+ host['claim']['parent_pid'] = parent_pid
+ host['claim']['scope_unit'] = unit
+ host['slice_name'] = common
+ # The native mount already exists. This fresh actor creates only its
+ # single fixed receiver domain so Query ordinals cannot overwrite parent
+ # evidence. It borrows only noninherited descriptors from that mount.
+ named_parent = scope._ordinary_factory_call_v1(os.lstat, native_root)
+ parent_slot = _ordinary_prefix_open_v1(scope, host, native_root,
+  'ORDINARY_RECEIVED_NATIVE_PARENT', directory=True)
+ scope._ordinary_prefix_bind_parent_v1(host, native_root, parent_slot)
+ original_prefix = native_root / 'prefix'
+ prefix_slot = _ordinary_prefix_open_v1(scope, host, original_prefix,
+  'ORDINARY_RECEIVED_ACTUAL_PREFIX_ROOT', directory=True)
+ storage = o._ordinary_initial_prefix_adoption_checked_v1(acquisition['native_input'],
+  role='RECEIVER', root=native_root, original_cutoffs=host['original_cutoffs'],
+  ceiling_programme=host['ceiling_programme'], prefix_programme=host['prefix_programme'])
+ root = original_prefix / 'receiver'
+ root_slot = _ordinary_prefix_open_v1(scope, host, root,
+  'ORDINARY_RECEIVED_NATIVE_PREFIX', directory=True)
+ info = scope._ordinary_factory_call_v1(os.fstat, root_slot['returned_fd'])
+ mounted = host['native'].mount(root_slot['returned_fd'])
+ usage = scope._ordinary_factory_call_v1(os.fstatvfs, root_slot['returned_fd'])
+ o._preflight_require_v1(stat.S_ISDIR(info.st_mode) and named_parent.st_uid == 0
+  and (info.st_uid, info.st_gid, stat.S_IMODE(info.st_mode)) == (0, 0, 0o700)
+  and mounted['magic'] == 0x01021994
+  and usage.f_blocks * usage.f_frsize == host['prefix_programme'][4]
+  and 0 < usage.f_files <= host['prefix_programme'][5],
+  'ORDINARY_RECEIVED_ACTUAL_PREFIX_OWNER_AND_CAPACITY')
+ prefix = dict(scope=scope, mount_path=root, root_slot=root_slot,
+  root_identity=(info.st_dev, info.st_ino), root_version=o._preflight_stamp_v1(info),
+  native_mount=mounted, statvfs=usage, source_programme=host['prefix_programme'],
+  user_slots=host['prefix_slots'], unmount_attempted=False, unmounted=False,
+  handoff=None, errors=host['prefix_errors'])
+ prefix['original'] = (prefix, scope, root, root_slot, prefix['root_identity'],
+  prefix['root_version'], mounted, usage, prefix['source_programme'], prefix['user_slots'], prefix['errors'])
+ host['prefix_tmpfs'] = host['original_prefix_tmpfs'] = prefix
+ o._ordinary_initial_prefix_handoff_v1(scope, host, prefix, storage)
+ original_control = original_prefix / 'control'
+ ticket = Path(o._linux_preflight_path_v1(os.environ.get('QTT_LINUX_BOOTSTRAP_TICKET', '')))
+ o._preflight_require_v1(ticket == original_control / 'release' / 'bootstrap.json',
+  'ORDINARY_RECEIVED_ORIGINAL_PARENT_CONTROL_ROOT')
+ host['controller_control'] = host['original_controller_control'] = original_control
+ _ordinary_prefix_continuous_evidence_v1(scope, host, prefix)
+ host['prlimit'] = host['original_prlimit'] = _ordinary_prefix_tool_v1(scope, host, Path('/usr/bin/prlimit'))
+ host['profile'] = scope.query.read('/proc/self/attr/current').decode('ascii').strip()
+ groups = scope.query.read('/proc/self/cgroup').decode('ascii').strip()
+ o._preflight_require_v1(groups.startswith('0::/'), 'ORDINARY_RECEIVED_UNIFIED_CGROUP')
+ cgroup = Path('/sys/fs/cgroup') / groups[4:]
+ host['cgroup'], host['common_cgroup'] = cgroup, cgroup.parent
+ host['slice_cgroup'] = '/' + str(cgroup.parent.relative_to('/sys/fs/cgroup'))
+ scope._ordinary_require_host_preparation_v1(host)
+ host['complete'] = True
+ _ordinary_host_tools_v1(scope, host)
+ scope._ordinary_receive_controller_v1(host, value,
+  native_hold=scope._ordinary_initial_native_holder_v1)
+ return scope, host, value
+
+
+def _ordinary_linux_provision_v1(*, phase):
+ """Reuse the original private entry and immutable pre-sudo ticket."""
+ global _ORDINARY_BOOTSTRAP_ENTRY_ATTEMPT_V1
+ import base64
+ from tools import validation_reliability as o
+ o._preflight_require_v1(sys.platform == 'linux' and sys.version_info[:3] == (3, 14, 6)
+  and type(phase) is str and phase in ORDERED_PHASES,
+  'ORDINARY_PROVISION_ORIGINAL_PLATFORM_AND_PHASE')
+ def acquire_original_native():
+  global _ORDINARY_BOOTSTRAP_ENTRY_ATTEMPT_V1
+  o._preflight_require_v1(_ORDINARY_BOOTSTRAP_ENTRY_ATTEMPT_V1 is None,
+   'ORDINARY_ENTRY_ONE_ORIGINAL_ATTEMPT')
+  runner = sys.modules.get(__name__)
+  entry = _ordinary_linux_provision_v1
+  initializer = _ORDINARY_INITIALIZED_MODULE_CODE_V1
+  o._preflight_require_v1(type(runner) is type(sys)
+   and runner.__dict__ is globals()
+   and sys.modules.get(entry.__module__) is runner
+   and entry.__globals__ is runner.__dict__
+   and type(initializer) is type(entry.__code__),
+   'ORDINARY_ENTRY_SAME_ACTUAL_INITIALIZED_NAMESPACE')
+  attempt = dict(owner=(os.getpid(), threading.get_ident()), phase=phase,
+   errors=[], native_input=None, native_product=None, product_return=None,
+   prepare_row=None, heap_record=None, query_row=None, runtime_capture=None,
+   complete=False)
+  _ORDINARY_BOOTSTRAP_ENTRY_ATTEMPT_V1 = attempt
+  attempt['original'] = (attempt, attempt['owner'], attempt['errors'], phase,
+   runner, runner.__dict__, initializer, entry, entry.__code__)
+  try:
+   returned = o._LinuxSourceNativeV2._ordinary_initial_native_product_v1(
+    runner=runner, initializer=initializer, entry=entry, phase=phase, attempt=attempt)
+   attempt['product_return'] = returned
+   issuer = attempt['native_product_issuer']
+   o._preflight_require_v1(returned is issuer['result'] and issuer['complete'] is True
+    and type(returned) is tuple and len(returned) == 3
+    and returned[0] is attempt['native_product'] and not attempt['errors'],
+    'ORDINARY_ENTRY_ACTUAL_NATIVE_PRODUCT_RETURN')
+   product, prepare_request, query_request = returned
+   prepare_row = _ordinary_bootstrap_heap_prepare_request_v1(product, prepare_request)
+   attempt['prepare_row'] = prepare_row
+   heap_record = _ordinary_bootstrap_heap_prepare_v1(product, initial_row=prepare_row)
+   attempt['heap_record'] = heap_record
+   query_row = _ordinary_bootstrap_query_request_v1(
+    product, query_request, native_root=product['native_root'])
+   attempt['query_row'] = query_row
+   capture = _ordinary_bootstrap_runtime_issue_v1(product, heap_record, query_row)
+   attempt['runtime_capture'] = capture
+   acquisition = _ORDINARY_BOOTSTRAP_ACQUISITION_V1
+   o._preflight_require_v1(type(acquisition) is dict
+    and acquisition is _ORDINARY_BOOTSTRAP_ORIGINAL_ACQUISITION_V1
+    and acquisition['native_product'] is product
+    and _ordinary_bootstrap_runner_check_v1(acquisition) is runner
+    and not attempt['errors'], 'ORDINARY_ENTRY_SAME_COMPLETED_RUNTIME_ACQUISITION')
+   attempt['complete'] = True
+  except BaseException as error:
+   if all(error is not prior for prior in attempt['errors']):
+    attempt['errors'].append(error)
+   raise
+
+ if phase != FAST_PREFLIGHT_PHASE:
+  acquire_original_native()
+ repository = o._linux_preflight_path_v1(str(REPO_ROOT))
+ interpreter = o._linux_preflight_path_v1(sys.executable)
+ installation = o._linux_preflight_path_v1(sys.prefix)
+ o._preflight_require_v1(Path(interpreter).is_relative_to(Path(installation))
+  and not Path(repository).is_relative_to(Path(installation)),
+  'ORDINARY_PROVISION_ORIGINAL_DISJOINT_INTERPRETER')
+ controls = ('GITHUB_ACTIONS', 'GITHUB_EVENT_NAME', 'GITHUB_REPOSITORY', 'GITHUB_WORKSPACE',
+  'GITHUB_EVENT_PATH', 'RUNNER_TEMP', 'GITHUB_REF', 'GITHUB_REF_NAME', 'GITHUB_SHA',
+  'GITHUB_HEAD_REF', 'GITHUB_BASE_REF', 'GITHUB_RUN_ID', 'GITHUB_RUN_ATTEMPT')
+ # Empty HEAD_REF/BASE_REF on push/dispatch are authentic empty values.
+ environment = {key: os.environ.get(key, '') for key in controls}
+ event_path = Path(o._linux_preflight_path_v1(environment['GITHUB_EVENT_PATH']))
+ def capture(path, maximum, uid=None, *, _ordinary_raw_source_v1=None):
+  source = _ordinary_raw_source_v1
+  slot = None if source is None else _ordinary_bootstrap_heap_raw_slot_v1(
+   source["result_original"][1]["native_product"], source)
+  o._local_unlinked_path(path.parent)
+  if source is not None: _ordinary_bootstrap_ticket_raw_call_v1(source, "leaf_lstat_attempts")
+  before = path.lstat()
+  o._preflight_require_v1(stat.S_ISREG(before.st_mode) and before.st_nlink == 1
+   and not o._stat_is_reparse_point(before) and 0 <= before.st_size <= maximum
+   and (uid is None or before.st_uid == uid), 'ORDINARY_PROVISION_FINITE_ORIGINAL_FILE')
+  errors, chunks, amount = [], [], 0
+  fd = None
+  try:
+   if source is not None: _ordinary_bootstrap_ticket_raw_call_v1(source, "open_attempts")
+   if slot is not None: slot["open_attempted"] = True
+   fd = o._open_regular_worktree_descriptor(path)
+   if slot is not None: slot["descriptor"] = fd
+   if source is not None: _ordinary_bootstrap_ticket_raw_call_v1(source, "inheritance_attempts")
+   os.set_inheritable(fd, False)
+   if source is not None: _ordinary_bootstrap_ticket_raw_call_v1(source, "fstat_attempts")
+   opened = os.fstat(fd)
+   o._preflight_require_v1(o._same_observed_file(before, opened),
+    'ORDINARY_PROVISION_ACTUAL_CAPTURE_HANDLE')
+   while True:
+    requested = min(65536, before.st_size - amount + 1)
+    if source is not None: _ordinary_bootstrap_ticket_raw_call_v1(source, "read_attempts", requested=requested)
+    data = os.read(fd, requested)
+    if source is not None: _ordinary_bootstrap_ticket_raw_return_v1(source, data)
+    o._preflight_require_v1(type(data) is bytes and len(data) <= requested,
+     'ORDINARY_PROVISION_CAPTURE_RETURN')
+    amount += len(data)
+    o._preflight_require_v1(amount <= before.st_size, 'ORDINARY_PROVISION_CAPTURE_GROWTH')
+    if not data:
+     break
+    chunks.append(data)
+   stable = amount == before.st_size
+   if stable:
+    if source is not None: _ordinary_bootstrap_ticket_raw_call_v1(source, "fstat_attempts")
+    stable = o._scan_same_api_version(opened) == o._scan_same_api_version(os.fstat(fd))
+   if stable:
+    if source is not None: _ordinary_bootstrap_ticket_raw_call_v1(source, "leaf_lstat_attempts")
+    stable = o._scan_same_api_version(before) == o._scan_same_api_version(path.lstat())
+   o._preflight_require_v1(stable, 'ORDINARY_PROVISION_CAPTURE_STABILITY')
+  except BaseException as error:
+   errors.append(error)
+  if fd is not None:
+   try:
+    if source is not None: _ordinary_bootstrap_ticket_raw_call_v1(source, "close_attempts")
+    if slot is not None: slot["close_attempted"] = True
+    os.close(fd)
+    if slot is not None: slot["closed"] = True
+   except BaseException as error:
+    errors.append(error)
+    if slot is not None: slot["close_error"] = error
+  o._scan_raise_errors(errors)
+  if source is not None: _ordinary_bootstrap_ticket_raw_call_v1(source, "leaf_lstat_attempts")
+  o._preflight_require_v1(o._scan_same_api_version(before) == o._scan_same_api_version(path.lstat()),
+   'ORDINARY_PROVISION_CAPTURE_AFTER_ONE_CLOSE')
+  result = b''.join(chunks), o._scan_same_api_version(before)
+  if slot is not None:
+   slot['capture_result'] = result
+   slot['capture_original'] = (slot, source, source['association'], result, slot['descriptor'])
+   slot['settled'] = True
+  return result
+ event_bytes, event_version = capture(event_path, 1 << 20)
+ event = json.loads(event_bytes)
+ if (phase == FAST_PREFLIGHT_PHASE and environment['GITHUB_EVENT_NAME'] == 'pull_request'
+   and type(event) is dict and type(event.get('pull_request')) is dict
+   and event['pull_request'].get('draft') is True):
+  # Only the original authentic draft PR298 first8 owner is selected.
+  # Its original provisioner rechecks its exact event/source bindings.
+  _linux_preflight_eligibility_v1(event, environment, repository)
+  return _linux_preflight_provision_v1()
+ _ordinary_ci_eligibility_v1(event, environment, Path(repository), phase=phase)
+ if phase == FAST_PREFLIGHT_PHASE:
+  acquire_original_native()
+ o._preflight_require_v1(type(_ORDINARY_BOOTSTRAP_ENTRY_ATTEMPT_V1) is dict
+  and _ORDINARY_BOOTSTRAP_ENTRY_ATTEMPT_V1['phase'] is phase
+  and _ORDINARY_BOOTSTRAP_ENTRY_ATTEMPT_V1['complete'] is True,
+  'ORDINARY_ENTRY_ORIGINAL_ACQUISITION_BEFORE_ORDINARY_SOURCE_CAPTURE')
+ names = ('tools/run_validation_gates.py', 'tools/validation_reliability.py',
+  'tools/validation_scope_registry.py', 'tools/ci_branch_context.py')
+ # Ordinary source operands retain the original SOURCE per-file law.
+ # Observe the complete finite module vector before copying any member;
+ # its base64 representation must fit the unchanged bootstrap control.
+ module_observations = []
+ source_base64_bytes = 0
+ for name in names:
+  path = Path(repository) / name
+  o._local_unlinked_path(path.parent)
+  info = path.lstat()
+  o._preflight_require_v1(stat.S_ISREG(info.st_mode) and info.st_nlink == 1
+   and not o._stat_is_reparse_point(info) and 0 <= info.st_size <= 128 << 20,
+   'ORDINARY_PROVISION_ORIGINAL_SOURCE_FILE_CAP')
+  module_observations.append((name, info.st_size, o._scan_same_api_version(info)))
+  source_base64_bytes += 4 * ((info.st_size + 2) // 3)
+ event_base64_bytes = 4 * ((len(event_bytes) + 2) // 3)
+ o._preflight_require_v1(source_base64_bytes + event_base64_bytes <= 8 << 20,
+  'ORDINARY_PROVISION_BASE64_EXTENTS_FIT_ORIGINAL_TICKET_BEFORE_COPY')
+ module_observations = tuple(module_observations)
+ originals = {}
+ for name, extent, expected_version in module_observations:
+  path = Path(repository) / name
+  o._preflight_require_v1(o._scan_same_api_version(path.lstat()) == expected_version,
+   'ORDINARY_PROVISION_SOURCE_CHANGED_BEFORE_CAPTURE')
+  raw, version = capture(path, extent)
+  o._preflight_require_v1(len(raw) == extent and version == expected_version,
+   'ORDINARY_PROVISION_SOURCE_CAPTURE_ORIGINAL_EXTENT_AND_VERSION')
+  encoded = base64.b64encode(raw).decode('ascii')
+  o._preflight_require_v1(len(encoded) == 4 * ((extent + 2) // 3),
+   'ORDINARY_PROVISION_EXACT_SOURCE_BASE64_EXTENT')
+  originals[name] = dict(bytes=encoded, version=version)
+ ticket_text = os.environ.get('QTT_LINUX_BOOTSTRAP_TICKET')
+ if os.geteuid() != 0:
+  o._preflight_require_v1(ticket_text is None
+   and not any(key.upper().startswith('QTT_LINUX_') for key in os.environ),
+   'ORDINARY_PROVISION_NO_INHERITED_SELECTOR')
+  parent = Path(o._linux_preflight_path_v1(environment['RUNNER_TEMP']))
+  o._local_unlinked_path(parent)
+  available = os.statvfs(parent)
+  # Finite original bootstrap source/ticket and two original native
+  # output streams, plus the existing independent one-GiB spare floor.
+  demand = 2 * (8 << 20) + (256 << 20)
+  o._preflight_require_v1(available.f_bavail * available.f_frsize >= demand + (1 << 30)
+   and available.f_favail >= 128, 'ORDINARY_PROVISION_ACTUAL_DISK_FLOOR')
+  acquisition = _ORDINARY_BOOTSTRAP_ACQUISITION_V1
+  o._preflight_require_v1(type(acquisition) is dict
+   and acquisition is _ORDINARY_BOOTSTRAP_ORIGINAL_ACQUISITION_V1
+   and acquisition['role'] == 'PROVISION' and acquisition['phase'] == phase,
+   'ORDINARY_PROVISION_ORIGINAL_EARLY_ACQUISITION_REQUIRED')
+  _ordinary_bootstrap_runner_check_v1(acquisition)
+  origin = acquisition['origin_ns']
+  name = o._linux_preflight_name_v1(os.getpid(), origin)
+  task = acquisition['native_root']
+  o._preflight_require_v1(type(task) is type(Path('/')) and task == parent / name,
+   'ORDINARY_PROVISION_SAME_ORIGINAL_TASK_NATIVE_ROOT')
+  export_root = task / 'native-export'
+  export_root.mkdir(mode=0o700, exist_ok=False)
+  export_info = export_root.lstat()
+  value = dict(export_root=str(export_root), export_identity=(export_info.st_dev, export_info.st_ino),
+   repository=repository, interpreter=interpreter, installation=installation, source=originals,
+   event=base64.b64encode(event_bytes).decode('ascii'), environment=environment,
+   phase=phase, uid=os.getuid(), pid=os.getpid(), origin_ns=origin)
+  # Only original bookkeeping and the Runner command-file operation are
+  # selected here. Native repository Git begins after the contained
+  # original source owner is ready in the received controller.
+  scope, host = _ordinary_bootstrap_scope_v1(value, name, native_root=task)
+  output = None
+  errors = []
+  try:
+   output = scope._ordinary_workflow_output_bind_v1(export_root)
+   scope._ordinary_workflow_output_publish_v1(output)
+  except BaseException as error:
+   errors.append(error)
+  if output is not None:
+   try: scope._ordinary_workflow_output_close_v1(output)
+   except BaseException as error: errors.append(error)
+  o._scan_raise_errors(errors)
+  ticket = task / 'bootstrap.json'
+  ticket_bytes = (json.dumps(o._json_compatible(value), indent=2, sort_keys=True)
+   + '\n').encode('utf-8')
+  o._preflight_require_v1(len(ticket_bytes) <= 8 << 20,
+   'ORDINARY_PROVISION_ACTUAL_CANONICAL_TICKET_WITHIN_ORIGINAL_CAP')
+  # Same original immutable byte publisher, with exactly the original
+  # atomic JSON encoding. The measured bytes are the bytes published.
+  o._atomic_write_bytes_v1(ticket, ticket_bytes)
+  for name, extent, expected_version in module_observations:
+   original = originals[name]
+   path = Path(repository) / name
+   o._preflight_require_v1(o._scan_same_api_version(path.lstat()) == expected_version,
+    'ORDINARY_PROVISION_SOURCE_CHANGED_BEFORE_PREPRIVILEGE_COMPARE')
+   raw, version = capture(path, extent)
+   o._preflight_require_v1(len(raw) == extent and version == expected_version
+    and raw == base64.b64decode(original['bytes'], validate=True)
+    and version == tuple(original['version']), 'ORDINARY_PROVISION_PREPRIVILEGE_SOURCE_CHANGED')
+  o._preflight_require_v1(capture(event_path, 1 << 20) == (event_bytes, event_version),
+   'ORDINARY_PROVISION_PREPRIVILEGE_EVENT_CHANGED')
+  child = dict(environment)
+  child.update(PATH=str(Path(interpreter).parent) + ':/usr/bin', LANG='C.UTF-8', LC_ALL='C.UTF-8',
+   LD_LIBRARY_PATH=installation + '/lib', QTT_LINUX_BOOTSTRAP_TICKET=str(ticket))
+  preserved = ','.join(key for key in child if key != 'PATH')
+  argv = ('/usr/bin/sudo', '-n', '--preserve-env=' + preserved,
+   '/usr/bin/prlimit', '--nofile=64:64', '--', interpreter, '-I', '-B', '-X', 'utf8',
+   repository + '/tools/run_validation_gates.py', '--linux-preflight-provision', '--phase', phase)
+  observation = {}
+  receipt = o.supervise_command(argv, cwd=Path(repository), run_id=task.name,
+   phase=phase + '-provision', command_index=1, evidence_root=task / 'evidence',
+   environment=child, timeout_seconds=3720, execution_deadline_ns=origin + 3720 * 10**9,
+   output_limits=_ordinary_prefix_output_limits_v1(host['ceiling_programme'], 'PROVISION'),
+   output_observation=observation)
+  # This PROVISION actor still occupies the genuine early bootstrap.
+  # The SAME outside living native holder owns its borrowed pidfd and
+  # performs the original suffix only AFTER PROVISION actually exits.
+  # A returned PARENT status cannot retire this live actor's units.
+  retained = o._command_requires_process_retention_v1(receipt)
+  o._preflight_require_v1(type(receipt) is o.CommandExecutionReceiptV1
+   and receipt.output_observation == observation
+   and not retained and all(type(observation.get(stream)) is dict
+    and observation[stream].get('complete') is True
+    and observation[stream].get('overflow') is False
+    and not observation[stream].get('errors')
+    and observation[stream]['drained_byte_count']
+     == observation[stream]['retained_byte_count']
+     == getattr(receipt, stream + '_byte_count')
+    for stream in ('stdout', 'stderr')),
+   'ORDINARY_PROVISION_ORIGINAL_PARENT_TERMINAL_AND_BOTH_EOF')
+  # Only local read-only loans end here. This actor is still living; the
+  # original outside keeper owns native-unit retirement after its real exit.
+  o._ordinary_initial_loan_retirement_v1(acquisition['native_input'],scope,receipt)
+  print(json.dumps(dict(ordinary_provision_receipt=o._json_compatible(receipt), evidence=str(task))), flush=True)
+  return 0 if receipt.failure_class is None and receipt.native_exit_code == 0 else 1
+ o._preflight_require_v1(type(ticket_text) is str, 'ORDINARY_PROVISION_ORIGINAL_TICKET_REQUIRED')
+ ticket = Path(o._linux_preflight_path_v1(ticket_text))
+ receiver = 'QTT_LINUX_CONTROLLER_UNIT' in os.environ
+ lexical_name = (ticket.parents[3].name.removesuffix('ordinary') if receiver else ticket.parent.name)
+ lexical_origin = re.fullmatch(r'qtt([1-9][0-9]*)n([0-9]+)', lexical_name)
+ o._preflight_require_v1(lexical_origin is not None,
+  'ORDINARY_PROVISION_ORIGINAL_TICKET_NAME')
+ original_origin = int(lexical_origin[2])
+ uid = 0 if receiver else o._preflight_decimal_v1(os.environ.get('SUDO_UID', ''))
+ acquisition = _ORDINARY_BOOTSTRAP_ACQUISITION_V1
+ o._preflight_require_v1(type(acquisition) is dict
+  and acquisition is _ORDINARY_BOOTSTRAP_ORIGINAL_ACQUISITION_V1
+  and acquisition["role"] == ("RECEIVER" if receiver else "PARENT")
+  and acquisition["origin_ns"] == original_origin,
+  "ORDINARY_TICKET_ACTUAL_ORIGINAL_EARLY_ACQUISITION_REQUIRED")
+ _ordinary_bootstrap_runner_check_v1(acquisition)
+ heap_record = acquisition["heap_record"]
+ raw_product = acquisition.get("ticket_raw_source_product")
+ ticket_product = acquisition.get("ticket_source_product")
+ o._preflight_require_v1(type(raw_product) is dict and type(ticket_product) is dict,
+  "ORDINARY_TICKET_AUTHENTIC_RAW_AND_DECODER_SOURCE_PRODUCTS_UNISSUED")
+ association = (acquisition, ticket, None, 8 << 20, 8 << 20, uid,
+  raw_product["layout"], capture, capture.__code__,
+  _ordinary_bootstrap_ticket_raw_request_v1,
+  _ordinary_bootstrap_ticket_raw_request_v1.__code__,
+  acquisition["source_generation"], acquisition["native_generation"],
+  raw_product["fixed_parts"], raw_product)
+ raw_stage = None
+ try:
+  raw_row = _ordinary_bootstrap_ticket_raw_request_v1(acquisition, association)
+  raw_source = acquisition["ticket_raw_request_attempt"]
+  raw_stage = _ordinary_bootstrap_heap_stage_v1(heap_record, raw_row)
+  captured = capture(ticket, 8 << 20, uid=uid, _ordinary_raw_source_v1=raw_source)
+  _ordinary_bootstrap_heap_stage_complete_v1(heap_record, raw_stage, captured)
+  raw_stage = None
+  raw, _version = captured
+ except BaseException as error:
+  if raw_stage is not None and heap_record["active"] is raw_stage:
+   try:
+    _ordinary_bootstrap_heap_stage_failed_v1(heap_record, raw_stage, error)
+   except BaseException as accounting_error:
+    if all(accounting_error is not prior for prior in acquisition["errors"]):
+     acquisition["errors"].append(accounting_error)
+  if all(error is not prior for prior in acquisition["errors"]):
+   acquisition["errors"].append(error)
+  raise
+ value = _ordinary_bootstrap_ticket_decode_v1(acquisition, heap_record, raw,
+  receiver=receiver, layout=ticket_product["layout"],
+  source_product=ticket_product, original_origin=original_origin)
+ o._preflight_require_v1(type(value) is dict and set(value) ==
+  {'export_root', 'export_identity', 'repository', 'interpreter', 'installation', 'source',
+  'event', 'environment', 'phase', 'uid', 'pid', 'origin_ns'}
+  and value['repository'] == repository and value['installation'] == installation
+  and value['interpreter'] == interpreter and value['phase'] == phase
+  and value['origin_ns'] == original_origin
+  and value['source'] == o._json_compatible(originals)
+  and value['environment'] == environment
+  and base64.b64decode(value['event'], validate=True) == event_bytes
+  and type(value['uid']) is int and value['uid'] > 0,
+  'ORDINARY_PROVISION_COMPLETE_UNCHANGED_INITIAL_BINDINGS')
+ export_root = Path(o._linux_preflight_path_v1(value['export_root']))
+ export_info = export_root.lstat()
+ o._preflight_require_v1(export_root.parent.parent == Path(environment['RUNNER_TEMP'])
+  and export_root.name == 'native-export' and stat.S_ISDIR(export_info.st_mode)
+  and export_info.st_uid == value['uid'] and stat.S_IMODE(export_info.st_mode) == 0o700
+  and (export_info.st_dev, export_info.st_ino) == tuple(value['export_identity']),
+  'ORDINARY_PROVISION_ORIGINAL_DURABLE_EXPORT_CUSTODY')
+ if receiver:
+  scope, host, bootstrap = _ordinary_received_controller_prefix_v1(value)
+  token = o._LINUX_PREFLIGHT_PROCESS_V1.set(scope)
+  try:
+   record = _ordinary_received_controller_run_v1(scope, host, bootstrap)
+   return _ordinary_received_controller_durable_finish_v1(record)
+  finally:
+   o._LINUX_PREFLIGHT_PROCESS_V1.reset(token)
+ return _ordinary_linux_parent_v1(value)
+
+
+def _ordinary_durable_export_owner_v1(scope, bootstrap, role):
+ """Bind the original Source15 bounded durable export, before any copy."""
+ from tools import validation_reliability as o
+ require = o._preflight_require_v1
+ require(type(scope) is o._LinuxPreflightScopeV1 and role in ('parent', 'controller')
+  and type(bootstrap) is dict and not hasattr(scope, '_ordinary_durable_export_v1'),
+  'ORDINARY_DURABLE_ORIGINAL_SINGLE_OWNER')
+ root = Path(o._linux_preflight_path_v1(bootstrap['export_root']))
+ chain = scope._ordinary_factory_chain_v1(root.parent, settling=True)
+ before = scope._ordinary_factory_call_v1(os.lstat, root, settling=True)
+ require(stat.S_ISDIR(before.st_mode) and before.st_uid == bootstrap['uid']
+  and stat.S_IMODE(before.st_mode) == 0o700
+  and (before.st_dev, before.st_ino) == tuple(bootstrap['export_identity']),
+  'ORDINARY_DURABLE_ORIGINAL_PLATFORM_ROOT')
+ record = dict(scope=scope, bootstrap=bootstrap, role=role, root=root, chain=chain,
+  root_slot=None, directory=None, directory_slot=None, bytes=0, entries=0,
+  slots=[], operations=[], observations=[], files=[], errors=[],
+  owner=(os.getpid(), threading.get_ident()), complete=False, closed=False,
+  extent_limit=(256 << 20) + (1 << 30), entry_limit=200000, file_limit=64 << 20)
+ record['original'] = (record, scope, bootstrap, role, root, chain, record['owner'],
+  record['slots'], record['operations'], record['observations'], record['files'], record['errors'])
+ scope._ordinary_durable_export_v1 = scope._ordinary_original_durable_export_v1 = record
+ slot = record['root_slot'] = scope._ordinary_factory_slot_v1(root,
+  'ORDINARY_DURABLE_PLATFORM_ROOT', settling=True)
+ record['slots'].append(slot)
+ descriptor = scope._ordinary_factory_open_v1(slot, root,
+  os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW | os.O_CLOEXEC, settling=True)
+ actual = scope._ordinary_factory_call_v1(os.fstat, descriptor, settling=True)
+ require(o._same_observed_file(actual, before), 'ORDINARY_DURABLE_ROOT_NAME_HANDLE')
+ directory = record['directory'] = root / role
+ scope._ordinary_factory_call_v1(os.mkdir, role, 0o755, dir_fd=descriptor, settling=True)
+ child = record['directory_slot'] = scope._ordinary_factory_slot_v1(directory,
+  'ORDINARY_DURABLE_FIXED_ROLE_ROOT', settling=True)
+ record['slots'].append(child)
+ scope._ordinary_factory_open_v1(child, role,
+  os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW | os.O_CLOEXEC,
+  parent_fd=descriptor, settling=True)
+ return record
+
+
+def _ordinary_durable_export_check_v1(record):
+ from tools import validation_reliability as o
+ scope = record['scope']
+ original = record['original']
+ o._preflight_require_v1(record is scope._ordinary_durable_export_v1
+  is scope._ordinary_original_durable_export_v1 and original[0] is record
+  and original[1] is scope and original[2] is record['bootstrap']
+  and original[3] == record['role'] and original[4] is record['root']
+  and original[5] is record['chain'] and original[6] == record['owner'] ==
+   (os.getpid(), threading.get_ident()) and not record['closed']
+  and all(record[name] is original[index] for name,index in
+   (('slots',7),('operations',8),('observations',9),('files',10),('errors',11)))
+  and time.monotonic_ns() < scope.settlement_deadline_ns,
+  'ORDINARY_DURABLE_SAME_ORIGINAL_OWNER_AND_CUTOFF')
+ scope._ordinary_factory_check_v1(settling=True)
+ return scope
+
+
+def _ordinary_durable_read_v1(record, path, *, expected=None):
+ """Original no-follow per-file export read; expected bytes remain independent."""
+ from tools import validation_reliability as o
+ scope = _ordinary_durable_export_check_v1(record)
+ errors = []
+ parts = []
+ extent = 0
+ slot = None
+ observation = dict(path=str(path), returned_bytes=0, maximum_request=0,
+  complete=False, errors=errors)
+ record['observations'].append(observation)
+ try:
+  chain = scope._ordinary_factory_chain_v1(path.parent, settling=True)
+  before = scope._ordinary_factory_call_v1(os.lstat, path, settling=True)
+  path_version = o._scan_same_api_version(before)
+  o._preflight_require_v1(stat.S_ISREG(before.st_mode) and before.st_nlink == 1
+   and not o._stat_is_reparse_point(before) and 0 <= before.st_size <= record['file_limit']
+   and (expected is None or type(expected) is bytes and len(expected) == before.st_size),
+   'ORDINARY_DURABLE_EXACT_ORIGINAL_FILE_EXTENT')
+  slot = scope._ordinary_factory_slot_v1(path, 'ORDINARY_DURABLE_FULL_FILE_READ', settling=True)
+  record['slots'].append(slot)
+  descriptor = scope._ordinary_factory_open_v1(slot, path,
+   os.O_RDONLY | os.O_NOFOLLOW | os.O_CLOEXEC | os.O_NONBLOCK, settling=True)
+  opened = scope._ordinary_factory_call_v1(os.fstat, descriptor, settling=True)
+  handle_version = o._scan_same_api_version(opened)
+  o._preflight_require_v1(o._same_observed_file(before, opened)
+   and before.st_mode == opened.st_mode and opened.st_nlink == 1,
+   'ORDINARY_DURABLE_ORIGINAL_FILE_NAME_HANDLE')
+  while True:
+   _ordinary_durable_export_check_v1(record)
+   request = min(65536, before.st_size - extent + 1)
+   observation['maximum_request'] = max(observation['maximum_request'], request)
+   raw = scope._ordinary_factory_call_v1(os.read, descriptor, request, settling=True)
+   o._preflight_require_v1(type(raw) is bytes, 'ORDINARY_DURABLE_READ_RETURN_TYPE')
+   observation['returned_bytes'] += len(raw)
+   scope._ordinary_factory_debit_v1('raw_read', len(raw), settling=True)
+   o._preflight_require_v1(len(raw) <= request and extent + len(raw) <= before.st_size,
+    'ORDINARY_DURABLE_READ_PREFIX_EXTENT')
+   if not raw:
+    break
+   if expected is None:
+    parts.append(raw)
+   else:
+    o._preflight_require_v1(raw == expected[extent:extent + len(raw)],
+     'ORDINARY_DURABLE_FULL_INDEPENDENT_BYTE_COMPARISON')
+   extent += len(raw)
+  o._preflight_require_v1(extent == before.st_size
+   and o._scan_same_api_version(scope._ordinary_factory_call_v1(os.fstat, descriptor,
+    settling=True)) == handle_version
+   and o._scan_same_api_version(scope._ordinary_factory_call_v1(os.lstat, path,
+    settling=True)) == path_version,
+   'ORDINARY_DURABLE_PHYSICAL_EOF_AND_SAME_API_VERSION')
+ except BaseException as error:
+  errors.append(error)
+ if slot is not None and not slot['close_attempted']:
+  try: scope._ordinary_factory_close_v1(slot, settling=True)
+  except BaseException as error: errors.append(error)
+ if not errors:
+  try:
+   o._preflight_require_v1(o._scan_same_api_version(scope._ordinary_factory_call_v1(
+    os.lstat, path, settling=True)) == path_version
+    and scope._ordinary_factory_chain_v1(path.parent, settling=True) == chain,
+    'ORDINARY_DURABLE_SOURCE_AFTER_ONE_CLOSE')
+  except BaseException as error: errors.append(error)
+ record['errors'].extend(errors)
+ o._scan_raise_errors(errors)
+ observation['complete'] = True
+ return b''.join(parts) if expected is None else None
+
+
+def _ordinary_durable_write_v1(record, path, raw, *, parent_slot=None, prior=None, mode=0o444):
+ """Copy only an admitted final body, with original Scope slots and counters."""
+ import errno
+ from tools import validation_reliability as o
+ scope = _ordinary_durable_export_check_v1(record)
+ o._preflight_require_v1(type(raw) is bytes and len(raw) <= record['file_limit']
+  and type(mode) is int and 0 <= mode <= 0o777 and type(path) is type(Path('/')),
+  'ORDINARY_DURABLE_ORIGINAL_COMPLETE_BODY')
+ record['bytes'] += len(raw)
+ record['entries'] += 1
+ o._preflight_require_v1(record['bytes'] <= record['extent_limit']
+  and record['entries'] <= record['entry_limit'], 'ORDINARY_DURABLE_CUMULATIVE_CAPACITY')
+ usage = scope._ordinary_factory_call_v1(os.statvfs, path.parent, settling=True)
+ o._preflight_require_v1(usage.f_bavail * usage.f_frsize >= len(raw) + (1 << 30)
+  and usage.f_favail >= 1, 'ORDINARY_DURABLE_ACTUAL_DISK_FLOOR')
+ acquired_parent = None
+ writer = None
+ errors = []
+ operation = dict(path=path, expected=raw, prior=prior, writer=None,
+  delivered=0, maximum_request=0, complete=False, pending=True, errors=errors)
+ record['operations'].append(operation)
+ try:
+  chain = scope._ordinary_factory_chain_v1(path.parent, settling=True)
+  if parent_slot is None:
+   acquired_parent = scope._ordinary_factory_slot_v1(path.parent,
+    'ORDINARY_DURABLE_DESTINATION_PARENT', settling=True)
+   record['slots'].append(acquired_parent)
+   scope._ordinary_factory_open_v1(acquired_parent, path.parent,
+    os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW | os.O_CLOEXEC, settling=True)
+   parent_slot = acquired_parent
+  parent_fd = parent_slot['returned_fd']
+  if prior is None:
+   try: scope._ordinary_factory_call_v1(os.stat, path.name,
+    dir_fd=parent_fd, follow_symlinks=False, settling=True)
+   except FileNotFoundError as error:
+    o._preflight_require_v1(error.errno == errno.ENOENT,
+     'ORDINARY_DURABLE_EXACT_CREATE_NEW_ABSENCE')
+   else:
+    raise ValueError('ORDINARY_DURABLE_DESTINATION_ALREADY_EXISTS')
+   flags = os.O_WRONLY | os.O_CREAT | os.O_EXCL
+  else:
+   named = scope._ordinary_factory_call_v1(os.stat, path.name,
+    dir_fd=parent_fd, follow_symlinks=False, settling=True)
+   o._preflight_require_v1(o._scan_same_api_version(named) == prior,
+    'ORDINARY_DURABLE_ORIGINAL_SELECTED_REPORT_PREIMAGE')
+   flags = os.O_WRONLY
+  writer = operation['writer'] = scope._ordinary_factory_slot_v1(path,
+   'ORDINARY_DURABLE_ORIGINAL_FILE_WRITER', settling=True)
+  record['slots'].append(writer)
+  descriptor = scope._ordinary_factory_open_v1(writer, path.name,
+   flags | os.O_NOFOLLOW | os.O_CLOEXEC | os.O_NONBLOCK, mode,
+   parent_fd=parent_fd, settling=True)
+  opened = scope._ordinary_factory_call_v1(os.fstat, descriptor, settling=True)
+  o._preflight_require_v1(stat.S_ISREG(opened.st_mode) and opened.st_nlink == 1
+   and (prior is None or o._scan_same_api_version(opened) == prior),
+   'ORDINARY_DURABLE_WRITER_ORIGINAL_NAME_HANDLE')
+  if prior is not None:
+   scope._ordinary_factory_call_v1(os.ftruncate, descriptor, 0, settling=True)
+  position = 0
+  while position < len(raw):
+   _ordinary_durable_export_check_v1(record)
+   part = raw[position:position + 65536]
+   operation['maximum_request'] = max(operation['maximum_request'], len(part))
+   count = scope._ordinary_factory_call_v1(os.write, descriptor, part, settling=True)
+   o._preflight_require_v1(type(count) is int, 'ORDINARY_DURABLE_WRITE_RETURN_TYPE')
+   if count > 0:
+    operation['delivered'] += count
+    scope._ordinary_factory_debit_v1('raw_write', count, settling=True)
+   o._preflight_require_v1(0 < count <= len(part), 'ORDINARY_DURABLE_SHORT_WRITE_PROGRESS')
+   position += count
+  scope._ordinary_factory_call_v1(os.fchmod, descriptor, mode, settling=True)
+  scope._ordinary_factory_call_v1(os.fsync, descriptor, settling=True)
+  after = scope._ordinary_factory_call_v1(os.fstat, descriptor, settling=True)
+  named = scope._ordinary_factory_call_v1(os.stat, path.name,
+   dir_fd=parent_fd, follow_symlinks=False, settling=True)
+  o._preflight_require_v1(o._same_observed_file(after, named)
+   and (opened.st_dev, opened.st_ino) == (after.st_dev, after.st_ino)
+   and after.st_size == len(raw) and after.st_nlink == 1,
+   'ORDINARY_DURABLE_WRITER_EXACT_FINAL_EXTENT')
+ except BaseException as error: errors.append(error)
+ for slot in (writer, acquired_parent):
+  if slot is not None and not slot['close_attempted']:
+   try: scope._ordinary_factory_close_v1(slot, settling=True)
+   except BaseException as error: errors.append(error)
+ if not errors:
+  try:
+   _ordinary_durable_read_v1(record, path, expected=raw)
+   o._preflight_require_v1(scope._ordinary_factory_chain_v1(path.parent,
+    settling=True) == chain, 'ORDINARY_DURABLE_DESTINATION_PARENT_STABLE')
+  except BaseException as error: errors.append(error)
+ record['errors'].extend(error for error in errors if not any(error is old for old in record['errors']))
+ o._scan_raise_errors(errors)
+ operation['complete'] = True
+ operation['pending'] = False
+ record['files'].append((path, len(raw)))
+ return operation
+
+
+def _ordinary_durable_tree_v1(record, path, destination, *, depth=0):
+ """Transfer the original fixed evidence tree, preserving every roster debt."""
+ from tools import validation_reliability as o
+ scope = _ordinary_durable_export_check_v1(record)
+ o._preflight_require_v1(type(depth) is int and 0 <= depth <= 64
+  and len(str(path).encode('utf-8')) <= 4096, 'ORDINARY_DURABLE_TREE_FINITE_BOUND')
+ before = scope._ordinary_factory_call_v1(os.lstat, path, settling=True)
+ o._preflight_require_v1(stat.S_ISDIR(before.st_mode) and not o._stat_is_reparse_point(before),
+  'ORDINARY_DURABLE_ORDINARY_DIRECTORY')
+ record['entries'] += 1
+ o._preflight_require_v1(record['entries'] <= record['entry_limit'],
+  'ORDINARY_DURABLE_TREE_CUMULATIVE_ENTRIES')
+ scope._ordinary_factory_call_v1(os.mkdir, destination, 0o755, settling=True)
+ directory_slot = scope._ordinary_factory_slot_v1(path, 'ORDINARY_DURABLE_SOURCE_DIRECTORY', settling=True)
+ record['slots'].append(directory_slot)
+ directory_fd = scope._ordinary_factory_open_v1(directory_slot, path,
+  os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW | os.O_CLOEXEC, settling=True)
+ opened = scope._ordinary_factory_call_v1(os.fstat, directory_fd, settling=True)
+ o._preflight_require_v1(o._same_observed_file(opened, before),
+  'ORDINARY_DURABLE_SOURCE_DIRECTORY_NAME_HANDLE')
+ iterator = scope._ordinary_factory_iterator_v1(directory_fd, settling=True)
+ errors = []
+ names = []
+ try:
+  while True:
+   try:
+    item = scope._ordinary_factory_call_v1(next, iterator['iterator'], settling=True)
+   except StopIteration:
+    break
+   name = item.name
+   o._preflight_require_v1(type(name) is str and name not in ('', '.', '..')
+    and '/' not in name and '\\' not in name and name not in names,
+    'ORDINARY_DURABLE_EXACT_DIRECTORY_NAME')
+   names.append(name)
+   child = path / name
+   info = scope._ordinary_factory_call_v1(os.lstat, child, settling=True)
+   if stat.S_ISDIR(info.st_mode):
+    _ordinary_durable_tree_v1(record, child, destination / name, depth=depth + 1)
+   else:
+    raw = _ordinary_durable_read_v1(record, child)
+    _ordinary_durable_write_v1(record, destination / name, raw)
+ except BaseException as error: errors.append(error)
+ scope._ordinary_factory_iterator_close_v1(iterator, errors)
+ try:
+  after = scope._ordinary_factory_call_v1(os.lstat, path, settling=True)
+  o._preflight_require_v1(o._scan_same_api_version(before) == o._scan_same_api_version(after),
+   'ORDINARY_DURABLE_TREE_ORIGINAL_SOURCE_VERSION')
+  verify = scope._ordinary_factory_iterator_v1(directory_fd, settling=True)
+  try:
+   final_names = []
+   while True:
+    try:
+     item = scope._ordinary_factory_call_v1(next, verify['iterator'], settling=True)
+    except StopIteration:
+     break
+    final_names.append(item.name)
+   o._preflight_require_v1(sorted(final_names) == sorted(names),
+    'ORDINARY_DURABLE_TREE_COMPLETE_FINAL_ROSTER')
+  except BaseException as error: errors.append(error)
+  scope._ordinary_factory_iterator_close_v1(verify, errors)
+ except BaseException as error: errors.append(error)
+ if not directory_slot['close_attempted']:
+  try: scope._ordinary_factory_close_v1(directory_slot, settling=True)
+  except BaseException as error: errors.append(error)
+ record['errors'].extend(error for error in errors if not any(error is old for old in record['errors']))
+ o._scan_raise_errors(errors)
+
+
+def _ordinary_durable_export_close_v1(record):
+ from tools import validation_reliability as o
+ scope = _ordinary_durable_export_check_v1(record)
+ errors = []
+ for slot in reversed(record['slots']):
+  if not slot['close_attempted']:
+   try: scope._ordinary_factory_close_v1(slot, settling=True)
+   except BaseException as error: errors.append(error)
+ record['errors'].extend(errors)
+ o._scan_raise_errors(errors)
+ o._preflight_require_v1(all(o._mapper_slot_settled_v1(slot) for slot in record['slots'])
+  and all(not row['pending'] and row['complete'] for row in record['operations']),
+  'ORDINARY_DURABLE_ALL_ACTUAL_READ_WRITE_CLOSE_OBLIGATIONS')
+ record['closed'] = True
+ record['complete'] = not record['errors']
+ return record
+
+
+def _ordinary_prepare_parent_outputs_v1(scope, programme):
+ """Join the original two CLI reports to their already compiled native capacity."""
+ from tools import validation_reliability as o
+ o._preflight_require_v1(programme is scope._ordinary_resource_programme_v1
+  and len(programme['report_geometry']) == 2 and not hasattr(scope, '_ordinary_output_programme_v1'),
+  'ORDINARY_ORIGINAL_SOURCE_SELECTED_REPORT_PROGRAMME')
+ rows = []
+ partition = programme['ceiling_programme']['output_partition']['report_body_bytes']
+ o._preflight_require_v1(type(partition) is int and partition == 256 << 20,
+  'ORDINARY_ORIGINAL_WHOLE_REPORT_BYTE_PARTITION')
+ for role, root, original, selected, payload, files, directories, edges in programme['report_geometry']:
+  underlay = scope._ordinary_capture_host_underlay_v1(role, root)
+  o._preflight_require_v1(underlay['source_row'] is original
+   and tuple(underlay['preimage_rows']) == selected,
+   'ORDINARY_ORIGINAL_REPORT_PREIMAGE_AND_GEOMETRY')
+  rows.append(dict(role=role, logical_root=underlay['logical_root'],
+   target_root_slot=underlay['target_slot'] or underlay['parent_slot'],
+   source_preimage_root=underlay['source_row'], preimage_rows=underlay['preimage_rows'],
+   original_requested_report_paths=(root / (scope._ordinary_phase_v1 + '.json'),),
+   reserved_new_cell_count=1, reserved_new_bytes=partition // 2, reserved_new_inodes=1))
+ result = tuple(rows)
+ scope._ordinary_output_programme_v1 = scope._ordinary_original_output_programme_v1 = result
+ scope._ordinary_runner_report_writers_v1 = (_write_timing_report, _write_json_report,
+  _write_full_validation_router_report)
+ scope._ordinary_bind_parent_outputs_v1(result)
+ return result
+
+
+def _ordinary_received_controller_durable_finish_v1(record):
+ """Finish this real controller's C/source/image debts before returning to its parent."""
+ from tools import validation_reliability as o
+ scope, host, bootstrap = record['scope'], record['host'], record['bootstrap']
+ errors = record['errors']
+ export = None
+ cleanup = None
+ record['finish_attempted'] = True
+ try:
+  o._preflight_require_v1(record is scope._ordinary_controller_run_v1
+   is scope._ordinary_original_controller_run_v1 and record['owner'] ==
+   (os.getpid(), threading.get_ident()), 'ORDINARY_RECEIVED_SAME_FINAL_OWNER')
+  candidate, source = record['candidate'], record['source']
+  o._preflight_require_v1(candidate is scope._ordinary_candidate_v1
+   and candidate is not None and candidate._disk_completed_restore_v1()
+   and not _invocation_requires_retention_v1(record['supervision'])
+   and scope.query.command_resources_settled_v1(),
+   'ORDINARY_RECEIVED_REAL_C_AND_NATIVE_TERMINAL_BEFORE_RESTORE')
+  with scope.query.ordinary_owned_resource_phase_v1(scope, candidate):
+   scope._ordinary_release_view_native_v1(candidate)
+   source.restore(deadline_ns=scope.settlement_deadline_ns, processes_settled=True)
+   scope._ordinary_require_output_phase_v1(candidate)
+   export = record['export'] = _ordinary_durable_export_owner_v1(scope, bootstrap, 'controller')
+   scope._ordinary_publish_parent_reports_v1(candidate, export=export)
+   continuous = host['continuous_evidence']
+   for role, path, slot, identity, version in continuous['subroots']:
+    # Each original five-role tree has one disjoint durable target.
+    _ordinary_durable_tree_v1(export, path, export['directory'] / role.lower())
+   _ordinary_durable_write_v1(export, export['directory'] / 'source-accounting.json',
+    (json.dumps(o._json_compatible(source.evidence()), indent=2, sort_keys=True) + '\n').encode('utf-8'))
+   cleanup = record['cleanup'] = scope._ordinary_close_host_output_v1(candidate, export)
+   prefix_query = next(row[1] for row in host['prefix_continuous_evidence']['subroots'] if row[0] == 'QUERY')
+   _ordinary_durable_tree_v1(export, prefix_query, export['directory'] / 'closure-query')
+   _ordinary_durable_export_close_v1(export)
+   scope._ordinary_close_prefix_v1()
+   o._ordinary_initial_loan_retirement_v1(scope._ordinary_initial_native_holder_v1['native_input'],scope,cleanup)
+ except BaseException as error:
+  if not any(error is old for old in errors): errors.append(error)
+  if export is not None and not export['closed']:
+   try: _ordinary_durable_export_close_v1(export)
+   except BaseException as closing:
+    if not any(closing is old for old in errors): errors.append(closing)
+ # A safely retained failure is a nonzero result, never successful release.
+ print(json.dumps(dict(ordinary_controller_result=record['main_status'],
+  evidence=bootstrap['export_root'], durable_complete=bool(export and export['complete']),
+  failures=[repr(error) for error in errors]), default=str), flush=True)
+ return 0 if not errors and record['main_status'] == 0 and cleanup is not None else 1
+
+
+def _ordinary_parent_durable_finish_v1(record):
+ """Export and retire only after actual service, launcher and both EOF results."""
+ from tools import validation_reliability as o
+ scope, host, bootstrap = record['scope'], record['host'], record['bootstrap']
+ row = getattr(scope, '_ordinary_controller_role_v1', None)
+ o._preflight_require_v1(record is scope._ordinary_parent_factory_v1
+  is scope._ordinary_original_parent_factory_v1 and record['owner'] ==
+  (os.getpid(), threading.get_ident()) and row is not None
+  and row is scope._ordinary_original_controller_role_v1
+  and row['terminal'] is not None and row['closed'] and not row['pending']
+  and scope.query.command_resources_settled_v1(),
+  'ORDINARY_PARENT_ACTUAL_NATIVE_TERMINAL_AND_STREAM_CLOSE')
+ settlement = dict(scope=scope, parent=record, controller=row, terminal=row['terminal'],
+  receipt=record['receipt'], owner=record['owner'], cutoff=scope.settlement_deadline_ns)
+ settlement['original'] = tuple(settlement.items())
+ scope._ordinary_parent_settlement_v1 = scope._ordinary_original_parent_settlement_v1 = settlement
+ export = record['export'] = _ordinary_durable_export_owner_v1(scope, bootstrap, 'parent')
+ issuer = record['issuer']
+ try:
+  # Retain original failed commands as data. A failed controller cannot
+  # authorize its unresolved HOST image or original source restoration.
+  prefix = host['prefix_continuous_evidence']
+  for role, path, slot, identity, version in prefix['subroots']:
+   _ordinary_durable_tree_v1(export, path, export['directory'] / role.lower())
+  _ordinary_durable_write_v1(export, export['directory'] / 'parent-result.json',
+   (json.dumps(dict(service_receipt=o._json_compatible(record['receipt']),
+    launcher_returncode=row['launcher'].returncode,
+    failures=[repr(error) for error in record['errors']]), indent=2, sort_keys=True) + '\n').encode('utf-8'))
+  # The outside provisioner uses these actual observations as locators;
+  # it still independently proves empty native units after this actor's
+  # real terminal result. This living bootstrap cannot prove itself empty.
+  units = []
+  for role in ('bootstrap', 'common'):
+   actual = issuer[role]
+   units.append(dict(role=role, name=actual[5]['Id'],
+    cgroup=actual[5]['ControlGroup'], invocation=actual[4],
+    identity=actual[3]))
+  _ordinary_durable_write_v1(export, export['directory'] / 'native-units.json',
+   (json.dumps(dict(units=units, prefix=str(issuer['mount_path']),
+    name=scope.name, origin_ns=bootstrap['origin_ns'],
+    export_identity=bootstrap['export_identity']),
+    sort_keys=True, separators=(',', ':'), ensure_ascii=True) + '\n').encode('ascii'))
+  o._preflight_require_v1(not record['errors'] and record['receipt'].failure_class is None
+   and record['receipt'].native_exit_code == 0 and not export['errors'],
+   'ORDINARY_PARENT_RETAIN_FAILED_CONTROLLER_ROOT')
+  scope._ordinary_close_controller_policy_v1(record['policy'])
+  _ordinary_durable_tree_v1(export, scope.query.evidence_root, export['directory'] / 'closure-query')
+  _ordinary_durable_export_close_v1(export)
+  scope._ordinary_close_prefix_v1()
+  cleanup=record['cleanup']=scope._ordinary_unmount_prefix_v1(issuer, export)
+  o._ordinary_initial_loan_retirement_v1(scope._ordinary_initial_native_holder_v1['native_input'],scope,cleanup)
+  return cleanup
+ except BaseException as body_error:
+  if not export['closed']:
+   try: _ordinary_durable_export_close_v1(export)
+   except BaseException as close_error:
+    o._scan_raise_errors([body_error, close_error])
+  raise
+
+
+def _ordinary_outer_native_suffix_v1(scope, host, value, task, receipt, observation):
+ """Retire exact empty native units after the real privileged actor exits."""
+ from tools import validation_reliability as o
+ o._preflight_require_v1(scope is host['scope'] and host is scope._ordinary_host_preparation_v1
+  and host is scope._ordinary_original_host_preparation_v1
+  and host['owner'] == (os.getpid(), threading.get_ident()) and os.geteuid() == value['uid']
+  and type(receipt) is o.CommandExecutionReceiptV1 and receipt.native_exit_code == 0
+  and receipt.failure_class is None and not o._command_requires_process_retention_v1(receipt)
+  and type(observation) is dict and receipt.output_observation == observation
+  and all(type(observation.get(name)) is dict and observation[name].get('complete') is True
+   and observation[name].get('overflow') is False and not observation[name].get('errors')
+   and observation[name]['drained_byte_count'] == observation[name]['retained_byte_count']
+   == getattr(receipt, name + '_byte_count') for name in ('stdout', 'stderr')),
+  'ORDINARY_OUTER_ACTUAL_PARENT_TERMINAL_BOTH_EOF')
+ cutoff = value['origin_ns'] + 3720 * 10**9
+ record = dict(scope=scope, host=host, receipt=receipt, observation=observation,
+  owner=host['owner'], cutoff=cutoff, commands=[], slots=[], errors=[], attempted=True,
+  complete=False, payload=None, units=None, original=None)
+ o._preflight_require_v1(not hasattr(scope, '_ordinary_outer_suffix_v1'),
+  'ORDINARY_OUTER_SUFFIX_SINGLE_ATTEMPT')
+ scope._ordinary_outer_suffix_v1 = scope._ordinary_original_outer_suffix_v1 = record
+ record['original'] = (record, scope, host, receipt, observation, record['owner'], cutoff,
+  record['commands'], record['slots'], record['errors'])
+ # These cells are source selected before any suffix native dispatch. They
+ # account all six possible original manager calls, both streams and every
+ # retained receipt, separately from the prior provisioner's streams.
+ record['programme'] = dict(command_count=6, stream_bytes=65536,
+  combined_bytes=2 * 65536, receipt_bytes=1 << 20,
+  retained_bytes=6 * ((1 << 20) + 2 * 65536), deadline_ns=cutoff)
+ association = scope._ordinary_query_output_owner_v1
+ o._preflight_require_v1(association is scope._ordinary_original_query_output_owner_v1
+  and association[0] is scope and association[1] is host and association[2] is value
+  and association[3] == 'PROVISION' and tuple(association[4].items()) == association[5]
+  and record['programme']['command_count']*record['programme']['combined_bytes']
+   == association[4]['outer_suffix_bytes']
+  and host['meter']['remaining']['metadata_byte_limit']
+   >= record['programme']['retained_bytes'], 'ORDINARY_OUTER_SUFFIX_PRESELECTED_CAPACITY')
+
+ def checked():
+  o._preflight_require_v1(record is scope._ordinary_outer_suffix_v1
+   is scope._ordinary_original_outer_suffix_v1
+   and record['owner'] == (os.getpid(), threading.get_ident())
+   and record['original'][7] is record['commands'] and record['original'][8] is record['slots']
+   and record['original'][9] is record['errors'] and time.monotonic_ns() < cutoff,
+   'ORDINARY_OUTER_SUFFIX_ORIGINAL_OWNER_AND_CUTOFF')
+
+ def read(path, *, maximum=65536, directory=False):
+  checked()
+  scope._ordinary_factory_chain_v1(path.parent, settling=True)
+  named = scope._ordinary_factory_call_v1(os.lstat, path, settling=True)
+  o._preflight_require_v1(not o._stat_is_reparse_point(named)
+   and (stat.S_ISDIR(named.st_mode) if directory else stat.S_ISREG(named.st_mode)),
+   'ORDINARY_OUTER_EXACT_NATIVE_FILE_KIND')
+  slot = scope._ordinary_factory_slot_v1(path, 'ORDINARY_OUTER_SUFFIX_READ', settling=True)
+  record['slots'].append(slot)
+  errors = []
+  result = bytearray()
+  try:
+   fd = scope._ordinary_factory_open_v1(slot, path,
+    os.O_RDONLY | os.O_NOFOLLOW | os.O_CLOEXEC | os.O_NONBLOCK
+     | (os.O_DIRECTORY if directory else 0), settling=True)
+   opened = scope._ordinary_factory_call_v1(os.fstat, fd, settling=True)
+   o._preflight_require_v1(o._same_observed_file(named, opened),
+    'ORDINARY_OUTER_NATIVE_PATH_HANDLE')
+   if not directory:
+    while True:
+     checked()
+     raw = scope._ordinary_factory_call_v1(os.read, fd,
+      min(65536, maximum + 1 - len(result)), settling=True)
+     scope._ordinary_factory_debit_v1('native_control_read', len(raw), settling=True)
+     result.extend(raw)
+     o._preflight_require_v1(len(result) <= maximum, 'ORDINARY_OUTER_NATIVE_EXTENT')
+     if not raw: break
+   after = scope._ordinary_factory_call_v1(os.fstat, fd, settling=True)
+   named_after = scope._ordinary_factory_call_v1(os.lstat, path, settling=True)
+   version = scope._ordinary_directory_version_v1 if directory else o._scan_same_api_version
+   o._preflight_require_v1(version(opened) == version(after)
+    and version(named) == version(named_after)
+    and o._same_observed_file(after, named_after), 'ORDINARY_OUTER_NATIVE_STABILITY')
+  except BaseException as error: errors.append(error)
+  if not slot['close_attempted']:
+   try: scope._ordinary_factory_close_v1(slot, settling=True)
+   except BaseException as error: errors.append(error)
+  o._scan_raise_errors(errors)
+  return opened, bytes(result)
+
+ def command(argv):
+  checked()
+  o._preflight_require_v1(any(argv is vector for vector in record['vectors'])
+   and len(record['commands']) < record['programme']['command_count'],
+   'ORDINARY_OUTER_EXACT_SELECTED_NATIVE_VECTOR')
+  row = dict(argv=argv, receipt=None, observation={}, attempted=False, pending=True, errors=[])
+  record['commands'].append(row)
+  try:
+   row['attempted'] = True
+   row['receipt'] = o.supervise_command(argv, cwd=Path('/'), run_id=task.name,
+    phase=value['phase'] + '-native-retirement', command_index=len(record['commands']),
+    evidence_root=task / 'native-retirement-evidence',
+    environment=dict(PATH='/usr/bin', LANG='C.UTF-8', LC_ALL='C.UTF-8'),
+    timeout_seconds=10, execution_deadline_ns=cutoff,
+    output_limits=dict(stdout_bytes=65536, stderr_bytes=65536, combined_output_bytes=131072),
+    output_observation=row['observation'], mirror_stdout=False, mirror_stderr=False)
+   actual = row['receipt']
+   row['pending'] = o._command_requires_process_retention_v1(actual)
+   for name in ('stdout', 'stderr'):
+    observed = row['observation'][name]
+    scope._ordinary_factory_debit_v1('native_control_read', observed['drained_byte_count'], settling=True)
+   o._preflight_require_v1(not row['pending'] and actual.native_exit_code == 0
+    and actual.failure_class is None and all(row['observation'][name]['complete']
+     and not row['observation'][name]['errors'] and not row['observation'][name]['overflow']
+     for name in ('stdout', 'stderr')), 'ORDINARY_OUTER_NATIVE_TERMINAL_AND_BOTH_EOF')
+   _info, raw = read(Path(actual.stdout_path))
+   return raw
+  except BaseException as error:
+   row['errors'].append(error)
+   record['errors'].append(error)
+   raise
+
+ def fields(raw):
+  result = {}
+  for line in raw.decode('ascii', 'strict').splitlines():
+   key, separator, content = line.partition('=')
+   o._preflight_require_v1(separator and key in properties and key not in result,
+    'ORDINARY_OUTER_UNIQUE_MANAGER_FIELDS')
+   result[key] = content
+  o._preflight_require_v1(set(result) == set(properties), 'ORDINARY_OUTER_COMPLETE_MANAGER_FIELDS')
+  return result
+
+ def native_empty(unit, manager):
+  path = Path('/sys/fs/cgroup') / unit['cgroup'].lstrip('/')
+  o._preflight_require_v1(manager['Id'] == unit['name'], 'ORDINARY_OUTER_MANAGER_SAME_UNIT')
+  # An expected native absence is an explicit pathname observation;
+  # failures while opening a previously observed live node remain errors.
+  scope._ordinary_factory_chain_v1(Path('/sys/fs/cgroup'), settling=True)
+  scope._ordinary_factory_debit_v1('metadata_call', settling=True)
+  try:
+   os.lstat(path)
+  except FileNotFoundError:
+   o._preflight_require_v1(manager['ActiveState'] in ('inactive', 'failed')
+    and manager['ControlGroup'] == '',
+    'ORDINARY_OUTER_KERNEL_ABSENCE_AND_MANAGER_RETIREMENT')
+   return False
+  info, _ = read(path, directory=True)
+  o._preflight_require_v1(manager['InvocationID'] == unit['invocation']
+   and manager['ControlGroup'] == unit['cgroup'] and manager['Transient'] == 'yes'
+   and (info.st_dev, info.st_ino) == tuple(unit['identity']),
+   'ORDINARY_OUTER_INDEPENDENT_ACTUAL_NATIVE_IDENTITY')
+  _info, events = read(path / 'cgroup.events')
+  _info, processes = read(path / 'cgroup.procs')
+  _info, count = read(path / 'pids.current')
+  values = dict(line.split(' ', 1) for line in events.decode('ascii').splitlines())
+  o._preflight_require_v1(values.get('populated') == '0' and processes == b'' and count == b'0\n',
+   'ORDINARY_OUTER_ACTUAL_EMPTY_SUBTREE')
+  return True
+
+ try:
+  source = Path(value['export_root']) / 'parent' / 'native-units.json'
+  _info, raw = read(source)
+  limits = dict(depth=16, lexical_units=131072, quoted_bytes=65536)
+  payload = record['payload'] = o._preflight_json_v1(raw, limits, checked,
+   canonical_encoding=False)[0]
+  o._preflight_require_v1(type(payload) is dict and set(payload) ==
+   {'units', 'prefix', 'name', 'origin_ns', 'export_identity'}
+   and payload['origin_ns'] == value['origin_ns']
+   and payload['export_identity'] == list(value['export_identity'])
+   and re.fullmatch(r'qtt[1-9][0-9]*n' + str(value['origin_ns']), payload['name'])
+   and payload['prefix'] == '/run/' + payload['name'] + 'ordinary/prefix'
+   and type(payload['units']) is list and len(payload['units']) == 2,
+   'ORDINARY_OUTER_SOURCE_SELECTED_NATIVE_LOCATORS')
+  units = record['units'] = payload['units']
+  for unit, role, suffix in zip(units, ('bootstrap', 'common'), ('bootstrap.scope', '.slice')):
+   o._preflight_require_v1(type(unit) is dict and set(unit) ==
+    {'role', 'name', 'cgroup', 'invocation', 'identity'}
+    and unit['role'] == role and unit['name'] == payload['name'] + suffix
+    and type(unit['cgroup']) is str and unit['cgroup'].startswith('/')
+    and Path(unit['cgroup']).name == unit['name']
+    and type(unit['invocation']) is str and len(unit['invocation']) == 32
+    and all(value in '0123456789abcdef' for value in unit['invocation'])
+    and type(unit['identity']) is list and len(unit['identity']) == 2
+    and all(type(value) is int and value >= 0 for value in unit['identity']),
+    'ORDINARY_OUTER_CLOSED_EXACT_NATIVE_UNIT_SHAPES')
+  o._preflight_require_v1(Path(units[0]['cgroup']).parent == Path(units[1]['cgroup']),
+   'ORDINARY_OUTER_SELECTED_COMMON_AND_BOOTSTRAP_RELATION')
+  properties = ('Id', 'LoadState', 'Transient', 'InvocationID', 'ControlGroup', 'ActiveState')
+  show = tuple(('/usr/bin/sudo', '-n', '--', '/usr/bin/systemctl', 'show', '--no-pager', '--all',
+   '--property=' + ','.join(properties), unit['name']) for unit in units)
+  stop = tuple(('/usr/bin/sudo', '-n', '--', '/usr/bin/systemctl', 'stop', unit['name']) for unit in units)
+  final = tuple(tuple(value for value in vector) for vector in show)
+  record['vectors'] = show + stop + final
+  _info, mounts = read(Path('/proc/self/mountinfo'), maximum=1 << 20)
+  o._preflight_require_v1(not any(row['path'] == payload['prefix']
+   for row in o._linux_preflight_mounts_v1(mounts)), 'ORDINARY_OUTER_ACTUAL_PREFIX_UNMOUNTED')
+  current = tuple(fields(command(vector)) for vector in show)
+  for index, unit in enumerate(units):
+   if native_empty(unit, current[index]):
+    command(stop[index])
+  for unit, vector in zip(units, final):
+   actual = fields(command(vector))
+   o._preflight_require_v1(not native_empty(unit, actual), 'ORDINARY_OUTER_NATIVE_UNIT_RETIRED')
+  o._preflight_require_v1(all(not row['pending'] for row in record['commands'])
+   and all(o._mapper_slot_settled_v1(slot) for slot in record['slots'])
+   and not record['errors'], 'ORDINARY_OUTER_NATIVE_SUFFIX_ALL_OUTCOMES_CLOSED')
+  record['complete'] = True
+  return record
+ except BaseException as error:
+  record['errors'].append(error)
+  raise
+
+
+def _ordinary_execute_controller_v1(scope, *, argv, environment, run_id, phase,
+  evidence_root, output_limits, host, bootstrap):
+ """Use the original supervisor for one previously admitted controller."""
+ from tools import validation_reliability as owner
+ owner._preflight_require_v1(type(scope) is owner._LinuxPreflightScopeV1,
+  'ORDINARY_CONTROLLER_ORIGINAL_CALLER_SCOPE')
+ record = None
+ receipt = None
+ token = None
+ errors = []
+ observed = {}
+ try:
+  record = scope._ordinary_prepare_controller_role_v1(argv=argv,
+   environment=environment, run_id=run_id, phase=phase,
+   evidence_root=evidence_root, output_limits=output_limits,
+   host=host, bootstrap=bootstrap, native_hold=scope._ordinary_initial_native_holder_v1)
+  token = owner._LINUX_PREFLIGHT_PROCESS_V1.set(scope)
+  receipt = owner.supervise_command(record['argv'], cwd=pathlib.Path(scope.repository),
+   run_id=record['run_id'], phase=record['phase'], command_index=1,
+   evidence_root=record['evidence_root'], environment=record['environment'],
+   execution_deadline_ns=record['programme']['cutoffs'][3],
+   output_limits=record['output_limits'], output_observation=observed,
+   mirror_stdout=False, mirror_stderr=False)
+ except BaseException as error:
+  errors.append(error)
+  # This is the original supervisor's retained receipt, when present.
+  # Groups or unknown exceptions do not manufacture terminal evidence.
+  attached = getattr(error, 'command_receipt', None)
+  if type(attached) is owner.CommandExecutionReceiptV1:
+   receipt = attached
+ finally:
+  if token is not None:
+   try:
+    owner._LINUX_PREFLIGHT_PROCESS_V1.reset(token)
+   except BaseException as error:
+    errors.append(error)
+  if record is not None:
+   try:
+    if (not owner._command_requires_process_retention_v1(receipt)
+      or scope._ordinary_controller_resource_close_ready_v1(record, receipt)):
+     scope._ordinary_controller_close_v1(record, receipt)
+   except BaseException as error:
+    errors.append(error)
+  # A missing/unproven receipt leaves the original Scope record pending.
+  # Closing these read-only controller descriptors does not release
+  # the actual common slice or owned control, export and image borrowers.
+ # Resource close normally propagates this exact error in its original
+ # group. Ports may safely close without doing so; retain it once.
+ launcher_error = None if record is None else record.get('launcher_error')
+ if launcher_error is not None:
+  pending_errors = list(errors)
+  retained = False
+  while pending_errors:
+   original_error = pending_errors.pop()
+   if original_error is launcher_error:
+    retained = True
+    break
+   if isinstance(original_error, BaseExceptionGroup):
+    pending_errors.extend(original_error.exceptions)
+  if not retained: errors.append(launcher_error)
+ owner._scan_raise_errors(errors)
+ return receipt
+
+
+# SOURCE_ONLY reviewer proposal; not an applied QTT candidate or native grant.
+# Integrate this class only into the genuine existing RUN module.
+# NEW Scope fields (pin __new__ before __init__, one-shot, no retry):
+#   _ordinary_source_selection_v1
+#   _ordinary_original_source_selection_v1
+# Existing context supplied by the original Scope:
+#   _ordinary_runner_owner_v1 / _ordinary_original_runner_owner_v1
+#   _ordinary_original_run_binding_v1 / _ordinary_precursor_ready_v1
+# NEW fixed RUN cores, implemented by extracting the original predicates/logging:
+#   _ordinary_foreign_filter_source_result_v1(commands, *, branch)
+#   _ordinary_router_filter_source_result_v1(commands, *, phase, router_result)
+# Both return EXACT (kept_list, kept_input_ordinals_tuple), retaining copied output refs and emitted prior-input ordinals.
+# This is metadata only. Keep the current original native phase/empty/admission guards.
+# Native attempts/custody of existing producers remain their original owners'
+# obligations; these latches are not replacement process/resource receipts.
+
+class _OrdinarySourceSelectionV1:
+    _SOURCE_MEMBERS = (
+        ("manifest", "build_phase_manifest"),
+        ("foreign", "_ordinary_foreign_filter_source_result_v1"),
+        ("routing", "_changed_area_routing_active"),
+        ("router", "_router_result_for_current_context"),
+        ("router_filter", "_ordinary_router_filter_source_result_v1"),
+        ("project", "_prepare_execution_plan"),
+    )
+
+    def __init__(self, scope, paths, phase, V, P):
+     self._errors = []
+     self._attempted = set()
+     self._returned = {}
+     self._raw_returns = []
+     self._scope, self.paths, self.phase = scope, paths, phase
+     self._V, self._P = V, P
+     self._runner = scope._ordinary_runner_owner_v1
+     self._run_binding = scope._ordinary_original_run_binding_v1
+     self._functions = {
+      stage: getattr(self._runner, member)
+      for stage, member in self._SOURCE_MEMBERS
+     }
+     self._history = []
+     self._filter_returns = []
+     self._original = (
+      scope, paths, phase, V, P, self._runner, self._run_binding,
+      self._errors, self._attempted, self._returned,
+      tuple(self._functions.items()), tuple(ORDERED_PHASES),
+      paths.run_id, paths.repo_root, self._raw_returns,
+      self._history, self._filter_returns, scope.query,
+      scope._ordinary_factory_owner_v1,
+     )
+     self._manifest = None
+     self._manifest_signature = ()
+     self.commands = None
+     self.rows = ()
+     self._branch = None
+     self._branch_producer = None
+     self._repo_call = None
+     self._repo_call_original = None
+     self._repo_call_value = None
+     self._branch_value = None
+     self._routing_inputs = None
+     self._routing_value = None
+     self._router_inputs = None
+     self._router_fields = None
+     self._execution = None
+     self._execution_fields = ()
+     self._plan = None
+     self._plan_fields = ()
+     self._bound = ()
+     self._bound_original = self._bound
+     self._pytest_constructor_rows = []
+     self._pytest_original_constructor_rows = self._pytest_constructor_rows
+     self._pytest_manifest_rows = []
+     self._pytest_original_manifest_rows = self._pytest_manifest_rows
+     self._pytest_source_original = None
+     self._begin("manifest")
+     manifest = self._produce("manifest", V, P)
+     self._manifest = manifest  # retain actual return before validation
+     self._require(type(manifest) is list and len(manifest) == len(ORDERED_PHASES),
+        "EXACT_MANIFEST")
+     signatures, selected, first = [], None, 1
+     for expected_phase, row in zip(ORDERED_PHASES, manifest):
+      self._require(type(row) is dict
+         and set(row) == {"phase", "command_count", "commands"}
+         and type(row["phase"]) is str
+         and row["phase"] == expected_phase
+         and type(row["command_count"]) is int
+         and row["command_count"] > 0
+         and type(row["commands"]) is list
+         and row["command_count"] == len(row["commands"]),
+         "MANIFEST_ROW")
+      commands = row["commands"]
+      self._require(all(type(command) is list for command in commands),
+         "MANIFEST_COMMAND_LIST")
+      values = tuple(self._argv(command) for command in commands)
+      signatures.append((row, expected_phase, len(commands), commands,
+          tuple(commands), values))
+      if expected_phase == phase:
+       self._require(selected is None, "ONE_SOURCE_PHASE")
+       selected = (first, commands)
+      first += len(commands)
+     self._require(selected is not None, "SOURCE_PHASE")
+     self._manifest_signature = tuple(signatures)
+     self._pytest_source_original = (self._pytest_constructor_rows,
+      tuple(self._pytest_constructor_rows), self._pytest_manifest_rows,
+      tuple(self._pytest_manifest_rows))
+     first, commands = selected
+     self.commands = commands
+     self.rows = tuple((first + i, i + 1, command, self._argv(command), command)
+         for i, command in enumerate(commands))
+     self._history.append((commands, self.rows, tuple(map(self._argv, commands))))
+     self._guard()
+
+    @staticmethod
+    def _pytest_source_fields_v1(selected):
+     if type(selected) is not PytestShardCommand:
+      raise ValueError('ORDINARY_PYTEST_EXACT_ORIGINAL_CONSTRUCTOR_TYPE')
+     return tuple((name, type(getattr(selected, name)), getattr(selected, name)) for name in (
+      'paths', 'ignores', 'reason', 'runtime_budget_seconds', 'historical_runtime_seconds',
+      'known_historical_heavy', 'bounded_idempotence'))
+
+    def _pytest_source_guard_v1(self):
+     self._require(self._pytest_constructor_rows is self._pytest_original_constructor_rows
+      and self._pytest_manifest_rows is self._pytest_original_manifest_rows,
+      'PYTEST_SOURCE_ORIGINAL_COLLECTIONS')
+     original = self._pytest_source_original
+     if original is not None:
+      self._require(original[0] is self._pytest_constructor_rows
+       and original[2] is self._pytest_manifest_rows
+       and len(original[1]) == len(self._pytest_constructor_rows)
+       and len(original[3]) == len(self._pytest_manifest_rows)
+       and all(actual is saved for actual, saved in zip(self._pytest_constructor_rows, original[1]))
+       and all(actual is saved for actual, saved in zip(self._pytest_manifest_rows, original[3])),
+       'PYTEST_SOURCE_FROZEN_ORIGINAL_ROWS')
+     for row in self._pytest_constructor_rows:
+      phase, registry, selected, fields, commands, command_refs, values = row
+      self._require(PYTEST_SHARD_COMMANDS.get(phase) is registry
+       and type(registry) is tuple and len(registry) == len(selected)
+       and all(actual is saved for actual, saved in zip(registry, selected))
+       and tuple(self._pytest_source_fields_v1(item) for item in selected) == fields
+       and type(commands) is list and len(commands) == len(command_refs)
+       and all(actual is saved for actual, saved in zip(commands, command_refs))
+       and tuple(map(self._argv, commands)) == values,
+       'PYTEST_SOURCE_ORIGINAL_CONSTRUCTOR_OPERANDS')
+     for constructor, commands, command_refs, values in self._pytest_manifest_rows:
+      self._require(any(constructor is actual for actual in self._pytest_constructor_rows)
+       and type(commands) is list and len(commands) == len(command_refs) == len(constructor[2])
+       and all(actual is saved for actual, saved in zip(commands, command_refs))
+       and tuple(map(self._argv, commands)) == values == constructor[6],
+       'PYTEST_SOURCE_ORIGINAL_MANIFEST_COPY_OPERANDS')
+
+    def _capture_pytest_constructor_v1(self, phase, selected, commands):
+     self._guard()
+     self._require(self._pytest_source_original is None and not self._manifest_signature
+      and 'manifest' in self._attempted and 'manifest' not in self._returned
+      and type(phase) is str and phase in PYTEST_SHARD_COMMANDS
+      and selected is PYTEST_SHARD_COMMANDS[phase] and type(selected) is tuple
+      and type(commands) is list and len(commands) == len(selected)
+      and all(type(command) is list for command in commands)
+      and not any(row[0] == phase for row in self._pytest_constructor_rows),
+      'PYTEST_SOURCE_SINGLE_ORIGINAL_CONSTRUCTION')
+     fields = tuple(self._pytest_source_fields_v1(item) for item in selected)
+     self._require(all(type(item.paths) is tuple and item.paths
+      and type(item.ignores) is tuple
+      and all(type(value) is str for value in (*item.paths, *item.ignores)) for item in selected),
+      'PYTEST_SOURCE_ORIGINAL_PATH_AND_IGNORE_OPERANDS')
+     self._pytest_constructor_rows.append((phase, selected, tuple(selected), fields,
+      commands, tuple(commands), tuple(map(self._argv, commands))))
+     self._pytest_source_guard_v1()
+
+    def _capture_pytest_manifest_v1(self, phase, commands, copies):
+     self._guard()
+     self._require(self._pytest_source_original is None and not self._manifest_signature
+      and 'manifest' in self._attempted and 'manifest' not in self._returned,
+      'PYTEST_SOURCE_COPY_DURING_ORIGINAL_MANIFEST_ONLY')
+     matches = tuple(row for row in self._pytest_constructor_rows
+      if row[0] == phase and row[4] is commands)
+     self._require(len(matches) == 1 and type(copies) is list and len(copies) == len(commands)
+      and all(type(command) is list and command is not prior
+       and self._argv(command) == self._argv(prior)
+       for command, prior in zip(copies, commands))
+      and not any(row[0] is matches[0] for row in self._pytest_manifest_rows),
+      'PYTEST_SOURCE_EXACT_ORIGINAL_MANIFEST_COPY')
+     self._pytest_manifest_rows.append((matches[0], copies, tuple(copies), tuple(map(self._argv, copies))))
+     self._pytest_source_guard_v1()
+
+    def pytest_source_for_bound_row(self, bound_row):
+     self._guard()
+     self._require(self._plan is not None and self._bound is self._bound_original
+      and any(bound_row is row for row in self._bound), 'PYTEST_SOURCE_EXACT_BOUND_OCCURRENCE')
+     position = next(index for index, row in enumerate(self._bound) if row is bound_row)
+     source_row = self.rows[position]
+     self._require(bound_row[2] == source_row[0], 'PYTEST_SOURCE_ORIGINAL_GLOBAL_POSITION')
+     matches = tuple(selected for constructor, commands, refs, values in self._pytest_manifest_rows
+      if constructor[0] == self.phase for selected, original_command in zip(constructor[2], refs)
+      if original_command is source_row[2])
+     self._require(len(matches) == 1, 'PYTEST_SOURCE_EXACT_CONSTRUCTOR_FOR_BOUND_OCCURRENCE')
+     return matches[0]
+
+    def _retain(self, error):
+     if all(error is not old for old in self._errors):
+      self._errors.append(error)
+
+    def _require(self, condition, code):
+     if not condition:
+      error = ValueError("ORDINARY_SOURCE_SELECTION_" + code)
+      self._retain(error)
+      raise error
+
+    def _member(self, value, name):
+     try:
+      return getattr(value, name)
+     except BaseException as error:
+      self._retain(error)
+      raise
+
+    def _argv(self, command):
+     self._require(type(command) in (list, tuple) and bool(command)
+        and all(type(part) is str and "\0" not in part for part in command),
+        "ARGV")
+     return tuple(command)
+
+    def _text_collection(self, value):
+     self._require(type(value) in (list, tuple, set, frozenset)
+        and all(type(item) is str for item in value),
+        "ROUTER_TEXT_COLLECTION")
+     frozen = tuple(value) if type(value) in (list, tuple) else frozenset(value)
+     return (type(value), frozen)
+
+    def _guard(self):
+     if self._errors:
+      raise self._errors[0]
+     try:
+      original = self._original
+      scope = original[0]
+      self._require(
+       scope is self._scope and self.paths is original[1]
+       and self.phase == original[2] and self._V is original[3]
+       and self._P is original[4] and self._runner is original[5]
+       and self._run_binding is original[6]
+       and self._errors is original[7] and self._attempted is original[8]
+       and self._returned is original[9]
+       and tuple(self._functions.items()) == original[10]
+       and tuple(ORDERED_PHASES) == original[11]
+       and type(self.paths) is ValidationRunPathsV1
+       and self.paths.run_id == original[12]
+       and type(self.paths.repo_root) is type(original[13])
+       and self.paths.repo_root == original[13]
+       and self._raw_returns is original[14]
+       and self._history is original[15]
+       and self._filter_returns is original[16]
+       and scope.query is original[17]
+       and scope._ordinary_factory_owner_v1 == original[18]
+       and type(self.phase) is str and self.phase in ORDERED_PHASES
+       and self._V == self.paths.validation_output_root
+       and self._P == self.paths.pytest_basetemp_root
+       and scope._ordinary_runner_owner_v1
+        is scope._ordinary_original_runner_owner_v1 is self._runner
+       and scope._ordinary_run_binding_v1
+        is scope._ordinary_original_run_binding_v1 is self._run_binding
+       and scope._ordinary_source_selection_v1
+        is scope._ordinary_original_source_selection_v1 is self
+       and self._runner._OrdinarySourceSelectionV1 is type(self),
+       "ORIGINAL_OWNER_PATHS_AND_PRODUCT")
+      self._pytest_source_guard_v1()
+      # Native precursor checks stay at the original Scope seams.
+      for stage, member in self._SOURCE_MEMBERS:
+       self._require(getattr(self._runner, member) is self._functions[stage],
+          "SOURCE_MEMBER_REBOUND")
+      self._require(len(self._raw_returns) == len(self._returned)
+         and all(self._returned.get(stage) is returned
+           and self._source_function(stage) is function
+           for stage, function, returned in self._raw_returns),
+         "ORIGINAL_SOURCE_RETURN")
+      if self._manifest_signature:
+       self._require(type(self._manifest) is list
+          and len(self._manifest) == len(self._manifest_signature),
+          "MANIFEST_DRIFT")
+       for actual, saved in zip(self._manifest, self._manifest_signature):
+        row, phase, count, commands, identities, values = saved
+        self._require(actual is row and type(row) is dict
+           and set(row) == {"phase", "command_count", "commands"}
+           and type(row["phase"]) is str
+           and row["phase"] == phase
+           and type(row["command_count"]) is int
+           and row["command_count"] == count
+           and row["commands"] is commands
+           and len(commands) == len(identities)
+           and all(command is old for command, old
+             in zip(commands, identities))
+           and tuple(map(self._argv, commands)) == values,
+           "MANIFEST_DRIFT")
+      if self._manifest_signature:
+       self._selection_chain_fence()
+      if self._repo_call is not None:
+       self._require(self._repo_call is self._repo_call_original
+          and type(self._repo_call) is self._repo_call_value[0]
+          and str(self._repo_call) == self._repo_call_value[1]
+          and self._repo_call == self.paths.repo_root,
+          "REPOSITORY_CALL_DRIFT")
+      if self._branch_producer is not None:
+       module, function = self._branch_producer
+       self._require(self._runner.sys.modules.get("tools.ci_branch_context")
+           is module
+          and getattr(module, "current_branch_context") is function,
+          "BRANCH_SOURCE_REBOUND")
+      if "branch" in self._returned:
+       self._require(self._returned["branch"] is self._branch
+          and self._member(self._branch, "branch") == self._branch_value,
+          "BRANCH_CONTEXT_DRIFT")
+      if self._routing_inputs is not None:
+       mode, changed, values = self._routing_inputs
+       self._require(tuple(changed) == values
+          and self._returned["routing"] is self._routing_value,
+          "ROUTING_INPUT_DRIFT")
+      if self._router_fields is not None:
+       result = self._returned["router"]
+       required, required_values, full, reason, failures, failure_values = (
+        self._router_fields)
+       self._require(
+        self._text_collection(self._member(result, "required_validators"))
+         == required_values
+        and self._member(result, "full_validation_required") is full
+        and self._member(result, "full_validation_reason") == reason
+        and self._text_collection(self._member(result, "fail_closed_reasons"))
+         == failure_values,
+        "ROUTER_GENERATION_DRIFT")
+       changed = self._router_inputs[1]
+       self._require(tuple(changed) == self._router_inputs[2],
+          "ROUTER_INPUT_DRIFT")
+      if self._execution is not None:
+       self._require(self._returned["project"] is self._execution
+          and len(self._execution) == len(self._execution_fields)
+          and all(entry is old and self._execution_fields_of(entry) == fields
+            for entry, (old, fields)
+            in zip(self._execution, self._execution_fields)),
+          "EXECUTION_PROJECTION_DRIFT")
+      if self._plan is not None:
+       self._require(len(self._plan) == len(self._plan_fields)
+          and all(entry is old and self._plan_fields_of(entry) == fields
+            for entry, (old, fields)
+            in zip(self._plan, self._plan_fields)),
+          "BOUND_PLAN_DRIFT")
+       self._require(self._bound is self._bound_original
+          and len(self._bound) == len(self.rows)
+          and all(type(triple) is tuple and len(triple) == 3
+            and triple[0] is entry and triple[1] is execution
+            and triple[2] == row[0]
+            for triple, entry, execution, row in zip(
+             self._bound, self._plan, self._execution, self.rows)),
+          "BOUND_SOURCE_ROWS_DRIFT")
+     except BaseException as error:
+      self._retain(error)
+      raise
+
+
+    def _rows_match(self, actual, expected):
+     return (type(actual) is tuple and len(actual) == len(expected)
+       and all(type(row) is tuple and len(row) == 5
+         and row[0] == old[0] and row[1] == old[1]
+         and row[2] is old[2] and row[3] == old[3]
+         and row[4] is old[4]
+         for row, old in zip(actual, expected)))
+
+    def _selection_chain_fence(self):
+     first, source_commands = 1, None
+     for saved in self._manifest_signature:
+      if saved[1] == self.phase:
+       source_commands = saved[3]
+       break
+      first += saved[2]
+     self._require(source_commands is not None
+        and len(self._history) == len(self._filter_returns) + 1,
+        "ORIGINAL_SELECTION_CHAIN")
+     expected = tuple((first + i, i + 1, command, self._argv(command), command)
+         for i, command in enumerate(source_commands))
+     commands, rows, values = self._history[0]
+     self._require(commands is source_commands and self._rows_match(rows, expected)
+        and tuple(map(self._argv, commands)) == values,
+        "ORIGINAL_SOURCE_ROWS")
+     for number, record in enumerate(self._filter_returns):
+      stage, result, prior_commands, prior_rows, kept_rows, identities, values = record
+      self._require(stage == ("foreign" if number == 0 else "router_filter")
+         and number < 2 and self._returned[stage] is result
+         and type(result) is tuple and len(result) == 2
+         and prior_commands is commands and prior_rows is rows,
+         "ORIGINAL_FILTER_CHAIN")
+      kept, indices = result
+      self._require(type(kept) is list and type(indices) is tuple
+         and len(kept) == len(indices) == len(identities)
+         and all(type(command) is list for command in kept)
+         and all(command is original for command, original
+           in zip(kept, identities))
+         and tuple(map(self._argv, kept)) == values,
+         "ACTUAL_COPIED_FILTER_OUTPUT")
+      previous, expected_rows = -1, []
+      for command, index in zip(kept, indices):
+       self._require(type(index) is int and previous < index < len(rows)
+          and self._argv(command) == self._argv(commands[index]),
+          "ORIGINAL_EMITTED_ORDINAL")
+       previous = index
+       old = rows[index]
+       expected_rows.append((old[0], old[1], old[2], old[3], command))
+      history_commands, history_rows, history_values = self._history[number + 1]
+      self._require(history_commands is kept and history_rows is kept_rows
+         and history_values == values
+         and self._rows_match(kept_rows, tuple(expected_rows)),
+         "PINNED_RESULT_ROWS")
+      commands, rows = kept, kept_rows
+     self._require(self.commands is commands and self.rows is rows,
+        "CURRENT_SELECTION_REBOUND")
+
+    def _begin(self, stage):
+     self._guard()
+     self._require(stage not in self._attempted, "ONE_" + stage.upper())
+     self._attempted.add(stage)  # reserve before the next fallible operation
+
+    def _source_function(self, stage):
+     return (self._branch_producer[1] if stage == "branch"
+       else self._functions[stage])
+
+    def _produce(self, stage, *args, **kwargs):
+     self._require(stage in self._attempted and stage not in self._returned,
+        "ORIGINAL_PRODUCER_ATTEMPT")
+     try:
+      function = self._source_function(stage)
+      returned = function(*args, **kwargs)
+      self._raw_returns.append((stage, function, returned))
+      self._returned[stage] = returned  # retain before interpretation
+      return returned
+     except BaseException as error:
+      self._retain(error)
+      raise
+
+    def _before_projection(self):
+     self._require("project" not in self._attempted and "bind" not in self._attempted,
+        "SELECTION_BEFORE_PROJECTION")
+
+    def current_branch_context(self, repo_root):
+     self._begin("branch")
+     self._before_projection()
+     self._require(type(repo_root) is type(self.paths.repo_root)
+        and repo_root == self.paths.repo_root, "ORIGINAL_REPOSITORY")
+     self._repo_call = self._repo_call_original = repo_root
+     self._repo_call_value = (type(repo_root), str(repo_root))
+     try:
+      # Keep this original local import at the original caller point.
+      from tools.ci_branch_context import current_branch_context as source_branch
+      module = self._runner.sys.modules.get("tools.ci_branch_context")
+      self._require(module is not None
+         and getattr(module, "current_branch_context") is source_branch,
+         "ACTUAL_BRANCH_SOURCE")
+      self._branch_producer = (module, source_branch)
+     except BaseException as error:
+      self._retain(error)
+      raise
+     result = self._produce("branch", repo_root)
+     self._branch = result
+     self._branch_value = self._member(result, "branch")
+     self._require(type(self._branch_value) in (str, type(None)), "BRANCH_VALUE")
+     self._guard()
+     return result
+
+    def _apply_source_result(self, stage, result):
+     before_commands, before_rows = self.commands, self.rows
+     self._require(type(result) is tuple and len(result) == 2, "FILTER_RESULT")
+     kept, indices = result
+     self._require(type(kept) is list and type(indices) is tuple
+        and len(kept) == len(indices), "FILTER_RESULT")
+     previous = -1
+     for command, index in zip(kept, indices):
+      self._require(type(command) is list and type(index) is int
+         and previous < index < len(before_commands)
+         and self._argv(command) == self._argv(before_commands[index]),
+         "SOURCE_FILTER_ORDINAL")
+      previous = index
+     self.rows = tuple((before_rows[i][0], before_rows[i][1],
+         before_rows[i][2], before_rows[i][3], command)
+         for command, i in zip(kept, indices))
+     self.commands = kept
+     values = tuple(map(self._argv, kept))
+     self._filter_returns.append((stage, result, before_commands, before_rows,
+            self.rows, tuple(kept), values))
+     self._history.append((kept, self.rows, values))
+     self._guard()
+     return kept
+
+    def foreign_filter(self):
+     self._begin("foreign")
+     self._before_projection()
+     self._require("branch" in self._returned
+        and "routing" not in self._attempted, "FOREIGN_FILTER_ORDER")
+     result = self._produce("foreign", self.commands, branch=self._branch_value)
+     return self._apply_source_result("foreign", result)
+
+    def routing_active(self, validation_mode, changed_files):
+     self._begin("routing")
+     self._before_projection()
+     self._require("foreign" in self._returned
+        and type(validation_mode) is str
+        and type(changed_files) in (list, tuple)
+        and all(type(path) is str for path in changed_files),
+        "ROUTING_INPUTS_AND_ORDER")
+     self._routing_inputs = (validation_mode, changed_files, tuple(changed_files))
+     result = self._produce("routing", validation_mode=validation_mode,
+          changed_files=changed_files)
+     self._routing_value = result
+     self._require(type(result) is bool, "ROUTING_RESULT")
+     self._guard()
+     return result
+
+    def router_result_for_current_context(self, repo_root, changed_files,
+             base_ref, head_ref, force_full, manual_mode):
+     self._begin("router")
+     self._before_projection()
+     self._require(self._routing_value is True
+        and repo_root is self._repo_call_original
+        and changed_files is self._routing_inputs[1],
+        "ORIGINAL_ROUTER_INPUTS")
+     self._router_inputs = (repo_root, changed_files, tuple(changed_files),
+          base_ref, head_ref, force_full, manual_mode)
+     result = self._produce(
+      "router", repo_root, changed_files=changed_files,
+      base_ref=base_ref, head_ref=head_ref, force_full=force_full,
+      manual_mode=manual_mode)
+     required = self._member(result, "required_validators")
+     full = self._member(result, "full_validation_required")
+     reason = self._member(result, "full_validation_reason")
+     failures = self._member(result, "fail_closed_reasons")
+     self._router_fields = (
+      required, self._text_collection(required), full, reason,
+      failures, self._text_collection(failures))
+     self._require(type(full) is bool and type(reason) in (str, type(None)),
+        "ROUTER_FIELDS")
+     self._guard()
+     return result
+
+    def router_filter(self):
+     self._begin("router_filter")
+     self._before_projection()
+     self._require("router" in self._returned
+        and self._router_fields[2] is False, "ROUTER_FILTER_REQUIRED")
+     result = self._produce(
+      "router_filter", self.commands, phase=self.phase,
+      router_result=self._returned["router"])
+     return self._apply_source_result("router_filter", result)
+
+    def _execution_fields_of(self, entry):
+     self._require(type(entry) is ExecutionPlanEntry
+        and type(entry.registered_argv) is tuple
+        and type(entry.timing_identity_argv) is tuple
+        and type(entry.execution_argv) is tuple
+        and type(entry.st12g_adapter_applied) is bool
+        and type(entry.qku_root_import_adapter_applied) is bool,
+        "EXECUTION_ENTRY")
+     return (self._argv(entry.registered_argv),
+       self._argv(entry.timing_identity_argv),
+       self._argv(entry.execution_argv),
+       entry.st12g_adapter_applied, entry.qku_root_import_adapter_applied)
+
+    def _plan_fields_of(self, entry):
+     self._require(type(entry) is CommandEvidencePlanEntry, "PLAN_ENTRY")
+     return (entry.run_id, entry.phase, entry.command_index, entry.cwd,
+       self._argv(entry.argv))
+
+    def project(self):
+     self._begin("project")
+     self._require("foreign" in self._returned
+        and "routing" in self._returned, "SOURCE_SELECTION_COMPLETE")
+     if self._routing_value:
+      self._require("router" in self._returned, "ORIGINAL_ROUTER_RESULT")
+      self._require(not self._router_fields[5][1], "ROUTER_FAIL_CLOSED")
+      self._require(self._router_fields[2] is True
+         or "router_filter" in self._returned,
+         "REQUIRED_ROUTER_FILTER_NOT_SKIPPED")
+     result = self._produce("project", self.commands)
+     self._execution = result
+     self._require(type(result) is tuple and len(result) == len(self.rows),
+        "ORIGINAL_EXECUTION_TUPLE")
+     self._execution_fields = tuple(
+      (entry, self._execution_fields_of(entry)) for entry in result)
+     self._require(all(fields[0] == self._argv(row[4])
+         for (entry, fields), row
+         in zip(self._execution_fields, self.rows)),
+        "REGISTERED_SOURCE_PROJECTION")
+     self._guard()
+     return result
+
+    def bind(self, paths, plan, *, execution_plan):
+     self._begin("bind")
+     self._require(paths is self.paths and type(plan) is tuple
+        and execution_plan is self._execution
+        and "project" in self._returned,
+        "ORIGINAL_PLAN_BINDING")
+     self._plan = plan  # retain attempted actual binding before validation
+     self._require(
+      self._runner._RUN_COMMANDS_ACTIVE_PATHS is paths
+      and self._runner._LAST_EXPECTED_COMMAND_PLAN is plan
+      and self._runner._LAST_PLANNED_COMMAND_COUNT == len(plan)
+      and len(plan) == len(execution_plan) == len(self.rows),
+      "ORIGINAL_PUBLISHED_PLAN")
+     self._plan_fields = tuple(
+      (entry, self._plan_fields_of(entry)) for entry in plan)
+     bound = []
+     for runtime_index, (entry, execution, row) in enumerate(
+       zip(plan, execution_plan, self.rows), 1):
+      self._require(type(entry.command_index) is int
+         and entry.command_index == runtime_index
+         and entry.run_id == paths.run_id
+         and entry.phase == self.phase
+         and entry.cwd == str(paths.repo_root)
+         and entry.argv == execution.execution_argv
+         and execution.registered_argv == self._argv(row[4]),
+         "RUNTIME_SOURCE_OCCURRENCE")
+      bound.append((entry, execution, row[0]))
+     self._bound = self._bound_original = tuple(bound)
+     self._guard()
+     return self._bound
+
+    def bound_rows(self, paths, plan, execution_plan, *, phase):
+     self._guard()
+     scope = self._scope
+     binding = self._run_binding
+     original = binding.get("original") if type(binding) is dict else None
+     self._require("bind" in self._attempted and self._plan is not None
+        and paths is self.paths and plan is self._plan
+        and execution_plan is self._execution and phase == self.phase
+        and scope._ordinary_bound_paths_v1 is paths
+        and scope._ordinary_bound_plan_v1 is plan
+        and scope._ordinary_execution_plan_v1
+         is scope._ordinary_original_execution_plan_v1 is execution_plan
+        and scope._ordinary_run_binding_v1
+         is scope._ordinary_original_run_binding_v1 is binding
+        and type(binding) is dict and binding.get("bound") is True
+        and binding.get("paths") is paths and binding.get("plan") is plan
+        and type(original) is tuple and len(original) == 4
+        and original[0] is binding and original[1] is paths
+        and original[2] is plan
+        and original[3] == scope._ordinary_factory_owner_v1,
+        "ACTUAL_SCOPE_BOUND_REFERENCES")
+     return self._bound
+
+
+# ASSERTION TEXT ONLY; no QTT, test, fixture, or native execution:
+# - Default route: original foreign predicate + routing=False -> no router call;
+#   project/bind preserve every actually retained occurrence in source order.
+# - Reduced route: required router_filter cannot be skipped; ordinals arise only
+#   from the original fixed predicate core, never from caller supplied subsets.
+# - Duplicate equal argv: distinct source-global/source-phase ordinals survive;
+#   copied equal-valued command/projection/plan replacements do not bind later.
+# - Empty predicate result: metadata may represent/project an exact empty tuple;
+#   this does not relax the current original Scope native phase/empty/admission guards.
+# - Changed commands, changed_files, router fields, function owners, or runpaths:
+#   sticky failure, no producer retry and no native permission from metadata.
+
+
+def _ordinary_source_selection_for_main_v1(paths, phase, V, P):
+ # Add this function to the actual original RUN module, beside its main owner.
+ if not _ORDINARY_CANDIDATE_FIRST_V1:
+  return None
+ from tools.validation_reliability import (
+  _LINUX_PREFLIGHT_PROCESS_V1,
+  _LinuxPreflightScopeV1,
+ )
+
+ scope = _LINUX_PREFLIGHT_PROCESS_V1.get()
+ if type(scope) is not _LinuxPreflightScopeV1 or not scope._ordinary_selected_v1():
+  return None
+ if (scope._ordinary_runner_owner_v1 is not sys.modules[__name__]
+   or scope._ordinary_original_runner_owner_v1 is not sys.modules[__name__]):
+  raise ValueError('ORDINARY_SOURCE_SELECTION_ACTUAL_MAIN_OWNER')
+ return scope._ordinary_select_source_occurrences_v1(paths, phase, V, P)
+
+
+
+def _ordinary_phase_occurrence_selection_v1(scope, paths, plan, execution_plan, *, phase):
+ """Check the actual source-selected generation without granting effects."""
+ from tools import validation_reliability as owner
+
+ require = owner._preflight_require_v1
+ require(
+  type(scope) is owner._LinuxPreflightScopeV1
+  and type(paths) is ValidationRunPathsV1
+  and paths is scope._ordinary_bound_paths_v1
+  and plan is scope._ordinary_bound_plan_v1
+  and execution_plan is scope._ordinary_execution_plan_v1
+  and execution_plan is scope._ordinary_original_execution_plan_v1
+  and type(plan) is tuple and type(execution_plan) is tuple
+  and type(phase) is str and phase in ORDERED_PHASES
+  and scope._ordinary_runner_owner_v1 is sys.modules[__name__]
+  and scope._ordinary_original_runner_owner_v1 is sys.modules[__name__],
+  'ORDINARY_COMPILER_ORIGINAL_SELECTED_PHASE_BINDINGS',
+ )
+ (scope._ordinary_precursor_ready_v1 if phase == POST_VALIDATION_PHASE
+  else scope._ordinary_precursor_lineage_v1)()
+ selection = getattr(scope, '_ordinary_source_selection_v1', None)
+ require(
+  type(selection) is _OrdinarySourceSelectionV1
+  and selection is getattr(scope, '_ordinary_original_source_selection_v1', None),
+  'ORDINARY_COMPILER_ORIGINAL_SOURCE_SELECTION_PRODUCT',
+ )
+ # No manifest rebuild, argv search, object-ID map, re-selection or reprojection.
+ return selection.bound_rows(paths, plan, execution_plan, phase=phase)
+
+
+
+def _ordinary_post_ceiling_programme_v1(*, original_cutoffs):
+    """Select finite R2 engineering ceilings before any ordinary native prefix.
+
+    The pure result supplies no Scope, filesystem, process or policy authority.
+    Its identical limit dictionaries must survive the actual native adoption,
+    complete source census, C handoff and final resource settlement.
+    """
+    if (type(original_cutoffs) is not tuple or len(original_cutoffs) != 4
+      or any(type(value) is not int or not 0 < value < 1 << 63 for value in original_cutoffs)
+      or not original_cutoffs[0] < original_cutoffs[1] < original_cutoffs[2] < original_cutoffs[3]):
+     raise ValueError('ORDINARY_COMPILER_EXACT_ORIGINAL_CUTOFFS')
+    # Ordinary syscall attempts include legitimate one-byte progress. They are
+    # not the independently limited native Query administrative attempts.
+    raw_reads, raw_writes = 512 << 40, 128 << 40
+    control_reads, control_writes = 128 << 30, 64 << 30
+    ancestry_calls = 32 * 65536 * (16 + 12 * (4096 + 1))
+    control_calls = control_reads + control_writes + ancestry_calls + 65536
+    limits = dict(baseline_byte_limit=32 << 30, generation_byte_limit=32 << 30,
+     index_byte_limit=16 << 20, namespace_entry_limit=65536,
+     path_pool_byte_limit=256 << 20, single_path_byte_limit=4096,
+     action_record_limit=0, diagnostic_owner_byte_limit=256 << 20,
+     raw_read_byte_limit=raw_reads, raw_write_byte_limit=raw_writes,
+     raw_retained_byte_limit=(32 << 30) + (16 << 20), extra_held_byte_limit=0,
+     extra_held_carrier_limit=0, metadata_byte_limit=1 << 30,
+     metadata_call_limit=raw_reads + raw_writes + control_calls,
+     metadata_read_limit=control_reads, metadata_write_limit=control_writes,
+     native_control_read_limit=control_reads, native_control_write_limit=control_writes,
+     native_control_call_limit=control_calls, heap_byte_limit=4 << 30,
+     native_handle_limit=4096, carrier_file_byte_limit=32 << 30,
+     allocated_storage_byte_limit=256 << 30, mapper_activation_read_reserve=0,
+     mapper_activation_retained_reserve=0, file_baseline_rows=32768,
+     file_generation_rows=32768, directory_baseline_rows=4096,
+     directory_generation_rows=4096, roster_baseline_edges=65536,
+     roster_generation_edges=65536)
+    layout = tuple(_ValidationCandidateCustodyV1._disk_control_layout_v1(limits).items())
+    fd_program = dict(controller=1536, fork_prefix=1536, application=64,
+     launcher=64, query=64, prefix_capture=128, manager_borrow=128, additional=576)
+    # This is an ordinary allocation from the R2 256-MiB total, not a transfer
+    # of FIRST8 limits: prefix1/8, administration1/2, applications3/8.
+    output_partition = dict(delivered_bytes=256 << 20, prefix_bytes=32 << 20,
+     administrative_bytes=128 << 20, application_bytes=96 << 20,
+     application_stream_bytes=12 << 20, report_body_bytes=256 << 20)
+    # These lower count ceilings bound retained cells before acquisition.
+    # They do not admit vectors not selected by the actual source programme.
+    evidence_programme = dict(query_command_count=512, native_response_count=4096,
+     application_occurrence_count=4, atomic_payload_bytes=1 << 20,
+     binding_payload_bytes=1 << 20, release_payload_bytes=4096,
+     administrative_attempts=65536)
+    programme = dict(limits=limits, control_layout=layout, fd_program=fd_program,
+     output_partition=output_partition, evidence_programme=evidence_programme,
+     original_cutoffs=original_cutoffs)
+    programme['original'] = (programme, limits, tuple(limits.items()), layout,
+     fd_program, tuple(fd_program.items()), output_partition,
+     tuple(output_partition.items()), evidence_programme,
+     tuple(evidence_programme.items()), original_cutoffs)
+    return programme
+
+
+def _ordinary_post_ceiling_checked_v1(programme):
+ from tools import validation_reliability as owner
+ require = owner._preflight_require_v1
+ if type(programme) is dict and 'phase_source' in programme:
+  return owner._ordinary_phase_ceiling_checked_v1(programme)
+ require(type(programme) is dict and set(programme) ==
+  {'limits', 'control_layout', 'fd_program', 'output_partition',
+  'evidence_programme', 'original_cutoffs', 'original'},
+  'ORDINARY_COMPILER_EXACT_EARLY_PROGRAMME')
+ original = programme['original']
+ require(type(original) is tuple and len(original) == 11 and original[0] is programme
+  and programme['limits'] is original[1] and tuple(original[1].items()) == original[2]
+  and programme['control_layout'] is original[3]
+  and programme['fd_program'] is original[4] and tuple(original[4].items()) == original[5]
+  and programme['output_partition'] is original[6] and tuple(original[6].items()) == original[7]
+  and programme['evidence_programme'] is original[8] and tuple(original[8].items()) == original[9]
+  and programme['original_cutoffs'] is original[10]
+  and sum(original[4].values()) == 4096
+  and original[6]['prefix_bytes'] + original[6]['administrative_bytes']
+   + original[6]['application_bytes'] == original[6]['delivered_bytes']
+  and 8 * original[6]['application_stream_bytes'] == original[6]['application_bytes'],
+  'ORDINARY_COMPILER_ORIGINAL_EARLY_PROGRAMME_VALUES')
+ require(tuple(_ValidationCandidateCustodyV1._disk_control_layout_v1(original[1]).items())
+  == original[3], 'ORDINARY_COMPILER_ORIGINAL_CONTROL_CAPACITY')
+ return programme
+
+
+def _ordinary_prefix_output_limits_v1(programme, role):
+    """Partition the original two physical prefix capture layers once.
+
+    The independently selected total is32MiB. Mirrored or repeated delivered
+    bytes are not collapsed; each of the two existing layers has a disjoint
+    16MiB cell, divided between its actual stdout/stderr owners.
+    """
+    from tools import validation_reliability as owner
+    programme = _ordinary_post_ceiling_checked_v1(programme)
+    owner._preflight_require_v1(type(role) is str and role in ('PROVISION', 'CONTROLLER'),
+     'ORDINARY_PREFIX_SOURCE_SELECTED_CAPTURE_LAYER')
+    total = programme['output_partition']['prefix_bytes']
+    owner._preflight_require_v1(type(total) is int and total == 32 << 20,
+     'ORDINARY_PREFIX_ORIGINAL_TOTAL_OUTPUT_ALLOCATION')
+    cell = total // 2
+    stream = cell // 2
+    return dict(stdout_bytes=stream, stderr_bytes=stream, combined_output_bytes=cell)
+
+
+def _ordinary_post_prefix_checked_v1(prefix_programme, ceiling_programme):
+ """Reproduce exact source-selected capacity without granting any native I/O."""
+ from tools import validation_reliability as owner
+ require = owner._preflight_require_v1
+ caps = _ordinary_post_ceiling_checked_v1(ceiling_programme)
+ operations = ('COMMON_SHOW', 'BOOTSTRAP_SHOW', 'COMMON_SHOW_AFTER', 'BOOTSTRAP_SHOW_AFTER',
+  'MANAGER_SHOW', 'PRLIMIT_VERSION', 'FORMATTER_VERSION', 'INITIAL_GIT_DIR',
+  'INITIAL_GIT_COMMON_DIR', 'INITIAL_GIT_INDEX', 'HOST_FORMAT', 'HOST_MOUNT',
+  'HOST_MOUNT_READBACK', 'CONTROLLER_POLICY_COMPILE', 'CONTROLLER_POLICY_LOAD',
+  'CONTROLLER_POLICY_REMOVE')
+ commands = caps['evidence_programme']['query_command_count']
+ responses = caps['evidence_programme']['native_response_count']
+ outer, source, index = 256 << 20, (4 * 2 + 16 + 2 + 2) << 20, caps['limits']['index_byte_limit']
+ cells = 16 + 7 + 1 + 5 * commands + 2 * responses + 16
+ metadata = cells * 65536
+ demand = (outer + source + index + 3 * caps['output_partition']['administrative_bytes']
+  + commands * caps['evidence_programme']['atomic_payload_bytes']
+  + (32 << 20) + (64 << 20) + (8 << 20) + 16 * 4096 + metadata)
+ extent = ((demand + (1 << 20) - 1) // (1 << 20)) * (1 << 20)
+ inodes = ((cells + 63) // 64) * 64
+ require(type(prefix_programme) is tuple and len(prefix_programme) == 12
+  and type(prefix_programme[0]) is int and prefix_programme[0] == 1
+  and type(prefix_programme[1]) is tuple and prefix_programme[1] == operations
+  and all(type(prefix_programme[index]) is int for index in range(2, 10))
+  and prefix_programme[2:10] == (commands, responses, extent, inodes, outer, source, index, metadata)
+  and prefix_programme[10] is caps and prefix_programme[11] is caps['original_cutoffs']
+  and extent <= caps['limits']['heap_byte_limit'] and inodes < 131072,
+  'ORDINARY_COMPILER_EXACT_ORIGINAL_PREFIX_CAPACITY')
+ return prefix_programme
+
+
+def _ordinary_post_installation_programme_v1(census, *, destination, controller_runtime_roles=None):
+    """Derive installation payload geometry from the complete original census.
+
+    This is part of the original resource compiler, not a copy owner or a
+    capacity grant. Every lexical FILE row needs its own independent copied
+    target even when its accepted installation alias observes another row's
+    source inode. Actual native wrappers and close debts remain Scope-owned.
+    """
+    from tools.validation_scope_registry import _facet_fn_post_installation_programme_v1 as _d
+    return _d(census, destination=destination, controller_runtime_roles=controller_runtime_roles)
+
+
+def _ordinary_nested_resource_demand_v1(caps):
+ from tools.validation_inventory import _facet_run_nested_resource_demand_v1 as _d
+ return _d(caps)
+
+
+def _ordinary_post_namespace_programme_v1(scope, *, root_parent, ceiling_programme=None):
+    """Compile actual namespace target names before the HOST image allocation.
+
+    The late original RUN path is not minted here. Its independently selected
+    maximum64 component chain is refined against the authentic resolver's
+    object before any target creation. No dictionary supplies native authority.
+    """
+    from tools.validation_scope_registry import _facet_run_post_namespace_programme_v1 as _d
+    return _d(scope, root_parent=root_parent, ceiling_programme=ceiling_programme)
+
+
+def _ordinary_candidate_demand_from_source_v1(scope, programme, census):
+    """Derive C's finite programme from the SAME complete source/effect inputs.
+
+    This is arithmetic and immutable operand binding, not capacity acquisition.
+    The original phase compiler seals this result in its existing product; C
+    subsequently compares INITIAL nodes and its actual remaining shared meter.
+    Already acquired SOURCE/native prefix work is outside this C-local demand.
+    """
+    from tools import validation_reliability as owner
+    need = owner._preflight_require_v1
+    need(type(scope) is owner._LinuxPreflightScopeV1,
+     'ORDINARY_C_DEMAND_ORIGINAL_SCOPE_TYPE')
+    need(programme is scope._ordinary_effect_programme_record_v1(),
+     'ORDINARY_C_DEMAND_COMPLETE_GENUINE_SOURCE_EFFECT_PRODUCT')
+    source = scope.source
+    need(type(source) is owner._LinuxImmutableSourceSealV2
+     and type(census) is owner._LinuxPreflightCensusV1
+     and source.census is census and census.complete and not census.failures
+     and source.state == 'READABLE' and source.failure is None
+     and source.phase == 'work' and len(source.post) == len(source.rows)
+     and type(programme) is dict and programme['scope'] is scope
+     and programme['source'] is source and programme['plan'] is scope._ordinary_bound_plan_v1
+     and programme['paths'] is scope._ordinary_bound_paths_v1
+     and programme['execution_plan'] is scope._ordinary_execution_plan_v1
+     and type(programme['rows']) is tuple
+     and len(programme['rows']) == len(programme['plan']) > 0
+     and not programme['errors']
+     and (source.pid, source.thread) == (os.getpid(), threading.get_ident())
+      == scope._ordinary_factory_owner_v1,
+     'ORDINARY_C_DEMAND_ORIGINAL_SOURCE_PLAN_AND_OWNER')
+    projection = scope._ordinary_census_meter_projection_v1(census)
+    source_projection = scope._ordinary_source_meter_projection_v1(source)
+    need(projection['scope'] is scope and projection['census'] is census
+     and projection['rows'] is census.records and projection['finished']
+     and not projection['active'] and not projection['errors']
+     and not projection['failures'] and projection['counters']['raw_read'] == 0
+     and source_projection['scope'] is scope and source_projection['source'] is source
+     and source_projection['meter'] is projection['meter'] is scope._ordinary_meter_v1
+     and source_projection['errors'] == [],
+     'ORDINARY_C_DEMAND_AUTHENTIC_COMPLETE_CENSUS_AND_SOURCE_PROJECTION')
+    host = scope._ordinary_host_preparation_v1
+    need(host is scope._ordinary_original_host_preparation_v1
+     and host['meter'] is projection['meter']
+     and host['ceiling_programme'] is host['original_ceiling_programme'],
+     'ORDINARY_C_DEMAND_ORIGINAL_NATIVE_RESOURCE_PRODUCT')
+    limits = host['ceiling_programme']['limits']
+    bindings = scope._ordinary_git_bindings_v1
+    need(bindings['original_source'] is source
+     and bindings['original_queries'] is scope._ordinary_git_queries_v1
+     and type(bindings['index']) is type(source.root),
+     'ORDINARY_C_DEMAND_ORIGINAL_PROTECTED_GIT_INDEX')
+    index_row = source.row_index.get(str(bindings['index']))
+    need(index_row is not None and index_row['kind'] == 'file'
+     and any(index_row is row for row in source.rows)
+     and index_row['logical_bytes'] <= limits['index_byte_limit'],
+     'ORDINARY_C_DEMAND_ACTUAL_INDEPENDENT_INDEX_OPERAND')
+    census_rows = tuple(row for row in census.records if row['role'] == 'repository')
+    need(len(census_rows) == len(source.rows)
+     and all(row is selected for row, selected in zip(source.rows, census_rows, strict=True)),
+     'ORDINARY_C_DEMAND_ORIGINAL_CENSUS_ROW_ORDER_AND_IDENTITY')
+    rows, files, directories, kinds, physical = [], {}, set(), {}, set()
+    for row in source.rows:
+     path = pathlib.Path(row['path'])
+     need(source.row_index.get(row['path']) is row
+      and row['role'] == 'repository' and path.is_relative_to(source.root)
+      and row['observed_path'] == row['path'] and row['aliases'] == []
+      and row['kind'] in ('file', 'directory')
+      and type(row['version']) is list and len(row['version']) == 11
+      and all(type(value) is int for value in row['version'])
+      and type(row['logical_bytes']) is int and row['logical_bytes'] >= 0
+      and source.originals[row['path']]['version'] is row['version'],
+      'ORDINARY_C_DEMAND_COMPLETE_ORIGINAL_SOURCE_ROW')
+     relative = path.relative_to(source.root).as_posix()
+     relative = '' if relative == '.' else relative
+     need(relative not in kinds and (row['version'][0], row['version'][1]) not in physical,
+      'ORDINARY_C_DEMAND_ORIGINAL_FILENAME_AND_PHYSICAL_MULTIPLICITY')
+     physical.add((row['version'][0], row['version'][1]))
+     kinds[relative] = 'FILE' if row['kind'] == 'file' else 'DIRECTORY'
+     if row['kind'] == 'file':
+      need(stat.S_ISREG(row['version'][2]) and row['version'][6] == 1
+       and row['logical_bytes'] == row['version'][3],
+       'ORDINARY_C_DEMAND_SOURCE_FILE_ROLE_CEILING')
+      scope._ordinary_source_file_bound_v1(row)
+      files[relative] = row['logical_bytes']
+     else:
+      need(stat.S_ISDIR(row['version'][2]) and row['logical_bytes'] == 0
+       and type(row['roster']) is list and len(row['roster']) == len(set(row['roster']))
+       and all(source.row_index.get(str(path / name)) is not None for name in row['roster']),
+       'ORDINARY_C_DEMAND_COMPLETE_SOURCE_DIRECTORY_ROSTER')
+      directories.add(relative)
+     rows.append((row, relative, row['kind'], tuple(row['version']), row['logical_bytes'],
+      tuple(row['roster']), source.originals[row['path']],
+      tuple(source.originals[row['path']].items()), tuple(source.post[row['path']])))
+    need(kinds.get('') == 'DIRECTORY' and len(kinds) == len(source.rows)
+     and len({name.casefold() for name in kinds}) == len(kinds),
+     'ORDINARY_C_DEMAND_ONE_COMPLETE_LOGICAL_ROOT')
+    for projection_row in bindings['projections']:
+     need(projection_row['original_source'] is source
+      and projection_row['kind'] in ('GIT_DIRECTORY', 'GIT_POINTER', 'INDEX'),
+      'ORDINARY_C_DEMAND_ORIGINAL_GIT_PROJECTION')
+     for operand in projection_row['source_records'].values():
+      need(source.row_index.get(operand['source_row']['path']) is operand['source_row']
+       and operand['descriptor_version'] == source.post[operand['source_row']['path']],
+       'ORDINARY_C_DEMAND_PROJECTED_SOURCE_NOT_DOUBLE_COUNTED')
+    file_targets, directory_targets, parent_targets = set(), set(), set()
+    occurrence_files, target_operands = [], []
+    for ordinal, row in enumerate(programme['rows']):
+     need(row['entry'] is programme['plan'][ordinal]
+      and row['execution'] is programme['execution_plan'][ordinal]
+      and type(row['targets']) is tuple and type(row['source_operands']) is tuple,
+      'ORDINARY_C_DEMAND_ORIGINAL_OCCURRENCE_EFFECT_ROW')
+     selected_files = set()
+     for target in row['targets']:
+      name, kind = target['path'], target['kind']
+      need(type(target) is dict and kind in ('FILE', 'DIRECTORY')
+       and _is_portable_relative_repo_path(name)
+       and type(target['actions']) is tuple and target['actions']
+       and set(target['actions']) <= {'WRITE', 'CREATE', 'DELETE'}
+       and type(target['parent_paths']) is tuple
+       and all(_is_portable_relative_repo_path(parent) for parent in target['parent_paths'])
+       and type(target['source_operands']) is tuple,
+       'ORDINARY_C_DEMAND_SOURCE_SELECTED_TARGET_SHAPE')
+      scope._ordinary_require_non_git_mutation_v1(name)
+      for parent_name in target['parent_paths']:
+       scope._ordinary_require_non_git_mutation_v1(parent_name)
+      need(name not in kinds or kinds[name] == kind,
+       'ORDINARY_C_DEMAND_NO_SOURCE_KIND_CONVERSION')
+      if kind == 'FILE':
+       selected_files.add(name)
+       file_targets.add(name)
+      else:
+       directory_targets.add(name)
+      parent_targets.update(target['parent_paths'])
+      target_operands.append((row, target, tuple(target.items())))
+     occurrence_files.append(tuple(sorted(selected_files)))
+    need(not (file_targets & (directory_targets | parent_targets))
+     and all(name not in kinds or kinds[name] == 'DIRECTORY'
+      for name in directory_targets | parent_targets),
+     'ORDINARY_C_DEMAND_UNAMBIGUOUS_KNOWN_FILE_DIRECTORY_NAMES')
+    prospective_files = set(files) | file_targets
+    prospective_directories = directories | directory_targets | parent_targets
+    known = prospective_files | prospective_directories
+    for name in tuple(known):
+     if name:
+      parent = name.rpartition('/')[0]
+      need(parent in prospective_directories,
+       'ORDINARY_C_DEMAND_COMPLETE_SOURCE_SELECTED_PARENT_CHAIN')
+    need(len(known) == len(prospective_files) + len(prospective_directories)
+     and len({name.casefold() for name in known}) == len(known),
+     'ORDINARY_C_DEMAND_EXACT_KNOWN_NAME_COVERAGE')
+    source_bytes, initial_files = sum(files.values()), len(files)
+    restoration_bytes = sum(length for name, length in files.items() if name in file_targets)
+    file_bound = 128 << 20
+    union_mutable_bytes = file_bound * len(file_targets)
+    source_later_bound = source_bytes - restoration_bytes + union_mutable_bytes
+    generation_pool = limits['generation_byte_limit']
+    need(type(generation_pool) is int and generation_pool == 32 << 30,
+     'ORDINARY_C_DEMAND_ORIGINAL_COUPLED_GENERATION_POOL')
+    later_bytes = min(source_later_bound, generation_pool)
+    source_mutable_bounds = tuple(file_bound * len(names) for names in occurrence_files)
+    mutable = tuple(min(value, generation_pool) for value in source_mutable_bounds)
+    runner = scope._ordinary_runner_owner_v1
+    need(runner is sys.modules[__name__], 'ORDINARY_C_DEMAND_ORIGINAL_RUNNER_OWNER')
+    rolling_methods = (
+     (runner._ValidationCandidateCustodyV1, '_disk_retire_raw_v1',
+      runner._ValidationCandidateCustodyV1._disk_retire_raw_v1),
+     (runner._ValidationCandidateCustodyV1, '_disk_rolling_disposal_context_v1',
+      runner._ValidationCandidateCustodyV1._disk_rolling_disposal_context_v1),
+     (runner._ValidationCandidateCustodyV1, '_disk_rolling_disposal_checked_v1',
+      runner._ValidationCandidateCustodyV1._disk_rolling_disposal_checked_v1),
+     (owner._LinuxPreflightScopeV1, 'dispose_carrier', owner._LinuxPreflightScopeV1.dispose_carrier))
+    need(all(callable(method) and getattr(owner_class, name) is method
+     for owner_class, name, method in rolling_methods),
+     'ORDINARY_C_DEMAND_ORIGINAL_ROLLING_LAST_USER_METHODS')
+    later_files, directory_count, entries = len(prospective_files), len(prospective_directories), len(known)
+    edges = entries - 1
+    path_bytes = sum(len(name.encode('utf-8', 'strict')) for name in known)
+    depth = max((len(name.split('/')) for name in known if name), default=0)
+    need(0 < source_bytes <= limits['baseline_byte_limit']
+     and source_bytes <= later_bytes <= limits['generation_byte_limit']
+     and initial_files <= limits['file_baseline_rows']
+     and later_files <= limits['file_generation_rows']
+     and directory_count <= min(limits['directory_baseline_rows'], limits['directory_generation_rows'])
+     and entries <= limits['namespace_entry_limit']
+     and edges <= min(limits['roster_baseline_edges'], limits['roster_generation_edges'])
+     and path_bytes <= limits['path_pool_byte_limit']
+     and all(len(name.encode('utf-8')) <= limits['single_path_byte_limit'] for name in known),
+     'ORDINARY_C_DEMAND_CONSERVATIVE_COMPLETE_GENERATION_FITS_ORIGINAL_CEILINGS')
+    n, index = len(programme['plan']), limits['index_byte_limit']
+    selected_names = file_targets | directory_targets | parent_targets
+    actions, file_actions = len(selected_names), len(file_targets)
+    directory_actions = actions - file_actions
+    attribute_files = sum(name in files for name in file_targets)
+    attribute_directories = sum(name in directories for name in directory_targets | parent_targets)
+    attributes = attribute_files + attribute_directories
+    transformed_files, transformed_directories = attribute_files, attribute_directories
+    transforms = transformed_files + transformed_directories
+    captures = initial_files + 1 + sum(len(names) for names in occurrence_files)
+    barriers, generations, retirements = 6 + 2 * n, n + 2, n
+    namespace_sweeps = barriers + generations
+    rolling_ends = max(0, n - 1)
+    rolling_rows = rolling_ends * (initial_files + 2 * later_files)
+    rolling_allocations = sum(len(names) for names in occurrence_files[:-1])
+    rolling_context_calls = rolling_ends + rolling_allocations
+    binding_checks = 3 + 2 * barriers + 2 * retirements
+    common = host['common_cgroup']
+    cgroup_depth, at = 1, common
+    while at != pathlib.Path('/sys/fs/cgroup'):
+     need(at.is_relative_to('/sys/fs/cgroup') and at != at.parent and cgroup_depth < 32,
+      'ORDINARY_C_DEMAND_ORIGINAL_CGROUP_ANCESTRY')
+     at, cgroup_depth = at.parent, cgroup_depth + 1
+    query_reads = binding_checks * (4 * cgroup_depth + 1)
+    query_allowance = scope.query.remaining_output()
+    need(type(query_allowance) is int and query_allowance >= 1048576,
+     'ORDINARY_C_DEMAND_ORIGINAL_QUERY_OUTPUT_PREFIX')
+    query_bytes = min(query_reads * 1048577, query_allowance + 1)
+    index_relative = bindings['index'].relative_to(source.root).as_posix()
+    index_depth = len(index_relative.split('/'))
+    query_parent_depth = len(scope.query.evidence_root.parent.parts) - 1
+    need(query_parent_depth <= 64,
+     'ORDINARY_C_DEMAND_ORIGINAL_PUBLICATION_PARENT_DEPTH')
+    from tools.validation_scope_registry import _ordinary_scope_candidate_io_values_v1
+    owed = scope._ordinary_pending_close_audit_v1(None)
+    demand, captures, current_pairs, raw_pairs, control_reads, control_writes, flag_reads, flag_writes, handle_peak = (
+     _ordinary_scope_candidate_io_values_v1(later_files, directory_count, edges, path_bytes, entries,
+      generations, retirements, actions, file_actions, barriers, n, attributes, attribute_files,
+      attribute_directories, transformed_files, transformed_directories, rolling_rows, captures,
+      transforms, binding_checks, later_bytes, mutable, restoration_bytes, index, query_bytes,
+      query_reads, source_bytes, namespace_sweeps, depth, index_depth, query_parent_depth,
+      len(source.anchors), rolling_allocations, initial_files, owed))
+    need(all(type(value) is int and 0 <= value < 1 << 63 for key, value in demand.items()
+      if key != 'mutable_file_byte_caps_by_occurrence')
+     and actions <= limits['action_record_limit'] and handle_peak <= limits['native_handle_limit'],
+     'ORDINARY_C_DEMAND_EXACT_FINITE_PACKED_AND_NATIVE_PROGRAMME')
+    arithmetic = dict(scope=scope, programme=programme, census=census, source=source,
+     source_rows=tuple(rows), target_operands=tuple(target_operands),
+     index_row=index_row, git_bindings=bindings, occurrence_files=tuple(occurrence_files),
+     prospective_names=tuple(sorted((name, 'FILE' if name in prospective_files else 'DIRECTORY') for name in known)),
+     geometry=(source_bytes, initial_files, later_bytes, later_files, directory_count,
+      entries, edges, path_bytes, depth, index_row['logical_bytes'], index,
+      restoration_bytes, union_mutable_bytes),
+     physical_raw_peak=(source_bytes + 2 * later_bytes + index,
+      source_bytes, later_bytes, index, generation_pool),
+     rolling_methods=rolling_methods,
+     coupled_source_bounds=(source_later_bound, source_mutable_bounds, generation_pool),
+     multiplicities=(n, barriers, generations, retirements, namespace_sweeps, binding_checks,
+      cgroup_depth, query_reads, query_bytes, captures, current_pairs, raw_pairs,
+      actions, file_actions, attribute_files, attribute_directories,
+      transformed_files, transformed_directories, control_reads, control_writes,
+      flag_reads, flag_writes, query_parent_depth, owed, rolling_ends,
+      rolling_rows, rolling_allocations, rolling_context_calls), demand=demand,
+     original_observed_prefix=tuple(projection['meter']['observed'].items()), errors=[])
+    arithmetic['original'] = (arithmetic, scope, programme, census, source,
+     arithmetic['source_rows'], arithmetic['target_operands'], index_row, bindings,
+     arithmetic['occurrence_files'], arithmetic['prospective_names'], arithmetic['geometry'],
+     arithmetic['multiplicities'], demand, tuple(demand.items()),
+     arithmetic['original_observed_prefix'], arithmetic['errors'],
+     arithmetic['physical_raw_peak'], arithmetic['rolling_methods'], arithmetic['coupled_source_bounds'])
+    return demand, arithmetic
+
+
+def _ordinary_candidate_demand_arithmetic_checked_v1(scope, programme, arithmetic):
+    """Check the compiler's SAME sealed arithmetic without recursive issuance.
+
+    The original complete source checker invokes this only after checking its
+    own source/callee/occurrence product. This checker does not invoke that
+    checker again, issue native work, renew a meter or adopt caller flags.
+    """
+    from tools import validation_reliability as owner
+    need = owner._preflight_require_v1
+    need(type(scope) is owner._LinuxPreflightScopeV1 and type(programme) is dict
+     and programme is scope._ordinary_effect_programme_v1
+      is scope._ordinary_original_effect_programme_v1
+     and programme['scope'] is scope and programme['source'] is scope.source
+     and programme['plan'] is scope._ordinary_bound_plan_v1
+     and programme['paths'] is scope._ordinary_bound_paths_v1
+     and programme['execution_plan'] is scope._ordinary_execution_plan_v1
+     and programme['check'] is programme['original_check']
+     and callable(programme['check']) and not programme['errors']
+     and arithmetic is programme['candidate_demand_arithmetic']
+     and type(arithmetic) is dict,
+     'ORDINARY_C_ARITHMETIC_ORIGINAL_SOURCE_EFFECT_OWNER')
+    original = arithmetic['original']
+    demand = arithmetic['demand']
+    need(type(original) is tuple and len(original) == 20
+     and original[0] is arithmetic and original[1] is scope and original[2] is programme
+     and original[3] is arithmetic['census'] is scope.source.census
+     and original[4] is arithmetic['source'] is scope.source
+     and original[5] is arithmetic['source_rows']
+     and original[6] is arithmetic['target_operands']
+     and original[7] is arithmetic['index_row']
+     and original[8] is arithmetic['git_bindings'] is scope._ordinary_git_bindings_v1
+     and original[9] is arithmetic['occurrence_files']
+     and original[10] is arithmetic['prospective_names']
+     and original[11] is arithmetic['geometry']
+     and original[12] is arithmetic['multiplicities']
+     and original[13] is demand is programme['candidate_demand']
+     and original[14] == tuple(demand.items())
+     and original[15] is arithmetic['original_observed_prefix']
+     and original[16] is arithmetic['errors'] and not arithmetic['errors']
+     and original[17] is arithmetic['physical_raw_peak']
+     and original[18] is arithmetic['rolling_methods']
+     and original[19] is arithmetic['coupled_source_bounds']
+     and original[17] == (demand['initial_raw_bytes'] + 2 * demand['later_raw_byte_cap']
+      + arithmetic['geometry'][10], demand['initial_raw_bytes'], demand['later_raw_byte_cap'],
+      arithmetic['geometry'][10], 32 << 30)
+     and original[19][2] == 32 << 30
+     and demand['later_raw_byte_cap'] == min(original[19][0], original[19][2])
+     and demand['mutable_file_byte_caps_by_occurrence'] ==
+      tuple(min(value, original[19][2]) for value in original[19][1])
+     and all(getattr(owner_class, name) is method
+      for owner_class, name, method in original[18]),
+     'ORDINARY_C_ARITHMETIC_NONRENEWABLE_LITERAL_AND_OPERAND_BINDING')
+    keys = {'initial_raw_bytes', 'initial_file_count', 'later_raw_byte_cap',
+     'later_file_count_cap', 'mutable_file_byte_caps_by_occurrence',
+     'raw_read_bytes', 'raw_write_bytes', 'raw_retained_bytes', 'action_rows',
+     'metadata_calls', 'metadata_read_bytes', 'metadata_write_bytes',
+     'native_control_calls', 'native_control_read_bytes', 'native_control_write_bytes',
+     'handle_peak'}
+    need(type(demand) is dict and set(demand) == keys
+     and all(type(value) is int and 0 <= value < 1 << 63
+      for key, value in demand.items() if key != 'mutable_file_byte_caps_by_occurrence')
+     and type(demand['mutable_file_byte_caps_by_occurrence']) is tuple
+     and len(demand['mutable_file_byte_caps_by_occurrence']) == len(programme['plan'])
+     and all(type(value) is int and 0 <= value < 1 << 63
+      for value in demand['mutable_file_byte_caps_by_occurrence']),
+     'ORDINARY_C_ARITHMETIC_EXACT_INTEGER_PROGRAMME')
+    source = scope.source
+    need(len(arithmetic['source_rows']) == len(source.rows)
+     and arithmetic['git_bindings']['original_source'] is source
+     and source.row_index.get(str(arithmetic['git_bindings']['index'])) is original[7],
+     'ORDINARY_C_ARITHMETIC_COMPLETE_ORIGINAL_SOURCE_AND_INDEX')
+    for position, saved in enumerate(original[5]):
+     row, relative, kind, version, length, roster, source_original, source_items, protected = saved
+     path = pathlib.Path(row['path'])
+     actual_relative = path.relative_to(source.root).as_posix()
+     actual_relative = '' if actual_relative == '.' else actual_relative
+     need(source.row_index.get(row['path']) is row and source.rows[position] is row
+      and actual_relative == relative and row['kind'] == kind
+      and tuple(row['version']) == version and row['logical_bytes'] == length
+      and tuple(row['roster']) == roster and row['aliases'] == []
+      and source.originals[row['path']] is source_original
+      and tuple(source_original.items()) == source_items
+      and source_original['version'] is row['version']
+      and tuple(source.post[row['path']]) == protected,
+      'ORDINARY_C_ARITHMETIC_RETAINED_SOURCE_GENERATION')
+    for row, target, items in original[6]:
+     need(any(row is selected for selected in programme['rows'])
+      and any(target is selected for selected in row['targets'])
+      and tuple(target.items()) == items,
+      'ORDINARY_C_ARITHMETIC_RETAINED_TARGET_OPERANDS')
+    before = dict(original[15])
+    meter = scope._ordinary_meter_v1
+    need(set(before) == set(meter['observed'])
+     and all(type(before[key]) is int and type(meter['observed'][key]) is int
+      and 0 <= before[key] <= meter['observed'][key] for key in before),
+     'ORDINARY_C_ARITHMETIC_ORIGINAL_PREFIX_NO_COUNTER_RENEWAL')
+    return arithmetic
+
+
+def _ordinary_post_census_programme_v1(census, *, ceiling_programme, prefix_programme, phase=None):
+    """Compile both image demands from complete original metadata before copies.
+
+    No source bytes are acquired here. Formatter overhead is an independent
+    engineering tranche; actual allocated blocks/superblock/statvfs readbacks
+    must establish required usable bytes and inodes before native release.
+    """
+    from tools.validation_scope_registry import _facet_run_post_census_programme_v1 as _d
+    return _d(census, ceiling_programme=ceiling_programme, prefix_programme=prefix_programme, phase=phase)
+
+
+def _ordinary_post_resource_programme_v1(scope, census, source, *, original_cutoffs,
+     host_preparation, ceiling_programme, census_programme, phase=None):
+    """Join actual SourceSeal/native products to the already compiled demand.
+
+    Original Source counters are overlapping observations: actual callbacks
+    already debit the same meter. This join never subtracts or reissues them.
+    """
+    from tools.validation_scope_registry import _facet_run_post_resource_programme_v1 as _d
+    return _d(scope, census, source, original_cutoffs=original_cutoffs, host_preparation=host_preparation, ceiling_programme=ceiling_programme, census_programme=census_programme, phase=phase)
+
+
+def _ordinary_post_git_controls_v1(original_controls, *, scope=None):
+ """Keep the original projection; bind the ordinary-only no-helper cells."""
+ from tools import validation_reliability as owner
+ owner._preflight_require_v1(type(original_controls) is tuple
+  and len(original_controls) == 1
+  and type(original_controls[0]) is tuple and len(original_controls[0]) == 2
+  and original_controls[0][0] == 'GIT_CONFIG_GLOBAL'
+  and type(original_controls[0][1]) is str and original_controls[0][1]
+  and '\x00' not in original_controls[0][1],
+  'ORDINARY_POST_ORIGINAL_GIT_CONFIG_PROJECTION')
+ if scope is not None:
+  owner._preflight_require_v1(type(scope) is owner._LinuxPreflightScopeV1
+   and owner._LINUX_PREFLIGHT_PROCESS_V1.get() is scope
+   and scope._ordinary_selected_v1(), 'ORDINARY_POST_GIT_ACTUAL_SELECTED_SCOPE')
+  scope._ordinary_precursor_ready_v1()
+  config = scope._ordinary_parent_git_config_v1
+  owner._preflight_require_v1(config is scope._ordinary_original_parent_git_config_v1
+   and config['sealed'] and config['readback_complete']
+   and original_controls == (('GIT_CONFIG_GLOBAL', str(config['path'])),),
+   'ORDINARY_POST_GIT_ORIGINAL_PRIVATE_CONFIG_OWNER')
+  # These are command-local cells, not a rewritten repository/global
+  # config. Repository attributes and all original diff paths remain.
+  # No old stream, external helper, trace or override is inherited.
+  return original_controls + (
+   ('GIT_OPTIONAL_LOCKS', '0'), ('GIT_CONFIG_COUNT', '5'),
+   ('GIT_CONFIG_KEY_0', 'core.preloadIndex'), ('GIT_CONFIG_VALUE_0', 'false'),
+   ('GIT_CONFIG_KEY_1', 'index.threads'), ('GIT_CONFIG_VALUE_1', '1'),
+   ('GIT_CONFIG_KEY_2', 'core.fsmonitor'), ('GIT_CONFIG_VALUE_2', 'false'),
+   ('GIT_CONFIG_KEY_3', 'diff.autoRefreshIndex'), ('GIT_CONFIG_VALUE_3', 'false'),
+   ('GIT_CONFIG_KEY_4', 'core.attributesFile'), ('GIT_CONFIG_VALUE_4', '/dev/null'),
+   ('GIT_CONFIG_NOSYSTEM', '1'), ('GIT_CONFIG_SYSTEM', '/dev/null'),
+   ('GIT_NO_REPLACE_OBJECTS', '1'), ('GIT_NO_LAZY_FETCH', '1'),
+   ('GIT_TERMINAL_PROMPT', '0'), ('GIT_ALLOW_PROTOCOL', ''),
+   ('GIT_ATTR_NOSYSTEM', '1'),
+  )
+ # The omitted selector retains every original byte/default. These six
+ # entries alone do not claim a complete ordinary Git effect programme.
+ return original_controls + (
+  ('GIT_OPTIONAL_LOCKS', '0'),
+  ('GIT_CONFIG_COUNT', '2'),
+  ('GIT_CONFIG_KEY_0', 'core.preloadIndex'),
+  ('GIT_CONFIG_VALUE_0', 'false'),
+  ('GIT_CONFIG_KEY_1', 'index.threads'),
+  ('GIT_CONFIG_VALUE_1', '1'),
+ )
+
+
+def _ordinary_post_execution_argv_v1(registered, execution, *, command_index=None):
+ """Only the original selected native POST route adopts retained447."""
+ from tools import validation_reliability as owner
+ scope = owner._LINUX_PREFLIGHT_PROCESS_V1.get()
+ if (type(scope) is not owner._LinuxPreflightScopeV1
+   or not scope._ordinary_selected_v1()):
+  return execution
+ # Failed selected ordinary acquisition never falls back to the original
+ # uncontrolled cache placement. This is authentic precursor admission,
+ # not a wire field, callback attribute or positive Boolean supplied by argv.
+ scope._ordinary_precursor_ready_v1()
+ paths = getattr(scope, '_ordinary_evidence_paths_v1', None)
+ owner._preflight_require_v1(type(paths) is ValidationRunPathsV1
+  and paths is _RUN_COMMANDS_ACTIVE_PATHS
+  and paths.repo_root == pathlib.Path(scope.repository)
+  and _RUN_COMMANDS_SUPERVISION is not None
+  and _RUN_COMMANDS_SUPERVISION['paths'] is paths
+  and type(_RUN_COMMANDS_SUPERVISION['phase']) is str
+  and _RUN_COMMANDS_SUPERVISION['phase'] in ORDERED_PHASES
+  and type(registered) is tuple and type(execution) is tuple,
+  'ORDINARY_POST_ORIGINAL_EFFECTIVE_PLAN_PATHS')
+ if _RUN_COMMANDS_SUPERVISION['phase'] != POST_VALIDATION_PHASE:
+  if registered[1:2] in (('tools/validate_atomicrows_semantic_field_coverage_enrichment_plan.py',), ('tools/validate_atomicrows_semantic_value_materialization_owner_authorization_gate.py',), ('tools/validate_atomicrows_semantic_value_materialization_authorization_handoff_readiness_gate.py',)):
+   owner._preflight_require_v1(execution == registered, 'ORDINARY_READONLY_GIT_CLI_COMPETING_EXECUTION')
+   return owner._ordinary_readonly_git_cli_execution_v1(scope, registered, command_index)
+  if registered == (sys.executable, '-c', PR138_NON_MUTATING_VALIDATION_SCRIPT):
+   owner._preflight_require_v1(execution == registered, 'ORDINARY_PR138_COMPETING_EXECUTION_PROJECTION')
+   return owner._ordinary_pr138_execution_argv_v1(scope, registered, command_index)
+  if registered[:2] in ((sys.executable, _path('tools','master_plan_traceability_check.py')),
+    (sys.executable, _path('tools','validate_first_pr_scope.py'))):
+   owner._preflight_require_v1(execution == registered,
+    'ORDINARY_READONLY_COMPETING_EXECUTION_PROJECTION')
+   return owner._ordinary_deterministic_readonly_argv_v1(scope, registered, command_index)
+  if (len(registered) >= 2 and registered[:2] in (
+    (sys.executable, _path('tools', 'master_plan_ingest.py')),
+    (sys.executable, _path('tools', 'validate_qtt_owner_global_override_authority.py')),
+    (sys.executable, _path('tools', 'validate_atomicrows_row_family_source_manifest_currentization.py')))):
+   owner._preflight_require_v1(execution == registered,
+    'ORDINARY_MASTER_PLAN_COMPETING_EXECUTION_PROJECTION')
+   # These original recipes use their retained modules and stdlib.
+   # Exclude site/.pth/PYTHON* startup and implicit cache writes;
+   # registered and timing identity remain the original command.
+   if registered[1] == _path('tools', 'validate_atomicrows_row_family_source_manifest_currentization.py'):
+    owner._preflight_require_v1(type(command_index) is int and command_index > 0,
+     'ORDINARY_PYTHON_RECIPE_ORIGINAL_ORDINAL')
+    cache_path = (scope._ordinary_image_v1['mount_path'] / 'runtime'
+     / ('p' + str(command_index)) / 'pycache')
+    return (registered[0], '-I', '-S', '-B', '-X',
+     'pycache_prefix=' + str(cache_path), *registered[1:])
+   return (registered[0], '-I', '-S', '-B', *registered[1:])
+  if (len(registered)==4 and registered[0]==sys.executable
+    and registered[1].startswith('tools/') and registered[1].endswith('.py')
+    and registered[2:]==('--repo-root','.')):
+   owner._preflight_require_v1(execution==registered,'ORDINARY_SOURCE_FAMILY_COMPETING_EXECUTION')
+   return owner._ordinary_readonly_source_family_execution_v1(scope,registered,command_index)
+  return execution
+ diffs = (('git', 'diff', '--check'),
+  ('git', 'diff', '--exit-code', '--',
+   _path('docs', 'master_plan', 'QTT_MasterPlan_Current.md')))
+ if registered in diffs:
+  owner._preflight_require_v1(execution == registered,
+   'ORDINARY_POST_DIFF_COMPETING_PROJECTION')
+  # none retains tracked/untracked dirty submodule inspection. It does
+  # not hide a gitlink change or authorize an unselected child helper.
+  return ('git', '--no-pager', 'diff', '--no-ext-diff', '--no-textconv',
+   '--ignore-submodules=none', '--submodule=short', *registered[2:])
+ atomic = (sys.executable, '-c', ATOMICROWS_BUNDLE_CHECK_SCRIPT)
+ if registered == atomic:
+  owner._preflight_require_v1(execution == registered,
+   'ORDINARY_POST_ATOMICROWS_COMPETING_PROJECTION')
+  # The literal body reads only the original bundle/absence operand.
+  # Isolate startup and suppress implicit import caches before that body;
+  # registered/timing identities and every unselected route stay intact.
+  return (registered[0], '-I', '-S', '-B', *registered[1:])
+ original = (sys.executable, '-m', 'compileall', '-q', 'tools', 'tests', 'src')
+ if registered != original:
+  return execution
+ owner._preflight_require_v1(execution == registered,
+  'ORDINARY_POST_COMPILEALL_COMPETING_PROJECTION')
+ # R2 keeps RUN equal to the actual original process_root. The same Scope
+ # separately acquires and maps its one physical p1/bytecode cell here.
+ return (registered[0], '-I', '-S', '-B', '-X',
+  'pycache_prefix=' + str(paths.process_root / 'bytecode'),
+  '-m', 'compileall', '-q', '-j', '1', '-o', '0',
+  '--invalidation-mode', 'timestamp', 'tools', 'tests', 'src')
+
+
+def _ordinary_post_compile_cache_programme_v1(scope, paths, plan,
+  execution_plan, resource_programme):
+ """Pure names/bounds; Scope later binds actual C0 VIEW headers and mounts."""
+ from tools.validation_inventory import _facet_run_post_compile_cache_programme_v1 as _d
+ return _d(scope, paths, plan, execution_plan, resource_programme)
+
+
+def _ordinary_post_environment_v1(scope, entry, environment):
+ """Project only the original POST row from the independently retained base."""
+ from tools import validation_reliability as owner
+ require = owner._preflight_require_v1
+ require(type(scope) is owner._LinuxPreflightScopeV1
+  and owner._LINUX_PREFLIGHT_PROCESS_V1.get() is scope
+  and type(environment) is dict and all(type(key) is str and type(value) is str
+   for key, value in environment.items()), 'ORDINARY_POST_ACTUAL_ENVIRONMENT_OWNER')
+ selection = scope._ordinary_source_selection_v1
+ if (selection is scope._ordinary_original_source_selection_v1
+   and selection._original[2] != POST_VALIDATION_PHASE):
+  return owner._ordinary_selected_environment_v1(scope, entry, environment)
+ original = scope._ordinary_post_base_environment_v1
+ require(type(original) is tuple and len(original) == 7
+  and original[0] is scope and original[1] is scope._ordinary_bound_paths_v1
+  and original[2] is scope._ordinary_bound_plan_v1
+  and original[3] is scope._ordinary_resource_programme_v1
+  and type(original[4]) is dict and tuple(original[4].items()) == original[5]
+  and original[6] == (os.getpid(), threading.get_ident())
+  and environment == original[4], 'ORDINARY_POST_UNCHANGED_INDEPENDENT_BASE_ENVIRONMENT')
+ row = scope._ordinary_programme_for_entry_v1(entry)
+ require(entry.phase == POST_VALIDATION_PHASE and row['entry'] is entry
+  and row['runtime_path'] == scope._ordinary_image_v1['mount_path'] / 'runtime' / ('p' + str(entry.command_index))
+  and type(row['git_controls']) is tuple,
+  'ORDINARY_POST_SOURCE_SELECTED_ENVIRONMENT_ROW')
+ projected = dict(environment)
+ for key in ('TMPDIR', 'TEMP', 'TMP'):
+  projected[key] = str(row['runtime_path'])
+ projected['QTT_LINUX_PREFLIGHT_CONTROL'] = str(scope.control)
+ projected['QTT_LINUX_PREFLIGHT_RUNTIME'] = str(row['runtime_path'])
+ if entry.command_index in (2, 3):
+  for key in tuple(projected):
+   if key.upper().startswith('GIT_'): del projected[key]
+  projected.update(row['git_controls'])
+ else:
+  require(row['git_controls'] == (), 'ORDINARY_POST_NON_GIT_ROW_HAS_NO_GIT_PROJECTION')
+ require(projected == row['environment'], 'ORDINARY_POST_EXACT_COMPILED_ENVIRONMENT_PROJECTION')
+ return projected
+
+
+def _ordinary_post_occurrence_programme_v1(scope, paths, plan, execution_plan, resource_programme, *, environment):
+ """Join the compiler to the publisher's actual plan; never precompute it."""
+ from tools import validation_reliability as owner
+ require = owner._preflight_require_v1
+ scope._ordinary_precursor_ready_v1()
+ selection = scope._ordinary_source_selection_v1
+ if (selection is scope._ordinary_original_source_selection_v1
+   and selection._original[2] != POST_VALIDATION_PHASE):
+  return owner._ordinary_selected_occurrence_programme_v1(scope, paths, plan,
+   execution_plan, resource_programme, environment=environment)
+ original = scope._ordinary_original_resource_programme_v1
+ require(resource_programme is scope._ordinary_resource_programme_v1 is original[0]
+  and tuple(resource_programme.items()) == original[1]
+  and tuple(resource_programme['limits'].items()) == original[2]
+  and resource_programme['control_layout'] is original[3]
+  and resource_programme['physical_program'] is original[4]
+  and tuple((role, record, tuple(record.items())) for role, record
+   in resource_programme['physical_program']['volumes']) == original[5]
+  and tuple(resource_programme['fd_program'].items()) == original[6]
+  and paths is scope._ordinary_bound_paths_v1 and plan is scope._ordinary_bound_plan_v1
+  and execution_plan is scope._ordinary_execution_plan_v1
+  and type(plan) is tuple and len(plan) == len(execution_plan) == 4
+  and type(environment) is dict and all(type(k) is str and type(v) is str for k, v in environment.items())
+  and len({key.upper() for key in environment}) == len(environment),
+  'ORDINARY_COMPILER_ACTUAL_PUBLISHER_AND_ORIGINAL_ALLOCATIONS')
+ require(all((row['path'], row['observed_path'], row['role'], row['kind'], tuple(row['version']),
+  row['logical_bytes'], tuple(row['roster']), None if row['acl'] is None else tuple(row['acl']))
+  == values and row['aliases'] == [] for row, values in resource_programme['original_rows']),
+  'ORDINARY_COMPILER_ORIGINAL_SOURCE_ROWS_CHANGED')
+ stream_bytes = resource_programme['output_partition'][4]
+ runtime = resource_programme['runtime_programme']
+ runtime_root = scope._ordinary_image_v1['mount_path'] / 'runtime'
+ argv1 = execution_plan[0].execution_argv
+ require(execution_plan[0].registered_argv ==
+   (sys.executable, '-m', 'compileall', '-q', 'tools', 'tests', 'src')
+  and argv1 == (sys.executable, '-I', '-S', '-B', '-X',
+   'pycache_prefix=' + str(paths.process_root / 'bytecode'),
+   '-m', 'compileall', '-q', '-j', '1', '-o', '0',
+   '--invalidation-mode', 'timestamp', 'tools', 'tests', 'src'),
+  'ORDINARY_COMPILER_EXACT_ISOLATED_COMPILEALL_ADAPTER')
+ require(execution_plan[1].registered_argv == ('git', 'diff', '--check')
+  and execution_plan[2].registered_argv == ('git', 'diff', '--exit-code', '--',
+   _path('docs', 'master_plan', 'QTT_MasterPlan_Current.md'))
+  and execution_plan[1].execution_argv == ('git', '--no-pager', 'diff', '--no-ext-diff',
+   '--no-textconv', '--ignore-submodules=none', '--submodule=short', '--check')
+  and execution_plan[2].execution_argv == ('git', '--no-pager', 'diff', '--no-ext-diff',
+   '--no-textconv', '--ignore-submodules=none', '--submodule=short', '--exit-code', '--',
+   _path('docs', 'master_plan', 'QTT_MasterPlan_Current.md'))
+  and execution_plan[3].registered_argv == (sys.executable, '-c', ATOMICROWS_BUNDLE_CHECK_SCRIPT)
+  and execution_plan[3].execution_argv ==
+   (sys.executable, '-I', '-S', '-B', '-c', ATOMICROWS_BUNDLE_CHECK_SCRIPT),
+  'ORDINARY_COMPILER_EXACT_ORIGINAL_POST_CONSTRUCTORS')
+ git_controls = tuple((key, value) for key, value in scope._ordinary_parent_git_environment_v1(paths.repo_root).items()
+  if key.startswith('GIT_'))
+ git_controls = _ordinary_post_git_controls_v1(git_controls, scope=scope)
+ require(resource_programme['post_git_control_programme'] == (8, 1, 8, 19, 458, 496, 520)
+  and len(git_controls[1:]) == 19
+  and sum(len(key.encode('ascii')) + len(value.encode('ascii'))
+   for key, value in git_controls[1:]) == 458
+  and sum(len(key.encode('ascii')) + len(value.encode('ascii')) + 2
+   for key, value in git_controls[1:]) == 496,
+  'ORDINARY_COMPILER_EXACT_POST_GIT_ENVIRONMENT_DEMAND')
+ require(type(scope._ordinary_image_v1['mount_path']) is type(pathlib.Path('/')),
+  'ORDINARY_COMPILER_ORIGINAL_QUALIFIED_GIT_CONTROLS')
+ require(not hasattr(scope, '_ordinary_post_base_environment_v1'),
+  'ORDINARY_POST_ONE_INDEPENDENT_BASE_ENVIRONMENT')
+ scope._ordinary_post_base_environment_v1 = (scope, paths, plan, resource_programme,
+  environment, tuple(environment.items()), (os.getpid(), threading.get_ident()))
+ compiled = []
+ for ordinal, (entry, execution) in enumerate(zip(plan, execution_plan), 1):
+  require(type(entry) is CommandEvidencePlanEntry and type(execution) is ExecutionPlanEntry
+   and entry.command_index == ordinal and entry.phase == POST_VALIDATION_PHASE
+   and entry.cwd == str(paths.repo_root) and entry.argv == execution.execution_argv,
+   'ORDINARY_COMPILER_ORIGINAL_OCCURRENCE_IDENTITY')
+  selected_environment = dict(environment)
+  if ordinal in (2, 3):
+   for key in tuple(selected_environment):
+    if key.upper().startswith('GIT_'): del selected_environment[key]
+   selected_environment.update(git_controls)
+  cell = runtime_root / ('p' + str(ordinal))
+  for name in ('TMPDIR', 'TEMP', 'TMP'):
+   selected_environment[name] = str(cell)
+  selected_environment['QTT_LINUX_PREFLIGHT_CONTROL'] = str(scope.control)
+  selected_environment['QTT_LINUX_PREFLIGHT_RUNTIME'] = str(cell)
+  # All deadlines are subdivisions of the original fixed body window.
+  # No late compilation or per-command entry renews its origin.
+  origin, app_end, custody_end, final_end = resource_programme['original_cutoffs']
+  startup_deadline = origin + 3 * (app_end - origin) // 4
+  require(time.monotonic_ns() < startup_deadline < app_end < custody_end < final_end,
+   'ORDINARY_COMPILER_ORIGINAL_STARTUP_AND_BODY_WINDOWS')
+  row = dict(entry=entry, execution_entry=execution, original_position=446 + ordinal,
+   argv=entry.argv, environment=selected_environment, deadline_ns=app_end,
+   startup_deadline_ns=startup_deadline, stdout_bytes=stream_bytes, stderr_bytes=stream_bytes,
+   tasks=1, nofile=resource_programme['fd_program']['application'],
+   startup_observation_limit=32, terminal_pending_observation_limit=32,
+   # One authentic post-B0 native transition fills the SAME shared
+   # envelope into every row before application admission.
+   runtime_bytes=None, runtime_inodes=None,
+   runtime_path=cell, bootstrap_fd_demand=resource_programme['fd_demand'][1],
+   application_fd_demand=resource_programme['fd_demand'][2],
+   git_controls=git_controls if ordinal in (2, 3) else ())
+  compiled.append(row)
+ scope._ordinary_bind_compile_cache_programme_v1(
+  _ordinary_post_compile_cache_programme_v1(scope, paths, plan,
+   execution_plan, resource_programme))
+ return tuple(compiled)
+
+
+def _linux_preflight_controller_v1(repository,installation,interpreter,event,event_bytes,origin,export_root):
+    from tools import validation_reliability as o
+    o._preflight_require_v1(os.geteuid() == 0 and time.monotonic_ns() < origin+3500*10**9,
+        'LINUX_PREFLIGHT_CONTROLLER_OWNER_OR_CUTOFF')
+    name = o._linux_preflight_name_v1(os.getpid(),origin)
+    control = pathlib.Path('/run')/(name+'control')
+    runtime = pathlib.Path('/run')/name
+    control.mkdir(mode=0o700,exist_ok=False)
+    control_identity = (control.stat().st_dev,control.stat().st_ino)
+    runtime_backing=runtime/'payload'
+    private_root,spool = control/'root',control/'spool'
+    private_root.mkdir(mode=0o755)
+    spool.mkdir(mode=0o700)
+    # The existing supervisor exclusively creates the two manager-bound stream files.
+    for directory in ('declaration','binding','release'):
+        (control/directory).mkdir(mode=0o555)
+    grants = o._linux_preflight_grants_v1(origin)
+    query = o._LinuxPreflightQueriesV1(evidence_root=control/'native-evidence',deadline_ns=grants['settlement_deadline_ns'],
+        reserved_output_bytes=2*67108864,startup_closeout_bytes=32*1024**2)
+    source = scope = None
+    capture_counts = dict(files=0,entries=0)
+    census = capacity = capacity_v2 = install = None
+    mounted = restored = False
+    failures = []
+    receipt = None
+    try:
+        version = query.command(('/usr/bin/systemctl','--version')).decode('ascii','strict')
+        first = version.splitlines()[0].split()
+        o._preflight_require_v1(len(first) >= 2 and first[0] == 'systemd' and first[1].isdigit()
+            and int(first[1]) >= 255,'LINUX_PREFLIGHT_SYSTEMD_BASELINE')
+        metadata = o._LinuxPreflightCensusV1(repository, installation, '/usr/bin/git',
+            deadline_ns=grants['native_deadline_ns'],installation_acl=True,setup_uid=int(os.environ['SUDO_UID']))
+        census = metadata.run()
+        executable = pathlib.Path(interpreter)
+        configs = tuple(dict.fromkeys((str(executable.parent/'pyvenv.cfg'),str(executable.parent.parent/'pyvenv.cfg'),
+            str(executable.with_suffix('._pth')),str(executable.parent/f'python{sys.version_info.major}{sys.version_info.minor}._pth'))))
+        # Count additional existing source config operands, without reading them.
+        repeated = sum(row['logical_bytes'] for row in census['records']
+            if row['kind'] == 'file' and row['role'] == 'repository' and row['path'] in configs)
+        capacity = _linux_preflight_capacity_v1(census, page_size=os.sysconf('SC_PAGE_SIZE'),
+            repeated_config_bytes=repeated if census['complete_size_census'] else None)
+        capacity_v2=_linux_preflight_capacity_v2(census,page_size=os.sysconf('SC_PAGE_SIZE'))
+        o._preflight_require_v1(capacity_v2['metadata_admitted'],'LINUX_V2_METADATA_CAPACITY_UNAVAILABLE')
+        install=o._LinuxInstallationCopyV2(metadata,installation,deadline_ns=grants['native_deadline_ns'],setup_uid=int(os.environ['SUDO_UID']))
+        install.copy_installation(control/'installation')
+        git=o._LinuxPreflightCaptureV1('/usr/bin/git',byte_limit=16*1024**2,
+            deadline_ns=grants['native_deadline_ns'],shared_capture=capture_counts)
+        source=o._LinuxImmutableSourceSealV2(metadata,deadline_ns=grants['native_deadline_ns'],workspace=export_root.parent,run_id=name)
+        source.journal_path=control/'source-transition.jsonl'
+        o._preflight_require_v1(time.monotonic_ns() < grants['settlement_deadline_ns']-220*10**9,
+            'LINUX_V2_SETTLEMENT_RESERVATION')
+        source.primitive_check(query)
+        source.recovery_check(setup_uid=int(os.environ['SUDO_UID']),evidence_root=control/'native-evidence',query=query,grants=grants)
+        o._LinuxPreflightScopeV1.runtime_fixture(query,grants,repository=repository,installation=installation,interpreter=interpreter)
+        source.protect()
+        source.readability()
+        source.stage='setup'
+        git_root=pathlib.Path(repository)/'.git'
+        o._preflight_require_v1(str(git_root/'index') in source.files,'LINUX_PREFLIGHT_ORIGINAL_GIT_ADMINISTRATION')
+        for path in (git_root/'objects/info/alternates',git_root/'commondir',git_root/'gitdir',git_root/'worktrees'):
+            o._preflight_require_v1(not source._meta(path.exists),'LINUX_PREFLIGHT_EXTERNAL_GIT_ADMINISTRATION')
+        config_path=git_root/'config'
+        o._preflight_require_v1(source._meta(config_path.stat).st_size<=1048576,'LINUX_PREFLIGHT_GIT_CONFIG_BOUND')
+        config=source.read_administration(config_path,1048576).decode('utf-8','strict').lower()
+        o._preflight_require_v1(not any(word in config for word in ('extraheader','credential','hookspath','insteadof')),
+            'LINUX_PREFLIGHT_CREDENTIAL_OR_HOOK_CONFIGURATION')
+        for path in source.files:
+            if pathlib.Path(path).parent==git_root/'hooks':
+                o._preflight_require_v1(path.endswith('.sample'),'LINUX_PREFLIGHT_ACTIVE_REPOSITORY_HOOK')
+        source.publish(control/'declaration/source-basis.json')
+        capacity_v2['immutable_custody_established']=True
+        environment = o._linux_preflight_environment_v1(repository=repository,installation=installation,
+            runtime=str(runtime),control=str(control))
+        header,blobs,frame,vectors,grants = _linux_preflight_declaration_v1(source,install,git,origin_ns=origin,
+            repository=repository,interpreter=interpreter,environment=environment)
+        capacity_v2['actual_outer_frame_bytes']=len(frame)
+        capacity_v2['actual_startup_body_bytes']=sum(map(len,blobs))
+        capacity_v2['actual_manifest_bytes']=len(source.raw)
+        capacity_v2['actual_journal_bytes']=source.journal_bytes
+        o._preflight_require_v1(len(frame)<=2*1024**3 and len(source.raw)<=32*1024**2
+            and source.journal_bytes<=32*1024**2,'LINUX_V2_SERIALIZED_GEOMETRY')
+        o._atomic_write_bytes_v1(control/'declaration/input.bin',frame,control_mode=0o444)
+        o._atomic_write_bytes_v1(control/'declaration/event.json',event_bytes,control_mode=0o444)
+        scope = o._LinuxPreflightScopeV1(name=name,query=query,control=control,runtime=runtime,private_root=private_root,
+            spool=spool,repository=repository,installation=installation,interpreter=interpreter,source=source,
+            header=header,blobs=blobs,vectors=vectors,grants=grants,event=event,environment=environment)
+        scope.prepare_runtime()
+        mounted=scope.runtime_mount_attempted
+        scope.prepare_view()
+        scope.expected_syscalls = o._linux_preflight_syscalls_v1(query)
+        scope.start_slice()
+        scope.startup_deadline_ns = min(origin+3500*10**9,time.monotonic_ns()+60*10**9)
+        scope.launch_argv = o._linux_preflight_service_argv_v1(name=name,private_root=str(private_root),runtime=str(runtime),
+            control=str(control),spool=str(spool),repository=repository,installation=installation,interpreter=interpreter,
+            startup_deadline_ns=scope.startup_deadline_ns,environment=environment)
+        scope.argv = scope.launch_argv[scope.launch_argv.index('--')+1:]
+        token = o._LINUX_PREFLIGHT_PROCESS_V1.set(scope)
+        try:
+            observed = {}
+            receipt = o.supervise_command(scope.argv,cwd=pathlib.Path(repository),run_id=name,phase='fast-preflight-native-service',
+                command_index=1,evidence_root=spool,environment=environment,timeout_seconds=3600,
+                execution_deadline_ns=grants['execution_deadline_ns'],output_limits=dict(stdout_bytes=64*1024**2,
+                    stderr_bytes=64*1024**2,combined_output_bytes=128*1024**2),output_observation=observed)
+        finally: o._LINUX_PREFLIGHT_PROCESS_V1.reset(token)
+        o._preflight_require_v1(scope.settled and (scope.startup_error is not None or not o._command_requires_process_retention_v1(receipt)),
+            'LINUX_PREFLIGHT_NATIVE_CUSTODY_UNRESOLVED')
+        if scope.startup_error is not None:raise scope.startup_error
+    except BaseException as exc:
+        failures.append(exc)
+        if scope is not None and scope.service_created and not scope.settled:
+            try:
+                if scope.startup_error is not None:scope.recover_failed_start()
+                else:
+                    if not scope.terminated:scope.terminate(10)
+                    scope.finish()
+            except BaseException as cleanup_error: failures.append(cleanup_error)
+    if source is not None and source.failure is None and failures:
+        source.failure=failures[0]
+        source.state='FAILED'
+    runtime_fixture=getattr(query,'runtime_fixture_result',None)
+    recovery_resources_settled=(source is None or all(row['complete'] for row in source.recovery_cases)) and (runtime_fixture is None or runtime_fixture['settled'] and runtime_fixture['removed'])
+    settled = ((scope is None or not scope.service_created or scope.settled) and recovery_resources_settled
+        and query.command_resources_settled_v1())
+    exported = []
+    export_bytes = export_entries = 0
+    export_complete = False
+    pre_export_deadline = min(grants['settlement_deadline_ns']-190*10**9, time.monotonic_ns()+30*10**9)
+    post_export_deadline = None
+    export_elapsed_ns = 0
+    export_owner=(os.getpid(),threading.get_ident())
+    export_io=dict(read_bytes=0,read_attempts=0,maximum_read_request=0,slots=[],observations=[],operations=[])
+    def export_resources_settled():
+        return ((os.getpid(),threading.get_ident())==export_owner
+            and all(o._mapper_slot_settled_v1(slot) for slot in export_io['slots'])
+            and all(not row['pending'] for row in export_io['operations']))
+    def export_publish(path,raw,*,control_mode=None):
+        operation=dict(kind='atomic-publication',path=str(path),pending=True)
+        export_io['operations'].append(operation)
+        # A failed shared publication has no invented writer-close proof.
+        result=o._atomic_write_bytes_v1(path,raw,control_mode=control_mode)
+        operation['pending']=False
+        return result
+    def export_read(path,*,deadline_ns,expected=None):
+        # Reuse the existing no-follow/descriptor owners. Windows pathname and
+        # handle versions are checked within their own APIs, never conflated.
+        errors=[]
+        pieces=[]
+        extent=0
+        slot=None
+        observation=dict(path=str(path),returned_bytes=0,complete=False,errors=[])
+        export_io['observations'].append(observation)
+        try:
+            o._preflight_require_v1((os.getpid(),threading.get_ident())==export_owner,
+                'LINUX_PREFLIGHT_EXPORT_OWNER')
+            o._local_unlinked_path(path.parent)
+            before=path.lstat()
+            path_version=o._scan_same_api_version(before)
+            o._preflight_require_v1(stat.S_ISREG(before.st_mode) and before.st_nlink==1
+                and not o._stat_is_reparse_point(before) and before.st_size<=67108864
+                and (expected is None or len(expected)==before.st_size),'LINUX_PREFLIGHT_EXPORT_REGULAR_OR_EXTENT')
+            slot=o._mapper_slot_v1(export_owner,export_io['slots'],path,'evidence export')
+            try:
+                o._mapper_slot_opened_v1(slot,o._open_regular_worktree_descriptor(path,nonblocking=True))
+            except BaseException as error:
+                o._mapper_slot_open_error_v1(slot,error)
+                raise
+            finally:slot['acquiring']=False
+            descriptor=slot['returned_fd']
+            os.set_inheritable(descriptor,False)
+            opened=os.fstat(descriptor)
+            handle_version=o._scan_same_api_version(opened)
+            o._preflight_require_v1(stat.S_ISREG(opened.st_mode) and opened.st_nlink==1
+                and not o._stat_is_reparse_point(opened) and o._same_observed_file(before,opened)
+                and before.st_mode==opened.st_mode and o._scan_same_api_version(path.lstat())==path_version,
+                'LINUX_PREFLIGHT_EXPORT_DESCRIPTOR')
+            while True:
+                o._preflight_require_v1((os.getpid(),threading.get_ident())==export_owner
+                    and time.monotonic_ns()<deadline_ns,'LINUX_PREFLIGHT_EXPORT_READ_DEADLINE')
+                request=min(65536,before.st_size-extent+1)
+                export_io['read_attempts']+=1
+                export_io['maximum_read_request']=max(export_io['maximum_read_request'],request)
+                chunk=os.read(descriptor,request)
+                o._preflight_require_v1(type(chunk) is bytes,'LINUX_PREFLIGHT_EXPORT_READ')
+                observation['returned_bytes']+=len(chunk)
+                export_io['read_bytes']+=len(chunk)
+                if not chunk:break
+                offset=extent
+                extent+=len(chunk)
+                # Charge all delivered bytes before bound/content rejection.
+                o._preflight_require_v1(len(chunk)<=request and extent<=before.st_size,
+                    'LINUX_PREFLIGHT_EXPORT_CHANGED')
+                if expected is None:pieces.append(chunk)
+                else:o._preflight_require_v1(chunk==expected[offset:extent],
+                    'LINUX_PREFLIGHT_EXPORT_BYTE_COMPARISON')
+            o._preflight_require_v1(extent==before.st_size
+                and o._scan_same_api_version(os.fstat(descriptor))==handle_version
+                and o._scan_same_api_version(path.lstat())==path_version,'LINUX_PREFLIGHT_EXPORT_CHANGED')
+        except BaseException as error:errors.append(error)
+        finally:
+            if slot is not None:o._mapper_close_slot_v1(slot,errors)
+        if not errors:
+            try:o._preflight_require_v1(o._scan_same_api_version(path.lstat())==path_version,
+                'LINUX_PREFLIGHT_EXPORT_CHANGED_AFTER_CLOSE')
+            except BaseException as error:errors.append(error)
+        observation['errors']=[repr(error) for error in errors]
+        try:o._scan_raise_errors(errors)
+        except BaseException as error:
+            error._linux_preflight_export_owner_v1=slot
+            raise
+        observation['complete']=True
+        return b''.join(pieces) if expected is None else None
+    def export_file(path,destination,*,deadline_ns):
+        nonlocal export_bytes,export_entries
+        o._preflight_require_v1(time.monotonic_ns() < deadline_ns,
+            'LINUX_PREFLIGHT_EXPORT_DEADLINE')
+        export_entries += 1
+        before = path.lstat()
+        o._preflight_require_v1(export_entries <= 200000 and stat.S_ISREG(before.st_mode)
+            and before.st_nlink == 1 and before.st_size <= 67108864,
+            'LINUX_PREFLIGHT_EXPORT_REGULAR_OR_EXTENT')
+        export_bytes += before.st_size
+        o._preflight_require_v1(export_bytes <= 256*1024**2+1024**3,
+            'LINUX_PREFLIGHT_EXPORT_ORIGINAL_EVIDENCE_CAPACITY')
+        raw=export_read(path,deadline_ns=deadline_ns)
+        o._preflight_require_v1(o._scan_same_api_version(path.lstat())==o._scan_same_api_version(before),
+            'LINUX_PREFLIGHT_EXPORT_CHANGED')
+        export_publish(destination,raw,control_mode=0o444)
+        export_read(destination,deadline_ns=deadline_ns,expected=raw)
+        exported.append(dict(source=str(path),destination=str(destination),bytes=len(raw)))
+    def export_tree(path,destination,depth=0,*,deadline_ns):
+        nonlocal export_entries
+        o._preflight_require_v1(depth <= 64 and len(str(path).encode('utf-8')) <= 4096
+            and time.monotonic_ns() < deadline_ns,'LINUX_PREFLIGHT_EXPORT_TREE_BOUND')
+        before = _linux_preflight_export_directory_v1(path)
+        destination.mkdir(mode=0o755,exist_ok=False)
+        operation=dict(kind='directory-stream',path=str(path),pending=True,
+            close_attempted=False,closed=False)
+        export_io['operations'].append(operation)
+        stream=None
+        errors=[]
+        try:
+            stream=os.scandir(path)
+            for item in stream:
+                export_entries += 1
+                o._preflight_require_v1(export_entries <= 200000,'LINUX_PREFLIGHT_EXPORT_ENTRIES')
+                child = path/item.name
+                if item.is_dir(follow_symlinks=False): export_tree(child,destination/item.name,depth+1,deadline_ns=deadline_ns)
+                else: export_file(child,destination/item.name,deadline_ns=deadline_ns)
+        except BaseException as error:errors.append(error)
+        finally:
+            if stream is not None:
+                operation['close_attempted']=True
+                try:
+                    stream.close()
+                    operation['closed']=True
+                    operation['pending']=False
+                except BaseException as error:errors.append(error)
+        o._scan_raise_errors(errors)
+        _linux_preflight_export_directory_v1(path,before)
+    # The export roots are literal owned evidence surfaces, never the checkout,
+    # index, installation, declaration payload or an arbitrary supplied pathname.
+    report = dict(native_service_receipt=None if receipt is None else o._json_compatible(receipt),
+        native_history=[] if scope is None else o._json_compatible(scope.history),
+        native_queries=query.observations,query_attempts=query.attempts,query_output_bytes=query.retained,
+        administrative_supervision=query.command_supervision_evidence_v1(),
+        capture_counts=capture_counts,capture_complete=False,runtime_fixture=runtime_fixture,
+        basis_kind='NATIVE_IMMUTABLE_V2',native_basis_state=None if source is None else source.state,
+        native_basis_capacity=capacity_v2,immutable_primitive=None if source is None else source.primitive,
+        installation_copy=None if install is None else dict(verified=install.copy_verified,logical_bytes=install.byte_count,
+            source_read_bytes=install.read_bytes,copied_bytes=install.copy_bytes),
+        complete_size_census=False if census is None else census['complete_size_census'],
+        capture_capacity=capacity,capture_census=None if census is None else 'capture-census.json',
+        source_capture_bytes=None if source is None else source.byte_count,
+        source_delivered_read_bytes=None if source is None else source.read_bytes,
+        source_auxiliary_read_bytes=None if source is None else source.auxiliary_read_bytes,
+        source_read_attempts=None if source is None else source.read_attempts,
+        source_metadata_calls=None if source is None else source.metadata_calls,
+        source_accounting=None if source is None else source.evidence(),
+        source_last_path=None if source is None else getattr(source,'current_path',None),
+        source_last_operation=None if source is None else getattr(source,'current_operation',None),
+        source_mount_observation=None if source is None else getattr(source,'mount_observation',None),
+        installation_last_path=None if install is None else getattr(install,'current_path',None),
+        failures=[repr(e) for e in failures],service_settled=settled,
+        evidence_root=str(control),export_root=str(export_root),canonical_acceptance=False)
+    pre_export_start=time.monotonic_ns()
+    try:
+        raw,census_raw = _linux_preflight_metadata_bytes_v1(census,report,pre_export_deadline)
+        if census is not None:
+            export_publish(control/'capture-census.json',census_raw)
+            export_file(control/'capture-census.json',export_root/'capture-census.json',deadline_ns=pre_export_deadline)
+        export_publish(control/'native-result.json',raw)
+        export_file(control/'native-result.json',export_root/'native-result.json',deadline_ns=pre_export_deadline)
+        for path,label in ((control/'source-transition.jsonl','source-transition-before-settlement.jsonl'),
+                (control/'declaration/source-basis.json','source-basis.json')):
+            if path.exists():export_file(path,export_root/label,deadline_ns=pre_export_deadline)
+        for path,label in ((control/'native-evidence','native'),(spool,'streams'),
+                (runtime_backing/'evidence','application-evidence'),(runtime_backing/'reports','reports'),
+                (runtime_backing/'native-observations','service-native-observations')):
+            if path.exists(): export_tree(path,export_root/label,deadline_ns=pre_export_deadline)
+        export_complete = True
+    except BaseException as exc: failures.append(exc)
+    finally:
+        export_elapsed_ns += time.monotonic_ns()-pre_export_start
+    # The single restoration entry uses only its prepaid settlement allocation.
+    # Unresolved export resources retain the sole journal/root and cannot
+    # spend rollback. A safely closed byte failure still blocks root release.
+    settled = settled and query.command_resources_settled_v1() and export_resources_settled()
+    if settled:
+        if source is None:
+            restored = True
+        else:
+            try:
+                source.restore(deadline_ns=min(grants['settlement_deadline_ns']-70*10**9,
+                    time.monotonic_ns()+120*10**9),processes_settled=True)
+                restored = source.state == 'RESTORED'
+            except BaseException as exc: failures.append(exc)
+    post_export_start=time.monotonic_ns()
+    post_export_deadline=min(grants['settlement_deadline_ns']-40*10**9,
+        post_export_start+min(30*10**9,max(0,60*10**9-export_elapsed_ns)))
+    try:
+        if source is not None and source.journal_path is not None and source.journal_path.exists():
+            export_file(source.journal_path,export_root/'source-transition-after-settlement.jsonl',
+                deadline_ns=post_export_deadline)
+    except BaseException as exc:
+        failures.append(exc)
+        export_complete=False
+    stopped = unmounted = removed = False
+    if settled and restored and export_complete:
+        for kind,source_name in (('timing','timing-fast-preflight.json'),('router','router-fast-preflight.json')):
+            path = runtime_backing/'reports'/source_name
+            if path.exists():
+                try:
+                    destination = pathlib.Path(repository)/'.tmp'/('qtt-validation-'+kind)/'fast-preflight.json'
+                    export_file(path,destination,deadline_ns=post_export_deadline)
+                except BaseException as exc:
+                    failures.append(exc)
+                    export_complete=False
+        try:
+            o._preflight_require_v1(export_complete and query.command_resources_settled_v1() and export_resources_settled(),
+                'LINUX_PREFLIGHT_EXPORT_CUSTODY_UNRESOLVED')
+            post_export_spent=time.monotonic_ns()-post_export_start
+            export_elapsed_ns+=post_export_spent
+            post_export_start=None
+            with query.owned_resource_phase():
+                if scope is not None:scope.close_owned_units()
+                stopped = True
+                if scope is not None:scope.unmount_runtime()
+                unmounted = True
+            # Stop/unmount receipts are produced after the first export. Preserve
+            # only those newly created files, never overwrite earlier evidence.
+            post_export_start=time.monotonic_ns()
+            post_export_deadline=min(query.deadline_ns,post_export_start+max(0,30*10**9-post_export_spent),
+                post_export_start+max(0,60*10**9-export_elapsed_ns))
+            if (control/'native-evidence').exists():
+                for path in sorted((control/'native-evidence').iterdir()):
+                    destination = export_root/'native'/path.name
+                    if not destination.exists(): export_file(path,destination,deadline_ns=post_export_deadline)
+            o._preflight_require_v1(export_complete and query.command_resources_settled_v1()
+                and export_resources_settled(),'LINUX_PREFLIGHT_EXPORT_CUSTODY_UNRESOLVED')
+            with query.owned_resource_phase():
+                if scope is not None:scope.remove_runtime(export_root)
+                for path,identity in ((control,control_identity),):
+                    actual = path.lstat()
+                    o._preflight_require_v1(path.parent == pathlib.Path('/run') and
+                        (actual.st_dev,actual.st_ino) == identity and stat.S_ISDIR(actual.st_mode),
+                        'LINUX_PREFLIGHT_EXACT_CLEANUP_ROOT')
+                    o.remove_exact_run_owned_process_tree(path,expected_run_root=path,
+                        repo_root=repository,evidence_root=export_root)
+                removed = True
+        except BaseException as exc: failures.append(exc)
+    if post_export_start is not None:export_elapsed_ns += time.monotonic_ns()-post_export_start
+    cleanup = dict(source_accounting=None if source is None else source.evidence(),
+        administrative_resources_settled=query.command_resources_settled_v1(),
+        export_resources_settled=export_resources_settled(),
+        export_native_io=dict(read_bytes=export_io['read_bytes'],read_attempts=export_io['read_attempts'],
+            maximum_read_request=export_io['maximum_read_request'],observations=export_io['observations'],
+            operations=export_io['operations'],
+            acquisitions=[dict(path=str(slot['path']),open_unknown=slot['open_unknown'],
+                acquiring=slot['acquiring'],close_attempted=slot['close_attempted'],closed=slot['closed'],
+                raw_handle_debt=slot['raw_owner'] is not None,settled=o._mapper_slot_settled_v1(slot))
+                for slot in export_io['slots']]),
+        administrative_supervision=query.command_supervision_evidence_v1(),
+        owned_resource_spent_ns=getattr(query,'resource_spent_ns',None),
+        startup_output_bytes=getattr(query,'startup_output_bytes',None),
+        startup_fixture_output_bytes=getattr(query,'startup_fixture_bytes',None),
+        startup_fixture_output_reservation=getattr(query,'startup_fixture_reservation',None),
+        tiny_recovery_resources_settled=recovery_resources_settled,runtime_fixture=runtime_fixture,
+        native_history=[] if scope is None else o._json_compatible(scope.history),
+        export_elapsed_ns=export_elapsed_ns,pre_export_deadline_ns=pre_export_deadline,
+        post_export_deadline_ns=post_export_deadline,service_settled=settled,source_attributes_restored=restored,evidence_export_complete=export_complete,
+        service_created=scope is not None and scope.service_created,runtime_mount_attempted=scope is not None and scope.runtime_mount_attempted,
+        source_protection_attempted=source is not None and bool(source.protected),
+        native_basis_state=None if source is None else source.state,
+        immutable_primitive=None if source is None else source.primitive,
+        owned_units_stopped=stopped,runtime_unmounted=unmounted,owned_roots_removed=removed,
+        retained_root=None if removed else str(control),exported_files=exported,
+        failures=[repr(e) for e in failures],query_attempts=query.attempts,query_output_bytes=query.retained)
+    # The cleanup snapshot precedes this separate external receipt write.
+    # Its actual publication result is observed in the retained parent stream.
+    cleanup_receipt_published=False
+    try:
+        o.atomic_write_json(export_root/'cleanup.json',cleanup)
+        cleanup_receipt_published=True
+    except BaseException as exc: failures.append(exc)
+    print(json.dumps(dict(linux_native_export=str(export_root),cleanup=cleanup,
+        cleanup_receipt_published=cleanup_receipt_published,
+        complete_size_census=False if census is None else census['complete_size_census'],
+        capacity=capacity),default=str),flush=True)
+    return 0 if not failures and receipt is not None and receipt.failure_class is None and receipt.native_exit_code == 0 else 1
+
+
+
+def _ordinary_application_entry_v1(startup_deadline_ns, *, phase):
+    """Join the existing ordinary binding/release and exec in the same PID.
+
+    The original privileged Scope establishes native unit/profile/view/resource
+    admission before publishing these controls. This bootstrap reads those
+    original controls; it creates no process, evidence file or new permission.
+    """
+    import re
+    from tools import validation_reliability as owner
+    require = owner._preflight_require_v1
+    require(sys.platform == 'linux' and os.geteuid() != 0
+     and type(phase) is str and phase in ORDERED_PHASES
+     and type(startup_deadline_ns) is int and startup_deadline_ns > 0,
+     'ORDINARY_APPLICATION_ORIGINAL_UNPRIVILEGED_ENTRY')
+    pycache_prefix = sys._xoptions.get('pycache_prefix')
+    require(type(pycache_prefix) is str, 'ORDINARY_APPLICATION_SOURCE_CACHE_PREFIX_TYPE')
+    expected_argv = (sys.executable, '-I', '-B', '-X',
+     'pycache_prefix=' + pycache_prefix, '-X', 'utf8',
+     str(REPO_ROOT / 'tools' / 'run_validation_gates.py'), '--linux-preflight-enter',
+     '--phase', phase, '--startup-deadline-ns', str(startup_deadline_ns))
+    require(tuple(sys.orig_argv) == expected_argv,
+     'ORDINARY_APPLICATION_ORIGINAL_BOOTSTRAP_VECTOR')
+    controls = pathlib.Path(owner._linux_preflight_path_v1(
+     os.environ.get('QTT_LINUX_PREFLIGHT_CONTROL', '')))
+    runtime = pathlib.Path(owner._linux_preflight_path_v1(
+     os.environ.get('QTT_LINUX_PREFLIGHT_RUNTIME', '')))
+    require(not controls.is_relative_to(REPO_ROOT) and not runtime.is_relative_to(REPO_ROOT)
+     and controls != runtime and pathlib.Path.cwd() == REPO_ROOT,
+     'ORDINARY_APPLICATION_ORIGINAL_EXTERNAL_CONTROL_AND_RUNTIME')
+    require(pycache_prefix == str(runtime / 'pycache'),
+     'ORDINARY_APPLICATION_ORIGINAL_RUNTIME_CACHE_OPERAND')
+    rp5a_header = owner._ordinary_rp5a_bootstrap_header_v1(os.environ, repo_root=REPO_ROOT,
+     phase=phase, deadline_ns=startup_deadline_ns)
+    io = owner._ordinary_application_io_v1(startup_deadline_ns, control_root=controls,
+     _temporary_filter_write_bytes=112)
+    if rp5a_header is not None:
+     owner._ordinary_rp5a_control_limits_v1(io, rp5a_header[1]["binding_byte_limit"])
+    call = lambda function, *args, **kwargs: owner._ordinary_application_io_call_v1(io, function, *args, **kwargs)
+    read_proc = lambda path: owner._ordinary_application_native_read_v1(io, path)
+    read_proc(pathlib.Path('/proc') / str(os.getpid()) / 'cgroup')
+    name, cgroup, (binding_path, release_path) = owner._ordinary_application_bind_controls_v1(io)
+    if rp5a_header is not None:
+     require(name.endswith("p" + str(rp5a_header[2])),
+      "ORDINARY_R_SOURCE_HEADER_AND_ACTUAL_NATIVE_UNIT_INDEX")
+    binding, version, chain = owner._linux_preflight_control_read_v1(binding_path,
+     deadline_ns=startup_deadline_ns, pending=True, _ordinary_entry_owner_v1=io)
+    binding_fields = {'name', 'pid', 'start', 'invocation', 'phase', 'command_index',
+     'argv', 'environment', 'mappings', 'profile', 'cgroup', 'deadline_ns', 'temporary_filter_abi'}
+    if rp5a_header is not None:
+     binding_fields.add('rp5a_launch')
+     if (rp5a_header[1]['role'] == 'SCANNER' and rp5a_header[1]['wire_version'] == 3
+       and 'rp5a_protection' in binding):
+      binding_fields.add('rp5a_protection')
+    require(set(binding) == binding_fields
+     and binding['name'] == name and type(binding['pid']) is int and binding['pid'] == os.getpid()
+     and type(binding['start']) is int and binding['start'] > 0
+     and type(binding['command_index']) is int and binding['command_index'] > 0
+     and name.endswith('p' + str(binding['command_index'])) and binding['phase'] == phase
+     and type(binding['deadline_ns']) is int and startup_deadline_ns < binding['deadline_ns']
+     and type(binding['argv']) is list and binding['argv']
+     and all(type(value) is str and value and '\0' not in value for value in binding['argv'])
+     and type(binding['environment']) is dict and all(type(key) is str and type(value) is str
+      for key, value in binding['environment'].items())
+     and all(os.environ.get(key) == value for key, value in binding['environment'].items())
+     and binding['environment']['QTT_LINUX_PREFLIGHT_CONTROL'] == str(controls)
+     and binding['environment']['QTT_LINUX_PREFLIGHT_RUNTIME'] == str(runtime)
+     and binding['cgroup'] == cgroup and type(binding['profile']) is str
+     and type(binding['invocation']) is str and binding['invocation']
+     and type(binding['mappings']) is dict and str(REPO_ROOT) in binding['mappings'],
+     'ORDINARY_APPLICATION_EXACT_ORIGINAL_PROCESS_AND_BINDING')
+    process_raw = read_proc(pathlib.Path('/proc') / str(os.getpid()) / 'stat')
+    close = process_raw.rfind(b') ')
+    fields = process_raw[close + 2:].split()
+    require(process_raw.startswith(str(os.getpid()).encode('ascii') + b' (') and close > 0
+     and len(fields) >= 20 and fields[19].isdigit() and int(fields[19]) == binding['start'],
+     'ORDINARY_APPLICATION_ACTUAL_SAME_PROCESS_START')
+    profile_raw = read_proc(pathlib.Path('/proc') / str(os.getpid()) / 'attr' / 'current')
+    require(profile_raw == (binding['profile'] + ' (enforce)\n').encode('ascii'),
+     'ORDINARY_APPLICATION_ACTUAL_ORIGINAL_ENFORCEMENT')
+    owner._ordinary_temporary_filter_v1(io, binding)
+    release, release_version, release_chain = owner._linux_preflight_control_read_v1(release_path,
+     deadline_ns=startup_deadline_ns, pending=True, _ordinary_entry_owner_v1=io)
+    require(set(release) == {'name', 'pid', 'start', 'invocation'}
+     and all(release[key] == binding[key] and type(release[key]) is type(binding[key])
+      for key in release) and not io['errors']
+     and all(owner._mapper_slot_settled_v1(slot) for slot in io['slots'])
+     and owner._scan_same_api_version(call(os.lstat, binding_path)) == version
+     and owner._scan_same_api_version(call(os.lstat, release_path)) == release_version
+     and owner._preflight_chain_v1(binding_path.parent, _ordinary_entry_owner_v1=io) == chain
+     and owner._preflight_chain_v1(release_path.parent, _ordinary_entry_owner_v1=io) == release_chain,
+     'ORDINARY_APPLICATION_ORIGINAL_RELEASE_AND_CLOSED_READ_DEBT')
+    if rp5a_header is not None:
+     attestation, row, index = rp5a_header
+     require(binding["command_index"] == index and tuple(binding["argv"]) == row["argv"],
+      "ORDINARY_R_ORIGINAL_HEADER_ARGV_MATCHES_NATIVE_BINDING")
+     identity = owner._ScanLaunchIdentity(attestation.run_id, phase, index,
+      int(os.environ["QTT_SCAN_COMMAND_COUNT"]), row["argv"], str(REPO_ROOT))
+     owner._ordinary_rp5a_control_projection_v1(binding["rp5a_launch"], row, identity=identity)
+    owner._ordinary_application_io_check_v1(io)
+    # Native TasksMax1, fixed stdin, original read-only mappings and the actual
+    # same process association remain held by the original parent Scope.
+    os.execvpe(binding['argv'][0], binding['argv'], binding['environment'])
+
+def _linux_preflight_enter_v1(startup_deadline_ns):
+    import socket
+    from tools import validation_reliability as o
+    o._preflight_require_v1(sys.platform == 'linux' and os.geteuid() != 0,'LINUX_PREFLIGHT_UNPRIVILEGED_ENTRY_ONLY')
+    control = pathlib.Path(o._linux_preflight_path_v1(os.environ.get('QTT_LINUX_PREFLIGHT_CONTROL','')))
+    runtime = pathlib.Path(o._linux_preflight_path_v1(os.environ.get('QTT_LINUX_PREFLIGHT_RUNTIME','')))
+    query = o._LinuxPreflightQueriesV1(evidence_root=runtime/'native-observations',deadline_ns=startup_deadline_ns)
+    binding,version,chain = o._linux_preflight_control_read_v1(control/'binding/native.json',
+        deadline_ns=startup_deadline_ns,pending=True,query=query)
+    o._preflight_require_v1(binding['profile'] == 'QTT_PR298_LINUX_PREFLIGHT_V1' and
+        binding['startup_deadline_ns'] == startup_deadline_ns and binding['repository'] == str(REPO_ROOT)
+        and binding['runtime'] == str(runtime) and binding['environment'] == o._linux_preflight_environment_v1(
+            repository=str(REPO_ROOT),installation=sys.prefix,runtime=str(runtime),control=str(control)),
+        'LINUX_PREFLIGHT_BOUND_ENTRY_OPERANDS')
+    lease = o._LinuxPreflightHostLeaseV1(binding=binding,control_path=control/'binding/native.json',runtime=runtime,
+        query=query,declaration_chain=tuple((p,tuple(s)) for p,s in binding['declaration_chain']),
+        declaration_version=tuple(binding['declaration_version']))
+    probe = dict(name=binding['name'],pid=os.getpid(),start=lease.initial['start'],passed=False,denials=[])
+    try:
+        for path in (REPO_ROOT/'tools/run_validation_gates.py',control/'binding/native.json',control/'declaration/input.bin'):
+            probe['denials'].append(lease.probe_write_denial(path))
+        for family in (socket.AF_INET,socket.AF_INET6):
+            try: sock = socket.socket(family,socket.SOCK_STREAM)
+            except OSError as error:
+                probe['denials'].append(dict(family=int(family),operation='socket-create-no-connect',errno=error.errno))
+            else:
+                sock.close()
+                raise RuntimeError('LINUX_PREFLIGHT_NETWORK_SOCKET_SUCCEEDED')
+        for path in ('/dev/shm','/dev/mqueue','/dev/hugepages'):
+            info = pathlib.Path(path).lstat()
+            o._preflight_require_v1(stat.S_ISDIR(info.st_mode) and stat.S_IMODE(info.st_mode) == 0,
+                'LINUX_PREFLIGHT_REQUIRED_DEVICE_MASK_ABSENT')
+            try: fd = os.open(path,os.O_RDONLY|os.O_DIRECTORY|os.O_NOFOLLOW|os.O_CLOEXEC)
+            except OSError as error:
+                o._preflight_require_v1(error.errno == 13,'LINUX_PREFLIGHT_DEVICE_MASK_QUERY_FAILURE')
+                probe['denials'].append(dict(path=path,operation='directory-read-open',errno=error.errno))
+            else:
+                os.close(fd)
+                raise RuntimeError('LINUX_PREFLIGHT_DEVICE_MASK_ACCESS_SUCCEEDED')
+        lease.check_parent(REPO_ROOT,pathlib.Path(binding['index']))
+        probe['passed'] = True
+    finally:
+        o.atomic_write_json(runtime/'probe.json',probe)
+    release,_,_ = o._linux_preflight_control_read_v1(control/'release/release.json',deadline_ns=startup_deadline_ns,
+        pending=True,query=query)
+    o._preflight_require_v1(release == dict(name=binding['name'],pid=os.getpid(),start=lease.initial['start'],
+        invocation=binding['invocation']),'LINUX_PREFLIGHT_ORIGINAL_RELEASE')
+    query.deadline_ns = binding['grants']['native_deadline_ns']
+    for directory in ('process','evidence','reports'):
+        (runtime/directory).mkdir(mode=0o700,exist_ok=False)
+    native = o._PreflightNativeInputV1(path=binding['declaration'],root=REPO_ROOT,index_path=pathlib.Path(binding['index']),
+        expected_path_version=lease.declaration_version,expected_chain=lease.declaration_chain,
+        limits=binding['grants']['native'],deadline_ns=binding['grants']['native_deadline_ns'],host_lease=lease,
+        capture_limits=binding['grants']['capture'],terminal_limits=binding['grants']['terminal'],git_executable='/usr/bin/git')
+    token = o._LINUX_PREFLIGHT_LEASE_V1.set(lease)
+    try:
+        with o._preflight_native_input_v1(native):
+            return main(['--phase','fast-preflight','--preflight-input',binding['declaration'],
+                '--timing-report',str(runtime/'reports/timing-fast-preflight.json'),
+                '--router-report',str(runtime/'reports/router-fast-preflight.json')])
+    finally:
+        o._LINUX_PREFLIGHT_LEASE_V1.reset(token)
+        o._preflight_require_v1(not lease.children,'LINUX_PREFLIGHT_RETAIN_UNRESOLVED_CHILD_HANDLES')
+
+
+def _linux_preflight_selected_v1(argv, suppliers):
+    request = argparse.ArgumentParser(add_help=False,allow_abbrev=False)
+    request.add_argument('--linux-preflight-provision',action='store_true')
+    request.add_argument('--linux-preflight-enter',action='store_true')
+    request.add_argument('--startup-deadline-ns')
+    request.add_argument('--phase')
+    selected,other = request.parse_known_args(argv)
+    if not (selected.linux_preflight_provision or selected.linux_preflight_enter):
+        if selected.startup_deadline_ns is not None:
+            raise ValueError('Linux startup cutoff requires the closed entry mode')
+        return None
+    if (selected.linux_preflight_provision == selected.linux_preflight_enter
+            or selected.phase not in ORDERED_PHASES
+            or other or any(value is not None for value in suppliers)):
+        raise ValueError('Linux provisioning requires the exact first phase without competing suppliers or arbitrary arguments')
+    if selected.linux_preflight_enter:
+        if selected.startup_deadline_ns is None:
+            raise ValueError('original Linux startup cutoff required')
+        from tools.validation_reliability import _preflight_decimal_v1
+        selected.startup_deadline_ns = _preflight_decimal_v1(selected.startup_deadline_ns)
+    elif selected.startup_deadline_ns is not None:
+        raise ValueError('service startup cutoff is not a controller input')
+    return selected
+
+
+def main(argv: Sequence[str] | None = None, *, scan_capacity_source=None, candidate_source=None, mapper_read_source=None) -> int:
+    global _ORDINARY_CANDIDATE_FIRST_V1
+    global _ACTIVE_PREFLIGHT_PATH_V1, _ACTIVE_PREFLIGHT_NATIVE_V1, _ACTIVE_PREFLIGHT_ASSEMBLY_V1
+    global _ACTIVE_MAPPER_OCCURRENCES_V1
+    global _ACTIVE_MAPPER_READ_PROFILES_V1, _ACTIVE_MAPPER_READ_SOURCE_V1, _MAPPER_READ_SOURCE_ATTEMPTED
+    global _ACTIVE_SCAN_CAPACITY_SOURCE, _ACTIVE_SCAN_LAUNCH, _SCAN_CAPACITY_ATTEMPTED, _ACTIVE_CANDIDATE_SOURCE
+    if _RUN_COMMANDS_SUPERVISION is not None and _RUN_COMMANDS_SUPERVISION["pending"]:
+        print("ENGVR_PROCESS_TERMINATION_FAILED: prior command custody is unresolved",
+              file=sys.stderr, flush=True)
+        return 1
+    if _invocation_requires_retention_v1(_RUN_COMMANDS_SUPERVISION):
+        print("ENGVR_PREPUBLICATION_CUSTODY_FAILED: prior candidate custody is unresolved",
+              file=sys.stderr, flush=True)
+        return 1
+    linux = _linux_preflight_selected_v1(sys.argv[1:] if argv is None else list(argv),
+        (scan_capacity_source,candidate_source,mapper_read_source))
+    if linux is not None:
+        from tools import validation_reliability as native
+        if linux.linux_preflight_enter:
+            if linux.phase != FAST_PREFLIGHT_PHASE:
+                return _ordinary_application_entry_v1(linux.startup_deadline_ns, phase=linux.phase)
+            return _linux_preflight_enter_v1(linux.startup_deadline_ns)
+        return _ordinary_linux_provision_v1(phase=linux.phase)
+    if not _SCAN_MAIN_LOCK.acquire(blocking=False):
+        raise ValueError("central validation invocation already active")
+    previous_preflight = (_ACTIVE_PREFLIGHT_PATH_V1, _ACTIVE_PREFLIGHT_NATIVE_V1, _ACTIVE_PREFLIGHT_ASSEMBLY_V1)
+    previous_occurrences = _ACTIVE_MAPPER_OCCURRENCES_V1
+    previous_mapper = (_ACTIVE_MAPPER_READ_PROFILES_V1, _ACTIVE_MAPPER_READ_SOURCE_V1, _MAPPER_READ_SOURCE_ATTEMPTED)
+    previous = (_ACTIVE_SCAN_CAPACITY_SOURCE, _ACTIVE_SCAN_LAUNCH, _SCAN_CAPACITY_ATTEMPTED, _ACTIVE_CANDIDATE_SOURCE)
+    previous_candidate_order = _ORDINARY_CANDIDATE_FIRST_V1
+    try:
+        request = argparse.ArgumentParser(add_help=False)
+        request.add_argument("--preflight-input", type=pathlib.Path)
+        request.add_argument("--phase", default=ALL_PHASE)
+        request.add_argument("--validation-mode", default="auto")
+        selected, _ = request.parse_known_args(sys.argv[1:] if argv is None else list(argv))
+        if selected.preflight_input is not None and (selected.phase != FAST_PREFLIGHT_PHASE
+                or selected.validation_mode == "reduced"
+                or any(v is not None for v in (candidate_source, mapper_read_source, scan_capacity_source))):
+            raise ValueError("preflight input requires the full first phase without competing suppliers")
+        from tools.validation_reliability import _LINUX_PREFLIGHT_PROCESS_V1, _LinuxPreflightScopeV1
+        ordinary_scope = _LINUX_PREFLIGHT_PROCESS_V1.get()
+        ordinary_selected = (type(ordinary_scope) is _LinuxPreflightScopeV1
+            and ordinary_scope._ordinary_selected_v1())
+        if ordinary_selected:
+            # The same native Scope supplies this one retained callable. Its
+            # actual paths and plan are bound later by the original publisher.
+            ordinary_scope._ordinary_precursor_ready_v1()
+            if hasattr(ordinary_scope, '_ordinary_controller_receiver_v1'):
+                _ordinary_ci_require_binding_v1(ordinary_scope, phase=selected.phase)
+            if (selected.preflight_input is not None or mapper_read_source is not None
+                    or scan_capacity_source is not None or not callable(candidate_source)
+                    or candidate_source is not ordinary_scope._ordinary_candidate_source_v1
+                    or candidate_source is not ordinary_scope._ordinary_original_candidate_source_v1):
+                raise ValueError("ORDINARY_ORIGINAL_SCOPE_SUPPLIER_ASSOCIATION")
+        _ACTIVE_PREFLIGHT_PATH_V1 = selected.preflight_input
+        _ACTIVE_PREFLIGHT_NATIVE_V1 = _ACTIVE_PREFLIGHT_ASSEMBLY_V1 = None
+        _ACTIVE_MAPPER_OCCURRENCES_V1 = {}
+        _ACTIVE_MAPPER_READ_PROFILES_V1 = None
+        _ACTIVE_MAPPER_READ_SOURCE_V1 = mapper_read_source
+        _MAPPER_READ_SOURCE_ATTEMPTED = False
+        _ACTIVE_SCAN_CAPACITY_SOURCE = scan_capacity_source
+        _ACTIVE_CANDIDATE_SOURCE = candidate_source
+        _ORDINARY_CANDIDATE_FIRST_V1 = (ordinary_selected or selected.preflight_input is None
+            and all(value is None for value in (candidate_source, mapper_read_source, scan_capacity_source)))
+        _ACTIVE_SCAN_LAUNCH = None
+        _SCAN_CAPACITY_ATTEMPTED = False
+        return _main_owned(argv)
+    finally:
+        _ACTIVE_PREFLIGHT_PATH_V1, _ACTIVE_PREFLIGHT_NATIVE_V1, _ACTIVE_PREFLIGHT_ASSEMBLY_V1 = previous_preflight
+        _ACTIVE_SCAN_CAPACITY_SOURCE, _ACTIVE_SCAN_LAUNCH, _SCAN_CAPACITY_ATTEMPTED, _ACTIVE_CANDIDATE_SOURCE = previous
+        _ORDINARY_CANDIDATE_FIRST_V1 = previous_candidate_order
+        _ACTIVE_MAPPER_READ_PROFILES_V1, _ACTIVE_MAPPER_READ_SOURCE_V1, _MAPPER_READ_SOURCE_ATTEMPTED = previous_mapper
+        _ACTIVE_MAPPER_OCCURRENCES_V1 = previous_occurrences
+        _SCAN_MAIN_LOCK.release()
+
+
+def _ordinary_bootstrap_heap_prepare_v1(native_product, *, initial_row):
+ """Keep pending accounting on the identical pre-Query native input."""
+ from tools import validation_reliability as o
+ fields = ('native_input', 'native_hold', 'native_generation', 'startup',
+  'source_generation', 'roles', 'actor', 'phase', 'role', 'native_root',
+  'origin_ns', 'errors')
+ o._preflight_require_v1(type(native_product) is dict
+  and 'heap_record' not in native_product,
+  'ORDINARY_BOOTSTRAP_ONE_ORIGINAL_HEAP_RECORD')
+ old = native_product['original']
+ o._preflight_require_v1(type(old) is tuple and len(old) == 13
+  and old[0] is native_product
+  and all(old[index + 1] is native_product[key] for index, key in enumerate(fields))
+  and all(native_product[key] is not None for key in fields[:5])
+  and type(native_product['errors']) is list and not native_product['errors']
+  and _ORDINARY_BOOTSTRAP_ACQUISITION_V1 is None
+  and _ORDINARY_BOOTSTRAP_ORIGINAL_ACQUISITION_V1 is None,
+  'ORDINARY_BOOTSTRAP_HEAP_SAME_PREQUERY_NATIVE_SOURCE_INPUT')
+ actor = native_product['actor']
+ o._preflight_require_v1(type(actor) is tuple and len(actor) == 4
+  and all(type(value) is int for value in actor)
+  and actor[0] == os.getpid() and actor[2] == threading.get_ident()
+  and actor[3] == threading.get_native_id()
+  and type(native_product['phase']) is str and native_product['phase'] in ORDERED_PHASES
+  and type(native_product['role']) is str
+  and native_product['role'] in ('CHECKER', 'PROVISION', 'PARENT', 'RECEIVER'),
+  'ORDINARY_BOOTSTRAP_HEAP_ACTUAL_ORIGINAL_ACTOR')
+ # The already Source-issued prepare row must fund this carrier, request
+ # records, issuer/capture frames and errors before their construction. Its
+ # original request-attempt witness is checked again by the same stage owner.
+ source = native_product['heap_prepare_request_attempt']
+ _ordinary_bootstrap_heap_source_row_v1(native_product, initial_row, source)
+ o._preflight_require_v1(initial_row[0] == 'BOOTSTRAP_PREPARE',
+  'ORDINARY_BOOTSTRAP_FIXED_PREPARE_STAGE')
+ record = dict(native_product=native_product, native_original=old,
+  owner=(os.getpid(), threading.get_ident()), actor=actor,
+  phase=native_product['phase'], role=native_product['role'],
+  stages=[], retained=[], errors=[], active=None, peak=0,
+  acquisition=None, acquisition_original=None, query=None,
+  acquisition_attempted=False, adoption_attempted=False,
+  scope=None, host=None, ceiling=None, value=None,
+  transfer_attempted=False, transfer=None)
+ fixed = ('native_product', 'native_original', 'owner', 'actor', 'phase',
+  'role', 'stages', 'retained', 'errors')
+ record['original'] = (record,) + tuple(record[key] for key in fixed)
+ native_product['heap_record'] = record
+ attempt = _ordinary_bootstrap_heap_stage_v1(record, initial_row)
+ _ordinary_bootstrap_heap_stage_complete_v1(record, attempt, record)
+ return record
+
+
+def _ordinary_bootstrap_heap_source_row_v1(native_product, row, source):
+ """Authenticate the actual fixed producer's completed original row."""
+ import types
+ from tools import validation_reliability as o
+ o._preflight_require_v1(type(row) is tuple and len(row) == 5
+  and type(source) is dict and source.get('result') is row
+  and source.get('complete') is True and type(source.get('errors')) is list
+  and not source['errors'], 'ORDINARY_BOOTSTRAP_COMPLETED_SOURCE_REQUEST_ROW')
+ original = source['result_original']
+ stage, association, components, retained_names, producer = row
+ raw_stage = type(stage) is str and stage in ('BOOTSTRAP_TICKET_RAW_PARENT', 'BOOTSTRAP_TICKET_RAW_RECEIVER')
+ o._preflight_require_v1(type(original) is tuple
+  and len(original) == (10 if raw_stage else 9)
+  and original[0] is row and original[2] is association
+  and original[3] is components and original[4] is retained_names
+  and original[5] is producer and original[6] is source
+  and original[7] is source['errors'] and original[8] is source['owner']
+  and type(source['owner']) is tuple and len(source['owner']) == 2
+  and all(type(value) is int for value in source['owner'])
+  and source['owner'] == (os.getpid(), threading.get_ident())
+  and type(stage) is str and stage
+  and ((stage in ('BOOTSTRAP_PREPARE', 'BOOTSTRAP_QUERY')
+    and association is native_product and original[1] is native_product)
+   or (type(association) is tuple and association
+    and association[0] is original[1]))
+  and (original[1] is native_product
+   or (original[1] is _ORDINARY_BOOTSTRAP_ACQUISITION_V1
+    is _ORDINARY_BOOTSTRAP_ORIGINAL_ACQUISITION_V1
+    and original[1]['native_product'] is native_product)),
+  'ORDINARY_BOOTSTRAP_IDENTICAL_FIXED_SOURCE_ROW_AND_OPERANDS')
+ # No emitter is invoked here. Each actual caller selects one fixed Source
+ # producer and retains its original result witness before entry. Unknown or
+ # missing producers cannot be substituted by a Boolean, module or callback.
+ names = {
+  'BOOTSTRAP_PREPARE': '_ordinary_bootstrap_heap_prepare_request_v1',
+  'BOOTSTRAP_QUERY': '_ordinary_bootstrap_query_request_v1',
+  'BOOTSTRAP_EVENT_BASE64': '_ordinary_bootstrap_event_request_v1',
+  'BOOTSTRAP_EVENT_JSON': '_ordinary_bootstrap_event_request_v1',
+  'BOOTSTRAP_SCOPE_CONSTRUCTION': '_ordinary_bootstrap_constructor_request_v1',
+  'BOOTSTRAP_TICKET_PARENT': '_ordinary_bootstrap_ticket_request_v1',
+  'BOOTSTRAP_TICKET_RECEIVER': '_ordinary_bootstrap_ticket_request_v1',
+  'BOOTSTRAP_TICKET_RAW_PARENT': '_ordinary_bootstrap_ticket_raw_request_v1',
+  'BOOTSTRAP_TICKET_RAW_RECEIVER': '_ordinary_bootstrap_ticket_raw_request_v1',
+  'BEFORE_TOKENIZE': '_ordinary_control_tokenize_request_v1',
+  'BEFORE_PARSE': '_ordinary_control_parse_request_v1',
+  'BEFORE_COMPILE': '_ordinary_control_compile_request_v1',
+ }
+ o._preflight_require_v1(stage in names and type(producer) is types.FunctionType
+  and producer is globals().get(names[stage]),
+  'ORDINARY_BOOTSTRAP_ONLY_ACTUAL_FIXED_SOURCE_PRODUCER')
+ if raw_stage:
+  _ordinary_bootstrap_heap_raw_slot_v1(native_product, source)
+ return source
+
+
+def _ordinary_bootstrap_heap_record_v1(record, *, failures=False):
+ from tools import validation_reliability as o
+ o._preflight_require_v1(type(record) is dict and type(failures) is bool,
+  'ORDINARY_BOOTSTRAP_EXACT_HEAP_RECORD')
+ n = record['native_product']
+ fixed = ('native_product', 'native_original', 'owner', 'actor', 'phase',
+  'role', 'stages', 'retained', 'errors')
+ old = record['original']
+ fields = ('native_input', 'native_hold', 'native_generation', 'startup',
+  'source_generation', 'roles', 'actor', 'phase', 'role', 'native_root',
+  'origin_ns', 'errors')
+ o._preflight_require_v1(type(n) is dict and n.get('heap_record') is record
+  and n['original'] is record['native_original']
+  and type(n['original']) is tuple and len(n['original']) == 13
+  and n['original'][0] is n
+  and all(n['original'][index + 1] is n[key] for index, key in enumerate(fields))
+  and type(old) is tuple and len(old) == 10 and old[0] is record
+  and all(record[key] is old[index + 1] for index, key in enumerate(fixed))
+  and type(record['owner']) is tuple and len(record['owner']) == 2
+  and all(type(value) is int for value in record['owner'])
+  and record['owner'] == (os.getpid(), threading.get_ident())
+  and record['actor'] is n['actor'] and record['phase'] is n['phase']
+  and record['role'] is n['role']
+  and type(record['errors']) is list and type(n['errors']) is list
+  and (failures or (not record['errors'] and not n['errors'])),
+  'ORDINARY_BOOTSTRAP_ORIGINAL_HEAP_RECORD_CONTINUITY')
+ acquisition = record['acquisition']
+ if acquisition is not None:
+  afields = fields[:-1] + ('query', 'errors')
+  aold = record['acquisition_original']
+  o._preflight_require_v1(acquisition is _ORDINARY_BOOTSTRAP_ACQUISITION_V1
+   is _ORDINARY_BOOTSTRAP_ORIGINAL_ACQUISITION_V1
+   and acquisition.get('native_product') is n
+   and acquisition.get('heap_record') is record
+   and acquisition['original'] is aold
+   and type(aold) is tuple and len(aold) == 14 and aold[0] is acquisition
+   and all(aold[index + 1] is acquisition[key] for index, key in enumerate(afields))
+   and record['query'] is acquisition['query']
+   and acquisition['errors'] is n['errors'],
+   'ORDINARY_BOOTSTRAP_HEAP_IDENTICAL_ONCE_CONSTRUCTED_QUERY')
+ return record
+
+
+def _ordinary_bootstrap_heap_acquisition_v1(record, acquisition):
+ from tools import validation_reliability as o
+ record = _ordinary_bootstrap_heap_record_v1(record)
+ o._preflight_require_v1(record['acquisition_attempted'] is False,
+  'ORDINARY_BOOTSTRAP_ONE_HEAP_QUERY_ASSOCIATION')
+ record['acquisition_attempted'] = True
+ try:
+  o._preflight_require_v1(acquisition is _ORDINARY_BOOTSTRAP_ACQUISITION_V1
+   is _ORDINARY_BOOTSTRAP_ORIGINAL_ACQUISITION_V1
+   and acquisition['native_product'] is record['native_product']
+   and acquisition['native_product']['runtime_issue_attempt']['acquisition'] is acquisition
+   and type(acquisition['query']) is o._LinuxPreflightQueriesV1
+   and acquisition['errors'] is record['native_product']['errors']
+   and record['acquisition'] is None and record['query'] is None
+   and 'heap_record' not in acquisition,
+   'ORDINARY_BOOTSTRAP_HEAP_REAL_QUERY_BEFORE_CAPTURE')
+  record['acquisition'], record['acquisition_original'] = acquisition, acquisition['original']
+  record['query'] = acquisition['query']
+  acquisition['heap_record'] = record
+  record['acquisition_binding'] = (record, acquisition, acquisition['original'],
+   acquisition['query'], record['native_product'])
+  _ordinary_bootstrap_heap_record_v1(record)
+  return record
+ except BaseException as error:
+  if all(error is not old for old in record['errors']): record['errors'].append(error)
+  if all(error is not old for old in record['native_product']['errors']):
+   record['native_product']['errors'].append(error)
+  raise
+
+
+def _ordinary_bootstrap_heap_stage_v1(record, row):
+ """Reserve the completed Source row before the corresponding operation."""
+ from tools import validation_reliability as o
+ record = _ordinary_bootstrap_heap_record_v1(record)
+ o._preflight_require_v1(record['active'] is None and record['transfer_attempted'] is False,
+  'ORDINARY_BOOTSTRAP_HEAP_STAGE_BEFORE_TRANSFER')
+ attempt = dict(row=row, complete=False, result=None, error=None)
+ record['stages'].append(attempt)
+ record['active'] = attempt
+ try:
+  o._preflight_require_v1(type(row) is tuple and len(row) == 5
+   and type(row[0]) is str, 'ORDINARY_BOOTSTRAP_SOURCE_REQUEST_ROW')
+  stage, association, components, retained_names, producer = row
+  if stage == 'BOOTSTRAP_PREPARE':
+   source = record['native_product']['heap_prepare_request_attempt']
+  elif stage == 'BOOTSTRAP_QUERY':
+   source = record['native_product']['query_request_attempt']
+  elif stage in ('BOOTSTRAP_TICKET_RAW_PARENT', 'BOOTSTRAP_TICKET_RAW_RECEIVER'):
+   source = record['acquisition']['ticket_raw_request_attempt']
+  elif stage in ('BOOTSTRAP_TICKET_PARENT', 'BOOTSTRAP_TICKET_RECEIVER'):
+   source = record['acquisition']['ticket_request_attempt']
+  else:
+   sources = record['acquisition']['heap_source_request_attempts']
+   o._preflight_require_v1(type(sources) is list,
+    'ORDINARY_BOOTSTRAP_ACTUAL_SOURCE_REQUEST_ATTEMPTS')
+   matching = [s for s in sources if type(s) is dict and s.get('result') is row]
+   o._preflight_require_v1(len(matching) == 1,
+    'ORDINARY_BOOTSTRAP_ONE_ORIGINAL_SOURCE_REQUEST_RESULT')
+   source = matching[0]
+  _ordinary_bootstrap_heap_source_row_v1(record['native_product'], row, source)
+  if stage in ('BOOTSTRAP_TICKET_RAW_PARENT', 'BOOTSTRAP_TICKET_RAW_RECEIVER'):
+   attempt['raw_slot_original'] = source['raw_slot']['original']
+  o._preflight_require_v1(type(components) is tuple and components
+   and type(retained_names) is tuple
+   and not any(prior['row'] is row for prior in record['stages'][:-1]),
+   'ORDINARY_BOOTSTRAP_SAME_SOURCE_STAGE_ASSOCIATION')
+  names, demand = [], 0
+  for item in components:
+   o._preflight_require_v1(type(item) is tuple and len(item) == 2
+    and type(item[0]) is str and item[0] and item[0] not in names
+    and type(item[1]) is int and 0 <= item[1] <= 4 << 30,
+    'ORDINARY_BOOTSTRAP_EXACT_COMPONENT_REQUEST')
+   names.append(item[0])
+   demand += item[1]
+  o._preflight_require_v1(demand > 0
+   and all(type(name) is str and name in names for name in retained_names)
+   and len(set(retained_names)) == len(retained_names),
+   'ORDINARY_BOOTSTRAP_SOURCE_RETAINED_COMPONENT_ROSTER')
+  prior = sum(item[2] for item in record['retained'])
+  peak = prior + demand
+  o._preflight_require_v1(peak <= 4 << 30,
+   'ORDINARY_BOOTSTRAP_WHOLE_HEAP_SOURCE_REQUEST_INTERSECTION')
+  record['peak'] = max(record['peak'], peak)
+  attempt['original'] = (attempt, record, row, source, association,
+   components, retained_names, producer, demand, prior, peak)
+  return attempt
+ except BaseException as error:
+  try:
+   _ordinary_bootstrap_heap_stage_failed_v1(record, attempt, error)
+  except BaseException as accounting_error:
+   o._scan_raise_errors((error, accounting_error))
+  raise
+
+
+def _ordinary_bootstrap_heap_stage_complete_v1(record, attempt, result):
+ from tools import validation_reliability as o
+ record = _ordinary_bootstrap_heap_record_v1(record)
+ old = attempt['original']
+ o._preflight_require_v1(record['active'] is attempt
+  and type(old) is tuple and len(old) == 11 and old[0] is attempt
+  and old[1] is record and old[2] is attempt['row']
+  and attempt['complete'] is False and attempt['error'] is None,
+  'ORDINARY_BOOTSTRAP_ORIGINAL_STAGE_COMPLETION')
+ _ordinary_bootstrap_heap_source_row_v1(record['native_product'], old[2], old[3])
+ stage, association, components, retained_names, producer = old[2]
+ if stage in ('BOOTSTRAP_TICKET_RAW_PARENT', 'BOOTSTRAP_TICKET_RAW_RECEIVER'):
+  _ordinary_bootstrap_heap_raw_slot_v1(record['native_product'], old[3],
+   completed=True, slot_original=attempt['raw_slot_original'], result=result)
+ for name, size in components:
+  if name in retained_names:
+   record['retained'].append((stage, name, size, old[2], association, producer))
+ attempt['result'], attempt['complete'] = result, True
+ record['active'] = None
+ return result
+
+
+def _ordinary_bootstrap_heap_stage_failed_v1(record, attempt, error):
+ from tools import validation_reliability as o
+ record = _ordinary_bootstrap_heap_record_v1(record, failures=True)
+ o._preflight_require_v1(record['active'] is attempt and attempt['complete'] is False
+  and isinstance(error, BaseException), 'ORDINARY_BOOTSTRAP_ORIGINAL_STAGE_FAILURE')
+ attempt['error'] = error
+ if all(error is not old for old in record['errors']): record['errors'].append(error)
+ if all(error is not old for old in record['native_product']['errors']):
+  record['native_product']['errors'].append(error)
+    # Failed operations keep the active reservation and its full partial debt.
+    # They acquire neither successful retirement nor permission for a new stage.
+
+
+def _ordinary_bootstrap_heap_adopt_v1(scope, record, ceiling, host, value):
+ from tools import validation_reliability as o
+ record = _ordinary_bootstrap_heap_record_v1(record)
+ o._preflight_require_v1(record['adoption_attempted'] is False,
+  'ORDINARY_BOOTSTRAP_ONE_HEAP_ADOPTION')
+ record['adoption_attempted'] = True
+ try:
+  runtime = _ordinary_bootstrap_runtime_check_v1(scope)
+  checked = _ordinary_post_ceiling_checked_v1(ceiling)
+  o._preflight_require_v1(type(scope) is o._LinuxPreflightScopeV1
+   and scope.query is record['query'] is runtime['query']
+   and runtime['acquisition'] is record['acquisition']
+   and host is scope._ordinary_host_preparation_v1
+   is scope._ordinary_original_host_preparation_v1
+   and host['ceiling_programme'] is checked
+   and value['phase'] == record['phase']
+   and checked['limits']['heap_byte_limit'] == 4 << 30
+   and record['active'] is None and not hasattr(scope, '_ordinary_bootstrap_heap_v1'),
+   'ORDINARY_BOOTSTRAP_HEAP_SAME_SCOPE_QUERY_AND_CEILING')
+  record['scope'], record['host'], record['ceiling'], record['value'] = scope, host, checked, value
+  record['adoption_original'] = (record, scope, scope.query, host, checked,
+   checked['original'], value, runtime)
+  scope._ordinary_bootstrap_heap_v1 = scope._ordinary_original_bootstrap_heap_v1 = record
+  return record
+ except BaseException as error:
+  if all(error is not old for old in record['errors']): record['errors'].append(error)
+  if all(error is not old for old in scope._ordinary_factory_errors_v1):
+   scope._ordinary_factory_errors_v1.append(error)
+  raise
+
+
+def _ordinary_bootstrap_heap_transfer_v1(scope, resource, record):
+ """Transfer the same retained programme once into the existing heap sum."""
+ from tools import validation_reliability as o
+ record = _ordinary_bootstrap_heap_record_v1(record)
+ o._preflight_require_v1(record is scope._ordinary_bootstrap_heap_v1
+  is scope._ordinary_original_bootstrap_heap_v1
+  and record['transfer_attempted'] is False and record['active'] is None,
+  'ORDINARY_BOOTSTRAP_ONE_HEAP_TRANSFER')
+ record['transfer_attempted'] = True
+ try:
+  old = record['adoption_original']
+  o._preflight_require_v1(type(old) is tuple and len(old) == 8
+   and old[0] is record and old[1] is scope and old[2] is scope.query
+   and old[3] is record['host'] and old[4] is record['ceiling']
+   and old[5] is record['ceiling']['original'] and old[6] is record['value']
+   and old[7] is _ordinary_bootstrap_runtime_check_v1(scope)
+   and resource is scope._ordinary_resource_programme_v1
+   is scope._ordinary_original_resource_programme_v1[0]
+   and resource['ceiling_programme'] is record['ceiling']
+   and resource['limits']['heap_byte_limit'] == 4 << 30
+   and all(attempt['complete'] is True and attempt['error'] is None
+    for attempt in record['stages']),
+   'ORDINARY_BOOTSTRAP_HEAP_FINAL_ORIGINAL_RESOURCE_ASSOCIATION')
+  retained = sum(item[2] for item in record['retained'])
+  transfer = (record, scope, resource, resource['data_allocation_programme'],
+   tuple(record['retained']), tuple(record['stages']), retained, record['peak'])
+  record['transfer'] = transfer
+  return transfer
+ except BaseException as error:
+  if all(error is not old for old in record['errors']): record['errors'].append(error)
+  if all(error is not old for old in scope._ordinary_factory_errors_v1):
+   scope._ordinary_factory_errors_v1.append(error)
+  raise
+
+def _ordinary_bootstrap_heap_raw_slot_v1(native_product, source, *, completed=False,
+  slot_original=None, result=None):
+ """Only the two fixed raw-ticket rows carry the original slot7 variant."""
+ from tools import validation_reliability as o
+ o._preflight_require_v1(type(completed) is bool and type(source) is dict,
+  'ORDINARY_BOOTSTRAP_RAW_SLOT_CHECK_ARGUMENTS')
+ row = source['result']
+ acquisition = _ORDINARY_BOOTSTRAP_ACQUISITION_V1
+ association = row[1]
+ o._preflight_require_v1(acquisition is _ORDINARY_BOOTSTRAP_ORIGINAL_ACQUISITION_V1
+  and acquisition['native_product'] is native_product
+  and acquisition['ticket_raw_request_attempt'] is source
+  and type(association) is tuple and len(association) == 15
+  and association[0] is acquisition
+  and source['association'] is association
+  and type(acquisition['role']) is str and acquisition['role'] in ('PARENT', 'RECEIVER')
+  and row[0] == 'BOOTSTRAP_TICKET_RAW_' + acquisition['role'],
+  'ORDINARY_BOOTSTRAP_RAW_ROLE_AND_ORIGINAL_SOURCE_ATTEMPT')
+ original = source['original']
+ o._preflight_require_v1(type(original) is tuple and len(original) == 5
+  and original[0] is source and original[1] is acquisition
+  and original[2] is association and original[3] is source['owner']
+  and original[4] is source['errors'],
+  'ORDINARY_BOOTSTRAP_RAW_SOURCE_ATTEMPT_ORIGINAL5')
+ slot = source['raw_slot']
+ old = slot['original']
+ o._preflight_require_v1(type(slot) is dict and source['result_original'][9] is slot
+  and type(old) is tuple and len(old) == 7 and old[0] is slot
+  and old[1] is acquisition and old[2] is source and old[3] is association
+  and old[4] is slot['caps'] and old[5] is slot['counts'] and old[6] is slot['errors']
+  and (slot_original is None or old is slot_original)
+  and type(slot['errors']) is list and not slot['errors'],
+  'ORDINARY_BOOTSTRAP_RAW_SLOT_IDENTICAL_ORIGINAL7')
+ cap_names = ('fd_slots', 'open_attempts', 'inheritance_attempts',
+  'leaf_lstat_attempts', 'fstat_attempts', 'close_attempts', 'read_attempts',
+  'largest_read', 'requested_read_bytes', 'returned_read_bytes', 'direct_api_attempts')
+ caps = slot['caps']
+ o._preflight_require_v1(type(caps) is tuple and len(caps) == len(cap_names)
+  and all(type(pair) is tuple and len(pair) == 2 and type(pair[0]) is str
+   and pair[0] == name and type(pair[1]) is int and pair[1] >= 0
+   for pair, name in zip(caps, cap_names)),
+  'ORDINARY_BOOTSTRAP_RAW_EXACT_SOURCE_CAP_ROSTER')
+ limit = dict(caps)
+ count_names = ('open_attempts', 'inheritance_attempts', 'leaf_lstat_attempts',
+  'fstat_attempts', 'close_attempts', 'read_attempts', 'requested_read_bytes',
+  'returned_read_bytes', 'direct_api_attempts')
+ counts = slot['counts']
+ o._preflight_require_v1(type(counts) is dict and len(counts) == len(count_names)
+  and all(type(key) is str and key in count_names for key in counts)
+  and all(type(counts[key]) is int and 0 <= counts[key] <= limit[key]
+   for key in count_names)
+  and all(type(slot[key]) is bool for key in ('open_attempted', 'close_attempted', 'settled'))
+  and (slot['descriptor'] is None or type(slot['descriptor']) is int),
+  'ORDINARY_BOOTSTRAP_RAW_ACTUAL_SOURCE_COUNTERS_AND_LATCHES')
+ if completed:
+  captured = slot.get('capture_original')
+  o._preflight_require_v1(slot['settled'] is True and slot['open_attempted'] is True
+   and slot['close_attempted'] is True and slot.get('closed') is True
+   and counts['open_attempts'] == counts['inheritance_attempts'] == counts['close_attempts'] == 1
+   and counts['fstat_attempts'] == 2 and counts['leaf_lstat_attempts'] == 3
+   and counts['read_attempts'] >= 1
+   and type(captured) is tuple and len(captured) == 5
+   and captured[0] is slot and captured[1] is source and captured[2] is association
+   and captured[3] is result is slot['capture_result']
+   and captured[4] is slot['descriptor']
+   and type(result) is tuple and len(result) == 2
+   and type(result[0]) is bytes and type(result[1]) is tuple
+   and counts['returned_read_bytes'] == len(result[0]),
+   'ORDINARY_BOOTSTRAP_RAW_GENUINE_CAPTURE_RETURN_EOF_AND_ONE_CLOSE')
+ return slot
+
+
+def _ordinary_bootstrap_ticket_raw_call_v1(source, kind, *, requested=0):
+ """Debit the same original raw slot before the selected direct API call."""
+ from tools import validation_reliability as o
+ slot = _ordinary_bootstrap_heap_raw_slot_v1(source['result_original'][1]['native_product'], source)
+ counts, caps = slot['counts'], dict(slot['caps'])
+ kinds = ('open_attempts', 'inheritance_attempts', 'leaf_lstat_attempts',
+  'fstat_attempts', 'close_attempts', 'read_attempts')
+ o._preflight_require_v1(type(kind) is str and kind in kinds
+  and type(requested) is int and requested >= 0
+  and (kind == 'read_attempts' or requested == 0)
+  and (kind != 'read_attempts' or 0 < requested <= caps['largest_read'])
+  and counts[kind] + 1 <= caps[kind]
+  and counts['direct_api_attempts'] + 1 <= caps['direct_api_attempts']
+  and counts['requested_read_bytes'] + requested <= caps['requested_read_bytes'],
+  'ORDINARY_BOOTSTRAP_RAW_SOURCE_API_REQUEST_BEFORE_CALL')
+ counts[kind] += 1
+ counts['direct_api_attempts'] += 1
+ counts['requested_read_bytes'] += requested
+ return slot
+
+
+def _ordinary_bootstrap_ticket_raw_return_v1(source, part):
+ from tools import validation_reliability as o
+ slot = _ordinary_bootstrap_heap_raw_slot_v1(source['result_original'][1]['native_product'], source)
+ o._preflight_require_v1(type(part) is bytes
+  and slot['counts']['returned_read_bytes'] + len(part) <= dict(slot['caps'])['returned_read_bytes'],
+  'ORDINARY_BOOTSTRAP_RAW_ACTUAL_RETURNED_BYTES')
+ slot['counts']['returned_read_bytes'] += len(part)
+
+
+# Source-only private request producer for the existing ordinary owner.
+# It emits no authority and performs no decoding.  The original prepare stage
+# must fund this emitter and its fixed Source/native closure before entry.
+# association:
+# (acquisition, raw, limits, receiver, early_layout, parser, parser_code,
+#  canonical, canonical_code, producer, producer_code, source_generation,
+#  native_generation, fixed_source_parts, ticket_source_product)
+# All components are conservative heap peak reservations. Some encoder
+# terms use stronger cumulative request upper bounds; this table does not
+# certify uniform cumulative allocation traffic or physical RAM.
+# early_layout/fixed_source_parts require independent original prebirth
+# installed-build/Source association. The later controller layout is not reused.
+
+def _ordinary_bootstrap_ticket_request_v1(acquisition, association):
+ if type(acquisition) is not dict or "ticket_request_attempted" in acquisition:
+  raise ValueError("ORDINARY_TICKET_SINGLE_ORIGINAL_REQUEST")
+ acquisition["ticket_request_attempted"] = True
+ attempt = dict(association=association, owner=(os.getpid(), threading.get_ident()),
+  complete=False, result=None, errors=[])
+ acquisition["ticket_request_attempt"] = attempt
+ attempt["original"] = (attempt, acquisition, association, attempt["owner"], attempt["errors"])
+ try:
+  from tools import validation_reliability as o
+  if type(association) is not tuple or len(association) != 15:
+   raise ValueError("ORDINARY_TICKET_EXACT_SOURCE_ASSOCIATION")
+  a, raw, limits, receiver, layout, parser, parser_code, canonical, canonical_code, producer, producer_code, source_generation, native_generation, fixed, source_product = association
+  if (a is not acquisition or type(raw) is not bytes or len(raw) > 8 << 20
+    or type(limits) is not dict or len(limits) != 3
+    or any(type(k) is not str for k in limits)
+    or set(limits) != {"depth", "lexical_units", "quoted_bytes"}
+    or any(type(v) is not int for v in limits.values())
+    or limits != dict(depth=64, lexical_units=16_000_000, quoted_bytes=8 << 20)
+    or type(receiver) is not bool
+    or parser is not o._preflight_json_v1 or parser.__code__ is not parser_code
+    or canonical is not o._preflight_canonical_v1 or canonical.__code__ is not canonical_code
+    or producer is not _ordinary_bootstrap_ticket_request_v1
+    or producer.__code__ is not producer_code
+    or source_generation is not a["source_generation"]
+    or native_generation is not a["native_generation"]):
+   raise ValueError("ORDINARY_TICKET_ORIGINAL_OPERANDS")
+  if (acquisition is not _ORDINARY_BOOTSTRAP_ACQUISITION_V1
+    or acquisition is not _ORDINARY_BOOTSTRAP_ORIGINAL_ACQUISITION_V1
+    or type(source_product) is not dict or type(layout) is not dict
+    or type(source_product["errors"]) is not list or source_product["errors"]):
+   raise ValueError("ORDINARY_TICKET_ORIGINAL_SOURCE_PRODUCT")
+  source_fields = ("native_product", "native_generation", "source_generation",
+   "layout", "sizes", "fixed_parts", "parser", "parser_code", "canonical",
+   "canonical_code", "producer", "producer_code", "owner", "errors")
+  old_source = source_product["original"]
+  if (type(old_source) is not tuple or len(old_source) != 15
+    or old_source[0] is not source_product
+    or any(old_source[i + 1] is not source_product[k]
+     for i, k in enumerate(source_fields))
+    or source_product["native_product"] is not acquisition["native_product"]
+    or source_product["native_generation"] is not native_generation
+    or source_product["source_generation"] is not source_generation
+    or source_product["layout"] is not layout
+    or source_product["sizes"] is not layout["sizes"]
+    or source_product["fixed_parts"] is not fixed
+    or source_product["parser"] is not parser
+    or source_product["parser_code"] is not parser_code
+    or source_product["canonical"] is not canonical
+    or source_product["canonical_code"] is not canonical_code
+    or source_product["producer"] is not producer
+    or source_product["producer_code"] is not producer_code
+    or type(source_product["owner"]) is not tuple
+    or len(source_product["owner"]) != 2
+    or any(type(x) is not int for x in source_product["owner"])
+    or source_product["owner"] != attempt["owner"]
+    or acquisition["errors"]):
+   raise ValueError("ORDINARY_TICKET_SAME_HELD_SOURCE_LAYOUT_AND_PROFILE")
+  # The original producer/heap prepare owns genuine native and Source
+  # provenance; these checks retain continuity, never issue that premise.
+  required = {"ticket_python_closure", "ticket_custom_decoder_scanner",
+   "ticket_request_emitter", "ticket_error_traceback_closure"}
+  if receiver:
+   required.add("ticket_encoder_native_fixed")
+  if (type(fixed) is not tuple or not fixed
+    or any(type(x) is not tuple or len(x) != 2
+     or type(x[0]) is not str or not x[0]
+     or type(x[1]) is not int or x[1] <= 0 for x in fixed)
+    or len({name for name, _ in fixed}) != len(fixed)
+    or not required.issubset({name for name, _ in fixed})):
+   raise ValueError("ORDINARY_TICKET_INDEPENDENT_FIXED_SOURCE_REQUEST")
+  n = len(raw)
+  strings = arrays = objects = keys = words = quoted = word_bytes = 0
+  in_string = escape = in_word = False
+  # Byte-only lexical upper accounting, with no new grammar/defaults.
+  # Invalid inputs still reach the unchanged original parser and its
+  # independently funded rejection/UTF8/error path.
+  for offset, b in enumerate(raw):
+   if offset % 4096 == 0:
+    a["query"].check()
+   if in_string:
+    quoted += 1
+    if escape:
+     escape = False
+    elif b == 92:
+     escape = True
+    elif b == 34:
+     in_string = False
+   elif b == 34:
+    strings += 1
+    in_string = True
+    in_word = False
+   elif b in (123, 91, 125, 93, 58, 44, 32, 9, 10, 13):
+    in_word = False
+    objects += b == 123
+    arrays += b == 91
+    keys += b == 58
+   else:
+    word_bytes += 1
+    if not in_word:
+     words += 1
+     in_word = True
+  size = lambda name: o._ordinary_data_size_v1(layout, name)
+  unicode = lambda length: o._ordinary_data_unicode_request_v1(layout, length)
+  lists = lambda count, slots: o._ordinary_data_list_requests_v1(layout, count, slots)
+  dictionaries = lambda count, slots, general=False: o._ordinary_data_dict_requests_v1(layout, count, slots, general=general)
+  tuple_request = lambda slots: o._ordinary_data_tuple_request_v1(layout, slots)
+  integers = lambda count, digits: o._ordinary_data_integer_requests_v1(layout, count, digits)
+  # A malformed input with colons but no object never constructs a
+  # dictionary; this lexical upper still funds its unchanged error path.
+  object_upper = max(objects, 1 if keys else 0)
+  value_tokens = strings + arrays + objects + words
+  parts = list(fixed)
+  parts.extend((
+   ("ticket_utf8_writer_and_decode", 2 * unicode(n)),
+   ("ticket_json_arrays", lists(arrays, value_tokens)),
+   ("ticket_json_objects", dictionaries(object_upper, keys)),
+   ("ticket_key_memo", dictionaries(1, keys)),
+   ("ticket_pairs_lists", lists(objects, 2 * keys)),
+   ("ticket_pair_tuples", keys * tuple_request(2)),
+   ("ticket_string_results", strings * size("unicode_prefix") + 4 * (quoted + strings)),
+   ("ticket_current_string_writer", 2 * unicode(quoted + quoted // 4)),
+   ("ticket_integer_results", integers(words, min(word_bytes, 19 * words))),
+   ("ticket_integer_replacement", integers(1 if words else 0, 19 if words else 0)),
+   # Custom callbacks receive Unicode tokens before rejecting.
+   ("ticket_current_numeric_token", unicode(n)),
+   ("ticket_duplicate_or_reject_message", unicode(n + max(
+    len("preflight duplicate JSON key: "),
+    len("preflight noninteger JSON number: ")))),
+   ("ticket_decoder_return_tuple", tuple_request(2)),
+   ("ticket_lexical_statistics", dictionaries(1, 2)),
+  ))
+  if receiver:
+   # ensure_ascii output: each UTF8 byte funds <=6 ASCII units;
+   # non-BMP input consumes >=4 UTF8 bytes for <=12 output units.
+   # Structure and unsigned <=19-digit ints do not expand this bound.
+   encoded = 6 * n
+   capacity = encoded + encoded // 4
+   # Linux writer growth: c_i+2 >= (5/4)*(c_(i-1)+2).
+   # This charges all growth payload requests, plus optional shrink.
+   writes = 2 * value_tokens + arrays + objects + 1
+   payload_sum = 5 * (capacity + 2)
+   parts.extend((
+    ("ticket_encoder_writer_requests",
+     (writes + 1) * size("unicode_prefix")
+     + 4 * (payload_sum + writes + encoded + 1)),
+    ("ticket_encoder_return_tuple", tuple_request(1)),
+    ("ticket_encoder_ascii_bytes", o._ordinary_data_bytes_request_v1(layout, encoded)),
+    ("ticket_encoder_escaped_strings",
+     strings * size("unicode_prefix") + 4 * (encoded + strings)),
+    ("ticket_encoder_markers", dictionaries(1, arrays + objects, general=True)),
+    ("ticket_encoder_address_integers",
+     integers(arrays + objects,
+      8 * size("pointer") * (arrays + objects))),
+    ("ticket_encoder_sort_items", lists(objects, keys)),
+    ("ticket_encoder_sort_pairs", keys * tuple_request(2)),
+    # Merge scratch allocation requests are separate from native
+    # MergeState/C frames in ticket_encoder_native_fixed.
+    ("ticket_encoder_sort_scratch_requests",
+     keys * (keys // 2) * size("pointer")),
+    # Each accepted integer needs <=4 native long scratch digits
+    # while writing directly into the current Unicode writer.
+    ("ticket_encoder_integer_format_requests",
+     words * (size("int_prefix") + 4 * size("int_digit_bytes"))),
+   ))
+  components = tuple(parts)
+  if (len({name for name, _ in components}) != len(components)
+    or any(type(amount) is not int or amount < 0 for _, amount in components)):
+   raise ValueError("ORDINARY_TICKET_EXACT_NONNEGATIVE_COMPONENTS")
+  # These names describe success retention only. On failure all prior
+  # request/traceback/decoder debt remains held until actual settlement.
+  retained = ("ticket_json_arrays", "ticket_json_objects",
+   "ticket_string_results", "ticket_integer_results")
+  row = ("BOOTSTRAP_TICKET_RECEIVER" if receiver else "BOOTSTRAP_TICKET_PARENT",
+   association, components, retained, _ordinary_bootstrap_ticket_request_v1)
+  attempt["result"] = row
+  attempt["result_original"] = (row, acquisition, association, components,
+   retained, _ordinary_bootstrap_ticket_request_v1, attempt,
+   attempt["errors"], attempt["owner"])
+  attempt["complete"] = True
+  return row
+ except BaseException as error:
+  attempt["errors"].append(error)
+  errors = acquisition.get("errors")
+  if type(errors) is list and all(error is not prior for prior in errors):
+   errors.append(error)
+  raise
+
+# Full private decoder caller. Original parser/policy/check expression is retained.
+def _ordinary_bootstrap_ticket_decode_v1(acquisition, heap_record, raw, *,
+  receiver, layout, source_product, original_origin):
+ if type(acquisition) is not dict or "ticket_decode_attempted" in acquisition:
+  raise ValueError("ORDINARY_TICKET_SINGLE_DECODER_ATTEMPT")
+ acquisition["ticket_decode_attempted"] = True
+ attempt = dict(complete=False, value=None, request=None, errors=[])
+ acquisition["ticket_decode_attempt"] = attempt
+ heap_stage = None
+ try:
+  from tools import validation_reliability as o
+  if (type(receiver) is not bool or type(original_origin) is not int
+    or original_origin != acquisition["origin_ns"]
+    or type(acquisition["role"]) is not str
+    or acquisition["role"] not in ("PARENT", "RECEIVER")
+    or receiver != (acquisition["role"] == "RECEIVER")):
+   raise ValueError("ORDINARY_TICKET_ORIGINAL_ROLE_AND_CUTOFF")
+  limits = dict(depth=64, lexical_units=16_000_000, quoted_bytes=8 << 20)
+  parser, canonical = o._preflight_json_v1, o._preflight_canonical_v1
+  association = (acquisition, raw, limits, receiver, layout, parser,
+   parser.__code__, canonical, canonical.__code__,
+   _ordinary_bootstrap_ticket_request_v1,
+   _ordinary_bootstrap_ticket_request_v1.__code__,
+   acquisition["source_generation"], acquisition["native_generation"],
+   source_product["fixed_parts"], source_product)
+  row = _ordinary_bootstrap_ticket_request_v1(acquisition, association)
+  attempt["request"] = row
+  heap_stage = _ordinary_bootstrap_heap_stage_v1(heap_record, row)
+  _ordinary_stock_runtime_check_v1(_ORDINARY_BOOTSTRAP_STOCK_RUNTIME_V1)
+  value = o._preflight_json_v1(raw, limits,
+   lambda: o._preflight_require_v1(time.monotonic_ns() < original_origin + 3720 * 10**9,
+    'ORDINARY_PROVISION_ORIGINAL_TICKET_CUTOFF'), canonical_encoding=receiver)[0]
+  _ordinary_bootstrap_heap_stage_complete_v1(heap_record, heap_stage, value)
+  attempt["value"] = value
+  attempt["complete"] = True
+  return value
+ except BaseException as error:
+  if heap_stage is not None and heap_record["active"] is heap_stage:
+   try:
+    _ordinary_bootstrap_heap_stage_failed_v1(heap_record,heap_stage,error)
+   except BaseException as accounting_error:
+    if all(accounting_error is not prior for prior in attempt["errors"]):
+     attempt["errors"].append(accounting_error)
+    if all(accounting_error is not prior for prior in acquisition["errors"]):
+     acquisition["errors"].append(accounting_error)
+  attempt["errors"].append(error)
+  errors = acquisition.get("errors")
+  if type(errors) is list and all(error is not prior for prior in errors):
+   errors.append(error)
+  # Do not release graph/decoder/error requests using success-only names.
+  raise
+
+
+def _ordinary_bootstrap_ticket_raw_request_v1(acquisition, association):
+ if type(acquisition) is not dict or 'ticket_raw_request_attempted' in acquisition:
+  raise ValueError('ORDINARY_TICKET_RAW_ONE_ORIGINAL_REQUEST')
+ acquisition['ticket_raw_request_attempted'] = True
+ attempt = dict(association=association, owner=(os.getpid(), threading.get_ident()),
+  complete=False, result=None, errors=[])
+ acquisition['ticket_raw_request_attempt'] = attempt
+ attempt['original'] = (attempt, acquisition, association, attempt['owner'], attempt['errors'])
+ try:
+  from tools import validation_reliability as o
+  if type(association) is not tuple or len(association) != 15:
+   raise ValueError('ORDINARY_TICKET_RAW_EXACT_SOURCE_ASSOCIATION')
+  a, path, before, extent, maximum, uid, layout, capture, capture_code, producer, producer_code, source_generation, native_generation, fixed, product = association
+  if (a is not acquisition or type(extent) is not int or not 0 <= extent <= 8 << 20
+    or type(maximum) is not int or maximum != 8 << 20
+    or type(uid) is not int or uid < 0
+    or type(a['role']) is not str or a['role'] not in ('PARENT', 'RECEIVER')
+    or producer is not _ordinary_bootstrap_ticket_raw_request_v1
+    or producer.__code__ is not producer_code
+    or type(capture) is not type(producer) or capture.__code__ is not capture_code
+    or source_generation is not a['source_generation']
+    or native_generation is not a['native_generation']):
+   raise ValueError('ORDINARY_TICKET_RAW_ORIGINAL_OPERANDS')
+  if (acquisition is not _ORDINARY_BOOTSTRAP_ACQUISITION_V1
+    or acquisition is not _ORDINARY_BOOTSTRAP_ORIGINAL_ACQUISITION_V1
+    or type(product) is not dict or type(layout) is not dict
+    or type(product['errors']) is not list or product['errors'] or a['errors']):
+   raise ValueError('ORDINARY_TICKET_RAW_ORIGINAL_SOURCE_PRODUCT')
+  fields = ('native_product', 'native_generation', 'source_generation', 'layout',
+   'sizes', 'fixed_parts', 'capture', 'capture_code', 'producer', 'producer_code',
+   'path', 'maximum', 'uid', 'owner', 'errors')
+  old = product['original']
+  if (type(old) is not tuple or len(old) != 16 or old[0] is not product
+    or any(old[i + 1] is not product[k] for i, k in enumerate(fields))
+    or product['native_product'] is not a['native_product']
+    or product['native_generation'] is not native_generation
+    or product['source_generation'] is not source_generation
+    or product['layout'] is not layout or product['sizes'] is not layout['sizes']
+    or product['fixed_parts'] is not fixed or product['capture'] is not capture
+    or product['capture_code'] is not capture_code or product['producer'] is not producer
+    or product['producer_code'] is not producer_code or product['path'] is not path
+    or product['maximum'] != maximum or product['uid'] != uid
+    or product['owner'] != attempt['owner']):
+   raise ValueError('ORDINARY_TICKET_RAW_SAME_HELD_SOURCE_AND_NATIVE_PRODUCT')
+  if before is None:
+   if extent != maximum:
+    raise ValueError('ORDINARY_TICKET_RAW_CAP_BEFORE_METADATA')
+  else:
+   observed = product['metadata_original']
+   if (type(before) is not os.stat_result or extent != before.st_size
+     or type(observed) is not tuple or len(observed) != 4
+     or observed[0] is not product or observed[1] is not path
+     or observed[2] is not before or observed[3] != extent):
+    raise ValueError('ORDINARY_TICKET_RAW_ORIGINAL_METADATA_EXTENT')
+  required = {'ticket_raw_python_closure', 'ticket_raw_path_chain_and_resolution',
+   'ticket_raw_stat_and_scalar_products', 'ticket_raw_error_traceback_closure',
+   'ticket_raw_request_emitter', 'ticket_raw_native_stack_and_error_closure'}
+  if (type(fixed) is not tuple or not fixed
+    or any(type(x) is not tuple or len(x) != 2 or type(x[0]) is not str
+     or not x[0] or type(x[1]) is not int or x[1] <= 0 for x in fixed)
+    or len({name for name, _ in fixed}) != len(fixed)
+    or not required.issubset({name for name, _ in fixed})):
+   raise ValueError('ORDINARY_TICKET_RAW_POSITIVE_ORIGINAL_FIXED_SOURCE_REQUEST')
+  sizes = layout['sizes']
+  if (type(sizes) is not tuple or any(type(x) is not tuple or len(x) != 2
+    or type(x[0]) is not str or type(x[1]) is not int or x[1] <= 0 for x in sizes)
+    or len({name for name, _ in sizes}) != len(sizes)):
+   raise ValueError('ORDINARY_TICKET_RAW_IMMUTABLE_ORIGINAL_LAYOUT_SIZES')
+  size = lambda name: o._ordinary_data_size_v1(layout, name)
+  byte_request = lambda n: o._ordinary_data_bytes_request_v1(layout, n)
+  tuple_request = lambda n: o._ordinary_data_tuple_request_v1(layout, n)
+  lists = lambda count, slots: o._ordinary_data_list_requests_v1(layout, count, slots)
+  e, block = extent, 65536
+  read_count = e + 1
+  largest_read = min(block, read_count)
+  requested_bytes = (read_count * (read_count + 1) // 2 if read_count <= block
+   else block * read_count - block * (block - 1) // 2)
+  # Short reads permit e chunks; join.h uses one Py_buffer per chunk.
+  # Full allocation plus short-read resize/realloc requests can overlap.
+  extra = (
+   ('ticket_raw_chunk_bytes', e * size('bytes_prefix') + e),
+   ('ticket_raw_chunk_list_old_new_arrays', lists(1, e)),
+   ('ticket_raw_active_read_resize_requests', 2 * byte_request(largest_read)),
+   ('ticket_raw_join_buffer_views', e * size('py_buffer') if e > 10 else 0),
+   ('ticket_raw_joined_bytes', byte_request(e)),
+   ('ticket_raw_error_and_version_lists', lists(3, 10)),
+   ('ticket_raw_version_temporaries', 2 * tuple_request(6) + tuple_request(4)),
+   ('ticket_raw_success_version', tuple_request(6)),
+   ('ticket_raw_return_pair', tuple_request(2)),
+  )
+  components = fixed + extra
+  if (len({name for name, _ in components}) != len(components)
+    or any(type(amount) is not int or amount < 0 for _, amount in components)):
+   raise ValueError('ORDINARY_TICKET_RAW_EXACT_NONNEGATIVE_COMPONENTS')
+  # These are SOURCE API call-site bounds, separately intersected with
+  # the SAME original native programme. They are not syscall grants.
+  caps = (('fd_slots', 1), ('open_attempts', 1), ('inheritance_attempts', 1),
+   ('leaf_lstat_attempts', 3), ('fstat_attempts', 2), ('close_attempts', 1),
+   ('read_attempts', read_count), ('largest_read', largest_read),
+   ('requested_read_bytes', requested_bytes), ('returned_read_bytes', e + 1),
+   ('direct_api_attempts', e + 9))
+  counts = dict(open_attempts=0, inheritance_attempts=0, leaf_lstat_attempts=0, fstat_attempts=0,
+   close_attempts=0, read_attempts=0, requested_read_bytes=0, returned_read_bytes=0,
+   direct_api_attempts=0)
+  attempt['raw_slot'] = dict(caps=caps, counts=counts, descriptor=None,
+   open_attempted=False, close_attempted=False, settled=False, errors=[])
+  slot = attempt['raw_slot']
+  slot['original'] = (slot, acquisition, attempt, association, caps, slot['counts'], slot['errors'])
+  retained = ('ticket_raw_joined_bytes', 'ticket_raw_success_version')
+  row = ('BOOTSTRAP_TICKET_RAW_' + a['role'], association, components,
+   retained, _ordinary_bootstrap_ticket_raw_request_v1)
+  attempt['result'] = row
+  attempt['result_original'] = (row, acquisition, association, components, retained,
+   _ordinary_bootstrap_ticket_raw_request_v1, attempt, attempt['errors'], attempt['owner'], slot)
+  attempt['complete'] = True
+  return row
+ except BaseException as error:
+  attempt['errors'].append(error)
+  errors = acquisition.get('errors')
+  if type(errors) is list and all(error is not prior for prior in errors): errors.append(error)
+  raise
+
+def _ordinary_bootstrap_runner_check_v1(acquisition):
+ import types
+ from tools import validation_reliability as o
+ attempt = acquisition["native_product"]["runtime_issue_attempt"]
+ old = attempt["runner_owner_original"]
+ o._preflight_require_v1(type(old) is tuple and len(old) == 5
+  and old[0] is attempt and acquisition["runner_owner_original"] is old
+  and type(old[1]) is types.ModuleType and old[2] is old[1].__dict__
+  and old[2] is globals() and type(old[3]) is str and old[3] == __name__
+  and sys.modules.get(old[3]) is old[1] and old[4] is acquisition["heap_record"],
+  "ORDINARY_BOOTSTRAP_IDENTICAL_INITIALIZED_RUN_NAMESPACE")
+ return old[1]
+
+
+def _ordinary_bootstrap_source_stage_v1(record, stage):
+ from tools import validation_reliability as o
+ acquisition = record["acquisition"]
+ _ordinary_bootstrap_runner_check_v1(acquisition)
+ o._preflight_require_v1(type(stage) is str and stage in (
+  "BOOTSTRAP_EVENT_BASE64", "BOOTSTRAP_EVENT_JSON", "BOOTSTRAP_SCOPE_CONSTRUCTION",
+  "BEFORE_TOKENIZE", "BEFORE_PARSE", "BEFORE_COMPILE"),
+  "ORDINARY_BOOTSTRAP_ACTUAL_SELECTED_SOURCE_STAGE")
+ sources = acquisition.get("heap_source_request_attempts")
+ o._preflight_require_v1(type(sources) is list,
+  "ORDINARY_BOOTSTRAP_ACTUAL_SOURCE_REQUEST_PRODUCER_UNISSUED")
+ matches = []
+ for source in sources:
+  if type(source) is dict:
+   row = source.get("result")
+   if type(row) is tuple and len(row) == 5 and type(row[0]) is str and row[0] == stage:
+    matches.append(row)
+ o._preflight_require_v1(len(matches) == 1,
+  "ORDINARY_BOOTSTRAP_ONE_COMPLETED_ORIGINAL_SOURCE_STAGE")
+ return _ordinary_bootstrap_heap_stage_v1(record, matches[0])
+
+
+# Source-only anchored04 RUN private spans. Preserve01/02/03; do not execute standalone.
+# Source/import/init/mutation/lifetime authority remains an explicit original native/Source premise.
+# Prerequisite: original qualified native/Source preexec acquisition supplies
+# _ORDINARY_BOOTSTRAP_ACQUISITION_V1 and identical ORIGINAL reference once.
+# These functions register continuity; they do not issue native custody.
+
+def _ordinary_stock_runtime_v1():
+ import types
+ jd, js, cj = (sys.modules[name] for name in ("json.decoder", "json.scanner", "_json"))
+ d = json._default_decoder
+ integer, floating, typ, dictionary = (0).__class__, (0.0).__class__, (0).__class__.__class__, {}.__class__
+ functions = (json.loads, jd.JSONDecoder.__init__, jd.JSONDecoder.decode, jd.JSONDecoder.raw_decode)
+ function_rows = tuple((f, f.__code__, f.__defaults__, f.__kwdefaults__,
+  None if f.__kwdefaults__ is None else tuple(f.__kwdefaults__.items()), f.__globals__, f.__builtins__)
+  for f in functions)
+ namespace_rows = tuple((namespace, name, name in namespace, namespace.get(name))
+  for f in functions for namespace in (f.__globals__, f.__builtins__) for name in f.__code__.co_names)
+ scanner_type = cj.make_scanner
+ member_get = types.MemberDescriptorType.__get__
+ member_names = ("strict", "object_hook", "object_pairs_hook", "parse_int", "parse_float", "parse_constant")
+ members = tuple(scanner_type.__dict__[name] for name in member_names)
+ classes = (jd.JSONDecoder, scanner_type, dictionary, types.BuiltinFunctionType,
+  types.MemberDescriptorType, types.MethodDescriptorType)
+ class_rows = tuple((cls, tuple(cls.__dict__.items()), cls.__bases__, cls.__mro__) for cls in classes)
+ constants = jd._CONSTANTS
+ getitem = dictionary.__dict__["__getitem__"]
+ constant_getter = types.MethodDescriptorType.__get__(getitem, constants, dictionary)
+ return dict(sys=sys, modules=sys.modules, getter=sys.get_int_max_str_digits,
+  trace_getter=sys.gettrace, profile_getter=sys.getprofile, types=types,
+  builtin_types=(integer,floating,typ,dictionary), json_modules=(json,jd,js,cj),
+  decoder=d, scanner=d.scan_once, functions=functions, function_rows=function_rows,
+  namespace_rows=namespace_rows, member_get=member_get, members=members,
+  member_types=(types.MemberDescriptorType,types.MethodDescriptorType),
+  member_method_get=types.MethodDescriptorType.__get__,
+  scanner_type=scanner_type, classes=class_rows, constants=constants,
+  constant_rows=tuple(constants.items()), getitem=getitem, constant_getter=constant_getter,
+  builtin_function_type=types.BuiltinFunctionType, whitespace=jd.WHITESPACE,
+  match=jd.WHITESPACE.match, decoder_type=jd.JSONDecoder)
+
+
+def _ordinary_stock_runtime_check_v1(s):
+ from tools import validation_reliability as o
+ integer,floating,typ,dictionary = s["builtin_types"]
+ jm,jd,js,cj = s["json_modules"]
+ d,scanner = s["decoder"],s["scanner"]
+ getter = s["getter"]
+ o._preflight_require_v1(sys is s["sys"] and sys.modules is s["modules"]
+  and sys.get_int_max_str_digits is getter
+  and typ(getter) is s["builtin_function_type"]
+  and getter.__self__ is sys and getter.__name__ == "get_int_max_str_digits"
+  and int is integer and float is floating and type is typ
+  and all(sys.modules.get(n) is m for n,m in
+   (("json",jm),("json.decoder",jd),("json.scanner",js),("_json",cj)))
+  and json is jm and jd.JSONDecoder is s["decoder_type"]
+  and json.loads is s["functions"][0]
+  and jd.JSONDecoder.__init__ is s["functions"][1]
+  and jd.JSONDecoder.decode is s["functions"][2] and jd.JSONDecoder.raw_decode is s["functions"][3],
+  "ORDINARY_BOOTSTRAP_ORIGINAL_RUNTIME_OBJECTS")
+ o._preflight_require_v1(all(f.__code__ is code and f.__defaults__ is defaults
+  and f.__kwdefaults__ is kw and f.__globals__ is g and f.__builtins__ is b
+  and (kw is None or len(kw)==len(items)
+   and all(k in kw and kw[k] is v for k,v in items))
+  for f,code,defaults,kw,items,g,b in s["function_rows"])
+  and all((name in namespace) is present
+   and (not present or namespace[name] is value)
+   for namespace,name,present,value in s["namespace_rows"]),
+  "ORDINARY_BOOTSTRAP_ORIGINAL_FUNCTION_DEFAULT_GLOBALS")
+ o._preflight_require_v1(all(cls.__bases__ is bases and cls.__mro__ is mro
+  and len(cls.__dict__)==len(rows)
+  and all(k in cls.__dict__ and cls.__dict__[k] is v for k,v in rows)
+  for cls,rows,bases,mro in s["classes"])
+  and cj.make_scanner is s["scanner_type"] and js.make_scanner is s["scanner_type"]
+  and typ(scanner) is s["scanner_type"] and typ(d) is s["decoder_type"]
+  and json._default_decoder is d and d.scan_once is scanner,
+  "ORDINARY_BOOTSTRAP_ORIGINAL_CLASS_AND_CALL_SLOTS")
+ member_type, method_type = s["member_types"]
+ o._preflight_require_v1(s["types"].MemberDescriptorType is member_type
+  and member_type.__get__ is s["member_get"]
+  and s["types"].MethodDescriptorType is method_type
+  and method_type.__get__ is s["member_method_get"]
+  and all(typ(descriptor) is member_type for descriptor in s["members"]),
+  "ORDINARY_BOOTSTRAP_GENUINE_MEMBER_DESCRIPTOR_READ")
+ stored = tuple(s["member_get"](descriptor,scanner,s["scanner_type"]) for descriptor in s["members"])
+ strict,hook,pairs,parse_int,parse_float,parse_constant = stored
+ constants = s["constants"]
+ o._preflight_require_v1(jd._CONSTANTS is constants and typ(constants) is dictionary
+  and set(constants)=={"NaN","Infinity","-Infinity"}
+  and len(s["constant_rows"])==3
+  and all(k in constants and constants[k] is v for k,v in s["constant_rows"])
+  and typ(constants["NaN"]) is floating and constants["NaN"]!=constants["NaN"]
+  and typ(constants["Infinity"]) is floating and constants["Infinity"]==1e309
+  and typ(constants["-Infinity"]) is floating and constants["-Infinity"]==-1e309
+  and dictionary.__dict__["__getitem__"] is s["getitem"]
+  and typ(s["getitem"]) is method_type
+  and typ(parse_constant) is s["builtin_function_type"]
+  and parse_constant.__self__ is constants
+  and parse_constant == s["constant_getter"]
+  and strict is d.strict is True and hook is d.object_hook is None
+  and pairs is d.object_pairs_hook is None and parse_int is d.parse_int is integer
+  and parse_float is d.parse_float is floating and parse_constant is d.parse_constant
+  and jd.WHITESPACE is s["whitespace"] and s["match"].__self__ is s["whitespace"]
+  and s["functions"][2].__defaults__ == (s["match"],),
+  "ORDINARY_BOOTSTRAP_ORIGINAL_STORED_HOOKS_AND_CONSTANTS")
+ value = getter()
+ o._preflight_require_v1(typ(value) is integer and value==4300
+  and sys.gettrace is s["trace_getter"] and sys.getprofile is s["profile_getter"]
+  and s["trace_getter"]() is None and s["profile_getter"]() is None,
+  "ORDINARY_BOOTSTRAP_ORIGINAL_DIGIT_LIMIT_AND_CALLBACKS")
+ return s
+
+
+# Place these after original RUN imports24 and before repository tools imports31.
+_ORDINARY_BOOTSTRAP_STOCK_RUNTIME_V1 = None
+_ORDINARY_BOOTSTRAP_ENTRY_ATTEMPT_V1 = None
+_ORDINARY_BOOTSTRAP_ACQUISITION_V1 = None
+_ORDINARY_BOOTSTRAP_ORIGINAL_ACQUISITION_V1 = None
+_ORDINARY_BOOTSTRAP_RUNTIME_ATTEMPT_V1 = None
+
+
+def _ordinary_bootstrap_runtime_capture_v1(acquisition):
+ global _ORDINARY_BOOTSTRAP_RUNTIME_ATTEMPT_V1
+ from tools import validation_reliability as o
+ if _ORDINARY_BOOTSTRAP_RUNTIME_ATTEMPT_V1 is not None:
+  error = ValueError("ORDINARY_BOOTSTRAP_SINGLE_RUNTIME_CAPTURE")
+  previous = _ORDINARY_BOOTSTRAP_RUNTIME_ATTEMPT_V1
+  original_acquisition = _ORDINARY_BOOTSTRAP_ORIGINAL_ACQUISITION_V1
+  for row in (previous,original_acquisition):
+   errors = row.get("errors") if type(row) is dict else None
+   if type(errors) is list and all(error is not prior for prior in errors):
+    errors.append(error)
+  raise error
+ attempt = dict(acquisition=acquisition, owner=(os.getpid(), threading.get_ident()),
+  complete=False, result=None, errors=[])
+ _ORDINARY_BOOTSTRAP_RUNTIME_ATTEMPT_V1 = attempt
+ try:
+  o._preflight_require_v1(type(acquisition) is dict
+   and acquisition is _ORDINARY_BOOTSTRAP_ACQUISITION_V1
+   is _ORDINARY_BOOTSTRAP_ORIGINAL_ACQUISITION_V1,
+   "ORDINARY_BOOTSTRAP_ORIGINAL_NATIVE_ACQUISITION_UNAVAILABLE")
+  a = acquisition
+  old = a["original"]
+  fields = ("native_input", "native_hold", "native_generation", "startup",
+   "source_generation", "roles", "actor", "phase", "role",
+   "native_root", "origin_ns", "query", "errors")
+  o._preflight_require_v1(type(old) is tuple and len(old) == 14
+   and old[0] is a and all(old[i+1] is a[k] for i,k in enumerate(fields))
+   and all(a[k] is not None for k in fields[:5])
+   and type(a["errors"]) is list and not a["errors"]
+   and "runtime_attempt" not in a, "ORDINARY_BOOTSTRAP_ORIGINAL_INPUT_FIELDS")
+  native = a["native_product"]
+  issuer = native["runtime_issue_attempt"]
+  io,no = issuer["original"],issuer["native_original"]
+  native_fields = ("native_input","native_hold","native_generation","startup","source_generation",
+   "roles","actor","phase","role","native_root","origin_ns","errors")
+  o._preflight_require_v1(type(issuer) is dict and issuer["complete"] is False
+   and issuer["result"] is None and issuer["acquisition"] is a
+   and issuer["acquisition_original"] is old
+   and type(io) is tuple and len(io)==10 and io[0] is issuer and io[1] is native
+   and io[2] is issuer["owner"] and io[3] is no and io[4] is a["query"]
+   and io[5] is a and io[6] is old and io[7] is issuer["errors"]
+   and io[8] is issuer["heap_record"] and io[9] is issuer["query_stage_row"]
+   and native["original"] is no and type(no) is tuple and len(no)==13 and no[0] is native
+   and all(no[i+1] is native[k] for i,k in enumerate(native_fields))
+   and a["errors"] is native["errors"] and not issuer["errors"],
+   "ORDINARY_BOOTSTRAP_CAPTURE_IDENTICAL_ACTIVE_ISSUER")
+  attempt["issuer_attempt"],attempt["issuer_original"] = issuer,io
+  attempt["native_original"],attempt["acquisition_original"] = no,old
+  attempt["original"] = (attempt,a,attempt["owner"],issuer,io,no,old,
+   a["query"],a["errors"],attempt["errors"])
+  a["runtime_attempt"] = attempt
+  actor = a["actor"]
+  query = a["query"]
+  o._preflight_require_v1(type(actor) is tuple and len(actor) == 4
+   and actor[0] == os.getpid() and actor[2] == threading.get_ident()
+   and actor[3] == threading.get_native_id()
+   and type(query) is o._LinuxPreflightQueriesV1
+   and (query.pid,query.thread) == attempt["owner"]
+   and type(a["origin_ns"]) is int and a["origin_ns"] > 0
+   and query.deadline_ns == a["origin_ns"] + 3720 * 10**9,
+   "ORDINARY_BOOTSTRAP_ACTUAL_LOCAL_NATIVE_ACTOR")
+  keys = {"observation", "version", "abi", "stdlib_roots", "site_roots",
+   "loader_environment", "config_paths", "customizer_paths", "startup_basis"}
+  startup = a["startup"]
+  roles = a["roles"]
+  o._preflight_require_v1(type(startup) is dict and set(startup) == keys
+   and type(startup["startup_basis"]) is dict
+   and set(startup["startup_basis"]) == {"files","directories","absent"}
+   and type(roles) is tuple and len(roles) == 7
+   and tuple(row[0] for row in roles) == ("executable","libpython","_json",
+    "_sre","json.__init__","json.decoder","json.scanner")
+   and a["role"] in ("PROVISION","PARENT","RECEIVER")
+   and type(a["phase"]) is str and a["phase"] in ORDERED_PHASES,
+   "ORDINARY_BOOTSTRAP_ORIGINAL_STARTUP_ROLE_SEMANTICS")
+  # Original qualified acquisition owns actual held role/path/body rows.
+  # Shape/type checks here are continuity, not issuance of that premise.
+  s = _ordinary_stock_runtime_check_v1(_ORDINARY_BOOTSTRAP_STOCK_RUNTIME_V1)
+  capture = dict(acquisition=a, attempt=attempt, owner=attempt["owner"],
+   actor=actor, stock=s, query=query, phase=a["phase"], role=a["role"],
+   native_root=a["native_root"], origin_ns=a["origin_ns"],
+   native_input=a["native_input"], native_hold=a["native_hold"],
+   native_generation=a["native_generation"], source_generation=a["source_generation"],
+   startup=startup, roles=roles, argv=tuple(sys.orig_argv),
+   executable=sys.executable, installation=sys.prefix, cwd=os.getcwd())
+  capture_fields = ("acquisition","attempt","owner","actor","stock","query","phase","role",
+   "native_root","origin_ns","native_input","native_hold","native_generation",
+   "source_generation","startup","roles","argv","executable","installation","cwd")
+  original = (capture,) + tuple(capture[key] for key in capture_fields)
+  capture["original"] = original
+  # Anchor the actual tuple before any publication of the capture result.
+  attempt["capture_original"] = original
+  attempt["result"] = capture
+  attempt["complete"] = True
+  return capture
+ except BaseException as error:
+  if all(error is not prior for prior in attempt["errors"]):
+   attempt["errors"].append(error)
+  if type(acquisition) is dict and type(acquisition.get("errors")) is list:
+   if all(error is not prior for prior in acquisition["errors"]):
+    acquisition["errors"].append(error)
+  raise
+
+
+
+
+def _ordinary_bootstrap_runtime_anchors_v1(capture):
+ """Rejoin retained Source identities; these anchors issue no native custody."""
+ from tools import validation_reliability as o
+ try:
+  ca = _ORDINARY_BOOTSTRAP_RUNTIME_ATTEMPT_V1
+  a = _ORDINARY_BOOTSTRAP_ACQUISITION_V1
+  o._preflight_require_v1(type(capture) is dict and type(ca) is dict and type(a) is dict
+   and a is _ORDINARY_BOOTSTRAP_ORIGINAL_ACQUISITION_V1
+   and capture is ca["result"] and capture["attempt"] is ca
+   and capture["acquisition"] is a and a["runtime_attempt"] is ca
+   and ca["complete"] is True, "ORDINARY_BOOTSTRAP_IDENTICAL_CAPTURE_ATTEMPT")
+  issuer = ca["issuer_attempt"]
+  native = issuer["native_product"]
+  io,no,ao,co = (ca["issuer_original"],ca["native_original"],
+   ca["acquisition_original"],ca["capture_original"])
+  native_fields = ("native_input","native_hold","native_generation","startup","source_generation",
+   "roles","actor","phase","role","native_root","origin_ns","errors")
+  acquisition_fields = ("native_input","native_hold","native_generation","startup","source_generation",
+   "roles","actor","phase","role","native_root","origin_ns","query","errors")
+  o._preflight_require_v1(type(issuer) is dict and type(native) is dict
+   and native["runtime_issue_attempt"] is issuer and a["native_product"] is native
+   and issuer["original"] is io and issuer["native_original"] is no
+   and issuer["acquisition_original"] is ao and issuer["acquisition"] is a
+   and issuer["result"] is capture and issuer["complete"] is True
+   and type(io) is tuple and len(io)==10 and io[0] is issuer and io[1] is native
+   and io[2] is issuer["owner"] and io[3] is no and io[4] is a["query"]
+   and io[5] is a and io[6] is ao and io[7] is issuer["errors"]
+   and io[8] is issuer["heap_record"] and io[9] is issuer["query_stage_row"]
+   and issuer["query_stage_row"][1] is native
+   and issuer["query_stage_row"][4] is _ordinary_bootstrap_query_request_v1
+   and native["query_request_attempt"]["result"] is issuer["query_stage_row"]
+   and native["original"] is no and type(no) is tuple and len(no)==13
+   and no[0] is native and all(no[i+1] is native[k] for i,k in enumerate(native_fields))
+   and a["original"] is ao and type(ao) is tuple and len(ao)==14 and ao[0] is a
+   and all(ao[i+1] is a[k] for i,k in enumerate(acquisition_fields)),
+   "ORDINARY_BOOTSTRAP_RETAINED_ISSUER_NATIVE13_ACQUISITION14")
+  ca_old = ca["original"]
+  o._preflight_require_v1(type(ca_old) is tuple and len(ca_old)==10
+   and ca_old[0] is ca and ca_old[1] is a and ca_old[2] is ca["owner"]
+   and ca_old[3] is issuer and ca_old[4] is io and ca_old[5] is no
+   and ca_old[6] is ao and ca_old[7] is a["query"]
+   and ca_old[8] is a["errors"] is native["errors"]
+   and ca_old[9] is ca["errors"] and not ca["errors"]
+   and not issuer["errors"] and not a["errors"],
+   "ORDINARY_BOOTSTRAP_RETAINED_CAPTURE_ATTEMPT_AND_ERRORS")
+  capture_fields = ("acquisition","attempt","owner","actor","stock","query","phase","role",
+   "native_root","origin_ns","native_input","native_hold","native_generation",
+   "source_generation","startup","roles","argv","executable","installation","cwd")
+  o._preflight_require_v1(capture["original"] is co
+   and type(co) is tuple and len(co)==21 and co[0] is capture and len(capture)==21
+   and all(co[i+1] is capture[k] for i,k in enumerate(capture_fields))
+   and capture["owner"] is ca["owner"]
+   and capture["actor"] is a["actor"] and capture["query"] is a["query"] is issuer["query"]
+   and all(capture[k] is a[k] for k in ("phase","role","native_root","origin_ns",
+    "native_input","native_hold","native_generation","source_generation","startup","roles"))
+   and capture["owner"]==(os.getpid(),threading.get_ident())
+   and a["query"].failure is None, "ORDINARY_BOOTSTRAP_RETAINED_CAPTURE21_FIELDS")
+  return capture
+ except BaseException as error:
+  for row in (_ORDINARY_BOOTSTRAP_RUNTIME_ATTEMPT_V1,_ORDINARY_BOOTSTRAP_ORIGINAL_ACQUISITION_V1):
+   errors = row.get("errors") if type(row) is dict else None
+   if type(errors) is list and all(error is not prior for prior in errors):
+    errors.append(error)
+  a = _ORDINARY_BOOTSTRAP_ORIGINAL_ACQUISITION_V1
+  if type(a) is dict:
+   native = a.get("native_product")
+   issuer = native.get("runtime_issue_attempt") if type(native) is dict else None
+   errors = issuer.get("errors") if type(issuer) is dict else None
+   if type(errors) is list and all(error is not prior for prior in errors):
+    errors.append(error)
+   query = a.get("query")
+   if type(query) is o._LinuxPreflightQueriesV1 and query.failure is None:
+    query.failure = error
+  raise
+
+
+def _ordinary_bootstrap_runtime_adopt_v1(capture, scope, host, value):
+ from tools import validation_reliability as o
+ _ordinary_bootstrap_runtime_anchors_v1(capture)
+ _ordinary_bootstrap_runner_check_v1(capture["acquisition"])
+ a = capture["acquisition"]
+ ca = capture["attempt"]
+ issuer = ca["issuer_attempt"]
+ o._preflight_require_v1("runtime_adoption_attempt" not in a,
+  "ORDINARY_BOOTSTRAP_SINGLE_RUNTIME_ADOPTION")
+ adoption = dict(acquisition=a,capture=capture,scope=scope,query=scope.query,
+  host=host,value=value,issuer_attempt=issuer,capture_attempt=ca,
+  capture_original=ca["capture_original"],capture_attempt_original=ca["original"],
+  complete=False,errors=[])
+ a["runtime_adoption_attempt"] = adoption
+ try:
+  o._preflight_require_v1(type(scope) is o._LinuxPreflightScopeV1
+   and scope.query is capture["query"] is a["query"]
+   and host is scope._ordinary_host_preparation_v1 is scope._ordinary_original_host_preparation_v1
+   and host["scope"] is scope and host["owner"]==capture["owner"]
+   ==(os.getpid(),threading.get_ident())
+   and value["phase"]==a["phase"] and value["origin_ns"]==a["origin_ns"]
+   and value["interpreter"]==capture["executable"]
+   and value["installation"]==capture["installation"]
+   and not hasattr(scope,"_ordinary_bootstrap_runtime_v1")
+   and not hasattr(scope,"_ordinary_bootstrap_runtime_adoption_original_v1")
+   and not hasattr(scope,"_ordinary_initial_native_holder_v1")
+   and not hasattr(scope,"_ordinary_original_initial_native_holder_v1")
+   and not hasattr(scope,"_ordinary_initial_native_holder_original_v1"),
+   "ORDINARY_BOOTSTRAP_RUNTIME_SAME_SCOPE_QUERY_AND_INPUTS")
+  original = (adoption,a,capture,scope,scope.query,host,value,adoption["errors"],
+   issuer,ca,ca["capture_original"],ca["original"])
+  adoption["original"] = original
+  ca["adoption_original"] = original
+  scope._ordinary_bootstrap_runtime_adoption_original_v1 = original
+  scope._ordinary_bootstrap_runtime_v1 = scope._ordinary_original_bootstrap_runtime_v1 = capture
+  a["runtime_adoption"] = adoption
+  native = a["native_product"]
+  hold = a["native_hold"]
+  hold_fields = ("owner", "service_unit", "invocation", "holder_identity",
+   "holder_pidfd_slot", "holder_cgroup", "holder_cgroup_slot", "holder_events_slot",
+   "ancestor_cgroup", "ancestor_slot", "cutoffs", "errors",
+   "holder_kernel_observations", "native_input", "native_generation",
+   "source_generation", "startup")
+  o._preflight_require_v1(type(hold) is dict and type(hold.get("original")) is tuple,
+   "ORDINARY_BOOTSTRAP_ORIGINAL_NATIVE_HOLDER_OBJECT")
+  hold_original = hold["original"]
+  o._preflight_require_v1(len(hold_original)==18 and hold_original[0] is hold
+   and all(hold_original[i+1] is hold[key] for i,key in enumerate(hold_fields))
+   and hold is native["native_hold"] is capture["native_hold"]
+   and native["original"] is ca["native_original"]
+   and native["original"][2] is a["original"][2] is hold
+   and all(hold[key] is native[key] for key in
+    ("native_input", "native_generation", "source_generation", "startup"))
+   and hold["cutoffs"] is host["original_cutoffs"]
+   and type(hold["errors"]) is list and not hold["errors"],
+   "ORDINARY_BOOTSTRAP_IDENTICAL_NATIVE_HOLDER_INPUTS")
+  scope._ordinary_initial_native_holder_v1 = scope._ordinary_original_initial_native_holder_v1 = hold
+  scope._ordinary_initial_native_holder_original_v1 = (scope,native,ca["native_original"],
+   hold,hold_original,capture,ca["capture_original"],host,host["original_cutoffs"])
+  scope._ordinary_require_initial_native_hold_v1(hold,host)
+  adoption["complete"] = True
+  return capture
+ except BaseException as error:
+  if all(error is not prior for prior in adoption["errors"]):
+   adoption["errors"].append(error)
+  for errors in (ca["errors"],issuer["errors"],a["errors"],scope._ordinary_factory_errors_v1):
+   if all(error is not prior for prior in errors):
+    errors.append(error)
+  if scope.query.failure is None:
+   scope.query.failure = error
+  raise
+
+
+
+
+def _ordinary_bootstrap_runtime_check_v1(scope):
+ from tools import validation_reliability as o
+ capture = scope._ordinary_bootstrap_runtime_v1
+ _ordinary_bootstrap_runtime_anchors_v1(capture)
+ _ordinary_bootstrap_runner_check_v1(capture["acquisition"])
+ a = capture["acquisition"]
+ ca = capture["attempt"]
+ issuer = ca["issuer_attempt"]
+ adoption = a["runtime_adoption"]
+ old = scope._ordinary_bootstrap_runtime_adoption_original_v1
+ o._preflight_require_v1(capture is scope._ordinary_original_bootstrap_runtime_v1
+  and adoption is a["runtime_adoption_attempt"] and adoption["complete"] is True
+  and adoption["acquisition"] is a and adoption["capture"] is capture
+  and adoption["scope"] is scope and adoption["query"] is scope.query
+  and adoption["original"] is old is ca["adoption_original"]
+  and type(old) is tuple and len(old)==12
+  and old[0] is adoption and old[1] is a and old[2] is capture and old[3] is scope
+  and old[4] is scope.query is capture["query"]
+  and old[5] is scope._ordinary_host_preparation_v1 is adoption["host"]
+  and old[6] is adoption["value"] and old[7] is adoption["errors"] and not adoption["errors"]
+  and old[8] is issuer is adoption["issuer_attempt"]
+  and old[9] is ca is adoption["capture_attempt"]
+  and old[10] is ca["capture_original"] is adoption["capture_original"]
+  and old[11] is ca["original"] is adoption["capture_attempt_original"],
+  "ORDINARY_BOOTSTRAP_RUNTIME_ORIGINAL_ADOPTION_CONTINUITY")
+ hold = scope._ordinary_initial_native_holder_v1
+ witness = scope._ordinary_initial_native_holder_original_v1
+ native = a["native_product"]
+ host = adoption["host"]
+ o._preflight_require_v1(type(witness) is tuple and len(witness)==9
+  and witness[0] is scope and witness[1] is native
+  and witness[2] is native["original"] is ca["native_original"]
+  and witness[3] is hold is scope._ordinary_original_initial_native_holder_v1
+  is native["native_hold"] is a["native_hold"] is capture["native_hold"]
+  and native["original"][2] is a["original"][2] is hold
+  and type(hold) is dict and witness[4] is hold["original"]
+  and witness[5] is capture and witness[6] is ca["capture_original"]
+  and witness[7] is host and witness[8] is host["original_cutoffs"],
+  "ORDINARY_BOOTSTRAP_ORIGINAL_NATIVE_HOLDER_ADOPTION_CONTINUITY")
+ scope._ordinary_require_initial_native_hold_v1(hold,host)
+ scope.query.check()
+ _ordinary_bootstrap_runtime_anchors_v1(capture)
+ _ordinary_bootstrap_runner_check_v1(capture["acquisition"])
+ _ordinary_stock_runtime_check_v1(capture["stock"])
+ return capture
+
+
+
+
+# Source-only conditional complete issuer + replacement RUN bootstrap.
+# Contains complete strengthened04 functions; no standalone execution.
+# Original checker stays unchanged; CHECKER is an outside-holder native role only.
+# Native producer is the existing original qualified Source/native preparation.
+# Its local input product is not a Bash/Python object transfer or new authority.
+# Caller pre-funds issuer/frame/attempt cells in the original fixed heap stage.
+
+def _ordinary_bootstrap_runtime_issue_v1(native_product, heap_record, query_stage_row):
+ global _ORDINARY_BOOTSTRAP_ACQUISITION_V1, _ORDINARY_BOOTSTRAP_ORIGINAL_ACQUISITION_V1
+ global _ORDINARY_BOOTSTRAP_STOCK_RUNTIME_V1
+ import types
+ from tools import validation_reliability as o
+ if type(native_product) is not dict or "runtime_issue_attempt" in native_product:
+  raise ValueError("ORDINARY_BOOTSTRAP_SINGLE_ORIGINAL_NATIVE_INPUT_ISSUE")
+ attempt = dict(native_product=native_product, owner=(os.getpid(),threading.get_ident()),
+  query=None, acquisition=None, native_original=None, acquisition_original=None,
+  heap_record=heap_record, query_stage_row=query_stage_row, result=None, complete=False, errors=[])
+ native_product["runtime_issue_attempt"] = attempt
+ heap_stage = None
+ try:
+  fields = ("native_input","native_hold","native_generation","startup","source_generation",
+   "roles","actor","phase","role","native_root","origin_ns","errors")
+  old = native_product["original"]
+  o._preflight_require_v1(type(old) is tuple and len(old)==13
+   and old[0] is native_product
+   and all(old[i+1] is native_product[k] for i,k in enumerate(fields))
+   and all(native_product[k] is not None for k in fields[:5])
+   and type(native_product["errors"]) is list and not native_product["errors"]
+   and _ORDINARY_BOOTSTRAP_ACQUISITION_V1 is None
+   and _ORDINARY_BOOTSTRAP_ORIGINAL_ACQUISITION_V1 is None,
+   "ORDINARY_BOOTSTRAP_ORIGINAL_QUALIFIED_NATIVE_INPUT")
+  # Retain the exact supplied original tuple before heap/Query fallibility.
+  attempt["native_original"] = old
+  actor = native_product["actor"]
+  role, phase = native_product["role"],native_product["phase"]
+  origin, native_root = native_product["origin_ns"],native_product["native_root"]
+  o._preflight_require_v1(type(actor) is tuple and len(actor)==4
+   and actor[0]==os.getpid() and actor[2]==threading.get_ident()
+   and actor[3]==threading.get_native_id()
+   and role in ("PROVISION","PARENT","RECEIVER")
+   and phase in ORDERED_PHASES and type(origin) is int and origin>0
+   and type(query_stage_row) is tuple and len(query_stage_row)==5
+   and query_stage_row[0]=="BOOTSTRAP_QUERY"
+   and query_stage_row[1] is native_product
+   and query_stage_row[4] is _ordinary_bootstrap_query_request_v1
+   and native_product["query_request_attempt"]["result"] is query_stage_row
+   and native_product["runtime_issue_attempt"] is attempt
+   and attempt["heap_record"] is heap_record
+   and attempt["query_stage_row"] is query_stage_row,
+   "ORDINARY_BOOTSTRAP_FIXED_ORIGINAL_QUERY_STAGE")
+  # Existing fixed producer, never caller callback/Boolean authority.
+  heap_stage = _ordinary_bootstrap_heap_stage_v1(heap_record,query_stage_row)
+  o._preflight_require_v1(_ORDINARY_BOOTSTRAP_STOCK_RUNTIME_V1 is None,
+   "ORDINARY_BOOTSTRAP_SINGLE_PENDING_STOCK_CAPTURE")
+  attempt["stock_capture_attempted"] = True
+  _ORDINARY_BOOTSTRAP_STOCK_RUNTIME_V1 = _ordinary_stock_runtime_v1()
+  runner = sys.modules.get(__name__)
+  o._preflight_require_v1(type(runner) is types.ModuleType
+   and runner.__dict__ is globals(), "ORDINARY_BOOTSTRAP_ORIGINAL_RUN_NAMESPACE")
+  attempt["runner_owner_original"] = (attempt, runner, runner.__dict__, __name__, heap_record)
+  prefix = native_root / "prefix" / "receiver" if role=="RECEIVER" else native_root / "prefix"
+  query = o._LinuxPreflightQueriesV1(evidence_root=prefix/"query",
+   deadline_ns=origin+3720*10**9)
+  attempt["query"] = query
+  o._ordinary_initial_query_adopt_v1(query, native_product)
+  acquisition = dict((key,native_product[key]) for key in fields if key!="errors")
+  acquisition["query"],acquisition["errors"] = query,native_product["errors"]
+  acquisition_fields = ("native_input","native_hold","native_generation","startup",
+   "source_generation","roles","actor","phase","role","native_root","origin_ns","query","errors")
+  # Freeze only after the actual funded once-constructed Query exists.
+  acquisition["original"] = (acquisition,) + tuple(acquisition[key] for key in acquisition_fields)
+  acquisition["native_product"] = native_product
+  acquisition["runner_owner_original"] = attempt["runner_owner_original"]
+  attempt["acquisition"] = acquisition
+  attempt["acquisition_original"] = acquisition["original"]
+  attempt["original"] = (attempt,native_product,attempt["owner"],attempt["native_original"],
+   query,acquisition,attempt["acquisition_original"],attempt["errors"],heap_record,query_stage_row)
+  _ORDINARY_BOOTSTRAP_ACQUISITION_V1 = _ORDINARY_BOOTSTRAP_ORIGINAL_ACQUISITION_V1 = acquisition
+  _ordinary_bootstrap_heap_acquisition_v1(heap_record, acquisition)
+  capture = _ordinary_bootstrap_runtime_capture_v1(acquisition)
+  _ordinary_bootstrap_heap_stage_complete_v1(heap_record, heap_stage, capture)
+  attempt["result"],attempt["complete"] = capture,True
+  return capture
+ except BaseException as error:
+  if all(error is not prior for prior in attempt["errors"]):
+   attempt["errors"].append(error)
+  errors = native_product.get("errors")
+  if type(errors) is list and all(error is not prior for prior in errors):
+   errors.append(error)
+  if (heap_stage is not None and heap_record["active"] is heap_stage
+    and heap_stage["error"] is None):
+   try:
+    _ordinary_bootstrap_heap_stage_failed_v1(heap_record, heap_stage, error)
+   except BaseException as accounting_error:
+    if all(accounting_error is not prior for prior in attempt["errors"]):
+     attempt["errors"].append(accounting_error)
+    if type(errors) is list and all(accounting_error is not prior for prior in errors):
+     errors.append(accounting_error)
+  query = attempt["query"]
+  if query is not None and query.failure is None:
+   query.failure = error
+  raise
+
+
+
+
+
+
+
+def _facet_fn_control_fixed_delegates_v1():
+ import tools.validation_reliability as _f
+ rel = 'tools.validation_reliability'
+ run = 'tools.run_validation_gates'
+ reg = 'tools.validation_scope_registry'
+ inv = 'tools.validation_inventory'
+ seal = '_LinuxImmutableSourceSealV2'
+ gate = '_LinuxPreflightScopeV1'
+ return (
+  (rel,'_ordinary_control_current_profile_bind_v1',rel,None),
+  (run,'_facet_fn_control_current_profile_bind_v1',rel,None),
+  (rel,'_ordinary_control_compiler_source_projection_v1',rel,None),
+  (reg,'_facet_fn_control_compiler_source_projection_v1',rel,None),
+  (rel,'_ordinary_control_current_staged_request_v1',rel,None),
+  (reg,'_facet_fn_control_current_staged_request_v1',rel,None),
+  (rel,'_ordinary_control_current_parser_request_v1',rel,None),
+  (rel,'_ordinary_control_python_ast_request_v1',rel,None),
+  ('tools.ci_branch_context','_facet_fn_control_python_ast_request_v1',rel,None),
+  (rel,'_ordinary_control_current_profile_literals_v1',rel,None),
+  (inv,'_facet_fn_control_current_profile_literals_v1',rel,None),
+  (inv,'_facet_fn_control_lexical_forward_activation_v1',rel,None),
+  (rel,'_LinuxImmutableSourceSealV2._check',rel,seal),
+  (rel,'_LinuxPreflightScopeV1._ordinary_source_data_allocator_projection_v1',rel,gate),
+  (rel,'_LinuxPreflightScopeV1._ordinary_source_data_construct_issued_v1',rel,gate),
+  (rel,'_LinuxPreflightScopeV1._ordinary_source_data_heap_issue_v1',rel,gate),
+  (rel,'_LinuxPreflightScopeV1._ordinary_source_data_live_credit_v1',rel,gate),
+  (rel,'_LinuxPreflightScopeV1._ordinary_source_data_managed_request_issue_v1',rel,gate),
+  (rel,'_LinuxPreflightScopeV1._ordinary_source_data_managed_request_v1',rel,gate),
+  (rel,'_LinuxPreflightScopeV1._ordinary_source_data_raw_binding_check_v1',rel,gate),
+  (rel,'_LinuxPreflightScopeV1._ordinary_source_data_raw_issue_v1',rel,gate),
+  (rel,'_LinuxPreflightScopeV1._ordinary_source_data_scan_v1',rel,gate),
+  (rel,'_LinuxPreflightScopeV1._ordinary_source_meter_projection_v1',rel,gate),
+  (rel,'_ordinary_control_bindings_check_v1',rel,None),
+  (rel,'_ordinary_control_bytecode_v1',rel,None),
+  (rel,'_ordinary_control_code_site_route_v1',rel,None),
+  (rel,'_ordinary_control_code_source_equal_v1',rel,None),
+  (rel,'_ordinary_control_default_binding_v1',rel,None),
+  (rel,'_ordinary_control_defaults_recheck_v1',rel,None),
+  (rel,'_ordinary_control_dictionary_keys_v1',rel,None),
+  (rel,'_ordinary_control_lexical_activation_v1',rel,None),
+  (rel,'_ordinary_control_lexical_forward_activation_v1',rel,None),
+  (rel,'_ordinary_control_lexical_forward_arguments_v1',rel,None),
+  (rel,'_ordinary_control_lexical_forward_route_v1',rel,None),
+  (rel,'_ordinary_control_literal_equal_v1',rel,None),
+  (rel,'_ordinary_control_member_v1',rel,None),
+  (rel,'_ordinary_control_programme_check_v1',rel,None),
+  (rel,'_ordinary_control_sites_check_v1',rel,None),
+  (rel,'_ordinary_control_source_product_check_v1',rel,None),
+  (rel,'_ordinary_data_align_v1',rel,None),
+  (rel,'_ordinary_data_buffer_request_v1',rel,None),
+  (rel,'_ordinary_data_bytes_request_v1',rel,None),
+  (rel,'_ordinary_data_components_v1',rel,None),
+  (rel,'_ordinary_data_control_components_v1',rel,None),
+  (rel,'_ordinary_data_controller_observation_check_v1',rel,None),
+  (rel,'_ordinary_data_dict_requests_v1',rel,None),
+  (rel,'_ordinary_data_dtoa_requests_v1',rel,None),
+  (rel,'_ordinary_data_emitter_basis_v1',rel,None),
+  (rel,'_ordinary_data_integer_requests_v1',rel,None),
+  (rel,'_ordinary_data_list_requests_v1',rel,None),
+  (rel,'_ordinary_data_nonnegative_v1',rel,None),
+  (rel,'_ordinary_data_runtime_layout_check_v1',rel,None),
+  (rel,'_ordinary_data_size_v1',rel,None),
+  (rel,'_ordinary_data_tuple_request_v1',rel,None),
+  (rel,'_ordinary_data_unicode_request_v1',rel,None),
+  (rel,'_ordinary_source_data_construct_v1',rel,None),
+  (rel,'_ordinary_source_data_json_span_v1',rel,None),
+  (rel,'_ordinary_source_data_lexical_admission_v1',rel,None),
+  (rel,'_ordinary_source_data_limits_v1',rel,None),
+  (rel,'_ordinary_source_data_operand_original_v1',rel,None),
+  (rel,'_ordinary_source_data_operand_v1',rel,None),
+  (rel,'_ordinary_source_data_utf8_scalar_v1',rel,None),
+  (rel,'_preflight_require_v1',rel,None),
+  (rel,'ValidationReliabilityError.__init__',rel,'ValidationReliabilityError'),
+  (inv,'_facet_fn_control_lexical_forward_arguments_v1',rel,None),
+  (inv,'_facet_fn_control_bytecode_values_v1',rel,None),
+  (inv,'_facet_fn_control_source_site_codes_v1', rel, None),
+  (reg, '_facet_fn_control_bindings_check_v1', rel, None),
+  (reg, '_facet_fn_control_bytecode_v1', rel, None),
+  (reg, '_facet_fn_control_code_site_route_v1', rel, None),
+  (reg, '_facet_fn_control_code_source_equal_v1', rel, None),
+  (reg, '_facet_fn_control_default_binding_v1', rel, None),
+  (reg, '_facet_fn_control_defaults_recheck_v1', rel, None),
+  (reg, '_facet_fn_control_dictionary_keys_v1', rel, None),
+  (reg, '_facet_fn_control_lexical_activation_v1', rel, None),
+  (reg, '_facet_fn_control_lexical_forward_route_v1', rel, None),
+  (reg, '_facet_fn_control_literal_equal_v1', rel, None),
+  (rel, '_facet_fn_control_literal_values_v1', rel, None),
+  (reg, '_facet_fn_control_member_v1', rel, None),
+  (reg, '_facet_fn_control_programme_check_v1', rel, None),
+  (reg, '_facet_fn_control_sites_check_v1', rel, None),
+  (reg, '_facet_fn_control_source_product_check_v1', rel, None),
+  (reg, '_facet_fn_data_align_v1', rel, None),
+  (reg, '_facet_fn_data_buffer_request_v1', rel, None),
+  (reg, '_facet_fn_data_bytes_request_v1', rel, None),
+  (reg, '_facet_fn_data_components_v1', rel, None),
+  (reg, '_facet_fn_data_control_components_v1', rel, None),
+  (reg, '_facet_fn_data_controller_observation_check_v1', rel, None),
+  (reg, '_facet_fn_data_dict_requests_v1', rel, None),
+  (reg, '_facet_fn_data_dtoa_requests_v1', rel, None),
+  (reg, '_facet_fn_data_integer_requests_v1', rel, None),
+  (reg, '_facet_fn_data_list_requests_v1', rel, None),
+  (reg, '_facet_fn_data_nonnegative_v1', rel, None),
+  (reg, '_facet_fn_data_runtime_layout_check_v1', rel, None),
+  (reg, '_facet_fn_data_size_v1', rel, None),
+  (reg, '_facet_fn_data_tuple_request_v1', rel, None),
+  (reg, '_facet_fn_data_unicode_request_v1', rel, None),
+  (reg, '_facet_fn_source_data_json_span_v1', rel, None),
+  (reg, '_facet_fn_source_data_lexical_admission_v1', rel, None),
+  (reg, '_facet_fn_source_data_limits_v1', rel, None),
+  (reg, '_facet_fn_source_data_operand_original_v1', rel, None),
+  (reg, '_facet_fn_source_data_utf8_scalar_v1', rel, None),
+  (reg, '_facet_m_source_data_allocator_projection_v1', rel, gate),
+  (reg, '_facet_m_source_data_heap_issue_v1', rel, gate),
+  (reg, '_facet_m_source_data_live_credit_v1', rel, gate),
+  (reg, '_facet_m_source_data_managed_request_issue_v1', rel, gate),
+  (reg, '_facet_m_source_data_managed_request_v1', rel, gate),
+  (reg, '_facet_m_source_data_raw_binding_check_v1', rel, gate),
+  (reg, '_facet_m_source_data_raw_issue_v1', rel, gate),
+  (reg, '_facet_m_source_data_scan_v1', rel, gate),
+  (reg, '_facet_m_source_meter_projection_v1', rel, gate),
+  ('dis', '_unpack_opargs', 'dis', None),
+  ('dis', '_deoptop', 'dis', None),
+  ('dis', '_get_cache_size', 'dis', None),
+  ('ast', 'dump', 'ast', None),
+  ('ast', 'walk', 'ast', None),
+  ('ast', 'iter_fields', 'ast', None),
+  ('ast', 'iter_child_nodes', 'ast', None),
+  ('ast', 'literal_eval', 'ast', None),
+  ('ast', 'parse', 'ast', None),
+  ('json', 'loads', 'json', None),
+  ('json.decoder', 'JSONDecoder.decode', 'json.decoder', None),
+  ('json.decoder', 'JSONDecoder.raw_decode', 'json.decoder', None),
+  (rel, '_LinuxImmutableSourceSealV2._anchors_live', rel, seal),
+  (rel, '_LinuxImmutableSourceSealV2._close', rel, seal),
+  (rel, '_LinuxImmutableSourceSealV2._identity', rel, seal),
+  (rel, '_LinuxImmutableSourceSealV2._meta', rel, seal),
+  (rel, '_LinuxImmutableSourceSealV2._meta_attempt', rel, seal),
+  (rel, '_LinuxImmutableSourceSealV2._open', rel, seal),
+  (rel, '_LinuxImmutableSourceSealV2._open_path', rel, seal),
+  (rel, '_LinuxImmutableSourceSealV2._ordinary_source_native_attempt_v1', rel, seal),
+  (rel, '_LinuxImmutableSourceSealV2._performed', rel, seal),
+  (rel, '_LinuxImmutableSourceSealV2._read', rel, seal),
+  (rel, '_LinuxImmutableSourceSealV2._reserve', rel, seal),
+  (rel, '_LinuxImmutableSourceSealV2.read_administration', rel, seal),
+  (rel, '_LinuxPreflightCensusV1._version', rel, '_LinuxPreflightCensusV1'),
+  (rel, '_LinuxPreflightScopeV1._ordinary_census_meter_projection_v1', rel, gate),
+  (rel, '_LinuxPreflightScopeV1._ordinary_factory_call_v1', rel, gate),
+  (rel, '_LinuxPreflightScopeV1._ordinary_factory_close_v1', rel, gate),
+  (rel, '_LinuxPreflightScopeV1._ordinary_factory_debit_v1', rel, gate),
+  (rel, '_LinuxPreflightScopeV1._ordinary_factory_open_v1', rel, gate),
+  (rel, '_LinuxPreflightScopeV1._ordinary_factory_slot_v1', rel, gate),
+  (rel, '_LinuxPreflightScopeV1._ordinary_installation_close_v1', rel, gate),
+  (rel, '_LinuxPreflightScopeV1._ordinary_installation_open_v1', rel, gate),
+  (rel, '_LinuxPreflightScopeV1._ordinary_installation_record_v1', rel, gate),
+  (rel, '_LinuxPreflightScopeV1._ordinary_pending_close_calls_v1', rel, gate),
+  (rel, '_LinuxPreflightScopeV1._ordinary_source_data_frozen_check_v1', rel, gate),
+  (rel, '_LinuxPreflightScopeV1._ordinary_source_data_read_v1', rel, gate),
+  (rel, '_LinuxPreflightScopeV1._ordinary_source_file_bound_v1', rel, gate),
+  (rel, '_LinuxPreflightScopeV1._ordinary_source_meter_event_v1', rel, gate),
+  (rel, '_LinuxPreflightScopeV1._ordinary_source_preopen_v1', rel, gate),
+  (rel, '_LinuxSourceNativeV2._call', rel, '_LinuxSourceNativeV2'),
+  (rel, '_LinuxSourceNativeV2.flags', rel, '_LinuxSourceNativeV2'),
+  (rel, '_linux_preflight_path_v1', rel, None),
+  (rel, '_mapper_append_error_v1', rel, None),
+  (rel, '_mapper_close_slot_v1', rel, None),
+  (rel, '_mapper_error_contains_v1', rel, None),
+  (rel, '_mapper_need_v1', rel, None),
+  (rel, '_mapper_portable_relative_v1', rel, None),
+  (rel, '_mapper_relative_v1', rel, None),
+  (rel, '_mapper_slot_open_error_v1', rel, None),
+  (rel, '_mapper_slot_opened_v1', rel, None),
+  (rel, '_mapper_slot_settled_v1', rel, None),
+  (rel, '_mapper_slot_v1', rel, None),
+  (rel, '_ordinary_control_error_constructor_route_v1', rel, None),
+  (rel, '_ordinary_deterministic_gfp_names_v1', rel, None),
+  (rel, '_ordinary_deterministic_gfp_targets_v1', rel, None),
+  (rel, '_ordinary_effect_value_snapshot_v1', rel, None),
+  (rel, '_ordinary_gfp_rp_assignment_keys_v1', rel, None),
+  (rel, '_ordinary_pytest_installation_source_v1', rel, None),
+  (rel, '_ordinary_pytest_source_graph_check_v1', rel, None),
+  (rel, '_ordinary_pytest_source_graph_v1', rel, None),
+  (rel, '_ordinary_rp_assignment_keys_v1', rel, None),
+  (rel, '_ordinary_rp_join_decode_v1', rel, None),
+  (rel, '_ordinary_rp_join_freeze_v1', rel, None),
+  (rel, '_ordinary_rp_join_raw_v1', rel, None),
+  (rel, '_ordinary_rp_join_records_v1', rel, None),
+  (rel, '_ordinary_rp_join_slot_v1', rel, None),
+  (rel, '_ordinary_rp_join_source_snapshot_v1', rel, None),
+  (rel, '_ordinary_rp_key_from_fields_v1', rel, None),
+  (rel, '_ordinary_rp_name_metadata_for_admissible_M_v1', rel, None),
+  (rel, '_ordinary_rp_predecessor_source_v1', rel, None),
+  (rel, '_ordinary_rp_report_row_ranges_v1', rel, None),
+  (rel, '_ordinary_source_absent_operand_v1', rel, None),
+  (rel, '_ordinary_source_data_operand_check_v1', rel, None),
+  (rel, '_ordinary_source_operand_v1', rel, None),
+  (rel, '_scan_raise_errors', rel, None),
+  ('tools.ci_branch_context', '_ordinary_rp5a_manager_label_source_v1', rel, None),
+  ('tools.ci_branch_context', '_ordinary_rp5a_manager_credentials_source_v1', rel, None),
+  ('tools.ci_branch_context', '_ordinary_rp5a_manager_result_source_v1', rel, None),
+  (reg, '_facet_fn_deterministic_gfp_names_v1', rel, None),
+  (reg, '_facet_fn_deterministic_gfp_targets_v1', rel, None),
+  (reg, '_facet_fn_effect_value_snapshot_v1', rel, None),
+  (reg, '_facet_fn_gfp_rp_assignment_keys_v1', rel, None),
+  (run, '_facet_fn_pytest_source_graph_check_v1', rel, None),
+  (reg, '_facet_fn_pytest_source_graph_v1', rel, None),
+  (reg, '_facet_fn_rp_assignment_keys_v1', rel, None),
+  (reg, '_facet_fn_rp_join_decode_v1', rel, None),
+  (reg, '_facet_fn_rp_join_freeze_v1', rel, None),
+  (reg, '_facet_fn_rp_join_raw_v1', rel, None),
+  (reg, '_facet_fn_rp_join_records_v1', rel, None),
+  (reg, '_facet_fn_rp_join_slot_v1', rel, None),
+  (reg, '_facet_fn_rp_join_source_snapshot_v1', rel, None),
+  (reg, '_facet_fn_rp_key_from_fields_v1', rel, None),
+  (reg, '_facet_fn_rp_name_metadata_for_admissible_M_v1', rel, None),
+  (reg, '_facet_fn_rp_predecessor_source_v1', rel, None),
+  (reg, '_facet_fn_rp_report_row_ranges_v1', rel, None),
+  (reg, '_facet_fn_source_data_operand_check_v1', rel, None),
+  (reg, '_facet_m_census_meter_projection_v1', rel, gate),
+  (reg, '_facet_m_factory_debit_v1', rel, gate),
+  (reg, '_facet_m_factory_slot_v1', rel, gate),
+  (reg, '_facet_m_installation_record_v1', rel, gate),
+  (reg, '_facet_m_pending_close_calls_v1', rel, gate),
+  (reg, '_facet_m_source_data_frozen_check_v1', rel, gate),
+  (reg, '_facet_m_source_file_bound_v1', rel, gate),
+  (reg, '_facet_m_source_meter_event_v1', rel, gate),
+  (reg, '_ordinary_scope_source_import_events_v1', rel, None),
+  (reg, '_ordinary_scope_source_module_map_v1', rel, None),
+  (rel, '_ordinary_control_ast_original_v1', rel, None),
+  (rel, '_ordinary_control_initialized_compiled_reuse_v1', rel, None),
+  (rel, '_ordinary_initialized_storage_data_request_v1', rel, None),
+  (reg, '_facet_fn_control_ast_original_v1', rel, None),
+  (reg, '_facet_fn_control_initialized_compiled_reuse_v1', rel, None),
+  (reg, '_facet_fn_initialized_storage_data_request_v1', rel, None),
+  (run, '_facet_fn_control_fixed_delegates_v1', rel, None),
+  (run, '_facet_fn_pytest_config_original_route_v1', rel, None),
+  (reg, '_facet_fn_control_fixed_delegate_roster_v1', rel, None),
+  (rel, '_ordinary_control_fixed_delegate_roster_v1', rel, None),
+ )
+
+
+def _facet_fn_pytest_config_original_route_v1(scope, record, relative, source_byte_limit,
+  source_node_limit, source_form, data_parser):
+ import tools.validation_reliability as _f
+ pytest_config = (type(scope) is _f._LinuxPreflightScopeV1 and type(record) is dict
+  and record is getattr(scope, '_ordinary_pytest_source_graph_v1', None)
+   is getattr(scope, '_ordinary_original_pytest_source_graph_v1', None)
+  and type(source_form) is str and type(relative) is str
+  and source_form == 'BINARY' and relative in ('pytest.ini',
+   '.github/workflows/qtt_validation.yml') and data_parser is None)
+ if pytest_config:
+  original = record.get('original')
+  _f._preflight_require_v1(type(original) is tuple and len(original) == 17
+   and original[0] is record and original[1] is scope
+   and all(original[index] is record[key] for index, key in ((2,'paths'), (3,'plan'),
+    (4,'execution_plan'), (5,'source'), (6,'source_selection'), (7,'bound_rows'),
+    (8,'rows'), (9,'source_operands'), (10,'module_sources'), (11,'errors'),
+    (16,'installation_source_operands')))
+   and record['paths'] is scope._ordinary_bound_paths_v1
+   and record['plan'] is scope._ordinary_bound_plan_v1
+   and record['execution_plan'] is scope._ordinary_execution_plan_v1
+   and record['source'] is scope.source and record['source_selection']
+    is scope._ordinary_source_selection_v1 is scope._ordinary_original_source_selection_v1
+   and original[12:15] == (source_byte_limit, source_node_limit, record['phase'])
+   and original[12:15] == (record['source_byte_limit'], record['source_node_limit'],
+    record['source_selection']._original[2])
+   and original[15] == (_f.os.getpid(), _f.threading.get_ident())
+   and not record['complete'] and not record['errors']
+   and record['check'] is record['original_check'] is _f._ordinary_pytest_source_graph_check_v1,
+   'ORDINARY_PYTEST_CONFIG_ORIGINAL_SOURCE_PROGRAMME')
+  if relative == '.github/workflows/qtt_validation.yml':
+   from tools.validation_scope_registry import _facet_fn_pytest_source_graph_v1
+   acquired = record['installed_acquisition_original']
+   _f._preflight_require_v1(type(acquired) is tuple and len(acquired) == 12
+    and acquired[0] is record
+    and acquired[1] is record['installation_operand_cache']
+     is record['original_installation_operand_cache']
+    and acquired[8] is _facet_fn_pytest_source_graph_v1
+    and acquired[9] is acquired[8].__code__
+    and acquired[10] is _f._ordinary_pytest_installation_source_v1
+    and acquired[11] is acquired[10].__code__
+    and record['rows'] == [] and not record['complete'],
+    'ORDINARY_PYTEST_FIXED_WORKFLOW_CONFIG_SAME_ORIGINAL_GRAPH_CAPTURE')
+ return pytest_config
+
+
+def _facet_fn_pytest_source_graph_check_v1(scope, record):
+ from tools.validation_scope_registry import _facet_fn_pytest_source_graph_v1
+ import tools.validation_reliability as _f
+ _pytest_need = _f._preflight_require_v1
+ import ast
+ original = record['original']
+ record['source_selection']._guard()
+ _pytest_need(record is scope._ordinary_pytest_source_graph_v1
+  is scope._ordinary_original_pytest_source_graph_v1 and type(original) is tuple
+  and len(original) == 17 and original[0] is record and original[1] is scope
+  and all(original[index] is record[key] for index, key in ((2,'paths'), (3,'plan'),
+   (4,'execution_plan'), (5,'source'), (6,'source_selection')))
+  and record['paths'] is scope._ordinary_bound_paths_v1
+  and record['plan'] is scope._ordinary_bound_plan_v1
+  and record['execution_plan'] is scope._ordinary_execution_plan_v1
+  and record['source'] is scope.source and record['source_selection']
+   is scope._ordinary_source_selection_v1 is scope._ordinary_original_source_selection_v1
+  and all(original[index] is record[key] for index, key in ((7,'bound_rows'), (8,'rows'),
+   (9,'source_operands'), (10,'module_sources'), (11,'errors')))
+  and original[12:15] == (record['source_byte_limit'], record['source_node_limit'], record['phase'])
+  and original[15] == (_f.os.getpid(), _f.threading.get_ident())
+  and original[16] is record['installation_source_operands']
+  and record['source'].state == 'READABLE' and record['source'].failure is None
+  and record['complete'] and not record['errors']
+  and record['check'] is record['original_check'] is _f._ordinary_pytest_source_graph_check_v1
+  and len(record['rows']) == len(record['bound_rows']) == len(record['row_originals'])
+  and record['raw_bytes'] == sum(value['raw_bytes'] for value in (*record['source_operands'],
+   *record['installation_source_operands']))
+  and record['nodes'] == sum(value['nodes'] for value in (*record['source_operands'],
+   *record['installation_source_operands'])) + record['dependency_profile_nodes']
+  and record['raw_bytes'] <= record['source_byte_limit'] and record['nodes'] <= record['source_node_limit'],
+  'ORDINARY_PYTEST_GRAPH_ORIGINAL_SOURCE_ASSOCIATION')
+ _pytest_need(record['collection_original'] == (record['python_file_patterns'],
+  record['selector_body'], record['collection_original'][2],
+  record['config_source'], record['config_lines'], record['config_bytes'])
+  and record['source_operand_cache'][('pytest.ini', 'BINARY')][0] is record['config_bytes']
+  and any(record['collection_original'][2] is value for value in record['installation_source_operands'])
+  and record['collection_original'][2]['source_form'] == 'INSTALLATION_PYTHON'
+  and record['collection_original'][2]['path'].endswith('/_pytest/python.py'),
+  'ORDINARY_PYTEST_GRAPH_ORIGINAL_COLLECTION_BODY_AND_CONFIG')
+ acquisition = record['installed_acquisition_original']
+ _pytest_need(type(acquisition) is tuple and len(acquisition) == 12
+  and acquisition[0] is record and acquisition[1] is record['installation_operand_cache']
+   is record['original_installation_operand_cache']
+  and all(acquisition[index] is record[key] for index, key in ((2,'installed_module_records'),
+   (3,'installed_import_edges'), (4,'installed_unresolved_edges'), (5,'installed_manifests'),
+   (6,'installed_entrypoints'), (7,'installed_selection_rows')))
+  and acquisition[8] is _facet_fn_pytest_source_graph_v1
+  and acquisition[9] is acquisition[8].__code__
+  and acquisition[10] is _f._ordinary_pytest_installation_source_v1
+  and acquisition[11] is acquisition[10].__code__
+  and tuple(record['installation_operand_cache'].items()) == record['installed_cache_originals']
+  and len(record['installed_source_originals']) == len(record['installation_source_operands'])
+  and all(value is observed for (value, snapshot), observed in
+   zip(record['installed_source_originals'], record['installation_source_operands'], strict=True))
+  and record['installed_semantic_originals'][5] is record['plugin_literals']
+  and record['installed_semantic_originals'][6] is record['dependency_profile']
+  and record['installed_semantic_originals'][8] is record['candidate_environment_original']
+  and record['installed_semantic_originals'] == (tuple(record['installed_import_edges']),
+   tuple(record['installed_unresolved_edges']), tuple(record['installed_manifests']),
+   tuple(record['installed_entrypoints']), tuple(record['installed_selection_rows']),
+   record['plugin_literals'], record['dependency_profile'], record['dependency_profile_nodes'],
+   record['candidate_environment_original']),
+  'ORDINARY_PYTEST_GRAPH_ORIGINAL_INSTALLED_ACQUISITION_AND_SOURCE_FACTS')
+ controller = scope._ordinary_controller_run_v1
+ environment = record['candidate_environment_original']
+ _pytest_need(controller is scope._ordinary_original_controller_run_v1
+  and controller['candidate_environment_original'] is environment
+  and environment[0] is controller and environment[1] is scope
+  and environment[2] is controller['candidate_environment']
+  and environment[3] == tuple(environment[2].items())
+  and environment[4] is _f._ordinary_supported_candidate_v1
+  and environment[5] is environment[4].__code__
+  and environment[6] == (_f.os.getpid(), _f.threading.get_ident()),
+  'ORDINARY_PYTEST_GRAPH_SAME_ORIGINAL_CALLER_ENVIRONMENT')
+ for fact, row in zip(record['installed_selection_rows'], record['rows'], strict=True):
+  _pytest_need(type(fact) is tuple and len(fact) == 12
+   and fact[0] is row and fact[1] is row['bound_row']
+   and row['installed_selection'] is fact and fact[2] is environment
+   and fact[3] is record['config_source'] and fact[10] == tuple(record['installed_entrypoints'])
+   and fact[11] is record['plugin_literals'],
+   'ORDINARY_PYTEST_GRAPH_ORIGINAL_SELECTED_PLUGIN_INPUT_ROW')
+ for value, snapshot in record['installed_source_originals']:
+  _pytest_need(any(value is observed for observed in record['installation_source_operands'])
+   and tuple(value.items()) == snapshot, 'ORDINARY_PYTEST_GRAPH_FROZEN_INSTALLED_SOURCE_FIELDS')
+ workflow = record['workflow_config_original']
+ workflow_entry = record['source_operand_cache'][('.github/workflows/qtt_validation.yml', 'BINARY')]
+ _pytest_need(type(workflow) is tuple and len(workflow) == 7
+  and workflow[0] is workflow_entry[1] and workflow[1] is workflow_entry[0]
+  and workflow[2] is workflow_entry and workflow[3] is workflow[0]['row']
+  and workflow[4] is workflow[0]['version']
+  and workflow[0]['path'] == '.github/workflows/qtt_validation.yml'
+  and workflow[0]['source_form'] == 'BINARY'
+  and workflow[5] is scope._ordinary_runner_owner_v1._facet_fn_pytest_config_original_route_v1
+  and workflow[6] is workflow[5].__code__
+  and workflow[0]['row'] is record['source'].row_index[workflow[0]['row']['path']]
+  and workflow[0]['version'] == tuple(record['source'].post[workflow[0]['row']['path']]),
+  'ORDINARY_PYTEST_FIXED_WORKFLOW_ORIGINAL_PATH_RAW_VERSION_CACHE_AND_ROUTE')
+ profile_source, profile_body, profile_tree, profile_assignment, profile_values = record['dependency_profile']
+ _pytest_need(profile_source is workflow[0],
+  'ORDINARY_PYTEST_PROFILE_PARSES_THE_SAME_ORIGINAL_WORKFLOW_OPERAND')
+ _pytest_need(any(profile_source is observed for observed in record['source_operands'])
+  and record['dependency_profile_nodes'] == sum(1 for value in ast.walk(profile_tree))
+  and ast.dump(profile_tree, include_attributes=False)
+   == ast.dump(ast.parse(profile_body), include_attributes=False)
+  and any(profile_assignment is value for value in profile_tree.body)
+  and ast.literal_eval(profile_assignment.value) == profile_values,
+  'ORDINARY_PYTEST_GRAPH_ACTUAL_RETAINED_WORKFLOW_PROFILE_BODY')
+ for saved in record['installed_module_originals']:
+  module, observed, path, tree, body, bodies, imports, native, dynamic, callers = saved
+  _pytest_need(any(module is value for value in record['installed_module_records'])
+   and module['source'] is observed and module['path'] == path and module['tree'] is tree
+   and module['body'] == body == observed['text'] and module['bodies'] is bodies
+   and tuple(module['imports']) == imports and tuple(module['native_sites']) == native
+   and tuple(module['dynamic_sites']) == dynamic and tuple(module['caller_edges']) == callers
+   and ast.dump(tree, include_attributes=False)
+    == ast.dump(ast.parse(observed['text']), include_attributes=False),
+   'ORDINARY_PYTEST_GRAPH_ACTUAL_INSTALLED_BODY_AND_CALLER_SYNTAX')
+  for name, node, text in bodies:
+   _pytest_need(any(node is value for value in ast.walk(tree))
+    and text == ast.get_source_segment(observed['text'], node),
+    'ORDINARY_PYTEST_GRAPH_RETAINED_QUALIFIED_CALLER_BODY')
+  for operand, name, body_node, call_node, text, callee in callers:
+   _pytest_need(operand is observed
+    and any(value[0] == name and value[1] is body_node for value in bodies)
+    and any(call_node is value for value in ast.walk(body_node))
+    and text == ast.get_source_segment(observed['text'], call_node)
+    and (callee is None or any(callee is value for value in bodies)),
+    'ORDINARY_PYTEST_GRAPH_ORIGINAL_SOURCE_CALLSITE_AND_STATIC_CALLEE')
+ for observed in record['installation_source_operands']:
+  saved = observed['original']
+  installation = scope._ordinary_installation_record_v1(observed['install'])
+  _pytest_need(type(saved) is tuple and len(saved) == 11 and saved[0] is observed
+   and saved[1] is scope and saved[2] is installation is observed['installation']
+   and saved[3] is observed['install'] and saved[4] is observed['row']
+   and saved[5:7] == (observed['target'], observed['version'])
+   and saved[7] is observed['raw'] is installation['files'][observed['row']['path']]
+   and saved[8:] == (observed['text'], observed['nodes'], observed['raw_bytes'])
+   and observed['complete'] and observed['error'] is None
+   and installation['complete'] and not installation['errors']
+   and any(row is observed['row'] and target == observed['target'] and tuple(version) == observed['version']
+    for row, target, version in installation['target_versions']),
+   'ORDINARY_PYTEST_GRAPH_ORIGINAL_INSTALLED_COLLECTION_SOURCE')
+  captured = observed['capture_original']
+  cache = record['installation_operand_cache']
+  tree, actual = cache[(observed['path'], observed['source_form'])]
+  _pytest_need(type(captured) is tuple and len(captured) == 7
+   and captured[0] is observed and captured[1] is observed['capture_owner'] is record
+   and captured[2] is scope and captured[3] is observed['capturer']
+    is _f._ordinary_pytest_installation_source_v1
+   and captured[4] is observed['capturer_code'] is captured[3].__code__
+   and captured[5] is cache and captured[6] is observed['original']
+   and actual is observed
+   and (observed['source_form'] == 'INSTALLATION_PYTHON'
+    and ast.dump(tree, include_attributes=False)
+     == ast.dump(ast.parse(observed['text']), include_attributes=False)
+    or observed['source_form'] == 'INSTALLATION_DATA' and tree is None and observed['nodes'] == 0),
+   'ORDINARY_PYTEST_GRAPH_ORIGINAL_INSTALLED_CAPTURE_OWNER_FUNCTION_CODE_AND_AST')
+ for row, saved in record['row_originals']:
+  selected = record['source_selection'].pytest_source_for_bound_row(row['bound_row'])
+  _pytest_need(row['original'] is saved and saved[0] is row and saved[1] is row['bound_row']
+   and saved[2] is selected is row['selected']
+   and saved[3] == record['source_selection']._pytest_source_fields_v1(selected)
+   and saved[4:] == (row['selected_modules'], tuple(row['source_operands']), tuple(row['module_records']),
+    tuple(row['import_edges']), tuple(row['external_imports']), tuple(row['unresolved_imports']),
+    tuple(row['native_call_sites']), tuple(row['dynamic_call_sites']), row['runtime_roles'],
+    tuple(row['unresolved_source_facts'])) and row['native_programme'] is None,
+   'ORDINARY_PYTEST_GRAPH_RETAINED_ORIGINAL_ROW_NOT_NATIVE_GRANT')
+ for row, saved in record['module_originals']:
+  _pytest_need(any(row is value for value in record['rows'])
+   and tuple(_f._ordinary_effect_value_snapshot_v1(value) for value in row['module_records']) == saved,
+   'ORDINARY_PYTEST_GRAPH_ORIGINAL_MODULE_BODY_AND_EDGES')
+ for observed, saved in record['source_originals']:
+  _pytest_need(_f._ordinary_effect_value_snapshot_v1(observed) == saved
+   and observed['row'] is record['source'].row_index[observed['row']['path']]
+   and observed['version'] == tuple(record['source'].post[observed['row']['path']]),
+   'ORDINARY_PYTEST_GRAPH_ORIGINAL_COMPLETE_SOURCE_BYTES')
+  if observed['source_form'] == 'PYTHON':
+   tree, cached = record['source_operand_cache'][(observed['path'], 'PYTHON')]
+   _pytest_need(cached is observed and ast.dump(tree, include_attributes=False)
+    == ast.dump(ast.parse(observed['text']), include_attributes=False),
+    'ORDINARY_PYTEST_GRAPH_RETAINED_AST_IS_ACTUAL_CAPTURED_BODY')
+ return record
+
+
+
+
+# Conditional Source component for the existing RUN heap row owner. No native
+# permission is issued here. The original native/Source acquisition must have
+# qualified source_request and its fixed operation/lifetime parts before entry.
+# source_request is a retained same-owner tuple, not a new provider or registry:
+# (native_product, source_generation, native_generation, startup, layout,
+#  fixed_parts, retained_fixed_names, producer, producer_code, original_operand).
+# The original Source owner supplies this exact tuple from its immutable input;
+# a producer records it on the existing request attempt, never rebaselines it.
+
+def _ordinary_bootstrap_request_begin_v1(owner, stage, producer, source_request):
+ if type(owner) is not dict:
+  raise ValueError('ORDINARY_FIXED_REQUEST_ORIGINAL_OWNER')
+ native = owner if stage in ('BOOTSTRAP_PREPARE', 'BOOTSTRAP_QUERY') else owner['native_product']
+ key = ('heap_prepare_request_attempt' if stage == 'BOOTSTRAP_PREPARE'
+  else 'query_request_attempt' if stage == 'BOOTSTRAP_QUERY' else None)
+ if type(owner) is not dict or type(native) is not dict:
+  raise ValueError('ORDINARY_FIXED_REQUEST_ORIGINAL_OWNER')
+ actor = native['actor']
+ if (type(actor) is not tuple or len(actor) != 4
+   or actor[0] != os.getpid() or actor[2] != threading.get_ident()
+   or actor[3] != threading.get_native_id()):
+  raise ValueError('ORDINARY_FIXED_REQUEST_ORIGINAL_PROCESS_THREAD')
+ if key is not None and key in owner:
+  raise ValueError('ORDINARY_FIXED_REQUEST_SINGLE_PREPARATION')
+ sources = None if key is not None else owner['heap_source_request_attempts']
+ if sources is not None and (type(sources) is not list or any(
+   type(old) is dict and old.get('stage') == stage for old in sources)):
+  raise ValueError('ORDINARY_FIXED_REQUEST_SINGLE_SOURCE_STAGE')
+ attempt = dict(stage=stage, owner=(os.getpid(), threading.get_ident()),
+  source_request=source_request, complete=False, result=None, errors=[])
+ if key is not None: owner[key] = attempt
+ else: sources.append(attempt)
+ attempt['original'] = (attempt, owner, native, stage, source_request,
+  attempt['owner'], attempt['errors'])
+ try:
+  fields = ('native_input','native_hold','native_generation','startup',
+   'source_generation','roles','actor','phase','role','native_root','origin_ns','errors')
+  original = native['original']
+  if (type(original) is not tuple or len(original) != 13
+    or original[0] is not native
+    or any(original[i+1] is not native[name] for i,name in enumerate(fields))
+    or any(native[name] is None for name in fields[:5])
+    or type(native['errors']) is not list or native['errors']
+    or type(source_request) is not tuple or len(source_request) != 10
+    or source_request[0] is not native
+    or source_request[1] is not native['source_generation']
+    or source_request[2] is not native['native_generation']
+    or source_request[3] is not native['startup']
+    or source_request[7] is not producer
+    or producer.__code__ is not source_request[8]):
+   raise ValueError('ORDINARY_FIXED_REQUEST_SAME_NATIVE13_SOURCE_AND_CODE')
+  if key is None:
+   afields = fields[:-1] + ('query','errors')
+   old = owner['original']
+   if (owner is not _ORDINARY_BOOTSTRAP_ACQUISITION_V1
+     or owner is not _ORDINARY_BOOTSTRAP_ORIGINAL_ACQUISITION_V1
+     or type(old) is not tuple or len(old) != 14 or old[0] is not owner
+     or any(old[i+1] is not owner[name] for i,name in enumerate(afields))
+     or owner['errors'] is not native['errors']):
+    raise ValueError('ORDINARY_FIXED_REQUEST_SAME_ACQUISITION14')
+  layout, parts, retained = source_request[4:7]
+  if (type(layout) is not dict or type(layout['sizes']) is not tuple
+    or type(parts) is not tuple or not parts or type(retained) is not tuple
+    or any(type(part) is not tuple or len(part) != 2
+     or type(part[0]) is not str or not part[0]
+     or type(part[1]) is not int or part[1] <= 0 for part in parts)
+    or len({name for name,_ in parts}) != len(parts)
+    or len(set(retained)) != len(retained)
+    or any(type(name) is not str or name not in {k for k,_ in parts} for name in retained)):
+   raise ValueError('ORDINARY_FIXED_REQUEST_ORIGINAL_POSITIVE_SOURCE_LIFETIMES')
+  # Required fixed terms are independently derived original Source debt;
+  # no unknown initialization/frame/error term becomes an empty component.
+  required = ('original_request_emitter_and_stage_records',
+   'original_selected_call_frames_and_retained_failures')
+  if stage not in ('BOOTSTRAP_PREPARE','BOOTSTRAP_QUERY'):
+   required += ('original_native_stack_and_allocator_backing',)
+  if not set(required).issubset({name for name,_ in parts}):
+   raise ValueError('ORDINARY_FIXED_REQUEST_INITIALIZATION_AND_FAILURE_DEBT')
+  initial = 'original_interpreter_and_prior_intern_storage'
+  if stage == 'BOOTSTRAP_PREPARE':
+   if initial not in {name for name,_ in parts} or initial not in retained:
+    raise ValueError('ORDINARY_FIXED_REQUEST_RETAINED_ORIGINAL_INTERPRETER_STORAGE')
+  elif (initial in {name for name,_ in parts}
+    or not any(item[0] == 'BOOTSTRAP_PREPARE' and item[1] == initial
+     for item in native['heap_record']['retained'])):
+   raise ValueError('ORDINARY_FIXED_REQUEST_SAME_ONCE_CHARGED_INITIAL_STORAGE')
+  return attempt, layout, parts, retained
+ except BaseException as error:
+  attempt['errors'].append(error)
+  if type(native.get('errors')) is list and all(error is not e for e in native['errors']):
+   native['errors'].append(error)
+  raise
+
+
+def _ordinary_bootstrap_request_finish_v1(owner, attempt, association, extra, retained_extra, producer):
+ try:
+  original = attempt['original']
+  native, stage, request = original[2:5]
+  if (attempt['complete'] or attempt['result'] is not None or attempt['errors']
+    or original[1] is not owner or original[0] is not attempt
+    or original[5] != (os.getpid(), threading.get_ident())
+    or request is not attempt['source_request'] or request[7] is not producer
+    or request[8] is not producer.__code__
+    or not (association is native if stage in ('BOOTSTRAP_PREPARE','BOOTSTRAP_QUERY')
+     else type(association) is tuple and association and association[0] is owner)):
+   raise ValueError('ORDINARY_FIXED_REQUEST_ORIGINAL_RESULT_ASSOCIATION')
+  parts = request[5] + extra
+  retained = request[6] + retained_extra
+  if (type(extra) is not tuple or type(retained_extra) is not tuple
+    or any(type(part) is not tuple or len(part) != 2
+     or type(part[0]) is not str or not part[0]
+     or type(part[1]) is not int or part[1] < 0 for part in parts)
+    or len({name for name,_ in parts}) != len(parts)
+    or len(set(retained)) != len(retained)
+    or any(type(name) is not str or name not in {key for key,_ in parts} for name in retained)):
+   raise ValueError('ORDINARY_FIXED_REQUEST_EXACT_RESULT_COMPONENTS')
+  row = (stage, association, parts, retained, producer)
+  attempt['result'] = row
+  attempt['result_original'] = (row, owner, association, parts, retained,
+   producer, attempt, attempt['errors'], attempt['owner'])
+  attempt['complete'] = True
+  return row
+ except BaseException as error:
+  attempt['errors'].append(error)
+  native = attempt['original'][2]
+  if all(error is not e for e in native['errors']): native['errors'].append(error)
+  raise
+
+
+def _ordinary_bootstrap_heap_prepare_request_v1(native_product, source_request):
+ producer = _ordinary_bootstrap_heap_prepare_request_v1
+ attempt, layout, parts, retained = _ordinary_bootstrap_request_begin_v1(
+  native_product, 'BOOTSTRAP_PREPARE', producer, source_request)
+ try:
+  # The actual fixed Source components include native13, hold18, initial
+  # input/roles, every issuer/capture/ledger record and initialized runtime.
+  return _ordinary_bootstrap_request_finish_v1(native_product, attempt,
+   native_product, (), (), producer)
+ except BaseException as error:
+  _ordinary_bootstrap_request_fail_v1(native_product, attempt, error)
+  raise
+
+
+def _ordinary_bootstrap_query_constructor_request_v1(layout, native_root, receiver):
+ # Query precedes ticket decoding. Its original constructor has no value/name
+ # operand; the full original Scope constructor is funded separately later.
+ from tools.validation_scope_registry import _facet_run_bootstrap_query_constructor_request_v1 as _d
+ return _d(layout, native_root, receiver)
+
+
+def _ordinary_bootstrap_query_request_v1(native_product, source_request, *, native_root):
+ producer = _ordinary_bootstrap_query_request_v1
+ attempt, layout, parts, retained = _ordinary_bootstrap_request_begin_v1(
+  native_product, 'BOOTSTRAP_QUERY', producer, source_request)
+ try:
+  if native_root is not source_request[9] or native_root is not native_product['native_root']:
+   raise ValueError('ORDINARY_FIXED_QUERY_ORIGINAL_NATIVE_ROOT')
+  extra = _ordinary_bootstrap_query_constructor_request_v1(layout, native_root,
+   native_product['role'] == 'RECEIVER')
+  return _ordinary_bootstrap_request_finish_v1(native_product, attempt,
+   native_product, extra, tuple(k for k,_ in extra), producer)
+ except BaseException as error:
+  _ordinary_bootstrap_request_fail_v1(native_product, attempt, error)
+  raise
+
+
+def _ordinary_bootstrap_event_request_v1(acquisition, association, source_request, *, stage, encoded_event):
+ if stage not in ('BOOTSTRAP_EVENT_BASE64','BOOTSTRAP_EVENT_JSON'):
+  raise ValueError('ORDINARY_FIXED_EVENT_STAGE')
+ producer = _ordinary_bootstrap_event_request_v1
+ attempt, layout, parts, retained = _ordinary_bootstrap_request_begin_v1(
+  acquisition, stage, producer, source_request)
+ try:
+  if type(encoded_event) is not str or encoded_event is not source_request[9]:
+   raise ValueError('ORDINARY_FIXED_EVENT_ORIGINAL_ENCODED_INPUT')
+  # All malformed/rejected paths remain funded by fixed Source decoder,
+  # stock/runtime/error parts. This emitter performs no decoding or imports.
+  n = len(encoded_event)
+  if stage == 'BOOTSTRAP_EVENT_BASE64':
+   extra = (('event_ascii_input_bytes', _ordinary_data_bytes_request_v1(layout,n)),
+    ('event_base64_output_bytes', _ordinary_data_bytes_request_v1(layout,3*((n+3)//4))),
+    ('event_strict_decoded_text', _ordinary_data_unicode_request_v1(layout,3*((n+3)//4))))
+  else:
+   # Detailed lexical decoder/retention calculus comes from the unchanged
+   # original fixed Source parts. Its prospective input is this SAME value.
+   extra = (('event_json_source_text',_ordinary_data_unicode_request_v1(layout,n)),)
+  return _ordinary_bootstrap_request_finish_v1(acquisition, attempt, association,
+   extra, tuple(k for k,_ in extra), producer)
+ except BaseException as error:
+  _ordinary_bootstrap_request_fail_v1(acquisition, attempt, error)
+  raise
+
+
+def _ordinary_bootstrap_constructor_request_v1(acquisition, association, source_request, *, value, name, native_root):
+ producer = _ordinary_bootstrap_constructor_request_v1
+ attempt, layout, parts, retained = _ordinary_bootstrap_request_begin_v1(
+  acquisition, 'BOOTSTRAP_SCOPE_CONSTRUCTION', producer, source_request)
+ try:
+  expected = source_request[9]
+  if type(expected) is not tuple or len(expected) != 3 or any(
+    actual is not original for actual,original in zip((value,name,native_root),expected)):
+   raise ValueError('ORDINARY_FIXED_CONSTRUCTOR_ORIGINAL_VALUE_NAME_ROOT')
+  fixed = _ordinary_bootstrap_fixed_constructor_request_v1(layout, value, name,
+   receiver=acquisition['role'] == 'RECEIVER', native_root=native_root)
+  return _ordinary_bootstrap_request_finish_v1(acquisition, attempt, association,
+   fixed['components'], tuple(k for k,_ in fixed['components']), producer)
+ except BaseException as error:
+  _ordinary_bootstrap_request_fail_v1(acquisition, attempt, error)
+  raise
+
+
+def _ordinary_control_tokenize_request_v1(acquisition, association, source_request, *, raw, native_sizes):
+ producer = _ordinary_control_tokenize_request_v1
+ attempt, layout, parts, retained = _ordinary_bootstrap_request_begin_v1(
+  acquisition, 'BEFORE_TOKENIZE', producer, source_request)
+ try:
+  expected = source_request[9]
+  if (type(expected) is not tuple or len(expected) != 2
+    or raw is not expected[0] or native_sizes is not expected[1]):
+   raise ValueError('ORDINARY_FIXED_TOKENIZER_SAME_SOURCE_AND_INITIALIZED_NATIVE_SIZE')
+  extra, held = _ordinary_control_before_tokenize_components_v1(layout, raw, native_sizes)
+  return _ordinary_bootstrap_request_finish_v1(acquisition, attempt, association,
+   extra, held, producer)
+ except BaseException as error:
+  _ordinary_bootstrap_request_fail_v1(acquisition, attempt, error)
+  raise
+
+
+def _ordinary_control_parse_request_v1(acquisition, association, source_request, *, raw, profile):
+ producer = _ordinary_control_parse_request_v1
+ attempt, layout, parts, retained = _ordinary_bootstrap_request_begin_v1(
+  acquisition, 'BEFORE_PARSE', producer, source_request)
+ try:
+  expected = source_request[9]
+  if (type(expected) is not tuple or len(expected) != 3 or raw is not expected[0]
+    or type(expected[1]) is not bytes or raw != expected[1] or profile is not expected[2]):
+   raise ValueError('ORDINARY_FIXED_PARSER_WHOLE_INDEPENDENT_SOURCE_PROFILE')
+  extra, held = _ordinary_control_before_parse_components_v1(layout, raw, profile)
+  return _ordinary_bootstrap_request_finish_v1(acquisition, attempt, association,
+   extra, held, producer)
+ except BaseException as error:
+  _ordinary_bootstrap_request_fail_v1(acquisition, attempt, error)
+  raise
+
+
+def _ordinary_control_compile_request_v1(acquisition, association, source_request, *, installation):
+ producer = _ordinary_control_compile_request_v1
+ attempt, layout, parts, retained = _ordinary_bootstrap_request_begin_v1(
+  acquisition, 'BEFORE_COMPILE', producer, source_request)
+ try:
+  expected = source_request[9]
+  # Both branches retain their original complete Source/profile owner.
+  # Current four-owner Source uses its actual independently bound projection;
+  # the unchanged importlib99 calculator remains the legacy selected branch.
+  if (type(expected) is not tuple or len(expected) != 2
+    or installation is not expected[0]
+    or (installation.get('control_request_profile_original') is not expected[1]
+     and installation['bootstrap_request_profile_original'] is not expected[1])):
+   raise ValueError('ORDINARY_FIXED_COMPILER_ORIGINAL_COMPLETE_PROFILE')
+  if installation.get('control_request_profile_original') is expected[1]:
+   calculation = _ordinary_control_current_staged_request_v1(layout, installation)
+   extra, held = calculation['components'], calculation['retained_names']
+  else:
+   calculation = _ordinary_runtime7_bootstrap_staged_request_v1(layout, installation)
+   extra = (('bootstrap_complete_compile_stage_request', calculation['staged_request']),)
+   held = ('bootstrap_complete_compile_stage_request',)
+  return _ordinary_bootstrap_request_finish_v1(acquisition, attempt, association,
+   extra, held, producer)
+ except BaseException as error:
+  _ordinary_bootstrap_request_fail_v1(acquisition, attempt, error)
+  raise
+
+
+def _ordinary_bootstrap_request_fail_v1(owner, attempt, error):
+ errors = [error]
+ native = owner if attempt.get('stage') in ('BOOTSTRAP_PREPARE','BOOTSTRAP_QUERY') else owner['native_product']
+ old = attempt.get('original')
+ try:
+  if (type(old) is not tuple or len(old) != 7 or old[0] is not attempt
+    or old[1] is not owner or old[2] is not native
+    or old[3] != attempt['stage'] or old[4] is not attempt['source_request']
+    or old[5] != (os.getpid(),threading.get_ident())
+    or old[6] is not attempt['errors']):
+   raise ValueError('ORDINARY_FIXED_REQUEST_ORIGINAL_FAILURE_WITNESS')
+ except BaseException as witness_error:
+  errors.append(witness_error)
+ # A corrupted current witness never discards its retained original list.
+ original_errors = old[6] if type(old) is tuple and len(old) == 7 else None
+ for saved in (original_errors, attempt.get('errors'), native.get('errors')):
+  try:
+   if type(saved) is not list:
+    raise ValueError('ORDINARY_FIXED_REQUEST_ORIGINAL_ERROR_LIST')
+   for failure in tuple(errors):
+    if all(failure is not prior for prior in saved): saved.append(failure)
+  except BaseException as recording_error:
+   if all(recording_error is not prior for prior in errors): errors.append(recording_error)
+ _scan_raise_errors(errors)
+
+
+def _facet_fn_control_current_profile_bind_v1(scope, installation):
+ import tools.validation_reliability as _f
+ # The existing native/source owner supplies receiver-local Input4 originals.
+ # The fixed literal is an existing-module declaration, never a moved pointer.
+ _f._preflight_require_v1(type(scope)is _f._LinuxPreflightScopeV1 and type(installation)is dict
+  and 'control_request_profile_original'not in installation,'CONTROL_ONE_CURRENT_PROFILE_BINDING')
+ native=scope._ordinary_bootstrap_runtime_v1['acquisition']['native_product']
+ generation=native['source_generation']
+ native_input=native['native_input']
+ source_original=generation['original']
+ inputs=generation['protected_inputs']
+ binding=generation['native_input_binding']
+ rows=generation['control_source_originals']
+ preloader=native_input['preloader_source_attempt']
+ source=scope.source
+ old=installation['original']
+ _f._preflight_require_v1(type(source_original)is tuple and len(source_original)==17
+  and source_original[0]is generation and source_original[1]is native_input
+  and type(inputs)is tuple and binding is not None and not generation['errors']
+  and type(preloader)is dict and preloader['native_input']is native_input
+  and preloader['source_generation']is generation and 'control_profile_attempt'not in preloader
+  and type(rows)is list and len(rows)==4 and type(old)is tuple and len(old)==17
+  and old[0]is installation and old[1]is scope and old[2]is installation['install']
+  and old[7]is installation['rows']and old[9]is installation['files']
+  and installation['complete']is True and not installation['errors']
+  and type(source)is _f._LinuxImmutableSourceSealV2 and source.state=='READABLE'
+  and source.failure is None and source._ordinary_meter_scope_v1 is scope,
+  'CONTROL_LOCAL_ORIGINAL_SOURCE_AND_INSTALLATION')
+ attempt=dict(source_generation=generation,source_original=source_original,native_input=native_input,
+  native_input_binding=binding,protected_inputs=inputs,rows=rows,producer=None,producer_code=None,
+  profiles=[],payload=None,result=None,complete=False,errors=[])
+ preloader['control_profile_attempt']=attempt
+ attempt['original']=(attempt,generation,source_original,native_input,binding,inputs,rows,attempt['profiles'],attempt['errors'])
+ try:
+  producer=_f._ordinary_control_current_profile_literals_v1
+  code=producer.__code__
+  attempt['producer']=producer
+  attempt['producer_code']=code
+  payload=producer()
+  attempt['payload']=payload
+  _f._preflight_require_v1(type(payload)is tuple and len(payload)==2
+   and type(payload[0])is tuple and len(payload[0])==4,'CONTROL_FIXED_LOCAL_LITERAL_ROSTER')
+  bindings=[]
+  for record,expected in zip(rows,payload[0]):
+   _f._preflight_require_v1(type(record)is dict and type(expected)is tuple and len(expected)==6
+    and type(expected[0])is str and all(type(n)is int and n>=0 for n in expected[1:5]),
+    'CONTROL_EXACT_LOCAL_SOURCE_PROFILE_ROW')
+   ro=record['original']
+   item=record['input4']
+   raw=record['raw']
+   baseline=record['baseline_raw']
+   key=str(_f.Path(source.root)/('tools/'+expected[0].split('.')[-1]+'.py'))
+   file_row=source.row_index[key]
+   before=file_row['version']
+   post=source.post[key]
+   original=source.originals[key]
+   captured=source.files[key]
+   _f._preflight_require_v1(type(ro)is tuple and len(ro)==10 and ro[0]is record and ro[1]is generation
+    and ro[2]is binding and ro[3]is item and ro[4]is record['source_row']and ro[5]is record['baseline_row']
+    and ro[6]is raw and ro[7]is baseline and ro[8]is record['acquisition']and ro[9]is record['acquisition_original']
+    and type(item)is tuple and len(item)==4 and any(type(pair)is tuple and len(pair)==2 and pair[1]is item for pair in inputs)
+    and record['source_version']is item[1]and record['baseline_version']is item[3]
+    and type(record['module'])is str and record['module']==expected[0]
+    and type(record['filename'])is str and record['filename']==key==item[0]
+    and type(raw)is bytes and type(baseline)is bytes and raw==baseline and len(raw)==expected[1]
+    and record.get('profile')is None and (captured is None or type(captured)is bytes and captured==raw)
+    and file_row['role']=='repository'and file_row['kind']=='file'and file_row['logical_bytes']==len(raw)
+    and type(before)is list and len(before)==11 and type(post)is list and len(post)==11
+    and original['version']is before and any(value is original for value in source.protected)
+    and type(item[1])is tuple and len(item[1])==9
+    and all(type(n)is int for n in before+post)
+    and all(type(n)is int for n in item[1])
+    and tuple(before[i]for i in(0,1,2,7,8,6,3,4,5))==item[1]
+    and all(post[i]==before[i]for i in(0,1,3,4,6,9,10))
+    and post[7]==post[8]==0 and post[2]==(before[2]&~0o777| (0o555 if before[2]&0o111 else 0o444))
+    and (all((key,operation)in source.attempts for operation in('chown','chmod','set-immutable'))
+        or source._keeper_borrow(file_row,operation='profile')),
+    'CONTROL_FULL_LOCAL_INPUT4_AND_COMPLETED_SOURCE_TRANSITION')
+   profile=(record,ro,expected,raw,baseline,producer,code)
+   record['profile']=profile
+   attempt['profiles'].append(profile)
+   bindings.append((record,ro,file_row,post,raw,baseline,expected))
+  fixed=(generation,source_original,rows,tuple(attempt['profiles']),payload,producer,code,attempt)
+  attempt['result']=fixed
+  generation['control_profile_original']=fixed
+  attempt['complete']=True
+  profile=(installation,scope,installation['install'],tuple(bindings),payload,fixed,
+   _f._ordinary_control_current_staged_request_v1)
+  installation['control_request_profile_original']=profile
+  return profile
+ except BaseException as error:
+  attempt['errors'].append(error)
+  if all(error is not old for old in generation['errors']):generation['errors'].append(error)
+  raise
+
+
+def _facet_fn_initial_prefix_v1(native_input):
+ import tools.validation_reliability as _f
+ # A Source ledger precedes Native construction; no physical receipt is made.
+ profile=native_input['initial_source_request']
+ allocation=native_input['early_allocation_original']
+ owner,errors=native_input['owner'],native_input['errors']
+ keys={'work_calls','work_bytes','settlement_calls','settlement_bytes','work_loops','settlement_loops'}
+ _f._preflight_require_v1(owner==(_f.os.getpid(),_f.threading.get_ident())
+  and native_input['early_profile'] is profile and type(allocation)is tuple and len(allocation)==4
+  and allocation[0]is native_input and allocation[1]is profile
+  and type(allocation[2])is dict and type(allocation[3])is dict
+  and set(allocation[2])==set(allocation[3])==keys
+  and all(type(n)is int and n>0 for n in allocation[2].values())
+  and all(type(n)is int and n>=0 for n in allocation[3].values())
+  and profile[8]==allocation[2]['work_calls']+allocation[2]['settlement_calls']
+  and profile[9]==allocation[2]['work_bytes']+allocation[2]['settlement_bytes'],
+  'ORDINARY_INITIAL_SOURCE_PREFIX_ORIGINAL_DISJOINT_ALLOCATION')
+ if 'initial_prefix' not in native_input:
+  _f._ordinary_initial_preloader_return_check_v1(native_input)
+  _f._preflight_require_v1(native_input.get('current_native_observation')is None
+   and all(n==0 for n in allocation[3].values()),'ORDINARY_INITIAL_ONE_UNSPENT_SOURCE_PREFIX')
+  record=dict(native_input=native_input,profile=profile,owner=owner,errors=errors,
+   operations=[],operation_calls=0,returned_bytes=0)
+  native_input['initial_prefix']=record
+  record['prefix_original']=(record,native_input,profile,(allocation,tuple(allocation[2].items())),owner,errors,
+   record['operations'],native_input['preloader_source_anchor'])
+ record=native_input['initial_prefix']
+ _f._preflight_require_v1(type(record)is dict,'ORDINARY_INITIAL_EXACT_SOURCE_PREFIX_RECORD')
+ old=record['prefix_original']
+ _f._preflight_require_v1(type(record)is dict and type(old)is tuple and len(old)==8
+  and type(old[3])is tuple and len(old[3])==2 and old[3][0]is allocation
+  and type(old[3][1])is tuple and old[3][1]==tuple(allocation[2].items())
+  and all(a is b for i,(a,b) in enumerate(zip(old,(record,native_input,profile,allocation,owner,errors,
+   record['operations'],native_input['preloader_source_anchor']))) if i!=3)
+  and record['native_input']is native_input and record['profile']is profile
+  and record['owner']is owner and record['errors']is errors
+  and type(record['operations'])is list and type(record['operation_calls'])is int
+  and record['operation_calls']==allocation[3]['work_calls']+allocation[3]['settlement_calls']
+  and type(record['returned_bytes'])is int
+  and record['returned_bytes']==allocation[3]['work_bytes']+allocation[3]['settlement_bytes'],
+  'ORDINARY_INITIAL_SAME_SOURCE_PREFIX_AND_CONTINUOUS_DEBT')
+ prebind=native_input.get('origin_prebind')
+ if type(prebind)is dict and prebind.get('complete')is True:
+  result=prebind.get('result_original')
+  cuts=prebind.get('cutoffs')
+  request=native_input['original_origin_request']
+  initial=prebind.get('original')
+  _f._preflight_require_v1(type(result)is tuple and len(result)==12
+   and result is native_input.get('origin_prebind_result_original')
+   and result[0]is prebind and result[1]is initial and type(initial)is tuple and len(initial)==16
+   and initial[0]is prebind and initial[1]is native_input and initial[6]is old
+   and initial[7]is owner and initial[8]is errors and initial[13]is record['operations']
+   and all(initial[index+1]is prebind[name] for index,name in enumerate((
+    'native_input','source_return','preloader_source_anchor','preloader_programme_original',
+    'initial_source_request','prefix_original','owner','errors','producer','producer_code',
+    'containing_function','containing_code','operations','slots','reads')))
+   and prebind['source_return']is native_input['preloader_source_return']
+   and prebind['preloader_source_anchor']is native_input['preloader_source_anchor']
+   and prebind['preloader_programme_original']is native_input['preloader_programme_original']
+   and prebind['initial_source_request']is profile
+   and prebind['producer'].__globals__ is _f.__dict__
+   and prebind['producer'].__code__ is prebind['producer_code']
+   and prebind['containing_function']is _f._ordinary_initial_native_object_v1
+   and prebind['containing_code']is _f._ordinary_initial_native_object_v1.__code__
+   and prebind['native_input']is native_input and prebind['prefix_original']is old
+   and prebind['owner']is owner and prebind['errors']is errors
+   and prebind['operations']is record['operations']
+   and result[2]is prebind['operands']is native_input['initial_operands']
+   and result[3]is native_input['initial_operands_original']
+   and result[4]is prebind['actor'] and result[5]is prebind['holder']
+   and result[6]is prebind['root'] and result[7]is prebind['holder_pidfd']
+   and result[8]is prebind['held_cgroups'] and result[9]is cuts
+   and result[10]is request and result[11]is errors
+   and type(cuts)is tuple and len(cuts)==3 and all(type(value)is int for value in cuts)
+   and cuts[0]>0 and cuts[1]==cuts[0]+3600*10**9 and cuts[2]==cuts[0]+3720*10**9
+   and prebind['origin_ns']is cuts[0]is native_input['original_origin_ns']is request['origin_ns']
+   and native_input['original_execution_cutoff_ns']is cuts[1]
+   and native_input['original_settlement_cutoff_ns']is cuts[2]is request['deadline_ns']
+   and request['observation']is prebind and request['ancestor']is prebind['held_cgroups']['ancestor']
+   and prebind['active_operation']is None,
+   'ORDINARY_INITIAL_SAME_COMPLETED_ORIGIN_PREBIND_AND_FROZEN_CUTOFFS')
+ current=native_input.get('current_native_observation')
+ if current is not None:
+  physical=record['original']
+  _f._preflight_require_v1(current is record and type(physical)is tuple and len(physical)==12
+   and all(a is b for a,b in zip(physical,(record,native_input,record['native'],profile,
+    record['operands'],native_input['initial_operands_original'],owner,errors,
+    record['slots'],record['reads'],record['commands'],record['operations'])))
+   and native_input['native_init_returned']is True
+   and type(record['physical_prefix_original'])is tuple and len(record['physical_prefix_original'])==2
+   and record['physical_prefix_original'][0]is old and record['physical_prefix_original'][1]is physical,
+   'ORDINARY_INITIAL_PHYSICAL_OBSERVER_JOINS_ORIGINAL_SOURCE_DEBT')
+ return record
+
+
+
+def _ordinary_bootstrap_initial_source_request_v1(native_input, source_generation,
+  native_generation, startup_source, *, phase):
+ from tools.ci_branch_context import _ordinary_ci_initial_source_request_v1 as _d
+ return _d(native_input,source_generation,native_generation,startup_source,
+  phase=phase,producer=_ordinary_bootstrap_initial_source_request_v1)
+
+
+
+
+def _ordinary_bootstrap_initial_stage_source_request_v1(product, stage):
+ from tools.ci_branch_context import _ordinary_ci_bootstrap_stage_source_request_v1 as _d
+ return _d(sys.modules[__name__],product,stage)
+
+
+if _ORDINARY_ORIGINAL_SCRIPT_ENTRY_V1:
     raise SystemExit(main())
