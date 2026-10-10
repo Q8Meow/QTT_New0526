@@ -19036,6 +19036,200 @@ def test_github_workflow_splits_validation_into_parallel_phase_jobs():
     workflow = _workflow_text()
     shard_block = _workflow_job_block(workflow, "validation_shards")
 
+    # Project complete literal run scalars using the runner's TemplateReader
+    # segmentation/escaping rules. This is a Source/length oracle, not an
+    # expression evaluator or evidence of a GitHub/native execution.
+    def utf16_units(value):
+        return len(value.encode("utf-16-le", "surrogatepass")) // 2
+
+    def literal_run_scalars(job_source):
+        rows = job_source.splitlines(keepends=True)
+        scalars = []
+        for index, row in enumerate(rows):
+            if not row.startswith("        run:"):
+                continue
+            header = row[len("        run:"):].strip().split()
+            if header and header[0].startswith("&"):
+                header = header[1:]
+            if not header or not header[0].startswith("|"):
+                continue
+            assert len(header) == 1 and header[0] in ("|", "|-", "|+")
+            body = []
+            for content_row in rows[index + 1:]:
+                content = content_row.rstrip("\n")
+                assert "\r" not in content
+                if content.strip(" ") and len(content) - len(content.lstrip(" ")) <= 8:
+                    break
+                body.append(content_row)
+            nonempty = [part for part in body if part.rstrip("\n").strip(" ")]
+            indentation = (len(nonempty[0]) - len(nonempty[0].lstrip(" "))
+                if nonempty else 10)
+            assert indentation >= 10
+            decoded = []
+            for part in body:
+                content = part.rstrip("\n")
+                if content.strip(" "):
+                    assert part.startswith(" " * indentation)
+                decoded.append(part[min(indentation, len(content)):])
+            scalar = "".join(decoded)
+            if header[0] == "|-":
+                scalar = scalar.rstrip("\n")
+            elif header[0] == "|" and scalar.endswith("\n"):
+                scalar = scalar.rstrip("\n")
+                if scalar:
+                    scalar += "\n"
+            scalars.append(scalar)
+        return scalars
+
+    def actions_projection(scalar):
+        # .NET String.Trim whitespace; no shell/string-expression evaluation.
+        trim_chars = " \t\n\r\v\f\x85\u00a0\u1680\u2000\u2001\u2002\u2003\u2004\u2005\u2006\u2007\u2008\u2009\u200a\u2028\u2029\u202f\u205f\u3000"
+        segments = []
+        position = 0
+        while position < len(scalar):
+            start = scalar.find("${{", position)
+            if start < 0:
+                segments.append(("literal", scalar[position:]))
+                break
+            if start > position:
+                segments.append(("literal", scalar[position:start]))
+            quoted = False
+            end = start + 3
+            while end < len(scalar):
+                if scalar[end] == "'":
+                    quoted = not quoted
+                elif not quoted and scalar[end] == "}" and scalar[end - 1] == "}":
+                    break
+                end += 1
+            if end == len(scalar):
+                raise ValueError("unclosed Actions expression")
+            expression = scalar[start + 3:end - 1].strip(trim_chars)
+            if not expression:
+                raise ValueError("empty Actions expression")
+            segments.append(("expression", expression))
+            position = end + 1
+        if not segments:
+            return ("literal", scalar, ())
+        expressions = tuple(value for kind, value in segments if kind == "expression")
+        if len(segments) == 1:
+            kind, value = segments[0]
+            if kind == "expression":
+                quoted = False
+                decoded = []
+                string_expression = True
+                for index, character in enumerate(value):
+                    if character == "'":
+                        quoted = not quoted
+                        if quoted and index:
+                            decoded.append(character)
+                    elif not quoted:
+                        string_expression = False
+                        break
+                    else:
+                        decoded.append(character)
+                if string_expression and not quoted:
+                    return ("literal", "".join(decoded), expressions)
+            return (kind, value, expressions)
+        formatted = []
+        arguments = []
+        for kind, value in segments:
+            if kind == "literal":
+                formatted.append(value.replace("'", "''").replace("{", "{{").replace("}", "}}"))
+            else:
+                formatted.append("{" + str(len(arguments)) + "}")
+                arguments.append(value)
+        return ("expression", "format('" + "".join(formatted) + "'" +
+            "".join(", " + value for value in arguments) + ")", expressions)
+
+    def admit_actions_run(scalar):
+        if utf16_units(scalar) > 21000:
+            raise ValueError("raw run exceeds 21000 UTF-16 units")
+        kind, projected, expressions = actions_projection(scalar)
+        if any(utf16_units(expression) > 21000 for expression in expressions):
+            raise ValueError("individual Actions expression exceeds 21000 UTF-16 units")
+        if kind == "expression" and utf16_units(projected) > 21000:
+            raise ValueError("generated Actions expression exceeds 21000 UTF-16 units")
+        return (kind, projected, expressions)
+
+    # Complete decoded blocks include clip/strip/keep and a non-newline EOF.
+    for indicator, expected in (("|", "echo x\n"), ("|-", "echo x"),
+            ("|+", "echo x\n\n\n")):
+        fixture = "        run: " + indicator + "\n          echo x\n\n\n        shell: bash\n"
+        assert literal_run_scalars(fixture) == [expected]
+    assert literal_run_scalars("        run: |\n          echo x") == ["echo x"]
+    assert literal_run_scalars("        run: &fixed |\n          echo x\n") == ["echo x\n"]
+    assert actions_projection("plain ' { } \U0001f680\n") == (
+        "literal", "plain ' { } \U0001f680\n", ())
+    assert actions_projection("${{ matrix.phase }}") == (
+        "expression", "matrix.phase", ("matrix.phase",))
+    assert actions_projection("${{ 'it''s }} { \U0001f680' }}") == (
+        "literal", "it's }} { \U0001f680", ("'it''s }} { \U0001f680'",))
+    assert actions_projection("a'{} \U0001f680 ${{ 'x''}}{y' }} z${{ matrix.phase }}") == (
+        "expression", "format('a''{{}} \U0001f680 {0} z{1}', 'x''}}{y', matrix.phase)",
+        ("'x''}}{y'", "matrix.phase"))
+    assert actions_projection("${{ matrix.phase }}${{ github.event.pull_request.draft && '1' || '0' }}") == (
+        "expression", "format('{0}{1}', matrix.phase, github.event.pull_request.draft && '1' || '0')",
+        ("matrix.phase", "github.event.pull_request.draft && '1' || '0'"))
+    for invalid in ("${{ }}", "${{ matrix.phase", "${{ 'unterminated }}"):
+        with pytest.raises(ValueError):
+            actions_projection(invalid)
+    assert utf16_units("\U0001f680") == 2 and len("\U0001f680") == 1
+    assert admit_actions_run("x" * 21000)[0] == "literal"
+    with pytest.raises(ValueError, match="raw run exceeds 21000"):
+        admit_actions_run("x" * 21001)
+    for seed in ("x ${{ matrix.phase }}", "\U0001f680 ${{ matrix.phase }}"):
+        remaining = 21000 - utf16_units(actions_projection(seed)[1])
+        prefix = ("x" * remaining if seed.startswith("x") else
+            "\U0001f680" * (remaining // 2) + "x" * (remaining % 2))
+        inclusive = prefix + seed
+        assert utf16_units(actions_projection(inclusive)[1]) == 21000
+        assert admit_actions_run(inclusive)[0] == "expression"
+        assert utf16_units(actions_projection(inclusive + "x")[1]) == 21001
+        with pytest.raises(ValueError, match="generated Actions expression exceeds 21000"):
+            admit_actions_run(inclusive + "x")
+
+    # Both new values are in the existing step.env. All seven quoted shell
+    # operands map back exactly; artifact/cache interpolations stay outside run.
+    phase_env = "          QTT_PHASE: ${{ matrix.phase }}\n"
+    draft_env = "          QTT_DRAFT: ${{ github.event.pull_request.draft && '1' || '0' }}\n"
+    assert shard_block.count(phase_env) == shard_block.count(draft_env) == 1
+    reverse_correspondence = (
+        ('[ "${{ matrix.phase }}" != fast-preflight ]', '[ "$QTT_PHASE" != fast-preflight ]'),
+        ("[ \"${{ github.event.pull_request.draft && '1' || '0' }}\" != 1 ]", '[ "$QTT_DRAFT" != 1 ]'),
+        ('qtt_original_birth_v1 - "${{ matrix.phase }}" <<\'QTT_FIXED_ORIGINAL_HOST_SOURCE_V1\'\n',
+            'qtt_original_birth_v1 - "$QTT_PHASE" <<\'QTT_FIXED_ORIGINAL_HOST_SOURCE_V1\'\n'),
+        ('            python -I -B -X utf8 tools/run_validation_gates.py --linux-preflight-provision --phase ${{ matrix.phase }}\n',
+            '            python -I -B -X utf8 tools/run_validation_gates.py --linux-preflight-provision --phase "$QTT_PHASE"\n'),
+        ('          --phase ${{ matrix.phase }} \\\n', '          --phase "$QTT_PHASE" \\\n'),
+        ('          --timing-report .tmp/qtt-validation-timing/${{ matrix.phase }}.json \\\n',
+            '          --timing-report ".tmp/qtt-validation-timing/$QTT_PHASE.json" \\\n'),
+        ('          --router-report .tmp/qtt-validation-router/${{ matrix.phase }}.json\n',
+            '          --router-report ".tmp/qtt-validation-router/$QTT_PHASE.json"\n'),
+    )
+    predecessor = shard_block
+    for before, after in reverse_correspondence:
+        assert predecessor.count(after) == 1 and before not in predecessor
+        predecessor = predecessor.replace(after, before, 1)
+    predecessor = predecessor.replace(phase_env, "", 1).replace(draft_env, "", 1)
+    old_scalars = literal_run_scalars(predecessor)
+    current_scalars = literal_run_scalars(shard_block)
+    assert len(old_scalars) == len(current_scalars) == 2
+    inflated = [scalar for scalar in old_scalars if
+        actions_projection(scalar)[0] == "expression" and
+        utf16_units(actions_projection(scalar)[1]) > 21000]
+    assert len(inflated) == 1
+    assert utf16_units(inflated[0]) == 21000
+    assert utf16_units(actions_projection(inflated[0])[1]) == 21064
+    assert actions_projection(inflated[0])[2] == (
+        "matrix.phase", "github.event.pull_request.draft && '1' || '0'",
+        "matrix.phase", "matrix.phase", "matrix.phase", "matrix.phase", "matrix.phase")
+    with pytest.raises(ValueError, match="generated Actions expression exceeds 21000"):
+        admit_actions_run(inflated[0])
+    assert all("${{" not in scalar for scalar in current_scalars)
+    for scalar in literal_run_scalars(workflow):
+        admit_actions_run(scalar)
+
+
     assert "    timeout-minutes: 90\n" in shard_block
     assert "    strategy:\n" in shard_block
     assert "      fail-fast: false\n" in shard_block
@@ -19067,9 +19261,9 @@ def test_github_workflow_splits_validation_into_parallel_phase_jobs():
     for phase in runner.ORDERED_PHASES:
         assert f"          - phase: {phase}\n" in shard_block
     assert "          - phase: deterministic-validators\n" not in shard_block
-    assert "--phase ${{ matrix.phase }}" in shard_block
-    assert "--timing-report .tmp/qtt-validation-timing/${{ matrix.phase }}.json" in shard_block
-    assert "--router-report .tmp/qtt-validation-router/${{ matrix.phase }}.json" in shard_block
+    assert '--phase "$QTT_PHASE"' in shard_block
+    assert '--timing-report ".tmp/qtt-validation-timing/$QTT_PHASE.json"' in shard_block
+    assert '--router-report ".tmp/qtt-validation-router/$QTT_PHASE.json"' in shard_block
     assert "uses: actions/upload-artifact@v4" in shard_block
     assert "validation-timing-${{ matrix.phase }}" in shard_block
     assert "validation-router-${{ matrix.phase }}" in shard_block
@@ -19098,7 +19292,7 @@ def test_github_workflow_splits_validation_into_parallel_phase_jobs():
     )
     assert shard_block.count(eligibility) == 1
     assert shard_block.count("          QTT_PR298_NATIVE_ELIGIBLE:") == 1
-    assert "            python -I -B -X utf8 tools/run_validation_gates.py --linux-preflight-provision --phase ${{ matrix.phase }}\n" in shard_block
+    assert '            python -I -B -X utf8 tools/run_validation_gates.py --linux-preflight-provision --phase "$QTT_PHASE"\n' in shard_block
     assert "          if [ \"$QTT_PR298_NATIVE_ELIGIBLE\" = \"1\" ]\n" in shard_block
 
     # These are source/control-flow and explicit no-child fault oracles. They
@@ -19108,7 +19302,7 @@ def test_github_workflow_splits_validation_into_parallel_phase_jobs():
     import copy
     import textwrap
 
-    opening = 'qtt_original_birth_v1 - "${{ matrix.phase }}" <<\'QTT_FIXED_ORIGINAL_HOST_SOURCE_V1\'\n'
+    opening = 'qtt_original_birth_v1 - "$QTT_PHASE" <<\'QTT_FIXED_ORIGINAL_HOST_SOURCE_V1\'\n'
     frontend_text = textwrap.dedent(shard_block.split(opening, 1)[1].split(
         "          QTT_FIXED_ORIGINAL_HOST_SOURCE_V1\n", 1)[0])
     frontend_tree = ast.parse(frontend_text)

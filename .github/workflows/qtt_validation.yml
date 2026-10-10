@@ -982,11 +982,13 @@ jobs:
         id: validation_run
         env:
           QTT_PR298_NATIVE_ELIGIBLE: ${{ ((github.event_name == 'pull_request' && github.repository == 'Q8Meow/QTT_New0526' && github.event.pull_request.number == 298 && github.event.pull_request.head.repo.full_name == 'Q8Meow/QTT_New0526' && github.event.pull_request.base.repo.full_name == 'Q8Meow/QTT_New0526' && github.event.pull_request.base.ref == 'main' && github.event.pull_request.head.ref == 'repair/main-cumulative-v35-final-r5-local-20260922') || (github.repository == 'Q8Meow/QTT_New0526' && github.ref == 'refs/heads/main' && github.ref_name == 'main' && github.head_ref == '' && github.base_ref == '' && (github.event_name == 'push' && github.event.ref == github.ref && github.event.after == github.sha && github.event.deleted == false || github.event_name == 'workflow_dispatch' && (github.event.ref == 'main' || github.event.ref == github.ref) && (github.event.inputs.full_validation == 'true' || github.event.inputs.full_validation == 'false')))) && '1' || '0' }}
+          QTT_PHASE: ${{ matrix.phase }}
+          QTT_DRAFT: ${{ github.event.pull_request.draft && '1' || '0' }}
           # This original trusted interpreter startup precedes the kernel timer;
           # the timer does not claim to certify sudo/interpreter startup retroactively.
           # Previous unselected failure is preserved in the top-level Source history.
         run: |
-          if [ "$QTT_PR298_NATIVE_ELIGIBLE" = 1 ] && { [ "${{ matrix.phase }}" != fast-preflight ] || [ "${{ github.event.pull_request.draft && '1' || '0' }}" != 1 ]
+          if [ "$QTT_PR298_NATIVE_ELIGIBLE" = 1 ] && { [ "$QTT_PHASE" != fast-preflight ] || [ "$QTT_DRAFT" != 1 ]
           }
           then
           qtt_original_birth_v1() {
@@ -1040,7 +1042,7 @@ jobs:
           wait "$I"||J=$?
           return "$J"
           }
-          qtt_original_birth_v1 - "${{ matrix.phase }}" <<'QTT_FIXED_ORIGINAL_HOST_SOURCE_V1'
+          qtt_original_birth_v1 - "$QTT_PHASE" <<'QTT_FIXED_ORIGINAL_HOST_SOURCE_V1'
           import os,stat,sys,time,signal,select,struct,errno,ctypes
           def _qtt_original_front_v1():
            jP=BaseException
@@ -1482,12 +1484,12 @@ jobs:
           else
           if [ "$QTT_PR298_NATIVE_ELIGIBLE" = "1" ]
           then
-            python -I -B -X utf8 tools/run_validation_gates.py --linux-preflight-provision --phase ${{ matrix.phase }}
+            python -I -B -X utf8 tools/run_validation_gates.py --linux-preflight-provision --phase "$QTT_PHASE"
           else
           python -B tools/run_validation_gates.py \
-          --phase ${{ matrix.phase }} \
-          --timing-report .tmp/qtt-validation-timing/${{ matrix.phase }}.json \
-          --router-report .tmp/qtt-validation-router/${{ matrix.phase }}.json
+          --phase "$QTT_PHASE" \
+          --timing-report ".tmp/qtt-validation-timing/$QTT_PHASE.json" \
+          --router-report ".tmp/qtt-validation-router/$QTT_PHASE.json"
           fi
           fi
       - name: Preserve PR298 native evidence
