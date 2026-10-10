@@ -398,6 +398,8 @@ def _command_requires_process_retention_v1(receipt: object) -> bool:
         return True
     if state == "NOT_REQUIRED":
         return receipt.timeout_state == "TRIGGERED"
+    if state == "OWNED_SYSTEMD_KILL;PIDFD_TERMINAL;HELD_SLICE_EMPTY":
+        return receipt.platform != "posix" or receipt.failure_class is None
     # Only the original termination owner's ordered action grammar is terminal.
     # The final token is exact: PROVEN is also a substring of UNPROVEN.
     tokens = state.split(";")
@@ -2410,8 +2412,10 @@ def classify_repository_changes(
         baseline,
         status_paths=status_paths,
     )
+    from tools.ci_branch_context import _custody_only_stat_paths_v1
+    custody_only = _custody_only_stat_paths_v1(root, stat_reported_paths)
     for path in stat_reported_paths:
-        states.setdefault(path, "EXISTING")
+        if path not in custody_only: states.setdefault(path, "EXISTING")
     for path in include_paths:
         states.setdefault(normalize_repo_path(path), "EXISTING")
     records: list[GitPathIntegrityV1] = []
@@ -15496,7 +15500,8 @@ class _PreflightNativeInputV1:
         return bool(self._initializing_v1 or self._consume_active_v1
             or self._declaration_acquisition_v1 is not None or self._declaration_record_v1 is not None
             or self._declaration_original_binding_v1 is not None or self._declaration_release_binding_v1 is not None
-            or self._declaration_raw_handle_owner_v1 is not None or self._declaration_settlement_error_v1 is not None)
+            or self._declaration_raw_handle_owner_v1 is not None or self._declaration_settlement_error_v1 is not None
+            or getattr(self, '_custody_stat_basis_v1', None) is not None)
 
     def _settle_resources_v1(self):
         _preflight_require_v1((os.getpid(), threading.get_ident()) == (self.pid, self.thread),
@@ -18158,6 +18163,7 @@ def _linux_source_manifest_v2(value):
     _preflight_require_v1(type(value['source_root_identity']) is list and len(value['source_root_identity'])==2,
         'LINUX_V2_ROOT_IDENTITY')
     for v in value['source_root_identity']: _preflight_integer_v1(v)
+    from tools.ci_branch_context import _custody_original_file_metadata_v1 as check
     files,dirs={},{}
     names=set();rosters={};identities=set()
     for key,target,directory in (('files',files,False),('directories',dirs,True)):
@@ -18165,7 +18171,7 @@ def _linux_source_manifest_v2(value):
         _preflight_require_v1(type(rows) is list and len(rows)<=100000, 'LINUX_V2_CATALOG_ARRAY')
         order=[]
         for row in rows:
-            _preflight_require_v1(type(row) is list and len(row)==(13 if directory else 12), 'LINUX_V2_CATALOG_ROW')
+            _preflight_require_v1(type(row) is list and len(row) in ((13,) if directory else (12,13)), 'LINUX_V2_CATALOG_ROW')
             name=_preflight_relative_v1(row[0],directory=directory)
             _preflight_require_v1(len(str(root/name).encode('utf-8'))<=4096 and
                 (0 if name=='.' else len(name.split('/')))<=64, 'LINUX_V2_CATALOG_PATH_BOUND')
@@ -18180,6 +18186,7 @@ def _linux_source_manifest_v2(value):
             _preflight_require_v1((stat.S_ISDIR(row[7]) if directory else stat.S_ISREG(row[7]) and row[10]==1)
                 and row[8]==row[9]==0 and not row[7]&0o222 and row[11]&0x10 and row[11]<=0xffffffff,
                 'LINUX_V2_CATALOG_PROTECTION')
+            if not directory and len(row)==13: check(row[12],row[:12])
             target[name]=tuple(row[:12])
             if directory:
                 rosters[name]=_preflight_rosters_v1([[name,row[12]]])[name]
@@ -18277,6 +18284,7 @@ class _LinuxImmutableSourceBasisV2:
                 limits = dict(lexical_units=32 * 1024 ** 2, depth=64, quoted_bytes=32 * 1024 ** 2)
                 value, _ = _preflight_json_v1(self.raw, limits, lambda: _preflight_require_v1(time.monotonic_ns() < self.deadline_ns, 'LINUX_V2_PARSE_DEADLINE'))
                 self.files, self.directory_records, self.directories, count = _linux_source_manifest_v2(value)
+                self.original_files = {r[0]:tuple(r[12]) for r in value['files'] if len(r)==13}
                 _preflight_require_v1(value['repository_root'] == str(self.root) and value['index_path'] == str(lease.index) and (value['run_id'] == run_id) and (count == descriptor['catalog_entry_count']) and (value['source_generation_ns'] <= time.monotonic_ns()), 'LINUX_V2_MANIFEST_RUN_BINDING')
                 self.count = count
                 self.state = 'IN_USE'
@@ -19570,6 +19578,7 @@ class _LinuxImmutableSourceSealV2:
                 item.append([list(v) for v in self.directories[str(path_value)]])
                 dirs.append(item)
             else:
+                item.append([*self.originals[str(path_value)]['version'],self.original_flags[str(path_value)]])
                 files.append(item)
         files.sort(key=lambda r: r[0].encode('utf-8'))
         dirs.sort(key=lambda r: r[0].encode('utf-8'))

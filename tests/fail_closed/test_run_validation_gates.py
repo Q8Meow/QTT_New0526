@@ -1150,6 +1150,68 @@ def _assert_exact_stat_command_boundary(monkeypatch, tmp_path: Path) -> None:
         "exact-stat.py",
     )
 
+    # Custody provenance must never hide a genuine original cache miss.
+    before = (1, 2, 0o100644, 5, 1000000100, 2000000123, 1, 1000, 1000, 0, 0, 0)
+    held = ('custody.py', 'WORKTREE', 1, 2, 5, before[4], 3000000000,
+            0o100444, 0, 0, 1, 16)
+    cached = (0o100644, '1' * 40, 0, before[5], before[4], 1, 2, 1000, 1000, 5, 0)
+    clean = ci_branch_context._custody_original_cache_clean_v1
+    assert clean(cached, before, held, 4000000000)
+    for slot in (3, 4, 5, 6, 7, 8, 9):
+        changed = list(cached); changed[slot] += 1
+        assert not clean(tuple(changed), before, held, 4000000000)
+    for flag in (0x8000, 0x200000, 0x20000000, 0x40000000, 0x80000000):
+        assert not clean((*cached[:-1], flag), before, held, 4000000000)
+    assert not clean((*cached[:2], 1, *cached[3:]), before, held, 4000000000)
+    assert not clean(cached, before, held, 1000000999)
+    original_edit = list(before); original_edit[5] += 1
+    assert not clean(cached, tuple(original_edit), held, 4000000000)
+    executable = list(before); executable[2] = 0o100654
+    changed_mode = list(held); changed_mode[7] = 0o100555
+    assert not clean(cached, tuple(executable), tuple(changed_mode), 4000000000)
+    borrowed = list(before); borrowed[2] = 0o100444; borrowed[7:9] = [0, 0]; borrowed[11] = 16
+    borrowed_held = list(held); borrowed_held[6] = borrowed[5]
+    borrowed_cache = list(cached); borrowed_cache[7:9] = [0, 0]
+    assert not clean(tuple(borrowed_cache), tuple(borrowed), tuple(borrowed_held), 4000000000)
+    four_gib = list(before); four_gib[3] = 1 << 32
+    large_held = list(held); large_held[4] = 1 << 32
+    assert clean((*cached[:9], 0x80000000, 0), tuple(four_gib), tuple(large_held), 4000000000)
+    assert not clean((*cached[:9], 0, 0), tuple(four_gib), tuple(large_held), 4000000000)
+    wire = ('100644 ' + '1' * 40 + ' 0\tcustody.py\0'
+            '  ctime: 2:123\n  mtime: 1:100\n  dev: 1\tino: 2\n'
+            '  uid: 1000\tgid: 1000\n  size: 5\tflags: 0\n')
+    parse = ci_branch_context._custody_git_debug_rows_v1
+    assert parse(wire, ('custody.py',)) == {'custody.py': [cached]}
+    assert parse('', ('custody.py',)) == {}
+    assert len(parse(wire + wire.replace(' 0\t', ' 1\t', 1), ('custody.py',))['custody.py']) == 2
+    for bad in (wire[:-1], wire + 'trailing', wire + wire):
+        with pytest.raises(ValueError):
+            parse(bad, ('custody.py',))
+    with pytest.raises(ValueError):
+        parse(wire, ('different.py',))
+    invalid_held = list(held); invalid_held[3] += 1
+    with pytest.raises(ValueError):
+        clean(cached, before, tuple(invalid_held), 4000000000)
+    # The raw Git tuple stays intact; separate semantic unions always win.
+    raw_stat = ('custody.py', 'dirty.py', 'baseline.py', 'explicit.py')
+    with monkeypatch.context() as patch:
+        patch.setattr(reliability, '_worktree_index_stat_paths', lambda root: raw_stat)
+        patch.setattr(reliability, '_status_paths', lambda root: ('dirty.py',))
+        patch.setattr(reliability, '_diff_path_states',
+                      lambda root, baseline, status_paths: {'dirty.py': 'EXISTING', 'baseline.py': 'EXISTING'})
+        patch.setattr(ci_branch_context, '_custody_only_stat_paths_v1', lambda root, paths: frozenset(raw_stat))
+        patch.setattr(reliability, '_git_blob_source', lambda *args: None)
+        patch.setattr(reliability, '_git_exact_path_modes', lambda *args: (None, None))
+        patch.setattr(reliability, '_resolve_no_follow_worktree_surface',
+                      lambda path: SimpleNamespace(source=None, kind='ABSENT'))
+        patch.setattr(reliability, '_git_attributes', lambda *args: (None, None))
+        patch.setattr(reliability, '_git_exact_path_status_state', lambda *args: 'CLEAN')
+        patch.setattr(reliability, '_git_exact_path_diff_state', lambda *args, **kwargs: 'CLEAN')
+        patch.setattr(reliability, '_classify_stream_surfaces', lambda **kwargs: SimpleNamespace(path=kwargs['path']))
+        retained = reliability.classify_repository_changes(tmp_path, baseline_ref='HEAD', include_paths=('explicit.py',))
+        assert tuple(row.path for row in retained) == ('baseline.py', 'dirty.py', 'explicit.py')
+        assert reliability._worktree_index_stat_paths(tmp_path) is raw_stat
+
 
 def _env_without_pythonpath() -> dict[str, str]:
     env = os.environ.copy()
@@ -19207,6 +19269,18 @@ def test_github_workflow_splits_validation_into_parallel_phase_jobs():
             '          --router-report ".tmp/qtt-validation-router/$QTT_PHASE.json"\n'),
     )
     predecessor = shard_block
+
+    # Undo only the later diagnostic Source correspondence for the authentic
+    # Source37 negative fixture; retain its original 21000/21064 assertions.
+    for original, observed in (
+            ('           if l[qY]<3:raise jQ("original held3 unavailable before first host effect")\n', '           if l[qY]<3 or l[jW]<2:raise jQ("held3 or diagnostic unavailable")\n'),
+            ('           l[qY]-=3\n', '           l[qY]-=3\n           l[jW]-=2\n'),
+            ('            if jC is None or d[0][2]is None or d[0][2]<jC:\n', '            if jC is None or d[0][2]is None or d[0][2]<jC:\n             try:\n              if os.write(2,b"::error::F\\n")!=11:raise jQ()\n             except jP as z:b[qC]+=[(qR,z)]\n'),
+            ('           a[qI]=[201061114,0,None]\n', '           a[qI]=[201061050,64,None]\n'),
+            ('           jY=\'watchdog-no-child-delete\'\n           qA="commands"\n', '           qA="commands"\n'),
+    ):
+        assert predecessor.count(observed) == 1
+        predecessor = predecessor.replace(observed, original, 1)
     for before, after in reverse_correspondence:
         assert predecessor.count(after) == 1 and before not in predecessor
         predecessor = predecessor.replace(after, before, 1)
@@ -19690,6 +19764,112 @@ def test_github_workflow_splits_validation_into_parallel_phase_jobs():
             assert all(item["attempted"] and item["error"] is None for item in effects)
             assert early["names"] is wanted and early["roster"] == b"".join(name + b"\n" for name in wanted)
 
+
+
+    # The selected hold owners publish only bounded Source literals. These
+    # ports exercise the actual nested definitions without a timer, syscall,
+    # managed child, native scope, or real stderr write.
+    host_function = next(node for node in host_tree.body
+        if isinstance(node, ast.FunctionDef) and node.name == "_qtt_original_host_source_v1")
+    host_failure = next(node for node in host_function.body
+        if isinstance(node, ast.FunctionDef) and node.name == "failure")
+    custodian_failure = next(node for node in ast.walk(host_tree)
+        if isinstance(node, ast.FunctionDef) and node.name == "_qtt_custodian_failure_v1")
+    held_owners = (("FRONT", members["failure"]), ("HOST", host_failure),
+        ("CUSTODIAN", custodian_failure))
+    reservation_source = ast.unparse(front_function)
+    assert "l[qY] < 3 or l[jW] < 2" in reservation_source
+    assert reservation_source.index("l[jW] -= 2") < reservation_source.index("p[qX] = True")
+    assert "[201061050, 64, None]" in reservation_source
+    assert 201061050 + 64 == 201061114
+    literal_error_owner = next(node for node in ast.walk(host_tree)
+        if isinstance(node, ast.FunctionDef) and node.name == "F")
+    assert ast.unparse(literal_error_owner) == "def F(name):\n    raise RuntimeError(name)"
+    assert any(isinstance(node, ast.Call) and isinstance(node.func, ast.Name)
+        and node.func.id == "F" and len(node.args) == 1
+        and isinstance(node.args[0], ast.Constant) and node.args[0].value == "B18"
+        for node in ast.walk(host_tree))
+    for stage, owner in held_owners:
+        writes = [node for node in ast.walk(owner) if isinstance(node, ast.Call)
+            and isinstance(node.func, ast.Attribute) and isinstance(node.func.value, ast.Name)
+            and node.func.value.id == "os" and node.func.attr == "write"]
+        assert len(writes) == 1 and isinstance(writes[0].args[0], ast.Constant) and writes[0].args[0].value == 2
+        message_node = writes[0].args[1]
+        if stage != "FRONT":
+            message_node = next(node.value for node in ast.walk(owner)
+                if isinstance(node, ast.Assign) and any(isinstance(target, ast.Name)
+                    and target.id == "diagnostic" for target in node.targets))
+        literals = [node.value for node in ast.walk(message_node)
+            if isinstance(node, ast.Constant) and type(node.value) is bytes]
+        expected_literals = ([b"::error::F\n"] if stage == "FRONT" else
+            [("::error::" + stage + ":B18\n").encode("ascii"), ("::error::" + stage + ":UNLISTED\n").encode("ascii")])
+        assert literals == expected_literals and all(0 < len(value) <= 64 for value in literals)
+        assert not any(isinstance(node, ast.Call) and
+            not (isinstance(node.func, ast.Name) and node.func.id in ("type", "len"))
+            for node in ast.walk(message_node))
+        for mode, expired, listed, optimization in ((mode, expired, listed, optimization)
+                for optimization in (0, 2)
+                for mode, expired, listed in (("complete", False, True), ("short", False, True), ("zero", False, True),
+                ("error", False, True), ("complete", True, True),
+                ("complete", False, False), ("wrong-type", False, True), ("non-str", False, True))):
+            cause = (OSError("B18") if mode == "wrong-type" else
+                RuntimeError(type("PrivateCode", (str,), {})("B18") if mode == "non-str" else
+                    "B18" if listed else "unselected private diagnostic"))
+            write_fault = OSError("synthetic output failure")
+            events, errors = [], []
+            held = {"kill_self": False, "reserved": True, "error": None, "operations": []}
+            state = {"closed": False, "custodian_effect_attempted": True, "commands": [object()],
+                "errors": errors, "failure_cutoff": 10}
+            retained_host = {"retired": False, "errors": errors}
+            def held_write(fd, message):
+                events.append(("write", fd, message))
+                if mode == "error":
+                    raise write_fault
+                return 0 if mode == "zero" else 1 if mode == "short" else len(message)
+            def held_clock(_clock):
+                events.append(("clock",))
+                return 10 if expired else 1
+            def held_pid():
+                events.append(("pid",))
+                return 17
+            def held_stop(pid, chosen_signal):
+                events.append(("stop", pid, chosen_signal))
+            ports = {"os": SimpleNamespace(write=held_write, getpid=held_pid, kill=held_stop),
+                "time": SimpleNamespace(CLOCK_MONOTONIC=1, clock_gettime_ns=held_clock),
+                "signal": SimpleNamespace(SIGSTOP=19), "state": state, "host": retained_host,
+                "failure_hold": held, "held": held, "a": state, "b": retained_host, "p": held,
+                "w": {"armed": True}, "jP": BaseException, "jQ": RuntimeError,
+                "qA": "commands", "qB": "custodian_effect_attempted", "qC": "errors",
+                "qM": "kill_self", "qX": "reserved", "qR": "error", "qE": "operations",
+                "qT": "failure_cutoff"}
+            isolated = ast.Module(body=[copy.deepcopy(owner)], type_ignores=[])
+            exec(compile(ast.fix_missing_locations(isolated), "<workflow-held-diagnostic-no-child>", "exec",
+                optimize=optimization), ports)
+            selected_failure = ports[owner.name]
+            with pytest.raises(RuntimeError) as raised:
+                selected_failure(cause)
+            assert raised.value.__cause__ is cause and held["error"] is cause and held["kill_self"]
+            assert not retained_host["retired"] and not state["closed"] and held["reserved"]
+            assert len(held["operations"]) == 3 and held["operations"][0][1]
+            if expired:
+                assert events == [("clock",)] and errors == []
+                assert not held["operations"][1][1] and not held["operations"][2][1]
+            else:
+                message = (b"::error::F\n" if stage == "FRONT" else
+                    ("::error::" + stage + (":B18\n" if listed and mode not in ("wrong-type", "non-str") else ":UNLISTED\n")).encode("ascii"))
+                assert events == [("clock",), ("write", 2, message), ("pid",), ("stop", 17, 19)]
+                assert held["operations"][1][1] and held["operations"][2][1]
+                if mode in ("short", "zero"):
+                    assert len(errors) == 1 and errors[0][0] == ("error" if stage == "FRONT" else "held-output")
+                    assert type(errors[0][1]) is RuntimeError
+                else:
+                    assert errors == ([("error" if stage == "FRONT" else "held-output", write_fault)]
+                        if mode == "error" else [])
+                assert b"private" not in message
+            prior_events = list(events)
+            with pytest.raises(type(cause)) as repeated:
+                selected_failure(cause)
+            assert repeated.value is cause and events == prior_events
 
     # Inspect the actual three controller Source literals and protected frame.
     # These DATA projections do not create a holder or qualify Linux startup.
@@ -20418,6 +20598,41 @@ def _assert_process_supervision_contract(monkeypatch, tmp_path: Path) -> None:
                               "TASKKILL_T:00;TERMINAL:PROVEN"):
             assert reliability._command_requires_process_retention_v1(
                 replace(proven, termination_state=invalid_state)) is True
+    systemd_state = "OWNED_SYSTEMD_KILL;PIDFD_TERMINAL;HELD_SLICE_EMPTY"
+    systemd_terminal = replace(timeout_receipt, platform="posix", native_exit_code=-9,
+                               termination_state=systemd_state)
+    assert reliability._command_requires_process_retention_v1(systemd_terminal) is False
+    assert (systemd_terminal.failure_class, systemd_terminal.timeout_state,
+            systemd_terminal.native_exit_code) == ("ENGVR_PROCESS_TIMEOUT", "TRIGGERED", -9)
+    for invalid_state in (
+        "OWNED_SYSTEMD_KILL", "OWNED_SYSTEMD_KILL;PIDFD_TERMINAL",
+        "OWNED_SYSTEMD_KILL;SETTLEMENT_UNRESOLVED",
+        "OWNED_SYSTEMD_KILL;PIDFD_TERMINAL;HELD_SLICE_NONEMPTY",
+        "OWNED_SYSTEMD_KILL;PIDFD_PENDING;HELD_SLICE_EMPTY",
+        "PIDFD_TERMINAL;OWNED_SYSTEMD_KILL;HELD_SLICE_EMPTY",
+        "OWNED_SYSTEMD_KILL;PIDFD_TERMINAL;HELD_SLICE_EMPTY;TERMINAL:UNPROVEN",
+        systemd_state + ";", " " + systemd_state, systemd_state.lower(),
+    ):
+        assert reliability._command_requires_process_retention_v1(
+            replace(systemd_terminal, termination_state=invalid_state)) is True
+    for field, value in (
+        ("platform", "nt"), ("platform", "POSIX"), ("platform", None),
+        ("failure_class", None), ("failure_class", "ENGVR_PROCESS_TERMINATION_FAILED"),
+        ("failure_class", "ENGVR_PROCESS_START_FAILED"), ("start_failure_class", "OSError"),
+        ("timeout_state", "NOT_TRIGGERED"), ("native_exit_code", None),
+        ("native_exit_code", True), ("pid", None), ("pid", True),
+        ("schema_version", True), ("argv", list(systemd_terminal.argv)),
+    ):
+        malformed = copy(systemd_terminal)
+        object.__setattr__(malformed, field, value)
+        assert reliability._command_requires_process_retention_v1(malformed) is True
+    incomplete_systemd = replace(systemd_terminal, output_observation={
+        "stdout": {"complete": False}, "stderr": {"complete": False}})
+    assert reliability._command_requires_process_retention_v1(incomplete_systemd) is False
+    assert incomplete_systemd.failure_class == "ENGVR_PROCESS_TIMEOUT"
+    assert not (incomplete_systemd.output_observation["stdout"]["complete"]
+                or incomplete_systemd.output_observation["stderr"]["complete"])
+
     for field, value in (("start_failure_class", None), ("start_failure_class", ""),
                          ("native_exit_code", 0), ("timeout_state", "TRIGGERED"),
                          ("failure_class", "ENGVR_ATOMIC_RECEIPT_WRITE_FAILED")):

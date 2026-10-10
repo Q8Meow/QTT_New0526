@@ -1054,7 +1054,6 @@ jobs:
            jV='armed'
            jW='settle'
            jX='delete_attempted'
-           jY='watchdog-no-child-delete'
            qA="commands"
            qB="custodian_effect_attempted"
            qC="errors"
@@ -1113,8 +1112,9 @@ jobs:
            p={qM:False,qX:False,qR:None,qE:[]}
            a["failure_hold"]=p
            a[qB]=False
-           if l[qY]<3:raise jQ("original held3 unavailable before first host effect")
+           if l[qY]<3 or l[jW]<2:raise jQ("held3 or diagnostic unavailable")
            l[qY]-=3
+           l[jW]-=2
            p[qX]=True
            def failure(cause):
             if b["retired"]or not a[qB]:raise cause
@@ -1140,6 +1140,9 @@ jobs:
              a[qC].append(("first-host-held-clock",jD))
             jC=a.get(qT)
             if jC is None or d[0][2]is None or d[0][2]<jC:
+             try:
+              if os.write(2,b"::error::F\n")!=11:raise jQ()
+             except jP as z:b[qC]+=[(qR,z)]
              try:
               d[1][1]=True
               d[1][2]=os.getpid()
@@ -1203,7 +1206,7 @@ jobs:
              raise jQ("original one-shot deadline readback changed")
             return jE
            def version(s):return(s.st_dev,s.st_ino,s.st_mode,s.st_uid,s.st_gid,s.st_nlink,s.st_size,s.st_mtime_ns,s.st_ctime_ns)
-           a[qI]=[201061114,0,None]
+           a[qI]=[201061050,64,None]
            d=[]
            def opened(name,*args,**kw):
             row=[name,None,False,None]
@@ -1639,6 +1642,10 @@ jobs:
 # QTT_HOST_PY |   except BaseException as error:rows[0][3]=error;state["errors"].append(("first-host-held-clock",error))
 # QTT_HOST_PY |   cutoff=state.get("failure_cutoff")
 # QTT_HOST_PY |   if cutoff is None or rows[0][2]is None or rows[0][2]<cutoff:
+# QTT_HOST_PY |    diagnostic=b"::error::HOST:B18\n"if type(cause)is RuntimeError and len(cause.args)==1 and type(cause.args[0])is str and cause.args[0]=="B18"else b"::error::HOST:UNLISTED\n"
+# QTT_HOST_PY |    try:
+# QTT_HOST_PY |     if os.write(2,diagnostic)!=len(diagnostic):raise RuntimeError()
+# QTT_HOST_PY |    except BaseException as error:host["errors"].append(("held-output",error))
 # QTT_HOST_PY |    try:
 # QTT_HOST_PY |     rows[1][1]=True;rows[1][2]=os.getpid()
 # QTT_HOST_PY |     rows[2][1]=True;rows[2][2]=os.kill(rows[1][2],signal.SIGSTOP)
@@ -1954,7 +1961,12 @@ jobs:
 # QTT_HOST_PY |    _0R=["original-held-clock",False,None,None];_1M=["original-held-PID",False,None,None];_1r=["original-held-STOP",False,None,None];held["operations"].extend((_0R,_1M,_1r))
 # QTT_HOST_PY |    try:
 # QTT_HOST_PY |     _0R[1]=True;_0R[2]=time.clock_gettime_ns(time.CLOCK_MONOTONIC);limit=state["failure_cutoff"]
-# QTT_HOST_PY |     if _0R[2]<limit:_1M[1]=True;_1M[2]=os.getpid();_1r[1]=True;_1r[2]=os.kill(_1M[2],signal.SIGSTOP)
+# QTT_HOST_PY |     if _0R[2]<limit:
+# QTT_HOST_PY |      diagnostic=b"::error::CUSTODIAN:B18\n"if type(cause)is RuntimeError and len(cause.args)==1 and type(cause.args[0])is str and cause.args[0]=="B18"else b"::error::CUSTODIAN:UNLISTED\n"
+# QTT_HOST_PY |      try:
+# QTT_HOST_PY |       if os.write(2,diagnostic)!=len(diagnostic):raise RuntimeError()
+# QTT_HOST_PY |      except BaseException as error:state["errors"].append(("held-output",error))
+# QTT_HOST_PY |      _1M[1]=True;_1M[2]=os.getpid();_1r[1]=True;_1r[2]=os.kill(_1M[2],signal.SIGSTOP)
 # QTT_HOST_PY |    except BaseException as ex:row=_1r if _1r[1]else _1M if _1M[1]else _0R;row[3]=ex;state["errors"].append(("original-custodian-held-action",ex));raise RuntimeError("original custodian failure-hold outcome incomplete")from ex
 # QTT_HOST_PY |    raise RuntimeError("original custodian retained failure; timed host custody required")from cause
 # QTT_HOST_PY |   def extract(raw):
@@ -2534,7 +2546,7 @@ jobs:
 # QTT_HOST_PY |     def U(n,c):return 68*n+4*c
 # QTT_HOST_PY |     def T(n,s):return 48*n+8*s
 # QTT_HOST_PY |     def L(n,s):return 56*n+16*(s+s//8+6*n)
-# QTT_HOST_PY |     initializer=5125424+21625000+U(7,7*extent)+T(1,parent_path_count);initializer+=6*(U(67,3*extent)+L(2,130)+T(1,65));initializer+=672+T(1,8)+2*T(1,9)+2*T(1,parent_path_count)+24;return(2361360383,301158970,32860047,initializer,1802350,241543444,18356704,1814632,1980516)
+# QTT_HOST_PY |     initializer=5125424+21625000+U(7,7*extent)+T(1,parent_path_count);initializer+=6*(U(67,3*extent)+L(2,130)+T(1,65));initializer+=672+T(1,8)+2*T(1,9)+2*T(1,parent_path_count)+24;return(2368680179,302894236,34477319,initializer,1802350,241543444,18395976,1818360,1983204)
 # QTT_HOST_PY |    def _ordinary_ci_initial_common_projection_v1(source,paths,catalogue,keeper,native):
 # QTT_HOST_PY |     """Project the fixed original programme; its caller owns every operand join."""
 # QTT_HOST_PY |     if(type(source)is not tuple or len(source)!=9 or type(paths)is not tuple or len(paths)!=19 or type(catalogue)is not tuple or len(catalogue)!=8 or type(keeper)is not tuple or len(keeper)!=7 or type(native)is not tuple or len(native)!=3 or any(type(n)is not int or n<0 for row in(source,paths,catalogue,keeper,native)for n in row)):raise ValueError('ORDINARY_INITIAL_COMMON_EXACT_SOURCE_OPERANDS')

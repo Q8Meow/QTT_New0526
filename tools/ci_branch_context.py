@@ -5079,7 +5079,7 @@ def _ordinary_ci_initial_common_source_v1(extent, parent_path_count):
  initializer=5125424+21625000+U(7,7*extent)+T(1,parent_path_count)
  initializer+=6*(U(67,3*extent)+L(2,130)+T(1,65))
  initializer+=672+T(1,8)+2*T(1,9)+2*T(1,parent_path_count)+24
- return(2361360383,301158970,32860047,initializer,1802350,241543444,18356704,1814632,1980516)
+ return(2368680179,302894236,34477319,initializer,1802350,241543444,18395976,1818360,1983204)
 
 def _ordinary_ci_initial_common_source_check_v1(native_input,profile,allocation):
  issue=native_input['initial_request_issuer'];source=issue['source_generation'];old=issue['common_source_original'];fn=_ordinary_ci_initial_common_source_v1
@@ -8006,3 +8006,160 @@ def _ordinary_ci_bootstrap_stage_source_request_v1(runner, product, stage):
  record['parts']=parts;record['request']=request
  record['result_original']=(record,record['original'],parts,retained,request,initialized,issued)
  return request
+
+def _custody_original_file_metadata_v1(original, held):
+    """Join genuine before custody DATA to the existing held file row."""
+    import stat
+    if (type(original) not in (list, tuple) or len(original) != 12
+            or any(type(v) is not int or not 0 <= v < 1 << 64 for v in original)
+            or type(held) not in (list, tuple) or len(held) != 12
+            or not stat.S_ISREG(original[2]) or original[6] != 1
+            or original[9] != 0 or original[10] != 0
+            or original[11] > 0xffffffff
+            or any(type(v) is not int or v < 0 for v in held[2:12])
+            or not stat.S_ISREG(held[7]) or held[10] != 1
+            or held[11] != original[11] | 16
+            or (original[0], original[1], original[3], original[4])
+                != tuple(held[i] for i in (2, 3, 4, 5))):
+        raise ValueError('invalid original-to-held custody file metadata')
+    if original[11] & 16:
+        if tuple(original[i] for i in (2, 5, 7, 8)) != tuple(held[i] for i in (7, 6, 8, 9)):
+            raise ValueError('borrowed protected file metadata changed')
+    elif (tuple(held[8:10]) != (0, 0)
+          or (held[7] & 0o7777) != (0o555 if original[2] & 0o111 else 0o444)):
+        raise ValueError('file does not match completed original custody transform')
+    return tuple(original)
+
+
+def _custody_git_debug_rows_v1(raw, requested):
+    """Parse only the complete original Git stage/debug wire; retain flags."""
+    if type(raw) is not str or len(raw.encode('utf-8')) > 1048576:
+        raise ValueError('bounded complete Git debug output required')
+    requested = frozenset(requested)
+    pattern = re.compile(
+        r'([0-7]{6}) ([0-9a-f]{40}|[0-9a-f]{64}) ([0-3])\t([^\0]+)\0'
+        r'  ctime: ([0-9]+):([0-9]+)\n  mtime: ([0-9]+):([0-9]+)\n'
+        r'  dev: ([0-9]+)\tino: ([0-9]+)\n  uid: ([0-9]+)\tgid: ([0-9]+)\n'
+        r'  size: ([0-9]+)\tflags: ([0-9a-f]+)\n')
+    rows, stages, cursor = {}, set(), 0
+    while cursor < len(raw):
+        match = pattern.match(raw, cursor)
+        if match is None:
+            raise ValueError('incomplete or unknown Git debug row')
+        mode, oid, stage, name, *values = match.groups()
+        numbers = tuple(int(v) for v in values[:-1])
+        flag = int(values[-1], 16)
+        if (name not in requested or (name, stage) in stages
+                or any(v > 0xffffffff for v in numbers)
+                or numbers[1] >= 1000000000 or numbers[3] >= 1000000000
+                or flag > 0xffffffff):
+            raise ValueError('nonexact Git debug path, stage or stat field')
+        stages.add((name, stage))
+        row = (int(mode, 8), oid, int(stage),
+               numbers[0] * 1000000000 + numbers[1],
+               numbers[2] * 1000000000 + numbers[3], *numbers[4:], flag)
+        rows.setdefault(name, []).append(row)
+        cursor = match.end()
+    return rows
+
+
+def _custody_original_cache_clean_v1(cached, original, held, index_mtime_ns):
+    """Conservative stat provenance, never a body or staged-content verdict."""
+    original = _custody_original_file_metadata_v1(original, held)
+    if (type(index_mtime_ns) is not int or index_mtime_ns <= 0
+            or type(cached) is not tuple or len(cached) != 11):
+        raise ValueError('exact original index/stat comparison required')
+    mode, oid, stage, ctime, mtime, dev, ino, uid, gid, size, flags = cached
+    expected_mode = 0o100755 if original[2] & 0o100 else 0o100644
+    original_size = original[3] & 0xffffffff
+    if not original_size and original[3]:
+        original_size = 0x80000000
+    return (mode == expected_mode and stage == 0 and flags == 0
+            and (original[2] & 0o100) == (held[7] & 0o100)
+            and tuple(original[i] for i in (2, 5, 7, 8)) != tuple(held[i] for i in (7, 6, 8, 9))
+            and ctime == original[5] and mtime == original[4]
+            and mtime // 1000000000 < index_mtime_ns // 1000000000
+            and (dev, ino, uid, gid, size) ==
+                (original[0] & 0xffffffff, original[1] & 0xffffffff,
+                 original[7] & 0xffffffff, original[8] & 0xffffffff, original_size))
+
+
+def _custody_only_stat_paths_v1(repo_root, paths):
+    """Omit only proved custody cache misses from the stat-only candidate union."""
+    from tools.validation_reliability import (
+        _PREFLIGHT_NATIVE_INPUT_V1, _PreflightNativeInputV1,
+        _LinuxPreflightHostLeaseV1, _LinuxImmutableSourceBasisV2,
+        _linux_source_descriptor_v2, _preflight_require_v1, _scan_raise_errors)
+    native = _PREFLIGHT_NATIVE_INPUT_V1.get()
+    if (type(native) is not _PreflightNativeInputV1
+            or type(native.host_lease) is not _LinuxPreflightHostLeaseV1
+            or native.host_lease.parent_pid is not None):
+        return frozenset()
+    native.check()
+    lease = native.host_lease
+    _preflight_require_v1(native.root == pathlib.Path(repo_root).absolute()
+        and native.state == 'AVAILABLE'
+        and getattr(native, '_custody_stat_basis_v1', None) is None,
+        'LINUX_V2_STAT_ORIGINAL_INPUT')
+    descriptor = _linux_source_descriptor_v2(lease.binding['native_basis'])
+    _preflight_require_v1(type(paths) is tuple,
+        'LINUX_V2_STAT_RAW_PATH_TUPLE')
+    demand = (2 * descriptor['byte_length'] + 65536 + 16 * 1048576
+              + 1024 * descriptor['catalog_entry_count'] + 128 * len(paths))
+    native.meter.buffers(demand)
+    basis = _LinuxImmutableSourceBasisV2.__new__(_LinuxImmutableSourceBasisV2)
+    native._custody_stat_basis_v1 = basis
+    errors, complete, selected = [], False, set()
+    try:
+        basis.__init__(lease, descriptor, lease.binding['source_run_id'])
+        complete = True
+        originals = basis.original_files
+        if originals:
+            index_mtime = originals['.git/index'][4]
+            names = tuple(name for name in paths if name in basis.files
+                          and basis.files[name][1] == 'WORKTREE')
+            position = 0
+            while position < len(names):
+                native.check(); basis.check_live()
+                batch, size = [], 0
+                while position < len(names) and len(batch) < 64:
+                    name = names[position]
+                    length = len(name.encode('utf-8')) + 1
+                    if batch and size + length > 32768:
+                        break
+                    batch.append(name); size += length; position += 1
+                # Original command owner retains actual native streams and receipts.
+                argv = ('/usr/bin/git', '--no-pager', '--literal-pathspecs',
+                        '--no-optional-locks', '-c', 'core.fsmonitor=false',
+                        '-c', 'protocol.allow=never', 'ls-files', '--stage',
+                        '--debug', '-z', '--', *batch)
+                raw = lease.query.command(argv, cwd=native.root,
+                    git_environment={'GIT_CONFIG_GLOBAL': '/etc/qtt-gitconfig',
+                                     'GIT_OPTIONAL_LOCKS': '0'})
+                native.meter.buffers(demand)
+                rows = _custody_git_debug_rows_v1(raw.decode('utf-8', 'strict'), batch)
+                for name, values in rows.items():
+                    if len(values) == 1 and _custody_original_cache_clean_v1(
+                            values[0], originals[name], basis.files[name], index_mtime):
+                        selected.add(basis.files[name][0])
+                native.check(); basis.check_live()
+    except BaseException as error:
+        errors.append(error)
+    finally:
+        try:
+            _LinuxImmutableSourceBasisV2._settle_resources_v2(basis)
+            _preflight_require_v1(not basis._resources_require_retention_v2(),
+                'LINUX_V2_STAT_BASIS_SETTLED')
+            if complete:
+                _preflight_require_v1(native._custody_stat_basis_v1 is basis,
+                    'LINUX_V2_STAT_ORIGINAL_HOLDER')
+                native._custody_stat_basis_v1 = None
+        except BaseException as error:
+            errors.append(error)
+    if errors:
+        try:
+            _scan_raise_errors(errors)
+        except BaseException as error:
+            native.failure = error
+            raise
+    return frozenset(selected)
