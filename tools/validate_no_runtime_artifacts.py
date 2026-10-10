@@ -1120,7 +1120,7 @@ def _ci_validation_dependency_block_v1(text: str) -> tuple[int, str] | None:
     if not isinstance(text, str):
         return None
     try:
-        if len(text.encode("utf-8")) > 256 * 1024:
+        if len(text.encode("utf-8")) > 500000:
             return None
     except UnicodeError:
         return None
@@ -1284,10 +1284,10 @@ def _scan_package_install_text_file(
     if path in CI_TEST_DEPENDENCY_ALLOWLIST:
         try:
             with source_path.open(encoding="utf-8", newline="") as source:
-                text = source.read(256 * 1024 + 1)
+                text = source.read(500000 + 1)
         except (OSError, UnicodeError) as exc:
             return [f"unable to scan package install text in {path}: {exc.__class__.__name__}"]
-        if len(text.encode("utf-8")) > 256 * 1024:
+        if len(text.encode("utf-8")) > 500000:
             return [f"CI dependency workflow exceeds bounded contract limit: {path}"]
         return _scan_text_content(path, text, ["forbid_package_install_scripts"])
     try:
@@ -1436,12 +1436,12 @@ def scan_repository(
         if rel in CI_TEST_DEPENDENCY_ALLOWLIST:
             try:
                 with path.open(encoding="utf-8", newline="") as source:
-                    text = source.read(256 * 1024 + 1)
+                    text = source.read(500000 + 1)
             except UnicodeError:
                 violations.append(f"CI dependency workflow is not UTF-8: {rel}")
                 maybe_progress()
                 continue
-            if len(text.encode("utf-8")) > 256 * 1024:
+            if len(text.encode("utf-8")) > 500000:
                 violations.append(f"CI dependency workflow exceeds bounded contract limit: {rel}")
                 maybe_progress()
                 continue

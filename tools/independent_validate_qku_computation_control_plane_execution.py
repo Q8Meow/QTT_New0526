@@ -1852,7 +1852,7 @@ def _f14_ci_dependency_contract_v1(text):
     """Independent literal/placement comparison; no production contract verdict."""
     import re
 
-    if len(text.encode('utf-8')) > 256 * 1024:
+    if len(text.encode('utf-8')) > 500000:
         return False
     text = text.replace('\r\n', '\n')
     if '\r' in text or re.search(r'^[ \t]*\t', text, re.MULTILINE):

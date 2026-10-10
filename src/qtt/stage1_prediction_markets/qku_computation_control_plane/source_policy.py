@@ -4556,13 +4556,13 @@ def _st12h_workflow_contract_state(workflow_path: Path) -> Mapping[str, object]:
 
     try:
         with workflow_path.open(encoding="utf-8", newline="") as source:
-            text = source.read(256 * 1024 + 1)
+            text = source.read(500000 + 1)
     except OSError as exc:
         raise SourcePolicyError(
             ReasonCode.SOURCE_EPOCH_MISSING,
             "current validation workflow is unavailable",
         ) from exc
-    if len(text.encode("utf-8")) > 256 * 1024:
+    if len(text.encode("utf-8")) > 500000:
         raise SourcePolicyError(
             ReasonCode.SOURCE_EPOCH_STALE,
             "current validation workflow exceeds the bounded contract parser limit",

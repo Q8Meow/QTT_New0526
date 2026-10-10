@@ -486,6 +486,7 @@ def _central_supervision_test_adapter(monkeypatch, tmp_path):
         if type(original) is SyntheticNoEffectCustody:
             return original.restore()
         return original_restore(root, original)
+    prepare_fixture._fixture_original = original_prepare
     monkeypatch.setattr(runner, "_prepare_validation_candidate_v1", prepare_fixture)
     monkeypatch.setattr(runner, "_restore_tracked_gate_side_effects", restore_fixture)
 
@@ -1603,6 +1604,1137 @@ def test_run_validation_gates_direct_script_imports_router_without_pythonpath(
     assert not tuple(evidence_root.glob("command-*.stderr.bin"))
     _assert_generic_text_preflight_and_scope_matrix(monkeypatch)
     _assert_actual_runner_receipt_integration(external_parent, monkeypatch)
+
+    # Keep the real script/Git/receipt prefix above. These additional cases
+    # execute only the actual extracted module-entry guard with explicit fake
+    # modules: no child, application entry or native termination is claimed.
+    import ast as _script_ast
+    import types as _script_types
+    import tools as _script_actual_package
+
+    assert runner.__name__ == "tools.run_validation_gates"
+    assert sys.modules["tools.run_validation_gates"] is runner
+    assert _script_actual_package.__dict__["run_validation_gates"] is runner
+    assert runner.main.__globals__ is runner.__dict__ and runner.main.__module__ == runner.__name__
+    _script_tree = _script_ast.parse(copied_sources["tools/run_validation_gates.py"])
+    _script_flags = [node for node in _script_tree.body if isinstance(node, _script_ast.Assign)
+        and len(node.targets) == 1 and isinstance(node.targets[0], _script_ast.Name)
+        and node.targets[0].id == "_ORDINARY_ORIGINAL_SCRIPT_ENTRY_V1"]
+    _script_bindings = [node for node in _script_tree.body if isinstance(node, _script_ast.If)
+        and isinstance(node.test, _script_ast.Name) and node.test.id == "_ORDINARY_ORIGINAL_SCRIPT_ENTRY_V1"]
+    assert len(_script_flags) == 1 and len(_script_bindings) == 2
+    assert _script_ast.dump(_script_flags[0].value, include_attributes=False) == _script_ast.dump(
+        _script_ast.parse('__name__ == "__main__"', mode="eval").body, include_attributes=False)
+    _script_guard, _script_entry = _script_bindings
+    assert _script_entry is _script_tree.body[-1] and not _script_entry.orelse
+    assert _script_ast.dump(_script_entry.body[0], include_attributes=False) == _script_ast.dump(
+        _script_ast.parse("raise SystemExit(main())").body[0], include_attributes=False)
+    assert len(_script_entry.body) == 1
+    assert _script_tree.body.index(_script_guard) < min(index for index, node in enumerate(_script_tree.body)
+        if isinstance(node, (_script_ast.FunctionDef, _script_ast.ClassDef)))
+    _script_required_helpers = (
+        "_ordinary_bootstrap_request_begin_v1", "_ordinary_bootstrap_request_finish_v1",
+        "_ordinary_bootstrap_heap_prepare_request_v1", "_ordinary_bootstrap_query_constructor_request_v1",
+        "_ordinary_bootstrap_query_request_v1", "_ordinary_bootstrap_event_request_v1",
+        "_ordinary_bootstrap_constructor_request_v1", "_ordinary_control_tokenize_request_v1",
+        "_ordinary_control_parse_request_v1", "_ordinary_control_compile_request_v1",
+        "_ordinary_bootstrap_request_fail_v1")
+    _script_definitions = {node.name: node for node in _script_tree.body if isinstance(node, _script_ast.FunctionDef)}
+    assert all(name in _script_definitions and _script_definitions[name].end_lineno < _script_entry.lineno
+        for name in _script_required_helpers)
+    assert all(node.end_lineno < _script_entry.lineno for node in _script_tree.body
+        if isinstance(node, (_script_ast.FunctionDef, _script_ast.ClassDef)))
+    _script_guard_code = compile(_script_ast.Module(body=[_script_flags[0], _script_guard], type_ignores=[]),
+        "<actual-runner-entry-guard>", "exec", dont_inherit=True)
+    _script_entry_code = compile(_script_ast.Module(body=[_script_entry], type_ignores=[]),
+        "<actual-runner-entry-call>", "exec", dont_inherit=True)
+    _script_boot = sys.modules["_frozen_importlib"]
+    _script_external = sys.modules["_frozen_importlib_external"]
+
+    def _script_module_case(defect):
+        _normal = defect == "ordinary-import"
+        _sys = _script_types.ModuleType("sys")
+        _package = _script_types.ModuleType("tools")
+        _module = _script_types.ModuleType("tools.run_validation_gates" if _normal else "__main__")
+        _spec = _script_boot.__dict__["ModuleSpec"].__new__(_script_boot.__dict__["ModuleSpec"])
+        _path = _script_external.__dict__["_NamespacePath"].__new__(_script_external.__dict__["_NamespacePath"])
+        _loader = _script_external.__dict__["NamespaceLoader"].__new__(_script_external.__dict__["NamespaceLoader"])
+        _path.__dict__.update(_name="tools", _path=[str(fixture_repo / "tools")])
+        _loader.__dict__["_path"] = _path
+        _spec.__dict__.update(name="tools", origin=None, loader=_loader, submodule_search_locations=_path)
+        _package.__dict__.update(__file__=None, __spec__=_spec, __path__=_path, __loader__=_loader)
+        _sys.modules = {"__main__": _script_types.ModuleType("unrelated-main") if _normal else _module,
+            "tools": _package, "_frozen_importlib": _script_boot, "_frozen_importlib_external": _script_external}
+        _sys.argv = [str(fixture_repo / "tools/run_validation_gates.py"), "--phase", "fast-preflight"]
+        _sys.orig_argv = [sys.executable, "-I", "-B", "-X", "utf8", *_sys.argv]
+        _imports, _callbacks, _main_calls = [], [], []
+        class _ForeignSpec:
+            @property
+            def _initializing(self):
+                _callbacks.append("foreign cached spec")
+                raise AssertionError("cached foreign package callback ran")
+        if defect in ("ordinary-import", "same-cache-and-parent"):
+            _sys.modules["tools.run_validation_gates"] = _module
+            _package.__dict__["run_validation_gates"] = _module
+        elif defect == "fresh-package":
+            _sys.modules.pop("tools")
+        elif defect == "foreign-runner-cache":
+            _sys.modules["tools.run_validation_gates"] = _script_types.ModuleType("tools.run_validation_gates")
+        elif defect == "null-runner-cache":
+            _sys.modules["tools.run_validation_gates"] = None
+        elif defect == "foreign-main-owner":
+            _sys.modules["__main__"] = _script_types.ModuleType("__main__")
+        elif defect == "foreign-tools-owner":
+            _sys.modules["tools"] = _script_types.ModuleType("foreign-tools")
+        elif defect == "null-tools-owner":
+            _sys.modules["tools"] = None
+        elif defect == "foreign-parent-child":
+            _package.__dict__["run_validation_gates"] = _script_types.ModuleType("tools.run_validation_gates")
+        elif defect == "null-parent-child":
+            _package.__dict__["run_validation_gates"] = None
+        elif defect == "foreign-root":
+            _path.__dict__["_path"] = [str(fixture_repo / "foreign-tools")]
+        elif defect == "additional-root":
+            _path.__dict__["_path"].append(str(fixture_repo / "foreign-tools"))
+        elif defect == "cached-spec-callback":
+            _package.__dict__["__spec__"] = _ForeignSpec()
+
+        def _only_original_namespace_import(name, globals=None, locals=None, fromlist=(), level=0):
+            _imports.append((name, tuple(fromlist or ()), level))
+            assert name == "tools" and not fromlist and level == 0
+            # Match the pinned cached import fast path so an unconditional
+            # import of the fault package cannot silently bypass this oracle.
+            if "tools" in _sys.modules:
+                getattr(_sys.modules["tools"].__dict__.get("__spec__"), "_initializing", False)
+            else:
+                _sys.modules["tools"] = _package
+            return _package
+        import builtins as _script_builtins
+        _builtins = dict(_script_builtins.__dict__)
+        _builtins["__import__"] = _only_original_namespace_import
+        _namespace = _module.__dict__
+        _namespace.update(sys=_sys, REPO_ROOT=fixture_repo, __builtins__=_builtins)
+        _modules_before, _package_before = dict(_sys.modules), dict(_package.__dict__)
+        _name_before = _namespace["__name__"]
+        _argv_before, _orig_argv_before = list(_sys.argv), list(_sys.orig_argv)
+        _positive = defect in ("ordinary-import", "script-owner", "fresh-package", "same-cache-and-parent")
+        if not _positive:
+            with pytest.raises(RuntimeError):
+                exec(_script_guard_code, _namespace, _namespace)
+            assert _sys.modules == _modules_before and _package.__dict__ == _package_before
+            assert _namespace["__name__"] == _name_before and not _callbacks and not _imports
+        else:
+            exec(_script_guard_code, _namespace, _namespace)
+            if _normal:
+                assert _sys.modules == _modules_before and _package.__dict__ == _package_before
+                assert _namespace["__name__"] == "tools.run_validation_gates"
+                assert _namespace["_ORDINARY_ORIGINAL_SCRIPT_ENTRY_V1"] is False and not _imports
+            else:
+                assert _sys.modules["__main__"] is _sys.modules["tools.run_validation_gates"] is _module
+                assert _package.__dict__["run_validation_gates"] is _module
+                assert _namespace["__name__"] == "tools.run_validation_gates"
+                assert _namespace["_ORDINARY_ORIGINAL_SCRIPT_ENTRY_V1"] is True
+                assert _imports == ([("tools", (), 0)] if defect == "fresh-package" else [])
+            # A separately literal declaration checks Python's actual emitted
+            # function module/global ownership after this actual source guard.
+            exec(compile("def owned_delegate():\n    return __name__\n", "<literal-module-declaration>", "exec"),
+                _namespace, _namespace)
+            _delegate = _namespace["owned_delegate"]
+            assert _delegate.__globals__ is _module.__dict__ and _delegate.__module__ == "tools.run_validation_gates"
+            assert _delegate() == "tools.run_validation_gates" and _sys.modules[_delegate.__module__] is _module
+            for name in _script_required_helpers:
+                _namespace[name] = object()
+            def _same_main():
+                _main_calls.append(_module)
+                assert all(name in _namespace for name in _script_required_helpers)
+                return 0
+            _namespace["main"] = _same_main
+            if _normal:
+                exec(_script_entry_code, _namespace, _namespace)
+                assert not _main_calls
+            else:
+                with pytest.raises(SystemExit) as _exit:
+                    exec(_script_entry_code, _namespace, _namespace)
+                assert _exit.value.code == 0 and _main_calls == [_module]
+        assert _sys.argv == _argv_before and _sys.orig_argv == _orig_argv_before
+        assert not _callbacks
+
+    for _script_case in ("ordinary-import", "script-owner", "fresh-package", "same-cache-and-parent",
+        "foreign-runner-cache", "null-runner-cache", "foreign-main-owner", "foreign-tools-owner",
+        "null-tools-owner", "foreign-parent-child", "null-parent-child", "foreign-root",
+        "additional-root", "cached-spec-callback"):
+        _script_module_case(_script_case)
+
+    # These prerequisite ports are explicit no-child/no-native fixture oracles.
+    # The actual prefix/debit/quantum/join and constructor bodies remain the
+    # subjects; supplied fixture cutoffs do not qualify receiver provenance.
+    from types import ModuleType as _PrefixModule
+
+    def _prefix_fixture(*, calls=20, raw=32, origin=True):
+        value = dict(owner=(os.getpid(), reliability.threading.get_ident()),
+            errors=[], current_native_observation=None,
+            preloader_source_anchor=tuple(object() for _ in range(16)))
+        source, native, startup = {}, {}, {}
+        request = dict(source_generation=source, origin_ns=1 if origin else None,
+            deadline_ns=3720 * 10**9 + 1 if origin else None)
+        def fixture_emitter():
+            raise AssertionError("fixture emitter is never an operational issuer")
+        profile = (value, source, native, startup, "fast-preflight", request,
+            None, (), calls + 4, raw + 16, fixture_emitter, fixture_emitter.__code__)
+        limits = dict(work_calls=calls, work_bytes=raw, settlement_calls=4,
+            settlement_bytes=16, work_loops=8, settlement_loops=2)
+        counters = {name: 0 for name in limits}
+        value.update(initial_source_request=profile, early_profile=profile,
+            early_allocation_original=(value, profile, limits, counters),
+            original_origin_request=request, original_origin_ns=request["origin_ns"],
+            original_execution_cutoff_ns=3600 * 10**9 + 1 if origin else None,
+            original_settlement_cutoff_ns=request["deadline_ns"])
+        return value
+
+    # This prerequisite port supplies no COMMON or Linux admission. The
+    # original prefix/counter/cutoff bodies below remain the no-child subjects;
+    # the actual Source9 checker is exercised separately from literal fixtures.
+    _common_prerequisite_calls = []
+    def _fixture_common_source_prerequisite(value, profile, allocation):
+        assert profile is value["initial_source_request"] is value["early_profile"]
+        assert allocation is value["early_allocation_original"]
+        assert allocation[0] is value and allocation[1] is profile
+        assert profile[6] is None
+        _common_prerequisite_calls.append((value, profile, allocation))
+        return None
+
+    _prefix_preloader_checks = []
+    def _fixture_preloader_return(value):
+        assert value["current_native_observation"] is None and not value["errors"]
+        assert value["initial_source_request"][0] is value
+        assert value["initial_source_request"][6] is None
+        _prefix_preloader_checks.append(value)
+        return value["initial_source_request"]
+
+    with monkeypatch.context() as _prefix_ports:
+        _prefix_ports.setattr(ci_branch_context, "_ordinary_ci_initial_common_source_check_v1",
+            _fixture_common_source_prerequisite)
+        _prefix_ports.setattr(reliability, "_ordinary_initial_preloader_return_check_v1",
+            _fixture_preloader_return)
+        _prefix_ports.setattr(reliability.time, "monotonic_ns", lambda: 2)
+        _prefix = _prefix_fixture()
+        _record = reliability._ordinary_initial_prefix_v1(_prefix)
+        _operations, _errors = _record["operations"], _record["errors"]
+        assert _prefix["current_native_observation"] is None
+        reliability._ordinary_initial_native_debit_v1(_prefix, "FIXTURE_PAIR_READ_ATTEMPT")
+        reliability._ordinary_initial_native_debit_v1(_prefix, "FIXTURE_PAIR_RETURNED",
+            raw=b"A\0\xffB", request_bytes=4)
+        assert _record["operation_calls"] == 1 and _record["returned_bytes"] == 4
+        assert _prefix["early_allocation_original"][3]["work_bytes"] == 4
+        assert reliability._ordinary_initial_native_quantum_v1(_prefix, 65536) == 28
+        assert _record["last_supervised_returned"] == b"A\0\xffB"
+        _fake_native, _operands, _operand_original = object(), {}, ()
+        _prefix.update(native_instance=_fake_native, native_init_returned=True,
+            initial_operands=_operands, initial_operands_original=_operand_original)
+        _joined = reliability._ordinary_initial_physical_prefix_v1(_fake_native, _prefix,
+            _prefix["early_profile"], _operands, _operand_original)
+        assert _joined is _record and _joined["operations"] is _operations and _joined["errors"] is _errors
+        assert _joined["operation_calls"] == 1 and _joined["returned_bytes"] == 4
+        assert _joined["complete"] is False and _joined["pending"] is False
+        assert reliability._ordinary_initial_prefix_v1(_prefix) is _record
+        assert _prefix_preloader_checks == [_prefix]
+        with pytest.raises(reliability.ValidationReliabilityError, match="ONE_REAL_PHYSICAL_PREFIX_JOIN"):
+            reliability._ordinary_initial_physical_prefix_v1(_fake_native, _prefix,
+                _prefix["early_profile"], _operands, _operand_original)
+
+        # Missing authentic original time remains a hard rejection before the
+        # hypothetical operation. The failed attempted prefix is not refunded.
+        _missing = _prefix_fixture(origin=False)
+        _would_run = []
+        with pytest.raises(reliability.ValidationReliabilityError,
+            match="GENUINE_SEPARATE_CUTOFFS") as _missing_error:
+            reliability._ordinary_initial_native_debit_v1(_missing, "FIXTURE_MISSING_ORIGIN")
+            _would_run.append("operation")
+        _missing["errors"].append(_missing_error.value)
+        assert not _would_run and _missing["current_native_observation"] is None
+        assert _missing["initial_source_request"][6] is None
+        assert _missing["initial_prefix"]["operations"] == ["FIXTURE_MISSING_ORIGIN"]
+        assert _missing["early_allocation_original"][3]["work_calls"] == 1
+
+        _limited = _prefix_fixture(calls=1, raw=4)
+        reliability._ordinary_initial_native_debit_v1(_limited, "FIXTURE_FIRST")
+        with pytest.raises(reliability.ValidationReliabilityError,
+            match="PROSPECTIVE_NATIVE_CALL_ALLOCATION") as _limited_error:
+            reliability._ordinary_initial_native_debit_v1(_limited, "FIXTURE_REJECTED_SECOND")
+        _limited["errors"].append(_limited_error.value)
+        _held_prefix = _limited["initial_prefix"]
+        reliability._ordinary_initial_native_debit_v1(_limited, "FIXTURE_RETAINED_SETTLEMENT", settling=True)
+        assert _held_prefix is _limited["initial_prefix"] and _held_prefix["operation_calls"] == 3
+        assert _held_prefix["errors"] == [_limited_error.value]
+        assert _limited["early_allocation_original"][3]["work_calls"] == 2
+        assert _limited["early_allocation_original"][3]["settlement_calls"] == 1
+        assert _held_prefix["operations"] == ["FIXTURE_FIRST", "FIXTURE_REJECTED_SECOND", "FIXTURE_RETAINED_SETTLEMENT"]
+
+        _late = _prefix_fixture()
+        with monkeypatch.context() as _late_clock:
+            _late_clock.setattr(reliability.time, "monotonic_ns", lambda: _late["original_execution_cutoff_ns"])
+            with pytest.raises(reliability.ValidationReliabilityError,
+                match="WORK_OR_SETTLEMENT_CUTOFF") as _late_error:
+                reliability._ordinary_initial_native_debit_v1(_late, "FIXTURE_EXPIRED_WORK")
+            _late["errors"].append(_late_error.value)
+            reliability._ordinary_initial_native_debit_v1(_late, "FIXTURE_WITHIN_ORIGINAL_SETTLEMENT", settling=True)
+        assert _late["initial_prefix"]["operation_calls"] == 2
+        assert _late["initial_prefix"]["errors"] == [_late_error.value]
+
+        # Frozen original values prohibit redistributing an issued work
+        # pool into settlement, even while combined Source totals stay equal.
+        for _pool_kind in ("calls", "bytes"):
+            _redistributed = _prefix_fixture()
+            _frozen_prefix = reliability._ordinary_initial_prefix_v1(_redistributed)
+            _six_limits = _redistributed["early_allocation_original"][2]
+            _six_limits["work_" + _pool_kind] -= 1
+            _six_limits["settlement_" + _pool_kind] += 1
+            with pytest.raises(reliability.ValidationReliabilityError,
+                match="SAME_SOURCE_PREFIX_AND_CONTINUOUS_DEBT"):
+                reliability._ordinary_initial_native_debit_v1(_redistributed, "FIXTURE_MUTATED_POOL")
+            assert _frozen_prefix["operation_calls"] == _frozen_prefix["returned_bytes"] == 0
+            assert not _frozen_prefix["operations"] and not _redistributed["errors"]
+
+        def _fixture_ctypes(record=None):
+            module = _PrefixModule("ctypes")
+            primitives = []
+            for name in ("c_void_p", "c_int", "c_size_t", "c_ssize_t", "c_char_p", "c_ulong"):
+                setattr(module, name, object())
+            library = SimpleNamespace(**{name: SimpleNamespace() for name in (
+                "flistxattr", "fgetxattr", "fremovexattr", "ioctl")})
+            def reached(name, debit):
+                if record is not None:
+                    assert record["operation_calls"] == debit
+                    assert record["operations"][-1] == "INITIAL_NATIVE_CONSTRUCTOR_CALL"
+                primitives.append(name)
+            def sizeof(value):
+                reached("sizeof-pointer" if value is module.c_void_p else "sizeof-int",
+                    2 if value is module.c_void_p else 3)
+                return 8 if value is module.c_void_p else 4
+            def uname():
+                reached("uname", 4)
+                return SimpleNamespace(machine="x86_64")
+            def load(name, *, use_errno):
+                assert name is None and use_errno is True
+                reached("CDLL", 5)
+                return library
+            def pointer(value):
+                assert value is module.c_int
+                reached("POINTER", 6)
+                return object()
+            module.sizeof, module.CDLL, module.POINTER = sizeof, load, pointer
+            return module, uname, primitives
+
+        # These scalar/loader ports create no library or child. Every reached
+        # actual private constructor callback must debit before its primitive.
+        for _call_limit in (20, 3):
+            _ctor = _prefix_fixture(calls=_call_limit)
+            _native = object.__new__(reliability._LinuxSourceNativeV2)
+            _ctor.update(native_instance=_native, native_init_attempted=False,
+                native_init_returned=False)
+            _ctor["native_init_original"] = (_ctor, _native,
+                reliability._LinuxSourceNativeV2.__init__, reliability._LinuxSourceNativeV2.__init__.__code__)
+            _ctor_record = reliability._ordinary_initial_prefix_v1(_ctor)
+            _ctypes, _uname, _reached = _fixture_ctypes(_ctor_record)
+            with monkeypatch.context() as _ctor_ports:
+                _ctor_ports.setitem(sys.modules, "ctypes", _ctypes)
+                _ctor_ports.setattr(reliability.sys, "platform", "linux")
+                _ctor_ports.setattr(reliability.os, "uname", _uname, raising=False)
+                if _call_limit == 20:
+                    assert reliability._ordinary_initial_native_initialize_v1(_ctor) is _native
+                    assert _ctor["native_init_attempted"] is True and _ctor["native_init_returned"] is True
+                    assert _ctor_record["operation_calls"] == 6 and not _ctor["errors"]
+                    assert _reached == ["sizeof-pointer", "sizeof-int", "uname", "CDLL", "POINTER"]
+                else:
+                    with pytest.raises(reliability.ValidationReliabilityError,
+                        match="PROSPECTIVE_NATIVE_CALL_ALLOCATION") as _ctor_error:
+                        reliability._ordinary_initial_native_initialize_v1(_ctor)
+                    assert _ctor["native_init_attempted"] is True and _ctor["native_init_returned"] is False
+                    assert _ctor["native_instance"] is _native and _ctor["errors"] == [_ctor_error.value]
+                    assert _ctor_record["operation_calls"] == 4 and _reached == ["sizeof-pointer", "sizeof-int"]
+                    reliability._ordinary_initial_native_debit_v1(_ctor, "FIXTURE_CTOR_SETTLEMENT", settling=True)
+                    assert _ctor_record["operation_calls"] == 5
+            assert _ctor["current_native_observation"] is None
+
+        # Existing other callback and None constructor contracts retain their
+        # exact behavior; an arbitrary callback cannot grant a Windows ABI.
+        _other_callbacks = []
+        def _ordinary_callback():
+            _other_callbacks.append("called")
+        _ctypes, _uname, _reached = _fixture_ctypes()
+        with monkeypatch.context() as _compat_ports:
+            _compat_ports.setitem(sys.modules, "ctypes", _ctypes)
+            _compat_ports.setattr(reliability.os, "uname", _uname, raising=False)
+            _compat_ports.setattr(reliability.sys, "platform", "linux")
+            _ordinary = reliability._LinuxSourceNativeV2(attempt=_ordinary_callback)
+            _default = reliability._LinuxSourceNativeV2()
+            assert _ordinary.attempt is _ordinary_callback and _default.attempt is None
+            assert not _other_callbacks and len(_reached) == 10
+            _reached.clear()
+            _compat_ports.setattr(reliability.sys, "platform", "win32")
+            with pytest.raises(reliability.ValidationReliabilityError, match="LINUX_V2_NATIVE_ABI"):
+                reliability._LinuxSourceNativeV2(attempt=_ordinary_callback)
+            assert not _other_callbacks and not _reached
+
+    # A literal Source-only runner owner exercises the complete real preloader
+    # and object producer with a pending original origin. No physical issuer,
+    # NativeV2 object, loader or child is fabricated for this negative case.
+    _literal_runner = _PrefixModule("_qtt_prefix_literal_runner")
+    _literal_runner.REPO_ROOT = runner.REPO_ROOT
+    _literal_runner.__file__ = str(runner.REPO_ROOT / "tools" / "run_validation_gates.py")
+    _literal_source = (
+        "def _ordinary_linux_provision_v1():\n"
+        "    return None\n"
+        "def _ordinary_bootstrap_initial_source_request_v1(native_input, source, native, startup, *, phase):\n"
+        "    limits = dict(work_calls=20, work_bytes=32, settlement_calls=4, settlement_bytes=16, work_loops=8, settlement_loops=2)\n"
+        "    counters = {name: 0 for name in limits}\n"
+        "    emitter = _ordinary_bootstrap_initial_source_request_v1\n"
+        "    profile = (native_input, source, native, startup, phase, native_input['original_origin_request'], None, (('literal_fixture_only', 1),), 24, 48, emitter, emitter.__code__)\n"
+        "    native_input['early_profile'] = profile\n"
+        "    native_input['early_allocation_original'] = (native_input, profile, limits, counters)\n"
+        "    native_input['original_origin_ns'] = None\n"
+        "    native_input['original_execution_cutoff_ns'] = None\n"
+        "    native_input['original_settlement_cutoff_ns'] = None\n"
+        "    return profile\n"
+    )
+    _literal_initializer = compile(_literal_source, _literal_runner.__file__, "exec")
+    exec(_literal_initializer, _literal_runner.__dict__, _literal_runner.__dict__)
+    _literal_entry = _literal_runner._ordinary_linux_provision_v1
+    _literal_phase = runner.FAST_PREFLIGHT_PHASE
+    _literal_attempt = dict(owner=(os.getpid(), reliability.threading.get_ident()),
+        phase=_literal_phase, errors=[], native_input=None, native_product=None)
+    _literal_attempt["original"] = (_literal_attempt, _literal_attempt["owner"],
+        _literal_attempt["errors"], _literal_phase, _literal_runner, _literal_runner.__dict__,
+        _literal_initializer, _literal_entry, _literal_entry.__code__)
+    _literal_runner._ORDINARY_BOOTSTRAP_ENTRY_ATTEMPT_V1 = _literal_attempt
+    _literal_runner._ORDINARY_INITIALIZED_MODULE_CODE_V1 = _literal_initializer
+    with monkeypatch.context() as _literal_owner:
+        _literal_owner.setitem(sys.modules, _literal_runner.__name__, _literal_runner)
+        # This whole-owner negative must never query the actual Linux host.
+        _literal_owner.setattr(reliability.sys, "platform", "win32")
+        with pytest.raises(reliability.ValidationReliabilityError,
+            match="ORIGIN_PREBIND_ORIGINAL_LINUX_OWNER") as _object_denial:
+            reliability._ordinary_initial_native_object_v1(runner=_literal_runner,
+                initializer=_literal_initializer, entry=_literal_entry, phase=_literal_phase,
+                attempt=_literal_attempt, initialize=False)
+    _literal_input = _literal_attempt["native_input"]
+    assert _literal_input["native_instance"] is None and _literal_input["native_init_attempted"] is False
+    assert _literal_input["preloader_source_return"][2]["native_instance"] is None
+    assert _literal_input["initial_source_request"][6] is None
+    assert _literal_input["initial_prefix"]["operations"] == []
+    assert _literal_input["initial_prefix"]["operation_calls"] == 0
+    assert _literal_input["errors"] == [_object_denial.value]
+
+    _pending = _literal_input["origin_prebind"]
+    _literal_prefix = _literal_input["initial_prefix"]
+    assert _pending["complete"] is False and _pending["active_operation"] is None
+    assert _pending["slots"] == _pending["reads"] == []
+    assert _pending["errors"] is _literal_prefix["errors"] is _literal_input["errors"]
+    assert _pending["operations"] is _literal_prefix["operations"]
+    assert _pending["original"][0] is _pending and len(_pending["original"]) == 16
+
+    # These calls deliberately occur outside the frozen producer/helper frame.
+    # Retained Function/Code objects come from the real failed owner above;
+    # synthetic controls supply no physical-root or process-lifetime credit.
+    _loan_failures = []
+    with monkeypatch.context() as _loan_ports:
+        _loan_ports.setattr(ci_branch_context, "_ordinary_ci_initial_common_source_check_v1",
+            _fixture_common_source_prerequisite)
+        _loan_ports.setattr(reliability.sys, "platform", "linux")
+        for _label, _producer_fault, _raw_fault in (
+            ("ORIGIN_PREBIND_FOREIGN", False, False),
+            ("ORIGIN_PREBIND_OWNER", True, False),
+            ("ORIGIN_PREBIND_OWNER", False, True),
+            ("ORIGIN_PREBIND_OWNER", False, False),
+        ):
+            _before_calls = _literal_prefix["operation_calls"]
+            _before_bytes = _literal_prefix["returned_bytes"]
+            with monkeypatch.context() as _selected_fault:
+                _selected_fault.setitem(_pending, "active_operation", _label)
+                if _producer_fault:
+                    _selected_fault.setitem(_pending, "producer", lambda: None)
+                _expected_error = ("ORIGIN_ONLY_ORIGINAL_NESTED_HELPER"
+                    if _label == "ORIGIN_PREBIND_OWNER" and not _producer_fault and not _raw_fault
+                    else "EXACT_ORIGIN_ONLY_PREBIND_SOURCE_LOAN")
+                with pytest.raises(reliability.ValidationReliabilityError,
+                    match=_expected_error) as _loan_error:
+                    reliability._ordinary_initial_native_debit_v1(_literal_input, _label,
+                        **({"raw": b"X", "request_bytes": 1} if _raw_fault else {}))
+            _loan_failures.append(_loan_error.value)
+            _literal_input["errors"].append(_loan_error.value)
+            assert _literal_prefix["operation_calls"] == _before_calls + (0 if _raw_fault else 1)
+            assert _literal_prefix["returned_bytes"] == _before_bytes + (1 if _raw_fault else 0)
+            assert _pending["complete"] is False and not _pending["slots"] and not _pending["reads"]
+        _before_settlement = _literal_input["early_allocation_original"][3]["settlement_calls"]
+        with monkeypatch.context() as _settlement_fault:
+            _settlement_fault.setitem(_pending, "active_operation", "ORIGIN_PREBIND_ONE_CLOSE")
+            with pytest.raises(reliability.ValidationReliabilityError,
+                match="ORIGIN_ONLY_ORIGINAL_NESTED_HELPER") as _close_frame_error:
+                reliability._ordinary_initial_native_debit_v1(_literal_input,
+                    "ORIGIN_PREBIND_ONE_CLOSE", settling=True)
+        _literal_input["errors"].append(_close_frame_error.value)
+        assert _literal_input["early_allocation_original"][3]["settlement_calls"] == _before_settlement + 1
+    assert _literal_prefix["operation_calls"] == 4 and _literal_prefix["returned_bytes"] == 1
+    assert _literal_input["early_allocation_original"][3]["work_calls"] == 3
+    assert _literal_input["early_allocation_original"][3]["work_bytes"] == 1
+    assert _literal_input["errors"] == [_object_denial.value, *_loan_failures, _close_frame_error.value]
+    assert _pending["origin_ns"] is _pending["cutoffs"] is None
+
+    # The private keeper loan remains Source-bound to the actual CI helper and
+    # original REL producer. These explicit no-child faults cannot authenticate
+    # an inherited Linux handle or manufacture an origin/lifetime observation.
+    _keeper_helper = ci_branch_context._facet_fn_initial_keeper_observation_loans_v1
+    _keeper_code = ci_branch_context._ORDINARY_INITIALIZED_MODULE_CODE_V1
+    assert _keeper_helper.__globals__ is ci_branch_context.__dict__
+    assert any(code is _keeper_helper.__code__ for code in _keeper_code.co_consts)
+    _keeper_tree = _script_ast.parse(copied_sources["tools/ci_branch_context.py"])
+    _keeper_nodes = [node for node in _keeper_tree.body if isinstance(node, _script_ast.FunctionDef)
+        and node.name == "_facet_fn_initial_keeper_observation_loans_v1"]
+    assert len(_keeper_nodes) == 1
+    _keeper_source = _script_ast.get_source_segment(
+        copied_sources["tools/ci_branch_context.py"].decode("utf-8"), _keeper_nodes[0])
+    _role_admission = _keeper_source.index("'ORDINARY_INITIAL_KEEPER_LOAN_NO_DUPLICATE_ROLE'")
+    _adoption = _keeper_source.index("value['slots'].append(slot);record['slots'].append(slot)")
+    _noninherit = _keeper_source.index("call('INHERITANCE',_f.os.set_inheritable,descriptor,False)")
+    assert _keeper_source.index("'ORDINARY_INITIAL_KEEPER_LOAN_EXACT_THREE_INHERITED_READONLY_ROLES'") < _role_admission < _adoption < _noninherit
+    assert "allocation[3]['work_loops']+=1" in _keeper_source and "variable_work_loops" not in _keeper_source
+    assert "descriptor not in value['seen_fds']" in _keeper_source
+    assert _keeper_source.index("if _f._same_observed_file(info,named):") < _keeper_source.index("module.ioctl,descriptor,0xb703,0")
+    assert "'CGROUP_NAMESPACE','MOUNT_NAMESPACE','KEEPER_MAPS'" in _keeper_source
+    assert "value['iterator_close_attempted']=True" in _keeper_source and "call('ONE_CLOSE',iterator.close,settling=True)" in _keeper_source
+
+    _keeper_startup_nodes = [node for node in _keeper_tree.body if isinstance(node, _script_ast.FunctionDef)
+        and node.name == "_facet_fn_initial_startup_prebind_v1"]
+    assert len(_keeper_startup_nodes) == 1
+    _keeper_startup_source = _script_ast.get_source_segment(
+        copied_sources["tools/ci_branch_context.py"].decode("utf-8"), _keeper_startup_nodes[0])
+    assert "for selected_role in('CGROUP_NAMESPACE','MOUNT_NAMESPACE','KEEPER_MAPS'):" in _keeper_startup_source
+    _slot_freeze = _keeper_startup_source.index("'INITIAL_STARTUP_SAME_ORIGINAL_KEEPER_LOAN_SLOT'")
+    assert "len(slot_original)==10" in _keeper_startup_source and "all(left is right for left,right in zip(slot_original,expected_slot))" in _keeper_startup_source
+    assert _slot_freeze < _keeper_startup_source.index("'INITIAL_STARTUP_KEEPER_LOAN_METADATA'") < _keeper_startup_source.index("'INITIAL_STARTUP_KEEPER_LOAN_READ'")
+
+    _keeper_effects = []
+    def _forbid_keeper_effect(*args, **kwargs):
+        _keeper_effects.append((args, kwargs))
+        pytest.fail("foreign keeper-loan caller reached a native descriptor operation")
+    _keeper_before = dict(_pending)
+    _keeper_debt = (_literal_prefix["operation_calls"], _literal_prefix["returned_bytes"],
+        tuple(_literal_prefix["operations"]), tuple(_literal_prefix["errors"]))
+    with monkeypatch.context() as _keeper_foreign_ports:
+        for _native_name in ("fstat", "stat", "lstat", "scandir", "get_inheritable", "set_inheritable", "lseek", "read", "close"):
+            _keeper_foreign_ports.setattr(reliability.os, _native_name, _forbid_keeper_effect)
+        with pytest.raises(reliability.ValidationReliabilityError, match="KEEPER_LOAN_FIXED_PROVISION_CALLER"):
+            _keeper_helper(_literal_input, _pending, object(), object())
+    assert _keeper_effects == [] and _pending == _keeper_before and "keeper_observation_loans" not in _pending
+    assert _keeper_debt == (_literal_prefix["operation_calls"], _literal_prefix["returned_bytes"],
+        tuple(_literal_prefix["operations"]), tuple(_literal_prefix["errors"]))
+
+    _keeper_fields = ("native_input", "prebind", "prebind_original", "source_anchor", "holder", "root", "owner", "errors",
+        "producer", "producer_code", "module_namespace", "initializer_code", "slots", "observations", "roles")
+    _keeper_literal = dict(native_input=_literal_input, prebind=_pending, prebind_original=_pending["original"],
+        source_anchor=_literal_input["preloader_source_anchor"], holder=object(), root={}, owner=_literal_input["owner"],
+        errors=_literal_input["errors"], producer=_keeper_helper, producer_code=_keeper_helper.__code__,
+        module_namespace=ci_branch_context.__dict__, initializer_code=_keeper_code, slots=[], observations=[], roles={},
+        complete=False, active_operation="ORIGIN_PREBIND_OWNER")
+    _keeper_literal["original"] = (_keeper_literal,) + tuple(_keeper_literal[name] for name in _keeper_fields)
+    _keeper_faults = []
+    with monkeypatch.context() as _keeper_pending_ports:
+        _keeper_pending_ports.setattr(ci_branch_context, "_ordinary_ci_initial_common_source_check_v1",
+            _fixture_common_source_prerequisite)
+        _keeper_pending_ports.setattr(reliability.sys, "platform", "linux")
+        _keeper_pending_ports.setitem(_pending, "active_operation", "ORIGIN_PREBIND_OWNER")
+        _keeper_pending_ports.setitem(_pending, "keeper_observation_loans", _keeper_literal)
+        for _field, _replacement in ((None, None), ("initializer_code", (lambda: None).__code__), ("producer", lambda: None)):
+            _before_calls = _literal_prefix["operation_calls"]
+            with monkeypatch.context() as _keeper_selected_fault:
+                if _field is not None:
+                    _keeper_selected_fault.setitem(_keeper_literal, _field, _replacement)
+                with pytest.raises(reliability.ValidationReliabilityError, match="EXACT_KEEPER_LOAN_PRIVATE_FACET_SOURCE") as _keeper_denial:
+                    reliability._ordinary_initial_native_debit_v1(_literal_input, "ORIGIN_PREBIND_OWNER")
+            _keeper_faults.append(_keeper_denial.value)
+            _literal_input["errors"].append(_keeper_denial.value)
+            assert _literal_prefix["operation_calls"] == _before_calls + 1
+            assert _pending["complete"] is False and _pending["origin_ns"] is _pending["cutoffs"] is None
+            assert _pending["slots"] == _pending["reads"] == _keeper_literal["slots"] == []
+    assert _keeper_effects == [] and _pending["active_operation"] is None and "keeper_observation_loans" not in _pending
+    assert _literal_input["errors"][-3:] == _keeper_faults
+    assert _literal_prefix["errors"] is _pending["errors"] is _literal_input["errors"]
+    assert _literal_prefix["returned_bytes"] == _keeper_debt[1]
+    assert _literal_prefix["operation_calls"] == _keeper_debt[0] + 3
+
+    # This is only a literal completed-record arithmetic fixture. It does not
+    # run the producer or qualify origin/root/lifetime. The actual prefix owner
+    # must pin each field to the one immutable original result and never reset
+    # its prior attempted debt or retained fault objects.
+    _fixture_origin = 1
+    _fixture_cutoffs = (_fixture_origin, _fixture_origin + 3600 * 10**9,
+        _fixture_origin + 3720 * 10**9)
+    _fixture_request = _literal_input["original_origin_request"]
+    _fixture_names = ("role", "native_root", "evidence_root", "stem", "actor_cgroup",
+        "ancestor_cgroup", "common_cgroup", "bootstrap_cgroup", "holder_cgroup")
+    _fixture_operands = {name: object() for name in _fixture_names}
+    _fixture_original = (_fixture_operands, _literal_input, _fixture_request,
+        _literal_input["initial_source_request"], _literal_input["owner"]) + tuple(
+        _fixture_operands[name] for name in _fixture_names)
+    _fixture_actor, _fixture_holder = (1, 2, 3), (4, 5, 6)
+    _fixture_root, _fixture_pidfd = {}, {}
+    _fixture_groups = {"ancestor": {}}
+    _fixture_result = (_pending, _pending["original"], _fixture_operands,
+        _fixture_original, _fixture_actor, _fixture_holder, _fixture_root,
+        _fixture_pidfd, _fixture_groups, _fixture_cutoffs, _fixture_request,
+        _literal_input["errors"])
+    _prior_debt = (_literal_prefix["operation_calls"], _literal_prefix["returned_bytes"],
+        tuple(_literal_prefix["operations"]), tuple(_literal_prefix["errors"]))
+    with monkeypatch.context() as _completed_fixture:
+        for _name, _value in dict(complete=True, result_original=_fixture_result,
+            operands=_fixture_operands, actor=_fixture_actor, holder=_fixture_holder,
+            root=_fixture_root, holder_pidfd=_fixture_pidfd, held_cgroups=_fixture_groups,
+            origin_ns=_fixture_origin, cutoffs=_fixture_cutoffs).items():
+            _completed_fixture.setitem(_pending, _name, _value)
+        for _name, _value in dict(origin_prebind_result_original=_fixture_result,
+            initial_operands=_fixture_operands, initial_operands_original=_fixture_original,
+            original_origin_ns=_fixture_origin, original_execution_cutoff_ns=_fixture_cutoffs[1],
+            original_settlement_cutoff_ns=_fixture_cutoffs[2]).items():
+            _completed_fixture.setitem(_literal_input, _name, _value)
+        for _name, _value in dict(ancestor=_fixture_groups["ancestor"],
+            origin_ns=_fixture_origin, deadline_ns=_fixture_cutoffs[2], observation=_pending).items():
+            _completed_fixture.setitem(_fixture_request, _name, _value)
+        assert reliability._ordinary_initial_prefix_v1(_literal_input) is _literal_prefix
+        # Literal completed records confer no terminal-owner or descriptor
+        # release authority. These denials occur before any native FD action;
+        # the genuine production cold/role endpoints remain the sole callers.
+        _retirement_effects = []
+        def _forbid_retirement_effect(*args, **kwargs):
+            _retirement_effects.append((args, kwargs))
+            pytest.fail("foreign retirement reached a native descriptor operation")
+        _before_retirement = dict(_pending)
+        with monkeypatch.context() as _retirement_ports:
+            _retirement_ports.setattr(reliability.os, "fstat", _forbid_retirement_effect)
+            _retirement_ports.setattr(reliability.os, "get_inheritable", _forbid_retirement_effect)
+            _retirement_ports.setattr(reliability.os, "close", _forbid_retirement_effect)
+            for _foreign_scope, _terminal_denial in (
+                (None, "COLD_FAILURE_PROVES_NO_NATIVE_DISPATCH"),
+                (object(), "ACTUAL_TERMINAL_SCOPE_AND_ORIGINAL_COMMANDS"),
+            ):
+                with pytest.raises(reliability.ValidationReliabilityError, match=_terminal_denial):
+                    reliability._ordinary_initial_loan_retirement_v1(_literal_input, _foreign_scope)
+                assert _pending == _before_retirement and "retirement" not in _pending
+                assert _pending["slots"] is _pending["original"][14] and _pending["slots"] == []
+                assert _pending["errors"] is _literal_prefix["errors"] is _literal_input["errors"]
+                assert _prior_debt == (_literal_prefix["operation_calls"], _literal_prefix["returned_bytes"],
+                    tuple(_literal_prefix["operations"]), tuple(_literal_prefix["errors"]))
+        assert _retirement_effects == []
+        for _changed_owner, _field, _replacement in (
+            (_pending, "result_original", tuple([*_fixture_result])),
+            (_pending, "cutoffs", tuple([*_fixture_cutoffs])),
+            (_literal_input, "original_execution_cutoff_ns", _fixture_cutoffs[1] + 1),
+            (_fixture_request, "origin_ns", _fixture_origin + 1),
+            (_pending, "producer_code", (lambda: None).__code__),
+        ):
+            with monkeypatch.context() as _completed_fault:
+                _completed_fault.setitem(_changed_owner, _field, _replacement)
+                with pytest.raises(reliability.ValidationReliabilityError,
+                    match="SAME_COMPLETED_ORIGIN_PREBIND_AND_FROZEN_CUTOFFS"):
+                    reliability._ordinary_initial_prefix_v1(_literal_input)
+            assert reliability._ordinary_initial_prefix_v1(_literal_input) is _literal_prefix
+        assert _prior_debt == (_literal_prefix["operation_calls"], _literal_prefix["returned_bytes"],
+            tuple(_literal_prefix["operations"]), tuple(_literal_prefix["errors"]))
+    assert _pending["complete"] is False and _pending["origin_ns"] is _pending["cutoffs"] is None
+    assert _literal_input["native_instance"] is None and _literal_input.get("current_native_observation") is None
+
+
+    # These are pure arithmetic and literal owner/substitution fixtures. They
+    # neither parse a QTT module nor issue a Source/native memory grant.
+    _memo_layout = {"sizes": (("pointer", 8), ("gc", 16),
+        ("bytes_prefix", 33), ("unicode_prefix", 64), ("tuple_prefix", 48),
+        ("list_prefix", 56), ("int_prefix", 24), ("int_digit_bits", 30),
+        ("int_digit_bytes", 4), ("float", 24))}
+    _memo_raw = b"pass\n"
+    _memo11 = (3, (), 0, 0, 0, ((), 0, 0, 0, 1), 0, 0, 0, 0, True)
+    _memo_request = reliability._ordinary_control_current_parser_request_v1
+    _memo_legacy, _memo_held = _memo_request(_memo_layout, _memo_raw, _memo11)
+    _memo_same, _memo_same_held = _memo_request(_memo_layout, _memo_raw, (*_memo11, 28 * 3))
+    assert _memo_same == _memo_legacy and _memo_same_held == _memo_held
+    _memo_zero, _ = _memo_request(_memo_layout, _memo_raw, (*_memo11, 0))
+    _memo_key = "PARSER_ORIGINAL_SHARED_ARENA_AND_MEMO"
+    assert dict(_memo_zero)[_memo_key] < dict(_memo_legacy)[_memo_key]
+    _memo_invalid11 = (*_memo11[:-1], False)
+    _memo_invalid, _ = _memo_request(_memo_layout, _memo_raw, _memo_invalid11)
+    assert dict(_memo_invalid)[_memo_key] > dict(_memo_legacy)[_memo_key]
+    for _memo_bad in ((*_memo11, -1), (*_memo11, True), (*_memo11, 85),
+        (*_memo_invalid11, 0), (*_memo11, object())):
+        with pytest.raises(ValueError, match="QUALIFIED_SOURCE_MEMO"):
+            _memo_request(_memo_layout, _memo_raw, _memo_bad)
+    with pytest.raises(ValueError, match="ORIGINAL_SOURCE_PROFILE"):
+        _memo_request(_memo_layout, _memo_raw, (*_memo11, 0, 0))
+    _memo_callbacks = []
+    class _MemoForeignInteger(int):
+        def __le__(self, other):
+            _memo_callbacks.append("comparison")
+            return True
+    with pytest.raises(ValueError, match="QUALIFIED_SOURCE_MEMO"):
+        _memo_request(_memo_layout, _memo_raw, (*_memo11, _MemoForeignInteger(0)))
+    assert _memo_callbacks == []
+
+    # The actual existing staged owner binds the SAME fixed profile/Source
+    # row before invoking the arithmetic helper. These constructed records are
+    # deliberately fixture DATA; no physical baseline or Linux admission is
+    # asserted. Substitution must veto the first allocator/debit callback.
+    _memo_scope = object.__new__(reliability._LinuxPreflightScopeV1)
+    _memo_source = object.__new__(reliability._LinuxImmutableSourceSealV2)
+    _memo_source.state, _memo_source.failure = "READABLE", None
+    _memo_source.files, _memo_source.row_index, _memo_source.post = {}, {}, {}
+    _memo_scope.source = _memo_source
+    _memo_input = {}
+    _memo_generation = {"errors": [], "native_input_binding": object(),
+        "protected_inputs": object()}
+    _memo_generation_original = (_memo_generation, _memo_input, *([None] * 15))
+    _memo_generation["original"] = _memo_generation_original
+    _memo_native = {"source_generation": _memo_generation, "native_input": _memo_input}
+    _memo_scope._ordinary_bootstrap_runtime_v1 = {"acquisition": {"native_product": _memo_native}}
+    _memo_rows, _memo_originals, _memo_bindings, _memo_fixed = [], [], [], []
+    _memo_profile_producer = reliability._ordinary_control_current_profile_literals_v1
+    _memo_allocator = reliability._ordinary_control_current_staged_request_v1
+    for _memo_index in range(4):
+        _memo_name = f"literal-source-profile-fixture-{_memo_index}"
+        _memo_fixed_row = (_memo_name, len(_memo_raw), 2, 4, 1, (*_memo11, 1))
+        _memo_record = {"filename": _memo_name, "input4": object(),
+            "source_row": object(), "baseline_row": object(),
+            "acquisition": object(), "acquisition_original": object()}
+        _memo_ro = (_memo_record, _memo_generation, _memo_generation["native_input_binding"],
+            _memo_record["input4"], _memo_record["source_row"], _memo_record["baseline_row"],
+            _memo_raw, _memo_raw, _memo_record["acquisition"], _memo_record["acquisition_original"])
+        _memo_record["original"] = _memo_ro
+        _memo_owned = (_memo_record, _memo_ro, _memo_fixed_row, _memo_raw, _memo_raw,
+            _memo_profile_producer, _memo_profile_producer.__code__)
+        _memo_record["profile"] = _memo_owned
+        _memo_version = object()
+        _memo_source.files[_memo_name] = _memo_raw
+        _memo_source.row_index[_memo_name] = _memo_record["source_row"]
+        _memo_source.post[_memo_name] = _memo_version
+        _memo_fixed.append(_memo_fixed_row); _memo_rows.append(_memo_record)
+        _memo_originals.append(_memo_owned)
+        _memo_bindings.append((_memo_record, _memo_ro, _memo_record["source_row"],
+            _memo_version, _memo_raw, _memo_raw, _memo_fixed_row))
+    _memo_payload = (tuple(_memo_fixed), ())
+    _memo_attempt = {"profiles": list(_memo_originals), "errors": [], "complete": True,
+        "source_generation": _memo_generation, "source_original": _memo_generation_original,
+        "producer": _memo_profile_producer, "producer_code": _memo_profile_producer.__code__}
+    _memo_ao = (_memo_attempt, _memo_generation, _memo_generation_original, _memo_input,
+        _memo_generation["native_input_binding"], _memo_generation["protected_inputs"],
+        _memo_rows, _memo_attempt["profiles"], _memo_attempt["errors"])
+    _memo_attempt["original"] = _memo_ao
+    _memo_original = (_memo_generation, _memo_generation_original, _memo_rows,
+        tuple(_memo_originals), _memo_payload, _memo_profile_producer,
+        _memo_profile_producer.__code__, _memo_attempt)
+    _memo_attempt["result"] = _memo_original
+    _memo_generation.update(control_profile_original=_memo_original, control_source_originals=_memo_rows)
+    _memo_input["preloader_source_attempt"] = {"control_profile_attempt": _memo_attempt}
+    _memo_installation = {"complete": True, "errors": []}
+    _memo_installation_original = (_memo_installation, _memo_scope, object(), *([None] * 14))
+    _memo_installation["original"] = _memo_installation_original
+    _memo_stage_profile = (_memo_installation, _memo_scope, _memo_installation_original[2],
+        tuple(_memo_bindings), _memo_payload, _memo_original, _memo_allocator)
+    _memo_installation["control_request_profile_original"] = _memo_stage_profile
+    _memo_effects = []
+    _memo_counters = {"calls": 0, "bytes": 0}
+    def _memo_arithmetic_after_binding(layout, raw, fixed):
+        _memo_effects.append((raw, fixed))
+        _memo_counters["calls"] += 1
+        return (("literal_fixture_AST", 1), ("literal_fixture_scratch", 2)), ("literal_fixture_AST",)
+    with monkeypatch.context() as _memo_ports:
+        _memo_ports.setattr(reliability, "_ordinary_control_current_parser_request_v1", _memo_arithmetic_after_binding)
+        _memo_ports.setattr(reliability, "_ordinary_control_compiler_source_projection_v1",
+            lambda layout, payload: tuple((str(i), 1) for i in range(7)))
+        _memo_result = _memo_allocator(_memo_layout, _memo_installation)
+        assert len(_memo_effects) == 4 and _memo_counters["calls"] == 4
+        assert _memo_result["original_profile"] is _memo_stage_profile
+        _memo_effects.clear(); _memo_counters["calls"] = 0
+        _memo_first = _memo_rows[0]; _memo_owned = _memo_originals[0]
+        for _memo_owner, _memo_field, _memo_substitute in (
+            (_memo_first, "original", tuple([*_memo_first["original"]])),
+            (_memo_first, "profile", (_memo_owned[0], _memo_owned[1], tuple([*_memo_owned[2]]), *_memo_owned[3:])),
+            (_memo_attempt, "producer_code", (lambda: None).__code__),
+            (_memo_attempt, "result", tuple([*_memo_original])),
+            (_memo_source.files, _memo_first["filename"], b"piss\n"),
+            (_memo_source.row_index, _memo_first["filename"], object()),
+            (_memo_source.post, _memo_first["filename"], object()),
+        ):
+            with monkeypatch.context() as _memo_fault:
+                _memo_fault.setitem(_memo_owner, _memo_field, _memo_substitute)
+                with pytest.raises(ValueError, match="CONTROL_CURRENT_STAGED"):
+                    _memo_allocator(_memo_layout, _memo_installation)
+            assert _memo_effects == [] and _memo_counters == {"calls": 0, "bytes": 0}
+        _memo_wrong_binding = (*_memo_bindings[0][:4], b"piss\n", _memo_raw, _memo_bindings[0][6])
+        with monkeypatch.context() as _memo_raw_fault:
+            _memo_raw_fault.setitem(_memo_installation, "control_request_profile_original",
+                (*_memo_stage_profile[:3], (_memo_wrong_binding, *_memo_bindings[1:]), *_memo_stage_profile[4:]))
+            with pytest.raises(ValueError, match="CONTROL_CURRENT_STAGED_FULL_ORIGINAL_BYTES"):
+                _memo_allocator(_memo_layout, _memo_installation)
+        assert _memo_effects == [] and _memo_counters == {"calls": 0, "bytes": 0}
+
+    # Pure Source10 constructor ports: canonical module/Code originals and
+    # independent Code copies below are explicit no-kernel test data.
+    import ast as stage_ast
+    import sys as stage_sys
+    import types as stage_types
+    stage_root = Path(__file__).resolve().parents[2]
+    def stage_read(path):
+        with path.open('rb') as stream:
+            return b''.join(iter(lambda: stream.read(65536), b''))
+    stage_raw = stage_read(stage_root / 'tools' / 'ci_branch_context.py')
+    stage_tree = stage_ast.parse(stage_raw)
+    stage_node = next(node for node in stage_tree.body if isinstance(node, stage_ast.FunctionDef)
+        and node.name == '_ordinary_ci_bootstrap_stage_source_request_v1')
+    stage_body = stage_ast.get_source_segment(stage_raw.decode('utf-8'), stage_node)
+    stage_rel_raw = stage_read(stage_root / 'tools' / 'validation_reliability.py')
+    stage_reg_raw = stage_read(stage_root / 'tools' / 'validation_scope_registry.py')
+    stage_rel_tree = stage_ast.parse(stage_rel_raw)
+    stage_reg_tree = stage_ast.parse(stage_reg_raw)
+    stage_names = ('align_v1', 'size_v1', 'tuple_request_v1', 'list_requests_v1', 'dict_requests_v1')
+    def stage_definitions(raw, tree, prefix):
+        return '\n\n'.join(stage_ast.get_source_segment(raw.decode('utf-8'), node)
+            for node in tree.body if isinstance(node, stage_ast.FunctionDef)
+            and node.name in tuple(prefix + name for name in stage_names))
+    stage_rel_body = stage_definitions(stage_rel_raw, stage_rel_tree, '_ordinary_data_')
+    stage_reg_body = stage_definitions(stage_reg_raw, stage_reg_tree, '_facet_fn_data_')
+    stage_run_body = '''
+def _ordinary_linux_provision_v1():pass
+def _ordinary_bootstrap_heap_prepare_request_v1(*args):pass
+def _ordinary_bootstrap_query_request_v1(*args):pass
+def _ordinary_bootstrap_request_begin_v1(*args):pass
+def _ordinary_bootstrap_request_finish_v1(*args):pass
+def _ordinary_bootstrap_request_fail_v1(*args):pass
+def _ordinary_bootstrap_initial_stage_source_request_v1(product,stage):
+ from tools.ci_branch_context import _ordinary_ci_bootstrap_stage_source_request_v1 as _d
+ return _d(__import__('sys').modules[__name__],product,stage)
+'''
+    stage_rel_body += '''
+def native_issue(product,issuer,stage):
+ return __import__('sys').modules['tools.run_validation_gates']._ordinary_bootstrap_initial_stage_source_request_v1(product,stage)
+def _ordinary_control_code_source_equal_v1(a,b):
+ return type(a)is type(b)and a.co_code==b.co_code and a.co_names==b.co_names
+def _preflight_require_v1(value,label):
+ if not value:raise ValueError(label)
+'''
+    with monkeypatch.context() as stage_ports:
+        stage_package = stage_types.ModuleType('tools'); stage_package.__path__ = []
+        stage_ports.setitem(stage_sys.modules, 'tools', stage_package)
+        stage_modules = {}
+        stage_bodies = {'run_validation_gates': stage_run_body,
+            'validation_reliability': stage_rel_body, 'validation_scope_registry': stage_reg_body,
+            'ci_branch_context': stage_body}
+        for name, body in stage_bodies.items():
+            module = stage_types.ModuleType('tools.' + name)
+            stage_ports.setitem(stage_sys.modules, module.__name__, module)
+            setattr(stage_package, name, module); stage_modules[name] = module
+            code = compile(body, '<explicit-stage-port-' + name + '>', 'exec', flags=0,
+                dont_inherit=True, optimize=0)
+            exec(code, module.__dict__)
+            module._ORDINARY_INITIALIZED_MODULE_CODE_V1 = code
+        stage_rel = stage_modules['validation_reliability']; stage_rel.sys = stage_sys
+        stage_run = stage_modules['run_validation_gates']; stage_ci = stage_modules['ci_branch_context']
+        def stage_fixture():
+            owner = (object(), object()); errors = []; phase = object(); method = stage_rel.native_issue
+            entry = stage_run._ordinary_linux_provision_v1; attempt = {'owner': owner, 'errors': errors}
+            entry_original = (attempt, owner, errors, phase, stage_run, stage_run.__dict__,
+                stage_run._ORDINARY_INITIALIZED_MODULE_CODE_V1, entry, entry.__code__)
+            value = {'entry_original': entry_original, 'errors': errors}
+            source = dict(native_input=value, entry_original=entry_original, runner=stage_run,
+                namespace=stage_run.__dict__, initializer=entry_original[6], entry=entry,
+                entry_code=entry.__code__, module=stage_rel, module_namespace=stage_rel.__dict__,
+                native_method=method, native_method_code=method.__code__, code_paths=(), workflow=object(),
+                expected_module_closure=(), physical_observations=[], errors=errors)
+            source['original'] = (source,) + tuple(source[name] for name in ('native_input',
+                'entry_original', 'runner', 'namespace', 'initializer', 'entry', 'entry_code',
+                'module', 'module_namespace', 'native_method', 'native_method_code', 'code_paths',
+                'workflow', 'expected_module_closure', 'physical_observations', 'errors'))
+            generation = dict(native_input=value, source_generation=source, native_class=object(),
+                constructor=entry, constructor_code=entry.__code__, native_method=method,
+                native_method_code=method.__code__, physical_observations=[], errors=errors)
+            generation['original'] = (generation,) + tuple(generation[name] for name in ('native_input',
+                'source_generation', 'native_class', 'constructor', 'constructor_code', 'native_method',
+                'native_method_code', 'physical_observations', 'errors'))
+            startup = dict(native_input=value, source_generation=source, native_generation=generation,
+                phase=phase, code_paths=source['code_paths'], workflow=source['workflow'],
+                expected_startup_keys=(), expected_basis_keys=(), expected_roles=(),
+                physical_observations=[], errors=errors, startup_binding={}, roles=())
+            startup['original'] = (startup,) + tuple(startup[name] for name in ('native_input',
+                'source_generation', 'native_generation', 'phase', 'code_paths', 'workflow',
+                'expected_startup_keys', 'expected_basis_keys', 'expected_roles', 'physical_observations', 'errors'))
+            limits = dict(work_calls=10, work_bytes=100, settlement_calls=10, settlement_bytes=100,
+                work_loops=10, settlement_loops=10); counters = {name: 0 for name in limits}
+            components = (('explicit-no-kernel', 1),)
+            profile = (value, source, generation, startup, phase, object(), None, components, 20, 200, entry, entry.__code__)
+            allocation = (value, profile, limits, counters)
+            issue = dict(complete=True, components=components, result=profile)
+            issue['original'] = (issue, value, source, generation, startup, phase, entry,
+                entry.__code__, entry_original, errors)
+            issue['result_original'] = (issue, issue['original'], components, tuple(limits.items()), allocation, counters, profile)
+            sizes = dict(pointer=8, gc=16, tuple_prefix=48, list_prefix=56, dict_prefix=64,
+                dict_keys_prefix=32, dict_unicode_entry=16, dict_general_entry=24, control_integer=44)
+            tiny = ((),) * 8; abi = (sizes, tiny)
+            layout = dict(initial_observation=abi, sizes=tuple(sizes.items()), tiny_layout_observations=tiny)
+            layout['original'] = (abi, sizes, tiny, layout['sizes'])
+            native = object(); raw = b'explicit maps'; entries = ((4096, 8192, b'rw-p', 0, 0, 0, 0),)
+            storage = dict(native=native, owner=owner, path=object(), deadline_ns=object(), requests=[], errors=[],
+                raw=raw, entries=entries, mapped_extent=4096, path_before=object(), handle_before=object(),
+                path_after=object(), handle_after=object(), complete=True, closed=True)
+            storage['original'] = (storage, native, owner, storage['path'], storage['deadline_ns'], storage['requests'], storage['errors'])
+            storage['success_original'] = (storage,) + tuple(storage[name] for name in ('native', 'owner', 'path',
+                'path_before', 'handle_before', 'path_after', 'handle_after', 'raw', 'entries', 'mapped_extent',
+                'requests', 'errors', 'deadline_ns'))
+            physical = dict(native=native, native_input=value, errors=errors, complete=True, pending=False,
+                original=object(), result_original=object())
+            hold_names = ('owner', 'service_unit', 'invocation', 'holder_identity', 'holder_pidfd_slot',
+                'holder_cgroup', 'holder_cgroup_slot', 'holder_events_slot', 'ancestor_cgroup', 'ancestor_slot',
+                'cutoffs', 'errors', 'holder_kernel_observations', 'native_input', 'native_generation', 'source_generation', 'startup')
+            hold = {name: object() for name in hold_names}; cuts = (1, 2, 3, 4)
+            hold.update(owner=owner, cutoffs=cuts, errors=errors, native_input=value,
+                native_generation=generation, source_generation=source, startup=startup['startup_binding'])
+            hold['original'] = (hold,) + tuple(hold[name] for name in hold_names)
+            product = dict(native_input=value, native_hold=hold, native_generation=generation,
+                startup=startup['startup_binding'], source_generation=source, roles=startup['roles'],
+                actor=object(), phase=phase, role='PROVISION', native_root=object(), origin_ns=1, errors=errors)
+            product['original'] = (product,) + tuple(product[name] for name in ('native_input', 'native_hold',
+                'native_generation', 'startup', 'source_generation', 'roles', 'actor', 'phase', 'role', 'native_root', 'origin_ns', 'errors'))
+            issuer = dict(entry_attempt=attempt, native_product=product, native_input=value, native=native,
+                stage='STAGE_REQUESTS', physical=physical, hold=hold, original_cutoffs=cuts,
+                abi_observation=abi, initial_layout=layout, storage_data_request={}, initialized_storage=storage)
+            issuer['original'] = (issuer, attempt, owner, errors, phase, stage_run, entry_original[6], entry, entry.__code__)
+            issuer['initialized_original'] = (issuer, value, native, abi, layout, issuer['storage_data_request'],
+                storage, storage['success_original'], physical, physical['original'], physical['result_original'], profile, allocation, errors)
+            observations = []
+            for name, module in stage_modules.items():
+                root = module._ORDINARY_INITIALIZED_MODULE_CODE_V1
+                witness = next(v for v in module.__dict__.values() if type(v) is stage_types.FunctionType)
+                body = stage_bodies[name].encode(); compiled = compile(body, root.co_filename, 'exec',
+                    flags=0, dont_inherit=True, optimize=0)
+                note = dict(record={}, module=module, namespace=module.__dict__, root=root, witness=witness,
+                    raw=body, compiled=compiled, filename=root.co_filename, proof_kind='WHOLE_MODULE_INITIALIZER',
+                    whole_initializer=True, complete=True)
+                note['original'] = (note, note['record'], module, module.__dict__, root, witness,
+                    witness.__code__, body, compiled, note['filename'], note['proof_kind'])
+                observations.append(note)
+            inputs = (); binding = dict(complete=True, inputs=inputs, physical=physical)
+            source.update(protected_inputs=inputs, native_input_binding=binding,
+                source_input4_acquisition=dict(complete=True, result=binding, generation=source,
+                    errors=errors, code_observations=observations))
+            pre = dict(complete=True); ci_root = stage_ci._ORDINARY_INITIALIZED_MODULE_CODE_V1
+            pre['ci_source_code_original'] = (pre, stage_ci, stage_ci.__dict__, ci_root,
+                compile(stage_body, ci_root.co_filename, 'exec', flags=0, dont_inherit=True, optimize=0),
+                {}, stage_ci._ordinary_ci_bootstrap_stage_source_request_v1,
+                stage_ci._ordinary_ci_bootstrap_stage_source_request_v1.__code__)
+            startup['pre_cold_result'] = pre
+            value.update(native_product_attempt=issuer, initial_request_issuer=issue, early_profile=profile,
+                early_allocation_original=allocation, current_native_observation=physical,
+                initialized_storage_attempts=[storage])
+            return product, issuer, issue, storage, allocation
+        product, issuer, issue, storage, allocation = stage_fixture()
+        prepare = stage_rel.native_issue(product, issuer, 'PREPARE')
+        query = stage_rel.native_issue(product, issuer, 'QUERY')
+        assert len(prepare) == len(query) == 10
+        assert prepare[0] is query[0] is product and prepare[4] is query[4] is issuer['initial_layout']
+        assert prepare[7] is stage_run._ordinary_bootstrap_heap_prepare_request_v1
+        assert query[7] is stage_run._ordinary_bootstrap_query_request_v1
+        assert prepare[8] is prepare[7].__code__ and query[8] is query[7].__code__
+        assert dict(prepare[5])['original_interpreter_and_prior_intern_storage'] == storage['mapped_extent']
+        assert 'original_interpreter_and_prior_intern_storage' not in dict(query[5])
+        assert 'original_native_stack_and_allocator_backing' not in dict(prepare[5])
+        assert 'original_native_stack_and_allocator_backing' not in dict(query[5])
+        assert all(type(amount) is int and amount > 0 for _, amount in prepare[5] + query[5])
+        assert 'heap_record' not in product and all(n == 0 for n in allocation[3].values())
+        assert issue['stage_requests']['PREPARE']['request'] is prepare
+        assert issue['stage_requests']['QUERY']['request'] is query
+        with pytest.raises(ValueError):stage_rel.native_issue(product, issuer, 'QUERY')
+        for reason in ('query_first', 'layout', 'getter', 'pool', 'code_note', 'direct'):
+            product, issuer, issue, storage, allocation = stage_fixture()
+            if reason == 'layout':issuer['initial_layout'] = dict(issuer['initial_layout'])
+            if reason == 'getter':storage['raw'] = bytes(bytearray(storage['raw']))
+            if reason == 'pool':allocation[2]['work_calls'] += 1; allocation[2]['settlement_calls'] -= 1
+            if reason == 'code_note':product['source_generation']['source_input4_acquisition']['code_observations'][0]['raw'] = b'foreign'
+            with pytest.raises(ValueError):
+                if reason == 'direct':stage_ci._ordinary_ci_bootstrap_stage_source_request_v1(stage_run, product, 'PREPARE')
+                else:stage_rel.native_issue(product, issuer, 'QUERY' if reason == 'query_first' else 'PREPARE')
+            assert not issue.get('stage_requests') and all(n == 0 for n in allocation[3].values())
+
+    # The private original lexical programme refuses before Path allocation.
+    import ast as path_stock_ast
+    import types as path_stock_types
+    from pathlib import PosixPath as path_stock_type
+    import os as path_stock_os
+    path_stock_source = copied_sources['tools/ci_branch_context.py']
+    path_stock_tree = path_stock_ast.parse(path_stock_source)
+    path_stock_fn = next(n for n in path_stock_tree.body
+                        if type(n) is path_stock_ast.FunctionDef
+                        and n.name == '_ordinary_ci_initial_path_stock_v1')
+    path_stock_module = path_stock_types.ModuleType('original_path_stock_fixture')
+    path_stock_namespace = path_stock_module.__dict__
+    exec('def _ordinary_ci_initial_direct_request_v1(*args): return None', path_stock_namespace)
+    exec(compile(path_stock_ast.Module(body=[path_stock_fn], type_ignores=[]),
+                 '<same original private path fixture>', 'exec',
+                 flags=0, dont_inherit=True, optimize=0), path_stock_namespace)
+    path_stock_guard = path_stock_namespace[path_stock_fn.name]
+    path_stock_native = {}; path_stock_generation = {}; path_stock_issue = {}
+    from pathlib import PurePosixPath as path_stock_pure_type
+    path_stock_paths_list = []
+    for path_stock_index in range(7):
+        path_stock_one = object.__new__(path_stock_type)
+        path_stock_pure_type.__init__(path_stock_one, '/original/source/' + str(path_stock_index))
+        path_stock_paths_list.append(path_stock_one)
+    path_stock_paths = tuple(path_stock_paths_list)
+    path_stock_original = [None] * 17
+    path_stock_original[0] = path_stock_generation
+    path_stock_original[1] = path_stock_native
+    path_stock_original[13] = path_stock_paths[0]
+    path_stock_original[14] = path_stock_paths[1:]
+    path_stock_generation['original'] = tuple(path_stock_original)
+    path_stock_values = tuple(map(str, path_stock_paths))
+    path_stock_temp = path_stock_os.environ.get('RUNNER_TEMP')
+    if path_stock_temp is None:
+        monkeypatch.setenv('RUNNER_TEMP', '/original/temporary')
+        path_stock_temp = '/original/temporary'
+    path_stock_extent = max(len(path_stock_temp), *map(len, path_stock_values)) + 192
+    path_stock_result = (path_stock_native, path_stock_generation, None, None,
+                         'PROVISION', None, None, (), 1, 1, None, None)
+    path_stock_allocation = (path_stock_native, path_stock_result, {}, {})
+    path_stock_native.update(initial_request_issuer=path_stock_issue,
+                             early_profile=path_stock_result,
+                             early_allocation_original=path_stock_allocation)
+    path_stock_direct = path_stock_namespace['_ordinary_ci_initial_direct_request_v1']
+    path_stock_issue.update(native_input=path_stock_native,
+        source_generation=path_stock_generation, complete=True,
+        result=path_stock_result, allocation=path_stock_allocation,
+        result_original=(path_stock_issue, None, (), (), path_stock_allocation,
+                         path_stock_allocation[3], path_stock_result))
+    path_stock_frozen = (path_stock_issue, path_stock_generation,
+        path_stock_generation['original'], path_stock_paths, path_stock_values,
+        path_stock_temp, path_stock_extent, path_stock_direct, path_stock_direct.__code__)
+    path_stock_issue['path_stock_original'] = path_stock_frozen
+    assert path_stock_guard(path_stock_native, '/original/selected') == '/original/selected'
+    assert path_stock_guard(path_stock_native, path_stock_paths[0]) is path_stock_paths[0]
+    path_stock_effects = []
+    for path_stock_change in ('extent', 'strings', 'unfinished', 'original-shape', 'result-shape'):
+        path_stock_issue['path_stock_original'] = path_stock_frozen
+        path_stock_issue['complete'] = True
+        path_stock_issue['result_original'] = (path_stock_issue, None, (), (),
+            path_stock_allocation, path_stock_allocation[3], path_stock_result)
+        path_stock_generation['original'] = path_stock_frozen[2]
+        if path_stock_change == 'extent':
+            path_stock_issue['path_stock_original'] = (*path_stock_frozen[:6],
+                path_stock_extent + 1, *path_stock_frozen[7:])
+        elif path_stock_change == 'strings':
+            path_stock_issue['path_stock_original'] = (*path_stock_frozen[:4],
+                ('changed', *path_stock_values[1:]), *path_stock_frozen[5:])
+        elif path_stock_change == 'unfinished': path_stock_issue['complete'] = False
+        elif path_stock_change == 'original-shape': path_stock_generation['original'] = object()
+        else: path_stock_issue['result_original'] = object()
+        with pytest.raises(ValueError):
+            path_stock_guard(path_stock_native, '/original/selected')
+        assert path_stock_effects == []
+    path_stock_generation['original'] = path_stock_frozen[2]
+    path_stock_issue['path_stock_original'] = path_stock_frozen
+    path_stock_issue['complete'] = True
+    path_stock_issue['result_original'] = (path_stock_issue, None, (), (),
+        path_stock_allocation, path_stock_allocation[3], path_stock_result)
+    with pytest.raises(ValueError):
+        path_stock_guard(path_stock_native, '/' + 'x' * path_stock_extent)
+        path_stock_effects.append('Path or native effect')
+    assert path_stock_effects == []
+    class PathStockForeign:
+        def __str__(self):
+            path_stock_effects.append('foreign callback')
+            return '/original/selected'
+    with pytest.raises(ValueError): path_stock_guard(path_stock_native, PathStockForeign())
+    assert path_stock_effects == []
+
+    assert _common_prerequisite_calls
+    assert all(profile is value["initial_source_request"] and allocation is value["early_allocation_original"]
+        for value, profile, allocation in _common_prerequisite_calls)
+
+    # These isolated Source fixtures run the exact private checker with explicit
+    # local carrier objects. They create no QTT issuer, native library or child,
+    # and do not qualify the numeric COMMON programme or cross-process custody.
+    _common_source_text = copied_sources["tools/ci_branch_context.py"].decode("utf-8")
+    _common_source_tree = _script_ast.parse(_common_source_text)
+    _common_names = ("_ordinary_ci_initial_common_source_v1", "_ordinary_ci_initial_common_source_check_v1")
+    _common_nodes = [node for node in _common_source_tree.body
+        if isinstance(node, _script_ast.FunctionDef) and node.name in _common_names]
+    assert tuple(node.name for node in _common_nodes) == _common_names
+    _common_root = compile(_script_ast.Module(body=_common_nodes, type_ignores=[]),
+        "<same private COMMON Source fixture>", "exec", flags=0, dont_inherit=True, optimize=0)
+    _common_module = _PrefixModule("_qtt_common_source_fixture")
+    _common_namespace = _common_module.__dict__
+    _common_namespace["_ORDINARY_INITIALIZED_MODULE_CODE_V1"] = _common_root
+    exec(_common_root, _common_namespace, _common_namespace)
+    _common_supplier = _common_namespace[_common_names[0]]
+    _common_checker = _common_namespace[_common_names[1]]
+    assert _common_supplier.__globals__ is _common_checker.__globals__ is _common_namespace
+    assert any(code is _common_supplier.__code__ for code in _common_root.co_consts)
+    _common_native = dict(errors=[]); _common_generation = {}; _common_issue = {}
+    _common_source_original = [_common_generation, _common_native] + [object() for _ in range(15)]
+    _common_generation["original"] = tuple(_common_source_original)
+    _common_native["source_generation"] = _common_generation
+    _common_components = (("explicit_no_child_only", 1),)
+    _common_limits = dict(work_calls=20, work_bytes=32, settlement_calls=4,
+        settlement_bytes=16, work_loops=8, settlement_loops=2)
+    _common_counters = {name: 0 for name in _common_limits}
+    def _common_fixture_emitter():
+        raise AssertionError("isolated fixture never issues an operational request")
+    _common_profile = (_common_native, _common_generation, {}, {}, "fast-preflight", {}, None,
+        _common_components, 24, 48, _common_fixture_emitter, _common_fixture_emitter.__code__)
+    _common_allocation = (_common_native, _common_profile, _common_limits, _common_counters)
+    _common_native.update(initial_request_issuer=_common_issue, initial_source_request=_common_profile,
+        early_profile=_common_profile, early_allocation_original=_common_allocation)
+    _common_issue_original = (_common_issue, _common_native, _common_generation,
+        _common_profile[2], _common_profile[3], _common_profile[4], _common_fixture_emitter,
+        _common_fixture_emitter.__code__, object(), _common_native["errors"])
+    _common_issue.update(source_generation=_common_generation, native_input=_common_native,
+        original=_common_issue_original, complete=True, result=_common_profile,
+        allocation=_common_allocation, limits=_common_limits, components=_common_components,
+        errors=_common_native["errors"], path_stock_original=(None,) * 6 + (64, None, None))
+    _common_issued = (_common_issue, _common_issue_original, _common_components,
+        tuple(_common_limits.items()), _common_allocation, _common_counters, _common_profile)
+    _common_issue["result_original"] = _common_issued
+    _common_parent_paths = tuple(sys.path)
+    _common_source9 = _common_supplier(64, len(_common_parent_paths))
+    _common_original = (_common_issue, _common_generation, _common_generation["original"],
+        _common_supplier, _common_supplier.__code__, _common_namespace, _common_parent_paths, _common_source9)
+    _common_issue["common_source_original"] = _common_original
+    assert len(_common_source9) == 9 and all(type(n) is int and n > 0 for n in _common_source9)
+    assert _common_checker(_common_native, _common_profile, _common_allocation) is _common_source9
+    assert all(n == 0 for n in _common_counters.values()) and _common_profile[6] is None
+    _common_replacements = (object(), {}, tuple(list(_common_generation["original"])),
+        _common_fixture_emitter, _common_fixture_emitter.__code__, {},
+        (*_common_parent_paths, "foreign-parent-path"), (_common_source9[0] + 1, *_common_source9[1:]))
+    for _common_index, _common_replacement in enumerate(_common_replacements):
+        _common_changed = list(_common_original); _common_changed[_common_index] = _common_replacement
+        with monkeypatch.context() as _common_binding_fault:
+            _common_binding_fault.setitem(_common_issue, "common_source_original", tuple(_common_changed))
+            with pytest.raises(ValueError, match="SAME_COMPLETE_COMMON_SOURCE_AND_FROZEN_ALLOCATION"):
+                _common_checker(_common_native, _common_profile, _common_allocation)
+        assert all(n == 0 for n in _common_counters.values())
+        assert _common_issue["common_source_original"] is _common_original
+    with monkeypatch.context() as _common_pool_fault:
+        _common_pool_fault.setitem(_common_limits, "work_calls", 19)
+        _common_pool_fault.setitem(_common_limits, "settlement_calls", 5)
+        with pytest.raises(ValueError, match="SAME_COMPLETE_COMMON_SOURCE_AND_FROZEN_ALLOCATION"):
+            _common_checker(_common_native, _common_profile, _common_allocation)
+    assert tuple(_common_limits.items()) == _common_issued[3] and all(n == 0 for n in _common_counters.values())
+    with monkeypatch.context() as _common_root_fault:
+        _common_root_fault.setitem(_common_namespace, "_ORDINARY_INITIALIZED_MODULE_CODE_V1",
+            _common_fixture_emitter.__code__)
+        with pytest.raises(ValueError, match="SAME_COMPLETE_COMMON_SOURCE_AND_FROZEN_ALLOCATION"):
+            _common_checker(_common_native, _common_profile, _common_allocation)
+    assert _common_namespace["_ORDINARY_INITIALIZED_MODULE_CODE_V1"] is _common_root
+    _common_debit_nodes = [node for node in _common_source_tree.body
+        if isinstance(node, _script_ast.FunctionDef) and node.name == "_facet_fn_initial_native_debit_v1"]
+    assert len(_common_debit_nodes) == 1
+    _common_debit_source = _script_ast.get_source_segment(_common_source_text, _common_debit_nodes[0])
+    assert _common_debit_source.index("_ordinary_ci_initial_common_source_check_v1(native_input,profile,allocation)") < _common_debit_source.index("allocation[3][pool] +=")
+    assert _common_checker(_common_native, _common_profile, _common_allocation) is _common_source9
+    assert _common_issue["result_original"] is _common_issued and _common_issue["allocation"] is _common_allocation
+    assert all(n == 0 for n in _common_counters.values())
 
 
 def test_validate_validation_inventory_direct_script_imports_pr208_modules_without_pythonpath():
@@ -4935,6 +6067,50 @@ def test_runner_phase_manifest_covers_full_validation_plan(monkeypatch):
             runner._project_probability_validation_manifest_v1(runner_source, scope_source, **{**options, key: value})
         assert {name for name in sys.modules if name.startswith("_qtt_v35_finite_manifest_")} == finite_before
 
+    # These are pure source-profile denials. The context object is a no-child
+    # marker, and no active Linux scope or native containment is constructed.
+    capture_nodes = [node for node in ast.parse(runner_source).body if
+                     isinstance(node, ast.FunctionDef) and node.name == "_ordinary_pytest_source_capture_v1"]
+    assert len(capture_nodes) == 1
+    capture_body = ast.get_source_segment(runner_source.decode("utf-8"), capture_nodes[0])
+    capture_return = "if type(scope) is not _LinuxPreflightScopeV1:\n  return"
+    assert capture_body.count(capture_return) == 1
+    manifest_nodes = [node for node in ast.parse(runner_source).body if
+                      isinstance(node, ast.FunctionDef) and node.name == "build_phase_manifest"]
+    assert len(manifest_nodes) == 1
+    manifest_body = ast.get_source_segment(runner_source.decode("utf-8"), manifest_nodes[0])
+    capture_expression = "_ordinary_pytest_source_capture_v1(phase, None, commands, copies=copies)"
+    assert manifest_body.count(capture_expression) == 1
+    capture_negatives = (
+        (replaced_declaration(runner_source, "_ordinary_pytest_source_capture_v1",
+            capture_body.replace(capture_return, "if False:\n  return", 1)),
+            "manifest capture requires original ScopeNone profile"),
+        (runner_source + b"\n" + capture_body.encode("utf-8") + b"\n",
+            "manifest capture requires original ScopeNone profile"),
+        (replaced_declaration(runner_source, "build_phase_manifest",
+            manifest_body.replace(capture_expression,
+                "_ordinary_pytest_source_capture_v1(phase, None, commands, copies=None)", 1)),
+            "unselected manifest call: _ordinary_pytest_source_capture_v1"),
+    )
+    for bad, reason in capture_negatives:
+        with pytest.raises(ValueError, match=reason):
+            runner._project_probability_validation_manifest_v1(bad, scope_source, **{**options,
+                "expected_runner_source": bad, "byte_limit": len(bad) + len(scope_source),
+                "node_limit": node_count + 1000})
+        assert {name for name in sys.modules if name.startswith("_qtt_v35_finite_manifest_")} == finite_before
+    original_capture_context = reliability._LINUX_PREFLIGHT_PROCESS_V1.get()
+    assert original_capture_context is None
+    active_capture_context = object()
+    capture_token = reliability._LINUX_PREFLIGHT_PROCESS_V1.set(active_capture_context)
+    try:
+        with pytest.raises(ValueError, match="manifest capture requires original ScopeNone profile"):
+            runner._project_probability_validation_manifest_v1(runner_source, scope_source, **options)
+        assert reliability._LINUX_PREFLIGHT_PROCESS_V1.get() is active_capture_context
+        assert {name for name in sys.modules if name.startswith("_qtt_v35_finite_manifest_")} == finite_before
+    finally:
+        reliability._LINUX_PREFLIGHT_PROCESS_V1.reset(capture_token)
+    assert reliability._LINUX_PREFLIGHT_PROCESS_V1.get() is original_capture_context
+
 
 def test_runner_assigns_canonical_non_pytest_commands_to_one_phase(monkeypatch):
     python_executable = r"C:\repo\.venv\Scripts\python.exe"
@@ -4965,6 +6141,49 @@ def test_runner_assigns_canonical_non_pytest_commands_to_one_phase(monkeypatch):
     assert not any(
         runner._command_uses_pytest_helper(command) for command in phase_non_pytest
     )
+
+    # Source recipe projections are pure data cases; no native admission or
+    # scientific builder is executed by these inner assertions.
+    root = Path.cwd() / "ordinary-source-output-projection"
+    leaves = reliability._ordinary_deterministic_run_output_operands_v1(
+        ("python", "tools/validator.py", "--out", str(root / "nested" / "report.json")),
+        root, ("--out",))
+    assert leaves == (("--out", root / "nested" / "report.json"),)
+    for arguments in (
+        ("python", "--out", str(root)),
+        ("python", "--out", str(root.parent / "outside.json")),
+        ("python", "--out", str(root / ".." / "outside.json")),
+        ("python", "--out", "relative.json"),
+        ("python", "--out", str(root / "x.json"), "--out", str(root / "y.json")),
+        ("python", "--out"),
+    ):
+        with pytest.raises(reliability.ValidationReliabilityError):
+            reliability._ordinary_deterministic_run_output_operands_v1(arguments, root, ("--out",))
+    roots = ("PR168_GFP_CanonicalRowKeyMap.report.json", "PR168_GFP_MasterPlanFormulaCatalog.report.json",
+        "PR168_GFP_GlobalLabelInventory.report.json")
+    names, bounds = reliability._ordinary_deterministic_gfp_names_v1(roots, (roots[0], roots[2]),
+        qku_count=1001, candidate_count=0, atomicrows_count=0, pr154_count=0,
+        label_count_cap=1, name_limit=6)
+    assert names == (
+        "docs/master_plan/generated/PR168_GFP_CanonicalRowKeyMap.report.json",
+        "docs/master_plan/generated/PR168_GFP_MasterPlanFormulaCatalog.report.json",
+        "docs/master_plan/generated/PR168_GFP_GlobalLabelInventory.report.json",
+        "docs/master_plan/generated/pr168_gfp_shards/PR168_GFP_CanonicalRowKeyMap.report.shard_0001.json",
+        "docs/master_plan/generated/pr168_gfp_shards/PR168_GFP_CanonicalRowKeyMap.report.shard_0002.json",
+        "docs/master_plan/generated/pr168_gfp_shards/PR168_GFP_GlobalLabelInventory.report.shard_0001.json")
+    assert bounds == ((roots[0], 1001), (roots[2], 1))
+    empty, zero = reliability._ordinary_deterministic_gfp_names_v1(roots, (roots[0], roots[2]),
+        qku_count=0, candidate_count=0, atomicrows_count=0, pr154_count=0,
+        label_count_cap=0, name_limit=3)
+    assert empty == names[:3] and zero == ((roots[0], 0), (roots[2], 0))
+    with pytest.raises(reliability.ValidationReliabilityError):
+        reliability._ordinary_deterministic_gfp_names_v1(roots, (roots[0], roots[2]),
+            qku_count=1001, candidate_count=0, atomicrows_count=0, pr154_count=0,
+            label_count_cap=1, name_limit=5)
+    with pytest.raises(reliability.ValidationReliabilityError):
+        reliability._ordinary_deterministic_gfp_names_v1(roots, (roots[0],),
+            qku_count=True, candidate_count=0, atomicrows_count=0, pr154_count=0,
+            label_count_cap=0, name_limit=10)
 
 
 def test_runner_deterministic_phase_moves_preflight_validator_out_of_long_phase():
@@ -7334,6 +8553,907 @@ def test_runner_restores_only_runtime_side_effects_before_pr142_pr143_and_final_
     _exercise_preflight_observation_v1(tmp_path, monkeypatch)
     _exercise_preflight_candidate_debits_v1(tmp_path, monkeypatch)
     _exercise_preflight_transport_v1(tmp_path, monkeypatch, capsys)
+    # Finite CONTROL algorithms and no-child port oracles only. These cases
+    # grant no native Scope, acquire no disk backend and qualify no namespace.
+    import ast
+    import struct
+    disk_type = runner._ValidationCandidateCustodyV1
+    control_limits = dict(baseline_byte_limit=64, generation_byte_limit=64,
+        index_byte_limit=16, namespace_entry_limit=8, path_pool_byte_limit=64,
+        single_path_byte_limit=64, action_record_limit=0, diagnostic_owner_byte_limit=4096,
+        raw_read_byte_limit=65536, raw_write_byte_limit=65536, raw_retained_byte_limit=65536,
+        extra_held_byte_limit=0, extra_held_carrier_limit=0, metadata_byte_limit=1048576,
+        metadata_call_limit=10000, metadata_read_limit=65536, metadata_write_limit=65536,
+        native_control_read_limit=65536, native_control_write_limit=65536,
+        native_control_call_limit=10000, heap_byte_limit=1048576, native_handle_limit=16,
+        carrier_file_byte_limit=64, allocated_storage_byte_limit=1048576,
+        mapper_activation_read_reserve=0, mapper_activation_retained_reserve=0,
+        file_baseline_rows=2, file_generation_rows=2, directory_baseline_rows=2,
+        directory_generation_rows=2, roster_baseline_edges=4, roster_generation_edges=4)
+    # Original M acquisition grammar and demand construction only. These pure
+    # source cases execute no builder, SourceSeal, C/native factory or child.
+    # There is no synthetic positive operational Scope admission.
+    for family_package, artifact_name in (
+        ('pr166_qb_bounded_quantum_benchmark', 'test_pr166_qb_artifacts.py'),
+        ('pr166_qc_quantum_selected_replay_paper_retest', 'test_pr166_qc_artifacts.py'),
+        ('pr162e_q_quantum_automapper', 'test_pr162e_q_artifacts.py'),
+    ):
+        source_prefix = runner.REPO_ROOT / 'src/qtt/stage1_prediction_markets' / family_package
+        test_prefix = runner.REPO_ROOT / 'tests/stage1_prediction_markets' / family_package
+        # Selected literal source operands are bounded individual modules;
+        # expected rosters come independently from their literal AST nodes.
+        bodies = tuple(path.read_bytes() for path in (
+            source_prefix / 'constants.py', source_prefix / 'report_writer.py',
+            test_prefix / 'helpers.py', test_prefix / artifact_name,
+            test_prefix / artifact_name.replace('_artifacts.py', '_idempotence.py')))
+        nodes = sum(sum(1 for _ in ast.walk(ast.parse(raw.decode('utf-8')))) for raw in bodies)
+        literal_rosters = {}
+        for declaration in ast.parse(bodies[0].decode('utf-8')).body:
+            names = declaration.targets if isinstance(declaration, ast.Assign) else (
+                (declaration.target,) if isinstance(declaration, ast.AnnAssign) else ())
+            for name in names:
+                if isinstance(name, ast.Name) and name.id in ('REPORT_FILENAMES', 'STRICT_INPUT_REPORTS'):
+                    literal_rosters[name.id] = ast.literal_eval(declaration.value)
+        compiled = runner._ordinary_mapper_source_grammar_v1(*bodies, node_limit=nodes)
+        assert compiled['report_names'] == literal_rosters['REPORT_FILENAMES']
+        assert compiled['upstream_names'] == literal_rosters['STRICT_INPUT_REPORTS']
+        assert compiled['source_ast_nodes'] == nodes
+        assert compiled['idempotence_source_acquisitions'] == 2
+        assert len(compiled['schema_names']) == len(literal_rosters['REPORT_FILENAMES'])
+        assert len(compiled['collected_names']) == len(set(compiled['collected_names']))
+        assert sum(kind == 'VALIDATOR' for kind, *_ in compiled['events']) == 1
+        for rejected_nodes in (True, False, 0, nodes - 1):
+            with pytest.raises(reliability.ValidationReliabilityError, match='ORDINARY_M_SOURCE_(NODE_LIMIT|NODE_ALLOCATION)') as mapper_source_denial:
+                runner._ordinary_mapper_source_grammar_v1(*bodies, node_limit=rejected_nodes)
+            assert mapper_source_denial.value.code == 'ENGVR_PREPUBLICATION_CUSTODY_FAILED'
+        malformed = (*bodies[:1], b'def schema_filename(report_filename):\n    return report_filename\n', *bodies[2:])
+        with pytest.raises(reliability.ValidationReliabilityError, match='ORDINARY_M_(ORIGINAL_SCHEMA|SCHEMA_)') as mapper_source_denial:
+            runner._ordinary_mapper_source_grammar_v1(*malformed, node_limit=nodes)
+        assert mapper_source_denial.value.code == 'ENGVR_PREPUBLICATION_CUSTODY_FAILED'
+        constant_tree = ast.parse(bodies[0].decode('utf-8'))
+        report_declaration = next(declaration for declaration in constant_tree.body
+            if isinstance(declaration, (ast.Assign, ast.AnnAssign))
+            and any(isinstance(name, ast.Name) and name.id == 'REPORT_FILENAMES'
+                for name in (declaration.targets if isinstance(declaration, ast.Assign) else (declaration.target,))))
+        report_declaration.value = ast.parse(repr((literal_rosters['REPORT_FILENAMES'][0],) * 2), mode='eval').body
+        duplicate_bodies = (ast.unparse(constant_tree).encode('utf-8'), *bodies[1:])
+        with pytest.raises(reliability.ValidationReliabilityError, match='ORDINARY_M_ORIGINAL_LITERAL_ROSTER') as mapper_source_denial:
+            runner._ordinary_mapper_source_grammar_v1(*duplicate_bodies, node_limit=nodes)
+        assert mapper_source_denial.value.code == 'ENGVR_PREPUBLICATION_CUSTODY_FAILED'
+    with pytest.raises(reliability.ValidationReliabilityError, match='ORDINARY_M_ORIGINAL_PRE_C_SOURCE_BINDING') as mapper_source_denial:
+        runner._ordinary_mapper_sources_v1(None, 'pytest-shards-4', (),
+            scope=None, census=None, source=None, parser_limits=None, source_node_limit=1)
+    assert mapper_source_denial.value.code == 'ENGVR_PREPUBLICATION_CUSTODY_FAILED'
+
+    literal_layout = {"FILE_HEADERS":896, "DIRECTORY_HEADERS":1088, "ROSTER":96,
+        "PATH_POOL":64, "OFFSETS":72, "BINDING":160, "ACTIONS":32}
+    assert disk_type._disk_control_layout_v1(control_limits) == literal_layout
+    assert sum(literal_layout.values()) == 2408
+    for key, bad in (("native_handle_limit", True), ("file_baseline_rows", 32769),
+                     ("metadata_byte_limit", 2407)):
+        with pytest.raises(ValueError):
+            disk_type._disk_control_layout_v1({**control_limits, key:bad})
+    control_root = tmp_path / "disk-controls"
+    control_root.mkdir()
+    empty_directory = control_root / "empty"
+    empty_directory.mkdir()
+    (control_root / "source.py").write_bytes(b"ABCD")
+    root_info, empty_info = control_root.stat(), empty_directory.stat()
+    literal_directory_version = (root_info.st_dev, root_info.st_ino, root_info.st_mode,
+        root_info.st_size, root_info.st_mtime_ns, root_info.st_ctime_ns,
+        root_info.st_nlink, root_info.st_uid, root_info.st_gid)
+    assert disk_type._disk_version_v1(root_info) == literal_directory_version
+    with pytest.raises(ValueError):
+        reliability._scan_file_identity(root_info)
+    file_info = (control_root / "source.py").stat()
+    assert disk_type._disk_version_v1(file_info) == reliability._scan_same_api_version(file_info)
+    control_plan = runner._prepare_execution_plan(((sys.executable, "tools/control_fixture.py"),))
+    with monkeypatch.context() as default_owner:
+        default_owner.setattr(runner, "_ORDINARY_CANDIDATE_FIRST_V1", False)
+        control_candidate = _synthetic_candidate_custody_v1(control_root, control_plan,
+            observed_paths=lambda:("source.py",), effects=())
+    sentinel = (1 << 64) - 1
+    binding = {"domain_id":0}
+    baseline = dict(ordinal=1, region=0, complete=True, directory_start=0,
+        directory_count=2, file_count=0, roster_start=0, roster_count=1)
+    state = dict(baseline_generation=baseline, regions={0:baseline}, roots=(binding,),
+        capturing_generation=None, names=((0,""),(0,"empty")), path_bytes=5,
+        directory_header_published=False, directory_header_roles=None,
+        directory_header_words=None, full_barriers=0, verified_generations={},
+        lookup={(0,""):0,(0,"empty"):1}, errors=[], pending_capture=None,
+        scope=None, config=None)
+    writes, reads, scope_checks = [], [], []
+    # This untyped object is only the explicit synthetic comparison port. The
+    # real constructor's exact Scope admission is never called or replaced.
+    class ControlPorts:
+        def check_storage_binding(self, actual, config):
+            assert actual is control_candidate and config is None
+            scope_checks.append(actual)
+    state["scope"] = ControlPorts()
+    def write_control(role, offset, raw, **keywords):
+        writes.append((role, offset, raw, keywords))
+    root_row = (1,0,0,sentinel,1,2,1,0,1,0,*literal_directory_version,0)
+    empty_row = (1,0,1,0,1,2,1,0,0,0,empty_info.st_dev,empty_info.st_ino,
+        empty_info.st_mode,empty_info.st_size,empty_info.st_mtime_ns,empty_info.st_ctime_ns,
+        empty_info.st_nlink,empty_info.st_uid,empty_info.st_gid,0)
+    literal_words = (0x3130524944545451,1,0,2,0,2,sentinel,0,1,2,5,0,1,
+        control_candidate.process_id,control_candidate.thread_id,0)
+    literal_header = struct.pack("<16Q", *literal_words)
+    packets = {("DIRECTORY_HEADERS",0,128):literal_header,
+        ("DIRECTORY_HEADERS",128,160):struct.pack("<20Q", *root_row),
+        ("DIRECTORY_HEADERS",288,160):struct.pack("<20Q", *empty_row),
+        ("ROSTER",0,8):b"\x01\x00\x00\x00\x00\x00\x00\x00"}
+    def read_control(role, offset, length):
+        reads.append((role, offset, length))
+        return packets[role,offset,length]
+    nodes = {(0,""):(binding,"",root_info,sentinel),
+        (0,"empty"):(binding,"empty",empty_info,(0,""))}
+    with monkeypatch.context() as controls:
+        controls.setattr(control_candidate, "_disk_light_v1", lambda:state)
+        controls.setattr(control_candidate, "_disk_control_write_v1", write_control)
+        controls.setattr(control_candidate, "_disk_control_read_v1", read_control)
+        controls.setattr(control_candidate, "_disk_namespace_v1", lambda paths:(state["names"],nodes))
+        control_candidate._disk_publish_directory_v1(baseline)
+        assert writes == [("DIRECTORY_HEADERS",0,literal_header,{"replace_header":False})]
+        assert literal_header[:8] == b"QTTDIR01" and len(literal_header) == 128
+        assert state["directory_header_words"] == literal_words
+        assert state["directory_header_roles"] == (baseline,baseline,None)
+        control_candidate._disk_compare_live(baseline, include_index=False)
+        assert state["full_barriers"] == 1 and state["verified_generations"] == {1:1}
+        assert max(length for _,_,length in reads) == 160
+        for damaged, where in ((root_row[:7]+(1,)+root_row[8:],128),
+                               (empty_row[:7]+(7,)+empty_row[8:],288)):
+            key = ("DIRECTORY_HEADERS",where,160)
+            original_packet = packets[key]
+            packets[key] = struct.pack("<20Q", *damaged)
+            try:
+                with pytest.raises(ValueError, match="DIRECTORY_ROSTER_CHANGED"):
+                    control_candidate._disk_compare_live(baseline, include_index=False)
+            finally:
+                packets[key] = original_packet
+            assert state["full_barriers"] == 1 and state["verified_generations"] == {1:1}
+        settled = dict(ordinal=2,region=1,complete=True,directory_start=2,directory_count=2,roster_count=2)
+        pending = dict(ordinal=3,region=2,complete=False,directory_start=4,directory_count=2,roster_count=3)
+        state["regions"].update({1:settled,2:pending})
+        state["capturing_generation"] = pending
+        state["pending_capture"] = {"ordinal":3,"complete":False}
+        control_candidate._disk_publish_directory_v1(settled, pending=pending)
+        distinct_words = (0x3130524944545451,1,0,2,2,2,4,2,6,2,5,0,1,
+            control_candidate.process_id,control_candidate.thread_id,0)
+        assert writes[-1] == ("DIRECTORY_HEADERS",0,struct.pack("<16Q", *distinct_words),{"replace_header":True})
+        assert state["directory_header_roles"][0] is baseline and state["directory_header_roles"][2] is pending
+        original_pending = state["pending_capture"]
+        original_roles, original_words = state["directory_header_roles"], state["directory_header_words"]
+        header_error = OSError("synthetic CONTROL publication/readback failure")
+        def failed_control_write(*args, **keywords):
+            raise header_error
+        controls.setattr(control_candidate, "_disk_control_write_v1", failed_control_write)
+        with pytest.raises(OSError) as caught:
+            control_candidate._disk_publish_directory_v1(settled, pending=pending)
+        assert caught.value is header_error
+        assert state["directory_header_roles"] is original_roles and state["directory_header_words"] is original_words
+        assert state["pending_capture"] is original_pending and not original_pending["complete"]
+        controls.setattr(control_candidate, "_ordinary_disk_state_v1", state)
+        controls.setattr(control_candidate, "failure", control_candidate.failure)
+        controls.setattr(control_candidate, "state", control_candidate.state)
+        control_candidate._disk_fail_v1(header_error)
+        control_candidate._disk_fail_v1(header_error)
+        assert control_candidate.failure is header_error and state["errors"] == [header_error]
+        assert control_candidate.state == "CLEANUP_REJECTED" and state["pending_capture"] is original_pending
+    # Negative-only exact Scope objects have no native resources or grant.
+    # This exercises selection/failure compatibility, not native admission.
+    unused_scope = reliability._LinuxPreflightScopeV1.__new__(reliability._LinuxPreflightScopeV1)
+    unused_fields = dict(unused_scope.__dict__)
+    assert unused_scope._ordinary_selected_v1() is False
+    assert unused_scope.__dict__ == unused_fields
+    process_token = reliability._LINUX_PREFLIGHT_PROCESS_V1.set(unused_scope)
+    observation_token = reliability._PREFLIGHT_OBSERVATION_V1.set(None)
+    try:
+        with monkeypatch.context() as selection_only:
+            selection_only.setattr(reliability.sys, "argv", ["selection-only-no-child"])
+            assert reliability._preflight_active_v1() is None
+    finally:
+        reliability._PREFLIGHT_OBSERVATION_V1.reset(observation_token)
+        reliability._LINUX_PREFLIGHT_PROCESS_V1.reset(process_token)
+    assert unused_scope.__dict__ == unused_fields
+    failed_scope = reliability._LinuxPreflightScopeV1.__new__(reliability._LinuxPreflightScopeV1)
+    failed_scope._ordinary_phase_v1 = runner.POST_VALIDATION_PHASE
+    failed_scope._ordinary_runner_owner_v1 = runner
+    failed_scope._ordinary_factory_attempted_v1 = True
+    failed_fields = dict(failed_scope.__dict__)
+    assert failed_scope._ordinary_selected_v1() is True
+    with pytest.raises(reliability.ValidationReliabilityError,
+            match="ORDINARY_PRECURSOR_PARTIAL_NATIVE_ACQUISITION"):
+        failed_scope._ordinary_precursor_ready_v1()
+    process_token = reliability._LINUX_PREFLIGHT_PROCESS_V1.set(failed_scope)
+    observation_token = reliability._PREFLIGHT_OBSERVATION_V1.set(None)
+    try:
+        with pytest.raises(reliability.ValidationReliabilityError,
+                match="ORDINARY_PRECURSOR_PARTIAL_NATIVE_ACQUISITION"):
+            reliability._preflight_active_v1()
+    finally:
+        reliability._PREFLIGHT_OBSERVATION_V1.reset(observation_token)
+        reliability._LINUX_PREFLIGHT_PROCESS_V1.reset(process_token)
+    assert failed_scope._ordinary_selected_v1() is True and failed_scope.__dict__ == failed_fields
+    # The production selector requires the exact retained original callable;
+    # these source checks do not stand in for native positive Scope evidence.
+    registered_scope = reliability._LinuxPreflightScopeV1.__new__(reliability._LinuxPreflightScopeV1)
+    registered_scope._ordinary_factory_attempted_v1 = True
+    registered_scope._ordinary_factory_original_v1 = object()
+    registered_scope._ordinary_original_run_binding_v1 = object()
+    scope_token = reliability._LINUX_PREFLIGHT_PROCESS_V1.set(registered_scope)
+    observation_token = reliability._PREFLIGHT_OBSERVATION_V1.set(None)
+    try:
+        with pytest.raises(reliability.ValidationReliabilityError,
+                match="selected preflight has no original observation binding") as selected_error:
+            reliability._preflight_active_v1()
+        assert selected_error.value.code == 'ENGVR_PREPUBLICATION_CUSTODY_FAILED'
+    finally:
+        reliability._PREFLIGHT_OBSERVATION_V1.reset(observation_token)
+        reliability._LINUX_PREFLIGHT_PROCESS_V1.reset(scope_token)
+
+    runner_ast = ast.parse(Path(runner.__file__).read_text(encoding="utf-8"))
+    main_ast = next(node for node in runner_ast.body if isinstance(node,ast.FunctionDef) and node.name=="main")
+    main_source = ast.unparse(main_ast)
+    assert "type(ordinary_scope) is _LinuxPreflightScopeV1" in main_source
+    assert "ordinary_scope._ordinary_selected_v1()" in main_source
+    assert "candidate_source is not ordinary_scope._ordinary_candidate_source_v1" in main_source
+    assert "candidate_source is not ordinary_scope._ordinary_original_candidate_source_v1" in main_source
+    publisher_ast = next(node for node in runner_ast.body if isinstance(node,ast.FunctionDef)
+        and node.name=="_publish_active_plan_provenance")
+    calls = [(node.lineno,ast.unparse(node.func)) for node in ast.walk(publisher_ast) if isinstance(node,ast.Call)]
+    assert next(line for line,name in calls if name=="ordinary_scope._ordinary_bind_run_v1") < next(
+        line for line,name in calls if name=="_prepare_validation_candidate_v1")
+    # Pure source-fixed arithmetic and explicitly synthetic no-child admission
+    # ports. No test object below supplies native Scope/capacity authority.
+    from types import SimpleNamespace
+    ceiling_cutoffs = (1, 2, 3, 4)
+    ceiling = runner._ordinary_post_ceiling_programme_v1(original_cutoffs=ceiling_cutoffs)
+    original_limits = ceiling['limits']
+    original_limit_values = tuple(original_limits.items())
+    assert runner._ordinary_post_ceiling_checked_v1(ceiling) is ceiling
+    assert ceiling['original'][1] is original_limits and ceiling['original'][10] is ceiling_cutoffs
+    assert ceiling['fd_program'] == dict(controller=1536, fork_prefix=1536,
+        application=64, launcher=64, query=64, prefix_capture=128, manager_borrow=128, additional=576)
+    literal_prefix = (1, ('COMMON_SHOW', 'BOOTSTRAP_SHOW', 'COMMON_SHOW_AFTER',
+        'BOOTSTRAP_SHOW_AFTER', 'MANAGER_SHOW', 'PRLIMIT_VERSION',
+        'FORMATTER_VERSION', 'INITIAL_GIT_DIR', 'INITIAL_GIT_COMMON_DIR',
+        'INITIAL_GIT_INDEX', 'HOST_FORMAT', 'HOST_MOUNT', 'HOST_MOUNT_READBACK',
+        'CONTROLLER_POLICY_COMPILE', 'CONTROLLER_POLICY_LOAD',
+        'CONTROLLER_POLICY_REMOVE'), 512, 4096, 2070937600, 10816, 268435456,
+        29360128, 16777216, 707264512, ceiling, ceiling_cutoffs)
+    assert runner._ordinary_post_prefix_checked_v1(literal_prefix, ceiling) is literal_prefix
+    for field in (4, 5, 8):
+        changed = tuple(value + 1 if index == field else value
+            for index, value in enumerate(literal_prefix))
+        with pytest.raises(reliability.ValidationReliabilityError,
+                match='ORDINARY_COMPILER_EXACT_ORIGINAL_PREFIX_CAPACITY'):
+            runner._ordinary_post_prefix_checked_v1(changed, ceiling)
+    with pytest.raises(reliability.ValidationReliabilityError,
+            match='ORDINARY_COMPILER_ORIGINAL_EARLY_PROGRAMME_VALUES'):
+        runner._ordinary_post_ceiling_checked_v1({**ceiling, 'limits': dict(original_limits)})
+    assert ceiling['limits'] is original_limits and tuple(original_limits.items()) == original_limit_values
+
+    admission_root = tmp_path / 'ordinary-admission-no-child'
+    admission_root.mkdir()
+    (admission_root / 'source.py').write_bytes(b'actual independent fixture source\n')
+    admission_paths = SimpleNamespace(repo_root=admission_root,
+        run_id='run_synthetic_ordinary_admission_ports')
+    registered = ((sys.executable, '-B', 'tools/ordinary_admission_no_child.py'),)
+    execution = runner._prepare_execution_plan(registered)
+    fixture_owner = (runner.os.getpid(), runner.threading.get_ident())
+    admission_scope = reliability._LinuxPreflightScopeV1.__new__(reliability._LinuxPreflightScopeV1)
+    admission_scope._ordinary_factory_attempted_v1 = True
+    fixture_remaining = {'raw_read_byte_limit': 31, 'raw_write_byte_limit': 19}
+    fixture_observed = {'raw_read_byte_limit': 0, 'raw_write_byte_limit': 0}
+    fixture_meter = {'remaining': fixture_remaining, 'observed': fixture_observed, 'owner': fixture_owner}
+    fixture_rows = tuple({'runtime_bytes': None, 'runtime_inodes': None} for _ in range(4))
+    admission_events, synthetic_candidates = [], []
+    fixture_supervision = {'paths': admission_paths, 'phase': 'post-validation', 'pending': False,
+        'receipt': None, 'errors': [], 'candidate_owner': fixture_owner,
+        'candidate_acquisition_attempted': False, 'candidate_admission_complete': False}
+    fixture_config = {'scope': admission_scope, 'paths': admission_paths, 'plan': None, 'meter': fixture_meter}
+    fake_capacity = {'candidate': None, 'config': fixture_config, 'meter': fixture_meter}
+    terminal_backstop = RuntimeError('synthetic no-child stop before original body dispatch')
+
+    def fixture_bind_run(paths, selected_plan, *, execution_plan):
+        assert paths is admission_paths and execution_plan is execution
+        assert fixture_config['plan'] is None
+        fixture_config['plan'] = selected_plan
+        admission_events.append('actual publisher plan')
+
+    def fixture_supplier(root, selected_plan):
+        assert root is admission_root and selected_plan is fixture_config['plan']
+        with monkeypatch.context() as default_fixture:
+            default_fixture.setattr(runner, '_ORDINARY_CANDIDATE_FIRST_V1', False)
+            actual = _synthetic_candidate_custody_v1(admission_root, selected_plan,
+                observed_paths=lambda: ('source.py',), effects=())
+        actual._ordinary_disk_config_v1 = fixture_config
+        real_check = actual._check
+        checks = []
+        def check_before_dispatch():
+            checks.append(actual)
+            real_check()
+            if len(checks) == 2:
+                raise terminal_backstop
+        actual._check = check_before_dispatch
+        synthetic_candidates.append(actual)
+        admission_events.append('actual finite C supplied')
+        return actual
+
+    def fixture_storage_check(actual, config):
+        assert actual is synthetic_candidates[0] and config is fixture_config
+        assert actual.plan is fixture_config['plan'] and actual.state == 'BASELINE_READY'
+        admission_events.append('synthetic storage port')
+
+    def fixture_finalize(actual):
+        assert admission_events == ['actual publisher plan', 'actual finite C supplied', 'synthetic storage port']
+        assert all(row['runtime_bytes'] is None and row['runtime_inodes'] is None for row in fixture_rows)
+        assert fixture_config['meter'] is fixture_meter
+        assert fixture_meter['remaining'] is fixture_remaining and fixture_meter['observed'] is fixture_observed
+        fake_capacity['candidate'] = actual
+        admission_scope._ordinary_application_capacity_v1 = fake_capacity
+        admission_scope._ordinary_original_application_capacity_v1 = fake_capacity
+        for row in fixture_rows:
+            row['runtime_bytes'], row['runtime_inodes'] = 17, 5
+        admission_events.append('synthetic one native-finalizer port')
+        return fake_capacity
+
+    def fixture_application_ready():
+        assert fake_capacity['candidate'] is synthetic_candidates[0]
+        assert fake_capacity['config'] is fixture_config and fake_capacity['meter'] is fixture_meter
+        assert all((row['runtime_bytes'], row['runtime_inodes']) == (17, 5) for row in fixture_rows)
+        admission_events.append('synthetic same grant readiness port')
+        return fake_capacity
+
+    def reject_synthetic_dispatch(*args, **kwargs):
+        raise AssertionError('no-child admission oracle unexpectedly dispatched')
+
+    admission_scope._ordinary_candidate_source_v1 = fixture_supplier
+    admission_scope._ordinary_original_candidate_source_v1 = fixture_supplier
+    admission_scope._ordinary_precursor_ready_v1 = lambda: None
+    admission_scope._ordinary_ready_v1 = lambda: fixture_config
+    admission_scope._ordinary_bind_run_v1 = fixture_bind_run
+    admission_scope.check_storage_binding = fixture_storage_check
+    admission_scope._ordinary_finalize_application_capacity_v1 = fixture_finalize
+    admission_scope._ordinary_application_ready_v1 = fixture_application_ready
+    registered_globals = ('_LAST_PLANNED_COMMAND_COUNT', '_LAST_EXPECTED_COMMAND_PLAN',
+        '_RUN_PROVENANCE_WRITTEN', '_RUN_PROVENANCE_ATTEMPTED', '_SCAN_CAPACITY_ATTEMPTED',
+        '_MAPPER_READ_SOURCE_ATTEMPTED', '_ACTIVE_SCAN_LAUNCH', '_ACTIVE_MAPPER_READ_PROFILES_V1',
+        '_ACTIVE_PREFLIGHT_ASSEMBLY_V1', '_LAST_COMMAND_RECEIPTS')
+    original_globals = {name: getattr(runner, name) for name in registered_globals}
+    context_token = reliability._LINUX_PREFLIGHT_PROCESS_V1.set(admission_scope)
+    try:
+        with monkeypatch.context() as admission_ports:
+            for name, value in original_globals.items():
+                admission_ports.setattr(runner, name, value)
+            for name, value in (('_LAST_PLANNED_COMMAND_COUNT', None), ('_LAST_EXPECTED_COMMAND_PLAN', ()),
+                    ('_RUN_PROVENANCE_WRITTEN', False), ('_RUN_PROVENANCE_ATTEMPTED', False),
+                    ('_SCAN_CAPACITY_ATTEMPTED', False), ('_MAPPER_READ_SOURCE_ATTEMPTED', False),
+                    ('_ACTIVE_SCAN_LAUNCH', None), ('_ACTIVE_PREFLIGHT_PATH_V1', None),
+                    ('_ACTIVE_MAPPER_READ_PROFILES_V1', None), ('_ACTIVE_SCAN_CAPACITY_SOURCE', None),
+                    ('_ACTIVE_MAPPER_READ_SOURCE_V1', None), ('_ORDINARY_CANDIDATE_FIRST_V1', True),
+                    ('_ACTIVE_CANDIDATE_SOURCE', fixture_supplier), ('_RUN_COMMANDS_ACTIVE_PATHS', admission_paths),
+                    ('_RUN_COMMANDS_SUPERVISION', fixture_supervision), ('_ACTIVE_FILESYSTEM_PROBE', object())):
+                admission_ports.setattr(runner, name, value)
+            admission_ports.setattr(runner, 'write_run_provenance', lambda *args, **kwargs: None)
+            admission_ports.setattr(runner, 'supervise_command', reject_synthetic_dispatch)
+            admission_ports.setattr(runner, '_prepare_validation_candidate_v1',
+                runner._prepare_validation_candidate_v1._fixture_original)
+            runner._publish_active_plan_provenance('post-validation', execution)
+            selected_plan = runner._LAST_EXPECTED_COMMAND_PLAN
+            assert selected_plan is fixture_config['plan'] is synthetic_candidates[0].plan
+            assert fixture_supervision['candidate_admission_complete'] is True
+            with pytest.raises(RuntimeError) as caught:
+                runner.run_commands(registered, phase='post-validation', repo_root=admission_root,
+                    run_paths=admission_paths, execution_plan=execution,
+                    candidate_custody=synthetic_candidates[0])
+            assert caught.value is terminal_backstop
+            assert len(synthetic_candidates) == 1 and admission_events == [
+                'actual publisher plan', 'actual finite C supplied', 'synthetic storage port',
+                'synthetic one native-finalizer port', 'synthetic storage port',
+                'synthetic same grant readiness port']
+            assert fixture_supervision['candidate_custody'] is synthetic_candidates[0]
+            assert fixture_supervision['candidate_admission_error'] is terminal_backstop
+            with pytest.raises(ValueError, match='original candidate admission cannot be retried'):
+                runner._prepare_validation_candidate_v1(admission_root, selected_plan, synthetic_candidates[0])
+            assert fixture_meter['remaining'] is fixture_remaining and fixture_meter['observed'] is fixture_observed
+            assert fixture_remaining == {'raw_read_byte_limit': 31, 'raw_write_byte_limit': 19}
+            assert fixture_observed == {'raw_read_byte_limit': 0, 'raw_write_byte_limit': 0}
+    finally:
+        reliability._LINUX_PREFLIGHT_PROCESS_V1.reset(context_token)
+    assert all(getattr(runner, name) is value for name, value in original_globals.items())
+    # The real incomplete Scope still denies finalize and APP selection before
+    # any native port or row transition; the synthetic sequence is no grant.
+    partial_before = dict(failed_scope.__dict__)
+    with pytest.raises(reliability.ValidationReliabilityError,
+            match='ORDINARY_PRECURSOR_PARTIAL_NATIVE_ACQUISITION'):
+        failed_scope._ordinary_finalize_application_capacity_v1(object())
+    with pytest.raises(reliability.ValidationReliabilityError,
+            match='ORDINARY_PRECURSOR_PARTIAL_NATIVE_ACQUISITION'):
+        failed_scope._ordinary_select_occurrence_v1(None, argv=(), cwd=admission_root,
+            environment={}, run_id='no-child-denial', phase='post-validation', command_index=1,
+            deadline_ns=1, output_limits={})
+    assert failed_scope.__dict__ == partial_before
+    # Pure POST Git projection has two logical settings and five actual
+    # command-precedence environment entries plus the existing optional-lock
+    # read-only control. These literals confer no Scope.
+    original_control = (('GIT_CONFIG_GLOBAL', 'owned/private/gitconfig'),)
+    literal_control = (('GIT_CONFIG_GLOBAL', 'owned/private/gitconfig'),
+        ('GIT_OPTIONAL_LOCKS', '0'), ('GIT_CONFIG_COUNT', '2'),
+        ('GIT_CONFIG_KEY_0', 'core.preloadIndex'), ('GIT_CONFIG_VALUE_0', 'false'),
+        ('GIT_CONFIG_KEY_1', 'index.threads'), ('GIT_CONFIG_VALUE_1', '1'))
+    assert runner._ordinary_post_git_controls_v1(original_control) == literal_control
+    assert original_control == (('GIT_CONFIG_GLOBAL', 'owned/private/gitconfig'),)
+    assert len(literal_control[1:]) == 6
+    assert sum(len(k.encode('ascii')) + len(v.encode('ascii')) for k, v in literal_control[1:]) == 140
+    assert sum(len(k.encode('ascii')) + len(v.encode('ascii')) + 2 for k, v in literal_control[1:]) == 152
+    for bad_control in ((), list(original_control), original_control + (('GIT_CONFIG_COUNT', '1'),),
+            (('GIT_CONFIG_GLOBAL', ''),)):
+        with pytest.raises(reliability.ValidationReliabilityError,
+                match='ORDINARY_POST_ORIGINAL_GIT_CONFIG_PROJECTION'):
+            runner._ordinary_post_git_controls_v1(bad_control)
+    literal_registered = (sys.executable, '-m', 'compileall', '-q', 'tools', 'tests', 'src')
+    # Exact unselected first8/default Scope keeps the original compile vector.
+    # A failed selected attempt must deny rather than adopt an unsafe fallback.
+    token = reliability._LINUX_PREFLIGHT_PROCESS_V1.set(unused_scope)
+    try:
+        assert runner._ordinary_post_execution_argv_v1(literal_registered, literal_registered) is literal_registered
+        default_execution = runner._prepare_execution_plan((literal_registered,))[0]
+        assert default_execution.registered_argv == default_execution.execution_argv == literal_registered
+        assert not default_execution.st12g_adapter_applied and not default_execution.qku_root_import_adapter_applied
+    finally:
+        reliability._LINUX_PREFLIGHT_PROCESS_V1.reset(token)
+    token = reliability._LINUX_PREFLIGHT_PROCESS_V1.set(failed_scope)
+    try:
+        with pytest.raises(reliability.ValidationReliabilityError,
+                match='ORDINARY_PRECURSOR_PARTIAL_NATIVE_ACQUISITION'):
+            runner._ordinary_post_execution_argv_v1(literal_registered, literal_registered)
+    finally:
+        reliability._LINUX_PREFLIGHT_PROCESS_V1.reset(token)
+    assert unused_scope.__dict__ == unused_fields and failed_scope.__dict__ == failed_fields
+    # Exact POST450 projection only: these are no-child metadata oracles,
+    # not native source/capacity admission or successful application evidence.
+    atomic_registered = (sys.executable, '-c', runner.ATOMICROWS_BUNDLE_CHECK_SCRIPT)
+    atomic_expected = (sys.executable, '-I', '-S', '-B', '-c', runner.ATOMICROWS_BUNDLE_CHECK_SCRIPT)
+    atomic_repo = tmp_path / 'atomic-projection-repository'
+    atomic_process = tmp_path / 'atomic-projection-owned' / 'compact'
+    # Only the two independently literal path operands consumed by this
+    # pure projector are populated. No constructor/probe PASS is fabricated.
+    atomic_paths = reliability.ValidationRunPathsV1.__new__(reliability.ValidationRunPathsV1)
+    object.__setattr__(atomic_paths, 'repo_root', atomic_repo)
+    object.__setattr__(atomic_paths, 'process_root', atomic_process)
+    atomic_scope = reliability._LinuxPreflightScopeV1.__new__(reliability._LinuxPreflightScopeV1)
+    atomic_scope._ordinary_factory_attempted_v1 = True
+    atomic_scope.repository = str(atomic_repo)
+    atomic_scope._ordinary_evidence_paths_v1 = atomic_paths
+    atomic_supervision = {'paths': atomic_paths, 'phase': runner.POST_VALIDATION_PHASE}
+    atomic_calls = []
+    atomic_original_globals = (runner._RUN_COMMANDS_ACTIVE_PATHS, runner._RUN_COMMANDS_SUPERVISION)
+    atomic_token = reliability._LINUX_PREFLIGHT_PROCESS_V1.set(atomic_scope)
+    try:
+        with monkeypatch.context() as atomic_patch:
+            atomic_patch.setattr(runner, '_RUN_COMMANDS_ACTIVE_PATHS', atomic_paths)
+            atomic_patch.setattr(runner, '_RUN_COMMANDS_SUPERVISION', atomic_supervision)
+            atomic_patch.setattr(atomic_scope, '_ordinary_precursor_ready_v1',
+                lambda: atomic_calls.append('no-child-precursor-oracle'))
+            assert runner._ordinary_post_execution_argv_v1(atomic_registered, atomic_registered) == atomic_expected
+            assert atomic_registered == (sys.executable, '-c', runner.ATOMICROWS_BUNDLE_CHECK_SCRIPT)
+            assert atomic_calls == ['no-child-precursor-oracle']
+            assert atomic_supervision == {'paths': atomic_paths, 'phase': runner.POST_VALIDATION_PHASE}
+            with pytest.raises(reliability.ValidationReliabilityError,
+                    match='ORDINARY_POST_ATOMICROWS_COMPETING_PROJECTION'):
+                runner._ordinary_post_execution_argv_v1(atomic_registered, atomic_expected)
+            foreign_atomic = (sys.executable, '-c', 'raise SystemExit(0)')
+            assert runner._ordinary_post_execution_argv_v1(foreign_atomic, foreign_atomic) is foreign_atomic
+            atomic_patch.setitem(atomic_supervision, 'phase', runner.FAST_PREFLIGHT_PHASE)
+            assert runner._ordinary_post_execution_argv_v1(atomic_registered, atomic_registered) is atomic_registered
+    finally:
+        reliability._LINUX_PREFLIGHT_PROCESS_V1.reset(atomic_token)
+    assert runner._RUN_COMMANDS_ACTIVE_PATHS is atomic_original_globals[0]
+    assert runner._RUN_COMMANDS_SUPERVISION is atomic_original_globals[1]
+    atomic_token = reliability._LINUX_PREFLIGHT_PROCESS_V1.set(unused_scope)
+    try:
+        assert runner._ordinary_post_execution_argv_v1(atomic_registered, atomic_registered) is atomic_registered
+        atomic_default = runner._prepare_execution_plan((atomic_registered,))[0]
+        assert atomic_default.registered_argv == atomic_default.timing_identity_argv == atomic_default.execution_argv == atomic_registered
+    finally:
+        reliability._LINUX_PREFLIGHT_PROCESS_V1.reset(atomic_token)
+    atomic_token = reliability._LINUX_PREFLIGHT_PROCESS_V1.set(failed_scope)
+    try:
+        with pytest.raises(reliability.ValidationReliabilityError,
+                match='ORDINARY_PRECURSOR_PARTIAL_NATIVE_ACQUISITION'):
+            runner._ordinary_post_execution_argv_v1(atomic_registered, atomic_registered)
+    finally:
+        reliability._LINUX_PREFLIGHT_PROCESS_V1.reset(atomic_token)
+    assert unused_scope.__dict__ == unused_fields and failed_scope.__dict__ == failed_fields
+    # Source-bound POST diff projection; all helpers below are no-child
+    # object oracles. Default API/first8 bytes above remain unchanged.
+    git_repo = tmp_path / 'git-projection-repository'
+    git_paths = reliability.ValidationRunPathsV1.__new__(reliability.ValidationRunPathsV1)
+    object.__setattr__(git_paths, 'repo_root', git_repo)
+    object.__setattr__(git_paths, 'process_root', tmp_path / 'git-projection-process')
+    git_scope = reliability._LinuxPreflightScopeV1.__new__(reliability._LinuxPreflightScopeV1)
+    git_scope._ordinary_factory_attempted_v1 = True
+    git_scope.repository = str(git_repo)
+    git_scope._ordinary_evidence_paths_v1 = git_paths
+    git_config = {'path': 'owned/private/gitconfig', 'sealed': True, 'readback_complete': True}
+    git_scope._ordinary_parent_git_config_v1 = git_scope._ordinary_original_parent_git_config_v1 = git_config
+    git_supervision = {'paths': git_paths, 'phase': runner.POST_VALIDATION_PHASE}
+    literal_new = original_control + (
+        ('GIT_OPTIONAL_LOCKS', '0'), ('GIT_CONFIG_COUNT', '5'),
+        ('GIT_CONFIG_KEY_0', 'core.preloadIndex'), ('GIT_CONFIG_VALUE_0', 'false'),
+        ('GIT_CONFIG_KEY_1', 'index.threads'), ('GIT_CONFIG_VALUE_1', '1'),
+        ('GIT_CONFIG_KEY_2', 'core.fsmonitor'), ('GIT_CONFIG_VALUE_2', 'false'),
+        ('GIT_CONFIG_KEY_3', 'diff.autoRefreshIndex'), ('GIT_CONFIG_VALUE_3', 'false'),
+        ('GIT_CONFIG_KEY_4', 'core.attributesFile'), ('GIT_CONFIG_VALUE_4', '/dev/null'),
+        ('GIT_CONFIG_NOSYSTEM', '1'), ('GIT_CONFIG_SYSTEM', '/dev/null'),
+        ('GIT_NO_REPLACE_OBJECTS', '1'), ('GIT_NO_LAZY_FETCH', '1'),
+        ('GIT_TERMINAL_PROMPT', '0'), ('GIT_ALLOW_PROTOCOL', ''), ('GIT_ATTR_NOSYSTEM', '1'))
+    git_cases = ((('git', 'diff', '--check'),
+        ('git', '--no-pager', 'diff', '--no-ext-diff', '--no-textconv',
+            '--ignore-submodules=none', '--submodule=short', '--check')),
+        (('git', 'diff', '--exit-code', '--', 'docs/master_plan/QTT_MasterPlan_Current.md'),
+        ('git', '--no-pager', 'diff', '--no-ext-diff', '--no-textconv',
+            '--ignore-submodules=none', '--submodule=short', '--exit-code', '--',
+            'docs/master_plan/QTT_MasterPlan_Current.md')))
+    git_calls = []
+    git_saved_globals = (runner._RUN_COMMANDS_ACTIVE_PATHS, runner._RUN_COMMANDS_SUPERVISION)
+    original_git_run_path = runner._path
+    git_token = reliability._LINUX_PREFLIGHT_PROCESS_V1.set(git_scope)
+    try:
+        with monkeypatch.context() as git_patch:
+            git_patch.setattr(runner, '_path', lambda *parts: original_git_run_path(*parts).replace('\\', '/'))
+            git_patch.setattr(runner, '_RUN_COMMANDS_ACTIVE_PATHS', git_paths)
+            git_patch.setattr(runner, '_RUN_COMMANDS_SUPERVISION', git_supervision)
+            git_patch.setattr(git_scope, '_ordinary_precursor_ready_v1',
+                lambda: git_calls.append('no-child-selected-precursor'))
+            assert runner._ordinary_post_git_controls_v1(original_control, scope=git_scope) == literal_new
+            assert runner._ordinary_post_git_controls_v1(original_control) == literal_control
+            assert len(literal_new[1:]) == 19
+            assert sum(len(k.encode('ascii')) + len(v.encode('ascii')) for k,v in literal_new[1:]) == 458
+            assert sum(len(k.encode('ascii')) + len(v.encode('ascii')) + 2 for k,v in literal_new[1:]) == 496
+            for registered_diff, expected_diff in git_cases:
+                assert runner._ordinary_post_execution_argv_v1(registered_diff, registered_diff) == expected_diff
+                assert registered_diff[1] == 'diff' and '--ignore-submodules=all' not in expected_diff
+                with pytest.raises(reliability.ValidationReliabilityError,
+                        match='ORDINARY_POST_DIFF_COMPETING_PROJECTION'):
+                    runner._ordinary_post_execution_argv_v1(registered_diff, expected_diff)
+            foreign_diff = ('git', 'diff', '--stat')
+            assert runner._ordinary_post_execution_argv_v1(foreign_diff, foreign_diff) is foreign_diff
+            git_patch.setitem(git_supervision, 'phase', runner.FAST_PREFLIGHT_PHASE)
+            assert runner._ordinary_post_execution_argv_v1(git_cases[0][0], git_cases[0][0]) is git_cases[0][0]
+            with pytest.raises(reliability.ValidationReliabilityError,
+                    match='ORDINARY_POST_GIT_ORIGINAL_PRIVATE_CONFIG_OWNER'):
+                runner._ordinary_post_git_controls_v1((('GIT_CONFIG_GLOBAL', 'foreign/config'),), scope=git_scope)
+    finally:
+        reliability._LINUX_PREFLIGHT_PROCESS_V1.reset(git_token)
+    assert runner._path is original_git_run_path
+    assert runner._RUN_COMMANDS_ACTIVE_PATHS is git_saved_globals[0]
+    assert runner._RUN_COMMANDS_SUPERVISION is git_saved_globals[1]
+    assert original_control == (('GIT_CONFIG_GLOBAL', 'owned/private/gitconfig'),)
+    for default_scope in (None, unused_scope):
+        git_token = reliability._LINUX_PREFLIGHT_PROCESS_V1.set(default_scope)
+        try:
+            for registered_diff, expected_diff in git_cases:
+                assert runner._ordinary_post_execution_argv_v1(registered_diff, registered_diff) is registered_diff
+                default_diff = runner._prepare_execution_plan((registered_diff,))[0]
+                assert default_diff.registered_argv == default_diff.timing_identity_argv == default_diff.execution_argv == registered_diff
+        finally:
+            reliability._LINUX_PREFLIGHT_PROCESS_V1.reset(git_token)
+    assert unused_scope.__dict__ == unused_fields and failed_scope.__dict__ == failed_fields
+    # Original publisher join with independently selected source phase.
+    # These typed no-child ports deliberately do not claim a native Scope,
+    # actual manifest acquisition, resource product or application admission.
+    bind_repo = (tmp_path / 'source-phase-binding').resolve()
+    bind_argv = (sys.executable, '-c', 'raise SystemExit(0)')
+    bind_execution = (runner.ExecutionPlanEntry(bind_argv, bind_argv, bind_argv, False, False),)
+    bind_saved_path = runner._RUN_COMMANDS_ACTIVE_PATHS
+    for bind_phase in (runner.FAST_PREFLIGHT_PHASE, runner.POST_VALIDATION_PHASE):
+        bind_paths = reliability.ValidationRunPathsV1.__new__(reliability.ValidationRunPathsV1)
+        object.__setattr__(bind_paths, 'repo_root', bind_repo)
+        object.__setattr__(bind_paths, 'run_id', 'source-phase-no-child')
+        bind_plan = (reliability.CommandEvidencePlanEntry('source-phase-no-child', bind_phase, 1,
+            bind_argv, str(bind_repo)),)
+        bind_scope = reliability._LinuxPreflightScopeV1.__new__(reliability._LinuxPreflightScopeV1)
+        bind_scope.repository = str(bind_repo)
+        bind_scope._ordinary_runner_owner_v1 = runner
+        bind_scope._ordinary_evidence_paths_v1 = bind_scope._ordinary_original_evidence_paths_v1 = bind_paths
+        bind_scope._ordinary_factory_owner_v1 = ('no-child-owner',)
+        bind_state = {'bound': False, 'paths': None, 'plan': None}
+        bind_scope._ordinary_run_binding_v1 = bind_state
+        bind_source = runner._OrdinarySourceSelectionV1.__new__(runner._OrdinarySourceSelectionV1)
+        bind_source._original = (bind_scope, bind_paths, bind_phase)
+        bind_scope._ordinary_source_selection_v1 = bind_scope._ordinary_original_source_selection_v1 = bind_source
+        bind_calls = []
+        with monkeypatch.context() as bind_patch:
+            bind_patch.setattr(runner, '_RUN_COMMANDS_ACTIVE_PATHS', bind_paths)
+            bind_patch.setattr(bind_scope, '_ordinary_precursor_ready_v1', lambda: None)
+            bind_patch.setattr(bind_source, '_guard', lambda: bind_calls.append('no-child-source-guard'), raising=False)
+            bind_patch.setattr(bind_source, 'bind',
+                lambda actual_paths, actual_plan, *, execution_plan: bind_calls.append(
+                    (actual_paths, actual_plan, execution_plan)), raising=False)
+            wrong_phase = (runner.POST_VALIDATION_PHASE if bind_phase == runner.FAST_PREFLIGHT_PHASE
+                else runner.FAST_PREFLIGHT_PHASE)
+            wrong_plan = (reliability.CommandEvidencePlanEntry('source-phase-no-child', wrong_phase, 1,
+                bind_argv, str(bind_repo)),)
+            with pytest.raises(reliability.ValidationReliabilityError,
+                    match='ORDINARY_ONE_ORIGINAL_PUBLISHER_PLAN_BINDING'):
+                bind_scope._ordinary_bind_run_v1(bind_paths, wrong_plan, execution_plan=bind_execution)
+            assert bind_state == {'bound': False, 'paths': None, 'plan': None}
+            assert bind_calls == ['no-child-source-guard']
+            result = bind_scope._ordinary_bind_run_v1(bind_paths, bind_plan, execution_plan=bind_execution)
+            assert result is bind_state and result['bound'] is True
+            assert result['paths'] is bind_paths and result['plan'] is bind_plan
+            assert bind_calls[-1] == (bind_paths, bind_plan, bind_execution)
+            assert bind_scope._ordinary_bound_plan_v1 is bind_plan
+            assert bind_scope._ordinary_execution_plan_v1 is bind_execution
+            with pytest.raises(reliability.ValidationReliabilityError,
+                    match='ORDINARY_ORIGINAL_REGISTERED_EFFECTIVE_PLAN_ASSOCIATION'):
+                bind_scope._ordinary_bind_run_v1(bind_paths, bind_plan, execution_plan=bind_execution)
+    assert runner._RUN_COMMANDS_ACTIVE_PATHS is bind_saved_path
+    # Value-free Git config/index proof parser. No child or Git is started;
+    # metadata/index counts below are independent literal fixture operands.
+    parse_edges = reliability._LinuxPreflightScopeV1._ordinary_post_git_edge_bytes_v1
+    assert parse_edges('CONFIG_NAMES', b'core.repositoryformatversion\0') == 1
+    assert parse_edges('VERSION', b'git version 2.36.0\n') == (2, 36, 0)
+    assert parse_edges('VERSION', b'git version 3.0.0\n') == (3, 0, 0)
+    with pytest.raises(reliability.ValidationReliabilityError, match='ORDINARY_POST_GIT_NATIVE_FSMONITOR_BOOLEAN_SUPPORT'):
+        parse_edges('VERSION', b'git version 2.35.1\n')
+    for malformed_version in (b'git version 2.36\n', b'git version 2.36.0', b'git version 2.36.0\nextra\n',
+            b'git version false.36.0\n', b'git version 02.36.0\n', b'git version 2.36.0.custom\n'):
+        with pytest.raises(reliability.ValidationReliabilityError, match='ORDINARY_POST_GIT_EXACT_NATIVE_VERSION_OUTPUT'):
+            parse_edges('VERSION', malformed_version)
+    assert parse_edges('INDEX_MODES', b'100644\0' + b'100755\0' + b'120000\0', index_entries=3) == 3
+    assert parse_edges('INDEX_MODES', b'', index_entries=0) == 0
+    for unsafe_names in (b'', b'core.repositoryformatversion', b'core.repositoryformatversion\0core.repositoryformatversion\0',
+            b'core.repositoryformatversion\0include.path\0', b'core.repositoryformatversion\0includeif.gitdir:here.path\0',
+            b'core.repositoryformatversion\0filter.fixture.clean\0', b'core.repositoryformatversion\0filter.fixture.process\0',
+            b'core.repositoryformatversion\0filter.fixture.smudge\0', b'core.repositoryformatversion\0extensions.worktreeconfig\0'):
+        with pytest.raises(reliability.ValidationReliabilityError, match='ORDINARY_POST_GIT_UNKNOWN_LOCAL_CONFIG_EDGE'):
+            parse_edges('CONFIG_NAMES', unsafe_names)
+    for bad_modes, count in ((b'160000\0',1), (b'100600\0',1), (b'100644',1),
+            (b'100644\0',2), (b'100644\0',True), (b'100644\0',1.0), (b'',-1)):
+        with pytest.raises(reliability.ValidationReliabilityError,
+                match='ORDINARY_POST_GIT_(INDEPENDENT_INDEX_MODE_EXTENT|UNSELECTED_GITLINK_OR_INDEX_MODE)'):
+            parse_edges('INDEX_MODES', bad_modes, index_entries=count)
+    with pytest.raises(reliability.ValidationReliabilityError, match='ORDINARY_POST_GIT_INDEPENDENT_INDEX_MODE_EXTENT'):
+        parse_edges('FOREIGN_QUERY', b'100644\0', index_entries=1)
+    with pytest.raises(reliability.ValidationReliabilityError, match='ORDINARY_POST_GIT_EDGE_EXACT_TYPES'):
+        parse_edges('INDEX_MODES', bytearray(b'100644\0'), index_entries=1)
+    # The following exact-vector oracle creates no native process or Query.
+    # It replaces only already-proven prefix/selected-record prerequisites;
+    # the real original literal-role classifier still accepts/rejects argv.
+    vector_scope = reliability._LinuxPreflightScopeV1.__new__(reliability._LinuxPreflightScopeV1)
+    vector_scope._ordinary_active_image_v1 = None
+    source_edge_suffix = ('config', '--local', '--no-includes', '--null', '--name-only', '--get-regexp',
+        r'^(core\.repositoryformatversion|include\.path|includeif\..*\.path|filter\..*\.(clean|smudge|process)|extensions\.worktreeconfig)$')
+    source_vectors = (
+        (('--version',), 'POST_GIT_NATIVE_VERSION'),
+        (source_edge_suffix, 'POST_GIT_LOCAL_SOURCE_EDGES'),
+        (('config', '--type=bool', '--get', 'core.preloadIndex'), 'POST_GIT_PRELOAD_CONTROL'),
+        (('config', '--type=int', '--get', 'index.threads'), 'POST_GIT_THREADS_CONTROL'),
+        (('config', '--type=bool', '--get', 'core.fsmonitor'), 'POST_GIT_FSMONITOR_CONTROL'),
+        (('config', '--type=bool', '--get', 'diff.autoRefreshIndex'), 'POST_GIT_REFRESH_CONTROL'),
+        (('config', '--path', '--get', 'core.attributesFile'), 'POST_GIT_ATTRIBUTES_CONTROL'),
+        (('ls-files', '-z', '--format=%(objectmode)'), 'POST_GIT_ORIGINAL_INDEX_MODES'))
+    with monkeypatch.context() as vector_oracle:
+        vector_oracle.setattr(vector_scope, '_ordinary_factory_check_v1', lambda **kwargs: (None,) * 9)
+        vector_oracle.setattr(vector_scope, '_ordinary_post_git_control_record_v1', lambda argv: source_vectors)
+        for suffix, purpose in source_vectors:
+            chosen = ('/usr/bin/git', '--no-pager', *suffix)
+            assert vector_scope._ordinary_factory_native_vector_v1(chosen) == purpose
+            for forbidden in (('/usr/bin/git', *suffix),
+                    ('/usr/bin/git', '--no-pager', '--no-pager', *suffix),
+                    ('/usr/bin/git', '--no-pager', *suffix, '--unselected')):
+                with pytest.raises(ValueError, match='ORDINARY_POST_GIT_CONTROL_UNSELECTED_ARGV'):
+                    vector_scope._ordinary_factory_native_vector_v1(forbidden)
+            with pytest.raises(reliability.ValidationReliabilityError, match='ORDINARY_POST_GIT_CONTROL_NO_SETTLEMENT_DISPATCH'):
+                vector_scope._ordinary_factory_native_vector_v1(chosen, settling=True)
+    # Pure metadata arithmetic only. This deliberately uninitialized Census
+    # fixture acquires no native observation, Scope, baseline, or filesystem.
+    # The zero FILE and accepted source alias each retain a distinct target.
+    geometry_census = reliability._LinuxPreflightCensusV1.__new__(reliability._LinuxPreflightCensusV1)
+    geometry_root = tmp_path / 'installation-geometry-source'
+    geometry_destination = tmp_path / 'installation-geometry-copy'
+    geometry_census.complete, geometry_census.failures, geometry_census.setup_uid = True, [], 23
+    geometry_census.roots = {'installation':geometry_root, 'repository':tmp_path / 'geometry-repo'}
+    def geometry_row(name, kind, length, inode):
+        path = geometry_root if not name else geometry_root / name
+        mode = (stat.S_IFDIR | 0o700) if kind == 'directory' else (stat.S_IFREG | 0o444)
+        return dict(path=str(path), observed_path=str(path), role='installation', kind=kind,
+            version=[1,inode,mode,length,1,1,1,23,23,0,0], logical_bytes=length,
+            roster=[], aliases=[], acl=[None,None])
+    geometry_root_row = geometry_row('', 'directory', 0, 1)
+    geometry_empty_row = geometry_row('empty', 'file', 0, 2)
+    geometry_base_row = geometry_row('base', 'file', 4, 3)
+    geometry_alias_row = geometry_row('alias', 'file', 4, 3)
+    geometry_root_row['roster'] = ['empty','base','alias']
+    geometry_alias_row['observed_path'] = str(geometry_root / 'base')
+    geometry_alias_row['aliases'] = [dict(path=str(geometry_root / 'alias'),
+        version=[1,4,stat.S_IFLNK | 0o777,4,1,1,1,23,23,0,0],target='base')]
+    geometry_census.records = [geometry_root_row,geometry_empty_row,geometry_base_row,geometry_alias_row]
+    pure_geometry = runner._ordinary_post_installation_programme_v1(geometry_census,
+        destination=geometry_destination)
+    assert pure_geometry['rows'] == tuple(geometry_census.records)
+    assert pure_geometry['geometry'][:7] == (3,1,4,3,8,12288,4)
+    assert pure_geometry['raw_programme'] == (33,8,393232)
+    assert pure_geometry['observation_programme'][:3] == (14,
+        4 * len((geometry_root / 'empty').parts) + 8 * len((geometry_root / 'base').parts)
+        + 2 * len(geometry_root.parts),19)
+    assert pure_geometry['geometry'][8:] == (1,4)
+    assert pure_geometry['original'][0] is pure_geometry
+    assert geometry_census.__dict__ == {'complete':True,'failures':[],'setup_uid':23,
+        'roots':{'installation':geometry_root,'repository':tmp_path / 'geometry-repo'},
+        'records':[geometry_root_row,geometry_empty_row,geometry_base_row,geometry_alias_row]}
+    with pytest.raises(reliability.ValidationReliabilityError,
+            match='ORDINARY_COMPILER_INDEPENDENT_INSTALLATION_TARGET'):
+        runner._ordinary_post_installation_programme_v1(geometry_census,destination=geometry_root)
+    geometry_alias_row['logical_bytes'] = True
+    with pytest.raises(reliability.ValidationReliabilityError,
+            match='ORDINARY_COMPILER_COMPLETE_INSTALLATION_ROW'):
+        runner._ordinary_post_installation_programme_v1(geometry_census,destination=geometry_destination)
+    geometry_alias_row['logical_bytes'] = 4
+    # Existing CONTROL group: original caller association/aggregation only.
+    # These explicit synthetic ports start no child, acquire no Scope grant,
+    # produce no native receipt and qualify no managed service or workflow.
+    caller_scope = reliability._LinuxPreflightScopeV1.__new__(reliability._LinuxPreflightScopeV1)
+    caller_scope.repository = str(tmp_path)
+    caller_scope._ordinary_initial_native_holder_v1 = object()
+    caller_arguments = ('synthetic-no-child-controller',)
+    caller_environment = {'PATH': 'synthetic-no-child'}
+    caller_limits = {'stdout_bytes': 0, 'stderr_bytes': 0, 'combined_output_bytes': 0}
+    caller_root = tmp_path / 'synthetic-controller-evidence'
+    caller_host, caller_bootstrap = object(), object()
+    caller_record = dict(argv=caller_arguments, environment=caller_environment,
+        run_id='synthetic-controller-caller', phase='synthetic-controller-phase',
+        evidence_root=caller_root, output_limits=caller_limits,
+        programme={'cutoffs': (1, 2, 3, 4)}, pending=True)
+    def caller_receipt(native_exit):
+        return reliability.CommandExecutionReceiptV1(schema_version=reliability.SCHEMA_VERSION,
+            run_id=caller_record['run_id'], phase=caller_record['phase'], command_index=1,
+            argv=caller_arguments, cwd=str(tmp_path), pid=17, platform='posix',
+            start_time_utc='2026-10-06T00:00:00Z', end_time_utc='2026-10-06T00:00:01Z',
+            elapsed_monotonic_seconds=1, native_exit_code=native_exit, start_failure_class=None,
+            timeout_seconds_or_null=None, timeout_state='NOT_CONFIGURED', termination_state='NOT_REQUIRED',
+            stdout_path=str(caller_root / 'command-1.stdout.bin'),
+            stderr_path=str(caller_root / 'command-1.stderr.bin'), stdout_byte_count=0,
+            stderr_byte_count=0, stdout_required_markers=(), stdout_marker_state='NOT_REQUIRED',
+            stderr_was_nonempty=False, failure_class=None if native_exit == 0 else 'ENGVR_NATIVE_EXIT_NONZERO')
+    terminal_zero, terminal_nonzero = caller_receipt(0), caller_receipt(7)
+    unresolved_receipt = replace(terminal_zero, native_exit_code=None,
+        failure_class='ENGVR_PROCESS_TERMINATION_FAILED', termination_state='UNPROVEN')
+    assert not reliability._command_requires_process_retention_v1(terminal_nonzero)
+    assert reliability._command_requires_process_retention_v1(unresolved_receipt)
+    prior_context = reliability._LINUX_PREFLIGHT_PROCESS_V1.get()
+    caller_events = []
+    def caller_prepare(**keywords):
+        assert keywords.pop('native_hold') is caller_scope._ordinary_initial_native_holder_v1
+        assert keywords == dict(argv=caller_arguments, environment=caller_environment,
+            run_id=caller_record['run_id'], phase=caller_record['phase'], evidence_root=caller_root,
+            output_limits=caller_limits, host=caller_host, bootstrap=caller_bootstrap)
+        caller_record['pending'] = True
+        caller_events.append('prepare')
+        return caller_record
+    def caller_close(actual_record, actual_receipt):
+        assert actual_record is caller_record and actual_receipt in (terminal_zero, terminal_nonzero)
+        assert reliability._LINUX_PREFLIGHT_PROCESS_V1.get() is prior_context
+        caller_events.append(('close', actual_receipt))
+        actual_record['pending'] = False
+    def reject_native_creation(*args, **keywords):
+        raise AssertionError('explicit no-child controller caller oracle dispatched')
+    def invoke_caller():
+        return runner._ordinary_execute_controller_v1(caller_scope, argv=caller_arguments,
+            environment=caller_environment, run_id=caller_record['run_id'], phase=caller_record['phase'],
+            evidence_root=caller_root, output_limits=caller_limits, host=caller_host, bootstrap=caller_bootstrap)
+    def caller_supervisor(selected, **keywords):
+        assert selected is caller_arguments
+        assert reliability._LINUX_PREFLIGHT_PROCESS_V1.get() is caller_scope
+        assert keywords['execution_deadline_ns'] == 4
+        assert keywords['mirror_stdout'] is False and keywords['mirror_stderr'] is False
+        assert keywords['environment'] is caller_environment and keywords['output_limits'] is caller_limits
+        assert keywords['output_observation'] == {}
+        caller_events.append('supervise')
+        return terminal_nonzero
+    def leaves(error):
+        return [leaf for nested in error.exceptions for leaf in leaves(nested)] if isinstance(
+            error, BaseExceptionGroup) else [error]
+    with monkeypatch.context() as caller_ports:
+        caller_ports.setattr(caller_scope, '_ordinary_prepare_controller_role_v1', caller_prepare)
+        caller_ports.setattr(caller_scope, '_ordinary_controller_close_v1', caller_close)
+        caller_ports.setattr(caller_scope, '_ordinary_controller_resource_close_ready_v1',
+            lambda record, receipt: False)
+        caller_ports.setattr(reliability.subprocess, 'Popen', reject_native_creation)
+        caller_ports.setattr(reliability, 'supervise_command', caller_supervisor)
+        assert invoke_caller() is terminal_nonzero
+        assert caller_events == ['prepare', 'supervise', ('close', terminal_nonzero)]
+        assert caller_record['pending'] is False
+        assert reliability._LINUX_PREFLIGHT_PROCESS_V1.get() is prior_context
+        # No-child oracle: execute the actual finish method, retaining service
+        # and launcher results separately. These ports prove no native actor.
+        from types import SimpleNamespace
+        for launcher_exit in (0, 9):
+            finish_scope = reliability._LinuxPreflightScopeV1.__new__(reliability._LinuxPreflightScopeV1)
+            finish_process = SimpleNamespace(returncode=0,
+                stdout=SimpleNamespace(closed=True), stderr=SimpleNamespace(closed=True))
+            finish_process.poll = lambda: finish_process.returncode
+            finish_launcher = SimpleNamespace(returncode=launcher_exit)
+            finish_launcher.poll = lambda: finish_launcher.returncode
+            finish_row = dict(process=finish_process, launcher=finish_launcher, stopped=True,
+                launcher_error=None, errors=[], pidfd_slot=object(), cgroup_event_slot=object(),
+                terminal_status=object(), stop_receipt=object(), output_outcomes=(
+                    {'eof_observed':True, 'writer_closed':True},
+                    {'eof_observed':True, 'writer_closed':True}))
+            finish_scope.process = finish_process
+            with monkeypatch.context() as finish_ports:
+                finish_ports.setattr(finish_scope, '_ordinary_controller_record_v1', lambda **kwargs: finish_row)
+                finish_ports.setattr(finish_scope, '_ordinary_controller_empty_v1', lambda row: row is finish_row)
+                assert finish_scope._ordinary_finish_controller_v1() is True
+            assert finish_scope.settled and finish_row['terminal'][8:] == (0, launcher_exit)
+            if launcher_exit:
+                launch_failure = finish_row['launcher_error']
+                assert type(launch_failure) is reliability.ValidationReliabilityError
+                assert launch_failure.code == 'ENGVR_NATIVE_EXIT_NONZERO'
+                assert finish_row['errors'] == [launch_failure]
+                caller_events.clear()
+                with monkeypatch.context() as semantic_ports:
+                    semantic_ports.setitem(caller_record, 'launcher_error', launch_failure)
+                    semantic_ports.setattr(reliability, 'supervise_command', lambda *a, **k: terminal_zero)
+                    with pytest.raises(reliability.ValidationReliabilityError) as semantic:
+                        invoke_caller()
+                assert semantic.value is launch_failure
+                assert caller_events == ['prepare', ('close', terminal_zero)]
+                assert not caller_record['pending'] and terminal_zero.native_exit_code == 0
+            else:
+                assert finish_row['launcher_error'] is None and finish_row['errors'] == []
+        caller_events.clear()
+        late_publication = RuntimeError('synthetic late publication after actual typed fixture receipt')
+        late_publication.command_receipt = terminal_zero
+        def late_supervisor(*args, **keywords):
+            assert reliability._LINUX_PREFLIGHT_PROCESS_V1.get() is caller_scope
+            caller_events.append('supervise')
+            raise late_publication
+        caller_ports.setattr(reliability, 'supervise_command', late_supervisor)
+        with pytest.raises(RuntimeError) as caught:
+            invoke_caller()
+        assert caught.value is late_publication
+        assert caller_events == ['prepare', 'supervise', ('close', terminal_zero)]
+        assert caller_record['pending'] is False
+        assert reliability._LINUX_PREFLIGHT_PROCESS_V1.get() is prior_context
+        caller_events.clear()
+        close_failure = OSError('synthetic original controller slot close failed')
+        def failed_close(record, receipt):
+            assert record is caller_record and receipt is terminal_zero
+            caller_events.append('failed close')
+            raise close_failure
+        caller_ports.setattr(caller_scope, '_ordinary_controller_close_v1', failed_close)
+        with pytest.raises(BaseExceptionGroup) as caught:
+            invoke_caller()
+        assert leaves(caught.value) == [late_publication, close_failure]
+        assert caller_record['pending'] is True
+        assert reliability._LINUX_PREFLIGHT_PROCESS_V1.get() is prior_context
+        caller_events.clear()
+        def unresolved_supervisor(*args, **keywords):
+            caller_events.append('supervise')
+            return unresolved_receipt
+        caller_ports.setattr(reliability, 'supervise_command', unresolved_supervisor)
+        assert invoke_caller() is unresolved_receipt
+        assert caller_events == ['prepare', 'supervise'] and caller_record['pending'] is True
+        assert reliability._LINUX_PREFLIGHT_PROCESS_V1.get() is prior_context
+        caller_events.clear()
+        partial_prepare = RuntimeError('synthetic retained preparation sentinel before body')
+        def failed_prepare(**keywords):
+            caller_scope._ordinary_controller_role_v1 = caller_record
+            caller_scope._ordinary_original_controller_role_v1 = caller_record
+            caller_events.append('partial prepare')
+            raise partial_prepare
+        caller_ports.setattr(caller_scope, '_ordinary_prepare_controller_role_v1', failed_prepare)
+        with pytest.raises(RuntimeError) as caught:
+            invoke_caller()
+        assert caught.value is partial_prepare and caller_events == ['partial prepare']
+        assert caller_scope._ordinary_controller_role_v1 is caller_record
+        assert caller_record['pending'] is True
+        assert reliability._LINUX_PREFLIGHT_PROCESS_V1.get() is prior_context
     class Completed:
         returncode = 0
         stderr = ""
@@ -9158,6 +11278,659 @@ def test_runner_restores_only_runtime_side_effects_before_pr142_pr143_and_final_
     finally:
         original_os_close(final_callback_foreign)
 
+    # Packed mutable C mechanics use independent literal records. The ports
+    # below create no child and grant no ordinary native Scope admission.
+    import threading
+    packed = disk_type.__new__(disk_type)
+    file_words = (0, 1, 2, 3, 1, 0o644, 4, 1, 0o644, 4, 1, 0)
+    directory_words = (1, 2, 2, 3, 1, 0, (1 << 64) - 1, 2, 7, 2, 0, 0)
+    expected_file = b'\x01' + struct.pack('<12Q', *file_words)
+    expected_directory = b'\x02' + struct.pack('<12Q', *directory_words)
+    assert packed._disk_restore_words_v1(1, file_words) == expected_file
+    assert packed._disk_restore_words_v1(2, directory_words) == expected_directory
+    assert len(expected_file) == len(expected_directory) == 97
+    for bad_tag, bad_words in (
+        (True, file_words), (0, file_words), (3, file_words),
+        (1, (True, *file_words[1:])), (1, (*file_words[:-1], 4)),
+        (2, (*directory_words[:4], 2, *directory_words[5:])),
+        (2, (*directory_words[:5], 2, *directory_words[6:])),
+        (2, (*directory_words[:6], 0, *directory_words[7:])),
+        (2, (*directory_words[:10], 2, 0)),
+    ):
+        with pytest.raises(ValueError):
+            packed._disk_restore_words_v1(bad_tag, bad_words)
+    fake_state = dict(action_count=2, limits={'action_record_limit':2},
+        restore_plan_original=object(), names=((0, 'file'), (0, 'directory')))
+    action_rows = {0:expected_file, 1:expected_directory}
+    transitions = []
+    def read_literal_action(_role, offset, length):
+        assert _role == 'ACTIONS' and length == 97 and offset >= 32 and (offset - 32) % 97 == 0
+        return action_rows[(offset - 32) // 97]
+    def write_literal_action(_role, offset, data, **keywords):
+        assert _role == 'ACTIONS' and len(data) == 97
+        transitions.append((offset, data, keywords))
+        action_rows[(offset - 32) // 97] = data
+    with monkeypatch.context() as packed_ports:
+        packed_ports.setattr(packed, '_disk_light_v1', lambda:fake_state)
+        packed_ports.setattr(packed, '_disk_control_read_v1', read_literal_action)
+        packed_ports.setattr(packed, '_disk_control_write_v1', write_literal_action)
+        with pytest.raises(ValueError, match='TERMINAL_TRANSITION'):
+            packed._disk_action_write_v1(0, 1, (*file_words[:-1], 2), transition=True)
+        assert not transitions
+        for code in (1, 2, 3):
+            packed._disk_action_write_v1(0, 1, (*file_words[:-1], code), transition=True)
+            assert action_rows[0] == b'\x01' + struct.pack('<12Q', *file_words[:-1], code)
+        with pytest.raises(ValueError, match='TERMINAL_TRANSITION'):
+            packed._disk_action_write_v1(0, 1, file_words, transition=True)
+        before_transitions = tuple(transitions)
+        with pytest.raises(ValueError, match='TERMINAL_TRANSITION'):
+            packed._disk_action_write_v1(0, 1, (*file_words[:10], 2, 3), transition=True)
+        assert tuple(transitions) == before_transitions
+        attempted_directory = (*directory_words[:10], 1, 0)
+        packed._disk_action_write_v1(1, 2, attempted_directory, transition=True)
+        failed_directory = (*directory_words[:10], 1, 2)
+        packed._disk_action_write_v1(1, 2, failed_directory, transition=True)
+        with pytest.raises(ValueError, match='TERMINAL_TRANSITION'):
+            packed._disk_action_write_v1(1, 2, (*directory_words[:10], 1, 1), transition=True)
+        assert action_rows[1] == b'\x02' + struct.pack('<12Q', *failed_directory)
+    # A DIRECTORY failed/unresolved result is never a completed FILE row.
+    with monkeypatch.context() as completion_ports:
+        completion_ports.setattr(packed, '_ordinary_disk_state_v1', fake_state, raising=False)
+        completion_ports.setattr(packed, '_disk_action_audit_read_v1',
+            lambda offset, length:read_literal_action('ACTIONS', offset, length))
+        view = packed._disk_completed_actions_view_v1()
+        assert len(view) == 1 and list(view) == [('file', 1, (*file_words[:-1], 3))]
+        assert fake_state['completed_view'] is fake_state['original_completed_view'] is view
+        action_rows[1] = b'\x02' + struct.pack('<12Q', *directory_words[:10], 1, 3)
+        assert len(view) == 1
+        action_rows[1] = b'\x02' + struct.pack('<12Q', *directory_words[:10], 1, 1)
+        assert len(view) == 2
+        with pytest.raises(AttributeError):
+            view.append(('extra', 1, file_words))
+        before_rows = dict(action_rows)
+        assert list(view)[1] == ('directory', 2, (*directory_words[:10], 1, 1))
+        assert action_rows == before_rows
+
+    # The original packed control writer independently closes the only new
+    # transition authority. Ordinary published regions retain their denial.
+    control_memory = bytearray(struct.pack('<4Q', 1, 0, 96, 1) + expected_file + expected_directory)
+    control_slot = dict(closed=False, acquiring=False, open_unknown=False, returned_fd=90)
+    controlled = dict(role='ACTIONS', extent=len(control_memory), sealed=False,
+        initialized=((0, len(control_memory)),), writer_slot=dict(control_slot),
+        reader_slot={**control_slot, 'returned_fd':91}, path='literal-control', version=(1,))
+    control_state = dict(action_count=2, limits={'action_record_limit':2},
+        control_transitions=0, action_header_published=False)
+    actual_plan = (packed, control_state, object(), object(), 3, 2, controlled,
+        object(), (os.getpid(), threading.get_ident()))
+    control_state['restore_plan_original'] = actual_plan
+    control_attempts = []
+    def literal_control_read(role, offset, length):
+        assert role == 'ACTIONS'
+        return bytes(control_memory[offset:offset + length])
+    def literal_control_write(descriptor, data, **keywords):
+        assert descriptor == 90 and keywords['control'] is True
+        control_attempts.append((keywords['offset'], data))
+        control_memory[keywords['offset']:keywords['offset'] + len(data)] = data
+    with monkeypatch.context() as original_control_ports:
+        original_control_ports.setattr(packed, '_disk_light_v1', lambda:control_state)
+        original_control_ports.setattr(packed, '_disk_control_v1', lambda role:controlled)
+        original_control_ports.setattr(packed, '_disk_control_read_v1', literal_control_read)
+        original_control_ports.setattr(packed, '_disk_charge_v1', lambda *args, **kwargs:None)
+        original_control_ports.setattr(packed, '_disk_write_v1', literal_control_write)
+        original_control_ports.setattr(packed, '_disk_read_v1',
+            lambda descriptor, length, **keywords:literal_control_read('ACTIONS', keywords['offset'], length))
+        original_control_ports.setattr(packed, '_disk_call_v1', lambda operation, *args, **kwargs:None)
+        original_control_ports.setattr(packed, '_disk_version_v1', lambda value:(1,))
+        with pytest.raises(ValueError, match='PUBLISHED_REGION_WRITE'):
+            packed._disk_control_write_v1('ACTIONS', 32, expected_file)
+        for foreign_transition in ((packed,), (object(), actual_plan, 'PLAN_HEADER'),
+                (packed, object(), 'PLAN_HEADER'), (packed, actual_plan, 'unknown')):
+            with pytest.raises(ValueError):
+                packed._disk_control_write_v1('ACTIONS', 0,
+                    struct.pack('<4Q', 1, 2, 96, 1), _action_transition_v1=foreign_transition)
+        assert not control_attempts and not control_state['action_header_published']
+        packed._disk_control_write_v1('ACTIONS', 0, struct.pack('<4Q', 1, 2, 96, 1),
+            _action_transition_v1=(packed, actual_plan, 'PLAN_HEADER'))
+        assert control_state['action_header_published'] and control_state['control_transitions'] == 1
+        next_words = (*file_words[:-1], 1)
+        next_packet = b'\x01' + struct.pack('<12Q', *next_words)
+        token = (packed, actual_plan, 0, 1, file_words, 1, next_words)
+        packed._disk_control_write_v1('ACTIONS', 32, next_packet, _action_transition_v1=token)
+        assert bytes(control_memory[32:129]) == next_packet
+        assert control_state['control_transitions'] == 2
+        before_control = bytes(control_memory)
+        for offset, prior, following in ((33, next_words, (*file_words[:-1], 2)),
+                (32, file_words, (*file_words[:-1], 2)), (32, next_words, (*file_words[:-1], 3))):
+            with pytest.raises(ValueError):
+                packed._disk_control_write_v1('ACTIONS', offset,
+                    b'\x01' + struct.pack('<12Q', *following),
+                    _action_transition_v1=(packed, actual_plan, 0, 1, prior, 1, following))
+        assert bytes(control_memory) == before_control and control_state['control_transitions'] == 2
+
+    # Demand comes from one independently frozen source programme, never from
+    # a quota. These small ports test admission arithmetic only, not a Scope.
+    packed.root = 'literal-root'
+    packed.plan = (object(),)
+    packed.remaining_read_bytes = 10000
+    packed.process_id, packed.thread_id = os.getpid(), threading.get_ident()
+    packed.deadline_ns = 123456789
+    candidate_keys = ('initial_raw_bytes', 'initial_file_count', 'later_raw_byte_cap',
+        'later_file_count_cap', 'mutable_file_byte_caps_by_occurrence',
+        'raw_read_bytes', 'raw_write_bytes', 'raw_retained_bytes', 'action_rows',
+        'metadata_calls', 'metadata_read_bytes', 'metadata_write_bytes',
+        'native_control_calls', 'native_control_read_bytes', 'native_control_write_bytes', 'handle_peak')
+    literal_demand = dict(zip(candidate_keys, (4, 1, 10, 2, (128,), 769, 152, 148, 1,
+        100, 200, 300, 400, 500, 600, 2)))
+    selected_file = dict(path='file', kind='FILE', actions=('WRITE',), parent_paths=())
+    candidate_nodes = {(0, 'file'):(None, 'file', SimpleNamespace(st_size=4, st_mode=stat.S_IFREG | 0o644), None)}
+    candidate_limits = dict(generation_byte_limit=10, file_generation_rows=2,
+        index_byte_limit=16, action_record_limit=1, native_handle_limit=2)
+    channel_keys = ('raw_read_byte_limit', 'raw_write_byte_limit', 'raw_retained_byte_limit',
+        'metadata_call_limit', 'metadata_read_limit', 'metadata_write_limit',
+        'native_control_call_limit', 'native_control_read_limit', 'native_control_write_limit')
+    packed.all_effects = {'file'}
+    def candidate_fixture(**changes):
+        values = {**literal_demand, **changes}
+        scope_port = SimpleNamespace(source=object())
+        effect_port = dict(candidate_demand=values)
+        resource_port = dict(scope=scope_port, source=scope_port.source, limits=candidate_limits,
+            control_layout=object(), physical_program={'volumes':()}, fd_program={}, candidate_demand=values)
+        scope_port._ordinary_resource_programme_v1 = resource_port
+        scope_port._ordinary_original_resource_programme_v1 = (resource_port, tuple(resource_port.items()),
+            tuple(candidate_limits.items()), resource_port['control_layout'], resource_port['physical_program'],
+            (), (), tuple(values.items()), effect_port)
+        state_port = dict(scope=scope_port, roots=({'logical_path':packed.root, 'domain_id':0},),
+            limits=candidate_limits, remaining=dict.fromkeys(channel_keys, 10000),
+            observed=dict.fromkeys(channel_keys, 0), meter=object())
+        boundary = (packed, state_port, state_port['meter'], tuple(state_port['observed'].items()),
+            (packed.process_id, packed.thread_id), packed.deadline_ns)
+        state_port['c_initial_meter_original'] = state_port['original_c_initial_meter_original'] = boundary
+        return state_port, effect_port, values
+    state_port, effect_port, values = candidate_fixture()
+    with monkeypatch.context() as candidate_ports:
+        candidate_ports.setattr(packed, '_disk_light_v1', lambda:state_port)
+        candidate_ports.setattr(packed, '_disk_effect_programme_v1', lambda:effect_port)
+        candidate_ports.setattr(packed, '_disk_effect_targets_v1', lambda index=None:((selected_file,), frozenset()))
+        assert packed._disk_mutable_programme_demand_v1(4, 1, candidate_nodes) == (values, 4)
+        assert state_port['remaining'] == dict.fromkeys(channel_keys, 10000)
+        state_port['observed']['metadata_call_limit'] = 7
+        state_port['remaining']['metadata_call_limit'] = 93
+        before_admission = dict(state_port['observed']), dict(state_port['remaining'])
+        assert packed._disk_mutable_programme_demand_v1(4, 1, candidate_nodes) == (values, 4)
+        assert (state_port['observed'], state_port['remaining']) == before_admission
+        assert dict(state_port['planned_c_local_prefix'][2])['metadata_calls'] == 7
+        assert dict(state_port['planned_c_local_prefix'][3])['metadata_calls'] == 93
+        state_port['remaining']['metadata_call_limit'] = 92
+        with pytest.raises(ValueError, match='DEMAND_BEFORE_ACQUISITION'):
+            packed._disk_mutable_programme_demand_v1(4, 1, candidate_nodes)
+        state_port['remaining']['metadata_call_limit'] = 93
+        values['raw_read_bytes'] += 1
+        with pytest.raises(ValueError, match='FROZEN_SOURCE_SELECTED'):
+            packed._disk_mutable_programme_demand_v1(4, 1, candidate_nodes)
+    for changes in (dict(initial_raw_bytes=5), dict(later_raw_byte_cap=True),
+            dict(mutable_file_byte_caps_by_occurrence=(True,)), dict(raw_read_bytes=768),
+            dict(raw_write_bytes=151), dict(raw_retained_bytes=147), dict(action_rows=0)):
+        state_port, effect_port, values = candidate_fixture(**changes)
+        with monkeypatch.context() as candidate_ports:
+            candidate_ports.setattr(packed, '_disk_light_v1', lambda:state_port)
+            candidate_ports.setattr(packed, '_disk_effect_programme_v1', lambda:effect_port)
+            candidate_ports.setattr(packed, '_disk_effect_targets_v1', lambda index=None:((selected_file,), frozenset()))
+            with pytest.raises(ValueError):
+                packed._disk_mutable_programme_demand_v1(4, 1, candidate_nodes)
+
+
+    # Specific fd0/manager borrowing uses literal kernel-metadata ports only.
+    # No child, manager, native namespace or production Scope is admitted here.
+    from tools import validation_reliability as handoff_owner
+    r_scope_type = handoff_owner._LinuxPreflightScopeV1
+    r_scope = r_scope_type.__new__(r_scope_type)
+    literal_fdinfo = b'pos:\t0\nflags:\t02000000\nmnt_id:\t19\nino:\t123\n'
+    assert r_scope._ordinary_rp5a_fdinfo_fields_v1(literal_fdinfo) == (0, 0o2000000, 19, 123)
+    for invalid_fdinfo in (literal_fdinfo + b'ino: 123\n', literal_fdinfo.replace(b'ino:\t123\n', b''),
+            literal_fdinfo.replace(b'pos:\t0', b'pos:\t-1'),
+            literal_fdinfo.replace(b'flags:\t02000000', b'flags:\t08'),
+            literal_fdinfo.replace(b'mnt_id:\t19', b'mnt_id:\t0'),
+            literal_fdinfo.replace(b'ino:\t123', b'ino:\t18446744073709551616'),
+            literal_fdinfo.replace(b'pos:\t0', b'pos:\t9223372036854775808'),
+            literal_fdinfo + b'X' * 65536, '\x00', bytearray(literal_fdinfo)):
+        with pytest.raises(handoff_owner.ValidationReliabilityError):
+            r_scope._ordinary_rp5a_fdinfo_fields_v1(invalid_fdinfo)
+    literal_manager = dict(pid=1, start=7, namespaces={'pid':(1, 9)})
+    literal_status = b'Uid:\t0\t0\t0\t0\nCapEff:\t0000000000080000\nCapPrm:\t0000000000080000\nCapBnd:\t0000000000080000\n'
+    authority_reads = []
+    authority_packets = {'/proc/1/attr/current':b'unconfined\n', '/proc/self/status':literal_status}
+    def literal_authority_read(path, *, settling=False, byte_limit=1048576):
+        authority_reads.append((path, settling, byte_limit))
+        return authority_packets[path]
+    r_scope.query = SimpleNamespace(_ordinary_read_v1=literal_authority_read)
+    with monkeypatch.context() as authority_ports:
+        authority_ports.setattr(handoff_owner.os, 'geteuid', lambda:0, raising=False)
+        authority_ports.setattr(r_scope, '_ordinary_process_identity_v1', lambda *args, **kwargs:literal_manager)
+        assert r_scope._ordinary_rp5a_manager_read_authority_v1() == (
+            literal_manager, 'unconfined', b'unconfined\n', literal_status)
+        assert authority_reads == [('/proc/1/attr/current', False, 65536), ('/proc/self/status', False, 65536)]
+        for broken_label, broken_status in ((b'*\n', literal_status), (b'guess"\n', literal_status),
+                (b'unconfined\n', literal_status.replace(b'Uid:\t0\t0\t0\t0', b'Uid:\t1\t1\t1\t1')),
+                (b'unconfined\n', literal_status.replace(b'0000000000080000', b'0000000000000000')),
+                (b'unconfined\n', literal_status + b'CapEff: 0000000000080000\n')):
+            authority_packets['/proc/1/attr/current'] = broken_label
+            authority_packets['/proc/self/status'] = broken_status
+            with pytest.raises(handoff_owner.ValidationReliabilityError):
+                r_scope._ordinary_rp5a_manager_read_authority_v1()
+
+    literal_directory = SimpleNamespace(st_dev=1, st_ino=2, st_mode=stat.S_IFDIR | 0o700,
+        st_size=0, st_mtime_ns=1, st_ctime_ns=2, st_nlink=2, st_uid=0, st_gid=0)
+    literal_input_info = SimpleNamespace(st_dev=1, st_ino=123, st_mode=stat.S_IFREG | 0o600,
+        st_size=4, st_mtime_ns=1, st_ctime_ns=2, st_nlink=1, st_uid=0, st_gid=0)
+    literal_owner = (os.getpid(), threading.get_ident())
+    frozen_material = (object(),) * 17
+    r_scope._ordinary_factory_owner_v1 = literal_owner
+    r_scope._ordinary_fd_program_v1 = {'manager_borrow':128}
+    def literal_handoff_record():
+        reader = SimpleNamespace(fileno=lambda:1234, tell=lambda:0, closed=False)
+        original_input = SimpleNamespace(reader=reader, state='ATTACHED',
+            descriptor_version=handoff_owner._scan_same_api_version(literal_input_info))
+        process = SimpleNamespace(returncode=0, poll=lambda:0,
+            stdout=SimpleNamespace(closed=True), stderr=SimpleNamespace(closed=True))
+        record = dict(scope=r_scope, entry=object(), rp5a_input=original_input,
+            programme=dict(rp5a_manager_fdinfo_records=1024, rp5a_manager_fdinfo_bytes=65536,
+                rp5a_manager_borrow_fds=128), stopped=True, process=process,
+            launcher=SimpleNamespace(poll=lambda:0),
+            output_outcomes=({'eof_observed':True}, {'eof_observed':True}), errors=[])
+        handoff = dict(record=record, scope=r_scope, material=frozen_material,
+            original_input=original_input, owner=literal_owner, parent_fields=(0, 0o2000000, 19, 123),
+            handle_version=original_input.descriptor_version, manager_identity=literal_manager,
+            observations=[], preexec=None, release_observation=None, descriptor=1234,
+            release_attempted=False, released=False, errors=[])
+        handoff['original'] = (handoff, record, r_scope, frozen_material, original_input,
+            literal_owner, handoff['observations'], handoff['errors'])
+        handoff['source_original'] = (handoff['parent_fields'], handoff['handle_version'], 1234)
+        record['rp5a_input_handoff'] = handoff
+        return record, handoff
+    for selected_names in (('0', '1'), ('0', '0'), tuple(str(number) for number in range(1025))):
+        record, handoff = literal_handoff_record()
+        close_calls, fd_reads, attempts = [], [], []
+        selected_entries = (SimpleNamespace(name=name) for name in selected_names)
+        iterator_port = {'iterator':selected_entries}
+        slot_port = {'returned_fd':5678}
+        def literal_fd_read(path, *, settling=False, byte_limit=1048576):
+            fd_reads.append((path, byte_limit))
+            return literal_fdinfo
+        r_scope.query = SimpleNamespace(_ordinary_read_v1=literal_fd_read)
+        def literal_meta_call(operation, *args, **kwargs):
+            assert operation in (os.lstat, os.fstat)
+            return literal_directory
+        def literal_iterator_close(value, errors):
+            assert value is iterator_port
+            close_calls.append('iterator')
+            value['iterator'].close()
+        with monkeypatch.context() as roster_ports:
+            for flag in ('O_DIRECTORY', 'O_NOFOLLOW', 'O_CLOEXEC'):
+                roster_ports.setattr(handoff_owner.os, flag, getattr(handoff_owner.os, flag, 0), raising=False)
+            roster_ports.setattr(r_scope, '_ordinary_occurrence_record_v1', lambda entry:record)
+            roster_ports.setattr(r_scope, '_ordinary_process_identity_v1', lambda *args, **kwargs:literal_manager)
+            roster_ports.setattr(r_scope, '_ordinary_factory_slot_v1', lambda *args, **kwargs:slot_port)
+            roster_ports.setattr(r_scope, '_ordinary_factory_open_v1', lambda *args, **kwargs:5678)
+            roster_ports.setattr(r_scope, '_ordinary_factory_iterator_v1', lambda *args, **kwargs:iterator_port)
+            roster_ports.setattr(r_scope, '_ordinary_factory_call_v1', literal_meta_call)
+            roster_ports.setattr(r_scope, '_ordinary_factory_debit_v1', lambda *args, **kwargs:attempts.append(args))
+            roster_ports.setattr(r_scope, '_ordinary_factory_iterator_close_v1', literal_iterator_close)
+            roster_ports.setattr(r_scope, '_ordinary_factory_close_v1', lambda *args, **kwargs:close_calls.append('directory'))
+            if selected_names == ('0', '1'):
+                observation = r_scope._ordinary_rp5a_manager_roster_v1(record)
+                assert observation['complete'] and len(observation['rows']) == 2 and not handoff['errors']
+            else:
+                with pytest.raises(handoff_owner.ValidationReliabilityError, match='FINITE_UNIQUE_FD_ROSTER') as roster_error:
+                    r_scope._ordinary_rp5a_manager_roster_v1(record)
+                assert not handoff['observations'][0]['complete']
+                assert any(error is roster_error.value for error in handoff['errors'])
+                assert len(fd_reads) == (1 if selected_names == ('0', '0') else 1024)
+        assert close_calls == ['iterator', 'directory']
+        assert all(byte_limit == 65536 and '/fdinfo/' in path for path, byte_limit in fd_reads)
+        assert len(attempts) == len(selected_names)
+
+    for aliases in ((), ((7, (4, 0o2000000, 19, 123)),)):
+        record, handoff = literal_handoff_record()
+        native_observations = []
+        def literal_terminal_roster(value, *, settling=False):
+            assert value is record and settling
+            observation = dict(record=record, manager_identity=literal_manager, rows=aliases,
+                complete=True, errors=[])
+            handoff['observations'].append(observation)
+            native_observations.append(observation)
+            return observation
+        def literal_terminal_meta(operation, *args, **kwargs):
+            assert operation is os.fstat and args == (1234,) and kwargs == {'settling':True}
+            return literal_input_info
+        with monkeypatch.context() as handback_ports:
+            handback_ports.setattr(r_scope, '_ordinary_rp5a_material_v1', lambda *args, **kwargs:frozen_material)
+            handback_ports.setattr(r_scope, '_ordinary_cgroup_empty_v1', lambda *args, **kwargs:True)
+            handback_ports.setattr(r_scope, '_ordinary_rp5a_manager_roster_v1', literal_terminal_roster)
+            handback_ports.setattr(r_scope, '_ordinary_factory_call_v1', literal_terminal_meta)
+            if not aliases:
+                assert r_scope._ordinary_rp5a_terminal_handback_v1(record) is handoff
+                assert handoff['released'] and not handoff['errors']
+                assert r_scope._ordinary_rp5a_terminal_handback_v1(record) is handoff
+                assert len(native_observations) == 1
+            else:
+                with pytest.raises(handoff_owner.ValidationReliabilityError, match='INPUT_BORROW_UNRESOLVED') as unresolved_borrow:
+                    r_scope._ordinary_rp5a_terminal_handback_v1(record)
+                assert not handoff['released'] and handoff['release_attempted']
+                assert handoff['errors'][0] is unresolved_borrow.value and record['errors'][0] is unresolved_borrow.value
+                with pytest.raises(handoff_owner.ValidationReliabilityError, match='HAND_BACK_ONE_ATTEMPT'):
+                    r_scope._ordinary_rp5a_terminal_handback_v1(record)
+                assert len(native_observations) == 1
+        assert record['rp5a_input'].state == 'ATTACHED' and not record['rp5a_input'].reader.closed
+        assert record['rp5a_input'].reader.tell() == 0
+
+
+    # Rolling RAW disposal ports are explicit no-child fixtures. They exercise
+    # original packed rows/last-user/native disposal owners, not admission.
+    from tools import validation_reliability as rolling_owner
+    rolling_candidate_type = runner._ValidationCandidateCustodyV1
+    rolling_scope_type = rolling_owner._LinuxPreflightScopeV1
+
+    def rolling_fixture(patches, *, reader=False, native_fault=False):
+        candidate = rolling_candidate_type.__new__(rolling_candidate_type)
+        scope = rolling_scope_type.__new__(rolling_scope_type)
+        allocations, witnesses = [], {}
+        for ordinal in range(1, 7):
+            errors = []
+            version = (1, 100 + ordinal, 2 if ordinal == 3 else 4, 7, 8, stat.S_IFREG | 0o600)
+            allocation = dict(ordinal=ordinal, length=version[2], version=version,
+                sealed=True, writer_closed=True, disposed=False, errors=errors)
+            allocations.append(allocation)
+            witnesses[id(allocation)] = dict(allocation=allocation, errors=errors,
+                dispose_attempted=False, basename='raw-'+str(ordinal), parent_fd=789,
+                original_flags=0, sealed_descriptor_version=version, sealed_path_version=version)
+        baseline = dict(ordinal=1, region=0, complete=True, file_count=2)
+        previous = dict(ordinal=2, region=1, complete=True, file_count=2)
+        current = dict(ordinal=3, region=2, complete=True, file_count=2)
+        def literal_row(path_ordinal, generation, allocation):
+            return (path_ordinal, generation['ordinal'], allocation['ordinal'], 1, 0o600,
+                allocation['length'], *allocation['version'], 9, 10, allocation['length'], 11)
+        rows = {1:[literal_row(0, baseline, allocations[0]), literal_row(1, baseline, allocations[1])],
+            2:[literal_row(0, previous, allocations[3]), literal_row(1, previous, allocations[4])],
+            3:[literal_row(0, current, allocations[5]), literal_row(1, current, allocations[4])]}
+        entry, paths = object(), object()
+        receipt = SimpleNamespace(native_exit_code=0, failure_class=None)
+        terminal = dict(native_exit=0)
+        record = dict(receipt=receipt, errors=[], process=object())
+        token = dict(candidate=candidate, generation=previous, released=True,
+            occurrence=2, consumer=entry, paths=paths, native_record=record)
+        config = dict(paths=paths)
+        supervision = dict(candidate_custody=candidate, receipt=receipt, pending=False,
+            paths=paths, errors=[])
+        state = dict(candidate=candidate, scope=scope, config=config, errors=[], slots=[],
+            iterator_records=[], close_debt=0, allocations=allocations, borrows=[],
+            pending_capture=None, capturing_generation=None, release_attempted=False,
+            action_count=0, restore_mutation_started=False, final_barriers=None,
+            regions={0:baseline, 1:previous, 2:current}, verified_generations={1:1, 2:2, 3:3},
+            full_barriers=3, directory_header_roles=(baseline, current, None),
+            index_allocation=allocations[2], controls={'FILE_HEADERS':{'version':(1, 77)}},
+            rolling_disposal=None, original_rolling_disposal=None,
+            remaining={'raw_retained_byte_limit':111}, observed={'raw_retained_byte_limit':222})
+        candidate._ordinary_disk_state_v1 = candidate._original_ordinary_disk_state_v1 = state
+        candidate.all_effects = ('literal-effect',)
+        candidate.state, candidate.failure, candidate.active_occurrence = 'BASELINE_READY', None, 2
+        candidate.baseline, candidate._settled_snapshot = baseline, current
+        candidate.plan = (object(), entry)
+        token['plan'] = candidate.plan
+        candidate._occurrence_before, candidate._acquisition_supervision = token, supervision
+        scope._ordinary_candidate_v1 = candidate
+        scope._ordinary_storage_errors_v1 = []
+        scope.query = SimpleNamespace(command_resources_settled_v1=lambda:True)
+        calls, acquisitions, leaves = [], [], set(range(1, 7))
+        faults = (OSError('literal unseal failure'), OSError('literal close failure'))
+        patches.setattr(runner, '_RUN_COMMANDS_SUPERVISION', supervision)
+        patches.setattr(candidate, '_disk_light_v1', lambda:state)
+        def literal_file_row(generation, ordinal):
+            acquisitions.append((generation['ordinal'], ordinal))
+            return rows[generation['ordinal']][ordinal]
+        patches.setattr(candidate, '_disk_file_row_v1', literal_file_row)
+        patches.setattr(scope, '_ordinary_occurrence_record_v1', lambda value:record)
+        patches.setattr(scope, '_ordinary_require_occurrence_terminal_v1', lambda *args:terminal)
+        patches.setattr(scope, '_ordinary_processes_settled_v1', lambda:True)
+        patches.setattr(scope, '_ordinary_port_allocation_v1', lambda allocation, **kwargs:witnesses[id(allocation)])
+        def literal_read_witness(witness, **kwargs):
+            calls.append(('reader-tranche', kwargs['settling']))
+            version = witness['sealed_descriptor_version']
+            info = SimpleNamespace(st_dev=version[0], st_ino=version[1], st_size=version[2],
+                st_mtime_ns=version[3], st_ctime_ns=version[4], st_mode=version[5], st_nlink=1)
+            slot = {'closed':False}
+            def literal_flags(fd, value=None):
+                calls.append(('flags', fd, value))
+                if native_fault: raise faults[0]
+                return 0
+            return 456, slot, info, info, 16, SimpleNamespace(flags=literal_flags)
+        patches.setattr(scope, '_ordinary_port_read_witness_v1', literal_read_witness)
+        patches.setattr(scope, '_ordinary_port_charge_v1', lambda *args, **kwargs:calls.append(('charge', args)))
+        def literal_close(slot, **kwargs):
+            calls.append(('close', slot))
+            if native_fault: raise faults[1]
+            slot['closed'] = True
+        patches.setattr(scope, '_ordinary_port_close_v1', literal_close)
+        def literal_leaf_call(operation, name, **kwargs):
+            if kwargs['settling']:
+                assert kwargs == {'dir_fd':789, 'settling':True} if operation is os.unlink else kwargs == {
+                    'dir_fd':789, 'follow_symlinks':False, 'settling':True}
+            else:
+                assert kwargs == {'dir_fd':789, 'settling':False} if operation is os.unlink else kwargs == {
+                    'dir_fd':789, 'follow_symlinks':False, 'settling':False}
+            ordinal = int(name.removeprefix('raw-'))
+            calls.append(('unlink' if operation is os.unlink else 'absence', ordinal))
+            if operation is os.unlink:
+                leaves.remove(ordinal)
+                return None
+            assert operation is os.stat
+            if ordinal not in leaves: raise FileNotFoundError(name)
+            return object()
+        patches.setattr(scope, '_ordinary_port_call_v1', literal_leaf_call)
+        if reader:
+            value = rolling_owner._ScanLaunchInput.__new__(rolling_owner._ScanLaunchInput)
+            for name, setting in dict(state='CLOSED', frame_unlinked=True, close_started=True,
+                    close_errors=[], retention_errors=[], raw_descriptor=None, raw_handle_owner=None,
+                    snapshot_descriptor=None, snapshot_acquiring=False, supervision_started=True,
+                    supervision_settled=True, writer=SimpleNamespace(closed=True), reader=SimpleNamespace(closed=True),
+                    writer_close_attempted=True, reader_close_attempted=True, finish_error=None,
+                    original_check_candidate=object(), process=record['process'], supervision_receipt=receipt).items():
+                setattr(value, name, setting)
+            material = dict(scope=scope, candidate=candidate, entry=entry, generation=previous, borrow=token,
+                input=value, reader=object(), scanner=None, basis=object(), projection=object(), canonical=b'x',
+                policy=object(), identity=object(), fence=object(), snapshot_root=object(), supervision=supervision)
+            frozen = (material, scope, *(material[name] for name in ('candidate', 'entry', 'generation',
+                'borrow', 'input', 'reader', 'scanner', 'basis', 'projection', 'canonical', 'policy',
+                'identity', 'fence', 'snapshot_root', 'supervision')))
+            material['original'] = frozen
+            record.update(rp5a_input=value, rp5a_material=material, rp5a_launch=material['projection'])
+            handoff = dict(record=record, scope=scope, material=frozen, original_input=value,
+                errors=[], released=True, release_observation=object())
+            record['rp5a_input_handoff'] = terminal['rp5a_input_handoff'] = handoff
+        return candidate, scope, state, previous, rows, record, calls, acquisitions, leaves, witnesses, faults
+
+    for has_reader in (False, True):
+        with monkeypatch.context() as rolling_ports:
+            value, scope, state, previous, rows, record, calls, reads, leaves, witnesses, faults = rolling_fixture(
+                rolling_ports, reader=has_reader)
+            before = (dict(state['remaining']), dict(state['observed']), tuple(state['allocations']))
+            value._disk_retire_raw_v1(previous)
+            assert [row['ordinal'] for row in state['allocations'] if row['disposed']] == [4]
+            assert leaves == {1, 2, 3, 5, 6} and len(reads) == 6
+            assert before == (dict(state['remaining']), dict(state['observed']), tuple(state['allocations']))
+            assert state['rolling_disposal'] is None and state['original_rolling_disposal'] is None
+            assert [call[1] for call in calls if call[0] == 'unlink'] == [4]
+            assert sum(call[0] == 'close' for call in calls) == 1
+            assert [call[1] for call in calls if call[0] == 'reader-tranche'] == [False]
+            scope._ordinary_require_disposed_carrier_v1(state['allocations'][3])
+            assert [call[1] for call in calls if call[0] == 'unlink'] == [4]
+
+    with monkeypatch.context() as final_disposal_ports:
+        value, scope, state, previous, rows, record, calls, reads, leaves, witnesses, faults = rolling_fixture(
+            final_disposal_ports)
+        final_disposal_ports.setattr(value, '_disk_settled_for_disposal_v1', lambda:True)
+        scope.dispose_carrier(state['allocations'][3])
+        assert [call[1] for call in calls if call[0] == 'reader-tranche'] == [True]
+        assert state['allocations'][3]['disposed'] and leaves == {1, 2, 3, 5, 6}
+
+    with monkeypatch.context() as shared_ports:
+        value, scope, state, previous, rows, record, calls, reads, leaves, witnesses, faults = rolling_fixture(shared_ports)
+        rows[3][0] = (rows[2][0][0], 3, *rows[2][0][2:])
+        value._disk_retire_raw_v1(previous)
+        assert not calls and all(not row['disposed'] for row in state['allocations'])
+
+    for retained_debt in ('borrow', 'capture', 'slot', 'partial', 'failed', 'unverified', 'header-alias', 'live-input',
+            'input-error', 'manager-alias'):
+        with monkeypatch.context() as debt_ports:
+            value, scope, state, previous, rows, record, calls, reads, leaves, witnesses, faults = rolling_fixture(
+                debt_ports, reader=retained_debt in ('live-input', 'input-error', 'manager-alias'))
+            if retained_debt == 'borrow': state['borrows'].append(value._occurrence_before)
+            elif retained_debt == 'capture': state['pending_capture'] = object()
+            elif retained_debt == 'slot': state['slots'].append(object())
+            elif retained_debt == 'partial': state['allocations'][3]['sealed'] = False
+            elif retained_debt == 'failed': record['receipt'].failure_class = 'ENGVR_NATIVE_EXIT_NONZERO'
+            elif retained_debt == 'unverified': del state['verified_generations'][3]
+            elif retained_debt == 'header-alias': state['directory_header_roles'] = (dict(value.baseline), value._settled_snapshot, None)
+            elif retained_debt == 'live-input': record['rp5a_input'].state = 'ATTACHED'
+            elif retained_debt == 'input-error': record['rp5a_input'].finish_error = faults[0]
+            else: record['rp5a_input_handoff']['released'] = False
+            with pytest.raises(RuntimeError, match='ROLLING_RAW'):
+                value._disk_retire_raw_v1(previous)
+            assert not calls and all(not row['disposed'] for row in state['allocations'])
+            assert state['remaining']['raw_retained_byte_limit'] == 111 and state['observed']['raw_retained_byte_limit'] == 222
+
+    with monkeypatch.context() as failed_native_ports:
+        value, scope, state, previous, rows, record, calls, reads, leaves, witnesses, faults = rolling_fixture(
+            failed_native_ports, native_fault=True)
+        with pytest.raises(BaseExceptionGroup) as rolling_failure:
+            value._disk_retire_raw_v1(previous)
+        assert rolling_failure.value.exceptions == faults
+        assert state['rolling_disposal'] is state['original_rolling_disposal'] and state['rolling_disposal'] is not None
+        assert witnesses[id(state['allocations'][3])]['dispose_attempted'] and not state['allocations'][3]['disposed']
+        before_calls = tuple(calls)
+        with pytest.raises(RuntimeError, match='NOT_REENTERED'):
+            value._disk_retire_raw_v1(previous)
+        assert tuple(calls) == before_calls and leaves == {1, 2, 3, 4, 5, 6}
+        assert state['allocations'][3]['errors'] == list(faults) and scope._ordinary_storage_errors_v1 == list(faults)
+
+    # Literal no-child ports for the original settlement/source-plan seam.
+    # The original bound_rows method is exercised; its source census guard and
+    # the native query/occurrence observation are explicit fixture oracles.
+    # These cases grant no native Scope and execute no application command.
+    from tools import validation_reliability as phase_owner
+
+    def settlement_fixture(patches, phase, native_exit=0, *, no_dispatch=False):
+        scope = phase_owner._LinuxPreflightScopeV1.__new__(phase_owner._LinuxPreflightScopeV1)
+        paths = SimpleNamespace(run_id='literal-settlement-run', repo_root=tmp_path)
+        entry = phase_owner.CommandEvidencePlanEntry(run_id=paths.run_id,
+            phase=phase, command_index=1, argv=('literal-no-child',), cwd=str(tmp_path))
+        plan, execution = (entry,), (object(),)
+        config = object()
+        candidate = SimpleNamespace(_ordinary_disk_config_v1=config, plan=plan)
+        binding = dict(paths=paths, plan=plan, bound=True)
+        scope._ordinary_factory_owner_v1 = (123, 456)
+        binding['original'] = (binding, paths, plan, scope._ordinary_factory_owner_v1)
+        scope._ordinary_runner_owner_v1 = scope._ordinary_original_runner_owner_v1 = runner
+        scope._ordinary_bound_paths_v1, scope._ordinary_bound_plan_v1 = paths, plan
+        scope._ordinary_execution_plan_v1 = scope._ordinary_original_execution_plan_v1 = execution
+        scope._ordinary_run_binding_v1 = scope._ordinary_original_run_binding_v1 = binding
+        source = runner._OrdinarySourceSelectionV1.__new__(runner._OrdinarySourceSelectionV1)
+        source._scope, source.paths, source.phase = scope, paths, phase
+        source._runner, source._run_binding = runner, binding
+        source._errors, source._attempted = [], {'bind'}
+        source._plan, source._execution = plan, execution
+        source._bound = source._bound_original = ((entry, execution[0], 1),)
+        source._original = (scope, paths, phase, object(), object(), runner, binding,
+            source._errors, source._attempted, {}, (), tuple(runner.ORDERED_PHASES),
+            paths.run_id, paths.repo_root, [], [], [], object(), scope._ordinary_factory_owner_v1)
+        scope._ordinary_source_selection_v1 = scope._ordinary_original_source_selection_v1 = source
+        guards, observations = [], []
+        patches.setattr(source, '_guard', lambda: guards.append('source-guard'))
+        scope.query = SimpleNamespace(command_resources_settled_v1=lambda: observations.append('query') or True)
+        receipt = phase_owner.CommandExecutionReceiptV1(schema_version=1, run_id=paths.run_id,
+            phase=phase, command_index=1, argv=entry.argv, cwd=entry.cwd, pid=123,
+            platform='literal-no-child', start_time_utc='literal-start', end_time_utc='literal-end',
+            elapsed_monotonic_seconds=0, native_exit_code=native_exit, start_failure_class=None,
+            timeout_seconds_or_null=None, timeout_state='NOT_CONFIGURED', termination_state='NOT_REQUIRED',
+            stdout_path=str(tmp_path / 'literal.stdout'), stderr_path=str(tmp_path / 'literal.stderr'),
+            stdout_byte_count=0, stderr_byte_count=0, stdout_required_markers=(),
+            stdout_marker_state='NOT_REQUIRED', stderr_was_nonempty=False,
+            failure_class=None if native_exit == 0 else 'ENGVR_NATIVE_EXIT_NONZERO')
+        record = dict(entry=entry, scope=scope, receipt=receipt, pending=False,
+            argv=entry.argv, cwd=entry.cwd, terminal={'native_exit':native_exit})
+        supervision = dict(candidate_custody=candidate, paths=paths, phase=phase,
+            pending=False, receipt=receipt)
+        candidate._acquisition_supervision = supervision
+        scope._ordinary_candidate_v1 = candidate
+        scope._ordinary_storage_original_v1 = dict(config=config, paths=paths, plan=plan)
+        patches.setattr(runner, '_RUN_COMMANDS_SUPERVISION', supervision)
+        def original_occurrence(value):
+            observations.append('occurrence')
+            assert value is entry
+            return record
+        patches.setattr(scope, '_ordinary_occurrence_record_v1', original_occurrence)
+        if no_dispatch:
+            baseline = {'complete':True}
+            index = dict(sealed=True, writer_closed=True, errors=[])
+            state = dict(candidate=candidate, config=config, baseline_generation=baseline,
+                index_allocation=index, allocations=[index], pending_capture=None)
+            candidate.baseline, candidate.index_baseline = baseline, object()
+            candidate._ordinary_disk_state_v1 = candidate._original_ordinary_disk_state_v1 = state
+            supervision.update(receipt=None, candidate_admission_complete=True)
+            record.update(dispatch_attempted=False, launcher_attempted=False, process=None,
+                launcher=None, receipt=None, binding=None, release_attempted=False,
+                released=False, output_outcomes=None, application_pidfd_slot=None,
+                root_slot=None, cgroup_slot=None, cgroup_event_slot=None)
+            scope._ordinary_occurrences_v1 = scope._ordinary_original_occurrences_v1 = [record]
+        return scope, candidate, supervision, source, record, receipt, guards, observations
+
+    for selected_phase in runner.ORDERED_PHASES:
+        for native_exit in (0, 9):
+            with monkeypatch.context() as phase_ports:
+                scope, candidate, supervision, source, record, receipt, guards, observations = settlement_fixture(
+                    phase_ports, selected_phase, native_exit)
+                assert scope._ordinary_require_supervision_settled_v1(candidate, supervision) is receipt
+                assert guards == ['source-guard'] and observations == ['query', 'occurrence']
+                assert receipt.phase == selected_phase and receipt.native_exit_code == native_exit
+        with monkeypatch.context() as no_dispatch_ports:
+            scope, candidate, supervision, source, record, receipt, guards, observations = settlement_fixture(
+                no_dispatch_ports, selected_phase, no_dispatch=True)
+            assert scope._ordinary_require_supervision_settled_v1(candidate, supervision) is None
+            assert guards == ['source-guard'] and observations == ['query', 'occurrence']
+
+    for defect in ('phase', 'source-phase', 'source-original-phase', 'foreign-source', 'runner', 'plan',
+            'execution', 'paths', 'receipt-phase', 'receipt-run', 'receipt-index', 'receipt-argv',
+            'receipt-cwd', 'equal-receipt', 'terminal-exit', 'pending'):
+        with monkeypatch.context() as mismatch_ports:
+            scope, candidate, supervision, source, record, receipt, guards, observations = settlement_fixture(
+                mismatch_ports, runner.ORDERED_PHASES[0])
+            if defect == 'phase': supervision['phase'] = runner.ORDERED_PHASES[-1]
+            elif defect == 'source-phase': source.phase = runner.ORDERED_PHASES[-1]
+            elif defect == 'source-original-phase':
+                source._original = (*source._original[:2], runner.ORDERED_PHASES[-1], *source._original[3:])
+            elif defect == 'foreign-source': scope._ordinary_source_selection_v1 = object()
+            elif defect == 'runner': scope._ordinary_original_runner_owner_v1 = object()
+            elif defect == 'plan': scope._ordinary_storage_original_v1['plan'] = tuple(list(candidate.plan))
+            elif defect == 'execution': scope._ordinary_execution_plan_v1 = tuple(list(source._execution))
+            elif defect == 'paths': supervision['paths'] = SimpleNamespace(**source.paths.__dict__)
+            elif defect == 'receipt-phase': supervision['receipt'] = replace(receipt, phase=runner.ORDERED_PHASES[-1])
+            elif defect == 'receipt-run': supervision['receipt'] = replace(receipt, run_id='foreign-run')
+            elif defect == 'receipt-index': supervision['receipt'] = replace(receipt, command_index=2)
+            elif defect == 'receipt-argv': supervision['receipt'] = replace(receipt, argv=('foreign-no-child',))
+            elif defect == 'receipt-cwd': supervision['receipt'] = replace(receipt, cwd=str(tmp_path / 'foreign'))
+            elif defect == 'equal-receipt': supervision['receipt'] = replace(receipt)
+            elif defect == 'terminal-exit': record['terminal']['native_exit'] = 9
+            else: supervision['pending'] = True
+            with pytest.raises((ValueError, phase_owner.ValidationReliabilityError), match='ORDINARY_'):
+                scope._ordinary_require_supervision_settled_v1(candidate, supervision)
+            assert supervision is runner._RUN_COMMANDS_SUPERVISION and candidate.plan is source._plan
+
+    with monkeypatch.context() as partial_ports:
+        scope, candidate, supervision, source, record, receipt, guards, observations = settlement_fixture(
+            partial_ports, runner.ORDERED_PHASES[-1], no_dispatch=True)
+        candidate.baseline['complete'] = False
+        with pytest.raises(phase_owner.ValidationReliabilityError, match='COMPLETE_C'):
+            scope._ordinary_require_supervision_settled_v1(candidate, supervision)
+        assert observations == ['query'] and guards == ['source-guard']
 
 def test_runner_preserves_initially_modified_files_after_final_pytest(
     monkeypatch,
@@ -15471,6 +18244,110 @@ def test_runner_returns_zero_when_all_mocked_commands_pass(monkeypatch, capsys, 
                     environment=reliability._scan_child_launch_environment({},launch=launch,planned=mixed_plan[0]),
                     explicit_basetemp=mixed_paths.pytest_basetemp_root,original_argv=argv,expected_role=role)
         assert calls == []
+    # Private ordinary header codec only: this creates no native application,
+    # Scope, source programme, capacity, launch input or process oracle.
+    ordinary_table = {}
+    for index in (1, 2):
+        original_reader = launch.reader_profiles[index]
+        original_scanner = launch.profiles.get(index)
+        def limits_only(value):
+            result = dataclasses.asdict(value)
+            del result["expected_inventory"]
+            del result["file_sizes"]
+            return result
+        ordinary_table[str(index)] = {
+            "argv": mixed_plan[index - 1].argv,
+            "role": reliability._rp5a_consumer_role_v1(mixed_plan[index - 1].argv, mixed_root),
+            "wire_version": 3 if index == 1 else 2,
+            "names": ("tools/run_validation_gates.py",),
+            "expected_inventory": original_reader.expected_inventory,
+            "reader_limits": limits_only(original_reader),
+            "scanner_limits": None if original_scanner is None else limits_only(original_scanner),
+            "reader_basis": reliability._rp5a_basis_projection_v1(basis),
+            "read_limits": dataclasses.asdict(limits),
+            "payload_byte_limit": 4 if index == 1 else 0,
+            "frame_scratch_bytes": 20_000_000,
+            "frame_reread_bytes": 60_000_000,
+            "candidate_read_bytes": 20_000_000,
+            "deadline_ns": deadline,
+            "binding_byte_limit": limits.byte_limit,
+            "fence_metadata_calls": 1000,
+            "fence_native_read_bytes": 2000,
+        }
+    projection_arguments = dict(run_id=mixed_paths.run_id, phase=phase,
+        command_count=len(mixed_plan), repo_root=mixed_root)
+    source_table = reliability._ordinary_rp5a_table_projection_v1(ordinary_table, **projection_arguments)
+    # The independent standard JSON encoder exercises its literal array
+    # representation; the expected typed fields above never use the producer.
+    parsed_table = json.loads(json.dumps(ordinary_table, ensure_ascii=True, separators=(",", ":")))
+    with pytest.raises(ValueError):
+        reliability._ordinary_rp5a_table_projection_v1(parsed_table, **projection_arguments)
+    decoded_table = reliability._ordinary_rp5a_table_projection_v1(parsed_table,
+        _json_arrays_v1=True, **projection_arguments)
+    assert decoded_table == source_table
+    assert decoded_table["1"]["argv"] == mixed_plan[0].argv
+    assert decoded_table["2"]["reader_limits"]["child_environment"] == original_reader.child_environment
+    for field in ("fence_metadata_calls", "fence_native_read_bytes"):
+        for wrong in (True, False, 0, -1, "1000"):
+            changed = {**ordinary_table, "1": {**ordinary_table["1"], field: wrong}}
+            with pytest.raises(ValueError):
+                reliability._ordinary_rp5a_table_projection_v1(changed, **projection_arguments)
+        missing = dict(ordinary_table["1"]); del missing[field]
+        with pytest.raises(ValueError, match="CLOSED_SHAPE"):
+            reliability._ordinary_rp5a_table_projection_v1({**ordinary_table, "1": missing}, **projection_arguments)
+    for wrong in (0, 1, None, "true"):
+        with pytest.raises(ValueError, match="EXACT_JSON_ARRAY_SELECTION"):
+            reliability._ordinary_rp5a_table_projection_v1(ordinary_table,
+                _json_arrays_v1=wrong, **projection_arguments)
+    for field, bad in (("argv", "not-an-array"), ("argv", [True]),
+            ("names", "not-an-array"), ("expected_inventory", [False])):
+        changed = {**parsed_table, "1": {**parsed_table["1"], field: bad}}
+        with pytest.raises(ValueError, match="EXACT_STRING_ARRAY"):
+            reliability._ordinary_rp5a_table_projection_v1(changed,
+                _json_arrays_v1=True, **projection_arguments)
+    for bad in ({"X": "Y"}, [["X", "Y", "Z"]], [["X", False]]):
+        reader_values = {**parsed_table["1"]["reader_limits"], "child_environment": bad}
+        changed = {**parsed_table, "1": {**parsed_table["1"], "reader_limits": reader_values}}
+        with pytest.raises(ValueError, match="EXACT_ENVIRONMENT_ARRAY"):
+            reliability._ordinary_rp5a_table_projection_v1(changed,
+                _json_arrays_v1=True, **projection_arguments)
+
+    # Synthetic no-child interface ports exercise the actual Scope method's
+    # normal/settling call grammar, then stop before any native record lookup.
+    for settling in (False, True):
+        interface_scope = object.__new__(reliability._LinuxPreflightScopeV1)
+        observed_ports = []
+        stopped = ValueError("synthetic no-child material lookup stop")
+        interface_scope.query = SimpleNamespace(check=lambda **kwargs:
+            observed_ports.append(("query", kwargs)))
+        def stop_record(_entry):
+            raise stopped
+        with monkeypatch.context() as material_ports:
+            material_ports.setattr(interface_scope, "_ordinary_factory_check_v1",
+                lambda **kwargs: observed_ports.append(("factory", kwargs)))
+            material_ports.setattr(interface_scope, "check",
+                lambda: observed_ports.append(("precursor", {})))
+            material_ports.setattr(interface_scope, "_ordinary_occurrence_record_v1", stop_record)
+            with pytest.raises(ValueError) as stopped_call:
+                interface_scope._ordinary_rp5a_material_v1({"entry": object()}, settling=settling)
+        assert stopped_call.value is stopped
+        assert observed_ports == [("factory", {"settling": settling}), ("query", {"settling": settling})] + (
+            [] if settling else [("precursor", {})])
+
+    # Source projection only: no native role, process or arbitrary config key.
+    git_vector = ("/usr/bin/git", "--no-pager", "--literal-pathspecs", "ls-files", "-z")
+    if os.name == "posix":
+        git_root = Path("/synthetic-original-root")
+        projected_git = reliability._ordinary_rp5a_git_requested_v1(git_vector, git_root)
+        assert projected_git == ("/usr/bin/git", "-c", "safe.directory=/synthetic-original-root",
+            "--no-pager", "--literal-pathspecs", "ls-files", "-z")
+        assert git_vector == ("/usr/bin/git", "--no-pager", "--literal-pathspecs", "ls-files", "-z")
+        for invalid_vector, invalid_root in ((list(git_vector), git_root),
+                (("/other/git", "status"), git_root), (git_vector, Path("relative")),
+                (("/usr/bin/git", "bad\0value"), git_root)):
+            with pytest.raises(ValueError, match="SOURCE_FIXED_GIT_ROOT_AND_VECTOR"):
+                reliability._ordinary_rp5a_git_requested_v1(invalid_vector, invalid_root)
+
     # Original runner publishes exactly one plan and forwards both new tables.
     published = []
     capacity_calls = []
@@ -16206,18 +19083,460 @@ def test_github_workflow_splits_validation_into_parallel_phase_jobs():
     assert "  workflow_dispatch:\n    inputs:\n      full_validation:\n" in event_block
     assert "  push:\n    branches:\n      - main\n" in event_block
     assert "pull_request_target:" not in event_block
-    eligibility = ("          QTT_PR298_NATIVE_ELIGIBLE: ${{ matrix.phase == 'fast-preflight' "
-        "&& github.event_name == 'pull_request' && github.repository == 'Q8Meow/QTT_New0526' "
-        "&& github.event.pull_request.number == 298 && github.event.pull_request.draft == true "
-        "&& github.event.pull_request.head.repo.full_name == 'Q8Meow/QTT_New0526' "
-        "&& github.event.pull_request.base.repo.full_name == 'Q8Meow/QTT_New0526' "
-        "&& github.event.pull_request.base.ref == 'main' "
-        "&& github.event.pull_request.head.ref == 'repair/main-cumulative-v35-final-r5-local-20260922' "
-        "&& '1' || '0' }}\n")
+    eligibility = (
+        "          QTT_PR298_NATIVE_ELIGIBLE: ${{ ((github.event_name == 'pull_request' && github.repository == "
+        "'Q8Meow/QTT_New0526' && github.event.pull_request.number == 298 && "
+        "github.event.pull_request.head.repo.full_name == 'Q8Meow/QTT_New0526' && "
+        "github.event.pull_request.base.repo.full_name == 'Q8Meow/QTT_New0526' && github.event.pull_request.base.ref "
+        "== 'main' && github.event.pull_request.head.ref == 'repair/main-cumulative-v35-final-r5-local-20260922') || "
+        "(github.repository == 'Q8Meow/QTT_New0526' && github.ref == 'refs/heads/main' && github.ref_name == 'main' "
+        "&& github.head_ref == '' && github.base_ref == '' && (github.event_name == 'push' && github.event.ref == "
+        'github.ref && github.event.after == github.sha && github.event.deleted == false || github.event_name == '
+        "'workflow_dispatch' && (github.event.ref == 'main' || github.event.ref == github.ref) && "
+        "(github.event.inputs.full_validation == 'true' || github.event.inputs.full_validation == 'false')))) && '1' "
+        "|| '0' }}\n"
+    )
     assert shard_block.count(eligibility) == 1
     assert shard_block.count("          QTT_PR298_NATIVE_ELIGIBLE:") == 1
-    assert "            python -I -B -X utf8 tools/run_validation_gates.py --linux-preflight-provision --phase fast-preflight\n" in shard_block
+    assert "            python -I -B -X utf8 tools/run_validation_gates.py --linux-preflight-provision --phase ${{ matrix.phase }}\n" in shard_block
     assert "          if [ \"$QTT_PR298_NATIVE_ELIGIBLE\" = \"1\" ]\n" in shard_block
+
+    # These are source/control-flow and explicit no-child fault oracles. They
+    # execute no Linux syscall, timer, fork, manager, privilege or scope effect;
+    # they do not qualify native timer delivery or descendant termination.
+    import ast
+    import copy
+    import textwrap
+
+    opening = 'qtt_original_birth_v1 - "${{ matrix.phase }}" <<\'QTT_FIXED_ORIGINAL_HOST_SOURCE_V1\'\n'
+    frontend_text = textwrap.dedent(shard_block.split(opening, 1)[1].split(
+        "          QTT_FIXED_ORIGINAL_HOST_SOURCE_V1\n", 1)[0])
+    frontend_tree = ast.parse(frontend_text)
+    front_function = next(node for node in frontend_tree.body
+        if isinstance(node, ast.FunctionDef) and node.name == "_qtt_original_front_v1")
+    members = {node.name: node for node in front_function.body if isinstance(node, ast.FunctionDef)}
+    # Compile only the actual selected nested helper definitions against closed
+    # synthetic ports. The real frontend and its entry call are never executed.
+    def helper_from_source(name, ports):
+        isolated = ast.Module(body=[copy.deepcopy(members[name])], type_ignores=[])
+        exec(compile(ast.fix_missing_locations(isolated), "<workflow-no-child-owner>", "exec"), ports)
+        return ports[name]
+
+    class KernelPort:
+        c_long = staticmethod(int)
+        c_int = staticmethod(int)
+
+        @staticmethod
+        def get_errno():
+            return 5
+
+    # A genuine successful raw lifecycle return remains recorded if the next
+    # errno getter or returned-byte admission fails. It cannot be lost and then
+    # recast as a never-acquired timer. Failed raw creation gains no such credit.
+    for number, raw_result, fault_after_raw in ((222, 0, "errno"), (222, 0, "bytes"),
+                                               (223, 0, "errno"), (226, 0, "errno"),
+                                               (222, -1, None)):
+        calls = []
+        raw_fault = OSError("synthetic getter/admission failure")
+        watchdog = {"id": None, "created": False, "armed": number == 226,
+                    "deleted": False}
+        observed = b"\x00\x00\x00\x00" if number == 222 else None
+        def synthetic_native(*args):
+            calls.append(("raw", args))
+            return raw_result
+        def synthetic_effect(name, function, *args, **kwargs):
+            calls.append(("effect", name, kwargs["tranche"]))
+            if name.endswith("-errno") and fault_after_raw == "errno":
+                raise raw_fault
+            return function(*args)
+        def synthetic_returned(part):
+            calls.append(("returned", bytes(part)))
+            if fault_after_raw == "bytes":
+                raise raw_fault
+        ports = {"qZ": "work", "ctypes": KernelPort, "native": synthetic_native,
+                 "effect": synthetic_effect, "returned": synthetic_returned,
+                 "w": watchdog, "handle": SimpleNamespace(value=17)}
+        kernel = helper_from_source("kernel", ports)
+        with pytest.raises(OSError) as raised:
+            kernel("synthetic-watchdog", number, observed=observed)
+        if fault_after_raw is not None:
+            assert raised.value is raw_fault
+        else:
+            assert raised.value.errno == 5
+        assert watchdog == {"id": 17 if number == 222 and raw_result == 0 else None,
+            "created": number == 222 and raw_result == 0,
+            "armed": number == 223 and raw_result == 0,
+            "deleted": number == 226 and raw_result == 0}
+        assert sum(row[0] == "raw" for row in calls) == 1
+        if observed is not None:
+            assert sum(row[0] == "returned" for row in calls) == 1
+
+    # A retained initial body error and its one-delete failure are both the
+    # original objects. This cold port has no real timer or managed child.
+    body_fault = OSError("synthetic no-child initial failure")
+    close_fault = OSError("synthetic no-child delete failure")
+    watchdog = {"armed": False, "created": True, "delete_attempted": False,
+                "deleted": False, "id": 19}
+    errors = [("original-first-front", body_fault)]
+    state = {"custodian_effect_attempted": True, "commands": [], "errors": errors}
+    deletes = []
+    def failed_delete(name, *args, **kwargs):
+        deletes.append((name, args, kwargs))
+        raise close_fault
+    ports = {"qA": "commands", "qB": "custodian_effect_attempted", "qC": "errors",
+             "qT": "failure_cutoff", "b": {"retired": False}, "a": state,
+             "w": watchdog, "ctypes": KernelPort, "kernel": failed_delete}
+    failure = helper_from_source("failure", ports)
+    with pytest.raises(BaseExceptionGroup) as raised:
+        failure(body_fault)
+    assert raised.value.exceptions == (body_fault, close_fault)
+    assert watchdog["delete_attempted"] and not watchdog["deleted"]
+    assert errors == [("original-first-front", body_fault), ("watchdog-no-child-delete", close_fault)]
+    assert len(deletes) == 1 and deletes[0][2] == {"tranche": "settle"}
+    assert "w" not in {node.id for node in ast.walk(members["failure"])
+        if isinstance(node, ast.Name) and isinstance(node.ctx, ast.Store)}
+
+    # The native path's own exact owner/cutoff/terminal guard stays visible. A
+    # timer, direct child exit or EOF alone cannot retire original Scope debt.
+    source = ast.unparse(front_function)
+    initial = ast.unparse(next(node for node in front_function.body if isinstance(node, ast.Try)))
+    assert initial.index("'same original privileged preparer required'") < initial.index("'watchdog-create'")
+    assert initial.index("'watchdog-arm-original'") < initial.index("'front-original-same-owner-call'")
+    assert "origin + 3720000000000" in source and "tranche='settle'" in source
+    manager_source = ast.unparse(members["manager"])
+    assert manager_source.index("timer_check()") < manager_source.index("'ancestor-manager-fork'")
+    assert manager_source.index("ctypes.c_long(157)") < manager_source.index("os.getppid()") < manager_source.index("os.execve(")
+    assert source.index("'original watchdog cannot retire unresolved child or scope debt'") < source.index("'watchdog-terminal-delete'")
+    assert "not all(c['eof'])" in source and "b['retired']" in source and "c['reap'] != (c['pid'], 0)" in source
+
+    # These checks inspect the actual emitted C, including packed formatting.
+    # They do not compile C, run chattr or qualify Linux/native termination.
+    native_raw = (Path(__file__).resolve().parents[2] / "tools/ci_branch_context.py").read_bytes()
+    native_tree = ast.parse(native_raw.decode("utf-8"))
+    native_rows = [node for node in native_tree.body
+        if isinstance(node, ast.Assign) and len(node.targets) == 1
+        and isinstance(node.targets[0], ast.Name)
+        and node.targets[0].id == "_QTT_ORDINARY_NATIVE_C_SOURCE_V1"]
+    assert len(native_rows) == 1
+    native_value = native_rows[0].value
+    assert isinstance(native_value, ast.Constant) and type(native_value.value) is bytes
+    native_bytes = native_value.value
+    native_begin = b"# QTT_ORDINARY_NATIVE_C_DATA_BEGIN_20261008_V1\n"
+    native_end = b"# QTT_ORDINARY_NATIVE_C_DATA_END_20261008_V1\n"
+    native_lines = native_raw.splitlines(keepends=True)
+    native_starts = [i for i, line in enumerate(native_lines) if line == native_begin]
+    native_ends = [i for i, line in enumerate(native_lines) if line == native_end]
+    assert len(native_starts) == len(native_ends) == 1
+    assert native_starts[0] < native_ends[0]
+    native_frame = b"".join(native_lines[native_starts[0] + 1:native_ends[0]])
+    native_prefix, native_suffix = b"_QTT_ORDINARY_NATIVE_C_SOURCE_V1 = rb'''", b"'''\n"
+    assert native_frame.startswith(native_prefix) and native_frame.endswith(native_suffix)
+    assert native_bytes == native_frame[len(native_prefix):-len(native_suffix)]
+    assert native_bytes and native_bytes.endswith(b"\n")
+    assert b"\r" not in native_bytes and b"\0" not in native_bytes and b"'''" not in native_bytes
+    native_source = native_bytes.decode("ascii")
+
+    def native_owner_body(name, return_type="int", definition_suffix=None):
+        # Scan just the fixed C lexical body. Ignore braces in comments and
+        # quoted literals, retaining every actual code character for the oracle.
+        assert return_type in ("int", "void", "ssize_t")
+        signature = "static " + return_type + " " + name + "("
+        if definition_suffix is not None:
+            assert definition_suffix == "void) {"
+            signature += definition_suffix
+        assert native_source.count(signature) == 1
+        opening = native_source.index("{", native_source.index(signature))
+        position, depth, state, escaped, code = opening, 0, "code", False, []
+        while position < len(native_source):
+            character = native_source[position]
+            following = native_source[position:position + 2]
+            if state == "line":
+                if character == "\n": state = "code"
+            elif state == "block":
+                if following == "*/": state = "code"; position += 1
+            elif state in ('"', "'"):
+                code.append(character)
+                if escaped: escaped = False
+                elif character == "\\": escaped = True
+                elif character == state: state = "code"
+            elif following == "//": state = "line"; position += 1
+            elif following == "/*": state = "block"; position += 1
+            else:
+                code.append(character)
+                if character in ('"', "'"): state = character
+                elif character == "{": depth += 1
+                elif character == "}":
+                    depth -= 1
+                    if not depth: return "".join("".join(code).split())
+            position += 1
+        raise AssertionError("actual C owner body is incomplete: " + name)
+
+    quiet = native_owner_body("qn_flag_command_quiet")
+    assert 'qn_error("source-seal-native-terminal-and-quiet",EPROTO)' in quiet
+    for original_field in ("!c->registered", "!c->child_created", "c->pending", "!c->exec_proven",
+            "!c->exec_eof", "!c->terminal", "c->status", "!c->stdout_eof", "!c->stderr_eof",
+            "!o->registered", "!o->native_attempted", "o->result", "o->native_errno",
+            "o->info.si_pid!=c->pid", "o->info.si_code!=CLD_EXITED", "o->info.si_status",
+            "c->stdout_used", "c->stderr_used"):
+        assert original_field in quiet
+    assert "free(" not in quiet and "realloc(" not in quiet and "qn_command_run(" not in quiet
+    assert "stdout_used=" not in quiet and "stderr_used=" not in quiet
+
+    for original_flag_owner, operand, journal in (
+            ("qn_flag_effect", "number", "*attempted=1;"),
+            ("qn_catalogue_flag_effect", "slot", "*attempted|=baseline?2:1;")):
+        flag = native_owner_body(original_flag_owner)
+        native_call = "qn_command_run(index,argv,1)<0"
+        generation = "qn_refresh_after_flag_effect(" + operand + ",after)<0"
+        acceptance = "qn_flag_command_quiet(index)<0"
+        assert flag.index(journal) < flag.index(native_call) < flag.index(generation) < flag.index(acceptance)
+        assert native_call + "||" + generation + "||" + acceptance in flag
+        assert 'argv[3]="/usr/bin/chattr";argv[4]=restore?"-i":"+i";' in flag
+        assert 'argv[5]="--";' in flag and "free(" not in flag
+        assert flag.index(acceptance) < flag.index("qn_startup_mode_loan(")
+    refreshed = native_owner_body("qn_refresh_after_flag_effect")
+    assert "s->path_before=p;s->handle_before=h;return0;" in refreshed
+    error = native_owner_body("qn_error")
+    assert "qn.stage=QN_HELD;" in error
+    owner_check = native_owner_body("qn_owner_check")
+    assert "!permit_held&&(qn.stage==QN_HELD||qn.stage==QN_CLOSED)" in owner_check
+    attempted = native_owner_body("qn_attempt")
+    assert "elseif(qn_owner_check(0)<0)return-1;" in attempted
+    captured = native_owner_body("qn_capture_one")
+    assert "qn.heap_remaining-=added;qn.realloc_peak_remaining-=next_extent;" in captured
+    assert "*used+=(size_t)n;" in captured and "free(" not in captured
+
+    # Inspect the real keeper's private C loan continuation. These independent
+    # literals are Source/custody oracles, not compilation or Linux-access proof.
+    keeper_prepare = native_owner_body("qn_keeper_observations_prepare")
+    for original_field in ("l->attempted=1", "l->role=QN_PROVISION", "l->keeper_pid=qn.pid",
+            "l->source_owner=(constvoid*)&qn", "l->origin_ns=qn.origin_ns", "l->cutoff_ns=qn.cutoff_ns",
+            "l->source_input_count=qn.input_count", "l->source_catalogue_count=qn.catalogue_count",
+            "l->source_alias_count=qn.alias_count", "!qn.provision.mask_held", "!qn.catalogue_complete"):
+        assert original_field in keeper_prepare
+    assert keeper_prepare.index("l->process_slot=qn_open_component(") < keeper_prepare.index("l->stat_slot=qn_open_component(") < keeper_prepare.index("l->keeper_pid_slot=qn_pidfd_slot(")
+    assert "qn_keeper_observation_slots_close()" in keeper_prepare
+    keeper_namespace = native_owner_body("qn_keeper_namespace_open")
+    assert keeper_namespace.index("number=qn_slot_register(") < keeper_namespace.index("qn_fstatat(") < keeper_namespace.index("s->fd=openat(")
+    assert 'name,O_RDONLY|O_CLOEXEC)' in keeper_namespace and "O_PATH" not in keeper_namespace
+    keeper_check = native_owner_body("qn_keeper_observation_check")
+    assert "flags!=FD_CLOEXEC" in keeper_check and "(access&O_ACCMODE)!=O_RDONLY||(access&O_PATH)" in keeper_check
+    assert "!initial&&access!=l->access_flags[role]" in keeper_check
+    assert "ioctl(s->fd,NS_GET_NSTYPE,(void*)0)" in keeper_check
+    assert "NSFS_MAGIC" in keeper_check and "PROC_SUPER_MAGIC" in keeper_check
+    keeper_life = native_owner_body("qn_keeper_original_check")
+    assert keeper_life.index("qn_keeper_start_from_held(o)") < keeper_life.index("poll(&port,1,0)")
+    assert "o->start_ticks!=l->keeper_start" in keeper_life and "o->poll_result!=0||o->poll_revents" in keeper_life
+
+    provision_prepare = native_owner_body("qn_provision_prepare", "int", "void) {")
+    assert provision_prepare.index("qn_provision_original_inputs()<0") < provision_prepare.index("qn_keeper_observations_prepare()<0") < provision_prepare.index("qn_provision_prefix_allocation()<0")
+    assert provision_prepare.index("qn_keeper_observations_prefork_join()<0") < provision_prepare.index("c->pid=fork();")
+    assert "qn_error(\"provision-original-native-fork\",errno);gotokeeper_prefork_failed;" in provision_prepare
+    actual_child_suffix = provision_prepare.split("c->child_created=1;", 1)[1].split("keeper_prefork_failed:", 1)[0]
+    assert "gotokeeper_prefork_failed;" not in actual_child_suffix and "return-1;" in actual_child_suffix
+    keeper_child = native_owner_body("qn_provision_child_observations", "void")
+    assert "syscall(SYS_close_range,3U,UINT_MAX,CLOSE_RANGE_CLOEXEC)" in keeper_child
+    assert "CLOSE_RANGE_UNSHARE" not in keeper_child and "close(" not in keeper_child
+    assert keeper_child.index("j->cloexec_range_attempted=1;") < keeper_child.index("syscall(SYS_close_range,") < keeper_child.index("parent=getppid();")
+    assert "parent!=l->keeper_pid" in keeper_child and "for(i=0;i<3;i++)" in keeper_child
+    assert "(returned&O_PATH)||returned!=l->access_flags[i]" in keeper_child
+    assert "ioctl(fd,NS_GET_NSTYPE,(void*)0)" in keeper_child
+    assert keeper_child.index("o->handle=qn_stat_version(&st);") < keeper_child.index("o->clear_attempted=1;") < keeper_child.index("fcntl(fd,F_SETFD,") < keeper_child.index("o->flags_after_result=returned;")
+    assert "o->flags_before_result&~FD_CLOEXEC" in keeper_child and "if(returned!=0)" in keeper_child
+    provision_child = native_owner_body("qn_provision_child", "void")
+    assert provision_child.index("qn_provision_child_root(") < provision_child.index("qn_provision_child_observations(") < provision_child.index("setgid(p->selected_gid)") < provision_child.index("setuid(p->selected_uid)") < provision_child.index("execveat(")
+    assert "F_SETFD" not in provision_child and "CLONE_FILES" not in provision_prepare
+
+    keeper_release = native_owner_body("qn_keeper_observations_release_join")
+    assert "SEEK_CUR" in keeper_release and "offset!=l->maps_initial_offset||offset!=0" in keeper_release
+    assert "SEEK_SET" not in keeper_release and "qn_read(" not in keeper_release
+    keeper_retire = native_owner_body("qn_keeper_observations_retire")
+    for terminal_field in ("!p->reaped", "c->pending", "!c->terminal", "!c->exec_proven",
+            "!c->stdout_eof", "!c->stderr_eof", "!p->prefix_merged"):
+        assert terminal_field in keeper_retire
+    assert keeper_retire.index('qn_error("keeper-original-observation-live-retirement-debt",EBUSY)') < keeper_retire.index("qn_keeper_observation_slots_close()") < keeper_retire.index("l->retired=1;")
+    keeper_close = native_owner_body("qn_keeper_observation_slots_close")
+    assert "intslots[7]=" in keeper_close and "for(i=0;i<7;i++)" in keeper_close
+    assert "if(!s->close_attempted)" in keeper_close and "s->close_result<0||s->close_errno" in keeper_close
+    # This original function has a separate prototype. Match its sole complete
+    # definition without changing the existing single-owner extractor's guard.
+    native_compact = "".join(native_source.split())
+    return_definition = "staticintqn_provision_return(intterminal_status){"
+    storage_definition = "staticintqn_provision_storage_close(void){"
+    assert native_compact.count(return_definition) == native_compact.count(storage_definition) == 1
+    provision_return = native_compact.split(return_definition, 1)[1].split(storage_definition, 1)[0]
+    assert provision_return.index("waitpid(c->pid,&status,0)") < provision_return.index("p->reaped=1;c->pending=0;") < provision_return.index("qn_keeper_observations_retire()") < provision_return.index("borrow->returned=1;")
+    provision_storage = native_owner_body("qn_provision_storage_close")
+    assert "!p->keeper_observations.retired" in provision_storage
+    original_read = native_owner_body("qn_read", "ssize_t")
+    assert original_read.index("request>qn.read_remaining") < original_read.index("n=read(") < original_read.index("qn.read_remaining-=(uint64_t)n;qn.read_bytes+=(uint64_t)n;")
+    namespace_read = native_owner_body("qn_keeper_namespace_link")
+    assert namespace_read.index("63U>qn.read_remaining") < namespace_read.index("n=readlinkat(") < namespace_read.index("qn.read_remaining-=(uint64_t)n;qn.read_bytes+=(uint64_t)n;")
+
+    # Actual keeper-roster Source with owned filesystem operands and explicit
+    # no-child ports. This does not qualify Linux FD/flags, process custody or
+    # containment. The real outside preparer/controller is never invoked.
+    import tempfile
+    import stat
+    host_tag = "# QTT_HOST_PY | "
+    host_source = "".join(line[len(host_tag):] for line in workflow.splitlines(keepends=True)
+        if line.startswith(host_tag))
+    host_tree = ast.parse(host_source)
+    adoption_nodes = [node for node in ast.walk(host_tree)
+        if isinstance(node, ast.FunctionDef) and node.name == "_qtt_adopt_early_startup_counts_v1"]
+    assert len(adoption_nodes) == 1
+    adoption_node = adoption_nodes[0]
+    roster_nodes = [node for node in ast.walk(adoption_node)
+        if isinstance(node, ast.FunctionDef) and node.name == "roster"]
+    assert len(roster_nodes) == 1
+    roster_node = roster_nodes[0]
+    adoption_source = ast.unparse(adoption_node)
+    roster_source = ast.unparse(roster_node)
+    assert "(r, c, r['path'], r['row'], r['version'], r['members'], r['duplicate'], c['function'], c['code'])" in adoption_source
+    assert "first['names'] is not r['names']" in adoption_source
+    assert "tuple((n for n, v in r['members'])) != r['names']" in adoption_source
+    admission_ifs = [node for node in ast.walk(roster_node) if isinstance(node, ast.If)
+        and any(isinstance(value, ast.Constant)
+            and value.value == "same original earlier roster bounded returned prefix"
+            for value in ast.walk(node))]
+    assert len(admission_ifs) == 1
+    admission = ast.unparse(admission_ifs[0].test)
+    assert "len(names) >= len(early['names'])" in admission
+    assert "len(names) >= 65535 // 2" in admission and "total + len(name) + 1 > 65535" in admission
+    assert roster_source.index("'C earlier roster original next'") < roster_source.index(
+        "len(names) >= len(early['names'])") < roster_source.index("names.append(name)")
+    assert "tuple(names) != early['names']" in roster_source
+    iterator_nodes = [node for node in ast.walk(host_tree)
+        if isinstance(node, ast.FunctionDef) and node.name == "iterator_next"]
+    assert len(iterator_nodes) == 1
+
+    for wanted, present, expected_error in (
+            ((b"aa", b"bb"), ("aa", "bb"), None),
+            ((), (), None),
+            ((b"aa", b"bb"), ("aa", "bb", "cc", "dd"), "prefix"),
+            ((), ("aa", "bb"), "prefix"),
+            ((b"aa", b"bb"), ("aa", "xx"), "membership")):
+        with tempfile.TemporaryDirectory(prefix="qtt-roster-no-child-") as owned:
+            root = Path(owned)
+            for filename in present:
+                operand = root / filename
+                operand.write_bytes(b"owned synthetic roster operand")
+                info = operand.lstat()
+                assert stat.S_ISREG(info.st_mode) and info.st_nlink == 1
+            # The observed current generation is deliberately part of this
+            # synthetic fixture; wanted is its independent literal baseline.
+            # It does not rebase any repository or retained owner snapshot.
+            info = root.stat()
+            current = (info.st_dev, info.st_ino, info.st_mode, info.st_uid, info.st_gid,
+                info.st_nlink, info.st_size, info.st_mtime_ns, info.st_ctime_ns)
+            row = [owned, owned, False, None]
+            early = {"row": row, "names": wanted, "roster": b"".join(name + b"\n" for name in wanted)}
+            retained = {"iterations": []}
+            failed = {"errors": []}
+            effects = []
+            rejoins = []
+
+            def same_local_port(operand, expected, directory=False):
+                rejoins.append((operand, expected, directory))
+                assert operand is row and expected is current and directory is True
+                actual = root.stat()
+                assert (actual.st_dev, actual.st_ino, actual.st_mode, actual.st_uid, actual.st_gid,
+                    actual.st_nlink, actual.st_size, actual.st_mtime_ns, actual.st_ctime_ns) == current
+                return actual
+
+            def effect_port(label, function, *args):
+                record = {"label": label, "function": function, "args": args,
+                    "attempted": False, "returned": None, "error": None}
+                effects.append(record)
+                record["attempted"] = True
+                try:
+                    record["returned"] = function(*args)
+                    return record["returned"]
+                except BaseException as error:
+                    record["error"] = error
+                    raise
+
+            def failure_port(label):
+                raise ValueError(label)
+
+            ports = {"os": os, "same_local": same_local_port, "E": effect_port,
+                "F": failure_port, "a": retained, "q": failed}
+            isolated = ast.Module(body=[copy.deepcopy(iterator_nodes[0]), copy.deepcopy(roster_node)],
+                type_ignores=[])
+            exec(compile(ast.fix_missing_locations(isolated), "<keeper-roster-no-child-owner>", "exec"), ports)
+            if expected_error is None:
+                ports["roster"](early, current)
+                assert failed["errors"] == [] and len(rejoins) == 2
+                assert len([item for item in effects if item["label"].endswith("original next")]) == len(wanted) + 1
+                assert retained["iterations"][0]["body_error"] is None
+            else:
+                message = ("same original earlier roster bounded returned prefix" if expected_error == "prefix"
+                    else "same original earlier complete directory membership changed")
+                with pytest.raises(ValueError, match=message) as raised:
+                    ports["roster"](early, current)
+                assert failed["errors"] == [raised.value]
+                assert retained["iterations"][0]["body_error"] is raised.value
+                assert len(rejoins) == 1
+                traceback = raised.value.__traceback__
+                while traceback is not None and traceback.tb_frame.f_code is not ports["roster"].__code__:
+                    traceback = traceback.tb_next
+                assert traceback is not None
+                assert len(traceback.tb_frame.f_locals["names"]) == len(wanted)
+                returned = [item for item in effects if item["label"].endswith("original next")]
+                assert len(returned) == len(wanted) + 1
+                if expected_error == "prefix":
+                    # Exactly one extra returned DirEntry/operation survives;
+                    # the additional suffix is never reached or given credit.
+                    assert returned[-1]["returned"][0] is False
+                    assert returned[-1]["returned"][1] is traceback.tb_frame.f_locals["entry"]
+            iteration = retained["iterations"][0]
+            assert iteration["early"] is early and iteration["row"] is row
+            assert iteration["close_attempted"] and iteration["closed"] and iteration["close_error"] is None
+            assert sum(item["label"] == "C earlier roster iterator one-close" for item in effects) == 1
+            assert all(item["attempted"] and item["error"] is None for item in effects)
+            assert early["names"] is wanted and early["roster"] == b"".join(name + b"\n" for name in wanted)
+
+
+    # Inspect the actual three controller Source literals and protected frame.
+    # These DATA projections do not create a holder or qualify Linux startup.
+    controller_begin = "# QTT_ORIGINAL_CONTROLLER_HELPERS_BEGIN_20261007_V1\n"
+    controller_end = "# QTT_ORIGINAL_CONTROLLER_HELPERS_END_20261007_V1\n"
+    controller_tag = "# QTT_CTL | "
+    controller_lines = workflow.splitlines(keepends=True)
+    controller_starts = [i for i, line in enumerate(controller_lines) if line == controller_begin]
+    controller_ends = [i for i, line in enumerate(controller_lines) if line == controller_end]
+    assert len(controller_starts) == len(controller_ends) == 1
+    assert controller_starts[0] < controller_ends[0]
+    controller_rows = controller_lines[controller_starts[0] + 1:controller_ends[0]]
+    assert all(line.startswith(controller_tag) and line.endswith("\n") for line in controller_rows)
+    controller_template = "".join(line[len(controller_tag):] for line in controller_rows).encode("ascii")
+    controller_init = (b'qtt_ordinary_native init "$GITHUB_RUN_ID" "$GITHUB_RUN_ATTEMPT" "$qtt_phase_ordinal" \\\n'
+        b'    "$1" "$2" "$3" "$4"')
+    assert controller_template.count(controller_init) == 1
+    assert controller_template.count(controller_init.replace(b"\n    ", b"\n  ")) == 0
+    ci_startup_nodes = [node for node in native_tree.body if isinstance(node, ast.FunctionDef)
+        and node.name == "_facet_fn_initial_startup_prebind_v1"]
+    assert len(ci_startup_nodes) == 1
+    ci_init_values = [node.value for node in ast.walk(ci_startup_nodes[0])
+        if isinstance(node, ast.Constant) and type(node.value) is bytes
+        and node.value.startswith(b"qtt_ordinary_native init ") and b"$GITHUB_RUN_ID" in node.value]
+    keeper_init_values = [node.value for node in ast.walk(host_tree)
+        if isinstance(node, ast.Constant) and type(node.value) is bytes
+        and node.value.startswith(b"qtt_ordinary_native init ") and b"$GITHUB_RUN_ID" in node.value]
+    assert ci_init_values == [controller_init]
+    assert keeper_init_values == [controller_init, controller_init]
+    ci_projection_source = ast.unparse(ci_startup_nodes[0])
+    assert ci_projection_source.index("template.count(init_before) == 1") < ci_projection_source.index(
+        "template.replace(init_before") < ci_projection_source.index("projected == pair_body['raw']")
+    projected_init = b"qtt_ordinary_native init 1 2 3 4 5 6 7"
+    projected_controller = controller_template.replace(controller_init, projected_init)
+    assert projected_controller.count(projected_init) == 1
+    assert len(projected_controller) == len(controller_template) - len(controller_init) + len(projected_init)
+    for invalid_controller in (controller_template.replace(controller_init, b""),
+            controller_template + b"\n" + controller_init + b"\n",
+            controller_template.replace(controller_init, controller_init.replace(b"\n    ", b"\n  "))):
+        assert invalid_controller.count(controller_init) != 1
+
 
 
 def test_github_workflow_aggregate_depends_on_validation_shard_matrix():
@@ -18968,6 +22287,313 @@ def _assert_exact_cleanup_contract(monkeypatch) -> None:
                     text_state="PASS", scan_launch=SimpleNamespace(paths=object()),
                 )
             assert runner._RUN_COMMANDS_SUPERVISION is None and calls == []
+
+    # Exact V source/custody ports have no child, filesystem or native proof.
+    # The real writer bodies and logical paths remain the original supplier's
+    # operands; these cases check only the new same-owner joins and denials.
+    from pathlib import PurePosixPath
+    import posixpath
+    from tools import validation_reliability as v_owner
+
+    def v_source_fixture(names):
+        scope = v_owner._LinuxPreflightScopeV1.__new__(v_owner._LinuxPreflightScopeV1)
+        root = PurePosixPath('/synthetic-owned/V')
+        paths = SimpleNamespace(validation_output_root=root)
+        source, selection = object(), object()
+        scope._ordinary_bound_paths_v1 = paths
+        scope.source, scope._ordinary_source_selection_v1 = source, selection
+        scope._ordinary_factory_check_v1 = lambda **kwargs: None
+        scope._ordinary_host_output_image_v1 = object()
+        scratch = dict(paths=paths, roots=(root, PurePosixPath('/synthetic-owned/p')))
+        scope._ordinary_run_scratch_roots_v1 = scope._ordinary_original_run_scratch_roots_v1 = scratch
+        rows, entries = [], []
+        for index, name in enumerate(names, 1):
+            path = root / name
+            entry = SimpleNamespace(argv=('python', 'original-writer.py', '--out', str(path)))
+            execution = SimpleNamespace(execution_argv=entry.argv)
+            operands = (object(),)
+            spec = dict(path=path, flag='--out', kind='FILE', actions=('CREATE', 'WRITE'),
+                source_operands=operands, parent_paths=tuple(parent for parent in reversed(path.parents)
+                    if parent == root or parent.is_relative_to(root)),
+                consumer_programme_required=('original_run_output_storage_owner',
+                    'native_view_mapping_and_uid', 'final_consumer_read_handback'))
+            bound = (entry, execution, index)
+            rows.append(dict(entry=entry, execution=execution, bound_row=bound,
+                source_operands=operands, run_output_effects=(spec,)))
+            entries.append(entry)
+        plan = tuple(entries)
+        scope._ordinary_bound_plan_v1 = plan
+        effects = dict(scope=scope, paths=paths, plan=plan, source=source,
+            source_selection=selection, rows=tuple(rows))
+        scope._ordinary_effect_programme_v1 = scope._ordinary_original_effect_programme_v1 = effects
+        return scope, effects
+
+    with pytest.MonkeyPatch.context() as v_sources:
+        # Pure POSIX operands test Linux lexical source binding on every host;
+        # no Path operation or native Scope initializer is invoked here.
+        v_sources.setattr(v_owner, 'Path', PurePosixPath)
+        v_sources.setattr(v_owner, 'os', SimpleNamespace(path=posixpath, getpid=v_owner.os.getpid))
+        v_scope, v_effects = v_source_fixture(('master.json', 'master_plan_generated/owner.json'))
+        v_recipe = v_owner._ordinary_run_output_recipe_v1(v_scope, v_effects)
+        assert v_owner._ordinary_run_output_recipe_check_v1(v_scope) is v_recipe
+        assert tuple(str(row['path']) for row in v_recipe['rows']) == (
+            '/synthetic-owned/V/master.json', '/synthetic-owned/V/master_plan_generated/owner.json')
+        assert all(not row['create_attempted'] and row['slot'] is None and row['completion'] is None
+            for row in v_recipe['rows'])
+        assert v_recipe['demand']['file_bytes'] == 2 * (128 << 20)
+        assert v_recipe['demand']['parent_read_bytes'] == 4 * (128 << 20)
+        assert (v_recipe['demand']['native_control_calls'],
+            v_recipe['demand']['native_control_read_bytes'],
+            v_recipe['demand']['native_control_write_bytes']) == (4, 1536, 48)
+        policy = v_scope._ordinary_run_output_policy_v1(v_effects['plan'][1])
+        assert policy == (('/synthetic-owned/V', 'DIRECTORY_READ'),
+            ('/synthetic-owned/V/master_plan_generated', 'DIRECTORY_READ'),
+            ('/synthetic-owned/V/master_plan_generated/owner.json', 'rwk'))
+        assert not any('*' in path or permission == 'rwk' and path != str(v_recipe['rows'][1]['path'])
+            for path, permission in policy)
+        with pytest.raises(v_owner.ValidationReliabilityError, match='ORDINARY_V_WRITER_PENDING_OR_ORIGINAL_COMPLETED_INPUT'):
+            v_scope._ordinary_run_output_exposure_v1(v_effects['plan'][0])
+        v_row = v_recipe['rows'][0]
+        v_occurrence = object()
+        v_scope._ordinary_occurrence_record_v1 = lambda entry: v_occurrence
+        v_row['created'], v_row['occurrence'] = True, v_occurrence
+        readonly, writable, selected = v_scope._ordinary_run_output_exposure_v1(v_effects['plan'][0])
+        assert readonly == () and writable == (('/synthetic-owned/V/master.json', '/synthetic-owned/V/master.json'),)
+        assert selected == (v_row,)
+        foreign = dict(v_recipe)
+        v_scope._ordinary_run_outputs_v1 = foreign
+        with pytest.raises(v_owner.ValidationReliabilityError, match='ORDINARY_V_SAME_FROZEN_SOURCE_RECIPE'):
+            v_owner._ordinary_run_output_recipe_check_v1(v_scope)
+        v_scope._ordinary_run_outputs_v1 = v_recipe
+        v_row['spec']['flag'] = '--foreign-output'
+        with pytest.raises(v_owner.ValidationReliabilityError, match='ORDINARY_V_RETAINED_SOURCE_FILE_VALUES'):
+            v_owner._ordinary_run_output_recipe_check_v1(v_scope)
+        duplicated, duplicate_effects = v_source_fixture(('same.json', 'same.json'))
+        with pytest.raises(v_owner.ValidationReliabilityError, match='ORDINARY_V_EXACT_SOURCE_SELECTED_FILE_AND_FLAG'):
+            v_owner._ordinary_run_output_recipe_v1(duplicated, duplicate_effects)
+        assert not hasattr(duplicated, '_ordinary_run_outputs_v1')
+        zero_scope, zero_effects = v_source_fixture(())
+        zero_recipe = v_owner._ordinary_run_output_recipe_v1(zero_scope, zero_effects)
+        assert zero_recipe['rows'] == () and zero_recipe['demand']['file_bytes'] == 0
+        assert v_owner._ordinary_run_output_recipe_check_v1(zero_scope) is zero_recipe
+        absent_scope, absent_effects = v_source_fixture(('required.json',))
+        absent_effects['original'] = (absent_effects, absent_scope, None, None, None,
+            None, None, None, absent_effects['rows'], None, None, None, None, ())
+        absent_effects['row_originals'] = ()
+        with pytest.raises(v_owner.ValidationReliabilityError, match='ORDINARY_V_ABSENCE_REQUIRES_ORIGINAL_ZERO_OUTPUT_PROGRAMME'):
+            v_owner._ordinary_run_output_recipe_check_v1(absent_scope)
+
+    # Safe nonzero terminals and later NOT_RUN consumers settle custody;
+    # they never become successful command evidence. No native child exists.
+    def v_cleanup_fixture(*, selected_later=False, pending=False):
+        import stat
+        value = v_owner._LinuxPreflightScopeV1.__new__(v_owner._LinuxPreflightScopeV1)
+        path = PurePosixPath('/synthetic-owned/V/failure.json')
+        writer = SimpleNamespace(argv=('writer', str(path)))
+        consumer = SimpleNamespace(argv=('consumer', str(path)))
+        later = SimpleNamespace(argv=('later-consumer', str(path)))
+        closed = []
+        receipt = SimpleNamespace(native_exit_code=1)
+        producer = dict(entry=writer, receipt=receipt, retired=True, native_principal=object(), stop_receipt=object())
+        reader = dict(entry=consumer, receipt=SimpleNamespace(native_exit_code=2), retired=True,
+            pending=pending, scope=value, dispatch_attempted=True, launcher_attempted=True,
+            process=object(), launcher=object())
+        occurrences = [producer, reader]
+        if selected_later:
+            occurrences.append(dict(entry=later, receipt=None, retired=False, pending=False,
+                scope=value, dispatch_attempted=False, launcher_attempted=False, process=None, launcher=None))
+        row = dict(create_attempted=True, created=True, slot=dict(returned_fd=7, closed=False),
+            parent_slot=dict(returned_fd=8, closed=True), occurrence=producer, entry=writer,
+            path=path, handback_complete=True, readback_complete=True, identity=(11, 12),
+            observed_extent=0, observed_read_bytes=0, final_version=(11, 12, 0, 1, 2, stat.S_IFREG | 0o444),
+            final_attributes=(0, 0, 0o444))
+        row['completion'] = row['original_completion'] = (row, producer, producer['native_principal'],
+            producer['stop_receipt'], row['identity'], 0, 0, row['final_version'], row['final_attributes'])
+        recipe = dict(paths=object(), cleanup_attempted=False, cleanup_complete=False,
+            rows=(row,), effects=dict(plan=(writer, consumer, later)), errors=[],
+            scratch=dict(operands=(None, dict(slot=row['parent_slot']))))
+        value._ordinary_candidate_v1 = SimpleNamespace(_disk_completed_restore_v1=lambda: True,
+            active_occurrence=None, _ordinary_disk_state_v1=dict(borrows=()))
+        value.query = SimpleNamespace(command_resources_settled_v1=lambda: True)
+        value._ordinary_occurrences_v1 = value._ordinary_original_occurrences_v1 = occurrences
+        programme = tuple(dict(entry=entry) for entry in (writer, consumer, later))
+        value._ordinary_occurrence_program_v1 = programme
+        value._ordinary_original_occurrence_program_v1 = tuple((item, tuple(item.items())) for item in programme)
+        value._ordinary_processes_settled_v1 = lambda: None
+        value._ordinary_occurrence_record_v1 = lambda entry: next(item for item in occurrences if item['entry'] is entry)
+        def terminal(item, actual):
+            v_owner._preflight_require_v1(actual is item['receipt'] and not item.get('pending', False),
+                'ORDINARY_RECEIPT_AND_ACTUAL_TERMINAL_JOIN')
+        value._ordinary_require_occurrence_terminal_v1 = terminal
+        value._ordinary_run_output_parent_check_v1 = lambda *args, **kwargs: None
+        observed = SimpleNamespace(st_dev=11, st_ino=12, st_size=0, st_mtime_ns=1,
+            st_ctime_ns=2, st_nlink=1, st_uid=0, st_gid=0, st_mode=stat.S_IFREG | 0o444)
+        value._ordinary_factory_call_v1 = lambda *args, **kwargs: observed
+        value._ordinary_run_output_native_check_v1 = lambda item: dict(rows=(dict(row=row),))
+        def close(slot, **kwargs):
+            closed.append(slot); slot['closed'] = True
+        value._ordinary_factory_close_v1 = close
+        return value, recipe, producer, reader, closed
+
+    for selected_later in (False, True):
+        value, recipe, producer, reader, closed = v_cleanup_fixture(selected_later=selected_later)
+        with pytest.MonkeyPatch.context() as custody:
+            custody.setattr(v_owner, '_ordinary_run_output_recipe_check_v1', lambda *args, **kwargs: recipe)
+            custody.setattr(v_owner, '_mapper_slot_settled_v1', lambda slot: slot['closed'])
+            assert value._ordinary_run_output_cleanup_ready_v1(recipe['paths']) is recipe
+        assert recipe['cleanup_complete'] and len(closed) == 1
+        assert producer['receipt'].native_exit_code == 1 and reader['receipt'].native_exit_code == 2
+        assert len(value._ordinary_occurrences_v1) == (3 if selected_later else 2)
+    value, recipe, producer, reader, closed = v_cleanup_fixture(pending=True)
+    with pytest.MonkeyPatch.context() as custody:
+        custody.setattr(v_owner, '_ordinary_run_output_recipe_check_v1', lambda *args, **kwargs: recipe)
+        custody.setattr(v_owner, '_mapper_slot_settled_v1', lambda slot: slot['closed'])
+        with pytest.raises(v_owner.ValidationReliabilityError, match='ORDINARY_RECEIPT_AND_ACTUAL_TERMINAL_JOIN'):
+            value._ordinary_run_output_cleanup_ready_v1(recipe['paths'])
+    assert recipe['cleanup_attempted'] and not recipe['cleanup_complete'] and not closed and recipe['errors']
+
+    # The existing registry calculates source-bound quantities only; it
+    # performs no native acquisition and cannot issue a Scope or quota.
+    # Independently enumerate the actual fixed filter's charged call sites.
+    # This source oracle executes no filter, syscall, native library or child.
+    import ast as _filter_ast
+    from inspect import getsource as _filter_source
+    _filter_function = _filter_ast.parse(_filter_source(v_owner._ordinary_temporary_filter_v1)).body[0]
+    _filter_direct = tuple(node for node in _filter_ast.walk(_filter_function)
+        if isinstance(node, _filter_ast.Call) and isinstance(node.func, _filter_ast.Name)
+        and node.func.id == '_ordinary_application_io_call_v1')
+    assert len(_filter_direct) == 2 and all(isinstance(node.args[0], _filter_ast.Name)
+        and node.args[0].id == 'io' for node in _filter_direct)
+    assert sorted(_filter_ast.unparse(node.args[1]) for node in _filter_direct) == ['function', 'os.uname']
+    _filter_calls = tuple(node for node in _filter_ast.walk(_filter_function)
+        if isinstance(node, _filter_ast.Call) and isinstance(node.func, _filter_ast.Name)
+        and node.func.id == 'call')
+    _filter_requests = next(node.value for node in _filter_function.body
+        if isinstance(node, _filter_ast.Assign) and len(node.targets) == 1
+        and isinstance(node.targets[0], _filter_ast.Name) and node.targets[0].id == 'requests')
+    _filter_original_requests = _filter_ast.literal_eval(_filter_requests)
+    assert _filter_original_requests == (0x401c5820, 0x40086602, 0x40046602)
+    _filter_probes = tuple(node for node in _filter_ast.walk(_filter_function)
+        if isinstance(node, _filter_ast.For) and isinstance(node.target, _filter_ast.Name)
+        and node.target.id == 'request')
+    assert len(_filter_probes) == 1
+    assert _filter_ast.dump(_filter_probes[0].iter, include_attributes=False) == _filter_ast.dump(
+        _filter_ast.parse('(*requests, *(value | (1 << 32) for value in requests), 0x80086601)',
+            mode='eval').body, include_attributes=False)
+    _filter_probe_calls = tuple(node for node in _filter_ast.walk(_filter_probes[0])
+        if isinstance(node, _filter_ast.Call) and isinstance(node.func, _filter_ast.Name)
+        and node.func.id == 'call')
+    assert len(_filter_probe_calls) == 1 and _filter_ast.unparse(_filter_probe_calls[0].args[0]) == 'libc.syscall'
+    _filter_fixed = tuple(node for node in _filter_calls
+        if all(node is not probe for probe in _filter_probe_calls))
+    assert sorted(_filter_ast.unparse(node.args[0]) for node in _filter_fixed) == ['ctypes.CDLL', 'libc.prctl', 'libc.syscall']
+    _filter_call_count = 1 + len(_filter_fixed) + 2 * len(_filter_original_requests) + 1
+    assert _filter_call_count == 11
+    from tools.validation_scope_registry import _ordinary_scope_receiver_io_values_v1
+    empty_io = _ordinary_scope_receiver_io_values_v1(2, (None, None), {}, 4, 3, 5, 0)
+    assert empty_io == (10 * 1048577, 2 * (5 * 1048577 + 18 + 1210 + 24 + 2 + _filter_call_count),
+        0, 0, 10 * 1048577 + 5, 2 * (5 * 1048577 + 18 + 1210 + 24 + 2 + _filter_call_count) + 3)
+    maxima = dict(reader_invocations=2, metadata_bytes=1048576)
+    ordinary_io = _ordinary_scope_receiver_io_values_v1(1, ('VALIDATE',), maxima, 4, 0, 0, 0)
+    fixed_io = _ordinary_scope_receiver_io_values_v1(1, ('PYTEST',), maxima, 4, 0, 0, 0)
+    assert fixed_io[2] > ordinary_io[2] and fixed_io[3] > ordinary_io[3]
+    assert ordinary_io[4] == ordinary_io[0] + ordinary_io[2]
+
+    # The original no-launch owner is independently exercised by its
+    # grouped source/native cases. These ports check the V caller's exact
+    # custody join and retain empty backing slots as scratch, never reports.
+    def no_launch_v_fixture(*, consumer_only=False, suffix=b'', handed=False, missing_receipt=False):
+        import stat
+        value, recipe, producer, consumer, closed = v_cleanup_fixture()
+        selected = consumer if consumer_only else producer
+        witness = (selected, value, object())
+        selected['no_launch'] = witness
+        calls = []
+        def original_no_launch(actual, *, settled=False):
+            v_owner._preflight_require_v1(actual is selected and actual['no_launch'] is witness
+                and settled is True and actual['retired'], 'V_EXACT_ORIGINAL_NO_LAUNCH_PORT')
+            calls.append(actual)
+            return witness
+        value._ordinary_never_launched_v1 = original_no_launch
+        row = recipe['rows'][0]
+        if not consumer_only:
+            row.update(handoff_attempted=False, handed=handed, handback_attempted=False,
+                handback_complete=False, readback_attempted=False, readback_complete=False,
+                completion=None, original_completion=None, uid=None, gid=None,
+                observed_extent=0, observed_read_bytes=0,
+                original_version=(11, 12, 0, 1, 2, stat.S_IFREG | 0o600))
+            observed = SimpleNamespace(st_dev=11, st_ino=12, st_size=0, st_mtime_ns=1,
+                st_ctime_ns=2, st_nlink=1, st_uid=0, st_gid=0, st_mode=stat.S_IFREG | 0o600)
+            operations = []
+            def observe(function, *args, **kwargs):
+                operations.append((function, args, kwargs))
+                return suffix if function is v_owner.os.pread else observed
+            value._ordinary_factory_call_v1 = observe
+            debits = []
+            value._ordinary_factory_debit_v1 = lambda *args, **kwargs: debits.append((args, kwargs))
+            if missing_receipt:
+                selected['receipt'] = None
+        else:
+            operations, debits = [], []
+        return value, recipe, producer, consumer, row, closed, calls, operations, debits
+
+    _pread_absent = object()
+    _pread_original = getattr(v_owner.os, 'pread', _pread_absent)
+    def synthetic_posix_pread(*args, **kwargs):
+        raise AssertionError('V synthetic pread port must be intercepted by observe')
+
+    for consumer_only in (False, True):
+        value, recipe, producer, consumer, row, closed, calls, operations, debits = no_launch_v_fixture(
+            consumer_only=consumer_only)
+        with pytest.MonkeyPatch.context() as custody:
+            if _pread_original is _pread_absent:
+                custody.setattr(v_owner.os, 'pread', synthetic_posix_pread, raising=False)
+            custody.setattr(v_owner, '_ordinary_run_output_recipe_check_v1', lambda *args, **kwargs: recipe)
+            custody.setattr(v_owner, '_mapper_slot_settled_v1', lambda slot: slot['closed'])
+            assert value._ordinary_run_output_cleanup_ready_v1(recipe['paths']) is recipe
+        assert getattr(v_owner.os, 'pread', _pread_absent) is _pread_original
+        assert recipe['cleanup_complete'] and len(closed) == 1 and len(calls) == 1
+        assert calls[0] is (consumer if consumer_only else producer)
+        if not consumer_only:
+            assert row['completion'] is None and not row['readback_complete'] and not row['handback_complete']
+            assert len(operations) == 5 and debits == [(('raw_read', 0), dict(settling=True))]
+        assert producer['receipt'].native_exit_code == 1 and consumer['receipt'].native_exit_code == 2
+    for options in (dict(suffix=b'x'), dict(handed=True), dict(missing_receipt=True)):
+        value, recipe, producer, consumer, row, closed, calls, operations, debits = no_launch_v_fixture(**options)
+        with pytest.MonkeyPatch.context() as custody:
+            if _pread_original is _pread_absent:
+                custody.setattr(v_owner.os, 'pread', synthetic_posix_pread, raising=False)
+            custody.setattr(v_owner, '_ordinary_run_output_recipe_check_v1', lambda *args, **kwargs: recipe)
+            custody.setattr(v_owner, '_mapper_slot_settled_v1', lambda slot: slot['closed'])
+            with pytest.raises(v_owner.ValidationReliabilityError, match='ORDINARY_V_'):
+                value._ordinary_run_output_cleanup_ready_v1(recipe['paths'])
+        assert getattr(v_owner.os, 'pread', _pread_absent) is _pread_original
+        assert recipe['cleanup_attempted'] and not recipe['cleanup_complete'] and recipe['errors'] and not closed
+
+    # Execute the actual fit predicate, rather than copying its arithmetic.
+    # Metadata and native-call pools are separate original source operands.
+    import ast
+    import inspect
+    import textwrap
+    from tools import validation_scope_registry as fit_registry
+    fit_tree = ast.parse(textwrap.dedent(inspect.getsource(
+        fit_registry._facet_m_issue_phase_allocations_v1)))
+    fit = next(node for node in ast.walk(fit_tree) if isinstance(node, ast.Call)
+        and isinstance(node.func, ast.Attribute) and node.func.attr == '_preflight_require_v1'
+        and isinstance(node.func.value, ast.Name) and node.func.value.id == '_f'
+        and len(node.args) == 2 and isinstance(node.args[1], ast.Constant)
+        and node.args[1].value == 'ORDINARY_V_NATIVE_FIXED_STRUCTURES_WITHIN_ORIGINAL_POOLS')
+    fit_code = compile(ast.Expression(fit.args[0]), '<actual-V-native-fit>', 'eval')
+    fit_values = dict(v_demand=dict(native_control_calls=10, native_control_write_bytes=10),
+        remaining=dict(native_control_call_limit=30, native_control_write_limit=100),
+        c_demand=dict(native_control_calls=10, native_control_write_bytes=10),
+        old_native=(10**9, 0, 0, 10, 0, 80), installation_native=(10**8, 4, 0, 3))
+    assert eval(fit_code, {'max': max}, fit_values) is True
+    fit_values['remaining']['native_control_call_limit'] = 20
+    assert eval(fit_code, {'max': max}, fit_values) is False
+    fit_values['remaining']['native_control_call_limit'] = 30
+    fit_values['remaining']['native_control_write_limit'] = 90
+    assert eval(fit_code, {'max': max}, fit_values) is False
 
 
 def test_st12h_runner_enforces_exact_timeouts_one_process_and_zero_retry(
@@ -24189,6 +27815,840 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
             'after-full-protection','during-readability','quota','deadline','torn-journal',
             'partial-post','foreign-identity','foreign-flags','primary-cleanup','failed-close','after-readability'):
         source_reference(case)
+    # Synthetic no-descriptor/no-child references for failed legacy SOURCE
+    # close. An injected outcome is not native close/termination evidence.
+    for close_case in ('native-close', 'charged-pre-close'):
+        close_seal = object.__new__(o._LinuxImmutableSourceSealV2)
+        close_seal.pid, close_seal.thread = os.getpid(), o.threading.get_ident()
+        close_seal.deadline_ns = time.monotonic_ns() + 60 * 10**9
+        close_seal.phase, close_seal.stage, close_seal.state = 'work', 'setup', 'FAILED'
+        close_seal.failure = RuntimeError('independent original SOURCE body failure')
+        close_seal.owned, close_seal.anchors = {17: 'setup'}, [(17, (1, 2), 'synthetic')]
+        close_seal.close_failure_count, close_seal.close_failures = 0, []
+        close_seal.metadata_calls = 0
+        close_seal.accounting = {'stages': {'setup': {'performed': 0}}}
+        close_seal.recovery_cases, close_seal.attempts = [], []
+        close_seal.primitive, close_seal.journal_fd = {}, None
+        close_fault = OSError('synthetic SOURCE close outcome unavailable')
+        close_calls, open_calls = [], []
+        original_close_performed = close_seal._performed
+        def charge_close_then_fail(stage=None):
+            original_close_performed(stage)
+            raise close_fault
+        def unavailable_close(fd):
+            close_calls.append(fd)
+            raise close_fault
+        def forbidden_reopen(*args, **kwargs):
+            open_calls.append((args, kwargs))
+            raise AssertionError('failed-close capacity must deny before native open')
+        with monkeypatch.context() as failed_source_close:
+            failed_source_close.setattr(o.os, 'close', unavailable_close)
+            failed_source_close.setattr(o.os, 'open', forbidden_reopen)
+            if close_case == 'charged-pre-close':
+                failed_source_close.setattr(close_seal, '_performed', charge_close_then_fail)
+            with pytest.raises(OSError) as close_error:
+                close_seal._close(17)
+            assert close_error.value is close_fault
+            assert close_seal.owned == {} and close_seal.close_failure_count == 1
+            assert close_seal.metadata_calls == close_seal.accounting['stages']['setup']['performed'] == 1
+            assert len(close_seal.close_failures) == 1 and close_seal.close_failures[0]['fd'] == 17
+            assert close_calls == ([17] if close_case == 'native-close' else [])
+            with pytest.raises(o.ValidationReliabilityError, match='LINUX_V2_DESCRIPTOR_CAPACITY'):
+                close_seal._open('synthetic', 0)
+            assert open_calls == []
+            with pytest.raises(o.ValidationReliabilityError, match='LINUX_V2_RESTORATION_FAILED'):
+                close_seal.restore(deadline_ns=time.monotonic_ns() + 60 * 10**9,
+                    processes_settled=True)
+            assert close_seal.state == 'FAILED' and close_seal.phase == 'settlement'
+            assert close_seal.forward_failure == repr(close_seal.failure)
+            assert close_seal.close_failure_count == 1 and len(close_seal.close_failures) == 1
+            assert close_calls == ([17] if close_case == 'native-close' else []) and open_calls == []
+            assert any('LINUX_V2_UNRESOLVED_OWNED_DESCRIPTOR' in error
+                for error in close_seal.settlement_errors)
+    # Controlled source-only isolated Python programme, no native admission.
+    module_path = Path(runner.REPO_ROOT) / 'tools' / 'master_plan_ingest.py'
+    module_text = module_path.read_text(encoding='utf-8')
+    module_tree = __import__('ast').parse(module_text)
+    native_scope = object.__new__(o._LinuxPreflightScopeV1)
+    native_source = object.__new__(o._LinuxImmutableSourceSealV2)
+    native_scope.source = native_source
+    native_scope._ordinary_runner_owner_v1 = native_scope._ordinary_original_runner_owner_v1 = runner
+    native_scope._ordinary_bound_paths_v1 = SimpleNamespace(repo_root=Path(runner.REPO_ROOT))
+    native_source.state, native_source.failure = 'READABLE', None
+    input_path = Path(runner.REPO_ROOT) / 'docs/master_plan/QTT_MasterPlan_Current.md'
+    input_row = {'role':'repository', 'kind':'file', 'logical_bytes':5}
+    native_source.row_index, native_source.files, native_source.post = {str(input_path):input_row}, {str(input_path):object()}, {str(input_path):(1,2)}
+    requested = (o.sys.executable, 'tools/master_plan_ingest.py', '--input',
+        'docs/master_plan/QTT_MasterPlan_Current.md', '--section-manifest-out', 'a',
+        '--traceability-out', 'b', '--scope-report-out', 'c')
+    effective = (requested[0], '-I', '-S', '-B', *requested[1:])
+    native_entry = SimpleNamespace(argv=effective, cwd=str(runner.REPO_ROOT))
+    native_execution = SimpleNamespace(registered_argv=requested, execution_argv=effective)
+    native_bound = (native_entry, native_execution, 9)
+    native_scope._ordinary_source_selection_v1 = SimpleNamespace(_bound=(native_bound,))
+    operand = {'path':'tools/master_plan_ingest.py','text':module_text,'complete':True,'error':None}
+    native_scope._ordinary_source_operand_cache_v1 = {(operand['path'],'PYTHON'):(module_tree,operand)}
+    grammar = ((operand,'<module>',module_text,()),)
+    native_resource = {'fd_demand':(20,12,8)}
+    native_scope._ordinary_resource_programme_v1 = native_resource
+    native_scope._ordinary_original_resource_programme_v1 = (native_resource,tuple(native_resource.items()))
+    factory_calls = []
+    def isolated_native_call(*args, **kwargs):
+        factory_calls.append((args,kwargs))
+        return factory_calls
+    with monkeypatch.context() as isolated_native_ports:
+        isolated_native_ports.setattr(o, '_ordinary_native_source_programme_v1', isolated_native_call)
+        assert o._ordinary_master_plan_python_native_v1(native_scope,native_bound,(operand,),grammar) is factory_calls
+        assert len(factory_calls) == 1 and factory_calls[0][0] == (native_scope,native_bound,(operand,),grammar)
+        assert factory_calls[0][1]['cohorts'] == ((('APPLICATION',),(operand,),()),)
+        assert factory_calls[0][1]['bootstrap_fd_demand'] == 12 and factory_calls[0][1]['application_fd_demand'] == 8
+        assert factory_calls[0][1]['nofile'] == 12 and factory_calls[0][1]['stdout_minimum'] == len('MASTER_PLAN_INGEST_OK') + 1
+        native_execution.execution_argv = requested
+        with pytest.raises(o.ValidationReliabilityError, match='ORDINARY_MASTER_PLAN_ISOLATED_ORIGINAL_EFFECTIVE_ARGV'):
+            o._ordinary_master_plan_python_native_v1(native_scope,native_bound,(operand,),grammar)
+        native_execution.execution_argv = effective
+        del native_source.post[str(input_path)]
+        with pytest.raises(o.ValidationReliabilityError, match='ORDINARY_MASTER_PLAN_ORIGINAL_PROTECTED_INPUT_OPERAND'):
+            o._ordinary_master_plan_python_native_v1(native_scope,native_bound,(operand,),grammar)
+        native_source.post[str(input_path)] = (1,2)
+        alien_text = module_text + '\nimport subprocess\n'
+        operand['text'] = alien_text
+        native_scope._ordinary_source_operand_cache_v1[(operand['path'],'PYTHON')] = (__import__('ast').parse(alien_text),operand)
+        with pytest.raises(o.ValidationReliabilityError, match='ORDINARY_MASTER_PLAN_ORIGINAL_STDLIB_IMPORT_COHORT'):
+            o._ordinary_master_plan_python_native_v1(native_scope,native_bound,(operand,),((operand,'<module>',alien_text,()),))
+        assert len(factory_calls) == 1
+    # The existing private execution owner isolates only this original route.
+    # No process/native/source acquisition occurs through these controlled ports.
+    # These synthetic Linux adapters project only the original RUN path port;
+    # source-cohort argv, protected operands and production classifiers stay exact.
+    original_run_path = runner._path
+    adapter_paths = object.__new__(runner.ValidationRunPathsV1)
+    object.__setattr__(adapter_paths, 'repo_root', Path(runner.REPO_ROOT))
+    native_scope.repository = Path(runner.REPO_ROOT)
+    native_scope._ordinary_evidence_paths_v1 = adapter_paths
+    with monkeypatch.context() as adapter_ports:
+        adapter_ports.setattr(runner, '_path', lambda *parts: original_run_path(*parts).replace('\\', '/'))
+        adapter_ports.setattr(o._LinuxPreflightScopeV1, '_ordinary_selected_v1', lambda self: True)
+        adapter_ports.setattr(o._LinuxPreflightScopeV1, '_ordinary_precursor_ready_v1', lambda self: None)
+        adapter_ports.setattr(runner, '_RUN_COMMANDS_ACTIVE_PATHS', adapter_paths)
+        adapter_ports.setattr(runner, '_RUN_COMMANDS_SUPERVISION', {'paths':adapter_paths, 'phase':'deterministic-validators-a'})
+        token = o._LINUX_PREFLIGHT_PROCESS_V1.set(native_scope)
+        try:
+            assert runner._ordinary_post_execution_argv_v1(requested,requested) == effective
+            unrelated = (o.sys.executable, 'tools/unselected-fixture.py')
+            assert runner._ordinary_post_execution_argv_v1(unrelated,unrelated) is unrelated
+            with pytest.raises(o.ValidationReliabilityError, match='ORDINARY_MASTER_PLAN_COMPETING_EXECUTION_PROJECTION'):
+                runner._ordinary_post_execution_argv_v1(requested,effective)
+            adapter_ports.setattr(o._LinuxPreflightScopeV1, '_ordinary_selected_v1', lambda self: False)
+            assert runner._ordinary_post_execution_argv_v1(requested,requested) is requested
+        finally:
+            o._LINUX_PREFLIGHT_PROCESS_V1.reset(token)
+    assert runner._path is original_run_path
+
+    # The remaining original RUN_OUTPUT recipes use the same source supplier.
+    # These are controlled metadata/call ports, never a native or V-output proof.
+    root = Path(runner.REPO_ROOT)
+    V = root.parent / 'synthetic-source-only-V'
+    native_scope._ordinary_bound_paths_v1 = SimpleNamespace(repo_root=root, validation_output_root=V)
+    native_source._ordinary_meter_scope_v1 = native_scope
+    native_scope._ordinary_original_source_selection_v1 = native_scope._ordinary_source_selection_v1
+    source_variants = (
+        ('tools/validate_qtt_owner_global_override_authority.py',
+            ('--mode','dev','--repo-root','.','--out',str(V/'owner.json')),
+            ('tools/validate_qtt_owner_global_override_authority.py',)),
+        ('tools/validate_atomicrows_row_family_source_manifest_currentization.py',
+            ('--repo-root','.','--out',str(V/'atomic.json')),
+            ('tools/validate_atomicrows_row_family_source_manifest_currentization.py',
+             'tools/build_master_plan_section_coverage_report.py',
+             'tools/validate_master_plan_section_coverage.py','tools/master_plan_ingest.py')))
+    import ast as source_ast
+    native_scope._ordinary_image_v1 = {'mount_path': root.parent / 'synthetic-owned-image'}
+    native_scope.interpreter = o.sys.executable
+    std_root = Path(o.sys.prefix)/'lib'/'python3.14'
+    dynamic = std_root/'lib-dynload'
+    install_rows = [dict(path=str(std_root),kind='directory',roster=('json','__pycache__','config-3.14')),
+        dict(path=str(dynamic),kind='directory',roster=('_opcode.cpython-314-x86_64-linux-gnu.so',)),
+        dict(path=str(std_root/'json'),kind='directory',roster=('__init__.py',)),
+        dict(path=str(std_root/'json/__init__.py'),kind='file',roster=()),
+        dict(path=str(std_root/'__pycache__'),kind='directory',roster=('abc.cpython-314.pyc',)),
+        dict(path=str(std_root/'__pycache__/abc.cpython-314.pyc'),kind='file',roster=()),
+        dict(path=str(std_root/'config-3.14'),kind='directory',roster=()),
+        dict(path=str(dynamic/'_opcode.cpython-314-x86_64-linux-gnu.so'),kind='file',roster=())]
+    copier = SimpleNamespace(row_index={row['path']:row for row in install_rows},
+        directories={row['path']:tuple((name,next(child['kind'] for child in install_rows
+            if child['path']==str(Path(row['path'])/name))) for name in row['roster'])
+            for row in install_rows if row['kind']=='directory'})
+    install = dict(complete=True,errors=[],install=copier,rows=install_rows,census=SimpleNamespace(roots={'installation':Path(o.sys.prefix)}))
+    native_scope._ordinary_installation_copy_v1 = native_scope._ordinary_original_installation_copy_v1 = install
+    closed_factory_calls = []
+    original_native_factory = o._ordinary_native_source_programme_v1
+    def closed_source_factory(*args, **kwargs):
+        closed_factory_calls.append((args,kwargs))
+        return closed_factory_calls
+    with monkeypatch.context() as closed_source_ports:
+        closed_source_ports.setattr(o,'_ordinary_native_source_programme_v1',closed_source_factory)
+        closed_source_ports.setattr(o._LinuxPreflightScopeV1,'_ordinary_installation_record_v1',lambda self, operand: install if operand is copier else None)
+        original_sys = o.sys
+        selected_sys = SimpleNamespace(executable=str(Path(original_sys.prefix)/'bin'/'python3.14'),
+            implementation=original_sys.implementation,version_info=original_sys.version_info,
+            prefix=original_sys.prefix,base_prefix=original_sys.base_prefix,
+            exec_prefix=original_sys.prefix,base_exec_prefix=original_sys.prefix,
+            platlibdir='lib',_stdlib_dir=str(std_root),abiflags='')
+        closed_source_ports.setattr(o,'sys',selected_sys)
+        closed_source_ports.setattr(runner,'sys',selected_sys)
+        native_scope.interpreter = selected_sys.executable
+        for module, tail, names in source_variants:
+            selected = (o.sys.executable,module,*tail)
+            cache_path = native_scope._ordinary_image_v1['mount_path']/'runtime'/'p1'/'pycache'
+            vector = ((selected[0],'-I','-S','-B','-X','pycache_prefix='+str(cache_path),*selected[1:])
+                if len(names)>1 else (selected[0],'-I','-S','-B',*selected[1:]))
+            entry = SimpleNamespace(argv=vector,cwd=str(root),command_index=1)
+            execution = SimpleNamespace(registered_argv=selected,execution_argv=vector)
+            bound = (entry,execution,9)
+            native_scope._ordinary_source_selection_v1._bound = (bound,)
+            operands = tuple(dict(path=name,text=(root/name).read_text(encoding='utf8'),complete=True,error=None) for name in names)
+            grammar = tuple((operand,'<module>',operand['text'],()) for operand in operands)
+            native_scope._ordinary_source_operand_cache_v1 = {(operand['path'],'PYTHON'):(source_ast.parse(operand['text']),operand) for operand in operands}
+            with monkeypatch.context() as family_adapter_ports:
+                family_adapter_ports.setattr(runner, '_path', lambda *parts: original_run_path(*parts).replace('\\', '/'))
+                family_adapter_ports.setattr(o._LinuxPreflightScopeV1,'_ordinary_selected_v1',lambda self: True)
+                family_adapter_ports.setattr(o._LinuxPreflightScopeV1,'_ordinary_precursor_ready_v1',lambda self: None)
+                family_adapter_ports.setattr(runner,'_RUN_COMMANDS_ACTIVE_PATHS',adapter_paths)
+                family_adapter_ports.setattr(runner,'_RUN_COMMANDS_SUPERVISION',{'paths':adapter_paths,'phase':'deterministic-validators-a'})
+                family_token = o._LINUX_PREFLIGHT_PROCESS_V1.set(native_scope)
+                try:
+                    assert runner._ordinary_post_execution_argv_v1(selected,selected,command_index=1) == vector
+                    assert runner._ordinary_post_execution_argv_v1(selected,selected,command_index=1)[-len(selected[2:]):] == selected[2:]
+                finally:
+                    o._LINUX_PREFLIGHT_PROCESS_V1.reset(family_token)
+            assert runner._path is original_run_path
+            tools_path = str(root/'tools')
+            tool_names = tuple(Path(name).name for name in names)
+            tools_row = {'path':tools_path,'kind':'directory','roster':tool_names}
+            root_row = {'path':str(root),'kind':'directory','roster':('tools',)}
+            native_source.row_index = {str(root):root_row,tools_path:tools_row,
+                **{str(root/name):{'path':str(root/name),'kind':'file'} for name in names}}
+            native_source.rows = list(native_source.row_index.values())
+            native_source.directories = {str(root):(('tools','directory'),),tools_path:tuple((name,'file') for name in tool_names)}
+            native_source.post[tools_path] = native_source.post[str(root)] = (1,2)
+            assert o._ordinary_deterministic_python_native_v1(native_scope,bound,operands,grammar) is closed_factory_calls
+            assert closed_factory_calls[-1][1]['cohorts'] == ((('APPLICATION',),operands,()),)
+            assert closed_factory_calls[-1][1]['nofile'] == 12 and closed_factory_calls[-1][1]['application_fd_demand'] == 8
+            requested_marker = next(node.value.value for node in source_ast.parse(operands[0]['text']).body
+                if isinstance(node,source_ast.Assign) and any(isinstance(target,source_ast.Name) and target.id=='SUCCESS_MARKER' for target in node.targets))
+            assert closed_factory_calls[-1][1]['stdout_minimum'] == len(requested_marker.encode('utf8')) + 1
+            # Exercise the actual source/native constructor and checker using
+            # the same explicitly synthetic metadata/installation ports.
+            for operand in operands:
+                operand['row'] = native_source.row_index[str(root/operand['path'])]
+                operand['version'] = native_source.post[str(root/operand['path'])] = (1,2,3,4,5,6)
+                operand['source_form'] = 'PYTHON'
+            native_scope._ordinary_original_source_operand_cache_v1 = native_scope._ordinary_source_operand_cache_v1
+            actual_native = original_native_factory(native_scope,bound,operands,grammar,**closed_factory_calls[-1][1])
+            assert o._ordinary_native_source_programme_check_v1(native_scope,actual_native) is actual_native
+            assert ('pycache_operand' in actual_native) is (len(names)>1)
+            if len(names)>1:
+                foreign_cache = (cache_path/'foreign',bound,operands,grammar,install)
+                foreign_kwargs = {**closed_factory_calls[-1][1],'pycache_operand':foreign_cache}
+                with pytest.raises(o.ValidationReliabilityError,match='ORDINARY_PYTHON_RECIPE_ORIGINAL_SOURCE_OWNED_CACHE_OPERAND'):
+                    original_native_factory(native_scope,bound,operands,grammar,**foreign_kwargs)
+                root_row['roster'] = ('tools','__pycache__')
+                native_source.row_index[str(root/'__pycache__')] = {'kind':'directory'}
+                native_source.directories[str(root)] = (('tools','directory'),('__pycache__','directory'))
+                assert o._ordinary_deterministic_python_native_v1(native_scope,bound,operands,grammar) is closed_factory_calls
+                root_row['roster'] = ('tools',)
+                native_source.directories[str(root)] = (('tools','directory'),)
+            execution.execution_argv = selected
+            with pytest.raises(o.ValidationReliabilityError, match='ORDINARY_PYTHON_RECIPE_EXACT_ISOLATED_ORIGINAL_VECTOR'):
+                o._ordinary_deterministic_python_native_v1(native_scope,bound,operands,grammar)
+            execution.execution_argv = vector
+            if len(operands)>1:
+                tools_row['roster'] = (*tool_names,'__init__.py')
+                native_source.row_index[str(root/'tools/__init__.py')] = {'kind':'file'}
+                native_source.directories[tools_path] = (*tuple((name,'file') for name in tool_names),('__init__.py','file'))
+                with pytest.raises(o.ValidationReliabilityError, match='ORDINARY_PYTHON_RECIPE_ORIGINAL_TOOLS_NAMESPACE_ROSTER'):
+                    o._ordinary_deterministic_python_native_v1(native_scope,bound,operands,grammar)
+                tools_row['roster'] = tool_names
+                native_source.directories[tools_path] = tuple((name,'file') for name in tool_names)
+                assert closed_factory_calls[-1][1]['pycache_operand'] == (cache_path,bound,operands,grammar,install)
+                for shadow, expected_error in (('tools.py','ORDINARY_PYTHON_RECIPE_ORIGINAL_TOOLS_NAMESPACE_ROSTER'),
+                        ('json.py','ORDINARY_PYTHON_RECIPE_NO_REPOSITORY_STDLIB_SHADOW')):
+                    root_row['roster'] = ('tools',shadow)
+                    native_source.row_index[str(root/shadow)] = {'kind':'file'}
+                    native_source.directories[str(root)] = (('tools','directory'),(shadow,'file'))
+                    with pytest.raises(o.ValidationReliabilityError,match=expected_error):
+                        o._ordinary_deterministic_python_native_v1(native_scope,bound,operands,grammar)
+                root_row['roster'] = ('tools',)
+                native_source.directories[str(root)] = (('tools','directory'),)
+                for shadow in ('build_master_plan_section_coverage_report.pyc',
+                        'build_master_plan_section_coverage_report.abi3.so','build_master_plan_section_coverage_report'):
+                    tools_row['roster'] = (*tool_names,shadow)
+                    native_source.row_index[str(root/'tools'/shadow)] = {'kind':'file'}
+                    native_source.directories[tools_path] = (*tuple((name,'file') for name in tool_names),(shadow,'file'))
+                    with pytest.raises(o.ValidationReliabilityError,match='ORDINARY_PYTHON_RECIPE_NO_ALTERNATIVE_HELPER_LOADER'):
+                        o._ordinary_deterministic_python_native_v1(native_scope,bound,operands,grammar)
+                tools_row['roster'] = tool_names
+                native_source.directories[tools_path] = tuple((name,'file') for name in tool_names)
+                alien = operands[0]['text'] + '\nimport subprocess\n'
+                operands[0]['text'] = alien
+                native_scope._ordinary_source_operand_cache_v1[(operands[0]['path'],'PYTHON')] = (source_ast.parse(alien),operands[0])
+                with pytest.raises(o.ValidationReliabilityError, match='ORDINARY_PYTHON_RECIPE_CLOSED_STDLIB_IMPORT'):
+                    o._ordinary_deterministic_python_native_v1(native_scope,bound,operands,
+                        tuple((operand,'<module>',operand['text'],()) for operand in operands))
+        assert len(closed_factory_calls) == 3
+
+    # Exact original readonly consumers follow the original V producer.
+    # Synthetic Source/installation metadata proves source control only.
+    native_scope.repository = str(root)
+    trace_name, scope_name = 'tools/master_plan_traceability_check.py', 'tools/validate_first_pr_scope.py'
+    consumers = (
+        ((selected_sys.executable,trace_name,'--master-plan','docs/master_plan/QTT_MasterPlan_Current.md',
+            '--section-manifest',str(V/'SectionManifest.json'),
+            '--traceability-report',str(V/'TraceabilityReport.json')),
+            (trace_name,'tools/master_plan_ingest.py')),
+        ((selected_sys.executable,scope_name,'--repo-root','.',
+            '--scope-report',str(V/'FirstPrScopeReport.json'),
+            '--block-runtime','--block-live','--block-sha','--block-companion-package',
+            '--block-profit-claims','--block-source-retrieval','--block-source-acceptance',
+            '--block-connector-binding','--block-private-state-fetch','--block-order-execution',
+            '--block-neural-training','--block-neural-inference','--block-external-repo-clone',
+            '--block-package-install-scripts'),(scope_name,)))
+    readonly_calls = []
+    def readonly_factory(*args,**kwargs):
+        readonly_calls.append((args,kwargs))
+        return readonly_calls
+    with monkeypatch.context() as readonly_ports:
+        readonly_ports.setattr(o,'sys',selected_sys)
+        readonly_ports.setattr(runner,'sys',selected_sys)
+        readonly_ports.setattr(o,'_ordinary_native_source_programme_v1',readonly_factory)
+        readonly_ports.setattr(o._LinuxPreflightScopeV1,'_ordinary_installation_record_v1',lambda self,operand:install if operand is copier else None)
+        readonly_ports.setattr(o._LinuxPreflightScopeV1,'_ordinary_selected_v1',lambda self:True)
+        readonly_ports.setattr(o._LinuxPreflightScopeV1,'_ordinary_precursor_ready_v1',lambda self:None)
+        readonly_ports.setattr(runner,'_RUN_COMMANDS_ACTIVE_PATHS',adapter_paths)
+        readonly_ports.setattr(runner,'_RUN_COMMANDS_SUPERVISION',{'paths':adapter_paths,'phase':'deterministic-validators-a'})
+        for selected,names in consumers:
+            vector = o._ordinary_deterministic_readonly_argv_v1(native_scope,selected,2)
+            assert vector[:4] == (selected_sys.executable,'-I','-S','-B')
+            assert vector[-len(selected[1:]):] == selected[1:]
+            if len(names)>1:
+                prefix_tree = source_ast.parse(vector[7])
+                assert vector[6] == '-c' and len(prefix_tree.body) == 4
+                assert source_ast.literal_eval(prefix_tree.body[1].value.args[1]) == str(root)
+                assert prefix_tree.body[2].targets[0].attr == 'argv'
+                with pytest.raises(o.ValidationReliabilityError,match='ORDINARY_READONLY_ORIGINAL_OCCURRENCE_ORDINAL'):
+                    o._ordinary_deterministic_readonly_argv_v1(native_scope,selected,True)
+            entry = SimpleNamespace(argv=vector,cwd=str(root),command_index=2)
+            execution = SimpleNamespace(registered_argv=selected,execution_argv=vector)
+            bound = (entry,execution,10)
+            native_scope._ordinary_source_selection_v1._bound = (bound,)
+            operands = tuple(dict(path=name,text=(root/name).read_text(encoding='utf8'),complete=True,error=None) for name in names)
+            grammar = tuple((operand,'<module>',operand['text'],()) for operand in operands)
+            native_scope._ordinary_source_operand_cache_v1 = {(operand['path'],'PYTHON'):(source_ast.parse(operand['text']),operand) for operand in operands}
+            native_scope._ordinary_original_source_operand_cache_v1 = native_scope._ordinary_source_operand_cache_v1
+            tool_names = tuple(Path(name).name for name in names)
+            root_row = dict(path=str(root),kind='directory',roster=('tools',))
+            tools_row = dict(path=str(root/'tools'),kind='directory',roster=tool_names)
+            native_source.row_index = {str(root):root_row,str(root/'tools'):tools_row,
+                **{str(root/name):dict(path=str(root/name),kind='file') for name in names}}
+            native_source.rows = list(native_source.row_index.values())
+            native_source.directories = {str(root):(('tools','directory'),),str(root/'tools'):tuple((name,'file') for name in tool_names)}
+            native_source.post[str(root)] = native_source.post[str(root/'tools')] = (1,2)
+            assert o._ordinary_deterministic_readonly_native_v1(native_scope,bound,operands,grammar) is readonly_calls
+            assert readonly_calls[-1][1]['cohorts'] == ((('APPLICATION',),operands,()),)
+            for operand in operands:
+                operand['row'] = native_source.row_index[str(root/operand['path'])]
+                operand['version'] = native_source.post[str(root/operand['path'])] = (1,2,3,4,5,6)
+                operand['source_form'] = 'PYTHON'
+            actual = original_native_factory(native_scope,bound,operands,grammar,**readonly_calls[-1][1])
+            assert o._ordinary_native_source_programme_check_v1(native_scope,actual) is actual
+            assert ('pycache_operand' in actual) is (len(names)>1)
+            token = o._LINUX_PREFLIGHT_PROCESS_V1.set(native_scope)
+            try:
+                with monkeypatch.context() as readonly_adapter_ports:
+                    readonly_adapter_ports.setattr(runner, '_path', lambda *parts: original_run_path(*parts).replace('\\', '/'))
+                    assert runner._ordinary_post_execution_argv_v1(selected,selected,command_index=2) == vector
+                    with pytest.raises(o.ValidationReliabilityError,match='ORDINARY_READONLY_COMPETING_EXECUTION_PROJECTION'):
+                        runner._ordinary_post_execution_argv_v1(selected,vector,command_index=2)
+                assert runner._path is original_run_path
+            finally: o._LINUX_PREFLIGHT_PROCESS_V1.reset(token)
+            malformed = (*selected[:-1],str(V/'foreign.json'))
+            execution.registered_argv = malformed
+            execution.execution_argv = entry.argv = o._ordinary_deterministic_readonly_argv_v1(native_scope,malformed,2)
+            with pytest.raises(o.ValidationReliabilityError,match='ORDINARY_.*_ORIGINAL_ROUTED_INPUTS'):
+                o._ordinary_deterministic_readonly_native_v1(native_scope,bound,operands,grammar)
+            execution.registered_argv = selected
+            execution.execution_argv = entry.argv = vector
+            if len(names)>1:
+                root_row['roster'] = ('tools','master_plan_ingest.py')
+                native_source.row_index[str(root/'master_plan_ingest.py')] = {'kind':'file'}
+                native_source.directories[str(root)] = (('tools','directory'),('master_plan_ingest.py','file'))
+                with pytest.raises(o.ValidationReliabilityError,match='ORDINARY_PYTHON_RECIPE_NO_UNCAPTURED_FALLBACK_LOADER'):
+                    o._ordinary_deterministic_readonly_native_v1(native_scope,bound,operands,grammar)
+        assert len(readonly_calls) == 2
+
+    # Original PR138 -c remains one source-selected programme. These are
+    # controlled no-child ports, not Linux/profile/Git qualification.
+    literal = runner.PR138_NON_MUTATING_VALIDATION_SCRIPT
+    requested_literal = (selected_sys.executable, '-c', literal)
+    source_names = o._ordinary_pr138_source_names_v1()
+    graph_operands = tuple(dict(path=name,text=(root/name).read_text(encoding='utf8'),
+        complete=True,error=None,source_form='PYTHON') for name in source_names)
+    graph_grammar = []
+    for operand in graph_operands:
+        tree = source_ast.parse(operand['text'])
+        calls = tuple(source_ast.get_source_segment(operand['text'],node) for node in source_ast.walk(tree)
+            if isinstance(node,source_ast.Call) and isinstance(node.func,source_ast.Attribute)
+            and node.func.attr in ('run','Popen','read_text','open','exists','glob'))
+        graph_grammar.append((operand,'<module>',operand['text'],calls))
+    graph_grammar = tuple(graph_grammar)
+    members = {str(root):{}}
+    for name in source_names:
+        path = root/name
+        members.setdefault(str(path.parent),{})[path.name]='file'
+        for parent in path.parents:
+            if parent==root:break
+            members.setdefault(str(parent.parent),{})[parent.name]='directory'
+    graph_index = {}
+    for path,names in members.items():
+        graph_index[path] = dict(path=path,kind='directory',roster=tuple(sorted(names)))
+    graph_index.update({str(root/operand['path']):dict(path=str(root/operand['path']),kind='file') for operand in graph_operands})
+    native_source.row_index = graph_index
+    native_source.rows = list(graph_index.values())
+    native_source.directories = {path:tuple((name,names[name]) for name in sorted(names)) for path,names in members.items()}
+    for path in graph_index:native_source.post[path]=(1,2,3,4,5,6)
+    for operand in graph_operands:
+        operand['row']=graph_index[str(root/operand['path'])]
+        operand['version']=native_source.post[operand['row']['path']]
+    native_scope._ordinary_source_operand_cache_v1={(operand['path'],'PYTHON'):(source_ast.parse(operand['text']),operand) for operand in graph_operands}
+    native_scope._ordinary_original_source_operand_cache_v1=native_scope._ordinary_source_operand_cache_v1
+    native_scope._ordinary_runner_owner_v1=native_scope._ordinary_original_runner_owner_v1=runner
+    native_scope._ordinary_git_bindings_v1={'original_source':native_source}
+    observed_literal_native=[]
+    def literal_native_factory(*args,**kwargs):
+        observed_literal_native.append((args,kwargs));return observed_literal_native
+    with monkeypatch.context() as literal_ports:
+        literal_ports.setattr(o,'sys',selected_sys)
+        literal_ports.setattr(runner,'sys',selected_sys)
+        literal_ports.setattr(o,'_ordinary_native_source_programme_v1',literal_native_factory)
+        literal_ports.setattr(o._LinuxPreflightScopeV1,'_ordinary_installation_record_v1',lambda self,operand:install if operand is copier else None)
+        literal_ports.setattr(o._LinuxPreflightScopeV1,'_ordinary_selected_v1',lambda self:True)
+        literal_ports.setattr(o._LinuxPreflightScopeV1,'_ordinary_precursor_ready_v1',lambda self:None)
+        literal_ports.setattr(runner,'_RUN_COMMANDS_ACTIVE_PATHS',adapter_paths)
+        literal_ports.setattr(runner,'_RUN_COMMANDS_SUPERVISION',{'paths':adapter_paths,'phase':'deterministic-validators-a'})
+        vector=o._ordinary_pr138_execution_argv_v1(native_scope,requested_literal,4)
+        assert vector[:4]==(selected_sys.executable,'-I','-S','-B') and vector[6]=='-c'
+        assert vector[7].endswith(literal)
+        prefix=source_ast.parse(vector[7][:-len(literal)])
+        assert source_ast.literal_eval(prefix.body[1].value.args[1])==str(root)
+        with pytest.raises(o.ValidationReliabilityError,match='ORDINARY_PR138_ORIGINAL_LITERAL_EXECUTION'):
+            o._ordinary_pr138_execution_argv_v1(native_scope,requested_literal,True)
+        literal_entry=SimpleNamespace(argv=vector,cwd=str(root),command_index=4)
+        literal_execution=SimpleNamespace(registered_argv=requested_literal,execution_argv=vector)
+        literal_bound=(literal_entry,literal_execution,4)
+        native_scope._ordinary_source_selection_v1._bound=(literal_bound,)
+        assert o._ordinary_pr138_native_v1(native_scope,literal_bound,graph_operands,graph_grammar) is observed_literal_native
+        assert observed_literal_native[-1][1]['application_fd_demand']==9
+        assert observed_literal_native[-1][1]['cohorts'][0][0]==('APPLICATION','GIT')
+        actual_literal=original_native_factory(native_scope,literal_bound,graph_operands,graph_grammar,**observed_literal_native[-1][1])
+        assert o._ordinary_native_source_programme_check_v1(native_scope,actual_literal) is actual_literal
+        assert actual_literal['tasks']==2 and actual_literal['nofile']==12
+        assert actual_literal['application_fd_demand']==9 and native_resource['fd_demand'][2]==8
+        stale_kwargs={**observed_literal_native[-1][1],'application_fd_demand':8}
+        with pytest.raises(o.ValidationReliabilityError,match='ORDINARY_PR138_SOURCE_NATIVE_EXACT_ACTOR_AND_FD_MINIMA'):
+            original_native_factory(native_scope,literal_bound,graph_operands,graph_grammar,**stale_kwargs)
+        context=o._LINUX_PREFLIGHT_PROCESS_V1.set(native_scope)
+        try:
+            assert runner._ordinary_post_execution_argv_v1(requested_literal,requested_literal,command_index=4)==vector
+            with pytest.raises(o.ValidationReliabilityError,match='ORDINARY_PR138_COMPETING_EXECUTION_PROJECTION'):
+                runner._ordinary_post_execution_argv_v1(requested_literal,vector,command_index=4)
+        finally:o._LINUX_PREFLIGHT_PROCESS_V1.reset(context)
+        wrong=(*requested_literal[:2],literal+'\nprint(1)')
+        with pytest.raises(o.ValidationReliabilityError,match='ORDINARY_PR138_ORIGINAL_LITERAL_EXECUTION'):
+            o._ordinary_pr138_execution_argv_v1(native_scope,wrong,4)
+        package=root/'src'
+        graph_index[str(package)]['roster']=(*graph_index[str(package)]['roster'],'__init__.py')
+        graph_index[str(package/'__init__.py')]={'kind':'file'}
+        native_source.directories[str(package)]=tuple((name,graph_index[str(package/name)]['kind']) for name in graph_index[str(package)]['roster'])
+        with pytest.raises(o.ValidationReliabilityError,match='ORDINARY_PR138_EXACT_INITIALIZER_OR_NAMESPACE_ABSENCE'):
+            o._ordinary_pr138_native_v1(native_scope,literal_bound,graph_operands,graph_grammar)
+
+        # The same actual prerequisite issuer consumes explicit no-child
+        # command/native ports and genuine typed original receipts here.
+        literal_ports.setattr(o,'os',SimpleNamespace(**{**vars(o.os),'O_NOFOLLOW':131072,'O_CLOEXEC':524288}))
+        programme = {'entry':literal_entry,'environment':{}}
+        effect = {'entry':literal_entry,'native_programme':actual_literal}
+        effects = {'rows':(effect,)}
+        native_scope._ordinary_source_selection_v1._original=(None,None,'deterministic-validators-a')
+        native_scope._ordinary_effect_programme_record_v1=lambda:effects
+        native_scope._ordinary_programme_for_entry_v1=lambda entry:programme if entry is literal_entry else None
+        native_scope._ordinary_parent_git_environment_v1=lambda selected_root:{'GIT_CONFIG_GLOBAL':str(root/'synthetic-source-safe-directory')}
+        native_scope._ordinary_administrative_records_v1=[]
+        native_scope._ordinary_factory_slots_v1=[]
+        native_scope._ordinary_factory_errors_v1=[]
+        source_config_index=(object(),(None,None,None,None,(None,None,1)))
+        native_scope._ordinary_post_git_source_operands_v1=lambda *,original=None:source_config_index if original is None or original is source_config_index else None
+        observed=SimpleNamespace(st_mode=0o100500,st_nlink=1,st_uid=0,st_dev=1,st_ino=2,
+            st_size=3,st_mtime_ns=4,st_ctime_ns=5)
+        native_scope._ordinary_factory_call_v1=lambda function,*args:observed
+        def loader_slot(path,purpose):
+            slot={'path':path,'purpose':purpose,'returned_fd':None,'close_attempted':False,'closed':False}
+            native_scope._ordinary_factory_slots_v1.append(slot)
+            return slot
+        def loader_open(slot,*args):slot['returned_fd']=17;return 17
+        native_scope._ordinary_factory_slot_v1=loader_slot
+        native_scope._ordinary_factory_open_v1=loader_open
+        native_scope.query=SimpleNamespace(_command_call_record=None,_last_command_supervision=None)
+        native_scope.query._command_record_settled_v1=lambda row:row['receipt'] is not None and all(
+            value['complete'] and value['closed'] and not value['errors'] for value in row['streams'].values())
+        native_scope.query.command_receipt_for_argv_v1=lambda argv:native_scope.query._command_call_record['receipt']
+        programme['environment'].update(native_scope._ordinary_selected_git_environment_v1(actual_literal))
+        native_vectors=native_scope._ordinary_selected_git_vectors_v1()
+        original_vectors=native_vectors
+        seen_vectors=[]
+        def command_port(argv,*,git_environment,cwd):
+            row=native_scope._ordinary_selected_git_control_record_v1(argv)
+            assert row is native_scope._ordinary_current_selected_git_control_v1
+            assert git_environment is row['environment'] and Path(cwd)==root
+            seen_vectors.append(argv)
+            raw = ({'VERSION':b'git version 2.43.0\n','CONFIG_NAMES':b'core.repositoryformatversion\0',
+                    'INDEX_MODES':b'100644\0'}.get(row['expected'],row['expected']))
+            effective=('/usr/bin/prlimit','--nofile=64:64','--',*argv)
+            receipt=o.CommandExecutionReceiptV1(1,'synthetic-source-only','deterministic-validators-a',1,
+                effective,str(root),123,'posix','2026-10-06T00:00:00Z','2026-10-06T00:00:01Z',1.0,
+                0,None,None,'NOT_CONFIGURED','NOT_REQUIRED',str(root/'synthetic-stdout'),
+                str(root/'synthetic-stderr'),len(raw),0,(),'NOT_REQUIRED',False,None)
+            query={'receipt':receipt,'streams':{name:dict(raw=value,complete=True,closed=True,errors=[])
+                for name,value in (('stdout',raw),('stderr',b''))}}
+            administrative={'argv':argv,'effective_argv':effective,'returned':True,'error':None}
+            native_scope._ordinary_administrative_records_v1.append(administrative)
+            native_scope.query._command_call_record=native_scope.query._last_command_supervision=query
+            return raw
+        native_scope._ordinary_factory_command_v1=command_port
+        proof=native_scope._ordinary_verify_selected_git_controls_v1()
+        assert proof is native_scope._ordinary_selected_git_proof_v1 and proof['complete'] and not proof['errors']
+        assert tuple(tuple(value[2:]) for value in seen_vectors)==tuple(value[0] for value in original_vectors)
+        assert len(seen_vectors)==8 and seen_vectors[0][2:]==('--version',)
+        assert seen_vectors[1][2:6]==('config','--local','--no-includes','--null')
+        assert all(value[:2]==('/usr/bin/git','--no-pager') for value in seen_vectors)
+        assert native_scope._ordinary_require_selected_git_controls_v1(literal_entry) is proof
+        assert len(native_scope._ordinary_factory_slots_v1)==1 and not proof['loader_slot']['close_attempted']
+        with pytest.raises(o.ValidationReliabilityError,match='ORDINARY_SELECTED_GIT_ONE_NONPOST_PROOF'):
+            native_scope._ordinary_verify_selected_git_controls_v1()
+        original_expected=proof['records'][2]['expected'];proof['records'][2]['expected']=b'true\n'
+        with pytest.raises(o.ValidationReliabilityError,match='ORDINARY_SELECTED_GIT_ORIGINAL_COMPLETE_PREREQUISITE'):
+            native_scope._ordinary_require_selected_git_controls_v1(literal_entry)
+        proof['records'][2]['expected']=original_expected
+        assert native_scope._ordinary_require_selected_git_controls_v1(literal_entry) is proof
+        for kind,raw in (('VERSION',b'git version 2.35.0\n'),('CONFIG_NAMES',b'include.path\0'),('INDEX_MODES',b'160000\0')):
+            with pytest.raises(o.ValidationReliabilityError,match='ORDINARY_POST_GIT_'):
+                native_scope._ordinary_post_git_edge_bytes_v1(kind,raw,index_entries=1 if kind=='INDEX_MODES' else None)
+        # Unknown command failure retains the same original exception, partial
+        # row and loader debt; it produces no completed proof or retry.
+        failed_scope=native_scope
+        del failed_scope._ordinary_selected_git_proof_v1
+        failed_scope._ordinary_factory_slots_v1=[];failed_scope._ordinary_factory_errors_v1=[]
+        failed_scope._ordinary_precursor_ready_v1=lambda:None
+        failed_scope._ordinary_selected_git_environment_v1=lambda native:dict(proof['environment'])
+        failed_scope._ordinary_effect_programme_record_v1=lambda:effects
+        failed_scope._ordinary_programme_for_entry_v1=lambda entry:programme
+        def failed_slot(path,purpose):
+            slot={'path':path,'purpose':purpose,'returned_fd':None,'close_attempted':False,'closed':False}
+            failed_scope._ordinary_factory_slots_v1.append(slot);return slot
+        failed_scope._ordinary_factory_slot_v1=failed_slot
+        failed_scope._ordinary_factory_open_v1=loader_open
+        fault=OSError('synthetic selected command birth unknown')
+        def refuse_command(*args,**kwargs):raise fault
+        failed_scope._ordinary_factory_command_v1=refuse_command
+        with pytest.raises(OSError,match='synthetic selected command birth unknown'):
+            failed_scope._ordinary_verify_selected_git_controls_v1()
+        failed=failed_scope._ordinary_selected_git_proof_v1
+        assert not failed['complete'] and failed['errors']==[fault]
+        assert failed['records'][0]['errors']==[fault] and failed_scope._ordinary_factory_errors_v1==[fault]
+        assert failed_scope._ordinary_current_selected_git_control_v1 is None
+        assert len(failed_scope._ordinary_factory_slots_v1)==1 and not failed_scope._ordinary_factory_slots_v1[0]['closed']
+        with pytest.raises(o.ValidationReliabilityError,match='ORDINARY_SELECTED_GIT_ONE_NONPOST_PROOF'):
+            failed_scope._ordinary_verify_selected_git_controls_v1()
+    # Three original readonly CLI graphs share the same source/native owner.
+    # These synthetic process/source ports never create a native child.
+    source_table = source_ast.parse((root/'tools/validation_inventory.py').read_text(encoding='utf8'))
+    literal_function = next(node for node in source_table.body if isinstance(node,source_ast.FunctionDef)
+        and node.name == '_ordinary_deterministic_fixed_sources_v1')
+    recipes = o._ordinary_deterministic_literal_references_v1(source_ast.literal_eval(
+        next(node for node in literal_function.body if isinstance(node,source_ast.Return)).value))
+    selected_cli_recipes = tuple(recipe for recipe in recipes if recipe[1] == 'READ_ONLY_GIT_CLI')
+    assert len(selected_cli_recipes) == 3
+    recorded_cli_native = []
+    def cli_native_factory(*args,**kwargs):
+        recorded_cli_native.append((args,kwargs));return recorded_cli_native
+    import base64 as source_base64
+    native_scope._ordinary_source_selection_v1._original = (None,None,'deterministic-validators-a')
+    ci_environment = {'GITHUB_HEAD_REF':'repair/main-cumulative-v35-final-r5-local-20260922',
+        'GITHUB_REF_NAME':'298/merge','GITHUB_REF':'refs/pull/298/merge'}
+    ci_binding = {'environment':ci_environment}
+    with monkeypatch.context() as cli_ports:
+        cli_ports.setattr(o,'sys',selected_sys)
+        cli_ports.setattr(runner,'sys',selected_sys)
+        cli_ports.setattr(o,'_ordinary_native_source_programme_v1',cli_native_factory)
+        cli_ports.setattr(runner,'_ordinary_ci_require_binding_v1',lambda self,phase:ci_binding)
+        cli_ports.setattr(o._LinuxPreflightScopeV1,'_ordinary_installation_record_v1',lambda self,operand:install if operand is copier else None)
+        cli_ports.setattr(o._LinuxPreflightScopeV1,'_ordinary_selected_v1',lambda self:True)
+        cli_ports.setattr(o._LinuxPreflightScopeV1,'_ordinary_precursor_ready_v1',lambda self:None)
+        cli_ports.setattr(runner,'_RUN_COMMANDS_ACTIVE_PATHS',adapter_paths)
+        cli_ports.setattr(runner,'_RUN_COMMANDS_SUPERVISION',{'paths':adapter_paths,'phase':'deterministic-validators-a'})
+        for recipe in selected_cli_recipes:
+            selected = (selected_sys.executable,recipe[0],'--repo-root','.')
+            vector = o._ordinary_readonly_git_cli_execution_v1(native_scope,selected,6)
+            assert vector[:4] == (selected_sys.executable,'-I','-S','-B') and vector[-3:] == selected[1:]
+            entry = SimpleNamespace(argv=vector,cwd=str(root),command_index=6)
+            execution = SimpleNamespace(registered_argv=selected,execution_argv=vector)
+            bound = (entry,execution,6)
+            native_scope._ordinary_source_selection_v1._bound = (bound,)
+            source_names = list(name for name,body in recipe[2])
+            assert recipe[4][0][:2] == ('AUTHENTIC_BOOTSTRAP_SOURCE','tools/validation_scope_registry.py')
+            source_names.insert(recipe[4][0][2],recipe[4][0][1])
+            source_names = (*source_names,'tools/validation_reliability.py')
+            operands = tuple(dict(path=name,text=(root/name).read_bytes().decode('utf8'),complete=True,
+                error=None,source_form='PYTHON') for name in source_names)
+            grammar = tuple((operand,'<module>',operand['text'],() if operand['path'] in ('tools/validation_reliability.py','tools/validation_scope_registry.py')
+                else tuple(source_ast.get_source_segment(operand['text'],node)
+                for node in source_ast.walk(source_ast.parse(operand['text'])) if isinstance(node,source_ast.Call)
+                and isinstance(node.func,source_ast.Attribute) and node.func.attr in ('run','read_text','open')))
+                for operand in operands)
+            members = {str(root):{}}
+            for name in source_names:
+                path = root/name;members.setdefault(str(path.parent),{})[path.name]='file'
+                for parent in path.parents:
+                    if parent == root:break
+                    members.setdefault(str(parent.parent),{})[parent.name]='directory'
+            index = {path:dict(path=path,kind='directory',roster=tuple(sorted(names))) for path,names in members.items()}
+            index.update({str(root/name):dict(path=str(root/name),kind='file') for name in source_names})
+            native_source.row_index=index;native_source.rows=list(index.values())
+            native_source.directories={path:tuple((name,names[name]) for name in sorted(names)) for path,names in members.items()}
+            native_source.post={path:(1,2,3,4,5,6) for path in index}
+            for operand in operands:
+                operand['row']=index[str(root/operand['path'])];operand['version']=native_source.post[operand['row']['path']]
+            native_scope._ordinary_source_operand_cache_v1={(operand['path'],'PYTHON'):(source_ast.parse(operand['text']),operand) for operand in operands}
+            native_scope._ordinary_original_source_operand_cache_v1=native_scope._ordinary_source_operand_cache_v1
+            captured = {'bytes':source_base64.b64encode(operands[-1]['text'].encode('utf8')).decode('ascii'),
+                'version':(1,2,3,4,5,6)}
+            registry_operand = next(item for item in operands if item['path']=='tools/validation_scope_registry.py')
+            registry_capture = {'bytes':source_base64.b64encode(registry_operand['text'].encode('utf8')).decode('ascii'),
+                'version':(1,2,3,4,5,6)}
+            bootstrap = {'source':{'tools/validation_reliability.py':captured,
+                'tools/validation_scope_registry.py':registry_capture}}
+            receiver = {'scope':native_scope,'bootstrap':bootstrap,'owner':(os.getpid(),o.threading.get_ident()),
+                'joined':True,'errors':[]}
+            receiver['original']=(receiver,native_scope,None,bootstrap,receiver['owner'])
+            native_scope._ordinary_controller_receiver_v1=native_scope._ordinary_original_controller_receiver_v1=receiver
+            ci_binding.update(receiver=receiver,bootstrap=bootstrap)
+            assert o._ordinary_readonly_git_cli_native_v1(native_scope,bound,operands,grammar) is recorded_cli_native
+            assert recorded_cli_native[-1][1]['cohorts'][0][0] == ('APPLICATION','GIT')
+            assert recorded_cli_native[-1][1]['application_fd_demand'] == 9
+            original_source_segment = source_ast.get_source_segment
+            def selected_source_segment(text,node,*args,**kwargs):
+                assert text != operands[-1]['text']
+                return original_source_segment(text,node,*args,**kwargs)
+            with monkeypatch.context() as selected_segments:
+                selected_segments.setattr(source_ast,'get_source_segment',selected_source_segment)
+                actual = original_native_factory(native_scope,bound,operands,grammar,**recorded_cli_native[-1][1])
+                assert o._ordinary_native_source_programme_check_v1(native_scope,actual) is actual
+                bad_grammar = tuple((*item[:3],('not an actual native call',)) if item is grammar[0] else item
+                    for item in grammar)
+                with pytest.raises(o.ValidationReliabilityError,match='ORDINARY_NATIVE_SOURCE_PROGRAMME_NATIVE_CALL_OPERANDS'):
+                    original_native_factory(native_scope,bound,operands,bad_grammar,**recorded_cli_native[-1][1])
+            assert actual['tasks'] == 2 and actual['nofile'] == 12
+            context = o._LINUX_PREFLIGHT_PROCESS_V1.set(native_scope)
+            try:
+                assert runner._ordinary_post_execution_argv_v1(selected,selected,command_index=6) == vector
+            finally:o._LINUX_PREFLIGHT_PROCESS_V1.reset(context)
+            with pytest.raises(o.ValidationReliabilityError,match='ORDINARY_READONLY_GIT_CLI_EXACT_ORIGINAL_VECTOR'):
+                o._ordinary_readonly_git_cli_execution_v1(native_scope,(*selected,'--write-artifacts'),6)
+            registry_capture['bytes']=''
+            with pytest.raises(o.ValidationReliabilityError,match='ORDINARY_READONLY_GIT_CLI_CURRENT_REGISTRY_EQUALS_AUTHENTICATED_BOOTSTRAP'):
+                o._ordinary_readonly_git_cli_native_v1(native_scope,bound,operands,grammar)
+            registry_capture['bytes']=source_base64.b64encode(registry_operand['text'].encode('utf8')).decode('ascii')
+            captured['bytes']=''
+            with pytest.raises(o.ValidationReliabilityError,match='ORDINARY_READONLY_GIT_CLI_CURRENT_REL_EQUALS_AUTHENTICATED_BOOTSTRAP'):
+                o._ordinary_readonly_git_cli_native_v1(native_scope,bound,operands,grammar)
+        assert len(recorded_cli_native) == 3
+        ci_environment['GITHUB_HEAD_REF']=''
+        with pytest.raises(o.ValidationReliabilityError,match='ORDINARY_READONLY_GIT_CLI_SOURCE_PROVED_STANDARD_BRANCH_RETURN'):
+            o._ordinary_readonly_git_cli_branch_v1(native_scope)
+        ci_environment.update(GITHUB_REF_NAME='main',GITHUB_REF='refs/heads/main')
+        assert o._ordinary_readonly_git_cli_branch_v1(native_scope) is ci_binding
+        native_scope._ordinary_post_base_environment_v1=(native_scope,adapter_paths,(),None,
+            {'GITHUB_REF_NAME':'other'},(('GITHUB_REF_NAME','other'),))
+        native_scope._ordinary_bound_plan_v1=()
+        with pytest.raises(o.ValidationReliabilityError,match='ORDINARY_READONLY_GIT_CLI_SAME_ORIGINAL_BRANCH_ENVIRONMENT'):
+            o._ordinary_readonly_git_cli_branch_v1(native_scope)
+        del native_scope._ordinary_post_base_environment_v1
+
+    literal_body = ('tools/example.py','pass\n')
+    logical_recipe = ('tools/example.py','READ_ONLY',(literal_body,),(),())
+    component = ('SOURCE_BODY_REFERENCES_V1',(literal_body,),
+        (('tools/example.py','READ_ONLY',(('tools/example.py',0),),(),()),))
+    assert o._ordinary_deterministic_literal_references_v1(component) == (logical_recipe,)
+    for bad in (
+            ('SOURCE_BODY_REFERENCES_V1',(literal_body,literal_body),component[2]),
+            ('SOURCE_BODY_REFERENCES_V1',(literal_body,),
+                (('tools/example.py','READ_ONLY',(('tools/example.py',False),),(),()),)),
+            ('SOURCE_BODY_REFERENCES_V1',(literal_body,),
+                (('tools/example.py','READ_ONLY',(('tools/foreign.py',0),),(),()),)),
+            ('SOURCE_BODY_REFERENCES_V1',(literal_body,),
+                (('tools/example.py','READ_ONLY',(),(),()),)),
+            ('SOURCE_BODY_REFERENCES_V1',(literal_body,),component[2]+component[2])):
+        with pytest.raises(o.ValidationReliabilityError,match='ORDINARY_SOURCE_LITERAL_'):
+            o._ordinary_deterministic_literal_references_v1(bad)
+
+    # Pure quota/source metadata only: no process or native admission.
+    prefix_caps = runner._ordinary_post_ceiling_programme_v1(original_cutoffs=(1, 2, 3, 4))
+    expected_prefix_cell = {'stdout_bytes': 8 << 20, 'stderr_bytes': 8 << 20,
+        'combined_output_bytes': 16 << 20}
+    prefix_outer = runner._ordinary_prefix_output_limits_v1(prefix_caps, 'PROVISION')
+    prefix_inner = runner._ordinary_prefix_output_limits_v1(prefix_caps, 'CONTROLLER')
+    assert prefix_outer == prefix_inner == expected_prefix_cell
+    assert prefix_outer is not prefix_inner
+    assert prefix_outer['combined_output_bytes'] + prefix_inner['combined_output_bytes'] == prefix_caps['output_partition']['prefix_bytes']
+    with pytest.raises(o.ValidationReliabilityError, match='ORDINARY_PREFIX_SOURCE_SELECTED_CAPTURE_LAYER'):
+        runner._ordinary_prefix_output_limits_v1(prefix_caps, 'APPLICATION')
+
+    # Synthetic original-owner dispatch references only. No source/native
+    # resource is acquired or admitted by these no-child marker records.
+    post_scope = object.__new__(o._LinuxPreflightScopeV1)
+    post_scope._ordinary_phase_v1 = runner.POST_VALIDATION_PHASE
+    post_scope._ordinary_runner_owner_v1 = runner
+    post_scope._ordinary_bound_paths_v1 = post_paths = object()
+    post_scope._ordinary_bound_plan_v1 = post_plan = object()
+    post_scope._ordinary_execution_plan_v1 = post_scope._ordinary_original_execution_plan_v1 = post_execution = object()
+    post_effects = object()
+    post_resource = {'ceiling_programme': {},
+        'limits': {'raw_retained_byte_limit': 33, 'raw_read_byte_limit': 77}}
+    post_scope._ordinary_resource_programme_v1 = post_resource
+    post_scope._ordinary_original_resource_programme_v1 = (post_resource, tuple(post_resource.items()))
+    allocation_calls = []
+    def selected_allocation(*args):
+        allocation_calls.append(args)
+        return allocation_calls
+    with monkeypatch.context() as original_post_route:
+        original_post_route.setattr(post_scope, '_ordinary_effect_programme_record_v1', lambda: post_effects)
+        original_post_route.setattr(post_scope, '_ordinary_issue_phase_allocations_v1', selected_allocation)
+        before_post = dict(post_resource)
+        assert o._ordinary_phase_allocations_v1(post_scope, post_paths, post_plan,
+            post_execution, post_resource, post_effects) is None
+        assert allocation_calls == [] and post_resource == before_post and 'phase_allocations' not in post_resource
+        assert o._ordinary_phase_candidate_limits_v1(post_scope, post_resource) == (33, 77)
+        with pytest.raises(o.ValidationReliabilityError, match='ORDINARY_PHASE_ORIGINAL_POST_ALLOCATION_ROUTE'):
+            o._ordinary_phase_allocations_v1(post_scope, post_paths, post_plan,
+                post_execution, post_resource, object())
+        assert allocation_calls == [] and post_resource == before_post
+        with pytest.raises(o.ValidationReliabilityError, match='ORDINARY_PHASE_ORIGINAL_POST_CANDIDATE_LIMITS'):
+            o._ordinary_phase_allocations_v1(post_scope, post_paths, post_plan,
+                post_execution, dict(post_resource), post_effects)
+        original_post_route.setattr(post_scope, '_ordinary_phase_v1', 'pytest-shard-1')
+        with pytest.raises(o.ValidationReliabilityError, match='ORDINARY_PHASE_ORIGINAL_POST_CANDIDATE_LIMITS'):
+            o._ordinary_phase_allocations_v1(post_scope, post_paths, post_plan,
+                post_execution, post_resource, post_effects)
+        assert allocation_calls == []
+        selected_resource = {'phase_allocations': object()}
+        assert o._ordinary_phase_allocations_v1(post_scope, post_paths, post_plan,
+            post_execution, selected_resource, post_effects) is allocation_calls
+        assert len(allocation_calls) == 1 and allocation_calls[0] == (
+            post_paths, post_plan, post_execution, selected_resource, post_effects)
+
+    # Synthetic quota bookkeeping only: no native owner is admitted by these
+    # finite record markers, no process is launched and no resource is acquired.
+    quota_scope = object.__new__(o._LinuxPreflightScopeV1)
+    quota_source = object()
+    quota_scope.source = quota_source
+    quota_meter = {'limits': {'raw_read_byte_limit': 99},
+        'remaining': {'raw_read_byte_limit': 99}, 'observed': {'raw_read_byte_limit': 0}}
+    quota_scope._ordinary_meter_v1 = quota_meter
+    quota_resource = {'scope': quota_scope, 'source': quota_source}
+    quota_balance = {'limits': {'raw_read_byte_limit': 3},
+        'remaining': {'raw_read_byte_limit': 3}, 'observed': {'raw_read_byte_limit': 0},
+        'errors': []}
+    quota_record = dict(scope=quota_scope, source=quota_source, resource=quota_resource,
+        geometry=object(), catalogue=object(), rp5a_policy=None, rp5a_demands=None,
+        meter=quota_meter, owner=(o.os.getpid(), o.threading.get_ident()), rows=(),
+        issuing=True, issued=True, paths=object(), plan=object(), execution_plan=object(),
+        effect_programme=object(), pools={}, complement=quota_balance, reservations=[], errors=[])
+    quota_record['original'] = (quota_record, quota_scope, quota_source, quota_resource,
+        quota_record['geometry'], quota_record['catalogue'], None, None, quota_meter,
+        quota_record['owner'], quota_record['reservations'], quota_record['errors'])
+    quota_record['issued_original'] = (quota_record, quota_record['paths'], quota_record['plan'],
+        quota_record['execution_plan'], quota_record['effect_programme'], quota_record['rows'],
+        (), quota_record['pools'], (), quota_balance, tuple(quota_balance['limits'].items()))
+    quota_scope._ordinary_phase_allocations_v1 = quota_scope._ordinary_original_phase_allocations_v1 = quota_record
+    quota_resource['phase_allocations'] = quota_record
+    assert quota_scope._ordinary_phase_allocation_record_v1(quota_resource, issued=True) is quota_record
+    with pytest.raises(o.ValidationReliabilityError, match='ORDINARY_PHASE_SINGLE_RESOURCE_REGISTRATION'):
+        quota_scope._ordinary_phase_resource_begin_v1(quota_resource)
+    with pytest.raises(o.ValidationReliabilityError, match='ORDINARY_PHASE_ONE_ISSUANCE_BEFORE_C'):
+        quota_scope._ordinary_issue_phase_allocations_v1(quota_record['paths'], quota_record['plan'],
+            quota_record['execution_plan'], quota_resource, quota_record['effect_programme'])
+    assert quota_record['rows'] == () and quota_record['reservations'] == [] and quota_record['errors'] == []
+    assert quota_balance['remaining'] == {'raw_read_byte_limit': 3}
+    quota_scope._ordinary_phase_complement_debit_v1('raw_read_byte_limit', 2)
+    assert quota_balance['observed'] == {'raw_read_byte_limit': 2}
+    assert quota_balance['remaining'] == {'raw_read_byte_limit': 1}
+    assert quota_meter == {'limits': {'raw_read_byte_limit': 99},
+        'remaining': {'raw_read_byte_limit': 99}, 'observed': {'raw_read_byte_limit': 0}}
+    with pytest.raises(ValueError, match='ORDINARY_PHASE_COMPLEMENT_EXHAUSTED') as first_quota_error:
+        quota_scope._ordinary_phase_complement_debit_v1('raw_read_byte_limit', 2)
+    assert quota_balance['remaining'] == {'raw_read_byte_limit': 0}
+    assert quota_balance['observed'] == {'raw_read_byte_limit': 4}
+    assert quota_record['errors'][0] is quota_balance['errors'][0] is first_quota_error.value
+    with pytest.raises(ValueError, match='ORDINARY_PHASE_COMPLEMENT_EXHAUSTED') as late_quota_error:
+        quota_scope._ordinary_phase_complement_debit_v1('raw_read_byte_limit', 1)
+    assert quota_balance['remaining'] == {'raw_read_byte_limit': 0}
+    assert quota_balance['observed'] == {'raw_read_byte_limit': 5}
+    assert quota_record['errors'][0] is first_quota_error.value
+    assert quota_record['errors'][1] is quota_balance['errors'][1] is late_quota_error.value
+    with pytest.raises(o.ValidationReliabilityError, match='ORDINARY_PHASE_EXACT_ACTUAL_PREFIX'):
+        quota_scope._ordinary_phase_complement_debit_v1('raw_read_byte_limit', False)
+    assert quota_balance['observed']['raw_read_byte_limit'] == 5 and len(quota_record['errors']) == 2
+    quota_record['owner'] = (o.os.getpid(), o.threading.get_ident()+1)
+    with pytest.raises(o.ValidationReliabilityError, match='ORDINARY_PHASE_RETAINED_DELIVERY_OWNER'):
+        quota_scope._ordinary_phase_complement_debit_v1('raw_read_byte_limit', 1)
+    assert quota_balance['observed']['raw_read_byte_limit'] == 5
+
+    # The actual two Query processes cannot each copy the whole category.
+    # Pure source quota arithmetic only; these records admit no native actor.
+    native_parent_output = o._ordinary_output_owner_limits_v1(prefix_caps, 'PARENT')
+    native_receiver_output = o._ordinary_output_owner_limits_v1(prefix_caps, 'RECEIVER')
+    native_outer_output = o._ordinary_output_owner_limits_v1(prefix_caps, 'PROVISION')
+    assert native_parent_output['query_bytes'] == native_receiver_output['query_bytes'] == 66_715_648
+    assert native_outer_output['query_bytes'] == 0 and native_outer_output['outer_suffix_bytes'] == 786_432
+    assert (native_parent_output['query_bytes'] + native_receiver_output['query_bytes']
+        + native_outer_output['outer_suffix_bytes']) == prefix_caps['output_partition']['administrative_bytes']
+    with pytest.raises(o.ValidationReliabilityError, match='ORDINARY_OUTPUT_ORIGINAL_OWNER_ROLE'):
+        o._ordinary_output_owner_limits_v1(prefix_caps, 'APPLICATION')
+
+    # Source-body-only quoting cases. These execute the original nested
+    # encoder with its original path guard; they do not compile/load policy,
+    # admit a filename family, create a child, or prove native containment.
+    import inspect
+    import textwrap
+    policy_body = ast.parse(textwrap.dedent(inspect.getsource(o._LinuxPreflightScopeV1._ordinary_prepare_policy_v1)))
+    quote_body = next(node for node in policy_body.body[0].body
+        if isinstance(node, ast.FunctionDef) and node.name == 'quoted')
+    quote_scope = {'_linux_preflight_path_v1': o._linux_preflight_path_v1,
+        '_preflight_require_v1': o._preflight_require_v1, 're': o.re}
+    exec(compile(ast.Module(body=[quote_body], type_ignores=[]), 'original-private-policy-quote', 'exec'), quote_scope)
+    quote = quote_scope['quoted']
+    literal = '/repo/docs/master_plan/generated/shards/PR168_RP_Order.report.part_0001_of_{total}.report.json'
+    assert quote('/repo/control') == '"/repo/control"'
+    assert quote('/repo/control', effect_literal=True) == '"/repo/control"'
+    assert quote(literal, effect_literal=True) == r'"/repo/docs/master_plan/generated/shards/PR168_RP_Order.report.part_0001_of_\{total\}.report.json"'
+    for rejected, selected in ((literal, False), (literal.replace('{total}', '{other}'), True),
+            (literal.replace('0001', '*'), True), (literal.replace('0001', '001'), True),
+            (literal.replace('PR168_RP_Order', '../PR168_RP_Order'), True),
+            (literal.replace('{total}', r'\{total\}'), True),
+            (literal.replace('{total}', '{total}{total}'), True)):
+        with pytest.raises(o.ValidationReliabilityError):
+            quote(rejected, effect_literal=selected)
+    with pytest.raises(o.ValidationReliabilityError, match='ORDINARY_POLICY_LITERAL_ROLE'):
+        quote('/repo/control', effect_literal=1)
     reference_evidence=os.environ.get('QTT_TEST_WINDOWS_JOB_DIAGNOSTIC_EVIDENCE')
     if reference_evidence:
         reference_path=Path(reference_evidence).parent/'source-recovery-references.json'
@@ -24712,6 +29172,186 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
             assert o._LINUX_PREFLIGHT_PROCESS_V1 is context or fault in ('reset','body-reset')
             evidence=admin.command_supervision_evidence_v1()
             assert len(evidence)==len(admin.command_supervisions) and all(row['argv']==admin_vector for row in evidence)
+    # Selected denied startup: real Query/Scope.create and ordinary evidence
+    # streams, with explicit NO-CHILD supervisor faults. These cases prove
+    # error/latch selection only, never native unit or descendant settlement.
+    from types import SimpleNamespace
+    scalar_defects=('combined-bool','combined-float','limit-bool','limit-float',
+        'drained-bool','drained-float','retained-bool','retained-float')
+    for defect in ('expected','unbound','foreign-context','argv-copy','unknown','unproven','timeout',
+            'publication','start-failure','wrong-receipt','shape','capture-incomplete','overflow',
+            'read','close','read-close','reset','report','deadline',*scalar_defects):
+        with monkeypatch.context() as denial_patch:
+            denial_patch.setattr(o.sys,'platform','linux')
+            area=tmp_path/('selected-denial-'+defect);area.mkdir()
+            evidence=area/'query';evidence.mkdir()
+            root=area/'startup-denial-root';root.mkdir()
+            spool=evidence/'startup-denial-streams';spool.mkdir()
+            for stream in ('stdout','stderr'):(spool/('command-1.'+stream+'.bin')).write_bytes(b'')
+            source=SimpleNamespace(root=area/'tiny-source',run_id='qtt123n456-recovery-3')
+            source.root.mkdir()
+            admin=o._LinuxPreflightQueriesV1(evidence_root=evidence,
+                deadline_ns=time.monotonic_ns()+60*10**9,startup_closeout_bytes=32*1024**2)
+            admin.startup_fixture_reservation=2097152
+            bind_administrative_fixture_cwd(admin,evidence,denial_patch)
+            end=time.monotonic_ns()+60*10**9
+            scope=o._LinuxPreflightScopeV1(name='qtt123n4560',query=admin,control=area,
+                runtime=root,private_root=root,spool=spool,repository=str(source.root),installation='',
+                interpreter='/qtt-intentionally-absent-fixture-executable',source=source,header=None,
+                blobs=None,vectors=None,grants=dict(execution_deadline_ns=end,settlement_deadline_ns=end),
+                event={},environment=dict(PATH='/usr/bin',LANG='C.UTF-8',LC_ALL='C.UTF-8'))
+            scope.argv=('/qtt-intentionally-absent-fixture-executable',)
+            scope.launch_argv=('/usr/bin/systemd-run','--system','--no-ask-password','--expand-environment=no',
+                '--unit=qtt123n4560.service','--slice=qtt123n4560.slice',
+                *('--property='+k+'='+v for k,v in o._LINUX_PREFLIGHT_PROPERTIES_V1),
+                '--property=RootDirectory='+str(root),'--property=WorkingDirectory=/',
+                '--property=StandardInput=null','--property=StandardOutput=append:'+str(spool/'command-1.stdout.bin'),
+                '--property=StandardError=append:'+str(spool/'command-1.stderr.bin'),
+                '--','/qtt-intentionally-absent-fixture-executable')
+            if defect!='unbound':admin._bind_denied_start_fixture_v1(scope)
+            frozen_vector=scope.launch_argv
+            if defect=='argv-copy':scope.launch_argv=tuple(list(scope.launch_argv))
+            starts=[];receipts=[];opened={};requests=[]
+            primary=OSError('selected denial '+defect+' original error')
+            secondary=OSError('selected denial original close error')
+            primary.owned_process=object() if defect=='unknown' else None
+            def no_child_denied(argv,**kwargs):
+                starts.append((argv,kwargs))
+                if defect=='unknown':raise primary
+                negative=argv[0]=='/usr/bin/systemd-run'
+                out=evidence/('command-'+str(kwargs['command_index'])+'.stdout.bin')
+                err=evidence/('command-'+str(kwargs['command_index'])+'.stderr.bin')
+                stdout=b'' if negative and (defect=='start-failure'
+                    or defect.startswith(('drained-','retained-'))) else b'version\n'
+                stderr=b'fixture absent\n' if negative and defect!='start-failure' else b''
+                out.write_bytes(stdout);err.write_bytes(stderr)
+                limits=kwargs['output_limits']
+                observation={'combined_output_grant':limits['combined_output_bytes']}
+                for name,data in (('stdout',stdout),('stderr',stderr)):
+                    observation[name]=dict(retention_limit=limits[name+'_bytes'],
+                        drained_byte_count=len(data),cleanup_drained_byte_count=0,
+                        retained_byte_count=len(data),overflow=False,complete=True,errors=[])
+                if negative and defect in scalar_defects:
+                    field=defect.split('-')[0]
+                    if field=='combined':
+                        observation['combined_output_grant']=(False if defect.endswith('-bool')
+                            else float(limits['combined_output_bytes']))
+                    elif field=='limit':
+                        observation['stdout']['retention_limit']=(False if defect.endswith('-bool')
+                            else float(limits['stdout_bytes']))
+                    else:
+                        observation['stdout'][field+'_byte_count']=False if defect.endswith('-bool') else 0.0
+                receipt=o.CommandExecutionReceiptV1(schema_version=o.SCHEMA_VERSION,
+                    run_id=kwargs['run_id'],phase=kwargs['phase'],command_index=kwargs['command_index'],argv=argv,
+                    cwd=str(kwargs['cwd']),pid=12345,platform='posix',
+                    start_time_utc='2026-10-06T00:00:00Z',end_time_utc='2026-10-06T00:00:01Z',
+                    elapsed_monotonic_seconds=1,native_exit_code=1 if negative else 0,
+                    start_failure_class=None,timeout_seconds_or_null=10,timeout_state='NOT_TRIGGERED',
+                    termination_state='NOT_REQUIRED',stdout_path=str(out),stderr_path=str(err),
+                    stdout_byte_count=len(stdout),stderr_byte_count=len(stderr),stdout_required_markers=(),
+                    stdout_marker_state='NOT_REQUIRED',stderr_was_nonempty=bool(stderr),
+                    failure_class='ENGVR_NATIVE_EXIT_NONZERO' if negative else None,output_observation=observation)
+                changes={'unproven':dict(termination_state='TERMINAL:UNPROVEN'),
+                    'timeout':dict(failure_class='ENGVR_PROCESS_TIMEOUT',timeout_state='TRIGGERED',
+                        termination_state='SIGTERM:0;TERMINAL:PROVEN'),
+                    'publication':dict(failure_class='ENGVR_ATOMIC_RECEIPT_WRITE_FAILED'),
+                    'start-failure':dict(pid=None,native_exit_code=None,start_failure_class='FileNotFoundError',
+                        failure_class='ENGVR_PROCESS_START_FAILED'),
+                    'wrong-receipt':dict(run_id='foreign-run')}.get(defect,{})
+                if negative and changes:receipt=dataclasses.replace(receipt,**changes)
+                if negative and defect=='capture-incomplete':observation['stderr']['complete']=False
+                if negative and defect=='overflow':observation['stderr']['overflow']=True
+                if negative and defect=='shape':receipt=object()
+                receipts.append(receipt);return receipt
+            denial_patch.setattr(o,'supervise_command',no_child_denied)
+            original_open=o._open_regular_worktree_descriptor;original_read=os.read;original_close=os.close
+            def selected_open(path,**kwargs):
+                fd=original_open(path,**kwargs);opened[fd]=path.name;return fd
+            def selected_read(fd,request):
+                requests.append(request)
+                if defect in ('read','read-close') and opened.get(fd,'').endswith('stdout.bin'):raise primary
+                return original_read(fd,min(request,3))
+            def selected_close(fd):
+                original_close(fd)
+                if defect in ('close','read-close'):raise secondary
+            denial_patch.setattr(o,'_open_regular_worktree_descriptor',selected_open)
+            denial_patch.setattr(os,'read',selected_read);denial_patch.setattr(os,'close',selected_close)
+            context=o._LINUX_PREFLIGHT_PROCESS_V1
+            token=context.set(object() if defect=='foreign-context' else scope)
+            if defect=='reset':
+                class SelectedResetFailure:
+                    def get(self):return scope
+                    def set(self,value):assert value is None;return object()
+                    def reset(self,value):raise primary
+                denial_patch.setattr(o,'_LINUX_PREFLIGHT_PROCESS_V1',SelectedResetFailure())
+            if defect=='report':
+                original_json=o._json_compatible
+                def fail_original_receipt_report(value):
+                    if type(value) is o.CommandExecutionReceiptV1:raise primary
+                    return original_json(value)
+                denial_patch.setattr(o,'_json_compatible',fail_original_receipt_report)
+            if defect=='deadline':
+                original_check=admin.check
+                def expire_only_after_complete_streams(**kwargs):
+                    record=admin._command_call_record
+                    if record is not None and set(record['streams'])=={'stdout','stderr'} and all(
+                            slot['complete'] for slot in record['streams'].values()):admin.deadline_ns=1
+                    return original_check(**kwargs)
+                denial_patch.setattr(admin,'check',expire_only_after_complete_streams)
+            try:
+                with pytest.raises(BaseException) as caught:
+                    scope.create(scope.argv,source.root,scope.environment)
+                assert scope.startup_error is caught.value and caught.value.owned_process is scope.process
+                assert scope.process.pid is None and scope.process.pidfd is None
+                assert admin._denied_start_binding is None
+                if defect=='expected':
+                    assert len(starts)==1 and admin.failure is None and admin.command_resources_settled_v1()
+                    record=admin.command_supervisions[0]
+                    assert record['receipt'] is receipts[0] is scope.launcher_receipt
+                    assert record['receipt'].native_exit_code==1 and record['receipt'].failure_class=='ENGVR_NATIVE_EXIT_NONZERO'
+                    assert record['errors']==[caught.value] and all(
+                        slot['complete'] and slot['closed'] and slot['raw_owner'] is None for slot in record['streams'].values())
+                    assert admin.retained==23 and scope.settled is False
+                    # Resource settlement remains the original independent
+                    # native fixture's obligation; a negative error is no pass.
+                    admin.check()
+                    assert admin.command(admin_vector)==b'version\n' and admin.failure is None and len(starts)==2
+                    before=len(admin.command_supervisions)
+                    with pytest.raises(o.ValidationReliabilityError,match='DENIED_START_BINDING'):
+                        admin._bind_denied_start_fixture_v1(scope)
+                    assert len(admin.command_supervisions)==before and admin._denied_start_bound
+                    with pytest.raises(o.ValidationReliabilityError,match='LINUX_PREFLIGHT_NATIVE_COMMAND') as repeated:
+                        admin.command(frozen_vector)
+                    assert len(starts)==3 and admin.failure is repeated.value
+                    assert admin.command_supervisions[-1]['receipt'].native_exit_code==1
+                else:
+                    assert admin.failure is caught.value
+                    assert len(starts)==(0 if defect in ('foreign-context','argv-copy') else 1)
+                    if defect in ('read','reset','report','unknown'):assert caught.value is primary
+                    if defect=='close':assert caught.value is secondary
+                    if defect=='read-close':
+                        assert isinstance(caught.value,BaseExceptionGroup) and caught.value.exceptions==(primary,secondary)
+                    if defect in ('foreign-context','argv-copy'):
+                        assert not admin.command_supervisions and admin.retained==0 and scope.launcher_receipt is None
+                    else:
+                        record=admin.command_supervisions[0]
+                        assert any(error is caught.value for error in record['errors'])
+                        if receipts:assert record['receipt'] is receipts[0]
+                        if defect=='deadline':
+                            assert len(record['errors'])==2 and record['errors'][0] is caught.value.__context__
+                            assert all(slot['complete'] and slot['closed'] for slot in record['streams'].values())
+                        if defect in ('unproven','wrong-receipt','shape','unknown','read','close','read-close'):
+                            assert not admin.command_resources_settled_v1()
+                        if defect in ('unbound','timeout','publication','start-failure','capture-incomplete','overflow','report','deadline',*scalar_defects):
+                            assert admin.command_resources_settled_v1()
+                    before=len(starts)
+                    with pytest.raises(BaseException):admin.command(admin_vector)
+                    assert len(starts)==before and admin.failure is caught.value
+            finally:
+                context.reset(token)
+                if scope.process is not None:
+                    scope.process.stdout.close();scope.process.stderr.close()
+            assert all(request<=65536 for request in requests)
     # Exercise the real caught-error diagnostic consumer too. The Scope object
     # here is only a no-child caller fixture, never successful native admission.
     for defect in ('run_id','phase','command_index','cwd','stdout_path','shape'):
@@ -25049,7 +29689,7 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
     with pytest.raises(ValueError): runner._linux_preflight_selected_v1(
         ['--linux-preflight-provision','--phase','fast-preflight'],(object(),None,None))
     if sys.platform != 'linux':
-        with pytest.raises(o.ValidationReliabilityError,match='SELECTED_PLATFORM'):
+        with pytest.raises(o.ValidationReliabilityError,match='^ENGVR_PREPUBLICATION_CUSTODY_FAILED: ORDINARY_PROVISION_ORIGINAL_PLATFORM_AND_PHASE$'):
             runner.main(['--linux-preflight-provision','--phase','fast-preflight'])
     with monkeypatch.context() as patch:
         patch.delenv('QTT_LINUX_PREFLIGHT_CONTROL',raising=False)
@@ -25923,4 +30563,4437 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
         line for line,name in controller_calls if name=='o._LinuxPreflightCaptureV1')
     print('CAPTURE_CENSUS_REFERENCE_AND_REAL_FILE_CHECKS_PASSED; direct_payload_reads=0',flush=True)
 
+    # These are typed event projections and default denials, not native
+    # permission, checkout qualification or a domain/campaign execution.
+    event_repository = {'full_name': 'Q8Meow/QTT_New0526'}
+    ready_event = {'number': 298, 'action': 'ready_for_review',
+        'repository': event_repository, 'pull_request': {'number': 298, 'draft': False,
+        'head': {'repo': event_repository, 'ref': 'repair/main-cumulative-v35-final-r5-local-20260922', 'sha': '2' * 40},
+        'base': {'repo': event_repository, 'ref': 'main', 'sha': '1' * 40}}}
+    original_controls = dict(GITHUB_ACTIONS='true', GITHUB_EVENT_NAME='pull_request',
+        GITHUB_REPOSITORY='Q8Meow/QTT_New0526', GITHUB_WORKSPACE=str(runner.REPO_ROOT),
+        GITHUB_REF='refs/pull/298/merge', GITHUB_REF_NAME='298/merge', GITHUB_SHA='3' * 40,
+        GITHUB_HEAD_REF='repair/main-cumulative-v35-final-r5-local-20260922', GITHUB_BASE_REF='main',
+        GITHUB_RUN_ID='123', GITHUB_RUN_ATTEMPT='2')
+    retained_event = copy.deepcopy(ready_event)
+    retained_controls = dict(original_controls)
+    for original_phase in runner.ORDERED_PHASES:
+        projected = runner._ordinary_ci_eligibility_v1(ready_event, original_controls,
+            runner.REPO_ROOT, phase=original_phase)
+        assert projected == ('pull_request', 'Q8Meow/QTT_New0526', 'refs/pull/298/merge',
+            '3' * 40, '2' * 40, '1' * 40, original_phase)
+    draft_event = copy.deepcopy(ready_event)
+    draft_event['action'] = 'synchronize'; draft_event['pull_request']['draft'] = True
+    assert runner._ordinary_ci_eligibility_v1(draft_event, original_controls,
+        runner.REPO_ROOT, phase='post-validation')[-1] == 'post-validation'
+    with pytest.raises(o.ValidationReliabilityError, match='DRAFT_FAST_RETAINS_FIRST8_OWNER'):
+        runner._ordinary_ci_eligibility_v1(draft_event, original_controls,
+            runner.REPO_ROOT, phase=runner.FAST_PREFLIGHT_PHASE)
+    # Original first8 defaults remain draft-only even when ordinary facts are valid.
+    runner._linux_preflight_eligibility_v1(draft_event, original_controls, str(runner.REPO_ROOT))
+    with pytest.raises(o.ValidationReliabilityError, match='UNADOPTED_REPOSITORY_PR_OR_HEAD'):
+        runner._linux_preflight_eligibility_v1(ready_event, original_controls, str(runner.REPO_ROOT))
+    # Provision every selected phase through the same original owner. This
+    # typed routing check supplies no native permission or execution credit.
+    for ordinary_phase in runner.ORDERED_PHASES:
+        selected_provision = runner._linux_preflight_selected_v1(
+            ['--linux-preflight-provision', '--phase', ordinary_phase], (None, None, None))
+        assert (selected_provision.phase == ordinary_phase and selected_provision.linux_preflight_provision
+            and not selected_provision.linux_preflight_enter and selected_provision.startup_deadline_ns is None)
+    for refused_argv, refused_suppliers in (
+            (['--linux-preflight-provision', '--phase', runner.ALL_PHASE], (None, None, None)),
+            (['--linux-preflight-provision', '--phase', 'unknown-phase'], (None, None, None)),
+            (['--linux-preflight-provision', '--phase', runner.FAST_PREFLIGHT_PHASE, '--extra'], (None, None, None)),
+            (['--linux-preflight-provision', '--phase', runner.FAST_PREFLIGHT_PHASE], (object(), None, None)),
+            (['--linux-preflight-provision', '--linux-preflight-enter', '--phase', runner.FAST_PREFLIGHT_PHASE], (None, None, None))):
+        with pytest.raises(ValueError, match='exact first phase'):
+            runner._linux_preflight_selected_v1(refused_argv, refused_suppliers)
+    with pytest.raises(ValueError, match='service startup cutoff'):
+        runner._linux_preflight_selected_v1(
+            ['--linux-preflight-provision', '--phase', runner.FAST_PREFLIGHT_PHASE, '--startup-deadline-ns', '1'],
+            (None, None, None))
+    assert runner._linux_preflight_selected_v1(['--phase', runner.ALL_PHASE], (None, None, None)) is None
+    for key, replacement in (('GITHUB_RUN_ID', None), ('GITHUB_RUN_ID', '01'),
+            ('GITHUB_RUN_ATTEMPT', True), ('GITHUB_RUN_ATTEMPT', '0'),
+            ('GITHUB_SHA', 'A' * 40), ('GITHUB_REF_NAME', 'main'),
+            ('GITHUB_HEAD_REF', 'main'), ('GITHUB_BASE_REF', 'other'),
+            ('GITHUB_WORKSPACE', str(runner.REPO_ROOT.parent)), ('GITHUB_ACTIONS', 'false')):
+        damaged_controls = dict(original_controls)
+        damaged_controls[key] = replacement
+        assert damaged_controls != original_controls
+        with pytest.raises(o.ValidationReliabilityError):
+            runner._ordinary_ci_eligibility_v1(ready_event, damaged_controls,
+                runner.REPO_ROOT, phase=runner.FAST_PREFLIGHT_PHASE)
+    for mutate in (lambda row: row.update(number=True),
+            lambda row: row['pull_request'].update(number=True),
+            lambda row: row['pull_request'].update(draft=0),
+            lambda row: row.update(action='closed'),
+            lambda row: row['pull_request'].update(draft=True),
+            lambda row: row['pull_request']['base'].update(sha='g' * 40),
+            lambda row: row['pull_request']['head'].update(repo={'full_name': 'foreign/repository'}),
+            lambda row: row['pull_request']['base'].update(ref='other')):
+        damaged_event = copy.deepcopy(ready_event)
+        mutate(damaged_event)
+        assert json.dumps(damaged_event, sort_keys=True, allow_nan=False) != json.dumps(ready_event, sort_keys=True, allow_nan=False)
+        with pytest.raises(o.ValidationReliabilityError):
+            runner._ordinary_ci_eligibility_v1(damaged_event, original_controls,
+                runner.REPO_ROOT, phase=runner.FAST_PREFLIGHT_PHASE)
+    main_controls = {**original_controls, 'GITHUB_EVENT_NAME': 'push',
+        'GITHUB_REF': 'refs/heads/main', 'GITHUB_REF_NAME': 'main',
+        'GITHUB_HEAD_REF': '', 'GITHUB_BASE_REF': ''}
+    main_event = dict(ref='refs/heads/main', after='3' * 40, deleted=False, repository=event_repository)
+    for original_phase in runner.ORDERED_PHASES:
+        assert runner._ordinary_ci_eligibility_v1(main_event, main_controls,
+            runner.REPO_ROOT, phase=original_phase) == ('push', 'Q8Meow/QTT_New0526',
+            'refs/heads/main', '3' * 40, '3' * 40, None, original_phase)
+    for values in ({'deleted': 0}, {'after': '4' * 40}, {'ref': 'refs/heads/other'}):
+        with pytest.raises(o.ValidationReliabilityError):
+            runner._ordinary_ci_eligibility_v1({**main_event, **values}, main_controls,
+                runner.REPO_ROOT, phase=runner.FAST_PREFLIGHT_PHASE)
+    manual_controls = {**main_controls, 'GITHUB_EVENT_NAME': 'workflow_dispatch'}
+    for full in ('true', 'false'):
+        manual_event = dict(ref='main', repository=event_repository, inputs={'full_validation': full})
+        assert runner._ordinary_ci_eligibility_v1(manual_event, manual_controls,
+            runner.REPO_ROOT, phase='post-validation')[0] == 'workflow_dispatch'
+    for full in (True, False, '', 'TRUE', None):
+        with pytest.raises(o.ValidationReliabilityError):
+            runner._ordinary_ci_eligibility_v1(
+                dict(ref='main', repository=event_repository, inputs={'full_validation': full}),
+                manual_controls, runner.REPO_ROOT, phase='post-validation')
+    for selected_phase in (runner.ALL_PHASE, '', None, 1, 'foreign-phase'):
+        with pytest.raises(o.ValidationReliabilityError):
+            runner._ordinary_ci_eligibility_v1(ready_event, original_controls,
+                runner.REPO_ROOT, phase=selected_phase)
+    assert ready_event == retained_event and original_controls == retained_controls
+
+    # No child is created by these environment-projection oracles. The actual
+    # ordinary selector still receives and checks the complete compiled row.
+    import threading
+    projection_scope = o._LinuxPreflightScopeV1.__new__(o._LinuxPreflightScopeV1)
+    projection_paths, projection_plan, projection_resources = object(), object(), object()
+    projection_selection = runner._OrdinarySourceSelectionV1.__new__(runner._OrdinarySourceSelectionV1)
+    projection_selection._original = (projection_scope, projection_paths, runner.POST_VALIDATION_PHASE)
+    projection_scope._ordinary_source_selection_v1 = projection_scope._ordinary_original_source_selection_v1 = projection_selection
+    projection_scope._ordinary_bound_paths_v1 = projection_paths
+    projection_scope._ordinary_bound_plan_v1 = projection_plan
+    projection_scope._ordinary_resource_programme_v1 = projection_resources
+    projection_scope.control = tmp_path / 'projection-control'
+    projection_scope._ordinary_image_v1 = {'mount_path': tmp_path / 'projection-volume'}
+    projection_base = {'PATH': '/usr/bin', 'GIT_TRACE': 'original', 'TMP': 'original'}
+    projection_scope._ordinary_post_base_environment_v1 = (projection_scope, projection_paths,
+        projection_plan, projection_resources, projection_base, tuple(projection_base.items()),
+        (os.getpid(), threading.get_ident()))
+    projection_token = o._LINUX_PREFLIGHT_PROCESS_V1.set(projection_scope)
+    try:
+        for position in (1, 2, 3, 4):
+            projection_entry = SimpleNamespace(command_index=position, phase=runner.POST_VALIDATION_PHASE)
+            projection_runtime = tmp_path / 'projection-volume' / 'runtime' / ('p' + str(position))
+            projection_git = (('GIT_OPTIONAL_LOCKS', '0'),) if position in (2, 3) else ()
+            projection_expected = dict(projection_base)
+            for key in ('TMPDIR', 'TEMP', 'TMP'):
+                projection_expected[key] = str(projection_runtime)
+            projection_expected['QTT_LINUX_PREFLIGHT_CONTROL'] = str(projection_scope.control)
+            projection_expected['QTT_LINUX_PREFLIGHT_RUNTIME'] = str(projection_runtime)
+            if position in (2, 3):
+                del projection_expected['GIT_TRACE']
+                projection_expected.update(projection_git)
+            projection_row = {'entry': projection_entry, 'runtime_path': projection_runtime,
+                'git_controls': projection_git, 'environment': projection_expected}
+            with monkeypatch.context() as environment_projection:
+                environment_projection.setattr(projection_scope, '_ordinary_programme_for_entry_v1',
+                    lambda selected, original=projection_entry, row=projection_row:
+                        row if selected is original else (_ for _ in ()).throw(ValueError('foreign entry')))
+                observed_projection = runner._ordinary_post_environment_v1(
+                    projection_scope, projection_entry, dict(projection_base))
+                assert observed_projection == projection_expected and observed_projection is not projection_expected
+                assert projection_base == {'PATH': '/usr/bin', 'GIT_TRACE': 'original', 'TMP': 'original'}
+                with pytest.raises(RuntimeError, match='UNCHANGED_INDEPENDENT_BASE_ENVIRONMENT'):
+                    runner._ordinary_post_environment_v1(projection_scope, projection_entry,
+                        {**projection_base, 'PATH': '/foreign'})
+                damaged_projection = {**projection_expected, 'TMP': '/foreign'}
+                environment_projection.setitem(projection_row, 'environment', damaged_projection)
+                with pytest.raises(RuntimeError, match='EXACT_COMPILED_ENVIRONMENT_PROJECTION'):
+                    runner._ordinary_post_environment_v1(projection_scope, projection_entry, dict(projection_base))
+    finally:
+        o._LINUX_PREFLIGHT_PROCESS_V1.reset(projection_token)
+    # These are no-child original/selected mode projection oracles. They do
+    # not attest native chmod, immutable flags, DynamicUser or kernel policy.
+    view_mode_scope = o._LinuxPreflightScopeV1.__new__(o._LinuxPreflightScopeV1)
+    view_original_path = str(tmp_path / 'view-mode-original-source')
+    view_source_row = {'path': view_original_path, 'kind': 'file'}
+    protected_source_version = (101, 102, stat.S_IFREG | 0o444, 4, 103, 104, 1, 1001, 1002, 0, 0)
+    original_source_version = (*protected_source_version[:2], stat.S_IFREG | 0o640,
+        *protected_source_version[3:])
+    view_mode_scope.source = SimpleNamespace(row_index={view_original_path: view_source_row},
+        post={view_original_path: protected_source_version},
+        originals={view_original_path: {'version': original_source_version}})
+    copied_view_version = (201, 202, 4, 203, 204, stat.S_IFREG | 0o640)
+    selected_view_version = (*copied_view_version[:4], 205, stat.S_IFREG | 0o666)
+    original_transfer = {'source_row': view_source_row, 'source_version': protected_source_version,
+        'copied': True, 'compared': True, 'sealed': True, 'errors': [],
+        'view_version': copied_view_version}
+    with monkeypatch.context() as view_projection:
+        view_projection.setattr(view_mode_scope, '_ordinary_view_effect_record_v1', lambda: None)
+        assert view_mode_scope._ordinary_view_operand_version_v1(view_source_row,
+            protected_source_version, original_transfer) is copied_view_version
+        assert stat.S_IMODE(copied_view_version[5]) == 0o640
+        assert stat.S_IMODE(protected_source_version[2]) == 0o444
+        transformed_operand = {'transfer_row': original_transfer, 'kind': 'FILE',
+            'before_version': copied_view_version, 'after_version': selected_view_version}
+        synthetic_transforms = {'transitions': [transformed_operand]}
+        view_projection.setattr(view_mode_scope, '_ordinary_view_effect_record_v1',
+            lambda: synthetic_transforms)
+        assert view_mode_scope._ordinary_view_operand_version_v1(view_source_row,
+            protected_source_version, original_transfer) is selected_view_version
+        assert original_transfer['view_version'] is copied_view_version
+        assert view_mode_scope.source.post[view_original_path] is protected_source_version
+        for field, damaged in (('kind', 'DIRECTORY'),
+                ('before_version', (201, 999, 4, 203, 204, stat.S_IFREG | 0o640))):
+            with monkeypatch.context() as wrong_transition:
+                wrong_transition.setitem(transformed_operand, field, damaged)
+                with pytest.raises(RuntimeError, match='ORIGINAL_ADMITTED_VIEW_TRANSFORM'):
+                    view_mode_scope._ordinary_view_operand_version_v1(view_source_row,
+                        protected_source_version, original_transfer)
+        with monkeypatch.context() as wrong_copy_mode:
+            wrong_copy_mode.setitem(original_transfer, 'view_version',
+                (*copied_view_version[:5], stat.S_IFREG | 0o444))
+            with pytest.raises(RuntimeError, match='ORIGINAL_SOURCE_MODE_AND_VIEW_TRANSFER'):
+                view_mode_scope._ordinary_view_operand_version_v1(view_source_row,
+                    protected_source_version, original_transfer)
+        with pytest.raises(RuntimeError, match='ORIGINAL_SOURCE_MODE_AND_VIEW_TRANSFER'):
+            view_mode_scope._ordinary_view_operand_version_v1(dict(view_source_row),
+                protected_source_version, original_transfer)
+    # No-child structural oracles for the same original source-calculated
+    # demand operand. They do not certify native capacity or an effect grant.
+    demand_scope = object.__new__(o._LinuxPreflightScopeV1)
+    demand_programme = {'plan': (object(), object())}
+    demand_literal = dict(initial_raw_bytes=7, initial_file_count=2,
+        later_raw_byte_cap=268435456, later_file_count_cap=3,
+        mutable_file_byte_caps_by_occurrence=(134217728, 134217728),
+        raw_read_bytes=1000, raw_write_bytes=1000, raw_retained_bytes=1000,
+        action_rows=3, metadata_calls=1000, metadata_read_bytes=1000,
+        metadata_write_bytes=1000, native_control_calls=1000,
+        native_control_read_bytes=1000, native_control_write_bytes=1000, handle_peak=12)
+    demand_programme['candidate_demand'] = demand_literal
+    with monkeypatch.context() as demand_authentication:
+        # Only the already separately qualified original-compiler association
+        # is replaced here; the production closed-set/type checker runs whole.
+        demand_authentication.setattr(demand_scope, '_ordinary_effect_programme_record_v1',
+            lambda: demand_programme)
+        assert demand_scope._ordinary_candidate_demand_checked_v1(demand_programme) is demand_literal
+        for key in demand_literal:
+            original_value = demand_literal[key]
+            for invalid in (([134217728, 134217728], (True, 1), (1,), (1, -1))
+                    if key == 'mutable_file_byte_caps_by_occurrence' else (False, 1.0, -1, 1 << 63)):
+                demand_literal[key] = invalid
+                with pytest.raises(o.ValidationReliabilityError, match='ORDINARY_RESTORE_EXACT_SOURCE_COMPILED_CANDIDATE_DEMAND'):
+                    demand_scope._ordinary_candidate_demand_checked_v1(demand_programme)
+            demand_literal[key] = original_value
+        for change in ('missing', 'extra'):
+            selected = dict(demand_literal)
+            if change == 'missing':
+                selected.pop('action_rows')
+            else:
+                selected['unselected_capacity'] = 1
+            demand_programme['candidate_demand'] = selected
+            with pytest.raises(o.ValidationReliabilityError, match='ORDINARY_RESTORE_EXACT_SOURCE_COMPILED_CANDIDATE_DEMAND'):
+                demand_scope._ordinary_candidate_demand_checked_v1(demand_programme)
+        demand_programme['candidate_demand'] = demand_literal
+        with pytest.raises(o.ValidationReliabilityError, match='ORDINARY_RESTORE_SAME_SOURCE_COMPILED_EFFECT_PROGRAMME'):
+            demand_scope._ordinary_candidate_demand_checked_v1(dict(demand_programme))
+        assert demand_scope._ordinary_candidate_demand_checked_v1(demand_programme) is demand_literal
+
+    # No-child arithmetic fixtures for the original complete C programme.
+    # Native source/census/phase acquisition is replaced ONLY for this numeric
+    # owner. These metadata records do not certify a native owner or a quota.
+    c_scope = object.__new__(o._LinuxPreflightScopeV1)
+    c_source = object.__new__(o._LinuxImmutableSourceSealV2)
+    c_census = object.__new__(o._LinuxPreflightCensusV1)
+    c_root = tmp_path / 'candidate-demand-arithmetic'
+    def arithmetic_source_row(relative, kind, size, inode, children=()):
+        version = [1, inode, (stat.S_IFREG | 0o644) if kind == 'file' else (stat.S_IFDIR | 0o755),
+            size, 1, 1, 1, 0, 0, 0, 0]
+        return dict(path=str(c_root / relative), observed_path=str(c_root / relative),
+            role='repository', kind=kind, version=version, logical_bytes=size,
+            roster=list(children), aliases=[])
+    c_rows = [arithmetic_source_row('', 'directory', 0, 1, ('a', '.git')),
+        arithmetic_source_row('a', 'file', 3, 2),
+        arithmetic_source_row('.git', 'directory', 0, 3, ('index',)),
+        arithmetic_source_row('.git/index', 'file', 1, 4)]
+    c_census.records, c_census.complete, c_census.failures = c_rows, True, []
+    c_source.census, c_source.root, c_source.rows = c_census, c_root, c_rows
+    c_source.row_index = {row['path']: row for row in c_rows}
+    c_source.originals = {row['path']: dict(version=row['version']) for row in c_rows}
+    c_source.post = {row['path']: list(row['version']) for row in c_rows}
+    c_source.state, c_source.failure, c_source.phase = 'READABLE', None, 'work'
+    c_source.pid, c_source.thread = os.getpid(), o.threading.get_ident()
+    c_source.anchors = []
+    c_source.original_flags = {}
+    c_scope.source, c_scope._ordinary_factory_owner_v1 = c_source, (c_source.pid, c_source.thread)
+    c_scope.repository = str(c_root)
+    c_scope._ordinary_runner_owner_v1 = c_scope._ordinary_original_runner_owner_v1 = runner
+    c_scope._ordinary_host_original_v1 = (c_source, c_source.rows, c_source.row_index,
+        c_source.post, c_source.original_flags, c_source.originals, c_source.anchors)
+    c_plan, c_execution = (object(), object()), (object(), object())
+    c_scope._ordinary_bound_plan_v1, c_scope._ordinary_bound_paths_v1 = c_plan, object()
+    c_scope._ordinary_execution_plan_v1 = c_execution
+    c_limits = dict(baseline_byte_limit=32 << 30, generation_byte_limit=32 << 30,
+        index_byte_limit=16, file_baseline_rows=32768, file_generation_rows=32768,
+        directory_baseline_rows=4096, directory_generation_rows=4096,
+        namespace_entry_limit=65536, roster_baseline_edges=65536, roster_generation_edges=65536,
+        path_pool_byte_limit=256 << 20, single_path_byte_limit=4096,
+        action_record_limit=1024, native_handle_limit=4096)
+    c_meter = {'observed': {'metadata_call_limit': 7}}
+    c_scope._ordinary_meter_v1 = c_meter
+    c_caps = {'limits': c_limits}
+    c_host = dict(meter=c_meter, ceiling_programme=c_caps, original_ceiling_programme=c_caps,
+        common_cgroup=Path('/sys/fs/cgroup/task.slice'))
+    c_scope._ordinary_host_preparation_v1 = c_scope._ordinary_original_host_preparation_v1 = c_host
+    c_scope._ordinary_git_queries_v1 = []
+    c_scope._ordinary_git_bindings_v1 = dict(original_source=c_source,
+        original_queries=c_scope._ordinary_git_queries_v1, index=c_root / '.git/index', projections=[],
+        lexical_path=c_root / '.git', lexical_row=c_rows[2])
+    c_git_bindings = c_scope._ordinary_git_bindings_v1
+    c_git_records, c_git_originals = {}, {}
+    for c_git_row in c_rows[2:]:
+        c_git_version = c_source.post[c_git_row['path']]
+        c_git_kind = 'FILE' if c_git_row['kind'] == 'file' else 'DIRECTORY'
+        c_git_tail = Path(c_git_row['path']).relative_to(c_git_bindings['lexical_path']).as_posix()
+        c_git_tail = '' if c_git_tail == '.' else c_git_tail
+        c_git_operand = dict(source_row=c_git_row, identity=tuple(c_git_version[:2]),
+            kind=c_git_kind, descriptor_version=c_git_version)
+        c_git_records[c_git_tail] = c_git_operand
+        c_git_originals[c_git_tail] = (c_git_operand, c_git_row, c_git_version,
+            c_git_version[3], c_git_kind)
+    c_git_bindings['source_records'] = c_git_records
+    c_git_bindings['source_record_originals'] = c_git_originals
+    c_git_bindings['source_records_original'] = (c_git_bindings, c_source,
+        c_git_bindings['lexical_row'], c_git_records, c_git_originals)
+    c_scope.query = SimpleNamespace(remaining_output=lambda: 1048576,
+        evidence_root=tmp_path / 'candidate-query' / 'responses')
+    c_projection = dict(scope=c_scope, census=c_census, rows=c_rows, finished=True,
+        active=False, errors=[], failures=[], counters={'raw_read': 0}, meter=c_meter)
+    c_source_projection = dict(scope=c_scope, source=c_source, meter=c_meter, errors=[])
+    def arithmetic_target(name, parents):
+        return dict(path=name, kind='FILE', actions=('CREATE', 'WRITE'),
+            parent_paths=parents, source_operands=())
+    c_effects = dict(scope=c_scope, source=c_source, plan=c_plan,
+        paths=c_scope._ordinary_bound_paths_v1, execution_plan=c_execution, errors=[],
+        rows=(dict(entry=c_plan[0], execution=c_execution[0],
+                targets=(arithmetic_target('reports/report.json', ('reports',)),), source_operands=()),
+            dict(entry=c_plan[1], execution=c_execution[1],
+                targets=(arithmetic_target('a', ()),), source_operands=())))
+    c_effects['check'] = c_effects['original_check'] = object()
+    with monkeypatch.context() as arithmetic_owner:
+        arithmetic_owner.setattr(c_scope, '_ordinary_effect_programme_record_v1', lambda: c_effects)
+        arithmetic_owner.setattr(c_scope, '_ordinary_census_meter_projection_v1', lambda value: c_projection)
+        arithmetic_owner.setattr(c_scope, '_ordinary_source_meter_projection_v1', lambda value: c_source_projection)
+        arithmetic_owner.setattr(c_scope, '_ordinary_pending_close_audit_v1', lambda value: 2)
+        c_demand, c_arithmetic = runner._ordinary_candidate_demand_from_source_v1(c_scope, c_effects, c_census)
+        assert (c_demand['initial_raw_bytes'], c_demand['initial_file_count'],
+            c_demand['later_raw_byte_cap'], c_demand['later_file_count_cap'],
+            c_demand['mutable_file_byte_caps_by_occurrence']) == (4, 2, 268435457, 3, (134217728, 134217728))
+        assert (c_demand['raw_read_bytes'], c_demand['raw_write_bytes'],
+            c_demand['raw_retained_bytes']) == (10201596656, 269484056, 268435476)
+        with pytest.raises(o.ValidationReliabilityError, match='ORDINARY_C_DEMAND_COMPLETE_GENUINE_SOURCE_EFFECT_PRODUCT'):
+            runner._ordinary_candidate_demand_from_source_v1(c_scope, dict(c_effects), c_census)
+        original_generation_cap = c_limits['generation_byte_limit']
+        c_limits['generation_byte_limit'] = 134217728
+        with pytest.raises(o.ValidationReliabilityError, match='ORDINARY_C_DEMAND_ORIGINAL_COUPLED_GENERATION_POOL'):
+            runner._ordinary_candidate_demand_from_source_v1(c_scope, c_effects, c_census)
+        c_limits['generation_byte_limit'] = original_generation_cap
+        original_baseline_cap = c_limits['baseline_byte_limit']
+        c_limits['baseline_byte_limit'] = 3
+        with pytest.raises(o.ValidationReliabilityError, match='ORDINARY_C_DEMAND_CONSERVATIVE_COMPLETE_GENERATION_FITS_ORIGINAL_CEILINGS'):
+            runner._ordinary_candidate_demand_from_source_v1(c_scope, c_effects, c_census)
+        c_limits['baseline_byte_limit'] = original_baseline_cap
+        # The independently sealed checker rejects a changed count or SOURCE
+        # generation. Its actual complete-source checker is already separated.
+        c_scope._ordinary_effect_programme_v1 = c_scope._ordinary_original_effect_programme_v1 = c_effects
+        c_effects['check'] = c_effects['original_check'] = lambda scope, value: value
+        c_effects['candidate_demand'], c_effects['candidate_demand_arithmetic'] = c_demand, c_arithmetic
+        assert runner._ordinary_candidate_demand_arithmetic_checked_v1(c_scope, c_effects, c_arithmetic) is c_arithmetic
+        c_demand['raw_read_bytes'] += 1
+        with pytest.raises(o.ValidationReliabilityError, match='ORDINARY_C_ARITHMETIC_NONRENEWABLE_LITERAL_AND_OPERAND_BINDING'):
+            runner._ordinary_candidate_demand_arithmetic_checked_v1(c_scope, c_effects, c_arithmetic)
+        c_demand['raw_read_bytes'] -= 1
+        c_rows[1]['logical_bytes'] = 4
+        with pytest.raises(o.ValidationReliabilityError, match='ORDINARY_C_ARITHMETIC_RETAINED_SOURCE_GENERATION'):
+            runner._ordinary_candidate_demand_arithmetic_checked_v1(c_scope, c_effects, c_arithmetic)
+        c_rows[1]['logical_bytes'] = 3
+
+    """NEW controlled fixture for grouped metadata assertions only.
+\x20\x20\x20\x20
+    This file is a proposed uncollected test helper. It performs no native admission,
+    factory construction, application dispatch, or QTT source import. The eventual
+    test owner supplies its original RUN/REL module objects; the isolated diagnostic
+    supplies exact AST units with explicitly controlled dependency modules instead.
+    The source manifest and imported decision/inventory providers are fixtures;
+    fixed traversal cores and all three execution adapters/projector run unchanged.
+    Filesystem probe_state PASS below is a typed metadata fixture, not a probe or
+    an installed native/environment grant.
+    """
+    def _make_source_selected_occurrence_metadata_case_fixture_v1(
+            tmp_path, monkeypatch, runner, owner):
+        import functools
+        import pathlib
+        import sys
+        import threading
+        import types
+
+        original_class = runner._OrdinarySourceSelectionV1
+        original_foreign = runner._ordinary_foreign_filter_source_result_v1
+        original_router_filter = runner._ordinary_router_filter_source_result_v1
+        original_projector = runner._prepare_execution_plan
+        original_registry_name = runner.ST12G_INDEPENDENT_ARCHITECTURE_SCRIPT_NAME
+        original_registry_builder = runner.build_st12g_architecture_validation_command
+        original_routing = runner._changed_area_routing_active
+        original_router = runner._router_result_for_current_context
+        cases = []
+        active = []
+        context = owner._LINUX_PREFLIGHT_PROCESS_V1
+        token = None
+        cleanup_errors = []
+        all_counts = []
+        original_plan_type = runner.CommandEvidencePlanEntry
+        assert original_plan_type is owner.CommandEvidencePlanEntry
+        assert runner.ValidationRunPathsV1 is owner.ValidationRunPathsV1
+
+        def retain_cleanup(error):
+            if all(error is not old for old in cleanup_errors):
+                cleanup_errors.append(error)
+
+        def release_patches():
+            # Failed undo retains its actual owner; attempt every other owner too.
+            for owned_patch in tuple(reversed(active)):
+                try:
+                    owned_patch.undo()
+                except BaseException as error:
+                    retain_cleanup(error)
+                else:
+                    active.remove(owned_patch)
+
+        def make_case(*, manifest, phase, validation_mode, event_name,
+                      foreign_eligible, router_fields):
+            # Restore the prior fixture environment, never any product's debt.
+            release_patches()
+            if cleanup_errors:
+                raise BaseExceptionGroup("metadata fixture retained cleanup errors", list(cleanup_errors))
+            patch = type(monkeypatch)()
+            active.append(patch)
+            attack = type(monkeypatch)()
+            active.append(attack)
+            counts = dict(foreign_core=0, router_filter_core=0, projector=0,
+                          native_admission=0, candidate_factory=0,
+                          application_dispatch=0, st12g_builder=0)
+            seam_calls = []
+            all_counts.append((counts, seam_calls))
+
+            def prohibit(kind, name):
+                def refused(*args, **kwargs):
+                    counts[kind] += 1
+                    seam_calls.append(name)
+                    raise AssertionError("metadata diagnostic crossed native seam: " + name)
+                return refused
+
+            # These are actual downstream names, checked before installing spies.
+            for target, name, kind in (
+                (runner, "_prepare_validation_candidate_v1", "candidate_factory"),
+                (runner, "run_commands", "application_dispatch"),
+                (runner, "_execute_supervised_command", "application_dispatch"),
+                (runner, "_ordinary_execute_controller_v1", "application_dispatch"),
+                (owner, "supervise_command", "application_dispatch"),
+                (owner._LinuxPreflightScopeV1, "_ordinary_precursor_ready_v1", "native_admission"),
+                (owner._LinuxPreflightScopeV1, "_ordinary_bind_run_v1", "native_admission"),
+            ):
+                getattr(target, name)  # absence is a fixture/owner incompatibility
+                patch.setattr(target, name, prohibit(kind, name))
+
+            branch = types.ModuleType("tools.ci_branch_context")
+            branch.current_branch_context = lambda root: types.SimpleNamespace(branch="fixture-branch")
+            branch.is_owner_authorized_validation_branch = lambda value: bool(foreign_eligible)
+            branch.is_validation_infrastructure_branch = lambda value: False
+            inventory = types.ModuleType("tools.validation_inventory")
+            inventory.canonical_command = lambda command: tuple(command)
+            def validator_id_for_command(command, command_phase):
+                assert command_phase == phase
+                name = pathlib.PurePath(command[1]).name
+                ids = {
+                    "build_pr168_rp5c_immutable_qku_formula_library.py": "fixture-guarded",
+                    "validate_fixture_equal.py": "fixture-equal",
+                    "validate_fixture_survivor.py": "fixture-survivor",
+                }
+                return ids[name]
+            inventory.validator_id_for_command = validator_id_for_command
+
+            router_value = types.SimpleNamespace(
+                full_validation_required=router_fields["full_validation_required"],
+                required_validators=router_fields["required_validators"],
+                fail_closed_reasons=router_fields["fail_closed_reasons"],
+                full_validation_reason="controlled original router fixture")
+            router_module = types.ModuleType("tools.changed_area_validation_router")
+            router_input = object()
+            router_inputs = []
+            def router_input_from_environment(repo_root, **kwargs):
+                router_inputs.append((repo_root, kwargs))
+                return router_input
+            def build_router_result(value):
+                assert value is router_input
+                return router_value
+            router_module.router_input_from_environment = router_input_from_environment
+            router_module.build_router_result = build_router_result
+            for module in (branch, inventory, router_module):
+                patch.setitem(sys.modules, module.__name__, module)
+            patch.setenv("GITHUB_EVENT_NAME", event_name)
+
+            @functools.wraps(original_foreign)
+            def counted_foreign(*args, **kwargs):
+                counts["foreign_core"] += 1
+                return original_foreign(*args, **kwargs)
+            @functools.wraps(original_router_filter)
+            def counted_router_filter(*args, **kwargs):
+                counts["router_filter_core"] += 1
+                return original_router_filter(*args, **kwargs)
+            def denied_registry_builder(*args, **kwargs):
+                counts["st12g_builder"] += 1
+                raise AssertionError("unselected ST12G registry builder was called")
+            patch.setattr(runner, "build_st12g_architecture_validation_command", denied_registry_builder)
+            assert runner.ST12G_INDEPENDENT_ARCHITECTURE_SCRIPT_NAME is original_registry_name
+
+            @functools.wraps(original_projector)
+            def counted_projector(*args, **kwargs):
+                counts["projector"] += 1
+                assert counted_projector.__wrapped__ is original_projector
+                assert original_projector.__globals__ is runner.__dict__
+                return original_projector(*args, **kwargs)
+            patch.setattr(runner, "_ordinary_foreign_filter_source_result_v1", counted_foreign)
+            patch.setattr(runner, "_ordinary_router_filter_source_result_v1", counted_router_filter)
+            patch.setattr(runner, "_prepare_execution_plan", counted_projector)
+            patch.setattr(runner, "_changed_area_routing_active", original_routing)
+            patch.setattr(runner, "_router_result_for_current_context", original_router)
+            def original_fixture_manifest(V, P):
+                assert V == paths.validation_output_root and P == paths.pytest_basetemp_root
+                return manifest
+            patch.setattr(runner, "build_phase_manifest", original_fixture_manifest)
+
+            root = pathlib.Path(tmp_path).resolve() / "selection-metadata-fixture"
+            repo, process, evidence = root / "repo", root / "p1", root / "evidence"
+            deepest = process / "v" / "fixture.json"
+            paths = owner.ValidationRunPathsV1(
+                run_id="selection-metadata-fixture", process_child_name="p1",
+                repo_root=repo, process_root=process,
+                validation_output_root=process / "v", pytest_basetemp_root=process / "p",
+                evidence_root=evidence, process_root_is_external_to_repo=True,
+                filesystem_probe_state="PASS", deepest_projected_path=deepest,
+                deepest_projected_path_text_length=len(str(deepest)), cleanup_target=process)
+            binding = {}
+            # NEW metadata port, not an admitted _LinuxPreflightScopeV1.
+            scope = types.SimpleNamespace(
+                query=object(), _ordinary_factory_owner_v1=(id(runner), threading.get_ident()),
+                _ordinary_runner_owner_v1=runner, _ordinary_original_runner_owner_v1=runner,
+                _ordinary_run_binding_v1=binding, _ordinary_original_run_binding_v1=binding)
+            product = original_class.__new__(original_class)
+            scope._ordinary_source_selection_v1 = product
+            scope._ordinary_original_source_selection_v1 = product
+            original_class.__init__(product, scope, paths, phase,
+                                   paths.validation_output_root, paths.pytest_basetemp_root)
+            product.current_branch_context(paths.repo_root)
+            product.foreign_filter()
+            # Actual RUN09 parser default at12042/12732 is auto, not full.
+            mode = "auto" if validation_mode is None else validation_mode
+            changed_files = []
+            if product.routing_active(mode, changed_files):
+                result = product.router_result_for_current_context(
+                    paths.repo_root, changed_files, None, None, False, mode)
+                if not result.full_validation_required:
+                    product.router_filter()
+
+            def make_plan(execution):
+                plan = tuple(owner.CommandEvidencePlanEntry(
+                    run_id=paths.run_id, phase=phase, command_index=i,
+                    argv=item.execution_argv, cwd=str(paths.repo_root))
+                    for i, item in enumerate(execution, 1))
+                patch.setattr(runner, "_RUN_COMMANDS_ACTIVE_PATHS", paths)
+                patch.setattr(runner, "_LAST_EXPECTED_COMMAND_PLAN", plan)
+                patch.setattr(runner, "_LAST_PLANNED_COMMAND_COUNT", len(plan))
+                return paths, plan
+
+            def complete_metadata_scope_binding(bound_paths, plan, execution):
+                assert bound_paths is paths
+                scope._ordinary_bound_paths_v1 = paths
+                scope._ordinary_bound_plan_v1 = plan
+                scope._ordinary_execution_plan_v1 = execution
+                scope._ordinary_original_execution_plan_v1 = execution
+                binding.update(bound=True, paths=paths, plan=plan,
+                               original=(binding, paths, plan, scope._ordinary_factory_owner_v1))
+
+            def replace_owner_function(name):
+                attack.setattr(runner, name, lambda *a, **k: (_ for _ in ()).throw(
+                    AssertionError("substituted source function must not run")))
+
+            def mutate_owner(kind):
+                if kind == "missing-scope":
+                    attack.setattr(product, "_scope", None)
+                elif kind == "substituted-scope":
+                    attack.setattr(product, "_scope", types.SimpleNamespace())
+                elif kind == "missing-original-scope-owner":
+                    attack.delattr(scope, "_ordinary_original_runner_owner_v1")
+                elif kind == "substituted-original-scope-owner":
+                    attack.setattr(scope, "_ordinary_original_runner_owner_v1", object())
+                elif kind == "substituted-run-binding":
+                    attack.setattr(scope, "_ordinary_run_binding_v1", {})
+                elif kind == "substituted-runner-module":
+                    attack.setattr(scope, "_ordinary_runner_owner_v1", types.ModuleType("substituted"))
+                else:
+                    raise AssertionError("unknown controlled owner attack")
+
+            case = dict(product=product, make_plan=make_plan,
+                complete_metadata_scope_binding=complete_metadata_scope_binding,
+                counts=counts, mutate_decision=lambda field,value: attack.setattr(router_value,field,value),
+                replace_owner_function=replace_owner_function, mutate_owner=mutate_owner,
+                restore_fixture_environment=attack.undo,
+                retained_error=lambda: product._errors[0] if product._errors else None,
+                seam_calls=seam_calls, router_inputs=router_inputs, paths=paths)
+            assert counts["st12g_builder"] == 0
+            cases.append(case)
+            return case
+
+        def close():
+            nonlocal token
+            try:
+                release_patches()
+            finally:
+                if token is not None:
+                    try:
+                        context.reset(token)
+                    except BaseException as error:
+                        retain_cleanup(error)
+                    else:
+                        token = None
+            if cleanup_errors:
+                raise BaseExceptionGroup("metadata fixture cleanup errors", list(cleanup_errors))
+        make_case.close = close
+        make_case.cases = cases
+        make_case.original_projector = original_projector
+        make_case.original_registry_name = original_registry_name
+        make_case.original_registry_builder = original_registry_builder
+        make_case.all_counts = all_counts
+        make_case.cleanup_errors = cleanup_errors
+        make_case.pending_patches = active
+        make_case.context = context
+        # Acquire only after the complete close owner and all validating setup exist.
+        try:
+            token = context.set(None)
+            return make_case
+        except BaseException as primary:
+            try:
+                close()
+            except BaseException as cleanup:
+                raise BaseExceptionGroup("metadata fixture acquisition and cleanup", [primary, cleanup])
+            raise
+
+
+    """PROPOSED grouped metadata assertions, not an executed test result.
+\x20\x20\x20\x20
+    Integration: call _exercise_source_selected_occurrence_producer_binder_review_v1
+    from an existing collected test/helper. This file adds no collected test,
+    decorator, parameterization, public production supplier, or native grant.
+\x20\x20\x20\x20
+    make_case is a NEW controlled test-fragment fixture contract. It is not an
+    existing source owner, authentic native input, or implemented production API.
+    The original test owner must implement it inside the existing grouped case
+    before this assertion fragment can be executed. This file is not a complete
+    implemented fixture or a collected executable test.
+\x20\x20\x20\x20
+    Required make_case keyword inputs:
+      manifest: the literal ordered source fixture below (never selected indices);
+      phase: the selected original phase;
+      validation_mode: None leaves the original default untouched;
+      event_name: the imported workflow-event provider response;
+      foreign_eligible: imported branch-provider response;
+      router_fields: the imported router-provider object's consumed fields.
+\x20\x20\x20\x20
+    It must invoke the actual shared fixed predicate/copy/log cores once through
+    the producer. It may control their imported branch/router/inventory dependencies and
+    the original manifest/projector providers. It must not replace a fixed core
+    with a preselected list, pass selected indices, or find rows by argv equality.
+\x20\x20\x20\x20
+    Returned NEW test-only fixture dictionary:
+      product: proposed product with ONLY the stated public API;
+      make_plan(execution_plan): creates the original test-fixture typed paths/plan
+        through the source publisher fixture, and records the original test-fixture
+        Scope/module/run associations against which metadata bind checks identity;
+      complete_metadata_scope_binding(paths, plan, execution_plan): after metadata
+        bind, simulates the Scope's existing binding mutation and original four-tuple.
+        This test-only mutation never calls or qualifies native admission;
+      counts: real-call spies for foreign_core, router_filter_core, projector,
+        native_admission, candidate_factory and application_dispatch;
+      mutate_decision(field, value): edits the actual retained router object;
+      replace_owner_function(name): replaces that actual source-owner function;
+      mutate_owner(kind): removes/substitutes the actual original association;
+      restore_fixture_environment(): restores test patches, NEVER product debt;
+      retained_error(): observes the actual first retained product error.
+\x20\x20\x20\x20
+    The mutation hooks are fixture controls, not callbacks consumed as authority
+    by the production product. All native/candidate/application spies must be
+    placed on the real downstream seams and prohibit their execution here.
+\x20\x20\x20\x20
+    API assumptions requiring integration confirmation:
+      project() returns the one actual execution-plan tuple;
+      product.rows/commands expose the retained actual source/selected carriers;
+      bound_rows returns the existing-compatible triples
+          (original plan entry, original execution entry, source global position).
+    None of these assumptions states that the current donor implements the API.
+    """
+    def _exercise_source_selected_occurrence_producer_binder_review_v1(make_case):
+        from dataclasses import replace
+
+        phase = "deterministic-validators-a"
+
+        def literal_manifest(*, same_duplicate_reference=False):
+            # Synthetic metadata fixtures only: no files or children are created.
+            preflight = [
+                ["fixture-python", "tools/fixture_preflight_01.py"],
+                ["fixture-python", "tools/fixture_preflight_02.py"],
+                ["fixture-python", "tools/fixture_preflight_03.py"],
+                ["fixture-python", "tools/fixture_preflight_04.py"],
+                ["fixture-python", "tools/fixture_preflight_05.py"],
+                ["fixture-python", "tools/fixture_preflight_06.py"],
+                ["fixture-python", "tools/fixture_preflight_07.py"],
+                ["fixture-python", "tools/fixture_preflight_08.py"],
+            ]
+            guarded = [
+                "fixture-python",
+                "tools/build_pr168_rp5c_immutable_qku_formula_library.py",
+                "--repo-root", ".",
+            ]
+            equal_one = [
+                "fixture-python", "tools/validate_fixture_equal.py", "--repo-root", ".",
+            ]
+            equal_two = equal_one if same_duplicate_reference else [
+                "fixture-python", "tools/validate_fixture_equal.py", "--repo-root", ".",
+            ]
+            survivor = [
+                "fixture-python", "tools/validate_fixture_survivor.py", "--repo-root", ".",
+            ]
+            original = [guarded, equal_one, equal_two, survivor]
+            # Exact independent oracle: source phase follows eight fixture entries.
+            expected_original = {
+                9: (1, guarded, tuple(guarded)),
+                10: (2, equal_one, tuple(equal_one)),
+                11: (3, equal_two, tuple(equal_two)),
+                12: (4, survivor, tuple(survivor)),
+            }
+            # Preserve the real 13 phase names; later fixture rows are unselected.
+            manifest = [
+                {"phase": "fast-preflight", "command_count": 8, "commands": preflight},
+                {"phase": phase, "command_count": 4, "commands": original},
+                {"phase": "deterministic-validators-b", "command_count": 1,
+                 "commands": [["fixture-python", "tools/fixture_det_b.py"]]},
+                {"phase": "deterministic-validators-c", "command_count": 1,
+                 "commands": [["fixture-python", "tools/fixture_det_c.py"]]},
+                {"phase": "pytest-shard-1", "command_count": 1,
+                 "commands": [["fixture-python", "tools/fixture_pytest_1.py"]]},
+                {"phase": "pytest-shard-2", "command_count": 1,
+                 "commands": [["fixture-python", "tools/fixture_pytest_2.py"]]},
+                {"phase": "pytest-shard-3", "command_count": 1,
+                 "commands": [["fixture-python", "tools/fixture_pytest_3.py"]]},
+                {"phase": "pytest-shard-4", "command_count": 1,
+                 "commands": [["fixture-python", "tools/fixture_pytest_4.py"]]},
+                {"phase": "pytest-shard-5", "command_count": 1,
+                 "commands": [["fixture-python", "tools/fixture_pytest_5.py"]]},
+                {"phase": "pytest-shard-6", "command_count": 1,
+                 "commands": [["fixture-python", "tools/fixture_pytest_6.py"]]},
+                {"phase": "pytest-shard-7", "command_count": 1,
+                 "commands": [["fixture-python", "tools/fixture_pytest_7.py"]]},
+                {"phase": "pytest-shard-8", "command_count": 1,
+                 "commands": [["fixture-python", "tools/fixture_pytest_8.py"]]},
+                {"phase": "post-validation", "command_count": 1,
+                 "commands": [["fixture-python", "tools/fixture_post.py"]]},
+            ]
+            assert len(manifest) == 13
+            assert expected_original[10][1] is not expected_original[11][1] \
+                if not same_duplicate_reference \
+                else expected_original[10][1] is expected_original[11][1]
+            return manifest, expected_original
+
+        def fresh_case(*, mode="reduced", foreign=True, router_full=False,
+                       required=("fixture-equal",), same_reference=False):
+            manifest, expected_original = literal_manifest(
+                same_duplicate_reference=same_reference)
+            case = make_case(
+                manifest=manifest,
+                phase=phase,
+                validation_mode=mode,
+                event_name="pull_request",
+                foreign_eligible=foreign,
+                router_fields={
+                    "full_validation_required": router_full,
+                    "required_validators": required,
+                    "fail_closed_reasons": (),
+                },
+            )
+            # The fixture's imported inventory/router provider binds these literal
+            # IDs to the equal and survivor vectors. It supplies no source indices.
+            # The guarded-builder predicate still uses the real source filename.
+            return case, expected_original
+
+        def assert_no_native(case):
+            assert case["counts"]["native_admission"] == 0
+            assert case["counts"]["candidate_factory"] == 0
+            assert case["counts"]["application_dispatch"] == 0
+
+        def expect_denial(action):
+            try:
+                action()
+            except BaseException as error:
+                return error
+            raise AssertionError("changed/unowned metadata was accepted")
+
+        def check_rows(case, expected_original, expected_globals):
+            product = case["product"]
+            rows = product.rows
+            commands = product.commands
+            assert type(rows) is tuple
+            assert len(rows) == len(commands) == len(expected_globals)
+            assert tuple(row[0] for row in rows) == expected_globals
+            for row, command, source_global in zip(rows, commands, expected_globals):
+                source_ordinal, original_ref, frozen = expected_original[source_global]
+                assert type(row) is tuple and len(row) == 5
+                assert row[1] == source_ordinal
+                assert row[2] is original_ref
+                assert type(row[3]) is tuple and row[3] == frozen
+                assert row[4] is command
+                assert tuple(command) == frozen
+                # Actual shared cores copy their retained command lists.
+                assert command is not original_ref
+            if 10 in expected_globals and 11 in expected_globals:
+                ten = rows[expected_globals.index(10)]
+                eleven = rows[expected_globals.index(11)]
+                assert ten[3] == eleven[3]
+                assert ten[4] is not eleven[4]
+            assert case["counts"]["foreign_core"] == 1
+            assert_no_native(case)
+            return rows
+
+        # Expected positions are oracle values, NEVER make_case/producer inputs.
+        matrix = (
+            ("default", None, False, True, ("fixture-equal",), False,
+             (9, 10, 11, 12), 0),
+            ("explicit-full-ignores-reduced-provider", "full", False, False,
+             ("fixture-equal",), False, (9, 10, 11, 12), 0),
+            ("foreign-omission-router-full", None, True, True,
+             ("fixture-equal",), False, (10, 11, 12), 0),
+            ("reduced-distinct-equal-refs", "reduced", False, False,
+             ("fixture-equal",), False, (10, 11), 1),
+            ("foreign-and-reduced", "reduced", True, False,
+             ("fixture-equal",), False, (10, 11), 1),
+            ("same-ref-two-source-incidences", "reduced", True, False,
+             ("fixture-equal",), True, (10, 11), 1),
+            ("false-full-empty-required", "reduced", True, False,
+             (), False, (), 1),
+        )
+        for label, mode, foreign, router_full, required, same_ref, expected, filter_calls in matrix:
+            case, oracle = fresh_case(
+                mode=mode, foreign=foreign, router_full=router_full,
+                required=required, same_reference=same_ref)
+            product = case["product"]
+            initial_rows = check_rows(case, oracle, expected)
+            assert case["counts"]["router_filter_core"] == filter_calls
+            assert case["counts"]["projector"] == 0
+            execution = product.project()
+            assert type(execution) is tuple and len(execution) == len(expected)
+            assert case["counts"]["projector"] == 1
+            paths, plan = case["make_plan"](execution)
+            assert type(plan) is tuple and len(plan) == len(expected)
+            product.bind(paths, plan, execution_plan=execution)
+            case["complete_metadata_scope_binding"](paths, plan, execution)
+            bound = product.bound_rows(paths, plan, execution, phase=phase)
+            assert type(bound) is tuple and len(bound) == len(expected)
+            assert tuple(row[2] for row in bound) == expected
+            for local_index, (row, entry, projected) in enumerate(
+                    zip(bound, plan, execution), 1):
+                assert type(row) is tuple and len(row) == 3
+                assert row[0] is entry and row[1] is projected
+                assert entry.command_index == local_index
+                assert entry.phase == phase and entry.run_id == paths.run_id
+                assert entry.cwd == str(paths.repo_root)
+                assert entry.argv == projected.execution_argv
+                assert projected.registered_argv == initial_rows[local_index - 1][3]
+            assert case["counts"]["projector"] == 1
+            assert case["counts"]["foreign_core"] == 1
+            assert case["counts"]["router_filter_core"] == filter_calls
+            assert_no_native(case)
+            if not expected:
+                # Empty METADATA does not stand for a passed phase or native grant.
+                assert product.rows == ()
+                assert len(product.commands) == 0
+                assert bound == () and plan == () and execution == ()
+
+        # Mutation of a genuinely consumed routing decision must fail, even when
+        # that changed decision would independently select a plausible subset.
+        for field, replacement_value in (
+            ("full_validation_required", True),
+            ("required_validators", ("fixture-survivor",)),
+            ("fail_closed_reasons", ("fixture newly fail-closed",)),
+        ):
+            case, oracle = fresh_case()
+            product = case["product"]
+            captured = check_rows(case, oracle, (10, 11))
+            case["mutate_decision"](field, replacement_value)
+            first = expect_denial(product.project)
+            assert case["retained_error"]() is first
+            assert product.rows is captured
+            assert_no_native(case)
+            case["restore_fixture_environment"]()
+            expect_denial(product.project)
+            assert case["retained_error"]() is first
+            assert product.rows is captured
+            assert_no_native(case)
+
+        # Freeze actual owner function identity, not a function name/string tag.
+        for owner_function in (
+            "_ordinary_foreign_filter_source_result_v1",
+            "_ordinary_router_filter_source_result_v1",
+            "_prepare_execution_plan",
+        ):
+            case, oracle = fresh_case()
+            product = case["product"]
+            captured = check_rows(case, oracle, (10, 11))
+            case["replace_owner_function"](owner_function)
+            first = expect_denial(product.project)
+            assert case["retained_error"]() is first
+            assert product.rows is captured
+            assert_no_native(case)
+            case["restore_fixture_environment"]()
+            expect_denial(product.project)
+            assert case["retained_error"]() is first
+            assert_no_native(case)
+
+        # Both original and copied current command carriers are part of the held
+        # generation. A mutable list must not silently become a new valid source.
+        for carrier in ("original", "current"):
+            case, oracle = fresh_case()
+            product = case["product"]
+            captured = check_rows(case, oracle, (10, 11))
+            row = captured[0]
+            changed = row[2] if carrier == "original" else row[4]
+            changed.append("--fixture-generation-changed")
+            first = expect_denial(product.project)
+            assert case["retained_error"]() is first
+            assert product.rows is captured
+            assert_no_native(case)
+            changed.pop()  # Fixture restoration does not reset the failed product.
+            expect_denial(product.project)
+            assert case["retained_error"]() is first
+            assert_no_native(case)
+
+        # Equal-looking container replacement must not replace original bindings.
+        for attack in (
+            "paths-copy", "plan-copy", "execution-copy", "plan-run-change",
+            "plan-index-change", "plan-reordered", "execution-reordered",
+            "plan-dropped", "plan-extra", "execution-argv-change", "registered-argv-change",
+            "timing-identity-change",
+        ):
+            case, oracle = fresh_case()
+            product = case["product"]
+            captured = check_rows(case, oracle, (10, 11))
+            execution = product.project()
+            paths, plan = case["make_plan"](execution)
+            bad_paths, bad_plan, bad_execution = paths, plan, execution
+            if attack == "paths-copy":
+                bad_paths = replace(paths)
+                assert bad_paths is not paths and bad_paths == paths
+            elif attack == "plan-copy":
+                bad_plan = tuple(list(plan))
+                assert bad_plan is not plan and bad_plan == plan
+            elif attack == "execution-copy":
+                bad_execution = tuple(list(execution))
+                assert bad_execution is not execution and bad_execution == execution
+            elif attack == "plan-run-change":
+                bad_plan = (replace(plan[0], run_id=plan[0].run_id + "-changed"), *plan[1:])
+            elif attack == "plan-index-change":
+                bad_plan = (replace(plan[0], command_index=99), *plan[1:])
+            elif attack == "plan-reordered":
+                bad_plan = tuple(reversed(plan))
+            elif attack == "execution-reordered":
+                bad_execution = tuple(reversed(execution))
+            elif attack == "plan-dropped":
+                bad_plan = plan[:-1]
+            elif attack == "plan-extra":
+                bad_plan = (*plan, plan[0])
+            elif attack == "execution-argv-change":
+                bad_execution = (replace(execution[0],
+                    execution_argv=(*execution[0].execution_argv, "--changed")), *execution[1:])
+            elif attack == "registered-argv-change":
+                bad_execution = (replace(execution[0],
+                    registered_argv=(*execution[0].registered_argv, "--changed")), *execution[1:])
+            else:
+                bad_execution = (replace(execution[0],
+                    timing_identity_argv=(*execution[0].timing_identity_argv, "--changed")), *execution[1:])
+            first = expect_denial(
+                lambda: product.bind(bad_paths, bad_plan, execution_plan=bad_execution))
+            assert case["retained_error"]() is first
+            assert product.rows is captured
+            assert_no_native(case)
+            expect_denial(lambda: product.bind(paths, plan, execution_plan=execution))
+            assert case["retained_error"]() is first
+            assert_no_native(case)
+
+        # Mutating an original frozen entry through a deliberate test-only bypass
+        # tests the consumed-field snapshots independently of tuple identity.
+        for field in (
+            "registered_argv", "timing_identity_argv", "execution_argv",
+            "st12g_adapter_applied", "qku_root_import_adapter_applied",
+        ):
+            case, oracle = fresh_case()
+            product = case["product"]
+            captured = check_rows(case, oracle, (10, 11))
+            execution = product.project()
+            paths, plan = case["make_plan"](execution)
+            old = getattr(execution[0], field)
+            changed = not old if type(old) is bool else (*old, "--changed-consumed-field")
+            object.__setattr__(execution[0], field, changed)
+            first = expect_denial(
+                lambda: product.bind(paths, plan, execution_plan=execution))
+            assert case["retained_error"]() is first
+            assert product.rows is captured
+            assert_no_native(case)
+            object.__setattr__(execution[0], field, old)
+            expect_denial(lambda: product.bind(paths, plan, execution_plan=execution))
+            assert case["retained_error"]() is first
+            assert_no_native(case)
+
+        # Exact original Scope/module/publication associations are independently
+        # required: command/vector equality does not repair missing owner lineage.
+        for attack in (
+            "missing-scope", "substituted-scope", "missing-original-scope-owner",
+            "substituted-original-scope-owner", "substituted-run-binding",
+            "substituted-runner-module",
+        ):
+            case, oracle = fresh_case()
+            product = case["product"]
+            captured = check_rows(case, oracle, (10, 11))
+            execution = product.project()
+            paths, plan = case["make_plan"](execution)
+            case["mutate_owner"](attack)
+            first = expect_denial(
+                lambda: product.bind(paths, plan, execution_plan=execution))
+            assert case["retained_error"]() is first
+            assert product.rows is captured
+            assert_no_native(case)
+            case["restore_fixture_environment"]()
+            expect_denial(lambda: product.bind(paths, plan, execution_plan=execution))
+            assert case["retained_error"]() is first
+            assert_no_native(case)
+
+        # Post-bind use must retain the exact path/plan/execution/phase context.
+        # Changing a lookup argument cannot search argv to find an equal new row.
+        for attack in ("paths-copy", "plan-copy", "execution-copy", "wrong-phase"):
+            case, oracle = fresh_case()
+            product = case["product"]
+            check_rows(case, oracle, (10, 11))
+            execution = product.project()
+            paths, plan = case["make_plan"](execution)
+            product.bind(paths, plan, execution_plan=execution)
+            case["complete_metadata_scope_binding"](paths, plan, execution)
+            bad_paths = replace(paths) if attack == "paths-copy" else paths
+            bad_plan = tuple(list(plan)) if attack == "plan-copy" else plan
+            bad_execution = tuple(list(execution)) if attack == "execution-copy" else execution
+            bad_phase = "deterministic-validators-b" if attack == "wrong-phase" else phase
+            first = expect_denial(lambda: product.bound_rows(
+                bad_paths, bad_plan, bad_execution, phase=bad_phase))
+            assert case["retained_error"]() is first
+            expect_denial(lambda: product.bound_rows(paths, plan, execution, phase=phase))
+            assert case["retained_error"]() is first
+            assert_no_native(case)
+
+
+    # Grouped metadata only; this invokes no native admission.
+    from tools import run_validation_gates as _selection_metadata_runner
+    with monkeypatch.context() as _selection_metadata_patch:
+        _selection_make_case = _make_source_selected_occurrence_metadata_case_fixture_v1(
+            tmp_path, _selection_metadata_patch, _selection_metadata_runner, o)
+        _selection_primary_error = None
+        try:
+            _exercise_source_selected_occurrence_producer_binder_review_v1(_selection_make_case)
+        except BaseException as _selection_body_error:
+            _selection_primary_error = _selection_body_error
+        finally:
+            try:
+                _selection_make_case.close()
+            except BaseException as _selection_cleanup_error:
+                if _selection_primary_error is not None:
+                    raise BaseExceptionGroup("metadata body and cleanup", [
+                        _selection_primary_error, _selection_cleanup_error])
+                raise
+        if _selection_primary_error is not None:
+            raise _selection_primary_error
+    # The same original source constructor carries typed pytest operands through
+    # actual noncontiguous filtering. This is metadata/no-child evidence only.
+    import pathlib
+    import types as _pytest_source_types
+    from dataclasses import replace as _pytest_source_replace
+    def _pytest_source_case_v1(defect=None):
+        with monkeypatch.context() as owned:
+            phase = 'pytest-shard-1'
+            registry = (
+                _selection_metadata_runner.PytestShardCommand(paths=('tests/fixture-a.py',)),
+                _selection_metadata_runner.PytestShardCommand(paths=('tests/fixture-b.py',)),
+                _selection_metadata_runner.PytestShardCommand(paths=('tests/fixture-c.py',),
+                    ignores=('tests/fixture-c/ignored.py',)),
+            )
+            owned.setitem(_selection_metadata_runner.PYTEST_SHARD_COMMANDS, phase, registry)
+            root = tmp_path / 'pytest-source-association-metadata'
+            paths = o.ValidationRunPathsV1(run_id='pytest-source-association-metadata',
+                process_child_name='p1', repo_root=root / 'repo', process_root=root / 'p1',
+                validation_output_root=root / 'p1' / 'v', pytest_basetemp_root=root / 'p1' / 'p',
+                evidence_root=root / 'evidence', process_root_is_external_to_repo=True,
+                filesystem_probe_state='PASS', deepest_projected_path=root / 'p1' / 'v' / 'x.json',
+                deepest_projected_path_text_length=len(str(root / 'p1' / 'v' / 'x.json')),
+                cleanup_target=root / 'p1')
+            binding = {}
+            # Exact owner type is used only at the metadata constructor port;
+            # no factory/native fields are acquired and no admission is claimed.
+            scope = o._LinuxPreflightScopeV1.__new__(o._LinuxPreflightScopeV1)
+            scope.query = object()
+            scope._ordinary_factory_owner_v1 = (os.getpid(), threading.get_ident())
+            scope._ordinary_runner_owner_v1 = scope._ordinary_original_runner_owner_v1 = _selection_metadata_runner
+            scope._ordinary_run_binding_v1 = scope._ordinary_original_run_binding_v1 = binding
+            product = _selection_metadata_runner._OrdinarySourceSelectionV1.__new__(
+                _selection_metadata_runner._OrdinarySourceSelectionV1)
+            scope._ordinary_source_selection_v1 = scope._ordinary_original_source_selection_v1 = product
+            original_built = []
+            def phase_commands(name, *, validation_dir=None, pytest_basetemp=None):
+                assert validation_dir is paths.validation_output_root and pytest_basetemp is paths.pytest_basetemp_root
+                if name != phase:
+                    if name in _selection_metadata_runner.PYTEST_SHARD_COMMANDS:
+                        return _selection_metadata_runner.build_pytest_shard_commands(
+                            name, pytest_basetemp)
+                    return [[sys.executable, 'tools/fixture.py']]
+                if defect == 'foreign-constructor':
+                    commands = [_selection_metadata_runner._build_pytest_command(item, pytest_basetemp)
+                        for item in registry]
+                    product._capture_pytest_constructor_v1(phase, tuple(list(registry)), commands)
+                commands = _selection_metadata_runner.build_pytest_shard_commands(phase, pytest_basetemp)
+                original_built.extend(commands)
+                return commands
+            branch = _pytest_source_types.ModuleType('tools.ci_branch_context')
+            branch.current_branch_context = lambda root: _pytest_source_types.SimpleNamespace(branch='metadata-fixture')
+            branch.is_owner_authorized_validation_branch = lambda value: False
+            branch.is_validation_infrastructure_branch = lambda value: False
+            inventory = _pytest_source_types.ModuleType('tools.validation_inventory')
+            inventory.canonical_command = lambda command: tuple(command)
+            inventory.validator_id_for_command = lambda command, selected_phase: command[2]
+            owned.setitem(sys.modules, branch.__name__, branch)
+            owned.setitem(sys.modules, inventory.__name__, inventory)
+            owned.setattr(_selection_metadata_runner, 'build_phase_commands', phase_commands)
+            owned.setattr(_selection_metadata_runner, '_changed_area_routing_active', lambda **kwargs: True)
+            routed = _pytest_source_types.SimpleNamespace(full_validation_required=False,
+                required_validators=('tests/fixture-a.py', 'tests/fixture-c.py'),
+                fail_closed_reasons=(), full_validation_reason='controlled noncontiguous fixture')
+            owned.setattr(_selection_metadata_runner, '_router_result_for_current_context', lambda *args, **kwargs: routed)
+            owned.setattr(_selection_metadata_runner, '_ORDINARY_CANDIDATE_FIRST_V1', True)
+            token = o._LINUX_PREFLIGHT_PROCESS_V1.set(scope)
+            try:
+                if defect == 'foreign-constructor':
+                    with pytest.raises(ValueError, match='PYTEST_SOURCE_SINGLE_ORIGINAL_CONSTRUCTION'):
+                        product.__init__(scope, paths, phase, paths.validation_output_root, paths.pytest_basetemp_root)
+                    assert product._errors and not product._pytest_constructor_rows
+                    return
+                product.__init__(scope, paths, phase, paths.validation_output_root, paths.pytest_basetemp_root)
+            finally:
+                o._LINUX_PREFLIGHT_PROCESS_V1.reset(token)
+            literal_a = [sys.executable, str(pathlib.Path('tools') / 'run_pytest_fresh_basetemp.py'),
+                'tests/fixture-a.py', '-q', '--durations=50', '--basetemp', str(paths.pytest_basetemp_root)]
+            assert original_built[0] == literal_a
+            assert product._pytest_constructor_rows[0][2][0] is registry[0]
+            product.current_branch_context(paths.repo_root)
+            product.foreign_filter()
+            changed = []
+            assert product.routing_active('reduced', changed) is True
+            product.router_result_for_current_context(paths.repo_root, changed, None, None, False, 'reduced')
+            product.router_filter()
+            assert tuple(row[0] for row in product.rows) == (5, 7)
+            execution = product.project()
+            plan = tuple(o.CommandEvidencePlanEntry(run_id=paths.run_id, phase=phase,
+                command_index=index, argv=row.execution_argv, cwd=str(paths.repo_root))
+                for index, row in enumerate(execution, 1))
+            for name, value in (('_RUN_COMMANDS_ACTIVE_PATHS', paths),
+                    ('_LAST_EXPECTED_COMMAND_PLAN', plan), ('_LAST_PLANNED_COMMAND_COUNT', len(plan))):
+                owned.setattr(_selection_metadata_runner, name, value)
+            product.bind(paths, plan, execution_plan=execution)
+            scope._ordinary_bound_paths_v1 = paths
+            scope._ordinary_bound_plan_v1 = plan
+            scope._ordinary_execution_plan_v1 = scope._ordinary_original_execution_plan_v1 = execution
+            binding.update(bound=True, paths=paths, plan=plan,
+                original=(binding, paths, plan, scope._ordinary_factory_owner_v1))
+            bound = product.bound_rows(paths, plan, execution, phase=phase)
+            assert tuple(row[2] for row in bound) == (5, 7)
+            assert product.pytest_source_for_bound_row(bound[0]) is registry[0]
+            assert product.pytest_source_for_bound_row(bound[1]) is registry[2]
+            if defect == 'foreign-bound-row':
+                foreign = tuple(list(bound[0]))
+                assert foreign == bound[0] and foreign is not bound[0]
+                with pytest.raises(ValueError, match='PYTEST_SOURCE_EXACT_BOUND_OCCURRENCE'):
+                    product.pytest_source_for_bound_row(foreign)
+            elif defect == 'foreign-same-valued-registry':
+                foreign = (_pytest_source_replace(registry[0]), *registry[1:])
+                assert foreign == registry and foreign[0] is not registry[0]
+                owned.setitem(_selection_metadata_runner.PYTEST_SHARD_COMMANDS, phase, foreign)
+                with pytest.raises(ValueError, match='PYTEST_SOURCE_ORIGINAL_CONSTRUCTOR_OPERANDS'):
+                    product.pytest_source_for_bound_row(bound[0])
+            elif defect == 'foreign-same-valued-command':
+                record = product._pytest_manifest_rows[0]
+                record[1][0] = list(record[1][0])
+                assert tuple(record[1][0]) == record[3][0]
+                with pytest.raises(ValueError, match='PYTEST_SOURCE_ORIGINAL_MANIFEST_COPY_OPERANDS'):
+                    product.pytest_source_for_bound_row(bound[0])
+            else:
+                assert not product._errors
+    for _pytest_source_defect in (None, 'foreign-constructor', 'foreign-bound-row',
+            'foreign-same-valued-registry', 'foreign-same-valued-command'):
+        _pytest_source_case_v1(_pytest_source_defect)
+    # The following callback ports are synthetic no-child compatibility cases.
+    # They check the installed operation contract; they are not C/source/native
+    # acquisition or process-termination evidence.
+    _supported_callback_scope = object.__new__(o._LinuxPreflightScopeV1)
+    _supported_callback_record = {'scope': _supported_callback_scope}
+    _supported_callback_entry = object()
+    _supported_callback_now = time.monotonic_ns()
+    _supported_callback_environment = {'TMPDIR': 'actual-owned-runtime'}
+    _supported_callback_programme = {'environment': _supported_callback_environment,
+        'deadline_ns': _supported_callback_now + 10_000_000_000}
+    _supported_callback_occurrence = {'programme': _supported_callback_programme,
+        'dispatch_attempted': False, 'environment': _supported_callback_environment}
+    _supported_callback_roots = (pathlib.Path('actual-run-output'), pathlib.Path('actual-pytest-basetemp'))
+    _supported_callback_scratch = {'roots': _supported_callback_roots}
+    _supported_callback_scope._ordinary_run_scratch_roots_v1 = _supported_callback_scratch
+    _supported_callback_scope._ordinary_current_occurrence_v1 = _supported_callback_occurrence
+    _supported_callback_scope._ordinary_resource_programme_v1 = {
+        'original_cutoffs': (_supported_callback_now, _supported_callback_now + 20_000_000_000)}
+    _supported_callback_checks = []
+    def _supported_callback_effect_check(value, record):
+        assert value is _supported_callback_scope and record is _supported_callback_record
+        _supported_callback_checks.append('source')
+        return record
+    def _supported_callback_scratch_check(value, record):
+        assert value is _supported_callback_scope and record is _supported_callback_scratch
+        _supported_callback_checks.append('scratch')
+        return record
+    def _supported_callback_occurrence_for(value):
+        assert value is _supported_callback_entry
+        return _supported_callback_occurrence
+    def _supported_callback_programme_for(value):
+        assert value is _supported_callback_entry
+        return _supported_callback_programme
+    with monkeypatch.context() as _supported_callback_patch:
+        _supported_callback_patch.setattr(o, '_ordinary_supported_effect_programme_check_v1',
+            _supported_callback_effect_check)
+        _supported_callback_patch.setattr(o, '_ordinary_run_scratch_roots_check_v1',
+            _supported_callback_scratch_check)
+        _supported_callback_patch.setattr(_supported_callback_scope, '_ordinary_occurrence_record_v1',
+            _supported_callback_occurrence_for)
+        _supported_callback_patch.setattr(_supported_callback_scope, '_ordinary_programme_for_entry_v1',
+            _supported_callback_programme_for)
+        assert o._ordinary_supported_operation_check_v1(_supported_callback_scope,
+            _supported_callback_record, entry=_supported_callback_entry,
+            environment=dict(_supported_callback_environment), timeout_seconds=1,
+            scratch_roots=_supported_callback_roots) is None
+        assert _supported_callback_checks == ['source', 'scratch']
+        for _unsupported_scratch in ((), (_supported_callback_roots[0],),
+                tuple(reversed(_supported_callback_roots))):
+            with pytest.raises(o.ValidationReliabilityError, match='SUPPORTED_OPERATION_ORIGINAL_NATIVE_AND_ACTUAL_SCRATCH'):
+                o._ordinary_supported_operation_check_v1(_supported_callback_scope,
+                    _supported_callback_record, entry=_supported_callback_entry,
+                    environment=_supported_callback_environment, timeout_seconds=1,
+                    scratch_roots=_unsupported_scratch)
+        for _unsupported_environment, _unsupported_timeout in (
+                ({'TMPDIR': 'foreign-runtime'}, 1), (_supported_callback_environment, True),
+                (_supported_callback_environment, 0), (_supported_callback_environment, 11)):
+            with pytest.raises(o.ValidationReliabilityError, match='SUPPORTED_OPERATION_ORIGINAL_NATIVE_AND_ACTUAL_SCRATCH'):
+                o._ordinary_supported_operation_check_v1(_supported_callback_scope,
+                    _supported_callback_record, entry=_supported_callback_entry,
+                    environment=_unsupported_environment, timeout_seconds=_unsupported_timeout,
+                    scratch_roots=_supported_callback_roots)
+        _supported_callback_occurrence['dispatch_attempted'] = True
+        with pytest.raises(o.ValidationReliabilityError, match='SUPPORTED_OPERATION_ORIGINAL_NATIVE_AND_ACTUAL_SCRATCH'):
+            o._ordinary_supported_operation_check_v1(_supported_callback_scope,
+                _supported_callback_record, entry=_supported_callback_entry,
+                environment=_supported_callback_environment, timeout_seconds=1,
+                scratch_roots=_supported_callback_roots)
+        assert _supported_callback_occurrence['dispatch_attempted'] is True
+    # Synthetic no-child filesystem ports exercise only scratch custody. They
+    # do not create native writable mounts or prove pytest/native enforcement.
+    def _disposable_scratch_case_v1(defect=None):
+        local = tmp_path / ('disposable-scratch-' + str(defect))
+        parent, output = local / 'process', local / 'process' / 'validation-output'
+        basetemp = parent / 'p'
+        paths = o.ValidationRunPathsV1(run_id='disposable-scratch', process_child_name='process',
+            repo_root=tmp_path / 'protected-repository', process_root=parent,
+            validation_output_root=output, pytest_basetemp_root=basetemp,
+            evidence_root=local / 'evidence', process_root_is_external_to_repo=True,
+            filesystem_probe_state='PASS', deepest_projected_path=basetemp / 'fixture',
+            deepest_projected_path_text_length=len(str(basetemp / 'fixture')), cleanup_target=parent)
+        scratch_scope = object.__new__(o._LinuxPreflightScopeV1)
+        scratch_scope._ordinary_runner_owner_v1 = scratch_scope._ordinary_original_runner_owner_v1 = runner
+        scratch_scope._ordinary_bound_paths_v1 = paths
+        scratch_scope._ordinary_factory_errors_v1 = []
+        scratch_scope._ordinary_host_output_image_v1 = {
+            'mount_path':local, 'mounted':True, 'disposed':False,
+            'filesystem':{'root_identity':(91, 90)}}
+        owner_id = (os.getpid(), threading.get_ident())
+        slots, handles, closed, calls = [], {}, [], []
+        def directory(ino, mode=0o700):
+            return SimpleNamespace(st_dev=91, st_ino=ino, st_mode=stat.S_IFDIR | mode,
+                st_uid=0, st_gid=0, st_size=4096, st_mtime_ns=5,
+                st_file_attributes=0, st_reparse_tag=0)
+        views = {parent:directory(1), output:directory(2), basetemp:directory(3)}
+        faults = {'read':False, 'close':False}
+        body_fault, close_fault = OSError('scratch child observation'), OSError('scratch child close')
+        def chain(path, **kwargs):
+            calls.append(('chain', path))
+            return ((str(path), (91, 90, stat.S_IFDIR | 0o700, 4096, 5)),)
+        def slot(path, kind, **kwargs):
+            return o._mapper_slot_v1(owner_id, slots, path, kind)
+        def opened(value, path, flags, mode=0o600, *, parent_fd=None, **kwargs):
+            actual = parent / path if parent_fd is not None else path
+            if parent_fd is not None:
+                assert handles[parent_fd][0] == parent and path == 'p'
+            fd = 70 + len(handles)
+            handles[fd] = (actual, SimpleNamespace(**vars(views[actual])))
+            o._mapper_slot_opened_v1(value, fd)
+            value['acquiring'] = False
+            calls.append(('open', actual))
+            return fd
+        def called(operation, *args, **kwargs):
+            calls.append((operation.__name__, args))
+            if operation is os.lstat: return views[args[0]]
+            if operation is os.stat:
+                assert args == ('p',) and kwargs['follow_symlinks'] is False
+                assert handles[kwargs['dir_fd']][0] == parent
+                if basetemp not in views: raise FileNotFoundError('synthetic reset interval')
+                return views[basetemp]
+            if operation is os.fstat:
+                if faults['read'] and handles[args[0]][0] == basetemp: raise body_fault
+                return handles[args[0]][1]
+            pytest.fail('unselected filesystem effect in scratch callback: ' + operation.__name__)
+        def close(value, **kwargs):
+            assert value['returned_fd'] is not None and not value['close_attempted']
+            value['close_attempted'] = True
+            closed.append(value)
+            if faults['close'] and handles[value['returned_fd']][0] == basetemp:
+                value['close_error'] = close_fault
+                raise close_fault
+            value['fd'] = None
+            value['closed'] = True
+        with monkeypatch.context() as scratch_ports:
+            for name, default in (('O_DIRECTORY', 0x10000), ('O_NOFOLLOW', 0x20000), ('O_CLOEXEC', 0x40000)):
+                scratch_ports.setattr(o.os, name, getattr(o.os, name, default), raising=False)
+            for name, value in (('_ordinary_factory_chain_v1',chain), ('_ordinary_factory_slot_v1',slot),
+                    ('_ordinary_factory_open_v1',opened), ('_ordinary_factory_call_v1',called),
+                    ('_ordinary_factory_close_v1',close)):
+                scratch_ports.setattr(scratch_scope, name, value)
+            bound = o._ordinary_bind_run_scratch_roots_v1(scratch_scope, paths)
+            assert bound['roots'] == (output, basetemp)
+            assert tuple(value['path'] for value in bound['operands']) == (parent, output)
+            assert all(value['slot']['returned_fd'] is not None for value in bound['operands'])
+            assert all(value['path'] == basetemp for value in closed)
+            if defect is None:
+                del views[basetemp]
+                assert o._ordinary_run_scratch_roots_check_v1(scratch_scope, bound) is bound
+                views[basetemp] = directory(44)
+                assert o._ordinary_run_scratch_roots_check_v1(scratch_scope, bound) is bound
+                assert views[basetemp].st_ino != 3 and len(closed) == 2
+            else:
+                if defect == 'parent-replacement': views[parent] = directory(31)
+                elif defect == 'output-replacement': views[output] = directory(32)
+                elif defect == 'child-alias': views[basetemp] = directory(1)
+                elif defect == 'child-mode': views[basetemp] = directory(3, 0o777)
+                elif defect == 'child-file': views[basetemp].st_mode = stat.S_IFREG | 0o700
+                elif defect == 'child-symlink': views[basetemp].st_mode = stat.S_IFLNK | 0o700
+                elif defect == 'read-and-close': faults.update(read=True, close=True)
+                with pytest.raises(BaseException) as failure:
+                    o._ordinary_run_scratch_roots_check_v1(scratch_scope, bound)
+                assert bound['errors'] and scratch_scope._ordinary_factory_errors_v1
+                if defect == 'read-and-close':
+                    def leaves(error):
+                        return tuple(value for child in getattr(error, 'exceptions', ()) for value in leaves(child)) or (error,)
+                    assert any(value is body_fault for value in leaves(failure.value))
+                    assert any(value is close_fault for value in leaves(failure.value))
+                    assert closed[-1]['close_attempted'] and closed[-1]['close_error'] is close_fault
+            assert not any(name in ('mkdir','unlink','rmdir','chmod','chown') for name, *rest in calls)
+    for _scratch_defect in (None, 'parent-replacement', 'output-replacement', 'child-alias',
+            'child-mode', 'child-file', 'child-symlink', 'read-and-close'):
+        _disposable_scratch_case_v1(_scratch_defect)
+    # These source-only, no-child ports exercise the private literal owner.
+    # They do not import inventory or qualify SOURCE/native acquisition.
+    import ast as _literal_ast
+    _literal_scope = object.__new__(o._LinuxPreflightScopeV1)
+    _literal_record = {'scope': _literal_scope}
+    _literal_names = ('_ordinary_deterministic_fixed_sources_v1', '_ordinary_source_fixed_recipes_v1')
+    _literal_expected = ((('deterministic-fixture', ('a',), 0),), (('writer-fixture', ('b',), 1),))
+    _literal_source = "import qtt_literal_source_must_not_import\nraise RuntimeError('must not execute')\n"
+    _literal_source += ''.join('def ' + name + '():\n    return ' + repr(value) + '\n'
+        for name, value in zip(_literal_names, _literal_expected, strict=True))
+    def _literal_packet(text):
+        tree = _literal_ast.parse(text)
+        return tree, dict(path='tools/validation_inventory.py', source_form='PYTHON',
+            complete=True, error=None, text=text, raw_bytes=len(text.encode('utf-8')),
+            nodes=sum(1 for node in _literal_ast.walk(tree)))
+    _literal_selected = [_literal_packet(_literal_source)]
+    _literal_calls = []
+    def _literal_getter(scope, record, relative, *, source_byte_limit, source_node_limit):
+        assert scope is _literal_scope and record is _literal_record
+        _literal_calls.append((relative, source_byte_limit, source_node_limit))
+        return _literal_selected[0]
+    with monkeypatch.context() as _literal_patch:
+        _literal_patch.setattr(o, '_ordinary_source_operand_v1', _literal_getter)
+        assert o._ordinary_deterministic_fixed_sources_v1(_literal_scope, _literal_record,
+            source_byte_limit=4096, source_node_limit=256) == _literal_expected[0]
+        assert o._ordinary_source_fixed_recipes_v1(_literal_scope, _literal_record,
+            source_byte_limit=4096, source_node_limit=256) == _literal_expected[1]
+        assert _literal_calls == [('tools/validation_inventory.py', 4096, 256)] * 2
+        assert 'qtt_literal_source_must_not_import' not in sys.modules
+        for _literal_name, _literal_bytes, _literal_nodes in (
+                ('foreign_table', 4096, 256), (_literal_names[0], True, 256),
+                (_literal_names[0], 4096, 0), (_literal_names[0], 4096, False)):
+            with pytest.raises(o.ValidationReliabilityError, match='SOURCE_LITERAL_EXACT_TABLE_AND_LIMITS'):
+                o._ordinary_source_literal_table_v1(_literal_scope, _literal_record, _literal_name,
+                    source_byte_limit=_literal_bytes, source_node_limit=_literal_nodes)
+        assert len(_literal_calls) == 2
+        for _literal_bad_source in (
+                'def other():\n    return ((1,),)\n',
+                ('def ' + _literal_names[0] + '():\n    return ((1,),)\n') * 2,
+                '@foreign\ndef ' + _literal_names[0] + '():\n    return ((1,),)\n',
+                'def ' + _literal_names[0] + '(operand=None):\n    return ((1,),)\n',
+                'def ' + _literal_names[0] + '():\n    print("must not execute")\n    return ((1,),)\n'):
+            _literal_selected[0] = _literal_packet(_literal_bad_source)
+            with pytest.raises(o.ValidationReliabilityError, match='SOURCE_LITERAL_(ONE_PRIVATE_DEFINITION|PURE_SINGLE_RETURN)'):
+                o._ordinary_deterministic_fixed_sources_v1(_literal_scope, _literal_record,
+                    source_byte_limit=4096, source_node_limit=256)
+        _literal_selected[0] = _literal_packet('def ' + _literal_names[0] + '():\n    return forbidden_call()\n')
+        with pytest.raises(ValueError, match='malformed node'):
+            o._ordinary_deterministic_fixed_sources_v1(_literal_scope, _literal_record,
+                source_byte_limit=4096, source_node_limit=256)
+        _literal_selected[0] = _literal_packet(_literal_source)
+        _literal_selected[0][0].body[-1].body[0].value = _literal_ast.Constant('foreign cached AST')
+        with pytest.raises(o.ValidationReliabilityError, match='SOURCE_LITERAL_RETAINED_AST_AND_CAPTURED_TEXT'):
+            o._ordinary_source_fixed_recipes_v1(_literal_scope, _literal_record,
+                source_byte_limit=4096, source_node_limit=256)
+    # Portable no-child ports exercise the actual filter body and literal BPF;
+    # they are not kernel/quota/process-termination qualification.
+    import ctypes as filter_ctypes
+    import errno as filter_errno
+    import struct as filter_struct
+    import threading as filter_threading
+    filter_cases = []
+    def filter_port_case(defect=None):
+        calls = []
+        captured = []
+        port_io = dict(owner=(os.getpid(), filter_threading.get_ident()), errors=[], attempts=0,temporary_filter_written=0)
+        port_io['temporary_filter_write_original'] = (port_io,112,port_io['owner'])
+        def port_check(value):
+            if value is not port_io or value['errors']:
+                raise ValueError('synthetic original IO owner or retained failure')
+        def port_call(value, function, *args, **kwargs):
+            port_check(value)
+            value['attempts'] += 1
+            return function(*args, **kwargs)
+        class PortFunction:
+            def __init__(self, body): self.body = body
+            def __call__(self, *args): return self.body(*args)
+        def nnp(*args):
+            calls.append(('nnp', tuple(value.value for value in args)))
+            return -1 if defect == 'nnp' else 0
+        def native_call(number, *args):
+            if number.value == 317:
+                programme = args[2]._obj
+                captured.append(tuple((row.code,row.jt,row.jf,row.k)
+                    for row in programme.instructions[:programme.length]))
+                calls.append(('load', args[0].value, args[1].value))
+                return 123 if defect == 'tsync-positive' else -1 if defect == 'load' else 0
+            assert number.value == 16 and args[0].value == -1
+            request = args[1].value
+            calls.append(('probe', request))
+            observed = (filter_errno.EBADF if request == 0x80086601 else filter_errno.EPERM)
+            if defect == 'mutation-denial' and request == 0x401c5820:
+                observed = filter_errno.EBADF
+            if defect == 'get-denial' and request == 0x80086601:
+                observed = filter_errno.EPERM
+            filter_ctypes.set_errno(observed)
+            return -1
+        libc = SimpleNamespace(prctl=PortFunction(nnp),syscall=PortFunction(native_call))
+        # Explicit Linux-width/loader ports make this grouped case portable;
+        # no real CDLL, prctl, syscall or native file operation is performed.
+        with monkeypatch.context() as filter_ports:
+            filter_ports.setattr(o, '_ordinary_application_io_check_v1', port_check)
+            filter_ports.setattr(o, '_ordinary_application_io_call_v1', port_call)
+            filter_ports.setattr(os, 'uname', lambda: SimpleNamespace(machine='x86_64'), raising=False)
+            filter_ports.setattr(filter_ctypes, 'c_ulong', filter_ctypes.c_uint64)
+            filter_ports.setattr(filter_ctypes, 'CDLL', lambda name, **kwargs: libc)
+            binding = {'temporary_filter_abi':[0xc000003e,317,16]}
+            if defect is None:
+                result = o._ordinary_temporary_filter_v1(port_io,binding)
+                assert result is port_io['temporary_filter'] and result['loaded'] and not result['errors']
+                assert port_io['attempts'] == 11 and len(result['probes']) == 7
+                assert result['native_submission_bytes'] == port_io['temporary_filter_written'] == 112
+                before = tuple(calls)
+                with pytest.raises(o.ValidationReliabilityError, match='ORDINARY_TEMP_FILTER_ORIGINAL_RESOLVED_NATIVE_ABI'):
+                    o._ordinary_temporary_filter_v1(port_io,binding)
+                assert tuple(calls) == before and port_io['attempts'] == 11
+            else:
+                with pytest.raises(o.ValidationReliabilityError) as failed_filter:
+                    o._ordinary_temporary_filter_v1(port_io,binding)
+                result = port_io['temporary_filter']
+                assert result['errors'] == port_io['errors'] == [failed_filter.value]
+                assert 'completion_original' not in result
+                assert port_io['temporary_filter_written'] == (0 if defect == 'nnp' else 112)
+        filter_cases.append((defect, port_io['attempts'], tuple(calls)))
+        return captured
+    observed_filter = filter_port_case()[0]
+    expected_filter = ((0x20,0,0,4),(0x15,0,9,0xc000003e),
+        (0x20,0,0,0),(0x35,7,0,0x40000000),(0x15,0,4,16),
+        (0x20,0,0,24),(0x15,3,0,0x401c5820),(0x15,2,0,0x40086602),
+        (0x15,1,0,0x40046602),(0x06,0,0,0x7fff0000),
+        (0x06,0,0,0x50001),(0x06,0,0,0x80000000))
+    assert observed_filter == expected_filter
+    def filter_result(number, request, architecture=0xc000003e):
+        data = filter_struct.pack('<iI7Q',number,architecture,0,0,request,0,0,0,0)
+        accumulator = index = 0
+        while index < len(observed_filter):
+            code,jt,jf,value = observed_filter[index]
+            if code == 0x20:
+                accumulator = filter_struct.unpack_from('<I',data,value)[0]
+                index += 1
+            elif code in (0x15,0x35):
+                selected = accumulator == value if code == 0x15 else accumulator >= value
+                index += 1 + (jt if selected else jf)
+            else:
+                assert code == 0x06
+                return value
+        raise AssertionError('literal filter did not return')
+    for request in (0x401c5820,0x40086602,0x40046602):
+        assert filter_result(16,request) == filter_result(16,request | (1 << 32)) == 0x50001
+    assert filter_result(16,0x80086601) == filter_result(1,0x401c5820) == 0x7fff0000
+    assert filter_result(16,0,0x40000003) == filter_result(0x40000010,0) == 0x80000000
+    for defect in ('nnp','load','tsync-positive','mutation-denial','get-denial'):
+        filter_port_case(defect)
+    assert len(filter_cases) == 6
+
+    # These are original-method no-child ports, not native termination or
+    # query-custody proof. An unexported proxy has no launcher/PIDfd or pipes.
+    from types import SimpleNamespace
+    import threading
+    no_launch_scope = o._LinuxPreflightScopeV1.__new__(o._LinuxPreflightScopeV1)
+    no_launch_entry = SimpleNamespace(run_id='ordinary-no-launch-ports', phase='post-validation',
+        command_index=1)
+    no_launch_candidate = SimpleNamespace(active_occurrence=None, _ordinary_disk_state_v1={'borrows':[]})
+    no_launch_outcomes = ({'drained_byte_count':0}, {'drained_byte_count':0})
+    no_launch_record = dict(scope=no_launch_scope, entry=no_launch_entry, programme={},
+        argv=(sys.executable, '-B', '-c', 'pass'), cwd=str(tmp_path), environment={},
+        dispatch_attempted=False, pending=False, process=None, launcher=None,
+        launcher_attempted=False, launcher_error=None, launcher_slot=None,
+        application_pidfd_slot=None, root_slot=None, cgroup_slot=None,
+        cgroup_event_slot=None, invocation=None, cgroup=None, identity=None,
+        binding=None, release_attempted=False, released=False, terminal=None,
+        actors_terminal=None, stop_attempted=False, kill_attempted=False, stopped=False,
+        output_outcomes=no_launch_outcomes, errors=[], no_launch=None, receipt=None,
+        retire_attempted=False, retired=False)
+    no_launch_record['original'] = (no_launch_record, no_launch_scope, no_launch_entry)
+    no_launch_streams = {name:dict(complete=False,errors=[],slot={'closed':False},
+        adapter=SimpleNamespace(closed=False)) for name in ('stdout','stderr')}
+    no_launch_core = dict(producer=no_launch_record, process=None, original_process=None,
+        pipes=None, outcomes=no_launch_outcomes, streams=no_launch_streams)
+    no_launch_scope._ordinary_factory_owner_v1 = (os.getpid(), threading.get_ident())
+    no_launch_scope._ordinary_occurrences_v1 = no_launch_scope._ordinary_original_occurrences_v1 = [no_launch_record]
+    no_launch_scope._ordinary_current_occurrence_v1 = no_launch_record
+    no_launch_scope._ordinary_core_outputs_v1 = [no_launch_core]
+    no_launch_scope._ordinary_candidate_v1 = no_launch_candidate
+    no_launch_scope._ordinary_effect_programme_v1 = None
+    no_launch_scope.startup_error = None
+    no_launch_cause = RuntimeError('original preparation fault before Popen')
+    # An administrative process may still be retained by another original
+    # owner. This APP proof must never erase or settle that foreign custody.
+    foreign_query_process = object()
+    no_launch_cause.owned_process = foreign_query_process
+    no_launch_calls = []
+    def no_launch_service(record):
+        assert record is no_launch_record
+        raise no_launch_cause
+    def forbid_launch(*args, **kwargs):
+        no_launch_calls.append((args,kwargs))
+        raise AssertionError('no native child is selected in these ports')
+    with monkeypatch.context() as no_launch_ports:
+        no_launch_ports.setattr(no_launch_scope,'_ordinary_application_ready_v1',lambda:None)
+        no_launch_ports.setattr(no_launch_scope,'_ordinary_port_context_v1',lambda candidate:None)
+        no_launch_ports.setattr(no_launch_scope,'_ordinary_rp5a_stdin_v1',lambda record, value:None)
+        no_launch_ports.setattr(no_launch_scope,'_ordinary_occurrence_record_v1',lambda entry:no_launch_record)
+        no_launch_ports.setattr(no_launch_scope,'_ordinary_rp5a_capture_resources_v1',lambda:True)
+        no_launch_ports.setattr(no_launch_scope,'_ordinary_service_argv_v1',no_launch_service)
+        no_launch_ports.setattr(o.subprocess,'Popen',forbid_launch)
+        no_launch_ports.setattr(o,'_mapper_slot_settled_v1',lambda slot:slot['closed'])
+        with pytest.raises(RuntimeError) as no_launch_failed:
+            no_launch_scope._ordinary_create_v1(no_launch_record['argv'],tmp_path,{},o.subprocess.DEVNULL)
+        assert no_launch_failed.value is no_launch_cause and no_launch_cause.owned_process is foreign_query_process
+        no_launch_witness = no_launch_scope._ordinary_never_launched_v1(no_launch_record)
+        assert no_launch_witness is no_launch_record['no_launch'] and not no_launch_calls
+        assert no_launch_record['errors'] == [no_launch_cause] and no_launch_record['dispatch_attempted']
+        assert no_launch_record['pending'] and no_launch_record['terminal'] is None
+        assert no_launch_core['process'] is None and no_launch_core['original_process'] is None
+        with pytest.raises(o.ValidationReliabilityError,match='PRESTART_WRITERS_ACTUALLY_CLOSED'):
+            no_launch_scope._ordinary_never_launched_v1(no_launch_record,settled=True)
+        for outcome in no_launch_outcomes:
+            outcome.update(evidence_complete=True,writer_closed=True)
+        for stream in no_launch_streams.values():
+            stream['complete']=stream['adapter'].closed=stream['slot']['closed']=True
+        assert no_launch_scope._ordinary_finish_v1() is True
+        assert all('eof_observed' not in outcome for outcome in no_launch_outcomes)
+        no_launch_receipt = o.CommandExecutionReceiptV1(schema_version=o.SCHEMA_VERSION,
+            run_id=no_launch_entry.run_id,phase=no_launch_entry.phase,command_index=1,
+            argv=no_launch_record['argv'],cwd=str(tmp_path),pid=None,platform=os.name,
+            start_time_utc='2026-10-06T00:00:00Z',end_time_utc='2026-10-06T00:00:00Z',
+            elapsed_monotonic_seconds=0,native_exit_code=None,
+            start_failure_class='original preparation fault before Popen',timeout_seconds_or_null=None,
+            timeout_state='NOT_CONFIGURED',termination_state='NOT_REQUIRED',
+            stdout_path=str(tmp_path/'no-launch.stdout.bin'),stderr_path=str(tmp_path/'no-launch.stderr.bin'),
+            stdout_byte_count=0,stderr_byte_count=0,stdout_required_markers=(),stdout_marker_state='NOT_REQUIRED',
+            stderr_was_nonempty=False,failure_class='ENGVR_PROCESS_START_FAILED')
+        no_launch_scope._ordinary_observe_receipt_v1(no_launch_record,no_launch_receipt)
+        assert no_launch_scope._ordinary_require_occurrence_terminal_v1(no_launch_record,no_launch_receipt) is no_launch_witness
+        assert not no_launch_record['pending'] and no_launch_scope._ordinary_processes_settled_v1()
+        for field,value in (('launcher_attempted',True),('terminal',{}),('release_attempted',True)):
+            prior = no_launch_record[field]
+            no_launch_record[field]=value
+            with pytest.raises(o.ValidationReliabilityError,match='CREATE_PREFIX_BEFORE_NATIVE_POPEN'):
+                no_launch_scope._ordinary_never_launched_v1(no_launch_record,settled=True)
+            no_launch_record[field]=prior
+        no_launch_scope._ordinary_retire_occurrence_v1(no_launch_record,no_launch_receipt)
+        assert no_launch_record['retired'] and no_launch_scope._ordinary_current_occurrence_v1 is None
+        assert no_launch_cause.owned_process is foreign_query_process and no_launch_record['terminal'] is None
+        assert no_launch_record['errors'] == [no_launch_cause] and not no_launch_calls
+
+    # Missing Linux flag constants are zero-valued synthetic ports only;
+    # these actual bodies never call the OS in this block. Native admission
+    # still requires the independently observed Linux implementation.
+    with monkeypatch.context() as nested_body_ports:
+        for flag_name in ('O_NOFOLLOW','O_CLOEXEC','O_NONBLOCK','O_DIRECTORY'):
+            if not hasattr(o.os,flag_name):
+                nested_body_ports.setattr(o.os,flag_name,0,raising=False)
+        # Actual ordinary reader/policy/unseal bodies through synthetic ports.
+        # These are no-child source checks, not native filesystem/policy evidence.
+        def nested_stat(kind, ino, size=4, mode=0o444):
+            return SimpleNamespace(st_dev=7,st_ino=ino,st_mode=kind|mode,
+                st_nlink=1,st_size=size,st_mtime_ns=90,st_ctime_ns=91,
+                st_uid=0,st_gid=0,st_file_attributes=0)
+
+        def nested_reader_port(pieces, *, close_error=None, file_ino=2):
+            scope=object.__new__(o._LinuxPreflightScopeV1)
+            physical=o.PurePosixPath('/owned/evidence')
+            parent=dict(returned_fd=100)
+            root=nested_stat(stat.S_IFDIR,1,size=0,mode=0o700)
+            before=nested_stat(stat.S_IFREG,2)
+            held=nested_stat(stat.S_IFREG,file_ino)
+            gate=SimpleNamespace(root=physical,parent_names=(),remaining=20,retained=0,
+                limits=dict(file_byte_limit=10,retained_byte_limit=100),
+                _ordinary_evidence_v1=dict(physical_root=physical,selected_name=None),
+                _check=lambda:None)
+            slots,requests,returned,close_calls=[],[],[],[]
+            def call(operation,*args,**kwargs):
+                if operation is o.os.fstat:return root if args[0]==100 else held
+                if operation is o.os.stat:return before
+                raise AssertionError('unexpected synthetic reader operation')
+            def slot(path,kind,**kwargs):
+                value=dict(path=path,returned_fd=None,close_attempted=False,closed=False)
+                slots.append(value);return value
+            def opened(value,*args,**kwargs):value['returned_fd']=101;return 101
+            def read(fd,amount,**kwargs):
+                assert fd==101 and 0<amount<=65536
+                requests.append(amount);value=pieces.pop(0)
+                if isinstance(value,BaseException):raise value
+                returned.append(value);return value
+            def close(value,**kwargs):
+                close_calls.append(value);value['close_attempted']=True
+                if close_error is not None:raise close_error
+                value['closed']=True
+            scope._ordinary_nested_directory_v1=lambda value,path:(parent,(7,1))
+            scope._ordinary_effective_settlement_v1=lambda:False
+            scope._ordinary_factory_call_v1=call
+            scope._ordinary_factory_slot_v1=slot
+            scope._ordinary_factory_open_v1=opened
+            scope._ordinary_transfer_read_v1=read
+            scope._ordinary_factory_close_v1=close
+            return scope,gate,physical/'run.json',slots,requests,returned,close_calls
+
+        nested_read=nested_reader_port([b'A',b'BC',b'D',b''])
+        actual=nested_read[0]._ordinary_nested_read_v1(nested_read[1],nested_read[2])
+        assert actual[0]==b'ABCD' and nested_read[1].remaining==16
+        assert nested_read[4]==[5,4,2,1] and len(nested_read[6])==1 and nested_read[3][0]['closed']
+        for pieces,detail,remaining in (([b'AB',b''],'UNCHANGED_COMPLETE_READ',18),
+                ([b'ABCDX'],'READ_CHARGED_SUFFIX',15)):
+            value=nested_reader_port(pieces)
+            with pytest.raises(o.ValidationReliabilityError,match=detail):
+                value[0]._ordinary_nested_read_v1(value[1],value[2])
+            assert value[1].remaining==remaining and len(value[6])==1 and value[3][0]['closed']
+        value=nested_reader_port([],file_ino=99)
+        with pytest.raises(o.ValidationReliabilityError,match='PATH_HANDLE_IDENTITY'):
+            value[0]._ordinary_nested_read_v1(value[1],value[2])
+        assert not value[4] and value[1].remaining==20 and len(value[6])==1
+        body_error,close_error=OSError('nested read body port'),OSError('nested read close port')
+        value=nested_reader_port([body_error],close_error=close_error)
+        with pytest.raises(BaseExceptionGroup) as combined:
+            value[0]._ordinary_nested_read_v1(value[1],value[2])
+        assert combined.value.exceptions==(body_error,close_error) and len(value[6])==1
+        assert value[3][0]['close_attempted'] and not value[3][0]['closed'] and value[1].remaining==20
+
+        def nested_unseal_port(*, native_error=None, close_error=None, substituted=False):
+            scope=object.__new__(o._LinuxPreflightScopeV1)
+            physical=o.PurePosixPath('/owned/evidence')
+            root=nested_stat(stat.S_IFDIR,10,size=0,mode=0o700)
+            directory=nested_stat(stat.S_IFDIR,11,size=0,mode=0)
+            header=nested_stat(stat.S_IFREG,12)
+            occupied=dict(name='nested-pytest-9-0',kind='DIRECTORY',protect_attempted=True,
+                original_flags=0,unseal_attempted=False,unsealed=False,identity=(7,11),
+                version=o._NestedPytestEvidenceV1._entry_version(directory),errors=[])
+            copy=dict(destination=physical/'run.json',protect_attempted=True,original_flags=8,
+                unseal_attempted=False,unsealed=False,identity=(7,12),complete=True,
+                final=(None,o._scan_same_api_version(header)),errors=[])
+            public=dict(destination=o.PurePosixPath('/global/history/run.json'),protect_attempted=True)
+            row=dict(root_slot=dict(returned_fd=200,closed=False),root_identity=(7,10),
+                physical_root=physical,occupied_rows=[occupied],transfer_rows=[copy,public],errors=[],
+                candidate=SimpleNamespace(_disk_completed_restore_v1=lambda:True,
+                    _ordinary_disk_state_v1=dict(borrows=[])))
+            gate=SimpleNamespace(_entry_version=o._NestedPytestEvidenceV1._entry_version)
+            infos={201:directory,202:header};flags={201:16,202:24};slots=[];events=[]
+            def call(operation,*args,**kwargs):
+                assert kwargs.get('settling') is True
+                if operation is o.os.fstat:return root if args[0]==200 else infos[args[0]]
+                if operation is o.os.stat:
+                    if args[0]=='nested-pytest-9-0':
+                        return nested_stat(stat.S_IFDIR,99,size=0,mode=0) if substituted else directory
+                    return header
+                raise AssertionError('unexpected synthetic unseal operation')
+            def slot(path,kind,**kwargs):
+                value=dict(path=path,returned_fd=None,close_attempted=False,closed=False)
+                slots.append(value);return value
+            def opened(value,name,*args,**kwargs):
+                value['returned_fd']=201 if name=='nested-pytest-9-0' else 202
+                return value['returned_fd']
+            def native(fd,value=None,**kwargs):
+                assert kwargs.get('settling') is True
+                events.append((fd,value))
+                if value is not None:
+                    if native_error is not None:raise native_error
+                    flags[fd]=value
+                return flags[fd]
+            def close(value,**kwargs):
+                assert kwargs.get('settling') is True
+                value['close_attempted']=True
+                if close_error is not None:raise close_error
+                value['closed']=True
+            scope._ordinary_nested_gate_record_v1=lambda value,**kwargs:row
+            scope._ordinary_nested_immutable_authority_v1=lambda **kwargs:('synthetic-capability-port',)
+            scope._ordinary_factory_call_v1=call;scope._ordinary_factory_slot_v1=slot
+            scope._ordinary_factory_open_v1=opened;scope._ordinary_nested_flags_v1=native
+            scope._ordinary_factory_close_v1=close
+            return scope,gate,row,flags,slots,events,public
+
+        unseal=nested_unseal_port()
+        actual=unseal[0]._ordinary_nested_unseal_v1(unseal[1])
+        assert actual==(unseal[2]['occupied_rows'][0],unseal[2]['transfer_rows'][0]) and unseal[3]=={201:0,202:8}
+        assert all(value['unsealed'] and len(value['unseal_observation'])==5 for value in actual)
+        assert all(value['closed'] and value['close_attempted'] for value in unseal[4]) and 'unseal_attempted' not in unseal[6]
+        with pytest.raises(o.ValidationReliabilityError,match='ONE_ATTEMPT'):
+            unseal[0]._ordinary_nested_unseal_v1(unseal[1])
+        value=nested_unseal_port(substituted=True)
+        with pytest.raises(o.ValidationReliabilityError,match='EXACT_NATIVE_PHYSICAL_OPERAND'):
+            value[0]._ordinary_nested_unseal_v1(value[1])
+        assert value[3][201]==16 and value[4][0]['closed'] and not value[2]['occupied_rows'][0]['unsealed']
+        body_error,close_error=OSError('nested unseal native port'),OSError('nested unseal close port')
+        value=nested_unseal_port(native_error=body_error,close_error=close_error)
+        with pytest.raises(BaseExceptionGroup) as combined:
+            value[0]._ordinary_nested_unseal_v1(value[1])
+        assert any(error is body_error for error in combined.value.exceptions) and any(error is close_error for error in combined.value.exceptions)
+        assert value[3]=={201:16,202:24} and all(slot['close_attempted'] and not slot['closed'] for slot in value[4])
+
+        def nested_pyc_port(*, unsafe=False, native_error=None, close_error=None):
+            scope=object.__new__(o._LinuxPreflightScopeV1)
+            root=o.PurePosixPath('/repo/root');view_path=o.PurePosixPath('/view/root')
+            protected='pkg/a.cpython-314.pyc' if not unsafe else 'pkg/a*.pyc'
+            names=(protected,'mutable.pyc','fixture/generated.pyc')
+            rows=[dict(path=str(root/name),role='repository',kind='file') for name in names]
+            source=SimpleNamespace(state='READABLE',failure=None,rows=rows,
+                row_index={row['path']:row for row in rows},post={row['path']:(1,2,3) for row in rows},anchors=(1,2,3))
+            info=nested_stat(stat.S_IFREG,301)
+            transfers=[dict(source_row=row,path=view_path/name,copied=True,compared=True,sealed=True,
+                errors=[],view_version=o._scan_same_api_version(info)) for row,name in zip(rows,names)]
+            entry,execution,bound_row=object(),object(),object()
+            operands,grammar,cohorts=(object(),),(object(),),(object(),)
+            native=dict(entry=entry,execution=execution,bound_row=bound_row,source=source,
+                source_operands=operands,call_grammar=grammar,cohorts=cohorts,
+                check=o._ordinary_native_source_programme_check_v1,
+                original_check=o._ordinary_native_source_programme_check_v1)
+            native['original_items']=tuple(native.items())
+            effects=dict(rows=[dict(entry=entry,execution=execution,bound_row=bound_row,
+                source_operands=operands,native_programme=native,
+                targets=[dict(path='mutable.pyc',kind='FILE'),dict(path='fixture',kind='DIRECTORY')])])
+            view=dict(root_slot=dict(returned_fd=300),transitions=[])
+            scope.repository=str(root);scope.source=source;scope._ordinary_view_path_v1=view_path
+            scope._ordinary_factory_original_v1=object();scope._ordinary_factory_owner_v1=(1,2)
+            scope._ordinary_policy_v1=dict(original_scope=scope,original_factory=scope._ordinary_factory_original_v1)
+            scope._ordinary_host_original_v1=(source,);scope._ordinary_candidate_v1=None
+            scope._ordinary_transfer_rows_v1=transfers
+            scope._ordinary_occurrence_program_v1=[dict(entry=entry,execution_entry=execution)]
+            scope._ordinary_nested_selection_v1=lambda entry:('actual-method-synthetic-selected-row',)
+            scope._ordinary_effect_programme_record_v1=lambda:effects
+            scope._ordinary_view_effect_record_v1=lambda:view
+            resource=dict(source=source,rows=source.rows,policy_source_pyc_demand=(3,2000,3,12))
+            scope._ordinary_resource_programme_v1=resource
+            scope._ordinary_original_resource_programme_v1=(resource,tuple(resource.items()))
+            scope._ordinary_meter_v1=dict(remaining=dict(metadata_call_limit=10000,
+                native_control_call_limit=100,native_control_read_limit=1000))
+            scope._ordinary_factory_check_v1=lambda:scope._ordinary_factory_original_v1
+            scope._ordinary_pending_close_calls_v1=lambda candidate:0
+            scope._ordinary_factory_errors_v1=[];events=[];slots=[]
+            scope._ordinary_host_check_v1=lambda:events.append('host-anchors')
+            def opened(root_slot,relative):
+                value=dict(returned_fd=401,close_attempted=False,closed=False)
+                slots.append(value);events.append(('open',relative));return value
+            def call(operation,*args,**kwargs):
+                assert operation in (o.os.fstat,o.os.lstat)
+                return info
+            def flags(fd):
+                events.append(('GETFLAGS',fd))
+                if native_error is not None:raise native_error
+                return 16
+            def close(slot,**kwargs):
+                slot['close_attempted']=True;events.append('close')
+                if close_error is not None:raise close_error
+                slot['closed']=True
+            scope._ordinary_cache_open_relative_v1=opened;scope._ordinary_factory_call_v1=call
+            scope._ordinary_nested_flags_v1=flags;scope._ordinary_factory_close_v1=close
+            return scope,source,transfers,events,slots,protected
+
+        with monkeypatch.context() as pyc_ports:
+            pyc_ports.setattr(o,'Path',o.PurePosixPath)
+            pyc_ports.setattr(o,'_ordinary_native_source_programme_check_v1',lambda scope,native:native,raising=False)
+            pyc_ports.setattr(o,'_mapper_slot_settled_v1',lambda slot:slot['closed'])
+            value=nested_pyc_port()
+            record=value[0]._ordinary_nested_source_pyc_v1()
+            assert len(record['rows'])==1 and record['planned']==(29,1,4)
+            assert record['declaration']=='@{QTT_IMMUTABLE_SOURCE_PYC} = "/view/root/pkg/a.cpython-314.pyc" "/repo/root/pkg/a.cpython-314.pyc"'
+            assert value[0]._ordinary_nested_source_pyc_checked_v1() is record and value[3].count(('GETFLAGS',401))==1
+            assert 'mutable.pyc' not in record['declaration'] and '/fixture/' not in record['declaration'] and value[4][0]['closed']
+            value[2][0]['sealed']=False
+            with pytest.raises(o.ValidationReliabilityError,match='EXACT_PROTECTED_ALIAS'):
+                value[0]._ordinary_nested_source_pyc_checked_v1()
+            value[2][0]['sealed']=True
+            record['declaration']+=' "foreign"'
+            with pytest.raises(o.ValidationReliabilityError,match='ORIGINAL_COMPLETED_OBSERVATION'):
+                value[0]._ordinary_nested_source_pyc_checked_v1()
+            unsafe=nested_pyc_port(unsafe=True)
+            with pytest.raises(o.ValidationReliabilityError,match='NATIVE_PATH'):
+                unsafe[0]._ordinary_nested_source_pyc_v1()
+            assert not unsafe[3] and not unsafe[4] and 'source_pyc' not in unsafe[0]._ordinary_policy_v1
+            body_error,close_error=OSError('pyc native port'),OSError('pyc close port')
+            failed=nested_pyc_port(native_error=body_error,close_error=close_error)
+            with pytest.raises(BaseExceptionGroup) as combined:
+                failed[0]._ordinary_nested_source_pyc_v1()
+            assert combined.value.exceptions==(body_error,close_error) and failed[4][0]['close_attempted'] and not failed[4][0]['closed']
+            assert failed[0]._ordinary_policy_v1['source_pyc']['errors']==[body_error,close_error] and not failed[0]._ordinary_policy_v1['source_pyc']['complete']
+
+    # Current complete SOURCE reader graphs and adversarial AST ports share
+    # this original grouped owner. No application body or native child runs.
+    from tools.validation_scope_registry import (_ordinary_readonly_source_family_plan_v1,
+        _ordinary_readonly_source_family_cli_v1)
+    reader_graphs = ((30, 'tools/validate_pr161d_qku_candidate_quality_replay_paper_prioritization.py', ('tools/validate_pr161d_qku_candidate_quality_replay_paper_prioritization.py', 'src/qtt/__init__.py', 'src/qtt/stage1_prediction_markets/qku_candidate_quality_replay_paper_prioritization/__init__.py', 'src/qtt/stage1_prediction_markets/qku_candidate_quality_replay_paper_prioritization/constants.py', 'src/qtt/stage1_prediction_markets/qku_candidate_quality_replay_paper_prioritization/validator.py', 'src/qtt/stage1_prediction_markets/qku_candidate_quality_replay_paper_prioritization/io.py', 'src/qtt/stage1_prediction_markets/qku_candidate_quality_replay_paper_prioritization/models.py')), (31, 'tools/validate_pr161e_replay_paper_outcome_capture_scenario_learning.py', ('tools/validate_pr161e_replay_paper_outcome_capture_scenario_learning.py', 'src/qtt/__init__.py', 'src/qtt/stage1_prediction_markets/replay_paper_outcome_capture_scenario_learning/__init__.py', 'src/qtt/stage1_prediction_markets/replay_paper_outcome_capture_scenario_learning/constants.py', 'src/qtt/stage1_prediction_markets/replay_paper_outcome_capture_scenario_learning/validator.py', 'src/qtt/stage1_prediction_markets/replay_paper_outcome_capture_scenario_learning/compact_records.py', 'src/qtt/stage1_prediction_markets/replay_paper_outcome_capture_scenario_learning/json_io.py', 'src/qtt/stage1_prediction_markets/replay_paper_outcome_capture_scenario_learning/models.py', 'src/qtt/stage1_prediction_markets/replay_paper_outcome_capture_scenario_learning/paths.py', 'src/qtt/stage1_prediction_markets/replay_paper_outcome_capture_scenario_learning/schema_loader.py')), (32, 'tools/validate_pr161f_replay_paper_executor_input_run_artifact_generation.py', ('tools/validate_pr161f_replay_paper_executor_input_run_artifact_generation.py', 'src/qtt/__init__.py', 'src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/__init__.py', 'src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/constants.py', 'src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/validator.py', 'src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/compact_records.py', 'src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/json_io.py', 'src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/models.py', 'src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/paths.py', 'src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schema_loader.py')), (38, 'tools/validate_pr162r_a_replay_paper_executability_classification_audit.py', ('tools/validate_pr162r_a_replay_paper_executability_classification_audit.py', 'src/qtt/__init__.py', 'src/qtt/stage1_prediction_markets/pr162r_a_replay_paper_executability_classification_audit/__init__.py', 'src/qtt/stage1_prediction_markets/pr162r_a_replay_paper_executability_classification_audit/constants.py', 'src/qtt/stage1_prediction_markets/pr162r_a_replay_paper_executability_classification_audit/validator.py', 'src/qtt/stage1_prediction_markets/pr162r_a_replay_paper_executability_classification_audit/json_io.py')), (40, 'tools/validate_pr162r_generic_replay_paper_adapter_rerun.py', ('tools/validate_pr162r_generic_replay_paper_adapter_rerun.py', 'src/qtt/__init__.py', 'src/qtt/stage1_prediction_markets/pr162r_generic_replay_paper_adapter_rerun/__init__.py', 'src/qtt/stage1_prediction_markets/pr162r_generic_replay_paper_adapter_rerun/validators.py', 'src/qtt/stage1_prediction_markets/pr162r_generic_replay_paper_adapter_rerun/paths.py', 'src/qtt/stage1_prediction_markets/pr162r_generic_replay_paper_adapter_rerun/authority_policy.py', 'src/qtt/stage1_prediction_markets/pr162r_generic_replay_paper_adapter_rerun/json_io.py')), (41, 'tools/validate_pr162r_b_replay_paper_data_binding_completion.py', ('tools/validate_pr162r_b_replay_paper_data_binding_completion.py', 'src/qtt/__init__.py', 'src/qtt/stage1_prediction_markets/pr162r_b_replay_paper_data_binding_completion/__init__.py', 'src/qtt/stage1_prediction_markets/pr162r_b_replay_paper_data_binding_completion/validators.py', 'src/qtt/stage1_prediction_markets/pr162r_b_replay_paper_data_binding_completion/paths.py', 'src/qtt/stage1_prediction_markets/pr162r_b_replay_paper_data_binding_completion/authority_policy.py', 'src/qtt/stage1_prediction_markets/pr162r_b_replay_paper_data_binding_completion/json_io.py')), (42, 'tools/validate_pr163_generic_paper_adapter_capture_framework.py', ('tools/validate_pr163_generic_paper_adapter_capture_framework.py', 'src/qtt/__init__.py', 'src/qtt/stage1_prediction_markets/pr163_generic_paper_adapter_capture_framework/__init__.py', 'src/qtt/stage1_prediction_markets/pr163_generic_paper_adapter_capture_framework/validators.py', 'src/qtt/stage1_prediction_markets/pr163_generic_paper_adapter_capture_framework/report_builder.py', 'src/qtt/stage1_prediction_markets/pr163_generic_paper_adapter_capture_framework/paths.py', 'src/qtt/stage1_prediction_markets/pr163_generic_paper_adapter_capture_framework/authority_policy.py', 'src/qtt/stage1_prediction_markets/pr163_generic_paper_adapter_capture_framework/json_io.py', 'src/qtt/stage1_prediction_markets/pr163_generic_paper_adapter_capture_framework/paper_pretrade_checks.py', 'src/qtt/stage1_prediction_markets/pr163_generic_paper_adapter_capture_framework/paper_scenario_grid.py', 'src/qtt/stage1_prediction_markets/pr163_generic_paper_adapter_capture_framework/report_sharding.py', 'src/qtt/stage1_prediction_markets/pr163_generic_paper_adapter_capture_framework/downstream_handoff.py', 'src/qtt/stage1_prediction_markets/pr163_generic_paper_adapter_capture_framework/forecastx_ibkr_paper_adapter.py', 'src/qtt/stage1_prediction_markets/pr163_generic_paper_adapter_capture_framework/input_discovery.py', 'src/qtt/stage1_prediction_markets/pr163_generic_paper_adapter_capture_framework/kalshi_paper_adapter.py', 'src/qtt/stage1_prediction_markets/pr163_generic_paper_adapter_capture_framework/llm_future_handoff.py', 'src/qtt/stage1_prediction_markets/pr163_generic_paper_adapter_capture_framework/paper_capture_events.py', 'src/qtt/stage1_prediction_markets/pr163_generic_paper_adapter_capture_framework/paper_cash_reservation.py', 'src/qtt/stage1_prediction_markets/pr163_generic_paper_adapter_capture_framework/paper_contracts.py', 'src/qtt/stage1_prediction_markets/pr163_generic_paper_adapter_capture_framework/paper_decision_intent.py', 'src/qtt/stage1_prediction_markets/pr163_generic_paper_adapter_capture_framework/paper_execution_costs.py', 'src/qtt/stage1_prediction_markets/pr163_generic_paper_adapter_capture_framework/paper_fill_simulator.py', 'src/qtt/stage1_prediction_markets/pr163_generic_paper_adapter_capture_framework/paper_latency_slippage.py', 'src/qtt/stage1_prediction_markets/pr163_generic_paper_adapter_capture_framework/paper_ledger_invariants.py', 'src/qtt/stage1_prediction_markets/pr163_generic_paper_adapter_capture_framework/paper_market_state.py', 'src/qtt/stage1_prediction_markets/pr163_generic_paper_adapter_capture_framework/paper_order_intent.py', 'src/qtt/stage1_prediction_markets/pr163_generic_paper_adapter_capture_framework/paper_order_state_machine.py', 'src/qtt/stage1_prediction_markets/pr163_generic_paper_adapter_capture_framework/paper_portfolio_ledger.py', 'src/qtt/stage1_prediction_markets/pr163_generic_paper_adapter_capture_framework/paper_risk_policy.py', 'src/qtt/stage1_prediction_markets/pr163_generic_paper_adapter_capture_framework/polymarket_paper_adapter.py', 'src/qtt/stage1_prediction_markets/pr163_generic_paper_adapter_capture_framework/qku_agent_routing.py', 'src/qtt/stage1_prediction_markets/pr163_generic_paper_adapter_capture_framework/qku_prioritization_handoff.py', 'src/qtt/stage1_prediction_markets/pr163_generic_paper_adapter_capture_framework/quantum_paper_advisory.py', 'src/qtt/stage1_prediction_markets/pr163_generic_paper_adapter_capture_framework/schema_writer.py', 'src/qtt/stage1_prediction_markets/pr163_generic_paper_adapter_capture_framework/source_candidate_policy.py', 'src/qtt/stage1_prediction_markets/pr163_generic_paper_adapter_capture_framework/venue_neutral_synthetic_paper_adapter.py', 'src/qtt/stage1_prediction_markets/pr163_generic_paper_adapter_capture_framework/paper_adapter_interface.py')), (43, 'tools/validate_pr163_b_paired_replay_paper_concurrent_executor.py', ('tools/validate_pr163_b_paired_replay_paper_concurrent_executor.py', 'src/qtt/__init__.py', 'src/qtt/stage1_prediction_markets/pr163_b_paired_replay_paper_concurrent_executor/__init__.py', 'src/qtt/stage1_prediction_markets/pr163_b_paired_replay_paper_concurrent_executor/validators.py', 'src/qtt/stage1_prediction_markets/pr163_b_paired_replay_paper_concurrent_executor/paths.py', 'src/qtt/stage1_prediction_markets/pr163_b_paired_replay_paper_concurrent_executor/authority_policy.py', 'src/qtt/stage1_prediction_markets/pr163_b_paired_replay_paper_concurrent_executor/json_io.py', 'src/qtt/stage1_prediction_markets/pr163_b_paired_replay_paper_concurrent_executor/report_sharding.py', 'src/qtt/stage1_prediction_markets/pr163_b_paired_replay_paper_concurrent_executor/scenario_stress.py')), (44, 'tools/validate_pr164_review_provenance_qku_canonical_coverage_audit.py', ('tools/validate_pr164_review_provenance_qku_canonical_coverage_audit.py', 'src/qtt/__init__.py', 'src/qtt/stage1_prediction_markets/pr164_review_provenance_qku_canonical_coverage_audit/__init__.py', 'src/qtt/stage1_prediction_markets/pr164_review_provenance_qku_canonical_coverage_audit/validators.py', 'src/qtt/stage1_prediction_markets/pr164_review_provenance_qku_canonical_coverage_audit/report_builder.py', 'src/qtt/stage1_prediction_markets/pr164_review_provenance_qku_canonical_coverage_audit/paths.py', 'src/qtt/stage1_prediction_markets/pr164_review_provenance_qku_canonical_coverage_audit/authority_policy.py', 'src/qtt/stage1_prediction_markets/pr164_review_provenance_qku_canonical_coverage_audit/central_reason_codes.py', 'src/qtt/stage1_prediction_markets/pr164_review_provenance_qku_canonical_coverage_audit/json_io.py', 'src/qtt/stage1_prediction_markets/pr164_review_provenance_qku_canonical_coverage_audit/report_sharding.py', 'src/qtt/stage1_prediction_markets/pr164_review_provenance_qku_canonical_coverage_audit/agent_orchestration_router.py', 'src/qtt/stage1_prediction_markets/pr164_review_provenance_qku_canonical_coverage_audit/artifact_discovery.py', 'src/qtt/stage1_prediction_markets/pr164_review_provenance_qku_canonical_coverage_audit/candidate_acquisition_workbench.py', 'src/qtt/stage1_prediction_markets/pr164_review_provenance_qku_canonical_coverage_audit/candidate_source_policy.py', 'src/qtt/stage1_prediction_markets/pr164_review_provenance_qku_canonical_coverage_audit/deterministic_ids.py', 'src/qtt/stage1_prediction_markets/pr164_review_provenance_qku_canonical_coverage_audit/divergence_materiality_review.py', 'src/qtt/stage1_prediction_markets/pr164_review_provenance_qku_canonical_coverage_audit/downstream_repair_trigger_matrix.py', 'src/qtt/stage1_prediction_markets/pr164_review_provenance_qku_canonical_coverage_audit/execution_cost_component_model.py', 'src/qtt/stage1_prediction_markets/pr164_review_provenance_qku_canonical_coverage_audit/formula_objective_solver_coverage.py', 'src/qtt/stage1_prediction_markets/pr164_review_provenance_qku_canonical_coverage_audit/graph_source_enrichment_plan.py', 'src/qtt/stage1_prediction_markets/pr164_review_provenance_qku_canonical_coverage_audit/infrastructure_rejection_review.py', 'src/qtt/stage1_prediction_markets/pr164_review_provenance_qku_canonical_coverage_audit/input_consumption.py', 'src/qtt/stage1_prediction_markets/pr164_review_provenance_qku_canonical_coverage_audit/latency_hot_path_classifier.py', 'src/qtt/stage1_prediction_markets/pr164_review_provenance_qku_canonical_coverage_audit/master_inventory_reconciliation.py', 'src/qtt/stage1_prediction_markets/pr164_review_provenance_qku_canonical_coverage_audit/market_scope_classifier.py', 'src/qtt/stage1_prediction_markets/pr164_review_provenance_qku_canonical_coverage_audit/model_risk_inventory.py', 'src/qtt/stage1_prediction_markets/pr164_review_provenance_qku_canonical_coverage_audit/negative_memory_preparation.py', 'src/qtt/stage1_prediction_markets/pr164_review_provenance_qku_canonical_coverage_audit/online_candidate_source_enrichment.py', 'src/qtt/stage1_prediction_markets/pr164_review_provenance_qku_canonical_coverage_audit/pr163_b_evidence_review.py', 'src/qtt/stage1_prediction_markets/pr164_review_provenance_qku_canonical_coverage_audit/pr165_scoring_readiness.py', 'src/qtt/stage1_prediction_markets/pr164_review_provenance_qku_canonical_coverage_audit/provenance_tiering.py', 'src/qtt/stage1_prediction_markets/pr164_review_provenance_qku_canonical_coverage_audit/qku_computability_materializer.py', 'src/qtt/stage1_prediction_markets/pr164_review_provenance_qku_canonical_coverage_audit/qku_formula_library.py', 'src/qtt/stage1_prediction_markets/pr164_review_provenance_qku_canonical_coverage_audit/qku_formula_test_vectors.py', 'src/qtt/stage1_prediction_markets/pr164_review_provenance_qku_canonical_coverage_audit/qku_identity_reconciliation.py', 'src/qtt/stage1_prediction_markets/pr164_review_provenance_qku_canonical_coverage_audit/qku_missing_value_fill_router.py', 'src/qtt/stage1_prediction_markets/pr164_review_provenance_qku_canonical_coverage_audit/qku_umbrella_audit.py', 'src/qtt/stage1_prediction_markets/pr164_review_provenance_qku_canonical_coverage_audit/quantum_compatibility_router.py', 'src/qtt/stage1_prediction_markets/pr164_review_provenance_qku_canonical_coverage_audit/schema_writer.py', 'src/qtt/stage1_prediction_markets/pr164_review_provenance_qku_canonical_coverage_audit/stage1_activation_dormancy.py', 'src/qtt/stage1_prediction_markets/pr164_review_provenance_qku_canonical_coverage_audit/qku_algorithm_formulation_library.py')), (45, 'tools/validate_pr163_c_pretrade_infrastructure_rejection_remediation.py', ('tools/validate_pr163_c_pretrade_infrastructure_rejection_remediation.py', 'src/qtt/__init__.py', 'src/qtt/stage1_prediction_markets/pr163_c_pretrade_infrastructure_rejection_remediation/__init__.py', 'src/qtt/stage1_prediction_markets/pr163_c_pretrade_infrastructure_rejection_remediation/validators.py', 'src/qtt/stage1_prediction_markets/pr163_c_pretrade_infrastructure_rejection_remediation/paths.py', 'src/qtt/stage1_prediction_markets/pr163_c_pretrade_infrastructure_rejection_remediation/central_pretrade_repair_reason_codes.py', 'src/qtt/stage1_prediction_markets/pr163_c_pretrade_infrastructure_rejection_remediation/json_io.py', 'src/qtt/stage1_prediction_markets/pr163_c_pretrade_infrastructure_rejection_remediation/pretrade_repair_authority_policy.py', 'src/qtt/stage1_prediction_markets/pr163_c_pretrade_infrastructure_rejection_remediation/repair_formula_library.py', 'src/qtt/stage1_prediction_markets/pr163_c_pretrade_infrastructure_rejection_remediation/report_sharding.py', 'tools/ci_branch_context.py')), (46, 'tools/validate_pr165_evidence_backed_scoring_ranking.py', ('tools/validate_pr165_evidence_backed_scoring_ranking.py', 'src/qtt/__init__.py', 'src/qtt/stage1_prediction_markets/pr165_evidence_backed_scoring_ranking/__init__.py', 'src/qtt/stage1_prediction_markets/pr165_evidence_backed_scoring_ranking/validators.py', 'src/qtt/stage1_prediction_markets/pr165_evidence_backed_scoring_ranking/paths.py', 'src/qtt/stage1_prediction_markets/pr165_evidence_backed_scoring_ranking/central_scoring_reason_codes.py', 'src/qtt/stage1_prediction_markets/pr165_evidence_backed_scoring_ranking/json_io.py', 'src/qtt/stage1_prediction_markets/pr165_evidence_backed_scoring_ranking/repair_routing_vocab.py', 'src/qtt/stage1_prediction_markets/pr165_evidence_backed_scoring_ranking/report_sharding.py', 'src/qtt/stage1_prediction_markets/pr165_evidence_backed_scoring_ranking/scoring_authority_policy.py', 'src/qtt/stage1_prediction_markets/pr165_evidence_backed_scoring_ranking/scoring_status_vocab.py')), (47, 'tools/validate_pr165_b_condition_scoped_negative_memory.py', ('tools/validate_pr165_b_condition_scoped_negative_memory.py', 'src/qtt/__init__.py', 'src/qtt/stage1_prediction_markets/pr165_b_condition_scoped_negative_memory/__init__.py', 'src/qtt/stage1_prediction_markets/pr165_b_condition_scoped_negative_memory/validators.py', 'src/qtt/stage1_prediction_markets/pr165_b_condition_scoped_negative_memory/paths.py', 'src/qtt/stage1_prediction_markets/pr165_b_condition_scoped_negative_memory/json_io.py', 'src/qtt/stage1_prediction_markets/pr165_b_condition_scoped_negative_memory/negative_memory_action_policy.py', 'src/qtt/stage1_prediction_markets/pr165_b_condition_scoped_negative_memory/negative_memory_authority_policy.py', 'src/qtt/stage1_prediction_markets/pr165_b_condition_scoped_negative_memory/negative_memory_reason_codes.py', 'src/qtt/stage1_prediction_markets/pr165_b_condition_scoped_negative_memory/negative_memory_status_vocab.py', 'src/qtt/stage1_prediction_markets/pr165_b_condition_scoped_negative_memory/quantum_negative_memory.py', 'src/qtt/stage1_prediction_markets/pr165_b_condition_scoped_negative_memory/report_sharding.py', 'src/qtt/stage1_prediction_markets/pr165_b_condition_scoped_negative_memory/deterministic_ids.py')), (48, 'tools/validate_pr165_c_replay_paper_memory_consumer_integration.py', ('tools/validate_pr165_c_replay_paper_memory_consumer_integration.py', 'src/qtt/__init__.py', 'src/qtt/stage1_prediction_markets/pr165_c_replay_paper_memory_consumer_integration/__init__.py', 'src/qtt/stage1_prediction_markets/pr165_c_replay_paper_memory_consumer_integration/validators.py', 'src/qtt/stage1_prediction_markets/pr165_c_replay_paper_memory_consumer_integration/paths.py', 'src/qtt/stage1_prediction_markets/pr165_c_replay_paper_memory_consumer_integration/authority_policy.py', 'src/qtt/stage1_prediction_markets/pr165_c_replay_paper_memory_consumer_integration/central_vocab.py', 'src/qtt/stage1_prediction_markets/pr165_c_replay_paper_memory_consumer_integration/computability_action_vocab.py', 'src/qtt/stage1_prediction_markets/pr165_c_replay_paper_memory_consumer_integration/json_io.py', 'src/qtt/stage1_prediction_markets/pr165_c_replay_paper_memory_consumer_integration/memory_consumer_action_vocab.py', 'src/qtt/stage1_prediction_markets/pr165_c_replay_paper_memory_consumer_integration/report_sharding.py')), (49, 'tools/validate_pr165_d_scenario_qku_combination_selection.py', ('tools/validate_pr165_d_scenario_qku_combination_selection.py', 'src/qtt/__init__.py', 'src/qtt/stage1_prediction_markets/pr165_d_scenario_qku_combination_selection/__init__.py', 'src/qtt/stage1_prediction_markets/pr165_d_scenario_qku_combination_selection/validators.py', 'src/qtt/stage1_prediction_markets/pr165_d_scenario_qku_combination_selection/paths.py', 'src/qtt/stage1_prediction_markets/pr165_d_scenario_qku_combination_selection/authority_policy.py', 'src/qtt/stage1_prediction_markets/pr165_d_scenario_qku_combination_selection/central_vocab.py', 'src/qtt/stage1_prediction_markets/pr165_d_scenario_qku_combination_selection/input_consumption.py', 'src/qtt/stage1_prediction_markets/pr165_d_scenario_qku_combination_selection/json_io.py', 'src/qtt/stage1_prediction_markets/pr165_d_scenario_qku_combination_selection/report_sharding.py', 'src/qtt/stage1_prediction_markets/pr165_d_scenario_qku_combination_selection/deterministic_ids.py')), (50, 'tools/validate_pr166_s_replay_paper_scenario_retest_execution.py', ('tools/validate_pr166_s_replay_paper_scenario_retest_execution.py', 'src/qtt/__init__.py', 'src/qtt/stage1_prediction_markets/pr166_s_replay_paper_scenario_retest_execution/__init__.py', 'src/qtt/stage1_prediction_markets/pr166_s_replay_paper_scenario_retest_execution/validators.py', 'src/qtt/stage1_prediction_markets/pr166_s_replay_paper_scenario_retest_execution/report_builder.py', 'src/qtt/stage1_prediction_markets/pr166_s_replay_paper_scenario_retest_execution/paths.py', 'src/qtt/stage1_prediction_markets/pr166_s_replay_paper_scenario_retest_execution/authority_policy.py', 'src/qtt/stage1_prediction_markets/pr166_s_replay_paper_scenario_retest_execution/central_vocab.py', 'src/qtt/stage1_prediction_markets/pr166_s_replay_paper_scenario_retest_execution/json_io.py', 'src/qtt/stage1_prediction_markets/pr166_s_replay_paper_scenario_retest_execution/report_sharding.py', 'src/qtt/stage1_prediction_markets/pr166_s_replay_paper_scenario_retest_execution/agent_execution_contract.py', 'src/qtt/stage1_prediction_markets/pr166_s_replay_paper_scenario_retest_execution/agent_execution_handoff.py', 'src/qtt/stage1_prediction_markets/pr166_s_replay_paper_scenario_retest_execution/commander_execution_handoff.py', 'src/qtt/stage1_prediction_markets/pr166_s_replay_paper_scenario_retest_execution/dashboard_execution_handoff.py', 'src/qtt/stage1_prediction_markets/pr166_s_replay_paper_scenario_retest_execution/event_stream_builder.py', 'src/qtt/stage1_prediction_markets/pr166_s_replay_paper_scenario_retest_execution/execution_cost_engine.py', 'src/qtt/stage1_prediction_markets/pr166_s_replay_paper_scenario_retest_execution/execution_model_assumptions.py', 'src/qtt/stage1_prediction_markets/pr166_s_replay_paper_scenario_retest_execution/execution_sensitivity_grid.py', 'src/qtt/stage1_prediction_markets/pr166_s_replay_paper_scenario_retest_execution/external_design_scouting.py', 'src/qtt/stage1_prediction_markets/pr166_s_replay_paper_scenario_retest_execution/fee_model.py', 'src/qtt/stage1_prediction_markets/pr166_s_replay_paper_scenario_retest_execution/fill_model.py', 'src/qtt/stage1_prediction_markets/pr166_s_replay_paper_scenario_retest_execution/governance_execution_handoff.py', 'src/qtt/stage1_prediction_markets/pr166_s_replay_paper_scenario_retest_execution/input_consumption.py', 'src/qtt/stage1_prediction_markets/pr166_s_replay_paper_scenario_retest_execution/latency_model.py', 'src/qtt/stage1_prediction_markets/pr166_s_replay_paper_scenario_retest_execution/lineage_graph_builder.py', 'src/qtt/stage1_prediction_markets/pr166_s_replay_paper_scenario_retest_execution/liquidity_model.py', 'src/qtt/stage1_prediction_markets/pr166_s_replay_paper_scenario_retest_execution/market_impact_model.py', 'src/qtt/stage1_prediction_markets/pr166_s_replay_paper_scenario_retest_execution/memory_refresh_candidates.py', 'src/qtt/stage1_prediction_markets/pr166_s_replay_paper_scenario_retest_execution/no_lookahead_audit.py', 'src/qtt/stage1_prediction_markets/pr166_s_replay_paper_scenario_retest_execution/optional_input_receipts.py', 'src/qtt/stage1_prediction_markets/pr166_s_replay_paper_scenario_retest_execution/order_intent_builder.py', 'src/qtt/stage1_prediction_markets/pr166_s_replay_paper_scenario_retest_execution/order_state_machine.py', 'src/qtt/stage1_prediction_markets/pr166_s_replay_paper_scenario_retest_execution/orphan_artifact_audit.py', 'src/qtt/stage1_prediction_markets/pr166_s_replay_paper_scenario_retest_execution/paper_episode_builder.py', 'src/qtt/stage1_prediction_markets/pr166_s_replay_paper_scenario_retest_execution/paper_run_engine.py', 'src/qtt/stage1_prediction_markets/pr166_s_replay_paper_scenario_retest_execution/point_in_time_execution_audit.py', 'src/qtt/stage1_prediction_markets/pr166_s_replay_paper_scenario_retest_execution/quantum_advisory_passthrough.py', 'src/qtt/stage1_prediction_markets/pr166_s_replay_paper_scenario_retest_execution/repair_feedback_router.py', 'src/qtt/stage1_prediction_markets/pr166_s_replay_paper_scenario_retest_execution/replay_episode_builder.py', 'src/qtt/stage1_prediction_markets/pr166_s_replay_paper_scenario_retest_execution/replay_run_engine.py', 'src/qtt/stage1_prediction_markets/pr166_s_replay_paper_scenario_retest_execution/result_attribution.py', 'src/qtt/stage1_prediction_markets/pr166_s_replay_paper_scenario_retest_execution/result_confidence.py', 'src/qtt/stage1_prediction_markets/pr166_s_replay_paper_scenario_retest_execution/schema_writer.py', 'src/qtt/stage1_prediction_markets/pr166_s_replay_paper_scenario_retest_execution/score_refresh_candidates.py', 'src/qtt/stage1_prediction_markets/pr166_s_replay_paper_scenario_retest_execution/selected_batch_loader.py', 'src/qtt/stage1_prediction_markets/pr166_s_replay_paper_scenario_retest_execution/settlement_assumption_model.py', 'src/qtt/stage1_prediction_markets/pr166_s_replay_paper_scenario_retest_execution/slippage_model.py', 'src/qtt/stage1_prediction_markets/pr166_s_replay_paper_scenario_retest_execution/spread_model.py', 'src/qtt/stage1_prediction_markets/pr166_s_replay_paper_scenario_retest_execution/deterministic_ids.py')))
+    reader_source_root = Path(runner.REPO_ROOT)
+    for source_position, entry_source, source_names in reader_graphs:
+        source_rows=tuple((name,(reader_source_root/name).read_text(encoding='utf8'),
+            source_ast.parse((reader_source_root/name).read_text(encoding='utf8'))) for name in source_names)
+        calculation=_ordinary_readonly_source_family_plan_v1(source_rows,entry_source)
+        assert not calculation['unresolved'] and calculation['value_domain']=='CURRENT_SOURCE_JSON_PATH_DATA_ONLY'
+        assert not calculation['native_process_operations'] and not calculation['write_operations']
+        assert not _ordinary_readonly_source_family_cli_v1(source_rows[0][2],entry_source)
+        assert calculation['readonly_operations'] and calculation['selected_call_nodes']
+    safe_reader="from pathlib import Path\nimport json\ndef main():\n return json.loads(Path('input.json').read_text(encoding='utf8'))\n"
+    def source_calculation(body):
+        return _ordinary_readonly_source_family_plan_v1((('tools/reader.py',body,source_ast.parse(body)),),'tools/reader.py')
+    assert not source_calculation(safe_reader)['unresolved']
+    # These complete Source declarations produce bounded initializer metadata;
+    # they grant no execution and keep the opaque Code outside JSON values.
+    identity_declaration='_ORDINARY_INITIALIZED_MODULE_CODE_V1 = __import__("sys")._getframe().f_code'
+    def identity_source_calculation(declaration,tail='',entry='tools/ci_branch_context.py'):
+        body=declaration+'\n'+tail+'\ndef main():\n return 0\n'
+        return _ordinary_readonly_source_family_plan_v1(((entry,body,source_ast.parse(body)),),entry)
+    identity_calculation=identity_source_calculation(identity_declaration)
+    assert not identity_calculation['unresolved'] and identity_calculation['fresh_execution'] is None
+    assert identity_calculation['value_domain']=='CURRENT_SOURCE_JSON_PATH_DATA_ONLY'
+    identity_spellings=("__import__('sys')._getframe",'__import__')
+    assert tuple(row[2] for row in identity_calculation['initialization_operations'])==identity_spellings
+    assert tuple(row[2] for row in identity_calculation['calls'])==identity_spellings
+    assert tuple(source_ast.unparse(row[1].func) for row in identity_calculation['selected_call_nodes'])==identity_spellings
+    assert all(row[1]!='_ORDINARY_INITIALIZED_MODULE_CODE_V1' for row in identity_calculation['source_data_constants'])
+    assert not identity_calculation['native_process_operations'] and not identity_calculation['native_data_operations'] and not identity_calculation['write_operations']
+    identity_negatives=(
+        (identity_declaration,'','tools/reader.py'),
+        (identity_declaration.replace('_ORDINARY_INITIALIZED_MODULE_CODE_V1','other'),'','tools/ci_branch_context.py'),
+        (identity_declaration.replace('"sys"','"os"'),'','tools/ci_branch_context.py'),
+        (identity_declaration.replace('_getframe()','_getframe(1)'),'','tools/ci_branch_context.py'),
+        (identity_declaration.replace('_getframe()','_getframe(depth=0)'),'','tools/ci_branch_context.py'),
+        (identity_declaration.replace('import__("sys")','import__("sys",None)'),'','tools/ci_branch_context.py'),
+        (identity_declaration.replace('.f_code','.f_globals'),'','tools/ci_branch_context.py'),
+        (identity_declaration.replace('.f_code','.f_back.f_code'),'','tools/ci_branch_context.py'),
+        (identity_declaration.replace('.f_code',''),'','tools/ci_branch_context.py'),
+        (identity_declaration+'\n'+identity_declaration,'','tools/ci_branch_context.py'),
+        ('def hidden():\n '+identity_declaration,'','tools/ci_branch_context.py'),
+        (identity_declaration,'other=_ORDINARY_INITIALIZED_MODULE_CODE_V1','tools/ci_branch_context.py'),
+        (identity_declaration,'del _ORDINARY_INITIALIZED_MODULE_CODE_V1','tools/ci_branch_context.py'),
+        (identity_declaration,'__import__=lambda name: None','tools/ci_branch_context.py'),
+        (identity_declaration,'import os as __import__','tools/ci_branch_context.py'),
+        (identity_declaration,'from builtins import __import__','tools/ci_branch_context.py'),
+        (identity_declaration,'def __import__(name):\n return None','tools/ci_branch_context.py'),
+        (identity_declaration,'class __import__:\n pass','tools/ci_branch_context.py'),
+        (identity_declaration,'def hidden(__import__):\n return 0','tools/ci_branch_context.py'),
+        (identity_declaration,'def hidden():\n global __import__','tools/ci_branch_context.py'),
+        (identity_declaration,'try:\n pass\nexcept ValueError as __import__:\n pass','tools/ci_branch_context.py'),
+        (identity_declaration,"match ():\n case [*__import__]:\n  pass",'tools/ci_branch_context.py'),
+        (identity_declaration,"match {}:\n case {**__import__}:\n  pass",'tools/ci_branch_context.py'),
+        (identity_declaration,"match 0:\n case __import__:\n  pass",'tools/ci_branch_context.py'),
+        (identity_declaration,'for __import__ in ():\n pass','tools/ci_branch_context.py'),
+        (identity_declaration,'if (__import__:=None):\n pass','tools/ci_branch_context.py'),
+        (identity_declaration,'with None as __import__:\n pass','tools/ci_branch_context.py'),
+        (identity_declaration,'__loader__=None','tools/ci_branch_context.py'),
+        (identity_declaration,'import sys\nsys._getframe=lambda:None','tools/ci_branch_context.py'),
+        (identity_declaration,"import sys\nsetattr(sys,'_getframe',lambda:None)",'tools/ci_branch_context.py'),
+        (identity_declaration,"import sys\nsys.__dict__['_getframe']=lambda:None",'tools/ci_branch_context.py'),
+        (identity_declaration,"import sys\nsys.__dict__.update(_getframe=lambda:None)",'tools/ci_branch_context.py'),
+        (identity_declaration,'from sys import _getframe as getter','tools/ci_branch_context.py'),
+        (identity_declaration,"other=__import__('sys')",'tools/ci_branch_context.py'),
+        (identity_declaration,"import builtins\nbuiltins.__import__=lambda name:None",'tools/ci_branch_context.py'),
+    )
+    identity_negatives+=(
+        (identity_declaration,'type T[__import__] = None','tools/ci_branch_context.py'),
+        (identity_declaration,'type T[**__import__] = None','tools/ci_branch_context.py'),
+        (identity_declaration,'type T[*__import__] = None','tools/ci_branch_context.py'),
+        (identity_declaration,"globals()['_ORDINARY_INITIALIZED_MODULE_CODE_V1']=None",'tools/ci_branch_context.py'),
+        (identity_declaration,"del globals()['_ORDINARY_INITIALIZED_MODULE_CODE_V1']",'tools/ci_branch_context.py'),
+        (identity_declaration,'import sys\nsys._ORDINARY_INITIALIZED_MODULE_CODE_V1=None','tools/ci_branch_context.py'),
+        (identity_declaration,'import sys\ndel sys._ORDINARY_INITIALIZED_MODULE_CODE_V1','tools/ci_branch_context.py'),
+        (identity_declaration,"globals()['__loader__']=None",'tools/ci_branch_context.py'),
+        (identity_declaration,"del globals()['__loader__']",'tools/ci_branch_context.py'),
+        (identity_declaration,'import sys\nsys.__loader__=None','tools/ci_branch_context.py'),
+        (identity_declaration,'import sys\ndel sys.__loader__','tools/ci_branch_context.py'),
+        (identity_declaration,"import sys\nsetattr(sys,'_ORDINARY_INITIALIZED_MODULE_CODE_V1',None)",'tools/ci_branch_context.py'),
+        (identity_declaration,'import sys\nsys.__dict__.update(__loader__=None)','tools/ci_branch_context.py'),
+    )
+    for declaration,tail,entry_source in identity_negatives:
+        denied_identity=identity_source_calculation(declaration,tail,entry_source)
+        assert denied_identity['unresolved'] and denied_identity['value_domain'] is None
+        assert not denied_identity['initialization_operations']
+    # Fixed inventory facets retain the original REG callable/global owner.
+    # These synthetic Source operands issue no native/source/resource grant.
+    from tools import validation_scope_registry as facet_registry
+    from tools import validation_inventory as inventory_facet
+    facet_plan = inventory_facet._facet_reg_fn_readonly_source_family_plan_v1
+    facet_cli = inventory_facet._facet_reg_fn_readonly_source_cli_projection_v1
+    assert facet_plan.__globals__ is inventory_facet.__dict__
+    assert facet_cli.__globals__ is inventory_facet.__dict__
+    assert facet_plan.__module__ == facet_cli.__module__ == 'tools.validation_inventory'
+    assert _ordinary_readonly_source_family_plan_v1.__globals__ is facet_registry.__dict__
+    assert _ordinary_readonly_source_family_plan_v1.__kwdefaults__ == {'fresh_execution': None}
+    assert facet_plan.__kwdefaults__ == {'fresh_execution': None}
+    facet_error = OSError('original registry projection failure')
+    facet_calls = []
+    def original_registry_projection(tree, entry):
+        facet_calls.append((tree, entry))
+        raise facet_error
+    def foreign_inventory_projection(*args):
+        raise AssertionError('inventory namespace substituted for original REG')
+    with monkeypatch.context() as facet_ports:
+        facet_ports.setattr(facet_registry, '_ordinary_readonly_source_cli_projection_v1', original_registry_projection)
+        facet_ports.setattr(inventory_facet, '_ordinary_readonly_source_cli_projection_v1', foreign_inventory_projection, raising=False)
+        with pytest.raises(OSError) as retained_facet_error:
+            source_calculation(safe_reader)
+        assert retained_facet_error.value is facet_error
+        assert len(facet_calls) == 1 and facet_calls[0][1] == 'tools/reader.py'
+    assert not source_calculation(safe_reader)['unresolved']
+    # Synthetic original-owner ports exercise no native/source authority.
+    from tools import validation_reliability as absent_owner
+    with monkeypatch.context() as absent_ports:
+        for absent_flag_name, absent_flag_default in (('O_NOFOLLOW',0x20000),('O_CLOEXEC',0x80000),('O_DIRECTORY',0x10000)):
+            absent_ports.setattr(absent_owner.os,absent_flag_name,
+                getattr(absent_owner.os,absent_flag_name,absent_flag_default),raising=False)
+        from types import SimpleNamespace as absent_namespace
+        absent_calls = []
+        def absent_fixture(*, metadata_failure=None, close_failure=None, now_present=False):
+            absent_scope = object.__new__(absent_owner._LinuxPreflightScopeV1)
+            absent_source = object.__new__(absent_owner._LinuxImmutableSourceSealV2)
+            absent_census = object.__new__(absent_owner._LinuxPreflightCensusV1)
+            absent_root = absent_owner.Path('/repo')
+            absent_row = dict(path=str(absent_root), role='repository', kind='directory',
+                roster=['present.json'])
+            absent_version = (11, 12)
+            absent_census.complete = True
+            absent_census.roots = {'repository': absent_root}
+            absent_census.records = [absent_row]
+            absent_census._version = lambda value: absent_version
+            absent_source.census, absent_source.root = absent_census, absent_root
+            absent_source.rows, absent_source.row_index = [absent_row], {str(absent_root): absent_row}
+            absent_source.post = {str(absent_root): absent_version}
+            absent_source.original_flags, absent_source.originals, absent_source.anchors = {}, {}, []
+            absent_source.directories = {str(absent_root): (('present.json', 'file'),)}
+            absent_source.files = {}
+            absent_source.state, absent_source.failure, absent_source.phase = 'READABLE', None, 'work'
+            absent_source.stage = 'fixture-original-stage'
+            absent_source.pid, absent_source.thread = absent_owner.os.getpid(), absent_owner.threading.get_ident()
+            absent_source.owned = {}
+            absent_scope.source = absent_source
+            absent_scope.query = absent_namespace(pid=absent_source.pid, thread=absent_source.thread)
+            absent_scope._ordinary_factory_errors_v1 = []
+            absent_scope._ordinary_host_original_v1 = (absent_source,absent_source.rows,absent_source.row_index,
+                absent_source.post,absent_source.original_flags,absent_source.originals,absent_source.anchors)
+            absent_source._ordinary_meter_scope_v1 = absent_scope
+            absent_source._check = lambda: None
+            absent_source._anchors_live = lambda: absent_calls.append(('anchors',))
+            absent_source._identity = lambda fd,row,kind: absent_calls.append(('identity',fd,row,kind))
+            def absent_open(part, flags, **kwargs):
+                descriptor = 70 + sum(item[0] == 'open' for item in absent_calls)
+                absent_calls.append(('open',part,flags,kwargs,descriptor))
+                absent_source.owned[descriptor] = 'setup'
+                return descriptor
+            def absent_close(descriptor):
+                absent_calls.append(('close',descriptor))
+                if close_failure is not None and descriptor == max(absent_source.owned):
+                    raise close_failure
+                del absent_source.owned[descriptor]
+            def absent_meta(function, *args, **kwargs):
+                absent_calls.append(('metadata',function,args,kwargs))
+                if function is absent_owner.os.stat:
+                    assert args == ('missing',) and kwargs['follow_symlinks'] is False
+                    assert kwargs['dir_fd'] in absent_source.owned
+                    if metadata_failure is not None: raise metadata_failure
+                    if now_present: return object()
+                    raise FileNotFoundError(2, 'fixture authentic no entry', 'missing')
+                assert function is absent_owner.os.lstat
+                return object()
+            absent_source._open, absent_source._close, absent_source._meta = absent_open,absent_close,absent_meta
+            absent_component = dict(scope=absent_scope,source=absent_source,source_operands=[],errors=[])
+            return absent_scope,absent_source,absent_component
+        absent_calls.clear()
+        absent_scope,absent_source,absent_component = absent_fixture()
+        absent_join = dict(acquisitions=[])
+        absent_result = absent_owner._ordinary_rp_join_raw_v1(absent_scope,absent_component,absent_join,
+            'missing/deep/report.json',required=False,source_byte_limit=1,source_node_limit=1)
+        absent_observed = absent_result['observed']
+        assert absent_result['raw'] is absent_result['value'] is absent_result['data_allocation'] is None
+        assert absent_observed is absent_component['source_operands'][0]
+        assert absent_observed['complete'] and absent_observed['error'] is None
+        assert absent_observed['source_form'] == 'ABSENT' and absent_observed['raw_bytes'] == 0
+        assert absent_observed['version'] == absent_result['slot']['absent_version']
+        assert absent_observed['row'] is absent_result['slot']['absent_parent']
+        assert absent_observed['suffix'] == ('missing','deep','report.json')
+        assert absent_observed['no_entry'].errno == 2 and not absent_source.owned
+        assert absent_source.stage == 'fixture-original-stage'
+        assert all(item[2] & absent_owner.os.O_NOFOLLOW and item[2] & absent_owner.os.O_DIRECTORY
+            for item in absent_calls if item[0] == 'open')
+        assert len([item for item in absent_calls if item[0] == 'close']) == len(absent_observed['opened'])
+        absent_calls.clear()
+        absent_scope,absent_source,absent_component = absent_fixture()
+        with pytest.raises(o.ValidationReliabilityError):
+            absent_owner._ordinary_rp_join_raw_v1(absent_scope,absent_component,dict(acquisitions=[]),
+                'missing/report.json',required=True,source_byte_limit=1,source_node_limit=1)
+        assert not absent_calls and not absent_component['source_operands']
+        absent_calls.clear()
+        absent_scope,absent_source,absent_component = absent_fixture(now_present=True)
+        with pytest.raises(ValueError):
+            absent_owner._ordinary_source_absent_operand_v1(absent_scope,absent_component,'missing/report.json')
+        assert absent_source.state == 'FAILED' and not absent_source.owned
+        assert not absent_component['source_operands'][0]['complete']
+        assert absent_component['source_operands'][0]['error'] is absent_source.failure
+        absent_calls.clear()
+        absent_body_error, absent_close_error = OSError('absent body observation'), OSError('absent close observation')
+        absent_scope,absent_source,absent_component = absent_fixture(
+            metadata_failure=absent_body_error,close_failure=absent_close_error)
+        with pytest.raises(BaseExceptionGroup) as absent_failures:
+            absent_owner._ordinary_source_absent_operand_v1(absent_scope,absent_component,'missing/report.json')
+        assert any(error is absent_body_error for error in absent_failures.value.exceptions)
+        assert any(error is absent_close_error for error in absent_failures.value.exceptions)
+        assert all(any(error is original for original in absent_scope._ordinary_factory_errors_v1)
+            for error in (absent_body_error,absent_close_error))
+        assert absent_source.owned and absent_component['source_operands'][0]['opened']
+        assert not absent_component['source_operands'][0]['complete']
+        assert absent_component['source_operands'][0]['error'] is absent_body_error
+    negatives=(
+        "from pathlib import Path\ndef helper():\n Path('x').unlink()\nhelper()\ndef helper():\n return 1\ndef main():\n return helper()\n",
+        "from pathlib import Path\ndef helper(p):\n p.replace('x')\n for p in ('text',):\n  pass\ndef main():\n return helper(Path('x'))\n",
+        "from pathlib import Path\nclass C:\n def get(self):\n  Path('x').unlink()\ndef main():\n return C().get()\n",
+        "from pathlib import Path\nclass M(type):\n def __new__(*args):\n  Path('x').unlink()\nclass C(metaclass=M):\n pass\ndef main():\n return C()\n",
+        "from pathlib import Path\ndef bad(x):\n Path('x').unlink()\n return x\ndef main():\n return sorted([1],key=bad)\n",
+        "import csv\ndef main():\n return csv.writer([])\n",
+        "from pathlib import Path\ndef main():\n return Path('x').read_text(encoding=Path('codec').read_text())\n",
+        "from pathlib import Path\ndef bad():\n Path('x').unlink()\ndef main():\n return type('C',(),{'get':bad})()\n",
+        "from pathlib import Path\ndef main():\n len=Path('x').unlink\n return len()\n",
+    )
+    negatives+= (
+        "from pathlib import Path\nif True:\n if __name__=='__main__':\n  Path('owned-report').unlink()\ndef main():\n return 0\nif __name__=='__main__':\n raise SystemExit(main())\n",
+        "from pathlib import Path\nclass C:\n if __name__=='__main__':\n  Path('owned-report').unlink()\ndef main():\n return 0\nif __name__=='__main__':\n raise SystemExit(main())\n",
+        "from pathlib import Path\n__name__='__main__'\nif __name__=='__main__':\n Path('owned-report').unlink()\ndef main():\n return 0\n",
+    )
+    negatives+= (
+        "from pathlib import Path\ndef main():\n return [p.replace('x') for p in ('text',) if (p:=Path('owned-report'))]\n",
+        "from pathlib import Path\nfrom tools.names import __name__\nif __name__=='__main__':\n Path('owned-report').unlink()\ndef main():\n return 0\n",
+    )
+    negatives+= (
+        "import dataclasses\ndef main():\n owner=dataclasses.sys.modules['os']\n owner.remove('owned-report')\n",
+        "import dataclasses\ndef main():\n dataclasses.sys.modules['os'].remove('owned-report')\n",
+        "import dataclasses\ndef main():\n owner=dataclasses\n owner.sys.modules['os'].remove('owned-report')\n",
+        "from dataclasses import sys as owner\ndef main():\n owner.modules['os'].remove('owned-report')\n",
+        "from pathlib import Path\nimport math\ndef main():\n owner=math.__loader__\n return owner.get_data('owned-report')\n",
+    )
+    negatives+=tuple("from pathlib import Path\n"+name+"=Path('owned-report').unlink\ndef main():\n return "+name+"()\nif __name__=='__main__':\n raise SystemExit(main())\n"
+        for name in ('SystemExit','ValueError','TypeError','RuntimeError','KeyError','IndexError','OSError','FileNotFoundError','AssertionError','len'))
+    negatives+=(
+        "from pathlib import Path\noperation=Path('owned-report').unlink\ndef main():\n return operation()\n",
+        "from pathlib import Path\ndef ValueError():\n Path('owned-report').unlink()\ndef main():\n return ValueError()\n",
+        "from pathlib import Path\ndef main(ValueError=Path('owned-report').unlink):\n return ValueError()\n",
+        "from pathlib import Path\ndef main():\n for ValueError in (Path('owned-report').unlink,):\n  ValueError()\n",
+    )
+    negatives+=(
+        "from pathlib import Path\ndef main():\n walk(Path('owned-report'))\n def walk(value):\n  return value\n",
+        "from pathlib import Path\ndef main():\n def walk(value):\n  Path('owned-report').unlink()\n walk({})\n",
+        "from pathlib import Path\ndef main():\n if True:\n  def walk(value):\n   return value\n return walk({})\n",
+        "from pathlib import Path\ndef main():\n pattern=Path('owned-report')\n return pattern.search('text')\n",
+        "from pathlib import Path\nimport re\npattern=re.compile(Path('owned-report').read_text())\ndef main():\n return pattern.search('text')\n",
+        "from pathlib import Path\nfrom dataclasses import dataclass\n@dataclass(frozen=True)\nclass Result:\n failures:tuple[str,...]\n @property\n def ok(self):\n  Path('owned-report').unlink()\n  return not self.failures\ndef main():\n return Result(()).ok\n",
+        "from pathlib import Path\nfrom dataclasses import dataclass\nproperty=Path('owned-report').unlink\n@dataclass(frozen=True)\nclass Result:\n failures:tuple[str,...]\n @property\n def ok(self):\n  return not self.failures\ndef main():\n return Result(()).ok\n",
+    )
+    negatives+=(
+        "from __future__ import annotations\nfrom pathlib import Path\nfrom typing import Protocol\nclass Port(Protocol):\n value:int\n Path('owned-report').unlink()\ndef main():\n return 0\n",
+        "from __future__ import annotations\nfrom pathlib import Path\nfrom typing import Protocol\nclass Port(Protocol):\n def read(self,x=Path('owned-report').unlink()):\n  ...\ndef main():\n return 0\n",
+        "from __future__ import annotations\nfrom pathlib import Path\nfrom dataclasses import dataclass\n@dataclass(frozen=True)\nclass Scenario:\n value:str=Path('owned-report').unlink()\ndef main():\n return Scenario()\n",
+        "from __future__ import annotations\nfrom pathlib import Path\nfrom dataclasses import dataclass\n@dataclass(frozen=True)\nclass Scenario:\n value:str\nScenario=Path('owned-report').unlink\ndef main():\n return Scenario('x')\n",
+        "from __future__ import annotations\nfrom pathlib import Path\nfrom dataclasses import dataclass\n@dataclass(frozen=True)\nclass Result:\n data:dict[str,str]\n @property\n def ready(self):\n  return self.data.unlink()\ndef main():\n return Result({}).ready\n",
+        "from pathlib import Path,PurePosixPath,PureWindowsPath\ndef main():\n value=Path('owned-report')\n raw=value.as_posix() if isinstance('different',(PurePosixPath,PureWindowsPath)) else str(value)\n return raw.replace('x','y')\n",
+    )
+    negatives+=(
+        "from pathlib import Path\ndef bad(x):\n Path('owned-report').unlink()\n return x\nFORMULAS={'x':bad}\ndef main():\n return FORMULAS['x'](1)\n",
+        "from pathlib import Path\ndef good(x):\n return x\nFORMULAS={'x':good}\nFORMULAS['x']=Path('owned-report').unlink\ndef main():\n return FORMULAS['x'](1)\n",
+        "from pathlib import Path\ndef good(x):\n return x\nFORMULAS={'x':good}\nalias=FORMULAS\nalias['x']=Path('owned-report').unlink\ndef main():\n return FORMULAS['x'](1)\n",
+        "import os\ndef good(x):\n return x\nFORMULAS={'x':good}\ndef main():\n owner=FORMULAS['x'].__globals__['os']\n owner.remove('owned-report')\n",
+        "from pathlib import Path\nfrom typing import Callable\nAlias=Callable[[Path('owned-report').unlink()],str]\ndef main():\n return 0\n",
+    )
+    negatives+=(
+        "from pathlib import Path\nNAMES=['literal']\nNAMES[0]=Path('owned-report')\ndef main():\n return tuple(name.replace('other-report') for name in NAMES)\n",
+        "from pathlib import Path\nNAMES=['literal']\nalias=NAMES\nalias[0]=Path('owned-report')\ndef main():\n return tuple(name.replace('other-report') for name in NAMES)\n",
+        "from pathlib import Path\nNAMES=['literal']\ndef change():\n NAMES[0]=Path('owned-report')\ndef main():\n change()\n return tuple(name.replace('other-report') for name in NAMES)\n",
+    )
+    assert all(source_calculation(body)['unresolved'] for body in negatives)
+    source_strings="PART='literal.report.json'\nNAMES=(PART,'second.report.json')\nSCHEMAS=tuple(name.replace('.report.json','.schema.json').lower() for name in NAMES)\ndef main():\n return SCHEMAS\n"
+    assert not source_calculation(source_strings)['unresolved']
+    assert source_calculation(source_strings.replace("PART='literal.report.json'","from pathlib import Path\nPART=Path('owned-report')"))['unresolved']
+    assert source_calculation("import importlib\ndef main():\n return importlib.import_module('os')\n")['unresolved']
+    fixed_cli="import argparse\nfrom pathlib import Path\ndef validate(root, *, output=None):\n if output is not None:\n  Path(output).write_text('forbidden')\n return 0\ndef main(argv=None):\n parser=argparse.ArgumentParser()\n parser.add_argument('--repo-root',type=Path,default='.')\n parser.add_argument('--output',type=Path,default=None)\n parser.add_argument('--write-report',action='store_true')\n args=parser.parse_args(argv)\n if args.write_report:\n  Path('owned-report').write_text('forbidden')\n return validate(args.repo_root,output=args.output)\nif __name__=='__main__':\n raise SystemExit(main())\n"
+    from tools.validation_scope_registry import _ordinary_readonly_source_family_cli_v1
+    assert not _ordinary_readonly_source_family_cli_v1(source_ast.parse(fixed_cli),'tools/reader.py')
+    assert not source_calculation(fixed_cli)['unresolved']
+    definition_default="import argparse\nfrom pathlib import Path\nflag=True\ndef write(output=flag):\n if output:\n  Path('owned-report').unlink()\ndef relay(flag):\n write()\ndef main(argv=None):\n parser=argparse.ArgumentParser()\n parser.add_argument('--repo-root',type=Path,default='.')\n args=parser.parse_args(argv)\n relay(False)\n return 0\nif __name__=='__main__':\n raise SystemExit(main())\n"
+    assert source_calculation(definition_default)['unresolved']
+    assert source_calculation(definition_default.replace('output=flag','output=True'))['unresolved']
+    assert not source_calculation(definition_default.replace('write()','write(flag)'))['unresolved']
+    mapping_reader="from typing import Mapping\ndef index(value):\n return str(value)\ndef main():\n counts={}\n counts[index('fixed')]=1\n return isinstance(counts,Mapping)\n"
+    assert not source_calculation(mapping_reader)['unresolved']
+    assert source_calculation(mapping_reader.replace("index('fixed')","__import__('os').remove('owned-report')"))['unresolved']
+    assert source_calculation(mapping_reader.replace('counts[index', 'index=lambda value:value\n counts[index'))['unresolved']
+    constants="NAMES=('b','a')\nORDERED=tuple(sorted(NAMES))\n"
+    imported="from src.base import ORDERED\nNAMES=ORDERED+('c',)\ndef main():\n return list(NAMES)\n"
+    rows=(('tools/reader.py',imported,source_ast.parse(imported)),('src/base.py',constants,source_ast.parse(constants)))
+    assert not _ordinary_readonly_source_family_plan_v1(rows,'tools/reader.py')['unresolved']
+    effectful=constants.replace('NAMES=(\'b\',\'a\')',"from pathlib import Path\nNAMES=Path('owned-report').unlink()")
+    assert _ordinary_readonly_source_family_plan_v1((rows[0],('src/base.py',effectful,source_ast.parse(effectful))),'tools/reader.py')['unresolved']
+    assert source_calculation("from typing import Mapping\ndef main():\n return Mapping.register(object)\n")['unresolved']
+    source_child="def child(value):\n return str(value)\n"
+    lexical="def main():\n from src.base import child\n return child('literal')\n"
+    def lexical_calculation(body,child=source_child):
+        return _ordinary_readonly_source_family_plan_v1((('tools/reader.py',body,source_ast.parse(body)),
+            ('src/base.py',child,source_ast.parse(child))),'tools/reader.py')
+    assert not lexical_calculation(lexical)['unresolved']
+    for changed in (
+        "def helper():\n return child('literal')\n"+lexical.replace("return child('literal')","return helper()"),
+        lexical.replace("return child('literal')","child=lambda value:value\n return child('literal')"),
+        lexical.replace("from src.base import child","if True:\n  from src.base import child"),
+        lexical.replace("return child('literal')","from src.base import child\n return child('literal')"),
+    ):assert lexical_calculation(changed)['unresolved']
+    assert lexical_calculation(lexical,"from pathlib import Path\ndef child(value):\n Path(value).unlink()\n")['unresolved']
+    reached="from pathlib import Path\ndef validate(output=None):\n if output is not None: Path(output).unlink()\n return 0\ndef dormant():\n return validate('owned-report')\ndef main():\n return validate()\n"
+    assert not source_calculation(reached)['unresolved']
+    path_constants="from pathlib import Path\nROOT=Path('source')\nNAMES=(ROOT.as_posix(),'literal')\ndef main():\n return list(NAMES)\n"
+    assert not source_calculation(path_constants)['unresolved']
+    initializing="from contextvars import ContextVar\nfrom types import MappingProxyType\nimport threading\nimport itertools\nVALUE=ContextVar('fixed',default=None)\nLOCK=threading.Lock()\nINDEX=itertools.count()\nMAP=MappingProxyType({})\nclass NativeError(RuntimeError):\n pass\ndef main():\n return 0\n"
+    initializer=source_calculation(initializing)
+    assert not initializer['unresolved'] and len(initializer['initialization_operations'])==4
+    defaults="import os\nfrom pathlib import Path\nKEYS={'fixed':'value'}\ndef dormant(path,observe=os.lstat,path_type=Path):\n return observe(path_type(path))\nclass Status:\n ORIGINAL=('status',)\n SELECTED=tuple(dict.fromkeys((*ORIGINAL,*KEYS,'final')))\ndef main():\n return 0\n"
+    default_calculation=source_calculation(defaults)
+    assert not default_calculation['unresolved'] and len(default_calculation['callable_references'])>=2
+    callbacks="def reader(value):\n return str(value)\ndef relay(value,callback=None):\n callback=callback or reader\n return callback(value)\ndef main():\n return relay('source',callback=reader)\n"
+    callback_calculation=source_calculation(callbacks)
+    assert not callback_calculation['unresolved'] and callback_calculation['source_callback_bindings']
+    for changed in (
+        callbacks.replace("callback=reader)","callback=__import__('os').remove)"),
+        callbacks.replace("return str(value)","from pathlib import Path\n Path(value).unlink()\n return str(value)"),
+        callbacks.replace("callback=callback or reader","callback=callback or reader\n callback=__import__('os').remove"),
+        callbacks.replace("callback=None","callback=__import__('os').remove"),
+    ):assert source_calculation(changed)['unresolved']
+    # Explicit synthetic Source grammar only: no child, Scope, Git or
+    # application body is executed by these actual calculator ports.
+    source_git_capture="import argparse\nimport subprocess\nfrom pathlib import Path\ndef _git_stdout(root,args):\n    completed=subprocess.run(['git',*args],cwd=root,check=False,capture_output=True,text=True)\n    return completed.returncode,completed.stdout.strip(),completed.stderr.strip()\ndef main(argv=None):\n    parser=argparse.ArgumentParser()\n    parser.add_argument('--repo-root',type=Path,default='.')\n    args=parser.parse_args(argv)\n    code,stdout,stderr=_git_stdout(args.repo_root,['status','--short','--untracked-files=all'])\n    return 0\nif __name__=='__main__':\n    raise SystemExit(main())\n"
+    source_git_entry='tools/reader.py'
+    source_git_argv=('/trusted/python','-I','-S','-B','-X','pycache_prefix=/runtime/p1/pycache',source_git_entry,'--repo-root','.')
+    def source_git_calculation(text):
+        return _ordinary_readonly_source_family_plan_v1(
+            ((source_git_entry,text,source_ast.parse(text)),),source_git_entry,fresh_execution=source_git_argv)
+    source_git_positive=source_git_calculation(source_git_capture)
+    assert not source_git_positive['unresolved'] and len(source_git_positive['native_process_operations'])==1
+    assert source_git_positive['native_process_operations'][0][3]==(('status','--short','--untracked-files=all'),)
+    source_git_loop=source_git_capture.replace(
+        "    code,stdout,stderr=_git_stdout(args.repo_root,['status','--short','--untracked-files=all'])",
+        "    for request in (['branch','--show-current'],['rev-parse','--abbrev-ref','HEAD']):\n"
+        "        code,stdout,stderr=_git_stdout(args.repo_root,request)\n        label=' '.join(request)")
+    source_git_loop_result=source_git_calculation(source_git_loop)
+    assert not source_git_loop_result['unresolved'] and source_git_loop_result['native_process_operations'][0][3]==(
+        ('branch','--show-current'),('rev-parse','--abbrev-ref','HEAD'))
+    for before,after in (
+        ("['status','--short','--untracked-files=all']","['clean','-fd']"),
+        ("capture_output=True,text=True)","capture_output=True,text=True,shell=True)"),
+        ("cwd=root,check=False","cwd='outside',check=False"),
+        ("capture_output=True","capture_output=False"),
+        ("text=True","text=False"),
+        ("    completed=subprocess.run","    args.append('write')\n    completed=subprocess.run"),
+        ("    completed=subprocess.run","    held=args\n    completed=subprocess.run"),
+        ("    completed=subprocess.run","    args[0]='clean'\n    completed=subprocess.run"),
+        ("    return completed.returncode,completed.stdout.strip(),completed.stderr.strip()","    return completed"),
+    ):
+        changed=source_git_calculation(source_git_capture.replace(before,after,1))
+        assert changed['unresolved'] and not changed['native_process_operations']
+    for statement in ("        request[0]='clean'\n","        held=request\n",
+            "        request.append('write')\n","        print(request)\n","        request=['clean','-fd']\n"):
+        changed=source_git_calculation(source_git_loop.replace('        code,stdout,stderr=',statement+'        code,stdout,stderr=',1))
+        assert changed['unresolved'] and not changed['native_process_operations']
+
+    # The root comes from the selected CLI or independently bound service
+    # WorkingDirectory. No synthetic application body is executed here.
+    source_git_call="_git_stdout(args.repo_root,['status','--short','--untracked-files=all'])"
+    for root in ('Path(args.repo_root)','args.repo_root.resolve()','Path.cwd()'):
+        changed=source_git_calculation(source_git_capture.replace(source_git_call,
+            "_git_stdout("+root+",['status','--short','--untracked-files=all'])",1))
+        assert not changed['unresolved'] and len(changed['native_process_operations'])==1
+    source_git_relay=source_git_capture.replace('def main(argv=None):',
+        "def relay(root):\n    root=root.resolve()\n    return _git_stdout(root,['status','--short','--untracked-files=all'])\ndef main(argv=None):").replace(source_git_call,'relay(args.repo_root)')
+    source_git_relay_result=source_git_calculation(source_git_relay)
+    assert not source_git_relay_result['unresolved'] and len(source_git_relay_result['native_process_operations'])==1
+    for root in ("Path('/outside')","Path('outside')","args.repo_root/'child'",
+            'args.repo_root.parent',"Path.cwd()/'child'",'Path.cwd().parent'):
+        changed=source_git_calculation(source_git_capture.replace(source_git_call,
+            "_git_stdout("+root+",['status','--short','--untracked-files=all'])",1))
+        assert changed['unresolved'] and not changed['native_process_operations']
+    for replacement in (
+        "    selected=args.repo_root\n    root=selected\n    code,stdout,stderr=_git_stdout(root,['status','--short','--untracked-files=all'])",
+        "    root=args.repo_root.resolve()\n    root=Path('/outside')\n    code,stdout,stderr=_git_stdout(root,['status','--short','--untracked-files=all'])",
+        "    code,stdout,stderr=_git_stdout(root,['status','--short','--untracked-files=all'])\n    root=args.repo_root.resolve()",
+        "    if True:\n        root=args.repo_root.resolve()\n    code,stdout,stderr=_git_stdout(root,['status','--short','--untracked-files=all'])",
+        "    args.repo_root=Path('/outside')\n    code,stdout,stderr="+source_git_call):
+        changed=source_git_calculation(source_git_capture.replace('    code,stdout,stderr='+source_git_call,replacement,1))
+        assert changed['unresolved'] and not changed['native_process_operations']
+    source_git_cwd_change=source_git_capture.replace('import subprocess','import subprocess\nimport os').replace(
+        '    code,stdout,stderr='+source_git_call,
+        "    os.chdir('/outside')\n    code,stdout,stderr=_git_stdout(Path.cwd(),['status','--short','--untracked-files=all'])")
+    assert source_git_calculation(source_git_cwd_change)['unresolved']
+    # The checked Git result supplies strings only through the original
+    # complete parser and dominating owned uses; no child body runs here.
+    source_git_string_parser = 'def _changed_paths(repo_root: Path) -> list[str]:\n    status_rc, status_out, _status_err = _git_stdout(repo_root,["status","--short","--untracked-files=all"])\n    if status_rc != 0:\n        return ["<git-status-unavailable>"]\n    paths: list[str] = []\n    for line in status_out.splitlines():\n        if not line.strip():\n            continue\n        if len(line)>2 and line[2]==" ":\n            path=line[3:]\n        elif len(line)>1 and line[1]==" ":\n            path=line[2:]\n        else:\n            path=line[3:] if len(line)>3 else line\n        normalized=path.strip().replace("\\\\","/")\n        if " -> " in normalized:\n            normalized=normalized.rsplit(" -> ",1)[1]\n        paths.append(normalized)\n    return sorted(set(paths))\ndef check_path(value):\n    return value.replace("\\\\","/")\n'
+    source_git_string=source_git_capture.replace('import argparse','from __future__ import annotations\nimport argparse',1).replace('def main(argv=None):',source_git_string_parser+'def main(argv=None):').replace(
+        "    code,stdout,stderr="+source_git_call,
+        "    for path in _changed_paths(args.repo_root):\n        normalized=path.strip()\n        check_path(normalized)")
+    source_git_string_result=source_git_calculation(source_git_string)
+    assert not source_git_string_result['unresolved']
+    assert len(source_git_string_result['native_process_operations'])==1
+    for before,after in (
+        ('paths.append(normalized)','paths.append(Path(normalized))'),
+        ('paths.append(normalized)','paths.append(normalized)\n        paths.append(Path("owned-report"))'),
+        ('    return sorted(set(paths))','    saved=paths\n    saved[0]=Path("owned-report")\n    return sorted(set(paths))'),
+        ('    return sorted(set(paths))','    unknown(paths)\n    return sorted(set(paths))'),
+        ('        check_path(normalized)','        normalized=Path("owned-report")\n        check_path(normalized)'),
+        ('        check_path(normalized)','        check_path(Path("owned-report"))'),
+        ('        check_path(normalized)','        check_path(normalized)\n    check_path(Path("owned-report"))'),
+        ('        check_path(normalized)','        check_path(future)\n        future=path.strip()'),
+        ('completed.stdout.strip()','Path("owned-report")'),
+        ('    completed=subprocess.run','    if True:\n        return 0,Path("owned-report"),""\n    completed=subprocess.run'),
+        ('    completed=subprocess.run','    try:\n        return 0,Path("owned-report"),""\n    except ValueError:\n        pass\n    completed=subprocess.run'),
+        ('    return completed.returncode,completed.stdout.strip(),completed.stderr.strip()',
+         '    completed=unknown(completed)\n    return completed.returncode,completed.stdout.strip(),completed.stderr.strip()'),
+        ('_changed_paths(args.repo_root)','_changed_paths(Path("outside"))'),
+        ('cwd=root,check=False','cwd=Path("outside"),check=False'),
+    ):
+        assert source_git_calculation(source_git_string.replace(before,after,1))['unresolved']
+
+
+    # Whole current data bodies select primitive work, never native admission.
+    source_data_capture = """import csv
+import hashlib
+import json
+from pathlib import Path
+def objects(value):
+    if isinstance(value, dict):
+        yield value
+        for child in value.values():
+            yield from objects(child)
+    elif isinstance(value, list):
+        for child in value:
+            yield from objects(child)
+def rows(path):
+    with path.open(newline="", encoding="utf-8") as handle:
+        return [dict(row) for row in csv.DictReader(handle)]
+def digest(payload):
+    blob = json.dumps(payload, sort_keys=True, ensure_ascii=True, separators=(",", ":"))
+    return hashlib.sha256(blob.encode("utf-8")).hexdigest()
+def main():
+    tuple(objects({}))
+    rows(Path("input.csv"))
+    digest({})
+    return 0
+if __name__ == "__main__":
+    raise SystemExit(main())
+"""
+    def source_data_calculation(body):
+        return _ordinary_readonly_source_family_plan_v1(
+            (("tools/reader.py",body,source_ast.parse(body)),), "tools/reader.py")
+    data_calculation=source_data_calculation(source_data_capture)
+    assert data_calculation['unresolved']==()
+    assert tuple(row[2] for row in data_calculation['native_data_operations'])==(
+        'READONLY_CSV_DICTREADER','SCIENTIFIC_JSON_SHA256_IDENTIFIER')
+    assert any('.open(' in row[2] for row in data_calculation['readonly_operations'])
+    for before,after in (
+        ('path.open(newline="", encoding="utf-8")','path.open("w", newline="", encoding="utf-8")'),
+        ('path.open(newline="", encoding="utf-8")','path.open("a", newline="", encoding="utf-8")'),
+        ('return [dict(row) for row in csv.DictReader(handle)]','return handle'),
+        ('csv.DictReader(handle)','csv.DictWriter(handle)'),
+        ('dict(row)','callback(row)'),
+        ('import csv','import csv\ncsv.DictReader = lambda value: value'),
+        ('hashlib.sha256','hashlib.sha1'),
+        ('blob.encode("utf-8")','blob.encode("utf-16")'),
+        ('.hexdigest()','.copy()'),
+        ('import hashlib','import hashlib\nhashlib.sha256 = lambda value: value'),
+        ('        yield value','        value.clear()\n        yield value'),
+        ('        yield value','        yield from callback(value)'),
+    ):
+        assert source_data_calculation(source_data_capture.replace(before,after,1))['unresolved']
+    # The original report walk changes only the fixed Mapping/key mechanics.
+    mapping_data_source=source_data_capture.replace('import csv','from typing import Mapping\nimport csv',1).replace(
+        '    if isinstance(value, dict):\n        yield value\n        for child in value.values():\n            yield from objects(child)',
+        '    if isinstance(value, Mapping):\n        for key,child in value.items():\n            yield str(key),child\n            yield from objects(child)',1)
+    mapping_data=source_data_calculation(mapping_data_source)
+    assert not mapping_data['unresolved']
+    assert tuple(row[2] for row in mapping_data['native_data_operations'])==(
+        'READONLY_CSV_DICTREADER','SCIENTIFIC_JSON_SHA256_IDENTIFIER')
+    for before,after in (
+        ('yield str(key),child','yield callback(key),child'),
+        ('yield str(key),child','value.clear()\n            yield str(key),child'),
+        ('yield str(key),child','yield from callback(child)'),
+        ('from typing import Mapping','from typing import Mapping\nMapping = lambda value: value'),
+        ('value.items()','value.iter_custom()'),
+        ('yield from objects(child)','yield from unknown(child)'),
+    ):
+        assert source_data_calculation(mapping_data_source.replace(before,after,1))['unresolved']
+    # A source-defined empty exception keeps only the native builtin constructor.
+    source_exception_text="from pathlib import Path\nclass ParseFault(ValueError):\n    pass\ndef main():\n    try:\n        raise ParseFault('invalid')\n    except ParseFault:\n        return 0\nif __name__=='__main__':\n    raise SystemExit(main())\n"
+    source_exception_calculate=lambda text:_ordinary_readonly_source_family_plan_v1(
+        (('tools/exception_reader.py',text,source_ast.parse(text)),),'tools/exception_reader.py')
+    assert not source_exception_calculate(source_exception_text)['unresolved']
+    for before,after in (
+        ('    pass','    def __init__(self,value):\n        Path(value).unlink()'),
+        ('    pass','    Path("owned-report").unlink()'),
+        ('class ParseFault(ValueError):','class ParseFault(Path):'),
+        ('class ParseFault(ValueError):','class ParseFault(ValueError,metaclass=unknown):'),
+        ('class ParseFault(ValueError):','@unknown\nclass ParseFault(ValueError):'),
+        ('class ParseFault(ValueError):','ValueError=Path("owned-report").unlink\nclass ParseFault(ValueError):'),
+        ('    pass','    __new__=Path("owned-report").unlink'),
+        ("raise ParseFault('invalid')","raise ParseFault(Path('owned-report').unlink())"),
+        ('    except ParseFault:','    except ParseFault:\n        ParseFault=Path("owned-report").unlink'),
+    ):
+        assert source_exception_calculate(source_exception_text.replace(before,after,1))['unresolved']
+    # The imported tools sibling uses the same captured source-parent startup.
+    source_startup_text="from __future__ import annotations\nimport pathlib\nimport sys\n_REPO_ROOT=pathlib.Path(__file__).resolve().parents[1]\nif str(_REPO_ROOT) not in sys.path:\n    sys.path.insert(0,str(_REPO_ROOT))\ndef value():\n    return 1\n"
+    source_startup_entry="from tools import sibling\ndef main():\n    return sibling.value()\nif __name__=='__main__':\n    raise SystemExit(main())\n"
+    source_startup_argv=('/trusted/python','-I','-S','-B','-X','pycache_prefix=/runtime/p1/pycache','tools/startup_reader.py','--repo-root','.')
+    source_startup_calculate=lambda text,argv:_ordinary_readonly_source_family_plan_v1(
+        (('tools/startup_reader.py',source_startup_entry,source_ast.parse(source_startup_entry)),
+         ('tools/sibling.py',text,source_ast.parse(text))),'tools/startup_reader.py',fresh_execution=argv)
+    assert not source_startup_calculate(source_startup_text,source_startup_argv)['unresolved']
+    assert source_startup_calculate(source_startup_text,())['unresolved']
+    for before,after in (
+        ('parents[1]','parents[2]'),
+        ('pathlib.Path(__file__)','pathlib.Path("/outside")'),
+        ('sys.path.insert(0,str(_REPO_ROOT))','sys.path.insert(1,str(_REPO_ROOT))'),
+        ('not in sys.path','in sys.path'),
+        ('    sys.path.insert(0,str(_REPO_ROOT))','    sys.path.insert(0,str(_REPO_ROOT))\n    pathlib.Path("owned-report").unlink()'),
+        ('if str(_REPO_ROOT)','_REPO_ROOT=pathlib.Path("/outside")\nif str(_REPO_ROOT)'),
+        ('    return 1','    global _REPO_ROOT\n    _REPO_ROOT=pathlib.Path("/outside")\n    return 1'),
+        ('pathlib.Path(__file__).resolve()','pathlib.Path(__file__).absolute()'),
+    ):
+        assert source_startup_calculate(source_startup_text.replace(before,after,1),source_startup_argv)['unresolved']
+    # Shared positive values remain bound to complete original Source producers.
+    source_value_normalizer='from pathlib import Path\ndef normalize(path):\n    normalized=str(path).strip().replace("\\\\","/")\n    while normalized.startswith("./"):\n        normalized=normalized[2:]\n    return normalized\ndef main():\n    return normalize("./name.py").removesuffix(".py")\nif __name__=="__main__":\n    raise SystemExit(main())\n'
+    source_value_calculate=lambda text:_ordinary_readonly_source_family_plan_v1((('tools/value_reader.py',text,source_ast.parse(text)),),'tools/value_reader.py')
+    assert not source_value_calculate(source_value_normalizer)['unresolved']
+    for before,after in (
+        ('return normalized','return Path("owned-report")'),
+        ('    normalized=str(path)','    return Path("owned-report")\n    normalized=str(path)'),
+        ('normalized=normalized[2:]','normalized=unknown(normalized)'),
+        ('normalized.startswith("./")','normalized.startswith(path)'),
+    ):
+        assert source_value_calculate(source_value_normalizer.replace(before,after,1))['unresolved']
+    source_value_flags='NAMES=("a","b")\nFLAGS={name:False for name in NAMES}\ndef main():\n    return FLAGS.get("a")\nif __name__=="__main__":\n    raise SystemExit(main())\n'
+    source_value_flag_entry='from tools import constants\ndef main():\n    return constants.FLAGS.get("a")\nif __name__=="__main__":\n    raise SystemExit(main())\n'
+    source_value_flag_calculate=lambda text:_ordinary_readonly_source_family_plan_v1((('tools/value_reader.py',source_value_flag_entry,source_ast.parse(source_value_flag_entry)),('tools/constants.py',text,source_ast.parse(text))),'tools/value_reader.py')
+    assert not source_value_flag_calculate(source_value_flags)['unresolved']
+    for before,after in (
+        ('NAMES=("a","b")','NAMES=["a","b"]'),
+        ('name:False','name:unknown()'),
+        ('FLAGS={','NAMES=("changed",)\nFLAGS={'),
+        ('for name in NAMES','for name in unknown(NAMES)'),
+    ):
+        assert source_value_flag_calculate(source_value_flags.replace(before,after,1))['unresolved']
+    source_value_dedup='from pathlib import Path\ndef main():\n    values=[str(item) for item in (1,2)]\n    if values:\n        return sorted(dict.fromkeys(values))\n    return []\nif __name__=="__main__":\n    raise SystemExit(main())\n'
+    assert not source_value_calculate(source_value_dedup)['unresolved']
+    for before,after in (
+        ('str(item)','Path("owned-report")'),
+        ('    if values:','    values[0]=Path("owned-report")\n    if values:'),
+        ('    if values:','    alias=values\n    alias.append(Path("owned-report"))\n    if values:'),
+        ('    if values:','    unknown(values)\n    if values:'),
+    ):
+        assert source_value_calculate(source_value_dedup.replace(before,after,1))['unresolved']
+    source_value_import='from tools.faults import ParseFault\ndef main():\n    try:\n        raise ParseFault("invalid")\n    except ParseFault:\n        return 0\nif __name__=="__main__":\n    raise SystemExit(main())\n'
+    source_value_fault='class ParseFault(ValueError):\n    pass\n'
+    source_value_imported=lambda text:_ordinary_readonly_source_family_plan_v1((('tools/value_reader.py',source_value_import,source_ast.parse(source_value_import)),('tools/faults.py',text,source_ast.parse(text))),'tools/value_reader.py')
+    assert not source_value_imported(source_value_fault)['unresolved']
+    assert source_value_imported(source_value_fault.replace('    pass','    def __init__(self,value):\n        unknown(value)'))['unresolved']
+    assert source_startup_calculate(source_startup_text.replace('_REPO_ROOT=', '__file__="/outside/tools/sibling.py"\n_REPO_ROOT=',1),source_startup_argv)['unresolved']
+    # The same original value group follows every real caller and all early returns.
+    source_shared_keys='from pathlib import Path\nCODE="source"\ndef result():\n    values=[]\n    values.append(CODE)\n    return tuple(dict.fromkeys(values))\ndef consume(values):\n    return tuple(dict.fromkeys(values))\ndef main():\n    return consume(result())\nif __name__=="__main__":\n    raise SystemExit(main())\n'
+    assert not source_value_calculate(source_shared_keys)['unresolved']
+    for before,after in (
+        ('values.append(CODE)','values.append(Path("owned-report"))'),
+        ('values.append(CODE)','alias=values\n    alias.append(Path("owned-report"))'),
+        ('return consume(result())','return consume((Path("owned-report"),))'),
+        ('    values=[]','    return (Path("owned-report"),)\n    values=[]'),
+        ('CODE="source"','CODE=Path("owned-report")'),
+        ('    values.append(CODE)','    unknown(values)\n    values.append(CODE)'),
+    ):
+        assert source_value_calculate(source_shared_keys.replace(before,after,1))['unresolved']
+    source_shared_contains='from pathlib import Path\ndef contains(value,needle):\n    if isinstance(value,str):\n        return value.replace("\\\\","/")==needle\n    if isinstance(value,list):\n        return any(contains(item,needle) for item in value)\n    return False\ndef main():\n    return contains(["a"],"a")\nif __name__=="__main__":\n    raise SystemExit(main())\n'
+    assert not source_value_calculate(source_shared_contains)['unresolved']
+    assert source_value_calculate(source_shared_contains.replace('isinstance(value,str)','isinstance(value,Path)'))['unresolved']
+    assert source_value_calculate(source_shared_contains.replace('return value.replace','value=Path("owned-report")\n        return value.replace'))['unresolved']
+    source_shared_json='import json\ndef main():\n    return json.dumps({"a":1},default=str)\nif __name__=="__main__":\n    raise SystemExit(main())\n'
+    assert not source_value_calculate(source_shared_json)['unresolved']
+    assert source_value_calculate(source_shared_json.replace('default=str','default=unknown'))['unresolved']
+    source_shared_import='from tools.constants import normalize\ndef main():\n    from tools.constants import NAMES, normalize\n    return normalize(NAMES[0])\nif __name__=="__main__":\n    raise SystemExit(main())\n'
+    source_shared_constants='NAMES=("a",)\ndef normalize(value):\n    return str(value)\n'
+    source_shared_imported=lambda text:_ordinary_readonly_source_family_plan_v1((('tools/value_reader.py',text,source_ast.parse(text)),('tools/constants.py',source_shared_constants,source_ast.parse(source_shared_constants))),'tools/value_reader.py')
+    assert not source_shared_imported(source_shared_import)['unresolved']
+    assert source_shared_imported(source_shared_import.replace('from tools.constants import normalize','from pathlib import Path as normalize',1))['unresolved']
+    # Required keyword-only arguments keep the same complete caller type proof.
+    source_shared_keyword=source_shared_keys.replace('def consume(values):','def consume(*,values):').replace('consume(result())','consume(values=result())')
+    assert not source_value_calculate(source_shared_keyword)['unresolved']
+    assert source_value_calculate(source_shared_keyword.replace('consume(values=result())','consume(values=(Path("owned-report"),))'))['unresolved']
+    assert source_value_calculate(source_shared_keyword.replace('consume(values=result())','consume()'))['unresolved']
+    source_shared_annotation='from __future__ import annotations\ndef identifier(*parts:str,**named:str):\n    return "_".join(str(part) for part in parts)\ndef main():\n    return identifier("a","b")\nif __name__=="__main__":\n    raise SystemExit(main())\n'
+    assert not source_value_calculate(source_shared_annotation)['unresolved']
+    assert source_value_calculate(source_shared_annotation.replace('from __future__ import annotations\n','').replace('*parts:str','*parts:unknown()'))['unresolved']
+    source_shared_walk='from __future__ import annotations\nfrom typing import Mapping,Any\ndef tokens(value:Any):\n    if isinstance(value,Mapping):\n        for key,item in value.items():\n            yield str(key)\n            yield from tokens(item)\n    elif isinstance(value,list):\n        for item in value:\n            yield from tokens(item)\n    elif isinstance(value,str):\n        yield value\ndef main():\n    return tuple(tokens({"a":["b"]}))\nif __name__=="__main__":\n    raise SystemExit(main())\n'
+    assert not source_value_calculate(source_shared_walk)['unresolved']
+    assert source_value_calculate(source_shared_walk.replace('yield str(key)','yield unknown(key)'))['unresolved']
+    assert source_value_calculate(source_shared_walk.replace('yield value','yield Path("owned-report").unlink()'))['unresolved']
+    source_shared_dictionary='from pathlib import Path\nCODE="source"\ndef consume(*,values):\n    return tuple(dict.fromkeys(values))\ndef main():\n    table={CODE:(CODE,)}\n    return consume(values=table.get(CODE,(CODE,)))\nif __name__=="__main__":\n    raise SystemExit(main())\n'
+    assert not source_value_calculate(source_shared_dictionary)['unresolved']
+    for before,after in (
+        ('table={CODE:(CODE,)}','table={CODE:(Path("owned-report"),)}'),
+        ('    return consume','    table[CODE]=(Path("owned-report"),)\n    return consume'),
+        ('    return consume','    alias=table\n    alias[CODE]=(Path("owned-report"),)\n    return consume'),
+        ('table.get(CODE,(CODE,))','table.get(CODE,(Path("owned-report"),))'),
+    ):
+        assert source_value_calculate(source_shared_dictionary.replace(before,after,1))['unresolved']
+    source_shared_fallback=source_shared_keys.replace('consume(result())','consume(result() or (CODE,))')
+    assert not source_value_calculate(source_shared_fallback)['unresolved']
+    assert source_value_calculate(source_shared_fallback.replace('(CODE,)','(Path("owned-report"),)'))['unresolved']
+    assert source_value_calculate(source_shared_fallback.replace('result() or','unknown() or'))['unresolved']
+    source_shared_bound_keyword=source_shared_keys.replace('def consume(values):','def consume(*,values):').replace('return consume(result())','missing=result()\n    return consume(values=missing)')
+    assert not source_value_calculate(source_shared_bound_keyword)['unresolved']
+    assert source_value_calculate(source_shared_bound_keyword.replace('    return consume(values=missing)','    unknown(missing)\n    return consume(values=missing)'))['unresolved']
+    assert source_value_calculate(source_shared_bound_keyword.replace('    return consume(values=missing)','    missing[0]=Path("owned-report")\n    return consume(values=missing)'))['unresolved']
+    source_shared_lexical_names=source_shared_keys.replace('return consume(result())','values=result()\n    return consume(values)')
+    assert not source_value_calculate(source_shared_lexical_names)['unresolved']
+    assert source_value_calculate(source_shared_lexical_names.replace('    return consume(values)','    values[0]=Path("owned-report")\n    return consume(values)'))['unresolved']
+    source_shared_truth=source_shared_keys.replace('values.append(CODE)','values.append(CODE)\n    if not values:\n        return ()')
+    assert not source_value_calculate(source_shared_truth)['unresolved']
+    assert source_value_calculate(source_shared_truth.replace('if not values:','if unknown(values):'))['unresolved']
+    source_contains_docstring = 'from pathlib import Path\ndef contains(value,needle):\n    "original literal docstring"\n    if isinstance(value,str):\n        return value.replace("\\\\","/")==needle\n    if isinstance(value,list):\n        return any(contains(item,needle) for item in value)\n    return False\ndef main():\n    return contains(["safe"],"safe")\n'
+    assert not source_value_calculate(source_contains_docstring)['unresolved']
+    assert source_value_calculate(source_contains_docstring.replace('isinstance(value,str)','isinstance(value,Path)'))['unresolved']
+    # Explicit synthetic Source tokens exercise the original context contract;
+    # they do not issue a Scope, loader, child or native permission.
+    context_core='from contextvars import ContextVar\nimport os\nimport sys\nfrom pathlib import Path\nRUN_ID_ENV=\'QTT_VALIDATION_RUN_ID\'\n_PREFLIGHT_OBSERVATION_V1=ContextVar(\'_PREFLIGHT_OBSERVATION_V1\',default=None)\n_LINUX_PREFLIGHT_PROCESS_V1=ContextVar(\'_LINUX_PREFLIGHT_PROCESS_V1\',default=None)\n_PREFLIGHT_SCRIPTS_V1=(\'tools/validate_grand_global_debug_logical_consistency_audit.py\', \'tools/validate_ci_branch_context_matrix.py\', \'tools/validate_repair_pr_changed_file_scope.py\', \'tools/validate_nested_validator_contracts.py\', \'tools/validate_validation_inventory.py\', \'tools/validate_validation_scope_registry.py\', \'tools/changed_area_validation_router.py\', \'tools/cross_platform_path_invariant.py\')\ndef _preflight_active_v1(root=None):\n    value = _PREFLIGHT_OBSERVATION_V1.get()\n    scope = _LINUX_PREFLIGHT_PROCESS_V1.get()\n    if scope is not None and type(scope) is _LinuxPreflightScopeV1 and scope._ordinary_selected_v1():\n        scope._ordinary_precursor_registration_v1()\n        _preflight_require_v1(value is not None,\n                             "selected preflight has no original observation binding")\n    selected = os.environ.get(RUN_ID_ENV) and any(\n        str(sys.argv[0]).replace("\\\\", "/").endswith(script) for script in _PREFLIGHT_SCRIPTS_V1)\n    if value is not None:\n        value.check()\n        if selected and (value.run_id != os.environ[RUN_ID_ENV]\n                         or value.argv != (sys.executable, *sys.argv)\n                         or value.root != Path.cwd()\n                         or value.root != Path(__file__).resolve().parents[1]):\n            value.fail("active canonical preflight lost actual run/vector/module/cwd association")\n        if root is not None and Path(root).absolute() != value.root:\n            value.fail("preflight module/argument root mismatch")\n    elif selected:\n        raise ValidationReliabilityError("ENGVR_PREPUBLICATION_CUSTODY_FAILED",\n                                        "selected preflight has no original observation binding")\n    return value\n'
+    context_entry="import argparse\nfrom pathlib import Path\nfrom tools.validation_reliability import _preflight_active_v1\ndef main(argv=None):\n parser=argparse.ArgumentParser()\n parser.add_argument('--repo-root',type=Path,default='.')\n args=parser.parse_args(argv)\n if _preflight_active_v1(args.repo_root) is not None:\n  Path('owned-report').unlink()\n return 0\nif __name__=='__main__':\n raise SystemExit(main())\n"
+    context_argv=('/trusted/python','-I','-S','-B','-X','pycache_prefix=/runtime/p1/pycache','tools/reader.py','--repo-root','.')
+    def context_calculation(root=context_entry,core=context_core,argv=context_argv):
+        source_rows=(('tools/reader.py',root,source_ast.parse(root)),
+            ('tools/validation_reliability.py',core,source_ast.parse(core)))
+        return _ordinary_readonly_source_family_plan_v1(source_rows,'tools/reader.py',fresh_execution=argv)
+    assert context_calculation()['inactive_preflight_context']
+    assert not context_calculation(argv=None)['inactive_preflight_context']
+    for root,core,argv in (
+        (context_entry,context_core,context_argv[:2]+context_argv[3:]),
+        (context_entry,context_core.replace('default=None','default=True'),context_argv),
+        (context_entry,context_core.replace('    value = _PREFLIGHT_OBSERVATION_V1.get()','    value = True'),context_argv),
+        (context_entry.replace(' parser=argparse.ArgumentParser()',
+            ' from tools.validation_reliability import _PREFLIGHT_OBSERVATION_V1 as held\n alias=held\n alias.set(1)\n parser=argparse.ArgumentParser()'),context_core,context_argv),
+        (context_entry.replace(' parser=argparse.ArgumentParser()',
+            ' import tools.validation_reliability as retained\n retained._PREFLIGHT_OBSERVATION_V1.set(1)\n parser=argparse.ArgumentParser()'),context_core,context_argv),
+        (context_entry,context_core.replace("_LINUX_PREFLIGHT_PROCESS_V1',default=None)",
+            "_LINUX_PREFLIGHT_PROCESS_V1',default=True)"),context_argv),
+        (context_entry,context_core.replace("_LINUX_PREFLIGHT_PROCESS_V1=ContextVar(",
+            "_LINUX_PREFLIGHT_PROCESS_V1=None\n_LINUX_PREFLIGHT_PROCESS_V1=ContextVar("),context_argv),
+        (context_entry.replace(' parser=argparse.ArgumentParser()',
+            ' from tools.validation_reliability import _LINUX_PREFLIGHT_PROCESS_V1 as held\n alias=held\n alias.set(1)\n parser=argparse.ArgumentParser()'),context_core,context_argv),
+        (context_entry.replace(' parser=argparse.ArgumentParser()',
+            ' import tools.validation_reliability as retained\n retained._LINUX_PREFLIGHT_PROCESS_V1.reset(None)\n parser=argparse.ArgumentParser()'),context_core,context_argv),
+        (context_entry.replace(' parser=argparse.ArgumentParser()',
+            ' from tools.validation_reliability import _LINUX_PREFLIGHT_PROCESS_V1 as held\n def install():\n  held.set(1)\n install()\n parser=argparse.ArgumentParser()'),context_core,context_argv),
+        (context_entry,context_core+"\nheld_scope_context=_LINUX_PREFLIGHT_PROCESS_V1\n",context_argv),
+        (context_entry.replace(' parser=argparse.ArgumentParser()',
+            ' def install():\n  from tools import validation_reliability as owner\n  owner._LINUX_PREFLIGHT_PROCESS_V1.set(1)\n install()\n parser=argparse.ArgumentParser()'),context_core,context_argv),
+        (context_entry.replace(' parser=argparse.ArgumentParser()',
+            ' from tools.validation_reliability import _LINUX_PREFLIGHT_PROCESS_V1 as held\n setter=held.set\n setter(1)\n parser=argparse.ArgumentParser()'),context_core,context_argv),
+        (context_entry.replace(' parser=argparse.ArgumentParser()',
+            ' from tools.validation_reliability import _LINUX_PREFLIGHT_PROCESS_V1 as held\n def install(value):\n  value.set(1)\n install(held)\n parser=argparse.ArgumentParser()'),context_core,context_argv),
+    ):
+        assert not context_calculation(root,core,argv)['inactive_preflight_context']
+    source_strings="from pathlib import Path\ndef normalize(value):\n return str(value).strip().replace('\\\\','/').removeprefix('./')\ndef main():\n result=normalize(Path('source'))\n return result.removesuffix('.copy')\n"
+    assert not source_calculation(source_strings)['unresolved']
+    for changed in (
+        source_strings.replace("return str(value).strip().replace", "Path('owned-report').unlink()\n return str(value).strip().replace"),
+        source_strings.replace("return str(value).strip().replace('\\\\','/').removeprefix('./')","return Path('owned-report')"),
+        source_strings.replace('def normalize(value):','def normalize(value,str=lambda x: Path(x)):'),
+        source_strings.replace('result=normalize(Path(\'source\'))',"normalize=Path('owned-report').unlink\n result=normalize(Path('source'))"),
+    ):assert source_calculation(changed)['unresolved']
+    for changed in (
+        defaults.replace('observe=os.lstat','observe=os.remove'),
+        defaults.replace('path_type=Path','path_type=Path.unlink'),
+        defaults.replace("KEYS={'fixed':'value'}","KEYS={'fixed':'value'}\nKEYS['other']=Path('owned-report')"),
+        defaults.replace("KEYS={'fixed':'value'}","KEYS={'fixed':'value'}\nALIAS=KEYS"),
+        defaults.replace('return 0',"return dormant('owned-report')"),
+    ):assert source_calculation(changed)['unresolved']
+    for changed in (
+        initializing.replace("ContextVar('fixed',default=None)","ContextVar(__import__('os').remove('owned-report'))"),
+        initializing.replace('threading.Lock()', 'threading.Thread()'),
+        initializing.replace(' pass',' def __init_subclass__(cls): Path(\'owned-report\').unlink()'),
+        initializing.replace('return 0','return threading.Lock()'),
+    ):assert source_calculation(changed)['unresolved']
+    for changed in (
+        path_constants.replace("ROOT=Path('source')","ROOT=Path('source')\nROOT=Path('foreign')"),
+        path_constants.replace('ROOT.as_posix()',"ROOT.rename('owned-report')"),
+        path_constants.replace("from pathlib import Path", "from foreign import Path"),
+        path_constants.replace("NAMES=", "ROOT._raw_paths=['foreign']\nNAMES="),
+    ):assert source_calculation(changed)['unresolved']
+    for changed in (
+        reached.replace('return validate()','return dormant()'),
+        reached.replace('return validate()','return tuple(map(dormant,(1,)))'),
+        reached.replace('def main():','INITIAL=validate(\'owned-report\')\ndef main():'),
+        reached.replace('return validate()','validate()\n return validate(\'owned-report\')'),
+    ):assert source_calculation(changed)['unresolved']
+    for changed in (
+        fixed_cli.replace("args=parser.parse_args(argv)","args=parser.parse_args(argv)\n args.write_report=True"),
+        fixed_cli.replace("args=parser.parse_args(argv)","args=parser.parse_args(argv)\n alias=args\n alias.write_report=True"),
+        fixed_cli.replace("args=parser.parse_args(argv)","args=parser.parse_args(argv)\n mutate(args)"),
+        fixed_cli.replace("action='store_true'","action='store_false'"),
+        fixed_cli.replace("return validate(args.repo_root,output=args.output)","return validate(args.repo_root,output='owned-report')"),
+        fixed_cli.replace("if output is not None:","output='owned-report'\n if output is not None:"),
+        fixed_cli.replace("raise SystemExit(main())","SystemExit=Path('owned-report').unlink\n raise SystemExit(main())"),
+    ):
+        assert source_calculation(changed)['unresolved']
+    fixed_map="def good(x):\n return float(x)\nFORMULAS={'x':good}\ndef main():\n return FORMULAS['x'](1)\n"
+    fixed_calculation=source_calculation(fixed_map)
+    assert not fixed_calculation['unresolved'] and ('tools/reader.py','good') in fixed_calculation['source_functions']
+    assert not source_calculation("def main():\n try:\n  raise ValueError('original')\n except (ValueError,OSError):\n  return 0\n")['unresolved']
+    original_cli="import argparse\nfrom pathlib import Path\ndef main():\n parser=argparse.ArgumentParser()\n parser.add_argument('--repo-root',type=Path,default=Path('.'))\n args=parser.parse_args()\n return 0\nif __name__=='__main__':\n raise SystemExit(main())\n"
+    assert not _ordinary_readonly_source_family_cli_v1(source_ast.parse(original_cli),'tools/reader.py')
+    assert _ordinary_readonly_source_family_cli_v1(source_ast.parse("SystemExit=lambda x: x\n"+original_cli),'tools/reader.py')
+    with pytest.raises(ValueError,match='CURRENT_AST_IDENTITY'):
+        _ordinary_readonly_source_family_plan_v1((('tools/reader.py',safe_reader,
+            source_ast.parse('def main(): return 1')),),'tools/reader.py')
+    with pytest.raises(ValueError,match='CURRENT_AST_IDENTITY'):
+        _ordinary_readonly_source_family_plan_v1((('tools/reader.py',safe_reader,source_ast.parse(safe_reader)),)*2,'tools/reader.py')
+    # The effective vector cannot accept an extra writer argument, a foreign
+    # ordinal or an unselected owner merely because the module is visible.
+    family_scope=o._LinuxPreflightScopeV1.__new__(o._LinuxPreflightScopeV1)
+    family_scope._ordinary_selected_v1=lambda:True
+    family_scope._ordinary_image_v1={'mount_path':Path('/same-owned-view')}
+    vector=(o.sys.executable,'tools/reader.py','--repo-root','.')
+    assert o._ordinary_readonly_source_family_execution_v1(family_scope,vector,6)==(
+        o.sys.executable,'-I','-S','-B','-X','pycache_prefix='+str(family_scope._ordinary_image_v1['mount_path']/'runtime'/'p6'/'pycache'),*vector[1:])
+    for changed,ordinal in ((vector,False),((*vector,'--write-artifacts'),6),(('foreign',*vector[1:]),6)):
+        with pytest.raises(o.ValidationReliabilityError,match='ORIGINAL_VECTOR'):
+            o._ordinary_readonly_source_family_execution_v1(family_scope,changed,ordinal)
+
+    # Actual original R producer/compiler/dispatch/material bodies through
+    # explicit no-native ports; source-policy controls freeze before native rows.
+    from types import ModuleType
+    import dataclasses
+    from tools import run_validation_gates as runner_module
+    with monkeypatch.context() as ports:
+        class Rejected(Exception): pass
+        def require(value, label):
+            if not value: raise Rejected(label)
+        Scope=o._LinuxPreflightScopeV1
+        Entry=o.CommandEvidencePlanEntry
+        class Selection:
+            def __init__(self): self._original = (None, None, 'synthetic-R-phase')
+            def _guard(self): require(self is owner._ordinary_original_source_selection_v1, 'foreign-selection')
+
+        _r_fixture_runner = ModuleType('_synthetic_source_R_runner')
+        ports.setitem(sys.modules,_r_fixture_runner.__name__,_r_fixture_runner)
+        _r_fixture_runner._OrdinarySourceSelectionV1 = Selection
+        _r_fixture_runner.POST_VALIDATION_PHASE = 'post-validation'
+        _r_fixture_runner.PYTEST_SHARD_COMMANDS = runner_module.PYTEST_SHARD_COMMANDS
+        native_port = ModuleType('resource')
+        native_port.RLIMIT_NOFILE = 7
+        native_port.getrlimit = lambda operand: (1536, 1536)
+        ports.setitem(sys.modules,'resource',native_port)
+        owner = object.__new__(Scope)
+        owner._ordinary_precursor_ready_v1=lambda:None
+        owner._ordinary_selected_v1=lambda:True
+        owner._ordinary_runner_owner_v1 = owner._ordinary_original_runner_owner_v1 = _r_fixture_runner
+        owner._ordinary_source_selection_v1 = owner._ordinary_original_source_selection_v1 = Selection()
+        paths = SimpleNamespace(run_id='synthetic', repo_root=Path('/repo'), evidence_root=Path('/E'), process_root=Path('/P'))
+        owner.repository = str(paths.repo_root)
+        owner.control = Path('/control')
+        owner.execution_deadline_ns = 10000
+        owner._ordinary_image_v1 = {'mount_path': Path('/image')}
+        plan = []
+        for ordinal, argv in enumerate((('READER',), ('SCANNER',), ('ordinary',)), 1):
+            entry = object.__new__(Entry)
+            for name,value in dict(run_id=paths.run_id,phase='synthetic-R-phase',command_index=ordinal,cwd=str(paths.repo_root),argv=argv).items():
+                object.__setattr__(entry,name,value)
+            plan.append(entry)
+        plan = tuple(plan)
+        execution = tuple(SimpleNamespace(execution_argv=entry.argv) for entry in plan)
+        rows = tuple((entry, actual, ordinal) for ordinal, (entry, actual) in enumerate(zip(plan, execution), 1))
+        owner._ordinary_bound_paths_v1, owner._ordinary_bound_plan_v1 = paths, plan
+        owner._ordinary_execution_plan_v1 = execution
+        policy = dict(maxima=dict(metadata_bytes=17, metadata_nodes=19, metadata_depth=7), original_cutoffs=(0, 1000, 2000, 3000))
+        resource = {'rp5a_source_policy': policy, 'original_cutoffs': policy['original_cutoffs']}
+        owner._ordinary_resource_programme_v1 = resource
+        owner._ordinary_original_resource_programme_v1 = (resource, tuple(resource.items()))
+        keys = o._SCAN_TRANSPORT_KEYS
+        role = lambda argv, root: None if argv == ('ordinary',) else argv[0]
+        def checked(value, scope):
+            require(value is policy and scope is owner, 'foreign-policy')
+            return value
+        _r_fixture_runner._ordinary_phase_occurrence_selection_v1 = lambda *args, **kwargs: rows
+        _r_fixture_runner._ordinary_rp5a_source_policy_checked_v1 = checked
+        effect_rows = []
+        allocations = []
+        rkeys = ('rp5a_reader_output_bytes', 'rp5a_reader_scratch_bytes', 'rp5a_reader_readback_bytes',
+            'rp5a_scanner_output_bytes', 'rp5a_scanner_scratch_bytes', 'rp5a_scanner_readback_bytes',
+            'rp5a_candidate_read_bytes', 'rp5a_frame_scratch_bytes', 'rp5a_frame_reread_bytes',
+            'rp5a_fence_metadata_calls', 'rp5a_fence_native_read_bytes', 'rp5a_manager_fdinfo_records',
+            'rp5a_manager_fdinfo_bytes', 'rp5a_manager_borrow_fds')
+        for row in rows:
+            entry, actual, ordinal = row
+            native = dict(bound_row=row, tool_operands=(object(),), tasks=1, nofile=12,
+                bootstrap_fd_demand=12, application_fd_demand=8, stdout_minimum=0, stderr_minimum=0)
+            effect_rows.append(dict(entry=entry, execution=actual, bound_row=row, native_programme=native))
+            allocation = dict(source_position=ordinal, native_programme=native, tasks=1, nofile=12,
+                bootstrap_fd_demand=12, application_fd_demand=8, stdout_bytes=100, stderr_bytes=100)
+            if role(entry.argv, paths.repo_root) is not None:
+                allocation.update({key: (0 if 'scanner' in key and entry.argv != ('SCANNER',) else 11) for key in rkeys})
+            allocations.append(allocation)
+        effect = dict(bound_rows=rows, rows=tuple(effect_rows))
+        allocations = tuple(allocations)
+        owner._ordinary_effect_programme_record_v1 = lambda: effect
+        owner._ordinary_parent_git_environment_v1 = lambda root: {'GIT_CONFIG_GLOBAL': 'original-controlled'}
+        owner._ordinary_factory_call_v1 = lambda operation, *args: operation(*args)
+        space = {name:getattr(o,name) for name in (
+            '_ordinary_selected_transport_environment_v1','_ordinary_selected_occurrence_programme_v1',
+            '_ordinary_compile_selected_process_programme_v1','_ordinary_selected_environment_v1',
+            '_ScanRunReadLimits')}
+        ports.setattr(o,'_rp5a_consumer_role_v1',role)
+        ports.setattr(o,'time',SimpleNamespace(monotonic_ns=lambda:1))
+        ports.setattr(o,'_ordinary_phase_allocation_rows_v1',lambda scope,value:allocations)
+        ports.setattr(o,'_ordinary_native_source_programme_check_v1',lambda scope,value:value)
+        ports.setattr(runner_module,'_ACTIVE_SCAN_LAUNCH',None)
+        token=o._LINUX_PREFLIGHT_PROCESS_V1.set(owner)
+        try:
+            base = {'fixed': 'original', o.RUN_ID_ENV:paths.run_id,o.EVIDENCE_ROOT_ENV:str(paths.evidence_root),o.PROCESS_ROOT_ENV:str(paths.process_root)}
+            original_base_items = tuple(base.items())
+            programme = space['_ordinary_selected_occurrence_programme_v1'](owner, paths, plan, execution, resource, environment=base)
+            fd = dict(controller=1536, fork_prefix=1536, application=64, launcher=64, query=64,
+                prefix_capture=128, manager_borrow=128, additional=576)
+            space['_ordinary_compile_selected_process_programme_v1'](owner, programme, fd)
+            owner._ordinary_programme_for_entry_v1 = lambda entry: programme[entry.command_index - 1]
+            limits_value = space['_ScanRunReadLimits'](17, 19, 7, 3)
+            context = dict(plan=plan, paths=paths, table={str(entry.command_index): dict(read_limits=dataclasses.asdict(limits_value), deadline_ns=1000)
+                for entry in plan if role(entry.argv, paths.repo_root) is not None})
+            owner._ordinary_rp5a_source_context_v1 = lambda: context
+            frozen = tuple((row, row['environment'], tuple(row['environment'].items())) for row in programme)
+            for entry in plan:
+                incoming = runner_module._scan_dispatch_environment(base,entry)
+                answer = space['_ordinary_selected_environment_v1'](owner, entry, incoming)
+                assert answer == programme[entry.command_index - 1]['environment']
+                assert owner._ordinary_rp5a_environment_v1(entry, answer) == answer
+            assert tuple(base.items()) == original_base_items
+            assert all(row['environment'] is environment and tuple(environment.items()) == items for row, environment, items in frozen)
+            def rejects(operation, expected_type, expected_detail):
+                try: operation()
+                except expected_type as error:
+                    assert type(error) is expected_type
+                    if expected_type is o.ValidationReliabilityError:
+                        assert error.code == 'ENGVR_PREPUBLICATION_CUSTODY_FAILED'
+                        assert error.detail == expected_detail
+                    else:
+                        assert expected_type is ValueError
+                        assert error.args == (expected_detail,)
+                    return
+                raise AssertionError('original typed owner accepted altered projection')
+            incoming = owner._ordinary_rp5a_environment_v1(plan[0], base)
+            altered = dict(incoming); altered[keys[6]] = '999'
+            rejects(lambda: space['_ordinary_selected_environment_v1'](owner, plan[0], altered),
+                o.ValidationReliabilityError, 'ORDINARY_SELECTED_ENVIRONMENT_UNCHANGED_INDEPENDENT_BASE')
+            old = context['table']['1']['read_limits']['profile_limit']
+            context['table']['1']['read_limits']['profile_limit'] = old + 1
+            rejects(lambda: space['_ordinary_selected_environment_v1'](owner, plan[0], incoming),
+                o.ValidationReliabilityError, 'ORDINARY_R_ORIGINAL_PHASE_ENVIRONMENT_TYPES')
+            context['table']['1']['read_limits']['profile_limit'] = old
+            assert owner._ordinary_rp5a_environment_v1(plan[0], programme[0]['environment']) == programme[0]['environment']
+            # Reach the actual post-BEGIN material guard and first original surface port.
+            class SurfaceSentinel(Exception):pass
+            sentinel = SurfaceSentinel('explicit no-native surface port')
+            owner.check = lambda: None
+            record = dict(entry=plan[0], argv=plan[0].argv, cwd=plan[0].cwd, environment=programme[0]['environment'])
+            owner._ordinary_occurrence_record_v1 = lambda entry: record
+            context.update(rows={'1': {'surface_programme': object()}}, issued=[], errors=[])
+            candidate = SimpleNamespace(plan=plan, active_occurrence=0, _settled_snapshot=object(), _occurrence_before=object())
+            supervision = dict(candidate_custody=candidate, paths=paths, phase=plan[0].phase, pending=False)
+            candidate._acquisition_supervision = supervision
+            def surface(*args): raise sentinel
+            candidate._disk_rp5a_surfaces_v1 = surface
+            rejects(lambda: owner._ordinary_prepare_rp5a_material_v1(record, candidate, supervision=supervision),
+                o.ValidationReliabilityError, 'ORDINARY_R_AFTER_ACTUAL_C_BEGIN_BEFORE_ORIGINAL_DISPATCH')
+            assert context['issued'] == []
+            candidate.active_occurrence = 1
+            try: owner._ordinary_prepare_rp5a_material_v1(record, candidate, supervision=supervision)
+            except SurfaceSentinel as observed: assert observed is sentinel
+            else: raise AssertionError('original surface port not reached')
+            assert len(context['issued']) == 1 and context['issued'][0]['errors'] == [sentinel]
+            assert context['errors'] == [sentinel] and 'rp5a_material' not in record
+
+            foreign_base=dict(base);foreign_base['fixed']='changed'
+            rejects(lambda:space['_ordinary_selected_environment_v1'](owner,plan[0],owner._ordinary_rp5a_environment_v1(plan[0],foreign_base)),
+                o.ValidationReliabilityError, 'ORDINARY_SELECTED_ENVIRONMENT_UNCHANGED_INDEPENDENT_BASE')
+            owner._ordinary_source_selection_v1._original=(None,None,_r_fixture_runner.POST_VALIDATION_PHASE)
+            rejects(lambda:space['_ordinary_selected_transport_environment_v1'](owner,plan[0],base),
+                o.ValidationReliabilityError, 'ORDINARY_SELECTED_NATIVE_ORIGINAL_RUNNER_AND_BASE_ENVIRONMENT')
+            owner._ordinary_source_selection_v1._original=(None,None,'synthetic-R-phase')
+        finally:o._LINUX_PREFLIGHT_PROCESS_V1.reset(token)
+        default_token=o._LINUX_PREFLIGHT_PROCESS_V1.set(None)
+        try:
+            legacy=runner_module._scan_dispatch_environment({**base,keys[0]:'inherited'},plan[0])
+            assert legacy==base
+        finally:o._LINUX_PREFLIGHT_PROCESS_V1.reset(default_token)
+
+    # Original late R source owner cannot consume rows before the native
+    # compiler has frozen their identities/environment. These ports invoke
+    # the actual preparation body and retain POST/no-R compatibility.
+    from types import SimpleNamespace
+    def r_original_preparation_order(phase, selected_role):
+        scope=object.__new__(o._LinuxPreflightScopeV1)
+        plan,limits,physical,parent,slot,cuts,tools,layout=(object() for _ in range(8))
+        path=SimpleNamespace(repo_root=tmp_path)
+        native_rows=(object(),)
+        fd=object()
+        host={}
+        source=object()
+        selection=SimpleNamespace(_original=(None,None,phase))
+        scope._ordinary_source_selection_v1=scope._ordinary_original_source_selection_v1=selection
+        scope._ordinary_runner_owner_v1=SimpleNamespace(POST_VALIDATION_PHASE='post-validation')
+        scope._ordinary_host_preparation_v1=scope._ordinary_original_host_preparation_v1=host
+        scope._ordinary_factory_original_v1=(None,None,limits,physical,parent,slot,cuts,tools,layout)
+        scope._ordinary_run_binding_v1={'bound':True}
+        scope._ordinary_bound_paths_v1=path;scope._ordinary_bound_plan_v1=plan
+        scope.source=source;scope._ordinary_git_bindings_v1={'original_source':source}
+        scope._ordinary_image_v1={'mounted':True}
+        scope._ordinary_precursor_ready_v1=lambda:None
+        scope._ordinary_compile_process_programme_v1=lambda rows,program:events.append(('compile',rows,program))
+        scope._ordinary_host_check_v1=lambda:events.append(('host',))
+        scope._ordinary_verify_post_git_controls_v1=lambda:events.append(('post-Git',))
+        scope._ordinary_verify_selected_git_controls_v1=lambda:events.append(('selected-Git',))
+        bound=((object(),SimpleNamespace(registered_argv=('source-fixed',)),1),)
+        scope._ordinary_effect_programme_record_v1=lambda:{'bound_rows':bound}
+        def original_r(paths,actual_plan,actual_bound,*,occurrence_programme):
+            assert events[0]==('compile',native_rows,fd) and events[-1]==('selected-Git',)
+            assert paths is path and actual_plan is plan and actual_bound is bound and occurrence_programme is native_rows
+            events.append(('original-R',))
+        scope._ordinary_prepare_rp5a_source_v1=original_r
+        for name in ('controls','transfer_host_view','runtime','namespace','policy'):
+            setattr(scope,'_ordinary_prepare_'+name+'_v1' if name!='transfer_host_view' else '_ordinary_transfer_host_view_v1',
+                lambda name=name:events.append((name,)))
+        scope._ordinary_require_host_preparation_v1=lambda actual:events.append(('retained-host',actual))
+        final=object()
+        scope._ordinary_freeze_storage_v1=lambda:final
+        events=[]
+        with monkeypatch.context() as order_ports:
+            order_ports.setattr(o,'_rp5a_consumer_role_v1',lambda argv,root:selected_role)
+            order_ports.setattr(o,'_ordinary_optional_compile_cache_v1',lambda actual:None)
+            actual=o._LinuxPreflightScopeV1._ordinary_prepare_post_v1(scope,paths=path,plan=plan,
+                limits=limits,physical_program=physical,root_parent=parent,root_parent_slot=slot,
+                original_cutoffs=cuts,tools=tools,control_layout=layout,git_environment={},
+                host_preparation=host,occurrence_program=native_rows,fd_program=fd)
+        assert actual is final and events[0]==('compile',native_rows,fd)
+        return events
+    # The source-selected paths object supplies only the original repository.
+    # No filesystem/native method is executed in the above owner ports.
+    assert ('original-R',) in r_original_preparation_order('synthetic-R-phase','READER')
+    assert ('original-R',) not in r_original_preparation_order('synthetic-R-phase',None)
+    assert ('original-R',) not in r_original_preparation_order('post-validation','READER')
+
+    # The original candidate-fence API requires None after successful checks.
+    # These ports use the actual Scope callback and original fence body only.
+    parent_root=tmp_path/'original-parent-root'
+    parent_row={'kind':'directory'}
+    parent_rows=(parent_row,);parent_index={str(parent_root):parent_row}
+    parent_post={};parent_flags={};parent_versions={}
+    parent_source=SimpleNamespace(root=parent_root,row_index=parent_index,post=parent_post,
+        original_flags=parent_flags,originals=parent_versions,state='READABLE',failure=None)
+    parent_anchors=((object(),),(object(),))
+    parent_scope=object.__new__(o._LinuxPreflightScopeV1);parent_scope.repository=str(parent_root)
+    callback_events=[]
+    parent_scope.check=lambda:callback_events.append('check')
+    parent_scope._ordinary_host_check_v1=lambda:(parent_source,parent_rows,parent_index,parent_post,
+        parent_flags,parent_versions,parent_anchors)
+    parent_scope._ordinary_parent_git_root_v1=lambda path:parent_root
+    parent_scope._ordinary_host_row_v1=lambda *args:callback_events.append(('row',args))
+    parent_scope._ordinary_parent_git_environment_v1=lambda path:callback_events.append(('environment',path))
+    assert parent_scope._ordinary_rp5a_parent_source_check_v1() is None
+    assert callback_events[0]=='check' and callback_events[-1]==('environment',parent_root)
+    o._scan_candidate_fence(parent_scope._ordinary_rp5a_parent_source_check_v1)
+    rejects(lambda:o._scan_candidate_fence(lambda:parent_root),
+        ValueError, 'original scan candidate fence must return None or raise')
+    for failed in ('check','_ordinary_host_check_v1','_ordinary_parent_git_root_v1',
+            '_ordinary_host_row_v1','_ordinary_parent_git_environment_v1'):
+        class ParentSourceSentinel(Exception):pass
+        sentinel=ParentSourceSentinel(failed)
+        def refuse(*args):raise sentinel
+        with monkeypatch.context() as callback_ports:
+            callback_ports.setattr(parent_scope,failed,refuse)
+            try:o._scan_candidate_fence(parent_scope._ordinary_rp5a_parent_source_check_v1)
+            except ParentSourceSentinel as observed:assert observed is sentinel
+            else:raise AssertionError('original parent Source failure suppressed')
+    with monkeypatch.context() as callback_ports:
+        callback_ports.setattr(parent_scope,'_ordinary_parent_git_root_v1',lambda path:parent_root/'foreign')
+        rejects(lambda:o._scan_candidate_fence(parent_scope._ordinary_rp5a_parent_source_check_v1),
+            o.ValidationReliabilityError, 'ORDINARY_R_PARENT_ORIGINAL_PROTECTED_SOURCE_ROOT')
+
+    # These are no-native fixture ports. Unit projection does not issue a
+    # manager receipt; direct-leaf admission still rejoins the original holder.
+    from tools import run_validation_gates as native_runner
+    native_fields = ('owner', 'service_unit', 'invocation', 'holder_identity',
+        'holder_pidfd_slot', 'holder_cgroup', 'holder_cgroup_slot', 'holder_events_slot',
+        'ancestor_cgroup', 'ancestor_slot', 'cutoffs', 'errors',
+        'holder_kernel_observations', 'native_input', 'native_generation', 'source_generation', 'startup')
+    def native_fixture_hold(ancestor='/job.slice'):
+        fixture = {key: object() for key in native_fields}
+        fixture['ancestor_cgroup'] = ancestor
+        fixture['original'] = (fixture, *(fixture[key] for key in native_fields))
+        return fixture
+    native_value = dict(environment=dict(GITHUB_RUN_ID='123', GITHUB_RUN_ATTEMPT='2'),
+        phase=native_runner.ORDERED_PHASES[0], origin_ns=23)
+    native_hold = native_fixture_hold()
+    assert native_runner._ordinary_workflow_native_units_v1(native_value, native_hold) == (
+        'qtt123n2p1', 'job-qtt123n2p1.slice', 'qtt123n2p1bootstrap.scope')
+    # A task-native root remains the original PID/origin identity.
+    assert o._linux_preflight_name_v1(17, 23) == 'qtt17n23'
+    for damaged, denial_detail in (
+            (dict(native_value, environment=dict(GITHUB_RUN_ID='0123', GITHUB_RUN_ATTEMPT='2')), 'preflight canonical decimal control'),
+            (dict(native_value, environment=dict(GITHUB_RUN_ID='123', GITHUB_RUN_ATTEMPT='0')), 'preflight exact integer range'),
+            (dict(native_value, environment=dict(GITHUB_RUN_ID=True, GITHUB_RUN_ATTEMPT='2')), 'preflight canonical decimal control'),
+            (dict(native_value, phase='foreign-phase'), 'ORDINARY_NATIVE_UNITS_ORIGINAL_RUN_ATTEMPT_PHASE')):
+        rejects(lambda: native_runner._ordinary_workflow_native_units_v1(damaged, native_hold),
+            o.ValidationReliabilityError, denial_detail)
+    for ancestor, denial_detail in (
+            ('/', 'ORDINARY_NATIVE_UNITS_REAL_ANCESTOR_LOCATOR'),
+            ('/plain', 'ORDINARY_NATIVE_UNITS_SOURCE_SELECTED_SLICE_PARENT'),
+            ('/a//job.slice', 'ORDINARY_NATIVE_UNITS_REAL_ANCESTOR_LOCATOR'),
+            ('/a/../job.slice', 'ORDINARY_NATIVE_UNITS_REAL_ANCESTOR_LOCATOR'),
+            ('/a/' + 'x'*60 + '.slice', 'ORDINARY_NATIVE_UNITS_EXISTING_NATIVE_SPELLING_CAP')):
+        rejects(lambda: native_runner._ordinary_workflow_native_units_v1(native_value, native_fixture_hold(ancestor)),
+            o.ValidationReliabilityError, denial_detail)
+    copied_hold = dict(native_hold)
+    rejects(lambda: native_runner._ordinary_workflow_native_units_v1(native_value, copied_hold),
+        o.ValidationReliabilityError, 'ORDINARY_NATIVE_UNITS_ORIGINAL_HOLDER')
+    replaced_hold = dict(native_hold, ancestor_cgroup='/other.slice')
+    rejects(lambda: native_runner._ordinary_workflow_native_units_v1(native_value, replaced_hold),
+        o.ValidationReliabilityError, 'ORDINARY_NATIVE_UNITS_ORIGINAL_HOLDER')
+
+    # Reach the original host predicate through its actual class method, then
+    # stop at the first kernel-read port. No cgroup or native child is created.
+    class NativeJoinSuffix(Exception): pass
+    suffix = NativeJoinSuffix('kernel suffix is deliberately unexecuted')
+    with monkeypatch.context() as native_ports:
+        resource_port = ModuleType('resource')
+        resource_port.RLIMIT_NOFILE = 7
+        resource_port.getrlimit = lambda which: (1536, 1536)
+        native_ports.setitem(sys.modules, 'resource', resource_port)
+        scope = object.__new__(o._LinuxPreflightScopeV1)
+        scope.name = 'qtt17n23'
+        scope._ordinary_prefix_checked_v1 = lambda: None
+        scope._ordinary_host_retained_lineage_v1 = lambda *args, **kwargs: None
+        cuts = (0, time.monotonic_ns() + 10**12, 0, time.monotonic_ns() + 10**12)
+        policy = dict(launcher=64, controller=1536)
+        ceiling = dict(fd_program=policy)
+        frozen = (None, None, None, None, policy, tuple(policy.items()))
+        ceiling['original'] = frozen
+        host = dict(owner=(os.getpid(), o.threading.get_ident()), claim=dict(profile='fixture-controller',
+            common_slice='job-qtt123n2p1.slice', scope_unit='qtt123n2p1bootstrap.scope'),
+            ceiling_programme=ceiling, original_ceiling_programme=ceiling, original_meter=object(),
+            prefix_slots=[], prefix_iterators=[], prefix_errors=[], prefix_close_debt=[],
+            prefix_counts={}, image_records=[], original_cutoffs=cuts,
+            cgroup=Path('/sys/fs/cgroup/job.slice/job-qtt123n2p1.slice/qtt17n23controller'),
+            common_cgroup=Path('/sys/fs/cgroup/job.slice/job-qtt123n2p1.slice'), profile='fixture-controller (enforce)')
+        host['original'] = (host, scope, host['owner'], host['claim'], ceiling, host['original_meter'],
+            *(host[key] for key in ('prefix_slots', 'prefix_iterators', 'prefix_errors',
+                'prefix_close_debt', 'prefix_counts', 'image_records')))
+        scope._ordinary_host_preparation_v1 = scope._ordinary_original_host_preparation_v1 = host
+        calls = []
+        scope._ordinary_initial_native_holder_v1 = scope._ordinary_original_initial_native_holder_v1 = native_hold
+        capture = dict(role='RECEIVER', native_hold=native_hold)
+        capture_original = [None]*21
+        capture_original[0], capture_original[8], capture_original[12] = capture, capture['role'], native_hold
+        capture['original'] = tuple(capture_original)
+        scope._ordinary_bootstrap_runtime_v1 = scope._ordinary_original_bootstrap_runtime_v1 = capture
+        scope._ordinary_require_initial_native_hold_v1 = lambda actual, actual_host, **kwargs: calls.append((actual, actual_host, kwargs))
+        def native_query(path, **kwargs):
+            if path == '/proc/self/attr/current': return host['profile'].encode('ascii')
+            if path == '/proc/self/cgroup':
+                return ('0::/' + str(host['cgroup'].relative_to('/sys/fs/cgroup'))).encode('ascii')
+            raise suffix
+        scope.query = SimpleNamespace(read=native_query)
+        invoke = lambda: o._LinuxPreflightScopeV1._ordinary_require_host_preparation_v1(scope, host)
+        try: invoke()
+        except NativeJoinSuffix as actual: assert actual is suffix
+        else: raise AssertionError('unexecuted kernel suffix was skipped')
+        assert calls == [(native_hold, host, dict(settling=False))]
+        calls.clear()
+        for key, altered in (('role', 'PARENT'), ('native_hold', object())):
+            original = capture[key]
+            capture[key] = altered
+            rejects(invoke, o.ValidationReliabilityError, 'ORDINARY_PREFIX_SAME_ORIGINAL_DIRECT_RECEIVER')
+            capture[key] = original
+            assert calls == []
+        original_capture = scope._ordinary_bootstrap_runtime_v1
+        scope._ordinary_bootstrap_runtime_v1 = dict(capture)
+        rejects(invoke, o.ValidationReliabilityError, 'ORDINARY_PREFIX_SAME_ORIGINAL_DIRECT_RECEIVER')
+        scope._ordinary_bootstrap_runtime_v1 = original_capture
+        assert calls == []
+        # The unchanged service route retains its original exact name contract.
+        host['cgroup'] = host['common_cgroup'] / (scope.name + 'controller.service')
+        try: invoke()
+        except NativeJoinSuffix as actual: assert actual is suffix
+        else: raise AssertionError('legacy host kernel suffix was skipped')
+        assert calls == []
+        host['cgroup'] = host['common_cgroup'] / 'foreigncontroller'
+        rejects(invoke, o.ValidationReliabilityError, 'ORDINARY_PREFIX_ACTUAL_FRESH_CONTROLLER_ROLE')
+
+    # Explicit no-native syscall ports exercise the SAME fixed early maps
+    # getter. These cases issue no startup, holder, provider or native proof.
+    from types import SimpleNamespace
+    import os as maps_os
+    import stat as maps_stat
+    import time as maps_time
+    from tools import validation_reliability as maps_owner
+    literal_maps = (b'1000-2000 rw-p 00000000 00:00 0\n'
+                    b'3000-5000 r--p 00000000 00:00 0\n')
+    literal_overlap = (b'1000-2000 rw-p 00000000 00:00 0\n'
+                       b'1800-3000 r--p 00000000 00:00 0\n')
+    named_maps = SimpleNamespace(st_dev=5, st_ino=7, st_mode=maps_stat.S_IFREG | 0o444,
+        st_nlink=1, st_size=0, st_mtime_ns=11, st_ctime_ns=13)
+    for maps_case in ('complete', 'overlap', 'partial-read-and-close', 'replaced-path'):
+        selected_native = object.__new__(maps_owner._LinuxSourceNativeV2)
+        requests, delivered, attempts, closes, opened = [], [], [], [], []
+        maps_input = dict(initialized_storage_attempts=[], errors=[])
+        maps_input['initialized_storage_original'] = (maps_input, selected_native,
+            (maps_os.getpid(), __import__('threading').get_ident()), maps_input['initialized_storage_attempts'], maps_input['errors'])
+        source_bytes = literal_overlap if maps_case == 'overlap' else literal_maps
+        position = [0]
+        paths = []
+        raw_error = OSError('synthetic initial maps raw failure')
+        close_error = OSError('synthetic initial maps close failure')
+        def maps_path(_path):
+            paths.append(_path)
+            if maps_case == 'replaced-path' and len(paths) == 2:
+                return SimpleNamespace(**{**named_maps.__dict__, 'st_ino':8})
+            return named_maps
+        def maps_open(path, attempt=None, *, close_attempt=None):
+            opened.append(path)
+            if attempt is not None: attempt()
+            return 87654321
+        def maps_read(fd, requested):
+            assert fd == 87654321
+            requests.append(requested)
+            if maps_case == 'partial-read-and-close' and position[0] >= 3:
+                raise raw_error
+            extent = min(requested, 3, len(source_bytes) - position[0])
+            raw = source_bytes[position[0]:position[0] + extent]
+            position[0] += extent
+            return raw
+        def maps_close(fd):
+            closes.append(fd)
+            if maps_case == 'partial-read-and-close': raise close_error
+        with monkeypatch.context() as maps_ports:
+            maps_ports.setattr(maps_owner.sys, 'platform', 'linux')
+            maps_ports.setattr(maps_owner, '_linux_source_open_v2', maps_open)
+            maps_ports.setattr(maps_owner.os, 'lstat', maps_path)
+            maps_ports.setattr(maps_owner.os, 'fstat', lambda fd: named_maps)
+            maps_ports.setattr(maps_owner.os, 'get_inheritable', lambda fd: False)
+            maps_ports.setattr(maps_owner.os, 'read', maps_read)
+            maps_ports.setattr(maps_owner.os, 'close', maps_close)
+            if maps_case == 'complete':
+                result = selected_native._ordinary_initialized_storage_v1(
+                    native_input=maps_input, attempt=attempts.append, delivered=delivered.append,
+                    deadline_ns=maps_time.monotonic_ns()+60*10**9)
+                assert result['raw'] == literal_maps and result['mapped_extent'] == 12288
+                assert result['entries'] == ((4096,8192,b'rw-p',0,0,0,0),
+                    (12288,20480,b'r--p',0,0,0,0))
+                assert result['complete'] and result['closed'] and not result['errors']
+                assert result['requests'] == requests and sum(delivered) == len(literal_maps)
+                assert result['success_original'][8] is result['raw']
+                assert result['success_original'][9] is result['entries']
+                prior_calls = (tuple(attempts),tuple(requests),tuple(closes),tuple(opened))
+                prior_history = tuple(maps_input['initialized_storage_attempts'])
+                with pytest.raises(maps_owner.ValidationReliabilityError, match='ORIGINAL_NATIVE_INPUT_ATTEMPT_OWNER'):
+                    selected_native._ordinary_initialized_storage_v1(
+                        native_input=maps_input, attempt=attempts.append, delivered=delivered.append,
+                        deadline_ns=maps_time.monotonic_ns()+60*10**9)
+                assert prior_calls == (tuple(attempts),tuple(requests),tuple(closes),tuple(opened))
+                assert tuple(maps_input['initialized_storage_attempts']) == prior_history
+            elif maps_case == 'partial-read-and-close':
+                with pytest.raises(ExceptionGroup) as collected:
+                    selected_native._ordinary_initialized_storage_v1(
+                        native_input=maps_input, attempt=attempts.append, delivered=delivered.append,
+                        deadline_ns=maps_time.monotonic_ns()+60*10**9)
+                assert collected.value.exceptions == (raw_error, close_error)
+                assert sum(delivered) == 3 and position[0] == 3
+            else:
+                with pytest.raises(maps_owner.ValidationReliabilityError, match=('ORDERED_COMPLETE_VMA_DOMAIN'
+                        if maps_case == 'overlap' else 'SEPARATE_NATIVE_METADATA_STABLE')):
+                    selected_native._ordinary_initialized_storage_v1(
+                        native_input=maps_input, attempt=attempts.append, delivered=delivered.append,
+                        deadline_ns=maps_time.monotonic_ns()+60*10**9)
+                assert sum(delivered) == len(source_bytes)
+        assert closes == [87654321] and len(opened) == 1
+        held_maps = maps_input['initialized_storage_attempts']
+        assert len(held_maps) == 1 and held_maps[0]['descriptor'] == 87654321
+        assert held_maps[0]['partial_raw'] == source_bytes[:position[0]]
+        assert maps_input['errors'] == held_maps[0]['errors']
+        assert requests and max(requests) <= 65536
+        assert all(str(path) == str(Path('/proc') / str(maps_os.getpid()) / 'maps') for path in paths)
+
+    # A failed resource callback must retain its genuinely returned chunk
+    # or its still-owned descriptor in the original input; no child is started.
+    for maps_case in ('close-admission', 'delivery-admission'):
+        selected_native = object.__new__(maps_owner._LinuxSourceNativeV2)
+        maps_input = dict(initialized_storage_attempts=[],errors=[])
+        maps_input['initialized_storage_original'] = (maps_input,selected_native,
+            (maps_os.getpid(),__import__('threading').get_ident()),maps_input['initialized_storage_attempts'],maps_input['errors'])
+        requests,delivered,attempts,closes,opened,paths = [],[],[],[],[],[]
+        source_bytes,position = literal_maps,[0]
+        callback_error = OSError('synthetic original getter callback failure')
+        def late_attempt(operation):
+            attempts.append(operation)
+            if maps_case == 'close-admission' and operation == 'INITIAL_MAPS_DESCRIPTOR_ONE_CLOSE':
+                raise callback_error
+        def late_delivery(count):
+            delivered.append(count)
+            if maps_case == 'delivery-admission': raise callback_error
+        with monkeypatch.context() as maps_ports:
+            maps_ports.setattr(maps_owner.sys,'platform','linux')
+            maps_ports.setattr(maps_owner,'_linux_source_open_v2',maps_open)
+            maps_ports.setattr(maps_owner.os,'lstat',maps_path)
+            maps_ports.setattr(maps_owner.os,'fstat',lambda fd:named_maps)
+            maps_ports.setattr(maps_owner.os,'get_inheritable',lambda fd:False)
+            maps_ports.setattr(maps_owner.os,'read',maps_read)
+            maps_ports.setattr(maps_owner.os,'close',maps_close)
+            with pytest.raises(OSError) as late_failure:
+                selected_native._ordinary_initialized_storage_v1(native_input=maps_input,
+                    attempt=late_attempt,delivered=late_delivery,deadline_ns=maps_time.monotonic_ns()+60*10**9)
+        assert late_failure.value is callback_error
+        retained = maps_input['initialized_storage_attempts']
+        assert len(retained)==1 and retained[0]['descriptor']==87654321 and not retained[0]['complete']
+        assert maps_input['errors']==retained[0]['errors']==[callback_error]
+        if maps_case == 'close-admission':
+            assert closes==[] and not retained[0]['close_attempted'] and not retained[0]['closed']
+            assert retained[0]['partial_raw']==literal_maps
+        else:
+            assert closes==[87654321] and retained[0]['close_attempted'] and retained[0]['closed']
+            assert retained[0]['last_returned_raw']==literal_maps[:3]
+            assert retained[0]['partial_raw']==b'' and sum(delivered)==3
+
+    # The original component-open owner keeps its default six-field receipts.
+    # The selected early-getter callback debits each actual close first and
+    # retains the exact cells when admission fails; all FDs here are oracles.
+    from pathlib import PurePosixPath
+    original_component_open = maps_owner._linux_source_open_v2
+    for component_case in ('default', 'selected', 'open-and-close-failure', 'close-admission'):
+        opened_components, closed_components, admitted_components = [], [], []
+        component_body_error = OSError('synthetic component open failure')
+        component_close_error = OSError('synthetic component close failure')
+        component_admission_error = OSError('synthetic component close admission failure')
+        def component_open(path, flags, *, dir_fd=None):
+            opened_components.append((path, flags, dir_fd))
+            if component_case == 'open-and-close-failure' and len(opened_components) == 2:
+                raise component_body_error
+            return 98760000 + len(opened_components)
+        def component_close(fd):
+            closed_components.append(fd)
+            if component_case == 'open-and-close-failure': raise component_close_error
+        def component_admit(slot):
+            admitted_components.append(slot)
+            if component_case == 'close-admission' and len(admitted_components) == 1:
+                raise component_admission_error
+        with monkeypatch.context() as component_ports:
+            component_ports.setattr(maps_owner, 'Path', PurePosixPath)
+            component_ports.setattr(maps_owner.os, 'O_DIRECTORY', getattr(maps_owner.os, 'O_DIRECTORY', 0), raising=False)
+            component_ports.setattr(maps_owner.os, 'O_NOFOLLOW', getattr(maps_owner.os, 'O_NOFOLLOW', 0), raising=False)
+            component_ports.setattr(maps_owner.os, 'O_CLOEXEC', getattr(maps_owner.os, 'O_CLOEXEC', 0), raising=False)
+            component_ports.setattr(maps_owner.os, 'O_NONBLOCK', getattr(maps_owner.os, 'O_NONBLOCK', 0), raising=False)
+            component_ports.setattr(maps_owner.os, 'open', component_open)
+            component_ports.setattr(maps_owner.os, 'close', component_close)
+            selected_close = {} if component_case == 'default' else {'close_attempt': component_admit}
+            if component_case == 'open-and-close-failure':
+                with pytest.raises(ExceptionGroup) as component_failure:
+                    original_component_open('/proc/123/maps', **selected_close)
+                assert component_failure.value.exceptions == (component_body_error, component_close_error)
+            elif component_case == 'close-admission':
+                with pytest.raises(OSError) as component_failure:
+                    original_component_open('/proc/123/maps', **selected_close)
+                assert component_failure.value is component_admission_error
+                assert admitted_components[0]['fd'] == 98760001
+                assert admitted_components[0]['close_admission_attempted']
+                assert not admitted_components[0]['close_attempted'] and not admitted_components[0]['closed']
+                assert admitted_components[0]['close_error'] is component_admission_error
+                assert closed_components == [98760002]
+            else:
+                assert original_component_open('/proc/123/maps', **selected_close) == 98760004
+                assert closed_components == [98760001, 98760002, 98760003]
+                assert (not admitted_components if component_case == 'default'
+                    else all(slot['close_attempted'] and slot['closed'] for slot in admitted_components))
+        if component_case == 'selected':
+            assert len(admitted_components) == 3 and all(len(slot) == 7 for slot in admitted_components)
+        if component_case == 'open-and-close-failure':
+            assert len(admitted_components) == 1 and admitted_components[0]['close_error'] is component_close_error
+
+    # Join the actual helper to the actual getter, still using no-native FDs.
+    # The owned history must retain both old/new component slots when a debit
+    # rejects the old close; a traceback alone is not the history observation.
+    for integrated_failure in (False, True):
+        selected_native = object.__new__(maps_owner._LinuxSourceNativeV2)
+        integrated_input = dict(initialized_storage_attempts=[], errors=[])
+        integrated_input['initialized_storage_original'] = (integrated_input, selected_native,
+            (maps_os.getpid(), __import__('threading').get_ident()),
+            integrated_input['initialized_storage_attempts'], integrated_input['errors'])
+        integrated_opened, integrated_closed, integrated_operations, integrated_delivered = [], [], [], []
+        integrated_position = [0]
+        integrated_error = OSError('synthetic getter intermediate close admission')
+        def integrated_open(path, flags, *, dir_fd=None):
+            integrated_opened.append((path, flags, dir_fd))
+            return 97650000 + len(integrated_opened)
+        def integrated_close(fd):
+            integrated_closed.append(fd)
+        def integrated_attempt(operation):
+            integrated_operations.append(operation)
+            if integrated_failure and operation == 'INITIAL_MAPS_COMPONENT_ONE_CLOSE':
+                if integrated_operations.count(operation) == 1:
+                    raise integrated_error
+        def integrated_read(fd, requested):
+            assert fd == 97650004 and requested <= 65536
+            raw = literal_maps[integrated_position[0]:integrated_position[0]+min(requested,3)]
+            integrated_position[0] += len(raw)
+            return raw
+        with monkeypatch.context() as integrated_ports:
+            integrated_ports.setattr(maps_owner.sys, 'platform', 'linux')
+            integrated_ports.setattr(maps_owner, 'Path', PurePosixPath)
+            for flag in ('O_DIRECTORY','O_NOFOLLOW','O_CLOEXEC','O_NONBLOCK'):
+                integrated_ports.setattr(maps_owner.os, flag, getattr(maps_owner.os,flag,0), raising=False)
+            integrated_ports.setattr(maps_owner.os, 'lstat', lambda path: named_maps)
+            integrated_ports.setattr(maps_owner.os, 'fstat', lambda fd: named_maps)
+            integrated_ports.setattr(maps_owner.os, 'get_inheritable', lambda fd: False)
+            integrated_ports.setattr(maps_owner.os, 'open', integrated_open)
+            integrated_ports.setattr(maps_owner.os, 'close', integrated_close)
+            integrated_ports.setattr(maps_owner.os, 'read', integrated_read)
+            if integrated_failure:
+                with pytest.raises(OSError) as integrated_exception:
+                    selected_native._ordinary_initialized_storage_v1(native_input=integrated_input,
+                        attempt=integrated_attempt, delivered=integrated_delivered.append,
+                        deadline_ns=maps_time.monotonic_ns()+60*10**9)
+                assert integrated_exception.value is integrated_error
+            else:
+                integrated_result = selected_native._ordinary_initialized_storage_v1(native_input=integrated_input,
+                    attempt=integrated_attempt, delivered=integrated_delivered.append,
+                    deadline_ns=maps_time.monotonic_ns()+60*10**9)
+                assert integrated_result['complete'] and integrated_result['closed']
+        integrated_history = integrated_input['initialized_storage_attempts']
+        assert len(integrated_history) == 1
+        integrated_slots = integrated_history[0]['component_slots']
+        if integrated_failure:
+            assert integrated_input['errors'] == integrated_history[0]['errors'] == [integrated_error]
+            assert not integrated_history[0]['complete'] and integrated_history[0]['descriptor'] is None
+            assert len(integrated_slots) == 2 and integrated_slots[0]['fd'] == 97650001
+            assert not integrated_slots[0]['close_attempted'] and not integrated_slots[0]['closed']
+            assert integrated_slots[0]['close_error'] is integrated_error
+            assert integrated_slots[1]['fd'] == 97650002 and integrated_slots[1]['closed']
+            assert integrated_closed == [97650002] and not integrated_delivered
+        else:
+            assert len(integrated_slots) == 3 and all(slot['closed'] for slot in integrated_slots)
+            assert integrated_closed == [97650001,97650002,97650003,97650004]
+            assert integrated_operations.count('INITIAL_MAPS_COMPONENT_OPEN') == 4
+            assert integrated_operations.count('INITIAL_MAPS_COMPONENT_ONE_CLOSE') == 3
+            assert sum(integrated_delivered) == len(literal_maps)
+
     print('LINUX_PREFLIGHT_REFERENCE_CHECKS_PASSED; native_systemd_enforcement=NOT_EXECUTED',flush=True)
+
+    from tools import validation_reliability as owner
+    import ast as forward_ast
+    from tools import validation_scope_registry as forward_reg
+    forward_scalar=forward_reg._facet_fn_source_data_utf8_scalar_v1
+    forward_span=forward_reg._facet_fn_source_data_json_span_v1
+    forward_scanner=forward_reg._facet_fn_source_data_lexical_admission_v1
+    forward_children=dict((code.co_name,(index,code))
+        for index,code in enumerate(forward_scanner.__code__.co_consts)
+        if isinstance(code,type(forward_scanner.__code__))
+        and code.co_name in ('checkpoint','visit','bump'))
+    forward_site=('CALL',1,0,1,8,
+        "Call(func=Name(id='visit', ctx=Load()), args=[Constant(value=0)], keywords=[])")
+    forward_selectors=tuple((function.__name__,function.__module__,function.__qualname__,
+        function.__code__.co_firstlineno,function,(),()) for function in (
+            forward_scanner,forward_scalar,forward_span,
+            owner._ordinary_source_data_utf8_scalar_v1,owner._ordinary_source_data_json_span_v1))
+    for wrong_owner,wrong_child in (
+            (owner._ordinary_source_data_lexical_admission_v1,forward_children['visit']),
+            (forward_scanner,forward_children['checkpoint']),
+            (forward_scanner,forward_children['bump'])):
+        with pytest.raises(ValueError,match='CONTROL_ORIGINAL_LEXICAL_FORWARD_OWNER'):
+            owner._ordinary_control_lexical_forward_route_v1(None,wrong_owner,
+                (wrong_child[0],),wrong_child[1],forward_scalar,forward_site,forward_selectors)
+    correct_call=forward_ast.parse('f(raw,index,end,visit)').body[0].value
+    assert owner._ordinary_control_lexical_forward_arguments_v1(correct_call,3,'visit',4) is correct_call
+    for changed in ('f(raw,index,visit,end)','f(raw,index,end,visit,extra)',
+            'f(raw,index,end,visit=visit)','f(raw,index,end,*visit)'):
+        with pytest.raises(ValueError,match='CONTROL_ORIGINAL_LEXICAL_FORWARD_ARGUMENT'):
+            owner._ordinary_control_lexical_forward_arguments_v1(
+                forward_ast.parse(changed).body[0].value,3,'visit',4)
+    with pytest.raises(ValueError,match='CONTROL_ORIGINAL_LEXICAL_FORWARD_ARGUMENT'):
+        owner._ordinary_control_lexical_forward_arguments_v1(correct_call,2,'visit',4)
+    for operand in (None, False, 1, b"", forward_scalar):
+        with pytest.raises(ValueError,match='CONTROL_ORIGINAL_TYPED_BYTECODE_OPERAND'):
+            owner._ordinary_control_bytecode_v1(operand)
+    for flags,optimize in ((False,0),(-1,0),(0,False),(0,-1),(0,3)):
+        with pytest.raises(ValueError,match='CONTROL_ORIGINAL_LOADER_COMPILE_POLICY'):
+            owner._ordinary_control_compiled_selections_v1(b'def f():\n return None\n',
+                '<private-proof-flags>',flags=flags,optimize=optimize,selected=())
+    with pytest.raises(ValueError,match='CONTROL_METADATA_CODE_SITE_ONLY'):
+        owner._ordinary_control_code_site_route_v1(forward_scanner,(),
+            forward_scanner.__code__,'CODE_SITE',forward_site)
+    with pytest.raises(ValueError,match='CONTROL_SOURCE_CHILD_CODE_IDENTITY'):
+        owner._ordinary_control_code_site_route_v1(forward_scanner,
+            (forward_children['visit'][0],),forward_children['bump'][1],'LEXICAL_CALL',forward_site)
+    with pytest.raises(ValueError,match='CONTROL_SOURCE_LEXICAL_SYMBOL_DISPATCH'):
+        owner._ordinary_control_code_site_route_v1(forward_scanner,
+            (forward_children['visit'][0],),forward_children['visit'][1],'LEXICAL_CALL',
+            forward_site[:5]+("Call(func=Name(id='arbitrary', ctx=Load()), args=[], keywords=[])",))
+    import types as forward_types
+    foreign_root=compile('def foreign():\n def visit(x): return x\n return visit(0)\n',
+        '<foreign-lexical-source>','exec',dont_inherit=True)
+    foreign_code=next(code for code in foreign_root.co_consts if isinstance(code,type(foreign_root)))
+    foreign_function=forward_types.FunctionType(foreign_code,{})
+    foreign_index,foreign_child=next((index,code) for index,code in enumerate(foreign_code.co_consts)
+        if isinstance(code,type(foreign_code)))
+    with pytest.raises(ValueError,match='CONTROL_ORIGINAL_LEXICAL_FORWARD_OWNER'):
+        owner._ordinary_control_lexical_forward_route_v1(None,foreign_function,
+            (foreign_index,),foreign_child,forward_scalar,forward_site,forward_selectors)
+
+    import ast as route_ast
+    import dis as route_dis
+    projected=tuple(owner._ordinary_control_bytecode_v1(forward_scalar.__code__))
+    native_instruction=tuple(route_dis.get_instructions(forward_scalar))
+    assert tuple(row[:3] for row in projected)==tuple(
+        (row.offset,row.opname,row.arg) for row in native_instruction)
+    tracked={'LOAD_CONST','LOAD_GLOBAL','STORE_GLOBAL','DELETE_GLOBAL','STORE_NAME',
+        'DELETE_NAME','STORE_FAST','DELETE_FAST','STORE_DEREF','DELETE_DEREF'}
+    assert tuple((row[0],row[1],row[3]) for row in projected if row[1] in tracked)==tuple(
+        (row.offset,row.opname,row.argval) for row in native_instruction if row.opname in tracked)
+    route_scope=object.__new__(owner._LinuxPreflightScopeV1)
+    route_source=object.__new__(owner._LinuxImmutableSourceSealV2)
+    route_scope.source=route_source
+    route_scope._ordinary_factory_errors_v1=[]
+    route_stage={'error':None}
+    route_raw=Path(route_ast.__file__).read_bytes()
+    route_observation={'compiled':None}
+    route_input=('ast',route_ast,route_observation,route_raw,route_ast.dump.__code__.co_filename,0,0)
+    route_selection={'scope':route_scope,'source':route_source,'stage':route_stage,
+        'module_inputs':(route_input,),'selected':[],'roots':[],'delegated':[],'errors':[]}
+    route_selection['original']=(route_selection,route_scope,route_source,route_stage,
+        route_selection['module_inputs'],route_selection['selected'],route_selection['roots'],
+        route_selection['delegated'],route_selection['errors'])
+    route_attempt={'selection':route_selection,'heap':{'active':route_stage}}
+    route_scope._ordinary_control_module_inputs_v1=route_attempt
+    with monkeypatch.context() as route_patch:
+        route_patch.setattr(owner,'_ordinary_control_fixed_delegate_roster_v1',
+            lambda:(('ast','dump','ast',None),))
+        route_result=owner._ordinary_control_initialized_routes_v1(route_scope,route_stage,route_selection)
+    assert route_result is route_selection['route_acquisition']['result']
+    assert route_selection['route_acquisition']['complete']
+    assert route_selection['selected'][0][4] is route_ast.dump
+    route_capture=route_selection['route_acquisition']['observations'][1]
+    assert route_capture['source_original'][1] is route_result[0][0][2]
+    assert route_capture['source_original'][3] is route_ast.dump.__code__
+    assert route_selection['route_acquisition']['code_sites_original'][1]
+    assert route_result[2]  # Metadata capture does not issue unclosed native CALL grants.
+    with pytest.raises(owner.ValidationReliabilityError):
+        owner._ordinary_control_initialized_routes_v1(route_scope,route_stage,route_selection)
+
+    # Exact native static descriptor and ordinary Source callback projections
+    # stay in the same private Source selection, never a generic callable grant.
+    census_path=('_LinuxPreflightCensusV1','_version')
+    census_descriptor=owner._LinuxPreflightCensusV1.__dict__['_version']
+    census_function=census_descriptor.__func__
+    assert type(census_descriptor) is staticmethod
+    assert owner._ordinary_control_member_v1(owner,census_path) is census_function
+    foreign_census=forward_types.FunctionType(census_function.__code__,{})
+    with monkeypatch.context() as census_patch:
+        census_patch.setattr(owner._LinuxPreflightCensusV1,'_version',staticmethod(foreign_census))
+        with pytest.raises(ValueError,match='CONTROL_ONLY_ORIGINAL_CENSUS_STATICMETHOD'):
+            owner._ordinary_control_member_v1(owner,census_path)
+    unrelated_descriptor=staticmethod(census_function)
+    unrelated_module=forward_types.ModuleType('unrelated_static_owner')
+    unrelated_module.member=unrelated_descriptor
+    assert owner._ordinary_control_member_v1(unrelated_module,('member',)) is unrelated_descriptor
+    def connected_source_member_fixture():
+        scoped=object.__new__(owner._LinuxPreflightScopeV1)
+        source=object.__new__(owner._LinuxImmutableSourceSealV2)
+        native=object.__new__(owner._LinuxSourceNativeV2)
+        scoped.source=source
+        limits={};remaining={};observed={}
+        meter={'limits':limits,'remaining':remaining,'observed':observed}
+        scoped._ordinary_meter_v1=meter
+        scoped._ordinary_original_meter_v1=(meter,limits,remaining,observed)
+        scoped._ordinary_factory_owner_v1=(owner.os.getpid(),owner.threading.get_ident())
+        source.native=native
+        source._ordinary_meter_scope_v1=scoped
+        native._ordinary_source_owner_v1=source
+        native.attempt=source._ordinary_source_native_attempt_v1
+        row=dict(scope=scoped,source=source,parent=None,meter=meter,counters={},
+            initial=(),global_before=(),native=native,original_native_attempt=source._meta_attempt,errors=[])
+        row['original']=(row,scoped,source,None,meter,row['counters'],row['initial'],
+            row['global_before'],native,row['original_native_attempt'],row['errors'])
+        records=[row]
+        scoped._ordinary_source_meter_records_v1=records
+        scoped._ordinary_original_source_meter_records_v1=records
+        source._ordinary_source_meter_record_v1=row
+        return scoped,source,native,row
+    member_scope,member_source,member_native,member_record=connected_source_member_fixture()
+    member_callback=member_native.attempt
+    callback_function=owner._LinuxImmutableSourceSealV2._ordinary_source_native_attempt_v1
+    assert owner._ordinary_control_member_v1(member_native,('attempt',)) is callback_function
+    assert owner._ordinary_control_member_v1(member_source,('native','flags')) is owner._LinuxSourceNativeV2.flags
+    assert owner._ordinary_control_member_v1(member_source,
+        ('_ordinary_meter_scope_v1','_ordinary_source_meter_event_v1')) is owner._LinuxPreflightScopeV1._ordinary_source_meter_event_v1
+    assert member_native.attempt is member_callback
+    assert member_scope._ordinary_source_meter_projection_v1(member_source) is member_record
+    with pytest.raises(ValueError,match='CONTROL_ORIGINAL_SOURCE_MEMBER_UNSUPPORTED'):
+        owner._ordinary_control_member_v1(member_source,('native','arbitrary'))
+    wrong_member_source=object.__new__(owner._LinuxImmutableSourceSealV2)
+    member_native.attempt=forward_types.MethodType(callback_function,wrong_member_source)
+    with pytest.raises(owner.ValidationReliabilityError,match='ORDINARY_SOURCE_PROJECTION_ORIGINAL_ASSOCIATIONS'):
+        owner._ordinary_control_member_v1(member_native,('attempt',))
+    member_native.attempt=member_callback
+    member_record['native']=object.__new__(owner._LinuxSourceNativeV2)
+    with pytest.raises(owner.ValidationReliabilityError,match='ORDINARY_SOURCE_PROJECTION_ORIGINAL_ASSOCIATIONS'):
+        owner._ordinary_control_member_v1(member_native,('attempt',))
+    member_record['native']=member_native
+    assert owner._ordinary_control_member_v1(member_native,('attempt',)) is callback_function
+    # Static descriptor replacement with the same underlying Function must be
+    # observed by the original site checker as a changed association.
+    static_site=('CALL',1,0,1,10,'original static Source site')
+    static_selector=('private.census','tools.validation_reliability',
+        census_function.__qualname__,0,census_function,(),())
+    static_fields=(census_function,member_scope,member_source,static_site)
+    static_route=(owner,census_path,census_function,'PYTHON',census_function,static_fields)
+    static_rows=(('private.census',static_site,(static_route,)),)
+    static_capture={'function':census_function,
+        'static_original':(owner._LinuxPreflightCensusV1,census_descriptor,census_function)}
+    member_scope._ordinary_control_module_inputs_v1={'selection':{
+        'route_acquisition':{'observations':[static_capture],'member_bindings':[]}}}
+    assert owner._ordinary_control_sites_check_v1(member_scope,'private.census',(static_site,),
+        static_rows,(static_selector,),(),(),()) == static_rows
+    with monkeypatch.context() as replacement_descriptor_patch:
+        replacement_descriptor_patch.setattr(owner._LinuxPreflightCensusV1,
+            '_version',staticmethod(census_function))
+        with pytest.raises(ValueError,match='CONTROL_ORIGINAL_CENSUS_STATIC_DESCRIPTOR_INTERVAL'):
+            owner._ordinary_control_sites_check_v1(member_scope,'private.census',(static_site,),
+                static_rows,(static_selector,),(),(),())
+    # The exact selected pytest02 guard projects the original graph record;
+    # arbitrary BINARY paths still use the existing DATA route.
+    import tools.run_validation_gates as connected_runner
+    graph_scope=object.__new__(owner._LinuxPreflightScopeV1)
+    graph_source=object()
+    graph_selection=forward_types.SimpleNamespace(_original=(None,None,'phase'))
+    graph=dict(paths=object(),plan=object(),execution_plan=object(),source=graph_source,
+        source_selection=graph_selection,bound_rows=[],rows=[],source_operands=[],
+        module_sources=[],errors=[],installation_source_operands=[],source_byte_limit=10,
+        source_node_limit=20,phase='phase',complete=False,
+        check=owner._ordinary_pytest_source_graph_check_v1,
+        original_check=owner._ordinary_pytest_source_graph_check_v1)
+    graph['original']=(graph,graph_scope,graph['paths'],graph['plan'],graph['execution_plan'],
+        graph_source,graph_selection,graph['bound_rows'],graph['rows'],graph['source_operands'],
+        graph['module_sources'],graph['errors'],10,20,'phase',
+        (owner.os.getpid(),owner.threading.get_ident()),graph['installation_source_operands'])
+    graph_scope._ordinary_pytest_source_graph_v1=graph_scope._ordinary_original_pytest_source_graph_v1=graph
+    graph_scope._ordinary_bound_paths_v1=graph['paths'];graph_scope._ordinary_bound_plan_v1=graph['plan']
+    graph_scope._ordinary_execution_plan_v1=graph['execution_plan'];graph_scope.source=graph_source
+    graph_scope._ordinary_source_selection_v1=graph_scope._ordinary_original_source_selection_v1=graph_selection
+    guard=connected_runner._facet_fn_pytest_config_original_route_v1
+    assert guard(graph_scope,graph,'pytest.ini',10,20,'BINARY',None) is True
+    assert guard(graph_scope,graph,'other.bin',10,20,'BINARY',None) is False
+    assert guard(graph_scope,graph,'pytest.ini',10,20,'JSON',None) is False
+    assert guard(graph_scope,graph,'pytest.ini',10,20,'BINARY','RAW_BYTES_V1') is False
+    old_graph=graph['original']
+    for original_index in range(17):
+        changed_graph=list(old_graph);changed_graph[original_index]=object()
+        graph['original']=tuple(changed_graph)
+        with pytest.raises(owner.ValidationReliabilityError,match='ORDINARY_PYTEST_CONFIG_ORIGINAL_SOURCE_PROGRAMME'):
+            guard(graph_scope,graph,'pytest.ini',10,20,'BINARY',None)
+    graph['original']=old_graph
+    assert guard(graph_scope,graph,'pytest.ini',10,20,'BINARY',None) is True
+    # The real DATA request owner supplies five Source sites across four
+    # existing Scope methods; private closure rows leave public root24 intact.
+    import tools.validation_scope_registry as operand_registry
+    operand_names=(
+        ('tools.validation_reliability','_ordinary_source_data_operand_v1',
+            'tools.validation_reliability',None),
+        ('tools.validation_reliability','_LinuxPreflightScopeV1._ordinary_source_data_raw_issue_v1',
+            'tools.validation_reliability','_LinuxPreflightScopeV1'),
+        ('tools.validation_scope_registry','_facet_m_source_data_raw_issue_v1',
+            'tools.validation_reliability','_LinuxPreflightScopeV1'))
+    operand_fixed=owner._ordinary_control_fixed_delegate_roster_v1()
+    assert all(operand_fixed.count(row)==1 for row in operand_names)
+    operand_targets=(owner._LinuxPreflightScopeV1._ordinary_source_data_raw_issue_v1,
+        owner._LinuxPreflightScopeV1._ordinary_source_data_managed_request_v1,
+        owner._LinuxPreflightScopeV1._ordinary_source_data_scan_v1,
+        owner._LinuxPreflightScopeV1._ordinary_source_data_construct_issued_v1)
+    operand_roster=operand_names+tuple(
+        ('tools.validation_reliability','_LinuxPreflightScopeV1.'+function.__name__,
+            'tools.validation_reliability','_LinuxPreflightScopeV1')
+        for function in operand_targets[1:])
+    def operand_route_fixture():
+        acquired=object.__new__(owner._LinuxPreflightScopeV1)
+        acquired.source=object.__new__(owner._LinuxImmutableSourceSealV2)
+        acquired._ordinary_factory_errors_v1=[]
+        stage={'error':None}
+        inputs=tuple((module.__name__,module,{'compiled':None},Path(module.__file__).read_bytes(),
+            str(module.__file__),0,0) for module in (owner,operand_registry))
+        selected={'scope':acquired,'source':acquired.source,'stage':stage,
+            'module_inputs':inputs,'selected':[],'roots':[],'delegated':[],'errors':[]}
+        selected['original']=(selected,acquired,acquired.source,stage,inputs,
+            selected['selected'],selected['roots'],selected['delegated'],selected['errors'])
+        acquired._ordinary_control_module_inputs_v1={'selection':selected,'heap':{'active':stage}}
+        return acquired,stage,selected
+    operand_scope,operand_stage,operand_selection=operand_route_fixture()
+    with monkeypatch.context() as operand_patch:
+        operand_patch.setattr(owner,'_ordinary_control_fixed_delegate_roster_v1',lambda:operand_roster)
+        operand_result=owner._ordinary_control_initialized_routes_v1(
+            operand_scope,operand_stage,operand_selection)
+    operand_label='delegated.tools.validation_reliability._ordinary_source_data_operand_v1'
+    operand_function=owner._ordinary_source_data_operand_v1
+    operand_row=next(row for row in operand_result[0] if row[0][0]==operand_label)
+    assert operand_row[1] is operand_function and operand_row[3] is operand_function.__code__
+    operand_capture=next(row for row in operand_selection['route_acquisition']['observations']
+        if row.get('function') is operand_function)
+    assert operand_capture['source_original'][1] is operand_row[2]
+    assert operand_capture['source_original'][3] is operand_function.__code__
+    operand_calls=tuple((site,route) for label,site,routes in operand_result[1]
+        if label==operand_label for route in routes
+        if route[3]=='PYTHON' and any(route[2] is target for target in operand_targets))
+    assert len(operand_calls)==5
+    assert sorted(route[2].__name__ for site,route in operand_calls)==sorted(
+        function.__name__ for function in operand_targets+(operand_targets[1],))
+    assert all(route[0] is owner and route[1]==('_LinuxPreflightScopeV1',route[2].__name__)
+        and route[4] is operand_function and route[5][0] is operand_function
+        and route[5][1] is operand_scope and route[5][2] is operand_scope.source
+        and route[5][3] is site for site,route in operand_calls)
+    assert any(label==operand_label for label,rows in
+        operand_selection['route_acquisition']['code_sites_original'][1])
+    assert not operand_selection['roots'] and operand_selection['delegated']
+    assert operand_result[2]  # Unrelated callbacks/native targets stay unresolved.
+    with pytest.raises(owner.ValidationReliabilityError):
+        owner._ordinary_control_initialized_routes_v1(
+            operand_scope,operand_stage,operand_selection)
+    foreign_operand=forward_types.FunctionType(operand_function.__code__,{})
+    wrong_scope,wrong_stage,wrong_selection=operand_route_fixture()
+    with monkeypatch.context() as wrong_operand_patch:
+        wrong_operand_patch.setattr(owner,'_ordinary_control_fixed_delegate_roster_v1',
+            lambda:(operand_names[0],))
+        wrong_operand_patch.setattr(owner,'_ordinary_source_data_operand_v1',foreign_operand)
+        with pytest.raises(owner.ValidationReliabilityError,match='CONTROL_ORIGINAL_DELEGATE_FUNCTION'):
+            owner._ordinary_control_initialized_routes_v1(wrong_scope,wrong_stage,wrong_selection)
+
+    for constructor_target,constructor_caller in (
+            (owner.ValidationReliabilityError.__init__,owner._preflight_require_v1),
+            (RuntimeError,owner._preflight_require_v1),
+            (owner.ValidationReliabilityError,forward_scalar)):
+        with pytest.raises(ValueError,match='CONTROL_ONLY_ORIGINAL_ERROR_CONSTRUCTOR'):
+            owner._ordinary_control_error_constructor_route_v1(route_scope,constructor_target,
+                constructor_caller,('CALL',1,0,1,1,'x'),(),(),())
+
+    # Same-original compiler reuse fixtures carry no native admission.
+    def original_reuse_fixture():
+        raw=b'def operand(value=3):\n    return value+1\n'
+        filename='synthetic-no-native-original.py'
+        tree=compile(raw,filename,'exec',flags=route_ast.PyCF_ONLY_AST,dont_inherit=True,optimize=0)
+        independent=compile(tree,filename,'exec',dont_inherit=True,optimize=0)
+        actual=compile(raw,filename,'exec',dont_inherit=True,optimize=0)
+        module=forward_types.ModuleType('synthetic_no_native_owner')
+        exec(actual,module.__dict__)
+        function=module.operand;definition=tree.body[0]
+        expected=next(c for c in independent.co_consts if type(c) is forward_types.CodeType)
+        declared=('operand',definition.lineno,expected.co_firstlineno,definition)
+        compiled=(independent,(independent,expected),(declared,))
+        observation={'root':actual,'witness':None,'compiled':compiled}
+        item=(module.__name__,module,observation,raw,filename,0,0)
+        observation['row']=item
+        observation['result_original']=(item,observation,raw,compiled,actual,None)
+        current_scope=object.__new__(owner._LinuxPreflightScopeV1)
+        source=object.__new__(owner._LinuxImmutableSourceSealV2)
+        current_scope.source=source
+        stage={'error':None,'complete':False};heap={'active':stage}
+        observations=[observation];rows=[item];errors=[]
+        acquisition={'scope':current_scope,'source':source,'stage':stage,'heap':heap,
+            'complete':True,'errors':errors,'observations':observations,'rows':rows,'result':(item,)}
+        original=(acquisition,current_scope,source,object(),heap,stage,object(),observations,rows,errors)
+        acquisition['original']=original
+        acquisition['result_original']=(acquisition['result'],acquisition,original,observations,rows)
+        selector=('original',module.__name__,'operand',1,function,(),());selectors=(selector,)
+        selection={'stage':stage,'module_inputs':acquisition['result'],'result':(selectors,())}
+        selection['original']=(selection,current_scope,source)
+        acquisition['selection']=selection
+        observed={'selector':selector,'function':function,'item':item,'code':function.__code__,
+            'definition':definition,'source_original':(compiled,definition,expected,function.__code__)}
+        record={'selection':selection,'scope':current_scope,'source':source,'stage':stage,
+            'rows':[],'sites':[],'unresolved':[],'observations':[observed],'error':None,'complete':True}
+        record['original']=(record,selection,current_scope,source,stage,record['rows'],record['sites'],
+            record['unresolved'],record['observations'])
+        record['compiled_inputs']={item[0]:compiled}
+        record['compiled_inputs_original']=(record['compiled_inputs'],tuple(record['compiled_inputs'].items()))
+        observed['definition_original']=owner._ordinary_control_ast_original_v1(definition)
+        observed['definition_original_association']=(observed,observed['source_original'],observed['definition_original'])
+        result=((),(),());record['result']=result;selection['routes']=result
+        selection['route_acquisition']=record
+        current_scope._ordinary_control_module_inputs_v1=acquisition
+        current_scope._ordinary_original_control_module_inputs_v1=acquisition
+        current_scope._ordinary_control_module_inputs_original_v1=original
+        return current_scope,item,selectors,compiled
+    reuse_scope,reuse_item,reuse_selectors,reuse_compiled=original_reuse_fixture()
+    assert owner._ordinary_control_initialized_compiled_reuse_v1(
+        reuse_scope,reuse_item,reuse_selectors) is reuse_compiled
+    assert owner._ordinary_control_initialized_compiled_reuse_v1(
+        object(),reuse_item,reuse_selectors) is None
+    reuse_callbacks=[]
+    for reuse_defect in ('foreign-acquisition','inactive-stage','selector-copy','foreign-row',
+            'raw-copy','map-copy','map-value-copy','ast-mutation','function-code-replacement',
+            'partial-route','foreign-definition','foreign-leaf','graph-row','graph-field','graph-association'):
+        reuse_scope,reuse_item,reuse_selectors,reuse_compiled=original_reuse_fixture()
+        reuse_acquisition=reuse_scope._ordinary_control_module_inputs_v1
+        reuse_selection=reuse_acquisition['selection'];reuse_record=reuse_selection['route_acquisition']
+        if reuse_defect=='foreign-acquisition':reuse_scope._ordinary_original_control_module_inputs_v1=dict(reuse_acquisition)
+        elif reuse_defect=='inactive-stage':reuse_acquisition['heap']['active']=dict(reuse_acquisition['stage'])
+        elif reuse_defect=='selector-copy':reuse_selectors=tuple(list(reuse_selectors))
+        elif reuse_defect=='foreign-row':reuse_item=tuple(list(reuse_item))
+        elif reuse_defect=='raw-copy':reuse_item[2]['result_original']=(reuse_item,reuse_item[2],
+            bytes(bytearray(reuse_item[3])),reuse_compiled,reuse_item[2]['root'],None)
+        elif reuse_defect=='map-copy':reuse_record['compiled_inputs']=dict(reuse_record['compiled_inputs'])
+        elif reuse_defect=='map-value-copy':reuse_record['compiled_inputs'][reuse_item[0]]=tuple(list(reuse_compiled))
+        elif reuse_defect=='ast-mutation':reuse_compiled[2][0][3].body[0].value.right.value=2
+        elif reuse_defect=='function-code-replacement':reuse_selectors[0][4].__code__=next(
+            c for c in compile('def operand(value=3):\n return value+2\n',reuse_item[4],'exec').co_consts
+            if type(c) is forward_types.CodeType)
+        elif reuse_defect=='partial-route':reuse_record['complete']=False
+        elif reuse_defect=='foreign-definition':reuse_record['observations'][0]['definition']=route_ast.parse('def operand():pass').body[0]
+        elif reuse_defect=='foreign-leaf':
+            class ReuseForeignLeaf:
+                def __repr__(self):reuse_callbacks.append('repr');return '1'
+                def __eq__(self,other):reuse_callbacks.append('eq');return True
+                def __getattribute__(self,name):reuse_callbacks.append('getattribute');return object.__getattribute__(self,name)
+            reuse_compiled[2][0][3].body[0].value.right.value=ReuseForeignLeaf()
+        elif reuse_defect in ('graph-row','graph-field','graph-association'):
+            observed=reuse_record['observations'][0];graph=observed['definition_original']
+            class ReuseForeignGraph:
+                def __iter__(self):reuse_callbacks.append('iter');return iter(())
+                def __eq__(self,other):reuse_callbacks.append('eq');return True
+            if reuse_defect=='graph-association':
+                observed['definition_original']=tuple(list(graph))
+            else:
+                node_rows,class_rows=graph[2]
+                if reuse_defect=='graph-row':node_rows=(ReuseForeignGraph(),)+node_rows[1:]
+                else:
+                    row=node_rows[0]
+                    node_rows=((row[0],row[1],row[2],row[3],(ReuseForeignGraph(),)),)+node_rows[1:]
+                changed=(graph[0],graph[1],(node_rows,class_rows))
+                observed['definition_original']=changed
+                observed['definition_original_association']=(observed,observed['source_original'],changed)
+        with pytest.raises(ValueError):
+            owner._ordinary_control_initialized_compiled_reuse_v1(reuse_scope,reuse_item,reuse_selectors)
+    assert reuse_callbacks==[]
+
+    ctor_cls=owner.ValidationReliabilityError
+    ctor_init=ctor_cls.__dict__['__init__']
+    ctor_builtin=ctor_init.__builtins__
+    ctor_parts=[]
+    with Path(owner.__file__).open('rb') as ctor_stream:
+        for ctor_part in iter(lambda:ctor_stream.read(65536),b''):ctor_parts.append(ctor_part)
+    ctor_raw=b''.join(ctor_parts)
+    ctor_compiled=owner._ordinary_control_compiled_module_v1(ctor_raw,owner.__file__,flags=0,optimize=0)
+    ctor_observation={'compiled':ctor_compiled,'root':owner._ORDINARY_INITIALIZED_MODULE_CODE_V1}
+    ctor_observation['result_original']=(None,None,ctor_raw,ctor_compiled)
+    ctor_item=('tools.validation_reliability',owner,ctor_observation,ctor_raw,owner.__file__,0,0)
+    ctor_inputs=(ctor_item,)
+    ctor_definition=next(row[3] for row in ctor_compiled[2]
+        if row[0]=='ValidationReliabilityError.__init__')
+    ctor_expected=next(code for code in ctor_compiled[1]
+        if code.co_qualname=='ValidationReliabilityError.__init__')
+    ctor_selectors=(('constructor','tools.validation_reliability',ctor_init.__qualname__,
+        ctor_definition.lineno,ctor_init,(),(ctor_cls,)),)
+    ctor_selection={'scope':route_scope,'source':route_source,'result':(ctor_selectors,())}
+    ctor_record={'selection':ctor_selection,'scope':route_scope,'source':route_source,
+        'error':None,'complete':True}
+    ctor_selection['route_acquisition']=ctor_record
+    ctor_capture={'namespace':ctor_cls.__dict__,'init':ctor_init,'observation':ctor_observation,
+        'source_original':(ctor_compiled,ctor_definition,ctor_expected,ctor_init.__code__)}
+    ctor_capture['dictionary_snapshot']=tuple(ctor_capture['namespace'].items())
+    ctor_capture['facts']=(ctor_builtin,type(ctor_cls),ctor_cls.__bases__,ctor_cls.__mro__,
+        RuntimeError.__dict__['__new__'],BaseException.__dict__['__init__'],
+        object.__dict__['__setattr__'],ctor_builtin['super'])
+    ctor_record['error_constructor']=ctor_capture
+    ctor_capture['original']=(ctor_capture,ctor_record,owner,ctor_cls,ctor_capture['namespace'],
+        ctor_capture['facts'],ctor_init,ctor_observation,ctor_capture['source_original'],
+        ctor_capture['dictionary_snapshot'])
+    ctor_attempt={'selection':ctor_selection,'result':ctor_inputs,'original':object()}
+    route_scope._ordinary_control_module_inputs_v1=ctor_attempt
+    route_scope._ordinary_original_control_module_inputs_v1=ctor_attempt
+    route_scope._ordinary_control_module_inputs_original_v1=ctor_attempt['original']
+    ctor_native=(type,super,RuntimeError,Exception,BaseException,object,
+        RuntimeError.__dict__['__new__'],BaseException.__dict__['__init__'],object.__dict__['__setattr__'])
+    ctor_caller=owner._preflight_require_v1
+    ctor_caller_definition=next(row[3] for row in ctor_compiled[2] if row[0]=='_preflight_require_v1')
+    ctor_site=next(site for site in owner._ordinary_control_source_sites_v1(ctor_caller_definition)
+        if site[0]=='CALL')
+    assert owner._ordinary_control_error_constructor_route_v1(route_scope,ctor_cls,ctor_caller,
+        ctor_site,ctor_selectors,ctor_inputs,ctor_native) is ctor_cls
+    assert ctor_capture['facts'][4] is RuntimeError.__dict__['__new__']
+    assert ctor_capture['facts'][4] is not BaseException.__dict__['__new__']
+    with pytest.raises(ValueError,match='CONTROL_ORIGINAL_ERROR_NATIVE_CONSTRUCTION_PROGRAMME'):
+        owner._ordinary_control_error_constructor_route_v1(route_scope,ctor_cls,ctor_caller,
+            ctor_site,ctor_selectors,ctor_inputs,ctor_native[:-1])
+    with monkeypatch.context() as ctor_patch:
+        ctor_patch.setattr(ctor_cls,'_source_port_marker',object(),raising=False)
+        with pytest.raises(ValueError,match='CONTROL_ORIGINAL_ERROR_CLASS_DICTIONARY'):
+            owner._ordinary_control_error_constructor_route_v1(route_scope,ctor_cls,ctor_caller,
+                ctor_site,ctor_selectors,ctor_inputs,ctor_native)
+    assert owner._ordinary_control_error_constructor_route_v1(route_scope,ctor_cls,ctor_caller,
+        ctor_site,ctor_selectors,ctor_inputs,ctor_native) is ctor_cls
+
+    for unsupported_observation in (None,(),[],({},()),({'tuple_prefix':40},())):
+        with pytest.raises(ValueError):
+            owner._ordinary_initial_data_layout_v1(unsupported_observation)
+
+
+    # Actual original initial-supervisor binding, under explicit no-child
+    # native/profile/debit oracles. A pending startup carrier is distinct from
+    # the later closed startup9; none of these cases issues native authority.
+    import os as real_os
+    import threading
+    from pathlib import PurePosixPath
+    from types import SimpleNamespace
+    with monkeypatch.context() as pending_ports:
+        pending_ports.setattr(o,'os',SimpleNamespace(getpid=real_os.getpid))
+        pending_ports.setattr(o,'Path',PurePosixPath)
+        pending_ports.setattr(o,'_LINUX_PREFLIGHT_PROCESS_V1',SimpleNamespace(get=lambda:None))
+        pending_ports.setattr(o,'_COMMAND_PROJECTION_V1',SimpleNamespace(get=lambda:None))
+        binding_owner=o._ordinary_initial_supervision_binding_v1
+        def pending_fixture():
+            errors=[];pending={};source={};generation={};request={}
+            native=object.__new__(o._LinuxSourceNativeV2)
+            root=PurePosixPath('/run/source-only/query')
+            operands=dict(ancestor_cgroup='/a.slice',common_cgroup='/a.slice/a-common.slice',
+                bootstrap_cgroup='/a.slice/a-common.slice/abootstrap.scope',
+                holder_cgroup='/a.slice/acontroller.service',evidence_root=root)
+            fields=('Id','LoadState','Transient','InvocationID','ControlGroup','ActiveState','ActiveEnterTimestampMonotonic')
+            argv=('/usr/bin/systemctl','show','--no-pager','--all','--property='+','.join(fields),'a.slice')
+            command=dict(pending=True,associated=False,receipt=None,argv=argv,cwd='/',run_id='source-only',
+                phase='fast-preflight-native-query',command_index=1,evidence_root=root)
+            inputs=dict(owner=(real_os.getpid(),threading.get_ident()),errors=errors,
+                native_instance=native,native_init_returned=True,source_generation=source,
+                native_generation=generation,startup_source=pending,original_origin_request=request,
+                entry_original=object())
+            profile=(inputs,source,generation,pending,'fast-preflight',request,None,(('synthetic',1),),1,1,
+                binding_owner,binding_owner.__code__)
+            record=dict(native=native,native_input=inputs,profile=profile,commands=[command],operands=operands,pending=True)
+            inputs['early_profile']=profile;inputs['current_native_observation']=record
+            debits=[];faults=[]
+            def debit(value,operation):
+                assert value is inputs
+                debits.append(operation)
+                if faults:
+                    raise faults[0]
+            pending_ports.setattr(o,'_ordinary_initial_native_debit_v1',debit)
+            kwargs=dict(argv=argv,cwd=PurePosixPath('/'),run_id=command['run_id'],phase=command['phase'],
+                command_index=1,evidence_root=root,environment=dict(PATH='/usr/bin',LANG='C.UTF-8',LC_ALL='C.UTF-8'))
+            return SimpleNamespace(inputs=inputs,command=command,profile=profile,pending=pending,
+                debits=debits,faults=faults,kwargs=kwargs)
+        f=pending_fixture();value=binding_owner(f.inputs,**f.kwargs)
+        assert value[0] is f.inputs and value[1] is f.profile and 'startup' not in f.inputs
+        assert f.debits==['SUPERVISOR_FIXED_ADMISSION'] and f.command['supervision_process_attempted'] is False
+        f=pending_fixture();f.inputs['startup']={};closed=f.inputs['startup']
+        value=binding_owner(f.inputs,**f.kwargs)
+        assert value[1][3] is f.pending and value[1][3] is not closed and f.inputs['startup'] is closed
+        f=pending_fixture();f.inputs['startup_source']={};before=dict(f.command)
+        with pytest.raises(o.ValidationReliabilityError):
+            binding_owner(f.inputs,**f.kwargs)
+        assert f.command==before and f.debits==[]
+        f=pending_fixture();f.inputs['startup']={};wrong=list(f.profile);wrong[3]=f.inputs['startup'];wrong=tuple(wrong)
+        f.inputs['early_profile']=f.inputs['current_native_observation']['profile']=wrong
+        before=dict(f.command)
+        with pytest.raises(o.ValidationReliabilityError):
+            binding_owner(f.inputs,**f.kwargs)
+        assert f.command==before and f.debits==[]
+        f=pending_fixture();fault=OSError('simulated Source admission refusal');f.faults.append(fault)
+        with pytest.raises(OSError) as refused:
+            binding_owner(f.inputs,**f.kwargs)
+        assert refused.value is fault
+        binding=f.command['supervision_original'];never=f.command['supervision_never_started_original']
+        assert never==(binding,fault,f.command,False) and f.command['supervision_process'] is None
+        assert f.command['pending'] is True and f.command['receipt'] is None
+
+    # Original initial13 lifecycle only, with explicitly synthetic no-child
+    # acquisition/data/manager ports. These cases exercise the actual producer
+    # joins; they do not issue Source, kernel, loader or trading qualification.
+    import os as product_os
+    import sys as product_sys
+    import threading as product_threading
+    import types as product_types
+    from pathlib import PurePosixPath
+    from tools import validation_scope_registry as product_registry
+    from tools import ci_branch_context as product_ci
+    with monkeypatch.context() as product_ports:
+        def product_fixture(failure=None):
+            module=product_types.ModuleType('_qtt_initial_product_no_child')
+            exec('def _ordinary_linux_provision_v1():\n    return None\n',module.__dict__)
+            entry=module._ordinary_linux_provision_v1
+            root_code=compile('pass','<explicit-no-child-initial13-root>','exec')
+            module._ORDINARY_INITIALIZED_MODULE_CODE_V1=root_code
+            owner=(product_os.getpid(),product_threading.get_ident())
+            phase='fast-preflight'
+            attempt=dict(owner=owner,phase=phase,native_product=None,errors=[])
+            attempt['original']=(attempt,owner,attempt['errors'],phase,module,module.__dict__,root_code,entry,entry.__code__)
+            module._ORDINARY_BOOTSTRAP_ENTRY_ATTEMPT_V1=attempt
+            product_ports.setitem(product_sys.modules,module.__name__,module)
+            effects=[];fault=OSError('explicit no-child '+str(failure));read_fault=OSError('explicit no-child read')
+            close_fault=OSError('explicit no-child close');joined=[];debits=[]
+            native=object.__new__(o._LinuxSourceNativeV2)
+            source=dict(protected_inputs=object(),native_input_binding=object(),policy_transition=object(),
+                physical_return=None,physical_observations=[])
+            source['native_method']=o._LinuxSourceNativeV2.__dict__[
+                '_ordinary_initial_native_product_v1'].__func__
+            generation=dict(physical_return=None,physical_observations=[])
+            startup_keys=('observation','version','abi','stdlib_roots','site_roots','loader_environment',
+                'config_paths','customizer_paths','startup_basis')
+            startup=dict.fromkeys(startup_keys,None);startup['startup_basis']=dict(files=(),directories=(),absent=())
+            role_names=('executable','libpython','_json','_sre','json.__init__','json.decoder','json.scanner')
+            startup_source=dict(startup_binding=startup,roles=tuple((name,) for name in role_names),
+                expected_startup_keys=startup_keys,expected_basis_keys=('files','directories','absent'),
+                expected_roles=role_names,physical_return=None,physical_observations=[])
+            root=PurePosixPath('/run/explicit-no-child-initial13')
+            inputs=dict(entry_attempt=attempt,owner=owner,errors=attempt['errors'],native_instance=native,
+                native_init_returned=True,source_generation=source,native_generation=generation,
+                startup_source=startup_source,original_origin_ns=1,
+                original_execution_cutoff_ns=1+3600*10**9,original_settlement_cutoff_ns=1+3720*10**9,
+                original_origin_request=dict(origin_ns=1,deadline_ns=1+3720*10**9),
+                initialized_storage_attempts=[])
+            inputs['early_profile']=(inputs,source,generation,startup_source,phase,
+                inputs['original_origin_request'],None,(('explicit_no_child',1),),1,1,
+                product_fixture,product_fixture.__code__)
+            inputs['early_allocation_original']=(inputs,inputs['early_profile'],{}, {})
+            physical=dict(native_input=inputs,native=native,errors=inputs['errors'],complete=False,pending=True,
+                profile=inputs['early_profile'],owner=owner,slots=[dict(returned_fd=123,held=True,closed=False)],
+                reads=[],commands=[],operations=[],operands=dict(role='PARENT',native_root=root,stem='qtt1n1p1',
+                    holder_cgroup='/a.slice/holder.service',ancestor_cgroup='/a.slice'),
+                actor=(owner[0],123,owner[1],product_threading.get_native_id()),origin_ns=1,
+                held_cgroups=dict(holder_cgroup={},ancestor_cgroup={}),holder=(999,456),
+                holder_pidfd_slot={},holder_events_slot={},kernel_controls=(),
+                manager_before=({}, {}, {},dict(InvocationID='0'*32)))
+            physical['original']=(physical,inputs,native,inputs['early_profile'],physical['operands'],object(),
+                owner,inputs['errors'],physical['slots'],physical['reads'],physical['commands'],physical['operations'])
+            def pending(**kwargs):
+                assert kwargs==dict(runner=module,initializer=root_code,entry=entry,phase=phase,attempt=attempt)
+                effects.append('pending');attempt['native_input']=inputs
+                if failure=='pending':raise fault
+                return inputs,native
+            def preloader(value):
+                assert value is inputs
+                effects.append('preloader')
+            def observe(value,**kwargs):
+                assert value is native and kwargs['native_input'] is inputs and kwargs['early_profile'] is inputs['early_profile']
+                effects.append('physical');inputs['current_native_observation']=physical
+                if failure=='physical':raise fault
+                inputs['capacity']=dict(original_cutoffs=kwargs['original_cutoffs'])
+                physical['commands']=[dict(associated=True,pending=False,stream_pending=False,errors=[]) for _ in range(8)]
+                physical['result_original']=(physical,physical['original'],physical['actor'],1,physical['holder'],
+                    physical['holder_pidfd_slot'],physical['holder_events_slot'],physical['held_cgroups'],(),
+                    {},{},physical['manager_before'],physical['manager_before'],inputs['original_origin_request'],
+                    inputs['early_profile'],inputs['errors'])
+                physical['complete']=True;physical['pending']=False
+                return physical
+            # This explicit no-child downstream port supplies no Source or
+            # Linux protection credit; the real Input4 helper remains unchanged.
+            input4_calls=[]
+            def input4_rejoin(value,current,cuts,producer,containing_function):
+                input4_calls.append((value,current,cuts,producer,containing_function))
+                assert value is inputs and current is physical is inputs['current_native_observation']
+                assert cuts is inputs['capacity']['original_cutoffs']
+                assert containing_function is source['native_method']
+                assert producer.__globals__ is o.__dict__ and any(
+                    producer.__code__ is code for code in containing_function.__code__.co_consts)
+                effects.append('input4')
+            product_ports.setattr(product_ci,'_facet_fn_original_source_input4_rejoin_v1',input4_rejoin)
+            def capacity(value):
+                assert value is inputs
+                return inputs['capacity']
+            def debit(value,operation,**kwargs):
+                assert value is inputs
+                debits.append((operation,kwargs))
+            def quantum(value,wanted):
+                assert value is inputs
+                return wanted
+            observation=({'explicit_no_child':48},('explicit_no_child',)*8)
+            layout=dict(sizes=tuple(observation[0].items()),tiny_layout_observations=observation[1])
+            def abi():effects.append('abi');return observation
+            def project(value):
+                assert value is observation
+                effects.append('layout');return layout
+            demand=dict(record_fields=22,original_slots=7,success_slots=14,raw_limit=1048576,
+                maximum_read_request=65536,data_request=5,components=(('explicit_no_child',5),))
+            def calculate(value):
+                assert value is layout
+                effects.append('demand');return demand
+            def getter(self,**kwargs):
+                assert self is native and kwargs['native_input'] is inputs
+                effects.append('getter')
+                record=dict(partial_raw=bytearray(),requests=[],last_returned_raw=None,
+                    complete=False,closed=False,errors=[],mapped_extent=4096)
+                inputs['initialized_storage_attempts'].append(record)
+                kwargs['attempt']('INITIAL_MAPS_RAW_READ');record['requests'].append(65536)
+                record['last_returned_raw']=b'ABCD';kwargs['delivered'](4);record['partial_raw'].extend(b'ABCD')
+                if failure=='getter':
+                    record['errors'].extend((read_fault,close_fault))
+                    raise ExceptionGroup('explicit no-child original body and close',[read_fault,close_fault])
+                record['closed']=True;record['complete']=True
+                record['success_original']=(record,native,owner,object(),object(),object(),object(),object(),
+                    b'ABCD',(),4096,record['requests'],record['errors'],kwargs['deadline_ns'])
+                return record
+            def root_join(product):
+                joined.append(product);effects.append('root_join')
+                assert product['native_input'] is inputs and product['original'][0] is product
+                if failure=='root_join':raise fault
+            inputs['role_root_acquisition']=dict(native_join_once=root_join)
+            def prepare(*args):return None
+            def query(*args):return None
+            module._ordinary_bootstrap_heap_prepare_request_v1=prepare
+            module._ordinary_bootstrap_query_request_v1=query
+            def stage(product,name):
+                assert product is attempt['native_product']
+                effects.append(name)
+                if failure=='query' and name=='QUERY':raise fault
+                producer=prepare if name=='PREPARE' else query
+                return(product,source,generation,startup,layout,(('explicit_no_child',1),),(),producer,producer.__code__,root)
+            module._ordinary_bootstrap_initial_stage_source_request_v1=stage
+            product_ports.setattr(o,'_ordinary_initial_native_object_v1',pending)
+            product_ports.setattr(o,'_ordinary_initial_preloader_return_check_v1',preloader)
+            product_ports.setattr(o,'_ordinary_initial_native_observations_v1',observe)
+            product_ports.setattr(o,'_ordinary_initial_prefix_capacity_checked_v1',capacity)
+            product_ports.setattr(o,'_ordinary_initial_native_debit_v1',debit)
+            product_ports.setattr(o,'_ordinary_initial_native_quantum_v1',quantum)
+            product_ports.setattr(o,'_ordinary_initial_data_layout_v1',project)
+            product_ports.setattr(o,'_ordinary_initialized_storage_data_request_v1',calculate)
+            product_ports.setattr(product_registry,'_ordinary_initial_abi_observation_v1',abi)
+            product_ports.setattr(o._LinuxSourceNativeV2,'_ordinary_initialized_storage_v1',getter)
+            return product_types.SimpleNamespace(module=module,entry=entry,root_code=root_code,phase=phase,
+                attempt=attempt,inputs=inputs,native=native,effects=effects,fault=fault,debits=debits,
+                physical=physical,observation=observation,layout=layout,demand=demand,joined=joined,
+                input4_calls=input4_calls,read_fault=read_fault,close_fault=close_fault,
+                kwargs=dict(runner=module,initializer=root_code,entry=entry,phase=phase,attempt=attempt))
+
+        f=product_fixture();product,prepare,query=o._LinuxSourceNativeV2._ordinary_initial_native_product_v1(**f.kwargs)
+        issuer=f.inputs['native_product_attempt']
+        assert product is f.attempt['native_product'] is issuer['native_product']
+        assert issuer['complete'] is True and issuer['result']==(product,prepare,query) and issuer['errors']==[]
+        assert issuer['abi_observation'] is f.observation and issuer['initial_layout'] is f.layout
+        assert issuer['initialized_storage'] is f.inputs['initialized_storage_attempts'][0]
+        assert issuer['initialized_original'][7] is issuer['initialized_storage']['success_original']
+        assert issuer['initialized_original'][12] is f.inputs['early_allocation_original']
+        assert product['original'][2] is issuer['hold'] and len(issuer['hold']['original'])==18
+        assert f.joined==[product] and f.effects.index('demand')<f.effects.index('getter')<f.effects.index('root_join')
+        assert len(f.input4_calls)==1 and f.input4_calls[0][4] is f.inputs['source_generation']['native_method']
+        assert f.effects.index('physical')<f.effects.index('input4')<f.effects.index('abi')
+        assert f.effects[-3:]==['PREPARE','QUERY','preloader']
+        assert any(name=='INITIAL_MAPS_RETURNED_BYTES' and kw==dict(raw=b'ABCD',request_bytes=65536) for name,kw in f.debits)
+        before=dict(issuer);effects=tuple(f.effects)
+        with pytest.raises(o.ValidationReliabilityError):
+            o._LinuxSourceNativeV2._ordinary_initial_native_product_v1(**f.kwargs)
+        assert issuer==before and tuple(f.effects)==effects
+
+        f=product_fixture();f.attempt['owner']=(f.attempt['owner'][0],f.attempt['owner'][1]+1)
+        before=dict(f.attempt)
+        with pytest.raises(o.ValidationReliabilityError):
+            o._LinuxSourceNativeV2._ordinary_initial_native_product_v1(**f.kwargs)
+        assert f.attempt==before and f.effects==[]
+        f=product_fixture();bad=dict(f.kwargs);bad['entry']=object();before=dict(f.attempt)
+        with pytest.raises(o.ValidationReliabilityError):
+            o._LinuxSourceNativeV2._ordinary_initial_native_product_v1(**bad)
+        assert f.attempt==before and f.effects==[]
+        for reason in ('pending','physical','getter','root_join','query'):
+            f=product_fixture(reason)
+            with pytest.raises(BaseException) as failure:
+                o._LinuxSourceNativeV2._ordinary_initial_native_product_v1(**f.kwargs)
+            issuer=f.attempt['native_product_issuer']
+            assert issuer['complete'] is False and issuer['result'] is None
+            assert failure.value is f.attempt['errors'][0] and len(f.attempt['errors'])==1
+            assert f.attempt['native_input'] is f.inputs
+            if reason=='getter':
+                assert isinstance(failure.value,ExceptionGroup)
+                assert failure.value.exceptions==(f.read_fault,f.close_fault)
+                assert f.inputs['initialized_storage_attempts'][0]['closed'] is False
+                assert f.inputs['initialized_storage_attempts'][0]['last_returned_raw']==b'ABCD'
+            if reason in ('physical','getter'):
+                assert f.inputs['current_native_observation'] is f.physical
+                assert f.physical['slots'][0]['returned_fd']==123 and f.physical['slots'][0]['closed'] is False
+            if reason in ('root_join','query'):
+                assert f.attempt['native_product'] is issuer['native_product']
+                assert issuer['native_product']['original'][0] is issuer['native_product']
+            if reason=='query':
+                assert issuer['prepare_request'] is not None and issuer['query_request'] is None
+
+    # Existing grouped Source ports only: actual private helper bodies with
+    # explicit no-child kernel/native/prefunding oracles. They demonstrate
+    # custody and error branches, not real mounts or a prebirth authority.
+    import os as real_os
+    import stat
+    import threading
+    from pathlib import PurePosixPath
+    from types import SimpleNamespace
+    with monkeypatch.context() as prefix_ports:
+        require = o._preflight_require_v1
+        class KernelOracle:
+            O_RDONLY=0; O_DIRECTORY=0x10000; O_NOFOLLOW=0x20000; O_CLOEXEC=0x80000
+            def __init__(self, role='PARENT'):
+                self.nodes={}; self.fds={}; self.next_fd=4; self.next_inode=100
+                self.calls=[]; self.role=role; self.open_fault=None; self.close_fault=None
+                self.replacement=False; self.foreign_entry=False; self.wrong_capacity=False
+                self.root=PurePosixPath('/run/qtt123n456ordinary')
+                self.make(self.root)
+                self.fds[3]=self.nodes[self.root]
+                if role=='RECEIVER':
+                    self.make(self.root/'prefix',dev=2)
+            def getpid(self): return real_os.getpid()
+            def fsencode(self,path): return str(path).encode()
+            def make(self,path,dev=1):
+                self.next_inode+=1
+                info=SimpleNamespace(st_dev=dev,st_ino=self.next_inode,st_mode=stat.S_IFDIR|0o700,
+                    st_uid=0,st_gid=0,st_size=0,st_mtime_ns=10,st_ctime_ns=10,st_nlink=2)
+                self.nodes[PurePosixPath(path)]=info
+                return info
+            def path(self,name,dir_fd=None):
+                path=PurePosixPath(name)
+                if path.is_absolute(): return path
+                parent=next(path for path,node in self.nodes.items() if node is self.fds[dir_fd])
+                return parent/path
+            def info_copy(self,node): return SimpleNamespace(**node.__dict__)
+            def stat(self,name,*,dir_fd=None,follow_symlinks=True):
+                self.calls.append(('stat',str(name)))
+                return self.info_copy(self.nodes[self.path(name,dir_fd)])
+            def lstat(self,name):
+                self.calls.append(('lstat',str(name)))
+                info=self.info_copy(self.nodes[PurePosixPath(name)])
+                if self.replacement and PurePosixPath(name)==self.root:
+                    info.st_ino+=999
+                return info
+            def fstat(self,fd):
+                self.calls.append(('fstat',fd))
+                return self.info_copy(self.fds[fd])
+            def get_inheritable(self,fd): self.calls.append(('inheritable',fd)); return False
+            def listdir(self,fd):
+                self.calls.append(('listdir',fd))
+                parent=next(path for path,node in self.nodes.items() if node is self.fds[fd])
+                return [path.name for path in self.nodes if path.parent==parent]
+            def mkdir(self,name,mode,*,dir_fd):
+                self.calls.append(('mkdir',str(name)))
+                path=self.path(name,dir_fd)
+                if path in self.nodes: raise FileExistsError(str(path))
+                self.make(path,dev=self.fds[dir_fd].st_dev)
+                parent=self.fds[dir_fd]; parent.st_mtime_ns+=1; parent.st_ctime_ns+=1
+                if self.foreign_entry and name=='prefix': self.make(path.parent/'unselected')
+            def open(self,name,flags,*,dir_fd):
+                self.calls.append(('open',str(name)))
+                if self.open_fault is not None: raise self.open_fault
+                self.next_fd+=1; self.fds[self.next_fd]=self.nodes[self.path(name,dir_fd)]
+                return self.next_fd
+            def close(self,fd):
+                self.calls.append(('close',fd))
+                if self.close_fault is not None and self.close_fault[0]==fd:
+                    raise self.close_fault[1]
+                del self.fds[fd]
+            def fstatvfs(self,fd):
+                self.calls.append(('statvfs',fd))
+                return SimpleNamespace(f_blocks=4096 if self.wrong_capacity else 8192,
+                    f_frsize=4096,f_files=1024,f_namemax=255)
+
+        class NativeFunction:
+            def __init__(self,kernel): self.kernel=kernel; self.fault=None
+            def __call__(self,*args):
+                self.kernel.calls.append(('mount-oracle',args[1]))
+                if self.fault is not None: raise self.fault
+                self.kernel.make(PurePosixPath(args[1].decode()),dev=2)
+                return 0
+
+        class NativeOracle:
+            def __init__(self,kernel):
+                self.kernel=kernel
+                self.ctypes=SimpleNamespace(c_char_p=lambda x:x,c_ulong=object(),c_void_p=object(),c_int=object())
+                self.lib=SimpleNamespace(mount=NativeFunction(kernel))
+            def _call(self,function,*args): return function(*args)
+            def mount(self,fd):
+                self.kernel.calls.append(('mount-query-oracle',fd))
+                return dict(unique_id=1234,old_id=5678,device=[0,2],magic=0x01021994,attributes=14,raw_hex='00')
+
+        def fixture(role='PARENT'):
+            kernel=KernelOracle(role); proxy=NativeOracle(kernel)
+            native=object.__new__(o._LinuxSourceNativeV2)
+            native.ctypes,native.lib,native._call,native.mount=proxy.ctypes,proxy.lib,proxy._call,proxy.mount
+            env={name:getattr(o,name) for name in ('_ordinary_initial_prefix_capacity_v1',
+                '_ordinary_initial_prefix_storage_v1','_ordinary_initial_prefix_capacity_checked_v1',
+                '_ordinary_initial_prefix_handoff_v1','_preflight_stamp_v1')}
+            prefix_ports.setattr(o,'os',kernel)
+            prefix_ports.setattr(o,'Path',PurePosixPath)
+            prefix_ports.setattr(o,'_ordinary_initial_preloader_return_check_v1',lambda value:None)
+            owner=(real_os.getpid(),threading.get_ident()); errors=[]; cuts=(456,3500000000456,3600000000456,3720000000456)
+            root_info=kernel.fstat(3)
+            root_slot=dict(owner=owner,path=kernel.root,returned_fd=3,held=True,closed=False,
+                close_admission_attempted=False,close_attempted=False,uid=0,gid=0,errors=[],
+                handle_version=env['_preflight_stamp_v1'](root_info),path_version=env['_preflight_stamp_v1'](root_info))
+            inputs=dict(owner=owner,errors=errors,native_instance=native,native_init_returned=True,
+                original_origin_ns=cuts[0],original_execution_cutoff_ns=cuts[2],original_settlement_cutoff_ns=cuts[3],
+                original_origin_request=dict(origin_ns=cuts[0],deadline_ns=cuts[3]),entry_attempt=dict(phase='phase'))
+            operands=dict(role=role,native_root=kernel.root,
+                evidence_root=kernel.root/'prefix'/'receiver'/'query' if role=='RECEIVER' else kernel.root/'prefix'/'query')
+            record=dict(operands=operands,owner=owner,errors=errors,slots=[root_slot],native=native)
+            inputs['current_native_observation']=record
+            runner=SimpleNamespace()
+            def ceiling_select(*,original_cutoffs): return dict(original_cutoffs=original_cutoffs)
+            def prefix_select(ceiling): return (1,(),512,4096,8192*4096,1024,0,0,0,0,ceiling,ceiling['original_cutoffs'])
+            def check(ceiling): require(type(ceiling) is dict,'SIMULATED_CAPACITY_SHAPE'); return ceiling
+            def prefix_check(prefix,ceiling):
+                require(prefix[10] is ceiling and prefix[11] is ceiling['original_cutoffs'],'SIMULATED_CAPACITY_IDENTITIES')
+                return prefix
+            runner._ordinary_post_ceiling_programme_v1=ceiling_select
+            runner._ordinary_prefix_programme_v1=prefix_select
+            runner._ordinary_post_ceiling_checked_v1=check
+            runner._ordinary_post_prefix_checked_v1=prefix_check
+            inputs['entry_original']=(None,None,None,None,runner)
+            prefix_ports.setattr(o,'_ordinary_phase_ceiling_values_v1',lambda ceiling,**kwargs:ceiling)
+            debits=[]; faults={}
+            def debit(value,operation,*,settling=False,**kwargs):
+                assert value is inputs
+                debits.append((operation,settling))
+                if operation in faults: raise faults[operation]
+            prefix_ports.setattr(o,'_ordinary_initial_native_debit_v1',debit)
+            return SimpleNamespace(kernel=kernel,native=native,env=env,inputs=inputs,root_slot=root_slot,
+                cuts=cuts,runner=runner,debits=debits,faults=faults,errors=errors)
+
+        def run(f):
+            selected=f.env['_ordinary_initial_prefix_capacity_v1'](f.inputs,original_cutoffs=f.cuts)
+            return f.env['_ordinary_initial_prefix_storage_v1'](f.native,native_input=f.inputs,root_slot=f.root_slot,
+                original_cutoffs=selected[1],ceiling_programme=selected[2],prefix_programme=selected[3])
+
+        def expect(call,exc=Exception,contains=None):
+            try: call()
+            except exc as error:
+                if contains is not None: assert contains in str(error), str(error)
+                return error
+            raise AssertionError('expected Source-only negative did not reject')
+
+        cases=[]
+        f=fixture(); value=run(f)
+        assert value['complete'] and value['mounted'] and value['query_slot']['path']==f.kernel.root/'prefix'/'query'
+        assert [name for name in f.kernel.nodes if name.parent==f.kernel.root]==[f.kernel.root/'prefix']
+        assert sum(name=='mount-oracle' for name,*_ in f.kernel.calls)==1
+        assert all(slot['closed'] for slot in value['slots'] if slot is value['effects'][0]['slot'])
+        assert f.env['_ordinary_initial_prefix_capacity_checked_v1'](f.inputs)['result_original'][2] is value['ceiling_programme']
+        cases.append('PARENT exact selected prefix/query creation and one simulated mount')
+        f=fixture('RECEIVER'); value=run(f)
+        assert value['complete'] and not value['mount_attempted'] and not value['mounted']
+        assert value['query_slot']['path']==f.kernel.root/'prefix'/'receiver'/'query'
+        assert not any(name=='mount-oracle' for name,*_ in f.kernel.calls)
+        cases.append('RECEIVER existing mount adoption and separate receiver/query')
+        f=fixture(); value=run(f); calls=list(f.kernel.calls); debits=list(f.debits)
+        selected=f.inputs['early_prefix_capacity']['result_original']
+        expect(lambda:f.env['_ordinary_initial_prefix_storage_v1'](f.native,native_input=f.inputs,root_slot=f.root_slot,
+            original_cutoffs=selected[1],ceiling_programme=selected[2],prefix_programme=selected[3]),o.ValidationReliabilityError)
+        assert f.kernel.calls==calls and f.debits==debits and f.inputs['early_prefix'] is value
+        expect(lambda:f.env['_ordinary_initial_prefix_capacity_v1'](f.inputs,original_cutoffs=f.cuts),o.ValidationReliabilityError)
+        assert f.kernel.calls==calls and f.debits==debits
+        cases.append('single capacity/storage acquisition before any repeated effect')
+        f=fixture(); f.inputs['original_origin_request']['origin_ns']=None
+        before=list(f.kernel.calls)
+        expect(lambda:run(f),o.ValidationReliabilityError,'GENUINE_ORIGINAL_UNRENEWED_CUTOFFS')
+        assert f.kernel.calls==before and not f.debits and 'early_prefix' not in f.inputs
+        cases.append('pending origin cannot fund a mkdir or mount from root suffix')
+        f=fixture(); fault=OSError('simulated before-create admission failure')
+        f.faults['PREFIX_CREATE_NEW_DIRECTORY']=fault
+        assert expect(lambda:run(f),OSError) is fault
+        value=f.inputs['early_prefix']
+        assert value['errors'][-1] is fault and not value['effects'][0]['attempted'] and len(f.kernel.nodes)==1
+        cases.append('admission failure retains original attempted record before OS create')
+        f=fixture(); f.kernel.foreign_entry=True
+        expect(lambda:run(f),o.ValidationReliabilityError,'EXACT_SELECTED_DIRECTORY_EFFECT')
+        assert f.inputs['early_prefix']['effects'][0]['returned'] and not f.inputs['early_prefix']['complete']
+        assert not any(name=='mount-oracle' for name,*_ in f.kernel.calls)
+        cases.append('unselected directory effect rejected before mount')
+        f=fixture(); f.kernel.replacement=True
+        expect(lambda:run(f),o.ValidationReliabilityError,'SAME_PATH_HANDLE_AND_ACCOUNT')
+        assert not any(name=='mkdir' for name,*_ in f.kernel.calls)
+        cases.append('same-content root pathname replacement rejected')
+        f=fixture(); fault=OSError('simulated mount body failure'); f.native.lib.mount.fault=fault
+        assert expect(lambda:run(f),OSError) is fault
+        value=f.inputs['early_prefix']
+        assert value['mount_attempted'] and not value['mounted'] and value['errors'][-1] is fault and not value['complete']
+        cases.append('original mount failure retained without cleanup or receipt invention')
+        f=fixture(); f.kernel.wrong_capacity=True
+        expect(lambda:run(f),o.ValidationReliabilityError,'ACTUAL_BOUND_STORAGE_AND_MOUNT')
+        assert f.inputs['early_prefix']['mounted'] and not f.inputs['early_prefix']['complete']
+        cases.append('actual capacity disagreement remains failed with mount retained')
+        f=fixture(); fault=OSError('simulated underlay close admission failure'); f.faults['ONE_CLOSE']=fault
+        assert expect(lambda:run(f),OSError) is fault
+        slot=f.inputs['early_prefix']['effects'][0]['slot']
+        assert slot['close_admission_attempted'] and not slot['close_attempted'] and not slot['closed'] and slot['returned_fd'] in f.kernel.fds
+        cases.append('one-close debit refusal retains actual descriptor')
+
+        def handoff_fixture():
+            f=fixture(); value=run(f); scope=object.__new__(o._LinuxPreflightScopeV1)
+            scope.query=SimpleNamespace(evidence_root=value['query_slot']['path'],command_resources_settled_v1=lambda:True)
+            host=dict(original_cutoffs=f.cuts,ceiling_programme=value['ceiling_programme'],
+                prefix_programme=value['prefix_programme'],prefix_errors=[])
+            actual=value['native_mount']; selected=value['result_original'][5]
+            prefix=dict(scope=scope,source_programme=value['prefix_programme'],native_mount=actual,
+                statvfs=value['statvfs'],root_identity=selected['identity'][:2])
+            host['prefix_tmpfs']=host['original_prefix_tmpfs']=prefix
+            scope._ordinary_host_preparation_v1=scope._ordinary_original_host_preparation_v1=host
+            return f,value,scope,host,prefix
+
+        f,value,scope,host,prefix=handoff_fixture()
+        assert f.env['_ordinary_initial_prefix_handoff_v1'](scope,host,prefix,value) is value
+        assert value['handed_off'] and all(slot['closed'] for slot in value['slots']) and 3 in f.kernel.fds
+        before=list(f.kernel.calls)
+        expect(lambda:f.env['_ordinary_initial_prefix_handoff_v1'](scope,host,prefix,value),o.ValidationReliabilityError)
+        assert f.kernel.calls==before
+        cases.append('private FD handoff closes once and preserves early root hold')
+        f,value,scope,host,prefix=handoff_fixture()
+        fault=OSError('simulated mount descriptor close failure')
+        f.kernel.close_fault=(value['mount_slot']['returned_fd'],fault)
+        assert expect(lambda:f.env['_ordinary_initial_prefix_handoff_v1'](scope,host,prefix,value),OSError) is fault
+        assert value['handoff_attempted'] and not value['handed_off'] and value['mount_slot']['returned_fd'] in f.kernel.fds
+        assert any(error is fault for error in value['errors']) and any(error is fault for error in host['prefix_errors'])
+        assert value['query_slot']['closed']
+        cases.append('handoff partial close failure retains shared original error and live FD')
+        f,value,scope,host,prefix=handoff_fixture()
+        scope.query.command_resources_settled_v1=lambda:False
+        before=list(f.kernel.calls)
+        expect(lambda:f.env['_ordinary_initial_prefix_handoff_v1'](scope,host,prefix,value),o.ValidationReliabilityError)
+        assert not value['handoff_attempted'] and f.kernel.calls==before
+        cases.append('unsettled original manager process prevents private handoff')
+
+        # Current original Root31/control-generation12 continuity only.
+        # All entry/kernel/native prerequisites are explicit no-child oracles.
+        root_names=('native_input','native_owner','input_original','entry_original','source_generation',
+            'source_original','anchor','profile','operands','operands_original','observation',
+            'observation_original','allocation_original','capacity','capacity_original','original_cutoffs',
+            'root','owner','phase','role','origin_ns','component_slots','slot','errors','close_once','close_code',
+            'native_join_once','native_join_code','pending_check','pending_check_code')
+
+        def birth_fixture(role='PARENT'):
+            f=fixture(role);storage=run(f);env=f.env
+            scope=object.__new__(o._LinuxPreflightScopeV1)
+            prefix_ports.setattr(o,'time',SimpleNamespace(monotonic_ns=lambda:f.cuts[0]+1))
+            scope._ordinary_factory_call_v1=lambda function,*args,settling=False,**kwargs:function(*args,**kwargs)
+            scope._ordinary_native_v1=f.native
+            host=dict(original_cutoffs=f.cuts,ceiling_programme=storage['ceiling_programme'],
+                prefix_programme=storage['prefix_programme'],prefix_errors=[])
+            scope._ordinary_host_preparation_v1=scope._ordinary_original_host_preparation_v1=host
+            scope.query=SimpleNamespace(evidence_root=storage['query_slot']['path'],command_resources_settled_v1=lambda:True)
+            f.kernel.next_fd+=1;scope_fd=f.kernel.next_fd
+            selected_slot=storage['result_original'][5]
+            f.kernel.fds[scope_fd]=f.kernel.nodes[selected_slot['path']]
+            prefix=dict(scope=scope,source_programme=storage['prefix_programme'],native_mount=storage['native_mount'],
+                statvfs=storage['statvfs'],root_identity=selected_slot['identity'][:2],
+                root_slot=dict(owner=f.inputs['owner'],returned_fd=scope_fd,close_attempted=False))
+            host['prefix_tmpfs']=host['original_prefix_tmpfs']=prefix
+            physical=f.inputs['current_native_observation'];physical['reads']=[];physical['commands']=[];physical['operations']=[]
+            physical['profile']=f.inputs['early_profile']=(object(),)
+            f.inputs['initial_operands_original']=object()
+            def slot(path,regular=False):
+                info=f.kernel.make(path)
+                if regular:info.st_mode=stat.S_IFREG|0o600;info.st_nlink=1;info.st_size=1
+                f.kernel.next_fd+=1;fd=f.kernel.next_fd;f.kernel.fds[fd]=info
+                value=dict(owner=f.inputs['owner'],path=PurePosixPath(path),returned_fd=fd,held=True,
+                    errors=[],uid=0,gid=0,closed=False,close_admission_attempted=False,close_attempted=False,
+                    path_version=env['_preflight_stamp_v1'](info),handle_version=env['_preflight_stamp_v1'](info))
+                physical['slots'].append(value);return value
+            physical['actor_proc_slot']=slot('/proc/123')
+            physical['holder_proc_slot']=slot('/proc/456')
+            physical['holder_events_slot']=slot('/sys/fs/cgroup/holder/cgroup.events',True)
+            held={name:slot('/sys/fs/cgroup/'+name) for name in
+                ('ancestor_cgroup','common_cgroup','bootstrap_cgroup','holder_cgroup')}
+            if role=='RECEIVER':held['actor_cgroup']=slot('/sys/fs/cgroup/actor_cgroup')
+            physical['held_cgroups']=held
+            pidfd=slot('/pidfd-oracle',True);info=f.kernel.fds[pidfd['returned_fd']];del pidfd['path']
+            pidfd['handle_version']=(info.st_dev,info.st_ino,info.st_mode,info.st_size,info.st_mtime_ns,info.st_ctime_ns,info.st_nlink)
+            physical['holder_pidfd_slot']=pidfd
+            physical['native_root_slot']=f.root_slot;physical['evidence_root_slot']=storage['query_slot']
+            actor=(f.inputs['owner'][0],789,f.inputs['owner'][1],100);physical['actor']=actor
+            physical['origin_ns']=f.cuts[0];physical['holder']=(456,987);physical['kernel_controls']=()
+            physical['complete']=True;physical['pending']=False
+            source=dict(original=object());generation=dict(native_instance=f.native,actor=actor,
+                origin_ns=f.cuts[0],deadline_ns=f.cuts[3],physical_return=physical)
+            startup9={};roles7={};startup=dict(startup_binding=startup9,roles=roles7)
+            f.inputs.update(source_generation=source,native_generation=generation,startup_source=startup)
+            physical['original']=(physical,f.inputs,f.native,physical['profile'],physical['operands'],
+                f.inputs['initial_operands_original'],physical['owner'],f.errors,physical['slots'],
+                physical['reads'],physical['commands'],physical['operations'])
+            physical['result_original']=(physical,physical['original'],actor,f.cuts[0],physical['holder'],pidfd,
+                physical['holder_events_slot'],held,physical['kernel_controls'],f.root_slot,storage['query_slot'],
+                object(),object(),f.inputs['original_origin_request'],physical['profile'],f.errors)
+            hold=dict(owner=f.inputs['owner'],cutoffs=f.cuts,holder_pidfd_slot=pidfd,
+                holder_events_slot=physical['holder_events_slot'],holder_cgroup_slot=held['holder_cgroup'],
+                ancestor_slot=held['ancestor_cgroup'],holder_identity=physical['holder'],
+                holder_kernel_observations=physical['kernel_controls'])
+            native=dict(native_input=f.inputs,native_hold=hold,native_generation=generation,startup=startup9,
+                source_generation=source,roles=roles7,actor=actor,phase=f.inputs['entry_attempt']['phase'],
+                role=role,native_root=physical['operands']['native_root'],origin_ns=f.cuts[0],errors=f.errors)
+            fields=('native_input','native_hold','native_generation','startup','source_generation','roles','actor',
+                'phase','role','native_root','origin_ns','errors')
+            native['original']=(native,)+tuple(native[name] for name in fields)
+            f.inputs['entry_attempt']['native_product']=native
+            root={name:object() for name in root_names}
+            root.update(native_input=f.inputs,native_owner=f.native,source_generation=source,
+                source_original=source['original'],observation=physical,observation_original=physical['original'],
+                slot=f.root_slot,origin_ns=f.cuts[0],errors=f.errors,complete=True,closed=False,
+                close_attempted=False,native_join_attempted=True,native_product=native,native_original=native['original'])
+            capacity=f.inputs['early_prefix_capacity']
+            root['capacity']=capacity;root['capacity_original']=capacity['original'];root['original_cutoffs']=f.cuts
+            root['path_version'],root['handle_version']=f.root_slot['path_version'],f.root_slot['handle_version']
+            root['original_fields']=root_names;root['original']=(root,)+tuple(root[name] for name in root_names)
+            initial=(root['path_version'],root['handle_version'])
+            current=f.root_slot.get('last_output_version',initial)
+            root['controlled_generation_original']=(root,root['original'],capacity,capacity['original'],f.cuts,
+                storage,storage['original'],storage['result_original'],storage['effects'][0] if role=='PARENT' else None,
+                initial,current,f.errors)
+            f.root_slot['fd']=f.root_slot['returned_fd'];f.root_slot['result_original']=(f.root_slot,f.root_slot['fd'],root)
+            root['result_original']=object()
+            root['native_join_original']=(root,root['original'],native,native['original'],f.inputs,root['result_original'],
+                physical,physical['result_original'],source,source['original'],f.root_slot,f.root_slot['result_original'],actor,root['origin_ns'],f.errors)
+            f.inputs['role_root_acquisition']=source['protected_root_locator']=root
+            f.storage=storage;f.scope=scope;f.host=host;f.prefix=prefix;f.hold=hold;f.product=native;f.pidfd=pidfd
+            return f
+
+        def check(f):return f.scope._ordinary_original_native_birth_check_v1(f.product,f.hold)
+        def handoff(f):return f.env['_ordinary_initial_prefix_handoff_v1'](f.scope,f.host,f.prefix,f.storage)
+        cases=[]
+        for role in ('PARENT','RECEIVER'):
+            f=birth_fixture(role);assert check(f) is f.product
+            handoff(f);assert check(f) is f.product
+            assert all(s['closed'] for s in f.storage['slots']) and f.root_slot['returned_fd'] in f.kernel.fds
+            assert f.pidfd['returned_fd'] in f.kernel.fds
+            cases.append(role+' exact original product holds before handoff and private-only one-close after handoff')
+        f=birth_fixture();f.hold['holder_cgroup_slot']['held']=False
+        expect(lambda:check(f),o.ValidationReliabilityError,'EVERY_REQUIRED_WITNESS');cases.append('changed holder held flag cannot omit required witness')
+        f=birth_fixture();f.pidfd['closed']=True;f.pidfd['close_attempted']=True;f.pidfd['close_admission_attempted']=True
+        expect(lambda:check(f),o.ValidationReliabilityError,'NO_CLOSED_SOURCE_KERNEL');cases.append('closed original pidfd never borrows private duplicate exception')
+        f=birth_fixture();s=f.hold['holder_events_slot'];s['closed']=s['close_attempted']=s['close_admission_attempted']=True
+        expect(lambda:check(f),o.ValidationReliabilityError,'NO_CLOSED_SOURCE_KERNEL');cases.append('closed held regular kernel input rejects')
+        f=birth_fixture();f.storage['mount_slot']['closed']=True
+        expect(lambda:check(f),o.ValidationReliabilityError,'NO_CLOSED_SOURCE_KERNEL');cases.append('unjournalled private close rejects')
+        f=birth_fixture();handoff(f);f.storage['close_records'].append(f.storage['close_records'][-1])
+        expect(lambda:check(f),o.ValidationReliabilityError,'ORIGINAL_ONE_CLOSE_JOURNAL');cases.append('duplicate successful close record does not grant reuse')
+        f=birth_fixture();handoff(f);f.storage['handoff_original']=(f.storage,object(),*f.storage['handoff_original'][2:])
+        expect(lambda:check(f),o.ValidationReliabilityError,'COMPLETE_SINGLE_SCOPE');cases.append('foreign Scope handoff rejects')
+        f=birth_fixture();fault=OSError('simulated partial private close');f.kernel.close_fault=(f.storage['mount_slot']['returned_fd'],fault)
+        assert expect(lambda:handoff(f),OSError) is fault
+        expect(lambda:check(f),o.ValidationReliabilityError,'ORIGINAL_CURRENT_OBSERVATION');cases.append('partial close failure and original error remain rejected')
+        f=birth_fixture();f.kernel.replacement=True
+        expect(lambda:check(f),o.ValidationReliabilityError,'LIVE_PATH_HANDLE_GENERATION');cases.append('same-content root pathname replacement rejects')
+        f=birth_fixture();handoff(f);f.kernel.wrong_capacity=True
+        expect(lambda:check(f),o.ValidationReliabilityError,'SAME_INDEPENDENTLY_ADOPTED_MOUNT');cases.append('later adopted capacity disagreement rejects')
+        f=birth_fixture();handoff(f);f.scope.query.command_resources_settled_v1=lambda:False
+        expect(lambda:check(f),o.ValidationReliabilityError,'COMPLETE_SINGLE_SCOPE');cases.append('unsettled manager ownership prevents successful handoff rejoin')
+        f=birth_fixture();f.inputs['role_root_acquisition']['capacity_original']=object()
+        expect(lambda:check(f),o.ValidationReliabilityError,'GENUINE_ORIGINAL_ROOT31');cases.append('foreign retained capacity identity rejects')
+        f=birth_fixture();old=f.inputs['role_root_acquisition']['controlled_generation_original']
+        f.inputs['role_root_acquisition']['controlled_generation_original']=(old[0],old[1],object(),*old[3:])
+        expect(lambda:check(f),o.ValidationReliabilityError,'CONTROLLED_ROOT_GENERATION12');cases.append('foreign controlled generation capacity rejects')
+        f=birth_fixture();old=f.inputs['role_root_acquisition']['controlled_generation_original']
+        f.inputs['role_root_acquisition']['controlled_generation_original']=(*old[:10],((1,2),(1,2)),old[11])
+        expect(lambda:check(f),o.ValidationReliabilityError,'CONTROLLED_ROOT_GENERATION12');cases.append('invented allowed root effect version rejects')
+
+    # This original Linux group also exercises the authentic Query/adoption
+    # owners with explicit no-child receipts. No native terminal proof or
+    # earlier Native13/source grant is supplied by these synthetic records.
+    import dataclasses
+    from pathlib import PurePosixPath
+    with monkeypatch.context() as initial_query_port:
+        initial_query_port.setattr(o, 'Path', PurePosixPath)
+        initial_query_port.setattr(o.sys, 'platform', 'linux')
+        Query, Receipt = o._LinuxPreflightQueriesV1, o.CommandExecutionReceiptV1
+        adopt = o._ordinary_initial_query_adopt_v1
+        cases = []
+        def receipt(index, argv, root):
+            # Explicit no-child oracle: a literal actual receipt class is constructed;
+            # no operating-system child or terminal native result is claimed.
+            return Receipt(1, 'linux-admin-' + str(os.getpid()), 'fast-preflight-native-query',
+                index, argv, '/', 7000 + index, 'posix', 'fixture-start', 'fixture-end',
+                0.01, 0, None, 10, 'NOT_TRIGGERED', 'NOT_REQUIRED',
+                str(root / ('command-' + str(index) + '.stdout.bin')),
+                str(root / ('command-' + str(index) + '.stderr.bin')),
+                4, 0, (), 'NOT_REQUIRED', False, None, registered_argv=argv)
+
+        def fixture():
+            root = PurePosixPath('/run/qtt1n100ordinary/prefix/query')
+            origin = 100
+            query = Query(evidence_root=root, deadline_ns=origin + 3720 * 10**9)
+            startup_source, startup, source_generation, generation = {}, {}, {}, {}
+            errors = []
+            native_input = dict(owner=(query.pid, query.thread), errors=errors,
+                startup_source=startup_source, original_origin_ns=origin,
+                original_execution_cutoff_ns=origin + 3600 * 10**9,
+                original_settlement_cutoff_ns=origin + 3720 * 10**9)
+            profile = (native_input, source_generation, generation, startup_source,
+                'fixture-phase', {}, None, (('fixture-calculation-only', 1),), 1000, 1000, fixture, fixture.__code__)
+            native_input['early_profile'] = profile
+            commands = []
+            for index in range(1, 9):
+                argv = ('/usr/bin/systemctl', 'show', 'literal-no-child-unit-' + str(index))
+                value = receipt(index, argv, root)
+                streams = {name: dict(path=root / ('command-' + str(index) + '.' + name + '.bin'),
+                    raw=b'ABCD' if name == 'stdout' else b'', returned_bytes=4 if name == 'stdout' else 0,
+                    fd=1000 + index, raw_owner=None, error=None, close_attempted=True, closed=True,
+                    complete=True, errors=[]) for name in ('stdout', 'stderr')}
+                commands.append(dict(command_index=index, evidence_root=root, cwd='/',
+                    run_id=value.run_id, phase=value.phase, argv=argv, receipt=value,
+                    associated=True, pending=False, stream_pending=False, streams=streams, errors=[]))
+            record = dict(native_input=native_input, complete=True, pending=False, profile=profile,
+                origin_ns=origin, operands={'evidence_root': root}, commands=commands,
+                output_journal=[(value,) for value in commands], returned_bytes=96)
+            record['original'] = (record,)
+            record['result_original'] = (record, record['original'], None, origin,
+                None, None, None, None, None, None, None, None, None, None, profile, errors)
+            native_input['current_native_observation'] = record
+            product = dict(native_input=native_input, native_hold={}, native_generation=generation,
+                startup=startup, source_generation=source_generation, roles={}, actor=(),
+                phase='fixture-phase', role='PARENT', native_root=root.parent.parent,
+                origin_ns=origin, errors=errors)
+            fields = ('native_input', 'native_hold', 'native_generation', 'startup',
+                'source_generation', 'roles', 'actor', 'phase', 'role', 'native_root', 'origin_ns', 'errors')
+            product['original'] = (product, *(product[name] for name in fields))
+            return query, product, native_input, record
+
+        q, product, ni, record = fixture()
+        original_list = q.command_supervisions
+        adopt(q, product)
+        assert q.command_supervisions is original_list is q._original_command_supervisions
+        assert q.command_supervisions == record['commands'] and all(a is b for a, b in zip(q.command_supervisions, record['commands']))
+        assert (q.attempts, q.command_dispatches, q.retained) == (8, 8, 96)
+        assert q._command_dispatch_settled_v1() and q.command_resources_settled_v1()
+        assert q.command_receipt_for_argv_v1(record['commands'][-1]['argv']) is record['commands'][-1]['receipt']
+        assert len(q.command_supervision_evidence_v1()) == len(q.observations) == 8
+        assert ni['early_profile'][6] is None and ni['query_adoption_attempt']['complete']
+        cases.append('eight_actual_original_receipt_stream_records_and_counter_list_adoption')
+        before = dict(q.__dict__)
+        try:
+            adopt(q, product)
+        except o.ValidationReliabilityError as error:
+            assert 'UNTOUCHED_ORIGINAL_CONSTRUCTOR' in str(error)
+        else:
+            raise AssertionError('repeat adoption admitted')
+        assert q.__dict__ == before
+        cases.append('one_use_adoption_rejects_without_reset_or_replacement')
+        record['commands'][0]['streams']['stdout']['closed'] = False
+        assert not q.command_resources_settled_v1()
+        assert q._command_dispatch_settled_v1()
+        cases.append('full_history_closeout_preserves_unresolved_earlier_stream_veto')
+
+        for defect in ('pending', 'foreign-cwd', 'foreign-receipt', 'wrong-cutoff', 'rebased-profile'):
+            q, product, ni, record = fixture()
+            if defect == 'pending':
+                record['commands'][3]['pending'] = True
+            elif defect == 'foreign-cwd':
+                record['commands'][3]['cwd'] = '/foreign'
+            elif defect == 'foreign-receipt':
+                record['commands'][3]['receipt'] = dataclasses.replace(record['commands'][3]['receipt'], command_index=9)
+            elif defect == 'wrong-cutoff':
+                q.deadline_ns += 1
+            else:
+                ni['early_profile'] = (*ni['early_profile'][:6], q.deadline_ns, *ni['early_profile'][7:])
+                record['profile'] = ni['early_profile']
+                record['result_original'] = (*record['result_original'][:14], ni['early_profile'], record['result_original'][15])
+            before = dict(q.__dict__)
+            try:
+                adopt(q, product)
+            except o.ValidationReliabilityError:
+                pass
+            else:
+                raise AssertionError('invalid query adoption admitted: ' + defect)
+            assert q.__dict__ == before and 'query_adoption_attempt' not in ni
+            cases.append('pre_adoption_rejects_' + defect + '_without_mutating_original_query')
+
+        q, product, ni, record = fixture()
+        body_fault = OSError('literal no-child projection failure')
+        def projection_fault(_):
+            raise body_fault
+        with monkeypatch.context() as projection_port:
+            projection_port.setattr(o, '_json_compatible', projection_fault)
+            try:
+                adopt(q, product)
+            except OSError as error:
+                assert error is body_fault
+            else:
+                raise AssertionError('projection failure disappeared')
+        assert q.failure is body_fault and ni['errors'] == [body_fault]
+        assert not ni['query_adoption_attempt']['complete']
+        assert (q.attempts, q.command_dispatches, q.retained) == (8, 8, 96)
+        assert all(a is b for a, b in zip(q.command_supervisions, record['commands']))
+        assert not q.observations and q.last_command_receipt is record['commands'][-1]['receipt']
+        cases.append('late_projection_failure_retains_original_records_debt_and_primary_error')

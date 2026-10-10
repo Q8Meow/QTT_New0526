@@ -1256,3 +1256,282 @@ def _exercise_v35_rp5a_reader_transport_v1(monkeypatch, tmp_path):
     with pytest.raises(ValueError):
         fence.read_original_source("tools/run_validation_gates.py", 4096)
     assert fence.held is True
+
+    # Independent native-response/control ports only. No service, kernel
+    # policy or child is created by this grouped protection regression.
+    import copy
+    import threading
+    from pathlib import PurePosixPath
+    monkeypatch.setattr(owner.os,'O_ACCMODE',getattr(owner.os,'O_ACCMODE',3),raising=False)
+    profile_text = (
+        'profile qtt7n0p1 flags=(attach_disconnected,mediate_deleted) {\n'
+        '  deny capability,\n  deny network,\n  deny mount,\n  deny pivot_root,\n'
+        '  /usr/** r,\n  "/qtt/**" r,\n  "/runtime/**" rwk,\n'
+        '  "/qtt/report.json" rwk,\n  "/qtt/" rw,\n  /dev/null rw,\n'
+        '  ptrace (readby) peer="qtt7n0controller",\n}\n')
+    literal_mounts = [
+        dict(id=1,parent=1,device='1:1',root='/',path='/',options=['ro'],
+            fs='ext4',source='/dev/fixture',super_options=['rw']),
+        dict(id=2,parent=1,device='8:1',root='/view',path='/qtt',options=['rw'],
+            fs='ext4',source='/dev/fixture',super_options=['rw']),
+        dict(id=3,parent=1,device='8:1',root='/runtime',path='/runtime',options=['rw'],
+            fs='ext4',source='/dev/fixture',super_options=['rw']),
+        dict(id=4,parent=1,device='8:1',root='/control',path='/ctrl',options=['ro'],
+            fs='ext4',source='/dev/fixture',super_options=['rw'])]
+    literal_credentials = {key:'0000000000000000' for key in ('CapInh','CapPrm','CapEff','CapBnd','CapAmb')}
+    literal_credentials.update(NoNewPrivs='1',Uid=1000,Gid=1000)
+    native_mode = stat.S_IFREG | 0o444
+    frame_mode = stat.S_IFREG | 0o400
+    file_version = (8,21,4,10,11,native_mode)
+    frame_version = (8,99,9,12,13,frame_mode)
+    identity_native = owner._ScanLaunchIdentity('fixture-protection','post-validation',1,1,
+        (sys.executable,'tools/build_pr168_rp5a_legacy_semantic_audit.py','--offline'),'/qtt')
+    # Projection-only carrier: it acquires no descriptor and grants no byte
+    # consumption. Actual owner behavior is exercised with the ports below.
+    shape_lease = object.__new__(owner._ScanPayloadLeaseV3)
+    shape_lease._payload_bytes,shape_lease._version = 4,frame_version
+    shape_span = owner._ScanPayloadSpanV3(shape_lease,0,4)
+    shape_rows = (owner._ScanCandidateSurface('data.bin','FILE',0o444,shape_span,()),)
+    literal_binding = dict(pid=os.getpid(),start=1,invocation='fixture',phase='post-validation',
+        command_index=1,profile='qtt7n0p1',mappings={'/qtt':{'identity':[8,2]}},
+        environment={'QTT_LINUX_PREFLIGHT_CONTROL':'/ctrl','QTT_LINUX_PREFLIGHT_RUNTIME':'/runtime'},
+        rp5a_launch={'candidate_generation':1})
+    literal_product = dict(profile_source=profile_text,
+        loader_receipt=dict(argv=['/usr/bin/apparmor_parser','--binary','--add','/fixture/policy'],
+            native_exit_code=0,failure_class=None,start_failure_class=None,
+            timeout_state='NOT_TRIGGERED',termination_state='NOT_REQUIRED'),
+        pid=os.getpid(),start=1,invocation='fixture',phase='post-validation',command_index=1,
+        candidate_generation=1,private_root_identity=[1,1,stat.S_IFDIR|0o555],
+        repository_identity=[8,2,stat.S_IFDIR|0o555],credentials=literal_credentials,
+        runtime='/runtime',control='/ctrl',mounts=literal_mounts,
+        file_writes=['/qtt/report.json'],directory_writes=['/qtt'],
+        frame_version=list(frame_version),frame_flags=os.O_RDONLY,frame_aliases=[],
+        files=[['data.bin',list(file_version),list(file_version),0,2,'CURRENT_PROFILE_EXCLUSION']])
+    projected = owner._ordinary_rp5a_protection_projection_v1(literal_product,
+        binding=literal_binding,identity=identity_native,files=shape_rows,lease=shape_lease)
+    assert projected is not None and projected[1] == (('/qtt/report.json',),('/qtt',),('/runtime',))
+    assert owner._ordinary_rp5a_protection_kind_v1(PurePosixPath('/qtt/data.bin'),0,
+        projected[0],projected[1])[0] == 'CURRENT_PROFILE_EXCLUSION'
+    for changed in (
+        {**literal_product,'unexpected':1},
+        {**literal_product,'profile_source':profile_text.replace('qtt7n0p1','qtt7n0p2')},
+        {**literal_product,'frame_flags':True},
+        {**literal_product,'candidate_generation':True},
+        {**literal_product,'credentials':{**literal_credentials,'CapEff':'1'}},
+        {**literal_product,'file_writes':['/qtt/data.bin']},
+        {**literal_product,'frame_aliases':['/runtime/frame']},
+        {**literal_product,'profile_source':profile_text.replace('  /dev/null rw,',
+            '  /dev/null rw,\n  link /qtt/data.bin -> /runtime/alias,')},
+    ):
+        assert owner._ordinary_rp5a_protection_projection_v1(changed,binding=literal_binding,
+            identity=identity_native,files=shape_rows,lease=shape_lease) is None
+    aliases = [*literal_mounts,dict(id=5,parent=3,device='8:1',root='/view',path='/runtime/alias',
+        options=['rw'],fs='ext4',source='/dev/fixture',super_options=['rw'])]
+    alias_product = {**literal_product,'mounts':aliases}
+    assert owner._ordinary_rp5a_protection_projection_v1(alias_product,binding=literal_binding,
+        identity=identity_native,files=shape_rows,lease=shape_lease) is None
+
+    # A writable ancestor that is not an actual mount root could relocate
+    # a mutable subtree under runtime/**. It must retain full byte checks.
+    relocation_writes = (projected[1][0], ('/qtt/sub',), projected[1][2])
+    assert owner._ordinary_rp5a_protection_kind_v1(PurePosixPath('/qtt/sub/data.bin'),
+        0, projected[0], relocation_writes) is None
+    anchor_mount = dict(id=6,parent=2,device='8:1',root='/view/sub',path='/qtt/sub',
+        options=frozenset({'rw'}),fs='ext4',source='/dev/fixture',super_options=frozenset({'rw'}))
+    assert owner._ordinary_rp5a_protection_kind_v1(PurePosixPath('/qtt/sub/data.bin'),
+        0, (*projected[0], anchor_mount), relocation_writes)[0] == 'CURRENT_PROFILE_EXCLUSION'
+    assert owner._ordinary_rp5a_protection_kind_v1(PurePosixPath('/qtt/sub/data.bin'),
+        16, projected[0], relocation_writes)[0] == 'IMMUTABLE'
+
+    # Real original fence/lease methods, fixed independent literal source and
+    # frame bytes, with all OS/kernel calls replaced by explicit no-child ports.
+    from types import SimpleNamespace
+    original_raw = b'HEADA' + b'A\x00\xffB'
+    original_current = b'A\x00\xffB'
+    stats_native = {
+        '/': SimpleNamespace(st_dev=1,st_ino=1,st_mode=stat.S_IFDIR|0o555,st_size=0,
+            st_nlink=1,st_mtime_ns=1,st_ctime_ns=1),
+        '/qtt': SimpleNamespace(st_dev=8,st_ino=2,st_mode=stat.S_IFDIR|0o555,st_size=0,
+            st_nlink=1,st_mtime_ns=1,st_ctime_ns=1),
+        '/ctrl': SimpleNamespace(st_dev=8,st_ino=3,st_mode=stat.S_IFDIR|0o555,st_size=0,
+            st_nlink=1,st_mtime_ns=1,st_ctime_ns=1),
+        '/qtt/data.bin': SimpleNamespace(st_dev=8,st_ino=21,st_mode=native_mode,st_size=4,
+            st_nlink=1,st_mtime_ns=10,st_ctime_ns=11),
+        '/ctrl/binding': SimpleNamespace(st_dev=8,st_ino=22,st_mode=frame_mode,st_size=2,
+            st_nlink=1,st_mtime_ns=10,st_ctime_ns=11),
+        '/ctrl/release': SimpleNamespace(st_dev=8,st_ino=23,st_mode=frame_mode,st_size=2,
+            st_nlink=1,st_mtime_ns=10,st_ctime_ns=11)}
+    class PortPath(PurePosixPath):
+        def lstat(self):
+            return port_lstat(self)
+        def resolve(self,**kwargs):
+            return self
+        def absolute(self):
+            return self
+    def port_lstat(path):
+        name = str(path)
+        if name not in stats_native:
+            raise FileNotFoundError(name)
+        return stats_native[name]
+    deadline_native = time.monotonic_ns()+180_000_000_000
+    with monkeypatch.context() as native_ports:
+        native_ports.setattr(owner,'Path',PortPath)
+        native_ports.setattr(owner.sys,'platform','linux')
+        native_ports.setattr(owner.os.path,'normpath',lambda value:value)
+        import types as protection_types
+        protection_fcntl=protection_types.ModuleType('fcntl')
+        protection_fcntl.F_GETFL=3
+        protection_fcntl.fcntl=lambda fd,command:os.O_RDONLY
+        native_ports.setitem(sys.modules,'fcntl',protection_fcntl)
+        for suffix,unsupported in (('proved',False),('unsupported',True),('mutation',False),
+                ('omitted',False)):
+            positions={991:0,992:0}; reads=[]; closes=[]
+            file_stat=stats_native['/qtt/data.bin']
+            frame_stat=SimpleNamespace(st_dev=8,st_ino=99,st_mode=frame_mode,st_size=9,
+                st_nlink=1,st_mtime_ns=12,st_ctime_ns=13)
+            def fstat_port(fd):
+                return frame_stat if fd == 991 else file_stat
+            def read_port(fd,request):
+                assert fd in positions and 0 < request <= 65536
+                reads.append((fd,request)); packet=original_raw if fd == 991 else original_current
+                part=packet[positions[fd]:positions[fd]+min(request,1)]
+                positions[fd]+=len(part)
+                return part
+            def seek_port(fd,offset,whence):
+                assert fd in positions and whence == os.SEEK_SET
+                positions[fd]=offset
+                return offset
+            def source_open_port(path,**kwargs):
+                assert str(path) == '/qtt/data.bin'
+                positions[992]=0
+                return 992
+            with native_ports.context() as body_ports:
+                body_ports.setattr(owner.os,'fstat',fstat_port)
+                body_ports.setattr(owner.os,'lstat',port_lstat)
+                body_ports.setattr(owner.os,'get_inheritable',lambda fd:False)
+                body_ports.setattr(owner.os,'read',read_port)
+                body_ports.setattr(owner.os,'lseek',seek_port)
+                body_ports.setattr(owner.os,'close',lambda fd:closes.append(fd))
+                body_ports.setattr(owner,'_open_regular_worktree_descriptor',source_open_port)
+                lease_native=owner._ScanPayloadLeaseV3(991,raw_data_start=5,payload_bytes=4,extent=9,
+                    descriptor_version=frame_version,deadline_ns=deadline_native,read_allowance=1000)
+                rows_native=(owner._ScanCandidateSurface('data.bin','FILE',0o444,
+                    owner._ScanPayloadSpanV3(lease_native,0,4),()),)
+                fence_native=owner._ScanCandidateFence('/qtt',rows_native,
+                    limits=limits,candidate_read_bytes=1000,deadline_ns=deadline_native,
+                    wire_version=3,surface_role='receiver',payload_lease=lease_native)
+                io_native=owner._ordinary_application_io_v1(deadline_native,control_root=PortPath('/ctrl'))
+                binding_native=copy.deepcopy(literal_binding)
+                product_native=copy.deepcopy(literal_product)
+                if unsupported:
+                    product_native['profile_source']=profile_text.replace('qtt7n0p1','qtt7n0p2')
+                if suffix != 'omitted':
+                    binding_native['rp5a_protection']=product_native
+                else:
+                    binding_native.pop('rp5a_protection',None)
+                    assert 'rp5a_protection' not in binding_native
+                receiver_native=dict(io=io_native,identity=identity_native,reader=object(),scanner=object(),
+                    parent_identity=None,binding=binding_native,release={'fixture':True},
+                    binding_original=owner._preflight_canonical_v1(binding_native),
+                    release_original=owner._preflight_canonical_v1({'fixture':True}),
+                    binding_version=owner._scan_same_api_version(stats_native['/ctrl/binding']),
+                    release_version=owner._scan_same_api_version(stats_native['/ctrl/release']),
+                    native_tokens=[],joined=True)
+                receiver_native['original']=(receiver_native,io_native)
+                io_native['rp5a_receiver']=receiver_native
+                io_native['allowed_controls']=(PortPath('/ctrl/binding'),PortPath('/ctrl/release'))
+                chain=owner._preflight_chain_v1(PortPath('/ctrl'),_ordinary_entry_owner_v1=io_native)
+                receiver_native['binding_chain']=receiver_native['release_chain']=chain
+                # The allocation was originally selected before any native I/O.
+                # Clear no counter: the two ancestor acquisitions remain charged.
+                fence_native._ordinary_rp5a_receiver_v1=receiver_native
+                lease_native._ordinary_bind_io_v3(fence_native,receiver_native)
+                assert fence_native._ordinary_io_v3() is io_native
+                assert lease_native._ordinary_io_v3() is io_native
+                fence_native()
+                assert lease_native.initial_consumption_complete and fence_native.remaining == 992
+                status_literal=(b'CapInh: 0000000000000000\nCapPrm: 0000000000000000\n'
+                    b'CapEff: 0000000000000000\nCapBnd: 0000000000000000\nCapAmb: 0000000000000000\n'
+                    b'NoNewPrivs: 1\nUid: 1000 1000 1000 1000\nGid: 1000 1000 1000 1000\n')
+                mount_literal=('\n'.join(str(row['id'])+' '+str(row['parent'])+' '+row['device']+' '
+                    +row['root']+' '+row['path']+' '+','.join(row['options'])+' - '+row['fs']+' '
+                    +row['source']+' '+','.join(row['super_options']) for row in literal_mounts)+'\n').encode('ascii')
+                def native_read_port(io,path,**kwargs):
+                    assert owner._ordinary_rp5a_native_operand_v1(io,kwargs['_rp5a_native_operand_v1'],path)
+                    part=status_literal if str(path).endswith('/status') else mount_literal
+                    io['attempts']+=1;io['delivered']+=len(part)
+                    return part
+                def flags_port(self,fd,io):
+                    owner._ordinary_application_io_check_v1(io)
+                    io['attempts']+=1;io['delivered']+=4
+                    return 0
+                body_ports.setattr(owner,'_ordinary_application_native_read_v1',native_read_port)
+                body_ports.setattr(owner._ScanCandidateFence,'_ordinary_flags_v3',flags_port)
+                protection_native=owner._ordinary_rp5a_protection_bind_v1(fence_native,receiver_native)
+                before_reads=len(reads);before_remaining=fence_native.remaining
+                before_attempts=io_native['attempts']
+                if suffix == 'mutation':
+                    file_stat.st_mtime_ns+=1
+                    with pytest.raises(ValueError,match='protected streamed candidate pathname/version changed'):
+                        fence_native()
+                    assert fence_native.held and lease_native.held
+                    assert len(reads) == before_reads and fence_native.remaining == before_remaining
+                    lease_native.close()
+                    file_stat.st_mtime_ns-=1
+                else:
+                    fence_native()
+                    assert io_native['attempts'] > before_attempts
+                    if unsupported:
+                        assert protection_native is None and receiver_native['file_protection']['unsupported']
+                        assert fence_native.remaining == before_remaining-8
+                    elif suffix == 'omitted':
+                        assert protection_native is None and 'file_protection' not in receiver_native
+                        assert fence_native.remaining == before_remaining-8
+                        assert any(fd == 992 for fd,request in reads[before_reads:])
+                        assert any(fd == 991 for fd,request in reads[before_reads:])
+                    else:
+                        assert protection_native is receiver_native['file_protection']
+                        assert fence_native.remaining == before_remaining
+                        assert all(fd == 991 for fd,request in reads[before_reads:])
+                    fence_native.close_payload_lease()
+                    if not unsupported and suffix != 'omitted':
+                        assert protection_native['full_final_attempted'] and protection_native['full_final_complete']
+                        assert fence_native.remaining == before_remaining-8
+                assert lease_native.closed and closes.count(991) == 1
+                assert io_native['maximum_request'] <= 65536
+        # An exhausted accounting allocation does not invent a failed OS
+        # close. Preserve that successful close and the independent cap error.
+        cap_closes=[]
+        with native_ports.context() as close_ports:
+            close_ports.setattr(owner.os,'fstat',lambda fd:frame_stat)
+            close_ports.setattr(owner.os,'get_inheritable',lambda fd:False)
+            close_ports.setattr(owner.os,'close',lambda fd:cap_closes.append(fd))
+            cap_lease=owner._ScanPayloadLeaseV3(991,raw_data_start=5,payload_bytes=4,extent=9,
+                descriptor_version=frame_version,deadline_ns=deadline_native,read_allowance=1000)
+            cap_io=owner._ordinary_application_io_v1(deadline_native,control_root=PortPath('/ctrl'))
+            # Test-only allocation selected before this owner's first I/O.
+            cap_io['metadata_limit']=3
+            cap_original=list(cap_io['original']);cap_original[3]=3;cap_io['original']=tuple(cap_original)
+            cap_fence=object.__new__(owner._ScanCandidateFence)
+            cap_fence.wire_version,cap_fence.surface_role,cap_fence.payload_lease=3,'receiver',cap_lease
+            cap_receiver=dict(io=cap_io,joined=True,parent_identity=None,scanner=object(),
+                binding={},original=None)
+            cap_receiver['original']=(cap_receiver,cap_io)
+            cap_fence._ordinary_rp5a_receiver_v1=cap_receiver
+            cap_lease._ordinary_bind_io_v3(cap_fence,cap_receiver)
+            with pytest.raises(ValueError,match='ORDINARY_R_FENCE_CLOSE_ATTEMPT_CEILING'):
+                cap_lease.close()
+            assert cap_lease.closed and cap_lease.held and cap_closes == [991] and cap_io['attempts'] == 4
+            with pytest.raises(ValueError,match='payload lease close already attempted'):
+                cap_lease.close()
+            assert cap_closes == [991]
+        close_fault=OSError('synthetic protection one-close fault')
+        closed_ports=[]
+        failing_io=dict(owner=(os.getpid(),threading.get_ident()),attempts=0,metadata_limit=0)
+        failing_io['original']=(failing_io,)
+        def fail_owned_close(fd):
+            closed_ports.append(fd)
+            raise close_fault
+        with pytest.raises(BaseExceptionGroup) as close_group:
+            owner._ordinary_application_owned_close_v1(failing_io,fail_owned_close,991)
+        assert closed_ports == [991] and close_group.value.exceptions[1] is close_fault

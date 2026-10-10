@@ -1299,7 +1299,7 @@ def _assert_f14_dual_install_slots(tmp_path):
     mutants.append(moved.replace('  validation:\n', selected_step + '  validation:\n', 1))
     mutants.append('\n'.join('# ' + row for row in text.splitlines()) + '\n')
     mutants.append('name: Dead\nrun: |\n' + '\n'.join('  ' + row for row in text.splitlines()) + '\n')
-    mutants.append(text + '#' + 'x' * (256 * 1024) + '\n')
+    mutants.append(text + '#' + 'x' * (500000 + 1 - len((text + '#\n').encode('utf-8'))) + '\n')
     for bad in mutants:
         assert bad != text
         workflow.write_bytes(bad.encode('utf-8'))
