@@ -19095,12 +19095,12 @@ def test_github_workflow_preserves_required_validation_check_identity():
 
 
 def test_github_workflow_splits_validation_into_parallel_phase_jobs():
+    # No-child literals: no Linux/timer/manager/privilege/Scope/Git/native
+    # admission/termination/FD-close proof; guards/prefix loans/independent
+    # baselines stay; EOF/suffix/direct-child exit != descendant cleanup.
     workflow = _workflow_text()
     shard_block = _workflow_job_block(workflow, "validation_shards")
 
-    # Project complete literal run scalars using the runner's TemplateReader
-    # segmentation/escaping rules. This is a Source/length oracle, not an
-    # expression evaluator or evidence of a GitHub/native execution.
     def utf16_units(value):
         return len(value.encode("utf-16-le", "surrogatepass")) // 2
 
@@ -19144,7 +19144,6 @@ def test_github_workflow_splits_validation_into_parallel_phase_jobs():
         return scalars
 
     def actions_projection(scalar):
-        # .NET String.Trim whitespace; no shell/string-expression evaluation.
         trim_chars = " \t\n\r\v\f\x85\u00a0\u1680\u2000\u2001\u2002\u2003\u2004\u2005\u2006\u2007\u2008\u2009\u200a\u2028\u2029\u202f\u205f\u3000"
         segments = []
         position = 0
@@ -19213,7 +19212,6 @@ def test_github_workflow_splits_validation_into_parallel_phase_jobs():
             raise ValueError("generated Actions expression exceeds 21000 UTF-16 units")
         return (kind, projected, expressions)
 
-    # Complete decoded blocks include clip/strip/keep and a non-newline EOF.
     for indicator, expected in (("|", "echo x\n"), ("|-", "echo x"),
             ("|+", "echo x\n\n\n")):
         fixture = "        run: " + indicator + "\n          echo x\n\n\n        shell: bash\n"
@@ -19250,8 +19248,6 @@ def test_github_workflow_splits_validation_into_parallel_phase_jobs():
         with pytest.raises(ValueError, match="generated Actions expression exceeds 21000"):
             admit_actions_run(inclusive + "x")
 
-    # Both new values are in the existing step.env. All seven quoted shell
-    # operands map back exactly; artifact/cache interpolations stay outside run.
     phase_env = "          QTT_PHASE: ${{ matrix.phase }}\n"
     draft_env = "          QTT_DRAFT: ${{ github.event.pull_request.draft && '1' || '0' }}\n"
     assert shard_block.count(phase_env) == shard_block.count(draft_env) == 1
@@ -19270,8 +19266,6 @@ def test_github_workflow_splits_validation_into_parallel_phase_jobs():
     )
     predecessor = shard_block
 
-    # Undo only the later diagnostic Source correspondence for the authentic
-    # Source37 negative fixture; retain its original 21000/21064 assertions.
     for original, observed in (
             ('           if l[qY]<3:raise jQ("original held3 unavailable before first host effect")\n', '           if l[qY]<3 or l[jW]<2:raise jQ("held3 or diagnostic unavailable")\n'),
             ('           l[qY]-=3\n', '           l[qY]-=3\n           l[jW]-=2\n'),
@@ -19292,13 +19286,17 @@ def test_github_workflow_splits_validation_into_parallel_phase_jobs():
         actions_projection(scalar)[0] == "expression" and
         utf16_units(actions_projection(scalar)[1]) > 21000]
     assert len(inflated) == 1
+    # Synthetic boundary; precursor rejects.
+    precursor = inflated
+    inflated = ["x"*20766+"'"*38+"{}"*15+"${{ "+" }}${{ ".join(actions_projection(precursor[0])[2])+" }}"]
     assert utf16_units(inflated[0]) == 21000
     assert utf16_units(actions_projection(inflated[0])[1]) == 21064
     assert actions_projection(inflated[0])[2] == (
         "matrix.phase", "github.event.pull_request.draft && '1' || '0'",
         "matrix.phase", "matrix.phase", "matrix.phase", "matrix.phase", "matrix.phase")
-    with pytest.raises(ValueError, match="generated Actions expression exceeds 21000"):
-        admit_actions_run(inflated[0])
+    for inflated in (precursor, inflated):
+        with pytest.raises(ValueError, match="generated Actions expression exceeds 21000"):
+            admit_actions_run(inflated[0])
     assert all("${{" not in scalar for scalar in current_scalars)
     for scalar in literal_run_scalars(workflow):
         admit_actions_run(scalar)
@@ -19344,8 +19342,6 @@ def test_github_workflow_splits_validation_into_parallel_phase_jobs():
     assert shard_block.count("if: ${{ always() }}") >= 2
     assert "Run canonical validation gates" not in workflow
 
-    # Keep the default PR activities and add the actual ready transition.
-    # These source assertions are not native admission or execution evidence.
     event_block = workflow.split("on:\n", 1)[1].split("\npermissions:\n", 1)[0]
     assert event_block.startswith("  pull_request:\n    types: [opened, synchronize, reopened, ready_for_review]\n")
     assert "  workflow_dispatch:\n    inputs:\n      full_validation:\n" in event_block
@@ -19369,9 +19365,6 @@ def test_github_workflow_splits_validation_into_parallel_phase_jobs():
     assert '            python -I -B -X utf8 tools/run_validation_gates.py --linux-preflight-provision --phase "$QTT_PHASE"\n' in shard_block
     assert "          if [ \"$QTT_PR298_NATIVE_ELIGIBLE\" = \"1\" ]\n" in shard_block
 
-    # These are source/control-flow and explicit no-child fault oracles. They
-    # execute no Linux syscall, timer, fork, manager, privilege or scope effect;
-    # they do not qualify native timer delivery or descendant termination.
     import ast
     import copy
     import textwrap
@@ -19382,9 +19375,26 @@ def test_github_workflow_splits_validation_into_parallel_phase_jobs():
     frontend_tree = ast.parse(frontend_text)
     front_function = next(node for node in frontend_tree.body
         if isinstance(node, ast.FunctionDef) and node.name == "_qtt_original_front_v1")
+    actual_front_function = copy.deepcopy(front_function)
+    aliases = dict(jR="original", q3="id", q4="ancestor-manager-ready",
+        q5="fixed first-host", q6="same original", q7="created", q8="deleted",
+        jV="armed", jW="settle", jX="delete_attempted")
+    bindings = [(t.id, v.value) for n in ast.walk(front_function) if isinstance(n, ast.Assign)
+        for t, v in zip(n.targets[0].elts if isinstance(n.targets[0], ast.Tuple) else n.targets,
+            n.value.elts if isinstance(n.value, ast.Tuple) else [n.value])
+        if isinstance(t, ast.Name) and t.id in aliases and isinstance(v, ast.Constant)]
+    assert len(bindings) == len(aliases) and dict(bindings) == aliases
+    class FrontLiterals(ast.NodeTransformer):
+        def visit_Name(self, n):
+            return ast.copy_location(ast.Constant(aliases[n.id]), n) if isinstance(n.ctx, ast.Load) and n.id in aliases and n.id != "jR" else n
+        def visit_BinOp(self, n):
+            self.generic_visit(n)
+            if isinstance(n.left, ast.Name) and n.left.id == "jR": n.left = ast.Constant("original")
+            if isinstance(n.op, ast.Add) and all(isinstance(v, ast.Constant) and type(v.value) is str for v in (n.left, n.right)):
+                return ast.copy_location(ast.Constant(n.left.value + n.right.value), n)
+            return n
+    front_function = FrontLiterals().visit(front_function)
     members = {node.name: node for node in front_function.body if isinstance(node, ast.FunctionDef)}
-    # Compile only the actual selected nested helper definitions against closed
-    # synthetic ports. The real frontend and its entry call are never executed.
     def helper_from_source(name, ports):
         isolated = ast.Module(body=[copy.deepcopy(members[name])], type_ignores=[])
         exec(compile(ast.fix_missing_locations(isolated), "<workflow-no-child-owner>", "exec"), ports)
@@ -19398,9 +19408,6 @@ def test_github_workflow_splits_validation_into_parallel_phase_jobs():
         def get_errno():
             return 5
 
-    # A genuine successful raw lifecycle return remains recorded if the next
-    # errno getter or returned-byte admission fails. It cannot be lost and then
-    # recast as a never-acquired timer. Failed raw creation gains no such credit.
     for number, raw_result, fault_after_raw in ((222, 0, "errno"), (222, 0, "bytes"),
                                                (223, 0, "errno"), (226, 0, "errno"),
                                                (222, -1, None)):
@@ -19439,8 +19446,6 @@ def test_github_workflow_splits_validation_into_parallel_phase_jobs():
         if observed is not None:
             assert sum(row[0] == "returned" for row in calls) == 1
 
-    # A retained initial body error and its one-delete failure are both the
-    # original objects. This cold port has no real timer or managed child.
     body_fault = OSError("synthetic no-child initial failure")
     close_fault = OSError("synthetic no-child delete failure")
     watchdog = {"armed": False, "created": True, "delete_attempted": False,
@@ -19464,8 +19469,6 @@ def test_github_workflow_splits_validation_into_parallel_phase_jobs():
     assert "w" not in {node.id for node in ast.walk(members["failure"])
         if isinstance(node, ast.Name) and isinstance(node.ctx, ast.Store)}
 
-    # The native path's own exact owner/cutoff/terminal guard stays visible. A
-    # timer, direct child exit or EOF alone cannot retire original Scope debt.
     source = ast.unparse(front_function)
     initial = ast.unparse(next(node for node in front_function.body if isinstance(node, ast.Try)))
     assert initial.index("'same original privileged preparer required'") < initial.index("'watchdog-create'")
@@ -19477,8 +19480,6 @@ def test_github_workflow_splits_validation_into_parallel_phase_jobs():
     assert source.index("'original watchdog cannot retire unresolved child or scope debt'") < source.index("'watchdog-terminal-delete'")
     assert "not all(c['eof'])" in source and "b['retired']" in source and "c['reap'] != (c['pid'], 0)" in source
 
-    # These checks inspect the actual emitted C, including packed formatting.
-    # They do not compile C, run chattr or qualify Linux/native termination.
     native_raw = (Path(__file__).resolve().parents[2] / "tools/ci_branch_context.py").read_bytes()
     native_tree = ast.parse(native_raw.decode("utf-8"))
     native_rows = [node for node in native_tree.body
@@ -19505,8 +19506,6 @@ def test_github_workflow_splits_validation_into_parallel_phase_jobs():
     native_source = native_bytes.decode("ascii")
 
     def native_owner_body(name, return_type="int", definition_suffix=None):
-        # Scan just the fixed C lexical body. Ignore braces in comments and
-        # quoted literals, retaining every actual code character for the oracle.
         assert return_type in ("int", "void", "ssize_t")
         signature = "static " + return_type + " " + name + "("
         if definition_suffix is not None:
@@ -19574,8 +19573,6 @@ def test_github_workflow_splits_validation_into_parallel_phase_jobs():
     assert "qn.heap_remaining-=added;qn.realloc_peak_remaining-=next_extent;" in captured
     assert "*used+=(size_t)n;" in captured and "free(" not in captured
 
-    # Inspect the real keeper's private C loan continuation. These independent
-    # literals are Source/custody oracles, not compilation or Linux-access proof.
     keeper_prepare = native_owner_body("qn_keeper_observations_prepare")
     for original_field in ("l->attempted=1", "l->role=QN_PROVISION", "l->keeper_pid=qn.pid",
             "l->source_owner=(constvoid*)&qn", "l->origin_ns=qn.origin_ns", "l->cutoff_ns=qn.cutoff_ns",
@@ -19626,8 +19623,6 @@ def test_github_workflow_splits_validation_into_parallel_phase_jobs():
     keeper_close = native_owner_body("qn_keeper_observation_slots_close")
     assert "intslots[7]=" in keeper_close and "for(i=0;i<7;i++)" in keeper_close
     assert "if(!s->close_attempted)" in keeper_close and "s->close_result<0||s->close_errno" in keeper_close
-    # This original function has a separate prototype. Match its sole complete
-    # definition without changing the existing single-owner extractor's guard.
     native_compact = "".join(native_source.split())
     return_definition = "staticintqn_provision_return(intterminal_status){"
     storage_definition = "staticintqn_provision_storage_close(void){"
@@ -19641,9 +19636,6 @@ def test_github_workflow_splits_validation_into_parallel_phase_jobs():
     namespace_read = native_owner_body("qn_keeper_namespace_link")
     assert namespace_read.index("63U>qn.read_remaining") < namespace_read.index("n=readlinkat(") < namespace_read.index("qn.read_remaining-=(uint64_t)n;qn.read_bytes+=(uint64_t)n;")
 
-    # Actual keeper-roster Source with owned filesystem operands and explicit
-    # no-child ports. This does not qualify Linux FD/flags, process custody or
-    # containment. The real outside preparer/controller is never invoked.
     import tempfile
     import stat
     host_tag = "# QTT_HOST_PY | "
@@ -19691,9 +19683,6 @@ def test_github_workflow_splits_validation_into_parallel_phase_jobs():
                 operand.write_bytes(b"owned synthetic roster operand")
                 info = operand.lstat()
                 assert stat.S_ISREG(info.st_mode) and info.st_nlink == 1
-            # The observed current generation is deliberately part of this
-            # synthetic fixture; wanted is its independent literal baseline.
-            # It does not rebase any repository or retained owner snapshot.
             info = root.stat()
             current = (info.st_dev, info.st_ino, info.st_mode, info.st_uid, info.st_gid,
                 info.st_nlink, info.st_size, info.st_mtime_ns, info.st_ctime_ns)
@@ -19753,8 +19742,6 @@ def test_github_workflow_splits_validation_into_parallel_phase_jobs():
                 returned = [item for item in effects if item["label"].endswith("original next")]
                 assert len(returned) == len(wanted) + 1
                 if expected_error == "prefix":
-                    # Exactly one extra returned DirEntry/operation survives;
-                    # the additional suffix is never reached or given credit.
                     assert returned[-1]["returned"][0] is False
                     assert returned[-1]["returned"][1] is traceback.tb_frame.f_locals["entry"]
             iteration = retained["iterations"][0]
@@ -19766,9 +19753,6 @@ def test_github_workflow_splits_validation_into_parallel_phase_jobs():
 
 
 
-    # The selected hold owners publish only bounded Source literals. These
-    # ports exercise the actual nested definitions without a timer, syscall,
-    # managed child, native scope, or real stderr write.
     host_function = next(node for node in host_tree.body
         if isinstance(node, ast.FunctionDef) and node.name == "_qtt_original_host_source_v1")
     host_failure = next(node for node in host_function.body
@@ -19777,7 +19761,7 @@ def test_github_workflow_splits_validation_into_parallel_phase_jobs():
         if isinstance(node, ast.FunctionDef) and node.name == "_qtt_custodian_failure_v1")
     held_owners = (("FRONT", members["failure"]), ("HOST", host_failure),
         ("CUSTODIAN", custodian_failure))
-    reservation_source = ast.unparse(front_function)
+    reservation_source = ast.unparse(actual_front_function)
     assert "l[qY] < 3 or l[jW] < 2" in reservation_source
     assert reservation_source.index("l[jW] -= 2") < reservation_source.index("p[qX] = True")
     assert "[201061050, 64, None]" in reservation_source
@@ -19794,13 +19778,16 @@ def test_github_workflow_splits_validation_into_parallel_phase_jobs():
             and isinstance(node.func, ast.Attribute) and isinstance(node.func.value, ast.Name)
             and node.func.value.id == "os" and node.func.attr == "write"]
         assert len(writes) == 1 and isinstance(writes[0].args[0], ast.Constant) and writes[0].args[0].value == 2
+        if stage != "FRONT":
+            location = next(n for n in ast.walk(owner) if isinstance(n, ast.If)
+                and isinstance(n.test, ast.Compare) and isinstance(n.test.left, ast.Name) and n.test.left.id == "diagnostic")
+            assert any(isinstance(n, ast.Try) and location in n.body and
+                any(writes[0] is v for s in n.body for v in ast.walk(s)) for n in ast.walk(owner))
         message_node = writes[0].args[1]
         if stage != "FRONT":
             message_node = next(node.value for node in ast.walk(owner)
                 if isinstance(node, ast.Assign) and any(isinstance(target, ast.Name)
                     and target.id == "diagnostic" for target in node.targets))
-        # Preserve the exact Source40 B18/default literal-inspection fixture.
-        # The retained actual Source41 expression is tested independently below.
         if stage == "HOST":
             actual_source41_host_message_node = copy.deepcopy(message_node)
             assert isinstance(message_node, ast.IfExp)
@@ -19824,11 +19811,16 @@ def test_github_workflow_splits_validation_into_parallel_phase_jobs():
                 for optimization in (0, 2)
                 for mode, expired, listed in (("complete", False, True), ("short", False, True), ("zero", False, True),
                 ("error", False, True), ("complete", True, True),
-                ("complete", False, False), ("wrong-type", False, True), ("non-str", False, True))):
+                ("complete", False, False), ("wrong-type", False, True), ("non-str", False, True))
+                + ((("format", False, False),) if stage != "FRONT" else ())):
             cause = (OSError("B18") if mode == "wrong-type" else
                 RuntimeError(type("PrivateCode", (str,), {})("B18") if mode == "non-str" else
                     "B18" if listed else "unselected private diagnostic"))
             write_fault = OSError("synthetic output failure")
+            if mode == "format":
+                try: raise cause
+                except RuntimeError as caught: cause = caught
+                write_fault = MemoryError("synthetic formatting allocation")
             events, errors = [], []
             held = {"kill_self": False, "reserved": True, "error": None, "operations": []}
             state = {"closed": False, "custodian_effect_attempted": True, "commands": [object()],
@@ -19855,6 +19847,10 @@ def test_github_workflow_splits_validation_into_parallel_phase_jobs():
                 "qA": "commands", "qB": "custodian_effect_attempted", "qC": "errors",
                 "qM": "kill_self", "qX": "reserved", "qR": "error", "qE": "operations",
                 "qT": "failure_cutoff"}
+            if mode == "format":
+                def formatting_fault(_line): raise write_fault
+                ports.update(str=formatting_fault, _qtt_original_host_source_v1=test_github_workflow_splits_validation_into_parallel_phase_jobs,
+                    front_code=None, _qtt_original_inputs_v1=test_github_workflow_splits_validation_into_parallel_phase_jobs)
             isolated = ast.Module(body=[copy.deepcopy(owner)], type_ignores=[])
             exec(compile(ast.fix_missing_locations(isolated), "<workflow-held-diagnostic-no-child>", "exec",
                 optimize=optimization), ports)
@@ -19870,12 +19866,15 @@ def test_github_workflow_splits_validation_into_parallel_phase_jobs():
             else:
                 message = (b"::error::F\n" if stage == "FRONT" else
                     ("::error::" + stage + (":B18\n" if listed and mode not in ("wrong-type", "non-str") else ":UNLISTED\n")).encode("ascii"))
-                assert events == [("clock",), ("write", 2, message), ("pid",), ("stop", 17, 19)]
+                if mode == "format":
+                    assert events == [("clock",), ("pid",), ("stop", 17, 19)] and errors == [("held-output", write_fault)]
+                else:
+                    assert events == [("clock",), ("write", 2, message), ("pid",), ("stop", 17, 19)]
                 assert held["operations"][1][1] and held["operations"][2][1]
                 if mode in ("short", "zero"):
                     assert len(errors) == 1 and errors[0][0] == ("error" if stage == "FRONT" else "held-output")
                     assert type(errors[0][1]) is RuntimeError
-                else:
+                elif mode != "format":
                     assert errors == ([("error" if stage == "FRONT" else "held-output", write_fault)]
                         if mode == "error" else [])
                 assert b"private" not in message
@@ -19884,8 +19883,6 @@ def test_github_workflow_splits_validation_into_parallel_phase_jobs():
                 selected_failure(cause)
             assert repeated.value is cause and events == prior_events
 
-    # Inspect the actual three controller Source literals and protected frame.
-    # These DATA projections do not create a holder or qualify Linux startup.
     controller_begin = "# QTT_ORIGINAL_CONTROLLER_HELPERS_BEGIN_20261007_V1\n"
     controller_end = "# QTT_ORIGINAL_CONTROLLER_HELPERS_END_20261007_V1\n"
     controller_tag = "# QTT_CTL | "
@@ -19925,9 +19922,6 @@ def test_github_workflow_splits_validation_into_parallel_phase_jobs():
         assert invalid_controller.count(controller_init) != 1
 
 
-    # The actual three production selectors must use the interfaces on which
-    # systemd exposes these properties. No RPC, holder, signal or native child
-    # is invoked by these finite DATA/AST ports.
     expected_unit_keys = (b"Id", b"LoadState", b"Transient", b"ActiveState",
         b"InvocationID", b"ActiveEnterTimestampMonotonic", b"StopWhenUnneeded")
     expected_scope_only = (b"RuntimeMaxUSec", b"RuntimeRandomizedExtraUSec",
@@ -20011,7 +20005,7 @@ def test_github_workflow_splits_validation_into_parallel_phase_jobs():
                     if key.endswith(b"USec") or key == b"ActiveEnterTimestampMonotonic" else
                     (b's "source-only"\n', b"source-only"))
                 parsed = {"key": key, "raw": raw, "out": {}, "_5r": {}, "data": {},
-                    "fail": reject_manager_data, "F": reject_manager_data}
+                    "fail": reject_manager_data, "F": reject_manager_data, "qQ": RuntimeError}
                 exec(parser_code, parsed)
                 result_name = ("out", "_5r", "data")[index]
                 assert parsed[result_name] == {key: expected}
@@ -20020,8 +20014,6 @@ def test_github_workflow_splits_validation_into_parallel_phase_jobs():
                     with pytest.raises(RuntimeError):
                         exec(parser_code, invalid)
 
-    # Current three-branch diagnostics are independent from the exact legacy
-    # sibling projection above. They accept only fixed literals and exact types.
     actual_manager_message = b"::error::HOST:ANCESTOR-MANAGER-TERMINAL\n"
     assert len(actual_manager_message) == 40 <= 64
     actual_diagnostic_code = compile(ast.Expression(copy.deepcopy(
@@ -20050,8 +20042,6 @@ def test_github_workflow_splits_validation_into_parallel_phase_jobs():
             assert b"private" not in expected and b"/" not in expected
 
 
-    # Both real current Source41 supplier owners must expose the independently
-    # repriced frame and closure cells. No Source40 tuple projection is used.
     expected_current_source9_literal_fields = (2368680179, 302894236, 34477319,
         "initializer", 1802350, 241543444, 18397008, 1818448, 1983204)
     for actual_source_tree in (host_tree, native_tree):
@@ -20066,13 +20056,13 @@ def test_github_workflow_splits_validation_into_parallel_phase_jobs():
         actual_cells = tuple(node.value if isinstance(node, ast.Constant)
             and type(node.value) is int else node.id if isinstance(node, ast.Name)
             else None for node in supplier_returns[0].elts)
-        # Bind current pricing before the exact Source41 cell projection.
+        assert actual_cells[6:8] == (18414912, 1822408)
+        actual_cells = actual_cells[:6] + (18407232, 1819632) + actual_cells[8:]
         assert actual_cells[6:8] == (18407232, 1819632)
         actual_cells = actual_cells[:6] + expected_current_source9_literal_fields[6:8] + actual_cells[8:]
         assert actual_cells == expected_current_source9_literal_fields
 
 
-    # Actual owner span, synthetic no-child ports, no real IO.
     owner = next(n for n in ast.walk(host_tree) if isinstance(n, ast.FunctionDef)
         and n.name == "_qtt_original_inputs_v1")
     body = next(n.body for n in ast.walk(owner) if isinstance(n, ast.Try)
@@ -20183,6 +20173,48 @@ def test_github_workflow_splits_validation_into_parallel_phase_jobs():
                 "duplicate_uid"):
             with pytest.raises(RuntimeError):
                 exec(code, parent_ports(kind, fault))
+
+    owners = [next(n for n in ast.walk(root) if isinstance(n, ast.FunctionDef) and n.name == name)
+        for root, name in ((actual_front_function, "manager"), (owner, "manager"), (host_tree, "command"))]
+    for role, owner in enumerate(owners):
+        wait = copy.deepcopy(next(n for n in owner.body if isinstance(n, ast.Try)))
+        start = next(i for i, s in enumerate(wait.body) if isinstance(s, ast.Assign)
+            and isinstance(s.targets[0], ast.Name) and s.targets[0].id in ("readiness", "poller"))
+        assert wait.body[start].value.args[1].attr == "poll"
+        loop = next(n for n in wait.body if isinstance(n, ast.While))
+        eof = loop.body[-1].body[-1]
+        assert isinstance(eof.test, ast.UnaryOp) and eof.test.operand.id == "part"
+        assert eof.body[1].value.args[1].attr == "unregister" and len(eof.body) == 3
+        wait.body = wait.body[start - bool(role):wait.body.index(loop)] + loop.body[2:5]
+        codes = {o: compile(ast.fix_missing_locations(ast.Module(body=[wait], type_ignores=[])),
+            "<actual-poll-consumer-no-child>", "exec", optimize=o) for o in (0, 2)}
+        for index, optimization in [(n, 0) for n in range(8)] + [(0, 2), (3, 2)]:
+            mask = (1, 16, 8, 32, 64, 0, 1, 1)[index]
+            fd, closed, error = (9999 if index == 6 else 2048), index == 7, (None if index < 3 else 9 if index == 3 else 71)
+            calls, fds = [], (2048, 2050, 2052)
+            rows = [{"fd": 2048 + i} if role == 1 else [2048 + i] for i in range(6)]
+            c = {"eof": [False] * 3, "errors": []}
+            def register(fd, mask): calls.append(("register", fd, mask))
+            def poll(ms):
+                calls.append(("poll", ms))
+                c["eof"][0] = closed
+                return [(fd, mask)]
+            def create():
+                calls.append(("create",))
+                return SimpleNamespace(register=register, poll=poll)
+            def effect(label, fn, *args, tranche="work"):
+                assert label == ("ancestor-manager-ready", "original manager ready", "O22synthetic")[role]
+                return fn(*args)
+            ports = dict(c=c, d=rows, rows=rows, name="synthetic", tranche="work", E=effect, effect=effect,
+                q4="ancestor-manager-ready", jP=BaseException, qC="errors", errno=SimpleNamespace(EBADF=9, EPROTO=71),
+                select=SimpleNamespace(poll=create, POLLIN=1, POLLHUP=16, POLLERR=8, POLLNVAL=32))
+            if error is None:
+                exec(codes[optimization], ports)
+                assert c["errors"] == []
+            else:
+                with pytest.raises(OSError) as raised: exec(codes[optimization], ports)
+                assert c["errors"] == [raised.value] and raised.value.args == (error,)
+            assert calls == [("create",)] + [("register", fd, 1) for fd in fds] + [("poll", 10)]
 
 
 
@@ -28163,10 +28195,7 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
     import io
     from tools import validation_reliability as o
     def bind_administrative_fixture_cwd(query, root, patch):
-        # Windows no-child references project the Linux working-directory port
-        # onto this exact disposable directory. The real Query still selects,
-        # dispatches and validates its receipt against that supplied binding.
-        # Production Linux paths/defaults and native-supervisor checks are intact.
+        # Windows cwd alone is disposable; Query receipt/dispatch/validation and Linux/default supervision stay.
         if os.name != 'nt':return
         original_path=o._linux_preflight_path_v1
         original_command=query.command
@@ -28178,8 +28207,7 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
         def bound_command(argv,**kwargs):
             return original_command(argv,**({'cwd':literal} if 'cwd' not in kwargs else {}),**kwargs)
         query.command=bound_command
-    # V2 references run in this original collected group. Windows ABI injection
-    # below tests parsing/error retention, never native Linux custody.
+    # Collected V2 Windows ABI references test parsing/error retention, never native custody.
     import struct
     import copy
     import ctypes
@@ -28303,8 +28331,7 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
         decoded,values,count=o._preflight_frame_read_v1(stream.fileno(),magic=(b'QTTPF01\n',b'QTTPF02\n'),extent=24+len(frame),meter=meter,
             validate=lambda h,p:([],o._preflight_header_v2(h,p,identity)))
         assert decoded==header and values==[] and count==7 and meter.received==24+len(frame)
-    # Finite syscall references exercise the complete current owner. These are
-    # injected API outcomes, never Linux native qualification or a host lease.
+    # Complete current owner through finite syscall ports: no Linux qualification or lease.
     from types import SimpleNamespace
     reference_results=[]
     def source_reference(case):
@@ -28497,8 +28524,7 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
             'after-full-protection','during-readability','quota','deadline','torn-journal',
             'partial-post','foreign-identity','foreign-flags','primary-cleanup','failed-close','after-readability'):
         source_reference(case)
-    # Synthetic no-descriptor/no-child references for failed legacy SOURCE
-    # close. An injected outcome is not native close/termination evidence.
+    # Failed legacy SOURCE-close ports have no descriptor/child or native close/termination credit.
     for close_case in ('native-close', 'charged-pre-close'):
         close_seal = object.__new__(o._LinuxImmutableSourceSealV2)
         close_seal.pid, close_seal.thread = os.getpid(), o.threading.get_ident()
@@ -28599,10 +28625,8 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
         with pytest.raises(o.ValidationReliabilityError, match='ORDINARY_MASTER_PLAN_ORIGINAL_STDLIB_IMPORT_COHORT'):
             o._ordinary_master_plan_python_native_v1(native_scope,native_bound,(operand,),((operand,'<module>',alien_text,()),))
         assert len(factory_calls) == 1
-    # The existing private execution owner isolates only this original route.
-    # No process/native/source acquisition occurs through these controlled ports.
-    # These synthetic Linux adapters project only the original RUN path port;
-    # source-cohort argv, protected operands and production classifiers stay exact.
+    # Private owner: controlled RUN-path ports acquire nothing. Cohort argv,
+    # protected operands and production classifiers remain exact.
     original_run_path = runner._path
     adapter_paths = object.__new__(runner.ValidationRunPathsV1)
     object.__setattr__(adapter_paths, 'repo_root', Path(runner.REPO_ROOT))
@@ -28868,8 +28892,7 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
                     o._ordinary_deterministic_readonly_native_v1(native_scope,bound,operands,grammar)
         assert len(readonly_calls) == 2
 
-    # Original PR138 -c remains one source-selected programme. These are
-    # controlled no-child ports, not Linux/profile/Git qualification.
+    # Original PR138 -c stays one selected programme; no-child ports give no Linux/profile/Git credit.
     literal = runner.PR138_NON_MUTATING_VALIDATION_SCRIPT
     requested_literal = (selected_sys.executable, '-c', literal)
     source_names = o._ordinary_pr138_source_names_v1()
@@ -28954,8 +28977,7 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
         with pytest.raises(o.ValidationReliabilityError,match='ORDINARY_PR138_EXACT_INITIALIZER_OR_NAMESPACE_ABSENCE'):
             o._ordinary_pr138_native_v1(native_scope,literal_bound,graph_operands,graph_grammar)
 
-        # The same actual prerequisite issuer consumes explicit no-child
-        # command/native ports and genuine typed original receipts here.
+        # Actual prerequisite issuer uses synthetic no-child/native ports and original typed receipts.
         literal_ports.setattr(o,'os',SimpleNamespace(**{**vars(o.os),'O_NOFOLLOW':131072,'O_CLOEXEC':524288}))
         programme = {'entry':literal_entry,'environment':{}}
         effect = {'entry':literal_entry,'native_programme':actual_literal}
@@ -29050,8 +29072,7 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
         assert len(failed_scope._ordinary_factory_slots_v1)==1 and not failed_scope._ordinary_factory_slots_v1[0]['closed']
         with pytest.raises(o.ValidationReliabilityError,match='ORDINARY_SELECTED_GIT_ONE_NONPOST_PROOF'):
             failed_scope._ordinary_verify_selected_git_controls_v1()
-    # Three original readonly CLI graphs share the same source/native owner.
-    # These synthetic process/source ports never create a native child.
+    # Three readonly CLI graphs share the source/native owner through no-child ports.
     source_table = source_ast.parse((root/'tools/validation_inventory.py').read_text(encoding='utf8'))
     literal_function = next(node for node in source_table.body if isinstance(node,source_ast.FunctionDef)
         and node.name == '_ordinary_deterministic_fixed_sources_v1')
@@ -29194,8 +29215,7 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
     with pytest.raises(o.ValidationReliabilityError, match='ORDINARY_PREFIX_SOURCE_SELECTED_CAPTURE_LAYER'):
         runner._ordinary_prefix_output_limits_v1(prefix_caps, 'APPLICATION')
 
-    # Synthetic original-owner dispatch references only. No source/native
-    # resource is acquired or admitted by these no-child marker records.
+    # Original dispatch markers acquire/admit no source, native resource or child.
     post_scope = object.__new__(o._LinuxPreflightScopeV1)
     post_scope._ordinary_phase_v1 = runner.POST_VALIDATION_PHASE
     post_scope._ordinary_runner_owner_v1 = runner
@@ -29237,8 +29257,7 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
         assert len(allocation_calls) == 1 and allocation_calls[0] == (
             post_paths, post_plan, post_execution, selected_resource, post_effects)
 
-    # Synthetic quota bookkeeping only: no native owner is admitted by these
-    # finite record markers, no process is launched and no resource is acquired.
+    # Finite quota markers acquire no resource, launch no process and admit no native owner.
     quota_scope = object.__new__(o._LinuxPreflightScopeV1)
     quota_source = object()
     quota_scope.source = quota_source
@@ -29337,8 +29356,7 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
         assert not reference_path.exists()
         o.atomic_write_json(reference_path,dict(native_linux_qualification=False,cases=reference_results))
     print('LINUX_V2_INJECTED_SOURCE_RECOVERY_REFERENCES '+json.dumps(reference_results,sort_keys=True))
-    # Fixed finite failed-start API references run the actual scope/query and
-    # supervisor owners. They are not native Linux execution or a host lease.
+    # Failed-start API ports exercise actual Scope/Query/supervisor, without Linux execution or lease.
     from datetime import datetime,UTC
     startup_references=[]
     actual_supervisor=o.supervise_command
@@ -29549,8 +29567,8 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
     assert any('injected export preparation failure' in v for v in cleanup['failures'])
     assert (Path(cleanup['retained_root'])/'native-result.json').is_file()
 
-    # Actual controller and Query owners: the supervisor alone is a no-child
-    # unknown-dispatch oracle. Successful evidence export cannot release roots.
+    # Actual controller/Query; supervisor alone is a no-child unknown-dispatch oracle.
+    # Successful export cannot release roots.
     controller_area=tmp_path/'administrative-unresolved-controller'
     controller_area.mkdir()
     controller_run=controller_area/'run';controller_run.mkdir()
@@ -29590,9 +29608,8 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
     assert successful_export['read_bytes']==2*actual_cleanup['exported_files'][0]['bytes']
     assert all(row['closed'] and row['settled'] for row in successful_export['acquisitions'])
 
-    # Original controller/export owners, real disposable file operands; only
-    # explicit no-child/failure ports below are synthetic. No native Linux or
-    # process-termination proof is inferred from these exceptional references.
+    # Controller/export use real disposable files; only no-child/failure ports
+    # are synthetic. They give no Linux or process-termination proof.
     original_open=o._open_regular_worktree_descriptor
     original_read=os.read;original_close=os.close;original_scandir=os.scandir
     original_raise=o._scan_raise_errors
@@ -29732,8 +29749,7 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
         assert damaged!=kernel
         with pytest.raises(o.ValidationReliabilityError):
             o._linux_preflight_status_v1(123,RuntimeQueryReference(damaged),credentials=True)
-    # Original administrative owner; all supervision/fault ports below are
-    # explicit no-child fixtures, not native Linux enforcement/termination proof.
+    # Actual administrative owner; synthetic no-child faults give no Linux enforcement/termination proof.
     import dataclasses
     admin_vector=('/usr/bin/systemctl','--version')
     faults=('success','nonzero','prestart','unknown','unproven','wrong-run','wrong-phase','wrong-index',
@@ -29854,9 +29870,8 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
             assert o._LINUX_PREFLIGHT_PROCESS_V1 is context or fault in ('reset','body-reset')
             evidence=admin.command_supervision_evidence_v1()
             assert len(evidence)==len(admin.command_supervisions) and all(row['argv']==admin_vector for row in evidence)
-    # Selected denied startup: real Query/Scope.create and ordinary evidence
-    # streams, with explicit NO-CHILD supervisor faults. These cases prove
-    # error/latch selection only, never native unit or descendant settlement.
+    # Real Query/Scope.create and streams with no-child startup faults prove
+    # error/latch selection, never native unit/descendant settlement.
     from types import SimpleNamespace
     scalar_defects=('combined-bool','combined-float','limit-bool','limit-float',
         'drained-bool','drained-float','retained-bool','retained-float')
@@ -30034,8 +30049,7 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
                 if scope.process is not None:
                     scope.process.stdout.close();scope.process.stderr.close()
             assert all(request<=65536 for request in requests)
-    # Exercise the real caught-error diagnostic consumer too. The Scope object
-    # here is only a no-child caller fixture, never successful native admission.
+    # Actual caught-error diagnostic consumer; no-child Scope caller gives no native admission.
     for defect in ('run_id','phase','command_index','cwd','stdout_path','shape'):
         with monkeypatch.context() as diagnostic_patch:
             diagnostic_patch.setattr(o.sys,'platform','linux')
@@ -30070,8 +30084,7 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
             assert raw==stderr==b'' and not output_opens and len(returned)==1
             assert admin.last_command_receipt is returned[0] and admin.command_supervisions[0]['receipt'] is returned[0]
             assert admin.command_receipt_for_argv_v1(tuple(record['argv'])) is None and not admin.command_resources_settled_v1()
-    # A genuinely successful earlier same-vector receipt cannot certify a
-    # later unresolved attempt. Only the supervisor is a no-child fault oracle.
+    # Earlier same-vector success cannot certify a later unresolved attempt; supervisor is no-child.
     with monkeypatch.context() as stale_patch:
         stale_patch.setattr(o.sys,'platform','linux')
         admin=o._LinuxPreflightQueriesV1(evidence_root=tmp_path/'admin-stale-success',
@@ -31398,8 +31411,7 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
                     runner._ordinary_post_environment_v1(projection_scope, projection_entry, dict(projection_base))
     finally:
         o._LINUX_PREFLIGHT_PROCESS_V1.reset(projection_token)
-    # These are no-child original/selected mode projection oracles. They do
-    # not attest native chmod, immutable flags, DynamicUser or kernel policy.
+    # No-child mode projections attest no native chmod/immutable/DynamicUser/kernel policy.
     view_mode_scope = o._LinuxPreflightScopeV1.__new__(o._LinuxPreflightScopeV1)
     view_original_path = str(tmp_path / 'view-mode-original-source')
     view_source_row = {'path': view_original_path, 'kind': 'file'}
@@ -31445,8 +31457,7 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
         with pytest.raises(RuntimeError, match='ORIGINAL_SOURCE_MODE_AND_VIEW_TRANSFER'):
             view_mode_scope._ordinary_view_operand_version_v1(dict(view_source_row),
                 protected_source_version, original_transfer)
-    # No-child structural oracles for the same original source-calculated
-    # demand operand. They do not certify native capacity or an effect grant.
+    # No-child structure tests the original demand operand, not native capacity/effect authority.
     demand_scope = object.__new__(o._LinuxPreflightScopeV1)
     demand_programme = {'plan': (object(), object())}
     demand_literal = dict(initial_raw_bytes=7, initial_file_count=2,
@@ -31485,9 +31496,8 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
             demand_scope._ordinary_candidate_demand_checked_v1(dict(demand_programme))
         assert demand_scope._ordinary_candidate_demand_checked_v1(demand_programme) is demand_literal
 
-    # No-child arithmetic fixtures for the original complete C programme.
-    # Native source/census/phase acquisition is replaced ONLY for this numeric
-    # owner. These metadata records do not certify a native owner or a quota.
+    # Complete C arithmetic through no-child numeric ports replacing only
+    # native source/census/phase metadata; no owner or quota qualification.
     c_scope = object.__new__(o._LinuxPreflightScopeV1)
     c_source = object.__new__(o._LinuxImmutableSourceSealV2)
     c_census = object.__new__(o._LinuxPreflightCensusV1)
@@ -32436,9 +32446,8 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
     for _pytest_source_defect in (None, 'foreign-constructor', 'foreign-bound-row',
             'foreign-same-valued-registry', 'foreign-same-valued-command'):
         _pytest_source_case_v1(_pytest_source_defect)
-    # The following callback ports are synthetic no-child compatibility cases.
-    # They check the installed operation contract; they are not C/source/native
-    # acquisition or process-termination evidence.
+    # Synthetic no-child callbacks test installed compatibility, not C/source/native
+    # acquisition or process termination.
     _supported_callback_scope = object.__new__(o._LinuxPreflightScopeV1)
     _supported_callback_record = {'scope': _supported_callback_scope}
     _supported_callback_entry = object()
@@ -32855,9 +32864,8 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
         assert no_launch_cause.owned_process is foreign_query_process and no_launch_record['terminal'] is None
         assert no_launch_record['errors'] == [no_launch_cause] and not no_launch_calls
 
-    # Missing Linux flag constants are zero-valued synthetic ports only;
-    # these actual bodies never call the OS in this block. Native admission
-    # still requires the independently observed Linux implementation.
+    # Missing Linux flags are zero synthetic ports; these bodies make no OS call.
+    # Native admission still needs the independently observed Linux implementation.
     with monkeypatch.context() as nested_body_ports:
         for flag_name in ('O_NOFOLLOW','O_CLOEXEC','O_NONBLOCK','O_DIRECTORY'):
             if not hasattr(o.os,flag_name):
@@ -34906,9 +34914,8 @@ if __name__ == "__main__":
             owner._ordinary_initial_data_layout_v1(unsupported_observation)
 
 
-    # Actual original initial-supervisor binding, under explicit no-child
-    # native/profile/debit oracles. A pending startup carrier is distinct from
-    # the later closed startup9; none of these cases issues native authority.
+    # Actual initial-supervisor joins use no-child native/profile/debit ports.
+    # Pending startup differs from later closed startup9; neither grants native authority.
     import os as real_os
     import threading
     from pathlib import PurePosixPath
@@ -34973,9 +34980,8 @@ if __name__ == "__main__":
         assert never==(binding,fault,f.command,False) and f.command['supervision_process'] is None
         assert f.command['pending'] is True and f.command['receipt'] is None
 
-    # Original initial13 lifecycle only, with explicitly synthetic no-child
-    # acquisition/data/manager ports. These cases exercise the actual producer
-    # joins; they do not issue Source, kernel, loader or trading qualification.
+    # Initial13 lifecycle joins use synthetic no-child acquisition/data/manager ports;
+    # they grant no Source, kernel, loader or trading qualification.
     import os as product_os
     import sys as product_sys
     import threading as product_threading
@@ -35181,9 +35187,8 @@ if __name__ == "__main__":
             if reason=='query':
                 assert issuer['prepare_request'] is not None and issuer['query_request'] is None
 
-    # Existing grouped Source ports only: actual private helper bodies with
-    # explicit no-child kernel/native/prefunding oracles. They demonstrate
-    # custody and error branches, not real mounts or a prebirth authority.
+    # Actual private helpers use no-child kernel/native/prefund ports to test custody
+    # and errors, not real mounts or prebirth authority.
     import os as real_os
     import stat
     import threading
@@ -35551,9 +35556,8 @@ if __name__ == "__main__":
         f.inputs['role_root_acquisition']['controlled_generation_original']=(*old[:10],((1,2),(1,2)),old[11])
         expect(lambda:check(f),o.ValidationReliabilityError,'CONTROLLED_ROOT_GENERATION12');cases.append('invented allowed root effect version rejects')
 
-    # This original Linux group also exercises the authentic Query/adoption
-    # owners with explicit no-child receipts. No native terminal proof or
-    # earlier Native13/source grant is supplied by these synthetic records.
+    # Authentic Query/adoption owners use no-child receipts, which provide no native
+    # terminal proof or earlier Native13/source grant.
     import dataclasses
     from pathlib import PurePosixPath
     with monkeypatch.context() as initial_query_port:
