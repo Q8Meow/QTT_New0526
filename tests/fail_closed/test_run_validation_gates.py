@@ -19799,6 +19799,19 @@ def test_github_workflow_splits_validation_into_parallel_phase_jobs():
             message_node = next(node.value for node in ast.walk(owner)
                 if isinstance(node, ast.Assign) and any(isinstance(target, ast.Name)
                     and target.id == "diagnostic" for target in node.targets))
+        # Preserve the exact Source40 B18/default literal-inspection fixture.
+        # The retained actual Source41 expression is tested independently below.
+        if stage == "HOST":
+            actual_source41_host_message_node = copy.deepcopy(message_node)
+            assert isinstance(message_node, ast.IfExp)
+            assert isinstance(message_node.orelse, ast.IfExp)
+            assert isinstance(message_node.orelse.body, ast.Constant)
+            assert message_node.orelse.body.value == b"::error::HOST:ANCESTOR-MANAGER-TERMINAL\n"
+            historical_source40_message_node = copy.deepcopy(message_node)
+            historical_source40_message_node.orelse = copy.deepcopy(message_node.orelse.orelse)
+            assert ast.dump(historical_source40_message_node, include_attributes=False) == ast.dump(
+                ast.parse("b'::error::HOST:B18\\n' if type(cause) is RuntimeError and len(cause.args) == 1 and (type(cause.args[0]) is str) and (cause.args[0] == 'B18') else b'::error::HOST:UNLISTED\\n'", mode="eval").body, include_attributes=False)
+            message_node = historical_source40_message_node
         literals = [node.value for node in ast.walk(message_node)
             if isinstance(node, ast.Constant) and type(node.value) is bytes]
         expected_literals = ([b"::error::F\n"] if stage == "FRONT" else
@@ -19910,6 +19923,150 @@ def test_github_workflow_splits_validation_into_parallel_phase_jobs():
             controller_template + b"\n" + controller_init + b"\n",
             controller_template.replace(controller_init, controller_init.replace(b"\n    ", b"\n  "))):
         assert invalid_controller.count(controller_init) != 1
+
+
+    # The actual three production selectors must use the interfaces on which
+    # systemd exposes these properties. No RPC, holder, signal or native child
+    # is invoked by these finite DATA/AST ports.
+    expected_unit_keys = (b"Id", b"LoadState", b"Transient", b"ActiveState",
+        b"InvocationID", b"ActiveEnterTimestampMonotonic", b"StopWhenUnneeded")
+    expected_scope_only = (b"RuntimeMaxUSec", b"RuntimeRandomizedExtraUSec",
+        b"TimeoutStopUSec", b"KillMode", b"SendSIGKILL", b"FinalKillSignal")
+    expected_first_roster = (b"Id", b"LoadState", b"Transient", b"ActiveState",
+        b"ControlGroup", b"InvocationID", b"ActiveEnterTimestampMonotonic")
+    expected_later_roster = (b"Id", b"LoadState", b"Transient", b"InvocationID",
+        b"ControlGroup", b"ActiveState", b"ActiveEnterTimestampMonotonic")
+    expected_interfaces = {"slice": "org.freedesktop.systemd1.Slice",
+        "scope": "org.freedesktop.systemd1.Scope"}
+    first_host = next(n for n in host_tree.body
+        if isinstance(n, ast.FunctionDef) and n.name == "_qtt_original_host_source_v1")
+    ancestor_owner = next(n for n in ast.walk(first_host)
+        if isinstance(n, ast.FunctionDef) and n.name == "original_ancestor")
+    observed_owner = next(n for n in ast.walk(ancestor_owner)
+        if isinstance(n, ast.FunctionDef) and n.name == "observed")
+    observed_calls = [n for n in ast.walk(ancestor_owner) if isinstance(n, ast.Call)
+        and isinstance(n.func, ast.Name) and n.func.id == "observed"]
+    observed_calls.sort(key=lambda node: node.lineno)
+    assert [(ast.unparse(n.args[0]), ast.unparse(n.args[1])) for n in observed_calls] == [
+        ("a['slice']", "keys"), ("a['scope']", "skeys"),
+        ("a['slice']", "(b'StopWhenUnneeded',)")]
+    first_keys = next(n.value for n in ast.walk(ancestor_owner) if isinstance(n, ast.Assign)
+        and any(isinstance(t, ast.Name) and t.id == "keys" for t in n.targets))
+    assert ast.literal_eval(first_keys) == expected_first_roster
+    selectors = [n for n in ast.walk(host_tree) if isinstance(n, ast.Assign)
+        and any(isinstance(t, ast.Name) and t.id == "interface" for t in n.targets)]
+    selectors.sort(key=lambda node: node.lineno)
+    assert len(selectors) == 3
+    selector_keys = ("unitkeys", "_3I", "_46")
+    for index, (selector, key_name) in enumerate(zip(selectors, selector_keys)):
+        parents = [n for n in ast.walk(host_tree) if isinstance(n, ast.For)
+            and any(child is selector for child in n.body)]
+        assert len(parents) == 1
+        property_loop = parents[0]
+        assert not any(isinstance(n, ast.Call) for n in ast.walk(selector.value))
+        key_bindings = [n.value for n in ast.walk(host_tree) if isinstance(n, ast.Assign)
+            and any(isinstance(t, ast.Name) and t.id == key_name for t in n.targets)]
+        assert len(key_bindings) == 1
+        actual_unit_keys = ast.literal_eval(key_bindings[0])
+        assert actual_unit_keys == ((expected_first_roster + (b"StopWhenUnneeded",))
+            if index == 0 else expected_later_roster)
+        if index:
+            outer = [n for n in ast.walk(host_tree) if isinstance(n, ast.For)
+                and any(child is property_loop for child in n.body)]
+            assert len(outer) == 1
+            assert ast.unparse(outer[0].target) == "(unit, keyset, retained)"
+            assert ast.unparse(outer[0].iter) == (
+                "((birth['slice'], " + key_name + ", birth['slice_fields']), "
+                "(birth['scope'], scopekeys, birth['scope_fields']))")
+        roles = {"slice": "source-only.slice", "scope": "source-only.scope"}
+        selector_code = compile(ast.Expression(copy.deepcopy(selector.value)),
+            "<actual-systemd-interface-selector-no-rpc>", "eval")
+        parser_nodes = [copy.deepcopy(n) for n in property_loop.body
+            if not (isinstance(n, ast.Assign) and any(isinstance(t, ast.Name)
+                and t.id in ("interface", "argv", "raw") for t in n.targets))]
+        assert not any(isinstance(n, ast.Call) and isinstance(n.func, ast.Name)
+            and n.func.id in ("rpc", "manager", "command", "E", "effect")
+            for node in parser_nodes for n in ast.walk(node))
+        parser_code = compile(ast.Module(body=parser_nodes, type_ignores=[]),
+            "<actual-systemd-typed-reply-parser-no-rpc>", "exec")
+        def reject_manager_data(message):
+            raise RuntimeError(message)
+        for role in ("slice", "scope"):
+            selected_keys = (expected_first_roster if index == 0 else expected_later_roster)
+            if role == "scope":
+                selected_keys += expected_scope_only
+            if index == 0 and role == "slice":
+                selected_keys += (b"StopWhenUnneeded",)
+            for key in selected_keys:
+                ports = {"a": roles, "birth": roles, "unit": roles[role], "key": key,
+                    key_name: actual_unit_keys}
+                expected_interface = ("org.freedesktop.systemd1.Unit"
+                    if key in expected_unit_keys else expected_interfaces[role])
+                assert eval(selector_code, ports) == expected_interface
+                raw, expected = ((b"b true\n", b"yes")
+                    if key in (b"Transient", b"SendSIGKILL", b"StopWhenUnneeded") else
+                    (b"ay 16 " + b" ".join([b"1"] * 16) + b"\n", b"01" * 16)
+                    if key == b"InvocationID" else (b"i 9\n", b"9")
+                    if key == b"FinalKillSignal" else (b"t 17\n", b"17")
+                    if key.endswith(b"USec") or key == b"ActiveEnterTimestampMonotonic" else
+                    (b's "source-only"\n', b"source-only"))
+                parsed = {"key": key, "raw": raw, "out": {}, "_5r": {}, "data": {},
+                    "fail": reject_manager_data, "F": reject_manager_data}
+                exec(parser_code, parsed)
+                result_name = ("out", "_5r", "data")[index]
+                assert parsed[result_name] == {key: expected}
+                for malformed in (b"x invalid\n", raw[:-1]):
+                    invalid = dict(parsed, raw=malformed, out={}, _5r={}, data={})
+                    with pytest.raises(RuntimeError):
+                        exec(parser_code, invalid)
+
+    # Current three-branch diagnostics are independent from the exact legacy
+    # sibling projection above. They accept only fixed literals and exact types.
+    actual_manager_message = b"::error::HOST:ANCESTOR-MANAGER-TERMINAL\n"
+    assert len(actual_manager_message) == 40 <= 64
+    actual_diagnostic_code = compile(ast.Expression(copy.deepcopy(
+        actual_source41_host_message_node)), "<actual-host-diagnostic-no-write>", "eval")
+    assert [n.value for n in ast.walk(actual_source41_host_message_node)
+        if isinstance(n, ast.Constant) and type(n.value) is bytes] == [
+            b"::error::HOST:B18\n", actual_manager_message, b"::error::HOST:UNLISTED\n"]
+    assert not any(isinstance(n, ast.Call) and not (isinstance(n.func, ast.Name)
+        and n.func.id in ("type", "len")) for n in ast.walk(actual_source41_host_message_node))
+    manager_cause_text = "original ancestor manager exec/terminal/threeEOF"
+    bad_text_type = type("SourceOnlyPrivateText", (str,), {})
+    bad_error_type = type("SourceOnlyOtherRuntimeError", (RuntimeError,), {})
+    for cause, expected in ((RuntimeError("B18"), b"::error::HOST:B18\n"),
+            (RuntimeError(manager_cause_text), actual_manager_message),
+            (RuntimeError("unselected private diagnostic"), b"::error::HOST:UNLISTED\n"),
+            (OSError(manager_cause_text), b"::error::HOST:UNLISTED\n"),
+            (bad_error_type(manager_cause_text), b"::error::HOST:UNLISTED\n"),
+            (RuntimeError(bad_text_type(manager_cause_text)), b"::error::HOST:UNLISTED\n"),
+            (RuntimeError(), b"::error::HOST:UNLISTED\n"),
+            (RuntimeError(manager_cause_text, "private"), b"::error::HOST:UNLISTED\n"),
+            (RuntimeError(manager_cause_text + " private"), b"::error::HOST:UNLISTED\n")):
+        for optimization in (0, 2):
+            selected_code = compile(ast.Expression(copy.deepcopy(actual_source41_host_message_node)),
+                "<actual-host-diagnostic-no-write>", "eval", optimize=optimization)
+            assert eval(selected_code, {"cause": cause}) == expected
+            assert b"private" not in expected and b"/" not in expected
+
+
+    # Both real current Source41 supplier owners must expose the independently
+    # repriced frame and closure cells. No Source40 tuple projection is used.
+    expected_current_source9_literal_fields = (2368680179, 302894236, 34477319,
+        "initializer", 1802350, 241543444, 18397008, 1818448, 1983204)
+    for actual_source_tree in (host_tree, native_tree):
+        actual_suppliers = [node for node in ast.walk(actual_source_tree)
+            if isinstance(node, ast.FunctionDef)
+            and node.name == "_ordinary_ci_initial_common_source_v1"]
+        assert len(actual_suppliers) == 1
+        supplier_returns = [node.value for node in ast.walk(actual_suppliers[0])
+            if isinstance(node, ast.Return) and isinstance(node.value, ast.Tuple)
+            and len(node.value.elts) == 9]
+        assert len(supplier_returns) == 1
+        actual_cells = tuple(node.value if isinstance(node, ast.Constant)
+            and type(node.value) is int else node.id if isinstance(node, ast.Name)
+            else None for node in supplier_returns[0].elts)
+        assert actual_cells == expected_current_source9_literal_fields
 
 
 
