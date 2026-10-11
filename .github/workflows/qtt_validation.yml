@@ -497,16 +497,16 @@ name: QTT Validation
 #     # The first Input4 producer above retained actual FD/path reobservations
 #     # from the SAME original timed owner before publishing this Source DATA.
 #     # The existing compiler owner fills its original vector before this call.
-#     # Keep every initial Source attempt debited. No factory/owner reset or
-#     # second held reservation can replenish the original lifetime allowance.
-#      # The caller's original timed keeper must already enforce this same absolute
-#      # cutoff. A metadata observation or this comparison cannot issue that law.
-#     # SAME trusted privileged Python is the outside custodian. Its parent is
-#     # retained as a launch/lifetime fact, never the future target's MainPID.
-#     # These observed paths/identities rejoin the original admitted host chain.
-#     # They do not issue its native containment, resources, policy or deadline.
-#     # Root/Resource joins its SAME actual source calculator outputs here;
-#     # entry joins its actual ancestor/scope/controller/policy products here.
+## Keep every initial Source attempt debited. No factory/owner reset or
+## second held reservation can replenish the original lifetime allowance.
+# # The caller's original timed keeper must already enforce this same absolute
+# # cutoff. A metadata observation or this comparison cannot issue that law.
+## SAME trusted privileged Python is the outside custodian. Its parent is
+## retained as a launch/lifetime fact, never the future target's MainPID.
+## These observed paths/identities rejoin the original admitted host chain.
+## They do not issue its native containment, resources, policy or deadline.
+## Root/Resource joins its SAME actual source calculator outputs here;
+## entry joins its actual ancestor/scope/controller/policy products here.
 #     # None explicitly identifies these exact missing operands. It is never
 #     # accepted as a numeric grant, original generation or policy selection.
 #     # This checks the selected original DATA and arithmetic, not native funding.
@@ -1967,8 +1967,7 @@ jobs:
 # QTT_HOST_PY |   if(type(held)is not dict or set(held)!={"kill_self","reserved","error","operations"}or type(held["operations"])is not list or not held["reserved"]):raise RuntimeError("original first-host reserved held3 association is unissued")
 # QTT_HOST_PY |   if"custodian_effect_attempted"not in state:raise RuntimeError("original first-host effect history is unissued")
 # QTT_HOST_PY |   def _qtt_custodian_failure_v1(cause):
-# QTT_HOST_PY |    if state["closed"]or not state["custodian_effect_attempted"]:raise cause
-# QTT_HOST_PY |    if held["kill_self"]:raise cause
+# QTT_HOST_PY |    if state["closed"]or not state["custodian_effect_attempted"]or held["kill_self"]:raise cause
 # QTT_HOST_PY |    held["kill_self"]=True;held["error"]=cause
 # QTT_HOST_PY |    if not held["reserved"]:raise RuntimeError("original admitted failure-hold reservation absent")from cause
 # QTT_HOST_PY |    _0R=["original-held-clock",False,None,None];_1M=["original-held-PID",False,None,None];_1r=["original-held-STOP",False,None,None];held["operations"].extend((_0R,_1M,_1r))
@@ -1979,11 +1978,22 @@ jobs:
 # QTT_HOST_PY |      try:
 # QTT_HOST_PY |       if diagnostic==b"::error::CUSTODIAN:UNLISTED\n":
 # QTT_HOST_PY |        tb=BaseException.__traceback__.__get__(cause)
-# QTT_HOST_PY |        if tb is not None:
-# QTT_HOST_PY |         code=tb.tb_frame.f_code
-# QTT_HOST_PY |         line=tb.tb_lineno
-# QTT_HOST_PY |         phase="I"if code is _qtt_original_inputs_v1.__code__ else"M"if code is _qtt_beforecompiler_owner_v1.__code__ else None
-# QTT_HOST_PY |         if phase is not None and type(line)is int and 0<line<=500000:diagnostic=("::error::CUSTODIAN:"+phase+":L"+str(line)+"\n").encode("ascii")
+# QTT_HOST_PY |        if tb:
+# QTT_HOST_PY |         c=tb.tb_frame.f_code;l=tb.tb_lineno;s="I"if c is _qtt_original_inputs_v1.__code__ else"M"if c is _qtt_beforecompiler_owner_v1.__code__ else None
+# QTT_HOST_PY |         if s and type(l)is int and 0<l<=500000:
+# QTT_HOST_PY |          diagnostic=f"::error::CUSTODIAN:{s}:L{str(l)}\n".encode("ascii")
+# QTT_HOST_PY |          try:
+# QTT_HOST_PY |           k=type(cause);n=type.__dict__["__name__"].__get__(k);b=__builtins__;v=type(n)is str and len(n)<22 and getattr(b,"__dict__",b).get(n)is k;e=v and isinstance(cause,OSError)and cause.errno;n=v and n or"OTHER";e=str(e)if type(e)is int and 0<=e<4096 else"-";s="?"
+# QTT_HOST_PY |           try:
+# QTT_HOST_PY |            r=_qtt_original_host_source_v1;a=_qtt_early_loop_admission_v1;t=tb;c=None
+# QTT_HOST_PY |            while t:a("D");h=t.tb_frame.f_globals is r.__globals__;h and(c:=t);t=t.tb_next
+# QTT_HOST_PY |            f=c.tb_frame.f_code;z=f.co_qualname;j=c.tb_lineno;b=lambda q:q is f or any((a("D"),type(x)is type(q)and(z==(y:=x.co_qualname)or z.startswith(y+".<locals>."))and b(x))[1]for x in q.co_consts)
+# QTT_HOST_PY |            if type(z)is str and(b(r.__code__)or b(_qtt_original_live_component_v1.__code__))and 0<j<=500000:l=j;s="+!"[1-h]
+# QTT_HOST_PY |           except BaseException as x:state["errors"].append(("held-walk",x))
+# QTT_HOST_PY |           d=f"{n}{l}#{e}{s}\n".encode("ascii")
+# QTT_HOST_PY |           if len(diagnostic)+len(d)>64:raise RuntimeError
+# QTT_HOST_PY |           diagnostic+=d
+# QTT_HOST_PY |          except BaseException as x:state["errors"].append(("held-output",x))
 # QTT_HOST_PY |       if os.write(2,diagnostic)!=len(diagnostic):raise RuntimeError()
 # QTT_HOST_PY |      except BaseException as error:state["errors"].append(("held-output",error))
 # QTT_HOST_PY |      _1M[1]=True;_1M[2]=os.getpid();_1r[1]=True;_1r[2]=os.kill(_1M[2],signal.SIGSTOP)
@@ -2560,7 +2570,7 @@ jobs:
 # QTT_HOST_PY |     def U(n,c):return 68*n+4*c
 # QTT_HOST_PY |     def T(n,s):return 48*n+8*s
 # QTT_HOST_PY |     def L(n,s):return 56*n+16*(s+s//8+6*n)
-# QTT_HOST_PY |     initializer=5125424+21625000+U(7,7*extent)+T(1,parent_path_count);initializer+=6*(U(67,3*extent)+L(2,130)+T(1,65));initializer+=672+T(1,8)+2*T(1,9)+2*T(1,parent_path_count)+24;return(2368680179,302894236,34477319,initializer,1802350,241543444,18414912,1822408,1983204)
+# QTT_HOST_PY |     initializer=5125424+21625000+U(7,7*extent)+T(1,parent_path_count);initializer+=6*(U(67,3*extent)+L(2,130)+T(1,65));initializer+=672+T(1,8)+2*T(1,9)+2*T(1,parent_path_count)+24;return(2368680179,302894236,34477319,initializer,1802350,241543444,18421352,1823560,1983204)
 # QTT_HOST_PY |    def _ordinary_ci_initial_common_projection_v1(source,paths,catalogue,keeper,native):
 # QTT_HOST_PY |     """Project the fixed original programme; its caller owns every operand join."""
 # QTT_HOST_PY |     if(type(source)is not tuple or len(source)!=9 or type(paths)is not tuple or len(paths)!=19 or type(catalogue)is not tuple or len(catalogue)!=8 or type(keeper)is not tuple or len(keeper)!=7 or type(native)is not tuple or len(native)!=3 or any(type(n)is not int or n<0 for row in(source,paths,catalogue,keeper,native)for n in row)):raise ValueError('ORDINARY_INITIAL_COMMON_EXACT_SOURCE_OPERANDS')

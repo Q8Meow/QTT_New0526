@@ -1496,16 +1496,16 @@ def test_run_validation_gates_direct_script_imports_router_without_pythonpath(
     monkeypatch,
     tmp_path,
 ):
-    fixture_repo = (tmp_path / "r").resolve()
-    fixture_hooks = (tmp_path / "h").resolve()
-    external_parent = (tmp_path / "p").resolve()
-    for directory in (fixture_repo, fixture_hooks, external_parent):
+    fixture_repo=(tmp_path/"r").resolve()
+    fixture_hooks=(tmp_path/"h").resolve()
+    external_parent=(tmp_path/"p").resolve()
+    for directory in(fixture_repo,fixture_hooks,external_parent):
         directory.mkdir()
-        assert directory.is_dir() and not directory.is_symlink()
-        assert not getattr(directory.lstat(), "st_file_attributes", 0) & 0x400
+        assert directory.is_dir()and not directory.is_symlink()
+        assert not getattr(directory.lstat(),"st_file_attributes",0)&0x400
     assert not tuple(fixture_hooks.iterdir())
 
-    source_paths = (
+    source_paths=(
         "tools/run_validation_gates.py",
         "tools/validation_reliability.py",
         "tools/validation_scope_registry.py",
@@ -1514,18 +1514,18 @@ def test_run_validation_gates_direct_script_imports_router_without_pythonpath(
         "tools/validation_inventory.py",
         "tools/repo_path_refs.py",
     )
-    copied_sources = {}
+    copied_sources={}
     for relative_path in source_paths:
-        content = (REPO_ROOT / relative_path).read_bytes()
-        destination = fixture_repo / relative_path
-        destination.parent.mkdir(parents=True, exist_ok=True)
+        content=(REPO_ROOT/relative_path).read_bytes()
+        destination=fixture_repo/relative_path
+        destination.parent.mkdir(parents=True,exist_ok=True)
         destination.write_bytes(content)
-        assert destination.read_bytes() == content
-        copied_sources[relative_path] = content
-    (fixture_repo / ".gitattributes").write_bytes(b"*.py text eol=lf\n")
-    (fixture_repo / ".gitignore").write_bytes(b"__pycache__/\n")
+        assert destination.read_bytes()==content
+        copied_sources[relative_path]=content
+    (fixture_repo/".gitattributes").write_bytes(b"*.py text eol=lf\n")
+    (fixture_repo/".gitignore").write_bytes(b"__pycache__/\n")
 
-    environment = _env_without_pythonpath()
+    environment=_env_without_pythonpath()
     for env_name in tuple(environment):
         if env_name.upper().startswith("GIT_"):
             environment.pop(env_name)
@@ -1538,8 +1538,8 @@ def test_run_validation_gates_direct_script_imports_router_without_pythonpath(
         GIT_ALLOW_PROTOCOL="",
         PYTHONDONTWRITEBYTECODE="1",
     )
-    environment[reliability.PROCESS_ROOT_ENV] = str(external_parent)
-    for env_name in (
+    environment[reliability.PROCESS_ROOT_ENV]=str(external_parent)
+    for env_name in(
         reliability.RUN_ID_ENV,
         reliability.EVIDENCE_ROOT_ENV,
         runner.NO_RUNTIME_ARTIFACT_SCAN_CACHE_ENV,
@@ -1547,16 +1547,16 @@ def test_run_validation_gates_direct_script_imports_router_without_pythonpath(
         "QTT_FORCE_FULL_VALIDATION",
         *BRANCH_CONTEXT_ENV,
     ):
-        environment.pop(env_name, None)
+        environment.pop(env_name,None)
 
     def fixture_git(*arguments):
-        result = subprocess.run(
+        result=subprocess.run(
             [
                 "git",
-                "-c", "user.name=QTT test fixture",
-                "-c", "user.email=qtt-fixture@example.invalid",
-                "-c", "commit.gpgsign=false",
-                "-c", "core.autocrlf=false",
+                "-c","user.name=QTT test fixture",
+                "-c","user.email=qtt-fixture@example.invalid",
+                "-c","commit.gpgsign=false",
+                "-c","core.autocrlf=false",
                 "-c", f"core.hooksPath={fixture_hooks}",
                 *arguments,
             ],
@@ -1567,25 +1567,25 @@ def test_run_validation_gates_direct_script_imports_router_without_pythonpath(
             stderr=subprocess.PIPE,
             timeout=60,
         )
-        assert result.returncode == 0, result.stderr.decode("utf-8")
+        assert result.returncode==0,result.stderr.decode("utf-8")
         return result.stdout
 
-    fixture_git("init", "--initial-branch=main")
-    fixture_git("add", "--", ".gitattributes", ".gitignore", *source_paths)
-    fixture_git("commit", "-m", "Direct runner test fixture")
-    fixture_git("update-ref", "refs/remotes/origin/main", "HEAD")
-    assert fixture_git("status", "--porcelain=v1", "-z", "--untracked-files=all") == b""
-    fixture_head = fixture_git("rev-parse", "HEAD")
-    fixture_index = fixture_git("ls-files", "--stage", "-z")
-    fixture_entries = [entry for entry in fixture_index.split(b"\0") if entry]
-    assert len(fixture_entries) == len(source_paths) + 2
-    assert all(entry.split(b"\t", 1)[0].split()[2] == b"0" for entry in fixture_entries)
+    fixture_git("init","--initial-branch=main")
+    fixture_git("add","--",".gitattributes",".gitignore",*source_paths)
+    fixture_git("commit","-m","Direct runner test fixture")
+    fixture_git("update-ref","refs/remotes/origin/main","HEAD")
+    assert fixture_git("status","--porcelain=v1","-z","--untracked-files=all")==b""
+    fixture_head=fixture_git("rev-parse","HEAD")
+    fixture_index=fixture_git("ls-files","--stage","-z")
+    fixture_entries=[entry for entry in fixture_index.split(b"\0")if entry]
+    assert len(fixture_entries)==len(source_paths)+2
+    assert all(entry.split(b"\t",1)[0].split()[2]==b"0" for entry in fixture_entries)
 
-    completed = subprocess.run(
+    completed=subprocess.run(
         [
             sys.executable,
             "-B",
-            str(Path("tools") / "run_validation_gates.py"),
+            str(Path("tools")/"run_validation_gates.py"),
             "--phase",
             "fast-preflight",
             "--validation-mode",
@@ -1601,71 +1601,71 @@ def test_run_validation_gates_direct_script_imports_router_without_pythonpath(
         timeout=60,
     )
 
-    combined_output = completed.stdout + completed.stderr
-    assert completed.returncode == 2
+    combined_output=completed.stdout+completed.stderr
+    assert completed.returncode==2
     assert "GENERATED_REPORT_OWNER_MISSING" in combined_output
     assert "ModuleNotFoundError" not in combined_output
     assert "No module named 'tools'" not in combined_output
     assert "QTT_VALIDATION_TEXT_INTEGRITY_PREFLIGHT_OK" in combined_output
     assert runner.SUCCESS_MARKER not in combined_output
-    assert fixture_git("status", "--porcelain=v1", "-z", "--untracked-files=all") == b""
-    fixture_head_unchanged = fixture_git("rev-parse", "HEAD") == fixture_head
-    fixture_index_unchanged = fixture_git("ls-files", "--stage", "-z") == fixture_index
+    assert fixture_git("status","--porcelain=v1","-z","--untracked-files=all")==b""
+    fixture_head_unchanged=fixture_git("rev-parse","HEAD")==fixture_head
+    fixture_index_unchanged=fixture_git("ls-files","--stage","-z")==fixture_index
     assert fixture_head_unchanged
     assert fixture_index_unchanged
-    for relative_path, content in copied_sources.items():
-        assert (fixture_repo / relative_path).read_bytes() == content
-    assert not (fixture_repo / "docs").exists()
+    for relative_path,content in copied_sources.items():
+        assert(fixture_repo/relative_path).read_bytes()==content
+    assert not(fixture_repo/"docs").exists()
     assert not tuple(fixture_hooks.iterdir())
 
-    evidence_roots = tuple(external_parent.glob("*.evidence"))
-    assert len(evidence_roots) == 1
-    evidence_root = evidence_roots[0]
+    evidence_roots=tuple(external_parent.glob("*.evidence"))
+    assert len(evidence_roots)==1
+    evidence_root=evidence_roots[0]
     assert evidence_root.is_dir()
-    run_payload = json.loads((evidence_root / "run.json").read_bytes().decode("utf-8"))
-    completion_payload = json.loads(
-        (evidence_root / "completion.json").read_bytes().decode("utf-8")
+    run_payload=json.loads((evidence_root/"run.json").read_bytes().decode("utf-8"))
+    completion_payload=json.loads(
+        (evidence_root/"completion.json").read_bytes().decode("utf-8")
     )
-    cleanup_payload = json.loads(
-        (evidence_root / "cleanup.json").read_bytes().decode("utf-8")
+    cleanup_payload=json.loads(
+        (evidence_root/"cleanup.json").read_bytes().decode("utf-8")
     )
-    assert Path(run_payload["paths"]["repo_root"]).resolve() == fixture_repo
-    assert run_payload["phase"] == runner.FAST_PREFLIGHT_PHASE
-    assert run_payload["command_count"] == 0
-    assert run_payload["text_integrity_preflight_state"] == "PASS"
-    assert run_payload["paths"]["filesystem_probe_state"] == "PASS"
-    probe = run_payload["filesystem_probe"]
-    assert probe["created_directory"] is True
-    assert probe["written_bytes"] > 0
-    assert probe["readback_equal"] is True
-    assert probe["rename_equal"] is True
-    assert probe["unlink_success"] is True
-    assert probe["directory_cleanup_success"] is True
-    assert probe["failure_operation"] is None
-    assert probe["native_error_class"] is None
-    assert completion_payload["final_state"] == "FAIL"
-    assert completion_payload["text_integrity_preflight_state"] == "PASS"
-    assert completion_payload["command_count_planned"] == 0
-    assert completion_payload["command_count_started"] == 0
-    assert completion_payload["command_count_completed"] == 0
-    assert completion_payload["required_marker_state"] == "NOT_RUN"
-    assert completion_payload["evidence_root_state"] == "PRESENT"
-    assert completion_payload["run_id"] == run_payload["run_id"]
-    assert cleanup_payload["run_id"] == run_payload["run_id"]
+    assert Path(run_payload["paths"]["repo_root"]).resolve()==fixture_repo
+    assert run_payload["phase"]==runner.FAST_PREFLIGHT_PHASE
+    assert run_payload["command_count"]==0
+    assert run_payload["text_integrity_preflight_state"]=="PASS"
+    assert run_payload["paths"]["filesystem_probe_state"]=="PASS"
+    probe=run_payload["filesystem_probe"]
+    assert probe["created_directory"]is True
+    assert probe["written_bytes"]>0
+    assert probe["readback_equal"]is True
+    assert probe["rename_equal"]is True
+    assert probe["unlink_success"]is True
+    assert probe["directory_cleanup_success"]is True
+    assert probe["failure_operation"]is None
+    assert probe["native_error_class"]is None
+    assert completion_payload["final_state"]=="FAIL"
+    assert completion_payload["text_integrity_preflight_state"]=="PASS"
+    assert completion_payload["command_count_planned"]==0
+    assert completion_payload["command_count_started"]==0
+    assert completion_payload["command_count_completed"]==0
+    assert completion_payload["required_marker_state"]=="NOT_RUN"
+    assert completion_payload["evidence_root_state"]=="PRESENT"
+    assert completion_payload["run_id"]==run_payload["run_id"]
+    assert cleanup_payload["run_id"]==run_payload["run_id"]
     assert cleanup_payload["cleanup_state"].startswith("PASS")
-    assert completion_payload["process_root_cleanup_state"] == cleanup_payload["cleanup_state"]
-    assert cleanup_payload["parent_preserved"] is True
-    cleanup_target = Path(cleanup_payload["cleanup_target"])
-    assert cleanup_target == Path(run_payload["paths"]["cleanup_target"])
-    assert cleanup_target.parent == external_parent
+    assert completion_payload["process_root_cleanup_state"]==cleanup_payload["cleanup_state"]
+    assert cleanup_payload["parent_preserved"]is True
+    cleanup_target=Path(cleanup_payload["cleanup_target"])
+    assert cleanup_target==Path(run_payload["paths"]["cleanup_target"])
+    assert cleanup_target.parent==external_parent
     assert not cleanup_target.exists()
     assert evidence_root.is_dir()
-    assert reliability.command_receipt_file_indexes(evidence_root) == ()
+    assert reliability.command_receipt_file_indexes(evidence_root)==()
     assert not tuple(evidence_root.glob("command-*.json"))
     assert not tuple(evidence_root.glob("command-*.stdout.bin"))
     assert not tuple(evidence_root.glob("command-*.stderr.bin"))
     _assert_generic_text_preflight_and_scope_matrix(monkeypatch)
-    _assert_actual_runner_receipt_integration(external_parent, monkeypatch)
+    _assert_actual_runner_receipt_integration(external_parent,monkeypatch)
 
     # Keep the real script/Git/receipt prefix above. These additional cases
     # execute only the actual extracted module-entry guard with explicit fake
@@ -1674,157 +1674,157 @@ def test_run_validation_gates_direct_script_imports_router_without_pythonpath(
     import types as _script_types
     import tools as _script_actual_package
 
-    assert runner.__name__ == "tools.run_validation_gates"
-    assert sys.modules["tools.run_validation_gates"] is runner
-    assert _script_actual_package.__dict__["run_validation_gates"] is runner
-    assert runner.main.__globals__ is runner.__dict__ and runner.main.__module__ == runner.__name__
-    _script_tree = _script_ast.parse(copied_sources["tools/run_validation_gates.py"])
-    _script_flags = [node for node in _script_tree.body if isinstance(node, _script_ast.Assign)
-        and len(node.targets) == 1 and isinstance(node.targets[0], _script_ast.Name)
-        and node.targets[0].id == "_ORDINARY_ORIGINAL_SCRIPT_ENTRY_V1"]
-    _script_bindings = [node for node in _script_tree.body if isinstance(node, _script_ast.If)
-        and isinstance(node.test, _script_ast.Name) and node.test.id == "_ORDINARY_ORIGINAL_SCRIPT_ENTRY_V1"]
-    assert len(_script_flags) == 1 and len(_script_bindings) == 2
-    assert _script_ast.dump(_script_flags[0].value, include_attributes=False) == _script_ast.dump(
-        _script_ast.parse('__name__ == "__main__"', mode="eval").body, include_attributes=False)
-    _script_guard, _script_entry = _script_bindings
-    assert _script_entry is _script_tree.body[-1] and not _script_entry.orelse
-    assert _script_ast.dump(_script_entry.body[0], include_attributes=False) == _script_ast.dump(
-        _script_ast.parse("raise SystemExit(main())").body[0], include_attributes=False)
-    assert len(_script_entry.body) == 1
-    assert _script_tree.body.index(_script_guard) < min(index for index, node in enumerate(_script_tree.body)
-        if isinstance(node, (_script_ast.FunctionDef, _script_ast.ClassDef)))
-    _script_required_helpers = (
-        "_ordinary_bootstrap_request_begin_v1", "_ordinary_bootstrap_request_finish_v1",
-        "_ordinary_bootstrap_heap_prepare_request_v1", "_ordinary_bootstrap_query_constructor_request_v1",
-        "_ordinary_bootstrap_query_request_v1", "_ordinary_bootstrap_event_request_v1",
-        "_ordinary_bootstrap_constructor_request_v1", "_ordinary_control_tokenize_request_v1",
-        "_ordinary_control_parse_request_v1", "_ordinary_control_compile_request_v1",
+    assert runner.__name__=="tools.run_validation_gates"
+    assert sys.modules["tools.run_validation_gates"]is runner
+    assert _script_actual_package.__dict__["run_validation_gates"]is runner
+    assert runner.main.__globals__ is runner.__dict__ and runner.main.__module__==runner.__name__
+    _script_tree=_script_ast.parse(copied_sources["tools/run_validation_gates.py"])
+    _script_flags=[node for node in _script_tree.body if isinstance(node,_script_ast.Assign)
+        and len(node.targets)==1 and isinstance(node.targets[0],_script_ast.Name)
+        and node.targets[0].id=="_ORDINARY_ORIGINAL_SCRIPT_ENTRY_V1"]
+    _script_bindings=[node for node in _script_tree.body if isinstance(node,_script_ast.If)
+        and isinstance(node.test,_script_ast.Name)and node.test.id=="_ORDINARY_ORIGINAL_SCRIPT_ENTRY_V1"]
+    assert len(_script_flags)==1 and len(_script_bindings)==2
+    assert _script_ast.dump(_script_flags[0].value,include_attributes=False)==_script_ast.dump(
+        _script_ast.parse('__name__ == "__main__"',mode="eval").body,include_attributes=False)
+    _script_guard,_script_entry=_script_bindings
+    assert _script_entry is _script_tree.body[-1]and not _script_entry.orelse
+    assert _script_ast.dump(_script_entry.body[0],include_attributes=False)==_script_ast.dump(
+        _script_ast.parse("raise SystemExit(main())").body[0],include_attributes=False)
+    assert len(_script_entry.body)==1
+    assert _script_tree.body.index(_script_guard)<min(index for index,node in enumerate(_script_tree.body)
+        if isinstance(node,(_script_ast.FunctionDef,_script_ast.ClassDef)))
+    _script_required_helpers=(
+        "_ordinary_bootstrap_request_begin_v1","_ordinary_bootstrap_request_finish_v1",
+        "_ordinary_bootstrap_heap_prepare_request_v1","_ordinary_bootstrap_query_constructor_request_v1",
+        "_ordinary_bootstrap_query_request_v1","_ordinary_bootstrap_event_request_v1",
+        "_ordinary_bootstrap_constructor_request_v1","_ordinary_control_tokenize_request_v1",
+        "_ordinary_control_parse_request_v1","_ordinary_control_compile_request_v1",
         "_ordinary_bootstrap_request_fail_v1")
-    _script_definitions = {node.name: node for node in _script_tree.body if isinstance(node, _script_ast.FunctionDef)}
-    assert all(name in _script_definitions and _script_definitions[name].end_lineno < _script_entry.lineno
+    _script_definitions={node.name:node for node in _script_tree.body if isinstance(node,_script_ast.FunctionDef)}
+    assert all(name in _script_definitions and _script_definitions[name].end_lineno<_script_entry.lineno
         for name in _script_required_helpers)
-    assert all(node.end_lineno < _script_entry.lineno for node in _script_tree.body
-        if isinstance(node, (_script_ast.FunctionDef, _script_ast.ClassDef)))
-    _script_guard_code = compile(_script_ast.Module(body=[_script_flags[0], _script_guard], type_ignores=[]),
-        "<actual-runner-entry-guard>", "exec", dont_inherit=True)
-    _script_entry_code = compile(_script_ast.Module(body=[_script_entry], type_ignores=[]),
-        "<actual-runner-entry-call>", "exec", dont_inherit=True)
-    _script_boot = sys.modules["_frozen_importlib"]
-    _script_external = sys.modules["_frozen_importlib_external"]
+    assert all(node.end_lineno<_script_entry.lineno for node in _script_tree.body
+        if isinstance(node,(_script_ast.FunctionDef,_script_ast.ClassDef)))
+    _script_guard_code=compile(_script_ast.Module(body=[_script_flags[0],_script_guard],type_ignores=[]),
+        "<actual-runner-entry-guard>","exec",dont_inherit=True)
+    _script_entry_code=compile(_script_ast.Module(body=[_script_entry],type_ignores=[]),
+        "<actual-runner-entry-call>","exec",dont_inherit=True)
+    _script_boot=sys.modules["_frozen_importlib"]
+    _script_external=sys.modules["_frozen_importlib_external"]
 
     def _script_module_case(defect):
-        _normal = defect == "ordinary-import"
-        _sys = _script_types.ModuleType("sys")
-        _package = _script_types.ModuleType("tools")
-        _module = _script_types.ModuleType("tools.run_validation_gates" if _normal else "__main__")
-        _spec = _script_boot.__dict__["ModuleSpec"].__new__(_script_boot.__dict__["ModuleSpec"])
-        _path = _script_external.__dict__["_NamespacePath"].__new__(_script_external.__dict__["_NamespacePath"])
-        _loader = _script_external.__dict__["NamespaceLoader"].__new__(_script_external.__dict__["NamespaceLoader"])
-        _path.__dict__.update(_name="tools", _path=[str(fixture_repo / "tools")])
-        _loader.__dict__["_path"] = _path
-        _spec.__dict__.update(name="tools", origin=None, loader=_loader, submodule_search_locations=_path)
-        _package.__dict__.update(__file__=None, __spec__=_spec, __path__=_path, __loader__=_loader)
-        _sys.modules = {"__main__": _script_types.ModuleType("unrelated-main") if _normal else _module,
-            "tools": _package, "_frozen_importlib": _script_boot, "_frozen_importlib_external": _script_external}
-        _sys.argv = [str(fixture_repo / "tools/run_validation_gates.py"), "--phase", "fast-preflight"]
-        _sys.orig_argv = [sys.executable, "-I", "-B", "-X", "utf8", *_sys.argv]
-        _imports, _callbacks, _main_calls = [], [], []
+        _normal=defect=="ordinary-import"
+        _sys=_script_types.ModuleType("sys")
+        _package=_script_types.ModuleType("tools")
+        _module=_script_types.ModuleType("tools.run_validation_gates" if _normal else "__main__")
+        _spec=_script_boot.__dict__["ModuleSpec"].__new__(_script_boot.__dict__["ModuleSpec"])
+        _path=_script_external.__dict__["_NamespacePath"].__new__(_script_external.__dict__["_NamespacePath"])
+        _loader=_script_external.__dict__["NamespaceLoader"].__new__(_script_external.__dict__["NamespaceLoader"])
+        _path.__dict__.update(_name="tools",_path=[str(fixture_repo/"tools")])
+        _loader.__dict__["_path"]=_path
+        _spec.__dict__.update(name="tools",origin=None,loader=_loader,submodule_search_locations=_path)
+        _package.__dict__.update(__file__=None,__spec__=_spec,__path__=_path,__loader__=_loader)
+        _sys.modules={"__main__":_script_types.ModuleType("unrelated-main")if _normal else _module,
+            "tools":_package,"_frozen_importlib":_script_boot,"_frozen_importlib_external":_script_external}
+        _sys.argv=[str(fixture_repo/"tools/run_validation_gates.py"),"--phase","fast-preflight"]
+        _sys.orig_argv=[sys.executable,"-I","-B","-X","utf8",*_sys.argv]
+        _imports,_callbacks,_main_calls=[],[],[]
         class _ForeignSpec:
             @property
             def _initializing(self):
                 _callbacks.append("foreign cached spec")
                 raise AssertionError("cached foreign package callback ran")
-        if defect in ("ordinary-import", "same-cache-and-parent"):
-            _sys.modules["tools.run_validation_gates"] = _module
-            _package.__dict__["run_validation_gates"] = _module
-        elif defect == "fresh-package":
+        if defect in("ordinary-import","same-cache-and-parent"):
+            _sys.modules["tools.run_validation_gates"]=_module
+            _package.__dict__["run_validation_gates"]=_module
+        elif defect=="fresh-package":
             _sys.modules.pop("tools")
-        elif defect == "foreign-runner-cache":
-            _sys.modules["tools.run_validation_gates"] = _script_types.ModuleType("tools.run_validation_gates")
-        elif defect == "null-runner-cache":
-            _sys.modules["tools.run_validation_gates"] = None
-        elif defect == "foreign-main-owner":
-            _sys.modules["__main__"] = _script_types.ModuleType("__main__")
-        elif defect == "foreign-tools-owner":
-            _sys.modules["tools"] = _script_types.ModuleType("foreign-tools")
-        elif defect == "null-tools-owner":
-            _sys.modules["tools"] = None
-        elif defect == "foreign-parent-child":
-            _package.__dict__["run_validation_gates"] = _script_types.ModuleType("tools.run_validation_gates")
-        elif defect == "null-parent-child":
-            _package.__dict__["run_validation_gates"] = None
-        elif defect == "foreign-root":
-            _path.__dict__["_path"] = [str(fixture_repo / "foreign-tools")]
-        elif defect == "additional-root":
-            _path.__dict__["_path"].append(str(fixture_repo / "foreign-tools"))
-        elif defect == "cached-spec-callback":
-            _package.__dict__["__spec__"] = _ForeignSpec()
+        elif defect=="foreign-runner-cache":
+            _sys.modules["tools.run_validation_gates"]=_script_types.ModuleType("tools.run_validation_gates")
+        elif defect=="null-runner-cache":
+            _sys.modules["tools.run_validation_gates"]=None
+        elif defect=="foreign-main-owner":
+            _sys.modules["__main__"]=_script_types.ModuleType("__main__")
+        elif defect=="foreign-tools-owner":
+            _sys.modules["tools"]=_script_types.ModuleType("foreign-tools")
+        elif defect=="null-tools-owner":
+            _sys.modules["tools"]=None
+        elif defect=="foreign-parent-child":
+            _package.__dict__["run_validation_gates"]=_script_types.ModuleType("tools.run_validation_gates")
+        elif defect=="null-parent-child":
+            _package.__dict__["run_validation_gates"]=None
+        elif defect=="foreign-root":
+            _path.__dict__["_path"]=[str(fixture_repo/"foreign-tools")]
+        elif defect=="additional-root":
+            _path.__dict__["_path"].append(str(fixture_repo/"foreign-tools"))
+        elif defect=="cached-spec-callback":
+            _package.__dict__["__spec__"]=_ForeignSpec()
 
-        def _only_original_namespace_import(name, globals=None, locals=None, fromlist=(), level=0):
-            _imports.append((name, tuple(fromlist or ()), level))
-            assert name == "tools" and not fromlist and level == 0
+        def _only_original_namespace_import(name,globals=None,locals=None,fromlist=(),level=0):
+            _imports.append((name,tuple(fromlist or()),level))
+            assert name=="tools" and not fromlist and level==0
             # Match the pinned cached import fast path so an unconditional
             # import of the fault package cannot silently bypass this oracle.
             if "tools" in _sys.modules:
-                getattr(_sys.modules["tools"].__dict__.get("__spec__"), "_initializing", False)
+                getattr(_sys.modules["tools"].__dict__.get("__spec__"),"_initializing",False)
             else:
-                _sys.modules["tools"] = _package
+                _sys.modules["tools"]=_package
             return _package
         import builtins as _script_builtins
-        _builtins = dict(_script_builtins.__dict__)
-        _builtins["__import__"] = _only_original_namespace_import
-        _namespace = _module.__dict__
-        _namespace.update(sys=_sys, REPO_ROOT=fixture_repo, __builtins__=_builtins)
-        _modules_before, _package_before = dict(_sys.modules), dict(_package.__dict__)
-        _name_before = _namespace["__name__"]
-        _argv_before, _orig_argv_before = list(_sys.argv), list(_sys.orig_argv)
-        _positive = defect in ("ordinary-import", "script-owner", "fresh-package", "same-cache-and-parent")
+        _builtins=dict(_script_builtins.__dict__)
+        _builtins["__import__"]=_only_original_namespace_import
+        _namespace=_module.__dict__
+        _namespace.update(sys=_sys,REPO_ROOT=fixture_repo,__builtins__=_builtins)
+        _modules_before,_package_before=dict(_sys.modules),dict(_package.__dict__)
+        _name_before=_namespace["__name__"]
+        _argv_before,_orig_argv_before=list(_sys.argv),list(_sys.orig_argv)
+        _positive=defect in("ordinary-import","script-owner","fresh-package","same-cache-and-parent")
         if not _positive:
             with pytest.raises(RuntimeError):
-                exec(_script_guard_code, _namespace, _namespace)
-            assert _sys.modules == _modules_before and _package.__dict__ == _package_before
-            assert _namespace["__name__"] == _name_before and not _callbacks and not _imports
+                exec(_script_guard_code,_namespace,_namespace)
+            assert _sys.modules==_modules_before and _package.__dict__==_package_before
+            assert _namespace["__name__"]==_name_before and not _callbacks and not _imports
         else:
-            exec(_script_guard_code, _namespace, _namespace)
+            exec(_script_guard_code,_namespace,_namespace)
             if _normal:
-                assert _sys.modules == _modules_before and _package.__dict__ == _package_before
-                assert _namespace["__name__"] == "tools.run_validation_gates"
-                assert _namespace["_ORDINARY_ORIGINAL_SCRIPT_ENTRY_V1"] is False and not _imports
+                assert _sys.modules==_modules_before and _package.__dict__==_package_before
+                assert _namespace["__name__"]=="tools.run_validation_gates"
+                assert _namespace["_ORDINARY_ORIGINAL_SCRIPT_ENTRY_V1"]is False and not _imports
             else:
-                assert _sys.modules["__main__"] is _sys.modules["tools.run_validation_gates"] is _module
-                assert _package.__dict__["run_validation_gates"] is _module
-                assert _namespace["__name__"] == "tools.run_validation_gates"
-                assert _namespace["_ORDINARY_ORIGINAL_SCRIPT_ENTRY_V1"] is True
-                assert _imports == ([("tools", (), 0)] if defect == "fresh-package" else [])
+                assert _sys.modules["__main__"]is _sys.modules["tools.run_validation_gates"]is _module
+                assert _package.__dict__["run_validation_gates"]is _module
+                assert _namespace["__name__"]=="tools.run_validation_gates"
+                assert _namespace["_ORDINARY_ORIGINAL_SCRIPT_ENTRY_V1"]is True
+                assert _imports==([("tools",(),0)]if defect=="fresh-package" else[])
             # A separately literal declaration checks Python's actual emitted
             # function module/global ownership after this actual source guard.
-            exec(compile("def owned_delegate():\n    return __name__\n", "<literal-module-declaration>", "exec"),
-                _namespace, _namespace)
-            _delegate = _namespace["owned_delegate"]
-            assert _delegate.__globals__ is _module.__dict__ and _delegate.__module__ == "tools.run_validation_gates"
-            assert _delegate() == "tools.run_validation_gates" and _sys.modules[_delegate.__module__] is _module
+            exec(compile("def owned_delegate():\n    return __name__\n","<literal-module-declaration>","exec"),
+                _namespace,_namespace)
+            _delegate=_namespace["owned_delegate"]
+            assert _delegate.__globals__ is _module.__dict__ and _delegate.__module__=="tools.run_validation_gates"
+            assert _delegate()=="tools.run_validation_gates" and _sys.modules[_delegate.__module__]is _module
             for name in _script_required_helpers:
-                _namespace[name] = object()
+                _namespace[name]=object()
             def _same_main():
                 _main_calls.append(_module)
                 assert all(name in _namespace for name in _script_required_helpers)
                 return 0
-            _namespace["main"] = _same_main
+            _namespace["main"]=_same_main
             if _normal:
-                exec(_script_entry_code, _namespace, _namespace)
+                exec(_script_entry_code,_namespace,_namespace)
                 assert not _main_calls
             else:
-                with pytest.raises(SystemExit) as _exit:
-                    exec(_script_entry_code, _namespace, _namespace)
-                assert _exit.value.code == 0 and _main_calls == [_module]
-        assert _sys.argv == _argv_before and _sys.orig_argv == _orig_argv_before
+                with pytest.raises(SystemExit)as _exit:
+                    exec(_script_entry_code,_namespace,_namespace)
+                assert _exit.value.code==0 and _main_calls==[_module]
+        assert _sys.argv==_argv_before and _sys.orig_argv==_orig_argv_before
         assert not _callbacks
 
-    for _script_case in ("ordinary-import", "script-owner", "fresh-package", "same-cache-and-parent",
-        "foreign-runner-cache", "null-runner-cache", "foreign-main-owner", "foreign-tools-owner",
-        "null-tools-owner", "foreign-parent-child", "null-parent-child", "foreign-root",
-        "additional-root", "cached-spec-callback"):
+    for _script_case in("ordinary-import","script-owner","fresh-package","same-cache-and-parent",
+        "foreign-runner-cache","null-runner-cache","foreign-main-owner","foreign-tools-owner",
+        "null-tools-owner","foreign-parent-child","null-parent-child","foreign-root",
+        "additional-root","cached-spec-callback"):
         _script_module_case(_script_case)
 
     # These prerequisite ports are explicit no-child/no-native fixture oracles.
@@ -1832,219 +1832,219 @@ def test_run_validation_gates_direct_script_imports_router_without_pythonpath(
     # subjects; supplied fixture cutoffs do not qualify receiver provenance.
     from types import ModuleType as _PrefixModule
 
-    def _prefix_fixture(*, calls=20, raw=32, origin=True):
-        value = dict(owner=(os.getpid(), reliability.threading.get_ident()),
-            errors=[], current_native_observation=None,
-            preloader_source_anchor=tuple(object() for _ in range(16)))
-        source, native, startup = {}, {}, {}
-        request = dict(source_generation=source, origin_ns=1 if origin else None,
-            deadline_ns=3720 * 10**9 + 1 if origin else None)
+    def _prefix_fixture(*,calls=20,raw=32,origin=True):
+        value=dict(owner=(os.getpid(),reliability.threading.get_ident()),
+            errors=[],current_native_observation=None,
+            preloader_source_anchor=tuple(object()for _ in range(16)))
+        source,native,startup={},{},{}
+        request=dict(source_generation=source,origin_ns=1 if origin else None,
+            deadline_ns=3720*10**9+1 if origin else None)
         def fixture_emitter():
             raise AssertionError("fixture emitter is never an operational issuer")
-        profile = (value, source, native, startup, "fast-preflight", request,
-            None, (), calls + 4, raw + 16, fixture_emitter, fixture_emitter.__code__)
-        limits = dict(work_calls=calls, work_bytes=raw, settlement_calls=4,
-            settlement_bytes=16, work_loops=8, settlement_loops=2)
-        counters = {name: 0 for name in limits}
-        value.update(initial_source_request=profile, early_profile=profile,
-            early_allocation_original=(value, profile, limits, counters),
-            original_origin_request=request, original_origin_ns=request["origin_ns"],
-            original_execution_cutoff_ns=3600 * 10**9 + 1 if origin else None,
+        profile=(value,source,native,startup,"fast-preflight",request,
+            None,(),calls+4,raw+16,fixture_emitter,fixture_emitter.__code__)
+        limits=dict(work_calls=calls,work_bytes=raw,settlement_calls=4,
+            settlement_bytes=16,work_loops=8,settlement_loops=2)
+        counters={name:0 for name in limits}
+        value.update(initial_source_request=profile,early_profile=profile,
+            early_allocation_original=(value,profile,limits,counters),
+            original_origin_request=request,original_origin_ns=request["origin_ns"],
+            original_execution_cutoff_ns=3600*10**9+1 if origin else None,
             original_settlement_cutoff_ns=request["deadline_ns"])
         return value
 
     # This prerequisite port supplies no COMMON or Linux admission. The
     # original prefix/counter/cutoff bodies below remain the no-child subjects;
     # the actual Source9 checker is exercised separately from literal fixtures.
-    _common_prerequisite_calls = []
-    def _fixture_common_source_prerequisite(value, profile, allocation):
-        assert profile is value["initial_source_request"] is value["early_profile"]
+    _common_prerequisite_calls=[]
+    def _fixture_common_source_prerequisite(value,profile,allocation):
+        assert profile is value["initial_source_request"]is value["early_profile"]
         assert allocation is value["early_allocation_original"]
-        assert allocation[0] is value and allocation[1] is profile
-        assert profile[6] is None
-        _common_prerequisite_calls.append((value, profile, allocation))
+        assert allocation[0]is value and allocation[1]is profile
+        assert profile[6]is None
+        _common_prerequisite_calls.append((value,profile,allocation))
         return None
 
-    _prefix_preloader_checks = []
+    _prefix_preloader_checks=[]
     def _fixture_preloader_return(value):
-        assert value["current_native_observation"] is None and not value["errors"]
-        assert value["initial_source_request"][0] is value
-        assert value["initial_source_request"][6] is None
+        assert value["current_native_observation"]is None and not value["errors"]
+        assert value["initial_source_request"][0]is value
+        assert value["initial_source_request"][6]is None
         _prefix_preloader_checks.append(value)
         return value["initial_source_request"]
 
-    with monkeypatch.context() as _prefix_ports:
-        _prefix_ports.setattr(ci_branch_context, "_ordinary_ci_initial_common_source_check_v1",
+    with monkeypatch.context()as _prefix_ports:
+        _prefix_ports.setattr(ci_branch_context,"_ordinary_ci_initial_common_source_check_v1",
             _fixture_common_source_prerequisite)
-        _prefix_ports.setattr(reliability, "_ordinary_initial_preloader_return_check_v1",
+        _prefix_ports.setattr(reliability,"_ordinary_initial_preloader_return_check_v1",
             _fixture_preloader_return)
-        _prefix_ports.setattr(reliability.time, "monotonic_ns", lambda: 2)
-        _prefix = _prefix_fixture()
-        _record = reliability._ordinary_initial_prefix_v1(_prefix)
-        _operations, _errors = _record["operations"], _record["errors"]
-        assert _prefix["current_native_observation"] is None
-        reliability._ordinary_initial_native_debit_v1(_prefix, "FIXTURE_PAIR_READ_ATTEMPT")
-        reliability._ordinary_initial_native_debit_v1(_prefix, "FIXTURE_PAIR_RETURNED",
-            raw=b"A\0\xffB", request_bytes=4)
-        assert _record["operation_calls"] == 1 and _record["returned_bytes"] == 4
-        assert _prefix["early_allocation_original"][3]["work_bytes"] == 4
-        assert reliability._ordinary_initial_native_quantum_v1(_prefix, 65536) == 28
-        assert _record["last_supervised_returned"] == b"A\0\xffB"
-        _fake_native, _operands, _operand_original = object(), {}, ()
-        _prefix.update(native_instance=_fake_native, native_init_returned=True,
-            initial_operands=_operands, initial_operands_original=_operand_original)
-        _joined = reliability._ordinary_initial_physical_prefix_v1(_fake_native, _prefix,
-            _prefix["early_profile"], _operands, _operand_original)
-        assert _joined is _record and _joined["operations"] is _operations and _joined["errors"] is _errors
-        assert _joined["operation_calls"] == 1 and _joined["returned_bytes"] == 4
-        assert _joined["complete"] is False and _joined["pending"] is False
-        assert reliability._ordinary_initial_prefix_v1(_prefix) is _record
-        assert _prefix_preloader_checks == [_prefix]
-        with pytest.raises(reliability.ValidationReliabilityError, match="ONE_REAL_PHYSICAL_PREFIX_JOIN"):
-            reliability._ordinary_initial_physical_prefix_v1(_fake_native, _prefix,
-                _prefix["early_profile"], _operands, _operand_original)
+        _prefix_ports.setattr(reliability.time,"monotonic_ns",lambda:2)
+        _prefix=_prefix_fixture()
+        _record=reliability._ordinary_initial_prefix_v1(_prefix)
+        _operations,_errors=_record["operations"],_record["errors"]
+        assert _prefix["current_native_observation"]is None
+        reliability._ordinary_initial_native_debit_v1(_prefix,"FIXTURE_PAIR_READ_ATTEMPT")
+        reliability._ordinary_initial_native_debit_v1(_prefix,"FIXTURE_PAIR_RETURNED",
+            raw=b"A\0\xffB",request_bytes=4)
+        assert _record["operation_calls"]==1 and _record["returned_bytes"]==4
+        assert _prefix["early_allocation_original"][3]["work_bytes"]==4
+        assert reliability._ordinary_initial_native_quantum_v1(_prefix,65536)==28
+        assert _record["last_supervised_returned"]==b"A\0\xffB"
+        _fake_native,_operands,_operand_original=object(),{},()
+        _prefix.update(native_instance=_fake_native,native_init_returned=True,
+            initial_operands=_operands,initial_operands_original=_operand_original)
+        _joined=reliability._ordinary_initial_physical_prefix_v1(_fake_native,_prefix,
+            _prefix["early_profile"],_operands,_operand_original)
+        assert _joined is _record and _joined["operations"]is _operations and _joined["errors"]is _errors
+        assert _joined["operation_calls"]==1 and _joined["returned_bytes"]==4
+        assert _joined["complete"]is False and _joined["pending"]is False
+        assert reliability._ordinary_initial_prefix_v1(_prefix)is _record
+        assert _prefix_preloader_checks==[_prefix]
+        with pytest.raises(reliability.ValidationReliabilityError,match="ONE_REAL_PHYSICAL_PREFIX_JOIN"):
+            reliability._ordinary_initial_physical_prefix_v1(_fake_native,_prefix,
+                _prefix["early_profile"],_operands,_operand_original)
 
         # Missing authentic original time remains a hard rejection before the
         # hypothetical operation. The failed attempted prefix is not refunded.
-        _missing = _prefix_fixture(origin=False)
-        _would_run = []
+        _missing=_prefix_fixture(origin=False)
+        _would_run=[]
         with pytest.raises(reliability.ValidationReliabilityError,
-            match="GENUINE_SEPARATE_CUTOFFS") as _missing_error:
-            reliability._ordinary_initial_native_debit_v1(_missing, "FIXTURE_MISSING_ORIGIN")
+            match="GENUINE_SEPARATE_CUTOFFS")as _missing_error:
+            reliability._ordinary_initial_native_debit_v1(_missing,"FIXTURE_MISSING_ORIGIN")
             _would_run.append("operation")
         _missing["errors"].append(_missing_error.value)
-        assert not _would_run and _missing["current_native_observation"] is None
-        assert _missing["initial_source_request"][6] is None
-        assert _missing["initial_prefix"]["operations"] == ["FIXTURE_MISSING_ORIGIN"]
-        assert _missing["early_allocation_original"][3]["work_calls"] == 1
+        assert not _would_run and _missing["current_native_observation"]is None
+        assert _missing["initial_source_request"][6]is None
+        assert _missing["initial_prefix"]["operations"]==["FIXTURE_MISSING_ORIGIN"]
+        assert _missing["early_allocation_original"][3]["work_calls"]==1
 
-        _limited = _prefix_fixture(calls=1, raw=4)
-        reliability._ordinary_initial_native_debit_v1(_limited, "FIXTURE_FIRST")
+        _limited=_prefix_fixture(calls=1,raw=4)
+        reliability._ordinary_initial_native_debit_v1(_limited,"FIXTURE_FIRST")
         with pytest.raises(reliability.ValidationReliabilityError,
-            match="PROSPECTIVE_NATIVE_CALL_ALLOCATION") as _limited_error:
-            reliability._ordinary_initial_native_debit_v1(_limited, "FIXTURE_REJECTED_SECOND")
+            match="PROSPECTIVE_NATIVE_CALL_ALLOCATION")as _limited_error:
+            reliability._ordinary_initial_native_debit_v1(_limited,"FIXTURE_REJECTED_SECOND")
         _limited["errors"].append(_limited_error.value)
-        _held_prefix = _limited["initial_prefix"]
-        reliability._ordinary_initial_native_debit_v1(_limited, "FIXTURE_RETAINED_SETTLEMENT", settling=True)
-        assert _held_prefix is _limited["initial_prefix"] and _held_prefix["operation_calls"] == 3
-        assert _held_prefix["errors"] == [_limited_error.value]
-        assert _limited["early_allocation_original"][3]["work_calls"] == 2
-        assert _limited["early_allocation_original"][3]["settlement_calls"] == 1
-        assert _held_prefix["operations"] == ["FIXTURE_FIRST", "FIXTURE_REJECTED_SECOND", "FIXTURE_RETAINED_SETTLEMENT"]
+        _held_prefix=_limited["initial_prefix"]
+        reliability._ordinary_initial_native_debit_v1(_limited,"FIXTURE_RETAINED_SETTLEMENT",settling=True)
+        assert _held_prefix is _limited["initial_prefix"]and _held_prefix["operation_calls"]==3
+        assert _held_prefix["errors"]==[_limited_error.value]
+        assert _limited["early_allocation_original"][3]["work_calls"]==2
+        assert _limited["early_allocation_original"][3]["settlement_calls"]==1
+        assert _held_prefix["operations"]==["FIXTURE_FIRST","FIXTURE_REJECTED_SECOND","FIXTURE_RETAINED_SETTLEMENT"]
 
-        _late = _prefix_fixture()
-        with monkeypatch.context() as _late_clock:
-            _late_clock.setattr(reliability.time, "monotonic_ns", lambda: _late["original_execution_cutoff_ns"])
+        _late=_prefix_fixture()
+        with monkeypatch.context()as _late_clock:
+            _late_clock.setattr(reliability.time,"monotonic_ns",lambda:_late["original_execution_cutoff_ns"])
             with pytest.raises(reliability.ValidationReliabilityError,
-                match="WORK_OR_SETTLEMENT_CUTOFF") as _late_error:
-                reliability._ordinary_initial_native_debit_v1(_late, "FIXTURE_EXPIRED_WORK")
+                match="WORK_OR_SETTLEMENT_CUTOFF")as _late_error:
+                reliability._ordinary_initial_native_debit_v1(_late,"FIXTURE_EXPIRED_WORK")
             _late["errors"].append(_late_error.value)
-            reliability._ordinary_initial_native_debit_v1(_late, "FIXTURE_WITHIN_ORIGINAL_SETTLEMENT", settling=True)
-        assert _late["initial_prefix"]["operation_calls"] == 2
-        assert _late["initial_prefix"]["errors"] == [_late_error.value]
+            reliability._ordinary_initial_native_debit_v1(_late,"FIXTURE_WITHIN_ORIGINAL_SETTLEMENT",settling=True)
+        assert _late["initial_prefix"]["operation_calls"]==2
+        assert _late["initial_prefix"]["errors"]==[_late_error.value]
 
         # Frozen original values prohibit redistributing an issued work
         # pool into settlement, even while combined Source totals stay equal.
-        for _pool_kind in ("calls", "bytes"):
-            _redistributed = _prefix_fixture()
-            _frozen_prefix = reliability._ordinary_initial_prefix_v1(_redistributed)
-            _six_limits = _redistributed["early_allocation_original"][2]
-            _six_limits["work_" + _pool_kind] -= 1
-            _six_limits["settlement_" + _pool_kind] += 1
+        for _pool_kind in("calls","bytes"):
+            _redistributed=_prefix_fixture()
+            _frozen_prefix=reliability._ordinary_initial_prefix_v1(_redistributed)
+            _six_limits=_redistributed["early_allocation_original"][2]
+            _six_limits["work_"+_pool_kind]-=1
+            _six_limits["settlement_"+_pool_kind]+=1
             with pytest.raises(reliability.ValidationReliabilityError,
                 match="SAME_SOURCE_PREFIX_AND_CONTINUOUS_DEBT"):
-                reliability._ordinary_initial_native_debit_v1(_redistributed, "FIXTURE_MUTATED_POOL")
-            assert _frozen_prefix["operation_calls"] == _frozen_prefix["returned_bytes"] == 0
-            assert not _frozen_prefix["operations"] and not _redistributed["errors"]
+                reliability._ordinary_initial_native_debit_v1(_redistributed,"FIXTURE_MUTATED_POOL")
+            assert _frozen_prefix["operation_calls"]==_frozen_prefix["returned_bytes"]==0
+            assert not _frozen_prefix["operations"]and not _redistributed["errors"]
 
         def _fixture_ctypes(record=None):
-            module = _PrefixModule("ctypes")
-            primitives = []
-            for name in ("c_void_p", "c_int", "c_size_t", "c_ssize_t", "c_char_p", "c_ulong"):
-                setattr(module, name, object())
-            library = SimpleNamespace(**{name: SimpleNamespace() for name in (
-                "flistxattr", "fgetxattr", "fremovexattr", "ioctl")})
-            def reached(name, debit):
+            module=_PrefixModule("ctypes")
+            primitives=[]
+            for name in("c_void_p","c_int","c_size_t","c_ssize_t","c_char_p","c_ulong"):
+                setattr(module,name,object())
+            library=SimpleNamespace(**{name:SimpleNamespace()for name in(
+                "flistxattr","fgetxattr","fremovexattr","ioctl")})
+            def reached(name,debit):
                 if record is not None:
-                    assert record["operation_calls"] == debit
-                    assert record["operations"][-1] == "INITIAL_NATIVE_CONSTRUCTOR_CALL"
+                    assert record["operation_calls"]==debit
+                    assert record["operations"][-1]=="INITIAL_NATIVE_CONSTRUCTOR_CALL"
                 primitives.append(name)
             def sizeof(value):
                 reached("sizeof-pointer" if value is module.c_void_p else "sizeof-int",
                     2 if value is module.c_void_p else 3)
                 return 8 if value is module.c_void_p else 4
             def uname():
-                reached("uname", 4)
+                reached("uname",4)
                 return SimpleNamespace(machine="x86_64")
-            def load(name, *, use_errno):
+            def load(name,*,use_errno):
                 assert name is None and use_errno is True
-                reached("CDLL", 5)
+                reached("CDLL",5)
                 return library
             def pointer(value):
                 assert value is module.c_int
-                reached("POINTER", 6)
+                reached("POINTER",6)
                 return object()
-            module.sizeof, module.CDLL, module.POINTER = sizeof, load, pointer
-            return module, uname, primitives
+            module.sizeof,module.CDLL,module.POINTER=sizeof,load,pointer
+            return module,uname,primitives
 
         # These scalar/loader ports create no library or child. Every reached
         # actual private constructor callback must debit before its primitive.
-        for _call_limit in (20, 3):
-            _ctor = _prefix_fixture(calls=_call_limit)
-            _native = object.__new__(reliability._LinuxSourceNativeV2)
-            _ctor.update(native_instance=_native, native_init_attempted=False,
+        for _call_limit in(20,3):
+            _ctor=_prefix_fixture(calls=_call_limit)
+            _native=object.__new__(reliability._LinuxSourceNativeV2)
+            _ctor.update(native_instance=_native,native_init_attempted=False,
                 native_init_returned=False)
-            _ctor["native_init_original"] = (_ctor, _native,
-                reliability._LinuxSourceNativeV2.__init__, reliability._LinuxSourceNativeV2.__init__.__code__)
-            _ctor_record = reliability._ordinary_initial_prefix_v1(_ctor)
-            _ctypes, _uname, _reached = _fixture_ctypes(_ctor_record)
-            with monkeypatch.context() as _ctor_ports:
-                _ctor_ports.setitem(sys.modules, "ctypes", _ctypes)
-                _ctor_ports.setattr(reliability.sys, "platform", "linux")
-                _ctor_ports.setattr(reliability.os, "uname", _uname, raising=False)
-                if _call_limit == 20:
-                    assert reliability._ordinary_initial_native_initialize_v1(_ctor) is _native
-                    assert _ctor["native_init_attempted"] is True and _ctor["native_init_returned"] is True
-                    assert _ctor_record["operation_calls"] == 6 and not _ctor["errors"]
-                    assert _reached == ["sizeof-pointer", "sizeof-int", "uname", "CDLL", "POINTER"]
+            _ctor["native_init_original"]=(_ctor,_native,
+                reliability._LinuxSourceNativeV2.__init__,reliability._LinuxSourceNativeV2.__init__.__code__)
+            _ctor_record=reliability._ordinary_initial_prefix_v1(_ctor)
+            _ctypes,_uname,_reached=_fixture_ctypes(_ctor_record)
+            with monkeypatch.context()as _ctor_ports:
+                _ctor_ports.setitem(sys.modules,"ctypes",_ctypes)
+                _ctor_ports.setattr(reliability.sys,"platform","linux")
+                _ctor_ports.setattr(reliability.os,"uname",_uname,raising=False)
+                if _call_limit==20:
+                    assert reliability._ordinary_initial_native_initialize_v1(_ctor)is _native
+                    assert _ctor["native_init_attempted"]is True and _ctor["native_init_returned"]is True
+                    assert _ctor_record["operation_calls"]==6 and not _ctor["errors"]
+                    assert _reached==["sizeof-pointer","sizeof-int","uname","CDLL","POINTER"]
                 else:
                     with pytest.raises(reliability.ValidationReliabilityError,
-                        match="PROSPECTIVE_NATIVE_CALL_ALLOCATION") as _ctor_error:
+                        match="PROSPECTIVE_NATIVE_CALL_ALLOCATION")as _ctor_error:
                         reliability._ordinary_initial_native_initialize_v1(_ctor)
-                    assert _ctor["native_init_attempted"] is True and _ctor["native_init_returned"] is False
-                    assert _ctor["native_instance"] is _native and _ctor["errors"] == [_ctor_error.value]
-                    assert _ctor_record["operation_calls"] == 4 and _reached == ["sizeof-pointer", "sizeof-int"]
-                    reliability._ordinary_initial_native_debit_v1(_ctor, "FIXTURE_CTOR_SETTLEMENT", settling=True)
-                    assert _ctor_record["operation_calls"] == 5
-            assert _ctor["current_native_observation"] is None
+                    assert _ctor["native_init_attempted"]is True and _ctor["native_init_returned"]is False
+                    assert _ctor["native_instance"]is _native and _ctor["errors"]==[_ctor_error.value]
+                    assert _ctor_record["operation_calls"]==4 and _reached==["sizeof-pointer","sizeof-int"]
+                    reliability._ordinary_initial_native_debit_v1(_ctor,"FIXTURE_CTOR_SETTLEMENT",settling=True)
+                    assert _ctor_record["operation_calls"]==5
+            assert _ctor["current_native_observation"]is None
 
         # Existing other callback and None constructor contracts retain their
         # exact behavior; an arbitrary callback cannot grant a Windows ABI.
-        _other_callbacks = []
+        _other_callbacks=[]
         def _ordinary_callback():
             _other_callbacks.append("called")
-        _ctypes, _uname, _reached = _fixture_ctypes()
-        with monkeypatch.context() as _compat_ports:
-            _compat_ports.setitem(sys.modules, "ctypes", _ctypes)
-            _compat_ports.setattr(reliability.os, "uname", _uname, raising=False)
-            _compat_ports.setattr(reliability.sys, "platform", "linux")
-            _ordinary = reliability._LinuxSourceNativeV2(attempt=_ordinary_callback)
-            _default = reliability._LinuxSourceNativeV2()
+        _ctypes,_uname,_reached=_fixture_ctypes()
+        with monkeypatch.context()as _compat_ports:
+            _compat_ports.setitem(sys.modules,"ctypes",_ctypes)
+            _compat_ports.setattr(reliability.os,"uname",_uname,raising=False)
+            _compat_ports.setattr(reliability.sys,"platform","linux")
+            _ordinary=reliability._LinuxSourceNativeV2(attempt=_ordinary_callback)
+            _default=reliability._LinuxSourceNativeV2()
             assert _ordinary.attempt is _ordinary_callback and _default.attempt is None
-            assert not _other_callbacks and len(_reached) == 10
+            assert not _other_callbacks and len(_reached)==10
             _reached.clear()
-            _compat_ports.setattr(reliability.sys, "platform", "win32")
-            with pytest.raises(reliability.ValidationReliabilityError, match="LINUX_V2_NATIVE_ABI"):
+            _compat_ports.setattr(reliability.sys,"platform","win32")
+            with pytest.raises(reliability.ValidationReliabilityError,match="LINUX_V2_NATIVE_ABI"):
                 reliability._LinuxSourceNativeV2(attempt=_ordinary_callback)
             assert not _other_callbacks and not _reached
 
     # A literal Source-only runner owner exercises the complete real preloader
     # and object producer with a pending original origin. No physical issuer,
     # NativeV2 object, loader or child is fabricated for this negative case.
-    _literal_runner = _PrefixModule("_qtt_prefix_literal_runner")
-    _literal_runner.REPO_ROOT = runner.REPO_ROOT
-    _literal_runner.__file__ = str(runner.REPO_ROOT / "tools" / "run_validation_gates.py")
-    _literal_source = (
+    _literal_runner=_PrefixModule("_qtt_prefix_literal_runner")
+    _literal_runner.REPO_ROOT=runner.REPO_ROOT
+    _literal_runner.__file__=str(runner.REPO_ROOT/"tools"/"run_validation_gates.py")
+    _literal_source=(
         "def _ordinary_linux_provision_v1():\n"
         "    return None\n"
         "def _ordinary_bootstrap_initial_source_request_v1(native_input, source, native, startup, *, phase):\n"
@@ -2059,408 +2059,408 @@ def test_run_validation_gates_direct_script_imports_router_without_pythonpath(
         "    native_input['original_settlement_cutoff_ns'] = None\n"
         "    return profile\n"
     )
-    _literal_initializer = compile(_literal_source, _literal_runner.__file__, "exec")
-    exec(_literal_initializer, _literal_runner.__dict__, _literal_runner.__dict__)
-    _literal_entry = _literal_runner._ordinary_linux_provision_v1
-    _literal_phase = runner.FAST_PREFLIGHT_PHASE
-    _literal_attempt = dict(owner=(os.getpid(), reliability.threading.get_ident()),
-        phase=_literal_phase, errors=[], native_input=None, native_product=None)
-    _literal_attempt["original"] = (_literal_attempt, _literal_attempt["owner"],
-        _literal_attempt["errors"], _literal_phase, _literal_runner, _literal_runner.__dict__,
-        _literal_initializer, _literal_entry, _literal_entry.__code__)
-    _literal_runner._ORDINARY_BOOTSTRAP_ENTRY_ATTEMPT_V1 = _literal_attempt
-    _literal_runner._ORDINARY_INITIALIZED_MODULE_CODE_V1 = _literal_initializer
-    with monkeypatch.context() as _literal_owner:
-        _literal_owner.setitem(sys.modules, _literal_runner.__name__, _literal_runner)
+    _literal_initializer=compile(_literal_source,_literal_runner.__file__,"exec")
+    exec(_literal_initializer,_literal_runner.__dict__,_literal_runner.__dict__)
+    _literal_entry=_literal_runner._ordinary_linux_provision_v1
+    _literal_phase=runner.FAST_PREFLIGHT_PHASE
+    _literal_attempt=dict(owner=(os.getpid(),reliability.threading.get_ident()),
+        phase=_literal_phase,errors=[],native_input=None,native_product=None)
+    _literal_attempt["original"]=(_literal_attempt,_literal_attempt["owner"],
+        _literal_attempt["errors"],_literal_phase,_literal_runner,_literal_runner.__dict__,
+        _literal_initializer,_literal_entry,_literal_entry.__code__)
+    _literal_runner._ORDINARY_BOOTSTRAP_ENTRY_ATTEMPT_V1=_literal_attempt
+    _literal_runner._ORDINARY_INITIALIZED_MODULE_CODE_V1=_literal_initializer
+    with monkeypatch.context()as _literal_owner:
+        _literal_owner.setitem(sys.modules,_literal_runner.__name__,_literal_runner)
         # This whole-owner negative must never query the actual Linux host.
-        _literal_owner.setattr(reliability.sys, "platform", "win32")
+        _literal_owner.setattr(reliability.sys,"platform","win32")
         with pytest.raises(reliability.ValidationReliabilityError,
-            match="ORIGIN_PREBIND_ORIGINAL_LINUX_OWNER") as _object_denial:
+            match="ORIGIN_PREBIND_ORIGINAL_LINUX_OWNER")as _object_denial:
             reliability._ordinary_initial_native_object_v1(runner=_literal_runner,
-                initializer=_literal_initializer, entry=_literal_entry, phase=_literal_phase,
-                attempt=_literal_attempt, initialize=False)
-    _literal_input = _literal_attempt["native_input"]
-    assert _literal_input["native_instance"] is None and _literal_input["native_init_attempted"] is False
-    assert _literal_input["preloader_source_return"][2]["native_instance"] is None
-    assert _literal_input["initial_source_request"][6] is None
-    assert _literal_input["initial_prefix"]["operations"] == []
-    assert _literal_input["initial_prefix"]["operation_calls"] == 0
-    assert _literal_input["errors"] == [_object_denial.value]
+                initializer=_literal_initializer,entry=_literal_entry,phase=_literal_phase,
+                attempt=_literal_attempt,initialize=False)
+    _literal_input=_literal_attempt["native_input"]
+    assert _literal_input["native_instance"]is None and _literal_input["native_init_attempted"]is False
+    assert _literal_input["preloader_source_return"][2]["native_instance"]is None
+    assert _literal_input["initial_source_request"][6]is None
+    assert _literal_input["initial_prefix"]["operations"]==[]
+    assert _literal_input["initial_prefix"]["operation_calls"]==0
+    assert _literal_input["errors"]==[_object_denial.value]
 
-    _pending = _literal_input["origin_prebind"]
-    _literal_prefix = _literal_input["initial_prefix"]
-    assert _pending["complete"] is False and _pending["active_operation"] is None
-    assert _pending["slots"] == _pending["reads"] == []
-    assert _pending["errors"] is _literal_prefix["errors"] is _literal_input["errors"]
-    assert _pending["operations"] is _literal_prefix["operations"]
-    assert _pending["original"][0] is _pending and len(_pending["original"]) == 16
+    _pending=_literal_input["origin_prebind"]
+    _literal_prefix=_literal_input["initial_prefix"]
+    assert _pending["complete"]is False and _pending["active_operation"]is None
+    assert _pending["slots"]==_pending["reads"]==[]
+    assert _pending["errors"]is _literal_prefix["errors"]is _literal_input["errors"]
+    assert _pending["operations"]is _literal_prefix["operations"]
+    assert _pending["original"][0]is _pending and len(_pending["original"])==16
 
     # These calls deliberately occur outside the frozen producer/helper frame.
     # Retained Function/Code objects come from the real failed owner above;
     # synthetic controls supply no physical-root or process-lifetime credit.
-    _loan_failures = []
-    with monkeypatch.context() as _loan_ports:
-        _loan_ports.setattr(ci_branch_context, "_ordinary_ci_initial_common_source_check_v1",
+    _loan_failures=[]
+    with monkeypatch.context()as _loan_ports:
+        _loan_ports.setattr(ci_branch_context,"_ordinary_ci_initial_common_source_check_v1",
             _fixture_common_source_prerequisite)
-        _loan_ports.setattr(reliability.sys, "platform", "linux")
-        for _label, _producer_fault, _raw_fault in (
-            ("ORIGIN_PREBIND_FOREIGN", False, False),
-            ("ORIGIN_PREBIND_OWNER", True, False),
-            ("ORIGIN_PREBIND_OWNER", False, True),
-            ("ORIGIN_PREBIND_OWNER", False, False),
+        _loan_ports.setattr(reliability.sys,"platform","linux")
+        for _label,_producer_fault,_raw_fault in(
+            ("ORIGIN_PREBIND_FOREIGN",False,False),
+            ("ORIGIN_PREBIND_OWNER",True,False),
+            ("ORIGIN_PREBIND_OWNER",False,True),
+            ("ORIGIN_PREBIND_OWNER",False,False),
         ):
-            _before_calls = _literal_prefix["operation_calls"]
-            _before_bytes = _literal_prefix["returned_bytes"]
-            with monkeypatch.context() as _selected_fault:
-                _selected_fault.setitem(_pending, "active_operation", _label)
+            _before_calls=_literal_prefix["operation_calls"]
+            _before_bytes=_literal_prefix["returned_bytes"]
+            with monkeypatch.context()as _selected_fault:
+                _selected_fault.setitem(_pending,"active_operation",_label)
                 if _producer_fault:
-                    _selected_fault.setitem(_pending, "producer", lambda: None)
-                _expected_error = ("ORIGIN_ONLY_ORIGINAL_NESTED_HELPER"
-                    if _label == "ORIGIN_PREBIND_OWNER" and not _producer_fault and not _raw_fault
+                    _selected_fault.setitem(_pending,"producer",lambda:None)
+                _expected_error=("ORIGIN_ONLY_ORIGINAL_NESTED_HELPER"
+                    if _label=="ORIGIN_PREBIND_OWNER" and not _producer_fault and not _raw_fault
                     else "EXACT_ORIGIN_ONLY_PREBIND_SOURCE_LOAN")
                 with pytest.raises(reliability.ValidationReliabilityError,
-                    match=_expected_error) as _loan_error:
-                    reliability._ordinary_initial_native_debit_v1(_literal_input, _label,
-                        **({"raw": b"X", "request_bytes": 1} if _raw_fault else {}))
+                    match=_expected_error)as _loan_error:
+                    reliability._ordinary_initial_native_debit_v1(_literal_input,_label,
+                        **({"raw":b"X","request_bytes":1}if _raw_fault else{}))
             _loan_failures.append(_loan_error.value)
             _literal_input["errors"].append(_loan_error.value)
-            assert _literal_prefix["operation_calls"] == _before_calls + (0 if _raw_fault else 1)
-            assert _literal_prefix["returned_bytes"] == _before_bytes + (1 if _raw_fault else 0)
-            assert _pending["complete"] is False and not _pending["slots"] and not _pending["reads"]
-        _before_settlement = _literal_input["early_allocation_original"][3]["settlement_calls"]
-        with monkeypatch.context() as _settlement_fault:
-            _settlement_fault.setitem(_pending, "active_operation", "ORIGIN_PREBIND_ONE_CLOSE")
+            assert _literal_prefix["operation_calls"]==_before_calls+(0 if _raw_fault else 1)
+            assert _literal_prefix["returned_bytes"]==_before_bytes+(1 if _raw_fault else 0)
+            assert _pending["complete"]is False and not _pending["slots"]and not _pending["reads"]
+        _before_settlement=_literal_input["early_allocation_original"][3]["settlement_calls"]
+        with monkeypatch.context()as _settlement_fault:
+            _settlement_fault.setitem(_pending,"active_operation","ORIGIN_PREBIND_ONE_CLOSE")
             with pytest.raises(reliability.ValidationReliabilityError,
-                match="ORIGIN_ONLY_ORIGINAL_NESTED_HELPER") as _close_frame_error:
+                match="ORIGIN_ONLY_ORIGINAL_NESTED_HELPER")as _close_frame_error:
                 reliability._ordinary_initial_native_debit_v1(_literal_input,
-                    "ORIGIN_PREBIND_ONE_CLOSE", settling=True)
+                    "ORIGIN_PREBIND_ONE_CLOSE",settling=True)
         _literal_input["errors"].append(_close_frame_error.value)
-        assert _literal_input["early_allocation_original"][3]["settlement_calls"] == _before_settlement + 1
-    assert _literal_prefix["operation_calls"] == 4 and _literal_prefix["returned_bytes"] == 1
-    assert _literal_input["early_allocation_original"][3]["work_calls"] == 3
-    assert _literal_input["early_allocation_original"][3]["work_bytes"] == 1
-    assert _literal_input["errors"] == [_object_denial.value, *_loan_failures, _close_frame_error.value]
-    assert _pending["origin_ns"] is _pending["cutoffs"] is None
+        assert _literal_input["early_allocation_original"][3]["settlement_calls"]==_before_settlement+1
+    assert _literal_prefix["operation_calls"]==4 and _literal_prefix["returned_bytes"]==1
+    assert _literal_input["early_allocation_original"][3]["work_calls"]==3
+    assert _literal_input["early_allocation_original"][3]["work_bytes"]==1
+    assert _literal_input["errors"]==[_object_denial.value,*_loan_failures,_close_frame_error.value]
+    assert _pending["origin_ns"]is _pending["cutoffs"]is None
 
     # The private keeper loan remains Source-bound to the actual CI helper and
     # original REL producer. These explicit no-child faults cannot authenticate
     # an inherited Linux handle or manufacture an origin/lifetime observation.
-    _keeper_helper = ci_branch_context._facet_fn_initial_keeper_observation_loans_v1
-    _keeper_code = ci_branch_context._ORDINARY_INITIALIZED_MODULE_CODE_V1
+    _keeper_helper=ci_branch_context._facet_fn_initial_keeper_observation_loans_v1
+    _keeper_code=ci_branch_context._ORDINARY_INITIALIZED_MODULE_CODE_V1
     assert _keeper_helper.__globals__ is ci_branch_context.__dict__
     assert any(code is _keeper_helper.__code__ for code in _keeper_code.co_consts)
-    _keeper_tree = _script_ast.parse(copied_sources["tools/ci_branch_context.py"])
-    _keeper_nodes = [node for node in _keeper_tree.body if isinstance(node, _script_ast.FunctionDef)
-        and node.name == "_facet_fn_initial_keeper_observation_loans_v1"]
-    assert len(_keeper_nodes) == 1
-    _keeper_source = _script_ast.get_source_segment(
-        copied_sources["tools/ci_branch_context.py"].decode("utf-8"), _keeper_nodes[0])
-    _role_admission = _keeper_source.index("'ORDINARY_INITIAL_KEEPER_LOAN_NO_DUPLICATE_ROLE'")
-    _adoption = _keeper_source.index("value['slots'].append(slot);record['slots'].append(slot)")
-    _noninherit = _keeper_source.index("call('INHERITANCE',_f.os.set_inheritable,descriptor,False)")
-    assert _keeper_source.index("'ORDINARY_INITIAL_KEEPER_LOAN_EXACT_THREE_INHERITED_READONLY_ROLES'") < _role_admission < _adoption < _noninherit
+    _keeper_tree=_script_ast.parse(copied_sources["tools/ci_branch_context.py"])
+    _keeper_nodes=[node for node in _keeper_tree.body if isinstance(node,_script_ast.FunctionDef)
+        and node.name=="_facet_fn_initial_keeper_observation_loans_v1"]
+    assert len(_keeper_nodes)==1
+    _keeper_source=_script_ast.get_source_segment(
+        copied_sources["tools/ci_branch_context.py"].decode("utf-8"),_keeper_nodes[0])
+    _role_admission=_keeper_source.index("'ORDINARY_INITIAL_KEEPER_LOAN_NO_DUPLICATE_ROLE'")
+    _adoption=_keeper_source.index("value['slots'].append(slot);record['slots'].append(slot)")
+    _noninherit=_keeper_source.index("call('INHERITANCE',_f.os.set_inheritable,descriptor,False)")
+    assert _keeper_source.index("'ORDINARY_INITIAL_KEEPER_LOAN_EXACT_THREE_INHERITED_READONLY_ROLES'")<_role_admission<_adoption<_noninherit
     assert "allocation[3]['work_loops']+=1" in _keeper_source and "variable_work_loops" not in _keeper_source
     assert "descriptor not in value['seen_fds']" in _keeper_source
-    assert _keeper_source.index("if _f._same_observed_file(info,named):") < _keeper_source.index("module.ioctl,descriptor,0xb703,0")
+    assert _keeper_source.index("if _f._same_observed_file(info,named):")<_keeper_source.index("module.ioctl,descriptor,0xb703,0")
     assert "'CGROUP_NAMESPACE','MOUNT_NAMESPACE','KEEPER_MAPS'" in _keeper_source
     assert "value['iterator_close_attempted']=True" in _keeper_source and "call('ONE_CLOSE',iterator.close,settling=True)" in _keeper_source
 
-    _keeper_startup_nodes = [node for node in _keeper_tree.body if isinstance(node, _script_ast.FunctionDef)
-        and node.name == "_facet_fn_initial_startup_prebind_v1"]
-    assert len(_keeper_startup_nodes) == 1
-    _keeper_startup_source = _script_ast.get_source_segment(
-        copied_sources["tools/ci_branch_context.py"].decode("utf-8"), _keeper_startup_nodes[0])
+    _keeper_startup_nodes=[node for node in _keeper_tree.body if isinstance(node,_script_ast.FunctionDef)
+        and node.name=="_facet_fn_initial_startup_prebind_v1"]
+    assert len(_keeper_startup_nodes)==1
+    _keeper_startup_source=_script_ast.get_source_segment(
+        copied_sources["tools/ci_branch_context.py"].decode("utf-8"),_keeper_startup_nodes[0])
     assert "for selected_role in('CGROUP_NAMESPACE','MOUNT_NAMESPACE','KEEPER_MAPS'):" in _keeper_startup_source
-    _slot_freeze = _keeper_startup_source.index("'INITIAL_STARTUP_SAME_ORIGINAL_KEEPER_LOAN_SLOT'")
+    _slot_freeze=_keeper_startup_source.index("'INITIAL_STARTUP_SAME_ORIGINAL_KEEPER_LOAN_SLOT'")
     assert "len(slot_original)==10" in _keeper_startup_source and "all(left is right for left,right in zip(slot_original,expected_slot))" in _keeper_startup_source
-    assert _slot_freeze < _keeper_startup_source.index("'INITIAL_STARTUP_KEEPER_LOAN_METADATA'") < _keeper_startup_source.index("'INITIAL_STARTUP_KEEPER_LOAN_READ'")
+    assert _slot_freeze<_keeper_startup_source.index("'INITIAL_STARTUP_KEEPER_LOAN_METADATA'")<_keeper_startup_source.index("'INITIAL_STARTUP_KEEPER_LOAN_READ'")
 
-    _keeper_effects = []
-    def _forbid_keeper_effect(*args, **kwargs):
-        _keeper_effects.append((args, kwargs))
+    _keeper_effects=[]
+    def _forbid_keeper_effect(*args,**kwargs):
+        _keeper_effects.append((args,kwargs))
         pytest.fail("foreign keeper-loan caller reached a native descriptor operation")
-    _keeper_before = dict(_pending)
-    _keeper_debt = (_literal_prefix["operation_calls"], _literal_prefix["returned_bytes"],
-        tuple(_literal_prefix["operations"]), tuple(_literal_prefix["errors"]))
-    with monkeypatch.context() as _keeper_foreign_ports:
-        for _native_name in ("fstat", "stat", "lstat", "scandir", "get_inheritable", "set_inheritable", "lseek", "read", "close"):
-            _keeper_foreign_ports.setattr(reliability.os, _native_name, _forbid_keeper_effect)
-        with pytest.raises(reliability.ValidationReliabilityError, match="KEEPER_LOAN_FIXED_PROVISION_CALLER"):
-            _keeper_helper(_literal_input, _pending, object(), object())
-    assert _keeper_effects == [] and _pending == _keeper_before and "keeper_observation_loans" not in _pending
-    assert _keeper_debt == (_literal_prefix["operation_calls"], _literal_prefix["returned_bytes"],
-        tuple(_literal_prefix["operations"]), tuple(_literal_prefix["errors"]))
+    _keeper_before=dict(_pending)
+    _keeper_debt=(_literal_prefix["operation_calls"],_literal_prefix["returned_bytes"],
+        tuple(_literal_prefix["operations"]),tuple(_literal_prefix["errors"]))
+    with monkeypatch.context()as _keeper_foreign_ports:
+        for _native_name in("fstat","stat","lstat","scandir","get_inheritable","set_inheritable","lseek","read","close"):
+            _keeper_foreign_ports.setattr(reliability.os,_native_name,_forbid_keeper_effect)
+        with pytest.raises(reliability.ValidationReliabilityError,match="KEEPER_LOAN_FIXED_PROVISION_CALLER"):
+            _keeper_helper(_literal_input,_pending,object(),object())
+    assert _keeper_effects==[]and _pending==_keeper_before and "keeper_observation_loans" not in _pending
+    assert _keeper_debt==(_literal_prefix["operation_calls"],_literal_prefix["returned_bytes"],
+        tuple(_literal_prefix["operations"]),tuple(_literal_prefix["errors"]))
 
-    _keeper_fields = ("native_input", "prebind", "prebind_original", "source_anchor", "holder", "root", "owner", "errors",
-        "producer", "producer_code", "module_namespace", "initializer_code", "slots", "observations", "roles")
-    _keeper_literal = dict(native_input=_literal_input, prebind=_pending, prebind_original=_pending["original"],
-        source_anchor=_literal_input["preloader_source_anchor"], holder=object(), root={}, owner=_literal_input["owner"],
-        errors=_literal_input["errors"], producer=_keeper_helper, producer_code=_keeper_helper.__code__,
-        module_namespace=ci_branch_context.__dict__, initializer_code=_keeper_code, slots=[], observations=[], roles={},
-        complete=False, active_operation="ORIGIN_PREBIND_OWNER")
-    _keeper_literal["original"] = (_keeper_literal,) + tuple(_keeper_literal[name] for name in _keeper_fields)
-    _keeper_faults = []
-    with monkeypatch.context() as _keeper_pending_ports:
-        _keeper_pending_ports.setattr(ci_branch_context, "_ordinary_ci_initial_common_source_check_v1",
+    _keeper_fields=("native_input","prebind","prebind_original","source_anchor","holder","root","owner","errors",
+        "producer","producer_code","module_namespace","initializer_code","slots","observations","roles")
+    _keeper_literal=dict(native_input=_literal_input,prebind=_pending,prebind_original=_pending["original"],
+        source_anchor=_literal_input["preloader_source_anchor"],holder=object(),root={},owner=_literal_input["owner"],
+        errors=_literal_input["errors"],producer=_keeper_helper,producer_code=_keeper_helper.__code__,
+        module_namespace=ci_branch_context.__dict__,initializer_code=_keeper_code,slots=[],observations=[],roles={},
+        complete=False,active_operation="ORIGIN_PREBIND_OWNER")
+    _keeper_literal["original"]=(_keeper_literal,)+tuple(_keeper_literal[name]for name in _keeper_fields)
+    _keeper_faults=[]
+    with monkeypatch.context()as _keeper_pending_ports:
+        _keeper_pending_ports.setattr(ci_branch_context,"_ordinary_ci_initial_common_source_check_v1",
             _fixture_common_source_prerequisite)
-        _keeper_pending_ports.setattr(reliability.sys, "platform", "linux")
-        _keeper_pending_ports.setitem(_pending, "active_operation", "ORIGIN_PREBIND_OWNER")
-        _keeper_pending_ports.setitem(_pending, "keeper_observation_loans", _keeper_literal)
-        for _field, _replacement in ((None, None), ("initializer_code", (lambda: None).__code__), ("producer", lambda: None)):
-            _before_calls = _literal_prefix["operation_calls"]
-            with monkeypatch.context() as _keeper_selected_fault:
+        _keeper_pending_ports.setattr(reliability.sys,"platform","linux")
+        _keeper_pending_ports.setitem(_pending,"active_operation","ORIGIN_PREBIND_OWNER")
+        _keeper_pending_ports.setitem(_pending,"keeper_observation_loans",_keeper_literal)
+        for _field,_replacement in((None,None),("initializer_code",(lambda:None).__code__),("producer",lambda:None)):
+            _before_calls=_literal_prefix["operation_calls"]
+            with monkeypatch.context()as _keeper_selected_fault:
                 if _field is not None:
-                    _keeper_selected_fault.setitem(_keeper_literal, _field, _replacement)
-                with pytest.raises(reliability.ValidationReliabilityError, match="EXACT_KEEPER_LOAN_PRIVATE_FACET_SOURCE") as _keeper_denial:
-                    reliability._ordinary_initial_native_debit_v1(_literal_input, "ORIGIN_PREBIND_OWNER")
+                    _keeper_selected_fault.setitem(_keeper_literal,_field,_replacement)
+                with pytest.raises(reliability.ValidationReliabilityError,match="EXACT_KEEPER_LOAN_PRIVATE_FACET_SOURCE")as _keeper_denial:
+                    reliability._ordinary_initial_native_debit_v1(_literal_input,"ORIGIN_PREBIND_OWNER")
             _keeper_faults.append(_keeper_denial.value)
             _literal_input["errors"].append(_keeper_denial.value)
-            assert _literal_prefix["operation_calls"] == _before_calls + 1
-            assert _pending["complete"] is False and _pending["origin_ns"] is _pending["cutoffs"] is None
-            assert _pending["slots"] == _pending["reads"] == _keeper_literal["slots"] == []
-    assert _keeper_effects == [] and _pending["active_operation"] is None and "keeper_observation_loans" not in _pending
-    assert _literal_input["errors"][-3:] == _keeper_faults
-    assert _literal_prefix["errors"] is _pending["errors"] is _literal_input["errors"]
-    assert _literal_prefix["returned_bytes"] == _keeper_debt[1]
-    assert _literal_prefix["operation_calls"] == _keeper_debt[0] + 3
+            assert _literal_prefix["operation_calls"]==_before_calls+1
+            assert _pending["complete"]is False and _pending["origin_ns"]is _pending["cutoffs"]is None
+            assert _pending["slots"]==_pending["reads"]==_keeper_literal["slots"]==[]
+    assert _keeper_effects==[]and _pending["active_operation"]is None and "keeper_observation_loans" not in _pending
+    assert _literal_input["errors"][-3:]==_keeper_faults
+    assert _literal_prefix["errors"]is _pending["errors"]is _literal_input["errors"]
+    assert _literal_prefix["returned_bytes"]==_keeper_debt[1]
+    assert _literal_prefix["operation_calls"]==_keeper_debt[0]+3
 
     # This is only a literal completed-record arithmetic fixture. It does not
     # run the producer or qualify origin/root/lifetime. The actual prefix owner
     # must pin each field to the one immutable original result and never reset
     # its prior attempted debt or retained fault objects.
-    _fixture_origin = 1
-    _fixture_cutoffs = (_fixture_origin, _fixture_origin + 3600 * 10**9,
-        _fixture_origin + 3720 * 10**9)
-    _fixture_request = _literal_input["original_origin_request"]
-    _fixture_names = ("role", "native_root", "evidence_root", "stem", "actor_cgroup",
-        "ancestor_cgroup", "common_cgroup", "bootstrap_cgroup", "holder_cgroup")
-    _fixture_operands = {name: object() for name in _fixture_names}
-    _fixture_original = (_fixture_operands, _literal_input, _fixture_request,
-        _literal_input["initial_source_request"], _literal_input["owner"]) + tuple(
-        _fixture_operands[name] for name in _fixture_names)
-    _fixture_actor, _fixture_holder = (1, 2, 3), (4, 5, 6)
-    _fixture_root, _fixture_pidfd = {}, {}
-    _fixture_groups = {"ancestor": {}}
-    _fixture_result = (_pending, _pending["original"], _fixture_operands,
-        _fixture_original, _fixture_actor, _fixture_holder, _fixture_root,
-        _fixture_pidfd, _fixture_groups, _fixture_cutoffs, _fixture_request,
+    _fixture_origin=1
+    _fixture_cutoffs=(_fixture_origin,_fixture_origin+3600*10**9,
+        _fixture_origin+3720*10**9)
+    _fixture_request=_literal_input["original_origin_request"]
+    _fixture_names=("role","native_root","evidence_root","stem","actor_cgroup",
+        "ancestor_cgroup","common_cgroup","bootstrap_cgroup","holder_cgroup")
+    _fixture_operands={name:object()for name in _fixture_names}
+    _fixture_original=(_fixture_operands,_literal_input,_fixture_request,
+        _literal_input["initial_source_request"],_literal_input["owner"])+tuple(
+        _fixture_operands[name]for name in _fixture_names)
+    _fixture_actor,_fixture_holder=(1,2,3),(4,5,6)
+    _fixture_root,_fixture_pidfd={},{}
+    _fixture_groups={"ancestor":{}}
+    _fixture_result=(_pending,_pending["original"],_fixture_operands,
+        _fixture_original,_fixture_actor,_fixture_holder,_fixture_root,
+        _fixture_pidfd,_fixture_groups,_fixture_cutoffs,_fixture_request,
         _literal_input["errors"])
-    _prior_debt = (_literal_prefix["operation_calls"], _literal_prefix["returned_bytes"],
-        tuple(_literal_prefix["operations"]), tuple(_literal_prefix["errors"]))
-    with monkeypatch.context() as _completed_fixture:
-        for _name, _value in dict(complete=True, result_original=_fixture_result,
-            operands=_fixture_operands, actor=_fixture_actor, holder=_fixture_holder,
-            root=_fixture_root, holder_pidfd=_fixture_pidfd, held_cgroups=_fixture_groups,
-            origin_ns=_fixture_origin, cutoffs=_fixture_cutoffs).items():
-            _completed_fixture.setitem(_pending, _name, _value)
-        for _name, _value in dict(origin_prebind_result_original=_fixture_result,
-            initial_operands=_fixture_operands, initial_operands_original=_fixture_original,
-            original_origin_ns=_fixture_origin, original_execution_cutoff_ns=_fixture_cutoffs[1],
+    _prior_debt=(_literal_prefix["operation_calls"],_literal_prefix["returned_bytes"],
+        tuple(_literal_prefix["operations"]),tuple(_literal_prefix["errors"]))
+    with monkeypatch.context()as _completed_fixture:
+        for _name,_value in dict(complete=True,result_original=_fixture_result,
+            operands=_fixture_operands,actor=_fixture_actor,holder=_fixture_holder,
+            root=_fixture_root,holder_pidfd=_fixture_pidfd,held_cgroups=_fixture_groups,
+            origin_ns=_fixture_origin,cutoffs=_fixture_cutoffs).items():
+            _completed_fixture.setitem(_pending,_name,_value)
+        for _name,_value in dict(origin_prebind_result_original=_fixture_result,
+            initial_operands=_fixture_operands,initial_operands_original=_fixture_original,
+            original_origin_ns=_fixture_origin,original_execution_cutoff_ns=_fixture_cutoffs[1],
             original_settlement_cutoff_ns=_fixture_cutoffs[2]).items():
-            _completed_fixture.setitem(_literal_input, _name, _value)
-        for _name, _value in dict(ancestor=_fixture_groups["ancestor"],
-            origin_ns=_fixture_origin, deadline_ns=_fixture_cutoffs[2], observation=_pending).items():
-            _completed_fixture.setitem(_fixture_request, _name, _value)
-        assert reliability._ordinary_initial_prefix_v1(_literal_input) is _literal_prefix
+            _completed_fixture.setitem(_literal_input,_name,_value)
+        for _name,_value in dict(ancestor=_fixture_groups["ancestor"],
+            origin_ns=_fixture_origin,deadline_ns=_fixture_cutoffs[2],observation=_pending).items():
+            _completed_fixture.setitem(_fixture_request,_name,_value)
+        assert reliability._ordinary_initial_prefix_v1(_literal_input)is _literal_prefix
         # Literal completed records confer no terminal-owner or descriptor
         # release authority. These denials occur before any native FD action;
         # the genuine production cold/role endpoints remain the sole callers.
-        _retirement_effects = []
-        def _forbid_retirement_effect(*args, **kwargs):
-            _retirement_effects.append((args, kwargs))
+        _retirement_effects=[]
+        def _forbid_retirement_effect(*args,**kwargs):
+            _retirement_effects.append((args,kwargs))
             pytest.fail("foreign retirement reached a native descriptor operation")
-        _before_retirement = dict(_pending)
-        with monkeypatch.context() as _retirement_ports:
-            _retirement_ports.setattr(reliability.os, "fstat", _forbid_retirement_effect)
-            _retirement_ports.setattr(reliability.os, "get_inheritable", _forbid_retirement_effect)
-            _retirement_ports.setattr(reliability.os, "close", _forbid_retirement_effect)
-            for _foreign_scope, _terminal_denial in (
-                (None, "COLD_FAILURE_PROVES_NO_NATIVE_DISPATCH"),
-                (object(), "ACTUAL_TERMINAL_SCOPE_AND_ORIGINAL_COMMANDS"),
+        _before_retirement=dict(_pending)
+        with monkeypatch.context()as _retirement_ports:
+            _retirement_ports.setattr(reliability.os,"fstat",_forbid_retirement_effect)
+            _retirement_ports.setattr(reliability.os,"get_inheritable",_forbid_retirement_effect)
+            _retirement_ports.setattr(reliability.os,"close",_forbid_retirement_effect)
+            for _foreign_scope,_terminal_denial in(
+                (None,"COLD_FAILURE_PROVES_NO_NATIVE_DISPATCH"),
+                (object(),"ACTUAL_TERMINAL_SCOPE_AND_ORIGINAL_COMMANDS"),
             ):
-                with pytest.raises(reliability.ValidationReliabilityError, match=_terminal_denial):
-                    reliability._ordinary_initial_loan_retirement_v1(_literal_input, _foreign_scope)
-                assert _pending == _before_retirement and "retirement" not in _pending
-                assert _pending["slots"] is _pending["original"][14] and _pending["slots"] == []
-                assert _pending["errors"] is _literal_prefix["errors"] is _literal_input["errors"]
-                assert _prior_debt == (_literal_prefix["operation_calls"], _literal_prefix["returned_bytes"],
-                    tuple(_literal_prefix["operations"]), tuple(_literal_prefix["errors"]))
-        assert _retirement_effects == []
-        for _changed_owner, _field, _replacement in (
-            (_pending, "result_original", tuple([*_fixture_result])),
-            (_pending, "cutoffs", tuple([*_fixture_cutoffs])),
-            (_literal_input, "original_execution_cutoff_ns", _fixture_cutoffs[1] + 1),
-            (_fixture_request, "origin_ns", _fixture_origin + 1),
-            (_pending, "producer_code", (lambda: None).__code__),
+                with pytest.raises(reliability.ValidationReliabilityError,match=_terminal_denial):
+                    reliability._ordinary_initial_loan_retirement_v1(_literal_input,_foreign_scope)
+                assert _pending==_before_retirement and "retirement" not in _pending
+                assert _pending["slots"]is _pending["original"][14]and _pending["slots"]==[]
+                assert _pending["errors"]is _literal_prefix["errors"]is _literal_input["errors"]
+                assert _prior_debt==(_literal_prefix["operation_calls"],_literal_prefix["returned_bytes"],
+                    tuple(_literal_prefix["operations"]),tuple(_literal_prefix["errors"]))
+        assert _retirement_effects==[]
+        for _changed_owner,_field,_replacement in(
+            (_pending,"result_original",tuple([*_fixture_result])),
+            (_pending,"cutoffs",tuple([*_fixture_cutoffs])),
+            (_literal_input,"original_execution_cutoff_ns",_fixture_cutoffs[1]+1),
+            (_fixture_request,"origin_ns",_fixture_origin+1),
+            (_pending,"producer_code",(lambda:None).__code__),
         ):
-            with monkeypatch.context() as _completed_fault:
-                _completed_fault.setitem(_changed_owner, _field, _replacement)
+            with monkeypatch.context()as _completed_fault:
+                _completed_fault.setitem(_changed_owner,_field,_replacement)
                 with pytest.raises(reliability.ValidationReliabilityError,
                     match="SAME_COMPLETED_ORIGIN_PREBIND_AND_FROZEN_CUTOFFS"):
                     reliability._ordinary_initial_prefix_v1(_literal_input)
-            assert reliability._ordinary_initial_prefix_v1(_literal_input) is _literal_prefix
-        assert _prior_debt == (_literal_prefix["operation_calls"], _literal_prefix["returned_bytes"],
-            tuple(_literal_prefix["operations"]), tuple(_literal_prefix["errors"]))
-    assert _pending["complete"] is False and _pending["origin_ns"] is _pending["cutoffs"] is None
-    assert _literal_input["native_instance"] is None and _literal_input.get("current_native_observation") is None
+            assert reliability._ordinary_initial_prefix_v1(_literal_input)is _literal_prefix
+        assert _prior_debt==(_literal_prefix["operation_calls"],_literal_prefix["returned_bytes"],
+            tuple(_literal_prefix["operations"]),tuple(_literal_prefix["errors"]))
+    assert _pending["complete"]is False and _pending["origin_ns"]is _pending["cutoffs"]is None
+    assert _literal_input["native_instance"]is None and _literal_input.get("current_native_observation")is None
 
 
     # These are pure arithmetic and literal owner/substitution fixtures. They
     # neither parse a QTT module nor issue a Source/native memory grant.
-    _memo_layout = {"sizes": (("pointer", 8), ("gc", 16),
-        ("bytes_prefix", 33), ("unicode_prefix", 64), ("tuple_prefix", 48),
-        ("list_prefix", 56), ("int_prefix", 24), ("int_digit_bits", 30),
-        ("int_digit_bytes", 4), ("float", 24))}
-    _memo_raw = b"pass\n"
-    _memo11 = (3, (), 0, 0, 0, ((), 0, 0, 0, 1), 0, 0, 0, 0, True)
-    _memo_request = reliability._ordinary_control_current_parser_request_v1
-    _memo_legacy, _memo_held = _memo_request(_memo_layout, _memo_raw, _memo11)
-    _memo_same, _memo_same_held = _memo_request(_memo_layout, _memo_raw, (*_memo11, 28 * 3))
-    assert _memo_same == _memo_legacy and _memo_same_held == _memo_held
-    _memo_zero, _ = _memo_request(_memo_layout, _memo_raw, (*_memo11, 0))
-    _memo_key = "PARSER_ORIGINAL_SHARED_ARENA_AND_MEMO"
-    assert dict(_memo_zero)[_memo_key] < dict(_memo_legacy)[_memo_key]
-    _memo_invalid11 = (*_memo11[:-1], False)
-    _memo_invalid, _ = _memo_request(_memo_layout, _memo_raw, _memo_invalid11)
-    assert dict(_memo_invalid)[_memo_key] > dict(_memo_legacy)[_memo_key]
-    for _memo_bad in ((*_memo11, -1), (*_memo11, True), (*_memo11, 85),
-        (*_memo_invalid11, 0), (*_memo11, object())):
-        with pytest.raises(ValueError, match="QUALIFIED_SOURCE_MEMO"):
-            _memo_request(_memo_layout, _memo_raw, _memo_bad)
-    with pytest.raises(ValueError, match="ORIGINAL_SOURCE_PROFILE"):
-        _memo_request(_memo_layout, _memo_raw, (*_memo11, 0, 0))
-    _memo_callbacks = []
+    _memo_layout={"sizes":(("pointer",8),("gc",16),
+        ("bytes_prefix",33),("unicode_prefix",64),("tuple_prefix",48),
+        ("list_prefix",56),("int_prefix",24),("int_digit_bits",30),
+        ("int_digit_bytes",4),("float",24))}
+    _memo_raw=b"pass\n"
+    _memo11=(3,(),0,0,0,((),0,0,0,1),0,0,0,0,True)
+    _memo_request=reliability._ordinary_control_current_parser_request_v1
+    _memo_legacy,_memo_held=_memo_request(_memo_layout,_memo_raw,_memo11)
+    _memo_same,_memo_same_held=_memo_request(_memo_layout,_memo_raw,(*_memo11,28*3))
+    assert _memo_same==_memo_legacy and _memo_same_held==_memo_held
+    _memo_zero,_=_memo_request(_memo_layout,_memo_raw,(*_memo11,0))
+    _memo_key="PARSER_ORIGINAL_SHARED_ARENA_AND_MEMO"
+    assert dict(_memo_zero)[_memo_key]<dict(_memo_legacy)[_memo_key]
+    _memo_invalid11=(*_memo11[:-1],False)
+    _memo_invalid,_=_memo_request(_memo_layout,_memo_raw,_memo_invalid11)
+    assert dict(_memo_invalid)[_memo_key]>dict(_memo_legacy)[_memo_key]
+    for _memo_bad in((*_memo11,-1),(*_memo11,True),(*_memo11,85),
+        (*_memo_invalid11,0),(*_memo11,object())):
+        with pytest.raises(ValueError,match="QUALIFIED_SOURCE_MEMO"):
+            _memo_request(_memo_layout,_memo_raw,_memo_bad)
+    with pytest.raises(ValueError,match="ORIGINAL_SOURCE_PROFILE"):
+        _memo_request(_memo_layout,_memo_raw,(*_memo11,0,0))
+    _memo_callbacks=[]
     class _MemoForeignInteger(int):
-        def __le__(self, other):
+        def __le__(self,other):
             _memo_callbacks.append("comparison")
             return True
-    with pytest.raises(ValueError, match="QUALIFIED_SOURCE_MEMO"):
-        _memo_request(_memo_layout, _memo_raw, (*_memo11, _MemoForeignInteger(0)))
-    assert _memo_callbacks == []
+    with pytest.raises(ValueError,match="QUALIFIED_SOURCE_MEMO"):
+        _memo_request(_memo_layout,_memo_raw,(*_memo11,_MemoForeignInteger(0)))
+    assert _memo_callbacks==[]
 
     # The actual existing staged owner binds the SAME fixed profile/Source
     # row before invoking the arithmetic helper. These constructed records are
     # deliberately fixture DATA; no physical baseline or Linux admission is
     # asserted. Substitution must veto the first allocator/debit callback.
-    _memo_scope = object.__new__(reliability._LinuxPreflightScopeV1)
-    _memo_source = object.__new__(reliability._LinuxImmutableSourceSealV2)
-    _memo_source.state, _memo_source.failure = "READABLE", None
-    _memo_source.files, _memo_source.row_index, _memo_source.post = {}, {}, {}
-    _memo_scope.source = _memo_source
-    _memo_input = {}
-    _memo_generation = {"errors": [], "native_input_binding": object(),
-        "protected_inputs": object()}
-    _memo_generation_original = (_memo_generation, _memo_input, *([None] * 15))
-    _memo_generation["original"] = _memo_generation_original
-    _memo_native = {"source_generation": _memo_generation, "native_input": _memo_input}
-    _memo_scope._ordinary_bootstrap_runtime_v1 = {"acquisition": {"native_product": _memo_native}}
-    _memo_rows, _memo_originals, _memo_bindings, _memo_fixed = [], [], [], []
-    _memo_profile_producer = reliability._ordinary_control_current_profile_literals_v1
-    _memo_allocator = reliability._ordinary_control_current_staged_request_v1
+    _memo_scope=object.__new__(reliability._LinuxPreflightScopeV1)
+    _memo_source=object.__new__(reliability._LinuxImmutableSourceSealV2)
+    _memo_source.state,_memo_source.failure="READABLE",None
+    _memo_source.files,_memo_source.row_index,_memo_source.post={},{},{}
+    _memo_scope.source=_memo_source
+    _memo_input={}
+    _memo_generation={"errors":[],"native_input_binding":object(),
+        "protected_inputs":object()}
+    _memo_generation_original=(_memo_generation,_memo_input,*([None]*15))
+    _memo_generation["original"]=_memo_generation_original
+    _memo_native={"source_generation":_memo_generation,"native_input":_memo_input}
+    _memo_scope._ordinary_bootstrap_runtime_v1={"acquisition":{"native_product":_memo_native}}
+    _memo_rows,_memo_originals,_memo_bindings,_memo_fixed=[],[],[],[]
+    _memo_profile_producer=reliability._ordinary_control_current_profile_literals_v1
+    _memo_allocator=reliability._ordinary_control_current_staged_request_v1
     for _memo_index in range(4):
         _memo_name = f"literal-source-profile-fixture-{_memo_index}"
-        _memo_fixed_row = (_memo_name, len(_memo_raw), 2, 4, 1, (*_memo11, 1))
-        _memo_record = {"filename": _memo_name, "input4": object(),
-            "source_row": object(), "baseline_row": object(),
-            "acquisition": object(), "acquisition_original": object()}
-        _memo_ro = (_memo_record, _memo_generation, _memo_generation["native_input_binding"],
-            _memo_record["input4"], _memo_record["source_row"], _memo_record["baseline_row"],
-            _memo_raw, _memo_raw, _memo_record["acquisition"], _memo_record["acquisition_original"])
-        _memo_record["original"] = _memo_ro
-        _memo_owned = (_memo_record, _memo_ro, _memo_fixed_row, _memo_raw, _memo_raw,
-            _memo_profile_producer, _memo_profile_producer.__code__)
-        _memo_record["profile"] = _memo_owned
-        _memo_version = object()
-        _memo_source.files[_memo_name] = _memo_raw
-        _memo_source.row_index[_memo_name] = _memo_record["source_row"]
-        _memo_source.post[_memo_name] = _memo_version
-        _memo_fixed.append(_memo_fixed_row); _memo_rows.append(_memo_record)
+        _memo_fixed_row=(_memo_name,len(_memo_raw),2,4,1,(*_memo11,1))
+        _memo_record={"filename":_memo_name,"input4":object(),
+            "source_row":object(),"baseline_row":object(),
+            "acquisition":object(),"acquisition_original":object()}
+        _memo_ro=(_memo_record,_memo_generation,_memo_generation["native_input_binding"],
+            _memo_record["input4"],_memo_record["source_row"],_memo_record["baseline_row"],
+            _memo_raw,_memo_raw,_memo_record["acquisition"],_memo_record["acquisition_original"])
+        _memo_record["original"]=_memo_ro
+        _memo_owned=(_memo_record,_memo_ro,_memo_fixed_row,_memo_raw,_memo_raw,
+            _memo_profile_producer,_memo_profile_producer.__code__)
+        _memo_record["profile"]=_memo_owned
+        _memo_version=object()
+        _memo_source.files[_memo_name]=_memo_raw
+        _memo_source.row_index[_memo_name]=_memo_record["source_row"]
+        _memo_source.post[_memo_name]=_memo_version
+        _memo_fixed.append(_memo_fixed_row);_memo_rows.append(_memo_record)
         _memo_originals.append(_memo_owned)
-        _memo_bindings.append((_memo_record, _memo_ro, _memo_record["source_row"],
-            _memo_version, _memo_raw, _memo_raw, _memo_fixed_row))
-    _memo_payload = (tuple(_memo_fixed), ())
-    _memo_attempt = {"profiles": list(_memo_originals), "errors": [], "complete": True,
-        "source_generation": _memo_generation, "source_original": _memo_generation_original,
-        "producer": _memo_profile_producer, "producer_code": _memo_profile_producer.__code__}
-    _memo_ao = (_memo_attempt, _memo_generation, _memo_generation_original, _memo_input,
-        _memo_generation["native_input_binding"], _memo_generation["protected_inputs"],
-        _memo_rows, _memo_attempt["profiles"], _memo_attempt["errors"])
-    _memo_attempt["original"] = _memo_ao
-    _memo_original = (_memo_generation, _memo_generation_original, _memo_rows,
-        tuple(_memo_originals), _memo_payload, _memo_profile_producer,
-        _memo_profile_producer.__code__, _memo_attempt)
-    _memo_attempt["result"] = _memo_original
-    _memo_generation.update(control_profile_original=_memo_original, control_source_originals=_memo_rows)
-    _memo_input["preloader_source_attempt"] = {"control_profile_attempt": _memo_attempt}
-    _memo_installation = {"complete": True, "errors": []}
-    _memo_installation_original = (_memo_installation, _memo_scope, object(), *([None] * 14))
-    _memo_installation["original"] = _memo_installation_original
-    _memo_stage_profile = (_memo_installation, _memo_scope, _memo_installation_original[2],
-        tuple(_memo_bindings), _memo_payload, _memo_original, _memo_allocator)
-    _memo_installation["control_request_profile_original"] = _memo_stage_profile
-    _memo_effects = []
-    _memo_counters = {"calls": 0, "bytes": 0}
-    def _memo_arithmetic_after_binding(layout, raw, fixed):
-        _memo_effects.append((raw, fixed))
-        _memo_counters["calls"] += 1
-        return (("literal_fixture_AST", 1), ("literal_fixture_scratch", 2)), ("literal_fixture_AST",)
-    with monkeypatch.context() as _memo_ports:
-        _memo_ports.setattr(reliability, "_ordinary_control_current_parser_request_v1", _memo_arithmetic_after_binding)
-        _memo_ports.setattr(reliability, "_ordinary_control_compiler_source_projection_v1",
-            lambda layout, payload: tuple((str(i), 1) for i in range(7)))
-        _memo_result = _memo_allocator(_memo_layout, _memo_installation)
-        assert len(_memo_effects) == 4 and _memo_counters["calls"] == 4
-        assert _memo_result["original_profile"] is _memo_stage_profile
-        _memo_effects.clear(); _memo_counters["calls"] = 0
-        _memo_first = _memo_rows[0]; _memo_owned = _memo_originals[0]
-        for _memo_owner, _memo_field, _memo_substitute in (
-            (_memo_first, "original", tuple([*_memo_first["original"]])),
-            (_memo_first, "profile", (_memo_owned[0], _memo_owned[1], tuple([*_memo_owned[2]]), *_memo_owned[3:])),
-            (_memo_attempt, "producer_code", (lambda: None).__code__),
-            (_memo_attempt, "result", tuple([*_memo_original])),
-            (_memo_source.files, _memo_first["filename"], b"piss\n"),
-            (_memo_source.row_index, _memo_first["filename"], object()),
-            (_memo_source.post, _memo_first["filename"], object()),
+        _memo_bindings.append((_memo_record,_memo_ro,_memo_record["source_row"],
+            _memo_version,_memo_raw,_memo_raw,_memo_fixed_row))
+    _memo_payload=(tuple(_memo_fixed),())
+    _memo_attempt={"profiles":list(_memo_originals),"errors":[],"complete":True,
+        "source_generation":_memo_generation,"source_original":_memo_generation_original,
+        "producer":_memo_profile_producer,"producer_code":_memo_profile_producer.__code__}
+    _memo_ao=(_memo_attempt,_memo_generation,_memo_generation_original,_memo_input,
+        _memo_generation["native_input_binding"],_memo_generation["protected_inputs"],
+        _memo_rows,_memo_attempt["profiles"],_memo_attempt["errors"])
+    _memo_attempt["original"]=_memo_ao
+    _memo_original=(_memo_generation,_memo_generation_original,_memo_rows,
+        tuple(_memo_originals),_memo_payload,_memo_profile_producer,
+        _memo_profile_producer.__code__,_memo_attempt)
+    _memo_attempt["result"]=_memo_original
+    _memo_generation.update(control_profile_original=_memo_original,control_source_originals=_memo_rows)
+    _memo_input["preloader_source_attempt"]={"control_profile_attempt":_memo_attempt}
+    _memo_installation={"complete":True,"errors":[]}
+    _memo_installation_original=(_memo_installation,_memo_scope,object(),*([None]*14))
+    _memo_installation["original"]=_memo_installation_original
+    _memo_stage_profile=(_memo_installation,_memo_scope,_memo_installation_original[2],
+        tuple(_memo_bindings),_memo_payload,_memo_original,_memo_allocator)
+    _memo_installation["control_request_profile_original"]=_memo_stage_profile
+    _memo_effects=[]
+    _memo_counters={"calls":0,"bytes":0}
+    def _memo_arithmetic_after_binding(layout,raw,fixed):
+        _memo_effects.append((raw,fixed))
+        _memo_counters["calls"]+=1
+        return(("literal_fixture_AST",1),("literal_fixture_scratch",2)),("literal_fixture_AST",)
+    with monkeypatch.context()as _memo_ports:
+        _memo_ports.setattr(reliability,"_ordinary_control_current_parser_request_v1",_memo_arithmetic_after_binding)
+        _memo_ports.setattr(reliability,"_ordinary_control_compiler_source_projection_v1",
+            lambda layout,payload:tuple((str(i),1)for i in range(7)))
+        _memo_result=_memo_allocator(_memo_layout,_memo_installation)
+        assert len(_memo_effects)==4 and _memo_counters["calls"]==4
+        assert _memo_result["original_profile"]is _memo_stage_profile
+        _memo_effects.clear();_memo_counters["calls"]=0
+        _memo_first=_memo_rows[0];_memo_owned=_memo_originals[0]
+        for _memo_owner,_memo_field,_memo_substitute in(
+            (_memo_first,"original",tuple([*_memo_first["original"]])),
+            (_memo_first,"profile",(_memo_owned[0],_memo_owned[1],tuple([*_memo_owned[2]]),*_memo_owned[3:])),
+            (_memo_attempt,"producer_code",(lambda:None).__code__),
+            (_memo_attempt,"result",tuple([*_memo_original])),
+            (_memo_source.files,_memo_first["filename"],b"piss\n"),
+            (_memo_source.row_index,_memo_first["filename"],object()),
+            (_memo_source.post,_memo_first["filename"],object()),
         ):
-            with monkeypatch.context() as _memo_fault:
-                _memo_fault.setitem(_memo_owner, _memo_field, _memo_substitute)
-                with pytest.raises(ValueError, match="CONTROL_CURRENT_STAGED"):
-                    _memo_allocator(_memo_layout, _memo_installation)
-            assert _memo_effects == [] and _memo_counters == {"calls": 0, "bytes": 0}
-        _memo_wrong_binding = (*_memo_bindings[0][:4], b"piss\n", _memo_raw, _memo_bindings[0][6])
-        with monkeypatch.context() as _memo_raw_fault:
-            _memo_raw_fault.setitem(_memo_installation, "control_request_profile_original",
-                (*_memo_stage_profile[:3], (_memo_wrong_binding, *_memo_bindings[1:]), *_memo_stage_profile[4:]))
-            with pytest.raises(ValueError, match="CONTROL_CURRENT_STAGED_FULL_ORIGINAL_BYTES"):
-                _memo_allocator(_memo_layout, _memo_installation)
-        assert _memo_effects == [] and _memo_counters == {"calls": 0, "bytes": 0}
+            with monkeypatch.context()as _memo_fault:
+                _memo_fault.setitem(_memo_owner,_memo_field,_memo_substitute)
+                with pytest.raises(ValueError,match="CONTROL_CURRENT_STAGED"):
+                    _memo_allocator(_memo_layout,_memo_installation)
+            assert _memo_effects==[]and _memo_counters=={"calls":0,"bytes":0}
+        _memo_wrong_binding=(*_memo_bindings[0][:4],b"piss\n",_memo_raw,_memo_bindings[0][6])
+        with monkeypatch.context()as _memo_raw_fault:
+            _memo_raw_fault.setitem(_memo_installation,"control_request_profile_original",
+                (*_memo_stage_profile[:3],(_memo_wrong_binding,*_memo_bindings[1:]),*_memo_stage_profile[4:]))
+            with pytest.raises(ValueError,match="CONTROL_CURRENT_STAGED_FULL_ORIGINAL_BYTES"):
+                _memo_allocator(_memo_layout,_memo_installation)
+        assert _memo_effects==[]and _memo_counters=={"calls":0,"bytes":0}
 
     # Pure Source10 constructor ports: canonical module/Code originals and
     # independent Code copies below are explicit no-kernel test data.
     import ast as stage_ast
     import sys as stage_sys
     import types as stage_types
-    stage_root = Path(__file__).resolve().parents[2]
+    stage_root=Path(__file__).resolve().parents[2]
     def stage_read(path):
-        with path.open('rb') as stream:
-            return b''.join(iter(lambda: stream.read(65536), b''))
-    stage_raw = stage_read(stage_root / 'tools' / 'ci_branch_context.py')
-    stage_tree = stage_ast.parse(stage_raw)
-    stage_node = next(node for node in stage_tree.body if isinstance(node, stage_ast.FunctionDef)
-        and node.name == '_ordinary_ci_bootstrap_stage_source_request_v1')
-    stage_body = stage_ast.get_source_segment(stage_raw.decode('utf-8'), stage_node)
-    stage_rel_raw = stage_read(stage_root / 'tools' / 'validation_reliability.py')
-    stage_reg_raw = stage_read(stage_root / 'tools' / 'validation_scope_registry.py')
-    stage_rel_tree = stage_ast.parse(stage_rel_raw)
-    stage_reg_tree = stage_ast.parse(stage_reg_raw)
-    stage_names = ('align_v1', 'size_v1', 'tuple_request_v1', 'list_requests_v1', 'dict_requests_v1')
-    def stage_definitions(raw, tree, prefix):
-        return '\n\n'.join(stage_ast.get_source_segment(raw.decode('utf-8'), node)
-            for node in tree.body if isinstance(node, stage_ast.FunctionDef)
-            and node.name in tuple(prefix + name for name in stage_names))
-    stage_rel_body = stage_definitions(stage_rel_raw, stage_rel_tree, '_ordinary_data_')
-    stage_reg_body = stage_definitions(stage_reg_raw, stage_reg_tree, '_facet_fn_data_')
-    stage_run_body = '''
+        with path.open('rb')as stream:
+            return b''.join(iter(lambda:stream.read(65536),b''))
+    stage_raw=stage_read(stage_root/'tools'/'ci_branch_context.py')
+    stage_tree=stage_ast.parse(stage_raw)
+    stage_node=next(node for node in stage_tree.body if isinstance(node,stage_ast.FunctionDef)
+        and node.name=='_ordinary_ci_bootstrap_stage_source_request_v1')
+    stage_body=stage_ast.get_source_segment(stage_raw.decode('utf-8'),stage_node)
+    stage_rel_raw=stage_read(stage_root/'tools'/'validation_reliability.py')
+    stage_reg_raw=stage_read(stage_root/'tools'/'validation_scope_registry.py')
+    stage_rel_tree=stage_ast.parse(stage_rel_raw)
+    stage_reg_tree=stage_ast.parse(stage_reg_raw)
+    stage_names=('align_v1','size_v1','tuple_request_v1','list_requests_v1','dict_requests_v1')
+    def stage_definitions(raw,tree,prefix):
+        return '\n\n'.join(stage_ast.get_source_segment(raw.decode('utf-8'),node)
+            for node in tree.body if isinstance(node,stage_ast.FunctionDef)
+            and node.name in tuple(prefix+name for name in stage_names))
+    stage_rel_body=stage_definitions(stage_rel_raw,stage_rel_tree,'_ordinary_data_')
+    stage_reg_body=stage_definitions(stage_reg_raw,stage_reg_tree,'_facet_fn_data_')
+    stage_run_body='''
 def _ordinary_linux_provision_v1():pass
 def _ordinary_bootstrap_heap_prepare_request_v1(*args):pass
 def _ordinary_bootstrap_query_request_v1(*args):pass
@@ -2471,7 +2471,7 @@ def _ordinary_bootstrap_initial_stage_source_request_v1(product,stage):
  from tools.ci_branch_context import _ordinary_ci_bootstrap_stage_source_request_v1 as _d
  return _d(__import__('sys').modules[__name__],product,stage)
 '''
-    stage_rel_body += '''
+    stage_rel_body+='''
 def native_issue(product,issuer,stage):
  return __import__('sys').modules['tools.run_validation_gates']._ordinary_bootstrap_initial_stage_source_request_v1(product,stage)
 def _ordinary_control_code_source_equal_v1(a,b):
@@ -2479,201 +2479,201 @@ def _ordinary_control_code_source_equal_v1(a,b):
 def _preflight_require_v1(value,label):
  if not value:raise ValueError(label)
 '''
-    with monkeypatch.context() as stage_ports:
-        stage_package = stage_types.ModuleType('tools'); stage_package.__path__ = []
-        stage_ports.setitem(stage_sys.modules, 'tools', stage_package)
-        stage_modules = {}
-        stage_bodies = {'run_validation_gates': stage_run_body,
-            'validation_reliability': stage_rel_body, 'validation_scope_registry': stage_reg_body,
-            'ci_branch_context': stage_body}
-        for name, body in stage_bodies.items():
-            module = stage_types.ModuleType('tools.' + name)
-            stage_ports.setitem(stage_sys.modules, module.__name__, module)
-            setattr(stage_package, name, module); stage_modules[name] = module
-            code = compile(body, '<explicit-stage-port-' + name + '>', 'exec', flags=0,
-                dont_inherit=True, optimize=0)
-            exec(code, module.__dict__)
-            module._ORDINARY_INITIALIZED_MODULE_CODE_V1 = code
-        stage_rel = stage_modules['validation_reliability']; stage_rel.sys = stage_sys
-        stage_run = stage_modules['run_validation_gates']; stage_ci = stage_modules['ci_branch_context']
+    with monkeypatch.context()as stage_ports:
+        stage_package=stage_types.ModuleType('tools');stage_package.__path__=[]
+        stage_ports.setitem(stage_sys.modules,'tools',stage_package)
+        stage_modules={}
+        stage_bodies={'run_validation_gates':stage_run_body,
+            'validation_reliability':stage_rel_body,'validation_scope_registry':stage_reg_body,
+            'ci_branch_context':stage_body}
+        for name,body in stage_bodies.items():
+            module=stage_types.ModuleType('tools.'+name)
+            stage_ports.setitem(stage_sys.modules,module.__name__,module)
+            setattr(stage_package,name,module);stage_modules[name]=module
+            code=compile(body,'<explicit-stage-port-'+name+'>','exec',flags=0,
+                dont_inherit=True,optimize=0)
+            exec(code,module.__dict__)
+            module._ORDINARY_INITIALIZED_MODULE_CODE_V1=code
+        stage_rel=stage_modules['validation_reliability'];stage_rel.sys=stage_sys
+        stage_run=stage_modules['run_validation_gates'];stage_ci=stage_modules['ci_branch_context']
         def stage_fixture():
-            owner = (object(), object()); errors = []; phase = object(); method = stage_rel.native_issue
-            entry = stage_run._ordinary_linux_provision_v1; attempt = {'owner': owner, 'errors': errors}
-            entry_original = (attempt, owner, errors, phase, stage_run, stage_run.__dict__,
-                stage_run._ORDINARY_INITIALIZED_MODULE_CODE_V1, entry, entry.__code__)
-            value = {'entry_original': entry_original, 'errors': errors}
-            source = dict(native_input=value, entry_original=entry_original, runner=stage_run,
-                namespace=stage_run.__dict__, initializer=entry_original[6], entry=entry,
-                entry_code=entry.__code__, module=stage_rel, module_namespace=stage_rel.__dict__,
-                native_method=method, native_method_code=method.__code__, code_paths=(), workflow=object(),
-                expected_module_closure=(), physical_observations=[], errors=errors)
-            source['original'] = (source,) + tuple(source[name] for name in ('native_input',
-                'entry_original', 'runner', 'namespace', 'initializer', 'entry', 'entry_code',
-                'module', 'module_namespace', 'native_method', 'native_method_code', 'code_paths',
-                'workflow', 'expected_module_closure', 'physical_observations', 'errors'))
-            generation = dict(native_input=value, source_generation=source, native_class=object(),
-                constructor=entry, constructor_code=entry.__code__, native_method=method,
-                native_method_code=method.__code__, physical_observations=[], errors=errors)
-            generation['original'] = (generation,) + tuple(generation[name] for name in ('native_input',
-                'source_generation', 'native_class', 'constructor', 'constructor_code', 'native_method',
-                'native_method_code', 'physical_observations', 'errors'))
-            startup = dict(native_input=value, source_generation=source, native_generation=generation,
-                phase=phase, code_paths=source['code_paths'], workflow=source['workflow'],
-                expected_startup_keys=(), expected_basis_keys=(), expected_roles=(),
-                physical_observations=[], errors=errors, startup_binding={}, roles=())
-            startup['original'] = (startup,) + tuple(startup[name] for name in ('native_input',
-                'source_generation', 'native_generation', 'phase', 'code_paths', 'workflow',
-                'expected_startup_keys', 'expected_basis_keys', 'expected_roles', 'physical_observations', 'errors'))
-            limits = dict(work_calls=10, work_bytes=100, settlement_calls=10, settlement_bytes=100,
-                work_loops=10, settlement_loops=10); counters = {name: 0 for name in limits}
-            components = (('explicit-no-kernel', 1),)
-            profile = (value, source, generation, startup, phase, object(), None, components, 20, 200, entry, entry.__code__)
-            allocation = (value, profile, limits, counters)
-            issue = dict(complete=True, components=components, result=profile)
-            issue['original'] = (issue, value, source, generation, startup, phase, entry,
-                entry.__code__, entry_original, errors)
-            issue['result_original'] = (issue, issue['original'], components, tuple(limits.items()), allocation, counters, profile)
-            sizes = dict(pointer=8, gc=16, tuple_prefix=48, list_prefix=56, dict_prefix=64,
-                dict_keys_prefix=32, dict_unicode_entry=16, dict_general_entry=24, control_integer=44)
-            tiny = ((),) * 8; abi = (sizes, tiny)
-            layout = dict(initial_observation=abi, sizes=tuple(sizes.items()), tiny_layout_observations=tiny)
-            layout['original'] = (abi, sizes, tiny, layout['sizes'])
-            native = object(); raw = b'explicit maps'; entries = ((4096, 8192, b'rw-p', 0, 0, 0, 0),)
-            storage = dict(native=native, owner=owner, path=object(), deadline_ns=object(), requests=[], errors=[],
-                raw=raw, entries=entries, mapped_extent=4096, path_before=object(), handle_before=object(),
-                path_after=object(), handle_after=object(), complete=True, closed=True)
-            storage['original'] = (storage, native, owner, storage['path'], storage['deadline_ns'], storage['requests'], storage['errors'])
-            storage['success_original'] = (storage,) + tuple(storage[name] for name in ('native', 'owner', 'path',
-                'path_before', 'handle_before', 'path_after', 'handle_after', 'raw', 'entries', 'mapped_extent',
-                'requests', 'errors', 'deadline_ns'))
-            physical = dict(native=native, native_input=value, errors=errors, complete=True, pending=False,
-                original=object(), result_original=object())
-            hold_names = ('owner', 'service_unit', 'invocation', 'holder_identity', 'holder_pidfd_slot',
-                'holder_cgroup', 'holder_cgroup_slot', 'holder_events_slot', 'ancestor_cgroup', 'ancestor_slot',
-                'cutoffs', 'errors', 'holder_kernel_observations', 'native_input', 'native_generation', 'source_generation', 'startup')
-            hold = {name: object() for name in hold_names}; cuts = (1, 2, 3, 4)
-            hold.update(owner=owner, cutoffs=cuts, errors=errors, native_input=value,
-                native_generation=generation, source_generation=source, startup=startup['startup_binding'])
-            hold['original'] = (hold,) + tuple(hold[name] for name in hold_names)
-            product = dict(native_input=value, native_hold=hold, native_generation=generation,
-                startup=startup['startup_binding'], source_generation=source, roles=startup['roles'],
-                actor=object(), phase=phase, role='PROVISION', native_root=object(), origin_ns=1, errors=errors)
-            product['original'] = (product,) + tuple(product[name] for name in ('native_input', 'native_hold',
-                'native_generation', 'startup', 'source_generation', 'roles', 'actor', 'phase', 'role', 'native_root', 'origin_ns', 'errors'))
-            issuer = dict(entry_attempt=attempt, native_product=product, native_input=value, native=native,
-                stage='STAGE_REQUESTS', physical=physical, hold=hold, original_cutoffs=cuts,
-                abi_observation=abi, initial_layout=layout, storage_data_request={}, initialized_storage=storage)
-            issuer['original'] = (issuer, attempt, owner, errors, phase, stage_run, entry_original[6], entry, entry.__code__)
-            issuer['initialized_original'] = (issuer, value, native, abi, layout, issuer['storage_data_request'],
-                storage, storage['success_original'], physical, physical['original'], physical['result_original'], profile, allocation, errors)
-            observations = []
-            for name, module in stage_modules.items():
-                root = module._ORDINARY_INITIALIZED_MODULE_CODE_V1
-                witness = next(v for v in module.__dict__.values() if type(v) is stage_types.FunctionType)
-                body = stage_bodies[name].encode(); compiled = compile(body, root.co_filename, 'exec',
-                    flags=0, dont_inherit=True, optimize=0)
-                note = dict(record={}, module=module, namespace=module.__dict__, root=root, witness=witness,
-                    raw=body, compiled=compiled, filename=root.co_filename, proof_kind='WHOLE_MODULE_INITIALIZER',
-                    whole_initializer=True, complete=True)
-                note['original'] = (note, note['record'], module, module.__dict__, root, witness,
-                    witness.__code__, body, compiled, note['filename'], note['proof_kind'])
+            owner=(object(),object());errors=[];phase=object();method=stage_rel.native_issue
+            entry=stage_run._ordinary_linux_provision_v1;attempt={'owner':owner,'errors':errors}
+            entry_original=(attempt,owner,errors,phase,stage_run,stage_run.__dict__,
+                stage_run._ORDINARY_INITIALIZED_MODULE_CODE_V1,entry,entry.__code__)
+            value={'entry_original':entry_original,'errors':errors}
+            source=dict(native_input=value,entry_original=entry_original,runner=stage_run,
+                namespace=stage_run.__dict__,initializer=entry_original[6],entry=entry,
+                entry_code=entry.__code__,module=stage_rel,module_namespace=stage_rel.__dict__,
+                native_method=method,native_method_code=method.__code__,code_paths=(),workflow=object(),
+                expected_module_closure=(),physical_observations=[],errors=errors)
+            source['original']=(source,)+tuple(source[name]for name in('native_input',
+                'entry_original','runner','namespace','initializer','entry','entry_code',
+                'module','module_namespace','native_method','native_method_code','code_paths',
+                'workflow','expected_module_closure','physical_observations','errors'))
+            generation=dict(native_input=value,source_generation=source,native_class=object(),
+                constructor=entry,constructor_code=entry.__code__,native_method=method,
+                native_method_code=method.__code__,physical_observations=[],errors=errors)
+            generation['original']=(generation,)+tuple(generation[name]for name in('native_input',
+                'source_generation','native_class','constructor','constructor_code','native_method',
+                'native_method_code','physical_observations','errors'))
+            startup=dict(native_input=value,source_generation=source,native_generation=generation,
+                phase=phase,code_paths=source['code_paths'],workflow=source['workflow'],
+                expected_startup_keys=(),expected_basis_keys=(),expected_roles=(),
+                physical_observations=[],errors=errors,startup_binding={},roles=())
+            startup['original']=(startup,)+tuple(startup[name]for name in('native_input',
+                'source_generation','native_generation','phase','code_paths','workflow',
+                'expected_startup_keys','expected_basis_keys','expected_roles','physical_observations','errors'))
+            limits=dict(work_calls=10,work_bytes=100,settlement_calls=10,settlement_bytes=100,
+                work_loops=10,settlement_loops=10);counters={name:0 for name in limits}
+            components=(('explicit-no-kernel',1),)
+            profile=(value,source,generation,startup,phase,object(),None,components,20,200,entry,entry.__code__)
+            allocation=(value,profile,limits,counters)
+            issue=dict(complete=True,components=components,result=profile)
+            issue['original']=(issue,value,source,generation,startup,phase,entry,
+                entry.__code__,entry_original,errors)
+            issue['result_original']=(issue,issue['original'],components,tuple(limits.items()),allocation,counters,profile)
+            sizes=dict(pointer=8,gc=16,tuple_prefix=48,list_prefix=56,dict_prefix=64,
+                dict_keys_prefix=32,dict_unicode_entry=16,dict_general_entry=24,control_integer=44)
+            tiny=((),)*8;abi=(sizes,tiny)
+            layout=dict(initial_observation=abi,sizes=tuple(sizes.items()),tiny_layout_observations=tiny)
+            layout['original']=(abi,sizes,tiny,layout['sizes'])
+            native=object();raw=b'explicit maps';entries=((4096,8192,b'rw-p',0,0,0,0),)
+            storage=dict(native=native,owner=owner,path=object(),deadline_ns=object(),requests=[],errors=[],
+                raw=raw,entries=entries,mapped_extent=4096,path_before=object(),handle_before=object(),
+                path_after=object(),handle_after=object(),complete=True,closed=True)
+            storage['original']=(storage,native,owner,storage['path'],storage['deadline_ns'],storage['requests'],storage['errors'])
+            storage['success_original']=(storage,)+tuple(storage[name]for name in('native','owner','path',
+                'path_before','handle_before','path_after','handle_after','raw','entries','mapped_extent',
+                'requests','errors','deadline_ns'))
+            physical=dict(native=native,native_input=value,errors=errors,complete=True,pending=False,
+                original=object(),result_original=object())
+            hold_names=('owner','service_unit','invocation','holder_identity','holder_pidfd_slot',
+                'holder_cgroup','holder_cgroup_slot','holder_events_slot','ancestor_cgroup','ancestor_slot',
+                'cutoffs','errors','holder_kernel_observations','native_input','native_generation','source_generation','startup')
+            hold={name:object()for name in hold_names};cuts=(1,2,3,4)
+            hold.update(owner=owner,cutoffs=cuts,errors=errors,native_input=value,
+                native_generation=generation,source_generation=source,startup=startup['startup_binding'])
+            hold['original']=(hold,)+tuple(hold[name]for name in hold_names)
+            product=dict(native_input=value,native_hold=hold,native_generation=generation,
+                startup=startup['startup_binding'],source_generation=source,roles=startup['roles'],
+                actor=object(),phase=phase,role='PROVISION',native_root=object(),origin_ns=1,errors=errors)
+            product['original']=(product,)+tuple(product[name]for name in('native_input','native_hold',
+                'native_generation','startup','source_generation','roles','actor','phase','role','native_root','origin_ns','errors'))
+            issuer=dict(entry_attempt=attempt,native_product=product,native_input=value,native=native,
+                stage='STAGE_REQUESTS',physical=physical,hold=hold,original_cutoffs=cuts,
+                abi_observation=abi,initial_layout=layout,storage_data_request={},initialized_storage=storage)
+            issuer['original']=(issuer,attempt,owner,errors,phase,stage_run,entry_original[6],entry,entry.__code__)
+            issuer['initialized_original']=(issuer,value,native,abi,layout,issuer['storage_data_request'],
+                storage,storage['success_original'],physical,physical['original'],physical['result_original'],profile,allocation,errors)
+            observations=[]
+            for name,module in stage_modules.items():
+                root=module._ORDINARY_INITIALIZED_MODULE_CODE_V1
+                witness=next(v for v in module.__dict__.values()if type(v)is stage_types.FunctionType)
+                body=stage_bodies[name].encode();compiled=compile(body,root.co_filename,'exec',
+                    flags=0,dont_inherit=True,optimize=0)
+                note=dict(record={},module=module,namespace=module.__dict__,root=root,witness=witness,
+                    raw=body,compiled=compiled,filename=root.co_filename,proof_kind='WHOLE_MODULE_INITIALIZER',
+                    whole_initializer=True,complete=True)
+                note['original']=(note,note['record'],module,module.__dict__,root,witness,
+                    witness.__code__,body,compiled,note['filename'],note['proof_kind'])
                 observations.append(note)
-            inputs = (); binding = dict(complete=True, inputs=inputs, physical=physical)
-            source.update(protected_inputs=inputs, native_input_binding=binding,
-                source_input4_acquisition=dict(complete=True, result=binding, generation=source,
-                    errors=errors, code_observations=observations))
-            pre = dict(complete=True); ci_root = stage_ci._ORDINARY_INITIALIZED_MODULE_CODE_V1
-            pre['ci_source_code_original'] = (pre, stage_ci, stage_ci.__dict__, ci_root,
-                compile(stage_body, ci_root.co_filename, 'exec', flags=0, dont_inherit=True, optimize=0),
-                {}, stage_ci._ordinary_ci_bootstrap_stage_source_request_v1,
+            inputs=();binding=dict(complete=True,inputs=inputs,physical=physical)
+            source.update(protected_inputs=inputs,native_input_binding=binding,
+                source_input4_acquisition=dict(complete=True,result=binding,generation=source,
+                    errors=errors,code_observations=observations))
+            pre=dict(complete=True);ci_root=stage_ci._ORDINARY_INITIALIZED_MODULE_CODE_V1
+            pre['ci_source_code_original']=(pre,stage_ci,stage_ci.__dict__,ci_root,
+                compile(stage_body,ci_root.co_filename,'exec',flags=0,dont_inherit=True,optimize=0),
+                {},stage_ci._ordinary_ci_bootstrap_stage_source_request_v1,
                 stage_ci._ordinary_ci_bootstrap_stage_source_request_v1.__code__)
-            startup['pre_cold_result'] = pre
-            value.update(native_product_attempt=issuer, initial_request_issuer=issue, early_profile=profile,
-                early_allocation_original=allocation, current_native_observation=physical,
+            startup['pre_cold_result']=pre
+            value.update(native_product_attempt=issuer,initial_request_issuer=issue,early_profile=profile,
+                early_allocation_original=allocation,current_native_observation=physical,
                 initialized_storage_attempts=[storage])
-            return product, issuer, issue, storage, allocation
-        product, issuer, issue, storage, allocation = stage_fixture()
-        prepare = stage_rel.native_issue(product, issuer, 'PREPARE')
-        query = stage_rel.native_issue(product, issuer, 'QUERY')
-        assert len(prepare) == len(query) == 10
-        assert prepare[0] is query[0] is product and prepare[4] is query[4] is issuer['initial_layout']
-        assert prepare[7] is stage_run._ordinary_bootstrap_heap_prepare_request_v1
-        assert query[7] is stage_run._ordinary_bootstrap_query_request_v1
-        assert prepare[8] is prepare[7].__code__ and query[8] is query[7].__code__
-        assert dict(prepare[5])['original_interpreter_and_prior_intern_storage'] == storage['mapped_extent']
+            return product,issuer,issue,storage,allocation
+        product,issuer,issue,storage,allocation=stage_fixture()
+        prepare=stage_rel.native_issue(product,issuer,'PREPARE')
+        query=stage_rel.native_issue(product,issuer,'QUERY')
+        assert len(prepare)==len(query)==10
+        assert prepare[0]is query[0]is product and prepare[4]is query[4]is issuer['initial_layout']
+        assert prepare[7]is stage_run._ordinary_bootstrap_heap_prepare_request_v1
+        assert query[7]is stage_run._ordinary_bootstrap_query_request_v1
+        assert prepare[8]is prepare[7].__code__ and query[8]is query[7].__code__
+        assert dict(prepare[5])['original_interpreter_and_prior_intern_storage']==storage['mapped_extent']
         assert 'original_interpreter_and_prior_intern_storage' not in dict(query[5])
         assert 'original_native_stack_and_allocator_backing' not in dict(prepare[5])
         assert 'original_native_stack_and_allocator_backing' not in dict(query[5])
-        assert all(type(amount) is int and amount > 0 for _, amount in prepare[5] + query[5])
-        assert 'heap_record' not in product and all(n == 0 for n in allocation[3].values())
-        assert issue['stage_requests']['PREPARE']['request'] is prepare
-        assert issue['stage_requests']['QUERY']['request'] is query
-        with pytest.raises(ValueError):stage_rel.native_issue(product, issuer, 'QUERY')
-        for reason in ('query_first', 'layout', 'getter', 'pool', 'code_note', 'direct'):
-            product, issuer, issue, storage, allocation = stage_fixture()
-            if reason == 'layout':issuer['initial_layout'] = dict(issuer['initial_layout'])
-            if reason == 'getter':storage['raw'] = bytes(bytearray(storage['raw']))
-            if reason == 'pool':allocation[2]['work_calls'] += 1; allocation[2]['settlement_calls'] -= 1
-            if reason == 'code_note':product['source_generation']['source_input4_acquisition']['code_observations'][0]['raw'] = b'foreign'
+        assert all(type(amount)is int and amount>0 for _,amount in prepare[5]+query[5])
+        assert 'heap_record' not in product and all(n==0 for n in allocation[3].values())
+        assert issue['stage_requests']['PREPARE']['request']is prepare
+        assert issue['stage_requests']['QUERY']['request']is query
+        with pytest.raises(ValueError):stage_rel.native_issue(product,issuer,'QUERY')
+        for reason in('query_first','layout','getter','pool','code_note','direct'):
+            product,issuer,issue,storage,allocation=stage_fixture()
+            if reason=='layout':issuer['initial_layout']=dict(issuer['initial_layout'])
+            if reason=='getter':storage['raw']=bytes(bytearray(storage['raw']))
+            if reason=='pool':allocation[2]['work_calls']+=1;allocation[2]['settlement_calls']-=1
+            if reason=='code_note':product['source_generation']['source_input4_acquisition']['code_observations'][0]['raw']=b'foreign'
             with pytest.raises(ValueError):
-                if reason == 'direct':stage_ci._ordinary_ci_bootstrap_stage_source_request_v1(stage_run, product, 'PREPARE')
-                else:stage_rel.native_issue(product, issuer, 'QUERY' if reason == 'query_first' else 'PREPARE')
-            assert not issue.get('stage_requests') and all(n == 0 for n in allocation[3].values())
+                if reason=='direct':stage_ci._ordinary_ci_bootstrap_stage_source_request_v1(stage_run,product,'PREPARE')
+                else:stage_rel.native_issue(product,issuer,'QUERY' if reason=='query_first' else 'PREPARE')
+            assert not issue.get('stage_requests')and all(n==0 for n in allocation[3].values())
 
     # The private original lexical programme refuses before Path allocation.
     import ast as path_stock_ast
     import types as path_stock_types
     from pathlib import PosixPath as path_stock_type
     import os as path_stock_os
-    path_stock_source = copied_sources['tools/ci_branch_context.py']
-    path_stock_tree = path_stock_ast.parse(path_stock_source)
-    path_stock_fn = next(n for n in path_stock_tree.body
-                        if type(n) is path_stock_ast.FunctionDef
-                        and n.name == '_ordinary_ci_initial_path_stock_v1')
-    path_stock_module = path_stock_types.ModuleType('original_path_stock_fixture')
-    path_stock_namespace = path_stock_module.__dict__
-    exec('def _ordinary_ci_initial_direct_request_v1(*args): return None', path_stock_namespace)
-    exec(compile(path_stock_ast.Module(body=[path_stock_fn], type_ignores=[]),
-                 '<same original private path fixture>', 'exec',
-                 flags=0, dont_inherit=True, optimize=0), path_stock_namespace)
-    path_stock_guard = path_stock_namespace[path_stock_fn.name]
-    path_stock_native = {}; path_stock_generation = {}; path_stock_issue = {}
+    path_stock_source=copied_sources['tools/ci_branch_context.py']
+    path_stock_tree=path_stock_ast.parse(path_stock_source)
+    path_stock_fn=next(n for n in path_stock_tree.body
+                        if type(n)is path_stock_ast.FunctionDef
+                        and n.name=='_ordinary_ci_initial_path_stock_v1')
+    path_stock_module=path_stock_types.ModuleType('original_path_stock_fixture')
+    path_stock_namespace=path_stock_module.__dict__
+    exec('def _ordinary_ci_initial_direct_request_v1(*args): return None',path_stock_namespace)
+    exec(compile(path_stock_ast.Module(body=[path_stock_fn],type_ignores=[]),
+                 '<same original private path fixture>','exec',
+                 flags=0,dont_inherit=True,optimize=0),path_stock_namespace)
+    path_stock_guard=path_stock_namespace[path_stock_fn.name]
+    path_stock_native={};path_stock_generation={};path_stock_issue={}
     from pathlib import PurePosixPath as path_stock_pure_type
-    path_stock_paths_list = []
+    path_stock_paths_list=[]
     for path_stock_index in range(7):
-        path_stock_one = object.__new__(path_stock_type)
-        path_stock_pure_type.__init__(path_stock_one, '/original/source/' + str(path_stock_index))
+        path_stock_one=object.__new__(path_stock_type)
+        path_stock_pure_type.__init__(path_stock_one,'/original/source/'+str(path_stock_index))
         path_stock_paths_list.append(path_stock_one)
-    path_stock_paths = tuple(path_stock_paths_list)
-    path_stock_original = [None] * 17
-    path_stock_original[0] = path_stock_generation
-    path_stock_original[1] = path_stock_native
-    path_stock_original[13] = path_stock_paths[0]
-    path_stock_original[14] = path_stock_paths[1:]
-    path_stock_generation['original'] = tuple(path_stock_original)
-    path_stock_values = tuple(map(str, path_stock_paths))
-    path_stock_temp = path_stock_os.environ.get('RUNNER_TEMP')
+    path_stock_paths=tuple(path_stock_paths_list)
+    path_stock_original=[None]*17
+    path_stock_original[0]=path_stock_generation
+    path_stock_original[1]=path_stock_native
+    path_stock_original[13]=path_stock_paths[0]
+    path_stock_original[14]=path_stock_paths[1:]
+    path_stock_generation['original']=tuple(path_stock_original)
+    path_stock_values=tuple(map(str,path_stock_paths))
+    path_stock_temp=path_stock_os.environ.get('RUNNER_TEMP')
     if path_stock_temp is None:
-        monkeypatch.setenv('RUNNER_TEMP', '/original/temporary')
-        path_stock_temp = '/original/temporary'
-    path_stock_extent = max(len(path_stock_temp), *map(len, path_stock_values)) + 192
-    path_stock_result = (path_stock_native, path_stock_generation, None, None,
-                         'PROVISION', None, None, (), 1, 1, None, None)
-    path_stock_allocation = (path_stock_native, path_stock_result, {}, {})
+        monkeypatch.setenv('RUNNER_TEMP','/original/temporary')
+        path_stock_temp='/original/temporary'
+    path_stock_extent=max(len(path_stock_temp),*map(len,path_stock_values))+192
+    path_stock_result=(path_stock_native,path_stock_generation,None,None,
+                         'PROVISION',None,None,(),1,1,None,None)
+    path_stock_allocation=(path_stock_native,path_stock_result,{},{})
     path_stock_native.update(initial_request_issuer=path_stock_issue,
                              early_profile=path_stock_result,
                              early_allocation_original=path_stock_allocation)
-    path_stock_direct = path_stock_namespace['_ordinary_ci_initial_direct_request_v1']
+    path_stock_direct=path_stock_namespace['_ordinary_ci_initial_direct_request_v1']
     path_stock_issue.update(native_input=path_stock_native,
-        source_generation=path_stock_generation, complete=True,
-        result=path_stock_result, allocation=path_stock_allocation,
-        result_original=(path_stock_issue, None, (), (), path_stock_allocation,
-                         path_stock_allocation[3], path_stock_result))
-    path_stock_frozen = (path_stock_issue, path_stock_generation,
-        path_stock_generation['original'], path_stock_paths, path_stock_values,
-        path_stock_temp, path_stock_extent, path_stock_direct, path_stock_direct.__code__)
-    path_stock_issue['path_stock_original'] = path_stock_frozen
-    assert path_stock_guard(path_stock_native, '/original/selected') == '/original/selected'
+        source_generation=path_stock_generation,complete=True,
+        result=path_stock_result,allocation=path_stock_allocation,
+        result_original=(path_stock_issue,None,(),(),path_stock_allocation,
+                         path_stock_allocation[3],path_stock_result))
+    path_stock_frozen=(path_stock_issue,path_stock_generation,
+        path_stock_generation['original'],path_stock_paths,path_stock_values,
+        path_stock_temp,path_stock_extent,path_stock_direct,path_stock_direct.__code__)
+    path_stock_issue['path_stock_original']=path_stock_frozen
+    assert path_stock_guard(path_stock_native,'/original/selected') == '/original/selected'
     assert path_stock_guard(path_stock_native, path_stock_paths[0]) is path_stock_paths[0]
     path_stock_effects = []
     for path_stock_change in ('extent', 'strings', 'unfinished', 'original-shape', 'result-shape'):
@@ -19095,1126 +19095,1219 @@ def test_github_workflow_preserves_required_validation_check_identity():
 
 
 def test_github_workflow_splits_validation_into_parallel_phase_jobs():
-    # No-child literals: no Linux/timer/manager/privilege/Scope/Git/native
-    # admission/termination/FD-close proof; guards/prefix loans/independent
-    # baselines stay; EOF/suffix/direct-child exit != descendant cleanup.
-    workflow = _workflow_text()
-    shard_block = _workflow_job_block(workflow, "validation_shards")
+ # No-child literals: no Linux/timer/manager/privilege/Scope/Git/native
+ # admission/termination/FD-close proof; guards/prefix loans/independent
+ # baselines stay; EOF/suffix/direct-child exit != descendant cleanup.
+ workflow=_workflow_text()
+ shard_block=_workflow_job_block(workflow,"validation_shards")
 
-    def utf16_units(value):
-        return len(value.encode("utf-16-le", "surrogatepass")) // 2
+ def utf16_units(value):
+     return len(value.encode("utf-16-le","surrogatepass"))//2
 
-    def literal_run_scalars(job_source):
-        rows = job_source.splitlines(keepends=True)
-        scalars = []
-        for index, row in enumerate(rows):
-            if not row.startswith("        run:"):
-                continue
-            header = row[len("        run:"):].strip().split()
-            if header and header[0].startswith("&"):
-                header = header[1:]
-            if not header or not header[0].startswith("|"):
-                continue
-            assert len(header) == 1 and header[0] in ("|", "|-", "|+")
-            body = []
-            for content_row in rows[index + 1:]:
-                content = content_row.rstrip("\n")
-                assert "\r" not in content
-                if content.strip(" ") and len(content) - len(content.lstrip(" ")) <= 8:
-                    break
-                body.append(content_row)
-            nonempty = [part for part in body if part.rstrip("\n").strip(" ")]
-            indentation = (len(nonempty[0]) - len(nonempty[0].lstrip(" "))
-                if nonempty else 10)
-            assert indentation >= 10
-            decoded = []
-            for part in body:
-                content = part.rstrip("\n")
-                if content.strip(" "):
-                    assert part.startswith(" " * indentation)
-                decoded.append(part[min(indentation, len(content)):])
-            scalar = "".join(decoded)
-            if header[0] == "|-":
-                scalar = scalar.rstrip("\n")
-            elif header[0] == "|" and scalar.endswith("\n"):
-                scalar = scalar.rstrip("\n")
-                if scalar:
-                    scalar += "\n"
-            scalars.append(scalar)
-        return scalars
+ def literal_run_scalars(job_source):
+     rows=job_source.splitlines(keepends=True)
+     scalars=[]
+     for index,row in enumerate(rows):
+         if not row.startswith("        run:"):
+             continue
+         header=row[len("        run:"):].strip().split()
+         if header and header[0].startswith("&"):
+             header=header[1:]
+         if not header or not header[0].startswith("|"):
+             continue
+         assert len(header)==1 and header[0]in("|","|-","|+")
+         body=[]
+         for content_row in rows[index+1:]:
+             content=content_row.rstrip("\n")
+             assert "\r" not in content
+             if content.strip(" ")and len(content)-len(content.lstrip(" "))<=8:
+                 break
+             body.append(content_row)
+         nonempty=[part for part in body if part.rstrip("\n").strip(" ")]
+         indentation=(len(nonempty[0])-len(nonempty[0].lstrip(" "))
+             if nonempty else 10)
+         assert indentation>=10
+         decoded=[]
+         for part in body:
+             content=part.rstrip("\n")
+             if content.strip(" "):
+                 assert part.startswith(" "*indentation)
+             decoded.append(part[min(indentation,len(content)):])
+         scalar="".join(decoded)
+         if header[0]=="|-":
+             scalar=scalar.rstrip("\n")
+         elif header[0]=="|" and scalar.endswith("\n"):
+             scalar=scalar.rstrip("\n")
+             if scalar:
+                 scalar+="\n"
+         scalars.append(scalar)
+     return scalars
 
-    def actions_projection(scalar):
-        trim_chars = " \t\n\r\v\f\x85\u00a0\u1680\u2000\u2001\u2002\u2003\u2004\u2005\u2006\u2007\u2008\u2009\u200a\u2028\u2029\u202f\u205f\u3000"
-        segments = []
-        position = 0
-        while position < len(scalar):
-            start = scalar.find("${{", position)
-            if start < 0:
-                segments.append(("literal", scalar[position:]))
-                break
-            if start > position:
-                segments.append(("literal", scalar[position:start]))
-            quoted = False
-            end = start + 3
-            while end < len(scalar):
-                if scalar[end] == "'":
-                    quoted = not quoted
-                elif not quoted and scalar[end] == "}" and scalar[end - 1] == "}":
-                    break
-                end += 1
-            if end == len(scalar):
-                raise ValueError("unclosed Actions expression")
-            expression = scalar[start + 3:end - 1].strip(trim_chars)
-            if not expression:
-                raise ValueError("empty Actions expression")
-            segments.append(("expression", expression))
-            position = end + 1
-        if not segments:
-            return ("literal", scalar, ())
-        expressions = tuple(value for kind, value in segments if kind == "expression")
-        if len(segments) == 1:
-            kind, value = segments[0]
-            if kind == "expression":
-                quoted = False
-                decoded = []
-                string_expression = True
-                for index, character in enumerate(value):
-                    if character == "'":
-                        quoted = not quoted
-                        if quoted and index:
-                            decoded.append(character)
-                    elif not quoted:
-                        string_expression = False
-                        break
-                    else:
-                        decoded.append(character)
-                if string_expression and not quoted:
-                    return ("literal", "".join(decoded), expressions)
-            return (kind, value, expressions)
-        formatted = []
-        arguments = []
-        for kind, value in segments:
-            if kind == "literal":
-                formatted.append(value.replace("'", "''").replace("{", "{{").replace("}", "}}"))
-            else:
-                formatted.append("{" + str(len(arguments)) + "}")
-                arguments.append(value)
-        return ("expression", "format('" + "".join(formatted) + "'" +
-            "".join(", " + value for value in arguments) + ")", expressions)
+ def actions_projection(scalar):
+     trim_chars=" \t\n\r\v\f\x85\u00a0\u1680\u2000\u2001\u2002\u2003\u2004\u2005\u2006\u2007\u2008\u2009\u200a\u2028\u2029\u202f\u205f\u3000"
+     segments=[]
+     position=0
+     while position<len(scalar):
+         start=scalar.find("${{",position)
+         if start<0:
+             segments.append(("literal",scalar[position:]))
+             break
+         if start>position:
+             segments.append(("literal",scalar[position:start]))
+         quoted=False
+         end=start+3
+         while end<len(scalar):
+             if scalar[end]=="'":
+                 quoted=not quoted
+             elif not quoted and scalar[end]=="}" and scalar[end-1]=="}":
+                 break
+             end+=1
+         if end==len(scalar):
+             raise ValueError("unclosed Actions expression")
+         expression=scalar[start+3:end-1].strip(trim_chars)
+         if not expression:
+             raise ValueError("empty Actions expression")
+         segments.append(("expression",expression))
+         position=end+1
+     if not segments:
+         return("literal",scalar,())
+     expressions=tuple(value for kind,value in segments if kind=="expression")
+     if len(segments)==1:
+         kind,value=segments[0]
+         if kind=="expression":
+             quoted=False
+             decoded=[]
+             string_expression=True
+             for index,character in enumerate(value):
+                 if character=="'":
+                     quoted=not quoted
+                     if quoted and index:
+                         decoded.append(character)
+                 elif not quoted:
+                     string_expression=False
+                     break
+                 else:
+                     decoded.append(character)
+             if string_expression and not quoted:
+                 return("literal","".join(decoded),expressions)
+         return(kind,value,expressions)
+     formatted=[]
+     arguments=[]
+     for kind,value in segments:
+         if kind=="literal":
+             formatted.append(value.replace("'","''").replace("{","{{").replace("}","}}"))
+         else:
+             formatted.append("{"+str(len(arguments))+"}")
+             arguments.append(value)
+     return("expression","format('"+"".join(formatted)+"'"+
+         "".join(", "+value for value in arguments)+")",expressions)
 
-    def admit_actions_run(scalar):
-        if utf16_units(scalar) > 21000:
-            raise ValueError("raw run exceeds 21000 UTF-16 units")
-        kind, projected, expressions = actions_projection(scalar)
-        if any(utf16_units(expression) > 21000 for expression in expressions):
-            raise ValueError("individual Actions expression exceeds 21000 UTF-16 units")
-        if kind == "expression" and utf16_units(projected) > 21000:
-            raise ValueError("generated Actions expression exceeds 21000 UTF-16 units")
-        return (kind, projected, expressions)
+ def admit_actions_run(scalar):
+     if utf16_units(scalar)>21000:
+         raise ValueError("raw run exceeds 21000 UTF-16 units")
+     kind,projected,expressions=actions_projection(scalar)
+     if any(utf16_units(expression)>21000 for expression in expressions):
+         raise ValueError("individual Actions expression exceeds 21000 UTF-16 units")
+     if kind=="expression" and utf16_units(projected)>21000:
+         raise ValueError("generated Actions expression exceeds 21000 UTF-16 units")
+     return(kind,projected,expressions)
 
-    for indicator, expected in (("|", "echo x\n"), ("|-", "echo x"),
-            ("|+", "echo x\n\n\n")):
-        fixture = "        run: " + indicator + "\n          echo x\n\n\n        shell: bash\n"
-        assert literal_run_scalars(fixture) == [expected]
-    assert literal_run_scalars("        run: |\n          echo x") == ["echo x"]
-    assert literal_run_scalars("        run: &fixed |\n          echo x\n") == ["echo x\n"]
-    assert actions_projection("plain ' { } \U0001f680\n") == (
-        "literal", "plain ' { } \U0001f680\n", ())
-    assert actions_projection("${{ matrix.phase }}") == (
-        "expression", "matrix.phase", ("matrix.phase",))
-    assert actions_projection("${{ 'it''s }} { \U0001f680' }}") == (
-        "literal", "it's }} { \U0001f680", ("'it''s }} { \U0001f680'",))
-    assert actions_projection("a'{} \U0001f680 ${{ 'x''}}{y' }} z${{ matrix.phase }}") == (
-        "expression", "format('a''{{}} \U0001f680 {0} z{1}', 'x''}}{y', matrix.phase)",
-        ("'x''}}{y'", "matrix.phase"))
-    assert actions_projection("${{ matrix.phase }}${{ github.event.pull_request.draft && '1' || '0' }}") == (
-        "expression", "format('{0}{1}', matrix.phase, github.event.pull_request.draft && '1' || '0')",
-        ("matrix.phase", "github.event.pull_request.draft && '1' || '0'"))
-    for invalid in ("${{ }}", "${{ matrix.phase", "${{ 'unterminated }}"):
-        with pytest.raises(ValueError):
-            actions_projection(invalid)
-    assert utf16_units("\U0001f680") == 2 and len("\U0001f680") == 1
-    assert admit_actions_run("x" * 21000)[0] == "literal"
-    with pytest.raises(ValueError, match="raw run exceeds 21000"):
-        admit_actions_run("x" * 21001)
-    for seed in ("x ${{ matrix.phase }}", "\U0001f680 ${{ matrix.phase }}"):
-        remaining = 21000 - utf16_units(actions_projection(seed)[1])
-        prefix = ("x" * remaining if seed.startswith("x") else
-            "\U0001f680" * (remaining // 2) + "x" * (remaining % 2))
-        inclusive = prefix + seed
-        assert utf16_units(actions_projection(inclusive)[1]) == 21000
-        assert admit_actions_run(inclusive)[0] == "expression"
-        assert utf16_units(actions_projection(inclusive + "x")[1]) == 21001
-        with pytest.raises(ValueError, match="generated Actions expression exceeds 21000"):
-            admit_actions_run(inclusive + "x")
+ for indicator,expected in(("|","echo x\n"),("|-","echo x"),
+         ("|+","echo x\n\n\n")):
+     fixture="        run: "+indicator+"\n          echo x\n\n\n        shell: bash\n"
+     assert literal_run_scalars(fixture)==[expected]
+ assert literal_run_scalars("        run: |\n          echo x")==["echo x"]
+ assert literal_run_scalars("        run: &fixed |\n          echo x\n")==["echo x\n"]
+ assert actions_projection("plain ' { } \U0001f680\n")==(
+     "literal","plain ' { } \U0001f680\n",())
+ assert actions_projection("${{ matrix.phase }}")==(
+     "expression","matrix.phase",("matrix.phase",))
+ assert actions_projection("${{ 'it''s }} { \U0001f680' }}")==(
+     "literal","it's }} { \U0001f680",("'it''s }} { \U0001f680'",))
+ assert actions_projection("a'{} \U0001f680 ${{ 'x''}}{y' }} z${{ matrix.phase }}")==(
+     "expression","format('a''{{}} \U0001f680 {0} z{1}', 'x''}}{y', matrix.phase)",
+     ("'x''}}{y'","matrix.phase"))
+ assert actions_projection("${{ matrix.phase }}${{ github.event.pull_request.draft && '1' || '0' }}")==(
+     "expression","format('{0}{1}', matrix.phase, github.event.pull_request.draft && '1' || '0')",
+     ("matrix.phase","github.event.pull_request.draft && '1' || '0'"))
+ for invalid in("${{ }}","${{ matrix.phase","${{ 'unterminated }}"):
+     with pytest.raises(ValueError):
+         actions_projection(invalid)
+ assert utf16_units("\U0001f680")==2 and len("\U0001f680")==1
+ assert admit_actions_run("x"*21000)[0]=="literal"
+ with pytest.raises(ValueError,match="raw run exceeds 21000"):
+     admit_actions_run("x"*21001)
+ for seed in("x ${{ matrix.phase }}","\U0001f680 ${{ matrix.phase }}"):
+     remaining=21000-utf16_units(actions_projection(seed)[1])
+     prefix=("x"*remaining if seed.startswith("x")else
+         "\U0001f680"*(remaining//2)+"x"*(remaining%2))
+     inclusive=prefix+seed
+     assert utf16_units(actions_projection(inclusive)[1])==21000
+     assert admit_actions_run(inclusive)[0]=="expression"
+     assert utf16_units(actions_projection(inclusive+"x")[1])==21001
+     with pytest.raises(ValueError,match="generated Actions expression exceeds 21000"):
+         admit_actions_run(inclusive+"x")
 
-    phase_env = "          QTT_PHASE: ${{ matrix.phase }}\n"
-    draft_env = "          QTT_DRAFT: ${{ github.event.pull_request.draft && '1' || '0' }}\n"
-    assert shard_block.count(phase_env) == shard_block.count(draft_env) == 1
-    reverse_correspondence = (
-        ('[ "${{ matrix.phase }}" != fast-preflight ]', '[ "$QTT_PHASE" != fast-preflight ]'),
-        ("[ \"${{ github.event.pull_request.draft && '1' || '0' }}\" != 1 ]", '[ "$QTT_DRAFT" != 1 ]'),
-        ('qtt_original_birth_v1 - "${{ matrix.phase }}" <<\'QTT_FIXED_ORIGINAL_HOST_SOURCE_V1\'\n',
-            'qtt_original_birth_v1 - "$QTT_PHASE" <<\'QTT_FIXED_ORIGINAL_HOST_SOURCE_V1\'\n'),
-        ('            python -I -B -X utf8 tools/run_validation_gates.py --linux-preflight-provision --phase ${{ matrix.phase }}\n',
-            '            python -I -B -X utf8 tools/run_validation_gates.py --linux-preflight-provision --phase "$QTT_PHASE"\n'),
-        ('          --phase ${{ matrix.phase }} \\\n', '          --phase "$QTT_PHASE" \\\n'),
-        ('          --timing-report .tmp/qtt-validation-timing/${{ matrix.phase }}.json \\\n',
-            '          --timing-report ".tmp/qtt-validation-timing/$QTT_PHASE.json" \\\n'),
-        ('          --router-report .tmp/qtt-validation-router/${{ matrix.phase }}.json\n',
-            '          --router-report ".tmp/qtt-validation-router/$QTT_PHASE.json"\n'),
-    )
-    predecessor = shard_block
+ phase_env="          QTT_PHASE: ${{ matrix.phase }}\n"
+ draft_env="          QTT_DRAFT: ${{ github.event.pull_request.draft && '1' || '0' }}\n"
+ assert shard_block.count(phase_env)==shard_block.count(draft_env)==1
+ reverse_correspondence=(
+     ('[ "${{ matrix.phase }}" != fast-preflight ]','[ "$QTT_PHASE" != fast-preflight ]'),
+     ("[ \"${{ github.event.pull_request.draft && '1' || '0' }}\" != 1 ]",'[ "$QTT_DRAFT" != 1 ]'),
+     ('qtt_original_birth_v1 - "${{ matrix.phase }}" <<\'QTT_FIXED_ORIGINAL_HOST_SOURCE_V1\'\n',
+         'qtt_original_birth_v1 - "$QTT_PHASE" <<\'QTT_FIXED_ORIGINAL_HOST_SOURCE_V1\'\n'),
+     ('            python -I -B -X utf8 tools/run_validation_gates.py --linux-preflight-provision --phase ${{ matrix.phase }}\n',
+         '            python -I -B -X utf8 tools/run_validation_gates.py --linux-preflight-provision --phase "$QTT_PHASE"\n'),
+     ('          --phase ${{ matrix.phase }} \\\n','          --phase "$QTT_PHASE" \\\n'),
+     ('          --timing-report .tmp/qtt-validation-timing/${{ matrix.phase }}.json \\\n',
+         '          --timing-report ".tmp/qtt-validation-timing/$QTT_PHASE.json" \\\n'),
+     ('          --router-report .tmp/qtt-validation-router/${{ matrix.phase }}.json\n',
+         '          --router-report ".tmp/qtt-validation-router/$QTT_PHASE.json"\n'),
+ )
+ predecessor=shard_block
 
-    for original, observed in (
-            ('           if l[qY]<3:raise jQ("original held3 unavailable before first host effect")\n', '           if l[qY]<3 or l[jW]<2:raise jQ("held3 or diagnostic unavailable")\n'),
-            ('           l[qY]-=3\n', '           l[qY]-=3\n           l[jW]-=2\n'),
-            ('            if jC is None or d[0][2]is None or d[0][2]<jC:\n', '            if jC is None or d[0][2]is None or d[0][2]<jC:\n             try:\n              if os.write(2,b"::error::F\\n")!=11:raise jQ()\n             except jP as z:b[qC]+=[(qR,z)]\n'),
-            ('           a[qI]=[201061114,0,None]\n', '           a[qI]=[201061050,64,None]\n'),
-            ('           jY=\'watchdog-no-child-delete\'\n           qA="commands"\n', '           qA="commands"\n'),
-    ):
-        assert predecessor.count(observed) == 1
-        predecessor = predecessor.replace(observed, original, 1)
-    for before, after in reverse_correspondence:
-        assert predecessor.count(after) == 1 and before not in predecessor
-        predecessor = predecessor.replace(after, before, 1)
-    predecessor = predecessor.replace(phase_env, "", 1).replace(draft_env, "", 1)
-    old_scalars = literal_run_scalars(predecessor)
-    current_scalars = literal_run_scalars(shard_block)
-    assert len(old_scalars) == len(current_scalars) == 2
-    inflated = [scalar for scalar in old_scalars if
-        actions_projection(scalar)[0] == "expression" and
-        utf16_units(actions_projection(scalar)[1]) > 21000]
-    assert len(inflated) == 1
-    # Synthetic boundary; precursor rejects.
-    precursor = inflated
-    inflated = ["x"*20766+"'"*38+"{}"*15+"${{ "+" }}${{ ".join(actions_projection(precursor[0])[2])+" }}"]
-    assert utf16_units(inflated[0]) == 21000
-    assert utf16_units(actions_projection(inflated[0])[1]) == 21064
-    assert actions_projection(inflated[0])[2] == (
-        "matrix.phase", "github.event.pull_request.draft && '1' || '0'",
-        "matrix.phase", "matrix.phase", "matrix.phase", "matrix.phase", "matrix.phase")
-    for inflated in (precursor, inflated):
-        with pytest.raises(ValueError, match="generated Actions expression exceeds 21000"):
-            admit_actions_run(inflated[0])
-    assert all("${{" not in scalar for scalar in current_scalars)
-    for scalar in literal_run_scalars(workflow):
-        admit_actions_run(scalar)
-
-
-    assert "    timeout-minutes: 90\n" in shard_block
-    assert "    strategy:\n" in shard_block
-    assert "      fail-fast: false\n" in shard_block
-    assert "          python-version: '3.14.6'\n" in shard_block
-    assert "      - name: Restore pip download cache\n" in shard_block
-    assert "        uses: actions/cache@v4\n" in shard_block
-    assert "cache-dependency-path" not in shard_block
-    assert "          cache: pip\n" not in shard_block
-    assert "        with: &pip_cache\n" in shard_block
-    assert "          path: ~/.cache/pip\n" in shard_block
-    assert (
-        "          key: ${{ runner.os }}-python-3.14.6-pip-pytest-9.1.1-"
-        "${{ hashFiles('.github/workflows/qtt_validation.yml') }}\n"
-    ) in shard_block
-    assert (
-        "            ${{ runner.os }}-python-3.14.6-pip-pytest-9.1.1-\n"
-        in shard_block
-    )
-    assert "        run: &install_pytest |\n" in shard_block
-    expected_pins = ("pytest==9.1.1", "iniconfig==2.3.0", "packaging==26.0", "pluggy==1.6.0",
-        "pygments==2.21.0", "websockets==17.0.1", "cryptography==50.0.1", "cffi==2.1.1", "pycparser==3.0",
-        "jsonschema==4.26.0", "jsonschema-specifications==2025.9.1", "referencing==0.37.0", "rpds-py==2026.5.1", "attrs==26.1.0")
-    install = shard_block.split("        run: &install_pytest |\n", 1)[1].split("          python -m pip check\n", 1)[0]
-    import shlex
-    assert tuple(shlex.split(install.replace("\\\n", " "))) == (
-        "python", "-m", "pip", "install", "--only-binary=:all:", "--no-deps", "--index-url",
-        "https://pypi.org/simple", *expected_pins)
-    assert "          python -m pip check\n" in shard_block
-    for phase in runner.ORDERED_PHASES:
-        assert f"          - phase: {phase}\n" in shard_block
-    assert "          - phase: deterministic-validators\n" not in shard_block
-    assert '--phase "$QTT_PHASE"' in shard_block
-    assert '--timing-report ".tmp/qtt-validation-timing/$QTT_PHASE.json"' in shard_block
-    assert '--router-report ".tmp/qtt-validation-router/$QTT_PHASE.json"' in shard_block
-    assert "uses: actions/upload-artifact@v4" in shard_block
-    assert "validation-timing-${{ matrix.phase }}" in shard_block
-    assert "validation-router-${{ matrix.phase }}" in shard_block
-    assert shard_block.count("if: ${{ always() }}") >= 2
-    assert "Run canonical validation gates" not in workflow
-
-    event_block = workflow.split("on:\n", 1)[1].split("\npermissions:\n", 1)[0]
-    assert event_block.startswith("  pull_request:\n    types: [opened, synchronize, reopened, ready_for_review]\n")
-    assert "  workflow_dispatch:\n    inputs:\n      full_validation:\n" in event_block
-    assert "  push:\n    branches:\n      - main\n" in event_block
-    assert "pull_request_target:" not in event_block
-    eligibility = (
-        "          QTT_PR298_NATIVE_ELIGIBLE: ${{ ((github.event_name == 'pull_request' && github.repository == "
-        "'Q8Meow/QTT_New0526' && github.event.pull_request.number == 298 && "
-        "github.event.pull_request.head.repo.full_name == 'Q8Meow/QTT_New0526' && "
-        "github.event.pull_request.base.repo.full_name == 'Q8Meow/QTT_New0526' && github.event.pull_request.base.ref "
-        "== 'main' && github.event.pull_request.head.ref == 'repair/main-cumulative-v35-final-r5-local-20260922') || "
-        "(github.repository == 'Q8Meow/QTT_New0526' && github.ref == 'refs/heads/main' && github.ref_name == 'main' "
-        "&& github.head_ref == '' && github.base_ref == '' && (github.event_name == 'push' && github.event.ref == "
-        'github.ref && github.event.after == github.sha && github.event.deleted == false || github.event_name == '
-        "'workflow_dispatch' && (github.event.ref == 'main' || github.event.ref == github.ref) && "
-        "(github.event.inputs.full_validation == 'true' || github.event.inputs.full_validation == 'false')))) && '1' "
-        "|| '0' }}\n"
-    )
-    assert shard_block.count(eligibility) == 1
-    assert shard_block.count("          QTT_PR298_NATIVE_ELIGIBLE:") == 1
-    assert '            python -I -B -X utf8 tools/run_validation_gates.py --linux-preflight-provision --phase "$QTT_PHASE"\n' in shard_block
-    assert "          if [ \"$QTT_PR298_NATIVE_ELIGIBLE\" = \"1\" ]\n" in shard_block
-
-    import ast
-    import copy
-    import textwrap
-
-    opening = 'qtt_original_birth_v1 - "$QTT_PHASE" <<\'QTT_FIXED_ORIGINAL_HOST_SOURCE_V1\'\n'
-    frontend_text = textwrap.dedent(shard_block.split(opening, 1)[1].split(
-        "          QTT_FIXED_ORIGINAL_HOST_SOURCE_V1\n", 1)[0])
-    frontend_tree = ast.parse(frontend_text)
-    front_function = next(node for node in frontend_tree.body
-        if isinstance(node, ast.FunctionDef) and node.name == "_qtt_original_front_v1")
-    actual_front_function = copy.deepcopy(front_function)
-    aliases = dict(jR="original", q3="id", q4="ancestor-manager-ready",
-        q5="fixed first-host", q6="same original", q7="created", q8="deleted",
-        jV="armed", jW="settle", jX="delete_attempted")
-    bindings = [(t.id, v.value) for n in ast.walk(front_function) if isinstance(n, ast.Assign)
-        for t, v in zip(n.targets[0].elts if isinstance(n.targets[0], ast.Tuple) else n.targets,
-            n.value.elts if isinstance(n.value, ast.Tuple) else [n.value])
-        if isinstance(t, ast.Name) and t.id in aliases and isinstance(v, ast.Constant)]
-    assert len(bindings) == len(aliases) and dict(bindings) == aliases
-    class FrontLiterals(ast.NodeTransformer):
-        def visit_Name(self, n):
-            return ast.copy_location(ast.Constant(aliases[n.id]), n) if isinstance(n.ctx, ast.Load) and n.id in aliases and n.id != "jR" else n
-        def visit_BinOp(self, n):
-            self.generic_visit(n)
-            if isinstance(n.left, ast.Name) and n.left.id == "jR": n.left = ast.Constant("original")
-            if isinstance(n.op, ast.Add) and all(isinstance(v, ast.Constant) and type(v.value) is str for v in (n.left, n.right)):
-                return ast.copy_location(ast.Constant(n.left.value + n.right.value), n)
-            return n
-    front_function = FrontLiterals().visit(front_function)
-    members = {node.name: node for node in front_function.body if isinstance(node, ast.FunctionDef)}
-    def helper_from_source(name, ports):
-        isolated = ast.Module(body=[copy.deepcopy(members[name])], type_ignores=[])
-        exec(compile(ast.fix_missing_locations(isolated), "<workflow-no-child-owner>", "exec"), ports)
-        return ports[name]
-
-    class KernelPort:
-        c_long = staticmethod(int)
-        c_int = staticmethod(int)
-
-        @staticmethod
-        def get_errno():
-            return 5
-
-    for number, raw_result, fault_after_raw in ((222, 0, "errno"), (222, 0, "bytes"),
-                                               (223, 0, "errno"), (226, 0, "errno"),
-                                               (222, -1, None)):
-        calls = []
-        raw_fault = OSError("synthetic getter/admission failure")
-        watchdog = {"id": None, "created": False, "armed": number == 226,
-                    "deleted": False}
-        observed = b"\x00\x00\x00\x00" if number == 222 else None
-        def synthetic_native(*args):
-            calls.append(("raw", args))
-            return raw_result
-        def synthetic_effect(name, function, *args, **kwargs):
-            calls.append(("effect", name, kwargs["tranche"]))
-            if name.endswith("-errno") and fault_after_raw == "errno":
-                raise raw_fault
-            return function(*args)
-        def synthetic_returned(part):
-            calls.append(("returned", bytes(part)))
-            if fault_after_raw == "bytes":
-                raise raw_fault
-        ports = {"qZ": "work", "ctypes": KernelPort, "native": synthetic_native,
-                 "effect": synthetic_effect, "returned": synthetic_returned,
-                 "w": watchdog, "handle": SimpleNamespace(value=17)}
-        kernel = helper_from_source("kernel", ports)
-        with pytest.raises(OSError) as raised:
-            kernel("synthetic-watchdog", number, observed=observed)
-        if fault_after_raw is not None:
-            assert raised.value is raw_fault
-        else:
-            assert raised.value.errno == 5
-        assert watchdog == {"id": 17 if number == 222 and raw_result == 0 else None,
-            "created": number == 222 and raw_result == 0,
-            "armed": number == 223 and raw_result == 0,
-            "deleted": number == 226 and raw_result == 0}
-        assert sum(row[0] == "raw" for row in calls) == 1
-        if observed is not None:
-            assert sum(row[0] == "returned" for row in calls) == 1
-
-    body_fault = OSError("synthetic no-child initial failure")
-    close_fault = OSError("synthetic no-child delete failure")
-    watchdog = {"armed": False, "created": True, "delete_attempted": False,
-                "deleted": False, "id": 19}
-    errors = [("original-first-front", body_fault)]
-    state = {"custodian_effect_attempted": True, "commands": [], "errors": errors}
-    deletes = []
-    def failed_delete(name, *args, **kwargs):
-        deletes.append((name, args, kwargs))
-        raise close_fault
-    ports = {"qA": "commands", "qB": "custodian_effect_attempted", "qC": "errors",
-             "qT": "failure_cutoff", "b": {"retired": False}, "a": state,
-             "w": watchdog, "ctypes": KernelPort, "kernel": failed_delete}
-    failure = helper_from_source("failure", ports)
-    with pytest.raises(BaseExceptionGroup) as raised:
-        failure(body_fault)
-    assert raised.value.exceptions == (body_fault, close_fault)
-    assert watchdog["delete_attempted"] and not watchdog["deleted"]
-    assert errors == [("original-first-front", body_fault), ("watchdog-no-child-delete", close_fault)]
-    assert len(deletes) == 1 and deletes[0][2] == {"tranche": "settle"}
-    assert "w" not in {node.id for node in ast.walk(members["failure"])
-        if isinstance(node, ast.Name) and isinstance(node.ctx, ast.Store)}
-
-    source = ast.unparse(front_function)
-    initial = ast.unparse(next(node for node in front_function.body if isinstance(node, ast.Try)))
-    assert initial.index("'same original privileged preparer required'") < initial.index("'watchdog-create'")
-    assert initial.index("'watchdog-arm-original'") < initial.index("'front-original-same-owner-call'")
-    assert "origin + 3720000000000" in source and "tranche='settle'" in source
-    manager_source = ast.unparse(members["manager"])
-    assert manager_source.index("timer_check()") < manager_source.index("'ancestor-manager-fork'")
-    assert manager_source.index("ctypes.c_long(157)") < manager_source.index("os.getppid()") < manager_source.index("os.execve(")
-    assert source.index("'original watchdog cannot retire unresolved child or scope debt'") < source.index("'watchdog-terminal-delete'")
-    assert "not all(c['eof'])" in source and "b['retired']" in source and "c['reap'] != (c['pid'], 0)" in source
-
-    native_raw = (Path(__file__).resolve().parents[2] / "tools/ci_branch_context.py").read_bytes()
-    native_tree = ast.parse(native_raw.decode("utf-8"))
-    native_rows = [node for node in native_tree.body
-        if isinstance(node, ast.Assign) and len(node.targets) == 1
-        and isinstance(node.targets[0], ast.Name)
-        and node.targets[0].id == "_QTT_ORDINARY_NATIVE_C_SOURCE_V1"]
-    assert len(native_rows) == 1
-    native_value = native_rows[0].value
-    assert isinstance(native_value, ast.Constant) and type(native_value.value) is bytes
-    native_bytes = native_value.value
-    native_begin = b"# QTT_ORDINARY_NATIVE_C_DATA_BEGIN_20261008_V1\n"
-    native_end = b"# QTT_ORDINARY_NATIVE_C_DATA_END_20261008_V1\n"
-    native_lines = native_raw.splitlines(keepends=True)
-    native_starts = [i for i, line in enumerate(native_lines) if line == native_begin]
-    native_ends = [i for i, line in enumerate(native_lines) if line == native_end]
-    assert len(native_starts) == len(native_ends) == 1
-    assert native_starts[0] < native_ends[0]
-    native_frame = b"".join(native_lines[native_starts[0] + 1:native_ends[0]])
-    native_prefix, native_suffix = b"_QTT_ORDINARY_NATIVE_C_SOURCE_V1 = rb'''", b"'''\n"
-    assert native_frame.startswith(native_prefix) and native_frame.endswith(native_suffix)
-    assert native_bytes == native_frame[len(native_prefix):-len(native_suffix)]
-    assert native_bytes and native_bytes.endswith(b"\n")
-    assert b"\r" not in native_bytes and b"\0" not in native_bytes and b"'''" not in native_bytes
-    native_source = native_bytes.decode("ascii")
-
-    def native_owner_body(name, return_type="int", definition_suffix=None):
-        assert return_type in ("int", "void", "ssize_t")
-        signature = "static " + return_type + " " + name + "("
-        if definition_suffix is not None:
-            assert definition_suffix == "void) {"
-            signature += definition_suffix
-        assert native_source.count(signature) == 1
-        opening = native_source.index("{", native_source.index(signature))
-        position, depth, state, escaped, code = opening, 0, "code", False, []
-        while position < len(native_source):
-            character = native_source[position]
-            following = native_source[position:position + 2]
-            if state == "line":
-                if character == "\n": state = "code"
-            elif state == "block":
-                if following == "*/": state = "code"; position += 1
-            elif state in ('"', "'"):
-                code.append(character)
-                if escaped: escaped = False
-                elif character == "\\": escaped = True
-                elif character == state: state = "code"
-            elif following == "//": state = "line"; position += 1
-            elif following == "/*": state = "block"; position += 1
-            else:
-                code.append(character)
-                if character in ('"', "'"): state = character
-                elif character == "{": depth += 1
-                elif character == "}":
-                    depth -= 1
-                    if not depth: return "".join("".join(code).split())
-            position += 1
-        raise AssertionError("actual C owner body is incomplete: " + name)
-
-    quiet = native_owner_body("qn_flag_command_quiet")
-    assert 'qn_error("source-seal-native-terminal-and-quiet",EPROTO)' in quiet
-    for original_field in ("!c->registered", "!c->child_created", "c->pending", "!c->exec_proven",
-            "!c->exec_eof", "!c->terminal", "c->status", "!c->stdout_eof", "!c->stderr_eof",
-            "!o->registered", "!o->native_attempted", "o->result", "o->native_errno",
-            "o->info.si_pid!=c->pid", "o->info.si_code!=CLD_EXITED", "o->info.si_status",
-            "c->stdout_used", "c->stderr_used"):
-        assert original_field in quiet
-    assert "free(" not in quiet and "realloc(" not in quiet and "qn_command_run(" not in quiet
-    assert "stdout_used=" not in quiet and "stderr_used=" not in quiet
-
-    for original_flag_owner, operand, journal in (
-            ("qn_flag_effect", "number", "*attempted=1;"),
-            ("qn_catalogue_flag_effect", "slot", "*attempted|=baseline?2:1;")):
-        flag = native_owner_body(original_flag_owner)
-        native_call = "qn_command_run(index,argv,1)<0"
-        generation = "qn_refresh_after_flag_effect(" + operand + ",after)<0"
-        acceptance = "qn_flag_command_quiet(index)<0"
-        assert flag.index(journal) < flag.index(native_call) < flag.index(generation) < flag.index(acceptance)
-        assert native_call + "||" + generation + "||" + acceptance in flag
-        assert 'argv[3]="/usr/bin/chattr";argv[4]=restore?"-i":"+i";' in flag
-        assert 'argv[5]="--";' in flag and "free(" not in flag
-        assert flag.index(acceptance) < flag.index("qn_startup_mode_loan(")
-    refreshed = native_owner_body("qn_refresh_after_flag_effect")
-    assert "s->path_before=p;s->handle_before=h;return0;" in refreshed
-    error = native_owner_body("qn_error")
-    assert "qn.stage=QN_HELD;" in error
-    owner_check = native_owner_body("qn_owner_check")
-    assert "!permit_held&&(qn.stage==QN_HELD||qn.stage==QN_CLOSED)" in owner_check
-    attempted = native_owner_body("qn_attempt")
-    assert "elseif(qn_owner_check(0)<0)return-1;" in attempted
-    captured = native_owner_body("qn_capture_one")
-    assert "qn.heap_remaining-=added;qn.realloc_peak_remaining-=next_extent;" in captured
-    assert "*used+=(size_t)n;" in captured and "free(" not in captured
-
-    keeper_prepare = native_owner_body("qn_keeper_observations_prepare")
-    for original_field in ("l->attempted=1", "l->role=QN_PROVISION", "l->keeper_pid=qn.pid",
-            "l->source_owner=(constvoid*)&qn", "l->origin_ns=qn.origin_ns", "l->cutoff_ns=qn.cutoff_ns",
-            "l->source_input_count=qn.input_count", "l->source_catalogue_count=qn.catalogue_count",
-            "l->source_alias_count=qn.alias_count", "!qn.provision.mask_held", "!qn.catalogue_complete"):
-        assert original_field in keeper_prepare
-    assert keeper_prepare.index("l->process_slot=qn_open_component(") < keeper_prepare.index("l->stat_slot=qn_open_component(") < keeper_prepare.index("l->keeper_pid_slot=qn_pidfd_slot(")
-    assert "qn_keeper_observation_slots_close()" in keeper_prepare
-    keeper_namespace = native_owner_body("qn_keeper_namespace_open")
-    assert keeper_namespace.index("number=qn_slot_register(") < keeper_namespace.index("qn_fstatat(") < keeper_namespace.index("s->fd=openat(")
-    assert 'name,O_RDONLY|O_CLOEXEC)' in keeper_namespace and "O_PATH" not in keeper_namespace
-    keeper_check = native_owner_body("qn_keeper_observation_check")
-    assert "flags!=FD_CLOEXEC" in keeper_check and "(access&O_ACCMODE)!=O_RDONLY||(access&O_PATH)" in keeper_check
-    assert "!initial&&access!=l->access_flags[role]" in keeper_check
-    assert "ioctl(s->fd,NS_GET_NSTYPE,(void*)0)" in keeper_check
-    assert "NSFS_MAGIC" in keeper_check and "PROC_SUPER_MAGIC" in keeper_check
-    keeper_life = native_owner_body("qn_keeper_original_check")
-    assert keeper_life.index("qn_keeper_start_from_held(o)") < keeper_life.index("poll(&port,1,0)")
-    assert "o->start_ticks!=l->keeper_start" in keeper_life and "o->poll_result!=0||o->poll_revents" in keeper_life
-
-    provision_prepare = native_owner_body("qn_provision_prepare", "int", "void) {")
-    assert provision_prepare.index("qn_provision_original_inputs()<0") < provision_prepare.index("qn_keeper_observations_prepare()<0") < provision_prepare.index("qn_provision_prefix_allocation()<0")
-    assert provision_prepare.index("qn_keeper_observations_prefork_join()<0") < provision_prepare.index("c->pid=fork();")
-    assert "qn_error(\"provision-original-native-fork\",errno);gotokeeper_prefork_failed;" in provision_prepare
-    actual_child_suffix = provision_prepare.split("c->child_created=1;", 1)[1].split("keeper_prefork_failed:", 1)[0]
-    assert "gotokeeper_prefork_failed;" not in actual_child_suffix and "return-1;" in actual_child_suffix
-    keeper_child = native_owner_body("qn_provision_child_observations", "void")
-    assert "syscall(SYS_close_range,3U,UINT_MAX,CLOSE_RANGE_CLOEXEC)" in keeper_child
-    assert "CLOSE_RANGE_UNSHARE" not in keeper_child and "close(" not in keeper_child
-    assert keeper_child.index("j->cloexec_range_attempted=1;") < keeper_child.index("syscall(SYS_close_range,") < keeper_child.index("parent=getppid();")
-    assert "parent!=l->keeper_pid" in keeper_child and "for(i=0;i<3;i++)" in keeper_child
-    assert "(returned&O_PATH)||returned!=l->access_flags[i]" in keeper_child
-    assert "ioctl(fd,NS_GET_NSTYPE,(void*)0)" in keeper_child
-    assert keeper_child.index("o->handle=qn_stat_version(&st);") < keeper_child.index("o->clear_attempted=1;") < keeper_child.index("fcntl(fd,F_SETFD,") < keeper_child.index("o->flags_after_result=returned;")
-    assert "o->flags_before_result&~FD_CLOEXEC" in keeper_child and "if(returned!=0)" in keeper_child
-    provision_child = native_owner_body("qn_provision_child", "void")
-    assert provision_child.index("qn_provision_child_root(") < provision_child.index("qn_provision_child_observations(") < provision_child.index("setgid(p->selected_gid)") < provision_child.index("setuid(p->selected_uid)") < provision_child.index("execveat(")
-    assert "F_SETFD" not in provision_child and "CLONE_FILES" not in provision_prepare
-
-    keeper_release = native_owner_body("qn_keeper_observations_release_join")
-    assert "SEEK_CUR" in keeper_release and "offset!=l->maps_initial_offset||offset!=0" in keeper_release
-    assert "SEEK_SET" not in keeper_release and "qn_read(" not in keeper_release
-    keeper_retire = native_owner_body("qn_keeper_observations_retire")
-    for terminal_field in ("!p->reaped", "c->pending", "!c->terminal", "!c->exec_proven",
-            "!c->stdout_eof", "!c->stderr_eof", "!p->prefix_merged"):
-        assert terminal_field in keeper_retire
-    assert keeper_retire.index('qn_error("keeper-original-observation-live-retirement-debt",EBUSY)') < keeper_retire.index("qn_keeper_observation_slots_close()") < keeper_retire.index("l->retired=1;")
-    keeper_close = native_owner_body("qn_keeper_observation_slots_close")
-    assert "intslots[7]=" in keeper_close and "for(i=0;i<7;i++)" in keeper_close
-    assert "if(!s->close_attempted)" in keeper_close and "s->close_result<0||s->close_errno" in keeper_close
-    native_compact = "".join(native_source.split())
-    return_definition = "staticintqn_provision_return(intterminal_status){"
-    storage_definition = "staticintqn_provision_storage_close(void){"
-    assert native_compact.count(return_definition) == native_compact.count(storage_definition) == 1
-    provision_return = native_compact.split(return_definition, 1)[1].split(storage_definition, 1)[0]
-    assert provision_return.index("waitpid(c->pid,&status,0)") < provision_return.index("p->reaped=1;c->pending=0;") < provision_return.index("qn_keeper_observations_retire()") < provision_return.index("borrow->returned=1;")
-    provision_storage = native_owner_body("qn_provision_storage_close")
-    assert "!p->keeper_observations.retired" in provision_storage
-    original_read = native_owner_body("qn_read", "ssize_t")
-    assert original_read.index("request>qn.read_remaining") < original_read.index("n=read(") < original_read.index("qn.read_remaining-=(uint64_t)n;qn.read_bytes+=(uint64_t)n;")
-    namespace_read = native_owner_body("qn_keeper_namespace_link")
-    assert namespace_read.index("63U>qn.read_remaining") < namespace_read.index("n=readlinkat(") < namespace_read.index("qn.read_remaining-=(uint64_t)n;qn.read_bytes+=(uint64_t)n;")
-
-    import tempfile
-    import stat
-    host_tag = "# QTT_HOST_PY | "
-    host_source = "".join(line[len(host_tag):] for line in workflow.splitlines(keepends=True)
-        if line.startswith(host_tag))
-    host_tree = ast.parse(host_source)
-    adoption_nodes = [node for node in ast.walk(host_tree)
-        if isinstance(node, ast.FunctionDef) and node.name == "_qtt_adopt_early_startup_counts_v1"]
-    assert len(adoption_nodes) == 1
-    adoption_node = adoption_nodes[0]
-    roster_nodes = [node for node in ast.walk(adoption_node)
-        if isinstance(node, ast.FunctionDef) and node.name == "roster"]
-    assert len(roster_nodes) == 1
-    roster_node = roster_nodes[0]
-    adoption_source = ast.unparse(adoption_node)
-    roster_source = ast.unparse(roster_node)
-    assert "(r, c, r['path'], r['row'], r['version'], r['members'], r['duplicate'], c['function'], c['code'])" in adoption_source
-    assert "first['names'] is not r['names']" in adoption_source
-    assert "tuple((n for n, v in r['members'])) != r['names']" in adoption_source
-    admission_ifs = [node for node in ast.walk(roster_node) if isinstance(node, ast.If)
-        and any(isinstance(value, ast.Constant)
-            and value.value == "same original earlier roster bounded returned prefix"
-            for value in ast.walk(node))]
-    assert len(admission_ifs) == 1
-    admission = ast.unparse(admission_ifs[0].test)
-    assert "len(names) >= len(early['names'])" in admission
-    assert "len(names) >= 65535 // 2" in admission and "total + len(name) + 1 > 65535" in admission
-    assert roster_source.index("'C earlier roster original next'") < roster_source.index(
-        "len(names) >= len(early['names'])") < roster_source.index("names.append(name)")
-    assert "tuple(names) != early['names']" in roster_source
-    iterator_nodes = [node for node in ast.walk(host_tree)
-        if isinstance(node, ast.FunctionDef) and node.name == "iterator_next"]
-    assert len(iterator_nodes) == 1
-
-    for wanted, present, expected_error in (
-            ((b"aa", b"bb"), ("aa", "bb"), None),
-            ((), (), None),
-            ((b"aa", b"bb"), ("aa", "bb", "cc", "dd"), "prefix"),
-            ((), ("aa", "bb"), "prefix"),
-            ((b"aa", b"bb"), ("aa", "xx"), "membership")):
-        with tempfile.TemporaryDirectory(prefix="qtt-roster-no-child-") as owned:
-            root = Path(owned)
-            for filename in present:
-                operand = root / filename
-                operand.write_bytes(b"owned synthetic roster operand")
-                info = operand.lstat()
-                assert stat.S_ISREG(info.st_mode) and info.st_nlink == 1
-            info = root.stat()
-            current = (info.st_dev, info.st_ino, info.st_mode, info.st_uid, info.st_gid,
-                info.st_nlink, info.st_size, info.st_mtime_ns, info.st_ctime_ns)
-            row = [owned, owned, False, None]
-            early = {"row": row, "names": wanted, "roster": b"".join(name + b"\n" for name in wanted)}
-            retained = {"iterations": []}
-            failed = {"errors": []}
-            effects = []
-            rejoins = []
-
-            def same_local_port(operand, expected, directory=False):
-                rejoins.append((operand, expected, directory))
-                assert operand is row and expected is current and directory is True
-                actual = root.stat()
-                assert (actual.st_dev, actual.st_ino, actual.st_mode, actual.st_uid, actual.st_gid,
-                    actual.st_nlink, actual.st_size, actual.st_mtime_ns, actual.st_ctime_ns) == current
-                return actual
-
-            def effect_port(label, function, *args):
-                record = {"label": label, "function": function, "args": args,
-                    "attempted": False, "returned": None, "error": None}
-                effects.append(record)
-                record["attempted"] = True
-                try:
-                    record["returned"] = function(*args)
-                    return record["returned"]
-                except BaseException as error:
-                    record["error"] = error
-                    raise
-
-            def failure_port(label):
-                raise ValueError(label)
-
-            ports = {"os": os, "same_local": same_local_port, "E": effect_port,
-                "F": failure_port, "a": retained, "q": failed}
-            isolated = ast.Module(body=[copy.deepcopy(iterator_nodes[0]), copy.deepcopy(roster_node)],
-                type_ignores=[])
-            exec(compile(ast.fix_missing_locations(isolated), "<keeper-roster-no-child-owner>", "exec"), ports)
-            if expected_error is None:
-                ports["roster"](early, current)
-                assert failed["errors"] == [] and len(rejoins) == 2
-                assert len([item for item in effects if item["label"].endswith("original next")]) == len(wanted) + 1
-                assert retained["iterations"][0]["body_error"] is None
-            else:
-                message = ("same original earlier roster bounded returned prefix" if expected_error == "prefix"
-                    else "same original earlier complete directory membership changed")
-                with pytest.raises(ValueError, match=message) as raised:
-                    ports["roster"](early, current)
-                assert failed["errors"] == [raised.value]
-                assert retained["iterations"][0]["body_error"] is raised.value
-                assert len(rejoins) == 1
-                traceback = raised.value.__traceback__
-                while traceback is not None and traceback.tb_frame.f_code is not ports["roster"].__code__:
-                    traceback = traceback.tb_next
-                assert traceback is not None
-                assert len(traceback.tb_frame.f_locals["names"]) == len(wanted)
-                returned = [item for item in effects if item["label"].endswith("original next")]
-                assert len(returned) == len(wanted) + 1
-                if expected_error == "prefix":
-                    assert returned[-1]["returned"][0] is False
-                    assert returned[-1]["returned"][1] is traceback.tb_frame.f_locals["entry"]
-            iteration = retained["iterations"][0]
-            assert iteration["early"] is early and iteration["row"] is row
-            assert iteration["close_attempted"] and iteration["closed"] and iteration["close_error"] is None
-            assert sum(item["label"] == "C earlier roster iterator one-close" for item in effects) == 1
-            assert all(item["attempted"] and item["error"] is None for item in effects)
-            assert early["names"] is wanted and early["roster"] == b"".join(name + b"\n" for name in wanted)
+ for original,observed in(
+         ('           if l[qY]<3:raise jQ("original held3 unavailable before first host effect")\n','           if l[qY]<3 or l[jW]<2:raise jQ("held3 or diagnostic unavailable")\n'),
+         ('           l[qY]-=3\n','           l[qY]-=3\n           l[jW]-=2\n'),
+         ('            if jC is None or d[0][2]is None or d[0][2]<jC:\n','            if jC is None or d[0][2]is None or d[0][2]<jC:\n             try:\n              if os.write(2,b"::error::F\\n")!=11:raise jQ()\n             except jP as z:b[qC]+=[(qR,z)]\n'),
+         ('           a[qI]=[201061114,0,None]\n','           a[qI]=[201061050,64,None]\n'),
+         ('           jY=\'watchdog-no-child-delete\'\n           qA="commands"\n','           qA="commands"\n'),
+ ):
+     assert predecessor.count(observed)==1
+     predecessor=predecessor.replace(observed,original,1)
+ for before,after in reverse_correspondence:
+     assert predecessor.count(after)==1 and before not in predecessor
+     predecessor=predecessor.replace(after,before,1)
+ predecessor=predecessor.replace(phase_env,"",1).replace(draft_env,"",1)
+ old_scalars=literal_run_scalars(predecessor)
+ current_scalars=literal_run_scalars(shard_block)
+ assert len(old_scalars)==len(current_scalars)==2
+ inflated=[scalar for scalar in old_scalars if
+     actions_projection(scalar)[0]=="expression" and
+     utf16_units(actions_projection(scalar)[1])>21000]
+ assert len(inflated)==1
+ # Synthetic boundary; precursor rejects.
+ precursor=inflated
+ inflated=["x"*20766+"'"*38+"{}"*15+"${{ "+" }}${{ ".join(actions_projection(precursor[0])[2])+" }}"]
+ assert utf16_units(inflated[0])==21000
+ assert utf16_units(actions_projection(inflated[0])[1])==21064
+ assert actions_projection(inflated[0])[2]==(
+     "matrix.phase","github.event.pull_request.draft && '1' || '0'",
+     "matrix.phase","matrix.phase","matrix.phase","matrix.phase","matrix.phase")
+ for inflated in(precursor,inflated):
+     with pytest.raises(ValueError,match="generated Actions expression exceeds 21000"):
+         admit_actions_run(inflated[0])
+ assert all("${{" not in scalar for scalar in current_scalars)
+ for scalar in literal_run_scalars(workflow):
+     admit_actions_run(scalar)
 
 
+ assert "    timeout-minutes: 90\n" in shard_block
+ assert "    strategy:\n" in shard_block
+ assert "      fail-fast: false\n" in shard_block
+ assert "          python-version: '3.14.6'\n" in shard_block
+ assert "      - name: Restore pip download cache\n" in shard_block
+ assert "        uses: actions/cache@v4\n" in shard_block
+ assert "cache-dependency-path" not in shard_block
+ assert "          cache: pip\n" not in shard_block
+ assert "        with: &pip_cache\n" in shard_block
+ assert "          path: ~/.cache/pip\n" in shard_block
+ assert(
+     "          key: ${{ runner.os }}-python-3.14.6-pip-pytest-9.1.1-"
+     "${{ hashFiles('.github/workflows/qtt_validation.yml') }}\n"
+ )in shard_block
+ assert(
+     "            ${{ runner.os }}-python-3.14.6-pip-pytest-9.1.1-\n"
+     in shard_block
+ )
+ assert "        run: &install_pytest |\n" in shard_block
+ expected_pins=("pytest==9.1.1","iniconfig==2.3.0","packaging==26.0","pluggy==1.6.0",
+     "pygments==2.21.0","websockets==17.0.1","cryptography==50.0.1","cffi==2.1.1","pycparser==3.0",
+     "jsonschema==4.26.0","jsonschema-specifications==2025.9.1","referencing==0.37.0","rpds-py==2026.5.1","attrs==26.1.0")
+ install=shard_block.split("        run: &install_pytest |\n",1)[1].split("          python -m pip check\n",1)[0]
+ import shlex
+ assert tuple(shlex.split(install.replace("\\\n"," ")))==(
+     "python","-m","pip","install","--only-binary=:all:","--no-deps","--index-url",
+     "https://pypi.org/simple",*expected_pins)
+ assert "          python -m pip check\n" in shard_block
+ for phase in runner.ORDERED_PHASES:
+     assert f"          - phase: {phase}\n" in shard_block
+ assert "          - phase: deterministic-validators\n" not in shard_block
+ assert '--phase "$QTT_PHASE"' in shard_block
+ assert '--timing-report ".tmp/qtt-validation-timing/$QTT_PHASE.json"' in shard_block
+ assert '--router-report ".tmp/qtt-validation-router/$QTT_PHASE.json"' in shard_block
+ assert "uses: actions/upload-artifact@v4" in shard_block
+ assert "validation-timing-${{ matrix.phase }}" in shard_block
+ assert "validation-router-${{ matrix.phase }}" in shard_block
+ assert shard_block.count("if: ${{ always() }}")>=2
+ assert "Run canonical validation gates" not in workflow
 
-    host_function = next(node for node in host_tree.body
-        if isinstance(node, ast.FunctionDef) and node.name == "_qtt_original_host_source_v1")
-    host_failure = next(node for node in host_function.body
-        if isinstance(node, ast.FunctionDef) and node.name == "failure")
-    custodian_failure = next(node for node in ast.walk(host_tree)
-        if isinstance(node, ast.FunctionDef) and node.name == "_qtt_custodian_failure_v1")
-    held_owners = (("FRONT", members["failure"]), ("HOST", host_failure),
-        ("CUSTODIAN", custodian_failure))
-    reservation_source = ast.unparse(actual_front_function)
-    assert "l[qY] < 3 or l[jW] < 2" in reservation_source
-    assert reservation_source.index("l[jW] -= 2") < reservation_source.index("p[qX] = True")
-    assert "[201061050, 64, None]" in reservation_source
-    assert 201061050 + 64 == 201061114
-    literal_error_owner = next(node for node in ast.walk(host_tree)
-        if isinstance(node, ast.FunctionDef) and node.name == "F")
-    assert ast.unparse(literal_error_owner) == "def F(name):\n    raise RuntimeError(name)"
-    assert any(isinstance(node, ast.Call) and isinstance(node.func, ast.Name)
-        and node.func.id == "F" and len(node.args) == 1
-        and isinstance(node.args[0], ast.Constant) and node.args[0].value == "B18"
-        for node in ast.walk(host_tree))
-    for stage, owner in held_owners:
-        writes = [node for node in ast.walk(owner) if isinstance(node, ast.Call)
-            and isinstance(node.func, ast.Attribute) and isinstance(node.func.value, ast.Name)
-            and node.func.value.id == "os" and node.func.attr == "write"]
-        assert len(writes) == 1 and isinstance(writes[0].args[0], ast.Constant) and writes[0].args[0].value == 2
-        if stage != "FRONT":
-            location = next(n for n in ast.walk(owner) if isinstance(n, ast.If)
-                and isinstance(n.test, ast.Compare) and isinstance(n.test.left, ast.Name) and n.test.left.id == "diagnostic")
-            assert any(isinstance(n, ast.Try) and location in n.body and
-                any(writes[0] is v for s in n.body for v in ast.walk(s)) for n in ast.walk(owner))
-        message_node = writes[0].args[1]
-        if stage != "FRONT":
-            message_node = next(node.value for node in ast.walk(owner)
-                if isinstance(node, ast.Assign) and any(isinstance(target, ast.Name)
-                    and target.id == "diagnostic" for target in node.targets))
-        if stage == "HOST":
-            actual_source41_host_message_node = copy.deepcopy(message_node)
-            assert isinstance(message_node, ast.IfExp)
-            assert isinstance(message_node.orelse, ast.IfExp)
-            assert isinstance(message_node.orelse.body, ast.Constant)
-            assert message_node.orelse.body.value == b"::error::HOST:ANCESTOR-MANAGER-TERMINAL\n"
-            historical_source40_message_node = copy.deepcopy(message_node)
-            historical_source40_message_node.orelse = copy.deepcopy(message_node.orelse.orelse)
-            assert ast.dump(historical_source40_message_node, include_attributes=False) == ast.dump(
-                ast.parse("b'::error::HOST:B18\\n' if type(cause) is RuntimeError and len(cause.args) == 1 and (type(cause.args[0]) is str) and (cause.args[0] == 'B18') else b'::error::HOST:UNLISTED\\n'", mode="eval").body, include_attributes=False)
-            message_node = historical_source40_message_node
-        literals = [node.value for node in ast.walk(message_node)
-            if isinstance(node, ast.Constant) and type(node.value) is bytes]
-        expected_literals = ([b"::error::F\n"] if stage == "FRONT" else
-            [("::error::" + stage + ":B18\n").encode("ascii"), ("::error::" + stage + ":UNLISTED\n").encode("ascii")])
-        assert literals == expected_literals and all(0 < len(value) <= 64 for value in literals)
-        assert not any(isinstance(node, ast.Call) and
-            not (isinstance(node.func, ast.Name) and node.func.id in ("type", "len"))
-            for node in ast.walk(message_node))
-        for mode, expired, listed, optimization in ((mode, expired, listed, optimization)
-                for optimization in (0, 2)
-                for mode, expired, listed in (("complete", False, True), ("short", False, True), ("zero", False, True),
-                ("error", False, True), ("complete", True, True),
-                ("complete", False, False), ("wrong-type", False, True), ("non-str", False, True))
-                + ((("format", False, False),) if stage != "FRONT" else ())):
-            cause = (OSError("B18") if mode == "wrong-type" else
-                RuntimeError(type("PrivateCode", (str,), {})("B18") if mode == "non-str" else
-                    "B18" if listed else "unselected private diagnostic"))
-            write_fault = OSError("synthetic output failure")
-            if mode == "format":
-                try: raise cause
-                except RuntimeError as caught: cause = caught
-                write_fault = MemoryError("synthetic formatting allocation")
-            events, errors = [], []
-            held = {"kill_self": False, "reserved": True, "error": None, "operations": []}
-            state = {"closed": False, "custodian_effect_attempted": True, "commands": [object()],
-                "errors": errors, "failure_cutoff": 10}
-            retained_host = {"retired": False, "errors": errors}
-            def held_write(fd, message):
-                events.append(("write", fd, message))
-                if mode == "error":
-                    raise write_fault
-                return 0 if mode == "zero" else 1 if mode == "short" else len(message)
-            def held_clock(_clock):
-                events.append(("clock",))
-                return 10 if expired else 1
-            def held_pid():
-                events.append(("pid",))
-                return 17
-            def held_stop(pid, chosen_signal):
-                events.append(("stop", pid, chosen_signal))
-            ports = {"os": SimpleNamespace(write=held_write, getpid=held_pid, kill=held_stop),
-                "time": SimpleNamespace(CLOCK_MONOTONIC=1, clock_gettime_ns=held_clock),
-                "signal": SimpleNamespace(SIGSTOP=19), "state": state, "host": retained_host,
-                "failure_hold": held, "held": held, "a": state, "b": retained_host, "p": held,
-                "w": {"armed": True}, "jP": BaseException, "jQ": RuntimeError,
-                "qA": "commands", "qB": "custodian_effect_attempted", "qC": "errors",
-                "qM": "kill_self", "qX": "reserved", "qR": "error", "qE": "operations",
-                "qT": "failure_cutoff"}
-            if mode == "format":
-                def formatting_fault(_line): raise write_fault
-                ports.update(str=formatting_fault, _qtt_original_host_source_v1=test_github_workflow_splits_validation_into_parallel_phase_jobs,
-                    front_code=None, _qtt_original_inputs_v1=test_github_workflow_splits_validation_into_parallel_phase_jobs)
-            isolated = ast.Module(body=[copy.deepcopy(owner)], type_ignores=[])
-            exec(compile(ast.fix_missing_locations(isolated), "<workflow-held-diagnostic-no-child>", "exec",
-                optimize=optimization), ports)
-            selected_failure = ports[owner.name]
-            with pytest.raises(RuntimeError) as raised:
-                selected_failure(cause)
-            assert raised.value.__cause__ is cause and held["error"] is cause and held["kill_self"]
-            assert not retained_host["retired"] and not state["closed"] and held["reserved"]
-            assert len(held["operations"]) == 3 and held["operations"][0][1]
-            if expired:
-                assert events == [("clock",)] and errors == []
-                assert not held["operations"][1][1] and not held["operations"][2][1]
-            else:
-                message = (b"::error::F\n" if stage == "FRONT" else
-                    ("::error::" + stage + (":B18\n" if listed and mode not in ("wrong-type", "non-str") else ":UNLISTED\n")).encode("ascii"))
-                if mode == "format":
-                    assert events == [("clock",), ("pid",), ("stop", 17, 19)] and errors == [("held-output", write_fault)]
-                else:
-                    assert events == [("clock",), ("write", 2, message), ("pid",), ("stop", 17, 19)]
-                assert held["operations"][1][1] and held["operations"][2][1]
-                if mode in ("short", "zero"):
-                    assert len(errors) == 1 and errors[0][0] == ("error" if stage == "FRONT" else "held-output")
-                    assert type(errors[0][1]) is RuntimeError
-                elif mode != "format":
-                    assert errors == ([("error" if stage == "FRONT" else "held-output", write_fault)]
-                        if mode == "error" else [])
-                assert b"private" not in message
-            prior_events = list(events)
-            with pytest.raises(type(cause)) as repeated:
-                selected_failure(cause)
-            assert repeated.value is cause and events == prior_events
+ event_block=workflow.split("on:\n",1)[1].split("\npermissions:\n",1)[0]
+ assert event_block.startswith("  pull_request:\n    types: [opened, synchronize, reopened, ready_for_review]\n")
+ assert "  workflow_dispatch:\n    inputs:\n      full_validation:\n" in event_block
+ assert "  push:\n    branches:\n      - main\n" in event_block
+ assert "pull_request_target:" not in event_block
+ eligibility=(
+     "          QTT_PR298_NATIVE_ELIGIBLE: ${{ ((github.event_name == 'pull_request' && github.repository == "
+     "'Q8Meow/QTT_New0526' && github.event.pull_request.number == 298 && "
+     "github.event.pull_request.head.repo.full_name == 'Q8Meow/QTT_New0526' && "
+     "github.event.pull_request.base.repo.full_name == 'Q8Meow/QTT_New0526' && github.event.pull_request.base.ref "
+     "== 'main' && github.event.pull_request.head.ref == 'repair/main-cumulative-v35-final-r5-local-20260922') || "
+     "(github.repository == 'Q8Meow/QTT_New0526' && github.ref == 'refs/heads/main' && github.ref_name == 'main' "
+     "&& github.head_ref == '' && github.base_ref == '' && (github.event_name == 'push' && github.event.ref == "
+     'github.ref && github.event.after == github.sha && github.event.deleted == false || github.event_name == '
+     "'workflow_dispatch' && (github.event.ref == 'main' || github.event.ref == github.ref) && "
+     "(github.event.inputs.full_validation == 'true' || github.event.inputs.full_validation == 'false')))) && '1' "
+     "|| '0' }}\n"
+ )
+ assert shard_block.count(eligibility)==1
+ assert shard_block.count("          QTT_PR298_NATIVE_ELIGIBLE:")==1
+ assert '            python -I -B -X utf8 tools/run_validation_gates.py --linux-preflight-provision --phase "$QTT_PHASE"\n' in shard_block
+ assert "          if [ \"$QTT_PR298_NATIVE_ELIGIBLE\" = \"1\" ]\n" in shard_block
 
-    controller_begin = "# QTT_ORIGINAL_CONTROLLER_HELPERS_BEGIN_20261007_V1\n"
-    controller_end = "# QTT_ORIGINAL_CONTROLLER_HELPERS_END_20261007_V1\n"
-    controller_tag = "# QTT_CTL | "
-    controller_lines = workflow.splitlines(keepends=True)
-    controller_starts = [i for i, line in enumerate(controller_lines) if line == controller_begin]
-    controller_ends = [i for i, line in enumerate(controller_lines) if line == controller_end]
-    assert len(controller_starts) == len(controller_ends) == 1
-    assert controller_starts[0] < controller_ends[0]
-    controller_rows = controller_lines[controller_starts[0] + 1:controller_ends[0]]
-    assert all(line.startswith(controller_tag) and line.endswith("\n") for line in controller_rows)
-    controller_template = "".join(line[len(controller_tag):] for line in controller_rows).encode("ascii")
-    controller_init = (b'qtt_ordinary_native init "$GITHUB_RUN_ID" "$GITHUB_RUN_ATTEMPT" "$qtt_phase_ordinal" \\\n'
-        b'    "$1" "$2" "$3" "$4"')
-    assert controller_template.count(controller_init) == 1
-    assert controller_template.count(controller_init.replace(b"\n    ", b"\n  ")) == 0
-    ci_startup_nodes = [node for node in native_tree.body if isinstance(node, ast.FunctionDef)
-        and node.name == "_facet_fn_initial_startup_prebind_v1"]
-    assert len(ci_startup_nodes) == 1
-    ci_init_values = [node.value for node in ast.walk(ci_startup_nodes[0])
-        if isinstance(node, ast.Constant) and type(node.value) is bytes
-        and node.value.startswith(b"qtt_ordinary_native init ") and b"$GITHUB_RUN_ID" in node.value]
-    keeper_init_values = [node.value for node in ast.walk(host_tree)
-        if isinstance(node, ast.Constant) and type(node.value) is bytes
-        and node.value.startswith(b"qtt_ordinary_native init ") and b"$GITHUB_RUN_ID" in node.value]
-    assert ci_init_values == [controller_init]
-    assert keeper_init_values == [controller_init, controller_init]
-    ci_projection_source = ast.unparse(ci_startup_nodes[0])
-    assert ci_projection_source.index("template.count(init_before) == 1") < ci_projection_source.index(
-        "template.replace(init_before") < ci_projection_source.index("projected == pair_body['raw']")
-    projected_init = b"qtt_ordinary_native init 1 2 3 4 5 6 7"
-    projected_controller = controller_template.replace(controller_init, projected_init)
-    assert projected_controller.count(projected_init) == 1
-    assert len(projected_controller) == len(controller_template) - len(controller_init) + len(projected_init)
-    for invalid_controller in (controller_template.replace(controller_init, b""),
-            controller_template + b"\n" + controller_init + b"\n",
-            controller_template.replace(controller_init, controller_init.replace(b"\n    ", b"\n  "))):
-        assert invalid_controller.count(controller_init) != 1
+ import ast
+ import copy
+ import textwrap
+
+ opening='qtt_original_birth_v1 - "$QTT_PHASE" <<\'QTT_FIXED_ORIGINAL_HOST_SOURCE_V1\'\n'
+ frontend_text=textwrap.dedent(shard_block.split(opening,1)[1].split(
+     "          QTT_FIXED_ORIGINAL_HOST_SOURCE_V1\n",1)[0])
+ frontend_tree=ast.parse(frontend_text)
+ front_function=next(node for node in frontend_tree.body
+     if isinstance(node,ast.FunctionDef)and node.name=="_qtt_original_front_v1")
+ actual_front_function=copy.deepcopy(front_function)
+ aliases=dict(jR="original",q3="id",q4="ancestor-manager-ready",
+     q5="fixed first-host",q6="same original",q7="created",q8="deleted",
+     jV="armed",jW="settle",jX="delete_attempted")
+ bindings=[(t.id,v.value)for n in ast.walk(front_function)if isinstance(n,ast.Assign)
+     for t,v in zip(n.targets[0].elts if isinstance(n.targets[0],ast.Tuple)else n.targets,
+         n.value.elts if isinstance(n.value,ast.Tuple)else[n.value])
+     if isinstance(t,ast.Name)and t.id in aliases and isinstance(v,ast.Constant)]
+ assert len(bindings)==len(aliases)and dict(bindings)==aliases
+ class FrontLiterals(ast.NodeTransformer):
+     def visit_Name(self,n):
+         return ast.copy_location(ast.Constant(aliases[n.id]),n)if isinstance(n.ctx,ast.Load)and n.id in aliases and n.id!="jR" else n
+     def visit_BinOp(self,n):
+         self.generic_visit(n)
+         if isinstance(n.left,ast.Name)and n.left.id=="jR":n.left=ast.Constant("original")
+         if isinstance(n.op,ast.Add)and all(isinstance(v,ast.Constant)and type(v.value)is str for v in(n.left,n.right)):
+             return ast.copy_location(ast.Constant(n.left.value+n.right.value),n)
+         return n
+ front_function=FrontLiterals().visit(front_function)
+ members={node.name:node for node in front_function.body if isinstance(node,ast.FunctionDef)}
+ def helper_from_source(name,ports):
+     isolated=ast.Module(body=[copy.deepcopy(members[name])],type_ignores=[])
+     exec(compile(ast.fix_missing_locations(isolated),"<workflow-no-child-owner>","exec"),ports)
+     return ports[name]
+
+ class KernelPort:
+     c_long=staticmethod(int)
+     c_int=staticmethod(int)
+
+     @staticmethod
+     def get_errno():
+         return 5
+
+ for number,raw_result,fault_after_raw in((222,0,"errno"),(222,0,"bytes"),
+                                            (223,0,"errno"),(226,0,"errno"),
+                                            (222,-1,None)):
+     calls=[]
+     raw_fault=OSError("synthetic getter/admission failure")
+     watchdog={"id":None,"created":False,"armed":number==226,
+                 "deleted":False}
+     observed=b"\x00\x00\x00\x00" if number==222 else None
+     def synthetic_native(*args):
+         calls.append(("raw",args))
+         return raw_result
+     def synthetic_effect(name,function,*args,**kwargs):
+         calls.append(("effect",name,kwargs["tranche"]))
+         if name.endswith("-errno")and fault_after_raw=="errno":
+             raise raw_fault
+         return function(*args)
+     def synthetic_returned(part):
+         calls.append(("returned",bytes(part)))
+         if fault_after_raw=="bytes":
+             raise raw_fault
+     ports={"qZ":"work","ctypes":KernelPort,"native":synthetic_native,
+              "effect":synthetic_effect,"returned":synthetic_returned,
+              "w":watchdog,"handle":SimpleNamespace(value=17)}
+     kernel=helper_from_source("kernel",ports)
+     with pytest.raises(OSError)as raised:
+         kernel("synthetic-watchdog",number,observed=observed)
+     if fault_after_raw is not None:
+         assert raised.value is raw_fault
+     else:
+         assert raised.value.errno==5
+     assert watchdog=={"id":17 if number==222 and raw_result==0 else None,
+         "created":number==222 and raw_result==0,
+         "armed":number==223 and raw_result==0,
+         "deleted":number==226 and raw_result==0}
+     assert sum(row[0]=="raw" for row in calls)==1
+     if observed is not None:
+         assert sum(row[0]=="returned" for row in calls)==1
+
+ body_fault=OSError("synthetic no-child initial failure")
+ close_fault=OSError("synthetic no-child delete failure")
+ watchdog={"armed":False,"created":True,"delete_attempted":False,
+             "deleted":False,"id":19}
+ errors=[("original-first-front",body_fault)]
+ state={"custodian_effect_attempted":True,"commands":[],"errors":errors}
+ deletes=[]
+ def failed_delete(name,*args,**kwargs):
+     deletes.append((name,args,kwargs))
+     raise close_fault
+ ports={"qA":"commands","qB":"custodian_effect_attempted","qC":"errors",
+          "qT":"failure_cutoff","b":{"retired":False},"a":state,
+          "w":watchdog,"ctypes":KernelPort,"kernel":failed_delete}
+ failure=helper_from_source("failure",ports)
+ with pytest.raises(BaseExceptionGroup)as raised:
+     failure(body_fault)
+ assert raised.value.exceptions==(body_fault,close_fault)
+ assert watchdog["delete_attempted"]and not watchdog["deleted"]
+ assert errors==[("original-first-front",body_fault),("watchdog-no-child-delete",close_fault)]
+ assert len(deletes)==1 and deletes[0][2]=={"tranche":"settle"}
+ assert "w" not in{node.id for node in ast.walk(members["failure"])
+     if isinstance(node,ast.Name)and isinstance(node.ctx,ast.Store)}
+
+ source=ast.unparse(front_function)
+ initial=ast.unparse(next(node for node in front_function.body if isinstance(node,ast.Try)))
+ assert initial.index("'same original privileged preparer required'")<initial.index("'watchdog-create'")
+ assert initial.index("'watchdog-arm-original'")<initial.index("'front-original-same-owner-call'")
+ assert "origin + 3720000000000" in source and "tranche='settle'" in source
+ manager_source=ast.unparse(members["manager"])
+ assert manager_source.index("timer_check()")<manager_source.index("'ancestor-manager-fork'")
+ assert manager_source.index("ctypes.c_long(157)")<manager_source.index("os.getppid()")<manager_source.index("os.execve(")
+ assert source.index("'original watchdog cannot retire unresolved child or scope debt'")<source.index("'watchdog-terminal-delete'")
+ assert "not all(c['eof'])" in source and "b['retired']" in source and "c['reap'] != (c['pid'], 0)" in source
+
+ native_raw=(Path(__file__).resolve().parents[2]/"tools/ci_branch_context.py").read_bytes()
+ native_tree=ast.parse(native_raw.decode("utf-8"))
+ native_rows=[node for node in native_tree.body
+     if isinstance(node,ast.Assign)and len(node.targets)==1
+     and isinstance(node.targets[0],ast.Name)
+     and node.targets[0].id=="_QTT_ORDINARY_NATIVE_C_SOURCE_V1"]
+ assert len(native_rows)==1
+ native_value=native_rows[0].value
+ assert isinstance(native_value,ast.Constant)and type(native_value.value)is bytes
+ native_bytes=native_value.value
+ native_begin=b"# QTT_ORDINARY_NATIVE_C_DATA_BEGIN_20261008_V1\n"
+ native_end=b"# QTT_ORDINARY_NATIVE_C_DATA_END_20261008_V1\n"
+ native_lines=native_raw.splitlines(keepends=True)
+ native_starts=[i for i,line in enumerate(native_lines)if line==native_begin]
+ native_ends=[i for i,line in enumerate(native_lines)if line==native_end]
+ assert len(native_starts)==len(native_ends)==1
+ assert native_starts[0]<native_ends[0]
+ native_frame=b"".join(native_lines[native_starts[0]+1:native_ends[0]])
+ native_prefix,native_suffix=b"_QTT_ORDINARY_NATIVE_C_SOURCE_V1 = rb'''",b"'''\n"
+ assert native_frame.startswith(native_prefix)and native_frame.endswith(native_suffix)
+ assert native_bytes==native_frame[len(native_prefix):-len(native_suffix)]
+ assert native_bytes and native_bytes.endswith(b"\n")
+ assert b"\r" not in native_bytes and b"\0" not in native_bytes and b"'''" not in native_bytes
+ native_source=native_bytes.decode("ascii")
+
+ def native_owner_body(name,return_type="int",definition_suffix=None):
+     assert return_type in("int","void","ssize_t")
+     signature="static "+return_type+" "+name+"("
+     if definition_suffix is not None:
+         assert definition_suffix=="void) {"
+         signature+=definition_suffix
+     assert native_source.count(signature)==1
+     opening=native_source.index("{",native_source.index(signature))
+     position,depth,state,escaped,code=opening,0,"code",False,[]
+     while position<len(native_source):
+         character=native_source[position]
+         following=native_source[position:position+2]
+         if state=="line":
+             if character=="\n":state="code"
+         elif state=="block":
+             if following=="*/":state="code";position+=1
+         elif state in('"',"'"):
+             code.append(character)
+             if escaped:escaped=False
+             elif character=="\\":escaped=True
+             elif character==state:state="code"
+         elif following=="//":state="line";position+=1
+         elif following=="/*":state="block";position+=1
+         else:
+             code.append(character)
+             if character in('"',"'"):state=character
+             elif character=="{":depth+=1
+             elif character=="}":
+                 depth-=1
+                 if not depth:return "".join("".join(code).split())
+         position+=1
+     raise AssertionError("actual C owner body is incomplete: "+name)
+
+ quiet=native_owner_body("qn_flag_command_quiet")
+ assert 'qn_error("source-seal-native-terminal-and-quiet",EPROTO)' in quiet
+ for original_field in("!c->registered","!c->child_created","c->pending","!c->exec_proven",
+         "!c->exec_eof","!c->terminal","c->status","!c->stdout_eof","!c->stderr_eof",
+         "!o->registered","!o->native_attempted","o->result","o->native_errno",
+         "o->info.si_pid!=c->pid","o->info.si_code!=CLD_EXITED","o->info.si_status",
+         "c->stdout_used","c->stderr_used"):
+     assert original_field in quiet
+ assert "free(" not in quiet and "realloc(" not in quiet and "qn_command_run(" not in quiet
+ assert "stdout_used=" not in quiet and "stderr_used=" not in quiet
+
+ for original_flag_owner,operand,journal in(
+         ("qn_flag_effect","number","*attempted=1;"),
+         ("qn_catalogue_flag_effect","slot","*attempted|=baseline?2:1;")):
+     flag=native_owner_body(original_flag_owner)
+     native_call="qn_command_run(index,argv,1)<0"
+     generation="qn_refresh_after_flag_effect("+operand+",after)<0"
+     acceptance="qn_flag_command_quiet(index)<0"
+     assert flag.index(journal)<flag.index(native_call)<flag.index(generation)<flag.index(acceptance)
+     assert native_call+"||"+generation+"||"+acceptance in flag
+     assert 'argv[3]="/usr/bin/chattr";argv[4]=restore?"-i":"+i";' in flag
+     assert 'argv[5]="--";' in flag and "free(" not in flag
+     assert flag.index(acceptance)<flag.index("qn_startup_mode_loan(")
+ refreshed=native_owner_body("qn_refresh_after_flag_effect")
+ assert "s->path_before=p;s->handle_before=h;return0;" in refreshed
+ error=native_owner_body("qn_error")
+ assert "qn.stage=QN_HELD;" in error
+ owner_check=native_owner_body("qn_owner_check")
+ assert "!permit_held&&(qn.stage==QN_HELD||qn.stage==QN_CLOSED)" in owner_check
+ attempted=native_owner_body("qn_attempt")
+ assert "elseif(qn_owner_check(0)<0)return-1;" in attempted
+ captured=native_owner_body("qn_capture_one")
+ assert "qn.heap_remaining-=added;qn.realloc_peak_remaining-=next_extent;" in captured
+ assert "*used+=(size_t)n;" in captured and "free(" not in captured
+
+ keeper_prepare=native_owner_body("qn_keeper_observations_prepare")
+ for original_field in("l->attempted=1","l->role=QN_PROVISION","l->keeper_pid=qn.pid",
+         "l->source_owner=(constvoid*)&qn","l->origin_ns=qn.origin_ns","l->cutoff_ns=qn.cutoff_ns",
+         "l->source_input_count=qn.input_count","l->source_catalogue_count=qn.catalogue_count",
+         "l->source_alias_count=qn.alias_count","!qn.provision.mask_held","!qn.catalogue_complete"):
+     assert original_field in keeper_prepare
+ assert keeper_prepare.index("l->process_slot=qn_open_component(")<keeper_prepare.index("l->stat_slot=qn_open_component(")<keeper_prepare.index("l->keeper_pid_slot=qn_pidfd_slot(")
+ assert "qn_keeper_observation_slots_close()" in keeper_prepare
+ keeper_namespace=native_owner_body("qn_keeper_namespace_open")
+ assert keeper_namespace.index("number=qn_slot_register(")<keeper_namespace.index("qn_fstatat(")<keeper_namespace.index("s->fd=openat(")
+ assert 'name,O_RDONLY|O_CLOEXEC)' in keeper_namespace and "O_PATH" not in keeper_namespace
+ keeper_check=native_owner_body("qn_keeper_observation_check")
+ assert "flags!=FD_CLOEXEC" in keeper_check and "(access&O_ACCMODE)!=O_RDONLY||(access&O_PATH)" in keeper_check
+ assert "!initial&&access!=l->access_flags[role]" in keeper_check
+ assert "ioctl(s->fd,NS_GET_NSTYPE,(void*)0)" in keeper_check
+ assert "NSFS_MAGIC" in keeper_check and "PROC_SUPER_MAGIC" in keeper_check
+ keeper_life=native_owner_body("qn_keeper_original_check")
+ assert keeper_life.index("qn_keeper_start_from_held(o)")<keeper_life.index("poll(&port,1,0)")
+ assert "o->start_ticks!=l->keeper_start" in keeper_life and "o->poll_result!=0||o->poll_revents" in keeper_life
+
+ provision_prepare=native_owner_body("qn_provision_prepare","int","void) {")
+ assert provision_prepare.index("qn_provision_original_inputs()<0")<provision_prepare.index("qn_keeper_observations_prepare()<0")<provision_prepare.index("qn_provision_prefix_allocation()<0")
+ assert provision_prepare.index("qn_keeper_observations_prefork_join()<0")<provision_prepare.index("c->pid=fork();")
+ assert "qn_error(\"provision-original-native-fork\",errno);gotokeeper_prefork_failed;" in provision_prepare
+ actual_child_suffix=provision_prepare.split("c->child_created=1;",1)[1].split("keeper_prefork_failed:",1)[0]
+ assert "gotokeeper_prefork_failed;" not in actual_child_suffix and "return-1;" in actual_child_suffix
+ keeper_child=native_owner_body("qn_provision_child_observations","void")
+ assert "syscall(SYS_close_range,3U,UINT_MAX,CLOSE_RANGE_CLOEXEC)" in keeper_child
+ assert "CLOSE_RANGE_UNSHARE" not in keeper_child and "close(" not in keeper_child
+ assert keeper_child.index("j->cloexec_range_attempted=1;")<keeper_child.index("syscall(SYS_close_range,")<keeper_child.index("parent=getppid();")
+ assert "parent!=l->keeper_pid" in keeper_child and "for(i=0;i<3;i++)" in keeper_child
+ assert "(returned&O_PATH)||returned!=l->access_flags[i]" in keeper_child
+ assert "ioctl(fd,NS_GET_NSTYPE,(void*)0)" in keeper_child
+ assert keeper_child.index("o->handle=qn_stat_version(&st);")<keeper_child.index("o->clear_attempted=1;")<keeper_child.index("fcntl(fd,F_SETFD,")<keeper_child.index("o->flags_after_result=returned;")
+ assert "o->flags_before_result&~FD_CLOEXEC" in keeper_child and "if(returned!=0)" in keeper_child
+ provision_child=native_owner_body("qn_provision_child","void")
+ assert provision_child.index("qn_provision_child_root(")<provision_child.index("qn_provision_child_observations(")<provision_child.index("setgid(p->selected_gid)")<provision_child.index("setuid(p->selected_uid)")<provision_child.index("execveat(")
+ assert "F_SETFD" not in provision_child and "CLONE_FILES" not in provision_prepare
+
+ keeper_release=native_owner_body("qn_keeper_observations_release_join")
+ assert "SEEK_CUR" in keeper_release and "offset!=l->maps_initial_offset||offset!=0" in keeper_release
+ assert "SEEK_SET" not in keeper_release and "qn_read(" not in keeper_release
+ keeper_retire=native_owner_body("qn_keeper_observations_retire")
+ for terminal_field in("!p->reaped","c->pending","!c->terminal","!c->exec_proven",
+         "!c->stdout_eof","!c->stderr_eof","!p->prefix_merged"):
+     assert terminal_field in keeper_retire
+ assert keeper_retire.index('qn_error("keeper-original-observation-live-retirement-debt",EBUSY)')<keeper_retire.index("qn_keeper_observation_slots_close()")<keeper_retire.index("l->retired=1;")
+ keeper_close=native_owner_body("qn_keeper_observation_slots_close")
+ assert "intslots[7]=" in keeper_close and "for(i=0;i<7;i++)" in keeper_close
+ assert "if(!s->close_attempted)" in keeper_close and "s->close_result<0||s->close_errno" in keeper_close
+ native_compact="".join(native_source.split())
+ return_definition="staticintqn_provision_return(intterminal_status){"
+ storage_definition="staticintqn_provision_storage_close(void){"
+ assert native_compact.count(return_definition)==native_compact.count(storage_definition)==1
+ provision_return=native_compact.split(return_definition,1)[1].split(storage_definition,1)[0]
+ assert provision_return.index("waitpid(c->pid,&status,0)")<provision_return.index("p->reaped=1;c->pending=0;")<provision_return.index("qn_keeper_observations_retire()")<provision_return.index("borrow->returned=1;")
+ provision_storage=native_owner_body("qn_provision_storage_close")
+ assert "!p->keeper_observations.retired" in provision_storage
+ original_read=native_owner_body("qn_read","ssize_t")
+ assert original_read.index("request>qn.read_remaining")<original_read.index("n=read(")<original_read.index("qn.read_remaining-=(uint64_t)n;qn.read_bytes+=(uint64_t)n;")
+ namespace_read=native_owner_body("qn_keeper_namespace_link")
+ assert namespace_read.index("63U>qn.read_remaining")<namespace_read.index("n=readlinkat(")<namespace_read.index("qn.read_remaining-=(uint64_t)n;qn.read_bytes+=(uint64_t)n;")
+
+ import tempfile
+ import stat
+ host_tag="# QTT_HOST_PY | "
+ host_source="".join(line[len(host_tag):]for line in workflow.splitlines(keepends=True)
+     if line.startswith(host_tag))
+ host_tree=ast.parse(host_source)
+ adoption_nodes=[node for node in ast.walk(host_tree)
+     if isinstance(node,ast.FunctionDef)and node.name=="_qtt_adopt_early_startup_counts_v1"]
+ assert len(adoption_nodes)==1
+ adoption_node=adoption_nodes[0]
+ roster_nodes=[node for node in ast.walk(adoption_node)
+     if isinstance(node,ast.FunctionDef)and node.name=="roster"]
+ assert len(roster_nodes)==1
+ roster_node=roster_nodes[0]
+ adoption_source=ast.unparse(adoption_node)
+ roster_source=ast.unparse(roster_node)
+ assert "(r, c, r['path'], r['row'], r['version'], r['members'], r['duplicate'], c['function'], c['code'])" in adoption_source
+ assert "first['names'] is not r['names']" in adoption_source
+ assert "tuple((n for n, v in r['members'])) != r['names']" in adoption_source
+ admission_ifs=[node for node in ast.walk(roster_node)if isinstance(node,ast.If)
+     and any(isinstance(value,ast.Constant)
+         and value.value=="same original earlier roster bounded returned prefix"
+         for value in ast.walk(node))]
+ assert len(admission_ifs)==1
+ admission=ast.unparse(admission_ifs[0].test)
+ assert "len(names) >= len(early['names'])" in admission
+ assert "len(names) >= 65535 // 2" in admission and "total + len(name) + 1 > 65535" in admission
+ assert roster_source.index("'C earlier roster original next'")<roster_source.index(
+     "len(names) >= len(early['names'])")<roster_source.index("names.append(name)")
+ assert "tuple(names) != early['names']" in roster_source
+ iterator_nodes=[node for node in ast.walk(host_tree)
+     if isinstance(node,ast.FunctionDef)and node.name=="iterator_next"]
+ assert len(iterator_nodes)==1
+
+ for wanted,present,expected_error in(
+         ((b"aa",b"bb"),("aa","bb"),None),
+         ((),(),None),
+         ((b"aa",b"bb"),("aa","bb","cc","dd"),"prefix"),
+         ((),("aa","bb"),"prefix"),
+         ((b"aa",b"bb"),("aa","xx"),"membership")):
+     with tempfile.TemporaryDirectory(prefix="qtt-roster-no-child-")as owned:
+         root=Path(owned)
+         for filename in present:
+             operand=root/filename
+             operand.write_bytes(b"owned synthetic roster operand")
+             info=operand.lstat()
+             assert stat.S_ISREG(info.st_mode)and info.st_nlink==1
+         info=root.stat()
+         current=(info.st_dev,info.st_ino,info.st_mode,info.st_uid,info.st_gid,
+             info.st_nlink,info.st_size,info.st_mtime_ns,info.st_ctime_ns)
+         row=[owned,owned,False,None]
+         early={"row":row,"names":wanted,"roster":b"".join(name+b"\n" for name in wanted)}
+         retained={"iterations":[]}
+         failed={"errors":[]}
+         effects=[]
+         rejoins=[]
+
+         def same_local_port(operand,expected,directory=False):
+             rejoins.append((operand,expected,directory))
+             assert operand is row and expected is current and directory is True
+             actual=root.stat()
+             assert(actual.st_dev,actual.st_ino,actual.st_mode,actual.st_uid,actual.st_gid,
+                 actual.st_nlink,actual.st_size,actual.st_mtime_ns,actual.st_ctime_ns)==current
+             return actual
+
+         def effect_port(label,function,*args):
+             record={"label":label,"function":function,"args":args,
+                 "attempted":False,"returned":None,"error":None}
+             effects.append(record)
+             record["attempted"]=True
+             try:
+                 record["returned"]=function(*args)
+                 return record["returned"]
+             except BaseException as error:
+                 record["error"]=error
+                 raise
+
+         def failure_port(label):
+             raise ValueError(label)
+
+         ports={"os":os,"same_local":same_local_port,"E":effect_port,
+             "F":failure_port,"a":retained,"q":failed}
+         isolated=ast.Module(body=[copy.deepcopy(iterator_nodes[0]),copy.deepcopy(roster_node)],
+             type_ignores=[])
+         exec(compile(ast.fix_missing_locations(isolated),"<keeper-roster-no-child-owner>","exec"),ports)
+         if expected_error is None:
+             ports["roster"](early,current)
+             assert failed["errors"]==[]and len(rejoins)==2
+             assert len([item for item in effects if item["label"].endswith("original next")])==len(wanted)+1
+             assert retained["iterations"][0]["body_error"]is None
+         else:
+             message=("same original earlier roster bounded returned prefix" if expected_error=="prefix"
+                 else "same original earlier complete directory membership changed")
+             with pytest.raises(ValueError,match=message)as raised:
+                 ports["roster"](early,current)
+             assert failed["errors"]==[raised.value]
+             assert retained["iterations"][0]["body_error"]is raised.value
+             assert len(rejoins)==1
+             traceback=raised.value.__traceback__
+             while traceback is not None and traceback.tb_frame.f_code is not ports["roster"].__code__:
+                 traceback=traceback.tb_next
+             assert traceback is not None
+             assert len(traceback.tb_frame.f_locals["names"])==len(wanted)
+             returned=[item for item in effects if item["label"].endswith("original next")]
+             assert len(returned)==len(wanted)+1
+             if expected_error=="prefix":
+                 assert returned[-1]["returned"][0]is False
+                 assert returned[-1]["returned"][1]is traceback.tb_frame.f_locals["entry"]
+         iteration=retained["iterations"][0]
+         assert iteration["early"]is early and iteration["row"]is row
+         assert iteration["close_attempted"]and iteration["closed"]and iteration["close_error"]is None
+         assert sum(item["label"]=="C earlier roster iterator one-close" for item in effects)==1
+         assert all(item["attempted"]and item["error"]is None for item in effects)
+         assert early["names"]is wanted and early["roster"]==b"".join(name+b"\n" for name in wanted)
 
 
-    expected_unit_keys = (b"Id", b"LoadState", b"Transient", b"ActiveState",
-        b"InvocationID", b"ActiveEnterTimestampMonotonic", b"StopWhenUnneeded")
-    expected_scope_only = (b"RuntimeMaxUSec", b"RuntimeRandomizedExtraUSec",
-        b"TimeoutStopUSec", b"KillMode", b"SendSIGKILL", b"FinalKillSignal")
-    expected_first_roster = (b"Id", b"LoadState", b"Transient", b"ActiveState",
-        b"ControlGroup", b"InvocationID", b"ActiveEnterTimestampMonotonic")
-    expected_later_roster = (b"Id", b"LoadState", b"Transient", b"InvocationID",
-        b"ControlGroup", b"ActiveState", b"ActiveEnterTimestampMonotonic")
-    expected_interfaces = {"slice": "org.freedesktop.systemd1.Slice",
-        "scope": "org.freedesktop.systemd1.Scope"}
-    first_host = next(n for n in host_tree.body
-        if isinstance(n, ast.FunctionDef) and n.name == "_qtt_original_host_source_v1")
-    ancestor_owner = next(n for n in ast.walk(first_host)
-        if isinstance(n, ast.FunctionDef) and n.name == "original_ancestor")
-    observed_owner = next(n for n in ast.walk(ancestor_owner)
-        if isinstance(n, ast.FunctionDef) and n.name == "observed")
-    observed_calls = [n for n in ast.walk(ancestor_owner) if isinstance(n, ast.Call)
-        and isinstance(n.func, ast.Name) and n.func.id == "observed"]
-    observed_calls.sort(key=lambda node: node.lineno)
-    assert [(ast.unparse(n.args[0]), ast.unparse(n.args[1])) for n in observed_calls] == [
-        ("a['slice']", "keys"), ("a['scope']", "skeys"),
-        ("a['slice']", "(b'StopWhenUnneeded',)")]
-    first_keys = next(n.value for n in ast.walk(ancestor_owner) if isinstance(n, ast.Assign)
-        and any(isinstance(t, ast.Name) and t.id == "keys" for t in n.targets))
-    assert ast.literal_eval(first_keys) == expected_first_roster
-    selectors = [n for n in ast.walk(host_tree) if isinstance(n, ast.Assign)
-        and any(isinstance(t, ast.Name) and t.id == "interface" for t in n.targets)]
-    selectors.sort(key=lambda node: node.lineno)
-    assert len(selectors) == 3
-    selector_keys = ("unitkeys", "_3I", "_46")
-    for index, (selector, key_name) in enumerate(zip(selectors, selector_keys)):
-        parents = [n for n in ast.walk(host_tree) if isinstance(n, ast.For)
-            and any(child is selector for child in n.body)]
-        assert len(parents) == 1
-        property_loop = parents[0]
-        assert not any(isinstance(n, ast.Call) for n in ast.walk(selector.value))
-        key_bindings = [n.value for n in ast.walk(host_tree) if isinstance(n, ast.Assign)
-            and any(isinstance(t, ast.Name) and t.id == key_name for t in n.targets)]
-        assert len(key_bindings) == 1
-        actual_unit_keys = ast.literal_eval(key_bindings[0])
-        assert actual_unit_keys == ((expected_first_roster + (b"StopWhenUnneeded",))
-            if index == 0 else expected_later_roster)
-        if index:
-            outer = [n for n in ast.walk(host_tree) if isinstance(n, ast.For)
-                and any(child is property_loop for child in n.body)]
-            assert len(outer) == 1
-            assert ast.unparse(outer[0].target) == "(unit, keyset, retained)"
-            assert ast.unparse(outer[0].iter) == (
-                "((birth['slice'], " + key_name + ", birth['slice_fields']), "
-                "(birth['scope'], scopekeys, birth['scope_fields']))")
-        roles = {"slice": "source-only.slice", "scope": "source-only.scope"}
-        selector_code = compile(ast.Expression(copy.deepcopy(selector.value)),
-            "<actual-systemd-interface-selector-no-rpc>", "eval")
-        parser_nodes = [copy.deepcopy(n) for n in property_loop.body
-            if not (isinstance(n, ast.Assign) and any(isinstance(t, ast.Name)
-                and t.id in ("interface", "argv", "raw") for t in n.targets))]
-        assert not any(isinstance(n, ast.Call) and isinstance(n.func, ast.Name)
-            and n.func.id in ("rpc", "manager", "command", "E", "effect")
-            for node in parser_nodes for n in ast.walk(node))
-        parser_code = compile(ast.Module(body=parser_nodes, type_ignores=[]),
-            "<actual-systemd-typed-reply-parser-no-rpc>", "exec")
-        def reject_manager_data(message):
-            raise RuntimeError(message)
-        for role in ("slice", "scope"):
-            selected_keys = (expected_first_roster if index == 0 else expected_later_roster)
-            if role == "scope":
-                selected_keys += expected_scope_only
-            if index == 0 and role == "slice":
-                selected_keys += (b"StopWhenUnneeded",)
-            for key in selected_keys:
-                ports = {"a": roles, "birth": roles, "unit": roles[role], "key": key,
-                    key_name: actual_unit_keys}
-                expected_interface = ("org.freedesktop.systemd1.Unit"
-                    if key in expected_unit_keys else expected_interfaces[role])
-                assert eval(selector_code, ports) == expected_interface
-                raw, expected = ((b"b true\n", b"yes")
-                    if key in (b"Transient", b"SendSIGKILL", b"StopWhenUnneeded") else
-                    (b"ay 16 " + b" ".join([b"1"] * 16) + b"\n", b"01" * 16)
-                    if key == b"InvocationID" else (b"i 9\n", b"9")
-                    if key == b"FinalKillSignal" else (b"t 17\n", b"17")
-                    if key.endswith(b"USec") or key == b"ActiveEnterTimestampMonotonic" else
-                    (b's "source-only"\n', b"source-only"))
-                parsed = {"key": key, "raw": raw, "out": {}, "_5r": {}, "data": {},
-                    "fail": reject_manager_data, "F": reject_manager_data, "qQ": RuntimeError}
-                exec(parser_code, parsed)
-                result_name = ("out", "_5r", "data")[index]
-                assert parsed[result_name] == {key: expected}
-                for malformed in (b"x invalid\n", raw[:-1]):
-                    invalid = dict(parsed, raw=malformed, out={}, _5r={}, data={})
-                    with pytest.raises(RuntimeError):
-                        exec(parser_code, invalid)
 
-    actual_manager_message = b"::error::HOST:ANCESTOR-MANAGER-TERMINAL\n"
-    assert len(actual_manager_message) == 40 <= 64
-    actual_diagnostic_code = compile(ast.Expression(copy.deepcopy(
-        actual_source41_host_message_node)), "<actual-host-diagnostic-no-write>", "eval")
-    assert [n.value for n in ast.walk(actual_source41_host_message_node)
-        if isinstance(n, ast.Constant) and type(n.value) is bytes] == [
-            b"::error::HOST:B18\n", actual_manager_message, b"::error::HOST:UNLISTED\n"]
-    assert not any(isinstance(n, ast.Call) and not (isinstance(n.func, ast.Name)
-        and n.func.id in ("type", "len")) for n in ast.walk(actual_source41_host_message_node))
-    manager_cause_text = "original ancestor manager exec/terminal/threeEOF"
-    bad_text_type = type("SourceOnlyPrivateText", (str,), {})
-    bad_error_type = type("SourceOnlyOtherRuntimeError", (RuntimeError,), {})
-    for cause, expected in ((RuntimeError("B18"), b"::error::HOST:B18\n"),
-            (RuntimeError(manager_cause_text), actual_manager_message),
-            (RuntimeError("unselected private diagnostic"), b"::error::HOST:UNLISTED\n"),
-            (OSError(manager_cause_text), b"::error::HOST:UNLISTED\n"),
-            (bad_error_type(manager_cause_text), b"::error::HOST:UNLISTED\n"),
-            (RuntimeError(bad_text_type(manager_cause_text)), b"::error::HOST:UNLISTED\n"),
-            (RuntimeError(), b"::error::HOST:UNLISTED\n"),
-            (RuntimeError(manager_cause_text, "private"), b"::error::HOST:UNLISTED\n"),
-            (RuntimeError(manager_cause_text + " private"), b"::error::HOST:UNLISTED\n")):
-        for optimization in (0, 2):
-            selected_code = compile(ast.Expression(copy.deepcopy(actual_source41_host_message_node)),
-                "<actual-host-diagnostic-no-write>", "eval", optimize=optimization)
-            assert eval(selected_code, {"cause": cause}) == expected
-            assert b"private" not in expected and b"/" not in expected
+ host_function=next(node for node in host_tree.body
+     if isinstance(node,ast.FunctionDef)and node.name=="_qtt_original_host_source_v1")
+ host_failure=next(node for node in host_function.body
+     if isinstance(node,ast.FunctionDef)and node.name=="failure")
+ custodian_failure=next(node for node in ast.walk(host_tree)
+     if isinstance(node,ast.FunctionDef)and node.name=="_qtt_custodian_failure_v1")
+ held_owners=(("FRONT",members["failure"]),("HOST",host_failure),
+     ("CUSTODIAN",custodian_failure))
+ reservation_source=ast.unparse(actual_front_function)
+ assert "l[qY] < 3 or l[jW] < 2" in reservation_source
+ assert reservation_source.index("l[jW] -= 2")<reservation_source.index("p[qX] = True")
+ assert "[201061050, 64, None]" in reservation_source
+ assert 201061050+64==201061114
+ literal_error_owner=next(node for node in ast.walk(host_tree)
+     if isinstance(node,ast.FunctionDef)and node.name=="F")
+ assert ast.unparse(literal_error_owner)=="def F(name):\n    raise RuntimeError(name)"
+ assert any(isinstance(node,ast.Call)and isinstance(node.func,ast.Name)
+     and node.func.id=="F" and len(node.args)==1
+     and isinstance(node.args[0],ast.Constant)and node.args[0].value=="B18"
+     for node in ast.walk(host_tree))
+ for stage,owner in held_owners:
+     writes=[node for node in ast.walk(owner)if isinstance(node,ast.Call)
+         and isinstance(node.func,ast.Attribute)and isinstance(node.func.value,ast.Name)
+         and node.func.value.id=="os" and node.func.attr=="write"]
+     assert len(writes)==1 and isinstance(writes[0].args[0],ast.Constant)and writes[0].args[0].value==2
+     if stage!="FRONT":
+         location=next(n for n in ast.walk(owner)if isinstance(n,ast.If)
+             and isinstance(n.test,ast.Compare)and isinstance(n.test.left,ast.Name)and n.test.left.id=="diagnostic")
+         assert any(isinstance(n,ast.Try)and location in n.body and
+             any(writes[0]is v for s in n.body for v in ast.walk(s))for n in ast.walk(owner))
+     message_node=writes[0].args[1]
+     if stage!="FRONT":
+         message_node=next(node.value for node in ast.walk(owner)
+             if isinstance(node,ast.Assign)and any(isinstance(target,ast.Name)
+                 and target.id=="diagnostic" for target in node.targets))
+     if stage=="HOST":
+         actual_source41_host_message_node=copy.deepcopy(message_node)
+         assert isinstance(message_node,ast.IfExp)
+         assert isinstance(message_node.orelse,ast.IfExp)
+         assert isinstance(message_node.orelse.body,ast.Constant)
+         assert message_node.orelse.body.value==b"::error::HOST:ANCESTOR-MANAGER-TERMINAL\n"
+         historical_source40_message_node=copy.deepcopy(message_node)
+         historical_source40_message_node.orelse=copy.deepcopy(message_node.orelse.orelse)
+         assert ast.dump(historical_source40_message_node,include_attributes=False)==ast.dump(
+             ast.parse("b'::error::HOST:B18\\n' if type(cause) is RuntimeError and len(cause.args) == 1 and (type(cause.args[0]) is str) and (cause.args[0] == 'B18') else b'::error::HOST:UNLISTED\\n'",mode="eval").body,include_attributes=False)
+         message_node=historical_source40_message_node
+     literals=[node.value for node in ast.walk(message_node)
+         if isinstance(node,ast.Constant)and type(node.value)is bytes]
+     expected_literals=([b"::error::F\n"]if stage=="FRONT" else
+         [("::error::"+stage+":B18\n").encode("ascii"),("::error::"+stage+":UNLISTED\n").encode("ascii")])
+     assert literals==expected_literals and all(0<len(value)<=64 for value in literals)
+     assert not any(isinstance(node,ast.Call)and
+         not(isinstance(node.func,ast.Name)and node.func.id in("type","len"))
+         for node in ast.walk(message_node))
+     for mode,expired,listed,optimization in((mode,expired,listed,optimization)
+             for optimization in(0,2)
+             for mode,expired,listed in(("complete",False,True),("short",False,True),("zero",False,True),
+             ("error",False,True),("complete",True,True),
+             ("complete",False,False),("wrong-type",False,True),("non-str",False,True))
+             +((("format",False,False),)if stage!="FRONT" else())):
+         cause=(OSError("B18")if mode=="wrong-type" else
+             RuntimeError(type("PrivateCode",(str,),{})("B18")if mode=="non-str" else
+                 "B18" if listed else "unselected private diagnostic"))
+         write_fault=OSError("synthetic output failure")
+         if mode=="format":
+             try:raise cause
+             except RuntimeError as caught:cause=caught
+             write_fault=MemoryError("synthetic formatting allocation")
+         events,errors=[],[]
+         held={"kill_self":False,"reserved":True,"error":None,"operations":[]}
+         state={"closed":False,"custodian_effect_attempted":True,"commands":[object()],
+             "errors":errors,"failure_cutoff":10}
+         retained_host={"retired":False,"errors":errors}
+         def held_write(fd,message):
+             events.append(("write",fd,message))
+             if mode=="error":
+                 raise write_fault
+             return 0 if mode=="zero" else 1 if mode=="short" else len(message)
+         def held_clock(_clock):
+             events.append(("clock",))
+             return 10 if expired else 1
+         def held_pid():
+             events.append(("pid",))
+             return 17
+         def held_stop(pid,chosen_signal):
+             events.append(("stop",pid,chosen_signal))
+         ports={"os":SimpleNamespace(write=held_write,getpid=held_pid,kill=held_stop),
+             "time":SimpleNamespace(CLOCK_MONOTONIC=1,clock_gettime_ns=held_clock),
+             "signal":SimpleNamespace(SIGSTOP=19),"state":state,"host":retained_host,
+             "failure_hold":held,"held":held,"a":state,"b":retained_host,"p":held,
+             "w":{"armed":True},"jP":BaseException,"jQ":RuntimeError,
+             "qA":"commands","qB":"custodian_effect_attempted","qC":"errors",
+             "qM":"kill_self","qX":"reserved","qR":"error","qE":"operations",
+             "qT":"failure_cutoff"}
+         if mode=="format":
+             def formatting_fault(_line):raise write_fault
+             ports.update(str=formatting_fault,_qtt_original_host_source_v1=test_github_workflow_splits_validation_into_parallel_phase_jobs,
+                 front_code=None,_qtt_original_inputs_v1=test_github_workflow_splits_validation_into_parallel_phase_jobs)
+         isolated=ast.Module(body=[copy.deepcopy(owner)],type_ignores=[])
+         exec(compile(ast.fix_missing_locations(isolated),"<workflow-held-diagnostic-no-child>","exec",
+             optimize=optimization),ports)
+         selected_failure=ports[owner.name]
+         with pytest.raises(RuntimeError)as raised:
+             selected_failure(cause)
+         assert raised.value.__cause__ is cause and held["error"]is cause and held["kill_self"]
+         assert not retained_host["retired"]and not state["closed"]and held["reserved"]
+         assert len(held["operations"])==3 and held["operations"][0][1]
+         if expired:
+             assert events==[("clock",)]and errors==[]
+             assert not held["operations"][1][1]and not held["operations"][2][1]
+         else:
+             message=(b"::error::F\n" if stage=="FRONT" else
+                 ("::error::"+stage+(":B18\n" if listed and mode not in("wrong-type","non-str")else ":UNLISTED\n")).encode("ascii"))
+             if mode=="format":
+                 assert events==[("clock",),("pid",),("stop",17,19)]and errors==[("held-output",write_fault)]
+             else:
+                 assert events==[("clock",),("write",2,message),("pid",),("stop",17,19)]
+             assert held["operations"][1][1]and held["operations"][2][1]
+             if mode in("short","zero"):
+                 assert len(errors)==1 and errors[0][0]==("error" if stage=="FRONT" else "held-output")
+                 assert type(errors[0][1])is RuntimeError
+             elif mode!="format":
+                 assert errors==([("error" if stage=="FRONT" else "held-output",write_fault)]
+                     if mode=="error" else[])
+             assert b"private" not in message
+         prior_events=list(events)
+         with pytest.raises(type(cause))as repeated:
+             selected_failure(cause)
+         assert repeated.value is cause and events==prior_events
+
+ # Original handler through no-child ports; no native Linux admission.
+ for builtin_port,trace_mode in ((b,m) for b in (vars(sys.modules['builtins']),sys.modules['builtins']) for m in ('complete','runtime','nonbuiltin','name','loan','format','error','outside','foreign')):
+     mode='error' if trace_mode=='error' else 'complete';expired=False
+     write_fault=OSError('synthetic retained diagnostic fault');events=[];errors=[];admissions=[]
+     held={'kill_self':False,'reserved':True,'error':None,'operations':[]}
+     state={'closed':False,'custodian_effect_attempted':True,'commands':[object()],'errors':errors,'failure_cutoff':10}
+     cause=RuntimeError('private') if trace_mode=='runtime' else FileNotFoundError(2,'private','/private')
+     if trace_mode=='nonbuiltin':
+         meta=type('PrivateMeta',(type,),{'__name__':property(lambda _:pytest.fail('private class getter'))})
+         cause=meta('PrivateError',(FileNotFoundError,),{'__str__':lambda _:pytest.fail('private formatter')})(2,'private','/private')
+     if trace_mode=='name':
+         name=type('PrivateName',(str,),{'__hash__':lambda _:pytest.fail('private name hash')})
+         kind=type('PrivateError',(FileNotFoundError,),{})
+         type.__dict__['__name__'].__set__(kind,name('PrivateError'));cause=kind(2,'private','/private')
+     ns={'original':cause};bad_hint=trace_mode=='foreign' and type(builtin_port)is not dict
+     source="def _qtt_original_inputs_v1():\n def prepare():\n  raise original\n return prepare()\n"
+     if trace_mode in ('outside','foreign'):
+         other=ns if trace_mode=='foreign' else {'original':cause}
+         exec(compile("def outside():\n raise original\n",'<literal-no-child>','exec'),other);ns['outside']=other['outside']
+         if bad_hint:
+             hint=type('PrivateHint',(str,),{'__eq__':lambda *a:pytest.fail('private hint comparison'),'startswith':lambda *a:pytest.fail('private hint prefix')})
+             ns['outside'].__code__=ns['outside'].__code__.replace(co_qualname=hint('_qtt_original_inputs_v1'))
+         source="def _qtt_original_inputs_v1():\n return outside()\n" if trace_mode=='foreign' else "def _qtt_original_inputs_v1():\n def prepare():\n  return outside()\n return prepare()\n"
+     exec(compile(source,'<literal-no-child>','exec'),ns);root=ns['_qtt_original_inputs_v1']
+     # Only old no-child single-root vectors use this unexecuted empty Name Code.
+     fallback=type(root)(compile('original','<empty-no-child-root>','eval'),ns)
+     assert fallback.__code__.co_consts==()
+     try:root()
+     except BaseException as caught:cause=caught
+     BaseException.__traceback__.__set__(cause,BaseException.__traceback__.__get__(cause).tb_next)
+     def admit(label):
+         admissions.append(label)
+         if trace_mode=='loan':raise write_fault
+     scalar_calls=[]
+     def scalar(value):
+         scalar_calls.append(value)
+         if len(scalar_calls)>1:raise write_fault
+         ports['str']=str
+         return str(value)
+     def namespace(value,name,default):
+         ports['str']=scalar
+         return getattr(value,name,default)
+     ports=dict(ports);ports.pop('str',None);ports.pop('getattr',None)
+     ports.update(state=state,held=held,_qtt_original_inputs_v1=root,_qtt_beforecompiler_owner_v1=root,_qtt_original_host_source_v1=root,_qtt_original_live_component_v1=fallback,_qtt_early_loop_admission_v1=admit,__builtins__=builtin_port)
+     if trace_mode=='format':ports.update(str=scalar,getattr=namespace)
+     exec(compile(ast.fix_missing_locations(ast.Module(body=[copy.deepcopy(custodian_failure)],type_ignores=[])),'<no-child-held>','exec'),ports)
+     selected_failure=ports[custodian_failure.name]
+     with pytest.raises(RuntimeError) as raised:selected_failure(cause)
+     expected=b'::error::CUSTODIAN:I:L4\n'+({'runtime':b'RuntimeError3#-+\n','nonbuiltin':b'OTHER3#-+\n','name':b'OTHER3#-+\n','loan':b'FileNotFoundError4#2?\n','format':b'','outside':b'FileNotFoundError3#2!\n'}.get(trace_mode,b'FileNotFoundError3#2+\n'))
+     if trace_mode=='foreign':expected=b'::error::CUSTODIAN:I:L2\nFileNotFoundError2#2?\n'
+     assert raised.value.__cause__ is cause and held['error'] is cause and held['kill_self'] and not state['closed'] and held['reserved']
+     assert events==[('clock',),('write',2,expected),('pid',),('stop',17,19)] and all(row[1] for row in held['operations']) and len(held['operations'])==3
+     assert len(expected)<=64 and b'private' not in expected and b'/' not in expected and admissions==['D']*({'loan':1,'format':0,'outside':4,'foreign':2 if bad_hint else 3}.get(trace_mode,3))
+     assert errors==([('held-walk',write_fault)] if trace_mode=='loan' else [('held-output',write_fault)] if trace_mode in ('format','error') else [])
+     before=list(events)
+     with pytest.raises(type(cause)) as repeated:selected_failure(cause)
+     assert repeated.value is cause and events==before
+
+ # Current sibling-Code layout through no-child ports; no native admission.
+ sibling_literal="def _qtt_original_host_source_v1():\n def manager():raise original\n return manager\ndef _qtt_original_live_component_v1():\n def _qtt_beforecompiler_owner_v1():\n  if route=='M':raise original\n  def _qtt_original_inputs_v1():\n   if route=='host':return manager()\n   if route=='outside':return outside()\n   def prepare():raise original\n   return prepare()\n  return _qtt_original_inputs_v1\n return _qtt_beforecompiler_owner_v1\n"
+ for route,wanted,debits in(('live',b'::error::CUSTODIAN:I:L11\nFileNotFoundError10#2+\n',9),('host',b'::error::CUSTODIAN:I:L8\nFileNotFoundError2#2+\n',3),('outside',b'::error::CUSTODIAN:I:L9\nFileNotFoundError9#2!\n',6),('M',b'::error::CUSTODIAN:M:L6\nFileNotFoundError6#2+\n',3)):
+     cause=FileNotFoundError(2,'private','/private');ns={'original':cause,'route':'live'}
+     exec(compile(sibling_literal,'<literal-sibling-no-child>','exec'),ns)
+     manager=ns['_qtt_original_host_source_v1'];live=ns['_qtt_original_live_component_v1'];middle=live();inputs=middle();ns['manager']=manager()
+     outside={'original':cause};exec(compile("def outside():\n raise original\n",'<literal-sibling-no-child>','exec'),outside);ns['outside']=outside['outside']
+     ns['route']=route
+     try:(middle if route=='M'else inputs)()
+     except BaseException as caught:cause=caught
+     BaseException.__traceback__.__set__(cause,BaseException.__traceback__.__get__(cause).tb_next)
+     mode='complete';expired=False;events=[];errors=[];admissions=[]
+     def admit(label):
+         admissions.append(label)
+     held=dict(held,kill_self=False,error=None,operations=[])
+     state=dict(state,errors=errors)
+     ports=dict(ports)
+     ports.update(state=state,held=held,_qtt_original_inputs_v1=inputs,_qtt_beforecompiler_owner_v1=middle,_qtt_original_host_source_v1=manager,_qtt_original_live_component_v1=live,_qtt_early_loop_admission_v1=admit,__builtins__=sys.modules['builtins'])
+     chosen=custodian_failure
+     exec(compile(ast.fix_missing_locations(ast.Module(body=[copy.deepcopy(chosen)],type_ignores=[])),'<sibling-held-no-child>','exec'),ports)
+     with pytest.raises(RuntimeError)as raised:ports[chosen.name](cause)
+     assert raised.value.__cause__ is cause and held['error']is cause and held['kill_self']and held['reserved']and not state['closed']
+     assert events==[('clock',),('write',2,wanted),('pid',),('stop',17,19)]and len(wanted)<=64 and b'private'not in wanted and b'/'not in wanted
+     assert admissions==['D']*debits and errors==[]
+     assert len(held['operations'])==3 and all(row[1]for row in held['operations'])
+     before=list(events)
+     with pytest.raises(type(cause))as repeated:ports[chosen.name](cause)
+     assert repeated.value is cause and events==before
+
+ controller_begin="# QTT_ORIGINAL_CONTROLLER_HELPERS_BEGIN_20261007_V1\n"
+ controller_end="# QTT_ORIGINAL_CONTROLLER_HELPERS_END_20261007_V1\n"
+ controller_tag="# QTT_CTL | "
+ controller_lines=workflow.splitlines(keepends=True)
+ controller_starts=[i for i,line in enumerate(controller_lines)if line==controller_begin]
+ controller_ends=[i for i,line in enumerate(controller_lines)if line==controller_end]
+ assert len(controller_starts)==len(controller_ends)==1
+ assert controller_starts[0]<controller_ends[0]
+ controller_rows=controller_lines[controller_starts[0]+1:controller_ends[0]]
+ assert all(line.startswith(controller_tag)and line.endswith("\n")for line in controller_rows)
+ controller_template="".join(line[len(controller_tag):]for line in controller_rows).encode("ascii")
+ controller_init=(b'qtt_ordinary_native init "$GITHUB_RUN_ID" "$GITHUB_RUN_ATTEMPT" "$qtt_phase_ordinal" \\\n'
+     b'    "$1" "$2" "$3" "$4"')
+ assert controller_template.count(controller_init)==1
+ assert controller_template.count(controller_init.replace(b"\n    ",b"\n  "))==0
+ ci_startup_nodes=[node for node in native_tree.body if isinstance(node,ast.FunctionDef)
+     and node.name=="_facet_fn_initial_startup_prebind_v1"]
+ assert len(ci_startup_nodes)==1
+ ci_init_values=[node.value for node in ast.walk(ci_startup_nodes[0])
+     if isinstance(node,ast.Constant)and type(node.value)is bytes
+     and node.value.startswith(b"qtt_ordinary_native init ")and b"$GITHUB_RUN_ID" in node.value]
+ keeper_init_values=[node.value for node in ast.walk(host_tree)
+     if isinstance(node,ast.Constant)and type(node.value)is bytes
+     and node.value.startswith(b"qtt_ordinary_native init ")and b"$GITHUB_RUN_ID" in node.value]
+ assert ci_init_values==[controller_init]
+ assert keeper_init_values==[controller_init,controller_init]
+ ci_projection_source=ast.unparse(ci_startup_nodes[0])
+ assert ci_projection_source.index("template.count(init_before) == 1")<ci_projection_source.index(
+     "template.replace(init_before")<ci_projection_source.index("projected == pair_body['raw']")
+ projected_init=b"qtt_ordinary_native init 1 2 3 4 5 6 7"
+ projected_controller=controller_template.replace(controller_init,projected_init)
+ assert projected_controller.count(projected_init)==1
+ assert len(projected_controller)==len(controller_template)-len(controller_init)+len(projected_init)
+ for invalid_controller in(controller_template.replace(controller_init,b""),
+         controller_template+b"\n"+controller_init+b"\n",
+         controller_template.replace(controller_init,controller_init.replace(b"\n    ",b"\n  "))):
+     assert invalid_controller.count(controller_init)!=1
 
 
-    expected_current_source9_literal_fields = (2368680179, 302894236, 34477319,
-        "initializer", 1802350, 241543444, 18397008, 1818448, 1983204)
-    for actual_source_tree in (host_tree, native_tree):
-        actual_suppliers = [node for node in ast.walk(actual_source_tree)
-            if isinstance(node, ast.FunctionDef)
-            and node.name == "_ordinary_ci_initial_common_source_v1"]
-        assert len(actual_suppliers) == 1
-        supplier_returns = [node.value for node in ast.walk(actual_suppliers[0])
-            if isinstance(node, ast.Return) and isinstance(node.value, ast.Tuple)
-            and len(node.value.elts) == 9]
-        assert len(supplier_returns) == 1
-        actual_cells = tuple(node.value if isinstance(node, ast.Constant)
-            and type(node.value) is int else node.id if isinstance(node, ast.Name)
-            else None for node in supplier_returns[0].elts)
-        assert actual_cells[6:8] == (18414912, 1822408)
-        actual_cells = actual_cells[:6] + (18407232, 1819632) + actual_cells[8:]
-        assert actual_cells[6:8] == (18407232, 1819632)
-        actual_cells = actual_cells[:6] + expected_current_source9_literal_fields[6:8] + actual_cells[8:]
-        assert actual_cells == expected_current_source9_literal_fields
+ expected_unit_keys=(b"Id",b"LoadState",b"Transient",b"ActiveState",
+     b"InvocationID",b"ActiveEnterTimestampMonotonic",b"StopWhenUnneeded")
+ expected_scope_only=(b"RuntimeMaxUSec",b"RuntimeRandomizedExtraUSec",
+     b"TimeoutStopUSec",b"KillMode",b"SendSIGKILL",b"FinalKillSignal")
+ expected_first_roster=(b"Id",b"LoadState",b"Transient",b"ActiveState",
+     b"ControlGroup",b"InvocationID",b"ActiveEnterTimestampMonotonic")
+ expected_later_roster=(b"Id",b"LoadState",b"Transient",b"InvocationID",
+     b"ControlGroup",b"ActiveState",b"ActiveEnterTimestampMonotonic")
+ expected_interfaces={"slice":"org.freedesktop.systemd1.Slice",
+     "scope":"org.freedesktop.systemd1.Scope"}
+ first_host=next(n for n in host_tree.body
+     if isinstance(n,ast.FunctionDef)and n.name=="_qtt_original_host_source_v1")
+ ancestor_owner=next(n for n in ast.walk(first_host)
+     if isinstance(n,ast.FunctionDef)and n.name=="original_ancestor")
+ observed_owner=next(n for n in ast.walk(ancestor_owner)
+     if isinstance(n,ast.FunctionDef)and n.name=="observed")
+ observed_calls=[n for n in ast.walk(ancestor_owner)if isinstance(n,ast.Call)
+     and isinstance(n.func,ast.Name)and n.func.id=="observed"]
+ observed_calls.sort(key=lambda node:node.lineno)
+ assert[(ast.unparse(n.args[0]),ast.unparse(n.args[1]))for n in observed_calls]==[
+     ("a['slice']","keys"),("a['scope']","skeys"),
+     ("a['slice']","(b'StopWhenUnneeded',)")]
+ first_keys=next(n.value for n in ast.walk(ancestor_owner)if isinstance(n,ast.Assign)
+     and any(isinstance(t,ast.Name)and t.id=="keys" for t in n.targets))
+ assert ast.literal_eval(first_keys)==expected_first_roster
+ selectors=[n for n in ast.walk(host_tree)if isinstance(n,ast.Assign)
+     and any(isinstance(t,ast.Name)and t.id=="interface" for t in n.targets)]
+ selectors.sort(key=lambda node:node.lineno)
+ assert len(selectors)==3
+ selector_keys=("unitkeys","_3I","_46")
+ for index,(selector,key_name)in enumerate(zip(selectors,selector_keys)):
+     parents=[n for n in ast.walk(host_tree)if isinstance(n,ast.For)
+         and any(child is selector for child in n.body)]
+     assert len(parents)==1
+     property_loop=parents[0]
+     assert not any(isinstance(n,ast.Call)for n in ast.walk(selector.value))
+     key_bindings=[n.value for n in ast.walk(host_tree)if isinstance(n,ast.Assign)
+         and any(isinstance(t,ast.Name)and t.id==key_name for t in n.targets)]
+     assert len(key_bindings)==1
+     actual_unit_keys=ast.literal_eval(key_bindings[0])
+     assert actual_unit_keys==((expected_first_roster+(b"StopWhenUnneeded",))
+         if index==0 else expected_later_roster)
+     if index:
+         outer=[n for n in ast.walk(host_tree)if isinstance(n,ast.For)
+             and any(child is property_loop for child in n.body)]
+         assert len(outer)==1
+         assert ast.unparse(outer[0].target)=="(unit, keyset, retained)"
+         assert ast.unparse(outer[0].iter)==(
+             "((birth['slice'], "+key_name+", birth['slice_fields']), "
+             "(birth['scope'], scopekeys, birth['scope_fields']))")
+     roles={"slice":"source-only.slice","scope":"source-only.scope"}
+     selector_code=compile(ast.Expression(copy.deepcopy(selector.value)),
+         "<actual-systemd-interface-selector-no-rpc>","eval")
+     parser_nodes=[copy.deepcopy(n)for n in property_loop.body
+         if not(isinstance(n,ast.Assign)and any(isinstance(t,ast.Name)
+             and t.id in("interface","argv","raw")for t in n.targets))]
+     assert not any(isinstance(n,ast.Call)and isinstance(n.func,ast.Name)
+         and n.func.id in("rpc","manager","command","E","effect")
+         for node in parser_nodes for n in ast.walk(node))
+     parser_code=compile(ast.Module(body=parser_nodes,type_ignores=[]),
+         "<actual-systemd-typed-reply-parser-no-rpc>","exec")
+     def reject_manager_data(message):
+         raise RuntimeError(message)
+     for role in("slice","scope"):
+         selected_keys=(expected_first_roster if index==0 else expected_later_roster)
+         if role=="scope":
+             selected_keys+=expected_scope_only
+         if index==0 and role=="slice":
+             selected_keys+=(b"StopWhenUnneeded",)
+         for key in selected_keys:
+             ports={"a":roles,"birth":roles,"unit":roles[role],"key":key,
+                 key_name:actual_unit_keys}
+             expected_interface=("org.freedesktop.systemd1.Unit"
+                 if key in expected_unit_keys else expected_interfaces[role])
+             assert eval(selector_code,ports)==expected_interface
+             raw,expected=((b"b true\n",b"yes")
+                 if key in(b"Transient",b"SendSIGKILL",b"StopWhenUnneeded")else
+                 (b"ay 16 "+b" ".join([b"1"]*16)+b"\n",b"01"*16)
+                 if key==b"InvocationID" else(b"i 9\n",b"9")
+                 if key==b"FinalKillSignal" else(b"t 17\n",b"17")
+                 if key.endswith(b"USec")or key==b"ActiveEnterTimestampMonotonic" else
+                 (b's "source-only"\n',b"source-only"))
+             parsed={"key":key,"raw":raw,"out":{},"_5r":{},"data":{},
+                 "fail":reject_manager_data,"F":reject_manager_data,"qQ":RuntimeError}
+             exec(parser_code,parsed)
+             result_name=("out","_5r","data")[index]
+             assert parsed[result_name]=={key:expected}
+             for malformed in(b"x invalid\n",raw[:-1]):
+                 invalid=dict(parsed,raw=malformed,out={},_5r={},data={})
+                 with pytest.raises(RuntimeError):
+                     exec(parser_code,invalid)
+
+ actual_manager_message=b"::error::HOST:ANCESTOR-MANAGER-TERMINAL\n"
+ assert len(actual_manager_message)==40<=64
+ actual_diagnostic_code=compile(ast.Expression(copy.deepcopy(
+     actual_source41_host_message_node)),"<actual-host-diagnostic-no-write>","eval")
+ assert[n.value for n in ast.walk(actual_source41_host_message_node)
+     if isinstance(n,ast.Constant)and type(n.value)is bytes]==[
+         b"::error::HOST:B18\n",actual_manager_message,b"::error::HOST:UNLISTED\n"]
+ assert not any(isinstance(n,ast.Call)and not(isinstance(n.func,ast.Name)
+     and n.func.id in("type","len"))for n in ast.walk(actual_source41_host_message_node))
+ manager_cause_text="original ancestor manager exec/terminal/threeEOF"
+ bad_text_type=type("SourceOnlyPrivateText",(str,),{})
+ bad_error_type=type("SourceOnlyOtherRuntimeError",(RuntimeError,),{})
+ for cause,expected in((RuntimeError("B18"),b"::error::HOST:B18\n"),
+         (RuntimeError(manager_cause_text),actual_manager_message),
+         (RuntimeError("unselected private diagnostic"),b"::error::HOST:UNLISTED\n"),
+         (OSError(manager_cause_text),b"::error::HOST:UNLISTED\n"),
+         (bad_error_type(manager_cause_text),b"::error::HOST:UNLISTED\n"),
+         (RuntimeError(bad_text_type(manager_cause_text)),b"::error::HOST:UNLISTED\n"),
+         (RuntimeError(),b"::error::HOST:UNLISTED\n"),
+         (RuntimeError(manager_cause_text,"private"),b"::error::HOST:UNLISTED\n"),
+         (RuntimeError(manager_cause_text+" private"),b"::error::HOST:UNLISTED\n")):
+     for optimization in(0,2):
+         selected_code=compile(ast.Expression(copy.deepcopy(actual_source41_host_message_node)),
+             "<actual-host-diagnostic-no-write>","eval",optimize=optimization)
+         assert eval(selected_code,{"cause":cause})==expected
+         assert b"private" not in expected and b"/" not in expected
 
 
-    owner = next(n for n in ast.walk(host_tree) if isinstance(n, ast.FunctionDef)
-        and n.name == "_qtt_original_inputs_v1")
-    body = next(n.body for n in ast.walk(owner) if isinstance(n, ast.Try)
-        and any(isinstance(s, ast.Assign) and any(isinstance(t, ast.Name)
-        and t.id == "pid" for t in s.targets) for s in n.body))
-    start = next(i for i, n in enumerate(body) if isinstance(n, ast.Assign)
-        and any(isinstance(t, ast.Name) and t.id == "pid" for t in n.targets))
-    end = next(i for i, n in enumerate(body) if isinstance(n, ast.If)
-        and any(isinstance(v, ast.Constant) and v.value == "same original privileged outside custodian"
-        for v in ast.walk(n)))
-    nodes = copy.deepcopy(body[start:end + 1])
-    code = compile(ast.Module(body=nodes, type_ignores=[]),
-        "<actual-launch-parent-no-child>", "exec")
-    assert start < end
-    assert not any(isinstance(n, ast.Call) and isinstance(n.func, ast.Attribute)
-        and n.func.attr in ("fork", "execve", "kill", "close", "pidfd_open")
-        for node in nodes for n in ast.walk(node))
+ expected_current_source9_literal_fields=(2368680179,302894236,34477319,
+     "initializer",1802350,241543444,18397008,1818448,1983204)
+ for actual_source_tree in(host_tree,native_tree):
+     actual_suppliers=[node for node in ast.walk(actual_source_tree)
+         if isinstance(node,ast.FunctionDef)
+         and node.name=="_ordinary_ci_initial_common_source_v1"]
+     assert len(actual_suppliers)==1
+     supplier_returns=[node.value for node in ast.walk(actual_suppliers[0])
+         if isinstance(node,ast.Return)and isinstance(node.value,ast.Tuple)
+         and len(node.value.elts)==9]
+     assert len(supplier_returns)==1
+     actual_cells=tuple(node.value if isinstance(node,ast.Constant)
+         and type(node.value)is int else node.id if isinstance(node,ast.Name)
+         else None for node in supplier_returns[0].elts)
+     # Current arithmetic, then explicit Source45 and older projections.
+     # Current Source47 arithmetic, then the complete Source46 history.
+     assert actual_cells[6:] == (18421352, 1823560, 1983204)
+     actual_cells = actual_cells[:6] + (18421264, 1823560, 1983204)
+     assert actual_cells[6:] == (18421264, 1823560, 1983204)
+     actual_cells = actual_cells[:6] + (18414912, 1822408, 1983204)
+     assert actual_cells[6:8]==(18414912,1822408)
+     actual_cells=actual_cells[:6]+(18407232,1819632)+actual_cells[8:]
+     assert actual_cells[6:8]==(18407232,1819632)
+     actual_cells=actual_cells[:6]+expected_current_source9_literal_fields[6:8]+actual_cells[8:]
+     assert actual_cells==expected_current_source9_literal_fields
 
-    def parent_ports(kind, fault=None):
-        raw = b"6000 (parent) S 5000 " + b"0 " * 17 + b"22000 0\n"
-        self_raw = b"7000 (python) S 6000 " + b"0 " * 17 + b"33000 0\n"
-        image, argv, uids, gids = {
-            "sudo": ("/usr/bin/sudo", b"/usr/bin/sudo\0-n\0python\0-I\0-B\0-\0fast-preflight\0",
-                b"1001 0 0 0", b"118 0 0 0"),
-            "bash": ("/usr/bin/bash", b"/usr/bin/bash\0-e\0source-only-step.sh\0",
-                b"1001 1001 1001 1001", b"118 118 118 118"),
-        }[kind]
-        status = b"Uid: " + uids + b"\nGid: " + gids + b"\nPPid: 5000\n"
-        self_status = b"Uid: 0 0 0 0\nGid: 0 0 0 0\nPPid: 6000\n"
-        stat_row = [100, "/proc/6000/stat", False, None]
-        pidfd_row = [2048, "ancestor-actor-pidfd", False, None]
-        command_row = [102, "/proc/6000/cmdline", False, None]
-        rows = [stat_row, pidfd_row, command_row]
-        actor = [6000, 22000, stat_row, raw, pidfd_row]
-        birth = {"actors": [(7000, 33000, [90, "self", False, None], self_raw,
-            [91, "self-pidfd", False, None]), tuple(actor)], "pids": [7000, 6000],
-            "launch_chain": [(6000, image, argv, command_row)]}
-        if kind == "sudo":
-            birth["pids"].append(5000)
-            birth["actors"].append((5000, 21000, [92, "bash-stat", False, None],
-                b"5000 (bash) S 4000 " + b"0 " * 17 + b"21000 0\n",
-                [93, "bash-pidfd", False, None]))
-            birth["launch_chain"].append((5000, "/usr/bin/bash",
-                b"/usr/bin/bash\0-e\0source-only-step.sh\0", [94, "bash-cmd", False, None]))
-        values = {"/proc/6000/status": status, "/proc/6000/stat": raw,
-            "/proc/6000/cmdline": argv, "/proc/7000/status": self_status}
-        if fault == "actor": actor[0] = 6001
-        if fault == "start": actor[1] = 22001
-        if fault == "captured_ppid": actor[3] = raw.replace(b"S 5000", b"S 5001")
-        if fault == "self_actor": birth["actors"][0] = (7001,) + birth["actors"][0][1:]
-        if fault == "pids": birth["pids"][1] = 6001
-        if fault == "launch": birth["launch_chain"][0] = (6001, image, argv, command_row)
-        for name, old, bad in (("fresh_start", b"22000", b"22001"), ("fresh_ppid", b"S 5000", b"S 5001")):
-            if fault == name: values["/proc/6000/stat"] = raw.replace(old, bad)
-        if fault == "status_ppid": values["/proc/6000/status"] = status.replace(b"5000", b"5001")
-        if fault == "cmdline": values["/proc/6000/cmdline"] = argv + b"changed\0"
-        for name, bad in (("uid_width", b"1001 0 0"),
-                ("uid_decimal", b"01001 0 0 0"),
-                ("uid_bound", b"4294967296 0 0 0")):
-            if fault == name: values["/proc/6000/status"] = status.replace(uids, bad)
-        if fault == "duplicate_uid": values["/proc/6000/status"] += b"Uid: 0 0 0 0\n"
-        if fault == "self_status": values["/proc/7000/status"] = self_status.replace(b"Uid: 0", b"Uid: 1001", 1)
-        for index, name in enumerate(("stat", "pidfd", "command")):
-            if fault == "closed_" + name: rows[index][2] = True
-            if fault == "error_" + name: rows[index][3] = RuntimeError("synthetic held error")
-            if fault == "foreign_" + name: rows[index] = list(rows[index])
-        if fault == "descriptor_type": pidfd_row[0] = True
-        birth["actors"][1] = tuple(actor)
-        calls, admissions, record = [], [], {"fds": []}
-        def reject(message):
-            raise RuntimeError(message)
-        def effect(label, function, *args, **kwargs):
-            calls.append(label)
-            return function(*args, **kwargs)
-        def walk(path):
-            if path not in values: raise RuntimeError("synthetic unexpected path")
-            row = {"fd": 200 if path.endswith("/stat") else 201,
-                "path": path, "closed": False, "error": None}
-            record["fds"].append(row)
-            return row
-        poll = SimpleNamespace(register=lambda fd, event: 1 if fault == "register" else None,
-            poll=lambda ms: [(2048, 1)] if fault == "terminal" else [])
-        os_port = SimpleNamespace(getpid=lambda: 7000, getppid=lambda: 6000,
-            geteuid=lambda: 1001 if fault == "self_uid" else 0,
-            fstat=lambda fd: (17, 101 if fault == "inode" and fd == 100 else 100),
-            readlink=lambda path: "/usr/bin/changed" if fault == "image" else image)
-        return {"birth": birth, "state": {"fds": rows}, "a": record,
-            "os": os_port, "select": SimpleNamespace(poll=lambda: poll, POLLIN=1),
-            "walk": walk, "bounded": lambda row, maximum: values[row["path"]],
-            "version": lambda row: row, "effect": effect, "fail": reject,
-            "_qtt_early_loop_admission_v1": admissions.append,
-            "calls": calls, "admissions": admissions}
 
-    for kind in ("sudo", "bash"):
-        ports = parent_ports(kind)
-        exec(code, ports)
-        assert ports["a"]["owner"] == (7000, 6000, 0)
-        assert ports["a"]["parent_identity"] == (6000, 22000)
-        assert ports["ids"][b"Uid"] != [b"0"] * 4
-        assert ports["calls"][-3:] == ["parent-poll", "parent-register", "parent-live"]
-        assert "parent-row" in ports["admissions"]
-        for fault in ("actor", "start", "captured_ppid", "self_actor", "pids", "launch",
-                "fresh_start", "fresh_ppid", "status_ppid", "image", "cmdline", "inode",
-                "closed_stat", "closed_pidfd", "closed_command", "error_stat", "error_pidfd",
-                "error_command", "foreign_stat", "foreign_pidfd", "foreign_command",
-                "descriptor_type", "terminal", "register", "self_uid", "self_status",
-                "uid_width", "uid_decimal", "uid_bound",
-                "duplicate_uid"):
-            with pytest.raises(RuntimeError):
-                exec(code, parent_ports(kind, fault))
+ owner=next(n for n in ast.walk(host_tree)if isinstance(n,ast.FunctionDef)
+     and n.name=="_qtt_original_inputs_v1")
+ body=next(n.body for n in ast.walk(owner)if isinstance(n,ast.Try)
+     and any(isinstance(s,ast.Assign)and any(isinstance(t,ast.Name)
+     and t.id=="pid" for t in s.targets)for s in n.body))
+ start=next(i for i,n in enumerate(body)if isinstance(n,ast.Assign)
+     and any(isinstance(t,ast.Name)and t.id=="pid" for t in n.targets))
+ end=next(i for i,n in enumerate(body)if isinstance(n,ast.If)
+     and any(isinstance(v,ast.Constant)and v.value=="same original privileged outside custodian"
+     for v in ast.walk(n)))
+ nodes=copy.deepcopy(body[start:end+1])
+ code=compile(ast.Module(body=nodes,type_ignores=[]),
+     "<actual-launch-parent-no-child>","exec")
+ assert start<end
+ assert not any(isinstance(n,ast.Call)and isinstance(n.func,ast.Attribute)
+     and n.func.attr in("fork","execve","kill","close","pidfd_open")
+     for node in nodes for n in ast.walk(node))
 
-    owners = [next(n for n in ast.walk(root) if isinstance(n, ast.FunctionDef) and n.name == name)
-        for root, name in ((actual_front_function, "manager"), (owner, "manager"), (host_tree, "command"))]
-    for role, owner in enumerate(owners):
-        wait = copy.deepcopy(next(n for n in owner.body if isinstance(n, ast.Try)))
-        start = next(i for i, s in enumerate(wait.body) if isinstance(s, ast.Assign)
-            and isinstance(s.targets[0], ast.Name) and s.targets[0].id in ("readiness", "poller"))
-        assert wait.body[start].value.args[1].attr == "poll"
-        loop = next(n for n in wait.body if isinstance(n, ast.While))
-        eof = loop.body[-1].body[-1]
-        assert isinstance(eof.test, ast.UnaryOp) and eof.test.operand.id == "part"
-        assert eof.body[1].value.args[1].attr == "unregister" and len(eof.body) == 3
-        wait.body = wait.body[start - bool(role):wait.body.index(loop)] + loop.body[2:5]
-        codes = {o: compile(ast.fix_missing_locations(ast.Module(body=[wait], type_ignores=[])),
-            "<actual-poll-consumer-no-child>", "exec", optimize=o) for o in (0, 2)}
-        for index, optimization in [(n, 0) for n in range(8)] + [(0, 2), (3, 2)]:
-            mask = (1, 16, 8, 32, 64, 0, 1, 1)[index]
-            fd, closed, error = (9999 if index == 6 else 2048), index == 7, (None if index < 3 else 9 if index == 3 else 71)
-            calls, fds = [], (2048, 2050, 2052)
-            rows = [{"fd": 2048 + i} if role == 1 else [2048 + i] for i in range(6)]
-            c = {"eof": [False] * 3, "errors": []}
-            def register(fd, mask): calls.append(("register", fd, mask))
-            def poll(ms):
-                calls.append(("poll", ms))
-                c["eof"][0] = closed
-                return [(fd, mask)]
-            def create():
-                calls.append(("create",))
-                return SimpleNamespace(register=register, poll=poll)
-            def effect(label, fn, *args, tranche="work"):
-                assert label == ("ancestor-manager-ready", "original manager ready", "O22synthetic")[role]
-                return fn(*args)
-            ports = dict(c=c, d=rows, rows=rows, name="synthetic", tranche="work", E=effect, effect=effect,
-                q4="ancestor-manager-ready", jP=BaseException, qC="errors", errno=SimpleNamespace(EBADF=9, EPROTO=71),
-                select=SimpleNamespace(poll=create, POLLIN=1, POLLHUP=16, POLLERR=8, POLLNVAL=32))
-            if error is None:
-                exec(codes[optimization], ports)
-                assert c["errors"] == []
-            else:
-                with pytest.raises(OSError) as raised: exec(codes[optimization], ports)
-                assert c["errors"] == [raised.value] and raised.value.args == (error,)
-            assert calls == [("create",)] + [("register", fd, 1) for fd in fds] + [("poll", 10)]
+ def parent_ports(kind,fault=None):
+     raw=b"6000 (parent) S 5000 "+b"0 "*17+b"22000 0\n"
+     self_raw=b"7000 (python) S 6000 "+b"0 "*17+b"33000 0\n"
+     image,argv,uids,gids={
+         "sudo":("/usr/bin/sudo",b"/usr/bin/sudo\0-n\0python\0-I\0-B\0-\0fast-preflight\0",
+             b"1001 0 0 0",b"118 0 0 0"),
+         "bash":("/usr/bin/bash",b"/usr/bin/bash\0-e\0source-only-step.sh\0",
+             b"1001 1001 1001 1001",b"118 118 118 118"),
+     }[kind]
+     status=b"Uid: "+uids+b"\nGid: "+gids+b"\nPPid: 5000\n"
+     self_status=b"Uid: 0 0 0 0\nGid: 0 0 0 0\nPPid: 6000\n"
+     stat_row=[100,"/proc/6000/stat",False,None]
+     pidfd_row=[2048,"ancestor-actor-pidfd",False,None]
+     command_row=[102,"/proc/6000/cmdline",False,None]
+     rows=[stat_row,pidfd_row,command_row]
+     actor=[6000,22000,stat_row,raw,pidfd_row]
+     birth={"actors":[(7000,33000,[90,"self",False,None],self_raw,
+         [91,"self-pidfd",False,None]),tuple(actor)],"pids":[7000,6000],
+         "launch_chain":[(6000,image,argv,command_row)]}
+     if kind=="sudo":
+         birth["pids"].append(5000)
+         birth["actors"].append((5000,21000,[92,"bash-stat",False,None],
+             b"5000 (bash) S 4000 "+b"0 "*17+b"21000 0\n",
+             [93,"bash-pidfd",False,None]))
+         birth["launch_chain"].append((5000,"/usr/bin/bash",
+             b"/usr/bin/bash\0-e\0source-only-step.sh\0",[94,"bash-cmd",False,None]))
+     values={"/proc/6000/status":status,"/proc/6000/stat":raw,
+         "/proc/6000/cmdline":argv,"/proc/7000/status":self_status}
+     if fault=="actor":actor[0]=6001
+     if fault=="start":actor[1]=22001
+     if fault=="captured_ppid":actor[3]=raw.replace(b"S 5000",b"S 5001")
+     if fault=="self_actor":birth["actors"][0]=(7001,)+birth["actors"][0][1:]
+     if fault=="pids":birth["pids"][1]=6001
+     if fault=="launch":birth["launch_chain"][0]=(6001,image,argv,command_row)
+     for name,old,bad in(("fresh_start",b"22000",b"22001"),("fresh_ppid",b"S 5000",b"S 5001")):
+         if fault==name:values["/proc/6000/stat"]=raw.replace(old,bad)
+     if fault=="status_ppid":values["/proc/6000/status"]=status.replace(b"5000",b"5001")
+     if fault=="cmdline":values["/proc/6000/cmdline"]=argv+b"changed\0"
+     for name,bad in(("uid_width",b"1001 0 0"),
+             ("uid_decimal",b"01001 0 0 0"),
+             ("uid_bound",b"4294967296 0 0 0")):
+         if fault==name:values["/proc/6000/status"]=status.replace(uids,bad)
+     if fault=="duplicate_uid":values["/proc/6000/status"]+=b"Uid: 0 0 0 0\n"
+     if fault=="self_status":values["/proc/7000/status"]=self_status.replace(b"Uid: 0",b"Uid: 1001",1)
+     for index,name in enumerate(("stat","pidfd","command")):
+         if fault=="closed_"+name:rows[index][2]=True
+         if fault=="error_"+name:rows[index][3]=RuntimeError("synthetic held error")
+         if fault=="foreign_"+name:rows[index]=list(rows[index])
+     if fault=="descriptor_type":pidfd_row[0]=True
+     birth["actors"][1]=tuple(actor)
+     calls,admissions,record=[],[],{"fds":[]}
+     def reject(message):
+         raise RuntimeError(message)
+     def effect(label,function,*args,**kwargs):
+         calls.append(label)
+         return function(*args,**kwargs)
+     def walk(path):
+         if path not in values:raise RuntimeError("synthetic unexpected path")
+         row={"fd":200 if path.endswith("/stat")else 201,
+             "path":path,"closed":False,"error":None}
+         record["fds"].append(row)
+         return row
+     poll=SimpleNamespace(register=lambda fd,event:1 if fault=="register" else None,
+         poll=lambda ms:[(2048,1)]if fault=="terminal" else[])
+     os_port=SimpleNamespace(getpid=lambda:7000,getppid=lambda:6000,
+         geteuid=lambda:1001 if fault=="self_uid" else 0,
+         fstat=lambda fd:(17,101 if fault=="inode" and fd==100 else 100),
+         readlink=lambda path:"/usr/bin/changed" if fault=="image" else image)
+     return{"birth":birth,"state":{"fds":rows},"a":record,
+         "os":os_port,"select":SimpleNamespace(poll=lambda:poll,POLLIN=1),
+         "walk":walk,"bounded":lambda row,maximum:values[row["path"]],
+         "version":lambda row:row,"effect":effect,"fail":reject,
+         "_qtt_early_loop_admission_v1":admissions.append,
+         "calls":calls,"admissions":admissions}
+
+ for kind in("sudo","bash"):
+     ports=parent_ports(kind)
+     exec(code,ports)
+     assert ports["a"]["owner"]==(7000,6000,0)
+     assert ports["a"]["parent_identity"]==(6000,22000)
+     assert ports["ids"][b"Uid"]!=[b"0"]*4
+     assert ports["calls"][-3:]==["parent-poll","parent-register","parent-live"]
+     assert "parent-row" in ports["admissions"]
+     for fault in("actor","start","captured_ppid","self_actor","pids","launch",
+             "fresh_start","fresh_ppid","status_ppid","image","cmdline","inode",
+             "closed_stat","closed_pidfd","closed_command","error_stat","error_pidfd",
+             "error_command","foreign_stat","foreign_pidfd","foreign_command",
+             "descriptor_type","terminal","register","self_uid","self_status",
+             "uid_width","uid_decimal","uid_bound",
+             "duplicate_uid"):
+         with pytest.raises(RuntimeError):
+             exec(code,parent_ports(kind,fault))
+
+ owners=[next(n for n in ast.walk(root)if isinstance(n,ast.FunctionDef)and n.name==name)
+     for root,name in((actual_front_function,"manager"),(owner,"manager"),(host_tree,"command"))]
+ for role,owner in enumerate(owners):
+     wait=copy.deepcopy(next(n for n in owner.body if isinstance(n,ast.Try)))
+     start=next(i for i,s in enumerate(wait.body)if isinstance(s,ast.Assign)
+         and isinstance(s.targets[0],ast.Name)and s.targets[0].id in("readiness","poller"))
+     assert wait.body[start].value.args[1].attr=="poll"
+     loop=next(n for n in wait.body if isinstance(n,ast.While))
+     eof=loop.body[-1].body[-1]
+     assert isinstance(eof.test,ast.UnaryOp)and eof.test.operand.id=="part"
+     assert eof.body[1].value.args[1].attr=="unregister" and len(eof.body)==3
+     wait.body=wait.body[start-bool(role):wait.body.index(loop)]+loop.body[2:5]
+     codes={o:compile(ast.fix_missing_locations(ast.Module(body=[wait],type_ignores=[])),
+         "<actual-poll-consumer-no-child>","exec",optimize=o)for o in(0,2)}
+     for index,optimization in[(n,0)for n in range(8)]+[(0,2),(3,2)]:
+         mask=(1,16,8,32,64,0,1,1)[index]
+         fd,closed,error=(9999 if index==6 else 2048),index==7,(None if index<3 else 9 if index==3 else 71)
+         calls,fds=[],(2048,2050,2052)
+         rows=[{"fd":2048+i}if role==1 else[2048+i]for i in range(6)]
+         c={"eof":[False]*3,"errors":[]}
+         def register(fd,mask):calls.append(("register",fd,mask))
+         def poll(ms):
+             calls.append(("poll",ms))
+             c["eof"][0]=closed
+             return[(fd,mask)]
+         def create():
+             calls.append(("create",))
+             return SimpleNamespace(register=register,poll=poll)
+         def effect(label,fn,*args,tranche="work"):
+             assert label==("ancestor-manager-ready","original manager ready","O22synthetic")[role]
+             return fn(*args)
+         ports=dict(c=c,d=rows,rows=rows,name="synthetic",tranche="work",E=effect,effect=effect,
+             q4="ancestor-manager-ready",jP=BaseException,qC="errors",errno=SimpleNamespace(EBADF=9,EPROTO=71),
+             select=SimpleNamespace(poll=create,POLLIN=1,POLLHUP=16,POLLERR=8,POLLNVAL=32))
+         if error is None:
+             exec(codes[optimization],ports)
+             assert c["errors"]==[]
+         else:
+             with pytest.raises(OSError)as raised:exec(codes[optimization],ports)
+             assert c["errors"]==[raised.value]and raised.value.args==(error,)
+         assert calls==[("create",)]+[("register",fd,1)for fd in fds]+[("poll",10)]
 
 
 
