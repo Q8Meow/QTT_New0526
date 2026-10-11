@@ -2548,7 +2548,7 @@ jobs:
 # QTT_HOST_PY |     def U(n,c):return 68*n+4*c
 # QTT_HOST_PY |     def T(n,s):return 48*n+8*s
 # QTT_HOST_PY |     def L(n,s):return 56*n+16*(s+s//8+6*n)
-# QTT_HOST_PY |     initializer=5125424+21625000+U(7,7*extent)+T(1,parent_path_count);initializer+=6*(U(67,3*extent)+L(2,130)+T(1,65));initializer+=672+T(1,8)+2*T(1,9)+2*T(1,parent_path_count)+24;return(2368680179,302894236,34477319,initializer,1802350,241543444,18397008,1818448,1983204)
+# QTT_HOST_PY |     initializer=5125424+21625000+U(7,7*extent)+T(1,parent_path_count);initializer+=6*(U(67,3*extent)+L(2,130)+T(1,65));initializer+=672+T(1,8)+2*T(1,9)+2*T(1,parent_path_count)+24;return(2368680179,302894236,34477319,initializer,1802350,241543444,18407232,1819632,1983204)
 # QTT_HOST_PY |    def _ordinary_ci_initial_common_projection_v1(source,paths,catalogue,keeper,native):
 # QTT_HOST_PY |     """Project the fixed original programme; its caller owns every operand join."""
 # QTT_HOST_PY |     if(type(source)is not tuple or len(source)!=9 or type(paths)is not tuple or len(paths)!=19 or type(catalogue)is not tuple or len(catalogue)!=8 or type(keeper)is not tuple or len(keeper)!=7 or type(native)is not tuple or len(native)!=3 or any(type(n)is not int or n<0 for row in(source,paths,catalogue,keeper,native)for n in row)):raise ValueError('ORDINARY_INITIAL_COMMON_EXACT_SOURCE_OPERANDS')
@@ -3028,9 +3028,16 @@ jobs:
 # QTT_HOST_PY |      if key in(b"Uid",b"Gid",b"PPid"):
 # QTT_HOST_PY |       if not sep or key in ids:fail("original parent credential fields")
 # QTT_HOST_PY |       ids[key]=value.split()
-# QTT_HOST_PY |     if(set(ids)!={b"Uid",b"Gid",b"PPid"}or ids[b"Uid"]!=[b"0"]*4 or ids[b"Gid"]!=[b"0"]*4 or len(ids[b"PPid"])!=1 or not ids[b"PPid"][0].isdigit()):fail("original actual root Bash credentials")
+# QTT_HOST_PY |     if(set(ids)!={b"Uid",b"Gid",b"PPid"}or any(len(ids[k])!=n for k,n in((b"Uid",4),(b"Gid",4),(b"PPid",1)))or any(not x.isdigit()or len(x)>10 or str(int(x)).encode()!=x or int(x)>4294967295 for xs in ids.values()for x in xs)):fail("original parent credentials")
 # QTT_HOST_PY |     _0z=walk("/proc/"+str(_0o)+"/stat");_3H=bounded(_0z,4096);head,sep,tail=_3H.rpartition(b")");stats=tail.split()
 # QTT_HOST_PY |     if(not sep or not head.startswith(str(_0o).encode("ascii")+b" (")or len(stats)<20 or not stats[19].isdigit()or stats[19]==b"0"):fail("original parent native start identity")
+# QTT_HOST_PY |     actor=birth["actors"][1];launch=birth["launch_chain"][0];prior=actor[3].rpartition(b")")[2].split();issue="original parent binding"
+# QTT_HOST_PY |     if(birth["actors"][0][0]!=pid or birth["pids"][1]!=_0o or actor[0]!=_0o or launch[0]!=_0o or actor[1]!=int(stats[19])or stats[1]!=prior[1]or ids[b"PPid"]!=[stats[1]]or any(type(r[0])is not int or r[0]<0 or r[2]or r[3]is not None or not any((_qtt_early_loop_admission_v1("parent-row"),r is q)[1]for q in state["fds"])for r in(actor[2],actor[4],launch[3]))):fail(issue)
+# QTT_HOST_PY |     if version(effect("parent-held",os.fstat,actor[2][0]))[:2]!=version(effect("parent-stat",os.fstat,_0z["fd"]))[:2]:fail(issue)
+# QTT_HOST_PY |     command=walk("/proc/"+str(_0o)+"/cmdline")
+# QTT_HOST_PY |     if bounded(command,4096)!=launch[2]or effect("parent-image",os.readlink,"/proc/"+str(_0o)+"/exe")!=launch[1]:fail(issue)
+# QTT_HOST_PY |     _qtt_early_loop_admission_v1("parent-pidfd");poll=effect("parent-poll",select.poll)
+# QTT_HOST_PY |     if effect("parent-register",poll.register,actor[4][0],select.POLLIN)is not None or effect("parent-live",poll.poll,0)!=[]:fail(issue)
 # QTT_HOST_PY |     a["parent_identity"]=(_0o,int(stats[19]));a["parent_credentials"]=(_1Z,_2o,ids);a["parent_stat"]=(_0z,_3H);_3D=walk("/proc/"+str(pid)+"/status");_0T=bounded(_3D,4096);_15={}
 # QTT_HOST_PY |     for line in _0T.splitlines():
 # QTT_HOST_PY |      key,sep,value=line.partition(b":")

@@ -20066,7 +20066,123 @@ def test_github_workflow_splits_validation_into_parallel_phase_jobs():
         actual_cells = tuple(node.value if isinstance(node, ast.Constant)
             and type(node.value) is int else node.id if isinstance(node, ast.Name)
             else None for node in supplier_returns[0].elts)
+        # Bind current pricing before the exact Source41 cell projection.
+        assert actual_cells[6:8] == (18407232, 1819632)
+        actual_cells = actual_cells[:6] + expected_current_source9_literal_fields[6:8] + actual_cells[8:]
         assert actual_cells == expected_current_source9_literal_fields
+
+
+    # Actual owner span, synthetic no-child ports, no real IO.
+    owner = next(n for n in ast.walk(host_tree) if isinstance(n, ast.FunctionDef)
+        and n.name == "_qtt_original_inputs_v1")
+    body = next(n.body for n in ast.walk(owner) if isinstance(n, ast.Try)
+        and any(isinstance(s, ast.Assign) and any(isinstance(t, ast.Name)
+        and t.id == "pid" for t in s.targets) for s in n.body))
+    start = next(i for i, n in enumerate(body) if isinstance(n, ast.Assign)
+        and any(isinstance(t, ast.Name) and t.id == "pid" for t in n.targets))
+    end = next(i for i, n in enumerate(body) if isinstance(n, ast.If)
+        and any(isinstance(v, ast.Constant) and v.value == "same original privileged outside custodian"
+        for v in ast.walk(n)))
+    nodes = copy.deepcopy(body[start:end + 1])
+    code = compile(ast.Module(body=nodes, type_ignores=[]),
+        "<actual-launch-parent-no-child>", "exec")
+    assert start < end
+    assert not any(isinstance(n, ast.Call) and isinstance(n.func, ast.Attribute)
+        and n.func.attr in ("fork", "execve", "kill", "close", "pidfd_open")
+        for node in nodes for n in ast.walk(node))
+
+    def parent_ports(kind, fault=None):
+        raw = b"6000 (parent) S 5000 " + b"0 " * 17 + b"22000 0\n"
+        self_raw = b"7000 (python) S 6000 " + b"0 " * 17 + b"33000 0\n"
+        image, argv, uids, gids = {
+            "sudo": ("/usr/bin/sudo", b"/usr/bin/sudo\0-n\0python\0-I\0-B\0-\0fast-preflight\0",
+                b"1001 0 0 0", b"118 0 0 0"),
+            "bash": ("/usr/bin/bash", b"/usr/bin/bash\0-e\0source-only-step.sh\0",
+                b"1001 1001 1001 1001", b"118 118 118 118"),
+        }[kind]
+        status = b"Uid: " + uids + b"\nGid: " + gids + b"\nPPid: 5000\n"
+        self_status = b"Uid: 0 0 0 0\nGid: 0 0 0 0\nPPid: 6000\n"
+        stat_row = [100, "/proc/6000/stat", False, None]
+        pidfd_row = [2048, "ancestor-actor-pidfd", False, None]
+        command_row = [102, "/proc/6000/cmdline", False, None]
+        rows = [stat_row, pidfd_row, command_row]
+        actor = [6000, 22000, stat_row, raw, pidfd_row]
+        birth = {"actors": [(7000, 33000, [90, "self", False, None], self_raw,
+            [91, "self-pidfd", False, None]), tuple(actor)], "pids": [7000, 6000],
+            "launch_chain": [(6000, image, argv, command_row)]}
+        if kind == "sudo":
+            birth["pids"].append(5000)
+            birth["actors"].append((5000, 21000, [92, "bash-stat", False, None],
+                b"5000 (bash) S 4000 " + b"0 " * 17 + b"21000 0\n",
+                [93, "bash-pidfd", False, None]))
+            birth["launch_chain"].append((5000, "/usr/bin/bash",
+                b"/usr/bin/bash\0-e\0source-only-step.sh\0", [94, "bash-cmd", False, None]))
+        values = {"/proc/6000/status": status, "/proc/6000/stat": raw,
+            "/proc/6000/cmdline": argv, "/proc/7000/status": self_status}
+        if fault == "actor": actor[0] = 6001
+        if fault == "start": actor[1] = 22001
+        if fault == "captured_ppid": actor[3] = raw.replace(b"S 5000", b"S 5001")
+        if fault == "self_actor": birth["actors"][0] = (7001,) + birth["actors"][0][1:]
+        if fault == "pids": birth["pids"][1] = 6001
+        if fault == "launch": birth["launch_chain"][0] = (6001, image, argv, command_row)
+        for name, old, bad in (("fresh_start", b"22000", b"22001"), ("fresh_ppid", b"S 5000", b"S 5001")):
+            if fault == name: values["/proc/6000/stat"] = raw.replace(old, bad)
+        if fault == "status_ppid": values["/proc/6000/status"] = status.replace(b"5000", b"5001")
+        if fault == "cmdline": values["/proc/6000/cmdline"] = argv + b"changed\0"
+        for name, bad in (("uid_width", b"1001 0 0"),
+                ("uid_decimal", b"01001 0 0 0"),
+                ("uid_bound", b"4294967296 0 0 0")):
+            if fault == name: values["/proc/6000/status"] = status.replace(uids, bad)
+        if fault == "duplicate_uid": values["/proc/6000/status"] += b"Uid: 0 0 0 0\n"
+        if fault == "self_status": values["/proc/7000/status"] = self_status.replace(b"Uid: 0", b"Uid: 1001", 1)
+        for index, name in enumerate(("stat", "pidfd", "command")):
+            if fault == "closed_" + name: rows[index][2] = True
+            if fault == "error_" + name: rows[index][3] = RuntimeError("synthetic held error")
+            if fault == "foreign_" + name: rows[index] = list(rows[index])
+        if fault == "descriptor_type": pidfd_row[0] = True
+        birth["actors"][1] = tuple(actor)
+        calls, admissions, record = [], [], {"fds": []}
+        def reject(message):
+            raise RuntimeError(message)
+        def effect(label, function, *args, **kwargs):
+            calls.append(label)
+            return function(*args, **kwargs)
+        def walk(path):
+            if path not in values: raise RuntimeError("synthetic unexpected path")
+            row = {"fd": 200 if path.endswith("/stat") else 201,
+                "path": path, "closed": False, "error": None}
+            record["fds"].append(row)
+            return row
+        poll = SimpleNamespace(register=lambda fd, event: 1 if fault == "register" else None,
+            poll=lambda ms: [(2048, 1)] if fault == "terminal" else [])
+        os_port = SimpleNamespace(getpid=lambda: 7000, getppid=lambda: 6000,
+            geteuid=lambda: 1001 if fault == "self_uid" else 0,
+            fstat=lambda fd: (17, 101 if fault == "inode" and fd == 100 else 100),
+            readlink=lambda path: "/usr/bin/changed" if fault == "image" else image)
+        return {"birth": birth, "state": {"fds": rows}, "a": record,
+            "os": os_port, "select": SimpleNamespace(poll=lambda: poll, POLLIN=1),
+            "walk": walk, "bounded": lambda row, maximum: values[row["path"]],
+            "version": lambda row: row, "effect": effect, "fail": reject,
+            "_qtt_early_loop_admission_v1": admissions.append,
+            "calls": calls, "admissions": admissions}
+
+    for kind in ("sudo", "bash"):
+        ports = parent_ports(kind)
+        exec(code, ports)
+        assert ports["a"]["owner"] == (7000, 6000, 0)
+        assert ports["a"]["parent_identity"] == (6000, 22000)
+        assert ports["ids"][b"Uid"] != [b"0"] * 4
+        assert ports["calls"][-3:] == ["parent-poll", "parent-register", "parent-live"]
+        assert "parent-row" in ports["admissions"]
+        for fault in ("actor", "start", "captured_ppid", "self_actor", "pids", "launch",
+                "fresh_start", "fresh_ppid", "status_ppid", "image", "cmdline", "inode",
+                "closed_stat", "closed_pidfd", "closed_command", "error_stat", "error_pidfd",
+                "error_command", "foreign_stat", "foreign_pidfd", "foreign_command",
+                "descriptor_type", "terminal", "register", "self_uid", "self_status",
+                "uid_width", "uid_decimal", "uid_bound",
+                "duplicate_uid"):
+            with pytest.raises(RuntimeError):
+                exec(code, parent_ports(kind, fault))
 
 
 
