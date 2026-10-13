@@ -1,46 +1,5 @@
 name: QTT Validation
 # QTT_COMPLETE_FIRST_OWNER_COMMENTS_BEGIN_20261007_V1
-#  # One Source-selected Python engineering share of 8192. The other original
-#  # Bash observation share is 1025; this private counter is not native funding,
-#  # an administrative/output allocation, a cutoff, or a first-birth permission.
-#   # Fixed original Source callsites use this SAME retained owner; no helper,
-#   # command, factory or settlement layer replenishes its remaining share.
-#    # Admission precedes the selected loop's acquisition, argument/byte-slice
-#    # allocation, append or command-row allocation. A failed later effect never
-#    # refunds this attempt. Existing effect rows retain its actual raw outcome.
-#  # Immutable original host genesis predates first read. Adopt the same
-#  # state/loan/history/genesis/remaining count. No8192 renewal after compile.
-#  # Original aggregate administrative output split02: Bash67374342,
-#  # Python201061114, total268435456. Source-file reads are separately bounded.
-#  # This engineering returned-byte counter issues neither host nor native funds.
-#   # The original effect row already retains the actual raw returned bytes.
-#   # Charge the true delivery BEFORE EOF/overflow/comparison/append validation.
-#  # ONE shared original failure-hold; reserve its held3 before factory effects.
-#  # Adopt the SAME original first-host reserved hold/effect history. The
-#  # admitted scope/Source owner creates these before host flags and supplies
-#  # actual initial tranches; neither this component nor its factory resets it.
-#    # The original timed host watchdog remains an input. No post-cutoff
-#    # terminal, close, grant or cleanup is invented from this retained row.
-#   # Original Source-only selection, to be authored by the same reviewed owner.
-#   # It has exactly the already consumed p36 grammar, including the genuine
-#   # work/settle/held/child Source tranches and C's exact compiled three amounts.
-#   # It is not supplied through a caller, environment, mutable global or file.
-#   # The real producer returns Input4 and typed measured host Source DATA
-#   # before the old preprotected consumer. Missing original programme outputs
-#   # stay explicitly unissued; no shape/profile/metadata issues their grants.
-#    # Actual acquisition in THIS original trusted keeper, before the existing
-#    # preprotected Input4 consumer. The initial original Source request/scope
-#    # owns these effects; current metadata never issues that request or clock.
-#     # Interpret actual nofollow symlink operands, retain every raw target and
-#     # generation, then restart the same fixed component walk. This is locator
-#     # DATA; no copied identity or executable pathname becomes permission.
-#     # True old flags and all pending state are retained BEFORE mutation.
-#     # This same keeper retains true originals and restores only its exact
-#     # Source, independent baseline and owned Input4-root metadata.
-#      # Existing host workflow's independent BEFORE-protection bytes remain
-#      # the same original observation; a fresh current file does not replace it.
-#      # This is the SAME frontend's complete immutable selected Git blob,
-#      # acquired before framed compile. It is neither current-file metadata
 #      # nor a transported Python original for the later native receiver.
 #     # Every existing numeric/string token has a fixed ASCII Source field.
 #     # Existing string domain8192 is physical whitespace, never permission.
@@ -1078,7 +1037,7 @@ jobs:
            a["original_host_source"]=b
            b[qP]=(b,a,b["function"],b["code"],b[qE],b[qW],b[qC],h)
            jA=1+2*2047
-           jB=(5+8*2050)+(52*32+2*(1+5*2047)+68)+(22+2*2050)+(4*jA+20+8*(3*jA+30)+1+3*64*(2047+2))+(64+2*jA+16380*(2*jA+12))+(24*jA+107+16380*(2*jA+12))+(jA+16+10*16379+32767*16379*(jA+14)+6*120000+3*jA+75)+1+19*8192+29+20*8192
+           jB=16405+(52*32+2*(1+5*2047)+68)+4122+(4*jA+20+8*(3*jA+30)+1+3*64*(2047+2))+(64+2*jA+16380*(2*jA+12))+(24*jA+107+16380*(2*jA+12))+(jA+16+10*16379+32767*16379*(jA+14)+6*120000+3*jA+75)+1+19*8192+29+20*8192+100687860
            zx=(2*jB,2*(3+3*32767*16379+2*120000+6*8+3*192+16+3+6*jB+19*8192),3,19*8192)
            if(type(zx)is not tuple or len(zx)!=4 or any(type(n)is not int or n<1 for n in zx)):
             raise jQ(jR+' first-host prospective Source tranches unissued')
@@ -2186,14 +2145,21 @@ jobs:
 # QTT_HOST_PY |        if i+1<len(parts)and not stat.S_ISDIR(before.st_mode):raise jQ("original selected locator ancestor kind")
 # QTT_HOST_PY |       if not changed:return current
 # QTT_HOST_PY |      raise jQ("original selected locator symlink Source depth")
-# QTT_HOST_PY |     def full(row,extent):
+# QTT_HOST_PY |     def full(row,extent,corpus=None):
 # QTT_HOST_PY |      if type(extent)is not int or not 0<=extent<=134217728:raise jQ("original FILE128MiB Source ceiling")
-# QTT_HOST_PY |      native("first Input4 rewind",os.lseek,row[0],0,os.SEEK_SET);parts=[];used=0
+# QTT_HOST_PY |      if corpus is not None:
+# QTT_HOST_PY |       if type(corpus)is not tuple or len(corpus)!=4:raise jQ("same fixed startup Source caller")
+# QTT_HOST_PY |       r,ordinal,caller,code=corpus;c=preparation["startup_counts"];o=r["original"];cb=a["common_checked_original"]
+# QTT_HOST_PY |       if(type(r)is not dict or type(ordinal)is not int or ordinal!=0 or caller is not c["capture"]or code is not c["capture_original"][1]or caller.__code__ is not code or caller.__globals__ is not c["function"].__globals__ or type(o)is not tuple or len(o)!=7 or o[0]is not r or o[1]is not c or o[2]!=r["path"]or o[3]is not row or o[4]is not r["version"]or o[5]is not c["function"]or o[6]is not c["code"]or c["function"].__code__ is not c["code"]or c["preparation"]is not preparation or not c["metadata_complete"]or not c["capture_attempted"]or c["complete"]or c["capture_error"]is not None or c["error"]is not None or not r["measured"]or r["complete"]or r["error"]is not None or extent!=r["length"]or type(cb)is not tuple or len(cb)!=6 or cb[0]is not a or cb[2].__code__ is not cb[3]or cb[4]is not _qtt_original_inputs_v1 or cb[4].__code__ is not cb[5]or cb[2].__globals__ is not cb[4].__globals__):raise jQ("same Source-funded startup FILE and COMMON")
+# QTT_HOST_PY |       cb[2]()
+# QTT_HOST_PY |      native("first Input4 rewind",os.lseek,row[0],0,os.SEEK_SET);parts=[];used=0;last=-1
 # QTT_HOST_PY |      while used<extent:
-# QTT_HOST_PY |       _qtt_early_loop_admission_v1("first-input4-source-read");part=native("first Input4 complete read",os.read,row[0],min(65536,extent-used))
+# QTT_HOST_PY |       frame=used//65536
+# QTT_HOST_PY |       if corpus is None or frame==last:_qtt_early_loop_admission_v1("first-input4-source-read")
+# QTT_HOST_PY |       last=frame;part=native("first Input4 complete read",os.read,row[0],min(65536,extent-used))
 # QTT_HOST_PY |       if not part:raise jQ("original first Input4 premature EOF")
 # QTT_HOST_PY |       parts.append(part);used+=len(part)
-# QTT_HOST_PY |      _qtt_early_loop_admission_v1("first-input4-source-EOF")
+# QTT_HOST_PY |      if corpus is None:_qtt_early_loop_admission_v1("first-input4-source-EOF")
 # QTT_HOST_PY |      if native("first Input4 EOF",os.read,row[0],1):raise jQ("original first Input4 source grew")
 # QTT_HOST_PY |      return b"".join(parts)
 # QTT_HOST_PY |     def getflags(row,value=None):raw=bytearray(struct.pack("=i",0 if value is None else value));native("first Input4 GETFLAGS"if value is None else"first Input4 SETFLAGS",fcntl.ioctl,row[0],0x80086601 if value is None else 0x40086602,raw,True);return struct.unpack("=i",raw)[0]
@@ -2406,7 +2372,7 @@ jobs:
 # QTT_HOST_PY |         same(row,_L["version"],True);r["names"]=_L["names"];r["roster"]=_L["roster"];r["complete"]=True;return r
 # QTT_HOST_PY |        it=dict(row=row,iterator=None,close_attempted=False,closed=False,error=None);c["iterators"].append(it);it["iterator"]=native("early startup original scandir",os.scandir,row[0]);names=[];total=0
 # QTT_HOST_PY |        while True:
-# QTT_HOST_PY |         _qtt_early_loop_admission_v1("early-startup-directory-next");ended,entry=native("early startup original directory next",next_entry,it["iterator"])
+# QTT_HOST_PY |         ended,entry=native("early startup original directory next",next_entry,it["iterator"])
 # QTT_HOST_PY |         if ended:break
 # QTT_HOST_PY |         name=os.fsencode(entry.name)
 # QTT_HOST_PY |         if(not name or len(name)>255 or name in(b".",b"..")or b"/"in name or b"\0"in name or b"\n"in name or b"\r"in name or total+len(name)+1>65535 or len(names)>=65535//2):raise jQ("original early startup directory roster extent")
@@ -2481,7 +2447,7 @@ jobs:
 # QTT_HOST_PY |          try:
 # QTT_HOST_PY |           same(r["row"],r["version"])
 # QTT_HOST_PY |           if getflags(r["row"])!=r["flags"]:raise jQ("original measured FILE flags changed before capture")
-# QTT_HOST_PY |           r["raw"]=full(r["row"],r["length"]);same(r["row"],r["version"])
+# QTT_HOST_PY |           r["raw"]=full(r["row"],r["length"],(r,0,_18,_18.__code__));same(r["row"],r["version"])
 # QTT_HOST_PY |           if getflags(r["row"])!=r["flags"]or len(r["raw"])!=r["length"]:raise RuntimeError("same original FILE complete capture changed")
 # QTT_HOST_PY |           r["capture_original"]=(r,ro,c,measurement,_18,_18.__code__,r["raw"]);r["complete"]=True
 # QTT_HOST_PY |          except BaseException as error:r["error"]=error;raise
@@ -2576,7 +2542,7 @@ jobs:
 # QTT_HOST_PY |     def U(n,c):return 68*n+4*c
 # QTT_HOST_PY |     def T(n,s):return 48*n+8*s
 # QTT_HOST_PY |     def L(n,s):return 56*n+16*(s+s//8+6*n)
-# QTT_HOST_PY |     initializer=5125424+21625000+U(7,7*extent)+T(1,parent_path_count);initializer+=6*(U(67,3*extent)+L(2,130)+T(1,65));initializer+=672+T(1,8)+2*T(1,9)+2*T(1,parent_path_count)+24;return(2454466522,324772011,63340350,initializer,1802350,241543444,19456680,1926312,2005764)
+# QTT_HOST_PY |     initializer=5125424+21625000+U(7,7*extent)+T(1,parent_path_count);initializer+=6*(U(67,3*extent)+L(2,130)+T(1,65));initializer+=672+T(1,8)+2*T(1,9)+2*T(1,parent_path_count)+24;return(2454466522,324772011,63340350,initializer,1802350,241543444,19469328,1926888,2006628)
 # QTT_HOST_PY |    def _ordinary_ci_initial_common_projection_v1(source,paths,catalogue,keeper,native):
 # QTT_HOST_PY |     """Project the fixed original programme; its caller owns every operand join."""
 # QTT_HOST_PY |     if(type(source)is not tuple or len(source)!=9 or type(paths)is not tuple or len(paths)!=19 or type(catalogue)is not tuple or len(catalogue)!=8 or type(keeper)is not tuple or len(keeper)!=7 or type(native)is not tuple or len(native)!=3 or any(type(n)is not int or n<0 for row in(source,paths,catalogue,keeper,native)for n in row)):raise ValueError('ORDINARY_INITIAL_COMMON_EXACT_SOURCE_OPERANDS')
@@ -3135,7 +3101,7 @@ jobs:
 # QTT_HOST_PY |     if _4m.__code__ is not prepared['code']or mapping['function'].__code__ is not mapping['code']or stack['function'].__code__ is not stack['code']or any(fn.__globals__ is not function.__globals__ or not any(code is fn.__code__ for code in mapping['code'].co_consts)for fn in(_5w,_3G)):fail('same retained mapping and stack implementation Code')
 # QTT_HOST_PY |     projection=prepared['path_stock_projection'][0];F=len(prospective['file_rows']);D=len(prospective['directory_rows']);_0S=len(prospective['duplicate_relations']);N=sum(len(row[2])for row in prospective['directory_rows']);A=len(prospective['alias_rows']);extent=prepared['path_stock_original'][4];HF=sum(projection((s,b))[0]for s,b,_ in prospective['file_rows']);HDs=sum(projection((row[0],))[0]for row in prospective['directory_rows']);HDb=sum(projection((row[1],))[0]for row in prospective['directory_rows']);HU=sum(projection((row[2],))[0]for row in prospective['duplicate_relations']);_D=prospective['path_metrics'];path_operand=(extent,*_D,HF,HDs,HDb,650,25,65,65,1040,65,65,4,2,6);catalogue_operand=(F,D,_0S,len(prospective['directory_observations']),N,A,HU,counts['bytes'][1]);common_join(host['original'],(host,state,host['function'],host['code'],host['operations'],host['fds'],host['errors'],state['early_loop_original']));_4f=state['early_loop_loan'];_4k=state['administrative_output'];_0U=_4f[0]
 # QTT_HOST_PY |     if(type(_4f)is not list or len(_4f)!=4 or _4f is not state['early_loop_original'][1]or _4f[2]is not state['early_loop_original'][2]or any(type(n)is not int or n<0 for n in _4f[:2])or sum(_4f[:2])!=8192 or len(_4f[2])!=_4f[1]or _4f[3]is not None or type(_4k)is not list or len(_4k)!=3 or any(type(n)is not int or n<0 for n in _4k[:2])or sum(_4k[:2])!=201061114 or _4k[2]is not None):fail('same original keeper progress and returned-byte debt')
-# QTT_HOST_PY |     _2m=len(prepared['operations'])+len(a['operations'])+len(state.get('operations',()))+len(host['operations']);_2j=42*F+41*D+24*_0S+12*N+16*A+5*_D[0];_38=_2m+_2j+30*_0U;_4H=_2m+_2j+_0U;_4H+=3*_0U;_4G=len(state['fds'])+len(a['fds'])+len(host['fds'])+_D[0]+7*((_0U+1)//2);_4M=sum(len(row[4])+len(row[5])for row in prepared['source_products']);_5x=_4k[1]+sum(len(row[5])for row in host['operations']if type(row)is list and len(row)==8 and type(row[5])in(bytes,bytearray))+sum(len(row[4])for row in prepared['operations']if type(row)is list and len(row)==6 and type(row[4])in(bytes,bytearray))+sum(len(row['result'])for row in a['operations']if type(row)is dict and type(row.get('result'))in(bytes,bytearray));_25=5873664+(_0U//3)*4096+2097159;_S=lambda n:n+n//8+7;_1t=2*_5x+_S(_5x)+_25+_S(_25)+_25+_S(1048577)+1048577+7*_38;keeper_raw=5*sum(row[2]for row in prospective['file_rows'])+4*_4M+_1t+33*_0U+2*min(256*N,65535*D)+512;_4D=2*_D[1]+_D[4]+(2*N+2*A)*(extent+256);_4E=2*_D[0]+_D[3]+2*N+2*A;_4F=104*_D[0]+56*(2*_D[0])+16*(_D[2]+_D[3]+(_D[2]+_D[3])//8+12*_D[0]);keeper_operand=(_38,_4H,_4G,keeper_raw,_4D,_4E,_4F);_20=((stack['soft']+page_size-1)//page_size)*page_size;native_operand=(result[0][6][1]+8388608,_20,mapping['mapped_extent']-mapping['stack_mapped']+max(mapping['stack_mapped'],_20));source_operand=common_source_fn(extent,len(sys.path));common_operands=(source_operand,path_operand,catalogue_operand,keeper_operand,native_operand);quantity['common_original']=(quantity,quantity['original'],quantity['result_original'],prepared,prepared['original'],prospective,plan_original,plan_result,counts,counts['measurement_original'],mapping,mapping['original'],mapping['success_original'],mapping['stack_result_original'],stack,stack['original'],stack['result_original'],common_operands,common_source_fn,common_source_fn.__code__,common_fn,common_fn.__code__,function,function.__code__,state['ledger'],a['errors'])
+# QTT_HOST_PY |     _2m=len(prepared['operations'])+len(a['operations'])+len(state.get('operations',()))+len(host['operations']);_2j=42*F+41*D+24*_0S+12*N+16*A+5*_D[0];P=sum((r["length"]+65535)//65536+1 for r in counts["files"]);_38=_2m+_2j+30*_0U+3*P;_4H=_2m+_2j+_0U;_4H+=3*_0U;_4G=len(state['fds'])+len(a['fds'])+len(host['fds'])+_D[0]+7*((_0U+1)//2);_4M=sum(len(row[4])+len(row[5])for row in prepared['source_products']);_5x=_4k[1]+sum(len(row[5])for row in host['operations']if type(row)is list and len(row)==8 and type(row[5])in(bytes,bytearray))+sum(len(row[4])for row in prepared['operations']if type(row)is list and len(row)==6 and type(row[4])in(bytes,bytearray))+sum(len(row['result'])for row in a['operations']if type(row)is dict and type(row.get('result'))in(bytes,bytearray));_25=5873664+(_0U//3)*4096+2097159;_S=lambda n:n+n//8+7;_1t=2*_5x+_S(_5x)+_25+_S(_25)+_25+_S(1048577)+1048577+7*_38;keeper_raw=5*sum(row[2]for row in prospective['file_rows'])+4*_4M+_1t+33*_0U+99*P+2*min(256*N,65535*D)+512;_4D=2*_D[1]+_D[4]+(2*N+2*A)*(extent+256)+2*sum(((r["length"]+65535)//65536+1)*(len(r["path"])+3)for r in counts["files"]);_4E=2*_D[0]+_D[3]+2*N+2*A+2*P;_4F=104*_D[0]+56*(2*_D[0])+16*(_D[2]+_D[3]+(_D[2]+_D[3])//8+12*_D[0]);keeper_operand=(_38,_4H,_4G,keeper_raw,_4D,_4E,_4F);_20=((stack['soft']+page_size-1)//page_size)*page_size;native_operand=(result[0][6][1]+8388608,_20,mapping['mapped_extent']-mapping['stack_mapped']+max(mapping['stack_mapped'],_20));source_operand=common_source_fn(extent,len(sys.path));common_operands=(source_operand,path_operand,catalogue_operand,keeper_operand,native_operand);quantity['common_original']=(quantity,quantity['original'],quantity['result_original'],prepared,prepared['original'],prospective,plan_original,plan_result,counts,counts['measurement_original'],mapping,mapping['original'],mapping['success_original'],mapping['stack_result_original'],stack,stack['original'],stack['result_original'],common_operands,common_source_fn,common_source_fn.__code__,common_fn,common_fn.__code__,function,function.__code__,state['ledger'],a['errors'])
 # QTT_HOST_PY |     try:
 # QTT_HOST_PY |      quantity['common_result']=common_fn(*common_operands)
 # QTT_HOST_PY |      if quantity['common_result'][2]<0:fail('original COMMON Source programme exceeds unchanged capacity')
@@ -3424,14 +3390,21 @@ jobs:
 # QTT_HOST_PY |     if flags(row)!=_1U[2]:F("B04")
 # QTT_HOST_PY |     _1U[4]=version(after);return _1U
 # QTT_HOST_PY |    except BaseException as ex:_1U[6]=ex;raise
-# QTT_HOST_PY |   def R(row,extent):
+# QTT_HOST_PY |   def R(row,extent,corpus=None):
 # QTT_HOST_PY |    if type(extent)is not int or extent<0 or extent>p["complete_read_extent"]:F("B07")
-# QTT_HOST_PY |    E("O09"+row[1],os.lseek,row[0],0,os.SEEK_SET);chunks,used=[],0
+# QTT_HOST_PY |    if corpus is not None:
+# QTT_HOST_PY |     if type(corpus)is not tuple or len(corpus)!=4:F("same fixed adopted Source caller")
+# QTT_HOST_PY |     r,ordinal,caller,code=corpus;acquisition=state["original_input_acquisition"];prepared=acquisition["first_input4_preparation"];c=prepared["startup_counts"];o=r["original"];cb=acquisition["common_checked_original"];adoption=state["original_c_startup_catalogue"]["early_adoption"]
+# QTT_HOST_PY |     if(type(r)is not dict or type(ordinal)is not int or ordinal not in(1,2)or caller is not adoption["function"]or code is not adoption["code"]or caller.__code__ is not code or caller.__globals__ is not c["function"].__globals__ or adoption["original"][7]is not caller or adoption["original"][8]is not code or adoption["complete"]or adoption["error"]is not None or type(o)is not tuple or len(o)!=7 or o[0]is not r or o[1]is not c or o[2]!=r["path"]or o[3]is not row or o[4]is not r["version"]or o[5]is not c["function"]or o[6]is not c["code"]or c["function"].__code__ is not c["code"]or c["preparation"]is not prepared or not c["complete"]or c["error"]is not None or c["capture_error"]is not None or not r["measured"]or not r["complete"]or r["error"]is not None or extent!=r["length"]or type(cb)is not tuple or len(cb)!=6 or cb[0]is not acquisition or cb[2].__code__ is not cb[3]or cb[4]is not _qtt_original_inputs_v1 or cb[4].__code__ is not cb[5]or cb[2].__globals__ is not cb[4].__globals__):F("same Source-funded adopted FILE and COMMON")
+# QTT_HOST_PY |     cb[2]()
+# QTT_HOST_PY |    E("O09"+row[1],os.lseek,row[0],0,os.SEEK_SET);chunks,used=[],0;last=-1
 # QTT_HOST_PY |    while used<extent:
-# QTT_HOST_PY |     _qtt_early_loop_admission_v1("owner-complete-read");part=E("O10"+row[1],os.read,row[0],min(65536,extent-used))
+# QTT_HOST_PY |     frame=used//65536
+# QTT_HOST_PY |     if corpus is None or frame==last:_qtt_early_loop_admission_v1("owner-complete-read")
+# QTT_HOST_PY |     last=frame;part=E("O10"+row[1],os.read,row[0],min(65536,extent-used))
 # QTT_HOST_PY |     if not part:F("B08")
 # QTT_HOST_PY |     chunks.append(part);used+=len(part)
-# QTT_HOST_PY |    _qtt_early_loop_admission_v1("owner-complete-EOF")
+# QTT_HOST_PY |    if corpus is None:_qtt_early_loop_admission_v1("owner-complete-EOF")
 # QTT_HOST_PY |    if E("O11"+row[1],os.read,row[0],1)!=b"":F("B09")
 # QTT_HOST_PY |    return b"".join(chunks)
 # QTT_HOST_PY |   def B(fd,label,maximum):
@@ -3945,7 +3918,7 @@ jobs:
 # QTT_HOST_PY |       captured=(r,r["original"],c,c["measurement_original"],capture,capture.__code__,r["raw"])
 # QTT_HOST_PY |       if(type(r["capture_original"])is not tuple or len(r["capture_original"])!=len(captured)or any(x is not y for x,y in zip(r["capture_original"],captured))or not r["measured"]):F("same earlier FILE measured-to-fullcapture original")
 # QTT_HOST_PY |       before=same_local(r["row"],r["version"])
-# QTT_HOST_PY |       if(not stat.S_ISREG(before.st_mode)or before.st_nlink!=1 or before.st_size!=r["length"]or flags(r["row"])!=r["flags"]or R(r["row"],r["length"])!=r["raw"]):F("same original earlier full FILE generation/flags/bytes")
+# QTT_HOST_PY |       if(not stat.S_ISREG(before.st_mode)or before.st_nlink!=1 or before.st_size!=r["length"]or flags(r["row"])!=r["flags"]or R(r["row"],r["length"],(r,1,fn,fn.__code__))!=r["raw"]):F("same original earlier full FILE generation/flags/bytes")
 # QTT_HOST_PY |       same_local(r["row"],r["version"]);a["files"].append(dict(early=r,before=r["version"],flags=r["flags"],record=None))
 # QTT_HOST_PY |      for r in c["directories"]:
 # QTT_HOST_PY |       ordinary_path(r["path"]);held(r["row"],r["path"]);original=(r,c,r["path"],r["row"],r["version"],r["members"],r["duplicate"],c["function"],c["code"])
@@ -3993,7 +3966,7 @@ jobs:
 # QTT_HOST_PY |         note("acquired selected directory",record)
 # QTT_HOST_PY |        else:
 # QTT_HOST_PY |         record["length"]=early["length"];record["raw_original"]=early["raw"]
-# QTT_HOST_PY |         if R(row,record["length"])!=early["raw"]:F("same earlier bytes changed across actual protection")
+# QTT_HOST_PY |         if R(row,record["length"],(early,2,fn,fn.__code__))!=early["raw"]:F("same earlier bytes changed across actual protection")
 # QTT_HOST_PY |         same_local(row,protected);note("acquired selected FILE",record)
 # QTT_HOST_PY |      for transition in a["aliases"]:early=transition["early"];record=dict(parent=early["parent"],path=early["path"],name=early["name"],original=early["version"],target=early["target"],complete=True,error=None,early_original=early["original"]);transition["record"]=record;q["aliases"].append(record);note("acquired selected alias",record)
 # QTT_HOST_PY |      for t in a["directories"]:
