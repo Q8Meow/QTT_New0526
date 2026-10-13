@@ -8618,7 +8618,7 @@ def test_runner_restores_only_runtime_side_effects_before_pr142_pr143_and_final_
     _exercise_preflight_observation_v1(tmp_path, monkeypatch)
     _exercise_preflight_candidate_debits_v1(tmp_path, monkeypatch)
     _exercise_preflight_transport_v1(tmp_path, monkeypatch, capsys)
-    # Synthetic; no credit.
+
 
     import ast
     import struct
@@ -9038,7 +9038,7 @@ def test_runner_restores_only_runtime_side_effects_before_pr142_pr143_and_final_
     finally:
         reliability._LINUX_PREFLIGHT_PROCESS_V1.reset(context_token)
     assert all(getattr(runner, name) is value for name, value in original_globals.items())
-    # Synthetic; no credit.
+
 
     partial_before = dict(failed_scope.__dict__)
     with pytest.raises(reliability.ValidationReliabilityError,
@@ -9085,7 +9085,7 @@ def test_runner_restores_only_runtime_side_effects_before_pr142_pr143_and_final_
     finally:
         reliability._LINUX_PREFLIGHT_PROCESS_V1.reset(token)
     assert unused_scope.__dict__ == unused_fields and failed_scope.__dict__ == failed_fields
-    # POST450: no credit.
+
 
     atomic_registered = (sys.executable, '-c', runner.ATOMICROWS_BUNDLE_CHECK_SCRIPT)
     atomic_expected = (sys.executable, '-I', '-S', '-B', '-c', runner.ATOMICROWS_BUNDLE_CHECK_SCRIPT)
@@ -10152,7 +10152,7 @@ def test_runner_restores_only_runtime_side_effects_before_pr142_pr143_and_final_
             assert target.read_bytes() == reference.read_bytes() == b"{}\n"
             reference_version = reliability._mapper_stamp_v1(reference.lstat())
             assert mapper_candidate._occurrence_before[target.name] == (stat.S_IMODE(target.stat().st_mode), b"{}\n")
-            # Owned negative construction; no owner-repository rebaselining.
+
             if fault == "byte-mismatch": target.write_bytes(b"[]\n")
             live_calls, verified, failing_descriptor = [], [], []
             verify_fault = OSError("synthetic native verification failed")
@@ -10484,8 +10484,8 @@ def test_runner_restores_only_runtime_side_effects_before_pr142_pr143_and_final_
                 assert m_reader.closed and not reliability._MapperDiskBasisV1._resources_require_retention_v1(m_reader)
             if m_fault in ('check-recursion','parse-recursion','target-close-recursion','basis-close-recursion'):
                 assert m_rejections
-            # The explicit no-child oracle permits disposal of only the exact
-            # fault-fixture fd after retention/no-retry decisions were proved.
+
+
             for descriptor in m_held:
                 os.fstat(descriptor); m_real_close(descriptor)
             if m_fault in ('target-close-error','body-and-close','open-no-return') and m_reader.fd is not None:
@@ -10554,9 +10554,9 @@ def test_runner_restores_only_runtime_side_effects_before_pr142_pr143_and_final_
         finally: reliability._MAPPER_FINAL_EVIDENCE_V1.reset(m_token)
         assert reliability._MAPPER_FINAL_EVIDENCE_V1.get() is None
 
-        # A mutated record is rejected before another byte read. The exact
-        # same SUP keeps the association error even if its C return is later
-        # missing; these remain explicit no-child retention oracles.
+
+
+
         bad_sup = dict(m_sup); bad_sup['errors'] = []
         bad_sup.pop('mapper_settlement_error', None)
         with monkeypatch.context() as bad_record:
@@ -10578,8 +10578,8 @@ def test_runner_restores_only_runtime_side_effects_before_pr142_pr143_and_final_
             runner._settle_mapper_occurrences_v1(None,m_paths,m_phase,m_plan,tuple(m_receipts))
         assert m_counts == before_counts
 
-    # The original bound scope owns its real mutex and actual tuple through
-    # initializer/body/close faults. The lock here is an owned no-child fixture.
+
+
     for s_number, s_fault in enumerate(('normal','body-and-basis-close','constructor-and-basis-close')):
         s_root = tmp_path / ('m-bound-' + str(s_number)); s_root.mkdir()
         s_paths, _s_probe = reliability.resolve_validation_run_paths(s_root,
@@ -10751,7 +10751,7 @@ def test_runner_restores_only_runtime_side_effects_before_pr142_pr143_and_final_
     assert before_yield.failure is body_error and before_yield.state == "FAILED"
     with pytest.raises(OSError): os.fstat(held_descriptor)
 
-    # Synthetic; no credit.
+
 
     def finite_native_resources():
         value = reliability._LinuxImmutableSourceBasisV2.__new__(reliability._LinuxImmutableSourceBasisV2)
@@ -11046,10 +11046,10 @@ def test_runner_restores_only_runtime_side_effects_before_pr142_pr143_and_final_
         assert os.fstat(partial_descriptor).st_size >= 0
         assert partial_c.baseline is None and partial_c.failure is body_error
     finally:
-        # Synthetic; no credit.
+
         os.close(partial_descriptor)
 
-    # Synthetic; no credit.
+
 
     def declaration_fixture():
         value = reliability._PreflightNativeInputV1.__new__(reliability._PreflightNativeInputV1)
@@ -11178,7 +11178,7 @@ def test_runner_restores_only_runtime_side_effects_before_pr142_pr143_and_final_
             expected_path_version=(), expected_chain=(), limits={}, deadline_ns=1,
             host_lease=None, capture_limits={}, terminal_limits={})
     assert foreign_declaration.__dict__ == before
-    # Synthetic; no credit.
+
 
     for replaced_holder in ("basis", "candidate"):
         original_basis = finite_native_resources()
@@ -11214,8 +11214,8 @@ def test_runner_restores_only_runtime_side_effects_before_pr142_pr143_and_final_
             assert before_counts == (original_basis.metadata_calls, original_basis.metadata_reserved)
             assert os.fstat(held_fd).st_size >= 0
         finally:
-            # Explicit original finite no-child fd owner releases after the
-            # association/retention oracle; no baseline restoration is selected.
+
+
             original_basis._settle_resources_v2()
 
     replaced_declaration = declaration_fixture()
@@ -11239,11 +11239,11 @@ def test_runner_restores_only_runtime_side_effects_before_pr142_pr143_and_final_
         assert replaced_declaration._declaration_original_binding_v1[1]['close_attempted'] is False
         assert os.fstat(declaration_original_fd).st_size >= 0 and os.fstat(declaration_foreign_fd).st_size >= 0
     finally:
-        # Synthetic; no credit.
+
 
         if declaration_original_fd is not None: original_os_close(declaration_original_fd)
         if declaration_foreign_fd is not None: original_os_close(declaration_foreign_fd)
-    # Synthetic; no credit.
+
 
 
     for release_mutation in ("replace-record", "clear-record", "clear-binding", "clear-release", "mutate-fd"):
@@ -11657,7 +11657,7 @@ def test_runner_restores_only_runtime_side_effects_before_pr142_pr143_and_final_
         assert record['rp5a_input'].reader.tell() == 0
 
 
-    # Synthetic; no credit.
+
 
     from tools import validation_reliability as rolling_owner
     rolling_candidate_type = runner._ValidationCandidateCustodyV1
@@ -11845,7 +11845,7 @@ def test_runner_restores_only_runtime_side_effects_before_pr142_pr143_and_final_
         assert tuple(calls) == before_calls and leaves == {1, 2, 3, 4, 5, 6}
         assert state['allocations'][3]['errors'] == list(faults) and scope._ordinary_storage_errors_v1 == list(faults)
 
-    # Synthetic; no credit.
+
 
 
 
@@ -19729,6 +19729,7 @@ def test_github_workflow_splits_validation_into_parallel_phase_jobs():
   if isinstance(node,ast.FunctionDef)and node.name=="_qtt_original_host_source_v1")
  host_failure=next(node for node in host_function.body
   if isinstance(node,ast.FunctionDef)and node.name=="failure")
+ loan_diagnostic=next(node for node in host_tree.body if isinstance(node,ast.FunctionDef)and node.name=="_qtt_original_loan_diagnostic_v1")
  custodian_failure=next(node for node in ast.walk(host_tree)
   if isinstance(node,ast.FunctionDef)and node.name=="_qtt_custodian_failure_v1")
  held_owners=(("FRONT",members["failure"]),("HOST",host_failure),
@@ -19818,12 +19819,12 @@ def test_github_workflow_splits_validation_into_parallel_phase_jobs():
           "w":{"armed":True},"jP":BaseException,"jQ":RuntimeError,
           "qA":"commands","qB":"custodian_effect_attempted","qC":"errors",
           "qM":"kill_self","qX":"reserved","qR":"error","qE":"operations",
-          "qT":"failure_cutoff"}
+          "qT":"failure_cutoff","genesis":None,"early_original":None}
       if mode=="format":
           def formatting_fault(_line):raise write_fault
           ports.update(str=formatting_fault,_qtt_original_host_source_v1=test_github_workflow_splits_validation_into_parallel_phase_jobs,
               front_code=None,_qtt_original_inputs_v1=test_github_workflow_splits_validation_into_parallel_phase_jobs)
-      isolated=ast.Module(body=[copy.deepcopy(owner)],type_ignores=[])
+      isolated=ast.Module(body=[copy.deepcopy(loan_diagnostic),copy.deepcopy(owner)],type_ignores=[])
       exec(compile(ast.fix_missing_locations(isolated),"<workflow-held-diagnostic-no-child>","exec",
           optimize=optimization),ports)
       selected_failure=ports[owner.name]
@@ -19898,9 +19899,9 @@ def test_github_workflow_splits_validation_into_parallel_phase_jobs():
       ports['str']=scalar
       return getattr(value,name,default)
   ports=dict(ports);ports.pop('str',None);ports.pop('getattr',None)
-  ports.update(state=state,held=held,_qtt_original_inputs_v1=root,_qtt_beforecompiler_owner_v1=root,_qtt_original_host_source_v1=root,_qtt_original_live_component_v1=fallback,_qtt_early_loop_admission_v1=admit,__builtins__=builtin_port)
+  ports.update(early_original=None,state=state,held=held,_qtt_original_inputs_v1=root,_qtt_beforecompiler_owner_v1=root,_qtt_original_host_source_v1=root,_qtt_original_live_component_v1=fallback,_qtt_early_loop_admission_v1=admit,__builtins__=builtin_port)
   if trace_mode=='format':ports.update(str=scalar,getattr=namespace)
-  exec(compile(ast.fix_missing_locations(ast.Module(body=[copy.deepcopy(custodian_failure)],type_ignores=[])),'<no-child-held>','exec'),ports)
+  exec(compile(ast.fix_missing_locations(ast.Module(body=[copy.deepcopy(loan_diagnostic),copy.deepcopy(custodian_failure)],type_ignores=[])),'<no-child-held>','exec'),ports)
   selected_failure=ports[custodian_failure.name]
   with pytest.raises(RuntimeError) as raised:selected_failure(cause)
   expected=b'::error::CUSTODIAN:I:L4\n'+({'runtime':b'RuntimeError3#-+\n','nonbuiltin':b'OTHER3#-+\n','name':b'OTHER3#-+\n','loan':b'FileNotFoundError4#2?\n','format':b'','outside':b'FileNotFoundError3#2!\n'}.get(trace_mode,b'FileNotFoundError3#2+\n'))
@@ -19932,7 +19933,7 @@ def test_github_workflow_splits_validation_into_parallel_phase_jobs():
   ports=dict(ports)
   ports.update(state=state,held=held,_qtt_original_inputs_v1=inputs,_qtt_beforecompiler_owner_v1=middle,_qtt_original_host_source_v1=manager,_qtt_original_live_component_v1=live,_qtt_early_loop_admission_v1=admit,__builtins__=sys.modules['builtins'])
   chosen=custodian_failure
-  exec(compile(ast.fix_missing_locations(ast.Module(body=[copy.deepcopy(chosen)],type_ignores=[])),'<sibling-held-no-child>','exec'),ports)
+  exec(compile(ast.fix_missing_locations(ast.Module(body=[copy.deepcopy(loan_diagnostic),copy.deepcopy(chosen)],type_ignores=[])),'<sibling-held-no-child>','exec'),ports)
   with pytest.raises(RuntimeError)as raised:ports[chosen.name](cause)
   assert raised.value.__cause__ is cause and held['error']is cause and held['kill_self']and held['reserved']and not state['closed']
   assert events==[('clock',),('write',2,wanted),('pid',),('stop',17,19)]and len(wanted)<=64 and b'private'not in wanted and b'/'not in wanted
@@ -19941,6 +19942,40 @@ def test_github_workflow_splits_validation_into_parallel_phase_jobs():
   before=list(events)
   with pytest.raises(type(cause))as repeated:ports[chosen.name](cause)
   assert repeated.value is cause and events==before
+
+ # Synthetic loan boundary; no native credit.
+ receiver=next(n for n in ast.walk(host_tree)if isinstance(n,ast.FunctionDef)and n.name=="_qtt_early_loop_admission_v1")
+ ns={'original':cause};exec(compile('def root():raise original',"<loan-no-child>",'exec'),ns);root=ns['root']
+ for stage,chosen in(("HOST",host_failure),("CUSTODIAN",custodian_failure)):
+  for marker in("E","S","zero","corrupt"):
+   events=[];errors=[];held=dict(held,kill_self=False,error=None,operations=[]);state=dict(state,errors=errors)
+   loan=[1,8191,[("fixture",i)for i in range(1,8192)],None]
+   original=(state,loan,loan[2],root,root.__code__,root,root.__code__)
+   state.update(early_loop_loan=loan,early_loop_original=original)
+   ports=dict(ports,state=state,held=held,failure_hold=held,host={"retired":False,"errors":errors},genesis=original,early_original=original,early_loan=loan,early_history=loan[2],_qtt_original_host=(state,original,root,root.__code__,root,root.__code__),_qtt_original_host_source_v1=root,_qtt_original_inputs_v1=root,front_code=None)
+   exec(compile(ast.fix_missing_locations(ast.Module(body=[copy.deepcopy(loan_diagnostic),copy.deepcopy(receiver),copy.deepcopy(chosen)],type_ignores=[])),"<loan-no-child>","exec"),ports)
+   admit=ports[receiver.name];admit("fixture");assert loan[:2]==[0,8192]and len(loan[2])==8192
+   try:admit("fixture")
+   except RuntimeError as saved:loan_error=saved
+   assert loan[3]is loan_error
+   if marker=="E":cause=loan_error
+   elif marker=="zero":loan[3]=None
+   elif marker=="corrupt":loan[1]-=1
+   ns['original']=cause
+   try:root()
+   except BaseException as caught:cause=caught
+   BaseException.__traceback__.__set__(cause,BaseException.__traceback__.__get__(cause).tb_next)
+   before=loan[:2]+[len(loan[2]),loan[3]]
+   if marker=="corrupt":assert ports[loan_diagnostic.name](state,original,cause)is None;continue
+   try:ports[chosen.name](cause)
+   except RuntimeError as result:assert result.__cause__ is cause
+   expected=(f"::error::{stage}:{'H'if stage=='HOST'else'I'}:L1\nLOAN:0:8192:{'E'if marker=='E'else'S'}\n").encode()
+   assert events==[('clock',),('write',2,expected),('pid',),('stop',17,19)]and len(expected)<=64
+   assert loan[:2]+[len(loan[2]),loan[3]]==before and held['error']is cause and errors==[('early-loop-admission',loan_error)]
+   prior=list(events)
+   try:ports[chosen.name](cause)
+   except type(cause)as repeated:assert repeated is cause
+   assert events==prior
 
  controller_begin="# QTT_ORIGINAL_CONTROLLER_HELPERS_BEGIN_20261007_V1\n"
  controller_end="# QTT_ORIGINAL_CONTROLLER_HELPERS_END_20261007_V1\n"
@@ -20073,6 +20108,74 @@ def test_github_workflow_splits_validation_into_parallel_phase_jobs():
               with pytest.raises(RuntimeError):
                   exec(parser_code,invalid)
 
+
+ activation_loop=next(n for n in ast.walk(ancestor_owner)if isinstance(n,ast.While)
+  and any(isinstance(x,ast.Constant)and x.value=="original scope activation observation"for x in ast.walk(n)))
+ activation_try=next(n for n in ancestor_owner.body if isinstance(n,ast.Try))
+ activation_start=activation_try.body.index(activation_loop)
+ activation_end=next(i for i,n in enumerate(activation_try.body)if i>activation_start
+  and isinstance(n,ast.Assign)and any(isinstance(x,ast.Subscript)and isinstance(x.value,ast.Name)and x.value.id=="state"and isinstance(x.slice,ast.Constant)and x.slice.value=="failure_cutoff"for x in n.targets))
+ rpc_code=compile(ast.Module(body=[copy.deepcopy(next(n for n in ast.walk(host_tree)if isinstance(n,ast.FunctionDef)and n.name=="rpc"))],type_ignores=[]),"<original-rpc-data-only>","exec")
+ activation_nodes=copy.deepcopy(activation_try.body[activation_start:activation_end])
+ activation_code=compile(ast.Module(body=activation_nodes,type_ignores=[]),"<original-ancestor-async-data-only>","exec")
+ assert not any(isinstance(n,ast.Call)and isinstance(n.func,ast.Attribute)and n.func.attr in("fork","execve","kill","open","clock_gettime_ns")for n in ast.walk(ast.Module(body=activation_nodes,type_ignores=[])))
+ def activation_case(mode):
+  names={"slice":"async.slice","scope":"async.scope"};state={"commands":[]};genesis=object();pid=7
+  def timer():pass
+  sig=SimpleNamespace(SIG_SETMASK=2,pthread_sigmask=object());h={"operations":[]};mo=[None,None,None,None]
+  def manager(argv):
+   hits.append("manager");check=[1029000000,None,1030000000,None];w["checks"].extend([check.copy(),check]);c=dict(argv=argv,pid=11,pidfd=[None,"p",True,None],rows=[[None,"r",True,None]for _ in range(6)],streams=[bytearray(b"i 9\n"),bytearray(),bytearray()],eof=[True]*3,terminal=(11,0,0,0,1),reap=(11,0),mask=set(),errors=[]);state["commands"].append(c);h["operations"].append(["ancestor-restore-SIGCHLD",sig.pthread_sigmask,(2,c["mask"]),{},True,None,None,1028000000])
+   if mode=="missing_check":w["checks"].pop(0)
+   if mode=="stderr":c["streams"][1].extend(b"x")
+   if mode=="mask":h["operations"][-1][2]=(2,set())
+   return b"i 9\n"
+  mo[2:]=[manager,manager.__code__];mo[0:2]=[h,state];hits=[]
+  original=[None,state,genesis,None,None,None,None,timer,timer.__code__]
+  w={"original":original,"checks":[],"owner":(pid,),"armed":True,"delete_attempted":False,"deadline":3720900000000};state["original_kernel_watchdog"]=w
+  original[0]=w
+  cr={"begin":1000000000,"after":1010000000,"raw":b'o "/org/freedesktop/systemd1/job/7"\n'}
+  counts={"slice":0,"scope":0};calls=[];a=dict(names)
+  def record():
+   if mode=="earlymanager_code":mo[3]=(lambda:None).__code__
+   if mode=="earlytimer_code":timer.__code__=(lambda:None).__code__
+   port=dict(state=state,genesis=genesis,host=h,manager=manager,original_manager=mo,effect=lambda *x:hits.append("clock")or 1027000000,time=SimpleNamespace(clock_gettime_ns=object(),CLOCK_MONOTONIC=1),signal=sig,os=SimpleNamespace(CLD_EXITED=1),qQ=RuntimeError)
+   exec(rpc_code,port)
+   try:port["rpc"](("get-property","org.freedesktop.systemd1","/org/freedesktop/systemd1/unit/async_2escope","org.freedesktop.systemd1.Scope","FinalKillSignal"))
+   except RuntimeError:
+    if mode in("earlymanager_code","earlytimer_code"):assert not hits
+    raise
+   check=w["checks"][-1]
+   if mode=="stale":w["checks"].append(check.copy())
+   if mode=="foreign":r=list(h["ancestor_rpc_terminal"]);r[4]=dict(w);h["ancestor_rpc_terminal"]=tuple(r)
+   if mode=="tuple":h["ancestor_rpc_terminal"]=list(h["ancestor_rpc_terminal"])
+   if mode=="manager_code":mo[3]=(lambda:None).__code__
+   if mode=="timer_code":original[8]=(lambda:None).__code__
+   if mode=="cutoff":check[2]=w["deadline"]
+   if mode=="pastdeadline":check[0]=3611021000000;check[2]=3611021000001
+  def observed(unit,keys):
+   record()
+   if keys==(b"StopWhenUnneeded",):return {b"StopWhenUnneeded":b"yes"}
+   role="slice"if unit==names["slice"]else"scope";counts[role]+=1
+   phase=b"inactive"if mode in("queued","completed","absent","wrongid","wrongpath","malformed")and counts[role]==1 else b"active"
+   if mode=="failed"and role=="scope":phase=b"failed"
+   stamp=1040000 if mode=="future"or mode=="futurescope"and role=="scope"else 999999 if mode=="predispatch"else 1020000 if role=="slice"else 1021000
+   row={b"Id":unit.encode(),b"LoadState":b"loaded",b"Transient":b"yes",b"ActiveState":phase,b"InvocationID":b"1"*32,b"ActiveEnterTimestampMonotonic":str(stamp).encode()}
+   if role=="scope":row.update(zip(expected_scope_only,(b"3600000000",b"0",b"10000000",b"control-group",b"yes",b"9")))
+   return row
+  def rpc(args):
+   record();calls.append(args)
+   if args[-1]=="Job":return {"queued":b'(uo) 7 "/org/freedesktop/systemd1/job/7"\n',"wrongid":b'(uo) 8 "/org/freedesktop/systemd1/job/7"\n',"wrongpath":b'(uo) 7 "/org/freedesktop/systemd1/job/8"\n',"malformed":b'uo 7 "/org/freedesktop/systemd1/job/7"\n'}.get(mode,b'(uo) 0 "/"\n')
+   return b's "inactive"\n'if mode=="absent"else b's "active"\n'
+  ports=dict(a=a,state=state,genesis=genesis,pid=pid,watchdog=w,creation=cr,manager=manager,host=h,original_manager=mo,observed=observed,rpc=rpc,admit=lambda site:None,qQ=RuntimeError,keys=expected_first_roster,skeys=expected_first_roster+expected_scope_only,runtime=3600000000)
+  exec(activation_code,ports)
+  return ports,calls
+ for mode in("active","queued","completed"):
+  ports,calls=activation_case(mode)
+  assert ports["origin"]==1020000000 and ports["deadline"]==3611021000000
+  assert ports["a"]["activation_observation"][3][2]==1030000000
+  assert (not calls)if mode=="active"else calls[0][-1]=="Job"
+ for mode in("future","futurescope","predispatch","stale","foreign","cutoff","pastdeadline","absent","wrongid","wrongpath","malformed","failed","tuple","manager_code","timer_code","missing_check","stderr","mask","earlymanager_code","earlytimer_code"):
+  with pytest.raises(RuntimeError):activation_case(mode)
  actual_manager_message=b"::error::HOST:ANCESTOR-MANAGER-TERMINAL\n"
  assert len(actual_manager_message)==40<=64
  actual_diagnostic_code=compile(ast.Expression(copy.deepcopy(
@@ -20115,7 +20218,7 @@ def test_github_workflow_splits_validation_into_parallel_phase_jobs():
   actual_cells=tuple(node.value if isinstance(node,ast.Constant)
       and type(node.value)is int else node.id if isinstance(node,ast.Name)
       else None for node in supplier_returns[0].elts)
-  assert actual_cells==(2454466522,324772011,63340350,'initializer',1802350,241543444,19433768,1924808,2003996)
+  assert actual_cells==(2454466522,324772011,63340350,'initializer',1802350,241543444,19456680,1926312,2005764)
   # Historical supplier fixtures.
   actual_cells=(2368680179,302894236,34477319,'initializer',1802350,241543444,18421352,1823560,1983204)
   assert actual_cells[6:] == (18421352, 1823560, 1983204)
@@ -28279,7 +28382,7 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
     import io
     from tools import validation_reliability as o
     def bind_administrative_fixture_cwd(query, root, patch):
-        # Guard reference.
+
         if os.name != 'nt':return
         original_path=o._linux_preflight_path_v1
         original_command=query.command
@@ -28291,7 +28394,7 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
         def bound_command(argv,**kwargs):
             return original_command(argv,**({'cwd':literal} if 'cwd' not in kwargs else {}),**kwargs)
         query.command=bound_command
-    # Collected V2 Windows ABI references test parsing/error retention, never native custody.
+
     import struct
     import copy
     import ctypes
@@ -28323,7 +28426,7 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
     assert o._linux_acl_parse_v2(raw,default=True,mode=0o000)==base
     if sys.platform!='linux':
         with pytest.raises(o.ValidationReliabilityError,match='NATIVE_ABI'):o._LinuxSourceNativeV2()
-    # Guard reference.
+
 
     abi=o._LinuxSourceNativeV2.__new__(o._LinuxSourceNativeV2)
     abi.ctypes=ctypes;abi.attempt=None;abi.last_acl={}
@@ -28339,7 +28442,7 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
             ctypes.set_errno(61);return -1
     abi.lib=ReferenceACL()
     import errno
-    # Guard reference.
+
 
     with monkeypatch.context() as patch:
         patch.setattr(errno,'ENODATA',61,raising=False)
@@ -28358,7 +28461,7 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
                 broken.setattr(abi.lib,'fgetxattr',denied)
                 with pytest.raises(OSError) as observed:abi.acl(17,attempt=lambda op:None,delivered=lambda n:None)
                 assert observed.value.errno==number and abi.last_acl['failure']['errno']==number
-    # Exact data shapes and geometry do not confer a lease.
+
     v2root=str(tmp_path/'v2-original')
     directory=lambda p,ino,roster:[p,'GIT_ADMIN' if p=='.git' else 'WORKTREE',1,ino,4096,3,4,stat.S_IFDIR|0o555,0,0,2,16,roster]
     file_row=lambda p,ino,size:[p,'GIT_ADMIN' if p.startswith('.git/') else 'WORKTREE',1,ino,size,3,4,stat.S_IFREG|0o444,0,0,1,16]
@@ -28391,7 +28494,7 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
     for category,limit in (('R',64*1024**3),('S',1024**3),('E',16*1024**2)):
         damaged=copy.deepcopy(reference_census);damaged['logical_bytes'][category]=limit+1
         assert runner._linux_preflight_capacity_v2(damaged,page_size=4096)['metadata_admitted'] is False
-    # V2 reference.
+
     vector=(sys.executable,o._PREFLIGHT_SCRIPTS_V1[3],'--repo-root','.')
     identity=dict(run_id='reference-v2',phase='fast-preflight',command_index=4,original_position=4,command_count=8,
         argv=list(vector),repo_root=v2root,process_root=str(tmp_path/'v2process'),evidence_root=str(tmp_path/'v2evidence'),parent_pid=os.getpid())
@@ -28415,7 +28518,7 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
         decoded,values,count=o._preflight_frame_read_v1(stream.fileno(),magic=(b'QTTPF01\n',b'QTTPF02\n'),extent=24+len(frame),meter=meter,
             validate=lambda h,p:([],o._preflight_header_v2(h,p,identity)))
         assert decoded==header and values==[] and count==7 and meter.received==24+len(frame)
-    # Synthetic; no credit.
+
     from types import SimpleNamespace
     reference_results=[]
     def source_reference(case):
@@ -28500,7 +28603,7 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
         def read(fd,amount):
             path=resolve(fd);note('read',path)
             offset=descriptors[fd]['offset']
-            # Deliberately return short non-EOF blocks.
+
             data=nodes[path]['data'][offset:offset+min(amount,2)]
             descriptors[fd]['offset']+=len(data)
             return data
@@ -28608,7 +28711,7 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
             'after-full-protection','during-readability','quota','deadline','torn-journal',
             'partial-post','foreign-identity','foreign-flags','primary-cleanup','failed-close','after-readability'):
         source_reference(case)
-    # Guard reference.
+
     for close_case in ('native-close', 'charged-pre-close'):
         close_seal = object.__new__(o._LinuxImmutableSourceSealV2)
         close_seal.pid, close_seal.thread = os.getpid(), o.threading.get_ident()
@@ -28657,7 +28760,7 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
             assert close_calls == ([17] if close_case == 'native-close' else []) and open_calls == []
             assert any('LINUX_V2_UNRESOLVED_OWNED_DESCRIPTOR' in error
                 for error in close_seal.settlement_errors)
-    # Synthetic; no credit.
+
     module_path = Path(runner.REPO_ROOT) / 'tools' / 'master_plan_ingest.py'
     module_text = module_path.read_text(encoding='utf-8')
     module_tree = __import__('ast').parse(module_text)
@@ -28709,7 +28812,7 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
         with pytest.raises(o.ValidationReliabilityError, match='ORDINARY_MASTER_PLAN_ORIGINAL_STDLIB_IMPORT_COHORT'):
             o._ordinary_master_plan_python_native_v1(native_scope,native_bound,(operand,),((operand,'<module>',alien_text,()),))
         assert len(factory_calls) == 1
-    # Guard reference.
+
 
     original_run_path = runner._path
     adapter_paths = object.__new__(runner.ValidationRunPathsV1)
@@ -28735,7 +28838,7 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
             o._LINUX_PREFLIGHT_PROCESS_V1.reset(token)
     assert runner._path is original_run_path
 
-    # Guard reference.
+
 
     root = Path(runner.REPO_ROOT)
     V = root.parent / 'synthetic-source-only-V'
@@ -28827,7 +28930,7 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
             requested_marker = next(node.value.value for node in source_ast.parse(operands[0]['text']).body
                 if isinstance(node,source_ast.Assign) and any(isinstance(target,source_ast.Name) and target.id=='SUCCESS_MARKER' for target in node.targets))
             assert closed_factory_calls[-1][1]['stdout_minimum'] == len(requested_marker.encode('utf8')) + 1
-            # Synthetic; no credit.
+
 
             for operand in operands:
                 operand['row'] = native_source.row_index[str(root/operand['path'])]
@@ -28887,7 +28990,7 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
                         tuple((operand,'<module>',operand['text'],()) for operand in operands))
         assert len(closed_factory_calls) == 3
 
-    # Synthetic; no credit.
+
 
     native_scope.repository = str(root)
     trace_name, scope_name = 'tools/master_plan_traceability_check.py', 'tools/validate_first_pr_scope.py'
@@ -28976,7 +29079,7 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
                     o._ordinary_deterministic_readonly_native_v1(native_scope,bound,operands,grammar)
         assert len(readonly_calls) == 2
 
-    # PR138: no credit.
+
     literal = runner.PR138_NON_MUTATING_VALIDATION_SCRIPT
     requested_literal = (selected_sys.executable, '-c', literal)
     source_names = o._ordinary_pr138_source_names_v1()
@@ -29061,7 +29164,7 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
         with pytest.raises(o.ValidationReliabilityError,match='ORDINARY_PR138_EXACT_INITIALIZER_OR_NAMESPACE_ABSENCE'):
             o._ordinary_pr138_native_v1(native_scope,literal_bound,graph_operands,graph_grammar)
 
-        # Synthetic; no credit.
+
         literal_ports.setattr(o,'os',SimpleNamespace(**{**vars(o.os),'O_NOFOLLOW':131072,'O_CLOEXEC':524288}))
         programme = {'entry':literal_entry,'environment':{}}
         effect = {'entry':literal_entry,'native_programme':actual_literal}
@@ -29130,7 +29233,7 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
         for kind,raw in (('VERSION',b'git version 2.35.0\n'),('CONFIG_NAMES',b'include.path\0'),('INDEX_MODES',b'160000\0')):
             with pytest.raises(o.ValidationReliabilityError,match='ORDINARY_POST_GIT_'):
                 native_scope._ordinary_post_git_edge_bytes_v1(kind,raw,index_entries=1 if kind=='INDEX_MODES' else None)
-        # Guard reference.
+
 
         failed_scope=native_scope
         del failed_scope._ordinary_selected_git_proof_v1
@@ -29156,7 +29259,7 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
         assert len(failed_scope._ordinary_factory_slots_v1)==1 and not failed_scope._ordinary_factory_slots_v1[0]['closed']
         with pytest.raises(o.ValidationReliabilityError,match='ORDINARY_SELECTED_GIT_ONE_NONPOST_PROOF'):
             failed_scope._ordinary_verify_selected_git_controls_v1()
-    # Synthetic; no credit.
+
     source_table = source_ast.parse((root/'tools/validation_inventory.py').read_text(encoding='utf8'))
     literal_function = next(node for node in source_table.body if isinstance(node,source_ast.FunctionDef)
         and node.name == '_ordinary_deterministic_fixed_sources_v1')
@@ -29287,7 +29390,7 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
         with pytest.raises(o.ValidationReliabilityError,match='ORDINARY_SOURCE_LITERAL_'):
             o._ordinary_deterministic_literal_references_v1(bad)
 
-    # Guard reference.
+
     prefix_caps = runner._ordinary_post_ceiling_programme_v1(original_cutoffs=(1, 2, 3, 4))
     expected_prefix_cell = {'stdout_bytes': 8 << 20, 'stderr_bytes': 8 << 20,
         'combined_output_bytes': 16 << 20}
@@ -29299,7 +29402,7 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
     with pytest.raises(o.ValidationReliabilityError, match='ORDINARY_PREFIX_SOURCE_SELECTED_CAPTURE_LAYER'):
         runner._ordinary_prefix_output_limits_v1(prefix_caps, 'APPLICATION')
 
-    # Guard reference.
+
     post_scope = object.__new__(o._LinuxPreflightScopeV1)
     post_scope._ordinary_phase_v1 = runner.POST_VALIDATION_PHASE
     post_scope._ordinary_runner_owner_v1 = runner
@@ -29341,7 +29444,7 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
         assert len(allocation_calls) == 1 and allocation_calls[0] == (
             post_paths, post_plan, post_execution, selected_resource, post_effects)
 
-    # Synthetic references; no resource or process admission.
+
     from tools import ci_branch_context as qci,validation_scope_registry as qr
     import inspect
     with monkeypatch.context() as qp:
@@ -29401,7 +29504,7 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
             exec(unit,{},env)
             assert len(env['rows'])==2 and all(row['native_programme'] is n for row,n in zip(env['rows'],ns,strict=True))
             assert tuple((row['tasks'],row['nofile']) for row in env['rows'])==(((2,12),)*2 if phase=='unselected-reference' else ((64,64),)*2)
-        # Allocation routing only: this checker is explicitly synthetic, not a native admission.
+
         qp.setattr(qci,'_ordinary_selected_operational_native_check_v1',lambda scope,value:value['operational_operand'])
         op_ns=tuple(dict(n,operational_operand=object()) for n in ns)
         op_effects={'rows':tuple(dict(native_programme=n,entry=b[0],execution=b[1]) for b,n in zip(bounds,op_ns,strict=True))}
@@ -29417,8 +29520,8 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
                 exec(unit,{},failed)
         assert tuple(qn.items())==frozen
 
-    # Synthetic CI source/receiver ports test the retained-body association only.
-    # They acquire no Linux event, source seal, child, profile or Git permission.
+
+
     from tools import ci_branch_context as ci_literal_owner
     ci_literal_text = (root/'tools/ci_branch_context.py').read_text(encoding='utf8')
     ci_literal_tree = source_ast.parse(ci_literal_text)
@@ -29483,7 +29586,7 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
         ci_literal_cache[('tools/ci_branch_context.py','PYTHON')]=(ci_literal_tree,ci_literal_operand)
         assert ci_literal_owner._ordinary_ci_literal_body_bootstrap_v1(native_scope,ci_literal_record,
             ci_literal_tree,ci_literal_operand,ci_literal_prior) is ci_literal_operand
-    # Synthetic managed geometry only; this does not issue target or native credit.
+
     from tools.ci_branch_context import _ordinary_selected_target_managed_request_v1 as target_request
     target_layout = object()
     target_sizes = dict(pointer=8, gc=16, unicode_prefix=11, tuple_prefix=7,
@@ -29517,7 +29620,7 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
                 target_request(target_layout, bad_recipe, bad_geometry)
         with pytest.raises(ValueError,match='FOREIGN_TARGET_LAYOUT'):
             target_request(object(), target_recipe, target_geometry)
-    # Source-extracted synthetic metadata callback only: no issuer, funding or native operation.
+
     import types as _startup_types
     import sys as _startup_sys
     import tools as _startup_tools
@@ -29665,7 +29768,7 @@ def _ordinary_ci_initial_common_source_check_v1(native_input,profile,allocation)
         assert _startup_issuer['physical']is _startup_issuer['initialized_storage']is None
         assert _startup_errors==[] and _startup_call(
             _startup_input,_startup_native,_startup_profile,_startup_cutoffs)is _startup_profile
-    # Metadata-only pure mapper relocation: no paths are opened and no resource is admitted.
+
     from tools import ci_branch_context as _mapper_move_ci
     _mapper_move_input=object();_mapper_move_result=object();_mapper_move_calls=[]
     with monkeypatch.context() as _mapper_move_ports:
@@ -29699,7 +29802,7 @@ def _ordinary_ci_initial_common_source_check_v1(native_input,profile,allocation)
         o._mapper_profile_v1(dict(_mapper_move_profile,entries=[]))
     with pytest.raises(ValueError,match='BASIS_PROFILE_FIELDS'):
         o._mapper_profile_v1(dict(_mapper_move_profile,foreign=None))
-    # The exact operational checker rejects equal replacement Code/default objects.
+
     _operational_tree=ast.parse((REPO_ROOT/'tools'/'ci_branch_context.py').read_text(encoding='utf-8'))
     _operational_checkers=tuple(n for n in _operational_tree.body if isinstance(n,ast.FunctionDef)
         and n.name=='_ordinary_selected_operational_native_check_v1')
@@ -29743,7 +29846,7 @@ def _ordinary_ci_initial_common_source_check_v1(native_input,profile,allocation)
     _v_demand_return=next(n for n in ast.walk(_v_demand_owners[0])if isinstance(n,ast.Return))
     _v_fd_code=compile(ast.Expression(_v_demand_return.value.elts[7]),'<directory-owner-fd-cohort>','eval')
     assert tuple(eval(_v_fd_code,{'depth':d})for d in(2,3,4))==(5,7,9)
-    # Explicitly synthetic source-cache ports: no allocator, parser grant or native credit.
+
     from tools import ci_branch_context as bci,validation_scope_registry as breg
     import inspect as bi
     bs_text="x = 'two'\nf(x)\n";bs_tree=ast.parse(bs_text);bs_nodes=sum(1 for _ in ast.walk(bs_tree))
@@ -29803,7 +29906,7 @@ def _ordinary_ci_initial_common_source_check_v1(native_input,profile,allocation)
         finally:literal.value=prior
         assert bci._ordinary_bounded_source_calls_v1(bs_scope,bs_tree,bs_observed)is bs_calls
     assert bci._ordinary_bounded_source_grammar_reserve_v1(object(),{},None,{})is None
-    # Extract only current scalar order/default guards, not their native/issuer bodies.
+
     bt=ast.parse(bi.getsource(bci._ordinary_bounded_control_source_reservations_bind_v1))
     reserve=next(n for n in ast.walk(bt)if isinstance(n,ast.FunctionDef)and n.name=='reserve_targets')
     prior_expr=next(n.value for n in reserve.body if isinstance(n,ast.Assign)
@@ -29833,14 +29936,14 @@ def _ordinary_ci_initial_common_source_check_v1(native_input,profile,allocation)
         if k.arg=='source_position')
     bound=(object(),object(),17)
     assert eval(compile(ast.Expression(position),'<fixed-pytest-bound-position>','eval'),{'bound':bound,'row':{}})==17
-    # Actual numeric ABI assignment only; synthetic value is not a native ABI observation.
+
     gt=ast.parse(bi.getsource(breg._facet_fn_data_layout_collect_v1))
     gc_assignment=next(n for n in gt.body[0].body if isinstance(n,ast.Assign)
         and any(isinstance(v,ast.Name)and v.id=='gc'for v in n.targets))
     gc_env={'sizes':{'gc':16}}
     exec(compile(ast.Module(body=[gc_assignment],type_ignores=[]),'<numeric-gc-binding>','exec'),gc_env)
     assert type(gc_env['gc'])is int and gc_env['gc']==16
-    # Mutable keyword defaults must compare retained items, not dictionary identity alone.
+
     kt=ast.parse(bi.getsource(bci._ordinary_bounded_source_planning_prepare_v1))
     branch=next(n for n in kt.body[0].body if isinstance(n,ast.If)and isinstance(n.test,ast.Compare)
         and isinstance(n.test.left,ast.Name)and n.test.left.id=='prior')
@@ -29857,7 +29960,7 @@ def _ordinary_ci_initial_common_source_check_v1(native_input,profile,allocation)
     kk['feature_version']=None
     assert eval(kguard,kenv)is False
 
-    # Synthetic Unicode layout arithmetic only, never allocator credit.
+
     rt=ast.parse(bi.getsource(bci._ordinary_bounded_source_retained_request_v1))
     leaf_expr=next(n.value for n in rt.body[0].body if isinstance(n,ast.Assign)
         and any(isinstance(v,ast.Name)and v.id=='leaves'for v in n.targets))
@@ -29866,7 +29969,7 @@ def _ordinary_ci_initial_common_source_check_v1(native_input,profile,allocation)
         dict(o=o,layout=rl,leaf={'strings':2,'codepoints':3}))
     assert amount==o._ordinary_data_unicode_request_v1(rl,1)+o._ordinary_data_unicode_request_v1(rl,2)
 
-    # Finite quota markers acquire no resource, launch no process and admit no native owner.
+
     quota_scope = object.__new__(o._LinuxPreflightScopeV1)
     quota_source = object()
     quota_scope.source = quota_source
@@ -29922,7 +30025,7 @@ def _ordinary_ci_initial_common_source_check_v1(native_input,profile,allocation)
         quota_scope._ordinary_phase_complement_debit_v1('raw_read_byte_limit', 1)
     assert quota_balance['observed']['raw_read_byte_limit'] == 5
 
-    # Synthetic; no credit.
+
 
     native_parent_output = o._ordinary_output_owner_limits_v1(prefix_caps, 'PARENT')
     native_receiver_output = o._ordinary_output_owner_limits_v1(prefix_caps, 'RECEIVER')
@@ -29934,7 +30037,7 @@ def _ordinary_ci_initial_common_source_check_v1(native_input,profile,allocation)
     with pytest.raises(o.ValidationReliabilityError, match='ORDINARY_OUTPUT_ORIGINAL_OWNER_ROLE'):
         o._ordinary_output_owner_limits_v1(prefix_caps, 'APPLICATION')
 
-    # Guard reference.
+
 
 
     import inspect
@@ -29965,7 +30068,7 @@ def _ordinary_ci_initial_common_source_check_v1(native_input,profile,allocation)
         assert not reference_path.exists()
         o.atomic_write_json(reference_path,dict(native_linux_qualification=False,cases=reference_results))
     print('LINUX_V2_INJECTED_SOURCE_RECOVERY_REFERENCES '+json.dumps(reference_results,sort_keys=True))
-    # Guard reference.
+
     from datetime import datetime,UTC
     startup_references=[]
     actual_supervisor=o.supervise_command
@@ -30094,7 +30197,7 @@ def _ordinary_ci_initial_common_source_check_v1(native_input,profile,allocation)
             assert sum(a[0]=='/usr/bin/systemd-run' for a in queries)==1
             assert any(a[0]=='/usr/bin/journalctl' for a in queries)
             assert len(words)<=1
-            # Guard reference.
+
 
             count=len(queries)
             if accepted:assert scope.finish()
@@ -30120,8 +30223,8 @@ def _ordinary_ci_initial_common_source_check_v1(native_input,profile,allocation)
         o.atomic_write_json(path,dict(native_linux_qualification=False,cases=startup_references))
     print('LINUX_FAILED_START_INJECTED_REFERENCES '+json.dumps(startup_references,sort_keys=True))
 
-    # A real disposable directory reaches the original factory's start boundary;
-    # a single-link regular-file validator cannot stand in for directory identity.
+
+
     factory_area=tmp_path/'startup-factory-reference';factory_area.mkdir()
     factory_native=factory_area/'native';factory_native.mkdir()
     factory_source=SimpleNamespace(root=tmp_path,run_id='qtt1n3-recovery-3')
@@ -30138,7 +30241,7 @@ def _ordinary_ci_initial_common_source_check_v1(native_input,profile,allocation)
     assert factory_query.startup_fixture_reservation==2097152
     assert not factory_result['settled'] and not factory_result['removed'] and factory_result['launcher_receipt'] is None
     assert (factory_area/'startup-denial-root').is_dir()
-    # Synthetic; no credit.
+
 
     export_reference=tmp_path/'source-export-failure-reference'
     export_reference.mkdir()
@@ -30176,7 +30279,7 @@ def _ordinary_ci_initial_common_source_check_v1(native_input,profile,allocation)
     assert any('injected export preparation failure' in v for v in cleanup['failures'])
     assert (Path(cleanup['retained_root'])/'native-result.json').is_file()
 
-    # Synthetic; no credit.
+
 
     controller_area=tmp_path/'administrative-unresolved-controller'
     controller_area.mkdir()
@@ -30190,7 +30293,7 @@ def _ordinary_ci_initial_common_source_check_v1(native_input,profile,allocation)
         value=original_query(**kwargs);captured_queries.append(value);return value
     def unresolved_administration(argv,**kwargs):
         controller_dispatches.append((argv,kwargs));raise controller_primary
-    # Synthetic; no credit.
+
 
 
     def controller_fixture_publication(path,raw,**kwargs):
@@ -30217,7 +30320,7 @@ def _ordinary_ci_initial_common_source_check_v1(native_input,profile,allocation)
     assert successful_export['read_bytes']==2*actual_cleanup['exported_files'][0]['bytes']
     assert all(row['closed'] and row['settled'] for row in successful_export['acquisitions'])
 
-    # Synthetic; no credit.
+
 
     original_open=o._open_regular_worktree_descriptor
     original_read=os.read;original_close=os.close;original_scandir=os.scandir
@@ -30306,9 +30409,9 @@ def _ordinary_ci_initial_common_source_check_v1(native_input,profile,allocation)
     missing=o._LinuxImmutableSourceBasisV2.__new__(o._LinuxImmutableSourceBasisV2)
     missing.failure=RuntimeError('original lost seal');missing.state='FAILED'
     with pytest.raises(RuntimeError,match='original lost seal'):missing.check_live()
-    # Genuine unprivileged Linux xattrs, mask, default inheritance and removal on
-    # disposable fixtures only. Root-owned production copy qualification belongs
-    # to the eligible controller, not to this reference or a mocked uid.
+
+
+
     if sys.platform=='linux':
         acl_area=tmp_path/'linux-acl-v2';acl_area.mkdir()
         inherited=acl_area/'original';inherited.mkdir()
@@ -30337,7 +30440,7 @@ def _ordinary_ci_initial_common_source_check_v1(native_input,profile,allocation)
         assert os.getxattr(inherited,'system.posix_acl_default',follow_symlinks=False)==default
         assert os.getxattr(original,'system.posix_acl_access',follow_symlinks=False)==observed[0]
         assert sum(values)>0 and len(attempts)>=9
-    # Guard reference.
+
     import inspect
     from types import SimpleNamespace
     kernel=(b'Uid:\t61234\t61234\t61234\t61234\nGid:\t61235\t61235\t61235\t61235\n'
@@ -30358,7 +30461,7 @@ def _ordinary_ci_initial_common_source_check_v1(native_input,profile,allocation)
         assert damaged!=kernel
         with pytest.raises(o.ValidationReliabilityError):
             o._linux_preflight_status_v1(123,RuntimeQueryReference(damaged),credentials=True)
-    # Synthetic; no credit.
+
     import dataclasses
     admin_vector=('/usr/bin/systemctl','--version')
     faults=('success','nonzero','prestart','unknown','unproven','wrong-run','wrong-phase','wrong-index',
@@ -30418,7 +30521,7 @@ def _ordinary_ci_initial_common_source_check_v1(native_input,profile,allocation)
                 return original_read(fd,min(request,3))  # Legitimate short reads.
             def tracked_close(fd):
                 closes.append(fd);original_close(fd)
-                # Synthetic; no credit.
+
 
                 if fault in ('close','read-close'):raise secondary
             admin_patch.setattr(o,'_open_regular_worktree_descriptor',tracked_open)
@@ -30479,7 +30582,7 @@ def _ordinary_ci_initial_common_source_check_v1(native_input,profile,allocation)
             assert o._LINUX_PREFLIGHT_PROCESS_V1 is context or fault in ('reset','body-reset')
             evidence=admin.command_supervision_evidence_v1()
             assert len(evidence)==len(admin.command_supervisions) and all(row['argv']==admin_vector for row in evidence)
-    # Synthetic; no credit.
+
 
     from types import SimpleNamespace
     scalar_defects=('combined-bool','combined-float','limit-bool','limit-float',
@@ -30618,7 +30721,7 @@ def _ordinary_ci_initial_common_source_check_v1(native_input,profile,allocation)
                     assert record['errors']==[caught.value] and all(
                         slot['complete'] and slot['closed'] and slot['raw_owner'] is None for slot in record['streams'].values())
                     assert admin.retained==23 and scope.settled is False
-                    # Synthetic; no credit.
+
 
                     admin.check()
                     assert admin.command(admin_vector)==b'version\n' and admin.failure is None and len(starts)==2
@@ -30658,7 +30761,7 @@ def _ordinary_ci_initial_common_source_check_v1(native_input,profile,allocation)
                 if scope.process is not None:
                     scope.process.stdout.close();scope.process.stderr.close()
             assert all(request<=65536 for request in requests)
-    # Synthetic; no credit.
+
     for defect in ('run_id','phase','command_index','cwd','stdout_path','shape'):
         with monkeypatch.context() as diagnostic_patch:
             diagnostic_patch.setattr(o.sys,'platform','linux')
@@ -30693,7 +30796,7 @@ def _ordinary_ci_initial_common_source_check_v1(native_input,profile,allocation)
             assert raw==stderr==b'' and not output_opens and len(returned)==1
             assert admin.last_command_receipt is returned[0] and admin.command_supervisions[0]['receipt'] is returned[0]
             assert admin.command_receipt_for_argv_v1(tuple(record['argv'])) is None and not admin.command_resources_settled_v1()
-    # Synthetic; no credit.
+
     with monkeypatch.context() as stale_patch:
         stale_patch.setattr(o.sys,'platform','linux')
         admin=o._LinuxPreflightQueriesV1(evidence_root=tmp_path/'admin-stale-success',
@@ -30732,7 +30835,7 @@ def _ordinary_ci_initial_common_source_check_v1(native_input,profile,allocation)
         with pytest.raises(o.ValidationReliabilityError,match='ADMINISTRATIVE_PROGRAM'):never.command(('/unselected/program',))
         assert never.failure is not None and never.command_supervisions==[]
         assert never.command_resources_settled_v1() and not never.evidence_root.exists()
-    # Guard reference.
+
     pending_root=tmp_path/'runtime-not-handed-off'
     with monkeypatch.context() as patch:
         patch.setattr(o.sys,'platform','linux')
@@ -30745,7 +30848,7 @@ def _ordinary_ci_initial_common_source_check_v1(native_input,profile,allocation)
         with pytest.raises(RuntimeError,match='reference pending boundary'):
             o._linux_preflight_control_read_v1(tmp_path/'not-published.json',deadline_ns=query.deadline_ns,pending=True,query=query)
         assert query.attempts==1 and query.observations==[] and not pending_root.exists()
-    # Guard reference.
+
     entry=ast.parse(inspect.getsource(runner._linux_preflight_enter_v1)).body[0]
     binding_position=next(i for i,node in enumerate(entry.body) if isinstance(node,ast.Assign)
         and isinstance(node.value,ast.Call) and isinstance(node.value.func,ast.Attribute)
@@ -30765,7 +30868,7 @@ def _ordinary_ci_initial_common_source_check_v1(native_input,profile,allocation)
         reference._runtime_call=lambda *args,_info=changed,**kwargs:_info
         with pytest.raises(o.ValidationReliabilityError,match='RUNTIME_DIRECTORY'):
             reference._runtime_directory('/run/qtt1n2',(91,92),0,0,0o700)
-    # Guard reference.
+
     reference.runtime=Path('/run/qtt1n2');reference.runtime_backing=reference.runtime/'payload'
     reference.runtime_identity=(91,92);reference.runtime_mounted_identity=(93,94);reference.runtime_fd=17;reference.runtime_envelope_fd=18
     reference.history=[]
@@ -30781,7 +30884,7 @@ def _ordinary_ci_initial_common_source_check_v1(native_input,profile,allocation)
     reference._runtime_call=denied_owner
     with monkeypatch.context() as patch:
         patch.setattr(o,'_linux_preflight_status_v1',lambda *args,**kwargs:credentials)
-        # Guard reference.
+
         patch.setattr(o.os,'fchown',lambda *args:None,raising=False)
         with pytest.raises(PermissionError,match='reference fchown denial'):
             reference.handoff_runtime(dict(pid=123),'/reference',())
@@ -30793,7 +30896,7 @@ def _ordinary_ci_initial_common_source_check_v1(native_input,profile,allocation)
         with pytest.raises(o.ValidationReliabilityError,match='RUNTIME_HELD_ROOT'):
             reference.handoff_runtime(dict(pid=123),'/reference',())
     assert len(effects)==1 and len(reference.history)==1
-    # Guard reference.
+
     class RuntimeACLReference:
         def __init__(self):self.last_acl=dict(reference=True)
         def acl(self,fd,*,attempt,delivered):attempt('reference');return (b'unexpected ACL',None)
@@ -30802,7 +30905,7 @@ def _ordinary_ci_initial_common_source_check_v1(native_input,profile,allocation)
         with pytest.raises(o.ValidationReliabilityError,match='RUNTIME_ACL'):
             o._LinuxPreflightScopeV1._runtime_acl(reference,17)
     assert reference.query.records[-1][0]=='runtime-acl'
-    # Guard reference.
+
     process=dict(pid=123,start=456,namespaces={})
     live=o._LinuxPreflightScopeV1.__new__(o._LinuxPreflightScopeV1)
     live.process=SimpleNamespace(pid=123,pidfd=17);live.query=RuntimeQueryReference()
@@ -30824,7 +30927,7 @@ def _ordinary_ci_initial_common_source_check_v1(native_input,profile,allocation)
         with pytest.raises(o.ValidationReliabilityError,match='RUNTIME_INVOCATION_CHANGED'):
             live._runtime_live(process,'/reference')
 
-    # Guard reference.
+
     def runtime_stat(ino,uid=0,gid=0,mode=0o1777):
         return SimpleNamespace(st_mode=stat.S_IFDIR|mode,st_dev=91,st_ino=ino,st_uid=uid,st_gid=gid)
     logical='/run/qtt1n2'
@@ -30857,7 +30960,7 @@ def _ordinary_ci_initial_common_source_check_v1(native_input,profile,allocation)
                 values={**vars(views[path]),field:value};assert values!=vars(views[path])
                 views[path]=SimpleNamespace(**values)
                 if field=='st_mode':
-                    # Guard reference.
+
 
                     for alias,info in original_views.items():
                         if (info.st_dev,info.st_ino)==(original_views[path].st_dev,original_views[path].st_ino):
@@ -30998,7 +31101,7 @@ def _ordinary_ci_initial_common_source_check_v1(native_input,profile,allocation)
     with monkeypatch.context() as patch:
         patch.delenv('QTT_LINUX_PREFLIGHT_CONTROL',raising=False)
         assert o._linux_preflight_git_environment_v1(Path(root),None) == {}
-    # Guard reference.
+
     area = tmp_path/'linux-profile-reference'; area.mkdir()
     spool = area/'spool'; spool.write_bytes(b'')
     tail = o._LinuxPreflightTailV1(spool)
@@ -31016,13 +31119,13 @@ def _ordinary_ci_initial_common_source_check_v1(native_input,profile,allocation)
     with spool.open('rb') as ordinary:
         ordinary.seek(0,2)
         assert o._consume_available_pipe(ordinary,io.BytesIO(),outcome={},native_terminal=False) == (False,True)
-    # Guard reference.
+
 
     tree = ast.parse(Path(o.__file__).read_text(encoding='utf-8'))
     writer = next(n for n in tree.body if isinstance(n,ast.FunctionDef) and n.name == '_atomic_write_bytes_v1')
     calls = [(n.lineno,ast.unparse(n.func)) for n in ast.walk(writer) if isinstance(n,ast.Call)]
     assert next(line for line,name in calls if name == 'os.fchmod') < next(line for line,name in calls if name == 'os.link')
-    # Guard reference.
+
 
     runtime_path = area/'runtime'; runtime_path.mkdir()
     vector = (sys.executable,'tools/validate_repair_pr_changed_file_scope.py','--repo-root','.')
@@ -31033,7 +31136,7 @@ def _ordinary_ci_initial_common_source_check_v1(native_input,profile,allocation)
         damaged = {**projected,key:value}; assert damaged != projected
         with pytest.raises(o.ValidationReliabilityError):
             o._linux_preflight_child_environment_v1(environment,damaged,runtime_path)
-    # Guard reference.
+
     status = dict(Type='exec',Restart='no',RemainAfterExit='yes',DynamicUser='yes',UMask='0077',
         NoNewPrivileges='yes',CapabilityBoundingSet='',AmbientCapabilities='',PrivateDevices='yes',
         PrivateNetwork='yes',PrivateIPC='yes',PrivateTmp='yes',ProtectSystem='strict',ProtectHome='tmpfs',
@@ -31055,7 +31158,7 @@ def _ordinary_ci_initial_common_source_check_v1(native_input,profile,allocation)
         with pytest.raises(o.ValidationReliabilityError): o._linux_preflight_unit_policy_v1(damaged,**options)
         damaged = {k:v for k,v in status.items() if k != key}
         with pytest.raises(o.ValidationReliabilityError): o._linux_preflight_unit_policy_v1(damaged,**options)
-    # Guard reference.
+
 
 
     recorded_raw=(
@@ -31135,7 +31238,7 @@ def _ordinary_ci_initial_common_source_check_v1(native_input,profile,allocation)
         patch.setitem(o._LINUX_PREFLIGHT_SERVICE_READBACK_V1,'PrivateTmp','no')
         with pytest.raises(o.ValidationReliabilityError,match='UNIT_READBACK:PrivateTmp'):
             o._linux_preflight_unit_policy_v1(recorded,**recorded_options)
-    # Guard reference.
+
 
     assert recorded['InaccessiblePaths']=='/dev/shm /dev/mqueue /dev/hugepages'
     assert recorded['ReadWritePaths']=='/run/qtt2557n2660997759221 /tmp /var/tmp'
@@ -31169,7 +31272,7 @@ def _ordinary_ci_initial_common_source_check_v1(native_input,profile,allocation)
         original_private_tmp_rejected=True,prospective_corrected_private_tmp_accepted=True,
         unchanged_recorded_bytes=len(recorded_raw),private_tmp_mutations_rejected=rejected_private_tmp+1,
         unrelated_recorded_mutations_rejected=6,native_execution=False)),flush=True)
-    # Guard reference.
+
 
     for key,wanted in (('InaccessiblePaths',('+/dev/shm','+/dev/mqueue','+/dev/hugepages')),
             ('ReadWritePaths',('+/run/qtt17n23','+/tmp','+/var/tmp'))):
@@ -31188,7 +31291,7 @@ def _ordinary_ci_initial_common_source_check_v1(native_input,profile,allocation)
             with pytest.raises(o.ValidationReliabilityError):o._linux_preflight_unit_policy_v1(damaged,**options)
         damaged={k:v for k,v in status.items() if k!=key}
         with pytest.raises(o.ValidationReliabilityError):o._linux_preflight_unit_policy_v1(damaged,**options)
-    # Synthetic; no credit.
+
 
     mask_paths=('/dev/shm','/dev/mqueue','/dev/hugepages')
     reference_path='/run/systemd/inaccessible/dir'
@@ -31227,7 +31330,7 @@ def _ordinary_ci_initial_common_source_check_v1(native_input,profile,allocation)
         mask_reference([{**r,'options':frozenset(('rw','nosuid'))} if r['path']==path else r for r in mask_mounts],mask_stats)
         mask_reference(mask_mounts,mask_stats,fail=path)
     mask_reference(mask_mounts,mask_stats,fail=reference_path)
-    # Synthetic; no credit.
+
 
     captured_mounts=o._linux_preflight_mounts_v1(
         b'405 403 0:26 / /dev/shm rw,nosuid,nodev shared:336 master:3 - tmpfs tmpfs rw,inode64\n'
@@ -31236,7 +31339,7 @@ def _ordinary_ci_initial_common_source_check_v1(native_input,profile,allocation)
     o._linux_preflight_unit_policy_v1(status,**options)
     observed=mask_reference(captured_mounts,mask_stats)
     assert all('rw' in row['mounts'][0]['options'] for row in observed['targets'])
-    # Guard reference.
+
     import itertools
     readonly_tokens=('+/home','+/root','+/run','+/run/user')
     for order in itertools.permutations(readonly_tokens):
@@ -31254,7 +31357,7 @@ def _ordinary_ci_initial_common_source_check_v1(native_input,profile,allocation)
             with pytest.raises(o.ValidationReliabilityError):o._linux_preflight_unit_policy_v1(changed,**options)
         changed={**status,'ReadOnlyPaths':' '.join(t for i,t in enumerate(readonly_tokens) if i!=position)}
         with pytest.raises(o.ValidationReliabilityError):o._linux_preflight_unit_policy_v1(changed,**options)
-    # Synthetic; no credit.
+
 
     containment_raw=(
         b'10 9 0:9 /private/root / ro - tmpfs tmpfs rw\n'
@@ -31422,11 +31525,11 @@ def _ordinary_ci_initial_common_source_check_v1(native_input,profile,allocation)
             b'90 10 0:10 / /proc rw - proc proc rw\n',
             b'90 10 0:13 / /run/qtt17n23 rw - tmpfs qtt-runtime rw\n'):
         containment_reference(raw=containment_raw+row)
-    # Guard reference.
+
     o._linux_preflight_unit_policy_v1(status,**options)
     writable=containment_reference(raw=containment_raw.replace(b'/private/root / ro',b'/private/root / rw'))
     assert all('PARENT_WRITABLE' in r['error'] for r in writable['parents'])
-    # Synthetic; no credit.
+
 
     captured_old_table=b'331 279 0:28 /qtt2528n259165130132control/root / ro,nosuid,nodev shared:333 master:12 - tmpfs tmpfs rw,size=3274488k,nr_inodes=819200,mode=755,inode64\n332 331 0:51 / /dev ro,nosuid,noexec shared:334 - tmpfs tmpfs rw,size=4096k,nr_inodes=65536,mode=755,inode64\n372 332 0:27 / /dev/pts rw,nosuid,noexec,relatime shared:335 master:4 - devpts devpts rw,gid=5,mode=620,ptmxmode=000\n375 332 0:28 /systemd/inaccessible/dir /dev/hugepages ro,nosuid,nodev,noexec shared:336 master:12 - tmpfs tmpfs rw,size=3274488k,nr_inodes=819200,mode=755,inode64\n374 332 0:28 /systemd/inaccessible/dir /dev/mqueue ro,nosuid,nodev,noexec shared:337 master:12 - tmpfs tmpfs rw,size=3274488k,nr_inodes=819200,mode=755,inode64\n373 332 0:28 /systemd/inaccessible/dir /dev/shm ro,nosuid,nodev,noexec shared:338 master:12 - tmpfs tmpfs rw,size=3274488k,nr_inodes=819200,mode=755,inode64\n376 331 0:52 / /home rw,nosuid,relatime shared:339 - tmpfs tmpfs rw,inode64\n377 376 8:1 /home/runner/work/QTT_New0526/QTT_New0526 /home/runner/work/QTT_New0526/QTT_New0526 ro,nosuid,relatime shared:340 master:1 - ext4 /dev/root rw,discard,journal_async_commit,nobarrier,errors=remount-ro,commit=30,data=writeback\n378 331 8:1 /usr/lib /lib ro,nosuid,relatime shared:341 master:1 - ext4 /dev/root rw,discard,journal_async_commit,nobarrier,errors=remount-ro,commit=30,data=writeback\n379 331 8:1 /usr/lib64 /lib64 ro,nosuid,relatime shared:342 master:1 - ext4 /dev/root rw,discard,journal_async_commit,nobarrier,errors=remount-ro,commit=30,data=writeback\n380 331 0:28 /qtt2528n259165130132control/installation /opt/hostedtoolcache/Python/3.14.6/x64 ro,nosuid,nodev shared:343 master:12 - tmpfs tmpfs rw,size=3274488k,nr_inodes=819200,mode=755,inode64\n381 331 0:53 / /proc rw,nosuid,nodev,noexec,relatime shared:344 - proc proc rw,hidepid=invisible\n382 381 0:37 / /proc/sys/fs/binfmt_misc rw,nosuid,nodev,noexec,relatime shared:345 master:48 - binfmt_misc binfmt_misc rw\n383 381 0:53 /acpi /proc/acpi ro,nosuid,nodev,noexec,relatime shared:346 - proc proc rw,hidepid=invisible\n384 381 0:53 /bus /proc/bus ro,nosuid,nodev,noexec,relatime shared:347 - proc proc rw,hidepid=invisible\n385 381 0:53 /fs /proc/fs ro,nosuid,nodev,noexec,relatime shared:348 - proc proc rw,hidepid=invisible\n386 381 0:53 /irq /proc/irq ro,nosuid,nodev,noexec,relatime shared:349 - proc proc rw,hidepid=invisible\n387 381 0:28 /systemd/inaccessible/reg /proc/kallsyms ro,nosuid,nodev,noexec shared:350 master:12 - tmpfs tmpfs rw,size=3274488k,nr_inodes=819200,mode=755,inode64\n388 381 0:28 /systemd/inaccessible/reg /proc/kcore ro,nosuid,nodev,noexec shared:351 master:12 - tmpfs tmpfs rw,size=3274488k,nr_inodes=819200,mode=755,inode64\n389 381 0:28 /systemd/inaccessible/reg /proc/kmsg ro,nosuid,nodev,noexec shared:352 master:12 - tmpfs tmpfs rw,size=3274488k,nr_inodes=819200,mode=755,inode64\n390 381 0:53 /latency_stats /proc/latency_stats ro,nosuid,nodev,noexec,relatime shared:353 - proc proc rw,hidepid=invisible\n391 381 0:53 /mtrr /proc/mtrr ro,nosuid,nodev,noexec,relatime shared:354 - proc proc rw,hidepid=invisible\n392 381 0:53 /scsi /proc/scsi ro,nosuid,nodev,noexec,relatime shared:355 - proc proc rw,hidepid=invisible\n393 381 0:53 /sys /proc/sys ro,nosuid,nodev,noexec,relatime shared:356 - proc proc rw,hidepid=invisible\n394 393 0:37 / /proc/sys/fs/binfmt_misc ro,nosuid,nodev,noexec,relatime shared:357 master:48 - binfmt_misc binfmt_misc rw\n395 381 0:53 /sysrq-trigger /proc/sysrq-trigger ro,nosuid,nodev,noexec,relatime shared:358 - proc proc rw,hidepid=invisible\n396 331 0:54 / /root rw,nosuid,relatime shared:359 - tmpfs tmpfs rw,inode64\n397 331 0:55 / /run rw,nosuid,relatime shared:360 - tmpfs tmpfs rw,inode64\n398 397 0:28 /systemd/propagate/.os-release-stage /run/host/.os-release-stage ro,nosuid,nodev shared:361 master:12 - tmpfs tmpfs rw,size=3274488k,nr_inodes=819200,mode=755,inode64\n399 397 0:48 / /run/qtt2528n259165130132 rw,nosuid,nodev,noexec,relatime shared:362 master:316 - tmpfs qtt-runtime rw,size=1048576k,mode=700,inode64\n400 397 0:28 /qtt2528n259165130132control/binding /run/qtt2528n259165130132control/binding ro,nosuid,nodev shared:363 master:12 - tmpfs tmpfs rw,size=3274488k,nr_inodes=819200,mode=755,inode64\n401 397 0:28 /qtt2528n259165130132control/declaration /run/qtt2528n259165130132control/declaration ro,nosuid,nodev shared:364 master:12 - tmpfs tmpfs rw,size=3274488k,nr_inodes=819200,mode=755,inode64\n402 397 0:28 /qtt2528n259165130132control/release /run/qtt2528n259165130132control/release ro,nosuid,nodev shared:365 master:12 - tmpfs tmpfs rw,size=3274488k,nr_inodes=819200,mode=755,inode64\n403 397 0:28 /qtt2528n259165130132control/spool /run/qtt2528n259165130132control/spool ro,nosuid,nodev shared:366 master:12 - tmpfs tmpfs rw,size=3274488k,nr_inodes=819200,mode=755,inode64\n404 397 0:28 /systemd/propagate/qtt2528n259165130132.service /run/systemd/incoming ro,nosuid,nodev master:12 - tmpfs tmpfs rw,size=3274488k,nr_inodes=819200,mode=755,inode64\n405 397 0:56 / /run/user rw,nosuid,relatime shared:368 - tmpfs tmpfs rw,inode64\n406 331 0:57 / /sys ro,nosuid,nodev,noexec,relatime shared:369 - sysfs sysfs rw\n407 406 0:32 / /sys/firmware/efi/efivars ro,nosuid,nodev,noexec,relatime shared:370 master:10 - efivarfs efivarfs rw\n408 406 0:33 / /sys/fs/bpf ro,nosuid,nodev,noexec,relatime shared:371 master:11 - bpf bpf rw,mode=700\n409 406 0:30 / /sys/fs/cgroup ro,nosuid,nodev,noexec,relatime shared:372 master:8 - cgroup2 cgroup2 rw,nsdelegate,memory_recursiveprot\n410 406 0:36 / /sys/fs/fuse/connections ro,nosuid,nodev,noexec,relatime shared:373 master:19 - fusectl fusectl rw\n411 406 0:31 / /sys/fs/pstore ro,nosuid,nodev,noexec,relatime shared:374 master:9 - pstore none rw\n412 406 0:20 / /sys/kernel/config ro,nosuid,nodev,noexec,relatime shared:375 master:20 - configfs configfs rw\n413 406 0:8 / /sys/kernel/debug ro,nosuid,nodev,noexec,relatime shared:376 master:17 - debugfs debugfs rw\n414 406 0:7 / /sys/kernel/security ro,nosuid,nodev,noexec,relatime shared:377 master:7 - securityfs securityfs rw\n415 406 0:13 / /sys/kernel/tracing ro,nosuid,nodev,noexec,relatime shared:378 master:18 - tracefs tracefs rw\n416 331 0:48 /tmp /tmp rw,nosuid,nodev,noexec,relatime shared:379 master:316 - tmpfs qtt-runtime rw,size=1048576k,mode=700,inode64\n417 331 8:1 /usr /usr ro,nosuid,relatime shared:380 master:1 - ext4 /dev/root rw,discard,journal_async_commit,nobarrier,errors=remount-ro,commit=30,data=writeback\n418 417 0:28 /systemd/inaccessible/dir /usr/lib/modules ro,nosuid,nodev,noexec shared:381 master:12 - tmpfs tmpfs rw,size=3274488k,nr_inodes=819200,mode=755,inode64\n419 331 0:48 /var-tmp /var/tmp rw,nosuid,nodev,noexec,relatime shared:382 master:316 - tmpfs qtt-runtime rw,size=1048576k,mode=700,inode64\n'
     old_table=containment_reference(raw=captured_old_table,
@@ -31439,7 +31542,7 @@ def _ordinary_ci_initial_common_source_check_v1(native_input,profile,allocation)
         original_mount_bytes=len(captured_old_table),historical_descriptor_ids_observed=False,
         four_captured_writable_parents_rejected=True,shared_controller_fixture_lease_predicate=True)),flush=True)
 
-    # Guard reference.
+
 
     def write_denial_reference(code,*,operand='source',kind='NATIVE_IMMUTABLE_V2',fault=None):
         from types import SimpleNamespace
@@ -31513,7 +31616,7 @@ def _ordinary_ci_initial_common_source_check_v1(native_input,profile,allocation)
     for fault in ('owner','mode','kind','links','identity','query','missing-immutable','flags-drift','close','evidence'):
         write_denial_reference(1,fault=fault)
 
-    # Synthetic; no credit.
+
 
     for prior in (None, '/reference/prior-config'):
         for outcome in ('pass', 'body-error', 'projection-error', 'wrong-projection'):
@@ -31544,7 +31647,7 @@ def _ordinary_ci_initial_common_source_check_v1(native_input,profile,allocation)
                 assert os.environ.get('GIT_CONFIG_GLOBAL') == prior
                 assert o._PREFLIGHT_NATIVE_INPUT_V1.get() is None
                 assert calls == (['checked', 'projection', 'body'] if outcome in ('pass', 'body-error') else ['checked', 'projection'])
-    # Guard reference.
+
 
     for selected in (False, True):
         token = o._LINUX_PREFLIGHT_LEASE_V1.set(o._LinuxPreflightHostLeaseV1.__new__(o._LinuxPreflightHostLeaseV1) if selected else None)
@@ -31570,14 +31673,14 @@ def _ordinary_ci_initial_common_source_check_v1(native_input,profile,allocation)
             assert original.read_bytes() == b'original manager bytes'
             assert counters['retained_byte_count'] == counters['drained_byte_count'] == 22
         finally: tail.close()
-    # Guard reference.
+
     evidence_directory = area/'directory-export'; evidence_directory.mkdir()
     original_directory = runner._linux_preflight_export_directory_v1(evidence_directory)
     assert runner._linux_preflight_export_directory_v1(evidence_directory,original_directory) == original_directory
     with pytest.raises(ValueError,match='single-link regular file'):
         o._scan_same_api_version(evidence_directory.lstat())
     (evidence_directory/'new-child').mkdir()
-    # Guard reference.
+
 
     before_change = evidence_directory.stat()
     os.utime(evidence_directory,ns=(before_change.st_atime_ns,before_change.st_mtime_ns+1_000_000_000))
@@ -31588,7 +31691,7 @@ def _ordinary_ci_initial_common_source_check_v1(native_input,profile,allocation)
         runner._linux_preflight_export_directory_v1(evidence_directory,original_directory)
     with pytest.raises(o.ValidationReliabilityError,match='EXPORT_DIRECTORY'):
         runner._linux_preflight_export_directory_v1(original)
-    # Guard reference.
+
 
     controller = next(n for n in ast.parse(Path(runner.__file__).read_text(encoding='utf-8')).body
         if isinstance(n,ast.FunctionDef) and n.name == '_linux_preflight_controller_v1')
@@ -31596,7 +31699,7 @@ def _ordinary_ci_initial_common_source_check_v1(native_input,profile,allocation)
     assert [len(n.args) for n in ast.walk(export_tree) if isinstance(n,ast.Call)
         and isinstance(n.func,ast.Name) and n.func.id == '_linux_preflight_export_directory_v1'] == [1,2]
     assert '_scan_same_api_version' not in ast.unparse(export_tree)
-    # Guard reference.
+
     from tools import validate_pr169_val1 as readability_owner
     actual_repository = Path(runner.__file__).resolve().parents[1]
     for relative in (Path('tools/run_validation_gates.py'),Path('.github/workflows/qtt_validation.yml')):
@@ -31615,7 +31718,7 @@ def _ordinary_ci_initial_common_source_check_v1(native_input,profile,allocation)
     assert not rejected.pass_
     print('INDEPENDENT_READABILITY_GUARD_PASSED; SEMICOLON_MUTATION_REJECTED',flush=True)
     print('LINUX_PREFLIGHT_EXPORT_DIRECTORY_CHECKS_PASSED; native_systemd_enforcement=NOT_EXECUTED',flush=True)
-    # Guard reference.
+
 
 
     import stat
@@ -31638,7 +31741,7 @@ def _ordinary_ci_initial_common_source_check_v1(native_input,profile,allocation)
     with monkeypatch.context() as patch:
         if not hasattr(os,'listxattr'):
             patch.setattr(os,'listxattr',lambda *a,**k:[],raising=False)
-        # Guard reference.
+
         patch.setattr(os,'read',lambda *a:pytest.fail('metadata census read a file body'))
         patch.setattr(Path,'read_bytes',lambda *a:pytest.fail('metadata census read a file body'))
         observed = observe().run()
@@ -31666,7 +31769,7 @@ def _ordinary_ci_initial_common_source_check_v1(native_input,profile,allocation)
         report_raw,census_raw = runner._linux_preflight_metadata_bytes_v1(observed,report,time.monotonic_ns()+10**9)
         assert report_raw == o._preflight_canonical_v1(report) and census_raw == o._preflight_canonical_v1(observed)
         with monkeypatch.context() as bound:
-            # Guard reference.
+
             bound.setattr(runner,'_LINUX_PREFLIGHT_METADATA_BYTES_V1',len(report_raw)+len(census_raw))
             assert runner._linux_preflight_metadata_bytes_v1(observed,report,time.monotonic_ns()+10**9) == (report_raw,census_raw)
             bound.setattr(runner,'_LINUX_PREFLIGHT_METADATA_BYTES_V1',len(report_raw)+len(census_raw)-1)
@@ -31675,7 +31778,7 @@ def _ordinary_ci_initial_common_source_check_v1(native_input,profile,allocation)
         assert runner._LINUX_PREFLIGHT_METADATA_BYTES_V1 == 32*mib
         with pytest.raises(o.ValidationReliabilityError,match='EXPORT_DEADLINE'):
             runner._linux_preflight_metadata_bytes_v1(observed,report,time.monotonic_ns()-1)
-        # Guard reference.
+
         oversized = {**observed,'logical_bytes':dict(R=3*gib,G=4*gib,I=gib,S=2*gib,E=17*mib)}
         all_limits = runner._linux_preflight_capacity_v1(oversized,page_size=4096,repeated_config_bytes=19)
         dispositions = {v['name']:v['disposition'] for v in all_limits['checks']}
@@ -31695,7 +31798,7 @@ def _ordinary_ci_initial_common_source_check_v1(native_input,profile,allocation)
         incomplete = runner._linux_preflight_capacity_v1({**observed,'complete_size_census':False},page_size=4096)
         assert not incomplete['byte_capture_admitted']
         assert all(v['disposition']=='UNESTABLISHED' for v in incomplete['checks'])
-        # Independently enumerate each fixed geometry at its boundary and one over.
+
         for key,field,cap,overhead in (
                 ('source_capture_R_plus_G','G',2*gib,0),('candidate_R_plus_I','R',512*mib,0),
                 ('installation_logical_S','S',gib,0),('declaration_body','S',gib,0),
@@ -31710,7 +31813,7 @@ def _ordinary_ci_initial_common_source_check_v1(native_input,profile,allocation)
                 assert check['demand_bytes'] == cap+excess
                 assert check['disposition'] == ('EXCEEDS_LIMIT' if excess else
                     'WITHIN_LIMIT' if check['demand_kind']=='EXACT_METADATA' else 'UNESTABLISHED')
-        # Guard reference.
+
         large = repository/'large-untracked'
         with large.open('w+b') as stream:
             if os.name == 'nt':
@@ -31742,7 +31845,7 @@ def _ordinary_ci_initial_common_source_check_v1(native_input,profile,allocation)
             assert failed['failures'][0]['last_successful_stat']['version'][6] == 2
         finally:
             linked.unlink()
-        # Guard reference.
+
 
         from types import SimpleNamespace
         original_lstat = Path.lstat
@@ -31775,7 +31878,7 @@ def _ordinary_ci_initial_common_source_check_v1(native_input,profile,allocation)
                     return altered_info(info,mode) if path==source_link else info
                 fault.setattr(Path,'lstat',special_stat)
                 assert 'UNSUPPORTED_SOURCE_KIND' in observe().run()['failures'][0]['error']
-        # Guard reference.
+
         original_scandir = os.scandir
         for fault_kind in ('scan-error','case-alias'):
             closed = []
@@ -31807,7 +31910,7 @@ def _ordinary_ci_initial_common_source_check_v1(native_input,profile,allocation)
             assert not failed['complete_size_census'] and closed
             assert 'reference scan failure' in failed['failures'][0]['error'] if fault_kind=='scan-error' else (
                 'CASE_ALIAS' in failed['failures'][0]['error'])
-        # Guard reference.
+
         meter = observe()
         def denied(*a,**k):
             raise PermissionError(13,'reference ACL query denied')
@@ -31820,7 +31923,7 @@ def _ordinary_ci_initial_common_source_check_v1(native_input,profile,allocation)
             fault.setattr(os,'listxattr',lambda *a,**k:['system.posix_acl_access'])
             failed = observe().run()
         assert 'UNSUPPORTED_ACL' in failed['failures'][0]['error']
-        # Guard reference.
+
         for change in ('version','roster'):
             meter = observe()
             verify = meter._verify
@@ -31857,7 +31960,7 @@ def _ordinary_ci_initial_common_source_check_v1(native_input,profile,allocation)
             observe()._walk('repository',repository,65)
         with pytest.raises(o.ValidationReliabilityError,match='PATH_BYTES'):
             observe()._stat(repository/('x'*4097))
-    # Guard reference.
+
     census_source = ast.unparse(next(n for n in ast.parse(Path(o.__file__).read_text(encoding='utf-8')).body
         if isinstance(n,ast.ClassDef) and n.name=='_LinuxPreflightCensusV1'))
     assert '.lstat()' in census_source and 'with os.scandir(path)' in census_source
@@ -31867,7 +31970,7 @@ def _ordinary_ci_initial_common_source_check_v1(native_input,profile,allocation)
         line for line,name in controller_calls if name=='o._LinuxPreflightCaptureV1')
     print('CAPTURE_CENSUS_REFERENCE_AND_REAL_FILE_CHECKS_PASSED; direct_payload_reads=0',flush=True)
 
-    # Guard reference.
+
 
     event_repository = {'full_name': 'Q8Meow/QTT_New0526'}
     ready_event = {'number': 298, 'action': 'ready_for_review',
@@ -31893,11 +31996,11 @@ def _ordinary_ci_initial_common_source_check_v1(native_input,profile,allocation)
     with pytest.raises(o.ValidationReliabilityError, match='DRAFT_FAST_RETAINS_FIRST8_OWNER'):
         runner._ordinary_ci_eligibility_v1(draft_event, original_controls,
             runner.REPO_ROOT, phase=runner.FAST_PREFLIGHT_PHASE)
-    # Guard reference.
+
     runner._linux_preflight_eligibility_v1(draft_event, original_controls, str(runner.REPO_ROOT))
     with pytest.raises(o.ValidationReliabilityError, match='UNADOPTED_REPOSITORY_PR_OR_HEAD'):
         runner._linux_preflight_eligibility_v1(ready_event, original_controls, str(runner.REPO_ROOT))
-    # Synthetic; no credit.
+
 
     for ordinary_phase in runner.ORDERED_PHASES:
         selected_provision = runner._linux_preflight_selected_v1(
@@ -31970,7 +32073,7 @@ def _ordinary_ci_initial_common_source_check_v1(native_input,profile,allocation)
                 runner.REPO_ROOT, phase=selected_phase)
     assert ready_event == retained_event and original_controls == retained_controls
 
-    # Synthetic; no credit.
+
 
     import threading
     projection_scope = o._LinuxPreflightScopeV1.__new__(o._LinuxPreflightScopeV1)
@@ -32020,7 +32123,7 @@ def _ordinary_ci_initial_common_source_check_v1(native_input,profile,allocation)
                     runner._ordinary_post_environment_v1(projection_scope, projection_entry, dict(projection_base))
     finally:
         o._LINUX_PREFLIGHT_PROCESS_V1.reset(projection_token)
-    # Synthetic; no credit.
+
     view_mode_scope = o._LinuxPreflightScopeV1.__new__(o._LinuxPreflightScopeV1)
     view_original_path = str(tmp_path / 'view-mode-original-source')
     view_source_row = {'path': view_original_path, 'kind': 'file'}
@@ -32066,7 +32169,7 @@ def _ordinary_ci_initial_common_source_check_v1(native_input,profile,allocation)
         with pytest.raises(RuntimeError, match='ORIGINAL_SOURCE_MODE_AND_VIEW_TRANSFER'):
             view_mode_scope._ordinary_view_operand_version_v1(dict(view_source_row),
                 protected_source_version, original_transfer)
-    # Synthetic; no credit.
+
     demand_scope = object.__new__(o._LinuxPreflightScopeV1)
     demand_programme = {'plan': (object(), object())}
     demand_literal = dict(initial_raw_bytes=7, initial_file_count=2,
@@ -32078,7 +32181,7 @@ def _ordinary_ci_initial_common_source_check_v1(native_input,profile,allocation)
         native_control_read_bytes=1000, native_control_write_bytes=1000, handle_peak=12)
     demand_programme['candidate_demand'] = demand_literal
     with monkeypatch.context() as demand_authentication:
-        # Guard reference.
+
 
         demand_authentication.setattr(demand_scope, '_ordinary_effect_programme_record_v1',
             lambda: demand_programme)
@@ -32105,7 +32208,7 @@ def _ordinary_ci_initial_common_source_check_v1(native_input,profile,allocation)
             demand_scope._ordinary_candidate_demand_checked_v1(dict(demand_programme))
         assert demand_scope._ordinary_candidate_demand_checked_v1(demand_programme) is demand_literal
 
-    # Synthetic; no credit.
+
 
     c_scope = object.__new__(o._LinuxPreflightScopeV1)
     c_source = object.__new__(o._LinuxImmutableSourceSealV2)
@@ -32208,7 +32311,7 @@ def _ordinary_ci_initial_common_source_check_v1(native_input,profile,allocation)
         with pytest.raises(o.ValidationReliabilityError, match='ORDINARY_C_DEMAND_CONSERVATIVE_COMPLETE_GENERATION_FITS_ORIGINAL_CEILINGS'):
             runner._ordinary_candidate_demand_from_source_v1(c_scope, c_effects, c_census)
         c_limits['baseline_byte_limit'] = original_baseline_cap
-        # Guard reference.
+
 
         c_scope._ordinary_effect_programme_v1 = c_scope._ordinary_original_effect_programme_v1 = c_effects
         c_effects['check'] = c_effects['original_check'] = lambda scope, value: value
@@ -32265,7 +32368,7 @@ def _ordinary_ci_initial_common_source_check_v1(native_input,profile,allocation)
                 cleanup_errors.append(error)
 
         def release_patches():
-            # Guard reference.
+
             for owned_patch in tuple(reversed(active)):
                 try:
                     owned_patch.undo()
@@ -32276,7 +32379,7 @@ def _ordinary_ci_initial_common_source_check_v1(native_input,profile,allocation)
 
         def make_case(*, manifest, phase, validation_mode, event_name,
                       foreign_eligible, router_fields):
-            # Synthetic; no credit.
+
             release_patches()
             if cleanup_errors:
                 raise BaseExceptionGroup("metadata fixture retained cleanup errors", list(cleanup_errors))
@@ -32297,7 +32400,7 @@ def _ordinary_ci_initial_common_source_check_v1(native_input,profile,allocation)
                     raise AssertionError("metadata diagnostic crossed native seam: " + name)
                 return refused
 
-            # Guard reference.
+
             for target, name, kind in (
                 (runner, "_prepare_validation_candidate_v1", "candidate_factory"),
                 (runner, "run_commands", "application_dispatch"),
@@ -32388,7 +32491,7 @@ def _ordinary_ci_initial_common_source_check_v1(native_input,profile,allocation)
                 filesystem_probe_state="PASS", deepest_projected_path=deepest,
                 deepest_projected_path_text_length=len(str(deepest)), cleanup_target=process)
             binding = {}
-            # Guard reference.
+
             scope = types.SimpleNamespace(
                 query=object(), _ordinary_factory_owner_v1=(id(runner), threading.get_ident()),
                 _ordinary_runner_owner_v1=runner, _ordinary_original_runner_owner_v1=runner,
@@ -32400,7 +32503,7 @@ def _ordinary_ci_initial_common_source_check_v1(native_input,profile,allocation)
                                    paths.validation_output_root, paths.pytest_basetemp_root)
             product.current_branch_context(paths.repo_root)
             product.foreign_filter()
-            # Guard reference.
+
             mode = "auto" if validation_mode is None else validation_mode
             changed_files = []
             if product.routing_active(mode, changed_files):
@@ -32482,7 +32585,7 @@ def _ordinary_ci_initial_common_source_check_v1(native_input,profile,allocation)
         make_case.cleanup_errors = cleanup_errors
         make_case.pending_patches = active
         make_case.context = context
-        # Guard reference.
+
         try:
             token = context.set(None)
             return make_case
@@ -32552,7 +32655,7 @@ def _ordinary_ci_initial_common_source_check_v1(native_input,profile,allocation)
         phase = "deterministic-validators-a"
 
         def literal_manifest(*, same_duplicate_reference=False):
-            # Synthetic; no credit.
+
             preflight = [
                 ["fixture-python", "tools/fixture_preflight_01.py"],
                 ["fixture-python", "tools/fixture_preflight_02.py"],
@@ -32578,14 +32681,14 @@ def _ordinary_ci_initial_common_source_check_v1(native_input,profile,allocation)
                 "fixture-python", "tools/validate_fixture_survivor.py", "--repo-root", ".",
             ]
             original = [guarded, equal_one, equal_two, survivor]
-            # Synthetic; no credit.
+
             expected_original = {
                 9: (1, guarded, tuple(guarded)),
                 10: (2, equal_one, tuple(equal_one)),
                 11: (3, equal_two, tuple(equal_two)),
                 12: (4, survivor, tuple(survivor)),
             }
-            # Synthetic; no credit.
+
             manifest = [
                 {"phase": "fast-preflight", "command_count": 8, "commands": preflight},
                 {"phase": phase, "command_count": 4, "commands": original},
@@ -32634,7 +32737,7 @@ def _ordinary_ci_initial_common_source_check_v1(native_input,profile,allocation)
                     "fail_closed_reasons": (),
                 },
             )
-            # Synthetic; no credit.
+
 
 
             return case, expected_original
@@ -32666,7 +32769,7 @@ def _ordinary_ci_initial_common_source_check_v1(native_input,profile,allocation)
                 assert type(row[3]) is tuple and row[3] == frozen
                 assert row[4] is command
                 assert tuple(command) == frozen
-                # Guard reference.
+
                 assert command is not original_ref
             if 10 in expected_globals and 11 in expected_globals:
                 ten = rows[expected_globals.index(10)]
@@ -32677,7 +32780,7 @@ def _ordinary_ci_initial_common_source_check_v1(native_input,profile,allocation)
             assert_no_native(case)
             return rows
 
-        # Synthetic; no credit.
+
         matrix = (
             ("default", None, False, True, ("fixture-equal",), False,
              (9, 10, 11, 12), 0),
@@ -32726,12 +32829,12 @@ def _ordinary_ci_initial_common_source_check_v1(native_input,profile,allocation)
             assert case["counts"]["router_filter_core"] == filter_calls
             assert_no_native(case)
             if not expected:
-                # Guard reference.
+
                 assert product.rows == ()
                 assert len(product.commands) == 0
                 assert bound == () and plan == () and execution == ()
 
-        # Guard reference.
+
 
         for field, replacement_value in (
             ("full_validation_required", True),
@@ -32752,7 +32855,7 @@ def _ordinary_ci_initial_common_source_check_v1(native_input,profile,allocation)
             assert product.rows is captured
             assert_no_native(case)
 
-        # Guard reference.
+
         for owner_function in (
             "_ordinary_foreign_filter_source_result_v1",
             "_ordinary_router_filter_source_result_v1",
@@ -32771,7 +32874,7 @@ def _ordinary_ci_initial_common_source_check_v1(native_input,profile,allocation)
             assert case["retained_error"]() is first
             assert_no_native(case)
 
-        # Guard reference.
+
 
         for carrier in ("original", "current"):
             case, oracle = fresh_case()
@@ -32789,7 +32892,7 @@ def _ordinary_ci_initial_common_source_check_v1(native_input,profile,allocation)
             assert case["retained_error"]() is first
             assert_no_native(case)
 
-        # Guard reference.
+
         for attack in (
             "paths-copy", "plan-copy", "execution-copy", "plan-run-change",
             "plan-index-change", "plan-reordered", "execution-reordered",
@@ -32841,7 +32944,7 @@ def _ordinary_ci_initial_common_source_check_v1(native_input,profile,allocation)
             assert case["retained_error"]() is first
             assert_no_native(case)
 
-        # Guard reference.
+
 
         for field in (
             "registered_argv", "timing_identity_argv", "execution_argv",
@@ -32865,7 +32968,7 @@ def _ordinary_ci_initial_common_source_check_v1(native_input,profile,allocation)
             assert case["retained_error"]() is first
             assert_no_native(case)
 
-        # Guard reference.
+
 
         for attack in (
             "missing-scope", "substituted-scope", "missing-original-scope-owner",
@@ -32888,7 +32991,7 @@ def _ordinary_ci_initial_common_source_check_v1(native_input,profile,allocation)
             assert case["retained_error"]() is first
             assert_no_native(case)
 
-        # Guard reference.
+
 
         for attack in ("paths-copy", "plan-copy", "execution-copy", "wrong-phase"):
             case, oracle = fresh_case()
@@ -32910,7 +33013,7 @@ def _ordinary_ci_initial_common_source_check_v1(native_input,profile,allocation)
             assert_no_native(case)
 
 
-    # Grouped metadata only; this invokes no native admission.
+
     from tools import run_validation_gates as _selection_metadata_runner
     with monkeypatch.context() as _selection_metadata_patch:
         _selection_make_case = _make_source_selected_occurrence_metadata_case_fixture_v1(
@@ -32930,7 +33033,7 @@ def _ordinary_ci_initial_common_source_check_v1(native_input,profile,allocation)
                 raise
         if _selection_primary_error is not None:
             raise _selection_primary_error
-    # Synthetic; no credit.
+
 
     import pathlib
     import types as _pytest_source_types
@@ -32954,7 +33057,7 @@ def _ordinary_ci_initial_common_source_check_v1(native_input,profile,allocation)
                 deepest_projected_path_text_length=len(str(root / 'p1' / 'v' / 'x.json')),
                 cleanup_target=root / 'p1')
             binding = {}
-            # Guard reference.
+
 
             scope = o._LinuxPreflightScopeV1.__new__(o._LinuxPreflightScopeV1)
             scope.query = object()
@@ -33055,7 +33158,7 @@ def _ordinary_ci_initial_common_source_check_v1(native_input,profile,allocation)
     for _pytest_source_defect in (None, 'foreign-constructor', 'foreign-bound-row',
             'foreign-same-valued-registry', 'foreign-same-valued-command'):
         _pytest_source_case_v1(_pytest_source_defect)
-    # Synthetic; no credit.
+
 
     _supported_callback_scope = object.__new__(o._LinuxPreflightScopeV1)
     _supported_callback_record = {'scope': _supported_callback_scope}
@@ -33123,7 +33226,7 @@ def _ordinary_ci_initial_common_source_check_v1(native_input,profile,allocation)
                 environment=_supported_callback_environment, timeout_seconds=1,
                 scratch_roots=_supported_callback_roots)
         assert _supported_callback_occurrence['dispatch_attempted'] is True
-    # Synthetic; no credit.
+
 
     def _disposable_scratch_case_v1(defect=None):
         local = tmp_path / ('disposable-scratch-' + str(defect))
@@ -33226,7 +33329,7 @@ def _ordinary_ci_initial_common_source_check_v1(native_input,profile,allocation)
     for _scratch_defect in (None, 'parent-replacement', 'output-replacement', 'child-alias',
             'child-mode', 'child-file', 'child-symlink', 'read-and-close'):
         _disposable_scratch_case_v1(_scratch_defect)
-    # Synthetic; no credit.
+
 
     import ast as _literal_ast
     _literal_scope = object.__new__(o._LinuxPreflightScopeV1)
@@ -33281,7 +33384,7 @@ def _ordinary_ci_initial_common_source_check_v1(native_input,profile,allocation)
         with pytest.raises(o.ValidationReliabilityError, match='SOURCE_LITERAL_RETAINED_AST_AND_CAPTURED_TEXT'):
             o._ordinary_source_fixed_recipes_v1(_literal_scope, _literal_record,
                 source_byte_limit=4096, source_node_limit=256)
-    # Synthetic; no credit.
+
 
     import ctypes as filter_ctypes
     import errno as filter_errno
@@ -33324,7 +33427,7 @@ def _ordinary_ci_initial_common_source_check_v1(native_input,profile,allocation)
             filter_ctypes.set_errno(observed)
             return -1
         libc = SimpleNamespace(prctl=PortFunction(nnp),syscall=PortFunction(native_call))
-        # Guard reference.
+
 
         with monkeypatch.context() as filter_ports:
             filter_ports.setattr(o, '_ordinary_application_io_check_v1', port_check)
@@ -33381,7 +33484,7 @@ def _ordinary_ci_initial_common_source_check_v1(native_input,profile,allocation)
         filter_port_case(defect)
     assert len(filter_cases) == 6
 
-    # Synthetic; no credit.
+
 
     from types import SimpleNamespace
     import threading
@@ -33413,7 +33516,7 @@ def _ordinary_ci_initial_common_source_check_v1(native_input,profile,allocation)
     no_launch_scope._ordinary_effect_programme_v1 = None
     no_launch_scope.startup_error = None
     no_launch_cause = RuntimeError('original preparation fault before Popen')
-    # Guard reference.
+
 
     foreign_query_process = object()
     no_launch_cause.owned_process = foreign_query_process
@@ -33473,13 +33576,13 @@ def _ordinary_ci_initial_common_source_check_v1(native_input,profile,allocation)
         assert no_launch_cause.owned_process is foreign_query_process and no_launch_record['terminal'] is None
         assert no_launch_record['errors'] == [no_launch_cause] and not no_launch_calls
 
-    # Synthetic; no credit.
+
 
     with monkeypatch.context() as nested_body_ports:
         for flag_name in ('O_NOFOLLOW','O_CLOEXEC','O_NONBLOCK','O_DIRECTORY'):
             if not hasattr(o.os,flag_name):
                 nested_body_ports.setattr(o.os,flag_name,0,raising=False)
-        # Synthetic; no credit.
+
 
         def nested_stat(kind, ino, size=4, mode=0o444):
             return SimpleNamespace(st_dev=7,st_ino=ino,st_mode=kind|mode,
@@ -33701,7 +33804,7 @@ def _ordinary_ci_initial_common_source_check_v1(native_input,profile,allocation)
             assert combined.value.exceptions==(body_error,close_error) and failed[4][0]['close_attempted'] and not failed[4][0]['closed']
             assert failed[0]._ordinary_policy_v1['source_pyc']['errors']==[body_error,close_error] and not failed[0]._ordinary_policy_v1['source_pyc']['complete']
 
-    # Guard reference.
+
 
     from tools.validation_scope_registry import (_ordinary_readonly_source_family_plan_v1,
         _ordinary_readonly_source_family_cli_v1)
@@ -33719,7 +33822,7 @@ def _ordinary_ci_initial_common_source_check_v1(native_input,profile,allocation)
     def source_calculation(body):
         return _ordinary_readonly_source_family_plan_v1((('tools/reader.py',body,source_ast.parse(body)),),'tools/reader.py')
     assert not source_calculation(safe_reader)['unresolved']
-    # Guard reference.
+
 
     identity_declaration='_ORDINARY_INITIALIZED_MODULE_CODE_V1 = __import__("sys")._getframe().f_code'
     def identity_source_calculation(declaration,tail='',entry='tools/ci_branch_context.py'):
@@ -33790,7 +33893,7 @@ def _ordinary_ci_initial_common_source_check_v1(native_input,profile,allocation)
         denied_identity=identity_source_calculation(declaration,tail,entry_source)
         assert denied_identity['unresolved'] and denied_identity['value_domain'] is None
         assert not denied_identity['initialization_operations']
-    # Synthetic; no credit.
+
 
     from tools import validation_scope_registry as facet_registry
     from tools import validation_inventory as inventory_facet
@@ -33817,7 +33920,7 @@ def _ordinary_ci_initial_common_source_check_v1(native_input,profile,allocation)
         assert retained_facet_error.value is facet_error
         assert len(facet_calls) == 1 and facet_calls[0][1] == 'tools/reader.py'
     assert not source_calculation(safe_reader)['unresolved']
-    # Synthetic; no credit.
+
     from tools import validation_reliability as absent_owner
     with monkeypatch.context() as absent_ports:
         for absent_flag_name, absent_flag_default in (('O_NOFOLLOW',0x20000),('O_CLOEXEC',0x80000),('O_DIRECTORY',0x10000)):
@@ -34043,7 +34146,7 @@ def _ordinary_ci_initial_common_source_check_v1(native_input,profile,allocation)
         callbacks.replace("callback=callback or reader","callback=callback or reader\n callback=__import__('os').remove"),
         callbacks.replace("callback=None","callback=__import__('os').remove"),
     ):assert source_calculation(changed)['unresolved']
-    # Synthetic; no credit.
+
 
     source_git_capture="import argparse\nimport subprocess\nfrom pathlib import Path\ndef _git_stdout(root,args):\n    completed=subprocess.run(['git',*args],cwd=root,check=False,capture_output=True,text=True)\n    return completed.returncode,completed.stdout.strip(),completed.stderr.strip()\ndef main(argv=None):\n    parser=argparse.ArgumentParser()\n    parser.add_argument('--repo-root',type=Path,default='.')\n    args=parser.parse_args(argv)\n    code,stdout,stderr=_git_stdout(args.repo_root,['status','--short','--untracked-files=all'])\n    return 0\nif __name__=='__main__':\n    raise SystemExit(main())\n"
     source_git_entry='tools/reader.py'
@@ -34079,7 +34182,7 @@ def _ordinary_ci_initial_common_source_check_v1(native_input,profile,allocation)
         changed=source_git_calculation(source_git_loop.replace('        code,stdout,stderr=',statement+'        code,stdout,stderr=',1))
         assert changed['unresolved'] and not changed['native_process_operations']
 
-    # Synthetic; no credit.
+
 
     source_git_call="_git_stdout(args.repo_root,['status','--short','--untracked-files=all'])"
     for root in ('Path(args.repo_root)','args.repo_root.resolve()','Path.cwd()'):
@@ -34107,8 +34210,8 @@ def _ordinary_ci_initial_common_source_check_v1(native_input,profile,allocation)
         '    code,stdout,stderr='+source_git_call,
         "    os.chdir('/outside')\n    code,stdout,stderr=_git_stdout(Path.cwd(),['status','--short','--untracked-files=all'])")
     assert source_git_calculation(source_git_cwd_change)['unresolved']
-    # The checked Git result supplies strings only through the original
-    # complete parser and dominating owned uses; no child body runs here.
+
+
     source_git_string_parser = 'def _changed_paths(repo_root: Path) -> list[str]:\n    status_rc, status_out, _status_err = _git_stdout(repo_root,["status","--short","--untracked-files=all"])\n    if status_rc != 0:\n        return ["<git-status-unavailable>"]\n    paths: list[str] = []\n    for line in status_out.splitlines():\n        if not line.strip():\n            continue\n        if len(line)>2 and line[2]==" ":\n            path=line[3:]\n        elif len(line)>1 and line[1]==" ":\n            path=line[2:]\n        else:\n            path=line[3:] if len(line)>3 else line\n        normalized=path.strip().replace("\\\\","/")\n        if " -> " in normalized:\n            normalized=normalized.rsplit(" -> ",1)[1]\n        paths.append(normalized)\n    return sorted(set(paths))\ndef check_path(value):\n    return value.replace("\\\\","/")\n'
     source_git_string=source_git_capture.replace('import argparse','from __future__ import annotations\nimport argparse',1).replace('def main(argv=None):',source_git_string_parser+'def main(argv=None):').replace(
         "    code,stdout,stderr="+source_git_call,
@@ -34136,7 +34239,7 @@ def _ordinary_ci_initial_common_source_check_v1(native_input,profile,allocation)
         assert source_git_calculation(source_git_string.replace(before,after,1))['unresolved']
 
 
-    # Synthetic; no credit.
+
     source_data_capture = """import csv
 import hashlib
 import json
@@ -34186,7 +34289,7 @@ if __name__ == "__main__":
         ('        yield value','        yield from callback(value)'),
     ):
         assert source_data_calculation(source_data_capture.replace(before,after,1))['unresolved']
-    # Guard reference.
+
     mapping_data_source=source_data_capture.replace('import csv','from typing import Mapping\nimport csv',1).replace(
         '    if isinstance(value, dict):\n        yield value\n        for child in value.values():\n            yield from objects(child)',
         '    if isinstance(value, Mapping):\n        for key,child in value.items():\n            yield str(key),child\n            yield from objects(child)',1)
@@ -34203,7 +34306,7 @@ if __name__ == "__main__":
         ('yield from objects(child)','yield from unknown(child)'),
     ):
         assert source_data_calculation(mapping_data_source.replace(before,after,1))['unresolved']
-    # Guard reference.
+
     source_exception_text="from pathlib import Path\nclass ParseFault(ValueError):\n    pass\ndef main():\n    try:\n        raise ParseFault('invalid')\n    except ParseFault:\n        return 0\nif __name__=='__main__':\n    raise SystemExit(main())\n"
     source_exception_calculate=lambda text:_ordinary_readonly_source_family_plan_v1(
         (('tools/exception_reader.py',text,source_ast.parse(text)),),'tools/exception_reader.py')
@@ -34220,7 +34323,7 @@ if __name__ == "__main__":
         ('    except ParseFault:','    except ParseFault:\n        ParseFault=Path("owned-report").unlink'),
     ):
         assert source_exception_calculate(source_exception_text.replace(before,after,1))['unresolved']
-    # Guard reference.
+
     source_startup_text="from __future__ import annotations\nimport pathlib\nimport sys\n_REPO_ROOT=pathlib.Path(__file__).resolve().parents[1]\nif str(_REPO_ROOT) not in sys.path:\n    sys.path.insert(0,str(_REPO_ROOT))\ndef value():\n    return 1\n"
     source_startup_entry="from tools import sibling\ndef main():\n    return sibling.value()\nif __name__=='__main__':\n    raise SystemExit(main())\n"
     source_startup_argv=('/trusted/python','-I','-S','-B','-X','pycache_prefix=/runtime/p1/pycache','tools/startup_reader.py','--repo-root','.')
@@ -34240,7 +34343,7 @@ if __name__ == "__main__":
         ('pathlib.Path(__file__).resolve()','pathlib.Path(__file__).absolute()'),
     ):
         assert source_startup_calculate(source_startup_text.replace(before,after,1),source_startup_argv)['unresolved']
-    # Guard reference.
+
     source_value_normalizer='from pathlib import Path\ndef normalize(path):\n    normalized=str(path).strip().replace("\\\\","/")\n    while normalized.startswith("./"):\n        normalized=normalized[2:]\n    return normalized\ndef main():\n    return normalize("./name.py").removesuffix(".py")\nif __name__=="__main__":\n    raise SystemExit(main())\n'
     source_value_calculate=lambda text:_ordinary_readonly_source_family_plan_v1((('tools/value_reader.py',text,source_ast.parse(text)),),'tools/value_reader.py')
     assert not source_value_calculate(source_value_normalizer)['unresolved']
@@ -34277,7 +34380,7 @@ if __name__ == "__main__":
     assert not source_value_imported(source_value_fault)['unresolved']
     assert source_value_imported(source_value_fault.replace('    pass','    def __init__(self,value):\n        unknown(value)'))['unresolved']
     assert source_startup_calculate(source_startup_text.replace('_REPO_ROOT=', '__file__="/outside/tools/sibling.py"\n_REPO_ROOT=',1),source_startup_argv)['unresolved']
-    # Guard reference.
+
     source_shared_keys='from pathlib import Path\nCODE="source"\ndef result():\n    values=[]\n    values.append(CODE)\n    return tuple(dict.fromkeys(values))\ndef consume(values):\n    return tuple(dict.fromkeys(values))\ndef main():\n    return consume(result())\nif __name__=="__main__":\n    raise SystemExit(main())\n'
     assert not source_value_calculate(source_shared_keys)['unresolved']
     for before,after in (
@@ -34301,7 +34404,7 @@ if __name__ == "__main__":
     source_shared_imported=lambda text:_ordinary_readonly_source_family_plan_v1((('tools/value_reader.py',text,source_ast.parse(text)),('tools/constants.py',source_shared_constants,source_ast.parse(source_shared_constants))),'tools/value_reader.py')
     assert not source_shared_imported(source_shared_import)['unresolved']
     assert source_shared_imported(source_shared_import.replace('from tools.constants import normalize','from pathlib import Path as normalize',1))['unresolved']
-    # Guard reference.
+
     source_shared_keyword=source_shared_keys.replace('def consume(values):','def consume(*,values):').replace('consume(result())','consume(values=result())')
     assert not source_value_calculate(source_shared_keyword)['unresolved']
     assert source_value_calculate(source_shared_keyword.replace('consume(values=result())','consume(values=(Path("owned-report"),))'))['unresolved']
@@ -34339,7 +34442,7 @@ if __name__ == "__main__":
     source_contains_docstring = 'from pathlib import Path\ndef contains(value,needle):\n    "original literal docstring"\n    if isinstance(value,str):\n        return value.replace("\\\\","/")==needle\n    if isinstance(value,list):\n        return any(contains(item,needle) for item in value)\n    return False\ndef main():\n    return contains(["safe"],"safe")\n'
     assert not source_value_calculate(source_contains_docstring)['unresolved']
     assert source_value_calculate(source_contains_docstring.replace('isinstance(value,str)','isinstance(value,Path)'))['unresolved']
-    # Synthetic; no credit.
+
 
     context_core='from contextvars import ContextVar\nimport os\nimport sys\nfrom pathlib import Path\nRUN_ID_ENV=\'QTT_VALIDATION_RUN_ID\'\n_PREFLIGHT_OBSERVATION_V1=ContextVar(\'_PREFLIGHT_OBSERVATION_V1\',default=None)\n_LINUX_PREFLIGHT_PROCESS_V1=ContextVar(\'_LINUX_PREFLIGHT_PROCESS_V1\',default=None)\n_PREFLIGHT_SCRIPTS_V1=(\'tools/validate_grand_global_debug_logical_consistency_audit.py\', \'tools/validate_ci_branch_context_matrix.py\', \'tools/validate_repair_pr_changed_file_scope.py\', \'tools/validate_nested_validator_contracts.py\', \'tools/validate_validation_inventory.py\', \'tools/validate_validation_scope_registry.py\', \'tools/changed_area_validation_router.py\', \'tools/cross_platform_path_invariant.py\')\ndef _preflight_active_v1(root=None):\n    value = _PREFLIGHT_OBSERVATION_V1.get()\n    scope = _LINUX_PREFLIGHT_PROCESS_V1.get()\n    if scope is not None and type(scope) is _LinuxPreflightScopeV1 and scope._ordinary_selected_v1():\n        scope._ordinary_precursor_registration_v1()\n        _preflight_require_v1(value is not None,\n                             "selected preflight has no original observation binding")\n    selected = os.environ.get(RUN_ID_ENV) and any(\n        str(sys.argv[0]).replace("\\\\", "/").endswith(script) for script in _PREFLIGHT_SCRIPTS_V1)\n    if value is not None:\n        value.check()\n        if selected and (value.run_id != os.environ[RUN_ID_ENV]\n                         or value.argv != (sys.executable, *sys.argv)\n                         or value.root != Path.cwd()\n                         or value.root != Path(__file__).resolve().parents[1]):\n            value.fail("active canonical preflight lost actual run/vector/module/cwd association")\n        if root is not None and Path(root).absolute() != value.root:\n            value.fail("preflight module/argument root mismatch")\n    elif selected:\n        raise ValidationReliabilityError("ENGVR_PREPUBLICATION_CUSTODY_FAILED",\n                                        "selected preflight has no original observation binding")\n    return value\n'
     context_entry="import argparse\nfrom pathlib import Path\nfrom tools.validation_reliability import _preflight_active_v1\ndef main(argv=None):\n parser=argparse.ArgumentParser()\n parser.add_argument('--repo-root',type=Path,default='.')\n args=parser.parse_args(argv)\n if _preflight_active_v1(args.repo_root) is not None:\n  Path('owned-report').unlink()\n return 0\nif __name__=='__main__':\n raise SystemExit(main())\n"
@@ -34441,7 +34544,7 @@ if __name__ == "__main__":
     for changed,ordinal in ((vector,False),((*vector,'--write-artifacts'),6),(('foreign',*vector[1:]),6)):
         with pytest.raises(o.ValidationReliabilityError,match='ORIGINAL_VECTOR'):
             o._ordinary_readonly_source_family_execution_v1(family_scope,changed,ordinal)
-    # No credit
+
     from types import ModuleType
     import dataclasses
     from tools import run_validation_gates as runner_module
@@ -34603,7 +34706,7 @@ if __name__ == "__main__":
             legacy=runner_module._scan_dispatch_environment({**base,keys[0]:'inherited'},plan[0])
             assert legacy==base
         finally:o._LINUX_PREFLIGHT_PROCESS_V1.reset(default_token)
-    # Guard reference.
+
 
 
     from types import SimpleNamespace
@@ -34652,13 +34755,13 @@ if __name__ == "__main__":
                 host_preparation=host,occurrence_program=native_rows,fd_program=fd)
         assert actual is final and events[0]==('compile',native_rows,fd)
         return events
-    # Guard reference.
+
 
     assert ('original-R',) in r_original_preparation_order('synthetic-R-phase','READER')
     assert ('original-R',) not in r_original_preparation_order('synthetic-R-phase',None)
     assert ('original-R',) not in r_original_preparation_order('post-validation','READER')
 
-    # Guard reference.
+
 
     parent_root=tmp_path/'original-parent-root'
     parent_row={'kind':'directory'}
@@ -34695,7 +34798,7 @@ if __name__ == "__main__":
         rejects(lambda:o._scan_candidate_fence(parent_scope._ordinary_rp5a_parent_source_check_v1),
             o.ValidationReliabilityError, 'ORDINARY_R_PARENT_ORIGINAL_PROTECTED_SOURCE_ROOT')
 
-    # Synthetic; no credit.
+
 
     from tools import run_validation_gates as native_runner
     native_fields = ('owner', 'service_unit', 'invocation', 'holder_identity',
@@ -34712,7 +34815,7 @@ if __name__ == "__main__":
     native_hold = native_fixture_hold()
     assert native_runner._ordinary_workflow_native_units_v1(native_value, native_hold) == (
         'qtt123n2p1', 'job-qtt123n2p1.slice', 'qtt123n2p1bootstrap.scope')
-    # Guard reference.
+
     assert o._linux_preflight_name_v1(17, 23) == 'qtt17n23'
     for damaged, denial_detail in (
             (dict(native_value, environment=dict(GITHUB_RUN_ID='0123', GITHUB_RUN_ATTEMPT='2')), 'preflight canonical decimal control'),
@@ -34736,7 +34839,7 @@ if __name__ == "__main__":
     rejects(lambda: native_runner._ordinary_workflow_native_units_v1(native_value, replaced_hold),
         o.ValidationReliabilityError, 'ORDINARY_NATIVE_UNITS_ORIGINAL_HOLDER')
 
-    # Guard reference.
+
 
     class NativeJoinSuffix(Exception): pass
     suffix = NativeJoinSuffix('kernel suffix is deliberately unexecuted')
@@ -34796,7 +34899,7 @@ if __name__ == "__main__":
         rejects(invoke, o.ValidationReliabilityError, 'ORDINARY_PREFIX_SAME_ORIGINAL_DIRECT_RECEIVER')
         scope._ordinary_bootstrap_runtime_v1 = original_capture
         assert calls == []
-        # Guard reference.
+
         host['cgroup'] = host['common_cgroup'] / (scope.name + 'controller.service')
         try: invoke()
         except NativeJoinSuffix as actual: assert actual is suffix
@@ -34805,7 +34908,7 @@ if __name__ == "__main__":
         host['cgroup'] = host['common_cgroup'] / 'foreigncontroller'
         rejects(invoke, o.ValidationReliabilityError, 'ORDINARY_PREFIX_ACTUAL_FRESH_CONTROLLER_ROLE')
 
-    # Synthetic; no credit.
+
 
     from types import SimpleNamespace
     import os as maps_os
@@ -34899,8 +35002,8 @@ if __name__ == "__main__":
         assert requests and max(requests) <= 65536
         assert all(str(path) == str(Path('/proc') / str(maps_os.getpid()) / 'maps') for path in paths)
 
-    # A failed resource callback must retain its genuinely returned chunk
-    # or its still-owned descriptor in the original input; no child is started.
+
+
     for maps_case in ('close-admission', 'delivery-admission'):
         selected_native = object.__new__(maps_owner._LinuxSourceNativeV2)
         maps_input = dict(initialized_storage_attempts=[],errors=[])
@@ -34939,7 +35042,7 @@ if __name__ == "__main__":
             assert retained[0]['last_returned_raw']==literal_maps[:3]
             assert retained[0]['partial_raw']==b'' and sum(delivered)==3
 
-    # Synthetic; no credit.
+
 
 
     from pathlib import PurePosixPath
@@ -34993,8 +35096,8 @@ if __name__ == "__main__":
         if component_case == 'open-and-close-failure':
             assert len(admitted_components) == 1 and admitted_components[0]['close_error'] is component_close_error
 
-    # Join the actual helper to the actual getter, still using no-native FDs.
-    # The owned history must retain both old/new component slots when a debit
+
+
     # rejects the old close; a traceback alone is not the history observation.
     for integrated_failure in (False, True):
         selected_native = object.__new__(maps_owner._LinuxSourceNativeV2)
