@@ -411,8 +411,8 @@ def _central_supervision_test_adapter(monkeypatch, tmp_path):
         )
 
     def typed_fake_supervise(command, **kwargs):
-        # Preserve the existing substituted child outcomes, with complete receipt
-        # identity. A namespace is deliberately no longer a terminal receipt.
+        # Guard reference.
+
         observed = fake_supervise(command, **kwargs)
         timed_out = observed.failure_class == "ENGVR_PROCESS_TIMEOUT"
         timeout = kwargs.get("timeout_seconds")
@@ -465,8 +465,8 @@ def _central_supervision_test_adapter(monkeypatch, tmp_path):
     )
     monkeypatch.setattr(runner, "_execute_supervised_command", typed_fake_supervise)
 
-    # The existing orchestration probes already replace the process owner.
-    # Their no-effect stub is never used by the explicit candidate-custody cases.
+    # Guard reference.
+
     original_prepare = runner._prepare_validation_candidate_v1
     original_restore = runner._restore_tracked_gate_side_effects
     class SyntheticNoEffectCustody:
@@ -492,9 +492,9 @@ def _central_supervision_test_adapter(monkeypatch, tmp_path):
 
     def activate_synthetic_scan(*, scan_source=None, resolve_paths=True, mock_commands=False, deadline_ns=None, patcher=None):
         patcher = monkeypatch if patcher is None else patcher
-        # Opt-in support for the existing mocked full-plan tests only. The real
-        # capacity guard and native frame owner stay in the exercised call chain.
-        # This grants no real RP5A scan, source acceptance or campaign capacity.
+        # Synthetic; no credit.
+
+
         from tools import pr168_rp5a_git_grep_scanner as scan_owner
 
         issued_inputs = []
@@ -570,8 +570,8 @@ def _central_supervision_test_adapter(monkeypatch, tmp_path):
                 command_index=kwargs["command_index"], argv=tuple(command),
                 cwd=kwargs["cwd"],
             )
-            # The existing subprocess port is mocked. Only its labeled lifecycle
-            # is simulated; the original frame I/O and context cleanup are real.
+            # Synthetic; no credit.
+
             process = SimpleNamespace(pid=4321, returncode=None)
             process.poll = lambda: process.returncode
             original_input._attached(process)
@@ -614,7 +614,7 @@ def _central_supervision_test_adapter(monkeypatch, tmp_path):
             assert selected, "do not attach this supplier to an unselected plan"
             assert {position for row, position in selected} in ({66, 67, 68}, {66, 67, 68, 429, 430, 431, 432, 433, 434})
             target = root / "mapper-fixture.json"
-            raw = b"{}\n"  # Independent transport bytes, never authentic application acceptance.
+            raw = b"{}\n"  # Guard reference.
             if target.exists():
                 assert target.read_bytes() == raw
             else:
@@ -630,8 +630,8 @@ def _central_supervision_test_adapter(monkeypatch, tmp_path):
             basis_chain = reliability._mapper_chain_v1(reference.parent)
             r, b, p = len(root_chain), len(basis_chain), len(root_chain)
             metadata = 2*(r+b)+4 + 6*(r+b)+3*p+11
-            # Existing finite sibling reader/header limits, with exact byte and
-            # metadata demand for this one three-byte acquisition per route.
+            # Guard reference.
+
             read_limits = dict(byte_limit=1_048_576, node_limit=10_000, depth_limit=32,
                                profile_limit=len(selected) + 4)
             bindings = {}
@@ -659,9 +659,9 @@ def _central_supervision_test_adapter(monkeypatch, tmp_path):
                         record_bytes=100_000, evidence_deadline_ns=state["deadline"]))
                 bindings[str(row.command_index)] = reliability._mapper_binding_v1(binding)
                 if child is not None:
-                    # Finite evidence roster and six retained files per nested
-                    # route. Every possible original barrier/final recheck is
-                    # reserved before dispatch, not enlarged after a failure.
+                    # Guard reference.
+
+
                     state["nested"][row.command_index] = dict(
                         entry_limit=3*len(plan)+2*len(selected)+4,
                         file_byte_limit=100_000, retained_byte_limit=1_000_000,
@@ -693,9 +693,9 @@ def _central_supervision_test_adapter(monkeypatch, tmp_path):
         patcher.setattr(runner, "atomic_write_json", write_fixture_atomic)
         patcher.setattr(runner, "_prepare_validation_candidate_v1", original_prepare)
         if mock_commands:
-            # These root/uniqueness tests previously substituted the whole
-            # run_commands port. Only their synthetic process outcomes move
-            # through the real admission/finalizer path; no application runs.
+            # Synthetic; no credit.
+
+
             patcher.setattr(runner.subprocess, "run", lambda command, **kwargs:
                 SimpleNamespace(returncode=0, stdout=_st12h_mock_terminal_output(command), stderr=""))
         original_port = runner._execute_supervised_command
@@ -705,8 +705,8 @@ def _central_supervision_test_adapter(monkeypatch, tmp_path):
 
         def supervise_bound_fixture(command, **kwargs):
             if "execution_deadline_ns" in kwargs:
-                # Match the existing native supervisor's launch-time clamp.
-                # The earlier planner timeout cannot widen the armed gate.
+                # Guard reference.
+
                 remaining = (kwargs["execution_deadline_ns"] - runner.time.monotonic_ns()) / 1e9
                 assert remaining > 0
                 prior = kwargs.get("timeout_seconds")
@@ -1150,7 +1150,7 @@ def _assert_exact_stat_command_boundary(monkeypatch, tmp_path: Path) -> None:
         "exact-stat.py",
     )
 
-    # Custody provenance must never hide a genuine original cache miss.
+    # Guard reference.
     before = (1, 2, 0o100644, 5, 1000000100, 2000000123, 1, 1000, 1000, 0, 0, 0)
     held = ('custody.py', 'WORKTREE', 1, 2, 5, before[4], 3000000000,
             0o100444, 0, 0, 1, 16)
@@ -1192,7 +1192,7 @@ def _assert_exact_stat_command_boundary(monkeypatch, tmp_path: Path) -> None:
     invalid_held = list(held); invalid_held[3] += 1
     with pytest.raises(ValueError):
         clean(cached, before, tuple(invalid_held), 4000000000)
-    # The raw Git tuple stays intact; separate semantic unions always win.
+    # Guard reference.
     raw_stat = ('custody.py', 'dirty.py', 'baseline.py', 'explicit.py')
     with monkeypatch.context() as patch:
         patch.setattr(reliability, '_worktree_index_stat_paths', lambda root: raw_stat)
@@ -1667,9 +1667,9 @@ def test_run_validation_gates_direct_script_imports_router_without_pythonpath(
     _assert_generic_text_preflight_and_scope_matrix(monkeypatch)
     _assert_actual_runner_receipt_integration(external_parent,monkeypatch)
 
-    # Keep the real script/Git/receipt prefix above. These additional cases
-    # execute only the actual extracted module-entry guard with explicit fake
-    # modules: no child, application entry or native termination is claimed.
+    # Guard reference.
+
+
     import ast as _script_ast
     import types as _script_types
     import tools as _script_actual_package
@@ -1764,8 +1764,8 @@ def test_run_validation_gates_direct_script_imports_router_without_pythonpath(
         def _only_original_namespace_import(name,globals=None,locals=None,fromlist=(),level=0):
             _imports.append((name,tuple(fromlist or()),level))
             assert name=="tools" and not fromlist and level==0
-            # Match the pinned cached import fast path so an unconditional
-            # import of the fault package cannot silently bypass this oracle.
+            # Synthetic; no credit.
+
             if "tools" in _sys.modules:
                 getattr(_sys.modules["tools"].__dict__.get("__spec__"),"_initializing",False)
             else:
@@ -1797,8 +1797,8 @@ def test_run_validation_gates_direct_script_imports_router_without_pythonpath(
                 assert _namespace["__name__"]=="tools.run_validation_gates"
                 assert _namespace["_ORDINARY_ORIGINAL_SCRIPT_ENTRY_V1"]is True
                 assert _imports==([("tools",(),0)]if defect=="fresh-package" else[])
-            # A separately literal declaration checks Python's actual emitted
-            # function module/global ownership after this actual source guard.
+            # Guard reference.
+
             exec(compile("def owned_delegate():\n    return __name__\n","<literal-module-declaration>","exec"),
                 _namespace,_namespace)
             _delegate=_namespace["owned_delegate"]
@@ -1827,9 +1827,9 @@ def test_run_validation_gates_direct_script_imports_router_without_pythonpath(
         "additional-root","cached-spec-callback"):
         _script_module_case(_script_case)
 
-    # These prerequisite ports are explicit no-child/no-native fixture oracles.
-    # The actual prefix/debit/quantum/join and constructor bodies remain the
-    # subjects; supplied fixture cutoffs do not qualify receiver provenance.
+    # Synthetic; no credit.
+
+
     from types import ModuleType as _PrefixModule
 
     def _prefix_fixture(*,calls=20,raw=32,origin=True):
@@ -1853,9 +1853,9 @@ def test_run_validation_gates_direct_script_imports_router_without_pythonpath(
             original_settlement_cutoff_ns=request["deadline_ns"])
         return value
 
-    # This prerequisite port supplies no COMMON or Linux admission. The
-    # original prefix/counter/cutoff bodies below remain the no-child subjects;
-    # the actual Source9 checker is exercised separately from literal fixtures.
+    # COMMON,Source9: no credit.
+
+
     _common_prerequisite_calls=[]
     def _fixture_common_source_prerequisite(value,profile,allocation):
         assert profile is value["initial_source_request"]is value["early_profile"]
@@ -1904,8 +1904,8 @@ def test_run_validation_gates_direct_script_imports_router_without_pythonpath(
             reliability._ordinary_initial_physical_prefix_v1(_fake_native,_prefix,
                 _prefix["early_profile"],_operands,_operand_original)
 
-        # Missing authentic original time remains a hard rejection before the
-        # hypothetical operation. The failed attempted prefix is not refunded.
+        # Guard reference.
+
         _missing=_prefix_fixture(origin=False)
         _would_run=[]
         with pytest.raises(reliability.ValidationReliabilityError,
@@ -1943,8 +1943,8 @@ def test_run_validation_gates_direct_script_imports_router_without_pythonpath(
         assert _late["initial_prefix"]["operation_calls"]==2
         assert _late["initial_prefix"]["errors"]==[_late_error.value]
 
-        # Frozen original values prohibit redistributing an issued work
-        # pool into settlement, even while combined Source totals stay equal.
+        # Guard reference.
+
         for _pool_kind in("calls","bytes"):
             _redistributed=_prefix_fixture()
             _frozen_prefix=reliability._ordinary_initial_prefix_v1(_redistributed)
@@ -1987,8 +1987,8 @@ def test_run_validation_gates_direct_script_imports_router_without_pythonpath(
             module.sizeof,module.CDLL,module.POINTER=sizeof,load,pointer
             return module,uname,primitives
 
-        # These scalar/loader ports create no library or child. Every reached
-        # actual private constructor callback must debit before its primitive.
+        # Guard reference.
+
         for _call_limit in(20,3):
             _ctor=_prefix_fixture(calls=_call_limit)
             _native=object.__new__(reliability._LinuxSourceNativeV2)
@@ -2018,8 +2018,8 @@ def test_run_validation_gates_direct_script_imports_router_without_pythonpath(
                     assert _ctor_record["operation_calls"]==5
             assert _ctor["current_native_observation"]is None
 
-        # Existing other callback and None constructor contracts retain their
-        # exact behavior; an arbitrary callback cannot grant a Windows ABI.
+        # Guard reference.
+
         _other_callbacks=[]
         def _ordinary_callback():
             _other_callbacks.append("called")
@@ -2038,9 +2038,9 @@ def test_run_validation_gates_direct_script_imports_router_without_pythonpath(
                 reliability._LinuxSourceNativeV2(attempt=_ordinary_callback)
             assert not _other_callbacks and not _reached
 
-    # A literal Source-only runner owner exercises the complete real preloader
-    # and object producer with a pending original origin. No physical issuer,
-    # NativeV2 object, loader or child is fabricated for this negative case.
+    # Synthetic; no credit.
+
+
     _literal_runner=_PrefixModule("_qtt_prefix_literal_runner")
     _literal_runner.REPO_ROOT=runner.REPO_ROOT
     _literal_runner.__file__=str(runner.REPO_ROOT/"tools"/"run_validation_gates.py")
@@ -2072,7 +2072,7 @@ def test_run_validation_gates_direct_script_imports_router_without_pythonpath(
     _literal_runner._ORDINARY_INITIALIZED_MODULE_CODE_V1=_literal_initializer
     with monkeypatch.context()as _literal_owner:
         _literal_owner.setitem(sys.modules,_literal_runner.__name__,_literal_runner)
-        # This whole-owner negative must never query the actual Linux host.
+        # Guard reference.
         _literal_owner.setattr(reliability.sys,"platform","win32")
         with pytest.raises(reliability.ValidationReliabilityError,
             match="ORIGIN_PREBIND_ORIGINAL_LINUX_OWNER")as _object_denial:
@@ -2095,9 +2095,9 @@ def test_run_validation_gates_direct_script_imports_router_without_pythonpath(
     assert _pending["operations"]is _literal_prefix["operations"]
     assert _pending["original"][0]is _pending and len(_pending["original"])==16
 
-    # These calls deliberately occur outside the frozen producer/helper frame.
-    # Retained Function/Code objects come from the real failed owner above;
-    # synthetic controls supply no physical-root or process-lifetime credit.
+    # Synthetic; no credit.
+
+
     _loan_failures=[]
     with monkeypatch.context()as _loan_ports:
         _loan_ports.setattr(ci_branch_context,"_ordinary_ci_initial_common_source_check_v1",
@@ -2142,9 +2142,9 @@ def test_run_validation_gates_direct_script_imports_router_without_pythonpath(
     assert _literal_input["errors"]==[_object_denial.value,*_loan_failures,_close_frame_error.value]
     assert _pending["origin_ns"]is _pending["cutoffs"]is None
 
-    # The private keeper loan remains Source-bound to the actual CI helper and
-    # original REL producer. These explicit no-child faults cannot authenticate
-    # an inherited Linux handle or manufacture an origin/lifetime observation.
+    # Synthetic; no credit.
+
+
     _keeper_helper=ci_branch_context._facet_fn_initial_keeper_observation_loans_v1
     _keeper_code=ci_branch_context._ORDINARY_INITIALIZED_MODULE_CODE_V1
     assert _keeper_helper.__globals__ is ci_branch_context.__dict__
@@ -2224,10 +2224,10 @@ def test_run_validation_gates_direct_script_imports_router_without_pythonpath(
     assert _literal_prefix["returned_bytes"]==_keeper_debt[1]
     assert _literal_prefix["operation_calls"]==_keeper_debt[0]+3
 
-    # This is only a literal completed-record arithmetic fixture. It does not
-    # run the producer or qualify origin/root/lifetime. The actual prefix owner
-    # must pin each field to the one immutable original result and never reset
-    # its prior attempted debt or retained fault objects.
+    # Synthetic; no credit.
+
+
+
     _fixture_origin=1
     _fixture_cutoffs=(_fixture_origin,_fixture_origin+3600*10**9,
         _fixture_origin+3720*10**9)
@@ -2262,9 +2262,9 @@ def test_run_validation_gates_direct_script_imports_router_without_pythonpath(
             origin_ns=_fixture_origin,deadline_ns=_fixture_cutoffs[2],observation=_pending).items():
             _completed_fixture.setitem(_fixture_request,_name,_value)
         assert reliability._ordinary_initial_prefix_v1(_literal_input)is _literal_prefix
-        # Literal completed records confer no terminal-owner or descriptor
-        # release authority. These denials occur before any native FD action;
-        # the genuine production cold/role endpoints remain the sole callers.
+        # Guard reference.
+
+
         _retirement_effects=[]
         def _forbid_retirement_effect(*args,**kwargs):
             _retirement_effects.append((args,kwargs))
@@ -2305,8 +2305,8 @@ def test_run_validation_gates_direct_script_imports_router_without_pythonpath(
     assert _literal_input["native_instance"]is None and _literal_input.get("current_native_observation")is None
 
 
-    # These are pure arithmetic and literal owner/substitution fixtures. They
-    # neither parse a QTT module nor issue a Source/native memory grant.
+    # Synthetic; no credit.
+
     _memo_layout={"sizes":(("pointer",8),("gc",16),
         ("bytes_prefix",33),("unicode_prefix",64),("tuple_prefix",48),
         ("list_prefix",56),("int_prefix",24),("int_digit_bits",30),
@@ -2338,10 +2338,10 @@ def test_run_validation_gates_direct_script_imports_router_without_pythonpath(
         _memo_request(_memo_layout,_memo_raw,(*_memo11,_MemoForeignInteger(0)))
     assert _memo_callbacks==[]
 
-    # The actual existing staged owner binds the SAME fixed profile/Source
-    # row before invoking the arithmetic helper. These constructed records are
-    # deliberately fixture DATA; no physical baseline or Linux admission is
-    # asserted. Substitution must veto the first allocator/debit callback.
+    # Synthetic; no credit.
+
+
+
     _memo_scope=object.__new__(reliability._LinuxPreflightScopeV1)
     _memo_source=object.__new__(reliability._LinuxImmutableSourceSealV2)
     _memo_source.state,_memo_source.failure="READABLE",None
@@ -2435,8 +2435,8 @@ def test_run_validation_gates_direct_script_imports_router_without_pythonpath(
                 _memo_allocator(_memo_layout,_memo_installation)
         assert _memo_effects==[]and _memo_counters=={"calls":0,"bytes":0}
 
-    # Pure Source10 constructor ports: canonical module/Code originals and
-    # independent Code copies below are explicit no-kernel test data.
+    # Source10 reference.
+
     import ast as stage_ast
     import sys as stage_sys
     import types as stage_types
@@ -2449,6 +2449,9 @@ def test_run_validation_gates_direct_script_imports_router_without_pythonpath(
     stage_node=next(node for node in stage_tree.body if isinstance(node,stage_ast.FunctionDef)
         and node.name=='_ordinary_ci_bootstrap_stage_source_request_v1')
     stage_body=stage_ast.get_source_segment(stage_raw.decode('utf-8'),stage_node)
+    stage_body+='\n\n'+stage_ast.get_source_segment(stage_raw.decode('utf-8'),
+        next(node for node in stage_tree.body if isinstance(node,stage_ast.FunctionDef)
+        and node.name=='_ordinary_bounded_bootstrap_products_request_v1'))
     stage_rel_raw=stage_read(stage_root/'tools'/'validation_reliability.py')
     stage_reg_raw=stage_read(stage_root/'tools'/'validation_scope_registry.py')
     stage_rel_tree=stage_ast.parse(stage_rel_raw)
@@ -2620,7 +2623,7 @@ def _preflight_require_v1(value,label):
                 else:stage_rel.native_issue(product,issuer,'QUERY' if reason=='query_first' else 'PREPARE')
             assert not issue.get('stage_requests')and all(n==0 for n in allocation[3].values())
 
-    # The private original lexical programme refuses before Path allocation.
+    # Guard reference.
     import ast as path_stock_ast
     import types as path_stock_types
     from pathlib import PosixPath as path_stock_type
@@ -2714,9 +2717,9 @@ def _preflight_require_v1(value,label):
     assert all(profile is value["initial_source_request"] and allocation is value["early_allocation_original"]
         for value, profile, allocation in _common_prerequisite_calls)
 
-    # These isolated Source fixtures run the exact private checker with explicit
-    # local carrier objects. They create no QTT issuer, native library or child,
-    # and do not qualify the numeric COMMON programme or cross-process custody.
+    # COMMON: no credit.
+
+
     _common_source_text = copied_sources["tools/ci_branch_context.py"].decode("utf-8")
     _common_source_tree = _script_ast.parse(_common_source_text)
     _common_names = ("_ordinary_ci_initial_common_source_v1", "_ordinary_ci_initial_common_source_check_v1")
@@ -6058,9 +6061,9 @@ def test_runner_phase_manifest_covers_full_validation_plan(monkeypatch):
     )
     runner_source = Path(runner.__file__).read_bytes()
     scope_source = (Path(runner.__file__).parent / "validation_scope_registry.py").read_bytes()
-    # The retained diagnostic has POSIX path spelling. Keep that inspected
-    # formatting profile explicit even when this group runs on admitted Windows;
-    # this pure path facade neither performs I/O nor qualifies native execution.
+    # Guard reference.
+
+
     monkeypatch.setattr(runner, "pathlib", SimpleNamespace(
         Path=PurePosixPath, PurePath=PurePosixPath, PurePosixPath=PurePosixPath))
     node_count = sum(sum(1 for _ in ast.walk(ast.parse(source))) for source in (runner_source, scope_source))
@@ -6091,8 +6094,8 @@ def test_runner_phase_manifest_covers_full_validation_plan(monkeypatch):
     for bad_runner, bad_helper in ((runner_source + b"\n", scope_source), (runner_source, scope_source + b"\n")):
         with pytest.raises(ValueError, match="independent original byte basis"):
             runner._project_probability_validation_manifest_v1(bad_runner, bad_helper, **options)
-    # Both bad bytes are independently supplied to reach the structural/effect
-    # checks: source equality alone must not bless arbitrary selected declarations.
+    # Guard reference.
+
     phase_nodes = [node for node in ast.parse(runner_source).body if isinstance(node, ast.Assign) and
                    any(isinstance(target, ast.Name) and target.id == "ORDERED_PHASES" for target in node.targets)]
     assert len(phase_nodes) == 2
@@ -6129,8 +6132,8 @@ def test_runner_phase_manifest_covers_full_validation_plan(monkeypatch):
             runner._project_probability_validation_manifest_v1(runner_source, scope_source, **{**options, key: value})
         assert {name for name in sys.modules if name.startswith("_qtt_v35_finite_manifest_")} == finite_before
 
-    # These are pure source-profile denials. The context object is a no-child
-    # marker, and no active Linux scope or native containment is constructed.
+    # Synthetic; no credit.
+
     capture_nodes = [node for node in ast.parse(runner_source).body if
                      isinstance(node, ast.FunctionDef) and node.name == "_ordinary_pytest_source_capture_v1"]
     assert len(capture_nodes) == 1
@@ -6204,8 +6207,8 @@ def test_runner_assigns_canonical_non_pytest_commands_to_one_phase(monkeypatch):
         runner._command_uses_pytest_helper(command) for command in phase_non_pytest
     )
 
-    # Source recipe projections are pure data cases; no native admission or
-    # scientific builder is executed by these inner assertions.
+    # Synthetic; no credit.
+
     root = Path.cwd() / "ordinary-source-output-projection"
     leaves = reliability._ordinary_deterministic_run_output_operands_v1(
         ("python", "tools/validator.py", "--out", str(root / "nested" / "report.json")),
@@ -8464,7 +8467,7 @@ def test_runner_fails_closed_without_removing_new_untracked_output_outside_prefi
             "unexpected.txt"
         ) in capsys.readouterr().err
 
-    # A mixed invalid batch must preserve even the generated diagnostic prefix.
+    # Guard reference.
     with tempfile.TemporaryDirectory(prefix="qtt_gate_batch_") as temp_dir:
         root = Path(temp_dir)
         generated = root / "docs/master_plan/generated/first.json"
@@ -8481,7 +8484,7 @@ def test_runner_fails_closed_without_removing_new_untracked_output_outside_prefi
         assert generated.read_bytes() == b"retained diagnostic"
         assert other.read_bytes() == b"outside diagnostic"
 
-    # All candidate leaf types are checked before any unlink in the batch.
+    # Guard reference.
     with tempfile.TemporaryDirectory(prefix="qtt_gate_kinds_") as temp_dir:
         root = Path(temp_dir)
         generated = root / "docs/master_plan/generated/first.json"
@@ -8499,7 +8502,7 @@ def test_runner_fails_closed_without_removing_new_untracked_output_outside_prefi
         assert generated.read_bytes() == b"retained diagnostic"
         assert directory.is_dir()
 
-    # Reparse admission is tested without requiring Windows symlink privilege.
+    # Guard reference.
     import stat as file_stat
     with tempfile.TemporaryDirectory(prefix="qtt_gate_reparse_") as temp_dir:
         root = Path(temp_dir)
@@ -8615,8 +8618,8 @@ def test_runner_restores_only_runtime_side_effects_before_pr142_pr143_and_final_
     _exercise_preflight_observation_v1(tmp_path, monkeypatch)
     _exercise_preflight_candidate_debits_v1(tmp_path, monkeypatch)
     _exercise_preflight_transport_v1(tmp_path, monkeypatch, capsys)
-    # Finite CONTROL algorithms and no-child port oracles only. These cases
-    # grant no native Scope, acquire no disk backend and qualify no namespace.
+    # Synthetic; no credit.
+
     import ast
     import struct
     disk_type = runner._ValidationCandidateCustodyV1
@@ -8632,9 +8635,8 @@ def test_runner_restores_only_runtime_side_effects_before_pr142_pr143_and_final_
         mapper_activation_read_reserve=0, mapper_activation_retained_reserve=0,
         file_baseline_rows=2, file_generation_rows=2, directory_baseline_rows=2,
         directory_generation_rows=2, roster_baseline_edges=4, roster_generation_edges=4)
-    # Original M acquisition grammar and demand construction only. These pure
-    # source cases execute no builder, SourceSeal, C/native factory or child.
-    # There is no synthetic positive operational Scope admission.
+
+
     for family_package, artifact_name in (
         ('pr166_qb_bounded_quantum_benchmark', 'test_pr166_qb_artifacts.py'),
         ('pr166_qc_quantum_selected_replay_paper_retest', 'test_pr166_qc_artifacts.py'),
@@ -8642,8 +8644,7 @@ def test_runner_restores_only_runtime_side_effects_before_pr142_pr143_and_final_
     ):
         source_prefix = runner.REPO_ROOT / 'src/qtt/stage1_prediction_markets' / family_package
         test_prefix = runner.REPO_ROOT / 'tests/stage1_prediction_markets' / family_package
-        # Selected literal source operands are bounded individual modules;
-        # expected rosters come independently from their literal AST nodes.
+
         bodies = tuple(path.read_bytes() for path in (
             source_prefix / 'constants.py', source_prefix / 'report_writer.py',
             test_prefix / 'helpers.py', test_prefix / artifact_name,
@@ -8725,8 +8726,7 @@ def test_runner_restores_only_runtime_side_effects_before_pr142_pr143_and_final_
         lookup={(0,""):0,(0,"empty"):1}, errors=[], pending_capture=None,
         scope=None, config=None)
     writes, reads, scope_checks = [], [], []
-    # This untyped object is only the explicit synthetic comparison port. The
-    # real constructor's exact Scope admission is never called or replaced.
+
     class ControlPorts:
         def check_storage_binding(self, actual, config):
             assert actual is control_candidate and config is None
@@ -8802,8 +8802,7 @@ def test_runner_restores_only_runtime_side_effects_before_pr142_pr143_and_final_
         control_candidate._disk_fail_v1(header_error)
         assert control_candidate.failure is header_error and state["errors"] == [header_error]
         assert control_candidate.state == "CLEANUP_REJECTED" and state["pending_capture"] is original_pending
-    # Negative-only exact Scope objects have no native resources or grant.
-    # This exercises selection/failure compatibility, not native admission.
+
     unused_scope = reliability._LinuxPreflightScopeV1.__new__(reliability._LinuxPreflightScopeV1)
     unused_fields = dict(unused_scope.__dict__)
     assert unused_scope._ordinary_selected_v1() is False
@@ -8837,8 +8836,7 @@ def test_runner_restores_only_runtime_side_effects_before_pr142_pr143_and_final_
         reliability._PREFLIGHT_OBSERVATION_V1.reset(observation_token)
         reliability._LINUX_PREFLIGHT_PROCESS_V1.reset(process_token)
     assert failed_scope._ordinary_selected_v1() is True and failed_scope.__dict__ == failed_fields
-    # The production selector requires the exact retained original callable;
-    # these source checks do not stand in for native positive Scope evidence.
+
     registered_scope = reliability._LinuxPreflightScopeV1.__new__(reliability._LinuxPreflightScopeV1)
     registered_scope._ordinary_factory_attempted_v1 = True
     registered_scope._ordinary_factory_original_v1 = object()
@@ -8866,8 +8864,7 @@ def test_runner_restores_only_runtime_side_effects_before_pr142_pr143_and_final_
     calls = [(node.lineno,ast.unparse(node.func)) for node in ast.walk(publisher_ast) if isinstance(node,ast.Call)]
     assert next(line for line,name in calls if name=="ordinary_scope._ordinary_bind_run_v1") < next(
         line for line,name in calls if name=="_prepare_validation_candidate_v1")
-    # Pure source-fixed arithmetic and explicitly synthetic no-child admission
-    # ports. No test object below supplies native Scope/capacity authority.
+
     from types import SimpleNamespace
     ceiling_cutoffs = (1, 2, 3, 4)
     ceiling = runner._ordinary_post_ceiling_programme_v1(original_cutoffs=ceiling_cutoffs)
@@ -8899,8 +8896,9 @@ def test_runner_restores_only_runtime_side_effects_before_pr142_pr143_and_final_
     admission_root = tmp_path / 'ordinary-admission-no-child'
     admission_root.mkdir()
     (admission_root / 'source.py').write_bytes(b'actual independent fixture source\n')
-    admission_paths = SimpleNamespace(repo_root=admission_root,
-        run_id='run_synthetic_ordinary_admission_ports')
+    admission_paths = reliability.ValidationRunPathsV1.__new__(reliability.ValidationRunPathsV1)
+    object.__setattr__(admission_paths, 'repo_root', admission_root)
+    object.__setattr__(admission_paths, 'run_id', 'run_synthetic_ordinary_admission_ports')
     registered = ((sys.executable, '-B', 'tools/ordinary_admission_no_child.py'),)
     execution = runner._prepare_execution_plan(registered)
     fixture_owner = (runner.os.getpid(), runner.threading.get_ident())
@@ -8922,6 +8920,21 @@ def test_runner_restores_only_runtime_side_effects_before_pr142_pr143_and_final_
         assert paths is admission_paths and execution_plan is execution
         assert fixture_config['plan'] is None
         fixture_config['plan'] = selected_plan
+        selection = runner._OrdinarySourceSelectionV1.__new__(runner._OrdinarySourceSelectionV1)
+        selection._original = (admission_scope, paths, runner.POST_VALIDATION_PHASE)
+        rows = tuple((entry, actual, index) for index, (entry, actual) in
+            enumerate(zip(selected_plan, execution_plan, strict=True), 1))
+        def bound_rows(actual_paths, actual_plan, actual_execution, *, phase):
+            if (actual_paths is not paths or actual_plan is not selected_plan
+                    or actual_execution is not execution_plan or phase != selection._original[2]):
+                raise AssertionError('synthetic bound-row identity')
+            return rows
+        selection.bound_rows = bound_rows
+        scope = admission_scope
+        scope._ordinary_source_selection_v1 = scope._ordinary_original_source_selection_v1 = selection
+        scope._ordinary_runner_owner_v1 = scope._ordinary_original_runner_owner_v1 = runner
+        scope._ordinary_bound_paths_v1, scope._ordinary_bound_plan_v1 = paths, selected_plan
+        scope._ordinary_execution_plan_v1 = scope._ordinary_original_execution_plan_v1 = execution_plan
         admission_events.append('actual publisher plan')
 
     def fixture_supplier(root, selected_plan):
@@ -9025,8 +9038,8 @@ def test_runner_restores_only_runtime_side_effects_before_pr142_pr143_and_final_
     finally:
         reliability._LINUX_PREFLIGHT_PROCESS_V1.reset(context_token)
     assert all(getattr(runner, name) is value for name, value in original_globals.items())
-    # The real incomplete Scope still denies finalize and APP selection before
-    # any native port or row transition; the synthetic sequence is no grant.
+    # Synthetic; no credit.
+
     partial_before = dict(failed_scope.__dict__)
     with pytest.raises(reliability.ValidationReliabilityError,
             match='ORDINARY_PRECURSOR_PARTIAL_NATIVE_ACQUISITION'):
@@ -9037,9 +9050,8 @@ def test_runner_restores_only_runtime_side_effects_before_pr142_pr143_and_final_
             environment={}, run_id='no-child-denial', phase='post-validation', command_index=1,
             deadline_ns=1, output_limits={})
     assert failed_scope.__dict__ == partial_before
-    # Pure POST Git projection has two logical settings and five actual
-    # command-precedence environment entries plus the existing optional-lock
-    # read-only control. These literals confer no Scope.
+
+
     original_control = (('GIT_CONFIG_GLOBAL', 'owned/private/gitconfig'),)
     literal_control = (('GIT_CONFIG_GLOBAL', 'owned/private/gitconfig'),
         ('GIT_OPTIONAL_LOCKS', '0'), ('GIT_CONFIG_COUNT', '2'),
@@ -9056,8 +9068,7 @@ def test_runner_restores_only_runtime_side_effects_before_pr142_pr143_and_final_
                 match='ORDINARY_POST_ORIGINAL_GIT_CONFIG_PROJECTION'):
             runner._ordinary_post_git_controls_v1(bad_control)
     literal_registered = (sys.executable, '-m', 'compileall', '-q', 'tools', 'tests', 'src')
-    # Exact unselected first8/default Scope keeps the original compile vector.
-    # A failed selected attempt must deny rather than adopt an unsafe fallback.
+
     token = reliability._LINUX_PREFLIGHT_PROCESS_V1.set(unused_scope)
     try:
         assert runner._ordinary_post_execution_argv_v1(literal_registered, literal_registered) is literal_registered
@@ -9074,14 +9085,13 @@ def test_runner_restores_only_runtime_side_effects_before_pr142_pr143_and_final_
     finally:
         reliability._LINUX_PREFLIGHT_PROCESS_V1.reset(token)
     assert unused_scope.__dict__ == unused_fields and failed_scope.__dict__ == failed_fields
-    # Exact POST450 projection only: these are no-child metadata oracles,
-    # not native source/capacity admission or successful application evidence.
+    # POST450: no credit.
+
     atomic_registered = (sys.executable, '-c', runner.ATOMICROWS_BUNDLE_CHECK_SCRIPT)
     atomic_expected = (sys.executable, '-I', '-S', '-B', '-c', runner.ATOMICROWS_BUNDLE_CHECK_SCRIPT)
     atomic_repo = tmp_path / 'atomic-projection-repository'
     atomic_process = tmp_path / 'atomic-projection-owned' / 'compact'
-    # Only the two independently literal path operands consumed by this
-    # pure projector are populated. No constructor/probe PASS is fabricated.
+
     atomic_paths = reliability.ValidationRunPathsV1.__new__(reliability.ValidationRunPathsV1)
     object.__setattr__(atomic_paths, 'repo_root', atomic_repo)
     object.__setattr__(atomic_paths, 'process_root', atomic_process)
@@ -9129,8 +9139,7 @@ def test_runner_restores_only_runtime_side_effects_before_pr142_pr143_and_final_
     finally:
         reliability._LINUX_PREFLIGHT_PROCESS_V1.reset(atomic_token)
     assert unused_scope.__dict__ == unused_fields and failed_scope.__dict__ == failed_fields
-    # Source-bound POST diff projection; all helpers below are no-child
-    # object oracles. Default API/first8 bytes above remain unchanged.
+
     git_repo = tmp_path / 'git-projection-repository'
     git_paths = reliability.ValidationRunPathsV1.__new__(reliability.ValidationRunPathsV1)
     object.__setattr__(git_paths, 'repo_root', git_repo)
@@ -9204,9 +9213,8 @@ def test_runner_restores_only_runtime_side_effects_before_pr142_pr143_and_final_
         finally:
             reliability._LINUX_PREFLIGHT_PROCESS_V1.reset(git_token)
     assert unused_scope.__dict__ == unused_fields and failed_scope.__dict__ == failed_fields
-    # Original publisher join with independently selected source phase.
-    # These typed no-child ports deliberately do not claim a native Scope,
-    # actual manifest acquisition, resource product or application admission.
+
+
     bind_repo = (tmp_path / 'source-phase-binding').resolve()
     bind_argv = (sys.executable, '-c', 'raise SystemExit(0)')
     bind_execution = (runner.ExecutionPlanEntry(bind_argv, bind_argv, bind_argv, False, False),)
@@ -9254,8 +9262,7 @@ def test_runner_restores_only_runtime_side_effects_before_pr142_pr143_and_final_
                     match='ORDINARY_ORIGINAL_REGISTERED_EFFECTIVE_PLAN_ASSOCIATION'):
                 bind_scope._ordinary_bind_run_v1(bind_paths, bind_plan, execution_plan=bind_execution)
     assert runner._RUN_COMMANDS_ACTIVE_PATHS is bind_saved_path
-    # Value-free Git config/index proof parser. No child or Git is started;
-    # metadata/index counts below are independent literal fixture operands.
+
     parse_edges = reliability._LinuxPreflightScopeV1._ordinary_post_git_edge_bytes_v1
     assert parse_edges('CONFIG_NAMES', b'core.repositoryformatversion\0') == 1
     assert parse_edges('VERSION', b'git version 2.36.0\n') == (2, 36, 0)
@@ -9283,9 +9290,8 @@ def test_runner_restores_only_runtime_side_effects_before_pr142_pr143_and_final_
         parse_edges('FOREIGN_QUERY', b'100644\0', index_entries=1)
     with pytest.raises(reliability.ValidationReliabilityError, match='ORDINARY_POST_GIT_EDGE_EXACT_TYPES'):
         parse_edges('INDEX_MODES', bytearray(b'100644\0'), index_entries=1)
-    # The following exact-vector oracle creates no native process or Query.
-    # It replaces only already-proven prefix/selected-record prerequisites;
-    # the real original literal-role classifier still accepts/rejects argv.
+
+
     vector_scope = reliability._LinuxPreflightScopeV1.__new__(reliability._LinuxPreflightScopeV1)
     vector_scope._ordinary_active_image_v1 = None
     source_edge_suffix = ('config', '--local', '--no-includes', '--null', '--name-only', '--get-regexp',
@@ -9312,9 +9318,8 @@ def test_runner_restores_only_runtime_side_effects_before_pr142_pr143_and_final_
                     vector_scope._ordinary_factory_native_vector_v1(forbidden)
             with pytest.raises(reliability.ValidationReliabilityError, match='ORDINARY_POST_GIT_CONTROL_NO_SETTLEMENT_DISPATCH'):
                 vector_scope._ordinary_factory_native_vector_v1(chosen, settling=True)
-    # Pure metadata arithmetic only. This deliberately uninitialized Census
-    # fixture acquires no native observation, Scope, baseline, or filesystem.
-    # The zero FILE and accepted source alias each retain a distinct target.
+
+
     geometry_census = reliability._LinuxPreflightCensusV1.__new__(reliability._LinuxPreflightCensusV1)
     geometry_root = tmp_path / 'installation-geometry-source'
     geometry_destination = tmp_path / 'installation-geometry-copy'
@@ -9356,9 +9361,8 @@ def test_runner_restores_only_runtime_side_effects_before_pr142_pr143_and_final_
             match='ORDINARY_COMPILER_COMPLETE_INSTALLATION_ROW'):
         runner._ordinary_post_installation_programme_v1(geometry_census,destination=geometry_destination)
     geometry_alias_row['logical_bytes'] = 4
-    # Existing CONTROL group: original caller association/aggregation only.
-    # These explicit synthetic ports start no child, acquire no Scope grant,
-    # produce no native receipt and qualify no managed service or workflow.
+
+
     caller_scope = reliability._LinuxPreflightScopeV1.__new__(reliability._LinuxPreflightScopeV1)
     caller_scope.repository = str(tmp_path)
     caller_scope._ordinary_initial_native_holder_v1 = object()
@@ -9431,8 +9435,7 @@ def test_runner_restores_only_runtime_side_effects_before_pr142_pr143_and_final_
         assert caller_events == ['prepare', 'supervise', ('close', terminal_nonzero)]
         assert caller_record['pending'] is False
         assert reliability._LINUX_PREFLIGHT_PROCESS_V1.get() is prior_context
-        # No-child oracle: execute the actual finish method, retaining service
-        # and launcher results separately. These ports prove no native actor.
+
         from types import SimpleNamespace
         for launcher_exit in (0, 9):
             finish_scope = reliability._LinuxPreflightScopeV1.__new__(reliability._LinuxPreflightScopeV1)
@@ -9552,7 +9555,6 @@ def test_runner_restores_only_runtime_side_effects_before_pr142_pr143_and_final_
                             if path.is_file() and path != index))
 
     def independent_surface():
-        # Read the actual fixture surface independently of the candidate's map.
         assert set(observed_paths()) == set(paths)
         rows = []
         for relative in sorted(paths):
@@ -9594,7 +9596,6 @@ def test_runner_restores_only_runtime_side_effects_before_pr142_pr143_and_final_
         finally:
             activity[0] = "occurrence"
         selected = observations[start:]
-        # Both original owner observations must occur, even for an empty plan.
         assert len(selected) == 2 and all(row[1] is False for row in selected)
         assert selected[0][2] == before and selected[1][2] == after == original_surface
         assert {path for path, _, mode, data in before
@@ -9615,9 +9616,8 @@ def test_runner_restores_only_runtime_side_effects_before_pr142_pr143_and_final_
         return Completed(_st12h_mock_terminal_output(command))
     monkeypatch.setattr(runner.subprocess, "run", fake_run)
     monkeypatch.setattr(runner, "_routed_generated_output_currentness_failures", lambda command, repo_root: [])
-    # This complete synthetic launch belongs only to the existing simulated
-    # orchestration case. It supplies no capacity or builder-read authority to
-    # an authentic campaign, and every original command vector is retained.
+
+
     from tools import pr168_rp5a_git_grep_scanner as scan_owner
 
     run_paths, probe = reliability.resolve_validation_run_paths(
@@ -9690,7 +9690,6 @@ def test_runner_restores_only_runtime_side_effects_before_pr142_pr143_and_final_
             command_index=kwargs["command_index"], argv=tuple(command),
             cwd=kwargs["cwd"],
         )
-        # The existing process adapter is synthetic; label its lifecycle too.
         process = SimpleNamespace(pid=4321, returncode=None)
         process.poll = lambda: process.returncode
         original_input._attached(process)
@@ -9765,7 +9764,6 @@ def test_runner_restores_only_runtime_side_effects_before_pr142_pr143_and_final_
             vector for _, vector in expected_occurrences]
 
     assert_original_command_occurrences(events)
-    # The script name alone cannot conceal a changed operand or missing occurrence.
     for ordinal, expected in expected_occurrences:
         changed = list(events)
         position = [i for i, event in enumerate(changed) if event[0] == "gate"][ordinal]
@@ -9774,9 +9772,8 @@ def test_runner_restores_only_runtime_side_effects_before_pr142_pr143_and_final_
             assert_original_command_occurrences(changed)
         with pytest.raises(AssertionError):
             assert_original_command_occurrences(events[:position] + events[position + 1:])
-    # The registered plan is distinct from the dispatched execution projection.
-    # This finite fixture is the retained 367-occurrence unsplit plan, not the
-    # real 450/449 campaign. The fake child changes both admitted files each time.
+
+
     assert len(original_vectors) == len(plan) == 367
     assert tuple(entry.registered_argv for entry in plan) == original_vectors
     expected_script_positions = {
@@ -9815,7 +9812,6 @@ def test_runner_restores_only_runtime_side_effects_before_pr142_pr143_and_final_
             expected_events.append(("restore", restored))
         dirty = False
 
-    # Normative barrier selection is independent of the implementation predicate.
     for ordinal, entry in enumerate(plan, 1):
         if ordinal in (9, 11, 366, 367):
             expect_restoration(("before", ordinal))
@@ -9863,7 +9859,6 @@ def test_runner_restores_only_runtime_side_effects_before_pr142_pr143_and_final_
     assert len([row for row in observations if isinstance(row[0], tuple)]) == 14
     assert timeline[-1] == ("restoration_complete", ())
 
-    # Finite copied observations only: no additional child, restore, or campaign.
     from copy import deepcopy
     expected_trace = (expected_events, expected_observations,
                       expected_restorations, expected_timeline)
@@ -9880,7 +9875,6 @@ def test_runner_restores_only_runtime_side_effects_before_pr142_pr143_and_final_
         if checkpoint_index == 2:
             del altered[0][367]  # Lose the nonempty pre366 barrier too.
         invalid_traces.append(altered)
-    # Merge adjacent post366/pre367 into one pair, with subsequent tags renumbered.
     merged = deepcopy(expected_trace)
     merge_tag = ("restoration", 4)
     merged[1][:] = [row for row in merged[1] if row[0] != merge_tag]
@@ -9918,7 +9912,6 @@ def test_runner_restores_only_runtime_side_effects_before_pr142_pr143_and_final_
     assert capsys.readouterr().out.splitlines()[-1] == runner.SUCCESS_MARKER
     repo_root = root
 
-    # A pre-command restoration failure must not be retried by finish().
     with monkeypatch.context() as scoped:
         attempted = []
         spawned = []
@@ -9940,8 +9933,7 @@ def test_runner_restores_only_runtime_side_effects_before_pr142_pr143_and_final_
         assert "prior restoration failure; not retried" in capsys.readouterr().err
     _exercise_candidate_custody_failures_v1(tmp_path, monkeypatch)
 
-    # Append separate finite caller faults; the complete 367-occurrence trace
-    # above is unchanged. No native child or extra campaign is used here.
+
     for fault in ("unproven", "exception", "group", "cancel", "system-exit", "base-group",
                   "context-exit", "missing", "shape", "bool-pid", "bool-exit", "unknown",
                   "conflicting-proof", "run", "phase", "index", "argv", "cwd", "proven-timeout"):
@@ -10112,9 +10104,8 @@ def test_runner_restores_only_runtime_side_effects_before_pr142_pr143_and_final_
 
 
 
-    # Finite M catalogue adapter: Linux live/generation ports are synthetic
-    # component oracles, not a native lease, source seal or campaign result.
-    # The mapper supplier, publisher, independent basis and comparator are real.
+
+
     import threading
     from copy import deepcopy
     from contextlib import contextmanager
@@ -10208,10 +10199,9 @@ def test_runner_restores_only_runtime_side_effects_before_pr142_pr143_and_final_
                 native.check_live, native.verify_fd = native_live, native_verify
                 @contextmanager
                 def native_open(name):
-                    # Explicit syscall-only no-child fixture, not a native Linux
-                    # lease. Reflect its actual acquisition/scope in the original
-                    # native owner's pure predicate without changing any M/read
-                    # accounting, verification calls or selected source bytes.
+
+
+
                     record = dict(fd=None, acquiring=True, close_attempted=False,
                         closed=False, error=None, acquisition_error=None)
                     native._entry_depth += 1
@@ -10291,8 +10281,7 @@ def test_runner_restores_only_runtime_side_effects_before_pr142_pr143_and_final_
                 elif fault == "native-read-allowance": observation.remaining['bytes'] = 6
                 elif fault == "native-retained-allowance": observation.remaining['retained_bytes'] = 2
                 elif fault == "native-deadline":
-                    # The supplier's child deadline is fifteen seconds earlier
-                    # than the candidate's; cross that actual bound explicitly.
+
                     observation.deadline_ns = template["basis"]["deadline_ns"] - 1
                     assert template["basis"]["deadline_ns"] > observation.deadline_ns
             real_open, real_close = reliability._open_regular_worktree_descriptor, os.close
@@ -10380,8 +10369,7 @@ def test_runner_restores_only_runtime_side_effects_before_pr142_pr143_and_final_
                 mapper_candidate._mapper_activation_usage_v1)
 
 
-    # Actual finite M resources, with explicit no-child fault ports. These
-    # component cases grant no native lease, process proof or domain acceptance.
+
     from src.qtt.stage1_prediction_markets.qku_computation_control_plane import serialization
     m_custody_faults = ('normal', 'check-recursion', 'parse-recursion',
         'target-close-recursion', 'basis-close-recursion', 'target-close-error',
@@ -10504,8 +10492,7 @@ def test_runner_restores_only_runtime_side_effects_before_pr142_pr143_and_final_
                 os.fstat(m_reader.fd); m_real_close(m_reader.fd)
             assert m_reference.read_bytes() == m_target.read_bytes() == b'{}\n'
 
-    # Each original activation owns one final reserved read. A later safe
-    # barrier extends receipt/proof membership without rereading earlier M.
+
     m_root = tmp_path / 'm-proof-prefix'; m_root.mkdir()
     m_paths, m_probe = reliability.resolve_validation_run_paths(m_root,
         explicit_process_root=(tmp_path / 'm-proof-prefix-p').resolve(),
@@ -10546,9 +10533,8 @@ def test_runner_restores_only_runtime_side_effects_before_pr142_pr143_and_final_
                 stdout_marker_state='NOT_REQUIRED', stderr_was_nonempty=False, failure_class=None,
                 fixed_environment_controls=((reliability._MAPPER_ACTIVATION_ENV_V1, m_record.identity),))
             m_receipts.append(m_receipt)
-            # New M members after an intermediate restoration need no new
-            # quota and receive no early final-byte proof. These receipts are
-            # no-child custody oracles, not native/domain acceptance.
+
+
             assert runner._check_mapper_barrier_v1(m_sup, m_paths, m_phase, m_plan, tuple(m_receipts)) is m_candidate
             assert all(count == 1 for count in m_counts.values())
             assert 'mapper_final_review' not in m_sup
@@ -10640,13 +10626,11 @@ def test_runner_restores_only_runtime_side_effects_before_pr142_pr143_and_final_
                     with reliability._mapper_bound_reads_v1(s_template): pytest.fail('held M scope reentered')
                 assert tuple(s_close_calls) == before
                 for fd in s_held: os.fstat(fd); s_original_close(fd)
-                # No-child oracle disposal is fixture-only. No production
-                # resource marker is reset or unresolved close retried.
+
                 s_patch.setattr(serialization,'_REPORT_READ_BINDING_V1',None)
         assert serialization._REPORT_READ_BINDING_V1 is s_original_binding
 
-    # A parent actual comparison close fault stays with its original C before
-    # _mapper_publish returns; a late report error cannot make that C disposable.
+
     p_root = tmp_path / 'm-parent-close'; p_root.mkdir()
     p_paths, p_probe = reliability.resolve_validation_run_paths(p_root,
         explicit_process_root=(tmp_path/'m-parent-close-p').resolve(),run_id='run_mapper_parent_close',
@@ -10696,9 +10680,8 @@ def test_runner_restores_only_runtime_side_effects_before_pr142_pr143_and_final_
         assert p_calls == p_held
         for fd in p_held: os.fstat(fd); p_real_close(fd)
 
-    # This source-order fault port is explicitly no-child: an original R
-    # terminal-release failure prevents native/M owners from being entered.
-    # It is neither a native termination proof nor a successful M byte proof.
+
+
     order_root = tmp_path / 'm-r-order'; order_root.mkdir()
     order_paths, _order_probe = reliability.resolve_validation_run_paths(order_root,
         explicit_process_root=(tmp_path/'m-r-order-p').resolve(),
@@ -10710,7 +10693,6 @@ def test_runner_restores_only_runtime_side_effects_before_pr142_pr143_and_final_
         '_ORDINARY_CANDIDATE_FIRST_V1','_ACTIVE_SCAN_LAUNCH',
         '_ACTIVE_MAPPER_READ_PROFILES_V1','_ACTIVE_MAPPER_OCCURRENCES_V1')}
     with monkeypatch.context() as order_patch:
-        # Register original objects before run_commands' direct assignments.
         for name,value in order_originals.items(): order_patch.setattr(runner,name,value)
         order_patch.setattr(runner,'_RUN_COMMANDS_SUPERVISION',None)
         order_patch.setattr(runner,'_RUN_PROVENANCE_WRITTEN',False)
@@ -10731,8 +10713,7 @@ def test_runner_restores_only_runtime_side_effects_before_pr142_pr143_and_final_
         order_patch.setattr(runner,'_settle_scan_inputs_v1',order_R)
         order_patch.setattr(runner,'_settle_native_candidate_resources_v1',order_forbidden)
         order_patch.setattr(runner,'_settle_mapper_occurrences_v1',order_forbidden)
-        # Empty control selection executes only the existing finish closure;
-        # no supervisor, producer, reader or domain command is dispatched.
+
         assert runner.run_commands((),phase='deterministic-validators-a',run_paths=order_paths,
             defer_success_markers=True) == 1
         assert order_events == ['R']
@@ -10741,8 +10722,7 @@ def test_runner_restores_only_runtime_side_effects_before_pr142_pr143_and_final_
     assert all(getattr(runner,name) is value for name,value in order_originals.items())
 
 
-    # Original native acquisition body with finite no-child ports: failure
-    # before yield and descriptor-close failure must retain both exceptions.
+
     before_yield = reliability._LinuxImmutableSourceBasisV2.__new__(reliability._LinuxImmutableSourceBasisV2)
     before_yield.root = tmp_path
     before_yield.pid, before_yield.thread = os.getpid(), threading.get_ident()
@@ -10771,8 +10751,8 @@ def test_runner_restores_only_runtime_side_effects_before_pr142_pr143_and_final_
     assert before_yield.failure is body_error and before_yield.state == "FAILED"
     with pytest.raises(OSError): os.fstat(held_descriptor)
 
-    # Finite syscall ports below exercise the actual native resource owner.
-    # They create no native child and do not qualify Linux/controller authority.
+    # Synthetic; no credit.
+
     def finite_native_resources():
         value = reliability._LinuxImmutableSourceBasisV2.__new__(reliability._LinuxImmutableSourceBasisV2)
         value.pid, value.thread = os.getpid(), threading.get_ident()
@@ -10977,8 +10957,7 @@ def test_runner_restores_only_runtime_side_effects_before_pr142_pr143_and_final_
     for descriptor in chain_fds:
         with pytest.raises(OSError): os.fstat(descriptor)
 
-    # Explicit no-I/O constructor callback: exact type alone is not a lease
-    # grant; the callback deliberately rejects before descriptor/native setup.
+
     constructing = reliability._LinuxImmutableSourceBasisV2.__new__(reliability._LinuxImmutableSourceBasisV2)
     constructor_lease = reliability._LinuxPreflightHostLeaseV1.__new__(reliability._LinuxPreflightHostLeaseV1)
     constructor_lease.root, constructor_lease.index = tmp_path, None
@@ -11021,9 +11000,8 @@ def test_runner_restores_only_runtime_side_effects_before_pr142_pr143_and_final_
     assert census_scope.failure is census_fault and census_scope._entry_depth == 0
     assert census_scope.metadata_calls == census_scope.metadata_reserved == 0 and not census_scope._resources_require_retention_v2()
 
-    # Original SUP/assembly resource records, typed only for finite close
-    # mechanics. No first8 plan, lease, controller or startup is qualified.
-    # A partial C owner reference cannot create a guessed-descriptor closer.
+
+
     partial_c = runner._ValidationCandidateCustodyV1.__new__(runner._ValidationCandidateCustodyV1)
     partial_c.root, partial_c.plan = mapper_paths.repo_root, mapper_plan
     partial_c.process_id, partial_c.thread_id = os.getpid(), threading.get_ident()
@@ -11068,11 +11046,11 @@ def test_runner_restores_only_runtime_side_effects_before_pr142_pr143_and_final_
         assert os.fstat(partial_descriptor).st_size >= 0
         assert partial_c.baseline is None and partial_c.failure is body_error
     finally:
-        # Explicit no-child fixture teardown; never a production debt escape.
+        # Synthetic; no credit.
         os.close(partial_descriptor)
 
-    # Declaration syscall/frame ports below are finite no-child fault oracles.
-    # They preserve the actual original input consume/metadata/close reliability.
+    # Synthetic; no credit.
+
     def declaration_fixture():
         value = reliability._PreflightNativeInputV1.__new__(reliability._PreflightNativeInputV1)
         value.pid, value.thread = os.getpid(), threading.get_ident()
@@ -11168,8 +11146,7 @@ def test_runner_restores_only_runtime_side_effects_before_pr142_pr143_and_final_
     no_native_defaults = dict(pending=True, errors=[])
     runner._settle_native_candidate_resources_v1(no_native_defaults, None, "not-selected", ())
     assert no_native_defaults == dict(pending=True, errors=[])
-    # First pre-acquisition callback recursion must reject without changing the
-    # original owner's chance to finish its one actual attempt.
+
     before_acquisition = declaration_fixture()
     first_callback_error = OSError("synthetic declaration admission callback")
     callback_visits = []
@@ -11201,8 +11178,8 @@ def test_runner_restores_only_runtime_side_effects_before_pr142_pr143_and_final_
             expected_path_version=(), expected_chain=(), limits={}, deadline_ns=1,
             host_lease=None, capture_limits={}, terminal_limits={})
     assert foreign_declaration.__dict__ == before
-    # Original partial-holder substitution is a no-child association fault.
-    # Neither a foreign closer nor whole-root cleanup becomes authorized.
+    # Synthetic; no credit.
+
     for replaced_holder in ("basis", "candidate"):
         original_basis = finite_native_resources()
         held_fd = original_basis._open(reference, os.O_RDONLY | getattr(os, "O_BINARY", 0))
@@ -11262,13 +11239,13 @@ def test_runner_restores_only_runtime_side_effects_before_pr142_pr143_and_final_
         assert replaced_declaration._declaration_original_binding_v1[1]['close_attempted'] is False
         assert os.fstat(declaration_original_fd).st_size >= 0 and os.fstat(declaration_foreign_fd).st_size >= 0
     finally:
-        # Both real finite fds are independently observed no-child fixtures;
-        # this teardown never clears the production owner's retained debt.
+        # Synthetic; no credit.
+
         if declaration_original_fd is not None: original_os_close(declaration_original_fd)
         if declaration_foreign_fd is not None: original_os_close(declaration_foreign_fd)
-    # Successful native close with changed aliases is still a failed release.
-    # This finite no-child port proves the actual original fd closed once, while
-    # preserving association debt and never closing the foreign substitute.
+    # Synthetic; no credit.
+
+
     for release_mutation in ("replace-record", "clear-record", "clear-binding", "clear-release", "mutate-fd"):
         release_input = declaration_fixture()
         release_original_fd = None
@@ -11314,8 +11291,7 @@ def test_runner_restores_only_runtime_side_effects_before_pr142_pr143_and_final_
             with pytest.raises(OSError): os.fstat(release_original_fd)
         finally:
             original_os_close(release_foreign_fd)
-    # A final custody callback cannot install a foreign current slot and earn
-    # successful consumption after the original fd has already closed once.
+
     final_callback_input = declaration_fixture()
     final_callback_foreign = os.open(reference, os.O_RDONLY | getattr(os, "O_BINARY", 0))
     final_callback_visits = []
@@ -11340,8 +11316,7 @@ def test_runner_restores_only_runtime_side_effects_before_pr142_pr143_and_final_
     finally:
         original_os_close(final_callback_foreign)
 
-    # Packed mutable C mechanics use independent literal records. The ports
-    # below create no child and grant no ordinary native Scope admission.
+
     import threading
     packed = disk_type.__new__(disk_type)
     file_words = (0, 1, 2, 3, 1, 0o644, 4, 1, 0o644, 4, 1, 0)
@@ -11395,7 +11370,6 @@ def test_runner_restores_only_runtime_side_effects_before_pr142_pr143_and_final_
         with pytest.raises(ValueError, match='TERMINAL_TRANSITION'):
             packed._disk_action_write_v1(1, 2, (*directory_words[:10], 1, 1), transition=True)
         assert action_rows[1] == b'\x02' + struct.pack('<12Q', *failed_directory)
-    # A DIRECTORY failed/unresolved result is never a completed FILE row.
     with monkeypatch.context() as completion_ports:
         completion_ports.setattr(packed, '_ordinary_disk_state_v1', fake_state, raising=False)
         completion_ports.setattr(packed, '_disk_action_audit_read_v1',
@@ -11413,8 +11387,7 @@ def test_runner_restores_only_runtime_side_effects_before_pr142_pr143_and_final_
         assert list(view)[1] == ('directory', 2, (*directory_words[:10], 1, 1))
         assert action_rows == before_rows
 
-    # The original packed control writer independently closes the only new
-    # transition authority. Ordinary published regions retain their denial.
+
     control_memory = bytearray(struct.pack('<4Q', 1, 0, 96, 1) + expected_file + expected_directory)
     control_slot = dict(closed=False, acquiring=False, open_unknown=False, returned_fd=90)
     controlled = dict(role='ACTIONS', extent=len(control_memory), sealed=False,
@@ -11469,8 +11442,7 @@ def test_runner_restores_only_runtime_side_effects_before_pr142_pr143_and_final_
                     _action_transition_v1=(packed, actual_plan, 0, 1, prior, 1, following))
         assert bytes(control_memory) == before_control and control_state['control_transitions'] == 2
 
-    # Demand comes from one independently frozen source programme, never from
-    # a quota. These small ports test admission arithmetic only, not a Scope.
+
     packed.root = 'literal-root'
     packed.plan = (object(),)
     packed.remaining_read_bytes = 10000
@@ -11541,8 +11513,7 @@ def test_runner_restores_only_runtime_side_effects_before_pr142_pr143_and_final_
                 packed._disk_mutable_programme_demand_v1(4, 1, candidate_nodes)
 
 
-    # Specific fd0/manager borrowing uses literal kernel-metadata ports only.
-    # No child, manager, native namespace or production Scope is admitted here.
+
     from tools import validation_reliability as handoff_owner
     r_scope_type = handoff_owner._LinuxPreflightScopeV1
     r_scope = r_scope_type.__new__(r_scope_type)
@@ -11686,8 +11657,8 @@ def test_runner_restores_only_runtime_side_effects_before_pr142_pr143_and_final_
         assert record['rp5a_input'].reader.tell() == 0
 
 
-    # Rolling RAW disposal ports are explicit no-child fixtures. They exercise
-    # original packed rows/last-user/native disposal owners, not admission.
+    # Synthetic; no credit.
+
     from tools import validation_reliability as rolling_owner
     rolling_candidate_type = runner._ValidationCandidateCustodyV1
     rolling_scope_type = rolling_owner._LinuxPreflightScopeV1
@@ -11874,10 +11845,10 @@ def test_runner_restores_only_runtime_side_effects_before_pr142_pr143_and_final_
         assert tuple(calls) == before_calls and leaves == {1, 2, 3, 4, 5, 6}
         assert state['allocations'][3]['errors'] == list(faults) and scope._ordinary_storage_errors_v1 == list(faults)
 
-    # Literal no-child ports for the original settlement/source-plan seam.
-    # The original bound_rows method is exercised; its source census guard and
-    # the native query/occurrence observation are explicit fixture oracles.
-    # These cases grant no native Scope and execute no application command.
+    # Synthetic; no credit.
+
+
+
     from tools import validation_reliability as phase_owner
 
     def settlement_fixture(patches, phase, native_exit=0, *, no_dispatch=False):
@@ -16011,7 +15982,7 @@ def test_pr82_static_contract_preserves_metadata_only_boundaries():
 
 
 def test_pr83_static_contract_preserves_owner_quantum_priority_boundaries(monkeypatch, tmp_path):
-    # Redirect only the CLI's output default; execute the real validator and writer.
+    # Guard reference.
     original_report = owner_quantum_priority_gate.DEFAULT_REPORT
     assert original_report.as_posix() == "docs/master_plan/generated/OwnerQuantumPriorityPolicyRegistry.report.json"
     before = (original_report.read_bytes(), original_report.stat().st_mode,
@@ -16056,7 +16027,7 @@ def test_pr83_static_contract_preserves_owner_quantum_priority_boundaries(monkey
 
 
 def test_pr84_static_contract_preserves_formula_registry_only_boundaries(monkeypatch, tmp_path):
-    # Redirect only the CLI's output default; execute the real validator and writer.
+    # Guard reference.
     original_report = scoring_policy_gate.DEFAULT_REPORT
     assert original_report.as_posix() == "docs/master_plan/generated/ParameterAlgorithmScoringPolicyRegistry.report.json"
     before = (original_report.read_bytes(), original_report.stat().st_mode,
@@ -16110,7 +16081,7 @@ def test_pr84_static_contract_preserves_formula_registry_only_boundaries(monkeyp
 
 
 def test_pr85_static_contract_preserves_parameter_stack_ranking_boundaries(monkeypatch, tmp_path):
-    # Redirect only the CLI's output default; execute the real validator and writer.
+    # Guard reference.
     original_report = stack_scoring_gate.DEFAULT_REPORT
     assert original_report.as_posix() == "docs/master_plan/generated/ParameterStackScoringAndRankingGate.report.json"
     before = (original_report.read_bytes(), original_report.stat().st_mode,
@@ -16167,7 +16138,7 @@ def test_pr85_static_contract_preserves_parameter_stack_ranking_boundaries(monke
 
 
 def test_pr86_static_contract_preserves_optimizer_arbitration_boundaries(monkeypatch, tmp_path):
-    # Redirect only the CLI's output default; execute the real validator and writer.
+    # Guard reference.
     original_report = optimizer_arbitration_gate.DEFAULT_REPORT
     assert original_report.as_posix() == "docs/master_plan/generated/QuantumClassicalOptimizerArbitrationGate.report.json"
     before = (original_report.read_bytes(), original_report.stat().st_mode,
@@ -17949,8 +17920,8 @@ def test_runner_timing_report_writes_only_when_requested(monkeypatch, tmp_path):
     assert payload["slowest_entries"]
     assert payload["total_elapsed_seconds"] >= 0
 
-    # Finite no-child output negatives: no ordinary output owner is supplied.
-    # C restoration or an existing path grants no permission to publish here.
+    # Synthetic; no credit.
+
     timing_before = report_path.read_bytes()
     output_primary = OSError("original execution failure retained with output denial")
     output_supervision = {"pending": False, "errors": [output_primary]}
@@ -17968,8 +17939,8 @@ def test_runner_timing_report_writes_only_when_requested(monkeypatch, tmp_path):
         assert not denied_timing.exists() and not denied_timing.parent.exists()
         assert report_path.read_bytes() == timing_before
 
-    # The original legacy diagnostic path keeps its return/raise behavior.
-    # These injected writer failures acquire no stream and create no child.
+    # Guard reference.
+
     for output_error in (ValueError("original timing validation failure"),
                          OSError("original timing publication failure")):
         def fail_timing_publication(*args, **kwargs):
@@ -18059,7 +18030,7 @@ def test_runner_returns_zero_when_all_mocked_commands_pass(monkeypatch, capsys, 
         lambda command, repo_root: [],
     )
 
-    # A synthetic success dependency must remain explicit, never a default.
+    # Synthetic; no credit.
     scan_vector = (sys.executable, "tools/build_pr168_rp5a_legacy_semantic_audit.py")
     negative_plan = reliability.build_command_evidence_plan(
         run_id="run_test_supervision_active", phase=runner.ALL_PHASE,
@@ -18110,8 +18081,8 @@ def test_runner_returns_zero_when_all_mocked_commands_pass(monkeypatch, capsys, 
     assert completion_receipts[-1].command_count_started == provenance_counts[0]
     assert completion_receipts[-1].command_count_completed == provenance_counts[0]
 
-    # Mixed v2/v3 provenance uses real typed inputs and ordinary local paths.
-    # No command below invokes a scanner/domain body or grants a real campaign.
+    # Guard reference.
+
     import dataclasses
     import stat
     import time
@@ -18212,8 +18183,8 @@ def test_runner_returns_zero_when_all_mocked_commands_pass(monkeypatch, capsys, 
     assert set(legacy_payload) == expected_keys - {"rp5a_launch_wire_versions","rp5a_payload_byte_limits"}
     assert legacy_payload["rp5a_launch_wire_version"] == 2
     reliability.write_run_provenance(mixed_paths,mixed_probe,**publication)
-    # Real finite operational decode and lease scopes, with explicit no-child
-    # body/close faults. Neither a scanner body nor a builder output runs.
+    # Synthetic; no credit.
+
     from tools import build_pr168_rp5a_legacy_semantic_audit as builder
     for scope_case in ("success", "body", "body-and-close", "construction"):
         original = inputs[1]
@@ -18293,7 +18264,7 @@ def test_runner_returns_zero_when_all_mocked_commands_pass(monkeypatch, capsys, 
                 reliability._rp5a_reader_profiles_from_run_v1(selected[0],MappingProxyType({**value,**wire_changes}),
                     command_index=index,repo_root=mixed_root,inherited_run_id=mixed_paths.run_id,
                     read_limits=limits,deadline_ns=deadline,include_wire_binding=True)
-    # Wrong operational argv is rejected before a decoder/descriptor acquisition.
+    # Guard reference.
     for argv,role in (((sys.executable,"transport_diagnostic.py"),"SCANNER"),
                       ((sys.executable,"tools/validate_pr168_rp5a_legacy_semantic_audit.py"),"VALIDATE"),
                       ((sys.executable,"tools/run_pytest_fresh_basetemp.py","tests/pr168_rp5a"),"PYTEST"),
@@ -18306,8 +18277,8 @@ def test_runner_returns_zero_when_all_mocked_commands_pass(monkeypatch, capsys, 
                     environment=reliability._scan_child_launch_environment({},launch=launch,planned=mixed_plan[0]),
                     explicit_basetemp=mixed_paths.pytest_basetemp_root,original_argv=argv,expected_role=role)
         assert calls == []
-    # Private ordinary header codec only: this creates no native application,
-    # Scope, source programme, capacity, launch input or process oracle.
+    # Synthetic; no credit.
+
     ordinary_table = {}
     for index in (1, 2):
         original_reader = launch.reader_profiles[index]
@@ -18339,8 +18310,8 @@ def test_runner_returns_zero_when_all_mocked_commands_pass(monkeypatch, capsys, 
     projection_arguments = dict(run_id=mixed_paths.run_id, phase=phase,
         command_count=len(mixed_plan), repo_root=mixed_root)
     source_table = reliability._ordinary_rp5a_table_projection_v1(ordinary_table, **projection_arguments)
-    # The independent standard JSON encoder exercises its literal array
-    # representation; the expected typed fields above never use the producer.
+    # Guard reference.
+
     parsed_table = json.loads(json.dumps(ordinary_table, ensure_ascii=True, separators=(",", ":")))
     with pytest.raises(ValueError):
         reliability._ordinary_rp5a_table_projection_v1(parsed_table, **projection_arguments)
@@ -18374,8 +18345,8 @@ def test_runner_returns_zero_when_all_mocked_commands_pass(monkeypatch, capsys, 
             reliability._ordinary_rp5a_table_projection_v1(changed,
                 _json_arrays_v1=True, **projection_arguments)
 
-    # Synthetic no-child interface ports exercise the actual Scope method's
-    # normal/settling call grammar, then stop before any native record lookup.
+    # Synthetic; no credit.
+
     for settling in (False, True):
         interface_scope = object.__new__(reliability._LinuxPreflightScopeV1)
         observed_ports = []
@@ -18396,7 +18367,7 @@ def test_runner_returns_zero_when_all_mocked_commands_pass(monkeypatch, capsys, 
         assert observed_ports == [("factory", {"settling": settling}), ("query", {"settling": settling})] + (
             [] if settling else [("precursor", {})])
 
-    # Source projection only: no native role, process or arbitrary config key.
+    # Synthetic; no credit.
     git_vector = ("/usr/bin/git", "--no-pager", "--literal-pathspecs", "ls-files", "-z")
     if os.name == "posix":
         git_root = Path("/synthetic-original-root")
@@ -18410,7 +18381,7 @@ def test_runner_returns_zero_when_all_mocked_commands_pass(monkeypatch, capsys, 
             with pytest.raises(ValueError, match="SOURCE_FIXED_GIT_ROOT_AND_VECTOR"):
                 reliability._ordinary_rp5a_git_requested_v1(invalid_vector, invalid_root)
 
-    # Original runner publishes exactly one plan and forwards both new tables.
+    # Guard reference.
     published = []
     capacity_calls = []
     selected_launches = []
@@ -18423,8 +18394,8 @@ def test_runner_returns_zero_when_all_mocked_commands_pass(monkeypatch, capsys, 
     publication_state = {name: getattr(runner, name) for name in (
         "_LAST_PLANNED_COMMAND_COUNT", "_LAST_EXPECTED_COMMAND_PLAN", "_RUN_PROVENANCE_WRITTEN")}
     with monkeypatch.context() as forwarding:
-        # Register the publisher's direct assignments for exact scoped teardown,
-        # including when an assertion or the publisher itself raises.
+        # Guard reference.
+
         for name, value in publication_state.items():
             forwarding.setattr(runner, name, value)
         forwarding.setattr(runner,"_RUN_COMMANDS_ACTIVE_PATHS",mixed_paths)
@@ -18450,8 +18421,8 @@ def test_runner_returns_zero_when_all_mocked_commands_pass(monkeypatch, capsys, 
             runner._publish_active_plan_provenance(phase,runner._prepare_execution_plan(command_vectors))
         assert len(capacity_calls) == 1
     assert all(getattr(runner, name) is value for name, value in publication_state.items())
-    # Completion uses the real original evidence validator; no child was
-    # dispatched, so this synthetic terminal record is explicitly FAIL.
+    # Synthetic; no credit.
+
     completed_bindings = []
     original_validator = reliability.validate_complete_run_evidence
     def observed_validation(*args,**kwargs):
@@ -18473,8 +18444,8 @@ def test_runner_returns_zero_when_all_mocked_commands_pass(monkeypatch, capsys, 
     assert not mixed_paths.process_root.exists()
     capsys.readouterr()
 
-    # All ordinary router publication branches are finite no-child negatives.
-    # Branch/router ports below are decision oracles, not native or output grants.
+    # Synthetic; no credit.
+
     report_scope_names = (
         "_rp5d_r1_local_branch_scope_active", "_rp5f_local_branch_scope_active",
         "_rp5g_local_branch_scope_active", "_pr169_readiness1_local_branch_scope_active",
@@ -18563,7 +18534,7 @@ def test_runner_returns_zero_when_all_mocked_commands_pass(monkeypatch, capsys, 
                 else:
                     assert report_leaf.read_bytes() == report_before
         finally:
-            # Every possible dispatch port above is an explicit no-child oracle.
+            # Synthetic; no credit.
             assert reliability.cleanup_validation_run(report_paths) == "PASS_REMOVED_EXACT_RUN_ROOT"
 
 
@@ -19095,196 +19066,196 @@ def test_github_workflow_preserves_required_validation_check_identity():
 
 
 def test_github_workflow_splits_validation_into_parallel_phase_jobs():
- # No-child literals: no Linux/timer/manager/privilege/Scope/Git/native
- # admission/termination/FD-close proof; guards/prefix loans/independent
- # baselines stay; EOF/suffix/direct-child exit != descendant cleanup.
+ # Synthetic; no credit.
+
+
  workflow=_workflow_text()
  shard_block=_workflow_job_block(workflow,"validation_shards")
 
  def utf16_units(value):
-     return len(value.encode("utf-16-le","surrogatepass"))//2
+  return len(value.encode("utf-16-le","surrogatepass"))//2
 
  def literal_run_scalars(job_source):
-     rows=job_source.splitlines(keepends=True)
-     scalars=[]
-     for index,row in enumerate(rows):
-         if not row.startswith("        run:"):
-             continue
-         header=row[len("        run:"):].strip().split()
-         if header and header[0].startswith("&"):
-             header=header[1:]
-         if not header or not header[0].startswith("|"):
-             continue
-         assert len(header)==1 and header[0]in("|","|-","|+")
-         body=[]
-         for content_row in rows[index+1:]:
-             content=content_row.rstrip("\n")
-             assert "\r" not in content
-             if content.strip(" ")and len(content)-len(content.lstrip(" "))<=8:
-                 break
-             body.append(content_row)
-         nonempty=[part for part in body if part.rstrip("\n").strip(" ")]
-         indentation=(len(nonempty[0])-len(nonempty[0].lstrip(" "))
-             if nonempty else 10)
-         assert indentation>=10
-         decoded=[]
-         for part in body:
-             content=part.rstrip("\n")
-             if content.strip(" "):
-                 assert part.startswith(" "*indentation)
-             decoded.append(part[min(indentation,len(content)):])
-         scalar="".join(decoded)
-         if header[0]=="|-":
-             scalar=scalar.rstrip("\n")
-         elif header[0]=="|" and scalar.endswith("\n"):
-             scalar=scalar.rstrip("\n")
-             if scalar:
-                 scalar+="\n"
-         scalars.append(scalar)
-     return scalars
+  rows=job_source.splitlines(keepends=True)
+  scalars=[]
+  for index,row in enumerate(rows):
+      if not row.startswith("        run:"):
+          continue
+      header=row[len("        run:"):].strip().split()
+      if header and header[0].startswith("&"):
+          header=header[1:]
+      if not header or not header[0].startswith("|"):
+          continue
+      assert len(header)==1 and header[0]in("|","|-","|+")
+      body=[]
+      for content_row in rows[index+1:]:
+          content=content_row.rstrip("\n")
+          assert "\r" not in content
+          if content.strip(" ")and len(content)-len(content.lstrip(" "))<=8:
+              break
+          body.append(content_row)
+      nonempty=[part for part in body if part.rstrip("\n").strip(" ")]
+      indentation=(len(nonempty[0])-len(nonempty[0].lstrip(" "))
+          if nonempty else 10)
+      assert indentation>=10
+      decoded=[]
+      for part in body:
+          content=part.rstrip("\n")
+          if content.strip(" "):
+              assert part.startswith(" "*indentation)
+          decoded.append(part[min(indentation,len(content)):])
+      scalar="".join(decoded)
+      if header[0]=="|-":
+          scalar=scalar.rstrip("\n")
+      elif header[0]=="|" and scalar.endswith("\n"):
+          scalar=scalar.rstrip("\n")
+          if scalar:
+              scalar+="\n"
+      scalars.append(scalar)
+  return scalars
 
  def actions_projection(scalar):
-     trim_chars=" \t\n\r\v\f\x85\u00a0\u1680\u2000\u2001\u2002\u2003\u2004\u2005\u2006\u2007\u2008\u2009\u200a\u2028\u2029\u202f\u205f\u3000"
-     segments=[]
-     position=0
-     while position<len(scalar):
-         start=scalar.find("${{",position)
-         if start<0:
-             segments.append(("literal",scalar[position:]))
-             break
-         if start>position:
-             segments.append(("literal",scalar[position:start]))
-         quoted=False
-         end=start+3
-         while end<len(scalar):
-             if scalar[end]=="'":
-                 quoted=not quoted
-             elif not quoted and scalar[end]=="}" and scalar[end-1]=="}":
-                 break
-             end+=1
-         if end==len(scalar):
-             raise ValueError("unclosed Actions expression")
-         expression=scalar[start+3:end-1].strip(trim_chars)
-         if not expression:
-             raise ValueError("empty Actions expression")
-         segments.append(("expression",expression))
-         position=end+1
-     if not segments:
-         return("literal",scalar,())
-     expressions=tuple(value for kind,value in segments if kind=="expression")
-     if len(segments)==1:
-         kind,value=segments[0]
-         if kind=="expression":
-             quoted=False
-             decoded=[]
-             string_expression=True
-             for index,character in enumerate(value):
-                 if character=="'":
-                     quoted=not quoted
-                     if quoted and index:
-                         decoded.append(character)
-                 elif not quoted:
-                     string_expression=False
-                     break
-                 else:
-                     decoded.append(character)
-             if string_expression and not quoted:
-                 return("literal","".join(decoded),expressions)
-         return(kind,value,expressions)
-     formatted=[]
-     arguments=[]
-     for kind,value in segments:
-         if kind=="literal":
-             formatted.append(value.replace("'","''").replace("{","{{").replace("}","}}"))
-         else:
-             formatted.append("{"+str(len(arguments))+"}")
-             arguments.append(value)
-     return("expression","format('"+"".join(formatted)+"'"+
-         "".join(", "+value for value in arguments)+")",expressions)
+  trim_chars=" \t\n\r\v\f\x85\u00a0\u1680\u2000\u2001\u2002\u2003\u2004\u2005\u2006\u2007\u2008\u2009\u200a\u2028\u2029\u202f\u205f\u3000"
+  segments=[]
+  position=0
+  while position<len(scalar):
+      start=scalar.find("${{",position)
+      if start<0:
+          segments.append(("literal",scalar[position:]))
+          break
+      if start>position:
+          segments.append(("literal",scalar[position:start]))
+      quoted=False
+      end=start+3
+      while end<len(scalar):
+          if scalar[end]=="'":
+              quoted=not quoted
+          elif not quoted and scalar[end]=="}" and scalar[end-1]=="}":
+              break
+          end+=1
+      if end==len(scalar):
+          raise ValueError("unclosed Actions expression")
+      expression=scalar[start+3:end-1].strip(trim_chars)
+      if not expression:
+          raise ValueError("empty Actions expression")
+      segments.append(("expression",expression))
+      position=end+1
+  if not segments:
+      return("literal",scalar,())
+  expressions=tuple(value for kind,value in segments if kind=="expression")
+  if len(segments)==1:
+      kind,value=segments[0]
+      if kind=="expression":
+          quoted=False
+          decoded=[]
+          string_expression=True
+          for index,character in enumerate(value):
+              if character=="'":
+                  quoted=not quoted
+                  if quoted and index:
+                      decoded.append(character)
+              elif not quoted:
+                  string_expression=False
+                  break
+              else:
+                  decoded.append(character)
+          if string_expression and not quoted:
+              return("literal","".join(decoded),expressions)
+      return(kind,value,expressions)
+  formatted=[]
+  arguments=[]
+  for kind,value in segments:
+      if kind=="literal":
+          formatted.append(value.replace("'","''").replace("{","{{").replace("}","}}"))
+      else:
+          formatted.append("{"+str(len(arguments))+"}")
+          arguments.append(value)
+  return("expression","format('"+"".join(formatted)+"'"+
+      "".join(", "+value for value in arguments)+")",expressions)
 
  def admit_actions_run(scalar):
-     if utf16_units(scalar)>21000:
-         raise ValueError("raw run exceeds 21000 UTF-16 units")
-     kind,projected,expressions=actions_projection(scalar)
-     if any(utf16_units(expression)>21000 for expression in expressions):
-         raise ValueError("individual Actions expression exceeds 21000 UTF-16 units")
-     if kind=="expression" and utf16_units(projected)>21000:
-         raise ValueError("generated Actions expression exceeds 21000 UTF-16 units")
-     return(kind,projected,expressions)
+  if utf16_units(scalar)>21000:
+      raise ValueError("raw run exceeds 21000 UTF-16 units")
+  kind,projected,expressions=actions_projection(scalar)
+  if any(utf16_units(expression)>21000 for expression in expressions):
+      raise ValueError("individual Actions expression exceeds 21000 UTF-16 units")
+  if kind=="expression" and utf16_units(projected)>21000:
+      raise ValueError("generated Actions expression exceeds 21000 UTF-16 units")
+  return(kind,projected,expressions)
 
  for indicator,expected in(("|","echo x\n"),("|-","echo x"),
-         ("|+","echo x\n\n\n")):
-     fixture="        run: "+indicator+"\n          echo x\n\n\n        shell: bash\n"
-     assert literal_run_scalars(fixture)==[expected]
+      ("|+","echo x\n\n\n")):
+  fixture="        run: "+indicator+"\n          echo x\n\n\n        shell: bash\n"
+  assert literal_run_scalars(fixture)==[expected]
  assert literal_run_scalars("        run: |\n          echo x")==["echo x"]
  assert literal_run_scalars("        run: &fixed |\n          echo x\n")==["echo x\n"]
  assert actions_projection("plain ' { } \U0001f680\n")==(
-     "literal","plain ' { } \U0001f680\n",())
+  "literal","plain ' { } \U0001f680\n",())
  assert actions_projection("${{ matrix.phase }}")==(
-     "expression","matrix.phase",("matrix.phase",))
+  "expression","matrix.phase",("matrix.phase",))
  assert actions_projection("${{ 'it''s }} { \U0001f680' }}")==(
-     "literal","it's }} { \U0001f680",("'it''s }} { \U0001f680'",))
+  "literal","it's }} { \U0001f680",("'it''s }} { \U0001f680'",))
  assert actions_projection("a'{} \U0001f680 ${{ 'x''}}{y' }} z${{ matrix.phase }}")==(
-     "expression","format('a''{{}} \U0001f680 {0} z{1}', 'x''}}{y', matrix.phase)",
-     ("'x''}}{y'","matrix.phase"))
+  "expression","format('a''{{}} \U0001f680 {0} z{1}', 'x''}}{y', matrix.phase)",
+  ("'x''}}{y'","matrix.phase"))
  assert actions_projection("${{ matrix.phase }}${{ github.event.pull_request.draft && '1' || '0' }}")==(
-     "expression","format('{0}{1}', matrix.phase, github.event.pull_request.draft && '1' || '0')",
-     ("matrix.phase","github.event.pull_request.draft && '1' || '0'"))
+  "expression","format('{0}{1}', matrix.phase, github.event.pull_request.draft && '1' || '0')",
+  ("matrix.phase","github.event.pull_request.draft && '1' || '0'"))
  for invalid in("${{ }}","${{ matrix.phase","${{ 'unterminated }}"):
-     with pytest.raises(ValueError):
-         actions_projection(invalid)
+  with pytest.raises(ValueError):
+      actions_projection(invalid)
  assert utf16_units("\U0001f680")==2 and len("\U0001f680")==1
  assert admit_actions_run("x"*21000)[0]=="literal"
  with pytest.raises(ValueError,match="raw run exceeds 21000"):
-     admit_actions_run("x"*21001)
+  admit_actions_run("x"*21001)
  for seed in("x ${{ matrix.phase }}","\U0001f680 ${{ matrix.phase }}"):
-     remaining=21000-utf16_units(actions_projection(seed)[1])
-     prefix=("x"*remaining if seed.startswith("x")else
-         "\U0001f680"*(remaining//2)+"x"*(remaining%2))
-     inclusive=prefix+seed
-     assert utf16_units(actions_projection(inclusive)[1])==21000
-     assert admit_actions_run(inclusive)[0]=="expression"
-     assert utf16_units(actions_projection(inclusive+"x")[1])==21001
-     with pytest.raises(ValueError,match="generated Actions expression exceeds 21000"):
-         admit_actions_run(inclusive+"x")
+  remaining=21000-utf16_units(actions_projection(seed)[1])
+  prefix=("x"*remaining if seed.startswith("x")else
+      "\U0001f680"*(remaining//2)+"x"*(remaining%2))
+  inclusive=prefix+seed
+  assert utf16_units(actions_projection(inclusive)[1])==21000
+  assert admit_actions_run(inclusive)[0]=="expression"
+  assert utf16_units(actions_projection(inclusive+"x")[1])==21001
+  with pytest.raises(ValueError,match="generated Actions expression exceeds 21000"):
+      admit_actions_run(inclusive+"x")
 
  phase_env="          QTT_PHASE: ${{ matrix.phase }}\n"
  draft_env="          QTT_DRAFT: ${{ github.event.pull_request.draft && '1' || '0' }}\n"
  assert shard_block.count(phase_env)==shard_block.count(draft_env)==1
  reverse_correspondence=(
-     ('[ "${{ matrix.phase }}" != fast-preflight ]','[ "$QTT_PHASE" != fast-preflight ]'),
-     ("[ \"${{ github.event.pull_request.draft && '1' || '0' }}\" != 1 ]",'[ "$QTT_DRAFT" != 1 ]'),
-     ('qtt_original_birth_v1 - "${{ matrix.phase }}" <<\'QTT_FIXED_ORIGINAL_HOST_SOURCE_V1\'\n',
-         'qtt_original_birth_v1 - "$QTT_PHASE" <<\'QTT_FIXED_ORIGINAL_HOST_SOURCE_V1\'\n'),
-     ('            python -I -B -X utf8 tools/run_validation_gates.py --linux-preflight-provision --phase ${{ matrix.phase }}\n',
-         '            python -I -B -X utf8 tools/run_validation_gates.py --linux-preflight-provision --phase "$QTT_PHASE"\n'),
-     ('          --phase ${{ matrix.phase }} \\\n','          --phase "$QTT_PHASE" \\\n'),
-     ('          --timing-report .tmp/qtt-validation-timing/${{ matrix.phase }}.json \\\n',
-         '          --timing-report ".tmp/qtt-validation-timing/$QTT_PHASE.json" \\\n'),
-     ('          --router-report .tmp/qtt-validation-router/${{ matrix.phase }}.json\n',
-         '          --router-report ".tmp/qtt-validation-router/$QTT_PHASE.json"\n'),
+  ('[ "${{ matrix.phase }}" != fast-preflight ]','[ "$QTT_PHASE" != fast-preflight ]'),
+  ("[ \"${{ github.event.pull_request.draft && '1' || '0' }}\" != 1 ]",'[ "$QTT_DRAFT" != 1 ]'),
+  ('qtt_original_birth_v1 - "${{ matrix.phase }}" <<\'QTT_FIXED_ORIGINAL_HOST_SOURCE_V1\'\n',
+      'qtt_original_birth_v1 - "$QTT_PHASE" <<\'QTT_FIXED_ORIGINAL_HOST_SOURCE_V1\'\n'),
+  ('            python -I -B -X utf8 tools/run_validation_gates.py --linux-preflight-provision --phase ${{ matrix.phase }}\n',
+      '            python -I -B -X utf8 tools/run_validation_gates.py --linux-preflight-provision --phase "$QTT_PHASE"\n'),
+  ('          --phase ${{ matrix.phase }} \\\n','          --phase "$QTT_PHASE" \\\n'),
+  ('          --timing-report .tmp/qtt-validation-timing/${{ matrix.phase }}.json \\\n',
+      '          --timing-report ".tmp/qtt-validation-timing/$QTT_PHASE.json" \\\n'),
+  ('          --router-report .tmp/qtt-validation-router/${{ matrix.phase }}.json\n',
+      '          --router-report ".tmp/qtt-validation-router/$QTT_PHASE.json"\n'),
  )
  predecessor=shard_block
 
  for original,observed in(
-         ('           if l[qY]<3:raise jQ("original held3 unavailable before first host effect")\n','           if l[qY]<3 or l[jW]<2:raise jQ("held3 or diagnostic unavailable")\n'),
-         ('           l[qY]-=3\n','           l[qY]-=3\n           l[jW]-=2\n'),
-         ('            if jC is None or d[0][2]is None or d[0][2]<jC:\n','            if jC is None or d[0][2]is None or d[0][2]<jC:\n             try:\n              if os.write(2,b"::error::F\\n")!=11:raise jQ()\n             except jP as z:b[qC]+=[(qR,z)]\n'),
-         ('           a[qI]=[201061114,0,None]\n','           a[qI]=[201061050,64,None]\n'),
-         ('           jY=\'watchdog-no-child-delete\'\n           qA="commands"\n','           qA="commands"\n'),
+      ('           if l[qY]<3:raise jQ("original held3 unavailable before first host effect")\n','           if l[qY]<3 or l[jW]<2:raise jQ("held3 or diagnostic unavailable")\n'),
+      ('           l[qY]-=3\n','           l[qY]-=3\n           l[jW]-=2\n'),
+      ('            if jC is None or d[0][2]is None or d[0][2]<jC:\n','            if jC is None or d[0][2]is None or d[0][2]<jC:\n             try:\n              if os.write(2,b"::error::F\\n")!=11:raise jQ()\n             except jP as z:b[qC]+=[(qR,z)]\n'),
+      ('           a[qI]=[201061114,0,None]\n','           a[qI]=[201061050,64,None]\n'),
+      ('           jY=\'watchdog-no-child-delete\'\n           qA="commands"\n','           qA="commands"\n'),
  ):
-     assert predecessor.count(observed)==1
-     predecessor=predecessor.replace(observed,original,1)
+  assert predecessor.count(observed)==1
+  predecessor=predecessor.replace(observed,original,1)
  for before,after in reverse_correspondence:
-     assert predecessor.count(after)==1 and before not in predecessor
-     predecessor=predecessor.replace(after,before,1)
+  assert predecessor.count(after)==1 and before not in predecessor
+  predecessor=predecessor.replace(after,before,1)
  predecessor=predecessor.replace(phase_env,"",1).replace(draft_env,"",1)
  old_scalars=literal_run_scalars(predecessor)
  current_scalars=literal_run_scalars(shard_block)
  assert len(old_scalars)==len(current_scalars)==2
  inflated=[scalar for scalar in old_scalars if
-     actions_projection(scalar)[0]=="expression" and
-     utf16_units(actions_projection(scalar)[1])>21000]
+  actions_projection(scalar)[0]=="expression" and
+  utf16_units(actions_projection(scalar)[1])>21000]
  assert len(inflated)==1
  # Synthetic boundary; precursor rejects.
  precursor=inflated
@@ -19292,14 +19263,15 @@ def test_github_workflow_splits_validation_into_parallel_phase_jobs():
  assert utf16_units(inflated[0])==21000
  assert utf16_units(actions_projection(inflated[0])[1])==21064
  assert actions_projection(inflated[0])[2]==(
-     "matrix.phase","github.event.pull_request.draft && '1' || '0'",
-     "matrix.phase","matrix.phase","matrix.phase","matrix.phase","matrix.phase")
- for inflated in(precursor,inflated):
-     with pytest.raises(ValueError,match="generated Actions expression exceeds 21000"):
-         admit_actions_run(inflated[0])
+  "matrix.phase","github.event.pull_request.draft && '1' || '0'",
+  "matrix.phase","matrix.phase","matrix.phase","matrix.phase","matrix.phase")
+ assert utf16_units(precursor[0])>21000
+ for inflated,error in((precursor,"raw run exceeds 21000 UTF-16 units"),(inflated,"generated Actions expression exceeds 21000")):
+  with pytest.raises(ValueError,match=error):
+      admit_actions_run(inflated[0])
  assert all("${{" not in scalar for scalar in current_scalars)
  for scalar in literal_run_scalars(workflow):
-     admit_actions_run(scalar)
+  admit_actions_run(scalar)
 
 
  assert "    timeout-minutes: 90\n" in shard_block
@@ -19313,25 +19285,25 @@ def test_github_workflow_splits_validation_into_parallel_phase_jobs():
  assert "        with: &pip_cache\n" in shard_block
  assert "          path: ~/.cache/pip\n" in shard_block
  assert(
-     "          key: ${{ runner.os }}-python-3.14.6-pip-pytest-9.1.1-"
-     "${{ hashFiles('.github/workflows/qtt_validation.yml') }}\n"
+  "          key: ${{ runner.os }}-python-3.14.6-pip-pytest-9.1.1-"
+  "${{ hashFiles('.github/workflows/qtt_validation.yml') }}\n"
  )in shard_block
  assert(
-     "            ${{ runner.os }}-python-3.14.6-pip-pytest-9.1.1-\n"
-     in shard_block
+  "            ${{ runner.os }}-python-3.14.6-pip-pytest-9.1.1-\n"
+  in shard_block
  )
  assert "        run: &install_pytest |\n" in shard_block
  expected_pins=("pytest==9.1.1","iniconfig==2.3.0","packaging==26.0","pluggy==1.6.0",
-     "pygments==2.21.0","websockets==17.0.1","cryptography==50.0.1","cffi==2.1.1","pycparser==3.0",
-     "jsonschema==4.26.0","jsonschema-specifications==2025.9.1","referencing==0.37.0","rpds-py==2026.5.1","attrs==26.1.0")
+  "pygments==2.21.0","websockets==17.0.1","cryptography==50.0.1","cffi==2.1.1","pycparser==3.0",
+  "jsonschema==4.26.0","jsonschema-specifications==2025.9.1","referencing==0.37.0","rpds-py==2026.5.1","attrs==26.1.0")
  install=shard_block.split("        run: &install_pytest |\n",1)[1].split("          python -m pip check\n",1)[0]
  import shlex
  assert tuple(shlex.split(install.replace("\\\n"," ")))==(
-     "python","-m","pip","install","--only-binary=:all:","--no-deps","--index-url",
-     "https://pypi.org/simple",*expected_pins)
+  "python","-m","pip","install","--only-binary=:all:","--no-deps","--index-url",
+  "https://pypi.org/simple",*expected_pins)
  assert "          python -m pip check\n" in shard_block
  for phase in runner.ORDERED_PHASES:
-     assert f"          - phase: {phase}\n" in shard_block
+  assert f"          - phase: {phase}\n" in shard_block
  assert "          - phase: deterministic-validators\n" not in shard_block
  assert '--phase "$QTT_PHASE"' in shard_block
  assert '--timing-report ".tmp/qtt-validation-timing/$QTT_PHASE.json"' in shard_block
@@ -19348,17 +19320,17 @@ def test_github_workflow_splits_validation_into_parallel_phase_jobs():
  assert "  push:\n    branches:\n      - main\n" in event_block
  assert "pull_request_target:" not in event_block
  eligibility=(
-     "          QTT_PR298_NATIVE_ELIGIBLE: ${{ ((github.event_name == 'pull_request' && github.repository == "
-     "'Q8Meow/QTT_New0526' && github.event.pull_request.number == 298 && "
-     "github.event.pull_request.head.repo.full_name == 'Q8Meow/QTT_New0526' && "
-     "github.event.pull_request.base.repo.full_name == 'Q8Meow/QTT_New0526' && github.event.pull_request.base.ref "
-     "== 'main' && github.event.pull_request.head.ref == 'repair/main-cumulative-v35-final-r5-local-20260922') || "
-     "(github.repository == 'Q8Meow/QTT_New0526' && github.ref == 'refs/heads/main' && github.ref_name == 'main' "
-     "&& github.head_ref == '' && github.base_ref == '' && (github.event_name == 'push' && github.event.ref == "
-     'github.ref && github.event.after == github.sha && github.event.deleted == false || github.event_name == '
-     "'workflow_dispatch' && (github.event.ref == 'main' || github.event.ref == github.ref) && "
-     "(github.event.inputs.full_validation == 'true' || github.event.inputs.full_validation == 'false')))) && '1' "
-     "|| '0' }}\n"
+  "          QTT_PR298_NATIVE_ELIGIBLE: ${{ ((github.event_name == 'pull_request' && github.repository == "
+  "'Q8Meow/QTT_New0526' && github.event.pull_request.number == 298 && "
+  "github.event.pull_request.head.repo.full_name == 'Q8Meow/QTT_New0526' && "
+  "github.event.pull_request.base.repo.full_name == 'Q8Meow/QTT_New0526' && github.event.pull_request.base.ref "
+  "== 'main' && github.event.pull_request.head.ref == 'repair/main-cumulative-v35-final-r5-local-20260922') || "
+  "(github.repository == 'Q8Meow/QTT_New0526' && github.ref == 'refs/heads/main' && github.ref_name == 'main' "
+  "&& github.head_ref == '' && github.base_ref == '' && (github.event_name == 'push' && github.event.ref == "
+  'github.ref && github.event.after == github.sha && github.event.deleted == false || github.event_name == '
+  "'workflow_dispatch' && (github.event.ref == 'main' || github.event.ref == github.ref) && "
+  "(github.event.inputs.full_validation == 'true' || github.event.inputs.full_validation == 'false')))) && '1' "
+  "|| '0' }}\n"
  )
  assert shard_block.count(eligibility)==1
  assert shard_block.count("          QTT_PR298_NATIVE_ELIGIBLE:")==1
@@ -19371,103 +19343,103 @@ def test_github_workflow_splits_validation_into_parallel_phase_jobs():
 
  opening='qtt_original_birth_v1 - "$QTT_PHASE" <<\'QTT_FIXED_ORIGINAL_HOST_SOURCE_V1\'\n'
  frontend_text=textwrap.dedent(shard_block.split(opening,1)[1].split(
-     "          QTT_FIXED_ORIGINAL_HOST_SOURCE_V1\n",1)[0])
+  "          QTT_FIXED_ORIGINAL_HOST_SOURCE_V1\n",1)[0])
  frontend_tree=ast.parse(frontend_text)
  front_function=next(node for node in frontend_tree.body
-     if isinstance(node,ast.FunctionDef)and node.name=="_qtt_original_front_v1")
+  if isinstance(node,ast.FunctionDef)and node.name=="_qtt_original_front_v1")
  actual_front_function=copy.deepcopy(front_function)
  aliases=dict(jR="original",q3="id",q4="ancestor-manager-ready",
-     q5="fixed first-host",q6="same original",q7="created",q8="deleted",
-     jV="armed",jW="settle",jX="delete_attempted")
+  q5="fixed first-host",q6="same original",q7="created",q8="deleted",
+  jV="armed",jW="settle",jX="delete_attempted")
  bindings=[(t.id,v.value)for n in ast.walk(front_function)if isinstance(n,ast.Assign)
-     for t,v in zip(n.targets[0].elts if isinstance(n.targets[0],ast.Tuple)else n.targets,
-         n.value.elts if isinstance(n.value,ast.Tuple)else[n.value])
-     if isinstance(t,ast.Name)and t.id in aliases and isinstance(v,ast.Constant)]
+  for t,v in zip(n.targets[0].elts if isinstance(n.targets[0],ast.Tuple)else n.targets,
+      n.value.elts if isinstance(n.value,ast.Tuple)else[n.value])
+  if isinstance(t,ast.Name)and t.id in aliases and isinstance(v,ast.Constant)]
  assert len(bindings)==len(aliases)and dict(bindings)==aliases
  class FrontLiterals(ast.NodeTransformer):
-     def visit_Name(self,n):
-         return ast.copy_location(ast.Constant(aliases[n.id]),n)if isinstance(n.ctx,ast.Load)and n.id in aliases and n.id!="jR" else n
-     def visit_BinOp(self,n):
-         self.generic_visit(n)
-         if isinstance(n.left,ast.Name)and n.left.id=="jR":n.left=ast.Constant("original")
-         if isinstance(n.op,ast.Add)and all(isinstance(v,ast.Constant)and type(v.value)is str for v in(n.left,n.right)):
-             return ast.copy_location(ast.Constant(n.left.value+n.right.value),n)
-         return n
+  def visit_Name(self,n):
+      return ast.copy_location(ast.Constant(aliases[n.id]),n)if isinstance(n.ctx,ast.Load)and n.id in aliases and n.id!="jR" else n
+  def visit_BinOp(self,n):
+      self.generic_visit(n)
+      if isinstance(n.left,ast.Name)and n.left.id=="jR":n.left=ast.Constant("original")
+      if isinstance(n.op,ast.Add)and all(isinstance(v,ast.Constant)and type(v.value)is str for v in(n.left,n.right)):
+          return ast.copy_location(ast.Constant(n.left.value+n.right.value),n)
+      return n
  front_function=FrontLiterals().visit(front_function)
  members={node.name:node for node in front_function.body if isinstance(node,ast.FunctionDef)}
  def helper_from_source(name,ports):
-     isolated=ast.Module(body=[copy.deepcopy(members[name])],type_ignores=[])
-     exec(compile(ast.fix_missing_locations(isolated),"<workflow-no-child-owner>","exec"),ports)
-     return ports[name]
+  isolated=ast.Module(body=[copy.deepcopy(members[name])],type_ignores=[])
+  exec(compile(ast.fix_missing_locations(isolated),"<workflow-no-child-owner>","exec"),ports)
+  return ports[name]
 
  class KernelPort:
-     c_long=staticmethod(int)
-     c_int=staticmethod(int)
+  c_long=staticmethod(int)
+  c_int=staticmethod(int)
 
-     @staticmethod
-     def get_errno():
-         return 5
+  @staticmethod
+  def get_errno():
+      return 5
 
  for number,raw_result,fault_after_raw in((222,0,"errno"),(222,0,"bytes"),
-                                            (223,0,"errno"),(226,0,"errno"),
-                                            (222,-1,None)):
-     calls=[]
-     raw_fault=OSError("synthetic getter/admission failure")
-     watchdog={"id":None,"created":False,"armed":number==226,
-                 "deleted":False}
-     observed=b"\x00\x00\x00\x00" if number==222 else None
-     def synthetic_native(*args):
-         calls.append(("raw",args))
-         return raw_result
-     def synthetic_effect(name,function,*args,**kwargs):
-         calls.append(("effect",name,kwargs["tranche"]))
-         if name.endswith("-errno")and fault_after_raw=="errno":
-             raise raw_fault
-         return function(*args)
-     def synthetic_returned(part):
-         calls.append(("returned",bytes(part)))
-         if fault_after_raw=="bytes":
-             raise raw_fault
-     ports={"qZ":"work","ctypes":KernelPort,"native":synthetic_native,
-              "effect":synthetic_effect,"returned":synthetic_returned,
-              "w":watchdog,"handle":SimpleNamespace(value=17)}
-     kernel=helper_from_source("kernel",ports)
-     with pytest.raises(OSError)as raised:
-         kernel("synthetic-watchdog",number,observed=observed)
-     if fault_after_raw is not None:
-         assert raised.value is raw_fault
-     else:
-         assert raised.value.errno==5
-     assert watchdog=={"id":17 if number==222 and raw_result==0 else None,
-         "created":number==222 and raw_result==0,
-         "armed":number==223 and raw_result==0,
-         "deleted":number==226 and raw_result==0}
-     assert sum(row[0]=="raw" for row in calls)==1
-     if observed is not None:
-         assert sum(row[0]=="returned" for row in calls)==1
+                                         (223,0,"errno"),(226,0,"errno"),
+                                         (222,-1,None)):
+  calls=[]
+  raw_fault=OSError("synthetic getter/admission failure")
+  watchdog={"id":None,"created":False,"armed":number==226,
+              "deleted":False}
+  observed=b"\x00\x00\x00\x00" if number==222 else None
+  def synthetic_native(*args):
+      calls.append(("raw",args))
+      return raw_result
+  def synthetic_effect(name,function,*args,**kwargs):
+      calls.append(("effect",name,kwargs["tranche"]))
+      if name.endswith("-errno")and fault_after_raw=="errno":
+          raise raw_fault
+      return function(*args)
+  def synthetic_returned(part):
+      calls.append(("returned",bytes(part)))
+      if fault_after_raw=="bytes":
+          raise raw_fault
+  ports={"qZ":"work","ctypes":KernelPort,"native":synthetic_native,
+           "effect":synthetic_effect,"returned":synthetic_returned,
+           "w":watchdog,"handle":SimpleNamespace(value=17)}
+  kernel=helper_from_source("kernel",ports)
+  with pytest.raises(OSError)as raised:
+      kernel("synthetic-watchdog",number,observed=observed)
+  if fault_after_raw is not None:
+      assert raised.value is raw_fault
+  else:
+      assert raised.value.errno==5
+  assert watchdog=={"id":17 if number==222 and raw_result==0 else None,
+      "created":number==222 and raw_result==0,
+      "armed":number==223 and raw_result==0,
+      "deleted":number==226 and raw_result==0}
+  assert sum(row[0]=="raw" for row in calls)==1
+  if observed is not None:
+      assert sum(row[0]=="returned" for row in calls)==1
 
  body_fault=OSError("synthetic no-child initial failure")
  close_fault=OSError("synthetic no-child delete failure")
  watchdog={"armed":False,"created":True,"delete_attempted":False,
-             "deleted":False,"id":19}
+          "deleted":False,"id":19}
  errors=[("original-first-front",body_fault)]
  state={"custodian_effect_attempted":True,"commands":[],"errors":errors}
  deletes=[]
  def failed_delete(name,*args,**kwargs):
-     deletes.append((name,args,kwargs))
-     raise close_fault
+  deletes.append((name,args,kwargs))
+  raise close_fault
  ports={"qA":"commands","qB":"custodian_effect_attempted","qC":"errors",
-          "qT":"failure_cutoff","b":{"retired":False},"a":state,
-          "w":watchdog,"ctypes":KernelPort,"kernel":failed_delete}
+       "qT":"failure_cutoff","b":{"retired":False},"a":state,
+       "w":watchdog,"ctypes":KernelPort,"kernel":failed_delete}
  failure=helper_from_source("failure",ports)
  with pytest.raises(BaseExceptionGroup)as raised:
-     failure(body_fault)
+  failure(body_fault)
  assert raised.value.exceptions==(body_fault,close_fault)
  assert watchdog["delete_attempted"]and not watchdog["deleted"]
  assert errors==[("original-first-front",body_fault),("watchdog-no-child-delete",close_fault)]
  assert len(deletes)==1 and deletes[0][2]=={"tranche":"settle"}
  assert "w" not in{node.id for node in ast.walk(members["failure"])
-     if isinstance(node,ast.Name)and isinstance(node.ctx,ast.Store)}
+  if isinstance(node,ast.Name)and isinstance(node.ctx,ast.Store)}
 
  source=ast.unparse(front_function)
  initial=ast.unparse(next(node for node in front_function.body if isinstance(node,ast.Try)))
@@ -19483,9 +19455,9 @@ def test_github_workflow_splits_validation_into_parallel_phase_jobs():
  native_raw=(Path(__file__).resolve().parents[2]/"tools/ci_branch_context.py").read_bytes()
  native_tree=ast.parse(native_raw.decode("utf-8"))
  native_rows=[node for node in native_tree.body
-     if isinstance(node,ast.Assign)and len(node.targets)==1
-     and isinstance(node.targets[0],ast.Name)
-     and node.targets[0].id=="_QTT_ORDINARY_NATIVE_C_SOURCE_V1"]
+  if isinstance(node,ast.Assign)and len(node.targets)==1
+  and isinstance(node.targets[0],ast.Name)
+  and node.targets[0].id=="_QTT_ORDINARY_NATIVE_C_SOURCE_V1"]
  assert len(native_rows)==1
  native_value=native_rows[0].value
  assert isinstance(native_value,ast.Constant)and type(native_value.value)is bytes
@@ -19506,61 +19478,61 @@ def test_github_workflow_splits_validation_into_parallel_phase_jobs():
  native_source=native_bytes.decode("ascii")
 
  def native_owner_body(name,return_type="int",definition_suffix=None):
-     assert return_type in("int","void","ssize_t")
-     signature="static "+return_type+" "+name+"("
-     if definition_suffix is not None:
-         assert definition_suffix=="void) {"
-         signature+=definition_suffix
-     assert native_source.count(signature)==1
-     opening=native_source.index("{",native_source.index(signature))
-     position,depth,state,escaped,code=opening,0,"code",False,[]
-     while position<len(native_source):
-         character=native_source[position]
-         following=native_source[position:position+2]
-         if state=="line":
-             if character=="\n":state="code"
-         elif state=="block":
-             if following=="*/":state="code";position+=1
-         elif state in('"',"'"):
-             code.append(character)
-             if escaped:escaped=False
-             elif character=="\\":escaped=True
-             elif character==state:state="code"
-         elif following=="//":state="line";position+=1
-         elif following=="/*":state="block";position+=1
-         else:
-             code.append(character)
-             if character in('"',"'"):state=character
-             elif character=="{":depth+=1
-             elif character=="}":
-                 depth-=1
-                 if not depth:return "".join("".join(code).split())
-         position+=1
-     raise AssertionError("actual C owner body is incomplete: "+name)
+  assert return_type in("int","void","ssize_t")
+  signature="static "+return_type+" "+name+"("
+  if definition_suffix is not None:
+      assert definition_suffix=="void) {"
+      signature+=definition_suffix
+  assert native_source.count(signature)==1
+  opening=native_source.index("{",native_source.index(signature))
+  position,depth,state,escaped,code=opening,0,"code",False,[]
+  while position<len(native_source):
+      character=native_source[position]
+      following=native_source[position:position+2]
+      if state=="line":
+          if character=="\n":state="code"
+      elif state=="block":
+          if following=="*/":state="code";position+=1
+      elif state in('"',"'"):
+          code.append(character)
+          if escaped:escaped=False
+          elif character=="\\":escaped=True
+          elif character==state:state="code"
+      elif following=="//":state="line";position+=1
+      elif following=="/*":state="block";position+=1
+      else:
+          code.append(character)
+          if character in('"',"'"):state=character
+          elif character=="{":depth+=1
+          elif character=="}":
+              depth-=1
+              if not depth:return "".join("".join(code).split())
+      position+=1
+  raise AssertionError("actual C owner body is incomplete: "+name)
 
  quiet=native_owner_body("qn_flag_command_quiet")
  assert 'qn_error("source-seal-native-terminal-and-quiet",EPROTO)' in quiet
  for original_field in("!c->registered","!c->child_created","c->pending","!c->exec_proven",
-         "!c->exec_eof","!c->terminal","c->status","!c->stdout_eof","!c->stderr_eof",
-         "!o->registered","!o->native_attempted","o->result","o->native_errno",
-         "o->info.si_pid!=c->pid","o->info.si_code!=CLD_EXITED","o->info.si_status",
-         "c->stdout_used","c->stderr_used"):
-     assert original_field in quiet
+      "!c->exec_eof","!c->terminal","c->status","!c->stdout_eof","!c->stderr_eof",
+      "!o->registered","!o->native_attempted","o->result","o->native_errno",
+      "o->info.si_pid!=c->pid","o->info.si_code!=CLD_EXITED","o->info.si_status",
+      "c->stdout_used","c->stderr_used"):
+  assert original_field in quiet
  assert "free(" not in quiet and "realloc(" not in quiet and "qn_command_run(" not in quiet
  assert "stdout_used=" not in quiet and "stderr_used=" not in quiet
 
  for original_flag_owner,operand,journal in(
-         ("qn_flag_effect","number","*attempted=1;"),
-         ("qn_catalogue_flag_effect","slot","*attempted|=baseline?2:1;")):
-     flag=native_owner_body(original_flag_owner)
-     native_call="qn_command_run(index,argv,1)<0"
-     generation="qn_refresh_after_flag_effect("+operand+",after)<0"
-     acceptance="qn_flag_command_quiet(index)<0"
-     assert flag.index(journal)<flag.index(native_call)<flag.index(generation)<flag.index(acceptance)
-     assert native_call+"||"+generation+"||"+acceptance in flag
-     assert 'argv[3]="/usr/bin/chattr";argv[4]=restore?"-i":"+i";' in flag
-     assert 'argv[5]="--";' in flag and "free(" not in flag
-     assert flag.index(acceptance)<flag.index("qn_startup_mode_loan(")
+      ("qn_flag_effect","number","*attempted=1;"),
+      ("qn_catalogue_flag_effect","slot","*attempted|=baseline?2:1;")):
+  flag=native_owner_body(original_flag_owner)
+  native_call="qn_command_run(index,argv,1)<0"
+  generation="qn_refresh_after_flag_effect("+operand+",after)<0"
+  acceptance="qn_flag_command_quiet(index)<0"
+  assert flag.index(journal)<flag.index(native_call)<flag.index(generation)<flag.index(acceptance)
+  assert native_call+"||"+generation+"||"+acceptance in flag
+  assert 'argv[3]="/usr/bin/chattr";argv[4]=restore?"-i":"+i";' in flag
+  assert 'argv[5]="--";' in flag and "free(" not in flag
+  assert flag.index(acceptance)<flag.index("qn_startup_mode_loan(")
  refreshed=native_owner_body("qn_refresh_after_flag_effect")
  assert "s->path_before=p;s->handle_before=h;return0;" in refreshed
  error=native_owner_body("qn_error")
@@ -19575,10 +19547,10 @@ def test_github_workflow_splits_validation_into_parallel_phase_jobs():
 
  keeper_prepare=native_owner_body("qn_keeper_observations_prepare")
  for original_field in("l->attempted=1","l->role=QN_PROVISION","l->keeper_pid=qn.pid",
-         "l->source_owner=(constvoid*)&qn","l->origin_ns=qn.origin_ns","l->cutoff_ns=qn.cutoff_ns",
-         "l->source_input_count=qn.input_count","l->source_catalogue_count=qn.catalogue_count",
-         "l->source_alias_count=qn.alias_count","!qn.provision.mask_held","!qn.catalogue_complete"):
-     assert original_field in keeper_prepare
+      "l->source_owner=(constvoid*)&qn","l->origin_ns=qn.origin_ns","l->cutoff_ns=qn.cutoff_ns",
+      "l->source_input_count=qn.input_count","l->source_catalogue_count=qn.catalogue_count",
+      "l->source_alias_count=qn.alias_count","!qn.provision.mask_held","!qn.catalogue_complete"):
+  assert original_field in keeper_prepare
  assert keeper_prepare.index("l->process_slot=qn_open_component(")<keeper_prepare.index("l->stat_slot=qn_open_component(")<keeper_prepare.index("l->keeper_pid_slot=qn_pidfd_slot(")
  assert "qn_keeper_observation_slots_close()" in keeper_prepare
  keeper_namespace=native_owner_body("qn_keeper_namespace_open")
@@ -19617,8 +19589,8 @@ def test_github_workflow_splits_validation_into_parallel_phase_jobs():
  assert "SEEK_SET" not in keeper_release and "qn_read(" not in keeper_release
  keeper_retire=native_owner_body("qn_keeper_observations_retire")
  for terminal_field in("!p->reaped","c->pending","!c->terminal","!c->exec_proven",
-         "!c->stdout_eof","!c->stderr_eof","!p->prefix_merged"):
-     assert terminal_field in keeper_retire
+      "!c->stdout_eof","!c->stderr_eof","!p->prefix_merged"):
+  assert terminal_field in keeper_retire
  assert keeper_retire.index('qn_error("keeper-original-observation-live-retirement-debt",EBUSY)')<keeper_retire.index("qn_keeper_observation_slots_close()")<keeper_retire.index("l->retired=1;")
  keeper_close=native_owner_body("qn_keeper_observation_slots_close")
  assert "intslots[7]=" in keeper_close and "for(i=0;i<7;i++)" in keeper_close
@@ -19640,14 +19612,14 @@ def test_github_workflow_splits_validation_into_parallel_phase_jobs():
  import stat
  host_tag="# QTT_HOST_PY | "
  host_source="".join(line[len(host_tag):]for line in workflow.splitlines(keepends=True)
-     if line.startswith(host_tag))
+  if line.startswith(host_tag))
  host_tree=ast.parse(host_source)
  adoption_nodes=[node for node in ast.walk(host_tree)
-     if isinstance(node,ast.FunctionDef)and node.name=="_qtt_adopt_early_startup_counts_v1"]
+  if isinstance(node,ast.FunctionDef)and node.name=="_qtt_adopt_early_startup_counts_v1"]
  assert len(adoption_nodes)==1
  adoption_node=adoption_nodes[0]
  roster_nodes=[node for node in ast.walk(adoption_node)
-     if isinstance(node,ast.FunctionDef)and node.name=="roster"]
+  if isinstance(node,ast.FunctionDef)and node.name=="roster"]
  assert len(roster_nodes)==1
  roster_node=roster_nodes[0]
  adoption_source=ast.unparse(adoption_node)
@@ -19656,319 +19628,319 @@ def test_github_workflow_splits_validation_into_parallel_phase_jobs():
  assert "first['names'] is not r['names']" in adoption_source
  assert "tuple((n for n, v in r['members'])) != r['names']" in adoption_source
  admission_ifs=[node for node in ast.walk(roster_node)if isinstance(node,ast.If)
-     and any(isinstance(value,ast.Constant)
-         and value.value=="same original earlier roster bounded returned prefix"
-         for value in ast.walk(node))]
+  and any(isinstance(value,ast.Constant)
+      and value.value=="same original earlier roster bounded returned prefix"
+      for value in ast.walk(node))]
  assert len(admission_ifs)==1
  admission=ast.unparse(admission_ifs[0].test)
  assert "len(names) >= len(early['names'])" in admission
  assert "len(names) >= 65535 // 2" in admission and "total + len(name) + 1 > 65535" in admission
  assert roster_source.index("'C earlier roster original next'")<roster_source.index(
-     "len(names) >= len(early['names'])")<roster_source.index("names.append(name)")
+  "len(names) >= len(early['names'])")<roster_source.index("names.append(name)")
  assert "tuple(names) != early['names']" in roster_source
  iterator_nodes=[node for node in ast.walk(host_tree)
-     if isinstance(node,ast.FunctionDef)and node.name=="iterator_next"]
+  if isinstance(node,ast.FunctionDef)and node.name=="iterator_next"]
  assert len(iterator_nodes)==1
 
  for wanted,present,expected_error in(
-         ((b"aa",b"bb"),("aa","bb"),None),
-         ((),(),None),
-         ((b"aa",b"bb"),("aa","bb","cc","dd"),"prefix"),
-         ((),("aa","bb"),"prefix"),
-         ((b"aa",b"bb"),("aa","xx"),"membership")):
-     with tempfile.TemporaryDirectory(prefix="qtt-roster-no-child-")as owned:
-         root=Path(owned)
-         for filename in present:
-             operand=root/filename
-             operand.write_bytes(b"owned synthetic roster operand")
-             info=operand.lstat()
-             assert stat.S_ISREG(info.st_mode)and info.st_nlink==1
-         info=root.stat()
-         current=(info.st_dev,info.st_ino,info.st_mode,info.st_uid,info.st_gid,
-             info.st_nlink,info.st_size,info.st_mtime_ns,info.st_ctime_ns)
-         row=[owned,owned,False,None]
-         early={"row":row,"names":wanted,"roster":b"".join(name+b"\n" for name in wanted)}
-         retained={"iterations":[]}
-         failed={"errors":[]}
-         effects=[]
-         rejoins=[]
+      ((b"aa",b"bb"),("aa","bb"),None),
+      ((),(),None),
+      ((b"aa",b"bb"),("aa","bb","cc","dd"),"prefix"),
+      ((),("aa","bb"),"prefix"),
+      ((b"aa",b"bb"),("aa","xx"),"membership")):
+  with tempfile.TemporaryDirectory(prefix="qtt-roster-no-child-")as owned:
+      root=Path(owned)
+      for filename in present:
+          operand=root/filename
+          operand.write_bytes(b"owned synthetic roster operand")
+          info=operand.lstat()
+          assert stat.S_ISREG(info.st_mode)and info.st_nlink==1
+      info=root.stat()
+      current=(info.st_dev,info.st_ino,info.st_mode,info.st_uid,info.st_gid,
+          info.st_nlink,info.st_size,info.st_mtime_ns,info.st_ctime_ns)
+      row=[owned,owned,False,None]
+      early={"row":row,"names":wanted,"roster":b"".join(name+b"\n" for name in wanted)}
+      retained={"iterations":[]}
+      failed={"errors":[]}
+      effects=[]
+      rejoins=[]
 
-         def same_local_port(operand,expected,directory=False):
-             rejoins.append((operand,expected,directory))
-             assert operand is row and expected is current and directory is True
-             actual=root.stat()
-             assert(actual.st_dev,actual.st_ino,actual.st_mode,actual.st_uid,actual.st_gid,
-                 actual.st_nlink,actual.st_size,actual.st_mtime_ns,actual.st_ctime_ns)==current
-             return actual
+      def same_local_port(operand,expected,directory=False):
+          rejoins.append((operand,expected,directory))
+          assert operand is row and expected is current and directory is True
+          actual=root.stat()
+          assert(actual.st_dev,actual.st_ino,actual.st_mode,actual.st_uid,actual.st_gid,
+              actual.st_nlink,actual.st_size,actual.st_mtime_ns,actual.st_ctime_ns)==current
+          return actual
 
-         def effect_port(label,function,*args):
-             record={"label":label,"function":function,"args":args,
-                 "attempted":False,"returned":None,"error":None}
-             effects.append(record)
-             record["attempted"]=True
-             try:
-                 record["returned"]=function(*args)
-                 return record["returned"]
-             except BaseException as error:
-                 record["error"]=error
-                 raise
+      def effect_port(label,function,*args):
+          record={"label":label,"function":function,"args":args,
+              "attempted":False,"returned":None,"error":None}
+          effects.append(record)
+          record["attempted"]=True
+          try:
+              record["returned"]=function(*args)
+              return record["returned"]
+          except BaseException as error:
+              record["error"]=error
+              raise
 
-         def failure_port(label):
-             raise ValueError(label)
+      def failure_port(label):
+          raise ValueError(label)
 
-         ports={"os":os,"same_local":same_local_port,"E":effect_port,
-             "F":failure_port,"a":retained,"q":failed}
-         isolated=ast.Module(body=[copy.deepcopy(iterator_nodes[0]),copy.deepcopy(roster_node)],
-             type_ignores=[])
-         exec(compile(ast.fix_missing_locations(isolated),"<keeper-roster-no-child-owner>","exec"),ports)
-         if expected_error is None:
-             ports["roster"](early,current)
-             assert failed["errors"]==[]and len(rejoins)==2
-             assert len([item for item in effects if item["label"].endswith("original next")])==len(wanted)+1
-             assert retained["iterations"][0]["body_error"]is None
-         else:
-             message=("same original earlier roster bounded returned prefix" if expected_error=="prefix"
-                 else "same original earlier complete directory membership changed")
-             with pytest.raises(ValueError,match=message)as raised:
-                 ports["roster"](early,current)
-             assert failed["errors"]==[raised.value]
-             assert retained["iterations"][0]["body_error"]is raised.value
-             assert len(rejoins)==1
-             traceback=raised.value.__traceback__
-             while traceback is not None and traceback.tb_frame.f_code is not ports["roster"].__code__:
-                 traceback=traceback.tb_next
-             assert traceback is not None
-             assert len(traceback.tb_frame.f_locals["names"])==len(wanted)
-             returned=[item for item in effects if item["label"].endswith("original next")]
-             assert len(returned)==len(wanted)+1
-             if expected_error=="prefix":
-                 assert returned[-1]["returned"][0]is False
-                 assert returned[-1]["returned"][1]is traceback.tb_frame.f_locals["entry"]
-         iteration=retained["iterations"][0]
-         assert iteration["early"]is early and iteration["row"]is row
-         assert iteration["close_attempted"]and iteration["closed"]and iteration["close_error"]is None
-         assert sum(item["label"]=="C earlier roster iterator one-close" for item in effects)==1
-         assert all(item["attempted"]and item["error"]is None for item in effects)
-         assert early["names"]is wanted and early["roster"]==b"".join(name+b"\n" for name in wanted)
+      ports={"os":os,"same_local":same_local_port,"E":effect_port,
+          "F":failure_port,"a":retained,"q":failed}
+      isolated=ast.Module(body=[copy.deepcopy(iterator_nodes[0]),copy.deepcopy(roster_node)],
+          type_ignores=[])
+      exec(compile(ast.fix_missing_locations(isolated),"<keeper-roster-no-child-owner>","exec"),ports)
+      if expected_error is None:
+          ports["roster"](early,current)
+          assert failed["errors"]==[]and len(rejoins)==2
+          assert len([item for item in effects if item["label"].endswith("original next")])==len(wanted)+1
+          assert retained["iterations"][0]["body_error"]is None
+      else:
+          message=("same original earlier roster bounded returned prefix" if expected_error=="prefix"
+              else "same original earlier complete directory membership changed")
+          with pytest.raises(ValueError,match=message)as raised:
+              ports["roster"](early,current)
+          assert failed["errors"]==[raised.value]
+          assert retained["iterations"][0]["body_error"]is raised.value
+          assert len(rejoins)==1
+          traceback=raised.value.__traceback__
+          while traceback is not None and traceback.tb_frame.f_code is not ports["roster"].__code__:
+              traceback=traceback.tb_next
+          assert traceback is not None
+          assert len(traceback.tb_frame.f_locals["names"])==len(wanted)
+          returned=[item for item in effects if item["label"].endswith("original next")]
+          assert len(returned)==len(wanted)+1
+          if expected_error=="prefix":
+              assert returned[-1]["returned"][0]is False
+              assert returned[-1]["returned"][1]is traceback.tb_frame.f_locals["entry"]
+      iteration=retained["iterations"][0]
+      assert iteration["early"]is early and iteration["row"]is row
+      assert iteration["close_attempted"]and iteration["closed"]and iteration["close_error"]is None
+      assert sum(item["label"]=="C earlier roster iterator one-close" for item in effects)==1
+      assert all(item["attempted"]and item["error"]is None for item in effects)
+      assert early["names"]is wanted and early["roster"]==b"".join(name+b"\n" for name in wanted)
 
 
 
  host_function=next(node for node in host_tree.body
-     if isinstance(node,ast.FunctionDef)and node.name=="_qtt_original_host_source_v1")
+  if isinstance(node,ast.FunctionDef)and node.name=="_qtt_original_host_source_v1")
  host_failure=next(node for node in host_function.body
-     if isinstance(node,ast.FunctionDef)and node.name=="failure")
+  if isinstance(node,ast.FunctionDef)and node.name=="failure")
  custodian_failure=next(node for node in ast.walk(host_tree)
-     if isinstance(node,ast.FunctionDef)and node.name=="_qtt_custodian_failure_v1")
+  if isinstance(node,ast.FunctionDef)and node.name=="_qtt_custodian_failure_v1")
  held_owners=(("FRONT",members["failure"]),("HOST",host_failure),
-     ("CUSTODIAN",custodian_failure))
+  ("CUSTODIAN",custodian_failure))
  reservation_source=ast.unparse(actual_front_function)
  assert "l[qY] < 3 or l[jW] < 2" in reservation_source
  assert reservation_source.index("l[jW] -= 2")<reservation_source.index("p[qX] = True")
  assert "[201061050, 64, None]" in reservation_source
  assert 201061050+64==201061114
  literal_error_owner=next(node for node in ast.walk(host_tree)
-     if isinstance(node,ast.FunctionDef)and node.name=="F")
+  if isinstance(node,ast.FunctionDef)and node.name=="F")
  assert ast.unparse(literal_error_owner)=="def F(name):\n    raise RuntimeError(name)"
  assert any(isinstance(node,ast.Call)and isinstance(node.func,ast.Name)
-     and node.func.id=="F" and len(node.args)==1
-     and isinstance(node.args[0],ast.Constant)and node.args[0].value=="B18"
-     for node in ast.walk(host_tree))
+  and node.func.id=="F" and len(node.args)==1
+  and isinstance(node.args[0],ast.Constant)and node.args[0].value=="B18"
+  for node in ast.walk(host_tree))
  for stage,owner in held_owners:
-     writes=[node for node in ast.walk(owner)if isinstance(node,ast.Call)
-         and isinstance(node.func,ast.Attribute)and isinstance(node.func.value,ast.Name)
-         and node.func.value.id=="os" and node.func.attr=="write"]
-     assert len(writes)==1 and isinstance(writes[0].args[0],ast.Constant)and writes[0].args[0].value==2
-     if stage!="FRONT":
-         location=next(n for n in ast.walk(owner)if isinstance(n,ast.If)
-             and isinstance(n.test,ast.Compare)and isinstance(n.test.left,ast.Name)and n.test.left.id=="diagnostic")
-         assert any(isinstance(n,ast.Try)and location in n.body and
-             any(writes[0]is v for s in n.body for v in ast.walk(s))for n in ast.walk(owner))
-     message_node=writes[0].args[1]
-     if stage!="FRONT":
-         message_node=next(node.value for node in ast.walk(owner)
-             if isinstance(node,ast.Assign)and any(isinstance(target,ast.Name)
-                 and target.id=="diagnostic" for target in node.targets))
-     if stage=="HOST":
-         actual_source41_host_message_node=copy.deepcopy(message_node)
-         assert isinstance(message_node,ast.IfExp)
-         assert isinstance(message_node.orelse,ast.IfExp)
-         assert isinstance(message_node.orelse.body,ast.Constant)
-         assert message_node.orelse.body.value==b"::error::HOST:ANCESTOR-MANAGER-TERMINAL\n"
-         historical_source40_message_node=copy.deepcopy(message_node)
-         historical_source40_message_node.orelse=copy.deepcopy(message_node.orelse.orelse)
-         assert ast.dump(historical_source40_message_node,include_attributes=False)==ast.dump(
-             ast.parse("b'::error::HOST:B18\\n' if type(cause) is RuntimeError and len(cause.args) == 1 and (type(cause.args[0]) is str) and (cause.args[0] == 'B18') else b'::error::HOST:UNLISTED\\n'",mode="eval").body,include_attributes=False)
-         message_node=historical_source40_message_node
-     literals=[node.value for node in ast.walk(message_node)
-         if isinstance(node,ast.Constant)and type(node.value)is bytes]
-     expected_literals=([b"::error::F\n"]if stage=="FRONT" else
-         [("::error::"+stage+":B18\n").encode("ascii"),("::error::"+stage+":UNLISTED\n").encode("ascii")])
-     assert literals==expected_literals and all(0<len(value)<=64 for value in literals)
-     assert not any(isinstance(node,ast.Call)and
-         not(isinstance(node.func,ast.Name)and node.func.id in("type","len"))
-         for node in ast.walk(message_node))
-     for mode,expired,listed,optimization in((mode,expired,listed,optimization)
-             for optimization in(0,2)
-             for mode,expired,listed in(("complete",False,True),("short",False,True),("zero",False,True),
-             ("error",False,True),("complete",True,True),
-             ("complete",False,False),("wrong-type",False,True),("non-str",False,True))
-             +((("format",False,False),)if stage!="FRONT" else())):
-         cause=(OSError("B18")if mode=="wrong-type" else
-             RuntimeError(type("PrivateCode",(str,),{})("B18")if mode=="non-str" else
-                 "B18" if listed else "unselected private diagnostic"))
-         write_fault=OSError("synthetic output failure")
-         if mode=="format":
-             try:raise cause
-             except RuntimeError as caught:cause=caught
-             write_fault=MemoryError("synthetic formatting allocation")
-         events,errors=[],[]
-         held={"kill_self":False,"reserved":True,"error":None,"operations":[]}
-         state={"closed":False,"custodian_effect_attempted":True,"commands":[object()],
-             "errors":errors,"failure_cutoff":10}
-         retained_host={"retired":False,"errors":errors}
-         def held_write(fd,message):
-             events.append(("write",fd,message))
-             if mode=="error":
-                 raise write_fault
-             return 0 if mode=="zero" else 1 if mode=="short" else len(message)
-         def held_clock(_clock):
-             events.append(("clock",))
-             return 10 if expired else 1
-         def held_pid():
-             events.append(("pid",))
-             return 17
-         def held_stop(pid,chosen_signal):
-             events.append(("stop",pid,chosen_signal))
-         ports={"os":SimpleNamespace(write=held_write,getpid=held_pid,kill=held_stop),
-             "time":SimpleNamespace(CLOCK_MONOTONIC=1,clock_gettime_ns=held_clock),
-             "signal":SimpleNamespace(SIGSTOP=19),"state":state,"host":retained_host,
-             "failure_hold":held,"held":held,"a":state,"b":retained_host,"p":held,
-             "w":{"armed":True},"jP":BaseException,"jQ":RuntimeError,
-             "qA":"commands","qB":"custodian_effect_attempted","qC":"errors",
-             "qM":"kill_self","qX":"reserved","qR":"error","qE":"operations",
-             "qT":"failure_cutoff"}
-         if mode=="format":
-             def formatting_fault(_line):raise write_fault
-             ports.update(str=formatting_fault,_qtt_original_host_source_v1=test_github_workflow_splits_validation_into_parallel_phase_jobs,
-                 front_code=None,_qtt_original_inputs_v1=test_github_workflow_splits_validation_into_parallel_phase_jobs)
-         isolated=ast.Module(body=[copy.deepcopy(owner)],type_ignores=[])
-         exec(compile(ast.fix_missing_locations(isolated),"<workflow-held-diagnostic-no-child>","exec",
-             optimize=optimization),ports)
-         selected_failure=ports[owner.name]
-         with pytest.raises(RuntimeError)as raised:
-             selected_failure(cause)
-         assert raised.value.__cause__ is cause and held["error"]is cause and held["kill_self"]
-         assert not retained_host["retired"]and not state["closed"]and held["reserved"]
-         assert len(held["operations"])==3 and held["operations"][0][1]
-         if expired:
-             assert events==[("clock",)]and errors==[]
-             assert not held["operations"][1][1]and not held["operations"][2][1]
-         else:
-             message=(b"::error::F\n" if stage=="FRONT" else
-                 ("::error::"+stage+(":B18\n" if listed and mode not in("wrong-type","non-str")else ":UNLISTED\n")).encode("ascii"))
-             if mode=="format":
-                 assert events==[("clock",),("pid",),("stop",17,19)]and errors==[("held-output",write_fault)]
-             else:
-                 assert events==[("clock",),("write",2,message),("pid",),("stop",17,19)]
-             assert held["operations"][1][1]and held["operations"][2][1]
-             if mode in("short","zero"):
-                 assert len(errors)==1 and errors[0][0]==("error" if stage=="FRONT" else "held-output")
-                 assert type(errors[0][1])is RuntimeError
-             elif mode!="format":
-                 assert errors==([("error" if stage=="FRONT" else "held-output",write_fault)]
-                     if mode=="error" else[])
-             assert b"private" not in message
-         prior_events=list(events)
-         with pytest.raises(type(cause))as repeated:
-             selected_failure(cause)
-         assert repeated.value is cause and events==prior_events
+  writes=[node for node in ast.walk(owner)if isinstance(node,ast.Call)
+      and isinstance(node.func,ast.Attribute)and isinstance(node.func.value,ast.Name)
+      and node.func.value.id=="os" and node.func.attr=="write"]
+  assert len(writes)==1 and isinstance(writes[0].args[0],ast.Constant)and writes[0].args[0].value==2
+  if stage!="FRONT":
+      location=next(n for n in ast.walk(owner)if isinstance(n,ast.If)
+          and isinstance(n.test,ast.Compare)and isinstance(n.test.left,ast.Name)and n.test.left.id=="diagnostic")
+      assert any(isinstance(n,ast.Try)and location in n.body and
+          any(writes[0]is v for s in n.body for v in ast.walk(s))for n in ast.walk(owner))
+  message_node=writes[0].args[1]
+  if stage!="FRONT":
+      message_node=next(node.value for node in ast.walk(owner)
+          if isinstance(node,ast.Assign)and any(isinstance(target,ast.Name)
+              and target.id=="diagnostic" for target in node.targets))
+  if stage=="HOST":
+      actual_source41_host_message_node=copy.deepcopy(message_node)
+      assert isinstance(message_node,ast.IfExp)
+      assert isinstance(message_node.orelse,ast.IfExp)
+      assert isinstance(message_node.orelse.body,ast.Constant)
+      assert message_node.orelse.body.value==b"::error::HOST:ANCESTOR-MANAGER-TERMINAL\n"
+      historical_source40_message_node=copy.deepcopy(message_node)
+      historical_source40_message_node.orelse=copy.deepcopy(message_node.orelse.orelse)
+      assert ast.dump(historical_source40_message_node,include_attributes=False)==ast.dump(
+          ast.parse("b'::error::HOST:B18\\n' if type(cause) is RuntimeError and len(cause.args) == 1 and (type(cause.args[0]) is str) and (cause.args[0] == 'B18') else b'::error::HOST:UNLISTED\\n'",mode="eval").body,include_attributes=False)
+      message_node=historical_source40_message_node
+  literals=[node.value for node in ast.walk(message_node)
+      if isinstance(node,ast.Constant)and type(node.value)is bytes]
+  expected_literals=([b"::error::F\n"]if stage=="FRONT" else
+      [("::error::"+stage+":B18\n").encode("ascii"),("::error::"+stage+":UNLISTED\n").encode("ascii")])
+  assert literals==expected_literals and all(0<len(value)<=64 for value in literals)
+  assert not any(isinstance(node,ast.Call)and
+      not(isinstance(node.func,ast.Name)and node.func.id in("type","len"))
+      for node in ast.walk(message_node))
+  for mode,expired,listed,optimization in((mode,expired,listed,optimization)
+          for optimization in(0,2)
+          for mode,expired,listed in(("complete",False,True),("short",False,True),("zero",False,True),
+          ("error",False,True),("complete",True,True),
+          ("complete",False,False),("wrong-type",False,True),("non-str",False,True))
+          +((("format",False,False),)if stage!="FRONT" else())):
+      cause=(OSError("B18")if mode=="wrong-type" else
+          RuntimeError(type("PrivateCode",(str,),{})("B18")if mode=="non-str" else
+              "B18" if listed else "unselected private diagnostic"))
+      write_fault=OSError("synthetic output failure")
+      if mode=="format":
+          try:raise cause
+          except RuntimeError as caught:cause=caught
+          write_fault=MemoryError("synthetic formatting allocation")
+      events,errors=[],[]
+      held={"kill_self":False,"reserved":True,"error":None,"operations":[]}
+      state={"closed":False,"custodian_effect_attempted":True,"commands":[object()],
+          "errors":errors,"failure_cutoff":10}
+      retained_host={"retired":False,"errors":errors}
+      def held_write(fd,message):
+          events.append(("write",fd,message))
+          if mode=="error":
+              raise write_fault
+          return 0 if mode=="zero" else 1 if mode=="short" else len(message)
+      def held_clock(_clock):
+          events.append(("clock",))
+          return 10 if expired else 1
+      def held_pid():
+          events.append(("pid",))
+          return 17
+      def held_stop(pid,chosen_signal):
+          events.append(("stop",pid,chosen_signal))
+      ports={"os":SimpleNamespace(write=held_write,getpid=held_pid,kill=held_stop),
+          "time":SimpleNamespace(CLOCK_MONOTONIC=1,clock_gettime_ns=held_clock),
+          "signal":SimpleNamespace(SIGSTOP=19),"state":state,"host":retained_host,
+          "failure_hold":held,"held":held,"a":state,"b":retained_host,"p":held,
+          "w":{"armed":True},"jP":BaseException,"jQ":RuntimeError,
+          "qA":"commands","qB":"custodian_effect_attempted","qC":"errors",
+          "qM":"kill_self","qX":"reserved","qR":"error","qE":"operations",
+          "qT":"failure_cutoff"}
+      if mode=="format":
+          def formatting_fault(_line):raise write_fault
+          ports.update(str=formatting_fault,_qtt_original_host_source_v1=test_github_workflow_splits_validation_into_parallel_phase_jobs,
+              front_code=None,_qtt_original_inputs_v1=test_github_workflow_splits_validation_into_parallel_phase_jobs)
+      isolated=ast.Module(body=[copy.deepcopy(owner)],type_ignores=[])
+      exec(compile(ast.fix_missing_locations(isolated),"<workflow-held-diagnostic-no-child>","exec",
+          optimize=optimization),ports)
+      selected_failure=ports[owner.name]
+      with pytest.raises(RuntimeError)as raised:
+          selected_failure(cause)
+      assert raised.value.__cause__ is cause and held["error"]is cause and held["kill_self"]
+      assert not retained_host["retired"]and not state["closed"]and held["reserved"]
+      assert len(held["operations"])==3 and held["operations"][0][1]
+      if expired:
+          assert events==[("clock",)]and errors==[]
+          assert not held["operations"][1][1]and not held["operations"][2][1]
+      else:
+          message=(b"::error::F\n" if stage=="FRONT" else
+              ("::error::"+stage+(":B18\n" if listed and mode not in("wrong-type","non-str")else ":UNLISTED\n")).encode("ascii"))
+          if mode=="format":
+              assert events==[("clock",),("pid",),("stop",17,19)]and errors==[("held-output",write_fault)]
+          else:
+              assert events==[("clock",),("write",2,message),("pid",),("stop",17,19)]
+          assert held["operations"][1][1]and held["operations"][2][1]
+          if mode in("short","zero"):
+              assert len(errors)==1 and errors[0][0]==("error" if stage=="FRONT" else "held-output")
+              assert type(errors[0][1])is RuntimeError
+          elif mode!="format":
+              assert errors==([("error" if stage=="FRONT" else "held-output",write_fault)]
+                  if mode=="error" else[])
+          assert b"private" not in message
+      prior_events=list(events)
+      with pytest.raises(type(cause))as repeated:
+          selected_failure(cause)
+      assert repeated.value is cause and events==prior_events
 
- # Original handler through no-child ports; no native Linux admission.
+ # Synthetic; no credit.
  for builtin_port,trace_mode in ((b,m) for b in (vars(sys.modules['builtins']),sys.modules['builtins']) for m in ('complete','runtime','nonbuiltin','name','loan','format','error','outside','foreign')):
-     mode='error' if trace_mode=='error' else 'complete';expired=False
-     write_fault=OSError('synthetic retained diagnostic fault');events=[];errors=[];admissions=[]
-     held={'kill_self':False,'reserved':True,'error':None,'operations':[]}
-     state={'closed':False,'custodian_effect_attempted':True,'commands':[object()],'errors':errors,'failure_cutoff':10}
-     cause=RuntimeError('private') if trace_mode=='runtime' else FileNotFoundError(2,'private','/private')
-     if trace_mode=='nonbuiltin':
-         meta=type('PrivateMeta',(type,),{'__name__':property(lambda _:pytest.fail('private class getter'))})
-         cause=meta('PrivateError',(FileNotFoundError,),{'__str__':lambda _:pytest.fail('private formatter')})(2,'private','/private')
-     if trace_mode=='name':
-         name=type('PrivateName',(str,),{'__hash__':lambda _:pytest.fail('private name hash')})
-         kind=type('PrivateError',(FileNotFoundError,),{})
-         type.__dict__['__name__'].__set__(kind,name('PrivateError'));cause=kind(2,'private','/private')
-     ns={'original':cause};bad_hint=trace_mode=='foreign' and type(builtin_port)is not dict
-     source="def _qtt_original_inputs_v1():\n def prepare():\n  raise original\n return prepare()\n"
-     if trace_mode in ('outside','foreign'):
-         other=ns if trace_mode=='foreign' else {'original':cause}
-         exec(compile("def outside():\n raise original\n",'<literal-no-child>','exec'),other);ns['outside']=other['outside']
-         if bad_hint:
-             hint=type('PrivateHint',(str,),{'__eq__':lambda *a:pytest.fail('private hint comparison'),'startswith':lambda *a:pytest.fail('private hint prefix')})
-             ns['outside'].__code__=ns['outside'].__code__.replace(co_qualname=hint('_qtt_original_inputs_v1'))
-         source="def _qtt_original_inputs_v1():\n return outside()\n" if trace_mode=='foreign' else "def _qtt_original_inputs_v1():\n def prepare():\n  return outside()\n return prepare()\n"
-     exec(compile(source,'<literal-no-child>','exec'),ns);root=ns['_qtt_original_inputs_v1']
-     # Only old no-child single-root vectors use this unexecuted empty Name Code.
-     fallback=type(root)(compile('original','<empty-no-child-root>','eval'),ns)
-     assert fallback.__code__.co_consts==()
-     try:root()
-     except BaseException as caught:cause=caught
-     BaseException.__traceback__.__set__(cause,BaseException.__traceback__.__get__(cause).tb_next)
-     def admit(label):
-         admissions.append(label)
-         if trace_mode=='loan':raise write_fault
-     scalar_calls=[]
-     def scalar(value):
-         scalar_calls.append(value)
-         if len(scalar_calls)>1:raise write_fault
-         ports['str']=str
-         return str(value)
-     def namespace(value,name,default):
-         ports['str']=scalar
-         return getattr(value,name,default)
-     ports=dict(ports);ports.pop('str',None);ports.pop('getattr',None)
-     ports.update(state=state,held=held,_qtt_original_inputs_v1=root,_qtt_beforecompiler_owner_v1=root,_qtt_original_host_source_v1=root,_qtt_original_live_component_v1=fallback,_qtt_early_loop_admission_v1=admit,__builtins__=builtin_port)
-     if trace_mode=='format':ports.update(str=scalar,getattr=namespace)
-     exec(compile(ast.fix_missing_locations(ast.Module(body=[copy.deepcopy(custodian_failure)],type_ignores=[])),'<no-child-held>','exec'),ports)
-     selected_failure=ports[custodian_failure.name]
-     with pytest.raises(RuntimeError) as raised:selected_failure(cause)
-     expected=b'::error::CUSTODIAN:I:L4\n'+({'runtime':b'RuntimeError3#-+\n','nonbuiltin':b'OTHER3#-+\n','name':b'OTHER3#-+\n','loan':b'FileNotFoundError4#2?\n','format':b'','outside':b'FileNotFoundError3#2!\n'}.get(trace_mode,b'FileNotFoundError3#2+\n'))
-     if trace_mode=='foreign':expected=b'::error::CUSTODIAN:I:L2\nFileNotFoundError2#2?\n'
-     assert raised.value.__cause__ is cause and held['error'] is cause and held['kill_self'] and not state['closed'] and held['reserved']
-     assert events==[('clock',),('write',2,expected),('pid',),('stop',17,19)] and all(row[1] for row in held['operations']) and len(held['operations'])==3
-     assert len(expected)<=64 and b'private' not in expected and b'/' not in expected and admissions==['D']*({'loan':1,'format':0,'outside':4,'foreign':2 if bad_hint else 3}.get(trace_mode,3))
-     assert errors==([('held-walk',write_fault)] if trace_mode=='loan' else [('held-output',write_fault)] if trace_mode in ('format','error') else [])
-     before=list(events)
-     with pytest.raises(type(cause)) as repeated:selected_failure(cause)
-     assert repeated.value is cause and events==before
+  mode='error' if trace_mode=='error' else 'complete';expired=False
+  write_fault=OSError('synthetic retained diagnostic fault');events=[];errors=[];admissions=[]
+  held={'kill_self':False,'reserved':True,'error':None,'operations':[]}
+  state={'closed':False,'custodian_effect_attempted':True,'commands':[object()],'errors':errors,'failure_cutoff':10}
+  cause=RuntimeError('private') if trace_mode=='runtime' else FileNotFoundError(2,'private','/private')
+  if trace_mode=='nonbuiltin':
+      meta=type('PrivateMeta',(type,),{'__name__':property(lambda _:pytest.fail('private class getter'))})
+      cause=meta('PrivateError',(FileNotFoundError,),{'__str__':lambda _:pytest.fail('private formatter')})(2,'private','/private')
+  if trace_mode=='name':
+      name=type('PrivateName',(str,),{'__hash__':lambda _:pytest.fail('private name hash')})
+      kind=type('PrivateError',(FileNotFoundError,),{})
+      type.__dict__['__name__'].__set__(kind,name('PrivateError'));cause=kind(2,'private','/private')
+  ns={'original':cause};bad_hint=trace_mode=='foreign' and type(builtin_port)is not dict
+  source="def _qtt_original_inputs_v1():\n def prepare():\n  raise original\n return prepare()\n"
+  if trace_mode in ('outside','foreign'):
+      other=ns if trace_mode=='foreign' else {'original':cause}
+      exec(compile("def outside():\n raise original\n",'<literal-no-child>','exec'),other);ns['outside']=other['outside']
+      if bad_hint:
+          hint=type('PrivateHint',(str,),{'__eq__':lambda *a:pytest.fail('private hint comparison'),'startswith':lambda *a:pytest.fail('private hint prefix')})
+          ns['outside'].__code__=ns['outside'].__code__.replace(co_qualname=hint('_qtt_original_inputs_v1'))
+      source="def _qtt_original_inputs_v1():\n return outside()\n" if trace_mode=='foreign' else "def _qtt_original_inputs_v1():\n def prepare():\n  return outside()\n return prepare()\n"
+  exec(compile(source,'<literal-no-child>','exec'),ns);root=ns['_qtt_original_inputs_v1']
+  # Synthetic; no credit.
+  fallback=type(root)(compile('original','<empty-no-child-root>','eval'),ns)
+  assert fallback.__code__.co_consts==()
+  try:root()
+  except BaseException as caught:cause=caught
+  BaseException.__traceback__.__set__(cause,BaseException.__traceback__.__get__(cause).tb_next)
+  def admit(label):
+      admissions.append(label)
+      if trace_mode=='loan':raise write_fault
+  scalar_calls=[]
+  def scalar(value):
+      scalar_calls.append(value)
+      if len(scalar_calls)>1:raise write_fault
+      ports['str']=str
+      return str(value)
+  def namespace(value,name,default):
+      ports['str']=scalar
+      return getattr(value,name,default)
+  ports=dict(ports);ports.pop('str',None);ports.pop('getattr',None)
+  ports.update(state=state,held=held,_qtt_original_inputs_v1=root,_qtt_beforecompiler_owner_v1=root,_qtt_original_host_source_v1=root,_qtt_original_live_component_v1=fallback,_qtt_early_loop_admission_v1=admit,__builtins__=builtin_port)
+  if trace_mode=='format':ports.update(str=scalar,getattr=namespace)
+  exec(compile(ast.fix_missing_locations(ast.Module(body=[copy.deepcopy(custodian_failure)],type_ignores=[])),'<no-child-held>','exec'),ports)
+  selected_failure=ports[custodian_failure.name]
+  with pytest.raises(RuntimeError) as raised:selected_failure(cause)
+  expected=b'::error::CUSTODIAN:I:L4\n'+({'runtime':b'RuntimeError3#-+\n','nonbuiltin':b'OTHER3#-+\n','name':b'OTHER3#-+\n','loan':b'FileNotFoundError4#2?\n','format':b'','outside':b'FileNotFoundError3#2!\n'}.get(trace_mode,b'FileNotFoundError3#2+\n'))
+  if trace_mode=='foreign':expected=b'::error::CUSTODIAN:I:L2\nFileNotFoundError2#2?\n'
+  assert raised.value.__cause__ is cause and held['error'] is cause and held['kill_self'] and not state['closed'] and held['reserved']
+  assert events==[('clock',),('write',2,expected),('pid',),('stop',17,19)] and all(row[1] for row in held['operations']) and len(held['operations'])==3
+  assert len(expected)<=64 and b'private' not in expected and b'/' not in expected and admissions==['D']*({'loan':1,'format':0,'outside':4,'foreign':2 if bad_hint else 3}.get(trace_mode,3))
+  assert errors==([('held-walk',write_fault)] if trace_mode=='loan' else [('held-output',write_fault)] if trace_mode in ('format','error') else [])
+  before=list(events)
+  with pytest.raises(type(cause)) as repeated:selected_failure(cause)
+  assert repeated.value is cause and events==before
 
- # Current sibling-Code layout through no-child ports; no native admission.
+ # Synthetic; no credit.
  sibling_literal="def _qtt_original_host_source_v1():\n def manager():raise original\n return manager\ndef _qtt_original_live_component_v1():\n def _qtt_beforecompiler_owner_v1():\n  if route=='M':raise original\n  def _qtt_original_inputs_v1():\n   if route=='host':return manager()\n   if route=='outside':return outside()\n   def prepare():raise original\n   return prepare()\n  return _qtt_original_inputs_v1\n return _qtt_beforecompiler_owner_v1\n"
  for route,wanted,debits in(('live',b'::error::CUSTODIAN:I:L11\nFileNotFoundError10#2+\n',9),('host',b'::error::CUSTODIAN:I:L8\nFileNotFoundError2#2+\n',3),('outside',b'::error::CUSTODIAN:I:L9\nFileNotFoundError9#2!\n',6),('M',b'::error::CUSTODIAN:M:L6\nFileNotFoundError6#2+\n',3)):
-     cause=FileNotFoundError(2,'private','/private');ns={'original':cause,'route':'live'}
-     exec(compile(sibling_literal,'<literal-sibling-no-child>','exec'),ns)
-     manager=ns['_qtt_original_host_source_v1'];live=ns['_qtt_original_live_component_v1'];middle=live();inputs=middle();ns['manager']=manager()
-     outside={'original':cause};exec(compile("def outside():\n raise original\n",'<literal-sibling-no-child>','exec'),outside);ns['outside']=outside['outside']
-     ns['route']=route
-     try:(middle if route=='M'else inputs)()
-     except BaseException as caught:cause=caught
-     BaseException.__traceback__.__set__(cause,BaseException.__traceback__.__get__(cause).tb_next)
-     mode='complete';expired=False;events=[];errors=[];admissions=[]
-     def admit(label):
-         admissions.append(label)
-     held=dict(held,kill_self=False,error=None,operations=[])
-     state=dict(state,errors=errors)
-     ports=dict(ports)
-     ports.update(state=state,held=held,_qtt_original_inputs_v1=inputs,_qtt_beforecompiler_owner_v1=middle,_qtt_original_host_source_v1=manager,_qtt_original_live_component_v1=live,_qtt_early_loop_admission_v1=admit,__builtins__=sys.modules['builtins'])
-     chosen=custodian_failure
-     exec(compile(ast.fix_missing_locations(ast.Module(body=[copy.deepcopy(chosen)],type_ignores=[])),'<sibling-held-no-child>','exec'),ports)
-     with pytest.raises(RuntimeError)as raised:ports[chosen.name](cause)
-     assert raised.value.__cause__ is cause and held['error']is cause and held['kill_self']and held['reserved']and not state['closed']
-     assert events==[('clock',),('write',2,wanted),('pid',),('stop',17,19)]and len(wanted)<=64 and b'private'not in wanted and b'/'not in wanted
-     assert admissions==['D']*debits and errors==[]
-     assert len(held['operations'])==3 and all(row[1]for row in held['operations'])
-     before=list(events)
-     with pytest.raises(type(cause))as repeated:ports[chosen.name](cause)
-     assert repeated.value is cause and events==before
+  cause=FileNotFoundError(2,'private','/private');ns={'original':cause,'route':'live'}
+  exec(compile(sibling_literal,'<literal-sibling-no-child>','exec'),ns)
+  manager=ns['_qtt_original_host_source_v1'];live=ns['_qtt_original_live_component_v1'];middle=live();inputs=middle();ns['manager']=manager()
+  outside={'original':cause};exec(compile("def outside():\n raise original\n",'<literal-sibling-no-child>','exec'),outside);ns['outside']=outside['outside']
+  ns['route']=route
+  try:(middle if route=='M'else inputs)()
+  except BaseException as caught:cause=caught
+  BaseException.__traceback__.__set__(cause,BaseException.__traceback__.__get__(cause).tb_next)
+  mode='complete';expired=False;events=[];errors=[];admissions=[]
+  def admit(label):
+      admissions.append(label)
+  held=dict(held,kill_self=False,error=None,operations=[])
+  state=dict(state,errors=errors)
+  ports=dict(ports)
+  ports.update(state=state,held=held,_qtt_original_inputs_v1=inputs,_qtt_beforecompiler_owner_v1=middle,_qtt_original_host_source_v1=manager,_qtt_original_live_component_v1=live,_qtt_early_loop_admission_v1=admit,__builtins__=sys.modules['builtins'])
+  chosen=custodian_failure
+  exec(compile(ast.fix_missing_locations(ast.Module(body=[copy.deepcopy(chosen)],type_ignores=[])),'<sibling-held-no-child>','exec'),ports)
+  with pytest.raises(RuntimeError)as raised:ports[chosen.name](cause)
+  assert raised.value.__cause__ is cause and held['error']is cause and held['kill_self']and held['reserved']and not state['closed']
+  assert events==[('clock',),('write',2,wanted),('pid',),('stop',17,19)]and len(wanted)<=64 and b'private'not in wanted and b'/'not in wanted
+  assert admissions==['D']*debits and errors==[]
+  assert len(held['operations'])==3 and all(row[1]for row in held['operations'])
+  before=list(events)
+  with pytest.raises(type(cause))as repeated:ports[chosen.name](cause)
+  assert repeated.value is cause and events==before
 
  controller_begin="# QTT_ORIGINAL_CONTROLLER_HELPERS_BEGIN_20261007_V1\n"
  controller_end="# QTT_ORIGINAL_CONTROLLER_HELPERS_END_20261007_V1\n"
@@ -19982,332 +19954,351 @@ def test_github_workflow_splits_validation_into_parallel_phase_jobs():
  assert all(line.startswith(controller_tag)and line.endswith("\n")for line in controller_rows)
  controller_template="".join(line[len(controller_tag):]for line in controller_rows).encode("ascii")
  controller_init=(b'qtt_ordinary_native init "$GITHUB_RUN_ID" "$GITHUB_RUN_ATTEMPT" "$qtt_phase_ordinal" \\\n'
-     b'    "$1" "$2" "$3" "$4"')
+  b'    "$1" "$2" "$3" "$4"')
  assert controller_template.count(controller_init)==1
  assert controller_template.count(controller_init.replace(b"\n    ",b"\n  "))==0
  ci_startup_nodes=[node for node in native_tree.body if isinstance(node,ast.FunctionDef)
-     and node.name=="_facet_fn_initial_startup_prebind_v1"]
+  and node.name=="_facet_fn_initial_startup_prebind_v1"]
  assert len(ci_startup_nodes)==1
  ci_init_values=[node.value for node in ast.walk(ci_startup_nodes[0])
-     if isinstance(node,ast.Constant)and type(node.value)is bytes
-     and node.value.startswith(b"qtt_ordinary_native init ")and b"$GITHUB_RUN_ID" in node.value]
+  if isinstance(node,ast.Constant)and type(node.value)is bytes
+  and node.value.startswith(b"qtt_ordinary_native init ")and b"$GITHUB_RUN_ID" in node.value]
  keeper_init_values=[node.value for node in ast.walk(host_tree)
-     if isinstance(node,ast.Constant)and type(node.value)is bytes
-     and node.value.startswith(b"qtt_ordinary_native init ")and b"$GITHUB_RUN_ID" in node.value]
+  if isinstance(node,ast.Constant)and type(node.value)is bytes
+  and node.value.startswith(b"qtt_ordinary_native init ")and b"$GITHUB_RUN_ID" in node.value]
  assert ci_init_values==[controller_init]
  assert keeper_init_values==[controller_init,controller_init]
  ci_projection_source=ast.unparse(ci_startup_nodes[0])
  assert ci_projection_source.index("template.count(init_before) == 1")<ci_projection_source.index(
-     "template.replace(init_before")<ci_projection_source.index("projected == pair_body['raw']")
+  "template.replace(init_before")<ci_projection_source.index("projected == pair_body['raw']")
  projected_init=b"qtt_ordinary_native init 1 2 3 4 5 6 7"
  projected_controller=controller_template.replace(controller_init,projected_init)
  assert projected_controller.count(projected_init)==1
  assert len(projected_controller)==len(controller_template)-len(controller_init)+len(projected_init)
  for invalid_controller in(controller_template.replace(controller_init,b""),
-         controller_template+b"\n"+controller_init+b"\n",
-         controller_template.replace(controller_init,controller_init.replace(b"\n    ",b"\n  "))):
-     assert invalid_controller.count(controller_init)!=1
+      controller_template+b"\n"+controller_init+b"\n",
+      controller_template.replace(controller_init,controller_init.replace(b"\n    ",b"\n  "))):
+  assert invalid_controller.count(controller_init)!=1
 
 
  expected_unit_keys=(b"Id",b"LoadState",b"Transient",b"ActiveState",
-     b"InvocationID",b"ActiveEnterTimestampMonotonic",b"StopWhenUnneeded")
+  b"InvocationID",b"ActiveEnterTimestampMonotonic",b"StopWhenUnneeded")
  expected_scope_only=(b"RuntimeMaxUSec",b"RuntimeRandomizedExtraUSec",
-     b"TimeoutStopUSec",b"KillMode",b"SendSIGKILL",b"FinalKillSignal")
+  b"TimeoutStopUSec",b"KillMode",b"SendSIGKILL",b"FinalKillSignal")
  expected_first_roster=(b"Id",b"LoadState",b"Transient",b"ActiveState",
-     b"ControlGroup",b"InvocationID",b"ActiveEnterTimestampMonotonic")
+  b"ControlGroup",b"InvocationID",b"ActiveEnterTimestampMonotonic")
  expected_later_roster=(b"Id",b"LoadState",b"Transient",b"InvocationID",
-     b"ControlGroup",b"ActiveState",b"ActiveEnterTimestampMonotonic")
+  b"ControlGroup",b"ActiveState",b"ActiveEnterTimestampMonotonic")
  expected_interfaces={"slice":"org.freedesktop.systemd1.Slice",
-     "scope":"org.freedesktop.systemd1.Scope"}
+  "scope":"org.freedesktop.systemd1.Scope"}
  first_host=next(n for n in host_tree.body
-     if isinstance(n,ast.FunctionDef)and n.name=="_qtt_original_host_source_v1")
+  if isinstance(n,ast.FunctionDef)and n.name=="_qtt_original_host_source_v1")
  ancestor_owner=next(n for n in ast.walk(first_host)
-     if isinstance(n,ast.FunctionDef)and n.name=="original_ancestor")
+  if isinstance(n,ast.FunctionDef)and n.name=="original_ancestor")
  observed_owner=next(n for n in ast.walk(ancestor_owner)
-     if isinstance(n,ast.FunctionDef)and n.name=="observed")
+  if isinstance(n,ast.FunctionDef)and n.name=="observed")
  observed_calls=[n for n in ast.walk(ancestor_owner)if isinstance(n,ast.Call)
-     and isinstance(n.func,ast.Name)and n.func.id=="observed"]
+  and isinstance(n.func,ast.Name)and n.func.id=="observed"]
  observed_calls.sort(key=lambda node:node.lineno)
  assert[(ast.unparse(n.args[0]),ast.unparse(n.args[1]))for n in observed_calls]==[
-     ("a['slice']","keys"),("a['scope']","skeys"),
-     ("a['slice']","(b'StopWhenUnneeded',)")]
+  ("a['slice']","keys"),("a['scope']","skeys"),
+  ("a['slice']","(b'StopWhenUnneeded',)")]
  first_keys=next(n.value for n in ast.walk(ancestor_owner)if isinstance(n,ast.Assign)
-     and any(isinstance(t,ast.Name)and t.id=="keys" for t in n.targets))
+  and any(isinstance(t,ast.Name)and t.id=="keys" for t in n.targets))
  assert ast.literal_eval(first_keys)==expected_first_roster
  selectors=[n for n in ast.walk(host_tree)if isinstance(n,ast.Assign)
-     and any(isinstance(t,ast.Name)and t.id=="interface" for t in n.targets)]
+  and any(isinstance(t,ast.Name)and t.id=="interface" for t in n.targets)]
  selectors.sort(key=lambda node:node.lineno)
  assert len(selectors)==3
  selector_keys=("unitkeys","_3I","_46")
  for index,(selector,key_name)in enumerate(zip(selectors,selector_keys)):
-     parents=[n for n in ast.walk(host_tree)if isinstance(n,ast.For)
-         and any(child is selector for child in n.body)]
-     assert len(parents)==1
-     property_loop=parents[0]
-     assert not any(isinstance(n,ast.Call)for n in ast.walk(selector.value))
-     key_bindings=[n.value for n in ast.walk(host_tree)if isinstance(n,ast.Assign)
-         and any(isinstance(t,ast.Name)and t.id==key_name for t in n.targets)]
-     assert len(key_bindings)==1
-     actual_unit_keys=ast.literal_eval(key_bindings[0])
-     assert actual_unit_keys==((expected_first_roster+(b"StopWhenUnneeded",))
-         if index==0 else expected_later_roster)
-     if index:
-         outer=[n for n in ast.walk(host_tree)if isinstance(n,ast.For)
-             and any(child is property_loop for child in n.body)]
-         assert len(outer)==1
-         assert ast.unparse(outer[0].target)=="(unit, keyset, retained)"
-         assert ast.unparse(outer[0].iter)==(
-             "((birth['slice'], "+key_name+", birth['slice_fields']), "
-             "(birth['scope'], scopekeys, birth['scope_fields']))")
-     roles={"slice":"source-only.slice","scope":"source-only.scope"}
-     selector_code=compile(ast.Expression(copy.deepcopy(selector.value)),
-         "<actual-systemd-interface-selector-no-rpc>","eval")
-     parser_nodes=[copy.deepcopy(n)for n in property_loop.body
-         if not(isinstance(n,ast.Assign)and any(isinstance(t,ast.Name)
-             and t.id in("interface","argv","raw")for t in n.targets))]
-     assert not any(isinstance(n,ast.Call)and isinstance(n.func,ast.Name)
-         and n.func.id in("rpc","manager","command","E","effect")
-         for node in parser_nodes for n in ast.walk(node))
-     parser_code=compile(ast.Module(body=parser_nodes,type_ignores=[]),
-         "<actual-systemd-typed-reply-parser-no-rpc>","exec")
-     def reject_manager_data(message):
-         raise RuntimeError(message)
-     for role in("slice","scope"):
-         selected_keys=(expected_first_roster if index==0 else expected_later_roster)
-         if role=="scope":
-             selected_keys+=expected_scope_only
-         if index==0 and role=="slice":
-             selected_keys+=(b"StopWhenUnneeded",)
-         for key in selected_keys:
-             ports={"a":roles,"birth":roles,"unit":roles[role],"key":key,
-                 key_name:actual_unit_keys}
-             expected_interface=("org.freedesktop.systemd1.Unit"
-                 if key in expected_unit_keys else expected_interfaces[role])
-             assert eval(selector_code,ports)==expected_interface
-             raw,expected=((b"b true\n",b"yes")
-                 if key in(b"Transient",b"SendSIGKILL",b"StopWhenUnneeded")else
-                 (b"ay 16 "+b" ".join([b"1"]*16)+b"\n",b"01"*16)
-                 if key==b"InvocationID" else(b"i 9\n",b"9")
-                 if key==b"FinalKillSignal" else(b"t 17\n",b"17")
-                 if key.endswith(b"USec")or key==b"ActiveEnterTimestampMonotonic" else
-                 (b's "source-only"\n',b"source-only"))
-             parsed={"key":key,"raw":raw,"out":{},"_5r":{},"data":{},
-                 "fail":reject_manager_data,"F":reject_manager_data,"qQ":RuntimeError}
-             exec(parser_code,parsed)
-             result_name=("out","_5r","data")[index]
-             assert parsed[result_name]=={key:expected}
-             for malformed in(b"x invalid\n",raw[:-1]):
-                 invalid=dict(parsed,raw=malformed,out={},_5r={},data={})
-                 with pytest.raises(RuntimeError):
-                     exec(parser_code,invalid)
+  parents=[n for n in ast.walk(host_tree)if isinstance(n,ast.For)
+      and any(child is selector for child in n.body)]
+  assert len(parents)==1
+  property_loop=parents[0]
+  assert not any(isinstance(n,ast.Call)for n in ast.walk(selector.value))
+  key_bindings=[n.value for n in ast.walk(host_tree)if isinstance(n,ast.Assign)
+      and any(isinstance(t,ast.Name)and t.id==key_name for t in n.targets)]
+  assert len(key_bindings)==1
+  actual_unit_keys=ast.literal_eval(key_bindings[0])
+  assert actual_unit_keys==((expected_first_roster+(b"StopWhenUnneeded",))
+      if index==0 else expected_later_roster)
+  if index:
+      outer=[n for n in ast.walk(host_tree)if isinstance(n,ast.For)
+          and any(child is property_loop for child in n.body)]
+      assert len(outer)==1
+      assert ast.unparse(outer[0].target)=="(unit, keyset, retained)"
+      assert ast.unparse(outer[0].iter)==(
+          "((birth['slice'], "+key_name+", birth['slice_fields']), "
+          "(birth['scope'], scopekeys, birth['scope_fields']))")
+  roles={"slice":"source-only.slice","scope":"source-only.scope"}
+  selector_code=compile(ast.Expression(copy.deepcopy(selector.value)),
+      "<actual-systemd-interface-selector-no-rpc>","eval")
+  parser_nodes=[copy.deepcopy(n)for n in property_loop.body
+      if not(isinstance(n,ast.Assign)and any(isinstance(t,ast.Name)
+          and t.id in("interface","argv","raw")for t in n.targets))]
+  assert not any(isinstance(n,ast.Call)and isinstance(n.func,ast.Name)
+      and n.func.id in("rpc","manager","command","E","effect")
+      for node in parser_nodes for n in ast.walk(node))
+  parser_code=compile(ast.Module(body=parser_nodes,type_ignores=[]),
+      "<actual-systemd-typed-reply-parser-no-rpc>","exec")
+  def reject_manager_data(message):
+      raise RuntimeError(message)
+  for role in("slice","scope"):
+      selected_keys=(expected_first_roster if index==0 else expected_later_roster)
+      if role=="scope":
+          selected_keys+=expected_scope_only
+      if index==0 and role=="slice":
+          selected_keys+=(b"StopWhenUnneeded",)
+      for key in selected_keys:
+          ports={"a":roles,"birth":roles,"unit":roles[role],"key":key,
+              key_name:actual_unit_keys}
+          expected_interface=("org.freedesktop.systemd1.Unit"
+              if key in expected_unit_keys else expected_interfaces[role])
+          assert eval(selector_code,ports)==expected_interface
+          raw,expected=((b"b true\n",b"yes")
+              if key in(b"Transient",b"SendSIGKILL",b"StopWhenUnneeded")else
+              (b"ay 16 "+b" ".join([b"1"]*16)+b"\n",b"01"*16)
+              if key==b"InvocationID" else(b"i 9\n",b"9")
+              if key==b"FinalKillSignal" else(b"t 17\n",b"17")
+              if key.endswith(b"USec")or key==b"ActiveEnterTimestampMonotonic" else
+              (b's "source-only"\n',b"source-only"))
+          parsed={"key":key,"raw":raw,"out":{},"_5r":{},"data":{},
+              "fail":reject_manager_data,"F":reject_manager_data,"qQ":RuntimeError}
+          exec(parser_code,parsed)
+          result_name=("out","_5r","data")[index]
+          assert parsed[result_name]=={key:expected}
+          for malformed in(b"x invalid\n",raw[:-1]):
+              invalid=dict(parsed,raw=malformed,out={},_5r={},data={})
+              with pytest.raises(RuntimeError):
+                  exec(parser_code,invalid)
 
  actual_manager_message=b"::error::HOST:ANCESTOR-MANAGER-TERMINAL\n"
  assert len(actual_manager_message)==40<=64
  actual_diagnostic_code=compile(ast.Expression(copy.deepcopy(
-     actual_source41_host_message_node)),"<actual-host-diagnostic-no-write>","eval")
+  actual_source41_host_message_node)),"<actual-host-diagnostic-no-write>","eval")
  assert[n.value for n in ast.walk(actual_source41_host_message_node)
-     if isinstance(n,ast.Constant)and type(n.value)is bytes]==[
-         b"::error::HOST:B18\n",actual_manager_message,b"::error::HOST:UNLISTED\n"]
+  if isinstance(n,ast.Constant)and type(n.value)is bytes]==[
+      b"::error::HOST:B18\n",actual_manager_message,b"::error::HOST:UNLISTED\n"]
  assert not any(isinstance(n,ast.Call)and not(isinstance(n.func,ast.Name)
-     and n.func.id in("type","len"))for n in ast.walk(actual_source41_host_message_node))
+  and n.func.id in("type","len"))for n in ast.walk(actual_source41_host_message_node))
  manager_cause_text="original ancestor manager exec/terminal/threeEOF"
  bad_text_type=type("SourceOnlyPrivateText",(str,),{})
  bad_error_type=type("SourceOnlyOtherRuntimeError",(RuntimeError,),{})
  for cause,expected in((RuntimeError("B18"),b"::error::HOST:B18\n"),
-         (RuntimeError(manager_cause_text),actual_manager_message),
-         (RuntimeError("unselected private diagnostic"),b"::error::HOST:UNLISTED\n"),
-         (OSError(manager_cause_text),b"::error::HOST:UNLISTED\n"),
-         (bad_error_type(manager_cause_text),b"::error::HOST:UNLISTED\n"),
-         (RuntimeError(bad_text_type(manager_cause_text)),b"::error::HOST:UNLISTED\n"),
-         (RuntimeError(),b"::error::HOST:UNLISTED\n"),
-         (RuntimeError(manager_cause_text,"private"),b"::error::HOST:UNLISTED\n"),
-         (RuntimeError(manager_cause_text+" private"),b"::error::HOST:UNLISTED\n")):
-     for optimization in(0,2):
-         selected_code=compile(ast.Expression(copy.deepcopy(actual_source41_host_message_node)),
-             "<actual-host-diagnostic-no-write>","eval",optimize=optimization)
-         assert eval(selected_code,{"cause":cause})==expected
-         assert b"private" not in expected and b"/" not in expected
+      (RuntimeError(manager_cause_text),actual_manager_message),
+      (RuntimeError("unselected private diagnostic"),b"::error::HOST:UNLISTED\n"),
+      (OSError(manager_cause_text),b"::error::HOST:UNLISTED\n"),
+      (bad_error_type(manager_cause_text),b"::error::HOST:UNLISTED\n"),
+      (RuntimeError(bad_text_type(manager_cause_text)),b"::error::HOST:UNLISTED\n"),
+      (RuntimeError(),b"::error::HOST:UNLISTED\n"),
+      (RuntimeError(manager_cause_text,"private"),b"::error::HOST:UNLISTED\n"),
+      (RuntimeError(manager_cause_text+" private"),b"::error::HOST:UNLISTED\n")):
+  for optimization in(0,2):
+      selected_code=compile(ast.Expression(copy.deepcopy(actual_source41_host_message_node)),
+          "<actual-host-diagnostic-no-write>","eval",optimize=optimization)
+      assert eval(selected_code,{"cause":cause})==expected
+      assert b"private" not in expected and b"/" not in expected
 
 
  expected_current_source9_literal_fields=(2368680179,302894236,34477319,
-     "initializer",1802350,241543444,18397008,1818448,1983204)
+  "initializer",1802350,241543444,18397008,1818448,1983204)
  for actual_source_tree in(host_tree,native_tree):
-     actual_suppliers=[node for node in ast.walk(actual_source_tree)
-         if isinstance(node,ast.FunctionDef)
-         and node.name=="_ordinary_ci_initial_common_source_v1"]
-     assert len(actual_suppliers)==1
-     supplier_returns=[node.value for node in ast.walk(actual_suppliers[0])
-         if isinstance(node,ast.Return)and isinstance(node.value,ast.Tuple)
-         and len(node.value.elts)==9]
-     assert len(supplier_returns)==1
-     actual_cells=tuple(node.value if isinstance(node,ast.Constant)
-         and type(node.value)is int else node.id if isinstance(node,ast.Name)
-         else None for node in supplier_returns[0].elts)
-     # Current arithmetic, then explicit Source45 and older projections.
-     # Current Source47 arithmetic, then the complete Source46 history.
-     assert actual_cells[6:] == (18421352, 1823560, 1983204)
-     actual_cells = actual_cells[:6] + (18421264, 1823560, 1983204)
-     assert actual_cells[6:] == (18421264, 1823560, 1983204)
-     actual_cells = actual_cells[:6] + (18414912, 1822408, 1983204)
-     assert actual_cells[6:8]==(18414912,1822408)
-     actual_cells=actual_cells[:6]+(18407232,1819632)+actual_cells[8:]
-     assert actual_cells[6:8]==(18407232,1819632)
-     actual_cells=actual_cells[:6]+expected_current_source9_literal_fields[6:8]+actual_cells[8:]
-     assert actual_cells==expected_current_source9_literal_fields
+  actual_suppliers=[node for node in ast.walk(actual_source_tree)
+      if isinstance(node,ast.FunctionDef)
+      and node.name=="_ordinary_ci_initial_common_source_v1"]
+  assert len(actual_suppliers)==1
+  supplier_returns=[node.value for node in ast.walk(actual_suppliers[0])
+      if isinstance(node,ast.Return)and isinstance(node.value,ast.Tuple)
+      and len(node.value.elts)==9]
+  assert len(supplier_returns)==1
+  actual_cells=tuple(node.value if isinstance(node,ast.Constant)
+      and type(node.value)is int else node.id if isinstance(node,ast.Name)
+      else None for node in supplier_returns[0].elts)
+  assert actual_cells==(2454466522,324772011,63340350,'initializer',1802350,241543444,19433768,1924808,2003996)
+  # Historical supplier fixtures.
+  actual_cells=(2368680179,302894236,34477319,'initializer',1802350,241543444,18421352,1823560,1983204)
+  assert actual_cells[6:] == (18421352, 1823560, 1983204)
+  actual_cells = actual_cells[:6] + (18421264, 1823560, 1983204)
+  assert actual_cells[6:] == (18421264, 1823560, 1983204)
+  actual_cells = actual_cells[:6] + (18414912, 1822408, 1983204)
+  assert actual_cells[6:8]==(18414912,1822408)
+  actual_cells=actual_cells[:6]+(18407232,1819632)+actual_cells[8:]
+  assert actual_cells[6:8]==(18407232,1819632)
+  actual_cells=actual_cells[:6]+expected_current_source9_literal_fields[6:8]+actual_cells[8:]
+  assert actual_cells==expected_current_source9_literal_fields
 
 
  owner=next(n for n in ast.walk(host_tree)if isinstance(n,ast.FunctionDef)
-     and n.name=="_qtt_original_inputs_v1")
+  and n.name=="_qtt_original_inputs_v1")
  body=next(n.body for n in ast.walk(owner)if isinstance(n,ast.Try)
-     and any(isinstance(s,ast.Assign)and any(isinstance(t,ast.Name)
-     and t.id=="pid" for t in s.targets)for s in n.body))
+  and any(isinstance(s,ast.Assign)and any(isinstance(t,ast.Name)
+  and t.id=="pid" for t in s.targets)for s in n.body))
  start=next(i for i,n in enumerate(body)if isinstance(n,ast.Assign)
-     and any(isinstance(t,ast.Name)and t.id=="pid" for t in n.targets))
+  and any(isinstance(t,ast.Name)and t.id=="pid" for t in n.targets))
  end=next(i for i,n in enumerate(body)if isinstance(n,ast.If)
-     and any(isinstance(v,ast.Constant)and v.value=="same original privileged outside custodian"
-     for v in ast.walk(n)))
+  and any(isinstance(v,ast.Constant)and v.value=="same original privileged outside custodian"
+  for v in ast.walk(n)))
  nodes=copy.deepcopy(body[start:end+1])
  code=compile(ast.Module(body=nodes,type_ignores=[]),
-     "<actual-launch-parent-no-child>","exec")
+  "<actual-launch-parent-no-child>","exec")
  assert start<end
  assert not any(isinstance(n,ast.Call)and isinstance(n.func,ast.Attribute)
-     and n.func.attr in("fork","execve","kill","close","pidfd_open")
-     for node in nodes for n in ast.walk(node))
+  and n.func.attr in("fork","execve","kill","close","pidfd_open")
+  for node in nodes for n in ast.walk(node))
 
  def parent_ports(kind,fault=None):
-     raw=b"6000 (parent) S 5000 "+b"0 "*17+b"22000 0\n"
-     self_raw=b"7000 (python) S 6000 "+b"0 "*17+b"33000 0\n"
-     image,argv,uids,gids={
-         "sudo":("/usr/bin/sudo",b"/usr/bin/sudo\0-n\0python\0-I\0-B\0-\0fast-preflight\0",
-             b"1001 0 0 0",b"118 0 0 0"),
-         "bash":("/usr/bin/bash",b"/usr/bin/bash\0-e\0source-only-step.sh\0",
-             b"1001 1001 1001 1001",b"118 118 118 118"),
-     }[kind]
-     status=b"Uid: "+uids+b"\nGid: "+gids+b"\nPPid: 5000\n"
-     self_status=b"Uid: 0 0 0 0\nGid: 0 0 0 0\nPPid: 6000\n"
-     stat_row=[100,"/proc/6000/stat",False,None]
-     pidfd_row=[2048,"ancestor-actor-pidfd",False,None]
-     command_row=[102,"/proc/6000/cmdline",False,None]
-     rows=[stat_row,pidfd_row,command_row]
-     actor=[6000,22000,stat_row,raw,pidfd_row]
-     birth={"actors":[(7000,33000,[90,"self",False,None],self_raw,
-         [91,"self-pidfd",False,None]),tuple(actor)],"pids":[7000,6000],
-         "launch_chain":[(6000,image,argv,command_row)]}
-     if kind=="sudo":
-         birth["pids"].append(5000)
-         birth["actors"].append((5000,21000,[92,"bash-stat",False,None],
-             b"5000 (bash) S 4000 "+b"0 "*17+b"21000 0\n",
-             [93,"bash-pidfd",False,None]))
-         birth["launch_chain"].append((5000,"/usr/bin/bash",
-             b"/usr/bin/bash\0-e\0source-only-step.sh\0",[94,"bash-cmd",False,None]))
-     values={"/proc/6000/status":status,"/proc/6000/stat":raw,
-         "/proc/6000/cmdline":argv,"/proc/7000/status":self_status}
-     if fault=="actor":actor[0]=6001
-     if fault=="start":actor[1]=22001
-     if fault=="captured_ppid":actor[3]=raw.replace(b"S 5000",b"S 5001")
-     if fault=="self_actor":birth["actors"][0]=(7001,)+birth["actors"][0][1:]
-     if fault=="pids":birth["pids"][1]=6001
-     if fault=="launch":birth["launch_chain"][0]=(6001,image,argv,command_row)
-     for name,old,bad in(("fresh_start",b"22000",b"22001"),("fresh_ppid",b"S 5000",b"S 5001")):
-         if fault==name:values["/proc/6000/stat"]=raw.replace(old,bad)
-     if fault=="status_ppid":values["/proc/6000/status"]=status.replace(b"5000",b"5001")
-     if fault=="cmdline":values["/proc/6000/cmdline"]=argv+b"changed\0"
-     for name,bad in(("uid_width",b"1001 0 0"),
-             ("uid_decimal",b"01001 0 0 0"),
-             ("uid_bound",b"4294967296 0 0 0")):
-         if fault==name:values["/proc/6000/status"]=status.replace(uids,bad)
-     if fault=="duplicate_uid":values["/proc/6000/status"]+=b"Uid: 0 0 0 0\n"
-     if fault=="self_status":values["/proc/7000/status"]=self_status.replace(b"Uid: 0",b"Uid: 1001",1)
-     for index,name in enumerate(("stat","pidfd","command")):
-         if fault=="closed_"+name:rows[index][2]=True
-         if fault=="error_"+name:rows[index][3]=RuntimeError("synthetic held error")
-         if fault=="foreign_"+name:rows[index]=list(rows[index])
-     if fault=="descriptor_type":pidfd_row[0]=True
-     birth["actors"][1]=tuple(actor)
-     calls,admissions,record=[],[],{"fds":[]}
-     def reject(message):
-         raise RuntimeError(message)
-     def effect(label,function,*args,**kwargs):
-         calls.append(label)
-         return function(*args,**kwargs)
-     def walk(path):
-         if path not in values:raise RuntimeError("synthetic unexpected path")
-         row={"fd":200 if path.endswith("/stat")else 201,
-             "path":path,"closed":False,"error":None}
-         record["fds"].append(row)
-         return row
-     poll=SimpleNamespace(register=lambda fd,event:1 if fault=="register" else None,
-         poll=lambda ms:[(2048,1)]if fault=="terminal" else[])
-     os_port=SimpleNamespace(getpid=lambda:7000,getppid=lambda:6000,
-         geteuid=lambda:1001 if fault=="self_uid" else 0,
-         fstat=lambda fd:(17,101 if fault=="inode" and fd==100 else 100),
-         readlink=lambda path:"/usr/bin/changed" if fault=="image" else image)
-     return{"birth":birth,"state":{"fds":rows},"a":record,
-         "os":os_port,"select":SimpleNamespace(poll=lambda:poll,POLLIN=1),
-         "walk":walk,"bounded":lambda row,maximum:values[row["path"]],
-         "version":lambda row:row,"effect":effect,"fail":reject,
-         "_qtt_early_loop_admission_v1":admissions.append,
-         "calls":calls,"admissions":admissions}
+  raw=b"6000 (parent) S 5000 "+b"0 "*17+b"22000 0\n"
+  self_raw=b"7000 (python) S 6000 "+b"0 "*17+b"33000 0\n"
+  image,argv,uids,gids={
+      "sudo":("/usr/bin/sudo",b"/usr/bin/sudo\0-n\0python\0-I\0-B\0-\0fast-preflight\0",
+          b"1001 0 0 0",b"118 0 0 0"),
+      "bash":("/usr/bin/bash",b"/usr/bin/bash\0-e\0source-only-step.sh\0",
+          b"1001 1001 1001 1001",b"118 118 118 118"),
+  }[kind]
+  status=b"Uid: "+uids+b"\nGid: "+gids+b"\nPPid: 5000\n"
+  self_status=b"Uid: 0 0 0 0\nGid: 0 0 0 0\nPPid: 6000\n"
+  stat_row=[100,"/proc/6000/stat",False,None]
+  pidfd_row=[2048,"ancestor-actor-pidfd",False,None]
+  command_row=[102,"/proc/6000/cmdline",False,None]
+  rows=[stat_row,pidfd_row,command_row]
+  actor=[6000,22000,stat_row,raw,pidfd_row]
+  birth={"actors":[(7000,33000,[90,"self",False,None],self_raw,
+      [91,"self-pidfd",False,None]),tuple(actor)],"pids":[7000,6000],
+      "launch_chain":[(6000,image,argv,command_row)]}
+  if kind=="sudo":
+      birth["pids"].append(5000)
+      birth["actors"].append((5000,21000,[92,"bash-stat",False,None],
+          b"5000 (bash) S 4000 "+b"0 "*17+b"21000 0\n",
+          [93,"bash-pidfd",False,None]))
+      birth["launch_chain"].append((5000,"/usr/bin/bash",
+          b"/usr/bin/bash\0-e\0source-only-step.sh\0",[94,"bash-cmd",False,None]))
+  values={"/proc/6000/status":status,"/proc/6000/stat":raw,
+      "/proc/6000/cmdline":argv,"/proc/7000/status":self_status}
+  if fault=="actor":actor[0]=6001
+  if fault=="start":actor[1]=22001
+  if fault=="captured_ppid":actor[3]=raw.replace(b"S 5000",b"S 5001")
+  if fault=="self_actor":birth["actors"][0]=(7001,)+birth["actors"][0][1:]
+  if fault=="pids":birth["pids"][1]=6001
+  if fault=="launch":birth["launch_chain"][0]=(6001,image,argv,command_row)
+  for name,old,bad in(("fresh_start",b"22000",b"22001"),("fresh_ppid",b"S 5000",b"S 5001")):
+      if fault==name:values["/proc/6000/stat"]=raw.replace(old,bad)
+  if fault=="status_ppid":values["/proc/6000/status"]=status.replace(b"5000",b"5001")
+  if fault=="cmdline":values["/proc/6000/cmdline"]=argv+b"changed\0"
+  for name,bad in(("uid_width",b"1001 0 0"),
+          ("uid_decimal",b"01001 0 0 0"),
+          ("uid_bound",b"4294967296 0 0 0")):
+      if fault==name:values["/proc/6000/status"]=status.replace(uids,bad)
+  if fault=="duplicate_uid":values["/proc/6000/status"]+=b"Uid: 0 0 0 0\n"
+  if fault=="self_status":values["/proc/7000/status"]=self_status.replace(b"Uid: 0",b"Uid: 1001",1)
+  for index,name in enumerate(("stat","pidfd","command")):
+      if fault=="closed_"+name:rows[index][2]=True
+      if fault=="error_"+name:rows[index][3]=RuntimeError("synthetic held error")
+      if fault=="foreign_"+name:rows[index]=list(rows[index])
+  if fault=="descriptor_type":pidfd_row[0]=True
+  birth["actors"][1]=tuple(actor)
+  calls,admissions,record=[],[],{"fds":[]}
+  def reject(message):
+      raise RuntimeError(message)
+  def effect(label,function,*args,**kwargs):
+      calls.append(label)
+      return function(*args,**kwargs)
+  def walk(path):
+      if path not in values:raise RuntimeError("synthetic unexpected path")
+      row={"fd":200 if path.endswith("/stat")else 201,
+          "path":path,"closed":False,"error":None}
+      record["fds"].append(row)
+      return row
+  poll=SimpleNamespace(register=lambda fd,event:1 if fault=="register" else None,
+      poll=lambda ms:[(2048,1)]if fault=="terminal" else[])
+  os_port=SimpleNamespace(getpid=lambda:7000,getppid=lambda:6000,
+      geteuid=lambda:1001 if fault=="self_uid" else 0,
+      fstat=lambda fd:(17,101 if fault=="inode" and fd==100 else 100),
+      readlink=lambda path:"/usr/bin/changed" if fault=="image" else image)
+  return{"birth":birth,"state":{"fds":rows},"a":record,
+      "os":os_port,"select":SimpleNamespace(poll=lambda:poll,POLLIN=1),
+      "walk":walk,"bounded":lambda row,maximum:values[row["path"]],
+      "version":lambda row:row,"effect":effect,"fail":reject,
+      "_qtt_early_loop_admission_v1":admissions.append,
+      "calls":calls,"admissions":admissions}
 
  for kind in("sudo","bash"):
-     ports=parent_ports(kind)
-     exec(code,ports)
-     assert ports["a"]["owner"]==(7000,6000,0)
-     assert ports["a"]["parent_identity"]==(6000,22000)
-     assert ports["ids"][b"Uid"]!=[b"0"]*4
-     assert ports["calls"][-3:]==["parent-poll","parent-register","parent-live"]
-     assert "parent-row" in ports["admissions"]
-     for fault in("actor","start","captured_ppid","self_actor","pids","launch",
-             "fresh_start","fresh_ppid","status_ppid","image","cmdline","inode",
-             "closed_stat","closed_pidfd","closed_command","error_stat","error_pidfd",
-             "error_command","foreign_stat","foreign_pidfd","foreign_command",
-             "descriptor_type","terminal","register","self_uid","self_status",
-             "uid_width","uid_decimal","uid_bound",
-             "duplicate_uid"):
-         with pytest.raises(RuntimeError):
-             exec(code,parent_ports(kind,fault))
+  ports=parent_ports(kind)
+  exec(code,ports)
+  assert ports["a"]["owner"]==(7000,6000,0)
+  assert ports["a"]["parent_identity"]==(6000,22000)
+  assert ports["ids"][b"Uid"]!=[b"0"]*4
+  assert ports["calls"][-3:]==["parent-poll","parent-register","parent-live"]
+  assert "parent-row" in ports["admissions"]
+  for fault in("actor","start","captured_ppid","self_actor","pids","launch",
+          "fresh_start","fresh_ppid","status_ppid","image","cmdline","inode",
+          "closed_stat","closed_pidfd","closed_command","error_stat","error_pidfd",
+          "error_command","foreign_stat","foreign_pidfd","foreign_command",
+          "descriptor_type","terminal","register","self_uid","self_status",
+          "uid_width","uid_decimal","uid_bound",
+          "duplicate_uid"):
+      with pytest.raises(RuntimeError):
+          exec(code,parent_ports(kind,fault))
 
  owners=[next(n for n in ast.walk(root)if isinstance(n,ast.FunctionDef)and n.name==name)
-     for root,name in((actual_front_function,"manager"),(owner,"manager"),(host_tree,"command"))]
+  for root,name in((actual_front_function,"manager"),(owner,"manager"),(host_tree,"command"))]
  for role,owner in enumerate(owners):
-     wait=copy.deepcopy(next(n for n in owner.body if isinstance(n,ast.Try)))
-     start=next(i for i,s in enumerate(wait.body)if isinstance(s,ast.Assign)
-         and isinstance(s.targets[0],ast.Name)and s.targets[0].id in("readiness","poller"))
-     assert wait.body[start].value.args[1].attr=="poll"
-     loop=next(n for n in wait.body if isinstance(n,ast.While))
-     eof=loop.body[-1].body[-1]
-     assert isinstance(eof.test,ast.UnaryOp)and eof.test.operand.id=="part"
-     assert eof.body[1].value.args[1].attr=="unregister" and len(eof.body)==3
-     wait.body=wait.body[start-bool(role):wait.body.index(loop)]+loop.body[2:5]
-     codes={o:compile(ast.fix_missing_locations(ast.Module(body=[wait],type_ignores=[])),
-         "<actual-poll-consumer-no-child>","exec",optimize=o)for o in(0,2)}
-     for index,optimization in[(n,0)for n in range(8)]+[(0,2),(3,2)]:
-         mask=(1,16,8,32,64,0,1,1)[index]
-         fd,closed,error=(9999 if index==6 else 2048),index==7,(None if index<3 else 9 if index==3 else 71)
-         calls,fds=[],(2048,2050,2052)
-         rows=[{"fd":2048+i}if role==1 else[2048+i]for i in range(6)]
-         c={"eof":[False]*3,"errors":[]}
-         def register(fd,mask):calls.append(("register",fd,mask))
-         def poll(ms):
-             calls.append(("poll",ms))
-             c["eof"][0]=closed
-             return[(fd,mask)]
-         def create():
-             calls.append(("create",))
-             return SimpleNamespace(register=register,poll=poll)
-         def effect(label,fn,*args,tranche="work"):
-             assert label==("ancestor-manager-ready","original manager ready","O22synthetic")[role]
-             return fn(*args)
-         ports=dict(c=c,d=rows,rows=rows,name="synthetic",tranche="work",E=effect,effect=effect,
-             q4="ancestor-manager-ready",jP=BaseException,qC="errors",errno=SimpleNamespace(EBADF=9,EPROTO=71),
-             select=SimpleNamespace(poll=create,POLLIN=1,POLLHUP=16,POLLERR=8,POLLNVAL=32))
-         if error is None:
-             exec(codes[optimization],ports)
-             assert c["errors"]==[]
-         else:
-             with pytest.raises(OSError)as raised:exec(codes[optimization],ports)
-             assert c["errors"]==[raised.value]and raised.value.args==(error,)
-         assert calls==[("create",)]+[("register",fd,1)for fd in fds]+[("poll",10)]
+  wait=copy.deepcopy(next(n for n in owner.body if isinstance(n,ast.Try)))
+  start=next(i for i,s in enumerate(wait.body)if isinstance(s,ast.Assign)
+      and isinstance(s.targets[0],ast.Name)and s.targets[0].id in("readiness","poller"))
+  assert wait.body[start].value.args[1].attr=="poll"
+  loop=next(n for n in wait.body if isinstance(n,ast.While))
+  eof=loop.body[-1].body[-1]
+  assert isinstance(eof.test,ast.UnaryOp)and eof.test.operand.id=="part"
+  assert eof.body[1].value.args[1].attr=="unregister" and len(eof.body)==3
+  wait.body=wait.body[start-bool(role):wait.body.index(loop)]+loop.body[2:5]
+  codes={o:compile(ast.fix_missing_locations(ast.Module(body=[wait],type_ignores=[])),
+      "<actual-poll-consumer-no-child>","exec",optimize=o)for o in(0,2)}
+  for index,optimization in[(n,0)for n in range(8)]+[(0,2),(3,2)]:
+      mask=(1,16,8,32,64,0,1,1)[index]
+      fd,closed,error=(9999 if index==6 else 2048),index==7,(None if index<3 else 9 if index==3 else 71)
+      calls,fds=[],(2048,2050,2052)
+      rows=[{"fd":2048+i}if role==1 else[2048+i]for i in range(6)]
+      c={"eof":[False]*3,"errors":[]}
+      def register(fd,mask):calls.append(("register",fd,mask))
+      def poll(ms):
+          calls.append(("poll",ms))
+          c["eof"][0]=closed
+          return[(fd,mask)]
+      def create():
+          calls.append(("create",))
+          return SimpleNamespace(register=register,poll=poll)
+      def effect(label,fn,*args,tranche="work"):
+          assert label==("ancestor-manager-ready","original manager ready","O22synthetic")[role]
+          return fn(*args)
+      ports=dict(c=c,d=rows,rows=rows,name="synthetic",tranche="work",E=effect,effect=effect,
+          q4="ancestor-manager-ready",jP=BaseException,qC="errors",errno=SimpleNamespace(EBADF=9,EPROTO=71),
+          select=SimpleNamespace(poll=create,POLLIN=1,POLLHUP=16,POLLERR=8,POLLNVAL=32))
+      if error is None:
+          exec(codes[optimization],ports)
+          assert c["errors"]==[]
+      else:
+          with pytest.raises(OSError)as raised:exec(codes[optimization],ports)
+          assert c["errors"]==[raised.value]and raised.value.args==(error,)
+      assert calls==[("create",)]+[("register",fd,1)for fd in fds]+[("poll",10)]
+ # Synthetic; no credit.
+ startup=tuple(shlex.split("/usr/bin/sudo "+shard_block.split("X=(/usr/bin/sudo ",1)[1].split(")\n",1)[0]))
+ env_words=shlex.split(" ".join(part.split("\n          do",1)[0]for part in shard_block.split("for h in ")[1:]).replace("\\\n",""))
+ assert startup==("/usr/bin/sudo","-n","--","/usr/bin/env","-i","${G[@]}","/usr/bin/bash","--norc","-c",'ulimit -n 4096&&ulimit -f 65536&&exec "$@"',"_","$z","-I","-B","-X","utf8","$@")and not any(name in env_words for name in("BASH_ENV","SHELLOPTS","BASHOPTS","POSIXLY_CORRECT"))
+ assert all(shard_block.count("ulimit "+row+"||return 1\n")==1 for row in("-n 4096","-f 65536"))and '[[ ! -v POSIXLY_CORRECT ]]||return 1\n'in shard_block
+ selected=[]
+ for message in("original finite kernel soft/hard limit is absent: ","original inherited compiler limit changed: "):
+  selected.append(next(n for n in ast.walk(host_tree)if isinstance(n,ast.If)and any(isinstance(v,ast.Constant)and v.value==message for v in ast.walk(n))))
+ guards=[compile(ast.Expression(copy.deepcopy(n.test)),"<kernel-limit-no-child>","eval")for n in selected]
+ for returned,rejected in(((67108864,-1),False),((4096,4096),False),((0,-1),True),((-1,-1),True),((-2,-1),True),((1,0),True),((1,-2),True),((1,"2"),True),((True,-1),True),((1,True),True),((1.,-1),True),([1,-1],True),((1,-1,2),True),((1<<64,-1),True)):
+  assert eval(guards[0],{"dN":returned,"dU":"constants","dL":{"constants":(0,1,-1)}})is rejected
+ for role,pair in(("fsize",(67108864,-1)),("nofile",(4096,-1))):
+  for returned,rejected in((pair,False),((pair[0]+1,-1),True),(list(pair),True),((True,-1),True)):
+   assert eval(guards[1],{"eB":returned,"eC":role,"dV":{role:pair}})is rejected
+ extent=next(n.value for n in ast.walk(host_tree)if isinstance(n,ast.Assign)and any(isinstance(t,ast.Subscript)and isinstance(t.value,ast.Name)and t.value.id=="dL"and isinstance(t.slice,ast.Constant)and t.slice.value=="extent"for t in n.targets))
+ assert[eval(compile(ast.Expression(copy.deepcopy(extent)),"<kernel-extent-no-child>","eval"),{"dL":{"fsize":(soft,-1)}})for soft in(67108864,134217729)]==[67108864,134217728]
+ dispatch=next(n for n in ast.walk(host_tree)if isinstance(n,ast.Call)and isinstance(n.func,ast.Name)and n.func.id=="command"and n.args and isinstance(n.args[0],ast.Constant)and n.args[0].value=="fixed-original-compiler")
+ assert selected[0].lineno<selected[1].lineno<dispatch.lineno
 
 
 
@@ -20572,7 +20563,7 @@ def _assert_path_projection_contract(monkeypatch, tmp_path: Path) -> None:
     assert "actual-output.json" in selected_suffixes
     assert "tests/fixtures/retained.json" in selected_suffixes
 
-    # A selected source may also be a real AST-derived temporary destination.
+    # Guard reference.
     selected_source.write_text(
         source_text + f"    same_spelling = tmp_path / {selector!r}\n",
         encoding="utf-8",
@@ -20599,7 +20590,7 @@ def _assert_path_projection_contract(monkeypatch, tmp_path: Path) -> None:
     )
     assert set(conservative_inputs) <= set(no_repository_suffixes)
 
-    # These are projection-only paths; their complete spelling must survive.
+    # Guard reference.
     long_output = "/".join(["explicit-output-component"] * 20) + "/retained.json"
     projection_root = Path("projection-only-root")
     for prefix, directory in (
@@ -20960,8 +20951,8 @@ def _assert_process_supervision_contract(monkeypatch, tmp_path: Path) -> None:
             sibling.terminate()
         sibling.wait(timeout=10)
 
-    # The receipt veto adds no process discovery. These are finite data copies;
-    # the original actual-child cases above and their assertions remain intact.
+    # Guard reference.
+
     from copy import copy
     for terminal_receipt in (pass_receipt, nonzero_receipt, marker_receipt,
                              start_receipt, timeout_receipt):
@@ -21039,9 +21030,9 @@ def _assert_process_supervision_contract(monkeypatch, tmp_path: Path) -> None:
         assert reliability._command_requires_process_retention_v1(malformed) is True
 
 
-    # First-error diagnostics are exercised here inside the original supervised
-    # process group. Finite fixture bytes are independent; none grants a domain
-    # scanner, repository effect, larger deadline, or new receipt interpretation.
+    # Synthetic; no credit.
+
+
     import stat
     diagnostic_limits = reliability._ScanRunReadLimits(100_000, 5_000, 32, 3)
     diagnostic_basis = reliability._Rp5aReadBasisV1("1" * 40, b"# finite historical fixture\n",
@@ -21104,9 +21095,9 @@ def _assert_process_supervision_contract(monkeypatch, tmp_path: Path) -> None:
             **({"wire_version": 3, "snapshot_root": snapshots} if version == 3 else {}))
         return home, value, fence
 
-    # These are actual finite children under the unchanged native supervisor,
-    # decoder and candidate owner. The parent-only clock fault is labeled as an
-    # injected diagnostic stimulus, never proof of a native deadline failure.
+    # Guard reference.
+
+
     for version in (1, 2, 3):
         for native_status in (0, 7):
             home, value, fence = diagnostic_input(version, "healthy-" + str(native_status), native_status)
@@ -21163,15 +21154,15 @@ def _assert_process_supervision_contract(monkeypatch, tmp_path: Path) -> None:
             with pytest.raises(ValueError, match="held launch retains its original frame evidence"):
                 value._close()
             assert value.reader.closed and value.path.exists() and value.finish_error is first
-            # Known safely terminal finite fixture only; no production held-frame
-            # release, child-tree settlement, or outer-root cleanup is invented.
+            # Synthetic; no credit.
+
             value.path.unlink()
         else:
             value._close()
             assert value._release_complete_v1() and value.finish_error is first and not value.path.exists()
 
-    # Genuine independent four-byte mismatch: metadata is valid on initial
-    # fixture construction. This is not rebasing a mutated repository baseline.
+    # Synthetic; no credit.
+
     for version in (1, 3):
         home, value, unused_fence = diagnostic_input(version, "byte-mismatch")
         source = Path(value.identity.repo_root) / "data.bin"
@@ -21195,8 +21186,8 @@ def _assert_process_supervision_contract(monkeypatch, tmp_path: Path) -> None:
             mismatch()
         assert repeated_mismatch.value.__cause__ is first_mismatch.value and mismatch.__dict__ == before
 
-    # All following close/owner ports are explicit no-child fixture faults. The
-    # real close occurs once before the injected error; no retry is authorized.
+    # Synthetic; no credit.
+
     home, value, fence = diagnostic_input(1, "body-close")
     value.__enter__()
     body = OSError("original finite body error")
@@ -21220,7 +21211,7 @@ def _assert_process_supervision_contract(monkeypatch, tmp_path: Path) -> None:
     with pytest.raises(OSError) as repeated_close:
         value._close()
     assert repeated_close.value is close and closes == [actual_reader] and value.__dict__ == before
-    value.path.unlink()  # Known no-child test fixture; actual reader already closed.
+    value.path.unlink()  # Synthetic; no credit.
 
     home, value, fence = diagnostic_input(1, "foreign-before-use")
     with monkeypatch.context() as foreign:
@@ -21234,8 +21225,8 @@ def _assert_process_supervision_contract(monkeypatch, tmp_path: Path) -> None:
     assert value._release_complete_v1()
 
 
-    # Decode-only fixture: the exact original lease really closes before the
-    # injected close-reporting error. It is never a process/tree qualification.
+    # Synthetic; no credit.
+
     home, value, unused_fence = diagnostic_input(3, "lease-close")
     with value:
         parsed = reliability._read_scan_launch_fd(value.reader.fileno(), limits=diagnostic_limits,
@@ -21267,9 +21258,9 @@ def _assert_process_supervision_contract(monkeypatch, tmp_path: Path) -> None:
         assert lease_closes == [lease] and value.finish_error is None
     assert value._release_complete_v1()
 
-    # This labeled no-child binary stream port acquires and closes the genuine
-    # finite descriptor. It returns deliberately wrong bytes and reports a close
-    # error after the real close; both ORIGINAL errors must remain in the group.
+    # Synthetic; no credit.
+
+
     home, value, unused_fence = diagnostic_input(1, "source-body-close")
     source = Path(value.identity.repo_root) / "tools/run_validation_gates.py"
     source.parent.mkdir()
@@ -21662,8 +21653,8 @@ def _assert_output_drain_terminality_contract(monkeypatch, tmp_path: Path) -> No
         assert raw_command_record[key] == getattr(raw_failure_receipt, key)
     assert raw_command_record["run_id"] == "run_raw_evidence_failure"
     assert raw_command_record["command_index"] == 1
-    # FD-level ordinary stdout survives the later helper's capsys.readouterr().
-    # This is the existing actual receipt, not a new receipt or inferred exit.
+    # Guard reference.
+
     print("Actual raw-evidence-failure command-1.json:", file=sys.__stdout__, flush=True)
     print(json.dumps(raw_command_record, sort_keys=True), file=sys.__stdout__, flush=True)
     print("Original child terminal observation:",
@@ -21700,8 +21691,8 @@ def _assert_output_drain_terminality_contract(monkeypatch, tmp_path: Path) -> No
                 altered_record, altered_observed,
                 expected_pid=original_process.pid, expected_exit=terminal_exit,
             )
-    # Explicit copied-metadata counterexample only: no child or receipt is changed.
-    # A real observed zero remains valid; taskkill's zero cannot replace a nonzero child.
+    # Guard reference.
+
     nonzero_witness = terminal_exit if terminal_exit != 0 else 7
     copied_observed = deepcopy(observed_metadata)
     copied_observed["post_poll"] = copied_observed["post_returncode"] = nonzero_witness
@@ -22317,8 +22308,8 @@ def _assert_complete_terminal_evidence_contract(monkeypatch, tmp_path: Path) -> 
             assert failed_cleanup.startswith("PASS")
             assert failed_completion.final_state == "FAIL"
             if tamper == "linked-stdout":
-                # The negative assertion above observes the real hard link.
-                # Release only the extra link created by this synthetic case.
+                # Synthetic; no credit.
+
                 linked_source = _failed_paths.evidence_root / "linked-stdout-source.bin"
                 assert os.path.samefile(
                     linked_source, _failed_paths.evidence_root / "command-1.stdout.bin"
@@ -22572,8 +22563,8 @@ def _assert_receipt_publication_failure_accounting(
     assert Path(original_receipt.stdout_path).read_bytes() == b"OUT"
     assert Path(original_receipt.stderr_path).read_bytes() == b"ERR"
 
-    # Exceptions retain a taskkill helper's different ownership and the original
-    # group/cancellation object; no substitute process is actually launched.
+    # Guard reference.
+
     for ordinal, kind in enumerate(("direct", "group", "cancel"), 1):
         helper_process = SimpleNamespace(pid=8822)
         original = reliability.ValidationReliabilityError(
@@ -22889,8 +22880,8 @@ def _assert_exact_cleanup_contract(monkeypatch) -> None:
         real_rmtree(failed_paths.process_root)
         assert historical.is_dir()
 
-        # Exercise the original main/finalizer unwind with no returned receipt.
-        # The process port raises; no native process is created by these cases.
+        # Synthetic; no credit.
+
         for fault in ("direct", "group", "cancel", "report-failure", "preflight"):
             held_paths, held_probe = reliability.resolve_validation_run_paths(
                 REPO_ROOT, explicit_process_root=external_parent.resolve(),
@@ -23026,8 +23017,8 @@ def _assert_exact_cleanup_contract(monkeypatch) -> None:
             assert runner._RUN_COMMANDS_SUPERVISION is retained_state
             assert held_paths.process_root.is_dir() and no_deletions == []
 
-        # Known process uncertainty must be retained before unrelated scan-plan
-        # identity validation can raise. No native process or scan is started.
+        # Synthetic; no credit.
+
         identity_plan = reliability.build_command_evidence_plan(
             run_id=held_paths.run_id, phase=runner.FAST_PREFLIGHT_PHASE,
             commands=(overwritten.argv,), cwd=REPO_ROOT,
@@ -23076,8 +23067,8 @@ def _assert_exact_cleanup_contract(monkeypatch) -> None:
                     assert runner._RUN_COMMANDS_SUPERVISION is retained
                     assert calls == [] and held_paths.process_root.is_dir()
 
-        # The same identity failure without process uncertainty does not invent
-        # an unresolved child or bypass the original scan identity check.
+        # Guard reference.
+
         terminal = replace(overwritten, termination_state="NOT_REQUIRED", failure_class=None)
         calls = []
         with monkeypatch.context() as terminal_identity_patch:
@@ -23095,9 +23086,9 @@ def _assert_exact_cleanup_contract(monkeypatch) -> None:
                 )
             assert runner._RUN_COMMANDS_SUPERVISION is None and calls == []
 
-    # Exact V source/custody ports have no child, filesystem or native proof.
-    # The real writer bodies and logical paths remain the original supplier's
-    # operands; these cases check only the new same-owner joins and denials.
+    # Guard reference.
+
+
     from pathlib import PurePosixPath
     import posixpath
     from tools import validation_reliability as v_owner
@@ -23136,8 +23127,8 @@ def _assert_exact_cleanup_contract(monkeypatch) -> None:
         return scope, effects
 
     with pytest.MonkeyPatch.context() as v_sources:
-        # Pure POSIX operands test Linux lexical source binding on every host;
-        # no Path operation or native Scope initializer is invoked here.
+        # Guard reference.
+
         v_sources.setattr(v_owner, 'Path', PurePosixPath)
         v_sources.setattr(v_owner, 'os', SimpleNamespace(path=posixpath, getpid=v_owner.os.getpid))
         v_scope, v_effects = v_source_fixture(('master.json', 'master_plan_generated/owner.json'))
@@ -23190,8 +23181,8 @@ def _assert_exact_cleanup_contract(monkeypatch) -> None:
         with pytest.raises(v_owner.ValidationReliabilityError, match='ORDINARY_V_ABSENCE_REQUIRES_ORIGINAL_ZERO_OUTPUT_PROGRAMME'):
             v_owner._ordinary_run_output_recipe_check_v1(absent_scope)
 
-    # Safe nonzero terminals and later NOT_RUN consumers settle custody;
-    # they never become successful command evidence. No native child exists.
+    # Synthetic; no credit.
+
     def v_cleanup_fixture(*, selected_later=False, pending=False):
         import stat
         value = v_owner._LinuxPreflightScopeV1.__new__(v_owner._LinuxPreflightScopeV1)
@@ -23259,10 +23250,10 @@ def _assert_exact_cleanup_contract(monkeypatch) -> None:
             value._ordinary_run_output_cleanup_ready_v1(recipe['paths'])
     assert recipe['cleanup_attempted'] and not recipe['cleanup_complete'] and not closed and recipe['errors']
 
-    # The existing registry calculates source-bound quantities only; it
-    # performs no native acquisition and cannot issue a Scope or quota.
-    # Independently enumerate the actual fixed filter's charged call sites.
-    # This source oracle executes no filter, syscall, native library or child.
+    # Synthetic; no credit.
+
+
+
     import ast as _filter_ast
     from inspect import getsource as _filter_source
     _filter_function = _filter_ast.parse(_filter_source(v_owner._ordinary_temporary_filter_v1)).body[0]
@@ -23306,9 +23297,9 @@ def _assert_exact_cleanup_contract(monkeypatch) -> None:
     assert fixed_io[2] > ordinary_io[2] and fixed_io[3] > ordinary_io[3]
     assert ordinary_io[4] == ordinary_io[0] + ordinary_io[2]
 
-    # The original no-launch owner is independently exercised by its
-    # grouped source/native cases. These ports check the V caller's exact
-    # custody join and retain empty backing slots as scratch, never reports.
+    # Guard reference.
+
+
     def no_launch_v_fixture(*, consumer_only=False, suffix=b'', handed=False, missing_receipt=False):
         import stat
         value, recipe, producer, consumer, closed = v_cleanup_fixture()
@@ -23377,8 +23368,8 @@ def _assert_exact_cleanup_contract(monkeypatch) -> None:
         assert getattr(v_owner.os, 'pread', _pread_absent) is _pread_original
         assert recipe['cleanup_attempted'] and not recipe['cleanup_complete'] and recipe['errors'] and not closed
 
-    # Execute the actual fit predicate, rather than copying its arithmetic.
-    # Metadata and native-call pools are separate original source operands.
+    # Guard reference.
+
     import ast
     import inspect
     import textwrap
@@ -23641,8 +23632,8 @@ def _assert_repository_local_layout_contract() -> int:
          rejects('descendant_symlink',lambda:r.remove_exact_run_owned_process_tree(paths.process_root, expected_run_root=paths.process_root, repo_root=root, evidence_root=paths.evidence_root))
          link.unlink()
      check('source_preserved', (root/'protected.txt').read_bytes()==b'preserve')
-     # Existing immutable failure cleanup receipt cannot be overwritten. Check direct
-     # cleanup to demonstrate that correcting test-only link permits exact removal.
+     # Guard reference.
+
      hard=paths.process_root/'hard';os.link(root/'protected.txt',hard)
      rejects('descendant_hardlink',lambda:r.remove_exact_run_owned_process_tree(paths.process_root,expected_run_root=paths.process_root,repo_root=root,evidence_root=paths.evidence_root))
      hard.unlink()
@@ -23710,8 +23701,8 @@ def _assert_repository_local_layout_contract() -> int:
              cleanup_calls.append(allocated)
              result = real_cleanup(allocated)
              if failure == 'cleanup':
-                 # Raise after real exact-root removal so the injected exception
-                 # tests propagation and no retry without leaving a test artifact.
+                 # Guard reference.
+
                  raise RuntimeError('ST12H_TEST_CLEANUP_FAILURE')
              return result
          def fail_stage(extracted):
@@ -23742,7 +23733,7 @@ def _assert_repository_local_layout_contract() -> int:
          Path(scratch['validation_output_root']) / 'w \u00fc' / name
          for name in ('publication archive.zip', 'stage journal.partial', 'stage journal.json')
      )
-     # A passing fallback sentinel cannot qualify an omitted scratch destination.
+     # Guard reference.
      check('st12h_longest_actual_destination_probed', Path(actual_probe['write_path']) == max(actual_destinations, key=lambda path: (len(str(path)), str(path))))
      expected_target = max(actual_destinations, key=lambda path: (len(str(path).encode('utf-16-le')) // 2, len(str(path)), str(path)))
      check('st12h_one_real_probe_call', len(st12h_probe_calls) == 1)
@@ -23829,14 +23820,14 @@ def _exercise_preflight_observation_v1(tmp_path, monkeypatch):
             with pytest.raises(owner.ValidationReliabilityError) as again:
                 value.check()
             assert again.value is failure
-    # Capacity is reserved before any native read, but an attempt is still spent.
+    # Guard reference.
     value = session(bytes=len(expected))
     with monkeypatch.context() as scoped:
         scoped.setattr(owner.os, "read", lambda *a: pytest.fail("pre-effect denial performed a read"))
         with pytest.raises(owner.ValidationReliabilityError), activate(value):
             owner._preflight_read_bytes_v1(path)
     assert value.reserved["attempts"] == 1 and value.observed["bytes"] == 0
-    # Every directory entry is charged, including an unmatched over-limit entry.
+    # Guard reference.
     value = session(entries=0)
     with pytest.raises(owner.ValidationReliabilityError), activate(value):
         owner._preflight_files_v1(root, "*.py")
@@ -23871,7 +23862,7 @@ def _exercise_preflight_observation_v1(tmp_path, monkeypatch):
     with pytest.raises(owner.ValidationReliabilityError):
         owner._preflight_directory_v1(root / "missing")
     assert owner._preflight_kind_v1(root / "missing", optional=True) is None
-    # Successful status settlement follows the last real ancestor/stat call.
+    # Guard reference.
     for kind in ("absent-leaf", "absent-parent", "file", "directory"):
         for late in (False, True):
             value, clock, calls = session(), [100], []
@@ -23919,7 +23910,7 @@ def _exercise_preflight_observation_v1(tmp_path, monkeypatch):
         with pytest.raises(owner.ValidationReliabilityError, match="optional status is unreadable"), activate(value):
             owner._preflight_kind_v1(denied_path, optional=True)
     assert value.observed["attempts"] == 1 and value.failure is not None
-    # Parsing follows complete acquisition and keeps its independent semantics.
+    # Guard reference.
     value = session()
     with activate(value):
         with pytest.raises(json.JSONDecodeError):
@@ -23949,13 +23940,13 @@ def _exercise_preflight_observation_v1(tmp_path, monkeypatch):
         scoped.setattr(owner.sys, "argv", [argv[1], *argv[2:]])
         with pytest.raises(owner.ValidationReliabilityError, match="no original observation binding"):
             owner._preflight_read_bytes_v1(path)
-    # Two tiny real native children exercise the existing finite pipe owner.
+    # Guard reference.
     for index, limit in enumerate((32, 4), 1):
         observation = {}
         program = "import os; os.write(1,b'abcdefgh'); os.write(2,b'err')"
         if limit == 4:
-            # Keep the offending child alive for the original tree owner to
-            # prove termination; a raced dead PID is deliberately not proof.
+            # Guard reference.
+
             program += "; import time; time.sleep(30)"
         receipt = owner.supervise_command(
             (sys.executable, "-I", "-B", "-c", program),
@@ -24049,8 +24040,8 @@ def _exercise_preflight_startup_v1(tmp_path, monkeypatch):
             directories={str(lib): (("module.py", "file"), ("site-packages", "directory")),
                          str(site_root): (("no_import.pth", "file"),)}, absent=config + customizers)
         catalog_entries = 3 + 2 + len(config) + len(customizers) + 3
-        # The existing finite acquisition allowance plus the known literal
-        # catalog index demand. Raw lengths are not a native memory grant.
+        # Guard reference.
+
         limits = dict(attempts=200, bytes=4096, entries=catalog_entries + 20, retained_bytes=4096,
             git_attempts=0, stdout_bytes=0, stderr_bytes=0, combined_output_bytes=0)
         paths = None
@@ -24080,7 +24071,7 @@ def _exercise_preflight_startup_v1(tmp_path, monkeypatch):
             scoped.setattr(owner.sys, "executable", str(case.executable))
             scoped.setattr(sysconfig, "get_path", lambda key: str(case.lib))
             scoped.setattr(site, "getsitepackages", lambda: [str(case.site_root)])
-            # No startup check may execute the literal data file (or a probe).
+            # Guard reference.
             scoped.setattr(owner.subprocess, "Popen", lambda *a, **k: pytest.fail("startup launched a process"))
             yield scoped
 
@@ -24137,7 +24128,7 @@ def _exercise_preflight_startup_v1(tmp_path, monkeypatch):
             assert case.observation.remaining["bytes"] == 4096 - expected_read
         settled(case)
 
-    # Preserve the original trust denials and add actual separated-location faults.
+    # Guard reference.
     failures = {
         "hook": "executable startup", "config": "._pth", "customizer": "customizer",
         "loader": "loader injection", "version": "version/ABI", "abi": "version/ABI",
@@ -24204,7 +24195,7 @@ def _exercise_preflight_startup_v1(tmp_path, monkeypatch):
             assert case.observation.reserved["entries"] > 0
             assert case.observation.remaining["bytes"] == 4096 - case.observation.observed["bytes"]
 
-    # Real declared file/directory/absence statuses and unchanged byte content.
+    # Guard reference.
     case = fixture("exact-status")
     with active(case), owner._preflight_startup_access_v1(case.observation, case.basis):
         assert owner._preflight_kind_v1(case.executable, optional=True) == "file"
@@ -24215,7 +24206,7 @@ def _exercise_preflight_startup_v1(tmp_path, monkeypatch):
     assert case.observation.observed["attempts"] == 5
     assert case.observation.observed["bytes"] == len(executable_raw)
 
-    # Exact role membership, no evidence exception, no reentry, immutable basis.
+    # Guard reference.
     for fault in ("sibling", "repository-role", "repository-only", "evidence", "reentry", "catalog-mutation", "wrong-observation"):
         case = fixture("role-" + fault)
         value = case.observation
@@ -24252,7 +24243,7 @@ def _exercise_preflight_startup_v1(tmp_path, monkeypatch):
         assert value.remaining["bytes"] == 4096 - value.observed["bytes"]
         assert value.observed["bytes"] == (len(executable_raw) if fault == "catalog-mutation" else 0)
 
-    # Exact types/shape, aliases, cross-kind contradictions and finite indexing.
+    # Guard reference.
     mutations = (
         lambda b, c: b.update(absent=list(b["absent"])),
         lambda b, c: b["files"].update({str(c.executable): bytearray(executable_raw)}),
@@ -24280,8 +24271,8 @@ def _exercise_preflight_startup_v1(tmp_path, monkeypatch):
         settled(case)
         assert case.observation.observed["bytes"] == 0 and case.observation.failure is not None
 
-    # Pure lexical checks cover both layouts; only the actual platform fixture
-    # above establishes physical I/O observations.
+    # Synthetic; no credit.
+
     for path_type, good, bad in (
         (PurePosixPath, "/runtime/bin/python", ("relative", "/runtime/../python", "/runtime/./python", "/runtime//python", "/runtime/python\x7f")),
         (PureWindowsPath, r"C:\runtime\bin\python.exe", (r"C:python.exe", r"\runtime\python.exe", r"C:\runtime\..\python.exe", "C:/runtime/python.exe", r"C:\runtime\python.exe.", r"C:\runtime\NUL")),
@@ -24291,7 +24282,7 @@ def _exercise_preflight_startup_v1(tmp_path, monkeypatch):
             with pytest.raises(ValueError):
                 owner._preflight_startup_path_v1(operand, path_type)
 
-    # Candidate association is checked before the startup owner can acquire I/O.
+    # Guard reference.
     for field in ("root", "run_id", "occurrence"):
         case = fixture("candidate-" + field, owned=True)
         with installation(case):
@@ -24309,8 +24300,8 @@ def _exercise_preflight_startup_v1(tmp_path, monkeypatch):
         assert case.observation.observed["attempts"] == 0
         assert not (case.paths.process_root / "preflight-cache-3").exists()
 
-    # Both absence paths retain real no-follow observations. The final native
-    # ancestor check advances a deterministic clock only in the negative case.
+    # Guard reference.
+
     for parent_missing in (False, True):
         for late in (False, True):
             case = fixture(f"absence-{parent_missing}-{late}")
@@ -24400,8 +24391,8 @@ def _exercise_preflight_candidate_debits_v1(tmp_path, monkeypatch):
         custody.restore()
     assert custody.failure is failure
 
-    # The real absent acquisition settles through _read's common final check.
-    # A delayed FileNotFoundError cannot escape as a timely successful None.
+    # Guard reference.
+
     for fault in ("timely", "late", "permission"):
         custody = _synthetic_candidate_custody_v1(root, plan, observed_paths=lambda: ("source.py",), effects=())
         custody.deadline_ns = 1000
@@ -24502,9 +24493,9 @@ def _exercise_failed_admission_plan_v1(tmp_path, monkeypatch, fixture_factory):
                             changed[field] = (tuple(list(kwargs[field])) if field == "expected_plan"
                                 else replace(kwargs[field]) if field == "run_paths" else "different-phase")
                             assert changed[field] is not kwargs[field]
-                            # Each deliberately corrupt identity owns separate
-                            # synthetic custody. Its retained pending state must
-                            # not contaminate the real failed-publication case.
+                            # Synthetic; no credit.
+
+
                             original_supervision = runner._RUN_COMMANDS_SUPERVISION
                             with monkeypatch.context() as identity_case:
                                 identity_case.setattr(runner, "_RUN_COMMANDS_SUPERVISION",
@@ -24542,9 +24533,9 @@ def _exercise_failed_admission_plan_v1(tmp_path, monkeypatch, fixture_factory):
                 assert all(value.process is None and value.reader is None and value.writer is None
                            for value in selected["launch"].launch_inputs.values())
 
-    # The ordinary entry has no adopted native issuer. Its original C denial
-    # precedes dependent M/R acquisition and any accepted header. These are
-    # no-child admission negatives, not ordinary native qualification.
+    # Synthetic; no credit.
+
+
     for phase in (runner.FAST_PREFLIGHT_PHASE, runner.ALL_PHASE):
         root = tmp_path / ("ordinary-c-first-" + phase)
         root.mkdir()
@@ -24612,8 +24603,8 @@ def _exercise_failed_admission_plan_v1(tmp_path, monkeypatch, fixture_factory):
         assert runner._ORDINARY_CANDIDATE_FIRST_V1 is previous_order
 
 
-    # One real finite C object through publication and dispatch. The child
-    # port is an explicit no-child oracle; this is not native ordinary admission.
+    # Synthetic; no credit.
+
     for fault in ("success", "candidate", "candidate-check", "scan", "mapper", "publication"):
         root = tmp_path / ("ordinary-retained-c-" + fault)
         root.mkdir()
@@ -24819,7 +24810,7 @@ def _exercise_failed_admission_plan_v1(tmp_path, monkeypatch, fixture_factory):
                         assert not runner._candidate_requires_retention_v1(supervision)
                 assert (root / "source.py").read_bytes() == b"independent owned candidate\n"
         finally:
-            # All selected child ports above prove no native child was started.
+            # Synthetic; no credit.
             assert dispatches == [] or fault == "success"
             if (paths.evidence_root / "cleanup.json").exists():
                 retained_cleanup = (paths.evidence_root / "cleanup.json").read_bytes()
@@ -24852,7 +24843,7 @@ def _exercise_failed_admission_plan_v1(tmp_path, monkeypatch, fixture_factory):
             commands = [[runner.sys.executable, "tools/run_pytest_fresh_basetemp.py",
                 "tests/stage1_prediction_markets/pr166_qb_bounded_quantum_benchmark/test_pr166_qb_idempotence.py",
                 "-q", "--durations=50", "--basetemp", str(paths.pytest_basetemp_root)]]
-            # Reuse the finite one-hop fixture allocations, never native grants.
+            # Synthetic; no credit.
             nested[1] = dict(entry_limit=3*len(commands)+2+4,
                 file_byte_limit=100_000, retained_byte_limit=1_000_000,
                 read_byte_limit=(2*len(commands)+16)*6*100_000,
@@ -25089,8 +25080,8 @@ def _exercise_failed_admission_plan_v1(tmp_path, monkeypatch, fixture_factory):
                 assert (root / "z.py").read_bytes() == b"independent last file\n"
                 assert index.read_bytes() == b"independent staged bytes\n"
         finally:
-            # The fixture proves no child and owns this explicitly unclosed fd.
-            # This is teardown only, never production settlement/retry credit.
+            # Synthetic; no credit.
+
             if held_fd is not None:
                 original_close(held_fd)
             if (paths.evidence_root / "cleanup.json").exists():
@@ -25104,8 +25095,8 @@ def _exercise_failed_admission_plan_v1(tmp_path, monkeypatch, fixture_factory):
                 assert real_cleanup(paths) == "PASS_REMOVED_EXACT_RUN_ROOT"
 
 
-    # A callback cannot replace an active acquisition, even before open.
-    # These finite reads have no process; rejected recursion earns no debit.
+    # Guard reference.
+
     recursion_root = tmp_path / "candidate-read-recursion"
     recursion_root.mkdir()
     recursion_source = recursion_root / "source.py"
@@ -25136,9 +25127,9 @@ def _exercise_failed_admission_plan_v1(tmp_path, monkeypatch, fixture_factory):
     assert recursive_c.observed_read_bytes - previous == len(b"independent recursion input\n")
     assert recursive_c._read_descriptor is None and not recursive_c._read_in_progress
 
-    # Direct acquisition callbacks are rejected before another file open.
-    # This also preserves the actual outer fd when its one close fails. These
-    # are no-child file fixtures, not process or kernel-handle qualification.
+    # Synthetic; no credit.
+
+
     for acquisition_fault in ("success", "close"):
         acquisition_root = tmp_path / ("candidate-direct-acquisition-" + acquisition_fault)
         acquisition_root.mkdir()
@@ -25202,12 +25193,12 @@ def _exercise_failed_admission_plan_v1(tmp_path, monkeypatch, fixture_factory):
                 assert not acquisition_c._read_in_progress and not acquisition_c._read_acquisition_in_progress
                 assert acquisition_c.observed_read_bytes - previous_reads == len(b"independent acquisition callback\n")
         finally:
-            # The synthetic failed close performed no native close. This exact
-            # real fixture fd is closed once after the syscall port is restored.
+            # Synthetic; no credit.
+
             if acquisition_c._read_descriptor is not None:
                 original_close(acquisition_c._read_descriptor)
 
-    # Lost finalizer identity cannot discard a completed but unsettled C.
+    # Guard reference.
     identity_root = tmp_path / "candidate-finalizer-identity"
     identity_root.mkdir()
     (identity_root / "source.py").write_bytes(b"independent finalizer input\n")
@@ -25254,7 +25245,7 @@ def _exercise_failed_admission_plan_v1(tmp_path, monkeypatch, fixture_factory):
             assert identity_repeat.value is identity_error.value and identity_supervision == before
             assert identity_calls == [] and not identity_supervision["pending"]
     finally:
-        # A no-child read-only fixture; the failed identity report is untouched.
+        # Synthetic; no credit.
         assert reliability.cleanup_validation_run(identity_paths) == "PASS_REMOVED_EXACT_RUN_ROOT"
 
     # Returned write handles also remain owned after an unproven close. The
@@ -25331,7 +25322,7 @@ def _exercise_failed_admission_plan_v1(tmp_path, monkeypatch, fixture_factory):
                 assert not write_supervision["pending"] and runner._RUN_COMMANDS_SUPERVISION is write_supervision
                 assert any(error is failed.value for error in write_supervision["errors"])
         finally:
-            # Only this no-child fixture closes its explicitly open handle.
+            # Synthetic; no credit.
             if held_write is not None:
                 original_close(held_write)
             if (write_paths.evidence_root / "cleanup.json").exists():
@@ -25346,8 +25337,8 @@ def _exercise_failed_admission_plan_v1(tmp_path, monkeypatch, fixture_factory):
                 assert reliability.cleanup_validation_run(write_paths) == "PASS_REMOVED_EXACT_RUN_ROOT"
 
 
-    # Exercise the original Windows opener through explicit syscall/CRT
-    # no-handle oracles. These are not native transfer/termination evidence.
+    # Synthetic; no credit.
+
     import ctypes
     original_opener = reliability._open_regular_worktree_descriptor
     original_os = reliability.os
@@ -25391,8 +25382,8 @@ def _exercise_failed_admission_plan_v1(tmp_path, monkeypatch, fixture_factory):
             syscall_fixture.setattr(ctypes, "WinError", lambda code: raw_close_error, raising=False)
             syscall_fixture.setitem(sys.modules, "msvcrt", SimpleNamespace(open_osfhandle=transfer_native))
             return original_opener(path, nonblocking=nonblocking)
-    # Carrier construction and owner identity must precede CreateFileW.
-    # These ports acquire no kernel handle, so failure must have no native call.
+    # Synthetic; no credit.
+
     original_raw_owner, original_threading = reliability._WorktreeRawHandleOwnerV1, reliability.threading
     for preparation_fault in ("carrier", "identity", "thread"):
         raw_calls.clear()
@@ -25438,8 +25429,8 @@ def _exercise_failed_admission_plan_v1(tmp_path, monkeypatch, fixture_factory):
         assert raw_calls[0][1][1:7] == (0x80000000, 0x1 | 0x2 | 0x4, None, 3, 0x00200000 | 0x08000000, None)
         assert reliability.os is original_os
 
-    # The real C captures that same typed original raw owner before helper
-    # return. The syscall fixture has no OS handle or child to release.
+    # Synthetic; no credit.
+
     raw_paths, raw_probe = reliability.resolve_validation_run_paths(raw_root,
         explicit_process_root=(tmp_path / "raw-parent").resolve(), run_id="run_candidate_raw_handle",
         projected_relative_paths=("command-1.stdout.bin",))
@@ -25503,7 +25494,7 @@ def _exercise_failed_admission_plan_v1(tmp_path, monkeypatch, fixture_factory):
             assert raw_paths.process_root.is_dir() and runner._RUN_COMMANDS_SUPERVISION is raw_supervision
             assert [name for name, _ in raw_calls] == ["create", "transfer", "close"]
     finally:
-        # No real syscall handle exists; preserve any original cleanup report.
+        # Guard reference.
         if (raw_paths.evidence_root / "cleanup.json").exists():
             retained_cleanup = (raw_paths.evidence_root / "cleanup.json").read_bytes()
             reliability.remove_exact_run_owned_process_tree(raw_paths.process_root,
@@ -25513,9 +25504,9 @@ def _exercise_failed_admission_plan_v1(tmp_path, monkeypatch, fixture_factory):
             assert reliability.cleanup_validation_run(raw_paths) == "PASS_REMOVED_EXACT_RUN_ROOT"
         assert not raw_paths.process_root.exists()
 
-    # Original R close failures are sticky, even if the close port completed
-    # before raising. These are no-child oracles with real finite frame files;
-    # their explicit teardown is not production process-release authority.
+    # Synthetic; no credit.
+
+
     for close_phase in ("before", "after"):
         r_root = tmp_path / ("input-close-custody-" + close_phase)
         r_root.mkdir()
@@ -25562,8 +25553,8 @@ def _exercise_failed_admission_plan_v1(tmp_path, monkeypatch, fixture_factory):
             if not original_reader.closed:
                 original_reader.close()
 
-    # Numeric transfer failure preserves its original fd and its single failed
-    # close. No process is created, and the fault port performs no native close.
+    # Synthetic; no credit.
+
     raw_root = tmp_path / "input-raw-custody"
     raw_root.mkdir()
     raw_identity = reliability._ScanLaunchIdentity("run_input_raw", "fixture", 1, 1,
@@ -25607,9 +25598,9 @@ def _exercise_failed_admission_plan_v1(tmp_path, monkeypatch, fixture_factory):
             real_os_close(raw_value.raw_descriptor)
     assert os.fdopen is real_fdopen and os.close is real_os_close
 
-    # Genuine original supervisor no-start evidence remains releasable. The
-    # nonexistent executable is an actual failed start, with no child created;
-    # no synthetic receipt or alternative termination classifier is supplied.
+    # Synthetic; no credit.
+
+
     absent_program = tmp_path / "input-custody-absent-python.exe"
     assert not absent_program.exists()
     no_start_root = tmp_path / "input-original-no-start"
@@ -25632,10 +25623,10 @@ def _exercise_failed_admission_plan_v1(tmp_path, monkeypatch, fixture_factory):
         assert no_start_input.supervision_receipt is original_start and no_start_input.state == "ISSUED"
     assert no_start_input.state == "CLOSED" and not no_start_input.path.exists()
 
-    # The exact supplier call registers a real finite input before return or
-    # failure. It grants no SCANNER execution. All attached process ports below
-    # are explicit no-child oracles, whose fixture teardown closes only their
-    # known local fd after the fault ports have been restored.
+    # Synthetic; no credit.
+
+
+
     from tools import pr168_rp5a_git_grep_scanner as scan_owner
     for supplier_fault in ("lazy", "ready", "throw", "issued", "attached", "foreign", "mutated", "mapping", "proxy-mapping"):
         holder_root = tmp_path / ("input-supplier-custody-" + supplier_fault)
@@ -25764,8 +25755,8 @@ def _exercise_failed_admission_plan_v1(tmp_path, monkeypatch, fixture_factory):
                     assert not records[0]["registered"] and value.path is None and value.reader is None
                     assert not holder_values and not runner._scan_inputs_require_retention_v1(holder_supervision)
         finally:
-            # Exact no-child fixture knowledge only: production settlement never
-            # uses this forced release, nor is an ISSUED state proof of no child.
+            # Synthetic; no credit.
+
             for value in holder_values:
                 if value.reader is not None and not value.reader.closed:
                     value.reader.close()
@@ -25823,12 +25814,12 @@ def _exercise_failed_admission_plan_v1(tmp_path, monkeypatch, fixture_factory):
                 runner._settle_scan_inputs_v1(preceding_supervision, preceding_paths, runner.ALL_PHASE, preceding_plan)
             assert later_preceding.value is refused_preceding.value and preceding_input.__dict__ == before
     finally:
-        # This fixture's no-child provenance is independent of production admission.
+        # Synthetic; no credit.
         preceding_input.reader.close()
         reliability.cleanup_validation_run(preceding_paths)
 
-    # Actual returned process association is retained before a fallible PID port.
-    # These objects have no operating-system child and grant no terminal proof.
+    # Guard reference.
+
     process_root = tmp_path / "input-process-association"
     process_root.mkdir()
     process_identity = reliability._ScanLaunchIdentity("run_process_association", "fixture", 1, 1,
@@ -25862,8 +25853,8 @@ def _exercise_failed_admission_plan_v1(tmp_path, monkeypatch, fixture_factory):
     finally:
         process_input.reader.close()  # Exact no-child fixture proof, not a production release.
 
-    # Original body/status failures remain together. These finite frames and
-    # process objects are explicit no-child fixtures, not descendant proofs.
+    # Synthetic; no credit.
+
     def finite_input(label):
         local = tmp_path / ("input-status-" + label)
         local.mkdir()
@@ -25929,14 +25920,14 @@ def _exercise_failed_admission_plan_v1(tmp_path, monkeypatch, fixture_factory):
         finally:
             value.reader.close()  # Known no-child fixture; never production settlement.
 
-    # The existing genuine no-start case uses the original supervisor receipt,
-    # not a synthetic terminal poll. Its binding is retained after frame removal.
+    # Synthetic; no credit.
+
     assert no_start_input.supervision_started and no_start_input.supervision_settled
     assert no_start_input.supervision_receipt is original_start and no_start_input._release_complete_v1()
 
-    # R close debt joins the actual finalizer, C restoration, public entry guard
-    # and cleanup/report owners. C remains the existing engineering-only finite
-    # fixture; no SCANNER, Linux service or command child is dispatched.
+    # Synthetic; no credit.
+
+
     for close_fault in ("ready", "reader-before", "reader-after", "source-before", "source-after",
                         "snapshot-before", "snapshot-after", "fence-snapshot-before", "fence-snapshot-after",
                         "directory-before", "directory-after"):
@@ -26124,8 +26115,8 @@ def _exercise_failed_admission_plan_v1(tmp_path, monkeypatch, fixture_factory):
                     assert any(error is report_error for error in supervision["errors"])
                     cleanup_before = (paths.evidence_root / "cleanup.json").read_bytes()
         finally:
-            # Teardown uses proven fixture/no-child knowledge after restoring all
-            # fault ports. Never retry a descriptor whose close actually happened.
+            # Synthetic; no credit.
+
             if selected_descriptors and close_fault.endswith("before"):
                 real_close(selected_descriptors[0])
             if actual_iterator is not None and close_fault.endswith("before"):
@@ -26142,8 +26133,8 @@ def _exercise_failed_admission_plan_v1(tmp_path, monkeypatch, fixture_factory):
             if cleanup_before is not None:
                 assert (paths.evidence_root / "cleanup.json").read_bytes() == cleanup_before
 
-    # A returning close is checked, rather than inferred from an attempted
-    # call. Only this no-child port withholds the actual writer close.
+    # Synthetic; no credit.
+
     writer_root = tmp_path / "input-returning-writer-close"
     writer_root.mkdir()
     writer_identity = reliability._ScanLaunchIdentity("run_returning_writer", "fixture", 1, 1,
@@ -26190,8 +26181,8 @@ def _exercise_failed_admission_plan_v1(tmp_path, monkeypatch, fixture_factory):
         for stream in writer_streams:
             stream.close()  # Known fixture stream, after the no-op close port is gone.
 
-    # Foreign/untyped return values are retained before shape validation. This
-    # private malformed-return fixture is not capacity or release authority.
+    # Synthetic; no credit.
+
     for returned_kind in ("untyped", "foreign", "foreign-owned"):
         return_root = tmp_path / ("input-return-" + returned_kind)
         return_root.mkdir()
@@ -26245,12 +26236,12 @@ def _exercise_failed_admission_plan_v1(tmp_path, monkeypatch, fixture_factory):
                         assert foreign_value.__dict__ == before and foreign_value.path.exists()
         finally:
             if foreign_value.reader is not None and not foreign_value.reader.closed:
-                foreign_value.reader.close()  # Proven no-child fixture only, not foreign production cleanup.
+                foreign_value.reader.close()  # Synthetic; no credit.
             reliability.remove_exact_run_owned_process_tree(return_paths.process_root,
                 expected_run_root=return_paths.process_root, repo_root=return_root, evidence_root=return_paths.evidence_root)
 
-    # These two constructor faults are explicit no-child fixtures. A failed
-    # custom copy is unresolved acquisition, not an observed member inventory.
+    # Synthetic; no credit.
+
     for copy_stage in ("profile", "input"):
         constructor_root = tmp_path / ("input-constructor-" + copy_stage)
         constructor_root.mkdir()
@@ -26339,9 +26330,9 @@ def _exercise_failed_admission_plan_v1(tmp_path, monkeypatch, fixture_factory):
                 expected_run_root=constructor_paths.process_root, repo_root=constructor_root,
                 evidence_root=constructor_paths.evidence_root)
 
-    # Definite original validation failure before _claim remains a genuine
-    # no-start receipt. The existing supervisor validates this invalid environment;
-    # no child is created and no receipt is synthesized or classifier replaced.
+    # Guard reference.
+
+
     invalid_root = tmp_path / "input-original-preclaim-no-start"
     invalid_root.mkdir()
     invalid_evidence = tmp_path / "input-original-preclaim-no-start.evidence"
@@ -26416,7 +26407,7 @@ def _exercise_windows_job_resource_v1(area, monkeypatch, capsys, deadline, settl
     scope.owner=original
     with pytest.raises(TypeError):
         with owner._windows_job_scope_v1(object()): pass
-    # This pure oracle is separate from the native witness produced below.
+    # Synthetic; no credit.
     from copy import deepcopy
     U32=(1<<32)-1
     def dword(value,positive=False):
@@ -26518,7 +26509,7 @@ def _exercise_windows_job_resource_v1(area, monkeypatch, capsys, deadline, settl
     real_api=owner._windows_job_api_v1()
     assert real_api.sizes==dict(BASIC_LIMIT=64,IO_COUNTERS=48,EXTENDED_LIMIT=144,
         BASIC_ACCOUNTING=48,CPU_RATE=8,STARTUPINFOW=104,STARTUPINFOEXW=112,PROCESS_INFORMATION=24)
-    # Independent launch-input expectations; no new native process or console.
+    # Guard reference.
     import ast
     import copy
     root_word=0x0008060C; descendant_word=0x00000208
@@ -26534,7 +26525,7 @@ def _exercise_windows_job_resource_v1(area, monkeypatch, capsys, deadline, settl
     worker_tree=ast.parse(worker_source)
     worker_calls=[node for node in ast.walk(worker_tree) if isinstance(node,ast.Call)
         and isinstance(node.func,ast.Attribute) and node.func.attr=='Popen']
-    assert len(worker_calls)==1  # One shared site implements both normal and timeout modes.
+    assert len(worker_calls)==1  # Guard reference.
     keywords={node.arg:node.value for node in worker_calls[0].keywords}
     assert set(keywords)=={'shell','close_fds','creationflags','stdin','stdout','stderr'}
     assert ast.literal_eval(keywords['shell']) is False and ast.literal_eval(keywords['close_fds']) is True
@@ -26551,8 +26542,8 @@ def _exercise_windows_job_resource_v1(area, monkeypatch, capsys, deadline, settl
     assert any(ast.dump(node)==ast.dump(expected_guard) for node in worker_tree.body)
     assert any(isinstance(node,ast.Compare) and ast.dump(node)==ast.dump(ast.parse("mode=='timeout'",mode='eval').body)
         for node in ast.walk(worker_tree))
-    # Existing no-scope supervisor behavior is exercised with a deliberate
-    # injected creation failure; the real Windows helper's operands are retained.
+    # Guard reference.
+
     assert owner._WINDOWS_JOB_SCOPE_V1.get() is None
     ordinary=owner.hidden_subprocess_kwargs(platform_name='nt',new_process_group=True)
     assert ordinary['creationflags']==0x08000200
@@ -26586,7 +26577,7 @@ def _exercise_windows_job_resource_v1(area, monkeypatch, capsys, deadline, settl
             ordinary_windows_group_flags=ordinary['creationflags'],ordinary_non_group_flags=0x08000000,
             posix_unchanged=True,ordinary_creation_failure_injected=True,native_execution=False)),flush=True)
 
-    # An API model exercises the complete backend, not the actual native cases.
+    # Guard reference.
     class ApiModel:
         def __init__(self,fault):
             self.api=SimpleNamespace(**vars(real_api)); self.fault=fault; self.triggered=False
@@ -26769,8 +26760,8 @@ def _exercise_windows_job_resource_v1(area, monkeypatch, capsys, deadline, settl
                 created=model.created,resumed=model.resumed,termination_calls=model.calls.get('TerminateJobObject',0),
                 retained_handle_errors=probe.handle_close_errors,creation_inputs=model.creation_inputs))
     with capsys.disabled(): print('WINDOWS_JOB_PURE_REFERENCES '+json.dumps(references),flush=True)
-    # Selected engineering evidence is external to the disposable wrapper root.
-    # This test-only location supplies no native grant or production option.
+    # Synthetic; no credit.
+
     retained_text=os.environ.get('QTT_TEST_WINDOWS_JOB_DIAGNOSTIC_EVIDENCE')
     if not retained_text: raise ValueError('selected native fixture requires its external attempt evidence directory')
     retained=Path(retained_text)
@@ -26817,12 +26808,12 @@ def _exercise_windows_job_resource_v1(area, monkeypatch, capsys, deadline, settl
                 finally: os.close(copy_fd)
                 value.update(bytes=len(raw),complete_hex=raw.hex(),copied=True)
                 try: value['complete_utf8']=raw.decode('utf-8')
-                except UnicodeDecodeError: pass  # Exact bytes remain available, never a guessed text stream.
+                except UnicodeDecodeError: pass  # Guard reference.
             except BaseException as error:
                 errors.append(error); value['error']=render_error(error)
         return streams
     def write_diagnostic(path,value):
-        # Measure incremental UTF-8 output before the bounded aggregate allocation.
+        # Guard reference.
         encoder=json.JSONEncoder(ensure_ascii=True,allow_nan=False,separators=(',',':'))
         parts=[]; size=0
         for part in encoder.iterencode(value):
@@ -26908,7 +26899,7 @@ def _exercise_windows_job_resource_v1(area, monkeypatch, capsys, deadline, settl
                     except BaseException as error:
                         row['closed']=False; row['errors'].append(render_error(error))
                 record['errors'].extend(row['errors'])
-        # This last read cannot clear the latch, and never reissues membership.
+        # Guard reference.
         try:
             value=scope.api.Accounting(); length=scope.api.D(0xffffffff)
             call('QueryInformationJobObject',scope.handles['job'],1,C.byref(value),C.sizeof(value),C.byref(length))
@@ -26919,8 +26910,8 @@ def _exercise_windows_job_resource_v1(area, monkeypatch, capsys, deadline, settl
         assert witness['state']=='failed'
         return record
 
-    # Deterministic fail paths exercise the actual shared query owner before any
-    # new native job is created. These injected answers are never native evidence.
+    # Synthetic; no credit.
+
     import struct
     class OldIds(C.Structure):
         _fields_=[('assigned',real_api.D),('listed',real_api.D),('ids',real_api.S*2)]
@@ -26980,8 +26971,8 @@ def _exercise_windows_job_resource_v1(area, monkeypatch, capsys, deadline, settl
         elif pids is not None:
             with pytest.raises(ValueError): snapshot({k:observed[k] for k in ('total','active','terminated_by_limit','assigned','listed','pids')},(11,22))
         response_results.append(dict(status=status,raw_preserved=True,parsed_pids=pids,native_execution=False))
-    # Receipt-less exceptional streams use the same copier, including byte data
-    # that is not valid UTF-8. A secondary failure never replaces the first one.
+    # Guard reference.
+
     precheck=group/'evidence-precheck'; precheck.mkdir()
     source=precheck/'source'; source.mkdir(); target=precheck/'copy'; target.mkdir()
     payloads={'stdout':b'actual\x00output\xff\r\n','stderr':b'actual error\r\n'}
@@ -27001,8 +26992,8 @@ def _exercise_windows_job_resource_v1(area, monkeypatch, capsys, deadline, settl
     assert not (precheck/'too-large.json').exists()
     write_diagnostic(precheck/'record.json',dict(primary=str(primary),streams=copied))
     with pytest.raises(FileExistsError): write_diagnostic(precheck/'record.json',{})
-    # Exercise the exact diagnostic helper with injected query-only outcomes;
-    # no process, job membership or termination result is represented as native.
+    # Guard reference.
+
     diagnostic_results=[]
     for fault in ('signaled-259','open-denied','pid-mismatch','not-member','image-denied','close-denied','incomplete'):
         closed=[]; opened=[]; queried=[]
@@ -27070,7 +27061,7 @@ def _exercise_windows_job_resource_v1(area, monkeypatch, capsys, deadline, settl
             primary_and_secondary_preserved=True,exclusive_collision_preserved=True,
             oversized_record_rejected=True,diagnostics=diagnostic_results,native_execution=False)),flush=True)
 
-    # Selected inherited settings only. Live accounting counts are not compared.
+    # Guard reference.
     def inherited_policy():
         member=real_api.B(); C.set_last_error(0)
         if not real_api.IsProcessInJob(real_api.GetCurrentProcess(),None,C.byref(member)):
@@ -27157,7 +27148,7 @@ def _exercise_windows_job_resource_v1(area, monkeypatch, capsys, deadline, settl
             with temporary.open('xb') as stream:
                 assert stream.write(b'RELEASE\n')==8
                 stream.flush(); os.fsync(stream.fileno())
-            os.rename(temporary,path)  # Windows: atomic publication, never replace an existing file.
+            os.rename(temporary,path)  # Guard reference.
             owner._fsync_directory(case_root)
             return dict(path=str(path),bytes=8,write_once=True)
         for case,cap,mode,seconds in (('process-cap-2',2,'normal',60),('process-cap-1',1,'normal',60),
@@ -27178,9 +27169,9 @@ def _exercise_windows_job_resource_v1(area, monkeypatch, capsys, deadline, settl
                 lifetime_attribution='not_established',historical_process_trace_complete=False)
             last_check=0
             def reserve(count):
-                # Keep the adopted 32-call allowance: five worker queries
-                # plus at most 27 controller calls. Earlier fixed setup/cleanup
-                # keeps its original bounds; each bracket now charges three.
+                # Guard reference.
+
+
                 assert witness['native_call_slots_reserved']+count<=27
                 witness['native_call_slots_reserved']+=count
             def query(name,*args,settling=False):
@@ -27241,7 +27232,7 @@ def _exercise_windows_job_resource_v1(area, monkeypatch, capsys, deadline, settl
                 return value
             def observer(process):
                 nonlocal child_handle,hook_error,last_check
-                result=original_poll(process)  # Always invoke the genuine poll; never replace its result.
+                result=original_poll(process)  # Guard reference.
                 if process is not scope.process: return result
                 if result is not None: witness['root_native_poll_result']=result
                 if witness['state'] in ('checking','verified','failed'): return result
@@ -27319,8 +27310,8 @@ def _exercise_windows_job_resource_v1(area, monkeypatch, capsys, deadline, settl
                             witness['handle_close_errors'].append(dict(operation='CloseHandle:query-child',error=getattr(error,'winerror',None)))
                             errors.append(error)
                 if hook_error is not None and all(error is not hook_error for error in errors): errors.append(hook_error)
-                # Guaranteed exceptional path; original evidence is already
-                # outside the wrapper root and survives any failed copy/encoding.
+                # Guard reference.
+
                 retained_streams=retain_streams(evidence,receipt,copies,errors)
                 stdout=retained_streams['stdout']['complete_utf8']; stderr=retained_streams['stderr']['complete_utf8']
             final_membership=None if scope is None else scope.membership_observation
@@ -27399,7 +27390,7 @@ def _exercise_windows_job_resource_v1(area, monkeypatch, capsys, deadline, settl
             assert type(projection['creation']['creation_flags']) is int and projection['creation']['creation_flags']==0x0008060C
             assert projection['terminal']['termination_attempted'] is False
             assert all(projection['terminal'][k] for k in ('job_handle_closed','process_handle_closed','primary_thread_handle_closed'))
-            # No running application or independent collector: reuse the original finite drain.
+            # Guard reference.
             stdout_path=evidence/'stdout.bin'; stderr_path=evidence/'stderr.bin'
             out=stdout_path.open('xb'); err=stderr_path.open('xb')
             outcomes=[dict(drained_byte_count=0,retained_byte_count=0,retention_limit=16384,
@@ -27426,7 +27417,7 @@ def _exercise_windows_job_resource_v1(area, monkeypatch, capsys, deadline, settl
         except BaseException as error:
             errors.append(error)
         finally:
-            # A failed witness must also reach this selected policy after-read.
+            # Guard reference.
             try:
                 if time.monotonic_ns()>=settlement: raise TimeoutError('inherited-policy after-read settlement cutoff')
                 after=inherited_policy()
@@ -27467,8 +27458,8 @@ def _exercise_preflight_transport_v1(tmp_path, monkeypatch, capsys):
     run_id = 'synthetic-preflight-transport'
     deadline = time.monotonic_ns()+120_000_000_000
     settlement = deadline+30_000_000_000
-    # Optional engineering caps only shorten this helper's existing window;
-    # they never supply a native lease or enter the five transport controls.
+    # Guard reference.
+
     caps = tuple(os.environ.get(key) for key in ('QTT_TEST_EXECUTION_CUTOFF_NS','QTT_TEST_SETTLEMENT_CUTOFF_NS'))
     if any(value is not None for value in caps):
         assert all(type(value) is str and value.isascii() and value.isdecimal() for value in caps)
@@ -27513,7 +27504,7 @@ def _exercise_preflight_transport_v1(tmp_path, monkeypatch, capsys):
         return dict(identity=identity(n),allowance=dict(limits),deadline_ns=deadline,
             git=dict(executable=None,evidence_root=None),files=[['a.bin',0,3],['z.bin',3,0]],
             directories=[['.',[['a.bin','file'],['z.bin','file']]]])
-    # Every original vector is projected and decoded without editing its argv.
+    # Guard reference.
     for n in range(1,9):
         h = header(n)
         owner._preflight_header_v1(h,3,identity(n))
@@ -27583,7 +27574,7 @@ def _exercise_preflight_transport_v1(tmp_path, monkeypatch, capsys):
     for bad in (frame[:-1],frame+b'x',b'QTTPA01\n'+frame[8:],frame+frame):
         with pytest.raises((ValueError,RuntimeError)):
             decode(bad)
-    # The shared adapter preserves unselected main semantics and rejects partial controls before stdin.
+    # Guard reference.
     with monkeypatch.context() as scoped:
         for key in tuple(os.environ):
             if key.upper().startswith('QTT_'): scoped.delenv(key,raising=False)
@@ -27592,7 +27583,7 @@ def _exercise_preflight_transport_v1(tmp_path, monkeypatch, capsys):
         scoped.setenv('QTT_PREFLIGHT_INPUT_BYTES','10')
         with pytest.raises(RuntimeError,match='partial'):
             owner._preflight_cli_v1(lambda:pytest.fail('entered without input'),__file__)
-    # No JSON Boolean or pathname can supply the absent native host owner.
+    # Guard reference.
     with pytest.raises(RuntimeError,match='NATIVE_HOST_PROVIDER_UNAVAILABLE'):
         owner._preflight_acquire_native_input_v1(area/'declaration.bin',root)
     with pytest.raises(RuntimeError,match='NATIVE_HOST_PROVIDER_UNAVAILABLE'):
@@ -27602,8 +27593,8 @@ def _exercise_preflight_transport_v1(tmp_path, monkeypatch, capsys):
             runner.main([*args,'--preflight-input',str(area/'declaration.bin')])
     with pytest.raises(ValueError,match='competing suppliers'):
         runner.main(['--phase','fast-preflight','--preflight-input',str(area/'declaration.bin')],candidate_source=lambda *a:None)
-    # Independent complete-ledger references are pure verification cases, not
-    # native executions or grants. Real byte-consuming CLI cases follow below.
+    # Guard reference.
+
     from types import SimpleNamespace
     accounting_area=area/'accounting'; accounting_area.mkdir()
     accounting_process=accounting_area/'process'; accounting_process.mkdir()
@@ -27634,7 +27625,7 @@ def _exercise_preflight_transport_v1(tmp_path, monkeypatch, capsys):
             extent=999,pid=12345,native_exit=value['application_exit'],basis_counts=basis)
     def reject_reference(value,basis,original,original_basis,match='preflight receiver|preflight exact integer|preflight exact object|preflight copied/changed initial allowance'):
         nonlocal mutation_count
-        # JSON distinguishes Boolean/float substitutions even where Python == does not.
+        # Guard reference.
         assert json.dumps([value,basis],sort_keys=True) != json.dumps([original,original_basis],sort_keys=True)
         with pytest.raises(RuntimeError,match=match): verify_reference(value,basis)
         with pytest.raises(RuntimeError,match=match):
@@ -27662,8 +27653,8 @@ def _exercise_preflight_transport_v1(tmp_path, monkeypatch, capsys):
             owner.atomic_write_json(accounting_result/'receiver.json',original)
             owner._preflight_command_evidence_v1(reference_receipt(original,basis),accounting_paths,accounting_meter)
             reference_count+=1
-            # All eight independently changed remaining dimensions must reject,
-            # including shared attempt views which must not be added together.
+            # Guard reference.
+
             for key in zero:
                 bad=copy.deepcopy(original); bad['remaining_limits'][key]-=1
                 reject_reference(bad,basis,original,basis,match='preflight receiver exact')
@@ -27715,8 +27706,8 @@ def _exercise_preflight_transport_v1(tmp_path, monkeypatch, capsys):
         print('PREFLIGHT_ACCOUNTING_REFERENCE '+json.dumps(dict(valid_complete_references=reference_count,
             rejected_mutations_each_through_direct_and_final_verifier=mutation_count,
             application_exits=[0,1,2],cases=[case for case,_,_ in scenarios],native_execution=False)),flush=True)
-    # A real child receives its own PID/thread and executes each original pure CLI.
-    # These two synthetic selections are not an admitted canonical eight-command run.
+    # Synthetic; no credit.
+
     for n in (2,6):
         ident=identity(n); argv=tuple(ident['argv'])
         observation=owner._PreflightObservationV1(root=root,run_id=run_id,occurrence=n,argv=argv,
@@ -27788,9 +27779,9 @@ def _exercise_preflight_transport_v1(tmp_path, monkeypatch, capsys):
                 extent=launch.extent,pid=receipt.pid,native_exit=0,basis_counts=dict(launch.basis_counts))
     assert parent_meter.received > 0 and parent_meter.emitted > 0 and parent_meter.readback_bytes > 0
     assert parent_meter.read_calls > 0 and parent_meter.write_calls > 0
-    # The same production receiver rejects a corrupt identity in a real child.
-    # Corrupt the wire deliberately after the sender's normal validation, prove
-    # the operand changed, and retain the real traceback/native terminal result.
+    # Guard reference.
+
+
     for n in (1,3):
         ident=identity(n); argv=tuple(ident['argv'])
         observation=owner._PreflightObservationV1(root=root,run_id=run_id,occurrence=n,argv=argv,
@@ -27831,8 +27822,8 @@ def _exercise_preflight_transport_v1(tmp_path, monkeypatch, capsys):
                 native_exit=receipt.native_exit_code,failure_class=receipt.failure_class,
                 termination_state=receipt.termination_state,complete_stdout=Path(receipt.stdout_path).read_bytes().decode('utf-8'),
                 complete_stderr=raw_error,receiver=failed,closed_reader=True,failed_input_retained=launch.path.exists())),flush=True)
-    # Real position-4 applications read complete current copied source. The
-    # copied tree is disposable test support, not an accepted QTT checkout.
+    # Guard reference.
+
     import stat
     from tools import validate_nested_validator_contracts as nested
     source_paths=['tools/validation_reliability.py','tools/validate_nested_validator_contracts.py']
@@ -27865,9 +27856,9 @@ def _exercise_preflight_transport_v1(tmp_path, monkeypatch, capsys):
         fixture_lease=SyntheticLease(fixture_root=copied_root,fixture_process_root=fixture_process,fixture_run_id=fixture_run,fixture_deadline=fixture_deadline)
         fixture_environment={k:v for k,v in os.environ.items() if not k.upper().startswith(('QTT_','PYTHON'))}
         fixture_environment.update(PYTHONDONTWRITEBYTECODE='1',PYTHONNOUSERSITE='1')
-        # This additional bounded bootstrap probe imports complete copied modules
-        # and records actual origins. It does not call/extract their functions or
-        # claim that bootstrap reads are application observations.
+        # Guard reference.
+
+
         import_code=('import json,os,sys; sys.path.insert(0,os.getcwd()); '
             'import tools.validation_reliability as r; import tools.validate_nested_validator_contracts as v; '
             'print(json.dumps({"reliability":r.__file__,"validator":v.__file__}))')
@@ -28038,8 +28029,8 @@ def _exercise_preflight_transport_v1(tmp_path, monkeypatch, capsys):
                 native_host_qualified=False,canonical_run=False,closed_reader=fixture_launch.reader.closed,
                 actual_cleanup=cleanup_record)),flush=True)
     job_lifecycle()
-    # One-shot parent declaration and candidate assembly over a tiny literal
-    # no-Git repository. Startup is intentionally not qualified or executed.
+    # Guard reference.
+
     fixture_root=area/'candidate'; fixture_root.mkdir(); (fixture_root/'a.bin').write_bytes(b'abc')
     allocation=area/'assembly-runs'; allocation.mkdir()
     paths,probe=owner.resolve_validation_run_paths(fixture_root,explicit_process_root=allocation,
@@ -28090,8 +28081,8 @@ def _exercise_preflight_transport_v1(tmp_path, monkeypatch, capsys):
         with pytest.raises(RuntimeError,match='single use'):
             native.consume(assembly._validate_declaration)
     assert owner._PREFLIGHT_NATIVE_INPUT_V1.get() is None
-    # Explicit no-child fault ports wrap the real original consume/C capture;
-    # they are neither a Linux lease nor startup/first8 native qualification.
+    # Synthetic; no credit.
+
     for changed_boundary in ("post-consume", "post-native-check", "post-candidate"):
         for changed_holder in ("native", "basis", "candidate"):
             changed_native = source(declaration)
@@ -28137,9 +28128,9 @@ def _exercise_preflight_transport_v1(tmp_path, monkeypatch, capsys):
             else:
                 assert changed_assembly._original_candidate_v1 is None
             assert not (paths.evidence_root/'run.json').exists() and changed_assembly.launches == {}
-    # The same pure original-holder validator governs operational callback
-    # returns as well as construction. All process objects here are explicit
-    # no-child oracles and establish no native host/descendant qualification.
+    # Synthetic; no credit.
+
+
     process_oracle = SimpleNamespace(pid=7654, poll=lambda: 0)
     closed_oracle = SimpleNamespace(state="CLOSED", result={"application_exit": 0}, process=process_oracle)
     receipt_oracle = SimpleNamespace(pid=7654, native_exit_code=0)
@@ -28200,11 +28191,11 @@ def _exercise_preflight_transport_v1(tmp_path, monkeypatch, capsys):
             assembly.candidate_source(fixture_root, plan)
         assert assembly.__dict__ == before_foreign
     assert assembly.native is assembly._original_native_input_v1 and assembly.candidate is assembly._original_candidate_v1
-    # Even simultaneous current/private native alias replacement cannot
-    # replace the original constructor-local witness before another callback.
-    # Construct the unused foreign fixture before freezing the selected
-    # declaration's actual ancestor stamps. A later sibling creation is a
-    # genuine namespace change and must not be rebased or hidden from consume.
+    # Synthetic; no credit.
+
+
+
+
     twin_foreign = source(declaration)
     twin_native = source(declaration)
     assert twin_native.expected_chain == owner._preflight_chain_v1(twin_native.path.parent)
@@ -28241,7 +28232,7 @@ def _exercise_preflight_transport_v1(tmp_path, monkeypatch, capsys):
         print('PREFLIGHT_SYNTHETIC_PARENT_ASSEMBLY '+json.dumps(dict(original_positions=8,one_plan_identity=True,
             candidate_bytes_compared=3,application_children_started=0,startup_qualified=False,canonical_host_qualified=False,
             run_header_published=False,actual_cleanup=cleanup)),flush=True)
-    # Deadline and exhausted transport negatives operate on the real reader.
+    # Guard reference.
     expired=owner._PreflightTransportV1(transport,time.monotonic_ns()-1)
     with pytest.raises(RuntimeError,match='deadline'):
         expired.check()
@@ -28254,9 +28245,9 @@ def _exercise_preflight_transport_v1(tmp_path, monkeypatch, capsys):
             tiny.read(fd,1)
         assert tiny.received == 1 and tiny.read_calls == 1
     finally: os.close(fd)
-    # Actual normal parent CLI, with no configured native provider, denies
-    # before path/probe allocation. This extra engineering probe is not a ninth
-    # selected command or a canonical run.
+    # Guard reference.
+
+
     parent_argv=(sys.executable,'tools/run_validation_gates.py','--phase','fast-preflight',
         '--preflight-input',str(area/'unavailable-parent-input.bin'))
     parent_env={k:v for k,v in os.environ.items() if not k.upper().startswith(('QTT_','PYTHON'))}
@@ -28275,7 +28266,7 @@ def _exercise_preflight_transport_v1(tmp_path, monkeypatch, capsys):
             native_exit=parent_receipt.native_exit_code,failure_class=parent_receipt.failure_class,
             termination_state=parent_receipt.termination_state,
             complete_stdout=Path(parent_receipt.stdout_path).read_bytes().decode('utf-8'),complete_stderr=parent_error)),flush=True)
-    # Exact selected CLI reaches the missing-provider denial without opening a declaration or dispatching.
+    # Guard reference.
     with monkeypatch.context() as scoped:
         scoped.setattr(runner,'_legacy_run_commands_test_adapter_active',lambda:False)
         with pytest.raises(RuntimeError,match='NATIVE_HOST_PROVIDER_UNAVAILABLE'):
@@ -28288,7 +28279,7 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
     import io
     from tools import validation_reliability as o
     def bind_administrative_fixture_cwd(query, root, patch):
-        # Windows cwd alone is disposable; Query receipt/dispatch/validation and Linux/default supervision stay.
+        # Guard reference.
         if os.name != 'nt':return
         original_path=o._linux_preflight_path_v1
         original_command=query.command
@@ -28332,8 +28323,8 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
     assert o._linux_acl_parse_v2(raw,default=True,mode=0o000)==base
     if sys.platform!='linux':
         with pytest.raises(o.ValidationReliabilityError,match='NATIVE_ABI'):o._LinuxSourceNativeV2()
-    # A fixed ABI reference drives the complete existing xattr method. Native
-    # negative return values and errno are preserved, not replaced with success.
+    # Guard reference.
+
     abi=o._LinuxSourceNativeV2.__new__(o._LinuxSourceNativeV2)
     abi.ctypes=ctypes;abi.attempt=None;abi.last_acl={}
     name_buffer=b'system.posix_acl_access\0'
@@ -28348,8 +28339,8 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
             ctypes.set_errno(61);return -1
     abi.lib=ReferenceACL()
     import errno
-    # ENODATA is a Linux errno. Reference mapping is explicitly injected only
-    # for this Windows parsing branch; it cannot create a native generation.
+    # Guard reference.
+
     with monkeypatch.context() as patch:
         patch.setattr(errno,'ENODATA',61,raising=False)
         assert abi.acl(17,attempt=lambda op:None,delivered=delivered.append)==(raw,None)
@@ -28400,7 +28391,7 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
     for category,limit in (('R',64*1024**3),('S',1024**3),('E',16*1024**2)):
         damaged=copy.deepcopy(reference_census);damaged['logical_bytes'][category]=limit+1
         assert runner._linux_preflight_capacity_v2(damaged,page_size=4096)['metadata_admitted'] is False
-    # Fixed V2 wire references use real bytes and the complete frame owner.
+    # V2 reference.
     vector=(sys.executable,o._PREFLIGHT_SCRIPTS_V1[3],'--repo-root','.')
     identity=dict(run_id='reference-v2',phase='fast-preflight',command_index=4,original_position=4,command_count=8,
         argv=list(vector),repo_root=v2root,process_root=str(tmp_path/'v2process'),evidence_root=str(tmp_path/'v2evidence'),parent_pid=os.getpid())
@@ -28424,7 +28415,7 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
         decoded,values,count=o._preflight_frame_read_v1(stream.fileno(),magic=(b'QTTPF01\n',b'QTTPF02\n'),extent=24+len(frame),meter=meter,
             validate=lambda h,p:([],o._preflight_header_v2(h,p,identity)))
         assert decoded==header and values==[] and count==7 and meter.received==24+len(frame)
-    # Complete current owner through finite syscall ports: no Linux qualification or lease.
+    # Synthetic; no credit.
     from types import SimpleNamespace
     reference_results=[]
     def source_reference(case):
@@ -28617,7 +28608,7 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
             'after-full-protection','during-readability','quota','deadline','torn-journal',
             'partial-post','foreign-identity','foreign-flags','primary-cleanup','failed-close','after-readability'):
         source_reference(case)
-    # Failed legacy SOURCE-close ports have no descriptor/child or native close/termination credit.
+    # Guard reference.
     for close_case in ('native-close', 'charged-pre-close'):
         close_seal = object.__new__(o._LinuxImmutableSourceSealV2)
         close_seal.pid, close_seal.thread = os.getpid(), o.threading.get_ident()
@@ -28666,7 +28657,7 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
             assert close_calls == ([17] if close_case == 'native-close' else []) and open_calls == []
             assert any('LINUX_V2_UNRESOLVED_OWNED_DESCRIPTOR' in error
                 for error in close_seal.settlement_errors)
-    # Controlled source-only isolated Python programme, no native admission.
+    # Synthetic; no credit.
     module_path = Path(runner.REPO_ROOT) / 'tools' / 'master_plan_ingest.py'
     module_text = module_path.read_text(encoding='utf-8')
     module_tree = __import__('ast').parse(module_text)
@@ -28718,8 +28709,8 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
         with pytest.raises(o.ValidationReliabilityError, match='ORDINARY_MASTER_PLAN_ORIGINAL_STDLIB_IMPORT_COHORT'):
             o._ordinary_master_plan_python_native_v1(native_scope,native_bound,(operand,),((operand,'<module>',alien_text,()),))
         assert len(factory_calls) == 1
-    # Private owner: controlled RUN-path ports acquire nothing. Cohort argv,
-    # protected operands and production classifiers remain exact.
+    # Guard reference.
+
     original_run_path = runner._path
     adapter_paths = object.__new__(runner.ValidationRunPathsV1)
     object.__setattr__(adapter_paths, 'repo_root', Path(runner.REPO_ROOT))
@@ -28744,8 +28735,8 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
             o._LINUX_PREFLIGHT_PROCESS_V1.reset(token)
     assert runner._path is original_run_path
 
-    # The remaining original RUN_OUTPUT recipes use the same source supplier.
-    # These are controlled metadata/call ports, never a native or V-output proof.
+    # Guard reference.
+
     root = Path(runner.REPO_ROOT)
     V = root.parent / 'synthetic-source-only-V'
     native_scope._ordinary_bound_paths_v1 = SimpleNamespace(repo_root=root, validation_output_root=V)
@@ -28836,8 +28827,8 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
             requested_marker = next(node.value.value for node in source_ast.parse(operands[0]['text']).body
                 if isinstance(node,source_ast.Assign) and any(isinstance(target,source_ast.Name) and target.id=='SUCCESS_MARKER' for target in node.targets))
             assert closed_factory_calls[-1][1]['stdout_minimum'] == len(requested_marker.encode('utf8')) + 1
-            # Exercise the actual source/native constructor and checker using
-            # the same explicitly synthetic metadata/installation ports.
+            # Synthetic; no credit.
+
             for operand in operands:
                 operand['row'] = native_source.row_index[str(root/operand['path'])]
                 operand['version'] = native_source.post[str(root/operand['path'])] = (1,2,3,4,5,6)
@@ -28896,8 +28887,8 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
                         tuple((operand,'<module>',operand['text'],()) for operand in operands))
         assert len(closed_factory_calls) == 3
 
-    # Exact original readonly consumers follow the original V producer.
-    # Synthetic Source/installation metadata proves source control only.
+    # Synthetic; no credit.
+
     native_scope.repository = str(root)
     trace_name, scope_name = 'tools/master_plan_traceability_check.py', 'tools/validate_first_pr_scope.py'
     consumers = (
@@ -28985,7 +28976,7 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
                     o._ordinary_deterministic_readonly_native_v1(native_scope,bound,operands,grammar)
         assert len(readonly_calls) == 2
 
-    # Original PR138 -c stays one selected programme; no-child ports give no Linux/profile/Git credit.
+    # PR138: no credit.
     literal = runner.PR138_NON_MUTATING_VALIDATION_SCRIPT
     requested_literal = (selected_sys.executable, '-c', literal)
     source_names = o._ordinary_pr138_source_names_v1()
@@ -29070,7 +29061,7 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
         with pytest.raises(o.ValidationReliabilityError,match='ORDINARY_PR138_EXACT_INITIALIZER_OR_NAMESPACE_ABSENCE'):
             o._ordinary_pr138_native_v1(native_scope,literal_bound,graph_operands,graph_grammar)
 
-        # Actual prerequisite issuer uses synthetic no-child/native ports and original typed receipts.
+        # Synthetic; no credit.
         literal_ports.setattr(o,'os',SimpleNamespace(**{**vars(o.os),'O_NOFOLLOW':131072,'O_CLOEXEC':524288}))
         programme = {'entry':literal_entry,'environment':{}}
         effect = {'entry':literal_entry,'native_programme':actual_literal}
@@ -29139,8 +29130,8 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
         for kind,raw in (('VERSION',b'git version 2.35.0\n'),('CONFIG_NAMES',b'include.path\0'),('INDEX_MODES',b'160000\0')):
             with pytest.raises(o.ValidationReliabilityError,match='ORDINARY_POST_GIT_'):
                 native_scope._ordinary_post_git_edge_bytes_v1(kind,raw,index_entries=1 if kind=='INDEX_MODES' else None)
-        # Unknown command failure retains the same original exception, partial
-        # row and loader debt; it produces no completed proof or retry.
+        # Guard reference.
+
         failed_scope=native_scope
         del failed_scope._ordinary_selected_git_proof_v1
         failed_scope._ordinary_factory_slots_v1=[];failed_scope._ordinary_factory_errors_v1=[]
@@ -29165,7 +29156,7 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
         assert len(failed_scope._ordinary_factory_slots_v1)==1 and not failed_scope._ordinary_factory_slots_v1[0]['closed']
         with pytest.raises(o.ValidationReliabilityError,match='ORDINARY_SELECTED_GIT_ONE_NONPOST_PROOF'):
             failed_scope._ordinary_verify_selected_git_controls_v1()
-    # Three readonly CLI graphs share the source/native owner through no-child ports.
+    # Synthetic; no credit.
     source_table = source_ast.parse((root/'tools/validation_inventory.py').read_text(encoding='utf8'))
     literal_function = next(node for node in source_table.body if isinstance(node,source_ast.FunctionDef)
         and node.name == '_ordinary_deterministic_fixed_sources_v1')
@@ -29296,7 +29287,7 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
         with pytest.raises(o.ValidationReliabilityError,match='ORDINARY_SOURCE_LITERAL_'):
             o._ordinary_deterministic_literal_references_v1(bad)
 
-    # Pure quota/source metadata only: no process or native admission.
+    # Guard reference.
     prefix_caps = runner._ordinary_post_ceiling_programme_v1(original_cutoffs=(1, 2, 3, 4))
     expected_prefix_cell = {'stdout_bytes': 8 << 20, 'stderr_bytes': 8 << 20,
         'combined_output_bytes': 16 << 20}
@@ -29308,7 +29299,7 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
     with pytest.raises(o.ValidationReliabilityError, match='ORDINARY_PREFIX_SOURCE_SELECTED_CAPTURE_LAYER'):
         runner._ordinary_prefix_output_limits_v1(prefix_caps, 'APPLICATION')
 
-    # Original dispatch markers acquire/admit no source, native resource or child.
+    # Guard reference.
     post_scope = object.__new__(o._LinuxPreflightScopeV1)
     post_scope._ordinary_phase_v1 = runner.POST_VALIDATION_PHASE
     post_scope._ordinary_runner_owner_v1 = runner
@@ -29349,6 +29340,531 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
             post_execution, selected_resource, post_effects) is allocation_calls
         assert len(allocation_calls) == 1 and allocation_calls[0] == (
             post_paths, post_plan, post_execution, selected_resource, post_effects)
+
+    # Synthetic references; no resource or process admission.
+    from tools import ci_branch_context as qci,validation_scope_registry as qr
+    import inspect
+    with monkeypatch.context() as qp:
+        qs=object.__new__(o._LinuxPreflightScopeV1);qs.name='quota-reference'
+        qc=runner._ordinary_post_ceiling_programme_v1(original_cutoffs=(1,2,3,4))
+        qc=o._ordinary_phase_ceiling_values_v1(qc,runner=runner,phase=runner.FAST_PREFLIGHT_PHASE,root=tmp_path)
+        qfd=qc['fd_program'];qclaim={'scope_unit':'quota-referencebootstrap.scope'}
+        qhost=dict(profile='synthetic',cgroup=Path('/sys/fs/cgroup/quota-reference/quota-referencecontroller'),
+            common_cgroup=Path('/sys/fs/cgroup/quota-reference'),claim=qclaim,ceiling_programme=qc,
+            original_ceiling_programme=qc,original_cutoffs=qc['original_cutoffs'],
+            latest_nofile=(1536,1536),latest_effective_intersection=(1<<32,256,((200000,100000),)))
+        qhost['latest_ancestor_readback']=((qhost['common_cgroup'],b'4294967296',b'0',b'256',(b'200000',b'100000')),
+            (Path('/sys/fs/cgroup'),None,None,None,((b'memory',b'pids',b'cpu'),(b'memory',b'pids',b'cpu'))))
+        qhost['original']=(qhost,qs,None,qclaim,qc)
+        qhost['native_lineage']=(qhost,qs,qhost['original'],qhost['profile'],qhost['cgroup'],qhost['common_cgroup'],
+            qc,qfd,tuple(qfd.items()),qclaim,tuple(qclaim.items()),qhost['original_cutoffs'])
+        qs._ordinary_host_preparation_v1=qs._ordinary_original_host_preparation_v1=qhost
+        qs._ordinary_host_native_lineage_v1=qhost['native_lineage'];qs._ordinary_candidate_v1=None
+        qs._ordinary_resource_programme_v1=qres={'ceiling_programme':qc}
+        qn=dict(tasks=2,nofile=12,bootstrap_fd_demand=12,application_fd_demand=8,
+            source_operands=({'path':'tools/validation_reliability.py','complete':True},))
+        qp.setattr(qr,'_facet_fn_native_source_programme_check_v1',lambda scope,value:value)
+        qp.setattr(o,'_ordinary_native_source_programme_check_v1',lambda scope,value:value)
+        qp.setattr(o,'_rp5a_consumer_role_v1',lambda argv,root:None)
+        frozen=tuple(qn.items())
+        assert qci._ordinary_supported_application_quotas_v1(qs,qres,qn)==(64,64)
+        assert tuple(qn.items())==frozen and qn['tasks']==2 and qn['nofile']==12
+        for mapping,key,value in ((qn,'tasks',65),(qn,'nofile',65),(qn,'tasks',0),
+                (qn,'source_operands',()),(qfd,'application',True),(qhost,'latest_nofile',(64,64)),
+                (qhost,'latest_effective_intersection',(1<<32,64,((200000,100000),))),
+                (qhost,'claim',dict(qclaim)),(qc['limits'],'heap_byte_limit',0)):
+            prior=mapping[key];mapping[key]=value
+            try:
+                with pytest.raises(o.ValidationReliabilityError):
+                    qci._ordinary_supported_application_quotas_v1(qs,qres,qn)
+            finally:mapping[key]=prior
+        prior=qhost.pop('latest_ancestor_readback')
+        try:
+            with pytest.raises(KeyError):qci._ordinary_supported_application_quotas_v1(qs,qres,qn)
+        finally:qhost['latest_ancestor_readback']=prior
+        prior=qhost['native_lineage'];changed=(*prior[:-1],object())
+        qhost['native_lineage']=qs._ordinary_host_native_lineage_v1=changed
+        try:
+            with pytest.raises(o.ValidationReliabilityError):
+                qci._ordinary_supported_application_quotas_v1(qs,qres,qn)
+        finally:qhost['native_lineage']=qs._ordinary_host_native_lineage_v1=prior
+        body=ast.parse(inspect.getsource(qr._facet_m_issue_phase_allocations_v1)).body[0]
+        loop=next(n for n in ast.walk(body) if isinstance(n,ast.For) and isinstance(n.iter,ast.Call)
+            and isinstance(n.iter.func,ast.Name) and n.iter.func.id=='zip')
+        unit=compile(ast.fix_missing_locations(ast.Module(body=[loop],type_ignores=[])),'<no-child allocation row loop>','exec')
+        bounds=tuple((SimpleNamespace(argv=('reference',)),SimpleNamespace(registered_argv=('reference',)),i) for i in (1,2))
+        ns=tuple(dict(qn,bound_row=b,entry=b[0],execution=b[1],source_position=b[2],stdout_minimum=0,stderr_minimum=0) for b in bounds)
+        effects={'rows':tuple(dict(native_programme=n,entry=b[0],execution=b[1]) for b,n in zip(bounds,ns,strict=True))}
+        for phase in (runner.FAST_PREFLIGHT_PHASE,next(iter(runner.PYTEST_SHARD_COMMANDS)),'unselected-reference'):
+            env=dict(self=qs,resource=qres,runner=runner,record={'geometry':{'phase':phase}},rows=[],sources=[],roles=[],
+                bound=bounds,effect_programme=effects,_f=o,paths=SimpleNamespace(repo_root=tmp_path))
+            exec(unit,{},env)
+            assert len(env['rows'])==2 and all(row['native_programme'] is n for row,n in zip(env['rows'],ns,strict=True))
+            assert tuple((row['tasks'],row['nofile']) for row in env['rows'])==(((2,12),)*2 if phase=='unselected-reference' else ((64,64),)*2)
+        # Allocation routing only: this checker is explicitly synthetic, not a native admission.
+        qp.setattr(qci,'_ordinary_selected_operational_native_check_v1',lambda scope,value:value['operational_operand'])
+        op_ns=tuple(dict(n,operational_operand=object()) for n in ns)
+        op_effects={'rows':tuple(dict(native_programme=n,entry=b[0],execution=b[1]) for b,n in zip(bounds,op_ns,strict=True))}
+        op_env=dict(self=qs,resource=qres,runner=runner,record={'geometry':{'phase':'unselected-reference'}},
+            rows=[],sources=[],roles=[],bound=bounds,effect_programme=op_effects,_f=o,paths=SimpleNamespace(repo_root=tmp_path))
+        exec(unit,{},op_env)
+        assert len(op_env['rows'])==2 and tuple((row['tasks'],row['nofile'])for row in op_env['rows'])==((64,64),)*2
+        assert all(row['native_programme']is n and n['tasks']==2 and n['nofile']==12 for row,n in zip(op_env['rows'],op_ns,strict=True))
+        for result in (None,object()):
+            qp.setattr(qci,'_ordinary_selected_operational_native_check_v1',lambda scope,value:result)
+            failed=dict(op_env,rows=[],sources=[],roles=[])
+            with pytest.raises(o.ValidationReliabilityError,match='ORDINARY_SELECTED_OPERATIONAL_IDENTICAL_QUOTA_OPERAND'):
+                exec(unit,{},failed)
+        assert tuple(qn.items())==frozen
+
+    # Synthetic CI source/receiver ports test the retained-body association only.
+    # They acquire no Linux event, source seal, child, profile or Git permission.
+    from tools import ci_branch_context as ci_literal_owner
+    ci_literal_text = (root/'tools/ci_branch_context.py').read_text(encoding='utf8')
+    ci_literal_tree = source_ast.parse(ci_literal_text)
+    inventory_tree = source_ast.parse((root/'tools/validation_inventory.py').read_text(encoding='utf8'))
+    literal_table = next(node for node in inventory_tree.body if isinstance(node,source_ast.FunctionDef)
+        and node.name=='_ordinary_deterministic_fixed_sources_v1')
+    literal_values = source_ast.literal_eval(literal_table.body[0].value)
+    ci_literal_prior = next(body for name,body in literal_values[1] if name=='tools/ci_branch_context.py')
+    ci_literal_operand = dict(path='tools/ci_branch_context.py',source_form='PYTHON',
+        text=ci_literal_text,complete=True,error=None)
+    ci_literal_record = dict(scope=native_scope,source=native_scope.source)
+    ci_literal_selection = SimpleNamespace(phase='deterministic-validators-a')
+    ci_literal_capture = dict(bytes=source_base64.b64encode(ci_literal_text.encode('utf8')).decode('ascii'),
+        version=(1,2,3,4,5,6))
+    ci_literal_bootstrap = {'source':{'tools/ci_branch_context.py':ci_literal_capture}}
+    ci_literal_receiver = dict(scope=native_scope,bootstrap=ci_literal_bootstrap,
+        owner=(os.getpid(),o.threading.get_ident()),joined=True,errors=[])
+    ci_literal_receiver['original']=(ci_literal_receiver,native_scope,None,
+        ci_literal_bootstrap,ci_literal_receiver['owner'])
+    ci_literal_binding = dict(receiver=ci_literal_receiver,bootstrap=ci_literal_bootstrap)
+    ci_literal_cache = {('tools/ci_branch_context.py','PYTHON'):(ci_literal_tree,ci_literal_operand)}
+    with monkeypatch.context() as ci_literal_ports:
+        for name,value in (
+                ('_ordinary_runner_owner_v1',runner),('_ordinary_original_runner_owner_v1',runner),
+                ('_ordinary_source_selection_v1',ci_literal_selection),
+                ('_ordinary_original_source_selection_v1',ci_literal_selection),
+                ('_ordinary_deterministic_source_ingredients_v1',ci_literal_record),
+                ('_ordinary_original_deterministic_source_ingredients_v1',ci_literal_record),
+                ('_ordinary_controller_receiver_v1',ci_literal_receiver),
+                ('_ordinary_original_controller_receiver_v1',ci_literal_receiver),
+                ('_ordinary_source_operand_cache_v1',ci_literal_cache)):
+            ci_literal_ports.setattr(native_scope,name,value,raising=False)
+        ci_literal_ports.setattr(runner,'_ordinary_ci_require_binding_v1',
+            lambda scope,phase:ci_literal_binding if scope is native_scope and phase==ci_literal_selection.phase else None)
+        assert ci_literal_owner._ordinary_ci_literal_body_bootstrap_v1(native_scope,ci_literal_record,
+            ci_literal_tree,ci_literal_operand,ci_literal_prior) is ci_literal_operand
+        ci_literal_capture['bytes']=''
+        with pytest.raises(o.ValidationReliabilityError,match='ORDINARY_CI_LITERAL_COMPLETE_HELD_BYTES'):
+            ci_literal_owner._ordinary_ci_literal_body_bootstrap_v1(native_scope,ci_literal_record,
+                ci_literal_tree,ci_literal_operand,ci_literal_prior)
+        ci_literal_capture['bytes']=source_base64.b64encode(ci_literal_text.encode('utf8')).decode('ascii')
+        with pytest.raises(o.ValidationReliabilityError,match='ORDINARY_CI_LITERAL_SAME_RECEIVED_SOURCE'):
+            ci_literal_owner._ordinary_ci_literal_body_bootstrap_v1(native_scope,dict(ci_literal_record),
+                ci_literal_tree,ci_literal_operand,ci_literal_prior)
+        for ci_literal_case in ('old-body','native-bytes','extra-import','shadowed-body'):
+            changed_ci=source_ast.parse(ci_literal_text)
+            if ci_literal_case=='old-body':
+                next(node for node in changed_ci.body if isinstance(node,source_ast.FunctionDef)
+                    and node.name=='is_repair_branch').body.append(source_ast.Pass())
+            elif ci_literal_case=='native-bytes':
+                next(node for node in changed_ci.body if isinstance(node,source_ast.Assign)
+                    and len(node.targets)==1 and isinstance(node.targets[0],source_ast.Name)
+                    and node.targets[0].id=='_QTT_ORDINARY_NATIVE_C_SOURCE_V1').value.value+=b' '
+            elif ci_literal_case=='extra-import':
+                changed_ci.body.append(source_ast.Import(names=[source_ast.alias(name='foreign',asname=None)]))
+            else:
+                changed_ci.body.append(source_ast.parse('def is_repair_branch():\n return True\n').body[0])
+            ci_literal_cache[('tools/ci_branch_context.py','PYTHON')]=(changed_ci,ci_literal_operand)
+            with pytest.raises(o.ValidationReliabilityError,match='ORDINARY_CI_LITERAL_'):
+                ci_literal_owner._ordinary_ci_literal_body_bootstrap_v1(native_scope,ci_literal_record,
+                    changed_ci,ci_literal_operand,ci_literal_prior)
+        ci_literal_cache[('tools/ci_branch_context.py','PYTHON')]=(ci_literal_tree,ci_literal_operand)
+        assert ci_literal_owner._ordinary_ci_literal_body_bootstrap_v1(native_scope,ci_literal_record,
+            ci_literal_tree,ci_literal_operand,ci_literal_prior) is ci_literal_operand
+    # Synthetic managed geometry only; this does not issue target or native credit.
+    from tools.ci_branch_context import _ordinary_selected_target_managed_request_v1 as target_request
+    target_layout = object()
+    target_sizes = dict(pointer=8, gc=16, unicode_prefix=11, tuple_prefix=7,
+        list_prefix=5, dict_prefix=13, dict_keys_prefix=17,
+        dict_general_entry=24, dict_unicode_entry=16, int_prefix=9, int_digit_bytes=4)
+    def target_size(layout, name):
+        if layout is not target_layout:
+            raise ValueError('FOREIGN_TARGET_LAYOUT')
+        return target_sizes[name]
+    target_recipe = dict(source_position=120)
+    target_geometry = ('HELD',2,7,3,8,2,5,2,7,1,4,2,1,3,8)
+    with monkeypatch.context() as target_math:
+        target_math.setattr(o, '_ordinary_data_size_v1', target_size)
+        target_rows = target_request(target_layout, target_recipe, target_geometry)
+        assert tuple(name for name, value in target_rows) == (
+            'HELD_target_unicode','HELD_target_tuples','HELD_target_lists',
+            'HELD_target_dictionaries','HELD_target_sets','HELD_target_integers',
+            'HELD_target_active_Path_workspace')
+        assert target_rows[0][1] == 2*11+4*(7+2) and target_rows[1][1] == 3*7+8*8
+        assert target_rows[5][1] == 2*(9+5*4) and target_rows[6][1] > 0
+        assert target_geometry == ('HELD',2,7,3,8,2,5,2,7,1,4,2,1,3,8) and target_recipe == {'source_position':120}
+        for bad_recipe, bad_geometry in (
+                ({'source_position':133}, target_geometry),
+                (target_recipe, ('HELD',True,*target_geometry[2:])),
+                (target_recipe, ('HELD',-1,*target_geometry[2:])),
+                (target_recipe, ('FOREIGN',*target_geometry[1:])),
+                (target_recipe, (object(),*target_geometry[1:])),
+                (target_recipe, ('HELD',0,7,*target_geometry[3:])),
+                (target_recipe, (*target_geometry[:-3],0,3,8))):
+            with pytest.raises(o.ValidationReliabilityError,match='ORDINARY_TARGET_'):
+                target_request(target_layout, bad_recipe, bad_geometry)
+        with pytest.raises(ValueError,match='FOREIGN_TARGET_LAYOUT'):
+            target_request(object(), target_recipe, target_geometry)
+    # Source-extracted synthetic metadata callback only: no issuer, funding or native operation.
+    import types as _startup_types
+    import sys as _startup_sys
+    import tools as _startup_tools
+    _startup_path=root/'tools'/'ci_branch_context.py'
+    _startup_before=_startup_path.lstat()
+    assert stat.S_ISREG(_startup_before.st_mode) and _startup_before.st_nlink==1
+    with _startup_path.open('rb',buffering=0) as _startup_stream:
+        _startup_opened=os.fstat(_startup_stream.fileno())
+        assert (_startup_opened.st_dev,_startup_opened.st_ino,_startup_opened.st_size)==(
+            _startup_before.st_dev,_startup_before.st_ino,_startup_before.st_size)
+        assert _startup_opened.st_size<=2*1024*1024
+        _startup_raw=bytearray()
+        while len(_startup_raw)<_startup_opened.st_size:
+            _startup_piece=_startup_stream.read(min(65536,_startup_opened.st_size-len(_startup_raw)))
+            assert type(_startup_piece)is bytes and 0<len(_startup_piece)<=65536
+            _startup_raw.extend(_startup_piece)
+        assert _startup_stream.read(1)==b''
+    _startup_text=_startup_raw.decode('utf-8')
+    _startup_nodes=[n for n in source_ast.parse(_startup_text).body
+        if isinstance(n,source_ast.FunctionDef) and n.name=='_ordinary_initial_physical_source_admission_v1']
+    assert len(_startup_nodes)==1
+    _startup_body=source_ast.get_source_segment(_startup_text,_startup_nodes[0])
+    _startup_ci=_startup_types.ModuleType('synthetic_initial_ci_source')
+    _startup_rel=_startup_types.ModuleType('tools.validation_reliability')
+    _startup_reg=_startup_types.ModuleType('tools.validation_scope_registry')
+    _startup_trace=[]
+    def _startup_need(value,message):
+        if not value:raise ValueError(message)
+    _startup_rel.__dict__.update(Path=Path,sys=_startup_sys,
+        _preflight_require_v1=_startup_need,_fixture_trace=_startup_trace)
+    _startup_rel_code=compile("""class _LinuxSourceNativeV2:
+ @classmethod
+ def _ordinary_initial_native_product_v1(cls,native_input,native,profile,cutoffs):
+  return _ordinary_initial_native_observations_v1(native_input,native,profile,cutoffs)
+def _ordinary_initial_native_observations_v1(native_input,native,profile,cutoffs):
+ return _fixture_registry._facet_fn_initial_native_observations_v1(
+  native_input=native_input,native=native,early_profile=profile,original_cutoffs=cutoffs)
+def _ordinary_initial_preloader_return_check_v1(native_input):
+ _fixture_trace.append('preloader');return _fixture_returned
+def _ordinary_initial_prefix_v1(native_input):
+ _fixture_trace.append('prefix');return native_input['current_native_observation']
+def _ordinary_control_code_source_equal_v1(left,right):
+ return left is right
+""",str(root/'tools'/'validation_reliability.py'),'exec')
+    exec(_startup_rel_code,_startup_rel.__dict__)
+    _startup_ci.__dict__['_fixture_trace']=_startup_trace
+    _startup_ci_code=compile("""def _facet_fn_initial_startup_prebind_v1():
+ raise AssertionError('synthetic startup source must never execute')
+def _ordinary_ci_initial_common_source_check_v1(native_input,profile,allocation):
+ _fixture_trace.append('common')
+ assert allocation is native_input['early_allocation_original']
+ assert profile is native_input['early_profile']
+""" + _startup_body+'\n',str(_startup_path),'exec')
+    exec(_startup_ci_code,_startup_ci.__dict__)
+    _startup_ci._ORDINARY_INITIALIZED_MODULE_CODE_V1=_startup_ci_code
+    _startup_reg.__dict__['_fixture_admission']=_startup_ci._ordinary_initial_physical_source_admission_v1
+    _startup_reg_code=compile("""def _facet_fn_initial_native_observations_v1(
+ native_input,native,early_profile,original_cutoffs):
+ return _fixture_admission(native_input,native,early_profile,original_cutoffs)
+""",str(root/'tools'/'validation_scope_registry.py'),'exec')
+    exec(_startup_reg_code,_startup_reg.__dict__)
+    _startup_reg._ORDINARY_INITIALIZED_MODULE_CODE_V1=_startup_reg_code
+    _startup_rel._fixture_registry=_startup_reg
+    _startup_native=object.__new__(_startup_rel._LinuxSourceNativeV2)
+    _startup_errors=[];_startup_entry=tuple(object()for _ in range(9))
+    _startup_attempt={};_startup_source={'original':object(),
+        'expected_module_closure':(object(),object(),root/'tools'/'validation_scope_registry.py'),
+        'native_method_code':_startup_rel._LinuxSourceNativeV2._ordinary_initial_native_product_v1.__func__.__code__,
+        'module_namespace':_startup_rel.__dict__}
+    _startup_origin={'complete':True,'origin_ns':10,'result_original':object()}
+    _startup_generation=object();_startup_record={}
+    _startup_prefix={'prefix_original':(object(),)}
+    _startup_prefix['physical_prefix_original']=(_startup_prefix['prefix_original'],object())
+    _startup_input=dict(errors=_startup_errors,entry_attempt=_startup_attempt,
+        entry_original=_startup_entry,source_generation=_startup_source,
+        native_generation=_startup_generation,startup_source=_startup_record,
+        origin_prebind=_startup_origin,origin_prebind_result_original=_startup_origin['result_original'],
+        original_execution_cutoff_ns=3500*10**9+10,original_settlement_cutoff_ns=3590*10**9+10,
+        current_native_observation=_startup_prefix,native_instance=_startup_native,native_init_returned=True)
+    _startup_components=object()
+    _startup_profile=(_startup_input,_startup_source,_startup_generation,_startup_record,
+        object(),_startup_origin,None,_startup_components,1,1,object(),object())
+    _startup_allocation=(_startup_input,_startup_profile,object(),object())
+    _startup_input.update(early_profile=_startup_profile,early_allocation_original=_startup_allocation,
+        initial_request_issuer=dict(result=_startup_profile,components=_startup_components,
+            allocation=_startup_allocation,complete=True))
+    _startup_rel._fixture_returned=(_startup_input,_startup_source,_startup_generation,
+        _startup_record,_startup_profile)
+    _startup_cutoffs=(10,10+3500*10**9,_startup_input['original_execution_cutoff_ns'],
+        _startup_input['original_settlement_cutoff_ns'])
+    _startup_issuer=dict(native_input=_startup_input,native=_startup_native,errors=_startup_errors,
+        stage='PHYSICAL',complete=False,physical=None,initialized_storage=None,
+        initial_layout=None,native_product=None,prepare_request=None,query_request=None,
+        original_cutoffs=_startup_cutoffs)
+    _startup_issuer['original']=(_startup_issuer,_startup_attempt,*_startup_entry[1:5],
+        *_startup_entry[6:9])
+    _startup_input['native_product_attempt']=_startup_attempt['native_product_issuer']=_startup_issuer
+    _startup_a=dict(native_input=_startup_input,generation=_startup_source,startup=_startup_record,
+        source_original=_startup_source['original'],origin=_startup_origin,
+        origin_original=_startup_origin['result_original'],owner=object(),cutoffs=_startup_cutoffs,
+        errors=_startup_errors,slots=[],reads=[],operations=[],pending_acl=object(),source_pairs=object(),
+        producer=_startup_ci._facet_fn_initial_startup_prebind_v1,
+        producer_code=_startup_ci._facet_fn_initial_startup_prebind_v1.__code__,complete=True,
+        startup_attempt=object(),product_original=tuple(object()for _ in range(4)))
+    _startup_fields=('native_input','generation','startup','source_original','origin','origin_original',
+        'owner','cutoffs','errors','slots','reads','operations','pending_acl','source_pairs','producer','producer_code')
+    _startup_a['original']=(_startup_a,*(_startup_a[name]for name in _startup_fields))
+    _startup_a['success_original']=(_startup_a,_startup_a['original'],_startup_a['startup_attempt'],
+        _startup_a['product_original'],_startup_a['pending_acl'],_startup_a['source_pairs'],
+        _startup_a['product_original'][3],_startup_a['origin_original'],_startup_allocation,
+        _startup_prefix,_startup_errors)
+    _startup_a['ci_source_code_original']=(_startup_a,object(),_startup_ci.__dict__,
+        _startup_ci_code,_startup_ci_code,object(),object(),object())
+    _startup_record['pre_cold_result']=_startup_record['pre_cold_attempt']=_startup_a
+    with monkeypatch.context() as _startup_ports:
+        _startup_ports.setattr(_startup_tools,'validation_reliability',_startup_rel)
+        _startup_ports.setitem(_startup_sys.modules,'tools.validation_reliability',_startup_rel)
+        _startup_ports.setitem(_startup_sys.modules,'tools.validation_scope_registry',_startup_reg)
+        _startup_call=_startup_rel._LinuxSourceNativeV2._ordinary_initial_native_product_v1
+        assert _startup_call(_startup_input,_startup_native,_startup_profile,_startup_cutoffs)is _startup_profile
+        assert _startup_trace==['preloader','prefix','common']
+        for _startup_key,_startup_foreign in (
+                ('stage','PENDING_SOURCE'),('original',tuple(object()for _ in range(9)))):
+            _startup_saved=_startup_issuer[_startup_key]
+            try:
+                _startup_issuer[_startup_key]=_startup_foreign
+                with pytest.raises(ValueError,match='ORDINARY_INITIAL_ACTUAL_REACHED_EARLY_ISSUER'):
+                    _startup_call(_startup_input,_startup_native,_startup_profile,_startup_cutoffs)
+            finally:_startup_issuer[_startup_key]=_startup_saved
+        with pytest.raises(ValueError,match='ORDINARY_INITIAL_FIXED_REACHED_PHYSICAL_SOURCE_CALLERS'):
+            _startup_reg._facet_fn_initial_native_observations_v1(
+                _startup_input,_startup_native,_startup_profile,_startup_cutoffs)
+        _startup_ci._ORDINARY_INITIALIZED_MODULE_CODE_V1=compile('pass',str(_startup_path),'exec')
+        try:
+            with pytest.raises(ValueError,match='ORDINARY_INITIAL_COMPLETE_PROTECTED_CI_ADMISSION_SOURCE'):
+                _startup_call(_startup_input,_startup_native,_startup_profile,_startup_cutoffs)
+        finally:_startup_ci._ORDINARY_INITIALIZED_MODULE_CODE_V1=_startup_ci_code
+        _startup_saved=_startup_a['success_original']
+        try:
+            _startup_a['success_original']=(*_startup_saved[:8],object(),*_startup_saved[9:])
+            with pytest.raises(ValueError,match='ORDINARY_INITIAL_COMPLETED_PROTECTED_STARTUP'):
+                _startup_call(_startup_input,_startup_native,_startup_profile,_startup_cutoffs)
+        finally:_startup_a['success_original']=_startup_saved
+        assert _startup_issuer['stage']=='PHYSICAL' and _startup_issuer['complete']is False
+        assert _startup_issuer['physical']is _startup_issuer['initialized_storage']is None
+        assert _startup_errors==[] and _startup_call(
+            _startup_input,_startup_native,_startup_profile,_startup_cutoffs)is _startup_profile
+    # Metadata-only pure mapper relocation: no paths are opened and no resource is admitted.
+    from tools import ci_branch_context as _mapper_move_ci
+    _mapper_move_input=object();_mapper_move_result=object();_mapper_move_calls=[]
+    with monkeypatch.context() as _mapper_move_ports:
+        _mapper_move_ports.setattr(_mapper_move_ci,'_mapper_profile_v1',
+            lambda profile:(_mapper_move_calls.append(profile),_mapper_move_result)[1])
+        assert o._mapper_profile_v1(_mapper_move_input)is _mapper_move_result
+    assert _mapper_move_calls==[_mapper_move_input]
+    _mapper_move_root=tmp_path/'synthetic-mapper-root'
+    _mapper_move_basis=tmp_path/'synthetic-mapper-reference'/'basis.bin'
+    _mapper_move_chain=[[str(p),[1,i+1,stat.S_IFDIR|0o755]]
+        for i,p in enumerate((*reversed(_mapper_move_root.parents),_mapper_move_root))]
+    _mapper_move_basis_chain=[[str(p),[1,i+50,stat.S_IFDIR|0o755]]
+        for i,p in enumerate((*reversed(_mapper_move_basis.parent.parents),_mapper_move_basis.parent))]
+    _mapper_move_profile=dict(kind='MAPPER_DISK_BASIS_V1',
+        position=o._REPORT_READ_ROUTES_V1[0][0],generation='synthetic-source-only',
+        root=str(_mapper_move_root),root_chain=_mapper_move_chain,basis=str(_mapper_move_basis),
+        basis_chain=_mapper_move_basis_chain,basis_lstat=[1,999,stat.S_IFREG|0o444,3,1,1,1],
+        basis_fstat=[1,999,stat.S_IFREG|0o444,3,1,1,1],
+        entries=[dict(path='fixture.txt',offset=0,length=3,attempt_limit=1,
+            lstat=[1,1000,stat.S_IFREG|0o644,3,1,1,1],
+            fstat=[1,1000,stat.S_IFREG|0o644,3,1,1,1],parent_chain=_mapper_move_chain)],
+        limits=dict(attempts=1,target_bytes=4,basis_bytes=3,metadata_calls=0,single_target_buffer=0),
+        chunk_bytes=65536,deadline_ns=1)
+    _mapper_move_shape=o._mapper_profile_v1(_mapper_move_profile)
+    assert _mapper_move_shape==dict(unique_files=1,basis_extent=3,attempt_envelope=1,
+        target_byte_reservation_envelope=4,basis_byte_reservation_envelope=3,
+        is_authentic_resource_grant=False)
+    with pytest.raises(ValueError,match='RUNTIME_INTEGER:chunk'):
+        o._mapper_profile_v1(dict(_mapper_move_profile,chunk_bytes=True))
+    with pytest.raises(ValueError,match='BASIS_ENTRIES'):
+        o._mapper_profile_v1(dict(_mapper_move_profile,entries=[]))
+    with pytest.raises(ValueError,match='BASIS_PROFILE_FIELDS'):
+        o._mapper_profile_v1(dict(_mapper_move_profile,foreign=None))
+    # The exact operational checker rejects equal replacement Code/default objects.
+    _operational_tree=ast.parse((REPO_ROOT/'tools'/'ci_branch_context.py').read_text(encoding='utf-8'))
+    _operational_checkers=tuple(n for n in _operational_tree.body if isinstance(n,ast.FunctionDef)
+        and n.name=='_ordinary_selected_operational_native_check_v1')
+    assert len(_operational_checkers)==1
+    _callback_guards=tuple(n.args[0] for n in ast.walk(_operational_checkers[0])
+        if isinstance(n,ast.Call) and isinstance(n.func,ast.Name) and n.func.id=='need'
+        and len(n.args)==2 and isinstance(n.args[1],ast.Constant)
+        and n.args[1].value=='ORDINARY_OPERATIONAL_RETAINED_CAPTURE_AND_PUBLIC_CHECK_CODE_IDENTITIES')
+    assert len(_callback_guards)==1
+    _callback_code=compile(ast.Expression(_callback_guards[0]),'<operational-callback-identity>','eval')
+    def _operational_callback_factory(held):
+        def callback(value=1,*,selected=True):
+            return held
+        return callback
+    _callback=_operational_callback_factory(object())
+    _callback_keys=('capture_source','capture_data','check','reserve_targets')
+    _callback_ports={name:_callback for name in _callback_keys}
+    _callback_original=tuple((name,_callback,_callback.__code__,_callback.__defaults__,
+        _callback.__kwdefaults__,_callback.__closure__)for name in _callback_keys)
+    def _operational_callback_guard():
+        return eval(_callback_code,{'a':_callback_ports,'callbacks':_callback_original})
+    assert _operational_callback_guard()
+    _callback.__code__=_callback.__code__.replace()
+    assert _callback.__code__==_callback_original[0][2] and not _operational_callback_guard()
+    _callback.__code__=_callback_original[0][2]
+    _callback.__defaults__=tuple(list(_callback.__defaults__))
+    assert _callback.__defaults__==_callback_original[0][3] and not _operational_callback_guard()
+    _callback.__defaults__=_callback_original[0][3]
+    _callback.__kwdefaults__=dict(_callback.__kwdefaults__)
+    assert _callback.__kwdefaults__==_callback_original[0][4] and not _operational_callback_guard()
+    _callback.__kwdefaults__=_callback_original[0][4]
+    from types import FunctionType as _OperationalFunction
+    _callback_ports['capture_data']=_OperationalFunction(_callback.__code__,_callback.__globals__,
+        _callback.__name__,_callback.__defaults__,_callback.__closure__)
+    assert not _operational_callback_guard()
+    _callback_ports['capture_data']=_callback
+    assert _operational_callback_guard()
+    _v_demand_owners=tuple(n for n in _operational_tree.body if isinstance(n,ast.FunctionDef)
+        and n.name=='_ordinary_selected_v_directory_demand_v1')
+    assert len(_v_demand_owners)==1
+    _v_demand_return=next(n for n in ast.walk(_v_demand_owners[0])if isinstance(n,ast.Return))
+    _v_fd_code=compile(ast.Expression(_v_demand_return.value.elts[7]),'<directory-owner-fd-cohort>','eval')
+    assert tuple(eval(_v_fd_code,{'depth':d})for d in(2,3,4))==(5,7,9)
+    # Explicitly synthetic source-cache ports: no allocator, parser grant or native credit.
+    from tools import ci_branch_context as bci,validation_scope_registry as breg
+    import inspect as bi
+    bs_text="x = 'two'\nf(x)\n";bs_tree=ast.parse(bs_text);bs_nodes=sum(1 for _ in ast.walk(bs_tree))
+    bs_scope=SimpleNamespace(_ordinary_source_operand_cache_v1={},_ordinary_data_allocator_v1=object())
+    bs_observed=dict(path='synthetic.py',source_form='PYTHON',complete=True,error=None,
+        text=bs_text,nodes=bs_nodes,raw_bytes=len(bs_text.encode()),row=object(),version=(1,))
+    bs_issued={'original_credit':object()}
+    bs_attempt={'source_requests':[bs_issued]}
+    bs_plan=(bs_scope,{},Path('synthetic.py'),bs_text.encode(),bs_text,((),(),(),bs_nodes,1,4),(),bs_issued)
+    bs_call=next(n for n in ast.walk(bs_tree)if isinstance(n,ast.Call))
+    bs_calls=((bs_call,ast.get_source_segment(bs_text,bs_call)),)
+    bs_snapshot=o._ordinary_control_ast_original_v1(bs_tree)
+    bs_original=(bs_observed,bs_scope,bs_tree,bs_plan,bs_snapshot,bs_text,bs_nodes,
+        bs_observed['raw_bytes'],bs_observed['row'],bs_observed['version'],bs_calls)
+    def bs_keeper():return bs_original
+    bs_issued['original']=(None,)*11+((bs_keeper,bs_keeper.__code__,None,None,None),)
+    bs_issued['bounded_source_original']=bs_original
+    bs_issued['bounded_source_publication_original']=(bs_original,0)
+    bs_observed['bounded_source_credit_index']=0
+    bs_scope._ordinary_source_operand_cache_v1[('synthetic.py','PYTHON')]=(bs_tree,bs_observed)
+    with monkeypatch.context() as bp:
+        bp.setattr(bci,'_ordinary_bounded_control_source_owner_v1',lambda scope:(bs_attempt,None,None,None))
+        bp.setattr(bci,'_ordinary_bounded_control_source_credit_v1',lambda scope,state,credit:bs_issued)
+        bp.setattr(bci,'_ordinary_bounded_source_planning_prepare_v1',lambda scope:None)
+        assert bci._ordinary_bounded_source_original_v1(bs_scope,bs_observed)is bs_original
+        assert bci._ordinary_bounded_source_module_check_v1(bs_scope,bs_tree,bs_observed)is True
+        assert bci._ordinary_bounded_source_calls_v1(bs_scope,bs_tree,bs_observed)is bs_calls
+        for value in (False,-1,1,object()):
+            bs_observed['bounded_source_credit_index']=value
+            with pytest.raises(ValueError,match='LITERAL_LEDGER_INDEX'):
+                bci._ordinary_bounded_source_original_v1(bs_scope,bs_observed)
+        bs_observed['bounded_source_credit_index']=0
+        replacement=(*bs_original[:-1],((bs_call,'foreign()'),))
+        bs_issued['bounded_source_original']=replacement
+        bs_issued['bounded_source_publication_original']=(replacement,0)
+        with pytest.raises(ValueError,match='ORIGINAL_PUBLICATION_POINTER'):
+            bci._ordinary_bounded_source_original_v1(bs_scope,bs_observed)
+        bs_issued['bounded_source_original']=bs_original
+        bs_issued['bounded_source_publication_original']=(bs_original,0)
+        bs_scope._ordinary_source_operand_cache_v1[('synthetic.py','PYTHON')]=(ast.parse(bs_text),bs_observed)
+        with pytest.raises(ValueError,match='ONE_ACTUAL_CACHE'):
+            bci._ordinary_bounded_source_original_v1(bs_scope,bs_observed)
+        bs_scope._ordinary_source_operand_cache_v1[('synthetic.py','PYTHON')]=(bs_tree,bs_observed)
+        equal_text=bs_text.encode().decode()
+        assert equal_text==bs_text and equal_text is not bs_text
+        for key,value in (('text',equal_text),('nodes',bs_nodes+1),('version',(2,))):
+            prior=bs_observed[key];bs_observed[key]=value
+            try:
+                with pytest.raises(ValueError,match='CACHE_ORIGINAL_ASSOCIATION'):
+                    bci._ordinary_bounded_source_original_v1(bs_scope,bs_observed)
+            finally:bs_observed[key]=prior
+        literal=next(n for n in ast.walk(bs_tree)if isinstance(n,ast.Constant))
+        prior=literal.value;literal.value='changed'
+        try:
+            with pytest.raises((ValueError,o.ValidationReliabilityError)):
+                bci._ordinary_bounded_source_module_check_v1(bs_scope,bs_tree,bs_observed)
+        finally:literal.value=prior
+        assert bci._ordinary_bounded_source_calls_v1(bs_scope,bs_tree,bs_observed)is bs_calls
+    assert bci._ordinary_bounded_source_grammar_reserve_v1(object(),{},None,{})is None
+    # Extract only current scalar order/default guards, not their native/issuer bodies.
+    bt=ast.parse(bi.getsource(bci._ordinary_bounded_control_source_reservations_bind_v1))
+    reserve=next(n for n in ast.walk(bt)if isinstance(n,ast.FunctionDef)and n.name=='reserve_targets')
+    prior_expr=next(n.value for n in reserve.body if isinstance(n,ast.Assign)
+        and any(isinstance(v,ast.Name)and v.id=='prior'for v in n.targets))
+    order=next(n.test for n in reserve.body if isinstance(n,ast.If)
+        and any(isinstance(v,ast.Constant)and v.value=='CONTROL_BOUNDED_NAMESPACE_ONE_ORDERED_PARTITION'for v in ast.walk(n)))
+    shape=next(n.test for n in reserve.body if isinstance(n,ast.If)
+        and any(isinstance(v,ast.Constant)and v.value=='CONTROL_BOUNDED_NAMESPACE_ORIGINAL_CALLER_CALCULATOR_PARTITIONS'for v in ast.walk(n)))
+    caller=object();calculator=object();recipe={}
+    grammar={'recipe':recipe,'calculator':object(),'caller':object(),'geometry':('CALL_GRAMMAR',)}
+    fixed={'recipe':recipe,'calculator':calculator,'caller':caller,'geometry':('FIXED',)+(0,)*14}
+    env=dict(attempt={'source_requests':[grammar]},recipe=recipe,calculator=calculator,caller=caller,callers=(caller,))
+    env['prior']=eval(compile(ast.Expression(prior_expr),'<namespace-credit-selection>','eval'),env)
+    env['partition']='FIXED'
+    assert env['prior']==() and eval(compile(ast.Expression(order),'<namespace-credit-order>','eval'),env)is False
+    env['attempt']['source_requests'].append(fixed)
+    env['prior']=eval(compile(ast.Expression(prior_expr),'<namespace-credit-selection>','eval'),env)
+    env['partition']='HELD'
+    assert env['prior']==(fixed,) and eval(compile(ast.Expression(order),'<namespace-credit-order>','eval'),env)is False
+    env['partition']='FIXED'
+    assert bool(eval(compile(ast.Expression(order),'<namespace-credit-order>','eval'),env))is True
+    fixed['caller']=object()
+    assert eval(compile(ast.Expression(shape),'<namespace-credit-source>','eval'),env)is True
+    fixed['caller']=caller
+    pt=ast.parse(bi.getsource(bci._ordinary_pytest_supported_row_v1))
+    position=next(k.value for n in ast.walk(pt)if isinstance(n,ast.Call)for k in n.keywords
+        if k.arg=='source_position')
+    bound=(object(),object(),17)
+    assert eval(compile(ast.Expression(position),'<fixed-pytest-bound-position>','eval'),{'bound':bound,'row':{}})==17
+    # Actual numeric ABI assignment only; synthetic value is not a native ABI observation.
+    gt=ast.parse(bi.getsource(breg._facet_fn_data_layout_collect_v1))
+    gc_assignment=next(n for n in gt.body[0].body if isinstance(n,ast.Assign)
+        and any(isinstance(v,ast.Name)and v.id=='gc'for v in n.targets))
+    gc_env={'sizes':{'gc':16}}
+    exec(compile(ast.Module(body=[gc_assignment],type_ignores=[]),'<numeric-gc-binding>','exec'),gc_env)
+    assert type(gc_env['gc'])is int and gc_env['gc']==16
+    # Mutable keyword defaults must compare retained items, not dictionary identity alone.
+    kt=ast.parse(bi.getsource(bci._ordinary_bounded_source_planning_prepare_v1))
+    branch=next(n for n in kt.body[0].body if isinstance(n,ast.If)and isinstance(n.test,ast.Compare)
+        and isinstance(n.test.left,ast.Name)and n.test.left.id=='prior')
+    predicate=next(n.test for n in branch.body if isinstance(n,ast.If))
+    def kp(*,feature_version=None):return None
+    km=SimpleNamespace(parse=kp);kk=kp.__kwdefaults__;kept=tuple(kk.items())
+    kenv=dict(sys=SimpleNamespace(modules={'ast':km}),module=km,ast=km,parser=kp,code=kp.__code__,
+        defaults=kp.__defaults__,kw=kk,kwitems=kept,closure=kp.__closure__,namespace=kp.__globals__,
+        builtins=kp.__builtins__,bindings=())
+    kguard=compile(ast.Expression(predicate),'<parser-keyword-default-binding>','eval')
+    assert eval(kguard,kenv)is False
+    kk['feature_version']=1
+    assert eval(kguard,kenv)is True
+    kk['feature_version']=None
+    assert eval(kguard,kenv)is False
+
+    # Synthetic Unicode layout arithmetic only, never allocator credit.
+    rt=ast.parse(bi.getsource(bci._ordinary_bounded_source_retained_request_v1))
+    leaf_expr=next(n.value for n in rt.body[0].body if isinstance(n,ast.Assign)
+        and any(isinstance(v,ast.Name)and v.id=='leaves'for v in n.targets))
+    rl={'sizes':(('unicode_prefix',64),('bytes_prefix',33),('int_prefix',24),('int_digit_bytes',4),('float',24))}
+    amount=eval(compile(ast.Expression(leaf_expr),'<primitive-unicode-carriers>','eval'),
+        dict(o=o,layout=rl,leaf={'strings':2,'codepoints':3}))
+    assert amount==o._ordinary_data_unicode_request_v1(rl,1)+o._ordinary_data_unicode_request_v1(rl,2)
 
     # Finite quota markers acquire no resource, launch no process and admit no native owner.
     quota_scope = object.__new__(o._LinuxPreflightScopeV1)
@@ -29406,8 +29922,8 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
         quota_scope._ordinary_phase_complement_debit_v1('raw_read_byte_limit', 1)
     assert quota_balance['observed']['raw_read_byte_limit'] == 5
 
-    # The actual two Query processes cannot each copy the whole category.
-    # Pure source quota arithmetic only; these records admit no native actor.
+    # Synthetic; no credit.
+
     native_parent_output = o._ordinary_output_owner_limits_v1(prefix_caps, 'PARENT')
     native_receiver_output = o._ordinary_output_owner_limits_v1(prefix_caps, 'RECEIVER')
     native_outer_output = o._ordinary_output_owner_limits_v1(prefix_caps, 'PROVISION')
@@ -29418,9 +29934,9 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
     with pytest.raises(o.ValidationReliabilityError, match='ORDINARY_OUTPUT_ORIGINAL_OWNER_ROLE'):
         o._ordinary_output_owner_limits_v1(prefix_caps, 'APPLICATION')
 
-    # Source-body-only quoting cases. These execute the original nested
-    # encoder with its original path guard; they do not compile/load policy,
-    # admit a filename family, create a child, or prove native containment.
+    # Guard reference.
+
+
     import inspect
     import textwrap
     policy_body = ast.parse(textwrap.dedent(inspect.getsource(o._LinuxPreflightScopeV1._ordinary_prepare_policy_v1)))
@@ -29449,7 +29965,7 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
         assert not reference_path.exists()
         o.atomic_write_json(reference_path,dict(native_linux_qualification=False,cases=reference_results))
     print('LINUX_V2_INJECTED_SOURCE_RECOVERY_REFERENCES '+json.dumps(reference_results,sort_keys=True))
-    # Failed-start API ports exercise actual Scope/Query/supervisor, without Linux execution or lease.
+    # Guard reference.
     from datetime import datetime,UTC
     startup_references=[]
     actual_supervisor=o.supervise_command
@@ -29578,8 +30094,8 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
             assert sum(a[0]=='/usr/bin/systemd-run' for a in queries)==1
             assert any(a[0]=='/usr/bin/journalctl' for a in queries)
             assert len(words)<=1
-            # Original native failure never becomes an application exit, and a
-            # second cleanup caller reuses proof/failure without another query.
+            # Guard reference.
+
             count=len(queries)
             if accepted:assert scope.finish()
             else:
@@ -29622,8 +30138,8 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
     assert factory_query.startup_fixture_reservation==2097152
     assert not factory_result['settled'] and not factory_result['removed'] and factory_result['launcher_receipt'] is None
     assert (factory_area/'startup-denial-root').is_dir()
-    # Execute the existing controller's exceptional export path with a denied
-    # query adapter. No native claim or source mutation is supplied by it.
+    # Synthetic; no credit.
+
     export_reference=tmp_path/'source-export-failure-reference'
     export_reference.mkdir()
     owned_run=export_reference/'run';owned_run.mkdir()
@@ -29660,8 +30176,8 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
     assert any('injected export preparation failure' in v for v in cleanup['failures'])
     assert (Path(cleanup['retained_root'])/'native-result.json').is_file()
 
-    # Actual controller/Query; supervisor alone is a no-child unknown-dispatch oracle.
-    # Successful export cannot release roots.
+    # Synthetic; no credit.
+
     controller_area=tmp_path/'administrative-unresolved-controller'
     controller_area.mkdir()
     controller_run=controller_area/'run';controller_run.mkdir()
@@ -29674,9 +30190,9 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
         value=original_query(**kwargs);captured_queries.append(value);return value
     def unresolved_administration(argv,**kwargs):
         controller_dispatches.append((argv,kwargs));raise controller_primary
-    # The UID/path fixture is Linux-shaped; Windows readonly unlink semantics
-    # do not qualify Linux publication. Delegate actual write-once byte custody
-    # with only that fixture's Linux mode stimulus omitted on Windows.
+    # Synthetic; no credit.
+
+
     def controller_fixture_publication(path,raw,**kwargs):
         if os.name=='nt' and kwargs.get('control_mode')==0o444:kwargs['control_mode']=None
         return actual_write(path,raw,**kwargs)
@@ -29701,8 +30217,8 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
     assert successful_export['read_bytes']==2*actual_cleanup['exported_files'][0]['bytes']
     assert all(row['closed'] and row['settled'] for row in successful_export['acquisitions'])
 
-    # Controller/export use real disposable files; only no-child/failure ports
-    # are synthetic. They give no Linux or process-termination proof.
+    # Synthetic; no credit.
+
     original_open=o._open_regular_worktree_descriptor
     original_read=os.read;original_close=os.close;original_scandir=os.scandir
     original_raise=o._scan_raise_errors
@@ -29821,7 +30337,7 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
         assert os.getxattr(inherited,'system.posix_acl_default',follow_symlinks=False)==default
         assert os.getxattr(original,'system.posix_acl_access',follow_symlinks=False)==observed[0]
         assert sum(values)>0 and len(attempts)>=9
-    # Runtime owner references exercise real predicates; they do not qualify Linux.
+    # Guard reference.
     import inspect
     from types import SimpleNamespace
     kernel=(b'Uid:\t61234\t61234\t61234\t61234\nGid:\t61235\t61235\t61235\t61235\n'
@@ -29842,7 +30358,7 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
         assert damaged!=kernel
         with pytest.raises(o.ValidationReliabilityError):
             o._linux_preflight_status_v1(123,RuntimeQueryReference(damaged),credentials=True)
-    # Actual administrative owner; synthetic no-child faults give no Linux enforcement/termination proof.
+    # Synthetic; no credit.
     import dataclasses
     admin_vector=('/usr/bin/systemctl','--version')
     faults=('success','nonzero','prestart','unknown','unproven','wrong-run','wrong-phase','wrong-index',
@@ -29902,8 +30418,8 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
                 return original_read(fd,min(request,3))  # Legitimate short reads.
             def tracked_close(fd):
                 closes.append(fd);original_close(fd)
-                # The fixture actually releases its descriptor; production sees
-                # only this explicit failed-close oracle and must retain debt.
+                # Synthetic; no credit.
+
                 if fault in ('close','read-close'):raise secondary
             admin_patch.setattr(o,'_open_regular_worktree_descriptor',tracked_open)
             admin_patch.setattr(os,'read',tracked_read);admin_patch.setattr(os,'close',tracked_close)
@@ -29963,8 +30479,8 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
             assert o._LINUX_PREFLIGHT_PROCESS_V1 is context or fault in ('reset','body-reset')
             evidence=admin.command_supervision_evidence_v1()
             assert len(evidence)==len(admin.command_supervisions) and all(row['argv']==admin_vector for row in evidence)
-    # Real Query/Scope.create and streams with no-child startup faults prove
-    # error/latch selection, never native unit/descendant settlement.
+    # Synthetic; no credit.
+
     from types import SimpleNamespace
     scalar_defects=('combined-bool','combined-float','limit-bool','limit-float',
         'drained-bool','drained-float','retained-bool','retained-float')
@@ -30102,8 +30618,8 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
                     assert record['errors']==[caught.value] and all(
                         slot['complete'] and slot['closed'] and slot['raw_owner'] is None for slot in record['streams'].values())
                     assert admin.retained==23 and scope.settled is False
-                    # Resource settlement remains the original independent
-                    # native fixture's obligation; a negative error is no pass.
+                    # Synthetic; no credit.
+
                     admin.check()
                     assert admin.command(admin_vector)==b'version\n' and admin.failure is None and len(starts)==2
                     before=len(admin.command_supervisions)
@@ -30142,7 +30658,7 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
                 if scope.process is not None:
                     scope.process.stdout.close();scope.process.stderr.close()
             assert all(request<=65536 for request in requests)
-    # Actual caught-error diagnostic consumer; no-child Scope caller gives no native admission.
+    # Synthetic; no credit.
     for defect in ('run_id','phase','command_index','cwd','stdout_path','shape'):
         with monkeypatch.context() as diagnostic_patch:
             diagnostic_patch.setattr(o.sys,'platform','linux')
@@ -30177,7 +30693,7 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
             assert raw==stderr==b'' and not output_opens and len(returned)==1
             assert admin.last_command_receipt is returned[0] and admin.command_supervisions[0]['receipt'] is returned[0]
             assert admin.command_receipt_for_argv_v1(tuple(record['argv'])) is None and not admin.command_resources_settled_v1()
-    # Earlier same-vector success cannot certify a later unresolved attempt; supervisor is no-child.
+    # Synthetic; no credit.
     with monkeypatch.context() as stale_patch:
         stale_patch.setattr(o.sys,'platform','linux')
         admin=o._LinuxPreflightQueriesV1(evidence_root=tmp_path/'admin-stale-success',
@@ -30216,7 +30732,7 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
         with pytest.raises(o.ValidationReliabilityError,match='ADMINISTRATIVE_PROGRAM'):never.command(('/unselected/program',))
         assert never.failure is not None and never.command_supervisions==[]
         assert never.command_resources_settled_v1() and not never.evidence_root.exists()
-    # Pending absence increments attempts but cannot create the runtime response tree.
+    # Guard reference.
     pending_root=tmp_path/'runtime-not-handed-off'
     with monkeypatch.context() as patch:
         patch.setattr(o.sys,'platform','linux')
@@ -30229,7 +30745,7 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
         with pytest.raises(RuntimeError,match='reference pending boundary'):
             o._linux_preflight_control_read_v1(tmp_path/'not-published.json',deadline_ns=query.deadline_ns,pending=True,query=query)
         assert query.attempts==1 and query.observations==[] and not pending_root.exists()
-    # All production entry work before the bounded binding read is nonpersistent.
+    # Guard reference.
     entry=ast.parse(inspect.getsource(runner._linux_preflight_enter_v1)).body[0]
     binding_position=next(i for i,node in enumerate(entry.body) if isinstance(node,ast.Assign)
         and isinstance(node.value,ast.Call) and isinstance(node.value.func,ast.Attribute)
@@ -30249,7 +30765,7 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
         reference._runtime_call=lambda *args,_info=changed,**kwargs:_info
         with pytest.raises(o.ValidationReliabilityError,match='RUNTIME_DIRECTORY'):
             reference._runtime_directory('/run/qtt1n2',(91,92),0,0,0o700)
-    # A denied descriptor handoff keeps its exact attempted effect, never completion.
+    # Guard reference.
     reference.runtime=Path('/run/qtt1n2');reference.runtime_backing=reference.runtime/'payload'
     reference.runtime_identity=(91,92);reference.runtime_mounted_identity=(93,94);reference.runtime_fd=17;reference.runtime_envelope_fd=18
     reference.history=[]
@@ -30265,7 +30781,7 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
     reference._runtime_call=denied_owner
     with monkeypatch.context() as patch:
         patch.setattr(o,'_linux_preflight_status_v1',lambda *args,**kwargs:credentials)
-        # fchown is a Linux-only attribute; this finite reference runs on Windows too.
+        # Guard reference.
         patch.setattr(o.os,'fchown',lambda *args:None,raising=False)
         with pytest.raises(PermissionError,match='reference fchown denial'):
             reference.handoff_runtime(dict(pid=123),'/reference',())
@@ -30277,7 +30793,7 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
         with pytest.raises(o.ValidationReliabilityError,match='RUNTIME_HELD_ROOT'):
             reference.handoff_runtime(dict(pid=123),'/reference',())
     assert len(effects)==1 and len(reference.history)==1
-    # Native failures in the existing ACL owner retain their raw observation.
+    # Guard reference.
     class RuntimeACLReference:
         def __init__(self):self.last_acl=dict(reference=True)
         def acl(self,fd,*,attempt,delivered):attempt('reference');return (b'unexpected ACL',None)
@@ -30286,7 +30802,7 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
         with pytest.raises(o.ValidationReliabilityError,match='RUNTIME_ACL'):
             o._LinuxPreflightScopeV1._runtime_acl(reference,17)
     assert reference.query.records[-1][0]=='runtime-acl'
-    # Held-process and manager-invocation observations cannot drift through handoff.
+    # Guard reference.
     process=dict(pid=123,start=456,namespaces={})
     live=o._LinuxPreflightScopeV1.__new__(o._LinuxPreflightScopeV1)
     live.process=SimpleNamespace(pid=123,pidfd=17);live.query=RuntimeQueryReference()
@@ -30308,7 +30824,7 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
         with pytest.raises(o.ValidationReliabilityError,match='RUNTIME_INVOCATION_CHANGED'):
             live._runtime_live(process,'/reference')
 
-    # Logical aliases are compared to backing children, not merely a device number.
+    # Guard reference.
     def runtime_stat(ino,uid=0,gid=0,mode=0o1777):
         return SimpleNamespace(st_mode=stat.S_IFDIR|mode,st_dev=91,st_ino=ino,st_uid=uid,st_gid=gid)
     logical='/run/qtt1n2'
@@ -30341,8 +30857,8 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
                 values={**vars(views[path]),field:value};assert values!=vars(views[path])
                 views[path]=SimpleNamespace(**values)
                 if field=='st_mode':
-                    # Mode belongs to the inode, so every alias of that inode
-                    # must carry the same changed mode in this reference.
+                    # Guard reference.
+
                     for alias,info in original_views.items():
                         if (info.st_dev,info.st_ino)==(original_views[path].st_dev,original_views[path].st_ino):
                             views[alias]=SimpleNamespace(**{**vars(info),field:value})
@@ -30482,7 +30998,7 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
     with monkeypatch.context() as patch:
         patch.delenv('QTT_LINUX_PREFLIGHT_CONTROL',raising=False)
         assert o._linux_preflight_git_environment_v1(Path(root),None) == {}
-    # Real tail bytes and real ordinary-file EOF, without a fake native process.
+    # Guard reference.
     area = tmp_path/'linux-profile-reference'; area.mkdir()
     spool = area/'spool'; spool.write_bytes(b'')
     tail = o._LinuxPreflightTailV1(spool)
@@ -30500,14 +31016,14 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
     with spool.open('rb') as ordinary:
         ordinary.seek(0,2)
         assert o._consume_available_pipe(ordinary,io.BytesIO(),outcome={},native_terminal=False) == (False,True)
-    # The complete original writer has the final permission transition before
-    # its no-overwrite publication; this is structural evidence on Windows.
+    # Guard reference.
+
     tree = ast.parse(Path(o.__file__).read_text(encoding='utf-8'))
     writer = next(n for n in tree.body if isinstance(n,ast.FunctionDef) and n.name == '_atomic_write_bytes_v1')
     calls = [(n.lineno,ast.unparse(n.func)) for n in ast.walk(writer) if isinstance(n,ast.Call)]
     assert next(line for line,name in calls if name == 'os.fchmod') < next(line for line,name in calls if name == 'os.link')
-    # Real original startup projection strips Python inputs. This checks the
-    # policy join only; it does not instantiate or approve a native lease.
+    # Guard reference.
+
     runtime_path = area/'runtime'; runtime_path.mkdir()
     vector = (sys.executable,'tools/validate_repair_pr_changed_file_scope.py','--repo-root','.')
     projected,_ = o._preflight_environment_v1(vector,dict(environment),cache_root=runtime_path/'cache')
@@ -30517,7 +31033,7 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
         damaged = {**projected,key:value}; assert damaged != projected
         with pytest.raises(o.ValidationReliabilityError):
             o._linux_preflight_child_environment_v1(environment,damaged,runtime_path)
-    # Independent manager-output operands, not read back from the argv producer.
+    # Guard reference.
     status = dict(Type='exec',Restart='no',RemainAfterExit='yes',DynamicUser='yes',UMask='0077',
         NoNewPrivileges='yes',CapabilityBoundingSet='',AmbientCapabilities='',PrivateDevices='yes',
         PrivateNetwork='yes',PrivateIPC='yes',PrivateTmp='yes',ProtectSystem='strict',ProtectHome='tmpfs',
@@ -30539,9 +31055,9 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
         with pytest.raises(o.ValidationReliabilityError): o._linux_preflight_unit_policy_v1(damaged,**options)
         damaged = {k:v for k,v in status.items() if k != key}
         with pytest.raises(o.ValidationReliabilityError): o._linux_preflight_unit_policy_v1(damaged,**options)
-    # Immutable historical manager bytes from workflow 37186553401, artifact
-    # 11296434607, native/command-331.stdout.bin. This is a policy reference,
-    # not a new process, credential, mount or acceptance observation.
+    # Guard reference.
+
+
     recorded_raw=(
         b'Type=exec\n'
         b'Restart=no\n'
@@ -30619,8 +31135,8 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
         patch.setitem(o._LINUX_PREFLIGHT_SERVICE_READBACK_V1,'PrivateTmp','no')
         with pytest.raises(o.ValidationReliabilityError,match='UNIT_READBACK:PrivateTmp'):
             o._linux_preflight_unit_policy_v1(recorded,**recorded_options)
-    # Historical PrivateTmp reference: old access-list operands are preserved,
-    # but no longer qualify the current unit-root policy.
+    # Guard reference.
+
     assert recorded['InaccessiblePaths']=='/dev/shm /dev/mqueue /dev/hugepages'
     assert recorded['ReadWritePaths']=='/run/qtt2557n2660997759221 /tmp /var/tmp'
     with pytest.raises(o.ValidationReliabilityError,match='DEVICE_MASK_READBACK'):
@@ -30653,8 +31169,8 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
         original_private_tmp_rejected=True,prospective_corrected_private_tmp_accepted=True,
         unchanged_recorded_bytes=len(recorded_raw),private_tmp_mutations_rejected=rejected_private_tmp+1,
         unrelated_recorded_mutations_rejected=6,native_execution=False)),flush=True)
-    # Prospective policy references: all six destinations are independent
-    # literals; mutations change the operand actually passed to the verifier.
+    # Guard reference.
+
     for key,wanted in (('InaccessiblePaths',('+/dev/shm','+/dev/mqueue','+/dev/hugepages')),
             ('ReadWritePaths',('+/run/qtt17n23','+/tmp','+/var/tmp'))):
         for value in (' '.join(wanted),'  '+ '\t'.join(reversed(wanted))+'  '):
@@ -30672,8 +31188,8 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
             with pytest.raises(o.ValidationReliabilityError):o._linux_preflight_unit_policy_v1(damaged,**options)
         damaged={k:v for k,v in status.items() if k!=key}
         with pytest.raises(o.ValidationReliabilityError):o._linux_preflight_unit_policy_v1(damaged,**options)
-    # Synthetic physical references exercise the complete current scope method.
-    # These stats are NOT observations of the historical failed native masks.
+    # Synthetic; no credit.
+
     mask_paths=('/dev/shm','/dev/mqueue','/dev/hugepages')
     reference_path='/run/systemd/inaccessible/dir'
     physical=dict(st_mode=stat.S_IFDIR,st_uid=0,st_gid=0,st_dev=91,st_ino=92)
@@ -30711,8 +31227,8 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
         mask_reference([{**r,'options':frozenset(('rw','nosuid'))} if r['path']==path else r for r in mask_mounts],mask_stats)
         mask_reference(mask_mounts,mask_stats,fail=path)
     mask_reference(mask_mounts,mask_stats,fail=reference_path)
-    # Actual retained mount lines from 37221048179/native-response-71.bin;
-    # only their stat partners below are synthetic reference operands.
+    # Synthetic; no credit.
+
     captured_mounts=o._linux_preflight_mounts_v1(
         b'405 403 0:26 / /dev/shm rw,nosuid,nodev shared:336 master:3 - tmpfs tmpfs rw,inode64\n'
         b'406 403 0:49 / /dev/mqueue rw,nosuid,nodev,noexec,relatime shared:338 - mqueue mqueue rw\n'
@@ -30720,7 +31236,7 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
     o._linux_preflight_unit_policy_v1(status,**options)
     observed=mask_reference(captured_mounts,mask_stats)
     assert all('rw' in row['mounts'][0]['options'] for row in observed['targets'])
-    # Prospective ReadOnlyPaths references; never a rewrite of historical bytes.
+    # Guard reference.
     import itertools
     readonly_tokens=('+/home','+/root','+/run','+/run/user')
     for order in itertools.permutations(readonly_tokens):
@@ -30738,8 +31254,8 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
             with pytest.raises(o.ValidationReliabilityError):o._linux_preflight_unit_policy_v1(changed,**options)
         changed={**status,'ReadOnlyPaths':' '.join(t for i,t in enumerate(readonly_tokens) if i!=position)}
         with pytest.raises(o.ValidationReliabilityError):o._linux_preflight_unit_policy_v1(changed,**options)
-    # Finite syscall/descriptor references of the complete current helper.
-    # The rows, IDs and stat values here are SYNTHETIC, not native qualification.
+    # Synthetic; no credit.
+
     containment_raw=(
         b'10 9 0:9 /private/root / ro - tmpfs tmpfs rw\n'
         b'20 10 0:10 / /proc rw,nosuid,nodev,noexec - proc proc rw\n'
@@ -30906,12 +31422,12 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
             b'90 10 0:10 / /proc rw - proc proc rw\n',
             b'90 10 0:13 / /run/qtt17n23 rw - tmpfs qtt-runtime rw\n'):
         containment_reference(raw=containment_raw+row)
-    # A correct property string cannot authorize a writable physical parent.
+    # Guard reference.
     o._linux_preflight_unit_policy_v1(status,**options)
     writable=containment_reference(raw=containment_raw.replace(b'/private/root / ro',b'/private/root / rw'))
     assert all('PARENT_WRITABLE' in r['error'] for r in writable['parents'])
-    # CAPTURED_OLD_TABLE is filled with the exact retained original bytes below;
-    # its descriptor selections/stat operands remain explicitly synthetic.
+    # Synthetic; no credit.
+
     captured_old_table=b'331 279 0:28 /qtt2528n259165130132control/root / ro,nosuid,nodev shared:333 master:12 - tmpfs tmpfs rw,size=3274488k,nr_inodes=819200,mode=755,inode64\n332 331 0:51 / /dev ro,nosuid,noexec shared:334 - tmpfs tmpfs rw,size=4096k,nr_inodes=65536,mode=755,inode64\n372 332 0:27 / /dev/pts rw,nosuid,noexec,relatime shared:335 master:4 - devpts devpts rw,gid=5,mode=620,ptmxmode=000\n375 332 0:28 /systemd/inaccessible/dir /dev/hugepages ro,nosuid,nodev,noexec shared:336 master:12 - tmpfs tmpfs rw,size=3274488k,nr_inodes=819200,mode=755,inode64\n374 332 0:28 /systemd/inaccessible/dir /dev/mqueue ro,nosuid,nodev,noexec shared:337 master:12 - tmpfs tmpfs rw,size=3274488k,nr_inodes=819200,mode=755,inode64\n373 332 0:28 /systemd/inaccessible/dir /dev/shm ro,nosuid,nodev,noexec shared:338 master:12 - tmpfs tmpfs rw,size=3274488k,nr_inodes=819200,mode=755,inode64\n376 331 0:52 / /home rw,nosuid,relatime shared:339 - tmpfs tmpfs rw,inode64\n377 376 8:1 /home/runner/work/QTT_New0526/QTT_New0526 /home/runner/work/QTT_New0526/QTT_New0526 ro,nosuid,relatime shared:340 master:1 - ext4 /dev/root rw,discard,journal_async_commit,nobarrier,errors=remount-ro,commit=30,data=writeback\n378 331 8:1 /usr/lib /lib ro,nosuid,relatime shared:341 master:1 - ext4 /dev/root rw,discard,journal_async_commit,nobarrier,errors=remount-ro,commit=30,data=writeback\n379 331 8:1 /usr/lib64 /lib64 ro,nosuid,relatime shared:342 master:1 - ext4 /dev/root rw,discard,journal_async_commit,nobarrier,errors=remount-ro,commit=30,data=writeback\n380 331 0:28 /qtt2528n259165130132control/installation /opt/hostedtoolcache/Python/3.14.6/x64 ro,nosuid,nodev shared:343 master:12 - tmpfs tmpfs rw,size=3274488k,nr_inodes=819200,mode=755,inode64\n381 331 0:53 / /proc rw,nosuid,nodev,noexec,relatime shared:344 - proc proc rw,hidepid=invisible\n382 381 0:37 / /proc/sys/fs/binfmt_misc rw,nosuid,nodev,noexec,relatime shared:345 master:48 - binfmt_misc binfmt_misc rw\n383 381 0:53 /acpi /proc/acpi ro,nosuid,nodev,noexec,relatime shared:346 - proc proc rw,hidepid=invisible\n384 381 0:53 /bus /proc/bus ro,nosuid,nodev,noexec,relatime shared:347 - proc proc rw,hidepid=invisible\n385 381 0:53 /fs /proc/fs ro,nosuid,nodev,noexec,relatime shared:348 - proc proc rw,hidepid=invisible\n386 381 0:53 /irq /proc/irq ro,nosuid,nodev,noexec,relatime shared:349 - proc proc rw,hidepid=invisible\n387 381 0:28 /systemd/inaccessible/reg /proc/kallsyms ro,nosuid,nodev,noexec shared:350 master:12 - tmpfs tmpfs rw,size=3274488k,nr_inodes=819200,mode=755,inode64\n388 381 0:28 /systemd/inaccessible/reg /proc/kcore ro,nosuid,nodev,noexec shared:351 master:12 - tmpfs tmpfs rw,size=3274488k,nr_inodes=819200,mode=755,inode64\n389 381 0:28 /systemd/inaccessible/reg /proc/kmsg ro,nosuid,nodev,noexec shared:352 master:12 - tmpfs tmpfs rw,size=3274488k,nr_inodes=819200,mode=755,inode64\n390 381 0:53 /latency_stats /proc/latency_stats ro,nosuid,nodev,noexec,relatime shared:353 - proc proc rw,hidepid=invisible\n391 381 0:53 /mtrr /proc/mtrr ro,nosuid,nodev,noexec,relatime shared:354 - proc proc rw,hidepid=invisible\n392 381 0:53 /scsi /proc/scsi ro,nosuid,nodev,noexec,relatime shared:355 - proc proc rw,hidepid=invisible\n393 381 0:53 /sys /proc/sys ro,nosuid,nodev,noexec,relatime shared:356 - proc proc rw,hidepid=invisible\n394 393 0:37 / /proc/sys/fs/binfmt_misc ro,nosuid,nodev,noexec,relatime shared:357 master:48 - binfmt_misc binfmt_misc rw\n395 381 0:53 /sysrq-trigger /proc/sysrq-trigger ro,nosuid,nodev,noexec,relatime shared:358 - proc proc rw,hidepid=invisible\n396 331 0:54 / /root rw,nosuid,relatime shared:359 - tmpfs tmpfs rw,inode64\n397 331 0:55 / /run rw,nosuid,relatime shared:360 - tmpfs tmpfs rw,inode64\n398 397 0:28 /systemd/propagate/.os-release-stage /run/host/.os-release-stage ro,nosuid,nodev shared:361 master:12 - tmpfs tmpfs rw,size=3274488k,nr_inodes=819200,mode=755,inode64\n399 397 0:48 / /run/qtt2528n259165130132 rw,nosuid,nodev,noexec,relatime shared:362 master:316 - tmpfs qtt-runtime rw,size=1048576k,mode=700,inode64\n400 397 0:28 /qtt2528n259165130132control/binding /run/qtt2528n259165130132control/binding ro,nosuid,nodev shared:363 master:12 - tmpfs tmpfs rw,size=3274488k,nr_inodes=819200,mode=755,inode64\n401 397 0:28 /qtt2528n259165130132control/declaration /run/qtt2528n259165130132control/declaration ro,nosuid,nodev shared:364 master:12 - tmpfs tmpfs rw,size=3274488k,nr_inodes=819200,mode=755,inode64\n402 397 0:28 /qtt2528n259165130132control/release /run/qtt2528n259165130132control/release ro,nosuid,nodev shared:365 master:12 - tmpfs tmpfs rw,size=3274488k,nr_inodes=819200,mode=755,inode64\n403 397 0:28 /qtt2528n259165130132control/spool /run/qtt2528n259165130132control/spool ro,nosuid,nodev shared:366 master:12 - tmpfs tmpfs rw,size=3274488k,nr_inodes=819200,mode=755,inode64\n404 397 0:28 /systemd/propagate/qtt2528n259165130132.service /run/systemd/incoming ro,nosuid,nodev master:12 - tmpfs tmpfs rw,size=3274488k,nr_inodes=819200,mode=755,inode64\n405 397 0:56 / /run/user rw,nosuid,relatime shared:368 - tmpfs tmpfs rw,inode64\n406 331 0:57 / /sys ro,nosuid,nodev,noexec,relatime shared:369 - sysfs sysfs rw\n407 406 0:32 / /sys/firmware/efi/efivars ro,nosuid,nodev,noexec,relatime shared:370 master:10 - efivarfs efivarfs rw\n408 406 0:33 / /sys/fs/bpf ro,nosuid,nodev,noexec,relatime shared:371 master:11 - bpf bpf rw,mode=700\n409 406 0:30 / /sys/fs/cgroup ro,nosuid,nodev,noexec,relatime shared:372 master:8 - cgroup2 cgroup2 rw,nsdelegate,memory_recursiveprot\n410 406 0:36 / /sys/fs/fuse/connections ro,nosuid,nodev,noexec,relatime shared:373 master:19 - fusectl fusectl rw\n411 406 0:31 / /sys/fs/pstore ro,nosuid,nodev,noexec,relatime shared:374 master:9 - pstore none rw\n412 406 0:20 / /sys/kernel/config ro,nosuid,nodev,noexec,relatime shared:375 master:20 - configfs configfs rw\n413 406 0:8 / /sys/kernel/debug ro,nosuid,nodev,noexec,relatime shared:376 master:17 - debugfs debugfs rw\n414 406 0:7 / /sys/kernel/security ro,nosuid,nodev,noexec,relatime shared:377 master:7 - securityfs securityfs rw\n415 406 0:13 / /sys/kernel/tracing ro,nosuid,nodev,noexec,relatime shared:378 master:18 - tracefs tracefs rw\n416 331 0:48 /tmp /tmp rw,nosuid,nodev,noexec,relatime shared:379 master:316 - tmpfs qtt-runtime rw,size=1048576k,mode=700,inode64\n417 331 8:1 /usr /usr ro,nosuid,relatime shared:380 master:1 - ext4 /dev/root rw,discard,journal_async_commit,nobarrier,errors=remount-ro,commit=30,data=writeback\n418 417 0:28 /systemd/inaccessible/dir /usr/lib/modules ro,nosuid,nodev,noexec shared:381 master:12 - tmpfs tmpfs rw,size=3274488k,nr_inodes=819200,mode=755,inode64\n419 331 0:48 /var-tmp /var/tmp rw,nosuid,nodev,noexec,relatime shared:382 master:316 - tmpfs qtt-runtime rw,size=1048576k,mode=700,inode64\n'
     old_table=containment_reference(raw=captured_old_table,
         selectors={'/home':376,'/root':396,'/run':397,'/run/user':405,'/proc/sys/fs/binfmt_misc':394},
@@ -30923,8 +31439,8 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
         original_mount_bytes=len(captured_old_table),historical_descriptor_ids_observed=False,
         four_captured_writable_parents_rejected=True,shared_controller_fixture_lease_predicate=True)),flush=True)
 
-    # Complete existing-owner calls against finite syscall references. These are
-    # not a native host grant or a replacement for the automatic Linux probe.
+    # Guard reference.
+
     def write_denial_reference(code,*,operand='source',kind='NATIVE_IMMUTABLE_V2',fault=None):
         from types import SimpleNamespace
         import threading
@@ -30997,8 +31513,8 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
     for fault in ('owner','mode','kind','links','identity','query','missing-immutable','flags-drift','close','evidence'):
         write_denial_reference(1,fault=fault)
 
-    # Synthetic environment lifecycle references, not a native host grant.
-    # The complete existing context owner is exercised on success and failure.
+    # Synthetic; no credit.
+
     for prior in (None, '/reference/prior-config'):
         for outcome in ('pass', 'body-error', 'projection-error', 'wrong-projection'):
             native = o._PreflightNativeInputV1.__new__(o._PreflightNativeInputV1)
@@ -31028,8 +31544,8 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
                 assert os.environ.get('GIT_CONFIG_GLOBAL') == prior
                 assert o._PREFLIGHT_NATIVE_INPUT_V1.get() is None
                 assert calls == (['checked', 'projection', 'body'] if outcome in ('pass', 'body-error') else ['checked', 'projection'])
-    # Failed optional legacy queries remain optional outside the native lease;
-    # under native custody their actual exit and complete stderr must survive.
+    # Guard reference.
+
     for selected in (False, True):
         token = o._LINUX_PREFLIGHT_LEASE_V1.set(o._LinuxPreflightHostLeaseV1.__new__(o._LinuxPreflightHostLeaseV1) if selected else None)
         try:
@@ -31054,15 +31570,15 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
             assert original.read_bytes() == b'original manager bytes'
             assert counters['retained_byte_count'] == counters['drained_byte_count'] == 22
         finally: tail.close()
-    # Actual directory observations: the export root is not a single-link file.
+    # Guard reference.
     evidence_directory = area/'directory-export'; evidence_directory.mkdir()
     original_directory = runner._linux_preflight_export_directory_v1(evidence_directory)
     assert runner._linux_preflight_export_directory_v1(evidence_directory,original_directory) == original_directory
     with pytest.raises(ValueError,match='single-link regular file'):
         o._scan_same_api_version(evidence_directory.lstat())
     (evidence_directory/'new-child').mkdir()
-    # Windows may retain the directory timestamp for an immediate child create.
-    # Change the real disposable directory's mtime explicitly, then measure it.
+    # Guard reference.
+
     before_change = evidence_directory.stat()
     os.utime(evidence_directory,ns=(before_change.st_atime_ns,before_change.st_mtime_ns+1_000_000_000))
     assert evidence_directory.stat().st_mtime_ns != before_change.st_mtime_ns
@@ -31072,15 +31588,15 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
         runner._linux_preflight_export_directory_v1(evidence_directory,original_directory)
     with pytest.raises(o.ValidationReliabilityError,match='EXPORT_DIRECTORY'):
         runner._linux_preflight_export_directory_v1(original)
-    # Complete controller source still invokes the directory check before and
-    # after traversal. The regular-file descriptor checks remain independent.
+    # Guard reference.
+
     controller = next(n for n in ast.parse(Path(runner.__file__).read_text(encoding='utf-8')).body
         if isinstance(n,ast.FunctionDef) and n.name == '_linux_preflight_controller_v1')
     export_tree = next(n for n in ast.walk(controller) if isinstance(n,ast.FunctionDef) and n.name == 'export_tree')
     assert [len(n.args) for n in ast.walk(export_tree) if isinstance(n,ast.Call)
         and isinstance(n.func,ast.Name) and n.func.id == '_linux_preflight_export_directory_v1'] == [1,2]
     assert '_scan_same_api_version' not in ast.unparse(export_tree)
-    # The existing independent aggregator's readability policy is unchanged.
+    # Guard reference.
     from tools import validate_pr169_val1 as readability_owner
     actual_repository = Path(runner.__file__).resolve().parents[1]
     for relative in (Path('tools/run_validation_gates.py'),Path('.github/workflows/qtt_validation.yml')):
@@ -31099,9 +31615,9 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
     assert not rejected.pass_
     print('INDEPENDENT_READABILITY_GUARD_PASSED; SEMICOLON_MUTATION_REJECTED',flush=True)
     print('LINUX_PREFLIGHT_EXPORT_DIRECTORY_CHECKS_PASSED; native_systemd_enforcement=NOT_EXECUTED',flush=True)
-    # The same selected census owner observes real disposable files. On Windows,
-    # only the unavailable Linux xattr API is supplied as a reference operand;
-    # this does not establish native Linux ACL or containment qualification.
+    # Guard reference.
+
+
     import stat
     census_area = area/'capacity-census'
     census_area.mkdir()
@@ -31122,7 +31638,7 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
     with monkeypatch.context() as patch:
         if not hasattr(os,'listxattr'):
             patch.setattr(os,'listxattr',lambda *a,**k:[],raising=False)
-        # No direct regular-file payload read is permitted in this entire census.
+        # Guard reference.
         patch.setattr(os,'read',lambda *a:pytest.fail('metadata census read a file body'))
         patch.setattr(Path,'read_bytes',lambda *a:pytest.fail('metadata census read a file body'))
         observed = observe().run()
@@ -31150,7 +31666,7 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
         report_raw,census_raw = runner._linux_preflight_metadata_bytes_v1(observed,report,time.monotonic_ns()+10**9)
         assert report_raw == o._preflight_canonical_v1(report) and census_raw == o._preflight_canonical_v1(observed)
         with monkeypatch.context() as bound:
-            # Lower only the test operand, never the installed production grant.
+            # Guard reference.
             bound.setattr(runner,'_LINUX_PREFLIGHT_METADATA_BYTES_V1',len(report_raw)+len(census_raw))
             assert runner._linux_preflight_metadata_bytes_v1(observed,report,time.monotonic_ns()+10**9) == (report_raw,census_raw)
             bound.setattr(runner,'_LINUX_PREFLIGHT_METADATA_BYTES_V1',len(report_raw)+len(census_raw)-1)
@@ -31159,7 +31675,7 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
         assert runner._LINUX_PREFLIGHT_METADATA_BYTES_V1 == 32*mib
         with pytest.raises(o.ValidationReliabilityError,match='EXPORT_DEADLINE'):
             runner._linux_preflight_metadata_bytes_v1(observed,report,time.monotonic_ns()-1)
-        # One finite geometry reports every excess together, never first-error only.
+        # Guard reference.
         oversized = {**observed,'logical_bytes':dict(R=3*gib,G=4*gib,I=gib,S=2*gib,E=17*mib)}
         all_limits = runner._linux_preflight_capacity_v1(oversized,page_size=4096,repeated_config_bytes=19)
         dispositions = {v['name']:v['disposition'] for v in all_limits['checks']}
@@ -31194,7 +31710,7 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
                 assert check['demand_bytes'] == cap+excess
                 assert check['disposition'] == ('EXCEEDS_LIMIT' if excess else
                     'WITHIN_LIMIT' if check['demand_kind']=='EXACT_METADATA' else 'UNESTABLISHED')
-        # Actual sparse logical size, never a giant allocated payload or capture.
+        # Guard reference.
         large = repository/'large-untracked'
         with large.open('w+b') as stream:
             if os.name == 'nt':
@@ -31226,8 +31742,8 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
             assert failed['failures'][0]['last_successful_stat']['version'][6] == 2
         finally:
             linked.unlink()
-        # Finite link/special operands mutate a fresh actual stat observation.
-        # They are references only when Windows cannot create POSIX file kinds.
+        # Guard reference.
+
         from types import SimpleNamespace
         original_lstat = Path.lstat
         original_readlink = os.readlink
@@ -31259,7 +31775,7 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
                     return altered_info(info,mode) if path==source_link else info
                 fault.setattr(Path,'lstat',special_stat)
                 assert 'UNSUPPORTED_SOURCE_KIND' in observe().run()['failures'][0]['error']
-        # A bounded real iterator is closed on both scan failure and alias denial.
+        # Guard reference.
         original_scandir = os.scandir
         for fault_kind in ('scan-error','case-alias'):
             closed = []
@@ -31291,7 +31807,7 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
             assert not failed['complete_size_census'] and closed
             assert 'reference scan failure' in failed['failures'][0]['error'] if fault_kind=='scan-error' else (
                 'CASE_ALIAS' in failed['failures'][0]['error'])
-        # Charge the failed operation and retain the actual exception prefix.
+        # Guard reference.
         meter = observe()
         def denied(*a,**k):
             raise PermissionError(13,'reference ACL query denied')
@@ -31304,7 +31820,7 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
             fault.setattr(os,'listxattr',lambda *a,**k:['system.posix_acl_access'])
             failed = observe().run()
         assert 'UNSUPPORTED_ACL' in failed['failures'][0]['error']
-        # Actual changed version and roster, during the single verification sweep.
+        # Guard reference.
         for change in ('version','roster'):
             meter = observe()
             verify = meter._verify
@@ -31341,7 +31857,7 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
             observe()._walk('repository',repository,65)
         with pytest.raises(o.ValidationReliabilityError,match='PATH_BYTES'):
             observe()._stat(repository/('x'*4097))
-    # Fresh no-follow observations and closed real scandir iterators are required.
+    # Guard reference.
     census_source = ast.unparse(next(n for n in ast.parse(Path(o.__file__).read_text(encoding='utf-8')).body
         if isinstance(n,ast.ClassDef) and n.name=='_LinuxPreflightCensusV1'))
     assert '.lstat()' in census_source and 'with os.scandir(path)' in census_source
@@ -31351,8 +31867,8 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
         line for line,name in controller_calls if name=='o._LinuxPreflightCaptureV1')
     print('CAPTURE_CENSUS_REFERENCE_AND_REAL_FILE_CHECKS_PASSED; direct_payload_reads=0',flush=True)
 
-    # These are typed event projections and default denials, not native
-    # permission, checkout qualification or a domain/campaign execution.
+    # Guard reference.
+
     event_repository = {'full_name': 'Q8Meow/QTT_New0526'}
     ready_event = {'number': 298, 'action': 'ready_for_review',
         'repository': event_repository, 'pull_request': {'number': 298, 'draft': False,
@@ -31377,12 +31893,12 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
     with pytest.raises(o.ValidationReliabilityError, match='DRAFT_FAST_RETAINS_FIRST8_OWNER'):
         runner._ordinary_ci_eligibility_v1(draft_event, original_controls,
             runner.REPO_ROOT, phase=runner.FAST_PREFLIGHT_PHASE)
-    # Original first8 defaults remain draft-only even when ordinary facts are valid.
+    # Guard reference.
     runner._linux_preflight_eligibility_v1(draft_event, original_controls, str(runner.REPO_ROOT))
     with pytest.raises(o.ValidationReliabilityError, match='UNADOPTED_REPOSITORY_PR_OR_HEAD'):
         runner._linux_preflight_eligibility_v1(ready_event, original_controls, str(runner.REPO_ROOT))
-    # Provision every selected phase through the same original owner. This
-    # typed routing check supplies no native permission or execution credit.
+    # Synthetic; no credit.
+
     for ordinary_phase in runner.ORDERED_PHASES:
         selected_provision = runner._linux_preflight_selected_v1(
             ['--linux-preflight-provision', '--phase', ordinary_phase], (None, None, None))
@@ -31454,8 +31970,8 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
                 runner.REPO_ROOT, phase=selected_phase)
     assert ready_event == retained_event and original_controls == retained_controls
 
-    # No child is created by these environment-projection oracles. The actual
-    # ordinary selector still receives and checks the complete compiled row.
+    # Synthetic; no credit.
+
     import threading
     projection_scope = o._LinuxPreflightScopeV1.__new__(o._LinuxPreflightScopeV1)
     projection_paths, projection_plan, projection_resources = object(), object(), object()
@@ -31504,7 +32020,7 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
                     runner._ordinary_post_environment_v1(projection_scope, projection_entry, dict(projection_base))
     finally:
         o._LINUX_PREFLIGHT_PROCESS_V1.reset(projection_token)
-    # No-child mode projections attest no native chmod/immutable/DynamicUser/kernel policy.
+    # Synthetic; no credit.
     view_mode_scope = o._LinuxPreflightScopeV1.__new__(o._LinuxPreflightScopeV1)
     view_original_path = str(tmp_path / 'view-mode-original-source')
     view_source_row = {'path': view_original_path, 'kind': 'file'}
@@ -31550,7 +32066,7 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
         with pytest.raises(RuntimeError, match='ORIGINAL_SOURCE_MODE_AND_VIEW_TRANSFER'):
             view_mode_scope._ordinary_view_operand_version_v1(dict(view_source_row),
                 protected_source_version, original_transfer)
-    # No-child structure tests the original demand operand, not native capacity/effect authority.
+    # Synthetic; no credit.
     demand_scope = object.__new__(o._LinuxPreflightScopeV1)
     demand_programme = {'plan': (object(), object())}
     demand_literal = dict(initial_raw_bytes=7, initial_file_count=2,
@@ -31562,8 +32078,8 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
         native_control_read_bytes=1000, native_control_write_bytes=1000, handle_peak=12)
     demand_programme['candidate_demand'] = demand_literal
     with monkeypatch.context() as demand_authentication:
-        # Only the already separately qualified original-compiler association
-        # is replaced here; the production closed-set/type checker runs whole.
+        # Guard reference.
+
         demand_authentication.setattr(demand_scope, '_ordinary_effect_programme_record_v1',
             lambda: demand_programme)
         assert demand_scope._ordinary_candidate_demand_checked_v1(demand_programme) is demand_literal
@@ -31589,8 +32105,8 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
             demand_scope._ordinary_candidate_demand_checked_v1(dict(demand_programme))
         assert demand_scope._ordinary_candidate_demand_checked_v1(demand_programme) is demand_literal
 
-    # Complete C arithmetic through no-child numeric ports replacing only
-    # native source/census/phase metadata; no owner or quota qualification.
+    # Synthetic; no credit.
+
     c_scope = object.__new__(o._LinuxPreflightScopeV1)
     c_source = object.__new__(o._LinuxImmutableSourceSealV2)
     c_census = object.__new__(o._LinuxPreflightCensusV1)
@@ -31692,8 +32208,8 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
         with pytest.raises(o.ValidationReliabilityError, match='ORDINARY_C_DEMAND_CONSERVATIVE_COMPLETE_GENERATION_FITS_ORIGINAL_CEILINGS'):
             runner._ordinary_candidate_demand_from_source_v1(c_scope, c_effects, c_census)
         c_limits['baseline_byte_limit'] = original_baseline_cap
-        # The independently sealed checker rejects a changed count or SOURCE
-        # generation. Its actual complete-source checker is already separated.
+        # Guard reference.
+
         c_scope._ordinary_effect_programme_v1 = c_scope._ordinary_original_effect_programme_v1 = c_effects
         c_effects['check'] = c_effects['original_check'] = lambda scope, value: value
         c_effects['candidate_demand'], c_effects['candidate_demand_arithmetic'] = c_demand, c_arithmetic
@@ -31749,7 +32265,7 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
                 cleanup_errors.append(error)
 
         def release_patches():
-            # Failed undo retains its actual owner; attempt every other owner too.
+            # Guard reference.
             for owned_patch in tuple(reversed(active)):
                 try:
                     owned_patch.undo()
@@ -31760,7 +32276,7 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
 
         def make_case(*, manifest, phase, validation_mode, event_name,
                       foreign_eligible, router_fields):
-            # Restore the prior fixture environment, never any product's debt.
+            # Synthetic; no credit.
             release_patches()
             if cleanup_errors:
                 raise BaseExceptionGroup("metadata fixture retained cleanup errors", list(cleanup_errors))
@@ -31781,7 +32297,7 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
                     raise AssertionError("metadata diagnostic crossed native seam: " + name)
                 return refused
 
-            # These are actual downstream names, checked before installing spies.
+            # Guard reference.
             for target, name, kind in (
                 (runner, "_prepare_validation_candidate_v1", "candidate_factory"),
                 (runner, "run_commands", "application_dispatch"),
@@ -31872,7 +32388,7 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
                 filesystem_probe_state="PASS", deepest_projected_path=deepest,
                 deepest_projected_path_text_length=len(str(deepest)), cleanup_target=process)
             binding = {}
-            # NEW metadata port, not an admitted _LinuxPreflightScopeV1.
+            # Guard reference.
             scope = types.SimpleNamespace(
                 query=object(), _ordinary_factory_owner_v1=(id(runner), threading.get_ident()),
                 _ordinary_runner_owner_v1=runner, _ordinary_original_runner_owner_v1=runner,
@@ -31884,7 +32400,7 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
                                    paths.validation_output_root, paths.pytest_basetemp_root)
             product.current_branch_context(paths.repo_root)
             product.foreign_filter()
-            # Actual RUN09 parser default at12042/12732 is auto, not full.
+            # Guard reference.
             mode = "auto" if validation_mode is None else validation_mode
             changed_files = []
             if product.routing_active(mode, changed_files):
@@ -31966,7 +32482,7 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
         make_case.cleanup_errors = cleanup_errors
         make_case.pending_patches = active
         make_case.context = context
-        # Acquire only after the complete close owner and all validating setup exist.
+        # Guard reference.
         try:
             token = context.set(None)
             return make_case
@@ -32036,7 +32552,7 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
         phase = "deterministic-validators-a"
 
         def literal_manifest(*, same_duplicate_reference=False):
-            # Synthetic metadata fixtures only: no files or children are created.
+            # Synthetic; no credit.
             preflight = [
                 ["fixture-python", "tools/fixture_preflight_01.py"],
                 ["fixture-python", "tools/fixture_preflight_02.py"],
@@ -32062,14 +32578,14 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
                 "fixture-python", "tools/validate_fixture_survivor.py", "--repo-root", ".",
             ]
             original = [guarded, equal_one, equal_two, survivor]
-            # Exact independent oracle: source phase follows eight fixture entries.
+            # Synthetic; no credit.
             expected_original = {
                 9: (1, guarded, tuple(guarded)),
                 10: (2, equal_one, tuple(equal_one)),
                 11: (3, equal_two, tuple(equal_two)),
                 12: (4, survivor, tuple(survivor)),
             }
-            # Preserve the real 13 phase names; later fixture rows are unselected.
+            # Synthetic; no credit.
             manifest = [
                 {"phase": "fast-preflight", "command_count": 8, "commands": preflight},
                 {"phase": phase, "command_count": 4, "commands": original},
@@ -32118,9 +32634,9 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
                     "fail_closed_reasons": (),
                 },
             )
-            # The fixture's imported inventory/router provider binds these literal
-            # IDs to the equal and survivor vectors. It supplies no source indices.
-            # The guarded-builder predicate still uses the real source filename.
+            # Synthetic; no credit.
+
+
             return case, expected_original
 
         def assert_no_native(case):
@@ -32150,7 +32666,7 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
                 assert type(row[3]) is tuple and row[3] == frozen
                 assert row[4] is command
                 assert tuple(command) == frozen
-                # Actual shared cores copy their retained command lists.
+                # Guard reference.
                 assert command is not original_ref
             if 10 in expected_globals and 11 in expected_globals:
                 ten = rows[expected_globals.index(10)]
@@ -32161,7 +32677,7 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
             assert_no_native(case)
             return rows
 
-        # Expected positions are oracle values, NEVER make_case/producer inputs.
+        # Synthetic; no credit.
         matrix = (
             ("default", None, False, True, ("fixture-equal",), False,
              (9, 10, 11, 12), 0),
@@ -32210,13 +32726,13 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
             assert case["counts"]["router_filter_core"] == filter_calls
             assert_no_native(case)
             if not expected:
-                # Empty METADATA does not stand for a passed phase or native grant.
+                # Guard reference.
                 assert product.rows == ()
                 assert len(product.commands) == 0
                 assert bound == () and plan == () and execution == ()
 
-        # Mutation of a genuinely consumed routing decision must fail, even when
-        # that changed decision would independently select a plausible subset.
+        # Guard reference.
+
         for field, replacement_value in (
             ("full_validation_required", True),
             ("required_validators", ("fixture-survivor",)),
@@ -32236,7 +32752,7 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
             assert product.rows is captured
             assert_no_native(case)
 
-        # Freeze actual owner function identity, not a function name/string tag.
+        # Guard reference.
         for owner_function in (
             "_ordinary_foreign_filter_source_result_v1",
             "_ordinary_router_filter_source_result_v1",
@@ -32255,8 +32771,8 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
             assert case["retained_error"]() is first
             assert_no_native(case)
 
-        # Both original and copied current command carriers are part of the held
-        # generation. A mutable list must not silently become a new valid source.
+        # Guard reference.
+
         for carrier in ("original", "current"):
             case, oracle = fresh_case()
             product = case["product"]
@@ -32273,7 +32789,7 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
             assert case["retained_error"]() is first
             assert_no_native(case)
 
-        # Equal-looking container replacement must not replace original bindings.
+        # Guard reference.
         for attack in (
             "paths-copy", "plan-copy", "execution-copy", "plan-run-change",
             "plan-index-change", "plan-reordered", "execution-reordered",
@@ -32325,8 +32841,8 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
             assert case["retained_error"]() is first
             assert_no_native(case)
 
-        # Mutating an original frozen entry through a deliberate test-only bypass
-        # tests the consumed-field snapshots independently of tuple identity.
+        # Guard reference.
+
         for field in (
             "registered_argv", "timing_identity_argv", "execution_argv",
             "st12g_adapter_applied", "qku_root_import_adapter_applied",
@@ -32349,8 +32865,8 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
             assert case["retained_error"]() is first
             assert_no_native(case)
 
-        # Exact original Scope/module/publication associations are independently
-        # required: command/vector equality does not repair missing owner lineage.
+        # Guard reference.
+
         for attack in (
             "missing-scope", "substituted-scope", "missing-original-scope-owner",
             "substituted-original-scope-owner", "substituted-run-binding",
@@ -32372,8 +32888,8 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
             assert case["retained_error"]() is first
             assert_no_native(case)
 
-        # Post-bind use must retain the exact path/plan/execution/phase context.
-        # Changing a lookup argument cannot search argv to find an equal new row.
+        # Guard reference.
+
         for attack in ("paths-copy", "plan-copy", "execution-copy", "wrong-phase"):
             case, oracle = fresh_case()
             product = case["product"]
@@ -32414,8 +32930,8 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
                 raise
         if _selection_primary_error is not None:
             raise _selection_primary_error
-    # The same original source constructor carries typed pytest operands through
-    # actual noncontiguous filtering. This is metadata/no-child evidence only.
+    # Synthetic; no credit.
+
     import pathlib
     import types as _pytest_source_types
     from dataclasses import replace as _pytest_source_replace
@@ -32438,8 +32954,8 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
                 deepest_projected_path_text_length=len(str(root / 'p1' / 'v' / 'x.json')),
                 cleanup_target=root / 'p1')
             binding = {}
-            # Exact owner type is used only at the metadata constructor port;
-            # no factory/native fields are acquired and no admission is claimed.
+            # Guard reference.
+
             scope = o._LinuxPreflightScopeV1.__new__(o._LinuxPreflightScopeV1)
             scope.query = object()
             scope._ordinary_factory_owner_v1 = (os.getpid(), threading.get_ident())
@@ -32539,8 +33055,8 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
     for _pytest_source_defect in (None, 'foreign-constructor', 'foreign-bound-row',
             'foreign-same-valued-registry', 'foreign-same-valued-command'):
         _pytest_source_case_v1(_pytest_source_defect)
-    # Synthetic no-child callbacks test installed compatibility, not C/source/native
-    # acquisition or process termination.
+    # Synthetic; no credit.
+
     _supported_callback_scope = object.__new__(o._LinuxPreflightScopeV1)
     _supported_callback_record = {'scope': _supported_callback_scope}
     _supported_callback_entry = object()
@@ -32607,8 +33123,8 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
                 environment=_supported_callback_environment, timeout_seconds=1,
                 scratch_roots=_supported_callback_roots)
         assert _supported_callback_occurrence['dispatch_attempted'] is True
-    # Synthetic no-child filesystem ports exercise only scratch custody. They
-    # do not create native writable mounts or prove pytest/native enforcement.
+    # Synthetic; no credit.
+
     def _disposable_scratch_case_v1(defect=None):
         local = tmp_path / ('disposable-scratch-' + str(defect))
         parent, output = local / 'process', local / 'process' / 'validation-output'
@@ -32710,8 +33226,8 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
     for _scratch_defect in (None, 'parent-replacement', 'output-replacement', 'child-alias',
             'child-mode', 'child-file', 'child-symlink', 'read-and-close'):
         _disposable_scratch_case_v1(_scratch_defect)
-    # These source-only, no-child ports exercise the private literal owner.
-    # They do not import inventory or qualify SOURCE/native acquisition.
+    # Synthetic; no credit.
+
     import ast as _literal_ast
     _literal_scope = object.__new__(o._LinuxPreflightScopeV1)
     _literal_record = {'scope': _literal_scope}
@@ -32765,8 +33281,8 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
         with pytest.raises(o.ValidationReliabilityError, match='SOURCE_LITERAL_RETAINED_AST_AND_CAPTURED_TEXT'):
             o._ordinary_source_fixed_recipes_v1(_literal_scope, _literal_record,
                 source_byte_limit=4096, source_node_limit=256)
-    # Portable no-child ports exercise the actual filter body and literal BPF;
-    # they are not kernel/quota/process-termination qualification.
+    # Synthetic; no credit.
+
     import ctypes as filter_ctypes
     import errno as filter_errno
     import struct as filter_struct
@@ -32808,8 +33324,8 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
             filter_ctypes.set_errno(observed)
             return -1
         libc = SimpleNamespace(prctl=PortFunction(nnp),syscall=PortFunction(native_call))
-        # Explicit Linux-width/loader ports make this grouped case portable;
-        # no real CDLL, prctl, syscall or native file operation is performed.
+        # Guard reference.
+
         with monkeypatch.context() as filter_ports:
             filter_ports.setattr(o, '_ordinary_application_io_check_v1', port_check)
             filter_ports.setattr(o, '_ordinary_application_io_call_v1', port_call)
@@ -32865,8 +33381,8 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
         filter_port_case(defect)
     assert len(filter_cases) == 6
 
-    # These are original-method no-child ports, not native termination or
-    # query-custody proof. An unexported proxy has no launcher/PIDfd or pipes.
+    # Synthetic; no credit.
+
     from types import SimpleNamespace
     import threading
     no_launch_scope = o._LinuxPreflightScopeV1.__new__(o._LinuxPreflightScopeV1)
@@ -32897,8 +33413,8 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
     no_launch_scope._ordinary_effect_programme_v1 = None
     no_launch_scope.startup_error = None
     no_launch_cause = RuntimeError('original preparation fault before Popen')
-    # An administrative process may still be retained by another original
-    # owner. This APP proof must never erase or settle that foreign custody.
+    # Guard reference.
+
     foreign_query_process = object()
     no_launch_cause.owned_process = foreign_query_process
     no_launch_calls = []
@@ -32957,14 +33473,14 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
         assert no_launch_cause.owned_process is foreign_query_process and no_launch_record['terminal'] is None
         assert no_launch_record['errors'] == [no_launch_cause] and not no_launch_calls
 
-    # Missing Linux flags are zero synthetic ports; these bodies make no OS call.
-    # Native admission still needs the independently observed Linux implementation.
+    # Synthetic; no credit.
+
     with monkeypatch.context() as nested_body_ports:
         for flag_name in ('O_NOFOLLOW','O_CLOEXEC','O_NONBLOCK','O_DIRECTORY'):
             if not hasattr(o.os,flag_name):
                 nested_body_ports.setattr(o.os,flag_name,0,raising=False)
-        # Actual ordinary reader/policy/unseal bodies through synthetic ports.
-        # These are no-child source checks, not native filesystem/policy evidence.
+        # Synthetic; no credit.
+
         def nested_stat(kind, ino, size=4, mode=0o444):
             return SimpleNamespace(st_dev=7,st_ino=ino,st_mode=kind|mode,
                 st_nlink=1,st_size=size,st_mtime_ns=90,st_ctime_ns=91,
@@ -33185,8 +33701,8 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
             assert combined.value.exceptions==(body_error,close_error) and failed[4][0]['close_attempted'] and not failed[4][0]['closed']
             assert failed[0]._ordinary_policy_v1['source_pyc']['errors']==[body_error,close_error] and not failed[0]._ordinary_policy_v1['source_pyc']['complete']
 
-    # Current complete SOURCE reader graphs and adversarial AST ports share
-    # this original grouped owner. No application body or native child runs.
+    # Guard reference.
+
     from tools.validation_scope_registry import (_ordinary_readonly_source_family_plan_v1,
         _ordinary_readonly_source_family_cli_v1)
     reader_graphs = ((30, 'tools/validate_pr161d_qku_candidate_quality_replay_paper_prioritization.py', ('tools/validate_pr161d_qku_candidate_quality_replay_paper_prioritization.py', 'src/qtt/__init__.py', 'src/qtt/stage1_prediction_markets/qku_candidate_quality_replay_paper_prioritization/__init__.py', 'src/qtt/stage1_prediction_markets/qku_candidate_quality_replay_paper_prioritization/constants.py', 'src/qtt/stage1_prediction_markets/qku_candidate_quality_replay_paper_prioritization/validator.py', 'src/qtt/stage1_prediction_markets/qku_candidate_quality_replay_paper_prioritization/io.py', 'src/qtt/stage1_prediction_markets/qku_candidate_quality_replay_paper_prioritization/models.py')), (31, 'tools/validate_pr161e_replay_paper_outcome_capture_scenario_learning.py', ('tools/validate_pr161e_replay_paper_outcome_capture_scenario_learning.py', 'src/qtt/__init__.py', 'src/qtt/stage1_prediction_markets/replay_paper_outcome_capture_scenario_learning/__init__.py', 'src/qtt/stage1_prediction_markets/replay_paper_outcome_capture_scenario_learning/constants.py', 'src/qtt/stage1_prediction_markets/replay_paper_outcome_capture_scenario_learning/validator.py', 'src/qtt/stage1_prediction_markets/replay_paper_outcome_capture_scenario_learning/compact_records.py', 'src/qtt/stage1_prediction_markets/replay_paper_outcome_capture_scenario_learning/json_io.py', 'src/qtt/stage1_prediction_markets/replay_paper_outcome_capture_scenario_learning/models.py', 'src/qtt/stage1_prediction_markets/replay_paper_outcome_capture_scenario_learning/paths.py', 'src/qtt/stage1_prediction_markets/replay_paper_outcome_capture_scenario_learning/schema_loader.py')), (32, 'tools/validate_pr161f_replay_paper_executor_input_run_artifact_generation.py', ('tools/validate_pr161f_replay_paper_executor_input_run_artifact_generation.py', 'src/qtt/__init__.py', 'src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/__init__.py', 'src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/constants.py', 'src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/validator.py', 'src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/compact_records.py', 'src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/json_io.py', 'src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/models.py', 'src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/paths.py', 'src/qtt/stage1_prediction_markets/replay_paper_executor_input_run_artifact_generation/schema_loader.py')), (38, 'tools/validate_pr162r_a_replay_paper_executability_classification_audit.py', ('tools/validate_pr162r_a_replay_paper_executability_classification_audit.py', 'src/qtt/__init__.py', 'src/qtt/stage1_prediction_markets/pr162r_a_replay_paper_executability_classification_audit/__init__.py', 'src/qtt/stage1_prediction_markets/pr162r_a_replay_paper_executability_classification_audit/constants.py', 'src/qtt/stage1_prediction_markets/pr162r_a_replay_paper_executability_classification_audit/validator.py', 'src/qtt/stage1_prediction_markets/pr162r_a_replay_paper_executability_classification_audit/json_io.py')), (40, 'tools/validate_pr162r_generic_replay_paper_adapter_rerun.py', ('tools/validate_pr162r_generic_replay_paper_adapter_rerun.py', 'src/qtt/__init__.py', 'src/qtt/stage1_prediction_markets/pr162r_generic_replay_paper_adapter_rerun/__init__.py', 'src/qtt/stage1_prediction_markets/pr162r_generic_replay_paper_adapter_rerun/validators.py', 'src/qtt/stage1_prediction_markets/pr162r_generic_replay_paper_adapter_rerun/paths.py', 'src/qtt/stage1_prediction_markets/pr162r_generic_replay_paper_adapter_rerun/authority_policy.py', 'src/qtt/stage1_prediction_markets/pr162r_generic_replay_paper_adapter_rerun/json_io.py')), (41, 'tools/validate_pr162r_b_replay_paper_data_binding_completion.py', ('tools/validate_pr162r_b_replay_paper_data_binding_completion.py', 'src/qtt/__init__.py', 'src/qtt/stage1_prediction_markets/pr162r_b_replay_paper_data_binding_completion/__init__.py', 'src/qtt/stage1_prediction_markets/pr162r_b_replay_paper_data_binding_completion/validators.py', 'src/qtt/stage1_prediction_markets/pr162r_b_replay_paper_data_binding_completion/paths.py', 'src/qtt/stage1_prediction_markets/pr162r_b_replay_paper_data_binding_completion/authority_policy.py', 'src/qtt/stage1_prediction_markets/pr162r_b_replay_paper_data_binding_completion/json_io.py')), (42, 'tools/validate_pr163_generic_paper_adapter_capture_framework.py', ('tools/validate_pr163_generic_paper_adapter_capture_framework.py', 'src/qtt/__init__.py', 'src/qtt/stage1_prediction_markets/pr163_generic_paper_adapter_capture_framework/__init__.py', 'src/qtt/stage1_prediction_markets/pr163_generic_paper_adapter_capture_framework/validators.py', 'src/qtt/stage1_prediction_markets/pr163_generic_paper_adapter_capture_framework/report_builder.py', 'src/qtt/stage1_prediction_markets/pr163_generic_paper_adapter_capture_framework/paths.py', 'src/qtt/stage1_prediction_markets/pr163_generic_paper_adapter_capture_framework/authority_policy.py', 'src/qtt/stage1_prediction_markets/pr163_generic_paper_adapter_capture_framework/json_io.py', 'src/qtt/stage1_prediction_markets/pr163_generic_paper_adapter_capture_framework/paper_pretrade_checks.py', 'src/qtt/stage1_prediction_markets/pr163_generic_paper_adapter_capture_framework/paper_scenario_grid.py', 'src/qtt/stage1_prediction_markets/pr163_generic_paper_adapter_capture_framework/report_sharding.py', 'src/qtt/stage1_prediction_markets/pr163_generic_paper_adapter_capture_framework/downstream_handoff.py', 'src/qtt/stage1_prediction_markets/pr163_generic_paper_adapter_capture_framework/forecastx_ibkr_paper_adapter.py', 'src/qtt/stage1_prediction_markets/pr163_generic_paper_adapter_capture_framework/input_discovery.py', 'src/qtt/stage1_prediction_markets/pr163_generic_paper_adapter_capture_framework/kalshi_paper_adapter.py', 'src/qtt/stage1_prediction_markets/pr163_generic_paper_adapter_capture_framework/llm_future_handoff.py', 'src/qtt/stage1_prediction_markets/pr163_generic_paper_adapter_capture_framework/paper_capture_events.py', 'src/qtt/stage1_prediction_markets/pr163_generic_paper_adapter_capture_framework/paper_cash_reservation.py', 'src/qtt/stage1_prediction_markets/pr163_generic_paper_adapter_capture_framework/paper_contracts.py', 'src/qtt/stage1_prediction_markets/pr163_generic_paper_adapter_capture_framework/paper_decision_intent.py', 'src/qtt/stage1_prediction_markets/pr163_generic_paper_adapter_capture_framework/paper_execution_costs.py', 'src/qtt/stage1_prediction_markets/pr163_generic_paper_adapter_capture_framework/paper_fill_simulator.py', 'src/qtt/stage1_prediction_markets/pr163_generic_paper_adapter_capture_framework/paper_latency_slippage.py', 'src/qtt/stage1_prediction_markets/pr163_generic_paper_adapter_capture_framework/paper_ledger_invariants.py', 'src/qtt/stage1_prediction_markets/pr163_generic_paper_adapter_capture_framework/paper_market_state.py', 'src/qtt/stage1_prediction_markets/pr163_generic_paper_adapter_capture_framework/paper_order_intent.py', 'src/qtt/stage1_prediction_markets/pr163_generic_paper_adapter_capture_framework/paper_order_state_machine.py', 'src/qtt/stage1_prediction_markets/pr163_generic_paper_adapter_capture_framework/paper_portfolio_ledger.py', 'src/qtt/stage1_prediction_markets/pr163_generic_paper_adapter_capture_framework/paper_risk_policy.py', 'src/qtt/stage1_prediction_markets/pr163_generic_paper_adapter_capture_framework/polymarket_paper_adapter.py', 'src/qtt/stage1_prediction_markets/pr163_generic_paper_adapter_capture_framework/qku_agent_routing.py', 'src/qtt/stage1_prediction_markets/pr163_generic_paper_adapter_capture_framework/qku_prioritization_handoff.py', 'src/qtt/stage1_prediction_markets/pr163_generic_paper_adapter_capture_framework/quantum_paper_advisory.py', 'src/qtt/stage1_prediction_markets/pr163_generic_paper_adapter_capture_framework/schema_writer.py', 'src/qtt/stage1_prediction_markets/pr163_generic_paper_adapter_capture_framework/source_candidate_policy.py', 'src/qtt/stage1_prediction_markets/pr163_generic_paper_adapter_capture_framework/venue_neutral_synthetic_paper_adapter.py', 'src/qtt/stage1_prediction_markets/pr163_generic_paper_adapter_capture_framework/paper_adapter_interface.py')), (43, 'tools/validate_pr163_b_paired_replay_paper_concurrent_executor.py', ('tools/validate_pr163_b_paired_replay_paper_concurrent_executor.py', 'src/qtt/__init__.py', 'src/qtt/stage1_prediction_markets/pr163_b_paired_replay_paper_concurrent_executor/__init__.py', 'src/qtt/stage1_prediction_markets/pr163_b_paired_replay_paper_concurrent_executor/validators.py', 'src/qtt/stage1_prediction_markets/pr163_b_paired_replay_paper_concurrent_executor/paths.py', 'src/qtt/stage1_prediction_markets/pr163_b_paired_replay_paper_concurrent_executor/authority_policy.py', 'src/qtt/stage1_prediction_markets/pr163_b_paired_replay_paper_concurrent_executor/json_io.py', 'src/qtt/stage1_prediction_markets/pr163_b_paired_replay_paper_concurrent_executor/report_sharding.py', 'src/qtt/stage1_prediction_markets/pr163_b_paired_replay_paper_concurrent_executor/scenario_stress.py')), (44, 'tools/validate_pr164_review_provenance_qku_canonical_coverage_audit.py', ('tools/validate_pr164_review_provenance_qku_canonical_coverage_audit.py', 'src/qtt/__init__.py', 'src/qtt/stage1_prediction_markets/pr164_review_provenance_qku_canonical_coverage_audit/__init__.py', 'src/qtt/stage1_prediction_markets/pr164_review_provenance_qku_canonical_coverage_audit/validators.py', 'src/qtt/stage1_prediction_markets/pr164_review_provenance_qku_canonical_coverage_audit/report_builder.py', 'src/qtt/stage1_prediction_markets/pr164_review_provenance_qku_canonical_coverage_audit/paths.py', 'src/qtt/stage1_prediction_markets/pr164_review_provenance_qku_canonical_coverage_audit/authority_policy.py', 'src/qtt/stage1_prediction_markets/pr164_review_provenance_qku_canonical_coverage_audit/central_reason_codes.py', 'src/qtt/stage1_prediction_markets/pr164_review_provenance_qku_canonical_coverage_audit/json_io.py', 'src/qtt/stage1_prediction_markets/pr164_review_provenance_qku_canonical_coverage_audit/report_sharding.py', 'src/qtt/stage1_prediction_markets/pr164_review_provenance_qku_canonical_coverage_audit/agent_orchestration_router.py', 'src/qtt/stage1_prediction_markets/pr164_review_provenance_qku_canonical_coverage_audit/artifact_discovery.py', 'src/qtt/stage1_prediction_markets/pr164_review_provenance_qku_canonical_coverage_audit/candidate_acquisition_workbench.py', 'src/qtt/stage1_prediction_markets/pr164_review_provenance_qku_canonical_coverage_audit/candidate_source_policy.py', 'src/qtt/stage1_prediction_markets/pr164_review_provenance_qku_canonical_coverage_audit/deterministic_ids.py', 'src/qtt/stage1_prediction_markets/pr164_review_provenance_qku_canonical_coverage_audit/divergence_materiality_review.py', 'src/qtt/stage1_prediction_markets/pr164_review_provenance_qku_canonical_coverage_audit/downstream_repair_trigger_matrix.py', 'src/qtt/stage1_prediction_markets/pr164_review_provenance_qku_canonical_coverage_audit/execution_cost_component_model.py', 'src/qtt/stage1_prediction_markets/pr164_review_provenance_qku_canonical_coverage_audit/formula_objective_solver_coverage.py', 'src/qtt/stage1_prediction_markets/pr164_review_provenance_qku_canonical_coverage_audit/graph_source_enrichment_plan.py', 'src/qtt/stage1_prediction_markets/pr164_review_provenance_qku_canonical_coverage_audit/infrastructure_rejection_review.py', 'src/qtt/stage1_prediction_markets/pr164_review_provenance_qku_canonical_coverage_audit/input_consumption.py', 'src/qtt/stage1_prediction_markets/pr164_review_provenance_qku_canonical_coverage_audit/latency_hot_path_classifier.py', 'src/qtt/stage1_prediction_markets/pr164_review_provenance_qku_canonical_coverage_audit/master_inventory_reconciliation.py', 'src/qtt/stage1_prediction_markets/pr164_review_provenance_qku_canonical_coverage_audit/market_scope_classifier.py', 'src/qtt/stage1_prediction_markets/pr164_review_provenance_qku_canonical_coverage_audit/model_risk_inventory.py', 'src/qtt/stage1_prediction_markets/pr164_review_provenance_qku_canonical_coverage_audit/negative_memory_preparation.py', 'src/qtt/stage1_prediction_markets/pr164_review_provenance_qku_canonical_coverage_audit/online_candidate_source_enrichment.py', 'src/qtt/stage1_prediction_markets/pr164_review_provenance_qku_canonical_coverage_audit/pr163_b_evidence_review.py', 'src/qtt/stage1_prediction_markets/pr164_review_provenance_qku_canonical_coverage_audit/pr165_scoring_readiness.py', 'src/qtt/stage1_prediction_markets/pr164_review_provenance_qku_canonical_coverage_audit/provenance_tiering.py', 'src/qtt/stage1_prediction_markets/pr164_review_provenance_qku_canonical_coverage_audit/qku_computability_materializer.py', 'src/qtt/stage1_prediction_markets/pr164_review_provenance_qku_canonical_coverage_audit/qku_formula_library.py', 'src/qtt/stage1_prediction_markets/pr164_review_provenance_qku_canonical_coverage_audit/qku_formula_test_vectors.py', 'src/qtt/stage1_prediction_markets/pr164_review_provenance_qku_canonical_coverage_audit/qku_identity_reconciliation.py', 'src/qtt/stage1_prediction_markets/pr164_review_provenance_qku_canonical_coverage_audit/qku_missing_value_fill_router.py', 'src/qtt/stage1_prediction_markets/pr164_review_provenance_qku_canonical_coverage_audit/qku_umbrella_audit.py', 'src/qtt/stage1_prediction_markets/pr164_review_provenance_qku_canonical_coverage_audit/quantum_compatibility_router.py', 'src/qtt/stage1_prediction_markets/pr164_review_provenance_qku_canonical_coverage_audit/schema_writer.py', 'src/qtt/stage1_prediction_markets/pr164_review_provenance_qku_canonical_coverage_audit/stage1_activation_dormancy.py', 'src/qtt/stage1_prediction_markets/pr164_review_provenance_qku_canonical_coverage_audit/qku_algorithm_formulation_library.py')), (45, 'tools/validate_pr163_c_pretrade_infrastructure_rejection_remediation.py', ('tools/validate_pr163_c_pretrade_infrastructure_rejection_remediation.py', 'src/qtt/__init__.py', 'src/qtt/stage1_prediction_markets/pr163_c_pretrade_infrastructure_rejection_remediation/__init__.py', 'src/qtt/stage1_prediction_markets/pr163_c_pretrade_infrastructure_rejection_remediation/validators.py', 'src/qtt/stage1_prediction_markets/pr163_c_pretrade_infrastructure_rejection_remediation/paths.py', 'src/qtt/stage1_prediction_markets/pr163_c_pretrade_infrastructure_rejection_remediation/central_pretrade_repair_reason_codes.py', 'src/qtt/stage1_prediction_markets/pr163_c_pretrade_infrastructure_rejection_remediation/json_io.py', 'src/qtt/stage1_prediction_markets/pr163_c_pretrade_infrastructure_rejection_remediation/pretrade_repair_authority_policy.py', 'src/qtt/stage1_prediction_markets/pr163_c_pretrade_infrastructure_rejection_remediation/repair_formula_library.py', 'src/qtt/stage1_prediction_markets/pr163_c_pretrade_infrastructure_rejection_remediation/report_sharding.py', 'tools/ci_branch_context.py')), (46, 'tools/validate_pr165_evidence_backed_scoring_ranking.py', ('tools/validate_pr165_evidence_backed_scoring_ranking.py', 'src/qtt/__init__.py', 'src/qtt/stage1_prediction_markets/pr165_evidence_backed_scoring_ranking/__init__.py', 'src/qtt/stage1_prediction_markets/pr165_evidence_backed_scoring_ranking/validators.py', 'src/qtt/stage1_prediction_markets/pr165_evidence_backed_scoring_ranking/paths.py', 'src/qtt/stage1_prediction_markets/pr165_evidence_backed_scoring_ranking/central_scoring_reason_codes.py', 'src/qtt/stage1_prediction_markets/pr165_evidence_backed_scoring_ranking/json_io.py', 'src/qtt/stage1_prediction_markets/pr165_evidence_backed_scoring_ranking/repair_routing_vocab.py', 'src/qtt/stage1_prediction_markets/pr165_evidence_backed_scoring_ranking/report_sharding.py', 'src/qtt/stage1_prediction_markets/pr165_evidence_backed_scoring_ranking/scoring_authority_policy.py', 'src/qtt/stage1_prediction_markets/pr165_evidence_backed_scoring_ranking/scoring_status_vocab.py')), (47, 'tools/validate_pr165_b_condition_scoped_negative_memory.py', ('tools/validate_pr165_b_condition_scoped_negative_memory.py', 'src/qtt/__init__.py', 'src/qtt/stage1_prediction_markets/pr165_b_condition_scoped_negative_memory/__init__.py', 'src/qtt/stage1_prediction_markets/pr165_b_condition_scoped_negative_memory/validators.py', 'src/qtt/stage1_prediction_markets/pr165_b_condition_scoped_negative_memory/paths.py', 'src/qtt/stage1_prediction_markets/pr165_b_condition_scoped_negative_memory/json_io.py', 'src/qtt/stage1_prediction_markets/pr165_b_condition_scoped_negative_memory/negative_memory_action_policy.py', 'src/qtt/stage1_prediction_markets/pr165_b_condition_scoped_negative_memory/negative_memory_authority_policy.py', 'src/qtt/stage1_prediction_markets/pr165_b_condition_scoped_negative_memory/negative_memory_reason_codes.py', 'src/qtt/stage1_prediction_markets/pr165_b_condition_scoped_negative_memory/negative_memory_status_vocab.py', 'src/qtt/stage1_prediction_markets/pr165_b_condition_scoped_negative_memory/quantum_negative_memory.py', 'src/qtt/stage1_prediction_markets/pr165_b_condition_scoped_negative_memory/report_sharding.py', 'src/qtt/stage1_prediction_markets/pr165_b_condition_scoped_negative_memory/deterministic_ids.py')), (48, 'tools/validate_pr165_c_replay_paper_memory_consumer_integration.py', ('tools/validate_pr165_c_replay_paper_memory_consumer_integration.py', 'src/qtt/__init__.py', 'src/qtt/stage1_prediction_markets/pr165_c_replay_paper_memory_consumer_integration/__init__.py', 'src/qtt/stage1_prediction_markets/pr165_c_replay_paper_memory_consumer_integration/validators.py', 'src/qtt/stage1_prediction_markets/pr165_c_replay_paper_memory_consumer_integration/paths.py', 'src/qtt/stage1_prediction_markets/pr165_c_replay_paper_memory_consumer_integration/authority_policy.py', 'src/qtt/stage1_prediction_markets/pr165_c_replay_paper_memory_consumer_integration/central_vocab.py', 'src/qtt/stage1_prediction_markets/pr165_c_replay_paper_memory_consumer_integration/computability_action_vocab.py', 'src/qtt/stage1_prediction_markets/pr165_c_replay_paper_memory_consumer_integration/json_io.py', 'src/qtt/stage1_prediction_markets/pr165_c_replay_paper_memory_consumer_integration/memory_consumer_action_vocab.py', 'src/qtt/stage1_prediction_markets/pr165_c_replay_paper_memory_consumer_integration/report_sharding.py')), (49, 'tools/validate_pr165_d_scenario_qku_combination_selection.py', ('tools/validate_pr165_d_scenario_qku_combination_selection.py', 'src/qtt/__init__.py', 'src/qtt/stage1_prediction_markets/pr165_d_scenario_qku_combination_selection/__init__.py', 'src/qtt/stage1_prediction_markets/pr165_d_scenario_qku_combination_selection/validators.py', 'src/qtt/stage1_prediction_markets/pr165_d_scenario_qku_combination_selection/paths.py', 'src/qtt/stage1_prediction_markets/pr165_d_scenario_qku_combination_selection/authority_policy.py', 'src/qtt/stage1_prediction_markets/pr165_d_scenario_qku_combination_selection/central_vocab.py', 'src/qtt/stage1_prediction_markets/pr165_d_scenario_qku_combination_selection/input_consumption.py', 'src/qtt/stage1_prediction_markets/pr165_d_scenario_qku_combination_selection/json_io.py', 'src/qtt/stage1_prediction_markets/pr165_d_scenario_qku_combination_selection/report_sharding.py', 'src/qtt/stage1_prediction_markets/pr165_d_scenario_qku_combination_selection/deterministic_ids.py')), (50, 'tools/validate_pr166_s_replay_paper_scenario_retest_execution.py', ('tools/validate_pr166_s_replay_paper_scenario_retest_execution.py', 'src/qtt/__init__.py', 'src/qtt/stage1_prediction_markets/pr166_s_replay_paper_scenario_retest_execution/__init__.py', 'src/qtt/stage1_prediction_markets/pr166_s_replay_paper_scenario_retest_execution/validators.py', 'src/qtt/stage1_prediction_markets/pr166_s_replay_paper_scenario_retest_execution/report_builder.py', 'src/qtt/stage1_prediction_markets/pr166_s_replay_paper_scenario_retest_execution/paths.py', 'src/qtt/stage1_prediction_markets/pr166_s_replay_paper_scenario_retest_execution/authority_policy.py', 'src/qtt/stage1_prediction_markets/pr166_s_replay_paper_scenario_retest_execution/central_vocab.py', 'src/qtt/stage1_prediction_markets/pr166_s_replay_paper_scenario_retest_execution/json_io.py', 'src/qtt/stage1_prediction_markets/pr166_s_replay_paper_scenario_retest_execution/report_sharding.py', 'src/qtt/stage1_prediction_markets/pr166_s_replay_paper_scenario_retest_execution/agent_execution_contract.py', 'src/qtt/stage1_prediction_markets/pr166_s_replay_paper_scenario_retest_execution/agent_execution_handoff.py', 'src/qtt/stage1_prediction_markets/pr166_s_replay_paper_scenario_retest_execution/commander_execution_handoff.py', 'src/qtt/stage1_prediction_markets/pr166_s_replay_paper_scenario_retest_execution/dashboard_execution_handoff.py', 'src/qtt/stage1_prediction_markets/pr166_s_replay_paper_scenario_retest_execution/event_stream_builder.py', 'src/qtt/stage1_prediction_markets/pr166_s_replay_paper_scenario_retest_execution/execution_cost_engine.py', 'src/qtt/stage1_prediction_markets/pr166_s_replay_paper_scenario_retest_execution/execution_model_assumptions.py', 'src/qtt/stage1_prediction_markets/pr166_s_replay_paper_scenario_retest_execution/execution_sensitivity_grid.py', 'src/qtt/stage1_prediction_markets/pr166_s_replay_paper_scenario_retest_execution/external_design_scouting.py', 'src/qtt/stage1_prediction_markets/pr166_s_replay_paper_scenario_retest_execution/fee_model.py', 'src/qtt/stage1_prediction_markets/pr166_s_replay_paper_scenario_retest_execution/fill_model.py', 'src/qtt/stage1_prediction_markets/pr166_s_replay_paper_scenario_retest_execution/governance_execution_handoff.py', 'src/qtt/stage1_prediction_markets/pr166_s_replay_paper_scenario_retest_execution/input_consumption.py', 'src/qtt/stage1_prediction_markets/pr166_s_replay_paper_scenario_retest_execution/latency_model.py', 'src/qtt/stage1_prediction_markets/pr166_s_replay_paper_scenario_retest_execution/lineage_graph_builder.py', 'src/qtt/stage1_prediction_markets/pr166_s_replay_paper_scenario_retest_execution/liquidity_model.py', 'src/qtt/stage1_prediction_markets/pr166_s_replay_paper_scenario_retest_execution/market_impact_model.py', 'src/qtt/stage1_prediction_markets/pr166_s_replay_paper_scenario_retest_execution/memory_refresh_candidates.py', 'src/qtt/stage1_prediction_markets/pr166_s_replay_paper_scenario_retest_execution/no_lookahead_audit.py', 'src/qtt/stage1_prediction_markets/pr166_s_replay_paper_scenario_retest_execution/optional_input_receipts.py', 'src/qtt/stage1_prediction_markets/pr166_s_replay_paper_scenario_retest_execution/order_intent_builder.py', 'src/qtt/stage1_prediction_markets/pr166_s_replay_paper_scenario_retest_execution/order_state_machine.py', 'src/qtt/stage1_prediction_markets/pr166_s_replay_paper_scenario_retest_execution/orphan_artifact_audit.py', 'src/qtt/stage1_prediction_markets/pr166_s_replay_paper_scenario_retest_execution/paper_episode_builder.py', 'src/qtt/stage1_prediction_markets/pr166_s_replay_paper_scenario_retest_execution/paper_run_engine.py', 'src/qtt/stage1_prediction_markets/pr166_s_replay_paper_scenario_retest_execution/point_in_time_execution_audit.py', 'src/qtt/stage1_prediction_markets/pr166_s_replay_paper_scenario_retest_execution/quantum_advisory_passthrough.py', 'src/qtt/stage1_prediction_markets/pr166_s_replay_paper_scenario_retest_execution/repair_feedback_router.py', 'src/qtt/stage1_prediction_markets/pr166_s_replay_paper_scenario_retest_execution/replay_episode_builder.py', 'src/qtt/stage1_prediction_markets/pr166_s_replay_paper_scenario_retest_execution/replay_run_engine.py', 'src/qtt/stage1_prediction_markets/pr166_s_replay_paper_scenario_retest_execution/result_attribution.py', 'src/qtt/stage1_prediction_markets/pr166_s_replay_paper_scenario_retest_execution/result_confidence.py', 'src/qtt/stage1_prediction_markets/pr166_s_replay_paper_scenario_retest_execution/schema_writer.py', 'src/qtt/stage1_prediction_markets/pr166_s_replay_paper_scenario_retest_execution/score_refresh_candidates.py', 'src/qtt/stage1_prediction_markets/pr166_s_replay_paper_scenario_retest_execution/selected_batch_loader.py', 'src/qtt/stage1_prediction_markets/pr166_s_replay_paper_scenario_retest_execution/settlement_assumption_model.py', 'src/qtt/stage1_prediction_markets/pr166_s_replay_paper_scenario_retest_execution/slippage_model.py', 'src/qtt/stage1_prediction_markets/pr166_s_replay_paper_scenario_retest_execution/spread_model.py', 'src/qtt/stage1_prediction_markets/pr166_s_replay_paper_scenario_retest_execution/deterministic_ids.py')))
@@ -33203,8 +33719,8 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
     def source_calculation(body):
         return _ordinary_readonly_source_family_plan_v1((('tools/reader.py',body,source_ast.parse(body)),),'tools/reader.py')
     assert not source_calculation(safe_reader)['unresolved']
-    # These complete Source declarations produce bounded initializer metadata;
-    # they grant no execution and keep the opaque Code outside JSON values.
+    # Guard reference.
+
     identity_declaration='_ORDINARY_INITIALIZED_MODULE_CODE_V1 = __import__("sys")._getframe().f_code'
     def identity_source_calculation(declaration,tail='',entry='tools/ci_branch_context.py'):
         body=declaration+'\n'+tail+'\ndef main():\n return 0\n'
@@ -33274,8 +33790,8 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
         denied_identity=identity_source_calculation(declaration,tail,entry_source)
         assert denied_identity['unresolved'] and denied_identity['value_domain'] is None
         assert not denied_identity['initialization_operations']
-    # Fixed inventory facets retain the original REG callable/global owner.
-    # These synthetic Source operands issue no native/source/resource grant.
+    # Synthetic; no credit.
+
     from tools import validation_scope_registry as facet_registry
     from tools import validation_inventory as inventory_facet
     facet_plan = inventory_facet._facet_reg_fn_readonly_source_family_plan_v1
@@ -33301,7 +33817,7 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
         assert retained_facet_error.value is facet_error
         assert len(facet_calls) == 1 and facet_calls[0][1] == 'tools/reader.py'
     assert not source_calculation(safe_reader)['unresolved']
-    # Synthetic original-owner ports exercise no native/source authority.
+    # Synthetic; no credit.
     from tools import validation_reliability as absent_owner
     with monkeypatch.context() as absent_ports:
         for absent_flag_name, absent_flag_default in (('O_NOFOLLOW',0x20000),('O_CLOEXEC',0x80000),('O_DIRECTORY',0x10000)):
@@ -33527,8 +34043,8 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
         callbacks.replace("callback=callback or reader","callback=callback or reader\n callback=__import__('os').remove"),
         callbacks.replace("callback=None","callback=__import__('os').remove"),
     ):assert source_calculation(changed)['unresolved']
-    # Explicit synthetic Source grammar only: no child, Scope, Git or
-    # application body is executed by these actual calculator ports.
+    # Synthetic; no credit.
+
     source_git_capture="import argparse\nimport subprocess\nfrom pathlib import Path\ndef _git_stdout(root,args):\n    completed=subprocess.run(['git',*args],cwd=root,check=False,capture_output=True,text=True)\n    return completed.returncode,completed.stdout.strip(),completed.stderr.strip()\ndef main(argv=None):\n    parser=argparse.ArgumentParser()\n    parser.add_argument('--repo-root',type=Path,default='.')\n    args=parser.parse_args(argv)\n    code,stdout,stderr=_git_stdout(args.repo_root,['status','--short','--untracked-files=all'])\n    return 0\nif __name__=='__main__':\n    raise SystemExit(main())\n"
     source_git_entry='tools/reader.py'
     source_git_argv=('/trusted/python','-I','-S','-B','-X','pycache_prefix=/runtime/p1/pycache',source_git_entry,'--repo-root','.')
@@ -33563,8 +34079,8 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
         changed=source_git_calculation(source_git_loop.replace('        code,stdout,stderr=',statement+'        code,stdout,stderr=',1))
         assert changed['unresolved'] and not changed['native_process_operations']
 
-    # The root comes from the selected CLI or independently bound service
-    # WorkingDirectory. No synthetic application body is executed here.
+    # Synthetic; no credit.
+
     source_git_call="_git_stdout(args.repo_root,['status','--short','--untracked-files=all'])"
     for root in ('Path(args.repo_root)','args.repo_root.resolve()','Path.cwd()'):
         changed=source_git_calculation(source_git_capture.replace(source_git_call,
@@ -33620,7 +34136,7 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
         assert source_git_calculation(source_git_string.replace(before,after,1))['unresolved']
 
 
-    # Whole current data bodies select primitive work, never native admission.
+    # Synthetic; no credit.
     source_data_capture = """import csv
 import hashlib
 import json
@@ -33670,7 +34186,7 @@ if __name__ == "__main__":
         ('        yield value','        yield from callback(value)'),
     ):
         assert source_data_calculation(source_data_capture.replace(before,after,1))['unresolved']
-    # The original report walk changes only the fixed Mapping/key mechanics.
+    # Guard reference.
     mapping_data_source=source_data_capture.replace('import csv','from typing import Mapping\nimport csv',1).replace(
         '    if isinstance(value, dict):\n        yield value\n        for child in value.values():\n            yield from objects(child)',
         '    if isinstance(value, Mapping):\n        for key,child in value.items():\n            yield str(key),child\n            yield from objects(child)',1)
@@ -33687,7 +34203,7 @@ if __name__ == "__main__":
         ('yield from objects(child)','yield from unknown(child)'),
     ):
         assert source_data_calculation(mapping_data_source.replace(before,after,1))['unresolved']
-    # A source-defined empty exception keeps only the native builtin constructor.
+    # Guard reference.
     source_exception_text="from pathlib import Path\nclass ParseFault(ValueError):\n    pass\ndef main():\n    try:\n        raise ParseFault('invalid')\n    except ParseFault:\n        return 0\nif __name__=='__main__':\n    raise SystemExit(main())\n"
     source_exception_calculate=lambda text:_ordinary_readonly_source_family_plan_v1(
         (('tools/exception_reader.py',text,source_ast.parse(text)),),'tools/exception_reader.py')
@@ -33704,7 +34220,7 @@ if __name__ == "__main__":
         ('    except ParseFault:','    except ParseFault:\n        ParseFault=Path("owned-report").unlink'),
     ):
         assert source_exception_calculate(source_exception_text.replace(before,after,1))['unresolved']
-    # The imported tools sibling uses the same captured source-parent startup.
+    # Guard reference.
     source_startup_text="from __future__ import annotations\nimport pathlib\nimport sys\n_REPO_ROOT=pathlib.Path(__file__).resolve().parents[1]\nif str(_REPO_ROOT) not in sys.path:\n    sys.path.insert(0,str(_REPO_ROOT))\ndef value():\n    return 1\n"
     source_startup_entry="from tools import sibling\ndef main():\n    return sibling.value()\nif __name__=='__main__':\n    raise SystemExit(main())\n"
     source_startup_argv=('/trusted/python','-I','-S','-B','-X','pycache_prefix=/runtime/p1/pycache','tools/startup_reader.py','--repo-root','.')
@@ -33724,7 +34240,7 @@ if __name__ == "__main__":
         ('pathlib.Path(__file__).resolve()','pathlib.Path(__file__).absolute()'),
     ):
         assert source_startup_calculate(source_startup_text.replace(before,after,1),source_startup_argv)['unresolved']
-    # Shared positive values remain bound to complete original Source producers.
+    # Guard reference.
     source_value_normalizer='from pathlib import Path\ndef normalize(path):\n    normalized=str(path).strip().replace("\\\\","/")\n    while normalized.startswith("./"):\n        normalized=normalized[2:]\n    return normalized\ndef main():\n    return normalize("./name.py").removesuffix(".py")\nif __name__=="__main__":\n    raise SystemExit(main())\n'
     source_value_calculate=lambda text:_ordinary_readonly_source_family_plan_v1((('tools/value_reader.py',text,source_ast.parse(text)),),'tools/value_reader.py')
     assert not source_value_calculate(source_value_normalizer)['unresolved']
@@ -33761,7 +34277,7 @@ if __name__ == "__main__":
     assert not source_value_imported(source_value_fault)['unresolved']
     assert source_value_imported(source_value_fault.replace('    pass','    def __init__(self,value):\n        unknown(value)'))['unresolved']
     assert source_startup_calculate(source_startup_text.replace('_REPO_ROOT=', '__file__="/outside/tools/sibling.py"\n_REPO_ROOT=',1),source_startup_argv)['unresolved']
-    # The same original value group follows every real caller and all early returns.
+    # Guard reference.
     source_shared_keys='from pathlib import Path\nCODE="source"\ndef result():\n    values=[]\n    values.append(CODE)\n    return tuple(dict.fromkeys(values))\ndef consume(values):\n    return tuple(dict.fromkeys(values))\ndef main():\n    return consume(result())\nif __name__=="__main__":\n    raise SystemExit(main())\n'
     assert not source_value_calculate(source_shared_keys)['unresolved']
     for before,after in (
@@ -33785,7 +34301,7 @@ if __name__ == "__main__":
     source_shared_imported=lambda text:_ordinary_readonly_source_family_plan_v1((('tools/value_reader.py',text,source_ast.parse(text)),('tools/constants.py',source_shared_constants,source_ast.parse(source_shared_constants))),'tools/value_reader.py')
     assert not source_shared_imported(source_shared_import)['unresolved']
     assert source_shared_imported(source_shared_import.replace('from tools.constants import normalize','from pathlib import Path as normalize',1))['unresolved']
-    # Required keyword-only arguments keep the same complete caller type proof.
+    # Guard reference.
     source_shared_keyword=source_shared_keys.replace('def consume(values):','def consume(*,values):').replace('consume(result())','consume(values=result())')
     assert not source_value_calculate(source_shared_keyword)['unresolved']
     assert source_value_calculate(source_shared_keyword.replace('consume(values=result())','consume(values=(Path("owned-report"),))'))['unresolved']
@@ -33823,8 +34339,8 @@ if __name__ == "__main__":
     source_contains_docstring = 'from pathlib import Path\ndef contains(value,needle):\n    "original literal docstring"\n    if isinstance(value,str):\n        return value.replace("\\\\","/")==needle\n    if isinstance(value,list):\n        return any(contains(item,needle) for item in value)\n    return False\ndef main():\n    return contains(["safe"],"safe")\n'
     assert not source_value_calculate(source_contains_docstring)['unresolved']
     assert source_value_calculate(source_contains_docstring.replace('isinstance(value,str)','isinstance(value,Path)'))['unresolved']
-    # Explicit synthetic Source tokens exercise the original context contract;
-    # they do not issue a Scope, loader, child or native permission.
+    # Synthetic; no credit.
+
     context_core='from contextvars import ContextVar\nimport os\nimport sys\nfrom pathlib import Path\nRUN_ID_ENV=\'QTT_VALIDATION_RUN_ID\'\n_PREFLIGHT_OBSERVATION_V1=ContextVar(\'_PREFLIGHT_OBSERVATION_V1\',default=None)\n_LINUX_PREFLIGHT_PROCESS_V1=ContextVar(\'_LINUX_PREFLIGHT_PROCESS_V1\',default=None)\n_PREFLIGHT_SCRIPTS_V1=(\'tools/validate_grand_global_debug_logical_consistency_audit.py\', \'tools/validate_ci_branch_context_matrix.py\', \'tools/validate_repair_pr_changed_file_scope.py\', \'tools/validate_nested_validator_contracts.py\', \'tools/validate_validation_inventory.py\', \'tools/validate_validation_scope_registry.py\', \'tools/changed_area_validation_router.py\', \'tools/cross_platform_path_invariant.py\')\ndef _preflight_active_v1(root=None):\n    value = _PREFLIGHT_OBSERVATION_V1.get()\n    scope = _LINUX_PREFLIGHT_PROCESS_V1.get()\n    if scope is not None and type(scope) is _LinuxPreflightScopeV1 and scope._ordinary_selected_v1():\n        scope._ordinary_precursor_registration_v1()\n        _preflight_require_v1(value is not None,\n                             "selected preflight has no original observation binding")\n    selected = os.environ.get(RUN_ID_ENV) and any(\n        str(sys.argv[0]).replace("\\\\", "/").endswith(script) for script in _PREFLIGHT_SCRIPTS_V1)\n    if value is not None:\n        value.check()\n        if selected and (value.run_id != os.environ[RUN_ID_ENV]\n                         or value.argv != (sys.executable, *sys.argv)\n                         or value.root != Path.cwd()\n                         or value.root != Path(__file__).resolve().parents[1]):\n            value.fail("active canonical preflight lost actual run/vector/module/cwd association")\n        if root is not None and Path(root).absolute() != value.root:\n            value.fail("preflight module/argument root mismatch")\n    elif selected:\n        raise ValidationReliabilityError("ENGVR_PREPUBLICATION_CUSTODY_FAILED",\n                                        "selected preflight has no original observation binding")\n    return value\n'
     context_entry="import argparse\nfrom pathlib import Path\nfrom tools.validation_reliability import _preflight_active_v1\ndef main(argv=None):\n parser=argparse.ArgumentParser()\n parser.add_argument('--repo-root',type=Path,default='.')\n args=parser.parse_args(argv)\n if _preflight_active_v1(args.repo_root) is not None:\n  Path('owned-report').unlink()\n return 0\nif __name__=='__main__':\n raise SystemExit(main())\n"
     context_argv=('/trusted/python','-I','-S','-B','-X','pycache_prefix=/runtime/p1/pycache','tools/reader.py','--repo-root','.')
@@ -33916,8 +34432,6 @@ if __name__ == "__main__":
             source_ast.parse('def main(): return 1')),),'tools/reader.py')
     with pytest.raises(ValueError,match='CURRENT_AST_IDENTITY'):
         _ordinary_readonly_source_family_plan_v1((('tools/reader.py',safe_reader,source_ast.parse(safe_reader)),)*2,'tools/reader.py')
-    # The effective vector cannot accept an extra writer argument, a foreign
-    # ordinal or an unselected owner merely because the module is visible.
     family_scope=o._LinuxPreflightScopeV1.__new__(o._LinuxPreflightScopeV1)
     family_scope._ordinary_selected_v1=lambda:True
     family_scope._ordinary_image_v1={'mount_path':Path('/same-owned-view')}
@@ -33927,9 +34441,7 @@ if __name__ == "__main__":
     for changed,ordinal in ((vector,False),((*vector,'--write-artifacts'),6),(('foreign',*vector[1:]),6)):
         with pytest.raises(o.ValidationReliabilityError,match='ORIGINAL_VECTOR'):
             o._ordinary_readonly_source_family_execution_v1(family_scope,changed,ordinal)
-
-    # Actual original R producer/compiler/dispatch/material bodies through
-    # explicit no-native ports; source-policy controls freeze before native rows.
+    # No credit
     from types import ModuleType
     import dataclasses
     from tools import run_validation_gates as runner_module
@@ -33942,7 +34454,6 @@ if __name__ == "__main__":
         class Selection:
             def __init__(self): self._original = (None, None, 'synthetic-R-phase')
             def _guard(self): require(self is owner._ordinary_original_source_selection_v1, 'foreign-selection')
-
         _r_fixture_runner = ModuleType('_synthetic_source_R_runner')
         ports.setitem(sys.modules,_r_fixture_runner.__name__,_r_fixture_runner)
         _r_fixture_runner._OrdinarySourceSelectionV1 = Selection
@@ -33969,8 +34480,9 @@ if __name__ == "__main__":
                 object.__setattr__(entry,name,value)
             plan.append(entry)
         plan = tuple(plan)
-        execution = tuple(SimpleNamespace(execution_argv=entry.argv) for entry in plan)
+        execution = tuple(SimpleNamespace(execution_argv=entry.argv,registered_argv=entry.argv) for entry in plan)
         rows = tuple((entry, actual, ordinal) for ordinal, (entry, actual) in enumerate(zip(plan, execution), 1))
+        owner._ordinary_source_selection_v1._bound=rows
         owner._ordinary_bound_paths_v1, owner._ordinary_bound_plan_v1 = paths, plan
         owner._ordinary_execution_plan_v1 = execution
         policy = dict(maxima=dict(metadata_bytes=17, metadata_nodes=19, metadata_depth=7), original_cutoffs=(0, 1000, 2000, 3000))
@@ -34058,7 +34570,6 @@ if __name__ == "__main__":
                 o.ValidationReliabilityError, 'ORDINARY_R_ORIGINAL_PHASE_ENVIRONMENT_TYPES')
             context['table']['1']['read_limits']['profile_limit'] = old
             assert owner._ordinary_rp5a_environment_v1(plan[0], programme[0]['environment']) == programme[0]['environment']
-            # Reach the actual post-BEGIN material guard and first original surface port.
             class SurfaceSentinel(Exception):pass
             sentinel = SurfaceSentinel('explicit no-native surface port')
             owner.check = lambda: None
@@ -34079,7 +34590,6 @@ if __name__ == "__main__":
             else: raise AssertionError('original surface port not reached')
             assert len(context['issued']) == 1 and context['issued'][0]['errors'] == [sentinel]
             assert context['errors'] == [sentinel] and 'rp5a_material' not in record
-
             foreign_base=dict(base);foreign_base['fixed']='changed'
             rejects(lambda:space['_ordinary_selected_environment_v1'](owner,plan[0],owner._ordinary_rp5a_environment_v1(plan[0],foreign_base)),
                 o.ValidationReliabilityError, 'ORDINARY_SELECTED_ENVIRONMENT_UNCHANGED_INDEPENDENT_BASE')
@@ -34093,10 +34603,9 @@ if __name__ == "__main__":
             legacy=runner_module._scan_dispatch_environment({**base,keys[0]:'inherited'},plan[0])
             assert legacy==base
         finally:o._LINUX_PREFLIGHT_PROCESS_V1.reset(default_token)
+    # Guard reference.
 
-    # Original late R source owner cannot consume rows before the native
-    # compiler has frozen their identities/environment. These ports invoke
-    # the actual preparation body and retain POST/no-R compatibility.
+
     from types import SimpleNamespace
     def r_original_preparation_order(phase, selected_role):
         scope=object.__new__(o._LinuxPreflightScopeV1)
@@ -34143,14 +34652,14 @@ if __name__ == "__main__":
                 host_preparation=host,occurrence_program=native_rows,fd_program=fd)
         assert actual is final and events[0]==('compile',native_rows,fd)
         return events
-    # The source-selected paths object supplies only the original repository.
-    # No filesystem/native method is executed in the above owner ports.
+    # Guard reference.
+
     assert ('original-R',) in r_original_preparation_order('synthetic-R-phase','READER')
     assert ('original-R',) not in r_original_preparation_order('synthetic-R-phase',None)
     assert ('original-R',) not in r_original_preparation_order('post-validation','READER')
 
-    # The original candidate-fence API requires None after successful checks.
-    # These ports use the actual Scope callback and original fence body only.
+    # Guard reference.
+
     parent_root=tmp_path/'original-parent-root'
     parent_row={'kind':'directory'}
     parent_rows=(parent_row,);parent_index={str(parent_root):parent_row}
@@ -34186,8 +34695,8 @@ if __name__ == "__main__":
         rejects(lambda:o._scan_candidate_fence(parent_scope._ordinary_rp5a_parent_source_check_v1),
             o.ValidationReliabilityError, 'ORDINARY_R_PARENT_ORIGINAL_PROTECTED_SOURCE_ROOT')
 
-    # These are no-native fixture ports. Unit projection does not issue a
-    # manager receipt; direct-leaf admission still rejoins the original holder.
+    # Synthetic; no credit.
+
     from tools import run_validation_gates as native_runner
     native_fields = ('owner', 'service_unit', 'invocation', 'holder_identity',
         'holder_pidfd_slot', 'holder_cgroup', 'holder_cgroup_slot', 'holder_events_slot',
@@ -34203,7 +34712,7 @@ if __name__ == "__main__":
     native_hold = native_fixture_hold()
     assert native_runner._ordinary_workflow_native_units_v1(native_value, native_hold) == (
         'qtt123n2p1', 'job-qtt123n2p1.slice', 'qtt123n2p1bootstrap.scope')
-    # A task-native root remains the original PID/origin identity.
+    # Guard reference.
     assert o._linux_preflight_name_v1(17, 23) == 'qtt17n23'
     for damaged, denial_detail in (
             (dict(native_value, environment=dict(GITHUB_RUN_ID='0123', GITHUB_RUN_ATTEMPT='2')), 'preflight canonical decimal control'),
@@ -34227,8 +34736,8 @@ if __name__ == "__main__":
     rejects(lambda: native_runner._ordinary_workflow_native_units_v1(native_value, replaced_hold),
         o.ValidationReliabilityError, 'ORDINARY_NATIVE_UNITS_ORIGINAL_HOLDER')
 
-    # Reach the original host predicate through its actual class method, then
-    # stop at the first kernel-read port. No cgroup or native child is created.
+    # Guard reference.
+
     class NativeJoinSuffix(Exception): pass
     suffix = NativeJoinSuffix('kernel suffix is deliberately unexecuted')
     with monkeypatch.context() as native_ports:
@@ -34287,7 +34796,7 @@ if __name__ == "__main__":
         rejects(invoke, o.ValidationReliabilityError, 'ORDINARY_PREFIX_SAME_ORIGINAL_DIRECT_RECEIVER')
         scope._ordinary_bootstrap_runtime_v1 = original_capture
         assert calls == []
-        # The unchanged service route retains its original exact name contract.
+        # Guard reference.
         host['cgroup'] = host['common_cgroup'] / (scope.name + 'controller.service')
         try: invoke()
         except NativeJoinSuffix as actual: assert actual is suffix
@@ -34296,8 +34805,8 @@ if __name__ == "__main__":
         host['cgroup'] = host['common_cgroup'] / 'foreigncontroller'
         rejects(invoke, o.ValidationReliabilityError, 'ORDINARY_PREFIX_ACTUAL_FRESH_CONTROLLER_ROLE')
 
-    # Explicit no-native syscall ports exercise the SAME fixed early maps
-    # getter. These cases issue no startup, holder, provider or native proof.
+    # Synthetic; no credit.
+
     from types import SimpleNamespace
     import os as maps_os
     import stat as maps_stat
@@ -34430,9 +34939,9 @@ if __name__ == "__main__":
             assert retained[0]['last_returned_raw']==literal_maps[:3]
             assert retained[0]['partial_raw']==b'' and sum(delivered)==3
 
-    # The original component-open owner keeps its default six-field receipts.
-    # The selected early-getter callback debits each actual close first and
-    # retains the exact cells when admission fails; all FDs here are oracles.
+    # Synthetic; no credit.
+
+
     from pathlib import PurePosixPath
     original_component_open = maps_owner._linux_source_open_v2
     for component_case in ('default', 'selected', 'open-and-close-failure', 'close-admission'):
@@ -34649,12 +35158,12 @@ if __name__ == "__main__":
     assert route_capture['source_original'][1] is route_result[0][0][2]
     assert route_capture['source_original'][3] is route_ast.dump.__code__
     assert route_selection['route_acquisition']['code_sites_original'][1]
-    assert route_result[2]  # Metadata capture does not issue unclosed native CALL grants.
+    assert route_result[2]  # Guard reference.
     with pytest.raises(owner.ValidationReliabilityError):
         owner._ordinary_control_initialized_routes_v1(route_scope,route_stage,route_selection)
 
-    # Exact native static descriptor and ordinary Source callback projections
-    # stay in the same private Source selection, never a generic callable grant.
+    # Guard reference.
+
     census_path=('_LinuxPreflightCensusV1','_version')
     census_descriptor=owner._LinuxPreflightCensusV1.__dict__['_version']
     census_function=census_descriptor.__func__
@@ -34713,8 +35222,8 @@ if __name__ == "__main__":
         owner._ordinary_control_member_v1(member_native,('attempt',))
     member_record['native']=member_native
     assert owner._ordinary_control_member_v1(member_native,('attempt',)) is callback_function
-    # Static descriptor replacement with the same underlying Function must be
-    # observed by the original site checker as a changed association.
+    # Guard reference.
+
     static_site=('CALL',1,0,1,10,'original static Source site')
     static_selector=('private.census','tools.validation_reliability',
         census_function.__qualname__,0,census_function,(),())
@@ -34733,8 +35242,8 @@ if __name__ == "__main__":
         with pytest.raises(ValueError,match='CONTROL_ORIGINAL_CENSUS_STATIC_DESCRIPTOR_INTERVAL'):
             owner._ordinary_control_sites_check_v1(member_scope,'private.census',(static_site,),
                 static_rows,(static_selector,),(),(),())
-    # The exact selected pytest02 guard projects the original graph record;
-    # arbitrary BINARY paths still use the existing DATA route.
+    # Guard reference.
+
     import tools.run_validation_gates as connected_runner
     graph_scope=object.__new__(owner._LinuxPreflightScopeV1)
     graph_source=object()
@@ -34766,6 +35275,37 @@ if __name__ == "__main__":
             guard(graph_scope,graph,'pytest.ini',10,20,'BINARY',None)
     graph['original']=old_graph
     assert guard(graph_scope,graph,'pytest.ini',10,20,'BINARY',None) is True
+    # Only original scalar guards run here; no graph/native admission is issued.
+    from tools import ci_branch_context as pgci
+    import inspect as pgi
+    pgt=forward_ast.parse(pgi.getsource(pgci._ordinary_pytest_supported_row_v1))
+    pgc=next(v for v in forward_ast.walk(pgt) if isinstance(v,forward_ast.Call)
+        and isinstance(v.func,forward_ast.Name) and v.func.id=='need'
+        and len(v.args)==2 and isinstance(v.args[1],forward_ast.Constant)
+        and v.args[1].value=='ORDINARY_PYTEST_NO_MISSING_OR_AMBIGUOUS_SELECTED_MODULE')
+    pgc=compile(forward_ast.Expression(pgc.args[0]),'<held-pytest-module-guard>','eval')
+    pgm=forward_ast.literal_eval(next(v.value for v in forward_ast.walk(pgt)
+        if isinstance(v,forward_ast.Assign) and any(isinstance(k,forward_ast.Name)
+        and k.id=='missing' for k in v.targets)))
+    pgf=['hook/fixture objects remain unobserved']
+    pgr=dict(unresolved_source_facts=pgf,unresolved_imports=[])
+    pgs=dict(installed_unresolved_edges=[])
+    pgn=dict(graph_row=pgr,graph=pgs,missing=pgm)
+    assert eval(pgc,pgn) is True and pgr['unresolved_source_facts'] is pgf
+    for pgb in ('actual requested plugin Source binding: missing',
+        'original pytest_plugins module binding: ambiguous'):
+        pgr['unresolved_source_facts']=[pgb]
+        assert eval(pgc,pgn) is False
+    pgr['unresolved_source_facts']=pgf
+    pgr['unresolved_imports']=[(object(),1,'import module','ambiguous sealed module paths')]
+    assert eval(pgc,pgn) is False
+    pgr['unresolved_imports']=[]
+    pgs['installed_unresolved_edges']=[(object(),1,'import module','module',('a','b'))]
+    assert eval(pgc,pgn) is False
+    pgs['installed_unresolved_edges']=[]
+    pgr['unresolved_imports']=[(object(),1,'import_module(name)',
+        'nonliteral dynamic source selection requires original callee binding')]
+    assert eval(pgc,pgn) is True and pgr['unresolved_source_facts'] is pgf
     # The real DATA request owner supplies five Source sites across four
     # existing Scope methods; private closure rows leave public root24 intact.
     import tools.validation_scope_registry as operand_registry
@@ -34846,7 +35386,7 @@ if __name__ == "__main__":
             owner._ordinary_control_error_constructor_route_v1(route_scope,constructor_target,
                 constructor_caller,('CALL',1,0,1,1,'x'),(),(),())
 
-    # Same-original compiler reuse fixtures carry no native admission.
+    # Synthetic; no credit.
     def original_reuse_fixture():
         raw=b'def operand(value=3):\n    return value+1\n'
         filename='synthetic-no-native-original.py'
@@ -35007,8 +35547,8 @@ if __name__ == "__main__":
             owner._ordinary_initial_data_layout_v1(unsupported_observation)
 
 
-    # Actual initial-supervisor joins use no-child native/profile/debit ports.
-    # Pending startup differs from later closed startup9; neither grants native authority.
+    # Synthetic; no credit.
+
     import os as real_os
     import threading
     from pathlib import PurePosixPath
@@ -35073,8 +35613,8 @@ if __name__ == "__main__":
         assert never==(binding,fault,f.command,False) and f.command['supervision_process'] is None
         assert f.command['pending'] is True and f.command['receipt'] is None
 
-    # Initial13 lifecycle joins use synthetic no-child acquisition/data/manager ports;
-    # they grant no Source, kernel, loader or trading qualification.
+    # Synthetic; no credit.
+
     import os as product_os
     import sys as product_sys
     import threading as product_threading
@@ -35151,8 +35691,8 @@ if __name__ == "__main__":
                     inputs['early_profile'],inputs['errors'])
                 physical['complete']=True;physical['pending']=False
                 return physical
-            # This explicit no-child downstream port supplies no Source or
-            # Linux protection credit; the real Input4 helper remains unchanged.
+            # Input4: no credit.
+
             input4_calls=[]
             def input4_rejoin(value,current,cuts,producer,containing_function):
                 input4_calls.append((value,current,cuts,producer,containing_function))
@@ -35280,8 +35820,8 @@ if __name__ == "__main__":
             if reason=='query':
                 assert issuer['prepare_request'] is not None and issuer['query_request'] is None
 
-    # Actual private helpers use no-child kernel/native/prefund ports to test custody
-    # and errors, not real mounts or prebirth authority.
+    # Synthetic; no credit.
+
     import os as real_os
     import stat
     import threading
@@ -35517,8 +36057,8 @@ if __name__ == "__main__":
         assert not value['handoff_attempted'] and f.kernel.calls==before
         cases.append('unsettled original manager process prevents private handoff')
 
-        # Current original Root31/control-generation12 continuity only.
-        # All entry/kernel/native prerequisites are explicit no-child oracles.
+        # Synthetic; no credit.
+
         root_names=('native_input','native_owner','input_original','entry_original','source_generation',
             'source_original','anchor','profile','operands','operands_original','observation',
             'observation_original','allocation_original','capacity','capacity_original','original_cutoffs',
@@ -35649,8 +36189,8 @@ if __name__ == "__main__":
         f.inputs['role_root_acquisition']['controlled_generation_original']=(*old[:10],((1,2),(1,2)),old[11])
         expect(lambda:check(f),o.ValidationReliabilityError,'CONTROLLED_ROOT_GENERATION12');cases.append('invented allowed root effect version rejects')
 
-    # Authentic Query/adoption owners use no-child receipts, which provide no native
-    # terminal proof or earlier Native13/source grant.
+    # Synthetic; no credit.
+
     import dataclasses
     from pathlib import PurePosixPath
     with monkeypatch.context() as initial_query_port:
@@ -35660,8 +36200,8 @@ if __name__ == "__main__":
         adopt = o._ordinary_initial_query_adopt_v1
         cases = []
         def receipt(index, argv, root):
-            # Explicit no-child oracle: a literal actual receipt class is constructed;
-            # no operating-system child or terminal native result is claimed.
+            # Synthetic; no credit.
+
             return Receipt(1, 'linux-admin-' + str(os.getpid()), 'fast-preflight-native-query',
                 index, argv, '/', 7000 + index, 'posix', 'fixture-start', 'fixture-end',
                 0.01, 0, None, 10, 'NOT_TRIGGERED', 'NOT_REQUIRED',

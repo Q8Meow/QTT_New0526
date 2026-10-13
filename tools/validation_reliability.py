@@ -7929,56 +7929,8 @@ def _read_scan_profile_for_run(
 
 
 def _rp5a_consumer_role_v1(argv, repo_root):
-    """Classify actual Python entry/selected pytest paths, never payload prose."""
-    if type(argv) is not tuple or not argv or any(type(v) is not str for v in argv):
-        raise TypeError("original command vector required")
-    offset = 1
-    while offset < len(argv) and argv[offset] in ("-B", "-I", "-u"):
-        offset += 1
-    if offset >= len(argv):
-        return None
-    root = Path(repo_root)
-    entry = argv[offset].replace("\\", "/")
-    if Path(entry).is_absolute():
-        try:
-            entry = Path(entry).relative_to(root).as_posix()
-        except ValueError:
-            return None
-    if entry == "tools/build_pr168_rp5a_legacy_semantic_audit.py":
-        return "EVIDENCE" if "--validation-scope-evidence-only" in argv[offset + 1:] else "SCANNER"
-    if entry == "tools/validate_pr168_rp5a_legacy_semantic_audit.py":
-        return "VALIDATE"
-    if entry == "tools/run_pytest_fresh_basetemp.py":
-        arguments = argv[offset + 1:]
-    elif argv[offset:offset + 2] == ("-m", "pytest"):
-        arguments = argv[offset + 2:]
-    else:
-        return None
-    value_options = {"-k", "-m", "-c", "-o", "-p", "--basetemp", "--rootdir", "--confcutdir",
-                     "--ignore", "--ignore-glob", "--deselect", "--maxfail", "--tb", "--color",
-                     "--import-mode", "--override-ini", "--inifile", "--durations"}
-    skip = False
-    literals = False
-    for value in arguments:
-        if skip:
-            skip = False
-            continue
-        if not literals and value == "--":
-            literals = True
-            continue
-        if not literals and value.startswith("-"):
-            skip = value in value_options
-            continue
-        selected = value.split("::", 1)[0].replace("\\", "/").rstrip("/")
-        if Path(selected).is_absolute():
-            try:
-                selected = Path(selected).relative_to(root).as_posix()
-            except ValueError:
-                continue
-        parts = selected.split("/")
-        if parts[:2] == ["tests", "pr168_rp5a"] and all(p not in ("", ".", "..") for p in parts):
-            return "PYTEST"
-    return None
+    from tools.ci_branch_context import _rp5a_consumer_role_v1 as d
+    return d(argv,repo_root)
 
 
 def _rp5a_wire_projection_v3(versions, payload_limits, *, readers, scanners, command_count):
@@ -8013,7 +7965,7 @@ def _scan_launch_wire_tables_v3(plan, inputs, readers, scanner_keys, repo_root):
                 or original.wire_version not in (2, 3)):
             raise ValueError("invalid original streamed launch occurrence")
         if original.wire_version == 3 and (
-                index not in scanner_keys or _rp5a_consumer_role_v1(plan[index - 1].argv, repo_root) != "SCANNER"):
+                index not in scanner_keys or _ordinary_selected_rp5a_role_v1(_LINUX_PREFLIGHT_PROCESS_V1.get(),plan[index-1]) != "SCANNER"):
             raise ValueError("streamed launch is restricted to the original full scanner role")
         versions[index] = original.wire_version
         payloads[index] = original.payload_bytes
@@ -8115,7 +8067,7 @@ def _prepare_scan_launch(paths, *, phase, plan, profiles, read_limits, deadline_
         raise ValueError("reader profiles and bases require exact coverage")
     if _ordinary_occurrence_v1 is None:
         if readers:
-            roles = {row.command_index: _rp5a_consumer_role_v1(row.argv, paths.repo_root) for row in plan}
+            roles = {row.command_index: _ordinary_selected_rp5a_role_v1(_LINUX_PREFLIGHT_PROCESS_V1.get(),row) for row in plan}
             if (set(readers) != {i for i, role in roles.items() if role is not None}
                     or set(profiles) != {i for i, role in roles.items() if role == "SCANNER"}):
                 raise ValueError("reader/scanner profiles differ from original role-derived coverage")
@@ -8127,7 +8079,7 @@ def _prepare_scan_launch(paths, *, phase, plan, profiles, read_limits, deadline_
         actual = scope._ordinary_rp5a_material_v1(record)
         context = scope._ordinary_rp5a_source_context_v1()
         entry = record['entry']
-        role = _rp5a_consumer_role_v1(entry.argv, paths.repo_root)
+        role = _ordinary_selected_rp5a_role_v1(scope,entry)
         if (actual is not frozen or context['paths'] is not paths or context['plan'] is not plan
                 or entry is not plan[entry.command_index - 1] or entry.phase != phase
                 or read_limits is not context['rows'][str(entry.command_index)]['read_limits']
@@ -10616,7 +10568,7 @@ class _ScanLaunchInput:
                 or self.identity != _ScanLaunchIdentity(paths.run_id, phase,
                     self.identity.command_index, len(plan), plan[self.identity.command_index - 1].argv,
                     str(paths.repo_root))
-                or _rp5a_consumer_role_v1(self.identity.argv, paths.repo_root) is None
+                or _ordinary_selected_rp5a_role_v1(_LINUX_PREFLIGHT_PROCESS_V1.get(),plan[self.identity.command_index-1]) is None
                 or type(self.deadline_ns) is not int
                 or self.scratch_root == paths.process_root
                 or not self.scratch_root.is_relative_to(paths.process_root)
@@ -11137,7 +11089,9 @@ def _read_rp5a_bound_launch_fd_v1(fd, *, repo_root, environment, explicit_basete
     outer_identity = _ScanLaunchIdentity(attestation.run_id, lowered["QTT_SCAN_PHASE"],
         reader.command_index, int(lowered["QTT_SCAN_COMMAND_COUNT"]), tuple(original_argv), str(repo_root))
     if expected_parent_identity is None:
-        if _rp5a_consumer_role_v1(tuple(original_argv), repo_root) != expected_role:
+        if (_rp5a_consumer_role_v1(tuple(original_argv), repo_root)
+            if attestation._scan_snapshot._ordinary_rp5a_controls_v1 is None else
+            _ordinary_rp5a_role_from_controls_v1(attestation._scan_snapshot._ordinary_rp5a_controls_v1,outer_identity)) != expected_role:
             raise ValueError("RP5A role differs from actual original entry")
         identity = outer_identity
     else:
@@ -11146,7 +11100,9 @@ def _read_rp5a_bound_launch_fd_v1(fd, *, repo_root, environment, explicit_basete
                 or (parent.run_id, parent.phase, parent.command_index, parent.command_count, parent.repo_root)
                 != (outer_identity.run_id, outer_identity.phase, outer_identity.command_index,
                     outer_identity.command_count, outer_identity.repo_root)
-                or _rp5a_consumer_role_v1(parent.argv, repo_root) != "PYTEST"):
+                or (_rp5a_consumer_role_v1(parent.argv, repo_root)
+                    if attestation._scan_snapshot._ordinary_rp5a_controls_v1 is None else
+                    _ordinary_rp5a_role_from_controls_v1(attestation._scan_snapshot._ordinary_rp5a_controls_v1,parent)) != "PYTEST"):
             raise ValueError("invalid independently bound original pytest parent")
         identity = _ScanLaunchIdentity(attestation.run_id, "nested-pytest", 1, 1, tuple(original_argv), str(repo_root))
     if (scanner is not None) != (expected_role == "SCANNER"):
@@ -11263,66 +11219,8 @@ def _mapper_chain_v1(path, observe=os.lstat):
 
 def _mapper_profile_v1(profile):
     """Validate representation, not acceptance. Every resource operand is explicit."""
-    fields = {'kind', 'position', 'generation', 'root', 'root_chain', 'basis',
-              'basis_chain', 'basis_lstat', 'basis_fstat', 'entries', 'limits',
-              'chunk_bytes', 'deadline_ns'}
-    _mapper_need_v1(type(profile) is dict and set(profile) == fields, 'BASIS_PROFILE_FIELDS')
-    _mapper_need_v1(profile['kind'] == 'MAPPER_DISK_BASIS_V1', 'BASIS_PROFILE_KIND')
-    _mapper_need_v1(type(profile['position']) is int and profile['position'] in tuple(row[0] for row in _REPORT_READ_ROUTES_V1), 'BASIS_POSITION')
-    _mapper_need_v1(type(profile['generation']) is str and bool(profile['generation']), 'BASIS_GENERATION')
-    root = _mapper_absolute_v1(profile['root']); basis = _mapper_absolute_v1(profile['basis'])
-    _mapper_need_v1(not basis.is_relative_to(root) and not root.is_relative_to(basis.parent), 'BASIS_ROOT_OVERLAP')
-    _mapper_int_v1(profile['chunk_bytes'], 'chunk', positive=True)
-    _mapper_int_v1(profile['deadline_ns'], 'deadline', positive=True)
-    limits = profile['limits']
-    _mapper_need_v1(type(limits) is dict and set(limits) == {'attempts', 'target_bytes', 'basis_bytes', 'metadata_calls', 'single_target_buffer'}, 'BASIS_LIMIT_FIELDS')
-    for name, value in limits.items(): _mapper_int_v1(value, name)
-    def stamp(value, n):
-        _mapper_need_v1(type(value) is list and len(value) == n and all(type(x) is int for x in value), 'BASIS_STAMP_FIELDS')
-        _mapper_need_v1(value[0] >= 0 and value[1] > 0 and value[2] >= 0, 'BASIS_STAMP_IDENTITY')
-        if n == 7:
-            _mapper_need_v1(value[3] >= 0 and value[5] == 1 and stat.S_ISREG(value[2]), 'BASIS_STAMP_FILE')
-        else: _mapper_need_v1(stat.S_ISDIR(value[2]), 'BASIS_STAMP_DIRECTORY')
-    for name, path in (('root_chain', root), ('basis_chain', basis.parent)):
-        expected = [str(p) for p in (*reversed(path.parents), path)]
-        chain = profile[name]
-        _mapper_need_v1(type(chain) is list and len(chain) == len(expected), 'BASIS_CHAIN_FIELDS')
-        for row, wanted in zip(chain, expected):
-            _mapper_need_v1(type(row) is list and len(row) == 2 and row[0] == wanted, 'BASIS_CHAIN_PATH')
-            stamp(row[1], 3)
-    stamp(profile['basis_lstat'], 7); stamp(profile['basis_fstat'], 7)
-    _mapper_need_v1(profile['basis_lstat'][:6] == profile['basis_fstat'][:6], 'BASIS_CROSS_API_IDENTITY')
-    entries = profile['entries']; _mapper_need_v1(type(entries) is list and bool(entries), 'BASIS_ENTRIES')
-    names = set(); identities = set(); end = attempts = target = reference = 0
-    for row in entries:
-        _mapper_need_v1(type(row) is dict and set(row) == {'path', 'offset', 'length', 'attempt_limit', 'lstat', 'fstat', 'parent_chain'}, 'BASIS_ENTRY_FIELDS')
-        name = row['path']; _mapper_portable_relative_v1(name)
-        _mapper_need_v1(name.casefold() not in names, 'BASIS_ALIAS_SPELLING'); names.add(name.casefold())
-        for field in ('offset', 'length', 'attempt_limit'):
-            _mapper_int_v1(row[field], field, positive=field == 'attempt_limit')
-        _mapper_need_v1(row['offset'] == end, 'BASIS_NONCONTIGUOUS_SEGMENT')
-        end = _mapper_add_v1(end, row['length'])
-        stamp(row['lstat'], 7); stamp(row['fstat'], 7)
-        _mapper_need_v1(row['lstat'][:6] == row['fstat'][:6] and row['lstat'][3] == row['length'], 'BASIS_ENTRY_IDENTITY')
-        identity = tuple(row['lstat'][:2]); _mapper_need_v1(identity not in identities, 'BASIS_PHYSICAL_ALIAS'); identities.add(identity)
-        parent = root.joinpath(*name.split('/')).parent
-        expected_chain = [str(p) for p in (*reversed(parent.parents), parent)]
-        chain = row['parent_chain']; _mapper_need_v1(type(chain) is list and len(chain) == len(expected_chain), 'BASIS_ENTRY_PARENT_CHAIN')
-        for pair, wanted in zip(chain, expected_chain):
-            _mapper_need_v1(type(pair) is list and len(pair) == 2 and pair[0] == wanted, 'BASIS_ENTRY_PARENT_PATH')
-            stamp(pair[1], 3)
-        _mapper_need_v1(chain[:len(profile['root_chain'])] == profile['root_chain'], 'BASIS_ENTRY_ROOT_DRIFT')
-        attempts = _mapper_add_v1(attempts, row['attempt_limit'])
-        # Overflow is checked before addition even though Python integers grow.
-        t = row['attempt_limit'] * _mapper_add_v1(row['length'], 1)
-        b = row['attempt_limit'] * row['length']
-        target = _mapper_add_v1(target, t); reference = _mapper_add_v1(reference, b)
-    _mapper_need_v1(end == profile['basis_lstat'][3], 'BASIS_FINAL_EXTENT')
-    _mapper_need_v1(tuple(profile['basis_lstat'][:2]) not in identities, 'BASIS_ALIASES_INPUT')
-    _mapper_need_v1(limits['attempts'] <= attempts and limits['target_bytes'] <= target and limits['basis_bytes'] <= reference, 'BASIS_EXCESS_UNUSED_ALLOCATION')
-    return {'unique_files': len(entries), 'basis_extent': end, 'attempt_envelope': attempts,
-            'target_byte_reservation_envelope': target, 'basis_byte_reservation_envelope': reference,
-            'is_authentic_resource_grant': False}
+    from tools.ci_branch_context import _mapper_profile_v1 as _mapper_profile_impl_v1
+    return _mapper_profile_impl_v1(profile)
 
 def _mapper_error_contains_v1(outer, inner):
     return outer is inner or isinstance(outer, BaseExceptionGroup) and any(
@@ -12768,7 +12666,7 @@ def _ordinary_rp5a_table_projection_v1(table, *, run_id, phase, command_count, r
  return output
 
 
-def _ordinary_rp5a_control_projection_v1(value, row, *, identity):
+def _ordinary_rp5a_control_projection_v1(value, row, *, identity, _original_registered_mapping_v1=None):
  fields = {'run_id', 'phase', 'command_index', 'command_count', 'argv', 'repo_root',
   'role', 'wire_version', 'payload_byte_count', 'file_sizes', 'control_bytes',
   'frame_extent', 'candidate_generation'}
@@ -12780,7 +12678,8 @@ def _ordinary_rp5a_control_projection_v1(value, row, *, identity):
    or type(value['command_index']) is not int or type(value['command_count']) is not int
    or type(value['wire_version']) is not int or value['wire_version'] != row['wire_version']
    or value['role'] != row['role']
-   or _rp5a_consumer_role_v1(identity.argv, Path(identity.repo_root)) != row['role']):
+   or (_rp5a_consumer_role_v1(identity.argv, Path(identity.repo_root)) if _original_registered_mapping_v1 is None
+    else _ordinary_rp5a_registered_mapping_check_v1(_original_registered_mapping_v1,identity,row)) != row['role']):
   raise ValueError('ORDINARY_R_ACTUAL_NATIVE_CONTROL_IDENTITY')
  for name in ('payload_byte_count', 'control_bytes', 'frame_extent', 'candidate_generation'):
   _scan_v3_integer(value[name], 'actual ordinary ' + name)
@@ -12873,7 +12772,6 @@ def _ordinary_rp5a_profiles_from_run_v1(attestation, value, *, command_index,
    or type(binding['pid']) is not int or binding['pid'] <= 0
    or type(binding['start']) is not int or binding['start'] <= 0
    or type(binding['argv']) is not list or any(type(part) is not str for part in binding['argv'])
-   or tuple(binding['argv']) != row['argv']
    or type(binding['mappings']) is not dict or str(repo_root) not in binding['mappings']
    or type(binding['environment']) is not dict
    or not all(type(key) is str and type(part) is str and environment.get(key) == part
@@ -12908,14 +12806,17 @@ def _ordinary_rp5a_profiles_from_run_v1(attestation, value, *, command_index,
   raise ValueError('ORDINARY_R_NATIVE_RELEASE_OR_CONTROL_DEBT')
  identity = _ScanLaunchIdentity(inherited_run_id, value['phase'], command_index,
   value['command_count'], tuple(binding['argv']), str(repo_root))
- parsed = _ordinary_rp5a_control_projection_v1(binding['rp5a_launch'], row, identity=identity)
+ mapping = _ordinary_rp5a_registered_mapping_v1(io,row,binding,release,
+  runtime=runtime,repo_root=repo_root,command_index=command_index,attestation=attestation)
+ parsed = _ordinary_rp5a_control_projection_v1(binding['rp5a_launch'], row, identity=identity,
+  _original_registered_mapping_v1=mapping)
  if (read_limits != _ScanRunReadLimits(**row['read_limits'])
    or deadline_ns > row['deadline_ns'] or attestation.process_root != Path(environment[PROCESS_ROOT_ENV])):
   raise ValueError('ORDINARY_R_ORIGINAL_FORWARDING_LIMITS')
  controls = dict(io=io, binding=binding, release=release,
   binding_version=bv, release_version=rv, binding_chain=bc, release_chain=rc,
   identity=identity, row=row, parsed=parsed, self_native=(os.getpid(), int(parts[19]), int(parts[1])),
-  name=name, cgroup=cgroup, control=control, runtime=runtime)
+  name=name, cgroup=cgroup, control=control, runtime=runtime,registered_mapping=mapping)
  controls['original'] = (
   controls, attestation, io, identity, row, parsed,
   _preflight_canonical_v1(binding), _preflight_canonical_v1(release), bv, rv, bc, rc)
@@ -13306,7 +13207,9 @@ def _ordinary_rp5a_protection_bind_v1(fence, receiver):
  _preflight_require_v1(type(receiver) is dict and receiver['original'][0] is receiver
   and receiver['original'][1] is receiver['io'] and receiver['joined']
   and receiver['parent_identity'] is None and receiver['scanner'] is not None
-  and _rp5a_consumer_role_v1(receiver['identity'].argv, fence.root) == 'SCANNER'
+  and (_rp5a_consumer_role_v1(receiver['identity'].argv, fence.root)
+   if 'original_controls' not in receiver else _ordinary_rp5a_role_from_controls_v1(
+    receiver['original_controls'],receiver['identity'])) == 'SCANNER'
   and fence._ordinary_rp5a_receiver_v1 is receiver
   and fence.payload_lease.initial_consumption_complete and not fence.held
   and (fence.process_id, fence.thread_id) == receiver['io']['owner']
@@ -13535,7 +13438,7 @@ def _ordinary_rp5a_receiver_from_controls_v1(identity, reader, scanner, basis, *
  _preflight_require_v1(reader is selected_reader and scanner is selected_scanner and basis is selected_basis
   and expected == controls['identity']
   and tuple(binding['argv']) == expected.argv
-  and _rp5a_consumer_role_v1(expected.argv, Path(expected.repo_root)) == controls['row']['role']
+  and _ordinary_rp5a_role_from_controls_v1(controls,expected) == controls['row']['role']
   and all(type(key) is str and type(value) is str and environment.get(key) == value
    for key, value in binding['environment'].items())
   and environment.get('QTT_LINUX_PREFLIGHT_CONTROL') == str(controls['control'])
@@ -13557,7 +13460,7 @@ def _ordinary_rp5a_receiver_from_controls_v1(identity, reader, scanner, basis, *
   release_version=controls['release_version'], binding_chain=controls['binding_chain'],
   release_chain=controls['release_chain'], self_native=controls['self_native'],
   name=controls['name'], cgroup=controls['cgroup'], ledgers=[], native_tokens=[],
-  errors=io['errors'], joined=False, foreign_parent=None)
+  errors=io['errors'], joined=False, foreign_parent=None,original_controls=controls)
  receiver['original'] = (receiver, io, identity, reader, scanner, basis, profiles, parent_identity,
   receiver['control'], receiver['runtime'], receiver['ledgers'], receiver['native_tokens'], receiver['errors'])
  io['rp5a_receiver'] = receiver
@@ -20309,6 +20212,15 @@ def _ordinary_source_operand_v1(scope, record, relative, *, source_byte_limit, s
   and source.pid == scope.query.pid == os.getpid()
   and source.thread == scope.query.thread == threading.get_ident(),
   'ORDINARY_SHARED_SOURCE_OPERAND_LIVE_SEAL')
+ bounded_source = source_form == 'PYTHON' and (type(getattr(scope, '_ordinary_controller_data_initialization_v1', None)) is dict and scope._ordinary_controller_data_initialization_v1.get('bounded_production') is True)
+ if bounded_source:
+  from tools import ci_branch_context as _bounded_source
+  try: _bounded_source._ordinary_bounded_source_planning_prepare_v1(scope)
+  except BaseException as error:
+   record['errors'].append(error)
+   if not any(error is prior for prior in scope._ordinary_factory_errors_v1):
+    scope._ordinary_factory_errors_v1.append(error)
+   raise
  cache = getattr(scope, '_ordinary_source_operand_cache_v1', None)
  if cache is None:
   cache = {}
@@ -20328,6 +20240,8 @@ def _ordinary_source_operand_v1(scope, record, relative, *, source_byte_limit, s
    and observed['row'] is source.row_index[str(Path(source.root).joinpath(*relative.split('/')))]
    and observed['version'] == tuple(source.post[observed['row']['path']]),
    'ORDINARY_SHARED_SOURCE_OPERAND_REUSE_ORIGINAL_OBSERVATION')
+  if bounded_source:
+   _bounded_source._ordinary_bounded_source_module_check_v1(scope, value, observed)
   if not any(item is observed for item in record['source_operands']):
    record['source_operands'].append(observed)
   return value, observed
@@ -20337,6 +20251,16 @@ def _ordinary_source_operand_v1(scope, record, relative, *, source_byte_limit, s
   and str(path) in source.files and str(path) in source.post
   and type(row['logical_bytes']) is int and 0 <= row['logical_bytes'] <= source_byte_limit,
   'ORDINARY_SHARED_SOURCE_OPERAND_AUTHENTIC_SELECTED_PATH')
+ capture_plan = None
+ if bounded_source:
+  try:
+   capture_plan = _bounded_source._ordinary_bounded_source_capture_plan_v1(
+    scope, record, path, source_byte_limit, source_node_limit)
+  except BaseException as error:
+   record['errors'].append(error)
+   if not any(error is prior for prior in scope._ordinary_factory_errors_v1):
+    scope._ordinary_factory_errors_v1.append(error)
+   raise
  observed = dict(path=relative, row=row, version=tuple(source.post[str(path)]),
   source_form=source_form, attempted=True, raw_bytes=None, text=None,
   complete=False, error=None, nodes=None)
@@ -20345,7 +20269,12 @@ def _ordinary_source_operand_v1(scope, record, relative, *, source_byte_limit, s
   raw = source.read_administration(path, source_byte_limit)
   _preflight_require_v1(type(raw) is bytes and len(raw) == row['logical_bytes'],
    'ORDINARY_SHARED_SOURCE_OPERAND_COMPLETE_EXTENT')
+  if capture_plan is not None:
+   _preflight_require_v1(raw == capture_plan[3], 'CONTROL_BOUNDED_SOURCE_INDEPENDENT_COMPLETE_BASELINE')
   text = None if source_form == 'BINARY' else raw.decode('utf-8', 'strict')
+  if capture_plan is not None:
+   _preflight_require_v1(text == capture_plan[4], 'CONTROL_BOUNDED_SOURCE_COMPLETE_DECODE_EQUALITY')
+   text = capture_plan[4]
   if source_form == 'BINARY':
    value = raw
    nodes = 1
@@ -20369,6 +20298,8 @@ def _ordinary_source_operand_v1(scope, record, relative, *, source_byte_limit, s
     elif type(item) in (list, tuple):
      pending.extend(item)
   observed.update(raw_bytes=len(raw), text=text, complete=True, nodes=nodes)
+  if capture_plan is not None:
+   _bounded_source._ordinary_bounded_source_capture_publish_v1(scope, value, observed, capture_plan)
   cache[cache_key] = (value, observed)
   return value, observed
  except BaseException as error:
@@ -20386,9 +20317,9 @@ def _ordinary_native_source_programme_check_v1(scope, record):
 
 def _ordinary_native_source_programme_v1(scope, bound_row, source_operands, call_grammar,
   *, cohorts, bootstrap_fd_demand, application_fd_demand, nofile,
-  stdout_minimum=0, stderr_minimum=0, uses_git=False, pycache_operand=None):
+  stdout_minimum=0, stderr_minimum=0, uses_git=False, pycache_operand=None, operational_operand=None):
  from tools.validation_scope_registry import _facet_fn_native_source_programme_v1 as _d
- return _d(scope, bound_row, source_operands, call_grammar, cohorts=cohorts, bootstrap_fd_demand=bootstrap_fd_demand, application_fd_demand=application_fd_demand, nofile=nofile, stdout_minimum=stdout_minimum, stderr_minimum=stderr_minimum, uses_git=uses_git, pycache_operand=pycache_operand)
+ return _d(scope, bound_row, source_operands, call_grammar, cohorts=cohorts, bootstrap_fd_demand=bootstrap_fd_demand, application_fd_demand=application_fd_demand, nofile=nofile, stdout_minimum=stdout_minimum, stderr_minimum=stderr_minimum, uses_git=uses_git, pycache_operand=pycache_operand, operational_operand=operational_operand)
 
 
 def _ordinary_selected_transport_environment_v1(scope, entry, environment):
@@ -20936,6 +20867,11 @@ def _ordinary_control_frame_demands_v1(scope, source_product, operation_rows, *,
 
 def _ordinary_control_installation_binding_check_v1(scope, record, source_product,
   operation_rows, interpreter_storage_request):
+ attempt=getattr(scope,'_ordinary_controller_data_initialization_v1',None)
+ if (type(attempt)is dict and attempt.get('bounded_production')is True
+  and operation_rows is None and interpreter_storage_request is None):
+  from tools.ci_branch_context import _ordinary_bounded_control_installation_check_v1 as _bounded
+  return _bounded(scope,record,source_product)
  from tools.validation_scope_registry import _facet_fn_control_installation_binding_check_v1 as _d
  return _d(scope, record, source_product, operation_rows, interpreter_storage_request)
 
@@ -21121,6 +21057,16 @@ def _ordinary_pytest_installation_source_v1(scope, record, suffix, *, source_byt
  _preflight_require_v1(type(cache) is dict and cache is record['original_installation_operand_cache']
   and (suffix, source_form) not in cache,
   'ORDINARY_PYTEST_INSTALLATION_ONE_ORIGINAL_CAPTURE')
+ capture_plan = None
+ if source_form == 'INSTALLATION_PYTHON' and (type(getattr(scope, '_ordinary_controller_data_initialization_v1', None)) is dict and scope._ordinary_controller_data_initialization_v1.get('bounded_production') is True):
+  from tools import ci_branch_context as _bounded_source
+  try:
+   capture_plan = _bounded_source._ordinary_bounded_source_capture_plan_v1(
+    scope, record, target, source_byte_limit, source_node_limit, baseline=expected)
+  except BaseException as error:
+   for owner_errors in (record['errors'], installation['errors'], scope._ordinary_factory_errors_v1):
+    if all(error is not prior for prior in owner_errors): owner_errors.append(error)
+   raise
  capturer = _ordinary_pytest_installation_source_v1
  observed = dict(path=suffix, source_form=source_form, installation=installation,
   install=install, row=row, target=target, version=version, raw=expected,
@@ -21177,11 +21123,16 @@ def _ordinary_pytest_installation_source_v1(scope, record, suffix, *, source_byt
    scope._ordinary_factory_call_v1(os.lstat, target))) == version,
    'ORDINARY_PYTEST_INSTALLATION_AFTER_CLOSE_PATH_VERSION')
   text = expected.decode('utf-8', 'strict')
+  if capture_plan is not None:
+   _preflight_require_v1(text == capture_plan[4], 'CONTROL_BOUNDED_SOURCE_COMPLETE_INSTALLED_DECODE_EQUALITY')
+   text = capture_plan[4]
   tree = ast.parse(text, filename=str(target)) if source_form == 'INSTALLATION_PYTHON' else None
   nodes = sum(1 for value in ast.walk(tree)) if tree is not None else 0
   _preflight_require_v1(nodes <= source_node_limit,
    'ORDINARY_PYTEST_INSTALLATION_LITERAL_AST_ALLOWANCE')
   observed.update(text=text, nodes=nodes, complete=True)
+  if capture_plan is not None:
+   _bounded_source._ordinary_bounded_source_capture_publish_v1(scope, tree, observed, capture_plan)
   observed['original'] = (observed, scope, installation, install, row, target, version,
    expected, text, nodes, observed['raw_bytes'])
   observed['capture_original'] = (observed, record, scope, capturer, capturer.__code__,
@@ -21189,8 +21140,8 @@ def _ordinary_pytest_installation_source_v1(scope, record, suffix, *, source_byt
   cache[(suffix, source_form)] = (tree, observed)
   record['raw_bytes'] += observed['raw_bytes']
   record['nodes'] += nodes
-  _preflight_require_v1(record['raw_bytes'] <= record['source_byte_limit']
-   and record['nodes'] <= record['source_node_limit'],
+  _preflight_require_v1(_ordinary_bounded_source_aggregate_check_v1(
+   scope, record, record['source_byte_limit'], record['source_node_limit']),
    'ORDINARY_PYTEST_GRAPH_CUMULATIVE_SOURCE_AND_AST_ALLOWANCE')
  except BaseException as error:
   observed['error'] = error
@@ -25614,8 +25565,10 @@ print(json.dumps(probe),flush=True)
      paths = context['paths']
      child.update({RUN_ID_ENV: paths.run_id, EVIDENCE_ROOT_ENV: str(paths.evidence_root),
       PROCESS_ROOT_ENV: str(paths.process_root)})
+     from tools.ci_branch_context import _ordinary_st12h_selected_environment_v1
+     child = _ordinary_st12h_selected_environment_v1(self, entry, child, context)
      if row is None:
-      _preflight_require_v1(_rp5a_consumer_role_v1(entry.argv, context['paths'].repo_root) is None,
+      _preflight_require_v1(_ordinary_selected_rp5a_role_v1(self,entry) is None,
        'ORDINARY_R_NO_UNSELECTED_DOMAIN_ROLE')
       return child
      limits = row['read_limits']
@@ -25628,7 +25581,7 @@ print(json.dumps(probe),flush=True)
      self.check()
      record = self._ordinary_occurrence_record_v1(record['entry'])
      entry = record['entry']
-     if _rp5a_consumer_role_v1(record['argv'], Path(record['cwd'])) is None:
+     if _ordinary_selected_rp5a_role_v1(self,record['entry']) is None:
       return None
      context = self._ordinary_rp5a_source_context_v1()
      key = str(entry.command_index)
@@ -25718,7 +25671,7 @@ print(json.dumps(probe),flush=True)
      _preflight_require_v1(type(record) is dict and record is
       self._ordinary_occurrence_record_v1(record['entry']),
       'ORDINARY_R_ORIGINAL_NATIVE_RECORD_BEFORE_ROLE_SELECTION')
-     role = _rp5a_consumer_role_v1(record['argv'], Path(record['cwd']))
+     role = _ordinary_selected_rp5a_role_v1(self,record['entry'])
      if role is None:
       _preflight_require_v1(not any(name in record for name in
        ('rp5a_material', 'rp5a_input', 'rp5a_launch')),
@@ -27363,7 +27316,8 @@ print(json.dumps(probe),flush=True)
      self._ordinary_run_cleanup_v1 = self._ordinary_original_run_cleanup_v1 = record
      try:
       _ordinary_run_scratch_roots_check_v1(self, scratch, settling=True)
-      record['v_output'] = self._ordinary_run_output_cleanup_ready_v1(paths)
+      from tools.ci_branch_context import _ordinary_selected_v_directory_cleanup_join_v1
+      record['v_output'] = _ordinary_selected_v_directory_cleanup_join_v1(self,paths)
       record['original_v_output'] = record['v_output']
       record['nested_evidence'] = self._ordinary_nested_cleanup_ready_v1(paths,supervision)
       for operand in scratch['operands']:
@@ -29014,7 +28968,7 @@ print(json.dumps(probe),flush=True)
         + '/**" rwk,',) if (cache := _ordinary_optional_compile_cache_v1(self)) is not None
         and row['entry'] is cache['programme']['entry'] else ()),
        '}', ''))
-      if _rp5a_consumer_role_v1(row['argv'], Path(self.repository)) is not None:
+      if _ordinary_selected_rp5a_role_v1(self,row['entry']) is not None:
        del lines[-2:]
        lines.extend(('  ptrace (readby) peer="' + self.name + 'controller",', '}', ''))
       writable, effect_rules = self._ordinary_effect_native_exposure_v1(row['entry'])
@@ -29026,11 +28980,13 @@ print(json.dumps(probe),flush=True)
         lines.append('  ' + (path[:-1] + '/" rw,' if kind == 'DIRECTORY' else path + ' rwk,'))
        lines.extend(('}', ''))
       if getattr(self, '_ordinary_effect_programme_v1', None) is not None:
-       v_rules = self._ordinary_run_output_policy_v1(row['entry'])
+       from tools.ci_branch_context import _ordinary_selected_v_directory_policy_v1
+       v_rules = self._ordinary_run_output_policy_v1(row['entry'])+_ordinary_selected_v_directory_policy_v1(self,row['entry'])
        if v_rules:
         del lines[-2:]
         lines.extend('  ' + (quoted(path)[:-1] + '/" r,'
-         if permission == 'DIRECTORY_READ' else quoted(path) + ' ' + permission + ',')
+         if permission == 'DIRECTORY_READ' else quoted(path)[:-1]+'/" rw,'
+          if permission == 'DIRECTORY_WRITE' else quoted(path) + ' ' + permission + ',')
          for path, permission in v_rules)
         lines.extend(('}', ''))
      source = ('\n'.join(lines) + '\n').encode('ascii')
@@ -29528,11 +29484,16 @@ print(json.dumps(probe),flush=True)
 
     def _ordinary_run_output_namespace_targets_v1(self):
      record = _ordinary_run_output_recipe_check_v1(self)
-     return () if record is None else tuple((str(row['path']), 'FILE') for row in record['rows'])
+     from tools.ci_branch_context import _ordinary_selected_v_directory_record_v1
+     directory=_ordinary_selected_v_directory_record_v1(self)
+     return (() if record is None else tuple((str(row['path']), 'FILE')for row in record['rows']))+(
+      ()if directory is None else((str(directory['logical']),'DIRECTORY'),))
 
     def _ordinary_run_output_namespace_programme_v1(self, base, known_targets):
      record = _ordinary_run_output_recipe_check_v1(self)
-     if record is None or not record['rows']:
+     from tools.ci_branch_context import _ordinary_selected_v_directory_record_v1
+     directory=_ordinary_selected_v_directory_record_v1(self)
+     if record is None or not record['rows'] and directory is None:
       return base
      _preflight_require_v1(base is self._ordinary_resource_programme_v1['namespace_programme']
       and base['original'] == (base, base['known_targets'], base['directory_paths'],
@@ -29563,7 +29524,7 @@ print(json.dumps(probe),flush=True)
        directories.add('/' + '/'.join(parts[:index]))
       if kind == 'FILE': files.add(value)
      _preflight_require_v1(not (directories & files)
-      and len(files) == 1 + len(record['rows']),
+      and len(files) == 1 + sum(kind=='FILE'for _,kind in self._ordinary_run_output_namespace_targets_v1()),
       'ORDINARY_V_EXACT_FILE_MOUNT_TARGET_PARTITION')
      extra_dirs = base['reserved_directory_count'] - len(base['directory_paths']) - 64 - 1
      extra_files = base['reserved_file_count'] - len(base['file_paths'])
@@ -30463,6 +30424,9 @@ print(json.dumps(probe),flush=True)
      if getattr(self, '_ordinary_effect_programme_v1', None) is not None:
       v_readonly, v_writable, _ = self._ordinary_run_output_exposure_v1(record['entry'])
       bindings += v_readonly
+      from tools.ci_branch_context import _ordinary_selected_v_directory_exposure_v1
+      directory_readonly,directory_writable,_=_ordinary_selected_v_directory_exposure_v1(self,record['entry'])
+      bindings+=directory_readonly;v_writable+=directory_writable
      for physical, logical in bindings:
       _linux_preflight_path_v1(physical); _linux_preflight_path_v1(logical)
      writable = ((str(runtime), str(runtime)),)
@@ -30555,6 +30519,8 @@ print(json.dumps(probe),flush=True)
      try:
       if getattr(self, '_ordinary_effect_programme_v1', None) is not None:
        self._ordinary_run_output_prepare_occurrence_v1(record)
+       from tools.ci_branch_context import _ordinary_selected_v_directory_prepare_v1
+       _ordinary_selected_v_directory_prepare_v1(self,record)
       requested_launch = self._ordinary_service_argv_v1(record)
       loader = self._ordinary_host_preparation_v1['prlimit']
       launch = (str(loader['path']), '--nofile=64:64', '--', *requested_launch)
@@ -30692,6 +30658,8 @@ print(json.dumps(probe),flush=True)
      self._ordinary_nested_handoff_v1(record,root_fd=root_fd,mounts=mounts,credentials=credentials)
      if getattr(self, '_ordinary_effect_programme_v1', None) is not None:
       self._ordinary_run_output_handoff_v1(record, root_fd, mounts, credentials)
+      from tools.ci_branch_context import _ordinary_selected_v_directory_handoff_v1
+      _ordinary_selected_v_directory_handoff_v1(self,record,root_fd,mounts,credentials)
      cache = _ordinary_optional_compile_cache_v1(self)
      if cache is not None and record['entry'] is cache['programme']['entry']:
       self._ordinary_cache_mapping_v1(record, root_fd, mounts, credentials)
@@ -30842,7 +30810,8 @@ print(json.dumps(probe),flush=True)
       and all(value.get('eof_observed') is True for value in outcomes)
       and process.stdout.closed and process.stderr.closed, 'ORDINARY_ACTUAL_STREAM_EOF_AND_CLOSE')
      handoff = self._ordinary_rp5a_terminal_handback_v1(record)
-     v_handoff = (self._ordinary_run_output_finish_v1(record)
+     from tools.ci_branch_context import _ordinary_selected_v_directory_finish_join_v1
+     v_handoff = (_ordinary_selected_v_directory_finish_join_v1(self,record)
       if getattr(self, '_ordinary_effect_programme_v1', None) is not None else None)
      if record['terminal'] is None:
       record['terminal'] = dict(record=record, process=process, launcher=record['launcher'],
@@ -38008,3 +37977,38 @@ def _ordinary_control_current_parser_request_v1(layout, raw, profile):
  # original source lines, never a list of all masked Source text copies.
  retained = tuple(name for name, value in converted)
  return rows, retained
+
+def _ordinary_selected_registered_argv_v1(scope, entry):
+ from tools.ci_branch_context import _ordinary_selected_registered_argv_v1 as d
+ return d(scope,entry)
+
+def _ordinary_selected_rp5a_role_v1(scope, entry):
+ from tools.ci_branch_context import _ordinary_selected_rp5a_role_v1 as d
+ return d(scope,entry)
+
+def _ordinary_rp5a_registered_mapping_v1(io, row, binding, release, *, runtime, repo_root, command_index, attestation):
+ from tools.ci_branch_context import _ordinary_rp5a_registered_mapping_v1 as d
+ return d(io,row,binding,release,runtime=runtime,repo_root=repo_root,command_index=command_index,attestation=attestation)
+
+def _ordinary_rp5a_registered_mapping_check_v1(record, identity, row):
+ from tools.ci_branch_context import _ordinary_rp5a_registered_mapping_check_v1 as d
+ return d(record,identity,row)
+
+def _ordinary_rp5a_role_from_controls_v1(controls, identity):
+ from tools.ci_branch_context import _ordinary_rp5a_role_from_controls_v1 as d
+ return d(controls,identity)
+
+
+def _ordinary_bounded_source_module_check_v1(scope, tree, observed):
+ from tools.ci_branch_context import _ordinary_bounded_source_module_check_v1 as _d
+ return _d(scope, tree, observed)
+
+
+def _ordinary_bounded_source_aggregate_check_v1(scope, record, byte_limit, node_limit):
+ from tools.ci_branch_context import _ordinary_bounded_source_aggregate_check_v1 as _d
+ return _d(scope, record, byte_limit, node_limit)
+
+
+def _ordinary_bounded_source_protected_module_v1(scope, relative, byte_limit, node_limit):
+ from tools.ci_branch_context import _ordinary_bounded_source_protected_module_v1 as _d
+ return _d(scope, relative, byte_limit, node_limit)

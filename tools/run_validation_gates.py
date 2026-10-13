@@ -13834,7 +13834,7 @@ def _ordinary_rp5a_publication_programme_v1(paths, phase, plan):
  if type(scope) is not owner._LinuxPreflightScopeV1 or not scope._ordinary_selected_v1():
   return None
  selected = {row.command_index for row in plan
-  if owner._rp5a_consumer_role_v1(row.argv, paths.repo_root) is not None}
+  if owner._ordinary_selected_rp5a_role_v1(scope,row) is not None}
  if not selected:
   return None
  context = scope._ordinary_rp5a_source_context_v1()
@@ -13850,8 +13850,8 @@ def _scan_resolve_parent_capacity(paths, phase, plan):
     from tools.validation_reliability import _ScanLaunch
 
     global _SCAN_CAPACITY_ATTEMPTED, _ACTIVE_SCAN_LAUNCH, _RUN_COMMANDS_SUPERVISION
-    from tools.validation_reliability import _rp5a_consumer_role_v1
-    roles = {row.command_index: _rp5a_consumer_role_v1(row.argv, paths.repo_root) for row in plan}
+    from tools.validation_reliability import _ordinary_selected_rp5a_role_v1, _LINUX_PREFLIGHT_PROCESS_V1
+    roles = {row.command_index: _ordinary_selected_rp5a_role_v1(_LINUX_PREFLIGHT_PROCESS_V1.get(),row) for row in plan}
     selected = {index for index, role in roles.items() if role is not None}
     scanners = {index for index, role in roles.items() if role == "SCANNER"}
     if not selected:
@@ -13887,9 +13887,9 @@ def _scan_resolve_parent_capacity(paths, phase, plan):
             original_inputs = getattr(launch, "_original_launch_inputs_v1", None)
             if type(original_inputs) is not MappingProxyType:
                 raise ValueError("capacity source lost original launch/container association")
-            # A known ordinary issuer-owned mapping can be observed without
-            # invoking caller callbacks. Retain its actual input references
-            # before rejecting any outer or current-container substitution.
+            # Observe issuer-owned mappings only.
+            # Keep input references without callbacks.
+            # Reject outer and container substitutions.
             for value in original_inputs.values():
                 if type(value) is _ScanLaunchInput and not any(
                         value is row["input"] for row in supervision["scan_input_records"]):
@@ -13961,12 +13961,12 @@ def _scan_resolve_parent_capacity(paths, phase, plan):
 
 
 def _scan_dispatch_environment(parent, planned):
-    from tools.validation_reliability import _SCAN_TRANSPORT_KEYS, _scan_child_launch_environment, _rp5a_consumer_role_v1
+    from tools.validation_reliability import _SCAN_TRANSPORT_KEYS, _scan_child_launch_environment, _ordinary_selected_rp5a_role_v1
 
     from tools.validation_reliability import _LINUX_PREFLIGHT_PROCESS_V1, _LinuxPreflightScopeV1
     scope = _LINUX_PREFLIGHT_PROCESS_V1.get()
     if type(scope) is _LinuxPreflightScopeV1 and scope._ordinary_selected_v1():
-        if _rp5a_consumer_role_v1(planned.argv, pathlib.Path(planned.cwd)) is not None:
+        if _ordinary_selected_rp5a_role_v1(scope,planned) is not None:
             return scope._ordinary_rp5a_environment_v1(planned, parent)
     if _ACTIVE_SCAN_LAUNCH is not None and planned.command_index in _ACTIVE_SCAN_LAUNCH.launch_inputs:
         return _scan_child_launch_environment(parent, launch=_ACTIVE_SCAN_LAUNCH, planned=planned)
@@ -14686,6 +14686,10 @@ def _ordinary_received_controller_run_v1(scope, host, bootstrap):
       compiler_heap = scope._ordinary_bootstrap_runtime_v1['acquisition']['heap_record']
       compiler_stage = None
       try:
+       from tools.ci_branch_context import _ordinary_bounded_bootstrap_stage_request_v1
+       _ordinary_bounded_bootstrap_stage_request_v1(actual_runner,
+        scope._ordinary_bootstrap_runtime_v1['acquisition'],'BEFORE_COMPILE',
+        (current_installation,current_installation['control_request_profile_original']))
        compiler_stage = actual_runner._ordinary_bootstrap_source_stage_v1(
         compiler_heap, 'BEFORE_COMPILE')
        record['control_source_stage'] = compiler_stage
@@ -14694,11 +14698,9 @@ def _ordinary_received_controller_run_v1(scope, host, bootstrap):
        record['control_module_inputs'] = module_inputs
        record['control_root_selections'] = owner._ordinary_control_initialized_selections_v1(
         scope, compiler_stage, module_inputs)
-       require(hasattr(scope, '_ordinary_control_source_inputs_v1'),
-        'CONTROL_AUTHENTIC_SOURCE_INPUT_PRODUCER_UNISSUED')
-       owner._ordinary_controller_data_source_initialize_v1(scope, resources,
-        scope._ordinary_control_source_inputs_v1,
-        _ordinary_source_stage_v1=compiler_stage)
+       from tools.ci_branch_context import _ordinary_bounded_controller_data_initialize_v1
+       _ordinary_bounded_controller_data_initialize_v1(scope,resources,module_inputs,
+        record['control_root_selections'],runtime_roles,compiler_stage)
        compiler_stage = None
       except BaseException as error:
        compiler_errors = [error]
@@ -15203,16 +15205,23 @@ def _ordinary_bootstrap_scope_v1(value, name, *, native_root, receiver=False):
  heap_stage = None
  try:
   query.check()
+  from tools.ci_branch_context import _ordinary_bounded_bootstrap_stage_request_v1
+  _ordinary_bounded_bootstrap_stage_request_v1(sys.modules[__name__],acquisition,
+   "BOOTSTRAP_EVENT_BASE64",value["event"])
   heap_stage = _ordinary_bootstrap_source_stage_v1(heap_record, "BOOTSTRAP_EVENT_BASE64")
   event_bytes = base64.b64decode(value["event"],validate=True)
   _ordinary_bootstrap_heap_stage_complete_v1(heap_record, heap_stage, event_bytes)
   heap_stage = None
+  _ordinary_bounded_bootstrap_stage_request_v1(sys.modules[__name__],acquisition,
+   "BOOTSTRAP_EVENT_JSON",value["event"])
   heap_stage = _ordinary_bootstrap_source_stage_v1(heap_record, "BOOTSTRAP_EVENT_JSON")
   _ordinary_bootstrap_runtime_anchors_v1(runtime_capture)
   _ordinary_stock_runtime_check_v1(runtime_capture["stock"])
   event = json.loads(event_bytes)
   _ordinary_bootstrap_heap_stage_complete_v1(heap_record, heap_stage, event)
   heap_stage = None
+  _ordinary_bounded_bootstrap_stage_request_v1(sys.modules[__name__],acquisition,
+   "BOOTSTRAP_SCOPE_CONSTRUCTION",(value,name,native_root))
   heap_stage = _ordinary_bootstrap_source_stage_v1(heap_record, "BOOTSTRAP_SCOPE_CONSTRUCTION")
   environment = dict(value["environment"])
   _ordinary_ci_eligibility_v1(event,environment,Path(value["repository"]),phase=value["phase"])
@@ -15723,6 +15732,8 @@ def _ordinary_linux_provision_v1(*, phase):
   "ORDINARY_TICKET_ACTUAL_ORIGINAL_EARLY_ACQUISITION_REQUIRED")
  _ordinary_bootstrap_runner_check_v1(acquisition)
  heap_record = acquisition["heap_record"]
+ from tools.ci_branch_context import _ordinary_bounded_bootstrap_prepare_v1
+ _ordinary_bounded_bootstrap_prepare_v1(sys.modules[__name__],acquisition,ticket,capture,uid)
  raw_product = acquisition.get("ticket_raw_source_product")
  ticket_product = acquisition.get("ticket_source_product")
  o._preflight_require_v1(type(raw_product) is dict and type(ticket_product) is dict,
@@ -17858,6 +17869,9 @@ def _ordinary_post_execution_argv_v1(registered, execution, *, command_index=Non
     and registered[2:]==('--repo-root','.')):
    owner._preflight_require_v1(execution==registered,'ORDINARY_SOURCE_FAMILY_COMPETING_EXECUTION')
    return owner._ordinary_readonly_source_family_execution_v1(scope,registered,command_index)
+  if command_index is not None and _RUN_COMMANDS_SUPERVISION['phase'] in (*DETERMINISTIC_VALIDATOR_SHARD_PHASES,FAST_PREFLIGHT_PHASE):
+   from tools.ci_branch_context import _ordinary_selected_operational_execution_v1
+   return _ordinary_selected_operational_execution_v1(scope,registered,execution,command_index)
   return execution
  diffs = (('git', 'diff', '--check'),
   ('git', 'diff', '--exit-code', '--',
@@ -19254,7 +19268,9 @@ def _ordinary_bootstrap_ticket_request_v1(acquisition, association):
      or type(x[0]) is not str or not x[0]
      or type(x[1]) is not int or x[1] <= 0 for x in fixed)
     or len({name for name, _ in fixed}) != len(fixed)
-    or not required.issubset({name for name, _ in fixed})):
+    or (not required.issubset({name for name, _ in fixed})
+     and not __import__("tools.ci_branch_context",fromlist=["_ordinary_bounded_bootstrap_source_check_v1"])._ordinary_bounded_bootstrap_source_check_v1(
+      sys.modules[__name__],acquisition,source_product,kind="decoder"))):
    raise ValueError("ORDINARY_TICKET_INDEPENDENT_FIXED_SOURCE_REQUEST")
   n = len(raw)
   strings = arrays = objects = keys = words = quoted = word_bytes = 0
@@ -19487,7 +19503,9 @@ def _ordinary_bootstrap_ticket_raw_request_v1(acquisition, association):
     or any(type(x) is not tuple or len(x) != 2 or type(x[0]) is not str
      or not x[0] or type(x[1]) is not int or x[1] <= 0 for x in fixed)
     or len({name for name, _ in fixed}) != len(fixed)
-    or not required.issubset({name for name, _ in fixed})):
+    or (not required.issubset({name for name, _ in fixed})
+     and not __import__('tools.ci_branch_context',fromlist=['_ordinary_bounded_bootstrap_source_check_v1'])._ordinary_bounded_bootstrap_source_check_v1(
+      sys.modules[__name__],acquisition,product,kind='raw'))):
    raise ValueError('ORDINARY_TICKET_RAW_POSITIVE_ORIGINAL_FIXED_SOURCE_REQUEST')
   sizes = layout['sizes']
   if (type(sizes) is not tuple or any(type(x) is not tuple or len(x) != 2
@@ -20118,243 +20136,8 @@ def _ordinary_bootstrap_runtime_issue_v1(native_product, heap_record, query_stag
 
 
 def _facet_fn_control_fixed_delegates_v1():
- import tools.validation_reliability as _f
- rel = 'tools.validation_reliability'
- run = 'tools.run_validation_gates'
- reg = 'tools.validation_scope_registry'
- inv = 'tools.validation_inventory'
- seal = '_LinuxImmutableSourceSealV2'
- gate = '_LinuxPreflightScopeV1'
- return (
-  (rel,'_ordinary_control_current_profile_bind_v1',rel,None),
-  (run,'_facet_fn_control_current_profile_bind_v1',rel,None),
-  (rel,'_ordinary_control_compiler_source_projection_v1',rel,None),
-  (reg,'_facet_fn_control_compiler_source_projection_v1',rel,None),
-  (rel,'_ordinary_control_current_staged_request_v1',rel,None),
-  (reg,'_facet_fn_control_current_staged_request_v1',rel,None),
-  (rel,'_ordinary_control_current_parser_request_v1',rel,None),
-  (rel,'_ordinary_control_python_ast_request_v1',rel,None),
-  ('tools.ci_branch_context','_facet_fn_control_python_ast_request_v1',rel,None),
-  (rel,'_ordinary_control_current_profile_literals_v1',rel,None),
-  (inv,'_facet_fn_control_current_profile_literals_v1',rel,None),
-  (inv,'_facet_fn_control_lexical_forward_activation_v1',rel,None),
-  (rel,'_LinuxImmutableSourceSealV2._check',rel,seal),
-  (rel,'_LinuxPreflightScopeV1._ordinary_source_data_allocator_projection_v1',rel,gate),
-  (rel,'_LinuxPreflightScopeV1._ordinary_source_data_construct_issued_v1',rel,gate),
-  (rel,'_LinuxPreflightScopeV1._ordinary_source_data_heap_issue_v1',rel,gate),
-  (rel,'_LinuxPreflightScopeV1._ordinary_source_data_live_credit_v1',rel,gate),
-  (rel,'_LinuxPreflightScopeV1._ordinary_source_data_managed_request_issue_v1',rel,gate),
-  (rel,'_LinuxPreflightScopeV1._ordinary_source_data_managed_request_v1',rel,gate),
-  (rel,'_LinuxPreflightScopeV1._ordinary_source_data_raw_binding_check_v1',rel,gate),
-  (rel,'_LinuxPreflightScopeV1._ordinary_source_data_raw_issue_v1',rel,gate),
-  (rel,'_LinuxPreflightScopeV1._ordinary_source_data_scan_v1',rel,gate),
-  (rel,'_LinuxPreflightScopeV1._ordinary_source_meter_projection_v1',rel,gate),
-  (rel,'_ordinary_control_bindings_check_v1',rel,None),
-  (rel,'_ordinary_control_bytecode_v1',rel,None),
-  (rel,'_ordinary_control_code_site_route_v1',rel,None),
-  (rel,'_ordinary_control_code_source_equal_v1',rel,None),
-  (rel,'_ordinary_control_default_binding_v1',rel,None),
-  (rel,'_ordinary_control_defaults_recheck_v1',rel,None),
-  (rel,'_ordinary_control_dictionary_keys_v1',rel,None),
-  (rel,'_ordinary_control_lexical_activation_v1',rel,None),
-  (rel,'_ordinary_control_lexical_forward_activation_v1',rel,None),
-  (rel,'_ordinary_control_lexical_forward_arguments_v1',rel,None),
-  (rel,'_ordinary_control_lexical_forward_route_v1',rel,None),
-  (rel,'_ordinary_control_literal_equal_v1',rel,None),
-  (rel,'_ordinary_control_member_v1',rel,None),
-  (rel,'_ordinary_control_programme_check_v1',rel,None),
-  (rel,'_ordinary_control_sites_check_v1',rel,None),
-  (rel,'_ordinary_control_source_product_check_v1',rel,None),
-  (rel,'_ordinary_data_align_v1',rel,None),
-  (rel,'_ordinary_data_buffer_request_v1',rel,None),
-  (rel,'_ordinary_data_bytes_request_v1',rel,None),
-  (rel,'_ordinary_data_components_v1',rel,None),
-  (rel,'_ordinary_data_control_components_v1',rel,None),
-  (rel,'_ordinary_data_controller_observation_check_v1',rel,None),
-  (rel,'_ordinary_data_dict_requests_v1',rel,None),
-  (rel,'_ordinary_data_dtoa_requests_v1',rel,None),
-  (rel,'_ordinary_data_emitter_basis_v1',rel,None),
-  (rel,'_ordinary_data_integer_requests_v1',rel,None),
-  (rel,'_ordinary_data_list_requests_v1',rel,None),
-  (rel,'_ordinary_data_nonnegative_v1',rel,None),
-  (rel,'_ordinary_data_runtime_layout_check_v1',rel,None),
-  (rel,'_ordinary_data_size_v1',rel,None),
-  (rel,'_ordinary_data_tuple_request_v1',rel,None),
-  (rel,'_ordinary_data_unicode_request_v1',rel,None),
-  (rel,'_ordinary_source_data_construct_v1',rel,None),
-  (rel,'_ordinary_source_data_json_span_v1',rel,None),
-  (rel,'_ordinary_source_data_lexical_admission_v1',rel,None),
-  (rel,'_ordinary_source_data_limits_v1',rel,None),
-  (rel,'_ordinary_source_data_operand_original_v1',rel,None),
-  (rel,'_ordinary_source_data_operand_v1',rel,None),
-  (rel,'_ordinary_source_data_utf8_scalar_v1',rel,None),
-  (rel,'_preflight_require_v1',rel,None),
-  (rel,'ValidationReliabilityError.__init__',rel,'ValidationReliabilityError'),
-  (inv,'_facet_fn_control_lexical_forward_arguments_v1',rel,None),
-  (inv,'_facet_fn_control_bytecode_values_v1',rel,None),
-  (inv,'_facet_fn_control_source_site_codes_v1', rel, None),
-  (reg, '_facet_fn_control_bindings_check_v1', rel, None),
-  (reg, '_facet_fn_control_bytecode_v1', rel, None),
-  (reg, '_facet_fn_control_code_site_route_v1', rel, None),
-  (reg, '_facet_fn_control_code_source_equal_v1', rel, None),
-  (reg, '_facet_fn_control_default_binding_v1', rel, None),
-  (reg, '_facet_fn_control_defaults_recheck_v1', rel, None),
-  (reg, '_facet_fn_control_dictionary_keys_v1', rel, None),
-  (reg, '_facet_fn_control_lexical_activation_v1', rel, None),
-  (reg, '_facet_fn_control_lexical_forward_route_v1', rel, None),
-  (reg, '_facet_fn_control_literal_equal_v1', rel, None),
-  (rel, '_facet_fn_control_literal_values_v1', rel, None),
-  (reg, '_facet_fn_control_member_v1', rel, None),
-  (reg, '_facet_fn_control_programme_check_v1', rel, None),
-  (reg, '_facet_fn_control_sites_check_v1', rel, None),
-  (reg, '_facet_fn_control_source_product_check_v1', rel, None),
-  (reg, '_facet_fn_data_align_v1', rel, None),
-  (reg, '_facet_fn_data_buffer_request_v1', rel, None),
-  (reg, '_facet_fn_data_bytes_request_v1', rel, None),
-  (reg, '_facet_fn_data_components_v1', rel, None),
-  (reg, '_facet_fn_data_control_components_v1', rel, None),
-  (reg, '_facet_fn_data_controller_observation_check_v1', rel, None),
-  (reg, '_facet_fn_data_dict_requests_v1', rel, None),
-  (reg, '_facet_fn_data_dtoa_requests_v1', rel, None),
-  (reg, '_facet_fn_data_integer_requests_v1', rel, None),
-  (reg, '_facet_fn_data_list_requests_v1', rel, None),
-  (reg, '_facet_fn_data_nonnegative_v1', rel, None),
-  (reg, '_facet_fn_data_runtime_layout_check_v1', rel, None),
-  (reg, '_facet_fn_data_size_v1', rel, None),
-  (reg, '_facet_fn_data_tuple_request_v1', rel, None),
-  (reg, '_facet_fn_data_unicode_request_v1', rel, None),
-  (reg, '_facet_fn_source_data_json_span_v1', rel, None),
-  (reg, '_facet_fn_source_data_lexical_admission_v1', rel, None),
-  (reg, '_facet_fn_source_data_limits_v1', rel, None),
-  (reg, '_facet_fn_source_data_operand_original_v1', rel, None),
-  (reg, '_facet_fn_source_data_utf8_scalar_v1', rel, None),
-  (reg, '_facet_m_source_data_allocator_projection_v1', rel, gate),
-  (reg, '_facet_m_source_data_heap_issue_v1', rel, gate),
-  (reg, '_facet_m_source_data_live_credit_v1', rel, gate),
-  (reg, '_facet_m_source_data_managed_request_issue_v1', rel, gate),
-  (reg, '_facet_m_source_data_managed_request_v1', rel, gate),
-  (reg, '_facet_m_source_data_raw_binding_check_v1', rel, gate),
-  (reg, '_facet_m_source_data_raw_issue_v1', rel, gate),
-  (reg, '_facet_m_source_data_scan_v1', rel, gate),
-  (reg, '_facet_m_source_meter_projection_v1', rel, gate),
-  ('dis', '_unpack_opargs', 'dis', None),
-  ('dis', '_deoptop', 'dis', None),
-  ('dis', '_get_cache_size', 'dis', None),
-  ('ast', 'dump', 'ast', None),
-  ('ast', 'walk', 'ast', None),
-  ('ast', 'iter_fields', 'ast', None),
-  ('ast', 'iter_child_nodes', 'ast', None),
-  ('ast', 'literal_eval', 'ast', None),
-  ('ast', 'parse', 'ast', None),
-  ('json', 'loads', 'json', None),
-  ('json.decoder', 'JSONDecoder.decode', 'json.decoder', None),
-  ('json.decoder', 'JSONDecoder.raw_decode', 'json.decoder', None),
-  (rel, '_LinuxImmutableSourceSealV2._anchors_live', rel, seal),
-  (rel, '_LinuxImmutableSourceSealV2._close', rel, seal),
-  (rel, '_LinuxImmutableSourceSealV2._identity', rel, seal),
-  (rel, '_LinuxImmutableSourceSealV2._meta', rel, seal),
-  (rel, '_LinuxImmutableSourceSealV2._meta_attempt', rel, seal),
-  (rel, '_LinuxImmutableSourceSealV2._open', rel, seal),
-  (rel, '_LinuxImmutableSourceSealV2._open_path', rel, seal),
-  (rel, '_LinuxImmutableSourceSealV2._ordinary_source_native_attempt_v1', rel, seal),
-  (rel, '_LinuxImmutableSourceSealV2._performed', rel, seal),
-  (rel, '_LinuxImmutableSourceSealV2._read', rel, seal),
-  (rel, '_LinuxImmutableSourceSealV2._reserve', rel, seal),
-  (rel, '_LinuxImmutableSourceSealV2.read_administration', rel, seal),
-  (rel, '_LinuxPreflightCensusV1._version', rel, '_LinuxPreflightCensusV1'),
-  (rel, '_LinuxPreflightScopeV1._ordinary_census_meter_projection_v1', rel, gate),
-  (rel, '_LinuxPreflightScopeV1._ordinary_factory_call_v1', rel, gate),
-  (rel, '_LinuxPreflightScopeV1._ordinary_factory_close_v1', rel, gate),
-  (rel, '_LinuxPreflightScopeV1._ordinary_factory_debit_v1', rel, gate),
-  (rel, '_LinuxPreflightScopeV1._ordinary_factory_open_v1', rel, gate),
-  (rel, '_LinuxPreflightScopeV1._ordinary_factory_slot_v1', rel, gate),
-  (rel, '_LinuxPreflightScopeV1._ordinary_installation_close_v1', rel, gate),
-  (rel, '_LinuxPreflightScopeV1._ordinary_installation_open_v1', rel, gate),
-  (rel, '_LinuxPreflightScopeV1._ordinary_installation_record_v1', rel, gate),
-  (rel, '_LinuxPreflightScopeV1._ordinary_pending_close_calls_v1', rel, gate),
-  (rel, '_LinuxPreflightScopeV1._ordinary_source_data_frozen_check_v1', rel, gate),
-  (rel, '_LinuxPreflightScopeV1._ordinary_source_data_read_v1', rel, gate),
-  (rel, '_LinuxPreflightScopeV1._ordinary_source_file_bound_v1', rel, gate),
-  (rel, '_LinuxPreflightScopeV1._ordinary_source_meter_event_v1', rel, gate),
-  (rel, '_LinuxPreflightScopeV1._ordinary_source_preopen_v1', rel, gate),
-  (rel, '_LinuxSourceNativeV2._call', rel, '_LinuxSourceNativeV2'),
-  (rel, '_LinuxSourceNativeV2.flags', rel, '_LinuxSourceNativeV2'),
-  (rel, '_linux_preflight_path_v1', rel, None),
-  (rel, '_mapper_append_error_v1', rel, None),
-  (rel, '_mapper_close_slot_v1', rel, None),
-  (rel, '_mapper_error_contains_v1', rel, None),
-  (rel, '_mapper_need_v1', rel, None),
-  (rel, '_mapper_portable_relative_v1', rel, None),
-  (rel, '_mapper_relative_v1', rel, None),
-  (rel, '_mapper_slot_open_error_v1', rel, None),
-  (rel, '_mapper_slot_opened_v1', rel, None),
-  (rel, '_mapper_slot_settled_v1', rel, None),
-  (rel, '_mapper_slot_v1', rel, None),
-  (rel, '_ordinary_control_error_constructor_route_v1', rel, None),
-  (rel, '_ordinary_deterministic_gfp_names_v1', rel, None),
-  (rel, '_ordinary_deterministic_gfp_targets_v1', rel, None),
-  (rel, '_ordinary_effect_value_snapshot_v1', rel, None),
-  (rel, '_ordinary_gfp_rp_assignment_keys_v1', rel, None),
-  (rel, '_ordinary_pytest_installation_source_v1', rel, None),
-  (rel, '_ordinary_pytest_source_graph_check_v1', rel, None),
-  (rel, '_ordinary_pytest_source_graph_v1', rel, None),
-  (rel, '_ordinary_rp_assignment_keys_v1', rel, None),
-  (rel, '_ordinary_rp_join_decode_v1', rel, None),
-  (rel, '_ordinary_rp_join_freeze_v1', rel, None),
-  (rel, '_ordinary_rp_join_raw_v1', rel, None),
-  (rel, '_ordinary_rp_join_records_v1', rel, None),
-  (rel, '_ordinary_rp_join_slot_v1', rel, None),
-  (rel, '_ordinary_rp_join_source_snapshot_v1', rel, None),
-  (rel, '_ordinary_rp_key_from_fields_v1', rel, None),
-  (rel, '_ordinary_rp_name_metadata_for_admissible_M_v1', rel, None),
-  (rel, '_ordinary_rp_predecessor_source_v1', rel, None),
-  (rel, '_ordinary_rp_report_row_ranges_v1', rel, None),
-  (rel, '_ordinary_source_absent_operand_v1', rel, None),
-  (rel, '_ordinary_source_data_operand_check_v1', rel, None),
-  (rel, '_ordinary_source_operand_v1', rel, None),
-  (rel, '_scan_raise_errors', rel, None),
-  ('tools.ci_branch_context', '_ordinary_rp5a_manager_label_source_v1', rel, None),
-  ('tools.ci_branch_context', '_ordinary_rp5a_manager_credentials_source_v1', rel, None),
-  ('tools.ci_branch_context', '_ordinary_rp5a_manager_result_source_v1', rel, None),
-  (reg, '_facet_fn_deterministic_gfp_names_v1', rel, None),
-  (reg, '_facet_fn_deterministic_gfp_targets_v1', rel, None),
-  (reg, '_facet_fn_effect_value_snapshot_v1', rel, None),
-  (reg, '_facet_fn_gfp_rp_assignment_keys_v1', rel, None),
-  (run, '_facet_fn_pytest_source_graph_check_v1', rel, None),
-  (reg, '_facet_fn_pytest_source_graph_v1', rel, None),
-  (reg, '_facet_fn_rp_assignment_keys_v1', rel, None),
-  (reg, '_facet_fn_rp_join_decode_v1', rel, None),
-  (reg, '_facet_fn_rp_join_freeze_v1', rel, None),
-  (reg, '_facet_fn_rp_join_raw_v1', rel, None),
-  (reg, '_facet_fn_rp_join_records_v1', rel, None),
-  (reg, '_facet_fn_rp_join_slot_v1', rel, None),
-  (reg, '_facet_fn_rp_join_source_snapshot_v1', rel, None),
-  (reg, '_facet_fn_rp_key_from_fields_v1', rel, None),
-  (reg, '_facet_fn_rp_name_metadata_for_admissible_M_v1', rel, None),
-  (reg, '_facet_fn_rp_predecessor_source_v1', rel, None),
-  (reg, '_facet_fn_rp_report_row_ranges_v1', rel, None),
-  (reg, '_facet_fn_source_data_operand_check_v1', rel, None),
-  (reg, '_facet_m_census_meter_projection_v1', rel, gate),
-  (reg, '_facet_m_factory_debit_v1', rel, gate),
-  (reg, '_facet_m_factory_slot_v1', rel, gate),
-  (reg, '_facet_m_installation_record_v1', rel, gate),
-  (reg, '_facet_m_pending_close_calls_v1', rel, gate),
-  (reg, '_facet_m_source_data_frozen_check_v1', rel, gate),
-  (reg, '_facet_m_source_file_bound_v1', rel, gate),
-  (reg, '_facet_m_source_meter_event_v1', rel, gate),
-  (reg, '_ordinary_scope_source_import_events_v1', rel, None),
-  (reg, '_ordinary_scope_source_module_map_v1', rel, None),
-  (rel, '_ordinary_control_ast_original_v1', rel, None),
-  (rel, '_ordinary_control_initialized_compiled_reuse_v1', rel, None),
-  (rel, '_ordinary_initialized_storage_data_request_v1', rel, None),
-  (reg, '_facet_fn_control_ast_original_v1', rel, None),
-  (reg, '_facet_fn_control_initialized_compiled_reuse_v1', rel, None),
-  (reg, '_facet_fn_initialized_storage_data_request_v1', rel, None),
-  (run, '_facet_fn_control_fixed_delegates_v1', rel, None),
-  (run, '_facet_fn_pytest_config_original_route_v1', rel, None),
-  (reg, '_facet_fn_control_fixed_delegate_roster_v1', rel, None),
-  (rel, '_ordinary_control_fixed_delegate_roster_v1', rel, None),
- )
+ from tools.ci_branch_context import _facet_fn_control_fixed_delegates_v1 as _d
+ return _d()
 
 
 def _facet_fn_pytest_config_original_route_v1(scope, record, relative, source_byte_limit,
@@ -20432,7 +20215,7 @@ def _facet_fn_pytest_source_graph_check_v1(scope, record):
    *record['installation_source_operands']))
   and record['nodes'] == sum(value['nodes'] for value in (*record['source_operands'],
    *record['installation_source_operands'])) + record['dependency_profile_nodes']
-  and record['raw_bytes'] <= record['source_byte_limit'] and record['nodes'] <= record['source_node_limit'],
+  and _f._ordinary_bounded_source_aggregate_check_v1(scope, record, record['source_byte_limit'], record['source_node_limit']),
   'ORDINARY_PYTEST_GRAPH_ORIGINAL_SOURCE_ASSOCIATION')
  _pytest_need(record['collection_original'] == (record['python_file_patterns'],
   record['selector_body'], record['collection_original'][2],
@@ -20517,8 +20300,9 @@ def _facet_fn_pytest_source_graph_check_v1(scope, record):
    and module['body'] == body == observed['text'] and module['bodies'] is bodies
    and tuple(module['imports']) == imports and tuple(module['native_sites']) == native
    and tuple(module['dynamic_sites']) == dynamic and tuple(module['caller_edges']) == callers
-   and ast.dump(tree, include_attributes=False)
-    == ast.dump(ast.parse(observed['text']), include_attributes=False),
+   and (_f._ordinary_bounded_source_module_check_v1(scope, tree, observed)
+   if 'bounded_source_credit_index' in observed else ast.dump(tree, include_attributes=False)
+    == ast.dump(ast.parse(observed['text']), include_attributes=False)),
    'ORDINARY_PYTEST_GRAPH_ACTUAL_INSTALLED_BODY_AND_CALLER_SYNTAX')
   for name, node, text in bodies:
    _pytest_need(any(node is value for value in ast.walk(tree))
@@ -20556,8 +20340,9 @@ def _facet_fn_pytest_source_graph_check_v1(scope, record):
    and captured[5] is cache and captured[6] is observed['original']
    and actual is observed
    and (observed['source_form'] == 'INSTALLATION_PYTHON'
-    and ast.dump(tree, include_attributes=False)
-     == ast.dump(ast.parse(observed['text']), include_attributes=False)
+    and (_f._ordinary_bounded_source_module_check_v1(scope, tree, observed)
+   if 'bounded_source_credit_index' in observed else ast.dump(tree, include_attributes=False)
+     == ast.dump(ast.parse(observed['text']), include_attributes=False))
     or observed['source_form'] == 'INSTALLATION_DATA' and tree is None and observed['nodes'] == 0),
    'ORDINARY_PYTEST_GRAPH_ORIGINAL_INSTALLED_CAPTURE_OWNER_FUNCTION_CODE_AND_AST')
  for row, saved in record['row_originals']:
@@ -20581,8 +20366,9 @@ def _facet_fn_pytest_source_graph_check_v1(scope, record):
    'ORDINARY_PYTEST_GRAPH_ORIGINAL_COMPLETE_SOURCE_BYTES')
   if observed['source_form'] == 'PYTHON':
    tree, cached = record['source_operand_cache'][(observed['path'], 'PYTHON')]
-   _pytest_need(cached is observed and ast.dump(tree, include_attributes=False)
-    == ast.dump(ast.parse(observed['text']), include_attributes=False),
+   _pytest_need(cached is observed and (_f._ordinary_bounded_source_module_check_v1(scope, tree, observed)
+   if 'bounded_source_credit_index' in observed else ast.dump(tree, include_attributes=False)
+    == ast.dump(ast.parse(observed['text']), include_attributes=False)),
     'ORDINARY_PYTEST_GRAPH_RETAINED_AST_IS_ACTUAL_CAPTURED_BODY')
  return record
 
@@ -20665,7 +20451,9 @@ def _ordinary_bootstrap_request_begin_v1(owner, stage, producer, source_request)
    'original_selected_call_frames_and_retained_failures')
   if stage not in ('BOOTSTRAP_PREPARE','BOOTSTRAP_QUERY'):
    required += ('original_native_stack_and_allocator_backing',)
-  if not set(required).issubset({name for name,_ in parts}):
+  if (not set(required).issubset({name for name,_ in parts})
+    and not (key is None and __import__("tools.ci_branch_context",fromlist=["_ordinary_bounded_bootstrap_source_check_v1"])._ordinary_bounded_bootstrap_source_check_v1(
+     sys.modules[__name__],owner,source_request,kind="stage"))):
    raise ValueError('ORDINARY_FIXED_REQUEST_INITIALIZATION_AND_FAILURE_DEBT')
   initial = 'original_interpreter_and_prior_intern_storage'
   if stage == 'BOOTSTRAP_PREPARE':

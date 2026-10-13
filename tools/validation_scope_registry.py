@@ -3684,24 +3684,8 @@ def _ordinary_scope_restore_suffix_values_v1(f, d, edges, action_count, file_act
 
 
 def _ordinary_scope_receiver_io_values_v1(row_count, roles, maxima, control_depth, mapper_calls, mapper_control, r_native):
- unit = 1048577
- app_io_reads = row_count*5*unit
- app_io_calls = row_count*(5*unit+3*6+2*(600+5)+6*control_depth+2+11)
- r_io_reads = r_io_calls = 0
- for role in roles:
-  if role is None: continue
-  invocations = maxima['reader_invocations'] + (maxima['reader_invocations'] if role=='SCANNER' else 0)
-  fixed_hop = role=='PYTEST'
-  owners = 2 if fixed_hop else 1
-  extra = 2*max(0,maxima['metadata_bytes']-1048576)
-  native_reads = 6*invocations+(invocations+1 if fixed_hop else 0)
-  r_io_reads += extra+maxima['metadata_bytes']+1 + owners*(5*unit+extra+native_reads*unit)
-  r_io_calls += (extra+maxima['metadata_bytes']+7
-   + owners*(5*unit+3*6+2*(600+5)+6*control_depth+2+11+extra
-    + native_reads*(unit+6)+invocations*(12+7+2*control_depth+2)+1))
- external_control = app_io_reads+r_io_reads+mapper_control+r_native
- base_external_calls = app_io_calls+r_io_calls+mapper_calls
- return (app_io_reads, app_io_calls, r_io_reads, r_io_calls, external_control, base_external_calls)
+ from tools.ci_branch_context import _ordinary_scope_receiver_io_values_v1 as _d
+ return _d(row_count,roles,maxima,control_depth,mapper_calls,mapper_control,r_native)
 
 
 def _ordinary_scope_candidate_io_values_v1(later_files, directory_count, edges, path_bytes, entries, generations, retirements, actions, file_actions, barriers, n, attributes, attribute_files, attribute_directories, transformed_files, transformed_directories, rolling_rows, captures, transforms, binding_checks, later_bytes, mutable, restoration_bytes, index, query_bytes, query_reads, source_bytes, namespace_sweeps, depth, index_depth, query_parent_depth, anchor_count, rolling_allocations, initial_files, owed):
@@ -4054,11 +4038,16 @@ def _facet_fn_source_literal_table_v1(scope, record, name, *, source_byte_limit,
   and len(observed['text'].encode('utf-8')) == observed['raw_bytes']
   and type(observed['nodes']) is int and 0 < observed['nodes'] <= source_node_limit,
   'ORDINARY_SOURCE_LITERAL_COMPLETE_ORIGINAL_OBSERVATION')
- original_tree = ast.parse(observed['text'], filename=observed['path'])
- _f._preflight_require_v1(sum(1 for node in ast.walk(original_tree)) == observed['nodes']
-  and ast.dump(tree, include_attributes=False)
-   == ast.dump(original_tree, include_attributes=False),
-  'ORDINARY_SOURCE_LITERAL_RETAINED_AST_AND_CAPTURED_TEXT')
+ if 'bounded_source_credit_index' in observed:
+  _f._preflight_require_v1(_f._ordinary_bounded_source_module_check_v1(scope, tree, observed),
+   'ORDINARY_SOURCE_LITERAL_RETAINED_AST_AND_CAPTURED_TEXT')
+  original_tree = tree
+ else:
+  original_tree = ast.parse(observed['text'], filename=observed['path'])
+  _f._preflight_require_v1(sum(1 for node in ast.walk(original_tree)) == observed['nodes']
+   and ast.dump(tree, include_attributes=False)
+    == ast.dump(original_tree, include_attributes=False),
+   'ORDINARY_SOURCE_LITERAL_RETAINED_AST_AND_CAPTURED_TEXT')
  definitions = tuple(node for node in original_tree.body
   if isinstance(node, ast.FunctionDef) and node.name == name)
  _f._preflight_require_v1(len(definitions) == 1,
@@ -4261,7 +4250,8 @@ def _facet_fn_master_plan_python_native_v1(scope, bound_row, operands, grammar):
      and operand['path'] == 'tools/master_plan_ingest.py'
      and grammar[0][0] is operand and grammar[0][1] == '<module>'
      and grammar[0][2] == operand['text']
-     and ast.dump(tree, include_attributes=False) == ast.dump(ast.parse(operand['text']), include_attributes=False),
+     and (_f._ordinary_bounded_source_module_check_v1(scope, tree, operand)
+   if 'bounded_source_credit_index' in operand else ast.dump(tree, include_attributes=False) == ast.dump(ast.parse(operand['text']), include_attributes=False)),
      'ORDINARY_MASTER_PLAN_SAME_PROTECTED_COMPLETE_MODULE')
     imports = tuple((type(node).__name__, getattr(node, 'module', None),
      tuple((alias.name, alias.asname) for alias in node.names), getattr(node, 'level', 0))
@@ -4452,8 +4442,9 @@ def _facet_fn_deterministic_python_native_v1(scope, bound_row, operands, grammar
     for operand in operands:
      tree, observed = scope._ordinary_source_operand_cache_v1[(operand['path'], 'PYTHON')]
      _f._preflight_require_v1(observed is operand and operand['complete'] and operand['error'] is None
-      and ast.dump(tree, include_attributes=False)
-       == ast.dump(ast.parse(operand['text']), include_attributes=False),
+      and (_f._ordinary_bounded_source_module_check_v1(scope, tree, operand)
+   if 'bounded_source_credit_index' in operand else ast.dump(tree, include_attributes=False)
+       == ast.dump(ast.parse(operand['text']), include_attributes=False)),
       'ORDINARY_PYTHON_RECIPE_SAME_COMPLETE_SOURCE_CACHE')
      trees.append(tree)
      for node in ast.walk(tree):
@@ -4889,7 +4880,8 @@ def _facet_fn_deterministic_readonly_native_v1(scope, bound_row, operands, gramm
   tree, observed = scope._ordinary_source_operand_cache_v1[(operand['path'],'PYTHON')]
   _f._preflight_require_v1(observed is operand and operand['complete'] and operand['error'] is None
    and item[0] is operand and item[1] == '<module>' and item[2] == operand['text']
-   and ast.dump(tree, include_attributes=False) == ast.dump(ast.parse(operand['text']),include_attributes=False),
+   and (_f._ordinary_bounded_source_module_check_v1(scope, tree, operand)
+   if 'bounded_source_credit_index' in operand else ast.dump(tree, include_attributes=False) == ast.dump(ast.parse(operand['text']),include_attributes=False)),
    'ORDINARY_READONLY_WHOLE_ACTUAL_CALLEE_SOURCE')
   for node in ast.walk(tree):
    if isinstance(node,ast.Import):
@@ -4908,7 +4900,8 @@ def _facet_fn_deterministic_readonly_native_v1(scope, bound_row, operands, gramm
    fallback_names=('master_plan_ingest',))
   cache = (scope._ordinary_image_v1['mount_path'] / 'runtime'
    / ('p'+str(entry.command_index)) / 'pycache', bound_row, operands, grammar, install)
- primary = ast.parse(operands[0]['text'])
+ primary = (scope._ordinary_source_operand_cache_v1[(operands[0]['path'], 'PYTHON')][0]
+  if 'bounded_source_credit_index' in operands[0] else ast.parse(operands[0]['text']))
  prints = tuple(node for node in ast.walk(primary) if isinstance(node,ast.Call)
   and isinstance(node.func,ast.Name) and node.func.id == 'print')
  _f._preflight_require_v1(len(prints) == 1 and len(prints[0].args) == 1 and not prints[0].keywords
@@ -5210,7 +5203,7 @@ def _facet_fn_deterministic_source_ingredients_v1(scope, paths, plan, execution_
      'ORDINARY_DETERMINISTIC_EXACT_ORIGINAL_PRE_C_COMPILER')
     selection = scope._ordinary_source_selection_v1
     _f._preflight_require_v1(selection is scope._ordinary_original_source_selection_v1
-     and selection.phase in runner.DETERMINISTIC_VALIDATOR_SHARD_PHASES,
+     and selection.phase in (*runner.DETERMINISTIC_VALIDATOR_SHARD_PHASES,runner.FAST_PREFLIGHT_PHASE),
      'ORDINARY_DETERMINISTIC_ORIGINAL_SELECTED_PHASE')
     bound_rows = runner._ordinary_phase_occurrence_selection_v1(scope, paths, plan,
      execution_plan, phase=selection.phase)
@@ -5265,9 +5258,13 @@ def _facet_fn_deterministic_source_ingredients_v1(scope, paths, plan, execution_
       for relative, expected_body in source_bodies:
        actual_tree, operand = _f._ordinary_source_operand_v1(scope, record, relative,
         source_byte_limit=source_byte_limit, source_node_limit=source_node_limit)
-       _f._preflight_require_v1(ast.dump(actual_tree, include_attributes=False)
-        == ast.dump(ast.parse(expected_body), include_attributes=False),
-        'ORDINARY_DETERMINISTIC_REVIEWED_WHOLE_SOURCE_BODY:' + relative)
+       if relative == 'tools/ci_branch_context.py':
+        from tools.ci_branch_context import _ordinary_ci_literal_body_bootstrap_v1
+        _ordinary_ci_literal_body_bootstrap_v1(scope, record, actual_tree, operand, expected_body)
+       else:
+        _f._preflight_require_v1(ast.dump(actual_tree, include_attributes=False)
+         == ast.dump(ast.parse(expected_body), include_attributes=False),
+         'ORDINARY_DETERMINISTIC_REVIEWED_WHOLE_SOURCE_BODY:' + relative)
        operands.append(operand)
        calls = tuple(ast.get_source_segment(operand['text'], node)
         for node in ast.walk(actual_tree) if isinstance(node, ast.Call)
@@ -5504,178 +5501,13 @@ def _facet_fn_deterministic_gfp_targets_v1(scope, record, row, root_names, shard
 
 
 def _facet_fn_native_source_programme_check_v1(scope, record):
- import tools.validation_reliability as _f
- _pytest_need = _f._preflight_require_v1
- import ast
- _pytest_need(type(scope) is _f._LinuxPreflightScopeV1 and type(record) is dict
-  and record['scope'] is scope and record['source'] is scope.source
-  and record['check'] is record['original_check'] is _f._ordinary_native_source_programme_check_v1,
-  'ORDINARY_NATIVE_SOURCE_PROGRAMME_ORIGINAL_CHECKER')
- original = record['original']
- _pytest_need(type(original) is tuple and len(original) == 8
-  and original[0] is record and original[1] is scope
-  and original[2] is record['bound_row'] and original[3] is record['source_operands']
-  and original[4] is record['call_grammar'] and original[5] is record['tool_operands']
-  and original[6] is record['errors'] and original[7] == (_f.os.getpid(), _f.threading.get_ident())
-  and not record['errors'] and tuple((key, value) for key, value in record.items()
-   if key != 'original_items') == record['original_items'],
-  'ORDINARY_NATIVE_SOURCE_PROGRAMME_FROZEN_IDENTITY_AND_VALUES')
- selection = scope._ordinary_source_selection_v1
- bound_row = record['bound_row']
- _pytest_need(selection is scope._ordinary_original_source_selection_v1
-  and any(bound_row is row for row in selection._bound)
-  and type(bound_row) is tuple and len(bound_row) == 3
-  and record['entry'] is bound_row[0] and record['execution'] is bound_row[1]
-  and type(record['source_position']) is int and record['source_position'] == bound_row[2],
-  'ORDINARY_NATIVE_SOURCE_PROGRAMME_EXACT_SELECTED_OCCURRENCE')
- for operand, snapshot in record['original_source_items']:
-  _pytest_need(any(operand is item for item in record['source_operands'])
-   and tuple(operand.items()) == snapshot and operand['complete']
-   and operand['error'] is None,
-   'ORDINARY_NATIVE_SOURCE_PROGRAMME_ORIGINAL_SOURCE_OPERAND')
-  if operand['source_form'] == 'PYTHON':
-   _pytest_need(operand['row'] is scope.source.row_index[operand['row']['path']]
-    and operand['version'] == tuple(scope.source.post[operand['row']['path']]),
-    'ORDINARY_NATIVE_SOURCE_PROGRAMME_ORIGINAL_REPOSITORY_SOURCE')
-   cache = scope._ordinary_source_operand_cache_v1
-   tree, observed = cache[(operand['path'], 'PYTHON')]
-   _pytest_need(cache is scope._ordinary_original_source_operand_cache_v1,
-    'ORDINARY_NATIVE_SOURCE_PROGRAMME_ORIGINAL_REPOSITORY_CACHE')
-  else:
-   _pytest_need(operand['source_form'] == 'INSTALLATION_PYTHON',
-    'ORDINARY_NATIVE_SOURCE_PROGRAMME_PYTHON_SOURCE_DOMAIN')
-   graph = scope._ordinary_pytest_source_graph_v1
-   _pytest_need(graph is scope._ordinary_original_pytest_source_graph_v1
-    and _f._ordinary_pytest_source_graph_check_v1(scope, graph) is graph
-    and any(operand is value for value in graph['installation_source_operands'])
-    and operand['capture_owner'] is graph,
-    'ORDINARY_NATIVE_SOURCE_PROGRAMME_ORIGINAL_INSTALLED_GRAPH_CAPTURE')
-   cache = graph['installation_operand_cache']
-   tree, observed = cache[(operand['path'], 'INSTALLATION_PYTHON')]
-  _pytest_need(observed is operand and ast.dump(tree, include_attributes=False)
-   == ast.dump(ast.parse(operand['text']), include_attributes=False),
-   'ORDINARY_NATIVE_SOURCE_PROGRAMME_RETAINED_AST_BODY')
- for operand, name, body, native_calls in record['call_grammar']:
-  _pytest_need(any(operand is item for item in record['source_operands'])
-   and type(name) is str and name and type(body) is str
-   and type(native_calls) is tuple,
-   'ORDINARY_NATIVE_SOURCE_PROGRAMME_CLOSED_BODY_GRAMMAR')
-  cache = (scope._ordinary_source_operand_cache_v1 if operand['source_form'] == 'PYTHON'
-   else scope._ordinary_pytest_source_graph_v1['installation_operand_cache'])
-  tree, observed = cache[(operand['path'], operand['source_form'])]
-  _pytest_need(observed is operand, 'ORDINARY_NATIVE_SOURCE_PROGRAMME_SAME_OPERAND_CACHE')
-  if name == '<module>':
-   _pytest_need(body == operand['text'],
-    'ORDINARY_NATIVE_SOURCE_PROGRAMME_FULL_MODULE_BODY')
-   selected = tree
-  else:
-   selected = tree
-   for part in name.split('.'):
-    matches = tuple(node for node in getattr(selected, 'body', ())
-     if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef))
-     and node.name == part)
-    _pytest_need(len(matches) == 1,
-     'ORDINARY_NATIVE_SOURCE_PROGRAMME_EXACT_QUALIFIED_BODY')
-    selected = matches[0]
-   _pytest_need(ast.dump(ast.parse(body).body[0], include_attributes=False)
-    == ast.dump(selected, include_attributes=False),
-    'ORDINARY_NATIVE_SOURCE_PROGRAMME_BODY_EQUALITY')
-  actual_calls = (tuple(ast.get_source_segment(operand['text'], node)
-   for node in ast.walk(selected) if isinstance(node, ast.Call)) if native_calls else ())
-  _pytest_need(all(type(call) is str and call in actual_calls for call in native_calls),
-   'ORDINARY_NATIVE_SOURCE_PROGRAMME_NATIVE_CALL_OPERANDS')
- installation = scope._ordinary_installation_copy_v1
- _pytest_need(installation is scope._ordinary_original_installation_copy_v1
-  and installation['complete'] and not installation['errors']
-  and scope._ordinary_installation_record_v1(installation['install']) is installation
-  and record['tool_operands'][0] is installation,
-  'ORDINARY_NATIVE_SOURCE_PROGRAMME_ACTUAL_INSTALLATION_HOLDER')
- if len(record['tool_operands']) == 2:
-  _pytest_need(record['tool_operands'][1] is scope._ordinary_git_bindings_v1
-   and record['tool_operands'][1]['original_source'] is scope.source,
-   'ORDINARY_NATIVE_SOURCE_PROGRAMME_ACTUAL_GIT_SOURCE_BINDING')
- _pytest_need(len(record['tool_operands']) in (1, 2)
-  and type(record['cohorts']) is tuple and record['cohorts']
-  and all(type(cohort) is tuple and len(cohort) == 3
-   and type(cohort[0]) is tuple and cohort[0]
-   and all(type(actor) is str and actor for actor in cohort[0])
-   and type(cohort[1]) is tuple
-   and all(any(operand is item for item in record['source_operands']) for operand in cohort[1])
-   and type(cohort[2]) is tuple and (cohort[2] or len(cohort[0]) == 1)
-   and all(type(call) is str and any(call in grammar[3] for grammar in record['call_grammar']
-    if any(grammar[0] is operand for operand in cohort[1])) for call in cohort[2])
-   for cohort in record['cohorts'])
-  and type(record['tasks']) is int and record['tasks'] == max(len(item[0]) for item in record['cohorts'])
-  and all(type(record[key]) is int and record[key] > 0 for key in
-   ('nofile', 'bootstrap_fd_demand', 'application_fd_demand'))
-  and record['nofile'] >= max(record['bootstrap_fd_demand'], record['application_fd_demand'])
-  and all(type(record[key]) is int and record[key] >= 0 for key in ('stdout_minimum', 'stderr_minimum')),
-  'ORDINARY_NATIVE_SOURCE_PROGRAMME_SOURCE_COHORT_AND_PREFIX_MINIMA')
- if 'pycache_operand' in record:
-  cache = record['pycache_operand']
-  _pytest_need(type(cache) is tuple and len(cache) == 5,
-   'ORDINARY_PYTHON_RECIPE_ORIGINAL_SOURCE_OWNED_CACHE_OPERAND')
-  entry, execution, position = bound_row
-  source_names = ('tools/validate_atomicrows_row_family_source_manifest_currentization.py',
-   'tools/build_master_plan_section_coverage_report.py',
-   'tools/validate_master_plan_section_coverage.py', 'tools/master_plan_ingest.py')
-  if execution.registered_argv == (_f.sys.executable, '-c', scope._ordinary_runner_owner_v1.PR138_NON_MUTATING_VALIDATION_SCRIPT):
-   source_names = _f._ordinary_pr138_source_names_v1()
-   _pytest_need(record['tasks'] == 2 and record['bootstrap_fd_demand'] == 12
-    and record['application_fd_demand'] == 9 and record['nofile'] == 12
-    and len(record['tool_operands']) == 2
-    and record['cohorts'][0][0] == ('APPLICATION', 'GIT'),
-    'ORDINARY_PR138_SOURCE_NATIVE_EXACT_ACTOR_AND_FD_MINIMA')
-   expected_argv = _f._ordinary_pr138_execution_argv_v1(scope, execution.registered_argv, entry.command_index)
-  elif execution.registered_argv[1:2] in (('tools/validate_atomicrows_semantic_field_coverage_enrichment_plan.py',), ('tools/validate_atomicrows_semantic_value_materialization_owner_authorization_gate.py',), ('tools/validate_atomicrows_semantic_value_materialization_authorization_handoff_readiness_gate.py',)):
-   source_names = tuple(item['path'] for item in record['source_operands'])
-   _pytest_need(record['tasks'] == 2 and record['bootstrap_fd_demand'] == 12
-    and record['application_fd_demand'] == 9 and record['nofile'] == 12
-    and len(record['tool_operands']) == 2 and record['cohorts'][0][0] == ('APPLICATION', 'GIT')
-    and source_names[0] == execution.registered_argv[1]
-    and source_names[-1] == 'tools/validation_reliability.py',
-    'ORDINARY_READONLY_GIT_CLI_SOURCE_NATIVE_EXACT_MINIMA')
-   _f._ordinary_readonly_git_cli_branch_v1(scope)
-   expected_argv = _f._ordinary_readonly_git_cli_execution_v1(scope, execution.registered_argv, entry.command_index)
-  elif execution.registered_argv[:2] == (_f.sys.executable, 'tools/master_plan_traceability_check.py'):
-   source_names = ('tools/master_plan_traceability_check.py', 'tools/master_plan_ingest.py')
-   expected_argv = _f._ordinary_deterministic_readonly_argv_v1(scope,
-    execution.registered_argv, entry.command_index)
-  elif (len(execution.registered_argv)==4 and execution.registered_argv[2:]==('--repo-root','.')
-    and execution.registered_argv[1] not in source_names):
-   source_names,family = _f._ordinary_readonly_source_family_check_v1(scope, bound_row,
-    record['source_operands'], record['call_grammar'],_native_facts=True)
-   uses_git=bool(family['native_process_operations'])
-   _pytest_need(record['tasks']==(2 if uses_git else 1) and record['bootstrap_fd_demand']==12
-    and record['application_fd_demand']==(9 if uses_git else 8) and record['nofile']==12
-    and len(record['tool_operands'])==(2 if uses_git else 1) and len(record['cohorts'])==1
-    and record['cohorts'][0][0]==(('APPLICATION','GIT') if uses_git else ('APPLICATION',)),
-    'ORDINARY_READONLY_SOURCE_FAMILY_EXACT_NATIVE_MINIMA')
-   expected_argv = _f._ordinary_readonly_source_family_execution_v1(scope,
-    execution.registered_argv, entry.command_index)
-  else:
-   expected_argv = (execution.registered_argv[0], '-I', '-S', '-B', '-X',
-    'pycache_prefix=' + str(cache[0]), *execution.registered_argv[1:])
-  _pytest_need(type(cache) is tuple and len(cache) == 5
-   and cache[1] is bound_row and cache[2] is record['source_operands']
-   and cache[3] is record['call_grammar'] and cache[4] is installation
-   and type(entry.command_index) is int and entry.command_index > 0
-   and cache[0] == scope._ordinary_image_v1['mount_path'] / 'runtime'
-    / ('p' + str(entry.command_index)) / 'pycache'
-   and tuple(item['path'] for item in record['source_operands']) == source_names
-   and (execution.registered_argv[:2] == (_f.sys.executable, source_names[0])
-    or source_names == _f._ordinary_pr138_source_names_v1()
-    and execution.registered_argv == (_f.sys.executable, '-c', scope._ordinary_runner_owner_v1.PR138_NON_MUTATING_VALIDATION_SCRIPT))
-   and entry.argv == execution.execution_argv == expected_argv
-   and all(item[0] is operand and item[1] == '<module>' and item[2] == operand['text']
-    for operand, item in zip(record['source_operands'], record['call_grammar'], strict=True)),
-   'ORDINARY_PYTHON_RECIPE_ORIGINAL_SOURCE_OWNED_CACHE_OPERAND')
- return record
+ from tools.ci_branch_context import _facet_fn_native_source_programme_check_v1 as d
+ return d(scope,record)
 
 
 def _facet_fn_native_source_programme_v1(scope, bound_row, source_operands, call_grammar,
   *, cohorts, bootstrap_fd_demand, application_fd_demand, nofile,
-  stdout_minimum=0, stderr_minimum=0, uses_git=False, pycache_operand=None):
+  stdout_minimum=0, stderr_minimum=0, uses_git=False, pycache_operand=None, operational_operand=None):
  import tools.validation_reliability as _f
  _f._preflight_require_v1(type(scope) is _f._LinuxPreflightScopeV1 and type(bound_row) is tuple
   and len(bound_row) == 3 and type(source_operands) is tuple and source_operands
@@ -5692,6 +5524,8 @@ def _facet_fn_native_source_programme_v1(scope, bound_row, source_operands, call
   stdout_minimum=stdout_minimum, stderr_minimum=stderr_minimum, errors=[])
  if pycache_operand is not None:
   record['pycache_operand'] = pycache_operand
+ if operational_operand is not None:
+  record['operational_operand'] = operational_operand
  record['check'] = record['original_check'] = _f._ordinary_native_source_programme_check_v1
  record['original_source_items'] = tuple((item, tuple(item.items())) for item in source_operands)
  record['original'] = (record, scope, bound_row, source_operands, call_grammar,
@@ -5723,12 +5557,12 @@ def _facet_fn_selected_transport_environment_v1(scope, entry, environment):
   'ORDINARY_SELECTED_NATIVE_SOURCE_ROW_AND_ALLOCATED_OCCURRENCE')
  child = {key: value for key, value in environment.items()
   if key.upper() not in _f._SCAN_TRANSPORT_KEYS}
- role = _f._rp5a_consumer_role_v1(entry.argv, paths.repo_root)
+ role = _f._ordinary_selected_rp5a_role_v1(scope,entry)
  if role is None:
   return child
  policy = runner._ordinary_rp5a_source_policy_checked_v1(
   scope._ordinary_resource_programme_v1['rp5a_source_policy'], scope)
- selected = tuple(_f._rp5a_consumer_role_v1(row[0].argv, paths.repo_root)
+ selected = tuple(_f._ordinary_selected_rp5a_role_v1(scope,row[0])
   for row in bound_rows)
  profile_count = sum(1 + int(value == 'SCANNER') for value in selected if value is not None)
  maxima = policy['maxima']
@@ -5835,7 +5669,7 @@ def _facet_fn_selected_occurrence_programme_v1(scope, paths, plan, execution_pla
    runtime_bytes=None, runtime_inodes=None, runtime_path=cell,
    bootstrap_fd_demand=allocation['bootstrap_fd_demand'],
    application_fd_demand=allocation['application_fd_demand'], git_controls=selected_git_controls)
-  role = _f._rp5a_consumer_role_v1(entry.argv, paths.repo_root)
+  role = _f._ordinary_selected_rp5a_role_v1(scope,entry)
   if role is not None:
    for key in rp5a_keys: row[key] = allocation[key]
   compiled.append(row)
@@ -5888,7 +5722,7 @@ def _facet_fn_compile_selected_process_programme_v1(scope, occurrence_program, f
    zip(occurrence_program, bound_rows, effects['rows'], allocations), 1):
   entry, execution, position = bound_row
   native = _f._ordinary_native_source_programme_check_v1(scope, effect['native_programme'])
-  role = _f._rp5a_consumer_role_v1(entry.argv, _f.Path(scope.repository))
+  role = _f._ordinary_selected_rp5a_role_v1(scope,entry)
   _f._preflight_require_v1(type(row) is dict and set(row) == required | (rp5a_keys if role is not None else set())
    and row['entry'] is entry and row['execution_entry'] is execution
    and row['original_position'] == position and type(row['original_position']) is int
@@ -5984,7 +5818,7 @@ def _facet_fn_selected_environment_v1(scope, entry, environment):
  expected_base = _f._ordinary_selected_transport_environment_v1(scope, entry, original[4])
  _f._preflight_require_v1(environment == expected_base,
   'ORDINARY_SELECTED_ENVIRONMENT_UNCHANGED_INDEPENDENT_BASE')
- if _f._rp5a_consumer_role_v1(entry.argv, _f.Path(scope.repository)) is not None:
+ if _f._ordinary_selected_rp5a_role_v1(scope,entry) is not None:
   _f._preflight_require_v1(scope._ordinary_rp5a_environment_v1(entry, original[4]) == expected_base,
    'ORDINARY_R_ORIGINAL_PHASE_ENVIRONMENT_TYPES')
  row = scope._ordinary_programme_for_entry_v1(entry)
@@ -6055,7 +5889,7 @@ def _facet_fn_selected_policy_projection_v1(scope, programme):
   and programme['nofile'] == allocation['nofile'] >= native['nofile']
   and native['tasks'] == max(len(cohort[0]) for cohort in native['cohorts']),
   'ORDINARY_NATIVE_POLICY_SOURCE_COHORT_NOT_FREE_TASK_GRANT')
- if native['tasks'] > 1:
+ if programme['tasks'] > 1:
   fork_filter = '~mount umount2 pivot_root unshare setns quotactl'
  return phase, programme['tasks'], fork_filter
 
@@ -6180,10 +6014,14 @@ def _facet_fn_phase_source_join_v1(scope, resource):
  _f._preflight_require_v1(row is not None and row['kind'] == 'file'
   and 0 < row['logical_bytes'] <= 16 << 20,
   'ORDINARY_PHASE_AUTHENTIC_ORIGINAL_CONSTRUCTOR_SOURCE')
- raw = source.read_administration(path, 16 << 20)
- tree = ast.parse(raw.decode('utf-8', 'strict'), filename=str(path))
- _f._preflight_require_v1(sum(1 for _ in ast.walk(tree)) <= 1_000_000,
-  'ORDINARY_PHASE_SOURCE_AST_LIMIT')
+ if type(getattr(scope, '_ordinary_controller_data_initialization_v1', None)) is dict and scope._ordinary_controller_data_initialization_v1.get('bounded_production') is True:
+  tree, observed = _f._ordinary_bounded_source_protected_module_v1(
+   scope, 'tools/run_validation_gates.py', 16 << 20, 1_000_000)
+ else:
+  raw = source.read_administration(path, 16 << 20)
+  tree = ast.parse(raw.decode('utf-8', 'strict'), filename=str(path))
+  _f._preflight_require_v1(sum(1 for _ in ast.walk(tree)) <= 1_000_000,
+   'ORDINARY_PHASE_SOURCE_AST_LIMIT')
  definitions = {node.name: node for node in tree.body if isinstance(node, ast.FunctionDef)}
  for name, function, code in geometry['constructors']:
   _f._preflight_require_v1(getattr(runner, name) is function and function.__code__ is code
@@ -6586,6 +6424,11 @@ def _facet_fn_pytest_fixed_repository_effects_v1(scope, paths, plan, execution_p
      def acquire(relative):
       if relative in compiled_sources:
        return compiled_sources[relative]
+      if type(getattr(scope, '_ordinary_controller_data_initialization_v1', None)) is dict and scope._ordinary_controller_data_initialization_v1.get('bounded_production') is True:
+       tree, observation = owner._ordinary_source_operand_v1(scope, record, relative,
+        source_byte_limit=source_byte_limit, source_node_limit=source_node_limit)
+       compiled_sources[relative] = (tree, observation)
+       return tree, observation
       owner._mapper_portable_relative_v1(relative)
       path = paths.repo_root.joinpath(*relative.split('/'))
       row = source.row_index.get(str(path))
@@ -6908,6 +6751,11 @@ def _facet_fn_run_output_recipe_v1(scope, effects):
   simultaneous_descriptors=2 * len(rows) + 2 + max(depths, default=0),
   namespace_file_count=len(rows), namespace_directory_count=len(set(
    parent for row in rows for parent in row['spec']['parent_paths'])))
+ from tools.ci_branch_context import (_ordinary_selected_v_directory_programme_v1,
+  _ordinary_selected_v_directory_phase_demand_v1)
+ directory=_ordinary_selected_v_directory_programme_v1(scope,effects)
+ if directory is not None:
+  _ordinary_selected_v_directory_phase_demand_v1(scope,directory,result['demand'])
  result['demand_original'] = tuple(result['demand'].items())
  result['original'] = (result, scope, effects, paths, scope.source, scratch,
   result['image'], rows, result['row_originals'], result['demand'],
@@ -7154,6 +7002,10 @@ def _facet_fn_control_source_sites_v1(definition):
 
 def _facet_fn_control_programme_check_v1(scope, programme):
  import tools.validation_reliability as _f
+ attempt=getattr(scope,'_ordinary_controller_data_initialization_v1',None)
+ if type(attempt)is dict and attempt.get('bounded_production')is True:
+  from tools.ci_branch_context import _ordinary_bounded_control_programme_check_v1 as _bounded
+  return _bounded(scope,programme)
  if (type(programme) is not dict
    or programme is not scope._ordinary_control_source_programme_v1
    or programme is not scope._ordinary_original_control_source_programme_v1):
@@ -7464,6 +7316,8 @@ def _facet_fn_control_sites_check_v1(scope, label, expected_sites, site_rows, se
   raise ValueError('CONTROL_EXACT_SOURCE_TRANSITIVE_SITE_COVERAGE')
  functions = tuple(row[4] for row in selectors)
  for row in selected:
+  from tools.ci_branch_context import _ordinary_bounded_control_unresolved_site_v1 as _bounded
+  if _bounded(scope,row):continue
   if type(row) is not tuple or len(row) != 3 or type(row[2]) is not tuple or not row[2]:
    raise ValueError('CONTROL_ORIGINAL_SITE_ROUTE_TABLE_REQUIRED')
   for route in row[2]:
@@ -8397,7 +8251,7 @@ def _facet_fn_pytest_source_graph_v1(scope, paths, plan, execution_plan, source,
    '_pytest/config/__init__.py', '_pytest/main.py', '_pytest/fixtures.py', '_pytest/tmpdir.py',
    'pluggy/_manager.py', 'pluggy/_callers.py', 'pluggy/_hooks.py',
    *(name for plugin in defaults for name in installed_module_map.get('_pytest.' + plugin, ()))))
-  _pytest_need(record['raw_bytes'] <= source_byte_limit and record['nodes'] <= source_node_limit,
+  _pytest_need(_f._ordinary_bounded_source_aggregate_check_v1(scope, record, source_byte_limit, source_node_limit),
    'ORDINARY_PYTEST_INSTALLED_GRAPH_CUMULATIVE_SOURCE_ALLOWANCE')
   installation_tree, installation_python = installed('_pytest/python.py')
   selector_calls = tuple(node for node in ast.walk(installation_tree)
@@ -8419,13 +8273,13 @@ def _facet_fn_pytest_source_graph_v1(scope, paths, plan, execution_plan, source,
    if relative in observed_by_path: return tree_by_path[relative], observed_by_path[relative]
    tree, observed = _f._ordinary_source_operand_v1(scope, record, relative,
     source_byte_limit=source_byte_limit, source_node_limit=source_node_limit)
-   _pytest_need(ast.dump(tree, include_attributes=False)
-    == ast.dump(ast.parse(observed['text']), include_attributes=False),
+   _pytest_need((_f._ordinary_bounded_source_module_check_v1(scope, tree, observed)
+   if 'bounded_source_credit_index' in observed else ast.dump(tree, include_attributes=False)
+    == ast.dump(ast.parse(observed['text']), include_attributes=False)),
     'ORDINARY_PYTEST_GRAPH_RETAINED_AST_IS_ACTUAL_CAPTURED_BODY')
    record['raw_bytes'] += observed['raw_bytes']
    record['nodes'] += observed['nodes']
-   _pytest_need(record['raw_bytes'] <= source_byte_limit
-    and record['nodes'] <= source_node_limit,
+   _pytest_need(_f._ordinary_bounded_source_aggregate_check_v1(scope, record, source_byte_limit, source_node_limit),
     'ORDINARY_PYTEST_GRAPH_CUMULATIVE_SOURCE_AND_AST_ALLOWANCE')
    observed_by_path[relative] = observed
    tree_by_path[relative] = tree
@@ -8434,7 +8288,7 @@ def _facet_fn_pytest_source_graph_v1(scope, paths, plan, execution_plan, source,
    source_byte_limit=source_byte_limit, source_node_limit=source_node_limit, source_form='BINARY')
   record['raw_bytes'] += config_observed['raw_bytes']
   record['nodes'] += config_observed['nodes']
-  _pytest_need(record['raw_bytes'] <= source_byte_limit and record['nodes'] <= source_node_limit,
+  _pytest_need(_f._ordinary_bounded_source_aggregate_check_v1(scope, record, source_byte_limit, source_node_limit),
    'ORDINARY_PYTEST_GRAPH_CUMULATIVE_SOURCE_AND_AST_ALLOWANCE')
   config_lines = tuple(value.strip() for value in config_raw.decode('utf-8', 'strict').splitlines()
    if value.strip() and not value.lstrip().startswith(('#', ';')))
@@ -8664,6 +8518,7 @@ def _facet_fn_supported_effect_programme_v1(scope, paths, plan, execution_plan, 
     and graph['bound_rows'] is bound_rows
     and len(graph['rows']) == len(component['rows']) == len(bound_rows),
     'ORDINARY_SELECTED_PYTEST_SAME_ACQUIRED_GRAPH_COMPONENT')
+   assembled=[]
    for row, graph_row in zip(component['rows'], graph['rows'], strict=True):
     selected = selection.pytest_source_for_bound_row(row['bound_row'])
     _f._preflight_require_v1(graph_row['bound_row'] is row['bound_row']
@@ -8671,29 +8526,16 @@ def _facet_fn_supported_effect_programme_v1(scope, paths, plan, execution_plan, 
      and graph_row['native_programme'] is None
      and graph_row['unresolved_source_facts'],
      'ORDINARY_SELECTED_PYTEST_ORIGINAL_ACQUIRED_ROW_NOT_NATIVE_GRANT')
-    record['unresolved_rows'].append((row['bound_row'], tuple(selected.paths),
-     'selected pytest application/native programme still requires original associations: '
-      + repr(tuple(graph_row['unresolved_source_facts']))))
-   raise ValueError('ORDINARY_SELECTED_PYTEST_NATIVE_SOURCE_PROGRAMME_REQUIRED:'
-    + repr(tuple((bound[2], paths, reason) for bound, paths, reason in record['unresolved_rows'])))
+    from tools.ci_branch_context import _ordinary_pytest_supported_row_v1
+    assembled.append(_ordinary_pytest_supported_row_v1(scope,record,component,graph,row,graph_row))
+   assembled=tuple(assembled)
   else:
    component = _f._ordinary_deterministic_source_ingredients_v1(scope, paths, plan, execution_plan,
     source, source_byte_limit=source_byte_limit, source_node_limit=source_node_limit)
    record['components'] = (component,)
-   assembled = []
-   for row in component['rows']:
-    if row['native_programme'] is None or row['unresolved_source_facts']:
-     record['unresolved_rows'].append((row['bound_row'], row['source_module'],
-      row['unresolved_source_facts']))
-     continue
-    assembled.append(dict(entry=row['entry'], execution=row['execution'],
-     bound_row=row['bound_row'], source_position=row['source_position'], targets=row['targets'],
-     source_operands=row['source_operands'], native_programme=row['native_programme'],
-     run_output_effects=row['run_output_effects'], source_programme=row))
-   if record['unresolved_rows']:
-    raise ValueError('ORDINARY_SELECTED_DETERMINISTIC_SOURCE_EDGE_REQUIRED:'
-     + repr(tuple((bound[2], module, reason) for bound, module, reason in record['unresolved_rows'])))
-   assembled = tuple(assembled)
+   from tools.ci_branch_context import _ordinary_selected_operational_rows_v1
+   assembled = _ordinary_selected_operational_rows_v1(scope,record,component,
+    source_byte_limit=source_byte_limit,source_node_limit=source_node_limit)
   _f._preflight_require_v1(len(assembled) == len(bound_rows)
    and all(row['bound_row'] is bound for row, bound in zip(assembled, bound_rows, strict=True)),
    'ORDINARY_SUPPORTED_EFFECT_COMPLETE_SELECTED_ROW_ASSEMBLY')
@@ -10156,9 +9998,9 @@ def _facet_m_prepare_rp5a_source_v1(self, paths, plan, bound_rows, *, occurrence
      'ORDINARY_R_ACTUAL_SOURCE_SELECTION_BEFORE_C_ONE_USE')
     policy = runner._ordinary_rp5a_source_policy_checked_v1(resource['rp5a_source_policy'], self)
     selected = tuple((entry, execution, position,
-     _f._rp5a_consumer_role_v1(entry.argv, paths.repo_root))
+     _f._ordinary_selected_rp5a_role_v1(self,entry))
      for entry, execution, position in bound_rows
-     if _f._rp5a_consumer_role_v1(entry.argv, paths.repo_root) is not None)
+     if _f._ordinary_selected_rp5a_role_v1(self,entry) is not None)
     if not selected:
      return None
     self._ordinary_rp5a_source_attempted_v1 = True
@@ -10392,7 +10234,7 @@ def _facet_m_bind_rp5a_source_v1(self, source_programme, parent_result):
   'ORDINARY_R_ACTUAL_ORIGINAL_NATIVE_BASIS_AND_SOURCE_ASSOCIATION')
  self._ordinary_rp5a_capture_resources_v1()
  paths, plan = source_programme['paths'], source_programme['plan']
- roles = {entry.command_index: _f._rp5a_consumer_role_v1(entry.argv, paths.repo_root) for entry in plan}
+ roles = {entry.command_index: _f._ordinary_selected_rp5a_role_v1(self,entry) for entry in plan}
  _f._preflight_require_v1(len(plan) == len(set(entry.command_index for entry in plan))
   and all(entry.command_index == index and entry.run_id == paths.run_id
    and entry.phase == plan[0].phase and entry.cwd == str(paths.repo_root)
@@ -10440,7 +10282,7 @@ def _facet_m_bind_rp5a_source_v1(self, source_programme, parent_result):
    'scanner_limits', 'payload_byte_limit', 'frame_scratch_bytes', 'frame_reread_bytes',
    'candidate_read_bytes', 'deadline_ns', 'binding_byte_limit',
    'fence_metadata_calls', 'fence_native_read_bytes')}
-  table[key].update(argv=row['entry'].argv, expected_inventory=parent_result['inventory'],
+  table[key].update(argv=_f._ordinary_selected_registered_argv_v1(self,row['entry']), expected_inventory=parent_result['inventory'],
    reader_basis=_f._rp5a_basis_projection_v1(parent_result['basis']),
    read_limits=_f.asdict(row['read_limits']))
   rows[key] = row
@@ -10933,9 +10775,20 @@ def _facet_m_issue_phase_allocations_v1(self, paths, plan, execution_plan,
       sources.append(native)
       role = _f._rp5a_consumer_role_v1(execution.registered_argv, paths.repo_root)
       roles.append(role)
+      task_quota,nofile_quota=native['tasks'],native['nofile']
+      if 'operational_operand' in native:
+       from tools import ci_branch_context as _ci
+       operational=_ci._ordinary_selected_operational_native_check_v1(self,native)
+       _f._preflight_require_v1(operational is not None and operational is native['operational_operand'],
+        'ORDINARY_SELECTED_OPERATIONAL_IDENTICAL_QUOTA_OPERAND')
+       task_quota,nofile_quota=_ci._ordinary_supported_application_quotas_v1(self,resource,native)
+      elif (record['geometry']['phase'] in runner.PYTEST_SHARD_COMMANDS
+       or record['geometry']['phase']==runner.FAST_PREFLIGHT_PHASE):
+       from tools.ci_branch_context import _ordinary_supported_application_quotas_v1
+       task_quota,nofile_quota=_ordinary_supported_application_quotas_v1(self,resource,native)
       rows.append(dict(source_position=position, native_programme=native,
        stdout_bytes=native['stdout_minimum'], stderr_bytes=native['stderr_minimum'],
-       tasks=native['tasks'], nofile=native['nofile'],
+       tasks=task_quota, nofile=nofile_quota,
        bootstrap_fd_demand=native['bootstrap_fd_demand'],
        application_fd_demand=native['application_fd_demand']))
      mapper = getattr(self, '_ordinary_mapper_sources_v1', None)
@@ -11726,7 +11579,7 @@ def _facet_m_select_occurrence_v1(self, entry, *, argv, cwd, environment,
   native_phase, tasks, syscall_filter = _f._ordinary_selected_policy_projection_v1(self, programme)
   _f._preflight_require_v1(native_phase == selected_phase,
    'ORDINARY_NATIVE_POLICY_EXACT_SELECTED_PHASE_AND_ROW')
-  role = _f._rp5a_consumer_role_v1(entry.argv, _f.Path(entry.cwd))
+  role = _f._ordinary_selected_rp5a_role_v1(self,entry)
   if role is not None:
    context = self._ordinary_rp5a_source_context_v1()
    selected = context['rows'].get(str(entry.command_index))
@@ -11770,7 +11623,9 @@ def _facet_m_select_occurrence_v1(self, entry, *, argv, cwd, environment,
 def _facet_m_run_output_namespace_checked_v1(self, programme):
  import tools.validation_reliability as _f
  record = _f._ordinary_run_output_recipe_check_v1(self)
- if record is None or not record['rows']:
+ from tools.ci_branch_context import _ordinary_selected_v_directory_record_v1
+ directory=_ordinary_selected_v_directory_record_v1(self)
+ if record is None or not record['rows'] and directory is None:
   _f._preflight_require_v1(programme is self._ordinary_resource_programme_v1['namespace_programme'],
    'ORDINARY_V_UNCHANGED_ZERO_OUTPUT_NAMESPACE')
   return programme
@@ -11806,6 +11661,8 @@ def _facet_m_run_output_native_check_v1(self, occurrence):
    and any(item['row'] is row for row in recipe['rows'])
    for item, kept in zip(proof['rows'], original[5], strict=True)),
   'ORDINARY_V_ORIGINAL_COMPLETE_NATIVE_FILE_PROOF')
+ from tools.ci_branch_context import _ordinary_selected_v_directory_native_check_v1
+ _ordinary_selected_v_directory_native_check_v1(self,occurrence)
  return proof
 
 
@@ -11993,7 +11850,7 @@ def _facet_m_rp5a_protection_v1(self, record, *, mounts, credentials, actual_roo
  _f._preflight_require_v1(record is self._ordinary_current_occurrence_v1
   and record['process'] is self.process and entry is record['entry']
   and not record['released'] and material[8] is not None
-  and _f._rp5a_consumer_role_v1(record['argv'], _f.Path(record['cwd'])) == 'SCANNER',
+  and _f._ordinary_selected_rp5a_role_v1(self,record['entry']) == 'SCANNER',
   'ORDINARY_R_PROTECTION_SAME_ONLY_ACTIVE_WRITER_AND_C_BORROW')
  observation = dict(scope=self, record=record, material=material, policy=self._ordinary_policy_v1,
   mounts=mounts, credentials=credentials, root=actual_root, files=[],
@@ -12734,6 +12591,13 @@ def _facet_m_source_data_live_credit_v1(self, state):
   _f._preflight_require_v1(type(credit) is tuple and len(credit) == 7,
    'ORDINARY_DATA_FROZEN_CREDIT_SHAPE')
   entry, allocation, stage, managed, retained, deadline, basis = credit
+  if stage=='source':
+   from tools.ci_branch_context import _ordinary_bounded_control_source_credit_v1 as _bounded
+   _bounded(self,state,credit)
+   _f._preflight_require_v1(not any(entry is item for item in seen),
+    'ORDINARY_DATA_ONE_ORIGINAL_SOURCE_CREDIT')
+   seen.append(entry);heap+=managed;payload+=retained
+   continue
   _f._preflight_require_v1(not any(entry is item for item in seen)
    and any(allocation is item for item in allocations)
    and type(managed) is int and managed >= 0
@@ -13643,6 +13507,7 @@ def _facet_fn_data_layout_collect_v1(scope, install_record, observation,
    decoder.parse_constant, whitespace):
   raise ValueError("SOURCE_DATA_ACTUAL_DECODER_OBJECT_OBSERVATION")
  sizes, tiny = _ordinary_initial_abi_observation_v1()
+ gc = sizes["gc"]
  if (type(control_source_rows) is not tuple or not control_source_rows
    or type(delegated_control_rows) is not tuple
    or original["delegated_control_rows"] is not delegated_control_rows):
@@ -13664,14 +13529,20 @@ def _facet_fn_data_layout_collect_v1(scope, install_record, observation,
    a[0] != b[0] or a[1] is not b[1] or a[2] is not b[2] or a[3] is not b[3]
    for a, b in zip(associated_rows, expected_rows))):
   raise ValueError("SOURCE_DATA_SAME_ORIGINAL_SOURCE_ASSOCIATION")
- incidence = _f._ordinary_control_frame_demands_v1(scope, source_product, operation_rows,
-  frame_basicsize=types.FrameType.__basicsize__,
-  traceback_basicsize=types.TracebackType.__basicsize__,
-  function_basicsize=types.FunctionType.__basicsize__,
-  cell_basicsize=types.CellType.__basicsize__,
-  tuple_prefix=sizes["tuple_prefix"], gc_header_size=gc, pointer_size=8,
-  interpreter_storage_request=interpreter_storage_request)
- fixed = list(incidence["programme_components"])
+ bounded=operation_rows is None and interpreter_storage_request is None
+ if bounded:
+  from tools.ci_branch_context import _ordinary_bounded_control_layout_preissued_check_v1 as _bounded
+  transfer=_bounded(scope,source_product)
+  fixed=[]
+ else:
+  incidence = _f._ordinary_control_frame_demands_v1(scope, source_product, operation_rows,
+   frame_basicsize=types.FrameType.__basicsize__,
+   traceback_basicsize=types.TracebackType.__basicsize__,
+   function_basicsize=types.FunctionType.__basicsize__,
+   cell_basicsize=types.CellType.__basicsize__,
+   tuple_prefix=sizes["tuple_prefix"], gc_header_size=gc, pointer_size=8,
+   interpreter_storage_request=interpreter_storage_request)
+  fixed = list(incidence["programme_components"])
  required_roots = ("raw_binding", "allocator_projection", "live_credit",
   "managed_issue", "scan_issue", "construction_issue", "emitter",
   "lexical", "construction", "json.loads", "JSONDecoder.decode",
@@ -13699,8 +13570,11 @@ def _facet_fn_data_layout_collect_v1(scope, install_record, observation,
   buffer_empty=tiny[1][1][0], buffer_one=tiny[1][1][1], buffer_two=tiny[1][1][2],
   fixed_control_demand=sum(size for _, size in fixed),
   original_source_association=source_product,
-  original_operation_frame_rows=operation_rows,
-  frame_incidence=incidence,
+  **(dict(bounded_control_coverage=(source_product,
+   scope._ordinary_controller_data_initialization_v1['profile'],transfer,
+   tuple(scope._ordinary_control_module_inputs_v1['selection']['routes'][2]),
+   'SOURCE_KNOWN_REQUESTS_AND_ENFORCED_NATIVE_LIMITS_NOT_ALL_ALLOCATION_CERTIFICATION'))
+   if bounded else dict(original_operation_frame_rows=operation_rows,frame_incidence=incidence)),
   constructor_source_observation=original, installation_record=install_record,
   controller_identity=original["actor"],
   runtime_origin=original["runtime_origin"],
@@ -18359,10 +18233,8 @@ def _facet_fn_initial_native_observations_v1(native, *, native_input, early_prof
     try:
      import select
      pid = owner[0]
-     # This fixed hook still awaits its genuine protected Source-programme issuer.
-     # Neither profile[6]=None nor a non-None port shape supplies that authority.
-     _f._preflight_require_v1(False,
-      'ORDINARY_INITIAL_ORIGINAL_PROTECTED_PROGRAMME_ISSUER_NOT_IMPLEMENTED')
+     from tools.ci_branch_context import _ordinary_initial_physical_source_admission_v1 as _source_admission
+     _source_admission(native_input,native,early_profile,original_cutoffs)
      capacity = _f._ordinary_initial_prefix_capacity_v1(native_input, original_cutoffs=original_cutoffs)
      role_root = _f._role_root_acquire_v1(native, native_input)
      current_root = role_root['slot']
@@ -18961,6 +18833,9 @@ def _facet_fn_control_compiler_source_projection_v1(layout, components):
  if(_f._ordinary_data_size_v1(layout,'pointer')!=8 or _f._ordinary_data_size_v1(layout,'gc')!=16
   or type(components)is not tuple or len(components)!=len(labels)):
   raise ValueError('CONTROL_ORIGINAL_COMPILER_PROJECTION_LAYOUT')
+ if (type(components[0])is tuple and len(components[0])==2
+  and components[0][0]=='original_control_all_retained_expected_Code_names_constants_and_bounded_source_products'):
+  labels=(components[0][0],)+labels[1:]
  result=[]
  for expected,row in zip(labels,components):
   if(type(row)is not tuple or len(row)!=2 or row[0]!=expected
@@ -18971,3 +18846,151 @@ def _facet_fn_control_compiler_source_projection_v1(layout, components):
   for key,count in zip(keys,row[1][1:]):value+=count*_f._ordinary_data_size_v1(layout,key)
   result.append((expected,value))
  return tuple(result)
+
+
+def _ordinary_native_call_texts_v1(operand, selected, *, pairs=False, original_calls=None):
+ """Return exact original Call text with one local standard-library line split."""
+ import ast
+ def reference_segment(source, node, *, padded=False):
+     'Get source code segment of the *source* that generated *node*.\n\n    If some location information (`lineno`, `end_lineno`, `col_offset`,\n    or `end_col_offset`) is missing, return None.\n\n    If *padded* is `True`, the first line of a multi-line statement will\n    be padded with spaces to match its original position.\n    '
+     try:
+         if node.end_lineno is None or node.end_col_offset is None:
+             return None
+         lineno = node.lineno - 1
+         end_lineno = node.end_lineno - 1
+         col_offset = node.col_offset
+         end_col_offset = node.end_col_offset
+     except AttributeError:
+         return None
+
+     lines = _splitlines_no_ff(source, maxlines=end_lineno+1)
+     if end_lineno == lineno:
+         return lines[lineno].encode()[col_offset:end_col_offset].decode()
+
+     if padded:
+         padding = _pad_whitespace(lines[lineno].encode()[:col_offset].decode())
+     else:
+         padding = ''
+
+     first = padding + lines[lineno].encode()[col_offset:].decode()
+     last = lines[end_lineno].encode()[:end_col_offset].decode()
+     lines = lines[lineno+1:end_lineno]
+
+     lines.insert(0, first)
+     lines.append(last)
+     return ''.join(lines)
+
+ def reference_splitter(source, maxlines=None):
+     'Split a string into lines ignoring form feed and other chars.\n\n    This mimics how the Python parser splits source code.\n    '
+     global _line_pattern
+     if _line_pattern is None:
+         # lazily computed to speedup import time of `ast`
+         import re
+         _line_pattern = re.compile(r"(.*?(?:\r\n|\n|\r|$))")
+
+     lines = []
+     for lineno, match in enumerate(_line_pattern.finditer(source), 1):
+         if maxlines is not None and lineno > maxlines:
+             break
+         lines.append(match[0])
+     return lines
+
+ code_fields = ('co_code', 'co_consts', 'co_names', 'co_varnames',
+  'co_argcount', 'co_posonlyargcount', 'co_kwonlyargcount', 'co_nlocals',
+  'co_stacksize', 'co_freevars', 'co_cellvars', 'co_exceptiontable')
+ original = ast.get_source_segment
+ original_splitter = ast.__dict__.get('_splitlines_no_ff')
+ original_code = (getattr(original, '__code__', None)
+  if type(original) is type(reference_segment) else None)
+ splitter_code = (getattr(original_splitter, '__code__', None)
+  if type(original_splitter) is type(reference_splitter) else None)
+ standard = (
+  type(original) is type(reference_segment)
+  and type(original_splitter) is type(reference_splitter)
+  and original.__globals__ is ast.__dict__
+  and original_splitter.__globals__ is ast.__dict__
+  and original.__builtins__ is reference_segment.__builtins__
+  and original_splitter.__builtins__ is reference_splitter.__builtins__
+  and original.__closure__ is None
+  and original_splitter.__closure__ is None
+  and all(getattr(original_code, key) ==
+   getattr(reference_segment.__code__, key) for key in code_fields)
+  and all(getattr(splitter_code, key) ==
+   getattr(reference_splitter.__code__, key) for key in code_fields)
+  and (original_code.co_flags & ~(16 | 16777216)) ==
+   (reference_segment.__code__.co_flags & ~(16 | 16777216))
+  and (splitter_code.co_flags & ~(16 | 16777216)) ==
+   (reference_splitter.__code__.co_flags & ~(16 | 16777216)))
+ position = [0]
+ lines = None
+ previous_text = None
+ previous_pattern = None
+ def format_node(node):
+  nonlocal lines, previous_text, previous_pattern
+  text = operand['text']
+  current = ast.get_source_segment
+  splitter = ast.__dict__.get('_splitlines_no_ff')
+  if not (standard
+   and current is original and splitter is original_splitter
+   and current.__code__ is original_code
+   and splitter.__code__ is splitter_code
+   and current.__globals__ is ast.__dict__ and splitter.__globals__ is ast.__dict__
+   and current.__builtins__ is reference_segment.__builtins__
+   and splitter.__builtins__ is reference_splitter.__builtins__
+   and current.__closure__ is None and splitter.__closure__ is None
+   and current.__defaults__ is None and type(current.__kwdefaults__) is dict
+   and len(current.__kwdefaults__) == 1 and current.__kwdefaults__.get('padded') is False
+   and splitter.__defaults__ == (None,) and splitter.__kwdefaults__ is None
+   and type(text) is str and type(node) is ast.Call
+   and ast.Call.__getattribute__ is ast.AST.__getattribute__
+   and type(ast.AST.__getattribute__) is type(object.__getattribute__)
+   and ast.AST.__getattribute__.__objclass__ is ast.AST
+   and not any(key in cls.__dict__ and cls.__dict__[key] is not None
+    for cls in ast.Call.__mro__ for key in ('lineno', 'end_lineno', 'col_offset', 'end_col_offset'))):
+   return ast.get_source_segment(text, node)
+  fields = ast.AST.__dict__['__dict__'].__get__(node, type(node))
+  start = fields.get('lineno'); end = fields.get('end_lineno')
+  col = fields.get('col_offset'); end_col = fields.get('end_col_offset')
+  if not (type(start) is type(end) is type(col) is type(end_col) is int
+   and 0 < start <= end and col >= 0 and end_col >= 0):
+   return ast.get_source_segment(text, node)
+  import sys as ast_sys
+  modules = ast_sys.__dict__.get('modules') if type(ast_sys) is type(ast) else None
+  re_module = modules.get('re') if type(modules) is dict else None
+  pattern_type = re_module.__dict__.get('Pattern') if type(re_module) is type(ast) else None
+  pattern = ast.__dict__.get('_line_pattern')
+  if not (type(pattern_type) is type and pattern_type.__flags__ & 256
+   and pattern_type.__module__ == 're' and pattern_type.__name__ == 'Pattern'
+   and type(pattern) is pattern_type
+   and pattern.pattern == reference_splitter.__code__.co_consts[2] and pattern.flags == 32):
+   return ast.get_source_segment(text, node)
+  if lines is None or text is not previous_text or pattern is not previous_pattern:
+   # Production caller validates its original planning credit before entry; legacy has no credit claim.
+   lines = splitter(text)
+   previous_text = text
+   previous_pattern = pattern
+  if end > len(lines):
+   return ast.get_source_segment(text, node)
+  failed = False
+  try:
+   if start == end:
+    value = lines[start - 1].encode()[col:end_col].decode()
+   else:
+    first = lines[start - 1].encode()[col:].decode()
+    last = lines[end - 1].encode()[:end_col].decode()
+    middle = lines[start:end - 1]
+    middle.insert(0, first); middle.append(last)
+    value = ''.join(middle)
+  except (IndexError, TypeError, UnicodeError):
+   failed = True
+  if failed:
+   return ast.get_source_segment(text, node)
+  if original_calls is not None and not pairs and type(selected) is ast.Module:
+   index = position[0]; position[0] += 1
+   if type(original_calls) is tuple and index < len(original_calls):
+    pair = original_calls[index]
+    if type(pair) is tuple and len(pair) == 2 and pair[0] is node and type(pair[1]) is str and pair[1] == value:
+     return pair[1]
+  return value
+ return tuple((node, format_node(node)) if pairs else format_node(node)
+  for node in ast.walk(selected) if (type(node) is ast.Call if pairs else isinstance(node, ast.Call)))

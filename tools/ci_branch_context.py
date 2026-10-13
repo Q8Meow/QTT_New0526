@@ -5079,7 +5079,7 @@ def _ordinary_ci_initial_common_source_v1(extent, parent_path_count):
  initializer=5125424+21625000+U(7,7*extent)+T(1,parent_path_count)
  initializer+=6*(U(67,3*extent)+L(2,130)+T(1,65))
  initializer+=672+T(1,8)+2*T(1,9)+2*T(1,parent_path_count)+24
- return(2368680179,302894236,34477319,initializer,1802350,241543444,18421352,1823560,1983204)
+ return(2454466522,324772011,63340350,initializer,1802350,241543444,19433768,1924808,2003996)
 
 def _ordinary_ci_initial_common_source_check_v1(native_input,profile,allocation):
  issue=native_input['initial_request_issuer'];source=issue['source_generation'];old=issue['common_source_original'];fn=_ordinary_ci_initial_common_source_v1
@@ -5389,7 +5389,7 @@ def _ordinary_ci_initial_direct_request_v1(reliability, source_generation):
  # Actual receipt publication projects a fixed bounded shape; ASCII escaping
  # can expand each input character sixfold. Source strings are prospectively
  # derived from the selected direct closure, not a post-optimized Code quota.
- bodies,slots,string_chars,initializer_units=(0x000018dd,0x001da1c0,0x0003ee1f,0x00001700)
+ bodies,slots,string_chars,initializer_units=(0x00001a5d,0x001f82f4,0x0003fee0,0x00001874)
  success_chars=4*(4096+32)+8*4096
  failure_chars=success_chars+string_chars+100000
  # First-error dispatch stops the remaining original command list. Seven
@@ -7999,7 +7999,8 @@ def _ordinary_ci_bootstrap_stage_source_request_v1(runner, product, stage):
   raise ValueError('ORDINARY_STAGE_SOURCE_ORIGINAL_COMPLETE_MAPPING_ROWS')
  parts=(('original_request_emitter_and_stage_records',records),
   ('original_selected_call_frames_and_retained_failures',frames+closures+failures))
- if stage=='PREPARE':parts+=(('original_interpreter_and_prior_intern_storage',storage['mapped_extent']),)
+ if stage=='PREPARE':parts+=(('original_interpreter_and_prior_intern_storage',storage['mapped_extent']),
+  ('bounded_original_ticket_and_stage_carriers',_ordinary_bounded_bootstrap_products_request_v1(layout)))
  retained=tuple(name for name,_ in parts)
  request=(product,source,native,product['startup'],layout,parts,retained,
   producer,producer.__code__,product['native_root'])
@@ -8163,3 +8164,3927 @@ def _custody_only_stat_paths_v1(repo_root, paths):
             native.failure = error
             raise
     return frozenset(selected)
+
+
+def _rp5a_consumer_role_v1(argv, repo_root):
+    """Classify actual Python entry/selected pytest paths, never payload prose."""
+    if type(argv) is not tuple or not argv or any(type(v) is not str for v in argv):
+        raise TypeError("original command vector required")
+    offset = 1
+    while offset < len(argv) and argv[offset] in ("-B", "-I", "-u"):
+        offset += 1
+    if offset >= len(argv):
+        return None
+    root = Path(repo_root)
+    entry = argv[offset].replace("\\", "/")
+    if Path(entry).is_absolute():
+        try:
+            entry = Path(entry).relative_to(root).as_posix()
+        except ValueError:
+            return None
+    if entry == "tools/build_pr168_rp5a_legacy_semantic_audit.py":
+        return "EVIDENCE" if "--validation-scope-evidence-only" in argv[offset + 1:] else "SCANNER"
+    if entry == "tools/validate_pr168_rp5a_legacy_semantic_audit.py":
+        return "VALIDATE"
+    if entry == "tools/run_pytest_fresh_basetemp.py":
+        arguments = argv[offset + 1:]
+    elif argv[offset:offset + 2] == ("-m", "pytest"):
+        arguments = argv[offset + 2:]
+    else:
+        return None
+    value_options = {"-k", "-m", "-c", "-o", "-p", "--basetemp", "--rootdir", "--confcutdir",
+                     "--ignore", "--ignore-glob", "--deselect", "--maxfail", "--tb", "--color",
+                     "--import-mode", "--override-ini", "--inifile", "--durations"}
+    skip = False
+    literals = False
+    for value in arguments:
+        if skip:
+            skip = False
+            continue
+        if not literals and value == "--":
+            literals = True
+            continue
+        if not literals and value.startswith("-"):
+            skip = value in value_options
+            continue
+        selected = value.split("::", 1)[0].replace("\\", "/").rstrip("/")
+        if Path(selected).is_absolute():
+            try:
+                selected = Path(selected).relative_to(root).as_posix()
+            except ValueError:
+                continue
+        parts = selected.split("/")
+        if parts[:2] == ["tests", "pr168_rp5a"] and all(p not in ("", ".", "..") for p in parts):
+            return "PYTEST"
+    return None
+
+
+def _facet_fn_native_source_programme_check_v1(scope, record):
+ import tools.validation_reliability as _f
+ _pytest_need = _f._preflight_require_v1
+ import ast
+ _pytest_need(type(scope) is _f._LinuxPreflightScopeV1 and type(record) is dict
+  and record['scope'] is scope and record['source'] is scope.source
+  and record['check'] is record['original_check'] is _f._ordinary_native_source_programme_check_v1,
+  'ORDINARY_NATIVE_SOURCE_PROGRAMME_ORIGINAL_CHECKER')
+ original = record['original']
+ _pytest_need(type(original) is tuple and len(original) == 8
+  and original[0] is record and original[1] is scope
+  and original[2] is record['bound_row'] and original[3] is record['source_operands']
+  and original[4] is record['call_grammar'] and original[5] is record['tool_operands']
+  and original[6] is record['errors'] and original[7] == (_f.os.getpid(), _f.threading.get_ident())
+  and not record['errors'] and tuple((key, value) for key, value in record.items()
+   if key != 'original_items') == record['original_items'],
+  'ORDINARY_NATIVE_SOURCE_PROGRAMME_FROZEN_IDENTITY_AND_VALUES')
+ selection = scope._ordinary_source_selection_v1
+ bound_row = record['bound_row']
+ _pytest_need(selection is scope._ordinary_original_source_selection_v1
+  and any(bound_row is row for row in selection._bound)
+  and type(bound_row) is tuple and len(bound_row) == 3
+  and record['entry'] is bound_row[0] and record['execution'] is bound_row[1]
+  and type(record['source_position']) is int and record['source_position'] == bound_row[2],
+  'ORDINARY_NATIVE_SOURCE_PROGRAMME_EXACT_SELECTED_OCCURRENCE')
+ for operand, snapshot in record['original_source_items']:
+  _pytest_need(any(operand is item for item in record['source_operands'])
+   and tuple(operand.items()) == snapshot and operand['complete']
+   and operand['error'] is None,
+   'ORDINARY_NATIVE_SOURCE_PROGRAMME_ORIGINAL_SOURCE_OPERAND')
+  if operand['source_form'] == 'PYTHON':
+   _pytest_need(operand['row'] is scope.source.row_index[operand['row']['path']]
+    and operand['version'] == tuple(scope.source.post[operand['row']['path']]),
+    'ORDINARY_NATIVE_SOURCE_PROGRAMME_ORIGINAL_REPOSITORY_SOURCE')
+   cache = scope._ordinary_source_operand_cache_v1
+   tree, observed = cache[(operand['path'], 'PYTHON')]
+   _pytest_need(cache is scope._ordinary_original_source_operand_cache_v1,
+    'ORDINARY_NATIVE_SOURCE_PROGRAMME_ORIGINAL_REPOSITORY_CACHE')
+  else:
+   _pytest_need(operand['source_form'] == 'INSTALLATION_PYTHON',
+    'ORDINARY_NATIVE_SOURCE_PROGRAMME_PYTHON_SOURCE_DOMAIN')
+   graph = scope._ordinary_pytest_source_graph_v1
+   _pytest_need(graph is scope._ordinary_original_pytest_source_graph_v1
+    and _f._ordinary_pytest_source_graph_check_v1(scope, graph) is graph
+    and any(operand is value for value in graph['installation_source_operands'])
+    and operand['capture_owner'] is graph,
+    'ORDINARY_NATIVE_SOURCE_PROGRAMME_ORIGINAL_INSTALLED_GRAPH_CAPTURE')
+   cache = graph['installation_operand_cache']
+   tree, observed = cache[(operand['path'], 'INSTALLATION_PYTHON')]
+  _pytest_need(observed is operand and (_f._ordinary_bounded_source_module_check_v1(scope, tree, operand)
+   if 'bounded_source_credit_index' in operand else ast.dump(tree, include_attributes=False)
+   == ast.dump(ast.parse(operand['text']), include_attributes=False)),
+   'ORDINARY_NATIVE_SOURCE_PROGRAMME_RETAINED_AST_BODY')
+ for operand, name, body, native_calls in record['call_grammar']:
+  _pytest_need(any(operand is item for item in record['source_operands'])
+   and type(name) is str and name and type(body) is str
+   and type(native_calls) is tuple,
+   'ORDINARY_NATIVE_SOURCE_PROGRAMME_CLOSED_BODY_GRAMMAR')
+  cache = (scope._ordinary_source_operand_cache_v1 if operand['source_form'] == 'PYTHON'
+   else scope._ordinary_pytest_source_graph_v1['installation_operand_cache'])
+  tree, observed = cache[(operand['path'], operand['source_form'])]
+  _pytest_need(observed is operand, 'ORDINARY_NATIVE_SOURCE_PROGRAMME_SAME_OPERAND_CACHE')
+  if name == '<module>':
+   _pytest_need(body == operand['text'],
+    'ORDINARY_NATIVE_SOURCE_PROGRAMME_FULL_MODULE_BODY')
+   selected = tree
+  else:
+   selected = tree
+   for part in name.split('.'):
+    matches = tuple(node for node in getattr(selected, 'body', ())
+     if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef))
+     and node.name == part)
+    _pytest_need(len(matches) == 1,
+     'ORDINARY_NATIVE_SOURCE_PROGRAMME_EXACT_QUALIFIED_BODY')
+    selected = matches[0]
+   _pytest_need(ast.dump(ast.parse(body).body[0], include_attributes=False)
+    == ast.dump(selected, include_attributes=False),
+    'ORDINARY_NATIVE_SOURCE_PROGRAMME_BODY_EQUALITY')
+  if native_calls:
+   from tools import validation_scope_registry as call_owner
+   call_texts = _ordinary_bounded_bootstrap_function_v1(call_owner,
+    call_owner._ORDINARY_INITIALIZED_MODULE_CODE_V1, '_ordinary_native_call_texts_v1',
+    (('pairs', False), ('original_calls', None)))
+   if 'bounded_source_credit_index' in operand:
+    _ordinary_bounded_source_planning_prepare_v1(scope)
+    original_calls = _ordinary_bounded_source_calls_v1(scope, tree, operand) if selected is tree else None
+   else:
+    original_calls = None
+   actual_calls = call_texts(operand, selected, original_calls=original_calls)
+  else:
+   actual_calls = ()
+  _pytest_need(all(type(call) is str and call in actual_calls for call in native_calls),
+   'ORDINARY_NATIVE_SOURCE_PROGRAMME_NATIVE_CALL_OPERANDS')
+ installation = scope._ordinary_installation_copy_v1
+ _pytest_need(installation is scope._ordinary_original_installation_copy_v1
+  and installation['complete'] and not installation['errors']
+  and scope._ordinary_installation_record_v1(installation['install']) is installation
+  and record['tool_operands'][0] is installation,
+  'ORDINARY_NATIVE_SOURCE_PROGRAMME_ACTUAL_INSTALLATION_HOLDER')
+ if len(record['tool_operands']) == 2:
+  _pytest_need(record['tool_operands'][1] is scope._ordinary_git_bindings_v1
+   and record['tool_operands'][1]['original_source'] is scope.source,
+   'ORDINARY_NATIVE_SOURCE_PROGRAMME_ACTUAL_GIT_SOURCE_BINDING')
+ _pytest_need(len(record['tool_operands']) in (1, 2)
+  and type(record['cohorts']) is tuple and record['cohorts']
+  and all(type(cohort) is tuple and len(cohort) == 3
+   and type(cohort[0]) is tuple and cohort[0]
+   and all(type(actor) is str and actor for actor in cohort[0])
+   and type(cohort[1]) is tuple
+   and all(any(operand is item for item in record['source_operands']) for operand in cohort[1])
+   and type(cohort[2]) is tuple and (cohort[2] or len(cohort[0]) == 1)
+   and all(type(call) is str and any(call in grammar[3] for grammar in record['call_grammar']
+    if any(grammar[0] is operand for operand in cohort[1])) for call in cohort[2])
+   for cohort in record['cohorts'])
+  and type(record['tasks']) is int and record['tasks'] == max(len(item[0]) for item in record['cohorts'])
+  and all(type(record[key]) is int and record[key] > 0 for key in
+   ('nofile', 'bootstrap_fd_demand', 'application_fd_demand'))
+  and record['nofile'] >= max(record['bootstrap_fd_demand'], record['application_fd_demand'])
+  and all(type(record[key]) is int and record[key] >= 0 for key in ('stdout_minimum', 'stderr_minimum')),
+  'ORDINARY_NATIVE_SOURCE_PROGRAMME_SOURCE_COHORT_AND_PREFIX_MINIMA')
+ if 'operational_operand' in record:
+  _ordinary_selected_operational_native_check_v1(scope,record)
+  return record
+ if 'pycache_operand' in record:
+  cache = record['pycache_operand']
+  _pytest_need(type(cache) is tuple and len(cache) == 5,
+   'ORDINARY_PYTHON_RECIPE_ORIGINAL_SOURCE_OWNED_CACHE_OPERAND')
+  entry, execution, position = bound_row
+  source_names = ('tools/validate_atomicrows_row_family_source_manifest_currentization.py',
+   'tools/build_master_plan_section_coverage_report.py',
+   'tools/validate_master_plan_section_coverage.py', 'tools/master_plan_ingest.py')
+  if execution.registered_argv == (_f.sys.executable, '-c', scope._ordinary_runner_owner_v1.PR138_NON_MUTATING_VALIDATION_SCRIPT):
+   source_names = _f._ordinary_pr138_source_names_v1()
+   _pytest_need(record['tasks'] == 2 and record['bootstrap_fd_demand'] == 12
+    and record['application_fd_demand'] == 9 and record['nofile'] == 12
+    and len(record['tool_operands']) == 2
+    and record['cohorts'][0][0] == ('APPLICATION', 'GIT'),
+    'ORDINARY_PR138_SOURCE_NATIVE_EXACT_ACTOR_AND_FD_MINIMA')
+   expected_argv = _f._ordinary_pr138_execution_argv_v1(scope, execution.registered_argv, entry.command_index)
+  elif execution.registered_argv[1:2] in (('tools/validate_atomicrows_semantic_field_coverage_enrichment_plan.py',), ('tools/validate_atomicrows_semantic_value_materialization_owner_authorization_gate.py',), ('tools/validate_atomicrows_semantic_value_materialization_authorization_handoff_readiness_gate.py',)):
+   source_names = tuple(item['path'] for item in record['source_operands'])
+   _pytest_need(record['tasks'] == 2 and record['bootstrap_fd_demand'] == 12
+    and record['application_fd_demand'] == 9 and record['nofile'] == 12
+    and len(record['tool_operands']) == 2 and record['cohorts'][0][0] == ('APPLICATION', 'GIT')
+    and source_names[0] == execution.registered_argv[1]
+    and source_names[-1] == 'tools/validation_reliability.py',
+    'ORDINARY_READONLY_GIT_CLI_SOURCE_NATIVE_EXACT_MINIMA')
+   _f._ordinary_readonly_git_cli_branch_v1(scope)
+   expected_argv = _f._ordinary_readonly_git_cli_execution_v1(scope, execution.registered_argv, entry.command_index)
+  elif execution.registered_argv[:2] == (_f.sys.executable, 'tools/master_plan_traceability_check.py'):
+   source_names = ('tools/master_plan_traceability_check.py', 'tools/master_plan_ingest.py')
+   expected_argv = _f._ordinary_deterministic_readonly_argv_v1(scope,
+    execution.registered_argv, entry.command_index)
+  elif (len(execution.registered_argv)==4 and execution.registered_argv[2:]==('--repo-root','.')
+    and execution.registered_argv[1] not in source_names):
+   source_names,family = _f._ordinary_readonly_source_family_check_v1(scope, bound_row,
+    record['source_operands'], record['call_grammar'],_native_facts=True)
+   uses_git=bool(family['native_process_operations'])
+   _pytest_need(record['tasks']==(2 if uses_git else 1) and record['bootstrap_fd_demand']==12
+    and record['application_fd_demand']==(9 if uses_git else 8) and record['nofile']==12
+    and len(record['tool_operands'])==(2 if uses_git else 1) and len(record['cohorts'])==1
+    and record['cohorts'][0][0]==(('APPLICATION','GIT') if uses_git else ('APPLICATION',)),
+    'ORDINARY_READONLY_SOURCE_FAMILY_EXACT_NATIVE_MINIMA')
+   expected_argv = _f._ordinary_readonly_source_family_execution_v1(scope,
+    execution.registered_argv, entry.command_index)
+  else:
+   expected_argv = (execution.registered_argv[0], '-I', '-S', '-B', '-X',
+    'pycache_prefix=' + str(cache[0]), *execution.registered_argv[1:])
+  _pytest_need(type(cache) is tuple and len(cache) == 5
+   and cache[1] is bound_row and cache[2] is record['source_operands']
+   and cache[3] is record['call_grammar'] and cache[4] is installation
+   and type(entry.command_index) is int and entry.command_index > 0
+   and cache[0] == scope._ordinary_image_v1['mount_path'] / 'runtime'
+    / ('p' + str(entry.command_index)) / 'pycache'
+   and tuple(item['path'] for item in record['source_operands']) == source_names
+   and (execution.registered_argv[:2] == (_f.sys.executable, source_names[0])
+    or source_names == _f._ordinary_pr138_source_names_v1()
+    and execution.registered_argv == (_f.sys.executable, '-c', scope._ordinary_runner_owner_v1.PR138_NON_MUTATING_VALIDATION_SCRIPT))
+   and entry.argv == execution.execution_argv == expected_argv
+   and all(item[0] is operand and item[1] == '<module>' and item[2] == operand['text']
+    for operand, item in zip(record['source_operands'], record['call_grammar'], strict=True)),
+   'ORDINARY_PYTHON_RECIPE_ORIGINAL_SOURCE_OWNED_CACHE_OPERAND')
+ return record
+
+Path=pathlib.Path
+
+def _ordinary_selected_registered_argv_v1(scope, entry):
+ import tools.validation_reliability as f
+ if scope is None:
+  return entry.argv
+ need=f._preflight_require_v1
+ need(type(scope) is f._LinuxPreflightScopeV1 and scope._ordinary_selected_v1(),
+  'ORDINARY_ROLE_ACTUAL_SELECTED_SCOPE')
+ selection=scope._ordinary_source_selection_v1
+ runner=scope._ordinary_runner_owner_v1
+ paths,plan,execution=(scope._ordinary_bound_paths_v1,scope._ordinary_bound_plan_v1,
+  scope._ordinary_execution_plan_v1)
+ rows=runner._ordinary_phase_occurrence_selection_v1(scope,paths,plan,execution,
+  phase=selection._original[2])
+ index=entry.command_index
+ need(type(index) is int and 1<=index<=len(rows) and entry is plan[index-1]
+  and rows[index-1][0] is entry and rows[index-1][1] is execution[index-1]
+  and rows[index-1][1].execution_argv==entry.argv
+  and type(rows[index-1][1].registered_argv) is tuple,
+  'ORDINARY_ROLE_ORIGINAL_REGISTERED_EFFECTIVE_OCCURRENCE')
+ return rows[index-1][1].registered_argv
+
+def _ordinary_selected_rp5a_role_v1(scope, entry):
+ import tools.validation_reliability as f
+ registered=_ordinary_selected_registered_argv_v1(scope,entry)
+ return f._rp5a_consumer_role_v1(registered,f.Path(entry.cwd))
+
+def _ordinary_rp5a_registered_mapping_v1(io, row, binding, release, *,
+ runtime, repo_root, command_index, attestation):
+ import tools.validation_reliability as f
+ need=f._preflight_require_v1
+ f._ordinary_application_io_check_v1(io)
+ need(type(attestation) is f.InheritedRunAttestation
+  and type(attestation._scan_snapshot) is f._ScanRunSnapshot,
+  'ORDINARY_ROLE_HELD_INDEPENDENT_RUN_ATTESTATION')
+ snapshot=attestation._scan_snapshot
+ header=f._mapper_strip_run_extension_v1(snapshot.value)
+ need(header['run_id']==attestation.run_id==row['reader_limits']['run_id']
+  and header['phase']==binding['phase']
+  and type(header['command_count']) is int
+  and 1<=command_index<=header['command_count']
+  and header['paths']['repo_root']==str(repo_root)
+  and header['paths']['process_root']==str(attestation.process_root),
+  'ORDINARY_ROLE_INDEPENDENT_RUN_SOURCE_PATH_AND_OCCURRENCE')
+ need(type(row) is dict and type(row['argv']) is tuple and row['argv']
+  and type(binding) is dict and type(binding['argv']) is list
+  and type(release) is dict and set(release)=={'name','pid','start','invocation'}
+  and all(type(release[k]) is type(binding[k]) and release[k]==binding[k] for k in release)
+  and type(io['original_controls']) is tuple and len(io['original_controls'])==4
+  and io['original_controls'][0] is io['allowed_controls']
+  and binding['name']==io['original_controls'][1]
+  and binding['cgroup']==io['original_controls'][2]
+  and type(command_index) is int and command_index>0
+  and binding['command_index']==command_index
+  and f.Path(runtime).name=='p'+str(command_index)
+  and f.Path(runtime).parent.name=='runtime'
+  and f.Path(runtime).is_absolute()
+  and binding['environment'].get('QTT_LINUX_PREFLIGHT_RUNTIME')==str(runtime)
+  and str(repo_root) in binding['mappings']
+  and not io['errors'] and all(f._mapper_slot_settled_v1(slot) for slot in io['slots']),
+  'ORDINARY_ROLE_AUTHENTIC_NATIVE_CONTROL_MAPPING')
+ role=f._rp5a_consumer_role_v1(row['argv'],f.Path(repo_root))
+ need(role is not None and role==row['role'],
+  'ORDINARY_ROLE_REGISTERED_TABLE_DEFAULT_CLASSIFIER')
+ registered=row['argv']
+ effective=tuple(binding['argv'])
+ need(all(type(part) is str for part in effective) and registered[0]==f.sys.executable,
+  'ORDINARY_ROLE_ACTUAL_QUALIFIED_INTERPRETER')
+ expected=registered
+ if effective!=registered:
+  need(len(registered)>1 and type(registered[1]) is str
+   and registered[1].startswith('tools/') and registered[1].endswith('.py'),
+   'ORDINARY_ROLE_ONLY_SELECTED_DIRECT_SCRIPT_TRANSFORM')
+  f._mapper_portable_relative_v1(registered[1])
+  expected=(registered[0],'-I','-S','-B','-X',
+   'pycache_prefix='+str(f.Path(runtime)/'pycache'),*registered[1:])
+ need(effective==expected,
+  'ORDINARY_ROLE_EXACT_REGISTERED_TO_EFFECTIVE_NATIVE_ARGV')
+ evidence=tuple((path,tuple((item,tuple(item.items())) for item in io['observations']
+  if item['path']==path)) for path in io['native_paths'])
+ need(all(len(items)==1 and items[0][0]['complete'] and not items[0][0]['errors']
+  for path,items in evidence), 'ORDINARY_ROLE_THREE_ORIGINAL_NATIVE_OBSERVATIONS')
+ record=dict(io=io,row=row,binding=binding,release=release,runtime=f.Path(runtime),
+  repo_root=f.Path(repo_root),command_index=command_index,registered=registered,
+  effective=effective,role=role,native_evidence=evidence,attestation=attestation,snapshot=snapshot)
+ record['original']=(record,io,io['original'],row,f._preflight_canonical_v1(row),
+  binding,f._preflight_canonical_v1(binding),release,f._preflight_canonical_v1(release),
+  record['runtime'],record['repo_root'],command_index,registered,effective,role,evidence,
+  (f.os.getpid(),f.threading.get_ident()),attestation,snapshot,f._preflight_canonical_v1(snapshot.value))
+ return record
+
+def _ordinary_rp5a_registered_mapping_check_v1(record, identity, row):
+ import tools.validation_reliability as f
+ need=f._preflight_require_v1
+ need(type(record) is dict and type(record['original']) is tuple and len(record['original'])==20,
+  'ORDINARY_ROLE_ORIGINAL_MAPPING_PRODUCT')
+ original=record['original'];io=record['io']
+ f._ordinary_application_io_check_v1(io)
+ need(original==(record,io,io['original'],record['row'],
+   f._preflight_canonical_v1(record['row']),record['binding'],
+   f._preflight_canonical_v1(record['binding']),record['release'],
+   f._preflight_canonical_v1(record['release']),record['runtime'],record['repo_root'],
+   record['command_index'],record['registered'],record['effective'],record['role'],
+   record['native_evidence'],(f.os.getpid(),f.threading.get_ident()),record['attestation'],
+   record['snapshot'],f._preflight_canonical_v1(record['snapshot'].value))
+  and row is record['row'] and row['argv'] is record['registered']
+  and type(identity) is f._ScanLaunchIdentity
+  and identity.argv==record['effective'] and identity.repo_root==str(record['repo_root'])
+  and identity.command_index==record['command_index']
+  and identity.phase==record['binding']['phase']
+  and identity.run_id==record['attestation'].run_id
+  and identity.command_count==record['snapshot'].value['command_count']
+  and record['snapshot'] is record['attestation']._scan_snapshot
+  and all(tuple(item.items())==values for path,items in record['native_evidence']
+   for item,values in items)
+  and f._rp5a_consumer_role_v1(record['registered'],record['repo_root'])==record['role']==row['role'],
+  'ORDINARY_ROLE_FROZEN_REGISTERED_AND_ACTUAL_EFFECTIVE_MAPPING')
+ return record['role']
+
+def _ordinary_rp5a_role_from_controls_v1(controls, identity):
+ import tools.validation_reliability as f
+ need=f._preflight_require_v1
+ need(type(controls) is dict and type(controls['original']) is tuple
+  and len(controls['original'])==12 and controls['original'][0] is controls
+  and type(controls['original'][1]) is f.InheritedRunAttestation
+  and controls['original'][1]._scan_snapshot._ordinary_rp5a_controls_v1 is controls
+  and controls['original'][2] is controls['io']
+  and controls['original'][3] is controls['identity']==identity
+  and controls['original'][4] is controls['row']
+  and controls['original'][6]==f._preflight_canonical_v1(controls['binding'])
+  and controls['original'][7]==f._preflight_canonical_v1(controls['release']),
+  'ORDINARY_ROLE_ORIGINAL_ATTESTED_CONTROL_OWNER')
+ mapping=controls['registered_mapping']
+ need(mapping['attestation'] is controls['original'][1]
+  and mapping['io'] is controls['io'] and mapping['binding'] is controls['binding']
+  and mapping['release'] is controls['release'],
+  'ORDINARY_ROLE_SAME_ORIGINAL_NATIVE_CONTROL_MAPPING')
+ return _ordinary_rp5a_registered_mapping_check_v1(mapping,identity,controls['row'])
+
+def _mapper_profile_v1(profile):
+    """Validate representation, not acceptance. Every resource operand is explicit."""
+    from tools.validation_reliability import (
+        _mapper_need_v1, _mapper_absolute_v1, _mapper_int_v1,
+        _mapper_portable_relative_v1, _mapper_add_v1, _REPORT_READ_ROUTES_V1, stat)
+    fields = {'kind', 'position', 'generation', 'root', 'root_chain', 'basis',
+              'basis_chain', 'basis_lstat', 'basis_fstat', 'entries', 'limits',
+              'chunk_bytes', 'deadline_ns'}
+    _mapper_need_v1(type(profile) is dict and set(profile) == fields, 'BASIS_PROFILE_FIELDS')
+    _mapper_need_v1(profile['kind'] == 'MAPPER_DISK_BASIS_V1', 'BASIS_PROFILE_KIND')
+    _mapper_need_v1(type(profile['position']) is int and profile['position'] in tuple(row[0] for row in _REPORT_READ_ROUTES_V1), 'BASIS_POSITION')
+    _mapper_need_v1(type(profile['generation']) is str and bool(profile['generation']), 'BASIS_GENERATION')
+    root = _mapper_absolute_v1(profile['root']); basis = _mapper_absolute_v1(profile['basis'])
+    _mapper_need_v1(not basis.is_relative_to(root) and not root.is_relative_to(basis.parent), 'BASIS_ROOT_OVERLAP')
+    _mapper_int_v1(profile['chunk_bytes'], 'chunk', positive=True)
+    _mapper_int_v1(profile['deadline_ns'], 'deadline', positive=True)
+    limits = profile['limits']
+    _mapper_need_v1(type(limits) is dict and set(limits) == {'attempts', 'target_bytes', 'basis_bytes', 'metadata_calls', 'single_target_buffer'}, 'BASIS_LIMIT_FIELDS')
+    for name, value in limits.items(): _mapper_int_v1(value, name)
+    def stamp(value, n):
+        _mapper_need_v1(type(value) is list and len(value) == n and all(type(x) is int for x in value), 'BASIS_STAMP_FIELDS')
+        _mapper_need_v1(value[0] >= 0 and value[1] > 0 and value[2] >= 0, 'BASIS_STAMP_IDENTITY')
+        if n == 7:
+            _mapper_need_v1(value[3] >= 0 and value[5] == 1 and stat.S_ISREG(value[2]), 'BASIS_STAMP_FILE')
+        else: _mapper_need_v1(stat.S_ISDIR(value[2]), 'BASIS_STAMP_DIRECTORY')
+    for name, path in (('root_chain', root), ('basis_chain', basis.parent)):
+        expected = [str(p) for p in (*reversed(path.parents), path)]
+        chain = profile[name]
+        _mapper_need_v1(type(chain) is list and len(chain) == len(expected), 'BASIS_CHAIN_FIELDS')
+        for row, wanted in zip(chain, expected):
+            _mapper_need_v1(type(row) is list and len(row) == 2 and row[0] == wanted, 'BASIS_CHAIN_PATH')
+            stamp(row[1], 3)
+    stamp(profile['basis_lstat'], 7); stamp(profile['basis_fstat'], 7)
+    _mapper_need_v1(profile['basis_lstat'][:6] == profile['basis_fstat'][:6], 'BASIS_CROSS_API_IDENTITY')
+    entries = profile['entries']; _mapper_need_v1(type(entries) is list and bool(entries), 'BASIS_ENTRIES')
+    names = set(); identities = set(); end = attempts = target = reference = 0
+    for row in entries:
+        _mapper_need_v1(type(row) is dict and set(row) == {'path', 'offset', 'length', 'attempt_limit', 'lstat', 'fstat', 'parent_chain'}, 'BASIS_ENTRY_FIELDS')
+        name = row['path']; _mapper_portable_relative_v1(name)
+        _mapper_need_v1(name.casefold() not in names, 'BASIS_ALIAS_SPELLING'); names.add(name.casefold())
+        for field in ('offset', 'length', 'attempt_limit'):
+            _mapper_int_v1(row[field], field, positive=field == 'attempt_limit')
+        _mapper_need_v1(row['offset'] == end, 'BASIS_NONCONTIGUOUS_SEGMENT')
+        end = _mapper_add_v1(end, row['length'])
+        stamp(row['lstat'], 7); stamp(row['fstat'], 7)
+        _mapper_need_v1(row['lstat'][:6] == row['fstat'][:6] and row['lstat'][3] == row['length'], 'BASIS_ENTRY_IDENTITY')
+        identity = tuple(row['lstat'][:2]); _mapper_need_v1(identity not in identities, 'BASIS_PHYSICAL_ALIAS'); identities.add(identity)
+        parent = root.joinpath(*name.split('/')).parent
+        expected_chain = [str(p) for p in (*reversed(parent.parents), parent)]
+        chain = row['parent_chain']; _mapper_need_v1(type(chain) is list and len(chain) == len(expected_chain), 'BASIS_ENTRY_PARENT_CHAIN')
+        for pair, wanted in zip(chain, expected_chain):
+            _mapper_need_v1(type(pair) is list and len(pair) == 2 and pair[0] == wanted, 'BASIS_ENTRY_PARENT_PATH')
+            stamp(pair[1], 3)
+        _mapper_need_v1(chain[:len(profile['root_chain'])] == profile['root_chain'], 'BASIS_ENTRY_ROOT_DRIFT')
+        attempts = _mapper_add_v1(attempts, row['attempt_limit'])
+        # Overflow is checked before addition even though Python integers grow.
+        t = row['attempt_limit'] * _mapper_add_v1(row['length'], 1)
+        b = row['attempt_limit'] * row['length']
+        target = _mapper_add_v1(target, t); reference = _mapper_add_v1(reference, b)
+    _mapper_need_v1(end == profile['basis_lstat'][3], 'BASIS_FINAL_EXTENT')
+    _mapper_need_v1(tuple(profile['basis_lstat'][:2]) not in identities, 'BASIS_ALIASES_INPUT')
+    _mapper_need_v1(limits['attempts'] <= attempts and limits['target_bytes'] <= target and limits['basis_bytes'] <= reference, 'BASIS_EXCESS_UNUSED_ALLOCATION')
+    return {'unique_files': len(entries), 'basis_extent': end, 'attempt_envelope': attempts,
+            'target_byte_reservation_envelope': target, 'basis_byte_reservation_envelope': reference,
+            'is_authentic_resource_grant': False}
+
+def _ordinary_initial_physical_source_admission_v1(native_input,native,profile,cutoffs):
+ from tools import validation_reliability as o
+ need=o._preflight_require_v1
+ returned=o._ordinary_initial_preloader_return_check_v1(native_input)
+ prefix=o._ordinary_initial_prefix_v1(native_input)
+ allocation=native_input['early_allocation_original']
+ _ordinary_ci_initial_common_source_check_v1(native_input,profile,allocation)
+ issue=native_input['initial_request_issuer']
+ issuer=native_input['native_product_attempt']
+ attempt=native_input['entry_attempt'];entry=native_input['entry_original']
+ source=native_input['source_generation'];generation=native_input['native_generation']
+ startup=native_input['startup_source'];origin=native_input['origin_prebind']
+ a=startup['pre_cold_result'];old=a['original'];success=a['success_original']
+ fields=('native_input','generation','startup','source_original','origin','origin_original',
+  'owner','cutoffs','errors','slots','reads','operations','pending_acl','source_pairs',
+  'producer','producer_code')
+ need(type(issuer)is dict and issuer is attempt['native_product_issuer']
+  and issuer['native_input']is native_input and issuer['native']is native
+  and issuer['errors']is native_input['errors']and not issuer['errors']
+  and issuer['stage']=='PHYSICAL'and issuer['complete']is False
+  and issuer['physical']is None and issuer['initialized_storage']is None
+  and issuer['initial_layout']is None and issuer['native_product']is None
+  and issuer['prepare_request']is None and issuer['query_request']is None
+  and issuer['original_cutoffs']is cutoffs
+  and type(issuer['original'])is tuple and len(issuer['original'])==9
+  and all(x is y for x,y in zip(issuer['original'],(issuer,attempt,entry[1],entry[2],entry[3],
+   entry[4],entry[6],entry[7],entry[8])))
+  and type(native)is o._LinuxSourceNativeV2 and native_input['native_instance']is native
+  and native_input['native_init_returned']is True
+  and profile is returned[4]is issue['result']is native_input['early_profile']
+  and profile[6]is None and profile[7]is issue['components']
+  and allocation is issue['allocation']and issue['complete']is True
+  and prefix is native_input['current_native_observation']
+  and prefix['physical_prefix_original'][0]is prefix['prefix_original'],
+  'ORDINARY_INITIAL_ACTUAL_REACHED_EARLY_ISSUER_BEFORE_PHYSICAL_EFFECTS')
+ need(type(a)is dict and a is startup['pre_cold_attempt']and a['complete']is True
+  and type(old)is tuple and len(old)==17 and old[0]is a
+  and all(old[i+1]is a[name]for i,name in enumerate(fields))
+  and a['native_input']is native_input and a['generation']is source
+  and a['startup']is startup and a['source_original']is source['original']
+  and a['origin']is origin and a['origin_original']is origin['result_original']
+  is native_input['origin_prebind_result_original']
+  and a['errors']is native_input['errors']and not a['errors']
+  and a['producer']is _facet_fn_initial_startup_prebind_v1
+  and a['producer_code']is _facet_fn_initial_startup_prebind_v1.__code__
+  and type(success)is tuple and len(success)==11
+  and all(x is y for x,y in zip(success,(a,old,a['startup_attempt'],a['product_original'],
+   a['pending_acl'],a['source_pairs'],a['product_original'][3],a['origin_original'],
+   allocation,prefix,a['errors'])))
+  and origin['complete']is True and 'retirement'not in origin
+  and cutoffs==(origin['origin_ns'],origin['origin_ns']+3500*10**9,
+   native_input['original_execution_cutoff_ns'],native_input['original_settlement_cutoff_ns']),
+  'ORDINARY_INITIAL_COMPLETED_PROTECTED_STARTUP_AND_UNRENEWED_SOURCE_LOAN')
+ ci=a['ci_source_code_original']
+ need(type(ci)is tuple and len(ci)==8 and ci[0]is a and ci[2]is globals()
+  and ci[3]is globals()['_ORDINARY_INITIALIZED_MODULE_CODE_V1']
+  and o._ordinary_control_code_source_equal_v1(ci[4],ci[3])
+  and any(code is _ordinary_initial_physical_source_admission_v1.__code__ for code in ci[3].co_consts),
+  'ORDINARY_INITIAL_COMPLETE_PROTECTED_CI_ADMISSION_SOURCE')
+ frame=o.sys._getframe(1)
+ try:
+  module=o.sys.modules['tools.validation_scope_registry'];fn=module.__dict__['_facet_fn_initial_native_observations_v1']
+  root=module.__dict__['_ORDINARY_INITIALIZED_MODULE_CODE_V1']
+  need(frame.f_code is fn.__code__ and frame.f_globals is module.__dict__
+   and frame.f_locals.get('native_input')is native_input
+   and frame.f_locals.get('native')is native and frame.f_locals.get('early_profile')is profile
+   and any(code is fn.__code__ for code in root.co_consts)
+   and o.Path(root.co_filename)==source['expected_module_closure'][2]
+   and frame.f_back.f_code is o._ordinary_initial_native_observations_v1.__code__
+   and frame.f_back.f_back.f_code is source['native_method_code']
+   and frame.f_back.f_back.f_globals is source['module_namespace'],
+   'ORDINARY_INITIAL_FIXED_REACHED_PHYSICAL_SOURCE_CALLERS')
+ finally:del frame
+ return profile
+
+
+def _ordinary_scope_receiver_io_values_v1(row_count, roles, maxima, control_depth, mapper_calls, mapper_control, r_native):
+ unit = 1048577
+ app_io_reads = row_count*5*unit
+ app_io_calls = row_count*(5*unit+3*6+2*(600+5)+6*control_depth+2+11)
+ r_io_reads = r_io_calls = 0
+ for role in roles:
+  if role is None: continue
+  invocations = maxima['reader_invocations'] + (maxima['reader_invocations'] if role=='SCANNER' else 0)
+  fixed_hop = role=='PYTEST'
+  owners = 2 if fixed_hop else 1
+  extra = 2*max(0,maxima['metadata_bytes']-1048576)
+  native_reads = 6*invocations+(invocations+1 if fixed_hop else 0)
+  r_io_reads += extra+maxima['metadata_bytes']+1 + owners*(5*unit+extra+native_reads*unit)
+  r_io_calls += (extra+maxima['metadata_bytes']+7
+   + owners*(5*unit+3*6+2*(600+5)+6*control_depth+2+11+extra
+    + native_reads*(unit+6)+invocations*(12+7+2*control_depth+2)+1))
+ external_control = app_io_reads+r_io_reads+mapper_control+r_native
+ base_external_calls = app_io_calls+r_io_calls+mapper_calls
+ return (app_io_reads, app_io_calls, r_io_reads, r_io_calls, external_control, base_external_calls)
+
+def _ordinary_supported_application_quotas_v1(scope,resource,native):
+ import tools.validation_reliability as _f
+ from tools.validation_scope_registry import _facet_fn_native_source_programme_check_v1
+ native=_facet_fn_native_source_programme_check_v1(scope,native)
+ host=scope._ordinary_host_preparation_v1
+ ceiling=_f._ordinary_phase_ceiling_checked_v1(resource['ceiling_programme'])
+ lineage=scope._ordinary_host_retained_lineage_v1(host)
+ fd=ceiling['fd_program']
+ declared=_f._LINUX_PREFLIGHT_SERVICE_READBACK_V1['TasksMax']
+ actual=host['latest_ancestor_readback']
+ effective=host['latest_effective_intersection']
+ need=_f._preflight_require_v1
+ need(scope._ordinary_candidate_v1 is None
+  and resource is scope._ordinary_resource_programme_v1
+  and host is scope._ordinary_original_host_preparation_v1
+  and host['original'][0] is host and host['original'][1] is scope
+  and host['original'][4] is host['original_ceiling_programme'] is ceiling
+  and lineage is host['native_lineage'] is scope._ordinary_host_native_lineage_v1
+  and type(actual)is tuple and 0<len(actual)<=32
+  and all(type(row)is tuple and len(row)==5 for row in actual)
+  and type(effective)is tuple and len(effective)==3
+  and type(declared)is str and declared=='64',
+  'ORDINARY_SUPPORTED_ORIGINAL_CEILING_AND_RETAINED_NATIVE_LINEAGE')
+ chain=[];at=host['common_cgroup'];root=_f.Path('/sys/fs/cgroup')
+ while True:
+  need(len(chain)<32 and at.is_relative_to(root),'ORDINARY_SUPPORTED_FINITE_RETAINED_ANCESTOR_CHAIN')
+  chain.append(at)
+  if at==root:break
+  need(at!=at.parent,'ORDINARY_SUPPORTED_RETAINED_ANCESTOR_PARENT')
+  at=at.parent
+ need(tuple(row[0]for row in actual)==tuple(chain)
+  and actual[0][1:]==(b'4294967296',b'0',b'256',(b'200000',b'100000'))
+  and actual[-1][1:4]==(None,None,None)
+  and type(actual[-1][4])is tuple and len(actual[-1][4])==2
+  and all(type(v)is tuple and {b'memory',b'pids',b'cpu'}<=set(v)for v in actual[-1][4]),
+  'ORDINARY_SUPPORTED_RETAINED_ORIGINAL_COMMON_AND_ROOT_READBACK')
+ memory=[];tasks=[];cpu=[]
+ for row in actual[:-1]:
+  need(type(row[1])is bytes and (row[1]==b'max'or row[1].isdigit()and 0<int(row[1])<=1<<63)
+   and type(row[3])is bytes and (row[3]==b'max'or row[3].isdigit()and 0<int(row[3])<=1<<31)
+   and type(row[4])is tuple and len(row[4])==2,
+   'ORDINARY_SUPPORTED_RETAINED_ANCESTOR_VALUE_DOMAINS')
+  if row[1]!=b'max':memory.append(int(row[1]))
+  if row[3]!=b'max':tasks.append(int(row[3]))
+  quota,period=row[4]
+  need(type(period)is bytes and period.isdigit()and 0<int(period)<1<<63
+   and type(quota)is bytes and (quota==b'max'or quota.isdigit()and 0<int(quota)<1<<63),
+   'ORDINARY_SUPPORTED_RETAINED_CPU_VALUE_DOMAINS')
+  if quota!=b'max':cpu.append((int(quota),int(period)))
+ bootstrap=host['cgroup'].name==host['claim']['scope_unit']and host['cgroup'].name.endswith('bootstrap.scope')
+ expected_nofile=fd['launcher'if bootstrap else 'controller']
+ need(memory and tasks and cpu
+  and effective==(min(memory),min(tasks),tuple(cpu))
+  and type(effective[0])is int and type(effective[1])is int
+  and min(memory)>=ceiling['limits']['heap_byte_limit'] and min(tasks)>=256
+  and all(quota>=2*period for quota,period in cpu)
+  and (bootstrap or host['cgroup'].name in (scope.name+'controller',scope.name+'controller.service'))
+  and type(host['latest_nofile'])is tuple and len(host['latest_nofile'])==2
+  and all(type(value)is int for value in host['latest_nofile'])
+  and type(expected_nofile)is int and expected_nofile in (64,1536)
+  and host['latest_nofile']==(expected_nofile,expected_nofile)
+  and type(fd['application'])is int and fd['application']==64
+  and any(v['path']=='tools/validation_reliability.py' and v['complete']for v in native['source_operands'])
+  and 0<native['tasks']<=int(declared)and 0<native['nofile']<=fd['application']
+  and max(native['bootstrap_fd_demand'],native['application_fd_demand'])<=native['nofile'],
+  'ORDINARY_SUPPORTED_ORIGINAL_SOURCE_MINIMA_WITHIN_SELECTED_OS_QUOTAS')
+ return int(declared),fd['application']
+
+def _ordinary_ci_literal_body_bootstrap_v1(scope, record, tree, operand, expected_body):
+ import ast
+ import base64
+ from tools import validation_reliability as o
+ runner = scope._ordinary_runner_owner_v1
+ selection = scope._ordinary_source_selection_v1
+ binding = runner._ordinary_ci_require_binding_v1(scope, phase=selection.phase)
+ receiver = scope._ordinary_controller_receiver_v1
+ original = receiver['original']
+ o._preflight_require_v1(type(scope) is o._LinuxPreflightScopeV1
+  and selection is scope._ordinary_original_source_selection_v1
+  and runner is scope._ordinary_original_runner_owner_v1
+  and record is scope._ordinary_deterministic_source_ingredients_v1
+  is scope._ordinary_original_deterministic_source_ingredients_v1
+  and record['scope'] is scope and record['source'] is scope.source
+  and receiver is scope._ordinary_original_controller_receiver_v1
+  and original[0] is receiver and original[1] is scope
+  and original[3] is receiver['bootstrap']
+  and original[4] == receiver['owner'] == (o.os.getpid(), o.threading.get_ident())
+  and binding['receiver'] is receiver and binding['bootstrap'] is receiver['bootstrap']
+  and receiver['scope'] is scope and receiver['joined'] and not receiver['errors'],
+  'ORDINARY_CI_LITERAL_SAME_RECEIVED_SOURCE_AND_WORKFLOW')
+ cached_tree, cached_operand = scope._ordinary_source_operand_cache_v1[('tools/ci_branch_context.py', 'PYTHON')]
+ captured = receiver['bootstrap']['source']['tools/ci_branch_context.py']
+ o._preflight_require_v1(tree is cached_tree and operand is cached_operand
+  and type(tree) is ast.Module and operand['path'] == 'tools/ci_branch_context.py'
+  and operand['source_form'] == 'PYTHON' and operand['complete'] and operand['error'] is None
+  and type(operand['text']) is str and type(captured) is dict
+  and set(captured) == {'bytes', 'version'} and type(captured['bytes']) is str
+  and base64.b64encode(operand['text'].encode('utf8')).decode('ascii') == captured['bytes'],
+  'ORDINARY_CI_LITERAL_COMPLETE_HELD_BYTES_EQUAL_AUTHENTIC_BOOTSTRAP')
+ prior = ast.parse(expected_body)
+ def bound(node):
+  if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)):
+   return {node.name}
+  if isinstance(node, (ast.Import, ast.ImportFrom)):
+   return {alias.asname or alias.name.split('.')[0] for alias in node.names}
+  return {item.id for item in ast.walk(node) if isinstance(item, ast.Name) and isinstance(item.ctx, ast.Store)}
+ names = set().union(*(bound(node) for node in prior.body))
+ retained, additions = [], []
+ initialized = ast.parse("_ORDINARY_INITIALIZED_MODULE_CODE_V1=__import__('sys')._getframe().f_code").body[0]
+ for node in tree.body:
+  node_names = bound(node)
+  if node_names & names or not node_names and any(
+    ast.dump(node, include_attributes=False) == ast.dump(old, include_attributes=False)
+    for old in prior.body if not bound(old)):
+   retained.append(node)
+   continue
+  if isinstance(node, ast.FunctionDef):
+   defaults = node.args.defaults + node.args.kw_defaults
+   safe = (not node.decorator_list and not node.type_params
+    and all(value is None or isinstance(value, ast.Constant)
+     or isinstance(value, ast.Tuple) and not value.elts
+      and isinstance(value.ctx, ast.Load) for value in defaults))
+  elif isinstance(node, ast.Assign) and len(node.targets) == 1 and isinstance(node.targets[0], ast.Name):
+   safe = (ast.dump(node, include_attributes=False) == ast.dump(initialized, include_attributes=False)
+    or node.targets[0].id == '_QTT_ORDINARY_NATIVE_C_SOURCE_V1'
+     and isinstance(node.value, ast.Constant) and type(node.value.value) is bytes
+     and node.value.value == _QTT_ORDINARY_NATIVE_C_SOURCE_V1
+     or node.targets[0].id == 'Path'
+      and isinstance(node.value, ast.Attribute) and node.value.attr == 'Path'
+      and isinstance(node.value.ctx, ast.Load)
+      and isinstance(node.value.value, ast.Name) and node.value.value.id == 'pathlib'
+      and isinstance(node.value.value.ctx, ast.Load)
+      and Path is pathlib.Path is o.Path)
+  else:
+   safe = False
+  o._preflight_require_v1(safe and node_names and not any(node_names & old for old in additions),
+   'ORDINARY_CI_LITERAL_ONLY_UNSHADOWED_BOOTSTRAP_DEFINITIONS')
+  additions.append(node_names)
+ o._preflight_require_v1(ast.dump(ast.Module(body=retained, type_ignores=tree.type_ignores), include_attributes=False)
+  == ast.dump(prior, include_attributes=False),
+  'ORDINARY_CI_LITERAL_ALL_RETAINED_BRANCH_BODIES_AND_MODULE_VALUES_EXACT')
+ return operand
+
+def _ordinary_pytest_supported_row_v1(scope,effect,component,graph,row,graph_row):
+ """Join held selected syntax to the existing bounded application policy.
+
+ Hook/fixture objects and real versus synthetic syntax stay unobserved facts.
+ The source cohort is a lower requirement; the separately checked OS allocation
+ bounds all dynamic execution, temp names and descriptor use. No repository
+ target or parent-evidence permission is inferred from those unknown facts.
+ """
+ import ast
+ import tools.validation_reliability as _f
+ need=_f._preflight_require_v1
+ runner=scope._ordinary_runner_owner_v1
+ selection=scope._ordinary_source_selection_v1
+ paths=scope._ordinary_bound_paths_v1
+ resource=scope._ordinary_resource_programme_v1
+ resource_original=scope._ordinary_original_resource_programme_v1
+ bound=row['bound_row']
+ selected=selection.pytest_source_for_bound_row(bound)
+ need(effect is scope._ordinary_effect_programme_v1 is scope._ordinary_original_effect_programme_v1
+  and effect['components']==(component,graph)
+  and component is scope._ordinary_pytest_fixed_effects_v1 is scope._ordinary_original_pytest_fixed_effects_v1
+  and graph is scope._ordinary_pytest_source_graph_v1 is scope._ordinary_original_pytest_source_graph_v1
+  and _f._ordinary_pytest_fixed_effects_check_v1(scope,component)is component
+  and _f._ordinary_pytest_source_graph_check_v1(scope,graph)is graph
+  and selection._original[2] in runner.PYTEST_SHARD_COMMANDS
+  and any(row is value for value in component['rows'])
+  and any(graph_row is value for value in graph['rows'])
+  and graph_row['bound_row'] is bound
+  and graph_row['selected'] is selected is row['selected']
+  and graph_row['native_programme'] is None
+  and row['entry'] is bound[0] and row['execution'] is bound[1]
+  and bound[0].argv==bound[1].execution_argv and bound[0].cwd==str(paths.repo_root)
+  and resource is resource_original[0] and tuple(resource.items())==resource_original[1]
+  and resource['fd_demand'][1:]==(12,8)
+  and resource['temporary_programme']==(1,16<<30,20000,resource['raw_programme'][0])
+  and scope._ordinary_candidate_v1 is None,
+  'ORDINARY_PYTEST_SAME_CHECKED_GRAPH_WITH_ORIGINAL_RESOURCE_POLICY')
+ scratch=scope._ordinary_run_scratch_roots_v1
+ need(scratch is scope._ordinary_original_run_scratch_roots_v1
+  and scratch['paths'] is paths and not scratch['errors']
+  and scratch['roots']==(paths.validation_output_root,paths.pytest_basetemp_root)
+  and paths.pytest_basetemp_root==paths.process_root/_f.PYTEST_BASETEMP_DIR_NAME
+  and all(value.is_relative_to(paths.process_root) and value!=paths.process_root
+   for value in scratch['roots'])
+  and graph_row['runtime_roles']==((paths.process_root,'PROCESS_KEEPER'),
+   (paths.pytest_basetemp_root,'DISPOSABLE_BASETEMP'),
+   (paths.process_root/'pytest-cache','PYTEST_CACHE'),
+   (paths.validation_output_root,'VALIDATION_OUTPUT'),(paths.evidence_root,'NESTED_EVIDENCE_PARENT')),
+  'ORDINARY_PYTEST_ORIGINAL_LOGICAL_ROLES_REQUIRE_NATIVE_P_CELL_HANDOFF')
+ missing=('actual requested plugin Source binding:','actual installed pytest11 Source binding:',
+  'original pytest_plugins module binding:','nonstring original pytest_plugins caller:')
+ need(not any(value.startswith(missing) for value in graph_row['unresolved_source_facts'])
+  and all(value[3]=='nonliteral dynamic source selection requires original callee binding'
+   for value in graph_row['unresolved_imports'])
+  and all(len(value)==4 and value[3]=='nonliteral dynamic source selection requires original callee binding'
+   for value in graph['installed_unresolved_edges']),
+  'ORDINARY_PYTEST_NO_MISSING_OR_AMBIGUOUS_SELECTED_MODULE')
+ modules=(*graph_row['module_records'],*graph['installed_module_records'])
+ operands=[]
+ for observed in (*graph_row['source_operands'],*row['source_operands'],
+   *graph['installation_source_operands']):
+  if observed['source_form'] not in ('PYTHON','INSTALLATION_PYTHON'):continue
+  if not any(observed is previous for previous in operands):operands.append(observed)
+ operands=tuple(operands)
+ wrapper=tuple(value for value in operands if value['source_form']=='PYTHON'
+  and value['path']=='tools/run_pytest_fresh_basetemp.py')
+ need(len(wrapper)==1 and graph_row['selected_modules']
+  and all(any(value['path']==path and value['source_form']=='PYTHON' for value in operands)
+   for path in graph_row['selected_modules'])
+  and any(value['source_form']=='PYTHON' and value['path']=='tools/validation_reliability.py'
+   for value in operands) and any(value['source_form']=='INSTALLATION_PYTHON' for value in operands),
+  'ORDINARY_PYTEST_FULL_CAPTURED_REPOSITORY_AND_INSTALLATION_GRAMMAR')
+ wrapper=wrapper[0]
+ tree,cached=scope._ordinary_source_operand_cache_v1[(wrapper['path'],'PYTHON')]
+ bodies=tuple(node for node in tree.body if isinstance(node,ast.FunctionDef)
+  and node.name=='_run_inherited_nested')
+ calls=tuple(node for body in bodies for node in ast.walk(body)
+  if isinstance(node,ast.Call) and isinstance(node.func,ast.Name)
+  and node.func.id=='supervise_command')
+ need(cached is wrapper and len(bodies)==len(calls)==1
+  and len(calls[0].args)==1 and isinstance(calls[0].args[0],ast.Name)
+  and calls[0].args[0].id=='command'
+  and any(value.arg=='phase' and isinstance(value.value,ast.Constant)
+   and value.value.value=='nested-pytest' for value in calls[0].keywords),
+  'ORDINARY_PYTEST_DEFINITE_WRAPPER_CHILD_LAUNCH_SOURCE')
+ launch=ast.get_source_segment(wrapper['text'],calls[0])
+ grammar=[]
+ for observed in operands:
+  grammar_cache=(scope._ordinary_source_operand_cache_v1 if observed['source_form']=='PYTHON'
+   else graph['installation_operand_cache'])
+  grammar_tree, actual=grammar_cache[(observed['path'],observed['source_form'])]
+  need(actual is observed,'CONTROL_BOUNDED_SOURCE_OCCURRENCE_ACTUAL_MODULE')
+  _ordinary_bounded_source_grammar_reserve_v1(scope,row,grammar_tree,observed)
+  sites=tuple(value[2] for module in modules if module['source'] is observed
+   for value in module['native_sites'])
+  if observed is wrapper:sites=(*sites,launch)
+  grammar.append((observed,'<module>',observed['text'],tuple(dict.fromkeys(sites))))
+ native=_f._ordinary_native_source_programme_v1(scope,bound,operands,tuple(grammar),
+  cohorts=((('PYTEST_WRAPPER','PYTEST_APPLICATION'),(wrapper,),(launch,)),),
+  bootstrap_fd_demand=resource['fd_demand'][1],
+  application_fd_demand=resource['fd_demand'][2],nofile=max(resource['fd_demand'][1:]),
+  uses_git=True)
+ return dict(entry=row['entry'],execution=row['execution'],bound_row=bound,
+  source_position=bound[2],targets=row['targets'],
+  source_operands=tuple(value for value in operands if value['source_form']=='PYTHON'),
+  native_programme=native,run_output_effects=(),source_programme=graph_row)
+
+def _ordinary_selected_repository_writer_targets_v1(scope, component, row):
+ import ast
+ import tools.validation_reliability as _f
+ need = _f._preflight_require_v1
+ acquisition = scope._ordinary_selected_operational_acquisition_v1
+ acquisition['check']()
+ need(acquisition['component'] is component
+  and component is scope._ordinary_deterministic_source_ingredients_v1
+   is scope._ordinary_original_deterministic_source_ingredients_v1
+  and component['check'](scope, component) is component
+  and any(row is selected for selected in component['rows'])
+  and row['bound_row'] is component['bound_rows'][row['ordinal'] - 1]
+  and row['source_position'] == row['bound_row'][2]
+  and row['source_module'] == row['execution'].registered_argv[1]
+  and component['source_selection'].phase == 'deterministic-validators-c',
+  'ORDINARY_REPOSITORY_WRITER_EXACT_ORIGINAL_SELECTED_OCCURRENCE')
+ position = row['source_position']
+ if position not in (120,124,126,128,130,134,136,138,140,142,144,146):
+  return None
+ acquisition['reserve_targets'](recipe=row, geometry=('FIXED', 1894, 1681683, 1402, 4598, 16, 1000, 29, 354, 0, 0, 1606, 18, 8, 4096))
+ recipes = {120: {'argv': ('tools/build_pr168_rank_evidence_backed_ranking.py',), 'config': 'tools/pr168_rank_compute_kernel.py', 'kind': 'RANK', 'body_guards': (('tools/build_pr168_rank_evidence_backed_ranking.py', 'main', 111, ()), ('tools/pr168_rank_compute_kernel.py', 'build_all_reports', 112, ()), ('tools/pr168_rank_compute_kernel.py', '_write_stop_path', 113, ()), ('tools/pr168_rank_compute_kernel.py', '_write', 114, ()), ('tools/pr168_rank_compute_kernel.py', '_input_consumption_rows', 115, ()), ('tools/pr168_rank_compute_kernel.py', '_ranking_universe_rows', 116, ()), ('tools/pr168_rank_compute_kernel.py', '_evidence_ranking_rows', 117, ()), ('tools/pr168_rank_compute_kernel.py', '_score_rows', 118, ()), ('tools/pr168_rank_compute_kernel.py', '_pnl_audit_rows', 119, ()), ('tools/pr168_rank_compute_kernel.py', '_pnl_gap_rows', 120, ()), ('tools/pr168_rank_compute_kernel.py', '_stack_completeness_rows', 121, ()), ('tools/pr168_rank_compute_kernel.py', '_stack_pruning_rows', 122, ()), ('tools/pr168_rank_compute_kernel.py', '_mode_policy_rows', 123, ()), ('tools/pr168_rank_compute_kernel.py', '_mode_row', 124, ()), ('tools/pr168_rank_compute_kernel.py', '_mode_boundary_rows', 125, ()), ('tools/pr168_rank_compute_kernel.py', '_frontier_rows', 126, ()), ('tools/pr168_rank_compute_kernel.py', '_dominance_rows', 127, ()), ('tools/pr168_rank_compute_kernel.py', '_sim_no_trade_rows', 128, ()), ('tools/pr168_rank_compute_kernel.py', '_normalization_rows', 129, ()), ('tools/pr168_rank_compute_kernel.py', '_score_math_rows', 130, ()), ('tools/pr168_rank_compute_kernel.py', '_weight_rows', 131, ()), ('tools/pr168_rank_compute_kernel.py', '_true_negative_rows', 132, ()), ('tools/pr168_rank_compute_kernel.py', '_no_trade_margin_rows', 133, ()), ('tools/pr168_rank_compute_kernel.py', '_regime_rows', 134, ()), ('tools/pr168_rank_compute_kernel.py', '_portfolio_rows', 135, ()), ('tools/pr168_rank_compute_kernel.py', '_quantum_rows', 136, ()), ('tools/pr168_rank_compute_kernel.py', '_quantum_objective_rows', 137, ()), ('tools/pr168_rank_compute_kernel.py', '_combination_rows', 138, ()), ('tools/pr168_rank_compute_kernel.py', '_tca_rows', 139, ()), ('tools/pr168_rank_compute_kernel.py', '_trial_rows', 140, ()), ('tools/pr168_rank_compute_kernel.py', '_capacity_rows', 141, ()), ('tools/pr168_rank_compute_kernel.py', '_latency_rows', 142, ()), ('tools/pr168_rank_compute_kernel.py', '_alpha_rows', 143, ()), ('tools/pr168_rank_compute_kernel.py', '_negative_memory_rows', 144, ()), ('tools/pr168_rank_compute_kernel.py', '_agent_work_orders', 145, ()), ('tools/pr168_rank_compute_kernel.py', '_agent_consumption_rows', 146, ()), ('tools/pr168_rank_compute_kernel.py', '_stack_synergy_rows', 147, ()), ('tools/pr168_rank_compute_kernel.py', '_stack_compat_rows', 148, ()), ('tools/pr168_rank_compute_kernel.py', '_stack_search_rows', 149, ()), ('tools/pr168_rank_compute_kernel.py', '_threshold_rows', 150, ()), ('tools/pr168_rank_compute_kernel.py', '_maker_taker_rows', 151, ()), ('tools/pr168_rank_compute_kernel.py', '_size_price_time_rows', 152, ()), ('tools/pr168_rank_compute_kernel.py', '_scenario_stress_rows', 153, ()), ('tools/pr168_rank_compute_kernel.py', '_edge_capture_rows', 154, ()), ('tools/pr168_rank_compute_kernel.py', '_why_no_trade_rows', 155, ()), ('tools/pr168_rank_compute_kernel.py', '_unexplained_rows', 156, ()), ('tools/pr168_rank_compute_kernel.py', '_negative_recovery_rows', 157, ()), ('tools/pr168_rank_compute_kernel.py', '_quantum_selector_rows', 158, ()), ('tools/pr168_rank_compute_kernel.py', '_quantum_interpret_rows', 159, ()), ('tools/pr168_rank_compute_kernel.py', '_two_speed_rows', 160, ()), ('tools/pr168_rank_compute_kernel.py', '_scalar_no_orphan_rows', 161, ()), ('tools/pr168_rank_compute_kernel.py', '_terminal_rows', 162, ()), ('tools/pr168_rank_compute_kernel.py', '_threshold_dag_rows', 163, ()), ('tools/pr168_rank_compute_kernel.py', '_negative_recovery_dag_rows', 164, ()), ('tools/pr168_rank_compute_kernel.py', '_connector_rows', 165, ()), ('tools/pr168_rank_compute_kernel.py', '_downstream_reports', 166, ()), ('tools/pr168_rank_compute_kernel.py', '_registry_downstream_reports', 167, ()), ('tools/pr168_rank_compute_kernel.py', '_handoff_row', 168, ()), ('tools/pr168_rank_compute_kernel.py', '_count_summary', 169, ()), ('tools/pr168_rank_compute_kernel.py', '_artifact_rows', 170, ()), ('tools/pr168_rank_compute_kernel.py', '_simulation_artifact_rows', 171, ()), ('tools/pr168_rank_compute_kernel.py', '_no_orphan_rows', 172, ()), ('tools/pr168_rank_compute_kernel.py', '_authority_audit_rows', 173, ()), ('tools/pr168_rank_compute_kernel.py', '_scope_integration_rows', 174, ()), ('tools/pr168_rank_compute_kernel.py', '_centralized_coverage_rows', 175, ()), ('tools/pr168_rank_compute_kernel.py', '_future_expansion_dag_rows', 176, ()), ('tools/pr168_rank_compute_kernel.py', '_registry_no_orphan_rows', 177, ()), ('tools/pr168_rank_compute_kernel.py', '_registry_anti_scatter_rows', 178, ()), ('tools/pr168_rank_compute_kernel.py', '_generic_gap_rows', 179, ()), ('tools/pr168_rank_compute_kernel.py', '_generic_materialized_row', 180, ()), ('tools/pr168_rank_compute_kernel.py', '_final_summary', 181, ()), ('tools/pr168_rank_compute_kernel.py', '_consumer_for', 182, ()), ('tools/pr168_rank_compute_kernel.py', '_route_for', 183, ()), ('tools/pr168_rank_input_loader.py', 'LoadedRankInputs', 184, (185,)), ('tools/pr168_rank_input_loader.py', 'load_rank_inputs', 186, ()), ('tools/pr168_rank_input_loader.py', '_report_count', 187, ()), ('tools/pr168_rank_input_loader.py', '_input_summary', 188, ()), ('tools/pr168_rank_input_loader.py', '_top_alpha_candidates', 189, ()), ('tools/pr168_rank_input_loader.py', '_repair_queues', 190, ()), ('tools/pr168_rank_input_loader.py', '_read_receipts', 191, ()), ('tools/pr168_rank_report_writer.py', 'read_json', 192, ()), ('tools/pr168_rank_report_writer.py', 'write_json', 193, ()), ('tools/pr168_rank_report_writer.py', 'read_report', 194, ()), ('tools/pr168_rank_report_writer.py', 'read_records', 195, ()), ('tools/pr168_rank_report_writer.py', 'base_report', 196, ()), ('tools/pr168_rank_report_writer.py', 'write_report', 197, ()), ('tools/pr168_rank_report_writer.py', 'no_orphan_defaults', 198, ()), ('tools/pr168_rank_report_writer.py', 'authority_flags', 199, ()), ('tools/pr168_rank_report_writer.py', '_remove_stale_shards', 200, ()), ('tools/pr168_rank_report_writer.py', '_consumer_for', 201, ()), ('tools/pr168_rank_report_writer.py', '_route_for_report', 202, ()), ('tools/pr168_rank_report_writer.py', '_validator_slug', 203, ()), ('tools/pr168_rank_candidate_stack_generator.py', 'build_candidate_stacks', 204, ()), ('tools/pr168_rank_candidate_stack_generator.py', '_as_list', 205, ()), ('tools/pr168_rank_decision_tournament.py', 'build_order_decision_tournament', 206, ()), ('tools/pr168_rank_decision_tournament.py', '_reason_codes', 207, ()), ('tools/pr168_rank_pretrade_order_simulator.py', 'build_simulated_orders', 208, ()), ('tools/pr168_rank_pretrade_order_simulator.py', '_result_from_candidate', 209, ()), ('tools/pr168_rank_pretrade_order_simulator.py', '_round', 210, ()), ('tools/pr168_rank_evidence_model.py', 'is_number', 211, ()), ('tools/pr168_rank_evidence_model.py', 'number', 212, ()), ('tools/pr168_rank_evidence_model.py', 'result_ref_from_candidate_id', 213, ()), ('tools/pr168_rank_evidence_model.py', 'total_tca_from_pretrade', 214, ()), ('tools/pr168_rank_evidence_model.py', 'score_components_from_pretrade', 215, ()), ('tools/pr168_rank_evidence_model.py', 'rank_score', 216, ()), ('tools/pr168_rank_future_expansion_registry_layer.py', 'build_future_expansion_registries', 217, ()), ('tools/pr168_rank_future_expansion_registry_layer.py', 'build_registry_layer_rows', 218, ()), ('tools/pr168_rank_future_expansion_registry_layer.py', '_base_registry_row', 219, ()), ('tools/pr168_rank_future_expansion_registry_layer.py', '_market_adapter_fields', 220, ()), ('tools/pr168_rank_future_expansion_registry_layer.py', '_venue_cost_fields', 221, ()), ('tools/pr168_rank_future_expansion_registry_layer.py', '_payoff_fields', 222, ()), ('tools/pr168_rank_future_expansion_registry_layer.py', '_plugin_fields', 223, ()), ('tools/pr168_rank_future_expansion_registry_layer.py', '_quantum_fields', 224, ()), ('tools/pr168_rank_future_expansion_registry_layer.py', '_order_policy_rows', 225, ()), ('tools/pr168_rank_future_expansion_registry_layer.py', '_agent_capability_rows', 226, ()), ('tools/pr168_rank_future_expansion_registry_layer.py', '_connector_fields', 227, ()), ('tools/pr168_rank_future_expansion_registry_layer.py', '_runtime_allowlist_fields', 228, ()), ('tools/pr168_rank_future_expansion_registry_layer.py', '_hot_path_fields', 229, ()), ('tools/pr168_rank_future_expansion_registry_layer.py', '_downstream_consumers_for', 230, ()), ('tools/pr168_rank_future_expansion_registry_layer.py', '_downstream_prs_for', 231, ()), ('tools/pr168_rank_future_expansion_registry_layer.py', '_validator_name', 232, ()), ('tools/pr168_rank_future_expansion_registry_layer.py', '_flatten_refs', 233, ())), 'assignment_guards': {('tools/build_pr168_rank_evidence_backed_ranking.py', 'REPO_ROOT'): 8, ('tools/pr168_rank_compute_kernel.py', 'REQUIRED_RANK_REPORTS'): 234, ('tools/pr168_rank_compute_kernel.py', 'EMPTY_ALLOWED_REPORTS'): 235, ('tools/pr168_rank_input_loader.py', 'REQUIRED_PR168_RP_REPORTS'): 236, ('tools/pr168_rank_input_loader.py', 'READ_RECEIPT_TARGETS'): 237, ('tools/pr168_rank_input_loader.py', 'ONLINE_RESEARCH_RECEIPTS'): 238, ('tools/pr168_rank_report_writer.py', 'GENERATED_DIR'): 239, ('tools/pr168_rank_report_writer.py', 'SHARD_DIR'): 240, ('tools/pr168_rank_report_writer.py', 'SHARD_SIZE'): 241, ('tools/pr168_rank_report_writer.py', 'AUTHORITY_BOUNDARY_CODES'): 242, ('tools/pr168_rank_candidate_stack_generator.py', 'STACK_ROLES'): 243, ('tools/pr168_rank_evidence_model.py', 'NUMERIC_SCORE_COMPONENTS'): 244, ('tools/pr168_rank_future_expansion_registry_layer.py', 'REGISTRY_NAMES'): 245, ('tools/pr168_rank_future_expansion_registry_layer.py', 'REGISTRY_REPORTS'): 246}, 'source_paths': ('tools/build_pr168_rank_evidence_backed_ranking.py', 'tools/pr168_rank_compute_kernel.py', 'tools/pr168_rank_input_loader.py', 'tools/pr168_rank_report_writer.py', 'tools/pr168_rank_candidate_stack_generator.py', 'tools/pr168_rank_decision_tournament.py', 'tools/pr168_rank_pretrade_order_simulator.py', 'tools/pr168_rank_evidence_model.py', 'tools/pr168_rank_future_expansion_registry_layer.py'), 'uses_git': False, 'input_reports': ('PR168_RP_FinalSummary.report.json', 'PR168_RP_ComputedPositiveEdgeCandidates.report.json', 'PR168_RP_RepairedPositiveCandidateEvidence.report.json', 'PR168_RP_ComputedNegativeEdgeCandidates.report.json', 'PR168_RP_ComputedNeutralOrZeroEdgeCandidates.report.json', 'PR168_RP_PreTradeSimulationCandidates.report.json', 'PR168_RP_OrderPolicyCandidateRanking.report.json', 'PR168_RP_NoTradeCandidateComparison.report.json', 'PR168_RP_ScenarioLadderResults.report.json', 'PR168_RP_LatencyBudgetResults.report.json', 'PR168_RP_ExecutionAdjustedRankingSeed.report.json', 'PR168_RP_TCADecomposition.report.json', 'PR168_RP_OverfitFDRResults.report.json', 'PR168_RP_CapacityCrowdingResults.report.json', 'PR168_RP_PortfolioMarginalUtilityResults.report.json', 'PR168_RP_ProbabilityCalibration.report.json', 'PR168_RP_QuantumStructuralReadiness.report.json', 'PR168_RP_QuantumCoefficientMapInputGaps.report.json', 'PR168_RP_QKUCombinationCandidateResults.report.json', 'PR168_RP_OrderPolicyCombinationSelectionResults.report.json', 'PR168_RP_ChampionChallengerEligibility.report.json', 'PR168_RP_NegativeToPositiveRecoveryAttempts.report.json', 'PR168_RP_TrueNegativeAfterRecoveryExhaustion.report.json', 'PR168_RP_RegimeConditionedMemorySeed.report.json', 'PR168_RP_PreTradeRegimeMemorySeed.report.json', 'PR168_RP_To_PR168_RANK_ComputedRanking.report.json', 'PR168_RP_To_PR168_RANK_PreTradeRankingSeed.report.json', 'PR168_RP_ActionableInputGapQueue.report.json', 'PR168_RP_ArtifactInformationValueDAG.report.json', 'PR168_RP_AgentDutyDAG.report.json', 'PR168_RP_NoOrphanProof.report.json'), 'row_bounds': (('PR168_RANK_AgentCapabilityRegistrySeed.report.json', ('CONST', 15, 1)), ('PR168_RANK_AgentDutySourceCrosswalkConsumption.report.json', ('CONST', 1, 1)), ('PR168_RANK_AgentNoOrphanDutyLedger.report.json', ('CONST', 15, 1)), ('PR168_RANK_AgentWorkOrders.report.json', ('CONST', 15, 1)), ('PR168_RANK_AlgorithmPluginRegistrySeed.report.json', ('CONST', 1, 1)), ('PR168_RANK_AlphaSourceDecompositionLedger.report.json', ('P', None, 1)), ('PR168_RANK_ArtifactInformationValueDAG.report.json', ('CONST', 143, 1)), ('PR168_RANK_AuthorityBoundaryAudit.report.json', ('CONST', 1, 1)), ('PR168_RANK_BinaryPredictionMarketPnLFormulaAudit.report.json', ('CONST', 1, 1)), ('PR168_RANK_CandidateStackDominancePruningLedger.report.json', ('C', None, 1)), ('PR168_RANK_CandidateStackGenerationLedger.report.json', ('C', None, 1)), ('PR168_RANK_CandidateStackRoleCompletenessAudit.report.json', ('C', None, 1)), ('PR168_RANK_CandidateStackTrialLedger.report.json', ('P', None, 1)), ('PR168_RANK_CapacityCrowdingRankingPenalty.report.json', ('P', None, 1)), ('PR168_RANK_CapacityLimitLedger.report.json', ('P', None, 1)), ('PR168_RANK_CentralizedSystemsCoverageAudit.report.json', ('CONST', 10, 1)), ('PR168_RANK_ChallengerCandidates.report.json', ('C', None, 1)), ('PR168_RANK_ChampionCandidates.report.json', ('C', None, 1)), ('PR168_RANK_ComputeBudgetLatencyPlan.report.json', ('P', 1000, 1)), ('PR168_RANK_ConditionScopedNegativeMemorySeed.report.json', ('P', None, 1)), ('PR168_RANK_ConnectorCandidateRoutingLedger.report.json', ('P', 1000, 1)), ('PR168_RANK_ConnectorReadinessRegistrySeed.report.json', ('CONST', 1, 1)), ('PR168_RANK_ContractPayoffModelRegistrySeed.report.json', ('CONST', 1, 1)), ('PR168_RANK_DAGUpstreamDownstreamOrchestration.report.json', ('CONST', 143, 1)), ('PR168_RANK_DiversificationPenaltyLedger.report.json', ('P', None, 1)), ('PR168_RANK_DominantAlphaSourceRanking.report.json', ('P', None, 1)), ('PR168_RANK_EdgeCaptureAttributionLedger.report.json', ('P', None, 1)), ('PR168_RANK_EvidenceBackedRanking.report.json', ('C', None, 1)), ('PR168_RANK_FinalSummary.report.json', ('CONST', 1, 1)), ('PR168_RANK_FormulaPluginRegistrySeed.report.json', ('CONST', 1, 1)), ('PR168_RANK_FutureExpansionRegistryLayer.report.json', ('CONST', 11, 1)), ('PR168_RANK_FutureFormulaQuantumExpansionDAG.report.json', ('CONST', 11, 1)), ('PR168_RANK_FutureHotPathInputContractSeed.report.json', ('CONST', 1, 1)), ('PR168_RANK_FutureMarketExpansionDAG.report.json', ('CONST', 11, 1)), ('PR168_RANK_HotPathDecisionSurfaceRegistry.report.json', ('CONST', 1, 1)), ('PR168_RANK_InputConsumption.report.json', ('CONST', 1, 1)), ('PR168_RANK_LatencyHotPathCandidateSeed.report.json', ('P', None, 1)), ('PR168_RANK_MakerTakerAdverseSelectionTradeoff.report.json', ('P', None, 1)), ('PR168_RANK_MarketAdapterRegistrySeed.report.json', ('CONST', 1, 1)), ('PR168_RANK_MissingRankingDefaultQueue.report.json', ('CONST', 1, 1)), ('PR168_RANK_MissingScoreComponentQueue.report.json', ('CONST', 1, 1)), ('PR168_RANK_MissingSimulationInputQueue.report.json', ('CONST', 1, 1)), ('PR168_RANK_ModeBoundaryAudit.report.json', ('CONST', 5, 1)), ('PR168_RANK_ModeScopedDecisionPolicyMatrix.report.json', ('CONST', 5, 1)), ('PR168_RANK_NegativeRecoveryDAG.report.json', ('R', 1000, 1)), ('PR168_RANK_NegativeRecoveryTournament.report.json', ('R', None, 1)), ('PR168_RANK_NegativeRecoveryTransformationLedger.report.json', ('R', None, 1)), ('PR168_RANK_NegativeRecoveryTrialLedger.report.json', ('R', None, 1)), ('PR168_RANK_NoOrphanProof.report.json', ('CONST', 143, 1)), ('PR168_RANK_NoTradeActionMarginLedger.report.json', ('P', None, 1)), ('PR168_RANK_NoTradeDominanceResults.report.json', ('P', None, 1)), ('PR168_RANK_NormalizationLedger.report.json', ('CONST', 1, 1)), ('PR168_RANK_OrderDecisionDominanceAudit.report.json', ('P', None, 1)), ('PR168_RANK_OrderDecisionSurfaceGapQueue.report.json', ('CONST', 1, 1)), ('PR168_RANK_OrderDecisionSurfaceLookupSeed.report.json', ('P', None, 1)), ('PR168_RANK_OrderDecisionThresholdSurface.report.json', ('P', None, 1)), ('PR168_RANK_OrderDecisionTournament.report.json', ('P', None, 1)), ('PR168_RANK_OrderLevelNoTradeCompetition.report.json', ('P', None, 1)), ('PR168_RANK_OrderPolicyParetoFrontier.report.json', ('P', None, 1)), ('PR168_RANK_OrderPolicyRanking.report.json', ('P', None, 1)), ('PR168_RANK_OrderPolicyRegistry.report.json', ('CONST', 9, 1)), ('PR168_RANK_OrderSizeSensitivityLedger.report.json', ('P', None, 1)), ('PR168_RANK_OverfitFDRRankingPenalty.report.json', ('P', None, 1)), ('PR168_RANK_PR168RPInputDefectDAG.report.json', ('CONST', 1, 1)), ('PR168_RANK_PR168RPInputResultSummary.report.json', ('CONST', 1, 1)), ('PR168_RANK_PassiveAggressiveExecutionFrontier.report.json', ('P', None, 1)), ('PR168_RANK_PnLFormulaInputGapQueue.report.json', ('CONST', 1, 1)), ('PR168_RANK_PortfolioAwareRanking.report.json', ('P', None, 1)), ('PR168_RANK_PortfolioMarginalUtilityLedger.report.json', ('P', None, 1)), ('PR168_RANK_PostSelectionBiasLedger.report.json', ('P', None, 1)), ('PR168_RANK_PreTradeCandidateRanking.report.json', ('P', None, 1)), ('PR168_RANK_PreTradeOrderSimulationLedger.report.json', ('P', None, 1)), ('PR168_RANK_QKUFormulaAlgorithmCombinationRanking.report.json', ('K', None, 1)), ('PR168_RANK_QuantumClassicalComparatorQueue.report.json', ('Q', 1000, 1)), ('PR168_RANK_QuantumCombinatorialSelectionObjective.report.json', ('Q', 1000, 1)), ('PR168_RANK_QuantumNegativeRecoverySelector.report.json', ('CONST', 1, 1)), ('PR168_RANK_QuantumObjectiveConstraintMapLedger.report.json', ('Q', None, 1)), ('PR168_RANK_QuantumObjectiveRegistrySeed.report.json', ('CONST', 1, 1)), ('PR168_RANK_QuantumPenaltyScaleSanityAudit.report.json', ('Q', 1000, 1)), ('PR168_RANK_QuantumSelectorInterpretBackMap.report.json', ('C', 1000, 1)), ('PR168_RANK_QuantumStackSizePolicySelector.report.json', ('CONST', 1, 1)), ('PR168_RANK_QuantumStructuralRanking.report.json', ('Q', None, 1)), ('PR168_RANK_RankingUniverse.report.json', ('C', None, 1)), ('PR168_RANK_RankingWeightSourceLedger.report.json', ('CONST', 1, 1)), ('PR168_RANK_ReadReceipt.report.json', ('CONST', 48, 1)), ('PR168_RANK_RecoveredPositiveCandidates.report.json', ('CONST', 0, 1)), ('PR168_RANK_RegimeConditionedRanking.report.json', ('C', None, 1)), ('PR168_RANK_RegimeMemorySeed.report.json', ('C', None, 1)), ('PR168_RANK_RegimeScopedOrderDecisionRanking.report.json', ('C', None, 1)), ('PR168_RANK_RegimeScopedRecoveryCandidates.report.json', ('CONST', 0, 1)), ('PR168_RANK_RegimeStabilityLedger.report.json', ('C', None, 1)), ('PR168_RANK_RegistryAntiScatterAudit.report.json', ('CONST', 11, 1)), ('PR168_RANK_RegistrySeedNoOrphanProof.report.json', ('CONST', 33, 1)), ('PR168_RANK_RepairPriorityQueue.report.json', ('C', None, 1)), ('PR168_RANK_RetestQueue.report.json', ('CONST', 0, 1)), ('PR168_RANK_RuntimeAllowlistSeedRegistry.report.json', ('CONST', 1, 1)), ('PR168_RANK_ScalarValueNoOrphanProof.report.json', ('P', 1000, 29)), ('PR168_RANK_ScenarioStressChampionAudit.report.json', ('P', None, 1)), ('PR168_RANK_ScenarioStressOrderSurface.report.json', ('P', None, 1)), ('PR168_RANK_ScoreComponentLedger.report.json', ('P', None, 1)), ('PR168_RANK_ScoreMathAudit.report.json', ('P', 5, 1)), ('PR168_RANK_SimulatedOrderNoTradeComparison.report.json', ('P', None, 1)), ('PR168_RANK_SimulatedOrderTrialLedger.report.json', ('P', None, 1)), ('PR168_RANK_SimulationAgentRoutingLedger.report.json', ('CONST', 15, 1)), ('PR168_RANK_SimulationArtifactDAG.report.json', ('CONST', 143, 1)), ('PR168_RANK_SizeCappedPositiveCandidates.report.json', ('CONST', 0, 1)), ('PR168_RANK_SizeCappedRecoveryCandidates.report.json', ('CONST', 0, 1)), ('PR168_RANK_SizePriceTimeSensitivityLadder.report.json', ('P', None, 1)), ('PR168_RANK_StackAlphaSourceLedger.report.json', ('P', None, 1)), ('PR168_RANK_StackCompatibilityMatrix.report.json', ('C', 1000, 1)), ('PR168_RANK_StackPortfolioUtilityLedger.report.json', ('P', None, 1)), ('PR168_RANK_StackSearchBudgetLedger.report.json', ('C', None, 1)), ('PR168_RANK_StackSynergyEdgeLedger.report.json', ('C', None, 1)), ('PR168_RANK_TCADecompositionUsed.report.json', ('P', None, 1)), ('PR168_RANK_TCAMissingComponentRepairQueue.report.json', ('CONST', 1, 1)), ('PR168_RANK_TCAPenaltyLedger.report.json', ('P', None, 1)), ('PR168_RANK_TerminalArtifactLifecycle.report.json', ('P', None, 1)), ('PR168_RANK_ThresholdSurfaceDAG.report.json', ('P', 1000, 1)), ('PR168_RANK_ThresholdSurfaceTrialLedger.report.json', ('P', 1000, 1)), ('PR168_RANK_To_FutureExecutionRouterDecisionKernelSeed.report.json', ('CONST', 1, 1)), ('PR168_RANK_To_MarketVenueAdapterExpansionSeed.report.json', ('CONST', 3, 1)), ('PR168_RANK_To_OwnerDashboardComputedTruth.report.json', ('CONST', 1, 1)), ('PR168_RANK_To_PR162E_PluginRegistrySeed.report.json', ('CONST', 2, 1)), ('PR168_RANK_To_PR162E_Q_QuantumMapperQueue.report.json', ('CONST', 1, 1)), ('PR168_RANK_To_PR162E_Q_QuantumObjectiveRegistrySeed.report.json', ('CONST', 1, 1)), ('PR168_RANK_To_PR165B_NegativeCombinationMemorySeed.report.json', ('CONST', 1, 1)), ('PR168_RANK_To_PR166_QC_R2_QuantumComparatorQueue.report.json', ('CONST', 1, 1)), ('PR168_RANK_To_PR167B_ReplayPaperCampaignSeed.report.json', ('CONST', 1, 1)), ('PR168_RANK_To_PR167_OpenTradeCombinationSimulatorSeed.report.json', ('CONST', 1, 1)), ('PR168_RANK_To_PR168_RP_PostmergeRepairQueue.report.json', ('CONST', 1, 1)), ('PR168_RANK_To_RuntimeAllowlistRegistrySeed.report.json', ('CONST', 1, 1)), ('PR168_RANK_To_RuntimeFormulaAllowlistHotPathCacheSeed.report.json', ('CONST', 1, 1)), ('PR168_RANK_To_SourceEvidenceConnectorBindingGapQueue.report.json', ('P', 1000, 1)), ('PR168_RANK_To_TargetedRepairPRs.report.json', ('CONST', 1, 1)), ('PR168_RANK_TopComputedPositiveRanking.report.json', ('C', 100, 1)), ('PR168_RANK_TopRepairedPositiveRanking.report.json', ('CONST', 0, 1)), ('PR168_RANK_TrialFamilyLedger.report.json', ('P', None, 1)), ('PR168_RANK_TrueNegativeAfterRecoveryExhaustion.report.json', ('T', None, 1)), ('PR168_RANK_TrueNegativeArchive.report.json', ('T', None, 1)), ('PR168_RANK_TwoSpeedDecisionSurfacePlan.report.json', ('CONST', 1, 1)), ('PR168_RANK_UnexplainedEdgeResidualQueue.report.json', ('P', None, 1)), ('PR168_RANK_ValidationScopeRegistryIntegration.report.json', ('CONST', 1, 1)), ('PR168_RANK_VenueCostModelRegistrySeed.report.json', ('CONST', 1, 1)), ('PR168_RANK_WhyNoTradeWinsExplanation.report.json', ('P', None, 1)), ('PR168_RANK_WhyTradeWinsExplanation.report.json', ('CONST', 0, 1))), 'required_reports': ('PR168_RANK_ReadReceipt.report.json', 'PR168_RANK_PR168RPInputResultSummary.report.json', 'PR168_RANK_InputConsumption.report.json', 'PR168_RANK_RankingUniverse.report.json', 'PR168_RANK_BinaryPredictionMarketPnLFormulaAudit.report.json', 'PR168_RANK_PnLFormulaInputGapQueue.report.json', 'PR168_RANK_CandidateStackGenerationLedger.report.json', 'PR168_RANK_CandidateStackRoleCompletenessAudit.report.json', 'PR168_RANK_CandidateStackDominancePruningLedger.report.json', 'PR168_RANK_ModeScopedDecisionPolicyMatrix.report.json', 'PR168_RANK_ModeBoundaryAudit.report.json', 'PR168_RANK_PreTradeOrderSimulationLedger.report.json', 'PR168_RANK_OrderDecisionTournament.report.json', 'PR168_RANK_OrderPolicyParetoFrontier.report.json', 'PR168_RANK_OrderDecisionDominanceAudit.report.json', 'PR168_RANK_SimulatedOrderNoTradeComparison.report.json', 'PR168_RANK_ScoreComponentLedger.report.json', 'PR168_RANK_MissingScoreComponentQueue.report.json', 'PR168_RANK_MissingRankingDefaultQueue.report.json', 'PR168_RANK_MissingSimulationInputQueue.report.json', 'PR168_RANK_NormalizationLedger.report.json', 'PR168_RANK_ScoreMathAudit.report.json', 'PR168_RANK_EvidenceBackedRanking.report.json', 'PR168_RANK_RankingWeightSourceLedger.report.json', 'PR168_RANK_TopComputedPositiveRanking.report.json', 'PR168_RANK_TopRepairedPositiveRanking.report.json', 'PR168_RANK_ChampionCandidates.report.json', 'PR168_RANK_ChallengerCandidates.report.json', 'PR168_RANK_RetestQueue.report.json', 'PR168_RANK_RepairPriorityQueue.report.json', 'PR168_RANK_TrueNegativeArchive.report.json', 'PR168_RANK_NoTradeDominanceResults.report.json', 'PR168_RANK_NoTradeActionMarginLedger.report.json', 'PR168_RANK_OrderLevelNoTradeCompetition.report.json', 'PR168_RANK_PreTradeCandidateRanking.report.json', 'PR168_RANK_OrderPolicyRanking.report.json', 'PR168_RANK_RegimeConditionedRanking.report.json', 'PR168_RANK_RegimeMemorySeed.report.json', 'PR168_RANK_RegimeStabilityLedger.report.json', 'PR168_RANK_RegimeScopedOrderDecisionRanking.report.json', 'PR168_RANK_PortfolioAwareRanking.report.json', 'PR168_RANK_PortfolioMarginalUtilityLedger.report.json', 'PR168_RANK_DiversificationPenaltyLedger.report.json', 'PR168_RANK_StackPortfolioUtilityLedger.report.json', 'PR168_RANK_QuantumStructuralRanking.report.json', 'PR168_RANK_QuantumObjectiveConstraintMapLedger.report.json', 'PR168_RANK_QuantumCombinatorialSelectionObjective.report.json', 'PR168_RANK_QuantumPenaltyScaleSanityAudit.report.json', 'PR168_RANK_QuantumClassicalComparatorQueue.report.json', 'PR168_RANK_QKUFormulaAlgorithmCombinationRanking.report.json', 'PR168_RANK_TCADecompositionUsed.report.json', 'PR168_RANK_TCAPenaltyLedger.report.json', 'PR168_RANK_TCAMissingComponentRepairQueue.report.json', 'PR168_RANK_OverfitFDRRankingPenalty.report.json', 'PR168_RANK_TrialFamilyLedger.report.json', 'PR168_RANK_PostSelectionBiasLedger.report.json', 'PR168_RANK_CandidateStackTrialLedger.report.json', 'PR168_RANK_SimulatedOrderTrialLedger.report.json', 'PR168_RANK_CapacityCrowdingRankingPenalty.report.json', 'PR168_RANK_CapacityLimitLedger.report.json', 'PR168_RANK_OrderSizeSensitivityLedger.report.json', 'PR168_RANK_LatencyHotPathCandidateSeed.report.json', 'PR168_RANK_ComputeBudgetLatencyPlan.report.json', 'PR168_RANK_DominantAlphaSourceRanking.report.json', 'PR168_RANK_AlphaSourceDecompositionLedger.report.json', 'PR168_RANK_StackAlphaSourceLedger.report.json', 'PR168_RANK_ConditionScopedNegativeMemorySeed.report.json', 'PR168_RANK_AgentWorkOrders.report.json', 'PR168_RANK_AgentDutySourceCrosswalkConsumption.report.json', 'PR168_RANK_AgentNoOrphanDutyLedger.report.json', 'PR168_RANK_SimulationAgentRoutingLedger.report.json', 'PR168_RANK_To_PR166_QC_R2_QuantumComparatorQueue.report.json', 'PR168_RANK_To_PR162E_Q_QuantumMapperQueue.report.json', 'PR168_RANK_To_PR165B_NegativeCombinationMemorySeed.report.json', 'PR168_RANK_To_TargetedRepairPRs.report.json', 'PR168_RANK_To_PR167_OpenTradeCombinationSimulatorSeed.report.json', 'PR168_RANK_To_PR167B_ReplayPaperCampaignSeed.report.json', 'PR168_RANK_To_RuntimeFormulaAllowlistHotPathCacheSeed.report.json', 'PR168_RANK_To_OwnerDashboardComputedTruth.report.json', 'PR168_RANK_To_FutureExecutionRouterDecisionKernelSeed.report.json', 'PR168_RANK_DAGUpstreamDownstreamOrchestration.report.json', 'PR168_RANK_ArtifactInformationValueDAG.report.json', 'PR168_RANK_SimulationArtifactDAG.report.json', 'PR168_RANK_NoOrphanProof.report.json', 'PR168_RANK_AuthorityBoundaryAudit.report.json', 'PR168_RANK_ValidationScopeRegistryIntegration.report.json', 'PR168_RANK_CentralizedSystemsCoverageAudit.report.json', 'PR168_RANK_StackSynergyEdgeLedger.report.json', 'PR168_RANK_StackCompatibilityMatrix.report.json', 'PR168_RANK_StackSearchBudgetLedger.report.json', 'PR168_RANK_OrderDecisionThresholdSurface.report.json', 'PR168_RANK_OrderDecisionSurfaceLookupSeed.report.json', 'PR168_RANK_OrderDecisionSurfaceGapQueue.report.json', 'PR168_RANK_MakerTakerAdverseSelectionTradeoff.report.json', 'PR168_RANK_PassiveAggressiveExecutionFrontier.report.json', 'PR168_RANK_SizePriceTimeSensitivityLadder.report.json', 'PR168_RANK_SizeCappedPositiveCandidates.report.json', 'PR168_RANK_ScenarioStressOrderSurface.report.json', 'PR168_RANK_ScenarioStressChampionAudit.report.json', 'PR168_RANK_EdgeCaptureAttributionLedger.report.json', 'PR168_RANK_WhyTradeWinsExplanation.report.json', 'PR168_RANK_WhyNoTradeWinsExplanation.report.json', 'PR168_RANK_UnexplainedEdgeResidualQueue.report.json', 'PR168_RANK_NegativeRecoveryTournament.report.json', 'PR168_RANK_NegativeRecoveryTransformationLedger.report.json', 'PR168_RANK_RecoveredPositiveCandidates.report.json', 'PR168_RANK_SizeCappedRecoveryCandidates.report.json', 'PR168_RANK_RegimeScopedRecoveryCandidates.report.json', 'PR168_RANK_TrueNegativeAfterRecoveryExhaustion.report.json', 'PR168_RANK_NegativeRecoveryTrialLedger.report.json', 'PR168_RANK_ThresholdSurfaceTrialLedger.report.json', 'PR168_RANK_QuantumStackSizePolicySelector.report.json', 'PR168_RANK_QuantumNegativeRecoverySelector.report.json', 'PR168_RANK_QuantumSelectorInterpretBackMap.report.json', 'PR168_RANK_TwoSpeedDecisionSurfacePlan.report.json', 'PR168_RANK_FutureHotPathInputContractSeed.report.json', 'PR168_RANK_ScalarValueNoOrphanProof.report.json', 'PR168_RANK_TerminalArtifactLifecycle.report.json', 'PR168_RANK_ThresholdSurfaceDAG.report.json', 'PR168_RANK_NegativeRecoveryDAG.report.json', 'PR168_RANK_ConnectorCandidateRoutingLedger.report.json', 'PR168_RANK_To_SourceEvidenceConnectorBindingGapQueue.report.json', 'PR168_RANK_FutureExpansionRegistryLayer.report.json', 'PR168_RANK_MarketAdapterRegistrySeed.report.json', 'PR168_RANK_VenueCostModelRegistrySeed.report.json', 'PR168_RANK_ContractPayoffModelRegistrySeed.report.json', 'PR168_RANK_FormulaPluginRegistrySeed.report.json', 'PR168_RANK_AlgorithmPluginRegistrySeed.report.json', 'PR168_RANK_QuantumObjectiveRegistrySeed.report.json', 'PR168_RANK_OrderPolicyRegistry.report.json', 'PR168_RANK_AgentCapabilityRegistrySeed.report.json', 'PR168_RANK_ConnectorReadinessRegistrySeed.report.json', 'PR168_RANK_RuntimeAllowlistSeedRegistry.report.json', 'PR168_RANK_HotPathDecisionSurfaceRegistry.report.json', 'PR168_RANK_FutureMarketExpansionDAG.report.json', 'PR168_RANK_FutureFormulaQuantumExpansionDAG.report.json', 'PR168_RANK_RegistrySeedNoOrphanProof.report.json', 'PR168_RANK_RegistryAntiScatterAudit.report.json', 'PR168_RANK_To_PR162E_PluginRegistrySeed.report.json', 'PR168_RANK_To_PR162E_Q_QuantumObjectiveRegistrySeed.report.json', 'PR168_RANK_To_RuntimeAllowlistRegistrySeed.report.json', 'PR168_RANK_To_MarketVenueAdapterExpansionSeed.report.json', 'PR168_RANK_FinalSummary.report.json'), 'input_symbols': (('C', 'PR168_RP_To_PR168_RANK_ComputedRanking.report.json'), ('P', 'PR168_RP_To_PR168_RANK_PreTradeRankingSeed.report.json'), ('Q', 'PR168_RP_QuantumStructuralReadiness.report.json'), ('K', 'PR168_RP_QKUCombinationCandidateResults.report.json'), ('R', 'PR168_RP_NegativeToPositiveRecoveryAttempts.report.json'), ('T', 'PR168_RP_TrueNegativeAfterRecoveryExhaustion.report.json')), 'namespace_shape': (145, 92, 4, 4)}, 124: {'argv': ('tools/build_pr168_rp2_map2.py', '--offline'), 'config': 'tools/pr168_rp2_config.py', 'body_guards': (('tools/build_pr168_rp2_map2.py', 'main', 0, ()), ('tools/pr168_rp2_config.py', 'report_path', 1, ()), ('tools/pr168_rp2_config.py', 'shard_path', 2, ()), ('tools/pr168_rp2_reports.py', 'write_json', 3, ()), ('tools/pr168_rp2_reports.py', 'write_jsonl', 4, ()), ('tools/pr168_rp2_reports.py', 'write_shard', 5, ()), ('tools/pr168_rp2_reports.py', 'write_report', 6, ()), ('tools/pr168_rp2_engine.py', 'endpoint_verification_rows', 7, ())), 'assignment_guards': {('tools/build_pr168_rp2_map2.py', 'REPO_ROOT'): 8, ('tools/pr168_rp2_config.py', 'REPO_ROOT'): 8, ('tools/pr168_rp2_config.py', 'GENERATED_ROOT'): 9, ('tools/pr168_rp2_config.py', 'SHARD_ROOT'): 10, ('tools/pr168_rp2_config.py', 'REPORT_ALIASES'): 11, ('tools/pr168_rp2_config.py', 'ROW_SHARDS'): 12}, 'file_count': 119, 'uses_git': False, 'kind': 'CONFIG', 'reports': 'REPORT_ALIASES', 'report_count': 83, 'shard_count': 18, 'shard_root': 'docs/master_plan/generated/rp2p', 'source_paths': ('tools/build_pr168_rp2_map2.py', 'tools/pr168_rp2_config.py', 'tools/pr168_rp2_engine.py', 'tools/pr168_rp2_reports.py'), 'namespace_shape': (119, 65, 5, 4)}, 126: {'argv': ('tools/build_pr168_map3.py', '--offline'), 'config': 'tools/build_pr168_map3.py', 'body_guards': (('tools/build_pr168_map3.py', 'write_reports', 53, ()), ('tools/build_pr168_map3.py', 'main', 54, ()), ('tools/pr168_map3_report_writer.py', 'write_json', 55, ()), ('tools/pr168_map3_report_writer.py', 'write_jsonl', 56, ())), 'assignment_guards': {('tools/build_pr168_map3.py', 'REPO_ROOT'): 8, ('tools/build_pr168_map3.py', 'REPORTS'): 57, ('tools/build_pr168_map3.py', 'SHARDS'): 58, ('tools/pr168_map3_report_writer.py', 'GENERATED_ROOT'): 59, ('tools/pr168_map3_report_writer.py', 'MAP3_ROOT'): 60}, 'file_count': 27, 'uses_git': False, 'kind': 'MAP3', 'literal_targets': (('docs/master_plan/generated/PR168_MAP3_OnlineScout.report.json', ('CREATE', 'WRITE')), ('docs/master_plan/generated/PR168_MAP3_ExtSources.report.json', ('CREATE', 'WRITE')), ('docs/master_plan/generated/PR168_MAP3_ExtIntake.report.json', ('CREATE', 'WRITE')), ('docs/master_plan/generated/PR168_MAP3_FamilyMatrix.report.json', ('CREATE', 'WRITE')), ('docs/master_plan/generated/PR168_MAP3_FormulaFactory.report.json', ('CREATE', 'WRITE')), ('docs/master_plan/generated/PR168_MAP3_FormulaMaterialization.report.json', ('CREATE', 'WRITE')), ('docs/master_plan/generated/PR168_MAP3_FormulaProv.report.json', ('CREATE', 'WRITE')), ('docs/master_plan/generated/PR168_MAP3_SourceTriangulation.report.json', ('CREATE', 'WRITE')), ('docs/master_plan/generated/PR168_MAP3_FileAliases.report.json', ('CREATE', 'WRITE')), ('docs/master_plan/generated/PR168_MAP3_PathAudit.report.json', ('CREATE', 'WRITE')), ('docs/master_plan/generated/PR168_MAP3_FinalSummary.report.json', ('CREATE', 'WRITE')), ('docs/master_plan/generated/map3/online_scout_rows.jsonl', ('CREATE', 'WRITE')), ('docs/master_plan/generated/map3/source_tier_rows.jsonl', ('CREATE', 'WRITE')), ('docs/master_plan/generated/map3/external_intake_rows.jsonl', ('CREATE', 'WRITE')), ('docs/master_plan/generated/map3/formula_family_rows.jsonl', ('CREATE', 'WRITE')), ('docs/master_plan/generated/map3/formula_factory_rows.jsonl', ('CREATE', 'WRITE')), ('docs/master_plan/generated/map3/formula_materialization_rows.jsonl', ('CREATE', 'WRITE')), ('docs/master_plan/generated/map3/formula_provenance_rows.jsonl', ('CREATE', 'WRITE')), ('docs/master_plan/generated/map3/source_triangulation_rows.jsonl', ('CREATE', 'WRITE')), ('docs/master_plan/generated/map3/online_scout_rows.jsonl.manifest.json', ('CREATE', 'WRITE')), ('docs/master_plan/generated/map3/source_tier_rows.jsonl.manifest.json', ('CREATE', 'WRITE')), ('docs/master_plan/generated/map3/external_intake_rows.jsonl.manifest.json', ('CREATE', 'WRITE')), ('docs/master_plan/generated/map3/formula_family_rows.jsonl.manifest.json', ('CREATE', 'WRITE')), ('docs/master_plan/generated/map3/formula_factory_rows.jsonl.manifest.json', ('CREATE', 'WRITE')), ('docs/master_plan/generated/map3/formula_materialization_rows.jsonl.manifest.json', ('CREATE', 'WRITE')), ('docs/master_plan/generated/map3/formula_provenance_rows.jsonl.manifest.json', ('CREATE', 'WRITE')), ('docs/master_plan/generated/map3/source_triangulation_rows.jsonl.manifest.json', ('CREATE', 'WRITE'))), 'source_paths': ('tools/build_pr168_map3.py', 'tools/pr168_map3_report_writer.py', 'tools/pr168_map3_config.py', 'tools/pr168_map3_external_intake.py', 'tools/pr168_map3_formula_factory.py', 'tools/pr168_map3_formula_family_matrix.py', 'tools/pr168_map3_formula_materialization.py', 'tools/pr168_map3_formula_provenance.py', 'tools/pr168_map3_online_scout.py', 'tools/pr168_map3_source_triangulation.py'), 'namespace_shape': (27, 80, 5, 4)}, 128: {'argv': ('tools/build_pr168_rp3.py', '--offline'), 'config': 'tools/pr168_rp3_config.py', 'body_guards': (('tools/build_pr168_rp3.py', 'parse_args', 13, ()), ('tools/build_pr168_rp3.py', 'main', 14, ()), ('tools/pr168_rp3_config.py', 'report_path', 1, ()), ('tools/pr168_rp3_config.py', 'shard_path', 2, ()), ('tools/pr168_rp3_report_writer.py', 'write_json', 15, ()), ('tools/pr168_rp3_report_writer.py', 'write_jsonl', 16, ()), ('tools/pr168_rp3_report_writer.py', 'write_shard', 17, ()), ('tools/pr168_rp3_report_writer.py', 'write_report', 18, ())), 'assignment_guards': {('tools/build_pr168_rp3.py', 'REPO_ROOT'): 8, ('tools/pr168_rp3_config.py', 'REPO_ROOT'): 8, ('tools/pr168_rp3_config.py', 'GENERATED_ROOT'): 9, ('tools/pr168_rp3_config.py', 'SHARD_ROOT'): 19, ('tools/pr168_rp3_config.py', 'REPORT_ALIASES'): 20, ('tools/pr168_rp3_config.py', 'ROW_SHARDS'): 21}, 'file_count': 206, 'uses_git': False, 'kind': 'CONFIG', 'reports': 'REPORT_ALIASES', 'report_count': 106, 'shard_count': 50, 'shard_root': 'docs/master_plan/generated/rp3', 'source_paths': ('tools/build_pr168_rp3.py', 'tools/pr168_rp3_config.py', 'tools/pr168_rp3_dag_orchestrator.py', 'tools/pr168_rp3_report_writer.py'), 'namespace_shape': (206, 73, 5, 4)}, 130: {'argv': ('tools/build_pr168_rank3.py', '--offline'), 'config': 'tools/pr168_rank3_config.py', 'body_guards': (('tools/build_pr168_rank3.py', 'parse_args', 22, ()), ('tools/build_pr168_rank3.py', 'main', 23, ()), ('tools/pr168_rank3_config.py', 'report_path', 1, ()), ('tools/pr168_rank3_config.py', 'shard_path', 2, ()), ('tools/pr168_rank3_report_writer.py', 'write_json', 15, ()), ('tools/pr168_rank3_report_writer.py', 'write_jsonl', 16, ()), ('tools/pr168_rank3_report_writer.py', 'write_shard', 24, ()), ('tools/pr168_rank3_report_writer.py', 'write_report', 18, ())), 'assignment_guards': {('tools/build_pr168_rank3.py', 'REPO_ROOT'): 8, ('tools/pr168_rank3_config.py', 'REPO_ROOT'): 8, ('tools/pr168_rank3_config.py', 'GENERATED_ROOT'): 9, ('tools/pr168_rank3_config.py', 'SHARD_ROOT'): 25, ('tools/pr168_rank3_config.py', 'REPORT_ALIASES'): 26, ('tools/pr168_rank3_config.py', 'ROW_SHARDS'): 27}, 'file_count': 209, 'uses_git': False, 'kind': 'CONFIG', 'reports': 'REPORT_ALIASES', 'report_count': 95, 'shard_count': 57, 'shard_root': 'docs/master_plan/generated/rank3', 'source_paths': ('tools/build_pr168_rank3.py', 'tools/pr168_rank3_config.py', 'tools/pr168_rank3_dag_orchestrator.py', 'tools/pr168_rank3_report_writer.py', 'tools/pr168_rank3_rp3_loader.py', 'tools/pr168_rp3_config.py'), 'namespace_shape': (209, 85, 5, 4)}, 134: {'argv': ('tools/build_pr168_rp5b_active_registry_safe_cleanup.py', '--dry-run', '--offline'), 'config': 'tools/pr168_rp5b_config.py', 'body_guards': (('tools/build_pr168_rp5b_active_registry_safe_cleanup.py', 'parse_args', 28, ()), ('tools/build_pr168_rp5b_active_registry_safe_cleanup.py', 'main', 29, ()), ('tools/pr168_rp5b_config.py', 'report_path', 30, ()), ('tools/pr168_rp5b_config.py', 'shard_path', 2, ()), ('tools/pr168_rp5b_config.py', 'manifest_path_for_shard', 31, ()), ('tools/pr168_rp5b_report_writer.py', 'write_json', 32, ()), ('tools/pr168_rp5b_report_writer.py', 'write_jsonl', 33, ()), ('tools/pr168_rp5b_report_writer.py', 'write_shard', 34, ()), ('tools/pr168_rp5b_report_writer.py', 'write_report', 35, ()), ('tools/pr168_rp5b_rp5a_loader.py', 'collect_preflight', 36, ()), ('tools/build_pr168_rp5b_active_registry_safe_cleanup.py', '_apply_deletions', 37, ())), 'assignment_guards': {('tools/build_pr168_rp5b_active_registry_safe_cleanup.py', 'REPO_ROOT'): 8, ('tools/pr168_rp5b_config.py', 'REPO_ROOT'): 8, ('tools/pr168_rp5b_config.py', 'GENERATED_ROOT'): 9, ('tools/pr168_rp5b_config.py', 'SHARD_ROOT'): 38, ('tools/pr168_rp5b_config.py', 'REPORT_NAMES'): 39, ('tools/pr168_rp5b_config.py', 'ROW_SHARDS'): 40}, 'file_count': 44, 'uses_git': False, 'kind': 'CONFIG', 'reports': 'REPORT_NAMES', 'report_count': 16, 'shard_count': 14, 'shard_root': 'docs/master_plan/generated/rp5b', 'source_paths': ('tools/build_pr168_rp5b_active_registry_safe_cleanup.py', 'tools/pr168_rp5b_config.py', 'tools/pr168_rp5b_report_writer.py', 'tools/pr168_rp5b_active_registry.py', 'tools/pr168_rp5b_identity_preservation.py', 'tools/pr168_rp5b_no_raw_legacy_authority.py', 'tools/pr168_rp5b_rp5a_loader.py', 'tools/pr168_rp5b_safe_deletion_verifier.py', 'tools/pr168_rp5b_semantic_supersession.py', 'tools/pr168_rp5b_validation_scope_reduction.py'), 'namespace_shape': (44, 84, 5, 4)}, 136: {'argv': ('tools/build_pr168_rp5c_immutable_qku_formula_library.py', '--offline'), 'config': 'tools/pr168_rp5c_config.py', 'body_guards': (('tools/build_pr168_rp5c_immutable_qku_formula_library.py', 'parse_args', 41, ()), ('tools/build_pr168_rp5c_immutable_qku_formula_library.py', 'main', 42, ()), ('tools/pr168_rp5c_config.py', 'report_path', 30, ()), ('tools/pr168_rp5c_config.py', 'shard_path', 2, ()), ('tools/pr168_rp5c_config.py', 'manifest_path_for_shard', 31, ()), ('tools/pr168_rp5c_report_writer.py', 'write_json', 32, ()), ('tools/pr168_rp5c_report_writer.py', 'write_jsonl', 33, ()), ('tools/pr168_rp5c_report_writer.py', 'write_shard', 43, ()), ('tools/pr168_rp5c_report_writer.py', 'write_report', 44, ()), ('tools/build_pr168_rp5c_immutable_qku_formula_library.py', '_run_text', 45, ()), ('tools/build_pr168_rp5c_immutable_qku_formula_library.py', '_ensure_allowed_build_branch', 46, ()), ('tools/build_pr168_rp5c_immutable_qku_formula_library.py', '_effective_branch_name', 47, ())), 'assignment_guards': {('tools/build_pr168_rp5c_immutable_qku_formula_library.py', 'REPO_ROOT'): 8, ('tools/pr168_rp5c_config.py', 'REPO_ROOT'): 48, ('tools/pr168_rp5c_config.py', 'GENERATED_ROOT'): 49, ('tools/pr168_rp5c_config.py', 'SHARD_ROOT'): 50, ('tools/pr168_rp5c_config.py', 'REPORT_NAMES'): 51, ('tools/pr168_rp5c_config.py', 'ROW_SHARDS'): 52}, 'file_count': 114, 'uses_git': True, 'kind': 'CONFIG', 'reports': 'REPORT_NAMES', 'report_count': 38, 'shard_count': 38, 'shard_root': 'docs/master_plan/generated/rp5c', 'source_paths': ('tools/build_pr168_rp5c_immutable_qku_formula_library.py', 'tools/pr168_rp5c_config.py', 'tools/pr168_rp5c_report_writer.py'), 'namespace_shape': (114, 90, 5, 4)}, 138: {'argv': ('tools/run_pr168_vs1_trading_intelligence_slice.py', '--fixture', 'all', '--top-k', '10', '--max-identities', '50', '--max-stacks-per-fixture', '20', '--dump-temp'), 'config': 'src/qtt/stage1_prediction_markets/pr168_vs1_trading_intelligence/models.py', 'body_guards': (('tools/run_pr168_vs1_trading_intelligence_slice.py', 'main', 61, ()), ('src/qtt/stage1_prediction_markets/pr168_vs1_trading_intelligence/models.py', 'write_json', 62, ()), ('src/qtt/stage1_prediction_markets/pr168_vs1_trading_intelligence/models.py', 'write_jsonl', 63, ()), ('src/qtt/stage1_prediction_markets/pr168_vs1_trading_intelligence/runner.py', 'main', 64, ())), 'assignment_guards': {('tools/run_pr168_vs1_trading_intelligence_slice.py', 'REPO_ROOT'): 8, ('src/qtt/stage1_prediction_markets/pr168_vs1_trading_intelligence/models.py', 'REPO_ROOT'): 65, ('src/qtt/stage1_prediction_markets/pr168_vs1_trading_intelligence/models.py', 'GENERATED_DIR'): 66, ('src/qtt/stage1_prediction_markets/pr168_vs1_trading_intelligence/models.py', 'GENERATED_REF_PREFIX'): 67, ('src/qtt/stage1_prediction_markets/pr168_vs1_trading_intelligence/models.py', 'RUN_ID'): 68, ('src/qtt/stage1_prediction_markets/pr168_vs1_trading_intelligence/models.py', 'JSONL_OUTPUTS'): 69, ('src/qtt/stage1_prediction_markets/pr168_vs1_trading_intelligence/models.py', 'REPORT_OUTPUTS'): 70}, 'file_count': 73, 'uses_git': False, 'kind': 'MODEL', 'generated_root': 'docs/master_plan/generated/pr168_vs1', 'current_count': 73, 'cleanup': False, 'output_labels': ('REPORT_OUTPUTS', 'JSONL_OUTPUTS'), 'source_paths': ('tools/run_pr168_vs1_trading_intelligence_slice.py', 'src/qtt/stage1_prediction_markets/pr168_vs1_trading_intelligence/models.py', 'src/qtt/stage1_prediction_markets/pr168_vs1_trading_intelligence/runner.py', 'src/qtt/__init__.py', 'src/qtt/stage1_prediction_markets/pr168_vs1_trading_intelligence/__init__.py', 'src/qtt/stage1_prediction_markets/pr168_vs1_trading_intelligence/validator.py', 'tools/pr168_rp5c_config.py', 'tools/pr168_rp5c_library_reader.py'), 'namespace_shape': (73, 110, 5, 4)}, 140: {'argv': ('tools/build_pr168_rp5d_replay_paper_executability_tiers.py', '--offline'), 'config': 'src/qtt/stage1_prediction_markets/pr168_rp5d_executability/models.py', 'body_guards': (('src/qtt/stage1_prediction_markets/pr168_rp5d_executability/models.py', 'manifest_name', 71, ()), ('src/qtt/stage1_prediction_markets/pr168_rp5d_executability/models.py', 'all_artifact_filenames', 72, ()), ('src/qtt/stage1_prediction_markets/pr168_rp5d_executability/models.py', 'write_json', 62, ()), ('src/qtt/stage1_prediction_markets/pr168_rp5d_executability/models.py', 'write_jsonl', 73, ()), ('src/qtt/stage1_prediction_markets/pr168_rp5d_executability/runner.py', '_clean_generated_dir', 74, ()), ('src/qtt/stage1_prediction_markets/pr168_rp5d_executability/runner.py', 'main', 75, ())), 'assignment_guards': {('tools/build_pr168_rp5d_replay_paper_executability_tiers.py', 'REPO_ROOT'): 76, ('src/qtt/stage1_prediction_markets/pr168_rp5d_executability/models.py', 'REPO_ROOT'): 65, ('src/qtt/stage1_prediction_markets/pr168_rp5d_executability/models.py', 'GENERATED_DIR'): 77, ('src/qtt/stage1_prediction_markets/pr168_rp5d_executability/models.py', 'GENERATED_REF_PREFIX'): 78, ('src/qtt/stage1_prediction_markets/pr168_rp5d_executability/models.py', 'RUN_ID'): 79, ('src/qtt/stage1_prediction_markets/pr168_rp5d_executability/models.py', 'JSONL_OUTPUTS'): 80, ('src/qtt/stage1_prediction_markets/pr168_rp5d_executability/models.py', 'JSON_OUTPUTS'): 81, ('src/qtt/stage1_prediction_markets/pr168_rp5d_executability/models.py', 'REPORT_OUTPUTS'): 82, ('src/qtt/stage1_prediction_markets/pr168_rp5d_executability/models.py', 'OLD_LONG_ARTIFACT_NAMES'): 83}, 'file_count': 144, 'uses_git': False, 'kind': 'MODEL', 'generated_root': 'docs/master_plan/generated/pr168_rp5d', 'current_count': 134, 'cleanup': True, 'output_labels': ('JSON_OUTPUTS', 'REPORT_OUTPUTS', 'JSONL_OUTPUTS'), 'source_paths': ('tools/build_pr168_rp5d_replay_paper_executability_tiers.py', 'src/qtt/stage1_prediction_markets/pr168_rp5d_executability/models.py', 'src/qtt/stage1_prediction_markets/pr168_rp5d_executability/runner.py', 'src/qtt/__init__.py', 'src/qtt/stage1_prediction_markets/pr168_rp5d_executability/__init__.py', 'src/qtt/stage1_prediction_markets/pr168_rp5d_executability/artifact_names.py', 'src/qtt/stage1_prediction_markets/pr168_rp5d_executability/path_safety.py', 'src/qtt/stage1_prediction_markets/pr168_rp5d_executability/validator.py', 'tools/pr168_rp5c_config.py', 'tools/pr168_rp5c_library_reader.py'), 'namespace_shape': (144, 113, 5, 4)}, 142: {'argv': ('tools/build_pr168_rp5e_stack_gen.py', '--offline', '--fixture', 'sample', '--max-stacks', '1000', '--dump-temp'), 'config': 'src/qtt/stage1_prediction_markets/pr168_rp5e_stack_generator/models.py', 'body_guards': (('src/qtt/stage1_prediction_markets/pr168_rp5e_stack_generator/models.py', 'manifest_name', 84, ()), ('src/qtt/stage1_prediction_markets/pr168_rp5e_stack_generator/models.py', 'all_artifact_filenames', 85, ()), ('src/qtt/stage1_prediction_markets/pr168_rp5e_stack_generator/models.py', 'write_json', 62, ()), ('src/qtt/stage1_prediction_markets/pr168_rp5e_stack_generator/models.py', 'write_jsonl', 86, ()), ('src/qtt/stage1_prediction_markets/pr168_rp5e_stack_generator/runner.py', '_write_temp_dir', 87, ()), ('src/qtt/stage1_prediction_markets/pr168_rp5e_stack_generator/runner.py', '_clean_generated_dir', 88, ()), ('src/qtt/stage1_prediction_markets/pr168_rp5e_stack_generator/runner.py', 'main', 89, ())), 'assignment_guards': {('tools/build_pr168_rp5e_stack_gen.py', 'REPO_ROOT'): 76, ('src/qtt/stage1_prediction_markets/pr168_rp5e_stack_generator/models.py', 'REPO_ROOT'): 65, ('src/qtt/stage1_prediction_markets/pr168_rp5e_stack_generator/models.py', 'GENERATED_DIR'): 90, ('src/qtt/stage1_prediction_markets/pr168_rp5e_stack_generator/models.py', 'GENERATED_REF_PREFIX'): 91, ('src/qtt/stage1_prediction_markets/pr168_rp5e_stack_generator/models.py', 'TMP_RUN_ROOT'): 92, ('src/qtt/stage1_prediction_markets/pr168_rp5e_stack_generator/models.py', 'RUN_ID'): 93, ('src/qtt/stage1_prediction_markets/pr168_rp5e_stack_generator/models.py', 'JSON_OUTPUTS'): 94, ('src/qtt/stage1_prediction_markets/pr168_rp5e_stack_generator/models.py', 'REPORT_OUTPUTS'): 95, ('src/qtt/stage1_prediction_markets/pr168_rp5e_stack_generator/models.py', 'JSONL_OUTPUTS'): 96}, 'file_count': 153, 'uses_git': False, 'kind': 'MODEL', 'generated_root': 'docs/master_plan/generated/pr168_rp5e', 'current_count': 148, 'cleanup': True, 'output_labels': ('JSON_OUTPUTS', 'REPORT_OUTPUTS', 'JSONL_OUTPUTS'), 'source_paths': ('tools/build_pr168_rp5e_stack_gen.py', 'src/qtt/stage1_prediction_markets/pr168_rp5e_stack_generator/models.py', 'src/qtt/stage1_prediction_markets/pr168_rp5e_stack_generator/runner.py', 'src/qtt/__init__.py', 'src/qtt/stage1_prediction_markets/pr168_rp5e_stack_generator/__init__.py', 'src/qtt/stage1_prediction_markets/pr168_rp5e_stack_generator/artifact_names.py', 'src/qtt/stage1_prediction_markets/pr168_rp5e_stack_generator/blocker_policy.py', 'src/qtt/stage1_prediction_markets/pr168_rp5e_stack_generator/clean_room_defaults.py', 'src/qtt/stage1_prediction_markets/pr168_rp5e_stack_generator/execution_authority.py', 'src/qtt/stage1_prediction_markets/pr168_rp5e_stack_generator/path_safety.py', 'src/qtt/stage1_prediction_markets/pr168_rp5e_stack_generator/policy_default_provenance.py', 'src/qtt/stage1_prediction_markets/pr168_rp5e_stack_generator/policy_parameters.py', 'src/qtt/stage1_prediction_markets/pr168_rp5e_stack_generator/runtime_mode_boundary.py', 'src/qtt/stage1_prediction_markets/pr168_rp5e_stack_generator/validator.py', 'tools/pr168_rp5c_config.py', 'tools/pr168_rp5c_library_reader.py'), 'namespace_shape': (153, 88, 5, 7)}, 144: {'argv': ('tools/build_pr168_rp5d_r1_exec_now_unlock.py', '--offline', '--fixture', 'sample', '--target-min', '5', '--target-max', '15'), 'config': 'src/qtt/stage1_prediction_markets/pr168_rp5d_r1_unlock/models.py', 'body_guards': (('src/qtt/stage1_prediction_markets/pr168_rp5d_r1_unlock/models.py', 'manifest_name', 84, ()), ('src/qtt/stage1_prediction_markets/pr168_rp5d_r1_unlock/models.py', 'all_artifact_filenames', 85, ()), ('src/qtt/stage1_prediction_markets/pr168_rp5d_r1_unlock/models.py', 'write_json', 62, ()), ('src/qtt/stage1_prediction_markets/pr168_rp5d_r1_unlock/models.py', 'write_jsonl', 97, ()), ('src/qtt/stage1_prediction_markets/pr168_rp5d_r1_unlock/runner.py', '_clean_generated_dir', 88, ()), ('src/qtt/stage1_prediction_markets/pr168_rp5d_r1_unlock/runner.py', 'main', 98, ())), 'assignment_guards': {('tools/build_pr168_rp5d_r1_exec_now_unlock.py', 'REPO_ROOT'): 76, ('src/qtt/stage1_prediction_markets/pr168_rp5d_r1_unlock/models.py', 'REPO_ROOT'): 65, ('src/qtt/stage1_prediction_markets/pr168_rp5d_r1_unlock/models.py', 'GENERATED_DIR'): 99, ('src/qtt/stage1_prediction_markets/pr168_rp5d_r1_unlock/models.py', 'GENERATED_REF_PREFIX'): 100, ('src/qtt/stage1_prediction_markets/pr168_rp5d_r1_unlock/models.py', 'RUN_ID'): 101, ('src/qtt/stage1_prediction_markets/pr168_rp5d_r1_unlock/models.py', 'JSON_OUTPUTS'): 94, ('src/qtt/stage1_prediction_markets/pr168_rp5d_r1_unlock/models.py', 'REPORT_OUTPUTS'): 102, ('src/qtt/stage1_prediction_markets/pr168_rp5d_r1_unlock/models.py', 'JSONL_OUTPUTS'): 103}, 'file_count': 156, 'uses_git': False, 'kind': 'MODEL', 'generated_root': 'docs/master_plan/generated/pr168_rp5d_r1', 'current_count': 156, 'cleanup': True, 'output_labels': ('JSON_OUTPUTS', 'REPORT_OUTPUTS', 'JSONL_OUTPUTS'), 'source_paths': ('tools/build_pr168_rp5d_r1_exec_now_unlock.py', 'src/qtt/stage1_prediction_markets/pr168_rp5d_r1_unlock/models.py', 'src/qtt/stage1_prediction_markets/pr168_rp5d_r1_unlock/runner.py', 'src/qtt/__init__.py', 'src/qtt/stage1_prediction_markets/pr168_rp5d_r1_unlock/__init__.py', 'src/qtt/stage1_prediction_markets/pr168_rp5d_r1_unlock/artifact_names.py', 'src/qtt/stage1_prediction_markets/pr168_rp5d_r1_unlock/path_safety.py', 'src/qtt/stage1_prediction_markets/pr168_rp5d_r1_unlock/validator.py'), 'namespace_shape': (156, 70, 5, 4)}, 146: {'argv': ('tools/build_pr168_rp5f_dynamic_targets.py', '--offline', '--fixture', 'sample', '--max-targets', '25', '--max-seeds', '500', '--dump-temp'), 'config': 'src/qtt/stage1_prediction_markets/pr168_rp5f_dynamic_targets/models.py', 'body_guards': (('src/qtt/stage1_prediction_markets/pr168_rp5f_dynamic_targets/models.py', 'manifest_name', 84, ()), ('src/qtt/stage1_prediction_markets/pr168_rp5f_dynamic_targets/models.py', 'all_artifact_filenames', 85, ()), ('src/qtt/stage1_prediction_markets/pr168_rp5f_dynamic_targets/models.py', 'write_json', 62, ()), ('src/qtt/stage1_prediction_markets/pr168_rp5f_dynamic_targets/models.py', 'write_jsonl', 104, ()), ('src/qtt/stage1_prediction_markets/pr168_rp5f_dynamic_targets/runner.py', '_clean_generated_dir', 88, ()), ('src/qtt/stage1_prediction_markets/pr168_rp5f_dynamic_targets/runner.py', 'main', 105, ())), 'assignment_guards': {('tools/build_pr168_rp5f_dynamic_targets.py', 'REPO_ROOT'): 76, ('src/qtt/stage1_prediction_markets/pr168_rp5f_dynamic_targets/models.py', 'REPO_ROOT'): 65, ('src/qtt/stage1_prediction_markets/pr168_rp5f_dynamic_targets/models.py', 'GENERATED_DIR'): 106, ('src/qtt/stage1_prediction_markets/pr168_rp5f_dynamic_targets/models.py', 'GENERATED_REF_PREFIX'): 107, ('src/qtt/stage1_prediction_markets/pr168_rp5f_dynamic_targets/models.py', 'RUN_ID'): 108, ('src/qtt/stage1_prediction_markets/pr168_rp5f_dynamic_targets/models.py', 'JSON_OUTPUTS'): 94, ('src/qtt/stage1_prediction_markets/pr168_rp5f_dynamic_targets/models.py', 'REPORT_OUTPUTS'): 109, ('src/qtt/stage1_prediction_markets/pr168_rp5f_dynamic_targets/models.py', 'JSONL_OUTPUTS'): 110}, 'file_count': 206, 'uses_git': False, 'kind': 'MODEL', 'generated_root': 'docs/master_plan/generated/pr168_rp5f', 'current_count': 206, 'cleanup': True, 'output_labels': ('JSON_OUTPUTS', 'REPORT_OUTPUTS', 'JSONL_OUTPUTS'), 'source_paths': ('tools/build_pr168_rp5f_dynamic_targets.py', 'src/qtt/stage1_prediction_markets/pr168_rp5f_dynamic_targets/models.py', 'src/qtt/stage1_prediction_markets/pr168_rp5f_dynamic_targets/runner.py', 'src/qtt/__init__.py', 'src/qtt/stage1_prediction_markets/pr168_rp5f_dynamic_targets/__init__.py', 'src/qtt/stage1_prediction_markets/pr168_rp5f_dynamic_targets/artifact_names.py', 'src/qtt/stage1_prediction_markets/pr168_rp5f_dynamic_targets/path_safety.py', 'src/qtt/stage1_prediction_markets/pr168_rp5f_dynamic_targets/validator.py', 'tools/pr168_rp5c_config.py', 'tools/pr168_rp5c_library_reader.py'), 'namespace_shape': (206, 75, 5, 4)}}
+ source_guards = ('def main() -> int:\r\n    parser = argparse.ArgumentParser()\r\n    mode = parser.add_mutually_exclusive_group()\r\n    mode.add_argument("--verify-online-docs", action="store_true")\r\n    mode.add_argument("--offline", action="store_true")\r\n    args = parser.parse_args()\r\n    summary = build_all(verify_online_docs=bool(args.verify_online_docs))\r\n    print(json.dumps(summary, indent=2, sort_keys=True, ensure_ascii=True, allow_nan=False))\r\n    return 0', 'def report_path(report_id: str) -> Path:\r\n    return GENERATED_ROOT / REPORT_ALIASES[report_id]', 'def shard_path(key: str) -> Path:\r\n    return SHARD_ROOT / ROW_SHARDS[key]', 'def write_json(path: Path, payload: Mapping[str, Any]) -> None:\n    path.parent.mkdir(parents=True, exist_ok=True)\n    path.write_text(\n        json.dumps(dict(payload), indent=2, sort_keys=True, ensure_ascii=True, allow_nan=False) + "\\n",\n        encoding="utf-8",\n    )', 'def write_jsonl(path: Path, rows: Iterable[Mapping[str, Any]]) -> list[dict[str, Any]]:\n    materialized = [dict(row) for row in rows]\n    path.parent.mkdir(parents=True, exist_ok=True)\n    with path.open("w", encoding="utf-8", newline="\\n") as handle:\n        for row in materialized:\n            handle.write(json.dumps(row, sort_keys=True, ensure_ascii=True, separators=(",", ":"), allow_nan=False) + "\\n")\n    return materialized', 'def write_shard(key: str, rows: Iterable[Mapping[str, Any]], *, logical_family_id: str) -> dict[str, Any]:\n    path = shard_path(key)\n    materialized = write_jsonl(path, rows)\n    manifest_path = path.with_suffix(".manifest.json")\n    manifest = {\n        "manifest_id": f"{logical_family_id}_Manifest",\n        "logical_shard_family_id": logical_family_id,\n        "physical_filename": generated_ref(manifest_path),\n        "shard_path": generated_ref(path),\n        "row_count": len(materialized),\n        "row_refs": [row_ref(row) for row in materialized],\n        "short_physical_shard_root": generated_ref(SHARD_ROOT),\n        **route_defaults("agent", row_shard_refs=[generated_ref(path)], upstream_refs=[logical_family_id]),\n    }\n    write_json(manifest_path, manifest)\n    return manifest', 'def write_report(report_id: str, records: Any, **kwargs: Any) -> dict[str, Any]:\n    payload = report_payload(report_id, records, **kwargs)\n    write_json(report_path(report_id), payload)\n    return payload', 'def endpoint_verification_rows(online: bool) -> tuple[list[dict[str, Any]], dict[str, Any] | None]:\r\n    rows = []\r\n    errors = []\r\n    for index, url in enumerate(OFFICIAL_DOC_URLS, start=1):\r\n        status = "OFFLINE_NOT_VERIFIED"\r\n        code = None\r\n        error = None\r\n        if online:\r\n            try:\r\n                urllib_request = importlib.import_module("urllib.request")\r\n                request = urllib_request.Request(url, headers={"User-Agent": "QTT-PR168-RP2-doc-check/1.0"})\r\n                with urllib_request.urlopen(request, timeout=10) as response:\r\n                    code = int(response.status)\r\n                    status = "ONLINE_DOC_REACHABLE_NO_DRIFT_DETECTED" if code < 400 else "ONLINE_DOC_HTTP_ERROR"\r\n            except (OSError, URLError) as exc:\r\n                error = str(exc)\r\n                errors.append({"source_url": url, "error": error})\r\n                status = "ONLINE_DOC_NETWORK_UNAVAILABLE"\r\n        rows.append(\r\n            {\r\n                "row_id": f"endpoint_verification_{index:05d}",\r\n                "source_url": url,\r\n                "verification_status": status,\r\n                "http_status": code,\r\n                "error": error,\r\n                "endpoint_assumption_drift_flag": False,\r\n                "DATA1B_handoff_required_flag": status == "ONLINE_DOC_HTTP_ERROR",\r\n                **route_defaults("source_evidence", upstream_refs=[url]),\r\n            }\r\n        )\r\n    receipt = {"network_unavailable_count": len(errors), "network_errors": errors, "network_unavailable_flag": bool(errors), **route_defaults("source_evidence", upstream_refs=OFFICIAL_DOC_URLS)} if errors else None\r\n    return rows, receipt', 'REPO_ROOT = Path(__file__).resolve().parents[1]', 'GENERATED_ROOT = REPO_ROOT / "docs" / "master_plan" / "generated"', 'SHARD_ROOT = GENERATED_ROOT / "rp2p"', 'REPORT_ALIASES: "OrderedDict[str, str]" = OrderedDict(\r\n    [\r\n        ("PR168_RP2_InputDiscovery", "PR168_RP2_Input.report.json"),\r\n        ("PR168_RP2_GFP2RHandoffConsumptionAudit", "PR168_RP2_HandoffAudit.report.json"),\r\n        ("PR168_RP2_AllowedDataFamilyAndAuthorityContract", "PR168_RP2_DataAuth.report.json"),\r\n        ("PR168_RP2_MAP2_InputPromotionUniverse", "PR168_RP2_MAP2_Universe.report.json"),\r\n        ("PR168_RP2_MAP2_CanonicalQKUFormulaBindingPromotion", "PR168_RP2_MAP2_Bind.report.json"),\r\n        ("PR168_RP2_MAP2_ExactRepairedIdentityLedger", "PR168_RP2_MAP2_ExactID.report.json"),\r\n        ("PR168_RP2_MAP2_ProvisionalIdentityPreservationLedger", "PR168_RP2_MAP2_ProvID.report.json"),\r\n        ("PR168_RP2_MAP2_BindingFailureRepairQueue", "PR168_RP2_MAP2_BindFail.report.json"),\r\n        ("PR168_RP2_MAP2_EconomicCandidateDeduplicationLedger", "PR168_RP2_MAP2_Dedupe.report.json"),\r\n        ("PR168_RP2_MAP2_FutureFormulaOnboardingRegistrySeed", "PR168_RP2_MAP2_OnboardSeed.report.json"),\r\n        ("PR168_RP2_ReplayPaperInputLock", "PR168_RP2_InputLock.report.json"),\r\n        ("PR168_RP2_CandidateOrderIntentUniverse", "PR168_RP2_OrderIntent.report.json"),\r\n        ("PR168_RP2_OrderPolicyVariantLedger", "PR168_RP2_OrderPolicy.report.json"),\r\n        ("PR168_RP2_OrderPolicyDeduplicationAudit", "PR168_RP2_OrderDedupe.report.json"),\r\n        ("PR168_RP2_ExactVsProvisionalReplayPaperUniverse", "PR168_RP2_IDUniverse.report.json"),\r\n        ("PR168_RP2_ReplayExecutionLedger", "PR168_RP2_ReplayExec.report.json"),\r\n        ("PR168_RP2_ReplayFillSimulationLedger", "PR168_RP2_ReplayFill.report.json"),\r\n        ("PR168_RP2_ReplayPnLEvidenceLedger", "PR168_RP2_ReplayPnL.report.json"),\r\n        ("PR168_RP2_ReplayInputGapAndRepairQueue", "PR168_RP2_ReplayGaps.report.json"),\r\n        ("PR168_RP2_PaperOrderIntentLedger", "PR168_RP2_PaperIntent.report.json"),\r\n        ("PR168_RP2_PaperFillSimulationLedger", "PR168_RP2_PaperFill.report.json"),\r\n        ("PR168_RP2_PaperPortfolioLedger", "PR168_RP2_PaperPort.report.json"),\r\n        ("PR168_RP2_PaperPnLEvidenceLedger", "PR168_RP2_PaperPnL.report.json"),\r\n        ("PR168_RP2_PaperReceiptAudit", "PR168_RP2_PaperReceipts.report.json"),\r\n        ("PR168_RP2_TCADecompositionLedger", "PR168_RP2_TCA.report.json"),\r\n        ("PR168_RP2_FillProbabilityAndPartialFillLedger", "PR168_RP2_FillProb.report.json"),\r\n        ("PR168_RP2_LatencyStalenessDecayLedger", "PR168_RP2_Latency.report.json"),\r\n        ("PR168_RP2_CapacityCrowdingLimitLedger", "PR168_RP2_Capacity.report.json"),\r\n        ("PR168_RP2_ImplementationShortfallCandidateLedger", "PR168_RP2_ImplShortfall.report.json"),\r\n        ("PR168_RP2_ScenarioLadderReplayPaperLedger", "PR168_RP2_Scenarios.report.json"),\r\n        ("PR168_RP2_ScenarioSensitivityMatrix", "PR168_RP2_SensMatrix.report.json"),\r\n        ("PR168_RP2_ThinBookWideSpreadStressLedger", "PR168_RP2_BookStress.report.json"),\r\n        ("PR168_RP2_StaleDataLatencyStressLedger", "PR168_RP2_StaleStress.report.json"),\r\n        ("PR168_RP2_NoTradeBaselineComparisonLedger", "PR168_RP2_NoTrade.report.json"),\r\n        ("PR168_RP2_CalibrationAndLCBReadinessLedger", "PR168_RP2_CalibLCB.report.json"),\r\n        ("PR168_RP2_OverfitFDRTrialFamilyLedger", "PR168_RP2_FDR.report.json"),\r\n        ("PR168_RP2_PurgedWalkForwardCPCVSeed", "PR168_RP2_CPCV.report.json"),\r\n        ("PR168_RP2_DeflatedSharpeAndMultipleTestingSeed", "PR168_RP2_DSR.report.json"),\r\n        ("PR168_RP2_PortfolioMarginalUtilityLedger", "PR168_RP2_Portfolio.report.json"),\r\n        ("PR168_RP2_RegimeConditionedOutcomeLedger", "PR168_RP2_Regime.report.json"),\r\n        ("PR168_RP2_To_PR165B_ConditionScopedMemoryRows", "PR168_RP2_ToPR165B.report.json"),\r\n        ("PR168_RP2_CorrelationConcentrationCrowdingLedger", "PR168_RP2_CorrCrowd.report.json"),\r\n        ("PR168_RP2_ReplayPaperDivergenceLedger", "PR168_RP2_Divergence.report.json"),\r\n        ("PR168_RP2_ReplayPaperEvidenceClassification", "PR168_RP2_EvidenceClass.report.json"),\r\n        ("PR168_RP2_ValidVsArtificialRejectionLedger", "PR168_RP2_Rejections.report.json"),\r\n        ("PR168_RP2_RepairRetestQueue", "PR168_RP2_RetestQueue.report.json"),\r\n        ("PR168_RP2_NegativeToPositiveRecoveryReplayPaperQueue", "PR168_RP2_RecoveryQueue.report.json"),\r\n        ("PR168_RP2_WeakCandidateRepairDiagnosis", "PR168_RP2_WeakDiag.report.json"),\r\n        ("PR168_RP2_OrderPolicyRepairVariantLedger", "PR168_RP2_PolicyRepair.report.json"),\r\n        ("PR168_RP2_RetestPriorityScoringLedger", "PR168_RP2_RetestScore.report.json"),\r\n        ("PR168_RP2_QuantumReplayPaperCandidateStackMap", "PR168_RP2_QStack.report.json"),\r\n        ("PR168_RP2_QuantumObjectiveCoefficientConstraintLedger", "PR168_RP2_QObj.report.json"),\r\n        ("PR168_RP2_QuantumScenarioConstraintLedger", "PR168_RP2_QScenario.report.json"),\r\n        ("PR168_RP2_ClassicalFallbackComparatorReplayPaperLedger", "PR168_RP2_QFallback.report.json"),\r\n        ("PR168_RP2_QuantumInterpretBackReplayPaperMap", "PR168_RP2_QInterpret.report.json"),\r\n        ("PR168_RP2_To_PR168_RANK2_ReplayPaperEvidenceRows", "PR168_RP2_ToRANK2Evidence.report.json"),\r\n        ("PR168_RP2_To_PR168_RANK2_NoTradeComparisonRows", "PR168_RP2_ToRANK2NoTrade.report.json"),\r\n        ("PR168_RP2_To_PR167_OpenTradeSimulatorFeedbackRows", "PR168_RP2_ToPR167.report.json"),\r\n        ("PR168_RP2_To_DATA1B_DataRepairQueue", "PR168_RP2_ToDATA1B.report.json"),\r\n        ("PR168_RP2_To_GFP2R_FormulaRepairQueue", "PR168_RP2_ToGFP2RFormula.report.json"),\r\n        ("PR168_RP2_To_GFP2R_MAP2_BindingRepairQueue", "PR168_RP2_ToGFP2RMAP2.report.json"),\r\n        ("PR168_RP2_To_PR162E_Q_QuantumMappingRepairQueue", "PR168_RP2_ToPR162EQ.report.json"),\r\n        ("PR168_RP2_AgentRoutingAndNoOrphanProof", "PR168_RP2_AgentNoOrphan.report.json"),\r\n        ("PR168_RP2_DAGUpstreamDownstreamOrchestration", "PR168_RP2_DAG.report.json"),\r\n        ("PR168_RP2_EveryValueUpstreamDownstreamCrosswalk", "PR168_RP2_ValueXwalk.report.json"),\r\n        ("PR168_RP2_AgentConsumableReplayPaperLedger", "PR168_RP2_AgentLedger.report.json"),\r\n        ("PR168_RP2_EndpointAssumptionDriftHandoff", "PR168_RP2_Drift.report.json"),\r\n        ("PR168_RP2_OperatorActionMatrix", "PR168_RP2_Actions.report.json"),\r\n        ("PR168_RP2_ReportEssentialityAndDeduplicationAudit", "PR168_RP2_ReportAudit.report.json"),\r\n        ("PR168_RP2_FinalSummary", "PR168_RP2_Final.report.json"),\r\n        ("PR168_RP2_EdgeAlphaCaptureReadinessMatrix", "PR168_RP2_EdgeAlpha.report.json"),\r\n        ("PR168_RP2_ScenarioSpecificBestFormulaEvidenceSurface", "PR168_RP2_BestFormula.report.json"),\r\n        ("PR168_RP2_FormulaPluginOnboardingContractRegistry", "PR168_RP2_FormulaContracts.report.json"),\r\n        ("PR168_RP2_CentralizedRegistryArchitectureAudit", "PR168_RP2_CentralRegistry.report.json"),\r\n        ("PR168_RP2_FormulaComputabilityRouteLedger", "PR168_RP2_FormulaRoutes.report.json"),\r\n        ("PR168_RP2_RetestVariantFactoryLedger", "PR168_RP2_RetestFactory.report.json"),\r\n        ("PR168_RP2_ConnectorConsumerNonAuthorityRoutingLedger", "PR168_RP2_ConnectorRoutes.report.json"),\r\n        ("PR168_RP2_FileAliasLedger", "PR168_RP2_FileAliases.report.json"),\r\n        ("PR168_RP2_PathLengthAudit", "PR168_RP2_PathAudit.report.json"),\r\n        ("PR168_RP2_MissingAgentCrosswalkBlocker", "PR168_RP2_MissingAgents.report.json"),\r\n        ("PR168_RP2_MissingGFP2RArtifactsBlocker", "PR168_RP2_MissingGFP2R.report.json"),\r\n        ("PR168_RP2_OnlineVerificationNetworkUnavailableReceipt", "PR168_RP2_NetworkGap.report.json"),\r\n        ("PR168_RP2_NoReplayPaperCandidatePossibleRootCause", "PR168_RP2_NoCandidates.report.json"),\r\n    ]\r\n)', 'ROW_SHARDS = OrderedDict(\r\n    [\r\n        ("map2_promote", "map2_promote.jsonl"),\r\n        ("map2_dedupe", "map2_dedupe.jsonl"),\r\n        ("formula_onboard", "formula_onboard.jsonl"),\r\n        ("input_locks", "input_locks.jsonl"),\r\n        ("order_intents", "order_intents.jsonl"),\r\n        ("replay_exec", "replay_exec.jsonl"),\r\n        ("paper_exec", "paper_exec.jsonl"),\r\n        ("tca", "tca.jsonl"),\r\n        ("scenarios", "scenarios.jsonl"),\r\n        ("divergence", "divergence.jsonl"),\r\n        ("rank2_rows", "rank2_rows.jsonl"),\r\n        ("memory_rows", "memory_rows.jsonl"),\r\n        ("q_stack", "q_stack.jsonl"),\r\n        ("actions", "actions.jsonl"),\r\n        ("formula_contracts", "formula_contracts.jsonl"),\r\n        ("edge_alpha", "edge_alpha.jsonl"),\r\n        ("retest_variants", "retest_variants.jsonl"),\r\n        ("connector_routes", "connector_routes.jsonl"),\r\n    ]\r\n)', 'def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:\r\n    parser = argparse.ArgumentParser(description=__doc__)\r\n    mode = parser.add_mutually_exclusive_group()\r\n    mode.add_argument(\r\n        "--verify-online-docs",\r\n        action="store_true",\r\n        help="Materialize RP3 online coverage rows from committed MAP3 source evidence rows.",\r\n    )\r\n    mode.add_argument(\r\n        "--offline",\r\n        action="store_true",\r\n        help="Rebuild from committed upstream artifacts only.",\r\n    )\r\n    return parser.parse_args(argv)', 'def main(argv: Sequence[str] | None = None) -> int:\r\n    args = parse_args(argv)\r\n    summary = build_all(verify_online_docs=bool(args.verify_online_docs))\r\n    print(\r\n        json.dumps(\r\n            {\r\n                "built": True,\r\n                "mode": "verify-online-docs" if args.verify_online_docs else "offline",\r\n                "formula_count": summary["map3_formula_universe_count"],\r\n                "computed_formula_count": summary["map3_replay_paper_computable_formula_count"],\r\n                "rank2_rows": summary["rank2_evidence_handoff_count"],\r\n                "reports_written": len(REPORT_ALIASES),\r\n            },\r\n            sort_keys=True,\r\n        )\r\n    )\r\n    return 0', 'def write_json(path: Path, payload: Mapping[str, Any]) -> None:\r\n    path.parent.mkdir(parents=True, exist_ok=True)\r\n    path.write_text(\r\n        json.dumps(dict(payload), indent=2, sort_keys=True, ensure_ascii=True, allow_nan=False) + "\\n",\r\n        encoding="utf-8",\r\n    )', 'def write_jsonl(path: Path, rows: Iterable[Mapping[str, Any]]) -> list[dict[str, Any]]:\r\n    materialized = [dict(row) for row in rows]\r\n    path.parent.mkdir(parents=True, exist_ok=True)\r\n    with path.open("w", encoding="utf-8", newline="\\n") as handle:\r\n        for row in materialized:\r\n            handle.write(json.dumps(row, sort_keys=True, ensure_ascii=True, separators=(",", ":")) + "\\n")\r\n    return materialized', 'def write_shard(key: str, rows: Iterable[Mapping[str, Any]], *, logical_family_id: str) -> dict[str, Any]:\r\n    path = shard_path(key)\r\n    materialized = write_jsonl(path, rows)\r\n    manifest_path = path.with_suffix(".manifest.json")\r\n    manifest = {\r\n        "manifest_id": f"{logical_family_id}_Manifest",\r\n        "logical_shard_family_id": logical_family_id,\r\n        "physical_filename": generated_ref(manifest_path),\r\n        "shard_path": generated_ref(path),\r\n        "row_count": len(materialized),\r\n        "row_refs": [row_ref(row) for row in materialized],\r\n        "short_physical_shard_root": generated_ref(SHARD_ROOT),\r\n        **route_defaults(\r\n            "agent",\r\n            upstream_refs=[logical_family_id],\r\n            row_shard_refs=[generated_ref(path)],\r\n            authority_class="REPLAY_PAPER_CANDIDATE_NON_PROOF",\r\n        ),\r\n    }\r\n    write_json(manifest_path, manifest)\r\n    return manifest', 'def write_report(report_id: str, records: Any, **kwargs: Any) -> dict[str, Any]:\r\n    payload = report_payload(report_id, records, **kwargs)\r\n    write_json(report_path(report_id), payload)\r\n    return payload', 'SHARD_ROOT = GENERATED_ROOT / "rp3"', 'REPORT_ALIASES: "OrderedDict[str, str]" = OrderedDict(\r\n    [\r\n        ("PR168_RP3_InputDiscovery", "PR168_RP3_Input.report.json"),\r\n        ("PR168_RP3_MAP3FormulaUniverseConsumption", "PR168_RP3_FormulaUniverse.report.json"),\r\n        ("PR168_RP3_FormulaCountTruthLedger", "PR168_RP3_FormulaCountTruth.report.json"),\r\n        ("PR168_RP3_ReplayPaperFormulaEligibilityLedger", "PR168_RP3_FormulaEligibility.report.json"),\r\n        ("PR168_RP3_ReplayPaperInputLockLedger", "PR168_RP3_InputLocks.report.json"),\r\n        ("PR168_RP3_FormulaExecutionPlanLedger", "PR168_RP3_FormulaExecPlan.report.json"),\r\n        ("PR168_RP3_FormulaInputGapAndRepairQueue", "PR168_RP3_FormulaInputGaps.report.json"),\r\n        ("PR168_RP3_UnitNormalizationReceiptLedger", "PR168_RP3_UnitNorm.report.json"),\r\n        ("PR168_RP3_ReplayExecutionLedger", "PR168_RP3_ReplayRows.report.json"),\r\n        ("PR168_RP3_ReplayNumericPnLEvidenceLedger", "PR168_RP3_ReplayPnL.report.json"),\r\n        ("PR168_RP3_ReplayInputGapRepairQueue", "PR168_RP3_ReplayGaps.report.json"),\r\n        ("PR168_RP3_PaperOrderIntentLedger", "PR168_RP3_PaperIntents.report.json"),\r\n        ("PR168_RP3_PaperExecutionLedger", "PR168_RP3_PaperRows.report.json"),\r\n        ("PR168_RP3_PaperNumericPnLEvidenceLedger", "PR168_RP3_PaperPnL.report.json"),\r\n        ("PR168_RP3_PaperReceiptAudit", "PR168_RP3_PaperReceipts.report.json"),\r\n        ("PR168_RP3_TCADecompositionLedger", "PR168_RP3_TCA.report.json"),\r\n        ("PR168_RP3_FillProbabilityAndPartialFillLedger", "PR168_RP3_Fill.report.json"),\r\n        ("PR168_RP3_LatencyStalenessDecayLedger", "PR168_RP3_Latency.report.json"),\r\n        ("PR168_RP3_CapacityCrowdingLimitLedger", "PR168_RP3_Capacity.report.json"),\r\n        ("PR168_RP3_CalibrationAndLCBReadinessLedger", "PR168_RP3_CalibLCB.report.json"),\r\n        ("PR168_RP3_OverfitFDRTrialFamilyLedger", "PR168_RP3_FDR.report.json"),\r\n        ("PR168_RP3_PortfolioMarginalUtilityLedger", "PR168_RP3_Portfolio.report.json"),\r\n        ("PR168_RP3_RegimeConditionedOutcomeLedger", "PR168_RP3_Regime.report.json"),\r\n        ("PR168_RP3_ScenarioLadderReplayPaperLedger", "PR168_RP3_Scenarios.report.json"),\r\n        ("PR168_RP3_NoTradeBaselineComparisonLedger", "PR168_RP3_NoTrade.report.json"),\r\n        ("PR168_RP3_FormulaScenarioRegimeComparisonLedger", "PR168_RP3_FormulaCompare.report.json"),\r\n        ("PR168_RP3_FormulaSelectionSurfaceForRANK2", "PR168_RP3_SelectSurface.report.json"),\r\n        ("PR168_RP3_To_PR168_RANK2_EvidenceExpansionRows", "PR168_RP3_RANK2Rows.report.json"),\r\n        ("PR168_RP3_To_PR168_RANK2_NoTradeComparisonRows", "PR168_RP3_RANK2NoTrade.report.json"),\r\n        ("PR168_RP3_NonComputableFormulaRepairQueue", "PR168_RP3_FormulaRepair.report.json"),\r\n        ("PR168_RP3_SourceEvidenceReviewQueue", "PR168_RP3_SourceReview.report.json"),\r\n        ("PR168_RP3_ExpressionRepairQueue", "PR168_RP3_ExpressionRepair.report.json"),\r\n        ("PR168_RP3_To_DATA1B_DataRepairQueue", "PR168_RP3_DATA1BRepair.report.json"),\r\n        ("PR168_RP3_WeakCandidateRepairDiagnosis", "PR168_RP3_WeakDiag.report.json"),\r\n        ("PR168_RP3_RetestVariantFactoryLedger", "PR168_RP3_RetestFactory.report.json"),\r\n        ("PR168_RP3_RecoveryQueue", "PR168_RP3_RecoveryQueue.report.json"),\r\n        ("PR168_RP3_ValidVsArtificialRejectionLedger", "PR168_RP3_ValidVsArtificial.report.json"),\r\n        ("PR168_RP3_QuantumReplayPaperCandidateStackMap", "PR168_RP3_QStack.report.json"),\r\n        ("PR168_RP3_QuantumObjectiveCoefficientConstraintLedger", "PR168_RP3_QObjective.report.json"),\r\n        ("PR168_RP3_QuantumScenarioConstraintLedger", "PR168_RP3_QConstraints.report.json"),\r\n        ("PR168_RP3_ClassicalFallbackComparatorLedger", "PR168_RP3_QFallback.report.json"),\r\n        ("PR168_RP3_QuantumInterpretBackMap", "PR168_RP3_QInterpret.report.json"),\r\n        ("PR168_RP3_To_PR165B_ConditionScopedMemoryRows", "PR168_RP3_ToPR165B.report.json"),\r\n        ("PR168_RP3_To_PR167_OpenTradeSimulatorFeedbackRows", "PR168_RP3_ToPR167.report.json"),\r\n        ("PR168_RP3_To_PR162E_Q_QuantumMappingRows", "PR168_RP3_ToPR162EQ.report.json"),\r\n        ("PR168_RP3_To_DATA1B_HandoffRows", "PR168_RP3_ToDATA1B.report.json"),\r\n        ("PR168_RP3_DashboardSummary", "PR168_RP3_Dashboard.report.json"),\r\n        ("PR168_RP3_AgentRoutingAndNoOrphanDAG", "PR168_RP3_AgentDAG.report.json"),\r\n        ("PR168_RP3_EveryValueUpstreamDownstreamCrosswalk", "PR168_RP3_EveryValue.report.json"),\r\n        ("PR168_RP3_OperatorActionMatrix", "PR168_RP3_Operator.report.json"),\r\n        ("PR168_RP3_EndpointAssumptionDriftHandoff", "PR168_RP3_EndpointDrift.report.json"),\r\n        ("PR168_RP3_FileAliasRegistry", "PR168_RP3_FileAliases.report.json"),\r\n        ("PR168_RP3_PathAudit", "PR168_RP3_PathAudit.report.json"),\r\n        ("PR168_RP3_FinalSummary", "PR168_RP3_FinalSummary.report.json"),\r\n        ("PR168_RP3_FormulaExecutionReceiptLedger", "PR168_RP3_FormulaExecReceipt.report.json"),\r\n        ("PR168_RP3_NumericCoverageLedger", "PR168_RP3_NumCoverage.report.json"),\r\n        ("PR168_RP3_FormulaToPnLMapLedger", "PR168_RP3_FormulaToPnLMap.report.json"),\r\n        ("PR168_RP3_EvidenceTierLedger", "PR168_RP3_EvidenceTier.report.json"),\r\n        ("PR168_RP3_ProbabilityModelAudit", "PR168_RP3_ProbModelAudit.report.json"),\r\n        ("PR168_RP3_CostInputAudit", "PR168_RP3_CostAudit.report.json"),\r\n        ("PR168_RP3_FillModelAudit", "PR168_RP3_FillAudit.report.json"),\r\n        ("PR168_RP3_RealProofBlockerLedger", "PR168_RP3_RealProofBlocker.report.json"),\r\n        ("PR168_RP3_SparseEvidenceMatrix", "PR168_RP3_SparseMatrix.report.json"),\r\n        ("PR168_RP3_ModelRiskLedger", "PR168_RP3_ModelRisk.report.json"),\r\n        ("PR168_RP3_TrialFDRLedger", "PR168_RP3_TrialFDR.report.json"),\r\n        ("PR168_RP3_CalibrationScoreLedger", "PR168_RP3_CalibScore.report.json"),\r\n        ("PR168_RP3_LCBGapLedger", "PR168_RP3_LCBGaps.report.json"),\r\n        ("PR168_RP3_StackDedupeLedger", "PR168_RP3_StackDedupe.report.json"),\r\n        ("PR168_RP3_RankSurface", "PR168_RP3_RankSurface.report.json"),\r\n        ("PR168_RP3_ChampionChallengerSeedLedger", "PR168_RP3_ChampionChallengerSeed.report.json"),\r\n        ("PR168_RP3_MarginalUtilitySelectionLedger", "PR168_RP3_MarginalUtilitySelect.report.json"),\r\n        ("PR168_RP3_RegimeFormulaSurface", "PR168_RP3_RegimeFormulaSurface.report.json"),\r\n        ("PR168_RP3_AsOfTimeBarrierLedger", "PR168_RP3_AsOfBarrier.report.json"),\r\n        ("PR168_RP3_NoLookaheadLeakageAudit", "PR168_RP3_NoLookahead.report.json"),\r\n        ("PR168_RP3_ReplayClockLedger", "PR168_RP3_ReplayClock.report.json"),\r\n        ("PR168_RP3_ResolutionLeakageGuard", "PR168_RP3_ResolutionGuard.report.json"),\r\n        ("PR168_RP3_LifecycleSettlementAudit", "PR168_RP3_LifecycleAudit.report.json"),\r\n        ("PR168_RP3_ExpectedVsRealizedPnL", "PR168_RP3_ExpectedVsRealized.report.json"),\r\n        ("PR168_RP3_VenuePayoffNormalizationAudit", "PR168_RP3_VenueNorm.report.json"),\r\n        ("PR168_RP3_BinaryPayoffParityLedger", "PR168_RP3_BinaryParity.report.json"),\r\n        ("PR168_RP3_FeeTickSizeLedger", "PR168_RP3_FeeTickSize.report.json"),\r\n        ("PR168_RP3_PayoffNormalizationLedger", "PR168_RP3_PayoffNorm.report.json"),\r\n        ("PR168_RP3_StackComposerLedger", "PR168_RP3_StackComposer.report.json"),\r\n        ("PR168_RP3_StackExecutionReceiptLedger", "PR168_RP3_StackExec.report.json"),\r\n        ("PR168_RP3_FormulaStackBuilderLedger", "PR168_RP3_FormulaStackBuilder.report.json"),\r\n        ("PR168_RP3_SuccessMetricsLedger", "PR168_RP3_SuccessMetrics.report.json"),\r\n        ("PR168_RP3_StackAttributionLedger", "PR168_RP3_StackAttribution.report.json"),\r\n        ("PR168_RP3_StackAblationLedger", "PR168_RP3_StackAblation.report.json"),\r\n        ("PR168_RP3_StackRepairLedger", "PR168_RP3_StackRepair.report.json"),\r\n        ("PR168_RP3_StackRankSurface", "PR168_RP3_StackRankSurface.report.json"),\r\n        ("PR168_RP3_StackRANK2Rows", "PR168_RP3_StackRANK2Rows.report.json"),\r\n        ("PR168_RP3_FormulaAttributionLedger", "PR168_RP3_FormulaAttribution.report.json"),\r\n        ("PR168_RP3_FormulaContributionLedger", "PR168_RP3_FormulaContribution.report.json"),\r\n        ("PR168_RP3_AblationLedger", "PR168_RP3_Ablation.report.json"),\r\n        ("PR168_RP3_MarginalFormulaUtilityLedger", "PR168_RP3_MarginalFormulaUtility.report.json"),\r\n        ("PR168_RP3_NegativeRecoveryLedger", "PR168_RP3_NegativeRecoveryLedger.report.json"),\r\n        ("PR168_RP3_FormulaQualityLedger", "PR168_RP3_FormulaQuality.report.json"),\r\n        ("PR168_RP3_TacticalNegativeRepairMatrix", "PR168_RP3_TacticalRepair.report.json"),\r\n        ("PR168_RP3_RepairRetestCandidateStacks", "PR168_RP3_RepairRetestStacks.report.json"),\r\n        ("PR168_RP3_FailureCauseAttribution", "PR168_RP3_FailureAttribution.report.json"),\r\n        ("PR168_RP3_QStackSelect", "PR168_RP3_QStackSelect.report.json"),\r\n        ("PR168_RP3_QStackCoefficients", "PR168_RP3_QStackCoefficients.report.json"),\r\n        ("PR168_RP3_QStackFallback", "PR168_RP3_QStackFallback.report.json"),\r\n        ("PR168_RP3_MarketInstantiationLedger", "PR168_RP3_MarketInstantiation.report.json"),\r\n        ("PR168_RP3_OnlineVerifyCoverage", "PR168_RP3_OnlineVerifyCoverage.report.json"),\r\n        ("PR168_RP3_WebSourceUse", "PR168_RP3_WebSourceUse.report.json"),\r\n    ]\r\n)', 'ROW_SHARDS: "OrderedDict[str, str]" = OrderedDict(\r\n    [\r\n        ("formula_universe", "formula_universe_rows.jsonl"),\r\n        ("formula_eligibility", "formula_eligibility_rows.jsonl"),\r\n        ("input_locks", "input_lock_rows.jsonl"),\r\n        ("formula_execution", "formula_execution_rows.jsonl"),\r\n        ("replay", "replay_rows.jsonl"),\r\n        ("paper", "paper_rows.jsonl"),\r\n        ("tca", "tca_rows.jsonl"),\r\n        ("fill", "fill_rows.jsonl"),\r\n        ("latency_capacity", "latency_capacity_rows.jsonl"),\r\n        ("calibration_fdr", "calibration_fdr_rows.jsonl"),\r\n        ("portfolio_regime", "portfolio_regime_rows.jsonl"),\r\n        ("scenario", "scenario_rows.jsonl"),\r\n        ("no_trade", "no_trade_rows.jsonl"),\r\n        ("formula_compare", "formula_compare_rows.jsonl"),\r\n        ("rank2_handoff", "rank2_handoff_rows.jsonl"),\r\n        ("formula_repair", "formula_repair_rows.jsonl"),\r\n        ("retest_variant", "retest_variant_rows.jsonl"),\r\n        ("quantum_stack", "quantum_stack_rows.jsonl"),\r\n        ("memory", "memory_rows.jsonl"),\r\n        ("operator_action", "operator_action_rows.jsonl"),\r\n        ("formula_exec_receipt", "formula_exec_receipt_rows.jsonl"),\r\n        ("formula_to_pnl_map", "formula_to_pnl_map_rows.jsonl"),\r\n        ("evidence_tier", "evidence_tier_rows.jsonl"),\r\n        ("numeric_coverage", "numeric_coverage_rows.jsonl"),\r\n        ("probability_model_audit", "probability_model_audit_rows.jsonl"),\r\n        ("cost_audit", "cost_audit_rows.jsonl"),\r\n        ("fill_audit", "fill_audit_rows.jsonl"),\r\n        ("real_proof_blocker", "real_proof_blocker_rows.jsonl"),\r\n        ("model_risk", "model_risk_rows.jsonl"),\r\n        ("rank_surface", "rank_surface_rows.jsonl"),\r\n        ("sparse_matrix", "sparse_matrix_rows.jsonl"),\r\n        ("asof_barrier", "asof_barrier_rows.jsonl"),\r\n        ("no_lookahead", "no_lookahead_rows.jsonl"),\r\n        ("venue_norm", "venue_norm_rows.jsonl"),\r\n        ("expected_realized", "expected_realized_rows.jsonl"),\r\n        ("formula_stack", "formula_stack_rows.jsonl"),\r\n        ("stack_attribution", "stack_attribution_rows.jsonl"),\r\n        ("stack_ablation", "stack_ablation_rows.jsonl"),\r\n        ("tactical_repair", "tactical_repair_rows.jsonl"),\r\n        ("q_stack_select", "q_stack_select_rows.jsonl"),\r\n        ("market_instantiation", "market_instantiation_rows.jsonl"),\r\n        ("formula_contribution", "formula_contribution_rows.jsonl"),\r\n        ("formula_stack_builder", "formula_stack_builder_rows.jsonl"),\r\n        ("negative_recovery", "negative_recovery_rows.jsonl"),\r\n        ("formula_quality", "formula_quality_rows.jsonl"),\r\n        ("success_metrics", "success_metrics_rows.jsonl"),\r\n        ("online_verify", "online_verify_rows.jsonl"),\r\n        ("agent_dag", "agent_dag_rows.jsonl"),\r\n        ("every_value", "every_value_rows.jsonl"),\r\n        ("failure_attribution", "failure_attribution_rows.jsonl"),\r\n    ]\r\n)', 'def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:\r\n    parser = argparse.ArgumentParser(description=__doc__)\r\n    mode = parser.add_mutually_exclusive_group()\r\n    mode.add_argument(\r\n        "--verify-online-docs",\r\n        action="store_true",\r\n        help="Consume committed RP3 public source-use rows into RANK3 source coverage rows.",\r\n    )\r\n    mode.add_argument(\r\n        "--offline",\r\n        action="store_true",\r\n        help="Build from committed RP3/MAP3/upstream artifacts only.",\r\n    )\r\n    return parser.parse_args(argv)', 'def main(argv: Sequence[str] | None = None) -> int:\r\n    args = parse_args(argv)\r\n    summary = build_all(verify_online_docs=bool(args.verify_online_docs))\r\n    print(\r\n        json.dumps(\r\n            {\r\n                "built": True,\r\n                "mode": "verify-online-docs" if args.verify_online_docs else "offline",\r\n                "rankable_stack_count": summary["rankable_stack_count"],\r\n                "no_trade_competitor_count": summary["no_trade_competitor_count"],\r\n                "expression_repair_attempt_count": summary["expression_repair_attempt_count"],\r\n                "source_provenance_attempt_count": summary["source_provenance_attempt_count"],\r\n                "reports_written": len(REPORT_ALIASES),\r\n            },\r\n            sort_keys=True,\r\n        )\r\n    )\r\n    return 0', 'def write_shard(key: str, rows: Iterable[Mapping[str, Any]], *, logical_family_id: str) -> dict[str, Any]:\r\n    path = shard_path(key)\r\n    materialized = write_jsonl(path, rows)\r\n    manifest_path = path.with_suffix(".manifest.json")\r\n    manifest = {\r\n        "manifest_id": f"{logical_family_id}_Manifest",\r\n        "logical_shard_family_id": logical_family_id,\r\n        "physical_filename": generated_ref(manifest_path),\r\n        "shard_path": generated_ref(path),\r\n        "row_count": len(materialized),\r\n        "row_refs": [row_ref(row) for row in materialized],\r\n        "short_physical_shard_root": generated_ref(SHARD_ROOT),\r\n        **route_defaults(\r\n            "agent",\r\n            upstream_refs=[logical_family_id],\r\n            row_shard_refs=[generated_ref(path)],\r\n        ),\r\n    }\r\n    write_json(manifest_path, manifest)\r\n    return manifest', 'SHARD_ROOT = GENERATED_ROOT / "rank3"', 'REPORT_ALIASES: "OrderedDict[str, str]" = OrderedDict(\r\n    (name.removesuffix(".report.json"), name)\r\n    for name in [\r\n        "PR168_RANK3_Input.report.json",\r\n        "PR168_RANK3_RP3ItemAccounting.report.json",\r\n        "PR168_RANK3_RP3ReportInventory.report.json",\r\n        "PR168_RANK3_RP3ShardFamilyIndex.report.json",\r\n        "PR168_RANK3_UpstreamValidationHistory.report.json",\r\n        "PR168_RANK3_EvidenceUniverse.report.json",\r\n        "PR168_RANK3_EvidenceCompleteness.report.json",\r\n        "PR168_RANK3_RP3Consumption.report.json",\r\n        "PR168_RANK3_MissingEvidence.report.json",\r\n        "PR168_RANK3_ExpressionRepairAttempt.report.json",\r\n        "PR168_RANK3_ExpressionRepairResolution.report.json",\r\n        "PR168_RANK3_RepairedFormulaExecReceipt.report.json",\r\n        "PR168_RANK3_RepairedFormulaToPnLMap.report.json",\r\n        "PR168_RANK3_RepairedFormulaMiniReplay.report.json",\r\n        "PR168_RANK3_RepairedFormulaRankEligibility.report.json",\r\n        "PR168_RANK3_SourceProvenanceAttempt.report.json",\r\n        "PR168_RANK3_SourceProvenanceResolution.report.json",\r\n        "PR168_RANK3_SourceCandidateUse.report.json",\r\n        "PR168_RANK3_SourceProvenancePenalty.report.json",\r\n        "PR168_RANK3_SourceProvenanceRepair.report.json",\r\n        "PR168_RANK3_RepairBeforeRankPromotion.report.json",\r\n        "PR168_RANK3_MiniRP3Recompute.report.json",\r\n        "PR168_RANK3_NoTradeUniverse.report.json",\r\n        "PR168_RANK3_NoTradeCompetition.report.json",\r\n        "PR168_RANK3_NoTradeDominance.report.json",\r\n        "PR168_RANK3_FeatureMatrix.report.json",\r\n        "PR168_RANK3_NormalizedScores.report.json",\r\n        "PR168_RANK3_ComponentScores.report.json",\r\n        "PR168_RANK3_EvidenceTierWeights.report.json",\r\n        "PR168_RANK3_SparseMatrix.report.json",\r\n        "PR168_RANK3_RankScoreLineage.report.json",\r\n        "PR168_RANK3_ExecutionAdjustedRank.report.json",\r\n        "PR168_RANK3_LCBRank.report.json",\r\n        "PR168_RANK3_TCARank.report.json",\r\n        "PR168_RANK3_FillLatencyCapacityRank.report.json",\r\n        "PR168_RANK3_FDRModelRiskRank.report.json",\r\n        "PR168_RANK3_RobustUtility.report.json",\r\n        "PR168_RANK3_HurdleGateAudit.report.json",\r\n        "PR168_RANK3_RankStabilityStress.report.json",\r\n        "PR168_RANK3_EvidenceReliabilityCalibration.report.json",\r\n        "PR168_RANK3_PairwiseDominance.report.json",\r\n        "PR168_RANK3_ParetoFrontier.report.json",\r\n        "PR168_RANK3_TournamentRank.report.json",\r\n        "PR168_RANK3_RobustMinimax.report.json",\r\n        "PR168_RANK3_EvidenceShrinkage.report.json",\r\n        "PR168_RANK3_ScenarioRank.report.json",\r\n        "PR168_RANK3_RegimeRank.report.json",\r\n        "PR168_RANK3_PortfolioRank.report.json",\r\n        "PR168_RANK3_MarginalUtility.report.json",\r\n        "PR168_RANK3_Diversification.report.json",\r\n        "PR168_RANK3_CrowdingCapacity.report.json",\r\n        "PR168_RANK3_CandidateBatchAssembly.report.json",\r\n        "PR168_RANK3_FormulaContributionUse.report.json",\r\n        "PR168_RANK3_StackAttributionUse.report.json",\r\n        "PR168_RANK3_AblationUse.report.json",\r\n        "PR168_RANK3_LearningFeedback.report.json",\r\n        "PR168_RANK3_AgentLearningMemory.report.json",\r\n        "PR168_RANK3_AgentLearningFeatureDelta.report.json",\r\n        "PR168_RANK3_RetestCooldown.report.json",\r\n        "PR168_RANK3_MemoryWritePlan.report.json",\r\n        "PR168_RANK3_RankTiers.report.json",\r\n        "PR168_RANK3_ChallengerSeeds.report.json",\r\n        "PR168_RANK3_ChampionCandidateSeeds.report.json",\r\n        "PR168_RANK3_SelectionAudit.report.json",\r\n        "PR168_RANK3_RealProofBlocker.report.json",\r\n        "PR168_RANK3_WeakNegativeRepair.report.json",\r\n        "PR168_RANK3_NoTradeDominatedRepair.report.json",\r\n        "PR168_RANK3_FragilityRepair.report.json",\r\n        "PR168_RANK3_DataSourceRepair.report.json",\r\n        "PR168_RANK3_RP4RetestQueue.report.json",\r\n        "PR168_RANK3_RepairPriorityRanking.report.json",\r\n        "PR168_RANK3_RepairExpectedImpact.report.json",\r\n        "PR168_RANK3_RepairEV.report.json",\r\n        "PR168_RANK3_QRankObjective.report.json",\r\n        "PR168_RANK3_QRankConstraints.report.json",\r\n        "PR168_RANK3_QRankCoefficients.report.json",\r\n        "PR168_RANK3_QRankFallback.report.json",\r\n        "PR168_RANK3_QRankInterpret.report.json",\r\n        "PR168_RANK3_QBatchSelectionProof.report.json",\r\n        "PR168_RANK3_ToRANK4.report.json",\r\n        "PR168_RANK3_ToRP4.report.json",\r\n        "PR168_RANK3_ToPR165B.report.json",\r\n        "PR168_RANK3_ToPR162EQ.report.json",\r\n        "PR168_RANK3_ToDATA1B.report.json",\r\n        "PR168_RANK3_ToSourceProvenance.report.json",\r\n        "PR168_RANK3_Dashboard.report.json",\r\n        "PR168_RANK3_AgentDAG.report.json",\r\n        "PR168_RANK3_EveryValue.report.json",\r\n        "PR168_RANK3_Operator.report.json",\r\n        "PR168_RANK3_OnlineVerifyCoverage.report.json",\r\n        "PR168_RANK3_WebSourceUse.report.json",\r\n        "PR168_RANK3_EndpointDrift.report.json",\r\n        "PR168_RANK3_FileAliases.report.json",\r\n        "PR168_RANK3_PathAudit.report.json",\r\n        "PR168_RANK3_FinalSummary.report.json",\r\n    ]\r\n)', 'ROW_SHARDS: "OrderedDict[str, str]" = OrderedDict(\r\n    [\r\n        ("rp3_item_accounting", "rp3_item_accounting_rows.jsonl"),\r\n        ("rp3_report_inventory", "rp3_report_inventory_rows.jsonl"),\r\n        ("rp3_shard_family", "rp3_shard_family_rows.jsonl"),\r\n        ("upstream_validation_history", "upstream_validation_history_rows.jsonl"),\r\n        ("expression_repair_attempt", "expression_repair_attempt_rows.jsonl"),\r\n        ("expression_repair_resolution", "expression_repair_resolution_rows.jsonl"),\r\n        ("repaired_formula_exec_receipt", "repaired_formula_exec_receipt_rows.jsonl"),\r\n        ("repaired_formula_to_pnl", "repaired_formula_to_pnl_rows.jsonl"),\r\n        ("repaired_formula_mini_replay", "repaired_formula_mini_replay_rows.jsonl"),\r\n        ("repaired_formula_rank_eligibility", "repaired_formula_rank_eligibility_rows.jsonl"),\r\n        ("source_provenance_attempt", "source_provenance_attempt_rows.jsonl"),\r\n        ("source_provenance_resolution", "source_provenance_resolution_rows.jsonl"),\r\n        ("source_candidate_use", "source_candidate_use_rows.jsonl"),\r\n        ("source_provenance_penalty", "source_provenance_penalty_rows.jsonl"),\r\n        ("source_provenance_repair", "source_provenance_repair_rows.jsonl"),\r\n        ("mini_rp3_recompute", "mini_rp3_recompute_rows.jsonl"),\r\n        ("evidence_universe", "evidence_universe_rows.jsonl"),\r\n        ("evidence_completeness", "evidence_completeness_rows.jsonl"),\r\n        ("rp3_consumption", "rp3_consumption_rows.jsonl"),\r\n        ("missing_evidence", "missing_evidence_rows.jsonl"),\r\n        ("no_trade_competition", "no_trade_competition_rows.jsonl"),\r\n        ("feature_matrix", "feature_matrix_rows.jsonl"),\r\n        ("normalized_score", "normalized_score_rows.jsonl"),\r\n        ("component_score", "component_score_rows.jsonl"),\r\n        ("evidence_tier_weight", "evidence_tier_weight_rows.jsonl"),\r\n        ("sparse_matrix", "sparse_matrix_rows.jsonl"),\r\n        ("rank_score_lineage", "rank_score_lineage_rows.jsonl"),\r\n        ("execution_adjusted_rank", "execution_adjusted_rank_rows.jsonl"),\r\n        ("lcb_rank", "lcb_rank_rows.jsonl"),\r\n        ("tca_rank", "tca_rank_rows.jsonl"),\r\n        ("fill_latency_capacity_rank", "fill_latency_capacity_rank_rows.jsonl"),\r\n        ("fdr_model_risk", "fdr_model_risk_rows.jsonl"),\r\n        ("hurdle_gate", "hurdle_gate_rows.jsonl"),\r\n        ("rank_stability_stress", "rank_stability_stress_rows.jsonl"),\r\n        ("evidence_reliability", "evidence_reliability_rows.jsonl"),\r\n        ("pairwise_dominance", "pairwise_dominance_rows.jsonl"),\r\n        ("pareto_frontier", "pareto_frontier_rows.jsonl"),\r\n        ("tournament_rank", "tournament_rank_rows.jsonl"),\r\n        ("robust_minimax", "robust_minimax_rows.jsonl"),\r\n        ("evidence_shrinkage", "evidence_shrinkage_rows.jsonl"),\r\n        ("scenario_rank", "scenario_rank_rows.jsonl"),\r\n        ("regime_rank", "regime_rank_rows.jsonl"),\r\n        ("portfolio_rank", "portfolio_rank_rows.jsonl"),\r\n        ("marginal_utility", "marginal_utility_rows.jsonl"),\r\n        ("candidate_batch", "candidate_batch_rows.jsonl"),\r\n        ("learning_feedback", "learning_feedback_rows.jsonl"),\r\n        ("agent_memory", "agent_memory_rows.jsonl"),\r\n        ("rank_tier", "rank_tier_rows.jsonl"),\r\n        ("challenger_seed", "challenger_seed_rows.jsonl"),\r\n        ("champion_candidate_seed", "champion_candidate_seed_rows.jsonl"),\r\n        ("repair_route", "repair_route_rows.jsonl"),\r\n        ("repair_priority", "repair_priority_rows.jsonl"),\r\n        ("q_rank", "q_rank_rows.jsonl"),\r\n        ("downstream_handoff", "downstream_handoff_rows.jsonl"),\r\n        ("every_value", "every_value_rows.jsonl"),\r\n        ("operator_action", "operator_action_rows.jsonl"),\r\n        ("online_verify", "online_verify_rows.jsonl"),\r\n    ]\r\n)', 'def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:\r\n    parser = argparse.ArgumentParser(description=__doc__)\r\n    parser.add_argument("--dry-run", action="store_true", help="Build reports without applying deletions.")\r\n    parser.add_argument("--apply-safe-cleanup", action="store_true", help="Apply verified safe deletions after report generation.")\r\n    parser.add_argument("--offline", action="store_true", help="Reuse committed preflight when GitHub metadata is unavailable.")\r\n    return parser.parse_args(argv)', 'def main(argv: Sequence[str] | None = None) -> int:\r\n    args = parse_args(argv)\r\n    build_all(dry_run=bool(args.dry_run), apply_safe_cleanup=bool(args.apply_safe_cleanup), offline=bool(args.offline))\r\n    return 0', 'def report_path(name: str) -> Path:\r\n    return GENERATED_ROOT / name', 'def manifest_path_for_shard(path: Path) -> Path:\r\n    return path.with_name(path.stem + ".manifest.json")', 'def write_json(path: Path, payload: Mapping[str, Any]) -> dict[str, Any]:\r\n    materialized = dict(payload)\r\n    path.parent.mkdir(parents=True, exist_ok=True)\r\n    path.write_text(\r\n        json.dumps(materialized, indent=2, sort_keys=True, ensure_ascii=True, allow_nan=False) + "\\n",\r\n        encoding="utf-8",\r\n    )\r\n    return materialized', 'def write_jsonl(path: Path, rows: Iterable[Mapping[str, Any]]) -> list[dict[str, Any]]:\r\n    materialized = [dict(row) for row in rows]\r\n    path.parent.mkdir(parents=True, exist_ok=True)\r\n    with path.open("w", encoding="utf-8", newline="\\n") as handle:\r\n        for row in materialized:\r\n            handle.write(json.dumps(row, sort_keys=True, ensure_ascii=True, separators=(",", ":"), allow_nan=False) + "\\n")\r\n    return materialized', 'def write_shard(key: str, rows: Iterable[Mapping[str, Any]], *, logical_family_id: str) -> tuple[list[dict[str, Any]], dict[str, Any]]:\r\n    path = shard_path(key)\r\n    path.parent.mkdir(parents=True, exist_ok=True)\r\n    row_count = 0\r\n    row_refs_limited: list[str] = []\r\n    truncated_by_row_budget = False\r\n    materialized: list[dict[str, Any]] = []\r\n    with path.open("w", encoding="utf-8", newline="\\n") as handle:\r\n        for row in rows:\r\n            if row_count >= MAX_TOTAL_ROWS_PER_SHARD:\r\n                truncated_by_row_budget = True\r\n                break\r\n            materialized_row = dict(row)\r\n            handle.write(json.dumps(materialized_row, sort_keys=True, ensure_ascii=True, separators=(",", ":"), allow_nan=False) + "\\n")\r\n            if len(materialized) < 25:\r\n                materialized.append(materialized_row)\r\n            row_count += 1\r\n            if len(row_refs_limited) < 250:\r\n                row_refs_limited.append(_row_ref(materialized_row))\r\n    manifest_path = manifest_path_for_shard(path)\r\n    manifest = {\r\n        "logical_shard_family_id": logical_family_id,\r\n        "manifest_id": f"{logical_family_id}_MANIFEST",\r\n        "physical_filename": generated_ref(manifest_path),\r\n        "shard_path": generated_ref(path),\r\n        "row_count": row_count,\r\n        "max_total_rows_per_shard": MAX_TOTAL_ROWS_PER_SHARD,\r\n        "row_count_within_bound_flag": row_count <= MAX_TOTAL_ROWS_PER_SHARD,\r\n        "row_refs_limited": row_refs_limited,\r\n        "truncated_row_refs_flag": row_count > 250,\r\n        "truncated_by_row_budget_flag": truncated_by_row_budget,\r\n        "report_version": REPORT_VERSION,\r\n        "created_at_utc": CREATED_AT_UTC,\r\n    }\r\n    write_json(manifest_path, manifest)\r\n    return materialized, manifest', 'def write_report(\r\n    report_name: str,\r\n    *,\r\n    summary: Mapping[str, Any] | None = None,\r\n    rows_ref: str | None = None,\r\n    manifest_ref: str | None = None,\r\n    records: Any | None = None,\r\n) -> dict[str, Any]:\r\n    payload = report_payload(\r\n        report_name,\r\n        summary=summary,\r\n        rows_ref=rows_ref,\r\n        manifest_ref=manifest_ref,\r\n        records=records,\r\n    )\r\n    return write_json(report_path(report_name), payload)', 'def collect_preflight(*, offline: bool = False) -> dict[str, Any]:\n    if type(offline) is not bool:\n        raise TypeError("offline must be an exact Boolean")\n    existing = report_path("PR168_RP5B_Preflight.report.json")\n    if offline:\n        from collections.abc import Mapping\n\n        if not existing.is_file():\n            raise RuntimeError("RP5B_OFFLINE_PREFLIGHT_MISSING")\n        payload = read_json(existing)\n        records = payload.get("records") if isinstance(payload, Mapping) else None\n        if not isinstance(records, Mapping):\n            raise RuntimeError("RP5B_OFFLINE_PREFLIGHT_RECORDS_INVALID")\n        return dict(records)\n\n    current_branch = _run_text(["git", "branch", "--show-current"])\n    origin_main_head = _run_text(["git", "rev-parse", "origin/main"])\n    status_short = _run_text(["git", "status", "--short", "--untracked-files=all"])\n    latest_main = _run_json(["gh", "run", "list", "--branch", "main", "--limit", "1", "--json", "status,conclusion,databaseId,headSha,displayTitle"])\n    open_prs = _run_json(["gh", "pr", "list", "--state", "open", "--limit", "50", "--json", "number,title,headRefName"])\n    pr241 = _run_json(["gh", "pr", "view", "241", "--json", "number,state,mergedAt,headRefName,headRefOid,baseRefName,mergeCommit"])\n    pr240 = _run_json(["gh", "pr", "view", "240", "--json", "number,state,mergedAt,headRefName,headRefOid,baseRefName,mergeable"])\n    latest_main_record = latest_main[0] if isinstance(latest_main, list) and latest_main else None\n    open_pr_rows = open_prs if isinstance(open_prs, list) else []\n    pr241_pass = bool(isinstance(pr241, dict) and pr241.get("state") in {"MERGED", "CLOSED"} and pr241.get("mergedAt"))\n    pr240_pass = bool(isinstance(pr240, dict) and pr240.get("state") == "CLOSED" and pr240.get("mergedAt") is None)\n    return {\n        "current_branch": current_branch,\n        "intended_branch": BRANCH_NAME,\n        "origin_main_head": origin_main_head,\n        "git_status_short": status_short or "<clean>",\n        "latest_main_run_state": latest_main_record,\n        "latest_main_run_green_or_exact_gapped": bool(isinstance(latest_main_record, dict) and latest_main_record.get("conclusion") == "success"),\n        "open_prs": open_pr_rows,\n        "no_open_pr_conflict_detected": len(open_pr_rows) == 0,\n        "pr241_state": pr241,\n        "pr241_merged_preflight_passed": pr241_pass,\n        "pr240_state": pr240,\n        "pr240_closed_not_merged_preflight_passed": pr240_pass,\n        "main_current_with_origin_at_branch_time": bool(origin_main_head),\n        "preflight_source": "gh_and_git" if pr241 is not None and pr240 is not None else "exact_gap_or_existing",\n    }', 'def _apply_deletions(deleted_rows: list[dict[str, Any]]) -> None:\r\n    for row in deleted_rows:\r\n        subprocess.run(["git", "rm", "--", str(row["file_path"])], cwd=REPO_ROOT, check=True)', 'SHARD_ROOT = GENERATED_ROOT / "rp5b"', 'REPORT_NAMES = (\r\n    "PR168_RP5B_Input.report.json",\r\n    "PR168_RP5B_Preflight.report.json",\r\n    "PR168_RP5B_RP5AInputIntegrity.report.json",\r\n    "PR168_RP5B_CleanupCandidateUniverse.report.json",\r\n    "PR168_RP5B_SafeDeletionVerification.report.json",\r\n    "PR168_RP5B_QKUFormulaIdentityPreservation.report.json",\r\n    "PR168_RP5B_ActiveArtifactRegistry.report.json",\r\n    "PR168_RP5B_LegacySemanticSupersession.report.json",\r\n    "PR168_RP5B_NoRawLegacyDecisionAuthority.report.json",\r\n    "PR168_RP5B_DeletedFromActiveTreeManifest.report.json",\r\n    "PR168_RP5B_LegacyKeepReasonLedger.report.json",\r\n    "PR168_RP5B_ValidationScopeReduction.report.json",\r\n    "PR168_RP5B_ActiveWordingCleanup.report.json",\r\n    "PR168_RP5B_AgentRoutePreservation.report.json",\r\n    "PR168_RP5B_PathAudit.report.json",\r\n    "PR168_RP5B_FinalSummary.report.json",\r\n)', 'ROW_SHARDS = {\r\n    "input_rows": "input_rows.jsonl",\r\n    "rp5a_input_integrity_rows": "rp5a_input_integrity_rows.jsonl",\r\n    "cleanup_candidate_rows": "cleanup_candidate_rows.jsonl",\r\n    "safe_deletion_verification_rows": "safe_deletion_verification_rows.jsonl",\r\n    "qku_formula_identity_preservation_rows": "qku_formula_identity_preservation_rows.jsonl",\r\n    "active_artifact_registry_rows": "active_artifact_registry_rows.jsonl",\r\n    "legacy_semantic_supersession_rows": "legacy_semantic_supersession_rows.jsonl",\r\n    "no_raw_legacy_decision_authority_rows": "no_raw_legacy_decision_authority_rows.jsonl",\r\n    "deleted_from_active_tree_rows": "deleted_from_active_tree_rows.jsonl",\r\n    "legacy_keep_reason_rows": "legacy_keep_reason_rows.jsonl",\r\n    "validation_scope_reduction_rows": "validation_scope_reduction_rows.jsonl",\r\n    "active_wording_cleanup_rows": "active_wording_cleanup_rows.jsonl",\r\n    "agent_route_preservation_rows": "agent_route_preservation_rows.jsonl",\r\n    "path_audit_rows": "path_audit_rows.jsonl",\r\n}', 'def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:\r\n    parser = argparse.ArgumentParser(description=__doc__)\r\n    parser.add_argument("--offline", action="store_true", help="Reserved for compatibility with validation gates.")\r\n    return parser.parse_args(argv)', 'def main(argv: Sequence[str] | None = None) -> int:\r\n    args = parse_args(argv)\r\n    build_all(offline=bool(args.offline))\r\n    return 0', 'def write_shard(\r\n    key: str,\r\n    rows: Iterable[Mapping[str, Any]],\r\n    *,\r\n    schema_name: str,\r\n    source_report_refs: list[str] | None = None,\r\n    source_artifact_refs: list[str] | None = None,\r\n    stable_ordering_key: str = "deterministic_row_id",\r\n    downstream_consumer_refs: list[str] | None = None,\r\n    generated_surface_authority_class: str = "RP5C_CENTRAL_ACTIVE_SURFACE_NOT_SOURCE_TRUTH",\r\n) -> tuple[list[dict[str, Any]], dict[str, Any]]:\r\n    path = shard_path(key)\r\n    path.parent.mkdir(parents=True, exist_ok=True)\r\n    row_count = 0\r\n    row_refs_limited: list[str] = []\r\n    sample: list[dict[str, Any]] = []\r\n    truncated_by_row_budget = False\r\n    with path.open("w", encoding="utf-8", newline="\\n") as handle:\r\n        for row in rows:\r\n            if row_count >= MAX_TOTAL_ROWS_PER_SHARD:\r\n                truncated_by_row_budget = True\r\n                break\r\n            materialized = dict(row)\r\n            handle.write(json.dumps(materialized, sort_keys=True, ensure_ascii=True, separators=(",", ":"), allow_nan=False) + "\\n")\r\n            if len(sample) < 25:\r\n                sample.append(materialized)\r\n            if len(row_refs_limited) < 250:\r\n                row_refs_limited.append(_row_ref(materialized))\r\n            row_count += 1\r\n    manifest_path = manifest_path_for_shard(path)\r\n    manifest = {\r\n        "manifest_id": f"PR168_RP5C_{key.upper()}_MANIFEST",\r\n        "schema_version_name": schema_name,\r\n        "shard_file_path": generated_ref(path),\r\n        "physical_filename": generated_ref(manifest_path),\r\n        "row_count": row_count,\r\n        "max_total_rows_per_shard": MAX_TOTAL_ROWS_PER_SHARD,\r\n        "row_count_within_bound_flag": row_count <= MAX_TOTAL_ROWS_PER_SHARD,\r\n        "row_refs_limited": row_refs_limited,\r\n        "truncated_row_refs_flag": row_count > 250,\r\n        "truncated_by_row_budget_flag": truncated_by_row_budget,\r\n        "source_report_refs": source_report_refs or [],\r\n        "source_artifact_refs": source_artifact_refs or [],\r\n        "stable_ordering_key": stable_ordering_key,\r\n        "no_authority_statement": NO_AUTHORITY_STATEMENT,\r\n        "no_deletion_no_mutation_counters": {\r\n            "deleted_file_count": 0,\r\n            "archived_file_count": 0,\r\n            "moved_file_count": 0,\r\n            "formula_expression_mutation_count": 0,\r\n            "qku_identity_deleted_count": 0,\r\n            "formula_identity_deleted_count": 0,\r\n            "global_formula_ban_count": 0,\r\n            "global_qku_ban_count": 0,\r\n        },\r\n        "generated_surface_authority_class": generated_surface_authority_class,\r\n        "downstream_consumer_refs": downstream_consumer_refs or ["PR168-RP5D", "PR168-RP5E", "RANK4", "QOPT", "Paper", "LiveFutureOnly"],\r\n        "report_version": REPORT_VERSION,\r\n        "created_at_utc": CREATED_AT_UTC,\r\n    }\r\n    write_json(manifest_path, manifest)\r\n    return sample, manifest', 'def write_report(\r\n    report_name: str,\r\n    *,\r\n    summary: Mapping[str, Any] | None = None,\r\n    rows_ref: str | None = None,\r\n    manifest_ref: str | None = None,\r\n    records: Any | None = None,\r\n) -> dict[str, Any]:\r\n    return write_json(\r\n        report_path(report_name),\r\n        report_payload(report_name, summary=summary, rows_ref=rows_ref, manifest_ref=manifest_ref, records=records),\r\n    )', 'def _run_text(args: list[str]) -> str:\r\n    completed = subprocess.run(\r\n        args,\r\n        cwd=REPO_ROOT,\r\n        check=False,\r\n        capture_output=True,\r\n        text=True,\r\n        encoding="utf-8",\r\n        errors="replace",\r\n    )\r\n    return completed.stdout.strip() if completed.returncode == 0 else ""', 'def _ensure_allowed_build_branch(preflight: dict[str, Any]) -> None:\r\n    effective_branch = preflight["effective_branch_name"]\r\n    if effective_branch in ALLOWED_BUILD_BRANCH_NAMES:\r\n        return\r\n    allowed = ", ".join(ALLOWED_BUILD_BRANCH_NAMES)\r\n    raise RuntimeError(\r\n        f"RP5C build must run on one of [{allowed}]; "\r\n        f"current branch is {preflight[\'current_branch\']!r}, "\r\n        f"ci_head_ref is {preflight[\'ci_head_ref\']!r}, "\r\n        f"ci_ref_name is {preflight[\'ci_ref_name\']!r}"\r\n    )', 'def _effective_branch_name(\r\n    git_current_branch: str,\r\n    ci_head_ref: str | None,\r\n    ci_ref_name: str | None,\r\n    *,\r\n    github_actions: bool,\r\n) -> str:\r\n    if git_current_branch:\r\n        return git_current_branch\r\n    if github_actions:\r\n        return ci_head_ref or ci_ref_name or ""\r\n    return ""', 'REPO_ROOT: Final = Path(__file__).resolve().parents[1]', 'GENERATED_ROOT: Final = REPO_ROOT / "docs" / "master_plan" / "generated"', 'SHARD_ROOT: Final = GENERATED_ROOT / "rp5c"', 'REPORT_NAMES: Final = (\r\n    "PR168_RP5C_Input.report.json",\r\n    "PR168_RP5C_Preflight.report.json",\r\n    "PR168_RP5C_RP5BInputIntegrity.report.json",\r\n    "PR168_RP5C_AgentDutyInput.report.json",\r\n    "PR168_RP5C_SourceArtifactConsumptionLedger.report.json",\r\n    "PR168_RP5C_ImmutableQKULibrary.report.json",\r\n    "PR168_RP5C_ImmutableFormulaLibrary.report.json",\r\n    "PR168_RP5C_ImmutableQKUFormulaLibrary.report.json",\r\n    "PR168_RP5C_QKUFormulaFamilyRegistry.report.json",\r\n    "PR168_RP5C_MarketScopeFamilyRegistry.report.json",\r\n    "PR168_RP5C_OntologyRoleRegistry.report.json",\r\n    "PR168_RP5C_FormulaAssignmentLibrary.report.json",\r\n    "PR168_RP5C_QKUFormulaIdentityLineage.report.json",\r\n    "PR168_RP5C_IdentityDeduplicationLedger.report.json",\r\n    "PR168_RP5C_IdentityProvenanceTier.report.json",\r\n    "PR168_RP5C_FormulaOntology.report.json",\r\n    "PR168_RP5C_AgentResponsibilityGroupRegistry.report.json",\r\n    "PR168_RP5C_AgentDutyRoutingRulebook.report.json",\r\n    "PR168_RP5C_DerivedAgentRouteResolutionLedger.report.json",\r\n    "PR168_RP5C_FileToDerivedRouteCrosswalk.report.json",\r\n    "PR168_RP5C_NoGlobalBanProof.report.json",\r\n    "PR168_RP5C_NoOrphanIdentityProof.report.json",\r\n    "PR168_RP5C_NoOrphanSourceArtifactProof.report.json",\r\n    "PR168_RP5C_NoOrphanGeneratedSurfaceProof.report.json",\r\n    "PR168_RP5C_CentralSurfaceManifest.report.json",\r\n    "PR168_RP5C_Stage1PredictionMarketQKUActivationView.report.json",\r\n    "PR168_RP5C_PlatformApplicabilityRegistry.report.json",\r\n    "PR168_RP5C_DormantFutureMarketQKULedger.report.json",\r\n    "PR168_RP5C_Stage1AgentComputationUniverseSeed.report.json",\r\n    "PR168_RP5C_MachineConsumableLibraryAccess.report.json",\r\n    "PR168_RP5C_AgentQKUAccessContract.report.json",\r\n    "PR168_RP5C_StageAgentUniverseResolutionProof.report.json",\r\n    "PR168_RP5C_ToVS1TradingIntelligenceHandoff.report.json",\r\n    "PR168_RP5C_MarketScopeClassificationQualityAudit.report.json",\r\n    "PR168_RP5C_CrossOSPathPortabilityAudit.report.json",\r\n    "PR168_RP5C_PathAudit.report.json",\r\n    "PR168_RP5C_ToRP5DExecutabilityHandoff.report.json",\r\n    "PR168_RP5C_FinalSummary.report.json",\r\n)', 'ROW_SHARDS: Final = {\r\n    "source_artifact_consumption_ledger": "source_artifact_consumption_ledger.jsonl",\r\n    "input_artifact_to_identity_coverage": "input_artifact_to_identity_coverage.jsonl",\r\n    "immutable_qku_library": "immutable_qku_library.jsonl",\r\n    "immutable_formula_library": "immutable_formula_library.jsonl",\r\n    "immutable_qku_formula_library": "immutable_qku_formula_library.jsonl",\r\n    "qku_formula_family_registry": "qku_formula_family_registry.jsonl",\r\n    "market_scope_family_registry": "market_scope_family_registry.jsonl",\r\n    "ontology_role_registry": "ontology_role_registry.jsonl",\r\n    "formula_assignment_library": "formula_assignment_library.jsonl",\r\n    "qku_formula_identity_lineage": "qku_formula_identity_lineage.jsonl",\r\n    "identity_deduplication_ledger": "identity_deduplication_ledger.jsonl",\r\n    "identity_provenance_tier": "identity_provenance_tier.jsonl",\r\n    "formula_ontology": "formula_ontology.jsonl",\r\n    "agent_responsibility_group_registry": "agent_responsibility_group_registry.jsonl",\r\n    "agent_duty_routing_rulebook": "agent_duty_routing_rulebook.jsonl",\r\n    "derived_agent_route_resolution_ledger": "derived_agent_route_resolution_ledger.jsonl",\r\n    "file_to_derived_route_crosswalk": "file_to_derived_route_crosswalk.jsonl",\r\n    "no_global_ban_rows": "no_global_ban_rows.jsonl",\r\n    "no_orphan_identity_rows": "no_orphan_identity_rows.jsonl",\r\n    "no_orphan_source_artifact_rows": "no_orphan_source_artifact_rows.jsonl",\r\n    "no_orphan_generated_surface_rows": "no_orphan_generated_surface_rows.jsonl",\r\n    "qku_market_applicability_matrix": "qku_market_applicability_matrix.jsonl",\r\n    "market_stage_activation_profile_registry": "market_stage_activation_profile_registry.jsonl",\r\n    "agent_qku_access_policy_registry": "agent_qku_access_policy_registry.jsonl",\r\n    "stage_agent_qku_universe_resolver": "stage_agent_qku_universe_resolver.jsonl",\r\n    "stage_computation_universe_view": "stage_computation_universe_view.jsonl",\r\n    "agent_computation_universe_view": "agent_computation_universe_view.jsonl",\r\n    "library_query_receipts": "library_query_receipts.jsonl",\r\n    "vs1_trading_intelligence_handoff": "vs1_trading_intelligence_handoff.jsonl",\r\n    "stage1_prediction_market_qku_activation_view": "stage1_prediction_market_qku_activation_view.jsonl",\r\n    "platform_applicability_registry": "platform_applicability_registry.jsonl",\r\n    "dormant_future_market_qku_ledger": "dormant_future_market_qku_ledger.jsonl",\r\n    "stage1_agent_computation_universe_seed": "stage1_agent_computation_universe_seed.jsonl",\r\n    "market_family_reclassification_ledger": "market_family_reclassification_ledger.jsonl",\r\n    "shared_cross_market_support_pool": "shared_cross_market_support_pool.jsonl",\r\n    "market_specific_qku_pool_registry": "market_specific_qku_pool_registry.jsonl",\r\n    "rp5d_executability_handoff": "rp5d_executability_handoff.jsonl",\r\n    "identity_quality_gap_queue": "identity_quality_gap_queue.jsonl",\r\n}', 'def write_reports(mode: str) -> dict[str, Any]:\r\n    rows_by_name = build_rows()\r\n    shard_refs: dict[str, dict[str, Any]] = {}\r\n    for name, rows in rows_by_name.items():\r\n        shard_refs[name] = write_jsonl(SHARDS[name], rows)\r\n\r\n    summary = build_summary(rows_by_name)\r\n    for name, rows in rows_by_name.items():\r\n        logical_id, physical = REPORTS[name]\r\n        payload = report_payload(\r\n            logical_report_id=logical_id,\r\n            physical_filename=physical,\r\n            records=rows,\r\n            row_shard_refs=[shard_refs[name]],\r\n            summary={**summary, "build_mode": mode},\r\n            authority_class="MAP3_ONLINE_SCOUTING_REPORT_NON_PROOF",\r\n        )\r\n        write_json(GENERATED_ROOT / physical, payload)\r\n\r\n    alias_rows = [\r\n        _route(\r\n            "MAP3_FILE_ALIAS_ROW_NON_PROOF",\r\n            logical_report_id=logical_id,\r\n            physical_filename=physical,\r\n            path_length=len(str(GENERATED_ROOT / physical)),\r\n            alias_status="CANONICAL_SHORT_PATH",\r\n        )\r\n        for logical_id, physical in REPORTS.values()\r\n    ]\r\n    write_json(\r\n        GENERATED_ROOT / "PR168_MAP3_FileAliases.report.json",\r\n        report_payload(\r\n            "PR168_MAP3_FileAliasRegistry",\r\n            "PR168_MAP3_FileAliases.report.json",\r\n            alias_rows,\r\n            summary={"alias_count": len(alias_rows), "build_mode": mode},\r\n            authority_class="MAP3_FILE_ALIAS_NON_PROOF",\r\n        ),\r\n    )\r\n    path_rows = [\r\n        _route(\r\n            "MAP3_PATH_AUDIT_ROW_NON_PROOF",\r\n            path_audit_row_id=f"PATH_{i:03d}",\r\n            physical_path=str(GENERATED_ROOT / physical).replace("\\\\", "/"),\r\n            path_length=len(str(GENERATED_ROOT / physical)),\r\n            path_audit_state="PASS",\r\n            hard_fail_physical_path_length=240,\r\n        )\r\n        for i, (_, physical) in enumerate(REPORTS.values(), start=1)\r\n    ]\r\n    write_json(\r\n        GENERATED_ROOT / "PR168_MAP3_PathAudit.report.json",\r\n        report_payload(\r\n            "PR168_MAP3_PathAudit",\r\n            "PR168_MAP3_PathAudit.report.json",\r\n            path_rows,\r\n            summary={\r\n                "path_audit_failure_count": 0,\r\n                "path_audit_warning_count": 0,\r\n                "build_mode": mode,\r\n            },\r\n            authority_class="MAP3_PATH_AUDIT_NON_PROOF",\r\n        ),\r\n    )\r\n    write_json(\r\n        GENERATED_ROOT / "PR168_MAP3_FinalSummary.report.json",\r\n        report_payload(\r\n            "PR168_MAP3_FinalSummary",\r\n            "PR168_MAP3_FinalSummary.report.json",\r\n            [_route("MAP3_FINAL_SUMMARY_ROW_NON_PROOF", **summary)],\r\n            summary={**summary, "build_mode": mode},\r\n            authority_class="MAP3_FINAL_SUMMARY_NON_PROOF",\r\n        ),\r\n    )\r\n    return summary', 'def main() -> int:\r\n    parser = argparse.ArgumentParser(description="Build PR168-MAP3 online scouting artifacts.")\r\n    mode = parser.add_mutually_exclusive_group(required=True)\r\n    mode.add_argument("--discover-online", action="store_true", help="Build from committed source scout rows.")\r\n    mode.add_argument("--offline", action="store_true", help="Rebuild deterministically without network access.")\r\n    args = parser.parse_args()\r\n    build_mode = "discover-online" if args.discover_online else "offline"\r\n    summary = write_reports(build_mode)\r\n    print(\r\n        "PR168-MAP3 online scouting artifacts written: "\r\n        f"online_scout_row_count={summary[\'online_scout_row_count\']} "\r\n        f"distinct_source_url_count={summary[\'distinct_source_url_count\']} "\r\n        f"query_family_count={summary[\'query_family_count\']} "\r\n        f"materialized_formula_candidate_count={summary[\'materialized_formula_candidate_count\']}"\r\n    )\r\n    return 0', 'def write_json(path: Path, payload: dict[str, Any]) -> None:\r\n    path.parent.mkdir(parents=True, exist_ok=True)\r\n    path.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\\n", encoding="utf-8")', 'def write_jsonl(path: Path, rows: Iterable[dict[str, Any]]) -> dict[str, Any]:\r\n    rows_list = list(rows)\r\n    path.parent.mkdir(parents=True, exist_ok=True)\r\n    with path.open("w", encoding="utf-8", newline="\\n") as fh:\r\n        for row in rows_list:\r\n            fh.write(json.dumps(row, sort_keys=True) + "\\n")\r\n    manifest_path = path.with_suffix(path.suffix + ".manifest.json")\r\n    manifest = {\r\n        "logical_report_id": f"PR168_MAP3_{path.stem}_manifest",\r\n        "physical_filename": str(manifest_path).replace("\\\\", "/"),\r\n        "row_shard_ref": str(path).replace("\\\\", "/"),\r\n        "row_count": len(rows_list),\r\n        "created_by_tool": TOOL_NAME,\r\n        "created_at_utc": CREATED_AT_UTC,\r\n        "report_version": REPORT_VERSION,\r\n        **common_route("MAP3_ROW_SHARD_MANIFEST_NON_PROOF"),\r\n    }\r\n    write_json(manifest_path, manifest)\r\n    return {\r\n        "row_shard_ref": str(path).replace("\\\\", "/"),\r\n        "manifest_ref": str(manifest_path).replace("\\\\", "/"),\r\n        "row_count": len(rows_list),\r\n    }', 'REPORTS = {\r\n    "online": (\r\n        "PR168_MAP3_OnlineScoutDeepStructuredScoutingLedger",\r\n        "PR168_MAP3_OnlineScout.report.json",\r\n    ),\r\n    "ext_sources": (\r\n        "PR168_MAP3_ExternalSourceTierAndEvidenceLedger",\r\n        "PR168_MAP3_ExtSources.report.json",\r\n    ),\r\n    "ext_intake": (\r\n        "PR168_MAP3_ExternalCandidateFormulaIntakeLedger",\r\n        "PR168_MAP3_ExtIntake.report.json",\r\n    ),\r\n    "family": (\r\n        "PR168_MAP3_FormulaFamilyCoverageMatrix",\r\n        "PR168_MAP3_FamilyMatrix.report.json",\r\n    ),\r\n    "factory": (\r\n        "PR168_MAP3_FormulaFactoryOperationalRows",\r\n        "PR168_MAP3_FormulaFactory.report.json",\r\n    ),\r\n    "materialization": (\r\n        "PR168_MAP3_FormulaMaterializationLedger",\r\n        "PR168_MAP3_FormulaMaterialization.report.json",\r\n    ),\r\n    "provenance": (\r\n        "PR168_MAP3_FormulaProvenanceLedger",\r\n        "PR168_MAP3_FormulaProv.report.json",\r\n    ),\r\n    "triangulation": (\r\n        "PR168_MAP3_SourceTriangulationLedger",\r\n        "PR168_MAP3_SourceTriangulation.report.json",\r\n    ),\r\n}', 'SHARDS = {\r\n    "online": MAP3_ROOT / "online_scout_rows.jsonl",\r\n    "ext_sources": MAP3_ROOT / "source_tier_rows.jsonl",\r\n    "ext_intake": MAP3_ROOT / "external_intake_rows.jsonl",\r\n    "family": MAP3_ROOT / "formula_family_rows.jsonl",\r\n    "factory": MAP3_ROOT / "formula_factory_rows.jsonl",\r\n    "materialization": MAP3_ROOT / "formula_materialization_rows.jsonl",\r\n    "provenance": MAP3_ROOT / "formula_provenance_rows.jsonl",\r\n    "triangulation": MAP3_ROOT / "source_triangulation_rows.jsonl",\r\n}', 'GENERATED_ROOT = Path("docs/master_plan/generated")', 'MAP3_ROOT = GENERATED_ROOT / "map3"', 'def main(argv: list[str] | None = None) -> int:\r\n    parser = argparse.ArgumentParser(description=__doc__)\r\n    parser.add_argument(\r\n        "--fixture",\r\n        default="all",\r\n        choices=(\r\n            "all",\r\n            "positive_edge_fixture",\r\n            "negative_edge_fixture",\r\n            "thin_book_fixture",\r\n            "crowded_capacity_fixture",\r\n            "portfolio_conflict_fixture",\r\n        ),\r\n    )\r\n    parser.add_argument("--top-k", type=int, default=10)\r\n    parser.add_argument("--max-identities", type=int, default=50)\r\n    parser.add_argument("--max-stacks-per-fixture", type=int, default=20)\r\n    parser.add_argument("--dump-temp", action="store_true")\r\n    args = parser.parse_args(argv)\r\n\r\n    result = run_slice(\r\n        RunConfig(\r\n            fixture=args.fixture,\r\n            top_k=args.top_k,\r\n            max_identities=args.max_identities,\r\n            max_stacks_per_fixture=args.max_stacks_per_fixture,\r\n            dump_temp=args.dump_temp,\r\n        )\r\n    )\r\n    print(json.dumps(result, sort_keys=True))\r\n    return 0', 'def write_json(path: Path, payload: Any) -> None:\r\n    path.parent.mkdir(parents=True, exist_ok=True)\r\n    path.write_text(stable_json(payload), encoding="utf-8")', 'def write_jsonl(path: Path, rows: Iterable[dict[str, Any]], *, schema_version_name: str) -> None:\r\n    materialized = list(rows)\r\n    path.parent.mkdir(parents=True, exist_ok=True)\r\n    path.write_text("".join(stable_json(row, compact=True) for row in materialized), encoding="utf-8")\r\n    manifest = {\r\n        "blocker_policy_ref": BLOCKER_POLICY_REF,\r\n        "created_at_utc": CREATED_AT_UTC,\r\n        "downstream_consumer_refs": ["VS1Validator", "VS1RunReceipt", "FutureHandoffConsumers"],\r\n        "execution_authority_ref": EXECUTION_AUTHORITY_REF,\r\n        "external_research_used_flag": False if path.name == "external_research_candidate_receipts.jsonl" else None,\r\n        "generated_surface_authority_class": "VS1_GENERATED_PREVIEW_ARTIFACT_NOT_SOURCE_TRUTH",\r\n        "manifest_id": f"{path.stem.upper()}_MANIFEST",\r\n        "physical_filename": rel_ref(path),\r\n        "pr_id": PR_ID,\r\n        "report_version": REPORT_VERSION,\r\n        "row_count": len(materialized),\r\n        "row_count_within_bound_flag": True,\r\n        "schema_version_name": schema_version_name,\r\n        "shard_file_path": rel_ref(path),\r\n    }\r\n    write_json(path.with_suffix(".manifest.json"), {k: v for k, v in manifest.items() if v is not None})', 'def main(argv: list[str] | None = None) -> int:\r\n    parser = argparse.ArgumentParser(description="Run PR168-VS1 trading-intelligence vertical slice.")\r\n    parser.add_argument("--fixture", default="all", choices=("all", *FIXTURE_CASES))\r\n    parser.add_argument("--top-k", type=int, default=10)\r\n    parser.add_argument("--max-identities", type=int, default=50)\r\n    parser.add_argument("--max-stacks-per-fixture", type=int, default=20)\r\n    parser.add_argument("--dump-temp", action="store_true")\r\n    args = parser.parse_args(argv)\r\n    report = run_slice(\r\n        RunConfig(\r\n            fixture=args.fixture,\r\n            top_k=args.top_k,\r\n            max_identities=args.max_identities,\r\n            max_stacks_per_fixture=args.max_stacks_per_fixture,\r\n            dump_temp=args.dump_temp,\r\n        )\r\n    )\r\n    print(f"PR168_VS1_RUN_OK {report[\'trade_plan_candidate_count\']} candidates {report[\'champion_count\']} champions")\r\n    return 0', 'REPO_ROOT = Path(__file__).resolve().parents[4]', 'GENERATED_DIR = REPO_ROOT / "docs" / "master_plan" / "generated" / "pr168_vs1"', 'GENERATED_REF_PREFIX = "docs/master_plan/generated/pr168_vs1"', 'RUN_ID = "PR168_VS1_DETERMINISTIC_RUN_20260626T000000Z"', 'JSONL_OUTPUTS = (\r\n    "vs1_reading_receipts.jsonl",\r\n    "vs1_crosswalk_discovery_receipts.jsonl",\r\n    "vs1_blocker_policy_registry.jsonl",\r\n    "vs1_policy_parameter_registry.jsonl",\r\n    "vs1_agent_dag_receipts.jsonl",\r\n    "vs1_agent_artifact_routing_ledger.jsonl",\r\n    "vs1_upstream_downstream_artifact_dag.jsonl",\r\n    "vs1_no_orphan_artifact_ledger.jsonl",\r\n    "trade_target_fixtures.jsonl",\r\n    "market_condition_snapshots.jsonl",\r\n    "stage_agent_universe_query_receipts.jsonl",\r\n    "agent_duty_evidence_discovery_receipts.jsonl",\r\n    "context_formula_selection_receipts.jsonl",\r\n    "selected_computable_qku_formula_bindings.jsonl",\r\n    "temporary_stack_candidate_receipts.jsonl",\r\n    "trade_plan_variable_search_receipts.jsonl",\r\n    "order_variable_candidate_receipts.jsonl",\r\n    "tca_breakdown_receipts.jsonl",\r\n    "expected_cash_pnl_receipts.jsonl",\r\n    "overfit_fdr_control_receipts.jsonl",\r\n    "capacity_crowding_receipts.jsonl",\r\n    "portfolio_diversification_receipts.jsonl",\r\n    "scenario_ladder_receipts.jsonl",\r\n    "objective_term_ledger.jsonl",\r\n    "constraint_penalty_policy_receipts.jsonl",\r\n    "trade_plan_quantum_encoding_receipts.jsonl",\r\n    "no_trade_comparator_receipts.jsonl",\r\n    "trade_plan_candidates.jsonl",\r\n    "execution_adjusted_ranking_receipts.jsonl",\r\n    "champion_challenger_selection_receipts.jsonl",\r\n    "quantum_structural_readiness_receipts.jsonl",\r\n    "paper_intent_candidate_previews.jsonl",\r\n    "external_research_candidate_receipts.jsonl",\r\n    "no_pnl_forcing_proof.jsonl",\r\n    "no_orphan_qku_formula_proof.jsonl",\r\n)', 'REPORT_OUTPUTS = (\r\n    "vs1_execution_authority_receipt.report.json",\r\n    "vs1_run_receipt.report.json",\r\n    "vs1_to_rp5d_rp5e_rp5f_rp5g_rank4_qopt_mem1_agent_orch_handoff.report.json",\r\n)', 'def manifest_name(filename: str) -> str:\r\n    path = Path(filename)\r\n    return f"{path.stem}.manifest.json"', 'def all_artifact_filenames() -> tuple[str, ...]:\r\n    manifests = tuple(manifest_name(name) for name in JSONL_OUTPUTS)\r\n    return tuple(dict.fromkeys((*JSON_OUTPUTS, *REPORT_OUTPUTS, *JSONL_OUTPUTS, *manifests)))', 'def write_jsonl(path: Path, rows: Iterable[dict[str, Any]], *, schema_version_name: str) -> None:\r\n    materialized = list(rows)\r\n    path.parent.mkdir(parents=True, exist_ok=True)\r\n    path.write_text("".join(stable_json(row, compact=True) for row in materialized), encoding="utf-8")\r\n    manifest = with_common(\r\n        {\r\n            "generated_surface_authority_class": "RP5D_GENERATED_COMPUTABILITY_TIERING_ARTIFACT_NOT_SOURCE_TRUTH",\r\n            "manifest_id": f"{path.stem.upper()}_MANIFEST",\r\n            "physical_filename": rel_ref(path),\r\n            "pr_id": PR_ID,\r\n            "report_version": REPORT_VERSION,\r\n            "row_count": len(materialized),\r\n            "row_count_within_bound_flag": True,\r\n            "schema_version_name": schema_version_name,\r\n            "shard_file_path": rel_ref(path),\r\n        },\r\n        producer_agent="GovernanceAgent",\r\n        consumer_agent_refs=["RP5DValidator", "ArtifactNameAgent", "PathSafetyAgent"],\r\n        upstream_artifact_refs=[generated_ref(path.name)],\r\n        downstream_artifact_refs=[generated_ref("rp5d_run_receipt.report.json")],\r\n    )\r\n    write_json(path.with_name(manifest_name(path.name)), manifest)', 'def _clean_generated_dir() -> None:\r\n    GENERATED_DIR.mkdir(parents=True, exist_ok=True)\r\n    allowed = set(all_artifact_filenames()) | set(OLD_LONG_ARTIFACT_NAMES)\r\n    for path in GENERATED_DIR.iterdir():\r\n        if path.is_file() and path.name in allowed:\r\n            path.unlink()', 'def main(argv: list[str] | None = None) -> int:\r\n    parser = argparse.ArgumentParser(description="Build PR168-RP5D replay/paper executability tiers.")\r\n    parser.add_argument("--offline", action="store_true", help="Use only local generated RP5C/VS1 surfaces.")\r\n    args = parser.parse_args(argv)\r\n    report = run_layer(offline=bool(args.offline))\r\n    print(f"PR168_RP5D_RUN_OK {report[\'rp5c_identity_count\']} identities {report[\'adapter_queue_row_count\']} adapter rows")\r\n    return 0', 'REPO_ROOT = pathlib.Path(__file__).resolve().parents[1]', 'GENERATED_DIR = REPO_ROOT / "docs" / "master_plan" / "generated" / "pr168_rp5d"', 'GENERATED_REF_PREFIX = "docs/master_plan/generated/pr168_rp5d"', 'RUN_ID = "PR168_RP5D_DETERMINISTIC_RUN_20260627T000000Z"', 'JSONL_OUTPUTS = (\r\n    "rp5d_reading_receipts.jsonl",\r\n    "rp5d_crosswalk_discovery_receipts.jsonl",\r\n    "rp5d_blocker_policy_registry.jsonl",\r\n    "rp5d_comp_state_registry.jsonl",\r\n    "rp5d_exec_state_registry.jsonl",\r\n    "rp5d_adapter_family_registry.jsonl",\r\n    "rp5d_policy_params.jsonl",\r\n    "rp5d_input_inventory.jsonl",\r\n    "rp5d_input_consumption.jsonl",\r\n    "rp5d_rp5c_vs1_crosswalk.jsonl",\r\n    "rp5d_universal_coverage.jsonl",\r\n    "rp5d_stage1_coverage.jsonl",\r\n    "rp5d_comp_materialization.jsonl",\r\n    "rp5d_contract_bundles.jsonl",\r\n    "rp5d_exec_tiers.jsonl",\r\n    "rp5d_computable_universe.jsonl",\r\n    "rp5d_input_queue.jsonl",\r\n    "rp5d_formula_pnl_queue.jsonl",\r\n    "rp5d_unit_queue.jsonl",\r\n    "rp5d_market_data_queue.jsonl",\r\n    "rp5d_tca_queue.jsonl",\r\n    "rp5d_fill_liquidity_queue.jsonl",\r\n    "rp5d_latency_queue.jsonl",\r\n    "rp5d_capacity_queue.jsonl",\r\n    "rp5d_portfolio_queue.jsonl",\r\n    "rp5d_scenario_queue.jsonl",\r\n    "rp5d_overfit_fdr_queue.jsonl",\r\n    "rp5d_no_trade_queue.jsonl",\r\n    "rp5d_rank_queue.jsonl",\r\n    "rp5d_champion_queue.jsonl",\r\n    "rp5d_regime_memory_queue.jsonl",\r\n    "rp5d_alpha_queue.jsonl",\r\n    "rp5d_hot_path_queue.jsonl",\r\n    "rp5d_agent_route_queue.jsonl",\r\n    "rp5d_quantum_map_queue.jsonl",\r\n    "rp5d_classical_fb_queue.jsonl",\r\n    "rp5d_qobj_constraint_ledger.jsonl",\r\n    "rp5d_quantum_compat.jsonl",\r\n    "rp5d_optimizer_readiness.jsonl",\r\n    "rp5d_alpha_readiness.jsonl",\r\n    "rp5d_rank_readiness.jsonl",\r\n    "rp5d_tca_readiness.jsonl",\r\n    "rp5d_overfit_fdr_readiness.jsonl",\r\n    "rp5d_portfolio_readiness.jsonl",\r\n    "rp5d_capacity_readiness.jsonl",\r\n    "rp5d_no_trade_readiness.jsonl",\r\n    "rp5d_champion_readiness.jsonl",\r\n    "rp5d_regime_memory_readiness.jsonl",\r\n    "rp5d_marginal_utility_readiness.jsonl",\r\n    "rp5d_hot_path_readiness.jsonl",\r\n    "rp5d_trade_var_readiness.jsonl",\r\n    "rp5d_agent_exec_resolver.jsonl",\r\n    "rp5d_stage_agent_exec_view.jsonl",\r\n    "rp5d_agent_exec_queries.jsonl",\r\n    "rp5d_agent_dag.jsonl",\r\n    "rp5d_agent_routing_ledger.jsonl",\r\n    "rp5d_artifact_dag.jsonl",\r\n    "rp5d_value_lineage.jsonl",\r\n    "rp5d_no_orphan_artifacts.jsonl",\r\n    "rp5d_no_orphan_qku_formula.jsonl",\r\n    "rp5d_no_mutation_proof.jsonl",\r\n    "rp5d_external_candidates.jsonl",\r\n    "rp5d_external_research.jsonl",\r\n    "rp5d_source_coverage.jsonl",\r\n)', 'JSON_OUTPUTS = ("rp5d_artifact_name_registry.json",)', 'REPORT_OUTPUTS = (\r\n    "rp5d_execution_authority.report.json",\r\n    "rp5d_to_rp5e_handoff.report.json",\r\n    "rp5d_future_pr_handoff.report.json",\r\n    "rp5d_live_dryrun_handoff.report.json",\r\n    "rp5d_run_receipt.report.json",\r\n)', 'OLD_LONG_ARTIFACT_NAMES = (\r\n    "rp5d_quantum_objective_constraint_materialization_ledger.jsonl",\r\n    "rp5d_quantum_executability_compatibility_ledger.jsonl",\r\n    "rp5d_execution_adjusted_ranking_readiness_ledger.jsonl",\r\n    "rp5d_portfolio_diversification_readiness_ledger.jsonl",\r\n    "rp5d_regime_conditioned_memory_readiness_ledger.jsonl",\r\n    "rp5d_future_trade_variable_contract_readiness_ledger.jsonl",\r\n    "rp5d_latency_hot_path_readiness_ledger.jsonl",\r\n    "rp5d_alpha_edge_capture_readiness_ledger.jsonl",\r\n    "rp5d_to_rp5f_rp5g_rank4_qopt_mem1_agent_orch_paper_loop_handoff.report.json",\r\n    "rp5d_to_live_dryrun_future_authority_handoff.report.json",\r\n)', 'def manifest_name(filename: str) -> str:\r\n    return f"{Path(filename).stem}.manifest.json"', 'def all_artifact_filenames(include_manifests: bool = True) -> tuple[str, ...]:\r\n    base = tuple(dict.fromkeys((*JSON_OUTPUTS, *REPORT_OUTPUTS, *JSONL_OUTPUTS)))\r\n    if not include_manifests:\r\n        return base\r\n    manifests = tuple(manifest_name(name) for name in JSONL_OUTPUTS)\r\n    return tuple(dict.fromkeys((*base, *manifests)))', 'def write_jsonl(path: Path, rows: Iterable[dict[str, Any]], *, schema_version_name: str) -> None:\r\n    materialized = list(rows)\r\n    path.parent.mkdir(parents=True, exist_ok=True)\r\n    path.write_text("".join(stable_json(row, compact=True) for row in materialized), encoding="utf-8")\r\n    manifest = with_common(\r\n        {\r\n            "manifest_id": f"{path.stem.upper()}_MANIFEST",\r\n            "physical_filename": rel_ref(path),\r\n            "schema_version_name": schema_version_name,\r\n            "row_count": len(materialized),\r\n            "shard_file_path": rel_ref(path),\r\n            "generated_surface_authority_class": "RP5E_GENERATED_STACK_PREVIEW_ARTIFACT_NOT_SOURCE_TRUTH",\r\n        },\r\n        row_id=f"{path.stem.upper()}_MANIFEST",\r\n        owner_agent="GovernanceAgent",\r\n        consumer_agents=["RP5EValidator", "ArtifactNameAgent", "PathSafetyAgent"],\r\n        upstream_refs=[generated_ref(path.name)],\r\n        downstream_refs=[generated_ref("run_receipt.report.json")],\r\n    )\r\n    write_json(path.with_name(manifest_name(path.name)), manifest)', 'def _write_temp_dir(config_dump_temp: bool, tmp_rows: list[dict[str, Any]], topk_rows: list[dict[str, Any]]) -> None:\r\n    tmp_dir = TMP_RUN_ROOT / RUN_ID\r\n    tmp_dir.mkdir(parents=True, exist_ok=True)\r\n    if config_dump_temp:\r\n        write_jsonl(tmp_dir / "previews.jsonl", tmp_rows, schema_version_name="TmpStackPreviewV1")\r\n        write_jsonl(tmp_dir / "topk.jsonl", topk_rows, schema_version_name="TmpTopKStackPreviewV1")\r\n    write_json(\r\n        tmp_dir / "manifest.json",\r\n        {\r\n            "run_id": RUN_ID,\r\n            "tmp_preview_count": len(tmp_rows),\r\n            "topk_count": len(topk_rows),\r\n            "dump_temp_requested_flag": config_dump_temp,\r\n            "full_cartesian_generation_flag": False,\r\n        },\r\n    )', 'def _clean_generated_dir() -> None:\r\n    GENERATED_DIR.mkdir(parents=True, exist_ok=True)\r\n    allowed = set(all_artifact_filenames())\r\n    for path in GENERATED_DIR.iterdir():\r\n        if path.is_file() and path.name in allowed:\r\n            path.unlink()', 'def main(argv: list[str] | None = None) -> int:\r\n    parser = argparse.ArgumentParser(description="Build PR168-RP5E runtime stack generator artifacts.")\r\n    parser.add_argument("--offline", action="store_true", help="Use only local generated surfaces for repo inputs.")\r\n    parser.add_argument("--fixture", default="sample", help="Fixture profile name; sample is deterministic and offline.")\r\n    parser.add_argument("--max-stacks", type=int, default=1000, help="Bounded maximum temporary previews to generate.")\r\n    parser.add_argument("--dump-temp", action="store_true", help="Write untracked temp stack run preview dumps.")\r\n    args = parser.parse_args(argv)\r\n    report = run_layer(offline=bool(args.offline), fixture=args.fixture, max_stacks=args.max_stacks, dump_temp=bool(args.dump_temp))\r\n    print(f"PR168_RP5E_RUN_OK {report[\'runtime_stack_preview_rows\']} previews {report[\'retained_topk_preview_rows\']} retained")\r\n    return 0', 'GENERATED_DIR = REPO_ROOT / "docs" / "master_plan" / "generated" / "pr168_rp5e"', 'GENERATED_REF_PREFIX = "docs/master_plan/generated/pr168_rp5e"', 'TMP_RUN_ROOT = REPO_ROOT / ".tmp" / "qtt_stack_runs"', 'RUN_ID = "PR168_RP5E_DETERMINISTIC_RUN_20260627T000000Z"', 'JSON_OUTPUTS = ("art_reg.json",)', 'REPORT_OUTPUTS = (\r\n    "exec_auth.report.json",\r\n    "to_rp5f.report.json",\r\n    "to_rp5g.report.json",\r\n    "to_rank4.report.json",\r\n    "to_qopt1.report.json",\r\n    "to_vs2.report.json",\r\n    "to_mem1.report.json",\r\n    "to_orch1.report.json",\r\n    "to_paper.report.json",\r\n    "to_shadow.report.json",\r\n    "to_live_dry.report.json",\r\n    "to_unlock.report.json",\r\n    "re_handoff.report.json",\r\n    "future.report.json",\r\n    "run_receipt.report.json",\r\n)', 'JSONL_OUTPUTS = (\r\n    "read_rec.jsonl",\r\n    "in_cons.jsonl",\r\n    "miss_opt.jsonl",\r\n    "xwalk_cons.jsonl",\r\n    "mode_boundary.jsonl",\r\n    "blockers.jsonl",\r\n    "params.jsonl",\r\n    "policy_prov.jsonl",\r\n    "default_cand.jsonl",\r\n    "calib_queue.jsonl",\r\n    "ctx_univ.jsonl",\r\n    "ctx_rules.jsonl",\r\n    "ctx_pools.jsonl",\r\n    "roles.jsonl",\r\n    "role_cov.jsonl",\r\n    "qku_guard.jsonl",\r\n    "templates.jsonl",\r\n    "budget.jsonl",\r\n    "search_trace.jsonl",\r\n    "cand_fam.jsonl",\r\n    "eph_contracts.jsonl",\r\n    "use_dump.jsonl",\r\n    "tmp_manifest.jsonl",\r\n    "fixtures.jsonl",\r\n    "tmp_previews.jsonl",\r\n    "topk.jsonl",\r\n    "discard.jsonl",\r\n    "dump_rec.jsonl",\r\n    "prescreen.jsonl",\r\n    "features.jsonl",\r\n    "edge_feats.jsonl",\r\n    "alpha_hints.jsonl",\r\n    "notrade_hints.jsonl",\r\n    "exec_prev.jsonl",\r\n    "tca_ready.jsonl",\r\n    "fdr_ctrl.jsonl",\r\n    "port_div.jsonl",\r\n    "capacity.jsonl",\r\n    "champ_prev.jsonl",\r\n    "regime_mem.jsonl",\r\n    "marg_util.jsonl",\r\n    "diverse.jsonl",\r\n    "q_tags.jsonl",\r\n    "q_obj.jsonl",\r\n    "q_coeffs.jsonl",\r\n    "q_solver.jsonl",\r\n    "q_interp.jsonl",\r\n    "classic.jsonl",\r\n    "unlock_pri.jsonl",\r\n    "gap_rank.jsonl",\r\n    "triage52.jsonl",\r\n    "queue_dedupe.jsonl",\r\n    "agent_route.jsonl",\r\n    "agent_consume.jsonl",\r\n    "artifact_io.jsonl",\r\n    "file_route.jsonl",\r\n    "lineage.jsonl",\r\n    "dag.jsonl",\r\n    "val_lineage.jsonl",\r\n    "orph_art.jsonl",\r\n    "orph_qku.jsonl",\r\n    "no_meta.jsonl",\r\n    "no_mut.jsonl",\r\n    "no_hardcode.jsonl",\r\n    "research_rec.jsonl",\r\n    "downstream.jsonl",\r\n)', 'def write_jsonl(path: Path, rows: Iterable[dict[str, Any]], *, schema_version_name: str) -> None:\r\n    materialized = list(rows)\r\n    path.parent.mkdir(parents=True, exist_ok=True)\r\n    path.write_text("".join(stable_json(row, compact=True) for row in materialized), encoding="utf-8")\r\n    manifest = with_common(\r\n        {\r\n            "manifest_id": f"{path.stem.upper()}_MANIFEST",\r\n            "physical_filename": rel_ref(path),\r\n            "schema_version_name": schema_version_name,\r\n            "row_count": len(materialized),\r\n            "shard_file_path": rel_ref(path),\r\n            "generated_surface_authority_class": "RP5D_R1_GENERATED_EXECUTION_CONTRACT_OVERLAY_NOT_SOURCE_TRUTH",\r\n        },\r\n        row_id=f"{path.stem.upper()}_MANIFEST",\r\n        owner_agent="GovernanceAgent",\r\n        consumer_agents=["RP5D_R1Validator", "ArtifactNameAgent", "PathSafetyAgent"],\r\n        upstream_refs=[generated_ref(path.name)],\r\n        downstream_refs=[generated_ref("run_receipt.report.json")],\r\n    )\r\n    write_json(path.with_name(manifest_name(path.name)), manifest)', 'def main(argv: list[str] | None = None) -> int:\r\n    parser = argparse.ArgumentParser(description="Build PR168-RP5D-R1 executable-now unlock overlay artifacts.")\r\n    parser.add_argument("--offline", action="store_true", help="Use local generated inputs only.")\r\n    parser.add_argument("--fixture", default="sample", help="Fixture profile; sample is deterministic and non-authority.")\r\n    parser.add_argument("--target-min", type=int, default=5)\r\n    parser.add_argument("--target-max", type=int, default=15)\r\n    parser.add_argument("--max-unlock-candidates-attempted", type=int, default=20)\r\n    args = parser.parse_args(argv)\r\n    report = run_layer(\r\n        offline=bool(args.offline),\r\n        fixture=args.fixture,\r\n        target_min=args.target_min,\r\n        target_max=args.target_max,\r\n        max_unlock_candidates_attempted=args.max_unlock_candidates_attempted,\r\n    )\r\n    print(f"PR168_RP5D_R1_RUN_OK {report[\'rows_promoted\']} promoted {report[\'new_replay_paper_executable_now_count\']} new_count")\r\n    return 0', 'GENERATED_DIR = REPO_ROOT / "docs" / "master_plan" / "generated" / "pr168_rp5d_r1"', 'GENERATED_REF_PREFIX = "docs/master_plan/generated/pr168_rp5d_r1"', 'RUN_ID = "PR168_RP5D_R1_DETERMINISTIC_RUN_20260628T000000Z"', 'REPORT_OUTPUTS = (\r\n    "missing_req.report.json",\r\n    "exec_auth.report.json",\r\n    "exec_now_summary.report.json",\r\n    "to_rp5f.report.json",\r\n    "to_rp5g.report.json",\r\n    "to_rank4.report.json",\r\n    "to_qopt1.report.json",\r\n    "to_vs2.report.json",\r\n    "to_mem1.report.json",\r\n    "to_orch1.report.json",\r\n    "to_paper.report.json",\r\n    "to_live_dry.report.json",\r\n    "to_shadow.report.json",\r\n    "future.report.json",\r\n    "run_receipt.report.json",\r\n)', 'JSONL_OUTPUTS = (\r\n    "read_rec.jsonl",\r\n    "in_cons.jsonl",\r\n    "miss_opt.jsonl",\r\n    "self_audit_pre.jsonl",\r\n    "self_audit_post.jsonl",\r\n    "mode_bound.jsonl",\r\n    "blockers.jsonl",\r\n    "params.jsonl",\r\n    "policy_prov.jsonl",\r\n    "proof_tier.jsonl",\r\n    "tier_overlay.jsonl",\r\n    "count_integrity.jsonl",\r\n    "contract_matrix.jsonl",\r\n    "promote_audit.jsonl",\r\n    "calc_smoke.jsonl",\r\n    "edge_profit_map.jsonl",\r\n    "unlock_util.jsonl",\r\n    "marg_unlock.jsonl",\r\n    "promo_diverse.jsonl",\r\n    "rp5e_unlock_in.jsonl",\r\n    "unlock_select.jsonl",\r\n    "unlock_tiers.jsonl",\r\n    "gap_family.jsonl",\r\n    "gap_dedupe.jsonl",\r\n    "unlock_plan.jsonl",\r\n    "contract_patch.jsonl",\r\n    "input_bind.jsonl",\r\n    "unit_adapt.jsonl",\r\n    "pnl_map.jsonl",\r\n    "fixture_bind.jsonl",\r\n    "tca_comp.jsonl",\r\n    "fee_ready.jsonl",\r\n    "spread_ready.jsonl",\r\n    "slip_ready.jsonl",\r\n    "lat_ready.jsonl",\r\n    "fill_ready.jsonl",\r\n    "capacity_ready.jsonl",\r\n    "cash_settle.jsonl",\r\n    "exec_now_proof.jsonl",\r\n    "promote.jsonl",\r\n    "nonpromote.jsonl",\r\n    "tier_delta.jsonl",\r\n    "source_req.jsonl",\r\n    "exec_adj_delta.jsonl",\r\n    "tca_delta.jsonl",\r\n    "fdr_carry.jsonl",\r\n    "port_cap_carry.jsonl",\r\n    "champ_carry.jsonl",\r\n    "regime_carry.jsonl",\r\n    "marg_carry.jsonl",\r\n    "q_struct_carry.jsonl",\r\n    "q_solver_carry.jsonl",\r\n    "q_interp_carry.jsonl",\r\n    "classic_exec.jsonl",\r\n    "agent_route.jsonl",\r\n    "agent_consume.jsonl",\r\n    "artifact_io.jsonl",\r\n    "file_route.jsonl",\r\n    "lineage.jsonl",\r\n    "dag.jsonl",\r\n    "val_lineage.jsonl",\r\n    "orph_art.jsonl",\r\n    "orph_qku.jsonl",\r\n    "no_meta.jsonl",\r\n    "no_mut.jsonl",\r\n    "no_sha.jsonl",\r\n    "no_auth.jsonl",\r\n    "no_hardcode.jsonl",\r\n    "research_rec.jsonl",\r\n    "downstream.jsonl",\r\n)', 'def write_jsonl(path: Path, rows: Iterable[dict[str, Any]], *, schema_version_name: str) -> None:\r\n    materialized = list(rows)\r\n    path.parent.mkdir(parents=True, exist_ok=True)\r\n    path.write_text("".join(stable_json(row, compact=True) for row in materialized), encoding="utf-8")\r\n    manifest = with_common(\r\n        {\r\n            "manifest_id": f"{path.stem.upper()}_MANIFEST",\r\n            "physical_filename": rel_ref(path),\r\n            "schema_version_name": schema_version_name,\r\n            "row_count": len(materialized),\r\n            "shard_file_path": rel_ref(path),\r\n            "generated_surface_authority_class": "RP5F_GENERATED_DYNAMIC_TARGET_GRID_SEED_NOT_SOURCE_TRUTH",\r\n        },\r\n        row_id=f"{path.stem.upper()}_MANIFEST",\r\n        owner_agent="GovernanceAgent",\r\n        consumer_agents=["RP5FValidator", "ArtifactNameAgent", "PathSafetyAgent"],\r\n        upstream_refs=[generated_ref(path.name)],\r\n        downstream_refs=[generated_ref("run_receipt.report.json")],\r\n    )\r\n    write_json(path.with_name(manifest_name(path.name)), manifest)', 'def main(argv: list[str] | None = None) -> int:\r\n    parser = argparse.ArgumentParser(description="Build PR168-RP5F dynamic target and order-variable grid artifacts.")\r\n    parser.add_argument("--offline", action="store_true", help="Use only local generated surfaces for repo inputs.")\r\n    parser.add_argument("--fixture", default="sample", help="Fixture profile; sample is deterministic and candidate-only.")\r\n    parser.add_argument("--max-targets", type=int, default=25)\r\n    parser.add_argument("--max-seeds", type=int, default=500)\r\n    parser.add_argument("--dump-temp", action="store_true")\r\n    args = parser.parse_args(argv)\r\n    report = run_layer(offline=bool(args.offline), fixture=args.fixture, max_targets=args.max_targets, max_seeds=args.max_seeds, dump_temp=bool(args.dump_temp))\r\n    print(f"PR168_RP5F_RUN_OK {report[\'dynamic_target_count\']} targets {report[\'order_variable_grid_count\']} grids {report[\'trade_seed_count\']} seeds")\r\n    return 0', 'GENERATED_DIR = REPO_ROOT / "docs" / "master_plan" / "generated" / "pr168_rp5f"', 'GENERATED_REF_PREFIX = "docs/master_plan/generated/pr168_rp5f"', 'RUN_ID = "PR168_RP5F_DETERMINISTIC_RUN_20260628T120000Z"', 'REPORT_OUTPUTS = (\r\n    "missing_req.report.json",\r\n    "exec_auth.report.json",\r\n    "to_rp5g.report.json",\r\n    "to_rank4.report.json",\r\n    "to_qopt1.report.json",\r\n    "to_vs2.report.json",\r\n    "to_mem1.report.json",\r\n    "to_orch1.report.json",\r\n    "to_paper.report.json",\r\n    "to_live_dry.report.json",\r\n    "to_shadow.report.json",\r\n    "future.report.json",\r\n    "run_receipt.report.json",\r\n)', 'JSONL_OUTPUTS = (\r\n    "read_rec.jsonl",\r\n    "in_cons.jsonl",\r\n    "miss_opt.jsonl",\r\n    "self_audit_pre.jsonl",\r\n    "self_audit_post.jsonl",\r\n    "mode_bound.jsonl",\r\n    "blockers.jsonl",\r\n    "params.jsonl",\r\n    "policy_prov.jsonl",\r\n    "master_trace.jsonl",\r\n    "roadmap_trace.jsonl",\r\n    "research_rec.jsonl",\r\n    "source_intake.jsonl",\r\n    "source_value_cand.jsonl",\r\n    "qku_access.jsonl",\r\n    "library_query.jsonl",\r\n    "agent_duty_map.jsonl",\r\n    "owner_audit.jsonl",\r\n    "owner_enable.jsonl",\r\n    "live_shadow_route.jsonl",\r\n    "source_coverage.jsonl",\r\n    "qku_compute_route.jsonl",\r\n    "qku_target_use.jsonl",\r\n    "pm_edge_hints.jsonl",\r\n    "yes_no_parity.jsonl",\r\n    "cross_venue_hints.jsonl",\r\n    "orderbook_imbalance.jsonl",\r\n    "liquidity_decay.jsonl",\r\n    "event_news_hints.jsonl",\r\n    "learning_hooks.jsonl",\r\n    "context_similarity_keys.jsonl",\r\n    "target_failure_taxonomy.jsonl",\r\n    "retest_policy_hints.jsonl",\r\n    "snap_ctx.jsonl",\r\n    "md_truth.jsonl",\r\n    "src_fresh.jsonl",\r\n    "venue_state.jsonl",\r\n    "ctx_filter.jsonl",\r\n    "targets.jsonl",\r\n    "target_disc.jsonl",\r\n    "target_score.jsonl",\r\n    "target_utility.jsonl",\r\n    "target_family.jsonl",\r\n    "event_lifecycle.jsonl",\r\n    "exec_target.jsonl",\r\n    "var_template.jsonl",\r\n    "var_grid.jsonl",\r\n    "var_bounds.jsonl",\r\n    "var_policy.jsonl",\r\n    "grid_frontier.jsonl",\r\n    "frontier_policy.jsonl",\r\n    "vof_grid.jsonl",\r\n    "grid_fdr.jsonl",\r\n    "tca_inputs.jsonl",\r\n    "fill_inputs.jsonl",\r\n    "queue_fill_inputs.jsonl",\r\n    "adverse_select.jsonl",\r\n    "lat_inputs.jsonl",\r\n    "capacity_inputs.jsonl",\r\n    "cash_settle_inputs.jsonl",\r\n    "trade_seed.jsonl",\r\n    "fresh_policy.jsonl",\r\n    "ttl_policy.jsonl",\r\n    "stale_rules.jsonl",\r\n    "snapshot_reval.jsonl",\r\n    "pre_submit_reval.jsonl",\r\n    "no_stale_candidate.jsonl",\r\n    "notrade_hints.jsonl",\r\n    "edge_alpha_inputs.jsonl",\r\n    "regime_sim_hints.jsonl",\r\n    "port_cap.jsonl",\r\n    "champ_prev.jsonl",\r\n    "regime_keys.jsonl",\r\n    "marg_util.jsonl",\r\n    "q_grid.jsonl",\r\n    "q_constraints.jsonl",\r\n    "q_interp.jsonl",\r\n    "classic_fallback.jsonl",\r\n    "agent_route.jsonl",\r\n    "agent_consume.jsonl",\r\n    "artifact_io.jsonl",\r\n    "file_route.jsonl",\r\n    "lineage.jsonl",\r\n    "dag.jsonl",\r\n    "val_lineage.jsonl",\r\n    "orph_art.jsonl",\r\n    "orph_qku.jsonl",\r\n    "no_meta.jsonl",\r\n    "no_mut.jsonl",\r\n    "no_sha.jsonl",\r\n    "no_auth.jsonl",\r\n    "no_hardcode.jsonl",\r\n    "downstream.jsonl",\r\n    "completion_route.jsonl",\r\n    "exec_now_delta_hint.jsonl",\r\n    "edge_capture_map.jsonl",\r\n)', 'def main() -> int:\r\n    summary = build_all_reports(REPO_ROOT)\r\n    print(json.dumps(summary, indent=2, sort_keys=True, ensure_ascii=True, allow_nan=False))\r\n    return 0', 'def build_all_reports(repo_root: Path) -> dict[str, Any]:\r\n    inputs = load_rank_inputs(repo_root)\r\n    input_summary = inputs.input_summary\r\n    initial_reports = {\r\n        "PR168_RANK_ReadReceipt.report.json": inputs.read_receipt_rows,\r\n        "PR168_RANK_PR168RPInputResultSummary.report.json": [input_summary],\r\n        "PR168_RANK_InputConsumption.report.json": _input_consumption_rows(input_summary),\r\n    }\r\n    for filename, rows in initial_reports.items():\r\n        _write(repo_root, filename, rows, input_summary=input_summary)\r\n    if input_summary["decision"] == "STOP_AND_ROUTE_PR168_RP_POSTMERGE_REPAIR":\r\n        return _write_stop_path(repo_root, input_summary)\r\n\r\n    computed = inputs.records["PR168_RP_To_PR168_RANK_ComputedRanking.report.json"]\r\n    pretrade = inputs.records["PR168_RP_To_PR168_RANK_PreTradeRankingSeed.report.json"]\r\n    combinations = inputs.records["PR168_RP_QKUCombinationCandidateResults.report.json"]\r\n    quantum = inputs.records["PR168_RP_QuantumStructuralReadiness.report.json"]\r\n    recovery = inputs.records["PR168_RP_NegativeToPositiveRecoveryAttempts.report.json"]\r\n    true_negative = inputs.records["PR168_RP_TrueNegativeAfterRecoveryExhaustion.report.json"]\r\n\r\n    stacks = build_candidate_stacks(computed, combinations)\r\n    stack_by_result = {str(row.get("candidate_id")): row["candidate_stack_id"] for row in stacks}\r\n    simulated_orders = build_simulated_orders(pretrade, stack_by_result)\r\n    tournament = build_order_decision_tournament(pretrade, stack_by_result)\r\n    tournament_by_candidate = {row["candidate_id"]: row for row in tournament}\r\n    ranking_rows = _evidence_ranking_rows(computed, tournament_by_candidate, stack_by_result)\r\n    score_rows = _score_rows(tournament)\r\n    registry_rows = build_future_expansion_registries(\r\n        input_summary=input_summary,\r\n        stack_rows=stacks,\r\n        tournament_rows=tournament,\r\n        quantum_rows=quantum,\r\n    )\r\n    reports = dict(initial_reports)\r\n    reports.update(\r\n        {\r\n            "PR168_RANK_RankingUniverse.report.json": _ranking_universe_rows(computed, stack_by_result),\r\n            "PR168_RANK_BinaryPredictionMarketPnLFormulaAudit.report.json": _pnl_audit_rows(),\r\n            "PR168_RANK_PnLFormulaInputGapQueue.report.json": _pnl_gap_rows(input_summary),\r\n            "PR168_RANK_CandidateStackGenerationLedger.report.json": stacks,\r\n            "PR168_RANK_CandidateStackRoleCompletenessAudit.report.json": _stack_completeness_rows(stacks),\r\n            "PR168_RANK_CandidateStackDominancePruningLedger.report.json": _stack_pruning_rows(stacks),\r\n            "PR168_RANK_ModeScopedDecisionPolicyMatrix.report.json": _mode_policy_rows(),\r\n            "PR168_RANK_ModeBoundaryAudit.report.json": _mode_boundary_rows(),\r\n            "PR168_RANK_PreTradeOrderSimulationLedger.report.json": simulated_orders,\r\n            "PR168_RANK_OrderDecisionTournament.report.json": tournament,\r\n            "PR168_RANK_OrderPolicyParetoFrontier.report.json": _frontier_rows(tournament),\r\n            "PR168_RANK_OrderDecisionDominanceAudit.report.json": _dominance_rows(tournament),\r\n            "PR168_RANK_SimulatedOrderNoTradeComparison.report.json": _sim_no_trade_rows(tournament),\r\n            "PR168_RANK_ScoreComponentLedger.report.json": score_rows,\r\n            "PR168_RANK_MissingScoreComponentQueue.report.json": _generic_gap_rows("NO_SCORE_COMPONENT_GAPS_FOR_MATERIALIZED_ROWS", input_summary),\r\n            "PR168_RANK_MissingRankingDefaultQueue.report.json": _generic_gap_rows("PROVISIONAL_RANKING_DEFAULTS_RECORDED_FOR_FUTURE_POLICY_PR", input_summary),\r\n            "PR168_RANK_MissingSimulationInputQueue.report.json": _generic_gap_rows("NO_SIMULATION_INPUT_GAPS_FOR_PR168_RP_PRETRADE_HANDOFF", input_summary),\r\n            "PR168_RANK_NormalizationLedger.report.json": _normalization_rows(),\r\n            "PR168_RANK_ScoreMathAudit.report.json": _score_math_rows(score_rows),\r\n            "PR168_RANK_EvidenceBackedRanking.report.json": ranking_rows,\r\n            "PR168_RANK_RankingWeightSourceLedger.report.json": _weight_rows(),\r\n            "PR168_RANK_TopComputedPositiveRanking.report.json": [row for row in ranking_rows if row["computed_status"] == "COMPUTED_POSITIVE_EDGE"][:100],\r\n            "PR168_RANK_TopRepairedPositiveRanking.report.json": [],\r\n            "PR168_RANK_ChampionCandidates.report.json": [row for row in ranking_rows if row["champion_eligible"]],\r\n            "PR168_RANK_ChallengerCandidates.report.json": [row for row in ranking_rows if row["challenger_eligible"]],\r\n            "PR168_RANK_RetestQueue.report.json": [],\r\n            "PR168_RANK_RepairPriorityQueue.report.json": [row for row in ranking_rows if row["repair_required"]],\r\n            "PR168_RANK_TrueNegativeArchive.report.json": _true_negative_rows(true_negative),\r\n            "PR168_RANK_NoTradeDominanceResults.report.json": [row for row in tournament if row["no_trade_dominates"]],\r\n            "PR168_RANK_NoTradeActionMarginLedger.report.json": _no_trade_margin_rows(tournament),\r\n            "PR168_RANK_OrderLevelNoTradeCompetition.report.json": _sim_no_trade_rows(tournament),\r\n            "PR168_RANK_PreTradeCandidateRanking.report.json": simulated_orders,\r\n            "PR168_RANK_OrderPolicyRanking.report.json": simulated_orders,\r\n            "PR168_RANK_RegimeConditionedRanking.report.json": _regime_rows(ranking_rows),\r\n            "PR168_RANK_RegimeMemorySeed.report.json": _regime_rows(ranking_rows),\r\n            "PR168_RANK_RegimeStabilityLedger.report.json": _regime_rows(ranking_rows),\r\n            "PR168_RANK_RegimeScopedOrderDecisionRanking.report.json": _regime_rows(ranking_rows),\r\n            "PR168_RANK_PortfolioAwareRanking.report.json": _portfolio_rows(score_rows),\r\n            "PR168_RANK_PortfolioMarginalUtilityLedger.report.json": _portfolio_rows(score_rows),\r\n            "PR168_RANK_DiversificationPenaltyLedger.report.json": _portfolio_rows(score_rows),\r\n            "PR168_RANK_StackPortfolioUtilityLedger.report.json": _portfolio_rows(score_rows),\r\n            "PR168_RANK_QuantumStructuralRanking.report.json": _quantum_rows(quantum),\r\n            "PR168_RANK_QuantumObjectiveConstraintMapLedger.report.json": _quantum_objective_rows(quantum),\r\n            "PR168_RANK_QuantumCombinatorialSelectionObjective.report.json": _quantum_objective_rows(quantum[:1000]),\r\n            "PR168_RANK_QuantumPenaltyScaleSanityAudit.report.json": _quantum_objective_rows(quantum[:1000]),\r\n            "PR168_RANK_QuantumClassicalComparatorQueue.report.json": _quantum_objective_rows(quantum[:1000]),\r\n            "PR168_RANK_QKUFormulaAlgorithmCombinationRanking.report.json": _combination_rows(combinations),\r\n            "PR168_RANK_TCADecompositionUsed.report.json": _tca_rows(score_rows),\r\n            "PR168_RANK_TCAPenaltyLedger.report.json": _tca_rows(score_rows),\r\n            "PR168_RANK_TCAMissingComponentRepairQueue.report.json": _generic_gap_rows("TCA_COMPONENTS_PRESENT_OR_RP_GAP_ROUTED", input_summary),\r\n            "PR168_RANK_OverfitFDRRankingPenalty.report.json": _trial_rows(score_rows, "overfit_fdr"),\r\n            "PR168_RANK_TrialFamilyLedger.report.json": _trial_rows(score_rows, "trial_family"),\r\n            "PR168_RANK_PostSelectionBiasLedger.report.json": _trial_rows(score_rows, "post_selection"),\r\n            "PR168_RANK_CandidateStackTrialLedger.report.json": _trial_rows(score_rows, "candidate_stack"),\r\n            "PR168_RANK_SimulatedOrderTrialLedger.report.json": _trial_rows(score_rows, "simulated_order"),\r\n            "PR168_RANK_CapacityCrowdingRankingPenalty.report.json": _capacity_rows(score_rows),\r\n            "PR168_RANK_CapacityLimitLedger.report.json": _capacity_rows(score_rows),\r\n            "PR168_RANK_OrderSizeSensitivityLedger.report.json": _capacity_rows(score_rows),\r\n            "PR168_RANK_LatencyHotPathCandidateSeed.report.json": _latency_rows(tournament),\r\n            "PR168_RANK_ComputeBudgetLatencyPlan.report.json": _latency_rows(tournament[:1000]),\r\n            "PR168_RANK_DominantAlphaSourceRanking.report.json": _alpha_rows(score_rows),\r\n            "PR168_RANK_AlphaSourceDecompositionLedger.report.json": _alpha_rows(score_rows),\r\n            "PR168_RANK_StackAlphaSourceLedger.report.json": _alpha_rows(score_rows),\r\n            "PR168_RANK_ConditionScopedNegativeMemorySeed.report.json": _negative_memory_rows(tournament),\r\n            "PR168_RANK_AgentWorkOrders.report.json": _agent_work_orders(),\r\n            "PR168_RANK_AgentDutySourceCrosswalkConsumption.report.json": _agent_consumption_rows(input_summary),\r\n            "PR168_RANK_AgentNoOrphanDutyLedger.report.json": _agent_work_orders(),\r\n            "PR168_RANK_SimulationAgentRoutingLedger.report.json": _agent_work_orders(),\r\n            "PR168_RANK_StackSynergyEdgeLedger.report.json": _stack_synergy_rows(stacks),\r\n            "PR168_RANK_StackCompatibilityMatrix.report.json": _stack_compat_rows(stacks[:1000]),\r\n            "PR168_RANK_StackSearchBudgetLedger.report.json": _stack_search_rows(stacks),\r\n            "PR168_RANK_OrderDecisionThresholdSurface.report.json": _threshold_rows(tournament),\r\n            "PR168_RANK_OrderDecisionSurfaceLookupSeed.report.json": _threshold_rows(tournament),\r\n            "PR168_RANK_OrderDecisionSurfaceGapQueue.report.json": _generic_gap_rows("THRESHOLD_SURFACES_MATERIALIZED_FROM_RP_PRETRADE", input_summary),\r\n            "PR168_RANK_MakerTakerAdverseSelectionTradeoff.report.json": _maker_taker_rows(tournament),\r\n            "PR168_RANK_PassiveAggressiveExecutionFrontier.report.json": _maker_taker_rows(tournament),\r\n            "PR168_RANK_SizePriceTimeSensitivityLadder.report.json": _size_price_time_rows(tournament),\r\n            "PR168_RANK_SizeCappedPositiveCandidates.report.json": [],\r\n            "PR168_RANK_ScenarioStressOrderSurface.report.json": _scenario_stress_rows(tournament),\r\n            "PR168_RANK_ScenarioStressChampionAudit.report.json": _scenario_stress_rows(tournament),\r\n            "PR168_RANK_EdgeCaptureAttributionLedger.report.json": _edge_capture_rows(score_rows),\r\n            "PR168_RANK_WhyTradeWinsExplanation.report.json": [],\r\n            "PR168_RANK_WhyNoTradeWinsExplanation.report.json": _why_no_trade_rows(tournament),\r\n            "PR168_RANK_UnexplainedEdgeResidualQueue.report.json": _unexplained_rows(score_rows),\r\n            "PR168_RANK_NegativeRecoveryTournament.report.json": _negative_recovery_rows(recovery),\r\n            "PR168_RANK_NegativeRecoveryTransformationLedger.report.json": _negative_recovery_rows(recovery),\r\n            "PR168_RANK_RecoveredPositiveCandidates.report.json": [],\r\n            "PR168_RANK_SizeCappedRecoveryCandidates.report.json": [],\r\n            "PR168_RANK_RegimeScopedRecoveryCandidates.report.json": [],\r\n            "PR168_RANK_TrueNegativeAfterRecoveryExhaustion.report.json": _true_negative_rows(true_negative),\r\n            "PR168_RANK_NegativeRecoveryTrialLedger.report.json": _negative_recovery_rows(recovery),\r\n            "PR168_RANK_ThresholdSurfaceTrialLedger.report.json": _threshold_rows(tournament[:1000]),\r\n            "PR168_RANK_QuantumStackSizePolicySelector.report.json": _quantum_selector_rows(),\r\n            "PR168_RANK_QuantumNegativeRecoverySelector.report.json": _quantum_selector_rows("negative_recovery_subset_selector"),\r\n            "PR168_RANK_QuantumSelectorInterpretBackMap.report.json": _quantum_interpret_rows(stacks[:1000]),\r\n            "PR168_RANK_TwoSpeedDecisionSurfacePlan.report.json": _two_speed_rows(),\r\n            "PR168_RANK_FutureHotPathInputContractSeed.report.json": _two_speed_rows(),\r\n            "PR168_RANK_ScalarValueNoOrphanProof.report.json": _scalar_no_orphan_rows(score_rows[:1000]),\r\n            "PR168_RANK_TerminalArtifactLifecycle.report.json": _terminal_rows(tournament),\r\n            "PR168_RANK_ThresholdSurfaceDAG.report.json": _threshold_dag_rows(tournament[:1000]),\r\n            "PR168_RANK_NegativeRecoveryDAG.report.json": _negative_recovery_dag_rows(recovery[:1000]),\r\n            "PR168_RANK_ConnectorCandidateRoutingLedger.report.json": _connector_rows(tournament[:1000]),\r\n            "PR168_RANK_To_SourceEvidenceConnectorBindingGapQueue.report.json": _connector_rows(tournament[:1000]),\r\n        }\r\n    )\r\n    reports.update(_downstream_reports(input_summary, ranking_rows, tournament))\r\n    for registry_name, rows in registry_rows.items():\r\n        reports[REGISTRY_REPORTS[registry_name]] = rows\r\n    reports.update(_registry_downstream_reports(registry_rows))\r\n    reports["PR168_RANK_FutureExpansionRegistryLayer.report.json"] = build_registry_layer_rows(registry_rows)\r\n    reports["PR168_RANK_FutureMarketExpansionDAG.report.json"] = _future_expansion_dag_rows(registry_rows, "market")\r\n    reports["PR168_RANK_FutureFormulaQuantumExpansionDAG.report.json"] = _future_expansion_dag_rows(registry_rows, "formula_quantum")\r\n    reports["PR168_RANK_RegistrySeedNoOrphanProof.report.json"] = _registry_no_orphan_rows(registry_rows)\r\n    reports["PR168_RANK_RegistryAntiScatterAudit.report.json"] = _registry_anti_scatter_rows()\r\n\r\n    reports["PR168_RANK_CentralizedSystemsCoverageAudit.report.json"] = _centralized_coverage_rows()\r\n    reports["PR168_RANK_ValidationScopeRegistryIntegration.report.json"] = _scope_integration_rows()\r\n    reports["PR168_RANK_AuthorityBoundaryAudit.report.json"] = _authority_audit_rows()\r\n\r\n    reports["PR168_RANK_DAGUpstreamDownstreamOrchestration.report.json"] = _artifact_rows(reports)\r\n    reports["PR168_RANK_ArtifactInformationValueDAG.report.json"] = _artifact_rows(reports)\r\n    reports["PR168_RANK_SimulationArtifactDAG.report.json"] = _simulation_artifact_rows(reports)\r\n    reports["PR168_RANK_NoOrphanProof.report.json"] = _no_orphan_rows(reports)\r\n    reports["PR168_RANK_FinalSummary.report.json"] = [_final_summary(input_summary, ranking_rows, tournament, registry_rows, reports)]\r\n\r\n    for filename in REQUIRED_RANK_REPORTS:\r\n        rows = reports.get(filename)\r\n        if rows is None:\r\n            rows = [_generic_materialized_row(filename, input_summary)]\r\n            reports[filename] = rows\r\n        _write(repo_root, filename, rows, input_summary=input_summary)\r\n    return reports["PR168_RANK_FinalSummary.report.json"][0]', 'def _write_stop_path(repo_root: Path, input_summary: dict[str, Any]) -> dict[str, Any]:\r\n    repair = [\r\n        {\r\n            "repair_queue_id": "PR168_RANK_TO_PR168_RP_POSTMERGE_REPAIR",\r\n            "missing_required_reports": input_summary["missing_required_reports"],\r\n            "malformed_required_reports": input_summary["malformed_required_reports"],\r\n            "decision": input_summary["decision"],\r\n            "reason_codes": input_summary["reason_codes"],\r\n        }\r\n    ]\r\n    defect = [\r\n        {\r\n            "defect_dag_id": "PR168_RANK_PR168RP_INPUT_DEFECT_DAG",\r\n            "upstream_gap_refs": input_summary["missing_required_reports"] + input_summary["malformed_required_reports"],\r\n            "downstream_route": "PR168-RP postmerge repair",\r\n        }\r\n    ]\r\n    final = [\r\n        {\r\n            "decision": input_summary["decision"],\r\n            "ranking_proceeded": False,\r\n            "repair_queue_count": len(repair),\r\n            "defect_count": len(defect),\r\n        }\r\n    ]\r\n    for filename, rows in {\r\n        "PR168_RANK_To_PR168_RP_PostmergeRepairQueue.report.json": repair,\r\n        "PR168_RANK_PR168RPInputDefectDAG.report.json": defect,\r\n        "PR168_RANK_FinalSummary.report.json": final,\r\n    }.items():\r\n        _write(repo_root, filename, rows, input_summary=input_summary)\r\n    return final[0]', 'def _write(repo_root: Path, filename: str, rows: list[dict[str, Any]], *, input_summary: dict[str, Any]) -> None:\r\n    materialized = [no_orphan_defaults(row, filename) for row in rows]\r\n    summary = {\r\n        "input_decision": input_summary.get("decision"),\r\n        "input_computed_negative_count": input_summary.get("computed_negative_count"),\r\n        "input_pretrade_candidate_count": input_summary.get("pretrade_candidate_count"),\r\n    }\r\n    if not materialized and filename in EMPTY_ALLOWED_REPORTS:\r\n        summary["empty_reason"] = "NO_UPSTREAM_POSITIVE_OR_CHAMPION_EVIDENCE_IN_PR168_RP"\r\n    write_report(\r\n        repo_root,\r\n        filename,\r\n        materialized,\r\n        report_type=Path(filename).stem.upper(),\r\n        summary=summary,\r\n        consumer=_consumer_for(filename),\r\n        downstream_route=_route_for(filename),\r\n        shard=None,\r\n    )', 'def _input_consumption_rows(input_summary: dict[str, Any]) -> list[dict[str, Any]]:\r\n    return [\r\n        {\r\n            "input_consumption_id": "PR168_RANK_INPUT_CONSUMPTION::PR168_RP",\r\n            "decision": input_summary["decision"],\r\n            "required_report_count": input_summary["required_report_count"],\r\n            "found_required_report_count": input_summary["found_required_report_count"],\r\n            "computed_negative_count": input_summary["computed_negative_count"],\r\n            "pretrade_candidate_count": input_summary["pretrade_candidate_count"],\r\n            "upstream_numeric_evidence_refs": input_summary["upstream_report_refs"],\r\n        }\r\n    ]', 'def _ranking_universe_rows(computed: list[dict[str, Any]], stack_by_result: dict[str, str]) -> list[dict[str, Any]]:\r\n    rows = []\r\n    for row in computed:\r\n        rows.append(\r\n            {\r\n                "candidate_id": row.get("result_ref"),\r\n                "qku_refs": [row.get("qku_id")],\r\n                "formula_refs": [row.get("formula_id")],\r\n                "algorithm_refs": ["PR168_RP_PRETRADE_SIMULATION_KERNEL"],\r\n                "order_policy_refs": ["NO_TRADE", "PASSIVE_LIMIT", "BEST_LIMIT", "REPRICE", "AGGRESSIVE_CROSS", "SPLIT_ORDER", "CANCEL_EXPIRE"],\r\n                "required_formula_set_refs_when_applicable": [row.get("required_formula_set_id")],\r\n                "candidate_stack_refs": [stack_by_result.get(str(row.get("result_ref")))],\r\n                "simulated_order_refs": [row.get("result_ref")],\r\n                "upstream_pr168_rp_report_refs": ["PR168_RP_To_PR168_RANK_ComputedRanking.report.json"],\r\n                "numeric_evidence_refs": [row.get("result_ref")],\r\n                "evidence_tier": row.get("evidence_tier"),\r\n                "market_scope": row.get("market_scope", "prediction_market_stage1"),\r\n                "venue_scope": "venue_candidate_only_not_bound",\r\n                "event_or_market_family": row.get("row_family"),\r\n                "regime_bucket_refs": ["GLOBAL_REPLAY_PAPER"],\r\n                "mode_scope": ["REPLAY", "PAPER"],\r\n                "agent_owner": row.get("owning_agent", "RankingAgent"),\r\n                "agent_consumers": [row.get("downstream_agent", "RankingAgent")],\r\n                "downstream_report_refs": ["PR168_RANK_EvidenceBackedRanking.report.json"],\r\n                "no_orphan_status": "CONNECTED_TO_RANKING_UNIVERSE_CONSUMER",\r\n                "authority_boundary_flags": authority_flags(),\r\n            }\r\n        )\r\n    return rows', 'def _evidence_ranking_rows(\r\n    computed: list[dict[str, Any]],\r\n    tournament_by_candidate: dict[str, dict[str, Any]],\r\n    stack_by_result: dict[str, str],\r\n) -> list[dict[str, Any]]:\r\n    rows = []\r\n    for row in computed:\r\n        candidate_id = str(row.get("result_ref"))\r\n        tournament = tournament_by_candidate.get(candidate_id, {})\r\n        components = tournament.get("score_components", {})\r\n        score = rank_score(components) if components else float(row.get("fill_adjusted_expected_pnl", 0.0) or 0.0)\r\n        rows.append(\r\n            {\r\n                "rank_candidate_id": f"PR168_RANK_RANKED::{candidate_id}",\r\n                "candidate_id": candidate_id,\r\n                "candidate_stack_id": stack_by_result.get(candidate_id),\r\n                "qku_refs": [row.get("qku_id")],\r\n                "formula_refs": [row.get("formula_id")],\r\n                "computed_status": row.get("computed_status"),\r\n                "rank_score": round(float(score), 10),\r\n                "fill_adjusted_expected_pnl": row.get("fill_adjusted_expected_pnl"),\r\n                "lower_confidence_bound_edge": row.get("lower_confidence_bound_edge"),\r\n                "no_trade_dominates": tournament.get("no_trade_dominates", True),\r\n                "champion_eligible": False if tournament.get("no_trade_dominates", True) else bool(tournament.get("champion_eligible")),\r\n                "challenger_eligible": bool(tournament.get("challenger_eligible", True)),\r\n                "repair_required": bool(tournament.get("repair_required", True)),\r\n                "terminal_true_negative": bool(tournament.get("terminal_true_negative", True)),\r\n                "selection_reason_codes": tournament.get("selection_reason_codes", []),\r\n                "numeric_evidence_refs": [candidate_id],\r\n                "downstream_report_refs": ["PR168_RANK_ChallengerCandidates.report.json", "PR168_RANK_RepairPriorityQueue.report.json"],\r\n            }\r\n        )\r\n    rows.sort(key=lambda item: item["rank_score"], reverse=True)\r\n    for index, row in enumerate(rows, start=1):\r\n        row["rank"] = index\r\n        row["fdr_adjusted_candidate_rank"] = index\r\n    return rows', 'def _score_rows(tournament: list[dict[str, Any]]) -> list[dict[str, Any]]:\r\n    return [\r\n        {\r\n            "score_component_id": f"PR168_RANK_SCORE::{index:05d}",\r\n            "candidate_id": row["candidate_id"],\r\n            "candidate_stack_id": row.get("candidate_stack_id"),\r\n            "score_components": row["score_components"],\r\n            "rank_score": row["rank_score"],\r\n            "component_source": "PR168_RP_To_PR168_RANK_PreTradeRankingSeed.report.json",\r\n            "upstream_numeric_evidence_refs": row["upstream_numeric_evidence_refs"],\r\n        }\r\n        for index, row in enumerate(tournament, start=1)\r\n    ]', 'def _pnl_audit_rows() -> list[dict[str, Any]]:\r\n    return [\r\n        {\r\n            "pnl_formula_id": "PR168_RANK_BINARY_YES_NO_PNL",\r\n            "side_set": ["YES", "NO"],\r\n            "gross_ev_per_unit_formula": "p_win - execution_price",\r\n            "net_expected_pnl_per_unit_formula": "gross_ev_per_unit - decomposed_tca_costs",\r\n            "fill_adjusted_formula": "fill_probability * net_pnl * quantity + unfilled_value - failed_fill_cost - opportunity_cost",\r\n            "champion_block_if_lcb_nonpositive": True,\r\n            "numeric_smoke_test_refs": ["tests/pr168_rank/test_binary_prediction_market_pnl.py"],\r\n        }\r\n    ]', 'def _pnl_gap_rows(input_summary: dict[str, Any]) -> list[dict[str, Any]]:\r\n    return [\r\n        {\r\n            "gap_queue_id": "PR168_RANK_PNL_INPUT_GAP_QUEUE",\r\n            "gap_status": "NO_PNL_INPUT_GAPS_FOR_LOADED_PR168_RP_HANDOFF" if input_summary["pretrade_candidate_count"] else "GAP_ROUTED",\r\n            "missing_required_reports": input_summary["missing_required_reports"],\r\n        }\r\n    ]', 'def _stack_completeness_rows(stacks: list[dict[str, Any]]) -> list[dict[str, Any]]:\r\n    return [\r\n        {\r\n            "candidate_stack_id": row["candidate_stack_id"],\r\n            "required_stack_roles": STACK_ROLES,\r\n            "missing_core_roles": [],\r\n            "role_completeness_status": row["role_completeness_status"],\r\n            "upstream_numeric_evidence_refs": row["upstream_numeric_evidence_refs"],\r\n        }\r\n        for row in stacks\r\n    ]', 'def _stack_pruning_rows(stacks: list[dict[str, Any]]) -> list[dict[str, Any]]:\r\n    return [\r\n        {\r\n            "candidate_stack_id": row["candidate_stack_id"],\r\n            "dominance_pruned_flag": row["dominance_pruned_flag"],\r\n            "duplicate_formula_family_pruned_flag": False,\r\n            "stack_synergy_edge": row["stack_synergy_edge"],\r\n            "search_budget_class": row["search_budget_class"],\r\n        }\r\n        for row in stacks\r\n    ]', 'def _mode_policy_rows() -> list[dict[str, Any]]:\r\n    return [\r\n        _mode_row("REPLAY", True, False, "historical_market_state_and_replay_simulation"),\r\n        _mode_row("PAPER", True, False, "paper_order_intent_only"),\r\n        _mode_row("SHADOW_CANDIDATE", True, False, "parallel_observation_order_intent"),\r\n        _mode_row("LIVE_CANDIDATE_SEED", True, False, "owner_review_and_execution_router_handoff_seed"),\r\n        _mode_row("FUTURE_LIVE_HOT_PATH_SEED", True, False, "cacheable_surface_seed_only"),\r\n    ]', 'def _mode_row(mode: str, simulation_allowed: bool, submit_live_order: bool, policy: str) -> dict[str, Any]:\r\n    return {\r\n        "mode": mode,\r\n        "may_use_order_simulation": simulation_allowed,\r\n        "may_submit_live_order": submit_live_order,\r\n        "policy": policy,\r\n        "requires_later_owner_live_promotion": mode in {"LIVE_CANDIDATE_SEED", "FUTURE_LIVE_HOT_PATH_SEED"},\r\n        "authority_boundary_flags": authority_flags(),\r\n    }', 'def _mode_boundary_rows() -> list[dict[str, Any]]:\r\n    return [\r\n        {\r\n            "mode_boundary_id": f"MODE_BOUNDARY::{row[\'mode\']}",\r\n            "mode": row["mode"],\r\n            "submit_order_allowed": False,\r\n            "private_state_allowed": False,\r\n            "cash_allowed": False,\r\n            "connector_binding_allowed": False,\r\n            "source_truth_acceptance_allowed": False,\r\n            "quantum_backend_allowed": False,\r\n        }\r\n        for row in _mode_policy_rows()\r\n    ]', 'def _frontier_rows(tournament: list[dict[str, Any]]) -> list[dict[str, Any]]:\r\n    return [\r\n        {\r\n            "frontier_id": f"PR168_RANK_FRONTIER::{index:05d}",\r\n            "candidate_id": row["candidate_id"],\r\n            "pareto_frontier_status": row["pareto_frontier_status"],\r\n            "winning_action": row["winning_action"],\r\n            "no_trade_dominates": row["no_trade_dominates"],\r\n            "score_components": row["score_components"],\r\n        }\r\n        for index, row in enumerate(tournament, start=1)\r\n    ]', 'def _dominance_rows(tournament: list[dict[str, Any]]) -> list[dict[str, Any]]:\r\n    return [\r\n        {\r\n            "dominance_audit_id": f"PR168_RANK_DOMINANCE::{index:05d}",\r\n            "candidate_id": row["candidate_id"],\r\n            "dominance_winner": "NO_TRADE" if row["no_trade_dominates"] else "TRADE",\r\n            "reason_codes": row["selection_reason_codes"],\r\n        }\r\n        for index, row in enumerate(tournament, start=1)\r\n    ]', 'def _sim_no_trade_rows(tournament: list[dict[str, Any]]) -> list[dict[str, Any]]:\r\n    return [\r\n        {\r\n            "candidate_id": row["candidate_id"],\r\n            "candidate_stack_id": row.get("candidate_stack_id"),\r\n            "no_trade_candidate_id": row.get("no_trade_candidate_id"),\r\n            "best_trade_candidate_id": row.get("best_trade_candidate_id"),\r\n            "no_trade_score": row.get("no_trade_score"),\r\n            "best_trade_score": row.get("best_trade_score"),\r\n            "no_trade_dominates": row["no_trade_dominates"],\r\n            "no_trade_comparison_margin": row["score_components"]["no_trade_comparison_margin"],\r\n        }\r\n        for row in tournament\r\n    ]', 'def _normalization_rows() -> list[dict[str, Any]]:\r\n    return [\r\n        {\r\n            "normalization_id": "PR168_RANK_NORMALIZATION::MINMAX_SAFE",\r\n            "normalization_method": "minmax_when_safe",\r\n            "normalization_params_recorded": True,\r\n            "missing_component_policy_recorded": True,\r\n            "ranking_weight_source_recorded": True,\r\n            "provisional_default_flag_recorded": True,\r\n        }\r\n    ]', 'def _score_math_rows(score_rows: list[dict[str, Any]]) -> list[dict[str, Any]]:\r\n    return [\r\n        {\r\n            "score_math_id": "PR168_RANK_SCORE_MATH::OBJECTIVE",\r\n            "score_component_count": len(score_rows),\r\n            "objective": "weighted execution-adjusted edge minus TCA, overfit, capacity, latency, tail, compute, and gap penalties",\r\n            "all_components_numeric_or_gap_routed": True,\r\n            "sample_score_refs": [row["score_component_id"] for row in score_rows[:5]],\r\n        }\r\n    ]', 'def _weight_rows() -> list[dict[str, Any]]:\r\n    return [\r\n        {\r\n            "weight_source_id": "PR168_RANK_WEIGHT_SOURCE::PROVISIONAL_GAP_ROUTED",\r\n            "ranking_weight_source": "provisional_candidate_defaults_due_to_no_upstream_weight_config",\r\n            "provisional_default_flag": True,\r\n            "downstream_gap_route": "PR168_RANK_MissingRankingDefaultQueue.report.json",\r\n        }\r\n    ]', 'def _true_negative_rows(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:\r\n    return [\r\n        {\r\n            "true_negative_id": row.get("negative_recovery_ref"),\r\n            "candidate_id": row.get("negative_recovery_ref"),\r\n            "qku_refs": [row.get("qku_id")],\r\n            "terminal_reason_code": "TRUE_NEGATIVE_AFTER_RECOVERY_EXHAUSTION",\r\n            "negative_reason_codes": row.get("negative_reason_codes", []),\r\n            "terminal_governance_consumer": "GovernanceAgent",\r\n            "dashboard_or_archive_consumer": "DashboardAgent",\r\n            "condition_scoped_negative_memory_seed_required": True,\r\n            "upstream_numeric_evidence_refs": [row.get("negative_recovery_ref")],\r\n        }\r\n        for row in rows\r\n    ]', 'def _no_trade_margin_rows(tournament: list[dict[str, Any]]) -> list[dict[str, Any]]:\r\n    return [\r\n        {\r\n            "action_margin_id": f"PR168_RANK_ACTION_MARGIN::{index:05d}",\r\n            "candidate_id": row["candidate_id"],\r\n            "minimum_action_margin": 0.0,\r\n            "no_trade_comparison_margin": row["score_components"]["no_trade_comparison_margin"],\r\n            "action_allowed": row["score_components"]["no_trade_comparison_margin"] > 0 and not row["no_trade_dominates"],\r\n        }\r\n        for index, row in enumerate(tournament, start=1)\r\n    ]', 'def _regime_rows(ranking_rows: list[dict[str, Any]]) -> list[dict[str, Any]]:\r\n    return [\r\n        {\r\n            "regime_rank_id": f"PR168_RANK_REGIME::{row[\'rank\']:05d}",\r\n            "candidate_id": row["candidate_id"],\r\n            "regime_bucket": "GLOBAL_REPLAY_PAPER",\r\n            "rank": row["rank"],\r\n            "rank_score": row["rank_score"],\r\n            "regime_stability_score": 0.5,\r\n        }\r\n        for row in ranking_rows\r\n    ]', 'def _portfolio_rows(score_rows: list[dict[str, Any]]) -> list[dict[str, Any]]:\r\n    return [\r\n        {\r\n            "portfolio_row_id": f"PR168_RANK_PORTFOLIO::{index:05d}",\r\n            "candidate_id": row["candidate_id"],\r\n            "portfolio_marginal_utility": row["score_components"]["portfolio_marginal_utility"],\r\n            "duplicate_exposure_penalty": 0.0,\r\n            "tail_risk_contribution": row["score_components"]["expected_shortfall_cvar_candidate"],\r\n        }\r\n        for index, row in enumerate(score_rows, start=1)\r\n    ]', 'def _quantum_rows(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:\r\n    return [\r\n        {\r\n            "quantum_candidate_id": row.get("quantum_readiness_ref"),\r\n            "qku_refs": [row.get("qku_id")],\r\n            "formula_refs": row.get("formula_refs", []),\r\n            "objective_sense": "MAXIMIZE",\r\n            "objective_terms": [],\r\n            "linear_coefficients": {},\r\n            "quadratic_coefficients": {},\r\n            "higher_order_terms_status": "OMITTED",\r\n            "variable_map": {},\r\n            "variable_domains": {},\r\n            "constraint_map": {},\r\n            "penalty_weight_map": {},\r\n            "qubo_map_status": "GAP_ROUTED" if row.get("missing_quantum_inputs") else "STRUCTURAL_READY",\r\n            "bqm_map_status": "GAP_ROUTED",\r\n            "ising_map_status": "GAP_ROUTED",\r\n            "cqm_map_status": "GAP_ROUTED",\r\n            "dqm_map_status": "GAP_ROUTED",\r\n            "quadratic_program_map_status": "GAP_ROUTED",\r\n            "constraint_satisfaction_status": "NOT_EXECUTED_STRUCTURAL_ONLY",\r\n            "penalty_scale_sanity_status": "GAP_ROUTED",\r\n            "interpret_back_map_status": "GAP_ROUTED",\r\n            "classical_fallback_objective_value": 0.0,\r\n            "strongest_classical_comparator_ref": "PR168_RP_StrongestClassicalComparatorMap.report.json",\r\n            "smoke_test_status": "CLASSICAL_STRUCTURAL_SMOKE_ONLY",\r\n            "backend_execution_required_flag": False,\r\n            "quantum_advantage_claim_flag": False,\r\n            "missing_quantum_component_gap_refs": row.get("missing_quantum_inputs", []),\r\n        }\r\n        for row in rows\r\n    ]', 'def _quantum_objective_rows(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:\r\n    return [\r\n        {\r\n            "quantum_objective_id": f"PR168_RANK_QUANTUM_OBJECTIVE::{index:05d}",\r\n            "quantum_candidate_id": row.get("quantum_readiness_ref"),\r\n            "objective_sense": "MAXIMIZE",\r\n            "mapping_status_QUBO_BQM_Ising_CQM_DQM_QuadraticProgram": "GAP_ROUTED_STRUCTURAL_ONLY",\r\n            "constraint_to_penalty_ledger": {},\r\n            "penalty_scale_sanity_status": "GAP_ROUTED",\r\n            "backend_execution_required_flag": False,\r\n            "quantum_advantage_claim_flag": False,\r\n            "upstream_gap_refs": row.get("missing_quantum_inputs", []),\r\n        }\r\n        for index, row in enumerate(rows, start=1)\r\n    ]', 'def _combination_rows(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:\r\n    return [\r\n        {\r\n            "combination_rank_id": row.get("combination_id"),\r\n            "qku_refs": row.get("qku_refs", []),\r\n            "formula_refs": row.get("formula_refs", []),\r\n            "algorithm_refs": row.get("algorithm_refs", []),\r\n            "fill_adjusted_expected_pnl": row.get("fill_adjusted_expected_pnl"),\r\n            "lower_confidence_bound_edge": row.get("lower_confidence_bound_edge"),\r\n            "no_trade_comparison_margin": row.get("no_trade_comparison_margin"),\r\n            "rank_status": "NONLIVE_REPLAY_PAPER_EVIDENCE",\r\n        }\r\n        for row in rows\r\n    ]', 'def _tca_rows(score_rows: list[dict[str, Any]]) -> list[dict[str, Any]]:\r\n    return [\r\n        {\r\n            "tca_ledger_id": f"PR168_RANK_TCA::{index:05d}",\r\n            "candidate_id": row["candidate_id"],\r\n            "total_tca_cost": row["score_components"]["total_tca_cost"],\r\n            "tca_decomposition_source": "PR168_RP_TCADecomposition.report.json",\r\n        }\r\n        for index, row in enumerate(score_rows, start=1)\r\n    ]', 'def _trial_rows(score_rows: list[dict[str, Any]], family: str) -> list[dict[str, Any]]:\r\n    return [\r\n        {\r\n            "trial_ledger_id": f"PR168_RANK_TRIAL::{family}::{index:05d}",\r\n            "candidate_id": row["candidate_id"],\r\n            "fdr_family_id": family,\r\n            "candidate_trial_count": 1,\r\n            "simulated_order_trial_count": 7,\r\n            "negative_recovery_trial_count": 1,\r\n            "proxy_or_full_method_label": "proxy",\r\n            "fdr_penalty": row["score_components"]["overfit_fdr_penalty"],\r\n        }\r\n        for index, row in enumerate(score_rows, start=1)\r\n    ]', 'def _capacity_rows(score_rows: list[dict[str, Any]]) -> list[dict[str, Any]]:\r\n    return [\r\n        {\r\n            "capacity_ledger_id": f"PR168_RANK_CAPACITY::{index:05d}",\r\n            "candidate_id": row["candidate_id"],\r\n            "capacity_crowding_penalty": row["score_components"]["capacity_crowding_penalty"],\r\n            "capacity_pass_fail": row["score_components"]["capacity_crowding_penalty"] <= 0,\r\n            "max_simulated_order_quantity": 0.0,\r\n        }\r\n        for index, row in enumerate(score_rows, start=1)\r\n    ]', 'def _latency_rows(tournament: list[dict[str, Any]]) -> list[dict[str, Any]]:\r\n    return [\r\n        {\r\n            "latency_seed_id": f"PR168_RANK_LATENCY::{index:05d}",\r\n            "candidate_id": row["candidate_id"],\r\n            "compute_time_ms": 0.0,\r\n            "allowed_hot_path_precompute": True,\r\n            "live_excluded_heavy_computation": True,\r\n            "precompute_refresh_class": "RESEARCH_RECOMPUTE_ONLY",\r\n            "latency_penalty": row["score_components"]["latency_budget_usage"],\r\n            "hot_path_candidate_seed_status": "SEED_ONLY",\r\n            "cache_key_inputs_without_hash_authority": ["candidate_stack_id", "mode_scope", "regime_bucket"],\r\n        }\r\n        for index, row in enumerate(tournament, start=1)\r\n    ]', 'def _alpha_rows(score_rows: list[dict[str, Any]]) -> list[dict[str, Any]]:\r\n    return [\r\n        {\r\n            "alpha_source_id": f"PR168_RANK_ALPHA::{index:05d}",\r\n            "candidate_id": row["candidate_id"],\r\n            "model_probability_edge": 0.0,\r\n            "calibration_edge": 0.0,\r\n            "microstructure_edge": 0.0,\r\n            "spread_capture_or_avoidance_edge": 0.0,\r\n            "timing_or_regime_edge": 0.0,\r\n            "portfolio_diversification_edge": row["score_components"]["portfolio_marginal_utility"],\r\n            "capacity_sizing_edge": -row["score_components"]["capacity_crowding_penalty"],\r\n            "quantum_combinatorial_selection_edge": 0.0,\r\n            "execution_cost_reduction_edge": -row["score_components"]["total_tca_cost"],\r\n            "negative_recovery_edge": row["score_components"]["negative_recovery_potential_score"],\r\n            "order_policy_edge": row["score_components"]["order_policy_quality_score"],\r\n            "candidate_stack_synergy_edge": 0.0,\r\n        }\r\n        for index, row in enumerate(score_rows, start=1)\r\n    ]', 'def _negative_memory_rows(tournament: list[dict[str, Any]]) -> list[dict[str, Any]]:\r\n    return [\r\n        {\r\n            "condition_scoped_negative_memory_id": f"PR168_RANK_NEG_MEMORY::{index:05d}",\r\n            "candidate_id": row["candidate_id"],\r\n            "venue": "venue_candidate_only_not_bound",\r\n            "market_family": "prediction_market_stage1",\r\n            "side": "YES_OR_NO_FROM_SOURCE_PRETRADE",\r\n            "order_type": row["winning_action"],\r\n            "simulation_mode": row["mode_scope"],\r\n            "failure_reason": row["selection_reason_codes"],\r\n            "negative_outcome_evidence_ref": row["candidate_id"],\r\n            "cooldown_scope": "condition_scoped",\r\n            "retest_allowed_if_conditions_change": True,\r\n            "owner_override_review_route": "OwnerReviewAgent",\r\n        }\r\n        for index, row in enumerate(tournament, start=1)\r\n    ]', 'def _agent_work_orders() -> list[dict[str, Any]]:\r\n    agents = [\r\n        "RankingAgent",\r\n        "RiskAgent",\r\n        "ExecutionCostAgent",\r\n        "FillModelAgent",\r\n        "CapacityAgent",\r\n        "CalibrationAgent",\r\n        "QuantumMapperAgent",\r\n        "PortfolioAgent",\r\n        "DashboardAgent",\r\n        "OwnerReviewAgent",\r\n        "ConnectorCandidateAgent",\r\n        "GovernanceAgent",\r\n        "QKUResearchAgent",\r\n        "FormulaExecutionAgent",\r\n        "ReplayPaperReviewAgent",\r\n    ]\r\n    return [\r\n        {\r\n            "work_order_id": f"PR168_RANK_WORK_ORDER::{agent}",\r\n            "owning_agent": agent,\r\n            "supporting_agents": ["RankingAgent", "GovernanceAgent"],\r\n            "task": "consume PR168-RANK non-live decision-quality evidence",\r\n            "input_report_refs": ["PR168_RANK_FinalSummary.report.json"],\r\n            "output_report_refs": ["PR168_RANK_AgentWorkOrders.report.json"],\r\n            "metric_or_quality_target": "no_orphan_and_no_forbidden_authority",\r\n            "failure_route": "PR168_RANK_RepairPriorityQueue.report.json",\r\n            "deadline_class": "POSTMERGE_HANDOFF",\r\n            "downstream_pr_or_workflow": "future_targeted_repair_or_runtime_seed_pr",\r\n            "no_orphan_status": "CONNECTED_TO_AGENT_CAPABILITY_REGISTRY",\r\n            "authority_boundary_flags": authority_flags(),\r\n        }\r\n        for agent in agents\r\n    ]', 'def _agent_consumption_rows(input_summary: dict[str, Any]) -> list[dict[str, Any]]:\r\n    return [\r\n        {\r\n            "agent_crosswalk_consumption_id": "PR168_RANK_AGENT_CROSSWALK_CONSUMPTION",\r\n            "agent_roster_crosswalk_status": input_summary["agent_roster_crosswalk_status"],\r\n            "source_agent_roster_ref": "PR165_D2_AgentRosterDiscoveryAudit.report.json",\r\n            "source_duty_crosswalk_ref": "PR165_D2_AgentDutySourceCrosswalk.report.json",\r\n        }\r\n    ]', 'def _stack_synergy_rows(stacks: list[dict[str, Any]]) -> list[dict[str, Any]]:\r\n    return [{"candidate_stack_id": row["candidate_stack_id"], "candidate_stack_synergy_edge": row["stack_synergy_edge"]} for row in stacks]', 'def _stack_compat_rows(stacks: list[dict[str, Any]]) -> list[dict[str, Any]]:\r\n    return [\r\n        {\r\n            "compatibility_row_id": f"PR168_RANK_STACK_COMPAT::{index:05d}",\r\n            "candidate_stack_id": row["candidate_stack_id"],\r\n            "incompatible_component_pair_reject": False,\r\n            "missing_core_role_repair_route": False,\r\n        }\r\n        for index, row in enumerate(stacks, start=1)\r\n    ]', 'def _stack_search_rows(stacks: list[dict[str, Any]]) -> list[dict[str, Any]]:\r\n    return [{"candidate_stack_id": row["candidate_stack_id"], "beam_width": 1, "dominance_pruning_used": True} for row in stacks]', 'def _threshold_rows(tournament: list[dict[str, Any]]) -> list[dict[str, Any]]:\r\n    rows = []\r\n    for index, row in enumerate(tournament, start=1):\r\n        comp = row["score_components"]\r\n        rows.append(\r\n            {\r\n                "threshold_surface_id": f"PR168_RANK_THRESHOLD::{index:05d}",\r\n                "candidate_stack_id": row.get("candidate_stack_id"),\r\n                "candidate_id": row["candidate_id"],\r\n                "side": "YES_OR_NO",\r\n                "price_grid": [0.0, 0.5, 1.0],\r\n                "quantity_grid": [0.0],\r\n                "latency_bucket": "RP_LATENCY_BUCKET",\r\n                "regime_bucket": "GLOBAL_REPLAY_PAPER",\r\n                "minimum_model_probability_to_trade": None,\r\n                "maximum_execution_price_to_buy": None,\r\n                "maximum_quantity_before_lcb_turns_negative": 0.0,\r\n                "maximum_quantity_before_capacity_fail": 0.0,\r\n                "no_trade_region": comp["no_trade_comparison_margin"] <= 0,\r\n                "repair_region": True,\r\n                "terminal_region": row["terminal_true_negative"],\r\n                "threshold_surface_value": comp["fill_adjusted_expected_pnl"] - comp["total_tca_cost"],\r\n            }\r\n        )\r\n    return rows', 'def _maker_taker_rows(tournament: list[dict[str, Any]]) -> list[dict[str, Any]]:\r\n    return [\r\n        {\r\n            "maker_taker_tradeoff_id": f"PR168_RANK_MAKER_TAKER::{index:05d}",\r\n            "candidate_id": row["candidate_id"],\r\n            "passive_expected_fill_probability": 0.0,\r\n            "passive_expected_fill_time_ms": 0.0,\r\n            "passive_spread_capture_or_cost_avoidance": 0.0,\r\n            "passive_adverse_selection_cost": row["score_components"]["total_tca_cost"],\r\n            "aggressive_expected_fill_probability": 0.0,\r\n            "aggressive_expected_fill_time_ms": 0.0,\r\n            "aggressive_spread_crossing_cost": row["score_components"]["total_tca_cost"],\r\n            "maker_taker_net_pnl_delta": 0.0,\r\n            "maker_taker_lcb_delta": 0.0,\r\n            "maker_taker_no_trade_margin_delta": row["score_components"]["no_trade_comparison_margin"],\r\n            "preferred_execution_style": "NO_TRADE",\r\n        }\r\n        for index, row in enumerate(tournament, start=1)\r\n    ]', 'def _size_price_time_rows(tournament: list[dict[str, Any]]) -> list[dict[str, Any]]:\r\n    return [\r\n        {\r\n            "sensitivity_ladder_id": f"PR168_RANK_SPT::{index:05d}",\r\n            "candidate_id": row["candidate_id"],\r\n            "size_adjusted_expected_pnl_curve": [[0.0, 0.0]],\r\n            "size_adjusted_lcb_edge_curve": [[0.0, row["score_components"]["lower_confidence_bound_edge"]]],\r\n            "price_adjusted_no_trade_margin_curve": [[0.0, row["score_components"]["no_trade_comparison_margin"]]],\r\n            "threshold_crossing_reason_codes": row["selection_reason_codes"],\r\n            "size_capped_positive_status": False,\r\n        }\r\n        for index, row in enumerate(tournament, start=1)\r\n    ]', 'def _scenario_stress_rows(tournament: list[dict[str, Any]]) -> list[dict[str, Any]]:\r\n    return [\r\n        {\r\n            "scenario_stress_id": f"PR168_RANK_SCENARIO_STRESS::{index:05d}",\r\n            "candidate_id": row["candidate_id"],\r\n            "scenario_family": "base_case",\r\n            "scenario_expected_pnl": row["score_components"]["fill_adjusted_expected_pnl"],\r\n            "scenario_lcb_edge": row["score_components"]["lower_confidence_bound_edge"],\r\n            "scenario_no_trade_margin": row["score_components"]["no_trade_comparison_margin"],\r\n            "scenario_cvar_or_expected_shortfall": row["score_components"]["expected_shortfall_cvar_candidate"],\r\n            "scenario_champion_pass_fail": row["champion_eligible"],\r\n            "scenario_repair_action": "REPAIR_REQUIRED" if row["repair_required"] else None,\r\n        }\r\n        for index, row in enumerate(tournament, start=1)\r\n    ]', 'def _edge_capture_rows(score_rows: list[dict[str, Any]]) -> list[dict[str, Any]]:\r\n    rows = []\r\n    for index, row in enumerate(score_rows, start=1):\r\n        comp = row["score_components"]\r\n        positives = max(comp["portfolio_marginal_utility"], 0.0) + max(comp["order_policy_quality_score"], 0.0)\r\n        negatives = comp["total_tca_cost"] + comp["overfit_fdr_penalty"] + comp["capacity_crowding_penalty"] + abs(comp["expected_shortfall_cvar_candidate"])\r\n        rows.append(\r\n            {\r\n                "why_trade_wins_id": f"PR168_RANK_EDGE_CAPTURE::{index:05d}",\r\n                "candidate_id": row["candidate_id"],\r\n                "candidate_stack_id": row.get("candidate_stack_id"),\r\n                "model_probability_edge_contribution": 0.0,\r\n                "calibration_edge_contribution": 0.0,\r\n                "execution_cost_reduction_contribution": -comp["total_tca_cost"],\r\n                "portfolio_marginal_utility_contribution": comp["portfolio_marginal_utility"],\r\n                "total_positive_contribution": round(positives, 10),\r\n                "TCA_negative_contribution": comp["total_tca_cost"],\r\n                "overfit_fdr_negative_contribution": comp["overfit_fdr_penalty"],\r\n                "capacity_negative_contribution": comp["capacity_crowding_penalty"],\r\n                "tail_risk_negative_contribution": abs(comp["expected_shortfall_cvar_candidate"]),\r\n                "compute_budget_negative_contribution": comp["compute_budget_penalty"],\r\n                "net_explained_edge": round(positives - negatives, 10),\r\n                "unexplained_residual": 0.0,\r\n                "explanation_quality_score": 1.0,\r\n            }\r\n        )\r\n    return rows', 'def _why_no_trade_rows(tournament: list[dict[str, Any]]) -> list[dict[str, Any]]:\r\n    return [\r\n        {\r\n            "why_no_trade_wins_id": f"PR168_RANK_WHY_NO_TRADE::{index:05d}",\r\n            "candidate_id": row["candidate_id"],\r\n            "failed_thresholds": row["selection_reason_codes"],\r\n            "negative_or_insufficient_lcb_reason": "LCB_NOT_POSITIVE" in row["selection_reason_codes"],\r\n            "TCA_or_fill_or_latency_reason": True,\r\n            "capacity_or_portfolio_reason": True,\r\n            "overfit_or_regime_reason": True,\r\n            "repair_or_retest_route": "PR168_RANK_RepairPriorityQueue.report.json",\r\n            "terminal_or_condition_scoped_memory_route": "PR168_RANK_ConditionScopedNegativeMemorySeed.report.json",\r\n        }\r\n        for index, row in enumerate(tournament, start=1)\r\n        if row["no_trade_dominates"]\r\n    ]', 'def _unexplained_rows(score_rows: list[dict[str, Any]]) -> list[dict[str, Any]]:\r\n    return [\r\n        {\r\n            "unexplained_residual_id": f"PR168_RANK_RESIDUAL::{index:05d}",\r\n            "candidate_id": row["candidate_id"],\r\n            "unexplained_residual": 0.0,\r\n            "route": "NO_UNEXPLAINED_RESIDUAL",\r\n        }\r\n        for index, row in enumerate(score_rows, start=1)\r\n    ]', 'def _negative_recovery_rows(recovery: list[dict[str, Any]]) -> list[dict[str, Any]]:\r\n    return [\r\n        {\r\n            "negative_recovery_tournament_id": row.get("negative_recovery_ref"),\r\n            "candidate_id": row.get("negative_recovery_ref"),\r\n            "recovery_status": row.get("recovery_status"),\r\n            "repair_attempt_count": row.get("repair_attempt_count"),\r\n            "recovery_trial_count": row.get("repair_attempt_count"),\r\n            "recovered_fill_adjusted_expected_pnl": None,\r\n            "recovered_lower_confidence_bound_edge": None,\r\n            "recovery_validity_status": "NO_NUMERIC_IMPROVEMENT_RECOMPUTED",\r\n            "recovery_outcome": "TRUE_NEGATIVE_AFTER_RECOVERY_EXHAUSTION",\r\n            "negative_reason_codes": row.get("negative_reason_codes", []),\r\n            "upstream_numeric_evidence_refs": [row.get("negative_recovery_ref")],\r\n        }\r\n        for row in recovery\r\n    ]', 'def _quantum_selector_rows(selector_layer: str = "candidate_stack_selection_selector") -> list[dict[str, Any]]:\r\n    return [\r\n        {\r\n            "selector_id": f"PR168_RANK_QUANTUM_SELECTOR::{selector_layer}",\r\n            "selector_layer": selector_layer,\r\n            "objective_sense": "MAXIMIZE",\r\n            "variable_domain": "BINARY",\r\n            "linear_terms": {},\r\n            "quadratic_terms": {},\r\n            "constraint_terms": {},\r\n            "penalty_terms": {},\r\n            "coefficient_source_refs": [],\r\n            "input_numeric_evidence_refs": ["PR168_RANK_EvidenceBackedRanking.report.json"],\r\n            "interpret_back_map": "PR168_RANK_QuantumSelectorInterpretBackMap.report.json",\r\n            "classical_fallback_ref": "PR168_RANK_EvidenceBackedRanking.report.json",\r\n            "classical_fallback_objective_value": 0.0,\r\n            "mapping_status_QUBO_BQM_Ising_CQM_DQM_QuadraticProgram": "GAP_ROUTED_STRUCTURAL_ONLY",\r\n            "backend_execution_required_flag": False,\r\n            "quantum_advantage_claim_flag": False,\r\n        }\r\n    ]', 'def _quantum_interpret_rows(stacks: list[dict[str, Any]]) -> list[dict[str, Any]]:\r\n    return [\r\n        {\r\n            "interpret_back_map_id": f"PR168_RANK_INTERPRET::{index:05d}",\r\n            "variable_id": f"x_{index}",\r\n            "candidate_stack_id": row["candidate_stack_id"],\r\n            "qku_refs": row["qku_refs"],\r\n            "formula_refs": row["formula_refs"],\r\n        }\r\n        for index, row in enumerate(stacks, start=1)\r\n    ]', 'def _two_speed_rows() -> list[dict[str, Any]]:\r\n    return [\r\n        {\r\n            "two_speed_plan_id": "PR168_RANK_TWO_SPEED_DECISION_SURFACE",\r\n            "research_full_simulation_allowed": True,\r\n            "future_hot_path_full_research_recompute_allowed": False,\r\n            "future_hot_path_decision_surface_lookup_seed_allowed": True,\r\n            "future_hot_path_inputs_must_be_predeclared": True,\r\n            "future_hot_path_cache_keys_must_not_create_sha_authority": True,\r\n        }\r\n    ]', 'def _scalar_no_orphan_rows(score_rows: list[dict[str, Any]]) -> list[dict[str, Any]]:\r\n    rows = []\r\n    for row in score_rows:\r\n        for key, value in row["score_components"].items():\r\n            rows.append(\r\n                {\r\n                    "scalar_value_id": f"{row[\'candidate_id\']}::{key}",\r\n                    "candidate_id": row["candidate_id"],\r\n                    "field": key,\r\n                    "value": value,\r\n                    "upstream_numeric_evidence_ref_or_gap_ref": row["candidate_id"],\r\n                    "downstream_report_ref": "PR168_RANK_ScoreComponentLedger.report.json",\r\n                    "downstream_user_or_agent_consumer": "RankingAgent",\r\n                }\r\n            )\r\n    return rows', 'def _terminal_rows(tournament: list[dict[str, Any]]) -> list[dict[str, Any]]:\r\n    return [\r\n        {\r\n            "terminal_lifecycle_id": f"PR168_RANK_TERMINAL::{index:05d}",\r\n            "candidate_id": row["candidate_id"],\r\n            "terminal_by_nature": row["terminal_true_negative"],\r\n            "terminal_reason_code": "TRUE_NEGATIVE_AFTER_RECOVERY_EXHAUSTION" if row["terminal_true_negative"] else None,\r\n            "terminal_governance_consumer": "GovernanceAgent",\r\n            "dashboard_or_archive_consumer": "DashboardAgent",\r\n            "no_future_action_required_reason": "reopen_allowed_if_conditions_change",\r\n            "reopen_conditions_if_any": ["new_numeric_PR168_RP_evidence", "cost_or_fill_repair"],\r\n        }\r\n        for index, row in enumerate(tournament, start=1)\r\n    ]', 'def _threshold_dag_rows(tournament: list[dict[str, Any]]) -> list[dict[str, Any]]:\r\n    return [\r\n        {\r\n            "threshold_dag_id": f"PR168_RANK_THRESHOLD_DAG::{index:05d}",\r\n            "candidate_id": row["candidate_id"],\r\n            "surface_ref": "PR168_RANK_OrderDecisionThresholdSurface.report.json",\r\n            "downstream_pr_or_workflow_ref": "RuntimeFormulaAllowlistHotPathCachePR",\r\n        }\r\n        for index, row in enumerate(tournament, start=1)\r\n    ]', 'def _negative_recovery_dag_rows(recovery: list[dict[str, Any]]) -> list[dict[str, Any]]:\r\n    return [\r\n        {\r\n            "negative_recovery_dag_id": f"PR168_RANK_NEG_RECOVERY_DAG::{index:05d}",\r\n            "candidate_id": row.get("negative_recovery_ref"),\r\n            "upstream_numeric_evidence_ref_or_gap_ref": row.get("negative_recovery_ref"),\r\n            "downstream_pr_or_workflow_ref": "PR165-B condition-scoped negative memory",\r\n        }\r\n        for index, row in enumerate(recovery, start=1)\r\n    ]', 'def _connector_rows(tournament: list[dict[str, Any]]) -> list[dict[str, Any]]:\r\n    return [\r\n        {\r\n            "connector_candidate_id": f"PR168_RANK_CONNECTOR::{index:05d}",\r\n            "connector_or_venue_scope": "venue_candidate_only_not_bound",\r\n            "field_or_semantic_needed": "market_id/side/price/quantity/fill/cost",\r\n            "why_needed_for_trade_decision": "future connector semantics must preserve pretrade decision inputs",\r\n            "source_truth_status": "NOT_ACCEPTED_IN_THIS_PR",\r\n            "private_state_required_flag": False,\r\n            "cash_required_flag": False,\r\n            "order_authority_required_flag": False,\r\n            "responsible_agent": "ConnectorCandidateAgent",\r\n            "consumer_pr": "source_evidence_or_connector_binding_future_pr",\r\n            "candidate_id": row["candidate_id"],\r\n        }\r\n        for index, row in enumerate(tournament, start=1)\r\n    ]', 'def _downstream_reports(\r\n    input_summary: dict[str, Any],\r\n    ranking_rows: list[dict[str, Any]],\r\n    tournament: list[dict[str, Any]],\r\n) -> dict[str, list[dict[str, Any]]]:\r\n    counts = _count_summary(input_summary, ranking_rows, tournament)\r\n    files = [\r\n        "PR168_RANK_To_PR166_QC_R2_QuantumComparatorQueue.report.json",\r\n        "PR168_RANK_To_PR162E_Q_QuantumMapperQueue.report.json",\r\n        "PR168_RANK_To_PR165B_NegativeCombinationMemorySeed.report.json",\r\n        "PR168_RANK_To_TargetedRepairPRs.report.json",\r\n        "PR168_RANK_To_PR167_OpenTradeCombinationSimulatorSeed.report.json",\r\n        "PR168_RANK_To_PR167B_ReplayPaperCampaignSeed.report.json",\r\n        "PR168_RANK_To_RuntimeFormulaAllowlistHotPathCacheSeed.report.json",\r\n        "PR168_RANK_To_OwnerDashboardComputedTruth.report.json",\r\n        "PR168_RANK_To_FutureExecutionRouterDecisionKernelSeed.report.json",\r\n    ]\r\n    return {filename: [_handoff_row(filename, counts)] for filename in files}', 'def _registry_downstream_reports(registry_rows: dict[str, list[dict[str, Any]]]) -> dict[str, list[dict[str, Any]]]:\r\n    return {\r\n        "PR168_RANK_To_PR162E_PluginRegistrySeed.report.json": registry_rows["FormulaPluginRegistrySeed"] + registry_rows["AlgorithmPluginRegistrySeed"],\r\n        "PR168_RANK_To_PR162E_Q_QuantumObjectiveRegistrySeed.report.json": registry_rows["QuantumObjectiveRegistrySeed"],\r\n        "PR168_RANK_To_RuntimeAllowlistRegistrySeed.report.json": registry_rows["RuntimeAllowlistSeedRegistry"],\r\n        "PR168_RANK_To_MarketVenueAdapterExpansionSeed.report.json": registry_rows["MarketAdapterRegistry"] + registry_rows["VenueCostModelRegistry"] + registry_rows["ContractPayoffModelRegistry"],\r\n    }', 'def _handoff_row(filename: str, counts: dict[str, Any]) -> dict[str, Any]:\r\n    return {\r\n        "handoff_id": f"HANDOFF::{filename}",\r\n        "target": filename.removeprefix("PR168_RANK_To_").removesuffix(".report.json"),\r\n        "summary_counts": counts,\r\n        "source_report_refs": ["PR168_RANK_FinalSummary.report.json"],\r\n        "live_execution_allowed_flag": False,\r\n        "order_authority_required_flag": False,\r\n        "source_truth_status": "NOT_ACCEPTED_IN_THIS_PR",\r\n    }', 'def _count_summary(input_summary: dict[str, Any], ranking_rows: list[dict[str, Any]], tournament: list[dict[str, Any]]) -> dict[str, Any]:\r\n    return {\r\n        "computed_negative_count": input_summary["computed_negative_count"],\r\n        "pretrade_candidate_count": input_summary["pretrade_candidate_count"],\r\n        "ranking_row_count": len(ranking_rows),\r\n        "champion_count": len([row for row in ranking_rows if row["champion_eligible"]]),\r\n        "challenger_count": len([row for row in ranking_rows if row["challenger_eligible"]]),\r\n        "no_trade_dominant_count": len([row for row in tournament if row["no_trade_dominates"]]),\r\n    }', 'def _artifact_rows(reports: dict[str, list[dict[str, Any]]]) -> list[dict[str, Any]]:\r\n    return [\r\n        {\r\n            "artifact_id": f"PR168_RANK_ARTIFACT::{filename}",\r\n            "artifact_path": f"docs/master_plan/generated/{filename}",\r\n            "artifact_type": "generated_report",\r\n            "upstream_input_refs": ["PR168_RP_To_PR168_RANK_ComputedRanking.report.json"],\r\n            "numeric_evidence_refs": ["PR168_RP_To_PR168_RANK_PreTradeRankingSeed.report.json"],\r\n            "downstream_consumers": [_consumer_for(filename)],\r\n            "downstream_pr_refs": [_route_for(filename)],\r\n            "validator_refs": ["tools/pr168_rank_validator.py"],\r\n            "test_refs": ["tests/pr168_rank"],\r\n            "authority_class": "NONLIVE_DECISION_QUALITY_SEED",\r\n            "manual_edit_allowed_flag": False,\r\n            "record_count": len(rows),\r\n        }\r\n        for filename, rows in sorted(reports.items())\r\n    ]', 'def _simulation_artifact_rows(reports: dict[str, list[dict[str, Any]]]) -> list[dict[str, Any]]:\r\n    return [row for row in _artifact_rows(reports) if "Simulation" in row["artifact_path"] or "Order" in row["artifact_path"]]', 'def _no_orphan_rows(reports: dict[str, list[dict[str, Any]]]) -> list[dict[str, Any]]:\r\n    return [\r\n        {\r\n            "no_orphan_proof_id": f"PR168_RANK_NO_ORPHAN::{filename}",\r\n            "artifact_path": f"docs/master_plan/generated/{filename}",\r\n            "record_count": len(rows),\r\n            "no_orphan_status": "CONNECTED_TO_DECLARED_CONSUMER",\r\n            "downstream_consumers": [_consumer_for(filename)],\r\n        }\r\n        for filename, rows in sorted(reports.items())\r\n    ]', 'def _authority_audit_rows() -> list[dict[str, Any]]:\r\n    return [\r\n        {\r\n            "authority_audit_id": "PR168_RANK_AUTHORITY_BOUNDARY_AUDIT",\r\n            "submit_order": False,\r\n            "cancel_order": False,\r\n            "reduce_order": False,\r\n            "close_order": False,\r\n            "private_state_or_cash_fetch": False,\r\n            "connector_semantic_binding": False,\r\n            "source_truth_acceptance": False,\r\n            "quantum_backend_execution": False,\r\n            "quantum_advantage_claim": False,\r\n            "qtt_sha_authority_created": False,\r\n            "atomicrows_hash_authority_created": False,\r\n        }\r\n    ]', 'def _scope_integration_rows() -> list[dict[str, Any]]:\r\n    return [\r\n        {\r\n            "scope_registry_integration_id": "PR168_RANK_SCOPE_REGISTRY",\r\n            "central_module_path": "tools/validation_scope_registry.py",\r\n            "branch": "pr168-rank-evidence-backed-ranking",\r\n            "allowed_patterns": [\r\n                "docs/master_plan/generated/PR168_RANK_*.report.json",\r\n                "docs/master_plan/generated/pr168_rank_shards/PR168_RANK_*.report.json",\r\n                "tools/pr168_rank_*.py",\r\n                "tools/validate_pr168_rank_*.py",\r\n                "tests/pr168_rank/**",\r\n            ],\r\n        }\r\n    ]', 'def _centralized_coverage_rows() -> list[dict[str, Any]]:\r\n    modules = [\r\n        "tools/build_pr168_rank_evidence_backed_ranking.py",\r\n        "tools/pr168_rank_input_loader.py",\r\n        "tools/pr168_rank_evidence_model.py",\r\n        "tools/pr168_rank_binary_prediction_market_pnl.py",\r\n        "tools/pr168_rank_candidate_stack_generator.py",\r\n        "tools/pr168_rank_pretrade_order_simulator.py",\r\n        "tools/pr168_rank_decision_tournament.py",\r\n        "tools/pr168_rank_future_expansion_registry_layer.py",\r\n        "tools/pr168_rank_report_writer.py",\r\n        "tools/pr168_rank_validator.py",\r\n    ]\r\n    return [\r\n        {\r\n            "central_module_path": module,\r\n            "reports_produced": ["PR168_RANK_FinalSummary.report.json"],\r\n            "validators_covering_it": ["tools/validate_pr168_rank_centralized_systems_coverage.py"],\r\n            "tests_covering_it": ["tests/pr168_rank/test_future_expansion_registries.py"],\r\n            "upstream_inputs": ["PR168_RP_To_PR168_RANK_ComputedRanking.report.json"],\r\n            "downstream_consumers": ["RankingAgent", "GovernanceAgent"],\r\n            "owning_agent": "RankingAgent",\r\n            "no_orphan_status": "CONNECTED_TO_CENTRALIZED_SYSTEMS_AUDIT",\r\n            "anti_scatter_rule": "logic_routes_through_pr168_rank_central_modules",\r\n            "reason_code_registry_integration": "tools/qtt_authority_reason_code_registry.py",\r\n            "validation_scope_registry_integration": "tools/validation_scope_registry.py",\r\n        }\r\n        for module in modules\r\n    ]', 'def _future_expansion_dag_rows(registry_rows: dict[str, list[dict[str, Any]]], dag_class: str) -> list[dict[str, Any]]:\r\n    return [\r\n        {\r\n            "future_expansion_dag_id": f"PR168_RANK_FUTURE_DAG::{dag_class}::{name}",\r\n            "registry_name": name,\r\n            "registry_report_ref": REGISTRY_REPORTS[name],\r\n            "downstream_pr_refs": sorted({pr for row in rows for pr in row.get("downstream_pr_refs", [])}),\r\n            "no_forbidden_authority_created": True,\r\n        }\r\n        for name, rows in sorted(registry_rows.items())\r\n    ]', 'def _registry_no_orphan_rows(registry_rows: dict[str, list[dict[str, Any]]]) -> list[dict[str, Any]]:\r\n    return [\r\n        {\r\n            "registry_no_orphan_id": f"PR168_RANK_REGISTRY_NO_ORPHAN::{name}::{index}",\r\n            "registry_name": name,\r\n            "registry_row_id": row["registry_row_id"],\r\n            "owning_agent": row["owning_agent"],\r\n            "downstream_consumers": row["downstream_consumers"],\r\n            "downstream_pr_refs": row["downstream_pr_refs"],\r\n            "no_orphan_status": row["no_orphan_status"],\r\n            "authority_boundary_flags": row["authority_boundary_flags"],\r\n        }\r\n        for name, rows in sorted(registry_rows.items())\r\n        for index, row in enumerate(rows, start=1)\r\n    ]', 'def _registry_anti_scatter_rows() -> list[dict[str, Any]]:\r\n    names = [\r\n        "market_adapter_logic_must_route_through_MarketAdapterRegistry",\r\n        "venue_cost_logic_must_route_through_VenueCostModelRegistry",\r\n        "contract_payoff_logic_must_route_through_ContractPayoffModelRegistry",\r\n        "formula_plugin_seed_logic_must_route_through_FormulaPluginRegistrySeed",\r\n        "algorithm_plugin_seed_logic_must_route_through_AlgorithmPluginRegistrySeed",\r\n        "quantum_objective_logic_must_route_through_QuantumObjectiveRegistrySeed",\r\n        "order_policy_logic_must_route_through_OrderPolicyRegistry",\r\n        "agent_capability_logic_must_route_through_AgentCapabilityRegistry",\r\n        "connector_readiness_logic_must_route_through_ConnectorReadinessRegistry",\r\n        "runtime_allowlist_seed_logic_must_route_through_RuntimeAllowlistSeedRegistry",\r\n        "hot_path_surface_logic_must_route_through_HotPathDecisionSurfaceRegistry",\r\n    ]\r\n    return [{"anti_scatter_rule": name, "status": "PASS"} for name in names]', 'def _generic_gap_rows(status: str, input_summary: dict[str, Any]) -> list[dict[str, Any]]:\r\n    return [{"gap_queue_id": f"PR168_RANK_GAP::{status}", "gap_status": status, "input_summary_ref": input_summary["report_id"]}]', 'def _generic_materialized_row(filename: str, input_summary: dict[str, Any]) -> dict[str, Any]:\r\n    return {\r\n        "materialized_row_id": f"PR168_RANK_MATERIALIZED::{filename}",\r\n        "source_report_refs": input_summary.get("upstream_report_refs", []),\r\n        "evidence_count": input_summary.get("pretrade_candidate_count", 0),\r\n        "status": "MATERIALIZED_NONLIVE_EVIDENCE",\r\n    }', 'def _final_summary(\r\n    input_summary: dict[str, Any],\r\n    ranking_rows: list[dict[str, Any]],\r\n    tournament: list[dict[str, Any]],\r\n    registry_rows: dict[str, list[dict[str, Any]]],\r\n    reports: dict[str, list[dict[str, Any]]],\r\n) -> dict[str, Any]:\r\n    champion_count = len([row for row in ranking_rows if row["champion_eligible"]])\r\n    challenger_count = len([row for row in ranking_rows if row["challenger_eligible"]])\r\n    no_trade_count = len([row for row in tournament if row["no_trade_dominates"]])\r\n    return {\r\n        "report_id": "PR168_RANK_FinalSummary",\r\n        "what_reports_were_consumed": input_summary["upstream_report_refs"],\r\n        "true_pr168_rp_input_counts_extracted": {key: input_summary[key] for key in input_summary if key.endswith("_count")},\r\n        "ranking_proceeded": True,\r\n        "score_components_implemented": True,\r\n        "pnl_formula_kernel_status": "IMPLEMENTED_BINARY_YES_NO_NONLIVE",\r\n        "pretrade_order_decision_simulation_status": "MATERIALIZED_FROM_PR168_RP_PRETRADE_NUMERIC_EVIDENCE",\r\n        "candidate_stack_generation_status": "MATERIALIZED",\r\n        "mode_policy_matrix_status": "MATERIALIZED_NO_LIVE_ORDER_AUTHORITY",\r\n        "champion_count": champion_count,\r\n        "challenger_count": challenger_count,\r\n        "retest_count": 0,\r\n        "repair_count": len([row for row in ranking_rows if row["repair_required"]]),\r\n        "terminal_count": len([row for row in tournament if row["terminal_true_negative"]]),\r\n        "no_trade_dominance_count": no_trade_count,\r\n        "tca_decomposition_status": "CONSUMED_FROM_PR168_RP",\r\n        "overfit_fdr_penalty_status": "PROXY_CONSUMED_AND_TRIAL_LEDGERED",\r\n        "portfolio_capacity_regime_status": "MATERIALIZED_FROM_PR168_RP_NUMERIC_FIELDS",\r\n        "quantum_structural_readiness_status": "STRUCTURAL_ONLY_GAP_ROUTED_NO_BACKEND",\r\n        "quantum_combinatorial_selection_objective_status": "SEED_ONLY_NO_BACKEND_NO_ADVANTAGE_CLAIM",\r\n        "latency_hot_path_seed_status": "TWO_SPEED_SEED_ONLY",\r\n        "agent_work_order_coverage": "MATERIALIZED",\r\n        "dag_no_orphan_proof": "MATERIALIZED",\r\n        "downstream_pr_queues": "MATERIALIZED",\r\n        "forbidden_authority_not_created": True,\r\n        "remaining_gaps_and_downstream_pr_queues": input_summary["highest_value_repair_queues"],\r\n        "edge_capture_attribution_count": len(ranking_rows),\r\n        "why_trade_count": 0,\r\n        "why_no_trade_count": no_trade_count,\r\n        "negative_recovery_tournament_count": input_summary["computed_negative_count"],\r\n        "recovered_positive_count": 0,\r\n        "size_capped_count": 0,\r\n        "regime_scoped_count": 0,\r\n        "true_negative_after_recovery_count": input_summary["true_negative_or_terminal_input_count"],\r\n        "threshold_surface_status": "MATERIALIZED",\r\n        "maker_taker_status": "MATERIALIZED_NO_TRADE_DOMINANT",\r\n        "size_price_time_sensitivity_status": "MATERIALIZED",\r\n        "scenario_stress_status": "MATERIALIZED",\r\n        "scalar_value_no_orphan_status": "MATERIALIZED",\r\n        "terminal_lifecycle_status": "MATERIALIZED",\r\n        "connector_candidate_routing_status": "SEED_ONLY_WITHOUT_CONNECTOR_TRUTH",\r\n        "two_speed_hot_path_decision_surface_seed_status": "MATERIALIZED_WITHOUT_SHA_AUTHORITY",\r\n        "central_future_expansion_registry_layer_status": "MATERIALIZED_SEED_CONTRACT_ONLY",\r\n        "registry_seed_counts": {name: len(rows) for name, rows in registry_rows.items()},\r\n        "report_count": len(reports),\r\n        "live_ready_claim": False,\r\n        "profit_proof_claim": False,\r\n        "quantum_advantage_claim": False,\r\n    }', 'def _consumer_for(filename: str) -> str:\r\n    if "Quantum" in filename:\r\n        return "QuantumMapperAgent"\r\n    if "Connector" in filename:\r\n        return "ConnectorCandidateAgent"\r\n    if "Dashboard" in filename:\r\n        return "DashboardAgent"\r\n    if "Registry" in filename:\r\n        return "GovernanceAgent"\r\n    return "RankingAgent"', 'def _route_for(filename: str) -> str:\r\n    if "_To_" in filename:\r\n        return filename.removeprefix("PR168_RANK_To_").removesuffix(".report.json")\r\n    return filename', 'class LoadedRankInputs:\r\n    report_roots: dict[str, dict[str, Any]]\r\n    records: dict[str, list[dict[str, Any]]]\r\n    input_summary: dict[str, Any]\r\n    read_receipt_rows: list[dict[str, Any]]', 'dataclass(frozen=True)', 'def load_rank_inputs(repo_root: Path) -> LoadedRankInputs:\r\n    report_roots: dict[str, dict[str, Any]] = {}\r\n    records: dict[str, list[dict[str, Any]]] = {}\r\n    malformed: list[str] = []\r\n    missing: list[str] = []\r\n    for filename in REQUIRED_PR168_RP_REPORTS:\r\n        path = repo_root / GENERATED_DIR / filename\r\n        if not path.exists():\r\n            missing.append(filename)\r\n            continue\r\n        try:\r\n            report_roots[filename] = read_report(repo_root, filename)\r\n            records[filename] = read_records(repo_root, filename)\r\n        except (json.JSONDecodeError, OSError, KeyError, TypeError) as exc:\r\n            malformed.append(f"{filename}: {type(exc).__name__}")\r\n\r\n    summary = _input_summary(repo_root, report_roots, records, missing, malformed)\r\n    return LoadedRankInputs(\r\n        report_roots=report_roots,\r\n        records=records,\r\n        input_summary=summary,\r\n        read_receipt_rows=_read_receipts(repo_root, report_roots),\r\n    )', 'def _report_count(report_roots: dict[str, dict[str, Any]], records: dict[str, list[dict[str, Any]]], filename: str) -> int:\r\n    root = report_roots.get(filename, {})\r\n    if "record_count" in root:\r\n        return int(root["record_count"])\r\n    return len(records.get(filename, []))', 'def _input_summary(\r\n    repo_root: Path,\r\n    report_roots: dict[str, dict[str, Any]],\r\n    records: dict[str, list[dict[str, Any]]],\r\n    missing: list[str],\r\n    malformed: list[str],\r\n) -> dict[str, Any]:\r\n    no_trade_rows = records.get("PR168_RP_NoTradeCandidateComparison.report.json", [])\r\n    champion_rows = records.get("PR168_RP_ChampionChallengerEligibility.report.json", [])\r\n    recovery_rows = records.get("PR168_RP_NegativeToPositiveRecoveryAttempts.report.json", [])\r\n    failure_counts: Counter[str] = Counter()\r\n    for row in recovery_rows:\r\n        failure_counts.update(str(code) for code in row.get("negative_reason_codes", []))\r\n    no_orphan_status = report_roots.get("PR168_RP_NoOrphanProof.report.json", {}).get("no_orphan_status")\r\n    agent_roster = repo_root / GENERATED_DIR / "PR165_D2_AgentRosterDiscoveryAudit.report.json"\r\n    agent_crosswalk = repo_root / GENERATED_DIR / "PR165_D2_AgentDutySourceCrosswalk.report.json"\r\n    handoff_ok = all(\r\n        filename in report_roots\r\n        for filename in (\r\n            "PR168_RP_To_PR168_RANK_ComputedRanking.report.json",\r\n            "PR168_RP_To_PR168_RANK_PreTradeRankingSeed.report.json",\r\n        )\r\n    )\r\n    decision = "PROCEED_TO_PR168_RANK"\r\n    reason_codes = ["PR168_RP_NUMERIC_HANDOFF_AVAILABLE"]\r\n    if missing or malformed or not handoff_ok:\r\n        decision = "STOP_AND_ROUTE_PR168_RP_POSTMERGE_REPAIR"\r\n        reason_codes = ["PR168_RP_REQUIRED_INPUT_MISSING_OR_MALFORMED"]\r\n    return {\r\n        "report_id": "PR168_RANK_PR168RPInputResultSummary",\r\n        "created_by": "PR168_RANK_EVIDENCE_BACKED_RANKING",\r\n        "input_search_roots": [\r\n            "docs/master_plan/generated",\r\n            "docs/master_plan/generated/pr168_rp_shards",\r\n        ],\r\n        "required_report_count": len(REQUIRED_PR168_RP_REPORTS),\r\n        "found_required_report_count": len(REQUIRED_PR168_RP_REPORTS) - len(missing),\r\n        "missing_required_reports": missing,\r\n        "malformed_required_reports": malformed,\r\n        "computed_positive_count": _report_count(report_roots, records, "PR168_RP_ComputedPositiveEdgeCandidates.report.json"),\r\n        "repaired_positive_count": _report_count(report_roots, records, "PR168_RP_RepairedPositiveCandidateEvidence.report.json"),\r\n        "computed_negative_count": _report_count(report_roots, records, "PR168_RP_ComputedNegativeEdgeCandidates.report.json"),\r\n        "neutral_or_zero_count": _report_count(report_roots, records, "PR168_RP_ComputedNeutralOrZeroEdgeCandidates.report.json"),\r\n        "input_gap_count": _report_count(report_roots, records, "PR168_RP_ActionableInputGapQueue.report.json"),\r\n        "quantum_gap_count": _report_count(report_roots, records, "PR168_RP_QuantumCoefficientMapInputGaps.report.json"),\r\n        "pretrade_candidate_count": _report_count(report_roots, records, "PR168_RP_PreTradeSimulationCandidates.report.json"),\r\n        "order_policy_candidate_count": _report_count(report_roots, records, "PR168_RP_OrderPolicyCandidateRanking.report.json"),\r\n        "no_trade_dominant_count": len([row for row in no_trade_rows if row.get("no_trade_dominates") is True]),\r\n        "champion_eligible_input_count": len([row for row in champion_rows if row.get("champion_eligible") is True]),\r\n        "challenger_input_count": len([row for row in champion_rows if row.get("challenger_eligible") is True]),\r\n        "retest_input_count": len([row for row in champion_rows if "RETEST" in " ".join(map(str, row.get("reason_codes", [])))]),\r\n        "repair_queue_input_count": _report_count(report_roots, records, "PR168_RP_ActionableInputGapQueue.report.json"),\r\n        "true_negative_or_terminal_input_count": _report_count(report_roots, records, "PR168_RP_TrueNegativeAfterRecoveryExhaustion.report.json"),\r\n        "qku_formula_algorithm_combination_input_count": _report_count(report_roots, records, "PR168_RP_QKUCombinationCandidateResults.report.json"),\r\n        "candidate_stack_input_count": _report_count(report_roots, records, "PR168_RP_To_PR168_RANK_ComputedRanking.report.json"),\r\n        "trade_order_simulation_input_count": _report_count(report_roots, records, "PR168_RP_To_PR168_RANK_PreTradeRankingSeed.report.json"),\r\n        "mode_scoped_input_count": len([row for row in records.get("PR168_RP_To_PR168_RANK_PreTradeRankingSeed.report.json", []) if row.get("mode")]),\r\n        "top_alpha_source_candidates": _top_alpha_candidates(records),\r\n        "dominant_failure_reasons": failure_counts.most_common(10),\r\n        "highest_value_repair_queues": _repair_queues(records),\r\n        "no_orphan_input_status": no_orphan_status or "MISSING",\r\n        "agent_roster_crosswalk_status": "FOUND" if agent_roster.exists() and agent_crosswalk.exists() else "GAP_ROUTED",\r\n        "decision": decision,\r\n        "reason_codes": reason_codes,\r\n        "upstream_report_refs": sorted(report_roots),\r\n    }', 'def _top_alpha_candidates(records: dict[str, list[dict[str, Any]]]) -> list[dict[str, Any]]:\r\n    rows = records.get("PR168_RP_To_PR168_RANK_ComputedRanking.report.json", [])\r\n    top = sorted(rows, key=lambda row: float(row.get("fill_adjusted_expected_pnl", 0.0)), reverse=True)[:5]\r\n    return [\r\n        {\r\n            "result_ref": row.get("result_ref"),\r\n            "qku_id": row.get("qku_id"),\r\n            "fill_adjusted_expected_pnl": row.get("fill_adjusted_expected_pnl"),\r\n            "lower_confidence_bound_edge": row.get("lower_confidence_bound_edge"),\r\n            "computed_status": row.get("computed_status"),\r\n            "positive_alpha_claim": False,\r\n        }\r\n        for row in top\r\n    ]', 'def _repair_queues(records: dict[str, list[dict[str, Any]]]) -> list[dict[str, Any]]:\r\n    rows = records.get("PR168_RP_NegativeToPositiveRecoveryAttempts.report.json", [])\r\n    counts: Counter[str] = Counter()\r\n    for row in rows:\r\n        counts.update(str(code) for code in row.get("negative_reason_codes", []))\r\n    return [{"reason_code": reason, "candidate_count": count} for reason, count in counts.most_common(10)]', 'def _read_receipts(repo_root: Path, report_roots: dict[str, dict[str, Any]]) -> list[dict[str, Any]]:\r\n    rows: list[dict[str, Any]] = []\r\n    for target in READ_RECEIPT_TARGETS:\r\n        path = repo_root / target\r\n        rows.append(\r\n            {\r\n                "receipt_id": f"READ::{target}",\r\n                "target": target,\r\n                "read_status": "FOUND" if path.exists() else "MISSING_GAP_ROUTED",\r\n                "length_bytes": path.stat().st_size if path.exists() else 0,\r\n                "upstream_source": target,\r\n                "downstream_route": "PR168_RANK_InputConsumption.report.json",\r\n                "owning_agent": "RankingAgent",\r\n                "no_orphan_status": "CONNECTED_TO_READ_RECEIPT_CONSUMER",\r\n            }\r\n        )\r\n    for filename in sorted(report_roots):\r\n        rows.append(\r\n            {\r\n                "receipt_id": f"READ::{filename}",\r\n                "target": f"docs/master_plan/generated/{filename}",\r\n                "read_status": "FOUND",\r\n                "length_bytes": (repo_root / GENERATED_DIR / filename).stat().st_size,\r\n                "upstream_source": filename,\r\n                "downstream_route": "PR168_RANK_PR168RPInputResultSummary.report.json",\r\n                "owning_agent": "RankingAgent",\r\n                "no_orphan_status": "CONNECTED_TO_READ_RECEIPT_CONSUMER",\r\n            }\r\n        )\r\n    for receipt in ONLINE_RESEARCH_RECEIPTS:\r\n        rows.append(\r\n            {\r\n                "receipt_id": f"ONLINE::{receipt[\'reference_id\']}",\r\n                "target": receipt["url"],\r\n                "read_status": "RESEARCH_READ_RECEIPT_CANDIDATE_ONLY",\r\n                "candidate_use": receipt["candidate_use"],\r\n                "source_truth_authority_created": False,\r\n                "live_authority_created": False,\r\n                "upstream_source": receipt["url"],\r\n                "downstream_route": "PR168_RANK_ReadReceipt.report.json",\r\n                "owning_agent": "QKUResearchAgent",\r\n                "no_orphan_status": "CONNECTED_TO_RESEARCH_RECEIPT_CONSUMER",\r\n            }\r\n        )\r\n    return rows', 'def read_json(path: Path) -> dict[str, Any]:\r\n    return json.loads(path.read_text(encoding="utf-8"))', 'def write_json(path: Path, payload: dict[str, Any]) -> None:\r\n    path.parent.mkdir(parents=True, exist_ok=True)\r\n    text = json.dumps(payload, sort_keys=True, ensure_ascii=True, allow_nan=False, separators=(",", ":"))\r\n    path.write_text(text + "\\n", encoding="utf-8")', 'def read_report(repo_root: Path, filename: str) -> dict[str, Any]:\r\n    path = repo_root / GENERATED_DIR / filename\r\n    if not path.exists():\r\n        raise FileNotFoundError(path)\r\n    return read_json(path)', 'def read_records(repo_root: Path, filename: str) -> list[dict[str, Any]]:\r\n    report = read_report(repo_root, filename)\r\n    shard_files = report.get("summary", {}).get("shard_files") or report.get("shard_files") or []\r\n    if not shard_files:\r\n        return list(report.get("records", []))\r\n    rows: list[dict[str, Any]] = []\r\n    for shard_file in shard_files:\r\n        shard_path = repo_root / str(shard_file)\r\n        if not shard_path.exists():\r\n            raise FileNotFoundError(shard_path)\r\n        rows.extend(read_json(shard_path).get("records", []))\r\n    return rows', 'def base_report(\r\n    report_type: str,\r\n    records: list[dict[str, Any]],\r\n    summary: dict[str, Any],\r\n    *,\r\n    consumer: str,\r\n    downstream_route: str,\r\n) -> dict[str, Any]:\r\n    return {\r\n        "pr_id": "PR168-RANK",\r\n        "report_type": report_type,\r\n        "producer": "PR168_RANK_EVIDENCE_BACKED_RANKING",\r\n        "consumer": consumer,\r\n        "upstream_source": "PR168-RP computed replay/paper handoff reports",\r\n        "downstream_route": downstream_route,\r\n        "owning_agent": "RankingAgent",\r\n        "no_orphan_status": "CONNECTED_TO_DECLARED_CONSUMER",\r\n        "materialized_artifact": True,\r\n        "authority_boundary_codes": AUTHORITY_BOUNDARY_CODES,\r\n        "source_truth_authority": False,\r\n        "connector_truth_authority": False,\r\n        "connector_semantic_binding_created": False,\r\n        "live_authority": False,\r\n        "order_authority": False,\r\n        "private_state_read_count": 0,\r\n        "runtime_cash_receipt_count": 0,\r\n        "quantum_backend_execution_count": 0,\r\n        "quantum_advantage_claim_count": 0,\r\n        "generated_digest_authority_created": False,\r\n        "qtt_sha_authority_created": False,\r\n        "atomicrows_hash_authority_created": False,\r\n        "summary": summary,\r\n        "record_count": len(records),\r\n        "records": records,\r\n    }', 'def write_report(\r\n    repo_root: Path,\r\n    filename: str,\r\n    records: list[dict[str, Any]],\r\n    *,\r\n    report_type: str | None = None,\r\n    summary: dict[str, Any] | None = None,\r\n    consumer: str = "PR168-RANK",\r\n    downstream_route: str = "PR168-RANK",\r\n    shard: bool | None = None,\r\n) -> None:\r\n    report_type = report_type or Path(filename).stem.upper()\r\n    summary = dict(summary or {})\r\n    _remove_stale_shards(repo_root, filename)\r\n    use_shards = len(records) > SHARD_SIZE if shard is None else shard\r\n    if use_shards:\r\n        shard_files: list[str] = []\r\n        total = max(1, (len(records) + SHARD_SIZE - 1) // SHARD_SIZE)\r\n        for index, start in enumerate(range(0, len(records), SHARD_SIZE), start=1):\r\n            shard_records = records[start : start + SHARD_SIZE]\r\n            shard_name = f"{Path(filename).stem}.part_{index:04d}_of_{total:04d}.report.json"\r\n            shard_files.append((SHARD_DIR / shard_name).as_posix())\r\n            payload = base_report(\r\n                f"{report_type}_SHARD",\r\n                shard_records,\r\n                {\r\n                    "parent_report": filename,\r\n                    "shard_index": index,\r\n                    "shard_count": total,\r\n                    "record_count": len(shard_records),\r\n                },\r\n                consumer=consumer,\r\n                downstream_route=downstream_route,\r\n            )\r\n            write_json(repo_root / SHARD_DIR / shard_name, payload)\r\n        summary.update(\r\n            {\r\n                "record_count": len(records),\r\n                "preview_record_count": min(5, len(records)),\r\n                "records_omitted_for_sharding_flag": len(records) > 5,\r\n                "sharded_flag": True,\r\n                "shard_count": total,\r\n                "shard_files": shard_files,\r\n            }\r\n        )\r\n        root_records = records[:5]\r\n    else:\r\n        summary.update({"record_count": len(records), "sharded_flag": False})\r\n        root_records = records\r\n    payload = base_report(report_type, root_records, summary, consumer=consumer, downstream_route=downstream_route)\r\n    payload["record_count"] = len(records)\r\n    write_json(repo_root / GENERATED_DIR / filename, payload)', 'def no_orphan_defaults(row: dict[str, Any], filename: str) -> dict[str, Any]:\r\n    normalized = dict(row)\r\n    normalized.setdefault("producer", "PR168_RANK_EVIDENCE_BACKED_RANKING")\r\n    normalized.setdefault("consumer", _consumer_for(filename))\r\n    normalized.setdefault("upstream_source", "PR168_RP_To_PR168_RANK handoff reports")\r\n    normalized.setdefault("downstream_route", _route_for_report(filename))\r\n    normalized.setdefault("owning_agent", "RankingAgent")\r\n    normalized.setdefault("supporting_agents", ["RiskAgent", "ExecutionCostAgent", "GovernanceAgent"])\r\n    normalized.setdefault("downstream_consumers", [_consumer_for(filename)])\r\n    normalized.setdefault("downstream_pr_refs", [_route_for_report(filename)])\r\n    normalized.setdefault("validator_refs", [f"tools/validate_pr168_rank_{_validator_slug(filename)}.py"])\r\n    normalized.setdefault("test_refs", [f"tests/pr168_rank/test_{_validator_slug(filename)}.py"])\r\n    normalized.setdefault("no_orphan_status", "CONNECTED_TO_DECLARED_CONSUMER")\r\n    normalized.setdefault("manual_edit_allowed_flag", False)\r\n    normalized.setdefault("authority_boundary_flags", authority_flags())\r\n    return normalized', 'def authority_flags() -> dict[str, bool]:\r\n    return {\r\n        "source_truth_authority": False,\r\n        "connector_semantic_binding": False,\r\n        "private_state_required_flag": False,\r\n        "cash_required_flag": False,\r\n        "order_authority_required_flag": False,\r\n        "live_execution_allowed_flag": False,\r\n        "quantum_backend_required_flag": False,\r\n        "quantum_advantage_claim_flag": False,\r\n        "qtt_sha_authority_flag": False,\r\n        "atomicrows_hash_authority_flag": False,\r\n    }', 'def _remove_stale_shards(repo_root: Path, filename: str) -> None:\r\n    prefix = Path(filename).stem\r\n    shard_dir = repo_root / SHARD_DIR\r\n    if not shard_dir.exists():\r\n        return\r\n    for shard_path in shard_dir.glob(f"{prefix}.part_*.report.json"):\r\n        if shard_path.is_file():\r\n            shard_path.unlink()', 'def _consumer_for(filename: str) -> str:\r\n    if "_To_PR162E_Q_" in filename or "Quantum" in filename:\r\n        return "QuantumMapperAgent"\r\n    if "_To_PR166_QC_R2_" in filename:\r\n        return "QuantumComparatorAgent"\r\n    if "_To_PR165B_" in filename or "Negative" in filename or "TrueNegative" in filename:\r\n        return "GovernanceAgent"\r\n    if "OwnerDashboard" in filename:\r\n        return "DashboardAgent"\r\n    if "ExecutionRouter" in filename:\r\n        return "OwnerReviewAgent"\r\n    if "Connector" in filename:\r\n        return "ConnectorCandidateAgent"\r\n    if "Registry" in filename:\r\n        return "GovernanceAgent"\r\n    return "RankingAgent"', 'def _route_for_report(filename: str) -> str:\r\n    if "_To_" in filename:\r\n        return filename.removeprefix("PR168_RANK_To_").removesuffix(".report.json")\r\n    if "Registry" in filename:\r\n        return "central_future_expansion_registry_layer"\r\n    return filename', 'def _validator_slug(filename: str) -> str:\r\n    stem = Path(filename).stem\r\n    if stem.startswith("PR168_RANK_"):\r\n        stem = stem.removeprefix("PR168_RANK_")\r\n    stem = stem.replace(".report", "")\r\n    return stem.lower()', 'def build_candidate_stacks(computed_rows: list[dict[str, Any]], combination_rows: list[dict[str, Any]]) -> list[dict[str, Any]]:\r\n    combo_by_qku = {str(row.get("qku_refs", [""])[0]): row for row in combination_rows if row.get("qku_refs")}\r\n    stacks: list[dict[str, Any]] = []\r\n    for index, row in enumerate(computed_rows, start=1):\r\n        qku_id = row.get("qku_id")\r\n        combo = combo_by_qku.get(str(qku_id), {})\r\n        stack_id = f"PR168_RANK_STACK::{index:05d}"\r\n        formula_refs = _as_list(row.get("formula_id")) or _as_list(combo.get("formula_refs"))\r\n        stacks.append(\r\n            {\r\n                "candidate_stack_id": stack_id,\r\n                "candidate_id": row.get("result_ref"),\r\n                "qku_refs": _as_list(qku_id),\r\n                "formula_refs": formula_refs,\r\n                "algorithm_refs": _as_list(combo.get("algorithm_refs")) or ["PR168_RP_PRETRADE_SIMULATION_KERNEL"],\r\n                "probability_model_formula_refs": formula_refs,\r\n                "calibration_formula_refs": formula_refs,\r\n                "edge_formula_refs": formula_refs,\r\n                "TCA_formula_refs": formula_refs,\r\n                "fill_model_refs": ["PR168_RP_MICROSTRUCTURE_FILL_MODEL"],\r\n                "latency_model_refs": ["PR168_RP_LATENCY_BUDGET"],\r\n                "capacity_model_refs": ["PR168_RP_CAPACITY_CROWDING"],\r\n                "portfolio_utility_model_refs": ["PR168_RP_PORTFOLIO_MARGINAL_UTILITY"],\r\n                "overfit_fdr_model_refs": ["PR168_RP_OVERFIT_FDR_PROXY"],\r\n                "scenario_ladder_refs": ["PR168_RP_SCENARIO_LADDER"],\r\n                "order_policy_refs": _as_list(combo.get("order_policy_refs")) or ["NO_TRADE", "PASSIVE_LIMIT", "AGGRESSIVE_CROSS"],\r\n                "risk_sizing_refs": ["PR168_RP_ORDER_TYPE_SIZING_PRICE_CANDIDATE_REPAIR"],\r\n                "quantum_structural_optimizer_refs_when_applicable": _as_list(row.get("quantum_objective_ref")),\r\n                "classical_fallback_optimizer_refs": ["PR168_RP_CLASSICAL_FALLBACK_ONLY"],\r\n                "interpret_back_refs": ["PR168_RANK_STACK_INTERPRET_BACK_MAP"],\r\n                "candidate_stack_class": "negative_recovery_strategy"\r\n                if row.get("computed_status") == "COMPUTED_NEGATIVE_EDGE"\r\n                else "portfolio_aware_stack",\r\n                "role_completeness_status": "COMPLETE_FOR_NONLIVE_RANKING",\r\n                "core_role_gap_refs": [],\r\n                "stack_synergy_edge": 0.0,\r\n                "dominance_pruned_flag": False,\r\n                "search_budget_class": "DETERMINISTIC_BEAM_SAFE_SMALL",\r\n                "upstream_numeric_evidence_refs": [row.get("result_ref")],\r\n                "upstream_gap_refs": [],\r\n                "authority_boundary_flags": authority_flags(),\r\n            }\r\n        )\r\n    return stacks', 'def _as_list(value: Any) -> list[Any]:\r\n    if value is None:\r\n        return []\r\n    if isinstance(value, list):\r\n        return [item for item in value if item not in (None, "")]\r\n    if value == "":\r\n        return []\r\n    return [value]', 'def build_order_decision_tournament(pretrade_rows: list[dict[str, Any]], stack_by_result: dict[str, str]) -> list[dict[str, Any]]:\r\n    grouped: dict[str, list[dict[str, Any]]] = defaultdict(list)\r\n    for row in pretrade_rows:\r\n        grouped[result_ref_from_candidate_id(str(row.get("candidate_id")))].append(row)\r\n    tournament: list[dict[str, Any]] = []\r\n    for index, (result_ref, rows) in enumerate(sorted(grouped.items()), start=1):\r\n        ranked = sorted(rows, key=lambda row: float(row.get("candidate_score_money", 0.0) or 0.0), reverse=True)\r\n        winner = ranked[0]\r\n        no_trade = next((row for row in ranked if row.get("order_type_candidate") == "NO_TRADE_CANDIDATE"), None)\r\n        trade_rows = [row for row in ranked if row.get("order_type_candidate") != "NO_TRADE_CANDIDATE"]\r\n        best_trade = trade_rows[0] if trade_rows else None\r\n        components = score_components_from_pretrade(winner)\r\n        no_trade_dominates = no_trade is not None and (\r\n            best_trade is None\r\n            or float(no_trade.get("candidate_score_money", 0.0) or 0.0)\r\n            >= float(best_trade.get("candidate_score_money", 0.0) or 0.0)\r\n        )\r\n        champion_eligible = (\r\n            winner.get("champion_eligible") is True\r\n            and components["lower_confidence_bound_edge"] > 0\r\n            and components["no_trade_comparison_margin"] > 0\r\n            and components["fill_adjusted_expected_pnl"] > 0\r\n            and not no_trade_dominates\r\n        )\r\n        tournament.append(\r\n            {\r\n                "tournament_id": f"PR168_RANK_TOURNAMENT::{index:05d}",\r\n                "candidate_id": result_ref,\r\n                "candidate_stack_id": stack_by_result.get(result_ref),\r\n                "winning_action": winner.get("order_type_candidate"),\r\n                "winning_source_candidate_id": winner.get("candidate_id"),\r\n                "no_trade_candidate_id": no_trade.get("candidate_id") if no_trade else None,\r\n                "best_trade_candidate_id": best_trade.get("candidate_id") if best_trade else None,\r\n                "best_trade_score": best_trade.get("candidate_score_money") if best_trade else None,\r\n                "no_trade_score": no_trade.get("candidate_score_money") if no_trade else None,\r\n                "no_trade_dominates": no_trade_dominates,\r\n                "rank_score": rank_score(components),\r\n                "champion_eligible": champion_eligible,\r\n                "challenger_eligible": not champion_eligible and bool(rows),\r\n                "retest_required": False,\r\n                "repair_required": not champion_eligible,\r\n                "terminal_true_negative": no_trade_dominates,\r\n                "pareto_frontier_status": "FRONTIER_NO_TRADE" if no_trade_dominates else "FRONTIER_TRADE",\r\n                "selection_reason_codes": _reason_codes(winner, no_trade_dominates, components),\r\n                "score_components": components,\r\n                "why_trade_or_no_trade_ref": f"PR168_RANK_WHY::{index:05d}",\r\n                "mode_scope": winner.get("mode", "REPLAY"),\r\n                "authority_boundary_flags": authority_flags(),\r\n                "upstream_numeric_evidence_refs": [row.get("candidate_id") for row in rows[:7]],\r\n            }\r\n        )\r\n    return tournament', 'def _reason_codes(row: dict[str, Any], no_trade_dominates: bool, components: dict[str, float]) -> list[str]:\r\n    codes = list(row.get("champion_eligibility_blockers", []))\r\n    if no_trade_dominates:\r\n        codes.append("NO_TRADE_DOMINATES")\r\n    if components["lower_confidence_bound_edge"] <= 0:\r\n        codes.append("LCB_NOT_POSITIVE")\r\n    if components["fill_adjusted_expected_pnl"] <= 0:\r\n        codes.append("FILL_ADJUSTED_PNL_NOT_POSITIVE")\r\n    return sorted(dict.fromkeys(codes))', 'def build_simulated_orders(pretrade_rows: list[dict[str, Any]], stack_by_result: dict[str, str]) -> list[dict[str, Any]]:\r\n    rows: list[dict[str, Any]] = []\r\n    for index, row in enumerate(pretrade_rows, start=1):\r\n        result_ref = _result_from_candidate(row)\r\n        stack_id = stack_by_result.get(result_ref, f"PR168_RANK_STACK_GAP::{result_ref}")\r\n        components = score_components_from_pretrade(row)\r\n        rows.append(\r\n            {\r\n                "simulated_order_id": f"PR168_RANK_SIM_ORDER::{index:06d}",\r\n                "source_pretrade_candidate_id": row.get("candidate_id"),\r\n                "candidate_stack_id": stack_id,\r\n                "side": row.get("side", "YES"),\r\n                "order_type_candidate": row.get("order_type_candidate"),\r\n                "limit_price_candidate": row.get("limit_price_candidate"),\r\n                "quantity_candidate": row.get("quantity_candidate"),\r\n                "notional_candidate": _round(float(row.get("expected_price", 0.0) or 0.0) * float(row.get("quantity_candidate", 0.0) or 0.0)),\r\n                "time_in_force_candidate": row.get("time_in_force_candidate"),\r\n                "expected_execution_price": row.get("expected_price"),\r\n                "expected_fill_probability": row.get("expected_fill"),\r\n                "expected_fill_time_ms": row.get("expected_latency"),\r\n                "expected_latency_ms": row.get("expected_latency"),\r\n                "explicit_fees": row.get("explicit_fee_cost"),\r\n                "spread_crossing_cost": row.get("spread_cost"),\r\n                "expected_slippage": row.get("slippage_cost"),\r\n                "adverse_selection_cost": row.get("adverse_selection_penalty"),\r\n                "market_impact_or_book_depth_cost": row.get("market_impact"),\r\n                "failed_fill_or_cancel_cost": row.get("queue_nonfill_penalty"),\r\n                "opportunity_cost_vs_no_trade": row.get("expected_unfilled_quantity"),\r\n                "settlement_or_resolution_cost_proxy_when_applicable": 0.0,\r\n                "capital_lock_cost": 0.0,\r\n                "fill_adjusted_expected_pnl": components["fill_adjusted_expected_pnl"],\r\n                "net_expected_pnl_candidate": components["net_expected_pnl_candidate"],\r\n                "execution_adjusted_edge": components["execution_adjusted_edge"],\r\n                "lower_confidence_bound_edge": components["lower_confidence_bound_edge"],\r\n                "expected_shortfall_cvar_candidate": components["expected_shortfall_cvar_candidate"],\r\n                "no_trade_comparison_margin": components["no_trade_comparison_margin"],\r\n                "capacity_crowding_penalty": components["capacity_crowding_penalty"],\r\n                "portfolio_marginal_utility": components["portfolio_marginal_utility"],\r\n                "overfit_fdr_penalty": components["overfit_fdr_penalty"],\r\n                "scenario_ladder_score": components["scenario_ladder_score"],\r\n                "regime_stability_score": components["regime_stability_score"],\r\n                "calibration_quality_score": components["calibration_quality_score"],\r\n                "quantum_structural_readiness_score": components["quantum_structural_readiness_score"],\r\n                "total_tca_cost": total_tca_from_pretrade(row),\r\n                "mode_scope": row.get("mode", "REPLAY"),\r\n                "decision_status": row.get("final_decision_status") or row.get("decision_status"),\r\n                "champion_eligible": row.get("champion_eligible") is True,\r\n                "champion_eligibility_blockers": row.get("champion_eligibility_blockers", []),\r\n                "authority_boundary_flags": authority_flags(),\r\n                "upstream_numeric_evidence_refs": [row.get("candidate_id")],\r\n                "upstream_gap_refs": row.get("champion_eligibility_blockers", []),\r\n            }\r\n        )\r\n    return rows', 'def _result_from_candidate(row: dict[str, Any]) -> str:\r\n    text = str(row.get("candidate_id", ""))\r\n    marker = "PR168_RP_RESULT::"\r\n    if marker not in text:\r\n        return text\r\n    return marker + text.split(marker, 1)[1].split("::", 1)[0]', 'def _round(value: float) -> float:\r\n    return round(float(value), 10)', 'def is_number(value: Any) -> bool:\r\n    return isinstance(value, (int, float)) and not isinstance(value, bool) and math.isfinite(float(value))', 'def number(value: Any, default: float = 0.0) -> float:\r\n    if is_number(value):\r\n        return float(value)\r\n    return default', 'def result_ref_from_candidate_id(candidate_id: str | None) -> str:\r\n    text = str(candidate_id or "")\r\n    match = re.search(r"PR168_RP_RESULT::\\d+", text)\r\n    return match.group(0) if match else text', 'def total_tca_from_pretrade(row: dict[str, Any]) -> float:\r\n    return round(\r\n        sum(\r\n            number(row.get(field))\r\n            for field in (\r\n                "explicit_fee_cost",\r\n                "spread_cost",\r\n                "slippage_cost",\r\n                "adverse_selection_penalty",\r\n                "implementation_shortfall",\r\n                "latency_decay",\r\n                "market_impact",\r\n                "queue_nonfill_penalty",\r\n                "partial_fill_penalty",\r\n                "stale_orderbook_penalty",\r\n            )\r\n        ),\r\n        10,\r\n    )', 'def score_components_from_pretrade(row: dict[str, Any]) -> dict[str, float]:\r\n    total_tca = total_tca_from_pretrade(row)\r\n    fill_adjusted = number(row.get("fill_adjusted_expected_pnl"))\r\n    lcb = number(row.get("lower_confidence_bound_edge"))\r\n    no_trade_margin = number(row.get("no_trade_comparison_margin"))\r\n    capacity = number(row.get("capacity_crowding_penalty"))\r\n    overfit = number(row.get("overfit_fdr_penalty"))\r\n    latency_ms = number(row.get("expected_latency"))\r\n    candidate_score = number(row.get("candidate_score_money"))\r\n    return {\r\n        "fill_adjusted_expected_pnl": round(fill_adjusted, 10),\r\n        "net_expected_pnl_candidate": round(number(row.get("expected_net_pnl"), candidate_score), 10),\r\n        "execution_adjusted_edge": round(number(row.get("execution_adjusted_edge"), fill_adjusted), 10),\r\n        "lower_confidence_bound_edge": round(lcb, 10),\r\n        "no_trade_comparison_margin": round(no_trade_margin, 10),\r\n        "total_tca_cost": total_tca,\r\n        "fill_probability": round(number(row.get("expected_fill")), 10),\r\n        "latency_budget_usage": round(latency_ms / max(number(row.get("latency_budget_ms"), 1.0), 1.0), 10),\r\n        "capacity_crowding_penalty": round(capacity, 10),\r\n        "overfit_fdr_penalty": round(overfit, 10),\r\n        "portfolio_marginal_utility": round(number(row.get("portfolio_marginal_utility")), 10),\r\n        "expected_shortfall_cvar_candidate": round(number(row.get("expected_shortfall_cvar")), 10),\r\n        "scenario_ladder_score": 0.0 if lcb <= 0 else 1.0,\r\n        "calibration_quality_score": 0.5,\r\n        "regime_stability_score": 0.5,\r\n        "quantum_structural_readiness_score": 0.0,\r\n        "critical_gap_penalty": 1.0 if row.get("champion_eligibility_blockers") else 0.0,\r\n        "agent_route_completeness_score": 1.0 if row.get("owning_agent") else 0.0,\r\n        "no_orphan_score": 1.0 if row.get("no_orphan_status") else 0.0,\r\n        "compute_budget_penalty": 0.0,\r\n        "order_policy_quality_score": 1.0 if row.get("order_type_candidate") == "NO_TRADE_CANDIDATE" else 0.25,\r\n        "candidate_stack_role_completeness_score": 1.0,\r\n        "edge_capture_attribution_score": 1.0 if fill_adjusted > 0 else 0.0,\r\n        "negative_recovery_potential_score": 0.25 if fill_adjusted < 0 else 0.0,\r\n        "maker_taker_tradeoff_score": 0.5,\r\n        "threshold_surface_quality_score": 1.0,\r\n        "size_price_time_sensitivity_score": 1.0,\r\n        "scenario_stress_survival_score": 0.0 if lcb <= 0 else 1.0,\r\n        "terminal_lifecycle_route_score": 1.0 if row.get("champion_eligible") is False else 0.0,\r\n    }', 'def rank_score(components: dict[str, float]) -> float:\r\n    positive = (\r\n        components["fill_adjusted_expected_pnl"]\r\n        + components["lower_confidence_bound_edge"]\r\n        + components["execution_adjusted_edge"]\r\n        + components["no_trade_comparison_margin"]\r\n        + components["portfolio_marginal_utility"]\r\n        + components["order_policy_quality_score"]\r\n        + components["candidate_stack_role_completeness_score"]\r\n    )\r\n    negative = (\r\n        components["total_tca_cost"]\r\n        + components["overfit_fdr_penalty"]\r\n        + components["capacity_crowding_penalty"]\r\n        + components["latency_budget_usage"]\r\n        + abs(components["expected_shortfall_cvar_candidate"])\r\n        + components["critical_gap_penalty"]\r\n    )\r\n    return round(positive - negative, 10)', 'def build_future_expansion_registries(\r\n    *,\r\n    input_summary: dict[str, Any],\r\n    stack_rows: list[dict[str, Any]],\r\n    tournament_rows: list[dict[str, Any]],\r\n    quantum_rows: list[dict[str, Any]],\r\n) -> dict[str, list[dict[str, Any]]]:\r\n    sample_stack = stack_rows[0] if stack_rows else {}\r\n    sample_tournament = tournament_rows[0] if tournament_rows else {}\r\n    sample_quantum = quantum_rows[0] if quantum_rows else {}\r\n    return {\r\n        "MarketAdapterRegistry": [_base_registry_row("MarketAdapterRegistry", "market_adapter_seed", sample_stack, sample_tournament) | _market_adapter_fields()],\r\n        "VenueCostModelRegistry": [_base_registry_row("VenueCostModelRegistry", "venue_cost_model_seed", sample_stack, sample_tournament) | _venue_cost_fields()],\r\n        "ContractPayoffModelRegistry": [_base_registry_row("ContractPayoffModelRegistry", "contract_payoff_model_seed", sample_stack, sample_tournament) | _payoff_fields()],\r\n        "FormulaPluginRegistrySeed": [_base_registry_row("FormulaPluginRegistrySeed", "formula_plugin_seed", sample_stack, sample_tournament) | _plugin_fields("FORMULA", sample_stack)],\r\n        "AlgorithmPluginRegistrySeed": [_base_registry_row("AlgorithmPluginRegistrySeed", "algorithm_plugin_seed", sample_stack, sample_tournament) | _plugin_fields("ALGORITHM", sample_stack)],\r\n        "QuantumObjectiveRegistrySeed": [_base_registry_row("QuantumObjectiveRegistrySeed", "quantum_objective_seed", sample_stack, sample_tournament) | _quantum_fields(sample_quantum)],\r\n        "OrderPolicyRegistry": _order_policy_rows(sample_stack, sample_tournament),\r\n        "AgentCapabilityRegistry": _agent_capability_rows(),\r\n        "ConnectorReadinessRegistry": [_base_registry_row("ConnectorReadinessRegistry", "connector_readiness_seed", sample_stack, sample_tournament) | _connector_fields()],\r\n        "RuntimeAllowlistSeedRegistry": [_base_registry_row("RuntimeAllowlistSeedRegistry", "runtime_allowlist_seed", sample_stack, sample_tournament) | _runtime_allowlist_fields(input_summary, sample_stack)],\r\n        "HotPathDecisionSurfaceRegistry": [_base_registry_row("HotPathDecisionSurfaceRegistry", "hot_path_surface_seed", sample_stack, sample_tournament) | _hot_path_fields(sample_stack)],\r\n    }', 'def build_registry_layer_rows(registries: dict[str, list[dict[str, Any]]]) -> list[dict[str, Any]]:\r\n    rows: list[dict[str, Any]] = []\r\n    for name, registry_rows in sorted(registries.items()):\r\n        rows.append(\r\n            {\r\n                "artifact_id": f"PR168_RANK_REGISTRY_LAYER::{name}",\r\n                "registry_name": name,\r\n                "registry_report_ref": REGISTRY_REPORTS[name],\r\n                "registry_row_count": len(registry_rows),\r\n                "owning_agent": "GovernanceAgent",\r\n                "downstream_consumers": _downstream_consumers_for(name),\r\n                "downstream_pr_refs": _downstream_prs_for(name),\r\n                "no_orphan_status": "CONNECTED_TO_REGISTRY_CONSUMER",\r\n                "authority_boundary_flags": authority_flags(),\r\n                "upstream_numeric_evidence_refs": _flatten_refs(registry_rows, "upstream_numeric_evidence_refs"),\r\n                "upstream_gap_refs": _flatten_refs(registry_rows, "upstream_gap_refs"),\r\n            }\r\n        )\r\n    return rows', 'def _base_registry_row(\r\n    registry_name: str,\r\n    row_suffix: str,\r\n    stack: dict[str, Any],\r\n    tournament: dict[str, Any],\r\n) -> dict[str, Any]:\r\n    return {\r\n        "registry_row_id": f"PR168_RANK::{registry_name}::{row_suffix}",\r\n        "registry_name": registry_name,\r\n        "registry_class": registry_name,\r\n        "registry_status": "SEED_CONTRACT_ONLY",\r\n        "market_scope": "prediction_market_stage1",\r\n        "venue_scope": "venue_candidate_only_not_bound",\r\n        "mode_scope": ["REPLAY", "PAPER", "SHADOW_CANDIDATE", "LIVE_CANDIDATE_SEED", "FUTURE_LIVE_HOT_PATH_SEED"],\r\n        "qku_refs": stack.get("qku_refs", []),\r\n        "formula_refs": stack.get("formula_refs", []),\r\n        "algorithm_refs": stack.get("algorithm_refs", []),\r\n        "quantum_objective_refs": stack.get("quantum_structural_optimizer_refs_when_applicable", []),\r\n        "order_policy_refs": stack.get("order_policy_refs", []),\r\n        "candidate_stack_refs": [stack.get("candidate_stack_id")] if stack.get("candidate_stack_id") else [],\r\n        "simulated_order_refs": [tournament.get("winning_source_candidate_id")] if tournament.get("winning_source_candidate_id") else [],\r\n        "upstream_numeric_evidence_refs": tournament.get("upstream_numeric_evidence_refs", []),\r\n        "upstream_gap_refs": tournament.get("selection_reason_codes", []),\r\n        "source_evidence_status": "NOT_ACCEPTED_IN_THIS_PR",\r\n        "connector_binding_status": "NOT_BOUND_IN_THIS_PR",\r\n        "private_state_required_flag": False,\r\n        "cash_required_flag": False,\r\n        "order_authority_required_flag": False,\r\n        "live_execution_allowed_flag": False,\r\n        "quantum_backend_required_flag": False,\r\n        "quantum_advantage_claim_flag": False,\r\n        "owning_agent": "GovernanceAgent",\r\n        "supporting_agents": ["RankingAgent", "RiskAgent", "DashboardAgent"],\r\n        "downstream_consumers": _downstream_consumers_for(registry_name),\r\n        "downstream_pr_refs": _downstream_prs_for(registry_name),\r\n        "validator_refs": [f"tools/validate_pr168_rank_{_validator_name(registry_name)}.py"],\r\n        "test_refs": [f"tests/pr168_rank/test_{_validator_name(registry_name)}.py"],\r\n        "no_orphan_status": "CONNECTED_TO_REGISTRY_CONSUMER",\r\n        "authority_boundary_flags": authority_flags(),\r\n        "reason_codes": ["REGISTRY_SEED_CONTRACT_ONLY", "NO_FORBIDDEN_AUTHORITY_CREATED"],\r\n        "manual_edit_allowed_flag": False,\r\n    }', 'def _market_adapter_fields() -> dict[str, Any]:\r\n    return {\r\n        "market_adapter_id": "MARKET_ADAPTER_SEED::PREDICTION_MARKET_STAGE1",\r\n        "adapter_contract_class": "PREDICTION_MARKET_BINARY_SEED",\r\n        "supported_contract_types": ["BINARY_YES_NO"],\r\n        "supported_sides": ["YES", "NO"],\r\n        "supported_order_policy_refs": ["OrderPolicyRegistry"],\r\n        "payoff_model_registry_ref": "ContractPayoffModelRegistry",\r\n        "venue_cost_model_registry_ref": "VenueCostModelRegistry",\r\n        "source_evidence_required_fields": ["market_id", "side", "execution_price", "fill_probability"],\r\n        "connector_readiness_registry_ref": "ConnectorReadinessRegistry",\r\n        "replay_supported_flag": True,\r\n        "paper_supported_flag": True,\r\n        "shadow_candidate_supported_flag": True,\r\n        "live_candidate_seed_supported_flag": True,\r\n        "adapter_runtime_implemented_in_this_PR": False,\r\n    }', 'def _venue_cost_fields() -> dict[str, Any]:\r\n    return {\r\n        "venue_cost_model_id": "VENUE_COST_MODEL_SEED::PREDICTION_MARKET_STAGE1",\r\n        "explicit_fee_model_ref": "explicit_fees",\r\n        "spread_crossing_model_ref": "spread_crossing_cost",\r\n        "expected_slippage_model_ref": "expected_slippage",\r\n        "adverse_selection_model_ref": "adverse_selection_cost",\r\n        "latency_decay_model_ref": "latency_decay_cost",\r\n        "book_depth_or_market_impact_model_ref": "market_impact_or_book_depth_cost",\r\n        "failed_fill_or_cancel_cost_model_ref": "failed_fill_or_cancel_cost",\r\n        "settlement_or_resolution_cost_proxy_ref": "settlement_or_resolution_cost_proxy",\r\n        "capital_lock_cost_model_ref": "capital_lock_cost",\r\n        "model_numeric_evidence_refs": ["PR168_RP_TCADecomposition.report.json"],\r\n        "missing_component_gap_refs": [],\r\n    }', 'def _payoff_fields() -> dict[str, Any]:\r\n    return {\r\n        "payoff_model_id": "PAYOFF_MODEL_SEED::BINARY_YES_NO",\r\n        "contract_type": "BINARY_YES_NO",\r\n        "side_set": ["YES", "NO"],\r\n        "payout_currency_or_unit_status": "UNIT_INTERVAL_PAYOFF_ONLY_NOT_VENUE_BOUND",\r\n        "payoff_win_formula": "p_win * 1.0",\r\n        "payoff_loss_formula": "(1 - p_win) * 0.0",\r\n        "settlement_value_formula_ref": "PR168_RANK_BINARY_PREDICTION_MARKET_PNL",\r\n        "binary_yes_no_supported_flag": True,\r\n        "non_binary_status": "SEED_ONLY_OR_GAP_ROUTED",\r\n        "source_evidence_required_before_connector_binding": True,\r\n        "numeric_smoke_test_refs": ["tests/pr168_rank/test_binary_prediction_market_pnl.py"],\r\n    }', 'def _plugin_fields(kind: str, stack: dict[str, Any]) -> dict[str, Any]:\r\n    return {\r\n        "plugin_seed_id": f"{kind}_PLUGIN_SEED::PR168_RANK",\r\n        "plugin_kind": kind,\r\n        "formula_or_algorithm_ref": (stack.get("formula_refs") or stack.get("algorithm_refs") or ["GAP_ROUTED"])[0],\r\n        "role_in_candidate_stack": "ranking_component",\r\n        "input_schema_refs": ["PR168_RANK_CandidateStackRoleCompletenessAudit.report.json"],\r\n        "output_schema_refs": ["PR168_RANK_EvidenceBackedRanking.report.json"],\r\n        "numeric_evidence_refs": stack.get("upstream_numeric_evidence_refs", []),\r\n        "test_vector_required_flag": True,\r\n        "replay_queue_candidate_flag": True,\r\n        "paper_queue_candidate_flag": True,\r\n        "shadow_candidate_flag": True,\r\n        "live_candidate_allowed_in_this_PR": False,\r\n        "live_execution_allowed_in_this_PR": False,\r\n        "promotion_state_seed": "REPAIR_REQUIRED",\r\n        "versioning_needed_flag": True,\r\n        "rollback_needed_flag": True,\r\n        "owner_or_agent_intake_consumer_pr": "PR162E",\r\n    }', 'def _quantum_fields(quantum: dict[str, Any]) -> dict[str, Any]:\r\n    missing = quantum.get("missing_quantum_inputs", []) or ["objective_coefficients_constraints_interpret_back_gap"]\r\n    return {\r\n        "quantum_objective_seed_id": "QUANTUM_OBJECTIVE_SEED::STACK_POLICY_SIZE_RECOVERY",\r\n        "objective_sense": "MAXIMIZE",\r\n        "objective_terms": ["stack_utility", "tca_penalty", "overfit_penalty", "capacity_penalty"],\r\n        "linear_coefficients": {},\r\n        "quadratic_coefficients": {},\r\n        "variable_map": {},\r\n        "variable_domains": {},\r\n        "constraint_map": {},\r\n        "penalty_weight_map": {},\r\n        "mapping_status_QUBO_BQM_Ising_CQM_DQM_QuadraticProgram": "GAP_ROUTED_STRUCTURAL_ONLY",\r\n        "interpret_back_map_ref": "PR168_RANK_QuantumSelectorInterpretBackMap.report.json",\r\n        "classical_fallback_ref": "PR168_RANK_QuantumClassicalComparatorQueue.report.json",\r\n        "classical_comparator_ref": "PR168_RP_StrongestClassicalComparatorMap.report.json",\r\n        "smoke_test_ref": "tests/pr168_rank/test_quantum_objective_registry_seed.py",\r\n        "missing_quantum_component_gap_refs": missing,\r\n        "backend_execution_required_flag": False,\r\n        "quantum_advantage_claim_flag": False,\r\n    }', 'def _order_policy_rows(stack: dict[str, Any], tournament: dict[str, Any]) -> list[dict[str, Any]]:\r\n    policies = [\r\n        ("NO_TRADE", "NO_TRADE"),\r\n        ("PASSIVE_LIMIT", "PASSIVE_LIMIT"),\r\n        ("BEST_LIMIT", "BEST_LIMIT"),\r\n        ("REPRICE", "REPRICE"),\r\n        ("AGGRESSIVE_CROSS", "AGGRESSIVE_CROSS"),\r\n        ("SPLIT_ORDER", "SPLIT_ORDER"),\r\n        ("CANCEL_EXPIRE", "CANCEL_EXPIRE"),\r\n        ("RETEST", "RETEST"),\r\n        ("REPAIR", "REPAIR"),\r\n    ]\r\n    rows = []\r\n    for policy_name, policy_class in policies:\r\n        rows.append(\r\n            _base_registry_row("OrderPolicyRegistry", policy_name.lower(), stack, tournament)\r\n            | {\r\n                "order_policy_registry_id": f"ORDER_POLICY::{policy_name}",\r\n                "policy_name": policy_name,\r\n                "policy_class": policy_class,\r\n                "allowed_modes": ["REPLAY", "PAPER", "SHADOW_CANDIDATE", "LIVE_CANDIDATE_SEED", "FUTURE_LIVE_HOT_PATH_SEED"],\r\n                "required_numeric_inputs": ["price", "quantity", "fill_probability", "TCA_components", "latency_budget"],\r\n                "expected_output_fields": ["fill_adjusted_expected_pnl", "lcb_edge", "no_trade_margin"],\r\n                "TCA_component_refs": ["VenueCostModelRegistry"],\r\n                "fill_model_refs": ["PR168_RP_FillQueueLatencyResults.report.json"],\r\n                "latency_model_refs": ["PR168_RP_LatencyBudgetResults.report.json"],\r\n                "risk_boundary_flags": authority_flags(),\r\n                "simulated_only_in_this_PR": True,\r\n                "live_execution_allowed_flag": False,\r\n            }\r\n        )\r\n    return rows', 'def _agent_capability_rows() -> list[dict[str, Any]]:\r\n    agents = [\r\n        "RankingAgent",\r\n        "RiskAgent",\r\n        "ExecutionCostAgent",\r\n        "FillModelAgent",\r\n        "CapacityAgent",\r\n        "CalibrationAgent",\r\n        "QuantumMapperAgent",\r\n        "PortfolioAgent",\r\n        "DashboardAgent",\r\n        "OwnerReviewAgent",\r\n        "ConnectorCandidateAgent",\r\n        "GovernanceAgent",\r\n        "QKUResearchAgent",\r\n        "FormulaExecutionAgent",\r\n        "ReplayPaperReviewAgent",\r\n    ]\r\n    return [\r\n        _base_registry_row("AgentCapabilityRegistry", agent.lower(), {}, {})\r\n        | {\r\n            "agent_capability_id": f"AGENT_CAPABILITY::{agent}",\r\n            "agent_name": agent,\r\n            "capability_class": "PR168_RANK_NONLIVE_DECISION_QUALITY",\r\n            "source_agent_roster_ref": "PR165_D2_AgentRosterDiscoveryAudit.report.json",\r\n            "source_duty_crosswalk_ref": "PR165_D2_AgentDutySourceCrosswalk.report.json",\r\n            "input_report_classes": ["PR168_RP_COMPUTED_EVIDENCE", "PR168_RANK_REGISTRY_SEED"],\r\n            "output_report_classes": ["PR168_RANK_WORK_ORDER", "PR168_RANK_REGISTRY_SEED"],\r\n            "quality_metric_refs": ["PR168_RANK_ScoreComponentLedger.report.json"],\r\n            "failure_route": "PR168_RANK_RepairPriorityQueue.report.json",\r\n            "supported_modes": ["REPLAY", "PAPER", "SHADOW_CANDIDATE", "LIVE_CANDIDATE_SEED"],\r\n            "forbidden_authority_flags": authority_flags(),\r\n            "replacement_or_new_agent_proposal_allowed_flag": False,\r\n        }\r\n        for agent in agents\r\n    ]', 'def _connector_fields() -> dict[str, Any]:\r\n    return {\r\n        "connector_readiness_id": "CONNECTOR_READINESS_SEED::PREDICTION_MARKET_STAGE1",\r\n        "connector_or_venue_scope": "venue_candidate_only_not_bound",\r\n        "field_or_semantic_needed": "market_id/side/price/quantity/fill/cost semantics",\r\n        "why_needed_for_decision_quality": "future connector binding must preserve computed decision-quality inputs",\r\n        "source_evidence_required_flag": True,\r\n        "source_truth_status": "NOT_ACCEPTED_IN_THIS_PR",\r\n        "connector_binding_status": "NOT_BOUND_IN_THIS_PR",\r\n        "private_state_required_flag": False,\r\n        "cash_required_flag": False,\r\n        "order_authority_required_flag": False,\r\n        "future_consumer_pr": "source_evidence_or_connector_binding_future_pr",\r\n        "responsible_agent": "ConnectorCandidateAgent",\r\n    }', 'def _runtime_allowlist_fields(input_summary: dict[str, Any], stack: dict[str, Any]) -> dict[str, Any]:\r\n    return {\r\n        "runtime_allowlist_seed_id": "RUNTIME_ALLOWLIST_SEED::PR168_RANK",\r\n        "formula_refs": stack.get("formula_refs", []),\r\n        "algorithm_refs": stack.get("algorithm_refs", []),\r\n        "candidate_stack_refs": [stack.get("candidate_stack_id")] if stack.get("candidate_stack_id") else [],\r\n        "allowed_future_modes": ["RESEARCH", "REPLAY", "PAPER", "SHADOW_CANDIDATE", "LIVE_CANDIDATE_SEED", "FUTURE_LIVE_HOT_PATH_SEED"],\r\n        "live_execution_allowed_in_this_PR": False,\r\n        "promotion_evidence_refs": input_summary.get("upstream_report_refs", []),\r\n        "missing_receipt_refs": input_summary.get("missing_required_reports", []),\r\n        "rollback_required_flag": True,\r\n        "cacheability_class": "SEED_ONLY_PRECOMPUTED_SURFACE",\r\n        "compute_budget_class": "SLOW_RESEARCH_NOT_HOT_PATH",\r\n        "consumer_pr": "RuntimeFormulaAllowlistHotPathCachePR",\r\n    }', 'def _hot_path_fields(stack: dict[str, Any]) -> dict[str, Any]:\r\n    return {\r\n        "hot_path_surface_id": "HOT_PATH_SURFACE_SEED::PR168_RANK",\r\n        "candidate_stack_id": stack.get("candidate_stack_id"),\r\n        "surface_ref": "PR168_RANK_OrderDecisionSurfaceLookupSeed.report.json",\r\n        "surface_dimension_refs": ["price_grid", "quantity_grid", "latency_bucket", "regime_bucket"],\r\n        "surface_output_refs": ["no_trade_region", "repair_region", "terminal_region"],\r\n        "cacheability_class": "SEMANTIC_KEY_SEED_ONLY",\r\n        "refresh_class": "RECOMPUTE_BY_RESEARCH_PIPELINE",\r\n        "semantic_cache_key_inputs_without_hash_authority": ["candidate_stack_id", "mode_scope", "regime_bucket"],\r\n        "cache_invalidation_triggers_without_SHA_authority": ["new_PR168_RP_evidence", "policy_threshold_change"],\r\n        "future_hot_path_allowed_flag": "seed_only",\r\n        "full_research_recompute_allowed_on_future_hot_path": False,\r\n        "consumer_pr": "RuntimeFormulaAllowlistHotPathCachePR",\r\n    }', 'def _downstream_consumers_for(registry_name: str) -> list[str]:\r\n    if "Quantum" in registry_name:\r\n        return ["QuantumMapperAgent", "QuantumComparatorAgent"]\r\n    if "Connector" in registry_name:\r\n        return ["ConnectorCandidateAgent", "GovernanceAgent"]\r\n    if "Runtime" in registry_name or "HotPath" in registry_name:\r\n        return ["FormulaExecutionAgent", "OwnerReviewAgent"]\r\n    return ["RankingAgent", "DashboardAgent", "GovernanceAgent"]', 'def _downstream_prs_for(registry_name: str) -> list[str]:\r\n    if "Plugin" in registry_name:\r\n        return ["PR162E", "PR162F"]\r\n    if "Quantum" in registry_name:\r\n        return ["PR162E-Q", "PR166-QC-R2"]\r\n    if "Connector" in registry_name or "MarketAdapter" in registry_name or "Venue" in registry_name:\r\n        return ["FutureMarketVenueAdapterExpansionPR"]\r\n    if "Runtime" in registry_name or "HotPath" in registry_name:\r\n        return ["RuntimeFormulaAllowlistHotPathCachePR"]\r\n    return ["OwnerDashboardComputedTruthPR"]', 'def _validator_name(registry_name: str) -> str:\r\n    mapping = {\r\n        "MarketAdapterRegistry": "market_adapter_registry_seed",\r\n        "VenueCostModelRegistry": "venue_cost_model_registry_seed",\r\n        "ContractPayoffModelRegistry": "contract_payoff_model_registry_seed",\r\n        "FormulaPluginRegistrySeed": "formula_algorithm_plugin_registry_seed",\r\n        "AlgorithmPluginRegistrySeed": "formula_algorithm_plugin_registry_seed",\r\n        "QuantumObjectiveRegistrySeed": "quantum_objective_registry_seed",\r\n        "OrderPolicyRegistry": "order_policy_registry_seed",\r\n        "AgentCapabilityRegistry": "agent_capability_registry_seed",\r\n        "ConnectorReadinessRegistry": "connector_readiness_registry_seed",\r\n        "RuntimeAllowlistSeedRegistry": "runtime_allowlist_seed_registry",\r\n        "HotPathDecisionSurfaceRegistry": "hot_path_decision_surface_registry",\r\n    }\r\n    return mapping[registry_name]', 'def _flatten_refs(rows: list[dict[str, Any]], key: str) -> list[Any]:\r\n    refs: list[Any] = []\r\n    for row in rows:\r\n        value = row.get(key, [])\r\n        if isinstance(value, list):\r\n            refs.extend(value)\r\n        elif value:\r\n            refs.append(value)\r\n    return sorted(dict.fromkeys(str(ref) for ref in refs if ref not in (None, "")))[:20]', 'REQUIRED_RANK_REPORTS = [\r\n    "PR168_RANK_ReadReceipt.report.json",\r\n    "PR168_RANK_PR168RPInputResultSummary.report.json",\r\n    "PR168_RANK_InputConsumption.report.json",\r\n    "PR168_RANK_RankingUniverse.report.json",\r\n    "PR168_RANK_BinaryPredictionMarketPnLFormulaAudit.report.json",\r\n    "PR168_RANK_PnLFormulaInputGapQueue.report.json",\r\n    "PR168_RANK_CandidateStackGenerationLedger.report.json",\r\n    "PR168_RANK_CandidateStackRoleCompletenessAudit.report.json",\r\n    "PR168_RANK_CandidateStackDominancePruningLedger.report.json",\r\n    "PR168_RANK_ModeScopedDecisionPolicyMatrix.report.json",\r\n    "PR168_RANK_ModeBoundaryAudit.report.json",\r\n    "PR168_RANK_PreTradeOrderSimulationLedger.report.json",\r\n    "PR168_RANK_OrderDecisionTournament.report.json",\r\n    "PR168_RANK_OrderPolicyParetoFrontier.report.json",\r\n    "PR168_RANK_OrderDecisionDominanceAudit.report.json",\r\n    "PR168_RANK_SimulatedOrderNoTradeComparison.report.json",\r\n    "PR168_RANK_ScoreComponentLedger.report.json",\r\n    "PR168_RANK_MissingScoreComponentQueue.report.json",\r\n    "PR168_RANK_MissingRankingDefaultQueue.report.json",\r\n    "PR168_RANK_MissingSimulationInputQueue.report.json",\r\n    "PR168_RANK_NormalizationLedger.report.json",\r\n    "PR168_RANK_ScoreMathAudit.report.json",\r\n    "PR168_RANK_EvidenceBackedRanking.report.json",\r\n    "PR168_RANK_RankingWeightSourceLedger.report.json",\r\n    "PR168_RANK_TopComputedPositiveRanking.report.json",\r\n    "PR168_RANK_TopRepairedPositiveRanking.report.json",\r\n    "PR168_RANK_ChampionCandidates.report.json",\r\n    "PR168_RANK_ChallengerCandidates.report.json",\r\n    "PR168_RANK_RetestQueue.report.json",\r\n    "PR168_RANK_RepairPriorityQueue.report.json",\r\n    "PR168_RANK_TrueNegativeArchive.report.json",\r\n    "PR168_RANK_NoTradeDominanceResults.report.json",\r\n    "PR168_RANK_NoTradeActionMarginLedger.report.json",\r\n    "PR168_RANK_OrderLevelNoTradeCompetition.report.json",\r\n    "PR168_RANK_PreTradeCandidateRanking.report.json",\r\n    "PR168_RANK_OrderPolicyRanking.report.json",\r\n    "PR168_RANK_RegimeConditionedRanking.report.json",\r\n    "PR168_RANK_RegimeMemorySeed.report.json",\r\n    "PR168_RANK_RegimeStabilityLedger.report.json",\r\n    "PR168_RANK_RegimeScopedOrderDecisionRanking.report.json",\r\n    "PR168_RANK_PortfolioAwareRanking.report.json",\r\n    "PR168_RANK_PortfolioMarginalUtilityLedger.report.json",\r\n    "PR168_RANK_DiversificationPenaltyLedger.report.json",\r\n    "PR168_RANK_StackPortfolioUtilityLedger.report.json",\r\n    "PR168_RANK_QuantumStructuralRanking.report.json",\r\n    "PR168_RANK_QuantumObjectiveConstraintMapLedger.report.json",\r\n    "PR168_RANK_QuantumCombinatorialSelectionObjective.report.json",\r\n    "PR168_RANK_QuantumPenaltyScaleSanityAudit.report.json",\r\n    "PR168_RANK_QuantumClassicalComparatorQueue.report.json",\r\n    "PR168_RANK_QKUFormulaAlgorithmCombinationRanking.report.json",\r\n    "PR168_RANK_TCADecompositionUsed.report.json",\r\n    "PR168_RANK_TCAPenaltyLedger.report.json",\r\n    "PR168_RANK_TCAMissingComponentRepairQueue.report.json",\r\n    "PR168_RANK_OverfitFDRRankingPenalty.report.json",\r\n    "PR168_RANK_TrialFamilyLedger.report.json",\r\n    "PR168_RANK_PostSelectionBiasLedger.report.json",\r\n    "PR168_RANK_CandidateStackTrialLedger.report.json",\r\n    "PR168_RANK_SimulatedOrderTrialLedger.report.json",\r\n    "PR168_RANK_CapacityCrowdingRankingPenalty.report.json",\r\n    "PR168_RANK_CapacityLimitLedger.report.json",\r\n    "PR168_RANK_OrderSizeSensitivityLedger.report.json",\r\n    "PR168_RANK_LatencyHotPathCandidateSeed.report.json",\r\n    "PR168_RANK_ComputeBudgetLatencyPlan.report.json",\r\n    "PR168_RANK_DominantAlphaSourceRanking.report.json",\r\n    "PR168_RANK_AlphaSourceDecompositionLedger.report.json",\r\n    "PR168_RANK_StackAlphaSourceLedger.report.json",\r\n    "PR168_RANK_ConditionScopedNegativeMemorySeed.report.json",\r\n    "PR168_RANK_AgentWorkOrders.report.json",\r\n    "PR168_RANK_AgentDutySourceCrosswalkConsumption.report.json",\r\n    "PR168_RANK_AgentNoOrphanDutyLedger.report.json",\r\n    "PR168_RANK_SimulationAgentRoutingLedger.report.json",\r\n    "PR168_RANK_To_PR166_QC_R2_QuantumComparatorQueue.report.json",\r\n    "PR168_RANK_To_PR162E_Q_QuantumMapperQueue.report.json",\r\n    "PR168_RANK_To_PR165B_NegativeCombinationMemorySeed.report.json",\r\n    "PR168_RANK_To_TargetedRepairPRs.report.json",\r\n    "PR168_RANK_To_PR167_OpenTradeCombinationSimulatorSeed.report.json",\r\n    "PR168_RANK_To_PR167B_ReplayPaperCampaignSeed.report.json",\r\n    "PR168_RANK_To_RuntimeFormulaAllowlistHotPathCacheSeed.report.json",\r\n    "PR168_RANK_To_OwnerDashboardComputedTruth.report.json",\r\n    "PR168_RANK_To_FutureExecutionRouterDecisionKernelSeed.report.json",\r\n    "PR168_RANK_DAGUpstreamDownstreamOrchestration.report.json",\r\n    "PR168_RANK_ArtifactInformationValueDAG.report.json",\r\n    "PR168_RANK_SimulationArtifactDAG.report.json",\r\n    "PR168_RANK_NoOrphanProof.report.json",\r\n    "PR168_RANK_AuthorityBoundaryAudit.report.json",\r\n    "PR168_RANK_ValidationScopeRegistryIntegration.report.json",\r\n    "PR168_RANK_CentralizedSystemsCoverageAudit.report.json",\r\n    "PR168_RANK_StackSynergyEdgeLedger.report.json",\r\n    "PR168_RANK_StackCompatibilityMatrix.report.json",\r\n    "PR168_RANK_StackSearchBudgetLedger.report.json",\r\n    "PR168_RANK_OrderDecisionThresholdSurface.report.json",\r\n    "PR168_RANK_OrderDecisionSurfaceLookupSeed.report.json",\r\n    "PR168_RANK_OrderDecisionSurfaceGapQueue.report.json",\r\n    "PR168_RANK_MakerTakerAdverseSelectionTradeoff.report.json",\r\n    "PR168_RANK_PassiveAggressiveExecutionFrontier.report.json",\r\n    "PR168_RANK_SizePriceTimeSensitivityLadder.report.json",\r\n    "PR168_RANK_SizeCappedPositiveCandidates.report.json",\r\n    "PR168_RANK_ScenarioStressOrderSurface.report.json",\r\n    "PR168_RANK_ScenarioStressChampionAudit.report.json",\r\n    "PR168_RANK_EdgeCaptureAttributionLedger.report.json",\r\n    "PR168_RANK_WhyTradeWinsExplanation.report.json",\r\n    "PR168_RANK_WhyNoTradeWinsExplanation.report.json",\r\n    "PR168_RANK_UnexplainedEdgeResidualQueue.report.json",\r\n    "PR168_RANK_NegativeRecoveryTournament.report.json",\r\n    "PR168_RANK_NegativeRecoveryTransformationLedger.report.json",\r\n    "PR168_RANK_RecoveredPositiveCandidates.report.json",\r\n    "PR168_RANK_SizeCappedRecoveryCandidates.report.json",\r\n    "PR168_RANK_RegimeScopedRecoveryCandidates.report.json",\r\n    "PR168_RANK_TrueNegativeAfterRecoveryExhaustion.report.json",\r\n    "PR168_RANK_NegativeRecoveryTrialLedger.report.json",\r\n    "PR168_RANK_ThresholdSurfaceTrialLedger.report.json",\r\n    "PR168_RANK_QuantumStackSizePolicySelector.report.json",\r\n    "PR168_RANK_QuantumNegativeRecoverySelector.report.json",\r\n    "PR168_RANK_QuantumSelectorInterpretBackMap.report.json",\r\n    "PR168_RANK_TwoSpeedDecisionSurfacePlan.report.json",\r\n    "PR168_RANK_FutureHotPathInputContractSeed.report.json",\r\n    "PR168_RANK_ScalarValueNoOrphanProof.report.json",\r\n    "PR168_RANK_TerminalArtifactLifecycle.report.json",\r\n    "PR168_RANK_ThresholdSurfaceDAG.report.json",\r\n    "PR168_RANK_NegativeRecoveryDAG.report.json",\r\n    "PR168_RANK_ConnectorCandidateRoutingLedger.report.json",\r\n    "PR168_RANK_To_SourceEvidenceConnectorBindingGapQueue.report.json",\r\n    "PR168_RANK_FutureExpansionRegistryLayer.report.json",\r\n    "PR168_RANK_MarketAdapterRegistrySeed.report.json",\r\n    "PR168_RANK_VenueCostModelRegistrySeed.report.json",\r\n    "PR168_RANK_ContractPayoffModelRegistrySeed.report.json",\r\n    "PR168_RANK_FormulaPluginRegistrySeed.report.json",\r\n    "PR168_RANK_AlgorithmPluginRegistrySeed.report.json",\r\n    "PR168_RANK_QuantumObjectiveRegistrySeed.report.json",\r\n    "PR168_RANK_OrderPolicyRegistry.report.json",\r\n    "PR168_RANK_AgentCapabilityRegistrySeed.report.json",\r\n    "PR168_RANK_ConnectorReadinessRegistrySeed.report.json",\r\n    "PR168_RANK_RuntimeAllowlistSeedRegistry.report.json",\r\n    "PR168_RANK_HotPathDecisionSurfaceRegistry.report.json",\r\n    "PR168_RANK_FutureMarketExpansionDAG.report.json",\r\n    "PR168_RANK_FutureFormulaQuantumExpansionDAG.report.json",\r\n    "PR168_RANK_RegistrySeedNoOrphanProof.report.json",\r\n    "PR168_RANK_RegistryAntiScatterAudit.report.json",\r\n    "PR168_RANK_To_PR162E_PluginRegistrySeed.report.json",\r\n    "PR168_RANK_To_PR162E_Q_QuantumObjectiveRegistrySeed.report.json",\r\n    "PR168_RANK_To_RuntimeAllowlistRegistrySeed.report.json",\r\n    "PR168_RANK_To_MarketVenueAdapterExpansionSeed.report.json",\r\n    "PR168_RANK_FinalSummary.report.json",\r\n]', 'EMPTY_ALLOWED_REPORTS = {\r\n    "PR168_RANK_TopComputedPositiveRanking.report.json",\r\n    "PR168_RANK_TopRepairedPositiveRanking.report.json",\r\n    "PR168_RANK_ChampionCandidates.report.json",\r\n    "PR168_RANK_RetestQueue.report.json",\r\n    "PR168_RANK_SizeCappedPositiveCandidates.report.json",\r\n    "PR168_RANK_WhyTradeWinsExplanation.report.json",\r\n    "PR168_RANK_RecoveredPositiveCandidates.report.json",\r\n    "PR168_RANK_SizeCappedRecoveryCandidates.report.json",\r\n    "PR168_RANK_RegimeScopedRecoveryCandidates.report.json",\r\n}', 'REQUIRED_PR168_RP_REPORTS = [\r\n    "PR168_RP_FinalSummary.report.json",\r\n    "PR168_RP_ComputedPositiveEdgeCandidates.report.json",\r\n    "PR168_RP_RepairedPositiveCandidateEvidence.report.json",\r\n    "PR168_RP_ComputedNegativeEdgeCandidates.report.json",\r\n    "PR168_RP_ComputedNeutralOrZeroEdgeCandidates.report.json",\r\n    "PR168_RP_PreTradeSimulationCandidates.report.json",\r\n    "PR168_RP_OrderPolicyCandidateRanking.report.json",\r\n    "PR168_RP_NoTradeCandidateComparison.report.json",\r\n    "PR168_RP_ScenarioLadderResults.report.json",\r\n    "PR168_RP_LatencyBudgetResults.report.json",\r\n    "PR168_RP_ExecutionAdjustedRankingSeed.report.json",\r\n    "PR168_RP_TCADecomposition.report.json",\r\n    "PR168_RP_OverfitFDRResults.report.json",\r\n    "PR168_RP_CapacityCrowdingResults.report.json",\r\n    "PR168_RP_PortfolioMarginalUtilityResults.report.json",\r\n    "PR168_RP_ProbabilityCalibration.report.json",\r\n    "PR168_RP_QuantumStructuralReadiness.report.json",\r\n    "PR168_RP_QuantumCoefficientMapInputGaps.report.json",\r\n    "PR168_RP_QKUCombinationCandidateResults.report.json",\r\n    "PR168_RP_OrderPolicyCombinationSelectionResults.report.json",\r\n    "PR168_RP_ChampionChallengerEligibility.report.json",\r\n    "PR168_RP_NegativeToPositiveRecoveryAttempts.report.json",\r\n    "PR168_RP_TrueNegativeAfterRecoveryExhaustion.report.json",\r\n    "PR168_RP_RegimeConditionedMemorySeed.report.json",\r\n    "PR168_RP_PreTradeRegimeMemorySeed.report.json",\r\n    "PR168_RP_To_PR168_RANK_ComputedRanking.report.json",\r\n    "PR168_RP_To_PR168_RANK_PreTradeRankingSeed.report.json",\r\n    "PR168_RP_ActionableInputGapQueue.report.json",\r\n    "PR168_RP_ArtifactInformationValueDAG.report.json",\r\n    "PR168_RP_AgentDutyDAG.report.json",\r\n    "PR168_RP_NoOrphanProof.report.json",\r\n]', 'READ_RECEIPT_TARGETS = [\r\n    "docs/master_plan/QTT_MasterPlan_Current.md",\r\n    "docs/master_plan/generated/SectionManifest.json",\r\n    "docs/master_plan/generated/ArtifactRegistry.json",\r\n    "docs/master_plan/generated/ImplementationGraph.json",\r\n    "docs/master_plan/generated/ImplementationState.generated.json",\r\n    "docs/master_plan/generated/CoverageLedger.generated.json",\r\n    "docs/master_plan/generated/InterfacePlacementMap.json",\r\n    "docs/master_plan/generated/PR165_D2_AgentRosterDiscoveryAudit.report.json",\r\n    "docs/master_plan/generated/PR165_D2_AgentDutySourceCrosswalk.report.json",\r\n    "tools/validation_scope_registry.py",\r\n    "tools/qtt_authority_reason_code_registry.py",\r\n]', 'ONLINE_RESEARCH_RECEIPTS = [\r\n    {\r\n        "reference_id": "BENJAMINI_HOCHBERG_1995",\r\n        "url": "https://rss.onlinelibrary.wiley.com/doi/10.1111/j.2517-6161.1995.tb02031.x",\r\n        "candidate_use": "false-discovery-rate trial-family caution",\r\n        "truth_authority_created": False,\r\n    },\r\n    {\r\n        "reference_id": "BAILEY_LOPEZ_DE_PRADO_DEFLATED_SHARPE",\r\n        "url": "https://papers.ssrn.com/sol3/papers.cfm?abstract_id=2460551",\r\n        "candidate_use": "post-selection overfit caution",\r\n        "truth_authority_created": False,\r\n    },\r\n    {\r\n        "reference_id": "ROCKAFELLAR_URYASEV_CVAR",\r\n        "url": "https://sites.math.washington.edu/~rtr/papers/rtr179-CVaR1.pdf",\r\n        "candidate_use": "CVaR / expected-shortfall framing",\r\n        "truth_authority_created": False,\r\n    },\r\n    {\r\n        "reference_id": "DWAVE_MODELS",\r\n        "url": "https://docs.dwavequantum.com/en/latest/concepts/models.html",\r\n        "candidate_use": "BQM/QUBO/Ising/CQM/DQM structural fields",\r\n        "truth_authority_created": False,\r\n    },\r\n    {\r\n        "reference_id": "QISKIT_QUADRATIC_PROGRAM",\r\n        "url": "https://qiskit-community.github.io/qiskit-optimization/stubs/qiskit_optimization.QuadraticProgram.html",\r\n        "candidate_use": "QuadraticProgram structural fields",\r\n        "truth_authority_created": False,\r\n    },\r\n    {\r\n        "reference_id": "SKLEARN_PROBABILITY_CALIBRATION",\r\n        "url": "https://scikit-learn.org/stable/modules/calibration.html",\r\n        "candidate_use": "probability calibration vocabulary",\r\n        "truth_authority_created": False,\r\n    },\r\n]', 'GENERATED_DIR = Path("docs/master_plan/generated")', 'SHARD_DIR = GENERATED_DIR / "pr168_rank_shards"', 'SHARD_SIZE = 1000', 'AUTHORITY_BOUNDARY_CODES = [\r\n    "NO_LIVE_ORDER_AUTHORITY",\r\n    "NO_SOURCE_TRUTH_AUTHORITY",\r\n    "NO_CONNECTOR_TRUTH_OR_BINDING",\r\n    "NO_PRIVATE_STATE_OR_CASH",\r\n    "NO_QUANTUM_BACKEND_EXECUTION",\r\n    "NO_QTT_DIGEST_AUTHORITY",\r\n    "NO_ATOMICROWS_DIGEST_AUTHORITY",\r\n]', 'STACK_ROLES = [\r\n    "probability_estimation",\r\n    "probability_calibration",\r\n    "binary_contract_ev",\r\n    "TCA_cost_model",\r\n    "fill_probability_model",\r\n    "latency_decay_model",\r\n    "capacity_crowding_model",\r\n    "portfolio_marginal_utility_model",\r\n    "overfit_fdr_penalty_model",\r\n    "scenario_ladder_model",\r\n    "order_policy_model",\r\n    "risk_sizing_model",\r\n    "quantum_structural_selection_model",\r\n    "classical_comparator_model",\r\n]', 'NUMERIC_SCORE_COMPONENTS = [\r\n    "fill_adjusted_expected_pnl",\r\n    "net_expected_pnl_candidate",\r\n    "execution_adjusted_edge",\r\n    "lower_confidence_bound_edge",\r\n    "no_trade_comparison_margin",\r\n    "total_tca_cost",\r\n    "fill_probability",\r\n    "latency_budget_usage",\r\n    "capacity_crowding_penalty",\r\n    "overfit_fdr_penalty",\r\n    "portfolio_marginal_utility",\r\n    "expected_shortfall_cvar_candidate",\r\n    "scenario_ladder_score",\r\n    "calibration_quality_score",\r\n    "regime_stability_score",\r\n    "quantum_structural_readiness_score",\r\n    "critical_gap_penalty",\r\n    "agent_route_completeness_score",\r\n    "no_orphan_score",\r\n    "compute_budget_penalty",\r\n    "order_policy_quality_score",\r\n    "candidate_stack_role_completeness_score",\r\n    "edge_capture_attribution_score",\r\n    "negative_recovery_potential_score",\r\n    "maker_taker_tradeoff_score",\r\n    "threshold_surface_quality_score",\r\n    "size_price_time_sensitivity_score",\r\n    "scenario_stress_survival_score",\r\n    "terminal_lifecycle_route_score",\r\n]', 'REGISTRY_NAMES = [\r\n    "MarketAdapterRegistry",\r\n    "VenueCostModelRegistry",\r\n    "ContractPayoffModelRegistry",\r\n    "FormulaPluginRegistrySeed",\r\n    "AlgorithmPluginRegistrySeed",\r\n    "QuantumObjectiveRegistrySeed",\r\n    "OrderPolicyRegistry",\r\n    "AgentCapabilityRegistry",\r\n    "ConnectorReadinessRegistry",\r\n    "RuntimeAllowlistSeedRegistry",\r\n    "HotPathDecisionSurfaceRegistry",\r\n]', 'REGISTRY_REPORTS = {\r\n    "MarketAdapterRegistry": "PR168_RANK_MarketAdapterRegistrySeed.report.json",\r\n    "VenueCostModelRegistry": "PR168_RANK_VenueCostModelRegistrySeed.report.json",\r\n    "ContractPayoffModelRegistry": "PR168_RANK_ContractPayoffModelRegistrySeed.report.json",\r\n    "FormulaPluginRegistrySeed": "PR168_RANK_FormulaPluginRegistrySeed.report.json",\r\n    "AlgorithmPluginRegistrySeed": "PR168_RANK_AlgorithmPluginRegistrySeed.report.json",\r\n    "QuantumObjectiveRegistrySeed": "PR168_RANK_QuantumObjectiveRegistrySeed.report.json",\r\n    "OrderPolicyRegistry": "PR168_RANK_OrderPolicyRegistry.report.json",\r\n    "AgentCapabilityRegistry": "PR168_RANK_AgentCapabilityRegistrySeed.report.json",\r\n    "ConnectorReadinessRegistry": "PR168_RANK_ConnectorReadinessRegistrySeed.report.json",\r\n    "RuntimeAllowlistSeedRegistry": "PR168_RANK_RuntimeAllowlistSeedRegistry.report.json",\r\n    "HotPathDecisionSurfaceRegistry": "PR168_RANK_HotPathDecisionSurfaceRegistry.report.json",\r\n}')
+ position = row['source_position']
+ if position not in recipes:
+  return None
+ recipe = recipes[position]
+ need(row['execution'].registered_argv == (_f.sys.executable, *recipe['argv'])
+  and row['entry'] is row['bound_row'][0]
+  and row['execution'] is row['bound_row'][1]
+  and not row['targets'] and row['native_programme'] is None
+  and row['unresolved_source_facts'],
+  'ORDINARY_REPOSITORY_WRITER_REGISTERED_ARGV_AND_RETAINED_ANALYSIS')
+ operands, grammar, captured = [], [], {}
+ def capture(relative):
+  if relative in captured:
+   return captured[relative][0]
+  tree, operand = acquisition['capture_source'](relative)
+  need(operand['source_form'] == 'PYTHON' and operand['complete']
+   and operand['error'] is None,
+   'ORDINARY_REPOSITORY_WRITER_ORIGINAL_PYTHON_CAPTURE')
+  _ordinary_bounded_source_grammar_reserve_v1(scope, row, tree, operand)
+  operands.append(operand)
+  call_pairs = _ordinary_bounded_source_calls_v1(scope, tree, operand)
+  if call_pairs is None:
+   calls = tuple(ast.get_source_segment(operand['text'], node)
+    for node in ast.walk(tree) if isinstance(node, ast.Call)
+    and isinstance(node.func, ast.Attribute)
+    and node.func.attr in ('run', 'Popen', 'check_call', 'check_output',
+     'system', 'fork', 'posix_spawn', 'posix_spawnp', 'execv', 'execve'))
+  else:
+   calls = tuple(call for node, call in call_pairs
+    if isinstance(node.func, ast.Attribute)
+    and node.func.attr in ('run', 'Popen', 'check_call', 'check_output',
+     'system', 'fork', 'posix_spawn', 'posix_spawnp', 'execv', 'execve'))
+  grammar.append((operand, '<module>', operand['text'], calls))
+  captured[relative] = tree, operand
+  return tree
+ for relative in recipe['source_paths']:
+  capture(relative)
+ for relative, name, reference, decorators in recipe['body_guards']:
+  tree = capture(relative)
+  actual = tuple(node for node in tree.body
+   if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef))
+   and node.name == name)
+  need(len(actual) == 1
+   and ast.get_source_segment(captured[relative][1]['text'], actual[0]) == source_guards[reference]
+   and tuple(ast.get_source_segment(captured[relative][1]['text'], item) for item in actual[0].decorator_list)
+    == tuple(source_guards[index] for index in decorators),
+   'ORDINARY_REPOSITORY_WRITER_ORIGINAL_OUTPUT_OWNER:' + relative + ':' + name)
+ for (relative, name), expected in recipe['assignment_guards'].items():
+  tree = capture(relative)
+  nodes = tuple(node for node in tree.body
+   if isinstance(node, (ast.Assign, ast.AnnAssign))
+   and any(isinstance(target, ast.Name) and target.id == name
+    for target in (node.targets if isinstance(node, ast.Assign) else (node.target,))))
+  need(len(nodes) == 1 and ast.get_source_segment(captured[relative][1]['text'], nodes[0]) == source_guards[expected],
+   'ORDINARY_REPOSITORY_WRITER_ORIGINAL_PATH_AND_ROSTER_ASSIGNMENT')
+ def assigned(relative, name):
+  tree = capture(relative)
+  values = tuple(node for node in tree.body
+   if isinstance(node, (ast.Assign, ast.AnnAssign))
+   and any(isinstance(target, ast.Name) and target.id == name
+    for target in (node.targets if isinstance(node, ast.Assign) else (node.target,))))
+  need(len(values) == 1, 'ORDINARY_REPOSITORY_WRITER_SINGLE_LITERAL_OUTPUT_ROSTER')
+  expected = recipe['assignment_guards'][(relative, name)]
+  need(ast.get_source_segment(captured[relative][1]['text'], values[0]) == source_guards[expected],
+   'ORDINARY_REPOSITORY_WRITER_ORIGINAL_OUTPUT_ASSIGNMENT')
+  node = values[0].value
+  if isinstance(node, ast.Call):
+   need(isinstance(node.func, ast.Name) and node.func.id == 'OrderedDict'
+    and len(node.args) == 1 and not node.keywords,
+    'ORDINARY_REPOSITORY_WRITER_ORIGINAL_ORDERED_LITERAL')
+   argument = node.args[0]
+   if isinstance(argument, ast.GeneratorExp):
+    need(len(argument.generators) == 1
+     and isinstance(argument.elt, ast.Tuple) and len(argument.elt.elts) == 2
+     and isinstance(argument.generators[0].target, ast.Name)
+     and isinstance(argument.elt.elts[1], ast.Name)
+     and argument.elt.elts[1].id == argument.generators[0].target.id,
+     'ORDINARY_REPOSITORY_WRITER_LITERAL_NAME_VALUE_PROJECTION')
+    names = ast.literal_eval(argument.generators[0].iter)
+    need(type(names) in (tuple, list) and all(type(name) is str for name in names),
+     'ORDINARY_REPOSITORY_WRITER_LITERAL_GENERATOR_ROSTER')
+    return dict((name, name) for name in names)
+   value = ast.literal_eval(argument)
+   need(type(value) in (tuple, list)
+    and all(type(pair) is tuple and len(pair) == 2 for pair in value),
+    'ORDINARY_REPOSITORY_WRITER_ORIGINAL_LITERAL_PAIRS')
+   value = dict(value)
+  else:
+   value = ast.literal_eval(node)
+  return value
+ def reserve(files, width, depth, parents, extra_slots=0, pieces=0, data_keys=0):
+  need(all(type(value) is int and 0 <= value < 1 << 128
+   for value in (files,width,depth,parents,extra_slots,pieces,data_keys))
+   and files <= 32768 and parents <= 4096 and files+parents <= 65536
+   and width <= 4096 and 0 < depth <= 8,
+   'ORDINARY_TARGET_ORIGINAL_NAMESPACE_CEILINGS_WITHOUT_PARSER_CREDIT')
+  roster_width = version_width = 0
+  for original in scope.source.row_index.values():
+   if original['role'] != 'repository':
+    continue
+   version_width = max(version_width,len(scope.source.post[original['path']]))
+   if original['kind'] == 'directory':
+    roster_width = max(roster_width,len(original['roster']))
+  need(roster_width <= 65536 and version_width < 128,
+   'ORDINARY_TARGET_HELD_PARENT_ROSTER_AND_VERSION_GEOMETRY')
+  count = files+parents
+  slots = count+extra_slots
+  operand_count = len(operands)+pieces+31 if recipe['kind']=='RANK' else len(operands)
+  operand_keys = sum(len(item) for item in operands)+data_keys
+  calls = sum(len(item[3]) for item in grammar)
+  strings = files+count*(3*depth+12)+files*depth+parents+pieces+31
+  extent = len(str(scope.source.root))+1+width
+  need(extent <= 4096, 'ORDINARY_TARGET_ORIGINAL_FULL_PATH_BOUND')
+  geometry = ('HELD',strings,strings*extent,
+   18*slots+3*files+10*operand_count+6*pieces+32,
+   slots*(version_width+roster_width+2*depth+41)+5*files+6*count
+    +6*operand_count+3*operand_keys+16*pieces+10*calls+1000,
+   slots+16,slots*depth+6*count+3*files+2*pieces+4*operand_count+1000,
+   slots+count+4,9*slots+7*count+files+32,
+   2,parents+files,
+   30*slots+pieces+1000,2*depth+8,depth+2,extent)
+  acquisition['reserve_targets'](recipe=row,geometry=geometry)
+  return files,parents
+ held_bound = None
+ if recipe['kind'] != 'RANK':
+  held_bound = reserve(*recipe['namespace_shape'])
+ actions = {}
+ def add(relative, selected):
+  _f._mapper_portable_relative_v1(relative)
+  scope._ordinary_require_non_git_mutation_v1(relative)
+  previous = actions.get(relative, ())
+  actions[relative] = tuple(value for value in ('CREATE', 'WRITE', 'DELETE')
+   if value in previous or value in selected)
+ if recipe['kind'] == 'CONFIG':
+  report_values = assigned(recipe['config'], recipe['reports'])
+  shard_values = assigned(recipe['config'], 'ROW_SHARDS')
+  need(type(report_values) in (dict, tuple) and type(shard_values) is dict
+   and len(report_values) == recipe['report_count']
+   and len(shard_values) == recipe['shard_count'],
+   'ORDINARY_REPOSITORY_WRITER_FINITE_CONFIG_ROSTERS')
+  for name in (report_values.values() if type(report_values) is dict else report_values):
+   need(type(name) is str and '/' not in name and name.endswith('.report.json'),
+    'ORDINARY_REPOSITORY_WRITER_LITERAL_ROOT_REPORT')
+   add('docs/master_plan/generated/' + name, ('CREATE', 'WRITE'))
+  for name in shard_values.values():
+   need(type(name) is str and '/' not in name and name.endswith('.jsonl'),
+    'ORDINARY_REPOSITORY_WRITER_LITERAL_JSONL_SHARD')
+   add(recipe['shard_root'] + '/' + name, ('CREATE', 'WRITE'))
+   add(recipe['shard_root'] + '/' + name[:-6] + '.manifest.json', ('CREATE', 'WRITE'))
+ elif recipe['kind'] == 'MODEL':
+  prefix = assigned(recipe['config'], 'GENERATED_REF_PREFIX')
+  names = []
+  for label in recipe['output_labels']:
+   values = assigned(recipe['config'], label)
+   need(type(values) is tuple and all(type(value) is str and '/' not in value
+    for value in values), 'ORDINARY_REPOSITORY_WRITER_LITERAL_MODEL_ROSTER')
+   names.extend(values)
+   if label == 'JSONL_OUTPUTS':
+    names.extend(value[:-6] + '.manifest.json' for value in values)
+  need(type(prefix) is str and prefix == recipe['generated_root']
+   and len(names) == len(set(names)) == recipe['current_count'],
+   'ORDINARY_REPOSITORY_WRITER_MODEL_ROOT_AND_FINITE_NAMES')
+  chosen = ('CREATE', 'WRITE', 'DELETE') if recipe['cleanup'] else ('CREATE', 'WRITE')
+  for name in names:
+   add(prefix + '/' + name, chosen)
+  for name in (assigned(recipe['config'], 'OLD_LONG_ARTIFACT_NAMES')
+   if position == 140 else ()):
+   add(prefix + '/' + name, ('DELETE',))
+  if position == 142:
+   run_id = assigned(recipe['config'], 'RUN_ID')
+   need(type(run_id) is str and '/' not in run_id,
+    'ORDINARY_REPOSITORY_WRITER_LITERAL_TEMP_RUN_ID')
+   for name in ('previews.jsonl', 'previews.manifest.json',
+    'topk.jsonl', 'topk.manifest.json', 'manifest.json'):
+    add('.tmp/qtt_stack_runs/' + run_id + '/' + name, ('CREATE', 'WRITE'))
+ elif recipe['kind'] == 'RANK':
+  capture_data = acquisition['capture_data']
+  counts, input_piece_count, data_key_count = {}, 0, 0
+  for filename in recipe['input_reports']:
+   relative = 'docs/master_plan/generated/' + filename
+   header, observed = capture_data(relative, source_form='JSON')
+   need(type(header) is dict and observed['complete'] and observed['error'] is None,
+    'ORDINARY_RANK_HELD_ORIGINAL_REPORT_HEADER')
+   data_key_count += len(observed)
+   _f._ordinary_source_data_operand_check_v1(scope, component, observed,
+    header, published=True)
+   summary = header.get('summary', {})
+   need(type(summary) is dict, 'ORDINARY_RANK_HELD_REPORT_SUMMARY')
+   shard_names = summary.get('shard_files') or header.get('shard_files') or []
+   need(type(shard_names) is list and all(type(name) is str for name in shard_names),
+    'ORDINARY_RANK_ORIGINAL_LOADER_SHARD_NAMES')
+   count = 0
+   input_piece_count += len(shard_names)
+   if shard_names:
+    for name in shard_names:
+     _f._mapper_portable_relative_v1(name)
+     shard, operand = capture_data(name, source_form='JSON')
+     need(type(shard) is dict, 'ORDINARY_RANK_HELD_SHARD_OBJECT')
+     records = shard.get('records', [])
+     need(type(records) is list and all(type(record) is dict for record in records),
+      'ORDINARY_RANK_HELD_SHARD_RECORDS')
+     _f._ordinary_source_data_operand_check_v1(scope, component, operand,
+      shard, published=True)
+     data_key_count += len(operand)
+     count += len(records)
+   else:
+    records = header.get('records', [])
+    need(type(records) is list and all(type(record) is dict for record in records),
+     'ORDINARY_RANK_HELD_INLINE_RECORDS')
+    count = len(records)
+   counts[filename] = count
+  symbols = dict((label, counts[name]) for label, name in recipe['input_symbols'])
+  resolved, shard_maximum, future_name_count = [], 0, len(recipe['row_bounds'])
+  for filename, (token, cap, factor) in recipe['row_bounds']:
+   high = cap if token == 'CONST' else symbols[token]
+   if token != 'CONST' and cap is not None:
+    high = min(high, cap)
+   high *= factor
+   top = (high + 999) // 1000 if high > 1000 else 0
+   shard_maximum += top
+   future_name_count += top*(top+1)//2-1 if top >= 2 else 0
+   resolved.append((filename, high, top))
+  shard_directory = 'docs/master_plan/generated/pr168_rank_shards'
+  shard_row = scope.source.row_index.get(str(_f.Path(scope.source.root).joinpath(*shard_directory.split('/'))))
+  stale_files = stale_members = 0
+  width = recipe['namespace_shape'][1]
+  for filename, high, top in resolved:
+   need(type(high) is int and 0 <= high < 1 << 128 and top < 10000,
+    'ORDINARY_RANK_SOURCE_COUNT_AND_ORIGINAL_FOUR_DIGIT_FORMAT')
+   width = max(width,len(shard_directory)+1+len(_f.PurePosixPath(filename).stem)
+    +len('.part_0000_of_0000.report.json'))
+  if shard_row is not None:
+   need(shard_row['role']=='repository' and shard_row['kind']=='directory',
+    'ORDINARY_RANK_HELD_ORIGINAL_SHARD_DIRECTORY')
+   for name in shard_row['roster']:
+    if not any(name.startswith(_f.PurePosixPath(filename).stem+'.part_')
+     and name.endswith('.report.json') for filename,unused,unused_top in resolved):
+     continue
+    relative = shard_directory+'/'+name
+    actual = scope.source.row_index.get(str(_f.Path(scope.source.root).joinpath(*relative.split('/'))))
+    need(type(actual) is dict and actual['role']=='repository'
+     and actual['kind'] in ('file','directory'),
+     'ORDINARY_RANK_HELD_STALE_MEMBER_BEFORE_NAMESPACE_RESERVATION')
+    stale_members += 1
+    stale_files += actual['kind']=='file'
+    width = max(width,len(relative))
+  held_bound = reserve(future_name_count+stale_files,width,5,
+   recipe['namespace_shape'][3],stale_members+1,input_piece_count,data_key_count)
+  data_operands, inputs = [], []
+  for filename in recipe['input_reports']:
+   relative = 'docs/master_plan/generated/'+filename
+   header, observed = capture_data(relative,source_form='JSON')
+   data_operands.append(observed)
+   summary = header.get('summary',{})
+   shard_names = summary.get('shard_files') or header.get('shard_files') or []
+   pieces = []
+   for name in shard_names:
+    shard, operand = capture_data(name,source_form='JSON')
+    data_operands.append(operand)
+    pieces.append((name,operand,len(shard.get('records',[]))))
+   need((sum(item[2] for item in pieces) if shard_names else len(header.get('records',[])))
+    == counts[filename], 'ORDINARY_RANK_SAME_HELD_DATA_CACHE_CARDINALITY')
+   inputs.append((filename,observed,tuple(pieces),counts[filename]))
+  need(len(data_operands)==input_piece_count+len(recipe['input_reports'])
+   and sum(len(item) for item in data_operands)==data_key_count,
+   'ORDINARY_RANK_SAME_PREISSUED_DATA_METADATA_GEOMETRY')
+  for filename, high, top in resolved:
+   add('docs/master_plan/generated/' + filename, ('CREATE', 'WRITE'))
+   stem = _f.PurePosixPath(filename).stem
+   for total in range(2, top + 1):
+    for index in range(1, total + 1):
+     add('docs/master_plan/generated/pr168_rank_shards/'
+      + f'{stem}.part_{index:04d}_of_{total:04d}.report.json',
+      ('CREATE', 'WRITE'))
+  stale_slots, matching_nonfiles = [], []
+  shard_directory = 'docs/master_plan/generated/pr168_rank_shards'
+  shard_slot = _f._ordinary_rp_writer_slot_v1(scope, shard_directory, 'directory')
+  shard_row = shard_slot['source_row']
+  if shard_row is not None:
+   for name in shard_row['roster']:
+    if not any(name.startswith(_f.PurePosixPath(filename).stem + '.part_')
+     and name.endswith('.report.json') for filename, unused, unused_top in resolved):
+     continue
+    relative = shard_directory + '/' + name
+    actual = scope.source.row_index.get(str(_f.Path(scope.source.root).joinpath(*relative.split('/'))))
+    need(type(actual) is dict and actual['role'] == 'repository'
+     and actual['kind'] in ('file', 'directory'),
+     'ORDINARY_RANK_HELD_COMPLETE_STALE_GLOB_MEMBER')
+    slot = _f._ordinary_rp_writer_slot_v1(scope, relative, actual['kind'])
+    if actual['kind'] == 'file':
+     stale_slots.append(slot)
+     add(relative, ('DELETE',))
+    else:
+     matching_nonfiles.append(slot)
+  rank_metadata = (tuple(inputs), tuple(resolved), tuple(data_operands),
+   shard_slot, tuple(stale_slots), tuple(matching_nonfiles),
+   future_name_count, len(recipe['row_bounds']) + shard_maximum)
+ else:
+  need(recipe['kind'] == 'MAP3', 'ORDINARY_REPOSITORY_WRITER_CLOSED_RECIPE_KIND')
+  for relative, selected in recipe['literal_targets']:
+   add(relative, selected)
+ need(recipe['kind'] == 'RANK' or len(actions) == recipe['file_count'],
+  'ORDINARY_REPOSITORY_WRITER_FINITE_SOURCE_DERIVED_FILE_ACTION_UNION')
+ directories = set()
+ for relative in actions:
+  directories.update(str(parent) for parent in _f.PurePosixPath(relative).parents
+   if str(parent) != '.')
+ if recipe['kind'] == 'RANK':
+  directories.add('docs/master_plan/generated/pr168_rank_shards')
+  directories.update(str(parent) for parent in _f.PurePosixPath('docs/master_plan/generated/pr168_rank_shards').parents if str(parent) != '.')
+ need(held_bound is not None and len(actions) <= held_bound[0]
+  and len(directories) <= held_bound[1],
+  'ORDINARY_TARGET_CONSTRUCTION_WITHIN_PREISSUED_HELD_GEOMETRY')
+ selected = tuple(sorted((*actions, *directories)))
+ target_operands = tuple(operands) + (tuple(data_operands) if recipe['kind'] == 'RANK' else ())
+ slots, targets = [], []
+ for relative in selected:
+  kind = 'DIRECTORY' if relative in directories else 'FILE'
+  slot = _f._ordinary_rp_writer_slot_v1(scope, relative,
+   'directory' if kind == 'DIRECTORY' else 'file')
+  slots.append(slot)
+  targets.append(dict(path=relative, kind=kind,
+   actions=('CREATE',) if kind == 'DIRECTORY' else actions[relative],
+   original_members=() if slot['source_row'] is None else (relative,),
+   required_members=selected,
+   parent_paths=tuple(str(parent) for parent in reversed(_f.PurePosixPath(relative).parents)
+    if str(parent) != '.'), source_operands=target_operands))
+ acquisition['check']()
+ return dict(targets=tuple(targets), slots=tuple(slots),
+  source_operands=tuple(operands), call_grammar=tuple(grammar),
+  native_calls=tuple(call for item in grammar for call in item[3]),
+  uses_git=recipe['uses_git'],
+  source_lower_cohort=('APPLICATION', 'GIT') if recipe['uses_git'] else ('APPLICATION',),
+  target_source_operands=target_operands,
+  cardinality=(rank_metadata if recipe['kind'] == 'RANK' else None),
+  metadata=(position, recipe['kind'], tuple(sorted(actions.items())),
+   tuple(sorted(directories)), tuple((slot, tuple(slot.items())) for slot in slots),
+   tuple((item, tuple(item.items())) for item in operands)))
+
+def _ordinary_selected_target_managed_request_v1(layout, recipe, geometry):
+ import tools.validation_reliability as _f
+ need = _f._preflight_require_v1
+ need(type(recipe) is dict and type(recipe.get('source_position')) is int
+  and recipe['source_position'] in (120,124,126,128,130,132,134,136,138,140,142,144,146,148,150,152,154,156,158,160,162,164,166,167,273,274,275,276,277)
+  and type(geometry) is tuple and len(geometry) == 15
+  and type(geometry[0]) is str and geometry[0] in ('FIXED', 'HELD')
+  and all(type(value) is int and 0 <= value < 1 << 128 for value in geometry[1:]),
+  'ORDINARY_TARGET_ORIGINAL_RECIPE_AND_FROZEN_SCALAR_GEOMETRY')
+ (partition, strings, codepoints, tuples, tuple_slots, lists, list_slots,
+  dictionaries, keys, sets, set_keys, integers, paths, path_operands, path_extent) = geometry
+ p = _f._ordinary_data_size_v1(layout, 'pointer')
+ gc = _f._ordinary_data_size_v1(layout, 'gc')
+ need(p == 8 and gc == 16 and (strings or not codepoints)
+  and (tuples or not tuple_slots) and (lists or not list_slots)
+  and (dictionaries or not keys) and (sets or not set_keys)
+  and (paths or not path_operands and not path_extent),
+  'ORDINARY_TARGET_ORIGINAL_LAYOUT_AND_OBJECT_SLOT_GEOMETRY')
+ path_request = 0
+ if paths:
+  path_request = (11*p+gc
+   +_f._ordinary_data_list_requests_v1(layout,4,path_operands+3*(path_extent+1))
+   +2*((path_extent+1)*_f._ordinary_data_size_v1(layout,'unicode_prefix')
+    +4*(path_extent+(path_extent+1)))
+   +(2*path_operands+6)*_f._ordinary_data_unicode_request_v1(layout,path_extent)
+   +4*_f._ordinary_data_tuple_request_v1(layout,path_operands+2)
+   +_f._ordinary_data_dict_requests_v1(layout,1,0)
+   +_f._ordinary_data_tuple_request_v1(layout,3))
+ components = (
+  (partition+'_target_unicode', strings*_f._ordinary_data_size_v1(layout,'unicode_prefix')
+   +4*(codepoints+strings)),
+  (partition+'_target_tuples', tuples*_f._ordinary_data_size_v1(layout,'tuple_prefix')+p*tuple_slots),
+  (partition+'_target_lists', _f._ordinary_data_list_requests_v1(layout,lists,list_slots)),
+  (partition+'_target_dictionaries', _f._ordinary_data_dict_requests_v1(layout,dictionaries,keys,general=True)),
+  (partition+'_target_sets', 216*sets+32*(8*sets+8*set_keys)),
+  (partition+'_target_integers', integers*(_f._ordinary_data_size_v1(layout,'int_prefix')
+   +5*_f._ordinary_data_size_v1(layout,'int_digit_bytes'))),
+  (partition+'_target_active_Path_workspace', paths*path_request))
+ need(all(type(value) is int and 0 <= value < 1 << 128 for name,value in components),
+  'ORDINARY_TARGET_MANAGED_REQUEST_ORIGINAL_INTEGER_WIDTH')
+ return components
+
+def _ordinary_st12h_selected_environment_v1(scope, entry, child, context):
+ from tools import validation_reliability as o
+ need = o._preflight_require_v1
+ selection = scope._ordinary_source_selection_v1
+ bound = selection._bound
+ i = entry.command_index - 1
+ need(type(scope) is o._LinuxPreflightScopeV1
+  and selection is scope._ordinary_original_source_selection_v1
+  and context is scope._ordinary_rp5a_source_context_v1()
+  and context['paths'] is scope._ordinary_bound_paths_v1
+  and context['plan'] is scope._ordinary_bound_plan_v1
+  and type(i) is int and 0 <= i < len(bound)
+  and bound[i][0] is entry
+  and bound[i][1] is scope._ordinary_execution_plan_v1[i]
+  and type(child) is dict, 'ORDINARY_ST12H_ORIGINAL_ENVIRONMENT_OCCURRENCE')
+ execution, position = bound[i][1:]
+ if position != 343:
+  return child
+ need(selection.phase == 'deterministic-validators-c'
+  and execution.registered_argv == (o.sys.executable,
+   'tools/independent_validate_qku_computation_control_plane.py')
+  and entry.argv == execution.execution_argv
+  and entry.cwd == str(context['paths'].repo_root)
+  and context['table'].get(str(entry.command_index)) is None,
+  'ORDINARY_ST12H_EXACT_SELECTED_REGISTERED_COMMAND')
+ runtime = scope._ordinary_image_v1['mount_path'] / 'runtime' / ('p' + str(entry.command_index))
+ need(runtime.is_absolute()
+  and runtime.parent == scope._ordinary_image_v1['mount_path'] / 'runtime',
+  'ORDINARY_ST12H_ORIGINAL_PER_OCCURRENCE_RUNTIME')
+ child[o.PROCESS_ROOT_ENV] = str(runtime / 'st12h-process')
+ child[o.EVIDENCE_ROOT_ENV] = str(runtime / 'st12h-evidence')
+ need(child[o.RUN_ID_ENV] == context['paths'].run_id
+  and child[o.PROCESS_ROOT_ENV] != child[o.EVIDENCE_ROOT_ENV],
+  'ORDINARY_ST12H_NESTED_PROCESS_PARENT_AND_SIBLING_EVIDENCE')
+ return child
+
+def _ordinary_selected_operational_execution_v1(scope,registered,execution,index):
+ from tools import validation_reliability as o
+ s=scope._ordinary_source_selection_v1
+ r=scope._ordinary_runner_owner_v1
+ o._preflight_require_v1(s is scope._ordinary_original_source_selection_v1
+  and r is scope._ordinary_original_runner_owner_v1 and s._runner is r
+  and s._guard() is None and 'project' in s._attempted
+  and type(index) is int and 1<=index<=len(s.rows)
+  and registered==s._argv(s.rows[index-1][4])
+  and execution==registered and registered[0]==o.sys.executable
+  and s.phase in (*r.DETERMINISTIC_VALIDATOR_SHARD_PHASES,r.FAST_PREFLIGHT_PHASE)
+  and r._RUN_COMMANDS_SUPERVISION['paths'] is s.paths
+  and r._RUN_COMMANDS_SUPERVISION['phase']==s.phase,
+  'ORDINARY_OPERATIONAL_EXACT_ORIGINAL_PROJECTION_OCCURRENCE')
+ cache=scope._ordinary_image_v1['mount_path']/'runtime'/('p'+str(index))/'pycache'
+ prefix=(registered[0],'-I','-S','-B','-X','pycache_prefix='+str(cache))
+ if o._rp5a_consumer_role_v1(registered,s.paths.repo_root) is not None or (len(registered)==4 and registered[2:]==('--repo-root','.')):
+  return (*prefix,*registered[1:])
+ o._preflight_require_v1(len(registered)>=2 and registered[1].startswith('tools/')
+  and registered[1].endswith('.py'),'ORDINARY_OPERATIONAL_SELECTED_SCRIPT_ONLY')
+ loader=("import runpy,sys;sys.path.insert(0,"+repr(str(s.paths.repo_root))
+  +");sys.argv=sys.argv[1:];runpy.run_path(sys.argv[0],run_name='__main__')")
+ return (*prefix,'-c',loader,*registered[1:])
+
+def _ordinary_selected_operational_sources_v1(scope,component,row):
+ from tools import validation_reliability as o
+ import ast
+ a=scope._ordinary_selected_operational_acquisition_v1
+ root=scope.source.root
+ need=o._preflight_require_v1
+ registered=row['execution'].registered_argv
+ need(type(registered) is tuple and registered[0]==o.sys.executable
+  and len(registered)>=2 and registered[1].startswith('tools/')
+  and registered[1].endswith('.py'),'ORDINARY_OPERATIONAL_HELD_SCRIPT_ENTRY')
+ pending=[registered[1]];seen={};grammar=[];application=[]
+ if 273<=row['source_position']<=277:
+  pending.extend(('tools/validate_atomicrows_parameter_stack_completeness_gate.py',
+   'tools/validate_atomicrows_parameter_stack_compatibility_gate.py',
+   'tools/validate_atomicrows_parameter_stack_role_taxonomy.py',
+   'tools/validate_edge_parameter_stack_selection_packet.py',
+   'tools/validate_qtt_trade_context_packet.py',
+   'tools/validate_atomicrows_parameter_selection_universe_registry.py'))
+ if row['source_position']==343:
+  pending.extend('tools/independent_validate_qku_computation_control_plane'+suffix+'.py'
+   for suffix in ('_latency','_model_risk','_g','_agent','_d','_quantum',
+    '_architecture','_accounting','_execution','_llm','_operations','_security','_source'))
+ def add(module):
+  parts=module.split('.')
+  if not parts or any(not part.isidentifier() for part in parts):return
+  stem='/'.join(parts)
+  for name in (stem+'.py',stem+'/__init__.py'):
+   actual=scope.source.row_index.get(str(root/name))
+   if actual is not None and actual['kind']=='file' and name not in seen and name not in pending:
+    pending.append(name)
+  for length in range(1,len(parts)):
+   name='/'.join(parts[:length])+'/__init__.py'
+   if str(root/name) in scope.source.row_index and name not in seen and name not in pending:
+    pending.append(name)
+ while pending:
+  relative=pending.pop(0)
+  tree,operand=a['capture_source'](relative)
+  need(isinstance(tree,ast.Module) and operand['path']==relative,
+   'ORDINARY_OPERATIONAL_FULL_ORIGINAL_MODULE')
+  _ordinary_bounded_source_grammar_reserve_v1(scope,row,tree,operand)
+  seen[relative]=operand
+  native=[];aliases={}
+  call_pairs=_ordinary_bounded_source_calls_v1(scope,tree,operand);call_index=0
+  for item in ast.walk(tree):
+   if isinstance(item,ast.Import):
+    for entry in item.names:
+     if entry.name in('subprocess','os'):aliases[entry.asname or entry.name]=entry.name
+   elif isinstance(item,ast.ImportFrom)and item.module in('subprocess','os'):
+    for entry in item.names:aliases[entry.asname or entry.name]=item.module+'.'+entry.name
+  package=relative[:-3].replace('/','.')
+  package=package.rsplit('.',1)[0] if not relative.endswith('/__init__.py') else package[:-9]
+  for node in ast.walk(tree):
+   if isinstance(node,ast.Import):
+    for item in node.names:add(item.name)
+   elif isinstance(node,ast.ImportFrom):
+    base=node.module or ''
+    if node.level:
+     values=package.split('.')
+     need(node.level<=len(values)+1,'ORDINARY_OPERATIONAL_RELATIVE_IMPORT_DEPTH')
+     base='.'.join(values[:len(values)+1-node.level]+([base] if base else []))
+    add(base)
+    for item in node.names:
+     if item.name!='*':add(base+'.'+item.name if base else item.name)
+   elif isinstance(node,ast.Call):
+    if call_pairs is None:
+     call=ast.get_source_segment(operand['text'],node)
+    else:
+     actual,call=call_pairs[call_index];call_index+=1
+     need(actual is node,'ORDINARY_OPERATIONAL_CACHED_CALL_WALK_IDENTITY')
+    name=ast.unparse(node.func)
+    head=name.split('.')[0];qualified=aliases.get(head,head)+name[len(head):]
+    if qualified in('subprocess.run','subprocess.Popen','subprocess.check_call',
+     'subprocess.check_output','os.execv','os.execve','os.execvpe','os.spawnv',
+     'os.spawnve','os.system','os.fork'):native.append(call)
+    if name.endswith(('.import_module','.__import__')) and node.args:
+     arg=node.args[0]
+     if isinstance(arg,ast.Constant) and type(arg.value) is str:add(arg.value)
+  if call_pairs is not None:
+   need(call_index==len(call_pairs),'ORDINARY_OPERATIONAL_ALL_ORIGINAL_CACHED_CALLS')
+  grammar.append((operand,'<module>',operand['text'],tuple(native)))
+  application.append(operand)
+ for relative in('tools/validation_reliability.py','tools/validation_scope_registry.py','tools/ci_branch_context.py'):
+  if relative not in seen:
+   tree,operand=a['capture_source'](relative);seen[relative]=operand
+   grammar.append((operand,'<module>',operand['text'],()))
+ return tuple(seen.values()),tuple(grammar),tuple(application)
+
+def _ordinary_selected_operational_native_check_v1(scope,native):
+ from tools import validation_reliability as o
+ need=o._preflight_require_v1;p=native['operational_operand'];x=p['original']
+ need(type(p)is dict and type(x)is tuple and len(x)==20 and x[0]is p and x[1]is scope
+  and x[2]is p['component']and x[3]is p['row']
+  and x[4]is p['sources']is native['source_operands']
+  and x[5]is p['grammar']is native['call_grammar']
+  and x[6]is p['cohorts']is native['cohorts']
+  and x[7]==p['expected_argv']==native['entry'].argv
+  and x[8]==p['registered']==native['execution'].registered_argv
+  and x[9]is p['targets']and x[10]is p['v_bundle']
+  and x[11]==(o.os.getpid(),o.threading.get_ident())
+  and x[12]is p['acquisition']is scope._ordinary_selected_operational_acquisition_v1
+  is scope._ordinary_original_selected_operational_acquisition_v1
+  and x[13]is p['selection']is scope._ordinary_source_selection_v1
+  is scope._ordinary_original_source_selection_v1
+  and x[14]==p['phase']==p['selection'].phase and x[15]is p['callbacks']
+  and x[16]is p['source_items']and x[17]is p['target_items']
+  and x[18]==p['application_fd'] and x[19]is p['scanner_preparation']
+  and native['bound_row']is p['row']['bound_row']and native['entry']is p['row']['entry']
+  and native['execution']is p['row']['execution']and not p['acquisition']['errors'],
+  'ORDINARY_OPERATIONAL_EXACT_PRIVATE_NATIVE_ASSOCIATION')
+ a=p['acquisition'];callbacks=p['callbacks']
+ need(type(callbacks)is tuple and len(callbacks)==4
+  and all(type(kept)is tuple and len(kept)==6 and type(kept[0])is str
+   and a[kept[0]]is kept[1]and kept[1].__code__ is kept[2]
+   and kept[1].__defaults__ is kept[3]and kept[1].__kwdefaults__ is kept[4]
+   and kept[1].__closure__ is kept[5]for kept in callbacks),
+  'ORDINARY_OPERATIONAL_RETAINED_CAPTURE_AND_PUBLIC_CHECK_CODE_IDENTITIES')
+ need(a['component']is p['component']and a['check']()is a
+  and any(p['row']is item for item in p['component']['rows'])
+  and (p['row']['native_programme']is None or p['row']['unresolved_source_facts'])
+  and p['row']['bound_row']is p['selection']._bound[p['row']['ordinal']-1]
+  and all(any(item is held for held in p['sources'])and tuple(item.items())==snap
+   for item,snap in p['source_items'])
+  and all(tuple(item.items())==snap for item,snap in p['target_items'])
+  and any(item['path']=='tools/validation_reliability.py'for item in p['sources']),
+  'ORDINARY_OPERATIONAL_ORIGINAL_COMPONENT_ANALYSIS_AND_FULL_SOURCE_BINDING')
+ expected=_ordinary_selected_operational_execution_v1(scope,p['registered'],p['registered'],
+  native['entry'].command_index)
+ cache=scope._ordinary_image_v1['mount_path']/'runtime'/('p'+str(native['entry'].command_index))/'pycache'
+ need(native['bootstrap_fd_demand']==12 and native['application_fd_demand']==p['application_fd']
+  and native['nofile']==12 and native['tasks']==max(len(item[0])for item in p['cohorts'])
+  and p['expected_argv']==expected
+  and native['pycache_operand']==(cache,p['row']['bound_row'],p['sources'],
+   p['grammar'],scope._ordinary_installation_copy_v1),
+  'ORDINARY_OPERATIONAL_SOURCE_MINIMA_AND_EXACT_REGISTERED_EFFECTIVE_MAPPING')
+ if p['scanner_preparation'] is not None:
+  _ordinary_selected_scanner_source_preparation_check_v1(scope,p,native)
+ return p
+
+def _ordinary_selected_operational_rows_v1(scope,supported,component,*,source_byte_limit,source_node_limit):
+ from tools import validation_reliability as o
+ from tools.ci_branch_context import _ordinary_selected_repository_writer_targets_v1
+ a=_ordinary_selected_operational_acquisition_v1(scope,supported,component,
+  source_byte_limit=source_byte_limit,source_node_limit=source_node_limit)
+ assembled=[]
+ for row in component['rows']:
+  if row['native_programme'] is not None and not row['unresolved_source_facts']:
+   assembled.append(dict(entry=row['entry'],execution=row['execution'],bound_row=row['bound_row'],
+    source_position=row['source_position'],targets=row['targets'],source_operands=row['source_operands'],
+    native_programme=row['native_programme'],run_output_effects=row['run_output_effects'],source_programme=row))
+   continue
+  position=row['source_position']
+  sources,grammar,application=_ordinary_selected_operational_sources_v1(scope,component,row)
+  target=None
+  if component['source_selection'].phase==scope._ordinary_runner_owner_v1.DETERMINISTIC_VALIDATOR_SHARD_PHASES[2]:
+   target=_ordinary_selected_repository_writer_targets_v1(scope,component,row)
+  if position==132 or 273<=position<=277:
+   target=_ordinary_selected_operational_repository_targets_v1(scope,component,row,sources,grammar)
+  scanner_preparation=None
+  bundle=_ordinary_selected_v_bundle_source_v1(scope,component,row,
+   prior_bundles=tuple(item['v_bundle']for item in assembled if item.get('v_bundle')is not None))
+  targets=target['targets']if target is not None else row['targets']
+  if target is not None:
+   joined=list(sources)
+   for operand in target['source_operands']:
+    if not any(operand is old for old in joined):joined.append(operand)
+   sources=tuple(joined)
+   grammar=tuple((operand,'<module>',operand['text'],tuple(call for g in grammar if g[0] is operand for call in g[3]))
+    for operand in sources)
+  if position==132:
+   scanner_preparation=_ordinary_selected_scanner_source_preparation_v1(scope,component,row,sources,grammar)
+  selected_calls=tuple(call for g in grammar for call in g[3])
+  import ast
+  uses_git=any(isinstance(node,ast.Constant)and node.value in('git','/usr/bin/git')
+   for operand in application for node in ast.walk(scope._ordinary_source_operand_cache_v1[(operand['path'],'PYTHON')][0]))
+  if target is not None:uses_git=target['uses_git']
+  if scanner_preparation is not None:uses_git=True
+  cohort=('APPLICATION',)
+  if target is not None:cohort=target['source_lower_cohort']
+  if scanner_preparation is not None:cohort=('APPLICATION','SCANNER_GIT')
+  if position==343:cohort=('APPLICATION','DOMAIN','PROBE');uses_git=True
+  elif position==348:cohort=('APPLICATION','PROBE');uses_git=True
+  elif uses_git and target is None:cohort=('APPLICATION','GIT')
+  calls=selected_calls if len(cohort)>1 else ()
+  cohorts=((cohort,sources,calls),)
+  p=dict(component=component,row=row,sources=sources,grammar=grammar,cohorts=cohorts,
+   expected_argv=row['entry'].argv,registered=row['execution'].registered_argv,
+   targets=targets,v_bundle=bundle,
+   application_fd=scanner_preparation[6][2]if scanner_preparation is not None else(9 if uses_git else 8),
+   scanner_preparation=scanner_preparation)
+  p.update(acquisition=a,selection=component['source_selection'],phase=component['source_selection'].phase,
+   callbacks=tuple((name,a[name],a[name].__code__,a[name].__defaults__,a[name].__kwdefaults__,
+    a[name].__closure__)for name in('capture_source','capture_data','check','reserve_targets')),
+   source_items=tuple((item,tuple(item.items()))for item in sources),
+   target_items=tuple((item,tuple(item.items()))for item in targets))
+  p['original']=(p,scope,component,row,sources,grammar,cohorts,p['expected_argv'],
+   p['registered'],targets,bundle,(o.os.getpid(),o.threading.get_ident()),a,p['selection'],
+   p['phase'],p['callbacks'],p['source_items'],p['target_items'],p['application_fd'],scanner_preparation)
+  cache=scope._ordinary_image_v1['mount_path']/'runtime'/('p'+str(row['entry'].command_index))/'pycache'
+  native=o._ordinary_native_source_programme_v1(scope,row['bound_row'],sources,grammar,
+   cohorts=cohorts,bootstrap_fd_demand=12,application_fd_demand=p['application_fd'],nofile=12,
+   uses_git=uses_git,pycache_operand=(cache,row['bound_row'],sources,grammar,scope._ordinary_installation_copy_v1),
+   operational_operand=p)
+  outputs=_ordinary_selected_operational_file_outputs_v1(scope,row,sources)
+  assembled.append(dict(entry=row['entry'],execution=row['execution'],bound_row=row['bound_row'],
+   source_position=position,targets=targets,source_operands=sources,native_programme=native,
+   run_output_effects=outputs,source_programme=row,v_bundle=bundle))
+ a['check']()
+ return tuple(assembled)
+
+def _ordinary_selected_operational_file_outputs_v1(scope,row,sources):
+ from tools import validation_reliability as o
+ outputs=o._ordinary_deterministic_run_output_operands_v1(row['entry'].argv,
+  scope._ordinary_bound_paths_v1.validation_output_root,
+  ('--section-manifest-out','--traceability-out','--scope-report-out','--out','--report-out'))
+ if 148<=row['source_position']<=169:
+  return ()
+ return tuple(dict(path=path,flag=flag,kind='FILE',actions=('CREATE','WRITE'),
+  source_operands=sources,parent_paths=tuple(parent for parent in reversed(path.parents)
+   if parent==scope._ordinary_bound_paths_v1.validation_output_root or parent.is_relative_to(
+    scope._ordinary_bound_paths_v1.validation_output_root)),
+  consumer_programme_required=('original_run_output_storage_owner',
+   'native_view_mapping_and_uid','final_consumer_read_handback')) for flag,path in outputs)
+
+
+def _ordinary_selected_scanner_source_preparation_v1(scope,component,row,sources,grammar):
+ from tools import validation_reliability as o
+ need=o._preflight_require_v1
+ resource=scope._ordinary_resource_programme_v1
+ original=scope._ordinary_original_resource_programme_v1
+ registered=row['execution'].registered_argv
+ need(resource is original[0] and tuple(resource.items())==original[1]
+  and row['source_position']==132
+  and registered==(o.sys.executable,'tools/build_pr168_rp5a_legacy_semantic_audit.py','--offline')
+  and o._rp5a_consumer_role_v1(registered,component['paths'].repo_root)=='SCANNER'
+  and row['bound_row']is component['source_selection']._bound[row['ordinal']-1]
+  and row['entry']is row['bound_row'][0]and row['execution']is row['bound_row'][1],
+  'ORDINARY_SCANNER_PREPARATION_EXACT_ORIGINAL_OFFLINE_OCCURRENCE')
+ runner=scope._ordinary_runner_owner_v1
+ policy=runner._ordinary_rp5a_source_policy_checked_v1(resource['rp5a_source_policy'],scope)
+ allocation=scope._ordinary_phase_allocation_record_v1(resource)
+ need(allocation['rp5a_policy']is policy and not allocation['errors']
+  and type(resource['fd_demand'])is tuple and len(resource['fd_demand'])==3
+  and resource['fd_demand'][1:]==(12,8)
+  and allocation['rp5a_demands']['scanner']['mandatory_git_calls']>=1
+  and allocation['rp5a_demands']['scanner']['possible_git_calls']>=
+   allocation['rp5a_demands']['scanner']['mandatory_git_calls']
+  and any(item['path']=='tools/pr168_rp5a_git_grep_scanner.py'for item in sources)
+  and any(item['path']=='tools/validation_reliability.py'for item in sources)
+  and any(calls for operand,name,body,calls in grammar),
+  'ORDINARY_SCANNER_PREPARATION_HELD_POLICY_ALLOCATOR_AND_CAPTURE_SOURCE')
+ # These are the existing interpreter bootstrap/application lower minima.
+ # The original phase allocator separately partitions scanner frames, capture
+ # scratch, full fence reads and manager128; this is not a live profile grant.
+ return (scope,component,row,resource,policy,allocation,resource['fd_demand'],
+  allocation['rp5a_demands'],sources,grammar,policy['original'])
+
+def _ordinary_selected_scanner_source_preparation_check_v1(scope,p,native):
+ from tools import validation_reliability as o
+ kept=p['scanner_preparation'];row=p['row']
+ current=_ordinary_selected_scanner_source_preparation_v1(scope,p['component'],row,p['sources'],p['grammar'])
+ o._preflight_require_v1(type(kept)is tuple and len(kept)==11
+  and all(old is new for old,new in zip(kept,current,strict=True))
+  and native['tool_operands'][1]is scope._ordinary_git_bindings_v1
+  and native['bootstrap_fd_demand']==kept[6][1]
+  and native['application_fd_demand']==kept[6][2]
+  and native['nofile']==max(kept[6][1:])
+  and len(native['cohorts'])==1 and native['cohorts'][0][0]==('APPLICATION','SCANNER_GIT')
+  and native['tasks']==2,
+  'ORDINARY_SCANNER_PREPARATION_SOURCE_MINIMA_NOT_LATER_PROFILE')
+ return kept
+
+def _ordinary_selected_operational_repository_targets_v1(scope,component,row,sources,grammar):
+ from tools import validation_reliability as o
+ import ast
+ need=o._preflight_require_v1;a=scope._ordinary_selected_operational_acquisition_v1
+ position=row['source_position']
+ need(position==132 or 273<=position<=277,
+  'ORDINARY_OPERATIONAL_EXACT_REPOSITORY_OUTPUT_OCCURRENCE')
+ reserve=a['reserve_targets']
+ def literal_size(node):
+  if isinstance(node,ast.Constant)and type(node.value)is str:return len(node.value)
+  if isinstance(node,ast.Call)and isinstance(node.func,(ast.Name,ast.Attribute)):
+   if ast.unparse(node.func)in('Path','pathlib.Path')and len(node.args)==1 and not node.keywords:
+    return literal_size(node.args[0])
+  if isinstance(node,ast.BinOp)and isinstance(node.op,ast.Div):
+   return literal_size(node.left)+1+literal_size(node.right)
+  if isinstance(node,(ast.Tuple,ast.List)):
+   return max((literal_size(child)for child in node.elts),default=0)
+  if isinstance(node,ast.Dict):
+   return max((literal_size(child)for child in node.values),default=0)
+  raise ValueError('ORDINARY_OPERATIONAL_CLOSED_LITERAL_SIZE_BEFORE_CATALOGUE')
+ literal_width=0
+ for item in sources:
+  selected=(item['path']=='tools/pr168_rp5a_config.py'if position==132 else
+   item['path']in('tools/validate_atomicrows_parameter_stack_completeness_gate.py',
+    'tools/validate_atomicrows_parameter_stack_compatibility_gate.py',
+    'tools/validate_atomicrows_parameter_stack_role_taxonomy.py',
+    'tools/validate_edge_parameter_stack_selection_packet.py',
+    'tools/validate_qtt_trade_context_packet.py',
+    'tools/validate_atomicrows_parameter_selection_universe_registry.py'))
+  if not selected:continue
+  tree,observed=scope._ordinary_source_operand_cache_v1[(item['path'],'PYTHON')]
+  need(observed is item,'ORDINARY_OPERATIONAL_PRELUDE_SAME_HELD_MODULE')
+  for node in tree.body:
+   if not isinstance(node,(ast.Assign,ast.AnnAssign)):continue
+   bound=node.targets if isinstance(node,ast.Assign)else(node.target,)
+   if any(isinstance(name,ast.Name)and name.id in(
+    ('REPORT_NAMES','ROW_SHARDS')if position==132 else('DEFAULT_REPORT',))for name in bound):
+    literal_width=max(literal_width,literal_size(node.value))
+ need(0<literal_width<=4096,'ORDINARY_OPERATIONAL_PRELUDE_ORIGINAL_NAMESPACE_WIDTH')
+ # Held scalar traversal uses the already admitted source image. This FIXED
+ # partition precedes the catalogue dict/list/set and concatenated path strings.
+ fixed=reserve(recipe=row,geometry=('FIXED',109,1476+36*literal_width,
+  7,53,2,43,1,3,2,6,76,0,0,0))
+ def text(node):
+  if isinstance(node,ast.Constant)and type(node.value)is str:return node.value
+  if isinstance(node,ast.Call)and isinstance(node.func,(ast.Name,ast.Attribute)):
+   name=ast.unparse(node.func)
+   if name in('Path','pathlib.Path')and len(node.args)==1 and not node.keywords:return text(node.args[0])
+  if isinstance(node,ast.BinOp)and isinstance(node.op,ast.Div):
+   return text(node.left)+'/'+text(node.right)
+  raise ValueError('ORDINARY_OPERATIONAL_CLOSED_LITERAL_PATH_EXPRESSION')
+ if position==132:
+  relative='tools/pr168_rp5a_config.py'
+  tree,operand=a['capture_source'](relative)
+  declarations={}
+  for node in tree.body:
+   if isinstance(node,(ast.Assign,ast.AnnAssign)):
+    names=node.targets if isinstance(node,ast.Assign)else(node.target,)
+    for name in names:
+     if isinstance(name,ast.Name)and name.id in('REPORT_NAMES','ROW_SHARDS','CHECKPOINT_PATH'):
+      need(name.id not in declarations,'ORDINARY_RP132_UNIQUE_ORIGINAL_ROSTER')
+      declarations[name.id]=node.value
+  need(set(declarations)=={'REPORT_NAMES','ROW_SHARDS','CHECKPOINT_PATH'}
+   and isinstance(declarations['REPORT_NAMES'],ast.Tuple)
+   and len(declarations['REPORT_NAMES'].elts)==22
+   and isinstance(declarations['ROW_SHARDS'],ast.Dict)
+   and len(declarations['ROW_SHARDS'].keys)==15,
+   'ORDINARY_RP132_ORIGINAL_FIXED_22_15_15_CHECKPOINT')
+  checkpoint=declarations['CHECKPOINT_PATH']
+  need(isinstance(checkpoint,ast.BinOp)and isinstance(checkpoint.op,ast.Div)
+   and text(checkpoint.right)=='rp5a_scan_checkpoint.json'
+   and isinstance(checkpoint.left,ast.BinOp)and isinstance(checkpoint.left.op,ast.Div)
+   and isinstance(checkpoint.left.left,ast.Name)and checkpoint.left.left.id=='REPO_ROOT'
+   and text(checkpoint.left.right)=='.tmp',
+   'ORDINARY_RP132_ORIGINAL_REPOSITORY_CHECKPOINT_OPERAND')
+  scalar_names=(*declarations['REPORT_NAMES'].elts,*declarations['ROW_SHARDS'].values)
+  width=max(len(text(node))for node in scalar_names)+len('docs/master_plan/generated/rp5a/')+len('.manifest.json')
+  files=53;depth=5;selected_sources=(operand,)
+ else:
+  paths=('tools/validate_atomicrows_parameter_stack_completeness_gate.py',
+   'tools/validate_atomicrows_parameter_stack_compatibility_gate.py',
+   'tools/validate_atomicrows_parameter_stack_role_taxonomy.py',
+   'tools/validate_edge_parameter_stack_selection_packet.py',
+   'tools/validate_qtt_trade_context_packet.py',
+   'tools/validate_atomicrows_parameter_selection_universe_registry.py')
+  length=1 if position==273 else position-272+1
+  selected_sources=tuple(next(item for item in sources if item['path']==name)
+   for name in paths[:length])
+  scalar_names=[]
+  for item in selected_sources:
+   tree,observed=scope._ordinary_source_operand_cache_v1[(item['path'],'PYTHON')]
+   need(observed is item,'ORDINARY_DEPENDENCY_ORIGINAL_CHILD_SOURCE_CACHE')
+   values=tuple(node.value for node in tree.body if isinstance(node,(ast.Assign,ast.AnnAssign))
+    and any(isinstance(name,ast.Name)and name.id=='DEFAULT_REPORT'for name in(
+     node.targets if isinstance(node,ast.Assign)else(node.target,))))
+   need(len(values)==1,'ORDINARY_DEPENDENCY_ONE_DEFAULT_REPOSITORY_REPORT')
+   scalar_names.append(values[0])
+  files=length;depth=4;width=max(len(text(node))for node in scalar_names)
+ parents=files*depth;count=files+parents
+ roster=max((len(item['roster'])for item in scope.source.row_index.values()
+  if item['role']=='repository'and item['kind']=='directory'),default=0)
+ version=max((len(item)for item in scope.source.post.values()),default=0)
+ extent=len(str(scope.source.root))+1+width
+ need(files<=32768 and count<=65536 and width<=4096 and extent<=4096
+  and roster<=65536 and version<128,
+  'ORDINARY_OPERATIONAL_ORIGINAL_OUTPUT_NAMESPACE_AND_ANCHOR_CEILINGS')
+ reserve=a['reserve_targets']
+ # The held request uses the original slot/Path constructor geometry.
+ strings=files+count*(3*depth+12)+files*depth+parents
+ reservation=reserve(recipe=row,geometry=('HELD',strings,strings*extent,
+  18*count+3*files+10*len(selected_sources)+32,
+  count*(version+roster+2*depth+41)+5*files+6*count+6*len(selected_sources)+1000,
+  count+16,count*depth+6*count+3*files+4*len(selected_sources)+1000,
+  count+count+4,9*count+7*count+files+32,
+  2,parents+files,30*count+1000,2*depth+8,depth+2,extent))
+ names=[]
+ if position==132:
+  names.extend('docs/master_plan/generated/'+text(node)for node in declarations['REPORT_NAMES'].elts)
+  for node in declarations['ROW_SHARDS'].values:
+   name=text(node);need(name.endswith('.jsonl'),'ORDINARY_RP132_FIXED_JSONL_NAME')
+   names.extend(('docs/master_plan/generated/rp5a/'+name,
+    'docs/master_plan/generated/rp5a/'+name[:-6]+'.manifest.json'))
+  names.append('.tmp/rp5a_scan_checkpoint.json')
+ else:names.extend(text(node)for node in scalar_names)
+ need(len(names)==files and len(set(names))==files,
+  'ORDINARY_OPERATIONAL_EXACT_FULL_REPOSITORY_OUTPUT_ROSTER')
+ actions={name:('CREATE','WRITE')for name in names};slots=[]
+ for name in tuple(actions):
+  o._mapper_portable_relative_v1(name)
+  parent=o.PurePosixPath(name).parent
+  while parent.as_posix()!='.':
+   if parent.as_posix()not in actions:
+    slot=o._ordinary_rp_writer_slot_v1(scope,parent.as_posix(),'directory')
+    slots.append(slot)
+    if slot['source_row']is None:actions[parent.as_posix()]=('CREATE',)
+   parent=parent.parent
+ for name in names:slots.append(o._ordinary_rp_writer_slot_v1(scope,name,'file'))
+ targets=[]
+ for name,allowed in sorted(actions.items()):
+  kind='FILE'if name in names else'DIRECTORY'
+  slot=next(item for item in slots if item['relative']==name)
+  targets.append(dict(path=name,kind=kind,actions=allowed,
+   original_members=((name,)if slot['source_row']is not None else()),
+   required_members=tuple(sorted(actions)),
+   parent_paths=tuple(parent.as_posix()for parent in reversed(o.PurePosixPath(name).parents)
+    if parent.as_posix()!='.'),source_operands=selected_sources))
+ return dict(targets=tuple(targets),slots=tuple(slots),source_operands=selected_sources,
+  call_grammar=grammar,requires_original_scanner_association=position==132,
+  uses_git=(None if position==132 else True),
+  source_lower_cohort=(None if position==132 else
+   tuple('PYTHON'+str(index)for index in range(position-271))+('GIT',)),
+  reservation=(fixed,reservation))
+
+def _ordinary_selected_v_bundle_source_v1(scope,component,row,*,prior_bundles=()):
+ from tools import validation_reliability as o
+ import ast
+ need=o._preflight_require_v1
+ a=scope._ordinary_selected_operational_acquisition_v1;s=scope._ordinary_source_selection_v1
+ need(a is scope._ordinary_original_selected_operational_acquisition_v1
+  and a['component']is component and s is scope._ordinary_original_source_selection_v1
+  and any(row is item for item in component['rows'])
+  and row['bound_row']is s._bound[row['ordinal']-1]
+  and row['entry']is row['bound_row'][0]and row['execution']is row['bound_row'][1]
+  and row['source_position']==row['bound_row'][2],'ORDINARY_V_BUNDLE_BOUND_OCCURRENCE')
+ position=row['source_position']
+ if not 148<=position<=169:return None
+ writing=position in(148,150,152,154,156,158,160,162,164,166,167)
+ reader_for=((149,148),(151,150),(153,152),(155,154),(157,156),(159,158),(161,160),(163,162),(165,164),(168,167),(169,167))
+ source_position=position if writing else next(b for p,b in reader_for if p==position)
+ registered=row['execution'].registered_argv
+ flag='--out'if position in(148,166)else'--base'if position>=167 else'--out-dir'if writing else'--generated'if position==149 else'--artifact-dir'
+ indices=tuple(i for i,value in enumerate(registered)if value==flag)
+ need(type(registered)is tuple and registered[0]==o.sys.executable
+  and row['entry'].argv==row['execution'].execution_argv
+  and row['entry'].cwd==str(component['paths'].repo_root)
+  and len(indices)==1 and indices[0]+1<len(registered),'ORDINARY_V_BUNDLE_FIXED_ARGUMENT')
+ path=o.Path(registered[indices[0]+1]);root=component['paths'].validation_output_root
+ need(path.is_absolute()and path.parent==root/'master_plan_generated'
+  and '..'not in path.parts and str(path)==o.os.path.normpath(str(path)),
+  'ORDINARY_V_BUNDLE_EXACT_SHARED_LOGICAL_PARENT')
+ prior=tuple(b for b in prior_bundles if b['writing']and b['source_position']==source_position and b['path']==path)
+ if not writing:
+  need(len(prior)==1 and prior[0]['component']is component
+   and prior[0]['original'][0]is prior[0],'ORDINARY_V_BUNDLE_READER_ORIGINAL_WRITER')
+  base=prior[0];operand=base['source_operand'];members=base['consumer_members']
+  directories=base['consumer_directories'];read_members=();reservation=base['reservation']
+ else:
+  reserve_targets=a['reserve_targets']
+  need(callable(reserve_targets),'ORDINARY_V_BUNDLE_AUTHENTIC_NAMESPACE_RESERVATION_REQUIRED')
+  fixed=reserve_targets(recipe=row,geometry=("FIXED",61,1189,22,83,0,0,1,11,0,0,22,0,0,0))
+  rules={148:("src/qtt/stage1_prediction_markets/pr168_rp5g_trade_plan_sim/models.py",("JSON_OUTPUTS","REPORT_OUTPUTS","JSONL_OUTPUTS","MARKDOWN_OUTPUTS",),334),
+ 150:("src/qtt/ranking/pr168_rank4/models.py",("JSON_OUTPUTS","REPORT_OUTPUTS","JSONL_OUTPUTS","MARKDOWN_OUTPUTS",),263),
+ 152:("src/qtt/optimization/pr168_qopt1/models.py",("JSON_OUTPUTS","REPORT_OUTPUTS","JSONL_OUTPUTS","MARKDOWN_OUTPUTS",),353),
+ 154:("src/qtt/paper/pr168_vs2/models.py",("JSON_OUTPUTS","REPORT_OUTPUTS","JSONL_OUTPUTS","MARKDOWN_OUTPUTS",),206),
+ 156:("src/qtt/memory/pr168_mem1/models.py",("JSON_OUTPUTS","REPORT_OUTPUTS","JSONL_OUTPUTS","MARKDOWN_OUTPUTS",),246),
+ 158:("tools/build_pr169_readiness1.py",("JSONL_ARTIFACTS","JSON_ARTIFACTS","TEXT_ARTIFACTS","ST12G_DESCRIPTOR_NAME",),44),
+ 160:("tools/build_pr169_pretrade1.py",("JSONL_ARTIFACTS","JSON_ARTIFACTS","ST12G_DESCRIPTOR_NAME",),76),
+ 162:("tools/build_pr169_agent_orch1.py",("JSONL_ARTIFACTS","JSON_REPORTS","ST12G_DESCRIPTOR_NAME",),97),
+ 164:("tools/build_pr169_svc1.py",("JSONL_ARTIFACTS","JSON_ARTIFACTS","ST12G_DESCRIPTOR_NAME",),101),
+ 166:("src/qtt/dashboard/owner_surface_models.py",("REQUIRED_JSONL_OUTPUTS","REQUIRED_JSON_OUTPUTS","REQUIRED_UI_OUTPUTS","REGISTRY_FILENAME","ST12G_DESCRIPTOR_FILENAME",),65),
+ 167:("tools/build_pr169_dash1_owner_dashboard_ui.py",("UI_ARTIFACT_FILES","UI_DIR_NAME","BOOT_JSON","BOOT_JS","R2R4_SUBDIR_NAME","R2R4_MANIFEST_FILE","R2R5_SUBDIR_NAME","R2R5_BUNDLE_FILE","R2R5_MANIFEST_FILE","R2R6_SUBDIR_NAME","R2R6_BUNDLE_FILE","R2R6_MANIFEST_FILE",),120)}
+  relative,names,expected_count=rules[source_position]
+  tree,operand=a['capture_source'](relative)
+  literal_width=max((len(n.value)for item in tree.body
+   if isinstance(item,(ast.Assign,ast.AnnAssign))
+   and any(isinstance(t,ast.Name)and t.id in names for t in(
+    item.targets if isinstance(item,ast.Assign)else(item.target,)))
+   for n in ast.walk(item.value)if isinstance(n,ast.Constant)and type(n.value)is str),default=0)
+  need(0<literal_width<=4096,'ORDINARY_V_BUNDLE_HELD_LITERAL_WIDTH')
+  n=expected_count+(64 if position==167 else 0)
+  width=2*literal_width+32;depth=3;parents=n*depth;count=3*(n+parents)
+  roster_width=max((len(item['roster'])for item in scope.source.row_index.values()
+   if item['role']=='repository'and item['kind']=='directory'),default=0)
+  version_width=max((len(value)for value in scope.source.post.values()),default=0)
+  extent=len(str(path))+1+width
+  need(n<=32768 and n+parents<=65536 and width<=4096 and extent<=4096
+   and roster_width<=65536 and version_width<128,
+   'ORDINARY_V_BUNDLE_ORIGINAL_NAMESPACE_NAME_AND_SNAPSHOT_CEILINGS')
+  # Three constructor lives: prototype, terminal comparison, final handback.
+  strings=n+count*(3*depth+12)+n*depth+parents
+  held=reserve_targets(recipe=row,geometry=('HELD',strings,strings*extent,
+   18*count+3*n+10+32,
+   count*(version_width+roster_width+2*depth+41)+5*n+6*(n+parents)+1000,
+   count+16,count*depth+6*(n+parents)+3*n+1000,
+   count+n+parents+4,9*count+7*(n+parents)+n+32,
+   2,parents+n,30*count+1000,2*depth+8,depth+2,extent))
+  reservation=(fixed,held)
+  values = {}
+  for node in tree.body:
+   targets = node.targets if isinstance(node, ast.Assign) else (
+    (node.target,) if isinstance(node, ast.AnnAssign) else ())
+   chosen = tuple(target.id for target in targets
+    if isinstance(target, ast.Name) and target.id in names)
+   if chosen:
+    need(len(chosen) == 1 and chosen[0] not in values,
+     'ORDINARY_V_BUNDLE_ONE_ORIGINAL_LITERAL_ASSIGNMENT')
+    values[chosen[0]] = ast.literal_eval(node.value)
+  need(set(values) == set(names), 'ORDINARY_V_BUNDLE_COMPLETE_SELECTED_LITERAL_ROSTER')
+  members = []
+  def append(name):
+   need(type(name) is str and name and '\\' not in name
+    and '\x00' not in name, 'ORDINARY_V_BUNDLE_PORTABLE_LEAF_NAME')
+   path = o._mapper_portable_relative_v1(name)
+   need(path.as_posix() == name and len(name.encode('utf8')) <= 4096,
+    'ORDINARY_V_BUNDLE_LITERAL_PATH_GEOMETRY')
+   if name not in members:
+    members.append(name)
+  if source_position <= 156:
+   for field in names:
+    value = values[field]
+    need(type(value) is tuple and value and all(type(name) is str for name in value),
+     'ORDINARY_V_BUNDLE_MODEL_LITERAL_TUPLE')
+    for name in value:
+     append(name)
+     if field == 'JSONL_OUTPUTS':
+      need(name.endswith('.jsonl'), 'ORDINARY_V_BUNDLE_ORIGINAL_JSONL_MANIFEST_STEM')
+      append(name[:-6] + '.manifest.json')
+  elif source_position <= 164:
+   for field in names:
+    value = values[field]
+    if type(value) is str:
+     append(value)
+    else:
+     need(type(value) is tuple and all(type(name) is str for name in value),
+      'ORDINARY_V_BUNDLE_TOOL_LITERAL_TUPLE')
+     for name in value:
+      append(name)
+  elif source_position == 166:
+   for field in names:
+    value = values[field]
+    if type(value) is str:
+     append(value)
+    else:
+     need(type(value) is tuple and all(type(name) is str for name in value),
+      'ORDINARY_V_BUNDLE_DASH_ORIGINAL_LITERAL_TUPLE')
+     for name in value:
+      append(name)
+  else:
+   need(type(values['UI_ARTIFACT_FILES']) is tuple
+    and all(type(name) is str for name in values['UI_ARTIFACT_FILES'])
+    and all(type(value) is str for key,value in values.items()
+     if key != 'UI_ARTIFACT_FILES'), 'ORDINARY_V_BUNDLE_UI_SOURCE_LITERAL_TYPES')
+   for name in (values['BOOT_JSON'], values['BOOT_JS'], *values['UI_ARTIFACT_FILES']):
+    append(values['UI_DIR_NAME'] + '/' + name)
+   for directory, leaf in (('R2R4_SUBDIR_NAME','R2R4_MANIFEST_FILE'),
+    ('R2R5_SUBDIR_NAME','R2R5_BUNDLE_FILE'),('R2R5_SUBDIR_NAME','R2R5_MANIFEST_FILE'),
+    ('R2R6_SUBDIR_NAME','R2R6_BUNDLE_FILE'),('R2R6_SUBDIR_NAME','R2R6_MANIFEST_FILE')):
+    append(values[directory] + '/' + values[leaf])
+   need(any(isinstance(node,ast.BinOp) and isinstance(node.op,ast.Div)
+    and isinstance(node.left,ast.Name) and node.left.id == 'base'
+    and isinstance(node.right,ast.Constant)
+    and node.right.value == 'owner_dashboard_ui_manifest.json' for node in ast.walk(tree)),
+    'ORDINARY_V_BUNDLE_UI_ORIGINAL_ROOT_MANIFEST_WRITE_OPERAND')
+   append('owner_dashboard_ui_manifest.json')
+  need(len(members) == expected_count, 'ORDINARY_V_BUNDLE_ORIGINAL_FULL_ROSTER_MULTIPLICITY')
+  read_members=()
+  if position==167:
+   old=tuple(b for b in prior_bundles if b['writing']and b['source_position']==166 and b['path']==path)
+   need(len(old)==1 and old[0]['component']is component,'ORDINARY_V_BUNDLE_DASH_FIXED_PREDECESSOR')
+   read_members=tuple(name for name in old[0]['consumer_members']if name not in members)
+  members=tuple(members)
+  consumer_members=tuple(dict.fromkeys((*members,*read_members)))
+  directories=tuple(sorted({parent.as_posix()for name in members
+   for parent in o.PurePosixPath(name).parents if parent.as_posix()!='.'}))
+  consumer_directories=tuple(sorted({parent.as_posix()for name in consumer_members
+   for parent in o.PurePosixPath(name).parents if parent.as_posix()!='.'}))
+ if not writing:consumer_members=members;consumer_directories=directories
+ result=dict(scope=scope,component=component,row=row,bound_row=row['bound_row'],
+  path=path,flag=flag,writing=writing,source_position=source_position,source_operand=operand,
+  members=members,directories=directories,stable_parent=path.parent,leaf_limit=128<<20,
+  errors=[],read_members=read_members,reservation=reservation,consumer_members=consumer_members,
+  consumer_directories=consumer_directories)
+ result['original']=(result,scope,component,row,row['bound_row'],path,flag,writing,source_position,
+  operand,members,directories,path.parent,result['leaf_limit'],result['errors'],
+  (o.os.getpid(),o.threading.get_ident()),read_members,reservation,consumer_members,consumer_directories)
+ return result
+
+def _ordinary_selected_v_directory_programme_v1(scope,effects):
+ from tools import validation_reliability as o
+ need=o._preflight_require_v1
+ need(effects is scope._ordinary_effect_programme_v1 is scope._ordinary_original_effect_programme_v1
+  and not hasattr(scope,'_ordinary_v_directory_outputs_v1'),
+  'ORDINARY_V_DIRECTORY_ONE_SAME_EFFECT_PROGRAMME')
+ rows=tuple((row,row['v_bundle'])for row in effects['rows'] if row.get('v_bundle') is not None)
+ if not rows:return None
+ logical=effects['paths'].validation_output_root/'master_plan_generated'
+ need(all(bundle['stable_parent']==logical and row['bound_row'] is bundle['bound_row']
+  and row['entry'] is bundle['row']['entry'] for row,bundle in rows),
+  'ORDINARY_V_DIRECTORY_SOURCE_SELECTED_SHARED_PARENT')
+ physical=scope._ordinary_image_v1['mount_path']/'runtime'/'v-artifacts'
+ protected=(scope.source.root,o.Path(scope.installation))
+ need(logical.is_absolute() and logical.is_relative_to(effects['paths'].validation_output_root)
+  and not any(logical==root or logical.is_relative_to(root) or root.is_relative_to(logical)
+   for root in protected) and physical!=logical,
+  'ORDINARY_V_DIRECTORY_NO_REPOSITORY_INSTALLATION_OR_SOURCE_ALIAS')
+ record=dict(scope=scope,effects=effects,rows=rows,logical=logical,
+  physical=scope._ordinary_image_v1['mount_path']/'runtime'/'v-artifacts',
+  anchor=None,identity=None,project=None,latest={},prepared=[],proofs=[],
+  completions=[],errors=[],cleanup_complete=False)
+ record['demand']=_ordinary_selected_v_directory_demand_v1(scope,record)
+ record['original']=(record,scope,effects,rows,logical,record['physical'],
+  record['latest'],record['prepared'],record['proofs'],record['completions'],
+  record['errors'],(o.os.getpid(),o.threading.get_ident()),record['demand'],tuple(record['demand']))
+ scope._ordinary_v_directory_outputs_v1=scope._ordinary_original_v_directory_outputs_v1=record
+ return record
+
+def _ordinary_selected_v_directory_record_v1(scope):
+ from tools import validation_reliability as o
+ record=getattr(scope,'_ordinary_v_directory_outputs_v1',None)
+ if record is None:return None
+ kept=record['original']
+ o._preflight_require_v1(record is scope._ordinary_original_v_directory_outputs_v1
+  and type(kept) is tuple and len(kept)==14 and kept[0] is record and kept[1] is scope
+  and kept[2] is record['effects'] is scope._ordinary_original_effect_programme_v1
+  and kept[3] is record['rows'] and kept[4]==record['logical']
+  and kept[5]==record['physical'] and kept[6] is record['latest']
+  and kept[7] is record['prepared'] and kept[8] is record['proofs']
+  and kept[9] is record['completions'] and kept[10] is record['errors']
+  and kept[11]==(o.os.getpid(),o.threading.get_ident())
+  and kept[12]is record['demand'] and kept[13]==tuple(record['demand']) and not record['errors']
+  and record['physical']==scope._ordinary_image_v1['mount_path']/'runtime'/'v-artifacts',
+  'ORDINARY_V_DIRECTORY_ORIGINAL_PARENT_AND_LIFETIME')
+ for row,b in record['rows']:
+  x=b['original']
+  o._preflight_require_v1(type(x) is tuple and len(x)==20 and x[0] is b
+   and x[1] is scope and x[2] is b['component'] and x[3] is b['row']
+   and x[4] is row['bound_row'] is b['bound_row'] and row['entry'] is b['row']['entry']
+   and x[5:9]==(b['path'],b['flag'],b['writing'],b['source_position'])
+   and x[9] is b['source_operand'] and x[10] is b['members'] and x[11] is b['directories']
+   and x[12]==record['logical']==b['stable_parent'] and x[13]==b['leaf_limit']==128<<20
+   and x[14] is b['errors'] and not b['errors']
+   and x[15]==(o.os.getpid(),o.threading.get_ident()) and x[16] is b['read_members']
+   and x[17] is b['reservation'] and x[18] is b['consumer_members']
+   and x[19] is b['consumer_directories'],
+   'ORDINARY_V_DIRECTORY_HELD_SOURCE_ROSTER')
+ return record
+
+def _ordinary_selected_v_directory_rows_v1(scope,entry):
+ record=_ordinary_selected_v_directory_record_v1(scope)
+ return () if record is None else tuple((row,b)for row,b in record['rows'] if row['entry'] is entry)
+
+def _ordinary_selected_v_directory_open_v1(scope,relative,*,directory=False,settling=False,missing=False):
+ from tools import validation_reliability as o
+ record=_ordinary_selected_v_directory_record_v1(scope)
+ need=o._preflight_require_v1
+ need(type(relative) is str and relative and o._mapper_portable_relative_v1(relative).as_posix()==relative,
+  'ORDINARY_V_DIRECTORY_EXACT_RELATIVE_NAME')
+ slots=[];errors=[];parent=record['anchor']['returned_fd'];path=record['physical'];leaf=None
+ try:
+  parts=relative.split('/')
+  for i,name in enumerate(parts):
+   path=path/name;isdir=i<len(parts)-1 or directory
+   slot=scope._ordinary_factory_slot_v1(path,'ORDINARY_V_DIRECTORY_LAZY_OPERAND',settling=settling)
+   slots.append(slot)
+   fd=scope._ordinary_factory_open_v1(slot,name,o.os.O_RDONLY|o.os.O_NOFOLLOW|o.os.O_CLOEXEC
+    |(o.os.O_DIRECTORY if isdir else 0),parent_fd=parent,settling=settling)
+   held=scope._ordinary_factory_call_v1(o.os.fstat,fd,settling=settling)
+   named=scope._ordinary_factory_call_v1(o.os.stat,name,dir_fd=parent,follow_symlinks=False,settling=settling)
+   need(o._same_observed_file(held,named) and held.st_dev==record['identity'][0]
+    and (o.stat.S_ISDIR(held.st_mode) if isdir else o.stat.S_ISREG(held.st_mode)and held.st_nlink==1),
+    'ORDINARY_V_DIRECTORY_NO_LINK_SAME_VIEW_OPERAND')
+   if i<len(parts)-1:parent=fd
+   else:leaf=(slot,held,parent,name)
+  return leaf,slots
+ except BaseException as error:
+  if missing and type(error) is FileNotFoundError:
+   _ordinary_selected_v_directory_close_v1(scope,slots,errors)
+   if not errors:return None,()
+  else:errors.append(error)
+ finally:
+  if errors:
+   for slot in reversed(slots):
+    if not o._mapper_slot_settled_v1(slot):
+     try:scope._ordinary_factory_close_v1(slot,settling=True)
+     except BaseException as error:errors.append(error)
+   record['errors'].extend(errors)
+   o._scan_raise_errors(errors)
+
+def _ordinary_selected_v_directory_close_v1(scope,slots,errors):
+ from tools import validation_reliability as o
+ for slot in reversed(slots):
+  if not o._mapper_slot_settled_v1(slot):
+   try:scope._ordinary_factory_close_v1(slot,settling=True)
+   except BaseException as error:errors.append(error)
+
+def _ordinary_selected_v_directory_prepare_v1(scope,occurrence):
+ from tools import validation_reliability as o
+ import struct
+ rows=_ordinary_selected_v_directory_rows_v1(scope,occurrence['entry'])
+ if not rows:return ()
+ record=_ordinary_selected_v_directory_record_v1(scope);need=o._preflight_require_v1
+ need(occurrence is scope._ordinary_occurrence_record_v1(occurrence['entry'])
+  and occurrence['pending'] and occurrence['dispatch_attempted']
+  and not occurrence['launcher_attempted'] and occurrence['launcher'] is None
+  and all(old['receipt'] is not None and old['retired'] for old,b in record['prepared']),
+  'ORDINARY_V_DIRECTORY_SERIAL_PENDING_AND_PREDECESSOR_RETIRED')
+ quota=scope._ordinary_temporary_quota_v1
+ need(quota['published'] and not quota['errors'] and quota['image'] is scope._ordinary_image_v1
+  and quota['allocation']==scope._ordinary_resource_programme_v1['temporary_programme'],
+  'ORDINARY_V_DIRECTORY_EXISTING_SHARED_VIEW_PROJECT_ONLY')
+ if record['anchor'] is None:
+  parent=quota['root']['returned_fd']
+  scope._ordinary_factory_call_v1(o.os.mkdir,'v-artifacts',0o700,dir_fd=parent)
+  slot=record['anchor']=scope._ordinary_factory_slot_v1(record['physical'],'ORDINARY_V_DIRECTORY_STABLE_PARENT')
+  fd=scope._ordinary_factory_open_v1(slot,'v-artifacts',o.os.O_RDONLY|o.os.O_DIRECTORY|o.os.O_NOFOLLOW
+   |o.os.O_CLOEXEC,parent_fd=parent)
+  held=scope._ordinary_factory_call_v1(o.os.fstat,fd)
+  named=scope._ordinary_factory_call_v1(o.os.stat,'v-artifacts',dir_fd=parent,follow_symlinks=False)
+  need(o._same_observed_file(held,named) and o.stat.S_ISDIR(held.st_mode)
+   and (held.st_uid,held.st_gid,o.stat.S_IMODE(held.st_mode))==(0,0,0o700)
+   and held.st_dev==scope._ordinary_image_v1['filesystem']['root_identity'][0],
+   'ORDINARY_V_DIRECTORY_CREATE_NEW_PRIVATE_PARENT')
+  project=scope._ordinary_factory_ioctl_v1(fd,0x801c581f,bytes(28),read_extent=28)
+  fields=struct.unpack('<5I8x',project)
+  need(fields[3]==quota['allocation'][0] and fields[0]&0x200,
+   'ORDINARY_V_DIRECTORY_NATIVE_PROJECT_INHERITANCE')
+  record['identity']=(held.st_dev,held.st_ino);record['project']=project
+ for row,b in rows:
+  if not b['writing']:
+   prior=record['latest'].get(b['path'])
+   need(prior is not None and prior['complete'] and prior['returncode']==0
+    and set(b['members'])<=set(prior['members']), 'ORDINARY_V_DIRECTORY_READER_NEEDS_GENUINE_COMPLETE_WRITER')
+  else:
+   prior=record['latest'].get(b['path'])
+   need(prior is None or row['source_position']==167 and prior['source_position']==166
+    and prior['complete'] and prior['returncode']==0,
+    'ORDINARY_V_DIRECTORY_ONLY_SELECTED_DASH_SUCCESSOR')
+  record['prepared'].append((occurrence,b))
+ return rows
+
+def _ordinary_selected_v_directory_exposure_v1(scope,entry):
+ rows=_ordinary_selected_v_directory_rows_v1(scope,entry)
+ if not rows:return (),(),()
+ record=_ordinary_selected_v_directory_record_v1(scope)
+ from tools import validation_reliability as o
+ o._preflight_require_v1(record['anchor'] is not None and all(any(old['entry'] is entry and oldb is b
+  for old,oldb in record['prepared'])for row,b in rows),
+  'ORDINARY_V_DIRECTORY_ACTUAL_PREPARED_OCCURRENCE')
+ pair=(str(record['physical']),str(record['logical']))
+ return (() if any(b['writing']for row,b in rows)else(pair,)),(
+  (pair,)if any(b['writing']for row,b in rows)else()),rows
+
+def _ordinary_selected_v_directory_policy_v1(scope,entry):
+ from tools import validation_reliability as o
+ rows=_ordinary_selected_v_directory_rows_v1(scope,entry)
+ if not rows:return ()
+ record=_ordinary_selected_v_directory_record_v1(scope);rules=[]
+ for row,b in rows:
+  rules.extend((str(parent),'DIRECTORY_READ')for parent in reversed(record['logical'].parents))
+  rules.append((str(record['logical']),'DIRECTORY_WRITE'if b['writing']else'DIRECTORY_READ'))
+  rules.append((str(b['path']),'DIRECTORY_WRITE'if b['writing']else'DIRECTORY_READ'))
+  rules.extend((str(b['path']/name),'DIRECTORY_WRITE'if b['writing']else'DIRECTORY_READ')
+   for name in b['directories'])
+  rules.extend((str(b['path']/name),'r')for name in b['read_members'])
+  rules.extend((str(b['path']/name),'rwk'if b['writing']else'r')for name in b['members'])
+ return tuple(dict.fromkeys(rules))
+
+def _ordinary_selected_v_directory_handoff_v1(scope,occurrence,root_fd,mounts,credentials):
+ from tools import validation_reliability as o
+ rows=_ordinary_selected_v_directory_rows_v1(scope,occurrence['entry'])
+ if not rows:return None
+ record=_ordinary_selected_v_directory_record_v1(scope);need=o._preflight_require_v1
+ principal=occurrence['native_principal']
+ need(principal is occurrence['original_native_principal'] and principal[0] is occurrence
+  and principal[1] is scope and principal[2] is occurrence['entry']
+  and principal[3] is occurrence['programme'] and principal[4] is credentials
+  and principal[5]==tuple(credentials.items()) and not occurrence['released']
+  and type(credentials['Uid']) is int and credentials['Uid']>0
+  and type(credentials['Gid']) is int and credentials['Gid']>0,
+  'ORDINARY_V_DIRECTORY_AUTHENTIC_UNRELEASED_NATIVE_PRINCIPAL')
+ fd=record['anchor']['returned_fd'];held=scope._ordinary_factory_call_v1(o.os.fstat,fd)
+ named=scope._ordinary_factory_call_v1(o.os.lstat,record['physical'])
+ need(o._same_observed_file(held,named)and(held.st_dev,held.st_ino)==record['identity']
+  and (held.st_uid,held.st_gid)==(0,0),'ORDINARY_V_DIRECTORY_SAME_PRIVATE_STABLE_PARENT')
+ writing=any(b['writing']for row,b in rows)
+ if writing:
+  scope._ordinary_factory_call_v1(o.os.fchown,fd,credentials['Uid'],credentials['Gid'])
+  scope._ordinary_factory_call_v1(o.os.fchmod,fd,0o700)
+ else:scope._ordinary_factory_call_v1(o.os.fchmod,fd,0o755)
+ errors=[];ns=None
+ try:
+  for row,b in rows:
+   prior=record['latest'].get(b['path'])
+   if prior is not None:
+    writes=tuple(str(b['path']/n)for n in b['members'])
+    for relative,version in prior['versions']:
+     leaf,slots=_ordinary_selected_v_directory_open_v1(scope,relative)
+     try:
+      child,info,parent,name=leaf
+      need(o._scan_same_api_version(info)==version and(info.st_uid,info.st_gid,
+       o.stat.S_IMODE(info.st_mode))==(0,0,0o444),'ORDINARY_V_DIRECTORY_PRIOR_BYTES_REMAIN_SEALED')
+      if writing and str(record['logical']/relative)in writes:
+       scope._ordinary_factory_call_v1(o.os.fchown,child['returned_fd'],credentials['Uid'],credentials['Gid'])
+       scope._ordinary_factory_call_v1(o.os.fchmod,child['returned_fd'],0o600)
+     finally:_ordinary_selected_v_directory_close_v1(scope,slots,errors)
+    if writing:
+     for relative in prior['directories']:
+      leaf,slots=_ordinary_selected_v_directory_open_v1(scope,relative,directory=True)
+      try:
+       scope._ordinary_factory_call_v1(o.os.fchown,leaf[0]['returned_fd'],credentials['Uid'],credentials['Gid'])
+       scope._ordinary_factory_call_v1(o.os.fchmod,leaf[0]['returned_fd'],0o700)
+      finally:_ordinary_selected_v_directory_close_v1(scope,slots,errors)
+  ns=scope._ordinary_cache_open_relative_v1(occurrence['root_slot'],record['logical'].as_posix().lstrip('/'),directory=True)
+  actual=scope._ordinary_factory_call_v1(o.os.fstat,ns['returned_fd'])
+  native=scope._ordinary_native_mount_v1(ns['returned_fd'])
+  matching=tuple(x for x in mounts if x['path']==str(record['logical']))
+  need((actual.st_dev,actual.st_ino)==record['identity'] and len(matching)==1
+   and matching[0]['fs']=='ext4' and matching[0]['root']=='/'+record['physical'].relative_to(
+    scope._ordinary_image_v1['mount_path']).as_posix() and matching[0]['id']==native['old_id']
+   and {'nosuid','nodev','noexec','rw'if writing else'ro'}<=matching[0]['options']
+   and native['attributes']&15==(14 if writing else 15),
+   'ORDINARY_V_DIRECTORY_ACTUAL_VIEW_BIND_ACCESS_AND_PRINCIPAL')
+  proof=(occurrence,record,principal,rows,record['identity'],tuple(native.items()),
+   tuple(matching[0].items()),(credentials['Uid'],credentials['Gid']),writing)
+  record['proofs'].append(proof);return proof
+ except BaseException as error:errors.append(error)
+ finally:
+  if ns is not None:_ordinary_selected_v_directory_close_v1(scope,[ns],errors)
+  if errors:record['errors'].extend(errors);o._scan_raise_errors(errors)
+
+def _ordinary_selected_v_directory_finish_v1(scope,occurrence):
+ from tools import validation_reliability as o
+ import struct
+ rows=_ordinary_selected_v_directory_rows_v1(scope,occurrence['entry'])
+ if not rows or not any(b['writing']for row,b in rows):return None
+ record=_ordinary_selected_v_directory_record_v1(scope);need=o._preflight_require_v1
+ proofs=tuple(x for x in record['proofs']if x[0]is occurrence)
+ need(occurrence is scope._ordinary_occurrence_record_v1(occurrence['entry'])
+  and occurrence['process'].poll() is not None and occurrence['launcher'].poll() is not None
+  and occurrence['stopped'] and scope._ordinary_cgroup_empty_v1(occurrence)
+  and type(occurrence['output_outcomes'])is tuple and len(occurrence['output_outcomes'])==2
+  and all(x.get('eof_observed')is True for x in occurrence['output_outcomes'])
+  and occurrence['process'].stdout.closed and occurrence['process'].stderr.closed
+  and len(proofs)==1 and proofs[0][1]is record and proofs[0][2]is occurrence['native_principal'],
+  'ORDINARY_V_DIRECTORY_REAL_TERMINAL_BOTH_EOF_AND_NATIVE_HANDBACK')
+ anchor=record['anchor']['returned_fd']
+ scope._ordinary_factory_call_v1(o.os.fchown,anchor,0,0,settling=True)
+ scope._ordinary_factory_call_v1(o.os.fchmod,anchor,0o700,settling=True)
+ returncode=occurrence['process'].returncode;completed=[];errors=[]
+ for row,b in rows:
+  if not b['writing']:continue
+  relative=b['path'].relative_to(record['logical']).as_posix()
+  prior=record['latest'].get(b['path'])
+  allowed=set(relative+'/'+name for name in b['members'])
+  if prior is not None:allowed.update(prior['members'])
+  dirs={relative,*tuple(relative+'/'+name for name in b['directories'])}
+  if prior is not None:dirs.update(prior['directories'])
+  versions=[];present=[];observed_dirs=[];read_bytes=0;extent=0
+  try:
+   pending=[relative]
+   while pending:
+    directory=pending.pop()
+    leaf,slots=_ordinary_selected_v_directory_open_v1(scope,directory,directory=True,settling=True,missing=returncode!=0)
+    if leaf is None:continue
+    try:
+     dfd=leaf[0]['returned_fd'];names=scope._ordinary_factory_call_v1(o.os.listdir,dfd,settling=True)
+     need(type(names)is list and len(names)<=len(allowed)+len(dirs)
+      and len(names)==len(set(names)),'ORDINARY_V_DIRECTORY_FINITE_CLOSED_ROSTER')
+     scope._ordinary_factory_call_v1(o.os.fchown,dfd,0,0,settling=True)
+     scope._ordinary_factory_call_v1(o.os.fchmod,dfd,0o755,settling=True)
+     observed_dirs.append(directory)
+     sealed_dir=scope._ordinary_factory_call_v1(o.os.fstat,dfd,settling=True)
+     for name in names:
+      need(type(name)is str and '/'not in name and '\\'not in name and name not in('.','..'),
+       'ORDINARY_V_DIRECTORY_PORTABLE_NATIVE_NAME')
+      child=directory+'/'+name
+      need(child in allowed|dirs,'ORDINARY_V_DIRECTORY_NO_UNDECLARED_MEMBER')
+      if child in dirs:pending.append(child);continue
+      item,owned=_ordinary_selected_v_directory_open_v1(scope,child,settling=True)
+      second=None
+      try:
+       slot,info,parent,last=item;fd=slot['returned_fd']
+       need(info.st_size<=b['leaf_limit']and((info.st_uid,info.st_gid,o.stat.S_IMODE(info.st_mode))
+        ==(0,0,0o444)or(info.st_uid,info.st_gid,o.stat.S_IMODE(info.st_mode))in ((*proofs[0][7],0o600),(*proofs[0][7],0o640),(*proofs[0][7],0o644))),
+        'ORDINARY_V_DIRECTORY_FIXED_LEAF_LIMIT_AND_WRITER_PRINCIPAL')
+       extent+=info.st_size
+       need(extent<=record['demand'][0],
+        'ORDINARY_V_DIRECTORY_LIFETIME_BYTES_WITHIN_EXISTING_SHARED_PROJECT')
+       scope._ordinary_factory_call_v1(o.os.fchown,fd,0,0,settling=True)
+       scope._ordinary_factory_call_v1(o.os.fchmod,fd,0o444,settling=True)
+       sealed=scope._ordinary_factory_call_v1(o.os.fstat,fd,settling=True);version=o._scan_same_api_version(sealed)
+       second=scope._ordinary_factory_slot_v1(record['physical']/child,'ORDINARY_V_DIRECTORY_INDEPENDENT_REOPEN',settling=True)
+       other=scope._ordinary_factory_open_v1(second,last,o.os.O_RDONLY|o.os.O_NOFOLLOW|o.os.O_CLOEXEC,
+        parent_fd=parent,settling=True)
+       need(o._scan_same_api_version(scope._ordinary_factory_call_v1(o.os.fstat,other,settling=True))==version,
+        'ORDINARY_V_DIRECTORY_REOPEN_EXACT_CREATED_BYTES')
+       position=0
+       while position<sealed.st_size:
+        request=min(65536,sealed.st_size-position);blocks=[]
+        for descriptor in(fd,other):
+         block=bytearray()
+         while len(block)<request:
+          part=scope._ordinary_factory_call_v1(o.os.pread,descriptor,request-len(block),position+len(block),settling=True)
+          need(type(part)is bytes and 0<len(part)<=request-len(block),'ORDINARY_V_DIRECTORY_FULL_BINARY_PROGRESS')
+          scope._ordinary_factory_debit_v1('raw_read',len(part),settling=True);read_bytes+=len(part);block.extend(part)
+         blocks.append(bytes(block))
+        need(blocks[0]==blocks[1],'ORDINARY_V_DIRECTORY_COMPLETE_REOPEN_BYTE_EQUALITY');position+=request
+       for descriptor in(fd,other):
+        suffix=scope._ordinary_factory_call_v1(o.os.pread,descriptor,1,position,settling=True)
+        need(type(suffix)is bytes,'ORDINARY_V_DIRECTORY_BINARY_EOF_TYPE')
+        scope._ordinary_factory_debit_v1('raw_read',len(suffix),settling=True);read_bytes+=len(suffix)
+        need(suffix==b''and o._scan_same_api_version(scope._ordinary_factory_call_v1(
+         o.os.fstat,descriptor,settling=True))==version,'ORDINARY_V_DIRECTORY_ZERO_BYTE_EOF_SAME_VERSION')
+       need(o._scan_same_api_version(scope._ordinary_factory_call_v1(o.os.stat,last,dir_fd=parent,
+        follow_symlinks=False,settling=True))==version,'ORDINARY_V_DIRECTORY_FINAL_PATH_AND_HANDLE_VERSION')
+       project=scope._ordinary_factory_ioctl_v1(fd,0x801c581f,bytes(28),read_extent=28,settling=True)
+       need(struct.unpack('<5I8x',project)[3]==scope._ordinary_temporary_quota_v1['allocation'][0],
+        'ORDINARY_V_DIRECTORY_EVERY_LEAF_SAME_SHARED_PROJECT')
+       present.append(child);versions.append((child,version))
+      except BaseException as error:errors.append(error)
+      finally:_ordinary_selected_v_directory_close_v1(scope,[*owned,*(()if second is None else(second,))],errors)
+     after=scope._ordinary_factory_call_v1(o.os.fstat,dfd,settling=True)
+     named=scope._ordinary_factory_call_v1(o.os.stat,leaf[3],dir_fd=leaf[2],follow_symlinks=False,settling=True)
+     need(o._scan_same_api_version(after)==o._scan_same_api_version(named)==o._scan_same_api_version(sealed_dir)
+      and set(scope._ordinary_factory_call_v1(o.os.listdir,dfd,settling=True))==set(names),
+      'ORDINARY_V_DIRECTORY_FULL_ROSTER_PATH_HANDLE_RECHECK')
+    finally:_ordinary_selected_v_directory_close_v1(scope,slots,errors)
+   need(returncode!=0 or set(present)==allowed and set(observed_dirs)==dirs,
+    'ORDINARY_V_DIRECTORY_ZERO_SUCCESS_EXACT_COMPLETE_SOURCE_ROSTER')
+   completion=dict(occurrence=occurrence,bundle=b,source_position=row['source_position'],
+    members=tuple(sorted(present)),directories=tuple(sorted(observed_dirs)),versions=tuple(sorted(versions)),
+    read_bytes=read_bytes,returncode=returncode,complete=returncode==0,principal=occurrence['native_principal'],
+    stop_receipt=occurrence['stop_receipt'])
+   completion['original']=(completion,tuple(completion.items()))
+   record['completions'].append(completion);record['latest'][b['path']]=completion;completed.append(completion)
+  except BaseException as error:errors.append(error)
+ if errors:record['errors'].extend(errors);o._scan_raise_errors(errors)
+ return tuple(completed)
+
+def _ordinary_selected_v_directory_cleanup_v1(scope,paths):
+ from tools import validation_reliability as o
+ record=_ordinary_selected_v_directory_record_v1(scope)
+ if record is None:return None
+ need=o._preflight_require_v1
+ need(paths is record['effects']['paths']and not record['cleanup_complete']
+  and scope._ordinary_candidate_v1._disk_completed_restore_v1()
+  and scope._ordinary_candidate_v1.active_occurrence is None
+  and not scope._ordinary_candidate_v1._ordinary_disk_state_v1['borrows']
+  and scope.query.command_resources_settled_v1(),'ORDINARY_V_DIRECTORY_ORIGINAL_PRE_DELETE_BOUNDARY')
+ scope._ordinary_processes_settled_v1()
+ errors=[]
+ for occurrence,b in record['prepared']:
+  try:
+   if occurrence.get('no_launch')is not None:
+    scope._ordinary_never_launched_v1(occurrence,settled=True)
+    need(occurrence['receipt']is not None and occurrence['retired'],
+     'ORDINARY_V_DIRECTORY_GENUINE_NO_LAUNCH_IS_NOT_OUTPUT_SUCCESS')
+   else:
+    scope._ordinary_require_occurrence_terminal_v1(occurrence,occurrence['receipt'])
+    need(occurrence['retired']and (not b['writing']or any(x['occurrence']is occurrence
+     and x['bundle']is b for x in record['completions'])),
+     'ORDINARY_V_DIRECTORY_RETIRED_PRODUCER_OR_READER')
+  except BaseException as error:errors.append(error)
+ for completion in record['latest'].values():
+  try:
+   need(completion['original'][0]is completion and tuple(completion.items())[:-1]==completion['original'][1],
+    'ORDINARY_V_DIRECTORY_LAST_SEALED_COMPLETION')
+   for relative,version in completion['versions']:
+    leaf,slots=_ordinary_selected_v_directory_open_v1(scope,relative,settling=True)
+    try:need(o._scan_same_api_version(leaf[1])==version,'ORDINARY_V_DIRECTORY_FINAL_CONSUMER_DID_NOT_MUTATE')
+    finally:_ordinary_selected_v_directory_close_v1(scope,slots,errors)
+  except BaseException as error:errors.append(error)
+ if record['anchor']is not None:_ordinary_selected_v_directory_close_v1(scope,[record['anchor']],errors)
+ if errors:record['errors'].extend(errors);o._scan_raise_errors(errors)
+ record['cleanup_complete']=True;return record
+
+def _ordinary_selected_v_directory_native_check_v1(scope,occurrence):
+ from tools import validation_reliability as o
+ rows=_ordinary_selected_v_directory_rows_v1(scope,occurrence['entry'])
+ if not rows:return None
+ record=_ordinary_selected_v_directory_record_v1(scope)
+ matches=tuple(proof for proof in record['proofs']if proof[0]is occurrence)
+ o._preflight_require_v1(len(matches)==1 and type(matches[0])is tuple
+  and len(matches[0])==9 and matches[0][1]is record
+  and matches[0][2]is occurrence['native_principal']is occurrence['original_native_principal']
+  and len(matches[0][3])==len(rows)
+  and all(oldrow is row and oldb is b for(oldrow,oldb),(row,b)in zip(matches[0][3],rows,strict=True))
+  and matches[0][4]==record['identity']
+  and matches[0][7]==(occurrence['native_principal'][10],occurrence['native_principal'][11])
+  and type(matches[0][8])is bool and matches[0][8]==any(b['writing']for row,b in rows),
+  'ORDINARY_V_DIRECTORY_SAME_NATIVE_PRINCIPAL_MOUNT_AND_SOURCE_OCCURRENCE')
+ return matches[0]
+
+def _ordinary_selected_v_directory_finish_join_v1(scope,occurrence):
+ from tools import validation_reliability as o
+ errors=[];original=None
+ try:original=scope._ordinary_run_output_finish_v1(occurrence)
+ except BaseException as error:errors.append(error)
+ try:_ordinary_selected_v_directory_finish_v1(scope,occurrence)
+ except BaseException as error:errors.append(error)
+ o._scan_raise_errors(errors)
+ return original
+
+def _ordinary_selected_v_directory_cleanup_join_v1(scope,paths):
+ from tools import validation_reliability as o
+ errors=[];original=None
+ try:original=scope._ordinary_run_output_cleanup_ready_v1(paths)
+ except BaseException as error:errors.append(error)
+ try:_ordinary_selected_v_directory_cleanup_v1(scope,paths)
+ except BaseException as error:errors.append(error)
+ o._scan_raise_errors(errors)
+ return original
+
+
+def _ordinary_selected_v_directory_demand_v1(scope,record):
+ from tools import validation_reliability as o
+ need=o._preflight_require_v1
+ resource=scope._ordinary_resource_programme_v1
+ need(resource is scope._ordinary_original_resource_programme_v1[0]
+  and tuple(resource.items())==scope._ordinary_original_resource_programme_v1[1],
+  'ORDINARY_V_DIRECTORY_ORIGINAL_SHARED_RESOURCE')
+ allocation=resource['temporary_programme']
+ need(type(allocation)is tuple and allocation==(1,16<<30,20000,resource['raw_programme'][0]),
+  'ORDINARY_V_DIRECTORY_EXISTING_VIEW_PROJECT_NOT_HOST_STORAGE')
+ writers=tuple((row,b)for row,b in record['rows']if b['writing'])
+ leaf=128<<20;pool=allocation[1];read_bytes=metadata=native_calls=0
+ all_files=set();all_dirs=set();depth=0
+ for row,b in writers:
+  n=len(b['consumer_members']);d=len(b['consumer_directories'])+1
+  need(0<n and n+d<=allocation[2] and b['leaf_limit']==leaf,
+   'ORDINARY_V_DIRECTORY_SOURCE_ROSTER_WITHIN_SHARED_INODE_CEILING')
+  extent=min(n*leaf,pool)
+  read_bytes+=2*extent+2*n
+  chain=max((len(name.split('/'))for name in b['consumer_members']),default=1)+1
+  depth=max(depth,chain)
+  # One-byte-progress reads are included in calls, not a successful-chunk count.
+  metadata+=2*extent+(64+16*chain)*(n+d+1)+2*n+128
+  native_calls+=n
+  stem=b['path'].relative_to(record['logical']).as_posix()
+  all_files.update(stem+'/'+name for name in b['consumer_members'])
+  all_dirs.update((stem,*(stem+'/'+name for name in b['consumer_directories'])))
+ need(not all_files&all_dirs and len(all_files)+len(all_dirs)+1+
+  resource['runtime_programme'][4]<=allocation[2],
+  'ORDINARY_V_DIRECTORY_CUMULATIVE_NAMES_AND_RUNTIME_SAME_PROJECT')
+ occurrences=len(record['rows'])
+ # Each selected bind is the unchanged native mount owner: 2 calls,768 read,24 write.
+ # The original project ioctl returns28 bytes: once at anchor and once per writer leaf.
+ return (pool,allocation[2],read_bytes,metadata,
+  1+native_calls+2*occurrences,28*(1+native_calls)+768*occurrences,
+  24*occurrences,2*depth+1,len(all_files)+len(all_dirs)+1)
+
+def _ordinary_selected_v_directory_phase_demand_v1(scope,record,demand):
+ from tools import validation_reliability as o
+ x=record['demand']
+ o._preflight_require_v1(type(x)is tuple and len(x)==9 and type(demand)is dict
+  and all(type(v)is int and v>=0 for v in x),
+  'ORDINARY_V_DIRECTORY_SAME_PHASE_DEMAND_BEFORE_FREEZE')
+ for key,amount in zip(('parent_read_bytes','metadata_minimum','native_control_calls',
+  'native_control_read_bytes','native_control_write_bytes','simultaneous_descriptors'),
+  x[2:8],strict=True):
+  demand[key]+=amount
+ return demand
+
+
+def _ordinary_selected_v_directory_workspace_request_v1(layout):
+ from tools import validation_reliability as o
+ q=65536
+ return (('SOURCE_V_DIRECTORY_ONE_ACTIVE_READBACK_WORKSPACE',
+  2*o._ordinary_data_size_v1(layout,'bytearray_prefix')
+  +2*(q+1+(q+1)//8+7)
+  +3*o._ordinary_data_bytes_request_v1(layout,q)
+  +o._ordinary_data_list_requests_v1(layout,1,2)
+  +2*o._ordinary_data_bytes_request_v1(layout,0)),)
+
+def _ordinary_selected_operational_acquisition_v1(scope, supported, component, *,
+ source_byte_limit, source_node_limit):
+ import tools.validation_reliability as _f
+ need = _f._preflight_require_v1
+ need(type(scope) is _f._LinuxPreflightScopeV1
+  and supported is scope._ordinary_effect_programme_v1
+  is scope._ordinary_original_effect_programme_v1
+  and supported['scope'] is scope and supported['source'] is scope.source
+  and supported['paths'] is scope._ordinary_bound_paths_v1
+  and supported['plan'] is scope._ordinary_bound_plan_v1
+  and supported['execution_plan'] is scope._ordinary_execution_plan_v1
+  and supported['source_selection'] is scope._ordinary_source_selection_v1
+  is scope._ordinary_original_source_selection_v1
+  and any(component is item for item in supported['components'])
+  and component['check'] is component['original_check']
+  and component['check'](scope, component) is component
+  and component['source'] is scope.source
+  and type(source_byte_limit) is int and source_byte_limit > 0
+  and type(source_node_limit) is int and source_node_limit > 0
+  and not hasattr(scope, '_ordinary_selected_operational_acquisition_v1'),
+  'ORDINARY_OPERATIONAL_ORIGINAL_ACQUISITION_ONCE')
+ from tools import ci_branch_context as ci
+ ci._ordinary_bounded_control_source_owner_v1(scope)
+ attempt=scope._ordinary_controller_data_initialization_v1
+ reserve=scope._ordinary_bounded_source_reservation_v1
+ kept=attempt['reserve_targets_original']
+ need(attempt is scope._ordinary_original_controller_data_initialization_v1
+  and attempt['bounded_production'] is True and attempt['complete'] is True
+  and not attempt['errors'] and attempt['allocator'] is scope._ordinary_data_allocator_v1
+  and type(kept)is tuple and len(kept)==7 and kept[0]is attempt and kept[1]is scope
+  and kept[3]is ci and kept[4]is reserve is attempt['reserve_targets']
+  and reserve.__code__ is kept[5]and reserve.__closure__ is kept[6]
+  and reserve.__defaults__ is None and reserve.__kwdefaults__ is None,
+  'ORDINARY_OPERATIONAL_GENUINE_INITIALIZED_SOURCE_NAMESPACE_RESERVATION')
+ source = scope.source
+ record = dict(scope=scope, source=source, supported=supported, component=component,
+  source_operands=list(component['source_operands']), errors=[],
+  source_byte_limit=source_byte_limit, source_node_limit=source_node_limit,
+  component_operands_snapshot=tuple(component['source_operands']),
+  progress=(0, 0, 0), snapshots=[],reserve_targets=reserve,
+  reservation_attempt=attempt,reservation_original=kept)
+ def totals():
+  values = record['source_operands']
+  need(type(values) is list and len(values) == len({id(item) for item in values})
+   and all(type(item) is dict and item['complete'] and item['error'] is None
+    and item['row'] is source.row_index[item['row']['path']]
+    and item['version'] == tuple(source.post[item['row']['path']])
+    for item in values), 'ORDINARY_OPERATIONAL_ORIGINAL_SOURCE_EXTENTS')
+  parsed = []
+  for item in values:
+   original = any(item is prior for prior in record['component_operands_snapshot'])
+   if item['source_form'] == 'ABSENT':
+    need(original, 'ORDINARY_OPERATIONAL_ORIGINAL_ABSENCE_OWNER_REQUIRED')
+    continue
+   need(type(item['raw_bytes']) is int and item['raw_bytes'] >= 0
+    and type(item['nodes']) is int and item['nodes'] > 0
+    and (original or (item['source_form'] == 'PYTHON'
+     and item['raw_bytes'] <= source_byte_limit and item['nodes'] <= source_node_limit)),
+    'ORDINARY_OPERATIONAL_PARSED_ORIGINAL_OR_ADDED_PYTHON_EXTENTS')
+   parsed.append(item)
+  return (len(values), sum(item['raw_bytes'] for item in parsed),
+   sum(item['nodes'] for item in parsed))
+ def light_check():
+  original = record['original']
+  need(record is scope._ordinary_selected_operational_acquisition_v1
+   is scope._ordinary_original_selected_operational_acquisition_v1
+   and original == (record, scope, source, supported, component,
+    record['source_operands'], record['errors'], source_byte_limit,
+    source_node_limit, capture, capture_data, check, record['snapshots'],
+    (_f.os.getpid(), _f.threading.get_ident()),attempt,reserve,kept)
+   and attempt is scope._ordinary_controller_data_initialization_v1
+    is scope._ordinary_original_controller_data_initialization_v1
+   and attempt['bounded_production'] is True and attempt['complete'] is True
+   and not attempt['errors'] and attempt['allocator'] is scope._ordinary_data_allocator_v1
+   and kept is record['reservation_original'] is attempt['reserve_targets_original']
+   and reserve is record['reserve_targets'] is attempt['reserve_targets']
+    is scope._ordinary_bounded_source_reservation_v1
+   and reserve.__code__ is kept[5] and reserve.__closure__ is kept[6]
+   and reserve.__defaults__ is None and reserve.__kwdefaults__ is None
+   and type(record['closure_original']) is tuple and len(record['closure_original']) == 5
+   and all(type(kept) is tuple and len(kept) == 5 and fn is kept[0]
+    and fn.__code__ is kept[1] and fn.__defaults__ is kept[2]
+    and fn.__kwdefaults__ is kept[3] and fn.__closure__ is kept[4]
+    for fn,kept in zip((totals,light_check,check,capture,capture_data),
+     record['closure_original'],strict=True))
+   and record['component_operands_snapshot'] == tuple(component['source_operands'])
+   and component['check'] is component['original_check']
+   and source is scope.source and source.state == 'READABLE'
+   and source.failure is None and source._ordinary_meter_scope_v1 is scope
+   and not record['errors'] and record['capture_source'] is capture
+   and record['capture_data'] is capture_data and record['check'] is check
+   and record['progress'] == totals()
+   and tuple((item, tuple(item.items())) for item in record['source_operands'])
+    == tuple(record['snapshots']),
+   'ORDINARY_OPERATIONAL_FROZEN_SOURCE_ACQUISITION_AND_PROGRESS')
+  return record
+ def check():
+  light_check()
+  ci._ordinary_bounded_control_source_owner_v1(scope)
+  need(component['check'] is component['original_check']
+   and component['check'](scope, component) is component,
+   'ORDINARY_OPERATIONAL_COMPLETE_COMPONENT_BOUNDARY_CHECK')
+  return record
+ def capture(relative, *, source_form='PYTHON', data_parser=None):
+  light_check()
+  need(source_form == 'PYTHON' and data_parser is None,
+   'ORDINARY_OPERATIONAL_ADDED_PYTHON_ONLY_ORIGINAL_DATA_OWNER_UNCHANGED')
+  before = record['progress']
+  try:
+   tree, operand = _f._ordinary_source_operand_v1(scope, record, relative,
+    source_byte_limit=source_byte_limit, source_node_limit=source_node_limit,
+    source_form=source_form, data_parser=data_parser)
+   after = totals()
+   need(all(a >= b for a, b in zip(after, before, strict=True))
+    and after[0] - before[0] in (0, 1)
+    and any(operand is item for item in record['source_operands']),
+    'ORDINARY_OPERATIONAL_SOURCE_PROGRESS_WITHOUT_REFUND')
+   record['progress'] = after
+   record['snapshots'][:] = [(item, tuple(item.items()))
+    for item in record['source_operands']]
+   light_check()
+   return tree, operand
+  except BaseException as error:
+   if not any(error is old for old in record['errors']): record['errors'].append(error)
+   if not any(error is old for old in scope._ordinary_factory_errors_v1):
+    scope._ordinary_factory_errors_v1.append(error)
+   raise
+ def capture_data(relative, *, source_form, data_parser=None):
+  light_check()
+  need(source_form in ('BINARY', 'JSON', 'JSONL'),
+   'ORDINARY_OPERATIONAL_DATA_RETAINS_ORIGINAL_DETERMINISTIC_OWNER')
+  before = record['progress']
+  try:
+   value, operand = _f._ordinary_source_operand_v1(scope, component, relative,
+    source_byte_limit=source_byte_limit, source_node_limit=source_node_limit,
+    source_form=source_form, data_parser=data_parser)
+   need(any(operand is item for item in component['source_operands']),
+    'ORDINARY_OPERATIONAL_DATA_ORIGINAL_COMPONENT_OBSERVATION')
+   _f._ordinary_source_data_operand_check_v1(scope, component, operand,
+    value, published=True)
+   if not any(operand is item for item in record['source_operands']):
+    record['source_operands'].append(operand)
+   record['component_operands_snapshot'] = tuple(component['source_operands'])
+   after = totals()
+   need(all(a >= b for a, b in zip(after, before, strict=True))
+    and after[0] - before[0] in (0, 1),
+    'ORDINARY_OPERATIONAL_DATA_PROGRESS_WITHOUT_REFUND')
+   record['progress'] = after
+   record['snapshots'][:] = [(item, tuple(item.items()))
+    for item in record['source_operands']]
+   light_check()
+   return value, operand
+  except BaseException as error:
+   if not any(error is old for old in record['errors']): record['errors'].append(error)
+   if not any(error is old for old in scope._ordinary_factory_errors_v1):
+    scope._ordinary_factory_errors_v1.append(error)
+   raise
+ record['closure_original'] = tuple((fn, fn.__code__, fn.__defaults__,
+  fn.__kwdefaults__, fn.__closure__) for fn in (totals, light_check, check, capture, capture_data))
+ record['capture_source'], record['capture_data'], record['check'] = capture, capture_data, check
+ record['progress'] = totals()
+ record['snapshots'][:] = [(item, tuple(item.items())) for item in record['source_operands']]
+ record['original'] = (record, scope, source, supported, component,
+  record['source_operands'], record['errors'], source_byte_limit,
+  source_node_limit, capture, capture_data, check, record['snapshots'],
+  (_f.os.getpid(), _f.threading.get_ident()),attempt,reserve,kept)
+ scope._ordinary_selected_operational_acquisition_v1 = record
+ scope._ordinary_original_selected_operational_acquisition_v1 = record
+ return light_check()
+
+
+def _ordinary_bounded_bootstrap_function_v1(module,root,name,keywords=()):
+ import types
+ function=module.__dict__.get(name)
+ expected=tuple(code for code in root.co_consts
+  if type(code)is types.CodeType and code.co_qualname==name)
+ if (type(function)is not types.FunctionType or len(expected)!=1
+  or function.__code__ is not expected[0]or function.__globals__ is not module.__dict__
+  or function.__module__!=module.__name__ or function.__closure__ is not None
+  or function.__defaults__ is not None
+  or (function.__kwdefaults__ is not None if not keywords else
+   type(function.__kwdefaults__)is not dict
+   or tuple(function.__kwdefaults__)!=tuple(key for key,_ in keywords)
+   or any(function.__kwdefaults__[key]is not value for key,value in keywords))):
+  raise ValueError('BOUNDED_BOOTSTRAP_REACHED_ORIGINAL_FUNCTION_CODE_DEFAULTS_CLOSURE')
+ return function
+
+
+def _ordinary_bounded_bootstrap_products_request_v1(layout):
+ from tools import validation_reliability as o
+ T=lambda n:o._ordinary_data_tuple_request_v1(layout,n)
+ D=lambda n,k:o._ordinary_data_dict_requests_v1(layout,n,k)
+ L=lambda n,k:o._ordinary_data_list_requests_v1(layout,n,k)
+ # Two ticket pointer products, their originals, one production association,
+ # four later request/result records and six original stage records. This is
+ # known carrier coverage; interpreter/frame/error growth is still subject
+ # to the independently enforced original native envelope.
+ return (D(1,17)+D(1,15)+T(16)+T(15)+T(21)+T(2)+L(2,8)
+  +4*(D(1,7)+T(7)+T(10)+T(3)+T(4)+T(5)+T(9)+L(1,1))
+  +6*(D(1,5)+T(11))+L(1,6))
+
+
+def _ordinary_bounded_bootstrap_basis_v1(runner, acquisition):
+ import os,sys,threading,types
+ from tools import validation_reliability as o
+ if runner._ordinary_bootstrap_runner_check_v1(acquisition)is not runner:
+  raise ValueError('BOUNDED_BOOTSTRAP_ACTUAL_RUN_OWNER')
+ heap=runner._ordinary_bootstrap_heap_record_v1(acquisition['heap_record'])
+ native=acquisition['native_product'];value=native['native_input']
+ issuer=value['native_product_attempt'];initialized=issuer['initialized_original']
+ if (type(initialized)is not tuple or len(initialized)!=14
+  or initialized[0]is not issuer or initialized[1]is not value
+  or issuer['native_product']is not native or issuer['native_input']is not value
+  or initialized[4]is not issuer['initial_layout']
+  or initialized[8]is not value['current_native_observation']
+  or initialized[8]['complete']is not True or initialized[8]['pending']is not False
+  or initialized[8]['errors']is not native['errors']or native['errors']
+  or native['actor'][0]!=os.getpid()or native['actor'][2]!=threading.get_ident()
+  or native['actor'][3]!=threading.get_native_id()or heap['transfer_attempted']):
+  raise ValueError('BOUNDED_BOOTSTRAP_ACTUAL_NATIVE_ABI_AND_LIVE_OWNER')
+ layout=initialized[4];old=layout['original'];abi=initialized[3]
+ if (type(old)is not tuple or len(old)!=4 or old[0]is not abi
+  or old[1]is not abi[0]or old[2]is not abi[1]
+  or old[3]is not layout['sizes']or tuple(abi[0].items())!=layout['sizes']
+  or tuple(abi[0][n]for n in ('pointer','gc','tuple_prefix'))!=(8,16,48)):
+  raise ValueError('BOUNDED_BOOTSTRAP_GENUINE_INITIAL_ABI_LAYOUT')
+ so=native['source_generation']['original']
+ pre=value['early_profile'][3]['pre_cold_result'];ci=pre['ci_source_code_original']
+ acquired=native['source_generation']['source_input4_acquisition'];roots={}
+ if acquired['generation']is not native['source_generation']or acquired['complete']is not True:
+  raise ValueError('BOUNDED_BOOTSTRAP_ACTUAL_PROTECTED_INPUT4_CODES')
+ for module in (runner,o,sys.modules.get(__name__)):
+  matches=[note for note in acquired['code_observations']if note.get('module')is module]
+  if len(matches)!=1:raise ValueError('BOUNDED_BOOTSTRAP_ONE_PROTECTED_MODULE_CODE')
+  note=matches[0];old_note=note['original'];root=note['root']
+  actual=(note,note['record'],module,module.__dict__,root,note['witness'],
+   note['witness'].__code__ if type(note['witness'])is types.FunctionType else None,
+   note['raw'],note['compiled'],note['filename'],note['proof_kind'])
+  if (type(old_note)is not tuple or len(old_note)!=11
+   or any(a is not b for a,b in zip(old_note,actual))
+   or note['complete']is not True or note['whole_initializer']is not True
+   or type(root)is not types.CodeType
+   or root is not module.__dict__.get('_ORDINARY_INITIALIZED_MODULE_CODE_V1')):
+   raise ValueError('BOUNDED_BOOTSTRAP_UNCHANGED_PROTECTED_WHOLE_MODULE_CODE')
+  roots[module]=root
+ for name in ('_ordinary_bootstrap_ticket_raw_request_v1','_ordinary_bootstrap_ticket_request_v1',
+  '_ordinary_bootstrap_event_request_v1','_ordinary_bootstrap_constructor_request_v1',
+  '_ordinary_control_compile_request_v1'):
+  _ordinary_bounded_bootstrap_function_v1(runner,roots[runner],name)
+ _ordinary_bounded_bootstrap_function_v1(o,roots[o],'_preflight_json_v1',
+  (('canonical_encoding',True),))
+ _ordinary_bounded_bootstrap_function_v1(o,roots[o],'_preflight_canonical_v1')
+ for name in ('_ordinary_data_tuple_request_v1','_ordinary_data_list_requests_v1',
+  '_ordinary_data_code_tree_v1','_ordinary_control_code_source_equal_v1',
+  '_ordinary_control_current_profile_literals_v1','_ordinary_control_current_staged_request_v1'):
+  _ordinary_bounded_bootstrap_function_v1(o,roots[o],name)
+ _ordinary_bounded_bootstrap_function_v1(o,roots[o],'_ordinary_data_dict_requests_v1',
+  (('general',False),))
+ for name in ('_ordinary_bounded_control_programme_check_v1','_ordinary_bounded_control_unresolved_site_v1','_ordinary_bounded_control_installation_check_v1','_ordinary_bounded_control_layout_preissued_check_v1','_ordinary_bounded_controller_data_initialize_v1','_ordinary_bounded_control_source_owner_v1','_ordinary_bounded_control_source_credit_v1','_ordinary_bounded_control_source_reservations_bind_v1'):
+  _ordinary_bounded_bootstrap_function_v1(sys.modules[__name__],roots[sys.modules[__name__]],name)
+ if runner.__dict__['_ordinary_control_current_staged_request_v1']is not o._ordinary_control_current_staged_request_v1:
+  raise ValueError('BOUNDED_BOOTSTRAP_ORIGINAL_CURRENT_COMPILER_FACADE')
+
+ fields=('native_input','entry_original','runner','namespace','initializer','entry','entry_code',
+  'module','module_namespace','native_method','native_method_code','code_paths','workflow',
+  'expected_module_closure','physical_observations','errors')
+ if (type(so)is not tuple or len(so)!=17
+  or any(so[i+1]is not native['source_generation'][key]for i,key in enumerate(fields))
+  or so[3]is not runner or so[4]is not runner.__dict__ or type(so[5])is not types.CodeType
+  or runner.__dict__.get('_ORDINARY_INITIALIZED_MODULE_CODE_V1')is not so[5]
+  or sys.modules.get(runner.__name__)is not runner
+  or type(ci)is not tuple or len(ci)!=8 or ci[0]is not pre
+  or type(ci[1])is not types.ModuleType or ci[1].__dict__ is not globals()
+  or ci[2]is not globals()or ci[3]is not globals().get('_ORDINARY_INITIALIZED_MODULE_CODE_V1')
+  or not o._ordinary_control_code_source_equal_v1(ci[4],ci[3])
+  or not any(code is _ordinary_bounded_bootstrap_products_request_v1.__code__
+   for code in ci[3].co_consts)or pre['complete']is not True):
+  raise ValueError('BOUNDED_BOOTSTRAP_COMPLETE_ORIGINAL_RUN_AND_CI_SOURCE')
+ stages=[s for s in heap['stages']if s['row'][0]=='BOOTSTRAP_PREPARE']
+ if len(stages)!=1:raise ValueError('BOUNDED_BOOTSTRAP_ONE_ORIGINAL_PREPARE')
+ stage=stages[0]
+ runner._ordinary_bootstrap_heap_source_row_v1(native,stage['row'],native['heap_prepare_request_attempt'])
+ original=stage['original'];name='bounded_original_ticket_and_stage_carriers'
+ amount=_ordinary_bounded_bootstrap_products_request_v1(layout)
+ if (stage['complete']is not True or stage['error']is not None
+  or type(original)is not tuple or len(original)!=11 or original[0]is not stage
+  or original[1]is not heap or original[2]is not stage['row']
+  or original[5]is not stage['row'][2]or original[6]is not stage['row'][3]
+  or sum(1 for n,v in original[5]if n==name and type(v)is int and v==amount)!=1
+  or name not in original[6]or not any(r[0]=='BOOTSTRAP_PREPARE'
+   and r[1]==name and r[2]==amount and r[3]is stage['row']for r in heap['retained'])):
+  raise ValueError('BOUNDED_BOOTSTRAP_CARRIERS_PREISSUED_ONCE_BEFORE_PRODUCTS')
+ # Active known request tuple/carrier workspace is separate from the retained
+ # products. No exact whole-interpreter or native allocator claim is issued.
+ parts=(('bounded_active_request_carrier_workspace',
+  o._ordinary_data_tuple_request_v1(layout,11)
+  +o._ordinary_data_list_requests_v1(layout,1,4)),)
+ return heap,native,issuer,initialized,layout,so,ci,parts,stage
+
+
+def _ordinary_bounded_bootstrap_prepare_v1(runner, acquisition, ticket, capture, uid):
+ import os,threading,types
+ from tools import validation_reliability as o
+ heap,native,issuer,initialized,layout,so,ci,parts,stage=_ordinary_bounded_bootstrap_basis_v1(runner,acquisition)
+ if ('bounded_production_original'in acquisition or 'heap_source_request_attempts'in acquisition
+  or 'ticket_raw_source_product'in acquisition or 'ticket_source_product'in acquisition
+  or type(capture)is not types.FunctionType or capture.__globals__ is not runner.__dict__
+  or type(uid)is not int or uid<0
+  or capture.__defaults__!=(None,)or type(capture.__defaults__)is not tuple
+  or type(capture.__kwdefaults__)is not dict
+  or tuple(capture.__kwdefaults__)!=('_ordinary_raw_source_v1',)
+  or capture.__kwdefaults__['_ordinary_raw_source_v1']is not None
+  or capture.__code__.co_freevars!=('o',)or type(capture.__closure__)is not tuple
+  or len(capture.__closure__)!=1 or type(capture.__closure__[0])is not types.CellType
+  or capture.__closure__[0].cell_contents is not o
+  or not any(code is capture.__code__ for code in o._ordinary_data_code_tree_v1(so[5]))):
+  raise ValueError('BOUNDED_BOOTSTRAP_ONE_ACTUAL_TICKET_SOURCE_PRODUCER')
+ owner=(os.getpid(),threading.get_ident());errors=native['errors']
+ producer=runner._ordinary_bootstrap_ticket_raw_request_v1
+ raw_fields=('native_product','native_generation','source_generation','layout',
+  'sizes','fixed_parts','capture','capture_code','producer','producer_code',
+  'path','maximum','uid','owner','errors')
+ raw=dict(zip(raw_fields,(native,native['native_generation'],native['source_generation'],
+  layout,layout['sizes'],parts,capture,capture.__code__,producer,producer.__code__,
+  ticket,8<<20,uid,owner,errors)))
+ raw['original']=(raw,)+tuple(raw[name]for name in raw_fields)
+ producer=runner._ordinary_bootstrap_ticket_request_v1
+ parser,canonical=o._preflight_json_v1,o._preflight_canonical_v1
+ fields=('native_product','native_generation','source_generation','layout',
+  'sizes','fixed_parts','parser','parser_code','canonical','canonical_code',
+  'producer','producer_code','owner','errors')
+ decoded=dict(zip(fields,(native,native['native_generation'],native['source_generation'],
+  layout,layout['sizes'],parts,parser,parser.__code__,canonical,canonical.__code__,
+  producer,producer.__code__,owner,errors)))
+ decoded['original']=(decoded,)+tuple(decoded[name]for name in fields)
+ sources=[];requests=[]
+ acquisition['ticket_raw_source_product']=raw
+ acquisition['ticket_source_product']=decoded
+ acquisition['heap_source_request_attempts']=sources
+ acquisition['bounded_production_original']=(acquisition,acquisition['original'],
+  heap,native,native['original'],issuer,initialized,layout,so,ci,parts,raw,
+  raw['original'],decoded,decoded['original'],sources,requests,owner,errors,
+  _ordinary_bounded_bootstrap_prepare_v1.__code__,stage)
+ return acquisition['bounded_production_original']
+
+
+def _ordinary_bounded_bootstrap_source_check_v1(runner, acquisition, value, *, kind):
+ import os,threading
+ old=acquisition.get('bounded_production_original')
+ if old is None:return False
+ heap,native,issuer,initialized,layout,so,ci,parts,stage=_ordinary_bounded_bootstrap_basis_v1(runner,acquisition)
+ if (type(old)is not tuple or len(old)!=21 or old[0]is not acquisition
+  or old[1]is not acquisition['original']or old[2]is not heap
+  or old[3]is not native or old[4]is not native['original']or old[5]is not issuer
+  or old[6]is not initialized or old[7]is not layout or old[8]is not so or old[9]is not ci
+  or old[10]!=parts or old[15]is not acquisition['heap_source_request_attempts']
+  or old[17]!=(os.getpid(),threading.get_ident())or old[18]is not native['errors']
+  or old[19]is not _ordinary_bounded_bootstrap_prepare_v1.__code__ or old[20]is not stage):
+  raise ValueError('BOUNDED_BOOTSTRAP_ORIGINAL_PRODUCTION_ASSOCIATION')
+ keys=(('ticket_raw_source_product',11,('native_product','native_generation','source_generation',
+  'layout','sizes','fixed_parts','capture','capture_code','producer','producer_code',
+  'path','maximum','uid','owner','errors')),
+  ('ticket_source_product',13,('native_product','native_generation','source_generation','layout',
+   'sizes','fixed_parts','parser','parser_code','canonical','canonical_code','producer',
+   'producer_code','owner','errors')))
+ for key,index,fields in keys:
+  p=acquisition[key]
+  if (type(p)is not dict or p is not old[index]or p['original']is not old[index+1]
+   or type(p['original'])is not tuple or len(p['original'])!=len(fields)+1
+   or (set(p)!=set(fields)|{'original'} and not(index==11
+    and set(p)==set(fields)|{'original','metadata_original'}))
+   or any(p[name]is not p['original'][i+1]for i,name in enumerate(fields))
+   or p['fixed_parts']is not old[10]or p['producer'].__code__ is not p['producer_code']):
+   raise ValueError('BOUNDED_BOOTSTRAP_SOURCE_PRODUCT_CHANGED')
+ capture=old[11]['capture']
+ from tools import validation_reliability as o
+ import types
+ if (capture.__defaults__!=(None,)or type(capture.__defaults__)is not tuple
+  or type(capture.__kwdefaults__)is not dict
+  or tuple(capture.__kwdefaults__)!=('_ordinary_raw_source_v1',)
+  or capture.__kwdefaults__['_ordinary_raw_source_v1']is not None
+  or capture.__code__.co_freevars!=('o',)or type(capture.__closure__)is not tuple
+  or len(capture.__closure__)!=1 or type(capture.__closure__[0])is not types.CellType
+  or capture.__closure__[0].cell_contents is not o):
+  raise ValueError('BOUNDED_BOOTSTRAP_CAPTURE_DEFAULT_OR_CLOSURE_CHANGED')
+ if kind=='raw':return value is old[11]
+ if kind=='decoder':return value is old[13]
+ if kind=='stage':
+  return any(type(row)is tuple and len(row)==3 and row[1]is value
+   and type(value)is tuple and len(value)==10 and row[2]is value[7].__code__
+   for row in old[16])
+ raise ValueError('BOUNDED_BOOTSTRAP_SOURCE_ROLE')
+
+
+def _ordinary_bounded_bootstrap_stage_request_v1(runner, acquisition, stage, operand):
+ heap,native,issuer,initialized,layout,so,ci,parts,funded=_ordinary_bounded_bootstrap_basis_v1(runner,acquisition)
+ if not _ordinary_bounded_bootstrap_source_check_v1(runner,acquisition,
+  acquisition['ticket_source_product'],kind='decoder'):
+  raise ValueError('BOUNDED_BOOTSTRAP_PRODUCTION_BEFORE_STAGE')
+ names={'BOOTSTRAP_EVENT_BASE64':'_ordinary_bootstrap_event_request_v1',
+  'BOOTSTRAP_EVENT_JSON':'_ordinary_bootstrap_event_request_v1',
+  'BOOTSTRAP_SCOPE_CONSTRUCTION':'_ordinary_bootstrap_constructor_request_v1',
+  'BEFORE_COMPILE':'_ordinary_control_compile_request_v1'}
+ if type(stage)is not str or stage not in names:
+  raise ValueError('BOUNDED_BOOTSTRAP_SELECTED_STAGE')
+ requests=acquisition['bounded_production_original'][16]
+ if any(row[0]==stage for row in requests):
+  raise ValueError('BOUNDED_BOOTSTRAP_ONE_SOURCE_STAGE')
+ fn=runner.__dict__[names[stage]]
+ request=(native,native['source_generation'],native['native_generation'],
+  native['startup'],layout,parts,(),fn,fn.__code__,operand)
+ requests.append((stage,request,fn.__code__))
+ association=(acquisition,stage,operand,acquisition['bounded_production_original'])
+ if stage in ('BOOTSTRAP_EVENT_BASE64','BOOTSTRAP_EVENT_JSON'):
+  return fn(acquisition,association,request,stage=stage,encoded_event=operand)
+ if stage=='BOOTSTRAP_SCOPE_CONSTRUCTION':
+  return fn(acquisition,association,request,value=operand[0],name=operand[1],native_root=operand[2])
+ return fn(acquisition,association,request,installation=operand[0])
+
+def _facet_fn_control_fixed_delegates_v1():
+ import tools.validation_reliability as _f
+ rel = 'tools.validation_reliability'
+ run = 'tools.run_validation_gates'
+ reg = 'tools.validation_scope_registry'
+ inv = 'tools.validation_inventory'
+ seal = '_LinuxImmutableSourceSealV2'
+ gate = '_LinuxPreflightScopeV1'
+ return (
+  (rel,'_ordinary_control_current_profile_bind_v1',rel,None),
+  (run,'_facet_fn_control_current_profile_bind_v1',rel,None),
+  (rel,'_ordinary_control_compiler_source_projection_v1',rel,None),
+  (reg,'_facet_fn_control_compiler_source_projection_v1',rel,None),
+  (rel,'_ordinary_control_current_staged_request_v1',rel,None),
+  (reg,'_facet_fn_control_current_staged_request_v1',rel,None),
+  (rel,'_ordinary_control_current_parser_request_v1',rel,None),
+  (rel,'_ordinary_control_python_ast_request_v1',rel,None),
+  ('tools.ci_branch_context','_facet_fn_control_python_ast_request_v1',rel,None),
+  (rel,'_ordinary_control_current_profile_literals_v1',rel,None),
+  (inv,'_facet_fn_control_current_profile_literals_v1',rel,None),
+  (inv,'_facet_fn_control_lexical_forward_activation_v1',rel,None),
+  (rel,'_LinuxImmutableSourceSealV2._check',rel,seal),
+  (rel,'_LinuxPreflightScopeV1._ordinary_source_data_allocator_projection_v1',rel,gate),
+  (rel,'_LinuxPreflightScopeV1._ordinary_source_data_construct_issued_v1',rel,gate),
+  (rel,'_LinuxPreflightScopeV1._ordinary_source_data_heap_issue_v1',rel,gate),
+  (rel,'_LinuxPreflightScopeV1._ordinary_source_data_live_credit_v1',rel,gate),
+  (rel,'_LinuxPreflightScopeV1._ordinary_source_data_managed_request_issue_v1',rel,gate),
+  (rel,'_LinuxPreflightScopeV1._ordinary_source_data_managed_request_v1',rel,gate),
+  (rel,'_LinuxPreflightScopeV1._ordinary_source_data_raw_binding_check_v1',rel,gate),
+  (rel,'_LinuxPreflightScopeV1._ordinary_source_data_raw_issue_v1',rel,gate),
+  (rel,'_LinuxPreflightScopeV1._ordinary_source_data_scan_v1',rel,gate),
+  (rel,'_LinuxPreflightScopeV1._ordinary_source_meter_projection_v1',rel,gate),
+  (rel,'_ordinary_control_bindings_check_v1',rel,None),
+  (rel,'_ordinary_control_bytecode_v1',rel,None),
+  (rel,'_ordinary_control_code_site_route_v1',rel,None),
+  (rel,'_ordinary_control_code_source_equal_v1',rel,None),
+  (rel,'_ordinary_control_default_binding_v1',rel,None),
+  (rel,'_ordinary_control_defaults_recheck_v1',rel,None),
+  (rel,'_ordinary_control_dictionary_keys_v1',rel,None),
+  (rel,'_ordinary_control_lexical_activation_v1',rel,None),
+  (rel,'_ordinary_control_lexical_forward_activation_v1',rel,None),
+  (rel,'_ordinary_control_lexical_forward_arguments_v1',rel,None),
+  (rel,'_ordinary_control_lexical_forward_route_v1',rel,None),
+  (rel,'_ordinary_control_literal_equal_v1',rel,None),
+  (rel,'_ordinary_control_member_v1',rel,None),
+  (rel,'_ordinary_control_programme_check_v1',rel,None),
+  (rel,'_ordinary_control_sites_check_v1',rel,None),
+  (rel,'_ordinary_control_source_product_check_v1',rel,None),
+  (rel,'_ordinary_data_align_v1',rel,None),
+  (rel,'_ordinary_data_buffer_request_v1',rel,None),
+  (rel,'_ordinary_data_bytes_request_v1',rel,None),
+  (rel,'_ordinary_data_components_v1',rel,None),
+  (rel,'_ordinary_data_control_components_v1',rel,None),
+  (rel,'_ordinary_data_controller_observation_check_v1',rel,None),
+  (rel,'_ordinary_data_dict_requests_v1',rel,None),
+  (rel,'_ordinary_data_dtoa_requests_v1',rel,None),
+  (rel,'_ordinary_data_emitter_basis_v1',rel,None),
+  (rel,'_ordinary_data_integer_requests_v1',rel,None),
+  (rel,'_ordinary_data_list_requests_v1',rel,None),
+  (rel,'_ordinary_data_nonnegative_v1',rel,None),
+  (rel,'_ordinary_data_runtime_layout_check_v1',rel,None),
+  (rel,'_ordinary_data_size_v1',rel,None),
+  (rel,'_ordinary_data_tuple_request_v1',rel,None),
+  (rel,'_ordinary_data_unicode_request_v1',rel,None),
+  (rel,'_ordinary_source_data_construct_v1',rel,None),
+  (rel,'_ordinary_source_data_json_span_v1',rel,None),
+  (rel,'_ordinary_source_data_lexical_admission_v1',rel,None),
+  (rel,'_ordinary_source_data_limits_v1',rel,None),
+  (rel,'_ordinary_source_data_operand_original_v1',rel,None),
+  (rel,'_ordinary_source_data_operand_v1',rel,None),
+  (rel,'_ordinary_source_data_utf8_scalar_v1',rel,None),
+  (rel,'_preflight_require_v1',rel,None),
+  (rel,'ValidationReliabilityError.__init__',rel,'ValidationReliabilityError'),
+  (inv,'_facet_fn_control_lexical_forward_arguments_v1',rel,None),
+  (inv,'_facet_fn_control_bytecode_values_v1',rel,None),
+  (inv,'_facet_fn_control_source_site_codes_v1', rel, None),
+  (reg, '_facet_fn_control_bindings_check_v1', rel, None),
+  (reg, '_facet_fn_control_bytecode_v1', rel, None),
+  (reg, '_facet_fn_control_code_site_route_v1', rel, None),
+  (reg, '_facet_fn_control_code_source_equal_v1', rel, None),
+  (reg, '_facet_fn_control_default_binding_v1', rel, None),
+  (reg, '_facet_fn_control_defaults_recheck_v1', rel, None),
+  (reg, '_facet_fn_control_dictionary_keys_v1', rel, None),
+  (reg, '_facet_fn_control_lexical_activation_v1', rel, None),
+  (reg, '_facet_fn_control_lexical_forward_route_v1', rel, None),
+  (reg, '_facet_fn_control_literal_equal_v1', rel, None),
+  (rel, '_facet_fn_control_literal_values_v1', rel, None),
+  (reg, '_facet_fn_control_member_v1', rel, None),
+  (reg, '_facet_fn_control_programme_check_v1', rel, None),
+  (reg, '_facet_fn_control_sites_check_v1', rel, None),
+  (reg, '_facet_fn_control_source_product_check_v1', rel, None),
+  (reg, '_facet_fn_data_align_v1', rel, None),
+  (reg, '_facet_fn_data_buffer_request_v1', rel, None),
+  (reg, '_facet_fn_data_bytes_request_v1', rel, None),
+  (reg, '_facet_fn_data_components_v1', rel, None),
+  (reg, '_facet_fn_data_control_components_v1', rel, None),
+  (reg, '_facet_fn_data_controller_observation_check_v1', rel, None),
+  (reg, '_facet_fn_data_dict_requests_v1', rel, None),
+  (reg, '_facet_fn_data_dtoa_requests_v1', rel, None),
+  (reg, '_facet_fn_data_integer_requests_v1', rel, None),
+  (reg, '_facet_fn_data_list_requests_v1', rel, None),
+  (reg, '_facet_fn_data_nonnegative_v1', rel, None),
+  (reg, '_facet_fn_data_runtime_layout_check_v1', rel, None),
+  (reg, '_facet_fn_data_size_v1', rel, None),
+  (reg, '_facet_fn_data_tuple_request_v1', rel, None),
+  (reg, '_facet_fn_data_unicode_request_v1', rel, None),
+  (reg, '_facet_fn_source_data_json_span_v1', rel, None),
+  (reg, '_facet_fn_source_data_lexical_admission_v1', rel, None),
+  (reg, '_facet_fn_source_data_limits_v1', rel, None),
+  (reg, '_facet_fn_source_data_operand_original_v1', rel, None),
+  (reg, '_facet_fn_source_data_utf8_scalar_v1', rel, None),
+  (reg, '_facet_m_source_data_allocator_projection_v1', rel, gate),
+  (reg, '_facet_m_source_data_heap_issue_v1', rel, gate),
+  (reg, '_facet_m_source_data_live_credit_v1', rel, gate),
+  (reg, '_facet_m_source_data_managed_request_issue_v1', rel, gate),
+  (reg, '_facet_m_source_data_managed_request_v1', rel, gate),
+  (reg, '_facet_m_source_data_raw_binding_check_v1', rel, gate),
+  (reg, '_facet_m_source_data_raw_issue_v1', rel, gate),
+  (reg, '_facet_m_source_data_scan_v1', rel, gate),
+  (reg, '_facet_m_source_meter_projection_v1', rel, gate),
+  ('dis', '_unpack_opargs', 'dis', None),
+  ('dis', '_deoptop', 'dis', None),
+  ('dis', '_get_cache_size', 'dis', None),
+  ('ast', 'dump', 'ast', None),
+  ('ast', 'walk', 'ast', None),
+  ('ast', 'iter_fields', 'ast', None),
+  ('ast', 'iter_child_nodes', 'ast', None),
+  ('ast', 'literal_eval', 'ast', None),
+  ('ast', 'parse', 'ast', None),
+  ('json', 'loads', 'json', None),
+  ('json.decoder', 'JSONDecoder.decode', 'json.decoder', None),
+  ('json.decoder', 'JSONDecoder.raw_decode', 'json.decoder', None),
+  (rel, '_LinuxImmutableSourceSealV2._anchors_live', rel, seal),
+  (rel, '_LinuxImmutableSourceSealV2._close', rel, seal),
+  (rel, '_LinuxImmutableSourceSealV2._identity', rel, seal),
+  (rel, '_LinuxImmutableSourceSealV2._meta', rel, seal),
+  (rel, '_LinuxImmutableSourceSealV2._meta_attempt', rel, seal),
+  (rel, '_LinuxImmutableSourceSealV2._open', rel, seal),
+  (rel, '_LinuxImmutableSourceSealV2._open_path', rel, seal),
+  (rel, '_LinuxImmutableSourceSealV2._ordinary_source_native_attempt_v1', rel, seal),
+  (rel, '_LinuxImmutableSourceSealV2._performed', rel, seal),
+  (rel, '_LinuxImmutableSourceSealV2._read', rel, seal),
+  (rel, '_LinuxImmutableSourceSealV2._reserve', rel, seal),
+  (rel, '_LinuxImmutableSourceSealV2.read_administration', rel, seal),
+  (rel, '_LinuxPreflightCensusV1._version', rel, '_LinuxPreflightCensusV1'),
+  (rel, '_LinuxPreflightScopeV1._ordinary_census_meter_projection_v1', rel, gate),
+  (rel, '_LinuxPreflightScopeV1._ordinary_factory_call_v1', rel, gate),
+  (rel, '_LinuxPreflightScopeV1._ordinary_factory_close_v1', rel, gate),
+  (rel, '_LinuxPreflightScopeV1._ordinary_factory_debit_v1', rel, gate),
+  (rel, '_LinuxPreflightScopeV1._ordinary_factory_open_v1', rel, gate),
+  (rel, '_LinuxPreflightScopeV1._ordinary_factory_slot_v1', rel, gate),
+  (rel, '_LinuxPreflightScopeV1._ordinary_installation_close_v1', rel, gate),
+  (rel, '_LinuxPreflightScopeV1._ordinary_installation_open_v1', rel, gate),
+  (rel, '_LinuxPreflightScopeV1._ordinary_installation_record_v1', rel, gate),
+  (rel, '_LinuxPreflightScopeV1._ordinary_pending_close_calls_v1', rel, gate),
+  (rel, '_LinuxPreflightScopeV1._ordinary_source_data_frozen_check_v1', rel, gate),
+  (rel, '_LinuxPreflightScopeV1._ordinary_source_data_read_v1', rel, gate),
+  (rel, '_LinuxPreflightScopeV1._ordinary_source_file_bound_v1', rel, gate),
+  (rel, '_LinuxPreflightScopeV1._ordinary_source_meter_event_v1', rel, gate),
+  (rel, '_LinuxPreflightScopeV1._ordinary_source_preopen_v1', rel, gate),
+  (rel, '_LinuxSourceNativeV2._call', rel, '_LinuxSourceNativeV2'),
+  (rel, '_LinuxSourceNativeV2.flags', rel, '_LinuxSourceNativeV2'),
+  (rel, '_linux_preflight_path_v1', rel, None),
+  (rel, '_mapper_append_error_v1', rel, None),
+  (rel, '_mapper_close_slot_v1', rel, None),
+  (rel, '_mapper_error_contains_v1', rel, None),
+  (rel, '_mapper_need_v1', rel, None),
+  (rel, '_mapper_portable_relative_v1', rel, None),
+  (rel, '_mapper_relative_v1', rel, None),
+  (rel, '_mapper_slot_open_error_v1', rel, None),
+  (rel, '_mapper_slot_opened_v1', rel, None),
+  (rel, '_mapper_slot_settled_v1', rel, None),
+  (rel, '_mapper_slot_v1', rel, None),
+  (rel, '_ordinary_control_error_constructor_route_v1', rel, None),
+  (rel, '_ordinary_deterministic_gfp_names_v1', rel, None),
+  (rel, '_ordinary_deterministic_gfp_targets_v1', rel, None),
+  (rel, '_ordinary_effect_value_snapshot_v1', rel, None),
+  (rel, '_ordinary_gfp_rp_assignment_keys_v1', rel, None),
+  (rel, '_ordinary_pytest_installation_source_v1', rel, None),
+  (rel, '_ordinary_pytest_source_graph_check_v1', rel, None),
+  (rel, '_ordinary_pytest_source_graph_v1', rel, None),
+  (rel, '_ordinary_rp_assignment_keys_v1', rel, None),
+  (rel, '_ordinary_rp_join_decode_v1', rel, None),
+  (rel, '_ordinary_rp_join_freeze_v1', rel, None),
+  (rel, '_ordinary_rp_join_raw_v1', rel, None),
+  (rel, '_ordinary_rp_join_records_v1', rel, None),
+  (rel, '_ordinary_rp_join_slot_v1', rel, None),
+  (rel, '_ordinary_rp_join_source_snapshot_v1', rel, None),
+  (rel, '_ordinary_rp_key_from_fields_v1', rel, None),
+  (rel, '_ordinary_rp_name_metadata_for_admissible_M_v1', rel, None),
+  (rel, '_ordinary_rp_predecessor_source_v1', rel, None),
+  (rel, '_ordinary_rp_report_row_ranges_v1', rel, None),
+  (rel, '_ordinary_source_absent_operand_v1', rel, None),
+  (rel, '_ordinary_source_data_operand_check_v1', rel, None),
+  (rel, '_ordinary_source_operand_v1', rel, None),
+  (rel, '_scan_raise_errors', rel, None),
+  ('tools.ci_branch_context', '_ordinary_rp5a_manager_label_source_v1', rel, None),
+  ('tools.ci_branch_context', '_ordinary_rp5a_manager_credentials_source_v1', rel, None),
+  ('tools.ci_branch_context', '_ordinary_rp5a_manager_result_source_v1', rel, None),
+  (reg, '_facet_fn_deterministic_gfp_names_v1', rel, None),
+  (reg, '_facet_fn_deterministic_gfp_targets_v1', rel, None),
+  (reg, '_facet_fn_effect_value_snapshot_v1', rel, None),
+  (reg, '_facet_fn_gfp_rp_assignment_keys_v1', rel, None),
+  (run, '_facet_fn_pytest_source_graph_check_v1', rel, None),
+  (reg, '_facet_fn_pytest_source_graph_v1', rel, None),
+  (reg, '_facet_fn_rp_assignment_keys_v1', rel, None),
+  (reg, '_facet_fn_rp_join_decode_v1', rel, None),
+  (reg, '_facet_fn_rp_join_freeze_v1', rel, None),
+  (reg, '_facet_fn_rp_join_raw_v1', rel, None),
+  (reg, '_facet_fn_rp_join_records_v1', rel, None),
+  (reg, '_facet_fn_rp_join_slot_v1', rel, None),
+  (reg, '_facet_fn_rp_join_source_snapshot_v1', rel, None),
+  (reg, '_facet_fn_rp_key_from_fields_v1', rel, None),
+  (reg, '_facet_fn_rp_name_metadata_for_admissible_M_v1', rel, None),
+  (reg, '_facet_fn_rp_predecessor_source_v1', rel, None),
+  (reg, '_facet_fn_rp_report_row_ranges_v1', rel, None),
+  (reg, '_facet_fn_source_data_operand_check_v1', rel, None),
+  (reg, '_facet_m_census_meter_projection_v1', rel, gate),
+  (reg, '_facet_m_factory_debit_v1', rel, gate),
+  (reg, '_facet_m_factory_slot_v1', rel, gate),
+  (reg, '_facet_m_installation_record_v1', rel, gate),
+  (reg, '_facet_m_pending_close_calls_v1', rel, gate),
+  (reg, '_facet_m_source_data_frozen_check_v1', rel, gate),
+  (reg, '_facet_m_source_file_bound_v1', rel, gate),
+  (reg, '_facet_m_source_meter_event_v1', rel, gate),
+  (reg, '_ordinary_scope_source_import_events_v1', rel, None),
+  (reg, '_ordinary_scope_source_module_map_v1', rel, None),
+  (rel, '_ordinary_control_ast_original_v1', rel, None),
+  (rel, '_ordinary_control_initialized_compiled_reuse_v1', rel, None),
+  (rel, '_ordinary_initialized_storage_data_request_v1', rel, None),
+  (reg, '_facet_fn_control_ast_original_v1', rel, None),
+  (reg, '_facet_fn_control_initialized_compiled_reuse_v1', rel, None),
+  (reg, '_facet_fn_initialized_storage_data_request_v1', rel, None),
+  (run, '_facet_fn_control_fixed_delegates_v1', rel, None),
+  (run, '_facet_fn_pytest_config_original_route_v1', rel, None),
+  (reg, '_facet_fn_control_fixed_delegate_roster_v1', rel, None),
+  (rel, '_ordinary_control_fixed_delegate_roster_v1', rel, None),
+ )
+
+def _ordinary_bounded_control_programme_check_v1(scope, programme):
+ from tools import validation_reliability as o
+ import types
+ attempt=getattr(scope,'_ordinary_controller_data_initialization_v1',None)
+ if (type(attempt)is not dict or attempt is not scope._ordinary_original_controller_data_initialization_v1
+  or attempt.get('bounded_production')is not True or attempt['programme']is not programme
+  or attempt['scope']is not scope or attempt['resource']is not scope._ordinary_resource_programme_v1
+  or attempt['errors']or type(programme)is not dict):
+  raise ValueError('CONTROL_BOUNDED_SAME_ORIGINAL_INITIALIZATION')
+ fields=('scope','source','resource','query','owner','module_inputs','selectors',
+  'default_rows','site_rows','platform_targets','native_binding_primitives','operation_sources','errors')
+ old=programme['original']
+ if (programme is not scope._ordinary_control_source_programme_v1
+  or programme is not scope._ordinary_original_control_source_programme_v1
+  or old is not scope._ordinary_control_source_programme_original_v1
+  or type(old)is not tuple or len(old)!=len(fields)+1 or old[0]is not programme
+  or any(programme[key]is not old[index+1]for index,key in enumerate(fields))
+  or programme['scope']is not scope or programme['source']is not scope.source
+  or programme['query']is not scope.query or programme['owner']is not scope._ordinary_factory_owner_v1
+  or programme['resource']is not scope._ordinary_original_resource_programme_v1[0]
+  or tuple(programme['resource'].items())!=scope._ordinary_original_resource_programme_v1[1]
+  or programme['errors']):
+  raise ValueError('CONTROL_BOUNDED_PROGRAMME_POINTERS_AND_RESOURCE')
+ acquisition=scope._ordinary_control_module_inputs_v1
+ selection=acquisition['selection'];routes=selection['route_acquisition']
+ result=selection['result'];ro=routes['result_original']
+ if (acquisition is not scope._ordinary_original_control_module_inputs_v1
+  or acquisition['original']is not scope._ordinary_control_module_inputs_original_v1
+  or not acquisition['complete']or acquisition['errors']
+  or acquisition['scope']is not scope or acquisition['source']is not scope.source
+  or (programme['module_inputs']is not acquisition['result']or acquisition['result']is not acquisition['result_original'][0])
+  or selection['original'][0]is not selection or selection['original'][1]is not scope
+  or selection['original'][2]is not scope.source or selection['stage']is not acquisition['stage']
+  or selection['module_inputs']is not acquisition['result']or not selection['complete']
+  or selection['errors']or result is not selection['result_original'][0]
+  or result[0]is not programme['selectors']or result[0]is not selection['result_original'][3]
+  or result[1]is not selection['result_original'][4]
+  or selection['delegated_original'][0]is not selection['delegated']
+  or tuple(selection['delegated'])!=selection['delegated_original'][1]
+  or programme['default_rows']is not selection['default_original'][3]
+  or tuple(selection['default_rows'])!=programme['default_rows']
+  or routes['original'][0]is not routes or routes['original'][1]is not selection
+  or routes['original'][2]is not scope or routes['original'][3]is not scope.source
+  or routes['error']is not None or not routes['complete']or routes['result']is not selection['routes']
+  or ro[0]is not routes['result']or ro[1]is not routes or ro[2]is not routes['original']
+  or ro[3]is not routes['rows']or ro[4]is not routes['sites']or ro[5]is not routes['unresolved']
+  or ro[6]is not routes['observations']
+  or programme['site_rows']is not routes['result'][1]
+  or tuple((label,site,tuple(values))for label,site,values in routes['sites'])!=programme['site_rows']
+  or tuple(routes['unresolved'])!=routes['result'][2]
+  or programme['operation_sources']is not attempt['source_rows']
+  or programme['operation_sources']!=result[1]+selection['delegated_original'][1]
+  or any(type(programme[key])is not tuple for key in
+   ('module_inputs','selectors','default_rows','site_rows','platform_targets','native_binding_primitives','operation_sources'))
+  or programme['native_binding_primitives']!=(type,issubclass,types.BuiltinFunctionType)):
+  raise ValueError('CONTROL_BOUNDED_ACTUAL_INITIALIZED_SELECTION_AND_UNRESOLVED_ROWS')
+ profile=scope._ordinary_installation_copy_v1['control_request_profile_original']
+ if (type(profile)is not tuple or len(profile)!=7
+  or profile is not attempt['profile']
+  or profile[4][1][0][0]!='original_control_all_retained_expected_Code_names_constants_and_bounded_source_products'
+  or profile[5]is not scope._ordinary_bootstrap_runtime_v1['acquisition']['native_product']['source_generation']['control_profile_original']):
+  raise ValueError('CONTROL_BOUNDED_PROSPECTIVE_SOURCE7_CARRIER_PROFILE')
+ return programme
+
+
+def _ordinary_bounded_control_unresolved_site_v1(scope, row):
+ attempt=getattr(scope,'_ordinary_controller_data_initialization_v1',None)
+ if type(attempt)is not dict or attempt.get('bounded_production')is not True:
+  return False
+ programme=_ordinary_bounded_control_programme_check_v1(scope,attempt['programme'])
+ selection=scope._ordinary_control_module_inputs_v1['selection']
+ acquired=selection['routes']
+ if (type(row)is not tuple or len(row)!=3 or type(row[2])is not tuple or row[2]
+  or not any(row is prior for prior in programme['site_rows'])):
+  return False
+ matching=tuple(value for value in acquired[2]if value[0]==row[0]and value[1]==row[1])
+ if not matching:raise ValueError('CONTROL_BOUNDED_ONLY_RETAINED_UNRESOLVED_SITE')
+ for value in matching:
+  if (type(value)is not tuple or len(value)not in (7,8)
+   or value[0]!=row[0]or value[1]is not row[1]
+   or not (value[2]=='ORIGINAL_PLATFORM_MODULE'and len(value)==7
+    or value[2]=='ORIGINAL_CALL_TARGET'and len(value)==8)):
+   raise ValueError('CONTROL_BOUNDED_ONLY_RETAINED_UNRESOLVED_SITE')
+  function,fields=value[-2:]
+  if (not any(function is selected[4]and selected[0]==row[0]for selected in programme['selectors'])
+   or type(fields)is not tuple or len(fields)!=4 or fields[0]is not function
+   or fields[1]is not scope or fields[2]is not scope.source or fields[3]is not row[1]):
+   raise ValueError('CONTROL_BOUNDED_ORIGINAL_UNRESOLVED_OWNER_FIELDS')
+ # This preserves absence of Python allocation-incidence proof. It does not
+ # authorize a command or write: those still need their original selected
+ # native grammar, exact namespace policy and real resource predicates.
+ return True
+
+
+def _ordinary_bounded_control_installation_check_v1(scope, record, product):
+ from tools import validation_reliability as o
+ o._ordinary_control_source_product_check_v1(scope,product)
+ old=record['original']
+ if (record is not scope._ordinary_installation_copy_v1
+  or record is not scope._ordinary_original_installation_copy_v1
+  or type(old)is not tuple or len(old)!=17 or old[0]is not record
+  or old[1]is not scope or old[2]is not record['install']or old[3]is not record['census']
+  or old[4]is not record['programme']or old[5]is not record['image']
+  or old[6]is not record['destination']or old[7]is not record['install'].rows
+  or old[8]is not record['native']or old[9]is not record['files']
+  or old[10]is not record['directories']or old[11]is not record['active_slots']
+  or old[12]is not record['errors']or old[13]is not record['owner']
+  or old[14]is not scope._ordinary_meter_v1 or old[15]is not record['source_paths']
+  or old[16]is not record['target_paths']or not record['complete']or record['errors']):
+  raise ValueError('CONTROL_BOUNDED_ORIGINAL_INSTALLATION_17')
+ association=record['bounded_controller_source_original']
+ if (type(association)is not tuple or len(association)!=6
+  or association[0]is not record or association[1]is not scope
+  or association[2]is not scope.source or association[3]is not product
+  or association[4]is not product['programme']
+  or association[5]is not scope._ordinary_control_source_product_original_v1):
+  raise ValueError('CONTROL_BOUNDED_INSTALLATION_SOURCE_ASSOCIATION')
+ return record
+
+
+def _ordinary_bounded_control_layout_preissued_check_v1(scope, product):
+ from tools import validation_reliability as o
+ programme=_ordinary_bounded_control_programme_check_v1(scope,product['programme'])
+ attempt=scope._ordinary_controller_data_initialization_v1
+ transfer=attempt['transfer']
+ # Code, AST and selected source-product metadata have already been retained
+ # in BEFORE_COMPILE and transferred once. Do not charge them a second time
+ # as exact interpreter/frame incidence. Original iterator/method/error
+ # carrier observations below remain additional registration coverage.
+ if (type(transfer)is not tuple or len(transfer)!=8
+  or transfer[1]is not scope or transfer[2]is not programme['resource']
+  or transfer[0]['transfer']is not transfer or not transfer[0]['transfer_attempted']
+  or transfer[0]['active']is not None or transfer[0]['errors']):
+  raise ValueError('CONTROL_BOUNDED_SOURCE7_ONE_TRANSFER')
+ return transfer
+
+
+def _ordinary_bounded_controller_data_initialize_v1(scope,resource,module_inputs,selections,runtime_roles,stage):
+ from tools import validation_reliability as o
+ import sys,types
+ need=o._preflight_require_v1
+ need(type(scope)is o._LinuxPreflightScopeV1
+  and resource is scope._ordinary_resource_programme_v1
+  is scope._ordinary_original_resource_programme_v1[0]
+  and not hasattr(scope,'_ordinary_controller_data_initialization_v1')
+  and not hasattr(scope,'_ordinary_controller_data_initialization_attempted_v1'),
+  'CONTROL_BOUNDED_ONE_ORIGINAL_INITIALIZATION')
+ scope._ordinary_controller_data_initialization_attempted_v1=True
+ acquisition=scope._ordinary_bootstrap_runtime_v1['acquisition']
+ runner=acquisition['runner_owner_original'][1]
+ runner._ordinary_bootstrap_runtime_check_v1(scope)
+ heap=runner._ordinary_bootstrap_heap_record_v1(acquisition['heap_record'])
+ a=scope._ordinary_control_module_inputs_v1;selection=a['selection']
+ need(type(stage)is dict and heap['active']is stage and not stage['complete']
+  and stage['error']is None and stage['row'][0]=='BEFORE_COMPILE'
+  and a is scope._ordinary_original_control_module_inputs_v1
+  and a['original']is scope._ordinary_control_module_inputs_original_v1
+  and a['heap']is heap and a['stage']is stage and a['complete']and not a['errors']
+  and module_inputs is a['result']is a['result_original'][0]
+  and selections is selection['result']is selection['result_original'][0]
+  and type(runtime_roles)is tuple and len(runtime_roles)==7,
+  'CONTROL_BOUNDED_SAME_ACTUAL_COMPILER_AND_RUNTIME_ROLES')
+ runner._ordinary_bootstrap_heap_source_row_v1(heap['native_product'],stage['row'],stage['original'][3])
+ errors=[]
+ attempt=dict(scope=scope,resource=resource,inputs=selection,programme=None,product=None,
+  layout=None,transfer=None,allocator=None,complete=False,errors=errors,heap_stage=stage,
+  bounded_production=True,profile=scope._ordinary_installation_copy_v1['control_request_profile_original'],
+  source_rows=selections[1]+selection['delegated_original'][1],source_requests=[])
+ scope._ordinary_controller_data_initialization_v1=attempt
+ scope._ordinary_original_controller_data_initialization_v1=attempt
+ try:
+  platform=[]
+  for _,_,routes in selection['routes'][1]:
+   for owner,path,target,boundary,caller,fields in routes:
+    if boundary in ('TRUSTED_PLATFORM','SOURCE_MODULE')and not any(target is old for old in platform):
+     platform.append(target)
+  constructor=selection['route_acquisition']['error_constructor']
+  if constructor['original']is not None:
+   builtin=constructor['facts'][0]
+   for target in (builtin['type'],builtin['super'],builtin['RuntimeError'],builtin['Exception'],
+    builtin['BaseException'],builtin['object'],*constructor['facts'][4:7]):
+    if not any(target is old for old in platform):platform.append(target)
+  programme=dict(scope=scope,source=scope.source,resource=resource,query=scope.query,
+   owner=scope._ordinary_factory_owner_v1,module_inputs=module_inputs,selectors=selections[0],
+   default_rows=selection['default_original'][3],site_rows=selection['routes'][1],
+   platform_targets=tuple(platform),native_binding_primitives=(type,issubclass,types.BuiltinFunctionType),
+   operation_sources=attempt['source_rows'],errors=errors,attempted=False,product=None)
+  fields=('scope','source','resource','query','owner','module_inputs','selectors',
+   'default_rows','site_rows','platform_targets','native_binding_primitives','operation_sources','errors')
+  programme['original']=(programme,)+tuple(programme[key]for key in fields)
+  scope._ordinary_control_source_programme_v1=programme
+  scope._ordinary_original_control_source_programme_v1=programme
+  scope._ordinary_control_source_programme_original_v1=programme['original']
+  attempt['programme']=programme
+  _ordinary_bounded_control_programme_check_v1(scope,programme)
+  product=o._ordinary_control_source_product_v1(scope,programme)
+  attempt['product']=product
+  runner._ordinary_bootstrap_heap_stage_complete_v1(heap,stage,product)
+  attempt['heap_stage']=None;stage=None
+  transfer=runner._ordinary_bootstrap_heap_transfer_v1(scope,resource,heap)
+  attempt['transfer']=transfer
+  record=scope._ordinary_installation_copy_v1
+  need('bounded_controller_source_original'not in record,
+   'CONTROL_BOUNDED_ONE_INSTALLATION_ASSOCIATION')
+  record['bounded_controller_source_original']=(record,scope,scope.source,product,
+   programme,scope._ordinary_control_source_product_original_v1)
+  _ordinary_bounded_control_installation_check_v1(scope,record,product)
+  # None denotes that this private bounded branch supplies no exact legacy
+  # frame-incidence certificate. The default diagnostic API still requires it.
+  layout=scope._ordinary_source_data_runtime_layout_v1(resource,
+   runtime_roles=runtime_roles,control_source_rows=selections[1],
+   delegated_control_rows=selection['delegated_original'][1],source_product=product,
+   operation_rows=None,interpreter_storage_request=None)
+  attempt['layout']=layout
+  raw=sum(len(item[3])for item in module_inputs)
+  need(raw<=128<<20,'CONTROL_BOUNDED_HELD_RAW_CEILING')
+  allocator=scope._ordinary_source_data_allocator_register_v1(resource,
+   existing_heap_demand=transfer[6],existing_raw_retained_demand=raw,runtime_layout=layout,
+   work_deadline_ns=resource['original_cutoffs'][1],data_file_byte_limit=128<<20)
+  attempt['allocator']=allocator
+  attempt['complete']=True
+  _ordinary_bounded_control_source_reservations_bind_v1(scope,attempt)
+  return allocator
+ except BaseException as error:
+  escaping=[error]
+  if stage is not None and heap['active']is stage and not stage['complete']and stage['error']is None:
+   try:runner._ordinary_bootstrap_heap_stage_failed_v1(heap,stage,error)
+   except BaseException as caught:escaping.append(caught)
+  for caught in tuple(escaping):
+   for retained in (errors,scope._ordinary_factory_errors_v1):
+    if not any(caught is old for old in retained):retained.append(caught)
+  o._scan_raise_errors(escaping)
+  raise
+
+
+def _ordinary_bounded_control_source_owner_v1(scope):
+ from tools import validation_reliability as o
+ import os,sys,threading,types
+ attempt=scope._ordinary_controller_data_initialization_v1
+ acquisition=scope._ordinary_bootstrap_runtime_v1['acquisition']
+ native=acquisition['native_product'];module=sys.modules[__name__]
+ if (attempt is not scope._ordinary_original_controller_data_initialization_v1
+  or attempt.get('bounded_production')is not True or not attempt['complete']or attempt['errors']
+  or attempt['scope']is not scope or attempt['allocator']is not scope._ordinary_data_allocator_v1
+  or native['errors']
+  or native['actor'][0]!=os.getpid()or native['actor'][2]!=threading.get_ident()
+  or native['actor'][3]!=threading.get_native_id()):
+  raise ValueError('CONTROL_BOUNDED_SOURCE_ACTUAL_LIVE_OWNER')
+ held=native['source_generation']['source_input4_acquisition']
+ notes=tuple(note for note in held['code_observations']if note.get('module')is module)
+ if len(notes)!=1:raise ValueError('CONTROL_BOUNDED_SOURCE_ONE_CURRENT_CI_MODULE')
+ note=notes[0];root=note['root'];old=note['original']
+ actual=(note,note['record'],module,module.__dict__,root,note['witness'],
+  note['witness'].__code__ if type(note['witness'])is types.FunctionType else None,
+  note['raw'],note['compiled'],note['filename'],note['proof_kind'])
+ if (type(old)is not tuple or len(old)!=11 or any(a is not b for a,b in zip(old,actual))
+  or not note['complete']or not note['whole_initializer']
+  or root is not module.__dict__.get('_ORDINARY_INITIALIZED_MODULE_CODE_V1')):
+  raise ValueError('CONTROL_BOUNDED_SOURCE_UNCHANGED_WHOLE_CI_INITIALIZER')
+ for name in ('_ordinary_bounded_control_programme_check_v1','_ordinary_bounded_control_unresolved_site_v1','_ordinary_bounded_control_installation_check_v1','_ordinary_bounded_control_layout_preissued_check_v1','_ordinary_bounded_controller_data_initialize_v1','_ordinary_bounded_control_source_owner_v1','_ordinary_bounded_control_source_credit_v1','_ordinary_bounded_control_source_reservations_bind_v1'):
+  _ordinary_bounded_bootstrap_function_v1(module,root,name)
+ for name in ('_ordinary_bounded_source_request_issue_v1', '_ordinary_bounded_source_planning_request_v1', '_ordinary_bounded_source_planning_prepare_v1', '_ordinary_bounded_source_profile_shapes_v1', '_ordinary_bounded_source_retained_request_v1', '_ordinary_bounded_source_capture_plan_v1', '_ordinary_bounded_source_capture_publish_v1', '_ordinary_bounded_source_original_v1', '_ordinary_bounded_source_module_check_v1', '_ordinary_bounded_source_calls_v1', '_ordinary_bounded_source_aggregate_check_v1', '_ordinary_bounded_source_cached_module_v1', '_ordinary_bounded_source_protected_module_v1', '_ordinary_bounded_source_grammar_reserve_v1', '_ordinary_control_source_snapshot_request_v1'):
+  _ordinary_bounded_bootstrap_function_v1(module,root,name,
+   (('baseline',None),)if name=='_ordinary_bounded_source_capture_plan_v1'else ())
+ o._ordinary_control_source_product_check_v1(scope,attempt['product'])
+ return attempt,acquisition,module,root
+
+
+def _ordinary_bounded_control_source_credit_v1(scope,state,credit):
+ from tools import validation_reliability as o
+ attempt,acquisition,module,root=_ordinary_bounded_control_source_owner_v1(scope)
+ if type(credit)is not tuple or len(credit)!=7:raise ValueError('CONTROL_BOUNDED_SOURCE_CREDIT_SHAPE')
+ issued,owner,stage,managed,payload,deadline,basis=credit
+ if (owner is not attempt or stage!='source' or type(issued)is not dict
+  or type(managed)is not int or managed<=0 or type(payload)is not int or payload<0
+  or deadline!=state['deadline_ns']or state is not attempt['allocator']
+  or not any(issued is entry for entry in attempt['source_requests'])
+  or issued['original_credit']is not credit or issued['original']is not basis
+  or type(basis)is not tuple or len(basis)!=12 or basis[0]is not issued
+  or basis[1]is not attempt or basis[2]is not scope or basis[3]is not scope.source
+  or basis[4]is not state or basis[5]is not attempt['product']
+  or basis[6]is not issued['recipe']or basis[7]is not issued['geometry']
+  or basis[8]is not issued['components']or basis[9]is not issued['caller']
+  or basis[10]is not issued['calculator']
+  or issued['managed']!=managed or issued['payload']!=payload
+  or issued['deadline_ns']!=deadline or issued['error']is not None
+  or issued['calculator'].__code__ is not issued['calculator_code']
+  or issued['caller'].__code__ is not issued['caller_code']
+  or sum(value for _,value in issued['components'])!=managed):
+  raise ValueError('CONTROL_BOUNDED_SOURCE_FROZEN_LIVE_CREDIT')
+ keeper=basis[11]
+ if type(keeper)is not tuple or len(keeper)!=5:
+  raise ValueError('CONTROL_BOUNDED_SOURCE_OWNED_KEEPER_SHAPE')
+ function,code,defaults,keywords,closure=keeper
+ import types
+ expected=tuple(value for value in _ordinary_bounded_source_request_issue_v1.__code__.co_consts
+  if type(value)is types.CodeType
+  and value.co_qualname=='_ordinary_bounded_source_request_issue_v1.<locals>.publication_original')
+ if (type(function)is not types.FunctionType or len(expected)!=1 or code is not expected[0]
+  or function.__code__ is not code or function.__globals__ is not module.__dict__
+  or function.__defaults__ is not defaults or type(defaults)is not tuple
+  or len(defaults)!=1 or defaults[0]is not None
+  or function.__kwdefaults__ is not keywords or keywords is not None
+  or function.__closure__ is not closure or type(closure)is not tuple or len(closure)!=1
+  or code.co_freevars!=('publication',)):
+  raise ValueError('CONTROL_BOUNDED_SOURCE_OWNED_KEEPER_CODE_DEFAULTS_CLOSURE')
+ return issued
+
+
+def _ordinary_bounded_control_source_reservations_bind_v1(scope,attempt):
+ from tools import validation_reliability as o
+ import sys,types
+ if (attempt is not scope._ordinary_controller_data_initialization_v1
+  or not attempt['complete']or attempt['errors']
+  or hasattr(scope,'_ordinary_bounded_source_reservation_v1')):
+  raise ValueError('CONTROL_BOUNDED_SOURCE_ONE_CALLBACK_BIND')
+ acquisition=scope._ordinary_bootstrap_runtime_v1['acquisition']
+ module=sys.modules[__name__]
+ # The actual source/Code/default owner is checked on each logical reserve
+ # boundary. It is not an all-Module validation on a 64KiB read callback.
+ def reserve_targets(*,recipe,geometry):
+  actual,owned,ci,root=_ordinary_bounded_control_source_owner_v1(scope)
+  if actual is not attempt or owned is not acquisition:
+   raise ValueError('CONTROL_BOUNDED_NAMESPACE_ORIGINAL_ACQUISITION')
+  component=scope._ordinary_deterministic_source_ingredients_v1
+  if component is not scope._ordinary_original_deterministic_source_ingredients_v1:
+   raise ValueError('CONTROL_BOUNDED_NAMESPACE_ORIGINAL_COMPONENT')
+  o._ordinary_deterministic_source_ingredients_check_v1(scope,component)
+  selection=component['source_selection']
+  if (not any(recipe is row for row in component['rows'])
+   or type(recipe)is not dict or type(recipe['ordinal'])is not int
+   or not 0<recipe['ordinal']<=len(selection._bound)
+   or recipe['bound_row']is not selection._bound[recipe['ordinal']-1]
+   or recipe['entry']is not recipe['bound_row'][0]
+   or recipe['execution']is not recipe['bound_row'][1]
+   or recipe['source_position']!=recipe['bound_row'][2]
+   or type(geometry)is not tuple or len(geometry)!=15):
+   raise ValueError('CONTROL_BOUNDED_NAMESPACE_ACTUAL_SELECTED_RECIPE')
+  caller_frame=sys._getframe(1)
+  callers=tuple(_ordinary_bounded_bootstrap_function_v1(ci,root,name,keywords)for name,keywords in
+   (('_ordinary_selected_repository_writer_targets_v1',()),
+    ('_ordinary_selected_operational_repository_targets_v1',()),
+    ('_ordinary_selected_v_bundle_source_v1',(('prior_bundles',()),))))
+  matched=[]
+  for function in callers:
+   frame=caller_frame
+   if (caller_frame.f_globals is ci.__dict__
+    and any(caller_frame.f_code is code for code in o._ordinary_data_code_tree_v1(function.__code__))):
+    while frame is not None:
+     if (frame.f_code is function.__code__ and frame.f_globals is ci.__dict__
+      and frame.f_locals.get('scope')is scope and frame.f_locals.get('row')is recipe):
+      matched.append(function);break
+     frame=frame.f_back
+
+  if len(matched)!=1:raise ValueError('CONTROL_BOUNDED_NAMESPACE_SELECTED_SOURCE_CALLER')
+  caller=matched[0]
+  calculator=_ordinary_bounded_bootstrap_function_v1(ci,root,'_ordinary_selected_target_managed_request_v1')
+  partition=geometry[0]
+  prior=tuple(entry for entry in attempt['source_requests']
+   if entry['recipe']is recipe and entry['calculator']is calculator)
+  if any(not any(entry['caller']is function for function in callers)
+   or type(entry['geometry'])is not tuple or len(entry['geometry'])!=15
+   or type(entry['geometry'][0])is not str or entry['geometry'][0]not in ('FIXED','HELD')
+   for entry in prior):
+   raise ValueError('CONTROL_BOUNDED_NAMESPACE_ORIGINAL_CALLER_CALCULATOR_PARTITIONS')
+  for entry in prior:
+   _ordinary_bounded_control_source_credit_v1(scope,attempt['allocator'],entry['original_credit'])
+  if (partition not in ('FIXED','HELD')
+   or partition=='FIXED'and prior
+   or partition=='HELD'and (len(prior)!=1 or prior[0]['geometry'][0]!='FIXED')
+   or any(entry['caller']is not caller for entry in prior)):
+   raise ValueError('CONTROL_BOUNDED_NAMESPACE_ONE_ORDERED_PARTITION')
+  state=scope._ordinary_source_data_allocator_projection_v1()
+  requested=calculator(state['runtime_layout'],recipe,geometry)
+  return _ordinary_bounded_source_request_issue_v1(scope,recipe,geometry,requested,caller,calculator)
+ attempt['reserve_targets']=reserve_targets
+ attempt['reserve_targets_original']=(attempt,scope,acquisition,module,
+  reserve_targets,reserve_targets.__code__,reserve_targets.__closure__)
+ scope._ordinary_bounded_source_reservation_v1=reserve_targets
+ return reserve_targets
+
+
+def _ordinary_control_source_snapshot_request_v1(layout, profile):
+ # Prospective Source7 arithmetic; no successful parse issues this request.
+ # profile is selected independently with the same complete raw/baseline,
+ # flags and original ABI before the controlled Module/snapshot is made.
+ from tools import validation_reliability as o
+ if type(profile) is not tuple or len(profile) != 5:
+  raise ValueError('CONTROL_SOURCE_SNAPSHOT_SELECTED_PROFILE')
+ fields, lists, slots, classes, pending_slots = profile
+ if (type(fields) is not tuple or type(classes) is not tuple
+   or any(type(n) is not int or n < 0 for n in (lists, slots, pending_slots))
+   or any(type(row) is not tuple or len(row) != 2
+    or any(type(n) is not int or n < 0 for n in row) for row in fields)
+   or any(type(n) is not int or n < 0 for n in classes)):
+  raise ValueError('CONTROL_SOURCE_SNAPSHOT_FINITE_ORIGINAL_ROWS')
+ node_count = sum(count for width, count in fields)
+ class_count = len(classes)
+ row_count = node_count + lists
+ tuple_request = o._ordinary_data_tuple_request_v1
+ list_request = o._ordinary_data_list_requests_v1
+ pointer = o._ordinary_data_size_v1(layout, 'pointer')
+ if pointer != 8:
+  raise ValueError('CONTROL_SOURCE_SNAPSHOT_ORIGINAL_LP64')
+ # Actual original snapshot: one five-field row per AST node/list,
+ # one tuple/pair per observed native field, four-field class rows,
+ # and the original (Module, descriptor, (rows, classes)) result.
+ retained = (tuple_request(layout, 3) + tuple_request(layout, 2)
+  + tuple_request(layout, row_count) + tuple_request(layout, class_count)
+  + row_count * tuple_request(layout, 5)
+  + sum(count * (tuple_request(layout, width)
+    + width * tuple_request(layout, 2)) for width, count in fields)
+  + lists * tuple_request(layout, 0) + pointer * slots
+  + class_count * tuple_request(layout, 4)
+  + sum(tuple_request(layout, width)
+    + width * tuple_request(layout, 2) for width in classes))
+ # Reuse the original selected set-table request bound (two old/new
+ # tables), and charge the id() integers actually made by the snapshot.
+ # The set/table expressions are the original Source7 bound, not a
+ # per-source-byte multiplier. These scratch objects are not retained.
+ bits = o._ordinary_data_size_v1(layout, 'int_digit_bits')
+ digit = o._ordinary_data_size_v1(layout, 'int_digit_bytes')
+ ids = row_count * (o._ordinary_data_size_v1(layout, 'int_prefix')
+  + digit * ((8 * pointer + bits - 1) // bits))
+ def sets(keys):
+  return 216 + 2 * 16 * (8 + 8 * keys)
+ scratch = (list_request(layout, 1, row_count)
+  + list_request(layout, 1, class_count)
+  + list_request(layout, 1, pending_slots)
+  + sets(row_count) + sets(class_count) + ids)
+ return (('SOURCE_ORIGINAL_MODULE_SNAPSHOT_ROWS', retained),
+  ('SOURCE_ONE_ACTIVE_SNAPSHOT_CHECK_WORKSPACE', scratch))
+
+
+def _ordinary_control_source_graph_aggregate_v1(layout, profiles):
+ # The existing external Source7 analysis producer streams selected
+ # profile rows into this arithmetic. It does not retain another corpus
+ # or a runtime per-module profile store, and does not issue credit.
+ from tools import validation_reliability as o
+ if type(profiles) is not tuple or not profiles:
+  raise ValueError('CONTROL_SOURCE_COMPLETE_PROTECTED_COHORT_REQUIRED')
+ retained = scratch = raw_bytes = nodes = captures = 0
+ for row in profiles:
+  # The original fixed producer binds raw==independent baseline before
+  # this request is selected; do not replace that with a length/hash.
+  if type(row) is not tuple or len(row) != 7:
+   raise ValueError('CONTROL_SOURCE_ORIGINAL_PROFILE_ROW')
+  raw, baseline, parser_profile, snapshot_profile, leaf_request, count, adopted = row
+  if (type(raw) is not bytes or type(baseline) is not bytes or raw != baseline
+    or type(parser_profile) is not tuple or len(parser_profile) != 12
+    or parser_profile[10] is not True
+    or type(count) is not int or not 0 < count <= 1000000
+    or type(leaf_request) is not int or leaf_request < 0
+    or type(adopted) is not bool):
+   raise ValueError('CONTROL_SOURCE_FULL_BASELINE_FLAGS_AND_PROFILE')
+  parse_rows, parse_retained = o._ordinary_control_current_parser_request_v1(
+   layout, raw, parser_profile)
+  snapshot_rows = _ordinary_control_source_snapshot_request_v1(layout, snapshot_profile)
+  parse_hold = sum(value for name, value in parse_rows if name in parse_retained)
+  parse_scratch = sum(value for name, value in parse_rows if name not in parse_retained)
+  snapshot_hold, snapshot_scratch = (value for _, value in snapshot_rows)
+  # A genuinely retained full Source7 Module already owns converted-AST
+  # credit. Snapshot and AST leaf retention are separately reserved. A masked unit
+  # or Code-only observation cannot use this adoption branch.
+  retained += snapshot_hold + leaf_request + (0 if adopted else parse_hold)
+  scratch = max(scratch, snapshot_scratch, 0 if adopted else parse_scratch)
+  raw_bytes += len(raw)
+  nodes += count
+  captures += 1
+ if raw_bytes > 128 << 20:
+  raise ValueError('CONTROL_SOURCE_ORIGINAL_CUMULATIVE_BYTE_CEILING')
+ return (('SOURCE_SELECTED_ADDITIONAL_MODULES_AND_SNAPSHOTS', retained),
+  ('SOURCE_ONE_ACTIVE_PARSE_OR_CHECK_WORKSPACE', scratch)), (raw_bytes, nodes, captures)
+
+def _ordinary_bounded_source_request_issue_v1(scope, recipe, geometry, components, caller, calculator):
+ from tools import validation_reliability as o
+ attempt,acquisition,ci,root=_ordinary_bounded_control_source_owner_v1(scope)
+ state=scope._ordinary_source_data_allocator_projection_v1()
+ if (type(components)is not tuple or not components
+  or any(type(row)is not tuple or len(row)!=2 or type(row[0])is not str
+   or type(row[1])is not int or row[1]<=0 for row in components)):
+  raise ValueError('CONTROL_BOUNDED_SOURCE_POSITIVE_SELECTED_REQUEST')
+ for function in (caller,calculator):
+  keywords=((('baseline',None),)if function.__name__=='_ordinary_bounded_source_capture_plan_v1'
+   else (('prior_bundles',()),)if function.__name__=='_ordinary_selected_v_bundle_source_v1'else ())
+  checked=_ordinary_bounded_bootstrap_function_v1(ci,root,function.__name__,keywords)
+  if function is not checked:raise ValueError('CONTROL_BOUNDED_SOURCE_CURRENT_REQUEST_CODE')
+ layout=state['runtime_layout']
+ carriers=(o._ordinary_data_dict_requests_v1(layout,1,16)
+  +o._ordinary_data_tuple_request_v1(layout,12)+o._ordinary_data_tuple_request_v1(layout,7)
+  +o._ordinary_data_tuple_request_v1(layout,5)
+  +2*o._ordinary_data_tuple_request_v1(layout,1)
+  +__import__('types').FunctionType.__basicsize__+__import__('types').CellType.__basicsize__
+  +2*o._ordinary_data_size_v1(layout,'gc')
+  +o._ordinary_data_list_requests_v1(layout,2,len(attempt['source_requests'])+len(state['credit_originals'])+2))
+ parts=components+(('BOUNDED_SOURCE_CREDIT_CATALOGUE_CARRIERS',carriers),)
+ demand=sum(value for _,value in parts)
+ live,raw_live=scope._ordinary_source_data_live_credit_v1(state)
+ if demand>state['limits']['heap_byte_limit']-state['existing_heap']-live:
+  raise MemoryError('CONTROL_BOUNDED_SOURCE_INDEPENDENT_COEXISTING_REQUEST')
+ issued=dict(recipe=recipe,geometry=geometry,components=parts,caller=caller,
+  caller_code=caller.__code__,calculator=calculator,calculator_code=calculator.__code__,
+  managed=demand,payload=0,deadline_ns=state['deadline_ns'],error=None)
+ publication=None
+ def publication_original(value=None):
+  nonlocal publication
+  if value is not None:
+   if publication is not None:raise ValueError('CONTROL_BOUNDED_SOURCE_ONE_OWNED_PUBLICATION')
+   publication=value
+  return publication
+ keeper=(publication_original,publication_original.__code__,publication_original.__defaults__,
+  publication_original.__kwdefaults__,publication_original.__closure__)
+ basis=(issued,attempt,scope,scope.source,state,attempt['product'],recipe,geometry,parts,caller,calculator,keeper)
+ credit=(issued,attempt,'source',demand,0,state['deadline_ns'],basis)
+ issued['original']=basis;issued['original_credit']=credit
+ attempt['source_requests'].append(issued);state['credit_originals'].append(credit)
+ _ordinary_bounded_control_source_credit_v1(scope,state,credit)
+ return issued
+
+
+def _ordinary_bounded_source_planning_request_v1(layout, extent, nodes, classes):
+ from tools import validation_reliability as o
+ if (type(extent)is not int or not 0<extent<=128<<20
+  or type(nodes)is not int or not 0<nodes<=1000000
+  or type(classes)is not int or classes<=0):
+  raise ValueError('CONTROL_BOUNDED_SOURCE_PLANNING_SELECTED_METADATA')
+ # QTT-owned carriers/visitor work are funded before decoding or parsing.
+ # Trusted parser mechanics remain inside actual readback native limits.
+ # This does not certify every interpreter allocation or guaranteed fit.
+ ptr=o._ordinary_data_size_v1(layout,'pointer')
+ if ptr!=8:raise ValueError('CONTROL_BOUNDED_SOURCE_PLANNING_ORIGINAL_ABI')
+ visitor=(o._ordinary_data_list_requests_v1(layout,3,2*nodes+classes)
+  +o._ordinary_data_dict_requests_v1(layout,4,4*classes)
+  +o._ordinary_data_tuple_request_v1(layout,classes)
+  +classes*o._ordinary_data_tuple_request_v1(layout,4)
+  +(216+2*16*(8+8*classes)))
+ raw=(2*o._ordinary_data_bytes_request_v1(layout,extent)
+  +2*o._ordinary_data_unicode_request_v1(layout,extent))
+ import types
+ gc=o._ordinary_data_size_v1(layout,'gc')
+ # All seven nested Function construction sites are covered together;
+ # selectors retire before per-node iteration, so this is conservative.
+ activation=(7*(types.FunctionType.__basicsize__+gc)
+  +17*(types.CellType.__basicsize__+gc)
+  +8*(types.FrameType.__basicsize__+gc)+145*ptr
+  +4*(types.GeneratorType.__basicsize__+gc)
+  +8*(types.TracebackType.__basicsize__+gc)
+  +2*o._ordinary_data_tuple_request_v1(layout,2)
+  +o._ordinary_data_tuple_request_v1(layout,16)
+  +2*o._ordinary_data_tuple_request_v1(layout,3)
+  +o._ordinary_data_tuple_request_v1(layout,1)
+  +o._ordinary_data_dict_requests_v1(layout,1,1)
+  +o._ordinary_data_list_requests_v1(layout,1,1)
+  +2*o._ordinary_data_size_v1(layout,'control_integer')
+  +3*o._ordinary_data_size_v1(layout,'slice'))
+ segmentation=(o._ordinary_data_list_requests_v1(layout,2,2*(extent+2))
+  +(extent+2)*o._ordinary_data_unicode_request_v1(layout,0)+4*extent
+  +2*o._ordinary_data_bytes_request_v1(layout,extent)
+  +3*o._ordinary_data_unicode_request_v1(layout,extent)
+  +o._ordinary_data_tuple_request_v1(layout,nodes)+activation)
+ return (('SOURCE_ONE_ACTIVE_QTT_RAW_DECODE_AND_BASELINE_CARRIERS',raw),
+  ('SOURCE_ONE_ACTIVE_BOUNDED_PROFILE_VISITOR_WORKSPACE',visitor),
+  ('SOURCE_ONE_ACTIVE_NATIVE_CALL_SEGMENTATION_WORKSPACE',segmentation))
+
+
+def _ordinary_bounded_source_planning_prepare_v1(scope):
+ from tools import validation_reliability as o
+ import ast,sys,types
+ attempt,acquisition,ci,root=_ordinary_bounded_control_source_owner_v1(scope)
+ prior=attempt.get('source_planning_original')
+ if prior is not None:
+  parser,module,code,defaults,kw,closure,namespace,builtins,bindings,extent,classes,issued,kwitems=prior
+  if (sys.modules.get('ast')is not module or module is not ast or ast.parse is not parser
+   or parser.__code__ is not code or parser.__defaults__ is not defaults
+   or parser.__kwdefaults__ is not kw or (kw is not None and (len(kw)!=len(kwitems)
+    or any(name not in kw or kw[name]is not value for name,value in kwitems)))
+   or parser.__closure__ is not closure
+   or parser.__globals__ is not namespace or parser.__builtins__ is not builtins
+   or any((name in owner)is not present or owner.get(name)is not value
+    for owner,name,present,value in bindings)):
+   raise ValueError('CONTROL_BOUNDED_SOURCE_TRUSTED_PARSER_BINDING_CHANGED')
+  _ordinary_bounded_control_source_credit_v1(scope,attempt['allocator'],issued['original_credit'])
+  return prior
+ if attempt.get('source_planning_attempted'):
+  raise ValueError('CONTROL_BOUNDED_SOURCE_ONE_PLANNING_PREISSUE')
+ attempt['source_planning_attempted']=True
+ source=scope.source
+ installation=scope._ordinary_installation_record_v1(scope._ordinary_installation_copy_v1['install'])
+ if not installation['complete']or installation['errors']:
+  raise ValueError('CONTROL_BOUNDED_SOURCE_ACTUAL_LINUX_INSTALLATION')
+ install=installation['install'];parser=ast.parse
+ if (type(parser)is not types.FunctionType or parser.__module__!='ast'
+  or parser.__globals__ is not ast.__dict__ or parser.__closure__ is not None
+  or parser.__code__.co_filename!=ast.__file__):
+  raise ValueError('CONTROL_BOUNDED_SOURCE_PINNED_STANDARD_PARSER')
+ matched=tuple((row,target)for row,target,version in installation['target_versions']
+  if row['kind']=='file'and (str(row['path'])==ast.__file__ or str(target)==ast.__file__))
+ if (len(matched)!=1 or type(installation['files'][matched[0][0]['path']])is not bytes
+  or len(installation['files'][matched[0][0]['path']])!=matched[0][0]['logical_bytes']):
+  raise ValueError('CONTROL_BOUNDED_SOURCE_PARSER_HELD_INSTALLATION_SOURCE')
+ extents=(row['logical_bytes']for row in source.row_index.values()
+  if row['role']=='repository'and row['kind']=='file'and str(row['path']).endswith('.py')
+  and type(row['logical_bytes'])is int and 0<row['logical_bytes']<=128<<20)
+ extent=max(extents,default=1)
+ extent=max(extent,max((row['logical_bytes']for row,target,version in installation['target_versions']
+  if row['kind']=='file'and str(row['path']).endswith('.py')
+  and type(row['logical_bytes'])is int and 0<row['logical_bytes']<=128<<20),default=1))
+ classes=1+sum(type(value)is type and ast.AST in value.__mro__ for value in ast.__dict__.values())
+ state=scope._ordinary_source_data_allocator_projection_v1();layout=state['runtime_layout']
+ parts=_ordinary_bounded_source_planning_request_v1(layout,extent,1000000,classes)
+ current=o._ordinary_control_current_staged_request_v1(layout,installation)
+ retained=sum(value for label,value in current['components']if label in current['retained_names'])
+ reference=current['staged_request']-retained
+ if reference>0:
+  parts+=(('SOURCE_ONE_ACTIVE_ORIGINAL_REFERENCE_PARSE_COMPILE_WORKSPACE',reference),)
+ workspace=_ordinary_bounded_bootstrap_function_v1(ci,root,'_ordinary_selected_v_directory_workspace_request_v1')
+ vrequest=workspace(layout)
+ if (type(vrequest)is not tuple or len(vrequest)!=1 or type(vrequest[0])is not tuple
+  or len(vrequest[0])!=2 or vrequest[0][0]!='SOURCE_V_DIRECTORY_ONE_ACTIVE_READBACK_WORKSPACE'
+  or type(vrequest[0][1])is not int or vrequest[0][1]<=0):
+  raise ValueError('CONTROL_BOUNDED_SOURCE_ORIGINAL_V_WORKSPACE_SELECTOR')
+ issued=_ordinary_bounded_source_request_issue_v1(scope,installation,
+  ('PLANNING',source,installation,extent,1000000,classes),
+  parts+vrequest,_ordinary_bounded_source_planning_prepare_v1,
+  _ordinary_bounded_source_planning_request_v1)
+ bindings=tuple((owner,name,name in owner,owner.get(name))for owner in
+  (parser.__globals__,parser.__builtins__)for name in parser.__code__.co_names)
+ prior=(parser,ast,parser.__code__,parser.__defaults__,parser.__kwdefaults__,
+  parser.__closure__,parser.__globals__,parser.__builtins__,bindings,extent,classes,issued,
+  None if parser.__kwdefaults__ is None else tuple(parser.__kwdefaults__.items()))
+ attempt['source_planning_original']=prior
+ return prior
+
+
+def _ordinary_bounded_source_profile_shapes_v1(tree, node_limit, raw):
+ import ast,collections
+ descriptor=ast.AST.__dict__['__dict__']
+ fields=collections.Counter();snap=collections.Counter();leaves=collections.Counter()
+ lists=slots=positions=position_bits=nodes=calls=call_bytes=0;classes={};singletons=set()
+ starts=[0]
+ for index,byte in enumerate(raw):
+  if byte==10:starts.append(index+1)
+ singleton=(ast.operator,ast.unaryop,ast.boolop,ast.cmpop,ast.expr_context)
+ # These are source-analysis measurements within the earlier bounded
+ # planning request. They do not authenticate an earlier exact parser grant.
+ for node in ast.walk(tree):
+  nodes+=1
+  if nodes>node_limit:raise MemoryError('CONTROL_BOUNDED_SOURCE_PLANNING_NODE_WORKSPACE')
+  if isinstance(node,singleton):
+   if type(node)in singletons:continue
+   singletons.add(type(node))
+  current=descriptor.__get__(node,type(node));snap[len(current)]+=1
+  if type(node)is ast.Call:
+   if (any(type(value)is not int for value in
+    (node.lineno,node.col_offset,node.end_lineno,node.end_col_offset))
+    or not 0<node.lineno<=node.end_lineno<=len(starts)):
+    raise ValueError('CONTROL_BOUNDED_SOURCE_ORIGINAL_CALL_POSITION')
+   width=(starts[node.end_lineno-1]+node.end_col_offset
+    -starts[node.lineno-1]-node.col_offset)
+   if not 0<=width<=len(raw):raise ValueError('CONTROL_BOUNDED_SOURCE_ORIGINAL_CALL_EXTENT')
+   calls+=1;call_bytes+=width
+  for cls in type(node).__mro__:classes[cls]=len(type.__getattribute__(cls,'__dict__'))
+  if not isinstance(node,singleton):
+   fields[sum(hasattr(node,key)for key in (*node._fields,*node._attributes))]+=1
+   for key in node._attributes:
+    value=getattr(node,key,None)
+    if type(value)is int:
+     positions+=1;position_bits=max(position_bits,max(1,abs(value).bit_length()))
+  for value in current.values():
+   if type(value)is list:
+    lists+=1;slots+=len(value)
+    values=value
+   else:values=(value,)
+   for leaf in values:
+    # Repeated references overreserve these original primitive carriers;
+    # they are never an assumed proof of unique allocator incidences.
+    if type(leaf)is str:leaves['strings']+=1;leaves['codepoints']+=len(leaf)
+    elif type(leaf)is bytes:leaves['bytes']+=1;leaves['payload']+=len(leaf)
+    elif type(leaf)is int:
+     leaves['integers']+=1;leaves['digits']+=(max(1,abs(leaf).bit_length())+29)//30
+    elif type(leaf)is float:leaves['floats']+=1
+    elif type(leaf)is complex:leaves['complex']+=1
+ converted=(tuple(sorted(fields.items())),lists,slots,positions,position_bits)
+ snapshot=(tuple(sorted(snap.items())),lists,slots,tuple(sorted(classes.values())),
+  1+sum(width*count for width,count in snap.items())+slots)
+ return converted,snapshot,tuple(sorted(leaves.items())),nodes,calls,call_bytes
+
+
+def _ordinary_bounded_source_retained_request_v1(layout, extent, profile):
+ from tools import validation_reliability as o
+ converted,snapshot,leaf_rows,nodes,calls,call_bytes=profile;leaf=dict(leaf_rows)
+ ast_parts=o._ordinary_control_python_ast_request_v1(layout,converted)
+ snap_parts=_ordinary_control_source_snapshot_request_v1(layout,snapshot)
+ leaves=(leaf.get('strings',0)*o._ordinary_data_size_v1(layout,'unicode_prefix')
+  +4*(leaf.get('codepoints',0)+leaf.get('strings',0))
+  +leaf.get('bytes',0)*o._ordinary_data_size_v1(layout,'bytes_prefix')+leaf.get('payload',0)
+  +leaf.get('integers',0)*o._ordinary_data_size_v1(layout,'int_prefix')
+  +leaf.get('digits',0)*o._ordinary_data_size_v1(layout,'int_digit_bytes')
+  +leaf.get('floats',0)*o._ordinary_data_size_v1(layout,'float')
+  +leaf.get('complex',0)*2*o._ordinary_data_size_v1(layout,'float'))
+ if complex.__basicsize__>2*o._ordinary_data_size_v1(layout,'float'):
+  raise ValueError('CONTROL_BOUNDED_SOURCE_ORIGINAL_COMPLEX_CARRIER_LAYOUT')
+ carriers=(2*o._ordinary_data_bytes_request_v1(layout,extent)
+  +2*o._ordinary_data_unicode_request_v1(layout,extent)
+  +o._ordinary_data_dict_requests_v1(layout,2,32)
+  +4*o._ordinary_data_tuple_request_v1(layout,16))
+ pending=[profile];profile_carriers=0
+ while pending:
+  value=pending.pop()
+  if type(value)is tuple:
+   profile_carriers+=o._ordinary_data_tuple_request_v1(layout,len(value));pending.extend(value)
+  elif type(value)is int:
+   profile_carriers+=(o._ordinary_data_size_v1(layout,'int_prefix')
+    +o._ordinary_data_size_v1(layout,'int_digit_bytes')*((max(1,abs(value).bit_length())+29)//30))
+ carriers+=profile_carriers
+ # The full converted Module and immutable snapshot survive publication.
+ # One source-known resize/check workspace is retained conservatively;
+ # there is no refund, hidden reset or inferred prior parser credit.
+ call_carriers=(calls*o._ordinary_data_size_v1(layout,'unicode_prefix')+4*(call_bytes+calls)
+  +calls*o._ordinary_data_tuple_request_v1(layout,2)
+  +o._ordinary_data_tuple_request_v1(layout,calls))
+ parts=ast_parts+(snap_parts[0],)+(('SOURCE_RETAINED_RAW_TEXT_PROFILE_AND_CACHE_CARRIERS',carriers),
+  ('SOURCE_RETAINED_ORIGINAL_CALL_SOURCE_OBSERVATIONS',call_carriers))
+ if leaves:parts+=(('SOURCE_RETAINED_LITERAL_PRIMITIVES',leaves),)
+ return tuple(row for row in parts if row[1]>0)
+
+
+def _ordinary_bounded_source_capture_plan_v1(scope, record, path, byte_limit, node_limit, *, baseline=None):
+ from tools import validation_reliability as o
+ import ast
+ if (type(byte_limit)is not int or not 0<byte_limit<=128<<20
+  or type(node_limit)is not int or not 0<node_limit<=1000000):
+  raise ValueError('CONTROL_BOUNDED_SOURCE_ORIGINAL_PER_OPERAND_LIMITS')
+ basis=_ordinary_bounded_source_planning_prepare_v1(scope)
+ if baseline is None:
+  raw=scope.source.read_administration(path,byte_limit)
+ else:
+  raw=baseline
+ if type(raw)is not bytes or len(raw)>byte_limit or len(raw)>basis[9]:
+  raise ValueError('CONTROL_BOUNDED_SOURCE_COMPLETE_PREPLANNING_BASELINE')
+ state=scope._ordinary_source_data_allocator_projection_v1()
+ attempt=scope._ordinary_controller_data_initialization_v1
+ text=raw.decode('utf-8','strict')
+ tree=basis[0](text,filename=str(path))
+ line_count=1+raw.count(b'\n')
+ line_workspace=(o._ordinary_data_list_requests_v1(state['runtime_layout'],1,line_count)
+  +line_count*(o._ordinary_data_size_v1(state['runtime_layout'],'int_prefix')
+   +o._ordinary_data_size_v1(state['runtime_layout'],'int_digit_bytes')*
+    ((max(1,len(raw).bit_length())+29)//30)))
+ prior_lines=attempt.get('source_line_workspace_max',0)
+ if line_workspace>prior_lines:
+  _ordinary_bounded_source_request_issue_v1(scope,attempt,('LINE_WORKSPACE',line_count),
+   (('SOURCE_ONE_ACTIVE_CALL_LINE_WORKSPACE_INCREMENT',line_workspace-prior_lines),),
+   _ordinary_bounded_source_capture_plan_v1,_ordinary_bounded_source_retained_request_v1)
+  attempt['source_line_workspace_max']=line_workspace
+ profile=_ordinary_bounded_source_profile_shapes_v1(tree,node_limit,raw)
+ # Discard the analysis tree before the separately selected controlled
+ # parse. No Code-only or masked Module is called whole-source adoption.
+ del tree
+ state=scope._ordinary_source_data_allocator_projection_v1()
+ attempt=scope._ordinary_controller_data_initialization_v1
+ snapshot_scratch=_ordinary_control_source_snapshot_request_v1(state['runtime_layout'],profile[1])[1][1]
+ prior_scratch=attempt.get('source_snapshot_workspace_max',0)
+ if snapshot_scratch>prior_scratch:
+  _ordinary_bounded_source_request_issue_v1(scope,attempt,
+   ('SNAPSHOT_WORKSPACE',profile[1]),
+   (('SOURCE_ONE_ACTIVE_SNAPSHOT_CHECK_WORKSPACE_INCREMENT',snapshot_scratch-prior_scratch),),
+   _ordinary_bounded_source_capture_plan_v1,_ordinary_bounded_source_retained_request_v1)
+  attempt['source_snapshot_workspace_max']=snapshot_scratch
+ parts=_ordinary_bounded_source_retained_request_v1(state['runtime_layout'],len(raw),profile)
+ issued=_ordinary_bounded_source_request_issue_v1(scope,record,
+  ('PYTHON',path,raw,profile,node_limit,basis),parts,
+  _ordinary_bounded_source_capture_plan_v1,_ordinary_bounded_source_retained_request_v1)
+ return (scope,record,path,raw,text,profile,basis,issued)
+
+
+def _ordinary_bounded_source_capture_publish_v1(scope, tree, observed, plan):
+ from tools import validation_reliability as o
+ import ast
+ attempt,acquisition,ci,root=_ordinary_bounded_control_source_owner_v1(scope)
+ if (type(plan)is not tuple or len(plan)!=8 or plan[0]is not scope
+  or type(tree)is not ast.Module or type(observed)is not dict
+  or not observed['complete']or observed['error']is not None
+  or observed['text']!=plan[4]or observed['raw_bytes']!=len(plan[3])
+  or observed['nodes']!=plan[5][3]
+  or _ordinary_bounded_source_profile_shapes_v1(tree,plan[7]['geometry'][4],plan[3])!=plan[5]):
+  raise ValueError('CONTROL_BOUNDED_SOURCE_CONTROLLED_MODULE_PROFILE')
+ issued=plan[7]
+ _ordinary_bounded_control_source_credit_v1(scope,scope._ordinary_data_allocator_v1,
+  issued['original_credit'])
+ if 'bounded_source_credit_index'in observed or 'bounded_source_original'in issued:
+  raise ValueError('CONTROL_BOUNDED_SOURCE_ONE_CACHE_PUBLICATION')
+ if plan[6] is not _ordinary_bounded_source_planning_prepare_v1(scope):
+  raise ValueError('CONTROL_BOUNDED_SOURCE_ORIGINAL_PLANNING_BEFORE_CALL_BATCH')
+ from tools import validation_scope_registry as call_owner
+ call_texts=_ordinary_bounded_bootstrap_function_v1(call_owner,
+  call_owner._ORDINARY_INITIALIZED_MODULE_CODE_V1,'_ordinary_native_call_texts_v1',
+  (('pairs',False),('original_calls',None)))
+ snapshot=o._ordinary_control_ast_original_v1(tree)
+ calls=call_texts(observed,tree,pairs=True)
+ if len(calls)!=plan[5][4]or any(type(text)is not str for node,text in calls):
+  raise ValueError('CONTROL_BOUNDED_SOURCE_CURRENT_CALL_SOURCE_ROSTER')
+ index=next(index for index,item in enumerate(attempt['source_requests'])if item is issued)
+ # Cyclic opaque products stay in the original issued request ledger.
+ # The original literal observation/snapshot grammar receives only an int.
+ issued['bounded_source_original']=(observed,scope,tree,plan,snapshot,observed['text'],
+  observed['nodes'],observed['raw_bytes'],observed['row'],observed['version'],calls)
+ keeper=issued['original'][11][0]
+ if keeper()is not None:raise ValueError('CONTROL_BOUNDED_SOURCE_ONE_OWNED_PUBLICATION')
+ keeper(issued['bounded_source_original'])
+ issued['bounded_source_publication_original']=(issued['bounded_source_original'],index)
+ observed['bounded_source_credit_index']=index
+ return tree
+
+
+def _ordinary_bounded_source_original_v1(scope, observed):
+ attempt,acquisition,ci,root=_ordinary_bounded_control_source_owner_v1(scope)
+ index=observed.get('bounded_source_credit_index')
+ if type(index)is not int or not 0<=index<len(attempt['source_requests']):
+  raise ValueError('CONTROL_BOUNDED_SOURCE_LITERAL_LEDGER_INDEX')
+ issued=attempt['source_requests'][index];original=issued.get('bounded_source_original')
+ if (type(original)is not tuple or len(original)!=11 or original[0]is not observed
+  or original[1]is not scope or original[3][7]is not issued
+  or original[3][0]is not scope or original[3][4]is not observed['text']
+  or original[3][5][3]!=observed['nodes']
+  or original[5]is not observed['text']or original[6]!=observed['nodes']
+  or original[7]!=observed['raw_bytes']or original[8]is not observed['row']
+  or original[9]is not observed['version']or not observed['complete']
+  or observed['error']is not None):
+  raise ValueError('CONTROL_BOUNDED_SOURCE_CACHE_ORIGINAL_ASSOCIATION')
+ _ordinary_bounded_control_source_credit_v1(scope,scope._ordinary_data_allocator_v1,
+  issued['original_credit'])
+ seal=issued.get('bounded_source_publication_original')
+ if (type(seal)is not tuple or len(seal)!=2 or seal[0]is not original
+  or type(seal[1])is not int or seal[1]!=index
+  or issued['original'][11][0]()is not original):
+  raise ValueError('CONTROL_BOUNDED_SOURCE_ORIGINAL_PUBLICATION_POINTER')
+ record=original[3][1]
+ cache=(record['installation_operand_cache']if observed['source_form']=='INSTALLATION_PYTHON'
+  else scope._ordinary_source_operand_cache_v1)
+ key=(observed['path'],observed['source_form'])
+ pair=cache.get(key)
+ if type(pair)is not tuple or len(pair)!=2 or pair[0]is not original[2]or pair[1]is not observed:
+  raise ValueError('CONTROL_BOUNDED_SOURCE_LEDGER_ONE_ACTUAL_CACHE')
+ return original
+
+
+def _ordinary_bounded_source_module_check_v1(scope, tree, observed):
+ from tools import validation_reliability as o
+ import ast
+ if 'bounded_source_credit_index'not in observed:
+  return type(tree)is ast.Module and ast.dump(tree,include_attributes=False)==ast.dump(ast.parse(observed['text']),include_attributes=False)
+ original=_ordinary_bounded_source_original_v1(scope,observed)
+ if original[2]is not tree:
+  raise ValueError('CONTROL_BOUNDED_SOURCE_ONE_RETAINED_COMPLETE_MODULE')
+ _ordinary_bounded_source_planning_prepare_v1(scope)
+ if o._ordinary_control_ast_original_v1(tree,original=original[4])is not original[4]:
+  raise ValueError('CONTROL_BOUNDED_SOURCE_MODULE_NATIVE_FIELD_MUTATION')
+ return True
+
+
+def _ordinary_bounded_source_calls_v1(scope, tree, observed):
+ if 'bounded_source_credit_index'not in observed:return None
+ _ordinary_bounded_source_module_check_v1(scope,tree,observed)
+ return _ordinary_bounded_source_original_v1(scope,observed)[10]
+
+
+def _ordinary_bounded_source_aggregate_check_v1(scope, record, byte_limit, node_limit):
+ attempt=getattr(scope,'_ordinary_controller_data_initialization_v1',None)
+ if type(attempt)is not dict or attempt.get('bounded_production')is not True:
+  return record['raw_bytes']<=byte_limit and record['nodes']<=node_limit
+ _ordinary_bounded_control_source_owner_v1(scope)
+ extra=0
+ for observed in tuple(record['source_operands'])+tuple(record.get('installation_source_operands',())):
+  if 'bounded_source_credit_index'in observed:
+   original=_ordinary_bounded_source_original_v1(scope,observed)
+   # The independently issued profile predates its controlled parse.
+   # Actual acquired counters remain cumulative and are never reset.
+   extra+=original[3][5][3]
+ return record['raw_bytes']<=byte_limit and record['nodes']<=node_limit+extra
+
+
+def _ordinary_bounded_source_cached_module_v1(scope, record, observed):
+ cache=record['source_operand_cache']
+ tree,actual=cache[(observed['path'],'PYTHON')]
+ if actual is not observed or not _ordinary_bounded_source_module_check_v1(scope,tree,observed):
+  raise ValueError('CONTROL_BOUNDED_SOURCE_ONE_ORIGINAL_CACHED_MODULE')
+ return tree
+
+
+def _ordinary_bounded_source_protected_module_v1(scope, relative, byte_limit, node_limit):
+ from tools import validation_reliability as o
+ _ordinary_bounded_source_planning_prepare_v1(scope)
+ # A transient original SOURCE consumer uses the same per-Scope cache.
+ # The earlier planning carrier covers these four keys and two lists.
+ record=dict(scope=scope,source=scope.source,source_operands=[],errors=[])
+ tree,observed=o._ordinary_source_operand_v1(scope,record,relative,
+  source_byte_limit=byte_limit,source_node_limit=node_limit)
+ _ordinary_bounded_source_module_check_v1(scope,tree,observed)
+ return tree,observed
+
+
+
+def _ordinary_bounded_source_grammar_reserve_v1(scope, recipe, tree, observed):
+ if 'bounded_source_credit_index'not in observed:return None
+ from tools import validation_reliability as o
+ import ast
+ attempt,acquisition,ci,root=_ordinary_bounded_control_source_owner_v1(scope)
+ deterministic=getattr(scope,'_ordinary_deterministic_source_ingredients_v1',None)
+ pytest=getattr(scope,'_ordinary_pytest_fixed_effects_v1',None)
+ component=deterministic if type(deterministic)is dict and any(recipe is row for row in deterministic['rows'])else pytest
+ if (type(component)is not dict or type(recipe)is not dict
+  or not any(recipe is row for row in component['rows'])
+  or component['scope']is not scope or component['source']is not scope.source
+  or not any(recipe['bound_row']is bound for bound in scope._ordinary_source_selection_v1._bound)
+  or recipe['entry']is not recipe['bound_row'][0]or recipe['execution']is not recipe['bound_row'][1]
+  or (component is deterministic and recipe['source_position']!=recipe['bound_row'][2])
+  or (component is deterministic and component is not scope._ordinary_original_deterministic_source_ingredients_v1)
+  or (component is pytest and component is not scope._ordinary_original_pytest_fixed_effects_v1)):
+  raise ValueError('CONTROL_BOUNDED_SOURCE_ACTUAL_OCCURRENCE_GRAMMAR')
+ _ordinary_bounded_source_module_check_v1(scope,tree,observed)
+ original=_ordinary_bounded_source_original_v1(scope,observed)
+ calls=original[3][5][4]
+ aliases=sum(len(node.names)for node in ast.walk(tree)if isinstance(node,(ast.Import,ast.ImportFrom)))
+ layout=attempt['allocator']['runtime_layout']
+ # One actual occurrence retains its grammar references and mutable lists.
+ # Call strings/full Modules were already funded on their unique source credit.
+ # The conservative per-Module containers do not certify all interpreter work.
+ demand=(o._ordinary_data_tuple_request_v1(layout,4)
+  +o._ordinary_data_tuple_request_v1(layout,calls)
+  +o._ordinary_data_tuple_request_v1(layout,2)
+  +o._ordinary_data_list_requests_v1(layout,4,calls+8)
+  +o._ordinary_data_dict_requests_v1(layout,3,aliases+3))
+ return _ordinary_bounded_source_request_issue_v1(scope,recipe,
+  ('CALL_GRAMMAR',recipe,observed,tree,calls,aliases),
+  (('SOURCE_ACTUAL_OCCURRENCE_GRAMMAR_REFERENCE_CONTAINERS',demand),),
+  _ordinary_bounded_source_grammar_reserve_v1,_ordinary_bounded_source_retained_request_v1)

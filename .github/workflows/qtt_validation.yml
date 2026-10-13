@@ -985,10 +985,10 @@ jobs:
           QTT_PHASE: ${{ matrix.phase }}
           QTT_DRAFT: ${{ github.event.pull_request.draft && '1' || '0' }}
           # This original trusted interpreter startup precedes the kernel timer;
-          # the timer does not claim to certify sudo/interpreter startup retroactively.
+          # the timer does not claim to certify sudo/Bash/interpreter startup retroactively.
           # Previous unselected failure is preserved in the top-level Source history.
         run: |
-          if [ "$QTT_PR298_NATIVE_ELIGIBLE" = 1 ] && { [ "$QTT_PHASE" != fast-preflight ] || [ "$QTT_DRAFT" != 1 ]
+          if [ "$QTT_PR298_NATIVE_ELIGIBLE" = 1 ]&&{ [ "$QTT_PHASE" != fast-preflight ]||[ "$QTT_DRAFT" != 1 ]
           }
           then
           qtt_original_birth_v1() {
@@ -1004,36 +1004,31 @@ jobs:
           for H in "$z" "$GITHUB_WORKSPACE"
           do
           (("${#H}"<4096))||return 1
-          IFS=/ read -r -a V <<< "${H#/}"
+          IFS=/ read -r -a V<<<"${H#/}"
           for y in "${V[@]}"
           do
-          [[ $y != .&&"$y" != ..&&"${#y}" -le 255 ]]||return 1
+          [[ $y != .&&$y != ..&&"${#y}" -le 255 ]]||return 1
           done
           done
-          for h in GITHUB_ACTIONS GITHUB_EVENT_NAME GITHUB_REPOSITORY \
-          GITHUB_WORKSPACE GITHUB_EVENT_PATH RUNNER_TEMP GITHUB_REF GITHUB_REF_NAME \
-          GITHUB_SHA GITHUB_HEAD_REF GITHUB_BASE_REF GITHUB_RUN_ID GITHUB_RUN_ATTEMPT \
-          GITHUB_OUTPUT
+          for h in GITHUB_ACTIONS GITHUB_EVENT_NAME GITHUB_REPOSITORY GITHUB_WORKSPACE GITHUB_EVENT_PATH RUNNER_TEMP GITHUB_REF GITHUB_REF_NAME GITHUB_SHA GITHUB_HEAD_REF GITHUB_BASE_REF GITHUB_RUN_ID GITHUB_RUN_ATTEMPT GITHUB_OUTPUT
           do
-          [[ -v "$h" ]]||return 1
+          [[ -v $h ]]||return 1
           G+=("$h=${!h}")
           done
-          for h in PATH HOME SHELL USER LOGNAME LANG LC_ALL LC_CTYPE TZ \
-          QTT_FORCE_FULL_VALIDATION LD_LIBRARY_PATH
+          for h in PATH HOME SHELL USER LOGNAME LANG LC_ALL LC_CTYPE TZ QTT_FORCE_FULL_VALIDATION LD_LIBRARY_PATH
           do
-          if [[ -v "$h" ]]
+          if [[ -v $h ]]
           then
           G+=("$h=${!h}")
           fi
           done
-          X=(/usr/bin/sudo -n -- /usr/bin/env -i
-          "${G[@]}" "$z" -I -B -X utf8 "$@")
+          X=(/usr/bin/sudo -n -- /usr/bin/env -i "${G[@]}" /usr/bin/bash --norc -c 'ulimit -n 4096&&ulimit -f 65536&&exec "$@"' _ "$z" -I -B -X utf8 "$@")
           cd -- "$GITHUB_WORKSPACE"||return 1
           [[ ! -v POSIXLY_CORRECT ]]||return 1
           ulimit -n 4096||return 1
           ulimit -f 65536||return 1
           [[ $2 = fast-preflight||$2 = deterministic-validators-[abc]||$2 = pytest-shard-[1-8]||$2 = post-validation ]]||return 1
-          "${X[@]}" <&0 >&1 2>&2 &
+          "${X[@]}"<&0>&1 2>&2&
           W=$?
           I=$!
           [[ $W = 0&&$I =~ $zn ]]||return 1
@@ -2570,7 +2565,7 @@ jobs:
 # QTT_HOST_PY |     def U(n,c):return 68*n+4*c
 # QTT_HOST_PY |     def T(n,s):return 48*n+8*s
 # QTT_HOST_PY |     def L(n,s):return 56*n+16*(s+s//8+6*n)
-# QTT_HOST_PY |     initializer=5125424+21625000+U(7,7*extent)+T(1,parent_path_count);initializer+=6*(U(67,3*extent)+L(2,130)+T(1,65));initializer+=672+T(1,8)+2*T(1,9)+2*T(1,parent_path_count)+24;return(2368680179,302894236,34477319,initializer,1802350,241543444,18421352,1823560,1983204)
+# QTT_HOST_PY |     initializer=5125424+21625000+U(7,7*extent)+T(1,parent_path_count);initializer+=6*(U(67,3*extent)+L(2,130)+T(1,65));initializer+=672+T(1,8)+2*T(1,9)+2*T(1,parent_path_count)+24;return(2454466522,324772011,63340350,initializer,1802350,241543444,19433768,1924808,2003996)
 # QTT_HOST_PY |    def _ordinary_ci_initial_common_projection_v1(source,paths,catalogue,keeper,native):
 # QTT_HOST_PY |     """Project the fixed original programme; its caller owns every operand join."""
 # QTT_HOST_PY |     if(type(source)is not tuple or len(source)!=9 or type(paths)is not tuple or len(paths)!=19 or type(catalogue)is not tuple or len(catalogue)!=8 or type(keeper)is not tuple or len(keeper)!=7 or type(native)is not tuple or len(native)!=3 or any(type(n)is not int or n<0 for row in(source,paths,catalogue,keeper,native)for n in row)):raise ValueError('ORDINARY_INITIAL_COMMON_EXACT_SOURCE_OPERANDS')
