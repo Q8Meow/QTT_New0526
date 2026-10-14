@@ -962,10 +962,10 @@ jobs:
           G+=("$h=${!h}")
           fi
           done
-          X=(/usr/bin/sudo -n -- /usr/bin/env -i "${G[@]}" /usr/bin/bash --norc -c 'ulimit -n 4096&&ulimit -f 65536&&exec "$@"' _ "$z" -I -B -X utf8 "$@")
+          X=(/usr/bin/sudo -n -- /usr/bin/env -i "${G[@]}" /usr/bin/bash --norc -c 'ulimit -Sn hard&&ulimit -f 65536&&exec "$@"' _ "$z" -I -B -X utf8 "$@")
           cd -- "$GITHUB_WORKSPACE"||return 1
           [[ ! -v POSIXLY_CORRECT ]]||return 1
-          ulimit -n 4096||return 1
+          ulimit -Sn hard||return 1
           ulimit -f 65536||return 1
           [[ $2 = fast-preflight||$2 = deterministic-validators-[abc]||$2 = pytest-shard-[1-8]||$2 = post-validation ]]||return 1
           "${X[@]}"<&0>&1 2>&2&

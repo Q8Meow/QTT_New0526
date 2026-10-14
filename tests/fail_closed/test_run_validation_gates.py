@@ -20372,8 +20372,8 @@ def test_github_workflow_splits_validation_into_parallel_phase_jobs():
       assert calls==[("create",)]+[("register",fd,1)for fd in fds]+[("poll",10)]
  startup=tuple(shlex.split("/usr/bin/sudo "+shard_block.split("X=(/usr/bin/sudo ",1)[1].split(")\n",1)[0]))
  env_words=shlex.split(" ".join(part.split("\n          do",1)[0]for part in shard_block.split("for h in ")[1:]).replace("\\\n",""))
- assert startup==("/usr/bin/sudo","-n","--","/usr/bin/env","-i","${G[@]}","/usr/bin/bash","--norc","-c",'ulimit -n 4096&&ulimit -f 65536&&exec "$@"',"_","$z","-I","-B","-X","utf8","$@")and not any(name in env_words for name in("BASH_ENV","SHELLOPTS","BASHOPTS","POSIXLY_CORRECT"))
- assert all(shard_block.count("ulimit "+row+"||return 1\n")==1 for row in("-n 4096","-f 65536"))and '[[ ! -v POSIXLY_CORRECT ]]||return 1\n'in shard_block
+ assert startup==("/usr/bin/sudo","-n","--","/usr/bin/env","-i","${G[@]}","/usr/bin/bash","--norc","-c",'ulimit -Sn hard&&ulimit -f 65536&&exec "$@"',"_","$z","-I","-B","-X","utf8","$@")and not any(name in env_words for name in("BASH_ENV","SHELLOPTS","BASHOPTS","POSIXLY_CORRECT"))
+ assert all(shard_block.count("ulimit "+row+"||return 1\n")==1 for row in("-Sn hard","-f 65536"))and '[[ ! -v POSIXLY_CORRECT ]]||return 1\n'in shard_block
  selected=[]
  for message in("original finite kernel soft/hard limit is absent: ","original inherited compiler limit changed: "):
   selected.append(next(n for n in ast.walk(host_tree)if isinstance(n,ast.If)and any(isinstance(v,ast.Constant)and v.value==message for v in ast.walk(n))))
