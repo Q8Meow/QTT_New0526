@@ -19074,128 +19074,128 @@ def test_github_workflow_splits_validation_into_parallel_phase_jobs():
   rows=job_source.splitlines(keepends=True)
   scalars=[]
   for index,row in enumerate(rows):
-      if not row.startswith("        run:"):
-          continue
-      header=row[len("        run:"):].strip().split()
-      if header and header[0].startswith("&"):
-          header=header[1:]
-      if not header or not header[0].startswith("|"):
-          continue
-      assert len(header)==1 and header[0]in("|","|-","|+")
-      body=[]
-      for content_row in rows[index+1:]:
-          content=content_row.rstrip("\n")
-          assert "\r" not in content
-          if content.strip(" ")and len(content)-len(content.lstrip(" "))<=8:
-              break
-          body.append(content_row)
-      nonempty=[part for part in body if part.rstrip("\n").strip(" ")]
-      indentation=(len(nonempty[0])-len(nonempty[0].lstrip(" "))
-          if nonempty else 10)
-      assert indentation>=10
-      decoded=[]
-      for part in body:
-          content=part.rstrip("\n")
-          if content.strip(" "):
-              assert part.startswith(" "*indentation)
-          decoded.append(part[min(indentation,len(content)):])
-      scalar="".join(decoded)
-      if header[0]=="|-":
-          scalar=scalar.rstrip("\n")
-      elif header[0]=="|" and scalar.endswith("\n"):
-          scalar=scalar.rstrip("\n")
-          if scalar:
-              scalar+="\n"
-      scalars.append(scalar)
+   if not row.startswith("        run:"):
+    continue
+   header=row[len("        run:"):].strip().split()
+   if header and header[0].startswith("&"):
+    header=header[1:]
+   if not header or not header[0].startswith("|"):
+    continue
+   assert len(header)==1 and header[0]in("|","|-","|+")
+   body=[]
+   for content_row in rows[index+1:]:
+    content=content_row.rstrip("\n")
+    assert "\r" not in content
+    if content.strip(" ")and len(content)-len(content.lstrip(" "))<=8:
+     break
+    body.append(content_row)
+   nonempty=[part for part in body if part.rstrip("\n").strip(" ")]
+   indentation=(len(nonempty[0])-len(nonempty[0].lstrip(" "))
+   if nonempty else 10)
+   assert indentation>=10
+   decoded=[]
+   for part in body:
+    content=part.rstrip("\n")
+    if content.strip(" "):
+     assert part.startswith(" "*indentation)
+    decoded.append(part[min(indentation,len(content)):])
+   scalar="".join(decoded)
+   if header[0]=="|-":
+    scalar=scalar.rstrip("\n")
+   elif header[0]=="|" and scalar.endswith("\n"):
+    scalar=scalar.rstrip("\n")
+    if scalar:
+     scalar+="\n"
+   scalars.append(scalar)
   return scalars
  def actions_projection(scalar):
   trim_chars=" \t\n\r\v\f\x85\u00a0\u1680\u2000\u2001\u2002\u2003\u2004\u2005\u2006\u2007\u2008\u2009\u200a\u2028\u2029\u202f\u205f\u3000"
   segments=[]
   position=0
   while position<len(scalar):
-      start=scalar.find("${{",position)
-      if start<0:
-          segments.append(("literal",scalar[position:]))
-          break
-      if start>position:
-          segments.append(("literal",scalar[position:start]))
-      quoted=False
-      end=start+3
-      while end<len(scalar):
-          if scalar[end]=="'":
-              quoted=not quoted
-          elif not quoted and scalar[end]=="}" and scalar[end-1]=="}":
-              break
-          end+=1
-      if end==len(scalar):
-          raise ValueError("unclosed Actions expression")
-      expression=scalar[start+3:end-1].strip(trim_chars)
-      if not expression:
-          raise ValueError("empty Actions expression")
-      segments.append(("expression",expression))
-      position=end+1
+   start=scalar.find("${{",position)
+   if start<0:
+    segments.append(("literal",scalar[position:]))
+    break
+   if start>position:
+    segments.append(("literal",scalar[position:start]))
+   quoted=False
+   end=start+3
+   while end<len(scalar):
+    if scalar[end]=="'":
+     quoted=not quoted
+    elif not quoted and scalar[end]=="}" and scalar[end-1]=="}":
+     break
+    end+=1
+   if end==len(scalar):
+    raise ValueError("unclosed Actions expression")
+   expression=scalar[start+3:end-1].strip(trim_chars)
+   if not expression:
+    raise ValueError("empty Actions expression")
+   segments.append(("expression",expression))
+   position=end+1
   if not segments:
-      return("literal",scalar,())
+   return("literal",scalar,())
   expressions=tuple(value for kind,value in segments if kind=="expression")
   if len(segments)==1:
-      kind,value=segments[0]
-      if kind=="expression":
-          quoted=False
-          decoded=[]
-          string_expression=True
-          for index,character in enumerate(value):
-              if character=="'":
-                  quoted=not quoted
-                  if quoted and index:
-                      decoded.append(character)
-              elif not quoted:
-                  string_expression=False
-                  break
-              else:
-                  decoded.append(character)
-          if string_expression and not quoted:
-              return("literal","".join(decoded),expressions)
-      return(kind,value,expressions)
+   kind,value=segments[0]
+   if kind=="expression":
+    quoted=False
+    decoded=[]
+    string_expression=True
+    for index,character in enumerate(value):
+     if character=="'":
+      quoted=not quoted
+      if quoted and index:
+       decoded.append(character)
+     elif not quoted:
+      string_expression=False
+      break
+     else:
+      decoded.append(character)
+    if string_expression and not quoted:
+     return("literal","".join(decoded),expressions)
+   return(kind,value,expressions)
   formatted=[]
   arguments=[]
   for kind,value in segments:
-      if kind=="literal":
-          formatted.append(value.replace("'","''").replace("{","{{").replace("}","}}"))
-      else:
-          formatted.append("{"+str(len(arguments))+"}")
-          arguments.append(value)
+   if kind=="literal":
+    formatted.append(value.replace("'","''").replace("{","{{").replace("}","}}"))
+   else:
+    formatted.append("{"+str(len(arguments))+"}")
+    arguments.append(value)
   return("expression","format('"+"".join(formatted)+"'"+
-      "".join(", "+value for value in arguments)+")",expressions)
+  "".join(", "+value for value in arguments)+")",expressions)
  def admit_actions_run(scalar):
   if utf16_units(scalar)>21000:
-      raise ValueError("raw run exceeds 21000 UTF-16 units")
+   raise ValueError("raw run exceeds 21000 UTF-16 units")
   kind,projected,expressions=actions_projection(scalar)
   if any(utf16_units(expression)>21000 for expression in expressions):
-      raise ValueError("individual Actions expression exceeds 21000 UTF-16 units")
+   raise ValueError("individual Actions expression exceeds 21000 UTF-16 units")
   if kind=="expression" and utf16_units(projected)>21000:
-      raise ValueError("generated Actions expression exceeds 21000 UTF-16 units")
+   raise ValueError("generated Actions expression exceeds 21000 UTF-16 units")
   return(kind,projected,expressions)
  for indicator,expected in(("|","echo x\n"),("|-","echo x"),
-      ("|+","echo x\n\n\n")):
+ ("|+","echo x\n\n\n")):
   fixture="        run: "+indicator+"\n          echo x\n\n\n        shell: bash\n"
   assert literal_run_scalars(fixture)==[expected]
  assert literal_run_scalars("        run: |\n          echo x")==["echo x"]
  assert literal_run_scalars("        run: &fixed |\n          echo x\n")==["echo x\n"]
  assert actions_projection("plain ' { } \U0001f680\n")==(
-  "literal","plain ' { } \U0001f680\n",())
+ "literal","plain ' { } \U0001f680\n",())
  assert actions_projection("${{ matrix.phase }}")==(
-  "expression","matrix.phase",("matrix.phase",))
+ "expression","matrix.phase",("matrix.phase",))
  assert actions_projection("${{ 'it''s }} { \U0001f680' }}")==(
-  "literal","it's }} { \U0001f680",("'it''s }} { \U0001f680'",))
+ "literal","it's }} { \U0001f680",("'it''s }} { \U0001f680'",))
  assert actions_projection("a'{} \U0001f680 ${{ 'x''}}{y' }} z${{ matrix.phase }}")==(
-  "expression","format('a''{{}} \U0001f680 {0} z{1}', 'x''}}{y', matrix.phase)",
-  ("'x''}}{y'","matrix.phase"))
+ "expression","format('a''{{}} \U0001f680 {0} z{1}', 'x''}}{y', matrix.phase)",
+ ("'x''}}{y'","matrix.phase"))
  assert actions_projection("${{ matrix.phase }}${{ github.event.pull_request.draft && '1' || '0' }}")==(
-  "expression","format('{0}{1}', matrix.phase, github.event.pull_request.draft && '1' || '0')",
-  ("matrix.phase","github.event.pull_request.draft && '1' || '0'"))
+ "expression","format('{0}{1}', matrix.phase, github.event.pull_request.draft && '1' || '0')",
+ ("matrix.phase","github.event.pull_request.draft && '1' || '0'"))
  for invalid in("${{ }}","${{ matrix.phase","${{ 'unterminated }}"):
   with pytest.raises(ValueError):
-      actions_projection(invalid)
+   actions_projection(invalid)
  assert utf16_units("\U0001f680")==2 and len("\U0001f680")==1
  assert admit_actions_run("x"*21000)[0]=="literal"
  with pytest.raises(ValueError,match="raw run exceeds 21000"):
@@ -19203,36 +19203,36 @@ def test_github_workflow_splits_validation_into_parallel_phase_jobs():
  for seed in("x ${{ matrix.phase }}","\U0001f680 ${{ matrix.phase }}"):
   remaining=21000-utf16_units(actions_projection(seed)[1])
   prefix=("x"*remaining if seed.startswith("x")else
-      "\U0001f680"*(remaining//2)+"x"*(remaining%2))
+  "\U0001f680"*(remaining//2)+"x"*(remaining%2))
   inclusive=prefix+seed
   assert utf16_units(actions_projection(inclusive)[1])==21000
   assert admit_actions_run(inclusive)[0]=="expression"
   assert utf16_units(actions_projection(inclusive+"x")[1])==21001
   with pytest.raises(ValueError,match="generated Actions expression exceeds 21000"):
-      admit_actions_run(inclusive+"x")
+   admit_actions_run(inclusive+"x")
  phase_env="          QTT_PHASE: ${{ matrix.phase }}\n"
  draft_env="          QTT_DRAFT: ${{ github.event.pull_request.draft && '1' || '0' }}\n"
  assert shard_block.count(phase_env)==shard_block.count(draft_env)==1
  reverse_correspondence=(
-  ('[ "${{ matrix.phase }}" != fast-preflight ]','[ "$QTT_PHASE" != fast-preflight ]'),
-  ("[ \"${{ github.event.pull_request.draft && '1' || '0' }}\" != 1 ]",'[ "$QTT_DRAFT" != 1 ]'),
-  ('qtt_original_birth_v1 - "${{ matrix.phase }}" <<\'QTT_FIXED_ORIGINAL_HOST_SOURCE_V1\'\n',
-      'qtt_original_birth_v1 - "$QTT_PHASE" <<\'QTT_FIXED_ORIGINAL_HOST_SOURCE_V1\'\n'),
-  ('            python -I -B -X utf8 tools/run_validation_gates.py --linux-preflight-provision --phase ${{ matrix.phase }}\n',
-      '            python -I -B -X utf8 tools/run_validation_gates.py --linux-preflight-provision --phase "$QTT_PHASE"\n'),
-  ('          --phase ${{ matrix.phase }} \\\n','          --phase "$QTT_PHASE" \\\n'),
-  ('          --timing-report .tmp/qtt-validation-timing/${{ matrix.phase }}.json \\\n',
-      '          --timing-report ".tmp/qtt-validation-timing/$QTT_PHASE.json" \\\n'),
-  ('          --router-report .tmp/qtt-validation-router/${{ matrix.phase }}.json\n',
-      '          --router-report ".tmp/qtt-validation-router/$QTT_PHASE.json"\n'),
+ ('[ "${{ matrix.phase }}" != fast-preflight ]','[ "$QTT_PHASE" != fast-preflight ]'),
+ ("[ \"${{ github.event.pull_request.draft && '1' || '0' }}\" != 1 ]",'[ "$QTT_DRAFT" != 1 ]'),
+ ('qtt_original_birth_v1 - "${{ matrix.phase }}" <<\'QTT_FIXED_ORIGINAL_HOST_SOURCE_V1\'\n',
+ 'qtt_original_birth_v1 - "$QTT_PHASE" <<\'QTT_FIXED_ORIGINAL_HOST_SOURCE_V1\'\n'),
+ ('            python -I -B -X utf8 tools/run_validation_gates.py --linux-preflight-provision --phase ${{ matrix.phase }}\n',
+ '            python -I -B -X utf8 tools/run_validation_gates.py --linux-preflight-provision --phase "$QTT_PHASE"\n'),
+ ('          --phase ${{ matrix.phase }} \\\n','          --phase "$QTT_PHASE" \\\n'),
+ ('          --timing-report .tmp/qtt-validation-timing/${{ matrix.phase }}.json \\\n',
+ '          --timing-report ".tmp/qtt-validation-timing/$QTT_PHASE.json" \\\n'),
+ ('          --router-report .tmp/qtt-validation-router/${{ matrix.phase }}.json\n',
+ '          --router-report ".tmp/qtt-validation-router/$QTT_PHASE.json"\n'),
  )
  predecessor=shard_block
  for original,observed in(
-      ('           if l[qY]<3:raise jQ("original held3 unavailable before first host effect")\n','           if l[qY]<3 or l[jW]<2:raise jQ("held3 or diagnostic unavailable")\n'),
-      ('           l[qY]-=3\n','           l[qY]-=3\n           l[jW]-=2\n'),
-      ('            if jC is None or d[0][2]is None or d[0][2]<jC:\n','            if jC is None or d[0][2]is None or d[0][2]<jC:\n             try:\n              if os.write(2,b"::error::F\\n")!=11:raise jQ()\n             except jP as z:b[qC]+=[(qR,z)]\n'),
-      ('           a[qI]=[201061114,0,None]\n','           a[qI]=[201061050,64,None]\n'),
-      ('           jY=\'watchdog-no-child-delete\'\n           qA="commands"\n','           qA="commands"\n'),
+ ('           if l[qY]<3:raise jQ("original held3 unavailable before first host effect")\n','           if l[qY]<3 or l[jW]<2:raise jQ("held3 or diagnostic unavailable")\n'),
+ ('           l[qY]-=3\n','           l[qY]-=3\n           l[jW]-=2\n'),
+ ('            if jC is None or d[0][2]is None or d[0][2]<jC:\n','            if jC is None or d[0][2]is None or d[0][2]<jC:\n             try:\n              if os.write(2,b"::error::F\\n")!=11:raise jQ()\n             except jP as z:b[qC]+=[(qR,z)]\n'),
+ ('           a[qI]=[201061114,0,None]\n','           a[qI]=[201061050,64,None]\n'),
+ ('           jY=\'watchdog-no-child-delete\'\n           qA="commands"\n','           qA="commands"\n'),
  ):
   assert predecessor.count(observed)==1
   predecessor=predecessor.replace(observed,original,1)
@@ -19244,20 +19244,20 @@ def test_github_workflow_splits_validation_into_parallel_phase_jobs():
  current_scalars=literal_run_scalars(shard_block)
  assert len(old_scalars)==len(current_scalars)==2
  inflated=[scalar for scalar in old_scalars if
-  actions_projection(scalar)[0]=="expression" and
-  utf16_units(actions_projection(scalar)[1])>21000]
+ actions_projection(scalar)[0]=="expression" and
+ utf16_units(actions_projection(scalar)[1])>21000]
  assert len(inflated)==1
  precursor=inflated
  inflated=["x"*20766+"'"*38+"{}"*15+"${{ "+" }}${{ ".join(actions_projection(precursor[0])[2])+" }}"]
  assert utf16_units(inflated[0])==21000
  assert utf16_units(actions_projection(inflated[0])[1])==21064
  assert actions_projection(inflated[0])[2]==(
-  "matrix.phase","github.event.pull_request.draft && '1' || '0'",
-  "matrix.phase","matrix.phase","matrix.phase","matrix.phase","matrix.phase")
+ "matrix.phase","github.event.pull_request.draft && '1' || '0'",
+ "matrix.phase","matrix.phase","matrix.phase","matrix.phase","matrix.phase")
  assert utf16_units(precursor[0])>21000
  for inflated,error in((precursor,"raw run exceeds 21000 UTF-16 units"),(inflated,"generated Actions expression exceeds 21000")):
   with pytest.raises(ValueError,match=error):
-      admit_actions_run(inflated[0])
+   admit_actions_run(inflated[0])
  assert all("${{" not in scalar for scalar in current_scalars)
  for scalar in literal_run_scalars(workflow):
   admit_actions_run(scalar)
@@ -19272,22 +19272,22 @@ def test_github_workflow_splits_validation_into_parallel_phase_jobs():
  assert "        with: &pip_cache\n" in shard_block
  assert "          path: ~/.cache/pip\n" in shard_block
  assert(
-  "          key: ${{ runner.os }}-python-3.14.6-pip-pytest-9.1.1-"
-  "${{ hashFiles('.github/workflows/qtt_validation.yml') }}\n"
+ "          key: ${{ runner.os }}-python-3.14.6-pip-pytest-9.1.1-"
+ "${{ hashFiles('.github/workflows/qtt_validation.yml') }}\n"
  )in shard_block
  assert(
-  "            ${{ runner.os }}-python-3.14.6-pip-pytest-9.1.1-\n"
-  in shard_block
+ "            ${{ runner.os }}-python-3.14.6-pip-pytest-9.1.1-\n"
+ in shard_block
  )
  assert "        run: &install_pytest |\n" in shard_block
  expected_pins=("pytest==9.1.1","iniconfig==2.3.0","packaging==26.0","pluggy==1.6.0",
-  "pygments==2.21.0","websockets==17.0.1","cryptography==50.0.1","cffi==2.1.1","pycparser==3.0",
-  "jsonschema==4.26.0","jsonschema-specifications==2025.9.1","referencing==0.37.0","rpds-py==2026.5.1","attrs==26.1.0")
+ "pygments==2.21.0","websockets==17.0.1","cryptography==50.0.1","cffi==2.1.1","pycparser==3.0",
+ "jsonschema==4.26.0","jsonschema-specifications==2025.9.1","referencing==0.37.0","rpds-py==2026.5.1","attrs==26.1.0")
  install=shard_block.split("        run: &install_pytest |\n",1)[1].split("          python -m pip check\n",1)[0]
  import shlex
  assert tuple(shlex.split(install.replace("\\\n"," ")))==(
-  "python","-m","pip","install","--only-binary=:all:","--no-deps","--index-url",
-  "https://pypi.org/simple",*expected_pins)
+ "python","-m","pip","install","--only-binary=:all:","--no-deps","--index-url",
+ "https://pypi.org/simple",*expected_pins)
  assert "          python -m pip check\n" in shard_block
  for phase in runner.ORDERED_PHASES:
   assert f"          - phase: {phase}\n" in shard_block
@@ -19306,17 +19306,17 @@ def test_github_workflow_splits_validation_into_parallel_phase_jobs():
  assert "  push:\n    branches:\n      - main\n" in event_block
  assert "pull_request_target:" not in event_block
  eligibility=(
-  "          QTT_PR298_NATIVE_ELIGIBLE: ${{ ((github.event_name == 'pull_request' && github.repository == "
-  "'Q8Meow/QTT_New0526' && github.event.pull_request.number == 298 && "
-  "github.event.pull_request.head.repo.full_name == 'Q8Meow/QTT_New0526' && "
-  "github.event.pull_request.base.repo.full_name == 'Q8Meow/QTT_New0526' && github.event.pull_request.base.ref "
-  "== 'main' && github.event.pull_request.head.ref == 'repair/main-cumulative-v35-final-r5-local-20260922') || "
-  "(github.repository == 'Q8Meow/QTT_New0526' && github.ref == 'refs/heads/main' && github.ref_name == 'main' "
-  "&& github.head_ref == '' && github.base_ref == '' && (github.event_name == 'push' && github.event.ref == "
-  'github.ref && github.event.after == github.sha && github.event.deleted == false || github.event_name == '
-  "'workflow_dispatch' && (github.event.ref == 'main' || github.event.ref == github.ref) && "
-  "(github.event.inputs.full_validation == 'true' || github.event.inputs.full_validation == 'false')))) && '1' "
-  "|| '0' }}\n"
+ "          QTT_PR298_NATIVE_ELIGIBLE: ${{ ((github.event_name == 'pull_request' && github.repository == "
+ "'Q8Meow/QTT_New0526' && github.event.pull_request.number == 298 && "
+ "github.event.pull_request.head.repo.full_name == 'Q8Meow/QTT_New0526' && "
+ "github.event.pull_request.base.repo.full_name == 'Q8Meow/QTT_New0526' && github.event.pull_request.base.ref "
+ "== 'main' && github.event.pull_request.head.ref == 'repair/main-cumulative-v35-final-r5-local-20260922') || "
+ "(github.repository == 'Q8Meow/QTT_New0526' && github.ref == 'refs/heads/main' && github.ref_name == 'main' "
+ "&& github.head_ref == '' && github.base_ref == '' && (github.event_name == 'push' && github.event.ref == "
+ 'github.ref && github.event.after == github.sha && github.event.deleted == false || github.event_name == '
+ "'workflow_dispatch' && (github.event.ref == 'main' || github.event.ref == github.ref) && "
+ "(github.event.inputs.full_validation == 'true' || github.event.inputs.full_validation == 'false')))) && '1' "
+ "|| '0' }}\n"
  )
  assert shard_block.count(eligibility)==1
  assert shard_block.count("          QTT_PR298_NATIVE_ELIGIBLE:")==1
@@ -19327,28 +19327,28 @@ def test_github_workflow_splits_validation_into_parallel_phase_jobs():
  import textwrap
  opening='qtt_original_birth_v1 - "$QTT_PHASE" <<\'QTT_FIXED_ORIGINAL_HOST_SOURCE_V1\'\n'
  frontend_text=textwrap.dedent(shard_block.split(opening,1)[1].split(
-  "          QTT_FIXED_ORIGINAL_HOST_SOURCE_V1\n",1)[0])
+ "          QTT_FIXED_ORIGINAL_HOST_SOURCE_V1\n",1)[0])
  frontend_tree=ast.parse(frontend_text)
  front_function=next(node for node in frontend_tree.body
-  if isinstance(node,ast.FunctionDef)and node.name=="_qtt_original_front_v1")
+ if isinstance(node,ast.FunctionDef)and node.name=="_qtt_original_front_v1")
  actual_front_function=copy.deepcopy(front_function)
  aliases=dict(jR="original",q3="id",q4="ancestor-manager-ready",
-  q5="fixed first-host",q6="same original",q7="created",q8="deleted",
-  jV="armed",jW="settle",jX="delete_attempted")
+ q5="fixed first-host",q6="same original",q7="created",q8="deleted",
+ jV="armed",jW="settle",jX="delete_attempted")
  bindings=[(t.id,v.value)for n in ast.walk(front_function)if isinstance(n,ast.Assign)
-  for t,v in zip(n.targets[0].elts if isinstance(n.targets[0],ast.Tuple)else n.targets,
-      n.value.elts if isinstance(n.value,ast.Tuple)else[n.value])
-  if isinstance(t,ast.Name)and t.id in aliases and isinstance(v,ast.Constant)]
+ for t,v in zip(n.targets[0].elts if isinstance(n.targets[0],ast.Tuple)else n.targets,
+ n.value.elts if isinstance(n.value,ast.Tuple)else[n.value])
+ if isinstance(t,ast.Name)and t.id in aliases and isinstance(v,ast.Constant)]
  assert len(bindings)==len(aliases)and dict(bindings)==aliases
  class FrontLiterals(ast.NodeTransformer):
   def visit_Name(self,n):
-      return ast.copy_location(ast.Constant(aliases[n.id]),n)if isinstance(n.ctx,ast.Load)and n.id in aliases and n.id!="jR" else n
+   return ast.copy_location(ast.Constant(aliases[n.id]),n)if isinstance(n.ctx,ast.Load)and n.id in aliases and n.id!="jR" else n
   def visit_BinOp(self,n):
-      self.generic_visit(n)
-      if isinstance(n.left,ast.Name)and n.left.id=="jR":n.left=ast.Constant("original")
-      if isinstance(n.op,ast.Add)and all(isinstance(v,ast.Constant)and type(v.value)is str for v in(n.left,n.right)):
-          return ast.copy_location(ast.Constant(n.left.value+n.right.value),n)
-      return n
+   self.generic_visit(n)
+   if isinstance(n.left,ast.Name)and n.left.id=="jR":n.left=ast.Constant("original")
+   if isinstance(n.op,ast.Add)and all(isinstance(v,ast.Constant)and type(v.value)is str for v in(n.left,n.right)):
+    return ast.copy_location(ast.Constant(n.left.value+n.right.value),n)
+   return n
  front_function=FrontLiterals().visit(front_function)
  members={node.name:node for node in front_function.body if isinstance(node,ast.FunctionDef)}
  def helper_from_source(name,ports):
@@ -19360,48 +19360,48 @@ def test_github_workflow_splits_validation_into_parallel_phase_jobs():
   c_int=staticmethod(int)
   @staticmethod
   def get_errno():
-      return 5
+   return 5
  for number,raw_result,fault_after_raw in((222,0,"errno"),(222,0,"bytes"),
-                                         (223,0,"errno"),(226,0,"errno"),
-                                         (222,-1,None)):
+ (223,0,"errno"),(226,0,"errno"),
+ (222,-1,None)):
   calls=[]
   raw_fault=OSError("synthetic getter/admission failure")
   watchdog={"id":None,"created":False,"armed":number==226,
-              "deleted":False}
+  "deleted":False}
   observed=b"\x00\x00\x00\x00" if number==222 else None
   def synthetic_native(*args):
-      calls.append(("raw",args))
-      return raw_result
+   calls.append(("raw",args))
+   return raw_result
   def synthetic_effect(name,function,*args,**kwargs):
-      calls.append(("effect",name,kwargs["tranche"]))
-      if name.endswith("-errno")and fault_after_raw=="errno":
-          raise raw_fault
-      return function(*args)
+   calls.append(("effect",name,kwargs["tranche"]))
+   if name.endswith("-errno")and fault_after_raw=="errno":
+    raise raw_fault
+   return function(*args)
   def synthetic_returned(part):
-      calls.append(("returned",bytes(part)))
-      if fault_after_raw=="bytes":
-          raise raw_fault
+   calls.append(("returned",bytes(part)))
+   if fault_after_raw=="bytes":
+    raise raw_fault
   ports={"qZ":"work","ctypes":KernelPort,"native":synthetic_native,
-           "effect":synthetic_effect,"returned":synthetic_returned,
-           "w":watchdog,"handle":SimpleNamespace(value=17)}
+  "effect":synthetic_effect,"returned":synthetic_returned,
+  "w":watchdog,"handle":SimpleNamespace(value=17)}
   kernel=helper_from_source("kernel",ports)
   with pytest.raises(OSError)as raised:
-      kernel("synthetic-watchdog",number,observed=observed)
+   kernel("synthetic-watchdog",number,observed=observed)
   if fault_after_raw is not None:
-      assert raised.value is raw_fault
+   assert raised.value is raw_fault
   else:
-      assert raised.value.errno==5
+   assert raised.value.errno==5
   assert watchdog=={"id":17 if number==222 and raw_result==0 else None,
-      "created":number==222 and raw_result==0,
-      "armed":number==223 and raw_result==0,
-      "deleted":number==226 and raw_result==0}
+  "created":number==222 and raw_result==0,
+  "armed":number==223 and raw_result==0,
+  "deleted":number==226 and raw_result==0}
   assert sum(row[0]=="raw" for row in calls)==1
   if observed is not None:
-      assert sum(row[0]=="returned" for row in calls)==1
+   assert sum(row[0]=="returned" for row in calls)==1
  body_fault=OSError("synthetic no-child initial failure")
  close_fault=OSError("synthetic no-child delete failure")
  watchdog={"armed":False,"created":True,"delete_attempted":False,
-          "deleted":False,"id":19}
+ "deleted":False,"id":19}
  errors=[("original-first-front",body_fault)]
  state={"custodian_effect_attempted":True,"commands":[],"errors":errors}
  deletes=[]
@@ -19409,8 +19409,8 @@ def test_github_workflow_splits_validation_into_parallel_phase_jobs():
   deletes.append((name,args,kwargs))
   raise close_fault
  ports={"qA":"commands","qB":"custodian_effect_attempted","qC":"errors",
-       "qT":"failure_cutoff","b":{"retired":False},"a":state,
-       "w":watchdog,"ctypes":KernelPort,"kernel":failed_delete}
+ "qT":"failure_cutoff","b":{"retired":False},"a":state,
+ "w":watchdog,"ctypes":KernelPort,"kernel":failed_delete}
  failure=helper_from_source("failure",ports)
  with pytest.raises(BaseExceptionGroup)as raised:
   failure(body_fault)
@@ -19419,7 +19419,7 @@ def test_github_workflow_splits_validation_into_parallel_phase_jobs():
  assert errors==[("original-first-front",body_fault),("watchdog-no-child-delete",close_fault)]
  assert len(deletes)==1 and deletes[0][2]=={"tranche":"settle"}
  assert "w" not in{node.id for node in ast.walk(members["failure"])
-  if isinstance(node,ast.Name)and isinstance(node.ctx,ast.Store)}
+ if isinstance(node,ast.Name)and isinstance(node.ctx,ast.Store)}
  source=ast.unparse(front_function)
  initial=ast.unparse(next(node for node in front_function.body if isinstance(node,ast.Try)))
  assert initial.index("'same original privileged preparer required'")<initial.index("'watchdog-create'")
@@ -19433,9 +19433,9 @@ def test_github_workflow_splits_validation_into_parallel_phase_jobs():
  native_raw=(Path(__file__).resolve().parents[2]/"tools/ci_branch_context.py").read_bytes()
  native_tree=ast.parse(native_raw.decode("utf-8"))
  native_rows=[node for node in native_tree.body
-  if isinstance(node,ast.Assign)and len(node.targets)==1
-  and isinstance(node.targets[0],ast.Name)
-  and node.targets[0].id=="_QTT_ORDINARY_NATIVE_C_SOURCE_V1"]
+ if isinstance(node,ast.Assign)and len(node.targets)==1
+ and isinstance(node.targets[0],ast.Name)
+ and node.targets[0].id=="_QTT_ORDINARY_NATIVE_C_SOURCE_V1"]
  assert len(native_rows)==1
  native_value=native_rows[0].value
  assert isinstance(native_value,ast.Constant)and type(native_value.value)is bytes
@@ -19458,47 +19458,47 @@ def test_github_workflow_splits_validation_into_parallel_phase_jobs():
   assert return_type in("int","void","ssize_t")
   signature="static "+return_type+" "+name+"("
   if definition_suffix is not None:
-      assert definition_suffix=="void) {"
-      signature+=definition_suffix
+   assert definition_suffix=="void) {"
+   signature+=definition_suffix
   assert native_source.count(signature)==1
   opening=native_source.index("{",native_source.index(signature))
   position,depth,state,escaped,code=opening,0,"code",False,[]
   while position<len(native_source):
-      character=native_source[position]
-      following=native_source[position:position+2]
-      if state=="line":
-          if character=="\n":state="code"
-      elif state=="block":
-          if following=="*/":state="code";position+=1
-      elif state in('"',"'"):
-          code.append(character)
-          if escaped:escaped=False
-          elif character=="\\":escaped=True
-          elif character==state:state="code"
-      elif following=="//":state="line";position+=1
-      elif following=="/*":state="block";position+=1
-      else:
-          code.append(character)
-          if character in('"',"'"):state=character
-          elif character=="{":depth+=1
-          elif character=="}":
-              depth-=1
-              if not depth:return "".join("".join(code).split())
-      position+=1
+   character=native_source[position]
+   following=native_source[position:position+2]
+   if state=="line":
+    if character=="\n":state="code"
+   elif state=="block":
+    if following=="*/":state="code";position+=1
+   elif state in('"',"'"):
+    code.append(character)
+    if escaped:escaped=False
+    elif character=="\\":escaped=True
+    elif character==state:state="code"
+   elif following=="//":state="line";position+=1
+   elif following=="/*":state="block";position+=1
+   else:
+    code.append(character)
+    if character in('"',"'"):state=character
+    elif character=="{":depth+=1
+    elif character=="}":
+     depth-=1
+     if not depth:return "".join("".join(code).split())
+   position+=1
   raise AssertionError("actual C owner body is incomplete: "+name)
  quiet=native_owner_body("qn_flag_command_quiet")
  assert 'qn_error("source-seal-native-terminal-and-quiet",EPROTO)' in quiet
  for original_field in("!c->registered","!c->child_created","c->pending","!c->exec_proven",
-      "!c->exec_eof","!c->terminal","c->status","!c->stdout_eof","!c->stderr_eof",
-      "!o->registered","!o->native_attempted","o->result","o->native_errno",
-      "o->info.si_pid!=c->pid","o->info.si_code!=CLD_EXITED","o->info.si_status",
-      "c->stdout_used","c->stderr_used"):
+ "!c->exec_eof","!c->terminal","c->status","!c->stdout_eof","!c->stderr_eof",
+ "!o->registered","!o->native_attempted","o->result","o->native_errno",
+ "o->info.si_pid!=c->pid","o->info.si_code!=CLD_EXITED","o->info.si_status",
+ "c->stdout_used","c->stderr_used"):
   assert original_field in quiet
  assert "free(" not in quiet and "realloc(" not in quiet and "qn_command_run(" not in quiet
  assert "stdout_used=" not in quiet and "stderr_used=" not in quiet
  for original_flag_owner,operand,journal in(
-      ("qn_flag_effect","number","*attempted=1;"),
-      ("qn_catalogue_flag_effect","slot","*attempted|=baseline?2:1;")):
+ ("qn_flag_effect","number","*attempted=1;"),
+ ("qn_catalogue_flag_effect","slot","*attempted|=baseline?2:1;")):
   flag=native_owner_body(original_flag_owner)
   native_call="qn_command_run(index,argv,1)<0"
   generation="qn_refresh_after_flag_effect("+operand+",after)<0"
@@ -19521,9 +19521,9 @@ def test_github_workflow_splits_validation_into_parallel_phase_jobs():
  assert "*used+=(size_t)n;" in captured and "free(" not in captured
  keeper_prepare=native_owner_body("qn_keeper_observations_prepare")
  for original_field in("l->attempted=1","l->role=QN_PROVISION","l->keeper_pid=qn.pid",
-      "l->source_owner=(constvoid*)&qn","l->origin_ns=qn.origin_ns","l->cutoff_ns=qn.cutoff_ns",
-      "l->source_input_count=qn.input_count","l->source_catalogue_count=qn.catalogue_count",
-      "l->source_alias_count=qn.alias_count","!qn.provision.mask_held","!qn.catalogue_complete"):
+ "l->source_owner=(constvoid*)&qn","l->origin_ns=qn.origin_ns","l->cutoff_ns=qn.cutoff_ns",
+ "l->source_input_count=qn.input_count","l->source_catalogue_count=qn.catalogue_count",
+ "l->source_alias_count=qn.alias_count","!qn.provision.mask_held","!qn.catalogue_complete"):
   assert original_field in keeper_prepare
  assert keeper_prepare.index("l->process_slot=qn_open_component(")<keeper_prepare.index("l->stat_slot=qn_open_component(")<keeper_prepare.index("l->keeper_pid_slot=qn_pidfd_slot(")
  assert "qn_keeper_observation_slots_close()" in keeper_prepare
@@ -19561,7 +19561,7 @@ def test_github_workflow_splits_validation_into_parallel_phase_jobs():
  assert "SEEK_SET" not in keeper_release and "qn_read(" not in keeper_release
  keeper_retire=native_owner_body("qn_keeper_observations_retire")
  for terminal_field in("!p->reaped","c->pending","!c->terminal","!c->exec_proven",
-      "!c->stdout_eof","!c->stderr_eof","!p->prefix_merged"):
+ "!c->stdout_eof","!c->stderr_eof","!p->prefix_merged"):
   assert terminal_field in keeper_retire
  assert keeper_retire.index('qn_error("keeper-original-observation-live-retirement-debt",EBUSY)')<keeper_retire.index("qn_keeper_observation_slots_close()")<keeper_retire.index("l->retired=1;")
  keeper_close=native_owner_body("qn_keeper_observation_slots_close")
@@ -19583,14 +19583,14 @@ def test_github_workflow_splits_validation_into_parallel_phase_jobs():
  import stat
  host_tag="# QTT_HOST_PY | "
  host_source="".join(line[len(host_tag):]for line in workflow.splitlines(keepends=True)
-  if line.startswith(host_tag))
+ if line.startswith(host_tag))
  host_tree=ast.parse(host_source)
  adoption_nodes=[node for node in ast.walk(host_tree)
-  if isinstance(node,ast.FunctionDef)and node.name=="_qtt_adopt_early_startup_counts_v1"]
+ if isinstance(node,ast.FunctionDef)and node.name=="_qtt_adopt_early_startup_counts_v1"]
  assert len(adoption_nodes)==1
  adoption_node=adoption_nodes[0]
  roster_nodes=[node for node in ast.walk(adoption_node)
-  if isinstance(node,ast.FunctionDef)and node.name=="roster"]
+ if isinstance(node,ast.FunctionDef)and node.name=="roster"]
  assert len(roster_nodes)==1
  roster_node=roster_nodes[0]
  adoption_source=ast.unparse(adoption_node)
@@ -19599,225 +19599,225 @@ def test_github_workflow_splits_validation_into_parallel_phase_jobs():
  assert "first['names'] is not r['names']" in adoption_source
  assert "tuple((n for n, v in r['members'])) != r['names']" in adoption_source
  admission_ifs=[node for node in ast.walk(roster_node)if isinstance(node,ast.If)
-  and any(isinstance(value,ast.Constant)
-      and value.value=="same original earlier roster bounded returned prefix"
-      for value in ast.walk(node))]
+ and any(isinstance(value,ast.Constant)
+ and value.value=="same original earlier roster bounded returned prefix"
+ for value in ast.walk(node))]
  assert len(admission_ifs)==1
  admission=ast.unparse(admission_ifs[0].test)
  assert "len(names) >= len(early['names'])" in admission
  assert "len(names) >= 65535 // 2" in admission and "total + len(name) + 1 > 65535" in admission
  assert roster_source.index("'C earlier roster original next'")<roster_source.index(
-  "len(names) >= len(early['names'])")<roster_source.index("names.append(name)")
+ "len(names) >= len(early['names'])")<roster_source.index("names.append(name)")
  assert "tuple(names) != early['names']" in roster_source
  iterator_nodes=[node for node in ast.walk(host_tree)
-  if isinstance(node,ast.FunctionDef)and node.name=="iterator_next"]
+ if isinstance(node,ast.FunctionDef)and node.name=="iterator_next"]
  assert len(iterator_nodes)==1
  for wanted,present,expected_error in(
-      ((b"aa",b"bb"),("aa","bb"),None),
-      ((),(),None),
-      ((b"aa",b"bb"),("aa","bb","cc","dd"),"prefix"),
-      ((),("aa","bb"),"prefix"),
-      ((b"aa",b"bb"),("aa","xx"),"membership")):
+ ((b"aa",b"bb"),("aa","bb"),None),
+ ((),(),None),
+ ((b"aa",b"bb"),("aa","bb","cc","dd"),"prefix"),
+ ((),("aa","bb"),"prefix"),
+ ((b"aa",b"bb"),("aa","xx"),"membership")):
   with tempfile.TemporaryDirectory(prefix="qtt-roster-no-child-")as owned:
-      root=Path(owned)
-      for filename in present:
-          operand=root/filename
-          operand.write_bytes(b"owned synthetic roster operand")
-          info=operand.lstat()
-          assert stat.S_ISREG(info.st_mode)and info.st_nlink==1
-      info=root.stat()
-      current=(info.st_dev,info.st_ino,info.st_mode,info.st_uid,info.st_gid,
-          info.st_nlink,info.st_size,info.st_mtime_ns,info.st_ctime_ns)
-      row=[owned,owned,False,None]
-      early={"row":row,"names":wanted,"roster":b"".join(name+b"\n" for name in wanted)}
-      retained={"iterations":[]}
-      failed={"errors":[]}
-      effects=[]
-      rejoins=[]
-      def same_local_port(operand,expected,directory=False):
-          rejoins.append((operand,expected,directory))
-          assert operand is row and expected is current and directory is True
-          actual=root.stat()
-          assert(actual.st_dev,actual.st_ino,actual.st_mode,actual.st_uid,actual.st_gid,
-              actual.st_nlink,actual.st_size,actual.st_mtime_ns,actual.st_ctime_ns)==current
-          return actual
-      def effect_port(label,function,*args):
-          record={"label":label,"function":function,"args":args,
-              "attempted":False,"returned":None,"error":None}
-          effects.append(record)
-          record["attempted"]=True
-          try:
-              record["returned"]=function(*args)
-              return record["returned"]
-          except BaseException as error:
-              record["error"]=error
-              raise
-      def failure_port(label):
-          raise ValueError(label)
-      ports={"os":os,"same_local":same_local_port,"E":effect_port,
-          "F":failure_port,"a":retained,"q":failed}
-      isolated=ast.Module(body=[copy.deepcopy(iterator_nodes[0]),copy.deepcopy(roster_node)],
-          type_ignores=[])
-      exec(compile(ast.fix_missing_locations(isolated),"<keeper-roster-no-child-owner>","exec"),ports)
-      if expected_error is None:
-          ports["roster"](early,current)
-          assert failed["errors"]==[]and len(rejoins)==2
-          assert len([item for item in effects if item["label"].endswith("original next")])==len(wanted)+1
-          assert retained["iterations"][0]["body_error"]is None
-      else:
-          message=("same original earlier roster bounded returned prefix" if expected_error=="prefix"
-              else "same original earlier complete directory membership changed")
-          with pytest.raises(ValueError,match=message)as raised:
-              ports["roster"](early,current)
-          assert failed["errors"]==[raised.value]
-          assert retained["iterations"][0]["body_error"]is raised.value
-          assert len(rejoins)==1
-          traceback=raised.value.__traceback__
-          while traceback is not None and traceback.tb_frame.f_code is not ports["roster"].__code__:
-              traceback=traceback.tb_next
-          assert traceback is not None
-          assert len(traceback.tb_frame.f_locals["names"])==len(wanted)
-          returned=[item for item in effects if item["label"].endswith("original next")]
-          assert len(returned)==len(wanted)+1
-          if expected_error=="prefix":
-              assert returned[-1]["returned"][0]is False
-              assert returned[-1]["returned"][1]is traceback.tb_frame.f_locals["entry"]
-      iteration=retained["iterations"][0]
-      assert iteration["early"]is early and iteration["row"]is row
-      assert iteration["close_attempted"]and iteration["closed"]and iteration["close_error"]is None
-      assert sum(item["label"]=="C earlier roster iterator one-close" for item in effects)==1
-      assert all(item["attempted"]and item["error"]is None for item in effects)
-      assert early["names"]is wanted and early["roster"]==b"".join(name+b"\n" for name in wanted)
+   root=Path(owned)
+   for filename in present:
+    operand=root/filename
+    operand.write_bytes(b"owned synthetic roster operand")
+    info=operand.lstat()
+    assert stat.S_ISREG(info.st_mode)and info.st_nlink==1
+   info=root.stat()
+   current=(info.st_dev,info.st_ino,info.st_mode,info.st_uid,info.st_gid,
+   info.st_nlink,info.st_size,info.st_mtime_ns,info.st_ctime_ns)
+   row=[owned,owned,False,None]
+   early={"row":row,"names":wanted,"roster":b"".join(name+b"\n" for name in wanted)}
+   retained={"iterations":[]}
+   failed={"errors":[]}
+   effects=[]
+   rejoins=[]
+   def same_local_port(operand,expected,directory=False):
+    rejoins.append((operand,expected,directory))
+    assert operand is row and expected is current and directory is True
+    actual=root.stat()
+    assert(actual.st_dev,actual.st_ino,actual.st_mode,actual.st_uid,actual.st_gid,
+    actual.st_nlink,actual.st_size,actual.st_mtime_ns,actual.st_ctime_ns)==current
+    return actual
+   def effect_port(label,function,*args):
+    record={"label":label,"function":function,"args":args,
+    "attempted":False,"returned":None,"error":None}
+    effects.append(record)
+    record["attempted"]=True
+    try:
+     record["returned"]=function(*args)
+     return record["returned"]
+    except BaseException as error:
+     record["error"]=error
+     raise
+   def failure_port(label):
+    raise ValueError(label)
+   ports={"os":os,"same_local":same_local_port,"E":effect_port,
+   "F":failure_port,"a":retained,"q":failed}
+   isolated=ast.Module(body=[copy.deepcopy(iterator_nodes[0]),copy.deepcopy(roster_node)],
+   type_ignores=[])
+   exec(compile(ast.fix_missing_locations(isolated),"<keeper-roster-no-child-owner>","exec"),ports)
+   if expected_error is None:
+    ports["roster"](early,current)
+    assert failed["errors"]==[]and len(rejoins)==2
+    assert len([item for item in effects if item["label"].endswith("original next")])==len(wanted)+1
+    assert retained["iterations"][0]["body_error"]is None
+   else:
+    message=("same original earlier roster bounded returned prefix" if expected_error=="prefix"
+    else "same original earlier complete directory membership changed")
+    with pytest.raises(ValueError,match=message)as raised:
+     ports["roster"](early,current)
+    assert failed["errors"]==[raised.value]
+    assert retained["iterations"][0]["body_error"]is raised.value
+    assert len(rejoins)==1
+    traceback=raised.value.__traceback__
+    while traceback is not None and traceback.tb_frame.f_code is not ports["roster"].__code__:
+     traceback=traceback.tb_next
+    assert traceback is not None
+    assert len(traceback.tb_frame.f_locals["names"])==len(wanted)
+    returned=[item for item in effects if item["label"].endswith("original next")]
+    assert len(returned)==len(wanted)+1
+    if expected_error=="prefix":
+     assert returned[-1]["returned"][0]is False
+     assert returned[-1]["returned"][1]is traceback.tb_frame.f_locals["entry"]
+   iteration=retained["iterations"][0]
+   assert iteration["early"]is early and iteration["row"]is row
+   assert iteration["close_attempted"]and iteration["closed"]and iteration["close_error"]is None
+   assert sum(item["label"]=="C earlier roster iterator one-close" for item in effects)==1
+   assert all(item["attempted"]and item["error"]is None for item in effects)
+   assert early["names"]is wanted and early["roster"]==b"".join(name+b"\n" for name in wanted)
  host_function=next(node for node in host_tree.body
-  if isinstance(node,ast.FunctionDef)and node.name=="_qtt_original_host_source_v1")
+ if isinstance(node,ast.FunctionDef)and node.name=="_qtt_original_host_source_v1")
  host_failure=next(node for node in host_function.body
-  if isinstance(node,ast.FunctionDef)and node.name=="failure")
+ if isinstance(node,ast.FunctionDef)and node.name=="failure")
  loan_diagnostic=next(node for node in host_tree.body if isinstance(node,ast.FunctionDef)and node.name=="_qtt_original_loan_diagnostic_v1")
  custodian_failure=next(node for node in ast.walk(host_tree)
-  if isinstance(node,ast.FunctionDef)and node.name=="_qtt_custodian_failure_v1")
+ if isinstance(node,ast.FunctionDef)and node.name=="_qtt_custodian_failure_v1")
  held_owners=(("FRONT",members["failure"]),("HOST",host_failure),
-  ("CUSTODIAN",custodian_failure))
+ ("CUSTODIAN",custodian_failure))
  reservation_source=ast.unparse(actual_front_function)
  assert "l[qY] < 3 or l[jW] < 2" in reservation_source
  assert reservation_source.index("l[jW] -= 2")<reservation_source.index("p[qX] = True")
  assert "[201061050, 64, None]" in reservation_source
  assert 201061050+64==201061114
  literal_error_owner=next(node for node in ast.walk(host_tree)
-  if isinstance(node,ast.FunctionDef)and node.name=="F")
+ if isinstance(node,ast.FunctionDef)and node.name=="F")
  assert ast.unparse(literal_error_owner)=="def F(name):\n    raise RuntimeError(name)"
  assert any(isinstance(node,ast.Call)and isinstance(node.func,ast.Name)
-  and node.func.id=="F" and len(node.args)==1
-  and isinstance(node.args[0],ast.Constant)and node.args[0].value=="B18"
-  for node in ast.walk(host_tree))
+ and node.func.id=="F" and len(node.args)==1
+ and isinstance(node.args[0],ast.Constant)and node.args[0].value=="B18"
+ for node in ast.walk(host_tree))
  for stage,owner in held_owners:
   writes=[node for node in ast.walk(owner)if isinstance(node,ast.Call)
-      and isinstance(node.func,ast.Attribute)and isinstance(node.func.value,ast.Name)
-      and node.func.value.id=="os" and node.func.attr=="write"]
+  and isinstance(node.func,ast.Attribute)and isinstance(node.func.value,ast.Name)
+  and node.func.value.id=="os" and node.func.attr=="write"]
   assert len(writes)==1 and isinstance(writes[0].args[0],ast.Constant)and writes[0].args[0].value==2
   if stage!="FRONT":
-      location=next(n for n in ast.walk(owner)if isinstance(n,ast.If)
-          and isinstance(n.test,ast.Compare)and isinstance(n.test.left,ast.Name)and n.test.left.id=="diagnostic")
-      assert any(isinstance(n,ast.Try)and location in n.body and
-          any(writes[0]is v for s in n.body for v in ast.walk(s))for n in ast.walk(owner))
+   location=next(n for n in ast.walk(owner)if isinstance(n,ast.If)
+   and isinstance(n.test,ast.Compare)and isinstance(n.test.left,ast.Name)and n.test.left.id=="diagnostic")
+   assert any(isinstance(n,ast.Try)and location in n.body and
+   any(writes[0]is v for s in n.body for v in ast.walk(s))for n in ast.walk(owner))
   message_node=writes[0].args[1]
   if stage!="FRONT":
-      message_node=next(node.value for node in ast.walk(owner)
-          if isinstance(node,ast.Assign)and any(isinstance(target,ast.Name)
-              and target.id=="diagnostic" for target in node.targets))
+   message_node=next(node.value for node in ast.walk(owner)
+   if isinstance(node,ast.Assign)and any(isinstance(target,ast.Name)
+   and target.id=="diagnostic" for target in node.targets))
   if stage=="HOST":
-      actual_source41_host_message_node=copy.deepcopy(message_node)
-      assert isinstance(message_node,ast.IfExp)
-      assert isinstance(message_node.orelse,ast.IfExp)
-      assert isinstance(message_node.orelse.body,ast.Constant)
-      assert message_node.orelse.body.value==b"::error::HOST:ANCESTOR-MANAGER-TERMINAL\n"
-      historical_source40_message_node=copy.deepcopy(message_node)
-      historical_source40_message_node.orelse=copy.deepcopy(message_node.orelse.orelse)
-      assert ast.dump(historical_source40_message_node,include_attributes=False)==ast.dump(
-          ast.parse("b'::error::HOST:B18\\n' if type(cause) is RuntimeError and len(cause.args) == 1 and (type(cause.args[0]) is str) and (cause.args[0] == 'B18') else b'::error::HOST:UNLISTED\\n'",mode="eval").body,include_attributes=False)
-      message_node=historical_source40_message_node
+   actual_source41_host_message_node=copy.deepcopy(message_node)
+   assert isinstance(message_node,ast.IfExp)
+   assert isinstance(message_node.orelse,ast.IfExp)
+   assert isinstance(message_node.orelse.body,ast.Constant)
+   assert message_node.orelse.body.value==b"::error::HOST:ANCESTOR-MANAGER-TERMINAL\n"
+   historical_source40_message_node=copy.deepcopy(message_node)
+   historical_source40_message_node.orelse=copy.deepcopy(message_node.orelse.orelse)
+   assert ast.dump(historical_source40_message_node,include_attributes=False)==ast.dump(
+   ast.parse("b'::error::HOST:B18\\n' if type(cause) is RuntimeError and len(cause.args) == 1 and (type(cause.args[0]) is str) and (cause.args[0] == 'B18') else b'::error::HOST:UNLISTED\\n'",mode="eval").body,include_attributes=False)
+   message_node=historical_source40_message_node
   literals=[node.value for node in ast.walk(message_node)
-      if isinstance(node,ast.Constant)and type(node.value)is bytes]
+  if isinstance(node,ast.Constant)and type(node.value)is bytes]
   expected_literals=([b"::error::F\n"]if stage=="FRONT" else
-      [("::error::"+stage+":B18\n").encode("ascii"),("::error::"+stage+":UNLISTED\n").encode("ascii")])
+  [("::error::"+stage+":B18\n").encode("ascii"),("::error::"+stage+":UNLISTED\n").encode("ascii")])
   assert literals==expected_literals and all(0<len(value)<=64 for value in literals)
   assert not any(isinstance(node,ast.Call)and
-      not(isinstance(node.func,ast.Name)and node.func.id in("type","len"))
-      for node in ast.walk(message_node))
+  not(isinstance(node.func,ast.Name)and node.func.id in("type","len"))
+  for node in ast.walk(message_node))
   for mode,expired,listed,optimization in((mode,expired,listed,optimization)
-          for optimization in(0,2)
-          for mode,expired,listed in(("complete",False,True),("short",False,True),("zero",False,True),
-          ("error",False,True),("complete",True,True),
-          ("complete",False,False),("wrong-type",False,True),("non-str",False,True))
-          +((("format",False,False),)if stage!="FRONT" else())):
-      cause=(OSError("B18")if mode=="wrong-type" else
-          RuntimeError(type("PrivateCode",(str,),{})("B18")if mode=="non-str" else
-              "B18" if listed else "unselected private diagnostic"))
-      write_fault=OSError("synthetic output failure")
-      if mode=="format":
-          try:raise cause
-          except RuntimeError as caught:cause=caught
-          write_fault=MemoryError("synthetic formatting allocation")
-      events,errors=[],[]
-      held={"kill_self":False,"reserved":True,"error":None,"operations":[]}
-      state={"closed":False,"custodian_effect_attempted":True,"commands":[object()],
-          "errors":errors,"failure_cutoff":10}
-      retained_host={"retired":False,"errors":errors}
-      def held_write(fd,message):
-          events.append(("write",fd,message))
-          if mode=="error":
-              raise write_fault
-          return 0 if mode=="zero" else 1 if mode=="short" else len(message)
-      def held_clock(_clock):
-          events.append(("clock",))
-          return 10 if expired else 1
-      def held_pid():
-          events.append(("pid",))
-          return 17
-      def held_stop(pid,chosen_signal):
-          events.append(("stop",pid,chosen_signal))
-      ports={"os":SimpleNamespace(write=held_write,getpid=held_pid,kill=held_stop),
-          "time":SimpleNamespace(CLOCK_MONOTONIC=1,clock_gettime_ns=held_clock),
-          "signal":SimpleNamespace(SIGSTOP=19),"state":state,"host":retained_host,
-          "failure_hold":held,"held":held,"a":state,"b":retained_host,"p":held,
-          "w":{"armed":True},"jP":BaseException,"jQ":RuntimeError,
-          "qA":"commands","qB":"custodian_effect_attempted","qC":"errors",
-          "qM":"kill_self","qX":"reserved","qR":"error","qE":"operations",
-          "qT":"failure_cutoff","genesis":None,"early_original":None}
-      if mode=="format":
-          def formatting_fault(_line):raise write_fault
-          ports.update(str=formatting_fault,_qtt_original_host_source_v1=test_github_workflow_splits_validation_into_parallel_phase_jobs,
-              front_code=None,_qtt_original_inputs_v1=test_github_workflow_splits_validation_into_parallel_phase_jobs)
-      isolated=ast.Module(body=[copy.deepcopy(loan_diagnostic),copy.deepcopy(owner)],type_ignores=[])
-      exec(compile(ast.fix_missing_locations(isolated),"<workflow-held-diagnostic-no-child>","exec",
-          optimize=optimization),ports)
-      selected_failure=ports[owner.name]
-      with pytest.raises(RuntimeError)as raised:
-          selected_failure(cause)
-      assert raised.value.__cause__ is cause and held["error"]is cause and held["kill_self"]
-      assert not retained_host["retired"]and not state["closed"]and held["reserved"]
-      assert len(held["operations"])==3 and held["operations"][0][1]
-      if expired:
-          assert events==[("clock",)]and errors==[]
-          assert not held["operations"][1][1]and not held["operations"][2][1]
-      else:
-          message=(b"::error::F\n" if stage=="FRONT" else
-              ("::error::"+stage+(":B18\n" if listed and mode not in("wrong-type","non-str")else ":UNLISTED\n")).encode("ascii"))
-          if mode=="format":
-              assert events==[("clock",),("pid",),("stop",17,19)]and errors==[("held-output",write_fault)]
-          else:
-              assert events==[("clock",),("write",2,message),("pid",),("stop",17,19)]
-          assert held["operations"][1][1]and held["operations"][2][1]
-          if mode in("short","zero"):
-              assert len(errors)==1 and errors[0][0]==("error" if stage=="FRONT" else "held-output")
-              assert type(errors[0][1])is RuntimeError
-          elif mode!="format":
-              assert errors==([("error" if stage=="FRONT" else "held-output",write_fault)]
-                  if mode=="error" else[])
-          assert b"private" not in message
-      prior_events=list(events)
-      with pytest.raises(type(cause))as repeated:
-          selected_failure(cause)
-      assert repeated.value is cause and events==prior_events
+  for optimization in(0,2)
+  for mode,expired,listed in(("complete",False,True),("short",False,True),("zero",False,True),
+  ("error",False,True),("complete",True,True),
+  ("complete",False,False),("wrong-type",False,True),("non-str",False,True))
+  +((("format",False,False),)if stage!="FRONT" else())):
+   cause=(OSError("B18")if mode=="wrong-type" else
+   RuntimeError(type("PrivateCode",(str,),{})("B18")if mode=="non-str" else
+   "B18" if listed else "unselected private diagnostic"))
+   write_fault=OSError("synthetic output failure")
+   if mode=="format":
+    try:raise cause
+    except RuntimeError as caught:cause=caught
+    write_fault=MemoryError("synthetic formatting allocation")
+   events,errors=[],[]
+   held={"kill_self":False,"reserved":True,"error":None,"operations":[]}
+   state={"closed":False,"custodian_effect_attempted":True,"commands":[object()],
+   "errors":errors,"failure_cutoff":10}
+   retained_host={"retired":False,"errors":errors}
+   def held_write(fd,message):
+    events.append(("write",fd,message))
+    if mode=="error":
+     raise write_fault
+    return 0 if mode=="zero" else 1 if mode=="short" else len(message)
+   def held_clock(_clock):
+    events.append(("clock",))
+    return 10 if expired else 1
+   def held_pid():
+    events.append(("pid",))
+    return 17
+   def held_stop(pid,chosen_signal):
+    events.append(("stop",pid,chosen_signal))
+   ports={"os":SimpleNamespace(write=held_write,getpid=held_pid,kill=held_stop),
+   "time":SimpleNamespace(CLOCK_MONOTONIC=1,clock_gettime_ns=held_clock),
+   "signal":SimpleNamespace(SIGSTOP=19),"state":state,"host":retained_host,
+   "failure_hold":held,"held":held,"a":state,"b":retained_host,"p":held,
+   "w":{"armed":True},"jP":BaseException,"jQ":RuntimeError,
+   "qA":"commands","qB":"custodian_effect_attempted","qC":"errors",
+   "qM":"kill_self","qX":"reserved","qR":"error","qE":"operations",
+   "qT":"failure_cutoff","genesis":None,"early_original":None}
+   if mode=="format":
+    def formatting_fault(_line):raise write_fault
+    ports.update(str=formatting_fault,_qtt_original_host_source_v1=test_github_workflow_splits_validation_into_parallel_phase_jobs,
+    front_code=None,_qtt_original_inputs_v1=test_github_workflow_splits_validation_into_parallel_phase_jobs)
+   isolated=ast.Module(body=[copy.deepcopy(loan_diagnostic),copy.deepcopy(owner)],type_ignores=[])
+   exec(compile(ast.fix_missing_locations(isolated),"<workflow-held-diagnostic-no-child>","exec",
+   optimize=optimization),ports)
+   selected_failure=ports[owner.name]
+   with pytest.raises(RuntimeError)as raised:
+    selected_failure(cause)
+   assert raised.value.__cause__ is cause and held["error"]is cause and held["kill_self"]
+   assert not retained_host["retired"]and not state["closed"]and held["reserved"]
+   assert len(held["operations"])==3 and held["operations"][0][1]
+   if expired:
+    assert events==[("clock",)]and errors==[]
+    assert not held["operations"][1][1]and not held["operations"][2][1]
+   else:
+    message=(b"::error::F\n" if stage=="FRONT" else
+    ("::error::"+stage+(":B18\n" if listed and mode not in("wrong-type","non-str")else ":UNLISTED\n")).encode("ascii"))
+    if mode=="format":
+     assert events==[("clock",),("pid",),("stop",17,19)]and errors==[("held-output",write_fault)]
+    else:
+     assert events==[("clock",),("write",2,message),("pid",),("stop",17,19)]
+    assert held["operations"][1][1]and held["operations"][2][1]
+    if mode in("short","zero"):
+     assert len(errors)==1 and errors[0][0]==("error" if stage=="FRONT" else "held-output")
+     assert type(errors[0][1])is RuntimeError
+    elif mode!="format":
+     assert errors==([("error" if stage=="FRONT" else "held-output",write_fault)]
+     if mode=="error" else[])
+    assert b"private" not in message
+   prior_events=list(events)
+   with pytest.raises(type(cause))as repeated:
+    selected_failure(cause)
+   assert repeated.value is cause and events==prior_events
  for builtin_port,trace_mode in ((b,m) for b in (vars(sys.modules['builtins']),sys.modules['builtins']) for m in ('complete','runtime','nonbuiltin','name','loan','format','error','outside','foreign')):
   mode='error' if trace_mode=='error' else 'complete';expired=False
   write_fault=OSError('synthetic retained diagnostic fault');events=[];errors=[];admissions=[]
@@ -19825,21 +19825,21 @@ def test_github_workflow_splits_validation_into_parallel_phase_jobs():
   state={'closed':False,'custodian_effect_attempted':True,'commands':[object()],'errors':errors,'failure_cutoff':10}
   cause=RuntimeError('private') if trace_mode=='runtime' else FileNotFoundError(2,'private','/private')
   if trace_mode=='nonbuiltin':
-      meta=type('PrivateMeta',(type,),{'__name__':property(lambda _:pytest.fail('private class getter'))})
-      cause=meta('PrivateError',(FileNotFoundError,),{'__str__':lambda _:pytest.fail('private formatter')})(2,'private','/private')
+   meta=type('PrivateMeta',(type,),{'__name__':property(lambda _:pytest.fail('private class getter'))})
+   cause=meta('PrivateError',(FileNotFoundError,),{'__str__':lambda _:pytest.fail('private formatter')})(2,'private','/private')
   if trace_mode=='name':
-      name=type('PrivateName',(str,),{'__hash__':lambda _:pytest.fail('private name hash')})
-      kind=type('PrivateError',(FileNotFoundError,),{})
-      type.__dict__['__name__'].__set__(kind,name('PrivateError'));cause=kind(2,'private','/private')
+   name=type('PrivateName',(str,),{'__hash__':lambda _:pytest.fail('private name hash')})
+   kind=type('PrivateError',(FileNotFoundError,),{})
+   type.__dict__['__name__'].__set__(kind,name('PrivateError'));cause=kind(2,'private','/private')
   ns={'original':cause};bad_hint=trace_mode=='foreign' and type(builtin_port)is not dict
   source="def _qtt_original_inputs_v1():\n def prepare():\n  raise original\n return prepare()\n"
   if trace_mode in ('outside','foreign'):
-      other=ns if trace_mode=='foreign' else {'original':cause}
-      exec(compile("def outside():\n raise original\n",'<literal-no-child>','exec'),other);ns['outside']=other['outside']
-      if bad_hint:
-          hint=type('PrivateHint',(str,),{'__eq__':lambda *a:pytest.fail('private hint comparison'),'startswith':lambda *a:pytest.fail('private hint prefix')})
-          ns['outside'].__code__=ns['outside'].__code__.replace(co_qualname=hint('_qtt_original_inputs_v1'))
-      source="def _qtt_original_inputs_v1():\n return outside()\n" if trace_mode=='foreign' else "def _qtt_original_inputs_v1():\n def prepare():\n  return outside()\n return prepare()\n"
+   other=ns if trace_mode=='foreign' else {'original':cause}
+   exec(compile("def outside():\n raise original\n",'<literal-no-child>','exec'),other);ns['outside']=other['outside']
+   if bad_hint:
+    hint=type('PrivateHint',(str,),{'__eq__':lambda *a:pytest.fail('private hint comparison'),'startswith':lambda *a:pytest.fail('private hint prefix')})
+    ns['outside'].__code__=ns['outside'].__code__.replace(co_qualname=hint('_qtt_original_inputs_v1'))
+   source="def _qtt_original_inputs_v1():\n return outside()\n" if trace_mode=='foreign' else "def _qtt_original_inputs_v1():\n def prepare():\n  return outside()\n return prepare()\n"
   exec(compile(source,'<literal-no-child>','exec'),ns);root=ns['_qtt_original_inputs_v1']
   fallback=type(root)(compile('original','<empty-no-child-root>','eval'),ns)
   assert fallback.__code__.co_consts==()
@@ -19847,17 +19847,17 @@ def test_github_workflow_splits_validation_into_parallel_phase_jobs():
   except BaseException as caught:cause=caught
   BaseException.__traceback__.__set__(cause,BaseException.__traceback__.__get__(cause).tb_next)
   def admit(label):
-      admissions.append(label)
-      if trace_mode=='loan':raise write_fault
+   admissions.append(label)
+   if trace_mode=='loan':raise write_fault
   scalar_calls=[]
   def scalar(value):
-      scalar_calls.append(value)
-      if len(scalar_calls)>1:raise write_fault
-      ports['str']=str
-      return str(value)
+   scalar_calls.append(value)
+   if len(scalar_calls)>1:raise write_fault
+   ports['str']=str
+   return str(value)
   def namespace(value,name,default):
-      ports['str']=scalar
-      return getattr(value,name,default)
+   ports['str']=scalar
+   return getattr(value,name,default)
   ports=dict(ports);ports.pop('str',None);ports.pop('getattr',None)
   ports.update(early_original=None,state=state,held=held,_qtt_original_inputs_v1=root,_qtt_beforecompiler_owner_v1=root,_qtt_original_host_source_v1=root,_qtt_original_live_component_v1=fallback,_qtt_early_loop_admission_v1=admit,__builtins__=builtin_port)
   if trace_mode=='format':ports.update(str=scalar,getattr=namespace)
@@ -19885,7 +19885,7 @@ def test_github_workflow_splits_validation_into_parallel_phase_jobs():
   BaseException.__traceback__.__set__(cause,BaseException.__traceback__.__get__(cause).tb_next)
   mode='complete';expired=False;events=[];errors=[];admissions=[]
   def admit(label):
-      admissions.append(label)
+   admissions.append(label)
   held=dict(held,kill_self=False,error=None,operations=[])
   state=dict(state,errors=errors)
   ports=dict(ports)
@@ -19975,6 +19975,31 @@ def test_github_workflow_splits_validation_into_parallel_phase_jobs():
  assert len(e["names"])==8193 and closed==[1]and e["it"]["closed"]and b["work"]==1000000-2*len(p["operations"])
  for s in("original early startup adoption reuse","original C catalogue stage reuse/order","same original metadata/capture association changed"):
   with pytest.raises(RuntimeError):run(dict(q={"stages":[0]*3,"early_adoption":{}},F=F,co=(),_5I=(),c={"capture":f,"capture_attempted":True},_18=f),hit(ast.If,s))
+ # Synthetic/no-child alias ports; real stdlib POSIX semantics and actual resolver siblings.
+ import posixpath
+ _rp=node("_qtt_first_input4_prepare_v1")
+ _rn=[next(n for n in _rp.body if isinstance(n,ast.FunctionDef)and n.name==s)for s in("version","path","resolve")]
+ for loc,link,target,want,changed in(("/lib","/lib","usr/lib","/usr/lib",False),("/opt/link","/opt/link","runtime","/opt/runtime",False),("/opt/link","/opt/link","/usr/lib","/usr/lib",False),("/lib/z","/lib","usr/lib","/usr/lib/z",False),("/x/usr/lib","/x","/","/usr/lib",False),("/lib","/lib","usr/lib",None,True)):
+  seen={}
+  def alias_stat(v):
+   seen[v]=seen.get(v,0)+1
+   return S(st_dev=1,st_ino=2 if v==link else 1,st_mode=stat.S_IFLNK|0o777 if v==link else stat.S_IFDIR|0o755,st_uid=0,st_gid=0,st_nlink=1,st_size=len(target),st_mtime_ns=1,st_ctime_ns=2 if changed and v==link and seen[v]>1 else 1)
+  rh=object();rp=dict(original=(),operations=[],aliases=[]);stock=("/"+"x"*256,)*7
+  rp["path_stock_original"]=(rp,rp["original"],stock,"/tmp",449,f,f.__code__,rh)
+  re=dict(preparation=rp,function=f,host=rh,state={"errors":[]},initial={"work":1000},cutoff=10,time=clock,jQ=RuntimeError,stat=stat,os=S(path=posixpath,fsencode=os.fsencode,lstat=alias_stat,readlink=lambda v:target))
+  run(re,nn,*_rn)
+  if changed:
+   with pytest.raises(RuntimeError,match="original selected locator alias generation")as failed:re["resolve"](loc)
+   assert rp["aliases"][0]["error"]is failed.value and rp["aliases"][0]["before"]!=rp["aliases"][0]["after"]
+  else:
+   assert re["resolve"](loc)==want
+   assert rp["aliases"][0]["error"]is None and rp["aliases"][0]["before"]==rp["aliases"][0]["after"]
+  assert len(rp["aliases"])==1 and rp["aliases"][0]["path"]==link and rp["aliases"][0]["target"]==target
+  assert re["initial"]["work"]==1000-2*len(rp["operations"])and all(r[2]and r[5]is None for r in rp["operations"])and re["state"]["errors"]==[]
+  count=len(rp["operations"])
+  for bad in("/","//usr/lib","/a/","/a//b","/a/./b","/a/../b","/"+"x"*256):
+   with pytest.raises(RuntimeError,match="original first Input4 nofollow components"):re["path"](bad)
+  assert len(rp["operations"])==count
  controller_begin="# QTT_ORIGINAL_CONTROLLER_HELPERS_BEGIN_20261007_V1\n"
  controller_end="# QTT_ORIGINAL_CONTROLLER_HELPERS_END_20261007_V1\n"
  controller_tag="# QTT_CTL | "
@@ -19987,128 +20012,128 @@ def test_github_workflow_splits_validation_into_parallel_phase_jobs():
  assert all(line.startswith(controller_tag)and line.endswith("\n")for line in controller_rows)
  controller_template="".join(line[len(controller_tag):]for line in controller_rows).encode("ascii")
  controller_init=(b'qtt_ordinary_native init "$GITHUB_RUN_ID" "$GITHUB_RUN_ATTEMPT" "$qtt_phase_ordinal" \\\n'
-  b'    "$1" "$2" "$3" "$4"')
+ b'    "$1" "$2" "$3" "$4"')
  assert controller_template.count(controller_init)==1
  assert controller_template.count(controller_init.replace(b"\n    ",b"\n  "))==0
  ci_startup_nodes=[node for node in native_tree.body if isinstance(node,ast.FunctionDef)
-  and node.name=="_facet_fn_initial_startup_prebind_v1"]
+ and node.name=="_facet_fn_initial_startup_prebind_v1"]
  assert len(ci_startup_nodes)==1
  ci_init_values=[node.value for node in ast.walk(ci_startup_nodes[0])
-  if isinstance(node,ast.Constant)and type(node.value)is bytes
-  and node.value.startswith(b"qtt_ordinary_native init ")and b"$GITHUB_RUN_ID" in node.value]
+ if isinstance(node,ast.Constant)and type(node.value)is bytes
+ and node.value.startswith(b"qtt_ordinary_native init ")and b"$GITHUB_RUN_ID" in node.value]
  keeper_init_values=[node.value for node in ast.walk(host_tree)
-  if isinstance(node,ast.Constant)and type(node.value)is bytes
-  and node.value.startswith(b"qtt_ordinary_native init ")and b"$GITHUB_RUN_ID" in node.value]
+ if isinstance(node,ast.Constant)and type(node.value)is bytes
+ and node.value.startswith(b"qtt_ordinary_native init ")and b"$GITHUB_RUN_ID" in node.value]
  assert ci_init_values==[controller_init]
  assert keeper_init_values==[controller_init,controller_init]
  ci_projection_source=ast.unparse(ci_startup_nodes[0])
  assert ci_projection_source.index("template.count(init_before) == 1")<ci_projection_source.index(
-  "template.replace(init_before")<ci_projection_source.index("projected == pair_body['raw']")
+ "template.replace(init_before")<ci_projection_source.index("projected == pair_body['raw']")
  projected_init=b"qtt_ordinary_native init 1 2 3 4 5 6 7"
  projected_controller=controller_template.replace(controller_init,projected_init)
  assert projected_controller.count(projected_init)==1
  assert len(projected_controller)==len(controller_template)-len(controller_init)+len(projected_init)
  for invalid_controller in(controller_template.replace(controller_init,b""),
-      controller_template+b"\n"+controller_init+b"\n",
-      controller_template.replace(controller_init,controller_init.replace(b"\n    ",b"\n  "))):
+ controller_template+b"\n"+controller_init+b"\n",
+ controller_template.replace(controller_init,controller_init.replace(b"\n    ",b"\n  "))):
   assert invalid_controller.count(controller_init)!=1
  expected_unit_keys=(b"Id",b"LoadState",b"Transient",b"ActiveState",
-  b"InvocationID",b"ActiveEnterTimestampMonotonic",b"StopWhenUnneeded")
+ b"InvocationID",b"ActiveEnterTimestampMonotonic",b"StopWhenUnneeded")
  expected_scope_only=(b"RuntimeMaxUSec",b"RuntimeRandomizedExtraUSec",
-  b"TimeoutStopUSec",b"KillMode",b"SendSIGKILL",b"FinalKillSignal")
+ b"TimeoutStopUSec",b"KillMode",b"SendSIGKILL",b"FinalKillSignal")
  expected_first_roster=(b"Id",b"LoadState",b"Transient",b"ActiveState",
-  b"ControlGroup",b"InvocationID",b"ActiveEnterTimestampMonotonic")
+ b"ControlGroup",b"InvocationID",b"ActiveEnterTimestampMonotonic")
  expected_later_roster=(b"Id",b"LoadState",b"Transient",b"InvocationID",
-  b"ControlGroup",b"ActiveState",b"ActiveEnterTimestampMonotonic")
+ b"ControlGroup",b"ActiveState",b"ActiveEnterTimestampMonotonic")
  expected_interfaces={"slice":"org.freedesktop.systemd1.Slice",
-  "scope":"org.freedesktop.systemd1.Scope"}
+ "scope":"org.freedesktop.systemd1.Scope"}
  first_host=next(n for n in host_tree.body
-  if isinstance(n,ast.FunctionDef)and n.name=="_qtt_original_host_source_v1")
+ if isinstance(n,ast.FunctionDef)and n.name=="_qtt_original_host_source_v1")
  ancestor_owner=next(n for n in ast.walk(first_host)
-  if isinstance(n,ast.FunctionDef)and n.name=="original_ancestor")
+ if isinstance(n,ast.FunctionDef)and n.name=="original_ancestor")
  observed_owner=next(n for n in ast.walk(ancestor_owner)
-  if isinstance(n,ast.FunctionDef)and n.name=="observed")
+ if isinstance(n,ast.FunctionDef)and n.name=="observed")
  observed_calls=[n for n in ast.walk(ancestor_owner)if isinstance(n,ast.Call)
-  and isinstance(n.func,ast.Name)and n.func.id=="observed"]
+ and isinstance(n.func,ast.Name)and n.func.id=="observed"]
  observed_calls.sort(key=lambda node:node.lineno)
  assert[(ast.unparse(n.args[0]),ast.unparse(n.args[1]))for n in observed_calls]==[
-  ("a['slice']","keys"),("a['scope']","skeys"),
-  ("a['slice']","(b'StopWhenUnneeded',)")]
+ ("a['slice']","keys"),("a['scope']","skeys"),
+ ("a['slice']","(b'StopWhenUnneeded',)")]
  first_keys=next(n.value for n in ast.walk(ancestor_owner)if isinstance(n,ast.Assign)
-  and any(isinstance(t,ast.Name)and t.id=="keys" for t in n.targets))
+ and any(isinstance(t,ast.Name)and t.id=="keys" for t in n.targets))
  assert ast.literal_eval(first_keys)==expected_first_roster
  selectors=[n for n in ast.walk(host_tree)if isinstance(n,ast.Assign)
-  and any(isinstance(t,ast.Name)and t.id=="interface" for t in n.targets)]
+ and any(isinstance(t,ast.Name)and t.id=="interface" for t in n.targets)]
  selectors.sort(key=lambda node:node.lineno)
  assert len(selectors)==3
  selector_keys=("unitkeys","_3I","_46")
  for index,(selector,key_name)in enumerate(zip(selectors,selector_keys)):
   parents=[n for n in ast.walk(host_tree)if isinstance(n,ast.For)
-      and any(child is selector for child in n.body)]
+  and any(child is selector for child in n.body)]
   assert len(parents)==1
   property_loop=parents[0]
   assert not any(isinstance(n,ast.Call)for n in ast.walk(selector.value))
   key_bindings=[n.value for n in ast.walk(host_tree)if isinstance(n,ast.Assign)
-      and any(isinstance(t,ast.Name)and t.id==key_name for t in n.targets)]
+  and any(isinstance(t,ast.Name)and t.id==key_name for t in n.targets)]
   assert len(key_bindings)==1
   actual_unit_keys=ast.literal_eval(key_bindings[0])
   assert actual_unit_keys==((expected_first_roster+(b"StopWhenUnneeded",))
-      if index==0 else expected_later_roster)
+  if index==0 else expected_later_roster)
   if index:
-      outer=[n for n in ast.walk(host_tree)if isinstance(n,ast.For)
-          and any(child is property_loop for child in n.body)]
-      assert len(outer)==1
-      assert ast.unparse(outer[0].target)=="(unit, keyset, retained)"
-      assert ast.unparse(outer[0].iter)==(
-          "((birth['slice'], "+key_name+", birth['slice_fields']), "
-          "(birth['scope'], scopekeys, birth['scope_fields']))")
+   outer=[n for n in ast.walk(host_tree)if isinstance(n,ast.For)
+   and any(child is property_loop for child in n.body)]
+   assert len(outer)==1
+   assert ast.unparse(outer[0].target)=="(unit, keyset, retained)"
+   assert ast.unparse(outer[0].iter)==(
+   "((birth['slice'], "+key_name+", birth['slice_fields']), "
+   "(birth['scope'], scopekeys, birth['scope_fields']))")
   roles={"slice":"source-only.slice","scope":"source-only.scope"}
   selector_code=compile(ast.Expression(copy.deepcopy(selector.value)),
-      "<actual-systemd-interface-selector-no-rpc>","eval")
+  "<actual-systemd-interface-selector-no-rpc>","eval")
   parser_nodes=[copy.deepcopy(n)for n in property_loop.body
-      if not(isinstance(n,ast.Assign)and any(isinstance(t,ast.Name)
-          and t.id in("interface","argv","raw")for t in n.targets))]
+  if not(isinstance(n,ast.Assign)and any(isinstance(t,ast.Name)
+  and t.id in("interface","argv","raw")for t in n.targets))]
   assert not any(isinstance(n,ast.Call)and isinstance(n.func,ast.Name)
-      and n.func.id in("rpc","manager","command","E","effect")
-      for node in parser_nodes for n in ast.walk(node))
+  and n.func.id in("rpc","manager","command","E","effect")
+  for node in parser_nodes for n in ast.walk(node))
   parser_code=compile(ast.Module(body=parser_nodes,type_ignores=[]),
-      "<actual-systemd-typed-reply-parser-no-rpc>","exec")
+  "<actual-systemd-typed-reply-parser-no-rpc>","exec")
   def reject_manager_data(message):
-      raise RuntimeError(message)
+   raise RuntimeError(message)
   for role in("slice","scope"):
-      selected_keys=(expected_first_roster if index==0 else expected_later_roster)
-      if role=="scope":
-          selected_keys+=expected_scope_only
-      if index==0 and role=="slice":
-          selected_keys+=(b"StopWhenUnneeded",)
-      for key in selected_keys:
-          ports={"a":roles,"birth":roles,"unit":roles[role],"key":key,
-              key_name:actual_unit_keys}
-          expected_interface=("org.freedesktop.systemd1.Unit"
-              if key in expected_unit_keys else expected_interfaces[role])
-          assert eval(selector_code,ports)==expected_interface
-          raw,expected=((b"b true\n",b"yes")
-              if key in(b"Transient",b"SendSIGKILL",b"StopWhenUnneeded")else
-              (b"ay 16 "+b" ".join([b"1"]*16)+b"\n",b"01"*16)
-              if key==b"InvocationID" else(b"i 9\n",b"9")
-              if key==b"FinalKillSignal" else(b"t 17\n",b"17")
-              if key.endswith(b"USec")or key==b"ActiveEnterTimestampMonotonic" else
-              (b's "source-only"\n',b"source-only"))
-          parsed={"key":key,"raw":raw,"out":{},"_5r":{},"data":{},
-              "fail":reject_manager_data,"F":reject_manager_data,"qQ":RuntimeError}
-          exec(parser_code,parsed)
-          result_name=("out","_5r","data")[index]
-          assert parsed[result_name]=={key:expected}
-          for malformed in(b"x invalid\n",raw[:-1]):
-              invalid=dict(parsed,raw=malformed,out={},_5r={},data={})
-              with pytest.raises(RuntimeError):
-                  exec(parser_code,invalid)
+   selected_keys=(expected_first_roster if index==0 else expected_later_roster)
+   if role=="scope":
+    selected_keys+=expected_scope_only
+   if index==0 and role=="slice":
+    selected_keys+=(b"StopWhenUnneeded",)
+   for key in selected_keys:
+    ports={"a":roles,"birth":roles,"unit":roles[role],"key":key,
+    key_name:actual_unit_keys}
+    expected_interface=("org.freedesktop.systemd1.Unit"
+    if key in expected_unit_keys else expected_interfaces[role])
+    assert eval(selector_code,ports)==expected_interface
+    raw,expected=((b"b true\n",b"yes")
+    if key in(b"Transient",b"SendSIGKILL",b"StopWhenUnneeded")else
+    (b"ay 16 "+b" ".join([b"1"]*16)+b"\n",b"01"*16)
+    if key==b"InvocationID" else(b"i 9\n",b"9")
+    if key==b"FinalKillSignal" else(b"t 17\n",b"17")
+    if key.endswith(b"USec")or key==b"ActiveEnterTimestampMonotonic" else
+    (b's "source-only"\n',b"source-only"))
+    parsed={"key":key,"raw":raw,"out":{},"_5r":{},"data":{},
+    "fail":reject_manager_data,"F":reject_manager_data,"qQ":RuntimeError}
+    exec(parser_code,parsed)
+    result_name=("out","_5r","data")[index]
+    assert parsed[result_name]=={key:expected}
+    for malformed in(b"x invalid\n",raw[:-1]):
+     invalid=dict(parsed,raw=malformed,out={},_5r={},data={})
+     with pytest.raises(RuntimeError):
+      exec(parser_code,invalid)
  activation_loop=next(n for n in ast.walk(ancestor_owner)if isinstance(n,ast.While)
-  and any(isinstance(x,ast.Constant)and x.value=="original scope activation observation"for x in ast.walk(n)))
+ and any(isinstance(x,ast.Constant)and x.value=="original scope activation observation"for x in ast.walk(n)))
  activation_try=next(n for n in ancestor_owner.body if isinstance(n,ast.Try))
  activation_start=activation_try.body.index(activation_loop)
  activation_end=next(i for i,n in enumerate(activation_try.body)if i>activation_start
-  and isinstance(n,ast.Assign)and any(isinstance(x,ast.Subscript)and isinstance(x.value,ast.Name)and x.value.id=="state"and isinstance(x.slice,ast.Constant)and x.slice.value=="failure_cutoff"for x in n.targets))
+ and isinstance(n,ast.Assign)and any(isinstance(x,ast.Subscript)and isinstance(x.value,ast.Name)and x.value.id=="state"and isinstance(x.slice,ast.Constant)and x.slice.value=="failure_cutoff"for x in n.targets))
  rpc_code=compile(ast.Module(body=[copy.deepcopy(next(n for n in ast.walk(host_tree)if isinstance(n,ast.FunctionDef)and n.name=="rpc"))],type_ignores=[]),"<original-rpc-data-only>","exec")
  activation_nodes=copy.deepcopy(activation_try.body[activation_start:activation_end])
  activation_code=compile(ast.Module(body=activation_nodes,type_ignores=[]),"<original-ancestor-async-data-only>","exec")
@@ -20173,44 +20198,44 @@ def test_github_workflow_splits_validation_into_parallel_phase_jobs():
  actual_manager_message=b"::error::HOST:ANCESTOR-MANAGER-TERMINAL\n"
  assert len(actual_manager_message)==40<=64
  actual_diagnostic_code=compile(ast.Expression(copy.deepcopy(
-  actual_source41_host_message_node)),"<actual-host-diagnostic-no-write>","eval")
+ actual_source41_host_message_node)),"<actual-host-diagnostic-no-write>","eval")
  assert[n.value for n in ast.walk(actual_source41_host_message_node)
-  if isinstance(n,ast.Constant)and type(n.value)is bytes]==[
-      b"::error::HOST:B18\n",actual_manager_message,b"::error::HOST:UNLISTED\n"]
+ if isinstance(n,ast.Constant)and type(n.value)is bytes]==[
+ b"::error::HOST:B18\n",actual_manager_message,b"::error::HOST:UNLISTED\n"]
  assert not any(isinstance(n,ast.Call)and not(isinstance(n.func,ast.Name)
-  and n.func.id in("type","len"))for n in ast.walk(actual_source41_host_message_node))
+ and n.func.id in("type","len"))for n in ast.walk(actual_source41_host_message_node))
  manager_cause_text="original ancestor manager exec/terminal/threeEOF"
  bad_text_type=type("SourceOnlyPrivateText",(str,),{})
  bad_error_type=type("SourceOnlyOtherRuntimeError",(RuntimeError,),{})
  for cause,expected in((RuntimeError("B18"),b"::error::HOST:B18\n"),
-      (RuntimeError(manager_cause_text),actual_manager_message),
-      (RuntimeError("unselected private diagnostic"),b"::error::HOST:UNLISTED\n"),
-      (OSError(manager_cause_text),b"::error::HOST:UNLISTED\n"),
-      (bad_error_type(manager_cause_text),b"::error::HOST:UNLISTED\n"),
-      (RuntimeError(bad_text_type(manager_cause_text)),b"::error::HOST:UNLISTED\n"),
-      (RuntimeError(),b"::error::HOST:UNLISTED\n"),
-      (RuntimeError(manager_cause_text,"private"),b"::error::HOST:UNLISTED\n"),
-      (RuntimeError(manager_cause_text+" private"),b"::error::HOST:UNLISTED\n")):
+ (RuntimeError(manager_cause_text),actual_manager_message),
+ (RuntimeError("unselected private diagnostic"),b"::error::HOST:UNLISTED\n"),
+ (OSError(manager_cause_text),b"::error::HOST:UNLISTED\n"),
+ (bad_error_type(manager_cause_text),b"::error::HOST:UNLISTED\n"),
+ (RuntimeError(bad_text_type(manager_cause_text)),b"::error::HOST:UNLISTED\n"),
+ (RuntimeError(),b"::error::HOST:UNLISTED\n"),
+ (RuntimeError(manager_cause_text,"private"),b"::error::HOST:UNLISTED\n"),
+ (RuntimeError(manager_cause_text+" private"),b"::error::HOST:UNLISTED\n")):
   for optimization in(0,2):
-      selected_code=compile(ast.Expression(copy.deepcopy(actual_source41_host_message_node)),
-          "<actual-host-diagnostic-no-write>","eval",optimize=optimization)
-      assert eval(selected_code,{"cause":cause})==expected
-      assert b"private" not in expected and b"/" not in expected
+   selected_code=compile(ast.Expression(copy.deepcopy(actual_source41_host_message_node)),
+   "<actual-host-diagnostic-no-write>","eval",optimize=optimization)
+   assert eval(selected_code,{"cause":cause})==expected
+   assert b"private" not in expected and b"/" not in expected
  expected_current_source9_literal_fields=(2368680179,302894236,34477319,
-  "initializer",1802350,241543444,18397008,1818448,1983204)
+ "initializer",1802350,241543444,18397008,1818448,1983204)
  for actual_source_tree in(host_tree,native_tree):
   actual_suppliers=[node for node in ast.walk(actual_source_tree)
-      if isinstance(node,ast.FunctionDef)
-      and node.name=="_ordinary_ci_initial_common_source_v1"]
+  if isinstance(node,ast.FunctionDef)
+  and node.name=="_ordinary_ci_initial_common_source_v1"]
   assert len(actual_suppliers)==1
   supplier_returns=[node.value for node in ast.walk(actual_suppliers[0])
-      if isinstance(node,ast.Return)and isinstance(node.value,ast.Tuple)
-      and len(node.value.elts)==9]
+  if isinstance(node,ast.Return)and isinstance(node.value,ast.Tuple)
+  and len(node.value.elts)==9]
   assert len(supplier_returns)==1
   actual_cells=tuple(node.value if isinstance(node,ast.Constant)
-      and type(node.value)is int else node.id if isinstance(node,ast.Name)
-      else None for node in supplier_returns[0].elts)
-  assert actual_cells==(2454466522,324772011,63340350,'initializer',1802350,241543444,19469328,1926888,2006628)
+  and type(node.value)is int else node.id if isinstance(node,ast.Name)
+  else None for node in supplier_returns[0].elts)
+  assert actual_cells==(2454466522,324772011,63340350,'initializer',1802350,241543444,19469392,1926888,2006628)
   actual_cells=(2368680179,302894236,34477319,'initializer',1802350,241543444,18421352,1823560,1983204)
   assert actual_cells[6:] == (18421352,1823560,1983204)
   actual_cells = actual_cells[:6] + (18421264,1823560,1983204)
@@ -20222,30 +20247,30 @@ def test_github_workflow_splits_validation_into_parallel_phase_jobs():
   actual_cells=actual_cells[:6]+expected_current_source9_literal_fields[6:8]+actual_cells[8:]
   assert actual_cells==expected_current_source9_literal_fields
  owner=next(n for n in ast.walk(host_tree)if isinstance(n,ast.FunctionDef)
-  and n.name=="_qtt_original_inputs_v1")
+ and n.name=="_qtt_original_inputs_v1")
  body=next(n.body for n in ast.walk(owner)if isinstance(n,ast.Try)
-  and any(isinstance(s,ast.Assign)and any(isinstance(t,ast.Name)
-  and t.id=="pid" for t in s.targets)for s in n.body))
+ and any(isinstance(s,ast.Assign)and any(isinstance(t,ast.Name)
+ and t.id=="pid" for t in s.targets)for s in n.body))
  start=next(i for i,n in enumerate(body)if isinstance(n,ast.Assign)
-  and any(isinstance(t,ast.Name)and t.id=="pid" for t in n.targets))
+ and any(isinstance(t,ast.Name)and t.id=="pid" for t in n.targets))
  end=next(i for i,n in enumerate(body)if isinstance(n,ast.If)
-  and any(isinstance(v,ast.Constant)and v.value=="same original privileged outside custodian"
-  for v in ast.walk(n)))
+ and any(isinstance(v,ast.Constant)and v.value=="same original privileged outside custodian"
+ for v in ast.walk(n)))
  nodes=copy.deepcopy(body[start:end+1])
  code=compile(ast.Module(body=nodes,type_ignores=[]),
-  "<actual-launch-parent-no-child>","exec")
+ "<actual-launch-parent-no-child>","exec")
  assert start<end
  assert not any(isinstance(n,ast.Call)and isinstance(n.func,ast.Attribute)
-  and n.func.attr in("fork","execve","kill","close","pidfd_open")
-  for node in nodes for n in ast.walk(node))
+ and n.func.attr in("fork","execve","kill","close","pidfd_open")
+ for node in nodes for n in ast.walk(node))
  def parent_ports(kind,fault=None):
   raw=b"6000 (parent) S 5000 "+b"0 "*17+b"22000 0\n"
   self_raw=b"7000 (python) S 6000 "+b"0 "*17+b"33000 0\n"
   image,argv,uids,gids={
-      "sudo":("/usr/bin/sudo",b"/usr/bin/sudo\0-n\0python\0-I\0-B\0-\0fast-preflight\0",
-          b"1001 0 0 0",b"118 0 0 0"),
-      "bash":("/usr/bin/bash",b"/usr/bin/bash\0-e\0source-only-step.sh\0",
-          b"1001 1001 1001 1001",b"118 118 118 118"),
+  "sudo":("/usr/bin/sudo",b"/usr/bin/sudo\0-n\0python\0-I\0-B\0-\0fast-preflight\0",
+  b"1001 0 0 0",b"118 0 0 0"),
+  "bash":("/usr/bin/bash",b"/usr/bin/bash\0-e\0source-only-step.sh\0",
+  b"1001 1001 1001 1001",b"118 118 118 118"),
   }[kind]
   status=b"Uid: "+uids+b"\nGid: "+gids+b"\nPPid: 5000\n"
   self_status=b"Uid: 0 0 0 0\nGid: 0 0 0 0\nPPid: 6000\n"
@@ -20255,17 +20280,17 @@ def test_github_workflow_splits_validation_into_parallel_phase_jobs():
   rows=[stat_row,pidfd_row,command_row]
   actor=[6000,22000,stat_row,raw,pidfd_row]
   birth={"actors":[(7000,33000,[90,"self",False,None],self_raw,
-      [91,"self-pidfd",False,None]),tuple(actor)],"pids":[7000,6000],
-      "launch_chain":[(6000,image,argv,command_row)]}
+  [91,"self-pidfd",False,None]),tuple(actor)],"pids":[7000,6000],
+  "launch_chain":[(6000,image,argv,command_row)]}
   if kind=="sudo":
-      birth["pids"].append(5000)
-      birth["actors"].append((5000,21000,[92,"bash-stat",False,None],
-          b"5000 (bash) S 4000 "+b"0 "*17+b"21000 0\n",
-          [93,"bash-pidfd",False,None]))
-      birth["launch_chain"].append((5000,"/usr/bin/bash",
-          b"/usr/bin/bash\0-e\0source-only-step.sh\0",[94,"bash-cmd",False,None]))
+   birth["pids"].append(5000)
+   birth["actors"].append((5000,21000,[92,"bash-stat",False,None],
+   b"5000 (bash) S 4000 "+b"0 "*17+b"21000 0\n",
+   [93,"bash-pidfd",False,None]))
+   birth["launch_chain"].append((5000,"/usr/bin/bash",
+   b"/usr/bin/bash\0-e\0source-only-step.sh\0",[94,"bash-cmd",False,None]))
   values={"/proc/6000/status":status,"/proc/6000/stat":raw,
-      "/proc/6000/cmdline":argv,"/proc/7000/status":self_status}
+  "/proc/6000/cmdline":argv,"/proc/7000/status":self_status}
   if fault=="actor":actor[0]=6001
   if fault=="start":actor[1]=22001
   if fault=="captured_ppid":actor[3]=raw.replace(b"S 5000",b"S 5001")
@@ -20273,45 +20298,45 @@ def test_github_workflow_splits_validation_into_parallel_phase_jobs():
   if fault=="pids":birth["pids"][1]=6001
   if fault=="launch":birth["launch_chain"][0]=(6001,image,argv,command_row)
   for name,old,bad in(("fresh_start",b"22000",b"22001"),("fresh_ppid",b"S 5000",b"S 5001")):
-      if fault==name:values["/proc/6000/stat"]=raw.replace(old,bad)
+   if fault==name:values["/proc/6000/stat"]=raw.replace(old,bad)
   if fault=="status_ppid":values["/proc/6000/status"]=status.replace(b"5000",b"5001")
   if fault=="cmdline":values["/proc/6000/cmdline"]=argv+b"changed\0"
   for name,bad in(("uid_width",b"1001 0 0"),
-          ("uid_decimal",b"01001 0 0 0"),
-          ("uid_bound",b"4294967296 0 0 0")):
-      if fault==name:values["/proc/6000/status"]=status.replace(uids,bad)
+  ("uid_decimal",b"01001 0 0 0"),
+  ("uid_bound",b"4294967296 0 0 0")):
+   if fault==name:values["/proc/6000/status"]=status.replace(uids,bad)
   if fault=="duplicate_uid":values["/proc/6000/status"]+=b"Uid: 0 0 0 0\n"
   if fault=="self_status":values["/proc/7000/status"]=self_status.replace(b"Uid: 0",b"Uid: 1001",1)
   for index,name in enumerate(("stat","pidfd","command")):
-      if fault=="closed_"+name:rows[index][2]=True
-      if fault=="error_"+name:rows[index][3]=RuntimeError("synthetic held error")
-      if fault=="foreign_"+name:rows[index]=list(rows[index])
+   if fault=="closed_"+name:rows[index][2]=True
+   if fault=="error_"+name:rows[index][3]=RuntimeError("synthetic held error")
+   if fault=="foreign_"+name:rows[index]=list(rows[index])
   if fault=="descriptor_type":pidfd_row[0]=True
   birth["actors"][1]=tuple(actor)
   calls,admissions,record=[],[],{"fds":[]}
   def reject(message):
-      raise RuntimeError(message)
+   raise RuntimeError(message)
   def effect(label,function,*args,**kwargs):
-      calls.append(label)
-      return function(*args,**kwargs)
+   calls.append(label)
+   return function(*args,**kwargs)
   def walk(path):
-      if path not in values:raise RuntimeError("synthetic unexpected path")
-      row={"fd":200 if path.endswith("/stat")else 201,
-          "path":path,"closed":False,"error":None}
-      record["fds"].append(row)
-      return row
+   if path not in values:raise RuntimeError("synthetic unexpected path")
+   row={"fd":200 if path.endswith("/stat")else 201,
+   "path":path,"closed":False,"error":None}
+   record["fds"].append(row)
+   return row
   poll=SimpleNamespace(register=lambda fd,event:1 if fault=="register" else None,
-      poll=lambda ms:[(2048,1)]if fault=="terminal" else[])
+  poll=lambda ms:[(2048,1)]if fault=="terminal" else[])
   os_port=SimpleNamespace(getpid=lambda:7000,getppid=lambda:6000,
-      geteuid=lambda:1001 if fault=="self_uid" else 0,
-      fstat=lambda fd:(17,101 if fault=="inode" and fd==100 else 100),
-      readlink=lambda path:"/usr/bin/changed" if fault=="image" else image)
+  geteuid=lambda:1001 if fault=="self_uid" else 0,
+  fstat=lambda fd:(17,101 if fault=="inode" and fd==100 else 100),
+  readlink=lambda path:"/usr/bin/changed" if fault=="image" else image)
   return{"birth":birth,"state":{"fds":rows},"a":record,
-      "os":os_port,"select":SimpleNamespace(poll=lambda:poll,POLLIN=1),
-      "walk":walk,"bounded":lambda row,maximum:values[row["path"]],
-      "version":lambda row:row,"effect":effect,"fail":reject,
-      "_qtt_early_loop_admission_v1":admissions.append,
-      "calls":calls,"admissions":admissions}
+  "os":os_port,"select":SimpleNamespace(poll=lambda:poll,POLLIN=1),
+  "walk":walk,"bounded":lambda row,maximum:values[row["path"]],
+  "version":lambda row:row,"effect":effect,"fail":reject,
+  "_qtt_early_loop_admission_v1":admissions.append,
+  "calls":calls,"admissions":admissions}
  for kind in("sudo","bash"):
   ports=parent_ports(kind)
   exec(code,ports)
@@ -20321,20 +20346,20 @@ def test_github_workflow_splits_validation_into_parallel_phase_jobs():
   assert ports["calls"][-3:]==["parent-poll","parent-register","parent-live"]
   assert "parent-row" in ports["admissions"]
   for fault in("actor","start","captured_ppid","self_actor","pids","launch",
-          "fresh_start","fresh_ppid","status_ppid","image","cmdline","inode",
-          "closed_stat","closed_pidfd","closed_command","error_stat","error_pidfd",
-          "error_command","foreign_stat","foreign_pidfd","foreign_command",
-          "descriptor_type","terminal","register","self_uid","self_status",
-          "uid_width","uid_decimal","uid_bound",
-          "duplicate_uid"):
-      with pytest.raises(RuntimeError):
-          exec(code,parent_ports(kind,fault))
+  "fresh_start","fresh_ppid","status_ppid","image","cmdline","inode",
+  "closed_stat","closed_pidfd","closed_command","error_stat","error_pidfd",
+  "error_command","foreign_stat","foreign_pidfd","foreign_command",
+  "descriptor_type","terminal","register","self_uid","self_status",
+  "uid_width","uid_decimal","uid_bound",
+  "duplicate_uid"):
+   with pytest.raises(RuntimeError):
+    exec(code,parent_ports(kind,fault))
  owners=[next(n for n in ast.walk(root)if isinstance(n,ast.FunctionDef)and n.name==name)
-  for root,name in((actual_front_function,"manager"),(owner,"manager"),(host_tree,"command"))]
+ for root,name in((actual_front_function,"manager"),(owner,"manager"),(host_tree,"command"))]
  for role,owner in enumerate(owners):
   wait=copy.deepcopy(next(n for n in owner.body if isinstance(n,ast.Try)))
   start=next(i for i,s in enumerate(wait.body)if isinstance(s,ast.Assign)
-      and isinstance(s.targets[0],ast.Name)and s.targets[0].id in("readiness","poller"))
+  and isinstance(s.targets[0],ast.Name)and s.targets[0].id in("readiness","poller"))
   assert wait.body[start].value.args[1].attr=="poll"
   loop=next(n for n in wait.body if isinstance(n,ast.While))
   eof=loop.body[-1].body[-1]
@@ -20342,34 +20367,34 @@ def test_github_workflow_splits_validation_into_parallel_phase_jobs():
   assert eof.body[1].value.args[1].attr=="unregister" and len(eof.body)==3
   wait.body=wait.body[start-bool(role):wait.body.index(loop)]+loop.body[2:5]
   codes={o:compile(ast.fix_missing_locations(ast.Module(body=[wait],type_ignores=[])),
-      "<actual-poll-consumer-no-child>","exec",optimize=o)for o in(0,2)}
+  "<actual-poll-consumer-no-child>","exec",optimize=o)for o in(0,2)}
   for index,optimization in[(n,0)for n in range(8)]+[(0,2),(3,2)]:
-      mask=(1,16,8,32,64,0,1,1)[index]
-      fd,closed,error=(9999 if index==6 else 2048),index==7,(None if index<3 else 9 if index==3 else 71)
-      calls,fds=[],(2048,2050,2052)
-      rows=[{"fd":2048+i}if role==1 else[2048+i]for i in range(6)]
-      c={"eof":[False]*3,"errors":[]}
-      def register(fd,mask):calls.append(("register",fd,mask))
-      def poll(ms):
-          calls.append(("poll",ms))
-          c["eof"][0]=closed
-          return[(fd,mask)]
-      def create():
-          calls.append(("create",))
-          return SimpleNamespace(register=register,poll=poll)
-      def effect(label,fn,*args,tranche="work"):
-          assert label==("ancestor-manager-ready","original manager ready","O22synthetic")[role]
-          return fn(*args)
-      ports=dict(c=c,d=rows,rows=rows,name="synthetic",tranche="work",E=effect,effect=effect,
-          q4="ancestor-manager-ready",jP=BaseException,qC="errors",errno=SimpleNamespace(EBADF=9,EPROTO=71),
-          select=SimpleNamespace(poll=create,POLLIN=1,POLLHUP=16,POLLERR=8,POLLNVAL=32))
-      if error is None:
-          exec(codes[optimization],ports)
-          assert c["errors"]==[]
-      else:
-          with pytest.raises(OSError)as raised:exec(codes[optimization],ports)
-          assert c["errors"]==[raised.value]and raised.value.args==(error,)
-      assert calls==[("create",)]+[("register",fd,1)for fd in fds]+[("poll",10)]
+   mask=(1,16,8,32,64,0,1,1)[index]
+   fd,closed,error=(9999 if index==6 else 2048),index==7,(None if index<3 else 9 if index==3 else 71)
+   calls,fds=[],(2048,2050,2052)
+   rows=[{"fd":2048+i}if role==1 else[2048+i]for i in range(6)]
+   c={"eof":[False]*3,"errors":[]}
+   def register(fd,mask):calls.append(("register",fd,mask))
+   def poll(ms):
+    calls.append(("poll",ms))
+    c["eof"][0]=closed
+    return[(fd,mask)]
+   def create():
+    calls.append(("create",))
+    return SimpleNamespace(register=register,poll=poll)
+   def effect(label,fn,*args,tranche="work"):
+    assert label==("ancestor-manager-ready","original manager ready","O22synthetic")[role]
+    return fn(*args)
+   ports=dict(c=c,d=rows,rows=rows,name="synthetic",tranche="work",E=effect,effect=effect,
+   q4="ancestor-manager-ready",jP=BaseException,qC="errors",errno=SimpleNamespace(EBADF=9,EPROTO=71),
+   select=SimpleNamespace(poll=create,POLLIN=1,POLLHUP=16,POLLERR=8,POLLNVAL=32))
+   if error is None:
+    exec(codes[optimization],ports)
+    assert c["errors"]==[]
+   else:
+    with pytest.raises(OSError)as raised:exec(codes[optimization],ports)
+    assert c["errors"]==[raised.value]and raised.value.args==(error,)
+   assert calls==[("create",)]+[("register",fd,1)for fd in fds]+[("poll",10)]
  startup=tuple(shlex.split("/usr/bin/sudo "+shard_block.split("X=(/usr/bin/sudo ",1)[1].split(")\n",1)[0]))
  env_words=shlex.split(" ".join(part.split("\n          do",1)[0]for part in shard_block.split("for h in ")[1:]).replace("\\\n",""))
  assert startup==("/usr/bin/sudo","-n","--","/usr/bin/env","-i","${G[@]}","/usr/bin/bash","--norc","-c",'ulimit -Sn hard&&ulimit -f 65536&&exec "$@"',"_","$z","-I","-B","-X","utf8","$@")and not any(name in env_words for name in("BASH_ENV","SHELLOPTS","BASHOPTS","POSIXLY_CORRECT"))

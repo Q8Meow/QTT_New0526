@@ -2140,7 +2140,7 @@ jobs:
 # QTT_HOST_PY |         try:
 # QTT_HOST_PY |          target=native("original selected locator target",os.readlink,_2Q);link["target"]=target;after=native("original selected locator after",os.lstat,_2Q);link["after"]=version(after)
 # QTT_HOST_PY |          if(type(target)is not str or not target or"\0"in target or len(os.fsencode(target))>=4095 or link["after"]!=link["before"]):raise jQ("original selected locator alias generation")
-# QTT_HOST_PY |          _3d=target if target.startswith("/")else os.path.dirname(_2Q)+"/"+target;_3d+="/"+"/".join(parts[i+1:])if i+1<len(parts)else"";current=os.path.normpath(_3d);path(current);changed=True;break
+# QTT_HOST_PY |          _3d=target if target.startswith("/")else os.path.join(os.path.dirname(_2Q),target);_3d=os.path.join(_3d,"/".join(parts[i+1:]))if i+1<len(parts)else _3d;current=os.path.normpath(_3d);path(current);changed=True;break
 # QTT_HOST_PY |         except BaseException as error:link["error"]=error;raise
 # QTT_HOST_PY |        if i+1<len(parts)and not stat.S_ISDIR(before.st_mode):raise jQ("original selected locator ancestor kind")
 # QTT_HOST_PY |       if not changed:return current
@@ -2542,7 +2542,7 @@ jobs:
 # QTT_HOST_PY |     def U(n,c):return 68*n+4*c
 # QTT_HOST_PY |     def T(n,s):return 48*n+8*s
 # QTT_HOST_PY |     def L(n,s):return 56*n+16*(s+s//8+6*n)
-# QTT_HOST_PY |     initializer=5125424+21625000+U(7,7*extent)+T(1,parent_path_count);initializer+=6*(U(67,3*extent)+L(2,130)+T(1,65));initializer+=672+T(1,8)+2*T(1,9)+2*T(1,parent_path_count)+24;return(2454466522,324772011,63340350,initializer,1802350,241543444,19469328,1926888,2006628)
+# QTT_HOST_PY |     initializer=5125424+21625000+U(7,7*extent)+T(1,parent_path_count);initializer+=6*(U(67,3*extent)+L(2,130)+T(1,65));initializer+=672+T(1,8)+2*T(1,9)+2*T(1,parent_path_count)+24;return(2454466522,324772011,63340350,initializer,1802350,241543444,19469392,1926888,2006628)
 # QTT_HOST_PY |    def _ordinary_ci_initial_common_projection_v1(source,paths,catalogue,keeper,native):
 # QTT_HOST_PY |     """Project the fixed original programme; its caller owns every operand join."""
 # QTT_HOST_PY |     if(type(source)is not tuple or len(source)!=9 or type(paths)is not tuple or len(paths)!=19 or type(catalogue)is not tuple or len(catalogue)!=8 or type(keeper)is not tuple or len(keeper)!=7 or type(native)is not tuple or len(native)!=3 or any(type(n)is not int or n<0 for row in(source,paths,catalogue,keeper,native)for n in row)):raise ValueError('ORDINARY_INITIAL_COMMON_EXACT_SOURCE_OPERANDS')
