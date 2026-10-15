@@ -2049,8 +2049,8 @@ jobs:
 # QTT_HOST_PY |         if type(raw)is not bytes or len(value)+len(raw)>65536:F("original AppArmor feature extent")
 # QTT_HOST_PY |         if not raw:break
 # QTT_HOST_PY |         value.extend(raw)
-# QTT_HOST_PY |        allowed=b"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_./, +:\t\n-"
-# QTT_HOST_PY |        if any(c not in allowed for c in value):F("original AppArmor feature grammar")
+# QTT_HOST_PY |        #
+# QTT_HOST_PY |        if b"\0"in value:F("original AppArmor feature grammar")
 # QTT_HOST_PY |        append(bytes(value))
 # QTT_HOST_PY |        if value and not value.endswith(b"\n"):append(b"\n")
 # QTT_HOST_PY |       append((" "*depth+"}\n").encode("ascii"));entry["after"]=version(E("original AppArmor feature held rejoin",os.fstat,child[0]));entry["named"]=version(E("original AppArmor feature named rejoin",os.stat,name,dir_fd=row[0],follow_symlinks=False))
@@ -2542,7 +2542,7 @@ jobs:
 # QTT_HOST_PY |     def U(n,c):return 68*n+4*c
 # QTT_HOST_PY |     def T(n,s):return 48*n+8*s
 # QTT_HOST_PY |     def L(n,s):return 56*n+16*(s+s//8+6*n)
-# QTT_HOST_PY |     initializer=5125424+21625000+U(7,7*extent)+T(1,parent_path_count);initializer+=6*(U(67,3*extent)+L(2,130)+T(1,65));initializer+=672+T(1,8)+2*T(1,9)+2*T(1,parent_path_count)+24;return(2454466522,324772011,63340350,initializer,1802350,241543444,19469816,1926936,2006628)
+# QTT_HOST_PY |     initializer=5125424+21625000+U(7,7*extent)+T(1,parent_path_count);initializer+=6*(U(67,3*extent)+L(2,130)+T(1,65));initializer+=672+T(1,8)+2*T(1,9)+2*T(1,parent_path_count)+24;return(2454466522,324772011,63340350,initializer,1802350,241543444,19468304,1926632,2006628)
 # QTT_HOST_PY |    def _ordinary_ci_initial_common_projection_v1(source,paths,catalogue,keeper,native):
 # QTT_HOST_PY |     """Project the fixed original programme; its caller owns every operand join."""
 # QTT_HOST_PY |     if(type(source)is not tuple or len(source)!=9 or type(paths)is not tuple or len(paths)!=19 or type(catalogue)is not tuple or len(catalogue)!=8 or type(keeper)is not tuple or len(keeper)!=7 or type(native)is not tuple or len(native)!=3 or any(type(n)is not int or n<0 for row in(source,paths,catalogue,keeper,native)for n in row)):raise ValueError('ORDINARY_INITIAL_COMMON_EXACT_SOURCE_OPERANDS')

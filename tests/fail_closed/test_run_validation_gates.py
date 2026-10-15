@@ -19892,6 +19892,105 @@ if mode=="error"else[])
   outer=2 if route=='bare'else 5 if route=='direct'else 6 if route=='nested'else 7
   wanted=f'::error::CUSTODIAN:I:L{outer}\nRuntimeError{line}#-{mark}\n'.encode('ascii')
   assert events==[('clock',),('write',2,wanted),('pid',),('stop',17,19)]and errors==[]and len(wanted)<=64 and b'private'not in wanted and b'/'not in wanted
+ def _feature_matrix():
+  feature_defs=[copy.deepcopy(next(n for n in ast.walk(host_tree)if isinstance(n,ast.FunctionDef)and n.name==name))for name in('F','version','D','X','same','_qtt_original_policy_features_v1')]
+  def feature_port(payload,mode='ok'):
+   trace=[];handles={};state={'fds':[],'errors':[]};body_fault=OSError('owned read fault');close_fault=OSError('owned close fault');caught=None
+   with tempfile.TemporaryDirectory(prefix='qtt-feature-no-child-')as owned:
+    root=Path(owned);(root/'file').mkdir();(root/'policy').mkdir();(root/'file'/'mask').write_bytes(payload);(root/'policy'/'abi').write_bytes(b'yes\n')
+    if mode=='depth':
+     at=root/'file'
+     for _ in range(17):at=at/'x';at.mkdir()
+    if mode=='total':
+     for i in range(16):(root/'file'/('v'+str(i))).write_bytes(b'x'*65536)
+    ops=SimpleNamespace(O_RDONLY=1,O_NOFOLLOW=2,O_CLOEXEC=4,O_DIRECTORY=8,**{name:(lambda:None)for name in('stat','lstat','fstat','open','read','close','scandir')})
+    functions={getattr(ops,name):name for name in('stat','lstat','fstat','open','read','close','scandir')}
+    def observed(path,stage):
+     q=path.stat(follow_symlinks=False);fields={key:getattr(q,key)for key in('st_dev','st_ino','st_mode','st_uid','st_gid','st_nlink','st_size','st_mtime_ns','st_ctime_ns')}
+     if path.is_file():fields['st_size']=0
+     if path==root/'file'/'mask':
+      if mode=='kind':fields['st_mode']=stat.S_IFLNK|0o777
+      if mode=='association'and stage=='original AppArmor feature held':fields['st_ino']+=1
+      if mode=='changed'and stage=='original AppArmor feature named rejoin':fields['st_ino']+=1
+     return SimpleNamespace(**fields)
+    def handle(path):
+     fd=1000000+len(handles);handles[fd]={'path':path,'real':os.open(path,os.O_RDONLY|getattr(os,'O_BINARY',0))if path.is_file()else None,'closed':False,'closes':0};return fd
+    def effect(label,function,*args,tranche='work',**kwargs):
+     trace.append((label,tranche));kind=functions.get(function)
+     if function is next:
+      it,default=args
+      if it.index==len(it.names):return default
+      name=it.names[it.index];it.index+=1;return SimpleNamespace(name=name)
+     if label=='original AppArmor feature iterator close':return function()
+     if kind=='scandir':
+      path=handles[args[0]]['path'];names=[v.name for v in path.iterdir()]
+      if path==root:
+       if mode=='name':names=['../escape']
+       if mode=='duplicate':names=['file','file']
+       if mode=='count':names=['n'+str(i)for i in range(4097)]
+      it=SimpleNamespace(names=names,index=0,closed=False)
+      def close_iterator():
+       assert not it.closed;it.closed=True
+       if mode=='iterator-close'and path==root:raise close_fault
+      it.close=close_iterator;return it
+     if kind=='stat':return observed(handles[kwargs['dir_fd']]['path']/args[0],label)
+     if kind=='lstat':return observed(root,label)
+     if kind=='fstat':return observed(handles[args[0]]['path'],label)
+     if kind=='open':
+      path=handles[kwargs['dir_fd']]['path']/args[0];flags=args[1]
+      assert flags==(1|2|4|(8 if path.is_dir()else 0));return handle(path)
+     if kind=='read':
+      row=handles[args[0]];request=args[1];assert type(request)is int and 0<request<=65536
+      if row['path']==root/'file'/'mask':
+       if mode in('read','body-close'):raise body_fault
+       if mode=='type':return'not bytes'
+      return os.read(row['real'],min(request,3)if mode=='short'else request)
+     if kind=='close':
+      row=handles[args[0]];assert not row['closed'];row['closed']=True;row['closes']+=1
+      if row['real']is not None:os.close(row['real']);row['real']=None
+      if row['path']==root/'file'/'mask'and mode in('close','body-close'):raise close_fault
+      return None
+     raise AssertionError((label,kind))
+    ports={'state':state,'p':object(),'os':ops,'stat':stat,'E':effect,'_qtt_early_loop_admission_v1':lambda label:trace.append((label,'loop'))}
+    exec(compile(ast.fix_missing_locations(ast.Module(body=copy.deepcopy(feature_defs),type_ignores=[])),'<owned-feature-ports>','exec'),ports)
+    def walk(path,directory=False):
+     assert path=='/sys/kernel/security/apparmor/features'and directory is True
+     return ports['D'](handle(root),path)
+    ports['walk']=walk
+    # Same owned row.
+    previous=effect
+    def selected_effect(label,function,*args,**kwargs):
+     if function is ops.lstat:
+      row=next(v for v in state['fds']if v[1]==args[0]);trace.append((label,kwargs.get('tranche','work')));return observed(handles[row[0]]['path'],label)
+     return previous(label,function,*args,**kwargs)
+    ports['E']=selected_effect
+    try:ports['_qtt_original_policy_features_v1']()
+    except BaseException as error:caught=error
+    finally:
+     for row in handles.values():
+      if row['real']is not None:os.close(row['real']);row['real']=None
+    record=state['original_policy_features']
+    assert all(v['closes']==1 for v in handles.values())and all(v['close_attempted']for v in record['iterators'])
+    return record,caught,state,trace,body_fault,close_fault
+  for payload,expected in(
+(b'@[]()="x";\\tail\r\n',b'file {\n mask {\n@[]()="x";\\tail\r\n }\n}\npolicy {\n abi {\nyes\n }\n}\n'),
+(b'[]',b'file {\n mask {\n[]\n }\n}\npolicy {\n abi {\nyes\n }\n}\n'),
+(b'0x00000000ffffffff\n',b'file {\n mask {\n0x00000000ffffffff\n }\n}\npolicy {\n abi {\nyes\n }\n}\n'),
+(b'inet inet6 unix\n',b'file {\n mask {\ninet inet6 unix\n }\n}\npolicy {\n abi {\nyes\n }\n}\n')):
+   record,caught,state,trace,_,_=feature_port(payload,'short')
+   assert caught is None and record['complete']and record['source']==expected==bytes(record['body'])and state['errors']==[]
+  record,caught,_,_,_,_=feature_port(b'x'*65536)
+  assert caught is None and record['complete']and len(record['entries'][1]['value'])==65536
+  for mode,payload,wanted in(('ok',b'a\0b','grammar'),('ok',b'x'*65537,'extent'),('type',b'x','extent'),('name',b'x','names'),('duplicate',b'x','names'),('count',b'x','names'),('kind',b'x','kind'),('association',b'x','association'),('changed',b'x','changed'),('depth',b'x','tree bound'),('total',b'x','total')):
+   record,caught,state,trace,_,_=feature_port(payload,mode)
+   assert isinstance(caught,RuntimeError)and wanted in str(caught)and record['error']is caught and not record['complete']and state['errors']
+  for mode in('read','close','body-close','iterator-close'):
+   record,caught,state,trace,body_fault,close_fault=feature_port(b'@[]',mode)
+   assert caught is(body_fault if mode in('read','body-close')else close_fault)and record['error']is caught and not record['complete']
+   if mode=='body-close':
+    entry=next(v for v in record['entries']if v['name']=='mask')
+    assert entry['body_error']is body_fault and entry['close_error']is close_fault and any(e is body_fault for _,e in state['errors'])and any(e is close_fault for _,e in state['errors'])
+ _feature_matrix()
  sibling_literal="def _qtt_original_host_source_v1():\n def manager():raise original\n return manager\ndef _qtt_original_live_component_v1():\n def _qtt_beforecompiler_owner_v1():\n  if route=='M':raise original\n  def _qtt_original_inputs_v1():\n   if route=='host':return manager()\n   if route=='outside':return outside()\n   def prepare():raise original\n   return prepare()\n  return _qtt_original_inputs_v1\n return _qtt_beforecompiler_owner_v1\n"
  for route,wanted,debits in(('live',b'::error::CUSTODIAN:I:L11\nFileNotFoundError10#2+\n',9),('host',b'::error::CUSTODIAN:I:L8\nFileNotFoundError2#2+\n',3),('outside',b'::error::CUSTODIAN:I:L9\nFileNotFoundError9#2!\n',6),('M',b'::error::CUSTODIAN:M:L6\nFileNotFoundError6#2+\n',3)):
   cause=FileNotFoundError(2,'private','/private');ns={'original':cause,'route':'live'}
@@ -20254,7 +20353,7 @@ and len(node.value.elts)==9]
   actual_cells=tuple(node.value if isinstance(node,ast.Constant)
 and type(node.value)is int else node.id if isinstance(node,ast.Name)
 else None for node in supplier_returns[0].elts)
-  assert actual_cells==(2454466522,324772011,63340350,'initializer',1802350,241543444,19469816,1926936,2006628)
+  assert actual_cells==(2454466522,324772011,63340350,'initializer',1802350,241543444,19468304,1926632,2006628)
   actual_cells=(2368680179,302894236,34477319,'initializer',1802350,241543444,18421352,1823560,1983204)
   assert actual_cells[6:]== (18421352,1823560,1983204)
   actual_cells=actual_cells[:6]+ (18421264,1823560,1983204)
@@ -28411,27 +28510,27 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
     import io
     from tools import validation_reliability as o
     def bind_administrative_fixture_cwd(query,root,patch):
-        if os.name != 'nt':return
+        if os.name!='nt':return
         original_path=o._linux_preflight_path_v1
         original_command=query.command
         literal='/qtt_test_administrative_cwd'
         def project_owned_cwd(value):
             admitted=original_path(value)
-            return str(root) if admitted==literal else admitted
+            return str(root)if admitted==literal else admitted
         patch.setattr(o,'_linux_preflight_path_v1',project_owned_cwd)
         def bound_command(argv,**kwargs):
-            return original_command(argv,**({'cwd':literal} if 'cwd' not in kwargs else {}),**kwargs)
+            return original_command(argv,**({'cwd':literal}if'cwd'not in kwargs else {}),**kwargs)
         query.command=bound_command
     import struct
     import copy
     import ctypes
     import stat
     undef=0xffffffff
-    def acl_bytes(rows):return struct.pack('<I',2)+b''.join(struct.pack('<HHI',*v) for v in rows)
+    def acl_bytes(rows):return struct.pack('<I',2)+b''.join(struct.pack('<HHI',*v)for v in rows)
     base=((1,7,undef),(4,5,undef),(32,1,undef))
     raw=acl_bytes(base)
     assert o._linux_acl_parse_v2(raw,default=False,mode=0o751)==base
-    assert o._linux_acl_parse_v2(None,default=False,mode=0o777) is None
+    assert o._linux_acl_parse_v2(None,default=False,mode=0o777)is None
     assert o._linux_acl_parse_v2(struct.pack('<I',2),default=True,mode=0o700)==()
     named=((1,7,undef),(2,0,123),(4,4,undef),(8,2,456),(16,6,undef),(32,7,undef))
     parsed=o._linux_acl_parse_v2(acl_bytes(named),default=False,mode=0o767)
@@ -28441,10 +28540,10 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
     assert o._linux_acl_rights_v2(parsed,mode=0o767,owner_uid=1,owner_gid=2,uid=999,groups=(),requested=7)
     assert o._linux_acl_rights_v2(parsed,mode=0o767,owner_uid=1,owner_gid=2,uid=1,groups=(),requested=7)
     invalid=[b'',struct.pack('<I',2),raw[:-1],struct.pack('<I',3)+raw[4:],raw+b'\0',
-        acl_bytes(((1,8,undef),*base[1:])),acl_bytes(((64,7,undef),*base[1:])),acl_bytes(base[1:]),
-        acl_bytes((*base,base[-1])),acl_bytes((base[1],base[0],base[2])),acl_bytes(((1,7,9),*base[1:])),
-        acl_bytes(((1,7,undef),(2,4,undef),*base[1:])),acl_bytes(((1,7,undef),(2,4,12),*base[1:])),
-        acl_bytes(((1,7,undef),(2,4,13),(2,4,12),*base[1:-1],(16,5,undef),base[-1]))]
+acl_bytes(((1,8,undef),*base[1:])),acl_bytes(((64,7,undef),*base[1:])),acl_bytes(base[1:]),
+acl_bytes((*base,base[-1])),acl_bytes((base[1],base[0],base[2])),acl_bytes(((1,7,9),*base[1:])),
+acl_bytes(((1,7,undef),(2,4,undef),*base[1:])),acl_bytes(((1,7,undef),(2,4,12),*base[1:])),
+acl_bytes(((1,7,undef),(2,4,13),(2,4,12),*base[1:-1],(16,5,undef),base[-1]))]
     for damaged in invalid:
         assert damaged!=raw
         with pytest.raises(o.ValidationReliabilityError):o._linux_acl_parse_v2(damaged,default=False,mode=0o751)
@@ -28464,42 +28563,42 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
         def fgetxattr(self,fd,name,buffer,size):
             assert fd==17 and size==1028;calls.append(('get',name,size))
             if name==b'system.posix_acl_access':ctypes.memmove(buffer,raw,len(raw));return len(raw)
-            ctypes.set_errno(61);return -1
+            ctypes.set_errno(61);return-1
     abi.lib=ReferenceACL()
     import errno
-    with monkeypatch.context() as patch:
+    with monkeypatch.context()as patch:
         patch.setattr(errno,'ENODATA',61,raising=False)
         assert abi.acl(17,attempt=lambda op:None,delivered=delivered.append)==(raw,None)
-        assert delivered==[len(name_buffer),len(raw)] and len(calls)==3
+        assert delivered==[len(name_buffer),len(raw)]and len(calls)==3
         assert abi.last_acl['values'][0]['raw_hex']==raw.hex()
         for damaged in (name_buffer[:-1],name_buffer+name_buffer,b'\0'):
-            with monkeypatch.context() as broken:
+            with monkeypatch.context()as broken:
                 def names(fd,buffer,size):ctypes.memmove(buffer,damaged,len(damaged));return len(damaged)
                 broken.setattr(abi.lib,'flistxattr',names)
                 with pytest.raises(o.ValidationReliabilityError):abi.acl(17,attempt=lambda op:None,delivered=lambda n:None)
                 assert abi.last_acl['names_hex']==damaged.hex()
         for number in (1,7,13,34,95):
-            with monkeypatch.context() as broken:
-                def denied(fd,name,buffer,size):ctypes.set_errno(number);return -1
+            with monkeypatch.context()as broken:
+                def denied(fd,name,buffer,size):ctypes.set_errno(number);return-1
                 broken.setattr(abi.lib,'fgetxattr',denied)
-                with pytest.raises(OSError) as observed:abi.acl(17,attempt=lambda op:None,delivered=lambda n:None)
+                with pytest.raises(OSError)as observed:abi.acl(17,attempt=lambda op:None,delivered=lambda n:None)
                 assert observed.value.errno==number and abi.last_acl['failure']['errno']==number
     v2root=str(tmp_path/'v2-original')
-    directory=lambda p,ino,roster:[p,'GIT_ADMIN' if p=='.git' else 'WORKTREE',1,ino,4096,3,4,stat.S_IFDIR|0o555,0,0,2,16,roster]
-    file_row=lambda p,ino,size:[p,'GIT_ADMIN' if p.startswith('.git/') else 'WORKTREE',1,ino,size,3,4,stat.S_IFREG|0o444,0,0,1,16]
+    directory=lambda p,ino,roster:[p,'GIT_ADMIN'if p=='.git'else'WORKTREE',1,ino,4096,3,4,stat.S_IFDIR|0o555,0,0,2,16,roster]
+    file_row=lambda p,ino,size:[p,'GIT_ADMIN'if p.startswith('.git/')else'WORKTREE',1,ino,size,3,4,stat.S_IFREG|0o444,0,0,1,16]
     manifest=dict(basis_kind='NATIVE_IMMUTABLE_V2',run_id='reference-v2',repository_root=v2root,index_path=str(Path(v2root)/'.git/index'),
-        source_root_identity=[1,1],source_generation_ns=5,files=[file_row('.git/index',3,12),file_row('large',4,2*1024**3+1)],
-        directories=[directory('.',1,[['.git','directory'],['large','file']]),directory('.git',2,[['index','file']])],
-        category_totals=dict(R=2*1024**3+1,G=12,I=12))
+source_root_identity=[1,1],source_generation_ns=5,files=[file_row('.git/index',3,12),file_row('large',4,2*1024**3+1)],
+directories=[directory('.',1,[['.git','directory'],['large','file']]),directory('.git',2,[['index','file']])],
+category_totals=dict(R=2*1024**3+1,G=12,I=12))
     catalog=o._linux_source_manifest_v2(manifest)
     assert catalog[3]==7 and catalog[0]['large'][4]==2*1024**3+1
     for mutation in (lambda d:d.update(extra=1),lambda d:d['files'][1].__setitem__(11,0),
-            lambda d:d['files'][1].__setitem__(10,2),lambda d:d['files'][1].__setitem__(8,1001),
-            lambda d:d['files'][1].__setitem__(7,stat.S_IFREG|0o644),lambda d:d['files'][1].__setitem__(1,'GIT_ADMIN'),
-            lambda d:d['directories'][0][12].append(['extra','file']),lambda d:d['files'].append(d['files'][-1]),
-            lambda d:d['category_totals'].update(R=0),lambda d:d.update(source_root_identity=[1,99]),
-            lambda d:d['files'][1].__setitem__(2,2),lambda d:d['files'][1].__setitem__(3,3),
-            lambda d:d['files'][1].__setitem__(0,'x'*4097),lambda d:d['files'][1].__setitem__(0,'/'.join(['x']*65))):
+lambda d:d['files'][1].__setitem__(10,2),lambda d:d['files'][1].__setitem__(8,1001),
+lambda d:d['files'][1].__setitem__(7,stat.S_IFREG|0o644),lambda d:d['files'][1].__setitem__(1,'GIT_ADMIN'),
+lambda d:d['directories'][0][12].append(['extra','file']),lambda d:d['files'].append(d['files'][-1]),
+lambda d:d['category_totals'].update(R=0),lambda d:d.update(source_root_identity=[1,99]),
+lambda d:d['files'][1].__setitem__(2,2),lambda d:d['files'][1].__setitem__(3,3),
+lambda d:d['files'][1].__setitem__(0,'x'*4097),lambda d:d['files'][1].__setitem__(0,'/'.join(['x']*65))):
         damaged=copy.deepcopy(manifest);mutation(damaged);assert damaged!=manifest
         with pytest.raises(o.ValidationReliabilityError):o._linux_source_manifest_v2(damaged)
     with pytest.raises(o.ValidationReliabilityError,match='ACTUAL_LEASE_REQUIRED'):
@@ -28507,23 +28606,23 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
     assert o._linux_preflight_storage_reservation_v1((1048576,)*8,(8*1024**2,)*8,4096)==545259520
     reference_census=dict(complete_size_census=True,logical_bytes=dict(R=28101722860,G=403209782,I=3446734,S=100,E=16))
     geometry=runner._linux_preflight_capacity_v2(reference_census,page_size=4096)
-    assert geometry['metadata_admitted'] is True and geometry['immutable_custody_established'] is False
+    assert geometry['metadata_admitted']is True and geometry['immutable_custody_established']is False
     assert geometry['constraints']['runtime_reservation_bytes']['observed']==545259520
     assert geometry['controller_metadata_design_reservation']==512*1024**2 and geometry['native_memory_limit']==6*1024**3
     incomplete=runner._linux_preflight_capacity_v2({**reference_census,'complete_size_census':False},page_size=4096)
-    assert incomplete['metadata_admitted'] is False and incomplete['constraints']['installation_bytes']['observed'] is None
-    assert incomplete['constraints']['git_executable_bytes']['observed'] is None
+    assert incomplete['metadata_admitted']is False and incomplete['constraints']['installation_bytes']['observed']is None
+    assert incomplete['constraints']['git_executable_bytes']['observed']is None
     for category,limit in (('R',64*1024**3),('S',1024**3),('E',16*1024**2)):
         damaged=copy.deepcopy(reference_census);damaged['logical_bytes'][category]=limit+1
-        assert runner._linux_preflight_capacity_v2(damaged,page_size=4096)['metadata_admitted'] is False
+        assert runner._linux_preflight_capacity_v2(damaged,page_size=4096)['metadata_admitted']is False
     vector=(sys.executable,o._PREFLIGHT_SCRIPTS_V1[3],'--repo-root','.')
     identity=dict(run_id='reference-v2',phase='fast-preflight',command_index=4,original_position=4,command_count=8,
-        argv=list(vector),repo_root=v2root,process_root=str(tmp_path/'v2process'),evidence_root=str(tmp_path/'v2evidence'),parent_pid=os.getpid())
+argv=list(vector),repo_root=v2root,process_root=str(tmp_path/'v2process'),evidence_root=str(tmp_path/'v2evidence'),parent_pid=os.getpid())
     limits=dict(zip(o._PREFLIGHT_DIMENSIONS_V1,(100,1024,100,1024,0,0,0,0),strict=True))
     manifest_path=tmp_path/'source-basis.json';manifest_path.write_bytes(b'X'*100)
     descriptor=dict(kind='NATIVE_IMMUTABLE_V2',path=str(manifest_path),physical_version=list(o._scan_same_api_version(manifest_path.lstat())),byte_length=100,catalog_entry_count=7)
     header=dict(identity=identity,allowance=limits,deadline_ns=time.monotonic_ns()+60*10**9,
-        git=dict(executable=None,evidence_root=None),native_basis=descriptor,selection='ALL_WORKTREE')
+git=dict(executable=None,evidence_root=None),native_basis=descriptor,selection='ALL_WORKTREE')
     assert o._preflight_header_v2(header,0,identity)==7
     with pytest.raises(o.ValidationReliabilityError):o._preflight_header_v1(header,0,identity)
     for key,value in (('selection','NONE'),('native_basis',{**descriptor,'files':[]})):
@@ -28533,12 +28632,12 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
     frame=o._preflight_canonical_v1(header);prefix=struct.pack('>8sQQ',b'QTTPF02\n',len(frame),0)
     framing=tmp_path/'v2-reference-frame';framing.write_bytes(prefix+frame)
     transport=dict(frame_byte_limit=1048576,header_byte_limit=1048552,lexical_units=100000,depth=64,quoted_bytes=100000,
-        read_calls=1000,write_calls=1000,chunk_bytes=65536,retained_buffer_bytes=4*1048576,receiver_byte_limit=1048576)
-    with framing.open('rb',buffering=0) as stream:
+read_calls=1000,write_calls=1000,chunk_bytes=65536,retained_buffer_bytes=4*1048576,receiver_byte_limit=1048576)
+    with framing.open('rb',buffering=0)as stream:
         meter=o._PreflightTransportV1(transport,time.monotonic_ns()+60*10**9)
         decoded,values,count=o._preflight_frame_read_v1(stream.fileno(),magic=(b'QTTPF01\n',b'QTTPF02\n'),extent=24+len(frame),meter=meter,
-            validate=lambda h,p:([],o._preflight_header_v2(h,p,identity)))
-        assert decoded==header and values==[] and count==7 and meter.received==24+len(frame)
+validate=lambda h,p:([],o._preflight_header_v2(h,p,identity)))
+        assert decoded==header and values==[]and count==7 and meter.received==24+len(frame)
     from types import SimpleNamespace
     reference_results=[]
     def source_reference(case):
@@ -28551,31 +28650,31 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
         writes=[0]
         def make(path,directory=False,data=b''):
             nodes[str(path)]=dict(st_dev=1,st_ino=len(nodes)+1,
-                st_mode=(stat.S_IFDIR|0o750) if directory else (stat.S_IFREG|0o640),
-                st_size=4096 if directory else len(data),st_mtime_ns=100,st_ctime_ns=100,
-                st_nlink=2 if directory else 1,st_uid=1001,st_gid=1001,
-                flags=0x80000,data=data)
-        for parent in reversed(root.parents): make(parent,True)
+st_mode=(stat.S_IFDIR|0o750)if directory else (stat.S_IFREG|0o640),
+st_size=4096 if directory else len(data),st_mtime_ns=100,st_ctime_ns=100,
+st_nlink=2 if directory else 1,st_uid=1001,st_gid=1001,
+flags=0x80000,data=data)
+        for parent in reversed(root.parents):make(parent,True)
         make(root,True)
-        for number in range(3): make(root/('file'+str(number)),data=b'abc')
+        for number in range(3):make(root/('file'+str(number)),data=b'abc')
         make(control,True)
         def resolve(path,dir_fd=None):
-            if isinstance(path,int): return descriptors[path]['path']
+            if isinstance(path,int):return descriptors[path]['path']
             path=Path(path)
-            return str(Path(descriptors[dir_fd]['path'])/path) if dir_fd is not None else str(path)
+            return str(Path(descriptors[dir_fd]['path'])/path)if dir_fd is not None else str(path)
         def note(op,path):
-            calls.append((op,str(path),'journal' if str(path).startswith(str(control)) else 'source'))
+            calls.append((op,str(path),'journal'if str(path).startswith(str(control))else'source'))
         def info(path):
             row=nodes[path]
-            return SimpleNamespace(**{k:v for k,v in row.items() if k.startswith('st_')})
+            return SimpleNamespace(**{k:v for k,v in row.items()if k.startswith('st_')})
         def opened(path,flags,mode=0o777,*,dir_fd=None):
             name=resolve(path,dir_fd)
             note('open',name)
             if flags&os.O_CREAT:
-                if flags&os.O_EXCL and name in nodes: raise FileExistsError(name)
+                if flags&os.O_EXCL and name in nodes:raise FileExistsError(name)
                 make(Path(name))
                 nodes[name].update(st_mode=stat.S_IFREG|mode,st_uid=0,st_gid=0)
-            if name not in nodes: raise FileNotFoundError(name)
+            if name not in nodes:raise FileNotFoundError(name)
             sequence[0]+=1
             fd=sequence[0]
             descriptors[fd]=dict(path=name,offset=0)
@@ -28584,7 +28683,7 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
             path=resolve(fd)
             note('close',path)
             del descriptors[fd]
-            if case=='failed-close' and not str(path).startswith(str(control)) and writes[0]==-1:
+            if case=='failed-close'and not str(path).startswith(str(control))and writes[0]==-1:
                 writes[0]=-2
                 raise OSError(5,'injected close outcome unavailable')
         def fstat(fd):
@@ -28599,22 +28698,22 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
         def chmod(fd,mode):
             path=resolve(fd);note('chmod',path)
             nodes[path].update(st_mode=stat.S_IFMT(nodes[path]['st_mode'])|mode,
-                st_ctime_ns=nodes[path]['st_ctime_ns']+1)
+st_ctime_ns=nodes[path]['st_ctime_ns']+1)
         class Stream:
             def __init__(self,path):
                 self.path=path
-                self.names=iter(sorted(Path(n).name for n in nodes if Path(n).parent==Path(path) and n!=path))
+                self.names=iter(sorted(Path(n).name for n in nodes if Path(n).parent==Path(path)and n!=path))
             def __next__(self):
                 note('next',self.path)
                 return SimpleNamespace(name=next(self.names))
-            def close(self): note('scan-close',self.path)
+            def close(self):note('scan-close',self.path)
         def scan(fd):
             path=resolve(fd);note('scandir',path)
             return Stream(path)
         def write(fd,raw):
             path=resolve(fd);note('write',path)
             raw=bytes(raw)
-            if case=='torn-journal' and writes[0]==-1:
+            if case=='torn-journal'and writes[0]==-1:
                 raw=raw[:1]
             nodes[path]['data']+=raw
             nodes[path]['st_size']=len(nodes[path]['data'])
@@ -28630,7 +28729,7 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
             def __init__(self,attempt=None):self.attempt=attempt
             def flags(self,fd,value=None):
                 if self.attempt:self.attempt()
-                path=resolve(fd);note('flags-get' if value is None else 'flags-set',path)
+                path=resolve(fd);note('flags-get'if value is None else'flags-set',path)
                 if value is not None:
                     nodes[path]['flags']=value
                     nodes[path]['st_ctime_ns']+=1
@@ -28639,22 +28738,22 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
         census.complete=True
         census.roots=dict(repository=root)
         census.records=[]
-        for path in (root,*(root/('file'+str(i)) for i in range(3))):
+        for path in (root,*(root/('file'+str(i))for i in range(3))):
             directory=path==root
-            census.records.append(dict(path=str(path),role='repository',kind='directory' if directory else 'file',
-                version=o._LinuxPreflightCensusV1._version(info(str(path))),logical_bytes=0 if directory else 3,
-                roster=['file0','file1','file2'] if directory else []))
+            census.records.append(dict(path=str(path),role='repository',kind='directory'if directory else'file',
+version=o._LinuxPreflightCensusV1._version(info(str(path))),logical_bytes=0 if directory else 3,
+roster=['file0','file1','file2']if directory else []))
         originals=copy.deepcopy(nodes)
-        with monkeypatch.context() as m:
+        with monkeypatch.context()as m:
             for name,value in (('geteuid',lambda:0),('open',opened),('close',close),('fstat',fstat),
-                    ('stat',stated),('lstat',stated),('fchown',chown),('fchmod',chmod),
-                    ('scandir',scan),('write',write),('fsync',sync),('read',read)):
+('stat',stated),('lstat',stated),('fchown',chown),('fchmod',chmod),
+('scandir',scan),('write',write),('fsync',sync),('read',read)):
                 m.setattr(o.os,name,value,raising=False)
             for name in ('O_NOFOLLOW','O_CLOEXEC','O_DIRECTORY'):
                 if not hasattr(o.os,name):m.setattr(o.os,name,0,raising=False)
             m.setattr(o,'_LinuxSourceNativeV2',Native)
             seal=o._LinuxImmutableSourceSealV2(census,deadline_ns=time.monotonic_ns()+60*10**9,
-                workspace=control,run_id='finite-api-reference')
+workspace=control,run_id='finite-api-reference')
             seal.journal_path=control/'journal'
             seal.primitive=dict(complete=True,restored=True,reference_only=True)
             count=seal.metadata_calls
@@ -28663,9 +28762,9 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
             assert seal.accounting['work']+seal.accounting['settlement']+seal.accounting['unallocated']==2000000
             injected=[]
             trigger={'quota':'after-chmod','deadline':'after-chmod','torn-journal':'after-chmod',
-                'foreign-identity':'after-set-immutable','foreign-flags':'after-set-immutable',
-                'primary-cleanup':'after-chmod','failed-close':'after-full-protection',
-                'partial-post':'after-set-immutable'}.get(case,case)
+'foreign-identity':'after-set-immutable','foreign-flags':'after-set-immutable',
+'primary-cleanup':'after-chmod','failed-close':'after-full-protection',
+'partial-post':'after-set-immutable'}.get(case,case)
             def fault(point,path):
                 if point!=trigger or injected:return
                 injected.append((point,path))
@@ -28707,10 +28806,10 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
             except BaseException as exc:cleanup=exc
             assert seal.forward_failure==repr(primary)
             assert all(seal.accounting['stages'][k]['reserved']==v['reserved']
-                for k,v in before.items() if k!='settlement')
-            assert seal.metadata_calls==sum(kind=='source' and op!='read' for op,path,kind in calls),case
+for k,v in before.items()if k!='settlement')
+            assert seal.metadata_calls==sum(kind=='source'and op!='read'for op,path,kind in calls),case
             assert seal.journal_counts['work']['calls']+seal.journal_counts['settlement']['calls']==sum(
-                kind=='journal' for op,path,kind in calls)
+kind=='journal'for op,path,kind in calls)
             if case in ('foreign-identity','foreign-flags','primary-cleanup','failed-close'):
                 assert cleanup is not None and seal.state=='FAILED'
             else:
@@ -28723,28 +28822,28 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
             if case=='quota':
                 assert seal.rejected_reservations and seal.accounting['stages']['settlement']['performed']>0
             reference_results.append(dict(case=case,primary=repr(primary),cleanup=repr(cleanup),
-                metadata_calls=seal.metadata_calls,read_attempts=seal.read_attempts,bytes=seal.read_bytes,
-                state=seal.state,original_latch_retained=seal.forward_failure==repr(primary),
-                prospective_and_actual=seal.accounting,journal=seal.journal_counts))
+metadata_calls=seal.metadata_calls,read_attempts=seal.read_attempts,bytes=seal.read_bytes,
+state=seal.state,original_latch_retained=seal.forward_failure==repr(primary),
+prospective_and_actual=seal.accounting,journal=seal.journal_counts))
     for case in ('before-mutation','after-chown','after-chmod','after-set-immutable',
-            'after-full-protection','during-readability','quota','deadline','torn-journal',
-            'partial-post','foreign-identity','foreign-flags','primary-cleanup','failed-close','after-readability'):
+'after-full-protection','during-readability','quota','deadline','torn-journal',
+'partial-post','foreign-identity','foreign-flags','primary-cleanup','failed-close','after-readability'):
         source_reference(case)
     for close_case in ('native-close','charged-pre-close'):
-        close_seal = object.__new__(o._LinuxImmutableSourceSealV2)
-        close_seal.pid,close_seal.thread = os.getpid(),o.threading.get_ident()
-        close_seal.deadline_ns = time.monotonic_ns() + 60 * 10**9
-        close_seal.phase,close_seal.stage,close_seal.state = 'work','setup','FAILED'
-        close_seal.failure = RuntimeError('independent original SOURCE body failure')
-        close_seal.owned,close_seal.anchors = {17: 'setup'},[(17,(1,2),'synthetic')]
-        close_seal.close_failure_count,close_seal.close_failures = 0,[]
-        close_seal.metadata_calls = 0
-        close_seal.accounting = {'stages': {'setup': {'performed': 0}}}
-        close_seal.recovery_cases,close_seal.attempts = [],[]
-        close_seal.primitive,close_seal.journal_fd = {},None
-        close_fault = OSError('synthetic SOURCE close outcome unavailable')
-        close_calls,open_calls = [],[]
-        original_close_performed = close_seal._performed
+        close_seal=object.__new__(o._LinuxImmutableSourceSealV2)
+        close_seal.pid,close_seal.thread=os.getpid(),o.threading.get_ident()
+        close_seal.deadline_ns=time.monotonic_ns()+60*10**9
+        close_seal.phase,close_seal.stage,close_seal.state='work','setup','FAILED'
+        close_seal.failure=RuntimeError('independent original SOURCE body failure')
+        close_seal.owned,close_seal.anchors= {17:'setup'},[(17,(1,2),'synthetic')]
+        close_seal.close_failure_count,close_seal.close_failures=0,[]
+        close_seal.metadata_calls=0
+        close_seal.accounting= {'stages': {'setup': {'performed':0}}}
+        close_seal.recovery_cases,close_seal.attempts= [],[]
+        close_seal.primitive,close_seal.journal_fd= {},None
+        close_fault=OSError('synthetic SOURCE close outcome unavailable')
+        close_calls,open_calls= [],[]
+        original_close_performed=close_seal._performed
         def charge_close_then_fail(stage=None):
             original_close_performed(stage)
             raise close_fault
@@ -28754,270 +28853,270 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
         def forbidden_reopen(*args,**kwargs):
             open_calls.append((args,kwargs))
             raise AssertionError('failed-close capacity must deny before native open')
-        with monkeypatch.context() as failed_source_close:
+        with monkeypatch.context()as failed_source_close:
             failed_source_close.setattr(o.os,'close',unavailable_close)
             failed_source_close.setattr(o.os,'open',forbidden_reopen)
-            if close_case == 'charged-pre-close':
+            if close_case=='charged-pre-close':
                 failed_source_close.setattr(close_seal,'_performed',charge_close_then_fail)
-            with pytest.raises(OSError) as close_error:
+            with pytest.raises(OSError)as close_error:
                 close_seal._close(17)
             assert close_error.value is close_fault
-            assert close_seal.owned == {} and close_seal.close_failure_count == 1
-            assert close_seal.metadata_calls == close_seal.accounting['stages']['setup']['performed'] == 1
-            assert len(close_seal.close_failures) == 1 and close_seal.close_failures[0]['fd'] == 17
-            assert close_calls == ([17] if close_case == 'native-close' else [])
+            assert close_seal.owned== {}and close_seal.close_failure_count==1
+            assert close_seal.metadata_calls==close_seal.accounting['stages']['setup']['performed']==1
+            assert len(close_seal.close_failures)==1 and close_seal.close_failures[0]['fd']==17
+            assert close_calls== ([17]if close_case=='native-close'else [])
             with pytest.raises(o.ValidationReliabilityError,match='LINUX_V2_DESCRIPTOR_CAPACITY'):
                 close_seal._open('synthetic',0)
-            assert open_calls == []
+            assert open_calls== []
             with pytest.raises(o.ValidationReliabilityError,match='LINUX_V2_RESTORATION_FAILED'):
-                close_seal.restore(deadline_ns=time.monotonic_ns() + 60 * 10**9,
-                    processes_settled=True)
-            assert close_seal.state == 'FAILED' and close_seal.phase == 'settlement'
-            assert close_seal.forward_failure == repr(close_seal.failure)
-            assert close_seal.close_failure_count == 1 and len(close_seal.close_failures) == 1
-            assert close_calls == ([17] if close_case == 'native-close' else []) and open_calls == []
-            assert any('LINUX_V2_UNRESOLVED_OWNED_DESCRIPTOR' in error
-                for error in close_seal.settlement_errors)
-    module_path = Path(runner.REPO_ROOT) / 'tools' / 'master_plan_ingest.py'
-    module_text = module_path.read_text(encoding='utf-8')
-    module_tree = __import__('ast').parse(module_text)
-    native_scope = object.__new__(o._LinuxPreflightScopeV1)
-    native_source = object.__new__(o._LinuxImmutableSourceSealV2)
-    native_scope.source = native_source
-    native_scope._ordinary_runner_owner_v1 = native_scope._ordinary_original_runner_owner_v1 = runner
-    native_scope._ordinary_bound_paths_v1 = SimpleNamespace(repo_root=Path(runner.REPO_ROOT))
-    native_source.state,native_source.failure = 'READABLE',None
-    input_path = Path(runner.REPO_ROOT) / 'docs/master_plan/QTT_MasterPlan_Current.md'
-    input_row = {'role':'repository','kind':'file','logical_bytes':5}
-    native_source.row_index,native_source.files,native_source.post = {str(input_path):input_row},{str(input_path):object()},{str(input_path):(1,2)}
-    requested = (o.sys.executable,'tools/master_plan_ingest.py','--input',
-        'docs/master_plan/QTT_MasterPlan_Current.md','--section-manifest-out','a',
-        '--traceability-out','b','--scope-report-out','c')
-    effective = (requested[0],'-I','-S','-B',*requested[1:])
-    native_entry = SimpleNamespace(argv=effective,cwd=str(runner.REPO_ROOT))
-    native_execution = SimpleNamespace(registered_argv=requested,execution_argv=effective)
-    native_bound = (native_entry,native_execution,9)
-    native_scope._ordinary_source_selection_v1 = SimpleNamespace(_bound=(native_bound,))
-    operand = {'path':'tools/master_plan_ingest.py','text':module_text,'complete':True,'error':None}
-    native_scope._ordinary_source_operand_cache_v1 = {(operand['path'],'PYTHON'):(module_tree,operand)}
-    grammar = ((operand,'<module>',module_text,()),)
-    native_resource = {'fd_demand':(20,12,8)}
-    native_scope._ordinary_resource_programme_v1 = native_resource
-    native_scope._ordinary_original_resource_programme_v1 = (native_resource,tuple(native_resource.items()))
-    factory_calls = []
+                close_seal.restore(deadline_ns=time.monotonic_ns()+60*10**9,
+processes_settled=True)
+            assert close_seal.state=='FAILED'and close_seal.phase=='settlement'
+            assert close_seal.forward_failure==repr(close_seal.failure)
+            assert close_seal.close_failure_count==1 and len(close_seal.close_failures)==1
+            assert close_calls== ([17]if close_case=='native-close'else [])and open_calls== []
+            assert any('LINUX_V2_UNRESOLVED_OWNED_DESCRIPTOR'in error
+for error in close_seal.settlement_errors)
+    module_path=Path(runner.REPO_ROOT)/'tools'/'master_plan_ingest.py'
+    module_text=module_path.read_text(encoding='utf-8')
+    module_tree=__import__('ast').parse(module_text)
+    native_scope=object.__new__(o._LinuxPreflightScopeV1)
+    native_source=object.__new__(o._LinuxImmutableSourceSealV2)
+    native_scope.source=native_source
+    native_scope._ordinary_runner_owner_v1=native_scope._ordinary_original_runner_owner_v1=runner
+    native_scope._ordinary_bound_paths_v1=SimpleNamespace(repo_root=Path(runner.REPO_ROOT))
+    native_source.state,native_source.failure='READABLE',None
+    input_path=Path(runner.REPO_ROOT)/'docs/master_plan/QTT_MasterPlan_Current.md'
+    input_row= {'role':'repository','kind':'file','logical_bytes':5}
+    native_source.row_index,native_source.files,native_source.post= {str(input_path):input_row},{str(input_path):object()},{str(input_path):(1,2)}
+    requested= (o.sys.executable,'tools/master_plan_ingest.py','--input',
+'docs/master_plan/QTT_MasterPlan_Current.md','--section-manifest-out','a',
+'--traceability-out','b','--scope-report-out','c')
+    effective= (requested[0],'-I','-S','-B',*requested[1:])
+    native_entry=SimpleNamespace(argv=effective,cwd=str(runner.REPO_ROOT))
+    native_execution=SimpleNamespace(registered_argv=requested,execution_argv=effective)
+    native_bound= (native_entry,native_execution,9)
+    native_scope._ordinary_source_selection_v1=SimpleNamespace(_bound=(native_bound,))
+    operand= {'path':'tools/master_plan_ingest.py','text':module_text,'complete':True,'error':None}
+    native_scope._ordinary_source_operand_cache_v1= {(operand['path'],'PYTHON'):(module_tree,operand)}
+    grammar= ((operand,'<module>',module_text,()),)
+    native_resource= {'fd_demand':(20,12,8)}
+    native_scope._ordinary_resource_programme_v1=native_resource
+    native_scope._ordinary_original_resource_programme_v1= (native_resource,tuple(native_resource.items()))
+    factory_calls= []
     def isolated_native_call(*args,**kwargs):
         factory_calls.append((args,kwargs))
         return factory_calls
-    with monkeypatch.context() as isolated_native_ports:
+    with monkeypatch.context()as isolated_native_ports:
         isolated_native_ports.setattr(o,'_ordinary_native_source_programme_v1',isolated_native_call)
-        assert o._ordinary_master_plan_python_native_v1(native_scope,native_bound,(operand,),grammar) is factory_calls
-        assert len(factory_calls) == 1 and factory_calls[0][0] == (native_scope,native_bound,(operand,),grammar)
-        assert factory_calls[0][1]['cohorts'] == ((('APPLICATION',),(operand,),()),)
-        assert factory_calls[0][1]['bootstrap_fd_demand'] == 12 and factory_calls[0][1]['application_fd_demand'] == 8
-        assert factory_calls[0][1]['nofile'] == 12 and factory_calls[0][1]['stdout_minimum'] == len('MASTER_PLAN_INGEST_OK') + 1
-        native_execution.execution_argv = requested
+        assert o._ordinary_master_plan_python_native_v1(native_scope,native_bound,(operand,),grammar)is factory_calls
+        assert len(factory_calls)==1 and factory_calls[0][0]== (native_scope,native_bound,(operand,),grammar)
+        assert factory_calls[0][1]['cohorts']== ((('APPLICATION',),(operand,),()),)
+        assert factory_calls[0][1]['bootstrap_fd_demand']==12 and factory_calls[0][1]['application_fd_demand']==8
+        assert factory_calls[0][1]['nofile']==12 and factory_calls[0][1]['stdout_minimum']==len('MASTER_PLAN_INGEST_OK')+1
+        native_execution.execution_argv=requested
         with pytest.raises(o.ValidationReliabilityError,match='ORDINARY_MASTER_PLAN_ISOLATED_ORIGINAL_EFFECTIVE_ARGV'):
             o._ordinary_master_plan_python_native_v1(native_scope,native_bound,(operand,),grammar)
-        native_execution.execution_argv = effective
+        native_execution.execution_argv=effective
         del native_source.post[str(input_path)]
         with pytest.raises(o.ValidationReliabilityError,match='ORDINARY_MASTER_PLAN_ORIGINAL_PROTECTED_INPUT_OPERAND'):
             o._ordinary_master_plan_python_native_v1(native_scope,native_bound,(operand,),grammar)
-        native_source.post[str(input_path)] = (1,2)
-        alien_text = module_text + '\nimport subprocess\n'
-        operand['text'] = alien_text
-        native_scope._ordinary_source_operand_cache_v1[(operand['path'],'PYTHON')] = (__import__('ast').parse(alien_text),operand)
+        native_source.post[str(input_path)]= (1,2)
+        alien_text=module_text+'\nimport subprocess\n'
+        operand['text']=alien_text
+        native_scope._ordinary_source_operand_cache_v1[(operand['path'],'PYTHON')]= (__import__('ast').parse(alien_text),operand)
         with pytest.raises(o.ValidationReliabilityError,match='ORDINARY_MASTER_PLAN_ORIGINAL_STDLIB_IMPORT_COHORT'):
             o._ordinary_master_plan_python_native_v1(native_scope,native_bound,(operand,),((operand,'<module>',alien_text,()),))
-        assert len(factory_calls) == 1
-    original_run_path = runner._path
-    adapter_paths = object.__new__(runner.ValidationRunPathsV1)
+        assert len(factory_calls)==1
+    original_run_path=runner._path
+    adapter_paths=object.__new__(runner.ValidationRunPathsV1)
     object.__setattr__(adapter_paths,'repo_root',Path(runner.REPO_ROOT))
-    native_scope.repository = Path(runner.REPO_ROOT)
-    native_scope._ordinary_evidence_paths_v1 = adapter_paths
-    with monkeypatch.context() as adapter_ports:
-        adapter_ports.setattr(runner,'_path',lambda *parts: original_run_path(*parts).replace('\\','/'))
-        adapter_ports.setattr(o._LinuxPreflightScopeV1,'_ordinary_selected_v1',lambda self: True)
-        adapter_ports.setattr(o._LinuxPreflightScopeV1,'_ordinary_precursor_ready_v1',lambda self: None)
+    native_scope.repository=Path(runner.REPO_ROOT)
+    native_scope._ordinary_evidence_paths_v1=adapter_paths
+    with monkeypatch.context()as adapter_ports:
+        adapter_ports.setattr(runner,'_path',lambda*parts:original_run_path(*parts).replace('\\','/'))
+        adapter_ports.setattr(o._LinuxPreflightScopeV1,'_ordinary_selected_v1',lambda self:True)
+        adapter_ports.setattr(o._LinuxPreflightScopeV1,'_ordinary_precursor_ready_v1',lambda self:None)
         adapter_ports.setattr(runner,'_RUN_COMMANDS_ACTIVE_PATHS',adapter_paths)
         adapter_ports.setattr(runner,'_RUN_COMMANDS_SUPERVISION',{'paths':adapter_paths,'phase':'deterministic-validators-a'})
-        token = o._LINUX_PREFLIGHT_PROCESS_V1.set(native_scope)
+        token=o._LINUX_PREFLIGHT_PROCESS_V1.set(native_scope)
         try:
-            assert runner._ordinary_post_execution_argv_v1(requested,requested) == effective
-            unrelated = (o.sys.executable,'tools/unselected-fixture.py')
-            assert runner._ordinary_post_execution_argv_v1(unrelated,unrelated) is unrelated
+            assert runner._ordinary_post_execution_argv_v1(requested,requested)==effective
+            unrelated= (o.sys.executable,'tools/unselected-fixture.py')
+            assert runner._ordinary_post_execution_argv_v1(unrelated,unrelated)is unrelated
             with pytest.raises(o.ValidationReliabilityError,match='ORDINARY_MASTER_PLAN_COMPETING_EXECUTION_PROJECTION'):
                 runner._ordinary_post_execution_argv_v1(requested,effective)
-            adapter_ports.setattr(o._LinuxPreflightScopeV1,'_ordinary_selected_v1',lambda self: False)
-            assert runner._ordinary_post_execution_argv_v1(requested,requested) is requested
+            adapter_ports.setattr(o._LinuxPreflightScopeV1,'_ordinary_selected_v1',lambda self:False)
+            assert runner._ordinary_post_execution_argv_v1(requested,requested)is requested
         finally:
             o._LINUX_PREFLIGHT_PROCESS_V1.reset(token)
     assert runner._path is original_run_path
-    root = Path(runner.REPO_ROOT)
-    V = root.parent / 'synthetic-source-only-V'
-    native_scope._ordinary_bound_paths_v1 = SimpleNamespace(repo_root=root,validation_output_root=V)
-    native_source._ordinary_meter_scope_v1 = native_scope
-    native_scope._ordinary_original_source_selection_v1 = native_scope._ordinary_source_selection_v1
-    source_variants = (
-        ('tools/validate_qtt_owner_global_override_authority.py',
-            ('--mode','dev','--repo-root','.','--out',str(V/'owner.json')),
-            ('tools/validate_qtt_owner_global_override_authority.py',)),
-        ('tools/validate_atomicrows_row_family_source_manifest_currentization.py',
-            ('--repo-root','.','--out',str(V/'atomic.json')),
-            ('tools/validate_atomicrows_row_family_source_manifest_currentization.py',
-             'tools/build_master_plan_section_coverage_report.py',
-             'tools/validate_master_plan_section_coverage.py','tools/master_plan_ingest.py')))
+    root=Path(runner.REPO_ROOT)
+    V=root.parent/'synthetic-source-only-V'
+    native_scope._ordinary_bound_paths_v1=SimpleNamespace(repo_root=root,validation_output_root=V)
+    native_source._ordinary_meter_scope_v1=native_scope
+    native_scope._ordinary_original_source_selection_v1=native_scope._ordinary_source_selection_v1
+    source_variants= (
+('tools/validate_qtt_owner_global_override_authority.py',
+('--mode','dev','--repo-root','.','--out',str(V/'owner.json')),
+('tools/validate_qtt_owner_global_override_authority.py',)),
+('tools/validate_atomicrows_row_family_source_manifest_currentization.py',
+('--repo-root','.','--out',str(V/'atomic.json')),
+('tools/validate_atomicrows_row_family_source_manifest_currentization.py',
+'tools/build_master_plan_section_coverage_report.py',
+'tools/validate_master_plan_section_coverage.py','tools/master_plan_ingest.py')))
     import ast as source_ast
-    native_scope._ordinary_image_v1 = {'mount_path': root.parent / 'synthetic-owned-image'}
-    native_scope.interpreter = o.sys.executable
-    std_root = Path(o.sys.prefix)/'lib'/'python3.14'
-    dynamic = std_root/'lib-dynload'
-    install_rows = [dict(path=str(std_root),kind='directory',roster=('json','__pycache__','config-3.14')),
-        dict(path=str(dynamic),kind='directory',roster=('_opcode.cpython-314-x86_64-linux-gnu.so',)),
-        dict(path=str(std_root/'json'),kind='directory',roster=('__init__.py',)),
-        dict(path=str(std_root/'json/__init__.py'),kind='file',roster=()),
-        dict(path=str(std_root/'__pycache__'),kind='directory',roster=('abc.cpython-314.pyc',)),
-        dict(path=str(std_root/'__pycache__/abc.cpython-314.pyc'),kind='file',roster=()),
-        dict(path=str(std_root/'config-3.14'),kind='directory',roster=()),
-        dict(path=str(dynamic/'_opcode.cpython-314-x86_64-linux-gnu.so'),kind='file',roster=())]
-    copier = SimpleNamespace(row_index={row['path']:row for row in install_rows},
-        directories={row['path']:tuple((name,next(child['kind'] for child in install_rows
-            if child['path']==str(Path(row['path'])/name))) for name in row['roster'])
-            for row in install_rows if row['kind']=='directory'})
-    install = dict(complete=True,errors=[],install=copier,rows=install_rows,census=SimpleNamespace(roots={'installation':Path(o.sys.prefix)}))
-    native_scope._ordinary_installation_copy_v1 = native_scope._ordinary_original_installation_copy_v1 = install
-    closed_factory_calls = []
-    original_native_factory = o._ordinary_native_source_programme_v1
+    native_scope._ordinary_image_v1= {'mount_path':root.parent/'synthetic-owned-image'}
+    native_scope.interpreter=o.sys.executable
+    std_root=Path(o.sys.prefix)/'lib'/'python3.14'
+    dynamic=std_root/'lib-dynload'
+    install_rows= [dict(path=str(std_root),kind='directory',roster=('json','__pycache__','config-3.14')),
+dict(path=str(dynamic),kind='directory',roster=('_opcode.cpython-314-x86_64-linux-gnu.so',)),
+dict(path=str(std_root/'json'),kind='directory',roster=('__init__.py',)),
+dict(path=str(std_root/'json/__init__.py'),kind='file',roster=()),
+dict(path=str(std_root/'__pycache__'),kind='directory',roster=('abc.cpython-314.pyc',)),
+dict(path=str(std_root/'__pycache__/abc.cpython-314.pyc'),kind='file',roster=()),
+dict(path=str(std_root/'config-3.14'),kind='directory',roster=()),
+dict(path=str(dynamic/'_opcode.cpython-314-x86_64-linux-gnu.so'),kind='file',roster=())]
+    copier=SimpleNamespace(row_index={row['path']:row for row in install_rows},
+directories={row['path']:tuple((name,next(child['kind']for child in install_rows
+if child['path']==str(Path(row['path'])/name)))for name in row['roster'])
+for row in install_rows if row['kind']=='directory'})
+    install=dict(complete=True,errors=[],install=copier,rows=install_rows,census=SimpleNamespace(roots={'installation':Path(o.sys.prefix)}))
+    native_scope._ordinary_installation_copy_v1=native_scope._ordinary_original_installation_copy_v1=install
+    closed_factory_calls= []
+    original_native_factory=o._ordinary_native_source_programme_v1
     def closed_source_factory(*args,**kwargs):
         closed_factory_calls.append((args,kwargs))
         return closed_factory_calls
-    with monkeypatch.context() as closed_source_ports:
+    with monkeypatch.context()as closed_source_ports:
         closed_source_ports.setattr(o,'_ordinary_native_source_programme_v1',closed_source_factory)
-        closed_source_ports.setattr(o._LinuxPreflightScopeV1,'_ordinary_installation_record_v1',lambda self,operand: install if operand is copier else None)
-        original_sys = o.sys
-        selected_sys = SimpleNamespace(executable=str(Path(original_sys.prefix)/'bin'/'python3.14'),
-            implementation=original_sys.implementation,version_info=original_sys.version_info,
-            prefix=original_sys.prefix,base_prefix=original_sys.base_prefix,
-            exec_prefix=original_sys.prefix,base_exec_prefix=original_sys.prefix,
-            platlibdir='lib',_stdlib_dir=str(std_root),abiflags='')
+        closed_source_ports.setattr(o._LinuxPreflightScopeV1,'_ordinary_installation_record_v1',lambda self,operand:install if operand is copier else None)
+        original_sys=o.sys
+        selected_sys=SimpleNamespace(executable=str(Path(original_sys.prefix)/'bin'/'python3.14'),
+implementation=original_sys.implementation,version_info=original_sys.version_info,
+prefix=original_sys.prefix,base_prefix=original_sys.base_prefix,
+exec_prefix=original_sys.prefix,base_exec_prefix=original_sys.prefix,
+platlibdir='lib',_stdlib_dir=str(std_root),abiflags='')
         closed_source_ports.setattr(o,'sys',selected_sys)
         closed_source_ports.setattr(runner,'sys',selected_sys)
-        native_scope.interpreter = selected_sys.executable
+        native_scope.interpreter=selected_sys.executable
         for module,tail,names in source_variants:
-            selected = (o.sys.executable,module,*tail)
-            cache_path = native_scope._ordinary_image_v1['mount_path']/'runtime'/'p1'/'pycache'
-            vector = ((selected[0],'-I','-S','-B','-X','pycache_prefix='+str(cache_path),*selected[1:])
-                if len(names)>1 else (selected[0],'-I','-S','-B',*selected[1:]))
-            entry = SimpleNamespace(argv=vector,cwd=str(root),command_index=1)
-            execution = SimpleNamespace(registered_argv=selected,execution_argv=vector)
-            bound = (entry,execution,9)
-            native_scope._ordinary_source_selection_v1._bound = (bound,)
-            operands = tuple(dict(path=name,text=(root/name).read_text(encoding='utf8'),complete=True,error=None) for name in names)
-            grammar = tuple((operand,'<module>',operand['text'],()) for operand in operands)
-            native_scope._ordinary_source_operand_cache_v1 = {(operand['path'],'PYTHON'):(source_ast.parse(operand['text']),operand) for operand in operands}
-            with monkeypatch.context() as family_adapter_ports:
-                family_adapter_ports.setattr(runner,'_path',lambda *parts: original_run_path(*parts).replace('\\','/'))
-                family_adapter_ports.setattr(o._LinuxPreflightScopeV1,'_ordinary_selected_v1',lambda self: True)
-                family_adapter_ports.setattr(o._LinuxPreflightScopeV1,'_ordinary_precursor_ready_v1',lambda self: None)
+            selected= (o.sys.executable,module,*tail)
+            cache_path=native_scope._ordinary_image_v1['mount_path']/'runtime'/'p1'/'pycache'
+            vector= ((selected[0],'-I','-S','-B','-X','pycache_prefix='+str(cache_path),*selected[1:])
+if len(names)>1 else (selected[0],'-I','-S','-B',*selected[1:]))
+            entry=SimpleNamespace(argv=vector,cwd=str(root),command_index=1)
+            execution=SimpleNamespace(registered_argv=selected,execution_argv=vector)
+            bound= (entry,execution,9)
+            native_scope._ordinary_source_selection_v1._bound= (bound,)
+            operands=tuple(dict(path=name,text=(root/name).read_text(encoding='utf8'),complete=True,error=None)for name in names)
+            grammar=tuple((operand,'<module>',operand['text'],())for operand in operands)
+            native_scope._ordinary_source_operand_cache_v1= {(operand['path'],'PYTHON'):(source_ast.parse(operand['text']),operand)for operand in operands}
+            with monkeypatch.context()as family_adapter_ports:
+                family_adapter_ports.setattr(runner,'_path',lambda*parts:original_run_path(*parts).replace('\\','/'))
+                family_adapter_ports.setattr(o._LinuxPreflightScopeV1,'_ordinary_selected_v1',lambda self:True)
+                family_adapter_ports.setattr(o._LinuxPreflightScopeV1,'_ordinary_precursor_ready_v1',lambda self:None)
                 family_adapter_ports.setattr(runner,'_RUN_COMMANDS_ACTIVE_PATHS',adapter_paths)
                 family_adapter_ports.setattr(runner,'_RUN_COMMANDS_SUPERVISION',{'paths':adapter_paths,'phase':'deterministic-validators-a'})
-                family_token = o._LINUX_PREFLIGHT_PROCESS_V1.set(native_scope)
+                family_token=o._LINUX_PREFLIGHT_PROCESS_V1.set(native_scope)
                 try:
-                    assert runner._ordinary_post_execution_argv_v1(selected,selected,command_index=1) == vector
-                    assert runner._ordinary_post_execution_argv_v1(selected,selected,command_index=1)[-len(selected[2:]):] == selected[2:]
+                    assert runner._ordinary_post_execution_argv_v1(selected,selected,command_index=1)==vector
+                    assert runner._ordinary_post_execution_argv_v1(selected,selected,command_index=1)[-len(selected[2:]):]==selected[2:]
                 finally:
                     o._LINUX_PREFLIGHT_PROCESS_V1.reset(family_token)
             assert runner._path is original_run_path
-            tools_path = str(root/'tools')
-            tool_names = tuple(Path(name).name for name in names)
-            tools_row = {'path':tools_path,'kind':'directory','roster':tool_names}
-            root_row = {'path':str(root),'kind':'directory','roster':('tools',)}
-            native_source.row_index = {str(root):root_row,tools_path:tools_row,
-                **{str(root/name):{'path':str(root/name),'kind':'file'} for name in names}}
-            native_source.rows = list(native_source.row_index.values())
-            native_source.directories = {str(root):(('tools','directory'),),tools_path:tuple((name,'file') for name in tool_names)}
-            native_source.post[tools_path] = native_source.post[str(root)] = (1,2)
-            assert o._ordinary_deterministic_python_native_v1(native_scope,bound,operands,grammar) is closed_factory_calls
-            assert closed_factory_calls[-1][1]['cohorts'] == ((('APPLICATION',),operands,()),)
-            assert closed_factory_calls[-1][1]['nofile'] == 12 and closed_factory_calls[-1][1]['application_fd_demand'] == 8
-            requested_marker = next(node.value.value for node in source_ast.parse(operands[0]['text']).body
-                if isinstance(node,source_ast.Assign) and any(isinstance(target,source_ast.Name) and target.id=='SUCCESS_MARKER' for target in node.targets))
-            assert closed_factory_calls[-1][1]['stdout_minimum'] == len(requested_marker.encode('utf8')) + 1
+            tools_path=str(root/'tools')
+            tool_names=tuple(Path(name).name for name in names)
+            tools_row= {'path':tools_path,'kind':'directory','roster':tool_names}
+            root_row= {'path':str(root),'kind':'directory','roster':('tools',)}
+            native_source.row_index= {str(root):root_row,tools_path:tools_row,
+**{str(root/name):{'path':str(root/name),'kind':'file'}for name in names}}
+            native_source.rows=list(native_source.row_index.values())
+            native_source.directories= {str(root):(('tools','directory'),),tools_path:tuple((name,'file')for name in tool_names)}
+            native_source.post[tools_path]=native_source.post[str(root)]= (1,2)
+            assert o._ordinary_deterministic_python_native_v1(native_scope,bound,operands,grammar)is closed_factory_calls
+            assert closed_factory_calls[-1][1]['cohorts']== ((('APPLICATION',),operands,()),)
+            assert closed_factory_calls[-1][1]['nofile']==12 and closed_factory_calls[-1][1]['application_fd_demand']==8
+            requested_marker=next(node.value.value for node in source_ast.parse(operands[0]['text']).body
+if isinstance(node,source_ast.Assign)and any(isinstance(target,source_ast.Name)and target.id=='SUCCESS_MARKER'for target in node.targets))
+            assert closed_factory_calls[-1][1]['stdout_minimum']==len(requested_marker.encode('utf8'))+1
             for operand in operands:
-                operand['row'] = native_source.row_index[str(root/operand['path'])]
-                operand['version'] = native_source.post[str(root/operand['path'])] = (1,2,3,4,5,6)
-                operand['source_form'] = 'PYTHON'
-            native_scope._ordinary_original_source_operand_cache_v1 = native_scope._ordinary_source_operand_cache_v1
-            actual_native = original_native_factory(native_scope,bound,operands,grammar,**closed_factory_calls[-1][1])
-            assert o._ordinary_native_source_programme_check_v1(native_scope,actual_native) is actual_native
-            assert ('pycache_operand' in actual_native) is (len(names)>1)
+                operand['row']=native_source.row_index[str(root/operand['path'])]
+                operand['version']=native_source.post[str(root/operand['path'])]= (1,2,3,4,5,6)
+                operand['source_form']='PYTHON'
+            native_scope._ordinary_original_source_operand_cache_v1=native_scope._ordinary_source_operand_cache_v1
+            actual_native=original_native_factory(native_scope,bound,operands,grammar,**closed_factory_calls[-1][1])
+            assert o._ordinary_native_source_programme_check_v1(native_scope,actual_native)is actual_native
+            assert ('pycache_operand'in actual_native)is (len(names)>1)
             if len(names)>1:
-                foreign_cache = (cache_path/'foreign',bound,operands,grammar,install)
-                foreign_kwargs = {**closed_factory_calls[-1][1],'pycache_operand':foreign_cache}
+                foreign_cache= (cache_path/'foreign',bound,operands,grammar,install)
+                foreign_kwargs= {**closed_factory_calls[-1][1],'pycache_operand':foreign_cache}
                 with pytest.raises(o.ValidationReliabilityError,match='ORDINARY_PYTHON_RECIPE_ORIGINAL_SOURCE_OWNED_CACHE_OPERAND'):
                     original_native_factory(native_scope,bound,operands,grammar,**foreign_kwargs)
-                root_row['roster'] = ('tools','__pycache__')
-                native_source.row_index[str(root/'__pycache__')] = {'kind':'directory'}
-                native_source.directories[str(root)] = (('tools','directory'),('__pycache__','directory'))
-                assert o._ordinary_deterministic_python_native_v1(native_scope,bound,operands,grammar) is closed_factory_calls
-                root_row['roster'] = ('tools',)
-                native_source.directories[str(root)] = (('tools','directory'),)
-            execution.execution_argv = selected
+                root_row['roster']= ('tools','__pycache__')
+                native_source.row_index[str(root/'__pycache__')]= {'kind':'directory'}
+                native_source.directories[str(root)]= (('tools','directory'),('__pycache__','directory'))
+                assert o._ordinary_deterministic_python_native_v1(native_scope,bound,operands,grammar)is closed_factory_calls
+                root_row['roster']= ('tools',)
+                native_source.directories[str(root)]= (('tools','directory'),)
+            execution.execution_argv=selected
             with pytest.raises(o.ValidationReliabilityError,match='ORDINARY_PYTHON_RECIPE_EXACT_ISOLATED_ORIGINAL_VECTOR'):
                 o._ordinary_deterministic_python_native_v1(native_scope,bound,operands,grammar)
-            execution.execution_argv = vector
+            execution.execution_argv=vector
             if len(operands)>1:
-                tools_row['roster'] = (*tool_names,'__init__.py')
-                native_source.row_index[str(root/'tools/__init__.py')] = {'kind':'file'}
-                native_source.directories[tools_path] = (*tuple((name,'file') for name in tool_names),('__init__.py','file'))
+                tools_row['roster']= (*tool_names,'__init__.py')
+                native_source.row_index[str(root/'tools/__init__.py')]= {'kind':'file'}
+                native_source.directories[tools_path]= (*tuple((name,'file')for name in tool_names),('__init__.py','file'))
                 with pytest.raises(o.ValidationReliabilityError,match='ORDINARY_PYTHON_RECIPE_ORIGINAL_TOOLS_NAMESPACE_ROSTER'):
                     o._ordinary_deterministic_python_native_v1(native_scope,bound,operands,grammar)
-                tools_row['roster'] = tool_names
-                native_source.directories[tools_path] = tuple((name,'file') for name in tool_names)
-                assert closed_factory_calls[-1][1]['pycache_operand'] == (cache_path,bound,operands,grammar,install)
+                tools_row['roster']=tool_names
+                native_source.directories[tools_path]=tuple((name,'file')for name in tool_names)
+                assert closed_factory_calls[-1][1]['pycache_operand']== (cache_path,bound,operands,grammar,install)
                 for shadow,expected_error in (('tools.py','ORDINARY_PYTHON_RECIPE_ORIGINAL_TOOLS_NAMESPACE_ROSTER'),
-                        ('json.py','ORDINARY_PYTHON_RECIPE_NO_REPOSITORY_STDLIB_SHADOW')):
-                    root_row['roster'] = ('tools',shadow)
-                    native_source.row_index[str(root/shadow)] = {'kind':'file'}
-                    native_source.directories[str(root)] = (('tools','directory'),(shadow,'file'))
+('json.py','ORDINARY_PYTHON_RECIPE_NO_REPOSITORY_STDLIB_SHADOW')):
+                    root_row['roster']= ('tools',shadow)
+                    native_source.row_index[str(root/shadow)]= {'kind':'file'}
+                    native_source.directories[str(root)]= (('tools','directory'),(shadow,'file'))
                     with pytest.raises(o.ValidationReliabilityError,match=expected_error):
                         o._ordinary_deterministic_python_native_v1(native_scope,bound,operands,grammar)
-                root_row['roster'] = ('tools',)
-                native_source.directories[str(root)] = (('tools','directory'),)
+                root_row['roster']= ('tools',)
+                native_source.directories[str(root)]= (('tools','directory'),)
                 for shadow in ('build_master_plan_section_coverage_report.pyc',
-                        'build_master_plan_section_coverage_report.abi3.so','build_master_plan_section_coverage_report'):
-                    tools_row['roster'] = (*tool_names,shadow)
-                    native_source.row_index[str(root/'tools'/shadow)] = {'kind':'file'}
-                    native_source.directories[tools_path] = (*tuple((name,'file') for name in tool_names),(shadow,'file'))
+'build_master_plan_section_coverage_report.abi3.so','build_master_plan_section_coverage_report'):
+                    tools_row['roster']= (*tool_names,shadow)
+                    native_source.row_index[str(root/'tools'/shadow)]= {'kind':'file'}
+                    native_source.directories[tools_path]= (*tuple((name,'file')for name in tool_names),(shadow,'file'))
                     with pytest.raises(o.ValidationReliabilityError,match='ORDINARY_PYTHON_RECIPE_NO_ALTERNATIVE_HELPER_LOADER'):
                         o._ordinary_deterministic_python_native_v1(native_scope,bound,operands,grammar)
-                tools_row['roster'] = tool_names
-                native_source.directories[tools_path] = tuple((name,'file') for name in tool_names)
-                alien = operands[0]['text'] + '\nimport subprocess\n'
-                operands[0]['text'] = alien
-                native_scope._ordinary_source_operand_cache_v1[(operands[0]['path'],'PYTHON')] = (source_ast.parse(alien),operands[0])
+                tools_row['roster']=tool_names
+                native_source.directories[tools_path]=tuple((name,'file')for name in tool_names)
+                alien=operands[0]['text']+'\nimport subprocess\n'
+                operands[0]['text']=alien
+                native_scope._ordinary_source_operand_cache_v1[(operands[0]['path'],'PYTHON')]= (source_ast.parse(alien),operands[0])
                 with pytest.raises(o.ValidationReliabilityError,match='ORDINARY_PYTHON_RECIPE_CLOSED_STDLIB_IMPORT'):
                     o._ordinary_deterministic_python_native_v1(native_scope,bound,operands,
-                        tuple((operand,'<module>',operand['text'],()) for operand in operands))
-        assert len(closed_factory_calls) == 3
-    native_scope.repository = str(root)
-    trace_name,scope_name = 'tools/master_plan_traceability_check.py','tools/validate_first_pr_scope.py'
-    consumers = (
-        ((selected_sys.executable,trace_name,'--master-plan','docs/master_plan/QTT_MasterPlan_Current.md',
-            '--section-manifest',str(V/'SectionManifest.json'),
-            '--traceability-report',str(V/'TraceabilityReport.json')),
-            (trace_name,'tools/master_plan_ingest.py')),
-        ((selected_sys.executable,scope_name,'--repo-root','.',
-            '--scope-report',str(V/'FirstPrScopeReport.json'),
-            '--block-runtime','--block-live','--block-sha','--block-companion-package',
-            '--block-profit-claims','--block-source-retrieval','--block-source-acceptance',
-            '--block-connector-binding','--block-private-state-fetch','--block-order-execution',
-            '--block-neural-training','--block-neural-inference','--block-external-repo-clone',
-            '--block-package-install-scripts'),(scope_name,)))
-    readonly_calls = []
+tuple((operand,'<module>',operand['text'],())for operand in operands))
+        assert len(closed_factory_calls)==3
+    native_scope.repository=str(root)
+    trace_name,scope_name='tools/master_plan_traceability_check.py','tools/validate_first_pr_scope.py'
+    consumers= (
+((selected_sys.executable,trace_name,'--master-plan','docs/master_plan/QTT_MasterPlan_Current.md',
+'--section-manifest',str(V/'SectionManifest.json'),
+'--traceability-report',str(V/'TraceabilityReport.json')),
+(trace_name,'tools/master_plan_ingest.py')),
+((selected_sys.executable,scope_name,'--repo-root','.',
+'--scope-report',str(V/'FirstPrScopeReport.json'),
+'--block-runtime','--block-live','--block-sha','--block-companion-package',
+'--block-profit-claims','--block-source-retrieval','--block-source-acceptance',
+'--block-connector-binding','--block-private-state-fetch','--block-order-execution',
+'--block-neural-training','--block-neural-inference','--block-external-repo-clone',
+'--block-package-install-scripts'),(scope_name,)))
+    readonly_calls= []
     def readonly_factory(*args,**kwargs):
         readonly_calls.append((args,kwargs))
         return readonly_calls
-    with monkeypatch.context() as readonly_ports:
+    with monkeypatch.context()as readonly_ports:
         readonly_ports.setattr(o,'sys',selected_sys)
         readonly_ports.setattr(runner,'sys',selected_sys)
         readonly_ports.setattr(o,'_ordinary_native_source_programme_v1',readonly_factory)
@@ -29027,103 +29126,103 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
         readonly_ports.setattr(runner,'_RUN_COMMANDS_ACTIVE_PATHS',adapter_paths)
         readonly_ports.setattr(runner,'_RUN_COMMANDS_SUPERVISION',{'paths':adapter_paths,'phase':'deterministic-validators-a'})
         for selected,names in consumers:
-            vector = o._ordinary_deterministic_readonly_argv_v1(native_scope,selected,2)
-            assert vector[:4] == (selected_sys.executable,'-I','-S','-B')
-            assert vector[-len(selected[1:]):] == selected[1:]
+            vector=o._ordinary_deterministic_readonly_argv_v1(native_scope,selected,2)
+            assert vector[:4]== (selected_sys.executable,'-I','-S','-B')
+            assert vector[-len(selected[1:]):]==selected[1:]
             if len(names)>1:
-                prefix_tree = source_ast.parse(vector[7])
-                assert vector[6] == '-c' and len(prefix_tree.body) == 4
-                assert source_ast.literal_eval(prefix_tree.body[1].value.args[1]) == str(root)
-                assert prefix_tree.body[2].targets[0].attr == 'argv'
+                prefix_tree=source_ast.parse(vector[7])
+                assert vector[6]=='-c'and len(prefix_tree.body)==4
+                assert source_ast.literal_eval(prefix_tree.body[1].value.args[1])==str(root)
+                assert prefix_tree.body[2].targets[0].attr=='argv'
                 with pytest.raises(o.ValidationReliabilityError,match='ORDINARY_READONLY_ORIGINAL_OCCURRENCE_ORDINAL'):
                     o._ordinary_deterministic_readonly_argv_v1(native_scope,selected,True)
-            entry = SimpleNamespace(argv=vector,cwd=str(root),command_index=2)
-            execution = SimpleNamespace(registered_argv=selected,execution_argv=vector)
-            bound = (entry,execution,10)
-            native_scope._ordinary_source_selection_v1._bound = (bound,)
-            operands = tuple(dict(path=name,text=(root/name).read_text(encoding='utf8'),complete=True,error=None) for name in names)
-            grammar = tuple((operand,'<module>',operand['text'],()) for operand in operands)
-            native_scope._ordinary_source_operand_cache_v1 = {(operand['path'],'PYTHON'):(source_ast.parse(operand['text']),operand) for operand in operands}
-            native_scope._ordinary_original_source_operand_cache_v1 = native_scope._ordinary_source_operand_cache_v1
-            tool_names = tuple(Path(name).name for name in names)
-            root_row = dict(path=str(root),kind='directory',roster=('tools',))
-            tools_row = dict(path=str(root/'tools'),kind='directory',roster=tool_names)
-            native_source.row_index = {str(root):root_row,str(root/'tools'):tools_row,
-                **{str(root/name):dict(path=str(root/name),kind='file') for name in names}}
-            native_source.rows = list(native_source.row_index.values())
-            native_source.directories = {str(root):(('tools','directory'),),str(root/'tools'):tuple((name,'file') for name in tool_names)}
-            native_source.post[str(root)] = native_source.post[str(root/'tools')] = (1,2)
-            assert o._ordinary_deterministic_readonly_native_v1(native_scope,bound,operands,grammar) is readonly_calls
-            assert readonly_calls[-1][1]['cohorts'] == ((('APPLICATION',),operands,()),)
+            entry=SimpleNamespace(argv=vector,cwd=str(root),command_index=2)
+            execution=SimpleNamespace(registered_argv=selected,execution_argv=vector)
+            bound= (entry,execution,10)
+            native_scope._ordinary_source_selection_v1._bound= (bound,)
+            operands=tuple(dict(path=name,text=(root/name).read_text(encoding='utf8'),complete=True,error=None)for name in names)
+            grammar=tuple((operand,'<module>',operand['text'],())for operand in operands)
+            native_scope._ordinary_source_operand_cache_v1= {(operand['path'],'PYTHON'):(source_ast.parse(operand['text']),operand)for operand in operands}
+            native_scope._ordinary_original_source_operand_cache_v1=native_scope._ordinary_source_operand_cache_v1
+            tool_names=tuple(Path(name).name for name in names)
+            root_row=dict(path=str(root),kind='directory',roster=('tools',))
+            tools_row=dict(path=str(root/'tools'),kind='directory',roster=tool_names)
+            native_source.row_index= {str(root):root_row,str(root/'tools'):tools_row,
+**{str(root/name):dict(path=str(root/name),kind='file')for name in names}}
+            native_source.rows=list(native_source.row_index.values())
+            native_source.directories= {str(root):(('tools','directory'),),str(root/'tools'):tuple((name,'file')for name in tool_names)}
+            native_source.post[str(root)]=native_source.post[str(root/'tools')]= (1,2)
+            assert o._ordinary_deterministic_readonly_native_v1(native_scope,bound,operands,grammar)is readonly_calls
+            assert readonly_calls[-1][1]['cohorts']== ((('APPLICATION',),operands,()),)
             for operand in operands:
-                operand['row'] = native_source.row_index[str(root/operand['path'])]
-                operand['version'] = native_source.post[str(root/operand['path'])] = (1,2,3,4,5,6)
-                operand['source_form'] = 'PYTHON'
-            actual = original_native_factory(native_scope,bound,operands,grammar,**readonly_calls[-1][1])
-            assert o._ordinary_native_source_programme_check_v1(native_scope,actual) is actual
-            assert ('pycache_operand' in actual) is (len(names)>1)
-            token = o._LINUX_PREFLIGHT_PROCESS_V1.set(native_scope)
+                operand['row']=native_source.row_index[str(root/operand['path'])]
+                operand['version']=native_source.post[str(root/operand['path'])]= (1,2,3,4,5,6)
+                operand['source_form']='PYTHON'
+            actual=original_native_factory(native_scope,bound,operands,grammar,**readonly_calls[-1][1])
+            assert o._ordinary_native_source_programme_check_v1(native_scope,actual)is actual
+            assert ('pycache_operand'in actual)is (len(names)>1)
+            token=o._LINUX_PREFLIGHT_PROCESS_V1.set(native_scope)
             try:
-                with monkeypatch.context() as readonly_adapter_ports:
-                    readonly_adapter_ports.setattr(runner,'_path',lambda *parts: original_run_path(*parts).replace('\\','/'))
-                    assert runner._ordinary_post_execution_argv_v1(selected,selected,command_index=2) == vector
+                with monkeypatch.context()as readonly_adapter_ports:
+                    readonly_adapter_ports.setattr(runner,'_path',lambda*parts:original_run_path(*parts).replace('\\','/'))
+                    assert runner._ordinary_post_execution_argv_v1(selected,selected,command_index=2)==vector
                     with pytest.raises(o.ValidationReliabilityError,match='ORDINARY_READONLY_COMPETING_EXECUTION_PROJECTION'):
                         runner._ordinary_post_execution_argv_v1(selected,vector,command_index=2)
                 assert runner._path is original_run_path
-            finally: o._LINUX_PREFLIGHT_PROCESS_V1.reset(token)
-            malformed = (*selected[:-1],str(V/'foreign.json'))
-            execution.registered_argv = malformed
-            execution.execution_argv = entry.argv = o._ordinary_deterministic_readonly_argv_v1(native_scope,malformed,2)
+            finally:o._LINUX_PREFLIGHT_PROCESS_V1.reset(token)
+            malformed= (*selected[:-1],str(V/'foreign.json'))
+            execution.registered_argv=malformed
+            execution.execution_argv=entry.argv=o._ordinary_deterministic_readonly_argv_v1(native_scope,malformed,2)
             with pytest.raises(o.ValidationReliabilityError,match='ORDINARY_.*_ORIGINAL_ROUTED_INPUTS'):
                 o._ordinary_deterministic_readonly_native_v1(native_scope,bound,operands,grammar)
-            execution.registered_argv = selected
-            execution.execution_argv = entry.argv = vector
+            execution.registered_argv=selected
+            execution.execution_argv=entry.argv=vector
             if len(names)>1:
-                root_row['roster'] = ('tools','master_plan_ingest.py')
-                native_source.row_index[str(root/'master_plan_ingest.py')] = {'kind':'file'}
-                native_source.directories[str(root)] = (('tools','directory'),('master_plan_ingest.py','file'))
+                root_row['roster']= ('tools','master_plan_ingest.py')
+                native_source.row_index[str(root/'master_plan_ingest.py')]= {'kind':'file'}
+                native_source.directories[str(root)]= (('tools','directory'),('master_plan_ingest.py','file'))
                 with pytest.raises(o.ValidationReliabilityError,match='ORDINARY_PYTHON_RECIPE_NO_UNCAPTURED_FALLBACK_LOADER'):
                     o._ordinary_deterministic_readonly_native_v1(native_scope,bound,operands,grammar)
-        assert len(readonly_calls) == 2
-    literal = runner.PR138_NON_MUTATING_VALIDATION_SCRIPT
-    requested_literal = (selected_sys.executable,'-c',literal)
-    source_names = o._ordinary_pr138_source_names_v1()
-    graph_operands = tuple(dict(path=name,text=(root/name).read_text(encoding='utf8'),
-        complete=True,error=None,source_form='PYTHON') for name in source_names)
-    graph_grammar = []
+        assert len(readonly_calls)==2
+    literal=runner.PR138_NON_MUTATING_VALIDATION_SCRIPT
+    requested_literal= (selected_sys.executable,'-c',literal)
+    source_names=o._ordinary_pr138_source_names_v1()
+    graph_operands=tuple(dict(path=name,text=(root/name).read_text(encoding='utf8'),
+complete=True,error=None,source_form='PYTHON')for name in source_names)
+    graph_grammar= []
     for operand in graph_operands:
-        tree = source_ast.parse(operand['text'])
-        calls = tuple(source_ast.get_source_segment(operand['text'],node) for node in source_ast.walk(tree)
-            if isinstance(node,source_ast.Call) and isinstance(node.func,source_ast.Attribute)
-            and node.func.attr in ('run','Popen','read_text','open','exists','glob'))
+        tree=source_ast.parse(operand['text'])
+        calls=tuple(source_ast.get_source_segment(operand['text'],node)for node in source_ast.walk(tree)
+if isinstance(node,source_ast.Call)and isinstance(node.func,source_ast.Attribute)
+and node.func.attr in ('run','Popen','read_text','open','exists','glob'))
         graph_grammar.append((operand,'<module>',operand['text'],calls))
-    graph_grammar = tuple(graph_grammar)
-    members = {str(root):{}}
+    graph_grammar=tuple(graph_grammar)
+    members= {str(root):{}}
     for name in source_names:
-        path = root/name
+        path=root/name
         members.setdefault(str(path.parent),{})[path.name]='file'
         for parent in path.parents:
             if parent==root:break
             members.setdefault(str(parent.parent),{})[parent.name]='directory'
-    graph_index = {}
+    graph_index= {}
     for path,names in members.items():
-        graph_index[path] = dict(path=path,kind='directory',roster=tuple(sorted(names)))
-    graph_index.update({str(root/operand['path']):dict(path=str(root/operand['path']),kind='file') for operand in graph_operands})
-    native_source.row_index = graph_index
-    native_source.rows = list(graph_index.values())
-    native_source.directories = {path:tuple((name,names[name]) for name in sorted(names)) for path,names in members.items()}
+        graph_index[path]=dict(path=path,kind='directory',roster=tuple(sorted(names)))
+    graph_index.update({str(root/operand['path']):dict(path=str(root/operand['path']),kind='file')for operand in graph_operands})
+    native_source.row_index=graph_index
+    native_source.rows=list(graph_index.values())
+    native_source.directories= {path:tuple((name,names[name])for name in sorted(names))for path,names in members.items()}
     for path in graph_index:native_source.post[path]=(1,2,3,4,5,6)
     for operand in graph_operands:
         operand['row']=graph_index[str(root/operand['path'])]
         operand['version']=native_source.post[operand['row']['path']]
-    native_scope._ordinary_source_operand_cache_v1={(operand['path'],'PYTHON'):(source_ast.parse(operand['text']),operand) for operand in graph_operands}
+    native_scope._ordinary_source_operand_cache_v1={(operand['path'],'PYTHON'):(source_ast.parse(operand['text']),operand)for operand in graph_operands}
     native_scope._ordinary_original_source_operand_cache_v1=native_scope._ordinary_source_operand_cache_v1
     native_scope._ordinary_runner_owner_v1=native_scope._ordinary_original_runner_owner_v1=runner
     native_scope._ordinary_git_bindings_v1={'original_source':native_source}
     observed_literal_native=[]
     def literal_native_factory(*args,**kwargs):
         observed_literal_native.append((args,kwargs));return observed_literal_native
-    with monkeypatch.context() as literal_ports:
+    with monkeypatch.context()as literal_ports:
         literal_ports.setattr(o,'sys',selected_sys)
         literal_ports.setattr(runner,'sys',selected_sys)
         literal_ports.setattr(o,'_ordinary_native_source_programme_v1',literal_native_factory)
@@ -29133,7 +29232,7 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
         literal_ports.setattr(runner,'_RUN_COMMANDS_ACTIVE_PATHS',adapter_paths)
         literal_ports.setattr(runner,'_RUN_COMMANDS_SUPERVISION',{'paths':adapter_paths,'phase':'deterministic-validators-a'})
         vector=o._ordinary_pr138_execution_argv_v1(native_scope,requested_literal,4)
-        assert vector[:4]==(selected_sys.executable,'-I','-S','-B') and vector[6]=='-c'
+        assert vector[:4]==(selected_sys.executable,'-I','-S','-B')and vector[6]=='-c'
         assert vector[7].endswith(literal)
         prefix=source_ast.parse(vector[7][:-len(literal)])
         assert source_ast.literal_eval(prefix.body[1].value.args[1])==str(root)
@@ -29143,11 +29242,11 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
         literal_execution=SimpleNamespace(registered_argv=requested_literal,execution_argv=vector)
         literal_bound=(literal_entry,literal_execution,4)
         native_scope._ordinary_source_selection_v1._bound=(literal_bound,)
-        assert o._ordinary_pr138_native_v1(native_scope,literal_bound,graph_operands,graph_grammar) is observed_literal_native
+        assert o._ordinary_pr138_native_v1(native_scope,literal_bound,graph_operands,graph_grammar)is observed_literal_native
         assert observed_literal_native[-1][1]['application_fd_demand']==9
         assert observed_literal_native[-1][1]['cohorts'][0][0]==('APPLICATION','GIT')
         actual_literal=original_native_factory(native_scope,literal_bound,graph_operands,graph_grammar,**observed_literal_native[-1][1])
-        assert o._ordinary_native_source_programme_check_v1(native_scope,actual_literal) is actual_literal
+        assert o._ordinary_native_source_programme_check_v1(native_scope,actual_literal)is actual_literal
         assert actual_literal['tasks']==2 and actual_literal['nofile']==12
         assert actual_literal['application_fd_demand']==9 and native_resource['fd_demand'][2]==8
         stale_kwargs={**observed_literal_native[-1][1],'application_fd_demand':8}
@@ -29165,13 +29264,13 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
         package=root/'src'
         graph_index[str(package)]['roster']=(*graph_index[str(package)]['roster'],'__init__.py')
         graph_index[str(package/'__init__.py')]={'kind':'file'}
-        native_source.directories[str(package)]=tuple((name,graph_index[str(package/name)]['kind']) for name in graph_index[str(package)]['roster'])
+        native_source.directories[str(package)]=tuple((name,graph_index[str(package/name)]['kind'])for name in graph_index[str(package)]['roster'])
         with pytest.raises(o.ValidationReliabilityError,match='ORDINARY_PR138_EXACT_INITIALIZER_OR_NAMESPACE_ABSENCE'):
             o._ordinary_pr138_native_v1(native_scope,literal_bound,graph_operands,graph_grammar)
         literal_ports.setattr(o,'os',SimpleNamespace(**{**vars(o.os),'O_NOFOLLOW':131072,'O_CLOEXEC':524288}))
-        programme = {'entry':literal_entry,'environment':{}}
-        effect = {'entry':literal_entry,'native_programme':actual_literal}
-        effects = {'rows':(effect,)}
+        programme= {'entry':literal_entry,'environment':{}}
+        effect= {'entry':literal_entry,'native_programme':actual_literal}
+        effects= {'rows':(effect,)}
         native_scope._ordinary_source_selection_v1._original=(None,None,'deterministic-validators-a')
         native_scope._ordinary_effect_programme_record_v1=lambda:effects
         native_scope._ordinary_programme_for_entry_v1=lambda entry:programme if entry is literal_entry else None
@@ -29180,9 +29279,9 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
         native_scope._ordinary_factory_slots_v1=[]
         native_scope._ordinary_factory_errors_v1=[]
         source_config_index=(object(),(None,None,None,None,(None,None,1)))
-        native_scope._ordinary_post_git_source_operands_v1=lambda *,original=None:source_config_index if original is None or original is source_config_index else None
+        native_scope._ordinary_post_git_source_operands_v1=lambda*,original=None:source_config_index if original is None or original is source_config_index else None
         observed=SimpleNamespace(st_mode=0o100500,st_nlink=1,st_uid=0,st_dev=1,st_ino=2,
-            st_size=3,st_mtime_ns=4,st_ctime_ns=5)
+st_size=3,st_mtime_ns=4,st_ctime_ns=5)
         native_scope._ordinary_factory_call_v1=lambda function,*args:observed
         def loader_slot(path,purpose):
             slot={'path':path,'purpose':purpose,'returned_fd':None,'close_attempted':False,'closed':False}
@@ -29192,8 +29291,8 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
         native_scope._ordinary_factory_slot_v1=loader_slot
         native_scope._ordinary_factory_open_v1=loader_open
         native_scope.query=SimpleNamespace(_command_call_record=None,_last_command_supervision=None)
-        native_scope.query._command_record_settled_v1=lambda row:row['receipt'] is not None and all(
-            value['complete'] and value['closed'] and not value['errors'] for value in row['streams'].values())
+        native_scope.query._command_record_settled_v1=lambda row:row['receipt']is not None and all(
+value['complete']and value['closed']and not value['errors']for value in row['streams'].values())
         native_scope.query.command_receipt_for_argv_v1=lambda argv:native_scope.query._command_call_record['receipt']
         programme['environment'].update(native_scope._ordinary_selected_git_environment_v1(actual_literal))
         native_vectors=native_scope._ordinary_selected_git_vectors_v1()
@@ -29202,29 +29301,29 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
         def command_port(argv,*,git_environment,cwd):
             row=native_scope._ordinary_selected_git_control_record_v1(argv)
             assert row is native_scope._ordinary_current_selected_git_control_v1
-            assert git_environment is row['environment'] and Path(cwd)==root
+            assert git_environment is row['environment']and Path(cwd)==root
             seen_vectors.append(argv)
-            raw = ({'VERSION':b'git version 2.43.0\n','CONFIG_NAMES':b'core.repositoryformatversion\0',
-                    'INDEX_MODES':b'100644\0'}.get(row['expected'],row['expected']))
+            raw= ({'VERSION':b'git version 2.43.0\n','CONFIG_NAMES':b'core.repositoryformatversion\0',
+'INDEX_MODES':b'100644\0'}.get(row['expected'],row['expected']))
             effective=('/usr/bin/prlimit','--nofile=64:64','--',*argv)
             receipt=o.CommandExecutionReceiptV1(1,'synthetic-source-only','deterministic-validators-a',1,
-                effective,str(root),123,'posix','2026-10-06T00:00:00Z','2026-10-06T00:00:01Z',1.0,
-                0,None,None,'NOT_CONFIGURED','NOT_REQUIRED',str(root/'synthetic-stdout'),
-                str(root/'synthetic-stderr'),len(raw),0,(),'NOT_REQUIRED',False,None)
+effective,str(root),123,'posix','2026-10-06T00:00:00Z','2026-10-06T00:00:01Z',1.0,
+0,None,None,'NOT_CONFIGURED','NOT_REQUIRED',str(root/'synthetic-stdout'),
+str(root/'synthetic-stderr'),len(raw),0,(),'NOT_REQUIRED',False,None)
             query={'receipt':receipt,'streams':{name:dict(raw=value,complete=True,closed=True,errors=[])
-                for name,value in (('stdout',raw),('stderr',b''))}}
+for name,value in (('stdout',raw),('stderr',b''))}}
             administrative={'argv':argv,'effective_argv':effective,'returned':True,'error':None}
             native_scope._ordinary_administrative_records_v1.append(administrative)
             native_scope.query._command_call_record=native_scope.query._last_command_supervision=query
             return raw
         native_scope._ordinary_factory_command_v1=command_port
         proof=native_scope._ordinary_verify_selected_git_controls_v1()
-        assert proof is native_scope._ordinary_selected_git_proof_v1 and proof['complete'] and not proof['errors']
-        assert tuple(tuple(value[2:]) for value in seen_vectors)==tuple(value[0] for value in original_vectors)
+        assert proof is native_scope._ordinary_selected_git_proof_v1 and proof['complete']and not proof['errors']
+        assert tuple(tuple(value[2:])for value in seen_vectors)==tuple(value[0]for value in original_vectors)
         assert len(seen_vectors)==8 and seen_vectors[0][2:]==('--version',)
         assert seen_vectors[1][2:6]==('config','--local','--no-includes','--null')
-        assert all(value[:2]==('/usr/bin/git','--no-pager') for value in seen_vectors)
-        assert native_scope._ordinary_require_selected_git_controls_v1(literal_entry) is proof
+        assert all(value[:2]==('/usr/bin/git','--no-pager')for value in seen_vectors)
+        assert native_scope._ordinary_require_selected_git_controls_v1(literal_entry)is proof
         assert len(native_scope._ordinary_factory_slots_v1)==1 and not proof['loader_slot']['close_attempted']
         with pytest.raises(o.ValidationReliabilityError,match='ORDINARY_SELECTED_GIT_ONE_NONPOST_PROOF'):
             native_scope._ordinary_verify_selected_git_controls_v1()
@@ -29232,10 +29331,10 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
         with pytest.raises(o.ValidationReliabilityError,match='ORDINARY_SELECTED_GIT_ORIGINAL_COMPLETE_PREREQUISITE'):
             native_scope._ordinary_require_selected_git_controls_v1(literal_entry)
         proof['records'][2]['expected']=original_expected
-        assert native_scope._ordinary_require_selected_git_controls_v1(literal_entry) is proof
+        assert native_scope._ordinary_require_selected_git_controls_v1(literal_entry)is proof
         for kind,raw in (('VERSION',b'git version 2.35.0\n'),('CONFIG_NAMES',b'include.path\0'),('INDEX_MODES',b'160000\0')):
             with pytest.raises(o.ValidationReliabilityError,match='ORDINARY_POST_GIT_'):
-                native_scope._ordinary_post_git_edge_bytes_v1(kind,raw,index_entries=1 if kind=='INDEX_MODES' else None)
+                native_scope._ordinary_post_git_edge_bytes_v1(kind,raw,index_entries=1 if kind=='INDEX_MODES'else None)
         failed_scope=native_scope
         del failed_scope._ordinary_selected_git_proof_v1
         failed_scope._ordinary_factory_slots_v1=[];failed_scope._ordinary_factory_errors_v1=[]
@@ -29254,28 +29353,28 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
         with pytest.raises(OSError,match='synthetic selected command birth unknown'):
             failed_scope._ordinary_verify_selected_git_controls_v1()
         failed=failed_scope._ordinary_selected_git_proof_v1
-        assert not failed['complete'] and failed['errors']==[fault]
-        assert failed['records'][0]['errors']==[fault] and failed_scope._ordinary_factory_errors_v1==[fault]
+        assert not failed['complete']and failed['errors']==[fault]
+        assert failed['records'][0]['errors']==[fault]and failed_scope._ordinary_factory_errors_v1==[fault]
         assert failed_scope._ordinary_current_selected_git_control_v1 is None
         assert len(failed_scope._ordinary_factory_slots_v1)==1 and not failed_scope._ordinary_factory_slots_v1[0]['closed']
         with pytest.raises(o.ValidationReliabilityError,match='ORDINARY_SELECTED_GIT_ONE_NONPOST_PROOF'):
             failed_scope._ordinary_verify_selected_git_controls_v1()
-    source_table = source_ast.parse((root/'tools/validation_inventory.py').read_text(encoding='utf8'))
-    literal_function = next(node for node in source_table.body if isinstance(node,source_ast.FunctionDef)
-        and node.name == '_ordinary_deterministic_fixed_sources_v1')
-    recipes = o._ordinary_deterministic_literal_references_v1(source_ast.literal_eval(
-        next(node for node in literal_function.body if isinstance(node,source_ast.Return)).value))
-    selected_cli_recipes = tuple(recipe for recipe in recipes if recipe[1] == 'READ_ONLY_GIT_CLI')
-    assert len(selected_cli_recipes) == 3
-    recorded_cli_native = []
+    source_table=source_ast.parse((root/'tools/validation_inventory.py').read_text(encoding='utf8'))
+    literal_function=next(node for node in source_table.body if isinstance(node,source_ast.FunctionDef)
+and node.name=='_ordinary_deterministic_fixed_sources_v1')
+    recipes=o._ordinary_deterministic_literal_references_v1(source_ast.literal_eval(
+next(node for node in literal_function.body if isinstance(node,source_ast.Return)).value))
+    selected_cli_recipes=tuple(recipe for recipe in recipes if recipe[1]=='READ_ONLY_GIT_CLI')
+    assert len(selected_cli_recipes)==3
+    recorded_cli_native= []
     def cli_native_factory(*args,**kwargs):
         recorded_cli_native.append((args,kwargs));return recorded_cli_native
     import base64 as source_base64
-    native_scope._ordinary_source_selection_v1._original = (None,None,'deterministic-validators-a')
-    ci_environment = {'GITHUB_HEAD_REF':'repair/main-cumulative-v35-final-r5-local-20260922',
-        'GITHUB_REF_NAME':'298/merge','GITHUB_REF':'refs/pull/298/merge'}
-    ci_binding = {'environment':ci_environment}
-    with monkeypatch.context() as cli_ports:
+    native_scope._ordinary_source_selection_v1._original= (None,None,'deterministic-validators-a')
+    ci_environment= {'GITHUB_HEAD_REF':'repair/main-cumulative-v35-final-r5-local-20260922',
+'GITHUB_REF_NAME':'298/merge','GITHUB_REF':'refs/pull/298/merge'}
+    ci_binding= {'environment':ci_environment}
+    with monkeypatch.context()as cli_ports:
         cli_ports.setattr(o,'sys',selected_sys)
         cli_ports.setattr(runner,'sys',selected_sys)
         cli_ports.setattr(o,'_ordinary_native_source_programme_v1',cli_native_factory)
@@ -29286,70 +29385,70 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
         cli_ports.setattr(runner,'_RUN_COMMANDS_ACTIVE_PATHS',adapter_paths)
         cli_ports.setattr(runner,'_RUN_COMMANDS_SUPERVISION',{'paths':adapter_paths,'phase':'deterministic-validators-a'})
         for recipe in selected_cli_recipes:
-            selected = (selected_sys.executable,recipe[0],'--repo-root','.')
-            vector = o._ordinary_readonly_git_cli_execution_v1(native_scope,selected,6)
-            assert vector[:4] == (selected_sys.executable,'-I','-S','-B') and vector[-3:] == selected[1:]
-            entry = SimpleNamespace(argv=vector,cwd=str(root),command_index=6)
-            execution = SimpleNamespace(registered_argv=selected,execution_argv=vector)
-            bound = (entry,execution,6)
-            native_scope._ordinary_source_selection_v1._bound = (bound,)
-            source_names = list(name for name,body in recipe[2])
-            assert recipe[4][0][:2] == ('AUTHENTIC_BOOTSTRAP_SOURCE','tools/validation_scope_registry.py')
+            selected= (selected_sys.executable,recipe[0],'--repo-root','.')
+            vector=o._ordinary_readonly_git_cli_execution_v1(native_scope,selected,6)
+            assert vector[:4]== (selected_sys.executable,'-I','-S','-B')and vector[-3:]==selected[1:]
+            entry=SimpleNamespace(argv=vector,cwd=str(root),command_index=6)
+            execution=SimpleNamespace(registered_argv=selected,execution_argv=vector)
+            bound= (entry,execution,6)
+            native_scope._ordinary_source_selection_v1._bound= (bound,)
+            source_names=list(name for name,body in recipe[2])
+            assert recipe[4][0][:2]== ('AUTHENTIC_BOOTSTRAP_SOURCE','tools/validation_scope_registry.py')
             source_names.insert(recipe[4][0][2],recipe[4][0][1])
-            source_names = (*source_names,'tools/validation_reliability.py')
-            operands = tuple(dict(path=name,text=(root/name).read_bytes().decode('utf8'),complete=True,
-                error=None,source_form='PYTHON') for name in source_names)
-            grammar = tuple((operand,'<module>',operand['text'],() if operand['path'] in ('tools/validation_reliability.py','tools/validation_scope_registry.py')
-                else tuple(source_ast.get_source_segment(operand['text'],node)
-                for node in source_ast.walk(source_ast.parse(operand['text'])) if isinstance(node,source_ast.Call)
-                and isinstance(node.func,source_ast.Attribute) and node.func.attr in ('run','read_text','open')))
-                for operand in operands)
-            members = {str(root):{}}
+            source_names= (*source_names,'tools/validation_reliability.py')
+            operands=tuple(dict(path=name,text=(root/name).read_bytes().decode('utf8'),complete=True,
+error=None,source_form='PYTHON')for name in source_names)
+            grammar=tuple((operand,'<module>',operand['text'],()if operand['path']in ('tools/validation_reliability.py','tools/validation_scope_registry.py')
+else tuple(source_ast.get_source_segment(operand['text'],node)
+for node in source_ast.walk(source_ast.parse(operand['text']))if isinstance(node,source_ast.Call)
+and isinstance(node.func,source_ast.Attribute)and node.func.attr in ('run','read_text','open')))
+for operand in operands)
+            members= {str(root):{}}
             for name in source_names:
-                path = root/name;members.setdefault(str(path.parent),{})[path.name]='file'
+                path=root/name;members.setdefault(str(path.parent),{})[path.name]='file'
                 for parent in path.parents:
-                    if parent == root:break
+                    if parent==root:break
                     members.setdefault(str(parent.parent),{})[parent.name]='directory'
-            index = {path:dict(path=path,kind='directory',roster=tuple(sorted(names))) for path,names in members.items()}
-            index.update({str(root/name):dict(path=str(root/name),kind='file') for name in source_names})
+            index= {path:dict(path=path,kind='directory',roster=tuple(sorted(names)))for path,names in members.items()}
+            index.update({str(root/name):dict(path=str(root/name),kind='file')for name in source_names})
             native_source.row_index=index;native_source.rows=list(index.values())
-            native_source.directories={path:tuple((name,names[name]) for name in sorted(names)) for path,names in members.items()}
-            native_source.post={path:(1,2,3,4,5,6) for path in index}
+            native_source.directories={path:tuple((name,names[name])for name in sorted(names))for path,names in members.items()}
+            native_source.post={path:(1,2,3,4,5,6)for path in index}
             for operand in operands:
                 operand['row']=index[str(root/operand['path'])];operand['version']=native_source.post[operand['row']['path']]
-            native_scope._ordinary_source_operand_cache_v1={(operand['path'],'PYTHON'):(source_ast.parse(operand['text']),operand) for operand in operands}
+            native_scope._ordinary_source_operand_cache_v1={(operand['path'],'PYTHON'):(source_ast.parse(operand['text']),operand)for operand in operands}
             native_scope._ordinary_original_source_operand_cache_v1=native_scope._ordinary_source_operand_cache_v1
-            captured = {'bytes':source_base64.b64encode(operands[-1]['text'].encode('utf8')).decode('ascii'),
-                'version':(1,2,3,4,5,6)}
-            registry_operand = next(item for item in operands if item['path']=='tools/validation_scope_registry.py')
-            registry_capture = {'bytes':source_base64.b64encode(registry_operand['text'].encode('utf8')).decode('ascii'),
-                'version':(1,2,3,4,5,6)}
-            bootstrap = {'source':{'tools/validation_reliability.py':captured,
-                'tools/validation_scope_registry.py':registry_capture}}
-            receiver = {'scope':native_scope,'bootstrap':bootstrap,'owner':(os.getpid(),o.threading.get_ident()),
-                'joined':True,'errors':[]}
+            captured= {'bytes':source_base64.b64encode(operands[-1]['text'].encode('utf8')).decode('ascii'),
+'version':(1,2,3,4,5,6)}
+            registry_operand=next(item for item in operands if item['path']=='tools/validation_scope_registry.py')
+            registry_capture= {'bytes':source_base64.b64encode(registry_operand['text'].encode('utf8')).decode('ascii'),
+'version':(1,2,3,4,5,6)}
+            bootstrap= {'source':{'tools/validation_reliability.py':captured,
+'tools/validation_scope_registry.py':registry_capture}}
+            receiver= {'scope':native_scope,'bootstrap':bootstrap,'owner':(os.getpid(),o.threading.get_ident()),
+'joined':True,'errors':[]}
             receiver['original']=(receiver,native_scope,None,bootstrap,receiver['owner'])
             native_scope._ordinary_controller_receiver_v1=native_scope._ordinary_original_controller_receiver_v1=receiver
             ci_binding.update(receiver=receiver,bootstrap=bootstrap)
-            assert o._ordinary_readonly_git_cli_native_v1(native_scope,bound,operands,grammar) is recorded_cli_native
-            assert recorded_cli_native[-1][1]['cohorts'][0][0] == ('APPLICATION','GIT')
-            assert recorded_cli_native[-1][1]['application_fd_demand'] == 9
-            original_source_segment = source_ast.get_source_segment
+            assert o._ordinary_readonly_git_cli_native_v1(native_scope,bound,operands,grammar)is recorded_cli_native
+            assert recorded_cli_native[-1][1]['cohorts'][0][0]== ('APPLICATION','GIT')
+            assert recorded_cli_native[-1][1]['application_fd_demand']==9
+            original_source_segment=source_ast.get_source_segment
             def selected_source_segment(text,node,*args,**kwargs):
-                assert text != operands[-1]['text']
+                assert text!=operands[-1]['text']
                 return original_source_segment(text,node,*args,**kwargs)
-            with monkeypatch.context() as selected_segments:
+            with monkeypatch.context()as selected_segments:
                 selected_segments.setattr(source_ast,'get_source_segment',selected_source_segment)
-                actual = original_native_factory(native_scope,bound,operands,grammar,**recorded_cli_native[-1][1])
-                assert o._ordinary_native_source_programme_check_v1(native_scope,actual) is actual
-                bad_grammar = tuple((*item[:3],('not an actual native call',)) if item is grammar[0] else item
-                    for item in grammar)
+                actual=original_native_factory(native_scope,bound,operands,grammar,**recorded_cli_native[-1][1])
+                assert o._ordinary_native_source_programme_check_v1(native_scope,actual)is actual
+                bad_grammar=tuple((*item[:3],('not an actual native call',))if item is grammar[0]else item
+for item in grammar)
                 with pytest.raises(o.ValidationReliabilityError,match='ORDINARY_NATIVE_SOURCE_PROGRAMME_NATIVE_CALL_OPERANDS'):
                     original_native_factory(native_scope,bound,operands,bad_grammar,**recorded_cli_native[-1][1])
-            assert actual['tasks'] == 2 and actual['nofile'] == 12
-            context = o._LINUX_PREFLIGHT_PROCESS_V1.set(native_scope)
+            assert actual['tasks']==2 and actual['nofile']==12
+            context=o._LINUX_PREFLIGHT_PROCESS_V1.set(native_scope)
             try:
-                assert runner._ordinary_post_execution_argv_v1(selected,selected,command_index=6) == vector
+                assert runner._ordinary_post_execution_argv_v1(selected,selected,command_index=6)==vector
             finally:o._LINUX_PREFLIGHT_PROCESS_V1.reset(context)
             with pytest.raises(o.ValidationReliabilityError,match='ORDINARY_READONLY_GIT_CLI_EXACT_ORIGINAL_VECTOR'):
                 o._ordinary_readonly_git_cli_execution_v1(native_scope,(*selected,'--write-artifacts'),6)
@@ -29360,105 +29459,105 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
             captured['bytes']=''
             with pytest.raises(o.ValidationReliabilityError,match='ORDINARY_READONLY_GIT_CLI_CURRENT_REL_EQUALS_AUTHENTICATED_BOOTSTRAP'):
                 o._ordinary_readonly_git_cli_native_v1(native_scope,bound,operands,grammar)
-        assert len(recorded_cli_native) == 3
+        assert len(recorded_cli_native)==3
         ci_environment['GITHUB_HEAD_REF']=''
         with pytest.raises(o.ValidationReliabilityError,match='ORDINARY_READONLY_GIT_CLI_SOURCE_PROVED_STANDARD_BRANCH_RETURN'):
             o._ordinary_readonly_git_cli_branch_v1(native_scope)
         ci_environment.update(GITHUB_REF_NAME='main',GITHUB_REF='refs/heads/main')
-        assert o._ordinary_readonly_git_cli_branch_v1(native_scope) is ci_binding
+        assert o._ordinary_readonly_git_cli_branch_v1(native_scope)is ci_binding
         native_scope._ordinary_post_base_environment_v1=(native_scope,adapter_paths,(),None,
-            {'GITHUB_REF_NAME':'other'},(('GITHUB_REF_NAME','other'),))
+{'GITHUB_REF_NAME':'other'},(('GITHUB_REF_NAME','other'),))
         native_scope._ordinary_bound_plan_v1=()
         with pytest.raises(o.ValidationReliabilityError,match='ORDINARY_READONLY_GIT_CLI_SAME_ORIGINAL_BRANCH_ENVIRONMENT'):
             o._ordinary_readonly_git_cli_branch_v1(native_scope)
         del native_scope._ordinary_post_base_environment_v1
-    literal_body = ('tools/example.py','pass\n')
-    logical_recipe = ('tools/example.py','READ_ONLY',(literal_body,),(),())
-    component = ('SOURCE_BODY_REFERENCES_V1',(literal_body,),
-        (('tools/example.py','READ_ONLY',(('tools/example.py',0),),(),()),))
-    assert o._ordinary_deterministic_literal_references_v1(component) == (logical_recipe,)
+    literal_body= ('tools/example.py','pass\n')
+    logical_recipe= ('tools/example.py','READ_ONLY',(literal_body,),(),())
+    component= ('SOURCE_BODY_REFERENCES_V1',(literal_body,),
+(('tools/example.py','READ_ONLY',(('tools/example.py',0),),(),()),))
+    assert o._ordinary_deterministic_literal_references_v1(component)== (logical_recipe,)
     for bad in (
-            ('SOURCE_BODY_REFERENCES_V1',(literal_body,literal_body),component[2]),
-            ('SOURCE_BODY_REFERENCES_V1',(literal_body,),
-                (('tools/example.py','READ_ONLY',(('tools/example.py',False),),(),()),)),
-            ('SOURCE_BODY_REFERENCES_V1',(literal_body,),
-                (('tools/example.py','READ_ONLY',(('tools/foreign.py',0),),(),()),)),
-            ('SOURCE_BODY_REFERENCES_V1',(literal_body,),
-                (('tools/example.py','READ_ONLY',(),(),()),)),
-            ('SOURCE_BODY_REFERENCES_V1',(literal_body,),component[2]+component[2])):
+('SOURCE_BODY_REFERENCES_V1',(literal_body,literal_body),component[2]),
+('SOURCE_BODY_REFERENCES_V1',(literal_body,),
+(('tools/example.py','READ_ONLY',(('tools/example.py',False),),(),()),)),
+('SOURCE_BODY_REFERENCES_V1',(literal_body,),
+(('tools/example.py','READ_ONLY',(('tools/foreign.py',0),),(),()),)),
+('SOURCE_BODY_REFERENCES_V1',(literal_body,),
+(('tools/example.py','READ_ONLY',(),(),()),)),
+('SOURCE_BODY_REFERENCES_V1',(literal_body,),component[2]+component[2])):
         with pytest.raises(o.ValidationReliabilityError,match='ORDINARY_SOURCE_LITERAL_'):
             o._ordinary_deterministic_literal_references_v1(bad)
-    prefix_caps = runner._ordinary_post_ceiling_programme_v1(original_cutoffs=(1,2,3,4))
-    expected_prefix_cell = {'stdout_bytes': 8 << 20,'stderr_bytes': 8 << 20,
-        'combined_output_bytes': 16 << 20}
-    prefix_outer = runner._ordinary_prefix_output_limits_v1(prefix_caps,'PROVISION')
-    prefix_inner = runner._ordinary_prefix_output_limits_v1(prefix_caps,'CONTROLLER')
-    assert prefix_outer == prefix_inner == expected_prefix_cell
+    prefix_caps=runner._ordinary_post_ceiling_programme_v1(original_cutoffs=(1,2,3,4))
+    expected_prefix_cell= {'stdout_bytes':8<<20,'stderr_bytes':8<<20,
+'combined_output_bytes':16<<20}
+    prefix_outer=runner._ordinary_prefix_output_limits_v1(prefix_caps,'PROVISION')
+    prefix_inner=runner._ordinary_prefix_output_limits_v1(prefix_caps,'CONTROLLER')
+    assert prefix_outer==prefix_inner==expected_prefix_cell
     assert prefix_outer is not prefix_inner
-    assert prefix_outer['combined_output_bytes'] + prefix_inner['combined_output_bytes'] == prefix_caps['output_partition']['prefix_bytes']
+    assert prefix_outer['combined_output_bytes']+prefix_inner['combined_output_bytes']==prefix_caps['output_partition']['prefix_bytes']
     with pytest.raises(o.ValidationReliabilityError,match='ORDINARY_PREFIX_SOURCE_SELECTED_CAPTURE_LAYER'):
         runner._ordinary_prefix_output_limits_v1(prefix_caps,'APPLICATION')
-    post_scope = object.__new__(o._LinuxPreflightScopeV1)
-    post_scope._ordinary_phase_v1 = runner.POST_VALIDATION_PHASE
-    post_scope._ordinary_runner_owner_v1 = runner
-    post_scope._ordinary_bound_paths_v1 = post_paths = object()
-    post_scope._ordinary_bound_plan_v1 = post_plan = object()
-    post_scope._ordinary_execution_plan_v1 = post_scope._ordinary_original_execution_plan_v1 = post_execution = object()
-    post_effects = object()
-    post_resource = {'ceiling_programme': {},
-        'limits': {'raw_retained_byte_limit': 33,'raw_read_byte_limit': 77}}
-    post_scope._ordinary_resource_programme_v1 = post_resource
-    post_scope._ordinary_original_resource_programme_v1 = (post_resource,tuple(post_resource.items()))
-    allocation_calls = []
+    post_scope=object.__new__(o._LinuxPreflightScopeV1)
+    post_scope._ordinary_phase_v1=runner.POST_VALIDATION_PHASE
+    post_scope._ordinary_runner_owner_v1=runner
+    post_scope._ordinary_bound_paths_v1=post_paths=object()
+    post_scope._ordinary_bound_plan_v1=post_plan=object()
+    post_scope._ordinary_execution_plan_v1=post_scope._ordinary_original_execution_plan_v1=post_execution=object()
+    post_effects=object()
+    post_resource= {'ceiling_programme': {},
+'limits': {'raw_retained_byte_limit':33,'raw_read_byte_limit':77}}
+    post_scope._ordinary_resource_programme_v1=post_resource
+    post_scope._ordinary_original_resource_programme_v1= (post_resource,tuple(post_resource.items()))
+    allocation_calls= []
     def selected_allocation(*args):
         allocation_calls.append(args)
         return allocation_calls
-    with monkeypatch.context() as original_post_route:
-        original_post_route.setattr(post_scope,'_ordinary_effect_programme_record_v1',lambda: post_effects)
+    with monkeypatch.context()as original_post_route:
+        original_post_route.setattr(post_scope,'_ordinary_effect_programme_record_v1',lambda:post_effects)
         original_post_route.setattr(post_scope,'_ordinary_issue_phase_allocations_v1',selected_allocation)
-        before_post = dict(post_resource)
+        before_post=dict(post_resource)
         assert o._ordinary_phase_allocations_v1(post_scope,post_paths,post_plan,
-            post_execution,post_resource,post_effects) is None
-        assert allocation_calls == [] and post_resource == before_post and 'phase_allocations' not in post_resource
-        assert o._ordinary_phase_candidate_limits_v1(post_scope,post_resource) == (33,77)
+post_execution,post_resource,post_effects)is None
+        assert allocation_calls== []and post_resource==before_post and'phase_allocations'not in post_resource
+        assert o._ordinary_phase_candidate_limits_v1(post_scope,post_resource)== (33,77)
         with pytest.raises(o.ValidationReliabilityError,match='ORDINARY_PHASE_ORIGINAL_POST_ALLOCATION_ROUTE'):
             o._ordinary_phase_allocations_v1(post_scope,post_paths,post_plan,
-                post_execution,post_resource,object())
-        assert allocation_calls == [] and post_resource == before_post
+post_execution,post_resource,object())
+        assert allocation_calls== []and post_resource==before_post
         with pytest.raises(o.ValidationReliabilityError,match='ORDINARY_PHASE_ORIGINAL_POST_CANDIDATE_LIMITS'):
             o._ordinary_phase_allocations_v1(post_scope,post_paths,post_plan,
-                post_execution,dict(post_resource),post_effects)
+post_execution,dict(post_resource),post_effects)
         original_post_route.setattr(post_scope,'_ordinary_phase_v1','pytest-shard-1')
         with pytest.raises(o.ValidationReliabilityError,match='ORDINARY_PHASE_ORIGINAL_POST_CANDIDATE_LIMITS'):
             o._ordinary_phase_allocations_v1(post_scope,post_paths,post_plan,
-                post_execution,post_resource,post_effects)
-        assert allocation_calls == []
-        selected_resource = {'phase_allocations': object()}
+post_execution,post_resource,post_effects)
+        assert allocation_calls== []
+        selected_resource= {'phase_allocations':object()}
         assert o._ordinary_phase_allocations_v1(post_scope,post_paths,post_plan,
-            post_execution,selected_resource,post_effects) is allocation_calls
-        assert len(allocation_calls) == 1 and allocation_calls[0] == (
-            post_paths,post_plan,post_execution,selected_resource,post_effects)
+post_execution,selected_resource,post_effects)is allocation_calls
+        assert len(allocation_calls)==1 and allocation_calls[0]== (
+post_paths,post_plan,post_execution,selected_resource,post_effects)
     from tools import ci_branch_context as qci,validation_scope_registry as qr
     import inspect
-    with monkeypatch.context() as qp:
+    with monkeypatch.context()as qp:
         qs=object.__new__(o._LinuxPreflightScopeV1);qs.name='quota-reference'
         qc=runner._ordinary_post_ceiling_programme_v1(original_cutoffs=(1,2,3,4))
         qc=o._ordinary_phase_ceiling_values_v1(qc,runner=runner,phase=runner.FAST_PREFLIGHT_PHASE,root=tmp_path)
         qfd=qc['fd_program'];qclaim={'scope_unit':'quota-referencebootstrap.scope'}
         qhost=dict(profile='synthetic',cgroup=Path('/sys/fs/cgroup/quota-reference/quota-referencecontroller'),
-            common_cgroup=Path('/sys/fs/cgroup/quota-reference'),claim=qclaim,ceiling_programme=qc,
-            original_ceiling_programme=qc,original_cutoffs=qc['original_cutoffs'],
-            latest_nofile=(1536,1536),latest_effective_intersection=(1<<32,256,((200000,100000),)))
+common_cgroup=Path('/sys/fs/cgroup/quota-reference'),claim=qclaim,ceiling_programme=qc,
+original_ceiling_programme=qc,original_cutoffs=qc['original_cutoffs'],
+latest_nofile=(1536,1536),latest_effective_intersection=(1<<32,256,((200000,100000),)))
         qhost['latest_ancestor_readback']=((qhost['common_cgroup'],b'4294967296',b'0',b'256',(b'200000',b'100000')),
-            (Path('/sys/fs/cgroup'),None,None,None,((b'memory',b'pids',b'cpu'),(b'memory',b'pids',b'cpu'))))
+(Path('/sys/fs/cgroup'),None,None,None,((b'memory',b'pids',b'cpu'),(b'memory',b'pids',b'cpu'))))
         qhost['original']=(qhost,qs,None,qclaim,qc)
         qhost['native_lineage']=(qhost,qs,qhost['original'],qhost['profile'],qhost['cgroup'],qhost['common_cgroup'],
-            qc,qfd,tuple(qfd.items()),qclaim,tuple(qclaim.items()),qhost['original_cutoffs'])
+qc,qfd,tuple(qfd.items()),qclaim,tuple(qclaim.items()),qhost['original_cutoffs'])
         qs._ordinary_host_preparation_v1=qs._ordinary_original_host_preparation_v1=qhost
         qs._ordinary_host_native_lineage_v1=qhost['native_lineage'];qs._ordinary_candidate_v1=None
         qs._ordinary_resource_programme_v1=qres={'ceiling_programme':qc}
         qn=dict(tasks=2,nofile=12,bootstrap_fd_demand=12,application_fd_demand=8,
-            source_operands=({'path':'tools/validation_reliability.py','complete':True},))
+source_operands=({'path':'tools/validation_reliability.py','complete':True},))
         qp.setattr(qr,'_facet_fn_native_source_programme_check_v1',lambda scope,value:value)
         qp.setattr(o,'_ordinary_native_source_programme_check_v1',lambda scope,value:value)
         qp.setattr(o,'_rp5a_consumer_role_v1',lambda argv,root:None)
@@ -29466,9 +29565,9 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
         assert qci._ordinary_supported_application_quotas_v1(qs,qres,qn)==(64,64)
         assert tuple(qn.items())==frozen and qn['tasks']==2 and qn['nofile']==12
         for mapping,key,value in ((qn,'tasks',65),(qn,'nofile',65),(qn,'tasks',0),
-                (qn,'source_operands',()),(qfd,'application',True),(qhost,'latest_nofile',(64,64)),
-                (qhost,'latest_effective_intersection',(1<<32,64,((200000,100000),))),
-                (qhost,'claim',dict(qclaim)),(qc['limits'],'heap_byte_limit',0)):
+(qn,'source_operands',()),(qfd,'application',True),(qhost,'latest_nofile',(64,64)),
+(qhost,'latest_effective_intersection',(1<<32,64,((200000,100000),))),
+(qhost,'claim',dict(qclaim)),(qc['limits'],'heap_byte_limit',0)):
             prior=mapping[key];mapping[key]=value
             try:
                 with pytest.raises(o.ValidationReliabilityError):
@@ -29485,23 +29584,23 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
                 qci._ordinary_supported_application_quotas_v1(qs,qres,qn)
         finally:qhost['native_lineage']=qs._ordinary_host_native_lineage_v1=prior
         body=ast.parse(inspect.getsource(qr._facet_m_issue_phase_allocations_v1)).body[0]
-        loop=next(n for n in ast.walk(body) if isinstance(n,ast.For) and isinstance(n.iter,ast.Call)
-            and isinstance(n.iter.func,ast.Name) and n.iter.func.id=='zip')
+        loop=next(n for n in ast.walk(body)if isinstance(n,ast.For)and isinstance(n.iter,ast.Call)
+and isinstance(n.iter.func,ast.Name)and n.iter.func.id=='zip')
         unit=compile(ast.fix_missing_locations(ast.Module(body=[loop],type_ignores=[])),'<no-child allocation row loop>','exec')
-        bounds=tuple((SimpleNamespace(argv=('reference',)),SimpleNamespace(registered_argv=('reference',)),i) for i in (1,2))
-        ns=tuple(dict(qn,bound_row=b,entry=b[0],execution=b[1],source_position=b[2],stdout_minimum=0,stderr_minimum=0) for b in bounds)
-        effects={'rows':tuple(dict(native_programme=n,entry=b[0],execution=b[1]) for b,n in zip(bounds,ns,strict=True))}
+        bounds=tuple((SimpleNamespace(argv=('reference',)),SimpleNamespace(registered_argv=('reference',)),i)for i in (1,2))
+        ns=tuple(dict(qn,bound_row=b,entry=b[0],execution=b[1],source_position=b[2],stdout_minimum=0,stderr_minimum=0)for b in bounds)
+        effects={'rows':tuple(dict(native_programme=n,entry=b[0],execution=b[1])for b,n in zip(bounds,ns,strict=True))}
         for phase in (runner.FAST_PREFLIGHT_PHASE,next(iter(runner.PYTEST_SHARD_COMMANDS)),'unselected-reference'):
             env=dict(self=qs,resource=qres,runner=runner,record={'geometry':{'phase':phase}},rows=[],sources=[],roles=[],
-                bound=bounds,effect_programme=effects,_f=o,paths=SimpleNamespace(repo_root=tmp_path))
+bound=bounds,effect_programme=effects,_f=o,paths=SimpleNamespace(repo_root=tmp_path))
             exec(unit,{},env)
-            assert len(env['rows'])==2 and all(row['native_programme'] is n for row,n in zip(env['rows'],ns,strict=True))
-            assert tuple((row['tasks'],row['nofile']) for row in env['rows'])==(((2,12),)*2 if phase=='unselected-reference' else ((64,64),)*2)
+            assert len(env['rows'])==2 and all(row['native_programme']is n for row,n in zip(env['rows'],ns,strict=True))
+            assert tuple((row['tasks'],row['nofile'])for row in env['rows'])==(((2,12),)*2 if phase=='unselected-reference'else ((64,64),)*2)
         qp.setattr(qci,'_ordinary_selected_operational_native_check_v1',lambda scope,value:value['operational_operand'])
-        op_ns=tuple(dict(n,operational_operand=object()) for n in ns)
-        op_effects={'rows':tuple(dict(native_programme=n,entry=b[0],execution=b[1]) for b,n in zip(bounds,op_ns,strict=True))}
+        op_ns=tuple(dict(n,operational_operand=object())for n in ns)
+        op_effects={'rows':tuple(dict(native_programme=n,entry=b[0],execution=b[1])for b,n in zip(bounds,op_ns,strict=True))}
         op_env=dict(self=qs,resource=qres,runner=runner,record={'geometry':{'phase':'unselected-reference'}},
-            rows=[],sources=[],roles=[],bound=bounds,effect_programme=op_effects,_f=o,paths=SimpleNamespace(repo_root=tmp_path))
+rows=[],sources=[],roles=[],bound=bounds,effect_programme=op_effects,_f=o,paths=SimpleNamespace(repo_root=tmp_path))
         exec(unit,{},op_env)
         assert len(op_env['rows'])==2 and tuple((row['tasks'],row['nofile'])for row in op_env['rows'])==((64,64),)*2
         assert all(row['native_programme']is n and n['tasks']==2 and n['nofile']==12 for row,n in zip(op_env['rows'],op_ns,strict=True))
@@ -29512,58 +29611,58 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
                 exec(unit,{},failed)
         assert tuple(qn.items())==frozen
     from tools import ci_branch_context as ci_literal_owner
-    ci_literal_text = (root/'tools/ci_branch_context.py').read_text(encoding='utf8')
-    ci_literal_tree = source_ast.parse(ci_literal_text)
-    inventory_tree = source_ast.parse((root/'tools/validation_inventory.py').read_text(encoding='utf8'))
-    literal_table = next(node for node in inventory_tree.body if isinstance(node,source_ast.FunctionDef)
-        and node.name=='_ordinary_deterministic_fixed_sources_v1')
-    literal_values = source_ast.literal_eval(literal_table.body[0].value)
-    ci_literal_prior = next(body for name,body in literal_values[1] if name=='tools/ci_branch_context.py')
-    ci_literal_operand = dict(path='tools/ci_branch_context.py',source_form='PYTHON',
-        text=ci_literal_text,complete=True,error=None)
-    ci_literal_record = dict(scope=native_scope,source=native_scope.source)
-    ci_literal_selection = SimpleNamespace(phase='deterministic-validators-a')
-    ci_literal_capture = dict(bytes=source_base64.b64encode(ci_literal_text.encode('utf8')).decode('ascii'),
-        version=(1,2,3,4,5,6))
-    ci_literal_bootstrap = {'source':{'tools/ci_branch_context.py':ci_literal_capture}}
-    ci_literal_receiver = dict(scope=native_scope,bootstrap=ci_literal_bootstrap,
-        owner=(os.getpid(),o.threading.get_ident()),joined=True,errors=[])
+    ci_literal_text= (root/'tools/ci_branch_context.py').read_text(encoding='utf8')
+    ci_literal_tree=source_ast.parse(ci_literal_text)
+    inventory_tree=source_ast.parse((root/'tools/validation_inventory.py').read_text(encoding='utf8'))
+    literal_table=next(node for node in inventory_tree.body if isinstance(node,source_ast.FunctionDef)
+and node.name=='_ordinary_deterministic_fixed_sources_v1')
+    literal_values=source_ast.literal_eval(literal_table.body[0].value)
+    ci_literal_prior=next(body for name,body in literal_values[1]if name=='tools/ci_branch_context.py')
+    ci_literal_operand=dict(path='tools/ci_branch_context.py',source_form='PYTHON',
+text=ci_literal_text,complete=True,error=None)
+    ci_literal_record=dict(scope=native_scope,source=native_scope.source)
+    ci_literal_selection=SimpleNamespace(phase='deterministic-validators-a')
+    ci_literal_capture=dict(bytes=source_base64.b64encode(ci_literal_text.encode('utf8')).decode('ascii'),
+version=(1,2,3,4,5,6))
+    ci_literal_bootstrap= {'source':{'tools/ci_branch_context.py':ci_literal_capture}}
+    ci_literal_receiver=dict(scope=native_scope,bootstrap=ci_literal_bootstrap,
+owner=(os.getpid(),o.threading.get_ident()),joined=True,errors=[])
     ci_literal_receiver['original']=(ci_literal_receiver,native_scope,None,
-        ci_literal_bootstrap,ci_literal_receiver['owner'])
-    ci_literal_binding = dict(receiver=ci_literal_receiver,bootstrap=ci_literal_bootstrap)
-    ci_literal_cache = {('tools/ci_branch_context.py','PYTHON'):(ci_literal_tree,ci_literal_operand)}
-    with monkeypatch.context() as ci_literal_ports:
+ci_literal_bootstrap,ci_literal_receiver['owner'])
+    ci_literal_binding=dict(receiver=ci_literal_receiver,bootstrap=ci_literal_bootstrap)
+    ci_literal_cache= {('tools/ci_branch_context.py','PYTHON'):(ci_literal_tree,ci_literal_operand)}
+    with monkeypatch.context()as ci_literal_ports:
         for name,value in (
-                ('_ordinary_runner_owner_v1',runner),('_ordinary_original_runner_owner_v1',runner),
-                ('_ordinary_source_selection_v1',ci_literal_selection),
-                ('_ordinary_original_source_selection_v1',ci_literal_selection),
-                ('_ordinary_deterministic_source_ingredients_v1',ci_literal_record),
-                ('_ordinary_original_deterministic_source_ingredients_v1',ci_literal_record),
-                ('_ordinary_controller_receiver_v1',ci_literal_receiver),
-                ('_ordinary_original_controller_receiver_v1',ci_literal_receiver),
-                ('_ordinary_source_operand_cache_v1',ci_literal_cache)):
+('_ordinary_runner_owner_v1',runner),('_ordinary_original_runner_owner_v1',runner),
+('_ordinary_source_selection_v1',ci_literal_selection),
+('_ordinary_original_source_selection_v1',ci_literal_selection),
+('_ordinary_deterministic_source_ingredients_v1',ci_literal_record),
+('_ordinary_original_deterministic_source_ingredients_v1',ci_literal_record),
+('_ordinary_controller_receiver_v1',ci_literal_receiver),
+('_ordinary_original_controller_receiver_v1',ci_literal_receiver),
+('_ordinary_source_operand_cache_v1',ci_literal_cache)):
             ci_literal_ports.setattr(native_scope,name,value,raising=False)
         ci_literal_ports.setattr(runner,'_ordinary_ci_require_binding_v1',
-            lambda scope,phase:ci_literal_binding if scope is native_scope and phase==ci_literal_selection.phase else None)
+lambda scope,phase:ci_literal_binding if scope is native_scope and phase==ci_literal_selection.phase else None)
         assert ci_literal_owner._ordinary_ci_literal_body_bootstrap_v1(native_scope,ci_literal_record,
-            ci_literal_tree,ci_literal_operand,ci_literal_prior) is ci_literal_operand
+ci_literal_tree,ci_literal_operand,ci_literal_prior)is ci_literal_operand
         ci_literal_capture['bytes']=''
         with pytest.raises(o.ValidationReliabilityError,match='ORDINARY_CI_LITERAL_COMPLETE_HELD_BYTES'):
             ci_literal_owner._ordinary_ci_literal_body_bootstrap_v1(native_scope,ci_literal_record,
-                ci_literal_tree,ci_literal_operand,ci_literal_prior)
+ci_literal_tree,ci_literal_operand,ci_literal_prior)
         ci_literal_capture['bytes']=source_base64.b64encode(ci_literal_text.encode('utf8')).decode('ascii')
         with pytest.raises(o.ValidationReliabilityError,match='ORDINARY_CI_LITERAL_SAME_RECEIVED_SOURCE'):
             ci_literal_owner._ordinary_ci_literal_body_bootstrap_v1(native_scope,dict(ci_literal_record),
-                ci_literal_tree,ci_literal_operand,ci_literal_prior)
+ci_literal_tree,ci_literal_operand,ci_literal_prior)
         for ci_literal_case in ('old-body','native-bytes','extra-import','shadowed-body'):
             changed_ci=source_ast.parse(ci_literal_text)
             if ci_literal_case=='old-body':
                 next(node for node in changed_ci.body if isinstance(node,source_ast.FunctionDef)
-                    and node.name=='is_repair_branch').body.append(source_ast.Pass())
+and node.name=='is_repair_branch').body.append(source_ast.Pass())
             elif ci_literal_case=='native-bytes':
                 next(node for node in changed_ci.body if isinstance(node,source_ast.Assign)
-                    and len(node.targets)==1 and isinstance(node.targets[0],source_ast.Name)
-                    and node.targets[0].id=='_QTT_ORDINARY_NATIVE_C_SOURCE_V1').value.value+=b' '
+and len(node.targets)==1 and isinstance(node.targets[0],source_ast.Name)
+and node.targets[0].id=='_QTT_ORDINARY_NATIVE_C_SOURCE_V1').value.value+=b' '
             elif ci_literal_case=='extra-import':
                 changed_ci.body.append(source_ast.Import(names=[source_ast.alias(name='foreign',asname=None)]))
             else:
@@ -29571,39 +29670,39 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
             ci_literal_cache[('tools/ci_branch_context.py','PYTHON')]=(changed_ci,ci_literal_operand)
             with pytest.raises(o.ValidationReliabilityError,match='ORDINARY_CI_LITERAL_'):
                 ci_literal_owner._ordinary_ci_literal_body_bootstrap_v1(native_scope,ci_literal_record,
-                    changed_ci,ci_literal_operand,ci_literal_prior)
+changed_ci,ci_literal_operand,ci_literal_prior)
         ci_literal_cache[('tools/ci_branch_context.py','PYTHON')]=(ci_literal_tree,ci_literal_operand)
         assert ci_literal_owner._ordinary_ci_literal_body_bootstrap_v1(native_scope,ci_literal_record,
-            ci_literal_tree,ci_literal_operand,ci_literal_prior) is ci_literal_operand
+ci_literal_tree,ci_literal_operand,ci_literal_prior)is ci_literal_operand
     from tools.ci_branch_context import _ordinary_selected_target_managed_request_v1 as target_request
-    target_layout = object()
-    target_sizes = dict(pointer=8,gc=16,unicode_prefix=11,tuple_prefix=7,
-        list_prefix=5,dict_prefix=13,dict_keys_prefix=17,
-        dict_general_entry=24,dict_unicode_entry=16,int_prefix=9,int_digit_bytes=4)
+    target_layout=object()
+    target_sizes=dict(pointer=8,gc=16,unicode_prefix=11,tuple_prefix=7,
+list_prefix=5,dict_prefix=13,dict_keys_prefix=17,
+dict_general_entry=24,dict_unicode_entry=16,int_prefix=9,int_digit_bytes=4)
     def target_size(layout,name):
         if layout is not target_layout:
             raise ValueError('FOREIGN_TARGET_LAYOUT')
         return target_sizes[name]
-    target_recipe = dict(source_position=120)
-    target_geometry = ('HELD',2,7,3,8,2,5,2,7,1,4,2,1,3,8)
-    with monkeypatch.context() as target_math:
+    target_recipe=dict(source_position=120)
+    target_geometry= ('HELD',2,7,3,8,2,5,2,7,1,4,2,1,3,8)
+    with monkeypatch.context()as target_math:
         target_math.setattr(o,'_ordinary_data_size_v1',target_size)
-        target_rows = target_request(target_layout,target_recipe,target_geometry)
-        assert tuple(name for name,value in target_rows) == (
-            'HELD_target_unicode','HELD_target_tuples','HELD_target_lists',
-            'HELD_target_dictionaries','HELD_target_sets','HELD_target_integers',
-            'HELD_target_active_Path_workspace')
-        assert target_rows[0][1] == 2*11+4*(7+2) and target_rows[1][1] == 3*7+8*8
-        assert target_rows[5][1] == 2*(9+5*4) and target_rows[6][1] > 0
-        assert target_geometry == ('HELD',2,7,3,8,2,5,2,7,1,4,2,1,3,8) and target_recipe == {'source_position':120}
+        target_rows=target_request(target_layout,target_recipe,target_geometry)
+        assert tuple(name for name,value in target_rows)== (
+'HELD_target_unicode','HELD_target_tuples','HELD_target_lists',
+'HELD_target_dictionaries','HELD_target_sets','HELD_target_integers',
+'HELD_target_active_Path_workspace')
+        assert target_rows[0][1]==2*11+4*(7+2)and target_rows[1][1]==3*7+8*8
+        assert target_rows[5][1]==2*(9+5*4)and target_rows[6][1]>0
+        assert target_geometry== ('HELD',2,7,3,8,2,5,2,7,1,4,2,1,3,8)and target_recipe== {'source_position':120}
         for bad_recipe,bad_geometry in (
-                ({'source_position':133},target_geometry),
-                (target_recipe,('HELD',True,*target_geometry[2:])),
-                (target_recipe,('HELD',-1,*target_geometry[2:])),
-                (target_recipe,('FOREIGN',*target_geometry[1:])),
-                (target_recipe,(object(),*target_geometry[1:])),
-                (target_recipe,('HELD',0,7,*target_geometry[3:])),
-                (target_recipe,(*target_geometry[:-3],0,3,8))):
+({'source_position':133},target_geometry),
+(target_recipe,('HELD',True,*target_geometry[2:])),
+(target_recipe,('HELD',-1,*target_geometry[2:])),
+(target_recipe,('FOREIGN',*target_geometry[1:])),
+(target_recipe,(object(),*target_geometry[1:])),
+(target_recipe,('HELD',0,7,*target_geometry[3:])),
+(target_recipe,(*target_geometry[:-3],0,3,8))):
             with pytest.raises(o.ValidationReliabilityError,match='ORDINARY_TARGET_'):
                 target_request(target_layout,bad_recipe,bad_geometry)
         with pytest.raises(ValueError,match='FOREIGN_TARGET_LAYOUT'):
@@ -29613,11 +29712,11 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
     import tools as _startup_tools
     _startup_path=root/'tools'/'ci_branch_context.py'
     _startup_before=_startup_path.lstat()
-    assert stat.S_ISREG(_startup_before.st_mode) and _startup_before.st_nlink==1
-    with _startup_path.open('rb',buffering=0) as _startup_stream:
+    assert stat.S_ISREG(_startup_before.st_mode)and _startup_before.st_nlink==1
+    with _startup_path.open('rb',buffering=0)as _startup_stream:
         _startup_opened=os.fstat(_startup_stream.fileno())
         assert (_startup_opened.st_dev,_startup_opened.st_ino,_startup_opened.st_size)==(
-            _startup_before.st_dev,_startup_before.st_ino,_startup_before.st_size)
+_startup_before.st_dev,_startup_before.st_ino,_startup_before.st_size)
         assert _startup_opened.st_size<=2*1024*1024
         _startup_raw=bytearray()
         while len(_startup_raw)<_startup_opened.st_size:
@@ -29627,7 +29726,7 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
         assert _startup_stream.read(1)==b''
     _startup_text=_startup_raw.decode('utf-8')
     _startup_nodes=[n for n in source_ast.parse(_startup_text).body
-        if isinstance(n,source_ast.FunctionDef) and n.name=='_ordinary_initial_physical_source_admission_v1']
+if isinstance(n,source_ast.FunctionDef)and n.name=='_ordinary_initial_physical_source_admission_v1']
     assert len(_startup_nodes)==1
     _startup_body=source_ast.get_source_segment(_startup_text,_startup_nodes[0])
     _startup_ci=_startup_types.ModuleType('synthetic_initial_ci_source')
@@ -29637,7 +29736,7 @@ def _exercise_linux_preflight_profile_v1(tmp_path,monkeypatch):
     def _startup_need(value,message):
         if not value:raise ValueError(message)
     _startup_rel.__dict__.update(Path=Path,sys=_startup_sys,
-        _preflight_require_v1=_startup_need,_fixture_trace=_startup_trace)
+_preflight_require_v1=_startup_need,_fixture_trace=_startup_trace)
     _startup_rel_code=compile("""class _LinuxSourceNativeV2:
  @classmethod
  def _ordinary_initial_native_product_v1(cls,native_input,native,profile,cutoffs):
@@ -29660,7 +29759,7 @@ def _ordinary_ci_initial_common_source_check_v1(native_input,profile,allocation)
  _fixture_trace.append('common')
  assert allocation is native_input['early_allocation_original']
  assert profile is native_input['early_profile']
-""" + _startup_body+'\n',str(_startup_path),'exec')
+"""+_startup_body+'\n',str(_startup_path),'exec')
     exec(_startup_ci_code,_startup_ci.__dict__)
     _startup_ci._ORDINARY_INITIALIZED_MODULE_CODE_V1=_startup_ci_code
     _startup_reg.__dict__['_fixture_admission']=_startup_ci._ordinary_initial_physical_source_admission_v1
@@ -29674,55 +29773,55 @@ def _ordinary_ci_initial_common_source_check_v1(native_input,profile,allocation)
     _startup_native=object.__new__(_startup_rel._LinuxSourceNativeV2)
     _startup_errors=[];_startup_entry=tuple(object()for _ in range(9))
     _startup_attempt={};_startup_source={'original':object(),
-        'expected_module_closure':(object(),object(),root/'tools'/'validation_scope_registry.py'),
-        'native_method_code':_startup_rel._LinuxSourceNativeV2._ordinary_initial_native_product_v1.__func__.__code__,
-        'module_namespace':_startup_rel.__dict__}
+'expected_module_closure':(object(),object(),root/'tools'/'validation_scope_registry.py'),
+'native_method_code':_startup_rel._LinuxSourceNativeV2._ordinary_initial_native_product_v1.__func__.__code__,
+'module_namespace':_startup_rel.__dict__}
     _startup_origin={'complete':True,'origin_ns':10,'result_original':object()}
     _startup_generation=object();_startup_record={}
     _startup_prefix={'prefix_original':(object(),)}
     _startup_prefix['physical_prefix_original']=(_startup_prefix['prefix_original'],object())
     _startup_input=dict(errors=_startup_errors,entry_attempt=_startup_attempt,
-        entry_original=_startup_entry,source_generation=_startup_source,
-        native_generation=_startup_generation,startup_source=_startup_record,
-        origin_prebind=_startup_origin,origin_prebind_result_original=_startup_origin['result_original'],
-        original_execution_cutoff_ns=3500*10**9+10,original_settlement_cutoff_ns=3590*10**9+10,
-        current_native_observation=_startup_prefix,native_instance=_startup_native,native_init_returned=True)
+entry_original=_startup_entry,source_generation=_startup_source,
+native_generation=_startup_generation,startup_source=_startup_record,
+origin_prebind=_startup_origin,origin_prebind_result_original=_startup_origin['result_original'],
+original_execution_cutoff_ns=3500*10**9+10,original_settlement_cutoff_ns=3590*10**9+10,
+current_native_observation=_startup_prefix,native_instance=_startup_native,native_init_returned=True)
     _startup_components=object()
     _startup_profile=(_startup_input,_startup_source,_startup_generation,_startup_record,
-        object(),_startup_origin,None,_startup_components,1,1,object(),object())
+object(),_startup_origin,None,_startup_components,1,1,object(),object())
     _startup_allocation=(_startup_input,_startup_profile,object(),object())
     _startup_input.update(early_profile=_startup_profile,early_allocation_original=_startup_allocation,
-        initial_request_issuer=dict(result=_startup_profile,components=_startup_components,
-            allocation=_startup_allocation,complete=True))
+initial_request_issuer=dict(result=_startup_profile,components=_startup_components,
+allocation=_startup_allocation,complete=True))
     _startup_rel._fixture_returned=(_startup_input,_startup_source,_startup_generation,
-        _startup_record,_startup_profile)
+_startup_record,_startup_profile)
     _startup_cutoffs=(10,10+3500*10**9,_startup_input['original_execution_cutoff_ns'],
-        _startup_input['original_settlement_cutoff_ns'])
+_startup_input['original_settlement_cutoff_ns'])
     _startup_issuer=dict(native_input=_startup_input,native=_startup_native,errors=_startup_errors,
-        stage='PHYSICAL',complete=False,physical=None,initialized_storage=None,
-        initial_layout=None,native_product=None,prepare_request=None,query_request=None,
-        original_cutoffs=_startup_cutoffs)
+stage='PHYSICAL',complete=False,physical=None,initialized_storage=None,
+initial_layout=None,native_product=None,prepare_request=None,query_request=None,
+original_cutoffs=_startup_cutoffs)
     _startup_issuer['original']=(_startup_issuer,_startup_attempt,*_startup_entry[1:5],
-        *_startup_entry[6:9])
+*_startup_entry[6:9])
     _startup_input['native_product_attempt']=_startup_attempt['native_product_issuer']=_startup_issuer
     _startup_a=dict(native_input=_startup_input,generation=_startup_source,startup=_startup_record,
-        source_original=_startup_source['original'],origin=_startup_origin,
-        origin_original=_startup_origin['result_original'],owner=object(),cutoffs=_startup_cutoffs,
-        errors=_startup_errors,slots=[],reads=[],operations=[],pending_acl=object(),source_pairs=object(),
-        producer=_startup_ci._facet_fn_initial_startup_prebind_v1,
-        producer_code=_startup_ci._facet_fn_initial_startup_prebind_v1.__code__,complete=True,
-        startup_attempt=object(),product_original=tuple(object()for _ in range(4)))
+source_original=_startup_source['original'],origin=_startup_origin,
+origin_original=_startup_origin['result_original'],owner=object(),cutoffs=_startup_cutoffs,
+errors=_startup_errors,slots=[],reads=[],operations=[],pending_acl=object(),source_pairs=object(),
+producer=_startup_ci._facet_fn_initial_startup_prebind_v1,
+producer_code=_startup_ci._facet_fn_initial_startup_prebind_v1.__code__,complete=True,
+startup_attempt=object(),product_original=tuple(object()for _ in range(4)))
     _startup_fields=('native_input','generation','startup','source_original','origin','origin_original',
-        'owner','cutoffs','errors','slots','reads','operations','pending_acl','source_pairs','producer','producer_code')
+'owner','cutoffs','errors','slots','reads','operations','pending_acl','source_pairs','producer','producer_code')
     _startup_a['original']=(_startup_a,*(_startup_a[name]for name in _startup_fields))
     _startup_a['success_original']=(_startup_a,_startup_a['original'],_startup_a['startup_attempt'],
-        _startup_a['product_original'],_startup_a['pending_acl'],_startup_a['source_pairs'],
-        _startup_a['product_original'][3],_startup_a['origin_original'],_startup_allocation,
-        _startup_prefix,_startup_errors)
+_startup_a['product_original'],_startup_a['pending_acl'],_startup_a['source_pairs'],
+_startup_a['product_original'][3],_startup_a['origin_original'],_startup_allocation,
+_startup_prefix,_startup_errors)
     _startup_a['ci_source_code_original']=(_startup_a,object(),_startup_ci.__dict__,
-        _startup_ci_code,_startup_ci_code,object(),object(),object())
+_startup_ci_code,_startup_ci_code,object(),object(),object())
     _startup_record['pre_cold_result']=_startup_record['pre_cold_attempt']=_startup_a
-    with monkeypatch.context() as _startup_ports:
+    with monkeypatch.context()as _startup_ports:
         _startup_ports.setattr(_startup_tools,'validation_reliability',_startup_rel)
         _startup_ports.setitem(_startup_sys.modules,'tools.validation_reliability',_startup_rel)
         _startup_ports.setitem(_startup_sys.modules,'tools.validation_scope_registry',_startup_reg)
@@ -29730,7 +29829,7 @@ def _ordinary_ci_initial_common_source_check_v1(native_input,profile,allocation)
         assert _startup_call(_startup_input,_startup_native,_startup_profile,_startup_cutoffs)is _startup_profile
         assert _startup_trace==['preloader','prefix','common']
         for _startup_key,_startup_foreign in (
-                ('stage','PENDING_SOURCE'),('original',tuple(object()for _ in range(9)))):
+('stage','PENDING_SOURCE'),('original',tuple(object()for _ in range(9)))):
             _startup_saved=_startup_issuer[_startup_key]
             try:
                 _startup_issuer[_startup_key]=_startup_foreign
@@ -29739,7 +29838,7 @@ def _ordinary_ci_initial_common_source_check_v1(native_input,profile,allocation)
             finally:_startup_issuer[_startup_key]=_startup_saved
         with pytest.raises(ValueError,match='ORDINARY_INITIAL_FIXED_REACHED_PHYSICAL_SOURCE_CALLERS'):
             _startup_reg._facet_fn_initial_native_observations_v1(
-                _startup_input,_startup_native,_startup_profile,_startup_cutoffs)
+_startup_input,_startup_native,_startup_profile,_startup_cutoffs)
         _startup_ci._ORDINARY_INITIALIZED_MODULE_CODE_V1=compile('pass',str(_startup_path),'exec')
         try:
             with pytest.raises(ValueError,match='ORDINARY_INITIAL_COMPLETE_PROTECTED_CI_ADMISSION_SOURCE'):
@@ -29751,37 +29850,37 @@ def _ordinary_ci_initial_common_source_check_v1(native_input,profile,allocation)
             with pytest.raises(ValueError,match='ORDINARY_INITIAL_COMPLETED_PROTECTED_STARTUP'):
                 _startup_call(_startup_input,_startup_native,_startup_profile,_startup_cutoffs)
         finally:_startup_a['success_original']=_startup_saved
-        assert _startup_issuer['stage']=='PHYSICAL' and _startup_issuer['complete']is False
+        assert _startup_issuer['stage']=='PHYSICAL'and _startup_issuer['complete']is False
         assert _startup_issuer['physical']is _startup_issuer['initialized_storage']is None
-        assert _startup_errors==[] and _startup_call(
-            _startup_input,_startup_native,_startup_profile,_startup_cutoffs)is _startup_profile
+        assert _startup_errors==[]and _startup_call(
+_startup_input,_startup_native,_startup_profile,_startup_cutoffs)is _startup_profile
     from tools import ci_branch_context as _mapper_move_ci
     _mapper_move_input=object();_mapper_move_result=object();_mapper_move_calls=[]
-    with monkeypatch.context() as _mapper_move_ports:
+    with monkeypatch.context()as _mapper_move_ports:
         _mapper_move_ports.setattr(_mapper_move_ci,'_mapper_profile_v1',
-            lambda profile:(_mapper_move_calls.append(profile),_mapper_move_result)[1])
+lambda profile:(_mapper_move_calls.append(profile),_mapper_move_result)[1])
         assert o._mapper_profile_v1(_mapper_move_input)is _mapper_move_result
     assert _mapper_move_calls==[_mapper_move_input]
     _mapper_move_root=tmp_path/'synthetic-mapper-root'
     _mapper_move_basis=tmp_path/'synthetic-mapper-reference'/'basis.bin'
     _mapper_move_chain=[[str(p),[1,i+1,stat.S_IFDIR|0o755]]
-        for i,p in enumerate((*reversed(_mapper_move_root.parents),_mapper_move_root))]
+for i,p in enumerate((*reversed(_mapper_move_root.parents),_mapper_move_root))]
     _mapper_move_basis_chain=[[str(p),[1,i+50,stat.S_IFDIR|0o755]]
-        for i,p in enumerate((*reversed(_mapper_move_basis.parent.parents),_mapper_move_basis.parent))]
+for i,p in enumerate((*reversed(_mapper_move_basis.parent.parents),_mapper_move_basis.parent))]
     _mapper_move_profile=dict(kind='MAPPER_DISK_BASIS_V1',
-        position=o._REPORT_READ_ROUTES_V1[0][0],generation='synthetic-source-only',
-        root=str(_mapper_move_root),root_chain=_mapper_move_chain,basis=str(_mapper_move_basis),
-        basis_chain=_mapper_move_basis_chain,basis_lstat=[1,999,stat.S_IFREG|0o444,3,1,1,1],
-        basis_fstat=[1,999,stat.S_IFREG|0o444,3,1,1,1],
-        entries=[dict(path='fixture.txt',offset=0,length=3,attempt_limit=1,
-            lstat=[1,1000,stat.S_IFREG|0o644,3,1,1,1],
-            fstat=[1,1000,stat.S_IFREG|0o644,3,1,1,1],parent_chain=_mapper_move_chain)],
-        limits=dict(attempts=1,target_bytes=4,basis_bytes=3,metadata_calls=0,single_target_buffer=0),
-        chunk_bytes=65536,deadline_ns=1)
+position=o._REPORT_READ_ROUTES_V1[0][0],generation='synthetic-source-only',
+root=str(_mapper_move_root),root_chain=_mapper_move_chain,basis=str(_mapper_move_basis),
+basis_chain=_mapper_move_basis_chain,basis_lstat=[1,999,stat.S_IFREG|0o444,3,1,1,1],
+basis_fstat=[1,999,stat.S_IFREG|0o444,3,1,1,1],
+entries=[dict(path='fixture.txt',offset=0,length=3,attempt_limit=1,
+lstat=[1,1000,stat.S_IFREG|0o644,3,1,1,1],
+fstat=[1,1000,stat.S_IFREG|0o644,3,1,1,1],parent_chain=_mapper_move_chain)],
+limits=dict(attempts=1,target_bytes=4,basis_bytes=3,metadata_calls=0,single_target_buffer=0),
+chunk_bytes=65536,deadline_ns=1)
     _mapper_move_shape=o._mapper_profile_v1(_mapper_move_profile)
     assert _mapper_move_shape==dict(unique_files=1,basis_extent=3,attempt_envelope=1,
-        target_byte_reservation_envelope=4,basis_byte_reservation_envelope=3,
-        is_authentic_resource_grant=False)
+target_byte_reservation_envelope=4,basis_byte_reservation_envelope=3,
+is_authentic_resource_grant=False)
     with pytest.raises(ValueError,match='RUNTIME_INTEGER:chunk'):
         o._mapper_profile_v1(dict(_mapper_move_profile,chunk_bytes=True))
     with pytest.raises(ValueError,match='BASIS_ENTRIES'):
@@ -29790,12 +29889,12 @@ def _ordinary_ci_initial_common_source_check_v1(native_input,profile,allocation)
         o._mapper_profile_v1(dict(_mapper_move_profile,foreign=None))
     _operational_tree=ast.parse((REPO_ROOT/'tools'/'ci_branch_context.py').read_text(encoding='utf-8'))
     _operational_checkers=tuple(n for n in _operational_tree.body if isinstance(n,ast.FunctionDef)
-        and n.name=='_ordinary_selected_operational_native_check_v1')
+and n.name=='_ordinary_selected_operational_native_check_v1')
     assert len(_operational_checkers)==1
-    _callback_guards=tuple(n.args[0] for n in ast.walk(_operational_checkers[0])
-        if isinstance(n,ast.Call) and isinstance(n.func,ast.Name) and n.func.id=='need'
-        and len(n.args)==2 and isinstance(n.args[1],ast.Constant)
-        and n.args[1].value=='ORDINARY_OPERATIONAL_RETAINED_CAPTURE_AND_PUBLIC_CHECK_CODE_IDENTITIES')
+    _callback_guards=tuple(n.args[0]for n in ast.walk(_operational_checkers[0])
+if isinstance(n,ast.Call)and isinstance(n.func,ast.Name)and n.func.id=='need'
+and len(n.args)==2 and isinstance(n.args[1],ast.Constant)
+and n.args[1].value=='ORDINARY_OPERATIONAL_RETAINED_CAPTURE_AND_PUBLIC_CHECK_CODE_IDENTITIES')
     assert len(_callback_guards)==1
     _callback_code=compile(ast.Expression(_callback_guards[0]),'<operational-callback-identity>','eval')
     def _operational_callback_factory(held):
@@ -29806,27 +29905,27 @@ def _ordinary_ci_initial_common_source_check_v1(native_input,profile,allocation)
     _callback_keys=('capture_source','capture_data','check','reserve_targets')
     _callback_ports={name:_callback for name in _callback_keys}
     _callback_original=tuple((name,_callback,_callback.__code__,_callback.__defaults__,
-        _callback.__kwdefaults__,_callback.__closure__)for name in _callback_keys)
+_callback.__kwdefaults__,_callback.__closure__)for name in _callback_keys)
     def _operational_callback_guard():
         return eval(_callback_code,{'a':_callback_ports,'callbacks':_callback_original})
     assert _operational_callback_guard()
     _callback.__code__=_callback.__code__.replace()
-    assert _callback.__code__==_callback_original[0][2] and not _operational_callback_guard()
+    assert _callback.__code__==_callback_original[0][2]and not _operational_callback_guard()
     _callback.__code__=_callback_original[0][2]
     _callback.__defaults__=tuple(list(_callback.__defaults__))
-    assert _callback.__defaults__==_callback_original[0][3] and not _operational_callback_guard()
+    assert _callback.__defaults__==_callback_original[0][3]and not _operational_callback_guard()
     _callback.__defaults__=_callback_original[0][3]
     _callback.__kwdefaults__=dict(_callback.__kwdefaults__)
-    assert _callback.__kwdefaults__==_callback_original[0][4] and not _operational_callback_guard()
+    assert _callback.__kwdefaults__==_callback_original[0][4]and not _operational_callback_guard()
     _callback.__kwdefaults__=_callback_original[0][4]
     from types import FunctionType as _OperationalFunction
     _callback_ports['capture_data']=_OperationalFunction(_callback.__code__,_callback.__globals__,
-        _callback.__name__,_callback.__defaults__,_callback.__closure__)
+_callback.__name__,_callback.__defaults__,_callback.__closure__)
     assert not _operational_callback_guard()
     _callback_ports['capture_data']=_callback
     assert _operational_callback_guard()
     _v_demand_owners=tuple(n for n in _operational_tree.body if isinstance(n,ast.FunctionDef)
-        and n.name=='_ordinary_selected_v_directory_demand_v1')
+and n.name=='_ordinary_selected_v_directory_demand_v1')
     assert len(_v_demand_owners)==1
     _v_demand_return=next(n for n in ast.walk(_v_demand_owners[0])if isinstance(n,ast.Return))
     _v_fd_code=compile(ast.Expression(_v_demand_return.value.elts[7]),'<directory-owner-fd-cohort>','eval')
@@ -29836,7 +29935,7 @@ def _ordinary_ci_initial_common_source_check_v1(native_input,profile,allocation)
     bs_text="x = 'two'\nf(x)\n";bs_tree=ast.parse(bs_text);bs_nodes=sum(1 for _ in ast.walk(bs_tree))
     bs_scope=SimpleNamespace(_ordinary_source_operand_cache_v1={},_ordinary_data_allocator_v1=object())
     bs_observed=dict(path='synthetic.py',source_form='PYTHON',complete=True,error=None,
-        text=bs_text,nodes=bs_nodes,raw_bytes=len(bs_text.encode()),row=object(),version=(1,))
+text=bs_text,nodes=bs_nodes,raw_bytes=len(bs_text.encode()),row=object(),version=(1,))
     bs_issued={'original_credit':object()}
     bs_attempt={'source_requests':[bs_issued]}
     bs_plan=(bs_scope,{},Path('synthetic.py'),bs_text.encode(),bs_text,((),(),(),bs_nodes,1,4),(),bs_issued)
@@ -29844,14 +29943,14 @@ def _ordinary_ci_initial_common_source_check_v1(native_input,profile,allocation)
     bs_calls=((bs_call,ast.get_source_segment(bs_text,bs_call)),)
     bs_snapshot=o._ordinary_control_ast_original_v1(bs_tree)
     bs_original=(bs_observed,bs_scope,bs_tree,bs_plan,bs_snapshot,bs_text,bs_nodes,
-        bs_observed['raw_bytes'],bs_observed['row'],bs_observed['version'],bs_calls)
+bs_observed['raw_bytes'],bs_observed['row'],bs_observed['version'],bs_calls)
     def bs_keeper():return bs_original
     bs_issued['original']=(None,)*11+((bs_keeper,bs_keeper.__code__,None,None,None),)
     bs_issued['bounded_source_original']=bs_original
     bs_issued['bounded_source_publication_original']=(bs_original,0)
     bs_observed['bounded_source_credit_index']=0
     bs_scope._ordinary_source_operand_cache_v1[('synthetic.py','PYTHON')]=(bs_tree,bs_observed)
-    with monkeypatch.context() as bp:
+    with monkeypatch.context()as bp:
         bp.setattr(bci,'_ordinary_bounded_control_source_owner_v1',lambda scope:(bs_attempt,None,None,None))
         bp.setattr(bci,'_ordinary_bounded_control_source_credit_v1',lambda scope,state,credit:bs_issued)
         bp.setattr(bci,'_ordinary_bounded_source_planning_prepare_v1',lambda scope:None)
@@ -29893,22 +29992,22 @@ def _ordinary_ci_initial_common_source_check_v1(native_input,profile,allocation)
     bt=ast.parse(bi.getsource(bci._ordinary_bounded_control_source_reservations_bind_v1))
     reserve=next(n for n in ast.walk(bt)if isinstance(n,ast.FunctionDef)and n.name=='reserve_targets')
     prior_expr=next(n.value for n in reserve.body if isinstance(n,ast.Assign)
-        and any(isinstance(v,ast.Name)and v.id=='prior'for v in n.targets))
+and any(isinstance(v,ast.Name)and v.id=='prior'for v in n.targets))
     order=next(n.test for n in reserve.body if isinstance(n,ast.If)
-        and any(isinstance(v,ast.Constant)and v.value=='CONTROL_BOUNDED_NAMESPACE_ONE_ORDERED_PARTITION'for v in ast.walk(n)))
+and any(isinstance(v,ast.Constant)and v.value=='CONTROL_BOUNDED_NAMESPACE_ONE_ORDERED_PARTITION'for v in ast.walk(n)))
     shape=next(n.test for n in reserve.body if isinstance(n,ast.If)
-        and any(isinstance(v,ast.Constant)and v.value=='CONTROL_BOUNDED_NAMESPACE_ORIGINAL_CALLER_CALCULATOR_PARTITIONS'for v in ast.walk(n)))
+and any(isinstance(v,ast.Constant)and v.value=='CONTROL_BOUNDED_NAMESPACE_ORIGINAL_CALLER_CALCULATOR_PARTITIONS'for v in ast.walk(n)))
     caller=object();calculator=object();recipe={}
     grammar={'recipe':recipe,'calculator':object(),'caller':object(),'geometry':('CALL_GRAMMAR',)}
     fixed={'recipe':recipe,'calculator':calculator,'caller':caller,'geometry':('FIXED',)+(0,)*14}
     env=dict(attempt={'source_requests':[grammar]},recipe=recipe,calculator=calculator,caller=caller,callers=(caller,))
     env['prior']=eval(compile(ast.Expression(prior_expr),'<namespace-credit-selection>','eval'),env)
     env['partition']='FIXED'
-    assert env['prior']==() and eval(compile(ast.Expression(order),'<namespace-credit-order>','eval'),env)is False
+    assert env['prior']==()and eval(compile(ast.Expression(order),'<namespace-credit-order>','eval'),env)is False
     env['attempt']['source_requests'].append(fixed)
     env['prior']=eval(compile(ast.Expression(prior_expr),'<namespace-credit-selection>','eval'),env)
     env['partition']='HELD'
-    assert env['prior']==(fixed,) and eval(compile(ast.Expression(order),'<namespace-credit-order>','eval'),env)is False
+    assert env['prior']==(fixed,)and eval(compile(ast.Expression(order),'<namespace-credit-order>','eval'),env)is False
     env['partition']='FIXED'
     assert bool(eval(compile(ast.Expression(order),'<namespace-credit-order>','eval'),env))is True
     fixed['caller']=object()
@@ -29916,24 +30015,24 @@ def _ordinary_ci_initial_common_source_check_v1(native_input,profile,allocation)
     fixed['caller']=caller
     pt=ast.parse(bi.getsource(bci._ordinary_pytest_supported_row_v1))
     position=next(k.value for n in ast.walk(pt)if isinstance(n,ast.Call)for k in n.keywords
-        if k.arg=='source_position')
+if k.arg=='source_position')
     bound=(object(),object(),17)
     assert eval(compile(ast.Expression(position),'<fixed-pytest-bound-position>','eval'),{'bound':bound,'row':{}})==17
     gt=ast.parse(bi.getsource(breg._facet_fn_data_layout_collect_v1))
     gc_assignment=next(n for n in gt.body[0].body if isinstance(n,ast.Assign)
-        and any(isinstance(v,ast.Name)and v.id=='gc'for v in n.targets))
+and any(isinstance(v,ast.Name)and v.id=='gc'for v in n.targets))
     gc_env={'sizes':{'gc':16}}
     exec(compile(ast.Module(body=[gc_assignment],type_ignores=[]),'<numeric-gc-binding>','exec'),gc_env)
     assert type(gc_env['gc'])is int and gc_env['gc']==16
     kt=ast.parse(bi.getsource(bci._ordinary_bounded_source_planning_prepare_v1))
     branch=next(n for n in kt.body[0].body if isinstance(n,ast.If)and isinstance(n.test,ast.Compare)
-        and isinstance(n.test.left,ast.Name)and n.test.left.id=='prior')
+and isinstance(n.test.left,ast.Name)and n.test.left.id=='prior')
     predicate=next(n.test for n in branch.body if isinstance(n,ast.If))
     def kp(*,feature_version=None):return None
     km=SimpleNamespace(parse=kp);kk=kp.__kwdefaults__;kept=tuple(kk.items())
     kenv=dict(sys=SimpleNamespace(modules={'ast':km}),module=km,ast=km,parser=kp,code=kp.__code__,
-        defaults=kp.__defaults__,kw=kk,kwitems=kept,closure=kp.__closure__,namespace=kp.__globals__,
-        builtins=kp.__builtins__,bindings=())
+defaults=kp.__defaults__,kw=kk,kwitems=kept,closure=kp.__closure__,namespace=kp.__globals__,
+builtins=kp.__builtins__,bindings=())
     kguard=compile(ast.Expression(predicate),'<parser-keyword-default-binding>','eval')
     assert eval(kguard,kenv)is False
     kk['feature_version']=1
@@ -29942,92 +30041,92 @@ def _ordinary_ci_initial_common_source_check_v1(native_input,profile,allocation)
     assert eval(kguard,kenv)is False
     rt=ast.parse(bi.getsource(bci._ordinary_bounded_source_retained_request_v1))
     leaf_expr=next(n.value for n in rt.body[0].body if isinstance(n,ast.Assign)
-        and any(isinstance(v,ast.Name)and v.id=='leaves'for v in n.targets))
+and any(isinstance(v,ast.Name)and v.id=='leaves'for v in n.targets))
     rl={'sizes':(('unicode_prefix',64),('bytes_prefix',33),('int_prefix',24),('int_digit_bytes',4),('float',24))}
     amount=eval(compile(ast.Expression(leaf_expr),'<primitive-unicode-carriers>','eval'),
-        dict(o=o,layout=rl,leaf={'strings':2,'codepoints':3}))
+dict(o=o,layout=rl,leaf={'strings':2,'codepoints':3}))
     assert amount==o._ordinary_data_unicode_request_v1(rl,1)+o._ordinary_data_unicode_request_v1(rl,2)
-    quota_scope = object.__new__(o._LinuxPreflightScopeV1)
-    quota_source = object()
-    quota_scope.source = quota_source
-    quota_meter = {'limits': {'raw_read_byte_limit': 99},
-        'remaining': {'raw_read_byte_limit': 99},'observed': {'raw_read_byte_limit': 0}}
-    quota_scope._ordinary_meter_v1 = quota_meter
-    quota_resource = {'scope': quota_scope,'source': quota_source}
-    quota_balance = {'limits': {'raw_read_byte_limit': 3},
-        'remaining': {'raw_read_byte_limit': 3},'observed': {'raw_read_byte_limit': 0},
-        'errors': []}
-    quota_record = dict(scope=quota_scope,source=quota_source,resource=quota_resource,
-        geometry=object(),catalogue=object(),rp5a_policy=None,rp5a_demands=None,
-        meter=quota_meter,owner=(o.os.getpid(),o.threading.get_ident()),rows=(),
-        issuing=True,issued=True,paths=object(),plan=object(),execution_plan=object(),
-        effect_programme=object(),pools={},complement=quota_balance,reservations=[],errors=[])
-    quota_record['original'] = (quota_record,quota_scope,quota_source,quota_resource,
-        quota_record['geometry'],quota_record['catalogue'],None,None,quota_meter,
-        quota_record['owner'],quota_record['reservations'],quota_record['errors'])
-    quota_record['issued_original'] = (quota_record,quota_record['paths'],quota_record['plan'],
-        quota_record['execution_plan'],quota_record['effect_programme'],quota_record['rows'],
-        (),quota_record['pools'],(),quota_balance,tuple(quota_balance['limits'].items()))
-    quota_scope._ordinary_phase_allocations_v1 = quota_scope._ordinary_original_phase_allocations_v1 = quota_record
-    quota_resource['phase_allocations'] = quota_record
-    assert quota_scope._ordinary_phase_allocation_record_v1(quota_resource,issued=True) is quota_record
+    quota_scope=object.__new__(o._LinuxPreflightScopeV1)
+    quota_source=object()
+    quota_scope.source=quota_source
+    quota_meter= {'limits': {'raw_read_byte_limit':99},
+'remaining': {'raw_read_byte_limit':99},'observed': {'raw_read_byte_limit':0}}
+    quota_scope._ordinary_meter_v1=quota_meter
+    quota_resource= {'scope':quota_scope,'source':quota_source}
+    quota_balance= {'limits': {'raw_read_byte_limit':3},
+'remaining': {'raw_read_byte_limit':3},'observed': {'raw_read_byte_limit':0},
+'errors': []}
+    quota_record=dict(scope=quota_scope,source=quota_source,resource=quota_resource,
+geometry=object(),catalogue=object(),rp5a_policy=None,rp5a_demands=None,
+meter=quota_meter,owner=(o.os.getpid(),o.threading.get_ident()),rows=(),
+issuing=True,issued=True,paths=object(),plan=object(),execution_plan=object(),
+effect_programme=object(),pools={},complement=quota_balance,reservations=[],errors=[])
+    quota_record['original']= (quota_record,quota_scope,quota_source,quota_resource,
+quota_record['geometry'],quota_record['catalogue'],None,None,quota_meter,
+quota_record['owner'],quota_record['reservations'],quota_record['errors'])
+    quota_record['issued_original']= (quota_record,quota_record['paths'],quota_record['plan'],
+quota_record['execution_plan'],quota_record['effect_programme'],quota_record['rows'],
+(),quota_record['pools'],(),quota_balance,tuple(quota_balance['limits'].items()))
+    quota_scope._ordinary_phase_allocations_v1=quota_scope._ordinary_original_phase_allocations_v1=quota_record
+    quota_resource['phase_allocations']=quota_record
+    assert quota_scope._ordinary_phase_allocation_record_v1(quota_resource,issued=True)is quota_record
     with pytest.raises(o.ValidationReliabilityError,match='ORDINARY_PHASE_SINGLE_RESOURCE_REGISTRATION'):
         quota_scope._ordinary_phase_resource_begin_v1(quota_resource)
     with pytest.raises(o.ValidationReliabilityError,match='ORDINARY_PHASE_ONE_ISSUANCE_BEFORE_C'):
         quota_scope._ordinary_issue_phase_allocations_v1(quota_record['paths'],quota_record['plan'],
-            quota_record['execution_plan'],quota_resource,quota_record['effect_programme'])
-    assert quota_record['rows'] == () and quota_record['reservations'] == [] and quota_record['errors'] == []
-    assert quota_balance['remaining'] == {'raw_read_byte_limit': 3}
+quota_record['execution_plan'],quota_resource,quota_record['effect_programme'])
+    assert quota_record['rows']== ()and quota_record['reservations']== []and quota_record['errors']== []
+    assert quota_balance['remaining']== {'raw_read_byte_limit':3}
     quota_scope._ordinary_phase_complement_debit_v1('raw_read_byte_limit',2)
-    assert quota_balance['observed'] == {'raw_read_byte_limit': 2}
-    assert quota_balance['remaining'] == {'raw_read_byte_limit': 1}
-    assert quota_meter == {'limits': {'raw_read_byte_limit': 99},
-        'remaining': {'raw_read_byte_limit': 99},'observed': {'raw_read_byte_limit': 0}}
-    with pytest.raises(ValueError,match='ORDINARY_PHASE_COMPLEMENT_EXHAUSTED') as first_quota_error:
+    assert quota_balance['observed']== {'raw_read_byte_limit':2}
+    assert quota_balance['remaining']== {'raw_read_byte_limit':1}
+    assert quota_meter== {'limits': {'raw_read_byte_limit':99},
+'remaining': {'raw_read_byte_limit':99},'observed': {'raw_read_byte_limit':0}}
+    with pytest.raises(ValueError,match='ORDINARY_PHASE_COMPLEMENT_EXHAUSTED')as first_quota_error:
         quota_scope._ordinary_phase_complement_debit_v1('raw_read_byte_limit',2)
-    assert quota_balance['remaining'] == {'raw_read_byte_limit': 0}
-    assert quota_balance['observed'] == {'raw_read_byte_limit': 4}
-    assert quota_record['errors'][0] is quota_balance['errors'][0] is first_quota_error.value
-    with pytest.raises(ValueError,match='ORDINARY_PHASE_COMPLEMENT_EXHAUSTED') as late_quota_error:
+    assert quota_balance['remaining']== {'raw_read_byte_limit':0}
+    assert quota_balance['observed']== {'raw_read_byte_limit':4}
+    assert quota_record['errors'][0]is quota_balance['errors'][0]is first_quota_error.value
+    with pytest.raises(ValueError,match='ORDINARY_PHASE_COMPLEMENT_EXHAUSTED')as late_quota_error:
         quota_scope._ordinary_phase_complement_debit_v1('raw_read_byte_limit',1)
-    assert quota_balance['remaining'] == {'raw_read_byte_limit': 0}
-    assert quota_balance['observed'] == {'raw_read_byte_limit': 5}
-    assert quota_record['errors'][0] is first_quota_error.value
-    assert quota_record['errors'][1] is quota_balance['errors'][1] is late_quota_error.value
+    assert quota_balance['remaining']== {'raw_read_byte_limit':0}
+    assert quota_balance['observed']== {'raw_read_byte_limit':5}
+    assert quota_record['errors'][0]is first_quota_error.value
+    assert quota_record['errors'][1]is quota_balance['errors'][1]is late_quota_error.value
     with pytest.raises(o.ValidationReliabilityError,match='ORDINARY_PHASE_EXACT_ACTUAL_PREFIX'):
         quota_scope._ordinary_phase_complement_debit_v1('raw_read_byte_limit',False)
-    assert quota_balance['observed']['raw_read_byte_limit'] == 5 and len(quota_record['errors']) == 2
-    quota_record['owner'] = (o.os.getpid(),o.threading.get_ident()+1)
+    assert quota_balance['observed']['raw_read_byte_limit']==5 and len(quota_record['errors'])==2
+    quota_record['owner']= (o.os.getpid(),o.threading.get_ident()+1)
     with pytest.raises(o.ValidationReliabilityError,match='ORDINARY_PHASE_RETAINED_DELIVERY_OWNER'):
         quota_scope._ordinary_phase_complement_debit_v1('raw_read_byte_limit',1)
-    assert quota_balance['observed']['raw_read_byte_limit'] == 5
-    native_parent_output = o._ordinary_output_owner_limits_v1(prefix_caps,'PARENT')
-    native_receiver_output = o._ordinary_output_owner_limits_v1(prefix_caps,'RECEIVER')
-    native_outer_output = o._ordinary_output_owner_limits_v1(prefix_caps,'PROVISION')
-    assert native_parent_output['query_bytes'] == native_receiver_output['query_bytes'] == 66_715_648
-    assert native_outer_output['query_bytes'] == 0 and native_outer_output['outer_suffix_bytes'] == 786_432
-    assert (native_parent_output['query_bytes'] + native_receiver_output['query_bytes']
-        + native_outer_output['outer_suffix_bytes']) == prefix_caps['output_partition']['administrative_bytes']
+    assert quota_balance['observed']['raw_read_byte_limit']==5
+    native_parent_output=o._ordinary_output_owner_limits_v1(prefix_caps,'PARENT')
+    native_receiver_output=o._ordinary_output_owner_limits_v1(prefix_caps,'RECEIVER')
+    native_outer_output=o._ordinary_output_owner_limits_v1(prefix_caps,'PROVISION')
+    assert native_parent_output['query_bytes']==native_receiver_output['query_bytes']==66_715_648
+    assert native_outer_output['query_bytes']==0 and native_outer_output['outer_suffix_bytes']==786_432
+    assert (native_parent_output['query_bytes']+native_receiver_output['query_bytes']
++native_outer_output['outer_suffix_bytes'])==prefix_caps['output_partition']['administrative_bytes']
     with pytest.raises(o.ValidationReliabilityError,match='ORDINARY_OUTPUT_ORIGINAL_OWNER_ROLE'):
         o._ordinary_output_owner_limits_v1(prefix_caps,'APPLICATION')
     import inspect
     import textwrap
-    policy_body = ast.parse(textwrap.dedent(inspect.getsource(o._LinuxPreflightScopeV1._ordinary_prepare_policy_v1)))
-    quote_body = next(node for node in policy_body.body[0].body
-        if isinstance(node,ast.FunctionDef) and node.name == 'quoted')
-    quote_scope = {'_linux_preflight_path_v1': o._linux_preflight_path_v1,
-        '_preflight_require_v1': o._preflight_require_v1,'re': o.re}
+    policy_body=ast.parse(textwrap.dedent(inspect.getsource(o._LinuxPreflightScopeV1._ordinary_prepare_policy_v1)))
+    quote_body=next(node for node in policy_body.body[0].body
+if isinstance(node,ast.FunctionDef)and node.name=='quoted')
+    quote_scope= {'_linux_preflight_path_v1':o._linux_preflight_path_v1,
+'_preflight_require_v1':o._preflight_require_v1,'re':o.re}
     exec(compile(ast.Module(body=[quote_body],type_ignores=[]),'original-private-policy-quote','exec'),quote_scope)
-    quote = quote_scope['quoted']
-    literal = '/repo/docs/master_plan/generated/shards/PR168_RP_Order.report.part_0001_of_{total}.report.json'
-    assert quote('/repo/control') == '"/repo/control"'
-    assert quote('/repo/control',effect_literal=True) == '"/repo/control"'
-    assert quote(literal,effect_literal=True) == r'"/repo/docs/master_plan/generated/shards/PR168_RP_Order.report.part_0001_of_\{total\}.report.json"'
+    quote=quote_scope['quoted']
+    literal='/repo/docs/master_plan/generated/shards/PR168_RP_Order.report.part_0001_of_{total}.report.json'
+    assert quote('/repo/control')=='"/repo/control"'
+    assert quote('/repo/control',effect_literal=True)=='"/repo/control"'
+    assert quote(literal,effect_literal=True)==r'"/repo/docs/master_plan/generated/shards/PR168_RP_Order.report.part_0001_of_\{total\}.report.json"'
     for rejected,selected in ((literal,False),(literal.replace('{total}','{other}'),True),
-            (literal.replace('0001','*'),True),(literal.replace('0001','001'),True),
-            (literal.replace('PR168_RP_Order','../PR168_RP_Order'),True),
-            (literal.replace('{total}',r'\{total\}'),True),
-            (literal.replace('{total}','{total}{total}'),True)):
+(literal.replace('0001','*'),True),(literal.replace('0001','001'),True),
+(literal.replace('PR168_RP_Order','../PR168_RP_Order'),True),
+(literal.replace('{total}',r'\{total\}'),True),
+(literal.replace('{total}','{total}{total}'),True)):
         with pytest.raises(o.ValidationReliabilityError):
             quote(rejected,effect_literal=selected)
     with pytest.raises(o.ValidationReliabilityError,match='ORDINARY_POLICY_LITERAL_ROLE'):
@@ -30046,7 +30145,7 @@ def _ordinary_ci_initial_common_source_check_v1(native_input,profile,allocation)
         spool=area/'spool';spool.mkdir()
         native=area/'native';native.mkdir()
         held=area/'slice';held.mkdir()
-        events=held/'cgroup.events';events.write_bytes(b'populated 1\n' if case=='nonempty-slice' else b'populated 0\n')
+        events=held/'cgroup.events';events.write_bytes(b'populated 1\n'if case=='nonempty-slice'else b'populated 0\n')
         boot='12345678-1234-1234-1234-123456789abc'
         bootfile=area/'boot';bootfile.write_text(boot+'\n',encoding='ascii')
         manager=dict(pid=1,start=5,namespaces={'pid':(1,2),'mnt':(1,3)})
@@ -30056,8 +30155,8 @@ def _ordinary_ci_initial_common_source_check_v1(native_input,profile,allocation)
         real_fstat=o.os.fstat;real_read=o._LinuxPreflightQueriesV1.read
         words=[];status_calls=[];queries=[]
         main=dict(Id='qtt1n2.service',LoadState='loaded',ActiveState='failed',SubState='failed',Result='exit-code',
-            MainPID='0',ControlPID='0',ExecMainPID='42',ExecMainCode='1',ExecMainStatus='203',
-            InvocationID='a'*32,ControlGroup='',Slice='qtt1n2.slice',Job='',Type='exec',Restart='no',Transient='yes')
+MainPID='0',ControlPID='0',ExecMainPID='42',ExecMainCode='1',ExecMainStatus='203',
+InvocationID='a'*32,ControlGroup='',Slice='qtt1n2.slice',Job='',Type='exec',Restart='no',Transient='yes')
         if case=='live-control':main['ControlPID']='31'
         if case=='queued-job':main['Job']='17'
         if case in ('stop-without-proof','absence-after-stop','unavailable-after-stop'):
@@ -30065,7 +30164,7 @@ def _ordinary_ci_initial_common_source_check_v1(native_input,profile,allocation)
         if case=='missing-fields':del main['Restart']
         if case=='conflicting-invocation':main['InvocationID']='b'*32
         bound=case in ('after-binding','nonterminal-pidfd','conflicting-invocation')
-        poll_values=[] if case=='nonterminal-pidfd' else [(70001,1)]
+        poll_values=[]if case=='nonterminal-pidfd'else [(70001,1)]
         class Poll:
             def register(self,handle,flags):assert handle==70001 and flags==1
             def poll(self,timeout):assert timeout==0;return list(poll_values)
@@ -30073,24 +30172,24 @@ def _ordinary_ci_initial_common_source_check_v1(native_input,profile,allocation)
             argv=tuple(argv);queries.append(argv)
             raw=b'';err=b'';code=0
             if argv[0]=='/usr/bin/systemd-run':
-                with (spool/'command-1.stdout.bin').open('ab') as stream:stream.write(b'fixture stdout before denied start\n')
-                with (spool/'command-1.stderr.bin').open('ab') as stream:stream.write(b'fixture stderr before denied start\n')
+                with (spool/'command-1.stdout.bin').open('ab')as stream:stream.write(b'fixture stdout before denied start\n')
+                with (spool/'command-1.stderr.bin').open('ab')as stream:stream.write(b'fixture stderr before denied start\n')
                 if not bound:code=1;err=b'injected launcher setup denial\n'
             elif argv[0]=='/usr/bin/journalctl':
-                assert '--boot=12345678123412341234123456789abc' in argv
-                assert '--boot='+boot not in argv and '--unit=qtt1n2.service' in argv
+                assert'--boot=12345678123412341234123456789abc'in argv
+                assert'--boot='+boot not in argv and'--unit=qtt1n2.service'in argv
                 assert scope.boot_id==boot and bootfile.read_text(encoding='ascii')==boot+'\n'
-                assert '--lines=201' in argv and all('*' not in v for v in argv)
-                assert any(v.startswith('--since=') for v in argv) and any(v.startswith('--until=') for v in argv)
+                assert'--lines=201'in argv and all('*'not in v for v in argv)
+                assert any(v.startswith('--since=')for v in argv)and any(v.startswith('--until=')for v in argv)
                 if case=='journal-failure':code=1;err=b'injected journal access denial\n'
-                else:raw=(b'{"MESSAGE":"injected reference, not native diagnosis"}\n'*(201 if case=='journal-cap' else 1))
+                else:raw=(b'{"MESSAGE":"injected reference, not native diagnosis"}\n'*(201 if case=='journal-cap'else 1))
             elif argv[:2]==('/usr/bin/systemctl','stop'):
                 words.append('stop');assert words==['stop']
             elif argv[:2]==('/usr/bin/systemctl','show'):
-                if any(v.startswith('--property=InvocationID,ControlGroup,MainPID,') for v in argv):
+                if any(v.startswith('--property=InvocationID,ControlGroup,MainPID,')for v in argv):
                     assert bound
                     fields=dict.fromkeys(o._LinuxPreflightScopeV1._STATUS,'')
-                    fields.update({k:v for k,v in main.items() if k in fields})
+                    fields.update({k:v for k,v in main.items()if k in fields})
                     fields.update(MainPID='42',InvocationID='a'*32,ActiveState='active',MemoryMax='6442450944')
                 else:
                     status_calls.append(1);fields=dict(main)
@@ -30098,7 +30197,7 @@ def _ordinary_ci_initial_common_source_check_v1(native_input,profile,allocation)
                         fields=dict(Id='qtt1n2.service',LoadState='not-found',ActiveState='inactive',Job='')
                         code=4
                     if len(status_calls)==2 and case=='unavailable-after-stop':fields={};code=1;err=b'injected unavailable manager\n'
-                raw=''.join(k+'='+v+'\n' for k,v in fields.items()).encode()
+                raw=''.join(k+'='+v+'\n'for k,v in fields.items()).encode()
             else:raise AssertionError(argv)
             base=Path(kw['evidence_root']);number=kw['command_index']
             out=base/f'command-{number}.stdout.bin';error=base/f'command-{number}.stderr.bin'
@@ -30106,18 +30205,18 @@ def _ordinary_ci_initial_common_source_check_v1(native_input,profile,allocation)
             observation=dict(combined_output_grant=kw['output_limits']['combined_output_bytes'])
             for name,data in (('stdout',raw),('stderr',err)):
                 observation[name]=dict(complete=True,overflow=False,errors=[],drained_byte_count=len(data),
-                    cleanup_drained_byte_count=0,retained_byte_count=len(data),retention_limit=kw['output_limits'][name+'_bytes'])
+cleanup_drained_byte_count=0,retained_byte_count=len(data),retention_limit=kw['output_limits'][name+'_bytes'])
             receipt=o.CommandExecutionReceiptV1(schema_version=1,run_id=kw['run_id'],phase=kw['phase'],
-                command_index=number,argv=argv,cwd=str(kw['cwd']),pid=123,platform='posix',
-                start_time_utc='2026-10-04T00:00:00Z',end_time_utc='2026-10-04T00:00:01Z',elapsed_monotonic_seconds=1.0,
-                native_exit_code=code,start_failure_class=None,timeout_seconds_or_null=10,
-                timeout_state='NOT_TRIGGERED',termination_state='NOT_REQUIRED',stdout_path=str(out),stderr_path=str(error),
-                stdout_byte_count=len(raw),stderr_byte_count=len(err),stdout_required_markers=(),
-                stdout_marker_state='NOT_REQUIRED',stderr_was_nonempty=bool(err),
-                failure_class=None if code==0 else 'ENGVR_NATIVE_EXIT_NONZERO',output_observation=observation)
+command_index=number,argv=argv,cwd=str(kw['cwd']),pid=123,platform='posix',
+start_time_utc='2026-10-04T00:00:00Z',end_time_utc='2026-10-04T00:00:01Z',elapsed_monotonic_seconds=1.0,
+native_exit_code=code,start_failure_class=None,timeout_seconds_or_null=10,
+timeout_state='NOT_TRIGGERED',termination_state='NOT_REQUIRED',stdout_path=str(out),stderr_path=str(error),
+stdout_byte_count=len(raw),stderr_byte_count=len(err),stdout_required_markers=(),
+stdout_marker_state='NOT_REQUIRED',stderr_was_nonempty=bool(err),
+failure_class=None if code==0 else'ENGVR_NATIVE_EXIT_NONZERO',output_observation=observation)
             o.atomic_write_json(base/f'command-{number}.json',receipt)
             return receipt
-        with monkeypatch.context() as patch:
+        with monkeypatch.context()as patch:
             patch.setattr(o.sys,'platform','linux')
             patch.setattr(o,'supervise_command',administrative)
             patch.setattr(o,'_linux_preflight_process_identity_v1',lambda pid,query,**kw:dict(manager))
@@ -30127,11 +30226,11 @@ def _ordinary_ci_initial_common_source_check_v1(native_input,profile,allocation)
                 if not hasattr(o.os,name):patch.setattr(o.os,name,0,raising=False)
             patch.setitem(sys.modules,'select',SimpleNamespace(poll=Poll,POLLIN=1,POLLERR=8,POLLNVAL=32))
             query=o._LinuxPreflightQueriesV1(evidence_root=native,deadline_ns=grants['settlement_deadline_ns'],startup_closeout_bytes=32*1024**2)
-            query.read=lambda path,**kw:real_read(query,bootfile if str(path)=='/proc/sys/kernel/random/boot_id' else path,**kw)
+            query.read=lambda path,**kw:real_read(query,bootfile if str(path)=='/proc/sys/kernel/random/boot_id'else path,**kw)
             bind_administrative_fixture_cwd(query,area,patch)
             scope=o._LinuxPreflightScopeV1(name='qtt1n2',query=query,control=area,runtime=area,private_root=area,
-                spool=spool,repository=str(area),installation='',interpreter='/missing-fixture',source=None,
-                header=None,blobs=None,vectors=None,grants=grants,event={},environment={'PATH':'/usr/bin'})
+spool=spool,repository=str(area),installation='',interpreter='/missing-fixture',source=None,
+header=None,blobs=None,vectors=None,grants=grants,event={},environment={'PATH':'/usr/bin'})
             scope.slice_created=True;scope.slice_fd=70000;scope.slice_path=held
             scope.slice_identity=(held_info.st_dev,held_info.st_ino)
             scope.slice_files={'cgroup.events':(fd,(file_info.st_dev,file_info.st_ino))}
@@ -30144,9 +30243,9 @@ def _ordinary_ci_initial_common_source_check_v1(native_input,profile,allocation)
             token=o._LINUX_PREFLIGHT_PROCESS_V1.set(scope)
             try:
                 receipt=actual_supervisor(scope.argv,cwd=area,run_id='reference-scope',phase='fast-preflight-native-service',
-                    command_index=1,evidence_root=spool,timeout_seconds=30,execution_deadline_ns=scope.execution_deadline_ns,
-                    environment=scope.environment,platform_name='posix',mirror_stdout=False,mirror_stderr=False,
-                    output_limits=dict(stdout_bytes=1048576,stderr_bytes=1048576,combined_output_bytes=2097152),output_observation={})
+command_index=1,evidence_root=spool,timeout_seconds=30,execution_deadline_ns=scope.execution_deadline_ns,
+environment=scope.environment,platform_name='posix',mirror_stdout=False,mirror_stderr=False,
+output_limits=dict(stdout_bytes=1048576,stderr_bytes=1048576,combined_output_bytes=2097152),output_observation={})
             except BaseException as exc:
                 print('FAILED_START_REFERENCE_EXCEPTION',case,repr(exc),json.dumps(scope.history,default=str))
                 raise
@@ -30154,35 +30253,35 @@ def _ordinary_ci_initial_common_source_check_v1(native_input,profile,allocation)
             accepted=case in ('before-binding','after-binding','journal-failure','journal-cap','absence-after-stop')
             assert scope.settled==accepted,(case,scope.history,receipt)
             assert scope.startup_error is not None
-            assert ((receipt.start_failure_class is None) if bound else bool(receipt.start_failure_class)),(case,receipt,scope.history)
+            assert ((receipt.start_failure_class is None)if bound else bool(receipt.start_failure_class)),(case,receipt,scope.history)
             assert receipt.native_exit_code is None and (receipt.pid==42 if bound else receipt.pid is None)
             assert Path(receipt.stdout_path).read_bytes()==b'fixture stdout before denied start\n'
             assert Path(receipt.stderr_path).read_bytes()==b'fixture stderr before denied start\n'
-            assert receipt.failure_class==('ENGVR_PROCESS_START_FAILED' if accepted or not bound else 'ENGVR_PROCESS_TERMINATION_FAILED'),(case,receipt)
+            assert receipt.failure_class==('ENGVR_PROCESS_START_FAILED'if accepted or not bound else'ENGVR_PROCESS_TERMINATION_FAILED'),(case,receipt)
             assert receipt.output_observation['linux_startup']['resource_settled']==accepted
             assert o._command_requires_process_retention_v1(receipt)
             assert scope.closeout_attempts<=6 and scope.closeout_slice_observations<=2
             assert query.resource_spent_ns<=40*10**9 and query.startup_output_bytes<=32*1024**2
-            assert sum(a[0]=='/usr/bin/systemd-run' for a in queries)==1
-            assert any(a[0]=='/usr/bin/journalctl' for a in queries)
+            assert sum(a[0]=='/usr/bin/systemd-run'for a in queries)==1
+            assert any(a[0]=='/usr/bin/journalctl'for a in queries)
             assert len(words)<=1
             count=len(queries)
             if accepted:assert scope.finish()
             else:
                 with pytest.raises(Exception):scope.finish()
             assert len(queries)==count
-            journals=[v['startup_diagnostic'] for v in scope.history if v.get('startup_diagnostic',{}).get('kind')=='journal']
+            journals=[v['startup_diagnostic']for v in scope.history if v.get('startup_diagnostic',{}).get('kind')=='journal']
             assert len(journals)==1
             if case in ('journal-failure','journal-cap'):assert not journals[0]['complete']
             if accepted:
-                assert all(receipt.output_observation[k]['complete'] for k in ('stdout','stderr'))
+                assert all(receipt.output_observation[k]['complete']for k in ('stdout','stderr'))
             startup_references.append(dict(case=case,resource_settled=scope.settled,native_linux_qualification=False,
-                native_exit=receipt.native_exit_code,pid=receipt.pid,failure_class=receipt.failure_class,
-                history=scope.history,query_attempts=query.attempts,resource_spent_ns=query.resource_spent_ns))
+native_exit=receipt.native_exit_code,pid=receipt.pid,failure_class=receipt.failure_class,
+history=scope.history,query_attempts=query.attempts,resource_spent_ns=query.resource_spent_ns))
         os.close(fd)
     for case in ('before-binding','after-binding','live-control','queued-job','missing-slice','replaced-slice',
-            'nonempty-slice','missing-fields','conflicting-invocation','nonterminal-pidfd','stop-without-proof',
-            'journal-failure','journal-cap','absence-after-stop','unavailable-after-stop'):
+'nonempty-slice','missing-fields','conflicting-invocation','nonterminal-pidfd','stop-without-proof',
+'journal-failure','journal-cap','absence-after-stop','unavailable-after-stop'):
         startup_reference(case)
     if reference_evidence:
         path=Path(reference_evidence).parent/'startup-recovery-references.json'
@@ -30193,17 +30292,17 @@ def _ordinary_ci_initial_common_source_check_v1(native_input,profile,allocation)
     factory_native=factory_area/'native';factory_native.mkdir()
     factory_source=SimpleNamespace(root=tmp_path,run_id='qtt1n3-recovery-3')
     factory_query=SimpleNamespace(evidence_root=factory_native,startup_fixture_reservation=0,
-        startup_output_bytes=0,startup_output_limit=32*1024**2)
+startup_output_bytes=0,startup_output_limit=32*1024**2)
     factory_grants=dict(execution_deadline_ns=time.monotonic_ns()+30*10**9,
-        settlement_deadline_ns=time.monotonic_ns()+60*10**9)
-    with monkeypatch.context() as patch:
+settlement_deadline_ns=time.monotonic_ns()+60*10**9)
+    with monkeypatch.context()as patch:
         def no_native_start(scope):raise RuntimeError('injected factory boundary before native start')
         patch.setattr(o._LinuxPreflightScopeV1,'start_slice',no_native_start)
         with pytest.raises(RuntimeError,match='injected factory boundary before native start'):
             o._LinuxPreflightScopeV1.denied_start_fixture(factory_source,factory_query,factory_grants)
     factory_result=json.loads((factory_native/'startup-denial-result.json').read_bytes())
     assert factory_query.startup_fixture_reservation==2097152
-    assert not factory_result['settled'] and not factory_result['removed'] and factory_result['launcher_receipt'] is None
+    assert not factory_result['settled']and not factory_result['removed']and factory_result['launcher_receipt']is None
     assert (factory_area/'startup-denial-root').is_dir()
     export_reference=tmp_path/'source-export-failure-reference'
     export_reference.mkdir()
@@ -30223,22 +30322,22 @@ def _ordinary_ci_initial_common_source_check_v1(native_input,profile,allocation)
         result=actual_write(path,raw,**kwargs)
         if path.name=='native-result.json':raise OSError(5,'injected export preparation failure')
         return result
-    with monkeypatch.context() as m:
-        m.setattr(runner,'pathlib',SimpleNamespace(Path=lambda v:owned_run if str(v)=='/run' else real_path(v)))
+    with monkeypatch.context()as m:
+        m.setattr(runner,'pathlib',SimpleNamespace(Path=lambda v:owned_run if str(v)=='/run'else real_path(v)))
         m.setattr(o.os,'geteuid',lambda:0,raising=False)
         for name in ('O_NOFOLLOW','O_CLOEXEC'):
             if not hasattr(o.os,name):m.setattr(o.os,name,0,raising=False)
         m.setattr(o,'_LinuxPreflightQueriesV1',DeniedQuery)
         m.setattr(o,'_atomic_write_bytes_v1',failed_export)
         exit_code=runner._linux_preflight_controller_v1(str(tmp_path/'repository'),str(tmp_path/'installation'),
-            str(tmp_path/'interpreter'),{},b'{}',time.monotonic_ns(),exported_run)
+str(tmp_path/'interpreter'),{},b'{}',time.monotonic_ns(),exported_run)
     assert exit_code==1
     cleanup=json.loads((exported_run/'cleanup.json').read_text(encoding='utf-8'))
-    assert not cleanup['evidence_export_complete'] and not cleanup['owned_roots_removed']
-    assert not cleanup['service_created'] and not cleanup['source_protection_attempted']
+    assert not cleanup['evidence_export_complete']and not cleanup['owned_roots_removed']
+    assert not cleanup['service_created']and not cleanup['source_protection_attempted']
     assert Path(cleanup['retained_root']).is_dir()
-    assert any('injected initial native query denial' in v for v in cleanup['failures'])
-    assert any('injected export preparation failure' in v for v in cleanup['failures'])
+    assert any('injected initial native query denial'in v for v in cleanup['failures'])
+    assert any('injected export preparation failure'in v for v in cleanup['failures'])
     assert (Path(cleanup['retained_root'])/'native-result.json').is_file()
     controller_area=tmp_path/'administrative-unresolved-controller'
     controller_area.mkdir()
@@ -30253,27 +30352,27 @@ def _ordinary_ci_initial_common_source_check_v1(native_input,profile,allocation)
     def unresolved_administration(argv,**kwargs):
         controller_dispatches.append((argv,kwargs));raise controller_primary
     def controller_fixture_publication(path,raw,**kwargs):
-        if os.name=='nt' and kwargs.get('control_mode')==0o444:kwargs['control_mode']=None
+        if os.name=='nt'and kwargs.get('control_mode')==0o444:kwargs['control_mode']=None
         return actual_write(path,raw,**kwargs)
-    with monkeypatch.context() as controller_patch:
+    with monkeypatch.context()as controller_patch:
         controller_patch.setattr(o,'_atomic_write_bytes_v1',controller_fixture_publication)
         controller_patch.setattr(o.sys,'platform','linux')
-        controller_patch.setattr(runner,'pathlib',SimpleNamespace(Path=lambda v:controller_run if str(v)=='/run' else real_path(v)))
+        controller_patch.setattr(runner,'pathlib',SimpleNamespace(Path=lambda v:controller_run if str(v)=='/run'else real_path(v)))
         controller_patch.setattr(o.os,'geteuid',lambda:0,raising=False)
         controller_patch.setattr(o,'_LinuxPreflightQueriesV1',capture_query)
         controller_patch.setattr(o,'supervise_command',unresolved_administration)
         exit_code=runner._linux_preflight_controller_v1(str(tmp_path/'repository'),str(tmp_path/'installation'),
-            str(tmp_path/'interpreter'),{},b'{}',time.monotonic_ns(),controller_export)
+str(tmp_path/'interpreter'),{},b'{}',time.monotonic_ns(),controller_export)
     actual_cleanup=json.loads((controller_export/'cleanup.json').read_bytes())
     assert exit_code==1 and len(controller_dispatches)==len(captured_queries)==1
-    assert not actual_cleanup['administrative_resources_settled'] and not actual_cleanup['owned_roots_removed']
-    assert actual_cleanup['evidence_export_complete'] and Path(actual_cleanup['retained_root']).is_dir()
+    assert not actual_cleanup['administrative_resources_settled']and not actual_cleanup['owned_roots_removed']
+    assert actual_cleanup['evidence_export_complete']and Path(actual_cleanup['retained_root']).is_dir()
     assert captured_queries[0].failure is controller_primary and captured_queries[0].command_supervisions[0]['pending']
-    assert any('original unresolved administrative controller command' in error for error in actual_cleanup['failures'])
+    assert any('original unresolved administrative controller command'in error for error in actual_cleanup['failures'])
     assert actual_cleanup['export_resources_settled']
     successful_export=actual_cleanup['export_native_io']
     assert successful_export['read_bytes']==2*actual_cleanup['exported_files'][0]['bytes']
-    assert all(row['closed'] and row['settled'] for row in successful_export['acquisitions'])
+    assert all(row['closed']and row['settled']for row in successful_export['acquisitions'])
     original_open=o._open_regular_worktree_descriptor
     original_read=os.read;original_close=os.close;original_scandir=os.scandir
     original_raise=o._scan_raise_errors
@@ -30295,31 +30394,31 @@ def _ordinary_ci_initial_common_source_check_v1(native_input,profile,allocation)
             out.write_bytes(b'');err.write_bytes(b'')
             if fault=='directory-close':(root/'sentinel.bin').write_bytes(b'owned')
             return o.CommandExecutionReceiptV1(schema_version=o.SCHEMA_VERSION,
-                run_id=kwargs['run_id'],phase=kwargs['phase'],command_index=kwargs['command_index'],argv=argv,
-                cwd=str(kwargs['cwd']),pid=None,platform='posix',start_time_utc='2026-10-06T00:00:00Z',
-                end_time_utc='2026-10-06T00:00:01Z',elapsed_monotonic_seconds=1,native_exit_code=None,
-                start_failure_class='FileNotFoundError',timeout_seconds_or_null=None,timeout_state='NOT_CONFIGURED',
-                termination_state='NOT_REQUIRED',stdout_path=str(out),stderr_path=str(err),stdout_byte_count=0,
-                stderr_byte_count=0,stdout_required_markers=(),stdout_marker_state='NOT_REQUIRED',
-                stderr_was_nonempty=False,failure_class='ENGVR_PROCESS_START_FAILED')
+run_id=kwargs['run_id'],phase=kwargs['phase'],command_index=kwargs['command_index'],argv=argv,
+cwd=str(kwargs['cwd']),pid=None,platform='posix',start_time_utc='2026-10-06T00:00:00Z',
+end_time_utc='2026-10-06T00:00:01Z',elapsed_monotonic_seconds=1,native_exit_code=None,
+start_failure_class='FileNotFoundError',timeout_seconds_or_null=None,timeout_state='NOT_CONFIGURED',
+termination_state='NOT_REQUIRED',stdout_path=str(out),stderr_path=str(err),stdout_byte_count=0,
+stderr_byte_count=0,stdout_required_markers=(),stdout_marker_state='NOT_REQUIRED',
+stderr_was_nonempty=False,failure_class='ENGVR_PROCESS_START_FAILED')
         def opened(path,**kwargs):
             fd=original_open(path,**kwargs);descriptors[fd]=Path(path);return fd
         def acquired(fd,count):
             path=descriptors.get(fd)
             if path is not None and not faulted:
-                if fault=='read-close' and path.name=='native-result.json':faulted.append(fd);raise read_failure
-                if fault=='payload' and path.parent==destination:
+                if fault=='read-close'and path.name=='native-result.json':faulted.append(fd);raise read_failure
+                if fault=='payload'and path.parent==destination:
                     raw=original_read(fd,count);faulted.append(fd)
-                    return bytes([raw[0]^1])+raw[1:] if raw else raw
+                    return bytes([raw[0]^1])+raw[1:]if raw else raw
             return original_read(fd,count)
         def closed(fd):
             result=original_close(fd)
-            if fault=='read-close' and faulted==[fd]:
+            if fault=='read-close'and faulted==[fd]:
                 faulted.append('closed-by-no-child-oracle');raise close_failure
             return result
         def published(path,raw,**kwargs):
             result=controller_fixture_publication(path,raw,**kwargs)
-            if fault=='publication' and Path(path).parent==destination and Path(path).name=='native-result.json':raise publication_failure
+            if fault=='publication'and Path(path).parent==destination and Path(path).name=='native-result.json':raise publication_failure
             return result
         class DirectoryCloseOracle:
             def __init__(self,stream):self.stream=stream
@@ -30329,12 +30428,12 @@ def _ordinary_ci_initial_common_source_check_v1(native_input,profile,allocation)
                 raise close_failure
         def directory(path):
             stream=original_scandir(path)
-            return DirectoryCloseOracle(stream) if fault=='directory-close' and Path(path).name=='native-evidence' else stream
+            return DirectoryCloseOracle(stream)if fault=='directory-close'and Path(path).name=='native-evidence'else stream
         def raised(errors):
             groups.append(tuple(errors));return original_raise(errors)
-        with monkeypatch.context() as export_patch:
+        with monkeypatch.context()as export_patch:
             export_patch.setattr(o.sys,'platform','linux')
-            export_patch.setattr(runner,'pathlib',SimpleNamespace(Path=lambda v:owned if str(v)=='/run' else real_path(v)))
+            export_patch.setattr(runner,'pathlib',SimpleNamespace(Path=lambda v:owned if str(v)=='/run'else real_path(v)))
             export_patch.setattr(o.os,'geteuid',lambda:0,raising=False)
             export_patch.setattr(o,'_LinuxPreflightQueriesV1',safe_terminal_query)
             export_patch.setattr(o,'supervise_command',no_child_administration)
@@ -30344,14 +30443,14 @@ def _ordinary_ci_initial_common_source_check_v1(native_input,profile,allocation)
             export_patch.setattr(o,'_atomic_write_bytes_v1',published)
             export_patch.setattr(o,'_scan_raise_errors',raised)
             result=runner._linux_preflight_controller_v1(str(tmp_path/'repository'),str(tmp_path/'installation'),
-                str(tmp_path/'interpreter'),{},b'{}',time.monotonic_ns(),destination)
+str(tmp_path/'interpreter'),{},b'{}',time.monotonic_ns(),destination)
         record=json.loads((destination/'cleanup.json').read_bytes())
-        assert result==1 and not record['evidence_export_complete'] and not record['owned_roots_removed']
-        assert Path(record['retained_root']).is_dir() and record['administrative_resources_settled']
-        assert record['source_attributes_restored'] is (fault=='payload')
+        assert result==1 and not record['evidence_export_complete']and not record['owned_roots_removed']
+        assert Path(record['retained_root']).is_dir()and record['administrative_resources_settled']
+        assert record['source_attributes_restored']is (fault=='payload')
         if fault=='payload':
-            assert record['export_resources_settled'] and record['export_native_io']['read_bytes']>0
-            assert any('LINUX_PREFLIGHT_EXPORT_BYTE_COMPARISON' in error for error in record['failures'])
+            assert record['export_resources_settled']and record['export_native_io']['read_bytes']>0
+            assert any('LINUX_PREFLIGHT_EXPORT_BYTE_COMPARISON'in error for error in record['failures'])
         else:
             assert not record['export_resources_settled']
         if fault=='read-close':
@@ -30370,7 +30469,7 @@ def _ordinary_ci_initial_common_source_check_v1(native_input,profile,allocation)
         fd=o._linux_source_open_v2(original)
         try:
             observed=native.acl(fd,attempt=attempts.append,delivered=values.append)
-            assert observed[0] is not None and observed[1] is None
+            assert observed[0]is not None and observed[1]is None
             o._linux_acl_parse_v2(observed[0],default=False,mode=os.fstat(fd).st_mode)
         finally:os.close(fd)
         copied=acl_area/'copy';copied.mkdir()
@@ -30380,9 +30479,9 @@ def _ordinary_ci_initial_common_source_check_v1(native_input,profile,allocation)
             assert native.acl(fd,attempt=attempts.append,delivered=values.append)==(None,None)
         finally:os.close(fd)
         target=copied/'bytes'
-        with original.open('rb') as left,target.open('xb') as right:
+        with original.open('rb')as left,target.open('xb')as right:
             while block:=left.read(65536):assert right.write(block)==len(block)
-        with original.open('rb') as left,target.open('rb') as right:
+        with original.open('rb')as left,target.open('rb')as right:
             assert left.read(65536)==right.read(65536)==b'original installation reference\n'
             assert left.read(1)==right.read(1)==b''
         assert os.getxattr(inherited,'system.posix_acl_default',follow_symlinks=False)==default
@@ -30391,8 +30490,8 @@ def _ordinary_ci_initial_common_source_check_v1(native_input,profile,allocation)
     import inspect
     from types import SimpleNamespace
     kernel=(b'Uid:\t61234\t61234\t61234\t61234\nGid:\t61235\t61235\t61235\t61235\n'
-        b'CapInh:\t0000000000000000\nCapPrm:\t0000000000000000\nCapEff:\t0000000000000000\n'
-        b'CapBnd:\t0000000000000000\nCapAmb:\t0000000000000000\nNoNewPrivs:\t1\n')
+b'CapInh:\t0000000000000000\nCapPrm:\t0000000000000000\nCapEff:\t0000000000000000\n'
+b'CapBnd:\t0000000000000000\nCapAmb:\t0000000000000000\nNoNewPrivs:\t1\n')
     class RuntimeQueryReference:
         def __init__(self,raw=kernel):self.raw=raw;self.attempts=0;self.records=[]
         def read(self,path,**kwargs):assert str(path).startswith('/proc/');self.check();return self.raw
@@ -30401,50 +30500,50 @@ def _ordinary_ci_initial_common_source_check_v1(native_input,profile,allocation)
     credentials=o._linux_preflight_status_v1(123,RuntimeQueryReference(),credentials=True)
     assert (credentials['Uid'],credentials['Gid'])==(61234,61235)
     for damaged in (kernel.replace(b'61234',b'0'),kernel.replace(b'61235',b'0'),
-            kernel.replace(b'61234\t61234',b'61234\t61233',1),kernel.replace(b'61235\t61235',b'61235\t61236',1),
-            kernel.replace(b'Uid:',b'UidMissing:'),kernel.replace(b'Gid:',b'GidMissing:'),
-            kernel+b'Uid:\t61234\t61234\t61234\t61234\n',kernel.replace(b'61234\t',b'',1),
-            kernel.replace(b'61235',b'-1'),kernel.replace(b'NoNewPrivs:\t1',b'NoNewPrivs:\t0')):
+kernel.replace(b'61234\t61234',b'61234\t61233',1),kernel.replace(b'61235\t61235',b'61235\t61236',1),
+kernel.replace(b'Uid:',b'UidMissing:'),kernel.replace(b'Gid:',b'GidMissing:'),
+kernel+b'Uid:\t61234\t61234\t61234\t61234\n',kernel.replace(b'61234\t',b'',1),
+kernel.replace(b'61235',b'-1'),kernel.replace(b'NoNewPrivs:\t1',b'NoNewPrivs:\t0')):
         assert damaged!=kernel
         with pytest.raises(o.ValidationReliabilityError):
             o._linux_preflight_status_v1(123,RuntimeQueryReference(damaged),credentials=True)
     import dataclasses
     admin_vector=('/usr/bin/systemctl','--version')
     faults=('success','nonzero','prestart','unknown','unproven','wrong-run','wrong-phase','wrong-index',
-        'wrong-cwd','wrong-path','shape','terminal-exception','stdout','stderr','partial-read',
-        'close','read-close','reset','body-reset','overdelivery')
+'wrong-cwd','wrong-path','shape','terminal-exception','stdout','stderr','partial-read',
+'close','read-close','reset','body-reset','overdelivery')
     for fault in faults:
-        with monkeypatch.context() as admin_patch:
+        with monkeypatch.context()as admin_patch:
             admin_patch.setattr(o.sys,'platform','linux')
             admin=o._LinuxPreflightQueriesV1(evidence_root=tmp_path/('admin-'+fault),
-                deadline_ns=time.monotonic_ns()+60*10**9)
+deadline_ns=time.monotonic_ns()+60*10**9)
             admin.evidence_root.mkdir()
             bind_administrative_fixture_cwd(admin,admin.evidence_root,admin_patch)
             starts=[];opens=[];reads=[];closes=[];actual=[];fd_names={}
             primary=OSError('original administrative '+fault+' fault')
             secondary=OSError('original administrative close/reset fault')
-            primary.owned_process=object() if fault in ('unknown','body-reset') else None
+            primary.owned_process=object()if fault in ('unknown','body-reset')else None
             def no_child_admin(argv,**kwargs):
                 starts.append((argv,kwargs))
                 if fault in ('unknown','body-reset'):raise primary
                 stdout=admin.evidence_root/('command-'+str(kwargs['command_index'])+'.stdout.bin')
                 stderr=admin.evidence_root/('command-'+str(kwargs['command_index'])+'.stderr.bin')
-                stdout.write_bytes(b'' if fault=='prestart' else b'version\n');stderr.write_bytes(b'')
+                stdout.write_bytes(b''if fault=='prestart'else b'version\n');stderr.write_bytes(b'')
                 receipt=o.CommandExecutionReceiptV1(schema_version=o.SCHEMA_VERSION,
-                    run_id=kwargs['run_id'],phase=kwargs['phase'],command_index=kwargs['command_index'],argv=argv,
-                    cwd=str(kwargs['cwd']),pid=None if fault=='prestart' else 12345,platform='posix',
-                    start_time_utc='2026-10-06T00:00:00Z',end_time_utc='2026-10-06T00:00:01Z',
-                    elapsed_monotonic_seconds=1,native_exit_code=None if fault=='prestart' else 7 if fault=='nonzero' else 0,
-                    start_failure_class='FileNotFoundError' if fault=='prestart' else None,
-                    timeout_seconds_or_null=None,timeout_state='NOT_CONFIGURED',
-                    termination_state='TERMINAL:UNPROVEN' if fault=='unproven' else 'NOT_REQUIRED',
-                    stdout_path=str(stdout),stderr_path=str(stderr),stdout_byte_count=0 if fault=='prestart' else 8,stderr_byte_count=0,
-                    stdout_required_markers=(),stdout_marker_state='NOT_REQUIRED',stderr_was_nonempty=False,
-                    failure_class='ENGVR_PROCESS_START_FAILED' if fault=='prestart' else 'ENGVR_NATIVE_EXIT_NONZERO'
-                        if fault=='nonzero' else 'ENGVR_PROCESS_TERMINATION_FAILED' if fault=='unproven' else None)
+run_id=kwargs['run_id'],phase=kwargs['phase'],command_index=kwargs['command_index'],argv=argv,
+cwd=str(kwargs['cwd']),pid=None if fault=='prestart'else 12345,platform='posix',
+start_time_utc='2026-10-06T00:00:00Z',end_time_utc='2026-10-06T00:00:01Z',
+elapsed_monotonic_seconds=1,native_exit_code=None if fault=='prestart'else 7 if fault=='nonzero'else 0,
+start_failure_class='FileNotFoundError'if fault=='prestart'else None,
+timeout_seconds_or_null=None,timeout_state='NOT_CONFIGURED',
+termination_state='TERMINAL:UNPROVEN'if fault=='unproven'else'NOT_REQUIRED',
+stdout_path=str(stdout),stderr_path=str(stderr),stdout_byte_count=0 if fault=='prestart'else 8,stderr_byte_count=0,
+stdout_required_markers=(),stdout_marker_state='NOT_REQUIRED',stderr_was_nonempty=False,
+failure_class='ENGVR_PROCESS_START_FAILED'if fault=='prestart'else'ENGVR_NATIVE_EXIT_NONZERO'
+if fault=='nonzero'else'ENGVR_PROCESS_TERMINATION_FAILED'if fault=='unproven'else None)
                 changes={'wrong-run':dict(run_id='foreign-run'),'wrong-phase':dict(phase='foreign-phase'),
-                    'wrong-index':dict(command_index=kwargs['command_index']+1),'wrong-cwd':dict(cwd=str(tmp_path)),
-                    'wrong-path':dict(stdout_path=str(tmp_path/'foreign-output.bin'))}.get(fault,{})
+'wrong-index':dict(command_index=kwargs['command_index']+1),'wrong-cwd':dict(cwd=str(tmp_path)),
+'wrong-path':dict(stdout_path=str(tmp_path/'foreign-output.bin'))}.get(fault,{})
                 receipt=dataclasses.replace(receipt,**changes)
                 if fault=='shape':receipt=object()
                 actual.append(receipt)
@@ -30458,10 +30557,10 @@ def _ordinary_ci_initial_common_source_check_v1(native_input,profile,allocation)
                 return fd
             def tracked_read(fd,request):
                 reads.append((fd,request));name=fd_names.get(fd,'')
-                if ((fault in ('stdout','read-close') and name.endswith('stdout.bin'))
-                        or (fault=='stderr' and name.endswith('stderr.bin'))):raise primary
-                if fault=='overdelivery' and name.endswith('stdout.bin'):return b'X'*(request+1)
-                if fault=='partial-read' and name.endswith('stdout.bin'):
+                if ((fault in ('stdout','read-close')and name.endswith('stdout.bin'))
+or (fault=='stderr'and name.endswith('stderr.bin'))):raise primary
+                if fault=='overdelivery'and name.endswith('stdout.bin'):return b'X'*(request+1)
+                if fault=='partial-read'and name.endswith('stdout.bin'):
                     if sum(item[0]==fd for item in reads)==1:return original_read(fd,3)
                     raise primary
                 return original_read(fd,min(request,3))  # Legitimate short reads.
@@ -30478,39 +30577,39 @@ def _ordinary_ci_initial_common_source_check_v1(native_input,profile,allocation)
                 admin_patch.setattr(o,'_LINUX_PREFLIGHT_PROCESS_V1',ResetFault())
             if fault=='success':
                 assert admin.command(admin_vector)==b'version\n'
-                assert admin.command(admin_vector)==b'version\n' and len(starts)==2
-                assert admin.failure is None and admin.command_resources_settled_v1() and admin.retained==16
-                assert admin.command_receipt_for_argv_v1(admin_vector) is actual[-1]
+                assert admin.command(admin_vector)==b'version\n'and len(starts)==2
+                assert admin.failure is None and admin.command_resources_settled_v1()and admin.retained==16
+                assert admin.command_receipt_for_argv_v1(admin_vector)is actual[-1]
             else:
-                with pytest.raises(BaseException) as caught:admin.command(admin_vector)
+                with pytest.raises(BaseException)as caught:admin.command(admin_vector)
                 assert admin.failure is caught.value and len(starts)==1
                 if fault in ('unknown','terminal-exception','stdout','stderr','partial-read'):assert caught.value is primary
                 if fault in ('read-close','body-reset'):
-                    assert isinstance(caught.value,BaseExceptionGroup) and caught.value.exceptions==(primary,secondary)
+                    assert isinstance(caught.value,BaseExceptionGroup)and caught.value.exceptions==(primary,secondary)
                 if fault in ('close','reset'):assert caught.value is secondary
                 unsafe=fault in ('unknown','unproven','wrong-run','wrong-phase','wrong-index','wrong-cwd',
-                    'wrong-path','shape','stdout','stderr','partial-read','close','read-close','body-reset','overdelivery')
-                assert admin.command_resources_settled_v1() is (not unsafe)
+'wrong-path','shape','stdout','stderr','partial-read','close','read-close','body-reset','overdelivery')
+                assert admin.command_resources_settled_v1()is (not unsafe)
                 if unsafe:
                     original=admin.command_supervisions[0];before=len(admin.command_supervisions)
                     with pytest.raises(o.ValidationReliabilityError,match='ADMINISTRATIVE_CUSTODY_UNRESOLVED'):
                         admin.command(admin_vector,settling=True)
                     assert len(starts)==1 and len(admin.command_supervisions)==before
-                    assert admin.command_supervisions[0] is original and admin.failure is caught.value
+                    assert admin.command_supervisions[0]is original and admin.failure is caught.value
                     controller=ast.parse(inspect.getsource(runner._linux_preflight_controller_v1)).body[0]
                     expression=next(node.value for node in controller.body if isinstance(node,ast.Assign)
-                        and any(isinstance(target,ast.Name) and target.id=='settled' for target in node.targets))
+and any(isinstance(target,ast.Name)and target.id=='settled'for target in node.targets))
                     assert not eval(compile(ast.Expression(expression),'<original controller settlement>','eval'),
-                        dict(scope=None,recovery_resources_settled=True,query=admin))
+dict(scope=None,recovery_resources_settled=True,query=admin))
                 else:
                     with pytest.raises(BaseException):admin.command(admin_vector)
                     assert len(starts)==1
                 record=admin.command_supervisions[0]
                 assert any(error is caught.value for error in record['errors'])
-                if actual:assert record['receipt'] is actual[0] and admin.last_command_receipt is actual[0]
-                else:assert record['receipt'] is None and record['pending']
+                if actual:assert record['receipt']is actual[0]and admin.last_command_receipt is actual[0]
+                else:assert record['receipt']is None and record['pending']
                 if fault in ('unproven','wrong-run','wrong-phase','wrong-index','wrong-cwd','wrong-path','shape','terminal-exception','reset'):
-                    assert opens==reads==closes==[] and admin.retained==0
+                    assert opens==reads==closes==[]and admin.retained==0
                 if fault=='stderr':assert admin.retained==8 and record['streams']['stdout']['raw']==b'version\n'
                 if fault=='partial-read':assert admin.retained==3 and record['streams']['stdout']['raw']==b'ver'
                 if fault=='overdelivery':
@@ -30519,20 +30618,20 @@ def _ordinary_ci_initial_common_source_check_v1(native_input,profile,allocation)
                 if fault in ('close','read-close'):assert len(closes)==1 and not record['streams']['stdout']['closed']
                 if fault in ('nonzero','prestart','terminal-exception'):
                     with pytest.raises(BaseException):admin.command(admin_vector,settling=True)
-                    assert len(starts)==2 and admin.command_resources_settled_v1() and admin.failure is caught.value
+                    assert len(starts)==2 and admin.command_resources_settled_v1()and admin.failure is caught.value
                     with pytest.raises(BaseException):admin.command(admin_vector)
-                    assert len(starts)==2 and admin.command_receipt_for_argv_v1(admin_vector) is None
+                    assert len(starts)==2 and admin.command_receipt_for_argv_v1(admin_vector)is None
             assert all(request<=65536 for _,request in reads)
             assert o._LINUX_PREFLIGHT_PROCESS_V1 is context or fault in ('reset','body-reset')
             evidence=admin.command_supervision_evidence_v1()
-            assert len(evidence)==len(admin.command_supervisions) and all(row['argv']==admin_vector for row in evidence)
+            assert len(evidence)==len(admin.command_supervisions)and all(row['argv']==admin_vector for row in evidence)
     from types import SimpleNamespace
     scalar_defects=('combined-bool','combined-float','limit-bool','limit-float',
-        'drained-bool','drained-float','retained-bool','retained-float')
+'drained-bool','drained-float','retained-bool','retained-float')
     for defect in ('expected','unbound','foreign-context','argv-copy','unknown','unproven','timeout',
-            'publication','start-failure','wrong-receipt','shape','capture-incomplete','overflow',
-            'read','close','read-close','reset','report','deadline',*scalar_defects):
-        with monkeypatch.context() as denial_patch:
+'publication','start-failure','wrong-receipt','shape','capture-incomplete','overflow',
+'read','close','read-close','reset','report','deadline',*scalar_defects):
+        with monkeypatch.context()as denial_patch:
             denial_patch.setattr(o.sys,'platform','linux')
             area=tmp_path/('selected-denial-'+defect);area.mkdir()
             evidence=area/'query';evidence.mkdir()
@@ -30542,73 +30641,73 @@ def _ordinary_ci_initial_common_source_check_v1(native_input,profile,allocation)
             source=SimpleNamespace(root=area/'tiny-source',run_id='qtt123n456-recovery-3')
             source.root.mkdir()
             admin=o._LinuxPreflightQueriesV1(evidence_root=evidence,
-                deadline_ns=time.monotonic_ns()+60*10**9,startup_closeout_bytes=32*1024**2)
+deadline_ns=time.monotonic_ns()+60*10**9,startup_closeout_bytes=32*1024**2)
             admin.startup_fixture_reservation=2097152
             bind_administrative_fixture_cwd(admin,evidence,denial_patch)
             end=time.monotonic_ns()+60*10**9
             scope=o._LinuxPreflightScopeV1(name='qtt123n4560',query=admin,control=area,
-                runtime=root,private_root=root,spool=spool,repository=str(source.root),installation='',
-                interpreter='/qtt-intentionally-absent-fixture-executable',source=source,header=None,
-                blobs=None,vectors=None,grants=dict(execution_deadline_ns=end,settlement_deadline_ns=end),
-                event={},environment=dict(PATH='/usr/bin',LANG='C.UTF-8',LC_ALL='C.UTF-8'))
+runtime=root,private_root=root,spool=spool,repository=str(source.root),installation='',
+interpreter='/qtt-intentionally-absent-fixture-executable',source=source,header=None,
+blobs=None,vectors=None,grants=dict(execution_deadline_ns=end,settlement_deadline_ns=end),
+event={},environment=dict(PATH='/usr/bin',LANG='C.UTF-8',LC_ALL='C.UTF-8'))
             scope.argv=('/qtt-intentionally-absent-fixture-executable',)
             scope.launch_argv=('/usr/bin/systemd-run','--system','--no-ask-password','--expand-environment=no',
-                '--unit=qtt123n4560.service','--slice=qtt123n4560.slice',
-                *('--property='+k+'='+v for k,v in o._LINUX_PREFLIGHT_PROPERTIES_V1),
-                '--property=RootDirectory='+str(root),'--property=WorkingDirectory=/',
-                '--property=StandardInput=null','--property=StandardOutput=append:'+str(spool/'command-1.stdout.bin'),
-                '--property=StandardError=append:'+str(spool/'command-1.stderr.bin'),
-                '--','/qtt-intentionally-absent-fixture-executable')
+'--unit=qtt123n4560.service','--slice=qtt123n4560.slice',
+*('--property='+k+'='+v for k,v in o._LINUX_PREFLIGHT_PROPERTIES_V1),
+'--property=RootDirectory='+str(root),'--property=WorkingDirectory=/',
+'--property=StandardInput=null','--property=StandardOutput=append:'+str(spool/'command-1.stdout.bin'),
+'--property=StandardError=append:'+str(spool/'command-1.stderr.bin'),
+'--','/qtt-intentionally-absent-fixture-executable')
             if defect!='unbound':admin._bind_denied_start_fixture_v1(scope)
             frozen_vector=scope.launch_argv
             if defect=='argv-copy':scope.launch_argv=tuple(list(scope.launch_argv))
             starts=[];receipts=[];opened={};requests=[]
             primary=OSError('selected denial '+defect+' original error')
             secondary=OSError('selected denial original close error')
-            primary.owned_process=object() if defect=='unknown' else None
+            primary.owned_process=object()if defect=='unknown'else None
             def no_child_denied(argv,**kwargs):
                 starts.append((argv,kwargs))
                 if defect=='unknown':raise primary
                 negative=argv[0]=='/usr/bin/systemd-run'
                 out=evidence/('command-'+str(kwargs['command_index'])+'.stdout.bin')
                 err=evidence/('command-'+str(kwargs['command_index'])+'.stderr.bin')
-                stdout=b'' if negative and (defect=='start-failure'
-                    or defect.startswith(('drained-','retained-'))) else b'version\n'
-                stderr=b'fixture absent\n' if negative and defect!='start-failure' else b''
+                stdout=b''if negative and (defect=='start-failure'
+or defect.startswith(('drained-','retained-')))else b'version\n'
+                stderr=b'fixture absent\n'if negative and defect!='start-failure'else b''
                 out.write_bytes(stdout);err.write_bytes(stderr)
                 limits=kwargs['output_limits']
                 observation={'combined_output_grant':limits['combined_output_bytes']}
                 for name,data in (('stdout',stdout),('stderr',stderr)):
                     observation[name]=dict(retention_limit=limits[name+'_bytes'],
-                        drained_byte_count=len(data),cleanup_drained_byte_count=0,
-                        retained_byte_count=len(data),overflow=False,complete=True,errors=[])
+drained_byte_count=len(data),cleanup_drained_byte_count=0,
+retained_byte_count=len(data),overflow=False,complete=True,errors=[])
                 if negative and defect in scalar_defects:
                     field=defect.split('-')[0]
                     if field=='combined':
                         observation['combined_output_grant']=(False if defect.endswith('-bool')
-                            else float(limits['combined_output_bytes']))
+else float(limits['combined_output_bytes']))
                     elif field=='limit':
                         observation['stdout']['retention_limit']=(False if defect.endswith('-bool')
-                            else float(limits['stdout_bytes']))
+else float(limits['stdout_bytes']))
                     else:
-                        observation['stdout'][field+'_byte_count']=False if defect.endswith('-bool') else 0.0
+                        observation['stdout'][field+'_byte_count']=False if defect.endswith('-bool')else 0.0
                 receipt=o.CommandExecutionReceiptV1(schema_version=o.SCHEMA_VERSION,
-                    run_id=kwargs['run_id'],phase=kwargs['phase'],command_index=kwargs['command_index'],argv=argv,
-                    cwd=str(kwargs['cwd']),pid=12345,platform='posix',
-                    start_time_utc='2026-10-06T00:00:00Z',end_time_utc='2026-10-06T00:00:01Z',
-                    elapsed_monotonic_seconds=1,native_exit_code=1 if negative else 0,
-                    start_failure_class=None,timeout_seconds_or_null=10,timeout_state='NOT_TRIGGERED',
-                    termination_state='NOT_REQUIRED',stdout_path=str(out),stderr_path=str(err),
-                    stdout_byte_count=len(stdout),stderr_byte_count=len(stderr),stdout_required_markers=(),
-                    stdout_marker_state='NOT_REQUIRED',stderr_was_nonempty=bool(stderr),
-                    failure_class='ENGVR_NATIVE_EXIT_NONZERO' if negative else None,output_observation=observation)
+run_id=kwargs['run_id'],phase=kwargs['phase'],command_index=kwargs['command_index'],argv=argv,
+cwd=str(kwargs['cwd']),pid=12345,platform='posix',
+start_time_utc='2026-10-06T00:00:00Z',end_time_utc='2026-10-06T00:00:01Z',
+elapsed_monotonic_seconds=1,native_exit_code=1 if negative else 0,
+start_failure_class=None,timeout_seconds_or_null=10,timeout_state='NOT_TRIGGERED',
+termination_state='NOT_REQUIRED',stdout_path=str(out),stderr_path=str(err),
+stdout_byte_count=len(stdout),stderr_byte_count=len(stderr),stdout_required_markers=(),
+stdout_marker_state='NOT_REQUIRED',stderr_was_nonempty=bool(stderr),
+failure_class='ENGVR_NATIVE_EXIT_NONZERO'if negative else None,output_observation=observation)
                 changes={'unproven':dict(termination_state='TERMINAL:UNPROVEN'),
-                    'timeout':dict(failure_class='ENGVR_PROCESS_TIMEOUT',timeout_state='TRIGGERED',
-                        termination_state='SIGTERM:0;TERMINAL:PROVEN'),
-                    'publication':dict(failure_class='ENGVR_ATOMIC_RECEIPT_WRITE_FAILED'),
-                    'start-failure':dict(pid=None,native_exit_code=None,start_failure_class='FileNotFoundError',
-                        failure_class='ENGVR_PROCESS_START_FAILED'),
-                    'wrong-receipt':dict(run_id='foreign-run')}.get(defect,{})
+'timeout':dict(failure_class='ENGVR_PROCESS_TIMEOUT',timeout_state='TRIGGERED',
+termination_state='SIGTERM:0;TERMINAL:PROVEN'),
+'publication':dict(failure_class='ENGVR_ATOMIC_RECEIPT_WRITE_FAILED'),
+'start-failure':dict(pid=None,native_exit_code=None,start_failure_class='FileNotFoundError',
+failure_class='ENGVR_PROCESS_START_FAILED'),
+'wrong-receipt':dict(run_id='foreign-run')}.get(defect,{})
                 if negative and changes:receipt=dataclasses.replace(receipt,**changes)
                 if negative and defect=='capture-incomplete':observation['stderr']['complete']=False
                 if negative and defect=='overflow':observation['stderr']['overflow']=True
@@ -30620,7 +30719,7 @@ def _ordinary_ci_initial_common_source_check_v1(native_input,profile,allocation)
                 fd=original_open(path,**kwargs);opened[fd]=path.name;return fd
             def selected_read(fd,request):
                 requests.append(request)
-                if defect in ('read','read-close') and opened.get(fd,'').endswith('stdout.bin'):raise primary
+                if defect in ('read','read-close')and opened.get(fd,'').endswith('stdout.bin'):raise primary
                 return original_read(fd,min(request,3))
             def selected_close(fd):
                 original_close(fd)
@@ -30628,7 +30727,7 @@ def _ordinary_ci_initial_common_source_check_v1(native_input,profile,allocation)
             denial_patch.setattr(o,'_open_regular_worktree_descriptor',selected_open)
             denial_patch.setattr(os,'read',selected_read);denial_patch.setattr(os,'close',selected_close)
             context=o._LINUX_PREFLIGHT_PROCESS_V1
-            token=context.set(object() if defect=='foreign-context' else scope)
+            token=context.set(object()if defect=='foreign-context'else scope)
             if defect=='reset':
                 class SelectedResetFailure:
                     def get(self):return scope
@@ -30638,19 +30737,19 @@ def _ordinary_ci_initial_common_source_check_v1(native_input,profile,allocation)
             if defect=='report':
                 original_json=o._json_compatible
                 def fail_original_receipt_report(value):
-                    if type(value) is o.CommandExecutionReceiptV1:raise primary
+                    if type(value)is o.CommandExecutionReceiptV1:raise primary
                     return original_json(value)
                 denial_patch.setattr(o,'_json_compatible',fail_original_receipt_report)
             if defect=='deadline':
                 original_check=admin.check
                 def expire_only_after_complete_streams(**kwargs):
                     record=admin._command_call_record
-                    if record is not None and set(record['streams'])=={'stdout','stderr'} and all(
-                            slot['complete'] for slot in record['streams'].values()):admin.deadline_ns=1
+                    if record is not None and set(record['streams'])=={'stdout','stderr'}and all(
+slot['complete']for slot in record['streams'].values()):admin.deadline_ns=1
                     return original_check(**kwargs)
                 denial_patch.setattr(admin,'check',expire_only_after_complete_streams)
             try:
-                with pytest.raises(BaseException) as caught:
+                with pytest.raises(BaseException)as caught:
                     scope.create(scope.argv,source.root,scope.environment)
                 assert scope.startup_error is caught.value and caught.value.owned_process is scope.process
                 assert scope.process.pid is None and scope.process.pidfd is None
@@ -30658,37 +30757,37 @@ def _ordinary_ci_initial_common_source_check_v1(native_input,profile,allocation)
                 if defect=='expected':
                     assert len(starts)==1 and admin.failure is None and admin.command_resources_settled_v1()
                     record=admin.command_supervisions[0]
-                    assert record['receipt'] is receipts[0] is scope.launcher_receipt
+                    assert record['receipt']is receipts[0]is scope.launcher_receipt
                     assert record['receipt'].native_exit_code==1 and record['receipt'].failure_class=='ENGVR_NATIVE_EXIT_NONZERO'
-                    assert record['errors']==[caught.value] and all(
-                        slot['complete'] and slot['closed'] and slot['raw_owner'] is None for slot in record['streams'].values())
+                    assert record['errors']==[caught.value]and all(
+slot['complete']and slot['closed']and slot['raw_owner']is None for slot in record['streams'].values())
                     assert admin.retained==23 and scope.settled is False
                     admin.check()
-                    assert admin.command(admin_vector)==b'version\n' and admin.failure is None and len(starts)==2
+                    assert admin.command(admin_vector)==b'version\n'and admin.failure is None and len(starts)==2
                     before=len(admin.command_supervisions)
                     with pytest.raises(o.ValidationReliabilityError,match='DENIED_START_BINDING'):
                         admin._bind_denied_start_fixture_v1(scope)
                     assert len(admin.command_supervisions)==before and admin._denied_start_bound
-                    with pytest.raises(o.ValidationReliabilityError,match='LINUX_PREFLIGHT_NATIVE_COMMAND') as repeated:
+                    with pytest.raises(o.ValidationReliabilityError,match='LINUX_PREFLIGHT_NATIVE_COMMAND')as repeated:
                         admin.command(frozen_vector)
                     assert len(starts)==3 and admin.failure is repeated.value
                     assert admin.command_supervisions[-1]['receipt'].native_exit_code==1
                 else:
                     assert admin.failure is caught.value
-                    assert len(starts)==(0 if defect in ('foreign-context','argv-copy') else 1)
+                    assert len(starts)==(0 if defect in ('foreign-context','argv-copy')else 1)
                     if defect in ('read','reset','report','unknown'):assert caught.value is primary
                     if defect=='close':assert caught.value is secondary
                     if defect=='read-close':
-                        assert isinstance(caught.value,BaseExceptionGroup) and caught.value.exceptions==(primary,secondary)
+                        assert isinstance(caught.value,BaseExceptionGroup)and caught.value.exceptions==(primary,secondary)
                     if defect in ('foreign-context','argv-copy'):
                         assert not admin.command_supervisions and admin.retained==0 and scope.launcher_receipt is None
                     else:
                         record=admin.command_supervisions[0]
                         assert any(error is caught.value for error in record['errors'])
-                        if receipts:assert record['receipt'] is receipts[0]
+                        if receipts:assert record['receipt']is receipts[0]
                         if defect=='deadline':
-                            assert len(record['errors'])==2 and record['errors'][0] is caught.value.__context__
-                            assert all(slot['complete'] and slot['closed'] for slot in record['streams'].values())
+                            assert len(record['errors'])==2 and record['errors'][0]is caught.value.__context__
+                            assert all(slot['complete']and slot['closed']for slot in record['streams'].values())
                         if defect in ('unproven','wrong-receipt','shape','unknown','read','close','read-close'):
                             assert not admin.command_resources_settled_v1()
                         if defect in ('unbound','timeout','publication','start-failure','capture-incomplete','overflow','report','deadline',*scalar_defects):
@@ -30702,10 +30801,10 @@ def _ordinary_ci_initial_common_source_check_v1(native_input,profile,allocation)
                     scope.process.stdout.close();scope.process.stderr.close()
             assert all(request<=65536 for request in requests)
     for defect in ('run_id','phase','command_index','cwd','stdout_path','shape'):
-        with monkeypatch.context() as diagnostic_patch:
+        with monkeypatch.context()as diagnostic_patch:
             diagnostic_patch.setattr(o.sys,'platform','linux')
             admin=o._LinuxPreflightQueriesV1(evidence_root=tmp_path/('diagnostic-'+defect),
-                deadline_ns=time.monotonic_ns()+60*10**9,startup_closeout_bytes=32*1024**2)
+deadline_ns=time.monotonic_ns()+60*10**9,startup_closeout_bytes=32*1024**2)
             admin.evidence_root.mkdir()
             bind_administrative_fixture_cwd(admin,admin.evidence_root,diagnostic_patch)
             fake_scope=object.__new__(o._LinuxPreflightScopeV1)
@@ -30715,30 +30814,30 @@ def _ordinary_ci_initial_common_source_check_v1(native_input,profile,allocation)
             returned=[];output_opens=[]
             def wrong_diagnostic(argv,**kwargs):
                 receipt=o.CommandExecutionReceiptV1(schema_version=o.SCHEMA_VERSION,
-                    run_id=kwargs['run_id'],phase=kwargs['phase'],command_index=kwargs['command_index'],argv=argv,
-                    cwd=str(kwargs['cwd']),pid=12345,platform='posix',start_time_utc='2026-10-06T00:00:00Z',
-                    end_time_utc='2026-10-06T00:00:01Z',elapsed_monotonic_seconds=1,native_exit_code=0,
-                    start_failure_class=None,timeout_seconds_or_null=None,timeout_state='NOT_CONFIGURED',
-                    termination_state='NOT_REQUIRED',stdout_path=str(admin.evidence_root/('command-'+str(kwargs['command_index'])+'.stdout.bin')),
-                    stderr_path=str(admin.evidence_root/('command-'+str(kwargs['command_index'])+'.stderr.bin')),
-                    stdout_byte_count=0,stderr_byte_count=0,stdout_required_markers=(),stdout_marker_state='NOT_REQUIRED',
-                    stderr_was_nonempty=False,failure_class=None)
+run_id=kwargs['run_id'],phase=kwargs['phase'],command_index=kwargs['command_index'],argv=argv,
+cwd=str(kwargs['cwd']),pid=12345,platform='posix',start_time_utc='2026-10-06T00:00:00Z',
+end_time_utc='2026-10-06T00:00:01Z',elapsed_monotonic_seconds=1,native_exit_code=0,
+start_failure_class=None,timeout_seconds_or_null=None,timeout_state='NOT_CONFIGURED',
+termination_state='NOT_REQUIRED',stdout_path=str(admin.evidence_root/('command-'+str(kwargs['command_index'])+'.stdout.bin')),
+stderr_path=str(admin.evidence_root/('command-'+str(kwargs['command_index'])+'.stderr.bin')),
+stdout_byte_count=0,stderr_byte_count=0,stdout_required_markers=(),stdout_marker_state='NOT_REQUIRED',
+stderr_was_nonempty=False,failure_class=None)
                 changes=dict(run_id='foreign',phase='foreign',command_index=kwargs['command_index']+1,
-                    cwd=str(tmp_path),stdout_path=str(tmp_path/'foreign-stream'))
-                receipt=object() if defect=='shape' else dataclasses.replace(receipt,**{defect:changes[defect]})
+cwd=str(tmp_path),stdout_path=str(tmp_path/'foreign-stream'))
+                receipt=object()if defect=='shape'else dataclasses.replace(receipt,**{defect:changes[defect]})
                 returned.append(receipt);return receipt
             diagnostic_patch.setattr(o,'supervise_command',wrong_diagnostic)
             def forbidden_open(path,**kwargs):output_opens.append(path);raise AssertionError('unassociated receipt read')
             diagnostic_patch.setattr(o,'_open_regular_worktree_descriptor',forbidden_open)
             with admin.owned_resource_phase():record,raw,stderr=admin.startup_diagnostic(fake_scope,'status')
-            assert not record['complete'] and not record['success'] and not record['command_settled']
-            assert raw==stderr==b'' and not output_opens and len(returned)==1
-            assert admin.last_command_receipt is returned[0] and admin.command_supervisions[0]['receipt'] is returned[0]
-            assert admin.command_receipt_for_argv_v1(tuple(record['argv'])) is None and not admin.command_resources_settled_v1()
-    with monkeypatch.context() as stale_patch:
+            assert not record['complete']and not record['success']and not record['command_settled']
+            assert raw==stderr==b''and not output_opens and len(returned)==1
+            assert admin.last_command_receipt is returned[0]and admin.command_supervisions[0]['receipt']is returned[0]
+            assert admin.command_receipt_for_argv_v1(tuple(record['argv']))is None and not admin.command_resources_settled_v1()
+    with monkeypatch.context()as stale_patch:
         stale_patch.setattr(o.sys,'platform','linux')
         admin=o._LinuxPreflightQueriesV1(evidence_root=tmp_path/'admin-stale-success',
-            deadline_ns=time.monotonic_ns()+60*10**9)
+deadline_ns=time.monotonic_ns()+60*10**9)
         admin.evidence_root.mkdir();bind_administrative_fixture_cwd(admin,admin.evidence_root,stale_patch)
         starts=[];old_receipts=[]
         current_error=OSError('original later same-vector unknown dispatch')
@@ -30750,65 +30849,65 @@ def _ordinary_ci_initial_common_source_check_v1(native_input,profile,allocation)
             err=admin.evidence_root/('command-'+str(kwargs['command_index'])+'.stderr.bin')
             out.write_bytes(b'prior-success');err.write_bytes(b'')
             receipt=o.CommandExecutionReceiptV1(schema_version=o.SCHEMA_VERSION,run_id=kwargs['run_id'],
-                phase=kwargs['phase'],command_index=kwargs['command_index'],argv=argv,cwd=str(kwargs['cwd']),
-                pid=12345,platform='posix',start_time_utc='2026-10-06T00:00:00Z',end_time_utc='2026-10-06T00:00:01Z',
-                elapsed_monotonic_seconds=1,native_exit_code=0,start_failure_class=None,timeout_seconds_or_null=None,
-                timeout_state='NOT_CONFIGURED',termination_state='NOT_REQUIRED',stdout_path=str(out),stderr_path=str(err),
-                stdout_byte_count=13,stderr_byte_count=0,stdout_required_markers=(),stdout_marker_state='NOT_REQUIRED',
-                stderr_was_nonempty=False,failure_class=None)
+phase=kwargs['phase'],command_index=kwargs['command_index'],argv=argv,cwd=str(kwargs['cwd']),
+pid=12345,platform='posix',start_time_utc='2026-10-06T00:00:00Z',end_time_utc='2026-10-06T00:00:01Z',
+elapsed_monotonic_seconds=1,native_exit_code=0,start_failure_class=None,timeout_seconds_or_null=None,
+timeout_state='NOT_CONFIGURED',termination_state='NOT_REQUIRED',stdout_path=str(out),stderr_path=str(err),
+stdout_byte_count=13,stderr_byte_count=0,stdout_required_markers=(),stdout_marker_state='NOT_REQUIRED',
+stderr_was_nonempty=False,failure_class=None)
             old_receipts.append(receipt);return receipt
         stale_patch.setattr(o,'supervise_command',one_success_then_unknown)
-        assert admin.command(admin_vector)==b'prior-success' and admin.command_resources_settled_v1()
-        assert admin.command_receipt_for_argv_v1(admin_vector) is old_receipts[0]
-        with pytest.raises(OSError) as caught:admin.command(admin_vector)
+        assert admin.command(admin_vector)==b'prior-success'and admin.command_resources_settled_v1()
+        assert admin.command_receipt_for_argv_v1(admin_vector)is old_receipts[0]
+        with pytest.raises(OSError)as caught:admin.command(admin_vector)
         assert caught.value is current_error and len(starts)==2 and admin.retained==13
-        assert admin.command_supervisions[0]['receipt'] is old_receipts[0] and admin.command_supervisions[1]['receipt'] is None
-        assert admin.command_receipt_for_argv_v1(admin_vector) is None and not admin.command_resources_settled_v1()
+        assert admin.command_supervisions[0]['receipt']is old_receipts[0]and admin.command_supervisions[1]['receipt']is None
+        assert admin.command_receipt_for_argv_v1(admin_vector)is None and not admin.command_resources_settled_v1()
         with pytest.raises(o.ValidationReliabilityError,match='ADMINISTRATIVE_CUSTODY_UNRESOLVED'):
             admin.command(admin_vector,settling=True)
         assert len(starts)==2 and len(admin.command_supervisions)==2 and admin.failure is current_error
-    with monkeypatch.context() as admin_patch:
+    with monkeypatch.context()as admin_patch:
         admin_patch.setattr(o.sys,'platform','linux')
         never=o._LinuxPreflightQueriesV1(evidence_root=tmp_path/'never-admin',deadline_ns=time.monotonic_ns()+60*10**9)
         with pytest.raises(o.ValidationReliabilityError,match='ADMINISTRATIVE_PROGRAM'):never.command(('/unselected/program',))
         assert never.failure is not None and never.command_supervisions==[]
-        assert never.command_resources_settled_v1() and not never.evidence_root.exists()
+        assert never.command_resources_settled_v1()and not never.evidence_root.exists()
     pending_root=tmp_path/'runtime-not-handed-off'
-    with monkeypatch.context() as patch:
+    with monkeypatch.context()as patch:
         patch.setattr(o.sys,'platform','linux')
         query=o._LinuxPreflightQueriesV1(evidence_root=pending_root,deadline_ns=time.monotonic_ns()+10**9)
-        assert not pending_root.exists() and query.observations==[]
+        assert not pending_root.exists()and query.observations==[]
         def one_pending(seconds):
-            assert seconds==0.1 and query.attempts==1 and query.observations==[] and not pending_root.exists()
+            assert seconds==0.1 and query.attempts==1 and query.observations==[]and not pending_root.exists()
             raise RuntimeError('reference pending boundary reached')
         patch.setattr(o.time,'sleep',one_pending)
         with pytest.raises(RuntimeError,match='reference pending boundary'):
             o._linux_preflight_control_read_v1(tmp_path/'not-published.json',deadline_ns=query.deadline_ns,pending=True,query=query)
-        assert query.attempts==1 and query.observations==[] and not pending_root.exists()
+        assert query.attempts==1 and query.observations==[]and not pending_root.exists()
     entry=ast.parse(inspect.getsource(runner._linux_preflight_enter_v1)).body[0]
-    binding_position=next(i for i,node in enumerate(entry.body) if isinstance(node,ast.Assign)
-        and isinstance(node.value,ast.Call) and isinstance(node.value.func,ast.Attribute)
-        and node.value.func.attr=='_linux_preflight_control_read_v1')
-    assert not any(isinstance(node,ast.Call) and isinstance(node.func,ast.Attribute)
-        and node.func.attr in ('mkdir','write_bytes','write_text','record','atomic_write_json','_atomic_write_bytes_v1')
-        for statement in entry.body[:binding_position] for node in ast.walk(statement))
+    binding_position=next(i for i,node in enumerate(entry.body)if isinstance(node,ast.Assign)
+and isinstance(node.value,ast.Call)and isinstance(node.value.func,ast.Attribute)
+and node.value.func.attr=='_linux_preflight_control_read_v1')
+    assert not any(isinstance(node,ast.Call)and isinstance(node.func,ast.Attribute)
+and node.func.attr in ('mkdir','write_bytes','write_text','record','atomic_write_json','_atomic_write_bytes_v1')
+for statement in entry.body[:binding_position]for node in ast.walk(statement))
     reference=o._LinuxPreflightScopeV1.__new__(o._LinuxPreflightScopeV1)
     reference.query=RuntimeQueryReference()
     original_info=SimpleNamespace(st_mode=stat.S_IFDIR|0o700,st_dev=91,st_ino=92,st_uid=0,st_gid=0)
     reference._runtime_call=lambda operation,*args,**kwargs:original_info
-    assert reference._runtime_directory('/run/qtt1n2',(91,92),0,0,0o700) is original_info
+    assert reference._runtime_directory('/run/qtt1n2',(91,92),0,0,0o700)is original_info
     for field,value in (('st_ino',93),('st_dev',93),('st_uid',61234),('st_gid',61235),
-            ('st_mode',stat.S_IFDIR|0o755),('st_mode',stat.S_IFLNK|0o700)):
+('st_mode',stat.S_IFDIR|0o755),('st_mode',stat.S_IFLNK|0o700)):
         changed=SimpleNamespace(**{**vars(original_info),field:value})
         assert vars(changed)!=vars(original_info)
-        reference._runtime_call=lambda *args,_info=changed,**kwargs:_info
+        reference._runtime_call=lambda*args,_info=changed,**kwargs:_info
         with pytest.raises(o.ValidationReliabilityError,match='RUNTIME_DIRECTORY'):
             reference._runtime_directory('/run/qtt1n2',(91,92),0,0,0o700)
     reference.runtime=Path('/run/qtt1n2');reference.runtime_backing=reference.runtime/'payload'
     reference.runtime_identity=(91,92);reference.runtime_mounted_identity=(93,94);reference.runtime_fd=17;reference.runtime_envelope_fd=18
     reference.history=[]
-    reference._runtime_live=lambda *args:None
-    reference._runtime_directory=lambda *args,**kwargs:None
+    reference._runtime_live=lambda*args:None
+    reference._runtime_directory=lambda*args,**kwargs:None
     reference._runtime_acl=lambda fd:None
     held=SimpleNamespace(st_dev=93,st_ino=94,st_uid=0,st_gid=0,st_mode=stat.S_IFDIR|0o700)
     effects=[]
@@ -30817,23 +30916,23 @@ def _ordinary_ci_initial_common_source_check_v1(native_input,profile,allocation)
         effects.append((operation.__name__,args))
         raise PermissionError('reference fchown denial')
     reference._runtime_call=denied_owner
-    with monkeypatch.context() as patch:
-        patch.setattr(o,'_linux_preflight_status_v1',lambda *args,**kwargs:credentials)
-        patch.setattr(o.os,'fchown',lambda *args:None,raising=False)
+    with monkeypatch.context()as patch:
+        patch.setattr(o,'_linux_preflight_status_v1',lambda*args,**kwargs:credentials)
+        patch.setattr(o.os,'fchown',lambda*args:None,raising=False)
         with pytest.raises(PermissionError,match='reference fchown denial'):
             reference.handoff_runtime(dict(pid=123),'/reference',())
     assert len(effects)==1 and effects[0][1]==(17,61234,61235)
     assert reference.history==[dict(runtime_handoff_attempt=dict(identity=(93,94),uid=61234,gid=61235),complete=False)]
     held.st_uid=61234
-    with monkeypatch.context() as patch:
-        patch.setattr(o,'_linux_preflight_status_v1',lambda *args,**kwargs:credentials)
+    with monkeypatch.context()as patch:
+        patch.setattr(o,'_linux_preflight_status_v1',lambda*args,**kwargs:credentials)
         with pytest.raises(o.ValidationReliabilityError,match='RUNTIME_HELD_ROOT'):
             reference.handoff_runtime(dict(pid=123),'/reference',())
     assert len(effects)==1 and len(reference.history)==1
     class RuntimeACLReference:
         def __init__(self):self.last_acl=dict(reference=True)
         def acl(self,fd,*,attempt,delivered):attempt('reference');return (b'unexpected ACL',None)
-    with monkeypatch.context() as patch:
+    with monkeypatch.context()as patch:
         patch.setattr(o,'_LinuxSourceNativeV2',RuntimeACLReference)
         with pytest.raises(o.ValidationReliabilityError,match='RUNTIME_ACL'):
             o._LinuxPreflightScopeV1._runtime_acl(reference,17)
@@ -30847,11 +30946,11 @@ def _ordinary_ci_initial_common_source_check_v1(native_input,profile,allocation)
         def register(self,fd,event):assert fd==17
         def poll(self,timeout):assert timeout==0;return []
     import select
-    with monkeypatch.context() as patch:
+    with monkeypatch.context()as patch:
         patch.setattr(select,'poll',PollReference,raising=False)
         patch.setattr(select,'POLLIN',1,raising=False)
-        patch.setattr(o,'_linux_preflight_process_identity_v1',lambda *args,**kwargs:process)
-        patch.setattr(o,'_linux_preflight_cgroup_path_v1',lambda *args,**kwargs:'/reference')
+        patch.setattr(o,'_linux_preflight_process_identity_v1',lambda*args,**kwargs:process)
+        patch.setattr(o,'_linux_preflight_cgroup_path_v1',lambda*args,**kwargs:'/reference')
         live._runtime_live(process,'/reference')
         with pytest.raises(o.ValidationReliabilityError,match='RUNTIME_PROCESS_CHANGED'):
             live._runtime_live({**process,'start':457},'/reference')
@@ -30862,7 +30961,7 @@ def _ordinary_ci_initial_common_source_check_v1(native_input,profile,allocation)
         return SimpleNamespace(st_mode=stat.S_IFDIR|mode,st_dev=91,st_ino=ino,st_uid=uid,st_gid=gid)
     logical='/run/qtt1n2'
     original_views={logical:runtime_stat(92,61234,61235,0o700),logical+'/tmp':runtime_stat(93),
-        logical+'/var-tmp':runtime_stat(94),'/tmp':runtime_stat(93),'/var/tmp':runtime_stat(94)}
+logical+'/var-tmp':runtime_stat(94),'/tmp':runtime_stat(93),'/var/tmp':runtime_stat(94)}
     views=dict(original_views)
     class LogicalRuntimeReference:
         def __init__(self,path):self.path=str(path)
@@ -30871,16 +30970,16 @@ def _ordinary_ci_initial_common_source_check_v1(native_input,profile,allocation)
         def lstat(self):return views[self.path]
     binding=dict(runtime_identity=[91,92],runtime_uid=61234,runtime_gid=61235,runtime_device='0:91')
     mount_raw=('31 1 0:91 / '+logical+' rw,noexec,nodev,nosuid - tmpfs qtt-runtime rw,size=1048576k\n'
-        '32 1 0:91 /tmp /tmp rw,noexec,nodev,nosuid - tmpfs qtt-runtime rw,size=1048576k\n'
-        '33 1 0:91 /var-tmp /var/tmp rw,noexec,nodev,nosuid - tmpfs qtt-runtime rw,size=1048576k\n').encode()
-    with monkeypatch.context() as patch:
+'32 1 0:91 /tmp /tmp rw,noexec,nodev,nosuid - tmpfs qtt-runtime rw,size=1048576k\n'
+'33 1 0:91 /var-tmp /var/tmp rw,noexec,nodev,nosuid - tmpfs qtt-runtime rw,size=1048576k\n').encode()
+    with monkeypatch.context()as patch:
         patch.setattr(o,'Path',LogicalRuntimeReference)
-        patch.setattr(o,'_linux_preflight_status_v1',lambda *args,**kwargs:credentials)
+        patch.setattr(o,'_linux_preflight_status_v1',lambda*args,**kwargs:credentials)
         patch.setattr(o.os,'geteuid',lambda:61234,raising=False)
         patch.setattr(o.os,'getegid',lambda:61235,raising=False)
         assert o._LinuxPreflightHostLeaseV1.check_runtime(binding,logical,RuntimeQueryReference(mount_raw))==credentials
         for key,value in (('runtime_identity',[91,95]),('runtime_uid',61233),('runtime_gid',61236),
-                ('runtime_identity',[True,92]),('runtime_device','0:92')):
+('runtime_identity',[True,92]),('runtime_device','0:92')):
             changed={**binding,key:value};assert changed!=binding
             with pytest.raises(o.ValidationReliabilityError):
                 o._LinuxPreflightHostLeaseV1.check_runtime(changed,logical,RuntimeQueryReference(mount_raw))
@@ -30899,213 +30998,213 @@ def _ordinary_ci_initial_common_source_check_v1(native_input,profile,allocation)
         mount_lines=mount_raw.splitlines(keepends=True)
         for index in range(3):
             for before,after in ((b'noexec,',b''),(b'nodev,',b''),(b',nosuid',b''),
-                    (b'size=1048576k',b'size=2048k'),(b'0:91',b'0:92'),(b' rw,',b' ro,')):
+(b'size=1048576k',b'size=2048k'),(b'0:91',b'0:92'),(b' rw,',b' ro,')):
                 lines=list(mount_lines);lines[index]=lines[index].replace(before,after,1)
                 damaged=b''.join(lines);assert damaged!=mount_raw
                 with pytest.raises(o.ValidationReliabilityError,match='RUNTIME_ALIAS'):
                     o._LinuxPreflightHostLeaseV1.check_runtime(binding,logical,RuntimeQueryReference(damaged))
-    mib,gib = 1024**2,1024**3
-    assert o._linux_preflight_name_v1(17,23) == 'qtt17n23'
+    mib,gib=1024**2,1024**3
+    assert o._linux_preflight_name_v1(17,23)=='qtt17n23'
     for pid,tick in ((True,23),(0,23),(17,-1),(17,True)):
-        with pytest.raises(o.ValidationReliabilityError): o._linux_preflight_name_v1(pid,tick)
-    valid = '/opt/hostedtoolcache/Python/3.14.6/x64'
-    assert o._linux_preflight_path_v1(valid) == valid
+        with pytest.raises(o.ValidationReliabilityError):o._linux_preflight_name_v1(pid,tick)
+    valid='/opt/hostedtoolcache/Python/3.14.6/x64'
+    assert o._linux_preflight_path_v1(valid)==valid
     for path in ('relative','/','/a/','/a//b','/a/../b','/a/./b','/a b','/a:b','/a%b','/a\\b','/a\nb','/a\0b','/caf\u00e9'):
-        with pytest.raises(o.ValidationReliabilityError): o._linux_preflight_path_v1(path)
-    root,runtime,control = '/work/QTT_New0526','/run/qtt17n23','/run/qtt17n23control'
-    environment = o._linux_preflight_environment_v1(repository=root,installation=valid,runtime=runtime,control=control)
-    call = dict(name='qtt17n23',private_root=control+'/root',runtime=runtime,control=control,spool=control+'/spool',
-        repository=root,installation=valid,interpreter=valid+'/bin/python',startup_deadline_ns=70000000000,environment=environment)
-    argv = o._linux_preflight_service_argv_v1(**call)
-    assert argv[:4] == ('/usr/bin/systemd-run','--system','--no-ask-password','--expand-environment=no')
-    assert argv.count('--') == 1 and '--unit=qtt17n23.service' in argv and '--slice=qtt17n23.slice' in argv
-    assert not set(argv) & {'--scope','--pty','--pipe','--collect','--shell','--wait'}
-    assert argv[argv.index('--')+1:] == (valid+'/bin/python','-I','-B','-X','utf8',root+'/tools/run_validation_gates.py',
-        '--linux-preflight-enter','--phase','fast-preflight','--startup-deadline-ns','70000000000')
-    properties = [part.removeprefix('--property=') for part in argv if part.startswith('--property=')]
-    assert len(properties) == len({v.split('=',1)[0] for v in properties})
-    required = {'Type=exec','Restart=no','RemainAfterExit=yes','DynamicUser=yes','UMask=0077','NoNewPrivileges=yes',
-        'CapabilityBoundingSet=','AmbientCapabilities=','PrivateDevices=yes','PrivateNetwork=yes','PrivateIPC=yes',
-        'InaccessiblePaths=+/dev/shm +/dev/mqueue +/dev/hugepages',
-        'ReadOnlyPaths=+/home +/root +/run +/run/user','PrivateTmp=yes','ProtectSystem=strict','ProtectHome=tmpfs',
-        'MountAPIVFS=yes','ProtectProc=invisible','ProtectControlGroups=yes','ProtectKernelTunables=yes',
-        'ProtectKernelModules=yes','ProtectKernelLogs=yes','RestrictSUIDSGID=yes','RestrictRealtime=yes',
-        'RestrictNamespaces=yes','LockPersonality=yes','RestrictAddressFamilies=AF_UNIX','SystemCallArchitectures=native',
-        'SystemCallFilter=~@mount @reboot @swap @raw-io @module','MemoryAccounting=yes','MemoryMax=6442450944',
-        'MemorySwapMax=0','TasksAccounting=yes','TasksMax=64','CPUAccounting=yes','CPUQuota=200%',
-        'CPUQuotaPeriodSec=100ms','RuntimeMaxSec=3600','TimeoutStartSec=60','TimeoutStopSec=10',
-        'KillMode=control-group','SendSIGKILL=yes','LimitCORE=0','LimitNOFILE=1024','LimitFSIZE=67108864',
-        'RootDirectory='+control+'/root',
-        'WorkingDirectory='+root,'StandardInput=null',
-        'StandardOutput=append:'+control+'/spool/command-1.stdout.bin','StandardError=append:'+control+'/spool/command-1.stderr.bin'}
-    assert not any(p.startswith(('RuntimeDirectory=','RuntimeDirectoryMode=','RuntimeDirectoryPreserve=')) for p in properties)
-    assert 'BindPaths='+runtime+'/payload:'+runtime+' '+runtime+'/payload/tmp:/tmp '+runtime+'/payload/var-tmp:/var/tmp' in properties
-    assert 'ReadWritePaths=+/run/qtt17n23 +/tmp +/var/tmp' in properties
+        with pytest.raises(o.ValidationReliabilityError):o._linux_preflight_path_v1(path)
+    root,runtime,control='/work/QTT_New0526','/run/qtt17n23','/run/qtt17n23control'
+    environment=o._linux_preflight_environment_v1(repository=root,installation=valid,runtime=runtime,control=control)
+    call=dict(name='qtt17n23',private_root=control+'/root',runtime=runtime,control=control,spool=control+'/spool',
+repository=root,installation=valid,interpreter=valid+'/bin/python',startup_deadline_ns=70000000000,environment=environment)
+    argv=o._linux_preflight_service_argv_v1(**call)
+    assert argv[:4]== ('/usr/bin/systemd-run','--system','--no-ask-password','--expand-environment=no')
+    assert argv.count('--')==1 and'--unit=qtt17n23.service'in argv and'--slice=qtt17n23.slice'in argv
+    assert not set(argv)& {'--scope','--pty','--pipe','--collect','--shell','--wait'}
+    assert argv[argv.index('--')+1:]== (valid+'/bin/python','-I','-B','-X','utf8',root+'/tools/run_validation_gates.py',
+'--linux-preflight-enter','--phase','fast-preflight','--startup-deadline-ns','70000000000')
+    properties= [part.removeprefix('--property=')for part in argv if part.startswith('--property=')]
+    assert len(properties)==len({v.split('=',1)[0]for v in properties})
+    required= {'Type=exec','Restart=no','RemainAfterExit=yes','DynamicUser=yes','UMask=0077','NoNewPrivileges=yes',
+'CapabilityBoundingSet=','AmbientCapabilities=','PrivateDevices=yes','PrivateNetwork=yes','PrivateIPC=yes',
+'InaccessiblePaths=+/dev/shm +/dev/mqueue +/dev/hugepages',
+'ReadOnlyPaths=+/home +/root +/run +/run/user','PrivateTmp=yes','ProtectSystem=strict','ProtectHome=tmpfs',
+'MountAPIVFS=yes','ProtectProc=invisible','ProtectControlGroups=yes','ProtectKernelTunables=yes',
+'ProtectKernelModules=yes','ProtectKernelLogs=yes','RestrictSUIDSGID=yes','RestrictRealtime=yes',
+'RestrictNamespaces=yes','LockPersonality=yes','RestrictAddressFamilies=AF_UNIX','SystemCallArchitectures=native',
+'SystemCallFilter=~@mount @reboot @swap @raw-io @module','MemoryAccounting=yes','MemoryMax=6442450944',
+'MemorySwapMax=0','TasksAccounting=yes','TasksMax=64','CPUAccounting=yes','CPUQuota=200%',
+'CPUQuotaPeriodSec=100ms','RuntimeMaxSec=3600','TimeoutStartSec=60','TimeoutStopSec=10',
+'KillMode=control-group','SendSIGKILL=yes','LimitCORE=0','LimitNOFILE=1024','LimitFSIZE=67108864',
+'RootDirectory='+control+'/root',
+'WorkingDirectory='+root,'StandardInput=null',
+'StandardOutput=append:'+control+'/spool/command-1.stdout.bin','StandardError=append:'+control+'/spool/command-1.stderr.bin'}
+    assert not any(p.startswith(('RuntimeDirectory=','RuntimeDirectoryMode=','RuntimeDirectoryPreserve='))for p in properties)
+    assert'BindPaths='+runtime+'/payload:'+runtime+' '+runtime+'/payload/tmp:/tmp '+runtime+'/payload/var-tmp:/var/tmp'in properties
+    assert'ReadWritePaths=+/run/qtt17n23 +/tmp +/var/tmp'in properties
     readonly='/usr:/usr /lib:/lib /lib64:/lib64 '+root+':'+root+' '+control+'/installation:'+valid
-    readonly+=' '+ ' '.join(control+'/'+n+':'+control+'/'+n for n in ('declaration','binding','release','spool'))
-    assert 'BindReadOnlyPaths='+readonly in properties
+    readonly+=' '+' '.join(control+'/'+n+':'+control+'/'+n for n in ('declaration','binding','release','spool'))
+    assert'BindReadOnlyPaths='+readonly in properties
     assert {p for p in argv if p.startswith('--setenv=')}=={'--setenv='+k+'='+v for k,v in environment.items()}
-    assert not any(p.startswith(('ExecPaths=','NoExecPaths=')) for p in properties)
+    assert not any(p.startswith(('ExecPaths=','NoExecPaths='))for p in properties)
     for value in ('+/dev/shm','+/tmp','+/run/qtt17n23'):
-        with pytest.raises(o.ValidationReliabilityError,match='NATIVE_PATH'): o._linux_preflight_path_v1(value)
-    assert required <= set(properties)
-    assert len(properties) == len(required)+3  # Exact two bind lists and writable-path restriction.
+        with pytest.raises(o.ValidationReliabilityError,match='NATIVE_PATH'):o._linux_preflight_path_v1(value)
+    assert required<=set(properties)
+    assert len(properties)==len(required)+3  # Exact two bind lists and writable-path restriction.
     for field in ('private_root','runtime','control','spool','repository','installation','interpreter'):
-        damaged = {**call,field:call[field]+' bad'}
-        assert damaged[field] != call[field]
-        with pytest.raises(o.ValidationReliabilityError): o._linux_preflight_service_argv_v1(**damaged)
+        damaged= {**call,field:call[field]+' bad'}
+        assert damaged[field]!=call[field]
+        with pytest.raises(o.ValidationReliabilityError):o._linux_preflight_service_argv_v1(**damaged)
     for key in ('LD_PRELOAD','GITHUB_TOKEN','SSH_AUTH_SOCK','DBUS_SESSION_BUS_ADDRESS'):
-        damaged = {**environment,key:'unadmitted'}
-        assert damaged != environment
-        with pytest.raises(o.ValidationReliabilityError): o._linux_preflight_service_argv_v1(**{**call,'environment':damaged})
-    policy = o._linux_preflight_grants_v1(23)
-    assert policy['candidate_limits'] == dict(entry_limit=100000,snapshot_byte_limit=512*mib,read_byte_limit=64*gib,
-        deadline_ns=23+3490*10**9)
-    assert policy['native_deadline_ns'] == 23+3490*10**9
-    assert policy['execution_deadline_ns'] == 23+3500*10**9
-    assert policy['settlement_deadline_ns'] == 23+3720*10**9
-    assert tuple(policy['capture'].values()) == (2000000,32*gib,4000000,2*gib,0,0,0,0)
-    assert policy['terminal'] == policy['capture'] and policy['terminal'] is not policy['capture']
-    assert tuple(policy['native'].values()) == (2*gib,16*mib,16000000,64,64*mib,2000000,2000000,65536,2*gib,8*mib)
+        damaged= {**environment,key:'unadmitted'}
+        assert damaged!=environment
+        with pytest.raises(o.ValidationReliabilityError):o._linux_preflight_service_argv_v1(**{**call,'environment':damaged})
+    policy=o._linux_preflight_grants_v1(23)
+    assert policy['candidate_limits']==dict(entry_limit=100000,snapshot_byte_limit=512*mib,read_byte_limit=64*gib,
+deadline_ns=23+3490*10**9)
+    assert policy['native_deadline_ns']==23+3490*10**9
+    assert policy['execution_deadline_ns']==23+3500*10**9
+    assert policy['settlement_deadline_ns']==23+3720*10**9
+    assert tuple(policy['capture'].values())== (2000000,32*gib,4000000,2*gib,0,0,0,0)
+    assert policy['terminal']==policy['capture']and policy['terminal']is not policy['capture']
+    assert tuple(policy['native'].values())== (2*gib,16*mib,16000000,64,64*mib,2000000,2000000,65536,2*gib,8*mib)
     for n,row in enumerate(policy['rows'],1):
-        assert tuple(row['limits'].values())[:4] == (2000000,16*gib,2000000,gib)
-        assert tuple(row['limits'].values())[4:] == ((0,0,0,0) if n in (2,4,6) else (64,16*mib,16*mib,32*mib))
-        assert set(row['parent_tail_reserve'].values()) == {0}
-        assert row['deadline_ns'] == 23+3480*10**9 and row['settlement_deadline_ns'] == 23+3490*10**9
-        assert tuple(row['transport'].values()) == (512*mib,8*mib,4000000,64,64*mib,2000000,2000000,65536,gib,8*mib)
-    assert o._linux_preflight_storage_reservation_v1((64*mib,)*8,(8*mib,)*8,4096) == gib
-    assert o._linux_preflight_storage_reservation_v1((24,)*8,(1024,)*8,4096) == 448*mib+16*4096
+        assert tuple(row['limits'].values())[:4]== (2000000,16*gib,2000000,gib)
+        assert tuple(row['limits'].values())[4:]== ((0,0,0,0)if n in (2,4,6)else (64,16*mib,16*mib,32*mib))
+        assert set(row['parent_tail_reserve'].values())== {0}
+        assert row['deadline_ns']==23+3480*10**9 and row['settlement_deadline_ns']==23+3490*10**9
+        assert tuple(row['transport'].values())== (512*mib,8*mib,4000000,64,64*mib,2000000,2000000,65536,gib,8*mib)
+    assert o._linux_preflight_storage_reservation_v1((64*mib,)*8,(8*mib,)*8,4096)==gib
+    assert o._linux_preflight_storage_reservation_v1((24,)*8,(1024,)*8,4096)==448*mib+16*4096
     for position in range(8):
-        damaged = [64*mib]*8; damaged[position] += 1
-        assert tuple(damaged) != (64*mib,)*8
+        damaged= [64*mib]*8;damaged[position]+=1
+        assert tuple(damaged)!= (64*mib,)*8
         with pytest.raises(o.ValidationReliabilityError,match='FILE_INTERSECTION'):
             o._linux_preflight_storage_reservation_v1(tuple(damaged),(8*mib,)*8,4096)
-    with pytest.raises(o.ValidationReliabilityError): o._linux_preflight_storage_reservation_v1((24,)*8,(8*mib+1,)*8,4096)
-    with pytest.raises(o.ValidationReliabilityError): o._linux_preflight_storage_reservation_v1((24,)*8,(1024,)*8,3)
-    assert o._linux_preflight_ancestor_values_v1(b'max\n',b'max\n',b'max 100000\n') == ('max','max',('max',100000))
-    assert o._linux_preflight_ancestor_values_v1(b'6442450944\n',b'64\n',b'200000 100000\n',owned=True) == (
-        6442450944,64,(200000,100000))
+    with pytest.raises(o.ValidationReliabilityError):o._linux_preflight_storage_reservation_v1((24,)*8,(8*mib+1,)*8,4096)
+    with pytest.raises(o.ValidationReliabilityError):o._linux_preflight_storage_reservation_v1((24,)*8,(1024,)*8,3)
+    assert o._linux_preflight_ancestor_values_v1(b'max\n',b'max\n',b'max 100000\n')== ('max','max',('max',100000))
+    assert o._linux_preflight_ancestor_values_v1(b'6442450944\n',b'64\n',b'200000 100000\n',owned=True)== (
+6442450944,64,(200000,100000))
     for operands in ((b'6442450943\n',b'64\n',b'200000 100000\n'),
-            (b'6442450944\n',b'63\n',b'200000 100000\n'),(b'max\n',b'max\n',b'199999 100000\n'),
-            (b'',b'max\n',b'max 100000\n'),(b'06442450944\n',b'64\n',b'200000 100000\n')):
-        with pytest.raises(o.ValidationReliabilityError): o._linux_preflight_ancestor_values_v1(*operands)
-    with pytest.raises(o.ValidationReliabilityError): o._linux_preflight_ancestor_values_v1(b'max\n',b'64\n',b'200000 100000\n',owned=True)
-    mounts = o._linux_preflight_mounts_v1(b'11 1 0:9 / /run/qtt17n23 rw,nosuid,nodev,noexec - tmpfs qtt-runtime rw,size=1048576k\n')
-    assert len(mounts) == 1 and mounts[0]['device'] == '0:9' and mounts[0]['fs'] == 'tmpfs'
-    assert {'noexec','nodev','nosuid'} <= mounts[0]['options']
+(b'6442450944\n',b'63\n',b'200000 100000\n'),(b'max\n',b'max\n',b'199999 100000\n'),
+(b'',b'max\n',b'max 100000\n'),(b'06442450944\n',b'64\n',b'200000 100000\n')):
+        with pytest.raises(o.ValidationReliabilityError):o._linux_preflight_ancestor_values_v1(*operands)
+    with pytest.raises(o.ValidationReliabilityError):o._linux_preflight_ancestor_values_v1(b'max\n',b'64\n',b'200000 100000\n',owned=True)
+    mounts=o._linux_preflight_mounts_v1(b'11 1 0:9 / /run/qtt17n23 rw,nosuid,nodev,noexec - tmpfs qtt-runtime rw,size=1048576k\n')
+    assert len(mounts)==1 and mounts[0]['device']=='0:9'and mounts[0]['fs']=='tmpfs'
+    assert {'noexec','nodev','nosuid'}<=mounts[0]['options']
     for raw in (b'11 1 0:9 missing\n',b'11 1 0:9 / /x ro - tmpfs x ro\n'*2):
-        with pytest.raises(o.ValidationReliabilityError): o._linux_preflight_mounts_v1(raw)
-    event = dict(number=298,repository=dict(full_name='Q8Meow/QTT_New0526'),pull_request=dict(number=298,draft=True,
-        head=dict(ref='repair/main-cumulative-v35-final-r5-local-20260922',repo=dict(full_name='Q8Meow/QTT_New0526')),
-        base=dict(ref='main',repo=dict(full_name='Q8Meow/QTT_New0526'))))
-    env = dict(GITHUB_ACTIONS='true',GITHUB_EVENT_NAME='pull_request',GITHUB_REPOSITORY='Q8Meow/QTT_New0526',GITHUB_WORKSPACE=root)
+        with pytest.raises(o.ValidationReliabilityError):o._linux_preflight_mounts_v1(raw)
+    event=dict(number=298,repository=dict(full_name='Q8Meow/QTT_New0526'),pull_request=dict(number=298,draft=True,
+head=dict(ref='repair/main-cumulative-v35-final-r5-local-20260922',repo=dict(full_name='Q8Meow/QTT_New0526')),
+base=dict(ref='main',repo=dict(full_name='Q8Meow/QTT_New0526'))))
+    env=dict(GITHUB_ACTIONS='true',GITHUB_EVENT_NAME='pull_request',GITHUB_REPOSITORY='Q8Meow/QTT_New0526',GITHUB_WORKSPACE=root)
     runner._linux_preflight_eligibility_v1(event,env,root)
     import copy
     for mutate in (lambda d:d.update(number=299),lambda d:d['pull_request'].update(draft=False),
-            lambda d:d['pull_request']['head'].update(ref='main'),
-            lambda d:d['pull_request']['base'].update(ref='other'),
-            lambda d:d['pull_request']['head']['repo'].update(full_name='fork/QTT_New0526')):
-        damaged = copy.deepcopy(event); mutate(damaged); assert damaged != event
-        with pytest.raises(o.ValidationReliabilityError): runner._linux_preflight_eligibility_v1(damaged,env,root)
-    with pytest.raises(o.ValidationReliabilityError): runner._linux_preflight_eligibility_v1(event,{**env,'GITHUB_EVENT_NAME':'workflow_dispatch'},root)
+lambda d:d['pull_request']['head'].update(ref='main'),
+lambda d:d['pull_request']['base'].update(ref='other'),
+lambda d:d['pull_request']['head']['repo'].update(full_name='fork/QTT_New0526')):
+        damaged=copy.deepcopy(event);mutate(damaged);assert damaged!=event
+        with pytest.raises(o.ValidationReliabilityError):runner._linux_preflight_eligibility_v1(damaged,env,root)
+    with pytest.raises(o.ValidationReliabilityError):runner._linux_preflight_eligibility_v1(event,{**env,'GITHUB_EVENT_NAME':'workflow_dispatch'},root)
     for key in ("GITHUB_ACTIONS","GITHUB_EVENT_NAME","GITHUB_REPOSITORY","GITHUB_WORKSPACE"):
-        missing = dict(env)
+        missing=dict(env)
         del missing[key]
         with pytest.raises(o.ValidationReliabilityError):
             runner._linux_preflight_eligibility_v1(event,missing,root)
-    assert runner._linux_preflight_selected_v1(['--phase','fast-preflight'],(None,None,None)) is None
+    assert runner._linux_preflight_selected_v1(['--phase','fast-preflight'],(None,None,None))is None
     for arguments in (['--linux-preflight-provision','--phase','all'],
-            ['--linux-preflight-provision','--linux-preflight-enter','--phase','fast-preflight'],
-            ['--linux-preflight-enter','--phase','fast-preflight'],
-            ['--linux-preflight-provision','--phase','fast-preflight','--preflight-input','/outside'],
-            ['--startup-deadline-ns','1']):
-        with pytest.raises(ValueError): runner._linux_preflight_selected_v1(arguments,(None,None,None))
-    with pytest.raises(ValueError): runner._linux_preflight_selected_v1(
-        ['--linux-preflight-provision','--phase','fast-preflight'],(object(),None,None))
-    if sys.platform != 'linux':
+['--linux-preflight-provision','--linux-preflight-enter','--phase','fast-preflight'],
+['--linux-preflight-enter','--phase','fast-preflight'],
+['--linux-preflight-provision','--phase','fast-preflight','--preflight-input','/outside'],
+['--startup-deadline-ns','1']):
+        with pytest.raises(ValueError):runner._linux_preflight_selected_v1(arguments,(None,None,None))
+    with pytest.raises(ValueError):runner._linux_preflight_selected_v1(
+['--linux-preflight-provision','--phase','fast-preflight'],(object(),None,None))
+    if sys.platform!='linux':
         with pytest.raises(o.ValidationReliabilityError,match='^ENGVR_PREPUBLICATION_CUSTODY_FAILED: ORDINARY_PROVISION_ORIGINAL_PLATFORM_AND_PHASE$'):
             runner.main(['--linux-preflight-provision','--phase','fast-preflight'])
-    with monkeypatch.context() as patch:
+    with monkeypatch.context()as patch:
         patch.delenv('QTT_LINUX_PREFLIGHT_CONTROL',raising=False)
-        assert o._linux_preflight_git_environment_v1(Path(root),None) == {}
-    area = tmp_path/'linux-profile-reference'; area.mkdir()
-    spool = area/'spool'; spool.write_bytes(b'')
-    tail = o._LinuxPreflightTailV1(spool)
-    destination = io.BytesIO()
-    outcome = dict(retention_limit=32,retained_byte_count=0,drained_byte_count=0,evidence_write_enabled=True)
+        assert o._linux_preflight_git_environment_v1(Path(root),None)== {}
+    area=tmp_path/'linux-profile-reference';area.mkdir()
+    spool=area/'spool';spool.write_bytes(b'')
+    tail=o._LinuxPreflightTailV1(spool)
+    destination=io.BytesIO()
+    outcome=dict(retention_limit=32,retained_byte_count=0,drained_byte_count=0,evidence_write_enabled=True)
     try:
-        assert o._consume_available_pipe(tail,destination,outcome=outcome,native_terminal=False) == (False,False)
-        with spool.open('ab') as stream: stream.write(b'actual regular-file bytes')
-        assert o._consume_available_pipe(tail,destination,outcome=outcome,native_terminal=False) == (True,False)
-        assert destination.getvalue() == b'actual regular-file bytes'
-        assert o._consume_available_pipe(tail,destination,outcome=outcome,native_terminal=False) == (False,False)
-        assert o._consume_available_pipe(tail,destination,outcome=outcome,native_terminal=True) == (False,True)
-        assert outcome['drained_byte_count'] == outcome['retained_byte_count'] == 25
-    finally: tail.close()
-    with spool.open('rb') as ordinary:
+        assert o._consume_available_pipe(tail,destination,outcome=outcome,native_terminal=False)== (False,False)
+        with spool.open('ab')as stream:stream.write(b'actual regular-file bytes')
+        assert o._consume_available_pipe(tail,destination,outcome=outcome,native_terminal=False)== (True,False)
+        assert destination.getvalue()==b'actual regular-file bytes'
+        assert o._consume_available_pipe(tail,destination,outcome=outcome,native_terminal=False)== (False,False)
+        assert o._consume_available_pipe(tail,destination,outcome=outcome,native_terminal=True)== (False,True)
+        assert outcome['drained_byte_count']==outcome['retained_byte_count']==25
+    finally:tail.close()
+    with spool.open('rb')as ordinary:
         ordinary.seek(0,2)
-        assert o._consume_available_pipe(ordinary,io.BytesIO(),outcome={},native_terminal=False) == (False,True)
-    tree = ast.parse(Path(o.__file__).read_text(encoding='utf-8'))
-    writer = next(n for n in tree.body if isinstance(n,ast.FunctionDef) and n.name == '_atomic_write_bytes_v1')
-    calls = [(n.lineno,ast.unparse(n.func)) for n in ast.walk(writer) if isinstance(n,ast.Call)]
-    assert next(line for line,name in calls if name == 'os.fchmod') < next(line for line,name in calls if name == 'os.link')
-    runtime_path = area/'runtime'; runtime_path.mkdir()
-    vector = (sys.executable,'tools/validate_repair_pr_changed_file_scope.py','--repo-root','.')
-    projected,_ = o._preflight_environment_v1(vector,dict(environment),cache_root=runtime_path/'cache')
+        assert o._consume_available_pipe(ordinary,io.BytesIO(),outcome={},native_terminal=False)== (False,True)
+    tree=ast.parse(Path(o.__file__).read_text(encoding='utf-8'))
+    writer=next(n for n in tree.body if isinstance(n,ast.FunctionDef)and n.name=='_atomic_write_bytes_v1')
+    calls= [(n.lineno,ast.unparse(n.func))for n in ast.walk(writer)if isinstance(n,ast.Call)]
+    assert next(line for line,name in calls if name=='os.fchmod')<next(line for line,name in calls if name=='os.link')
+    runtime_path=area/'runtime';runtime_path.mkdir()
+    vector= (sys.executable,'tools/validate_repair_pr_changed_file_scope.py','--repo-root','.')
+    projected,_=o._preflight_environment_v1(vector,dict(environment),cache_root=runtime_path/'cache')
     o._linux_preflight_child_environment_v1(environment,projected,runtime_path)
     for key,value in (('PYTHONPATH','/outside'),('PYTHONUTF8','1'),('LD_LIBRARY_PATH','/outside'),
-            ('GITHUB_TOKEN','fake'),('PYTHONPYCACHEPREFIX',str(tmp_path/'outside'))):
-        damaged = {**projected,key:value}; assert damaged != projected
+('GITHUB_TOKEN','fake'),('PYTHONPYCACHEPREFIX',str(tmp_path/'outside'))):
+        damaged= {**projected,key:value};assert damaged!=projected
         with pytest.raises(o.ValidationReliabilityError):
             o._linux_preflight_child_environment_v1(environment,damaged,runtime_path)
-    status = dict(Type='exec',Restart='no',RemainAfterExit='yes',DynamicUser='yes',UMask='0077',
-        NoNewPrivileges='yes',CapabilityBoundingSet='',AmbientCapabilities='',PrivateDevices='yes',
-        PrivateNetwork='yes',PrivateIPC='yes',PrivateTmp='yes',ProtectSystem='strict',ProtectHome='tmpfs',
-        MountAPIVFS='yes',ProtectProc='invisible',ProtectControlGroups='yes',ProtectKernelTunables='yes',
-        ProtectKernelModules='yes',ProtectKernelLogs='yes',RestrictSUIDSGID='yes',RestrictRealtime='yes',
-        RestrictNamespaces='yes',LockPersonality='yes',RestrictAddressFamilies='AF_UNIX',SystemCallArchitectures='native',
-        MemoryAccounting='yes',MemoryMax='6442450944',MemorySwapMax='0',TasksAccounting='yes',TasksMax='64',
-        CPUAccounting='yes',CPUQuotaPerSecUSec='2s',CPUQuotaPeriodUSec='100ms',RuntimeMaxUSec='1h',
-        TimeoutStartUSec='1min',TimeoutStopUSec='10s',KillMode='control-group',SendSIGKILL='yes',
-        LimitCORE='0',LimitNOFILE='1024',LimitFSIZE='67108864',StandardInput='null',StandardOutput='append',StandardError='append',
-        RootDirectory=control+'/root',WorkingDirectory=root,RuntimeDirectory='',Slice='qtt17n23.slice',
-        InaccessiblePaths='+/dev/shm +/dev/mqueue +/dev/hugepages',ReadWritePaths='+'+runtime+' +/tmp +/var/tmp',
-        ReadOnlyPaths='+/home +/root +/run +/run/user',SystemCallFilter='~mount reboot swapon init_module')
-    options = dict(name='qtt17n23',root=control+'/root',repository=root,runtime=runtime,
-        syscall_filter=frozenset(('mount','reboot','swapon','init_module')))
+    status=dict(Type='exec',Restart='no',RemainAfterExit='yes',DynamicUser='yes',UMask='0077',
+NoNewPrivileges='yes',CapabilityBoundingSet='',AmbientCapabilities='',PrivateDevices='yes',
+PrivateNetwork='yes',PrivateIPC='yes',PrivateTmp='yes',ProtectSystem='strict',ProtectHome='tmpfs',
+MountAPIVFS='yes',ProtectProc='invisible',ProtectControlGroups='yes',ProtectKernelTunables='yes',
+ProtectKernelModules='yes',ProtectKernelLogs='yes',RestrictSUIDSGID='yes',RestrictRealtime='yes',
+RestrictNamespaces='yes',LockPersonality='yes',RestrictAddressFamilies='AF_UNIX',SystemCallArchitectures='native',
+MemoryAccounting='yes',MemoryMax='6442450944',MemorySwapMax='0',TasksAccounting='yes',TasksMax='64',
+CPUAccounting='yes',CPUQuotaPerSecUSec='2s',CPUQuotaPeriodUSec='100ms',RuntimeMaxUSec='1h',
+TimeoutStartUSec='1min',TimeoutStopUSec='10s',KillMode='control-group',SendSIGKILL='yes',
+LimitCORE='0',LimitNOFILE='1024',LimitFSIZE='67108864',StandardInput='null',StandardOutput='append',StandardError='append',
+RootDirectory=control+'/root',WorkingDirectory=root,RuntimeDirectory='',Slice='qtt17n23.slice',
+InaccessiblePaths='+/dev/shm +/dev/mqueue +/dev/hugepages',ReadWritePaths='+'+runtime+' +/tmp +/var/tmp',
+ReadOnlyPaths='+/home +/root +/run +/run/user',SystemCallFilter='~mount reboot swapon init_module')
+    options=dict(name='qtt17n23',root=control+'/root',repository=root,runtime=runtime,
+syscall_filter=frozenset(('mount','reboot','swapon','init_module')))
     o._linux_preflight_unit_policy_v1(status,**options)
     for key in status:
-        damaged = {**status,key:status[key]+' changed'}; assert damaged[key] != status[key]
-        with pytest.raises(o.ValidationReliabilityError): o._linux_preflight_unit_policy_v1(damaged,**options)
-        damaged = {k:v for k,v in status.items() if k != key}
-        with pytest.raises(o.ValidationReliabilityError): o._linux_preflight_unit_policy_v1(damaged,**options)
+        damaged= {**status,key:status[key]+' changed'};assert damaged[key]!=status[key]
+        with pytest.raises(o.ValidationReliabilityError):o._linux_preflight_unit_policy_v1(damaged,**options)
+        damaged= {k:v for k,v in status.items()if k!=key}
+        with pytest.raises(o.ValidationReliabilityError):o._linux_preflight_unit_policy_v1(damaged,**options)
     recorded_raw=(
-        b'Type=exec\n'
-        b'Restart=no\n'
-        b'TimeoutStartUSec=1min\n'
-        b'TimeoutStopUSec=10s\n'
-        b'RuntimeMaxUSec=1h\n'
-        b'RemainAfterExit=yes\n'
-        b'MainPID=2580\n'
-        b'Result=success\n'
-        b'ExecMainCode=0\n'
-        b'ExecMainStatus=0\n'
-        b'Slice=qtt2557n2660997759221.slice\n'
-        b'ControlGroup=/qtt2557n2660997759221.slice/qtt2557n2660997759221.service\n'
-        b'CPUAccounting=yes\n'
-        b'CPUQuotaPerSecUSec=2s\n'
-        b'CPUQuotaPeriodUSec=100ms\n'
-        b'MemoryAccounting=yes\n'
-        b'MemoryMax=6442450944\n'
-        b'MemorySwapMax=0\n'
-        b'TasksAccounting=yes\n'
-        b'TasksMax=64\n'
-        b'UMask=0077\n'
-        b'LimitFSIZE=67108864\n'
-        b'LimitCORE=0\n'
-        b'LimitNOFILE=1024\n'
-        b'WorkingDirectory=/home/runner/work/QTT_New0526/QTT_New0526\n'
-        b'RootDirectory=/run/qtt2557n266099775922control/runtime-roundtrip-control/root\n'
+b'Type=exec\n'
+b'Restart=no\n'
+b'TimeoutStartUSec=1min\n'
+b'TimeoutStopUSec=10s\n'
+b'RuntimeMaxUSec=1h\n'
+b'RemainAfterExit=yes\n'
+b'MainPID=2580\n'
+b'Result=success\n'
+b'ExecMainCode=0\n'
+b'ExecMainStatus=0\n'
+b'Slice=qtt2557n2660997759221.slice\n'
+b'ControlGroup=/qtt2557n2660997759221.slice/qtt2557n2660997759221.service\n'
+b'CPUAccounting=yes\n'
+b'CPUQuotaPerSecUSec=2s\n'
+b'CPUQuotaPeriodUSec=100ms\n'
+b'MemoryAccounting=yes\n'
+b'MemoryMax=6442450944\n'
+b'MemorySwapMax=0\n'
+b'TasksAccounting=yes\n'
+b'TasksMax=64\n'
+b'UMask=0077\n'
+b'LimitFSIZE=67108864\n'
+b'LimitCORE=0\n'
+b'LimitNOFILE=1024\n'
+b'WorkingDirectory=/home/runner/work/QTT_New0526/QTT_New0526\n'
+    b'RootDirectory=/run/qtt2557n266099775922control/runtime-roundtrip-control/root\n'
         b'StandardInput=null\n'
         b'StandardOutput=append\n'
         b'StandardError=append\n'
