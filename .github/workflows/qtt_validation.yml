@@ -1549,7 +1549,7 @@ jobs:
 # QTT_ORIGINAL_FIRST_HOST_PROGRAMME_BEGIN_20261007_V1
 # QTT_HOST_PY | import os,stat,struct,fcntl,sys,signal,select,time,errno
 # QTT_HOST_PY | def _qtt_original_host_source_v1(_qtt_original_front):
-# QTT_HOST_PY |  # R2 5237/8K.33.4 admits host/kernel/binaries/stdio/enclosure, not metadata grants.
+# QTT_HOST_PY | #
 # QTT_HOST_PY |  qQ=RuntimeError
 # QTT_HOST_PY |  state,genesis,front,front_code,admit,admit_code=_qtt_original_front
 # QTT_HOST_PY |  if(type(_qtt_original_front)is not tuple or len(_qtt_original_front)!=6 or state.get("early_loop_original")is not genesis or genesis[0]is not state or genesis[3]is not front or genesis[4]is not front_code or genesis[5]is not admit or genesis[6]is not admit_code):raise RuntimeError("same original first-host reader/loan changed")
@@ -1950,9 +1950,9 @@ jobs:
 # QTT_HOST_PY |           if d is None:
 # QTT_HOST_PY |            k=type(cause);n=type.__dict__["__name__"].__get__(k);b=__builtins__;v=type(n)is str and len(n)<22 and getattr(b,"__dict__",b).get(n)is k;e=v and isinstance(cause,OSError)and cause.errno;n=v and n or"OTHER";e=str(e)if type(e)is int and 0<=e<4096 else"-";s="?"
 # QTT_HOST_PY |            try:
-# QTT_HOST_PY |             r=_qtt_original_host_source_v1;a=_qtt_early_loop_admission_v1;t=tb;c=None
-# QTT_HOST_PY |             while t:a("D");h=t.tb_frame.f_globals is r.__globals__;h and(c:=t);t=t.tb_next
-# QTT_HOST_PY |             f=c.tb_frame.f_code;z=f.co_qualname;j=c.tb_lineno;b=lambda q:q is f or any((a("D"),type(x)is type(q)and(z==(y:=x.co_qualname)or z.startswith(y+".<locals>."))and b(x))[1]for x in q.co_consts)
+# QTT_HOST_PY |             r=_qtt_original_host_source_v1;a=_qtt_early_loop_admission_v1;t=tb;c=v=b=None
+# QTT_HOST_PY |             while t:a("D");h=t.tb_frame.f_globals is r.__globals__;h and(v:=b);h and(c:=t);b=t if h else None;t=t.tb_next
+# QTT_HOST_PY |             c=v if c.tb_frame.f_code is F.__code__ and v is not None else c;f=c.tb_frame.f_code;z=f.co_qualname;j=c.tb_lineno;b=lambda q:q is f or any((a("D"),type(x)is type(q)and(z==(y:=x.co_qualname)or z.startswith(y+".<locals>."))and b(x))[1]for x in q.co_consts)
 # QTT_HOST_PY |             if type(z)is str and(b(r.__code__)or b(_qtt_original_live_component_v1.__code__))and 0<j<=500000:l=j;s="+!"[1-h]
 # QTT_HOST_PY |            except BaseException as x:state["errors"].append(("held-walk",x))
 # QTT_HOST_PY |            d=_qtt_original_loan_diagnostic_v1(state,early_original,cause)or f"{n}{l}#{e}{s}\n".encode("ascii")
@@ -2542,7 +2542,7 @@ jobs:
 # QTT_HOST_PY |     def U(n,c):return 68*n+4*c
 # QTT_HOST_PY |     def T(n,s):return 48*n+8*s
 # QTT_HOST_PY |     def L(n,s):return 56*n+16*(s+s//8+6*n)
-# QTT_HOST_PY |     initializer=5125424+21625000+U(7,7*extent)+T(1,parent_path_count);initializer+=6*(U(67,3*extent)+L(2,130)+T(1,65));initializer+=672+T(1,8)+2*T(1,9)+2*T(1,parent_path_count)+24;return(2454466522,324772011,63340350,initializer,1802350,241543444,19469392,1926888,2006628)
+# QTT_HOST_PY |     initializer=5125424+21625000+U(7,7*extent)+T(1,parent_path_count);initializer+=6*(U(67,3*extent)+L(2,130)+T(1,65));initializer+=672+T(1,8)+2*T(1,9)+2*T(1,parent_path_count)+24;return(2454466522,324772011,63340350,initializer,1802350,241543444,19469816,1926936,2006628)
 # QTT_HOST_PY |    def _ordinary_ci_initial_common_projection_v1(source,paths,catalogue,keeper,native):
 # QTT_HOST_PY |     """Project the fixed original programme; its caller owns every operand join."""
 # QTT_HOST_PY |     if(type(source)is not tuple or len(source)!=9 or type(paths)is not tuple or len(paths)!=19 or type(catalogue)is not tuple or len(catalogue)!=8 or type(keeper)is not tuple or len(keeper)!=7 or type(native)is not tuple or len(native)!=3 or any(type(n)is not int or n<0 for row in(source,paths,catalogue,keeper,native)for n in row)):raise ValueError('ORDINARY_INITIAL_COMMON_EXACT_SOURCE_OPERANDS')
