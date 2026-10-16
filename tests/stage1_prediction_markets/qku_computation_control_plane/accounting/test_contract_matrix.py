@@ -2798,7 +2798,7 @@ def _assert_f14_native_and_storage(adapter_kind, directory):
                 source_policy._st12h_validate_workflow_contract(fixture_root)
             assert failure.value.reason_code.value == 'ST12A_SOURCE_EPOCH_STALE'
             parser_limit = 500000
-            at_limit = workflow_bytes + b'#' + b'x' * (parser_limit - len(workflow_bytes) - 2) + b'\n'
+            at_limit = workflow_bytes + b'\n' * (parser_limit - len(workflow_bytes))
             assert len(at_limit) == parser_limit
             workflow.write_bytes(at_limit)
             assert source_policy._st12h_validate_workflow_contract(fixture_root) == (workflow_name,)
