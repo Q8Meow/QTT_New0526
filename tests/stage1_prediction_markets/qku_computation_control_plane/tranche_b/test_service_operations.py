@@ -1,11 +1,21 @@
 import json
-from dataclasses import replace
+from dataclasses import FrozenInstanceError, fields, replace
 from datetime import UTC, datetime, timedelta
-from decimal import Decimal
+from decimal import Decimal, Inexact, Rounded, ROUND_CEILING, ROUND_FLOOR, localcontext
+from fractions import Fraction
 from pathlib import Path
 
 import pytest
 
+from src.qtt.pretrade import pr169_pretrade1_resolvers as pretrade_module
+from src.qtt.pretrade.pr169_pretrade1_resolvers import (
+    KalshiConditionalCashflowTermsV1,
+    compose_kalshi_conditional_cashflows_v1,
+)
+from src.qtt.stage1_prediction_markets.qku_computation_control_plane.economic_math import (
+    KalshiFeeRoundingInputV1,
+    kalshi_fee_rounding_v1,
+)
 from src.qtt.stage1_prediction_markets.qku_computation_control_plane.agent_policy import (
     POLICY_VERSION,
     AgentCapabilityDecisionStateV1,
@@ -15,6 +25,7 @@ from src.qtt.stage1_prediction_markets.qku_computation_control_plane.bindings im
     FORMULA_INPUT_AUTHORITY_BY_MATH_ID,
 )
 from src.qtt.stage1_prediction_markets.qku_computation_control_plane.errors import (
+    ComputationControlPlaneError,
     ContractValidationError,
     ReasonCode,
 )
@@ -65,6 +76,9 @@ from src.qtt.stage1_prediction_markets.qku_computation_control_plane.point_in_ti
 from src.qtt.stage1_prediction_markets.qku_computation_control_plane.service import (
     QKUComputationControlPlaneV1,
     ST12B_FROZEN_PACKAGE_VERSION,
+)
+from src.qtt.stage1_prediction_markets.qku_computation_control_plane.specification import (
+    CURRENT_NAMED_OUTPUT_CONTRACTS,
 )
 import src.qtt.stage1_prediction_markets.qku_computation_control_plane.service as service_module
 from src.qtt.stage1_prediction_markets.qku_computation_control_plane.stack_resolver import (
@@ -830,6 +844,256 @@ def test_service_plan_and_stack_admission_matrix(
         in unknown_stack.blocker_codes
     )
     assert invocations == []
+
+
+    _assert_kalshi_conditional_service(monkeypatch, invocations)
+
+
+def _assert_kalshi_conditional_service(monkeypatch, invocations):
+    """Synthetic arithmetic/owner fixtures only; no native acceptance or effects."""
+    profile = "KALSHI_US_DCM_DIRECT"
+    row = KalshiFeeRoundingInputV1(Decimal("-.055"), Decimal(".011"))
+    rows = (row,) * 3
+    common = dict(profile_id=profile, currency="USD", balance_increment=Decimal(".01"),
+                  prior_rounding_overpayment=Decimal(0))
+    calls = []
+
+    def counted_rounding(**kwargs):
+        calls.append((kwargs["revenue"], kwargs["model_fee"], kwargs["prior_rounding_overpayment"]))
+        return kalshi_fee_rounding_v1(**kwargs)
+
+    monkeypatch.setattr(pretrade_module, "kalshi_fee_rounding_v1", counted_rounding)
+    whole = compose_kalshi_conditional_cashflows_v1(**common, fills=rows)
+    assert calls == [(Decimal("-.055"), Decimal(".011"), Decimal(carry)) for carry in ("0", ".004", ".008")]
+    assert tuple(getattr(whole, field.name) for field in fields(whole)) == tuple(map(Decimal, ("-.165", ".045", ".01", ".002")))
+    assert rows == (row, row, row)
+    assert not hasattr(whole, "__dict__")
+    with pytest.raises(FrozenInstanceError):
+        whole.expected_rebate_total = Decimal(0)
+    for split in (1, 2):
+        prefix = compose_kalshi_conditional_cashflows_v1(**common, fills=rows[:split])
+        tail = compose_kalshi_conditional_cashflows_v1(
+            **{**common, "prior_rounding_overpayment": prefix.rounding_overpayment_after}, fills=rows[split:],
+        )
+        for name in ("entry_trade_cashflow_total", "platform_fee_total", "expected_rebate_total"):
+            assert Fraction(getattr(prefix, name)) + Fraction(getattr(tail, name)) == Fraction(getattr(whole, name))
+        assert tail.rounding_overpayment_after == whole.rounding_overpayment_after
+    reset = compose_kalshi_conditional_cashflows_v1(**common, fills=rows[-1:])
+    assert reset.expected_rebate_total == 0
+    assert tail.expected_rebate_total == Decimal(".01")
+    mixed = (KalshiFeeRoundingInputV1(Decimal("-.004"), Decimal(0)),
+             KalshiFeeRoundingInputV1(Decimal(0), Decimal(".01")))
+    calls.clear()
+    released = compose_kalshi_conditional_cashflows_v1(
+        **{**common, "prior_rounding_overpayment": Decimal(".006")}, fills=mixed,
+    )
+    assert calls == [(Decimal("-.004"), Decimal(0), Decimal(".006")), (Decimal(0), Decimal(".01"), Decimal(".012"))]
+    assert tuple(getattr(released, field.name) for field in fields(released)) == tuple(map(Decimal, ("-.004", ".016", ".01", ".002")))
+    calls.clear()
+    maximum = compose_kalshi_conditional_cashflows_v1(
+        **common, fills=(KalshiFeeRoundingInputV1(Decimal(0), Decimal(0)),) * 4096,
+    )
+    assert len(calls) == 4096
+    assert all(getattr(maximum, field.name) == 0 for field in fields(maximum))
+
+    class StringSubclass(str):
+        pass
+
+    class TupleSubclass(tuple):
+        pass
+
+    class RowSubclass(KalshiFeeRoundingInputV1):
+        pass
+
+    for changes in (
+        *(({"profile_id": value}) for value in ("POLYMARKET_US_RETAIL_DIRECT", "GEMINI_TITAN_DIRECT", "FORECASTEX_IBKR", "KALSHI", profile.lower(), StringSubclass(profile), None)),
+        *(({"currency": value}) for value in ("EUR", "usd", StringSubclass("USD"), None)),
+        *(({"fills": value}) for value in ((), list(rows), iter(rows), TupleSubclass(rows), (object(),), (RowSubclass(row.revenue, row.model_fee),), rows * 1366)),
+    ):
+        with pytest.raises(ComputationControlPlaneError) as rejected:
+            compose_kalshi_conditional_cashflows_v1(**{**common, "fills": rows, **changes})
+        assert rejected.value.reason_code is ReasonCode.INVALID_CONTRACT
+    for omitted in (*common, "fills"):
+        with pytest.raises(TypeError):
+            compose_kalshi_conditional_cashflows_v1(**{key: value for key, value in {**common, "fills": rows}.items() if key != omitted})
+    for changes in ({"balance_increment": Decimal(".001")}, {"prior_rounding_overpayment": Decimal("-0")}, {"prior_rounding_overpayment": Decimal(".0000001")}):
+        with pytest.raises(ComputationControlPlaneError) as rejected:
+            compose_kalshi_conditional_cashflows_v1(**{**common, **changes}, fills=rows)
+        assert rejected.value.reason_code is ReasonCode.OUT_OF_DOMAIN
+    for field in fields(whole):
+        for bad, reason in (("0", ReasonCode.INVALID_NUMERIC_INPUT), (Decimal("sNaN"), ReasonCode.NONFINITE_NUMERIC_INPUT), (Decimal("-0"), ReasonCode.OUT_OF_DOMAIN), (Decimal(".0000001"), ReasonCode.OUT_OF_DOMAIN), (Decimal("1e101"), ReasonCode.OUT_OF_DOMAIN)):
+            with pytest.raises(ComputationControlPlaneError) as rejected:
+                replace(whole, **{field.name: bad})
+            assert rejected.value.reason_code is reason
+        if field.name != "entry_trade_cashflow_total":
+            with pytest.raises(ComputationControlPlaneError) as rejected:
+                replace(whole, **{field.name: Decimal("-.01")})
+            assert rejected.value.reason_code is ReasonCode.OUT_OF_DOMAIN
+    with pytest.raises(ComputationControlPlaneError):
+        replace(whole, expected_rebate_total=Decimal(".046"))
+    precise34 = Decimal("1234567890123456789012345678901234")
+    precise35 = Decimal("12345678901234567890123456789012345")
+    admitted34 = compose_kalshi_conditional_cashflows_v1(
+        **common, fills=(KalshiFeeRoundingInputV1(precise34, Decimal(0)),),
+    )
+    assert admitted34.entry_trade_cashflow_total == precise34
+    for name in ("entry_trade_cashflow_total", "platform_fee_total", "expected_rebate_total"):
+        with pytest.raises(ComputationControlPlaneError) as rejected:
+            replace(whole, **{name: precise35})
+        assert rejected.value.reason_code is ReasonCode.OUT_OF_DOMAIN
+    for fills in ((KalshiFeeRoundingInputV1(precise35, Decimal(0)),),
+                  (KalshiFeeRoundingInputV1(Decimal("9e100"), Decimal(0)),) * 2):
+        with pytest.raises(ComputationControlPlaneError) as rejected:
+            compose_kalshi_conditional_cashflows_v1(**common, fills=fills)
+        assert rejected.value.reason_code is ReasonCode.OUT_OF_DOMAIN
+    for precision in (1, 7, 28):
+        for rounding in (ROUND_CEILING, ROUND_FLOOR):
+            with localcontext() as ambient:
+                ambient.prec, ambient.rounding = precision, rounding
+                ambient.Emin, ambient.Emax = -2, 2
+                ambient.traps[Inexact] = ambient.traps[Rounded] = True
+                ambient.flags[Rounded] = True
+                before = (ambient.prec, ambient.rounding, ambient.Emin, ambient.Emax,
+                          ambient.capitals, ambient.clamp, dict(ambient.traps), dict(ambient.flags))
+                assert compose_kalshi_conditional_cashflows_v1(**common, fills=rows) == whole
+                after = (ambient.prec, ambient.rounding, ambient.Emin, ambient.Emax,
+                         ambient.capitals, ambient.clamp, dict(ambient.traps), dict(ambient.flags))
+                assert before == after
+
+    # These six clocks and all owner packets are explicitly synthetic fixtures.
+    moment = datetime(2026, 10, 17, 12, 0, tzinfo=UTC)
+    context = ComputationExecutionContextV1(
+        context_id="SYNTHETIC::KALSHI::MATH06", as_of=moment,
+        observed_at=moment - timedelta(seconds=1), source_epoch_id="SYNTHETIC::EPOCH",
+        input_version="SYNTHETIC_V1", maximum_age=timedelta(days=1),
+        scope=ComputationScopeV1(
+            market_scope_id="SYNTHETIC::MARKET", venue_scope_id=profile,
+            event_scope_id="SYNTHETIC::EVENT", instrument_or_contract_scope_id="SYNTHETIC::CONTRACT",
+            mode_context_id="MODE_CONTEXT::CONTRACT_ONLY", input_snapshot_id="SYNTHETIC::SNAPSHOT",
+        ),
+        binding_profile_version=ST12B_FROZEN_PACKAGE_VERSION,
+        parameter_policy_version=ST12B_FROZEN_PACKAGE_VERSION,
+        implementation_versions=_pins(("MATH-06",)),
+    )
+    clocks = PointInTimeClocksV1(
+        observed_time=moment - timedelta(seconds=1), effective_time=moment - timedelta(seconds=1),
+        available_time=moment - timedelta(seconds=1), received_time=moment - timedelta(seconds=1),
+        processed_time=moment - timedelta(seconds=1), as_of_time=moment,
+    )
+    bindings = FORMULA_INPUT_AUTHORITY_BY_MATH_ID["MATH-06"]
+    schema = CURRENT_NAMED_OUTPUT_CONTRACTS["MATH-06"]
+    roster_before = (tuple(IMPLEMENTATION_REGISTRY), tuple(ST12B_OPERATION_CAPABILITY_BY_ID))
+    assert tuple(pin.implementation_id for pin in context.implementation_versions) == ("MATH-06::2.0.0",)
+
+    def fixture_values(terms):
+        return {
+            "p_win": Decimal(".55"), "p_void": Decimal(0), "fill_probability": Decimal(".8"),
+            "entry_trade_cashflow_total": terms.entry_trade_cashflow_total,
+            "win_terminal_cashflow_total": Decimal(100), "lose_terminal_cashflow_total": Decimal(0),
+            "void_terminal_cashflow_total": Decimal(50), "no_fill_cashflow_total": Decimal(0),
+            "platform_fee_total": terms.platform_fee_total, "builder_fee_total": Decimal(0),
+            "other_fee_total": Decimal(0), "expected_rebate_total": terms.expected_rebate_total,
+            "exit_slippage_reserve_total": Decimal(".10"), "market_impact_reserve_total": Decimal(".20"),
+            "latency_adverse_selection_reserve_total": Decimal(".30"), "capital_time_cost_reserve_total": Decimal(".40"),
+            "cashflow_basis": "SIGNED_TOTAL_ACCOUNT_CASHFLOW_EACH_EVENT_INCLUDED_EXACTLY_ONCE",
+        }
+
+    def fixture_packets(values):
+        assert set(values) == {binding.input_name for binding in bindings}
+        return tuple(OwnerValuePacketV1(
+            packet_id=f"SYNTHETIC::{binding.binding_id}", owner_id=binding.accepted_upstream_owner_id,
+            packet_type=binding.accepted_packet_or_snapshot_type, schema_id=binding.schema_id,
+            schema_version=binding.schema_version, context_id=context.context_id, scope=context.scope,
+            source_epoch_id=context.source_epoch_id, input_version=context.input_version,
+            clocks=clocks, ttl=timedelta(days=1), values={binding.exact_field_path: values[binding.input_name]},
+            authorized_binding_ids=(binding.binding_id,), producer_receipt_id=f"SYNTHETIC_RECEIPT::{binding.binding_id}",
+            producer_receipt_type=binding.producer_receipt_type,
+            source_state_and_claim_lineage=binding.source_state_and_claim_lineage,
+            provider_sequence=1, revision=1,
+        ) for binding in bindings)
+
+    def fixture_request(values, selected_context=context):
+        return ComputeComponentRequestV1(
+            **{**_common("compute_component", context=selected_context), "requested_at": moment},
+            component_id="MATH-06", expected_output_schema_ref=schema.schema_id,
+            input_values=TypedValueRecordV1(tuple(TypedValueV1(
+                name=binding.input_name,
+                kind=TypedValueKindV1.TEXT if binding.input_name == "cashflow_basis" else TypedValueKindV1.DECIMAL,
+                value=values[binding.input_name], unit=binding.unit_or_basis, basis="SYNTHETIC_CONDITIONAL_FIXTURE",
+            ) for binding in bindings)),
+        )
+
+    def evaluate(values, packets=None, selected_context=context):
+        selected_packets = fixture_packets(values) if packets is None else packets
+        snapshots = tuple(dict(packet.values) for packet in selected_packets)
+        registry = CanonicalOwnerPacketRegistryV1(selected_packets)
+        service = QKUComputationControlPlaneV1(registry, agent_capability_resolver=_EXPLICIT_NO_EFFECT_TEST_ADMISSION)
+        invocations.clear()
+        response = service.compute_component(fixture_request(values, selected_context))
+        assert registry.packets == selected_packets
+        assert snapshots == tuple(dict(packet.values) for packet in selected_packets)
+        assert response.component_result.no_authority_flag is True
+        return response
+
+    for principal, fee, expected in (("-50", "1.75", "1.8"), ("-50", "3.50", ".4"), ("-60", "1.68", "-6.144"), ("-60", "1.75", "-6.2")):
+        terms = compose_kalshi_conditional_cashflows_v1(
+            **common, fills=(KalshiFeeRoundingInputV1(Decimal(principal), Decimal(fee)),),
+        )
+        assert terms.entry_trade_cashflow_total == Decimal(principal)
+        assert terms.platform_fee_total == Decimal(fee) and terms.expected_rebate_total == 0
+        assert Fraction(Decimal(expected)) == Fraction(4, 5) * (Fraction(principal) + 55 - Fraction(fee) - 1)
+        values = fixture_values(terms)
+        response = evaluate(values)
+        assert response.status is OperationStatusV1.SUCCEEDED
+        assert invocations == ["MATH-06"]
+        output = response.component_result.formula_output
+        assert output.execution_context is context and output.no_authority_flag is True
+        assert output.implementation_id == "MATH-06::2.0.0"
+        assert output.output_schema_ref == schema.schema_id
+        assert output.output_schema_version == schema.schema_version
+        assert set(output.value) == {"expected_net_cash", "expected_net_cash_if_filled", "expected_terminal_cashflow", "p_lose"}
+        assert output.value["expected_net_cash"] == Decimal(expected)
+        assert Fraction(output.value["expected_net_cash_if_filled"]) == Fraction(Decimal(expected)) / Fraction(4, 5)
+        assert output.value["expected_terminal_cashflow"] == Decimal(55)
+        assert output.value["p_lose"] == Decimal(".45")
+        assert values == fixture_values(terms)
+    no_fill = evaluate({**values, "fill_probability": Decimal(0)})
+    assert no_fill.status is OperationStatusV1.SUCCEEDED
+    assert no_fill.component_result.formula_output.value["expected_net_cash"] == 0
+    credited_values = fixture_values(whole)
+    credited = evaluate(credited_values)
+    uncredited = evaluate({**credited_values, "expected_rebate_total": Decimal(0)})
+    assert credited.status is uncredited.status is OperationStatusV1.SUCCEEDED
+    credited_value = credited.component_result.formula_output.value["expected_net_cash"]
+    uncredited_value = uncredited.component_result.formula_output.value["expected_net_cash"]
+    assert credited_value == Decimal("43.04") and uncredited_value == Decimal("43.032")
+    assert Fraction(credited_value) - Fraction(uncredited_value) == Fraction(1, 125)
+    assert "rounding_overpayment_after" not in credited_values
+    packets = fixture_packets(credited_values)
+    target = next(packet for packet in packets if packet.authorized_binding_ids == ("FIVAB::MATH-06::platform_fee_total",))
+    for changed, reason in (
+        (None, ReasonCode.INPUT_OWNER_MISSING),
+        (replace(target, ttl=timedelta(microseconds=1)), ReasonCode.FRESHNESS_VIOLATION),
+        (replace(target, source_conflict=True), ReasonCode.SOURCE_CONFLICT),
+        # Context IDs index separate registries; a foreign context has no candidate.
+        (replace(target, context_id="SYNTHETIC::WRONG_CONTEXT"), ReasonCode.INPUT_OWNER_MISSING),
+        (replace(target, scope=replace(context.scope, venue_scope_id="SYNTHETIC::OTHER_VENUE")), ReasonCode.INPUT_SCOPE_MISMATCH),
+    ):
+        variant = tuple(changed if packet is target else packet for packet in packets if packet is not target or changed is not None)
+        rejected = evaluate(credited_values, variant)
+        assert rejected.status is not OperationStatusV1.SUCCEEDED
+        assert rejected.component_result.formula_output is None
+        assert reason.value in rejected.receipt_refs
+        assert invocations == []
+    wrong_assertion = evaluate({**credited_values, "platform_fee_total": Decimal(".046")}, packets)
+    assert wrong_assertion.status is not OperationStatusV1.SUCCEEDED
+    assert ReasonCode.INPUT_VALUE_CONFLICT.value in wrong_assertion.receipt_refs
+    assert wrong_assertion.component_result.formula_output is None and invocations == []
+    wrong_context = evaluate(credited_values, packets, replace(context, scope=replace(context.scope, venue_scope_id="SYNTHETIC::OTHER_VENUE")))
+    assert wrong_context.status is not OperationStatusV1.SUCCEEDED
+    assert ReasonCode.INPUT_SCOPE_MISMATCH.value in wrong_context.receipt_refs
+    assert wrong_context.component_result.formula_output is None and invocations == []
+    assert roster_before == (tuple(IMPLEMENTATION_REGISTRY), tuple(ST12B_OPERATION_CAPABILITY_BY_ID))
 
 
 def test_execution_context_propagates_through_stack(

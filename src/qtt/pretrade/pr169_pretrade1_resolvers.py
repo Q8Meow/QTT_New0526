@@ -1,12 +1,21 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from decimal import Decimal
+from fractions import Fraction
 import json
 from pathlib import Path
 from typing import TYPE_CHECKING, Iterable
 
+from ..stage1_prediction_markets.qku_computation_control_plane.economic_math import (
+    KalshiFeeRoundingInputV1,
+    _kalshi_bounded_fraction,
+    _kalshi_decimal6,
+    kalshi_fee_rounding_v1,
+)
 from ..stage1_prediction_markets.qku_computation_control_plane.errors import (
     ContractValidationError,
+    NumericDomainError,
     ReasonCode,
 )
 if TYPE_CHECKING:
@@ -18,6 +27,71 @@ if TYPE_CHECKING:
 
 GENERATED_PREFIX = Path("docs/master_plan/generated/pr169_pretrade1")
 REGISTRY_REF = "docs/master_plan/generated/pr169_pretrade1/pretrade_decision_registry.jsonl"
+
+
+@dataclass(frozen=True, slots=True)
+class KalshiConditionalCashflowTermsV1:
+    """Conditional principal, charges and refunds; carry is not spendable cash."""
+
+    entry_trade_cashflow_total: Decimal
+    platform_fee_total: Decimal
+    expected_rebate_total: Decimal
+    rounding_overpayment_after: Decimal
+
+    def __post_init__(self) -> None:
+        amounts = []
+        for name in (
+            "entry_trade_cashflow_total", "platform_fee_total",
+            "expected_rebate_total", "rounding_overpayment_after",
+        ):
+            value = getattr(self, name)
+            amounts.append(_kalshi_bounded_fraction(
+                value, name, nonnegative=name != "entry_trade_cashflow_total",
+                microdollars=True,
+            ))
+            if name != "rounding_overpayment_after":
+                digits = value.as_tuple().digits
+                significant = len(digits)
+                while significant > 1 and digits[significant - 1] == 0:
+                    significant -= 1
+                if significant > 34:
+                    raise NumericDomainError(ReasonCode.OUT_OF_DOMAIN, f"{name} exceeds current MATH-06 precision")
+        if amounts[1] < amounts[2]:
+            raise NumericDomainError(ReasonCode.OUT_OF_DOMAIN, "conditional credits exceed charges")
+
+
+def compose_kalshi_conditional_cashflows_v1(
+    *, profile_id: str, currency: str, fills: tuple[KalshiFeeRoundingInputV1, ...],
+    balance_increment: Decimal, prior_rounding_overpayment: Decimal,
+) -> KalshiConditionalCashflowTermsV1:
+    """Compose one declared ordered hypothetical sequence, without native admission."""
+    if type(profile_id) is not str or profile_id != "KALSHI_US_DCM_DIRECT":
+        raise ContractValidationError(ReasonCode.INVALID_CONTRACT, "exact Kalshi profile required")
+    if type(currency) is not str or currency != "USD":
+        raise ContractValidationError(ReasonCode.INVALID_CONTRACT, "exact USD currency required")
+    if type(fills) is not tuple or not 1 <= len(fills) <= 4096:
+        raise ContractValidationError(ReasonCode.INVALID_CONTRACT, "fills must be a tuple of 1..4096 conditional rows")
+    principal = Fraction(0)
+    charges = Fraction(0)
+    credits = Fraction(0)
+    carry = prior_rounding_overpayment
+    for row in fills:
+        if type(row) is not KalshiFeeRoundingInputV1:
+            raise ContractValidationError(ReasonCode.INVALID_CONTRACT, "exact typed conditional fill required")
+        rounded = kalshi_fee_rounding_v1(
+            revenue=row.revenue, model_fee=row.model_fee,
+            balance_increment=balance_increment, prior_rounding_overpayment=carry,
+        )
+        principal += Fraction(row.revenue)
+        charges += Fraction(rounded.trade_fee) + Fraction(rounded.rounding_fee)
+        credits += Fraction(rounded.rounding_rebate)
+        carry = rounded.rounding_overpayment_after
+    return KalshiConditionalCashflowTermsV1(
+        entry_trade_cashflow_total=_kalshi_decimal6(principal, "entry_trade_cashflow_total"),
+        platform_fee_total=_kalshi_decimal6(charges, "platform_fee_total"),
+        expected_rebate_total=_kalshi_decimal6(credits, "expected_rebate_total"),
+        rounding_overpayment_after=carry,
+    )
 
 
 def _repo_root() -> Path:

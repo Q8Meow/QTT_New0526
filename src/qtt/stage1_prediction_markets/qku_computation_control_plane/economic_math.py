@@ -5,6 +5,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from datetime import datetime, timedelta
 from decimal import Decimal, localcontext
+from fractions import Fraction
 from types import MappingProxyType
 from typing import Mapping, Sequence
 
@@ -20,6 +21,125 @@ from .errors import ContractValidationError, NumericDomainError, ReasonCode
 
 
 DecimalInput = Decimal | str | int
+
+
+def _kalshi_bounded_fraction(
+    value: Decimal, field_name: str, *, nonnegative: bool = False,
+    microdollars: bool = False,
+) -> Fraction:
+    """Admit the private exact boundary without consulting Decimal context."""
+    if type(value) is not Decimal:
+        raise NumericDomainError(ReasonCode.INVALID_NUMERIC_INPUT, f"{field_name} must be an exact Decimal")
+    if not value.is_finite():
+        raise NumericDomainError(ReasonCode.NONFINITE_NUMERIC_INPUT, f"{field_name} must be finite")
+    parts = value.as_tuple()
+    if (
+        (value.is_zero() and value.is_signed())
+        or len(parts.digits) > 128
+        or not -128 <= parts.exponent <= 128
+        or (not value.is_zero() and not -100 <= value.adjusted() <= 100)
+    ):
+        raise NumericDomainError(ReasonCode.OUT_OF_DOMAIN, f"{field_name} exceeds exact numeric containment")
+    result = Fraction(value)
+    if (nonnegative and result < 0) or (microdollars and (result * 1_000_000).denominator != 1):
+        raise NumericDomainError(ReasonCode.OUT_OF_DOMAIN, f"{field_name} has a prohibited sign or microdollar value")
+    return result
+
+
+def _kalshi_decimal6(value: Fraction, field_name: str) -> Decimal:
+    units = value * 1_000_000
+    if units.denominator != 1:
+        raise NumericDomainError(ReasonCode.OUT_OF_DOMAIN, f"{field_name} must be on the microdollar grid")
+    coefficient = units.numerator
+    result = Decimal((int(coefficient < 0), tuple(int(digit) for digit in str(abs(coefficient))), -6))
+    _kalshi_bounded_fraction(result, field_name, microdollars=True)
+    return result
+
+
+@dataclass(frozen=True, slots=True)
+class KalshiFeeRoundingInputV1:
+    """One hypothetical fill; neither fee selection nor source admission."""
+
+    revenue: Decimal
+    model_fee: Decimal
+
+    def __post_init__(self) -> None:
+        _kalshi_bounded_fraction(self.revenue, "revenue", microdollars=True)
+        _kalshi_bounded_fraction(self.model_fee, "model_fee", nonnegative=True)
+
+
+@dataclass(frozen=True, slots=True)
+class KalshiFeeRoundingResultV1:
+    trade_fee: Decimal
+    rounding_fee: Decimal
+    rounding_rebate: Decimal
+    net_fee: Decimal
+    balance_change: Decimal
+    rounding_overpayment_after: Decimal
+
+    def __post_init__(self) -> None:
+        amounts = tuple(
+            _kalshi_bounded_fraction(
+                getattr(self, name), name, nonnegative=name != "balance_change",
+                microdollars=True,
+            )
+            for name in (
+                "trade_fee", "rounding_fee", "rounding_rebate", "net_fee",
+                "balance_change", "rounding_overpayment_after",
+            )
+        )
+        trade, rounding, rebate, net, _, _ = amounts
+        if net != trade + rounding - rebate:
+            raise NumericDomainError(ReasonCode.OUT_OF_DOMAIN, "Kalshi fee components do not conserve net fee")
+
+
+def kalshi_fee_rounding_v1(
+    *, revenue: Decimal, model_fee: Decimal, balance_increment: Decimal,
+    prior_rounding_overpayment: Decimal,
+) -> KalshiFeeRoundingResultV1:
+    """Exact conditional-fill rounding with explicit balance grid and order carry."""
+    principal = _kalshi_bounded_fraction(revenue, "revenue", microdollars=True)
+    fee = _kalshi_bounded_fraction(model_fee, "model_fee", nonnegative=True)
+    grid = _kalshi_bounded_fraction(balance_increment, "balance_increment", nonnegative=True)
+    prior = _kalshi_bounded_fraction(
+        prior_rounding_overpayment, "prior_rounding_overpayment",
+        nonnegative=True, microdollars=True,
+    )
+    if grid not in (Fraction(1, 10_000), Fraction(1, 100)):
+        raise NumericDomainError(ReasonCode.OUT_OF_DOMAIN, "explicit balance increment must be 0.0001 or 0.01 USD")
+    micro = Fraction(1, 1_000_000)
+    fee_units = fee / micro
+    trade = -(-fee_units.numerator // fee_units.denominator) * micro
+    balance_units = (principal - trade) / grid
+    base = (balance_units.numerator // balance_units.denominator) * grid
+    rounding = principal - trade - base
+    accumulated_units = (prior + rounding) / grid
+    charge_units = (trade + rounding) / grid
+    rebate = min(
+        accumulated_units.numerator // accumulated_units.denominator,
+        charge_units.numerator // charge_units.denominator,
+    ) * grid
+    net = trade + rounding - rebate
+    balance = base + rebate
+    after = prior + rounding - rebate
+    if not (
+        0 <= rounding < grid
+        and trade >= fee and trade - fee < micro
+        and net >= 0 and rebate >= 0 and after >= 0
+        and (rebate / grid).denominator == 1
+        and (balance / grid).denominator == 1
+        and balance == principal - net
+        and prior + rounding == rebate + after
+    ):
+        raise NumericDomainError(ReasonCode.OUT_OF_DOMAIN, "Kalshi rounding conservation failed")
+    return KalshiFeeRoundingResultV1(
+        trade_fee=_kalshi_decimal6(trade, "trade_fee"),
+        rounding_fee=_kalshi_decimal6(rounding, "rounding_fee"),
+        rounding_rebate=_kalshi_decimal6(rebate, "rounding_rebate"),
+        net_fee=_kalshi_decimal6(net, "net_fee"),
+        balance_change=_kalshi_decimal6(balance, "balance_change"),
+        rounding_overpayment_after=_kalshi_decimal6(after, "rounding_overpayment_after"),
+    )
 
 
 def _decimal(value: DecimalInput, field_name: str) -> Decimal:

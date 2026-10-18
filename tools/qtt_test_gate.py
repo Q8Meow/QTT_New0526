@@ -6,7 +6,11 @@ import pathlib
 import sys
 from typing import Any, Sequence
 
-_SRC = pathlib.Path(__file__).resolve().parents[1] / "src"
+_REPO_ROOT = pathlib.Path(__file__).resolve().parents[1]
+if str(_REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(_REPO_ROOT))
+
+_SRC = _REPO_ROOT / "src"
 if str(_SRC) not in sys.path:
     sys.path.insert(0, str(_SRC))
 
