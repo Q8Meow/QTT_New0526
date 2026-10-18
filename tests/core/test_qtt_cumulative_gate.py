@@ -2,7 +2,10 @@ from __future__ import annotations
 
 import copy
 import json
+import os
 from pathlib import Path
+import subprocess
+import sys
 
 from tools import qtt_test_gate
 
@@ -17,6 +20,147 @@ def _report() -> dict:
 
 def _assert_failure_contains(failures: list[str], fragment: str) -> None:
     assert any(fragment in failure for failure in failures), failures
+
+
+def _assert_direct_cli_layout_boundaries(tmp_path: Path) -> None:
+    """Real CLI children; receipt files below are synthetic existence fixtures."""
+    code_root = Path(__file__).resolve().parents[2]
+    foreign_cwd = tmp_path / "unrelated-cwd"
+    foreign_cwd.mkdir()
+    outputs = tmp_path / "cli-reports"
+    outputs.mkdir()
+    empty_hooks = tmp_path / "empty-hooks"
+    empty_hooks.mkdir()
+    empty_excludes = tmp_path / "empty-excludes"
+    empty_excludes.write_text("", encoding="utf-8")
+    environment = {
+        key: value for key, value in os.environ.items()
+        if key.upper() != "PYTHONPATH" and not key.upper().startswith("GIT_")
+    }
+    git_environment = dict(
+        environment, GIT_CONFIG_NOSYSTEM="1", GIT_CONFIG_GLOBAL=os.devnull,
+        GIT_TERMINAL_PROMPT="0",
+    )
+    strict_flags = [
+        "--forbid-source-retrieval", "--forbid-source-acceptance",
+        "--forbid-connector-binding", "--forbid-private-state-fetch",
+        "--forbid-order-execution", "--forbid-neural-training",
+        "--forbid-neural-inference", "--forbid-external-repo-clone",
+        "--forbid-package-install-scripts",
+    ]
+    for case, rejection in (
+        ("absent", None), ("admitted", None), ("hidden-zip", None),
+        ("secret", None),
+        ("file", "local directory chain contains a link, reparse point or non-directory"),
+        ("unignored", "read-only layout custody query returned nonzero"),
+        ("tracked", "tracked .qtt path present"),
+    ):
+        root = tmp_path / case
+        root.mkdir()
+
+        def git(*args: str) -> str:
+            result = subprocess.run(
+                ["git", "-c", "user.name=QTT synthetic fixture",
+                 "-c", "user.email=fixture@example.invalid",
+                 "-c", "commit.gpgsign=false", "-c", "tag.gpgsign=false",
+                 "-c", f"core.hooksPath={empty_hooks}",
+                 "-c", "core.autocrlf=false", "-C", str(root), *args],
+                env=git_environment, stdin=subprocess.DEVNULL,
+                capture_output=True, text=True, timeout=30, check=False,
+            )
+            assert result.returncode == 0, (result.args, result.stdout, result.stderr)
+            return result.stdout
+
+        git("init", "--quiet", "--template", str(empty_hooks))
+        git("config", "--local", "core.excludesFile", str(empty_excludes))
+        (root / ".gitignore").write_text(
+            "" if case == "unignored" else ".qtt/\n", encoding="utf-8",
+        )
+        git("add", "--", ".gitignore")
+        git("commit", "--quiet", "-m", "Synthetic CLI layout fixture")
+        for spec in qtt_test_gate.REQUIRED_RECEIPTS:
+            for relative in spec["paths"]:
+                receipt = root / relative
+                receipt.parent.mkdir(parents=True, exist_ok=True)
+                receipt.write_text("{}\n", encoding="utf-8")
+        if case == "file":
+            (root / ".qtt").write_text("synthetic non-directory", encoding="utf-8")
+        elif case != "absent":
+            (root / ".qtt").mkdir()
+            (root / ".qtt" / "local_input.zip").write_bytes(b"PK")
+        if case == "hidden-zip":
+            (root / "hidden_authority.zip").write_bytes(b"PK")
+        if case == "secret":
+            (root / ".env").write_text("SYNTHETIC_ONLY=1\n", encoding="utf-8")
+        if case == "tracked":
+            git("add", "-f", "--", ".qtt/local_input.zip")
+        before_git = (git("rev-parse", "HEAD"), git("status", "--porcelain=v1"))
+        report_path = outputs / f"{case}.json"
+        assert not report_path.exists()
+        outcomes = []
+        for script, arguments in (
+            ("qtt_test_gate.py", ["--phase", "first-coding-runbook",
+             "--repo-root", str(root), "--strict-no-claim", "--out", str(report_path)]),
+            ("validate_no_runtime_artifacts.py", ["--repo-root", str(root), *strict_flags]),
+        ):
+            try:
+                outcomes.append(subprocess.run(
+                    [sys.executable, "-I", "-B", str(code_root / "tools" / script), *arguments],
+                    cwd=foreign_cwd, env=environment, stdin=subprocess.DEVNULL,
+                    capture_output=True, text=True, timeout=30, check=False,
+                ))
+            except subprocess.TimeoutExpired as exc:
+                outcomes.append(exc)
+        # Both actual entry points run before any outcome assertion for this case.
+        details = "\n".join(
+            f"{case}: {result.args!r}\nexit={getattr(result, 'returncode', None)}"
+            f"\nstdout={result.stdout}\nstderr={result.stderr}"
+            for result in outcomes
+        )
+        assert all(isinstance(result, subprocess.CompletedProcess) for result in outcomes), details
+        gate, scanner = outcomes
+        assert all("ModuleNotFoundError" not in result.stderr and
+                   "ImportError" not in result.stderr for result in outcomes), details
+        assert before_git == (git("rev-parse", "HEAD"), git("status", "--porcelain=v1"))
+        if rejection is not None:
+            for result in outcomes:
+                assert result.returncode == 1, details
+                assert f"ENGVR_REPOSITORY_LOCAL_LAYOUT_REJECTED: {rejection}" in result.stderr, details
+            assert "QTT_CUMULATIVE_TEST_GATE_OK" not in gate.stdout, details
+            assert "NO_RUNTIME_ARTIFACT_GATE_OK" not in scanner.stdout, details
+            assert "NO_RUNTIME_ARTIFACT_GATE_FAILED" in scanner.stderr.splitlines(), details
+            assert not report_path.exists(), details
+            continue
+        assert gate.returncode == (1 if case == "hidden-zip" else 0), details
+        assert gate.stderr == "", details
+        assert report_path.is_file(), details
+        report = json.loads(report_path.read_text(encoding="utf-8"))
+        assert report["status"] == ("FAIL" if case == "hidden-zip" else "PASS"), details
+        assert report["strict_no_claim"] is True
+        assert all(value is False for value in report["no_claim_flags"].values())
+        for record in (report["metadata"], *report["prior_gate_receipts"]):
+            assert all(record[field] is False for field in qtt_test_gate.STATIC_AUTHORITY_FLAGS)
+        filesystem = report["filesystem_claim_checks"]
+        assert filesystem["hidden_zip_paths"] == (["hidden_authority.zip"] if case == "hidden-zip" else [])
+        assert filesystem["hidden_zip_authority_present"] is (case == "hidden-zip")
+        if case == "hidden-zip":
+            assert gate.stdout.splitlines()[0] == "QTT_CUMULATIVE_TEST_GATE_FAILED", details
+            assert report["findings"] == [
+                "gate_checks.no_hidden_zip_authority must be true",
+                "qtt test gate report.filesystem_claim_checks.hidden_zip_authority_present must remain false",
+                "qtt test gate report: hidden ZIP authority must remain absent",
+            ]
+        else:
+            assert gate.stdout.strip() == "QTT_CUMULATIVE_TEST_GATE_OK", details
+            assert report["findings"] == []
+        if case == "secret":
+            assert scanner.returncode == 1, details
+            assert "NO_RUNTIME_ARTIFACT_GATE_FAILED" in scanner.stderr.splitlines(), details
+            assert "- forbidden runtime/secret artifact present: .env" in scanner.stderr.splitlines(), details
+            assert "NO_RUNTIME_ARTIFACT_GATE_OK" not in scanner.stdout, details
+        else:
+            assert scanner.returncode == 0, details
+            assert scanner.stdout.strip() == "NO_RUNTIME_ARTIFACT_GATE_OK", details
 
 
 def test_qtt_cumulative_gate_valid_static_report_passes():
@@ -200,6 +344,7 @@ def test_qtt_cumulative_gate_blocks_hidden_zip_authority(tmp_path):
             "nested/.codex_inputs/hidden_authority.zip"
         ),
     ]
+    _assert_direct_cli_layout_boundaries(tmp_path)
 
 
 def test_qtt_cumulative_gate_blocks_direct_main_bypass_claim():

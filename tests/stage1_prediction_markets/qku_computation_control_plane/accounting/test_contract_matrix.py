@@ -1,8 +1,10 @@
 """Centralized 16-row Tranche-C accounting contract matrix."""
 
-from dataclasses import replace
+from dataclasses import FrozenInstanceError, fields, replace
 from datetime import UTC, datetime
-from decimal import Decimal
+from decimal import Decimal, Inexact, Rounded, ROUND_CEILING, ROUND_FLOOR, localcontext
+from fractions import Fraction
+from itertools import product
 from pathlib import Path
 from tempfile import TemporaryDirectory
 
@@ -44,10 +46,13 @@ from src.qtt.stage1_prediction_markets.qku_computation_control_plane.economic_ma
     BinaryBookSnapshotV1,
     FeeScheduleBindingV1,
     FillQuantityDistributionArtifactV1,
+    KalshiFeeRoundingInputV1,
+    KalshiFeeRoundingResultV1,
     TRANCHE_C_MATH_SPECIFICATIONS,
     binary_book_implied_asks_v1,
     expected_partial_fill_quantity_v1,
     global_prediction_market_fee_v1,
+    kalshi_fee_rounding_v1,
 )
 from src.qtt.stage1_prediction_markets.qku_computation_control_plane.errors import (
     ComputationControlPlaneError,
@@ -245,6 +250,7 @@ def test_accounting_contract_matrix(case) -> None:
         with pytest.raises(ComputationControlPlaneError):
             ExposureProjectionV1("bad", (("VENUE_A", "10"), ("VENUE_A", "10")), ("10", "-10"), ("p1",), NOW, NOW)
     elif slug == "fee-rebate-treatment":
+        _assert_kalshi_rounding_values()
         binding = FeeScheduleBindingV1("CATEGORY", "venue", "market-category", "v1", "source-epoch", datetime(2025, 1, 1, tzinfo=UTC), None, NOW, ("PLATFORM_FEE", "BUILDER_FEE_SEPARATE_ADDITIVE"), (("PLATFORM_FEE", ".05"),))
         policy = QuantizationPolicyV1("fee-5dp", "fee", "0.00001", QuantizationRoundingV1.HALF_EVEN, "USD", "USD", "FEE", 5, binding.binding_ref)
         fee = global_prediction_market_fee_v1(contracts="100", fee_rate=".05", price=".5", schedule_binding=binding, quantization_policy=policy, receipt_id="fee-r1")
@@ -280,6 +286,7 @@ def test_accounting_contract_matrix(case) -> None:
         with pytest.raises(ComputationControlPlaneError):
             ReconciliationRunV1("run-2", ("projection",), "snapshot", NOW, ("break",), ReconciliationStateV1.UNKNOWN, False)
     elif slug == "rounding-and-quantization":
+        _assert_kalshi_rounding_boundaries()
         policy = QuantizationPolicyV1("cent", "amount", ".01", QuantizationRoundingV1.HALF_EVEN, "USD", "USD", "SETTLED", 2, "OWNER")
         receipt = quantize_decimal_v1("1.005", policy=policy, receipt_id="rounding-1")
         assert (receipt.pre_value, receipt.post_value, receipt.residual) == (Decimal("1.005"), Decimal("1.00"), Decimal("0.005"))
@@ -311,6 +318,164 @@ def test_accounting_contract_matrix(case) -> None:
             AccountingAndTCAServiceV1.validate_journal(journal, postings, _accounts(second_basis="PROJECTED"))
     else:  # pragma: no cover - the meta-test makes this unreachable
         raise AssertionError(f"unhandled control case {slug}")
+
+
+def _kalshi_integer_oracle(revenue, model_fee, increment, prior):
+    """Independent integer microdollar oracle, with Euclidean signed division."""
+    principal = Fraction(revenue) * 1_000_000
+    fee_units = Fraction(model_fee) * 1_000_000
+    grid = int(Fraction(increment) * 1_000_000)
+    carried = int(Fraction(prior) * 1_000_000)
+    whole, remainder = divmod(fee_units.numerator, fee_units.denominator)
+    charged = whole + int(remainder != 0)
+    balance_units, rounding = divmod(int(principal) - charged, grid)
+    refunded = min((carried + rounding) // grid, (charged + rounding) // grid) * grid
+    return tuple(Fraction(value, 1_000_000) for value in (
+        charged, rounding, refunded, charged + rounding - refunded,
+        balance_units * grid + refunded, carried + rounding - refunded,
+    ))
+
+
+def _kalshi_values(result):
+    return tuple(getattr(result, field.name) for field in fields(result))
+
+
+def _assert_kalshi_rounding_values():
+    golden = (
+        (("-.055", ".00363825", ".01", "0"), (".003639", ".001361", "0", ".005", "-.06", ".001361")),
+        (("-.055", ".00363825", ".0001", "0"), (".003639", ".000061", "0", ".0037", "-.0587", ".000061")),
+        (("-.004", "0", ".01", ".006"), ("0", ".006", "0", ".006", "-.01", ".012")),
+        (("0", ".01", ".01", ".012"), (".01", "0", ".01", "0", "0", ".002")),
+        ((".055", ".00363825", ".01", "0"), (".003639", ".001361", "0", ".005", ".05", ".001361")),
+        (("0", "0", ".01", "0"), ("0", "0", "0", "0", "0", "0")),
+    )
+    for inputs, expected in golden:
+        revenue, fee, grid, carry = map(Decimal, inputs)
+        result = kalshi_fee_rounding_v1(
+            revenue=revenue, model_fee=fee, balance_increment=grid,
+            prior_rounding_overpayment=carry,
+        )
+        assert _kalshi_values(result) == tuple(map(Decimal, expected))
+    for revenue, fee, grid, carry in product(
+        map(Decimal, ("-10", "-.055", "-.004", "-.000001", "0", ".000001", ".055", "10")),
+        map(Decimal, ("0", ".0000001", ".000001", ".00363825", ".01", "1.75")),
+        map(Decimal, (".0001", ".01")),
+        map(Decimal, ("0", ".000001", ".000099", ".004", ".009999", ".012")),
+    ):
+        before = tuple(value.as_tuple() for value in (revenue, fee, grid, carry))
+        result = kalshi_fee_rounding_v1(
+            revenue=revenue, model_fee=fee, balance_increment=grid,
+            prior_rounding_overpayment=carry,
+        )
+        actual = _kalshi_values(result)
+        assert tuple(map(Fraction, actual)) == _kalshi_integer_oracle(revenue, fee, grid, carry)
+        trade, rounding, rebate, net, balance, after = map(Fraction, actual)
+        assert 0 <= rounding < Fraction(grid)
+        assert 0 <= trade - Fraction(fee) < Fraction(1, 1_000_000)
+        assert net >= 0 and rebate >= 0 and after >= 0
+        assert (rebate / Fraction(grid)).denominator == 1
+        assert (balance / Fraction(grid)).denominator == 1
+        assert balance == Fraction(revenue) - net
+        assert Fraction(carry) + rounding == rebate + after
+        assert all(value.as_tuple().exponent == -6 for value in actual)
+        assert all(not value.is_signed() for value in actual if value.is_zero())
+        assert before == tuple(value.as_tuple() for value in (revenue, fee, grid, carry))
+        continued = kalshi_fee_rounding_v1(
+            revenue=Decimal(0), model_fee=Decimal(".01"), balance_increment=grid,
+            prior_rounding_overpayment=result.rounding_overpayment_after,
+        )
+        assert tuple(map(Fraction, _kalshi_values(continued))) == _kalshi_integer_oracle(
+            Decimal(0), Decimal(".01"), grid, result.rounding_overpayment_after,
+        )
+    row = KalshiFeeRoundingInputV1(Decimal("-.055"), Decimal(".011"))
+    assert not hasattr(row, "__dict__") and not hasattr(result, "__dict__")
+    with pytest.raises(FrozenInstanceError):
+        row.revenue = Decimal(0)
+    with pytest.raises(FrozenInstanceError):
+        result.net_fee = Decimal(0)
+
+
+def _assert_kalshi_rounding_boundaries():
+    class DecimalSubclass(Decimal):
+        pass
+
+    valid = dict(revenue=Decimal("-.055"), model_fee=Decimal(".00363825"),
+                 balance_increment=Decimal(".01"), prior_rounding_overpayment=Decimal(0))
+    invalid_common = (
+        *((value, ReasonCode.INVALID_NUMERIC_INPUT) for value in
+          (True, False, 1, 0.01, "0.01", None, {}, DecimalSubclass("0.01"))),
+        *((Decimal(value), ReasonCode.NONFINITE_NUMERIC_INPUT) for value in
+          ("NaN", "sNaN", "Infinity", "-Infinity")),
+        *((Decimal(value), ReasonCode.OUT_OF_DOMAIN) for value in
+          ("-0", "-0.000000", "1e101", "1e-101", "0e-129", "0e129", "1." + "0" * 128)),
+    )
+    for name in valid:
+        for value, reason in invalid_common:
+            with pytest.raises(ComputationControlPlaneError) as rejected:
+                kalshi_fee_rounding_v1(**{**valid, name: value})
+            assert rejected.value.reason_code is reason
+        with pytest.raises(TypeError):
+            kalshi_fee_rounding_v1(**{key: value for key, value in valid.items() if key != name})
+    for name, value in (
+        ("revenue", Decimal(".0000001")),
+        ("model_fee", Decimal("-.01")),
+        ("balance_increment", Decimal(0)),
+        ("balance_increment", Decimal(".001")),
+        ("balance_increment", Decimal("-.01")),
+        ("prior_rounding_overpayment", Decimal("-.01")),
+        ("prior_rounding_overpayment", Decimal(".0000001")),
+    ):
+        with pytest.raises(ComputationControlPlaneError) as rejected:
+            kalshi_fee_rounding_v1(**{**valid, name: value})
+        assert rejected.value.reason_code is ReasonCode.OUT_OF_DOMAIN
+    for name in ("revenue", "model_fee"):
+        for value, reason in invalid_common:
+            with pytest.raises(ComputationControlPlaneError) as rejected:
+                KalshiFeeRoundingInputV1(**{key: value if key == name else valid[key] for key in ("revenue", "model_fee")})
+            assert rejected.value.reason_code is reason
+    for changes in (
+        {"revenue": Decimal("-9.99e100"), "model_fee": Decimal("9.99e100")},
+        {"revenue": Decimal(".000001"), "model_fee": Decimal(0),
+         "prior_rounding_overpayment": Decimal("9" * 101 + "." + "9" * 6)},
+    ):
+        with pytest.raises(ComputationControlPlaneError) as rejected:
+            kalshi_fee_rounding_v1(**{**valid, **changes})
+        assert rejected.value.reason_code is ReasonCode.OUT_OF_DOMAIN
+    for revenue, fee in (("1." + "0" * 127, "1e-100"), ("1e100", "0e-128"), ("0e128", "0")):
+        result = kalshi_fee_rounding_v1(**{**valid, "revenue": Decimal(revenue), "model_fee": Decimal(fee)})
+        assert tuple(map(Fraction, _kalshi_values(result))) == _kalshi_integer_oracle(
+            Decimal(revenue), Decimal(fee), valid["balance_increment"], valid["prior_rounding_overpayment"],
+        )
+    result = kalshi_fee_rounding_v1(**valid)
+    for field in fields(result):
+        for value, reason in (*invalid_common, (Decimal(".0000001"), ReasonCode.OUT_OF_DOMAIN)):
+            with pytest.raises(ComputationControlPlaneError) as rejected:
+                replace(result, **{field.name: value})
+            assert rejected.value.reason_code is reason
+        if field.name != "balance_change":
+            with pytest.raises(ComputationControlPlaneError) as rejected:
+                replace(result, **{field.name: Decimal("-.01")})
+            assert rejected.value.reason_code is ReasonCode.OUT_OF_DOMAIN
+    with pytest.raises(ComputationControlPlaneError) as rejected:
+        replace(result, net_fee=Decimal(".006"))
+    assert rejected.value.reason_code is ReasonCode.OUT_OF_DOMAIN
+    for precision, rounding in product((1, 7, 28), (ROUND_CEILING, ROUND_FLOOR)):
+        with localcontext() as ambient:
+            ambient.prec = precision
+            ambient.rounding = rounding
+            ambient.Emin, ambient.Emax = -2, 2
+            ambient.traps[Inexact] = ambient.traps[Rounded] = True
+            ambient.flags[Inexact] = True
+            before = (ambient.prec, ambient.rounding, ambient.Emin, ambient.Emax,
+                      ambient.capitals, ambient.clamp, dict(ambient.traps), dict(ambient.flags))
+            rounded = kalshi_fee_rounding_v1(**valid)
+            assert _kalshi_values(rounded) == tuple(map(Decimal, (".003639", ".001361", "0", ".005", "-.06", ".001361")))
+            KalshiFeeRoundingInputV1(valid["revenue"], valid["model_fee"])
+            with pytest.raises(ComputationControlPlaneError):
+                kalshi_fee_rounding_v1(**{**valid, "model_fee": Decimal("sNaN")})
+            after = (ambient.prec, ambient.rounding, ambient.Emin, ambient.Emax,
+                     ambient.capitals, ambient.clamp, dict(ambient.traps), dict(ambient.flags))
+            assert before == after
 
 
 def _atomic_records(*, credit: str = "1.00", claim_id: str = "claim-1", claim_key: str = "key-1", no_fill: bool = False):

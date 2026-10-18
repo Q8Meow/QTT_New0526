@@ -15,6 +15,16 @@ GITHUB_BRANCH_CONTEXT_ENV = (
 )
 ST12_BRANCH_CASES = (
     (
+        "s1-kalshi-fee-rounding-cashflows",
+        (
+            "S1-kalshi-fee-rounding-cashflows",
+            "s1-kalshi-fee-rounding-cashflow",
+            "s1-kalshi-fee-rounding-cashflows-copy",
+            "s1-kalshi-fee-rounding-cashflows/",
+            "s1-kalshi-fee-rounding-*",
+        ),
+    ),
+    (
         "agent/st12a-contract-envelope",
         (
             "agent/st12a-contract-envelop",
@@ -192,7 +202,7 @@ def test_st12_inherited_math_receipt_repair_branch_is_exactly_classified():
 @pytest.mark.parametrize(
     ("branch", "adversarial_branches"),
     ST12_BRANCH_CASES,
-    ids=("st12a", "st12b", "st12c", "st12e", "st12d", "st12f", "st12h", "f12"),
+    ids=(None, "st12a", "st12b", "st12c", "st12e", "st12d", "st12f", "st12h", "f12"),
 )
 def test_st12_owner_authorized_branches_are_exactly_validation_only(
     branch: str,
