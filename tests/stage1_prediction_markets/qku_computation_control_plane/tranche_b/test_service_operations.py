@@ -1279,6 +1279,197 @@ def _assert_kalshi_conditional_service(monkeypatch, invocations):
                 assert before == after
     assert roster_before == (tuple(IMPLEMENTATION_REGISTRY), tuple(ST12B_OPERATION_CAPABILITY_BY_ID))
 
+    # Unadmitted literal Series bytes feed the same synthetic owners and MATH-06.
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane import source_policy as source_owner
+    series_wrapper = pretrade_module.compose_kalshi_series_quadratic_taker_buy_yes_cashflows_v1
+    ticker = "QTT-SYNTHETIC-SERIES"
+    raw_one = b'{"series":{"ticker":"QTT-SYNTHETIC-SERIES","fee_type":"quadratic","fee_multiplier":1}}'
+    source_rosters_before = (
+        tuple(source_owner.CERTIFIED_SOURCE_STATES), tuple(source_owner.SOURCE_CURRENTIZATION_OVERLAYS),
+        tuple(source_owner.SOURCE_STATE_BY_ID), tuple(source_owner.SOURCE_OVERLAY_BY_ID),
+        tuple(source_owner.ST12H_SOURCE_BINDINGS), tuple(source_owner.ST12H_SOURCE_CURRENTIZATION_RULES),
+    )
+    series_common = {**common, "raw_series_response": raw_one, "expected_series_ticker": ticker}
+    decoder_calls, candidate_results, taker_calls, taker_results = [], [], [], []
+    real_decoder = source_owner.decode_kalshi_quadratic_series_fee_candidate_v1
+
+    def counted_decoder(**kwargs):
+        decoder_calls.append(kwargs)
+        candidate = real_decoder(**kwargs)
+        candidate_results.append(candidate)
+        return candidate
+
+    def counted_taker(**kwargs):
+        taker_calls.append(kwargs)
+        result = compose_kalshi_quadratic_taker_buy_yes_cashflows_v1(**kwargs)
+        taker_results.append(result)
+        return result
+
+    with monkeypatch.context() as delegated:
+        delegated.setattr(pretrade_module, "decode_kalshi_quadratic_series_fee_candidate_v1", counted_decoder)
+        delegated.setattr(pretrade_module, "compose_kalshi_quadratic_taker_buy_yes_cashflows_v1", counted_taker)
+        ordered = (KalshiQuadraticTakerBuyYesFillV1(Decimal(50), Decimal(".4")), *portions)
+        forwarded = series_wrapper(**series_common, fills=ordered)
+        assert len(decoder_calls) == len(taker_calls) == 1
+        assert decoder_calls[0]["raw_response"] is raw_one
+        assert decoder_calls[0]["expected_series_ticker"] is ticker
+        assert taker_calls[0]["fee_multiplier"] is candidate_results[0].fee_multiplier
+        assert taker_calls[0]["fills"] is ordered
+        assert tuple((r.contracts, r.yes_price) for r in ordered) == (
+            (Decimal(50), Decimal(".4")), *((Decimal(25), Decimal(".5")),) * 4,
+        )
+        for name in common:
+            assert taker_calls[0][name] is series_common[name]
+        assert forwarded is taker_results[0]
+        for changes in (
+            *(({"profile_id": value}) for value in ("KALSHI", "POLYMARKET_US_RETAIL_DIRECT", "GEMINI_TITAN_DIRECT", "FORECASTEX_IBKR", StringSubclass(profile), None)),
+            *(({"currency": value}) for value in ("usd", "EUR", StringSubclass("USD"), None)),
+        ):
+            decoder_calls.clear(); taker_calls.clear(); invocations.clear()
+            with pytest.raises(ContractValidationError) as rejected:
+                series_wrapper(**{**series_common, "raw_series_response": b"malformed", **changes}, fills=portions)
+            assert rejected.value.reason_code is ReasonCode.INVALID_CONTRACT
+            assert decoder_calls == taker_calls == invocations == []
+        for changes, reason in (
+            ({"expected_series_ticker": "OTHER"}, ReasonCode.INPUT_SCOPE_MISMATCH),
+            ({"raw_series_response": b"{"}, ReasonCode.INVALID_CONTRACT),
+            ({"raw_series_response": b"{}"}, ReasonCode.INCOMPLETE_CONTRACT),
+            ({"raw_series_response": raw_one.replace(b'"quadratic"', b'"flat"')}, ReasonCode.INVALID_CONTRACT),
+        ):
+            decoder_calls.clear(); taker_calls.clear(); invocations.clear()
+            with pytest.raises(ContractValidationError) as rejected:
+                series_wrapper(**{**series_common, **changes}, fills=portions)
+            assert rejected.value.reason_code is reason
+            assert len(decoder_calls) == 1 and taker_calls == invocations == []
+        malformed_row = object.__new__(KalshiQuadraticTakerBuyYesFillV1)
+        object.__setattr__(malformed_row, "contracts", Decimal(".001"))
+        object.__setattr__(malformed_row, "yes_price", Decimal(".5"))
+        for changes, reason in (
+            *(({"fills": value}, ReasonCode.INVALID_CONTRACT) for value in ((), list(portions), iter(portions), TupleSubclass(portions), (object(),), (portion,) * 4097)),
+            ({"fills": (malformed_row,)}, ReasonCode.OUT_OF_DOMAIN),
+            ({"balance_increment": ".01"}, ReasonCode.INVALID_NUMERIC_INPUT),
+            ({"balance_increment": Decimal(".001")}, ReasonCode.OUT_OF_DOMAIN),
+            ({"prior_rounding_overpayment": Decimal("sNaN")}, ReasonCode.NONFINITE_NUMERIC_INPUT),
+            ({"prior_rounding_overpayment": Decimal("-0")}, ReasonCode.OUT_OF_DOMAIN),
+            ({"prior_rounding_overpayment": Decimal(".0000001")}, ReasonCode.OUT_OF_DOMAIN),
+            ({"raw_series_response": raw_one.replace(b'"fee_multiplier":1', b'"fee_multiplier":1e100'),
+              "fills": (KalshiQuadraticTakerBuyYesFillV1(Decimal("1e100"), Decimal(".5")),)}, ReasonCode.OUT_OF_DOMAIN),
+        ):
+            decoder_calls.clear(); taker_calls.clear(); invocations.clear()
+            with pytest.raises(ComputationControlPlaneError) as rejected:
+                series_wrapper(**{**series_common, "fills": portions, **changes})
+            assert rejected.value.reason_code is reason
+            assert len(decoder_calls) == len(taker_calls) == 1 and invocations == []
+        decoder_calls.clear(); taker_calls.clear()
+        for omitted in (*series_common, "fills"):
+            with pytest.raises(TypeError):
+                series_wrapper(**{key: value for key, value in {**series_common, "fills": portions}.items() if key != omitted})
+        with pytest.raises(TypeError):
+            series_wrapper(**series_common, fills=portions, fee_multiplier=Decimal(2))
+        with pytest.raises(TypeError):
+            series_wrapper(profile, "USD", raw_one, ticker, portions, Decimal(".01"), Decimal(0))
+        assert decoder_calls == taker_calls == []
+
+    consumed = []
+    for quantity, price, token, grid, literals, expected in (
+        ("100", ".5", b"1", ".01", ("-50", "1.75", "0", "0"), "1.8"),
+        ("100", ".5", b"2", ".01", ("-50", "3.5", "0", "0"), ".4"),
+        ("100", ".6", b"1.0", ".0001", ("-60", "1.68", "0", "0"), "-6.144"),
+        ("50", ".5", b"1e0", ".01", ("-25", ".88", "0", ".005"), ".496"),
+        ("50", ".5", b"1e0", ".0001", ("-25", ".875", "0", "0"), ".5"),
+    ):
+        supplied = raw_one.replace(b'"fee_multiplier":1', b'"fee_multiplier":' + token)
+        declared_fills = (KalshiQuadraticTakerBuyYesFillV1(Decimal(quantity), Decimal(price)),)
+        before_fills = tuple((fill.contracts, fill.yes_price) for fill in declared_fills)
+        terms = series_wrapper(**{**series_common, "raw_series_response": supplied, "balance_increment": Decimal(grid)}, fills=declared_fills)
+        assert type(terms) is KalshiConditionalCashflowTermsV1
+        assert tuple(getattr(terms, field.name) for field in fields(terms)) == tuple(map(Decimal, literals))
+        _, cash = assert_taker_service(terms, expected, int(quantity))
+        consumed.append(cash)
+        assert before_fills == tuple((fill.contracts, fill.yes_price) for fill in declared_fills)
+        assert supplied == raw_one.replace(b'"fee_multiplier":1', b'"fee_multiplier":' + token)
+    assert consumed[:2] == [Decimal("1.8"), Decimal(".4")]
+    additive = raw_one[:-2] + b',"last_updated_ts":"not-admission","title":"synthetic","exchange_index":9,"accepted":true},"metadata":[1,2]}'
+    metadata_terms = series_wrapper(**{**series_common, "raw_series_response": additive}, fills=(KalshiQuadraticTakerBuyYesFillV1(Decimal(100), Decimal(".5")),))
+    assert_taker_service(metadata_terms, "1.8")
+
+    def assert_fractional_series_service(terms, payout, expected):
+        actual_values = {**fixture_values(terms), "win_terminal_cashflow_total": Decimal(payout),
+                         "void_terminal_cashflow_total": Decimal(0)}
+        saved_values = dict(actual_values)
+        actual = evaluate(actual_values)
+        assert actual.status is OperationStatusV1.SUCCEEDED and invocations == ["MATH-06"]
+        output = actual.component_result.formula_output
+        assert output.execution_context is context and output.no_authority_flag is True
+        assert output.implementation_id == "MATH-06::2.0.0"
+        assert (output.output_schema_ref, output.output_schema_version) == (schema.schema_id, schema.schema_version)
+        assert output.value["expected_net_cash"] == Decimal(expected)
+        assert Fraction(output.value["expected_terminal_cashflow"]) == Fraction(11, 20) * Fraction(payout)
+        assert Fraction(expected) == Fraction(4, 5) * (
+            Fraction(terms.entry_trade_cashflow_total) + Fraction(11, 20) * Fraction(payout)
+            - Fraction(terms.platform_fee_total) + Fraction(terms.expected_rebate_total) - 1
+        )
+        assert actual_values == saved_values and "rounding_overpayment_after" not in actual_values
+
+    fractional_raw = raw_one.replace(b'"fee_multiplier":1', b'"fee_multiplier":2.1')
+    fractional_fill = KalshiQuadraticTakerBuyYesFillV1(Decimal(".1"), Decimal(".55"))
+    for grid, literals in ((".01", ("-.055", ".005", "0", ".001361")),
+                           (".0001", ("-.055", ".0037", "0", ".000061"))):
+        producer_calls.clear()
+        with monkeypatch.context() as delegated:
+            delegated.setattr(pretrade_module, "kalshi_quadratic_taker_buy_yes_input_v1", counted_producer)
+            terms = series_wrapper(**{**series_common, "raw_series_response": fractional_raw, "balance_increment": Decimal(grid)}, fills=(fractional_fill,))
+        assert len(producer_calls) == 1 and producer_calls[0][1].model_fee == Decimal(".00363825")
+        assert tuple(getattr(terms, field.name) for field in fields(terms)) == tuple(map(Decimal, literals))
+        assert_fractional_series_service(terms, ".1", "-.804" if grid == ".01" else "-.80296")
+
+    series_whole = series_wrapper(**series_common, fills=portions)
+    assert tuple(getattr(series_whole, field.name) for field in fields(series_whole)) == tuple(map(Decimal, ("-50", "1.76", ".01", "0")))
+    series_values, series_cash = assert_taker_service(series_whole, "1.8")
+    no_refund = evaluate({**series_values, "expected_rebate_total": Decimal(0)})
+    assert no_refund.status is OperationStatusV1.SUCCEEDED
+    assert no_refund.component_result.formula_output.value["expected_net_cash"] == Decimal("1.792")
+    assert Fraction(series_cash) - Fraction(no_refund.component_result.formula_output.value["expected_net_cash"]) == Fraction(".008")
+    prefix = series_wrapper(**series_common, fills=portions[:2])
+    suffix = series_wrapper(**{**series_common, "prior_rounding_overpayment": prefix.rounding_overpayment_after}, fills=portions[2:])
+    for name in ("entry_trade_cashflow_total", "platform_fee_total", "expected_rebate_total"):
+        assert Fraction(getattr(prefix, name)) + Fraction(getattr(suffix, name)) == Fraction(getattr(series_whole, name))
+    assert suffix.rounding_overpayment_after == series_whole.rounding_overpayment_after
+    mixed_series = series_wrapper(**series_common, fills=tuple(KalshiQuadraticTakerBuyYesFillV1(Decimal(50), Decimal(p)) for p in (".4", ".6")))
+    assert tuple(getattr(mixed_series, field.name) for field in fields(mixed_series)) == tuple(map(Decimal, ("-50", "1.68", "0", "0")))
+    assert_taker_service(mixed_series, "1.856")
+    zero_raw = raw_one.replace(b'"fee_multiplier":1', b'"fee_multiplier":0')
+    zero_terms = series_wrapper(**{**series_common, "raw_series_response": zero_raw}, fills=(KalshiQuadraticTakerBuyYesFillV1(Decimal(".01"), Decimal(".5")),))
+    assert tuple(getattr(zero_terms, field.name) for field in fields(zero_terms)) == tuple(map(Decimal, ("-.005", ".005", "0", ".005")))
+    assert_fractional_series_service(zero_terms, ".01", "-.8036")
+    maximum = series_wrapper(**{**series_common, "raw_series_response": zero_raw}, fills=(KalshiQuadraticTakerBuyYesFillV1(Decimal(1), Decimal(".5")),) * 4096)
+    assert tuple(getattr(maximum, field.name) for field in fields(maximum)) == tuple(map(Decimal, ("-2048", "0", "0", "0")))
+    assert_taker_service(maximum, "163.04", 4096)
+    no_fill = evaluate({**series_values, "fill_probability": Decimal(0)})
+    assert no_fill.status is OperationStatusV1.SUCCEEDED and no_fill.component_result.formula_output.value["expected_net_cash"] == 0
+    rejected = evaluate({**series_values, "platform_fee_total": Decimal("1.75")}, fixture_packets(series_values))
+    assert rejected.status is not OperationStatusV1.SUCCEEDED and rejected.component_result.formula_output is None
+    assert ReasonCode.INPUT_VALUE_CONFLICT.value in rejected.receipt_refs and invocations == []
+    for precision in (1, 7, 28):
+        for rounding in (ROUND_CEILING, ROUND_FLOOR):
+            with localcontext() as ambient:
+                ambient.prec, ambient.rounding, ambient.Emin, ambient.Emax = precision, rounding, -2, 2
+                ambient.traps[Inexact] = ambient.traps[Rounded] = True
+                ambient.flags[Rounded] = True
+                before = (ambient.prec, ambient.rounding, ambient.Emin, ambient.Emax,
+                          ambient.capitals, ambient.clamp, dict(ambient.traps), dict(ambient.flags))
+                assert series_wrapper(**series_common, fills=portions) == series_whole
+                with pytest.raises(ContractValidationError):
+                    series_wrapper(**{**series_common, "raw_series_response": raw_one.replace(b'"fee_multiplier":1', b'"fee_multiplier":-0')}, fills=portions)
+                assert before == (ambient.prec, ambient.rounding, ambient.Emin, ambient.Emax,
+                                  ambient.capitals, ambient.clamp, dict(ambient.traps), dict(ambient.flags))
+    assert source_rosters_before == (
+        tuple(source_owner.CERTIFIED_SOURCE_STATES), tuple(source_owner.SOURCE_CURRENTIZATION_OVERLAYS),
+        tuple(source_owner.SOURCE_STATE_BY_ID), tuple(source_owner.SOURCE_OVERLAY_BY_ID),
+        tuple(source_owner.ST12H_SOURCE_BINDINGS), tuple(source_owner.ST12H_SOURCE_CURRENTIZATION_RULES),
+    )
+    assert roster_before == (tuple(IMPLEMENTATION_REGISTRY), tuple(ST12B_OPERATION_CAPABILITY_BY_ID))
+
 
 def test_execution_context_propagates_through_stack(
     monkeypatch: pytest.MonkeyPatch,

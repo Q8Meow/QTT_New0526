@@ -108,6 +108,16 @@ ST12_BRANCH_CASES = (
             "s1-kalshi-quadratic-taker-*",
         ),
     ),
+    (
+        "s1-kalshi-series-fee-candidates",
+        (
+            "S1-kalshi-series-fee-candidates",
+            "s1-kalshi-series-fee-candidate",
+            "s1-kalshi-series-fee-candidates-copy",
+            "s1-kalshi-series-fee-candidates/",
+            "s1-kalshi-series-fee-*",
+        ),
+    ),
 )
 
 
@@ -212,7 +222,7 @@ def test_st12_inherited_math_receipt_repair_branch_is_exactly_classified():
 @pytest.mark.parametrize(
     ("branch", "adversarial_branches"),
     ST12_BRANCH_CASES,
-    ids=(None, "st12a", "st12b", "st12c", "st12e", "st12d", "st12f", "st12h", "f12", None),
+    ids=(None, "st12a", "st12b", "st12c", "st12e", "st12d", "st12f", "st12h", "f12", None, None),
 )
 def test_st12_owner_authorized_branches_are_exactly_validation_only(
     branch: str,

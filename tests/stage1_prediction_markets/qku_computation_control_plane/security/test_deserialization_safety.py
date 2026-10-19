@@ -14,6 +14,7 @@ from src.qtt.stage1_prediction_markets.qku_computation_control_plane.serializati
 
 def test_json_is_deterministic_and_unsafe_values_fail_closed() -> None:
     _assert_f14_bounded_witness_codec()
+    _assert_kalshi_series_fee_candidate()
     assert deterministic_json({"b": 2, "a": 1}) == '{"a":1,"b":2}'
     assert safe_json_loads('{"a":[1,true,null]}') == {
         "a": [1, True, None]
@@ -170,6 +171,195 @@ def test_json_is_deterministic_and_unsafe_values_fail_closed() -> None:
             with pytest.raises(type(error)) as caught:
                 receipt_owner._native_retail_clock_companion(body)
             assert caught.value is error
+
+
+def _assert_kalshi_series_fee_candidate():
+    from dataclasses import FrozenInstanceError, fields
+    from decimal import Decimal, Inexact, Rounded, ROUND_CEILING, ROUND_FLOOR, localcontext
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane import source_policy as owner
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane.errors import ContractValidationError, SourcePolicyError
+
+    candidate_type = owner.KalshiQuadraticSeriesFeeCandidateV1
+    decode = owner.decode_kalshi_quadratic_series_fee_candidate_v1
+    ticker = "QTT-SYNTHETIC-SERIES"
+
+    def body(token=b"1"):
+        return b'{"series":{"ticker":"QTT-SYNTHETIC-SERIES","fee_type":"quadratic","fee_multiplier":' + token + b'}}'
+
+    raw = body()
+    calls, decoded_trees = [], []
+    real_parser = owner._native_strict_json
+
+    def parser_spy(*args, **kwargs):
+        calls.append((args, kwargs))
+        tree = real_parser(*args, **kwargs)
+        decoded_trees.append(tree)
+        return tree
+
+    with pytest.MonkeyPatch.context() as patch:
+        patch.setattr(owner, "_native_strict_json", parser_spy)
+        for token in (b"0", b"1", b"1.0", b"1e0", b"2", b"2.1", b"0.123456789012345678901234567890123456789"):
+            supplied = body(token)
+            calls.clear()
+            candidate = decode(raw_response=supplied, expected_series_ticker=ticker)
+            assert calls == [((supplied,), {})]
+            assert calls[0][0][0] is supplied
+            assert type(candidate) is candidate_type and candidate.series_ticker == ticker
+            assert type(candidate.fee_multiplier) is Decimal
+            assert candidate.fee_multiplier.as_tuple() == Decimal(token.decode("ascii")).as_tuple()
+            wire_number = decoded_trees[-1]["series"]["fee_multiplier"]
+            if token in (b"0", b"1", b"2"):
+                assert type(wire_number) is int
+            else:
+                assert type(wire_number) is Decimal and candidate.fee_multiplier is wire_number
+        for invalid in (None, "", " padded", "with space", "x" * 257, 1):
+            calls.clear()
+            with pytest.raises(ContractValidationError):
+                decode(raw_response=b"not JSON", expected_series_ticker=invalid)
+            assert calls == []
+
+    candidate = decode(raw_response=raw, expected_series_ticker=ticker)
+    assert tuple(field.name for field in fields(candidate)) == ("series_ticker", "fee_multiplier")
+    assert candidate.__slots__ == ("series_ticker", "fee_multiplier") and not hasattr(candidate, "__dict__")
+    with pytest.raises(FrozenInstanceError):
+        candidate.fee_multiplier = Decimal(2)
+    for kwargs in ({}, {"series_ticker": ticker}, {"fee_multiplier": Decimal(1)},
+                   {"series_ticker": ticker, "fee_multiplier": Decimal(1), "accepted": True}):
+        with pytest.raises(TypeError):
+            candidate_type(**kwargs)
+    for kwargs in ({}, {"raw_response": raw}, {"expected_series_ticker": ticker},
+                   {"raw_response": raw, "expected_series_ticker": ticker, "max_bytes": 1048576}):
+        with pytest.raises(TypeError):
+            decode(**kwargs)
+    with pytest.raises(TypeError):
+        decode(raw, ticker)
+
+    class DecimalSubclass(Decimal):
+        pass
+
+    class StringSubclass(str):
+        pass
+
+    class BytesSubclass(bytes):
+        pass
+
+    for value in (1, 1.0, True, "1", None, DecimalSubclass("1"), Decimal("-0"), Decimal("sNaN"),
+                  Decimal("NaN"), Decimal("Infinity"), Decimal("-1"), Decimal("1e101"),
+                  Decimal("1e-101"), Decimal("0e129"), Decimal("0e-129"), Decimal("0." + "1" * 129)):
+        with pytest.raises(ContractValidationError):
+            candidate_type(ticker, value)
+    for value in (StringSubclass(ticker), None, "", " padded", "a\x00b", "x" * 257, "a\x80b", "\ud800"):
+        with pytest.raises(ContractValidationError):
+            candidate_type(value, Decimal(1))
+    for token in (b"1e100", b"1e-100", b"0e128", b"0e-128", b"1" + b"0" * 100):
+        assert decode(raw_response=body(token), expected_series_ticker=ticker).fee_multiplier == Decimal(token.decode())
+
+    missing = (b'{}', b'{"series":{}}',
+               raw.replace(b'"ticker":"QTT-SYNTHETIC-SERIES",', b''),
+               raw.replace(b'"fee_type":"quadratic",', b''),
+               raw.replace(b',"fee_multiplier":1', b''))
+    for supplied in missing:
+        with pytest.raises(ContractValidationError) as caught:
+            decode(raw_response=supplied, expected_series_ticker=ticker)
+        assert caught.value.reason_code is ReasonCode.INCOMPLETE_CONTRACT
+        assert str(caught.value).endswith(": Kalshi series fee fields are missing")
+    for supplied in (b'[]', b'null', b'1', b'"root"', b'{"series":null}', b'{"series":[]}', b'{"series":"x"}'):
+        with pytest.raises(ContractValidationError, match="response shape is invalid") as caught:
+            decode(raw_response=supplied, expected_series_ticker=ticker)
+        assert caught.value.reason_code is ReasonCode.INVALID_CONTRACT
+    for token in (b'"1"', b'true', b'false', b'null', b'[]', b'{}'):
+        with pytest.raises(ContractValidationError, match="must be a JSON number"):
+            decode(raw_response=body(token), expected_series_ticker=ticker)
+    for family in (b'"flat"', b'"quadratic_with_maker_fees"', b'"Quadratic"', b'"unknown"', b'null', b'true', b'1'):
+        with pytest.raises(ContractValidationError, match="outside the selected quadratic scope"):
+            decode(raw_response=raw.replace(b'"quadratic"', family), expected_series_ticker=ticker)
+    with pytest.raises(ContractValidationError) as caught:
+        decode(raw_response=raw, expected_series_ticker=ticker.lower())
+    assert caught.value.reason_code is ReasonCode.INPUT_SCOPE_MISMATCH
+    for replacement in (b'null', b'true', b'1', b'""', b'" padded"', b'"x y"'):
+        with pytest.raises(ContractValidationError):
+            decode(raw_response=raw.replace(b'"QTT-SYNTHETIC-SERIES"', replacement), expected_series_ticker=ticker)
+    escaped = raw.replace(b'"ticker"', b'"t\\u0069cker"').replace(b'"QTT-', b'"\\u0051TT-')
+    assert decode(raw_response=escaped, expected_series_ticker=ticker) == candidate
+    for width in (1, 256):
+        identity = "\u00e9" * width
+        supplied = raw.replace(ticker.encode(), identity.encode("utf-8"))
+        assert decode(raw_response=supplied, expected_series_ticker=identity).series_ticker == identity
+
+    for extra in (b',"last_updated_ts":"past","title":"A","exchange_index":0',
+                  b',"last_updated_ts":"future","title":"B","exchange_index":12,"accepted":true,"nested":[{},[1,"text"]]'):
+        supplied = raw[:-2] + extra + b'},"unrelated":{"current":true}}'
+        assert decode(raw_response=supplied, expected_series_ticker=ticker) == candidate
+    for supplied in (
+        raw[:-1] + b',"Api_Key":"synthetic-private-marker"}',
+        raw[:-2] + b',"nested":[{"authorization":"synthetic-private-marker"}]}}',
+        b'{"series":null,"password":"synthetic-private-marker"}',
+    ):
+        with pytest.raises(SourcePolicyError) as caught:
+            decode(raw_response=supplied, expected_series_ticker=ticker)
+        assert caught.value.reason_code is ReasonCode.SECRET_MATERIAL_REJECTED
+        assert "synthetic-private-marker" not in str(caught.value)
+        assert all(key not in str(caught.value) for key in ("Api_Key", "authorization", "password"))
+
+    for token, reason in ((b'-1', 'NONNEGATIVE'), (b'-0', 'NUMBER'), (b'-0.0', 'NUMBER'),
+                          (b'-0e1', 'NUMBER'), (b'NaN', 'NONFINITE'), (b'Infinity', 'NONFINITE'),
+                          (b'-Infinity', 'NONFINITE'), (b'1e101', 'NUMBER_BOUND'), (b'1e-101', 'NUMBER_BOUND'),
+                          (b'0e129', 'NUMBER_BOUND'), (b'0e-129', 'NUMBER_BOUND'),
+                          (b'1' * 129, 'NUMBER_BOUND'), (b'1.' + b'0' * 127, 'NUMBER_BOUND')):
+        with pytest.raises(ContractValidationError) as caught:
+            decode(raw_response=body(token), expected_series_ticker=ticker)
+        assert str(caught.value).endswith(": " + reason)
+    parser_cases = (
+        (raw.replace(b'"fee_multiplier":1', b'"fee_multiplier":1,"fee_\\u006dultiplier":2'), 'DUPLICATE_JSON_KEY'),
+        (raw[:-1] + b',"unused":{"x":1,"x":2}}', 'DUPLICATE_JSON_KEY'),
+        (raw[:-1] + b',"unused":NaN}', 'NONFINITE'),
+        (raw[:-1] + b',"unused":-0}', 'NUMBER'),
+        (raw[:-1] + b',"unused":1e101}', 'NUMBER_BOUND'),
+        (raw[:-1] + b',"unused":"\\ud800"}', 'SURROGATE'),
+        (raw[:-1] + b'," bad":1}', 'TEXT'),
+        (raw[:-1] + b',"unused":' + b'[' * 16 + b'0' + b']' * 16 + b'}', 'JSON_DEPTH'),
+        (raw[:-1] + b',"unused":[' + b','.join([b'0'] * 4096) + b']}', 'JSON_NODES'),
+        (b'', 'JSON'), (b'\xff', 'JSON'), (raw + b' trailing', 'JSON'), (b'{', 'JSON'),
+    )
+    for supplied, reason in parser_cases:
+        with pytest.raises(ContractValidationError) as caught:
+            decode(raw_response=supplied, expected_series_ticker=ticker)
+        assert str(caught.value).endswith(": " + reason)
+    for supplied in (raw.decode(), bytearray(raw), memoryview(raw), BytesSubclass(raw), None):
+        with pytest.raises(ContractValidationError, match="JSON_BOUND"):
+            decode(raw_response=supplied, expected_series_ticker=ticker)
+    multibyte = raw[:-1] + b',"title":"' + "\u00e9".encode("utf-8") * 100 + b'"}'
+    assert len(multibyte) > len(multibyte.decode("utf-8"))
+    for supplied in (raw, multibyte):
+        maximum = supplied + b' ' * (65536 - len(supplied))
+        assert len(maximum) == 65536
+        assert decode(raw_response=maximum, expected_series_ticker=ticker) == candidate
+        with pytest.raises(ContractValidationError, match="JSON_BOUND"):
+            decode(raw_response=maximum + b' ', expected_series_ticker=ticker)
+
+    for name, error in (("_native_strict_json", ContractValidationError(ReasonCode.INCOMPLETE_CONTRACT, "synthetic parser sentinel")),
+                        ("reject_secret_material", SourcePolicyError(ReasonCode.SECRET_MATERIAL_REJECTED, "synthetic secret sentinel"))):
+        def fail(*args, **kwargs):
+            raise error
+        with pytest.MonkeyPatch.context() as patch:
+            patch.setattr(owner, name, fail)
+            with pytest.raises(type(error)) as caught:
+                decode(raw_response=raw, expected_series_ticker=ticker)
+            assert caught.value is error
+    for precision in (1, 7, 28):
+        for rounding in (ROUND_CEILING, ROUND_FLOOR):
+            with localcontext() as ambient:
+                ambient.prec, ambient.rounding, ambient.Emin, ambient.Emax = precision, rounding, -2, 2
+                ambient.traps[Inexact] = ambient.traps[Rounded] = True
+                ambient.flags[Rounded] = True
+                before = (ambient.prec, ambient.rounding, ambient.Emin, ambient.Emax,
+                          ambient.capitals, ambient.clamp, dict(ambient.traps), dict(ambient.flags))
+                assert decode(raw_response=body(b"2.1"), expected_series_ticker=ticker).fee_multiplier == Decimal("2.1")
+                for token in (b"-0", b"-1", b"1e101"):
+                    with pytest.raises(ContractValidationError):
+                        decode(raw_response=body(token), expected_series_ticker=ticker)
+                assert before == (ambient.prec, ambient.rounding, ambient.Emin, ambient.Emax,
+                                  ambient.capitals, ambient.clamp, dict(ambient.traps), dict(ambient.flags))
 
 
 def _assert_f14_bounded_witness_codec():

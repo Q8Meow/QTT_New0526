@@ -5,6 +5,7 @@ from __future__ import annotations
 import ast
 from dataclasses import dataclass
 from datetime import UTC, date, datetime, timedelta
+from decimal import Decimal
 from enum import StrEnum
 import json
 from pathlib import Path
@@ -18,6 +19,7 @@ from .point_in_time import (
     PITReasonCodeV1,
 )
 from .stage1_launch_graph import Stage1VenueProfileIdV1
+from .source_rights import reject_secret_material
 
 
 class AtomicFactTerminalStateV1(StrEnum):
@@ -4870,6 +4872,50 @@ if (
     )
 
 
+# Unadmitted native Series candidates; no source or account acceptance is implied.
+@dataclass(frozen=True, slots=True)
+class KalshiQuadraticSeriesFeeCandidateV1:
+    """Unadmitted Series fee fields; not current source or account evidence."""
+
+    series_ticker: str
+    fee_multiplier: Decimal
+
+    def __post_init__(self) -> None:
+        _native_ident(self.series_ticker)
+        _native_bounded_decimal(self.fee_multiplier)
+        _native_require(self.fee_multiplier >= 0, "NONNEGATIVE")
+
+
+def decode_kalshi_quadratic_series_fee_candidate_v1(
+    *, raw_response: bytes, expected_series_ticker: str,
+) -> KalshiQuadraticSeriesFeeCandidateV1:
+    """Project bounded caller bytes into unadmitted quadratic Series fee fields."""
+    _native_ident(expected_series_ticker)
+    decoded = _native_strict_json(raw_response)
+    reject_secret_material("series_fee_response", decoded)
+    if type(decoded) is not dict:
+        raise ContractValidationError(ReasonCode.INVALID_CONTRACT, "Kalshi series fee response shape is invalid")
+    if "series" not in decoded:
+        raise ContractValidationError(ReasonCode.INCOMPLETE_CONTRACT, "Kalshi series fee fields are missing")
+    series = decoded["series"]
+    if type(series) is not dict:
+        raise ContractValidationError(ReasonCode.INVALID_CONTRACT, "Kalshi series fee response shape is invalid")
+    if not {"ticker", "fee_type", "fee_multiplier"} <= series.keys():
+        raise ContractValidationError(ReasonCode.INCOMPLETE_CONTRACT, "Kalshi series fee fields are missing")
+    ticker = _native_ident(series["ticker"])
+    if ticker != expected_series_ticker:
+        raise ContractValidationError(ReasonCode.INPUT_SCOPE_MISMATCH, "Kalshi series ticker does not match expected scope")
+    if type(series["fee_type"]) is not str or series["fee_type"] != "quadratic":
+        raise ContractValidationError(ReasonCode.INVALID_CONTRACT, "Kalshi fee family is outside the selected quadratic scope")
+    multiplier = series["fee_multiplier"]
+    if type(multiplier) not in (int, Decimal):
+        raise ContractValidationError(ReasonCode.INVALID_CONTRACT, "Kalshi fee multiplier must be a JSON number")
+    return KalshiQuadraticSeriesFeeCandidateV1(
+        series_ticker=ticker,
+        fee_multiplier=Decimal(multiplier) if type(multiplier) is int else multiplier,
+    )
+
+
 def _pit_source_text(value: object, name: str) -> str:
     if (
         type(value) is not str
@@ -5201,9 +5247,11 @@ from contextlib import contextmanager
 from _thread import RLock
 import time
 from .context import _f14_freeze_v1, _f14_plain_v1, _native_utc_nanoseconds
+from .context import _native_ident, _native_bounded_decimal, _native_require
 from .errors import ContractValidationError, PointInTimeError
 from .serialization import (_F14_SCOPE, _F14_SCOPE_FIELDS, _F14_ID, _F14_OPERATIONS, _F14_MAX_INT,
     _f14_validate_v1, _f14_native_time_v1)
+from .serialization import _native_strict_json
 
 
 def _f14_ingress_require_v1(ok, token):
