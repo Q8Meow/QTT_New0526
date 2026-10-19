@@ -1471,6 +1471,146 @@ def _assert_kalshi_conditional_service(monkeypatch, invocations):
     assert roster_before == (tuple(IMPLEMENTATION_REGISTRY), tuple(ST12B_OPERATION_CAPABILITY_BY_ID))
 
 
+    # These supplied identities link only a hypothetical Series-base scenario.
+    linked_wrapper = pretrade_module.compose_kalshi_market_linked_series_base_cashflows_v1
+    market_raw = b'{"market":{"ticker":"SYNTHETIC::MARKET","event_ticker":"QTT-LINK-EVENT"}}'
+    event_raw = b'{"event":{"event_ticker":"QTT-LINK-EVENT","series_ticker":"QTT-LINK-SERIES"}}'
+    linked_series_raw = b'{"series":{"ticker":"QTT-LINK-SERIES","fee_type":"quadratic","fee_multiplier":1}}'
+    linked_common = {**common, "raw_market_response": market_raw, "raw_event_response": event_raw,
+                     "raw_series_response": linked_series_raw, "expected_market_ticker": "SYNTHETIC::MARKET"}
+    assert linked_common["expected_market_ticker"] == context.scope.market_scope_id
+    link_calls, link_results = [], []
+    real_link = source_owner.decode_kalshi_market_linked_series_fee_candidate_v1
+
+    def counted_link(**kwargs):
+        link_calls.append(kwargs)
+        candidate = real_link(**kwargs)
+        link_results.append(candidate)
+        return candidate
+
+    with monkeypatch.context() as delegated:
+        delegated.setattr(pretrade_module, "decode_kalshi_market_linked_series_fee_candidate_v1", counted_link)
+        delegated.setattr(pretrade_module, "compose_kalshi_quadratic_taker_buy_yes_cashflows_v1", counted_taker)
+        taker_calls.clear(); taker_results.clear()
+        ordered = (KalshiQuadraticTakerBuyYesFillV1(Decimal(50), Decimal(".4")), *portions)
+        forwarded = linked_wrapper(**linked_common, fills=ordered)
+        assert len(link_calls) == len(taker_calls) == 1
+        assert set(link_calls[0]) == {"raw_market_response", "raw_event_response", "raw_series_response", "expected_market_ticker"}
+        assert all(link_calls[0][key] is linked_common[key] for key in link_calls[0])
+        assert taker_calls[0]["fee_multiplier"] is link_results[0].fee_multiplier
+        assert taker_calls[0]["fills"] is ordered and forwarded is taker_results[0]
+        assert all(taker_calls[0][key] is linked_common[key] for key in common)
+        assert tuple((fill.contracts, fill.yes_price) for fill in ordered) == (
+            (Decimal(50), Decimal(".4")), *((Decimal(25), Decimal(".5")),) * 4,
+        )
+        for changes in ({"profile_id": "KALSHI"}, {"profile_id": StringSubclass(profile)},
+                        {"currency": "usd"}, {"currency": StringSubclass("USD")}):
+            link_calls.clear(); taker_calls.clear(); invocations.clear()
+            with pytest.raises(ContractValidationError) as rejected:
+                linked_wrapper(**{**linked_common, "raw_market_response": b"{", **changes}, fills=portions)
+            assert rejected.value.reason_code is ReasonCode.INVALID_CONTRACT
+            assert str(rejected.value).endswith(": exact Kalshi profile required" if "profile_id" in changes else ": exact USD currency required")
+            assert link_calls == taker_calls == invocations == []
+        for changes, reason in (
+            ({"raw_market_response": market_raw.replace(b"SYNTHETIC::MARKET", b"OTHER-MARKET")}, ReasonCode.INPUT_SCOPE_MISMATCH),
+            ({"raw_event_response": event_raw.replace(b"QTT-LINK-EVENT", b"OTHER-EVENT")}, ReasonCode.INPUT_SCOPE_MISMATCH),
+            ({"raw_series_response": linked_series_raw.replace(b"QTT-LINK-SERIES", b"OTHER-SERIES")}, ReasonCode.INPUT_SCOPE_MISMATCH),
+            ({"raw_series_response": linked_series_raw.replace(b'"quadratic"', b'"flat"')}, ReasonCode.INVALID_CONTRACT),
+            ({"raw_series_response": linked_series_raw.replace(b'"fee_multiplier":1', b'"fee_multiplier":-1')}, ReasonCode.INVALID_CONTRACT),
+        ):
+            link_calls.clear(); taker_calls.clear(); invocations.clear()
+            with pytest.raises(ContractValidationError) as rejected:
+                linked_wrapper(**{**linked_common, **changes}, fills=portions)
+            assert rejected.value.reason_code is reason
+            assert len(link_calls) == 1 and taker_calls == invocations == []
+        for changes, reason in (
+            ({"fills": ()}, ReasonCode.INVALID_CONTRACT),
+            ({"fills": (malformed_row,)}, ReasonCode.OUT_OF_DOMAIN),
+            ({"balance_increment": Decimal(".001")}, ReasonCode.OUT_OF_DOMAIN),
+            ({"prior_rounding_overpayment": Decimal("sNaN")}, ReasonCode.NONFINITE_NUMERIC_INPUT),
+        ):
+            link_calls.clear(); taker_calls.clear(); invocations.clear()
+            with pytest.raises(ComputationControlPlaneError) as rejected:
+                linked_wrapper(**{**linked_common, "fills": portions, **changes})
+            assert rejected.value.reason_code is reason
+            assert len(link_calls) == len(taker_calls) == 1 and invocations == []
+        link_calls.clear(); taker_calls.clear()
+        from inspect import Parameter, signature
+        parameters = signature(linked_wrapper).parameters
+        assert set(parameters) == {*linked_common, "fills"} and len(parameters) == 9
+        assert all(p.kind is Parameter.KEYWORD_ONLY and p.default is Parameter.empty for p in parameters.values())
+        for omitted in parameters:
+            with pytest.raises(TypeError):
+                linked_wrapper(**{key: value for key, value in {**linked_common, "fills": portions}.items() if key != omitted})
+        for extra in ("fee_multiplier", "expected_series_ticker"):
+            with pytest.raises(TypeError):
+                linked_wrapper(**linked_common, fills=portions, **{extra: None})
+        with pytest.raises(TypeError):
+            linked_wrapper(profile, "USD", market_raw, event_raw, linked_series_raw, "SYNTHETIC::MARKET", portions, Decimal(".01"), Decimal(0))
+        assert link_calls == taker_calls == []
+
+        maximum_fills = (KalshiQuadraticTakerBuyYesFillV1(Decimal(1), Decimal(".5")),) * 4096
+        maximum = linked_wrapper(**{**linked_common, "raw_series_response": linked_series_raw.replace(b'"fee_multiplier":1', b'"fee_multiplier":0')}, fills=maximum_fills)
+        assert len(link_calls) == len(taker_calls) == 1 and taker_calls[0]["fills"] is maximum_fills
+        assert tuple(getattr(maximum, field.name) for field in fields(maximum)) == tuple(map(Decimal, ("-2048", "0", "0", "0")))
+        assert_taker_service(maximum, "163.04", 4096)
+
+    linked_consumed = []
+    for quantity, price, token, grid, literals, expected in (
+        ("100", ".5", b"1", ".01", ("-50", "1.75", "0", "0"), "1.8"),
+        ("100", ".5", b"2", ".01", ("-50", "3.5", "0", "0"), ".4"),
+        ("100", ".6", b"1.0", ".0001", ("-60", "1.68", "0", "0"), "-6.144"),
+        ("50", ".5", b"1e0", ".01", ("-25", ".88", "0", ".005"), ".496"),
+        ("50", ".5", b"1e0", ".0001", ("-25", ".875", "0", "0"), ".5"),
+    ):
+        raw = linked_series_raw.replace(b'"fee_multiplier":1', b'"fee_multiplier":' + token)
+        fills = (KalshiQuadraticTakerBuyYesFillV1(Decimal(quantity), Decimal(price)),)
+        terms = linked_wrapper(**{**linked_common, "raw_series_response": raw, "balance_increment": Decimal(grid)}, fills=fills)
+        assert type(terms) is KalshiConditionalCashflowTermsV1
+        assert tuple(getattr(terms, field.name) for field in fields(terms)) == tuple(map(Decimal, literals))
+        _, cash = assert_taker_service(terms, expected, int(quantity))
+        linked_consumed.append(cash)
+        assert tuple((fill.contracts, fill.yes_price) for fill in fills) == ((Decimal(quantity), Decimal(price)),)
+    assert linked_consumed[:2] == [Decimal("1.8"), Decimal(".4")]
+    renamed = {**linked_common, "raw_event_response": event_raw.replace(b"QTT-LINK-SERIES", b"RENAMED-SERIES"),
+               "raw_series_response": linked_series_raw.replace(b"QTT-LINK-SERIES", b"RENAMED-SERIES")}
+    assert_taker_service(linked_wrapper(**renamed, fills=(KalshiQuadraticTakerBuyYesFillV1(Decimal(100), Decimal(".5")),)), "1.8")
+
+    linked_whole = linked_wrapper(**linked_common, fills=portions)
+    assert tuple(getattr(linked_whole, field.name) for field in fields(linked_whole)) == tuple(map(Decimal, ("-50", "1.76", ".01", "0")))
+    linked_values, linked_cash = assert_taker_service(linked_whole, "1.8")
+    no_refund = evaluate({**linked_values, "expected_rebate_total": Decimal(0)})
+    assert no_refund.status is OperationStatusV1.SUCCEEDED and invocations == ["MATH-06"]
+    assert no_refund.component_result.formula_output.value["expected_net_cash"] == Decimal("1.792")
+    assert Fraction(linked_cash) - Fraction(no_refund.component_result.formula_output.value["expected_net_cash"]) == Fraction(".008")
+    prefix = linked_wrapper(**linked_common, fills=portions[:2])
+    suffix = linked_wrapper(**{**linked_common, "prior_rounding_overpayment": prefix.rounding_overpayment_after}, fills=portions[2:])
+    for name in ("entry_trade_cashflow_total", "platform_fee_total", "expected_rebate_total"):
+        assert Fraction(getattr(prefix, name)) + Fraction(getattr(suffix, name)) == Fraction(getattr(linked_whole, name))
+    assert suffix.rounding_overpayment_after == linked_whole.rounding_overpayment_after
+    for grid, literals in ((".01", ("-.055", ".005", "0", ".001361")),
+                           (".0001", ("-.055", ".0037", "0", ".000061"))):
+        producer_calls.clear()
+        with monkeypatch.context() as delegated:
+            delegated.setattr(pretrade_module, "kalshi_quadratic_taker_buy_yes_input_v1", counted_producer)
+            terms = linked_wrapper(**{**linked_common, "raw_series_response": linked_series_raw.replace(b'"fee_multiplier":1', b'"fee_multiplier":2.1'),
+                                      "balance_increment": Decimal(grid)}, fills=(fractional_fill,))
+        assert len(producer_calls) == 1 and producer_calls[0][1].model_fee == Decimal(".00363825")
+        assert tuple(getattr(terms, field.name) for field in fields(terms)) == tuple(map(Decimal, literals))
+        assert_fractional_series_service(terms, ".1", "-.804" if grid == ".01" else "-.80296")
+    rejected = evaluate({**linked_values, "platform_fee_total": Decimal("1.75")}, fixture_packets(linked_values))
+    assert rejected.status is not OperationStatusV1.SUCCEEDED and rejected.component_result.formula_output is None
+    assert ReasonCode.INPUT_VALUE_CONFLICT.value in rejected.receipt_refs and invocations == []
+    assert source_rosters_before == (
+        tuple(source_owner.CERTIFIED_SOURCE_STATES), tuple(source_owner.SOURCE_CURRENTIZATION_OVERLAYS),
+        tuple(source_owner.SOURCE_STATE_BY_ID), tuple(source_owner.SOURCE_OVERLAY_BY_ID),
+        tuple(source_owner.ST12H_SOURCE_BINDINGS), tuple(source_owner.ST12H_SOURCE_CURRENTIZATION_RULES),
+    )
+    assert roster_before == (tuple(IMPLEMENTATION_REGISTRY), tuple(ST12B_OPERATION_CAPABILITY_BY_ID))
+    assert linked_common == {**common, "raw_market_response": market_raw, "raw_event_response": event_raw,
+                             "raw_series_response": linked_series_raw, "expected_market_ticker": "SYNTHETIC::MARKET"}
+
+
 def test_execution_context_propagates_through_stack(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:

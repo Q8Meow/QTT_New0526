@@ -4916,6 +4916,54 @@ def decode_kalshi_quadratic_series_fee_candidate_v1(
     )
 
 
+def decode_kalshi_market_linked_series_fee_candidate_v1(
+    *, raw_market_response: bytes, raw_event_response: bytes,
+    raw_series_response: bytes, expected_market_ticker: str,
+) -> KalshiQuadraticSeriesFeeCandidateV1:
+    """Join supplied identities for an unadmitted, hypothetical Series-base scenario."""
+    _native_ident(expected_market_ticker)
+
+    def identity_pair(raw, root, names, secret_field):
+        decoded = _native_strict_json(raw)
+        reject_secret_material(secret_field, decoded)
+        if type(decoded) is not dict:
+            raise ContractValidationError(
+                ReasonCode.INVALID_CONTRACT, "Kalshi linked identity response shape is invalid",
+            )
+        if root not in decoded:
+            raise ContractValidationError(
+                ReasonCode.INCOMPLETE_CONTRACT, "Kalshi linked identity fields are missing",
+            )
+        identity = decoded[root]
+        if type(identity) is not dict:
+            raise ContractValidationError(
+                ReasonCode.INVALID_CONTRACT, "Kalshi linked identity response shape is invalid",
+            )
+        if not set(names) <= identity.keys():
+            raise ContractValidationError(
+                ReasonCode.INCOMPLETE_CONTRACT, "Kalshi linked identity fields are missing",
+            )
+        return _native_ident(identity[names[0]]), _native_ident(identity[names[1]])
+
+    market_ticker, market_event = identity_pair(
+        raw_market_response, "market", ("ticker", "event_ticker"), "market_identity_response",
+    )
+    if market_ticker != expected_market_ticker:
+        raise ContractValidationError(
+            ReasonCode.INPUT_SCOPE_MISMATCH, "Kalshi market ticker does not match expected scope",
+        )
+    event_ticker, event_series = identity_pair(
+        raw_event_response, "event", ("event_ticker", "series_ticker"), "event_identity_response",
+    )
+    if event_ticker != market_event:
+        raise ContractValidationError(
+            ReasonCode.INPUT_SCOPE_MISMATCH, "Kalshi event ticker does not match market linkage",
+        )
+    return decode_kalshi_quadratic_series_fee_candidate_v1(
+        raw_response=raw_series_response, expected_series_ticker=event_series,
+    )
+
+
 def _pit_source_text(value: object, name: str) -> str:
     if (
         type(value) is not str
