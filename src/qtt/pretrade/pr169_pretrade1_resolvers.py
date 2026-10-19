@@ -21,6 +21,7 @@ from ..stage1_prediction_markets.qku_computation_control_plane.errors import (
     ReasonCode,
 )
 from ..stage1_prediction_markets.qku_computation_control_plane.source_policy import (
+    decode_kalshi_market_linked_series_fee_candidate_v1,
     decode_kalshi_quadratic_series_fee_candidate_v1,
 )
 if TYPE_CHECKING:
@@ -138,6 +139,29 @@ def compose_kalshi_series_quadratic_taker_buy_yes_cashflows_v1(
         raise ContractValidationError(ReasonCode.INVALID_CONTRACT, "exact USD currency required")
     candidate = decode_kalshi_quadratic_series_fee_candidate_v1(
         raw_response=raw_series_response, expected_series_ticker=expected_series_ticker,
+    )
+    return compose_kalshi_quadratic_taker_buy_yes_cashflows_v1(
+        profile_id=profile_id, currency=currency, fills=fills,
+        fee_multiplier=candidate.fee_multiplier, balance_increment=balance_increment,
+        prior_rounding_overpayment=prior_rounding_overpayment,
+    )
+
+
+def compose_kalshi_market_linked_series_base_cashflows_v1(
+    *, profile_id: str, currency: str,
+    raw_market_response: bytes, raw_event_response: bytes,
+    raw_series_response: bytes, expected_market_ticker: str,
+    fills: tuple[KalshiQuadraticTakerBuyYesFillV1, ...],
+    balance_increment: Decimal, prior_rounding_overpayment: Decimal,
+) -> KalshiConditionalCashflowTermsV1:
+    """Compose a hypothetical Series-base scenario after joining supplied identities."""
+    if type(profile_id) is not str or profile_id != "KALSHI_US_DCM_DIRECT":
+        raise ContractValidationError(ReasonCode.INVALID_CONTRACT, "exact Kalshi profile required")
+    if type(currency) is not str or currency != "USD":
+        raise ContractValidationError(ReasonCode.INVALID_CONTRACT, "exact USD currency required")
+    candidate = decode_kalshi_market_linked_series_fee_candidate_v1(
+        raw_market_response=raw_market_response, raw_event_response=raw_event_response,
+        raw_series_response=raw_series_response, expected_market_ticker=expected_market_ticker,
     )
     return compose_kalshi_quadratic_taker_buy_yes_cashflows_v1(
         profile_id=profile_id, currency=currency, fills=fills,

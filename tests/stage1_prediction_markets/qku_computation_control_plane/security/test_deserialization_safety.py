@@ -362,6 +362,179 @@ def _assert_kalshi_series_fee_candidate():
                                   ambient.capitals, ambient.clamp, dict(ambient.traps), dict(ambient.flags))
 
 
+    _assert_kalshi_market_link()
+
+
+def _assert_kalshi_market_link():
+    from dataclasses import FrozenInstanceError, fields
+    from decimal import Decimal, Inexact, Rounded, ROUND_CEILING, ROUND_FLOOR, localcontext
+    from inspect import Parameter, signature
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane import source_policy as owner
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane.errors import ContractValidationError, SourcePolicyError
+
+    market = b'{"market":{"ticker":"SYNTHETIC::MARKET","event_ticker":"QTT-LINK-EVENT"}}'
+    event = b'{"event":{"event_ticker":"QTT-LINK-EVENT","series_ticker":"QTT-LINK-SERIES"}}'
+    series = b'{"series":{"ticker":"QTT-LINK-SERIES","fee_type":"quadratic","fee_multiplier":1}}'
+    supplied = dict(raw_market_response=market, raw_event_response=event,
+                    raw_series_response=series, expected_market_ticker="SYNTHETIC::MARKET")
+    decode = owner.decode_kalshi_market_linked_series_fee_candidate_v1
+    parameters = signature(decode).parameters
+    assert tuple(parameters) == tuple(supplied)
+    assert all(p.kind is Parameter.KEYWORD_ONLY and p.default is Parameter.empty for p in parameters.values())
+    for omitted in supplied:
+        with pytest.raises(TypeError):
+            decode(**{key: value for key, value in supplied.items() if key != omitted})
+    for extra in ("expected_event_ticker", "expected_series_ticker", "fee_multiplier", "max_bytes", "accepted"):
+        with pytest.raises(TypeError):
+            decode(**supplied, **{extra: None})
+    with pytest.raises(TypeError):
+        decode(*supplied.values())
+
+    roster_names = ("CERTIFIED_SOURCE_STATES", "SOURCE_CURRENTIZATION_OVERLAYS", "SOURCE_STATE_BY_ID",
+                    "SOURCE_OVERLAY_BY_ID", "ST12H_SOURCE_BINDINGS", "ST12H_SOURCE_CURRENTIZATION_RULES")
+    rosters_before = tuple(tuple(getattr(owner, name)) for name in roster_names)
+    parser_calls, series_calls, results, errors = [], [], [], []
+    real_parser, real_series = owner._native_strict_json, owner.decode_kalshi_quadratic_series_fee_candidate_v1
+
+    def parse(*args, **kwargs):
+        parser_calls.append((args, kwargs))
+        return real_parser(*args, **kwargs)
+
+    def decode_series(**kwargs):
+        series_calls.append(kwargs)
+        try:
+            result = real_series(**kwargs)
+        except ContractValidationError as error:
+            errors.append(error)
+            raise
+        results.append(result)
+        return result
+
+    class StringSubclass(str):
+        pass
+
+    class BytesSubclass(bytes):
+        pass
+
+    with pytest.MonkeyPatch.context() as patch:
+        patch.setattr(owner, "_native_strict_json", parse)
+        patch.setattr(owner, "decode_kalshi_quadratic_series_fee_candidate_v1", decode_series)
+        for token in (b"0", b"1e0", b"2.1", b"0.123456789012345678901234567890123456789"):
+            raw = series.replace(b'"fee_multiplier":1', b'"fee_multiplier":' + token)
+            parser_calls.clear(); series_calls.clear()
+            candidate = decode(**{**supplied, "raw_series_response": raw})
+            assert parser_calls == [((body,), {}) for body in (market, event, raw)]
+            assert all(call[0][0] is body for call, body in zip(parser_calls, (market, event, raw)))
+            assert series_calls == [{"raw_response": raw, "expected_series_ticker": "QTT-LINK-SERIES"}]
+            assert series_calls[0]["raw_response"] is raw and candidate is results[-1]
+            assert type(candidate) is owner.KalshiQuadraticSeriesFeeCandidateV1
+            assert candidate.fee_multiplier.as_tuple() == Decimal(token.decode()).as_tuple()
+        for invalid in (None, 1, True, "", " padded", "a b", "x" * 257, StringSubclass("SYNTHETIC::MARKET")):
+            parser_calls.clear(); series_calls.clear()
+            with pytest.raises(ContractValidationError):
+                decode(**{**supplied, "expected_market_ticker": invalid, "raw_market_response": b"{"})
+            assert parser_calls == series_calls == []
+        for expected in ("SYNTHETIC::MARKET-X", "synthetic::market", "SYNTHETIC/MARKET"):
+            parser_calls.clear(); series_calls.clear()
+            with pytest.raises(ContractValidationError, match="Kalshi market ticker does not match expected scope") as caught:
+                decode(**{**supplied, "expected_market_ticker": expected, "raw_event_response": b"{"})
+            assert caught.value.reason_code is ReasonCode.INPUT_SCOPE_MISMATCH
+            assert parser_calls == [((market,), {})] and series_calls == []
+        for identity in (b"QTT-LINK-EVENT-X", b"qtt-link-event", b"QTT/LINK/EVENT"):
+            wrong_event = event.replace(b"QTT-LINK-EVENT", identity)
+            parser_calls.clear(); series_calls.clear()
+            with pytest.raises(ContractValidationError, match="Kalshi event ticker does not match market linkage") as caught:
+                decode(**{**supplied, "raw_event_response": wrong_event, "raw_series_response": b"{"})
+            assert caught.value.reason_code is ReasonCode.INPUT_SCOPE_MISMATCH
+            assert parser_calls == [((market,), {}), ((wrong_event,), {})] and series_calls == []
+        for raw, reason in (
+            (series.replace(b"QTT-LINK-SERIES", b"OTHER-SERIES"), ReasonCode.INPUT_SCOPE_MISMATCH),
+            (series.replace(b'"quadratic"', b'"flat"'), ReasonCode.INVALID_CONTRACT),
+            (series.replace(b'"fee_multiplier":1', b'"fee_multiplier":-1'), ReasonCode.INVALID_CONTRACT),
+        ):
+            parser_calls.clear(); series_calls.clear(); errors.clear()
+            with pytest.raises(ContractValidationError) as caught:
+                decode(**{**supplied, "raw_series_response": raw})
+            assert len(parser_calls) == 3 and len(series_calls) == 1
+            assert caught.value is errors[0] and caught.value.reason_code is reason
+
+    candidate = decode(**supplied)
+    assert tuple(field.name for field in fields(candidate)) == ("series_ticker", "fee_multiplier")
+    assert candidate.__slots__ == ("series_ticker", "fee_multiplier") and not hasattr(candidate, "__dict__")
+    with pytest.raises(FrozenInstanceError):
+        candidate.series_ticker = "OTHER"
+    for width in (1, 256):
+        identities = ("é" * width, "Z" * width, "y" * width)
+        renamed = dict(raw_market_response=market.replace(b"SYNTHETIC::MARKET", identities[0].encode()).replace(b"QTT-LINK-EVENT", identities[1].encode()),
+                       raw_event_response=event.replace(b"QTT-LINK-EVENT", identities[1].encode()).replace(b"QTT-LINK-SERIES", identities[2].encode()),
+                       raw_series_response=series.replace(b"QTT-LINK-SERIES", identities[2].encode()), expected_market_ticker=identities[0])
+        result = decode(**renamed)
+        assert result.series_ticker == identities[2] and result.fee_multiplier == candidate.fee_multiplier
+    escaped = {key: value.replace(b"SYNTHETIC", b"\\u0053YNTHETIC").replace(b"QTT", b"\\u0051TT") if type(value) is bytes else value
+               for key, value in supplied.items()}
+    assert decode(**escaped) == candidate
+
+    for argument, root, raw, pairs in (
+        ("raw_market_response", b"market", market, ((b"ticker", b"SYNTHETIC::MARKET"), (b"event_ticker", b"QTT-LINK-EVENT"))),
+        ("raw_event_response", b"event", event, ((b"event_ticker", b"QTT-LINK-EVENT"), (b"series_ticker", b"QTT-LINK-SERIES"))),
+    ):
+        for body in (b'{}', b'{"alias":' + raw + b'}', raw.replace(b'"' + root + b'":', b'"other":'),
+                     b'{"' + root + b'":{}}', *(raw.replace(b'"' + key + b'":', b'"alias":') for key, _ in pairs)):
+            with pytest.raises(ContractValidationError, match="Kalshi linked identity fields are missing") as caught:
+                decode(**{**supplied, argument: body})
+            assert caught.value.reason_code is ReasonCode.INCOMPLETE_CONTRACT
+        for body in (b'[]', b'null', b'1', b'"root"', *(b'{"' + root + b'":' + value + b'}' for value in (b'null', b'[]', b'1', b'"x"'))):
+            with pytest.raises(ContractValidationError, match="Kalshi linked identity response shape is invalid") as caught:
+                decode(**{**supplied, argument: body})
+            assert caught.value.reason_code is ReasonCode.INVALID_CONTRACT
+        for key, identity in pairs:
+            for token in (b'null', b'true', b'1', b'1.0', b'[]', b'{}', b'""', b'" padded"', b'"a b"', b'"' + b'x' * 257 + b'"'):
+                body = raw.replace(b'"' + identity + b'"', token)
+                with pytest.raises(ContractValidationError) as caught:
+                    decode(**{**supplied, argument: body})
+                assert caught.value.reason_code is ReasonCode.INVALID_CONTRACT
+            duplicate = raw.replace(b'"' + key + b'":', b'"' + key + b'":"x","' + key.replace(b't', b'\\u0074', 1) + b'":')
+            with pytest.raises(ContractValidationError, match="DUPLICATE_JSON_KEY"):
+                decode(**{**supplied, argument: duplicate})
+        for body, detail in ((b'\xff', "JSON"), (b'{', "JSON"), (raw + b'trailing', "JSON"),
+                             (raw[:-1] + b',"unused":NaN}', "NONFINITE")):
+            with pytest.raises(ContractValidationError) as caught:
+                decode(**{**supplied, argument: body})
+            assert str(caught.value).endswith(": " + detail)
+        for body in (raw.decode(), bytearray(raw), memoryview(raw), BytesSubclass(raw), None):
+            with pytest.raises(ContractValidationError, match="JSON_BOUND"):
+                decode(**{**supplied, argument: body})
+        maximum = raw + b' ' * (65536 - len(raw))
+        assert decode(**{**supplied, argument: maximum}) == candidate
+        with pytest.raises(ContractValidationError, match="JSON_BOUND"):
+            decode(**{**supplied, argument: maximum + b' '})
+        for body in (raw[:-1] + b',"unused":[{"authorization":"synthetic-private-marker"}]}',
+                     b'{"' + root + b'":null,"Api_Key":"synthetic-private-marker"}'):
+            with pytest.raises(SourcePolicyError) as caught:
+                decode(**{**supplied, argument: body})
+            assert caught.value.reason_code is ReasonCode.SECRET_MATERIAL_REJECTED
+            assert all(text not in str(caught.value) for text in ("synthetic-private-marker", "authorization", "Api_Key"))
+        additive = raw[:-2] + b',"markets":[{"ticker":"OTHER"}],"fee_multiplier":99,"override":true,"accepted":true},"markets":[],"current":true}'
+        assert decode(**{**supplied, argument: additive}) == candidate
+
+    for precision in (1, 7, 28):
+        for rounding in (ROUND_CEILING, ROUND_FLOOR):
+            with localcontext() as ambient:
+                ambient.prec, ambient.rounding, ambient.Emin, ambient.Emax = precision, rounding, -2, 2
+                ambient.traps[Inexact] = ambient.traps[Rounded] = True
+                ambient.flags[Rounded] = True
+                before = (ambient.prec, ambient.rounding, ambient.Emin, ambient.Emax,
+                          ambient.capitals, ambient.clamp, dict(ambient.traps), dict(ambient.flags))
+                assert decode(**{**supplied, "raw_series_response": series.replace(b'"fee_multiplier":1', b'"fee_multiplier":2.1')}).fee_multiplier == Decimal("2.1")
+                with pytest.raises(ContractValidationError):
+                    decode(**{**supplied, "raw_series_response": series.replace(b'"fee_multiplier":1', b'"fee_multiplier":-0')})
+                assert before == (ambient.prec, ambient.rounding, ambient.Emin, ambient.Emax,
+                                  ambient.capitals, ambient.clamp, dict(ambient.traps), dict(ambient.flags))
+    assert rosters_before == tuple(tuple(getattr(owner, name)) for name in roster_names)
+    assert supplied == dict(raw_market_response=market, raw_event_response=event,
+                            raw_series_response=series, expected_market_ticker="SYNTHETIC::MARKET")
+
+
 def _assert_f14_bounded_witness_codec():
     import copy
     from src.qtt.stage1_prediction_markets.qku_computation_control_plane import receipts as r, serialization as s

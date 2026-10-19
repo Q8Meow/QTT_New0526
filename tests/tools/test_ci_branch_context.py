@@ -118,6 +118,16 @@ ST12_BRANCH_CASES = (
             "s1-kalshi-series-fee-*",
         ),
     ),
+    (
+        "s1-kalshi-market-series-link",
+        (
+            "S1-kalshi-market-series-link",
+            "s1-kalshi-market-series-lin",
+            "s1-kalshi-market-series-link-copy",
+            "s1-kalshi-market-series-link/",
+            "s1-kalshi-market-series-*",
+        ),
+    ),
 )
 
 
@@ -222,7 +232,7 @@ def test_st12_inherited_math_receipt_repair_branch_is_exactly_classified():
 @pytest.mark.parametrize(
     ("branch", "adversarial_branches"),
     ST12_BRANCH_CASES,
-    ids=(None, "st12a", "st12b", "st12c", "st12e", "st12d", "st12f", "st12h", "f12", None, None),
+    ids=(None, "st12a", "st12b", "st12c", "st12e", "st12d", "st12f", "st12h", "f12", None, None, None),
 )
 def test_st12_owner_authorized_branches_are_exactly_validation_only(
     branch: str,
