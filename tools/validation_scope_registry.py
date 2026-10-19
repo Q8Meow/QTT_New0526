@@ -11,6 +11,7 @@ from tools.ci_branch_context import (
     normalize_branch_context,
     S1_KALSHI_FEE_ROUNDING_CASHFLOW_BRANCH,
     S1_KALSHI_QUADRATIC_TAKER_INPUTS_BRANCH,
+    S1_KALSHI_SERIES_FEE_CANDIDATES_BRANCH,
     S1_LAUNCH_GRAPH_IMPLEMENTATION_BRANCH,
     S1_PIT_DATA_PHASE_A_01_IMPLEMENTATION_BRANCH,
     S1_PLUGIN_PACKAGE_CURRENTIZATION_BRANCH,
@@ -792,6 +793,20 @@ S1_KALSHI_FEE_ROUNDING_CASHFLOW_ALLOWED_EXACT_PATHS = frozenset(
         "tools/qtt_test_gate.py",
         "tools/validate_no_runtime_artifacts.py",
         "tests/core/test_qtt_cumulative_gate.py",
+        "docs/master_plan/generated/PR152_GrandGlobalDebugLogicalConsistencyAuditEntireQTTRepo.report.json",
+    }
+)
+
+S1_KALSHI_SERIES_FEE_CANDIDATES_ALLOWED_EXACT_PATHS = frozenset(
+    {
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/source_policy.py",
+        "src/qtt/pretrade/pr169_pretrade1_resolvers.py",
+        "tests/stage1_prediction_markets/qku_computation_control_plane/security/test_deserialization_safety.py",
+        "tests/stage1_prediction_markets/qku_computation_control_plane/tranche_b/test_service_operations.py",
+        "tools/ci_branch_context.py",
+        "tools/validation_scope_registry.py",
+        "tests/tools/test_ci_branch_context.py",
+        "tests/tools/test_validation_scope_registry.py",
         "docs/master_plan/generated/PR152_GrandGlobalDebugLogicalConsistencyAuditEntireQTTRepo.report.json",
     }
 )
@@ -2951,6 +2966,16 @@ def explain_pr_scope_decision(branch: str, path: str) -> dict[str, object]:
             "pr_id": None,
             "matched_rule": forbidden_reason,
             "reason": "forbidden_path",
+        }
+    if branch_name == S1_KALSHI_SERIES_FEE_CANDIDATES_BRANCH:
+        allowed = normalized in S1_KALSHI_SERIES_FEE_CANDIDATES_ALLOWED_EXACT_PATHS
+        return {
+            "allowed": allowed,
+            "branch": branch_name,
+            "normalized_path": normalized,
+            "pr_id": "S1-VENUE-SEMANTICS-PHASE-A-01",
+            "matched_rule": f"exact:{normalized}" if allowed else "no_s1_kalshi_series_fee_candidates_scope_rule",
+            "reason": "registered_exact_path" if allowed else "path_not_registered_for_pr_scope",
         }
     if branch_name == S1_KALSHI_QUADRATIC_TAKER_INPUTS_BRANCH:
         allowed = normalized in S1_KALSHI_QUADRATIC_TAKER_INPUTS_ALLOWED_EXACT_PATHS
