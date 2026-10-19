@@ -9,9 +9,11 @@ from typing import TYPE_CHECKING, Iterable
 
 from ..stage1_prediction_markets.qku_computation_control_plane.economic_math import (
     KalshiFeeRoundingInputV1,
+    KalshiQuadraticTakerBuyYesFillV1,
     _kalshi_bounded_fraction,
     _kalshi_decimal6,
     kalshi_fee_rounding_v1,
+    kalshi_quadratic_taker_buy_yes_input_v1,
 )
 from ..stage1_prediction_markets.qku_computation_control_plane.errors import (
     ContractValidationError,
@@ -91,6 +93,32 @@ def compose_kalshi_conditional_cashflows_v1(
         platform_fee_total=_kalshi_decimal6(charges, "platform_fee_total"),
         expected_rebate_total=_kalshi_decimal6(credits, "expected_rebate_total"),
         rounding_overpayment_after=carry,
+    )
+
+
+def compose_kalshi_quadratic_taker_buy_yes_cashflows_v1(
+    *, profile_id: str, currency: str,
+    fills: tuple[KalshiQuadraticTakerBuyYesFillV1, ...],
+    fee_multiplier: Decimal, balance_increment: Decimal,
+    prior_rounding_overpayment: Decimal,
+) -> KalshiConditionalCashflowTermsV1:
+    """Compile hypothetical quadratic fills and reuse the conditional cash owner."""
+    if type(profile_id) is not str or profile_id != "KALSHI_US_DCM_DIRECT":
+        raise ContractValidationError(ReasonCode.INVALID_CONTRACT, "exact Kalshi profile required")
+    if type(currency) is not str or currency != "USD":
+        raise ContractValidationError(ReasonCode.INVALID_CONTRACT, "exact USD currency required")
+    if type(fills) is not tuple or not 1 <= len(fills) <= 4096:
+        raise ContractValidationError(ReasonCode.INVALID_CONTRACT, "fills must be a tuple of 1..4096 conditional rows")
+    if any(type(row) is not KalshiQuadraticTakerBuyYesFillV1 for row in fills):
+        raise ContractValidationError(ReasonCode.INVALID_CONTRACT, "exact quadratic taker BUY-YES fills required")
+    compiled = tuple(
+        kalshi_quadratic_taker_buy_yes_input_v1(fill=row, fee_multiplier=fee_multiplier)
+        for row in fills
+    )
+    return compose_kalshi_conditional_cashflows_v1(
+        profile_id=profile_id, currency=currency, fills=compiled,
+        balance_increment=balance_increment,
+        prior_rounding_overpayment=prior_rounding_overpayment,
     )
 
 
