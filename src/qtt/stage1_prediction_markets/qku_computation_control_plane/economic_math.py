@@ -12,6 +12,7 @@ from typing import Mapping, Sequence
 from .context import (
     QuantizationPolicyV1,
     QuantizationReceiptV1,
+    _native_retail_finite_decimal_text_v1,
     decimal_context_v1,
     exact_decimal,
     quantize_decimal_v1,
@@ -139,6 +140,47 @@ def kalshi_fee_rounding_v1(
         net_fee=_kalshi_decimal6(net, "net_fee"),
         balance_change=_kalshi_decimal6(balance, "balance_change"),
         rounding_overpayment_after=_kalshi_decimal6(after, "rounding_overpayment_after"),
+    )
+
+
+def _kalshi_quadratic_taker_fill_values_v1(
+    contracts: Decimal, yes_price: Decimal,
+) -> tuple[Fraction, Fraction]:
+    quantity = _kalshi_bounded_fraction(contracts, "contracts", nonnegative=True)
+    price = _kalshi_bounded_fraction(yes_price, "yes_price", nonnegative=True)
+    if not (
+        quantity > 0 and 0 < price < 1
+        and (quantity * 100).denominator == 1
+        and (price * 10_000).denominator == 1
+    ):
+        raise NumericDomainError(ReasonCode.OUT_OF_DOMAIN, "positive quantity and interior YES price must satisfy their exact lattices")
+    return quantity, price
+
+
+@dataclass(frozen=True, slots=True)
+class KalshiQuadraticTakerBuyYesFillV1:
+    """One hypothetical ordinary BUY-YES taker portion, without native admission."""
+
+    contracts: Decimal
+    yes_price: Decimal
+
+    def __post_init__(self) -> None:
+        _kalshi_quadratic_taker_fill_values_v1(self.contracts, self.yes_price)
+
+
+def kalshi_quadratic_taker_buy_yes_input_v1(
+    *, fill: KalshiQuadraticTakerBuyYesFillV1, fee_multiplier: Decimal,
+) -> KalshiFeeRoundingInputV1:
+    """Produce exact principal and unrounded fee under the fixed quadratic law."""
+    if type(fill) is not KalshiQuadraticTakerBuyYesFillV1:
+        raise ContractValidationError(ReasonCode.INVALID_CONTRACT, "exact quadratic taker BUY-YES fill required")
+    quantity, price = _kalshi_quadratic_taker_fill_values_v1(fill.contracts, fill.yes_price)
+    multiplier = _kalshi_bounded_fraction(fee_multiplier, "fee_multiplier", nonnegative=True)
+    principal = -quantity * price
+    raw_fee = Fraction(7, 100) * multiplier * quantity * price * (1 - price)
+    return KalshiFeeRoundingInputV1(
+        revenue=_kalshi_decimal6(principal, "revenue"),
+        model_fee=Decimal(_native_retail_finite_decimal_text_v1(raw_fee)),
     )
 
 

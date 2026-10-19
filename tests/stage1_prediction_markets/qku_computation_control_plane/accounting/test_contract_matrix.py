@@ -48,14 +48,18 @@ from src.qtt.stage1_prediction_markets.qku_computation_control_plane.economic_ma
     FillQuantityDistributionArtifactV1,
     KalshiFeeRoundingInputV1,
     KalshiFeeRoundingResultV1,
+    KalshiQuadraticTakerBuyYesFillV1,
     TRANCHE_C_MATH_SPECIFICATIONS,
     binary_book_implied_asks_v1,
     expected_partial_fill_quantity_v1,
     global_prediction_market_fee_v1,
     kalshi_fee_rounding_v1,
+    kalshi_quadratic_taker_buy_yes_input_v1,
 )
 from src.qtt.stage1_prediction_markets.qku_computation_control_plane.errors import (
     ComputationControlPlaneError,
+    ContractValidationError,
+    NumericDomainError,
     ReasonCode,
 )
 from src.qtt.stage1_prediction_markets.qku_computation_control_plane.idempotency import (
@@ -251,6 +255,7 @@ def test_accounting_contract_matrix(case) -> None:
             ExposureProjectionV1("bad", (("VENUE_A", "10"), ("VENUE_A", "10")), ("10", "-10"), ("p1",), NOW, NOW)
     elif slug == "fee-rebate-treatment":
         _assert_kalshi_rounding_values()
+        _assert_kalshi_quadratic_taker_values()
         binding = FeeScheduleBindingV1("CATEGORY", "venue", "market-category", "v1", "source-epoch", datetime(2025, 1, 1, tzinfo=UTC), None, NOW, ("PLATFORM_FEE", "BUILDER_FEE_SEPARATE_ADDITIVE"), (("PLATFORM_FEE", ".05"),))
         policy = QuantizationPolicyV1("fee-5dp", "fee", "0.00001", QuantizationRoundingV1.HALF_EVEN, "USD", "USD", "FEE", 5, binding.binding_ref)
         fee = global_prediction_market_fee_v1(contracts="100", fee_rate=".05", price=".5", schedule_binding=binding, quantization_policy=policy, receipt_id="fee-r1")
@@ -287,6 +292,7 @@ def test_accounting_contract_matrix(case) -> None:
             ReconciliationRunV1("run-2", ("projection",), "snapshot", NOW, ("break",), ReconciliationStateV1.UNKNOWN, False)
     elif slug == "rounding-and-quantization":
         _assert_kalshi_rounding_boundaries()
+        _assert_kalshi_quadratic_taker_boundaries()
         policy = QuantizationPolicyV1("cent", "amount", ".01", QuantizationRoundingV1.HALF_EVEN, "USD", "USD", "SETTLED", 2, "OWNER")
         receipt = quantize_decimal_v1("1.005", policy=policy, receipt_id="rounding-1")
         assert (receipt.pre_value, receipt.post_value, receipt.residual) == (Decimal("1.005"), Decimal("1.00"), Decimal("0.005"))
@@ -473,6 +479,155 @@ def _assert_kalshi_rounding_boundaries():
             KalshiFeeRoundingInputV1(valid["revenue"], valid["model_fee"])
             with pytest.raises(ComputationControlPlaneError):
                 kalshi_fee_rounding_v1(**{**valid, "model_fee": Decimal("sNaN")})
+            after = (ambient.prec, ambient.rounding, ambient.Emin, ambient.Emax,
+                     ambient.capitals, ambient.clamp, dict(ambient.traps), dict(ambient.flags))
+            assert before == after
+
+
+def _kalshi_quadratic_integer_oracle(contracts, price, multiplier):
+    """Independent integer hundredths-of-contract / ten-thousandths price law."""
+    quantity_units, price_units = Fraction(contracts) * 100, Fraction(price) * 10_000
+    assert quantity_units.denominator == price_units.denominator == 1
+    q, p, m = quantity_units.numerator, price_units.numerator, Fraction(multiplier)
+    return (
+        Fraction(-q * p, 1_000_000),
+        Fraction(7 * m.numerator * q * p * (10_000 - p), 10**12 * m.denominator),
+    )
+
+
+def _assert_kalshi_quadratic_taker_values():
+    golden = (
+        ("100", ".5", "1", "-50", "1.75"),
+        ("100", ".5", "2", "-50", "3.50"),
+        ("100", ".6", "1", "-60", "1.68"),
+        (".1", ".55", "2.1", "-.055", ".00363825"),
+        (".01", ".0001", "1", "-.000001", ".000000069993"),
+        ("50", ".5", "1", "-25", ".875"),
+        ("3.75", ".4321", ".5", "-1.620375", ".0322073836875"),
+        ("1", ".5", "0", "-.5", "0"),
+    )
+    for quantity, price, multiplier, revenue, fee in golden:
+        fill = KalshiQuadraticTakerBuyYesFillV1(Decimal(quantity), Decimal(price))
+        result = kalshi_quadratic_taker_buy_yes_input_v1(fill=fill, fee_multiplier=Decimal(multiplier))
+        assert type(result) is KalshiFeeRoundingInputV1
+        assert (result.revenue, result.model_fee) == (Decimal(revenue), Decimal(fee))
+        assert result.revenue.as_tuple().exponent == -6
+        assert not result.model_fee.is_signed() if result.model_fee.is_zero() else result.model_fee > 0
+    for quantity, price, multiplier in product(
+        map(Decimal, (".01", ".1", "1", "3.75", "25", "100")),
+        map(Decimal, (".0001", ".1", ".4321", ".5", ".55", ".9", ".9999")),
+        map(Decimal, ("0", ".000001", ".5", "1", "2", "2.1")),
+    ):
+        fill = KalshiQuadraticTakerBuyYesFillV1(quantity, price)
+        before = (quantity.as_tuple(), price.as_tuple(), multiplier.as_tuple())
+        result = kalshi_quadratic_taker_buy_yes_input_v1(fill=fill, fee_multiplier=multiplier)
+        expected = _kalshi_quadratic_integer_oracle(quantity, price, multiplier)
+        assert (Fraction(result.revenue), Fraction(result.model_fee)) == expected
+        complement = kalshi_quadratic_taker_buy_yes_input_v1(
+            fill=replace(fill, yes_price=Decimal(1) - price), fee_multiplier=multiplier,
+        )
+        assert complement.model_fee == result.model_fee
+        assert Fraction(complement.revenue) == -Fraction(quantity) * (1 - Fraction(price))
+        for scaled in (
+            kalshi_quadratic_taker_buy_yes_input_v1(fill=replace(fill, contracts=quantity * 2), fee_multiplier=multiplier),
+            kalshi_quadratic_taker_buy_yes_input_v1(fill=fill, fee_multiplier=multiplier * 2),
+        ):
+            assert Fraction(scaled.model_fee) == expected[1] * 2
+        for grid, carry in product(map(Decimal, (".01", ".0001")), map(Decimal, ("0", ".004", ".012"))):
+            rounded = kalshi_fee_rounding_v1(
+                revenue=result.revenue, model_fee=result.model_fee,
+                balance_increment=grid, prior_rounding_overpayment=carry,
+            )
+            assert tuple(map(Fraction, _kalshi_values(rounded))) == _kalshi_integer_oracle(*expected, grid, carry)
+        assert before == (fill.contracts.as_tuple(), fill.yes_price.as_tuple(), multiplier.as_tuple())
+    fractional = kalshi_quadratic_taker_buy_yes_input_v1(
+        fill=KalshiQuadraticTakerBuyYesFillV1(Decimal(".1"), Decimal(".55")), fee_multiplier=Decimal("2.1"),
+    )
+    for grid, expected_net, expected_balance in ((".01", ".005", "-.06"), (".0001", ".0037", "-.0587")):
+        rounded = kalshi_fee_rounding_v1(
+            revenue=fractional.revenue, model_fee=fractional.model_fee,
+            balance_increment=Decimal(grid), prior_rounding_overpayment=Decimal(0),
+        )
+        assert (rounded.net_fee, rounded.balance_change) == (Decimal(expected_net), Decimal(expected_balance))
+    trailing = KalshiQuadraticTakerBuyYesFillV1(Decimal("1.00"), Decimal(".50000"))
+    assert kalshi_quadratic_taker_buy_yes_input_v1(fill=trailing, fee_multiplier=Decimal("1.000")) == KalshiFeeRoundingInputV1(Decimal("-.5"), Decimal(".0175"))
+    assert tuple(field.name for field in fields(trailing)) == ("contracts", "yes_price")
+    assert not hasattr(trailing, "__dict__")
+    for name in ("contracts", "yes_price"):
+        with pytest.raises(FrozenInstanceError):
+            setattr(trailing, name, Decimal(0))
+
+
+def _assert_kalshi_quadratic_taker_boundaries():
+    class DecimalSubclass(Decimal):
+        pass
+
+    class FillSubclass(KalshiQuadraticTakerBuyYesFillV1):
+        pass
+
+    fill_values = dict(contracts=Decimal(1), yes_price=Decimal(".5"))
+    fill = KalshiQuadraticTakerBuyYesFillV1(**fill_values)
+    valid = dict(fill=fill, fee_multiplier=Decimal(1))
+    invalid = (
+        *((value, ReasonCode.INVALID_NUMERIC_INPUT) for value in (True, False, 1, .01, "1", None, {}, DecimalSubclass("1"))),
+        *((Decimal(value), ReasonCode.NONFINITE_NUMERIC_INPUT) for value in ("NaN", "sNaN", "Infinity", "-Infinity")),
+        *((Decimal(value), ReasonCode.OUT_OF_DOMAIN) for value in ("-0", "-0.00000", "1e101", "1e-101", "0e-129", "0e129", "1." + "0" * 128, "-1")),
+    )
+    for name in ("contracts", "yes_price", "fee_multiplier"):
+        domain_values = {"contracts": ("0", ".001"), "yes_price": ("0", "1", ".00001"), "fee_multiplier": ()}
+        domain = tuple((Decimal(value), ReasonCode.OUT_OF_DOMAIN) for value in domain_values[name])
+        for value, reason in (*invalid, *domain):
+            if name == "fee_multiplier":
+                with pytest.raises(NumericDomainError) as rejected:
+                    kalshi_quadratic_taker_buy_yes_input_v1(**{**valid, name: value})
+            else:
+                with pytest.raises(NumericDomainError) as rejected:
+                    KalshiQuadraticTakerBuyYesFillV1(**{**fill_values, name: value})
+                assert rejected.value.reason_code is reason
+                # Bypass construction only to prove producer revalidation, not admission.
+                malformed = object.__new__(KalshiQuadraticTakerBuyYesFillV1)
+                for field, supplied in {**fill_values, name: value}.items():
+                    object.__setattr__(malformed, field, supplied)
+                with pytest.raises(NumericDomainError) as rejected:
+                    kalshi_quadratic_taker_buy_yes_input_v1(**{**valid, "fill": malformed})
+            assert rejected.value.reason_code is reason
+    for bad in (None, {}, (Decimal(1), Decimal(".5")), FillSubclass(**fill_values), KalshiFeeRoundingInputV1(Decimal("-.5"), Decimal(0))):
+        with pytest.raises(ContractValidationError) as rejected:
+            kalshi_quadratic_taker_buy_yes_input_v1(**{**valid, "fill": bad})
+        assert rejected.value.reason_code is ReasonCode.INVALID_CONTRACT
+    for callable_, kwargs in ((KalshiQuadraticTakerBuyYesFillV1, fill_values), (kalshi_quadratic_taker_buy_yes_input_v1, valid)):
+        for omitted in kwargs:
+            with pytest.raises(TypeError):
+                callable_(**{key: value for key, value in kwargs.items() if key != omitted})
+        with pytest.raises(TypeError):
+            callable_(**kwargs, unknown=True)
+    with pytest.raises(TypeError):
+        kalshi_quadratic_taker_buy_yes_input_v1(fill, Decimal(1))
+    for quantity, price, multiplier in (("1e100", ".5", "1e100"), (".01", ".0001", "1e-100")):
+        with pytest.raises(NumericDomainError) as rejected:
+            kalshi_quadratic_taker_buy_yes_input_v1(
+                fill=KalshiQuadraticTakerBuyYesFillV1(Decimal(quantity), Decimal(price)), fee_multiplier=Decimal(multiplier),
+            )
+        assert rejected.value.reason_code is ReasonCode.OUT_OF_DOMAIN
+    for precision, rounding in product((1, 7, 28), (ROUND_CEILING, ROUND_FLOOR)):
+        with localcontext() as ambient:
+            ambient.prec, ambient.rounding, ambient.Emin, ambient.Emax = precision, rounding, -2, 2
+            ambient.traps[Inexact] = ambient.traps[Rounded] = True
+            ambient.flags[Inexact] = True
+            before = (ambient.prec, ambient.rounding, ambient.Emin, ambient.Emax,
+                      ambient.capitals, ambient.clamp, dict(ambient.traps), dict(ambient.flags))
+            actual = kalshi_quadratic_taker_buy_yes_input_v1(
+                fill=KalshiQuadraticTakerBuyYesFillV1(Decimal(".1"), Decimal(".55")), fee_multiplier=Decimal("2.1"),
+            )
+            assert (actual.revenue, actual.model_fee) == (Decimal("-.055"), Decimal(".00363825"))
+            for bad, reason in invalid:
+                with pytest.raises(NumericDomainError) as rejected:
+                    kalshi_quadratic_taker_buy_yes_input_v1(fill=fill, fee_multiplier=bad)
+                assert rejected.value.reason_code is reason
+            for name in fill_values:
+                with pytest.raises(NumericDomainError) as rejected:
+                    KalshiQuadraticTakerBuyYesFillV1(**{**fill_values, name: Decimal("sNaN")})
+                assert rejected.value.reason_code is ReasonCode.NONFINITE_NUMERIC_INPUT
             after = (ambient.prec, ambient.rounding, ambient.Emin, ambient.Emax,
                      ambient.capitals, ambient.clamp, dict(ambient.traps), dict(ambient.flags))
             assert before == after

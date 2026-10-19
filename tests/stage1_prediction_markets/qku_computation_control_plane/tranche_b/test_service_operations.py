@@ -11,10 +11,13 @@ from src.qtt.pretrade import pr169_pretrade1_resolvers as pretrade_module
 from src.qtt.pretrade.pr169_pretrade1_resolvers import (
     KalshiConditionalCashflowTermsV1,
     compose_kalshi_conditional_cashflows_v1,
+    compose_kalshi_quadratic_taker_buy_yes_cashflows_v1,
 )
 from src.qtt.stage1_prediction_markets.qku_computation_control_plane.economic_math import (
     KalshiFeeRoundingInputV1,
+    KalshiQuadraticTakerBuyYesFillV1,
     kalshi_fee_rounding_v1,
+    kalshi_quadratic_taker_buy_yes_input_v1,
 )
 from src.qtt.stage1_prediction_markets.qku_computation_control_plane.agent_policy import (
     POLICY_VERSION,
@@ -1093,6 +1096,187 @@ def _assert_kalshi_conditional_service(monkeypatch, invocations):
     assert wrong_context.status is not OperationStatusV1.SUCCEEDED
     assert ReasonCode.INPUT_SCOPE_MISMATCH.value in wrong_context.receipt_refs
     assert wrong_context.component_result.formula_output is None and invocations == []
+
+    # New fixed-family path uses the same fixture owners and actual MATH-06.
+    taker_common = {**common, "fee_multiplier": Decimal("1.00")}
+    portion = KalshiQuadraticTakerBuyYesFillV1(Decimal(25), Decimal(".5"))
+    portions = (portion,) * 4
+    producer_calls, composed_calls, composed_results = [], [], []
+
+    def counted_producer(**kwargs):
+        compiled = kalshi_quadratic_taker_buy_yes_input_v1(**kwargs)
+        producer_calls.append((kwargs, compiled))
+        return compiled
+
+    def counted_composer(**kwargs):
+        composed_calls.append(kwargs)
+        result = compose_kalshi_conditional_cashflows_v1(**kwargs)
+        composed_results.append(result)
+        return result
+
+    with monkeypatch.context() as delegated:
+        delegated.setattr(pretrade_module, "kalshi_quadratic_taker_buy_yes_input_v1", counted_producer)
+        delegated.setattr(pretrade_module, "compose_kalshi_conditional_cashflows_v1", counted_composer)
+        # A different price plus repeated rows proves order and multiplicity.
+        ordered = (KalshiQuadraticTakerBuyYesFillV1(Decimal(50), Decimal(".4")), *portions)
+        delegated_result = compose_kalshi_quadratic_taker_buy_yes_cashflows_v1(**taker_common, fills=ordered)
+        assert len(producer_calls) == len(ordered) and len(composed_calls) == 1
+        assert all(call["fill"] is row and call["fee_multiplier"] is taker_common["fee_multiplier"]
+                   for (call, _), row in zip(producer_calls, ordered))
+        compiled_rows = composed_calls[0]["fills"]
+        assert type(compiled_rows) is tuple and len(compiled_rows) == len(ordered)
+        assert all(compiled is observed for compiled, (_, observed) in zip(compiled_rows, producer_calls))
+        assert tuple((r.revenue, r.model_fee) for r in compiled_rows) == (
+            (Decimal(-20), Decimal(".84")), *((Decimal("-12.5"), Decimal(".4375")),) * 4,
+        )
+        for name in common:
+            assert composed_calls[0][name] is taker_common[name]
+        assert delegated_result is composed_results[0]
+
+        class TakerSubclass(KalshiQuadraticTakerBuyYesFillV1):
+            pass
+
+        for changes in (
+            *(({"profile_id": value}) for value in ("KALSHI", "POLYMARKET_US_RETAIL_DIRECT", "GEMINI_TITAN_DIRECT", "FORECASTEX_IBKR", profile.lower(), StringSubclass(profile), None)),
+            *(({"currency": value}) for value in ("EUR", "usd", StringSubclass("USD"), None)),
+            *(({"fills": value}) for value in ((), list(portions), iter(portions), TupleSubclass(portions), (object(),), (portion, row), (TakerSubclass(portion.contracts, portion.yes_price),), (portion,) * 4097)),
+        ):
+            with pytest.raises(ContractValidationError) as rejected:
+                compose_kalshi_quadratic_taker_buy_yes_cashflows_v1(**{**taker_common, "fills": portions, **changes})
+            assert rejected.value.reason_code is ReasonCode.INVALID_CONTRACT
+            assert len(producer_calls) == len(ordered) and len(composed_calls) == 1
+
+    for omitted in (*taker_common, "fills"):
+        with pytest.raises(TypeError):
+            compose_kalshi_quadratic_taker_buy_yes_cashflows_v1(**{
+                key: value for key, value in {**taker_common, "fills": portions}.items() if key != omitted
+            })
+    with pytest.raises(TypeError):
+        compose_kalshi_quadratic_taker_buy_yes_cashflows_v1(**taker_common, fills=portions, unknown=True)
+    with pytest.raises(TypeError):
+        compose_kalshi_quadratic_taker_buy_yes_cashflows_v1(profile, "USD", portions, Decimal(1), Decimal(".01"), Decimal(0))
+    for changes, reason in (
+        ({"fee_multiplier": "1"}, ReasonCode.INVALID_NUMERIC_INPUT),
+        ({"fee_multiplier": Decimal("sNaN")}, ReasonCode.NONFINITE_NUMERIC_INPUT),
+        ({"fee_multiplier": Decimal("-0")}, ReasonCode.OUT_OF_DOMAIN),
+        ({"fee_multiplier": Decimal("-1")}, ReasonCode.OUT_OF_DOMAIN),
+        ({"balance_increment": ".01"}, ReasonCode.INVALID_NUMERIC_INPUT),
+        ({"balance_increment": Decimal(".001")}, ReasonCode.OUT_OF_DOMAIN),
+        ({"prior_rounding_overpayment": Decimal("sNaN")}, ReasonCode.NONFINITE_NUMERIC_INPUT),
+        ({"prior_rounding_overpayment": Decimal("-0")}, ReasonCode.OUT_OF_DOMAIN),
+        ({"prior_rounding_overpayment": Decimal(".0000001")}, ReasonCode.OUT_OF_DOMAIN),
+    ):
+        with pytest.raises(ComputationControlPlaneError) as rejected:
+            compose_kalshi_quadratic_taker_buy_yes_cashflows_v1(**{**taker_common, **changes}, fills=portions)
+        assert rejected.value.reason_code is reason
+
+    def assert_taker_service(terms, expected, payout=100):
+        actual_values = {
+            **fixture_values(terms), "win_terminal_cashflow_total": Decimal(payout),
+            "void_terminal_cashflow_total": Decimal(payout // 2),
+        }
+        saved_values = dict(actual_values)
+        actual = evaluate(actual_values)
+        assert actual.status is OperationStatusV1.SUCCEEDED and invocations == ["MATH-06"]
+        output = actual.component_result.formula_output
+        assert output.execution_context is context and output.no_authority_flag is True
+        assert output.implementation_id == "MATH-06::2.0.0"
+        assert (output.output_schema_ref, output.output_schema_version) == (schema.schema_id, schema.schema_version)
+        assert set(output.value) == {"expected_net_cash", "expected_net_cash_if_filled", "expected_terminal_cashflow", "p_lose"}
+        assert output.value["expected_net_cash"] == Decimal(expected)
+        assert Fraction(output.value["expected_net_cash_if_filled"]) == Fraction(expected) / Fraction(4, 5)
+        assert Fraction(output.value["expected_terminal_cashflow"]) == Fraction(11, 20) * payout
+        assert output.value["p_lose"] == Decimal(".45")
+        assert Fraction(expected) == Fraction(4, 5) * (
+            Fraction(terms.entry_trade_cashflow_total) + Fraction(11, 20) * payout
+            - Fraction(terms.platform_fee_total) + Fraction(terms.expected_rebate_total) - 1
+        )
+        assert actual_values == saved_values and "rounding_overpayment_after" not in actual_values
+        return actual_values, output.value["expected_net_cash"]
+
+    for quantity, price, multiplier, principal, cent_fee, fine_fee, payout, cent_expected, fine_expected in (
+        ("100", ".5", "1", "-50", "1.75", "1.75", 100, "1.8", "1.8"),
+        ("100", ".5", "2", "-50", "3.50", "3.50", 100, ".4", ".4"),
+        ("100", ".6", "1", "-60", "1.68", "1.68", 100, "-6.144", "-6.144"),
+        ("50", ".5", "1", "-25", ".88", ".875", 50, ".496", ".5"),
+    ):
+        for grid, charge, expected in ((".01", cent_fee, cent_expected), (".0001", fine_fee, fine_expected)):
+            terms = compose_kalshi_quadratic_taker_buy_yes_cashflows_v1(
+                **{**taker_common, "balance_increment": Decimal(grid), "fee_multiplier": Decimal(multiplier)},
+                fills=(KalshiQuadraticTakerBuyYesFillV1(Decimal(quantity), Decimal(price)),),
+            )
+            assert type(terms) is KalshiConditionalCashflowTermsV1
+            assert terms.entry_trade_cashflow_total == Decimal(principal)
+            assert terms.platform_fee_total == Decimal(charge) and terms.expected_rebate_total == 0
+            assert terms.rounding_overpayment_after == (Decimal(".005") if quantity == "50" and grid == ".01" else Decimal(0))
+            assert_taker_service(terms, expected, payout)
+
+    taker_whole = compose_kalshi_quadratic_taker_buy_yes_cashflows_v1(**taker_common, fills=portions)
+    assert tuple(getattr(taker_whole, field.name) for field in fields(taker_whole)) == tuple(map(Decimal, ("-50", "1.76", ".01", "0")))
+    taker_values, taker_cash = assert_taker_service(taker_whole, "1.8")
+    taker_no_credit = evaluate({**taker_values, "expected_rebate_total": Decimal(0)})
+    assert taker_no_credit.status is OperationStatusV1.SUCCEEDED
+    no_credit_cash = taker_no_credit.component_result.formula_output.value["expected_net_cash"]
+    assert no_credit_cash == Decimal("1.792")
+    assert Fraction(taker_cash) - Fraction(no_credit_cash) == Fraction(".008")
+    taker_no_fill = evaluate({**taker_values, "fill_probability": Decimal(0)})
+    assert taker_no_fill.status is OperationStatusV1.SUCCEEDED
+    assert taker_no_fill.component_result.formula_output.value["expected_net_cash"] == 0
+    taker_packets = fixture_packets(taker_values)
+    taker_wrong_assertion = evaluate({**taker_values, "platform_fee_total": Decimal("1.75")}, taker_packets)
+    assert taker_wrong_assertion.status is not OperationStatusV1.SUCCEEDED
+    assert taker_wrong_assertion.component_result.formula_output is None and invocations == []
+    assert ReasonCode.INPUT_VALUE_CONFLICT.value in taker_wrong_assertion.receipt_refs
+
+    for grid in map(Decimal, (".01", ".0001")):
+        scenario = {**taker_common, "balance_increment": grid}
+        continuous = compose_kalshi_quadratic_taker_buy_yes_cashflows_v1(**scenario, fills=portions)
+        for split in (1, 2, 3):
+            prefix = compose_kalshi_quadratic_taker_buy_yes_cashflows_v1(**scenario, fills=portions[:split])
+            suffix = compose_kalshi_quadratic_taker_buy_yes_cashflows_v1(
+                **{**scenario, "prior_rounding_overpayment": prefix.rounding_overpayment_after}, fills=portions[split:],
+            )
+            for name in ("entry_trade_cashflow_total", "platform_fee_total", "expected_rebate_total"):
+                assert Fraction(getattr(prefix, name)) + Fraction(getattr(suffix, name)) == Fraction(getattr(continuous, name))
+            assert suffix.rounding_overpayment_after == continuous.rounding_overpayment_after
+        mixed_terms = compose_kalshi_quadratic_taker_buy_yes_cashflows_v1(
+            **scenario, fills=tuple(KalshiQuadraticTakerBuyYesFillV1(Decimal(50), Decimal(price)) for price in (".4", ".6")),
+        )
+        assert tuple(getattr(mixed_terms, field.name) for field in fields(mixed_terms)) == tuple(map(Decimal, ("-50", "1.68", "0", "0")))
+        assert_taker_service(mixed_terms, "1.856")
+        maximum = compose_kalshi_quadratic_taker_buy_yes_cashflows_v1(
+            **{**scenario, "fee_multiplier": Decimal(0)},
+            fills=(KalshiQuadraticTakerBuyYesFillV1(Decimal(1), Decimal(".5")),) * 4096,
+        )
+        assert tuple(getattr(maximum, field.name) for field in fields(maximum)) == tuple(map(Decimal, ("-2048", "0", "0", "0")))
+    reset_half = compose_kalshi_quadratic_taker_buy_yes_cashflows_v1(**taker_common, fills=portions[:2])
+    assert reset_half.expected_rebate_total == 0 and taker_whole.expected_rebate_total == Decimal(".01")
+    zero_multiplier = compose_kalshi_quadratic_taker_buy_yes_cashflows_v1(
+        **{**taker_common, "fee_multiplier": Decimal(0)},
+        fills=(KalshiQuadraticTakerBuyYesFillV1(Decimal(".01"), Decimal(".5")),),
+    )
+    assert tuple(getattr(zero_multiplier, field.name) for field in fields(zero_multiplier)) == tuple(map(Decimal, ("-.005", ".005", "0", ".005")))
+    # The raw producer admits its own bounded domain; MATH-06 totals constrain composition.
+    precise_fill = KalshiQuadraticTakerBuyYesFillV1(Decimal("24691357802469135780246913578024690"), Decimal(".5"))
+    assert kalshi_quadratic_taker_buy_yes_input_v1(fill=precise_fill, fee_multiplier=Decimal(0)).revenue == Decimal("-12345678901234567890123456789012345")
+    with pytest.raises(ComputationControlPlaneError) as rejected:
+        compose_kalshi_quadratic_taker_buy_yes_cashflows_v1(**{**taker_common, "fee_multiplier": Decimal(0)}, fills=(precise_fill,))
+    assert rejected.value.reason_code is ReasonCode.OUT_OF_DOMAIN
+    for precision in (1, 7, 28):
+        for rounding in (ROUND_CEILING, ROUND_FLOOR):
+            with localcontext() as ambient:
+                ambient.prec, ambient.rounding, ambient.Emin, ambient.Emax = precision, rounding, -2, 2
+                ambient.traps[Inexact] = ambient.traps[Rounded] = True
+                ambient.flags[Rounded] = True
+                before = (ambient.prec, ambient.rounding, ambient.Emin, ambient.Emax,
+                          ambient.capitals, ambient.clamp, dict(ambient.traps), dict(ambient.flags))
+                assert compose_kalshi_quadratic_taker_buy_yes_cashflows_v1(**taker_common, fills=portions) == taker_whole
+                with pytest.raises(ComputationControlPlaneError) as rejected:
+                    compose_kalshi_quadratic_taker_buy_yes_cashflows_v1(**{**taker_common, "fee_multiplier": Decimal("sNaN")}, fills=portions)
+                assert rejected.value.reason_code is ReasonCode.NONFINITE_NUMERIC_INPUT
+                after = (ambient.prec, ambient.rounding, ambient.Emin, ambient.Emax,
+                         ambient.capitals, ambient.clamp, dict(ambient.traps), dict(ambient.flags))
+                assert before == after
     assert roster_before == (tuple(IMPLEMENTATION_REGISTRY), tuple(ST12B_OPERATION_CAPABILITY_BY_ID))
 
 
