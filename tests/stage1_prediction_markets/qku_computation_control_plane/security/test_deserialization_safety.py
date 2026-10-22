@@ -174,6 +174,7 @@ def test_json_is_deterministic_and_unsafe_values_fail_closed() -> None:
 
 
 def _assert_kalshi_series_fee_candidate():
+    _assert_kalshi_observed_fee_projection()
     from dataclasses import FrozenInstanceError, fields
     from decimal import Decimal, Inexact, Rounded, ROUND_CEILING, ROUND_FLOOR, localcontext
     from src.qtt.stage1_prediction_markets.qku_computation_control_plane import source_policy as owner
@@ -363,6 +364,78 @@ def _assert_kalshi_series_fee_candidate():
 
 
     _assert_kalshi_market_link()
+
+
+def _assert_kalshi_observed_fee_projection():
+    from dataclasses import FrozenInstanceError, fields, replace
+    from decimal import Decimal, Inexact, Rounded, ROUND_FLOOR, localcontext
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane import source_policy as source
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane.errors import ContractValidationError, ComputationControlPlaneError
+    from tests.stage1_prediction_markets.qku_computation_control_plane.accounting.test_contract_matrix import _synthetic_kalshi_observation
+
+    with _synthetic_kalshi_observation() as h:
+        baseline = h.bodies
+    real_parser, real_link = source._native_strict_json, source.decode_kalshi_market_linked_series_fee_candidate_v1
+    assert source._KALSHI_OBSERVATION_BODY_LIMIT == real_parser.__defaults__[0] == 65_536
+    for token in (b'0', b'2', b'2.10', b'2e0', b'0.12345678901234567890123456789'):
+        event = baseline[1].replace(b'"fee_type_override":null', b'"fee_type_override":"quadratic"').replace(
+            b'"fee_multiplier_override":null', b'"fee_multiplier_override":'+token)
+        raw = (baseline[0], event, baseline[2])
+        calls, trees, links = [], [], []
+        def parser(*args, **kwargs):
+            calls.append((args,kwargs)); result = real_parser(*args,**kwargs); trees.append(result); return result
+        def linker(**kwargs):
+            links.append(kwargs); return real_link(**kwargs)
+        with localcontext() as ambient:
+            ambient.prec, ambient.rounding = 2, ROUND_FLOOR
+            ambient.traps[Inexact] = ambient.traps[Rounded] = True
+            ambient.flags[Rounded] = True
+            before = (ambient.prec,ambient.rounding,dict(ambient.traps),dict(ambient.flags))
+            with _synthetic_kalshi_observation(bodies=raw) as h, pytest.MonkeyPatch.context() as patch:
+                patch.setattr(source, '_native_strict_json', parser)
+                patch.setattr(source, 'decode_kalshi_market_linked_series_fee_candidate_v1', linker)
+                cohort = h.owner.capture()
+                assert cohort.fee_basis == 'OBSERVED_EVENT_OVERRIDE' and cohort.fee_multiplier == Decimal(token.decode())
+                assert len(calls) == 5 and all(args[0] is body and not kwargs for (args,kwargs),body in zip(calls,(*raw[:2],*raw)))
+                assert len(links) == 1
+                assert all(links[0][key] is body for key,body in zip(('raw_market_response','raw_event_response','raw_series_response'),raw))
+                observed = trees[1]['event']['fee_multiplier_override']
+                assert type(observed) is (int if token in (b'0',b'2') else Decimal)
+                if type(observed) is Decimal:
+                    assert cohort.fee_multiplier is observed
+                assert h.owner.resolve_scenario_multiplier(cohort=cohort, expected_market_ticker=cohort.market_ticker,
+                    as_of_monotonic_ns=cohort.available_monotonic_ns) is cohort.fee_multiplier
+                assert len(calls) == 5 and len(links) == 1 and len(h.sends) == 3
+                assert not hasattr(cohort, '__dict__') and all(not hasattr(row,'__dict__') for row in cohort.observations)
+                with pytest.raises(FrozenInstanceError):
+                    cohort.fee_multiplier = Decimal(9)
+                with pytest.raises(FrozenInstanceError):
+                    cohort.observations[0].raw_body = b'{}'
+                assert tuple(field.name for field in fields(cohort)) == ('observations','market_ticker','event_ticker','series_ticker',
+                    'fee_basis','fee_multiplier','available_wall_ns','available_monotonic_ns','process_epoch_id','monotonic_clock_id')
+                for changes in ({'observations':list(cohort.observations)}, {'observations':cohort.observations[::-1]},
+                                {'fee_basis':'NATIVE'}, {'available_monotonic_ns':0}, {'fee_multiplier':Decimal('-0')}):
+                    with pytest.raises(ComputationControlPlaneError):
+                        replace(cohort, **changes)
+            assert before == (ambient.prec,ambient.rounding,dict(ambient.traps),dict(ambient.flags))
+    for event, count in (
+        (baseline[1].replace(b',"fee_type_override":null',b''),3),
+        (baseline[1].replace(b',"fee_multiplier_override":null',b''),3),
+        (baseline[1].replace(b'"fee_type_override":null',b'"fee_type_override":"quadratic"'),3),
+        (baseline[1].replace(b'"fee_multiplier_override":null',b'"fee_multiplier_override":2'),3),
+        (baseline[1].replace(b'"fee_type_override":null',b'"fee_type_override":"linear"'),3),
+        *((baseline[1].replace(b'"fee_type_override":null',b'"fee_type_override":"quadratic"').replace(
+            b'"fee_multiplier_override":null',b'"fee_multiplier_override":'+token), count)
+          for token,count in ((b'true',3),(b'"2"',3),(b'-1',3),(b'-0',2),(b'-0.0',2),(b'NaN',2),(b'1e101',2))),
+        (baseline[1].replace(b'"fee_type_override":null',b'"fee_type_override":null,"\\u0066ee_type_override":null'),2),
+        (baseline[1][:-1]+b',"other":{"access_token":"secret"}}',2),
+    ):
+        with _synthetic_kalshi_observation(bodies=(baseline[0],event,baseline[2])) as h:
+            with pytest.raises(ComputationControlPlaneError):
+                h.owner.capture()
+            assert len(h.sends) == count and h.owner._issued_cohort is None
+    with _synthetic_kalshi_observation(bodies=tuple(raw[:-1]+b',"unrelated":{"note":"synthetic"}}' for raw in baseline)) as h:
+        assert h.owner.capture().fee_multiplier == Decimal(1)
 
 
 def _assert_kalshi_market_link():

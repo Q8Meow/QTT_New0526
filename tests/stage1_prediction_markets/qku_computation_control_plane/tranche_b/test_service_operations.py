@@ -1038,6 +1038,67 @@ def _assert_kalshi_conditional_service(monkeypatch, invocations):
         assert response.component_result.no_authority_flag is True
         return response
 
+    from tests.stage1_prediction_markets.qku_computation_control_plane.accounting.test_contract_matrix import _synthetic_kalshi_observation
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane import source_policy as observation_source
+    observed_wrapper = pretrade_module.compose_kalshi_observed_fee_scenario_cashflows_v1
+    with _synthetic_kalshi_observation() as fixture:
+        observed_bodies = fixture.bodies
+    observed_fills = (KalshiQuadraticTakerBuyYesFillV1(Decimal(100), Decimal('.50')),)
+    observed_rosters = (tuple(observation_source.SOURCE_STATE_BY_ID), tuple(observation_source.SOURCE_OVERLAY_BY_ID))
+    for series_multiplier, override, applied, fee, expected in (
+        (b'1',False,'1','1.75','1.8'), (b'1',True,'2','3.50','.4'),
+        (b'1',False,'1','1.75','1.8'), (b'3',False,'3','5.25','-1.0')):
+        event = observed_bodies[1]
+        if override:
+            event = event.replace(b'"fee_type_override":null',b'"fee_type_override":"quadratic"').replace(
+                b'"fee_multiplier_override":null',b'"fee_multiplier_override":2')
+        raw = (*observed_bodies[:1],event,observed_bodies[2].replace(b'"fee_multiplier":1',b'"fee_multiplier":'+series_multiplier))
+        with _synthetic_kalshi_observation(bodies=raw) as fixture:
+            cohort = fixture.owner.capture()
+            assert cohort.market_ticker == context.scope.market_scope_id
+            resolved, delegated_calls, delegated_results = [], [], []
+            real_resolve = observation_source.KalshiFeeObservationOwnerV1.resolve_scenario_multiplier
+            real_compose = pretrade_module.compose_kalshi_quadratic_taker_buy_yes_cashflows_v1
+            def resolve_spy(self, **kwargs):
+                resolved.append((self,kwargs)); return real_resolve(self,**kwargs)
+            def compose_spy(**kwargs):
+                delegated_calls.append(kwargs); result = real_compose(**kwargs); delegated_results.append(result); return result
+            observed_kwargs = dict(**common, source_owner=fixture.owner, cohort=cohort,
+                expected_market_ticker=context.scope.market_scope_id,
+                as_of_monotonic_ns=cohort.available_monotonic_ns, fills=observed_fills)
+            with monkeypatch.context() as delegated:
+                delegated.setattr(observation_source.KalshiFeeObservationOwnerV1,'resolve_scenario_multiplier',resolve_spy)
+                delegated.setattr(pretrade_module,'compose_kalshi_quadratic_taker_buy_yes_cashflows_v1',compose_spy)
+                terms = observed_wrapper(**observed_kwargs)
+                assert len(resolved) == len(delegated_calls) == 1 and terms is delegated_results[0]
+                assert resolved[0][0] is fixture.owner and resolved[0][1]['cohort'] is cohort
+                assert delegated_calls[0]['fee_multiplier'] is cohort.fee_multiplier
+                for name in (*common,'fills'):
+                    assert delegated_calls[0][name] is observed_kwargs[name]
+                for changes in ({'profile_id':'KALSHI'},{'currency':'EUR'},{'source_owner':object()},
+                                {'cohort':replace(cohort)},{'as_of_monotonic_ns':cohort.available_monotonic_ns-1}):
+                    with pytest.raises(ComputationControlPlaneError):
+                        observed_wrapper(**{**observed_kwargs,**changes})
+                    assert len(delegated_calls) == 1
+            assert cohort.fee_multiplier == Decimal(applied) and terms.platform_fee_total == Decimal(fee)
+            assert terms.entry_trade_cashflow_total == Decimal(-50) and terms.expected_rebate_total == 0
+            assert Fraction(Decimal(expected)) == Fraction(4,5)*(-50+55-Fraction(fee)-1)
+            values = fixture_values(terms)
+            response = evaluate(values)
+            assert response.status is OperationStatusV1.SUCCEEDED and invocations == ['MATH-06']
+            assert response.component_result.formula_output.execution_context is context
+            assert response.component_result.formula_output.value['expected_net_cash'] == Decimal(expected)
+            rejected = evaluate({**values,'platform_fee_total':Decimal('99')},fixture_packets(values))
+            assert rejected.status is not OperationStatusV1.SUCCEEDED and invocations == []
+            assert ReasonCode.INPUT_VALUE_CONFLICT.value in rejected.receipt_refs
+            if override:
+                legacy = pretrade_module.compose_kalshi_market_linked_series_base_cashflows_v1(
+                    **common, raw_market_response=raw[0], raw_event_response=raw[1], raw_series_response=raw[2],
+                    expected_market_ticker=cohort.market_ticker, fills=observed_fills)
+                assert legacy.platform_fee_total == Decimal('1.75') and terms.platform_fee_total == Decimal('3.50')
+    assert observed_rosters == (tuple(observation_source.SOURCE_STATE_BY_ID), tuple(observation_source.SOURCE_OVERLAY_BY_ID))
+    assert roster_before == (tuple(IMPLEMENTATION_REGISTRY),tuple(ST12B_OPERATION_CAPABILITY_BY_ID))
+
     for principal, fee, expected in (("-50", "1.75", "1.8"), ("-50", "3.50", ".4"), ("-60", "1.68", "-6.144"), ("-60", "1.75", "-6.2")):
         terms = compose_kalshi_conditional_cashflows_v1(
             **common, fills=(KalshiFeeRoundingInputV1(Decimal(principal), Decimal(fee)),),

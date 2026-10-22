@@ -1,6 +1,7 @@
 """Centralized 16-row Tranche-C accounting contract matrix."""
 
 from dataclasses import FrozenInstanceError, fields, replace
+from contextlib import contextmanager
 from datetime import UTC, datetime
 from decimal import Decimal, Inexact, Rounded, ROUND_CEILING, ROUND_FLOOR, localcontext
 from fractions import Fraction
@@ -809,7 +810,338 @@ def test_reference_adapter_atomic_commit_rollback_and_replay(adapter_kind, refer
     _assert_f13_reference_storage(adapter_kind, reference_directory)
     _assert_f13_transaction_truth(adapter_kind, reference_directory)
     _assert_f14_native_and_storage(adapter_kind)
+    if adapter_kind == 'memory':
+        _assert_kalshi_observation_custody()
 
+
+
+@contextmanager
+def _synthetic_kalshi_observation(*, bodies=None, headers=None, status=200, on_read=None,
+                                 on_send=None, on_close=None, on_tls=None):
+    """Offline-only transport/clock fixture; never original provider evidence."""
+    import ssl
+    from datetime import timedelta
+    from types import SimpleNamespace
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane import source_policy as source
+
+    moment = datetime(2026, 10, 20, 12, tzinfo=UTC)
+    delta = moment - datetime(1970, 1, 1, tzinfo=UTC)
+    clock = dict(wall=(delta.days * 86400 + delta.seconds) * 1_000_000_000, mono=10_000_000_000)
+    raw = bodies if bodies is not None else (
+        b'{"market":{"ticker":"SYNTHETIC::MARKET","event_ticker":"SYNTHETIC::EVENT"}}',
+        b'{"event":{"event_ticker":"SYNTHETIC::EVENT","series_ticker":"SYNTHETIC::SERIES","fee_type_override":null,"fee_multiplier_override":null}}',
+        b'{"series":{"ticker":"SYNTHETIC::SERIES","fee_type":"quadratic","fee_multiplier":1}}',
+    )
+    profile = source.Stage1VenueProfileIdV1.KALSHI_US_DCM_DIRECT
+    source_receipt = source.PITSourceCurrentizationReceiptV1(
+        receipt_id='SYNTHETIC::SOURCE', profile_id=profile,
+        source_id='KALSHI_PUBLIC_MARKET_EVENT_SERIES', source_contract_version='KALSHI_PUBLIC_FEE_OBSERVATION_V1',
+        checked_at_utc=moment-timedelta(seconds=1), effective_at_utc=moment-timedelta(seconds=2),
+        expires_at_utc=moment+timedelta(minutes=1), currentization_owner_id='SYNTHETIC::BOOTSTRAP',
+        recheck_triggers=('SYNTHETIC_CHANGE',), invalidating_change_detected=False, admitted_current=True)
+    rights_receipt = source.PITRightsAdmissionReceiptV1(
+        receipt_id='SYNTHETIC::RIGHTS', profile_id=profile, account_scope='SYNTHETIC::ACCOUNT',
+        source_id='KALSHI_PUBLIC_MARKET_EVENT_SERIES', agreement_id='SYNTHETIC::AGREEMENT',
+        agreement_version='SYNTHETIC_V1', internal_use_class='OBSERVED_FEE_SCENARIO_INTERNAL',
+        owner_decision='ADMITTED_INTERNAL_USE', checked_at_utc=moment-timedelta(seconds=1),
+        expires_at_utc=moment+timedelta(minutes=1), recheck_triggers=('SYNTHETIC_CHANGE',), revoked=False,
+        permitted_retention_class='PROCESS_MEMORY_ONLY', prohibited_redistribution_class='SYNTHETIC::NO_REDISTRIBUTION')
+    kwargs = dict(source_receipt=source_receipt, rights_receipt=rights_receipt,
+        account_scope='SYNTHETIC::ACCOUNT', internal_use_class='OBSERVED_FEE_SCENARIO_INTERNAL',
+        permitted_retention_class='PROCESS_MEMORY_ONLY', expected_market_ticker='SYNTHETIC::MARKET',
+        process_epoch_id='SYNTHETIC::PROCESS', monotonic_clock_id='SYNTHETIC::CLOCK',
+        operating_authorization_ref='SYNTHETIC::OPERATING_AUTHORIZATION',
+        authorization_expires_at_utc=moment+timedelta(seconds=50), deadline_monotonic_ns=clock['mono']+50_000_000_000)
+    harness = SimpleNamespace(clock=clock, bodies=raw, kwargs=kwargs, connections=[], sends=[], closes=[], reads=[], tls_preparations=[], owner=None)
+    real_context = ssl.create_default_context
+
+    def create_context():
+        harness.tls_preparations.append(len(harness.tls_preparations))
+        context = real_context()
+        if on_tls is not None:
+            on_tls(harness, harness.tls_preparations[-1])
+        return context
+
+    class Response:
+        def __init__(self, index):
+            self.index = index
+            self.status = status
+
+        def getheaders(self):
+            return headers if headers is not None else [('Content-Type', 'application/json'), ('Content-Length', str(len(raw[self.index])))]
+
+        def read(self, limit):
+            harness.reads.append((self.index, limit))
+            assert limit == 65_537
+            if on_read is not None:
+                on_read(harness, self.index)
+            return raw[self.index]
+
+    class Connection:
+        def __init__(self, host, port, *, timeout, context):
+            self.index = len(harness.connections)
+            harness.connections.append((host, port, timeout, context))
+            assert host == 'external-api.kalshi.com' and port == 443
+            assert 0 < timeout <= 20 and context.check_hostname is True and context.verify_mode == ssl.CERT_REQUIRED
+
+        def request(self, method, target, *, body, headers):
+            harness.sends.append((method, target, body, dict(headers)))
+            if on_send is not None:
+                on_send(harness, self.index)
+
+        def getresponse(self):
+            return Response(self.index)
+
+        def close(self):
+            harness.closes.append(self.index)
+            if on_close is not None:
+                on_close(harness, self.index)
+
+    with pytest.MonkeyPatch.context() as patch:
+        patch.setattr("http.client.HTTPSConnection", Connection)
+        patch.setattr(ssl, 'create_default_context', create_context)
+        patch.setattr(source.time, 'time_ns', lambda: clock['wall'])
+        patch.setattr(source.time, 'monotonic_ns', lambda: clock['mono'])
+        harness.owner = source.KalshiFeeObservationOwnerV1(**kwargs)
+        yield harness
+        assert harness.closes == list(range(len(harness.connections)))
+
+
+def _assert_kalshi_observation_custody():
+    from copy import copy
+    from dataclasses import fields
+    from datetime import timedelta
+    from inspect import Parameter, signature
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane import source_policy as source
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane.errors import ComputationControlPlaneError, ContractValidationError, PointInTimeError
+
+    owner_type = source.KalshiFeeObservationOwnerV1
+
+    def reject_reinitialization(h):
+        state, attempts, cohort = h.owner._state, h.owner._attempts, h.owner._issued_cohort
+        with pytest.raises(ContractValidationError):
+            h.owner.__init__(**h.kwargs)
+        assert h.owner._state == state and h.owner._attempts == attempts
+        assert h.owner._issued_cohort is cohort
+
+    with _synthetic_kalshi_observation() as h:
+        assert all(p.kind is Parameter.KEYWORD_ONLY and p.default is Parameter.empty
+                   for p in signature(owner_type).parameters.values())
+        assert set(signature(owner_type).parameters) == set(h.kwargs)
+        assert not h.connections and h.owner._state == 'NEW'
+        reject_reinitialization(h)
+        for impostor in (copy(h.owner), object.__new__(owner_type)):
+            with pytest.raises(ContractValidationError):
+                impostor.capture()
+            with pytest.raises(ContractValidationError):
+                impostor.revoke()
+        assert not h.connections and h.owner._state == 'NEW'
+        cohort = h.owner.capture()
+        assert h.owner._state == 'READY' and h.owner._issued_cohort is cohort and h.owner._pending is None
+        assert h.owner._attempts == 3 and len(h.sends) == 3
+        reject_reinitialization(h)
+        assert [row[1] for row in h.sends] == [
+            '/trade-api/v2/markets/SYNTHETIC%3A%3AMARKET',
+            '/trade-api/v2/events/SYNTHETIC%3A%3AEVENT?exclude_markets=true',
+            '/trade-api/v2/series/SYNTHETIC%3A%3ASERIES']
+        assert all(row[0] == 'GET' and row[2] is None and row[3] == {
+            'Accept': 'application/json', 'Accept-Encoding': 'identity', 'Connection': 'close'} for row in h.sends)
+        assert all(row.raw_body is raw for row, raw in zip(cohort.observations, h.bodies))
+        assert cohort.fee_multiplier == Decimal(1) and cohort.fee_basis == 'OBSERVED_SERIES_BASE'
+        assert all(row.request_wall_ns == row.received_wall_ns == h.clock['wall']
+                   and row.request_monotonic_ns == row.received_monotonic_ns == h.clock['mono'] for row in cohort.observations)
+        query = dict(cohort=cohort, expected_market_ticker='SYNTHETIC::MARKET', as_of_monotonic_ns=cohort.available_monotonic_ns)
+        copied_owner = copy(h.owner)
+        with pytest.raises(ContractValidationError):
+            copied_owner.resolve_scenario_multiplier(**query)
+        assert h.owner.resolve_scenario_multiplier(**query) is cohort.fee_multiplier
+        for supplied in (copy(cohort), replace(cohort), replace(cohort, process_epoch_id='OTHER'), replace(cohort, monotonic_clock_id='OTHER'), object()):
+            with pytest.raises(ContractValidationError):
+                h.owner.resolve_scenario_multiplier(**{**query, 'cohort': supplied})
+        for value in (cohort.available_monotonic_ns-1, h.clock['mono']+1, True, 1.5, -1, 2**63):
+            with pytest.raises(PointInTimeError):
+                h.owner.resolve_scenario_multiplier(**{**query, 'as_of_monotonic_ns': value})
+        with pytest.raises(ContractValidationError) as mismatch:
+            h.owner.resolve_scenario_multiplier(**{**query, 'expected_market_ticker': 'OTHER'})
+        assert mismatch.value.reason_code is source.ReasonCode.INPUT_SCOPE_MISMATCH
+        with pytest.raises(ContractValidationError):
+            h.owner.capture()
+        other = owner_type(**h.kwargs)
+        with pytest.raises(ContractValidationError):
+            other.resolve_scenario_multiplier(**query)
+        other.revoke()
+        h.owner.revoke(); h.owner.revoke()
+        reject_reinitialization(h)
+        with pytest.raises(ContractValidationError):
+            copied_owner.resolve_scenario_multiplier(**query)
+        with pytest.raises(ContractValidationError):
+            h.owner.resolve_scenario_multiplier(**query)
+        assert len(h.sends) == 3 and cohort.observations[0].raw_body is h.bodies[0]
+        baseline = h.bodies
+
+    def failed_capture(**kwargs):
+        with _synthetic_kalshi_observation(**kwargs) as h:
+            with pytest.raises(ComputationControlPlaneError) as failure:
+                h.owner.capture()
+            assert h.owner._state in ('FAILED', 'REVOKED') and h.owner._issued_cohort is None
+            assert h.owner._pending is None
+            reject_reinitialization(h)
+            before = len(h.connections)
+            with pytest.raises(ContractValidationError):
+                h.owner.capture()
+            assert len(h.connections) == before
+            assert 'PRIVATE_TRANSPORT_TEXT' not in str(failure.value)
+            return before, len(h.sends), failure.value
+
+    for body_index, body, expected_sends in (
+        (0, baseline[0].replace(b'SYNTHETIC::MARKET', b'OTHER'), 1),
+        (0, b'{"market":{}}', 1), (0, b'{"market":null}', 1),
+        (0, baseline[0][:-1] + b',"access_token":"SECRET"}', 1),
+        (1, baseline[1].replace(b'SYNTHETIC::EVENT', b'OTHER'), 2),
+        (1, b'{"event":{}}', 2),
+        (2, baseline[2].replace(b'SYNTHETIC::SERIES', b'OTHER'), 3),
+        (2, baseline[2].replace(b'quadratic', b'linear'), 3),
+        (2, baseline[2].replace(b':1}', b':-1}'), 3),
+    ):
+        bodies = list(baseline); bodies[body_index] = body
+        assert failed_capture(bodies=tuple(bodies))[1] == expected_sends
+    for index in (0, 1):
+        for token in (b'1', b'true', b'null'):
+            bodies = list(baseline)
+            bodies[index] = bodies[index][:-2] + b',"exchange_index":' + token + b'}}'
+            assert failed_capture(bodies=tuple(bodies))[1] == index + 1
+    for value in (b'"2000-01-01T00:00:00Z"', b'false', b'0'):
+        bodies = (baseline[0][:-2]+b',"fee_waiver_expiration_time":'+value+b'}}', *baseline[1:])
+        assert failed_capture(bodies=bodies)[1] == 3
+    for invalid in (b'{}', b'null', b'\xff', b'{"market":{"ticker":NaN}}', b'x'*65_537):
+        assert failed_capture(bodies=(invalid,*baseline[1:]))[1] == 1
+    for status in (True, 199, 201, 301, 304, 401, 429, 500):
+        assert failed_capture(status=status)[1] == 1
+    normal = [('Content-Type', 'application/json')]
+    for headers in (
+        [], [('Content-Type', 'text/html')], normal*2,
+        [('Content-Type', 'application/json;charset=ascii')], [('Content-Type', 'application/json;foo=utf-8')],
+        normal+[('Content-Encoding','gzip')], normal+[('Content-Encoding','identity')]*2,
+        normal+[('Transfer-Encoding','gzip')], normal+[('Transfer-Encoding','chunked')]*2,
+        normal+[('Transfer-Encoding','chunked'),('Content-Length','1')],
+        normal+[('Content-Length','1')]*2,
+        *(normal+[('Content-Length', value)] for value in ('0','-1','+1',' 1','1 ','1,1','65537','9'*1000,'１','1')),
+        normal+[('Other','x')]*100, normal+[('Other','x'*65_536)], normal+[('Other','\u2603')],
+    ):
+        assert failed_capture(headers=headers)[1] == 1
+    for headers in (normal, [('Content-Type','APPLICATION/JSON; charset="UTF-8"'),('Transfer-Encoding','CHUNKED')],
+                    normal+[('Content-Encoding','identity'),('Set-Cookie','ignored')]):
+        with _synthetic_kalshi_observation(headers=headers) as h:
+            assert h.owner.capture().fee_multiplier == 1
+            assert all('Cookie' not in row[3] for row in h.sends)
+    for key, replacement in (('event_ticker', b'fee_changes'), ('event_ticker', b'..')):
+        assert failed_capture(bodies=(baseline[0].replace(b'SYNTHETIC::EVENT', replacement),*baseline[1:]))[1] == 1
+    with _synthetic_kalshi_observation(bodies=tuple(row.replace(b'SYNTHETIC::EVENT',b'E/%2F?#') for row in baseline)) as h:
+        assert h.owner.capture().event_ticker == 'E/%2F?#'
+        assert h.sends[1][1] == '/trade-api/v2/events/E%2F%252F%3F%23?exclude_markets=true'
+
+    for change in (
+        lambda k: {'source_receipt': object()}, lambda k: {'rights_receipt': object()},
+        lambda k: {'source_receipt': replace(k['source_receipt'], source_id='OTHER')},
+        lambda k: {'source_receipt': replace(k['source_receipt'], source_contract_version='OTHER')},
+        lambda k: {'rights_receipt': replace(k['rights_receipt'], source_id='OTHER')},
+        lambda k: {'source_receipt': replace(k['source_receipt'], profile_id=source.Stage1VenueProfileIdV1.POLYMARKET_US_RETAIL_DIRECT)},
+        lambda k: {'rights_receipt': replace(k['rights_receipt'], profile_id=source.Stage1VenueProfileIdV1.POLYMARKET_US_RETAIL_DIRECT)},
+        lambda k: {'rights_receipt': replace(k['rights_receipt'], internal_use_class='OTHER')},
+        lambda k: {'rights_receipt': replace(k['rights_receipt'], permitted_retention_class='OTHER')},
+        lambda k: {'internal_use_class':'OTHER'}, lambda k: {'permitted_retention_class':'OTHER'},
+        lambda k: {'account_scope':'OTHER'}, lambda k: {'operating_authorization_ref':''},
+        lambda k: {'authorization_expires_at_utc':datetime(2026,10,20,12,tzinfo=UTC)},
+        lambda k: {'authorization_expires_at_utc':datetime(2026,10,20,12)},
+        lambda k: {'deadline_monotonic_ns':10_000_000_000}, lambda k: {'deadline_monotonic_ns':70_000_000_001},
+        lambda k: {'deadline_monotonic_ns':True}, lambda k: {'expected_market_ticker':'..'},
+        lambda k: {'source_receipt':replace(k['source_receipt'], checked_at_utc=datetime(2026,10,18,tzinfo=UTC), effective_at_utc=datetime(2026,10,18,tzinfo=UTC))},
+    ):
+        with _synthetic_kalshi_observation() as h:
+            with pytest.raises(ComputationControlPlaneError):
+                owner_type(**{**h.kwargs, **change(h.kwargs)})
+            assert not h.tls_preparations and not h.connections and not h.sends
+    class OwnerSubclass(owner_type):
+        pass
+    class SourceSubclass(source.PITSourceCurrentizationReceiptV1):
+        pass
+    class RightsSubclass(source.PITRightsAdmissionReceiptV1):
+        pass
+    with _synthetic_kalshi_observation() as h:
+        with pytest.raises(ContractValidationError):
+            OwnerSubclass(**h.kwargs)
+        for key, subtype in (('source_receipt', SourceSubclass), ('rights_receipt', RightsSubclass)):
+            original = h.kwargs[key]
+            subclass_receipt = subtype(**{field.name: getattr(original, field.name) for field in fields(original)})
+            with pytest.raises(ContractValidationError):
+                owner_type(**{**h.kwargs, key: subclass_receipt})
+        assert not h.tls_preparations and not h.connections and not h.sends
+    def timeout(h, index):
+        raise TimeoutError('PRIVATE_TRANSPORT_TEXT')
+    for hook in ('on_read','on_send','on_close'):
+        result = failed_capture(**{hook:timeout})
+        assert result[1] == 1 and str(result[2]).endswith('KALSHI_OBSERVATION_TRANSPORT')
+    def late(h,index):
+        h.clock['mono'] = h.kwargs['deadline_monotonic_ns']
+    def backward(h,index):
+        h.clock['wall'] -= 1
+    def backward_monotonic(h,index):
+        h.clock['mono'] -= 1
+    def revoke(h,index):
+        h.owner.revoke()
+    for hook in (late,backward,backward_monotonic,revoke):
+        assert failed_capture(on_read=hook)[1] == 1
+    for samples in ((9_999_999_999, 10_000_000_000), (10_000_000_001, 10_000_000_000)):
+        with _synthetic_kalshi_observation() as h, pytest.MonkeyPatch.context() as patch:
+            clock_samples = iter(samples)
+            patch.setattr(source.time, 'monotonic_ns', lambda: next(clock_samples))
+            with pytest.raises(PointInTimeError):
+                h.owner.capture()
+            assert h.owner._state == 'FAILED' and h.owner._issued_cohort is None
+            assert not h.tls_preparations and not h.connections and not h.sends
+    def slow_tls(h, index):
+        h.clock['mono'] = h.kwargs['deadline_monotonic_ns'] - 1_000_000_000
+    with _synthetic_kalshi_observation(on_tls=slow_tls) as h:
+        assert h.owner.capture().fee_multiplier == 1
+        assert [row[2] for row in h.connections] == [1.0, 1.0, 1.0]
+    with _synthetic_kalshi_observation(on_tls=late) as h:
+        with pytest.raises(PointInTimeError):
+            h.owner.capture()
+        assert h.tls_preparations == [0] and not h.connections and not h.sends
+        assert h.owner._state == 'FAILED' and h.owner._issued_cohort is None
+    with _synthetic_kalshi_observation() as h:
+        h.owner.revoke()
+        with pytest.raises(ContractValidationError):
+            h.owner.capture()
+        assert not h.connections
+    for expired in ('mono','wall'):
+        with _synthetic_kalshi_observation() as h:
+            cohort = h.owner.capture()
+            if expired == 'mono':
+                h.clock['mono'] = h.kwargs['deadline_monotonic_ns']
+            else:
+                h.clock['wall'] += 50_000_000_000
+            with pytest.raises(PointInTimeError):
+                h.owner.resolve_scenario_multiplier(cohort=cohort, expected_market_ticker=cohort.market_ticker,
+                                                   as_of_monotonic_ns=cohort.available_monotonic_ns)
+            assert h.owner._state == 'FAILED'
+    with _synthetic_kalshi_observation() as h:
+        real_link = source.decode_kalshi_market_linked_series_fee_candidate_v1
+        def slow_link(**kwargs):
+            result = real_link(**kwargs)
+            h.clock['mono'] = h.kwargs['deadline_monotonic_ns']
+            return result
+        with pytest.MonkeyPatch.context() as patch:
+            patch.setattr(source, 'decode_kalshi_market_linked_series_fee_candidate_v1', slow_link)
+            with pytest.raises(PointInTimeError):
+                h.owner.capture()
+        assert len(h.sends) == 3 and h.owner._issued_cohort is None
+    def interrupt(h,index):
+        raise KeyboardInterrupt()
+    with _synthetic_kalshi_observation(on_read=interrupt) as h:
+        with pytest.raises(KeyboardInterrupt):
+            h.owner.capture()
+        assert h.owner._state == 'FAILED' and h.owner._issued_cohort is None
 
 
 def _f13_storage_fixture():

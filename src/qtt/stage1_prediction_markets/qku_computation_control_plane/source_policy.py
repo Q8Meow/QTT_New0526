@@ -4964,6 +4964,476 @@ def decode_kalshi_market_linked_series_fee_candidate_v1(
     )
 
 
+# A dormant, process-local observation capability. Bootstrap admission remains
+# external; neither these records nor synthetic receiver tests confer authority.
+_KALSHI_OBSERVATION_BODY_LIMIT = 65_536
+
+
+def _kalshi_observation_require(ok, token, reason=ReasonCode.INVALID_CONTRACT):
+    if not ok:
+        raise ContractValidationError(reason, token)
+
+
+def _kalshi_observation_time(ok):
+    if not ok:
+        raise PointInTimeError(ReasonCode.POINT_IN_TIME_VIOLATION, "KALSHI_OBSERVATION_TIME")
+
+
+def _kalshi_observation_counter(value):
+    _kalshi_observation_time(type(value) is int and 0 <= value <= 2**63 - 1)
+    return value
+
+
+def _kalshi_observation_target(role, ticker):
+    from urllib.parse import quote
+
+    _native_ident(ticker)
+    _kalshi_observation_require(
+        type(role) is str and role in ("MARKET", "EVENT", "SERIES")
+        and ticker not in (".", "..")
+        and not (role in ("EVENT", "SERIES") and ticker == "fee_changes"),
+        "KALSHI_OBSERVATION_FIELDS",
+    )
+    routes = {"MARKET": "markets", "EVENT": "events", "SERIES": "series"}
+    return ("/trade-api/v2/" + routes[role] + "/"
+            + quote(ticker, safe='', encoding='utf-8', errors='strict')
+            + ("?exclude_markets=true" if role == "EVENT" else ""))
+
+
+@dataclass(frozen=True, slots=True)
+class KalshiFeeHttpObservationV1:
+    """Original entity bytes and nominal local times; not a native receipt."""
+
+    role: str
+    request_target: str
+    raw_body: bytes
+    request_wall_ns: int
+    request_monotonic_ns: int
+    received_wall_ns: int
+    received_monotonic_ns: int
+
+    def __post_init__(self):
+        _kalshi_observation_require(
+            type(self.role) is str and self.role in ("MARKET", "EVENT", "SERIES")
+            and type(self.request_target) is str,
+            "KALSHI_OBSERVATION_FIELDS",
+        )
+        _kalshi_observation_require(
+            type(self.raw_body) is bytes and 1 <= len(self.raw_body) <= _KALSHI_OBSERVATION_BODY_LIMIT,
+            "KALSHI_OBSERVATION_HTTP",
+        )
+        for value in (self.request_wall_ns, self.request_monotonic_ns,
+                      self.received_wall_ns, self.received_monotonic_ns):
+            _kalshi_observation_counter(value)
+        _kalshi_observation_time(self.request_wall_ns <= self.received_wall_ns
+                                 and self.request_monotonic_ns <= self.received_monotonic_ns)
+
+
+@dataclass(frozen=True, slots=True)
+class KalshiObservedFeeCohortV1:
+    """An observed hypothetical fee scenario, without effective-fee authority."""
+
+    observations: tuple[KalshiFeeHttpObservationV1, ...]
+    market_ticker: str
+    event_ticker: str
+    series_ticker: str
+    fee_basis: str
+    fee_multiplier: Decimal
+    available_wall_ns: int
+    available_monotonic_ns: int
+    process_epoch_id: str
+    monotonic_clock_id: str
+
+    def __post_init__(self):
+        for value in (self.market_ticker, self.event_ticker, self.series_ticker,
+                      self.process_epoch_id, self.monotonic_clock_id):
+            _native_ident(value)
+        _kalshi_observation_require(
+            type(self.observations) is tuple and len(self.observations) == 3
+            and all(type(row) is KalshiFeeHttpObservationV1 for row in self.observations)
+            and type(self.fee_basis) is str
+            and self.fee_basis in ("OBSERVED_SERIES_BASE", "OBSERVED_EVENT_OVERRIDE"),
+            "KALSHI_OBSERVATION_FIELDS",
+        )
+        KalshiQuadraticSeriesFeeCandidateV1(self.series_ticker, self.fee_multiplier)
+        previous_wall = previous_mono = 0
+        for row, role, ticker in zip(self.observations, ("MARKET", "EVENT", "SERIES"),
+                                    (self.market_ticker, self.event_ticker, self.series_ticker), strict=True):
+            _kalshi_observation_require(
+                row.role == role and row.request_target == _kalshi_observation_target(role, ticker),
+                "KALSHI_OBSERVATION_ASSOCIATION",
+            )
+            _kalshi_observation_time(previous_wall <= row.request_wall_ns
+                                     and previous_mono <= row.request_monotonic_ns)
+            previous_wall, previous_mono = row.received_wall_ns, row.received_monotonic_ns
+        _kalshi_observation_counter(self.available_wall_ns)
+        _kalshi_observation_counter(self.available_monotonic_ns)
+        _kalshi_observation_time(previous_wall <= self.available_wall_ns
+                                 and previous_mono <= self.available_monotonic_ns)
+
+
+@dataclass(frozen=True, slots=True)
+class _KalshiObservationConfigV1:
+    owner: object
+    source_receipt: PITSourceCurrentizationReceiptV1
+    rights_receipt: PITRightsAdmissionReceiptV1
+    account_scope: str
+    internal_use_class: str
+    permitted_retention_class: str
+    expected_market_ticker: str
+    process_epoch_id: str
+    monotonic_clock_id: str
+    operating_authorization_ref: str
+    effective_expiry_wall_ns: int
+    deadline_monotonic_ns: int
+
+
+@dataclass(frozen=True, slots=True)
+class _KalshiPreparedReadV1:
+    owner: object
+    role: str
+    ticker: str
+    target: str
+    headers: Mapping
+    tls_context: object
+    timeout_seconds: float
+    maximum_raw_bytes: int
+
+
+class KalshiFeeObservationOwnerV1:
+    """One explicitly authorized capture and same-process scenario consumption.
+
+    No factory or runtime registration activates this capability. The operating
+    window fences publication, not the total duration of blocking network I/O.
+    """
+
+    def __init__(self, *, source_receipt: PITSourceCurrentizationReceiptV1,
+                 rights_receipt: PITRightsAdmissionReceiptV1, account_scope: str,
+                 internal_use_class: str, permitted_retention_class: str,
+                 expected_market_ticker: str, process_epoch_id: str,
+                 monotonic_clock_id: str, operating_authorization_ref: str,
+                 authorization_expires_at_utc: datetime, deadline_monotonic_ns: int) -> None:
+        _kalshi_observation_require(not hasattr(self, "_lock"), "KALSHI_OBSERVATION_STATE")
+        _kalshi_observation_require(type(self) is KalshiFeeObservationOwnerV1
+            and type(source_receipt) is PITSourceCurrentizationReceiptV1
+            and type(rights_receipt) is PITRightsAdmissionReceiptV1,
+            "KALSHI_OBSERVATION_SCOPE")
+        profile = Stage1VenueProfileIdV1.KALSHI_US_DCM_DIRECT
+        _kalshi_observation_require(
+            source_receipt.profile_id is profile and rights_receipt.profile_id is profile
+            and source_receipt.source_id == rights_receipt.source_id == "KALSHI_PUBLIC_MARKET_EVENT_SERIES"
+            and source_receipt.source_contract_version == "KALSHI_PUBLIC_FEE_OBSERVATION_V1"
+            and type(internal_use_class) is str
+            and internal_use_class == rights_receipt.internal_use_class == "OBSERVED_FEE_SCENARIO_INTERNAL"
+            and type(permitted_retention_class) is str
+            and permitted_retention_class == rights_receipt.permitted_retention_class == "PROCESS_MEMORY_ONLY",
+            "KALSHI_OBSERVATION_SCOPE",
+        )
+        for value in (expected_market_ticker, process_epoch_id, monotonic_clock_id,
+                      operating_authorization_ref):
+            _native_ident(value)
+        _kalshi_observation_target("MARKET", expected_market_ticker)
+        _kalshi_observation_time(type(authorization_expires_at_utc) is datetime
+            and authorization_expires_at_utc.tzinfo is not None
+            and authorization_expires_at_utc.utcoffset() == timedelta(0))
+        _kalshi_observation_counter(deadline_monotonic_ns)
+        self._lock = RLock()
+        self._state = "NEW"
+        self._last_clock = None
+        self._pending = None
+        self._issued_cohort = None
+        self._attempts = 0
+        self._expected_read = ("MARKET", expected_market_ticker)
+        wall, mono = self._observe_clock_v1()
+        _kalshi_observation_time(mono < deadline_monotonic_ns <= mono + 60_000_000_000)
+        admission = validate_pit_source_rights_admission_v1(
+            source_receipt, rights_receipt, admission_id=operating_authorization_ref,
+            profile_id=profile, account_scope=account_scope, internal_use_class=internal_use_class,
+            permitted_retention_class=permitted_retention_class,
+            evaluated_at_utc=self._wall_datetime_v1(wall))
+        expiry = min(authorization_expires_at_utc, admission.valid_until_utc)
+        expiry_ns = _native_utc_nanoseconds(expiry.isoformat())
+        _kalshi_observation_time(wall < expiry_ns)
+        self._config = _KalshiObservationConfigV1(
+            self, source_receipt, rights_receipt, account_scope, internal_use_class,
+            permitted_retention_class, expected_market_ticker, process_epoch_id,
+            monotonic_clock_id, operating_authorization_ref, expiry_ns, deadline_monotonic_ns)
+
+    @staticmethod
+    def _wall_datetime_v1(wall):
+        seconds, nanos = divmod(wall, 1_000_000_000)
+        return datetime(1970, 1, 1, tzinfo=UTC) + timedelta(seconds=seconds, microseconds=nanos // 1000)
+
+    def _invalidate_v1(self):
+        if self._state != "REVOKED":
+            self._state = "FAILED"
+        self._pending = None
+        self._issued_cohort = None
+
+    def _require_instance_v1(self):
+        config = getattr(self, "_config", None)
+        _kalshi_observation_require(type(self) is KalshiFeeObservationOwnerV1
+            and type(config) is _KalshiObservationConfigV1 and config.owner is self,
+            "KALSHI_OBSERVATION_ASSOCIATION")
+
+    def _observe_clock_v1(self):
+        with self._lock:
+            try:
+                before = _kalshi_observation_counter(time.monotonic_ns())
+                wall = _kalshi_observation_counter(time.time_ns())
+                after = _kalshi_observation_counter(time.monotonic_ns())
+                _kalshi_observation_time(before <= after)
+                if self._last_clock is not None:
+                    _kalshi_observation_time(self._last_clock[0] <= wall and self._last_clock[1] <= before)
+                self._last_clock = (wall, after)
+                return self._last_clock
+            except BaseException:
+                self._invalidate_v1()
+                raise
+
+    def _check_operating_v1(self, clock):
+        config = self._config
+        _kalshi_observation_require(self._state in ("NEW", "CAPTURING", "READY"),
+                                    "KALSHI_OBSERVATION_STATE")
+        try:
+            validate_pit_source_rights_admission_v1(
+                config.source_receipt, config.rights_receipt,
+                admission_id=config.operating_authorization_ref,
+                profile_id=Stage1VenueProfileIdV1.KALSHI_US_DCM_DIRECT,
+                account_scope=config.account_scope, internal_use_class=config.internal_use_class,
+                permitted_retention_class=config.permitted_retention_class,
+                evaluated_at_utc=self._wall_datetime_v1(clock[0]))
+            _kalshi_observation_time(clock[0] < config.effective_expiry_wall_ns
+                                     and clock[1] < config.deadline_monotonic_ns)
+        except BaseException:
+            self._invalidate_v1()
+            raise
+
+    def _require_pending_v1(self, prepared, *, charged):
+        _kalshi_observation_require(self._state == "CAPTURING", "KALSHI_OBSERVATION_STATE")
+        _kalshi_observation_require(
+            type(prepared) is _KalshiPreparedReadV1 and prepared.owner is self
+            and self._pending is not None and self._pending[0] is prepared
+            and (self._pending[1] is not None) is charged,
+            "KALSHI_OBSERVATION_ASSOCIATION")
+
+    def _prepare_read_v1(self, role, ticker):
+        import ssl
+
+        with self._lock:
+            _kalshi_observation_require(self._state == "CAPTURING" and self._pending is None
+                and self._attempts < 3 and (role, ticker) == self._expected_read
+                and role == ("MARKET", "EVENT", "SERIES")[self._attempts],
+                "KALSHI_OBSERVATION_STATE")
+            target = _kalshi_observation_target(role, ticker)
+            clock = self._observe_clock_v1()
+            self._check_operating_v1(clock)
+            try:
+                tls_context = ssl.create_default_context()
+            except (OSError, ValueError) as error:
+                self._raise_transport_v1(error)
+            _kalshi_observation_require(tls_context.check_hostname is True
+                and tls_context.verify_mode == ssl.CERT_REQUIRED, "KALSHI_OBSERVATION_TRANSPORT")
+            clock = self._observe_clock_v1()
+            self._check_operating_v1(clock)
+            prepared = _KalshiPreparedReadV1(
+                self, role, ticker, target,
+                MappingProxyType({"Accept": "application/json", "Accept-Encoding": "identity", "Connection": "close"}),
+                tls_context, min(20.0, (self._config.deadline_monotonic_ns - clock[1]) / 1_000_000_000),
+                _KALSHI_OBSERVATION_BODY_LIMIT)
+            self._pending = (prepared, None, None, False)
+            return prepared
+
+    def _recheck_and_charge_v1(self, prepared):
+        with self._lock:
+            self._require_pending_v1(prepared, charged=False)
+            clock = self._observe_clock_v1()
+            self._check_operating_v1(clock)
+            _kalshi_observation_require(self._attempts < 3, "KALSHI_OBSERVATION_STATE")
+            self._attempts += 1
+            self._pending = (prepared, clock, None, False)
+
+    def _validate_response_headers_v1(self, prepared, response):
+        with self._lock:
+            self._require_pending_v1(prepared, charged=True)
+            _kalshi_observation_require(type(response.status) is int and response.status == 200,
+                                        "KALSHI_OBSERVATION_HTTP")
+            headers = response.getheaders()
+            _kalshi_observation_require(type(headers) in (list, tuple) and len(headers) <= 100,
+                                        "KALSHI_OBSERVATION_HTTP")
+            retained = {}
+            size = 0
+            for pair in headers:
+                _kalshi_observation_require(type(pair) in (list, tuple) and len(pair) == 2
+                    and all(type(value) is str for value in pair), "KALSHI_OBSERVATION_HTTP")
+                name, value = pair
+                try:
+                    size += len(name.encode("latin-1", "strict")) + len(value.encode("latin-1", "strict"))
+                except UnicodeError:
+                    raise ContractValidationError(ReasonCode.INVALID_CONTRACT, "KALSHI_OBSERVATION_HTTP") from None
+                _kalshi_observation_require(size <= 65_536, "KALSHI_OBSERVATION_HTTP")
+                name = name.lower()
+                if name in ("content-type", "content-length", "content-encoding", "transfer-encoding"):
+                    _kalshi_observation_require(name not in retained, "KALSHI_OBSERVATION_HTTP")
+                    retained[name] = value
+            content_type = retained.get("content-type", "").lower().split(";")
+            valid_type = content_type[0].strip() == "application/json" and len(content_type) <= 2
+            if len(content_type) == 2:
+                parameter = content_type[1].strip().split("=")
+                valid_type = valid_type and len(parameter) == 2 and parameter[0].strip() == "charset" and parameter[1].strip() in ('utf-8', '"utf-8"')
+            _kalshi_observation_require(valid_type, "KALSHI_OBSERVATION_HTTP")
+            _kalshi_observation_require(retained.get("content-encoding", "identity").lower() == "identity"
+                and retained.get("transfer-encoding", "chunked").lower() == "chunked"
+                and not {"transfer-encoding", "content-length"} <= retained.keys(),
+                "KALSHI_OBSERVATION_HTTP")
+            length = None
+            if "content-length" in retained:
+                text = retained["content-length"]
+                _kalshi_observation_require(bool(text) and all("0" <= c <= "9" for c in text),
+                                            "KALSHI_OBSERVATION_HTTP")
+                digits = text.lstrip("0")
+                _kalshi_observation_require(0 < len(digits) <= 5, "KALSHI_OBSERVATION_HTTP")
+                length = int(digits)
+                _kalshi_observation_require(1 <= length <= prepared.maximum_raw_bytes, "KALSHI_OBSERVATION_HTTP")
+            self._pending = (prepared, self._pending[1], length, True)
+
+    def _validate_response_body_v1(self, prepared, response, raw):
+        with self._lock:
+            self._require_pending_v1(prepared, charged=True)
+            self._check_operating_v1(self._last_clock)
+            _kalshi_observation_require(self._pending[3] and type(raw) is bytes
+                and 1 <= len(raw) <= prepared.maximum_raw_bytes
+                and (self._pending[2] is None or len(raw) == self._pending[2]),
+                "KALSHI_OBSERVATION_HTTP")
+
+    def _retain_received_v1(self, prepared, raw, received):
+        with self._lock:
+            self._require_pending_v1(prepared, charged=True)
+            _kalshi_observation_require(received is self._last_clock, "KALSHI_OBSERVATION_ASSOCIATION")
+            self._check_operating_v1(received)
+            request = self._pending[1]
+            observation = KalshiFeeHttpObservationV1(prepared.role, prepared.target, raw,
+                request[0], request[1], received[0], received[1])
+            self._pending = None
+            return observation
+
+    def _raise_transport_v1(self, error):
+        raise ContractValidationError(ReasonCode.INVALID_CONTRACT, "KALSHI_OBSERVATION_TRANSPORT") from None
+
+    def _read_rest_once_v1(self, role, ticker):
+        prepared = self._prepare_read_v1(role, ticker)
+        import http.client
+        connection = http.client.HTTPSConnection("external-api.kalshi.com", 443, timeout=prepared.timeout_seconds, context=prepared.tls_context)
+        try:
+            self._recheck_and_charge_v1(prepared)
+            connection.request("GET", prepared.target, body=None, headers=prepared.headers)
+            response = connection.getresponse()
+            self._validate_response_headers_v1(prepared, response)
+            raw = response.read(prepared.maximum_raw_bytes + 1)
+            received = self._observe_clock_v1()
+            self._validate_response_body_v1(prepared, response, raw)
+            return self._retain_received_v1(prepared, raw, received)
+        except (OSError, http.client.HTTPException) as error:
+            self._raise_transport_v1(error)
+        finally:
+            try:
+                connection.close()
+            except OSError as error:
+                self._raise_transport_v1(error)
+
+    @staticmethod
+    def _routing_fields_v1(raw, role, ticker):
+        decoded = _native_strict_json(raw)
+        reject_secret_material("kalshi_observation", decoded)
+        root, identity, link = ("market", "ticker", "event_ticker") if role == "MARKET" else ("event", "event_ticker", "series_ticker")
+        _kalshi_observation_require(type(decoded) is dict, "KALSHI_OBSERVATION_FIELDS")
+        _kalshi_observation_require(root in decoded, "KALSHI_OBSERVATION_FIELDS", ReasonCode.INCOMPLETE_CONTRACT)
+        fields = decoded[root]
+        _kalshi_observation_require(type(fields) is dict, "KALSHI_OBSERVATION_FIELDS")
+        _kalshi_observation_require({identity, link} <= fields.keys(), "KALSHI_OBSERVATION_FIELDS", ReasonCode.INCOMPLETE_CONTRACT)
+        observed, next_ticker = _native_ident(fields[identity]), _native_ident(fields[link])
+        _kalshi_observation_require(observed == ticker, "KALSHI_OBSERVATION_FIELDS", ReasonCode.INPUT_SCOPE_MISMATCH)
+        if "exchange_index" in fields:
+            _kalshi_observation_require(type(fields["exchange_index"]) is int and fields["exchange_index"] == 0,
+                                        "KALSHI_OBSERVATION_MODIFIER")
+        return fields, next_ticker
+
+    def capture(self) -> KalshiObservedFeeCohortV1:
+        self._require_instance_v1()
+        with self._lock:
+            _kalshi_observation_require(self._state == "NEW", "KALSHI_OBSERVATION_STATE")
+            self._state = "CAPTURING"
+        try:
+            config = self._config
+            market = self._read_rest_once_v1("MARKET", config.expected_market_ticker)
+            market_fields, event_ticker = self._routing_fields_v1(market.raw_body, "MARKET", config.expected_market_ticker)
+            with self._lock:
+                self._expected_read = ("EVENT", event_ticker)
+            event = self._read_rest_once_v1("EVENT", event_ticker)
+            event_fields, series_ticker = self._routing_fields_v1(event.raw_body, "EVENT", event_ticker)
+            with self._lock:
+                self._expected_read = ("SERIES", series_ticker)
+            series = self._read_rest_once_v1("SERIES", series_ticker)
+            candidate = decode_kalshi_market_linked_series_fee_candidate_v1(
+                raw_market_response=market.raw_body, raw_event_response=event.raw_body,
+                raw_series_response=series.raw_body, expected_market_ticker=config.expected_market_ticker)
+            _kalshi_observation_require({"fee_type_override", "fee_multiplier_override"} <= event_fields.keys(),
+                "KALSHI_OBSERVATION_FIELDS", ReasonCode.INCOMPLETE_CONTRACT)
+            _kalshi_observation_require(market_fields.get("fee_waiver_expiration_time") is None,
+                                        "KALSHI_OBSERVATION_MODIFIER")
+            family, multiplier = event_fields["fee_type_override"], event_fields["fee_multiplier_override"]
+            if family is None and multiplier is None:
+                basis, multiplier = "OBSERVED_SERIES_BASE", candidate.fee_multiplier
+            else:
+                _kalshi_observation_require(type(family) is str and family == "quadratic"
+                    and type(multiplier) in (int, Decimal), "KALSHI_OBSERVATION_MODIFIER")
+                multiplier = KalshiQuadraticSeriesFeeCandidateV1(series_ticker,
+                    Decimal(multiplier) if type(multiplier) is int else multiplier).fee_multiplier
+                basis = "OBSERVED_EVENT_OVERRIDE"
+            with self._lock:
+                _kalshi_observation_require(self._state == "CAPTURING" and self._pending is None
+                    and self._attempts == 3, "KALSHI_OBSERVATION_STATE")
+                available = self._observe_clock_v1()
+                self._check_operating_v1(available)
+                cohort = KalshiObservedFeeCohortV1((market, event, series), config.expected_market_ticker,
+                    event_ticker, series_ticker, basis, multiplier, available[0], available[1],
+                    config.process_epoch_id, config.monotonic_clock_id)
+                self._issued_cohort = cohort
+                self._state = "READY"
+                return cohort
+        except BaseException as error:
+            with self._lock:
+                self._invalidate_v1()
+            if isinstance(error, OSError):
+                self._raise_transport_v1(error)
+            raise
+
+    def resolve_scenario_multiplier(self, *, cohort: KalshiObservedFeeCohortV1,
+                                    expected_market_ticker: str, as_of_monotonic_ns: int) -> Decimal:
+        self._require_instance_v1()
+        with self._lock:
+            _kalshi_observation_require(self._state == "READY", "KALSHI_OBSERVATION_STATE")
+            config = self._config
+            _kalshi_observation_require(type(cohort) is KalshiObservedFeeCohortV1
+                and self._issued_cohort is cohort and cohort.process_epoch_id == config.process_epoch_id
+                and cohort.monotonic_clock_id == config.monotonic_clock_id, "KALSHI_OBSERVATION_ASSOCIATION")
+            _native_ident(expected_market_ticker)
+            _kalshi_observation_require(expected_market_ticker == cohort.market_ticker == config.expected_market_ticker,
+                                        "KALSHI_OBSERVATION_FIELDS", ReasonCode.INPUT_SCOPE_MISMATCH)
+            now = self._observe_clock_v1()
+            self._check_operating_v1(now)
+            _kalshi_observation_counter(as_of_monotonic_ns)
+            _kalshi_observation_time(cohort.available_monotonic_ns <= as_of_monotonic_ns <= now[1])
+            return cohort.fee_multiplier
+
+    def revoke(self) -> None:
+        self._require_instance_v1()
+        with self._lock:
+            self._state = "REVOKED"
+            self._pending = None
+            self._issued_cohort = None
+
+
 def _pit_source_text(value: object, name: str) -> str:
     if (
         type(value) is not str

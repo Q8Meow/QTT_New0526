@@ -21,6 +21,8 @@ from ..stage1_prediction_markets.qku_computation_control_plane.errors import (
     ReasonCode,
 )
 from ..stage1_prediction_markets.qku_computation_control_plane.source_policy import (
+    KalshiFeeObservationOwnerV1,
+    KalshiObservedFeeCohortV1,
     decode_kalshi_market_linked_series_fee_candidate_v1,
     decode_kalshi_quadratic_series_fee_candidate_v1,
 )
@@ -143,6 +145,30 @@ def compose_kalshi_series_quadratic_taker_buy_yes_cashflows_v1(
     return compose_kalshi_quadratic_taker_buy_yes_cashflows_v1(
         profile_id=profile_id, currency=currency, fills=fills,
         fee_multiplier=candidate.fee_multiplier, balance_increment=balance_increment,
+        prior_rounding_overpayment=prior_rounding_overpayment,
+    )
+
+
+def compose_kalshi_observed_fee_scenario_cashflows_v1(
+    *, profile_id: str, currency: str, source_owner: KalshiFeeObservationOwnerV1,
+    cohort: KalshiObservedFeeCohortV1, expected_market_ticker: str,
+    as_of_monotonic_ns: int, fills: tuple[KalshiQuadraticTakerBuyYesFillV1, ...],
+    balance_increment: Decimal, prior_rounding_overpayment: Decimal,
+) -> KalshiConditionalCashflowTermsV1:
+    """Consume an original same-process observation for hypothetical cashflows."""
+    if type(profile_id) is not str or profile_id != "KALSHI_US_DCM_DIRECT":
+        raise ContractValidationError(ReasonCode.INVALID_CONTRACT, "exact Kalshi profile required")
+    if type(currency) is not str or currency != "USD":
+        raise ContractValidationError(ReasonCode.INVALID_CONTRACT, "exact USD currency required")
+    if type(source_owner) is not KalshiFeeObservationOwnerV1:
+        raise ContractValidationError(ReasonCode.INVALID_CONTRACT, "KALSHI_OBSERVATION_SCOPE")
+    multiplier = source_owner.resolve_scenario_multiplier(
+        cohort=cohort, expected_market_ticker=expected_market_ticker,
+        as_of_monotonic_ns=as_of_monotonic_ns,
+    )
+    return compose_kalshi_quadratic_taker_buy_yes_cashflows_v1(
+        profile_id=profile_id, currency=currency, fills=fills,
+        fee_multiplier=multiplier, balance_increment=balance_increment,
         prior_rounding_overpayment=prior_rounding_overpayment,
     )
 
