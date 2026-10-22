@@ -92,19 +92,117 @@ def test_frozen_online_receipts_are_build_evidence_not_runtime_fetchers() -> Non
         "zipfile",
         "webbrowser",
     }
-    for name in runtime_modules:
-        tree = ast.parse((package_root / name).read_text(encoding="utf-8"))
-        imports = {
-            alias.name.split(".", 1)[0]
-            for node in ast.walk(tree)
-            if isinstance(node, ast.Import)
-            for alias in node.names
-        } | {
-            (node.module or "").split(".", 1)[0]
-            for node in ast.walk(tree)
+    from tools.validate_no_runtime_artifacts import kalshi_fee_native_admission_v1
+
+    owner_path = (
+        "src/qtt/stage1_prediction_markets/"
+        "qku_computation_control_plane/source_policy.py"
+    )
+
+    def rejected_imports(relative: str, tree: ast.Module):
+        admitted, admission_errors = kalshi_fee_native_admission_v1(relative, tree)
+        quote_nodes = [
+            node for node in ast.walk(tree)
             if isinstance(node, ast.ImportFrom)
-        }
-        assert not imports & forbidden_imports
+            and node.module == "urllib.parse"
+            and node.level == 0
+            and tuple((alias.name, alias.asname) for alias in node.names)
+            == (("quote", None),)
+        ]
+        quote_node = (
+            quote_nodes[0]
+            if relative == owner_path
+            and not admission_errors
+            and len(admitted) == 2
+            and {position[0] for position in admitted} == {"Import", "Call"}
+            and len(quote_nodes) == 1
+            else None
+        )
+        imports = set()
+        for node in ast.walk(tree):
+            if node is quote_node:
+                continue
+            if isinstance(node, ast.Import):
+                imports.update(alias.name.split(".", 1)[0] for alias in node.names)
+            elif isinstance(node, ast.ImportFrom):
+                imports.add((node.module or "").split(".", 1)[0])
+        return imports & forbidden_imports, admission_errors
+
+    for name in runtime_modules:
+        path = package_root / name
+        blocked, errors = rejected_imports(
+            path.as_posix(), ast.parse(path.read_text(encoding="utf-8"))
+        )
+        assert not errors, (name, errors)
+        assert not blocked, (name, blocked)
+
+    # Reuse the existing independent test literal without copying its template.
+    fixture_tree = ast.parse(Path(
+        "tests/source_evidence/"
+        "test_source_fact_binding_connector_semantic_readiness_static.py"
+    ).read_text(encoding="utf-8"))
+    fixture_values = [
+        node.value for node in fixture_tree.body
+        if isinstance(node, ast.Assign)
+        and any(isinstance(target, ast.Name)
+                and target.id == "_KALSHI_INDEPENDENT_NATIVE_TEMPLATE"
+                for target in node.targets)
+    ]
+    assert len(fixture_values) == 1
+    receiver = ast.literal_eval(fixture_values[0])
+    assert isinstance(receiver, str)
+    quote = "from urllib.parse import quote\n"
+    approved = quote + receiver
+    assert rejected_imports(owner_path, ast.parse("x = 1")) == (set(), ())
+    assert rejected_imports(owner_path, ast.parse(quote + "x = 1")) == ({"urllib"}, ())
+    assert rejected_imports(owner_path, ast.parse(approved)) == (set(), ())
+    positions, errors = kalshi_fee_native_admission_v1(owner_path, ast.parse(approved))
+    assert len(positions) == 2 and errors == ()
+    assert {position[0] for position in positions} == {"Import", "Call"}
+
+    for declaration in (
+        quote + quote,
+        "from urllib.parse import quote as quote\n",
+        "from urllib.parse import quote as encoded\n",
+        quote + "from urllib.parse import quote as encoded\n",
+        "from urllib.parse import quote, urlencode\n",
+        "from urllib.parse import quote, quote\n",
+        "from .urllib.parse import quote\n",
+        "from ..urllib.parse import quote\n",
+        "from urllib.parse import *\n",
+        "import urllib\n",
+        "import urllib.parse\n",
+        "from urllib import parse\n",
+    ):
+        assert rejected_imports(owner_path, ast.parse(declaration + receiver)) == (
+            {"urllib"}, ()
+        )
+    for wrong_path in (
+        (package_root / "bindings.py").as_posix(),
+        owner_path.upper(),
+        owner_path + ".copy",
+    ):
+        assert rejected_imports(wrong_path, ast.parse(approved)) == ({"urllib"}, ())
+    for extra, expected_root in (
+        ("\nimport urllib.request\n", "urllib"),
+        ("\nfrom urllib.request import urlopen\n", "urllib"),
+        ("\nimport httpx\n", "httpx"),
+        ("\nimport requests\n", "requests"),
+        ("\nimport zipfile\n", "zipfile"),
+        ("\nimport webbrowser\n", "webbrowser"),
+    ):
+        assert rejected_imports(owner_path, ast.parse(approved + extra)) == (
+            {expected_root}, ()
+        )
+    for malformed in (
+        receiver.replace('"GET"', '"POST"'),
+        receiver.replace("import http.client", "pass"),
+        receiver.replace("connection.close()", "pass"),
+        receiver + receiver,
+    ):
+        blocked, errors = rejected_imports(owner_path, ast.parse(quote + malformed))
+        assert errors
+        assert "urllib" in blocked
 
 
 def test_latency_classes_are_exactly_eight_point_in_time_and_22_nearline() -> None:

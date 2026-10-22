@@ -941,6 +941,35 @@ def f14_native_admission_v1(relpath: str, tree: ast.Module) -> tuple[frozenset[t
         return (frozenset(), tuple(errors))
     return (frozenset(allowed), ())
 
+_KALSHI_FEE_NATIVE_OWNER = 'src/qtt/stage1_prediction_markets/qku_computation_control_plane/source_policy.py'
+_KALSHI_FEE_NATIVE_TRANSPORT_TEMPLATE = "class KalshiFeeObservationOwnerV1:\n    def _read_rest_once_v1(self, role, ticker):\n        prepared = self._prepare_read_v1(role, ticker)\n        import http.client\n        connection = http.client.HTTPSConnection(\"external-api.kalshi.com\", 443, timeout=prepared.timeout_seconds, context=prepared.tls_context)\n        try:\n            self._recheck_and_charge_v1(prepared)\n            connection.request(\"GET\", prepared.target, body=None, headers=prepared.headers)\n            response = connection.getresponse()\n            self._validate_response_headers_v1(prepared, response)\n            raw = response.read(prepared.maximum_raw_bytes + 1)\n            received = self._observe_clock_v1()\n            self._validate_response_body_v1(prepared, response, raw)\n            return self._retain_received_v1(prepared, raw, received)\n        except (OSError, http.client.HTTPException) as error:\n            self._raise_transport_v1(error)\n        finally:\n            try:\n                connection.close()\n            except OSError as error:\n                self._raise_transport_v1(error)\n"
+
+
+def kalshi_fee_native_admission_v1(relpath: str, tree: ast.Module) -> tuple[frozenset[tuple], tuple[str, ...]]:
+    """Admit only the two network nodes in the independently frozen method."""
+    if relpath != _KALSHI_FEE_NATIVE_OWNER:
+        return (frozenset(), ())
+    classes = [node for node in ast.walk(tree)
+               if isinstance(node, ast.ClassDef) and node.name == 'KalshiFeeObservationOwnerV1']
+    if not classes:
+        return (frozenset(), ())
+    if len(classes) != 1 or classes[0] not in tree.body:
+        return (frozenset(), ('KALSHI_FEE_NATIVE_OWNER_CLASS_ROSTER',))
+    template = ast.parse(_KALSHI_FEE_NATIVE_TRANSPORT_TEMPLATE).body[0].body[0]
+    found = [node for node in classes[0].body
+             if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)) and node.name == template.name]
+    if len(found) != 1 or ast.dump(found[0], include_attributes=False) != ast.dump(template, include_attributes=False):
+        return (frozenset(), ('KALSHI_FEE_NATIVE_METHOD_TEMPLATE',))
+    admitted = set()
+    for node in ast.walk(found[0]):
+        match = isinstance(node, ast.Import) and len(node.names) == 1 and node.names[0].name == 'http.client'
+        if isinstance(node, ast.Call):
+            match = ast.unparse(node.func) == 'http.client.HTTPSConnection'
+        if match:
+            admitted.add((type(node).__name__, node.lineno, node.col_offset, node.end_lineno, node.end_col_offset))
+    return (frozenset(admitted), ())
+
+
 def _scan_python_content(path: pathlib.Path, text: str, enabled_flags: list[str]) -> list[str]:
     try:
         tree = ast.parse(text, filename=str(path))
@@ -948,6 +977,9 @@ def _scan_python_content(path: pathlib.Path, text: str, enabled_flags: list[str]
         return _scan_text_content(path, text, enabled_flags)
 
     admitted, admission_failures = f14_native_admission_v1(path.as_posix(), tree)
+    kalshi_admitted, kalshi_failures = kalshi_fee_native_admission_v1(path.as_posix(), tree)
+    admitted = admitted | kalshi_admitted
+    admission_failures = admission_failures + kalshi_failures
     found_by_flag = {flag: set[str]() for flag in enabled_flags}
     source_retrieval_imports = {
         "http.client": "http.client import/use",

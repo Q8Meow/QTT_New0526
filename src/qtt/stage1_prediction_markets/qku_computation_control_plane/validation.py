@@ -1276,6 +1276,8 @@ def _package_ast() -> tuple[tuple[Path, ast.Module], ...]:
 
 
 def _no_runtime_topology() -> bool:
+    from tools.validate_no_runtime_artifacts import kalshi_fee_native_admission_v1
+
     forbidden_modules = {
         "asyncio",
         "http",
@@ -1299,12 +1301,42 @@ def _no_runtime_topology() -> bool:
     cache_lock_assignment_count = 0
     cache_lock_publication_count = 0
     for path, tree in _package_ast():
+        relative = path.relative_to(REPO_ROOT).as_posix()
+        kalshi_admitted, admission_errors = kalshi_fee_native_admission_v1(
+            relative, tree
+        )
+        if admission_errors:
+            return False
+        quote_imports = [
+            node for node in ast.walk(tree)
+            if isinstance(node, ast.ImportFrom)
+            and node.module == "urllib.parse"
+            and node.level == 0
+            and tuple((alias.name, alias.asname) for alias in node.names)
+            == (("quote", None),)
+        ]
+        quote_import = (
+            quote_imports[0]
+            if relative == (
+                "src/qtt/stage1_prediction_markets/"
+                "qku_computation_control_plane/source_policy.py"
+            )
+            and len(kalshi_admitted) == 2
+            and {position[0] for position in kalshi_admitted} == {"Import", "Call"}
+            and len(quote_imports) == 1
+            else None
+        )
         for node in ast.walk(tree):
             if isinstance(node, ast.Import) and any(
                 alias.name.split(".", 1)[0] in forbidden_modules
                 for alias in node.names
             ):
-                return False
+                position = (
+                    type(node).__name__, node.lineno, node.col_offset,
+                    node.end_lineno, node.end_col_offset,
+                )
+                if position not in kalshi_admitted:
+                    return False
             if (
                 isinstance(node, ast.ImportFrom)
                 and node.module
@@ -1323,7 +1355,11 @@ def _no_runtime_topology() -> bool:
                 )
                 if cache_publication_exception:
                     cache_lock_import_count += 1
-                if not parameter_policy_exception and not cache_publication_exception:
+                if (
+                    not parameter_policy_exception
+                    and not cache_publication_exception
+                    and node is not quote_import
+                ):
                     return False
             if path.name == "evidence.py" and isinstance(node, ast.Assign):
                 if (

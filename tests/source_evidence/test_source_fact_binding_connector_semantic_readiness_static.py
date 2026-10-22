@@ -237,6 +237,7 @@ def test_python_usage_scan_allows_exact_local_visual_qa_playwright_path(tmp_path
 
 def test_python_usage_scan_rejects_unregistered_playwright_path(tmp_path):
     _assert_f14_shared_native_admission(tmp_path / "f14")
+    _assert_kalshi_shared_native_admission(tmp_path / "kalshi")
     script = tmp_path / "tools" / "bad_browser_fetch.py"
     script.parent.mkdir(parents=True)
     script.write_text(
@@ -306,6 +307,122 @@ def test_master_plan_remains_unchanged():
 
 
 _F14_INDEPENDENT_NATIVE_TEMPLATE = 'class RetailPrivateIngressV1:\n    def read_rest_once(self, request):\n        prepared = self._prepare_rest_v1(request)\n        import http.client\n        connection = http.client.HTTPSConnection("api.polymarket.us", 443, timeout=prepared.timeout_seconds, context=prepared.tls_context)\n        try:\n            self._recheck_and_charge_v1(prepared)\n            connection.request("GET", prepared.target, body=None, headers=prepared.headers)\n            response = connection.getresponse()\n            self._validate_response_headers_v1(prepared, response)\n            raw = response.read(prepared.maximum_raw_bytes + 1)\n            received = self._observe_clock_v1()\n            self._validate_response_body_v1(prepared, response, raw)\n            return self._retain_received_v1(prepared, raw, received, 200)\n        finally:\n            connection.close()\n\n    def read_private_message_once(self, request):\n        prepared = self._prepare_ws_v1(request)\n        import websockets.sync.client\n        with websockets.sync.client.connect("wss://api.polymarket.us/v1/ws/private", ssl=prepared.tls_context, additional_headers=prepared.headers, proxy=None, compression=None, open_timeout=prepared.timeout_seconds, ping_interval=20, ping_timeout=20, close_timeout=10, max_size=prepared.maximum_raw_bytes, max_queue=16, logger=prepared.quiet_logger) as connection:\n            self._verify_handshake_v1(prepared, connection.response)\n            self._recheck_subscription_v1(prepared)\n            connection.send(prepared.subscription_json)\n            state = self._initial_ws_state_v1()\n            for unused in range(prepared.maximum_application_messages):\n                message = connection.recv(timeout=self._remaining_seconds_v1(prepared))\n                received = self._observe_clock_v1()\n                state, disposition, raw = self._classify_ws_message_v1(prepared, state, message)\n                if disposition == "SELECTED_UPDATE":\n                    return self._retain_received_v1(prepared, raw, received, 101)\n            self._raise_message_budget_v1()\n'
+
+
+_KALSHI_INDEPENDENT_NATIVE_TEMPLATE = "class KalshiFeeObservationOwnerV1:\n    def _read_rest_once_v1(self, role, ticker):\n        prepared = self._prepare_read_v1(role, ticker)\n        import http.client\n        connection = http.client.HTTPSConnection(\"external-api.kalshi.com\", 443, timeout=prepared.timeout_seconds, context=prepared.tls_context)\n        try:\n            self._recheck_and_charge_v1(prepared)\n            connection.request(\"GET\", prepared.target, body=None, headers=prepared.headers)\n            response = connection.getresponse()\n            self._validate_response_headers_v1(prepared, response)\n            raw = response.read(prepared.maximum_raw_bytes + 1)\n            received = self._observe_clock_v1()\n            self._validate_response_body_v1(prepared, response, raw)\n            return self._retain_received_v1(prepared, raw, received)\n        except (OSError, http.client.HTTPException) as error:\n            self._raise_transport_v1(error)\n        finally:\n            try:\n                connection.close()\n            except OSError as error:\n                self._raise_transport_v1(error)\n"
+
+
+def _assert_kalshi_shared_native_admission(root):
+    import ast
+    from pathlib import PurePosixPath
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane import validation as operations
+    from tools import validate_no_runtime_artifacts as runtime
+    from tools import validate_source_fact_binding_connector_semantic_readiness_static as readiness
+
+    relative = 'src/qtt/stage1_prediction_markets/qku_computation_control_plane/source_policy.py'
+    target = root / relative
+    target.parent.mkdir(parents=True)
+    source = _KALSHI_INDEPENDENT_NATIVE_TEMPLATE
+    assert runtime.kalshi_fee_native_admission_v1(relative, ast.parse('x = 1')) == (frozenset(), ())
+    positions, errors = runtime.kalshi_fee_native_admission_v1(relative, ast.parse(source))
+    assert len(positions) == 2 and errors == ()
+    assert {position[0] for position in positions} == {'Import', 'Call'}
+    target.write_text(source, encoding='utf-8')
+    assert runtime._scan_python_content(PurePosixPath(relative), source, ['forbid_source_retrieval']) == []
+    assert readiness._scan_forbidden_python_usage(root) == []
+    evidence_relative = 'src/qtt/stage1_prediction_markets/qku_computation_control_plane/evidence.py'
+    evidence_source = (
+        'from threading import Lock\n'
+        'class Evidence:\n'
+        '    def __init__(self):\n'
+        '        self._cache_publication_lock = Lock()\n'
+        '    def publish(self):\n'
+        '        with self._cache_publication_lock:\n'
+        '            pass\n'
+    )
+
+    def operations_admits(candidate, owner_relative=relative, extra_source=None):
+        trees = (
+            (root / owner_relative, ast.parse(candidate)),
+            (root / evidence_relative, ast.parse(evidence_source)),
+        )
+        if extra_source is not None:
+            trees += ((root / 'src/qtt/elsewhere.py', ast.parse(extra_source)),)
+        with pytest.MonkeyPatch.context() as patch:
+            patch.setattr(operations, 'REPO_ROOT', root)
+            patch.setattr(operations, '_package_ast', lambda: trees)
+            return operations._no_runtime_topology()
+
+    assert operations_admits('x = 1')
+    assert operations_admits(source)
+    quote_import = 'from urllib.parse import quote\n'
+    with_quote = quote_import + source
+    assert operations_admits(with_quote)
+    positions, errors = runtime.kalshi_fee_native_admission_v1(relative, ast.parse(with_quote))
+    assert len(positions) == 2 and errors == ()
+    assert {position[0] for position in positions} == {'Import', 'Call'}
+    assert not operations_admits(quote_import + 'x = 1')
+    for malformed in (
+        source.replace('"GET"', '"POST"'),
+        source.replace('import http.client', 'pass'),
+        source.replace('connection.close()', 'pass'),
+        source + source,
+    ):
+        assert not operations_admits(malformed)
+        assert not operations_admits(quote_import + malformed)
+    for invalid_quote in (
+        quote_import + quote_import,
+        'from urllib.parse import quote as quote\n',
+        'from urllib.parse import quote as encoded\n',
+        'from urllib.parse import quote, urlencode\n',
+        'from urllib.parse import quote, quote\n',
+        'from .urllib.parse import quote\n',
+        'from urllib.parse import *\n',
+        'import urllib\n',
+        'import urllib.parse\n',
+        'from urllib import parse\n',
+    ):
+        assert not operations_admits(invalid_quote + source)
+    assert not operations_admits(source, extra_source=quote_import)
+    for extra in ('\nimport urllib.request\n', '\nfrom urllib.request import urlopen\n',
+                  '\nimport socket\n', '\nimport http.client\n'):
+        assert not operations_admits(with_quote + extra)
+    for extra in ('\nimport http.client\n', '\nimport socket\n', '\nfrom http import client\n'):
+        assert not operations_admits(source + extra)
+    assert not operations_admits(source, 'src/qtt/elsewhere.py')
+    for old, new in (
+        ('external-api.kalshi.com','other.example'), ('"GET"','"POST"'),
+        ('body=None','body=b"secret"'), ('headers=prepared.headers','headers={}'),
+        ('self._prepare_read_v1(role, ticker)','self._prepare_read_v1("SERIES", ticker)'),
+        ('self._recheck_and_charge_v1(prepared)','self._observe_clock_v1()'),
+        ('connection.close()','pass'), ('finally:','except ValueError:'),
+        ('def _read_rest_once_v1','async def _read_rest_once_v1'),
+        ('def _read_rest_once_v1','def renamed_read'),
+        ('class KalshiFeeObservationOwnerV1','class WrongOwner'),
+        ('import http.client','import http.client as hidden'),
+        ('import http.client','http = __import__("http.client")'),
+        ('    def _read_rest_once_v1','    @staticmethod\n    def _read_rest_once_v1'),
+    ):
+        bad = source.replace(old,new)
+        target.write_text(bad,encoding='utf-8')
+        assert runtime._scan_python_content(PurePosixPath(relative),bad,['forbid_source_retrieval'])
+        assert readiness._scan_forbidden_python_usage(root)
+        admitted, _ = runtime.kalshi_fee_native_admission_v1(relative,ast.parse(bad))
+        assert not admitted
+    for bad in (source+source, source+source.split('\n',1)[1],
+                source+'\nimport socket\nsocket.socket()\n',
+                source+'\nimport http.client\nhttp.client.HTTPSConnection("other.example")\n',
+                source+'\ndef other():\n    import urllib.request\n    urllib.request.urlopen("https://other.example")\n'):
+        target.write_text(bad,encoding='utf-8')
+        assert runtime._scan_python_content(PurePosixPath(relative),bad,['forbid_source_retrieval'])
+        assert readiness._scan_forbidden_python_usage(root)
+    for wrong in ('src/qtt/elsewhere.py',relative+'.copy',relative.upper()):
+        assert runtime.kalshi_fee_native_admission_v1(wrong,ast.parse(source)) == (frozenset(), ())
+        assert runtime._scan_python_content(PurePosixPath(wrong),source,['forbid_source_retrieval'])
+    target.unlink()
+    other = root/'src/qtt/elsewhere.py'
+    other.write_text(source,encoding='utf-8')
+    assert readiness._scan_forbidden_python_usage(root)
 
 
 def _assert_f14_shared_native_admission(root):
