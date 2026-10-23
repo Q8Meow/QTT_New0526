@@ -1774,7 +1774,7 @@ def _f14_execution_contract_failures_v1(repo_root):
     discriminator = next(n for n in tree.body if isinstance(n, ast.ClassDef) and n.name == 'EconomicRecordTypeV1')
     values = {ast.literal_eval(n.value) for n in discriminator.body if isinstance(n, ast.Assign)}
     if values != _F14_EXPECTED_DISCRIMINATORS:
-        failures.append('F14 exact 21-discriminator roster changed')
+        failures.append('exact 22-discriminator roster changed, including source-use custody')
     for name, cls in (('persistence.py', 'PersistenceAdapterV1'), ('persistence.py', 'InMemoryPersistenceAdapterV1'),
             ('sqlite_reference.py', 'SQLiteReferenceAdapterV1')):
         tree = ast.parse((owner / name).read_text(encoding='utf-8'))
@@ -1796,8 +1796,8 @@ def _f14_execution_contract_failures_v1(repo_root):
         failures.append('F14 native install is not the single exact line under the inherited anchor')
     return failures
 
-_F14_EXPECTED_DISCRIMINATORS = frozenset(('DURABLE_COMPUTATION_RECEIPT', 'ECONOMIC_EVENT', 'JOURNAL_TRANSACTION', 'JOURNAL_POSTING', 'STATE_TRANSITION', 'IDEMPOTENCY_CLAIM', 'OUTBOX_INTENT', 'REVERSAL', 'RECONCILIATION_BREAK', 'ORDER_INTENT', 'EXECUTION_CUSTODY', 'MODE_SNAPSHOT_CONTROL', 'ST12F_EVIDENCE_CONTROL', 'PIT_COMMIT_INTENT', 'PIT_COMMIT_COMPLETION', 'PIT_AVAILABILITY', 'PIT_CANONICAL_EVENT', 'PIT_CAPTURE_AND_GAP', 'PIT_CHECKPOINT', 'PRIVATE_OBSERVATION_CLOCK', 'PRIVATE_EVIDENCE_WITNESS'))
-_F14_EXPECTED_METHODS = frozenset(('availability', 'begin_transaction', 'insert_receipt_record', 'insert_value_lineage_edge', 'insert_economic_event', 'insert_journal_transaction', 'insert_journal_posting', 'insert_state_transition', 'acquire_idempotency_claim', 'bind_idempotency_result', 'insert_outbox_intent', 'insert_reversal_link', 'load_committed_reversal_history', 'insert_reconciliation_break', 'get_record', 'load_committed_private_clock_receipt_v1', 'get_idempotency_result', 'reconstruct_as_of', 'load_committed_private_evidence_witness_v1', 'load_committed_private_evidence_snapshot_v1'))
+_F14_EXPECTED_DISCRIMINATORS = frozenset(('DURABLE_COMPUTATION_RECEIPT', 'ECONOMIC_EVENT', 'JOURNAL_TRANSACTION', 'JOURNAL_POSTING', 'STATE_TRANSITION', 'IDEMPOTENCY_CLAIM', 'OUTBOX_INTENT', 'REVERSAL', 'RECONCILIATION_BREAK', 'ORDER_INTENT', 'EXECUTION_CUSTODY', 'MODE_SNAPSHOT_CONTROL', 'ST12F_EVIDENCE_CONTROL', 'PIT_COMMIT_INTENT', 'PIT_COMMIT_COMPLETION', 'PIT_AVAILABILITY', 'PIT_CANONICAL_EVENT', 'PIT_CAPTURE_AND_GAP', 'PIT_CHECKPOINT', 'PRIVATE_OBSERVATION_CLOCK', 'PRIVATE_EVIDENCE_WITNESS', 'SOURCE_USE_CONTROL'))
+_F14_EXPECTED_METHODS = frozenset(('availability', 'begin_transaction', 'insert_receipt_record', 'insert_value_lineage_edge', 'insert_economic_event', 'insert_journal_transaction', 'insert_journal_posting', 'insert_state_transition', 'acquire_idempotency_claim', 'bind_idempotency_result', 'insert_outbox_intent', 'insert_reversal_link', 'load_committed_reversal_history', 'insert_reconciliation_break', 'get_record', 'load_committed_private_clock_receipt_v1', 'get_idempotency_result', 'reconstruct_as_of', 'load_committed_private_evidence_witness_v1', 'load_committed_private_evidence_snapshot_v1', 'load_committed_source_use_record_v1', 'load_committed_source_use_head_v1', 'load_source_use_head_for_update_v1', 'load_source_use_record_for_update_v1'))
 _F14_EXPECTED_NATIVE_INSTALL = 'python -m pip install --only-binary=:all: --no-deps --index-url https://pypi.org/simple websockets==17.0.1 cryptography==50.0.1 cffi==2.1.1 pycparser==3.0'
 
 
@@ -1891,6 +1891,8 @@ def main() -> int:
         "load_committed_private_clock_receipt_v1",
         "load_committed_private_evidence_witness_v1",
         "load_committed_private_evidence_snapshot_v1",
+        "load_committed_source_use_record_v1", "load_committed_source_use_head_v1",
+        "load_source_use_head_for_update_v1", "load_source_use_record_for_update_v1",
         "reconstruct_as_of",
     }
     if persistence_methods != expected_methods:

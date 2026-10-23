@@ -3,14 +3,14 @@
 from __future__ import annotations
 
 import ast
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import UTC, date, datetime, timedelta
 from decimal import Decimal
 from enum import StrEnum
 import json
 from pathlib import Path
 from types import MappingProxyType
-from typing import Mapping
+from typing import TYPE_CHECKING, Mapping
 
 from .errors import ReasonCode, SourcePolicyError
 from .models import NO_EFFECTS_V1, NoEffectFlagsV1
@@ -20,6 +20,76 @@ from .point_in_time import (
 )
 from .stage1_launch_graph import Stage1VenueProfileIdV1
 from .source_rights import reject_secret_material
+
+if TYPE_CHECKING:
+    from .persistence import PersistenceAdapterV1
+
+
+@dataclass(frozen=True, slots=True)
+class RecordedSourceUseStatusV1:
+    """Current recorded assertions only; neither authenticated nor admitted."""
+
+    stream_id: str
+    current_head_record_ref: str | None
+    current_sequence: int | None
+    subject_kind: str | None
+    recorded_at_utc: datetime | None
+    evaluated_at_utc: datetime
+    state: str
+    admission_eligible: bool = field(default=False, init=False)
+
+    def __post_init__(self) -> None:
+        from .receipts import (
+            _source_use_stream_id_v1, _source_use_record_ref_v1, _source_use_require_v1, _source_use_utc_v1,
+        )
+
+        _source_use_stream_id_v1(self.stream_id)
+        _source_use_utc_v1(self.evaluated_at_utc)
+        _source_use_require_v1(type(self.state) is str and self.state in {
+            "MISSING", "RECORDED_UNVERIFIED", "WITHDRAWAL_RECORDED_UNVERIFIED",
+            "CLAIMED_NOT_YET_EFFECTIVE_UNVERIFIED", "CLAIMED_EXPIRED_UNVERIFIED",
+        })
+        if self.state == "MISSING":
+            _source_use_require_v1(all(value is None for value in (
+                self.current_head_record_ref, self.current_sequence, self.subject_kind, self.recorded_at_utc,
+            )))
+        else:
+            _source_use_record_ref_v1(self.current_head_record_ref)
+            _source_use_require_v1(type(self.current_sequence) is int and 1 <= self.current_sequence <= 2**63 - 1
+                                   and self.current_head_record_ref == f"SOURCE_USE::{self.stream_id}::{self.current_sequence:020d}"
+                                   and type(self.subject_kind) is str and self.subject_kind in {"OWNER_DECLARATION", "SOURCE_REVIEW"})
+            _source_use_require_v1(_source_use_utc_v1(self.recorded_at_utc) <= self.evaluated_at_utc)
+
+
+def read_recorded_source_use_status_v1(
+    *, adapter: PersistenceAdapterV1, stream_id: str, evaluated_at_utc: datetime,
+) -> RecordedSourceUseStatusV1:
+    from .errors import PersistenceContractError, PointInTimeError
+    from .persistence import PersistenceAdapterV1
+    from .receipts import _source_use_from_storage_v1, _source_use_stream_id_v1, _source_use_utc_v1, _source_use_require_v1
+
+    _source_use_stream_id_v1(stream_id)
+    evaluated_at_utc = _source_use_utc_v1(evaluated_at_utc)
+    _source_use_require_v1(isinstance(adapter, PersistenceAdapterV1))
+    head = adapter.load_committed_source_use_head_v1(stream_id)
+    if head is None:
+        return RecordedSourceUseStatusV1(stream_id, None, None, None, None, evaluated_at_utc, "MISSING")
+    head = _source_use_from_storage_v1(head, record_id=getattr(head, "record_id", None))
+    payload = head.typed_payload
+    if payload.stream_id != stream_id:
+        raise PersistenceContractError(ReasonCode.PERSISTENCE_CONFLICT, "source-use stored head mismatch")
+    if head.recorded_at > evaluated_at_utc:
+        raise PointInTimeError(ReasonCode.POINT_IN_TIME_VIOLATION, "source-use head is recorded after evaluation")
+    if payload.action == "WITHDRAW":
+        state = "WITHDRAWAL_RECORDED_UNVERIFIED"
+    elif payload.content.claimed_effective_at_utc is not None and evaluated_at_utc < payload.content.claimed_effective_at_utc:
+        state = "CLAIMED_NOT_YET_EFFECTIVE_UNVERIFIED"
+    elif payload.content.claimed_expires_at_utc is not None and evaluated_at_utc >= payload.content.claimed_expires_at_utc:
+        state = "CLAIMED_EXPIRED_UNVERIFIED"
+    else:
+        state = "RECORDED_UNVERIFIED"
+    return RecordedSourceUseStatusV1(stream_id, head.record_id, head.sequence, payload.subject_kind,
+                                    head.recorded_at, evaluated_at_utc, state)
 
 
 class AtomicFactTerminalStateV1(StrEnum):

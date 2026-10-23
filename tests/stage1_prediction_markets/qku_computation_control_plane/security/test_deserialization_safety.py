@@ -12,7 +12,220 @@ from src.qtt.stage1_prediction_markets.qku_computation_control_plane.serializati
 )
 
 
-def test_json_is_deterministic_and_unsafe_values_fail_closed() -> None:
+def _assert_source_use_closed_storage(directory):
+    from copy import copy, deepcopy
+    from dataclasses import fields, replace
+    from datetime import UTC, datetime, timedelta, timezone
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane.errors import (
+        ContractValidationError, PersistenceContractError,
+    )
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane.models import NO_EFFECTS_V1, NoEffectFlagsV1
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane.persistence import (
+        InMemoryPersistenceAdapterV1, PersistenceAvailabilityV1,
+    )
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane.sqlite_reference import SQLiteReferenceAdapterV1
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane.receipts import (
+        EconomicReceiptEventSpineV1, EconomicRecordTypeV1, SourceUseScopeV1,
+        SourceUseOriginalContentV1, SourceUseControlRecordV1,
+        _source_use_from_storage_v1, _source_use_reconstruct_spine_v1,
+    )
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane.stage1_launch_graph import Stage1VenueProfileIdV1
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane.source_policy import (
+        PITSourceCurrentizationReceiptV1, read_recorded_source_use_status_v1, validate_pit_source_rights_admission_v1,
+    )
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane.point_in_time import PITDataContractErrorV1, PITReasonCodeV1
+
+    now = datetime(2026, 1, 1, tzinfo=UTC)
+    scope = SourceUseScopeV1(Stage1VenueProfileIdV1.KALSHI_US_DCM_DIRECT,
+        "KALSHI_PUBLIC_MARKET_EVENT_SERIES", "KALSHI_PUBLIC_FEE_OBSERVATION_V1", "OBSERVED_FEE_SCENARIO_INTERNAL",
+        "PROCESS_MEMORY_ONLY", "NO_REDISTRIBUTION_NO_EXTERNAL_AI_FORWARDING", None)
+    content = SourceUseOriginalContentV1(" \tSYNTHETIC e\u0301 café 漢字\r\n retained.\n", None, None, "UNKNOWN", None, None, None, None, None)
+    control = SourceUseControlRecordV1("synthetic-codec", "OWNER_DECLARATION", 1, "RECORD", None, scope, content, None, "SYNTHETIC_TEST")
+    record = EconomicReceiptEventSpineV1("SOURCE_USE::synthetic-codec::00000000000000000001",
+        EconomicRecordTypeV1.SOURCE_USE_CONTROL, "SOURCE_USE_CONTROL_V1", "QTT_SOURCE_USE_CUSTODY", "QTT_SOURCE_USE_CUSTODY",
+        "synthetic-context", now, now, "synthetic-cause", "synthetic-correlation", "synthetic-trace", "synthetic-tracestate",
+        1, "SOURCE_USE::synthetic-codec", 1, "RECORDED_NOT_AUTHENTICATED_NOT_ADMITTED", control)
+    raw = deterministic_json(record)
+    assert _source_use_from_storage_v1(raw, record_id=record.record_id) == record
+    assert _source_use_from_storage_v1(raw, record_id=record.record_id).typed_payload.content.original_text.encode() == content.original_text.encode()
+    for time_kind, time_text in (("UNKNOWN", None), ("CALENDAR_DATE", "2024-02-29"),
+            ("UTC_INSTANT", "2026-01-01T00:00:00Z"), ("UTC_INSTANT", "2026-01-01T00:00:00.000001+00:00")):
+        changed = replace(record, typed_payload=replace(control, content=replace(content,
+            reported_time_kind=time_kind, reported_time_text=time_text)))
+        actual = _source_use_from_storage_v1(deterministic_json(changed), record_id=record.record_id)
+        assert (actual.typed_payload.content.reported_time_kind, actual.typed_payload.content.reported_time_text) == (time_kind, time_text)
+    for time_kind, time_text in (("UNKNOWN", "2026-01-01"), ("CALENDAR_DATE", None), ("CALENDAR_DATE", "2026-02-29"),
+            ("CALENDAR_DATE", "20260101"), ("CALENDAR_DATE", "2026-1-01"), ("UTC_INSTANT", "2026-01-01T00:00:00"),
+            ("UTC_INSTANT", "2026-01-01T00:00:00+01:00"), ("UTC_INSTANT", "2026-01-01T00:00:60Z"),
+            ("UTC_INSTANT", "2026-01-01T00:00:00.0000001Z"), ("utc_instant", "2026-01-01T00:00:00Z")):
+        with pytest.raises(ContractValidationError):
+            replace(content, reported_time_kind=time_kind, reported_time_text=time_text)
+    class Text(str):
+        pass
+    class Scope(SourceUseScopeV1):
+        pass
+    for field_name, value in (("original_text", Text("synthetic")), ("original_text", "\ud800"),
+            ("original_text", "synthetic\0"), ("original_text", "synthetic\x7f"), ("original_text", " \t\n"),
+            ("reported_origin_ref", ""), ("reported_principal_ref", 7), ("reported_origin_ref", "é" * 1025),
+            ("reported_origin_ref", "synthetic\nref"), ("claimed_effective_at_utc", datetime(2026, 1, 1)),
+            ("claimed_expires_at_utc", datetime(2026, 1, 1, tzinfo=timezone(timedelta(hours=1)))),
+            ("reviewed_document_ref", "synthetic-only-one-half")):
+        with pytest.raises(ContractValidationError) as caught:
+            replace(content, **{field_name: value})
+        assert caught.value.reason_code is ReasonCode.INVALID_CONTRACT
+    for sequence in (True, 0, -1, 2**63, "1", 1.0):
+        with pytest.raises(ContractValidationError):
+            replace(control, sequence=sequence)
+    with pytest.raises(ContractValidationError):
+        replace(control, subject_kind="SOURCE_REVIEW")
+    with pytest.raises(ContractValidationError):
+        replace(control, scope=Scope(**{field.name: getattr(scope, field.name) for field in fields(scope)}))
+    with pytest.raises(ContractValidationError):
+        replace(control, predecessor_record_ref="SOURCE_USE::synthetic-other::00000000000000000001")
+    with pytest.raises(ContractValidationError):
+        replace(record, typed_payload=replace(control, content=replace(content, original_text="s" * 65536)))
+    with pytest.raises(ContractValidationError):
+        replace(record, no_effect_flags=NoEffectFlagsV1())
+    with pytest.raises(ContractValidationError):
+        replace(record, effective_at=now + timedelta(seconds=1))
+    for field_name in ("scope", "content"):
+        mutated = copy(getattr(control, field_name))
+        object.__setattr__(mutated, "account_scope_ref" if field_name == "scope" else "original_text", 1)
+        forged_control, forged_spine = copy(control), copy(record)
+        object.__setattr__(forged_control, field_name, mutated)
+        object.__setattr__(forged_spine, "typed_payload", forged_control)
+        with pytest.raises(ContractValidationError):
+            _source_use_reconstruct_spine_v1(forged_spine)
+    homonym = type("SourceUseControlRecordV1", (), {"__module__": SourceUseControlRecordV1.__module__})()
+    with pytest.raises(ContractValidationError):
+        replace(record, typed_payload=homonym)
+    data = safe_json_loads(raw)
+    malformed = []
+    for path, value in (
+        (("record_type",), "ECONOMIC_EVENT"), (("extra",), "synthetic"), (("sequence",), True),
+        (("sequence",), 1.0), (("aggregate_version",), "1"), (("aggregate_id",), "SOURCE_USE::synthetic-other"),
+        (("record_id",), "SOURCE_USE::synthetic-codec::1"), (("effective_at",), "2026-01-01T00:00:00Z"),
+        (("recorded_at",), "2026-01-02T00:00:00+00:00"), (("authority_class",), "AUTHENTICATED"),
+        (("typed_payload", "subject_kind"), "APPROVED"), (("typed_payload", "action"), "ACCEPT"),
+        (("typed_payload", "scope", "account_scope_ref"), False), (("typed_payload", "input_class"), "AUTHENTICATED"),
+        (("typed_payload", "content", "claimed_expires_at_utc"), "2026-01-01T00:00:00.1+00:00"),
+        (("typed_payload", "content", "original_text"), "SYNTHETIC\x00"),
+        (("no_effect_flags", fields(NoEffectFlagsV1)[0].name), 0),
+    ):
+        changed = deepcopy(data)
+        target = changed
+        for part in path[:-1]:
+            target = target[part]
+        target[path[-1]] = value
+        malformed.append(deterministic_json(changed))
+    for path in (("context_ref",), ("no_effect_flags",), ("typed_payload", "reason"),
+                 ("typed_payload", "scope", "account_scope_ref"), ("typed_payload", "content", "reported_origin_ref")):
+        changed = deepcopy(data)
+        target = changed
+        for part in path[:-1]:
+            target = target[part]
+        del target[path[-1]]
+        malformed.append(deterministic_json(changed))
+    malformed += [raw.replace('"sequence":1', '"sequence":1,"sequence":1', 1),
+                  raw.replace('"sequence":1', '"sequence":NaN', 1),
+                  raw.replace('"context_ref":', '"access_token":"synthetic-rejected", "context_ref":', 1),
+                  raw + " " * 65536, '{"broken":', "\ud800", raw.replace('"sequence":1', '"sequence":1e0', 1)]
+    for invalid_key in (1, None, False,
+            Text("SOURCE_USE::synthetic-codec::00000000000000000002"),
+            "SOURCE_USE::synthetic-codec::0", "SOURCE_USE::synthetic-other::00000000000000000001"):
+        for transactional in (False, True):
+            adapter = InMemoryPersistenceAdapterV1()
+            tx = adapter.begin_transaction()
+            adapter.insert_receipt_record(tx, record)
+            tx.commit()
+            tx = adapter.begin_transaction() if transactional else None
+            try:
+                rows = tx._working["receipt_records"] if tx else adapter._tables["receipt_records"]
+                # Corrupt identity beside a valid head: selection itself must fail closed.
+                rows[invalid_key] = record
+                with pytest.raises(PersistenceContractError, match="invalid stored source-use control identity") as caught:
+                    if tx:
+                        adapter.load_source_use_head_for_update_v1(tx, "synthetic-codec")
+                    else:
+                        adapter.load_committed_source_use_head_v1("synthetic-codec")
+                assert caught.value.reason_code is ReasonCode.PERSISTENCE_CONFLICT
+                assert adapter.availability is PersistenceAvailabilityV1.INTEGRITY_FAILURE
+            finally:
+                if tx and tx.is_active:
+                    tx.rollback()
+            with pytest.raises(PersistenceContractError) as unavailable:
+                adapter.load_committed_source_use_record_v1(record.record_id)
+            assert unavailable.value.reason_code is ReasonCode.PERSISTENCE_UNAVAILABLE
+            with pytest.raises(PersistenceContractError) as unavailable:
+                adapter.begin_transaction()
+            assert unavailable.value.reason_code is ReasonCode.PERSISTENCE_UNAVAILABLE
+    for kind in ("memory", "sqlite"):
+        for index, invalid in enumerate(malformed):
+            adapter = (InMemoryPersistenceAdapterV1() if kind == "memory" else SQLiteReferenceAdapterV1(
+                directory / f"synthetic-corrupt-{index}.db", busy_timeout_ms=0, max_transaction_attempts=1))
+            try:
+                # Test-only corruption injection; no trigger, schema or production owner is changed.
+                if kind == "memory":
+                    adapter._tables["receipt_records"][record.record_id] = invalid
+                elif "\ud800" in invalid:
+                    # sqlite3 itself rejects invalid UTF-8 text before storage; exercise the shared decoder directly.
+                    with pytest.raises(PersistenceContractError):
+                        _source_use_from_storage_v1(invalid, record_id=record.record_id)
+                    continue
+                else:
+                    adapter._connection.execute("INSERT INTO receipt_records VALUES(?,?,?,?,?)",
+                        (record.record_id, now.isoformat(), now.isoformat(), record.aggregate_id, invalid))
+                with pytest.raises((PersistenceContractError, SerializationSafetyError)):
+                    if index % 2:
+                        adapter.load_committed_source_use_head_v1("synthetic-codec")
+                    else:
+                        adapter.load_committed_source_use_record_v1(record.record_id)
+                with pytest.raises(PersistenceContractError) as unavailable:
+                    adapter.load_committed_source_use_head_v1("synthetic-codec")
+                assert unavailable.value.reason_code is ReasonCode.PERSISTENCE_UNAVAILABLE
+            finally:
+                if kind == "sqlite":
+                    adapter.close()
+        for column_index, wrong in enumerate(("SOURCE_USE::synthetic-codec::00000000000000000002",
+                "2026-01-02T00:00:00+00:00", "2026-01-03T00:00:00+00:00", "SOURCE_USE::synthetic-other")):
+            columns = [record.record_id, now.isoformat(), now.isoformat(), record.aggregate_id]
+            columns[column_index] = wrong
+            with pytest.raises(PersistenceContractError):
+                _source_use_from_storage_v1(raw, record_id=columns[0], columns=tuple(columns))
+            if kind == "sqlite":
+                adapter = SQLiteReferenceAdapterV1(directory / f"synthetic-columns-{column_index}.db",
+                    busy_timeout_ms=0, max_transaction_attempts=1)
+                try:
+                    adapter._connection.execute("INSERT INTO receipt_records VALUES(?,?,?,?,?)", (*columns, raw))
+                    with pytest.raises(PersistenceContractError):
+                        adapter.load_committed_source_use_record_v1(columns[0])
+                finally:
+                    adapter.close()
+        adapter = InMemoryPersistenceAdapterV1() if kind == "memory" else SQLiteReferenceAdapterV1(
+            directory / "synthetic-non-admission.db", busy_timeout_ms=0, max_transaction_attempts=1)
+        try:
+            tx = adapter.begin_transaction()
+            adapter.insert_receipt_record(tx, record)
+            tx.commit()
+            projection = read_recorded_source_use_status_v1(adapter=adapter, stream_id="synthetic-codec", evaluated_at_utc=now)
+            arguments = dict(admission_id="synthetic-admission", profile_id=Stage1VenueProfileIdV1.KALSHI_US_DCM_DIRECT,
+                account_scope="synthetic-unverified-account", internal_use_class="OBSERVED_FEE_SCENARIO_INTERNAL",
+                permitted_retention_class="PROCESS_MEMORY_ONLY", evaluated_at_utc=now)
+            with pytest.raises(PITDataContractErrorV1) as source_rejected:
+                validate_pit_source_rights_admission_v1(projection, projection, **arguments)
+            assert source_rejected.value.pit_reason_code is PITReasonCodeV1.PIT_SOURCE_CURRENTIZATION_STALE
+            # An exact but uninitialized first type reaches the second ordinary type gate, never admission.
+            with pytest.raises(PITDataContractErrorV1) as rights_rejected:
+                validate_pit_source_rights_admission_v1(object.__new__(PITSourceCurrentizationReceiptV1), projection, **arguments)
+            assert rights_rejected.value.pit_reason_code is PITReasonCodeV1.PIT_RIGHTS_NOT_ADMITTED
+            assert projection.admission_eligible is False and record.no_effect_flags is NO_EFFECTS_V1
+        finally:
+            if kind == "sqlite":
+                adapter.close()
+
+
+def test_json_is_deterministic_and_unsafe_values_fail_closed(tmp_path) -> None:
+    _assert_source_use_closed_storage(tmp_path)
     _assert_f14_bounded_witness_codec()
     _assert_kalshi_series_fee_candidate()
     assert deterministic_json({"b": 2, "a": 1}) == '{"a":1,"b":2}'

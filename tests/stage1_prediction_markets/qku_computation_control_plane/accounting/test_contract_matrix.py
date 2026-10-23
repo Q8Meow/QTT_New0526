@@ -101,6 +101,7 @@ from src.qtt.stage1_prediction_markets.qku_computation_control_plane.receipts im
     EconomicRecordTypeV1,
     TypedEconomicAmountV1,
     ValueLineageEdgeV1,
+    SourceUseScopeV1, SourceUseOriginalContentV1, SourceUseControlRecordV1,
 )
 from src.qtt.stage1_prediction_markets.qku_computation_control_plane.rollback import (
     build_journal_reversal_v1,
@@ -134,6 +135,380 @@ DYNAMIC_EVALUATED_AT = datetime(2026, 1, 1, 0, 1, tzinfo=UTC)
 DYNAMIC_RESOLUTION_AT = datetime(2026, 1, 1, 0, 2, tzinfo=UTC)
 DYNAMIC_VALID_UNTIL = datetime(2026, 1, 1, 1, 0, tzinfo=UTC)
 ACCOUNTING_CASES = tuple(row for row in ST12C_CONTROL_COVERAGE_MATRIX if row.domain == "accounting")
+
+
+def _source_use_record(stream="synthetic-owner", sequence=1, action="RECORD", *,
+                       subject="OWNER_DECLARATION", content=None, scope=None, recorded=NOW,
+                       input_class="SYNTHETIC_TEST"):
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane.stage1_launch_graph import Stage1VenueProfileIdV1
+
+    if scope is None:
+        scope = SourceUseScopeV1(Stage1VenueProfileIdV1.KALSHI_US_DCM_DIRECT,
+            "KALSHI_PUBLIC_MARKET_EVENT_SERIES", "KALSHI_PUBLIC_FEE_OBSERVATION_V1",
+            "OBSERVED_FEE_SCENARIO_INTERNAL", "PROCESS_MEMORY_ONLY",
+            "NO_REDISTRIBUTION_NO_EXTERNAL_AI_FORWARDING", None)
+    if content is None and action != "WITHDRAW":
+        content = SourceUseOriginalContentV1(" \tSYNTHETIC café 漢字\r\n  reference statement only.\n ",
+            None, None, "UNKNOWN", None,
+            "https://synthetic.invalid/document" if subject == "SOURCE_REVIEW" else None,
+            "synthetic-edition" if subject == "SOURCE_REVIEW" else None, None, None)
+    aggregate = "SOURCE_USE::" + stream
+    payload = SourceUseControlRecordV1(stream, subject, sequence, action,
+        None if action == "RECORD" else f"{aggregate}::{sequence - 1:020d}", scope, content,
+        None if action == "RECORD" else "synthetic lifecycle reason", input_class)
+    return EconomicReceiptEventSpineV1(f"{aggregate}::{sequence:020d}", EconomicRecordTypeV1.SOURCE_USE_CONTROL,
+        "SOURCE_USE_CONTROL_V1", "QTT_SOURCE_USE_CUSTODY", "QTT_SOURCE_USE_CUSTODY",
+        "synthetic-context", recorded, recorded, "synthetic-cause", "synthetic-correlation",
+        "synthetic-trace", "synthetic-tracestate", sequence, aggregate, sequence,
+        "RECORDED_NOT_AUTHENTICATED_NOT_ADMITTED", payload)
+
+
+def _source_use_adapter(kind, path, *, attempts=1):
+    return (InMemoryPersistenceAdapterV1() if kind == "memory" else
+            SQLiteReferenceAdapterV1(path, busy_timeout_ms=0, max_transaction_attempts=attempts))
+
+
+def _source_use_counts(adapter):
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane.migrations import APPEND_ONLY_TABLES_V1
+
+    if isinstance(adapter, SQLiteReferenceAdapterV1):
+        return {table: adapter._connection.execute(f"SELECT COUNT(*) FROM {table}").fetchone()[0]
+                for table in APPEND_ONLY_TABLES_V1}
+    return {table: len(rows) for table, rows in adapter._tables.items()}
+
+
+def _source_use_append(adapter, record, *, attempts=1):
+    return TrancheCUnitOfWorkV1(adapter, TransactionRetryPolicyV1(attempts)).append_source_use_control_v1(
+        record=record, expected_previous_record_ref=record.typed_payload.predecessor_record_ref)
+
+
+def _assert_source_use_lifecycle(kind, directory, monkeypatch):
+    from copy import copy
+    from datetime import timedelta
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane.errors import (
+        PersistenceContractError, PointInTimeError, TransactionContractError,
+    )
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane.source_policy import (
+        RecordedSourceUseStatusV1, read_recorded_source_use_status_v1,
+    )
+
+    path = directory / (kind + "-source-use.db")
+    adapter = _source_use_adapter(kind, path)
+    peer = _source_use_adapter(kind, path) if kind == "sqlite" else adapter
+    try:
+        def status(at=NOW):
+            return read_recorded_source_use_status_v1(adapter=adapter, stream_id="synthetic-owner", evaluated_at_utc=at)
+
+        missing = status()
+        assert (missing.state, missing.current_head_record_ref, missing.current_sequence,
+                missing.subject_kind, missing.recorded_at_utc, missing.admission_eligible) == (
+                    "MISSING", None, None, None, None, False)
+        with pytest.raises(TypeError):
+            RecordedSourceUseStatusV1("synthetic-owner", None, None, None, None, NOW, "MISSING", admission_eligible=True)
+        original = _source_use_record()
+        first = _source_use_append(adapter, original)
+        assert first.disposition == "APPENDED" and first.record == first.current_head == original
+        assert first.record is not original and first.record.typed_payload is not original.typed_payload
+        assert status().state == "RECORDED_UNVERIFIED" and status().admission_eligible is False
+        stored_text = original.typed_payload.content.original_text
+        object.__setattr__(original.typed_payload.content, "original_text", "synthetic input mutation after commit")
+        assert adapter.load_committed_source_use_record_v1(original.record_id).typed_payload.content.original_text == stored_text
+        original = first.record
+        loaded = adapter.load_committed_source_use_record_v1(original.record_id)
+        object.__setattr__(loaded.typed_payload.content, "original_text", "synthetic tampering")
+        assert adapter.load_committed_source_use_record_v1(original.record_id).typed_payload.content.original_text == stored_text
+        generic = adapter.get_record(original.record_id)
+        object.__setattr__(generic.typed_payload.content, "original_text", "synthetic generic-read mutation")
+        assert adapter.load_committed_source_use_record_v1(original.record_id).typed_payload.content.original_text == stored_text
+        assert adapter.load_committed_source_use_head_v1("synthetic-owner").typed_payload.scope.account_scope_ref is None
+        review = _source_use_record("synthetic-review", subject="SOURCE_REVIEW")
+        review = replace(review, typed_payload=replace(review.typed_payload,
+            content=replace(review.typed_payload.content, reported_time_kind="CALENDAR_DATE", reported_time_text="2026-01-01")))
+        _source_use_append(adapter, review)
+        assert adapter.load_committed_source_use_record_v1(review.record_id) == review
+        assert adapter.load_committed_source_use_record_v1(_source_use_record("synthetic-missing").record_id) is None
+        start, expiry = NOW + timedelta(minutes=1), NOW + timedelta(minutes=2)
+        replacement = _source_use_record(sequence=2, action="SUPERSEDE", recorded=NOW + timedelta(seconds=10),
+            content=replace(original.typed_payload.content, original_text="SYNTHETIC replacement\t\r\n",
+                reported_time_kind="UTC_INSTANT", reported_time_text="2026-01-01T00:00:00.1Z",
+                claimed_effective_at_utc=start, claimed_expires_at_utc=expiry))
+        second = _source_use_append(adapter, replacement)
+        assert (second.disposition, second.current_head.sequence, second.current_head.typed_payload.predecessor_record_ref) == (
+            "APPENDED", 2, "SOURCE_USE::synthetic-owner::00000000000000000001")
+        with pytest.raises(PointInTimeError) as future:
+            status()
+        assert future.value.reason_code is ReasonCode.POINT_IN_TIME_VIOLATION
+        assert status(NOW + timedelta(seconds=10)).state == "CLAIMED_NOT_YET_EFFECTIVE_UNVERIFIED"
+        assert status(start).state == "RECORDED_UNVERIFIED"
+        assert status(expiry).state == "CLAIMED_EXPIRED_UNVERIFIED"
+        assert status(expiry + timedelta(days=1)).admission_eligible is False
+        before = _source_use_counts(adapter)
+        for duplicate in (original, replacement):
+            result = _source_use_append(adapter, duplicate)
+            assert result.disposition == "EXACT_DUPLICATE" and result.record == duplicate and result.current_head == replacement
+        assert _source_use_counts(adapter) == before
+
+        withdrawal = _source_use_record(sequence=3, action="WITHDRAW", recorded=NOW + timedelta(seconds=20))
+        transaction = adapter.begin_transaction()
+        try:
+            for reader, argument in ((adapter.load_committed_source_use_record_v1, original.record_id),
+                                     (adapter.get_record, original.record_id),
+                                     (adapter.load_committed_source_use_head_v1, "synthetic-owner")):
+                with pytest.raises(TransactionContractError) as caught:
+                    reader(argument)
+                assert caught.value.reason_code is ReasonCode.TRANSACTION_STATE_INVALID
+            for reader, argument in ((adapter.load_source_use_record_for_update_v1, original.record_id),
+                                     (adapter.load_source_use_head_for_update_v1, "synthetic-owner")):
+                with pytest.raises(TransactionContractError):
+                    reader(copy(transaction), argument)
+            assert adapter.load_source_use_record_for_update_v1(transaction, original.record_id) == original
+            adapter.insert_receipt_record(transaction, withdrawal)
+            assert adapter.load_source_use_head_for_update_v1(transaction, "synthetic-owner") == withdrawal
+            if kind == "sqlite":
+                assert peer.load_committed_source_use_head_v1("synthetic-owner") == replacement
+                assert peer.load_committed_source_use_record_v1(withdrawal.record_id) is None
+                with pytest.raises(TransactionContractError):
+                    peer.load_source_use_head_for_update_v1(transaction, "synthetic-owner")
+        finally:
+            transaction.rollback()
+        with pytest.raises(TransactionContractError):
+            adapter.load_source_use_record_for_update_v1(transaction, original.record_id)
+        assert adapter.load_committed_source_use_head_v1("synthetic-owner") == replacement
+        assert _source_use_counts(adapter) == before
+        # Two correctly owned writers read the same predecessor, then interleave stale proposals.
+        observed = peer.load_committed_source_use_head_v1("synthetic-owner")
+        assert observed == replacement
+        alternative = _source_use_record(sequence=3, action="SUPERSEDE", recorded=withdrawal.recorded_at)
+        _source_use_append(adapter, withdrawal)
+        with pytest.raises(PersistenceContractError) as loser:
+            _source_use_append(peer, alternative)
+        assert loser.value.reason_code is ReasonCode.PERSISTENCE_CONFLICT
+        assert peer.load_committed_source_use_head_v1("synthetic-owner") == withdrawal
+        with pytest.raises(PointInTimeError):
+            status(NOW + timedelta(seconds=19))
+        projected = status(withdrawal.recorded_at)
+        assert (projected.state, projected.current_sequence, projected.admission_eligible) == (
+            "WITHDRAWAL_RECORDED_UNVERIFIED", 3, False)
+        assert {field.name for field in fields(projected)} == {
+            "stream_id", "current_head_record_ref", "current_sequence", "subject_kind",
+            "recorded_at_utc", "evaluated_at_utc", "state", "admission_eligible",
+        }
+        with pytest.raises(PersistenceContractError):
+            _source_use_append(adapter, _source_use_record(sequence=4, action="SUPERSEDE", recorded=expiry))
+        with pytest.raises(ContractValidationError):
+            TrancheCUnitOfWorkV1(adapter, TransactionRetryPolicyV1(1)).append_source_use_control_v1(
+                record=original, expected_previous_record_ref=original.record_id)
+        # Observe actual UOW orchestration: old identity lookup is transactional, then read-only commit.
+        calls = []
+        begin, head_read, record_read = (adapter.begin_transaction, adapter.load_source_use_head_for_update_v1,
+                                         adapter.load_source_use_record_for_update_v1)
+        def traced_begin():
+            calls.append("begin")
+            tx = begin()
+            commit = tx.commit
+            def traced_commit():
+                calls.append("commit")
+                commit()
+            tx.commit = traced_commit
+            return tx
+        def traced_head(tx, stream):
+            calls.append("head")
+            return head_read(tx, stream)
+        def traced_record(tx, ref):
+            calls.append("record")
+            return record_read(tx, ref)
+        with monkeypatch.context() as patch:
+            patch.setattr(adapter, "begin_transaction", traced_begin)
+            patch.setattr(adapter, "load_source_use_head_for_update_v1", traced_head)
+            patch.setattr(adapter, "load_source_use_record_for_update_v1", traced_record)
+            result = _source_use_append(adapter, original)
+        assert calls == ["begin", "head", "record", "commit"]
+        assert result.disposition == "EXACT_DUPLICATE" and result.record == original and result.current_head == withdrawal
+        counts = _source_use_counts(adapter)
+        assert len(counts) == 10 and counts["receipt_records"] == 4
+        assert all(count == 0 for table, count in counts.items() if table != "receipt_records")
+        assert adapter.production_selection_state.startswith("NO_DEFAULT")
+        if kind == "sqlite":
+            peer.close()
+            adapter.close()
+            adapter = _source_use_adapter(kind, path)
+            assert adapter.load_committed_source_use_record_v1(original.record_id) == original
+            assert adapter.load_committed_source_use_record_v1(replacement.record_id) == replacement
+            assert adapter.load_committed_source_use_record_v1(review.record_id) == review
+            assert status(expiry).state == "WITHDRAWAL_RECORDED_UNVERIFIED"
+            assert _source_use_counts(adapter) == counts
+    finally:
+        if kind == "sqlite":
+            adapter.close()
+            peer.close()
+
+
+def _assert_source_use_rejections(kind, directory):
+    from copy import copy
+    from datetime import timedelta
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane.errors import PersistenceContractError
+
+    adapter = _source_use_adapter(kind, directory / (kind + "-source-use-rejections.db"))
+    try:
+        original = _source_use_record(recorded=NOW + timedelta(seconds=5))
+        _source_use_append(adapter, original)
+        second = _source_use_record(sequence=2, action="SUPERSEDE", recorded=original.recorded_at)
+        different_scope = replace(second, typed_payload=replace(second.typed_payload,
+            scope=replace(second.typed_payload.scope, account_scope_ref="synthetic-other-account")))
+        different_input = replace(second, typed_payload=replace(second.typed_payload, input_class="UNVERIFIED_SUBMISSION"))
+        changed_subject = _source_use_record(sequence=2, action="SUPERSEDE", subject="SOURCE_REVIEW", recorded=original.recorded_at)
+        changed_identity = replace(original, typed_payload=replace(original.typed_payload,
+            content=replace(original.typed_payload.content, original_text="SYNTHETIC conflicting original")))
+        for candidate in (different_scope, different_input, changed_subject, changed_identity,
+                _source_use_record(sequence=2, action="SUPERSEDE"),
+                _source_use_record(sequence=3, action="SUPERSEDE", recorded=original.recorded_at),
+                _source_use_record("synthetic-absent", sequence=2, action="SUPERSEDE")):
+            for direct in (False, True):
+                before = _source_use_counts(adapter)
+                transaction = adapter.begin_transaction() if direct else None
+                try:
+                    with pytest.raises(PersistenceContractError) as caught:
+                        if direct:
+                            adapter.insert_receipt_record(transaction, candidate)
+                        else:
+                            _source_use_append(adapter, candidate)
+                    assert caught.value.reason_code is ReasonCode.PERSISTENCE_CONFLICT
+                finally:
+                    if transaction is not None:
+                        transaction.rollback()
+                assert _source_use_counts(adapter) == before
+        for malformed in (None, True, 1, "", "SOURCE_USE::synthetic-owner::1", "SOURCE_USE::synthetic-owner::00000000000000000000",
+                          "SOURCE_USE::synthetic-owner::09223372036854775808", "source_use::synthetic-owner::00000000000000000001"):
+            with pytest.raises(ContractValidationError) as caught:
+                adapter.load_committed_source_use_record_v1(malformed)
+            assert caught.value.reason_code is ReasonCode.INVALID_CONTRACT
+        for malformed in (None, 1, True, "", "synthetic/owner", "é", "a" * 65):
+            with pytest.raises(ContractValidationError):
+                adapter.load_committed_source_use_head_v1(malformed)
+        # Forged frozen objects must be reconstructed before direct insertion or UOW begin.
+        candidates = []
+        for name, value in (("sequence", True), ("aggregate_version", "1"), ("authority_class", "ADMITTED"),
+                            ("effective_at", NOW.isoformat()), ("record_type", EconomicRecordTypeV1.ECONOMIC_EVENT)):
+            forged = copy(original)
+            object.__setattr__(forged, name, value)
+            candidates.append(forged)
+        empty_payload = object.__new__(SourceUseControlRecordV1)
+        forged = copy(original)
+        object.__setattr__(forged, "typed_payload", empty_payload)
+        candidates.append(forged)
+        for forged in candidates:
+            with pytest.raises(ContractValidationError):
+                _source_use_append(adapter, forged) if forged.typed_payload is not empty_payload else TrancheCUnitOfWorkV1(
+                    adapter, TransactionRetryPolicyV1(1)).append_source_use_control_v1(record=forged, expected_previous_record_ref=None)
+            transaction = adapter.begin_transaction()
+            try:
+                with pytest.raises(ContractValidationError):
+                    adapter.insert_receipt_record(transaction, forged)
+            finally:
+                transaction.rollback()
+        assert _source_use_counts(adapter)["receipt_records"] == 1
+    finally:
+        if kind == "sqlite":
+            adapter.close()
+
+
+def _assert_source_use_failure_truth(kind, directory, monkeypatch):
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane.errors import PersistenceContractError
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane.persistence import PersistenceAvailabilityV1
+
+    for failure in ("commit_before", "commit_after", "insert_rollback_failure"):
+        adapter = _source_use_adapter(kind, directory / (kind + "-" + failure + ".db"), attempts=3)
+        original = _source_use_record()
+        primary = RuntimeError("synthetic primary failure")
+        calls = []
+        begin = adapter.begin_transaction
+        def begin_injected():
+            calls.append("begin")
+            tx = begin()
+            commit, rollback = tx.commit, tx.rollback
+            def fail_commit():
+                calls.append("commit")
+                if failure == "commit_after":
+                    commit()
+                raise primary
+            def traced_rollback():
+                calls.append("rollback")
+                rollback()
+                if failure == "insert_rollback_failure":
+                    raise RuntimeError("synthetic confidential cleanup detail")
+            tx.commit, tx.rollback = fail_commit, traced_rollback
+            return tx
+        def fail_insert(*_args):
+            raise primary
+        try:
+            with monkeypatch.context() as patch:
+                patch.setattr(adapter, "begin_transaction", begin_injected)
+                if failure == "insert_rollback_failure":
+                    patch.setattr(adapter, "insert_receipt_record", fail_insert)
+                with pytest.raises(RuntimeError) as caught:
+                    _source_use_append(adapter, original, attempts=3)
+                assert caught.value is primary
+            assert calls.count("begin") == 1
+            assert calls.count("rollback") == (0 if failure == "commit_after" else 1)
+            assert _source_use_counts(adapter)["receipt_records"] == (1 if failure == "commit_after" else 0)
+            assert adapter.availability is PersistenceAvailabilityV1.INTEGRITY_FAILURE
+            if failure == "insert_rollback_failure":
+                assert primary.__notes__ == ["source-use rollback failed; persistence integrity is unknown"]
+            with pytest.raises(PersistenceContractError):
+                adapter.load_committed_source_use_head_v1("synthetic-owner")
+        finally:
+            if kind == "sqlite":
+                adapter.close()
+    if kind == "sqlite":
+        import sqlite3
+
+        path = directory / "synthetic-source-use-busy.db"
+        holder = _source_use_adapter(kind, path, attempts=3)
+        contender = _source_use_adapter(kind, path, attempts=3)
+        transaction = holder.begin_transaction()
+        calls = []
+        begin = contender.begin_transaction
+        def counted_begin():
+            calls.append("begin")
+            return begin()
+        try:
+            with monkeypatch.context() as patch:
+                patch.setattr(contender, "begin_transaction", counted_begin)
+                with pytest.raises(PersistenceContractError) as caught:
+                    _source_use_append(contender, _source_use_record(), attempts=3)
+            assert caught.value.reason_code is ReasonCode.REFERENCE_SQLITE_BUSY_BEFORE_SIDE_EFFECT
+            assert isinstance(caught.value.__cause__, sqlite3.OperationalError)
+            assert calls == ["begin"]
+        finally:
+            transaction.rollback()
+            holder.close()
+            contender.close()
+
+
+def test_source_use_record_custody(reference_directory, monkeypatch) -> None:
+    """Synthetic original custody on both reference adapters; no authentic intake."""
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane.persistence import PersistenceAdapterV1
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane.errors import PersistenceContractError
+
+    # Existing subclasses can retain the old abstract interface and deny the new feature.
+    for name in ("load_committed_source_use_record_v1", "load_committed_source_use_head_v1",
+                 "load_source_use_record_for_update_v1", "load_source_use_head_for_update_v1"):
+        assert name not in PersistenceAdapterV1.__abstractmethods__
+        reader = getattr(PersistenceAdapterV1, name)
+        arguments = ((_source_use_record().record_id if "record" in name else "synthetic-owner"),)
+        if "for_update" in name:
+            arguments = (object(), *arguments)
+        with pytest.raises(PersistenceContractError) as caught:
+            reader(InMemoryPersistenceAdapterV1(), *arguments)
+        assert caught.value.reason_code is ReasonCode.PERSISTENCE_UNAVAILABLE
+    def no_transport(*_args, **_kwargs):
+        raise AssertionError("synthetic custody must not construct a transport")
+    with monkeypatch.context() as patch:
+        patch.setattr("http.client.HTTPSConnection", no_transport)
+        for kind in ("memory", "sqlite"):
+            _assert_source_use_lifecycle(kind, reference_directory, monkeypatch)
+            _assert_source_use_rejections(kind, reference_directory)
+            _assert_source_use_failure_truth(kind, reference_directory, monkeypatch)
 
 
 @pytest.fixture
