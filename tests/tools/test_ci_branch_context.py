@@ -15,6 +15,16 @@ GITHUB_BRANCH_CONTEXT_ENV = (
 )
 ST12_BRANCH_CASES = (
     (
+        "s1-kalshi-scenario-bootstrap",
+        (
+            "S1-kalshi-scenario-bootstrap",
+            "s1-kalshi-scenario-bootstra",
+            "s1-kalshi-scenario-bootstrap-copy",
+            "s1-kalshi-scenario-bootstrap/",
+            "s1-kalshi-scenario-*",
+        ),
+    ),
+    (
         "s1-kalshi-observed-fee-cohort",
         (
             "S1-kalshi-observed-fee-cohort",
@@ -242,7 +252,7 @@ def test_st12_inherited_math_receipt_repair_branch_is_exactly_classified():
 @pytest.mark.parametrize(
     ("branch", "adversarial_branches"),
     ST12_BRANCH_CASES,
-    ids=(None, None, "st12a", "st12b", "st12c", "st12e", "st12d", "st12f", "st12h", "f12", None, None, None),
+    ids=(None, None, None, "st12a", "st12b", "st12c", "st12e", "st12d", "st12f", "st12h", "f12", None, None, None),
 )
 def test_st12_owner_authorized_branches_are_exactly_validation_only(
     branch: str,

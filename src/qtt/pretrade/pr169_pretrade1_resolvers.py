@@ -1,9 +1,13 @@
 from __future__ import annotations
 
+from _thread import RLock
+import dataclasses
 from dataclasses import dataclass
+from datetime import datetime
 from decimal import Decimal
 from fractions import Fraction
 import json
+import time
 from pathlib import Path
 from typing import TYPE_CHECKING, Iterable
 
@@ -18,11 +22,16 @@ from ..stage1_prediction_markets.qku_computation_control_plane.economic_math imp
 from ..stage1_prediction_markets.qku_computation_control_plane.errors import (
     ContractValidationError,
     NumericDomainError,
+    PointInTimeError,
     ReasonCode,
 )
+from ..stage1_prediction_markets.qku_computation_control_plane.context import _native_ident
 from ..stage1_prediction_markets.qku_computation_control_plane.source_policy import (
     KalshiFeeObservationOwnerV1,
     KalshiObservedFeeCohortV1,
+    KalshiQuadraticSeriesFeeCandidateV1,
+    PITRightsAdmissionReceiptV1,
+    PITSourceCurrentizationReceiptV1,
     decode_kalshi_market_linked_series_fee_candidate_v1,
     decode_kalshi_quadratic_series_fee_candidate_v1,
 )
@@ -171,6 +180,178 @@ def compose_kalshi_observed_fee_scenario_cashflows_v1(
         fee_multiplier=multiplier, balance_increment=balance_increment,
         prior_rounding_overpayment=prior_rounding_overpayment,
     )
+
+
+def _kalshi_scenario_inputs_v1(fills, balance_increment, prior_rounding_overpayment):
+    if (type(fills) is not tuple or not 1 <= len(fills) <= 4096
+            or any(type(row) is not KalshiQuadraticTakerBuyYesFillV1 for row in fills)):
+        raise ContractValidationError(ReasonCode.INVALID_CONTRACT, "KALSHI_SCENARIO_SESSION_RESULT")
+    for row in fills:
+        try:
+            values = {field.name: getattr(row, field.name)
+                      for field in dataclasses.fields(KalshiQuadraticTakerBuyYesFillV1)}
+        except AttributeError:
+            raise ContractValidationError(ReasonCode.INVALID_CONTRACT, "KALSHI_SCENARIO_SESSION_RESULT") from None
+        KalshiQuadraticTakerBuyYesFillV1(**values)
+    _kalshi_bounded_fraction(balance_increment, "balance_increment", nonnegative=True, microdollars=True)
+    _kalshi_bounded_fraction(prior_rounding_overpayment, "prior_rounding_overpayment",
+                            nonnegative=True, microdollars=True)
+    if balance_increment not in (Decimal("0.0001"), Decimal("0.01")):
+        raise NumericDomainError(ReasonCode.OUT_OF_DOMAIN, "KALSHI_SCENARIO_SESSION_RESULT")
+
+
+@dataclass(frozen=True, slots=True)
+class KalshiObservedFeeScenarioResultV1:
+    """Constructible hypothetical data, with no native admission or standing authority."""
+
+    cashflows: KalshiConditionalCashflowTermsV1
+    market_ticker: str
+    event_ticker: str
+    series_ticker: str
+    fee_basis: str
+    fee_multiplier: Decimal
+    source_receipt_ref: str
+    rights_receipt_ref: str
+    account_scope: str
+    operating_authorization_ref: str
+    process_epoch_id: str
+    monotonic_clock_id: str
+    available_wall_ns: int
+    available_monotonic_ns: int
+    evaluated_monotonic_ns: int
+    fills: tuple[KalshiQuadraticTakerBuyYesFillV1, ...]
+    balance_increment: Decimal
+    prior_rounding_overpayment: Decimal
+    evidence_class: str = dataclasses.field(default="OBSERVED_FEE_HYPOTHETICAL_SCENARIO", init=False)
+
+    def __post_init__(self) -> None:
+        if (type(self.cashflows) is not KalshiConditionalCashflowTermsV1
+                or type(self.fee_basis) is not str
+                or self.fee_basis not in ("OBSERVED_SERIES_BASE", "OBSERVED_EVENT_OVERRIDE")):
+            raise ContractValidationError(ReasonCode.INVALID_CONTRACT, "KALSHI_SCENARIO_SESSION_RESULT")
+        try:
+            amounts = {field.name: getattr(self.cashflows, field.name)
+                       for field in dataclasses.fields(KalshiConditionalCashflowTermsV1)}
+        except AttributeError:
+            raise ContractValidationError(ReasonCode.INVALID_CONTRACT, "KALSHI_SCENARIO_SESSION_RESULT") from None
+        KalshiConditionalCashflowTermsV1(**amounts)
+        for value in (self.market_ticker, self.event_ticker, self.series_ticker,
+                      self.source_receipt_ref, self.rights_receipt_ref, self.account_scope,
+                      self.operating_authorization_ref, self.process_epoch_id, self.monotonic_clock_id):
+            _native_ident(value)
+        KalshiQuadraticSeriesFeeCandidateV1(self.series_ticker, self.fee_multiplier)
+        if (any(type(value) is not int or not 0 <= value <= 2**63 - 1
+                for value in (self.available_wall_ns, self.available_monotonic_ns, self.evaluated_monotonic_ns))
+                or self.available_monotonic_ns > self.evaluated_monotonic_ns):
+            raise PointInTimeError(ReasonCode.POINT_IN_TIME_VIOLATION, "KALSHI_SCENARIO_SESSION_RESULT")
+        _kalshi_scenario_inputs_v1(self.fills, self.balance_increment, self.prior_rounding_overpayment)
+
+
+class KalshiFeeScenarioSessionV1:
+    """One dormant producer-to-consumer call; upstream admission remains external."""
+
+    __slots__ = ("__origin", "__lock", "__owner", "__context", "__state")
+
+    def __init__(self, *, source_receipt: PITSourceCurrentizationReceiptV1,
+                 rights_receipt: PITRightsAdmissionReceiptV1, account_scope: str,
+                 internal_use_class: str, permitted_retention_class: str,
+                 expected_market_ticker: str, process_epoch_id: str,
+                 monotonic_clock_id: str, operating_authorization_ref: str,
+                 authorization_expires_at_utc: datetime, deadline_monotonic_ns: int) -> None:
+        if type(self) is not KalshiFeeScenarioSessionV1 or hasattr(self, "_KalshiFeeScenarioSessionV1__origin"):
+            raise ContractValidationError(ReasonCode.INVALID_CONTRACT, "KALSHI_SCENARIO_SESSION_STATE")
+        self.__origin = self
+        self.__lock = RLock()
+        self.__state = "FAILED"
+        self.__owner = KalshiFeeObservationOwnerV1(
+            source_receipt=source_receipt, rights_receipt=rights_receipt, account_scope=account_scope,
+            internal_use_class=internal_use_class, permitted_retention_class=permitted_retention_class,
+            expected_market_ticker=expected_market_ticker, process_epoch_id=process_epoch_id,
+            monotonic_clock_id=monotonic_clock_id, operating_authorization_ref=operating_authorization_ref,
+            authorization_expires_at_utc=authorization_expires_at_utc, deadline_monotonic_ns=deadline_monotonic_ns,
+        )
+        self.__context = (source_receipt.receipt_id, rights_receipt.receipt_id, account_scope,
+                          expected_market_ticker, operating_authorization_ref, process_epoch_id, monotonic_clock_id)
+        self.__state = "NEW"
+
+    def __require_instance(self) -> None:
+        if (type(self) is not KalshiFeeScenarioSessionV1 or self.__origin is not self
+                or type(getattr(self, "_KalshiFeeScenarioSessionV1__owner", None)) is not KalshiFeeObservationOwnerV1):
+            raise ContractValidationError(ReasonCode.INVALID_CONTRACT, "KALSHI_SCENARIO_SESSION_ASSOCIATION")
+
+    def evaluate(self, *, fills: tuple[KalshiQuadraticTakerBuyYesFillV1, ...],
+                 balance_increment: Decimal, prior_rounding_overpayment: Decimal) -> KalshiObservedFeeScenarioResultV1:
+        lock = getattr(self, "_KalshiFeeScenarioSessionV1__lock", None)
+        if lock is None:
+            raise ContractValidationError(ReasonCode.INVALID_CONTRACT, "KALSHI_SCENARIO_SESSION_ASSOCIATION")
+        with lock:
+            self.__require_instance()
+            if self.__state != "NEW":
+                raise ContractValidationError(ReasonCode.INVALID_CONTRACT, "KALSHI_SCENARIO_SESSION_STATE")
+        _kalshi_scenario_inputs_v1(fills, balance_increment, prior_rounding_overpayment)
+        with lock:
+            self.__require_instance()
+            if self.__state != "NEW":
+                raise ContractValidationError(ReasonCode.INVALID_CONTRACT, "KALSHI_SCENARIO_SESSION_STATE")
+            owner, context = self.__owner, self.__context
+            self.__state = "RUNNING"
+        cohort = None
+        try:
+            cohort = owner.capture()
+            evaluated = time.monotonic_ns()
+            cashflows = compose_kalshi_observed_fee_scenario_cashflows_v1(
+                profile_id="KALSHI_US_DCM_DIRECT", currency="USD", source_owner=owner, cohort=cohort,
+                expected_market_ticker=context[3], as_of_monotonic_ns=evaluated, fills=fills,
+                balance_increment=balance_increment, prior_rounding_overpayment=prior_rounding_overpayment,
+            )
+            result = KalshiObservedFeeScenarioResultV1(
+                cashflows=cashflows, market_ticker=cohort.market_ticker, event_ticker=cohort.event_ticker,
+                series_ticker=cohort.series_ticker, fee_basis=cohort.fee_basis, fee_multiplier=cohort.fee_multiplier,
+                source_receipt_ref=context[0], rights_receipt_ref=context[1], account_scope=context[2],
+                operating_authorization_ref=context[4], process_epoch_id=context[5], monotonic_clock_id=context[6],
+                available_wall_ns=cohort.available_wall_ns, available_monotonic_ns=cohort.available_monotonic_ns,
+                evaluated_monotonic_ns=evaluated, fills=fills, balance_increment=balance_increment,
+                prior_rounding_overpayment=prior_rounding_overpayment,
+            )
+            with lock:
+                self.__require_instance()
+                if self.__state != "RUNNING":
+                    raise ContractValidationError(ReasonCode.INVALID_CONTRACT, "KALSHI_SCENARIO_SESSION_STATE")
+                if self.__owner is not owner or self.__context is not context:
+                    raise ContractValidationError(ReasonCode.INVALID_CONTRACT, "KALSHI_SCENARIO_SESSION_ASSOCIATION")
+                if owner.resolve_scenario_multiplier(cohort=cohort, expected_market_ticker=context[3],
+                                                     as_of_monotonic_ns=evaluated) != result.fee_multiplier:
+                    raise ContractValidationError(ReasonCode.INVALID_CONTRACT, "KALSHI_SCENARIO_SESSION_RESULT")
+                try:
+                    owner.revoke()
+                except BaseException:
+                    raise ContractValidationError(ReasonCode.INVALID_CONTRACT, "KALSHI_SCENARIO_SESSION_CLEANUP_FAILED") from None
+                self.__state = "CONSUMED"
+                return result
+        except BaseException as error:
+            with lock:
+                if self.__state != "REVOKED":
+                    self.__state = "FAILED"
+                try:
+                    owner.revoke()
+                except BaseException:
+                    BaseException.add_note(error, "KALSHI_SCENARIO_SESSION_CLEANUP_FAILED")
+            raise
+        finally:
+            cohort = None
+
+    def revoke(self) -> None:
+        lock = getattr(self, "_KalshiFeeScenarioSessionV1__lock", None)
+        if lock is None:
+            raise ContractValidationError(ReasonCode.INVALID_CONTRACT, "KALSHI_SCENARIO_SESSION_ASSOCIATION")
+        with lock:
+            self.__require_instance()
+            if self.__state in ("NEW", "RUNNING"):
+                self.__state = "REVOKED"
+                try:
+                    self.__owner.revoke()
+                except BaseException:
+                    raise ContractValidationError(ReasonCode.INVALID_CONTRACT, "KALSHI_SCENARIO_SESSION_CLEANUP_FAILED") from None
 
 
 def compose_kalshi_market_linked_series_base_cashflows_v1(

@@ -1143,6 +1143,401 @@ def _assert_kalshi_observation_custody():
             h.owner.capture()
         assert h.owner._state == 'FAILED' and h.owner._issued_cohort is None
 
+    _assert_kalshi_scenario_session()
+
+
+def _assert_kalshi_scenario_session():
+    from copy import copy
+    from datetime import timedelta
+    from inspect import Parameter, signature
+    from src.qtt.pretrade import pr169_pretrade1_resolvers as pretrade
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane import source_policy as source
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane.errors import PointInTimeError
+
+    session_type = pretrade.KalshiFeeScenarioSessionV1
+    result_type = pretrade.KalshiObservedFeeScenarioResultV1
+    fills = (KalshiQuadraticTakerBuyYesFillV1(Decimal(100), Decimal('.5')),)
+    inputs = dict(fills=fills, balance_increment=Decimal('.01'), prior_rounding_overpayment=Decimal(0))
+
+    def start(h, **changes):
+        h.session = session_type(**{**h.kwargs, **changes})
+        h.owner = h.session._KalshiFeeScenarioSessionV1__owner
+        assert type(h.owner) is source.KalshiFeeObservationOwnerV1
+        return h.session
+
+    def state(session):
+        return session._KalshiFeeScenarioSessionV1__state
+
+    def terminal(h, expected):
+        assert state(h.session) == expected
+        assert h.owner._pending is None and h.owner._issued_cohort is None
+        count = len(h.sends)
+        with pytest.raises(ContractValidationError, match='KALSHI_SCENARIO_SESSION_STATE'):
+            h.session.evaluate(**inputs)
+        with pytest.raises(ContractValidationError, match='KALSHI_SCENARIO_SESSION_STATE'):
+            h.session.__init__(**h.kwargs)
+        h.session.revoke(); h.session.revoke()
+        assert state(h.session) == expected and len(h.sends) == count
+
+    with _synthetic_kalshi_observation() as h:
+        session = start(h)
+        assert set(signature(session_type).parameters) == set(h.kwargs)
+        assert all(p.kind is Parameter.KEYWORD_ONLY and p.default is Parameter.empty
+                   for p in signature(session_type).parameters.values())
+        assert set(signature(session.evaluate).parameters) == set(inputs)
+        assert all(p.kind is Parameter.KEYWORD_ONLY and p.default is Parameter.empty
+                   for p in signature(session.evaluate).parameters.values())
+        assert not hasattr(session, '__dict__') and not h.connections and not h.sends
+        with pytest.raises(ContractValidationError):
+            session.__init__(**h.kwargs)
+        for impostor in (copy(session), object.__new__(session_type)):
+            for operation in (lambda: impostor.evaluate(**inputs), impostor.revoke):
+                with pytest.raises(ContractValidationError, match='KALSHI_SCENARIO_SESSION_ASSOCIATION'):
+                    operation()
+        class SessionSubclass(session_type):
+            pass
+        with pytest.raises(ContractValidationError):
+            SessionSubclass(**h.kwargs)
+        assert state(session) == 'NEW' and h.owner._state == 'NEW' and not h.connections
+        captures, composed, resolved = [], [], []
+        real_capture = source.KalshiFeeObservationOwnerV1.capture
+        real_compose = pretrade.compose_kalshi_observed_fee_scenario_cashflows_v1
+        real_resolve = source.KalshiFeeObservationOwnerV1.resolve_scenario_multiplier
+        def capture_spy(owner):
+            cohort = real_capture(owner)
+            captures.append((owner, cohort))
+            return cohort
+        def compose_spy(**kwargs):
+            cash = real_compose(**kwargs)
+            composed.append((kwargs, cash))
+            return cash
+        def resolve_spy(owner, **kwargs):
+            resolved.append((owner, kwargs))
+            return real_resolve(owner, **kwargs)
+        with pytest.MonkeyPatch.context() as patch:
+            patch.setattr(source.KalshiFeeObservationOwnerV1, 'capture', capture_spy)
+            patch.setattr(pretrade, 'compose_kalshi_observed_fee_scenario_cashflows_v1', compose_spy)
+            patch.setattr(source.KalshiFeeObservationOwnerV1, 'resolve_scenario_multiplier', resolve_spy)
+            result = session.evaluate(**inputs)
+        assert len(captures) == len(composed) == 1 and len(resolved) == 2
+        owner, cohort = captures[0]
+        assert owner is h.owner and all(row[0] is owner and row[1]['cohort'] is cohort for row in resolved)
+        assert resolved[0][1] == resolved[1][1]
+        assert composed[0][0]['source_owner'] is owner and composed[0][0]['cohort'] is cohort
+        assert result.cashflows is composed[0][1] and result.fills is fills
+        assert all(composed[0][0][name] is value for name, value in inputs.items())
+        assert [row[1] for row in h.sends] == [
+            '/trade-api/v2/markets/SYNTHETIC%3A%3AMARKET',
+            '/trade-api/v2/events/SYNTHETIC%3A%3AEVENT?exclude_markets=true',
+            '/trade-api/v2/series/SYNTHETIC%3A%3ASERIES']
+        assert result.cashflows.platform_fee_total == Decimal('1.75')
+        assert result.fee_basis == 'OBSERVED_SERIES_BASE' and result.fee_multiplier is cohort.fee_multiplier
+        assert (result.market_ticker, result.event_ticker, result.series_ticker) == (
+            cohort.market_ticker, cohort.event_ticker, cohort.series_ticker)
+        assert result.source_receipt_ref is h.kwargs['source_receipt'].receipt_id
+        assert result.rights_receipt_ref is h.kwargs['rights_receipt'].receipt_id
+        for name in ('account_scope', 'operating_authorization_ref', 'process_epoch_id', 'monotonic_clock_id'):
+            assert getattr(result, name) is h.kwargs[name]
+        assert result.available_wall_ns == cohort.available_wall_ns == h.clock['wall']
+        assert result.available_monotonic_ns == cohort.available_monotonic_ns == result.evaluated_monotonic_ns
+        assert result.evidence_class == 'OBSERVED_FEE_HYPOTHETICAL_SCENARIO'
+        assert [field.name for field in fields(result)] == [
+            'cashflows', 'market_ticker', 'event_ticker', 'series_ticker', 'fee_basis', 'fee_multiplier',
+            'source_receipt_ref', 'rights_receipt_ref', 'account_scope', 'operating_authorization_ref',
+            'process_epoch_id', 'monotonic_clock_id', 'available_wall_ns', 'available_monotonic_ns',
+            'evaluated_monotonic_ns', 'fills', 'balance_increment', 'prior_rounding_overpayment', 'evidence_class']
+        assert not fields(result)[-1].init and not hasattr(result, '__dict__')
+        with pytest.raises(FrozenInstanceError):
+            result.fee_basis = 'NATIVE'
+        terminal(h, 'CONSUMED')
+        assert result.cashflows.platform_fee_total == Decimal('1.75')
+        baseline = h.bodies
+
+    for name in ('source_receipt', 'rights_receipt', 'authorization_expires_at_utc', 'deadline_monotonic_ns'):
+        with _synthetic_kalshi_observation() as h:
+            kwargs = dict(h.kwargs); del kwargs[name]
+            with pytest.raises(TypeError):
+                session_type(**kwargs)
+            assert not h.connections and not h.sends
+    for change in (
+        lambda k: {'source_receipt': object()}, lambda k: {'rights_receipt': object()},
+        lambda k: {'account_scope': 'OTHER'}, lambda k: {'internal_use_class': 'OTHER'},
+        lambda k: {'permitted_retention_class': 'OTHER'},
+        lambda k: {'source_receipt': replace(k['source_receipt'], source_id='OTHER')},
+        lambda k: {'rights_receipt': replace(k['rights_receipt'], source_id='OTHER')},
+        lambda k: {'source_receipt': replace(k['source_receipt'], checked_at_utc=k['source_receipt'].checked_at_utc + timedelta(seconds=2))},
+        lambda k: {'rights_receipt': replace(k['rights_receipt'], checked_at_utc=k['rights_receipt'].checked_at_utc + timedelta(seconds=2))},
+        lambda k: {'source_receipt': replace(k['source_receipt'], checked_at_utc=k['source_receipt'].checked_at_utc - timedelta(days=2), effective_at_utc=k['source_receipt'].effective_at_utc - timedelta(days=2))},
+        lambda k: {'source_receipt': replace(k['source_receipt'], expires_at_utc=k['source_receipt'].checked_at_utc + timedelta(seconds=1))},
+        lambda k: {'rights_receipt': replace(k['rights_receipt'], expires_at_utc=k['rights_receipt'].checked_at_utc + timedelta(seconds=1))},
+        lambda k: {'authorization_expires_at_utc': k['authorization_expires_at_utc'] - timedelta(seconds=50)},
+        lambda k: {'deadline_monotonic_ns': 10_000_000_000},
+    ):
+        with _synthetic_kalshi_observation() as h:
+            with pytest.raises(ComputationControlPlaneError):
+                start(h, **change(h.kwargs))
+            assert not h.connections and not h.sends and not h.tls_preparations
+
+    class FillSubclass(KalshiQuadraticTakerBuyYesFillV1):
+        pass
+    malformed = [None, [], (), fills * 4097, (object(),),
+                 (FillSubclass(Decimal(1), Decimal('.5')),), (object.__new__(KalshiQuadraticTakerBuyYesFillV1),)]
+    for name in ('contracts', 'yes_price'):
+        for value in (True, '1', 0.5, Decimal('NaN'), Decimal('sNaN'), Decimal('Infinity'), Decimal('-1'), Decimal('0')):
+            row = object.__new__(KalshiQuadraticTakerBuyYesFillV1)
+            for field in fields(KalshiQuadraticTakerBuyYesFillV1):
+                object.__setattr__(row, field.name, value if field.name == name else getattr(fills[0], field.name))
+            malformed.append((row,))
+    with _synthetic_kalshi_observation() as h:
+        session = start(h)
+        bad_inputs = [{'fills': value} for value in malformed]
+        for name in ('balance_increment', 'prior_rounding_overpayment'):
+            bad_inputs.extend({name: value} for value in (
+                True, '0.01', .01, Decimal('NaN'), Decimal('sNaN'), Decimal('Infinity'), Decimal('-.01'), Decimal('.0000001')))
+        bad_inputs += [{'balance_increment': Decimal('0')}, {'balance_increment': Decimal('.001')}]
+        for changes in bad_inputs:
+            with pytest.raises(ComputationControlPlaneError):
+                session.evaluate(**{**inputs, **changes})
+            assert state(session) == 'NEW' and h.owner._state == 'NEW'
+            assert not h.connections and not h.sends
+        assert session.evaluate(**inputs).cashflows.platform_fee_total == Decimal('1.75')
+        terminal(h, 'CONSUMED')
+
+    for field in ('market_ticker', 'event_ticker', 'series_ticker', 'source_receipt_ref', 'rights_receipt_ref',
+                  'account_scope', 'operating_authorization_ref', 'process_epoch_id', 'monotonic_clock_id'):
+        for value in ('', ' leading', 'two words', 'line\nbreak', True):
+            with pytest.raises(ContractValidationError):
+                replace(result, **{field: value})
+    for changes in ({'cashflows': object()}, {'cashflows': object.__new__(pretrade.KalshiConditionalCashflowTermsV1)},
+                    {'fee_basis': 'NATIVE'}, {'fee_basis': True}, {'fee_multiplier': Decimal('-1')},
+                    {'fee_multiplier': True}, {'fee_multiplier': Decimal('NaN')}, {'fills': []},
+                    {'balance_increment': Decimal('.001')}, {'prior_rounding_overpayment': Decimal('-1')}):
+        with pytest.raises(ComputationControlPlaneError):
+            replace(result, **changes)
+    for field in ('available_wall_ns', 'available_monotonic_ns', 'evaluated_monotonic_ns'):
+        for value in (True, 1.0, '1', -1, 2**63):
+            with pytest.raises(PointInTimeError):
+                replace(result, **{field: value})
+    with pytest.raises(PointInTimeError):
+        replace(result, evaluated_monotonic_ns=result.available_monotonic_ns - 1)
+    for grid, prior, fee, rebate, carry in (
+        ('.01', '.009', '1.76', '.01', '.009'), ('.0001', '.00009', '1.75', '0', '.00009')):
+        raw = (*baseline[:2], baseline[2].replace(b'"fee_multiplier":1', b'"fee_multiplier":0.5'))
+        with _synthetic_kalshi_observation(bodies=raw) as h:
+            value = start(h).evaluate(fills=fills * 2, balance_increment=Decimal(grid), prior_rounding_overpayment=Decimal(prior))
+            assert value.fee_multiplier == Decimal('.5')
+            assert value.cashflows == pretrade.KalshiConditionalCashflowTermsV1(
+                Decimal('-100'), Decimal(fee), Decimal(rebate), Decimal(carry))
+            terminal(h, 'CONSUMED')
+
+    raw = (*baseline[:2], baseline[2].replace(b'"fee_multiplier":1', b'"fee_multiplier":1000'))
+    with _synthetic_kalshi_observation(bodies=raw) as h:
+        with pytest.raises(NumericDomainError) as failure:
+            start(h).evaluate(**{**inputs, 'fills': (KalshiQuadraticTakerBuyYesFillV1(Decimal('1e100'), Decimal('.5')), )})
+        assert failure.value.reason_code is ReasonCode.OUT_OF_DOMAIN and len(h.sends) == 3
+        terminal(h, 'FAILED')
+    raw = (baseline[0][:-2] + b',"fee_waiver_expiration_time":"SYNTHETIC"}}', *baseline[1:])
+    with _synthetic_kalshi_observation(bodies=raw) as h:
+        with pytest.raises(ContractValidationError, match='KALSHI_OBSERVATION_MODIFIER'):
+            start(h).evaluate(**inputs)
+        terminal(h, 'FAILED')
+
+    _assert_kalshi_session_failures(start, terminal, inputs)
+    _assert_kalshi_session_concurrency(start, terminal, inputs)
+
+
+def _assert_kalshi_session_failures(start, terminal, inputs):
+    from datetime import timedelta
+    from src.qtt.pretrade import pr169_pretrade1_resolvers as pretrade
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane import source_policy as source
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane.errors import PointInTimeError
+
+    with _synthetic_kalshi_observation() as h:
+        start(h).revoke()
+        terminal(h, 'REVOKED')
+        assert not h.sends
+    for response_index in range(3):
+        def revoke_on_read(h, index):
+            if index == response_index:
+                h.session.revoke()
+        with _synthetic_kalshi_observation(on_read=revoke_on_read) as h:
+            with pytest.raises(ContractValidationError):
+                start(h).evaluate(**inputs)
+            assert len(h.sends) == response_index + 1
+            terminal(h, 'REVOKED')
+
+    for receipt_name in ('source_receipt', 'rights_receipt'):
+        with _synthetic_kalshi_observation() as h, pytest.MonkeyPatch.context() as patch:
+            receipt = h.kwargs[receipt_name]
+            start(h, **{receipt_name: replace(receipt, expires_at_utc=receipt.checked_at_utc + timedelta(seconds=3))})
+            real_post = pretrade.KalshiObservedFeeScenarioResultV1.__post_init__
+            def expire(result):
+                real_post(result)
+                h.clock['wall'] += 2_000_000_000
+            patch.setattr(pretrade.KalshiObservedFeeScenarioResultV1, '__post_init__', expire)
+            with pytest.raises(ComputationControlPlaneError):
+                h.session.evaluate(**inputs)
+            assert len(h.sends) == 3
+            terminal(h, 'FAILED')
+
+    for stage in ('after_capture', 'composition', 'result'):
+        with _synthetic_kalshi_observation() as h, pytest.MonkeyPatch.context() as patch:
+            start(h)
+            if stage == 'after_capture':
+                real_capture = source.KalshiFeeObservationOwnerV1.capture
+                def revoke_after_capture(owner):
+                    cohort = real_capture(owner)
+                    h.session.revoke()
+                    return cohort
+                patch.setattr(source.KalshiFeeObservationOwnerV1, 'capture', revoke_after_capture)
+            elif stage == 'composition':
+                real_compose = pretrade.compose_kalshi_observed_fee_scenario_cashflows_v1
+                def revoke_after_composition(**kwargs):
+                    cash = real_compose(**kwargs)
+                    h.session.revoke()
+                    return cash
+                patch.setattr(pretrade, 'compose_kalshi_observed_fee_scenario_cashflows_v1', revoke_after_composition)
+            else:
+                real_post = pretrade.KalshiObservedFeeScenarioResultV1.__post_init__
+                def revoke_after_result(result):
+                    real_post(result)
+                    h.session.revoke()
+                patch.setattr(pretrade.KalshiObservedFeeScenarioResultV1, '__post_init__', revoke_after_result)
+            with pytest.raises(ContractValidationError):
+                h.session.evaluate(**inputs)
+            assert len(h.sends) == 3
+            terminal(h, 'REVOKED')
+
+    for change in ('deadline', 'authorization', 'wall_reversal', 'mono_reversal', 'future_evaluation'):
+        with _synthetic_kalshi_observation() as h, pytest.MonkeyPatch.context() as patch:
+            start(h)
+            real_post = pretrade.KalshiObservedFeeScenarioResultV1.__post_init__
+            def change_after_result(result):
+                real_post(result)
+                if change == 'deadline':
+                    h.clock['mono'] = h.kwargs['deadline_monotonic_ns']
+                elif change == 'authorization':
+                    h.clock['wall'] += 50_000_000_000
+                elif change == 'wall_reversal':
+                    h.clock['wall'] -= 1
+                elif change == 'mono_reversal':
+                    h.clock['mono'] -= 1
+            patch.setattr(pretrade.KalshiObservedFeeScenarioResultV1, '__post_init__', change_after_result)
+            if change == 'future_evaluation':
+                real_capture = source.KalshiFeeObservationOwnerV1.capture
+                def future_after_capture(owner):
+                    cohort = real_capture(owner)
+                    samples = iter((h.clock['mono'] + 1, h.clock['mono'], h.clock['mono']))
+                    patch.setattr(pretrade.time, 'monotonic_ns', lambda: next(samples))
+                    return cohort
+                patch.setattr(source.KalshiFeeObservationOwnerV1, 'capture', future_after_capture)
+            with pytest.raises(PointInTimeError) as failure:
+                h.session.evaluate(**inputs)
+            assert failure.value.reason_code is ReasonCode.POINT_IN_TIME_VIOLATION and len(h.sends) == 3
+            terminal(h, 'FAILED')
+
+    for stage in ('capture', 'arithmetic', 'result', 'cleanup'):
+        primary = NumericDomainError(ReasonCode.OUT_OF_DOMAIN, 'SYNTHETIC_PRIMARY')
+        def fail_read(h, index):
+            raise primary
+        with _synthetic_kalshi_observation(on_read=fail_read if stage == 'capture' else None) as h:
+            start(h)
+            with pytest.MonkeyPatch.context() as patch:
+                if stage == 'arithmetic':
+                    real_math = pretrade.kalshi_quadratic_taker_buy_yes_input_v1
+                    def fail_math(**kwargs):
+                        real_math(**kwargs)
+                        raise primary
+                    patch.setattr(pretrade, 'kalshi_quadratic_taker_buy_yes_input_v1', fail_math)
+                elif stage in ('result', 'cleanup'):
+                    real_post = pretrade.KalshiObservedFeeScenarioResultV1.__post_init__
+                    def fail_post(result):
+                        real_post(result)
+                        raise primary
+                    patch.setattr(pretrade.KalshiObservedFeeScenarioResultV1, '__post_init__', fail_post)
+                if stage == 'cleanup':
+                    real_revoke = source.KalshiFeeObservationOwnerV1.revoke
+                    def fail_cleanup(owner):
+                        real_revoke(owner)
+                        raise RuntimeError('SYNTHETIC_PRIVATE_CLEANUP_TEXT')
+                    patch.setattr(source.KalshiFeeObservationOwnerV1, 'revoke', fail_cleanup)
+                with pytest.raises(NumericDomainError) as failure:
+                    h.session.evaluate(**inputs)
+                assert failure.value is primary
+                if stage == 'cleanup':
+                    assert failure.value.__notes__ == ['KALSHI_SCENARIO_SESSION_CLEANUP_FAILED']
+                    assert 'SYNTHETIC_PRIVATE_CLEANUP_TEXT' not in str(failure.value)
+            assert len(h.sends) == (1 if stage == 'capture' else 3)
+            terminal(h, 'FAILED')
+
+
+def _assert_kalshi_session_concurrency(start, terminal, inputs):
+    from threading import Event, Thread
+    from src.qtt.pretrade import pr169_pretrade1_resolvers as pretrade
+
+    # Bound every worker using the existing two-second event/join convention.
+    for action in ('competing_evaluate', 'revoke'):
+        entered, release = Event(), Event()
+        outcomes, competing = [], []
+        def blocked_read(h, index):
+            if index == 0:
+                entered.set()
+                assert release.wait(2)
+        with _synthetic_kalshi_observation(on_read=blocked_read) as h:
+            start(h)
+            def evaluate():
+                try:
+                    outcomes.append(h.session.evaluate(**inputs))
+                except BaseException as error:
+                    outcomes.append(error)
+            def contend():
+                try:
+                    if action == 'revoke':
+                        h.session.revoke()
+                        competing.append('REVOKED')
+                    else:
+                        h.session.evaluate(**{**inputs, 'fills': []})
+                except BaseException as error:
+                    competing.append(error)
+            first, second = Thread(target=evaluate), Thread(target=contend)
+            first.start()
+            try:
+                assert entered.wait(2)
+                second.start()
+                second.join(2)
+                assert not second.is_alive() and len(competing) == 1
+                if action == 'competing_evaluate':
+                    assert type(competing[0]) is ContractValidationError
+                    assert str(competing[0]).endswith('KALSHI_SCENARIO_SESSION_STATE')
+                    assert h.session._KalshiFeeScenarioSessionV1__state == 'RUNNING'
+                else:
+                    assert competing == ['REVOKED']
+            finally:
+                release.set()
+                first.join(2)
+                if second.ident is not None:
+                    second.join(2)
+            assert not first.is_alive() and not second.is_alive() and len(outcomes) == 1
+            if action == 'competing_evaluate':
+                assert type(outcomes[0]) is pretrade.KalshiObservedFeeScenarioResultV1
+                terminal(h, 'CONSUMED')
+            else:
+                assert isinstance(outcomes[0], ContractValidationError) and len(h.sends) == 1
+                terminal(h, 'REVOKED')
+
+    # A revoke winning the gap between input validation and claim prevents any send.
+    with _synthetic_kalshi_observation() as h, pytest.MonkeyPatch.context() as patch:
+        start(h)
+        real_preflight = pretrade._kalshi_scenario_inputs_v1
+        def revoke_after_preflight(*args):
+            real_preflight(*args)
+            h.session.revoke()
+        patch.setattr(pretrade, '_kalshi_scenario_inputs_v1', revoke_after_preflight)
+        with pytest.raises(ContractValidationError, match='KALSHI_SCENARIO_SESSION_STATE'):
+            h.session.evaluate(**inputs)
+        assert not h.connections and not h.sends
+        terminal(h, 'REVOKED')
+
 
 def _f13_storage_fixture():
     from src.qtt.stage1_prediction_markets.qku_computation_control_plane import receipts as owner

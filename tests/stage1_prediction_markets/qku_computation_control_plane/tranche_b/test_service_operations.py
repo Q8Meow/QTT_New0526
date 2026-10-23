@@ -1082,6 +1082,27 @@ def _assert_kalshi_conditional_service(monkeypatch, invocations):
                     assert len(delegated_calls) == 1
             assert cohort.fee_multiplier == Decimal(applied) and terms.platform_fee_total == Decimal(fee)
             assert terms.entry_trade_cashflow_total == Decimal(-50) and terms.expected_rebate_total == 0
+            if override:
+                legacy = pretrade_module.compose_kalshi_market_linked_series_base_cashflows_v1(
+                    **common, raw_market_response=raw[0], raw_event_response=raw[1], raw_series_response=raw[2],
+                    expected_market_ticker=cohort.market_ticker, fills=observed_fills)
+                assert legacy.platform_fee_total == Decimal('1.75') and terms.platform_fee_total == Decimal('3.50')
+        # Actual MATH-06 consumption now comes from a fresh one-shot session.
+        # The original composer checks above remain independent predecessor coverage.
+        with _synthetic_kalshi_observation(bodies=raw) as fixture:
+            session = pretrade_module.KalshiFeeScenarioSessionV1(**fixture.kwargs)
+            assert not fixture.connections and not fixture.sends
+            scenario = session.evaluate(
+                fills=observed_fills, balance_increment=common['balance_increment'],
+                prior_rounding_overpayment=common['prior_rounding_overpayment'])
+            assert scenario.market_ticker == context.scope.market_scope_id
+            assert scenario.fills is observed_fills and scenario.fee_multiplier == Decimal(applied)
+            assert scenario.fee_basis == ('OBSERVED_EVENT_OVERRIDE' if override else 'OBSERVED_SERIES_BASE')
+            assert scenario.evidence_class == 'OBSERVED_FEE_HYPOTHETICAL_SCENARIO'
+            assert len(fixture.sends) == 3
+            terms = scenario.cashflows
+            assert terms.platform_fee_total == Decimal(fee)
+            assert terms.entry_trade_cashflow_total == Decimal(-50) and terms.expected_rebate_total == 0
             assert Fraction(Decimal(expected)) == Fraction(4,5)*(-50+55-Fraction(fee)-1)
             values = fixture_values(terms)
             response = evaluate(values)
@@ -1091,11 +1112,6 @@ def _assert_kalshi_conditional_service(monkeypatch, invocations):
             rejected = evaluate({**values,'platform_fee_total':Decimal('99')},fixture_packets(values))
             assert rejected.status is not OperationStatusV1.SUCCEEDED and invocations == []
             assert ReasonCode.INPUT_VALUE_CONFLICT.value in rejected.receipt_refs
-            if override:
-                legacy = pretrade_module.compose_kalshi_market_linked_series_base_cashflows_v1(
-                    **common, raw_market_response=raw[0], raw_event_response=raw[1], raw_series_response=raw[2],
-                    expected_market_ticker=cohort.market_ticker, fills=observed_fills)
-                assert legacy.platform_fee_total == Decimal('1.75') and terms.platform_fee_total == Decimal('3.50')
     assert observed_rosters == (tuple(observation_source.SOURCE_STATE_BY_ID), tuple(observation_source.SOURCE_OVERLAY_BY_ID))
     assert roster_before == (tuple(IMPLEMENTATION_REGISTRY),tuple(ST12B_OPERATION_CAPABILITY_BY_ID))
 
