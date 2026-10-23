@@ -2479,6 +2479,51 @@ def test_registered_exact_repair_scope_reaches_atomicrows_owners(monkeypatch) ->
 
 
 def test_s1_launch_graph_scope_is_exactly_owned_and_fail_closed() -> None:
+    bootstrap_branch = "s1-kalshi-scenario-bootstrap"
+    bootstrap_paths = frozenset({
+        "src/qtt/pretrade/pr169_pretrade1_resolvers.py",
+        "tests/stage1_prediction_markets/qku_computation_control_plane/accounting/test_contract_matrix.py",
+        "tests/stage1_prediction_markets/qku_computation_control_plane/tranche_b/test_service_operations.py",
+        "tools/ci_branch_context.py",
+        "tools/validation_scope_registry.py",
+        "tests/tools/test_ci_branch_context.py",
+        "tests/tools/test_validation_scope_registry.py",
+        "docs/master_plan/generated/PR152_GrandGlobalDebugLogicalConsistencyAuditEntireQTTRepo.report.json",
+    })
+    assert registry.S1_KALSHI_SCENARIO_BOOTSTRAP_BRANCH == bootstrap_branch
+    assert registry.S1_KALSHI_SCENARIO_BOOTSTRAP_ALLOWED_EXACT_PATHS == bootstrap_paths
+    assert len(bootstrap_paths) == 8
+    for path in bootstrap_paths:
+        expected = {
+            "allowed": True, "branch": bootstrap_branch, "normalized_path": path,
+            "pr_id": "S1-VENUE-SEMANTICS-PHASE-A-01", "matched_rule": f"exact:{path}",
+            "reason": "registered_exact_path",
+        }
+        assert registry.explain_pr_scope_decision(bootstrap_branch, path) == expected
+        assert registry.explain_pr_scope_decision(bootstrap_branch, path.replace('/', '\\')) == expected
+        for near in (bootstrap_branch.upper(), bootstrap_branch[:-1], bootstrap_branch + '-copy',
+                     bootstrap_branch + '/', 'prefix-' + bootstrap_branch, 's1-kalshi-*'):
+            assert not registry.is_pr_scoped_changed_path_allowed(near, path)
+        for near in (path.upper(), path + '.copy', '../' + path, '/' + path, 'C:/repo/' + path,
+                     path + '/', path.replace('/', '//'), path.replace('/', '/*/'), path.replace('/', '/../')):
+            assert not registry.is_pr_scoped_changed_path_allowed(bootstrap_branch, near)
+    for denied in (
+        'src/qtt/stage1_prediction_markets/qku_computation_control_plane/source_policy.py',
+        'src/qtt/stage1_prediction_markets/qku_computation_control_plane/economic_math.py',
+        'src/qtt/stage1_prediction_markets/qku_computation_control_plane/validation.py',
+        'tests/stage1_prediction_markets/qku_computation_control_plane/tranche_b/test_source_quantum_model_risk.py',
+        'tools/run_validation_gates.py', 'tools/validation_reliability.py', 'tools/run_pytest_fresh_basetemp.py',
+        'tools/validate_no_runtime_artifacts.py', 'tools/validate_source_fact_binding_connector_semantic_readiness_static.py',
+        'tests/tools/new_test.py', 'src/qtt/pretrade/new_resolver.py',
+    ):
+        assert registry.explain_pr_scope_decision(bootstrap_branch, denied) == {
+            'allowed': False, 'branch': bootstrap_branch, 'normalized_path': denied,
+            'pr_id': 'S1-VENUE-SEMANTICS-PHASE-A-01', 'matched_rule': 'no_s1_kalshi_scenario_bootstrap_scope_rule',
+            'reason': 'path_not_registered_for_pr_scope',
+        }
+    for protected in ('.github/workflows/qtt_validation.yml', 'AGENTS.md', '.gitignore',
+                      'docs/master_plan/atomic_rows/AtomicRows.bundle.sha256', 'docs/master_plan/QTT_MasterPlan_Current.md'):
+        assert not registry.is_pr_scoped_changed_path_allowed(bootstrap_branch, protected)
     observed_branch = "s1-kalshi-observed-fee-cohort"
     observed_paths = frozenset({
         "src/qtt/stage1_prediction_markets/qku_computation_control_plane/source_policy.py",
