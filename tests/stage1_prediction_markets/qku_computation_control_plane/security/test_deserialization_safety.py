@@ -1,4 +1,5 @@
 from types import MappingProxyType
+from contextlib import contextmanager
 
 import pytest
 
@@ -10,6 +11,968 @@ from src.qtt.stage1_prediction_markets.qku_computation_control_plane.serializati
     deterministic_json,
     safe_json_loads,
 )
+
+
+def _source_use_synthetic_key():
+    """Public synthetic enrollment; the actual ES256 verifier is never replaced."""
+    from datetime import UTC, datetime
+    from cryptography.hazmat.primitives.asymmetric import ec
+    from fido2.cose import ES256
+    from fido2.webauthn import AttestedCredentialData
+    from src.qtt.service.owner_source_use import PublicSourceUseEnrollmentV1, _b64_v1
+
+    private = ec.generate_private_key(ec.SECP256R1())
+    key_id = b"synthetic-owner-key-id-0123456789"
+    key = AttestedCredentialData.create(bytes(16), key_id, ES256.from_cryptography_key(private.public_key()))
+    enrollment = PublicSourceUseEnrollmentV1("QTT_OWNER_SOURCE_USE_ROOT_V1", "ACTIVE",
+        "SYNTHETIC::ENROLLMENT", "S-1-5-21-100-200-300-1001", "SYNTHETIC::OWNER",
+        "localhost", "https://localhost", _b64_v1(b"u" * 32), _b64_v1(key_id), _b64_v1(bytes(key)),
+        0, False, datetime(2026, 10, 20, tzinfo=UTC), ("REVIEW_ACCEPT", "USE_ADMIT", "OBSERVE_ONCE"))
+    return private, enrollment
+
+
+def _source_use_signed_response(private, pending, *, counter=1, flags=5, client=None, key_id=None, handle=None):
+    from hashlib import sha256
+    from cryptography.hazmat.primitives import hashes
+    from cryptography.hazmat.primitives.asymmetric import ec
+    from src.qtt.service.owner_source_use import _RawSourceUseResponseV1, _source_use_b64_v1
+
+    client = pending.client_data if client is None else client
+    auth = sha256(b"localhost").digest() + bytes([flags]) + counter.to_bytes(4, "big")
+    signature = private.sign(auth + sha256(client).digest(), ec.ECDSA(hashes.SHA256()))
+    return _RawSourceUseResponseV1("GET", _source_use_b64_v1(pending.enrollment.key_id_b64, maximum=1024)
+        if key_id is None else key_id, client, auth, signature, handle, None)
+
+
+@contextmanager
+def _synthetic_source_use_root(*, enrollment=None, private=None, mutate_observations=None):
+    """Run the actual bootstrap/controller using synthetic OS observations only.
+
+    No native-call table, host principal, installed application, account or key
+    is queried. All policy checks, parsing, crypto, registry and factories remain.
+    """
+    import ctypes
+    import json
+    import os
+    from pathlib import Path
+    from types import SimpleNamespace
+    from src.qtt.service import owner_source_use as service, owner_source_use_windows as native
+
+    if enrollment is None:
+        private, enrollment = _source_use_synthetic_key()
+    program_files, program_data = Path("synthetic_program_files").absolute(), Path("synthetic_program_data").absolute()
+    installation = program_files / "QTT" / "OwnerControl"
+    config = program_data / "QTT" / "OwnerControl" / "enrollment.json"
+    mapping = json.loads(deterministic_json(enrollment))
+    files = {installation / "runtime" / "python314._pth": b"python314.zip\n.\n../app\n../deps\n",
+             installation / "runtime" / "pythonw.exe": b"synthetic-runtime-not-executed",
+             installation / "runtime" / "python314.zip": b"synthetic-stdlib-not-executed",
+             installation / "app" / "qtt" / "service" / "owner_source_use_windows.py": b"synthetic-entry-not-executed",
+             config: json.dumps(mapping).encode("utf-8")}
+    directories = {program_files / "QTT", installation, installation / "runtime", installation / "app",
+                   installation / "app" / "qtt", installation / "app" / "qtt" / "service", installation / "deps",
+                   program_data / "QTT", config.parent}
+    all_paths = directories | set(files)
+    identities = {path: index + 1 for index, path in enumerate(sorted(all_paths))}
+    handles, closes = {}, []
+    closed_handles = set()
+
+    class Entries:
+        def __init__(self, directory):
+            self.entries = [SimpleNamespace(name=path.name, is_dir=lambda follow_symlinks, path=path: path in directories)
+                            for path in sorted(all_paths) if path.parent == directory]
+        def __enter__(self):
+            return iter(self.entries)
+        def __exit__(self, *args):
+            return False
+
+    class Kernel:
+        def GetCurrentProcessId(self):
+            return 501
+        def CreateFileW(self, name, access, sharing, security, creation, flags, template):
+            path = Path(name)
+            assert path in all_paths and access == 0x20081 and sharing == 1 and security is None
+            assert creation == 3 and template is None
+            assert flags == 0x200000 | (0x2000000 if path in directories else 0)
+            handle = len(handles) + 1
+            handles[handle] = path
+            return handle
+        def GetFileType(self, handle):
+            assert handle in handles
+            return 1
+        def GetFileInformationByHandleEx(self, handle, kind, pointer, capacity):
+            path = handles[handle]
+            directory = path in directories
+            size = 0 if directory else len(files[path])
+            if kind == 9:
+                value = native._FileAttributeTag(16 if directory else 32, 0)
+            elif kind == 1:
+                value = native._FileStandard(size, size, 1, 0, int(directory))
+            elif kind == 18:
+                value = native._FileId()
+                value.volume = 123
+                value.file_id[:] = identities[path].to_bytes(16, "little")
+            else:
+                raise AssertionError("unexpected native information class")
+            assert capacity == ctypes.sizeof(value)
+            ctypes.memmove(pointer, ctypes.byref(value), capacity)
+            return 1
+        def GetFinalPathNameByHandleW(self, handle, buffer, capacity, flags):
+            assert flags == 0
+            text = "\\\\?\\" + str(handles[handle])
+            assert len(text) < capacity
+            buffer.value = text
+            return len(text)
+        def ReadFile(self, handle, buffer, count, returned, overlapped):
+            assert overlapped is None
+            data = files[handles[handle]]
+            ctypes.memmove(buffer, data, len(data))
+            ctypes.cast(returned, ctypes.POINTER(ctypes.c_uint32)).contents.value = len(data)
+            return 1
+        def CloseHandle(self, handle):
+            assert handle in handles and handle not in closed_handles
+            closed_handles.add(handle)
+            closes.append(handle)
+            return 1
+
+    api = SimpleNamespace(kernel=Kernel())
+    observed_principal = dict(sid=enrollment.approval_sid, type=1, elevation_type=1,
+                              elevated=0, integrity="S-1-16-8192", app_container=0)
+    acl = dict(owner="S-1-5-18", protected=True, present=1, defaulted=0,
+        aces=(("S-1-5-18", 0x1F01FF, 0, 0), ("S-1-5-32-544", 0x1F01FF, 0, 0),
+              (enrollment.approval_sid, 0x1200A9, 0, 0)))
+    observed_sys = SimpleNamespace(version_info=(3, 14, 6), platform="win32", implementation=SimpleNamespace(_multiarch="win-amd64"),
+        flags=SimpleNamespace(isolated=1, no_site=1, ignore_environment=1, safe_path=1, dont_write_bytecode=1),
+        prefix=str(installation / "runtime"), base_prefix=str(installation / "runtime"),
+        exec_prefix=str(installation / "runtime"), base_exec_prefix=str(installation / "runtime"),
+        executable=str(installation / "runtime" / "pythonw.exe"),
+        path=[str(installation / "runtime" / "python314.zip"), str(installation / "runtime"),
+              str(installation / "app"), str(installation / "deps")], modules={},
+        argv=[str(installation / "app" / "qtt" / "service" / "owner_source_use_windows.py")])
+    if mutate_observations is not None:
+        mutate_observations(SimpleNamespace(system=observed_sys, principal=observed_principal,
+            acl=acl, files=files, paths=all_paths, directories=directories, identities=identities,
+            installation=installation, config=config, api=api, handles=handles, closes=closes))
+
+    with pytest.MonkeyPatch.context() as patch:
+        patch.setattr(native, "_native_system_v1", lambda: api)
+        patch.setattr(native, "_observe_principal_v1", lambda actual: dict(observed_principal))
+        patch.setattr(native, "_known_folders_v1", lambda actual: (program_files, program_data))
+        patch.setattr(native, "_observe_acl_v1", lambda actual, handle: dict(acl))
+        patch.setattr(native, "sys", observed_sys)
+        patch.setattr(native, "os", SimpleNamespace(name="nt", path=os.path, getcwd=lambda: str(installation / "runtime"), scandir=Entries))
+        patch.setattr(native, "__file__", observed_sys.argv[0])
+        try:
+            root = native._bootstrap_owner_source_use_v1()
+        except BaseException:
+            assert len(closes) == len(handles)
+            raise
+        try:
+            native._require_native_root_v1(root)
+            controller = service._create_owner_source_use_controller_v1(root)
+            counter = [enrollment.initial_counter or 0]
+            response_transform = [None]
+            completions = []
+
+            class Guid(ctypes.Structure):
+                _fields_ = [("bytes", ctypes.c_ubyte * 16)]
+
+            class User:
+                def IsWindow(self, hwnd):
+                    return hwnd == 7
+                def GetWindowThreadProcessId(self, hwnd, target):
+                    assert hwnd == 7
+                    ctypes.cast(target, ctypes.POINTER(ctypes.c_uint32)).contents.value = 501
+                    return 601
+
+            root.window = SimpleNamespace(root=root, hwnd=7, user=User())
+
+            def device(actual_root, operation):
+                assert actual_root is root and operation.authentication is controller._authority._pending.authentication
+                counter[0] += 1
+                raw = _source_use_signed_response(private, operation.authentication, counter=counter[0])
+                if response_transform[0] is not None:
+                    raw = response_transform[0](raw)
+                observed = native._check_principal_v1(native._observe_principal_v1(api))
+                return raw, observed, observed
+
+            def sign(proposal, *, via_controller=False, before_complete=None, transform_response=None):
+                reference, preview = controller.prepare_action_v1(deterministic_json(proposal).encode("utf-8"))
+                assert reference in preview
+                # Only OS/device acquisition is substituted. Original operation,
+                # worker/join, completion registry, issuer and real crypto execute.
+                with pytest.MonkeyPatch.context() as device_patch:
+                    device_patch.setattr(native, "_webauthn_table_v1", lambda actual: (
+                        SimpleNamespace(WebAuthNGetCancellationId=lambda guid: 0,
+                                        WebAuthNCancelCurrentOperation=lambda guid: 0), SimpleNamespace(GUID=Guid)))
+                    device_patch.setattr(native, "_acquire_native_response_v1", device)
+                    response_transform[0] = transform_response
+                    controller._confirm_prepared_v1()
+                    root.operation.worker.join(timeout=5)
+                    assert not root.operation.worker.is_alive()
+                    completed = native._take_native_completion_v1(root)
+                    assert completed is not None and completed[0] == reference and completed[2] is None
+                    response_transform[0] = None
+                completions.append((reference, controller._authority._pending, completed[1]))
+                if before_complete is not None:
+                    before_complete()
+                if via_controller:
+                    return controller.complete_action_v1(reference, completed[1])
+                controller._pending_ref = controller._preview = None
+                return controller._authority.complete_action_v1(reference, completed[1])
+
+            yield SimpleNamespace(root=root, controller=controller, authority=controller._authority,
+                                  enrollment=enrollment, private=private, api=api, handles=handles, closes=closes,
+                                  sign=sign, counter=counter, completions=completions)
+        finally:
+            native._close_native_root_v1(root)
+        assert len(closes) == len(handles)
+
+
+def test_source_use_authentication(caplog, capsys):
+    from dataclasses import replace
+    from datetime import UTC, datetime
+    from hashlib import sha256
+    import json
+    import logging
+    from fido2 import cbor
+    from src.qtt.service import owner_source_use as service
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane.errors import ComputationControlPlaneError
+
+    private, enrollment = _source_use_synthetic_key()
+    moment = datetime(2026, 10, 20, 12, tzinfo=UTC)
+    caplog.set_level(logging.DEBUG, logger="fido2.server")
+    pending = service._begin_source_use_authentication_v1(enrollment, operation="GET")
+    assert len(service._source_use_b64_v1(pending.state["challenge"], minimum=32, maximum=32)) == 32
+    raw = _source_use_signed_response(private, pending)
+    proof = service._verify_source_use_response_v1(pending, raw, verified_at_utc=moment)
+    assert proof.counter == 1 and proof.key_ref == enrollment.enrollment_ref
+    assert proof.verified_at_utc == moment and proof.returned_user_handle_b64 is None
+    from cryptography.hazmat.primitives import hashes
+    from cryptography.hazmat.primitives.asymmetric import ec
+    other_private = ec.generate_private_key(ec.SECP256R1())
+    with pytest.raises((ComputationControlPlaneError, ValueError)):
+        service._verify_source_use_response_v1(pending, _source_use_signed_response(other_private, pending), verified_at_utc=moment)
+    wrong_rp = sha256(b"wrong.invalid").digest() + raw.authenticator_data[32:]
+    wrong_rp_raw = replace(raw, authenticator_data=wrong_rp,
+        signature=private.sign(wrong_rp + sha256(raw.client_data).digest(), ec.ECDSA(hashes.SHA256())))
+    with pytest.raises((ComputationControlPlaneError, ValueError)):
+        service._verify_source_use_response_v1(pending, wrong_rp_raw, verified_at_utc=moment)
+    key_data = service._source_use_b64_v1(enrollment.key_data_b64, maximum=4096)
+    prefix = key_data[:18 + len(raw.key_id)]
+    public_key = cbor.decode(key_data[len(prefix):])
+    for changes in ({3: -257}, {3: -8}, {-1: 2}, {1: 3}, {-4: bytes(32)}):
+        with pytest.raises((ComputationControlPlaneError, ValueError)):
+            service._validate_public_key_v1(prefix + cbor.encode({**public_key, **changes}))
+    assert not [record for record in caplog.records if record.name == "fido2.server"]
+    assert service._begin_source_use_authentication_v1(enrollment, operation="GET").state["challenge"] != pending.state["challenge"]
+    for flags in (0, 1, 4, 7, 0x25, 0x45, 0x85, 0x15, 0x0D):
+        bad = _source_use_signed_response(private, pending, flags=flags)
+        with pytest.raises((ComputationControlPlaneError, ValueError)):
+            service._verify_source_use_response_v1(pending, bad, verified_at_utc=moment)
+    for bad in (replace(raw, signature=b"not-an-ES256-signature"),
+                _source_use_signed_response(private, pending, key_id=b"another-public-key"),
+                _source_use_signed_response(private, pending, handle=b"x" * 32)):
+        with pytest.raises((ComputationControlPlaneError, ValueError)):
+            service._verify_source_use_response_v1(pending, bad, verified_at_utc=moment)
+    accepted_handle = _source_use_signed_response(private, pending, handle=b"u" * 32)
+    assert service._verify_source_use_response_v1(pending, accepted_handle, verified_at_utc=moment).returned_user_handle_b64 == enrollment.user_handle_b64
+    with pytest.raises(ComputationControlPlaneError):
+        replace(raw, user_handle=b"")
+    for field, value in (("origin", "https://localhost.attacker.example"), ("origin", "https://localhost/"),
+                         ("challenge", "A" * 43), ("crossOrigin", True), ("crossOrigin", 0),
+                         ("topOrigin", "https://localhost"), ("tokenBinding", {}), ("type", "webauthn.create")):
+        client = json.loads(pending.client_data)
+        client[field] = value
+        changed = json.dumps(client, separators=(",", ":")).encode()
+        bad = _source_use_signed_response(private, pending, client=changed)
+        # Also test the closed policy when a malformed original native client
+        # snapshot is supplied, so equality alone cannot satisfy the negative.
+        with pytest.raises((ComputationControlPlaneError, ValueError)):
+            service._verify_source_use_response_v1(replace(pending, client_data=changed), bad, verified_at_utc=moment)
+    for malformed in (pending.client_data + b"{}", pending.client_data[:-1] + b',"origin":"https://localhost"}', b"\xff"):
+        bad = _source_use_signed_response(private, pending, client=malformed)
+        with pytest.raises((ComputationControlPlaneError, ValueError, UnicodeError)):
+            service._verify_source_use_response_v1(replace(pending, client_data=malformed), bad, verified_at_utc=moment)
+
+    class Text(str):
+        pass
+
+    for identifier in ("has space", "x" * 257, Text("SYNTHETIC::OWNER"), "", "\ud800"):
+        for field in ("enrollment_ref", "owner_ref"):
+            with pytest.raises(ComputationControlPlaneError):
+                replace(enrollment, **{field: identifier})
+        with pytest.raises(ComputationControlPlaneError):
+            replace(proof, key_ref=identifier)
+    with pytest.raises(ComputationControlPlaneError):
+        replace(enrollment, roles=(Text("REVIEW_ACCEPT"), "USE_ADMIT", "OBSERVE_ONCE"))
+    for field in ("key_id_b64", "key_data_b64", "user_handle_b64"):
+        with pytest.raises(ComputationControlPlaneError):
+            replace(enrollment, **{field: getattr(enrollment, field) + "="})
+    with pytest.raises(ComputationControlPlaneError):
+        replace(enrollment, initial_counter=True)
+    with pytest.raises(ComputationControlPlaneError):
+        replace(proof, counter=2**32)
+
+    unregistered = replace(enrollment, root_state="ENROLLMENT_ONLY", key_id_b64=None, key_data_b64=None,
+                           initial_counter=None, key_backup_eligible=None, registered_at_utc=None)
+    creation = service._begin_source_use_authentication_v1(unregistered, operation="CREATE")
+    key_data = service._source_use_b64_v1(enrollment.key_data_b64, maximum=4096)
+    auth = sha256(b"localhost").digest() + b"\x45" + bytes(4) + key_data
+    attestation = cbor.encode({"fmt": "none", "authData": auth, "attStmt": {}})
+    creation_raw = service._RawSourceUseResponseV1("CREATE", raw.key_id, creation.client_data, auth, None, None, attestation)
+    verified_key, backup = service._verify_source_use_response_v1(creation, creation_raw, verified_at_utc=moment)
+    assert verified_key == key_data and backup is False
+    for modified in ({"fmt": "packed", "authData": auth, "attStmt": {}},
+                     {"fmt": "none", "authData": auth, "attStmt": {"alg": -7}}):
+        with pytest.raises(ComputationControlPlaneError):
+            service._verify_source_use_response_v1(creation, replace(creation_raw, attestation_object=cbor.encode(modified)), verified_at_utc=moment)
+    # Actual possession verification remains required independently of registration.
+    assert service._verify_source_use_response_v1(pending, raw, verified_at_utc=moment).counter == 1
+    _assert_source_use_enrollment_lifecycle()
+    captured = capsys.readouterr()
+    assert captured.out == captured.err == ""
+
+
+def _assert_source_use_enrollment_lifecycle():
+    import ctypes
+    import json
+    import time
+    from dataclasses import replace
+    from datetime import UTC, datetime
+    from hashlib import sha256
+    from types import SimpleNamespace
+    from fido2 import cbor
+    from src.qtt.service import owner_source_use as service, owner_source_use_windows as native
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane.errors import ComputationControlPlaneError
+
+    private, installed = _source_use_synthetic_key()
+    enrollment = replace(installed, root_state="ENROLLMENT_ONLY", key_id_b64=None, key_data_b64=None,
+                         initial_counter=None, key_backup_eligible=None, registered_at_utc=None)
+    class Guid(ctypes.Structure):
+        _fields_ = [("bytes", ctypes.c_ubyte * 16)]
+    for failure in (None, "create_wall", "create_mono", "possession_wall", "possession_mono",
+                    "rollback", "bad_signature", "cancel", "session"):
+        clock = dict(wall=1792497600_000000000, mono=10_000000000)
+        with pytest.MonkeyPatch.context() as patch:
+            patch.setattr(time, "time_ns", lambda: clock["wall"])
+            patch.setattr(time, "monotonic_ns", lambda: clock["mono"])
+            with _synthetic_source_use_root(enrollment=enrollment, private=private) as h:
+                acquired = []
+                def acquire(root, operation):
+                    pending = operation.authentication
+                    acquired.append(pending)
+                    if pending.operation == "CREATE":
+                        key_data = service._source_use_b64_v1(installed.key_data_b64, maximum=4096)
+                        auth = sha256(b"localhost").digest() + b"\x45" + bytes(4) + key_data
+                        raw = service._RawSourceUseResponseV1("CREATE",
+                            service._source_use_b64_v1(installed.key_id_b64, maximum=1024),
+                            pending.client_data, auth, None, None,
+                            cbor.encode({"fmt": "none", "authData": auth, "attStmt": {}}))
+                    else:
+                        raw = _source_use_signed_response(private, pending, counter=1)
+                        if failure == "bad_signature":
+                            raw = replace(raw, signature=b"invalid synthetic signature")
+                    observed = native._check_principal_v1(native._observe_principal_v1(h.api))
+                    return raw, observed, observed
+                patch.setattr(native, "_webauthn_table_v1", lambda actual: (
+                    SimpleNamespace(WebAuthNGetCancellationId=lambda guid: 0,
+                                    WebAuthNCancelCurrentOperation=lambda guid: 0), SimpleNamespace(GUID=Guid)))
+                patch.setattr(native, "_acquire_native_response_v1", acquire)
+                controller = h.controller
+                controller._begin_enrollment_v1()
+                assert controller._authority is None and controller._enrollment_stage == "CREATE"
+
+                def completed():
+                    operation = h.root.operation
+                    operation.worker.join(5)
+                    assert not operation.worker.is_alive()
+                    value = native._take_native_completion_v1(h.root)
+                    assert value is not None and value[2] is None
+                    return value[:2]
+
+                reference, raw = completed()
+                if failure in ("create_wall", "create_mono", "rollback", "cancel", "session"):
+                    if failure == "create_wall":
+                        clock["wall"] += 120_000000000
+                    elif failure == "create_mono":
+                        clock["mono"] += 120_000000000
+                    elif failure == "rollback":
+                        clock["wall"] -= 1
+                    elif failure == "session":
+                        clock["wall"] += 900_000000000
+                        clock["mono"] += 900_000000000
+                    else:
+                        controller.cancel_v1()
+                    with pytest.raises(ComputationControlPlaneError):
+                        controller._complete_enrollment_v1(reference, raw)
+                else:
+                    assert controller._complete_enrollment_v1(reference, raw) is None
+                    assert controller._enrollment_candidate is None and controller._enrollment_stage == "POSSESSION"
+                    assert acquired[0].state["challenge"] != controller._enrollment_pending.state["challenge"]
+                    reference, raw = completed()
+                    if failure is not None:
+                        if failure == "possession_wall":
+                            clock["wall"] += 120_000000000
+                        elif failure == "possession_mono":
+                            clock["mono"] += 120_000000000
+                        with pytest.raises((ComputationControlPlaneError, ValueError)):
+                            controller._complete_enrollment_v1(reference, raw)
+                    else:
+                        candidate = controller._complete_enrollment_v1(reference, raw)
+                        parsed = service._read_public_enrollment_v1(candidate.encode())
+                        assert parsed.root_state == "ACTIVE" and parsed.initial_counter == 1
+                        assert parsed.key_data_b64 == installed.key_data_b64
+                        assert controller._enrollment_stage == "PUBLIC_CANDIDATE_ONLY"
+                        assert set(json.loads(candidate)) == set(json.loads(deterministic_json(installed)))
+                assert not h.root.completed and h.root.operation is None
+                assert controller._authority is None and h.root.enrollment == enrollment
+                if failure is not None:
+                    assert controller._enrollment_candidate is None
+                with pytest.raises(ComputationControlPlaneError):
+                    controller._complete_enrollment_v1(reference, raw)
+                assert controller.read_status_v1()["state"] == "DENIED"
+
+
+def test_source_use_native_boundary(monkeypatch):
+    import ctypes
+    import importlib.util
+    from src.qtt.service import owner_source_use_windows as native
+
+    _assert_source_use_native_extended(monkeypatch)
+    _assert_source_use_local_ui(monkeypatch)
+
+    native._check_output_layouts_v1()  # Frozen Win64 expectations, no native qualification.
+    assert ctypes.sizeof(native._FileStandard) == 24 and ctypes.sizeof(native._FileId) == 24
+    effects = []
+
+    def forbidden(*args, **kwargs):
+        effects.append(True)
+        raise AssertionError("native activity during collection/import")
+
+    with monkeypatch.context() as patch:
+        patch.setattr(ctypes, "WinDLL", forbidden, raising=False)
+        spec = importlib.util.spec_from_file_location("synthetic_inert_owner_entry", native.__file__)
+        inert = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(inert)
+        assert effects == [] and inert._ROOTS == {}
+
+    sid = ctypes.create_string_buffer(b"\x01\x01" + b"\x00" * 6 + b"\x01\x00\x00\x00")
+    start = ctypes.addressof(sid)
+    assert native._bounded_sid_v1(start, start, start + 12) == 12
+    for pointer, end in ((start + 11, start + 12), (start, start + 7),
+                         (start, start + 11), (start - 1, start + 12)):
+        with pytest.raises(RuntimeError):
+            native._bounded_sid_v1(pointer, start, end)
+    sid[1] = b"\x10"
+    with pytest.raises(RuntimeError):
+        native._bounded_sid_v1(start, start, start + len(sid))
+
+    principal = dict(sid="S-1-5-21-100-200-300-1001", type=1, elevation_type=1,
+                     elevated=0, integrity="S-1-16-8192", app_container=0)
+    assert native._check_principal_v1(principal) == principal["sid"]
+    for name, value in (("type", 2), ("elevation_type", 3), ("elevated", 1),
+                        ("integrity", "S-1-16-12288"), ("app_container", 1), ("elevated", False)):
+        with pytest.raises(RuntimeError):
+            native._check_principal_v1({**principal, name: value})
+    acl = dict(owner="S-1-5-18", protected=True, present=1, defaulted=0,
+               aces=(("S-1-5-18", 0x1F01FF, 0, 0), ("S-1-5-32-544", 0x1F01FF, 0, 0),
+                     (principal["sid"], 0x1200A9, 0, 0)))
+    native._check_acl_v1(acl, principal["sid"], False)
+    for change in (dict(protected=False), dict(present=0), dict(defaulted=1), dict(owner=principal["sid"]),
+                   dict(aces=acl["aces"] + (("S-1-1-0", 0x1200A9, 0, 0),)),
+                   dict(aces=acl["aces"][:-1] + ((principal["sid"], 0x1F01FF, 0, 0),)),
+                   dict(aces=acl["aces"][:-1] + ((principal["sid"], 0x1200A9, 16, 0),)),
+                   dict(aces=acl["aces"][:-1] + ((principal["sid"], 0x1200A9, 0, 9),))):
+        with pytest.raises(RuntimeError):
+            native._check_acl_v1({**acl, **change}, principal["sid"], False)
+
+    private, enrollment = _source_use_synthetic_key()
+    from src.qtt.service import owner_source_use as service
+    pending = service._begin_source_use_authentication_v1(enrollment, operation="GET")
+    signed = _source_use_signed_response(private, pending)
+    buffers = []
+
+    def buffer(data):
+        value = ctypes.create_string_buffer(data)
+        buffers.append(value)
+        return ctypes.addressof(value)
+
+    def assertion(version):
+        row = native._ASSERTION_VIEWS[version]()
+        row.dwVersion = version
+        row.cbAuthenticatorData, row.pbAuthenticatorData = len(signed.authenticator_data), buffer(signed.authenticator_data)
+        row.cbSignature, row.pbSignature = len(signed.signature), buffer(signed.signature)
+        row.Credential.dwVersion = 1
+        row.Credential.cbId, row.Credential.pbId = len(signed.key_id), buffer(signed.key_id)
+        row.Credential.pwszCredentialType = buffer("public-key\0".encode("utf-16-le"))
+        if version >= 4:
+            row.dwUsedTransports = 0x10
+        return row
+
+    for version in range(1, 7):
+        row = assertion(version)
+        raw = native._copy_native_response_v1(ctypes.addressof(row), "GET", pending.client_data)
+        assert raw == signed
+        assert "__del__" not in type(row).__dict__
+    row = assertion(6)
+    for name, value in (("dwVersion", 0), ("dwVersion", 7), ("cbAuthenticatorData", 36),
+                        ("pHmacSecret", 1), ("cbUnsignedExtensionOutputs", 1),
+                        ("pbUnsignedExtensionOutputs", 1), ("pbCredLargeBlob", 1),
+                        ("dwUsedTransports", 1)):
+        old = getattr(row, name)
+        setattr(row, name, value)
+        with pytest.raises(RuntimeError):
+            native._copy_native_response_v1(ctypes.addressof(row), "GET", pending.client_data)
+        setattr(row, name, old)
+    row.Extensions.cExtensions, row.Extensions.pExtensions = 1, 1
+    with monkeypatch.context() as patch:
+        patch.setattr(ctypes, "string_at", forbidden)
+        with pytest.raises(RuntimeError):
+            native._copy_native_response_v1(ctypes.addressof(row), "GET", pending.client_data)
+        assert effects == []
+    row.Extensions.cExtensions, row.Extensions.pExtensions = 0, None
+    row.cbClientDataJSON, row.pbClientDataJSON = 65536, 1
+    with monkeypatch.context() as patch:
+        patch.setattr(ctypes, "string_at", forbidden)
+        with pytest.raises(RuntimeError):
+            native._copy_native_response_v1(ctypes.addressof(row), "GET", pending.client_data)
+        assert effects == []
+    row.cbClientDataJSON, row.pbClientDataJSON = len(pending.client_data), buffer(pending.client_data)
+    assert native._copy_native_response_v1(ctypes.addressof(row), "GET", pending.client_data) == signed
+    row.pbClientDataJSON = buffer(b"x" * len(pending.client_data))
+    with pytest.raises(RuntimeError):
+        native._copy_native_response_v1(ctypes.addressof(row), "GET", pending.client_data)
+
+
+def _assert_source_use_native_extended(monkeypatch):
+    import ctypes
+    import json
+    import time
+    from dataclasses import replace
+    from hashlib import sha256
+    from threading import Event
+    from types import SimpleNamespace
+    from fido2 import cbor
+    from src.qtt.service import owner_source_use as service, owner_source_use_windows as native
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane.errors import ComputationControlPlaneError
+
+    # The original bootstrap, handles and closed parser run against changed raw
+    # OS observations. None of these cases reads a real protected installation.
+    changes = [
+        lambda o: setattr(o.system, "version_info", (3, 14, 7)),
+        lambda o: setattr(o.system, "platform", "linux"),
+        lambda o: setattr(o.system.implementation, "_multiarch", "win-arm64"),
+        lambda o: setattr(o.system, "prefix", "other-runtime"),
+        lambda o: setattr(o.system, "executable", str(o.installation / "runtime/python.exe")),
+        lambda o: o.system.path.append("writable-extension"),
+        lambda o: o.system.modules.update(site=object()),
+        lambda o: o.system.argv.append("unexpected"),
+        lambda o: o.principal.update(elevated=1),
+        lambda o: o.principal.update(type=2),
+        lambda o: o.principal.update(integrity="S-1-16-12288"),
+        lambda o: o.acl.update(protected=False),
+        lambda o: o.acl.update(aces=o.acl["aces"] + (("S-1-1-0", 0x1200A9, 0, 0),)),
+        lambda o: o.files.__setitem__(o.installation / "runtime/python314._pth", b"python314.zip\n.\n../app\n../deps\nimport site\n"),
+        lambda o: o.paths.remove(o.installation / "runtime/pythonw.exe"),
+        lambda o: o.files.__setitem__(o.config, b'{"schema_version":"UNKNOWN"}'),
+    ]
+    for flag in ("isolated", "no_site", "ignore_environment", "safe_path", "dont_write_bytecode"):
+        changes.append(lambda o, flag=flag: setattr(o.system.flags, flag, 0))
+    for change in changes:
+        with pytest.raises((RuntimeError, ComputationControlPlaneError)):
+            with _synthetic_source_use_root(mutate_observations=change):
+                raise AssertionError("inadmissible bootstrap accepted")
+
+    for kind, field, value in ((9, "attributes", 0x400), (9, "tag", 1),
+                               (1, "links", 2), (1, "delete_pending", 1)):
+        def corrupt(o, kind=kind, field=field, value=value):
+            original = o.api.kernel.GetFileInformationByHandleEx
+            def observation(handle, observed_kind, pointer, size):
+                result = original(handle, observed_kind, pointer, size)
+                if observed_kind == kind and o.handles[handle] not in o.directories:
+                    typ = native._FileAttributeTag if kind == 9 else native._FileStandard
+                    view = ctypes.cast(pointer, ctypes.POINTER(typ)).contents
+                    setattr(view, field, value)
+                return result
+            o.api.kernel.GetFileInformationByHandleEx = observation
+        with pytest.raises(RuntimeError):
+            with _synthetic_source_use_root(mutate_observations=corrupt):
+                raise AssertionError("unsafe descendant accepted")
+
+    for failure in ("changed_identity", "metadata_failure", "unsupported_file_type"):
+        def corrupt_identity(o):
+            original = o.api.kernel.GetFileInformationByHandleEx
+            counts = {}
+            def metadata(handle, kind, pointer, size):
+                if failure == "metadata_failure":
+                    return 0
+                value = original(handle, kind, pointer, size)
+                if kind == 18:
+                    counts[handle] = counts.get(handle, 0) + 1
+                    if counts[handle] == 2:
+                        ctypes.cast(pointer, ctypes.POINTER(native._FileId)).contents.volume += 1
+                return value
+            if failure == "unsupported_file_type":
+                o.api.kernel.GetFileType = lambda handle: 2
+            else:
+                o.api.kernel.GetFileInformationByHandleEx = metadata
+        with pytest.raises(RuntimeError):
+            with _synthetic_source_use_root(mutate_observations=corrupt_identity):
+                raise AssertionError("changed/unsupported opened object accepted")
+
+    for total in (65536, 65537):
+        def populate(o):
+            present = sum(path != o.installation and path.is_relative_to(o.installation) for path in o.paths)
+            for index in range(total - present):
+                path = o.installation / "deps" / ("synthetic_%06d.dat" % index)
+                o.paths.add(path)
+                o.files[path] = b""
+                o.identities[path] = 1000 + index
+        if total == 65536:
+            with _synthetic_source_use_root(mutate_observations=populate) as bounded:
+                assert len(bounded.handles) == total + 5
+        else:
+            with pytest.raises(RuntimeError):
+                with _synthetic_source_use_root(mutate_observations=populate):
+                    raise AssertionError("enumeration above65536 accepted")
+
+    private, enrollment = _source_use_synthetic_key()
+    inactive = replace(enrollment, root_state="ENROLLMENT_ONLY", key_id_b64=None, key_data_b64=None,
+                       initial_counter=None, key_backup_eligible=None, registered_at_utc=None)
+    get = service._begin_source_use_authentication_v1(enrollment, operation="GET")
+    create = service._begin_source_use_authentication_v1(inactive, operation="CREATE")
+    signed = _source_use_signed_response(private, get)
+    key_data = service._source_use_b64_v1(enrollment.key_data_b64, maximum=4096)
+    auth = sha256(b"localhost").digest() + b"\x45" + bytes(4) + key_data
+    attestation = cbor.encode({"fmt": "none", "authData": auth, "attStmt": {}})
+    buffers = []
+
+    def buffer(data):
+        value = ctypes.create_string_buffer(data)
+        buffers.append(value)
+        return ctypes.addressof(value)
+
+    def raw_view(operation, version):
+        row = (native._ASSERTION_VIEWS if operation == "GET" else native._ATTESTATION_VIEWS)[version]()
+        row.dwVersion = version
+        if operation == "GET":
+            row.cbAuthenticatorData, row.pbAuthenticatorData = len(signed.authenticator_data), buffer(signed.authenticator_data)
+            row.cbSignature, row.pbSignature = len(signed.signature), buffer(signed.signature)
+            row.Credential.dwVersion = 1
+            row.Credential.cbId, row.Credential.pbId = len(signed.key_id), buffer(signed.key_id)
+            row.Credential.pwszCredentialType = buffer("public-key\0".encode("utf-16-le"))
+            if version >= 4:
+                row.dwUsedTransports = 0x10
+        else:
+            row.cbAuthenticatorData, row.pbAuthenticatorData = len(auth), buffer(auth)
+            row.pwszFormatType = buffer("none\0".encode("utf-16-le"))
+            row.cbAttestation, row.pbAttestation = 1, buffer(cbor.encode({}))
+            row.cbAttestationObject, row.pbAttestationObject = len(attestation), buffer(attestation)
+            row.cbCredentialId, row.pbCredentialId = len(signed.key_id), buffer(signed.key_id)
+            if version >= 3:
+                row.dwUsedTransport = 0x10
+            if version >= 8:
+                row.dwTransports = 0x10
+        return row
+
+    for version in range(1, 9):
+        row = raw_view("CREATE", version)
+        response = native._copy_native_response_v1(ctypes.addressof(row), "CREATE", create.client_data)
+        assert response.authenticator_data == auth and response.attestation_object == attestation
+        assert "__del__" not in type(row).__dict__
+    for operation, version, pending in (("GET", 6, get), ("CREATE", 8, create)):
+        for field, value in (("dwVersion", 99), ("cbAuthenticatorData", 65537), ("pbAuthenticatorData", None)):
+            row = raw_view(operation, version)
+            setattr(row, field, value)
+            copies = []
+            with monkeypatch.context() as patch:
+                def forbidden_copy(*args):
+                    copies.append(args)
+                    raise AssertionError("native payload copied before rejection")
+                patch.setattr(ctypes, "string_at", forbidden_copy)
+                with pytest.raises(RuntimeError):
+                    native._copy_native_response_v1(ctypes.addressof(row), operation, pending.client_data)
+                assert not copies
+    for field, value in (("pHmacSecret", 1), ("cbUnsignedExtensionOutputs", 1),
+                         ("pbUnsignedExtensionOutputs", 1), ("bPrfEnabled", 1), ("bEpAtt", 1),
+                         ("bThirdPartyPayment", 1), ("dwTransports", 1), ("pvAttestationDecode", 1)):
+        row = raw_view("CREATE", 8)
+        setattr(row, field, value)
+        with pytest.raises(RuntimeError):
+            native._copy_native_response_v1(ctypes.addressof(row), "CREATE", create.client_data)
+
+    # Real acquisition/free/finally code, with synthetic ABI inputs and API only.
+    for operation, version, pending in (("GET", 6, get), ("CREATE", 8, create)):
+        for outcome in ("success", "native_error", "missing_pointer", "bad_output", "changed_principal"):
+            row = raw_view(operation, version)
+            if outcome == "bad_output":
+                row.dwVersion = 99
+            freed, constructed, called = [], [], []
+            class Input(ctypes.Structure):
+                _fields_ = [("placeholder", ctypes.c_uint32)]
+                def __init__(self, *args, **kwargs):
+                    self.values = (args, kwargs)
+                    constructed.append(self)
+            constant = lambda **kwargs: SimpleNamespace(**kwargs)
+            library = constant(WebAuthNClientData=Input, WebAuthNGetAssertionOptions=Input,
+                WebAuthNMakeCredentialOptions=Input, WebAuthNRpEntityInformation=Input,
+                WebAuthNUserEntityInformation=Input, WebAuthNCoseCredentialParameters=Input,
+                WebAuthNAuthenticatorAttachment=constant(PLATFORM=1),
+                WebAuthNUserVerificationRequirement=constant(REQUIRED=1),
+                WebAuthNLargeBlobOperation=constant(NONE=0),
+                WebAuthNAttestationConveyancePreference=constant(NONE=1),
+                WebAuthNEnterpriseAttestation=constant(NONE=0), WebAuthNLargeBlobSupport=constant(NONE=0))
+            def invoke(*args):
+                called.append(args)
+                assert args[0] == 7
+                if operation == "GET":
+                    assert args[1] == "localhost"
+                if outcome != "missing_pointer":
+                    ctypes.cast(args[-1], ctypes.POINTER(ctypes.c_void_p)).contents.value = ctypes.addressof(row)
+                return 1 if outcome == "native_error" else 0
+            def free(pointer):
+                assert pointer.value == ctypes.addressof(row)
+                freed.append(operation)
+            table = constant(WebAuthNAuthenticatorGetAssertion=invoke, WebAuthNAuthenticatorMakeCredential=invoke,
+                             WebAuthNFreeAssertion=free, WebAuthNFreeCredentialAttestation=free)
+            with _synthetic_source_use_root() as h, monkeypatch.context() as patch:
+                observed = native._observe_principal_v1
+                principal_reads = []
+                def principal(api):
+                    result = observed(api)
+                    principal_reads.append(result)
+                    if outcome == "changed_principal" and len(principal_reads) == 2:
+                        result["elevated"] = 1
+                    return result
+                patch.setattr(native, "_observe_principal_v1", principal)
+                attempt = constant(authentication=pending, library=library, table=table, guid=Input(),
+                                   keepalive=[], deadline=time.monotonic_ns() + 60_000_000_000)
+                if outcome == "success":
+                    result = native._acquire_native_response_v1(h.root, attempt)
+                    assert result[0].operation == operation and result[1] == result[2] == h.root.sid
+                else:
+                    with pytest.raises(RuntimeError):
+                        native._acquire_native_response_v1(h.root, attempt)
+                assert len(called) == 1 and freed == ([] if outcome == "missing_pointer" else [operation])
+                assert attempt.keepalive[0] is h.root.window and attempt.keepalive[1] is attempt.guid
+                options = attempt.keepalive[3].values[1]
+                assert 1 <= options["timeout"] <= 120000 and options["attachment"] == options["uv_requirement"] == 1
+                assert options["extensions"] == [] and options["cancellationId"] is attempt.guid
+                if operation == "GET":
+                    assert options["credentials"] == [{"id": signed.key_id, "type": "public-key", "transport": "INTERNAL"}]
+                    assert options["flags"] == options["cred_large_blob_operation"] == 0
+                else:
+                    assert options["require_resident_key"] is options["prefer_resident_key"] is options["enable_prf"] is False
+                    assert options["enterprise_attestation"] == options["large_blob_support"] == 0
+                    assert attempt.keepalive[-1].values[0] == ([{"type": "public-key", "alg": -7}],)
+
+    # Cancel a blocked native observation. No replacement work or root/window
+    # release is accepted until its original non-daemon worker actually returns.
+    with _synthetic_source_use_root() as h, monkeypatch.context() as patch:
+        entered, release = Event(), Event()
+        cancels = []
+        class Guid(ctypes.Structure):
+            _fields_ = [("value", ctypes.c_ubyte * 16)]
+        table = SimpleNamespace(WebAuthNGetCancellationId=lambda pointer: 0,
+            WebAuthNCancelCurrentOperation=lambda pointer: cancels.append(pointer) or 0)
+        patch.setattr(native, "_webauthn_table_v1", lambda root: (table, SimpleNamespace(GUID=Guid)))
+        def blocked(root, operation):
+            entered.set()
+            assert release.wait(5)
+            return signed, root.sid, root.sid
+        patch.setattr(native, "_acquire_native_response_v1", blocked)
+        native._start_native_operation_v1(h.root, "synthetic-native-cancel", get, time.monotonic_ns() + 60_000_000_000)
+        original = h.root.operation
+        try:
+            assert entered.wait(5) and not original.worker.daemon
+            native._cancel_native_operation_v1(h.root)
+            native._cancel_native_operation_v1(h.root)
+            assert len(cancels) == 1 and native._take_native_completion_v1(h.root) is None
+            with pytest.raises(RuntimeError):
+                native._close_native_root_v1(h.root)
+            with pytest.raises(RuntimeError):
+                native._start_native_operation_v1(h.root, "other", get, original.deadline)
+        finally:
+            release.set()
+            original.worker.join(5)
+        assert not original.worker.is_alive()
+        assert native._take_native_completion_v1(h.root) == ("synthetic-native-cancel", None, "CANCELLED")
+        assert h.root.operation is None and not h.root.completed
+
+
+def _assert_source_use_local_ui(monkeypatch):
+    import ctypes
+    from datetime import UTC, datetime, timedelta
+    from types import SimpleNamespace
+    from src.qtt.service import owner_source_use as service, owner_source_use_windows as native
+    from tests.stage1_prediction_markets.qku_computation_control_plane.accounting.test_contract_matrix import _source_use_action_proposals
+
+    with _synthetic_source_use_root() as h, monkeypatch.context() as patch:
+        now, unused = h.authority._live_v1()
+        scope, review, facts, declaration = _source_use_action_proposals(now)
+        reference, preview = h.controller.prepare_action_v1(deterministic_json(dict(
+            action="REVIEW_ACCEPT", scope=scope, original=review, review_facts=facts,
+            requested_expires_at_utc=now + timedelta(seconds=60))).encode())
+        changed = []
+        class User:
+            def __init__(self):
+                self.alive = False
+                self.callback = None
+                self.messages = [(0x111, (0x300 << 16) | 10), (0x10, 0)]
+                self.text = {}
+                self.unregister = []
+            def RegisterClassExW(self, pointer):
+                self.callback = pointer._obj.procedure
+                assert pointer._obj.name == "QTT.OwnerSourceUse.V1"
+                return 1
+            def UnregisterClassW(self, name, instance):
+                self.unregister.append((name, instance))
+                return 1
+            def CreateWindowExW(self, *args):
+                if args[8] is None:
+                    self.alive = True
+                    return 7
+                assert args[8] == 7
+                return 100 + args[9]
+            def IsWindow(self, handle):
+                return self.alive and handle == 7
+            def GetWindowThreadProcessId(self, handle, target):
+                assert handle == 7
+                ctypes.cast(target, ctypes.POINTER(ctypes.c_uint32)).contents.value = 501
+                return 601
+            def SetWindowTextW(self, control, text):
+                assert not h.authority._lock._is_owned()
+                self.text[control] = text
+                return 1
+            def EnableWindow(self, *args):
+                return 1
+            def SendMessageW(self, *args):
+                return 1
+            def SetWindowLongPtrW(self, *args):
+                return 1
+            def SetTimer(self, *args):
+                return 1
+            def ShowWindow(self, *args):
+                return 0
+            def UpdateWindow(self, *args):
+                return 1
+            def GetMessageW(self, pointer, *args):
+                if not self.messages:
+                    return 0
+                pointer._obj.message, pointer._obj.wparam = self.messages.pop(0)
+                pointer._obj.window = 7
+                return 1
+            def TranslateMessage(self, *args):
+                return 1
+            def DispatchMessageW(self, pointer):
+                message = pointer._obj
+                value = self.callback(7, message.message, message.wparam, 0)
+                if message.message == 0x111:
+                    assert h.authority._pending is None and h.controller._pending_ref is None
+                    assert h.controller._preview is None and h.authority._head is None
+                    assert "Input changed" in self.text[113]
+                    changed.append(reference)
+                return value
+            def DestroyWindow(self, hwnd):
+                assert hwnd == 7 and self.alive
+                self.alive = False
+                self.callback(7, 2, 0, 0)
+                return 1
+            def KillTimer(self, *args):
+                return 1
+            def PostQuitMessage(self, *args):
+                return None
+            def DefWindowProcW(self, *args):
+                return 0
+            def CallWindowProcW(self, *args):
+                raise AssertionError("copy/context menu escaped the closed result surface")
+        user = User()
+        patch.setattr(native, "_user_table_v1", lambda: user)
+        patch.setattr(ctypes, "WINFUNCTYPE", ctypes.CFUNCTYPE, raising=False)
+        assert native._run_local_window_v1(h.root, h.controller) == 0
+        assert changed == [reference] and h.authority._stopped and h.controller._closed
+        assert user.unregister == [("QTT.OwnerSourceUse.V1", None)] and not user.alive
+        for message in (0x300, 0x301, 0x7B):
+            assert h.root.window.callbacks[1](114, message, 0, 0) == 0
+
+    from threading import Event, Thread
+    from tests.stage1_prediction_markets.qku_computation_control_plane.accounting.test_contract_matrix import _synthetic_kalshi_observation
+    for winner in ("withdrawal", "display_model"):
+        with _synthetic_kalshi_observation() as observation, monkeypatch.context() as patch:
+            h = observation.issuer
+            observation.authorize(via_controller=True)
+            user = User()
+            user.messages = [(0x113, 0), (0x10, 0)]
+            completed, errors = Event(), []
+            def withdraw():
+                try:
+                    head = h.authority._head.typed_payload
+                    h.sign(dict(action="WITHDRAW_USE", scope=head.scope,
+                        expected_declaration_ref=head.declaration_ref, expected_review_ref=head.review_ref,
+                        reason="SYNTHETIC_DISPLAY_WITHDRAWAL"))
+                except BaseException as error:
+                    errors.append(error)
+                finally:
+                    completed.set()
+            if winner == "withdrawal":
+                withdraw()
+            real_text = user.SetWindowTextW
+            rendered = []
+            def set_text(control, text):
+                assert not h.authority._lock._is_owned()
+                if control == 114:
+                    assert winner == "display_model" and h.controller._display_model is not None
+                    worker = Thread(target=withdraw)
+                    worker.start()
+                    try:
+                        assert completed.wait(5)  # A must be available during native window dispatch.
+                    finally:
+                        worker.join(5)
+                    assert not worker.is_alive() and not errors
+                    rendered.append(text)
+                return real_text(control, text)
+            user.SetWindowTextW = set_text
+            worker = Thread(target=lambda: None)
+            worker.start(); worker.join(5)
+            h.root.completion_worker = worker
+            patch.setattr(native, "_user_table_v1", lambda: user)
+            patch.setattr(ctypes, "WINFUNCTYPE", ctypes.CFUNCTYPE, raising=False)
+            assert native._run_local_window_v1(h.root, h.controller) == 0
+            assert not errors and completed.is_set() and h.authority._use is None
+            if winner == "withdrawal":
+                assert not rendered and h.controller._display_model is None
+            else:
+                assert len(rendered) == 1 and "AS-OF HISTORICAL RESULT" in rendered[0]
+            assert h.root.completion_worker is None and not h.root.completed
+
+    # Original entry cleanup must retain a failure separately from a successful
+    # window result. No native entry/host/device call is used in these injections.
+    for fail_window, fail_cleanup in ((False, False), (True, False), (False, True)):
+        with _synthetic_source_use_root() as h, monkeypatch.context() as patch:
+            patch.setattr(native, "_bootstrap_owner_source_use_v1", lambda: h.root)
+            factory = service._create_owner_source_use_controller_v1
+            controllers, cleanup = [], []
+            def create(root):
+                controller = factory(root)
+                controllers.append(controller)
+                return controller
+            def window(root, controller):
+                if fail_window:
+                    raise RuntimeError("synthetic window failure")
+                return 0
+            def close(root):
+                cleanup.append(root)
+                if fail_cleanup:
+                    raise RuntimeError("synthetic cleanup failure")
+                # Retain the real synthetic handles for the fixture's one final
+                # actual close. This spy tests entry propagation, not OS release.
+            patch.setattr(service, "_create_owner_source_use_controller_v1", create)
+            patch.setattr(native, "_run_local_window_v1", window)
+            patch.setattr(native, "_close_native_root_v1", close)
+            assert native.run_owner_source_use_local_v1() == int(fail_window or fail_cleanup)
+            assert len(controllers) == 1 and controllers[0]._closed and controllers[0]._authority._stopped
+            assert cleanup == [h.root]
 
 
 def _assert_source_use_closed_storage(directory):

@@ -16,6 +16,7 @@ from tools.ci_branch_context import (
     S1_KALSHI_OBSERVED_FEE_COHORT_BRANCH,
     S1_KALSHI_SCENARIO_BOOTSTRAP_BRANCH,
     S1_SOURCE_USE_CUSTODY_BRANCH,
+    S1_KALSHI_SOURCE_USE_ADMISSION_BRANCH,
     S1_LAUNCH_GRAPH_IMPLEMENTATION_BRANCH,
     S1_PIT_DATA_PHASE_A_01_IMPLEMENTATION_BRANCH,
     S1_PLUGIN_PACKAGE_CURRENTIZATION_BRANCH,
@@ -797,6 +798,39 @@ S1_KALSHI_FEE_ROUNDING_CASHFLOW_ALLOWED_EXACT_PATHS = frozenset(
         "tools/qtt_test_gate.py",
         "tools/validate_no_runtime_artifacts.py",
         "tests/core/test_qtt_cumulative_gate.py",
+        "docs/master_plan/generated/PR152_GrandGlobalDebugLogicalConsistencyAuditEntireQTTRepo.report.json",
+    }
+)
+
+S1_KALSHI_SOURCE_USE_ADMISSION_ALLOWED_EXACT_PATHS = frozenset(
+    {
+        "src/qtt/service/owner_source_use.py",
+        "src/qtt/service/owner_source_use_windows.py",
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/receipts.py",
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/persistence.py",
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/transaction.py",
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/sqlite_reference.py",
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/source_policy.py",
+        "src/qtt/pretrade/pr169_pretrade1_resolvers.py",
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/validation.py",
+        "tools/validate_no_runtime_artifacts.py",
+        "tools/validate_source_fact_binding_connector_semantic_readiness_static.py",
+        "tools/independent_validate_qku_computation_control_plane_execution.py",
+        "tools/independent_validate_qku_computation_control_plane_source.py",
+        "tools/independent_validate_qku_computation_control_plane_security.py",
+        "tools/independent_validate_qku_computation_control_plane_operations.py",
+        ".github/workflows/qtt_validation.yml",
+        "tools/ci_branch_context.py",
+        "tools/validation_scope_registry.py",
+        "tests/stage1_prediction_markets/qku_computation_control_plane/accounting/test_contract_matrix.py",
+        "tests/stage1_prediction_markets/qku_computation_control_plane/security/test_deserialization_safety.py",
+        "tests/stage1_prediction_markets/qku_computation_control_plane/tranche_b/test_service_operations.py",
+        "tests/source_evidence/test_s1_pit_data_phase_a_01.py",
+        "tests/stage1_prediction_markets/qku_computation_control_plane/tranche_b/test_source_quantum_model_risk.py",
+        "tests/fail_closed/test_no_runtime_artifacts_strict.py",
+        "tests/source_evidence/test_source_fact_binding_connector_semantic_readiness_static.py",
+        "tests/tools/test_ci_branch_context.py",
+        "tests/tools/test_validation_scope_registry.py",
         "docs/master_plan/generated/PR152_GrandGlobalDebugLogicalConsistencyAuditEntireQTTRepo.report.json",
     }
 )
@@ -3036,6 +3070,14 @@ def explain_pr_scope_decision(branch: str, path: str) -> dict[str, object]:
             "pr_id": None,
             "matched_rule": forbidden_reason,
             "reason": "forbidden_path",
+        }
+    if branch_name == S1_KALSHI_SOURCE_USE_ADMISSION_BRANCH:
+        allowed = normalized in S1_KALSHI_SOURCE_USE_ADMISSION_ALLOWED_EXACT_PATHS
+        return {
+            "allowed": allowed, "branch": branch_name, "normalized_path": normalized,
+            "pr_id": "S1-VENUE-SEMANTICS-PHASE-A-01",
+            "matched_rule": f"exact:{normalized}" if allowed else "no_s1_kalshi_source_use_admission_scope_rule",
+            "reason": "registered_exact_path" if allowed else "path_not_registered_for_pr_scope",
         }
     if branch_name == S1_SOURCE_USE_CUSTODY_BRANCH:
         allowed = normalized in S1_SOURCE_USE_CUSTODY_ALLOWED_EXACT_PATHS

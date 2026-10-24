@@ -13,11 +13,12 @@ from .errors import ComputationControlPlaneError, ContractValidationError, Persi
 from .idempotency import IdempotencyClaimReceiptV1, IdempotencyOutcomeV1
 from .lifecycle import StateTransitionReceiptV1
 from .outbox import OutboxIntentRecordV1
-from .persistence import PersistenceAdapterV1, PersistenceAvailabilityV1, PersistenceTransactionV1
+from .persistence import PersistenceAdapterV1, PersistenceAvailabilityV1, PersistenceTransactionV1, OwnerControlMemoryAdapterV1
 from .receipts import EconomicEventRecordV1, EconomicReceiptEventSpineV1, ValueLineageEdgeV1, validate_lineage_acyclic_v1
 from .receipts import (
     _source_use_reconstruct_spine_v1, _source_use_record_ref_v1,
     _source_use_require_v1, _source_use_append_disposition_v1,
+    _source_action_reconstruct_spine_v1, _source_action_ref_v1,
 )
 from .rollback import (
     JournalReversalBundleV1,
@@ -221,21 +222,124 @@ class SourceUseAppendResultV1:
         object.__setattr__(self, "current_head", head)
 
 
+@dataclass(frozen=True, slots=True)
+class SourceUseActionCommitResultV1:
+    """Historical atomic result, not a binding or a renewable observation permit."""
+
+    event: EconomicReceiptEventSpineV1
+    declaration: EconomicReceiptEventSpineV1 | None
+    review: EconomicReceiptEventSpineV1 | None
+    current_event: EconomicReceiptEventSpineV1
+    disposition: str
+
+    def __post_init__(self) -> None:
+        event = _source_action_reconstruct_spine_v1(self.event)
+        current = _source_action_reconstruct_spine_v1(self.current_event)
+        _source_use_require_v1(type(self.disposition) is str and self.disposition in {"APPENDED", "EXACT_DUPLICATE"}
+                               and current.aggregate_id == event.aggregate_id and current.sequence >= event.sequence
+                               and current.recorded_at >= event.recorded_at and current.typed_payload.scope == event.typed_payload.scope)
+        if self.disposition == "APPENDED":
+            _source_use_require_v1(current == event)
+        for name, kind in (("declaration", "OWNER_DECLARATION"), ("review", "SOURCE_REVIEW")):
+            row = getattr(self, name)
+            ref = getattr(event.typed_payload, name + "_ref")
+            _source_use_require_v1((row is None) == (ref is None))
+            if row is not None:
+                row = _source_use_reconstruct_spine_v1(row)
+                _source_use_require_v1(row.record_id == ref and row.typed_payload.subject_kind == kind
+                                       and row.typed_payload.scope == event.typed_payload.scope)
+                object.__setattr__(self, name, row)
+        object.__setattr__(self, "event", event)
+        object.__setattr__(self, "current_event", current)
+
+
 class TrancheCUnitOfWorkV1:
     """Compose writes only; economic meaning remains with accounting/lifecycle owners."""
 
     def __init__(self, adapter: PersistenceAdapterV1, retry_policy: TransactionRetryPolicyV1) -> None:
         if not isinstance(adapter, PersistenceAdapterV1):
             raise ContractValidationError(ReasonCode.INVALID_CONTRACT, "typed PersistenceAdapterV1 is required")
-        if adapter.availability is not PersistenceAvailabilityV1.AVAILABLE_REFERENCE:
+        owner_control = type(adapter) is OwnerControlMemoryAdapterV1 and adapter._scope_valid_v1()
+        if adapter.availability is not PersistenceAvailabilityV1.AVAILABLE_REFERENCE and not owner_control:
             raise PersistenceContractError(ReasonCode.PERSISTENCE_UNAVAILABLE, "durable operation requires available reference persistence")
         if not isinstance(retry_policy, TransactionRetryPolicyV1):
             raise ContractValidationError(ReasonCode.INVALID_CONTRACT, "typed transaction retry policy is required")
+        if owner_control and (type(retry_policy) is not TransactionRetryPolicyV1 or retry_policy.max_transaction_attempts != 1):
+            raise ContractValidationError(ReasonCode.INVALID_CONTRACT, "owner-control transition permits exactly one attempt")
         adapter_attempts = getattr(adapter, "max_transaction_attempts", retry_policy.max_transaction_attempts)
         if adapter_attempts != retry_policy.max_transaction_attempts:
             raise ContractValidationError(ReasonCode.INVALID_CONTRACT, "adapter and unit-of-work retry limits must match")
         self._adapter = adapter
         self._retry_policy = retry_policy
+
+    def commit_source_use_action_v1(
+        self, *, originals: tuple[EconomicReceiptEventSpineV1, ...], event: EconomicReceiptEventSpineV1,
+        expected_event_ref: str | None, expected_declaration_ref: str | None,
+        expected_review_ref: str | None, verified_action,
+    ) -> SourceUseActionCommitResultV1:
+        from .source_policy import _VerifiedSourceUseActionV1
+
+        adapter = self._adapter
+        _source_use_require_v1(type(adapter) is OwnerControlMemoryAdapterV1 and adapter._scope_valid_v1()
+                               and type(verified_action) is _VerifiedSourceUseActionV1)
+        _source_use_require_v1(any(batch["verified"] is verified_action for batch in adapter._registered_batches.values()))
+        attempted_before = verified_action._attempted
+        verified_action._attempted = True
+        _source_use_require_v1(type(originals) is tuple and len(originals) <= 1)
+        event = _source_action_reconstruct_spine_v1(event)
+        originals = tuple(_source_use_reconstruct_spine_v1(row) for row in originals)
+        if expected_event_ref is not None:
+            _source_action_ref_v1(expected_event_ref)
+        for ref in (expected_declaration_ref, expected_review_ref):
+            if ref is not None:
+                _source_use_record_ref_v1(ref)
+        expected = (expected_event_ref, expected_declaration_ref, expected_review_ref)
+        # Historical duplicate reads share P, cannot renew state, and require the
+        # original registered batch; a public/deserialized event is insufficient.
+        with adapter._lock:
+            batch = adapter._registered_batches.get(event.record_id)
+            _source_use_require_v1(batch is not None and batch["verified"] is verified_action
+                                   and batch["event"] == event and batch["originals"] == originals
+                                   and batch["expected"] == expected)
+            existing = adapter.load_committed_source_action_v1(event.record_id)
+            if existing is not None:
+                _source_use_require_v1(existing == event)
+                current = adapter.load_committed_source_action_head_v1(event.typed_payload.process_ref)
+                declaration = (None if event.typed_payload.declaration_ref is None else
+                               adapter.load_committed_source_use_record_v1(event.typed_payload.declaration_ref))
+                review = (None if event.typed_payload.review_ref is None else
+                          adapter.load_committed_source_use_record_v1(event.typed_payload.review_ref))
+                return SourceUseActionCommitResultV1(existing, declaration, review, current, "EXACT_DUPLICATE")
+            _source_use_require_v1(attempted_before is False)
+            adapter._prepare_action_batch_v1(verified_action, originals, event, expected)
+        transaction = None
+        committing = False
+        try:
+            transaction = adapter.begin_transaction()
+            declaration, review = adapter._validate_action_batch_v1(transaction, complete=False)
+            for original in originals:
+                adapter.insert_receipt_record(transaction, original)
+            adapter.insert_receipt_record(transaction, event)
+            adapter._validate_action_batch_v1(transaction, complete=True)
+            result = SourceUseActionCommitResultV1(event, declaration, review, event, "APPENDED")
+            committing = True
+            transaction.commit()
+            if transaction.is_active:
+                raise TransactionContractError(ReasonCode.TRANSACTION_STATE_INVALID, "owner-control commit remains active")
+            return SourceUseActionCommitResultV1(result.event, result.declaration, result.review,
+                                                result.current_event, result.disposition)
+        except BaseException as primary:
+            if committing:
+                adapter._source_use_integrity_failed_v1 = True
+            try:
+                if transaction is not None and transaction.is_active:
+                    transaction.rollback()
+                    if transaction.is_active:
+                        raise TransactionContractError(ReasonCode.TRANSACTION_STATE_INVALID, "owner-control rollback remains active")
+            except BaseException:
+                adapter._source_use_integrity_failed_v1 = True
+                primary.add_note("owner-control rollback failed; process authority must remain stopped")
+            raise
 
     def append_source_use_control_v1(
         self, *, record: EconomicReceiptEventSpineV1,
@@ -294,6 +398,8 @@ class TrancheCUnitOfWorkV1:
         started_at: datetime | str,
         completed_at: datetime | str,
     ) -> TransactionCommitReceiptV1:
+        if self._adapter.availability is not PersistenceAvailabilityV1.AVAILABLE_REFERENCE:
+            raise PersistenceContractError(ReasonCode.PERSISTENCE_UNAVAILABLE, "economic execution requires reference persistence")
         refs = (
             *(record.record_id for record in records.receipt_records),
             *(event.economic_event_id for event in records.economic_events),

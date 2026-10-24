@@ -970,6 +970,220 @@ def kalshi_fee_native_admission_v1(relpath: str, tree: ast.Module) -> tuple[froz
     return (frozenset(admitted), ())
 
 
+# Reviewed, literal native entry/function boundaries. These are narrow AST
+# templates and call sites, never a module-wide permission for native effects.
+_SOURCE_USE_NATIVE_PATH = "src/qtt/service/owner_source_use_windows.py"
+_SOURCE_USE_NATIVE_TEMPLATES = {
+    "run_owner_source_use_local_v1": "def run_owner_source_use_local_v1() -> int:\n    root = None\n    controller = None\n    outcome = 1\n    try:\n        root = _bootstrap_owner_source_use_v1()\n        from .owner_source_use import _create_owner_source_use_controller_v1\n        controller = _create_owner_source_use_controller_v1(root)\n        outcome = _run_local_window_v1(root, controller)\n    except BaseException:\n        outcome = 1\n    finally:\n        if controller is not None:\n            try:\n                controller.stop_v1()\n            except BaseException:\n                outcome = 1\n        if root is not None:\n            try:\n                _close_native_root_v1(root)\n            except BaseException:\n                outcome = 1\n    return outcome",
+    "_native_system_v1": "def _native_system_v1():\n    \"\"\"Fixed System32 libraries and explicit prototypes; no generic native caller.\"\"\"\n    _require(sys.platform == 'win32' and ctypes.sizeof(ctypes.c_void_p) == 8)\n    k = ctypes.WinDLL('kernel32.dll', use_last_error=True, winmode=2048)\n    a = ctypes.WinDLL('advapi32.dll', use_last_error=True, winmode=2048)\n    s = ctypes.WinDLL('shell32.dll', use_last_error=True, winmode=2048)\n    o = ctypes.WinDLL('ole32.dll', use_last_error=True, winmode=2048)\n    h, p, d, b = (ctypes.c_void_p, ctypes.c_void_p, ctypes.c_uint32, ctypes.c_int32)\n    k.GetCurrentProcess.argtypes, k.GetCurrentProcess.restype = ([], h)\n    k.GetCurrentThread.argtypes, k.GetCurrentThread.restype = ([], h)\n    k.GetCurrentProcessId.argtypes, k.GetCurrentProcessId.restype = ([], d)\n    k.CloseHandle.argtypes, k.CloseHandle.restype = ([h], b)\n    k.LocalFree.argtypes, k.LocalFree.restype = ([h], h)\n    k.CreateFileW.argtypes = [ctypes.c_wchar_p, d, d, p, d, d, h]\n    k.CreateFileW.restype = h\n    k.GetFileType.argtypes, k.GetFileType.restype = ([h], d)\n    k.GetFileInformationByHandleEx.argtypes, k.GetFileInformationByHandleEx.restype = ([h, ctypes.c_int32, p, d], b)\n    k.GetFinalPathNameByHandleW.argtypes, k.GetFinalPathNameByHandleW.restype = ([h, ctypes.c_wchar_p, d, d], d)\n    k.GetDriveTypeW.argtypes, k.GetDriveTypeW.restype = ([ctypes.c_wchar_p], d)\n    k.GetVolumeInformationW.argtypes = [ctypes.c_wchar_p, ctypes.c_wchar_p, d, p, p, p, ctypes.c_wchar_p, d]\n    k.GetVolumeInformationW.restype = b\n    k.ReadFile.argtypes, k.ReadFile.restype = ([h, p, d, ctypes.POINTER(d), p], b)\n    a.OpenProcessToken.argtypes, a.OpenProcessToken.restype = ([h, d, ctypes.POINTER(h)], b)\n    a.OpenThreadToken.argtypes, a.OpenThreadToken.restype = ([h, d, b, ctypes.POINTER(h)], b)\n    a.GetTokenInformation.argtypes, a.GetTokenInformation.restype = ([h, ctypes.c_int32, p, d, ctypes.POINTER(d)], b)\n    a.IsValidSid.argtypes, a.IsValidSid.restype = ([p], b)\n    a.GetLengthSid.argtypes, a.GetLengthSid.restype = ([p], d)\n    a.ConvertSidToStringSidW.argtypes, a.ConvertSidToStringSidW.restype = ([p, ctypes.POINTER(p)], b)\n    a.GetSecurityInfo.argtypes = [h, ctypes.c_int32, d, ctypes.POINTER(p), p, ctypes.POINTER(p), p, ctypes.POINTER(p)]\n    a.GetSecurityInfo.restype = d\n    a.GetSecurityDescriptorControl.argtypes, a.GetSecurityDescriptorControl.restype = ([p, ctypes.POINTER(ctypes.c_uint16), ctypes.POINTER(d)], b)\n    a.GetSecurityDescriptorLength.argtypes, a.GetSecurityDescriptorLength.restype = ([p], d)\n    a.GetSecurityDescriptorDacl.argtypes = [p, ctypes.POINTER(b), ctypes.POINTER(p), ctypes.POINTER(b)]\n    a.GetSecurityDescriptorDacl.restype = b\n    a.GetAce.argtypes, a.GetAce.restype = ([p, d, ctypes.POINTER(p)], b)\n    s.SHGetKnownFolderPath.argtypes, s.SHGetKnownFolderPath.restype = ([p, d, h, ctypes.POINTER(p)], ctypes.c_int32)\n    o.CoTaskMemFree.argtypes, o.CoTaskMemFree.restype = ([p], None)\n    return SimpleNamespace(kernel=k, security=a, shell=s, ole=o)",
+    "_known_folders_v1": "def _known_folders_v1(api):\n    from uuid import UUID\n    paths = []\n    for fixed in ('905e63b6-c1bf-494e-b29c-65b732d3d21a', '62ab5d82-fdc1-4dc3-a9dd-070d1d495d97'):\n        guid = (ctypes.c_ubyte * 16).from_buffer_copy(UUID(fixed).bytes_le)\n        pointer = ctypes.c_void_p()\n        _require(api.shell.SHGetKnownFolderPath(ctypes.byref(guid), 0, None, ctypes.byref(pointer)) == 0 and pointer.value)\n        try:\n            value = _native_utf16_v1(pointer.value, 32768)[0]\n        finally:\n            api.ole.CoTaskMemFree(pointer)\n        _require(len(value) >= 3 and value[1:3] == ':\\\\' and value[0].isascii() and value[0].isalpha() and (not value.startswith('\\\\')) and (':' not in value[2:]))\n        volume = value[:3]\n        filesystem = ctypes.create_unicode_buffer(32)\n        _require(api.kernel.GetDriveTypeW(volume) == 3 and api.kernel.GetVolumeInformationW(volume, None, 0, None, None, None, filesystem, len(filesystem)) and (filesystem.value == 'NTFS'))\n        paths.append(Path(value))\n    return tuple(paths)",
+    "_open_control_object_v1": "def _open_control_object_v1(api, path, directory, sid, retained):\n    text = str(path)\n    _require(path.is_absolute() and len(text) < 32760 and (':' not in text[2:]) and (not text.startswith('\\\\')))\n    handle = api.kernel.CreateFileW(text, 131072 | 128 | 1, 1, None, 3, 2097152 | (33554432 if directory else 0), None)\n    _require(handle not in (None, ctypes.c_void_p(-1).value))\n    retained.append(handle)\n    state = _object_state_v1(api, handle, path, directory)\n    _check_acl_v1(_observe_acl_v1(api, handle), sid, directory)\n    _require(_object_state_v1(api, handle, path, directory) == state)\n    return (handle, state)",
+    "_check_interpreter_v1": "def _check_interpreter_v1(installation):\n    runtime = installation / 'runtime'\n    expected = (runtime / 'python314.zip', runtime, installation / 'app', installation / 'deps')\n    _require(sys.version_info[:3] == (3, 14, 6) and sys.platform == 'win32' and (os.name == 'nt') and (ctypes.sizeof(ctypes.c_void_p) == 8) and (getattr(sys.implementation, '_multiarch', None) == 'win-amd64') and all((getattr(sys.flags, name) == 1 for name in ('isolated', 'no_site', 'ignore_environment', 'safe_path', 'dont_write_bytecode'))) and (sys.prefix == sys.base_prefix) and (sys.exec_prefix == sys.base_exec_prefix) and (os.path.normcase(sys.executable) == os.path.normcase(str(runtime / 'pythonw.exe'))) and (tuple((os.path.normcase(str(Path(value))) for value in sys.path)) == tuple((os.path.normcase(str(value)) for value in expected))) and (os.path.normcase(os.getcwd()) == os.path.normcase(str(runtime))) and (not {'site', 'sitecustomize', 'usercustomize'}.intersection(sys.modules)) and (len(sys.argv) == 1) and (os.path.normcase(sys.argv[0]) == os.path.normcase(str(installation / 'app' / 'qtt' / 'service' / 'owner_source_use_windows.py'))) and (os.path.normcase(__file__) == os.path.normcase(sys.argv[0])))",
+    "_bootstrap_owner_source_use_v1": "def _bootstrap_owner_source_use_v1():\n    api = _native_system_v1()\n    retained = []\n    try:\n        sid = _check_principal_v1(_observe_principal_v1(api))\n        program_files, program_data = _known_folders_v1(api)\n        installation = program_files / 'QTT' / 'OwnerControl'\n        _check_interpreter_v1(installation)\n        for anchor in (program_files, program_data):\n            _open_control_object_v1(api, anchor / 'QTT', True, sid, retained)\n            _open_control_object_v1(api, anchor / 'QTT' / 'OwnerControl', True, sid, retained)\n        opened = {}\n        seen_ids = set()\n        stack = [installation]\n        while stack:\n            directory = stack.pop()\n            with os.scandir(directory) as entries:\n                for entry in entries:\n                    _require(len(opened) < 65536 and entry.name not in {'.', '..'} and (':' not in entry.name))\n                    path = directory / entry.name\n                    is_directory = entry.is_dir(follow_symlinks=False)\n                    handle, state = _open_control_object_v1(api, path, is_directory, sid, retained)\n                    _require(state[:2] not in seen_ids)\n                    seen_ids.add(state[:2])\n                    opened[os.path.normcase(str(path))] = (handle, state)\n                    if is_directory:\n                        stack.append(path)\n        for relative, directory in (('runtime', True), ('app', True), ('deps', True), ('runtime/pythonw.exe', False), ('runtime/python314.zip', False), ('runtime/python314._pth', False), ('app/qtt/service/owner_source_use_windows.py', False)):\n            required = opened.get(os.path.normcase(str(installation / relative)))\n            _require(required is not None and required[1][5] is directory)\n        pth = installation / 'runtime' / 'python314._pth'\n        handle, state = opened[os.path.normcase(str(pth))]\n        pth_raw = _read_control_bytes_v1(api, handle, state[3], 256)\n        _require(pth_raw in (b'python314.zip\\n.\\n../app\\n../deps\\n', b'python314.zip\\r\\n.\\r\\n../app\\r\\n../deps\\r\\n') and _object_state_v1(api, handle, pth, False) == state)\n        config = program_data / 'QTT' / 'OwnerControl' / 'enrollment.json'\n        handle, state = _open_control_object_v1(api, config, False, sid, retained)\n        raw = _read_control_bytes_v1(api, handle, state[3], 65536)\n        _require(_object_state_v1(api, handle, config, False) == state)\n        _bind_native_module_identity_v1()\n        from .owner_source_use import _read_public_enrollment_v1\n        enrollment = _read_public_enrollment_v1(raw)\n        _require(enrollment.approval_sid == sid and enrollment.root_state != 'DISABLED')\n        root = object.__new__(_SourceUseNativeRootV1)\n        root.api, root.handles, root.enrollment, root.sid = (api, retained, enrollment, sid)\n        root.closed, root.operation = (False, None)\n        from threading import RLock\n        root.operation_lock = RLock()\n        root.window = None\n        root.completion_worker = None\n        root.completed = {}\n        _ROOTS[id(root)] = root\n        return root\n    except BaseException:\n        for handle in reversed(retained):\n            api.kernel.CloseHandle(handle)\n        raise",
+    "_webauthn_table_v1": "def _webauthn_table_v1(root):\n    _require_native_root_v1(root)\n    w = ctypes.WinDLL('webauthn.dll', use_last_error=True, winmode=2048)\n    w.WebAuthNGetApiVersionNumber.argtypes, w.WebAuthNGetApiVersionNumber.restype = ([], ctypes.c_uint32)\n    version = w.WebAuthNGetApiVersionNumber()\n    _require(type(version) is int and 1 <= version <= 9)\n    from fido2.client import win_api\n    _require(win_api.WEBAUTHN_API_VERSION == version)\n    _check_output_layouts_v1(win_api)\n    h, p, hr = (ctypes.c_void_p, ctypes.c_void_p, ctypes.c_int32)\n    w.WebAuthNIsUserVerifyingPlatformAuthenticatorAvailable.argtypes = [ctypes.POINTER(ctypes.c_int32)]\n    w.WebAuthNIsUserVerifyingPlatformAuthenticatorAvailable.restype = hr\n    w.WebAuthNGetCancellationId.argtypes, w.WebAuthNGetCancellationId.restype = ([ctypes.POINTER(win_api.GUID)], hr)\n    w.WebAuthNCancelCurrentOperation.argtypes, w.WebAuthNCancelCurrentOperation.restype = ([ctypes.POINTER(win_api.GUID)], hr)\n    w.WebAuthNAuthenticatorMakeCredential.argtypes = [h, ctypes.POINTER(win_api.WebAuthNRpEntityInformation), ctypes.POINTER(win_api.WebAuthNUserEntityInformation), ctypes.POINTER(win_api.WebAuthNCoseCredentialParameters), ctypes.POINTER(win_api.WebAuthNClientData), ctypes.POINTER(win_api.WebAuthNMakeCredentialOptions), ctypes.POINTER(p)]\n    w.WebAuthNAuthenticatorMakeCredential.restype = hr\n    w.WebAuthNAuthenticatorGetAssertion.argtypes = [h, ctypes.c_wchar_p, ctypes.POINTER(win_api.WebAuthNClientData), ctypes.POINTER(win_api.WebAuthNGetAssertionOptions), ctypes.POINTER(p)]\n    w.WebAuthNAuthenticatorGetAssertion.restype = hr\n    w.WebAuthNFreeCredentialAttestation.argtypes, w.WebAuthNFreeCredentialAttestation.restype = ([p], None)\n    w.WebAuthNFreeAssertion.argtypes, w.WebAuthNFreeAssertion.restype = ([p], None)\n    available = ctypes.c_int32()\n    _require(w.WebAuthNIsUserVerifyingPlatformAuthenticatorAvailable(ctypes.byref(available)) == 0 and available.value == 1)\n    return (w, win_api)",
+    "_acquire_native_response_v1": "def _acquire_native_response_v1(root, operation):\n    import time\n    from .owner_source_use import _source_use_b64_v1\n    _require_native_root_v1(root)\n    window = _check_owned_window_v1(root)\n    before = _check_principal_v1(_observe_principal_v1(root.api))\n    _require(before == root.sid)\n    library, table = (operation.library, operation.table)\n    authentication = operation.authentication\n    remaining_ms = (operation.deadline - time.monotonic_ns()) // 1000000\n    _require(1 <= remaining_ms <= 120000)\n    client = library.WebAuthNClientData(authentication.client_data)\n    pointer = ctypes.c_void_p()\n    operation.keepalive = [window, operation.guid, client]\n    try:\n        if authentication.operation == 'GET':\n            options = library.WebAuthNGetAssertionOptions(timeout=remaining_ms, attachment=library.WebAuthNAuthenticatorAttachment.PLATFORM, uv_requirement=library.WebAuthNUserVerificationRequirement.REQUIRED, credentials=[{'id': _source_use_b64_v1(authentication.enrollment.key_id_b64, maximum=1024), 'type': 'public-key', 'transport': 'INTERNAL'}], cancellationId=operation.guid, extensions=[], flags=0, cred_large_blob_operation=library.WebAuthNLargeBlobOperation.NONE)\n            operation.keepalive.append(options)\n            result = table.WebAuthNAuthenticatorGetAssertion(window.hwnd, 'localhost', ctypes.byref(client), ctypes.byref(options), ctypes.byref(pointer))\n        else:\n            options = library.WebAuthNMakeCredentialOptions(timeout=remaining_ms, require_resident_key=False, prefer_resident_key=False, attachment=library.WebAuthNAuthenticatorAttachment.PLATFORM, uv_requirement=library.WebAuthNUserVerificationRequirement.REQUIRED, attestation_convoyence=library.WebAuthNAttestationConveyancePreference.NONE, credentials=[], cancellationId=operation.guid, extensions=[], enterprise_attestation=library.WebAuthNEnterpriseAttestation.NONE, large_blob_support=library.WebAuthNLargeBlobSupport.NONE, enable_prf=False)\n            rp = library.WebAuthNRpEntityInformation({'id': 'localhost', 'name': 'QTT Owner Source Use'})\n            user = library.WebAuthNUserEntityInformation({'id': _source_use_b64_v1(authentication.enrollment.user_handle_b64, minimum=32, maximum=32), 'name': authentication.enrollment.owner_ref, 'displayName': authentication.enrollment.owner_ref})\n            algorithms = library.WebAuthNCoseCredentialParameters([{'type': 'public-key', 'alg': -7}])\n            operation.keepalive.extend((options, rp, user, algorithms))\n            result = table.WebAuthNAuthenticatorMakeCredential(window.hwnd, ctypes.byref(rp), ctypes.byref(user), ctypes.byref(algorithms), ctypes.byref(client), ctypes.byref(options), ctypes.byref(pointer))\n        _require(result == 0 and pointer.value)\n        after = _check_principal_v1(_observe_principal_v1(root.api))\n        _require(after == before == root.sid)\n        raw = _copy_native_response_v1(pointer.value, authentication.operation, authentication.client_data)\n        return (raw, before, after)\n    finally:\n        if pointer.value:\n            if authentication.operation == 'GET':\n                table.WebAuthNFreeAssertion(pointer)\n            else:\n                table.WebAuthNFreeCredentialAttestation(pointer)",
+    "_user_table_v1": "def _user_table_v1():\n    user = ctypes.WinDLL('user32.dll', use_last_error=True, winmode=2048)\n    h, p, b, d, word = (ctypes.c_void_p, ctypes.c_void_p, ctypes.c_int32, ctypes.c_uint32, ctypes.c_size_t)\n    result = ctypes.c_ssize_t\n    user.IsWindow.argtypes, user.IsWindow.restype = ([h], b)\n    user.GetWindowThreadProcessId.argtypes, user.GetWindowThreadProcessId.restype = ([h, ctypes.POINTER(d)], d)\n    user.RegisterClassExW.argtypes, user.RegisterClassExW.restype = ([p], ctypes.c_uint16)\n    user.UnregisterClassW.argtypes, user.UnregisterClassW.restype = ([ctypes.c_wchar_p, h], b)\n    user.CreateWindowExW.argtypes = [d, ctypes.c_wchar_p, ctypes.c_wchar_p, d, b, b, b, b, h, h, h, p]\n    user.CreateWindowExW.restype = h\n    user.DefWindowProcW.argtypes, user.DefWindowProcW.restype = ([h, d, word, result], result)\n    user.DestroyWindow.argtypes, user.DestroyWindow.restype = ([h], b)\n    user.ShowWindow.argtypes, user.ShowWindow.restype = ([h, b], b)\n    user.UpdateWindow.argtypes, user.UpdateWindow.restype = ([h], b)\n    user.GetMessageW.argtypes, user.GetMessageW.restype = ([p, h, d, d], b)\n    user.TranslateMessage.argtypes, user.TranslateMessage.restype = ([p], b)\n    user.DispatchMessageW.argtypes, user.DispatchMessageW.restype = ([p], result)\n    user.PostQuitMessage.argtypes, user.PostQuitMessage.restype = ([b], None)\n    user.SetWindowTextW.argtypes, user.SetWindowTextW.restype = ([h, ctypes.c_wchar_p], b)\n    user.GetWindowTextLengthW.argtypes, user.GetWindowTextLengthW.restype = ([h], b)\n    user.GetWindowTextW.argtypes, user.GetWindowTextW.restype = ([h, ctypes.c_wchar_p, b], b)\n    user.EnableWindow.argtypes, user.EnableWindow.restype = ([h, b], b)\n    user.SendMessageW.argtypes, user.SendMessageW.restype = ([h, d, word, result], result)\n    user.SetTimer.argtypes, user.SetTimer.restype = ([h, word, d, p], word)\n    user.KillTimer.argtypes, user.KillTimer.restype = ([h, word], b)\n    user.MessageBoxW.argtypes, user.MessageBoxW.restype = ([h, ctypes.c_wchar_p, ctypes.c_wchar_p, d], b)\n    user.SetWindowLongPtrW.argtypes, user.SetWindowLongPtrW.restype = ([h, b, result], result)\n    user.CallWindowProcW.argtypes, user.CallWindowProcW.restype = ([p, h, d, word, result], result)\n    return user",
+}
+_SOURCE_USE_NATIVE_CALLS = (
+    ("_sid_string_v1", "api.security.IsValidSid(pointer)"),
+    ("_sid_string_v1", "api.security.GetLengthSid(pointer)"),
+    ("_sid_string_v1", "api.security.ConvertSidToStringSidW(pointer, ctypes.byref(text))"),
+    ("_sid_string_v1", "api.kernel.LocalFree(text)"),
+    ("_observe_principal_v1", "api.security.OpenThreadToken(api.kernel.GetCurrentThread(), 8, True, ctypes.byref(thread))"),
+    ("_observe_principal_v1", "api.kernel.GetCurrentThread()"),
+    ("_observe_principal_v1", "api.kernel.CloseHandle(thread)"),
+    ("_observe_principal_v1", "api.security.OpenProcessToken(api.kernel.GetCurrentProcess(), 8, ctypes.byref(handle))"),
+    ("_observe_principal_v1", "api.kernel.GetCurrentProcess()"),
+    ("_observe_principal_v1", "api.security.GetTokenInformation(handle, information, None, 0, ctypes.byref(length))"),
+    ("_observe_principal_v1", "api.security.GetTokenInformation(handle, information, data, capacity, ctypes.byref(length))"),
+    ("_observe_principal_v1", "api.kernel.CloseHandle(handle)"),
+    ("_known_folders_v1", "api.shell.SHGetKnownFolderPath(ctypes.byref(guid), 0, None, ctypes.byref(pointer))"),
+    ("_known_folders_v1", "api.ole.CoTaskMemFree(pointer)"),
+    ("_known_folders_v1", "api.kernel.GetDriveTypeW(volume)"),
+    ("_known_folders_v1", "api.kernel.GetVolumeInformationW(volume, None, 0, None, None, None, filesystem, len(filesystem))"),
+    ("_observe_acl_v1", "api.security.GetSecurityInfo(handle, 1, 5, ctypes.byref(owner), None, ctypes.byref(dacl), None, ctypes.byref(descriptor))"),
+    ("_observe_acl_v1", "api.security.GetSecurityDescriptorControl(descriptor, ctypes.byref(control), ctypes.byref(revision))"),
+    ("_observe_acl_v1", "api.security.GetSecurityDescriptorDacl(descriptor, ctypes.byref(present), ctypes.byref(verified_dacl), ctypes.byref(defaulted))"),
+    ("_observe_acl_v1", "api.security.GetSecurityDescriptorLength(descriptor)"),
+    ("_observe_acl_v1", "api.security.GetAce(dacl, index, ctypes.byref(pointer))"),
+    ("_observe_acl_v1", "api.security.IsValidSid(pointer.value + 8)"),
+    ("_observe_acl_v1", "api.security.GetLengthSid(pointer.value + 8)"),
+    ("_observe_acl_v1", "api.kernel.LocalFree(descriptor)"),
+    ("_object_state_v1", "api.kernel.GetFileType(handle)"),
+    ("_object_state_v1", "api.kernel.GetFileInformationByHandleEx(handle, kind, ctypes.byref(value), ctypes.sizeof(value))"),
+    ("_object_state_v1", "api.kernel.GetFinalPathNameByHandleW(handle, text, len(text), 0)"),
+    ("_open_control_object_v1", "api.kernel.CreateFileW(text, 131072 | 128 | 1, 1, None, 3, 2097152 | (33554432 if directory else 0), None)"),
+    ("_read_control_bytes_v1", "api.kernel.ReadFile(handle, buffer, size + 1, ctypes.byref(count), None)"),
+    ("_bootstrap_owner_source_use_v1", "api.kernel.CloseHandle(handle)"),
+    ("_close_native_root_v1", "root.api.kernel.CloseHandle(handle)"),
+    ("_check_owned_window_v1", "window.user.IsWindow(window.hwnd)"),
+    ("_check_owned_window_v1", "window.user.GetWindowThreadProcessId(window.hwnd, ctypes.byref(process))"),
+    ("_check_owned_window_v1", "root.api.kernel.GetCurrentProcessId()"),
+    ("_acquire_native_response_v1", "table.WebAuthNAuthenticatorGetAssertion(window.hwnd, 'localhost', ctypes.byref(client), ctypes.byref(options), ctypes.byref(pointer))"),
+    ("_acquire_native_response_v1", "table.WebAuthNAuthenticatorMakeCredential(window.hwnd, ctypes.byref(rp), ctypes.byref(user), ctypes.byref(algorithms), ctypes.byref(client), ctypes.byref(options), ctypes.byref(pointer))"),
+    ("_acquire_native_response_v1", "table.WebAuthNFreeAssertion(pointer)"),
+    ("_acquire_native_response_v1", "table.WebAuthNFreeCredentialAttestation(pointer)"),
+    ("_start_native_operation_v1", "table.WebAuthNGetCancellationId(ctypes.byref(guid))"),
+    ("_cancel_native_operation_v1", "operation.table.WebAuthNCancelCurrentOperation(ctypes.byref(operation.guid))"),
+    ("_run_local_window_v1.set_text", "user.SetWindowTextW(window.controls[control], _display_text_v1(text))"),
+    ("_run_local_window_v1.enable_inputs", "user.EnableWindow(window.controls[control], enabled)"),
+    ("_run_local_window_v1.enable_inputs", "user.EnableWindow(window.controls[12], enabled and controller._pending_ref is not None)"),
+    ("_run_local_window_v1.enable_inputs", "user.EnableWindow(window.controls[16], enabled and controller._authority is None and (controller._enrollment_stage is None))"),
+    ("_run_local_window_v1.stop", "user.DestroyWindow(window.hwnd)"),
+    ("_run_local_window_v1.timer", "user.DestroyWindow(window.hwnd)"),
+    ("_run_local_window_v1.command", "user.GetWindowTextLengthW(window.controls[10])"),
+    ("_run_local_window_v1.command", "user.GetWindowTextW(window.controls[10], buffer, len(buffer))"),
+    ("_run_local_window_v1.command", "user.MessageBoxW(window.hwnd, 'Confirm the complete displayed action and its explicit effects?', 'QTT Owner Source Use', 36)"),
+    ("_run_local_window_v1.command", "user.MessageBoxW(window.hwnd, 'Create a platform public key with user verification, then prove possession. This only produces a public enrollment candidate; it grants no source use.', 'QTT Owner Source Use', 36)"),
+    ("_run_local_window_v1.procedure", "user.KillTimer(hwnd, 1)"),
+    ("_run_local_window_v1.procedure", "user.PostQuitMessage(0)"),
+    ("_run_local_window_v1.procedure", "user.DefWindowProcW(hwnd, message, wparam, lparam)"),
+    ("_run_local_window_v1", "user.RegisterClassExW(ctypes.byref(specification))"),
+    ("_run_local_window_v1", "user.CreateWindowExW(0, specification.name, 'QTT Owner Source Use', 13238272, 80, 60, 1000, 840, None, None, None, None)"),
+    ("_run_local_window_v1", "user.CreateWindowExW(0, kind, title, 1342177280 | extra, x, y, width, height, window.hwnd, control, None, None)"),
+    ("_run_local_window_v1", "user.SendMessageW(window.controls[10], 197, 262144, 0)"),
+    ("_run_local_window_v1", "user.SendMessageW(window.controls[control], 197, 2147483646, 0)"),
+    ("_run_local_window_v1.result_procedure", "user.CallWindowProcW(window.result_procedure, hwnd, message, wparam, lparam)"),
+    ("_run_local_window_v1", "user.SetWindowLongPtrW(window.controls[14], -4, ctypes.cast(result_procedure, ctypes.c_void_p).value)"),
+    ("_run_local_window_v1", "user.SetTimer(window.hwnd, 1, 100, None)"),
+    ("_run_local_window_v1", "user.ShowWindow(window.hwnd, 5)"),
+    ("_run_local_window_v1", "user.UpdateWindow(window.hwnd)"),
+    ("_run_local_window_v1", "user.GetMessageW(ctypes.byref(message), None, 0, 0)"),
+    ("_run_local_window_v1", "user.TranslateMessage(ctypes.byref(message))"),
+    ("_run_local_window_v1", "user.DispatchMessageW(ctypes.byref(message))"),
+    ("_run_local_window_v1", "user.IsWindow(window.hwnd)"),
+    ("_run_local_window_v1", "user.DestroyWindow(window.hwnd)"),
+    ("_run_local_window_v1", "user.UnregisterClassW(specification.name, None)"),
+)
+
+
+def source_use_native_contract_v1(relpath: str, tree: ast.Module) -> tuple[str, ...]:
+    """Check explicit native entry and consequential source-use call sites."""
+    failures = []
+    native = relpath == _SOURCE_USE_NATIVE_PATH
+    controller = relpath == "src/qtt/service/owner_source_use.py"
+    policy = relpath == "src/qtt/stage1_prediction_markets/qku_computation_control_plane/source_policy.py"
+    calls = []
+    located = []
+    parents = {}
+
+    def visit(node, owner=()):
+        if isinstance(node, (ast.ClassDef, ast.FunctionDef, ast.AsyncFunctionDef)):
+            owner = (*owner, node.name)
+        located.append((node, ".".join(owner)))
+        for child in ast.iter_child_nodes(node):
+            parents[id(child)] = node
+            visit(child, owner)
+    visit(tree)
+    if native:
+        functions = {n.name: n for n in tree.body if isinstance(n, ast.FunctionDef)}
+        for name, template in _SOURCE_USE_NATIVE_TEMPLATES.items():
+            candidates = [n for n in tree.body if isinstance(n, ast.FunctionDef) and n.name == name]
+            if len(candidates) != 1 or ast.dump(candidates[0], include_attributes=False) != ast.dump(ast.parse(template).body[0], include_attributes=False):
+                failures.append("SOURCE_USE_NATIVE_TEMPLATE:" + name)
+        entry = [n for n in tree.body if isinstance(n, ast.If)]
+        expected_entry = ast.parse('if __name__ == "__main__":\n    raise SystemExit(run_owner_source_use_local_v1())').body[0]
+        if len(entry) != 1 or ast.dump(entry[0], include_attributes=False) != ast.dump(expected_entry, include_attributes=False):
+            failures.append("SOURCE_USE_NATIVE_EXPLICIT_ENTRY")
+
+    allowed_loaders = {
+        "_native_system_v1": {"kernel32.dll", "advapi32.dll", "shell32.dll", "ole32.dll"},
+        "_webauthn_table_v1": {"webauthn.dll"}, "_user_table_v1": {"user32.dll"},
+    }
+    helper_callers = {
+        "_native_system_v1": {(True, "_bootstrap_owner_source_use_v1")},
+        "_bootstrap_owner_source_use_v1": {(True, "run_owner_source_use_local_v1")},
+        "_webauthn_table_v1": {(True, "_start_native_operation_v1")},
+        "_user_table_v1": {(True, "_run_local_window_v1")},
+        "_acquire_native_response_v1": {(True, "_start_native_operation_v1.worker")},
+    }
+    loader_count = 0
+    entry_calls = []
+    for node, owner in located:
+        if relpath.startswith("src/"):
+            protected_callable = (node.id if isinstance(node, ast.Name) else node.attr if isinstance(node, ast.Attribute) else None)
+            if protected_callable in {*helper_callers, "run_owner_source_use_local_v1", "_start_native_operation_v1"}:
+                parent = parents.get(id(node))
+                if not (isinstance(parent, ast.Call) and parent.func is node):
+                    failures.append("SOURCE_USE_NATIVE_CALLABLE_REFERENCE:" + protected_callable)
+            if isinstance(node, ast.Import) and any(a.name == "ctypes" and a.asname not in (None, "ctypes") for a in node.names):
+                failures.append("SOURCE_USE_NATIVE_MODULE_ALIAS")
+            if isinstance(node, ast.Name) and node.id == "ctypes" and isinstance(node.ctx, ast.Load):
+                parent = parents.get(id(node))
+                if not (isinstance(parent, ast.Attribute) and parent.value is node):
+                    failures.append("SOURCE_USE_NATIVE_MODULE_INDIRECTION")
+            if isinstance(node, ast.Attribute) and isinstance(node.value, ast.Name) and node.value.id == "ctypes" and node.attr in {
+                    "WinDLL", "CDLL", "OleDLL", "PyDLL", "windll", "cdll"}:
+                parent = parents.get(id(node))
+                if not (isinstance(parent, ast.Call) and parent.func is node):
+                    failures.append("SOURCE_USE_NATIVE_LOADER_INDIRECTION")
+        if isinstance(node, (ast.Import, ast.ImportFrom)):
+            if relpath.startswith("src/") and isinstance(node, ast.ImportFrom) and node.module == "ctypes" and any(
+                    alias.name in {"WinDLL", "CDLL", "OleDLL", "PyDLL", "windll", "cdll"} for alias in node.names):
+                failures.append("SOURCE_USE_NATIVE_LOADER_ALIAS")
+            modules = _imported_module_names(node)
+            for module in modules:
+                if module == "fido2.client.windows" or (
+                    module == "fido2.client.win_api" or module == "fido2.client"
+                    and any(alias.name == "win_api" for alias in node.names)):
+                    if not (native and owner == "_webauthn_table_v1" and isinstance(node, ast.ImportFrom)
+                            and node.module == "fido2.client" and [a.name for a in node.names] == ["win_api"]):
+                        failures.append("SOURCE_USE_NATIVE_IMPORT_BOUNDARY")
+        if not isinstance(node, ast.Call):
+            continue
+        name = ast.unparse(node.func)
+        if native and name in {"globals", "locals", "vars", "eval", "exec", "__import__"}:
+            failures.append("SOURCE_USE_NATIVE_DYNAMIC_NAMESPACE")
+        if relpath.startswith("src/") and name.rsplit(".", 1)[-1] == "run_owner_source_use_local_v1":
+            entry_calls.append(node)
+            guarded = native and any(node is child for branch in tree.body if isinstance(branch, ast.If)
+                and ast.dump(branch, include_attributes=False) == ast.dump(expected_entry, include_attributes=False)
+                for child in ast.walk(branch))
+            if not guarded:
+                failures.append("SOURCE_USE_NATIVE_OPERATIONAL_ENTRY_CALLER")
+        loader = name in {"ctypes.WinDLL", "ctypes.CDLL", "ctypes.OleDLL", "ctypes.PyDLL"} or name.startswith(("ctypes.windll.", "ctypes.cdll."))
+        if loader and (native or relpath.startswith("src/")):
+            valid = native and name == "ctypes.WinDLL" and len(node.args) == 1 and isinstance(node.args[0], ast.Constant)
+            valid = valid and node.args[0].value in allowed_loaders.get(owner, set())
+            valid = valid and ast.dump(node, include_attributes=False) == ast.dump(ast.parse(
+                "ctypes.WinDLL(" + repr(node.args[0].value) + ", use_last_error=True, winmode=0x800)").body[0].value, include_attributes=False)
+            if not valid:
+                failures.append("SOURCE_USE_NATIVE_DLL_BOUNDARY")
+            loader_count += 1
+        if native and name.startswith(("api.kernel.", "api.security.", "api.shell.", "api.ole.", "root.api.kernel.",
+                                      "table.WebAuthN", "operation.table.WebAuthN", "user.", "window.user.")):
+            calls.append((owner, ast.unparse(node)))
+        if relpath.startswith("src/"):
+            leaf = name.rsplit(".", 1)[-1]
+            if leaf in helper_callers and (native, owner) not in helper_callers[leaf]:
+                failures.append("SOURCE_USE_NATIVE_CALLER:" + leaf)
+            if leaf == "_start_native_operation_v1" and not (controller and owner in {
+                    "OwnerSourceUseControllerV1._confirm_prepared_v1",
+                    "OwnerSourceUseControllerV1._begin_enrollment_v1",
+                    "OwnerSourceUseControllerV1._complete_enrollment_v1"}):
+                failures.append("SOURCE_USE_NATIVE_CALLER:" + leaf)
+    if native and (loader_count != 6 or sorted(calls) != sorted(_SOURCE_USE_NATIVE_CALLS)):
+        failures.append("SOURCE_USE_NATIVE_EXACT_CALL_SITES")
+    if native and len(entry_calls) != 1:
+        failures.append("SOURCE_USE_NATIVE_OPERATIONAL_ENTRY_COUNT")
+    if policy and any(isinstance(n, ast.ClassDef) and n.name == "SourceUseAuthorityV1" for n in tree.body):
+        methods = {n.name: n for n in ast.walk(tree) if isinstance(n, ast.FunctionDef)}
+        required = {
+            "_authority_guard_v1": {"binding._authority._check_binding_v1"},
+            "_recheck_and_charge_v1": {"self._authority_guard_v1", "self._require_pending_v1"},
+            "_prepare_read_v1": {"self._authority_guard_v1"},
+            "_publication_fence_v1": {"authority._check_binding_v1"},
+            "complete_action_v1": {"_verify_source_use_response_v1", "self._commit_verified_action_v1"},
+            "_commit_verified_action_v1": {"self._uow.commit_source_use_action_v1"},
+        }
+        for name, expected in required.items():
+            observed = {ast.unparse(n.func) for n in ast.walk(methods.get(name, ast.Module(body=[], type_ignores=[])))
+                        if isinstance(n, ast.Call)}
+            if not expected <= observed:
+                failures.append("SOURCE_USE_AUTHORITY_BOUNDARY:" + name)
+    return tuple(failures)
+
+
 def _scan_python_content(path: pathlib.Path, text: str, enabled_flags: list[str]) -> list[str]:
     try:
         tree = ast.parse(text, filename=str(path))
@@ -980,6 +1194,7 @@ def _scan_python_content(path: pathlib.Path, text: str, enabled_flags: list[str]
     kalshi_admitted, kalshi_failures = kalshi_fee_native_admission_v1(path.as_posix(), tree)
     admitted = admitted | kalshi_admitted
     admission_failures = admission_failures + kalshi_failures
+    admission_failures += source_use_native_contract_v1(path.as_posix(), tree)
     found_by_flag = {flag: set[str]() for flag in enabled_flags}
     source_retrieval_imports = {
         "http.client": "http.client import/use",
@@ -1105,7 +1320,7 @@ def _matched_line(text: str, match: re.Match[str]) -> str:
     return text[line_start:line_end].strip()
 
 
-_F14_NATIVE_INSTALL = 'python -m pip install --only-binary=:all: --no-deps --index-url https://pypi.org/simple websockets==17.0.1 cryptography==50.0.1 cffi==2.1.1 pycparser==3.0'
+_F14_NATIVE_INSTALL = 'python -m pip install --only-binary=:all: --no-deps --index-url https://pypi.org/simple websockets==17.0.1 cryptography==50.0.1 cffi==2.1.1 pycparser==3.0 fido2==2.2.1'
 
 
 def _is_ci_test_dependency_allowlisted_pip_install(

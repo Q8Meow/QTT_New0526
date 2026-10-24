@@ -2479,6 +2479,63 @@ def test_registered_exact_repair_scope_reaches_atomicrows_owners(monkeypatch) ->
 
 
 def test_s1_launch_graph_scope_is_exactly_owned_and_fail_closed() -> None:
+    admission_branch = "s1-kalshi-source-use-admission"
+    admission_paths = frozenset({
+        "src/qtt/service/owner_source_use.py",
+        "src/qtt/service/owner_source_use_windows.py",
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/receipts.py",
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/persistence.py",
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/transaction.py",
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/sqlite_reference.py",
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/source_policy.py",
+        "src/qtt/pretrade/pr169_pretrade1_resolvers.py",
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/validation.py",
+        "tools/validate_no_runtime_artifacts.py",
+        "tools/validate_source_fact_binding_connector_semantic_readiness_static.py",
+        "tools/independent_validate_qku_computation_control_plane_execution.py",
+        "tools/independent_validate_qku_computation_control_plane_source.py",
+        "tools/independent_validate_qku_computation_control_plane_security.py",
+        "tools/independent_validate_qku_computation_control_plane_operations.py",
+        ".github/workflows/qtt_validation.yml",
+        "tools/ci_branch_context.py",
+        "tools/validation_scope_registry.py",
+        "tests/stage1_prediction_markets/qku_computation_control_plane/accounting/test_contract_matrix.py",
+        "tests/stage1_prediction_markets/qku_computation_control_plane/security/test_deserialization_safety.py",
+        "tests/stage1_prediction_markets/qku_computation_control_plane/tranche_b/test_service_operations.py",
+        "tests/source_evidence/test_s1_pit_data_phase_a_01.py",
+        "tests/stage1_prediction_markets/qku_computation_control_plane/tranche_b/test_source_quantum_model_risk.py",
+        "tests/fail_closed/test_no_runtime_artifacts_strict.py",
+        "tests/source_evidence/test_source_fact_binding_connector_semantic_readiness_static.py",
+        "tests/tools/test_ci_branch_context.py",
+        "tests/tools/test_validation_scope_registry.py",
+        "docs/master_plan/generated/PR152_GrandGlobalDebugLogicalConsistencyAuditEntireQTTRepo.report.json",
+    })
+    assert registry.S1_KALSHI_SOURCE_USE_ADMISSION_BRANCH == admission_branch
+    assert registry.S1_KALSHI_SOURCE_USE_ADMISSION_ALLOWED_EXACT_PATHS == admission_paths
+    assert len(admission_paths) == 28
+    for path in admission_paths:
+        expected = dict(allowed=True, branch=admission_branch, normalized_path=path,
+            pr_id="S1-VENUE-SEMANTICS-PHASE-A-01", matched_rule=f"exact:{path}", reason="registered_exact_path")
+        assert registry.explain_pr_scope_decision(admission_branch, path) == expected
+        assert registry.explain_pr_scope_decision(admission_branch, path.replace("/", "\\")) == expected
+        for near in (admission_branch.upper(), admission_branch[:-1], admission_branch + "-copy",
+                     admission_branch + "/", "prefix-" + admission_branch, "s1-kalshi-source-use-*"):
+            assert not registry.is_pr_scoped_changed_path_allowed(near, path)
+        for near in (path.upper(), path + ".copy", "../" + path, "/" + path, "C:/repo/" + path,
+                     path + "/", path.replace("/", "//"), path.replace("/", "/*/"), path.replace("/", "/../")):
+            assert not registry.is_pr_scoped_changed_path_allowed(admission_branch, near)
+    for path in ("src/qtt/stage1_prediction_markets/qku_computation_control_plane/source_rights.py",
+                 "src/qtt/stage1_prediction_markets/qku_computation_control_plane/economic_math.py",
+                 "src/qtt/stage1_prediction_markets/qku_computation_control_plane/migrations.py",
+                 "src/qtt/stage1_prediction_markets/qku_computation_control_plane/serialization.py",
+                 "src/qtt/stage1_prediction_markets/qku_computation_control_plane/errors.py",
+                 "src/qtt/stage1_prediction_markets/qku_computation_control_plane/models.py",
+                 "tools/run_validation_gates.py", "tools/validation_reliability.py",
+                 "tools/run_pytest_fresh_basetemp.py", "tools/currentize_pr152_after_generated_artifacts.py",
+                 "tests/stage1_prediction_markets/qku_computation_control_plane/operations/test_runtime_topology.py",
+                 "docs/master_plan/QTT_MasterPlan_Current.md", "docs/master_plan/atomic_rows/AtomicRows.bundle.jsonl",
+                 "docs/master_plan/generated/unowned.report.json", "tests/tools/new_test.py", "AGENTS.md", ".gitignore"):
+        assert not registry.is_pr_scoped_changed_path_allowed(admission_branch, path)
     custody_branch = "s1-source-use-custody"
     custody_paths = frozenset({
         "src/qtt/stage1_prediction_markets/qku_computation_control_plane/receipts.py",

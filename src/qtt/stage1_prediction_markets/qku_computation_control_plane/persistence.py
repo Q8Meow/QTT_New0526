@@ -31,6 +31,8 @@ from .receipts import (
     _private_clock_reconstruct_spine_v1,
     SourceUseControlRecordV1, _source_use_stream_id_v1, _source_use_record_ref_v1,
     _source_use_reconstruct_spine_v1, _source_use_from_storage_v1, _source_use_append_disposition_v1,
+    SourceUseAttributedActionV1, _source_action_ref_v1, _source_action_from_storage_v1,
+    _source_action_reconstruct_spine_v1, _source_use_require_v1,
 )
 from .rollback import (
     JournalReversalBundleV1,
@@ -45,6 +47,7 @@ from .serialization import (deterministic_json, _f14_require_v1,
 
 class PersistenceAvailabilityV1(StrEnum):
     AVAILABLE_REFERENCE = "AVAILABLE_REFERENCE"
+    AVAILABLE_OWNER_CONTROL_EPHEMERAL = "AVAILABLE_OWNER_CONTROL_EPHEMERAL"
     UNAVAILABLE = "UNAVAILABLE"
     SCHEMA_MISMATCH = "SCHEMA_MISMATCH"
     INTEGRITY_FAILURE = "INTEGRITY_FAILURE"
@@ -178,6 +181,22 @@ class PersistenceAdapterV1(ABC):
         _source_use_record_ref_v1(record_ref)
         raise PersistenceContractError(ReasonCode.PERSISTENCE_UNAVAILABLE, "source-use custody is unavailable")
 
+    def load_committed_source_action_v1(self, event_ref: str) -> EconomicReceiptEventSpineV1 | None:
+        _source_action_ref_v1(event_ref)
+        raise PersistenceContractError(ReasonCode.PERSISTENCE_UNAVAILABLE, "source action storage is unavailable")
+
+    def load_committed_source_action_head_v1(self, process_ref: str) -> EconomicReceiptEventSpineV1 | None:
+        _source_use_stream_id_v1(process_ref)
+        raise PersistenceContractError(ReasonCode.PERSISTENCE_UNAVAILABLE, "source action storage is unavailable")
+
+    def load_source_action_for_update_v1(self, transaction: PersistenceTransactionV1, event_ref: str) -> EconomicReceiptEventSpineV1 | None:
+        _source_action_ref_v1(event_ref)
+        raise PersistenceContractError(ReasonCode.PERSISTENCE_UNAVAILABLE, "source action storage is unavailable")
+
+    def load_source_action_head_for_update_v1(self, transaction: PersistenceTransactionV1, process_ref: str) -> EconomicReceiptEventSpineV1 | None:
+        _source_use_stream_id_v1(process_ref)
+        raise PersistenceContractError(ReasonCode.PERSISTENCE_UNAVAILABLE, "source action storage is unavailable")
+
 
 class _InMemoryTransactionV1(PersistenceTransactionV1):
     def __init__(
@@ -226,10 +245,15 @@ class InMemoryPersistenceAdapterV1(PersistenceAdapterV1):
         return (PersistenceAvailabilityV1.INTEGRITY_FAILURE
                 if self._source_use_integrity_failed_v1 else self._availability)
 
+    def _source_use_available_v1(self) -> bool:
+        if type(self) is OwnerControlMemoryAdapterV1:
+            return self._scope_valid_v1()
+        return self.availability is PersistenceAvailabilityV1.AVAILABLE_REFERENCE
+
     def begin_transaction(self) -> PersistenceTransactionV1:
         self._lock.acquire()
         try:
-            if self.availability is not PersistenceAvailabilityV1.AVAILABLE_REFERENCE:
+            if not self._source_use_available_v1():
                 raise PersistenceContractError(ReasonCode.PERSISTENCE_UNAVAILABLE, "reference persistence is unavailable")
             if self._active_transaction is not None and self._active_transaction.is_active:
                 raise TransactionContractError(ReasonCode.TRANSACTION_STATE_INVALID, "nested transactions are forbidden")
@@ -276,6 +300,8 @@ class InMemoryPersistenceAdapterV1(PersistenceAdapterV1):
         return any(record_ref in rows for table, rows in tables.items() if table != "idempotency_claims")
 
     def insert_receipt_record(self, transaction: PersistenceTransactionV1, record: EconomicReceiptEventSpineV1) -> None:
+        if _source_action_reserved_v1(record):
+            raise PersistenceContractError(ReasonCode.PERSISTENCE_UNAVAILABLE, "attributed actions require original owner composition")
         tx = self._transaction(transaction)
         payload = record.typed_payload
         if (record.record_type == EconomicRecordTypeV1.SOURCE_USE_CONTROL
@@ -300,7 +326,7 @@ class InMemoryPersistenceAdapterV1(PersistenceAdapterV1):
         self._insert(transaction, "receipt_records", record.record_id, record)
 
     def _source_use_read_v1(self, tables, *, record_ref=None, stream_id=None):
-        if self.availability is not PersistenceAvailabilityV1.AVAILABLE_REFERENCE:
+        if not self._source_use_available_v1():
             raise PersistenceContractError(ReasonCode.PERSISTENCE_UNAVAILABLE, "source-use custody is unavailable")
         try:
             if stream_id is not None:
@@ -581,9 +607,13 @@ class InMemoryPersistenceAdapterV1(PersistenceAdapterV1):
             )
         if record_ref.startswith("SOURCE_USE::"):
             return self.load_committed_source_use_record_v1(record_ref)
+        if record_ref.startswith("SOURCE_ACTION::"):
+            raise PersistenceContractError(ReasonCode.PERSISTENCE_UNAVAILABLE, "attributed actions require specialized reads")
         with self._lock:
             for rows in self._tables.values():
                 if record_ref in rows:
+                    if _source_action_reserved_v1(rows[record_ref]):
+                        raise PersistenceContractError(ReasonCode.PERSISTENCE_CONFLICT, "unexpected attributed action in reference storage")
                     return rows[record_ref]
         return None
 
@@ -613,6 +643,243 @@ class InMemoryPersistenceAdapterV1(PersistenceAdapterV1):
                         records.append(record)
         minimum = datetime.min.replace(tzinfo=UTC)
         return tuple(sorted(records, key=lambda row: (getattr(row, "aggregate_id", ""), getattr(row, "sequence", getattr(row, "event_sequence", 0)), getattr(row, "recorded_at", getattr(row, "created_at", minimum)), getattr(row, "record_id", getattr(row, "economic_event_id", getattr(row, "journal_transaction_id", getattr(row, "transition_id", "")))))))
+
+
+def _source_action_reserved_v1(record: object) -> bool:
+    return (getattr(record, "record_type", None) == EconomicRecordTypeV1.SOURCE_USE_ATTRIBUTED_ACTION
+            or isinstance(getattr(record, "typed_payload", None), SourceUseAttributedActionV1)
+            or any(type(value) is str and value.startswith("SOURCE_ACTION::")
+                   for value in (getattr(record, "record_id", None), getattr(record, "aggregate_id", None))))
+
+
+class OwnerControlMemoryAdapterV1(InMemoryPersistenceAdapterV1):
+    """Process-owned source state, constructed only by the original policy factory.
+
+    P never calls back into the authority or native verifier. Its registered batch
+    already binds the original issuer, root, proof and exact prospective records.
+    """
+
+    def __init__(self) -> None:
+        raise PersistenceContractError(ReasonCode.PERSISTENCE_UNAVAILABLE, "owner composition requires original bootstrap")
+
+    def _scope_valid_v1(self) -> bool:
+        return (type(self) is OwnerControlMemoryAdapterV1
+                and self.availability is PersistenceAvailabilityV1.AVAILABLE_OWNER_CONTROL_EPHEMERAL
+                and self._control_scope is self._original_control_scope
+                and self._control_scope[0] is not None and self._control_scope[1] is not None)
+
+    def _deny_v1(self, *args, **kwargs):
+        raise PersistenceContractError(ReasonCode.PERSISTENCE_UNAVAILABLE, "operation is outside owner-control storage")
+
+    get_record = _deny_v1
+    get_idempotency_result = _deny_v1
+    reconstruct_as_of = _deny_v1
+    insert_value_lineage_edge = _deny_v1
+    insert_economic_event = _deny_v1
+    insert_journal_transaction = _deny_v1
+    insert_journal_posting = _deny_v1
+    insert_state_transition = _deny_v1
+    acquire_idempotency_claim = _deny_v1
+    bind_idempotency_result = _deny_v1
+    insert_outbox_intent = _deny_v1
+    insert_reversal_link = _deny_v1
+    load_committed_reversal_history = _deny_v1
+    insert_reconciliation_break = _deny_v1
+    load_committed_private_clock_receipt_v1 = _deny_v1
+    load_committed_private_evidence_witness_v1 = _deny_v1
+    load_committed_private_evidence_snapshot_v1 = _deny_v1
+
+    def _prepare_action_batch_v1(self, verified, originals, event, expected):
+        _source_use_require_v1(self._scope_valid_v1() and self._pending_batch is None)
+        batch = self._registered_batches.get(event.record_id)
+        _source_use_require_v1(batch is not None and batch["verified"] is verified
+                               and batch["scope"] is self._control_scope
+                               and batch["event"] == event and batch["originals"] == originals
+                               and batch["expected"] == expected)
+        _source_use_require_v1(verified._attempted is True)
+        self._pending_batch = batch
+
+    def begin_transaction(self) -> PersistenceTransactionV1:
+        _source_use_require_v1(self._scope_valid_v1() and self._pending_batch is not None)
+        batch = self._pending_batch
+        self._pending_batch = None
+        tx = super().begin_transaction()
+        tx._source_action_batch = batch
+        return tx
+
+    def _transaction(self, transaction: PersistenceTransactionV1) -> _InMemoryTransactionV1:
+        tx = super()._transaction(transaction)
+        batch = getattr(tx, "_source_action_batch", None)
+        _source_use_require_v1(type(tx) is _InMemoryTransactionV1 and tx._adapter is self
+                               and batch is not None and batch["scope"] is self._control_scope
+                               and self._registered_batches.get(batch["event"].record_id) is batch)
+        return tx
+
+    def _action_read_v1(self, tables, *, event_ref=None, process_ref=None):
+        _source_use_require_v1(self._scope_valid_v1())
+        try:
+            if process_ref is not None:
+                _source_use_require_v1(process_ref == self._control_scope[2])
+                aggregate = "SOURCE_ACTION::" + process_ref
+                matches = []
+                for key, value in tables["receipt_records"].items():
+                    if (getattr(value, "aggregate_id", None) == aggregate
+                            or (type(key) is str and key.startswith(aggregate + "::"))):
+                        _source_action_ref_v1(key)
+                        _source_use_require_v1(key.startswith(aggregate + "::"))
+                        matches.append(key)
+                if not matches:
+                    return None
+                event_ref = max(matches)
+            _source_use_require_v1(event_ref.startswith("SOURCE_ACTION::" + self._control_scope[2] + "::"))
+            value = tables["receipt_records"].get(event_ref)
+            if value is None and not any(event_ref in rows for rows in tables.values()):
+                return None
+            return _source_action_from_storage_v1(value, record_id=event_ref)
+        except (ContractValidationError, PersistenceContractError, SerializationSafetyError):
+            self._source_use_integrity_failed_v1 = True
+            raise
+
+    def load_committed_source_action_v1(self, event_ref: str) -> EconomicReceiptEventSpineV1 | None:
+        _source_action_ref_v1(event_ref)
+        with self._lock:
+            if self._active_transaction is not None:
+                raise TransactionContractError(ReasonCode.TRANSACTION_STATE_INVALID, "source action read requires committed state")
+            return self._action_read_v1(self._tables, event_ref=event_ref)
+
+    def load_committed_source_action_head_v1(self, process_ref: str) -> EconomicReceiptEventSpineV1 | None:
+        _source_use_stream_id_v1(process_ref)
+        with self._lock:
+            if self._active_transaction is not None:
+                raise TransactionContractError(ReasonCode.TRANSACTION_STATE_INVALID, "source action read requires committed state")
+            return self._action_read_v1(self._tables, process_ref=process_ref)
+
+    def load_source_action_for_update_v1(self, transaction: PersistenceTransactionV1, event_ref: str) -> EconomicReceiptEventSpineV1 | None:
+        _source_action_ref_v1(event_ref)
+        return self._action_read_v1(self._transaction(transaction)._working, event_ref=event_ref)
+
+    def load_source_action_head_for_update_v1(self, transaction: PersistenceTransactionV1, process_ref: str) -> EconomicReceiptEventSpineV1 | None:
+        _source_use_stream_id_v1(process_ref)
+        return self._action_read_v1(self._transaction(transaction)._working, process_ref=process_ref)
+
+    def insert_receipt_record(self, transaction: PersistenceTransactionV1, record: EconomicReceiptEventSpineV1) -> None:
+        tx = self._transaction(transaction)
+        batch = tx._source_action_batch
+        if _source_action_reserved_v1(record):
+            record = _source_action_reconstruct_spine_v1(record)
+            _source_use_require_v1(record == batch["event"])
+        else:
+            record = _source_use_reconstruct_spine_v1(record)
+            _source_use_require_v1(record in batch["originals"])
+            head = self.load_source_use_head_for_update_v1(tx, record.typed_payload.stream_id)
+            existing = self.load_source_use_record_for_update_v1(tx, record.record_id)
+            _source_use_append_disposition_v1(record, head, existing)
+        self._insert(tx, "receipt_records", record.record_id, record)
+
+    def _validate_action_batch_v1(self, transaction, *, complete):
+        tx = self._transaction(transaction)
+        batch = tx._source_action_batch
+        event, originals = batch["event"], batch["originals"]
+        p = event.typed_payload
+        before = tx._committed_snapshot
+        head = self._action_read_v1(before, process_ref=p.process_ref)
+        expected_event, expected_declaration, expected_review = batch["expected"]
+        _source_use_require_v1((None if head is None else head.record_id) == expected_event == p.predecessor_event_ref
+                               and (expected_declaration, expected_review) == (p.expected_declaration_ref, p.expected_review_ref)
+                               and p.sequence == (1 if head is None else head.sequence + 1)
+                               and p.generation_before == (0 if head is None else head.typed_payload.generation_after))
+        if head is not None:
+            _source_use_require_v1(head.typed_payload.scope == p.scope and head.recorded_at <= event.recorded_at
+                                   and (head.typed_payload.declaration_ref, head.typed_payload.review_ref)
+                                   == (expected_declaration, expected_review))
+        else:
+            _source_use_require_v1(expected_declaration is expected_review is None)
+        _source_use_require_v1(tuple(row.record_id for row in originals) == p.original_event_refs
+                               and type(originals) is tuple and len(originals) <= 1)
+        results = []
+        for kind, expected, resulting in (("OWNER_DECLARATION", expected_declaration, p.declaration_ref),
+                                          ("SOURCE_REVIEW", expected_review, p.review_ref)):
+            old = None
+            if expected is not None:
+                old = self._source_use_read_v1(before, record_ref=expected)
+                _source_use_require_v1(old is not None and old.typed_payload.subject_kind == kind
+                                       and old.typed_payload.scope == p.scope
+                                       and self._source_use_read_v1(before, stream_id=old.typed_payload.stream_id) == old)
+            appended = next((row for row in originals if row.typed_payload.subject_kind == kind), None)
+            if appended is None:
+                _source_use_require_v1(resulting == expected)
+                current = old
+            else:
+                a = appended.typed_payload
+                _source_use_require_v1(resulting == appended.record_id and a.scope == p.scope
+                                       and appended.recorded_at == event.recorded_at)
+                original_head = self._source_use_read_v1(before, stream_id=a.stream_id)
+                existing = self._source_use_read_v1(before, record_ref=appended.record_id)
+                _source_use_require_v1(_source_use_append_disposition_v1(appended, original_head, existing) == "APPENDED")
+                if old is not None and old.typed_payload.action != "WITHDRAW":
+                    _source_use_require_v1(a.stream_id == old.typed_payload.stream_id)
+                expected_kind = "SOURCE_REVIEW" if p.action in {"REVIEW_ACCEPT", "INVALIDATE_REVIEW"} else "OWNER_DECLARATION"
+                _source_use_require_v1(kind == expected_kind and p.action != "OBSERVE_ONCE"
+                                       and (a.action == "WITHDRAW") == (p.action in {"WITHDRAW_USE", "INVALIDATE_REVIEW"}))
+                current = appended
+            if current is not None:
+                _source_use_require_v1(current.typed_payload.scope == p.scope)
+            results.append(current)
+        declaration, review = results
+        review_parent = use_parent = None
+        if head is not None:
+            hp = head.typed_payload
+            if hp.action != "INVALIDATE_REVIEW":
+                review_parent = head.record_id if hp.action == "REVIEW_ACCEPT" else hp.review_event_ref
+            if hp.action in {"USE_ADMIT", "OBSERVE_ONCE"}:
+                use_parent = head.record_id if hp.action == "USE_ADMIT" else hp.use_event_ref
+        if p.action == "REVIEW_ACCEPT":
+            _source_use_require_v1(review is not None and review.typed_payload.content is not None)
+            content, facts = review.typed_payload.content, p.review_facts
+            _source_use_require_v1(content.reported_time_kind == "UTC_INSTANT"
+                                   and datetime.fromisoformat(content.reported_time_text) == facts.factual_checked_at_utc
+                                   and (content.reviewed_document_ref, content.reviewed_document_version,
+                                        content.claimed_effective_at_utc, content.claimed_expires_at_utc)
+                                   == (facts.document_ref, facts.document_version, facts.source_effective_at_utc, facts.source_expires_at_utc))
+        else:
+            _source_use_require_v1(p.review_event_ref == review_parent)
+        if p.action in {"USE_ADMIT", "OBSERVE_ONCE"}:
+            _source_use_require_v1(declaration is not None and review is not None
+                                   and declaration.typed_payload.content is not None and review.typed_payload.content is not None)
+            accepted_review = self._action_read_v1(before, event_ref=review_parent)
+            _source_use_require_v1(accepted_review is not None and accepted_review.typed_payload.action == "REVIEW_ACCEPT"
+                                   and accepted_review.typed_payload.review_ref == review.record_id
+                                   and accepted_review.typed_payload.scope == p.scope
+                                   and event.recorded_at < p.expires_at_utc <= accepted_review.typed_payload.expires_at_utc)
+            content = declaration.typed_payload.content
+            _source_use_require_v1(content.claimed_effective_at_utc is not None and content.claimed_expires_at_utc is not None
+                                   and content.claimed_effective_at_utc <= event.recorded_at < p.expires_at_utc <= content.claimed_expires_at_utc)
+        if p.action == "OBSERVE_ONCE":
+            _source_use_require_v1(p.use_event_ref == use_parent)
+            accepted_use = self._action_read_v1(before, event_ref=use_parent)
+            _source_use_require_v1(accepted_use is not None and accepted_use.typed_payload.action == "USE_ADMIT"
+                                   and accepted_use.typed_payload.generation_after == p.generation_after
+                                   and (accepted_use.typed_payload.declaration_ref, accepted_use.typed_payload.review_ref,
+                                        accepted_use.typed_payload.review_event_ref) == (p.declaration_ref, p.review_ref, p.review_event_ref)
+                                   and p.expires_at_utc <= accepted_use.typed_payload.expires_at_utc)
+        elif p.action in {"WITHDRAW_USE", "INVALIDATE_REVIEW"}:
+            _source_use_require_v1(p.use_event_ref == use_parent)
+        expected_tables = {name: dict(rows) for name, rows in before.items()}
+        for record in (*originals, event):
+            _source_use_require_v1(not any(record.record_id in rows for rows in before.values()))
+            expected_tables["receipt_records"][record.record_id] = record
+        rows = expected_tables["receipt_records"]
+        _source_use_require_v1(len(rows) <= 256 and sum(len(deterministic_json(row).encode("utf-8")) for row in rows.values()) <= 16 * 1024 * 1024)
+        if complete:
+            _source_use_require_v1(tx._working == expected_tables)
+            for original in originals:
+                _source_use_require_v1(self._source_use_read_v1(tx._working, stream_id=original.typed_payload.stream_id) == original)
+            _source_use_require_v1(self._action_read_v1(tx._working, process_ref=p.process_ref) == event)
+        return declaration, review
+
+    def _commit(self, transaction: _InMemoryTransactionV1) -> None:
+        self._validate_action_batch_v1(transaction, complete=True)
+        super()._commit(transaction)
 
 
 _F14_RECORD_ROLES = ('raw', 'transport', 'capture_commit', 'publication',

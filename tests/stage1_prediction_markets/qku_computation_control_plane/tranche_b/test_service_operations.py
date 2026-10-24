@@ -1053,7 +1053,8 @@ def _assert_kalshi_conditional_service(monkeypatch, invocations):
             event = event.replace(b'"fee_type_override":null',b'"fee_type_override":"quadratic"').replace(
                 b'"fee_multiplier_override":null',b'"fee_multiplier_override":2')
         raw = (*observed_bodies[:1],event,observed_bodies[2].replace(b'"fee_multiplier":1',b'"fee_multiplier":'+series_multiplier))
-        with _synthetic_kalshi_observation(bodies=raw) as fixture:
+        with _synthetic_kalshi_observation(bodies=raw, fills=observed_fills,
+                balance_increment=common['balance_increment'], prior_rounding_overpayment=common['prior_rounding_overpayment']) as fixture:
             cohort = fixture.owner.capture()
             assert cohort.market_ticker == context.scope.market_scope_id
             resolved, delegated_calls, delegated_results = [], [], []
@@ -1070,7 +1071,8 @@ def _assert_kalshi_conditional_service(monkeypatch, invocations):
                 delegated.setattr(observation_source.KalshiFeeObservationOwnerV1,'resolve_scenario_multiplier',resolve_spy)
                 delegated.setattr(pretrade_module,'compose_kalshi_quadratic_taker_buy_yes_cashflows_v1',compose_spy)
                 terms = observed_wrapper(**observed_kwargs)
-                assert len(resolved) == len(delegated_calls) == 1 and terms is delegated_results[0]
+                assert len(resolved) == 2 and len(delegated_calls) == 1 and terms is delegated_results[0]
+                assert resolved[0] == resolved[1]  # Original resolution plus final publication fence.
                 assert resolved[0][0] is fixture.owner and resolved[0][1]['cohort'] is cohort
                 assert delegated_calls[0]['fee_multiplier'] is cohort.fee_multiplier
                 for name in (*common,'fills'):
@@ -1089,8 +1091,9 @@ def _assert_kalshi_conditional_service(monkeypatch, invocations):
                 assert legacy.platform_fee_total == Decimal('1.75') and terms.platform_fee_total == Decimal('3.50')
         # Actual MATH-06 consumption now comes from a fresh one-shot session.
         # The original composer checks above remain independent predecessor coverage.
-        with _synthetic_kalshi_observation(bodies=raw) as fixture:
-            session = pretrade_module.KalshiFeeScenarioSessionV1(**fixture.kwargs)
+        with _synthetic_kalshi_observation(bodies=raw, fills=observed_fills,
+                balance_increment=common['balance_increment'], prior_rounding_overpayment=common['prior_rounding_overpayment']) as fixture:
+            session = pretrade_module.KalshiFeeScenarioSessionV1(**fixture.authorize())
             assert not fixture.connections and not fixture.sends
             scenario = session.evaluate(
                 fills=observed_fills, balance_increment=common['balance_increment'],

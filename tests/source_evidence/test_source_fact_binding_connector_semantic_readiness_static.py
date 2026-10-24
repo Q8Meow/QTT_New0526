@@ -312,12 +312,176 @@ _F14_INDEPENDENT_NATIVE_TEMPLATE = 'class RetailPrivateIngressV1:\n    def read_
 _KALSHI_INDEPENDENT_NATIVE_TEMPLATE = "class KalshiFeeObservationOwnerV1:\n    def _read_rest_once_v1(self, role, ticker):\n        prepared = self._prepare_read_v1(role, ticker)\n        import http.client\n        connection = http.client.HTTPSConnection(\"external-api.kalshi.com\", 443, timeout=prepared.timeout_seconds, context=prepared.tls_context)\n        try:\n            self._recheck_and_charge_v1(prepared)\n            connection.request(\"GET\", prepared.target, body=None, headers=prepared.headers)\n            response = connection.getresponse()\n            self._validate_response_headers_v1(prepared, response)\n            raw = response.read(prepared.maximum_raw_bytes + 1)\n            received = self._observe_clock_v1()\n            self._validate_response_body_v1(prepared, response, raw)\n            return self._retain_received_v1(prepared, raw, received)\n        except (OSError, http.client.HTTPException) as error:\n            self._raise_transport_v1(error)\n        finally:\n            try:\n                connection.close()\n            except OSError as error:\n                self._raise_transport_v1(error)\n"
 
 
+def _assert_source_use_native_boundaries(root):
+    import ast
+    from pathlib import Path, PurePosixPath
+    from tools import validate_no_runtime_artifacts as runtime
+    from tools import validate_source_fact_binding_connector_semantic_readiness_static as readiness
+
+    repo = Path(__file__).resolve().parents[2]
+    relative = 'src/qtt/service/owner_source_use_windows.py'
+    source = (repo / relative).read_text(encoding='utf-8')
+    tree = ast.parse(source)
+    # Independent expected DLL set, not the mutable scanner's permission table.
+    dlls = [n.args[0].value for n in ast.walk(tree) if isinstance(n, ast.Call)
+            and ast.unparse(n.func) == 'ctypes.WinDLL']
+    assert sorted(dlls) == sorted(('kernel32.dll', 'advapi32.dll', 'shell32.dll',
+                                  'ole32.dll', 'user32.dll', 'webauthn.dll'))
+    target = root / relative
+    target.parent.mkdir(parents=True)
+    mutations = [
+        source + '\nrun_owner_source_use_local_v1()\n',
+        source + '\nlaunch = run_owner_source_use_local_v1\nlaunch()\n',
+        source + '\nlaunch = _bootstrap_owner_source_use_v1\nlaunch()\n',
+        source + '\ndef alternate_entry():\n    return run_owner_source_use_local_v1()\n',
+        source.replace('root = _bootstrap_owner_source_use_v1()', 'root = object()'),
+        source + '\nimport ctypes as native_api\nnative_api.WinDLL("unapproved.dll")\n',
+        source + '\nloader = ctypes.WinDLL\nloader("unapproved.dll")\n',
+        source + '\ngetattr(ctypes, "WinDLL")("unapproved.dll")\n',
+        source + '\nctypes.WinDLL("webauthn.dll", use_last_error=True, winmode=0x800)\n',
+        source.replace('"webauthn.dll"', '"unapproved.dll"'),
+        source.replace('winmode=0x800', 'winmode=0'),
+        source.replace('table.WebAuthNAuthenticatorGetAssertion(', 'table.UnapprovedNativeOperation('),
+        source.replace('api = _native_system_v1()', 'api = object()'),
+        source.replace('        _check_interpreter_v1(installation)', '        _require(True)'),
+        source.replace('anchor / "QTT" / "OwnerControl"', 'anchor / "UNOWNED"'),
+        source + '\ndef alternate_caller():\n    return _webauthn_table_v1(None)\n',
+        source.replace('from fido2.client import win_api', 'from fido2.client import windows as win_api'),
+        source + '\nfrom fido2.client import win_api\n',
+    ]
+    assert runtime.source_use_native_contract_v1(relative, tree) == ()
+    for candidate in (source, *mutations):
+        target.write_text(candidate, encoding='utf-8')
+        expected = candidate != source
+        assert bool(runtime._scan_python_content(PurePosixPath(relative), candidate, ['forbid_source_retrieval'])) is expected
+        assert bool(readiness._scan_forbidden_python_usage(root)) is expected
+    target.write_text(source, encoding='utf-8')
+    assert runtime.source_use_native_contract_v1('src/qtt/service/alternate.py', tree)
+    policy_path = 'src/qtt/stage1_prediction_markets/qku_computation_control_plane/source_policy.py'
+    policy = (repo / policy_path).read_text(encoding='utf-8')
+    assert runtime.source_use_native_contract_v1(policy_path, ast.parse(policy)) == ()
+    missing_binding = policy.replace('binding._authority._check_binding_v1(binding, self)', 'pass')
+    assert missing_binding != policy
+    assert runtime.source_use_native_contract_v1(policy_path, ast.parse(missing_binding))
+    # The existing exact HTTP templates remain independent transport oracles.
+    assert len(runtime.kalshi_fee_native_admission_v1(policy_path, ast.parse(policy))[0]) == 2
+    _assert_source_use_independent_censuses(repo)
+    _assert_source_use_operations_thread_sites(repo)
+
+
+def _assert_source_use_operations_thread_sites(repo):
+    from tools import independent_validate_qku_computation_control_plane_operations as operations
+
+    # Literal independent expectations: only these two direct method imports.
+    exact = """
+class KalshiFeeObservationOwnerV1:
+    def _prepare_read_v1(self):
+        from threading import current_thread
+        return current_thread()
+    def _require_pending_v1(self):
+        from threading import current_thread
+        return current_thread()
+"""
+    check = operations.validate_runtime_topology_source
+    assert check(file_name="source_policy.py", source=exact) == ()
+    actual = (repo / "src/qtt/stage1_prediction_markets/qku_computation_control_plane/source_policy.py").read_text(encoding="utf-8")
+    assert check(file_name="source_policy.py", source=actual) == ()
+    for name in ("another.py", "source_policy.py.bak", "other/source_policy.py"):
+        assert check(file_name=name, source=exact)
+    for mutated in (
+        exact.replace("KalshiFeeObservationOwnerV1", "AnotherOwnerV1"),
+        exact.replace("_prepare_read_v1", "another_method"),
+        exact.replace("_require_pending_v1", "another_method"),
+        exact.replace("from threading import current_thread", "from threading import current_thread as alias", 1),
+        exact.replace("from threading import current_thread", "from threading import current_thread, Thread", 1),
+        exact.replace("from threading import current_thread", "from .threading import current_thread", 1),
+        exact.replace("from threading import current_thread", "from threading import current_thread\n        from threading import current_thread", 1),
+        exact.replace("from threading import current_thread", "def nested():\n            from threading import current_thread", 1),
+        exact + "\nfrom threading import current_thread\n",
+        exact + "\nclass AnotherOwner:\n    from threading import current_thread\n",
+        exact + "\nclass KalshiFeeObservationOwnerV1:\n    pass\n",
+        exact + "    def _prepare_read_v1(self):\n        from threading import current_thread\n",
+        exact.replace("def _prepare_read_v1", "async def _prepare_read_v1"),
+        exact + "    async def _prepare_read_v1(self):\n        pass\n",
+        exact + "\nimport threading\n",
+        exact + "\nfrom threading import Lock\n",
+    ):
+        assert any("runtime import" in item for item in check(file_name="source_policy.py", source=mutated))
+
+
+def _assert_source_use_independent_censuses(repo):
+    import ast
+    from types import SimpleNamespace
+    from tools import independent_validate_qku_computation_control_plane_source as source
+    from tools import independent_validate_qku_computation_control_plane_execution as execution
+    # Execute the actual standalone validator function without importing its
+    # CLI-only sibling import graph or any production/native code.
+    security_tree = ast.parse((repo / "tools/independent_validate_qku_computation_control_plane_security.py").read_text(encoding="utf-8"))
+    security_node = next(n for n in security_tree.body if isinstance(n, ast.FunctionDef) and n.name == "_source_use_security_failures_v1")
+    security_namespace = {"ast": ast}
+    exec(compile(ast.Module(body=[security_node], type_ignores=[]), "<independent-security-census>", "exec"), security_namespace)
+    security = SimpleNamespace(_source_use_security_failures_v1=security_namespace[security_node.name])
+
+    class ObservedRoot:
+        def __init__(self, replacements):
+            self.replacements = replacements
+        def __truediv__(self, relative):
+            value = self.replacements.get(relative)
+            if value is None:
+                value = (repo / relative).read_text(encoding="utf-8")
+            return SimpleNamespace(read_text=lambda **unused: value)
+
+    policy = "src/qtt/stage1_prediction_markets/qku_computation_control_plane/source_policy.py"
+    pretrade = "src/qtt/pretrade/pr169_pretrade1_resolvers.py"
+    native = "src/qtt/service/owner_source_use_windows.py"
+    assert source._source_use_admission_failures_v1(ObservedRoot({})) == []
+    for path, old, new in (
+        (policy, "self._valid_completion is pending", "True"),
+        (policy, "prepared.originating_thread is current_thread()", "True"),
+        (policy, "len(rows) + 2 <= 256", "len(rows) + 2 <= 257"),
+        (policy, "+ 2 * 65536 <= 16 * 1024 * 1024", "+ 2 * 65536 <= 17 * 1024 * 1024"),
+        (pretrade, "owner.revoke()", "None"),
+        ("src/qtt/service/owner_source_use.py", "with self._authority._lock:", "with self._root.operation_lock:"),
+    ):
+        original = (repo / path).read_text(encoding="utf-8")
+        changed = original.replace(old, new)
+        assert changed != original
+        failures = source._source_use_admission_failures_v1(ObservedRoot({path: changed}))
+        assert failures and all(type(value) is str for value in failures)
+
+    files = ("receipts.py", "persistence.py", "transaction.py", "sqlite_reference.py")
+    package = repo / "src/qtt/stage1_prediction_markets/qku_computation_control_plane"
+    originals = {name: (package / name).read_text(encoding="utf-8") for name in files}
+    assert execution._source_use_execution_contract_failures_v1({name: ast.parse(value) for name, value in originals.items()}) == []
+    for name, old, new in (
+        ("persistence.py", "_source_action_reserved_v1(record)", "False"),
+        ("sqlite_reference.py", '"SOURCE_ACTION::"', '"UNRELATED::"'),
+        ("transaction.py", "transaction.rollback()", "None"),
+        ("transaction.py", "verified_action._attempted = True", "verified_action._attempted = False"),
+        ("transaction.py", "adapter._prepare_action_batch_v1(", "adapter.unregistered_batch("),
+    ):
+        changed = originals[name].replace(old, new)
+        assert changed != originals[name]
+        trees = {file: ast.parse(changed if file == name else value) for file, value in originals.items()}
+        assert execution._source_use_execution_contract_failures_v1(trees)
+    assert security._source_use_security_failures_v1(ObservedRoot({})) == []
+    original = (repo / native).read_text(encoding="utf-8")
+    for old, new in (('"webauthn.dll"', '"unapproved.dll"'),
+                     ("winmode=0x800", "winmode=0"),
+                     ("WebAuthNFreeAssertion(pointer)", "UnapprovedFree(pointer)")):
+        changed = original.replace(old, new)
+        assert changed != original
+        assert security._source_use_security_failures_v1(ObservedRoot({native: changed}))
+
+
 def _assert_kalshi_shared_native_admission(root):
     import ast
     from pathlib import PurePosixPath
     from src.qtt.stage1_prediction_markets.qku_computation_control_plane import validation as operations
     from tools import validate_no_runtime_artifacts as runtime
     from tools import validate_source_fact_binding_connector_semantic_readiness_static as readiness
+
+    _assert_source_use_native_boundaries(root / 'source-use')
 
     relative = 'src/qtt/stage1_prediction_markets/qku_computation_control_plane/source_policy.py'
     target = root / relative

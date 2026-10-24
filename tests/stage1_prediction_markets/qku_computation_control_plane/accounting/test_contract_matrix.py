@@ -137,6 +137,603 @@ DYNAMIC_VALID_UNTIL = datetime(2026, 1, 1, 1, 0, tzinfo=UTC)
 ACCOUNTING_CASES = tuple(row for row in ST12C_CONTROL_COVERAGE_MATRIX if row.domain == "accounting")
 
 
+def _source_use_action_proposals(moment):
+    from datetime import timedelta
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane.receipts import (
+        SourceUseScopeV1, SourceUseOriginalContentV1, SourceUseReviewFactsV1,
+    )
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane.stage1_launch_graph import Stage1VenueProfileIdV1
+
+    scope = SourceUseScopeV1(Stage1VenueProfileIdV1.KALSHI_US_DCM_DIRECT,
+        "KALSHI_PUBLIC_MARKET_EVENT_SERIES", "KALSHI_PUBLIC_FEE_OBSERVATION_V1",
+        "OBSERVED_FEE_SCENARIO_INTERNAL", "PROCESS_MEMORY_ONLY", "NO_REDISTRIBUTION_NO_EXTERNAL_AI_FORWARDING",
+        "SYNTHETIC::ACCOUNT")
+    facts = SourceUseReviewFactsV1("SYNTHETIC::DOCUMENT", "SYNTHETIC_V1", "SYNTHETIC::AGREEMENT", "SYNTHETIC_V1",
+        moment - timedelta(seconds=1), moment - timedelta(seconds=2), moment - timedelta(seconds=2),
+        moment + timedelta(minutes=1), ("SYNTHETIC_CHANGE",), ("SYNTHETIC_ONLY_INTERNAL_USE",), ("NO_NATIVE_QUALIFICATION",))
+    review = SourceUseOriginalContentV1("Synthetic review only; no actual source or legal acceptance.", None, None,
+        "UTC_INSTANT", facts.factual_checked_at_utc.isoformat(), facts.document_ref, facts.document_version,
+        facts.source_effective_at_utc, facts.source_expires_at_utc)
+    declaration = SourceUseOriginalContentV1("Synthetic owner declaration only.", None, None, "UNKNOWN", None,
+        None, None, moment - timedelta(seconds=2), moment + timedelta(minutes=1))
+    return scope, review, facts, declaration
+
+
+def test_source_use_admission_integration(monkeypatch, reference_directory, capsys):
+    from datetime import timedelta
+    from tests.stage1_prediction_markets.qku_computation_control_plane.security.test_deserialization_safety import _synthetic_source_use_root
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane import source_policy as source
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane.receipts import SourceUseObservationRequestV1
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane.persistence import (
+        InMemoryPersistenceAdapterV1, OwnerControlMemoryAdapterV1, PersistenceAvailabilityV1,
+    )
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane.sqlite_reference import SQLiteReferenceAdapterV1
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane.transaction import TrancheCUnitOfWorkV1, TransactionRetryPolicyV1
+
+    moment = datetime(2026, 10, 20, 12, tzinfo=UTC)
+    seconds = int((moment - datetime(1970, 1, 1, tzinfo=UTC)).total_seconds())
+    clock = dict(wall=seconds * 1_000_000_000, mono=10_000_000_000)
+    monkeypatch.setattr(source.time, "time_ns", lambda: clock["wall"])
+    monkeypatch.setattr(source.time, "monotonic_ns", lambda: clock["mono"])
+    scope, review, facts, declaration = _source_use_action_proposals(moment)
+    with _synthetic_source_use_root() as h:
+        authority = h.authority
+        assert type(authority._adapter) is OwnerControlMemoryAdapterV1
+        assert authority._adapter.availability is PersistenceAvailabilityV1.AVAILABLE_OWNER_CONTROL_EPHEMERAL
+        assert h.controller.read_status_v1()["state"] == "DENIED"
+        review_proposal = dict(action="REVIEW_ACCEPT", scope=scope, original=review, review_facts=facts,
+                               requested_expires_at_utc=moment + timedelta(minutes=1))
+        for invalid in (None,):
+            with pytest.raises(ComputationControlPlaneError):
+                h.controller.prepare_action_v1(deterministic_json({**review_proposal, "original": invalid}).encode())
+        for expires in (moment + timedelta(minutes=2), moment + timedelta(minutes=16)):
+            with pytest.raises(ComputationControlPlaneError):
+                h.controller.prepare_action_v1(deterministic_json({**review_proposal, "requested_expires_at_utc": expires}).encode())
+        first = h.sign(review_proposal)
+        assert first.event.typed_payload.generation_before == 0 and first.event.typed_payload.generation_after == 1
+        assert first.declaration is None and first.review.typed_payload.content == review
+        assert first.review.authority_class == "RECORDED_NOT_AUTHENTICATED_NOT_ADMITTED"
+        assert source.read_recorded_source_use_status_v1(adapter=authority._adapter,
+            stream_id=first.review.typed_payload.stream_id, evaluated_at_utc=moment).admission_eligible is False
+        assert h.controller.read_status_v1()["state"] == "DENIED"
+        use_proposal = dict(action="USE_ADMIT", scope=scope, original=declaration,
+            expected_review_ref=first.review.record_id, requested_expires_at_utc=moment + timedelta(seconds=55))
+        with pytest.raises(ComputationControlPlaneError):
+            h.controller.prepare_action_v1(deterministic_json({**use_proposal,
+                "requested_expires_at_utc": moment + timedelta(seconds=61)}).encode())
+        second = h.sign(use_proposal)
+        assert second.event.typed_payload.review_event_ref == first.event.record_id
+        assert second.event.typed_payload.generation_after == 2
+        assert h.controller.read_status_v1()["state"] == "ACTIVE"
+        binding = next(iter(authority._bindings.values()))
+        assert binding._permit is None
+        assert binding._source.checked_at_utc == facts.factual_checked_at_utc
+        assert binding._source.currentization_owner_id == h.enrollment.owner_ref
+        assert first.event.record_id in binding._source.receipt_id
+        fills = (KalshiQuadraticTakerBuyYesFillV1(Decimal(100), Decimal(".5")),)
+        request = SourceUseObservationRequestV1("SYNTHETIC::MARKET", fills, Decimal(".01"), Decimal(0),
+                                                moment + timedelta(seconds=50), 50_000_000_000)
+        third = h.sign(dict(action="OBSERVE_ONCE", scope=scope, expected_declaration_ref=second.declaration.record_id,
+            expected_review_ref=second.review.record_id, observation=request))
+        assert third.event.typed_payload.generation_before == third.event.typed_payload.generation_after == 2
+        assert third.event.typed_payload.review_event_ref == first.event.record_id
+        assert third.event.typed_payload.use_event_ref == second.event.record_id
+        assert len(authority._adapter._tables["receipt_records"]) == 5 and authority._counter == 3
+        operational = next(row for row in authority._bindings.values() if row._permit is not None)
+        permit = operational._permit
+        arguments = dict(source_receipt=operational._source, rights_receipt=operational._rights,
+            account_scope=scope.account_scope_ref, internal_use_class=scope.internal_use_class,
+            permitted_retention_class=scope.permitted_retention_class, expected_market_ticker=request.market_ticker,
+            process_epoch_id=authority._process_ref, monotonic_clock_id=authority._clock_ref,
+            operating_authorization_ref=third.event.record_id, authorization_expires_at_utc=request.expires_at_utc,
+            deadline_monotonic_ns=permit._deadline, source_use_binding=operational)
+        owner = source.KalshiFeeObservationOwnerV1(**arguments)
+        assert permit._owner is owner
+        with pytest.raises(ComputationControlPlaneError):
+            source.KalshiFeeObservationOwnerV1(**arguments)
+        with pytest.raises(ComputationControlPlaneError):
+            owner._check_inputs_v1(fills, Decimal(".0001"), Decimal(0))
+        detached = authority._adapter.load_committed_source_action_v1(third.event.record_id)
+        assert detached == third.event and detached is not third.event
+        assert detached.typed_payload is not third.event.typed_payload
+        batch = authority._adapter._registered_batches[first.event.record_id]
+        before_bindings = tuple(authority._bindings)
+        duplicate = authority._uow.commit_source_use_action_v1(originals=batch["originals"], event=first.event,
+            expected_event_ref=None, expected_declaration_ref=None, expected_review_ref=None, verified_action=batch["verified"])
+        assert duplicate.disposition == "EXACT_DUPLICATE" and duplicate.current_event == third.event
+        assert tuple(authority._bindings) == before_bindings and authority._counter == 3
+        for operation in (lambda: authority._adapter.get_record(first.event.record_id), authority._adapter.begin_transaction,
+                          lambda: TrancheCUnitOfWorkV1(authority._adapter, TransactionRetryPolicyV1(2))):
+            with pytest.raises(ComputationControlPlaneError):
+                operation()
+        reference = InMemoryPersistenceAdapterV1()
+        tx = reference.begin_transaction()
+        with pytest.raises(ComputationControlPlaneError):
+            reference.insert_receipt_record(tx, first.event)
+        tx.rollback()
+        database = SQLiteReferenceAdapterV1(reference_directory / "source-use-action-denial.sqlite",
+            busy_timeout_ms=0, max_transaction_attempts=1)
+        try:
+            with pytest.raises(ComputationControlPlaneError):
+                database.insert_receipt_record(None, first.event)
+        finally:
+            database.close()
+        for offset, expected in ((54, "ACTIVE"), (55, "EXPIRED_OR_NOT_CURRENT"), (56, "EXPIRED_OR_NOT_CURRENT")):
+            clock["wall"] = (seconds + offset) * 1_000_000_000
+            clock["mono"] = 10_000_000_000 + offset * 1_000_000_000
+            assert h.controller.read_status_v1()["state"] == expected
+        authority.stop_v1()
+        assert h.controller.read_status_v1()["state"] == "STOPPED"
+        assert h.controller.read_status_v1()["expiry"] == second.event.typed_payload.expires_at_utc.isoformat()
+        with pytest.raises(ComputationControlPlaneError):
+            owner._check_inputs_v1(fills, Decimal(".01"), Decimal(0))
+
+    clock.update(wall=seconds * 1_000_000_000, mono=10_000_000_000)
+    _assert_source_use_cancel_and_thread_binding(moment)
+    _assert_source_use_atomic_and_currentness(moment)
+    _assert_source_use_withdrawal_fences()
+    _assert_source_use_controller_publication()
+    _assert_source_use_authority_boundaries(moment)
+    _assert_source_use_capacity(moment)
+    captured = capsys.readouterr()
+    assert captured.out == captured.err == ""
+
+
+def _assert_source_use_cancel_and_thread_binding(moment):
+    from threading import Event, Thread
+    from datetime import timedelta
+    from src.qtt.service import owner_source_use as service
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane import source_policy as source
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane.receipts import SourceUseObservationRequestV1
+    from tests.stage1_prediction_markets.qku_computation_control_plane.security.test_deserialization_safety import _synthetic_source_use_root
+
+    for action in ('REVIEW_ACCEPT', 'USE_ADMIT', 'OBSERVE_ONCE'):
+        with _synthetic_source_use_root() as h:
+            scope, review, facts, declaration = _source_use_action_proposals(moment)
+            proposal = dict(action='REVIEW_ACCEPT', scope=scope, original=review, review_facts=facts,
+                requested_expires_at_utc=moment + timedelta(seconds=60))
+            if action != 'REVIEW_ACCEPT':
+                reviewed = h.sign(proposal)
+                proposal = dict(action='USE_ADMIT', scope=scope, original=declaration,
+                    expected_review_ref=reviewed.review.record_id, requested_expires_at_utc=moment + timedelta(seconds=55))
+            if action == 'OBSERVE_ONCE':
+                used = h.sign(proposal)
+                proposal = dict(action=action, scope=scope, expected_declaration_ref=used.declaration.record_id,
+                    expected_review_ref=used.review.record_id, observation=SourceUseObservationRequestV1(
+                        'SYNTHETIC::MARKET', (KalshiQuadraticTakerBuyYesFillV1(Decimal(100), Decimal('.5')),),
+                        Decimal('.01'), Decimal(0), moment + timedelta(seconds=50), 50_000_000_000))
+            entered, release = Event(), Event()
+            errors, proofs, responses = [], [], []
+            real_verify = service._verify_source_use_response_v1
+            before = h.authority._head
+            old_counter = h.authority._counter
+
+            def blocked_verify(*args, **kwargs):
+                responses.append(args[1])
+                entered.set()
+                assert release.wait(5)
+                proof = real_verify(*args, **kwargs)
+                proofs.append(proof)
+                return proof
+
+            def complete():
+                try:
+                    h.sign(proposal, via_controller=True)
+                except BaseException as error:
+                    errors.append(error)
+
+            with pytest.MonkeyPatch.context() as patch:
+                patch.setattr(service, '_verify_source_use_response_v1', blocked_verify)
+                worker = Thread(target=complete)
+                worker.start()
+                try:
+                    assert entered.wait(5)
+                    pending = h.authority._completion_pending
+                    assert pending is not None and h.authority._pending is None and h.root.operation is None
+                    h.controller.cancel_v1()
+                    assert h.authority._valid_completion is None
+                finally:
+                    release.set()
+                    worker.join(5)
+                assert not worker.is_alive()
+            assert len(proofs) == len(errors) == 1 and isinstance(errors[0], ComputationControlPlaneError)
+            assert h.authority._counter == old_counter + 1 == proofs[0].counter
+            assert h.authority._head is before and h.authority._active_permit is None
+            assert h.controller._result is None and h.authority._completion_pending is None
+            assert not h.root.completed
+            with pytest.raises(ComputationControlPlaneError):
+                h.authority.complete_action_v1(pending.request_ref, responses[0])
+
+    # Every original capture prepares/charges on its own thread. An attempted
+    # transfer of that exact pending object cannot consume either request count.
+    with _synthetic_kalshi_observation() as h, pytest.MonkeyPatch.context() as patch:
+        real_prepare = source.KalshiFeeObservationOwnerV1._prepare_read_v1
+        rejected = []
+
+        def prepare(owner, *args):
+            prepared = real_prepare(owner, *args)
+            attempts, started = owner._attempts, owner._config.source_use_binding._permit._started
+            def other_thread():
+                try:
+                    owner._recheck_and_charge_v1(prepared)
+                except ComputationControlPlaneError as error:
+                    rejected.append(error)
+            worker = Thread(target=other_thread)
+            worker.start(); worker.join(5)
+            assert not worker.is_alive()
+            assert owner._attempts == attempts and owner._config.source_use_binding._permit._started == started
+            return prepared
+
+        patch.setattr(source.KalshiFeeObservationOwnerV1, '_prepare_read_v1', prepare)
+        h.owner.capture()
+        assert len(rejected) == h.owner._attempts == len(h.sends) == 3
+
+
+def _assert_source_use_atomic_and_currentness(moment):
+    from datetime import timedelta
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane import persistence as storage
+    from tests.stage1_prediction_markets.qku_computation_control_plane.security.test_deserialization_safety import _synthetic_source_use_root
+
+    for phase in ("prepare", "begin", "validate", "original", "event", "complete", "commit_before", "commit_after", "rollback", "publish"):
+        with _synthetic_source_use_root() as h, pytest.MonkeyPatch.context() as patch:
+            authority, adapter = h.authority, h.authority._adapter
+            scope, review, facts, declaration = _source_use_action_proposals(moment)
+            proposal = dict(action="REVIEW_ACCEPT", scope=scope, original=review, review_facts=facts,
+                            requested_expires_at_utc=moment + timedelta(seconds=60))
+            if phase == "publish":
+                reviewed = h.sign(proposal)
+                proposal = dict(action="USE_ADMIT", scope=scope, original=declaration,
+                    expected_review_ref=reviewed.review.record_id, requested_expires_at_utc=moment + timedelta(seconds=55))
+            before = {name: dict(rows) for name, rows in adapter._tables.items()}
+            before_count = len(before["receipt_records"])
+            primary = RuntimeError("synthetic source-use atomic failure")
+            def fail(*args, **kwargs):
+                raise primary
+            if phase == "prepare":
+                patch.setattr(adapter, "_prepare_action_batch_v1", fail)
+            elif phase == "begin":
+                patch.setattr(adapter, "begin_transaction", fail)
+            elif phase in ("validate", "complete"):
+                original = adapter._validate_action_batch_v1
+                def validate(transaction, *, complete):
+                    if complete == (phase == "complete"):
+                        raise primary
+                    return original(transaction, complete=complete)
+                patch.setattr(adapter, "_validate_action_batch_v1", validate)
+            elif phase in ("original", "event", "rollback"):
+                original = adapter.insert_receipt_record
+                count = [0]
+                def insert(transaction, row):
+                    count[0] += 1
+                    if count[0] == (2 if phase == "event" else 1):
+                        raise primary
+                    return original(transaction, row)
+                patch.setattr(adapter, "insert_receipt_record", insert)
+                if phase == "rollback":
+                    original_rollback = storage._InMemoryTransactionV1.rollback
+                    def rollback(transaction):
+                        original_rollback(transaction)
+                        raise RuntimeError("synthetic rollback failure")
+                    patch.setattr(storage._InMemoryTransactionV1, "rollback", rollback)
+            elif phase in ("commit_before", "commit_after"):
+                original = adapter._commit
+                def commit(transaction):
+                    if phase == "commit_after":
+                        original(transaction)
+                    raise primary
+                patch.setattr(adapter, "_commit", commit)
+            elif phase == "publish":
+                patch.setattr(authority, "_issue_binding_v1", fail)
+            with pytest.raises(RuntimeError) as failure:
+                h.sign(proposal)
+            assert failure.value is primary
+            assert authority._stopped and authority._use is None and not authority._bindings
+            assert authority._active_permit is None and authority._pending is None
+            assert adapter._active_transaction is None and authority._counter == h.counter[0]
+            if phase in ("commit_after", "publish"):
+                assert len(adapter._tables["receipt_records"]) == before_count + 2
+            else:
+                assert adapter._tables == before
+            assert adapter._source_use_integrity_failed_v1 is (phase in ("commit_before", "commit_after", "rollback"))
+            assert h.controller.read_status_v1()["state"] == "STOPPED"
+
+    # Real successful proofs exercise all counter transitions; all-zero is
+    # accepted without asserting cloning resistance or cross-process continuity.
+    for counters, accepted in (((0, 0), True), ((0, 2), True), ((2, 3), True), ((2, 2), False), ((2, 1), False)):
+        with _synthetic_source_use_root() as h:
+            scope, review, facts, _ = _source_use_action_proposals(moment)
+            proposal = dict(action="REVIEW_ACCEPT", scope=scope, original=review, review_facts=facts,
+                            requested_expires_at_utc=moment + timedelta(seconds=60))
+            h.counter[0] = counters[0] - 1
+            first = h.sign(proposal)
+            h.counter[0] = counters[1] - 1
+            if accepted:
+                second = h.sign(proposal)
+                assert second.review == first.review and second.event.typed_payload.generation_after == 2
+                assert second.event.typed_payload.original_event_refs == ()
+                assert second.event.typed_payload.review_facts.factual_checked_at_utc == facts.factual_checked_at_utc
+            else:
+                with pytest.raises(ComputationControlPlaneError):
+                    h.sign(proposal)
+                assert h.authority._stopped and h.authority._head == first.event
+
+
+def _assert_source_use_withdrawal_fences():
+    from threading import Event, Thread
+    from src.qtt.pretrade import pr169_pretrade1_resolvers as pretrade
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane import source_policy as source
+
+    def withdraw(h):
+        head = h.issuer.authority._head.typed_payload
+        return h.issuer.sign(dict(action="WITHDRAW_USE", scope=head.scope,
+            expected_declaration_ref=head.declaration_ref, expected_review_ref=head.review_ref,
+            reason="SYNTHETIC_OWNER_WITHDRAWAL"))
+
+    with _synthetic_kalshi_observation() as h:
+        withdraw(h)
+        with pytest.raises(ComputationControlPlaneError):
+            h.owner.capture()
+        assert not h.connections and not h.sends and h.owner._attempts == 0
+
+    for stop in (False, True):
+        for boundary in range(3):
+            def invalidate(h, index):
+                if index == boundary:
+                    h.issuer.controller.stop_v1() if stop else withdraw(h)
+            with _synthetic_kalshi_observation(on_send=invalidate) as h:
+                with pytest.raises(ComputationControlPlaneError):
+                    h.owner.capture()
+                assert len(h.sends) == h.owner._attempts == boundary + 1
+                assert h.owner._issued_cohort is None
+                assert h.issuer.controller.read_status_v1()["already_started"] is True
+                assert h.issuer.authority._last_operating_permit._started == boundary + 1
+
+    for winner in ("withdrawal", "publication"):
+        with _synthetic_kalshi_observation() as h, pytest.MonkeyPatch.context() as patch:
+            cohort = h.owner.capture()
+            entered, release, finished = Event(), Event(), Event()
+            results, errors = [], []
+            original = pretrade.compose_kalshi_quadratic_taker_buy_yes_cashflows_v1
+            def calculate(**kwargs):
+                entered.set()
+                assert release.wait(5)
+                return original(**kwargs)
+            patch.setattr(pretrade, "compose_kalshi_quadratic_taker_buy_yes_cashflows_v1", calculate)
+            def compose():
+                try:
+                    results.append(pretrade.compose_kalshi_observed_fee_scenario_cashflows_v1(
+                        profile_id="KALSHI_US_DCM_DIRECT", currency="USD", source_owner=h.owner, cohort=cohort,
+                        expected_market_ticker="SYNTHETIC::MARKET", as_of_monotonic_ns=cohort.available_monotonic_ns,
+                        fills=(KalshiQuadraticTakerBuyYesFillV1(Decimal(100), Decimal(".5")),),
+                        balance_increment=Decimal(".01"), prior_rounding_overpayment=Decimal(0)))
+                except BaseException as error:
+                    errors.append(error)
+                finally:
+                    finished.set()
+            worker = Thread(target=compose)
+            worker.start()
+            try:
+                assert entered.wait(5)
+                if winner == "withdrawal":
+                    withdraw(h)
+                release.set()
+                assert finished.wait(5)
+            finally:
+                release.set()
+                worker.join(5)
+            assert not worker.is_alive()
+            if winner == "publication":
+                assert not errors and len(results) == 1 and results[0].platform_fee_total == Decimal("1.75")
+                assert h.kwargs["source_use_binding"]._permit._published
+                withdraw(h)
+            else:
+                assert not results and len(errors) == 1 and isinstance(errors[0], ComputationControlPlaneError)
+            assert h.issuer.authority._use is None
+            assert h.issuer.controller.read_status_v1()["already_started"] is True
+            assert h.issuer.authority._last_operating_permit._started == 3
+
+
+def _assert_source_use_controller_publication():
+    from threading import Event, Thread
+    from src.qtt.pretrade import pr169_pretrade1_resolvers as pretrade
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane import source_policy as source
+
+    def withdraw(h):
+        head = h.issuer.authority._head.typed_payload
+        return h.issuer.sign(dict(action="WITHDRAW_USE", scope=head.scope,
+            expected_declaration_ref=head.declaration_ref, expected_review_ref=head.review_ref,
+            reason="SYNTHETIC_OWNER_WITHDRAWAL"))
+
+    for changed in ("source_receipt", "expected_market_ticker", "deadline_monotonic_ns"):
+        with _synthetic_kalshi_observation() as h:
+            arguments = dict(h.authorize())
+            permit = arguments["source_use_binding"]._permit
+            assert permit._owner is None
+            with pytest.raises(ComputationControlPlaneError):
+                source.KalshiFeeObservationOwnerV1(**{**arguments, changed: None})
+            assert permit._failed and permit._owner is not None and h.issuer.authority._active_permit is None
+            with pytest.raises(ComputationControlPlaneError):
+                source.KalshiFeeObservationOwnerV1(**arguments)
+            assert not h.connections
+
+    for boundary in ("outer_result", "before_display", "after_display"):
+        with _synthetic_kalshi_observation() as h, pytest.MonkeyPatch.context() as patch:
+            entered, release = Event(), Event()
+            results, errors = [], []
+            original = pretrade.KalshiObservedFeeScenarioResultV1.__post_init__
+            def construct(result):
+                original(result)
+                entered.set()
+                assert release.wait(5)
+            patch.setattr(pretrade.KalshiObservedFeeScenarioResultV1, "__post_init__", construct)
+            def operate():
+                try:
+                    results.append(h.authorize(via_controller=True))
+                except BaseException as error:
+                    errors.append(error)
+            worker = Thread(target=operate)
+            worker.start()
+            try:
+                assert entered.wait(5)
+                if boundary == "outer_result":
+                    withdraw(h)
+            finally:
+                release.set()
+                worker.join(5)
+            assert not worker.is_alive() and len(h.sends) == 3
+            controller = h.issuer.controller
+            if boundary == "outer_result":
+                assert len(errors) == 1 and isinstance(errors[0], ComputationControlPlaneError)
+                assert not results and controller._result is None and controller._display_model is None
+                assert not h.issuer.authority._last_operating_permit._published
+            else:
+                assert not errors and len(results) == 1 and results[0]["state"] == "ACTIVE"
+                assert h.issuer.authority._last_operating_permit._published
+                assert controller._result[0].cashflows.platform_fee_total == Decimal("1.75")
+                assert controller._result[0].cashflows.entry_trade_cashflow_total == Decimal("-50")
+                if boundary == "after_display":
+                    model = controller._display_result_v1()
+                    assert Decimal(model["platform_fee_total"]) == Decimal("1.75") and "HISTORICAL RESULT" in model["label"]
+                    assert "source_receipt_ref" not in model and "account_scope" not in model
+                withdraw(h)
+                with pytest.raises(ComputationControlPlaneError):
+                    controller._display_result_v1()
+                if boundary == "before_display":
+                    assert controller._display_model is None
+                else:
+                    assert controller._display_model is model  # Already displayed history stays labeled.
+            assert not h.issuer.root.completed and controller.read_status_v1()["already_started"] is True
+
+
+def _assert_source_use_authority_boundaries(moment):
+    from datetime import timedelta
+    import time
+    from src.qtt.service import owner_source_use as service
+    from tests.stage1_prediction_markets.qku_computation_control_plane.security.test_deserialization_safety import _synthetic_source_use_root
+
+    base = int(moment.timestamp()) * 1_000_000_000
+    for kind in ("pending", "session"):
+        for offset in (-1, 0, 1):
+            clock = dict(wall=base, mono=10_000_000_000)
+            with pytest.MonkeyPatch.context() as patch:
+                patch.setattr(time, "time_ns", lambda: clock["wall"])
+                patch.setattr(time, "monotonic_ns", lambda: clock["mono"])
+                with _synthetic_source_use_root() as h:
+                    scope, review, facts, unused = _source_use_action_proposals(moment)
+                    expiry = moment + timedelta(seconds=900)
+                    facts = replace(facts, source_expires_at_utc=expiry)
+                    review = replace(review, claimed_expires_at_utc=expiry)
+                    proposal = dict(action="REVIEW_ACCEPT", scope=scope, original=review, review_facts=facts,
+                                    requested_expires_at_utc=expiry)
+                    if kind == "session":
+                        clock.update(wall=base + 780_000_000_000, mono=790_000_000_000)
+                    def advance():
+                        seconds = 120 if kind == "pending" else 900
+                        clock.update(wall=base + seconds * 1_000_000_000 + offset,
+                                     mono=10_000_000_000 + seconds * 1_000_000_000 + offset)
+                    if offset < 0:
+                        result = h.sign(proposal, via_controller=True, before_complete=advance)
+                        assert result["action"] == "REVIEW_ACCEPT" and h.authority._head is not None
+                    else:
+                        with pytest.raises(ComputationControlPlaneError):
+                            h.sign(proposal, via_controller=True, before_complete=advance)
+                        assert h.authority._head is None and not h.authority._bindings
+                    reference, pending, raw = h.completions[-1]
+                    assert pending.deadline_monotonic_ns == (130_000_000_000 if kind == "pending" else 910_000_000_000)
+                    assert not h.root.completed and h.authority._pending is None
+                    with pytest.raises(ComputationControlPlaneError):
+                        h.controller.complete_action_v1(reference, raw)
+
+    for failure in ("signature", "head", "original", "scope", "cleared_scope"):
+        with _synthetic_source_use_root() as h, pytest.MonkeyPatch.context() as patch:
+            scope, review, facts, declaration = _source_use_action_proposals(moment)
+            reviewed = h.sign(dict(action="REVIEW_ACCEPT", scope=scope, original=review, review_facts=facts,
+                                  requested_expires_at_utc=moment + timedelta(seconds=60)))
+            proposal = dict(action="USE_ADMIT", scope=scope, original=declaration,
+                expected_review_ref=reviewed.review.record_id, requested_expires_at_utc=moment + timedelta(seconds=55))
+            real_verify = service._verify_source_use_response_v1
+            observed = []
+            def verify(*args, **kwargs):
+                proof = real_verify(*args, **kwargs)
+                observed.append(proof)
+                if failure == "scope":
+                    h.authority._selected_scope = replace(scope, account_scope_ref="SYNTHETIC::OTHER")
+                elif failure == "cleared_scope":
+                    h.authority._selected_scope = None
+                elif failure == "head":
+                    patch.setattr(h.authority._adapter, "load_committed_source_action_head_v1", lambda reference: None)
+                elif failure == "original":
+                    old = h.authority._adapter.load_committed_source_use_record_v1
+                    def changed(reference):
+                        row = old(reference)
+                        return replace(row, typed_payload=replace(row.typed_payload,
+                            content=replace(row.typed_payload.content, original_text="SYNTHETIC changed original")))
+                    patch.setattr(h.authority._adapter, "load_committed_source_use_record_v1", changed)
+                return proof
+            patch.setattr(service, "_verify_source_use_response_v1", verify)
+            before = {name: dict(rows) for name, rows in h.authority._adapter._tables.items()}
+            transform = (lambda raw: replace(raw, signature=b"synthetic invalid proof")) if failure == "signature" else None
+            with pytest.raises((ComputationControlPlaneError, ValueError)):
+                h.sign(proposal, via_controller=True, transform_response=transform)
+            assert bool(observed) is (failure != "signature")
+            assert h.authority._use is None and not h.authority._bindings and h.controller._result is None
+            assert h.authority._adapter._tables == before and not h.root.completed
+            reference, unused, raw = h.completions[-1]
+            with pytest.raises(ComputationControlPlaneError):
+                h.controller.complete_action_v1(reference, raw)
+
+
+def _assert_source_use_capacity(moment):
+    from datetime import timedelta
+    from src.qtt.service import owner_source_use as service
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane.receipts import _source_use_reconstruct_spine_v1
+    from tests.stage1_prediction_markets.qku_computation_control_plane.security.test_deserialization_safety import _synthetic_source_use_root
+
+    scope, review, facts, unused = _source_use_action_proposals(moment)
+    proposal = dict(action="REVIEW_ACCEPT", scope=scope, original=review, review_facts=facts,
+                    requested_expires_at_utc=moment + timedelta(seconds=60))
+    with _synthetic_source_use_root() as h:
+        for unused in range(253):
+            h.sign(proposal)
+        rows = h.authority._adapter._tables["receipt_records"]
+        assert len(rows) == 254
+        previous = dict(rows)
+        # A different original uses the full reserved two-record allowance.
+        h.sign({**proposal, "original": replace(review, original_text="SYNTHETIC second source review.")})
+        rows = h.authority._adapter._tables["receipt_records"]
+        assert len(rows) == 256 and all(rows[key] == value for key, value in previous.items())
+        before = dict(rows)
+        with pytest.MonkeyPatch.context() as patch:
+            def no_prompt(*args, **kwargs):
+                raise AssertionError("capacity must refuse before challenge/native confirmation")
+            patch.setattr(service, "_begin_source_use_authentication_v1", no_prompt)
+            with pytest.raises(ComputationControlPlaneError):
+                h.controller.prepare_action_v1(deterministic_json(proposal).encode())
+            assert h.authority._pending is None and h.root.operation is None
+            h.controller.stop_v1()
+        assert h.authority._stopped and not h.authority._bindings and h.authority._use is None
+        assert h.authority._adapter._tables["receipt_records"] == before
+        with pytest.raises(ComputationControlPlaneError):
+            h.controller.prepare_action_v1(deterministic_json(proposal).encode())
+
+    # Whole canonical spines are bounded, not just their source text. The exact
+    # byte ceiling times the independently enforced 256 rows is exactly16MiB.
+    row = _source_use_record()
+    padding = 65536 - len(deterministic_json(row).encode())
+    content = replace(row.typed_payload.content, original_text=row.typed_payload.content.original_text + "x" * padding)
+    exact = replace(row, typed_payload=replace(row.typed_payload, content=content))
+    assert len(deterministic_json(exact).encode()) == 65536
+    assert _source_use_reconstruct_spine_v1(exact) == exact
+    with pytest.raises(ComputationControlPlaneError):
+        replace(exact, typed_payload=replace(exact.typed_payload,
+            content=replace(content, original_text=content.original_text + "x")))
+    assert 256 * len(deterministic_json(exact).encode()) == 16 * 1024 * 1024
+    with _synthetic_source_use_root() as restarted:
+        assert restarted.controller.read_status_v1()["state"] == "DENIED"
+        assert restarted.authority._head is None and restarted.authority._counter == 0
+        assert not restarted.authority._bindings and not restarted.authority._adapter._tables["receipt_records"]
+
+
 def _source_use_record(stream="synthetic-owner", sequence=1, action="RECORD", *,
                        subject="OWNER_DECLARATION", content=None, scope=None, recorded=NOW,
                        input_class="SYNTHETIC_TEST"):
@@ -1192,12 +1789,16 @@ def test_reference_adapter_atomic_commit_rollback_and_replay(adapter_kind, refer
 
 @contextmanager
 def _synthetic_kalshi_observation(*, bodies=None, headers=None, status=200, on_read=None,
-                                 on_send=None, on_close=None, on_tls=None):
-    """Offline-only transport/clock fixture; never original provider evidence."""
+                                 on_send=None, on_close=None, on_tls=None, fills=None,
+                                 balance_increment=Decimal('.01'), prior_rounding_overpayment=Decimal(0),
+                                 source_lifetime=60, use_lifetime=60):
+    """Real signed synthetic issuer plus offline transport; no native qualification."""
     import ssl
     from datetime import timedelta
     from types import SimpleNamespace
     from src.qtt.stage1_prediction_markets.qku_computation_control_plane import source_policy as source
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane.receipts import SourceUseObservationRequestV1
+    from tests.stage1_prediction_markets.qku_computation_control_plane.security.test_deserialization_safety import _synthetic_source_use_root
 
     moment = datetime(2026, 10, 20, 12, tzinfo=UTC)
     delta = moment - datetime(1970, 1, 1, tzinfo=UTC)
@@ -1207,26 +1808,7 @@ def _synthetic_kalshi_observation(*, bodies=None, headers=None, status=200, on_r
         b'{"event":{"event_ticker":"SYNTHETIC::EVENT","series_ticker":"SYNTHETIC::SERIES","fee_type_override":null,"fee_multiplier_override":null}}',
         b'{"series":{"ticker":"SYNTHETIC::SERIES","fee_type":"quadratic","fee_multiplier":1}}',
     )
-    profile = source.Stage1VenueProfileIdV1.KALSHI_US_DCM_DIRECT
-    source_receipt = source.PITSourceCurrentizationReceiptV1(
-        receipt_id='SYNTHETIC::SOURCE', profile_id=profile,
-        source_id='KALSHI_PUBLIC_MARKET_EVENT_SERIES', source_contract_version='KALSHI_PUBLIC_FEE_OBSERVATION_V1',
-        checked_at_utc=moment-timedelta(seconds=1), effective_at_utc=moment-timedelta(seconds=2),
-        expires_at_utc=moment+timedelta(minutes=1), currentization_owner_id='SYNTHETIC::BOOTSTRAP',
-        recheck_triggers=('SYNTHETIC_CHANGE',), invalidating_change_detected=False, admitted_current=True)
-    rights_receipt = source.PITRightsAdmissionReceiptV1(
-        receipt_id='SYNTHETIC::RIGHTS', profile_id=profile, account_scope='SYNTHETIC::ACCOUNT',
-        source_id='KALSHI_PUBLIC_MARKET_EVENT_SERIES', agreement_id='SYNTHETIC::AGREEMENT',
-        agreement_version='SYNTHETIC_V1', internal_use_class='OBSERVED_FEE_SCENARIO_INTERNAL',
-        owner_decision='ADMITTED_INTERNAL_USE', checked_at_utc=moment-timedelta(seconds=1),
-        expires_at_utc=moment+timedelta(minutes=1), recheck_triggers=('SYNTHETIC_CHANGE',), revoked=False,
-        permitted_retention_class='PROCESS_MEMORY_ONLY', prohibited_redistribution_class='SYNTHETIC::NO_REDISTRIBUTION')
-    kwargs = dict(source_receipt=source_receipt, rights_receipt=rights_receipt,
-        account_scope='SYNTHETIC::ACCOUNT', internal_use_class='OBSERVED_FEE_SCENARIO_INTERNAL',
-        permitted_retention_class='PROCESS_MEMORY_ONLY', expected_market_ticker='SYNTHETIC::MARKET',
-        process_epoch_id='SYNTHETIC::PROCESS', monotonic_clock_id='SYNTHETIC::CLOCK',
-        operating_authorization_ref='SYNTHETIC::OPERATING_AUTHORIZATION',
-        authorization_expires_at_utc=moment+timedelta(seconds=50), deadline_monotonic_ns=clock['mono']+50_000_000_000)
+    kwargs = {}
     harness = SimpleNamespace(clock=clock, bodies=raw, kwargs=kwargs, connections=[], sends=[], closes=[], reads=[], tls_preparations=[], owner=None)
     real_context = ssl.create_default_context
 
@@ -1277,9 +1859,43 @@ def _synthetic_kalshi_observation(*, bodies=None, headers=None, status=200, on_r
         patch.setattr(ssl, 'create_default_context', create_context)
         patch.setattr(source.time, 'time_ns', lambda: clock['wall'])
         patch.setattr(source.time, 'monotonic_ns', lambda: clock['mono'])
-        harness.owner = source.KalshiFeeObservationOwnerV1(**kwargs)
-        yield harness
-        assert harness.closes == list(range(len(harness.connections)))
+        with _synthetic_source_use_root() as issuer:
+            scope, review, facts, declaration = _source_use_action_proposals(moment)
+            facts = replace(facts, source_expires_at_utc=moment + timedelta(seconds=source_lifetime))
+            review = replace(review, claimed_expires_at_utc=facts.source_expires_at_utc)
+            declaration = replace(declaration, claimed_expires_at_utc=moment + timedelta(seconds=use_lifetime))
+            reviewed = issuer.sign(dict(action='REVIEW_ACCEPT', scope=scope, original=review, review_facts=facts,
+                requested_expires_at_utc=facts.source_expires_at_utc))
+            used = issuer.sign(dict(action='USE_ADMIT', scope=scope, original=declaration,
+                expected_review_ref=reviewed.review.record_id,
+                requested_expires_at_utc=min(facts.source_expires_at_utc, declaration.claimed_expires_at_utc)))
+            financial_fills = fills if fills is not None else (KalshiQuadraticTakerBuyYesFillV1(Decimal(100), Decimal('.5')),)
+
+            def authorize(*, via_controller=False):
+                if harness.owner is not None:
+                    harness.owner.revoke()
+                request = SourceUseObservationRequestV1('SYNTHETIC::MARKET', financial_fills,
+                    balance_increment, prior_rounding_overpayment,
+                    moment + timedelta(seconds=min(50, source_lifetime, use_lifetime)), 50_000_000_000)
+                observed = issuer.sign(dict(action='OBSERVE_ONCE', scope=scope,
+                    expected_declaration_ref=used.declaration.record_id,
+                    expected_review_ref=used.review.record_id, observation=request), via_controller=via_controller)
+                if via_controller:
+                    return observed
+                binding = next(value for value in issuer.authority._bindings.values()
+                    if value._permit is not None and value._permit._event.record_id == observed.event.record_id)
+                kwargs.update(source_receipt=binding._source, rights_receipt=binding._rights,
+                    account_scope=scope.account_scope_ref, internal_use_class=scope.internal_use_class,
+                    permitted_retention_class=scope.permitted_retention_class, expected_market_ticker=request.market_ticker,
+                    process_epoch_id=issuer.authority._process_ref, monotonic_clock_id=issuer.authority._clock_ref,
+                    operating_authorization_ref=observed.event.record_id, authorization_expires_at_utc=request.expires_at_utc,
+                    deadline_monotonic_ns=binding._permit._deadline, source_use_binding=binding)
+                return kwargs
+
+            harness.authorize, harness.issuer = authorize, issuer
+            harness.owner = source.KalshiFeeObservationOwnerV1(**authorize())
+            yield harness
+            assert harness.closes == list(range(len(harness.connections)))
 
 
 def _assert_kalshi_observation_custody():
@@ -1301,7 +1917,8 @@ def _assert_kalshi_observation_custody():
 
     with _synthetic_kalshi_observation() as h:
         assert all(p.kind is Parameter.KEYWORD_ONLY and p.default is Parameter.empty
-                   for p in signature(owner_type).parameters.values())
+                   for name, p in signature(owner_type).parameters.items() if name != 'source_use_binding')
+        assert signature(owner_type).parameters['source_use_binding'].default is None
         assert set(signature(owner_type).parameters) == set(h.kwargs)
         assert not h.connections and h.owner._state == 'NEW'
         reject_reinitialization(h)
@@ -1341,7 +1958,9 @@ def _assert_kalshi_observation_custody():
         assert mismatch.value.reason_code is source.ReasonCode.INPUT_SCOPE_MISMATCH
         with pytest.raises(ContractValidationError):
             h.owner.capture()
-        other = owner_type(**h.kwargs)
+        with pytest.raises(ComputationControlPlaneError):
+            owner_type(**h.kwargs)
+        other = owner_type(**{**h.kwargs, 'source_use_binding': None})
         with pytest.raises(ContractValidationError):
             other.resolve_scenario_multiplier(**query)
         other.revoke()
@@ -1535,7 +2154,7 @@ def _assert_kalshi_scenario_session():
     inputs = dict(fills=fills, balance_increment=Decimal('.01'), prior_rounding_overpayment=Decimal(0))
 
     def start(h, **changes):
-        h.session = session_type(**{**h.kwargs, **changes})
+        h.session = session_type(**{**h.authorize(), **changes})
         h.owner = h.session._KalshiFeeScenarioSessionV1__owner
         assert type(h.owner) is source.KalshiFeeObservationOwnerV1
         return h.session
@@ -1558,7 +2177,8 @@ def _assert_kalshi_scenario_session():
         session = start(h)
         assert set(signature(session_type).parameters) == set(h.kwargs)
         assert all(p.kind is Parameter.KEYWORD_ONLY and p.default is Parameter.empty
-                   for p in signature(session_type).parameters.values())
+                   for name, p in signature(session_type).parameters.items() if name != 'source_use_binding')
+        assert signature(session_type).parameters['source_use_binding'].default is None
         assert set(signature(session.evaluate).parameters) == set(inputs)
         assert all(p.kind is Parameter.KEYWORD_ONLY and p.default is Parameter.empty
                    for p in signature(session.evaluate).parameters.values())
@@ -1594,10 +2214,10 @@ def _assert_kalshi_scenario_session():
             patch.setattr(pretrade, 'compose_kalshi_observed_fee_scenario_cashflows_v1', compose_spy)
             patch.setattr(source.KalshiFeeObservationOwnerV1, 'resolve_scenario_multiplier', resolve_spy)
             result = session.evaluate(**inputs)
-        assert len(captures) == len(composed) == 1 and len(resolved) == 2
+        assert len(captures) == len(composed) == 1 and len(resolved) == 4
         owner, cohort = captures[0]
         assert owner is h.owner and all(row[0] is owner and row[1]['cohort'] is cohort for row in resolved)
-        assert resolved[0][1] == resolved[1][1]
+        assert all(row[1] == resolved[0][1] for row in resolved[1:])
         assert composed[0][0]['source_owner'] is owner and composed[0][0]['cohort'] is cohort
         assert result.cashflows is composed[0][1] and result.fills is fills
         assert all(composed[0][0][name] is value for name, value in inputs.items())
@@ -1698,7 +2318,8 @@ def _assert_kalshi_scenario_session():
     for grid, prior, fee, rebate, carry in (
         ('.01', '.009', '1.76', '.01', '.009'), ('.0001', '.00009', '1.75', '0', '.00009')):
         raw = (*baseline[:2], baseline[2].replace(b'"fee_multiplier":1', b'"fee_multiplier":0.5'))
-        with _synthetic_kalshi_observation(bodies=raw) as h:
+        with _synthetic_kalshi_observation(bodies=raw, fills=fills * 2,
+                balance_increment=Decimal(grid), prior_rounding_overpayment=Decimal(prior)) as h:
             value = start(h).evaluate(fills=fills * 2, balance_increment=Decimal(grid), prior_rounding_overpayment=Decimal(prior))
             assert value.fee_multiplier == Decimal('.5')
             assert value.cashflows == pretrade.KalshiConditionalCashflowTermsV1(
@@ -1706,7 +2327,8 @@ def _assert_kalshi_scenario_session():
             terminal(h, 'CONSUMED')
 
     raw = (*baseline[:2], baseline[2].replace(b'"fee_multiplier":1', b'"fee_multiplier":1000'))
-    with _synthetic_kalshi_observation(bodies=raw) as h:
+    with _synthetic_kalshi_observation(bodies=raw,
+            fills=(KalshiQuadraticTakerBuyYesFillV1(Decimal('1e100'), Decimal('.5')),)) as h:
         with pytest.raises(NumericDomainError) as failure:
             start(h).evaluate(**{**inputs, 'fills': (KalshiQuadraticTakerBuyYesFillV1(Decimal('1e100'), Decimal('.5')), )})
         assert failure.value.reason_code is ReasonCode.OUT_OF_DOMAIN and len(h.sends) == 3
@@ -1742,9 +2364,9 @@ def _assert_kalshi_session_failures(start, terminal, inputs):
             terminal(h, 'REVOKED')
 
     for receipt_name in ('source_receipt', 'rights_receipt'):
-        with _synthetic_kalshi_observation() as h, pytest.MonkeyPatch.context() as patch:
-            receipt = h.kwargs[receipt_name]
-            start(h, **{receipt_name: replace(receipt, expires_at_utc=receipt.checked_at_utc + timedelta(seconds=3))})
+        lifetime = {'source_lifetime': 2} if receipt_name == 'source_receipt' else {'use_lifetime': 2}
+        with _synthetic_kalshi_observation(**lifetime) as h, pytest.MonkeyPatch.context() as patch:
+            start(h)
             real_post = pretrade.KalshiObservedFeeScenarioResultV1.__post_init__
             def expire(result):
                 real_post(result)
@@ -1802,8 +2424,8 @@ def _assert_kalshi_session_failures(start, terminal, inputs):
                 real_capture = source.KalshiFeeObservationOwnerV1.capture
                 def future_after_capture(owner):
                     cohort = real_capture(owner)
-                    samples = iter((h.clock['mono'] + 1, h.clock['mono'], h.clock['mono']))
-                    patch.setattr(pretrade.time, 'monotonic_ns', lambda: next(samples))
+                    samples = iter((h.clock['mono'] + 1,))
+                    patch.setattr(pretrade.time, 'monotonic_ns', lambda: next(samples, h.clock['mono']))
                     return cohort
                 patch.setattr(source.KalshiFeeObservationOwnerV1, 'capture', future_after_capture)
             with pytest.raises(PointInTimeError) as failure:

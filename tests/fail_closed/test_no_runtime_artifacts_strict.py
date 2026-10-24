@@ -1126,7 +1126,7 @@ def test_scanner_progress_receipts_are_available_for_long_running_gate(tmp_path)
     assert any(receipt.startswith("NO_RUNTIME_ARTIFACT_SCAN_DONE") for receipt in receipts)
 
 
-_F14_TEST_NATIVE_INSTALL = 'python -m pip install --only-binary=:all: --no-deps --index-url https://pypi.org/simple websockets==17.0.1 cryptography==50.0.1 cffi==2.1.1 pycparser==3.0'
+_F14_TEST_NATIVE_INSTALL = 'python -m pip install --only-binary=:all: --no-deps --index-url https://pypi.org/simple websockets==17.0.1 cryptography==50.0.1 cffi==2.1.1 pycparser==3.0 fido2==2.2.1'
 
 
 def _assert_f14_dual_install_slots(tmp_path):

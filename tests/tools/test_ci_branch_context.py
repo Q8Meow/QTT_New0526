@@ -156,6 +156,14 @@ ST12_BRANCH_CASES = (
             "s1-source-use-*",
         ),
     ),
+    (
+        "s1-kalshi-source-use-admission",
+        (
+            "S1-kalshi-source-use-admission", "s1-kalshi-source-use-admissio",
+            "s1-kalshi-source-use-admission-copy", "s1-kalshi-source-use-admission/",
+            "s1-kalshi-source-use-*",
+        ),
+    ),
 )
 
 
@@ -260,7 +268,7 @@ def test_st12_inherited_math_receipt_repair_branch_is_exactly_classified():
 @pytest.mark.parametrize(
     ("branch", "adversarial_branches"),
     ST12_BRANCH_CASES,
-    ids=(None, None, None, "st12a", "st12b", "st12c", "st12e", "st12d", "st12f", "st12h", "f12", None, None, None, None),
+    ids=(None, None, None, "st12a", "st12b", "st12c", "st12e", "st12d", "st12f", "st12h", "f12", None, None, None, None, None),
 )
 def test_st12_owner_authorized_branches_are_exactly_validation_only(
     branch: str,
