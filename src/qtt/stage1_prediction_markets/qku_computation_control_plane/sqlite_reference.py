@@ -16,7 +16,7 @@ from .accounting import (
     ReconciliationBreakReceiptV1,
 )
 from .context import _native_ident, parse_utc
-from .errors import PersistenceContractError, ReasonCode, SerializationSafetyError, TransactionContractError
+from .errors import ContractValidationError, PersistenceContractError, ReasonCode, SerializationSafetyError, TransactionContractError
 from .idempotency import IdempotencyClaimReceiptV1, IdempotencyClaimStateV1, IdempotencyOutcomeV1
 from .lifecycle import StateTransitionReceiptV1
 from .migrations import (
@@ -41,6 +41,8 @@ from .receipts import (
     EconomicReceiptEventSpineV1, EconomicRecordTypeV1, PrivateObservationClockReceiptV1,
     ValueLineageEdgeV1, _private_clock_reconstruct_spine_v1,
     PrivateEvidenceWitnessV1, _f14_singleton_witness_v1,
+    SourceUseControlRecordV1, _source_use_stream_id_v1, _source_use_record_ref_v1,
+    _source_use_reconstruct_spine_v1, _source_use_from_storage_v1, _source_use_append_disposition_v1,
 )
 from .rollback import (
     JournalReversalBundleV1,
@@ -238,7 +240,8 @@ class SQLiteReferenceAdapterV1(PersistenceAdapterV1):
 
     @property
     def availability(self) -> PersistenceAvailabilityV1:
-        return self._availability
+        return (PersistenceAvailabilityV1.INTEGRITY_FAILURE
+                if self._source_use_integrity_failed_v1 else self._availability)
 
     def _install_and_verify_schema(self) -> None:
         connection = self._connection
@@ -290,7 +293,7 @@ class SQLiteReferenceAdapterV1(PersistenceAdapterV1):
         self._availability = PersistenceAvailabilityV1.UNAVAILABLE
 
     def begin_transaction(self) -> PersistenceTransactionV1:
-        if self._availability is not PersistenceAvailabilityV1.AVAILABLE_REFERENCE:
+        if self.availability is not PersistenceAvailabilityV1.AVAILABLE_REFERENCE:
             raise PersistenceContractError(ReasonCode.PERSISTENCE_UNAVAILABLE, "reference persistence is unavailable")
         if self._active_transaction is not None and self._active_transaction.is_active:
             raise TransactionContractError(ReasonCode.TRANSACTION_STATE_INVALID, "nested transactions are forbidden")
@@ -355,6 +358,15 @@ class SQLiteReferenceAdapterV1(PersistenceAdapterV1):
     def insert_receipt_record(self, transaction: PersistenceTransactionV1, record: EconomicReceiptEventSpineV1) -> None:
         self._transaction(transaction)
         payload = record.typed_payload
+        if (record.record_type == EconomicRecordTypeV1.SOURCE_USE_CONTROL
+                or isinstance(payload, SourceUseControlRecordV1)
+                or (type(record.aggregate_id) is str and record.aggregate_id.startswith("SOURCE_USE::"))
+                or (type(record.record_id) is str and record.record_id.startswith("SOURCE_USE::"))):
+            record = _source_use_reconstruct_spine_v1(record)
+            head = self.load_source_use_head_for_update_v1(transaction, record.typed_payload.stream_id)
+            existing = self.load_source_use_record_for_update_v1(transaction, record.record_id)
+            if _source_use_append_disposition_v1(record, head, existing) == "EXACT_DUPLICATE":
+                return
         if (record.record_type == EconomicRecordTypeV1.PRIVATE_OBSERVATION_CLOCK
                 or type(payload) is PrivateObservationClockReceiptV1):
             record = _private_clock_reconstruct_spine_v1(record, expected_record_id=record.record_id)
@@ -369,6 +381,71 @@ class SQLiteReferenceAdapterV1(PersistenceAdapterV1):
             return
         self._assert_cross_table_identity_available("receipt_records", record.record_id)
         self._insert(transaction, "INSERT INTO receipt_records VALUES(?,?,?,?,?)", (record.record_id, _iso(record.effective_at, "effective_at"), _iso(record.recorded_at, "recorded_at"), record.aggregate_id, deterministic_json(record)), "receipt record")
+
+    def _source_use_read_v1(self, *, record_ref=None, stream_id=None, committed=False):
+        if self.availability is not PersistenceAvailabilityV1.AVAILABLE_REFERENCE:
+            raise PersistenceContractError(ReasonCode.PERSISTENCE_UNAVAILABLE, "source-use custody is unavailable")
+        try:
+            if committed and (self._active_transaction is not None or self._connection.in_transaction):
+                raise TransactionContractError(ReasonCode.TRANSACTION_STATE_INVALID, "source-use read requires committed state")
+            if stream_id is None:
+                cursor = self._connection.execute(
+                    "SELECT record_id,effective_at,recorded_at,aggregate_id,payload_json "
+                    "FROM receipt_records WHERE record_id=?", (record_ref,),
+                )
+            else:
+                cursor = self._connection.execute(
+                    "SELECT record_id,effective_at,recorded_at,aggregate_id,payload_json "
+                    "FROM receipt_records WHERE aggregate_id=? ORDER BY record_id DESC LIMIT 1",
+                    ("SOURCE_USE::" + stream_id,),
+                )
+            try:
+                row = cursor.fetchone()
+            finally:
+                cursor.close()
+            if row is None:
+                if record_ref is not None:
+                    self._assert_cross_table_identity_available("receipt_records", record_ref)
+                return None
+        except sqlite3.Error as exc:
+            # Native busy/connection errors remain available to the caller; never absence.
+            if getattr(exc, "sqlite_errorcode", None) in {5, 6}:
+                raise
+            raise PersistenceContractError(ReasonCode.PERSISTENCE_UNAVAILABLE, "SQLite source-use read failed") from exc
+        try:
+            record = _source_use_from_storage_v1(row[4], record_id=record_ref if stream_id is None else row[0], columns=row[:4])
+            if stream_id is not None and record.typed_payload.stream_id != stream_id:
+                raise PersistenceContractError(ReasonCode.PERSISTENCE_CONFLICT, "source-use stored head mismatch")
+            return record
+        except (PersistenceContractError, SerializationSafetyError):
+            self._availability = PersistenceAvailabilityV1.INTEGRITY_FAILURE
+            raise
+
+    def load_committed_source_use_record_v1(self, record_ref: str) -> EconomicReceiptEventSpineV1 | None:
+        _source_use_record_ref_v1(record_ref)
+        return self._source_use_read_v1(record_ref=record_ref, committed=True)
+
+    def load_committed_source_use_head_v1(self, stream_id: str) -> EconomicReceiptEventSpineV1 | None:
+        _source_use_stream_id_v1(stream_id)
+        return self._source_use_read_v1(stream_id=stream_id, committed=True)
+
+    def load_source_use_head_for_update_v1(
+        self, transaction: PersistenceTransactionV1, stream_id: str,
+    ) -> EconomicReceiptEventSpineV1 | None:
+        _source_use_stream_id_v1(stream_id)
+        tx = self._transaction(transaction)
+        if type(tx) is not _SQLiteReferenceTransactionV1 or tx._adapter is not self:
+            raise TransactionContractError(ReasonCode.TRANSACTION_STATE_INVALID, "source-use transaction ownership mismatch")
+        return self._source_use_read_v1(stream_id=stream_id)
+
+    def load_source_use_record_for_update_v1(
+        self, transaction: PersistenceTransactionV1, record_ref: str,
+    ) -> EconomicReceiptEventSpineV1 | None:
+        _source_use_record_ref_v1(record_ref)
+        tx = self._transaction(transaction)
+        if type(tx) is not _SQLiteReferenceTransactionV1 or tx._adapter is not self:
+            raise TransactionContractError(ReasonCode.TRANSACTION_STATE_INVALID, "source-use transaction ownership mismatch")
+        return self._source_use_read_v1(record_ref=record_ref)
 
     def insert_value_lineage_edge(self, transaction: PersistenceTransactionV1, edge: ValueLineageEdgeV1) -> None:
         self._transaction(transaction)
@@ -690,6 +767,13 @@ class SQLiteReferenceAdapterV1(PersistenceAdapterV1):
             return snapshot
 
     def get_record(self, record_ref: str) -> object | None:
+        if type(record_ref) is not str:
+            raise ContractValidationError(
+                ReasonCode.INVALID_CONTRACT,
+                "record_ref must be an exact string",
+            )
+        if record_ref.startswith("SOURCE_USE::"):
+            return self.load_committed_source_use_record_v1(record_ref)
         for table in APPEND_ONLY_TABLES_V1:
             identity = REFERENCE_IDENTITY_COLUMN_BY_TABLE_V1[table]
             row = self._connection.execute(f"SELECT payload_json FROM {table} WHERE {identity}=?", (record_ref,)).fetchone()
@@ -726,6 +810,10 @@ class SQLiteReferenceAdapterV1(PersistenceAdapterV1):
                 params,
             ).fetchall()
             for aggregate, identity_value, recorded, payload_text in rows:
+                if table == "receipt_records" and identity_value.startswith("SOURCE_USE::"):
+                    original = self.load_committed_source_use_record_v1(identity_value)
+                    results.append((aggregate, original.sequence, recorded, identity_value, original))
+                    continue
                 payload = safe_json_loads(payload_text)
                 sequence = int(payload.get("sequence", payload.get("event_sequence", payload.get("aggregate_version_after", 0)))) if isinstance(payload, dict) else 0
                 results.append((aggregate, sequence, recorded, identity_value, payload))

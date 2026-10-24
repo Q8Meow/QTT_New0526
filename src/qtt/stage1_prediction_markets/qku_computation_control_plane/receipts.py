@@ -5,7 +5,7 @@ from __future__ import annotations
 import copy
 import re
 from dataclasses import dataclass, fields as dataclass_fields
-from datetime import UTC, datetime
+from datetime import UTC, date, datetime
 from decimal import Decimal
 from enum import StrEnum
 import json
@@ -106,6 +106,7 @@ class EconomicRecordTypeV1(StrEnum):
     PIT_CHECKPOINT = "PIT_CHECKPOINT"
     PRIVATE_OBSERVATION_CLOCK = "PRIVATE_OBSERVATION_CLOCK"
     PRIVATE_EVIDENCE_WITNESS = "PRIVATE_EVIDENCE_WITNESS"
+    SOURCE_USE_CONTROL = "SOURCE_USE_CONTROL"
 
 
 class ModeSnapshotControlClassV1(StrEnum):
@@ -528,6 +529,7 @@ ECONOMIC_RECORD_PAYLOAD_CLASS: Mapping[EconomicRecordTypeV1, tuple[str, str]] = 
             "PITCheckpointV1",
         ),
         EconomicRecordTypeV1.PRIVATE_EVIDENCE_WITNESS: ("receipts", "PrivateEvidenceWitnessV1"),
+        EconomicRecordTypeV1.SOURCE_USE_CONTROL: ("receipts", "SourceUseControlRecordV1"),
         EconomicRecordTypeV1.PRIVATE_OBSERVATION_CLOCK: (
             "receipts",
             "PrivateObservationClockReceiptV1",
@@ -558,6 +560,8 @@ class EconomicReceiptEventSpineV1:
     no_effect_flags: NoEffectFlagsV1 = NO_EFFECTS_V1
 
     def __post_init__(self) -> None:
+        if self.record_type == EconomicRecordTypeV1.SOURCE_USE_CONTROL:
+            _source_use_validate_spine_v1(self)
         for name in (
             "record_id", "schema_version", "semantic_owner", "implementation_owner",
             "context_ref", "causation_id", "correlation_id", "traceparent", "tracestate",
@@ -589,6 +593,274 @@ class EconomicReceiptEventSpineV1:
 
         if self.record_type is EconomicRecordTypeV1.PRIVATE_OBSERVATION_CLOCK:
             _private_clock_validate_spine_v1(self)
+
+
+def _source_use_require_v1(condition: bool) -> None:
+    if not condition:
+        raise ContractValidationError(ReasonCode.INVALID_CONTRACT, "invalid source-use control input")
+
+
+def _source_use_text_v1(value: object, *, optional: bool = False, original: bool = False) -> None:
+    if optional and value is None:
+        return
+    _source_use_require_v1(type(value) is str and bool(value.strip()))
+    try:
+        size = len(value.encode("utf-8", errors="strict"))
+    except UnicodeError as exc:
+        raise ContractValidationError(ReasonCode.INVALID_CONTRACT, "invalid source-use text encoding") from exc
+    _source_use_require_v1(size <= (65536 if original else 2048))
+    _source_use_require_v1(all(
+        (ord(char) >= 32 and not 127 <= ord(char) < 160)
+        or (original and char in "\t\r\n") for char in value
+    ))
+
+
+def _source_use_stream_id_v1(value: object) -> str:
+    _source_use_require_v1(type(value) is str and re.fullmatch(r"[A-Za-z0-9_-]{1,64}", value) is not None)
+    return _native_ident(value)
+
+
+def _source_use_record_ref_v1(value: object) -> str:
+    _source_use_require_v1(type(value) is str)
+    match = re.fullmatch(r"SOURCE_USE::([A-Za-z0-9_-]{1,64})::([0-9]{20})", value)
+    _source_use_require_v1(match is not None and 1 <= int(match[2]) <= 2**63 - 1)
+    return _native_ident(value)
+
+
+def _source_use_utc_v1(value: object) -> datetime:
+    _source_use_require_v1(type(value) is datetime and value.tzinfo is not None
+                           and value.utcoffset() is not None and value.utcoffset().total_seconds() == 0)
+    return parse_utc(value, field_name="source-use time")
+
+
+def _source_use_fields_v1(value: object, expected: type) -> dict[str, object]:
+    _source_use_require_v1(type(value) is expected)
+    try:
+        return {field.name: getattr(value, field.name) for field in dataclass_fields(expected)}
+    except AttributeError as exc:
+        raise ContractValidationError(ReasonCode.INVALID_CONTRACT, "source-use fields are missing") from exc
+
+
+@dataclass(frozen=True, slots=True)
+class SourceUseScopeV1:
+    profile_id: Stage1VenueProfileIdV1
+    source_id: str
+    source_contract_version: str
+    internal_use_class: str
+    permitted_retention_class: str
+    prohibited_redistribution_class: str
+    account_scope_ref: str | None
+
+    def __post_init__(self) -> None:
+        _source_use_require_v1(type(self.profile_id) is Stage1VenueProfileIdV1
+                               and self.profile_id is Stage1VenueProfileIdV1.KALSHI_US_DCM_DIRECT)
+        for name, expected in (
+            ("source_id", "KALSHI_PUBLIC_MARKET_EVENT_SERIES"),
+            ("source_contract_version", "KALSHI_PUBLIC_FEE_OBSERVATION_V1"),
+            ("internal_use_class", "OBSERVED_FEE_SCENARIO_INTERNAL"),
+            ("permitted_retention_class", "PROCESS_MEMORY_ONLY"),
+            ("prohibited_redistribution_class", "NO_REDISTRIBUTION_NO_EXTERNAL_AI_FORWARDING"),
+        ):
+            value = getattr(self, name)
+            _source_use_text_v1(value)
+            _source_use_require_v1(value == expected)
+        _source_use_text_v1(self.account_scope_ref, optional=True)
+
+
+@dataclass(frozen=True, slots=True)
+class SourceUseOriginalContentV1:
+    original_text: str
+    reported_origin_ref: str | None
+    reported_principal_ref: str | None
+    reported_time_kind: str
+    reported_time_text: str | None
+    reviewed_document_ref: str | None
+    reviewed_document_version: str | None
+    claimed_effective_at_utc: datetime | None
+    claimed_expires_at_utc: datetime | None
+
+    def __post_init__(self) -> None:
+        _source_use_text_v1(self.original_text, original=True)
+        for name in ("reported_origin_ref", "reported_principal_ref", "reported_time_text",
+                     "reviewed_document_ref", "reviewed_document_version"):
+            _source_use_text_v1(getattr(self, name), optional=True)
+        _source_use_text_v1(self.reported_time_kind)
+        _source_use_require_v1(self.reported_time_kind in {"UNKNOWN", "CALENDAR_DATE", "UTC_INSTANT"})
+        text = self.reported_time_text
+        if self.reported_time_kind == "UNKNOWN":
+            _source_use_require_v1(text is None)
+        else:
+            _source_use_require_v1(type(text) is str)
+            try:
+                if self.reported_time_kind == "CALENDAR_DATE":
+                    _source_use_require_v1(re.fullmatch(r"[0-9]{4}-[0-9]{2}-[0-9]{2}", text) is not None)
+                    date.fromisoformat(text)
+                else:
+                    _source_use_require_v1(re.fullmatch(
+                        r"[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(?:\.[0-9]{1,6})?(?:Z|\+00:00)", text
+                    ) is not None)
+                    _source_use_utc_v1(datetime.fromisoformat(text))
+            except ValueError as exc:
+                raise ContractValidationError(ReasonCode.INVALID_CONTRACT, "invalid reported source-use time") from exc
+        _source_use_require_v1((self.reviewed_document_ref is None) == (self.reviewed_document_version is None))
+        for name in ("claimed_effective_at_utc", "claimed_expires_at_utc"):
+            if getattr(self, name) is not None:
+                object.__setattr__(self, name, _source_use_utc_v1(getattr(self, name)))
+        if self.claimed_effective_at_utc is not None and self.claimed_expires_at_utc is not None:
+            _source_use_require_v1(self.claimed_expires_at_utc > self.claimed_effective_at_utc)
+
+
+@dataclass(frozen=True, slots=True)
+class SourceUseControlRecordV1:
+    stream_id: str
+    subject_kind: str
+    sequence: int
+    action: str
+    predecessor_record_ref: str | None
+    scope: SourceUseScopeV1
+    content: SourceUseOriginalContentV1 | None
+    reason: str | None
+    input_class: str
+
+    def __post_init__(self) -> None:
+        _source_use_stream_id_v1(self.stream_id)
+        _source_use_require_v1(type(self.sequence) is int and 1 <= self.sequence <= 2**63 - 1)
+        for name, allowed in (
+            ("subject_kind", {"OWNER_DECLARATION", "SOURCE_REVIEW"}),
+            ("action", {"RECORD", "SUPERSEDE", "WITHDRAW"}),
+            ("input_class", {"SYNTHETIC_TEST", "UNVERIFIED_SUBMISSION"}),
+        ):
+            _source_use_text_v1(getattr(self, name))
+            _source_use_require_v1(getattr(self, name) in allowed)
+        object.__setattr__(self, "scope", SourceUseScopeV1(**_source_use_fields_v1(self.scope, SourceUseScopeV1)))
+        if self.content is not None:
+            content = SourceUseOriginalContentV1(**_source_use_fields_v1(self.content, SourceUseOriginalContentV1))
+            object.__setattr__(self, "content", content)
+            if self.subject_kind == "SOURCE_REVIEW":
+                _source_use_require_v1(content.reviewed_document_ref is not None)
+        _source_use_text_v1(self.reason, optional=True)
+        if self.action == "RECORD":
+            _source_use_require_v1(self.sequence == 1 and self.predecessor_record_ref is None
+                                   and self.content is not None and self.reason is None)
+        else:
+            _source_use_record_ref_v1(self.predecessor_record_ref)
+            _source_use_require_v1(self.sequence > 1 and self.reason is not None
+                                   and self.predecessor_record_ref == f"SOURCE_USE::{self.stream_id}::{self.sequence - 1:020d}"
+                                   and (self.content is None) == (self.action == "WITHDRAW"))
+
+
+def _source_use_validate_spine_v1(record: EconomicReceiptEventSpineV1) -> None:
+    row = _source_use_fields_v1(record, EconomicReceiptEventSpineV1)
+    _source_use_require_v1(type(record.record_type) is EconomicRecordTypeV1
+                           and record.record_type is EconomicRecordTypeV1.SOURCE_USE_CONTROL)
+    payload = SourceUseControlRecordV1(**_source_use_fields_v1(record.typed_payload, SourceUseControlRecordV1))
+    for name in ("record_id", "schema_version", "semantic_owner", "implementation_owner", "context_ref",
+                 "causation_id", "correlation_id", "traceparent", "tracestate", "aggregate_id", "authority_class"):
+        _source_use_text_v1(row[name])
+    for value in (record.sequence, record.aggregate_version):
+        _source_use_require_v1(type(value) is int and value == payload.sequence)
+    _source_use_require_v1(record.schema_version == "SOURCE_USE_CONTROL_V1"
+                           and record.semantic_owner == record.implementation_owner == "QTT_SOURCE_USE_CUSTODY"
+                           and record.authority_class == "RECORDED_NOT_AUTHENTICATED_NOT_ADMITTED"
+                           and record.aggregate_id == "SOURCE_USE::" + payload.stream_id
+                           and record.record_id == f"{record.aggregate_id}::{payload.sequence:020d}")
+    _source_use_require_v1(_source_use_utc_v1(record.effective_at) == _source_use_utc_v1(record.recorded_at))
+    _source_use_require_v1(record.no_effect_flags is NO_EFFECTS_V1
+                           and all(getattr(record.no_effect_flags, field.name) is False
+                                   for field in dataclass_fields(NoEffectFlagsV1)))
+    object.__setattr__(record, "typed_payload", payload)
+    _source_use_require_v1(len(deterministic_json(record).encode("utf-8")) <= 65536)
+
+
+def _source_use_reconstruct_spine_v1(value: object) -> EconomicReceiptEventSpineV1:
+    row = _source_use_fields_v1(value, EconomicReceiptEventSpineV1)
+    _source_use_require_v1(row["record_type"] is EconomicRecordTypeV1.SOURCE_USE_CONTROL)
+    return EconomicReceiptEventSpineV1(**row)
+
+
+def _source_use_mapping_v1(value: object, expected: type) -> dict[str, object]:
+    _source_use_require_v1(type(value) is dict and set(value) == {field.name for field in dataclass_fields(expected)})
+    return dict(value)
+
+
+def _source_use_stored_utc_v1(value: object) -> datetime:
+    _source_use_text_v1(value)
+    try:
+        parsed = _source_use_utc_v1(datetime.fromisoformat(value))
+    except ValueError as exc:
+        raise ContractValidationError(ReasonCode.INVALID_CONTRACT, "invalid stored source-use time") from exc
+    _source_use_require_v1(parsed.isoformat() == value)
+    return parsed
+
+
+def _source_use_from_storage_v1(
+    value: object, *, record_id: str, columns: tuple[object, ...] | None = None,
+) -> EconomicReceiptEventSpineV1:
+    """Closed reconstruction of this kind only; no locator is ever followed."""
+    try:
+        if type(value) is EconomicReceiptEventSpineV1:
+            rebuilt = _source_use_reconstruct_spine_v1(value)
+        else:
+            _source_use_require_v1(type(value) is str and len(value.encode("utf-8", errors="strict")) <= 65536)
+            # The original codec rejects duplicate keys, unsafe fields and nonfinite numbers.
+            row = _source_use_mapping_v1(safe_json_loads(value), EconomicReceiptEventSpineV1)
+            _source_use_require_v1(type(row["record_type"]) is str and row["record_type"] == "SOURCE_USE_CONTROL")
+            payload = _source_use_mapping_v1(row["typed_payload"], SourceUseControlRecordV1)
+            scope = _source_use_mapping_v1(payload["scope"], SourceUseScopeV1)
+            _source_use_require_v1(type(scope["profile_id"]) is str and scope["profile_id"] == "KALSHI_US_DCM_DIRECT")
+            scope["profile_id"] = Stage1VenueProfileIdV1.KALSHI_US_DCM_DIRECT
+            payload["scope"] = SourceUseScopeV1(**scope)
+            if payload["content"] is not None:
+                content = _source_use_mapping_v1(payload["content"], SourceUseOriginalContentV1)
+                for name in ("claimed_effective_at_utc", "claimed_expires_at_utc"):
+                    if content[name] is not None:
+                        content[name] = _source_use_stored_utc_v1(content[name])
+                payload["content"] = SourceUseOriginalContentV1(**content)
+            flags = _source_use_mapping_v1(row["no_effect_flags"], NoEffectFlagsV1)
+            _source_use_require_v1(all(item is False for item in flags.values()))
+            row.update(record_type=EconomicRecordTypeV1.SOURCE_USE_CONTROL,
+                       typed_payload=SourceUseControlRecordV1(**payload), no_effect_flags=NO_EFFECTS_V1)
+            for name in ("effective_at", "recorded_at"):
+                row[name] = _source_use_stored_utc_v1(row[name])
+            rebuilt = EconomicReceiptEventSpineV1(**row)
+            _source_use_require_v1(deterministic_json(rebuilt) == value)
+        _source_use_require_v1(type(record_id) is str and rebuilt.record_id == record_id)
+        if columns is not None:
+            _source_use_require_v1(type(columns) is tuple and len(columns) == 4
+                                   and all(type(item) is str for item in columns)
+                                   and columns == (rebuilt.record_id, rebuilt.effective_at.isoformat(),
+                                                   rebuilt.recorded_at.isoformat(), rebuilt.aggregate_id))
+        return rebuilt
+    except (ContractValidationError, AttributeError, TypeError, UnicodeError, RecursionError) as exc:
+        raise PersistenceContractError(ReasonCode.PERSISTENCE_CONFLICT, "invalid stored source-use control record") from exc
+
+
+def _source_use_append_disposition_v1(
+    record: EconomicReceiptEventSpineV1, head: EconomicReceiptEventSpineV1 | None,
+    existing: EconomicReceiptEventSpineV1 | None,
+) -> str:
+    """Shared serialized transition rule, used by the UOW and direct inserts."""
+    def conflict() -> None:
+        raise PersistenceContractError(ReasonCode.PERSISTENCE_CONFLICT, "source-use identity or head conflict")
+
+    payload = record.typed_payload
+    if head is not None:
+        current = head.typed_payload
+        if (head.aggregate_id != record.aggregate_id or current.scope != payload.scope
+                or current.subject_kind != payload.subject_kind or current.input_class != payload.input_class):
+            conflict()
+    if existing is not None:
+        if (deterministic_json(existing) != deterministic_json(record) or head is None
+                or head.sequence < record.sequence or head.recorded_at < record.recorded_at):
+            conflict()
+        return "EXACT_DUPLICATE"
+    if head is None:
+        if payload.action != "RECORD" or payload.sequence != 1 or payload.predecessor_record_ref is not None:
+            conflict()
+    elif (head.typed_payload.action == "WITHDRAW" or payload.sequence != head.sequence + 1
+          or payload.predecessor_record_ref != head.record_id or record.recorded_at < head.recorded_at):
+        conflict()
+    return "APPENDED"
 
 
 @dataclass(frozen=True, slots=True)

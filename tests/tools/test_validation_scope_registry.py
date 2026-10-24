@@ -2479,6 +2479,52 @@ def test_registered_exact_repair_scope_reaches_atomicrows_owners(monkeypatch) ->
 
 
 def test_s1_launch_graph_scope_is_exactly_owned_and_fail_closed() -> None:
+    custody_branch = "s1-source-use-custody"
+    custody_paths = frozenset({
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/receipts.py",
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/persistence.py",
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/sqlite_reference.py",
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/transaction.py",
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/source_policy.py",
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/validation.py",
+        "tests/stage1_prediction_markets/qku_computation_control_plane/accounting/test_contract_matrix.py",
+        "tests/stage1_prediction_markets/qku_computation_control_plane/security/test_deserialization_safety.py",
+        "tools/independent_validate_qku_computation_control_plane_execution.py",
+        "tools/ci_branch_context.py",
+        "tools/validation_scope_registry.py",
+        "tests/tools/test_ci_branch_context.py",
+        "tests/tools/test_validation_scope_registry.py",
+        "docs/master_plan/generated/PR152_GrandGlobalDebugLogicalConsistencyAuditEntireQTTRepo.report.json",
+    })
+    assert registry.S1_SOURCE_USE_CUSTODY_BRANCH == custody_branch
+    assert registry.S1_SOURCE_USE_CUSTODY_ALLOWED_EXACT_PATHS == custody_paths
+    assert len(custody_paths) == 14
+    for path in custody_paths:
+        expected = {
+            "allowed": True, "branch": custody_branch, "normalized_path": path,
+            "pr_id": "S1-VENUE-SEMANTICS-PHASE-A-01", "matched_rule": f"exact:{path}",
+            "reason": "registered_exact_path",
+        }
+        assert registry.explain_pr_scope_decision(custody_branch, path) == expected
+        assert registry.explain_pr_scope_decision(custody_branch, path.replace("/", "\\")) == expected
+        for near in (custody_branch.upper(), custody_branch[:-1], custody_branch + "-copy",
+                     custody_branch + "/", "prefix-" + custody_branch, "s1-source-use-*"):
+            assert not registry.is_pr_scoped_changed_path_allowed(near, path)
+        for near in (path.upper(), path + ".copy", "../" + path, "/" + path, "C:/repo/" + path,
+                     path + "/", path.replace("/", "//"), path.replace("/", "/*/"), path.replace("/", "/../")):
+            assert not registry.is_pr_scoped_changed_path_allowed(custody_branch, near)
+    for denied in (
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/source_rights.py",
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/economic_math.py",
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/migrations.py",
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/serialization.py",
+        "src/qtt/pretrade/pr169_pretrade1_resolvers.py", "tools/run_validation_gates.py",
+        "tools/validation_reliability.py", "tools/run_pytest_fresh_basetemp.py",
+        "tests/tools/new_test.py", "docs/master_plan/generated/unowned.report.json",
+        ".github/workflows/qtt_validation.yml", "AGENTS.md", ".gitignore",
+        "docs/master_plan/atomic_rows/AtomicRows.bundle.sha256", "docs/master_plan/QTT_MasterPlan_Current.md",
+    ):
+        assert not registry.is_pr_scoped_changed_path_allowed(custody_branch, denied)
     bootstrap_branch = "s1-kalshi-scenario-bootstrap"
     bootstrap_paths = frozenset({
         "src/qtt/pretrade/pr169_pretrade1_resolvers.py",

@@ -15,6 +15,10 @@ from .lifecycle import StateTransitionReceiptV1
 from .outbox import OutboxIntentRecordV1
 from .persistence import PersistenceAdapterV1, PersistenceAvailabilityV1, PersistenceTransactionV1
 from .receipts import EconomicEventRecordV1, EconomicReceiptEventSpineV1, ValueLineageEdgeV1, validate_lineage_acyclic_v1
+from .receipts import (
+    _source_use_reconstruct_spine_v1, _source_use_record_ref_v1,
+    _source_use_require_v1, _source_use_append_disposition_v1,
+)
 from .rollback import (
     JournalReversalBundleV1,
     ReversalReceiptV1,
@@ -198,6 +202,25 @@ class TrancheCAtomicRecordSetV1:
         validate_lineage_acyclic_v1(self.value_lineage_edges)
 
 
+@dataclass(frozen=True, slots=True)
+class SourceUseAppendResultV1:
+    """Custody snapshot at transaction completion; never current-use authority."""
+
+    record: EconomicReceiptEventSpineV1
+    current_head: EconomicReceiptEventSpineV1
+    disposition: str
+
+    def __post_init__(self) -> None:
+        record = _source_use_reconstruct_spine_v1(self.record)
+        head = _source_use_reconstruct_spine_v1(self.current_head)
+        _source_use_require_v1(type(self.disposition) is str and self.disposition in {"APPENDED", "EXACT_DUPLICATE"})
+        _source_use_append_disposition_v1(record, head, record)
+        if self.disposition == "APPENDED":
+            _source_use_require_v1(record == head)
+        object.__setattr__(self, "record", record)
+        object.__setattr__(self, "current_head", head)
+
+
 class TrancheCUnitOfWorkV1:
     """Compose writes only; economic meaning remains with accounting/lifecycle owners."""
 
@@ -213,6 +236,46 @@ class TrancheCUnitOfWorkV1:
             raise ContractValidationError(ReasonCode.INVALID_CONTRACT, "adapter and unit-of-work retry limits must match")
         self._adapter = adapter
         self._retry_policy = retry_policy
+
+    def append_source_use_control_v1(
+        self, *, record: EconomicReceiptEventSpineV1,
+        expected_previous_record_ref: str | None,
+    ) -> SourceUseAppendResultV1:
+        record = _source_use_reconstruct_spine_v1(record)
+        if expected_previous_record_ref is not None:
+            _source_use_record_ref_v1(expected_previous_record_ref)
+        _source_use_require_v1(expected_previous_record_ref == record.typed_payload.predecessor_record_ref)
+        if (self._adapter._source_use_integrity_failed_v1
+                or self._adapter.availability is not PersistenceAvailabilityV1.AVAILABLE_REFERENCE):
+            raise PersistenceContractError(ReasonCode.PERSISTENCE_UNAVAILABLE, "source-use custody is unavailable")
+        # One attempt. In particular an existing BEGIN IMMEDIATE busy error is not retried.
+        transaction = self._adapter.begin_transaction()
+        committing = False
+        try:
+            head = self._adapter.load_source_use_head_for_update_v1(transaction, record.typed_payload.stream_id)
+            existing = self._adapter.load_source_use_record_for_update_v1(transaction, record.record_id)
+            disposition = _source_use_append_disposition_v1(record, head, existing)
+            if disposition == "APPENDED":
+                self._adapter.insert_receipt_record(transaction, record)
+                head = record
+            result = SourceUseAppendResultV1(record, head, disposition)
+            committing = True
+            transaction.commit()
+            if transaction.is_active:
+                raise TransactionContractError(ReasonCode.TRANSACTION_STATE_INVALID, "source-use commit remains active")
+            return result
+        except BaseException as primary:
+            if committing:
+                self._adapter._source_use_integrity_failed_v1 = True
+            try:
+                if transaction.is_active:
+                    transaction.rollback()
+                    if transaction.is_active:
+                        raise TransactionContractError(ReasonCode.TRANSACTION_STATE_INVALID, "source-use rollback remains active")
+            except BaseException:
+                self._adapter._source_use_integrity_failed_v1 = True
+                primary.add_note("source-use rollback failed; persistence integrity is unknown")
+            raise
 
     @staticmethod
     def _receipt(

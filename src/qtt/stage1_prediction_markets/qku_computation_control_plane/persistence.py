@@ -11,7 +11,7 @@ from typing import Mapping
 
 from .accounting import JournalPostingV1, JournalTransactionV1, ReconciliationBreakReceiptV1
 from .context import _native_ident, parse_utc, _f14_freeze_v1, _f14_plain_v1
-from .errors import PersistenceContractError, ReasonCode, TransactionContractError
+from .errors import ContractValidationError, PersistenceContractError, ReasonCode, SerializationSafetyError, TransactionContractError
 from .idempotency import (
     IdempotencyClaimReceiptV1,
     IdempotencyClaimStateV1,
@@ -29,6 +29,8 @@ from .receipts import (
     _f14_singleton_witness_v1, _f14_typed_spine_v1,
     ValueLineageEdgeV1,
     _private_clock_reconstruct_spine_v1,
+    SourceUseControlRecordV1, _source_use_stream_id_v1, _source_use_record_ref_v1,
+    _source_use_reconstruct_spine_v1, _source_use_from_storage_v1, _source_use_append_disposition_v1,
 )
 from .rollback import (
     JournalReversalBundleV1,
@@ -82,6 +84,7 @@ class PersistenceAdapterV1(ABC):
     """Typed append-only storage boundary; production technology remains unselected."""
 
     production_selection_state = PRODUCTION_PERSISTENCE_SELECTION_STATE_V1
+    _source_use_integrity_failed_v1 = False
 
     @property
     @abstractmethod
@@ -155,6 +158,26 @@ class PersistenceAdapterV1(ABC):
         self, request: PrivateEvidenceReadRequestV1,
     ) -> PrivateEvidenceReadSnapshotV1: ...
 
+    def load_committed_source_use_record_v1(self, record_ref: str) -> EconomicReceiptEventSpineV1 | None:
+        _source_use_record_ref_v1(record_ref)
+        raise PersistenceContractError(ReasonCode.PERSISTENCE_UNAVAILABLE, "source-use custody is unavailable")
+
+    def load_committed_source_use_head_v1(self, stream_id: str) -> EconomicReceiptEventSpineV1 | None:
+        _source_use_stream_id_v1(stream_id)
+        raise PersistenceContractError(ReasonCode.PERSISTENCE_UNAVAILABLE, "source-use custody is unavailable")
+
+    def load_source_use_head_for_update_v1(
+        self, transaction: PersistenceTransactionV1, stream_id: str,
+    ) -> EconomicReceiptEventSpineV1 | None:
+        _source_use_stream_id_v1(stream_id)
+        raise PersistenceContractError(ReasonCode.PERSISTENCE_UNAVAILABLE, "source-use custody is unavailable")
+
+    def load_source_use_record_for_update_v1(
+        self, transaction: PersistenceTransactionV1, record_ref: str,
+    ) -> EconomicReceiptEventSpineV1 | None:
+        _source_use_record_ref_v1(record_ref)
+        raise PersistenceContractError(ReasonCode.PERSISTENCE_UNAVAILABLE, "source-use custody is unavailable")
+
 
 class _InMemoryTransactionV1(PersistenceTransactionV1):
     def __init__(
@@ -196,14 +219,18 @@ class InMemoryPersistenceAdapterV1(PersistenceAdapterV1):
         self._tables: dict[str, dict[str, object]] = {table: {} for table in APPEND_ONLY_TABLES_V1}
         self._lock = RLock()
         self._active_transaction: _InMemoryTransactionV1 | None = None
+        self._availability = PersistenceAvailabilityV1.AVAILABLE_REFERENCE
 
     @property
     def availability(self) -> PersistenceAvailabilityV1:
-        return PersistenceAvailabilityV1.AVAILABLE_REFERENCE
+        return (PersistenceAvailabilityV1.INTEGRITY_FAILURE
+                if self._source_use_integrity_failed_v1 else self._availability)
 
     def begin_transaction(self) -> PersistenceTransactionV1:
         self._lock.acquire()
         try:
+            if self.availability is not PersistenceAvailabilityV1.AVAILABLE_REFERENCE:
+                raise PersistenceContractError(ReasonCode.PERSISTENCE_UNAVAILABLE, "reference persistence is unavailable")
             if self._active_transaction is not None and self._active_transaction.is_active:
                 raise TransactionContractError(ReasonCode.TRANSACTION_STATE_INVALID, "nested transactions are forbidden")
             committed_snapshot = {
@@ -251,6 +278,15 @@ class InMemoryPersistenceAdapterV1(PersistenceAdapterV1):
     def insert_receipt_record(self, transaction: PersistenceTransactionV1, record: EconomicReceiptEventSpineV1) -> None:
         tx = self._transaction(transaction)
         payload = record.typed_payload
+        if (record.record_type == EconomicRecordTypeV1.SOURCE_USE_CONTROL
+                or isinstance(payload, SourceUseControlRecordV1)
+                or (type(record.aggregate_id) is str and record.aggregate_id.startswith("SOURCE_USE::"))
+                or (type(record.record_id) is str and record.record_id.startswith("SOURCE_USE::"))):
+            record = _source_use_reconstruct_spine_v1(record)
+            head = self.load_source_use_head_for_update_v1(transaction, record.typed_payload.stream_id)
+            existing = self.load_source_use_record_for_update_v1(transaction, record.record_id)
+            if _source_use_append_disposition_v1(record, head, existing) == "EXACT_DUPLICATE":
+                return
         if (record.record_type == EconomicRecordTypeV1.PRIVATE_OBSERVATION_CLOCK
                 or type(payload) is PrivateObservationClockReceiptV1):
             record = _private_clock_reconstruct_spine_v1(record, expected_record_id=record.record_id)
@@ -262,6 +298,71 @@ class InMemoryPersistenceAdapterV1(PersistenceAdapterV1):
         ):
             raise PersistenceContractError(ReasonCode.PERSISTENCE_CONFLICT, "durable receipt dependency is absent")
         self._insert(transaction, "receipt_records", record.record_id, record)
+
+    def _source_use_read_v1(self, tables, *, record_ref=None, stream_id=None):
+        if self.availability is not PersistenceAvailabilityV1.AVAILABLE_REFERENCE:
+            raise PersistenceContractError(ReasonCode.PERSISTENCE_UNAVAILABLE, "source-use custody is unavailable")
+        try:
+            if stream_id is not None:
+                aggregate = "SOURCE_USE::" + stream_id
+                record_ref = None
+                for key, value in tables["receipt_records"].items():
+                    if (getattr(value, "aggregate_id", None) == aggregate
+                            or (type(key) is str and key.startswith(aggregate + "::"))):
+                        _source_use_record_ref_v1(key)
+                        if not key.startswith(aggregate + "::"):
+                            raise PersistenceContractError(ReasonCode.PERSISTENCE_CONFLICT,
+                                "invalid stored source-use control identity")
+                        if record_ref is None or key > record_ref:
+                            record_ref = key
+                if record_ref is None:
+                    return None
+            value = tables["receipt_records"].get(record_ref)
+            if value is None and not any(record_ref in rows for rows in tables.values()):
+                return None
+            record = _source_use_from_storage_v1(value, record_id=record_ref)
+            if stream_id is not None and record.typed_payload.stream_id != stream_id:
+                raise PersistenceContractError(ReasonCode.PERSISTENCE_CONFLICT, "source-use stored head mismatch")
+            return record
+        except ContractValidationError as exc:
+            self._availability = PersistenceAvailabilityV1.INTEGRITY_FAILURE
+            raise PersistenceContractError(ReasonCode.PERSISTENCE_CONFLICT,
+                "invalid stored source-use control identity") from exc
+        except (PersistenceContractError, SerializationSafetyError):
+            self._availability = PersistenceAvailabilityV1.INTEGRITY_FAILURE
+            raise
+
+    def load_committed_source_use_record_v1(self, record_ref: str) -> EconomicReceiptEventSpineV1 | None:
+        _source_use_record_ref_v1(record_ref)
+        with self._lock:
+            if self._active_transaction is not None:
+                raise TransactionContractError(ReasonCode.TRANSACTION_STATE_INVALID, "source-use read requires committed state")
+            return self._source_use_read_v1(self._tables, record_ref=record_ref)
+
+    def load_committed_source_use_head_v1(self, stream_id: str) -> EconomicReceiptEventSpineV1 | None:
+        _source_use_stream_id_v1(stream_id)
+        with self._lock:
+            if self._active_transaction is not None:
+                raise TransactionContractError(ReasonCode.TRANSACTION_STATE_INVALID, "source-use read requires committed state")
+            return self._source_use_read_v1(self._tables, stream_id=stream_id)
+
+    def load_source_use_head_for_update_v1(
+        self, transaction: PersistenceTransactionV1, stream_id: str,
+    ) -> EconomicReceiptEventSpineV1 | None:
+        _source_use_stream_id_v1(stream_id)
+        tx = self._transaction(transaction)
+        if type(tx) is not _InMemoryTransactionV1 or tx._adapter is not self:
+            raise TransactionContractError(ReasonCode.TRANSACTION_STATE_INVALID, "source-use transaction ownership mismatch")
+        return self._source_use_read_v1(tx._working, stream_id=stream_id)
+
+    def load_source_use_record_for_update_v1(
+        self, transaction: PersistenceTransactionV1, record_ref: str,
+    ) -> EconomicReceiptEventSpineV1 | None:
+        _source_use_record_ref_v1(record_ref)
+        tx = self._transaction(transaction)
+        if type(tx) is not _InMemoryTransactionV1 or tx._adapter is not self:
+            raise TransactionContractError(ReasonCode.TRANSACTION_STATE_INVALID, "source-use transaction ownership mismatch")
+        return self._source_use_read_v1(tx._working, record_ref=record_ref)
 
     def insert_value_lineage_edge(self, transaction: PersistenceTransactionV1, edge: ValueLineageEdgeV1) -> None:
         tx = self._transaction(transaction)
@@ -473,6 +574,13 @@ class InMemoryPersistenceAdapterV1(PersistenceAdapterV1):
             return _f14_reconstruct_snapshot_v1(request, rows)
 
     def get_record(self, record_ref: str) -> object | None:
+        if type(record_ref) is not str:
+            raise ContractValidationError(
+                ReasonCode.INVALID_CONTRACT,
+                "record_ref must be an exact string",
+            )
+        if record_ref.startswith("SOURCE_USE::"):
+            return self.load_committed_source_use_record_v1(record_ref)
         with self._lock:
             for rows in self._tables.values():
                 if record_ref in rows:
@@ -500,6 +608,8 @@ class InMemoryPersistenceAdapterV1(PersistenceAdapterV1):
                     recorded = getattr(record, "recorded_at", getattr(record, "created_at", None))
                     aggregate = getattr(record, "aggregate_id", None)
                     if isinstance(effective, datetime) and isinstance(recorded, datetime) and effective <= effective_cutoff and recorded <= recorded_cutoff and (not aggregate_scope or aggregate in aggregate_scope):
+                        if getattr(record, "record_type", None) is EconomicRecordTypeV1.SOURCE_USE_CONTROL:
+                            record = self.load_committed_source_use_record_v1(record.record_id)
                         records.append(record)
         minimum = datetime.min.replace(tzinfo=UTC)
         return tuple(sorted(records, key=lambda row: (getattr(row, "aggregate_id", ""), getattr(row, "sequence", getattr(row, "event_sequence", 0)), getattr(row, "recorded_at", getattr(row, "created_at", minimum)), getattr(row, "record_id", getattr(row, "economic_event_id", getattr(row, "journal_transaction_id", getattr(row, "transition_id", "")))))))
