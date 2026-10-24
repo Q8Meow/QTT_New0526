@@ -16,7 +16,7 @@ from .accounting import (
     ReconciliationBreakReceiptV1,
 )
 from .context import _native_ident, parse_utc
-from .errors import PersistenceContractError, ReasonCode, SerializationSafetyError, TransactionContractError
+from .errors import ContractValidationError, PersistenceContractError, ReasonCode, SerializationSafetyError, TransactionContractError
 from .idempotency import IdempotencyClaimReceiptV1, IdempotencyClaimStateV1, IdempotencyOutcomeV1
 from .lifecycle import StateTransitionReceiptV1
 from .migrations import (
@@ -767,7 +767,12 @@ class SQLiteReferenceAdapterV1(PersistenceAdapterV1):
             return snapshot
 
     def get_record(self, record_ref: str) -> object | None:
-        if type(record_ref) is str and record_ref.startswith("SOURCE_USE::"):
+        if type(record_ref) is not str:
+            raise ContractValidationError(
+                ReasonCode.INVALID_CONTRACT,
+                "record_ref must be an exact string",
+            )
+        if record_ref.startswith("SOURCE_USE::"):
             return self.load_committed_source_use_record_v1(record_ref)
         for table in APPEND_ONLY_TABLES_V1:
             identity = REFERENCE_IDENTITY_COLUMN_BY_TABLE_V1[table]

@@ -17,7 +17,7 @@ def _assert_source_use_closed_storage(directory):
     from dataclasses import fields, replace
     from datetime import UTC, datetime, timedelta, timezone
     from src.qtt.stage1_prediction_markets.qku_computation_control_plane.errors import (
-        ContractValidationError, PersistenceContractError,
+        ContractValidationError, PersistenceContractError, TransactionContractError,
     )
     from src.qtt.stage1_prediction_markets.qku_computation_control_plane.models import NO_EFFECTS_V1, NoEffectFlagsV1
     from src.qtt.stage1_prediction_markets.qku_computation_control_plane.persistence import (
@@ -222,6 +222,137 @@ def _assert_source_use_closed_storage(directory):
         finally:
             if kind == "sqlite":
                 adapter.close()
+
+    import sqlite3
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane.idempotency import (
+        IdempotencyClaimReceiptV1, IdempotencyClaimStateV1,
+    )
+
+    input_calls = []
+    class PrefixText(str):
+        def startswith(self, *args, **kwargs):
+            input_calls.append("startswith")
+            return False
+    class Alias:
+        def __init__(self, reference):
+            self.reference = reference
+        def __hash__(self):
+            input_calls.append("hash")
+            return hash(self.reference)
+        def __eq__(self, other):
+            input_calls.append("eq")
+            return self.reference == other
+        def __conform__(self, protocol):
+            input_calls.append("conform")
+            assert protocol is sqlite3.PrepareProtocol
+            return self.reference
+        def __str__(self):
+            input_calls.append("str")
+            return self.reference
+
+    pending = replace(record, record_id="SOURCE_USE::synthetic-codec::00000000000000000002",
+        sequence=2, aggregate_version=2, typed_payload=replace(control, sequence=2,
+            action="SUPERSEDE", predecessor_record_ref=record.record_id,
+            content=replace(content, original_text="SYNTHETIC pending replacement"), reason="synthetic correction"))
+    legacy = IdempotencyClaimReceiptV1("synthetic-legacy-claim", "synthetic-legacy-key",
+        "synthetic-legacy-class", "{}", IdempotencyClaimStateV1.ACQUIRED, None, now, None, None)
+    failures = []
+    for kind in ("memory", "sqlite"):
+        path = directory / "synthetic-generic-getter.db"
+        adapter = (InMemoryPersistenceAdapterV1() if kind == "memory" else
+            SQLiteReferenceAdapterV1(path, busy_timeout_ms=0, max_transaction_attempts=1))
+        peer = None
+        tx = None
+        leaked = None
+        try:
+            tx = adapter.begin_transaction()
+            adapter.insert_receipt_record(tx, record)
+            adapter.acquire_idempotency_claim(tx, legacy)
+            tx.commit()
+            tx = None
+            if kind == "sqlite":
+                peer = SQLiteReferenceAdapterV1(path, busy_timeout_ms=0, max_transaction_attempts=1)
+            loaded = adapter.get_record(record.record_id)
+            assert type(loaded) is EconomicReceiptEventSpineV1 and loaded == record and loaded is not record
+            object.__setattr__(loaded.typed_payload.content, "original_text", "SYNTHETIC detached-read mutation")
+            assert adapter.load_committed_source_use_record_v1(record.record_id) == record
+            legacy_value = adapter.get_record(legacy.claim_id)
+            assert type(legacy_value) is (IdempotencyClaimReceiptV1 if kind == "memory" else dict)
+            assert deterministic_json(legacy_value) == deterministic_json(legacy)
+            assert adapter.get_record("synthetic-absent") is None
+            for active in (False, True):
+                if active:
+                    tx = adapter.begin_transaction()
+                    adapter.insert_receipt_record(tx, pending)
+                    with pytest.raises(TransactionContractError) as blocked:
+                        adapter.get_record(pending.record_id)
+                    assert blocked.value.reason_code is ReasonCode.TRANSACTION_STATE_INVALID
+                    with pytest.raises(TransactionContractError):
+                        adapter.get_record(record.record_id)
+                    if peer is not None:
+                        assert adapter._connection.in_transaction is True
+                        assert peer.get_record(pending.record_id) is None
+                        assert peer.load_committed_source_use_head_v1("synthetic-codec") == record
+                if kind == "memory":
+                    before = deterministic_json(adapter._tables)
+                    working_before = deterministic_json(tx._working) if active else None
+                else:
+                    before = tuple(adapter._connection.iterdump())
+                references = (record.record_id, pending.record_id) if active else (record.record_id, legacy.claim_id)
+                for reference in references:
+                    for invalid in (Text(reference), PrefixText(reference), Alias(reference), None, True, 1, reference.encode("utf-8")):
+                        input_calls.clear()
+                        statements = []
+                        if kind == "sqlite":
+                            adapter._connection.set_trace_callback(statements.append)
+                        label = (kind, "active" if active else "committed", type(invalid).__name__)
+                        try:
+                            actual = adapter.get_record(invalid)
+                        except ContractValidationError as exc:
+                            if (type(exc) is not ContractValidationError or exc.reason_code is not ReasonCode.INVALID_CONTRACT
+                                    or str(exc) != f"{ReasonCode.INVALID_CONTRACT}: record_ref must be an exact string"):
+                                failures.append((*label, "wrong contract rejection"))
+                        except Exception as exc:
+                            failures.append((*label, "wrong exception", type(exc).__name__))
+                        else:
+                            failures.append((*label, "returned", type(actual).__name__))
+                            if kind == "memory" and type(invalid) is Text and reference == record.record_id:
+                                leaked = actual
+                            if kind == "sqlite" and active and type(invalid) is Text and reference == pending.record_id:
+                                assert actual == safe_json_loads(deterministic_json(pending))
+                                failures.append((*label, "pending row exposed"))
+                        finally:
+                            if kind == "sqlite":
+                                adapter._connection.set_trace_callback(None)
+                        if input_calls or statements:
+                            failures.append((*label, "input hooks or SQL consulted", tuple(input_calls), len(statements)))
+                        assert adapter.availability is PersistenceAvailabilityV1.AVAILABLE_REFERENCE
+                if kind == "memory":
+                    assert deterministic_json(adapter._tables) == before
+                    if active:
+                        assert deterministic_json(tx._working) == working_before
+                else:
+                    assert tuple(adapter._connection.iterdump()) == before
+                if active:
+                    tx.rollback()
+                    tx = None
+                assert adapter.load_committed_source_use_head_v1("synthetic-codec") == record
+                assert adapter.get_record(pending.record_id) is None
+                assert deterministic_json(adapter.get_record(legacy.claim_id)) == deterministic_json(legacy)
+                assert adapter.get_record("synthetic-absent") is None
+            if leaked is not None:
+                assert leaked is adapter._tables["receipt_records"][record.record_id]
+                object.__setattr__(leaked.typed_payload.content, "original_text", "SYNTHETIC escaped alias mutation")
+                assert adapter.load_committed_source_use_record_v1(record.record_id).typed_payload.content.original_text == "SYNTHETIC escaped alias mutation"
+                failures.append((kind, "stored original changed through subclass alias"))
+        finally:
+            if tx is not None and tx.is_active:
+                tx.rollback()
+            if peer is not None:
+                peer.close()
+            if kind == "sqlite":
+                adapter.close()
+    assert not failures, failures
 
 
 def test_json_is_deterministic_and_unsafe_values_fail_closed(tmp_path) -> None:
