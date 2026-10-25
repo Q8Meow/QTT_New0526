@@ -274,6 +274,7 @@ def test_source_use_admission_integration(monkeypatch, reference_directory, caps
     _assert_source_use_withdrawal_fences()
     _assert_source_use_controller_publication()
     _assert_source_use_authority_boundaries(moment)
+    _assert_source_use_observation_expiry()
     _assert_source_use_capacity(moment)
     captured = capsys.readouterr()
     assert captured.out == captured.err == ""
@@ -1787,11 +1788,202 @@ def test_reference_adapter_atomic_commit_rollback_and_replay(adapter_kind, refer
 
 
 
+def _assert_source_use_observation_expiry():
+    from datetime import timedelta
+    from src.qtt.pretrade import pr169_pretrade1_resolvers as pretrade
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane import source_policy as source
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane.errors import PointInTimeError
+
+    factual = datetime(2026, 10, 19, 12, tzinfo=UTC)
+    cutoff = factual + timedelta(hours=24)
+    with _synthetic_kalshi_observation(factual_checked_at_utc=factual, construct_owner=False) as h:
+        arguments = h.authorize()
+        admission = source.validate_pit_source_rights_admission_v1(
+            arguments['source_receipt'], arguments['rights_receipt'],
+            admission_id=arguments['operating_authorization_ref'],
+            profile_id=arguments['source_receipt'].profile_id, account_scope=arguments['account_scope'],
+            internal_use_class=arguments['internal_use_class'],
+            permitted_retention_class=arguments['permitted_retention_class'], evaluated_at_utc=cutoff)
+        assert admission.valid_until_utc == cutoff
+        with pytest.raises(PointInTimeError):
+            source.KalshiFeeObservationOwnerV1(**arguments)
+        assert not h.connections
+
+    def wall_ns(value):
+        delta = value - datetime(1970, 1, 1, tzinfo=UTC)
+        return (delta.days * 86400 + delta.seconds) * 1_000_000_000 + delta.microseconds * 1000
+
+    start = cutoff - timedelta(seconds=10)
+    cutoff_ns = wall_ns(cutoff)
+
+    def advance(h, wall):
+        elapsed = wall - h.clock['wall']
+        assert elapsed >= 0
+        h.clock.update(wall=wall, mono=h.clock['mono'] + elapsed)
+
+    def logical(arguments, evaluated):
+        return source.validate_pit_source_rights_admission_v1(
+            arguments['source_receipt'], arguments['rights_receipt'],
+            admission_id=arguments['operating_authorization_ref'],
+            profile_id=arguments['source_receipt'].profile_id, account_scope=arguments['account_scope'],
+            internal_use_class=arguments['internal_use_class'],
+            permitted_retention_class=arguments['permitted_retention_class'], evaluated_at_utc=evaluated)
+
+    source_expiry = start + timedelta(seconds=60)
+    rights_expiry = start + timedelta(seconds=60)
+    operating_expiry = start + timedelta(seconds=50)
+    admission_limit = min(source_expiry, factual + timedelta(hours=24), rights_expiry)
+    observation_limit = min(operating_expiry, admission_limit)
+    assert observation_limit == cutoff
+    for offset in (-1, 0, 1, 1000):
+        with _synthetic_kalshi_observation(moment=start, factual_checked_at_utc=factual,
+                                          construct_owner=False) as h:
+            arguments = h.authorize()
+            assert arguments['source_receipt'].checked_at_utc == factual
+            assert arguments['source_receipt'].expires_at_utc == source_expiry
+            assert arguments['rights_receipt'].expires_at_utc == rights_expiry
+            assert arguments['authorization_expires_at_utc'] == operating_expiry
+            advance(h, cutoff_ns + offset)
+            evaluated = source.KalshiFeeObservationOwnerV1._wall_datetime_v1(h.clock['wall'])
+            assert evaluated == cutoff + timedelta(microseconds=-1 if offset < 0 else offset // 1000)
+            if offset == 1000:
+                with pytest.raises(source.PITDataContractErrorV1):
+                    logical(arguments, evaluated)
+                with pytest.raises(ComputationControlPlaneError):
+                    source.KalshiFeeObservationOwnerV1(**arguments)
+            else:
+                assert logical(arguments, evaluated).valid_until_utc == admission_limit
+                if offset < 0:
+                    h.owner = source.KalshiFeeObservationOwnerV1(**arguments)
+                    assert h.owner._config.effective_expiry_wall_ns == wall_ns(observation_limit)
+                else:
+                    with pytest.raises(PointInTimeError):
+                        source.KalshiFeeObservationOwnerV1(**arguments)
+            assert not h.connections and not h.sends
+
+    with _synthetic_kalshi_observation(moment=start, factual_checked_at_utc=factual) as h:
+        advance(h, cutoff_ns)
+        with pytest.raises(PointInTimeError):
+            h.owner.capture()
+        assert not h.connections and not h.sends and h.owner._pending is None
+
+    def expire_returned_body(h, index):
+        assert index == 0
+        advance(h, cutoff_ns)
+
+    with _synthetic_kalshi_observation(moment=start, factual_checked_at_utc=factual,
+                                      on_read=expire_returned_body) as h:
+        with pytest.raises(PointInTimeError):
+            h.owner.capture()
+        assert len(h.reads) == len(h.sends) == 1
+        assert h.owner._issued_cohort is None and h.owner._pending is None
+
+    inputs = dict(fills=(KalshiQuadraticTakerBuyYesFillV1(Decimal(100), Decimal('.5')),),
+                  balance_increment=Decimal('.01'), prior_rounding_overpayment=Decimal(0))
+    for route in ('DIRECT', 'SESSION_FINAL'):
+        for expire in (False, True):
+            with _synthetic_kalshi_observation(moment=start, factual_checked_at_utc=factual,
+                                              construct_owner=False) as h, pytest.MonkeyPatch.context() as patch:
+                calculated, final_checks, returned = [], [], []
+                real_calculate = pretrade.compose_kalshi_quadratic_taker_buy_yes_cashflows_v1
+                real_clock = source.KalshiFeeObservationOwnerV1._observe_clock_v1
+
+                def calculate(**kwargs):
+                    result = real_calculate(**kwargs)
+                    calculated.append(result)
+                    return result
+
+                def final_clock(owner):
+                    if owner._publication_route == route:
+                        assert len(calculated) == 1
+                        if route == 'SESSION_FINAL':
+                            assert owner._publication_cleanup and owner._state == 'REVOKED'
+                            assert session._KalshiFeeScenarioSessionV1__state == 'CONSUMED'
+                        final_checks.append(route)
+                        advance(h, cutoff_ns if expire else cutoff_ns - 1)
+                    return real_clock(owner)
+
+                patch.setattr(pretrade, 'compose_kalshi_quadratic_taker_buy_yes_cashflows_v1', calculate)
+                patch.setattr(source.KalshiFeeObservationOwnerV1, '_observe_clock_v1', final_clock)
+                if route == 'DIRECT':
+                    h.owner = source.KalshiFeeObservationOwnerV1(**h.authorize())
+                    cohort = h.owner.capture()
+                    def publish():
+                        return pretrade.compose_kalshi_observed_fee_scenario_cashflows_v1(
+                            profile_id='KALSHI_US_DCM_DIRECT', currency='USD', source_owner=h.owner,
+                            cohort=cohort, expected_market_ticker='SYNTHETIC::MARKET',
+                            as_of_monotonic_ns=cohort.available_monotonic_ns, **inputs)
+                else:
+                    session = pretrade.KalshiFeeScenarioSessionV1(**h.authorize())
+                    h.owner = session._KalshiFeeScenarioSessionV1__owner
+                    def publish():
+                        return session.evaluate(**inputs)
+                if expire:
+                    with pytest.raises(PointInTimeError):
+                        returned.append(publish())
+                    assert not returned and not h.kwargs['source_use_binding']._permit._published
+                    assert h.kwargs['source_use_binding']._permit._failed
+                else:
+                    returned.append(publish())
+                    cashflows = returned[0] if route == 'DIRECT' else returned[0].cashflows
+                    assert cashflows.platform_fee_total == Decimal('1.75')
+                    assert cashflows.entry_trade_cashflow_total == Decimal('-50')
+                    assert h.kwargs['source_use_binding']._permit._published
+                assert final_checks == [route] and len(calculated) == 1 and len(h.sends) == 3
+
+    # Real issuer restrictions also clamp downstream expiry to source/use expiry.
+    # Exercise each original bound without inventing an inconsistent binding.
+    for source_seconds, rights_seconds, operating_seconds in ((20, 60, 50), (60, 20, 50), (60, 60, 20)):
+        expected_source = start + timedelta(seconds=source_seconds)
+        expected_rights = min(expected_source, start + timedelta(seconds=rights_seconds))
+        expected_operating = min(expected_source, expected_rights, start + timedelta(seconds=operating_seconds))
+        fresh_fact = start - timedelta(seconds=1)
+        expected_admission = min(expected_source, fresh_fact + timedelta(hours=24), expected_rights)
+        expected_observation = min(expected_operating, expected_admission)
+        for offset in (-1, 0, 1):
+            with _synthetic_kalshi_observation(moment=start, source_lifetime=source_seconds,
+                    use_lifetime=rights_seconds, operating_lifetime=operating_seconds) as h:
+                assert h.kwargs['source_receipt'].expires_at_utc == expected_source
+                assert h.kwargs['rights_receipt'].expires_at_utc == expected_rights
+                assert h.kwargs['authorization_expires_at_utc'] == expected_operating
+                assert h.owner._config.effective_expiry_wall_ns == wall_ns(expected_observation)
+                # Wall and monotonic clocks are independent bounds in the owner.
+                h.clock['wall'] = wall_ns(expected_observation) + offset
+                if offset < 0:
+                    assert h.owner.capture().market_ticker == 'SYNTHETIC::MARKET'
+                else:
+                    with pytest.raises(ComputationControlPlaneError):
+                        h.owner.capture()
+                    assert not h.sends
+
+    for offset in (-1, 0, 1):
+        with _synthetic_kalshi_observation(maximum_duration_ns=5_000_000_000) as h:
+            assert h.kwargs['deadline_monotonic_ns'] == 15_000_000_000
+            h.clock['mono'] = 15_000_000_000 + offset
+            if offset < 0:
+                assert h.owner.capture().market_ticker == 'SYNTHETIC::MARKET'
+            else:
+                with pytest.raises(ComputationControlPlaneError):
+                    h.owner.capture()
+                assert not h.sends
+    with _synthetic_kalshi_observation(source_lifetime=90, use_lifetime=90,
+            operating_lifetime=60, maximum_duration_ns=60_000_000_000) as h:
+        assert h.kwargs['deadline_monotonic_ns'] == 70_000_000_000
+        assert h.owner.capture().market_ticker == 'SYNTHETIC::MARKET'
+    with _synthetic_kalshi_observation(source_lifetime=90, use_lifetime=90, operating_lifetime=61,
+            maximum_duration_ns=60_000_000_001, construct_owner=False) as h:
+        with pytest.raises(ComputationControlPlaneError):
+            h.authorize()
+        assert not h.connections
+
+
 @contextmanager
 def _synthetic_kalshi_observation(*, bodies=None, headers=None, status=200, on_read=None,
                                  on_send=None, on_close=None, on_tls=None, fills=None,
                                  balance_increment=Decimal('.01'), prior_rounding_overpayment=Decimal(0),
-                                 source_lifetime=60, use_lifetime=60):
+                                 source_lifetime=60, use_lifetime=60,
+                                 factual_checked_at_utc=None, construct_owner=True, moment=None,
+                                 operating_lifetime=50, maximum_duration_ns=50_000_000_000):
     """Real signed synthetic issuer plus offline transport; no native qualification."""
     import ssl
     from datetime import timedelta
@@ -1800,7 +1992,7 @@ def _synthetic_kalshi_observation(*, bodies=None, headers=None, status=200, on_r
     from src.qtt.stage1_prediction_markets.qku_computation_control_plane.receipts import SourceUseObservationRequestV1
     from tests.stage1_prediction_markets.qku_computation_control_plane.security.test_deserialization_safety import _synthetic_source_use_root
 
-    moment = datetime(2026, 10, 20, 12, tzinfo=UTC)
+    moment = datetime(2026, 10, 20, 12, tzinfo=UTC) if moment is None else moment
     delta = moment - datetime(1970, 1, 1, tzinfo=UTC)
     clock = dict(wall=(delta.days * 86400 + delta.seconds) * 1_000_000_000, mono=10_000_000_000)
     raw = bodies if bodies is not None else (
@@ -1860,7 +2052,8 @@ def _synthetic_kalshi_observation(*, bodies=None, headers=None, status=200, on_r
         patch.setattr(source.time, 'time_ns', lambda: clock['wall'])
         patch.setattr(source.time, 'monotonic_ns', lambda: clock['mono'])
         with _synthetic_source_use_root() as issuer:
-            scope, review, facts, declaration = _source_use_action_proposals(moment)
+            factual_moment = moment if factual_checked_at_utc is None else factual_checked_at_utc + timedelta(seconds=1)
+            scope, review, facts, declaration = _source_use_action_proposals(factual_moment)
             facts = replace(facts, source_expires_at_utc=moment + timedelta(seconds=source_lifetime))
             review = replace(review, claimed_expires_at_utc=facts.source_expires_at_utc)
             declaration = replace(declaration, claimed_expires_at_utc=moment + timedelta(seconds=use_lifetime))
@@ -1876,7 +2069,7 @@ def _synthetic_kalshi_observation(*, bodies=None, headers=None, status=200, on_r
                     harness.owner.revoke()
                 request = SourceUseObservationRequestV1('SYNTHETIC::MARKET', financial_fills,
                     balance_increment, prior_rounding_overpayment,
-                    moment + timedelta(seconds=min(50, source_lifetime, use_lifetime)), 50_000_000_000)
+                    moment + timedelta(seconds=min(operating_lifetime, source_lifetime, use_lifetime)), maximum_duration_ns)
                 observed = issuer.sign(dict(action='OBSERVE_ONCE', scope=scope,
                     expected_declaration_ref=used.declaration.record_id,
                     expected_review_ref=used.review.record_id, observation=request), via_controller=via_controller)
@@ -1893,7 +2086,8 @@ def _synthetic_kalshi_observation(*, bodies=None, headers=None, status=200, on_r
                 return kwargs
 
             harness.authorize, harness.issuer = authorize, issuer
-            harness.owner = source.KalshiFeeObservationOwnerV1(**authorize())
+            if construct_owner:
+                harness.owner = source.KalshiFeeObservationOwnerV1(**authorize())
             yield harness
             assert harness.closes == list(range(len(harness.connections)))
 

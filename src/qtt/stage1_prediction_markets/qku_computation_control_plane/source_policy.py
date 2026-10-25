@@ -5715,9 +5715,9 @@ class KalshiFeeObservationOwnerV1:
                 profile_id=profile, account_scope=account_scope, internal_use_class=internal_use_class,
                 permitted_retention_class=permitted_retention_class,
                 evaluated_at_utc=self._wall_datetime_v1(wall))
-            # The original PIT validator uses age > 24h, whereas receipt/operation
-            # expiries are exclusive. Do not turn the inclusive age boundary into expiry.
-            expiry = min(authorization_expires_at_utc, source_receipt.expires_at_utc, rights_receipt.expires_at_utc)
+            # Logical PIT admits factual age exactly 24h, but the observation
+            # deadline is exclusive: at that endpoint no observation window remains.
+            expiry = min(authorization_expires_at_utc, admission.valid_until_utc)
             expiry_ns = _native_utc_nanoseconds(expiry.isoformat())
             _kalshi_observation_time(wall < expiry_ns)
             self._config = _KalshiObservationConfigV1(
