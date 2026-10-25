@@ -3,7 +3,7 @@ from __future__ import annotations
 from _thread import RLock
 import dataclasses
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import UTC, datetime
 from decimal import Decimal
 from fractions import Fraction
 import json
@@ -25,15 +25,17 @@ from ..stage1_prediction_markets.qku_computation_control_plane.errors import (
     PointInTimeError,
     ReasonCode,
 )
-from ..stage1_prediction_markets.qku_computation_control_plane.context import _native_ident
+from ..stage1_prediction_markets.qku_computation_control_plane.context import ComputationContextKeyV1, _native_ident
 from ..stage1_prediction_markets.qku_computation_control_plane.source_policy import (
     KalshiFeeObservationOwnerV1,
     KalshiObservedFeeCohortV1,
     KalshiQuadraticSeriesFeeCandidateV1,
+    KalshiScheduledFeeStateV1,
     PITRightsAdmissionReceiptV1,
     PITSourceCurrentizationReceiptV1,
     decode_kalshi_market_linked_series_fee_candidate_v1,
     decode_kalshi_quadratic_series_fee_candidate_v1,
+    resolve_kalshi_scheduled_fee_scenario_v1,
 )
 if TYPE_CHECKING:
     from ..stage1_prediction_markets.qku_computation_control_plane.existing_owner_projection import (
@@ -155,6 +157,65 @@ def compose_kalshi_series_quadratic_taker_buy_yes_cashflows_v1(
         profile_id=profile_id, currency=currency, fills=fills,
         fee_multiplier=candidate.fee_multiplier, balance_increment=balance_increment,
         prior_rounding_overpayment=prior_rounding_overpayment,
+    )
+
+
+@dataclass(frozen=True, slots=True)
+class KalshiScheduledTakerBuyYesFillV1:
+    """A proposed conditional fill, without execution or account authority."""
+
+    fill: KalshiQuadraticTakerBuyYesFillV1
+    fill_at_utc: datetime
+
+    def __post_init__(self) -> None:
+        if type(self.fill) is not KalshiQuadraticTakerBuyYesFillV1:
+            raise ContractValidationError(ReasonCode.INVALID_CONTRACT, "exact quadratic fill required")
+        if type(self.fill_at_utc) is not datetime or self.fill_at_utc.tzinfo is not UTC:
+            raise ContractValidationError(ReasonCode.INVALID_CONTRACT, "exact UTC scheduled fill required")
+        try:
+            contracts, price = self.fill.contracts, self.fill.yes_price
+        except AttributeError as error:
+            raise ContractValidationError(ReasonCode.INVALID_CONTRACT, "scheduled fill fields missing") from error
+        object.__setattr__(self, "fill", KalshiQuadraticTakerBuyYesFillV1(contracts, price))
+
+
+def compose_kalshi_scheduled_fee_scenario_cashflows_v1(
+    *, profile_id: str, currency: str, context: ComputationContextKeyV1,
+    expected_series_ticker: str, expected_event_ticker: str,
+    states: tuple[KalshiScheduledFeeStateV1, ...],
+    fills: tuple[KalshiScheduledTakerBuyYesFillV1, ...],
+    balance_increment: Decimal, prior_rounding_overpayment: Decimal,
+) -> KalshiConditionalCashflowTermsV1:
+    """Compose one offline hypothetical order, never source/account admission."""
+    if type(profile_id) is not str or profile_id != "KALSHI_US_DCM_DIRECT":
+        raise ContractValidationError(ReasonCode.INVALID_CONTRACT, "exact Kalshi profile required")
+    if type(currency) is not str or currency != "USD":
+        raise ContractValidationError(ReasonCode.INVALID_CONTRACT, "exact USD currency required")
+    if type(fills) is not tuple or not 1 <= len(fills) <= 4096:
+        raise ContractValidationError(ReasonCode.INVALID_CONTRACT, "scheduled fills must be a tuple of 1..4096 rows")
+    grid = _kalshi_bounded_fraction(balance_increment, "balance_increment", nonnegative=True)
+    _kalshi_bounded_fraction(prior_rounding_overpayment, "prior_rounding_overpayment", nonnegative=True, microdollars=True)
+    if grid not in (Fraction(1, 10_000), Fraction(1, 100)):
+        raise NumericDomainError(ReasonCode.OUT_OF_DOMAIN, "explicit balance increment must be 0.0001 or 0.01 USD")
+    local_fills = []
+    for row in fills:
+        if type(row) is not KalshiScheduledTakerBuyYesFillV1:
+            raise ContractValidationError(ReasonCode.INVALID_CONTRACT, "exact scheduled fill required")
+        try:
+            fill, moment = row.fill, row.fill_at_utc
+        except AttributeError as error:
+            raise ContractValidationError(ReasonCode.INVALID_CONTRACT, "scheduled fill fields missing") from error
+        local_fills.append(KalshiScheduledTakerBuyYesFillV1(fill, moment))
+    multipliers = resolve_kalshi_scheduled_fee_scenario_v1(
+        context=context, expected_series_ticker=expected_series_ticker,
+        expected_event_ticker=expected_event_ticker, states=states,
+        fill_times=tuple(row.fill_at_utc for row in local_fills),
+    )
+    compiled = tuple(kalshi_quadratic_taker_buy_yes_input_v1(fill=row.fill, fee_multiplier=multiplier)
+                     for row, multiplier in zip(local_fills, multipliers, strict=True))
+    return compose_kalshi_conditional_cashflows_v1(
+        profile_id=profile_id, currency=currency, fills=compiled,
+        balance_increment=balance_increment, prior_rounding_overpayment=prior_rounding_overpayment,
     )
 
 

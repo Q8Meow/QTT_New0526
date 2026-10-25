@@ -513,6 +513,13 @@ def test_st12_owner_authorized_branches_are_exactly_validation_only(
                 assert ast.dump(persistence_tree, include_attributes=True) == original_tree_dump
 
     assert_selected_branch(branch, adversarial_branches)
+    if branch == context.S1_KALSHI_SCENARIO_BOOTSTRAP_BRANCH:
+        scheduled = "s1-kalshi-scheduled-fee-scenario"
+        assert context.S1_KALSHI_SCHEDULED_FEE_SCENARIO_BRANCH == scheduled
+        assert_selected_branch(scheduled, (
+            scheduled.upper(), scheduled[:-1], scheduled + "-copy", scheduled + "/",
+            "prefix-" + scheduled, "s1-kalshi-scheduled-fee-*",
+        ))
     if branch == context.F12_EXACT_TIME_COMPOSITION_BRANCH:
         assert_selected_branch(*F13_BRANCH_CASE)
 

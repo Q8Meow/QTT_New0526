@@ -1038,7 +1038,26 @@ def _assert_kalshi_conditional_service(monkeypatch, invocations):
         assert response.component_result.no_authority_flag is True
         return response
 
-    from tests.stage1_prediction_markets.qku_computation_control_plane.accounting.test_contract_matrix import _synthetic_kalshi_observation
+    from tests.stage1_prediction_markets.qku_computation_control_plane.accounting.test_contract_matrix import _synthetic_kalshi_observation, _scheduled_kalshi_fixture
+    # New temporal composition feeds the same real MATH-06 synthetic packet route.
+    # Translating the fixture's knowledge instant to this existing context changes no economics.
+    for multiplier, grid, expected in (('3','.01','.04'),('6','.01','-.01'),('3','.0001','.046'),('6','.0001','-.006')):
+        scheduled_inputs, scheduled_fills = _scheduled_kalshi_fixture(multiplier, moment=moment)
+        terms = pretrade_module.compose_kalshi_scheduled_fee_scenario_cashflows_v1(
+            **{**common,'balance_increment':Decimal(grid)}, **scheduled_inputs, fills=scheduled_fills)
+        values = fixture_values(terms)
+        values.update(p_win=Decimal('.6'), p_void=Decimal(0), fill_probability=Decimal(1),
+                      win_terminal_cashflow_total=Decimal(3), void_terminal_cashflow_total=Decimal(0),
+                      exit_slippage_reserve_total=Decimal(0), market_impact_reserve_total=Decimal(0),
+                      latency_adverse_selection_reserve_total=Decimal(0), capital_time_cost_reserve_total=Decimal(0))
+        response = evaluate(values)
+        assert response.status is OperationStatusV1.SUCCEEDED and invocations == ['MATH-06']
+        output = response.component_result.formula_output
+        assert output.execution_context is context and output.no_authority_flag is True
+        assert output.value['expected_net_cash'] == Decimal(expected)
+        assert output.value['expected_terminal_cashflow'] == Decimal('1.8')
+        assert Fraction(Decimal(expected)) == Fraction(3,5)*3 + Fraction(terms.entry_trade_cashflow_total) - Fraction(terms.platform_fee_total) + Fraction(terms.expected_rebate_total)
+    assert roster_before == (tuple(IMPLEMENTATION_REGISTRY),tuple(ST12B_OPERATION_CAPABILITY_BY_ID))
     from src.qtt.stage1_prediction_markets.qku_computation_control_plane import source_policy as observation_source
     observed_wrapper = pretrade_module.compose_kalshi_observed_fee_scenario_cashflows_v1
     with _synthetic_kalshi_observation() as fixture:
