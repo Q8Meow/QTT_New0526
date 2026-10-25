@@ -2479,6 +2479,41 @@ def test_registered_exact_repair_scope_reaches_atomicrows_owners(monkeypatch) ->
 
 
 def test_s1_launch_graph_scope_is_exactly_owned_and_fail_closed() -> None:
+    scheduled = "s1-kalshi-scheduled-fee-scenario"
+    scheduled_paths = frozenset({
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/source_policy.py",
+        "src/qtt/pretrade/pr169_pretrade1_resolvers.py",
+        "tests/stage1_prediction_markets/qku_computation_control_plane/accounting/test_contract_matrix.py",
+        "tests/stage1_prediction_markets/qku_computation_control_plane/tranche_b/test_service_operations.py",
+        "tools/independent_validate_qku_computation_control_plane_source.py",
+        "tools/ci_branch_context.py",
+        "tools/validation_scope_registry.py",
+        "tests/tools/test_ci_branch_context.py",
+        "tests/tools/test_validation_scope_registry.py",
+        "docs/master_plan/generated/PR152_GrandGlobalDebugLogicalConsistencyAuditEntireQTTRepo.report.json",
+    })
+    assert registry.S1_KALSHI_SCHEDULED_FEE_SCENARIO_BRANCH == scheduled
+    assert registry.S1_KALSHI_SCHEDULED_FEE_SCENARIO_ALLOWED_EXACT_PATHS == scheduled_paths
+    assert len(scheduled_paths) == 10
+    for path in scheduled_paths:
+        for prefix in ("", "refs/heads/", "refs/remotes/origin/", "origin/"):
+            expected = dict(allowed=True, branch=scheduled, normalized_path=path,
+                pr_id="S1-VENUE-SEMANTICS-PHASE-A-01", matched_rule=f"exact:{path}", reason="registered_exact_path")
+            for supplied in (path, "./" + path, path.replace("/", "\\")):
+                assert registry.explain_pr_scope_decision(prefix + scheduled, supplied) == expected
+        for near in (scheduled.upper(), scheduled[:-1], scheduled + "-copy", scheduled + "/",
+                     "prefix-" + scheduled, "s1-kalshi-scheduled-fee-*"):
+            assert not registry.is_pr_scoped_changed_path_allowed(near, path)
+        for near in (path.upper(), path + ".copy", "../" + path, "/" + path, "C:/repo/" + path,
+                     path + "/", path.replace("/", "//"), path.replace("/", "/*/"), path.replace("/", "/../")):
+            assert not registry.is_pr_scoped_changed_path_allowed(scheduled, near)
+    for path in ("src/qtt/stage1_prediction_markets/qku_computation_control_plane/economic_math.py",
+                 "src/qtt/stage1_prediction_markets/qku_computation_control_plane/point_in_time.py",
+                 "src/qtt/stage1_prediction_markets/qku_computation_control_plane/context.py",
+                 "src/qtt/service/owner_source_use.py", "src/qtt/service/owner_source_use_windows.py",
+                 "tools/run_validation_gates.py", "tools/validation_reliability.py", ".github/workflows/qtt_validation.yml",
+                 "docs/master_plan/QTT_MasterPlan_Current.md", "docs/master_plan/generated/unowned.report.json"):
+        assert not registry.is_pr_scoped_changed_path_allowed(scheduled, path)
     admission_branch = "s1-kalshi-source-use-admission"
     admission_paths = frozenset({
         "src/qtt/service/owner_source_use.py",

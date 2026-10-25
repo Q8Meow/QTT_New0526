@@ -18,6 +18,9 @@ from .models import NO_EFFECTS_V1, NoEffectFlagsV1
 from .point_in_time import (
     PITDataContractErrorV1,
     PITReasonCodeV1,
+    PointInTimeClocksV1,
+    PointInTimeFieldClassV1,
+    PointInTimePolicyV1,
 )
 from .stage1_launch_graph import Stage1VenueProfileIdV1
 from .source_rights import reject_secret_material
@@ -5435,6 +5438,140 @@ class KalshiQuadraticSeriesFeeCandidateV1:
         _native_require(self.fee_multiplier >= 0, "NONNEGATIVE")
 
 
+def _kalshi_scheduled_utc_v1(value: datetime) -> datetime:
+    _native_require(type(value) is datetime and value.tzinfo is UTC, "SCHEDULED_UTC")
+    return value
+
+
+def _kalshi_scheduled_clocks_v1(clocks: PointInTimeClocksV1) -> PointInTimeClocksV1:
+    _native_require(type(clocks) is PointInTimeClocksV1, "SCHEDULED_CLOCKS")
+    try:
+        values = {name: getattr(clocks, name) for name in PointInTimePolicyV1.CHECKED_CLOCKS}
+    except AttributeError as error:
+        raise ContractValidationError(ReasonCode.INVALID_CONTRACT, "SCHEDULED_CLOCK_FIELDS") from error
+    return PointInTimeClocksV1(**{name: _kalshi_scheduled_utc_v1(value) for name, value in values.items()})
+
+
+@dataclass(frozen=True, slots=True)
+class KalshiScheduledFeeStateV1:
+    """One unadmitted hypothetical interval; never source or account evidence."""
+
+    state_ref: str
+    scope_kind: str
+    series_ticker: str
+    event_ticker: str | None
+    clocks: PointInTimeClocksV1
+    effective_until_utc: datetime
+    fee_type: str | None
+    fee_multiplier: Decimal | None
+
+    def __post_init__(self) -> None:
+        _native_ident(self.state_ref)
+        _native_ident(self.series_ticker)
+        _native_require(type(self.scope_kind) is str and self.scope_kind in ("SERIES", "EVENT"), "SCHEDULED_ROLE")
+        if self.scope_kind == "SERIES":
+            _native_require(self.event_ticker is None, "SCHEDULED_SERIES_SCOPE")
+        else:
+            _native_ident(self.event_ticker)
+        if not (self.scope_kind == "EVENT" and self.fee_type is None and self.fee_multiplier is None):
+            _native_require(type(self.fee_type) is str and self.fee_type == "quadratic", "SCHEDULED_FEE_PAIR")
+            _native_require(self.fee_multiplier is not None, "SCHEDULED_FEE_PAIR")
+            KalshiQuadraticSeriesFeeCandidateV1(self.series_ticker, self.fee_multiplier)
+        clocks = _kalshi_scheduled_clocks_v1(self.clocks)
+        end = _kalshi_scheduled_utc_v1(self.effective_until_utc)
+        if clocks.effective_time >= end:
+            raise PointInTimeError(ReasonCode.POINT_IN_TIME_VIOLATION, "SCHEDULED_INTERVAL_ORDER")
+        object.__setattr__(self, "clocks", clocks)
+
+
+def _kalshi_scheduled_context_v1(context: ComputationContextKeyV1) -> ComputationContextKeyV1:
+    _native_require(type(context) is ComputationContextKeyV1, "SCHEDULED_CONTEXT")
+    try:
+        context_id, as_of, observed_at, epoch, version, age = (
+            context.context_id, context.as_of, context.observed_at,
+            context.source_epoch_id, context.input_version, context.maximum_age,
+        )
+    except AttributeError as error:
+        raise ContractValidationError(ReasonCode.INVALID_CONTRACT, "SCHEDULED_CONTEXT_FIELDS") from error
+    _native_ident(context_id)
+    _native_ident(epoch)
+    _native_ident(version)
+    _kalshi_scheduled_utc_v1(as_of)
+    _kalshi_scheduled_utc_v1(observed_at)
+    _native_require(type(age) is timedelta and age > timedelta(0), "SCHEDULED_MAXIMUM_AGE")
+    local = ComputationContextKeyV1(context_id, as_of, observed_at, epoch, version, age)
+    local.assert_fresh()
+    return local
+
+
+def _kalshi_scheduled_state_snapshot_v1(row: KalshiScheduledFeeStateV1) -> KalshiScheduledFeeStateV1:
+    _native_require(type(row) is KalshiScheduledFeeStateV1, "SCHEDULED_STATE")
+    try:
+        values = (row.state_ref, row.scope_kind, row.series_ticker, row.event_ticker,
+                  row.clocks, row.effective_until_utc, row.fee_type, row.fee_multiplier)
+    except AttributeError as error:
+        raise ContractValidationError(ReasonCode.INVALID_CONTRACT, "SCHEDULED_STATE_FIELDS") from error
+    return KalshiScheduledFeeStateV1(*values)
+
+
+def resolve_kalshi_scheduled_fee_scenario_v1(
+    *, context: ComputationContextKeyV1, expected_series_ticker: str,
+    expected_event_ticker: str, states: tuple[KalshiScheduledFeeStateV1, ...],
+    fill_times: tuple[datetime, ...],
+) -> tuple[Decimal, ...]:
+    """Resolve explicit known hypothetical states; grant no source/account admission.
+
+    Both streams must cover each nondecreasing future fill. Local sorted intervals
+    and monotone cursors bound the work to O(S log S + F), with O(S + F) memory.
+    """
+    _native_require(type(states) is tuple and 2 <= len(states) <= 4096, "SCHEDULED_STATES")
+    _native_require(type(fill_times) is tuple and 1 <= len(fill_times) <= 4096, "SCHEDULED_FILL_TIMES")
+    local_context = _kalshi_scheduled_context_v1(context)
+    _native_ident(expected_series_ticker)
+    _native_ident(expected_event_ticker)
+    rows = tuple(_kalshi_scheduled_state_snapshot_v1(row) for row in states)
+    _native_require(len({row.state_ref for row in rows}) == len(rows), "SCHEDULED_DUPLICATE_REF")
+    for row in rows:
+        if row.series_ticker != expected_series_ticker or (
+            row.scope_kind == "EVENT" and row.event_ticker != expected_event_ticker
+        ):
+            raise ContractValidationError(ReasonCode.INPUT_SCOPE_MISMATCH, "SCHEDULED_SCOPE")
+    for row in rows:
+        PointInTimePolicyV1.validate(
+            receipt_id=row.state_ref, field_class=PointInTimeFieldClassV1.SCHEDULED_EFFECTIVE_FACT,
+            clocks=row.clocks, context=local_context,
+        )
+        if local_context.as_of - row.clocks.observed_time > local_context.maximum_age:
+            raise PointInTimeError(ReasonCode.POINT_IN_TIME_VIOLATION, "SCHEDULED_ROW_AGE")
+    streams = tuple(tuple(sorted(
+        (row for row in rows if row.scope_kind == role),
+        key=lambda row: (row.clocks.effective_time, row.effective_until_utc, row.state_ref),
+    )) for role in ("SERIES", "EVENT"))
+    for stream in streams:
+        for previous, current in zip(stream, stream[1:]):
+            if previous.effective_until_utc > current.clocks.effective_time:
+                raise SourcePolicyError(ReasonCode.SOURCE_CONFLICT, "SCHEDULED_INTERVAL_CONFLICT")
+    previous_time = local_context.as_of
+    for moment in fill_times:
+        _kalshi_scheduled_utc_v1(moment)
+        if moment < previous_time:
+            raise PointInTimeError(ReasonCode.POINT_IN_TIME_VIOLATION, "SCHEDULED_FILL_ORDER_OR_PAST")
+        previous_time = moment
+    cursors = [0, 0]
+    selected = []
+    for moment in fill_times:
+        covering = []
+        for index, stream in enumerate(streams):
+            while cursors[index] < len(stream) and stream[cursors[index]].effective_until_utc <= moment:
+                cursors[index] += 1
+            if cursors[index] == len(stream) or stream[cursors[index]].clocks.effective_time > moment:
+                raise ContractValidationError(ReasonCode.INCOMPLETE_CONTRACT, "SCHEDULED_COVERAGE")
+            covering.append(stream[cursors[index]])
+        series, event = covering
+        selected.append(series.fee_multiplier if event.fee_multiplier is None else event.fee_multiplier)
+    return tuple(selected)
+
+
 def decode_kalshi_quadratic_series_fee_candidate_v1(
     *, raw_response: bytes, expected_series_ticker: str,
 ) -> KalshiQuadraticSeriesFeeCandidateV1:
@@ -6443,7 +6580,7 @@ from contextlib import contextmanager
 from _thread import RLock
 import time
 from .context import _f14_freeze_v1, _f14_plain_v1, _native_utc_nanoseconds
-from .context import _native_ident, _native_bounded_decimal, _native_require
+from .context import ComputationContextKeyV1, _native_ident, _native_bounded_decimal, _native_require
 from .errors import ContractValidationError, PointInTimeError
 from .serialization import (_F14_SCOPE, _F14_SCOPE_FIELDS, _F14_ID, _F14_OPERATIONS, _F14_MAX_INT,
     _f14_validate_v1, _f14_native_time_v1)

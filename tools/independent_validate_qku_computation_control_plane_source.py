@@ -159,9 +159,70 @@ def _source_use_admission_failures_v1(root):
     return failures
 
 
+def _kalshi_scheduled_scenario_failures_v1(root):
+    """AST-only delegation/effect boundary; behavior and review remain separate."""
+    failures = []
+    source = ast.parse((root / "src/qtt/stage1_prediction_markets/qku_computation_control_plane/source_policy.py").read_text(encoding="utf-8"))
+    pretrade = ast.parse((root / "src/qtt/pretrade/pr169_pretrade1_resolvers.py").read_text(encoding="utf-8"))
+    selected = {}
+    for tree, names in ((source, {
+        "KalshiScheduledFeeStateV1", "_kalshi_scheduled_utc_v1", "_kalshi_scheduled_clocks_v1",
+        "_kalshi_scheduled_context_v1", "_kalshi_scheduled_state_snapshot_v1",
+        "resolve_kalshi_scheduled_fee_scenario_v1",
+    }), (pretrade, {"KalshiScheduledTakerBuyYesFillV1", "compose_kalshi_scheduled_fee_scenario_cashflows_v1"})):
+        for name in names:
+            found = [node for node in tree.body if isinstance(node, (ast.FunctionDef, ast.ClassDef)) and node.name == name]
+            if len(found) != 1:
+                failures.append("scheduled scenario symbol missing/duplicated: " + name)
+            else:
+                selected[name] = found[0]
+    allowed = set(selected) | {
+        "dataclass", "type", "len", "getattr", "tuple", "sorted", "zip", "enumerate", "timedelta",
+        "_native_ident", "_native_require", "PointInTimeClocksV1", "ComputationContextKeyV1",
+        "KalshiQuadraticSeriesFeeCandidateV1", "KalshiQuadraticTakerBuyYesFillV1",
+        "ContractValidationError", "PointInTimeError", "SourcePolicyError", "NumericDomainError",
+        "PointInTimePolicyV1.validate", "local.assert_fresh", "object.__setattr__", "values.items",
+        "selected.append", "covering.append", "local_fills.append", "Fraction", "_kalshi_bounded_fraction",
+        "kalshi_quadratic_taker_buy_yes_input_v1", "compose_kalshi_conditional_cashflows_v1",
+    }
+    for name, node in selected.items():
+        for child in ast.walk(node):
+            if isinstance(child, (ast.Import, ast.ImportFrom, ast.Global, ast.Nonlocal, ast.AsyncFunctionDef)):
+                failures.append("scheduled scenario effect/import boundary: " + name)
+            if isinstance(child, ast.Call) and ast.unparse(child.func) not in allowed:
+                failures.append("scheduled scenario unapproved call: " + ast.unparse(child.func))
+            if isinstance(child, ast.Attribute) and isinstance(child.ctx, (ast.Store, ast.Del)):
+                failures.append("scheduled scenario external mutation: " + name)
+            if isinstance(child, ast.Call) and ast.unparse(child.func) == "object.__setattr__":
+                if not (isinstance(node, ast.ClassDef) and len(child.args) == 3
+                        and ast.unparse(child.args[0]) == "self"
+                        and isinstance(child.args[1], ast.Constant) and child.args[1].value in {"fill", "clocks"}):
+                    failures.append("scheduled scenario unexpected attribute mutation: " + name)
+    for name, required in (
+        ("_kalshi_scheduled_context_v1", {"ComputationContextKeyV1", "local.assert_fresh"}),
+        ("resolve_kalshi_scheduled_fee_scenario_v1", {"PointInTimePolicyV1.validate"}),
+        ("compose_kalshi_scheduled_fee_scenario_cashflows_v1", {
+            "resolve_kalshi_scheduled_fee_scenario_v1", "kalshi_quadratic_taker_buy_yes_input_v1",
+            "compose_kalshi_conditional_cashflows_v1",
+        }),
+    ):
+        calls = [n for n in ast.walk(selected[name]) if isinstance(n, ast.Call)] if name in selected else []
+        for target in required:
+            found = [n for n in calls if ast.unparse(n.func) == target]
+            if len(found) != 1:
+                failures.append("scheduled scenario delegation missing/duplicated: " + target)
+            elif target == "PointInTimePolicyV1.validate":
+                keywords = {k.arg: ast.unparse(k.value) for k in found[0].keywords}
+                if keywords != {"receipt_id": "row.state_ref", "field_class": "PointInTimeFieldClassV1.SCHEDULED_EFFECTIVE_FACT",
+                                "clocks": "row.clocks", "context": "local_context"}:
+                    failures.append("scheduled scenario central clock policy association changed")
+    return failures
+
+
 def main() -> int:
     failures: list[str] = []
     failures.extend(_source_use_admission_failures_v1(REPO_ROOT))
+    failures.extend(_kalshi_scheduled_scenario_failures_v1(REPO_ROOT))
     tree = ast.parse(
         SOURCE_POLICY.read_text(encoding="utf-8"),
         filename=str(SOURCE_POLICY),

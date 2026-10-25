@@ -1230,6 +1230,7 @@ def test_accounting_contract_matrix(case) -> None:
     elif slug == "fee-rebate-treatment":
         _assert_kalshi_rounding_values()
         _assert_kalshi_quadratic_taker_values()
+        _assert_kalshi_scheduled_values()
         binding = FeeScheduleBindingV1("CATEGORY", "venue", "market-category", "v1", "source-epoch", datetime(2025, 1, 1, tzinfo=UTC), None, NOW, ("PLATFORM_FEE", "BUILDER_FEE_SEPARATE_ADDITIVE"), (("PLATFORM_FEE", ".05"),))
         policy = QuantizationPolicyV1("fee-5dp", "fee", "0.00001", QuantizationRoundingV1.HALF_EVEN, "USD", "USD", "FEE", 5, binding.binding_ref)
         fee = global_prediction_market_fee_v1(contracts="100", fee_rate=".05", price=".5", schedule_binding=binding, quantization_policy=policy, receipt_id="fee-r1")
@@ -1267,6 +1268,7 @@ def test_accounting_contract_matrix(case) -> None:
     elif slug == "rounding-and-quantization":
         _assert_kalshi_rounding_boundaries()
         _assert_kalshi_quadratic_taker_boundaries()
+        _assert_kalshi_scheduled_boundaries()
         policy = QuantizationPolicyV1("cent", "amount", ".01", QuantizationRoundingV1.HALF_EVEN, "USD", "USD", "SETTLED", 2, "OWNER")
         receipt = quantize_decimal_v1("1.005", policy=policy, receipt_id="rounding-1")
         assert (receipt.pre_value, receipt.post_value, receipt.residual) == (Decimal("1.005"), Decimal("1.00"), Decimal("0.005"))
@@ -1298,6 +1300,316 @@ def test_accounting_contract_matrix(case) -> None:
             AccountingAndTCAServiceV1.validate_journal(journal, postings, _accounts(second_basis="PROJECTED"))
     else:  # pragma: no cover - the meta-test makes this unreachable
         raise AssertionError(f"unhandled control case {slug}")
+
+
+def _scheduled_kalshi_fixture(second_series_multiplier="3", *, moment=None):
+    """Explicit hypothetical assumptions; no capture, rights or account admission."""
+    from datetime import timedelta
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane.context import ComputationContextKeyV1
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane.point_in_time import PointInTimeClocksV1
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane.source_policy import KalshiScheduledFeeStateV1
+    from src.qtt.pretrade.pr169_pretrade1_resolvers import KalshiScheduledTakerBuyYesFillV1
+
+    k = datetime(2026, 10, 25, 12, tzinfo=UTC) if moment is None else moment
+    context = ComputationContextKeyV1("SYNTHETIC::SCHEDULE", k, k, "SYNTHETIC::EPOCH", "SYNTHETIC_V1", timedelta(minutes=1))
+    states = tuple(KalshiScheduledFeeStateV1(
+        ref, role, "SYNTHETIC::SERIES", None if role == "SERIES" else "SYNTHETIC::EVENT",
+        PointInTimeClocksV1(k, k + timedelta(seconds=start), k, k, k, k),
+        k + timedelta(seconds=end), None if multiplier is None else "quadratic",
+        None if multiplier is None else Decimal(multiplier),
+    ) for ref, role, start, end, multiplier in (
+        ("S0", "SERIES", 0, 10, "1"), ("S1", "SERIES", 10, 30, second_series_multiplier),
+        ("E0", "EVENT", 0, 5, None), ("E1", "EVENT", 5, 15, "2"), ("E2", "EVENT", 15, 30, None),
+    ))
+    fills = tuple(KalshiScheduledTakerBuyYesFillV1(
+        KalshiQuadraticTakerBuyYesFillV1(Decimal(1), Decimal(".55")), k + timedelta(seconds=t),
+    ) for t in (4, 5, 15))
+    return dict(context=context, expected_series_ticker="SYNTHETIC::SERIES",
+                expected_event_ticker="SYNTHETIC::EVENT", states=states), fills
+
+
+def _scheduled_mutation(value, **changes):
+    """Bypass dataclass initialization solely to test the consumption boundary."""
+    copied = object.__new__(type(value))
+    for field in fields(value):
+        object.__setattr__(copied, field.name, changes.get(field.name, getattr(value, field.name)))
+    return copied
+
+
+def _assert_kalshi_scheduled_values():
+    from datetime import timedelta
+    from src.qtt.pretrade import pr169_pretrade1_resolvers as pretrade
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane import source_policy as source
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane.point_in_time import PointInTimePolicyV1, PointInTimeFieldClassV1
+
+    common = dict(profile_id="KALSHI_US_DCM_DIRECT", currency="USD", prior_rounding_overpayment=Decimal(0))
+    vectors = (
+        ("3", ".01", ("-1.650000", ".120000", ".010000", ".006050")),
+        ("3", ".0001", ("-1.650000", ".104100", ".000100", ".000050")),
+        ("6", ".01", ("-1.650000", ".170000", ".010000", ".004075")),
+        ("6", ".0001", ("-1.650000", ".156100", ".000100", ".000075")),
+    )
+    resolve = source.resolve_kalshi_scheduled_fee_scenario_v1
+    compose = pretrade.compose_kalshi_scheduled_fee_scenario_cashflows_v1
+    rosters = (tuple(source.SOURCE_STATE_BY_ID), tuple(source.SOURCE_OVERLAY_BY_ID), tuple(IMPLEMENTATION_REGISTRY))
+    for multiplier, grid_text, expected in vectors:
+        inputs, fills = _scheduled_kalshi_fixture(multiplier)
+        times = tuple(row.fill_at_utc for row in fills)
+        states_before = tuple(tuple(getattr(row, field.name) for field in fields(row)) for row in inputs['states'])
+        resolved = tuple(map(Decimal, ("1", "2", multiplier)))
+        assert resolve(**inputs, fill_times=times) == resolved
+        assert resolve(**{**inputs, 'states': tuple(reversed(inputs['states']))}, fill_times=times) == resolved
+        grid = Decimal(grid_text)
+        for prior in (Decimal(0), Decimal(".012")):
+            result = compose(**{**common, 'prior_rounding_overpayment': prior}, **inputs, fills=fills, balance_increment=grid)
+            # The rational law and integer rounding oracle never read production results.
+            carry, fees, rebates = Fraction(prior), Fraction(0), Fraction(0)
+            for selected in (1, 2, int(multiplier)):
+                raw_fee = Fraction(7, 100) * selected * Fraction(55, 100) * Fraction(45, 100)
+                rounded = _kalshi_integer_oracle(Fraction(-55, 100), raw_fee, grid, carry)
+                trade, rounding, rebate, _, _, carry = rounded
+                fees += trade + rounding
+                rebates += rebate
+            assert tuple(map(Fraction, _kalshi_values(result))) == (Fraction(-165, 100), fees, rebates, carry)
+            if prior == 0:
+                assert _kalshi_values(result) == tuple(map(Decimal, expected))
+            for split in (1, 2):
+                prefix = compose(**{**common, 'prior_rounding_overpayment': prior}, **inputs, fills=fills[:split], balance_increment=grid)
+                tail = compose(**{**common, 'prior_rounding_overpayment': prefix.rounding_overpayment_after},
+                               **inputs, fills=fills[split:], balance_increment=grid)
+                assert tuple(Fraction(getattr(prefix, name)) + Fraction(getattr(tail, name)) for name in (
+                    'entry_trade_cashflow_total', 'platform_fee_total', 'expected_rebate_total')) == tuple(map(Fraction, _kalshi_values(result)[:3]))
+                assert tail.rounding_overpayment_after == result.rounding_overpayment_after
+        assert states_before == tuple(tuple(getattr(row, field.name) for field in fields(row)) for row in inputs['states'])
+        assert tuple(row.fill_at_utc for row in fills) == times
+    inputs, fills = _scheduled_kalshi_fixture()
+    k = inputs['context'].as_of
+    prefix = compose(**common, **inputs, fills=fills[:2], balance_increment=Decimal('.01'))
+    continued = compose(**{**common, 'prior_rounding_overpayment': prefix.rounding_overpayment_after}, **inputs,
+                        fills=fills[2:], balance_increment=Decimal('.01'))
+    reset = compose(**common, **inputs, fills=fills[2:], balance_increment=Decimal('.01'))
+    assert continued.expected_rebate_total == Decimal('.01') and reset.expected_rebate_total == 0
+    assert continued.platform_fee_total - continued.expected_rebate_total != reset.platform_fee_total - reset.expected_rebate_total
+    assert resolve(**inputs, fill_times=(k, k + timedelta(seconds=5), k + timedelta(seconds=10), k + timedelta(seconds=15))) == tuple(map(Decimal, ('1','2','2','3')))
+    zero = replace(inputs['states'][3], fee_multiplier=Decimal(0))
+    assert resolve(**{**inputs, 'states': (*inputs['states'][:3], zero, inputs['states'][4])}, fill_times=(fills[1].fill_at_utc,)) == (Decimal(0),)
+    constant = (replace(inputs['states'][0], effective_until_utc=k + timedelta(seconds=30), fee_multiplier=Decimal(2)),
+                replace(inputs['states'][2], effective_until_utc=k + timedelta(seconds=30)))
+    for grid in (Decimal('.01'), Decimal('.0001')):
+        assert compose(**common, **{**inputs, 'states': constant}, fills=fills, balance_increment=grid) == pretrade.compose_kalshi_quadratic_taker_buy_yes_cashflows_v1(
+            **common, fills=tuple(row.fill for row in fills), fee_multiplier=Decimal(2), balance_increment=grid)
+    calls, numerics, composed, clocks = [], [], [], []
+    real_numerical = pretrade.kalshi_quadratic_taker_buy_yes_input_v1
+    real_compose = pretrade.compose_kalshi_conditional_cashflows_v1
+    real_policy = PointInTimePolicyV1.validate
+    def resolve_spy(**kwargs):
+        calls.append(kwargs)
+        return resolve(**kwargs)
+    def numerical_spy(**kwargs):
+        numerics.append(kwargs)
+        return real_numerical(**kwargs)
+    def composition_spy(**kwargs):
+        result = real_compose(**kwargs)
+        composed.append((kwargs, result))
+        return result
+    def policy_spy(**kwargs):
+        clocks.append(kwargs)
+        return real_policy(**kwargs)
+    def forbidden(*args, **kwargs):
+        raise AssertionError('scheduled arithmetic called an observation/native path')
+    with pytest.MonkeyPatch.context() as patch:
+        patch.setattr(pretrade, 'resolve_kalshi_scheduled_fee_scenario_v1', resolve_spy)
+        patch.setattr(pretrade, 'kalshi_quadratic_taker_buy_yes_input_v1', numerical_spy)
+        patch.setattr(pretrade, 'compose_kalshi_conditional_cashflows_v1', composition_spy)
+        patch.setattr(PointInTimePolicyV1, 'validate', policy_spy)
+        patch.setattr(source.KalshiFeeObservationOwnerV1, 'capture', forbidden)
+        patch.setattr(pretrade.KalshiFeeScenarioSessionV1, 'evaluate', forbidden)
+        patch.setattr(pretrade, 'compose_kalshi_observed_fee_scenario_cashflows_v1', forbidden)
+        result = compose(**common, **inputs, fills=fills, balance_increment=Decimal('.01'))
+    assert len(calls) == 1 and len(numerics) == 3 and len(composed) == 1
+    assert result is composed[0][1] and len(composed[0][0]['fills']) == 3
+    assert composed[0][0]['prior_rounding_overpayment'] is common['prior_rounding_overpayment']
+    assert tuple(row['fee_multiplier'] for row in numerics) == tuple(map(Decimal, ('1','2','3')))
+    assert len(clocks) == len(inputs['states'])
+    for observed, original in zip(clocks, inputs['states'], strict=True):
+        assert set(observed) == {'receipt_id','field_class','clocks','context'}
+        assert observed['receipt_id'] == original.state_ref
+        assert observed['field_class'] is PointInTimeFieldClassV1.SCHEDULED_EFFECTIVE_FACT
+        assert observed['clocks'] == original.clocks and observed['clocks'] is not original.clocks
+        assert observed['context'] == inputs['context'] and observed['context'] is not inputs['context']
+    for precision in (1, 7, 28):
+        with localcontext() as ambient:
+            ambient.prec = precision
+            ambient.Emin, ambient.Emax = -2, 2
+            ambient.traps[Inexact] = ambient.traps[Rounded] = True
+            ambient.flags[Rounded] = True
+            before = (ambient.prec, ambient.rounding, ambient.Emin, ambient.Emax, dict(ambient.traps), dict(ambient.flags))
+            assert compose(**common, **inputs, fills=fills, balance_increment=Decimal('.01')) == result
+            assert before == (ambient.prec, ambient.rounding, ambient.Emin, ambient.Emax, dict(ambient.traps), dict(ambient.flags))
+    assert rosters == (tuple(source.SOURCE_STATE_BY_ID), tuple(source.SOURCE_OVERLAY_BY_ID), tuple(IMPLEMENTATION_REGISTRY))
+    assert resolve(**inputs, fill_times=tuple(row.fill_at_utc for row in fills)) == tuple(map(Decimal, ('1','2','3')))
+
+
+def _assert_kalshi_scheduled_boundaries():
+    from datetime import timedelta, timezone
+    from src.qtt.pretrade import pr169_pretrade1_resolvers as pretrade
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane import source_policy as source
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane.errors import PointInTimeError, SourcePolicyError
+    from tools import independent_validate_qku_computation_control_plane_source as guard
+
+    inputs, fills = _scheduled_kalshi_fixture()
+    rows, context = inputs['states'], inputs['context']
+    k = context.as_of
+    times = tuple(row.fill_at_utc for row in fills)
+    resolve = source.resolve_kalshi_scheduled_fee_scenario_v1
+    compose = pretrade.compose_kalshi_scheduled_fee_scenario_cashflows_v1
+    common = dict(profile_id='KALSHI_US_DCM_DIRECT', currency='USD', **inputs, fills=fills,
+                  balance_increment=Decimal('.01'), prior_rounding_overpayment=Decimal(0))
+    def rejected(call, kind=ContractValidationError, reason=ReasonCode.INVALID_CONTRACT):
+        with pytest.raises(kind) as error:
+            call()
+        assert error.value.reason_code is reason
+    def reject_resolve(changes, kind=ContractValidationError, reason=ReasonCode.INVALID_CONTRACT):
+        rejected(lambda: resolve(**{**inputs, 'fill_times': times, **changes}), kind, reason)
+    def time_failure(changes):
+        reject_resolve(changes, PointInTimeError, ReasonCode.POINT_IN_TIME_VIOLATION)
+    def coverage(changes):
+        reject_resolve(changes, ContractValidationError, ReasonCode.INCOMPLETE_CONTRACT)
+    class Text(str): pass
+    class Tuple(tuple): pass
+    class Date(datetime): pass
+    class Duration(timedelta): pass
+    class State(source.KalshiScheduledFeeStateV1): pass
+    class Timed(pretrade.KalshiScheduledTakerBuyYesFillV1): pass
+    class Fill(KalshiQuadraticTakerBuyYesFillV1): pass
+    for value in (None, True, 1, 1.0, 'states', list(rows), iter(rows), Tuple(rows), (), rows[:1], rows * 820):
+        reject_resolve({'states': value})
+    for value in (None, True, [], iter(times), Tuple(times), (), times * 1366):
+        reject_resolve({'fill_times': value})
+    for value in (None, True, object(), State(*(getattr(rows[0], f.name) for f in fields(rows[0])))):
+        reject_resolve({'states': (value, *rows[1:])})
+    for name in ('expected_series_ticker', 'expected_event_ticker'):
+        for value in (None, True, '', 'has space', 'x'*257, Text('SYNTHETIC::SERIES')):
+            reject_resolve({name: value})
+    for name in ('context_id','source_epoch_id','input_version'):
+        reject_resolve({'context': _scheduled_mutation(context, **{name: Text('IDENT')})})
+    for name in ('as_of','observed_at'):
+        for value in (None, k.replace(tzinfo=None), Date(2026,10,25,12,tzinfo=UTC), k.astimezone(timezone(timedelta(hours=1)))):
+            reject_resolve({'context': _scheduled_mutation(context, **{name:value})})
+    for value in (None, 60, Duration(seconds=60), timedelta(0), timedelta(seconds=-1)):
+        reject_resolve({'context': _scheduled_mutation(context, maximum_age=value)})
+    reject_resolve({'context': _scheduled_mutation(context, observed_at=k+timedelta(seconds=1))}, reason=ReasonCode.FUTURE_CONTEXT)
+    reject_resolve({'context': replace(context, observed_at=k-timedelta(seconds=61))}, reason=ReasonCode.STALE_CONTEXT)
+    assert resolve(**{**inputs,'context':replace(context,observed_at=k-timedelta(seconds=60))}, fill_times=times) == (Decimal(1),Decimal(2),Decimal(3))
+    for name in ('state_ref','scope_kind','series_ticker','event_ticker','fee_type'):
+        valid = rows[3]
+        for value in (True, 1, ' ', Text(getattr(valid,name))):
+            rejected(lambda name=name,value=value: replace(valid, **{name:value}))
+    for changes in ({'scope_kind':'SERIES'}, {'event_ticker':None}, {'fee_type':'linear'},
+                    {'fee_type':None}, {'fee_multiplier':None}):
+        rejected(lambda changes=changes: replace(rows[3], **changes))
+    rejected(lambda: replace(rows[0], event_ticker='EVENT'))
+    for value in (True, 1, 0.1, '1', Decimal('NaN'), Decimal('Infinity'), Decimal('-1')):
+        rejected(lambda value=value: replace(rows[0], fee_multiplier=value))
+    for end in (k, k-timedelta(seconds=1)):
+        rejected(lambda end=end: replace(rows[0], effective_until_utc=end), PointInTimeError, ReasonCode.POINT_IN_TIME_VIOLATION)
+    for value in (None, k.replace(tzinfo=None), Date(2026,10,25,12,tzinfo=UTC), k.astimezone(timezone(timedelta(hours=1)))):
+        rejected(lambda value=value: replace(rows[0], effective_until_utc=value))
+        for field in fields(rows[0].clocks):
+            bad = _scheduled_mutation(rows[0].clocks, **{field.name:value})
+            reject_resolve({'states': (_scheduled_mutation(rows[0],clocks=bad),*rows[1:])})
+    for value, key, replacement in ((context,'context',None),(rows[0],'states',None),(rows[0].clocks,'clocks',None),
+                                   (fills[0],'fills',None),(fills[0].fill,'fill',None)):
+        for field in fields(value):
+            missing = _scheduled_mutation(value)
+            object.__delattr__(missing,field.name)
+            if key == 'context': reject_resolve({'context':missing})
+            elif key == 'states': reject_resolve({'states':(missing,*rows[1:])})
+            elif key == 'clocks': reject_resolve({'states':(_scheduled_mutation(rows[0],clocks=missing),*rows[1:])})
+            else:
+                row = missing if key == 'fills' else _scheduled_mutation(fills[0],fill=missing)
+                rejected(lambda row=row: compose(**{**common,'fills':(row,)}))
+    for name in ('observed_time','available_time','received_time','processed_time','as_of_time'):
+        changed = replace(rows[-1],clocks=replace(rows[-1].clocks,**{name:k+timedelta(seconds=1)}))
+        time_failure({'states':(*rows[:-1],changed),'fill_times':(times[0],)})
+    bad_order = replace(rows[0],clocks=replace(rows[0].clocks,available_time=k-timedelta(seconds=1)))
+    time_failure({'states':(bad_order,*rows[1:])})
+    aged = replace(rows[0],clocks=replace(rows[0].clocks,observed_time=k-timedelta(seconds=60)))
+    assert resolve(**{**inputs,'states':(aged,*rows[1:])},fill_times=times) == (Decimal(1),Decimal(2),Decimal(3))
+    time_failure({'states':(replace(aged,clocks=replace(aged.clocks,observed_time=k-timedelta(seconds=61))),*rows[1:])})
+    reject_resolve({'states':(rows[0],replace(rows[1],state_ref=rows[0].state_ref),*rows[2:])})
+    for changes in ({'series_ticker':'OTHER'},{'event_ticker':'OTHER'}):
+        reject_resolve({'states':(*rows[:3],replace(rows[3],**changes),rows[4])},reason=ReasonCode.INPUT_SCOPE_MISMATCH)
+    overlap = replace(rows[1],state_ref='UNQUERIED',clocks=replace(rows[1].clocks,effective_time=k+timedelta(seconds=20)),effective_until_utc=k+timedelta(seconds=21))
+    reject_resolve({'states':(*rows,overlap),'fill_times':(times[0],)},SourcePolicyError,ReasonCode.SOURCE_CONFLICT)
+    event_overlap = replace(rows[3],state_ref='EVENT_OVERLAP',fee_multiplier=Decimal(2))
+    reject_resolve({'states':(*rows,event_overlap)},SourcePolicyError,ReasonCode.SOURCE_CONFLICT)
+    coverage({'states':rows[:2]})
+    coverage({'states':rows[2:]})
+    coverage({'states':(*rows[:3],rows[4])})
+    coverage({'states':rows[1:],'fill_times':(times[1],)})
+    coverage({'fill_times':(k+timedelta(seconds=30),)})
+    future = (replace(rows[0],clocks=replace(rows[0].clocks,effective_time=k+timedelta(seconds=1))),rows[2])
+    assert resolve(**{**inputs,'states':future},fill_times=(k+timedelta(seconds=1),)) == (Decimal(1),)
+    coverage({'states':future,'fill_times':(k,)})
+    time_failure({'fill_times':tuple(reversed(times))})
+    time_failure({'fill_times':(k-timedelta(microseconds=1),)})
+    assert resolve(**inputs,fill_times=(times[0],times[0])) == (Decimal(1),Decimal(1))
+    assert resolve(**inputs,fill_times=(times[0],)*4096) == (Decimal(1),)*4096
+    maximum = tuple(replace(base,state_ref=f'{role}{index}',clocks=replace(base.clocks,effective_time=k+timedelta(seconds=index)),
+                            effective_until_utc=k+timedelta(seconds=index+1))
+                    for role,base in (('S',rows[0]),('E',rows[2])) for index in range(2048))
+    assert resolve(**{**inputs,'states':tuple(reversed(maximum))},fill_times=(k,k+timedelta(seconds=2047))) == (Decimal(1),Decimal(1))
+    # Deterministic precedence: context, row shape, duplicate, scope, knowledge,
+    # conflicts, fill order, then coverage; no late filtering of malformed facts.
+    reject_resolve({'context':replace(context,observed_at=k-timedelta(seconds=61)),'states':(object(),object())},reason=ReasonCode.STALE_CONTEXT)
+    reject_resolve({'states':(rows[0],replace(rows[0],series_ticker='OTHER'))})
+    reject_resolve({'states':(bad_order,replace(rows[1],series_ticker='OTHER'),*rows[2:])},reason=ReasonCode.INPUT_SCOPE_MISMATCH)
+    time_failure({'states':(bad_order,*rows[1:],overlap)})
+    reject_resolve({'states':(*rows,overlap),'fill_times':(None,)},SourcePolicyError,ReasonCode.SOURCE_CONFLICT)
+    time_failure({'states':rows[:2],'fill_times':tuple(reversed(times))})
+    for changes in ({'profile_id':Text('KALSHI_US_DCM_DIRECT')},{'profile_id':'POLYMARKET_US_RETAIL_DIRECT'},
+                    {'currency':'EUR'},{'currency':Text('USD')},{'fills':()}, {'fills':list(fills)},
+                    {'fills':iter(fills)},{'fills':Tuple(fills)},{'fills':fills*1366}, {'fills':(object(),)},
+                    {'fills':(Timed(fills[0].fill,times[0]),)}):
+        rejected(lambda changes=changes:compose(**{**common,**changes}))
+    for value in (None, k.replace(tzinfo=None), Date(2026,10,25,12,tzinfo=UTC)):
+        rejected(lambda value=value:compose(**{**common,'fills':(_scheduled_mutation(fills[0],fill_at_utc=value),)}))
+    rejected(lambda:pretrade.KalshiScheduledTakerBuyYesFillV1(Fill(Decimal(1),Decimal('.55')),k))
+    for name in ('balance_increment','prior_rounding_overpayment'):
+        for value,reason in ((True,ReasonCode.INVALID_NUMERIC_INPUT),('0',ReasonCode.INVALID_NUMERIC_INPUT),
+                             (Decimal('NaN'),ReasonCode.NONFINITE_NUMERIC_INPUT),(Decimal('-0'),ReasonCode.OUT_OF_DOMAIN)):
+            rejected(lambda name=name,value=value:compose(**{**common,name:value}),NumericDomainError,reason)
+    for changes in ({'balance_increment':Decimal('.001')},{'prior_rounding_overpayment':Decimal('.0000001')},
+                    {'fills':(_scheduled_mutation(fills[0],fill=_scheduled_mutation(fills[0].fill,contracts=Decimal('.001'))),)}):
+        rejected(lambda changes=changes:compose(**{**common,**changes}),NumericDomainError,ReasonCode.OUT_OF_DOMAIN)
+    for name in common:
+        with pytest.raises(TypeError): compose(**{key:value for key,value in common.items() if key != name})
+    largest = compose(**{**common,'fills':(fills[0],)*4096})
+    assert largest.entry_trade_cashflow_total == Decimal('-2252.800000')
+    assert not hasattr(rows[0],'__dict__') and not hasattr(fills[0],'__dict__')
+    with pytest.raises(FrozenInstanceError): rows[0].state_ref='MUTATION'
+    with pytest.raises(FrozenInstanceError): fills[0].fill_at_utc=k
+    assert guard._kalshi_scheduled_scenario_failures_v1(guard.REPO_ROOT) == []
+    source_path = guard.SOURCE_POLICY
+    pretrade_path = guard.REPO_ROOT/'src/qtt/pretrade/pr169_pretrade1_resolvers.py'
+    originals = {path:path.read_text(encoding='utf-8') for path in (source_path,pretrade_path)}
+    original_read = Path.read_text
+    for path,old,new in (
+        (source_path,'PointInTimePolicyV1.validate(', 'forbidden_capture('),
+        (source_path,'PointInTimeFieldClassV1.SCHEDULED_EFFECTIVE_FACT,','PointInTimeFieldClassV1.OBSERVATION,'),
+        (pretrade_path,'multipliers = resolve_kalshi_scheduled_fee_scenario_v1(', 'multipliers = forbidden_capture('),
+        (pretrade_path,'compiled = tuple(kalshi_quadratic_taker_buy_yes_input_v1(', 'compiled = tuple(forbidden_storage('),
+        (pretrade_path,'return compose_kalshi_conditional_cashflows_v1(\n        profile_id=profile_id, currency=currency, fills=compiled,',
+                       'return forbidden_registration(\n        profile_id=profile_id, currency=currency, fills=compiled,'),
+    ):
+        assert old in originals[path]
+        changed = originals[path].replace(old,new)
+        def fake_read(self,*args,**kwargs):
+            return changed if self == path else original_read(self,*args,**kwargs)
+        with pytest.MonkeyPatch.context() as patch:
+            patch.setattr(Path,'read_text',fake_read)
+            assert guard._kalshi_scheduled_scenario_failures_v1(guard.REPO_ROOT)
 
 
 def _kalshi_integer_oracle(revenue, model_fee, increment, prior):
