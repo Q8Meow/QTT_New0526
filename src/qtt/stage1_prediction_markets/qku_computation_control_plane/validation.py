@@ -1276,7 +1276,7 @@ def _package_ast() -> tuple[tuple[Path, ast.Module], ...]:
 
 
 def _no_runtime_topology() -> bool:
-    from tools.validate_no_runtime_artifacts import kalshi_fee_native_admission_v1
+    from tools.validate_no_runtime_artifacts import kalshi_fee_native_admission_v1, source_use_native_contract_v1
 
     forbidden_modules = {
         "asyncio",
@@ -1307,6 +1307,17 @@ def _no_runtime_topology() -> bool:
         )
         if admission_errors:
             return False
+        if source_use_native_contract_v1(relative, tree):
+            return False
+        source_use_thread_imports = set()
+        if relative == 'src/qtt/stage1_prediction_markets/qku_computation_control_plane/source_policy.py':
+            for cls in tree.body:
+                if isinstance(cls, ast.ClassDef) and cls.name == 'KalshiFeeObservationOwnerV1':
+                    for method in cls.body:
+                        if isinstance(method, ast.FunctionDef) and method.name in {'_prepare_read_v1', '_require_pending_v1'}:
+                            source_use_thread_imports.update(id(n) for n in method.body if isinstance(n, ast.ImportFrom)
+                                and n.module == 'threading' and n.level == 0
+                                and tuple((a.name, a.asname) for a in n.names) == (('current_thread', None),))
         quote_imports = [
             node for node in ast.walk(tree)
             if isinstance(node, ast.ImportFrom)
@@ -1358,6 +1369,7 @@ def _no_runtime_topology() -> bool:
                 if (
                     not parameter_policy_exception
                     and not cache_publication_exception
+                    and id(node) not in source_use_thread_imports
                     and node is not quote_import
                 ):
                     return False

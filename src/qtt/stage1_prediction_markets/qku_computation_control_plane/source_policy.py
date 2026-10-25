@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import ast
+from contextlib import contextmanager
 from dataclasses import dataclass, field
 from datetime import UTC, date, datetime, timedelta
 from decimal import Decimal
@@ -90,6 +91,484 @@ def read_recorded_source_use_status_v1(
         state = "RECORDED_UNVERIFIED"
     return RecordedSourceUseStatusV1(stream_id, head.record_id, head.sequence, payload.subject_kind,
                                     head.recorded_at, evaluated_at_utc, state)
+
+
+class _VerifiedSourceUseActionV1:
+    """One original verification; neither a value constructor nor serializable."""
+
+    __slots__ = ("_authority", "_root", "_pending", "_proof", "_attempted")
+
+    def __init__(self):
+        raise TypeError("source-use verification is owned by the original authority")
+
+    def __reduce__(self):
+        raise TypeError("source-use verification cannot be serialized")
+
+
+class KalshiSourceUseBindingV1:
+    """Private, registered process binding. Public receipts alone are not authority."""
+
+    __slots__ = ("_authority", "_root", "_generation", "_declaration_ref", "_review_ref",
+                 "_review_event_ref", "_use_event_ref", "_permit", "_source", "_rights")
+
+    def __init__(self):
+        raise TypeError("source-use bindings are issued by their original authority")
+
+    def __reduce__(self):
+        raise TypeError("source-use bindings cannot be serialized")
+
+
+class _SourceUseObservationPermitV1:
+    __slots__ = ("_event", "_request", "_deadline", "_owner", "_route", "_published", "_failed", "_started")
+
+    def __init__(self):
+        raise TypeError("observation permission requires its separately verified action")
+
+    def __reduce__(self):
+        raise TypeError("observation permission cannot be serialized")
+
+
+@dataclass(frozen=True, slots=True)
+class _PendingSourceUseActionV1:
+    request_ref: str
+    proposal: object
+    expected: tuple
+    original_heads: tuple
+    original: object
+    expires_at_utc: datetime
+    deadline_monotonic_ns: int
+    authentication: object
+    preview: str
+
+
+def _create_source_use_authority_v1(root):
+    from uuid import uuid4
+    from ...service.owner_source_use_windows import _require_native_root_v1
+    from .persistence import InMemoryPersistenceAdapterV1, OwnerControlMemoryAdapterV1, PersistenceAvailabilityV1
+    from .receipts import _source_use_require_v1
+    from .transaction import TrancheCUnitOfWorkV1, TransactionRetryPolicyV1
+
+    _require_native_root_v1(root)
+    _source_use_require_v1(root.enrollment.root_state == "ACTIVE")
+    authority = object.__new__(SourceUseAuthorityV1)
+    authority._root = root
+    authority._lock = RLock()
+    authority._process_ref = uuid4().hex
+    authority._clock_ref = uuid4().hex
+    authority._issuer = object()
+    authority._stopped = False
+    authority._pending = None
+    authority._completion_pending = None
+    authority._valid_completion = None
+    authority._selected_scope = None
+    authority._head = authority._review = authority._use = None
+    authority._last_use_event = None
+    authority._bindings = {}
+    authority._active_permit = None
+    authority._last_operating_permit = None
+    authority._counter = root.enrollment.initial_counter
+    authority._last_clock = None
+    authority._last_disposition = "DENIED_NO_ACTION"
+    now, mono = authority._clock_v1()
+    authority._deadline = mono + 900_000_000_000
+    _source_use_require_v1(authority._deadline <= 2**63 - 1)
+    authority._expires = now + timedelta(seconds=900)
+    adapter = object.__new__(OwnerControlMemoryAdapterV1)
+    InMemoryPersistenceAdapterV1.__init__(adapter)
+    adapter._availability = PersistenceAvailabilityV1.AVAILABLE_OWNER_CONTROL_EPHEMERAL
+    adapter._control_scope = (root, authority._issuer, authority._process_ref)
+    adapter._original_control_scope = adapter._control_scope
+    adapter._registered_batches = {}
+    adapter._pending_batch = None
+    authority._adapter = adapter
+    authority._uow = TrancheCUnitOfWorkV1(adapter, TransactionRetryPolicyV1(1))
+    return authority
+
+
+class SourceUseAuthorityV1:
+    """Sole ephemeral issuer. Lock order is S → O → A → P, never reversed.
+
+    Device calls and cryptographic completion execute outside A. Storage only
+    examines previously registered immutable batches and never calls back here.
+    """
+
+    def __init__(self):
+        raise TypeError("source-use authority requires original native bootstrap")
+
+    def __reduce__(self):
+        raise TypeError("process source-use authority cannot be serialized")
+
+    def _clock_v1(self):
+        from .receipts import _source_use_require_v1
+
+        before, wall, after = time.monotonic_ns(), time.time_ns(), time.monotonic_ns()
+        _kalshi_observation_time(all(type(value) is int and 0 <= value <= 2**63 - 1 for value in (before, wall, after))
+                                 and before <= after)
+        if self._last_clock is not None and (wall < self._last_clock[0] or before < self._last_clock[1]):
+            self.stop_v1()
+            _kalshi_observation_time(False)
+        self._last_clock = (wall, after)
+        return KalshiFeeObservationOwnerV1._wall_datetime_v1(wall), after
+
+    def _live_v1(self):
+        from .receipts import _source_use_require_v1
+
+        _source_use_require_v1(not self._stopped and self._adapter._scope_valid_v1())
+        now, mono = self._clock_v1()
+        if mono >= self._deadline or now >= self._expires:
+            self.stop_v1()
+            _kalshi_observation_time(False)
+        return now, mono
+
+    def stop_v1(self):
+        # Preallocated latch, no append/signature, no record or permit allocation.
+        with self._lock:
+            self._stopped = True
+            self._pending = None
+            self._valid_completion = None
+            self._use = None
+            self._active_permit = None
+            self._bindings.clear()
+            self._last_disposition = "STOPPED"
+
+    def cancel_pending_v1(self):
+        with self._lock:
+            self._pending = None
+            self._valid_completion = None
+            self._last_disposition = "CANCELLED"
+
+    def _heads_v1(self):
+        from .receipts import _source_use_require_v1
+
+        adapter = self._adapter
+        with adapter._lock:
+            head = adapter.load_committed_source_action_head_v1(self._process_ref)
+            _source_use_require_v1(head == self._head)
+            originals = []
+            for ref in (() if head is None else (head.typed_payload.declaration_ref, head.typed_payload.review_ref)):
+                if ref is None:
+                    originals.append(None)
+                else:
+                    row = adapter.load_committed_source_use_record_v1(ref)
+                    _source_use_require_v1(row is not None
+                        and adapter.load_committed_source_use_head_v1(row.typed_payload.stream_id) == row)
+                    originals.append(row)
+            return head, tuple(originals) if head is not None else (None, None)
+
+    def prepare_action_v1(self, raw_proposal: bytes):
+        from dataclasses import replace
+        from uuid import uuid4
+        from ...service.owner_source_use import _source_use_proposal_v1, _begin_source_use_authentication_v1
+        from .receipts import _source_use_require_v1, SourceUseControlRecordV1
+        from .serialization import deterministic_json
+
+        proposal = _source_use_proposal_v1(raw_proposal)
+        action, scope = proposal["action"], proposal["scope"]
+        with self._lock:
+            now, mono = self._live_v1()
+            _source_use_require_v1(self._pending is None and self._completion_pending is None
+                                   and (self._selected_scope is None or scope == self._selected_scope))
+            head, originals = self._heads_v1()
+            expected = (None if head is None else head.record_id,
+                        *(None if row is None else row.record_id for row in originals))
+            for name, ref in (("expected_declaration_ref", expected[1]), ("expected_review_ref", expected[2])):
+                if name in proposal:
+                    _source_use_require_v1(proposal[name] == ref)
+            positive = action in {"REVIEW_ACCEPT", "USE_ADMIT", "OBSERVE_ONCE"}
+            if positive:
+                rows = self._adapter._tables["receipt_records"]
+                _source_use_require_v1(len(rows) + 2 <= 256
+                    and sum(len(deterministic_json(row).encode("utf-8")) for row in rows.values()) + 2 * 65536 <= 16 * 1024 * 1024)
+            _source_use_require_v1(head is not None or action == "REVIEW_ACCEPT")
+            if action == "OBSERVE_ONCE":
+                _source_use_require_v1(self._use is not None and self._active_permit is None)
+            if action == "USE_ADMIT":
+                _source_use_require_v1(self._review is not None)
+            original = None
+            if action != "OBSERVE_ONCE":
+                review_action = action in {"REVIEW_ACCEPT", "INVALIDATE_REVIEW"}
+                old = originals[1 if review_action else 0]
+                kind = "SOURCE_REVIEW" if review_action else "OWNER_DECLARATION"
+                if positive:
+                    content = proposal["original"]
+                    if old is None or old.typed_payload.content != content:
+                        fresh = old is None or old.typed_payload.action == "WITHDRAW"
+                        stream = ("review_" if review_action else "declaration_") + uuid4().hex if fresh else old.typed_payload.stream_id
+                        original = SourceUseControlRecordV1(stream, kind, 1 if fresh else old.sequence + 1,
+                            "RECORD" if fresh else "SUPERSEDE", None if fresh else old.record_id, scope, content,
+                            None if fresh else ("OWNER_CONFIRMED_REVIEW_REPLACEMENT" if review_action else "OWNER_CONFIRMED_DECLARATION_REPLACEMENT"),
+                            "UNVERIFIED_SUBMISSION")
+                else:
+                    _source_use_require_v1(old is not None)
+                    if old.typed_payload.action != "WITHDRAW":
+                        original = SourceUseControlRecordV1(old.typed_payload.stream_id, kind, old.sequence + 1,
+                            "WITHDRAW", old.record_id, scope, None, proposal["reason"], old.typed_payload.input_class)
+            expiry = now
+            if positive:
+                requested = proposal["observation"].expires_at_utc if action == "OBSERVE_ONCE" else proposal["requested_expires_at_utc"]
+                _source_use_require_v1(requested <= self._expires)
+                expiry = min(requested, self._expires)
+                if action == "REVIEW_ACCEPT":
+                    facts = proposal["review_facts"]
+                    _source_use_require_v1(facts.factual_checked_at_utc <= now)
+                    _source_use_require_v1(requested <= facts.source_expires_at_utc)
+                    expiry = min(expiry, facts.source_expires_at_utc)
+                else:
+                    _source_use_require_v1(self._review is not None)
+                    _source_use_require_v1(requested <= self._review.typed_payload.expires_at_utc)
+                    expiry = min(expiry, self._review.typed_payload.expires_at_utc)
+                    declaration = original if original is not None else (None if originals[0] is None else originals[0].typed_payload)
+                    _source_use_require_v1(declaration is not None and declaration.content is not None
+                                           and declaration.content.claimed_effective_at_utc is not None
+                                           and declaration.content.claimed_effective_at_utc <= now
+                                           and declaration.content.claimed_expires_at_utc is not None)
+                    expiry = min(expiry, declaration.content.claimed_expires_at_utc)
+                    _source_use_require_v1(requested <= declaration.content.claimed_expires_at_utc)
+                    if action == "OBSERVE_ONCE":
+                        expiry = min(expiry, self._use.typed_payload.expires_at_utc)
+                        _source_use_require_v1(proposal["observation"].expires_at_utc <= expiry)
+                _source_use_require_v1(now < expiry)
+            request = uuid4().hex
+            preview = deterministic_json({"request_ref": request, "proposal": dict(proposal),
+                "expected_event_ref": expected[0], "expected_declaration_ref": expected[1],
+                "expected_review_ref": expected[2], "selected_original": original,
+                "current_originals": originals, "accepted_expires_at_utc": expiry,
+                "owner_ref": self._root.enrollment.owner_ref, "key_ref": self._root.enrollment.enrollment_ref,
+                "process_ref": self._process_ref, "generation": 0 if head is None else head.typed_payload.generation_after})
+            pending = _PendingSourceUseActionV1(request, proposal, expected, originals, original, expiry,
+                min(mono + 120_000_000_000, self._deadline), None, preview)
+            self._pending = pending
+        try:
+            authentication = _begin_source_use_authentication_v1(self._root.enrollment, operation="GET")
+            with self._lock:
+                self._live_v1()
+                _source_use_require_v1(self._pending is pending)
+                self._pending = replace(pending, authentication=authentication)
+                return request, preview
+        except BaseException:
+            with self._lock:
+                if self._pending is pending:
+                    self._pending = None
+            raise
+
+    def _spine_v1(self, payload, now, request):
+        from .receipts import EconomicReceiptEventSpineV1, EconomicRecordTypeV1, SourceUseControlRecordV1
+
+        original = type(payload) is SourceUseControlRecordV1
+        aggregate = ("SOURCE_USE::" + payload.stream_id) if original else ("SOURCE_ACTION::" + self._process_ref)
+        owner = "QTT_SOURCE_USE_CUSTODY" if original else "QTT_SOURCE_USE_POLICY"
+        return EconomicReceiptEventSpineV1(
+            record_id=f"{aggregate}::{payload.sequence:020d}",
+            record_type=EconomicRecordTypeV1.SOURCE_USE_CONTROL if original else EconomicRecordTypeV1.SOURCE_USE_ATTRIBUTED_ACTION,
+            schema_version="SOURCE_USE_CONTROL_V1" if original else "SOURCE_USE_ATTRIBUTED_ACTION_V1",
+            semantic_owner=owner, implementation_owner=owner, context_ref=self._process_ref,
+            effective_at=now, recorded_at=now, causation_id="ACTION::" + request,
+            correlation_id="PROCESS::" + self._process_ref, traceparent="TRACE::" + request,
+            tracestate="LOCAL_OWNER_CONTROL", sequence=payload.sequence, aggregate_id=aggregate,
+            aggregate_version=payload.sequence,
+            authority_class="RECORDED_NOT_AUTHENTICATED_NOT_ADMITTED" if original else "PROCESS_SCOPED_SOURCE_USE_EVENT",
+            typed_payload=payload)
+
+    def complete_action_v1(self, pending_ref, raw_response):
+        from dataclasses import replace
+        from ...service.owner_source_use import _verify_source_use_response_v1
+        from ...service.owner_source_use_windows import _require_completed_operation_v1
+        from .receipts import _source_use_require_v1, SourceUseAttributedActionV1
+
+        with self._lock:
+            pending = self._pending
+            self._pending = None  # First completion attempt consumes, including malformed input.
+            _source_use_require_v1(type(pending_ref) is str and type(pending) is _PendingSourceUseActionV1
+                                   and pending.request_ref == pending_ref and pending.authentication is not None)
+            now, mono = self._live_v1()
+            _source_use_require_v1(mono < pending.deadline_monotonic_ns)
+            _source_use_require_v1(self._completion_pending is None)
+            self._completion_pending = self._valid_completion = pending
+        committed = [False]
+        try:
+            _require_completed_operation_v1(self._root, pending_ref, raw_response)
+            proof = _verify_source_use_response_v1(pending.authentication, raw_response, verified_at_utc=now)
+            return self._commit_verified_action_v1(pending, proof, committed)
+        except BaseException:
+            if pending.proposal["action"] in {"WITHDRAW_USE", "INVALIDATE_REVIEW"}:
+                with self._lock:
+                    self.stop_v1()
+                    self._last_disposition = ("STOPPED_WITHDRAWAL_COMMITTED" if committed[0] else
+                        "STOPPED_WITHDRAWAL_COMMIT_UNESTABLISHED" if self._adapter._source_use_integrity_failed_v1 else
+                        "STOPPED_WITHDRAWAL_NOT_COMMITTED")
+            raise
+        finally:
+            with self._lock:
+                if self._completion_pending is pending:
+                    self._completion_pending = self._valid_completion = None
+
+    def _commit_verified_action_v1(self, pending, proof, committed):
+        from dataclasses import replace
+        from .receipts import _source_use_require_v1, SourceUseAttributedActionV1
+
+        pending_ref = pending.request_ref
+        with self._lock:
+            # Crypto succeeded: retain the observed high-water even if expiry,
+            # changed heads or another business condition now rejects the action.
+            if (self._counter != 0 or proof.counter != 0) and proof.counter <= self._counter:
+                self.stop_v1()
+                _source_use_require_v1(False)
+            self._counter = proof.counter
+            _source_use_require_v1(self._valid_completion is pending)
+            now, mono = self._live_v1()
+            proof = replace(proof, verified_at_utc=now)
+            _source_use_require_v1(mono < pending.deadline_monotonic_ns)
+            head, originals_before = self._heads_v1()
+            _source_use_require_v1(originals_before == pending.original_heads
+                                   and (None if head is None else head.record_id) == pending.expected[0])
+            proposal, action = pending.proposal, pending.proposal["action"]
+            _source_use_require_v1((head is None and self._selected_scope is None)
+                or (head is not None and self._selected_scope == head.typed_payload.scope == proposal["scope"]))
+            negative = action in {"WITHDRAW_USE", "INVALIDATE_REVIEW"}
+            _source_use_require_v1(negative or now < pending.expires_at_utc)
+            originals = () if pending.original is None else (self._spine_v1(pending.original, now, pending_ref),)
+            resulting = list(pending.expected[1:])
+            for row in originals:
+                resulting[1 if row.typed_payload.subject_kind == "SOURCE_REVIEW" else 0] = row.record_id
+            generation = 0 if head is None else head.typed_payload.generation_after
+            payload = SourceUseAttributedActionV1(
+                self._process_ref, 1 if head is None else head.sequence + 1, pending.expected[0], action,
+                proposal["scope"], self._root.enrollment.owner_ref, self._root.enrollment.enrollment_ref,
+                pending_ref, proof, generation, generation + (action != "OBSERVE_ONCE"),
+                pending.expected[1], pending.expected[2], *resulting,
+                None if action == "REVIEW_ACCEPT" or self._review is None else self._review.record_id,
+                None if action in {"REVIEW_ACCEPT", "USE_ADMIT"} or self._use is None else self._use.record_id,
+                tuple(row.record_id for row in originals), proposal.get("review_facts"),
+                now, now if negative else pending.expires_at_utc, proposal.get("observation"), proposal.get("reason"))
+            event = self._spine_v1(payload, now, pending_ref)
+            verified = object.__new__(_VerifiedSourceUseActionV1)
+            verified._authority, verified._root = self, self._root
+            verified._pending, verified._proof, verified._attempted = pending, proof, False
+            self._adapter._registered_batches[event.record_id] = MappingProxyType({
+                "verified": verified, "scope": self._adapter._control_scope,
+                "event": event, "originals": originals, "expected": pending.expected})
+            try:
+                result = self._uow.commit_source_use_action_v1(originals=originals, event=event,
+                    expected_event_ref=pending.expected[0], expected_declaration_ref=pending.expected[1],
+                    expected_review_ref=pending.expected[2], verified_action=verified)
+                _source_use_require_v1(result.disposition == "APPENDED")
+                committed[0] = True
+                self._head = result.current_event
+                self._selected_scope = proposal["scope"]
+                if action != "OBSERVE_ONCE":
+                    self._bindings.clear()
+                    self._active_permit = None
+                    self._use = None
+                if action == "REVIEW_ACCEPT":
+                    self._review = event
+                elif action == "INVALIDATE_REVIEW":
+                    self._review = None
+                elif action == "USE_ADMIT":
+                    self._use = event
+                    self._last_use_event = event
+                    self._issue_binding_v1(None, mono)
+                elif action == "OBSERVE_ONCE":
+                    _source_use_require_v1(self._active_permit is None)
+                    self._issue_binding_v1(event, mono)
+                self._last_disposition = "APPENDED"
+                return result
+            except BaseException:
+                self.stop_v1()
+                raise
+
+    def _issue_binding_v1(self, permit_event, mono):
+        from .receipts import _source_use_require_v1
+
+        _source_use_require_v1(self._review is not None and self._use is not None)
+        scope, facts = self._selected_scope, self._review.typed_payload.review_facts
+        source = PITSourceCurrentizationReceiptV1(
+            "SOURCE_REVIEW::" + self._review.record_id, scope.profile_id, scope.source_id,
+            scope.source_contract_version, facts.factual_checked_at_utc, facts.source_effective_at_utc,
+            facts.source_expires_at_utc, self._root.enrollment.owner_ref, facts.recheck_triggers, False, True)
+        rights = PITRightsAdmissionReceiptV1(
+            "SOURCE_USE::" + self._use.record_id, scope.profile_id, scope.account_scope_ref, scope.source_id,
+            facts.agreement_id, facts.agreement_version, scope.internal_use_class, "ADMITTED_INTERNAL_USE",
+            self._use.recorded_at, self._use.typed_payload.expires_at_utc, facts.recheck_triggers, False,
+            scope.permitted_retention_class, scope.prohibited_redistribution_class)
+        validate_pit_source_rights_admission_v1(source, rights, admission_id=self._use.record_id,
+            profile_id=scope.profile_id, account_scope=scope.account_scope_ref,
+            internal_use_class=scope.internal_use_class, permitted_retention_class=scope.permitted_retention_class,
+            evaluated_at_utc=self._head.recorded_at)
+        binding = object.__new__(KalshiSourceUseBindingV1)
+        binding._authority, binding._root = self, self._root
+        binding._generation = self._head.typed_payload.generation_after
+        binding._declaration_ref, binding._review_ref = self._head.typed_payload.declaration_ref, self._head.typed_payload.review_ref
+        binding._review_event_ref, binding._use_event_ref = self._review.record_id, self._use.record_id
+        binding._source, binding._rights, binding._permit = source, rights, None
+        if permit_event is not None:
+            permit = object.__new__(_SourceUseObservationPermitV1)
+            permit._event, permit._request = permit_event, permit_event.typed_payload.observation
+            remaining = permit._request.expires_at_utc - permit_event.recorded_at
+            remaining_ns = (remaining.days * 86400 + remaining.seconds) * 1_000_000_000 + remaining.microseconds * 1000
+            permit._deadline = min(self._deadline, mono + permit._request.maximum_duration_ns, mono + remaining_ns)
+            _source_use_require_v1(mono < permit._deadline <= 2**63 - 1)
+            permit._owner = permit._route = None
+            permit._published = permit._failed = False
+            permit._started = 0
+            binding._permit = permit
+            self._active_permit = permit
+            self._last_operating_permit = permit
+        self._bindings[id(binding)] = binding
+        return binding
+
+    def _check_binding_v1(self, binding, owner=None, *, inputs=None, allow_published=False):
+        from .receipts import _source_use_require_v1
+
+        now, mono = self._live_v1()
+        _source_use_require_v1(type(binding) is KalshiSourceUseBindingV1
+                               and self._bindings.get(id(binding)) is binding
+                               and binding._authority is self and binding._root is self._root)
+        head, originals = self._heads_v1()
+        _source_use_require_v1(head is not None and self._review is not None and self._use is not None
+                               and head.typed_payload.generation_after == binding._generation
+                               and (head.typed_payload.declaration_ref, head.typed_payload.review_ref)
+                               == (binding._declaration_ref, binding._review_ref)
+                               and self._review.record_id == binding._review_event_ref
+                               and self._use.record_id == binding._use_event_ref
+                               and self._review.typed_payload.review_ref == binding._review_ref
+                               and all(row is not None and row.typed_payload.content is not None for row in originals))
+        scope = self._selected_scope
+        _source_use_require_v1(head.typed_payload.scope == scope
+                               and binding._rights.prohibited_redistribution_class == scope.prohibited_redistribution_class)
+        _kalshi_observation_time(now < self._review.typed_payload.expires_at_utc
+                                 and now < self._use.typed_payload.expires_at_utc)
+        validate_pit_source_rights_admission_v1(binding._source, binding._rights, admission_id=self._use.record_id,
+            profile_id=scope.profile_id, account_scope=scope.account_scope_ref,
+            internal_use_class=scope.internal_use_class, permitted_retention_class=scope.permitted_retention_class,
+            evaluated_at_utc=now)
+        permit = binding._permit
+        if owner is not None or inputs is not None:
+            _source_use_require_v1(type(permit) is _SourceUseObservationPermitV1
+                                   and (permit is self._active_permit or (allow_published and permit._published)) and not permit._failed
+                                   and (allow_published or not permit._published))
+            _kalshi_observation_time(now < permit._event.typed_payload.expires_at_utc
+                                     and now < permit._request.expires_at_utc and mono < permit._deadline)
+            if owner is not None:
+                _source_use_require_v1(permit._owner is owner)
+            if inputs is not None:
+                _source_use_require_v1(type(inputs) is tuple and inputs == (permit._request.fills,
+                    permit._request.balance_increment, permit._request.prior_rounding_overpayment))
+        return now, mono
+
+    def _claim_owner_v1(self, binding, owner, supplied):
+        from .receipts import _source_use_require_v1
+
+        with self._lock:
+            self._check_binding_v1(binding, inputs=(binding._permit._request.fills,
+                binding._permit._request.balance_increment, binding._permit._request.prior_rounding_overpayment))
+            permit = binding._permit
+            _source_use_require_v1(permit._owner is None)
+            permit._owner = owner  # Failure after this line consumes this owner claim.
+            expected = (binding._source, binding._rights, self._selected_scope.account_scope_ref,
+                self._selected_scope.internal_use_class, self._selected_scope.permitted_retention_class,
+                permit._request.market_ticker, self._process_ref, self._clock_ref, permit._event.record_id,
+                permit._event.typed_payload.expires_at_utc, permit._deadline)
+            _source_use_require_v1(supplied[0] is binding._source and supplied[1] is binding._rights and supplied == expected)
 
 
 class AtomicFactTerminalStateV1(StrEnum):
@@ -5156,11 +5635,13 @@ class _KalshiObservationConfigV1:
     operating_authorization_ref: str
     effective_expiry_wall_ns: int
     deadline_monotonic_ns: int
+    source_use_binding: object = None
 
 
 @dataclass(frozen=True, slots=True)
 class _KalshiPreparedReadV1:
     owner: object
+    originating_thread: object
     role: str
     ticker: str
     target: str
@@ -5182,31 +5663,10 @@ class KalshiFeeObservationOwnerV1:
                  internal_use_class: str, permitted_retention_class: str,
                  expected_market_ticker: str, process_epoch_id: str,
                  monotonic_clock_id: str, operating_authorization_ref: str,
-                 authorization_expires_at_utc: datetime, deadline_monotonic_ns: int) -> None:
-        _kalshi_observation_require(not hasattr(self, "_lock"), "KALSHI_OBSERVATION_STATE")
+                 authorization_expires_at_utc: datetime, deadline_monotonic_ns: int,
+                 source_use_binding=None) -> None:
         _kalshi_observation_require(type(self) is KalshiFeeObservationOwnerV1
-            and type(source_receipt) is PITSourceCurrentizationReceiptV1
-            and type(rights_receipt) is PITRightsAdmissionReceiptV1,
-            "KALSHI_OBSERVATION_SCOPE")
-        profile = Stage1VenueProfileIdV1.KALSHI_US_DCM_DIRECT
-        _kalshi_observation_require(
-            source_receipt.profile_id is profile and rights_receipt.profile_id is profile
-            and source_receipt.source_id == rights_receipt.source_id == "KALSHI_PUBLIC_MARKET_EVENT_SERIES"
-            and source_receipt.source_contract_version == "KALSHI_PUBLIC_FEE_OBSERVATION_V1"
-            and type(internal_use_class) is str
-            and internal_use_class == rights_receipt.internal_use_class == "OBSERVED_FEE_SCENARIO_INTERNAL"
-            and type(permitted_retention_class) is str
-            and permitted_retention_class == rights_receipt.permitted_retention_class == "PROCESS_MEMORY_ONLY",
-            "KALSHI_OBSERVATION_SCOPE",
-        )
-        for value in (expected_market_ticker, process_epoch_id, monotonic_clock_id,
-                      operating_authorization_ref):
-            _native_ident(value)
-        _kalshi_observation_target("MARKET", expected_market_ticker)
-        _kalshi_observation_time(type(authorization_expires_at_utc) is datetime
-            and authorization_expires_at_utc.tzinfo is not None
-            and authorization_expires_at_utc.utcoffset() == timedelta(0))
-        _kalshi_observation_counter(deadline_monotonic_ns)
+            and not hasattr(self, "_lock"), "KALSHI_OBSERVATION_STATE")
         self._lock = RLock()
         self._state = "NEW"
         self._last_clock = None
@@ -5214,20 +5674,145 @@ class KalshiFeeObservationOwnerV1:
         self._issued_cohort = None
         self._attempts = 0
         self._expected_read = ("MARKET", expected_market_ticker)
-        wall, mono = self._observe_clock_v1()
-        _kalshi_observation_time(mono < deadline_monotonic_ns <= mono + 60_000_000_000)
-        admission = validate_pit_source_rights_admission_v1(
-            source_receipt, rights_receipt, admission_id=operating_authorization_ref,
-            profile_id=profile, account_scope=account_scope, internal_use_class=internal_use_class,
-            permitted_retention_class=permitted_retention_class,
-            evaluated_at_utc=self._wall_datetime_v1(wall))
-        expiry = min(authorization_expires_at_utc, admission.valid_until_utc)
-        expiry_ns = _native_utc_nanoseconds(expiry.isoformat())
-        _kalshi_observation_time(wall < expiry_ns)
-        self._config = _KalshiObservationConfigV1(
-            self, source_receipt, rights_receipt, account_scope, internal_use_class,
-            permitted_retention_class, expected_market_ticker, process_epoch_id,
-            monotonic_clock_id, operating_authorization_ref, expiry_ns, deadline_monotonic_ns)
+        self._session_origin = None
+        self._publication_route = None
+        self._publication_cleanup = False
+        try:
+            if source_use_binding is not None:
+                _kalshi_observation_require(type(source_use_binding) is KalshiSourceUseBindingV1,
+                                            "KALSHI_OBSERVATION_ASSOCIATION")
+                with self._lock:
+                    source_use_binding._authority._claim_owner_v1(source_use_binding, self, (
+                        source_receipt, rights_receipt, account_scope, internal_use_class, permitted_retention_class,
+                        expected_market_ticker, process_epoch_id, monotonic_clock_id, operating_authorization_ref,
+                        authorization_expires_at_utc, deadline_monotonic_ns))
+            _kalshi_observation_require(type(source_receipt) is PITSourceCurrentizationReceiptV1
+                and type(rights_receipt) is PITRightsAdmissionReceiptV1,
+                "KALSHI_OBSERVATION_SCOPE")
+            profile = Stage1VenueProfileIdV1.KALSHI_US_DCM_DIRECT
+            _kalshi_observation_require(
+                source_receipt.profile_id is profile and rights_receipt.profile_id is profile
+                and source_receipt.source_id == rights_receipt.source_id == "KALSHI_PUBLIC_MARKET_EVENT_SERIES"
+                and source_receipt.source_contract_version == "KALSHI_PUBLIC_FEE_OBSERVATION_V1"
+                and type(internal_use_class) is str
+                and internal_use_class == rights_receipt.internal_use_class == "OBSERVED_FEE_SCENARIO_INTERNAL"
+                and type(permitted_retention_class) is str
+                and permitted_retention_class == rights_receipt.permitted_retention_class == "PROCESS_MEMORY_ONLY",
+                "KALSHI_OBSERVATION_SCOPE",
+            )
+            for value in (expected_market_ticker, process_epoch_id, monotonic_clock_id,
+                          operating_authorization_ref):
+                _native_ident(value)
+            _kalshi_observation_target("MARKET", expected_market_ticker)
+            _kalshi_observation_time(type(authorization_expires_at_utc) is datetime
+                and authorization_expires_at_utc.tzinfo is not None
+                and authorization_expires_at_utc.utcoffset() == timedelta(0))
+            _kalshi_observation_counter(deadline_monotonic_ns)
+            wall, mono = self._observe_clock_v1()
+            _kalshi_observation_time(mono < deadline_monotonic_ns <= mono + 60_000_000_000)
+            admission = validate_pit_source_rights_admission_v1(
+                source_receipt, rights_receipt, admission_id=operating_authorization_ref,
+                profile_id=profile, account_scope=account_scope, internal_use_class=internal_use_class,
+                permitted_retention_class=permitted_retention_class,
+                evaluated_at_utc=self._wall_datetime_v1(wall))
+            # Logical PIT admits factual age exactly 24h, but the observation
+            # deadline is exclusive: at that endpoint no observation window remains.
+            expiry = min(authorization_expires_at_utc, admission.valid_until_utc)
+            expiry_ns = _native_utc_nanoseconds(expiry.isoformat())
+            _kalshi_observation_time(wall < expiry_ns)
+            self._config = _KalshiObservationConfigV1(
+                self, source_receipt, rights_receipt, account_scope, internal_use_class,
+                permitted_retention_class, expected_market_ticker, process_epoch_id,
+                monotonic_clock_id, operating_authorization_ref, expiry_ns, deadline_monotonic_ns, source_use_binding)
+        except BaseException:
+            # A genuine first claim is consumed even when later constructor
+            # validation fails. Never invalidate another owner's permit.
+            if type(source_use_binding) is KalshiSourceUseBindingV1:
+                authority = source_use_binding._authority
+                with self._lock, authority._lock:
+                    permit = source_use_binding._permit
+                    if type(permit) is _SourceUseObservationPermitV1 and permit._owner is self:
+                        permit._failed = True
+                        if authority._active_permit is permit:
+                            authority._active_permit = None
+            self._invalidate_v1()
+            raise
+
+    @contextmanager
+    def _authority_guard_v1(self):
+        binding = self._config.source_use_binding
+        _kalshi_observation_require(type(binding) is KalshiSourceUseBindingV1, "KALSHI_OBSERVATION_SOURCE_USE_REQUIRED")
+        with binding._authority._lock:
+            binding._authority._check_binding_v1(binding, self)
+            yield
+
+    def _bind_session_v1(self, session):
+        with self._lock:
+            _kalshi_observation_require(self._session_origin is None and self._state == "NEW", "KALSHI_OBSERVATION_STATE")
+            if self._config.source_use_binding is not None:
+                with self._authority_guard_v1():
+                    permit = self._config.source_use_binding._permit
+                    _kalshi_observation_require(permit._route is None, "KALSHI_OBSERVATION_STATE")
+                    permit._route = "SESSION"
+            self._session_origin = session
+
+    def _check_inputs_v1(self, fills, balance_increment, prior_rounding_overpayment):
+        with self._lock, self._authority_guard_v1():
+            binding = self._config.source_use_binding
+            binding._authority._check_binding_v1(binding, self,
+                inputs=(fills, balance_increment, prior_rounding_overpayment))
+
+    @contextmanager
+    def _publication_fence_v1(self, *, cohort, expected_market_ticker, as_of_monotonic_ns,
+                              fills, balance_increment, prior_rounding_overpayment, route):
+        with self._lock, self._authority_guard_v1():
+            binding = self._config.source_use_binding
+            authority, permit, config = binding._authority, binding._permit, self._config
+            inputs = (fills, balance_increment, prior_rounding_overpayment)
+            authority._check_binding_v1(binding, self, inputs=inputs)
+            self.resolve_scenario_multiplier(cohort=cohort, expected_market_ticker=expected_market_ticker,
+                                             as_of_monotonic_ns=as_of_monotonic_ns)
+            _kalshi_observation_require(self._publication_route is None
+                and route in ("DIRECT", "SESSION_INTERNAL", "SESSION_FINAL"), "KALSHI_OBSERVATION_PUBLICATION")
+            if route == "DIRECT":
+                _kalshi_observation_require(self._session_origin is None and permit._route in (None, "DIRECT"),
+                                            "KALSHI_OBSERVATION_PUBLICATION")
+            else:
+                session = self._session_origin
+                _kalshi_observation_require(session is not None and permit._route == "SESSION"
+                    and session._KalshiFeeScenarioSessionV1__origin is session
+                    and session._KalshiFeeScenarioSessionV1__owner is self
+                    and session._KalshiFeeScenarioSessionV1__state == "RUNNING", "KALSHI_OBSERVATION_PUBLICATION")
+            self._publication_route = route
+            self._publication_cleanup = False
+            try:
+                yield  # No guard object or arbitrary callback escapes this region.
+                authority._check_binding_v1(binding, self, inputs=inputs)
+                now = self._observe_clock_v1()
+                _kalshi_observation_require(self._config is config and config.source_use_binding is binding
+                    and permit._owner is self and self._publication_route == route,
+                    "KALSHI_OBSERVATION_ASSOCIATION")
+                _kalshi_observation_time(cohort.available_monotonic_ns <= as_of_monotonic_ns <= now[1]
+                    and now[0] < config.effective_expiry_wall_ns and now[1] < config.deadline_monotonic_ns)
+                if route == "SESSION_FINAL":
+                    _kalshi_observation_require(self._publication_cleanup and self._state == "REVOKED"
+                        and self._issued_cohort is None and self._pending is None
+                        and self._session_origin is session and session._KalshiFeeScenarioSessionV1__owner is self
+                        and session._KalshiFeeScenarioSessionV1__state == "CONSUMED", "KALSHI_OBSERVATION_PUBLICATION")
+                else:
+                    _kalshi_observation_require(self._state == "READY" and self._issued_cohort is cohort
+                        and not self._publication_cleanup, "KALSHI_OBSERVATION_PUBLICATION")
+                if route != "SESSION_INTERNAL":
+                    permit._route = "DIRECT" if route == "DIRECT" else "SESSION"
+                    permit._published = True
+                    authority._active_permit = None
+            except BaseException:
+                permit._failed = True
+                self._invalidate_v1()
+                raise
+            finally:
+                self._publication_route = None
+                self._publication_cleanup = False
 
     @staticmethod
     def _wall_datetime_v1(wall):
@@ -5266,6 +5851,9 @@ class KalshiFeeObservationOwnerV1:
         _kalshi_observation_require(self._state in ("NEW", "CAPTURING", "READY"),
                                     "KALSHI_OBSERVATION_STATE")
         try:
+            if config.source_use_binding is not None:
+                with config.source_use_binding._authority._lock:
+                    config.source_use_binding._authority._check_binding_v1(config.source_use_binding, self)
             validate_pit_source_rights_admission_v1(
                 config.source_receipt, config.rights_receipt,
                 admission_id=config.operating_authorization_ref,
@@ -5280,17 +5868,21 @@ class KalshiFeeObservationOwnerV1:
             raise
 
     def _require_pending_v1(self, prepared, *, charged):
+        from threading import current_thread
+
         _kalshi_observation_require(self._state == "CAPTURING", "KALSHI_OBSERVATION_STATE")
         _kalshi_observation_require(
             type(prepared) is _KalshiPreparedReadV1 and prepared.owner is self
+            and prepared.originating_thread is current_thread()
             and self._pending is not None and self._pending[0] is prepared
             and (self._pending[1] is not None) is charged,
             "KALSHI_OBSERVATION_ASSOCIATION")
 
     def _prepare_read_v1(self, role, ticker):
         import ssl
+        from threading import current_thread
 
-        with self._lock:
+        with self._lock, self._authority_guard_v1():
             _kalshi_observation_require(self._state == "CAPTURING" and self._pending is None
                 and self._attempts < 3 and (role, ticker) == self._expected_read
                 and role == ("MARKET", "EVENT", "SERIES")[self._attempts],
@@ -5298,16 +5890,20 @@ class KalshiFeeObservationOwnerV1:
             target = _kalshi_observation_target(role, ticker)
             clock = self._observe_clock_v1()
             self._check_operating_v1(clock)
-            try:
-                tls_context = ssl.create_default_context()
-            except (OSError, ValueError) as error:
-                self._raise_transport_v1(error)
+        try:
+            tls_context = ssl.create_default_context()
+        except (OSError, ValueError) as error:
+            self._raise_transport_v1(error)
+        with self._lock, self._authority_guard_v1():
+            _kalshi_observation_require(self._state == "CAPTURING" and self._pending is None
+                and self._attempts < 3 and (role, ticker) == self._expected_read,
+                "KALSHI_OBSERVATION_STATE")
             _kalshi_observation_require(tls_context.check_hostname is True
                 and tls_context.verify_mode == ssl.CERT_REQUIRED, "KALSHI_OBSERVATION_TRANSPORT")
             clock = self._observe_clock_v1()
             self._check_operating_v1(clock)
             prepared = _KalshiPreparedReadV1(
-                self, role, ticker, target,
+                self, current_thread(), role, ticker, target,
                 MappingProxyType({"Accept": "application/json", "Accept-Encoding": "identity", "Connection": "close"}),
                 tls_context, min(20.0, (self._config.deadline_monotonic_ns - clock[1]) / 1_000_000_000),
                 _KALSHI_OBSERVATION_BODY_LIMIT)
@@ -5315,12 +5911,13 @@ class KalshiFeeObservationOwnerV1:
             return prepared
 
     def _recheck_and_charge_v1(self, prepared):
-        with self._lock:
+        with self._lock, self._authority_guard_v1():
             self._require_pending_v1(prepared, charged=False)
             clock = self._observe_clock_v1()
             self._check_operating_v1(clock)
             _kalshi_observation_require(self._attempts < 3, "KALSHI_OBSERVATION_STATE")
             self._attempts += 1
+            self._config.source_use_binding._permit._started += 1
             self._pending = (prepared, clock, None, False)
 
     def _validate_response_headers_v1(self, prepared, response):
@@ -5377,7 +5974,7 @@ class KalshiFeeObservationOwnerV1:
                 "KALSHI_OBSERVATION_HTTP")
 
     def _retain_received_v1(self, prepared, raw, received):
-        with self._lock:
+        with self._lock, self._authority_guard_v1():
             self._require_pending_v1(prepared, charged=True)
             _kalshi_observation_require(received is self._last_clock, "KALSHI_OBSERVATION_ASSOCIATION")
             self._check_operating_v1(received)
@@ -5460,7 +6057,7 @@ class KalshiFeeObservationOwnerV1:
                 multiplier = KalshiQuadraticSeriesFeeCandidateV1(series_ticker,
                     Decimal(multiplier) if type(multiplier) is int else multiplier).fee_multiplier
                 basis = "OBSERVED_EVENT_OVERRIDE"
-            with self._lock:
+            with self._lock, self._authority_guard_v1():
                 _kalshi_observation_require(self._state == "CAPTURING" and self._pending is None
                     and self._attempts == 3, "KALSHI_OBSERVATION_STATE")
                 available = self._observe_clock_v1()
@@ -5499,6 +6096,17 @@ class KalshiFeeObservationOwnerV1:
     def revoke(self) -> None:
         self._require_instance_v1()
         with self._lock:
+            if self._publication_route == "SESSION_FINAL" and self._state == "READY":
+                self._publication_cleanup = True
+            else:
+                binding = self._config.source_use_binding
+                if binding is not None:
+                    with binding._authority._lock:
+                        permit = binding._permit
+                        if permit is not None and permit._owner is self and not permit._published:
+                            permit._failed = True
+                            if binding._authority._active_permit is permit:
+                                binding._authority._active_permit = None
             self._state = "REVOKED"
             self._pending = None
             self._issued_cohort = None

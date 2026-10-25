@@ -175,11 +175,18 @@ def compose_kalshi_observed_fee_scenario_cashflows_v1(
         cohort=cohort, expected_market_ticker=expected_market_ticker,
         as_of_monotonic_ns=as_of_monotonic_ns,
     )
-    return compose_kalshi_quadratic_taker_buy_yes_cashflows_v1(
+    source_owner._check_inputs_v1(fills, balance_increment, prior_rounding_overpayment)
+    result = compose_kalshi_quadratic_taker_buy_yes_cashflows_v1(
         profile_id=profile_id, currency=currency, fills=fills,
         fee_multiplier=multiplier, balance_increment=balance_increment,
         prior_rounding_overpayment=prior_rounding_overpayment,
     )
+    with source_owner._publication_fence_v1(
+        cohort=cohort, expected_market_ticker=expected_market_ticker, as_of_monotonic_ns=as_of_monotonic_ns,
+        fills=fills, balance_increment=balance_increment, prior_rounding_overpayment=prior_rounding_overpayment,
+        route="DIRECT" if source_owner._session_origin is None else "SESSION_INTERNAL",
+    ):
+        return result
 
 
 def _kalshi_scenario_inputs_v1(fills, balance_increment, prior_rounding_overpayment):
@@ -257,7 +264,8 @@ class KalshiFeeScenarioSessionV1:
                  internal_use_class: str, permitted_retention_class: str,
                  expected_market_ticker: str, process_epoch_id: str,
                  monotonic_clock_id: str, operating_authorization_ref: str,
-                 authorization_expires_at_utc: datetime, deadline_monotonic_ns: int) -> None:
+                 authorization_expires_at_utc: datetime, deadline_monotonic_ns: int,
+                 source_use_binding=None) -> None:
         if type(self) is not KalshiFeeScenarioSessionV1 or hasattr(self, "_KalshiFeeScenarioSessionV1__origin"):
             raise ContractValidationError(ReasonCode.INVALID_CONTRACT, "KALSHI_SCENARIO_SESSION_STATE")
         self.__origin = self
@@ -269,7 +277,9 @@ class KalshiFeeScenarioSessionV1:
             expected_market_ticker=expected_market_ticker, process_epoch_id=process_epoch_id,
             monotonic_clock_id=monotonic_clock_id, operating_authorization_ref=operating_authorization_ref,
             authorization_expires_at_utc=authorization_expires_at_utc, deadline_monotonic_ns=deadline_monotonic_ns,
+            source_use_binding=source_use_binding,
         )
+        self.__owner._bind_session_v1(self)
         self.__context = (source_receipt.receipt_id, rights_receipt.receipt_id, account_scope,
                           expected_market_ticker, operating_authorization_ref, process_epoch_id, monotonic_clock_id)
         self.__state = "NEW"
@@ -293,6 +303,7 @@ class KalshiFeeScenarioSessionV1:
             self.__require_instance()
             if self.__state != "NEW":
                 raise ContractValidationError(ReasonCode.INVALID_CONTRACT, "KALSHI_SCENARIO_SESSION_STATE")
+            self.__owner._check_inputs_v1(fills, balance_increment, prior_rounding_overpayment)
             owner, context = self.__owner, self.__context
             self.__state = "RUNNING"
         cohort = None
@@ -322,12 +333,15 @@ class KalshiFeeScenarioSessionV1:
                 if owner.resolve_scenario_multiplier(cohort=cohort, expected_market_ticker=context[3],
                                                      as_of_monotonic_ns=evaluated) != result.fee_multiplier:
                     raise ContractValidationError(ReasonCode.INVALID_CONTRACT, "KALSHI_SCENARIO_SESSION_RESULT")
-                try:
-                    owner.revoke()
-                except BaseException:
-                    raise ContractValidationError(ReasonCode.INVALID_CONTRACT, "KALSHI_SCENARIO_SESSION_CLEANUP_FAILED") from None
-                self.__state = "CONSUMED"
-                return result
+                with owner._publication_fence_v1(cohort=cohort, expected_market_ticker=context[3],
+                    as_of_monotonic_ns=evaluated, fills=fills, balance_increment=balance_increment,
+                    prior_rounding_overpayment=prior_rounding_overpayment, route="SESSION_FINAL"):
+                    try:
+                        owner.revoke()
+                    except BaseException:
+                        raise ContractValidationError(ReasonCode.INVALID_CONTRACT, "KALSHI_SCENARIO_SESSION_CLEANUP_FAILED") from None
+                    self.__state = "CONSUMED"
+                    return result
         except BaseException as error:
             with lock:
                 if self.__state != "REVOKED":

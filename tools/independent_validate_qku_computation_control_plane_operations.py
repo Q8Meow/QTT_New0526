@@ -1423,6 +1423,24 @@ def _runtime_topology_failures(
     failures: list[str] = []
     permitted_import_count = 0
     permitted_call_count = 0
+    source_thread_imports: set[ast.ImportFrom] = set()
+    if file_name == "source_policy.py":
+        owners = [node for node in tree.body if isinstance(node, ast.ClassDef)
+                  and node.name == "KalshiFeeObservationOwnerV1"]
+        if len(owners) == 1:
+            exact_nodes = []
+            for name in ("_prepare_read_v1", "_require_pending_v1"):
+                methods = [node for node in owners[0].body if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef))
+                           and node.name == name]
+                imports = [] if len(methods) != 1 or not isinstance(methods[0], ast.FunctionDef) else [node for node in ast.walk(methods[0])
+                    if isinstance(node, ast.ImportFrom) and node.module == "threading"]
+                if (len(imports) == 1 and imports[0] in methods[0].body
+                        and imports[0].level == 0
+                        and tuple((alias.name, alias.asname) for alias in imports[0].names)
+                        == (("current_thread", None),)):
+                    exact_nodes.append(imports[0])
+            if len(exact_nodes) == 2:
+                source_thread_imports.update(exact_nodes)
     for node in ast.walk(tree):
         if isinstance(node, ast.Import):
             for alias in node.names:
@@ -1453,7 +1471,8 @@ def _runtime_topology_failures(
                     and tuple((alias.name, alias.asname) for alias in node.names)
                     == (("Lock", None),)
                 )
-                if not parameter_policy_exception and not cache_publication_exception:
+                if (not parameter_policy_exception and not cache_publication_exception
+                        and node not in source_thread_imports):
                     failures.append(f"runtime import {node.module}")
         elif isinstance(node, ast.Call):
             qualified_name = _qualified_callable_name(node.func)

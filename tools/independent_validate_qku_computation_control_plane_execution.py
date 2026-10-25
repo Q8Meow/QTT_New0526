@@ -1774,12 +1774,15 @@ def _f14_execution_contract_failures_v1(repo_root):
     discriminator = next(n for n in tree.body if isinstance(n, ast.ClassDef) and n.name == 'EconomicRecordTypeV1')
     values = {ast.literal_eval(n.value) for n in discriminator.body if isinstance(n, ast.Assign)}
     if values != _F14_EXPECTED_DISCRIMINATORS:
-        failures.append('exact 22-discriminator roster changed, including source-use custody')
+        failures.append('exact attributed-action/source-use discriminator roster changed')
     for name, cls in (('persistence.py', 'PersistenceAdapterV1'), ('persistence.py', 'InMemoryPersistenceAdapterV1'),
             ('sqlite_reference.py', 'SQLiteReferenceAdapterV1')):
         tree = ast.parse((owner / name).read_text(encoding='utf-8'))
         methods = set(_class_methods(tree, cls))
-        if (cls == 'PersistenceAdapterV1' and methods != _F14_EXPECTED_METHODS) or not _F14_EXPECTED_METHODS <= methods:
+        inherited_denials = {'load_committed_source_action_v1', 'load_committed_source_action_head_v1',
+            'load_source_action_for_update_v1', 'load_source_action_head_for_update_v1'}
+        required = _F14_EXPECTED_METHODS if cls == 'PersistenceAdapterV1' else _F14_EXPECTED_METHODS - inherited_denials
+        if (cls == 'PersistenceAdapterV1' and methods != required) or not required <= methods:
             failures.append('F14 committed reader/interface roster changed: ' + cls)
     handoff = ast.parse((repo_root / 'src/qtt/stage1_prediction_markets/private_state_receipts/handoff.py').read_text(encoding='utf-8'))
     function = next(n for n in handoff.body if isinstance(n, ast.FunctionDef) and n.name == 'run_retail_private_observation_once_v1')
@@ -1796,9 +1799,76 @@ def _f14_execution_contract_failures_v1(repo_root):
         failures.append('F14 native install is not the single exact line under the inherited anchor')
     return failures
 
-_F14_EXPECTED_DISCRIMINATORS = frozenset(('DURABLE_COMPUTATION_RECEIPT', 'ECONOMIC_EVENT', 'JOURNAL_TRANSACTION', 'JOURNAL_POSTING', 'STATE_TRANSITION', 'IDEMPOTENCY_CLAIM', 'OUTBOX_INTENT', 'REVERSAL', 'RECONCILIATION_BREAK', 'ORDER_INTENT', 'EXECUTION_CUSTODY', 'MODE_SNAPSHOT_CONTROL', 'ST12F_EVIDENCE_CONTROL', 'PIT_COMMIT_INTENT', 'PIT_COMMIT_COMPLETION', 'PIT_AVAILABILITY', 'PIT_CANONICAL_EVENT', 'PIT_CAPTURE_AND_GAP', 'PIT_CHECKPOINT', 'PRIVATE_OBSERVATION_CLOCK', 'PRIVATE_EVIDENCE_WITNESS', 'SOURCE_USE_CONTROL'))
-_F14_EXPECTED_METHODS = frozenset(('availability', 'begin_transaction', 'insert_receipt_record', 'insert_value_lineage_edge', 'insert_economic_event', 'insert_journal_transaction', 'insert_journal_posting', 'insert_state_transition', 'acquire_idempotency_claim', 'bind_idempotency_result', 'insert_outbox_intent', 'insert_reversal_link', 'load_committed_reversal_history', 'insert_reconciliation_break', 'get_record', 'load_committed_private_clock_receipt_v1', 'get_idempotency_result', 'reconstruct_as_of', 'load_committed_private_evidence_witness_v1', 'load_committed_private_evidence_snapshot_v1', 'load_committed_source_use_record_v1', 'load_committed_source_use_head_v1', 'load_source_use_head_for_update_v1', 'load_source_use_record_for_update_v1'))
-_F14_EXPECTED_NATIVE_INSTALL = 'python -m pip install --only-binary=:all: --no-deps --index-url https://pypi.org/simple websockets==17.0.1 cryptography==50.0.1 cffi==2.1.1 pycparser==3.0'
+_F14_EXPECTED_DISCRIMINATORS = frozenset(('DURABLE_COMPUTATION_RECEIPT', 'ECONOMIC_EVENT', 'JOURNAL_TRANSACTION', 'JOURNAL_POSTING', 'STATE_TRANSITION', 'IDEMPOTENCY_CLAIM', 'OUTBOX_INTENT', 'REVERSAL', 'RECONCILIATION_BREAK', 'ORDER_INTENT', 'EXECUTION_CUSTODY', 'MODE_SNAPSHOT_CONTROL', 'ST12F_EVIDENCE_CONTROL', 'PIT_COMMIT_INTENT', 'PIT_COMMIT_COMPLETION', 'PIT_AVAILABILITY', 'PIT_CANONICAL_EVENT', 'PIT_CAPTURE_AND_GAP', 'PIT_CHECKPOINT', 'PRIVATE_OBSERVATION_CLOCK', 'PRIVATE_EVIDENCE_WITNESS', 'SOURCE_USE_CONTROL', 'SOURCE_USE_ATTRIBUTED_ACTION'))
+_F14_EXPECTED_METHODS = frozenset(('availability', 'begin_transaction', 'insert_receipt_record', 'insert_value_lineage_edge', 'insert_economic_event', 'insert_journal_transaction', 'insert_journal_posting', 'insert_state_transition', 'acquire_idempotency_claim', 'bind_idempotency_result', 'insert_outbox_intent', 'insert_reversal_link', 'load_committed_reversal_history', 'insert_reconciliation_break', 'get_record', 'load_committed_private_clock_receipt_v1', 'get_idempotency_result', 'reconstruct_as_of', 'load_committed_private_evidence_witness_v1', 'load_committed_private_evidence_snapshot_v1', 'load_committed_source_use_record_v1', 'load_committed_source_use_head_v1', 'load_source_use_head_for_update_v1', 'load_source_use_record_for_update_v1', 'load_committed_source_action_v1', 'load_committed_source_action_head_v1', 'load_source_action_for_update_v1', 'load_source_action_head_for_update_v1'))
+_F14_EXPECTED_NATIVE_INSTALL = 'python -m pip install --only-binary=:all: --no-deps --index-url https://pypi.org/simple websockets==17.0.1 cryptography==50.0.1 cffi==2.1.1 pycparser==3.0 fido2==2.2.1'
+
+
+def _source_use_execution_contract_failures_v1(trees):
+    """Joint census for the new discriminator, storage denies and atomic UOW."""
+    failures = []
+    def method(file, owner, name):
+        outer = [trees[file]] if owner is None else [n for n in trees[file].body
+            if isinstance(n, ast.ClassDef) and n.name == owner]
+        found = [n for cls in outer for n in cls.body if isinstance(n, ast.FunctionDef) and n.name == name]
+        if len(found) != 1:
+            raise ValueError("attributed-action execution member missing: " + name)
+        return found[0]
+    def named_calls(node):
+        return {ast.unparse(n.func) for n in ast.walk(node) if isinstance(n, ast.Call)}
+    try:
+        for name in ("_source_action_validate_spine_v1", "_source_action_reconstruct_spine_v1",
+                     "_source_action_from_storage_v1"):
+            method("receipts.py", None, name)
+        rebuilt = method("receipts.py", None, "_source_action_reconstruct_spine_v1")
+        if not {"_source_use_fields_v1", "EconomicReceiptEventSpineV1"} <= named_calls(rebuilt):
+            failures.append("attributed action reconstruction is not typed")
+        for file, owner in (("persistence.py", "InMemoryPersistenceAdapterV1"),
+                            ("sqlite_reference.py", "SQLiteReferenceAdapterV1")):
+            insert = method(file, owner, "insert_receipt_record")
+            if not insert.body or not isinstance(insert.body[0], ast.If) or not (
+                    "_source_action_reserved_v1" in named_calls(insert.body[0])
+                    and any(isinstance(n, ast.Raise) for n in ast.walk(insert.body[0]))):
+                failures.append("reference attributed-action insert denial missing: " + owner)
+            getter = method(file, owner, "get_record")
+            if not any(isinstance(n, ast.Constant) and n.value == "SOURCE_ACTION::" for n in ast.walk(getter)):
+                failures.append("generic attributed-action namespace rejection missing: " + owner)
+        readers = ("load_committed_source_action_v1", "load_committed_source_action_head_v1",
+                   "load_source_action_for_update_v1", "load_source_action_head_for_update_v1")
+        for name in readers:
+            default = method("persistence.py", "PersistenceAdapterV1", name)
+            if not any(isinstance(n, ast.Raise) for n in ast.walk(default)):
+                failures.append("default source-action reader is not deny-only: " + name)
+            selected = method("persistence.py", "OwnerControlMemoryAdapterV1", name)
+            if "self._action_read_v1" not in named_calls(selected):
+                failures.append("ephemeral source-action reader lacks strict reconstruction: " + name)
+        memory = next(n for n in trees["persistence.py"].body if isinstance(n, ast.ClassDef)
+                      and n.name == "OwnerControlMemoryAdapterV1")
+        aliases = {t.id: ast.unparse(n.value) for n in memory.body if isinstance(n, ast.Assign)
+                   for t in n.targets if isinstance(t, ast.Name)}
+        if aliases.get("get_record") != "_deny_v1" or aliases.get("reconstruct_as_of") != "_deny_v1":
+            failures.append("ephemeral generic/replay denial missing")
+        insert = method("persistence.py", "OwnerControlMemoryAdapterV1", "insert_receipt_record")
+        if not {"self._transaction", "self._insert", "_source_use_require_v1"} <= named_calls(insert):
+            failures.append("ephemeral insertion bypasses original registered transaction")
+        commit = method("transaction.py", "TrancheCUnitOfWorkV1", "commit_source_use_action_v1")
+        required = {"_source_action_reconstruct_spine_v1", "_source_use_reconstruct_spine_v1",
+                    "adapter._prepare_action_batch_v1", "adapter.begin_transaction",
+                    "adapter._validate_action_batch_v1", "adapter.insert_receipt_record",
+                    "transaction.commit", "transaction.rollback", "SourceUseActionCommitResultV1",
+                    "adapter.load_committed_source_action_v1", "adapter.load_committed_source_action_head_v1"}
+        if not required <= named_calls(commit):
+            failures.append("specialized attributed-action atomic/duplicate/rollback census incomplete")
+        expressions = {ast.unparse(n) for n in ast.walk(commit)}
+        if not {"type(adapter) is OwnerControlMemoryAdapterV1", "type(verified_action) is _VerifiedSourceUseActionV1",
+                "verified_action._attempted = True", 'adapter._source_use_integrity_failed_v1 = True'} <= expressions:
+            failures.append("specialized UOW original authority/attempt/integrity checks missing")
+        generic = method("transaction.py", "TrancheCUnitOfWorkV1", "execute")
+        if not any(isinstance(n, ast.Attribute) and n.attr == "AVAILABLE_REFERENCE" for n in ast.walk(generic)):
+            failures.append("generic UOW can admit ephemeral source-control storage")
+    except (KeyError, StopIteration, ValueError) as error:
+        failures.append(str(error))
+    return failures
 
 
 def main() -> int:
@@ -1893,6 +1963,8 @@ def main() -> int:
         "load_committed_private_evidence_snapshot_v1",
         "load_committed_source_use_record_v1", "load_committed_source_use_head_v1",
         "load_source_use_head_for_update_v1", "load_source_use_record_for_update_v1",
+        "load_committed_source_action_v1", "load_committed_source_action_head_v1",
+        "load_source_action_for_update_v1", "load_source_action_head_for_update_v1",
         "reconstruct_as_of",
     }
     if persistence_methods != expected_methods:
@@ -2044,6 +2116,7 @@ def main() -> int:
     if not (matrix_root / "accounting" / "test_contract_matrix.py").is_file() or not (matrix_root / "execution" / "test_contract_matrix.py").is_file():
         failures.append("centralized contract matrices are missing")
     failures.extend(_f14_execution_contract_failures_v1(REPO_ROOT))
+    failures.extend(_source_use_execution_contract_failures_v1(trees))
     if failures:
         print("\n".join(failures), file=sys.stderr)
         return 1

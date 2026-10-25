@@ -35,6 +35,7 @@ from .persistence import (
     PersistenceAdapterV1,
     PersistenceAvailabilityV1,
     PersistenceTransactionV1,
+    _source_action_reserved_v1,
 )
 from .receipts import (
     DurableComputationExecutionReceiptRecordV1, EconomicEventRecordV1,
@@ -356,6 +357,8 @@ class SQLiteReferenceAdapterV1(PersistenceAdapterV1):
                 )
 
     def insert_receipt_record(self, transaction: PersistenceTransactionV1, record: EconomicReceiptEventSpineV1) -> None:
+        if _source_action_reserved_v1(record):
+            raise PersistenceContractError(ReasonCode.PERSISTENCE_UNAVAILABLE, "attributed actions are ephemeral only")
         self._transaction(transaction)
         payload = record.typed_payload
         if (record.record_type == EconomicRecordTypeV1.SOURCE_USE_CONTROL
@@ -774,6 +777,8 @@ class SQLiteReferenceAdapterV1(PersistenceAdapterV1):
             )
         if record_ref.startswith("SOURCE_USE::"):
             return self.load_committed_source_use_record_v1(record_ref)
+        if record_ref.startswith("SOURCE_ACTION::"):
+            raise PersistenceContractError(ReasonCode.PERSISTENCE_UNAVAILABLE, "attributed actions are ephemeral only")
         for table in APPEND_ONLY_TABLES_V1:
             identity = REFERENCE_IDENTITY_COLUMN_BY_TABLE_V1[table]
             row = self._connection.execute(f"SELECT payload_json FROM {table} WHERE {identity}=?", (record_ref,)).fetchone()

@@ -275,8 +275,92 @@ def _helper_enforces_exact_clock_base(
     )
 
 
+def _source_use_security_failures_v1(root):
+    """Separate security oracle; no production/native module is imported."""
+    native_path = root / "src/qtt/service/owner_source_use_windows.py"
+    service_path = root / "src/qtt/service/owner_source_use.py"
+    native = ast.parse(native_path.read_text(encoding="utf-8"))
+    service = ast.parse(service_path.read_text(encoding="utf-8"))
+    failures = []
+    native_functions = {n.name: n for n in native.body if isinstance(n, ast.FunctionDef)}
+    service_functions = {n.name: n for n in service.body if isinstance(n, ast.FunctionDef)}
+    def calls(node):
+        return [n for n in ast.walk(node) if isinstance(n, ast.Call)]
+    try:
+        expected_dlls = {
+            "_native_system_v1": ["advapi32.dll", "kernel32.dll", "ole32.dll", "shell32.dll"],
+            "_webauthn_table_v1": ["webauthn.dll"], "_user_table_v1": ["user32.dll"],
+        }
+        found = []
+        for name, function in native_functions.items():
+            loads = [n for n in calls(function) if ast.unparse(n.func) == "ctypes.WinDLL"]
+            if loads:
+                observed = []
+                for node in loads:
+                    if len(node.args) != 1 or not isinstance(node.args[0], ast.Constant):
+                        failures.append("native DLL is not fixed")
+                        continue
+                    observed.append(node.args[0].value)
+                    if {kw.arg: ast.literal_eval(kw.value) for kw in node.keywords} != {"use_last_error": True, "winmode": 2048}:
+                        failures.append("native DLL search policy differs")
+                if sorted(observed) != expected_dlls.get(name):
+                    failures.append("native DLL owner/roster differs")
+                found.extend(observed)
+        if len(found) != 6:
+            failures.append("native DLL census differs")
+        allowed_entry = ast.parse('if __name__ == "__main__":\n    raise SystemExit(run_owner_source_use_local_v1())').body[0]
+        top_effects = [n for n in native.body if not isinstance(n, (ast.Import, ast.ImportFrom, ast.Assign,
+                      ast.AnnAssign, ast.FunctionDef, ast.ClassDef, ast.Expr))]
+        if len(top_effects) != 1 or ast.dump(top_effects[0], include_attributes=False) != ast.dump(allowed_entry, include_attributes=False):
+            failures.append("native explicit entry differs")
+        for node in native.body:
+            if isinstance(node, ast.Expr) and not isinstance(node.value, ast.Constant):
+                failures.append("native import scope executes a call")
+            if isinstance(node, (ast.Assign, ast.AnnAssign)):
+                if any(ast.unparse(call.func) in {"run_owner_source_use_local_v1", "_bootstrap_owner_source_use_v1", "ctypes.WinDLL"}
+                       for call in calls(node)):
+                    failures.append("native import scope constructs an operational root")
+        entry_calls = {ast.unparse(n.func) for n in calls(native_functions["run_owner_source_use_local_v1"])}
+        if not {"_bootstrap_owner_source_use_v1", "_create_owner_source_use_controller_v1",
+                "_run_local_window_v1", "_close_native_root_v1", "controller.stop_v1"} <= entry_calls:
+            failures.append("entry bootstrap/controller/window/cleanup chain incomplete")
+        verify = service_functions["_verify_source_use_response_v1"]
+        verifier_calls = {ast.unparse(n.func) for n in calls(verify)}
+        if not {"Fido2Server.authenticate_complete", "Fido2Server.register_complete", "_validate_public_key_v1",
+                "_closed_json_v1", "_source_use_b64_v1"} <= verifier_calls:
+            failures.append("actual Fido2Server verification boundary incomplete")
+        if {"pending.server.authenticate_complete", "pending.server.register_complete"} & verifier_calls:
+            failures.append("verifier is replaceable through an instance callback")
+        verifier_checks = {ast.unparse(n) for n in ast.walk(verify)}
+        if not {"raw.client_data == pending.client_data", "pending.server._verify is _exact_source_use_origin_v1",
+                "type(pending.server) is Fido2Server"} <= verifier_checks:
+            failures.append("frozen response/origin/server association missing")
+        table_text = ast.unparse(native_functions["_webauthn_table_v1"])
+        if "w.WebAuthNIsUserVerifyingPlatformAuthenticatorAvailable.argtypes = [ctypes.POINTER(ctypes.c_int32)]" not in table_text:
+            failures.append("WebAuthn availability BOOL width differs")
+        acquire = native_functions["_acquire_native_response_v1"]
+        finalizers = [n for n in ast.walk(acquire) if isinstance(n, ast.Try) and n.finalbody]
+        if len(finalizers) != 1:
+            failures.append("native response does not have one cleanup owner")
+        else:
+            free_calls = [ast.unparse(n.func) for stmt in finalizers[0].finalbody for n in calls(stmt)]
+            if free_calls != ["table.WebAuthNFreeAssertion", "table.WebAuthNFreeCredentialAttestation"]:
+                failures.append("native response free functions differ")
+        for node in ast.walk(native):
+            if isinstance(node, ast.ImportFrom) and node.module == "fido2.client.windows":
+                failures.append("high-level native parser imported")
+            if isinstance(node, ast.FunctionDef) and node.name == "__del__":
+                failures.append("native response has an automatic destructor")
+            if isinstance(node, ast.Assign) and any(ast.unparse(t) == "sys.path" for t in node.targets):
+                failures.append("bootstrap modifies its import path")
+    except (KeyError, ValueError, TypeError) as error:
+        failures.append("source-use security structure invalid: " + str(error))
+    return failures
+
+
 def main() -> int:
     failures: list[str] = []
+    failures.extend(_source_use_security_failures_v1(REPO_ROOT))
     failures.extend(validate_st12e_domain("security"))
     authority_tree: ast.Module | None = None
     certified_import_count = 0
@@ -287,6 +371,15 @@ def main() -> int:
     cache_lock_publication_count = 0
     for path in sorted(PACKAGE.glob("*.py")):
         tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
+        source_use_thread_imports = set()
+        if path.name == "source_policy.py":
+            for cls in tree.body:
+                if isinstance(cls, ast.ClassDef) and cls.name == "KalshiFeeObservationOwnerV1":
+                    for method in cls.body:
+                        if isinstance(method, ast.FunctionDef) and method.name in {"_prepare_read_v1", "_require_pending_v1"}:
+                            source_use_thread_imports.update(id(n) for n in method.body if isinstance(n, ast.ImportFrom)
+                                and n.module == "threading" and n.level == 0
+                                and tuple((a.name, a.asname) for a in n.names) == (("current_thread", None),))
         if path.name == "authority.py":
             authority_tree = tree
         for node in ast.walk(tree):
@@ -310,7 +403,7 @@ def main() -> int:
                                 "evidence.py: cache publication import differs "
                                 "from exact threading.Lock authority"
                             )
-                    elif path.name != "parameter_policy.py":
+                    elif path.name != "parameter_policy.py" and id(node) not in source_use_thread_imports:
                         failures.append(
                             f"{path.name}: unauthorized production threading import"
                         )

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import copy
+import base64
 import re
 from dataclasses import dataclass, fields as dataclass_fields
 from datetime import UTC, date, datetime
@@ -20,6 +21,7 @@ from .errors import (
     ComputationControlPlaneError, ContractValidationError, PersistenceContractError,
     PointInTimeError, ReasonCode, SerializationSafetyError,
 )
+from .economic_math import KalshiQuadraticTakerBuyYesFillV1, _kalshi_bounded_fraction
 from .models import (
     ComputationExecutionReceiptV1,
     ModeSnapshotCandidateProposalResultV1,
@@ -107,6 +109,7 @@ class EconomicRecordTypeV1(StrEnum):
     PRIVATE_OBSERVATION_CLOCK = "PRIVATE_OBSERVATION_CLOCK"
     PRIVATE_EVIDENCE_WITNESS = "PRIVATE_EVIDENCE_WITNESS"
     SOURCE_USE_CONTROL = "SOURCE_USE_CONTROL"
+    SOURCE_USE_ATTRIBUTED_ACTION = "SOURCE_USE_ATTRIBUTED_ACTION"
 
 
 class ModeSnapshotControlClassV1(StrEnum):
@@ -530,6 +533,7 @@ ECONOMIC_RECORD_PAYLOAD_CLASS: Mapping[EconomicRecordTypeV1, tuple[str, str]] = 
         ),
         EconomicRecordTypeV1.PRIVATE_EVIDENCE_WITNESS: ("receipts", "PrivateEvidenceWitnessV1"),
         EconomicRecordTypeV1.SOURCE_USE_CONTROL: ("receipts", "SourceUseControlRecordV1"),
+        EconomicRecordTypeV1.SOURCE_USE_ATTRIBUTED_ACTION: ("receipts", "SourceUseAttributedActionV1"),
         EconomicRecordTypeV1.PRIVATE_OBSERVATION_CLOCK: (
             "receipts",
             "PrivateObservationClockReceiptV1",
@@ -562,6 +566,11 @@ class EconomicReceiptEventSpineV1:
     def __post_init__(self) -> None:
         if self.record_type == EconomicRecordTypeV1.SOURCE_USE_CONTROL:
             _source_use_validate_spine_v1(self)
+        if (self.record_type == EconomicRecordTypeV1.SOURCE_USE_ATTRIBUTED_ACTION
+                or type(self.typed_payload) is SourceUseAttributedActionV1
+                or (type(self.record_id) is str and self.record_id.startswith("SOURCE_ACTION::"))
+                or (type(self.aggregate_id) is str and self.aggregate_id.startswith("SOURCE_ACTION::"))):
+            _source_action_validate_spine_v1(self)
         for name in (
             "record_id", "schema_version", "semantic_owner", "implementation_owner",
             "context_ref", "causation_id", "correlation_id", "traceparent", "tracestate",
@@ -833,6 +842,235 @@ def _source_use_from_storage_v1(
         return rebuilt
     except (ContractValidationError, AttributeError, TypeError, UnicodeError, RecursionError) as exc:
         raise PersistenceContractError(ReasonCode.PERSISTENCE_CONFLICT, "invalid stored source-use control record") from exc
+
+
+def _source_action_ref_v1(value: object) -> str:
+    _source_use_require_v1(type(value) is str)
+    match = re.fullmatch(r"SOURCE_ACTION::([A-Za-z0-9_-]{1,64})::([0-9]{20})", value)
+    _source_use_require_v1(match is not None and 1 <= int(match[2]) <= 2**63 - 1)
+    return _native_ident(value)
+
+
+def _source_use_b64_v1(value: object, *, maximum: int, minimum: int = 1) -> bytes:
+    _source_use_require_v1(type(value) is str and len(value) <= (maximum * 4 + 2) // 3
+                           and re.fullmatch(r"[A-Za-z0-9_-]*", value) is not None)
+    try:
+        raw = base64.b64decode(value + "=" * (-len(value) % 4), altchars=b"-_", validate=True)
+    except ValueError as exc:
+        raise ContractValidationError(ReasonCode.INVALID_CONTRACT, "invalid public proof encoding") from exc
+    _source_use_require_v1(minimum <= len(raw) <= maximum
+                           and base64.urlsafe_b64encode(raw).rstrip(b"=").decode("ascii") == value)
+    return raw
+
+
+def _source_use_text_tuple_v1(value: object, *, minimum: int) -> None:
+    _source_use_require_v1(type(value) is tuple and minimum <= len(value) <= 32)
+    for item in value:
+        _source_use_text_v1(item)
+    _source_use_require_v1(len(set(value)) == len(value))
+
+
+@dataclass(frozen=True, slots=True)
+class SourceUseReviewFactsV1:
+    document_ref: str
+    document_version: str
+    agreement_id: str
+    agreement_version: str
+    factual_checked_at_utc: datetime
+    available_at_utc: datetime
+    source_effective_at_utc: datetime
+    source_expires_at_utc: datetime
+    recheck_triggers: tuple[str, ...]
+    reviewed_claims: tuple[str, ...]
+    limitations: tuple[str, ...]
+
+    def __post_init__(self) -> None:
+        for name in ("document_ref", "document_version", "agreement_id", "agreement_version"):
+            _source_use_text_v1(getattr(self, name))
+        for name in ("factual_checked_at_utc", "available_at_utc", "source_effective_at_utc", "source_expires_at_utc"):
+            object.__setattr__(self, name, _source_use_utc_v1(getattr(self, name)))
+        _source_use_require_v1(self.available_at_utc <= self.factual_checked_at_utc
+                               and self.source_effective_at_utc <= self.factual_checked_at_utc
+                               and self.factual_checked_at_utc < self.source_expires_at_utc)
+        _source_use_text_tuple_v1(self.recheck_triggers, minimum=1)
+        _source_use_text_tuple_v1(self.reviewed_claims, minimum=1)
+        _source_use_text_tuple_v1(self.limitations, minimum=0)
+
+
+@dataclass(frozen=True, slots=True)
+class SourceUseProofV1:
+    key_ref: str
+    client_data_b64: str
+    authenticator_data_b64: str
+    signature_b64: str
+    returned_user_handle_b64: str | None
+    counter: int
+    verified_at_utc: datetime
+
+    def __post_init__(self) -> None:
+        _native_ident(self.key_ref)
+        sizes = sum(len(_source_use_b64_v1(getattr(self, name), maximum=65536)) for name in (
+            "client_data_b64", "authenticator_data_b64", "signature_b64"))
+        _source_use_require_v1(sizes <= 65536)
+        if self.returned_user_handle_b64 is not None:
+            handle = _source_use_b64_v1(self.returned_user_handle_b64, maximum=32, minimum=32)
+            _source_use_require_v1(sizes + len(handle) <= 65536)
+        _source_use_require_v1(type(self.counter) is int and 0 <= self.counter <= 2**32 - 1)
+        object.__setattr__(self, "verified_at_utc", _source_use_utc_v1(self.verified_at_utc))
+
+
+@dataclass(frozen=True, slots=True)
+class SourceUseObservationRequestV1:
+    market_ticker: str
+    fills: tuple[KalshiQuadraticTakerBuyYesFillV1, ...]
+    balance_increment: Decimal
+    prior_rounding_overpayment: Decimal
+    expires_at_utc: datetime
+    maximum_duration_ns: int
+
+    def __post_init__(self) -> None:
+        from .source_policy import _kalshi_observation_target
+
+        _kalshi_observation_target("MARKET", self.market_ticker)
+        _source_use_require_v1(type(self.fills) is tuple and 1 <= len(self.fills) <= 4096)
+        object.__setattr__(self, "fills", tuple(KalshiQuadraticTakerBuyYesFillV1(
+            **_source_use_fields_v1(row, KalshiQuadraticTakerBuyYesFillV1)) for row in self.fills))
+        _kalshi_bounded_fraction(self.balance_increment, "balance_increment", nonnegative=True)
+        _source_use_require_v1(self.balance_increment in (Decimal("0.0001"), Decimal("0.01")))
+        _kalshi_bounded_fraction(self.prior_rounding_overpayment, "prior_rounding_overpayment",
+                                nonnegative=True, microdollars=True)
+        object.__setattr__(self, "expires_at_utc", _source_use_utc_v1(self.expires_at_utc))
+        _source_use_require_v1(type(self.maximum_duration_ns) is int and 1 <= self.maximum_duration_ns <= 60_000_000_000)
+
+
+@dataclass(frozen=True, slots=True)
+class SourceUseAttributedActionV1:
+    process_ref: str
+    sequence: int
+    predecessor_event_ref: str | None
+    action: str
+    scope: SourceUseScopeV1
+    owner_ref: str
+    key_ref: str
+    request_ref: str
+    proof: SourceUseProofV1
+    generation_before: int
+    generation_after: int
+    expected_declaration_ref: str | None
+    expected_review_ref: str | None
+    declaration_ref: str | None
+    review_ref: str | None
+    review_event_ref: str | None
+    use_event_ref: str | None
+    original_event_refs: tuple[str, ...]
+    review_facts: SourceUseReviewFactsV1 | None
+    starts_at_utc: datetime
+    expires_at_utc: datetime
+    observation: SourceUseObservationRequestV1 | None
+    reason: str | None
+
+    def __post_init__(self) -> None:
+        _source_use_stream_id_v1(self.process_ref)
+        _source_use_require_v1(type(self.sequence) is int and 1 <= self.sequence <= 2**63 - 1)
+        predecessor = None if self.sequence == 1 else f"SOURCE_ACTION::{self.process_ref}::{self.sequence - 1:020d}"
+        if self.predecessor_event_ref is not None:
+            _source_action_ref_v1(self.predecessor_event_ref)
+        _source_use_require_v1(self.predecessor_event_ref == predecessor)
+        _source_use_text_v1(self.action)
+        _source_use_require_v1(self.action in {"REVIEW_ACCEPT", "USE_ADMIT", "OBSERVE_ONCE", "WITHDRAW_USE", "INVALIDATE_REVIEW"})
+        object.__setattr__(self, "scope", SourceUseScopeV1(**_source_use_fields_v1(self.scope, SourceUseScopeV1)))
+        _source_use_require_v1(self.scope.account_scope_ref is not None)
+        for name in ("owner_ref", "key_ref", "request_ref"):
+            _native_ident(getattr(self, name))
+        object.__setattr__(self, "proof", SourceUseProofV1(**_source_use_fields_v1(self.proof, SourceUseProofV1)))
+        _source_use_require_v1(self.proof.key_ref == self.key_ref)
+        for value in (self.generation_before, self.generation_after):
+            _source_use_require_v1(type(value) is int and 0 <= value <= 2**63 - 1)
+        _source_use_require_v1(self.generation_after == self.generation_before + (self.action != "OBSERVE_ONCE"))
+        if self.sequence == 1:
+            _source_use_require_v1(self.generation_before == 0 and self.action == "REVIEW_ACCEPT")
+        for name in ("expected_declaration_ref", "expected_review_ref", "declaration_ref", "review_ref"):
+            if getattr(self, name) is not None:
+                _source_use_record_ref_v1(getattr(self, name))
+        for name in ("review_event_ref", "use_event_ref"):
+            value = getattr(self, name)
+            if value is not None:
+                _source_action_ref_v1(value)
+                _source_use_require_v1(value.startswith(f"SOURCE_ACTION::{self.process_ref}::")
+                                       and int(value.rsplit("::", 1)[1]) < self.sequence)
+        _source_use_require_v1(type(self.original_event_refs) is tuple and len(self.original_event_refs) <= 1)
+        for value in self.original_event_refs:
+            _source_use_record_ref_v1(value)
+            _source_use_require_v1(value in (self.declaration_ref, self.review_ref))
+        if self.review_facts is not None:
+            object.__setattr__(self, "review_facts", SourceUseReviewFactsV1(
+                **_source_use_fields_v1(self.review_facts, SourceUseReviewFactsV1)))
+            _source_use_require_v1(self.review_facts.factual_checked_at_utc <= self.proof.verified_at_utc)
+        if self.observation is not None:
+            object.__setattr__(self, "observation", SourceUseObservationRequestV1(
+                **_source_use_fields_v1(self.observation, SourceUseObservationRequestV1)))
+        for name in ("starts_at_utc", "expires_at_utc"):
+            object.__setattr__(self, name, _source_use_utc_v1(getattr(self, name)))
+        _source_use_require_v1(self.proof.verified_at_utc <= self.starts_at_utc)
+        negative = self.action in {"WITHDRAW_USE", "INVALIDATE_REVIEW"}
+        _source_use_require_v1(self.starts_at_utc == self.expires_at_utc if negative
+                               else self.starts_at_utc < self.expires_at_utc)
+        _source_use_text_v1(self.reason, optional=True)
+        if self.action == "REVIEW_ACCEPT":
+            _source_use_require_v1(self.review_ref is not None and self.review_facts is not None
+                                   and self.review_event_ref is self.use_event_ref is self.observation is self.reason is None
+                                   and self.expires_at_utc <= self.review_facts.source_expires_at_utc)
+        elif self.action == "USE_ADMIT":
+            _source_use_require_v1(self.declaration_ref is not None and self.review_ref is not None
+                                   and self.review_event_ref is not None
+                                   and self.review_facts is self.use_event_ref is self.observation is self.reason is None)
+        elif self.action == "OBSERVE_ONCE":
+            _source_use_require_v1(all(value is not None for value in (
+                self.declaration_ref, self.review_ref, self.review_event_ref, self.use_event_ref, self.observation))
+                and self.review_facts is self.reason is None and not self.original_event_refs
+                and self.starts_at_utc < self.observation.expires_at_utc <= self.expires_at_utc)
+        else:
+            _source_use_require_v1(self.reason is not None and self.review_facts is self.observation is None
+                                   and (self.declaration_ref is not None if self.action == "WITHDRAW_USE" else self.review_ref is not None))
+
+
+def _source_action_validate_spine_v1(record: EconomicReceiptEventSpineV1) -> None:
+    row = _source_use_fields_v1(record, EconomicReceiptEventSpineV1)
+    _source_use_require_v1(type(record.record_type) is EconomicRecordTypeV1
+                           and record.record_type is EconomicRecordTypeV1.SOURCE_USE_ATTRIBUTED_ACTION)
+    payload = SourceUseAttributedActionV1(**_source_use_fields_v1(record.typed_payload, SourceUseAttributedActionV1))
+    for name in ("record_id", "schema_version", "semantic_owner", "implementation_owner", "context_ref",
+                 "causation_id", "correlation_id", "traceparent", "tracestate", "aggregate_id", "authority_class"):
+        _source_use_text_v1(row[name])
+    for value in (record.sequence, record.aggregate_version):
+        _source_use_require_v1(type(value) is int and value == payload.sequence)
+    _source_use_require_v1(record.schema_version == "SOURCE_USE_ATTRIBUTED_ACTION_V1"
+                           and record.semantic_owner == record.implementation_owner == "QTT_SOURCE_USE_POLICY"
+                           and record.authority_class == "PROCESS_SCOPED_SOURCE_USE_EVENT"
+                           and record.aggregate_id == "SOURCE_ACTION::" + payload.process_ref
+                           and record.record_id == f"{record.aggregate_id}::{payload.sequence:020d}")
+    _source_use_require_v1(_source_use_utc_v1(record.effective_at) == _source_use_utc_v1(record.recorded_at) == payload.starts_at_utc)
+    _source_use_require_v1(record.no_effect_flags is NO_EFFECTS_V1
+                           and all(getattr(record.no_effect_flags, field.name) is False for field in dataclass_fields(NoEffectFlagsV1)))
+    object.__setattr__(record, "typed_payload", payload)
+    _source_use_require_v1(len(deterministic_json(record).encode("utf-8")) <= 65536)
+
+
+def _source_action_reconstruct_spine_v1(value: object) -> EconomicReceiptEventSpineV1:
+    row = _source_use_fields_v1(value, EconomicReceiptEventSpineV1)
+    _source_use_require_v1(row["record_type"] is EconomicRecordTypeV1.SOURCE_USE_ATTRIBUTED_ACTION)
+    return EconomicReceiptEventSpineV1(**row)
+
+
+def _source_action_from_storage_v1(value: object, *, record_id: str) -> EconomicReceiptEventSpineV1:
+    """Detached strict reconstruction; the operational adapter stores typed rows only."""
+    try:
+        _source_action_ref_v1(record_id)
+        rebuilt = _source_action_reconstruct_spine_v1(value)
+        _source_use_require_v1(rebuilt.record_id == record_id)
+        return rebuilt
+    except (ContractValidationError, AttributeError, TypeError, UnicodeError, RecursionError) as exc:
+        raise PersistenceContractError(ReasonCode.PERSISTENCE_CONFLICT, "invalid stored source-use action") from exc
 
 
 def _source_use_append_disposition_v1(
